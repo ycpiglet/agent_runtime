@@ -1,0 +1,8 @@
+project: fixture-host
+upstream:
+  package: agent_runtime
+  remote_url: https://github.com/example/agent_runtime.git
+  ref: v0.1.4
+sync:
+  mode: check-diff-apply
+  allow_silent_overwrite: false
