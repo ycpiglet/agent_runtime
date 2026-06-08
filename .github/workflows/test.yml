@@ -31,8 +31,8 @@ jobs:
       - name: Build clean publish bundle
         run: PYTHONPATH=src python -m agent_runtime.cli publish-bundle --source . --dest .tmp/public-source --apply
       - name: Check local tag smoke plan
-        run: PYTHONPATH=src python -m agent_runtime.cli publish-tag-smoke --source . --repo-dir .tmp/tag-repo --install-dir .tmp/tag-install --tag v0.1.4 --check
+        run: PYTHONPATH=src python -m agent_runtime.cli publish-tag-smoke --source . --repo-dir .tmp/tag-repo --install-dir .tmp/tag-install --tag v0.1.5 --check
       - name: Check GitHub publish plan
-        run: PYTHONPATH=src python -m agent_runtime.cli publish-github-plan --source .tmp/public-source --remote-url https://github.com/example/agent_runtime.git --install-dir .tmp/public-source/.tmp/github-install --tag v0.1.4 --check
+        run: PYTHONPATH=src python -m agent_runtime.cli publish-github-plan --source .tmp/public-source --remote-url https://github.com/example/agent_runtime.git --install-dir .tmp/public-source/.tmp/github-install --tag v0.1.5 --check
       - name: Check release preflight
-        run: PYTHONPATH=.tmp/public-source/src python -m agent_runtime.cli release-preflight --source .tmp/public-source --host-root .tmp/public-source/tests/fixtures/host --remote-url https://github.com/example/agent_runtime.git --tag v0.1.4 --check
+        run: PYTHONPATH=.tmp/public-source/src python -m agent_runtime.cli release-preflight --source .tmp/public-source --host-root .tmp/public-source/tests/fixtures/host --remote-url https://github.com/example/agent_runtime.git --tag v0.1.5 --check

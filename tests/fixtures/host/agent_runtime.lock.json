@@ -152,7 +152,7 @@
       "scripts/verify_sdk_backend.py": "sha256:d3b25541b8ea286ba630d4da1d01644b4e0da1d6b14ac1b193610e4d4e8d7e9f",
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
-    "package_version": "0.1.4",
+    "package_version": "0.1.5",
     "template_digest": "sha256:8b47d2912b82d9d19d5d967432c553b8116541908a82ff3cbeaa3d0e77465664",
     "template_files": 150
   },
@@ -160,7 +160,7 @@
   "schema": "agent-runtime-lock/v1",
   "upstream": {
     "package": "agent_runtime",
-    "ref": "v0.1.4",
+    "ref": "v0.1.5",
     "remote_url": "https://github.com/example/agent_runtime.git"
   }
 }

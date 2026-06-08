@@ -31,7 +31,7 @@ from agent_runtime.sanitize import analyze as analyze_sanitize
 from agent_runtime.sync import _template_files
 from agent_runtime.sync import build_sync_plan
 
-CURRENT_RELEASE_VERSION = "0.1.4"
+CURRENT_RELEASE_VERSION = "0.1.5"
 CURRENT_RELEASE_TAG = f"v{CURRENT_RELEASE_VERSION}"
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 

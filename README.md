@@ -10,10 +10,10 @@ published and host projects have moved to `agent_runtime`.
 
 Public release boundary:
 
-- Current already-published legacy tag: `https://github.com/ycpiglet/ralph-automation` `v0.1.4`
-- Next stable target after external repo migration: `https://github.com/ycpiglet/agent_runtime`
+- Primary public tag: `https://github.com/ycpiglet/agent_runtime` `v0.1.5`
+- Legacy compatibility tag: `https://github.com/ycpiglet/ralph-automation` `v0.1.4`
 
-Current scope is GitHub source preparation:
+Current scope is GitHub source and host sync distribution:
 
 - importable `agent_runtime` package
 - `agent_runtime inventory --check`
@@ -37,25 +37,22 @@ Current scope is GitHub source preparation:
 ## Quick Host Install
 
 In a project that wants to use Agent Runtime, create a virtual environment,
-install the package, add `agent_runtime.yml`, then run the non-mutating checks
-before applying templates.
-
-Use the local source path until the external `agent_runtime` GitHub repository
-and replacement tag are published.
+install the package from the public GitHub tag, add `agent_runtime.yml`, then
+run the non-mutating checks before applying templates.
 
 Windows PowerShell:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python -m pip install --upgrade pip
-.\.venv\Scripts\python -m pip install -e <path-to-agent-runtime>
+.\.venv\Scripts\python -m pip install "git+https://github.com/ycpiglet/agent_runtime.git@v0.1.5"
 
 @'
 project: my-project
 upstream:
   package: agent_runtime
   remote_url: https://github.com/ycpiglet/agent_runtime.git
-  ref: v0.1.4
+  ref: v0.1.5
 sync:
   mode: check-diff-apply
   allow_silent_overwrite: false
@@ -73,14 +70,14 @@ macOS/Linux:
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -e /path/to/tag_manual/packages/agent_runtime
+python -m pip install "git+https://github.com/ycpiglet/agent_runtime.git@v0.1.5"
 
 cat > agent_runtime.yml <<'YAML'
 project: my-project
 upstream:
   package: agent_runtime
   remote_url: https://github.com/ycpiglet/agent_runtime.git
-  ref: v0.1.4
+  ref: v0.1.5
 sync:
   mode: check-diff-apply
   allow_silent_overwrite: false
@@ -95,11 +92,10 @@ agent_runtime update --apply
 Use `--check` first for a safe status report, `--diff` to inspect exact file
 changes, and `--apply` only when the diff is acceptable.
 
-After the external repository migration is complete, replace the editable
-install with:
+For local development on this source tree, use an editable install instead:
 
 ```powershell
-python -m pip install "git+https://github.com/ycpiglet/agent_runtime.git@v0.1.4"
+python -m pip install -e <local-agent-runtime-path>
 ```
 
 ## Export Behavior
@@ -228,7 +224,7 @@ Host projects pin the upstream dependency in `agent_runtime.yml`:
 upstream:
   package: agent_runtime
   remote_url: https://github.com/ycpiglet/agent_runtime.git
-  ref: v0.1.4
+  ref: v0.1.5
 ```
 
 If the package is installed in the active environment, run:
@@ -273,5 +269,5 @@ publish plan, host update plan, host upstream match, executable host update
 command shape, host sync conflict detection, and host lock freshness into one
 report. It does not replace `publish-tag-smoke --apply` or the real
 `publish-github-execute --execute` / workflow status evidence. Release tags such
-as `v0.1.4` are accepted for normal distribution; a 40-character commit SHA is
+as `v0.1.5` are accepted for normal distribution; a 40-character commit SHA is
 stricter if the host must be protected from force-moved tags.
