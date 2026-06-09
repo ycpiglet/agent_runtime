@@ -93,7 +93,7 @@
       "scripts/kedb_search.py": "sha256:b2b714723f8be28fb9f09de571b2b5414ff6c0213c98d35dc9cc42e102e38b82",
       "scripts/local_schedule_daemon.py": "sha256:548b5ce03b04f44ac1fd833b6347a7850665895f299f8aceeacfa4b7cf5d4f8d",
       "scripts/macro_detect.py": "sha256:15a7ecad24ee5e73922ba7f276d3e8439a37f6a6e2e6b95fdcfc843cababd813",
-      "scripts/message_queue.py": "sha256:6fb6e238e20f43a4ef9f4c8b9b526f3901342af2c6e81170c88d30d409bc2e6e",
+      "scripts/message_queue.py": "sha256:37ecb65c8a039f6a9a2782aa4d283dde230a4fb355e3b5176b039bcb179f271f",
       "scripts/model_routing.py": "sha256:fffc78d8a9aaee9f5f102ee071a9e6253b53963713044048c2e1c0dc1113c23e",
       "scripts/now.py": "sha256:6d6d6fcc9f1a4599a6735a15013fd263c887ae9910388e741134870abf446c9f",
       "scripts/orchestrator_safety_gate.py": "sha256:ff588238e9e0ab497f7a82caf52cb674c362409ca0583b33e402321efb29c7c7",
@@ -176,7 +176,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.1.8",
-    "template_digest": "sha256:30f51c4c9a6fc1bd821eede00dc7a5328074ef65ad511e8c5ba9f1942eae51c7",
+    "template_digest": "sha256:8367919e6e9d00a1725a00576591ff281f865a9874173c923c782b686ba09768",
     "template_files": 173
   },
   "project": "fixture-host",

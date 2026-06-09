@@ -156,6 +156,10 @@ def _coalesce_warning_summary_records(
 
 def _append_jsonl_record(path: str, payload: object) -> None:
     output_path = Path(path)
+    if not output_path.is_absolute():
+        github_workspace = os.getenv("GITHUB_WORKSPACE", "").strip()
+        if github_workspace:
+            output_path = Path(github_workspace) / output_path
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
@@ -163,6 +167,10 @@ def _append_jsonl_record(path: str, payload: object) -> None:
 
 def _load_warning_summary_records(path: str) -> list[dict[str, object]]:
     output_path = Path(path)
+    if not output_path.is_absolute():
+        github_workspace = os.getenv("GITHUB_WORKSPACE", "").strip()
+        if github_workspace:
+            output_path = Path(github_workspace) / output_path
     if not output_path.exists():
         return []
     if output_path.suffix.lower() == ".jsonl":
