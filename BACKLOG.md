@@ -443,10 +443,10 @@
   - 이후 task create/edit/reorder/assign, agent prompt, pause/resume 등 쓰기 동작은 runtime API 또는 command outbox를 통해서만 수행한다.
 
 - P0-UI-0: `TASK-AR-226` UI Runtime Data Map
-  - 상태: planned
+  - 상태: completed
   - 내용: tasks/agents/messages/events/goals/logs/state-machine/evidence의 실제 저장 위치와 안전한 read/write 경계를 `docs/UI_RUNTIME_DATA_MAP.md`로 고정.
 - P0-UI-1: `TASK-AR-227` UI State API / File Adapter
-  - 상태: planned
+  - 상태: next
   - 내용: `GET /api/state`, tasks, agents, messages, events, goals 또는 동일 shape의 local adapter를 구현해 UI가 runtime state를 안정적으로 읽게 함.
 - P0-UI-2: `TASK-AR-228` Read-Only Web Console MVP
   - 상태: planned
@@ -466,13 +466,14 @@
 
 ## 다음 세션 우선순위
 
-1. `TASK-AR-223` 버전 업데이트 closeout 통합(강제 규칙/오버레이/마이그레이션 재수합)
-2. `TASK-AR-221` 운영 정합 통합(Task-합의 마감)
-3. `TASK-AR-215` cross-project overlay simulation
-4. `TASK-AR-204` co-location enforcement executable gate
-5. `TASK-AR-210` 재판정: boundaries closure 후 `ready` 가능 여부 확인
-6. `TASK-AR-219` 공식 권고 반영 및 판정 근거 고정
-7. `TASK-AR-220` tag_manual 이식 근거 마감(스크립트/훅/스킬 누락·의도적 제외 정렬)
+1. `TASK-AR-227` UI State API / File Adapter: `docs/UI_RUNTIME_DATA_MAP.md` 계약을 읽기 전용 adapter/API로 구현
+2. `TASK-AR-228` Read-Only Web Console MVP: adapter output으로 dashboard/backlog/agents/messages/events/task detail 표시
+3. `TASK-AR-229` Task CRUD and Backlog Ordering: canonical order/write-through 전략 확정 후 쓰기 기능 추가
+4. `TASK-AR-223` 버전 업데이트 closeout 통합(강제 규칙/오버레이/마이그레이션 재수합)
+5. `TASK-AR-221` 운영 정합 통합(Task-합의 마감)
+6. `TASK-AR-210` 재판정: boundaries closure 후 `ready` 가능 여부 확인
+7. `TASK-AR-219` 공식 권고 반영 및 판정 근거 고정
+8. `TASK-AR-220` tag_manual 이식 근거 마감(스크립트/훅/스킬 누락·의도적 제외 정렬)
 8. `TASK-AR-216` v0.1.8 후보 이관 사유 정렬
 9. `TASK-AR-222` v0.1.8 closeout 번들 완성
 10. `TASK-AR-218` migration 무결성 정합 + migration-map block rule 정비

@@ -9,17 +9,17 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-10
 task_count: 33
-open_count: 28
+open_count: 27
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `33` total tasks; `28` open or active.
+- Summary: `33` total tasks; `27` open or active.
 - Recommended next: `TASK-AR-205` - 오프라인에서 정답 보유 영역은 구조화된 데이터셋으로 재현 가능한 평가를 수행하고, 90% 미만이면 릴리스를 막는다.
 
 ## Signal
-- Status: Action `25` / Ask `2` / Review `0` / Later `1` / Done `5`.
+- Status: Action `24` / Ask `2` / Review `0` / Later `1` / Done `6`.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -58,7 +58,6 @@ open_count: 28
 | `TASK-AR-203` | planned | P0 | Critical | Medium | 8h/1500tok | Medium | 8 | project-context | doc-steward | Execute next | 지식창고 문서를 `빠른 참조, 차원 설명, 핵심 테이블, 주의사항/패턴, 상위 문맥 링크` 형식으로 표준화해 사람이 즉시 구조를 읽고 판단할 수 있게 한… |
 | `TASK-AR-221` | in_progress | P0 | Critical | High | 16h/3200tok | Medium | 8 | validation-team | qa | Execute next | 에이전트 런타임을 한 번에 재사용 가능한 MVP/멀티 프로젝트 운영 구조로 정리한다. 공식 가이드(Claude/Codex/OpenAI 권고)에 맞추어 아… |
 | `TASK-AR-222` | in_progress | P0 | Critical | High | 14h/2800tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | `v0.1.8` 1차 판정(2026-07-02)을 위해 요구사항 1~16 및 공식 권고를 하나의 판정 번들로 정합한다. 특히 `agent_runtime`… |
-| `TASK-AR-226` | planned | P0 | Critical | Medium | 8h/1400tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Map the current `agent_runtime` state sources before building a web UI, so the UI rea… |
 | `TASK-AR-227` | planned | P0 | Critical | Medium | 12h/2200tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Expose a safe, read-first backend interface for the UI console, using runtime files a… |
 | `TASK-AR-228` | planned | P0 | Critical | High | 14h/2600tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Build the first read-only web console so the user can see backlog, current work, agen… |
 | `TASK-AR-229` | planned | P1 | High | Medium | 12h/2200tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Let the UI manage tasks safely by sending changes through runtime APIs or a command o… |
@@ -92,6 +91,7 @@ open_count: 28
 | `TASK-AR-216` | completed | P0 | Critical | Medium | 10h/2200tok | Medium | 8 | agent-runtime-core | lead-engineer | Archive/evidence only | `v0.1.7` 공개 판정의 미충족 항목을 `v0.1.8` 판정으로 안전하게 이관하고, 릴리스 보드가 읽는 하나의 `release-state` 체인으로… |
 | `TASK-AR-215` | completed | P0 | Critical | Medium | 18h/3000tok | Low | 6 | project-context | doc-steward | Archive/evidence only | 다른 프로젝트로 에이전트를 투입할 때 공용 런타임은 유지하고 오버레이만 교체해 vision, roadmap, 조직도, 팀, 링크, 협의기록을 즉시 맥락에… |
 | `TASK-AR-225` | completed | P0 | Critical | Medium | 10h/1800tok | Low | 6 | agent-runtime-core | cicd-engineer | Archive/evidence only | Close the `release-preflight findings=358` blocker discovered by `TASK-AR-224` execut… |
+| `TASK-AR-226` | completed | P0 | Critical | Medium | 8h/1400tok | Low | 6 | agent-runtime-core | lead-engineer | Archive/evidence only | Map the current `agent_runtime` state sources before building a web UI, so the UI rea… |
 | `TASK-AR-233` | completed | P0 | Critical | Medium | 6h/1400tok | Low | 6 | agent-runtime-core | lead-engineer | Archive/evidence only | Clean the current working tree through an intentional commit and push, then keep back… |
 
 ## Risks / Blockers

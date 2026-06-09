@@ -559,3 +559,35 @@ Decision
 | Start UI Runtime Data Map | lead-engineer | `TASK-AR-226` |
 | Then implement UI State API / File Adapter | lead-engineer | `TASK-AR-227` |
 | Then build read-only console MVP | lead-engineer | `TASK-AR-228` |
+
+## 2026-06-10 - UI Runtime Data Map Cycle
+
+### Bottom Line
+
+- Summary: completed `TASK-AR-226`; UI Console data sources and mutation boundaries are mapped before UI implementation.
+- Output: `docs/UI_RUNTIME_DATA_MAP.md`.
+- State machine: `cycle=done`, `task=TASK-AR-226 completed`, `gate=pass`, `document=formatted`.
+
+### Signal
+
+| Signal | State | Evidence |
+| --- | --- | --- |
+| Source map | pass | `docs/UI_RUNTIME_DATA_MAP.md` |
+| MVP coverage | pass | backlog, current tasks, Kanban, agents, events, messages, goal status, task detail mapped |
+| Safe-write boundary | pass | API first; `.ui_outbox/COMMAND-*.json` fallback; no direct browser mutation |
+| Follow-up contract | pass | `TASK-AR-227` read-first adapter endpoints listed |
+| Known gap | watch | durable repo-local goal JSON SSoT does not exist yet |
+
+### Decision
+
+- Decision: treat `docs/UI_RUNTIME_DATA_MAP.md` as the implementation contract for `TASK-AR-227`.
+- Decision: keep `TASK-AR-227` read-first and side-effect-free.
+- Decision: defer task reorder mutation to `TASK-AR-229` unless a canonical order field or runtime-owned order file is introduced.
+
+### Next Steps
+
+| Step | Owner | Evidence |
+| --- | --- | --- |
+| Start UI State API / File Adapter | lead-engineer | `TASK-AR-227` |
+| Write adapter tests before production code | lead-engineer | TDD required for implementation code |
+| Keep source freshness metadata in API output | lead-engineer | every normalized response includes source info |

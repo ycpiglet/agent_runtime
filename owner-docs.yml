@@ -3,3 +3,4 @@ owner_docs:
   - BACKLOG-BOARD.md
   - reviews/REVIEW-2026-06-09-backlog-board-restoration-owner-format-gate.md
   - reviews/REVIEW-2026-06-10-agent-runtime-worktree-cleanup-cycle-map.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-226-data-map.md
