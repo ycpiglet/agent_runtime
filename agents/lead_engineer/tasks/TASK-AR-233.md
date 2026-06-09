@@ -1,6 +1,6 @@
 ---
 id: TASK-AR-233
-status: in_progress
+status: completed
 owner: lead-engineer
 priority: P0
 difficulty: M
@@ -35,10 +35,10 @@ Clean the current working tree through an intentional commit and push, then keep
 
 | Machine | Current State | Trigger | Evidence |
 |---|---|---|---|
-| `cycle` | `executing` | `owner_or_agent_decision` | User requested clean commit/push and repeated cycles. |
-| `task` | `in_progress` | `agent_claimed` | `TASK-AR-233` created and active. |
+| `cycle` | `completed` | `branch_pushed` | Cleanup branch is pushed and continuation is mapped. |
+| `task` | `completed` | `completion_criteria_met` | `TASK-AR-233` committed and pushed. |
 | `gate` | `pass` | `verification_passed` | Owner governance, sanitize, publish-check, diff-check, secret scan, and pytest pass. |
-| `document` | `ready` | `source_task_changed` | `BACKLOG-BOARD.md`, `STATUS.md`, and cycle map are updated. |
+| `document` | `published` | `handoff_committed` | `BACKLOG-BOARD.md`, `STATUS.md`, and cycle map are updated. |
 | `release` | `ready` | no release execution | This task is not a release authorization. |
 
 ## Completion Criteria
@@ -56,4 +56,4 @@ Clean the current working tree through an intentional commit and push, then keep
 - 2026-06-10: Resolved release-preflight, publish-bundle, reporting-format, and fixture-lock conflicts by preserving `origin/main` plus local owner-doc/state-machine gate additions.
 - 2026-06-10: Regenerated `BACKLOG-BOARD.md` with 33 tasks and confirmed `TASK-AR-226` through `TASK-AR-233` are present.
 - 2026-06-10: Verified `git diff --cached --check`, owner governance gate, state-machine gate, sanitize, publish-check, and `pytest tests -q` all pass before commit.
-- 2026-06-10: Commit/push remains the only pending step before marking this task complete.
+- 2026-06-10: Committed `f9a3347` and pushed `codex/ui-console-backlog-cleanup` to `origin`.

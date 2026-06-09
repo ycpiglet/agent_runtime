@@ -528,9 +528,11 @@ Decision
 
 ### Bottom Line
 
-- Summary: advanced `TASK-AR-233` through local verification; commit/push is the remaining external write step.
+- Summary: completed `TASK-AR-233`; cleanup work is committed and pushed on a branch.
 - Branch: `codex/ui-console-backlog-cleanup`.
-- State machine: `cycle=executing`, `task=TASK-AR-233 in_progress`, `gate=pass`, `document=ready`.
+- Remote: `origin/codex/ui-console-backlog-cleanup`.
+- Commit: `f9a3347` (`chore: register ui console backlog and governance gates`).
+- State machine: `cycle=completed`, `task=TASK-AR-233 completed`, `gate=pass`, `document=published`.
 
 ### Signal
 
@@ -542,6 +544,7 @@ Decision
 | UI backlog registration | pass | `TASK-AR-226` through `TASK-AR-232` created |
 | Cycle map | pass | `reviews/REVIEW-2026-06-10-agent-runtime-worktree-cleanup-cycle-map.md` created |
 | Local verification | pass | `pytest tests -q`: 218 passed; owner governance/sanitize/publish-check/diff-check passed |
+| Remote publication | pass | branch pushed to `origin/codex/ui-console-backlog-cleanup` |
 
 ### Decision
 
@@ -553,6 +556,6 @@ Decision
 
 | Step | Owner | Evidence |
 | --- | --- | --- |
-| Commit staged cleanup | lead-engineer | local verification passed |
-| Push branch | lead-engineer | `origin/codex/ui-console-backlog-cleanup` |
-| Continue UI Console MVP | lead-engineer | `TASK-AR-226 -> TASK-AR-227 -> TASK-AR-228` |
+| Start UI Runtime Data Map | lead-engineer | `TASK-AR-226` |
+| Then implement UI State API / File Adapter | lead-engineer | `TASK-AR-227` |
+| Then build read-only console MVP | lead-engineer | `TASK-AR-228` |
