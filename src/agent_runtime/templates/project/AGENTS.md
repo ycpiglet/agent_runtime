@@ -243,3 +243,11 @@ python scripts/check_agent_docs.py
 ```
 
 If a check cannot run, report exactly why and what remains unverified.
+
+## 13. Handoff Protocol
+
+When handing off to another model or session, leave four sections: (1) what was done and how it was verified, (2) what is still open (next work, blockers), (3) what to read (relevant files, docs, TASK), (4) cautions and risks. Per-tool handoff detail lives under `docs/agent_bootstrap/`.
+
+## 14. Token Budget
+
+Session token catalogue and budget rules follow [agents/lead_engineer/TOKEN-BUDGET.md](agents/lead_engineer/TOKEN-BUDGET.md). Record the estimated cost of large work in the Cost line of the BRIEF/PLAN. (`scripts/check_agent_docs.py::check_token_budget` enforces this §14 cross-link.)

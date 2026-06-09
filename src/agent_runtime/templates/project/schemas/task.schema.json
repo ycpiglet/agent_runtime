@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/ycpiglet/agent_runtime/schemas/task.schema.json",
+  "title": "agent_runtime TASK frontmatter",
+  "description": "구조화 TASK 레이어 ① 계약 (TASK-231). frontmatter 값은 텍스트라 정수/실수는 문자열 표현을 coerce 검증한다. scripts/validate_task_schema.py 의 subset 검증기와 표준 JSON Schema 도구 양쪽이 사용한다.",
+  "type": "object",
+  "required": [
+    "type",
+    "id",
+    "status",
+    "owner",
+    "priority",
+    "difficulty",
+    "est_hours",
+    "est_tokens",
+    "tags",
+    "created",
+    "created_at"
+  ],
+  "properties": {
+    "type": { "const": "task" },
+    "id": { "type": "string", "pattern": "^TASK-\\d{3,}$" },
+    "status": {
+      "type": "string",
+      "enum": ["대기", "진행 중", "완료", "보류", "취소"],
+      "description": "공백 포함 정규 표기('진행 중')만 허용"
+    },
+    "owner": { "type": "string", "description": "담당 역할 (roles.yml display 이름)" },
+    "priority": { "type": "string", "enum": ["Critical", "High", "Medium", "Low"] },
+    "difficulty": { "type": "string", "enum": ["상", "중", "하"] },
+    "est_hours": { "type": "number", "description": "예상 소요 시간(시간). 0.5 같은 실수 허용" },
+    "est_tokens": { "type": "integer", "description": "예상 토큰 비용(정수)" },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "audit_log": { "type": "string", "description": "관련 AUDIT-YYYY-MM-DD-NNN (선택)" },
+    "created": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "description": "생성일 YYYY-MM-DD" },
+    "created_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}",
+      "description": "생성 타임스탬프 ISO-8601 (scripts/now.py)"
+    }
+  },
+  "additionalProperties": true
+}
