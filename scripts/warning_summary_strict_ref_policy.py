@@ -25,6 +25,7 @@ def _resolve_env(value: str | None, env_var: str) -> str:
 
 
 def _write_artifact(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
 
 
