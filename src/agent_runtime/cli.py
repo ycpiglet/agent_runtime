@@ -18,6 +18,7 @@ from . import publish_tag_smoke
 from . import release_preflight
 from . import sanitize
 from . import sync
+from . import ui_state
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -152,6 +153,16 @@ def build_parser() -> argparse.ArgumentParser:
     doctor_parser.add_argument("--check", action="store_true", help="Fail if blocker findings exist")
     doctor_parser.add_argument("--repair", action="store_true", help="Attempt safe host repairs")
 
+    ui_state_parser = subparsers.add_parser("ui-state", help="Emit read-only UI runtime state")
+    ui_state_parser.add_argument("--root", type=ui_state.Path, default=ui_state.Path.cwd(), help="Host project root")
+    ui_state_parser.add_argument(
+        "--resource",
+        choices=ui_state.RESOURCE_NAMES,
+        default="state",
+        help="State resource to emit",
+    )
+    ui_state_parser.add_argument("--json", action="store_true", help="Emit JSON")
+
     return parser
 
 
@@ -259,6 +270,8 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.command == "doctor":
         return doctor.run_doctor(args.root, check=args.check, repair=args.repair)
+    if args.command == "ui-state":
+        return ui_state.run_ui_state(args.root, resource=args.resource, json_output=args.json)
 
     parser.print_help()
     return 0

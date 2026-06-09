@@ -591,3 +591,36 @@ Decision
 | Start UI State API / File Adapter | lead-engineer | `TASK-AR-227` |
 | Write adapter tests before production code | lead-engineer | TDD required for implementation code |
 | Keep source freshness metadata in API output | lead-engineer | every normalized response includes source info |
+
+## 2026-06-10 - UI State API / File Adapter Cycle
+
+### Bottom Line
+
+- Summary: completed `TASK-AR-227`; the UI Console has a read-only local adapter and CLI shaped like future `/api/*` endpoints.
+- Output: `src/agent_runtime/ui_state.py`, `tests/test_ui_state.py`, and `docs/UI_STATE_API_EXAMPLES.md`.
+- State machine: `cycle=done`, `task=TASK-AR-227 completed`, `gate=pass`, `document=formatted`.
+
+### Signal
+
+| Signal | State | Evidence |
+| --- | --- | --- |
+| Read-only adapter | pass | `agent_runtime.ui_state.build_state(root)` |
+| CLI surface | pass | `agent_runtime ui-state --resource state --json` |
+| Source metadata | pass | records include `source_path`, `source_kind`, `source`, `last_updated`, `freshness` |
+| Optional missing sources | pass | empty arrays plus `missing_optional_source` gaps |
+| Malformed records | pass | JSONL/session warnings instead of crashes |
+| Targeted tests | pass | `PYTHONPATH=src pytest tests/test_ui_state.py -q` -> 5 passed |
+
+### Decision
+
+- Decision: build `TASK-AR-228` against `agent_runtime ui-state --root . --resource state --json`.
+- Decision: keep the first web console read-only and polling-compatible.
+- Decision: defer all mutation controls to `TASK-AR-229` write-through/outbox work.
+
+### Next Steps
+
+| Step | Owner | Evidence |
+| --- | --- | --- |
+| Start Read-Only Web Console MVP | lead-engineer | `TASK-AR-228` |
+| Use adapter JSON as UI fixture | lead-engineer | `docs/UI_STATE_API_EXAMPLES.md` |
+| Preserve source/freshness metadata in panels | lead-engineer | adapter response contract |

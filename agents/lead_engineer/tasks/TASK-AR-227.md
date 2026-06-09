@@ -1,6 +1,6 @@
 ---
 id: TASK-AR-227
-status: planned
+status: completed
 owner: lead-engineer
 priority: P0
 difficulty: M
@@ -15,6 +15,10 @@ tags:
 audit_log:
   - AGENT_RUNTIME_UI_CONSOLE_BRIEF.md
   - agents/lead_engineer/tasks/TASK-AR-226.md
+  - docs/UI_RUNTIME_DATA_MAP.md
+  - docs/UI_STATE_API_EXAMPLES.md
+  - src/agent_runtime/ui_state.py
+  - tests/test_ui_state.py
   - BACKLOG.md
   - BACKLOG-BOARD.md
 created: 2026-06-10
@@ -60,3 +64,20 @@ Expose a safe, read-first backend interface for the UI console, using runtime fi
 
 - Add unit tests for adapter parsing and empty-state behavior.
 - Run targeted tests plus any existing publish/release preflight checks affected by new files.
+
+## State Machine Mapping
+
+| Machine | Current State | Trigger | Evidence |
+|---|---|---|---|
+| `cycle` | `done` | `gates_pass` | `ui-state` adapter loads current repo state without starting a runtime loop. |
+| `task` | `completed` | `done_criteria_met` | `src/agent_runtime/ui_state.py`, CLI subcommand, and tests are present. |
+| `gate` | `pass` | `verification_passed` | `pytest tests/test_ui_state.py -q` passed under `PYTHONPATH=src`. |
+| `document` | `formatted` | `document_regenerated` | `docs/UI_STATE_API_EXAMPLES.md` documents response shapes for `TASK-AR-228`. |
+
+## Completion Evidence
+
+- 2026-06-10: Added read-only adapter module `src/agent_runtime/ui_state.py`.
+- 2026-06-10: Added CLI surface `agent_runtime ui-state --resource state|tasks|agents|messages|events|goals|sources --json`.
+- 2026-06-10: Added tests for runtime task/message/event/session parsing, missing optional source gaps, malformed JSON warnings, Korean `## 목표` task descriptions, and CLI JSON output.
+- 2026-06-10: Added API response examples in `docs/UI_STATE_API_EXAMPLES.md`.
+- 2026-06-10: Next implementation pointer is `TASK-AR-228` Read-Only Web Console MVP.
