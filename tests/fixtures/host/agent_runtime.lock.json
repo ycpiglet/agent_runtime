@@ -2,8 +2,8 @@
   "installed": {
     "managed_files": {
       ".githooks/pre-commit": "sha256:850b1f91882fd3ec4d7335cbe9d0e5678af7d111d2754a5da9134d70b2d1c65b",
-      "AGENTS.md": "sha256:6b7e1aabdc6e6fb128f3572634099ba954f915e7bf5b214090d8bd9abb4cb44a",
-      "AGENT_RUNTIME.md": "sha256:7d1895add62fa65129cd628958a0d2231a6331544b6a95e65be59d4bd7064be4",
+      "AGENTS.md": "sha256:2dc905a8437809e0f4c7ecd1b9129ea2b764b283a2f3fb6c4084e20972cecb65",
+      "AGENT_RUNTIME.md": "sha256:e1fea0c100683f01b39d9038f970ffd17b6ccb2885f02251731e4aafb9e6fe78",
       "CLAUDE.md": "sha256:0e7d39713d8ba3bd20fa2d098b13a31800f92d158a0227563ad982d6a674659d",
       "CURSOR.md": "sha256:c2f7a525713eb281435cf7907da6d2c89ed42e8ea9f1569f3146834035e2f9ca",
       "GEMINI.md": "sha256:777c43463d7fd1532cec26cb169ed04dca3e2df3336428e5919fbd836cc8786f",
@@ -18,11 +18,12 @@
       "agents/independent_auditor/SKILL.md": "sha256:ad7e9d90894a60baafe2dc8da3821ec2c6c725ed7a66872ed10467e77da716a1",
       "agents/lead_engineer/GOTCHAS.md": "sha256:d0d4e67e8edbbd59cc1ff43e92cac31da305ae4c87412b1f8215604ab7040acf",
       "agents/lead_engineer/RALPH-PROMPT-SCAFFOLD.md": "sha256:c2d06b9ddce89df2cb5548e0a2e0dd0321ec652e777aa4a603d3977d46b8bbf9",
-      "agents/lead_engineer/REPORTING-FORMAT.md": "sha256:5e6a7388610ae535680d8737c15fefbf061bb15e6854a71d47636d4ff6863506",
+      "agents/lead_engineer/REPORTING-FORMAT.md": "sha256:571734362368f4192a3145765fa3d16d24d0077055cc7b4afb96b80125b0b55d",
       "agents/lead_engineer/SKILL.md": "sha256:a988661985458b2d9e28f86f6757eacccf91805c4a3bbf0a60e0cba8fb4b177e",
       "agents/lead_engineer/TOKEN-BUDGET.md": "sha256:437a3e676948572f37737e71db55edd29c62f8fea916feb864954349cccc402a",
       "agents/managing_partner/SKILL.md": "sha256:0d54db960eeb111e2b863007e897f5f1ae96db32b4611ee14a832159c5f79e12",
       "agents/owner/SKILL.md": "sha256:eeeb78ac0aabcefd8ce81088a5c8c149cfae3f07fc1088befa9911e04effed8d",
+      "agents/project/AUTONOMY-POLICY.example.yml": "sha256:cd2b31b0e0959158abb7716398231baa670c76f5b4539054f93465dca43e7dbc",
       "agents/project/CONTEXT-SOURCES.example.yml": "sha256:c606680b1b32d867c73c981597d61fb26dae590107f3683557476d8b331592b2",
       "agents/project/DATASET-CATALOG.example.yml": "sha256:88e71db4200c796b635332de04543d8316d4082097d591c56617f85be4299056",
       "agents/project/EVAL-POLICY.example.yml": "sha256:1e6a0569306ef8857f7f24cd9914e390c36bdf4562d8d51c26c905c6af20f5f8",
@@ -33,7 +34,7 @@
       "agents/project/README.md": "sha256:91b62e1ae52a1b4cdb5a008daf6f230695f0c72772dd38acf36eb3122eacdeb5",
       "agents/project/ROADMAP.md": "sha256:50dac5ec32d2eb6386aa11fd98e4a19583564cfe053ac32da2d7a7a5e4f94ba6",
       "agents/project/SKILL-DATA-MAP.example.yml": "sha256:05da0f74b8a9a62a715091d164622efb6c3bb6fe0692e96a072edd19af121957",
-      "agents/project/SKILL-GOVERNANCE.md": "sha256:a83b146e2d514727d3b973d82445d8d8629f252c7dbb685f70053b79d9a324e8",
+      "agents/project/SKILL-GOVERNANCE.md": "sha256:26913eefd63a8dcf4d8ae6e4694a4128ae96a037cc12c9d0342c106546f9bbca",
       "agents/project/TEAMS.md": "sha256:dbe2079d5f29ff7ec3d48277e1e8a9a403943cc228b9da1948d27f5b2ce6fa4c",
       "agents/project/teams/.gitkeep": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
       "agents/qa/SKILL.md": "sha256:4bb9495507a0ef045f59bfe5f200d7072792b06e1a74264b1465ad6e0698d6e0",
@@ -174,15 +175,15 @@
       "scripts/verify_sdk_backend.py": "sha256:d3b25541b8ea286ba630d4da1d01644b4e0da1d6b14ac1b193610e4d4e8d7e9f",
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
-    "package_version": "0.1.6",
-    "template_digest": "sha256:d86b13932ff77af5c0cbb37c8afb6e1a6ff9e4d50a62ab41b99391dac643bea1",
-    "template_files": 172
+    "package_version": "0.1.8",
+    "template_digest": "sha256:02faa9d65ae3c8131bccd2e91cc4693ecf0e37ddb9a3bce1128ab2980a4efa78",
+    "template_files": 173
   },
   "project": "fixture-host",
   "schema": "agent-runtime-lock/v1",
   "upstream": {
     "package": "agent_runtime",
-    "ref": "v0.1.6",
-    "remote_url": "https://github.com/example/agent_runtime.git"
+    "ref": "v0.1.8",
+    "remote_url": "https://github.com/ycpiglet/agent_runtime.git"
   }
 }
