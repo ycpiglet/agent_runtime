@@ -709,18 +709,29 @@ def _acquire_claim(
             else:
                 return False
 
-        try:
-            with open(p, "x", encoding="utf-8") as f:
-                f.write(marker_text)
-            observed = _read_claim(p)
-            return bool(
-                isinstance(observed, dict)
-                and str(observed.get("token")) == str(marker.get("token"))
-            )
-        except FileExistsError:
-            return False
-        except Exception:
-            return False
+        for attempt in range(MAX_CLAIM_CREATE_ATTEMPTS):
+            try:
+                with open(p, "x", encoding="utf-8") as f:
+                    f.write(marker_text)
+                observed = _read_claim(p)
+                return bool(
+                    isinstance(observed, dict)
+                    and str(observed.get("token")) == str(marker.get("token"))
+                )
+            except FileExistsError:
+                return False
+            except Exception:
+                observed = _read_claim(p)
+                if observed is not None and not _is_stale_claim(observed, now=now_val):
+                    return False
+                if observed is not None:
+                    try:
+                        p.unlink(missing_ok=True)
+                    except Exception:
+                        pass
+                if attempt == MAX_CLAIM_CREATE_ATTEMPTS - 1:
+                    return False
+                time.sleep(CLAIM_CREATE_RETRY_DELAY_SECONDS)
     finally:
         _release_claim_file_lock(lock_path)
 
@@ -867,31 +878,37 @@ def recover_stale_claim(path: Path, *, now: float | None = None) -> bool:
     if not meta:
         return False
     message_id = _msg_id_from_path(path, meta)
-    claim = _read_claim(_claim_path(message_id))
-    if claim is None:
+    lock_path = _claim_lock_path(message_id)
+    if not _acquire_claim_file_lock(lock_path):
         return False
-    claim_path = str(claim.get("path", ""))
-    expected_path = str(path.resolve())
-    if claim_path and claim_path not in {str(message_id), expected_path}:
-        _release_claim(message_id)
-        return False
-    if not _is_stale_claim(claim, now=_now_epoch() if now is None else now):
-        return False
+    try:
+        claim = _read_claim(_claim_path(message_id))
+        if claim is None:
+            return False
+        claim_path = str(claim.get("path", ""))
+        expected_path = str(path.resolve())
+        if claim_path and claim_path not in {str(message_id), expected_path}:
+            _release_claim(message_id)
+            return False
+        if not _is_stale_claim(claim, now=_now_epoch() if now is None else now):
+            return False
 
-    if _has_reply(message_id):
-        # Reply already exists -> lease can be deleted without reopening.
-        _release_claim(message_id)
-        return False
+        if _has_reply(message_id):
+            # Reply already exists -> lease can be deleted without reopening.
+            _release_claim(message_id)
+            return False
 
-    if meta.get("status") != "claimed":
-        _release_claim(message_id)
-        return False
+        if meta.get("status") != "claimed":
+            _release_claim(message_id)
+            return False
 
-    meta["status"] = "open"
-    if not _write_text_atomic(path, serialize_frontmatter(meta, body)):
-        return False
-    _release_claim(message_id)
-    return True
+        meta["status"] = "open"
+        if not _write_text_atomic(path, serialize_frontmatter(meta, body)):
+            return False
+        _release_claim(message_id)
+        return True
+    finally:
+        _release_claim_file_lock(lock_path)
 
 
 if __name__ == "__main__":
