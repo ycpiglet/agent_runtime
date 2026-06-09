@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -73,6 +74,40 @@ def _host_sync_findings(sync_plan) -> tuple[PublishFinding, ...]:
     )
 
 
+def _parse_warning_summary_gate_strict_refs(raw: str | None) -> tuple[str, ...]:
+    if not raw:
+        return ()
+    refs = tuple(line.strip() for line in raw.splitlines() if line.strip())
+    return refs
+
+
+def _warning_summary_gate_strict_refs_findings(raw: str | None) -> tuple[PublishFinding, ...]:
+    if raw is None:
+        return ()
+    refs = _parse_warning_summary_gate_strict_refs(raw)
+    findings: list[PublishFinding] = []
+    if not refs:
+        findings.append(
+            PublishFinding(
+                "release-preflight",
+                "missing-warning-summary-gate-strict-ref",
+                "PASS_39_WARNING_SUMMARY_GATE_STRICT_REFS is configured as an empty list",
+            )
+        )
+        return tuple(findings)
+
+    for strict_ref in refs:
+        if not (strict_ref.startswith("refs/") or strict_ref == ""):
+            findings.append(
+                PublishFinding(
+                    "release-preflight",
+                    "invalid-warning-summary-gate-strict-ref",
+                    f"strict-ref must start with refs/, got: {strict_ref}",
+                )
+            )
+    return tuple(findings)
+
+
 def _source_work_dir(source_root: Path, path: Path) -> Path:
     return path if path.is_absolute() else source_root / path
 
@@ -88,6 +123,7 @@ def build_preflight_plan(
     host_install_dir: Path,
     remote_url: str,
     tag: str,
+    warning_summary_gate_strict_refs: str | None = None,
 ) -> PreflightPlan:
     source = source_root.resolve()
     host = host_root.resolve()
@@ -140,8 +176,18 @@ def build_preflight_plan(
             lock_detail = f"template_digest={lock_plan.record['installed']['template_digest']}"
             lock_check = PreflightCheck("host-lock", _status(lock_plan.findings), lock_detail, tuple(lock_plan.findings))
 
+    strict_refs_findings = _warning_summary_gate_strict_refs_findings(warning_summary_gate_strict_refs)
+    strict_refs = _parse_warning_summary_gate_strict_refs(warning_summary_gate_strict_refs)
+    strict_refs_detail = f"refs={';'.join(strict_refs)}" if strict_refs else "refs=<none>"
+    strict_refs_status = "skipped" if warning_summary_gate_strict_refs is None else _status(strict_refs_findings)
     checks = (
         PreflightCheck("sanitize", _status(sanitize_findings), f"findings={len(sanitize_findings)}", sanitize_findings),
+        PreflightCheck(
+            "warning-summary-gate-strict-refs",
+            strict_refs_status,
+            strict_refs_detail,
+            strict_refs_findings,
+        ),
         PreflightCheck("publish-check", _status(publish_findings), f"findings={len(publish_findings)}", publish_findings),
         PreflightCheck(
             "publish-bundle",
@@ -210,7 +256,10 @@ def run_preflight(
     host_install_dir: Path,
     tag: str,
     check: bool,
+    warning_summary_gate_strict_refs: str | None = None,
 ) -> int:
+    if warning_summary_gate_strict_refs is None:
+        warning_summary_gate_strict_refs = os.getenv("PASS_39_WARNING_SUMMARY_GATE_STRICT_REFS")
     plan = build_preflight_plan(
         source_root=source_root,
         host_root=host_root,
@@ -221,6 +270,7 @@ def run_preflight(
         host_install_dir=host_install_dir,
         remote_url=remote_url,
         tag=tag,
+        warning_summary_gate_strict_refs=warning_summary_gate_strict_refs,
     )
     print(render(plan))
     return 1 if check and plan.findings_count else 0
@@ -231,7 +281,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--source", type=Path, default=Path.cwd(), help="Package source root")
     parser.add_argument("--host-root", type=Path, default=Path.cwd(), help="Host project root")
     parser.add_argument("--remote-url", required=True, help="GitHub remote URL to publish/install from")
-    parser.add_argument("--tag", default="v0.1.5", help="Release tag")
+    parser.add_argument(
+        "--warning-summary-gate-strict-refs",
+        help="Optional strict-ref configuration for warning-summary-gate checks",
+    )
+    parser.add_argument("--tag", default="v0.1.8", help="Release tag")
     parser.add_argument("--bundle-dir", type=Path, default=Path(".tmp/public-source"), help="Temporary publish bundle dir")
     parser.add_argument("--tag-repo-dir", type=Path, default=Path(".tmp/tag-repo"), help="Temporary local tag repo dir")
     parser.add_argument("--tag-install-dir", type=Path, default=Path(".tmp/tag-install"), help="Temporary local tag install dir")
@@ -255,8 +309,10 @@ def main(argv: list[str] | None = None) -> int:
         host_install_dir=args.host_install_dir,
         tag=args.tag,
         check=args.check,
+        warning_summary_gate_strict_refs=args.warning_summary_gate_strict_refs,
     )
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

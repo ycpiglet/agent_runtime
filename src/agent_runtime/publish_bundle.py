@@ -13,6 +13,7 @@ INCLUDE_FILES = (
     ".gitignore",
     "pyproject.toml",
     "README.md",
+    "scripts/warning_summary_strict_ref_policy.py",
 )
 
 INCLUDE_DIRS = (

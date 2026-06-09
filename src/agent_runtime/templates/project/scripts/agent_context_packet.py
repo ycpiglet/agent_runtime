@@ -6,6 +6,7 @@ orchestrator wants to spawn or call. Output is markdown (default) or JSON.
 
 Reads:
   - agents/roles.yml         role registry (canonical)
+  - agents/project/*         host-owned project context overlay, if present
   - agents/lead_engineer/STATUS.md  current state
   - agents/lead_engineer/tasks/TASK-NNN-*.md (when --task is given)
   - related BTC/BUG (later — out of TASK-084 scope, follow-up)
@@ -44,6 +45,54 @@ if sys.platform == "win32":
 ROOT = Path(__file__).resolve().parents[1]
 ROLES_YML = ROOT / "agents" / "roles.yml"
 TASKS_DIR = ROOT / "agents" / "lead_engineer" / "tasks"
+PROJECT_CONTEXT_README = "agents/project/README.md"
+PROJECT_CONTEXT_EXAMPLE = "agents/project/PROJECT-CONTEXT.example.yml"
+PROJECT_CONTEXT_FILES = (
+    "agents/project/PROJECT-CONTEXT.yml",
+    "agents/project/PROJECT-CONTEXT.yaml",
+    "agents/project/PROJECT-CONTEXT.md",
+    "agents/project/CONTEXT-SOURCES.yml",
+    "agents/project/CONTEXT-SOURCES.yaml",
+    "agents/project/DATASET-CATALOG.yml",
+    "agents/project/DATASET-CATALOG.yaml",
+    "agents/project/EVAL-POLICY.yml",
+    "agents/project/EVAL-POLICY.yaml",
+    "agents/project/SKILL-GOVERNANCE.md",
+    "agents/project/VISION.md",
+    "agents/project/ROADMAP.md",
+    "agents/project/ORG.md",
+    "agents/project/TEAMS.md",
+    "agents/project/LINKS.md",
+)
+CONTEXT_SOURCE_CANDIDATES = (
+    "agents/project/CONTEXT-SOURCES.yml",
+    "agents/project/CONTEXT-SOURCES.yaml",
+)
+CONTEXT_SOURCE_REQUIRED_FIELDS = (
+    "source_tier",
+    "id",
+    "owner",
+    "access_level",
+    "lineage",
+    "freshness_sla",
+)
+CONTEXT_SOURCE_REQUIRED_METADATA = (
+    "owner",
+    "updated_at",
+    "source_tier",
+    "access_level",
+    "lineage",
+    "confidence",
+)
+CONTEXT_QUERY_REQUIRED_FIELDS = (
+    "question",
+    "business_scope",
+    "source_tier",
+    "time_window",
+    "tolerance",
+    "ambiguity_level",
+    "access_check",
+)
 
 
 # ---------- minimal yaml loader ----------
@@ -232,6 +281,7 @@ class Packet:
     aliases: list[str]
     task_id: str | None
     task_summary: dict | None
+    project_context: list[str]
     required_inputs: list[str]
     forbidden_inputs: list[str]
     output_contract: list[str]
@@ -240,6 +290,10 @@ class Packet:
     skill_file: str
     verification_commands: list[str]
     notes: str
+    context_source_metadata: list[str]
+    context_source_warnings: list[str]
+    required_routing_fields: list[str]
+    definition_policy: str | None
 
     def to_dict(self) -> dict:
         return {
@@ -247,6 +301,7 @@ class Packet:
             "aliases": self.aliases,
             "task_id": self.task_id,
             "task_summary": self.task_summary,
+            "project_context": self.project_context,
             "required_inputs": self.required_inputs,
             "forbidden_inputs": self.forbidden_inputs,
             "output_contract": self.output_contract,
@@ -254,6 +309,10 @@ class Packet:
             "bootstrap_doc": self.bootstrap_doc,
             "skill_file": self.skill_file,
             "verification_commands": self.verification_commands,
+            "context_source_metadata": self.context_source_metadata,
+            "context_source_warnings": self.context_source_warnings,
+            "required_routing_fields": self.required_routing_fields,
+            "definition_policy": self.definition_policy,
             "notes": self.notes,
         }
 
@@ -274,6 +333,199 @@ def resolve_role(roles_doc: dict, role_arg: str) -> dict:
             return role
     known = ", ".join(r["id"] for r in roles_doc["roles"])
     raise SystemExit(f"unknown role '{role_arg}'. known: {known}")
+
+
+def discover_project_context_files(root: Path = ROOT) -> list[str]:
+    """Return host-owned context docs that should frame every role packet.
+
+    The managed upstream role files stay generic. Host projects put product
+    vision, roadmap, organization, team topology, and external links under
+    agents/project/ so role behavior changes through context, not by editing
+    upstream SKILL.md files.
+    """
+    found: list[str] = []
+    if (root / PROJECT_CONTEXT_README).exists():
+        found.append(PROJECT_CONTEXT_README)
+
+    actual = [rel for rel in PROJECT_CONTEXT_FILES if (root / rel).exists()]
+    teams_dir = root / "agents" / "project" / "teams"
+    if teams_dir.is_dir():
+        actual.extend(
+            path.relative_to(root).as_posix()
+            for path in sorted(teams_dir.glob("*.md"), key=lambda p: p.name.lower())
+        )
+
+    if actual:
+        found.extend(actual)
+    elif (root / PROJECT_CONTEXT_EXAMPLE).exists():
+        found.append(PROJECT_CONTEXT_EXAMPLE)
+    return found
+
+
+def _indent_of(line: str) -> int:
+    return len(line) - len(line.lstrip(" "))
+
+
+def _load_context_policy_fields(root: Path = ROOT) -> tuple[list[str], str | None]:
+    source_file: Path | None = None
+    for rel in CONTEXT_SOURCE_CANDIDATES:
+        candidate = root / rel
+        if candidate.exists():
+            source_file = candidate
+            break
+    if source_file is None:
+        return list(CONTEXT_QUERY_REQUIRED_FIELDS), None
+
+    lines = source_file.read_text(encoding="utf-8").splitlines()
+    section: str | None = None
+    section_indent = 0
+    list_indent = -1
+    required_fields: list[str] = []
+    definition_rule: str | None = None
+
+    for raw in lines:
+        text = _strip_yaml_comment(raw).rstrip("\n")
+        if not text.strip() or text.lstrip().startswith("#"):
+            continue
+        indent = _indent_of(text)
+        stripped = text.strip()
+
+        if indent == 0 and stripped.endswith(":"):
+            section = stripped[:-1]
+            section_indent = indent
+            list_indent = -1
+            if section not in {"definition_policy", "query_policy"}:
+                section = None
+                section_indent = 0
+            continue
+
+        if section is None or indent <= section_indent:
+            continue
+
+        if section == "definition_policy":
+            if stripped.startswith("rule:") and not definition_rule:
+                definition_rule = stripped.partition(":")[2].strip().strip('"')
+                continue
+            if stripped.startswith("required_metadata:"):
+                list_indent = indent
+                continue
+            if list_indent != -1 and indent > list_indent and stripped.startswith("- "):
+                required_fields.append(stripped[2:].strip())
+            elif list_indent != -1 and indent <= list_indent:
+                list_indent = -1
+            continue
+
+        if section == "query_policy":
+            if stripped.startswith("required_fields:"):
+                list_indent = indent
+                continue
+            if list_indent != -1 and indent > list_indent and stripped.startswith("- "):
+                required_fields.append(stripped[2:].strip())
+            elif list_indent != -1 and indent <= list_indent:
+                list_indent = -1
+
+    if not required_fields:
+        return list(CONTEXT_QUERY_REQUIRED_FIELDS), definition_rule
+    return required_fields, definition_rule
+
+
+def _load_context_source_metadata(root: Path = ROOT) -> tuple[list[str], list[str]]:
+    source_file: Path | None = None
+    for rel in CONTEXT_SOURCE_CANDIDATES:
+        candidate = root / rel
+        if candidate.exists():
+            source_file = candidate
+            break
+
+    if source_file is None:
+        return [], []
+
+    text = source_file.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    source_text = "\n".join(lines)
+
+    records: list[dict[str, object]] = []
+    current: dict[str, object] = {}
+    in_source_tiers = False
+    section_indent: int | None = None
+    entries_indent: int | None = None
+
+    def emit_current() -> None:
+        nonlocal current
+        if current:
+            records.append(current)
+            current = {}
+
+    for raw in lines:
+        stripped = raw.rstrip()
+        if not stripped.strip() or stripped.lstrip().startswith("#"):
+            continue
+        indent = _indent_of(stripped)
+        text_line = stripped.strip()
+
+        if not in_source_tiers:
+            if text_line.startswith("source_tiers:"):
+                in_source_tiers = True
+                section_indent = indent
+            continue
+
+        if in_source_tiers and section_indent is not None:
+            if text_line.startswith("query_policy:"):
+                emit_current()
+                break
+            if indent <= section_indent:
+                emit_current()
+                break
+            if indent == section_indent + 2 and text_line.startswith("- "):
+                emit_current()
+                entries_indent = section_indent + 2
+                _, _, tail = text_line.partition("- ")
+                key, sep, value = tail.partition(":")
+                if sep:
+                    current[key.strip()] = _parse_scalar(value.strip())
+                continue
+            if entries_indent is not None and indent >= entries_indent + 2 and ":" in text_line:
+                key, _, value = text_line.partition(":")
+                current[key.strip()] = _parse_scalar(value.strip())
+
+    emit_current()
+
+    summaries: list[str] = []
+    warnings: list[str] = []
+    for index, row in enumerate(records, start=1):
+        source_tier = row.get("source_tier", row.get("tier"))
+        if isinstance(source_tier, (int, float)):
+            source_tier = str(source_tier)
+
+        row_id = row.get("id", "(missing)")
+        row_owner = row.get("owner", "(missing)")
+        access = row.get("access_level", "(missing)")
+        freshness = row.get("freshness_sla", "(missing)")
+        lineage = row.get("lineage", "(missing)")
+
+        for field in CONTEXT_SOURCE_REQUIRED_FIELDS:
+            if field == "source_tier":
+                if "source_tier" not in row and "tier" not in row:
+                    warnings.append(
+                        f"{source_file.as_posix()}: entry #{index} missing required field '{field}'"
+                    )
+                continue
+            value = row.get(field)
+            if value is None or value in ("", None):
+                warnings.append(f"{source_file.as_posix()}: entry #{index} missing required field '{field}'")
+
+        summaries.append(
+            f"#{index}: id={row_id} tier={source_tier or '(missing)'} owner={row_owner} "
+            f"access={access} freshness={freshness} lineage={lineage}"
+        )
+
+    if "definition_policy" not in source_text:
+        warnings.append(f"{source_file.as_posix()}: missing definition_policy section")
+    if "query_policy" not in source_text:
+        warnings.append(f"{source_file.as_posix()}: missing query_policy section")
+    if not records:
+        warnings.append(f"{source_file.as_posix()}: no source_tiers entries found")
+    return summaries, warnings
 
 
 TASK_FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---", re.DOTALL)
@@ -343,11 +595,22 @@ def verification_commands(role_id: str, task_id: str | None) -> list[str]:
 def build_packet(roles_doc: dict, role_arg: str, task_arg: str | None) -> Packet:
     role = resolve_role(roles_doc, role_arg)
     task_summary = load_task_summary(task_arg) if task_arg else None
+    context_metadata, context_warnings = _load_context_source_metadata(ROOT)
+    required_routing_fields, definition_policy = _load_context_policy_fields(ROOT)
+    if required_routing_fields == []:
+        context_warnings.append(
+            "CONTEXT-SOURCES.yml: query_policy.required_fields is missing or empty; routing schema weak."
+        )
+    if not definition_policy:
+        context_warnings.append(
+            "CONTEXT-SOURCES.yml: definition_policy.rule is missing; define policy first."
+        )
     return Packet(
         role_id=role["id"],
         aliases=role.get("aliases") or [],
         task_id=task_arg,
         task_summary=task_summary,
+        project_context=discover_project_context_files(ROOT),
         required_inputs=role.get("required_inputs") or [],
         forbidden_inputs=role.get("forbidden_inputs") or [],
         output_contract=role.get("output_contract") or [],
@@ -356,6 +619,10 @@ def build_packet(roles_doc: dict, role_arg: str, task_arg: str | None) -> Packet
         skill_file=role["skill_file"],
         verification_commands=verification_commands(role["id"], task_arg),
         notes=(role.get("notes") or "").strip(),
+        context_source_metadata=context_metadata,
+        context_source_warnings=context_warnings,
+        required_routing_fields=required_routing_fields,
+        definition_policy=definition_policy,
     )
 
 
@@ -368,6 +635,27 @@ def render_markdown(p: Packet) -> str:
     lines.append(f"- Bootstrap: `{p.bootstrap_doc}` then `{p.skill_file}`")
     lines.append(f"- Aliases: {', '.join('/' + a for a in p.aliases) or '(none)'}")
     lines.append(f"- Audit gate: {'YES (High/Critical 완료 시 ## Independent Audit 필수)' if p.audit_gate else 'no (priority 따라감)'}")
+    lines.append("")
+    if p.project_context:
+        lines.append("## Project context overlay (READ FIRST)")
+        for x in p.project_context:
+            lines.append(f"- {x}")
+        lines.append("")
+    if p.context_source_metadata:
+        lines.append("## Context source ranking")
+        for row in p.context_source_metadata:
+            lines.append(f"- {row}")
+        lines.append("")
+    if p.context_source_warnings:
+        lines.append("## Context source warnings (needs update)")
+        for row in p.context_source_warnings:
+            lines.append(f"- {row}")
+        lines.append("")
+    lines.append("## Routing policy (required fields + definitions)")
+    lines.append(f"- definition_policy: {p.definition_policy or 'missing (block if policy absent)'}")
+    lines.append("- required_routing_fields:")
+    for row in p.required_routing_fields:
+        lines.append(f"  - {row}")
     lines.append("")
     if p.task_summary:
         lines.append("## Active TASK")
@@ -438,6 +726,11 @@ def main() -> int:
             resolve_role(roles_doc, args.role)
             if args.task:
                 load_task_summary(args.task)
+            _, warnings = _load_context_source_metadata(ROOT)
+            if warnings:
+                print("WARN: context source metadata quality issues:")
+                for warning in warnings:
+                    print(f"- {warning}")
             print(f"OK: role '{args.role}' and task '{args.task or '(none)'}' resolve cleanly")
             return 0
         except SystemExit as exc:

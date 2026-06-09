@@ -4,10 +4,38 @@ on:
   pull_request:
   push:
     branches: [main]
+  schedule:
+    - cron: "0 2 * * 1"
+  workflow_call:
+    inputs:
+      warning_summary_gate_strict_refs:
+        description: "PASS_39_WARNING_SUMMARY_GATE_STRICT_REFS 정책 문자열(줄바꿈 구분)"
+        required: false
+        type: string
+        default: |
+          refs/heads/main
+          refs/heads/release/
+          refs/tags/
+  workflow_dispatch:
+    inputs:
+      warning_summary_gate_strict_refs:
+        description: "PASS_39_WARNING_SUMMARY_GATE_STRICT_REFS 정책 문자열(줄바꿈 구분)"
+        required: false
+        default: |
+          refs/heads/main
+          refs/heads/release/
+          refs/tags/
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      PASS_39_LATENCY_METRICS_RUN_ID_REJECTION_LOG_PATH: >
+        .tmp/pass39-latency-metrics-run-id-rejections-${{ github.event_name }}-${{ matrix.python-version }}.jsonl
+      PASS_39_WARNING_SUMMARY_GATE_STRICT_REFS: |
+        refs/heads/main
+        refs/heads/release/
+        refs/tags/
     strategy:
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
@@ -16,10 +44,198 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Resolve warning summary strict refs input
+        id: resolve_warning_summary_strict_refs
+        run: |
+          DEFAULT_STRICT_REFS="$(
+            printf '%s\n' "${PASS_39_WARNING_SUMMARY_GATE_STRICT_REFS}" \
+            | sed 's/\r//g' \
+            | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' \
+            | sed '/^$/d'
+          )"
+          if [[ "${{ github.event_name }}" == "workflow_call" ]]; then
+            STRICT_REFS="${{ inputs.warning_summary_gate_strict_refs }}"
+            STRICT_REFS_SOURCE="workflow_call_input"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            STRICT_REFS="${{ github.event.inputs.warning_summary_gate_strict_refs }}"
+            STRICT_REFS_SOURCE="workflow_dispatch_input"
+          else
+            STRICT_REFS="${DEFAULT_STRICT_REFS}"
+            STRICT_REFS_SOURCE="job_env_default"
+          fi
+
+          # Normalize whitespace and Windows-style CRLF for reliable prefix matching.
+          STRICT_REFS="$(
+            printf '%s\n' "${STRICT_REFS}" \
+            | sed 's/\r//g' \
+            | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' \
+            | sed '/^$/d'
+          )"
+
+          if [[ -z "${STRICT_REFS}" ]]; then
+            STRICT_REFS_SOURCE="fallback_job_env_default"
+            STRICT_REFS="${DEFAULT_STRICT_REFS}"
+          fi
+
+          REQUIRE_SEND_TARGETS="0"
+          while IFS= read -r strict_ref; do
+            if [[ -z "${strict_ref}" ]]; then
+              continue
+            fi
+            if [[ "${GITHUB_REF}" == "${strict_ref}"* ]]; then
+              REQUIRE_SEND_TARGETS="1"
+              break
+            fi
+          done <<< "${STRICT_REFS}"
+
+          if [[ -n "${STRICT_REFS}" ]]; then
+            {
+              echo "PASS_39_WARNING_SUMMARY_GATE_STRICT_REFS<<EOF"
+              echo "${STRICT_REFS}"
+              echo "EOF"
+            } >> "$GITHUB_ENV"
+            {
+              echo "strict_refs_source=${STRICT_REFS_SOURCE}"
+              echo "strict_refs<<EOF"
+              echo "${STRICT_REFS}"
+              echo "EOF"
+              echo "require_send_targets=${REQUIRE_SEND_TARGETS}"
+            } >> "$GITHUB_OUTPUT"
+            echo "Resolved PASS_39_WARNING_SUMMARY_GATE_STRICT_REFS:"
+            echo "${STRICT_REFS}"
+            echo "Resolved require-send-targets: ${REQUIRE_SEND_TARGETS}"
+          else
+            echo "No strict refs policy resolved; leaving PASS_39_WARNING_SUMMARY_GATE_STRICT_REFS unchanged."
+          fi
+      - name: Write warning-summary strict-ref policy decision artifact
+        run: |
+          python scripts/warning_summary_strict_ref_policy.py \
+            --mode write \
+            --artifact .tmp/warning-summary-strict-ref-policy.json \
+            --github-event-name "${{ github.event_name }}" \
+            --github-ref "${GITHUB_REF}" \
+            --run-id "${GITHUB_RUN_ID}" \
+            --job-attempt "${GITHUB_RUN_ATTEMPT}" \
+            --matrix-python-version "${MATRIX_PYTHON_VERSION}" \
+            --strict-refs-source "${STRICT_REFS_SOURCE}" \
+            --strict-refs "${STRICT_REFS}" \
+            --require-send-targets "${REQUIRE_SEND_TARGETS}"
+        env:
+          MATRIX_PYTHON_VERSION: ${{ matrix.python-version }}
+          STRICT_REFS_SOURCE: ${{ steps.resolve_warning_summary_strict_refs.outputs.strict_refs_source }}
+          STRICT_REFS: ${{ steps.resolve_warning_summary_strict_refs.outputs.strict_refs }}
+          REQUIRE_SEND_TARGETS: ${{ steps.resolve_warning_summary_strict_refs.outputs.require_send_targets }}
+      - name: Validate warning-summary strict-ref policy artifact consistency
+        run: |
+          python scripts/warning_summary_strict_ref_policy.py \
+            --mode validate \
+            --artifact .tmp/warning-summary-strict-ref-policy.json \
+            --github-event-name "${{ github.event_name }}" \
+            --github-ref "${GITHUB_REF}" \
+            --run-id "${GITHUB_RUN_ID}" \
+            --job-attempt "${GITHUB_RUN_ATTEMPT}" \
+            --matrix-python-version "${MATRIX_PYTHON_VERSION}" \
+            --strict-refs-source "${STRICT_REFS_SOURCE}" \
+            --strict-refs "${STRICT_REFS}" \
+            --require-send-targets "${REQUIRE_SEND_TARGETS}"
+        env:
+          MATRIX_PYTHON_VERSION: ${{ matrix.python-version }}
+          STRICT_REFS_SOURCE: ${{ steps.resolve_warning_summary_strict_refs.outputs.strict_refs_source }}
+          STRICT_REFS: ${{ steps.resolve_warning_summary_strict_refs.outputs.strict_refs }}
+          REQUIRE_SEND_TARGETS: ${{ steps.resolve_warning_summary_strict_refs.outputs.require_send_targets }}
       - name: Install test dependencies
         run: python -m pip install --upgrade pip pytest
       - name: Run package tests
         run: PYTHONPATH=src python -m pytest tests -q
+      - name: Run latency policy gate (warning-only) for queue metrics
+        env:
+          PYTHONPATH: src
+          PASS_39_LATENCY_METRICS_PATH: .tmp/pass39-latency-metrics-${{ github.event_name }}-${{ matrix.python-version }}.jsonl
+          PASS_39_LATENCY_POLICY: warning-only
+          PASS_39_LATENCY_POLICY_MAX_WARNING_COUNT: "0"
+          PASS_39_LATENCY_METRICS_RUN_ID: >
+            run-${{ github.run_id }}-${{ github.event_name }}-py${{ matrix.python-version }}-warning
+        run: PYTHONPATH=src python -m pytest tests/test_template_message_queue.py -k "parallel_recover_and_answer_latency_distribution_and_starvation_guard" -q
+      - name: Run latency policy gate (fail-on-warning) on main push
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && (matrix.python-version == '3.10' || matrix.python-version == '3.11' || matrix.python-version == '3.12')
+        env:
+          PYTHONPATH: src
+          PASS_39_LATENCY_METRICS_PATH: .tmp/pass39-latency-metrics-${{ github.event_name }}-${{ matrix.python-version }}-strict-count0.jsonl
+          PASS_39_LATENCY_POLICY: fail-on-warning
+          PASS_39_LATENCY_POLICY_MAX_WARNING_COUNT: "0"
+          PASS_39_LATENCY_METRICS_RUN_ID: >
+            run-${{ github.run_id }}-${{ github.event_name }}-main-py${{ matrix.python-version }}-fail-${{ github.sha }}
+        run: PYTHONPATH=src python -m pytest tests/test_template_message_queue.py -k "parallel_recover_and_answer_latency_distribution_and_starvation_guard" -q
+      - name: Run latency policy gate (fail-on-warning) on schedule
+        if: github.event_name == 'schedule' && (matrix.python-version == '3.10' || matrix.python-version == '3.11' || matrix.python-version == '3.12')
+        env:
+          PYTHONPATH: src
+          PASS_39_LATENCY_METRICS_PATH: .tmp/pass39-latency-metrics-${{ github.event_name }}-${{ matrix.python-version }}-strict-count1.jsonl
+          PASS_39_LATENCY_POLICY: fail-on-warning
+          PASS_39_LATENCY_POLICY_MAX_WARNING_COUNT: "1"
+          PASS_39_LATENCY_METRICS_RUN_ID: >
+            run-${{ github.run_id }}-${{ github.event_name }}-schedule-py${{ matrix.python-version }}-fail
+        run: PYTHONPATH=src python -m pytest tests/test_template_message_queue.py -k "parallel_recover_and_answer_latency_distribution_and_starvation_guard" -q
+      - name: Run template smoke tests
+        run: PYTHONPATH=src python -m pytest tests/test_template_smoke.py -q
+      - name: Run template warning-summary policy gate smoke
+        env:
+          PASS_39_WARNING_SUMMARY_GATE_REPORT_PATH: .tmp/template-warning-summary-gate-report.jsonl
+        run: PYTHONPATH=src python -m pytest tests/test_template_smoke.py -k "warning_summary_gate_runs_in_template_runtime_and_survives_mixed_schema_contexts" -q
+      - name: Summarize template warning-summary gate reports
+        if: always()
+        env:
+          PASS_39_WARNING_SUMMARY_GATE_REPORT_PATH: .tmp/template-warning-summary-gate-report.jsonl
+          PASS_39_WARNING_SUMMARY_GATE_SLACK_WEBHOOK_URL: ${{ secrets.PASS_39_WARNING_SUMMARY_GATE_SLACK_WEBHOOK_URL }}
+          PASS_39_WARNING_SUMMARY_GATE_MONITORING_ENDPOINT: ${{ secrets.PASS_39_WARNING_SUMMARY_GATE_MONITORING_ENDPOINT }}
+        run: |
+          CI_SUMMARY_ARGS=(
+            "--last" "10"
+            "--github-annotations"
+            "--json"
+            "--dashboard-json" ".tmp/template-warning-summary-gate-dashboard.json"
+            "--slack-payload" ".tmp/template-warning-summary-gate-slack.json"
+            "--monitoring-json" ".tmp/template-warning-summary-gate-monitoring.json"
+            "--monitoring-threshold" "1"
+            "--slack-threshold" "3"
+          )
+
+          if [[ "${{ steps.resolve_warning_summary_strict_refs.outputs.require_send_targets }}" == "1" ]]; then
+            CI_SUMMARY_ARGS+=("--require-send-targets")
+          fi
+
+          echo "Summarizing warning-summary gate for ${GITHUB_REF}"
+          echo "Strict ref policies source: ${{ steps.resolve_warning_summary_strict_refs.outputs.strict_refs_source }}"
+          echo "Strict ref policies: ${{ steps.resolve_warning_summary_strict_refs.outputs.strict_refs }}"
+          echo "Require send targets: ${{ steps.resolve_warning_summary_strict_refs.outputs.require_send_targets }}"
+          if [[ " ${CI_SUMMARY_ARGS[*]} " == *" --require-send-targets "* ]]; then
+            echo "require-send-targets enabled"
+          fi
+
+          {
+            echo "### warning-summary-gate strict-ref policy"
+            echo ""
+            echo "source: ${{ steps.resolve_warning_summary_strict_refs.outputs.strict_refs_source }}"
+            echo "require-send-targets: ${{ steps.resolve_warning_summary_strict_refs.outputs.require_send_targets }}"
+            echo ""
+            echo "refs:"
+            printf '%s\n' "${{ steps.resolve_warning_summary_strict_refs.outputs.strict_refs }}" | sed 's/^/- /'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          PYTHONPATH=src python src/agent_runtime/templates/project/scripts/summarize_warning_summary_gate_report.py \
+            "${CI_SUMMARY_ARGS[@]}"
+      - name: Upload template warning-summary gate report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: template-warning-summary-gate-report-${{ matrix.python-version }}-${{ github.event_name }}-${{ github.run_id }}
+          path: |
+            .tmp/template-warning-summary-gate-report.jsonl
+            .tmp/template-warning-summary-gate-dashboard.json
+            .tmp/warning-summary-strict-ref-policy.json
+            .tmp/template-warning-summary-gate-slack.json
+            .tmp/template-warning-summary-gate-monitoring.json
+          if-no-files-found: warn
       - name: Check package CLI
         run: PYTHONPATH=src python -m agent_runtime.cli --version
       - name: Check public sanitization
@@ -31,8 +247,16 @@ jobs:
       - name: Build clean publish bundle
         run: PYTHONPATH=src python -m agent_runtime.cli publish-bundle --source . --dest .tmp/public-source --apply
       - name: Check local tag smoke plan
-        run: PYTHONPATH=src python -m agent_runtime.cli publish-tag-smoke --source . --repo-dir .tmp/tag-repo --install-dir .tmp/tag-install --tag v0.1.5 --check
+        run: PYTHONPATH=src python -m agent_runtime.cli publish-tag-smoke --source . --repo-dir .tmp/tag-repo --install-dir .tmp/tag-install --tag v0.1.8 --check
       - name: Check GitHub publish plan
-        run: PYTHONPATH=src python -m agent_runtime.cli publish-github-plan --source .tmp/public-source --remote-url https://github.com/example/agent_runtime.git --install-dir .tmp/public-source/.tmp/github-install --tag v0.1.5 --check
+        run: PYTHONPATH=src python -m agent_runtime.cli publish-github-plan --source .tmp/public-source --remote-url https://github.com/ycpiglet/agent_runtime.git --install-dir .tmp/public-source/.tmp/github-install --tag v0.1.8 --check
       - name: Check release preflight
-        run: PYTHONPATH=.tmp/public-source/src python -m agent_runtime.cli release-preflight --source .tmp/public-source --host-root .tmp/public-source/tests/fixtures/host --remote-url https://github.com/example/agent_runtime.git --tag v0.1.5 --check
+        run: |
+          PYTHONPATH=.tmp/public-source/src python -m agent_runtime.cli release-preflight \
+            --source .tmp/public-source \
+            --host-root .tmp/public-source/tests/fixtures/host \
+            --remote-url https://github.com/ycpiglet/agent_runtime.git \
+            --tag v0.1.8 \
+            --warning-summary-gate-strict-refs "${{ steps.resolve_warning_summary_strict_refs.outputs.strict_refs }}" \
+            --check
+

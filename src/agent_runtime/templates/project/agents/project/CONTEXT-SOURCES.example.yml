@@ -1,0 +1,67 @@
+schema: agent-runtime-context-sources/v1
+updated_at: YYYY-MM-DDTHH:MM:SS+09:00
+
+source_tiers:
+  - tier: 1
+    id: certified-semantic-layer
+    trust: highest
+    description: Officially approved definitions, metrics, data contracts, APIs, and schema.
+    examples:
+      - path: docs/data/metrics.yml
+      - path: schemas/
+    owner: data-owner
+    freshness_sla: 30d
+  - tier: 2
+    id: lineage
+    trust: high
+    description: Data lineage, source systems, transforms, owners, and access boundaries.
+    examples:
+      - path: docs/data/lineage.md
+    owner: data-owner
+    freshness_sla: 30d
+  - tier: 3
+    id: history
+    trust: medium
+    description: Past decisions, correction notes, incidents, reviews, and accepted exceptions.
+    examples:
+      - path: agents/lead_engineer/reviews/
+      - path: agents/lead_engineer/tasks/BACKLOG.md
+    owner: doc-steward
+    freshness_sla: 14d
+  - tier: 4
+    id: context-knowledge
+    trust: contextual
+    description: Roadmap, org chart, meeting notes, product intent, and communication records.
+    examples:
+      - path: agents/project/ROADMAP.md
+      - path: agents/project/ORG.md
+      - path: agents/project/LINKS.md
+    owner: ceo
+    freshness_sla: 14d
+
+definition_policy:
+  human_accountable_owner: owner
+  rule: "If the definition is ambiguous, escalate. Agents may propose definitions but may not silently finalize them."
+  required_metadata:
+    - owner
+    - updated_at
+    - source_tier
+    - access_level
+    - lineage
+    - confidence
+
+query_policy:
+  rule: "Queries must be refined until they name the source tier, metric/definition, scope, time window, and acceptable error tolerance."
+  required_fields:
+    - question
+    - source_tier
+    - business_scope
+    - time_window
+    - tolerance
+    - access_check
+
+access_levels:
+  - public
+  - internal
+  - confidential
+  - secret

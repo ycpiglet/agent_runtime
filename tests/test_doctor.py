@@ -1,0 +1,212 @@
+from __future__ import annotations
+
+import json
+import os
+import shutil
+from pathlib import Path
+
+from agent_runtime import cli as cli_module
+from agent_runtime import doctor
+
+PACKAGE_ROOT = Path(__file__).resolve().parents[1]
+SOURCE_TEMPLATES = PACKAGE_ROOT / "src" / "agent_runtime" / "templates" / "project"
+
+
+def _write_host_config(root: Path) -> None:
+    (root / "agent_runtime.yml").write_text(
+        "\n".join(
+            [
+                "project: fixture-host",
+                "upstream:",
+                "  package: agent_runtime",
+                "  remote_url: https://github.com/example/agent_runtime.git",
+                "  ref: v0.1.6",
+                "sync:",
+                "  mode: check-diff-apply",
+                "  allow_silent_overwrite: false",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+def _copy_project_templates(root: Path) -> None:
+    for child in SOURCE_TEMPLATES.iterdir():
+        target = root / child.name
+        if child.is_dir():
+            if target.exists():
+                shutil.rmtree(target)
+            shutil.copytree(child, target)
+        else:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(child, target)
+
+
+def _prepare_host_root(tmp_path: Path, *, with_lock: bool = False) -> Path:
+    host = tmp_path / "host"
+    _copy_project_templates(host)
+    _write_host_config(host)
+    (host / "agents" / "messages" / "inbox").mkdir(parents=True, exist_ok=True)
+    (host / "agents" / "messages" / "archive").mkdir(parents=True, exist_ok=True)
+    (host / "agents" / "messages" / "samples").mkdir(parents=True, exist_ok=True)
+    (host / "agents" / "runtime" / "claims").mkdir(parents=True, exist_ok=True)
+    (host / "agents" / "runtime" / "events").mkdir(parents=True, exist_ok=True)
+    if with_lock:
+        result = cli_module.main(["lock", "--root", str(host), "--write"])
+        assert result == 0
+    return host
+
+
+def _write_message_file(root: Path, message_id: str, *, status: str = "claimed", in_reply_to: str | None = None) -> Path:
+    inbox = root / "agents" / "messages" / "inbox"
+    inbox.mkdir(parents=True, exist_ok=True)
+    body = "question body\n"
+    msg = [
+        "---",
+        f"id: {message_id}",
+        "from: orchestrator",
+        "to: qa",
+        "type: question",
+        f"status: {status}",
+        "ts: 2026-06-08T11:11:11+09:00",
+        f"intent: test",
+        "task_id: none",
+        f"in_reply_to: {in_reply_to}" if in_reply_to else "",
+        "---",
+        body,
+        "",
+    ]
+    path = inbox / f"{message_id}.md"
+    path.write_text("\n".join([line for line in msg if line != ""]), encoding="utf-8")
+    return path
+
+
+def test_doctor_check_fails_on_missing_core_template_file(tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    (root / "scripts" / "orchestrator_safety_gate.py").unlink()
+
+    rc = cli_module.main(["doctor", "--root", str(root), "--check"])
+    assert rc == 1
+
+    plan, _ = doctor.build_doctor_plan(root)
+    assert any(
+        f.path == "scripts/orchestrator_safety_gate.py" and f.kind == "missing-required-file"
+        and f.severity == "blocker"
+        for f in plan.findings
+    )
+
+
+def test_doctor_detects_stale_claim_without_reply(tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    inbox = root / "agents" / "messages" / "inbox"
+    _write_message_file(root, "MSG-20260608-111111-stale")
+    claim_path = root / "agents" / "runtime" / "claims" / "MSG-20260608-111111-stale.claim"
+    claim_path.write_text(
+        '{"message_id":"MSG-20260608-111111-stale","role":"qa","pid":1,"hostname":"host",'
+        '"claimed_at":1,"expires_at":0,"path":"MSG-20260608-111111-stale"}',
+        encoding="utf-8",
+    )
+
+    plan, _ = doctor.build_doctor_plan(root)
+    assert any(
+        f.path == "agents/runtime/claims/MSG-20260608-111111-stale.claim"
+        and f.kind == "stale-claim-without-reply"
+        and f.severity == "warning"
+        for f in plan.findings
+    )
+
+
+def test_doctor_reports_provider_import_failure_as_warning(monkeypatch, tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+
+    def fake_import(root_path: Path, module_name: str) -> tuple[bool, str | None]:
+        if module_name == "providers.codex":
+            return False, "missing dependency or module: requests"
+        return True, None
+
+    monkeypatch.setattr(doctor, "_module_import_check", fake_import)
+
+    plan, _ = doctor.build_doctor_plan(root)
+    assert any(
+        f.area == "provider-imports"
+        and f.path == "providers/codex.py"
+        and f.severity == "warning"
+        for f in plan.findings
+    )
+
+
+def test_doctor_success_for_synced_host(tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+
+    rc = cli_module.main(["doctor", "--root", str(root), "--check"])
+    assert rc == 0
+    output = doctor.render(doctor.build_doctor_plan(root)[0])
+    assert "blockers=0" in output
+    plan, _ = doctor.build_doctor_plan(root)
+    assert not any(
+        f.kind == "toolrunner-audit-missing" for f in plan.findings
+    )
+
+
+def test_doctor_blocks_invalid_config(tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    (root / "agent_runtime.yml").unlink()
+
+    rc = cli_module.main(["doctor", "--root", str(root), "--check"])
+    assert rc == 1
+
+    plan, _ = doctor.build_doctor_plan(root)
+    assert any(f.area == "config" and f.kind == "config-invalid" and f.severity == "blocker" for f in plan.findings)
+
+
+def test_doctor_repair_creates_missing_runtime_dirs(tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    shutil.rmtree(root / "agents" / "runtime" / "events")
+    shutil.rmtree(root / "agents" / "runtime" / "claims")
+    shutil.rmtree(root / "agents" / "messages" / "inbox")
+    (root / "agents" / "messages").mkdir(parents=True, exist_ok=True)
+
+    rc = cli_module.main(["doctor", "--root", str(root), "--repair"])
+    assert rc == 0
+    assert (root / "agents" / "runtime" / "events").exists()
+    assert (root / "agents" / "runtime" / "claims").exists()
+    assert (root / "agents" / "messages" / "inbox").exists()
+
+
+def test_doctor_repair_removes_stale_claim(tmp_path, capsys):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    claim_path = root / "agents" / "runtime" / "claims" / "MSG-20260608-111111-stale.claim"
+    claim_path.write_text(
+        json.dumps(
+            {
+                "message_id": "MSG-20260608-111111-stale",
+                "role": "qa",
+                "pid": 1,
+                "hostname": "host",
+                "claimed_at": 1,
+                "expires_at": 0,
+                "path": "MSG-20260608-111111-stale",
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    _write_message_file(root, "MSG-20260608-111111-stale")
+
+    rc = cli_module.main(["doctor", "--root", str(root), "--repair"])
+    captured = capsys.readouterr()
+    assert rc == 0
+    assert not claim_path.exists()
+    assert "removed_stale_claim" in captured.out
+
+
+def test_doctor_repair_reports_no_action_when_clean(tmp_path, capsys):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    for old_claim in (root / "agents" / "runtime" / "claims").glob("*.claim"):
+        old_claim.unlink()
+    rc = cli_module.main(["doctor", "--root", str(root), "--repair"])
+    captured = capsys.readouterr()
+    assert rc == 0
+    assert "no actions needed" in captured.out
+

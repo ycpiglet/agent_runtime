@@ -1,0 +1,62 @@
+schema: agent-runtime-migration-compat-map/v1
+updated_at: 2026-06-18T10:20:00+09:00
+source_system: source_project
+source_root: ../source-project
+
+items:
+  - id: scripts-core-kept
+    category: script
+    source_path: scripts/
+    runtime_path: src/agent_runtime/templates/project/scripts/
+    state: mapped
+    status: kept
+    rationale: 공통 스크립트 kept 항목 템플릿
+
+  - id: scripts-core-changed
+    category: script
+    source_path: scripts/
+    runtime_path: src/agent_runtime/templates/project/scripts/
+    state: mapped
+    status: changed
+    rationale: 공통 스크립트 changed 항목 템플릿
+
+  - id: scripts-source-only
+    category: script
+    source_path: scripts/
+    runtime_path: none
+    state: mapped
+    status: missing
+    rationale: source-only 항목 템플릿 (의도적 제외/미이식 사유 필수 기록)
+
+  - id: scripts-runtime-extra
+    category: script
+    source_path: none
+    runtime_path: src/agent_runtime/templates/project/scripts/
+    state: mapped
+    status: deprecated
+    rationale: runtime-only 항목 템플릿 (의도적 추가/구조 개선 확인)
+
+  - id: skills-pack
+    category: skill
+    source_path: agents/**/*.SKILL.md
+    runtime_path: src/agent_runtime/templates/project/agents/**/*.SKILL.md
+    state: mapped
+    status: changed
+    rationale: SKILL 이식 템플릿 (변경/동기화 여부)
+
+  - id: hooks-wrapper
+    category: hook
+    source_path: src/hooks/.gitkeep
+    runtime_path: src/agent_runtime/templates/project/scripts/*_hook.py
+    state: mapped
+    status: changed
+    rationale: hook wrapper 템플릿
+
+summary:
+  total_source_items: 0
+  kept: 0
+  changed: 0
+  deprecated: 0
+  dropped: 0
+  missing: 0
+  notes: "TASK-AR-209/212/213 완료 후 실제 집계값으로 갱신."

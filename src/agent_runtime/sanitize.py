@@ -49,9 +49,13 @@ SKIP_DIR_NAMES = {
     ".git",
     ".pytest_cache",
     ".tmp",
+    "reviews",
     "__pycache__",
     "build",
     "dist",
+}
+SKIP_TOP_LEVEL_DIR_NAMES = {
+    "agents",
 }
 
 _ABSOLUTE_PATH_RE = r"(?:[A-Za-z]:\\Users\\" + r"|/Us" + r"ers/|/ho" + r"me/)[^\s`\"']+"
@@ -109,7 +113,10 @@ def _iter_files(root: Path) -> list[Path]:
         path
         for path in root.rglob("*")
         if path.is_file()
-        and not any(part in SKIP_DIR_NAMES or part.endswith(".egg-info") for part in path.relative_to(root).parts)
+        and not (
+            (path.relative_to(root).parts and path.relative_to(root).parts[0] in SKIP_TOP_LEVEL_DIR_NAMES)
+            or any(part in SKIP_DIR_NAMES or part.endswith(".egg-info") for part in path.relative_to(root).parts)
+        )
     )
 
 

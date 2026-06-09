@@ -1,0 +1,48 @@
+schema: agent-runtime-eval-policy/v1
+updated_at: YYYY-MM-DDTHH:MM:SS+09:00
+
+offline_eval:
+  gate: blocking
+  minimum_score_by_domain: 0.90
+  dataset_catalog: agents/project/DATASET-CATALOG.yml
+  required_case_types:
+    - typical
+    - edge
+    - adversarial
+    - ambiguous
+    - access-controlled
+  required_metrics:
+    - answer_correctness
+    - context_recall
+    - context_precision
+    - source_selection
+    - citation_presence
+    - policy_compliance
+
+live_verification:
+  gate: advisory_until_configured
+  reviewer_agent: independent-auditor
+  output_requirements:
+    - source_footer
+    - confidence_tag
+    - source_tier_tag
+    - unresolved_ambiguity_tag
+  tradeoffs:
+    improves:
+      - accuracy
+      - auditability
+    costs:
+      - time
+      - model spend
+
+correction_loop:
+  gate: scheduled
+  collector_agent: doc-steward
+  scan_sources:
+    - agents/messages/
+    - agents/lead_engineer/reviews/
+    - agents/lead_engineer/tasks/
+  output:
+    path: agents/project/corrections/
+    type: correction_proposal
+  rule: "Collectors may propose corrections. Human/accountable owner accepts definitions."

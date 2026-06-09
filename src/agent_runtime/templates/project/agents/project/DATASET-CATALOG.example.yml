@@ -1,0 +1,43 @@
+schema: agent-runtime-dataset-catalog/v1
+updated_at: YYYY-MM-DDTHH:MM:SS+09:00
+
+datasets:
+  - id: project-context-qa-gold
+    purpose: Verify that agents map questions to the correct project context and source tier.
+    owner: ceo
+    source_tier: certified-semantic-layer
+    location: agents/project/evals/project-context-qa.jsonl
+    label_type: human_gold
+    minimum_score: 0.90
+    metrics:
+      - exact_source_selection
+      - answer_correctness
+      - citation_presence
+      - access_policy_respected
+    required_metadata:
+      - question_id
+      - domain
+      - expected_sources
+      - expected_answer
+      - ambiguity_notes
+      - access_level
+
+  - id: runbook-execution-gold
+    purpose: Verify that runbook skills follow clarify, retrieve, execute, adversarial review, and verify steps.
+    owner: lead-engineer
+    source_tier: history
+    location: agents/project/evals/runbook-execution.jsonl
+    label_type: trace_gold
+    minimum_score: 0.90
+    metrics:
+      - step_order
+      - required_questions_asked
+      - tool_choice
+      - verification_evidence
+      - reviewer_findings_handled
+
+quality_gates:
+  per_domain_minimum_score: 0.90
+  block_release_on_regression: true
+  require_held_out_split: true
+  require_adversarial_cases: true

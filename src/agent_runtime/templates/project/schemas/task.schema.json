@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-runtime.local/schemas/task.schema.json",
+  "title": "TASK frontmatter",
+  "description": "agents/lead_engineer/tasks/TASK-NNN-*.md 용 YAML frontmatter 계약 (host 템플릿 검사 기준)",
+  "type": "object",
+  "required": [
+    "type", "id", "status", "owner", "priority", "difficulty",
+    "est_hours", "est_tokens", "tags", "created", "created_at"
+  ],
+  "properties": {
+    "type": { "const": "task" },
+    "id": { "type": "string", "pattern": "^TASK-\\d+$" },
+    "status": { "type": "string", "enum": ["대기", "진행 중", "완료", "보류"] },
+    "owner": { "type": "string" },
+    "assignees": { "type": "array" },
+    "priority": { "type": "string", "enum": ["Critical", "High", "Medium", "Low"] },
+    "difficulty": { "type": "string" },
+    "est_hours": { "type": "number" },
+    "est_tokens": { "type": "integer" },
+    "tags": { "type": "array" },
+    "trigger_meeting": { "type": "string" },
+    "audit_log": { "type": "string" },
+    "created": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "created_at": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T" },
+    "gate": { "type": "string" }
+  }
+}

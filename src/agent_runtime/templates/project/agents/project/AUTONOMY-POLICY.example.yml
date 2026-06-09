@@ -1,0 +1,72 @@
+schema: agent-runtime-autonomy-policy/v1
+updated_at: YYYY-MM-DDTHH:MM:SS+09:00
+
+autonomous_delivery:
+  default: enabled
+  branch_commit_pr_merge:
+    allowed_without_owner_approval: true
+    required_conditions:
+      - scoped_task_or_direct_user_request
+      - deterministic_checks_pass
+      - no_secret_or_production_data
+      - no_destructive_or_irreversible_action
+      - no_critical_security_legal_billing_risk
+      - branch_protection_allows_automation
+      - rollback_path_exists
+    required_evidence:
+      - task_or_request_id
+      - branch_name
+      - commit_summary
+      - check_result
+      - pr_or_merge_record
+      - risk_label
+
+release_council:
+  routine_patch_minor_release:
+    allowed_without_owner_approval: true
+    required_roles:
+      - lead-engineer
+      - qa
+      - independent-auditor
+      - doc-steward
+    required_evidence:
+      - release_readiness_summary
+      - validation_results
+      - risk_review
+      - report_handoff
+      - release_execution_log
+  owner_required_when:
+    - major_or_breaking_release
+    - secret_or_credential_change
+    - production_data_write
+    - billing_or_legal_impact
+    - failed_or_missing_critical_gate
+    - destructive_or_irreversible_operation
+    - untrusted_external_publication_target
+    - explicit_owner_policy
+
+executive_brief:
+  default: enabled
+  required_frontmatter:
+    - type
+    - id
+    - audience
+    - status
+    - priority
+    - tags
+    - actions
+    - owner
+    - evidence
+  required_body_order:
+    - Bottom Line
+    - Signal
+    - Action
+    - Insight
+    - Decision
+    - Footer
+  style:
+    concise_bullets: true
+    max_indent_levels: 2
+    decorative_emoji: false
+    table_first_for_signals: true
+    machine_readable_tags: true

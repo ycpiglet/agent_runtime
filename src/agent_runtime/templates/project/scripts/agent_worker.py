@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import socket
 import sys
 import threading
 import time
@@ -34,6 +35,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from providers import get_provider, Provider, ProviderError  # noqa: E402
+from message_queue import (  # noqa: E402
+    claim_message as lease_claim_message,
+    _has_reply,
+    current_claim_token,
+    has_active_claim,
+    mark_answered as lease_mark_answered,
+)
 import model_routing  # noqa: E402
 import eval_harness  # noqa: E402
 
@@ -424,28 +432,14 @@ def list_inbox_for(role: str) -> list[tuple[Path, dict, str]]:
     return out
 
 
-def claim_message(path: Path, meta: dict, body: str) -> bool:
+def claim_message(path: Path, meta: dict, body: str, role: str | None = None) -> bool:
     """Flip status open -> claimed via atomic write. Returns True on success."""
-    if meta.get("status") != "open":
-        return False
-    meta["status"] = "claimed"
-    new_text = serialize_frontmatter(meta, body)
-    atomic_write_text(path, new_text)
-    return True
+    return lease_claim_message(path, meta, body, role=role)
 
 
-def mark_answered(path: Path) -> bool:
+def mark_answered(path: Path, role: str | None = None, *, claim_identity: dict | None = None) -> bool:
     """Re-read message, flip claimed -> answered. Returns True on success."""
-    try:
-        text = path.read_text(encoding="utf-8")
-    except Exception:
-        return False
-    meta, body = parse_frontmatter(text)
-    if meta.get("status") not in {"claimed", "open"}:
-        return False
-    meta["status"] = "answered"
-    atomic_write_text(path, serialize_frontmatter(meta, body))
-    return True
+    return lease_mark_answered(path, role=role, worker_identity=claim_identity)
 
 
 def write_reply(role: str, original_meta: dict, reply_text: str,
@@ -474,7 +468,9 @@ def write_reply(role: str, original_meta: dict, reply_text: str,
         "next": [],
     }
     body = reply_text.rstrip("\n") + "\n"
-    target.write_text(serialize_frontmatter(meta, body), encoding="utf-8")
+    tmp = target.with_suffix(target.suffix + f".tmp.{uuid.uuid4().hex[:6]}")
+    tmp.write_text(serialize_frontmatter(meta, body), encoding="utf-8")
+    os.replace(tmp, target)
     return target
 
 
@@ -496,11 +492,24 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
     cfg.handled_ids.add(msg_id)
 
     log(cfg, f"claiming {path.name}")
-    if not claim_message(path, meta, body):
+    if not claim_message(path, meta, body, role=cfg.role):
         log(cfg, f"claim failed (concurrent change?), skipping {path.name}")
         return False
+    claim_identity = {
+        "role": cfg.role,
+        "pid": os.getpid(),
+        "hostname": socket.gethostname(),
+    }
+    token = current_claim_token(path)
+    if token is not None:
+        claim_identity["token"] = token
     append_event(EVENTS_DIR, cfg.role, "message_claimed",
                  message_id=msg_id, path=str(path.relative_to(REPO_ROOT)))
+
+    if not has_active_claim(path, role=cfg.role, worker_identity=claim_identity):
+        log(cfg, f"WARN lost claim before processing {path.name}")
+        append_event(EVENTS_DIR, cfg.role, "claim_lost", message_id=msg_id, phase="pre_process")
+        return True
 
     instruction = body if body.strip() else str(meta.get("intent", ""))
     routing_decision = _message_routing_decision(cfg, meta, instruction)
@@ -575,13 +584,27 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
             event_fields["eval_skip_reason"] = eval_skip_reason
         append_event(EVENTS_DIR, cfg.role, "provider_called", **event_fields)
 
+    if not has_active_claim(path, role=cfg.role, worker_identity=claim_identity):
+        log(cfg, f"WARN lost claim before marking answered for {msg_id}")
+        append_event(EVENTS_DIR, cfg.role, "claim_lost", message_id=msg_id, phase="post_reply")
+        return True
+
+    if _has_reply(msg_id):
+        log(cfg, f"reply already exists for {msg_id}, skipping duplicate write")
+        append_event(EVENTS_DIR, cfg.role, "reply_exists", message_id=msg_id)
+        if mark_answered(path, role=cfg.role, claim_identity=claim_identity):
+            append_event(EVENTS_DIR, cfg.role, "status_updated", message_id=msg_id, from_status="claimed", to_status="answered")
+            log(cfg, f"marked original {msg_id} answered")
+            return True
+        return True
+
     reply_path = write_reply(cfg.role, meta, reply_text)
     log(cfg, f"wrote reply {reply_path.name}")
     append_event(EVENTS_DIR, cfg.role, "reply_written",
                  reply_id=reply_path.stem, in_reply_to=msg_id,
                  path=str(reply_path.relative_to(REPO_ROOT)))
 
-    if mark_answered(path):
+    if mark_answered(path, role=cfg.role, claim_identity=claim_identity):
         log(cfg, f"marked original {msg_id} answered")
         append_event(EVENTS_DIR, cfg.role, "status_updated",
                      message_id=msg_id, from_status="claimed",
