@@ -1,0 +1,63 @@
+schema: agent-runtime-project-context/v1
+updated_at: YYYY-MM-DDTHH:MM:SS+09:00
+
+project:
+  id: my-project
+  name: My Project
+  stage: mvp
+  one_liner: Short description of what this project is building.
+  primary_user: Who the MVP serves first.
+  problem: The concrete problem this project solves.
+  success_metric: The measurable signal that the MVP is working.
+
+vision:
+  purpose: Why this should exist.
+  principles:
+    - Principle 1
+    - Principle 2
+  non_goals:
+    - What the project should not optimize for right now.
+
+roadmap:
+  source: agents/project/ROADMAP.md
+  current_phase: MVP
+  next_milestone: Milestone name and target date.
+  release_policy: What counts as releasable.
+
+organization:
+  source: agents/project/ORG.md
+  owner: Human final authority.
+  decision_owner: Who decides product priority day to day.
+  escalation: What must be escalated before mutation.
+
+agent_teams:
+  - id: product-core
+    purpose: Build and verify the core MVP loop.
+    roles: [ceo, lead-engineer, backend, uiux, qa]
+    canonical_context:
+      - agents/project/VISION.md
+      - agents/project/ROADMAP.md
+  - id: governance
+    purpose: Keep decisions, risks, and handoff records consistent.
+    roles: [managing-partner, independent-auditor, doc-steward, scribe]
+    canonical_context:
+      - agents/project/ORG.md
+      - agents/lead_engineer/tasks/BACKLOG.md
+
+links:
+  - label: Product brief
+    path: agents/project/VISION.md
+    owner: ceo
+  - label: Roadmap
+    path: agents/project/ROADMAP.md
+    owner: lead-engineer
+
+runtime_policy:
+  host_owned:
+    - agents/project/**
+    - agents/lead_engineer/tasks/**
+    - agents/lead_engineer/reports/**
+  do_not_customize_for_product:
+    - agents/*/SKILL.md
+    - agents/roles.yml
+    - scripts/**

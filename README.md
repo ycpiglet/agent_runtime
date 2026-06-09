@@ -10,7 +10,7 @@ published and host projects have moved to `agent_runtime`.
 
 Public release boundary:
 
-- Primary public tag: `https://github.com/ycpiglet/agent_runtime` `v0.1.5`
+- Primary public tag: `https://github.com/ycpiglet/agent_runtime` `v0.1.8`
 - Legacy compatibility tag: `https://github.com/ycpiglet/ralph-automation` `v0.1.4`
 
 Current scope is GitHub source and host sync distribution:
@@ -29,10 +29,95 @@ Current scope is GitHub source and host sync distribution:
 - `agent_runtime update-plan --root <host> --install-dir <dir> --check`
 - `agent_runtime update --root <host> --install-dir <dir> --check|--diff|--apply`
 - `agent_runtime release-preflight --source . --host-root <host> --remote-url <github-url> --check`
+- `agent_runtime release-preflight --source . --host-root <host> --remote-url <github-url> --warning-summary-gate-strict-refs <strict_refs> --check`
 - package-data templates under `src/agent_runtime/templates/project/`
 - package-local `tests/`
 - GitHub Actions workflow under `.github/workflows/test.yml`
 - no product files, host state, or local runtime state exported by default
+
+### Latency policy hooks (message queue PASS-39+)
+
+Queue latency metrics for `tests/test_template_message_queue.py` are optionally exported
+and evaluated by policy:
+
+- `PASS_39_LATENCY_METRICS_PATH`: JSON or JSONL output path for one or more latency
+  metric records.
+- `PASS_39_MAX_P95_MS`, `PASS_39_MAX_P99_MS`, `PASS_39_MAX_FAILURE_RATIO`: numeric
+  threshold overrides used by `test_parallel_recover_and_answer_latency_distribution_and_starvation_guard`.
+- `PASS_39_LATENCY_POLICY`: one of `warning-only` (default) or `fail-on-warning`.
+- `PASS_39_LATENCY_POLICY_MAX_WARNING_COUNT`: optional integer limit for allowed warning
+  entries per policy evaluation.
+- `PASS_39_LATENCY_METRICS_RUN_ID`: optional stable id written into each record.
+
+`warning-only` mode keeps warnings visible without failing the assertion path, while
+`fail-on-warning` enforces a hard gate when warning records exist.
+
+CI 운영에서는 기본 게이트를 `warning-only`로 유지하고, 현재 워크플로우에서는
+`main` 브랜치 푸시에 한해 Python `3.10`, `3.11`, `3.12` 실행기로 `fail-on-warning` 게이트를
+추가로 실행합니다. 또한 매주 월요일 02:00 UTC의 `schedule` 실행에서는 Python
+`3.10`, `3.11`, `3.12`에서 `fail-on-warning`을 실행하되,
+`main`은 `PASS_39_LATENCY_POLICY_MAX_WARNING_COUNT=0`,
+`schedule`은 `PASS_39_LATENCY_POLICY_MAX_WARNING_COUNT=1`을 사용합니다.
+경로는 `event-py<python-version>-strict-countN.jsonl` 형태로 정책/허용치별 분리 저장하고, warning-only는 `event-py<python-version>.jsonl`으로 남깁니다.
+CI 실행마다 `PASS_39_LATENCY_METRICS_RUN_ID`를 `run-<github_run_id>-...` 패턴으로 주입해
+아티팩트 추적 재현성을 보장합니다.
+
+### warning-summary strict-ref policy inputs (manual/reusable workflows)
+
+`test` workflow supports `workflow_call` / `workflow_dispatch` input:
+
+- input name: `warning_summary_gate_strict_refs`
+- default lines:
+  - `refs/heads/main`
+  - `refs/heads/release/`
+  - `refs/tags/`
+
+재현 실행 예시:
+
+```bash
+gh workflow run test.yml \
+  --repo <OWNER>/<REPO> \
+  --ref <branch-or-tag> \
+  --field warning_summary_gate_strict_refs=$'refs/heads/main\nrefs/heads/release/\nrefs/tags/'
+```
+
+수동 실행에서는 요약 로그/summary에 다음이 남아야 추적 가능합니다:
+
+- source (`workflow_dispatch_input` 또는 fallback source)
+- 정규화된 strict-ref 라인 목록
+- `require-send-targets` 판정 (`0`/`1`)
+- `warning-summary-strict-ref-policy.json`(workflow artifact) 내 동일 값
+
+CI summary는 동일한 판정을 재사용하므로, policy 재현 시점과 실제 적용이 일치해야 합니다.
+
+CI에서 `PASS-93` 항목은 추가로 `Validate warning-summary strict-ref policy artifact consistency` 스텝에서
+artifact( .tmp/warning-summary-strict-ref-policy.json )와 resolve step 출력의 일치 여부를
+자동 검증합니다. 추가로 수동 점검이 필요하면 다음처럼 확인할 수 있습니다:
+
+```bash
+python - <<'PY'
+import json
+path = ".tmp/warning-summary-strict-ref-policy.json"
+decision = json.load(open(path, encoding="utf-8"))
+print(decision)
+PY
+```
+
+PASS-95 보조 재현 스크립트:
+
+```bash
+python scripts/warning_summary_strict_ref_policy.py \
+  --mode validate \
+  --artifact .tmp/warning-summary-strict-ref-policy.json \
+  --github-event-name manual \
+  --github-ref refs/heads/main \
+  --run-id 1234 \
+  --job-attempt 1 \
+  --matrix-python-version 3.12 \
+  --strict-refs-source workflow_dispatch_input \
+  --strict-refs $'refs/heads/main\nrefs/heads/release/\nrefs/tags/' \
+  --require-send-targets 1
+```
 
 ## Quick Host Install
 
@@ -45,14 +130,14 @@ Windows PowerShell:
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python -m pip install --upgrade pip
-.\.venv\Scripts\python -m pip install "git+https://github.com/ycpiglet/agent_runtime.git@v0.1.5"
+.\.venv\Scripts\python -m pip install "git+https://github.com/ycpiglet/agent_runtime.git@v0.1.8"
 
 @'
 project: my-project
 upstream:
   package: agent_runtime
   remote_url: https://github.com/ycpiglet/agent_runtime.git
-  ref: v0.1.5
+  ref: v0.1.8
 sync:
   mode: check-diff-apply
   allow_silent_overwrite: false
@@ -62,6 +147,7 @@ sync:
 .\.venv\Scripts\agent_runtime update --check
 .\.venv\Scripts\agent_runtime update --diff
 .\.venv\Scripts\agent_runtime update --apply
+Copy-Item agents\project\PROJECT-CONTEXT.example.yml agents\project\PROJECT-CONTEXT.yml
 ```
 
 macOS/Linux:
@@ -70,14 +156,14 @@ macOS/Linux:
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install "git+https://github.com/ycpiglet/agent_runtime.git@v0.1.5"
+python -m pip install "git+https://github.com/ycpiglet/agent_runtime.git@v0.1.8"
 
 cat > agent_runtime.yml <<'YAML'
 project: my-project
 upstream:
   package: agent_runtime
   remote_url: https://github.com/ycpiglet/agent_runtime.git
-  ref: v0.1.5
+  ref: v0.1.8
 sync:
   mode: check-diff-apply
   allow_silent_overwrite: false
@@ -87,10 +173,30 @@ agent_runtime update-plan --check
 agent_runtime update --check
 agent_runtime update --diff
 agent_runtime update --apply
+cp agents/project/PROJECT-CONTEXT.example.yml agents/project/PROJECT-CONTEXT.yml
 ```
 
 Use `--check` first for a safe status report, `--diff` to inspect exact file
 changes, and `--apply` only when the diff is acceptable.
+
+## Host Project Context
+
+Agent Runtime is meant to act like a reusable agent development team. Keep the
+team's shared runtime behavior upstream-managed, and put each host project's
+product identity under `agents/project/`.
+
+Use `agents/project/PROJECT-CONTEXT.yml` to map:
+
+- project vision, purpose, user, and MVP success metric
+- roadmap phase and release policy
+- organization, decision owner, and escalation rule
+- agent teams and the documents each team must read
+- links to briefs, specs, tickets, product docs, and external references
+
+`scripts/agent_context_packet.py` automatically includes existing
+`agents/project/` context files in every role packet. This lets different host
+projects tune vision, roadmap, organization, and team topology without editing
+managed files such as `agents/*/SKILL.md`, `agents/roles.yml`, or `scripts/*`.
 
 For local development on this source tree, use an editable install instead:
 
@@ -140,6 +246,32 @@ When conflicts appear:
 This keeps product-specific edits, local operating rules, and private host
 state from being replaced by generic upstream templates.
 
+## Tool Command Guardrails (Template Runtime)
+
+Template workers expose a constrained command tool (`ToolRunner`) used by provider
+bridges.
+
+- `ci` (default): read-only verification commands only.
+- `research`: `ci` baseline + non-mutating helper script help commands.
+- `owner`: `research` + extra maintenance commands (`git add`, `git restore`)
+  with explicit in-repo path checks.
+
+Allowed examples:
+
+- `git status`, `git diff`, `python scripts/check_agent_docs.py`, `python -m pytest -q`
+- `python scripts/agent_worker.py --help`, `python scripts/auto_runner.py --help` (research)
+- `git add path/to/file` (owner only)
+
+Blocked by default:
+
+- `python -c ...`
+- `python -m pip ...`
+- mutable git commands (`git commit`, `git checkout`, `git push`, `git stash`, ...)
+- shell composition tokens (`&&`, `||`, `|`, `;`, `>`/`<`, `` ` ``, `$(`)
+
+If a command is denied, the runtime message includes the active profile and the
+profile allowlist summary for deterministic review.
+
 ## Publish Check
 
 Run this before creating a public GitHub repo or tag:
@@ -154,7 +286,7 @@ PYTHONPATH=src python -m agent_runtime.cli publish-github-status --remote-url ht
 PYTHONPATH=src python -m agent_runtime.cli publish-github-status --remote-url https://github.com/ycpiglet/agent_runtime.git --branch main --require-workflow --wait-workflow --check
 PYTHONPATH=src python -m agent_runtime.cli publish-github-status --remote-url https://github.com/ycpiglet/agent_runtime.git --branch main --require-workflow --wait-workflow --workflow-head-sha <commit-sha> --check
 PYTHONPATH=src python -m agent_runtime.cli publish-github-execute --source .tmp/public-source --remote-url https://github.com/ycpiglet/agent_runtime.git --install-dir .tmp/public-source/.tmp/github-install
-PYTHONPATH=src python -m agent_runtime.cli release-preflight --source . --host-root tests/fixtures/host --remote-url https://github.com/ycpiglet/agent_runtime.git --check
+PYTHONPATH=src python -m agent_runtime.cli release-preflight --source . --host-root tests/fixtures/host --remote-url https://github.com/ycpiglet/agent_runtime.git --warning-summary-gate-strict-refs $'refs/heads/main\nrefs/heads/release/\nrefs/tags/' --check
 PYTHONPATH=src python -m pytest tests -q
 ```
 
@@ -224,7 +356,7 @@ Host projects pin the upstream dependency in `agent_runtime.yml`:
 upstream:
   package: agent_runtime
   remote_url: https://github.com/ycpiglet/agent_runtime.git
-  ref: v0.1.5
+  ref: v0.1.6
 ```
 
 If the package is installed in the active environment, run:
@@ -269,5 +401,6 @@ publish plan, host update plan, host upstream match, executable host update
 command shape, host sync conflict detection, and host lock freshness into one
 report. It does not replace `publish-tag-smoke --apply` or the real
 `publish-github-execute --execute` / workflow status evidence. Release tags such
-as `v0.1.5` are accepted for normal distribution; a 40-character commit SHA is
+as `v0.1.6` are accepted for normal distribution; a 40-character commit SHA is
 stricter if the host must be protected from force-moved tags.
+

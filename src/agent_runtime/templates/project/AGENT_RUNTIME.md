@@ -12,6 +12,7 @@ Message      = file-based work or coordination packet
 Event        = append-only runtime record
 Pane         = optional observer view, not the source of truth
 Orchestrator = command layer that routes work and starts workers
+Context      = host-owned project overlay under agents/project/
 ```
 
 A terminal pane is only a view. The durable state lives in files, task records,
@@ -22,6 +23,7 @@ and event logs.
 ```text
 User or CEO instruction
   -> orchestrator
+  -> project context overlay
   -> message/task store
   -> role worker
   -> provider adapter
@@ -49,6 +51,44 @@ A role worker should:
 - Do not write secrets to messages, events, reports, or logs.
 - Do not let runtime artifacts become public release content.
 - Prefer deterministic local checks before expensive model calls.
+- Do not encode project-specific product behavior in upstream SKILL.md files.
+- Put host vision, roadmap, organization, and link maps under `agents/project/`.
+- Automate branch, commit, PR, and merge for routine R1/R2 work when checks pass.
+- Escalate only critical release boundaries to Owner; routine patch/minor
+  release decisions can be made by the agent release council.
+- Reports and plans should use concise Executive BRIEF structure with
+  frontmatter, tags, action summaries, evidence links, and clear visual tables.
+
+## Autonomous Delivery
+
+```text
+Task or direct user request
+  -> branch
+  -> scoped commit
+  -> focused checks
+  -> PR/review agents
+  -> merge gate
+  -> record evidence
+```
+
+Agents should ask for Owner approval only when a critical boundary is present:
+secrets, production data, legal/billing, destructive actions, failed critical
+gates, untrusted external publication, force push, or major/breaking release.
+
+## Release Council
+
+```text
+Release candidate
+  -> Lead Engineer scope check
+  -> QA validation check
+  -> Independent Auditor risk check
+  -> Doc Steward report/handoff check
+  -> release decision gate
+  -> execution evidence
+```
+
+The council may approve routine patch/minor releases when gates pass. Owner
+approval remains mandatory for critical releases.
 
 ## Common Commands
 

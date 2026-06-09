@@ -53,6 +53,15 @@ except Exception:
 from providers import get_provider  # noqa: E402
 import model_routing  # noqa: E402
 import eval_harness  # noqa: E402
+from message_queue import (  # noqa: E402
+    claim_message as lease_claim_message,
+    mark_answered as lease_mark_answered,
+    has_active_claim,
+    current_claim_token,
+    _has_reply,
+    parse_frontmatter,
+)
+from agent_worker import write_reply  # noqa: E402
 
 RUNTIME_DIR = REPO_ROOT / "agents" / "runtime"
 STOP_LOOP_FILE = RUNTIME_DIR / "STOP_LOOP"
@@ -244,7 +253,7 @@ def _stop_file_present(stop_files) -> Path | None:
     return None
 
 
-def _claim_source(path: Path):
+def _claim_source(path: Path, role: str | None = None):
     """Re-read a source message fresh and atomically claim open->claimed, using
     the same primitive agent_worker uses. Returns (meta, body) on success, or
     None if it is no longer claimable (already taken / not open / unreadable).
@@ -254,14 +263,13 @@ def _claim_source(path: Path):
     check-then-write window is identical to agent_worker.claim_message's — this
     serializes with a concurrent worker, it does not add a stronger guarantee.
     """
-    from agent_worker import claim_message, parse_frontmatter
     try:
         meta, body = parse_frontmatter(path.read_text(encoding="utf-8"))
     except Exception:
         return None
     if not meta or meta.get("status") != "open":
         return None
-    if not claim_message(path, meta, body):
+    if not lease_claim_message(path, meta, body, role=role):
         return None
     return meta, body
 
@@ -277,13 +285,28 @@ def _write_back_reply(role: str, src_meta: dict, reply_text: str, source_path: P
     message is left at 'claimed' — the same best-effort the real worker gives
     (agent_worker only logs a WARN on a failed mark_answered). So the orphan-free
     guarantee covers provider errors, not a write-side IO failure on the flip."""
-    from agent_worker import mark_answered, write_reply
+    claim_identity = {"role": role}
+    token = current_claim_token(source_path)
+    if token is not None:
+        claim_identity["token"] = token
+
+    if not has_active_claim(source_path, role=role, worker_identity=claim_identity):
+        return None
+    if _has_reply(src_meta["id"], source_path.parent):
+        try:
+            lease_mark_answered(source_path, role=role, worker_identity=claim_identity)
+        except Exception:
+            pass
+        return None
+
     try:
         reply_path = write_reply(role, src_meta, reply_text, inbox=source_path.parent)
     except Exception:
         return None
+    if not has_active_claim(source_path, role=role, worker_identity=claim_identity):
+        return None
     try:
-        mark_answered(source_path)
+        lease_mark_answered(source_path, role=role, worker_identity=claim_identity)
     except Exception:
         pass  # reply already written; failed flip leaves 'claimed' (worker-equivalent)
     return reply_path
@@ -356,7 +379,7 @@ def run_bounded_dispatch(
 
         if source is not None:
             # --- write-back path: claim BEFORE any billable call ---
-            claimed = _claim_source(Path(source))
+            claimed = _claim_source(Path(source), role=role)
             if claimed is None:
                 # Lost the claim (a worker took it, or it is no longer open).
                 # No dispatch => no spend: the anti-waste invariant holds.

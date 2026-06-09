@@ -26,14 +26,35 @@ from agent_runtime.publish_github_status import build_github_status
 from agent_runtime.publish_github_execute import build_github_execution
 from agent_runtime.publish_github_execute import run_github_publish
 from agent_runtime.release_preflight import build_preflight_plan
+from agent_runtime import release_preflight
 from agent_runtime.publish_tag_smoke import build_tag_smoke_plan
 from agent_runtime.sanitize import analyze as analyze_sanitize
 from agent_runtime.sync import _template_files
 from agent_runtime.sync import build_sync_plan
 
-CURRENT_RELEASE_VERSION = "0.1.5"
+CURRENT_RELEASE_VERSION = "0.1.6"
 CURRENT_RELEASE_TAG = f"v{CURRENT_RELEASE_VERSION}"
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
+
+
+def _extract_workflow_step(workflow_text: str, step_name: str) -> str:
+    lines = workflow_text.splitlines()
+    start_prefix = f"      - name: {step_name}"
+    next_prefix = "      - name: "
+    for i, line in enumerate(lines):
+        if line.startswith(start_prefix):
+            start = i
+            break
+    else:
+        raise AssertionError(f"workflow step not found: {step_name}")
+
+    end = len(lines)
+    for i in range(start + 1, len(lines)):
+        if lines[i].startswith(next_prefix):
+            end = i
+            break
+
+    return "\n".join(lines[start:end])
 
 
 def _write(path: Path, text: str = ""):
@@ -916,6 +937,63 @@ def test_release_preflight_reports_missing_host_upstream(tmp_path):
     assert checks["host-lock"].status == "skipped"
 
 
+def test_release_preflight_reports_warning_summary_gate_strict_refs_in_render_and_checks(tmp_path):
+    source = tmp_path / "source"
+    host = tmp_path / "host"
+    _write_public_source(source)
+    _write_host_config(host)
+    strict_refs = "refs/heads/main\nrefs/tags/\n"
+    plan = build_preflight_plan(
+        source_root=source,
+        host_root=host,
+        bundle_dir=tmp_path / "bundle",
+        tag_repo_dir=tmp_path / "tag-repo",
+        tag_install_dir=tmp_path / "tag-install",
+        github_install_dir=source / ".tmp" / "github-install",
+        host_install_dir=host / ".tmp" / "host-install",
+        remote_url="https://github.com/example/agent_runtime.git",
+        tag="v0.1.0",
+        warning_summary_gate_strict_refs=strict_refs,
+    )
+
+    checks = {check.name: check for check in plan.checks}
+
+    assert checks["warning-summary-gate-strict-refs"].status == "ok"
+    assert checks["warning-summary-gate-strict-refs"].detail == "refs=refs/heads/main;refs/tags/"
+
+    rendered = release_preflight.render(plan)
+    assert "| warning-summary-gate-strict-refs | ok | refs=refs/heads/main;refs/tags/ | 0 |" in rendered
+
+
+def test_release_preflight_blocks_invalid_warning_summary_gate_strict_refs(tmp_path):
+    source = tmp_path / "source"
+    host = tmp_path / "host"
+    _write_public_source(source)
+    _write_host_config(host)
+    strict_refs = "main\nrefs/heads/main\n"
+
+    plan = build_preflight_plan(
+        source_root=source,
+        host_root=host,
+        bundle_dir=tmp_path / "bundle",
+        tag_repo_dir=tmp_path / "tag-repo",
+        tag_install_dir=tmp_path / "tag-install",
+        github_install_dir=source / ".tmp" / "github-install",
+        host_install_dir=host / ".tmp" / "host-install",
+        remote_url="https://github.com/example/agent_runtime.git",
+        tag="v0.1.0",
+        warning_summary_gate_strict_refs=strict_refs,
+    )
+
+    checks = {check.name: check for check in plan.checks}
+    check = checks["warning-summary-gate-strict-refs"]
+    assert check.status == "blocked"
+    assert check.findings[0].kind == "invalid-warning-summary-gate-strict-ref"
+
+    rendered = release_preflight.render(plan)
+    assert "| warning-summary-gate-strict-refs | blocked | refs=main;refs/heads/main | 1 |" in rendered
+
+
 def test_sanitize_blocks_forbidden_public_content(tmp_path):
     local_path = "C:" + "\\Us" + "ers\\someone\\private"
     _write(tmp_path / ".env")
@@ -951,6 +1029,22 @@ def test_sanitize_ignores_generated_local_work_dirs(tmp_path):
 
     findings = analyze_sanitize(tmp_path)
 
+    assert findings == []
+
+
+def test_sanitize_ignores_review_artifacts(tmp_path):
+    local_path = "C" + ":/Us" + "ers/you/private"
+    _write(tmp_path / "reviews" / "REVIEW-999.md", f"Local path: {local_path}\n")
+
+    findings = analyze_sanitize(tmp_path)
+    assert findings == []
+
+
+def test_sanitize_ignores_top_level_host_agents_artifacts(tmp_path):
+    local_path = "C" + ":/Us" + "ers/you/private"
+    _write(tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-001.md", f"Local path: {local_path}\n")
+
+    findings = analyze_sanitize(tmp_path)
     assert findings == []
 
 
@@ -1079,7 +1173,13 @@ def test_github_workflow_runs_publish_gates_against_clean_bundle():
 
     assert "publish-bundle --source . --dest .tmp/public-source --apply" in workflow
     assert "publish-github-plan --source .tmp/public-source" in workflow
-    assert "release-preflight --source .tmp/public-source" in workflow
+    assert "PYTHONPATH=.tmp/public-source/src python -m agent_runtime.cli release-preflight" in workflow
+    assert "--warning-summary-gate-strict-refs" in workflow
+    assert "--warning-summary-gate-strict-refs \"${{ steps.resolve_warning_summary_strict_refs.outputs.strict_refs }}\"" in workflow
+    check_step = _extract_workflow_step(workflow, "Check release preflight")
+    assert "--warning-summary-gate-strict-refs \"${{ steps.resolve_warning_summary_strict_refs.outputs.strict_refs }}\"" in check_step
+    assert "PASS_39_WARNING_SUMMARY_GATE_STRICT_REFS" not in check_step
+    assert "PYTHONPATH=.tmp/public-source/src python -m agent_runtime.cli release-preflight" in check_step
     assert f"--tag {CURRENT_RELEASE_TAG}" in workflow
     assert "--host-root .tmp/public-source/tests/fixtures/host" in workflow
     assert "publish-github-plan --source . --remote-url" not in workflow
@@ -2097,3 +2197,4 @@ def test_publish_github_execute_cli_passes_work_dir(tmp_path, monkeypatch):
 
     assert captured["work_dir"] == tmp_path / "source" / ".tmp" / "work"
     assert captured["execute"] is True
+

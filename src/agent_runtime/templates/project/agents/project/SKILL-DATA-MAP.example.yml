@@ -1,0 +1,130 @@
+schema: agent-runtime-skill-data-map/v1
+updated_at: 2026-06-19T10:10:00+09:00
+
+- skill_id: knowledge-router
+  owner: lead-engineer
+  scope: source-routing
+  criticality: high
+  artifacts:
+    - path: agents/project/SKILL-GOVERNANCE.md
+      kind: governance-doc
+    - path: agents/project/CONTEXT-SOURCES.yml
+      kind: context-source
+    - path: agents/project/DATASET-CATALOG.yml
+      kind: dataset
+    - path: agents/project/SKILL-DATA-MAP.yml
+      kind: mapping
+    - path: scripts/agent_context_packet.py
+      kind: runtime-script
+  change_policy: hard
+  required_when:
+    - model-provider-changed
+    - provider-config-changed
+    - context-source-changed
+    - mapping-doc-changed
+    - dataset-catalog-changed
+  linked_tasks:
+    - TASK-AR-201
+    - TASK-AR-204
+    - TASK-AR-221
+
+- skill_id: context-contract
+  owner: lead-engineer
+  scope: query-contract-and-source-ranking
+  criticality: critical
+  artifacts:
+    - path: agents/project/CONTEXT-SOURCES.yml
+      kind: context-contract
+    - path: agents/project/SKILL-GOVERNANCE.md
+      kind: governance-doc
+    - path: agents/project/EVAL-POLICY.yml
+      kind: policy
+    - path: agents/project/SKILL-DATA-MAP.yml
+      kind: mapping
+  change_policy: hard
+  required_when:
+    - query-policy-changed
+    - source-tier-rules-changed
+    - review-footer-schema-changed
+    - mapping-doc-changed
+  linked_tasks:
+    - TASK-AR-204
+    - TASK-AR-214
+    - TASK-AR-221
+
+- skill_id: runbook-standard
+  owner: doc-steward
+  scope: runbook-execution
+  criticality: high
+  artifacts:
+    - path: agents/project/SKILL-GOVERNANCE.md
+      kind: governance-doc
+    - path: agents/project/ROADMAP.md
+      kind: project-governance
+    - path: agents/project/TEAMS.md
+      kind: team-structure
+    - path: agents/project/SKILL-DATA-MAP.yml
+      kind: mapping
+  change_policy: hard
+  required_when:
+    - runbook-template-changed
+    - governance-rule-changed
+    - review-footer-schema-changed
+    - mapping-doc-changed
+  linked_tasks:
+    - TASK-AR-202
+    - TASK-AR-204
+    - TASK-AR-221
+
+- skill_id: project-overlay-contract
+  owner: lead-engineer
+  scope: project-context
+  criticality: critical
+  artifacts:
+    - path: agents/project/PROJECT-CONTEXT.yml
+      kind: project-context
+    - path: agents/project/ROADMAP.md
+      kind: project-governance
+    - path: agents/project/ORG.md
+      kind: team-governance
+    - path: agents/project/LINKS.md
+      kind: reference
+    - path: agents/project/TEAMS.md
+      kind: team-structure
+    - path: agents/project/SKILL-DATA-MAP.yml
+      kind: mapping
+  change_policy: hard
+  required_when:
+    - project-overlay-changed
+    - team-structure-changed
+    - mapping-doc-changed
+  linked_tasks:
+    - TASK-AR-211
+    - TASK-AR-204
+    - TASK-AR-221
+
+- skill_id: model-provider-doc-sync
+  owner: lead-engineer
+  scope: provider-doc-sync
+  criticality: critical
+  artifacts:
+    - path: agents/project/SKILL-DATA-MAP.yml
+      kind: mapping
+    - path: agents/project/SKILL-GOVERNANCE.md
+      kind: governance-doc
+    - path: agents/project/EVAL-POLICY.yml
+      kind: policy
+    - path: scripts/agent_worker.py
+      kind: runtime-script
+    - path: scripts/model_routing.py
+      kind: runtime-script
+  change_policy: hard
+  required_when:
+    - model-provider-changed
+    - provider-config-changed
+    - runtime-script-changed
+    - mapping-doc-changed
+    - task-policy-changed
+  linked_tasks:
+    - TASK-AR-204
+    - TASK-AR-221
