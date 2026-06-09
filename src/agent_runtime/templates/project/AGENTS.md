@@ -334,3 +334,39 @@ python scripts/check_agent_docs.py
 ```
 
 If a check cannot run, report exactly why and what remains unverified.
+
+## 14. Downstream Bug Intake
+
+Host projects that consume this runtime report bugs through a structured evidence
+process. Maintainers should respond to issues labelled `downstream-report`.
+
+### What a good bug report includes
+
+Every downstream bug report must follow the 6W1H structure:
+
+| Field | Content |
+|-------|---------|
+| Who | Component / caller that triggered the error |
+| What | Error type and message (verbatim) |
+| When | agent_runtime version, upgrade path |
+| Where | File:line in agent_runtime source |
+| Why | Root cause analysis (design gap / missing doc / regression) |
+| How | Reproduction steps and minimal code snippet |
+
+### Intake checklist for maintainers
+
+1. Confirm reproduction in a clean install.
+2. Apply labels: `bug` + severity (`critical`/`high`/`medium`/`low`) + `downstream-report`.
+3. Link to the host EVIDENCE file if provided.
+4. Prioritize `high` and above within one release cycle.
+5. Add a CHANGELOG entry and update `MIGRATION-COMPAT-MAP.example.yml` when
+   fixing a public API change (function signature rename, removed export, etc.).
+
+### Known standing issues from downstream
+
+- **Windows cp949 encoding**: `sync --diff` fails on Windows cp949 consoles
+  when template files contain non-ASCII characters. Workaround: set
+  `PYTHONIOENCODING=utf-8`. Tracked in issue #6.
+- **`build_sync_plan` signature**: the function internally calls `load_config`;
+  callers must NOT pass an `AgentRuntimeConfig` as `template_root`. Tracked
+  in issue #5. Add a type guard or clear error message.
