@@ -4,6 +4,29 @@ Agent Runtime is a reusable automation core for repository agent workflows.
 The primary distribution name, import package, config files, and CLI command
 are `agent_runtime`.
 
+## Host? Start Here
+
+If you are installing Agent Runtime into a host project such as Autofolio, do
+not clone this repository and copy files by hand. Treat this repository as the
+upstream runtime, pin a release tag, then let `agent_runtime update`/`sync`
+install the managed templates.
+
+Recommended first path:
+
+1. Install from the current public tag: `git+https://github.com/ycpiglet/agent_runtime.git@v0.1.8`.
+2. Create `agent_runtime.yml` with the same `remote_url` and `ref`.
+3. Run `agent_runtime update --check`, then `--diff`, then `--apply`.
+4. Put host identity under `agents/project/` overlays, not inside managed runtime files.
+5. Run the host smoke checks listed below before tuning roles or reports.
+
+Keep this split:
+
+| Layer | Owner | Edit rule |
+|---|---|---|
+| Runtime templates | `agent_runtime` | Update through pinned release tags. |
+| Host context | host project | Store under `agents/project/` overlays. |
+| Host seams | host project | Use `sync.unmanaged` only when a managed file must diverge. |
+
 Legacy `ralph` / `ralph_automation` aliases remain for one release so existing
 host projects can migrate safely. Remove them after the replacement release is
 published and host projects have moved to `agent_runtime`.
@@ -179,6 +202,18 @@ cp agents/project/PROJECT-CONTEXT.example.yml agents/project/PROJECT-CONTEXT.yml
 Use `--check` first for a safe status report, `--diff` to inspect exact file
 changes, and `--apply` only when the diff is acceptable.
 
+Recommended host smoke after first apply:
+
+```bash
+agent_runtime update --check
+python scripts/check_agent_docs.py
+python -m pytest tests -q
+```
+
+Host projects should scope their own tests under `tests/`. Framework self-tests
+remain upstream CI responsibility unless the host intentionally vendors or
+modifies template internals.
+
 ## Host Project Context
 
 Agent Runtime is meant to act like a reusable agent development team. Keep the
@@ -197,6 +232,36 @@ Use `agents/project/PROJECT-CONTEXT.yml` to map:
 `agents/project/` context files in every role packet. This lets different host
 projects tune vision, roadmap, organization, and team topology without editing
 managed files such as `agents/*/SKILL.md`, `agents/roles.yml`, or `scripts/*`.
+
+Recommended host-owned overlay files:
+
+| File | Purpose |
+|---|---|
+| `PROJECT-CONTEXT.yml` | Vision, product purpose, target users, MVP success metric, domain constraints. |
+| `ROADMAP.md` | Current phase, milestones, release policy, near-term work. |
+| `ORG.md` | Decision owner, escalation path, accountability map. |
+| `LINKS.md` | Canonical specs, tickets, docs, external references. |
+| `TEAMS.md` | Host-specific team topology and role mapping. |
+| `CONTEXT-SOURCES.example.yml` | Source tier, owner, freshness, lineage, access level examples. |
+| `DATASET-CATALOG.example.yml` | SSoT-style dataset inventory and trust ranking examples. |
+| `AUTONOMY-POLICY.example.yml` | Branch/commit/PR/merge and release-council defaults. |
+| `EVAL-POLICY.example.yml` | Offline/live validation defaults and evidence expectations. |
+
+### Autofolio integration lessons tracked in issue #1
+
+Autofolio's host integration report identified three high-value adoption
+lessons. The current disposition is:
+
+| Input | Current handling |
+|---|---|
+| Host context injection was unclear. | Use `agents/project/PROJECT-CONTEXT.yml` and neighboring overlay files as the fixed read location for project identity. Runtime context packets include these files when present. |
+| Sync was too binary for unavoidable host seams. | Current safe behavior remains fail-closed conflicts. Use overlays first; use `sync.unmanaged` only for intentional host-owned seams. Managed-region and skip-conflict ergonomics remain follow-up design work. |
+| Fresh host install was not green enough. | `v0.1.8` ships the missing schema, handoff/token-budget links, safety gate, pipeline module, and clean-bundle CI coverage. Hosts should still run the smoke commands above. |
+
+When a host needs custom agents or role exposure for another runtime such as
+Claude Code, keep `agents/<role>/SKILL.md` as the durable project-readable
+source and add adapter/generated files separately. Do not edit upstream-managed
+role skills just to inject host product context.
 
 For local development on this source tree, use an editable install instead:
 
@@ -356,7 +421,7 @@ Host projects pin the upstream dependency in `agent_runtime.yml`:
 upstream:
   package: agent_runtime
   remote_url: https://github.com/ycpiglet/agent_runtime.git
-  ref: v0.1.6
+  ref: v0.1.8
 ```
 
 If the package is installed in the active environment, run:
