@@ -669,14 +669,10 @@ def _acquire_claim(
                         pass
                 elif claim == {}:
                     # Partial or malformed payloads can appear briefly during
-                    # concurrent writes; retry once before deciding to reclaim.
-                    if attempt < 1:
-                        time.sleep(CLAIM_CREATE_RETRY_DELAY_SECONDS)
-                        continue
-                    try:
-                        p.unlink(missing_ok=True)
-                    except Exception:
-                        pass
+                    # concurrent writes. Do not unlink here: another worker
+                    # may own a just-created lease that is still being flushed.
+                    time.sleep(CLAIM_CREATE_RETRY_DELAY_SECONDS)
+                    continue
                 else:
                     return False
 

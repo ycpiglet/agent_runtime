@@ -213,6 +213,8 @@ def _is_repo_path(root: Path, token: str) -> bool:
     # Empty or flag-like tokens are not treated as paths.
     if not token or _is_flag(token):
         return False
+    if re.match(r"^[A-Za-z]:[\\/]", token):
+        return False
     try:
         resolve_in_root(root, token)
         return True
