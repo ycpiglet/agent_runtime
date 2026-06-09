@@ -1,0 +1,21 @@
+schema: agent-runtime-state-machine-instance/v1
+cycle:
+  id: CYCLE-EXAMPLE
+  machine: cycle
+  state: executing
+  signal: watch
+  score: 80
+  next_allowed: [review, blocked]
+agent_job:
+  id: JOB-EXAMPLE
+  machine: agent_job
+  state: working
+  signal: watch
+  score: 80
+  assignee: lead-engineer
+gate:
+  id: owner-doc-format
+  machine: gate
+  state: pass
+  signal: pass
+  score: 100

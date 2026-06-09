@@ -1,0 +1,42 @@
+{
+  "schema": "agent-runtime-a2a-trace-gate/v1",
+  "evaluation_mode": "a2a_trace_reconstruction",
+  "generated_at": "2026-06-09T06:15:16.903912+00:00",
+  "input": "agents/project/a2a/a2a-trace-baseline-2026-06-09.jsonl",
+  "status": "pass",
+  "events": 4,
+  "chains": 1,
+  "findings": [],
+  "event_results": [
+    {
+      "event_id": "evt-20260609-001",
+      "findings": []
+    },
+    {
+      "event_id": "evt-20260609-002",
+      "findings": []
+    },
+    {
+      "event_id": "evt-20260609-003",
+      "findings": []
+    },
+    {
+      "event_id": "evt-20260609-004",
+      "findings": []
+    }
+  ],
+  "chain_results": [
+    {
+      "contextId": "ctx-v018-rehearsal",
+      "taskId": "TASK-AR-217",
+      "decision_cycle_id": "cycle-20260609-validation",
+      "event_types": [
+        "request",
+        "review",
+        "decision",
+        "correction"
+      ],
+      "findings": []
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+schema: agent-runtime-dataset-catalog/v1
+updated_at: 2026-06-13T10:05:00+09:00
+
+datasets:
+  - id: project-overlay-routing-gold
+    purpose: 요청이 올바른 오버레이(ROADMAP/ORG/LINKS/TEAMS)로 라우팅되는지 검증
+    owner: lead_engineer
+    source_tier: certified-semantic-layer
+    location: agents/project/evals/overlay-routing-v1.jsonl
+    label_type: human_gold
+    minimum_score: 0.90
+    metrics:
+      - overlay_selection
+      - source_tier_selection
+      - query_refinement_rate
+      - citation_presence
+    tags:
+      - overlay
+      - query
+
+  - id: project-metadata-gov-gold
+    purpose: 정의 책임/메타 누락 여부 및 정책 준수 점검
+    owner: owner
+    source_tier: lineage
+    location: agents/project/evals/gov-metadata-v1.jsonl
+    label_type: trace_gold
+    minimum_score: 0.90
+    metrics:
+      - required_metadata
+      - ambiguity_score_completeness
+      - confidence_reporting
+      - policy_compliance
+    tags:
+      - governance
+      - metadata
+
+  quality_gates:
+  per_domain_minimum_score: 0.90
+  block_release_on_regression: true
+  require_held_out_split: true
+  require_adversarial_cases: true
+  require_trace_reproduction: true
+
+  # 태그/오류 허용/도메인 난이도별 오차 허용도 정책
+  tolerance_defaults:
+    business_error_rate: 0.05
+    technical_error_rate: 0.02
+    high_risk_block_threshold: 0.00

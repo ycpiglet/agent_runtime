@@ -1,0 +1,5 @@
+schema: agent-runtime-owner-docs/v1
+owner_docs:
+  - BACKLOG-BOARD.md
+  - reviews/REVIEW-2026-06-09-backlog-board-restoration-owner-format-gate.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-worktree-cleanup-cycle-map.md

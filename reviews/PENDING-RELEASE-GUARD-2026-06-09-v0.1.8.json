@@ -1,0 +1,22 @@
+{
+  "schema": "agent-runtime-pending-release-guard/v1",
+  "evaluation_mode": "owner_pending_no_mutation_guard",
+  "generated_at": "2026-06-09T09:59:09.881684+00:00",
+  "status": "pass",
+  "guard_route": "release_decision_recorded",
+  "owner_status": "agent_council_approved",
+  "execution_status": "executed",
+  "release_state": "release",
+  "target_version": "0.1.8",
+  "target_tag": "v0.1.8",
+  "pyproject_version": "0.1.8",
+  "init_version": "0.1.8",
+  "findings": [],
+  "inputs": {
+    "approval": "agents/project/release/OWNER-APPROVAL-v0.1.8.yml",
+    "execution": "agents/project/release/RELEASE-EXECUTION-v0.1.8.yml",
+    "template": "agents/project/RELEASE-GATE-TEMPLATE.yml",
+    "pyproject": "pyproject.toml",
+    "init": "src/agent_runtime/__init__.py"
+  }
+}

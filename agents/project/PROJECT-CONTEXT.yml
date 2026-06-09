@@ -1,0 +1,95 @@
+schema: agent-runtime-project-context/v1
+updated_at: 2026-06-13T09:30:00+09:00
+
+project:
+  id: agent-runtime-mvp-platform
+  name: Agent Runtime 공통 런타임 오버레이 플랫폼
+  stage: mvp
+  one_liner: 공통 런타임을 유지하면서 프로젝트별 맥락을 오버레이로 바인딩한다.
+  primary_user: 멀티 에이전트 운영팀
+  problem: 프로젝트가 바뀔 때마다 스킬/훅을 재작성하지 않고, 정확성·안전성 정책을 오버레이로 맞추고 싶다.
+  success_metric: 릴리스 게이트에서 정책 위반이 0건, 오버레이 누락 시 high-risk 라우팅 비율 0%.
+
+vision:
+  purpose: 공통성과 프로젝트 고유 맥락의 분리
+  principles:
+    - 공통 스킬/훅은 재사용하고, 프로젝트 정의는 오버레이로만 바꾼다.
+    - 정답성은 코드 변경보다 맥락 정합, 쿼리 정제, 검증 루프로 보장한다.
+    - 강제 규칙은 경고가 아니라 release gate에서 실제 차단된다.
+  non_goals:
+    - 프로젝트별 성능 튜닝용 런타임 대규모 수정
+    - 오버레이와 무관한 커스텀 스킬 변경
+
+roadmap:
+  source: agents/project/ROADMAP.md
+  current_phase: v0.1.8 candidate
+  next_milestone: TASK-AR-223 판정 closeout 통합 -> TASK-AR-216 판정 이관 정합 -> TASK-AR-218 migration hardening -> TASK-AR-217 release rehearsal -> TASK-AR-210 최종 판정
+  release_policy: `TASK-AR-216`에 의해 미해결 항목 블로킹 -> 1차/2차/3차 게이트(07-02/07-09/07-16)에서 블로커 소거 시만 공개
+
+organization:
+  source: agents/project/ORG.md
+  owner: owner
+  decision_owner: lead-engineer
+  escalation: blocker or unresolved ambiguity must route through owner/lead-engineer
+
+agent_teams:
+  - id: agent-runtime-core
+    purpose: 공통 런타임 안정성 및 게이트 구현
+    roles:
+      - lead-engineer
+      - backend
+      - qa
+      - doc-steward
+    canonical_context:
+      - agents/project/ROADMAP.md
+      - agents/project/ORG.md
+      - agents/project/SKILL-DATA-MAP.yml
+  - id: project-governance
+    purpose: 오버레이·릴리스 게이트·교차프로젝트 의사결정
+    roles:
+      - managing-partner
+      - independent-auditor
+      - doc-steward
+      - scribe
+    canonical_context:
+      - agents/project/LINKS.md
+      - agents/project/CONTEXT-SOURCES.yml
+      - agents/lead_engineer/tasks/TASK-AR-216.md
+      - agents/lead_engineer/tasks/TASK-AR-217.md
+      - agents/lead_engineer/tasks/TASK-AR-218.md
+      - agents/lead_engineer/tasks/TASK-AR-214.md
+      - agents/lead_engineer/tasks/TASK-AR-215.md
+      - agents/lead_engineer/tasks/TASK-AR-210.md
+      - agents/lead_engineer/tasks/TASK-AR-204.md
+  - id: project-context
+    purpose: 비즈니스 맥락, 외부 의사결정, 사용자 요구 반영
+    roles:
+      - ceo
+      - owner
+    canonical_context:
+      - agents/project/VISION.md
+      - agents/project/ROADMAP.md
+
+links:
+  - label: release gate
+    path: agents/lead_engineer/tasks/TASK-AR-210.md
+    owner: lead-engineer
+  - label: overlay policy
+    path: agents/lead_engineer/tasks/TASK-AR-211.md
+    owner: lead-engineer
+  - label: migration compatibility
+    path: agents/project/MIGRATION-COMPAT-MAP.yml
+    owner: owner
+  - label: dataset policy
+    path: agents/project/DATASET-CATALOG.yml
+    owner: owner
+
+runtime_policy:
+  host_owned:
+    - agents/project/**
+    - agents/lead_engineer/tasks/**
+    - agents/lead_engineer/reviews/**
+  do_not_customize_for_project:
+    - agents/*/SKILL.md
+    - agents/roles.yml
+    - scripts/**

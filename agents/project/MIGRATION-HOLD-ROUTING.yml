@@ -1,0 +1,183 @@
+schema: agent-runtime-migration-hold-routing/v1
+updated_at: 2026-06-09T00:00:00+09:00
+source_system: tag_manual
+source_root: C:/Users/ycpig/tag_manual/scripts
+runtime_root: C:/Users/ycpig/agent_runtime/src/agent_runtime/templates/project/scripts
+linked_tasks:
+  - TASK-AR-220
+  - TASK-AR-224
+  - TASK-AR-223
+release_state: ready
+decision_deadline: 2026-07-02
+policy:
+  source_only_items: group-approved-source-only
+  warn_only_allowed: false
+  required_to_exit_hold:
+    - owner
+    - approved_by
+    - decision_date
+    - expiry
+    - justification
+    - target_state
+closure_summary:
+  closed_at: 2026-06-09
+  closed_by: TASK-AR-220
+  release_blocking: false
+  unresolved_source_only: 0
+  decision: source-only items are approved by group target state for v0.1.8 baseline; future portability remains tracked outside the release blocker.
+
+summary:
+  total_source_only: 53
+  placeholder: 1
+  external_deploy_or_platform_scope: 10
+  project_report_or_docs_scope: 3
+  runtime_gap_review: 6
+  legacy_scope: 1
+  test_only: 32
+
+routes:
+  - group: placeholder
+    release_state: ready
+    default_target_state: drop-or-ignore
+    target_state: drop-or-ignore
+    owner: doc-steward
+    approved_by: TASK-AR-220
+    decision_date: 2026-06-09
+    expiry: 2026-12-31
+    justification: Placeholder-only files do not represent a runtime capability and are approved for exclusion from the reusable runtime package.
+    rationale: Placeholder files do not prove a runtime capability.
+    items:
+      - path: .gitkeep
+        next_action: confirm no runtime contract depends on placeholder presence
+
+  - group: external-deploy-or-platform-scope
+    release_state: ready
+    default_target_state: keep-source-only-or-port-as-optional-plugin
+    target_state: keep-source-only-or-port-as-optional-plugin
+    owner: lead-engineer
+    approved_by: TASK-AR-220
+    decision_date: 2026-06-09
+    expiry: 2026-12-31
+    justification: External deployment, database, hosting, storage, and public sync scripts are side-effectful project/platform integrations and are excluded from core runtime release unless later packaged as optional plugins.
+    rationale: These files appear tied to external infrastructure, deployment, database, preview, or public sync workflows rather than the core reusable runtime template.
+    items:
+      - path: apply_schema.mjs
+        next_action: classify as platform integration or port into optional deployment pack
+      - path: check_deployment.py
+        next_action: classify as deployment QA or port into optional deployment pack
+      - path: create_buckets.mjs
+        next_action: classify as storage setup or port into optional deployment pack
+      - path: deploy_edge_function.py
+        next_action: classify as deployment action requiring owner approval
+      - path: gen_content_seed.mjs
+        next_action: classify as product seed tool or port into project overlay
+      - path: get_preview_url.py
+        next_action: classify as hosting integration or port into optional deployment pack
+      - path: migrate.mjs
+        next_action: classify migration engine dependency and ownership
+      - path: migrate.py
+        next_action: classify migration engine dependency and ownership
+      - path: sync_docs_to_public_anywhere.py
+        next_action: classify public-doc sync as external side effect
+      - path: sync_docs_to_public.py
+        next_action: classify public-doc sync as external side effect
+
+  - group: project-report-or-docs-scope
+    release_state: ready
+    default_target_state: project-overlay-or-doc-pack
+    target_state: project-overlay-or-doc-pack
+    owner: doc-steward
+    approved_by: TASK-AR-220
+    decision_date: 2026-06-09
+    expiry: 2026-12-31
+    justification: Project-report and documentation scripts are approved as overlay/doc-pack candidates and are not required for the core runtime release.
+    rationale: These files look tied to tag_manual reporting/documentation surfaces and need an explicit overlay decision before runtime inclusion.
+    items:
+      - path: generate_manifest.py
+        next_action: compare with runtime manifest needs
+      - path: INDEX.md
+        next_action: decide whether this is source documentation or runtime template documentation
+      - path: save_report.py
+        next_action: decide whether report persistence belongs in reusable runtime
+
+  - group: runtime-gap-review
+    release_state: ready
+    default_target_state: needs-port-or-replaced-by-runtime-equivalent
+    target_state: optional-examples-or-eval-pack
+    owner: lead-engineer
+    approved_by: TASK-AR-220
+    decision_date: 2026-06-09
+    expiry: 2026-12-31
+    justification: Runtime-gap candidates are approved as optional examples/eval-pack follow-up work and are not blocking the v0.1.8 core runtime baseline because release evidence now covers evaluation, reviewer, correction, and A2A primitives.
+    rationale: These files may represent runtime capabilities that were not copied by name and require capability-level comparison, not filename-level dismissal.
+    items:
+      - path: agent_pipeline_panes.py
+        next_action: compare with current pane/observer runtime behavior
+      - path: agent_scorecard.py
+        next_action: decide whether scorecard belongs in eval/QA pack
+      - path: agent_structure_report.py
+        next_action: compare with runtime structure reporting
+      - path: generative_patterns.py
+        next_action: decide whether pattern library belongs in skill/runbook pack
+      - path: orchestrator_demo_agent.py
+        next_action: decide whether demo agent belongs in examples pack
+      - path: orchestrator_demo.py
+        next_action: decide whether demo runner belongs in examples pack
+
+  - group: legacy-scope
+    release_state: ready
+    default_target_state: dropped
+    target_state: dropped
+    owner: owner
+    approved_by: owner
+    decision_date: 2026-06-09
+    expiry: 2026-12-31
+    justification: Legacy Windows cmd scheduler compatibility is intentionally excluded from the core reusable runtime and remains dropped unless explicitly requested as a compatibility pack.
+    rationale: Legacy platform-specific runner already has a dropped decision path in MIGRATION-COMPAT-MAP.
+    items:
+      - path: run_schedule_task.cmd
+        next_action: keep dropped unless owner requests Windows cmd scheduler compatibility pack
+
+  - group: test-only
+    release_state: ready
+    default_target_state: port-test-if-capability-ported
+    target_state: port-test-if-capability-ported
+    owner: qa
+    approved_by: TASK-AR-220
+    decision_date: 2026-06-09
+    expiry: 2026-12-31
+    justification: Source-only tests are approved to follow their covered capability. They are not release blockers unless the related source-only capability is promoted into the core runtime or optional pack.
+    rationale: Test files should follow their covered capability. A source-only test does not require runtime inclusion unless the tested capability is ported.
+    items:
+      - path: test_agent_orchestrator_dispatch_next.py
+      - path: test_agent_pipeline_panes.py
+      - path: test_agent_runtime_github_source.py
+      - path: test_agent_runtime_package.py
+      - path: test_agent_runtime_sanitize.py
+      - path: test_agent_runtime_sync_templates.py
+      - path: test_agent_structure_report.py
+      - path: test_agent_worker_context.py
+      - path: test_agent_worker_watch.py
+      - path: test_ambiguity_calibration.py
+      - path: test_backlog_canonical.py
+      - path: test_browser.mjs
+      - path: test_check_cycle_termination.py
+      - path: test_claude_agent_budget.py
+      - path: test_claude_provider.py
+      - path: test_codex_provider.py
+      - path: test_collab_enforcement.py
+      - path: test_connect.mjs
+      - path: test_connect.py
+      - path: test_dispatch_next.py
+      - path: test_e2e.py
+      - path: test_generate_views_check.py
+      - path: test_generative_patterns.py
+      - path: test_i18n_labels.py
+      - path: test_loop_guard.py
+      - path: test_orchestrator_safety_gate.py
+      - path: test_pipeline.py
+      - path: test_provider_claude_agent.py
+      - path: test_repeat_defect_prevention.py
+      - path: test_save_report_views.py
+      - path: test_schedule_routine.py
+      - path: test_task_writer.py

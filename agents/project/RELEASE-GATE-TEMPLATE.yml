@@ -1,0 +1,83 @@
+schema: agent-runtime-release-gate-template/v1
+updated_at: 2026-06-09T00:00:00+09:00
+linked_task: TASK-AR-210
+version: v0.1.8
+decision_windows:
+  - date: 2026-07-02
+    label: first_decision
+  - date: 2026-07-09
+    label: second_decision
+  - date: 2026-07-16
+    label: final_freeze
+
+required_fields:
+  - release_state
+  - release_cause
+  - decision_deadline
+  - owner
+  - blocked_by
+  - impact_on_version
+  - evidence_bundle
+  - next_action
+
+allowed_release_states:
+  - hold_for_query_contract
+  - hold_for_overlay
+  - hold_for_data
+  - ready
+  - release
+  - block
+
+route_mapping:
+  hold_for_query_contract:
+    cause: missing_or_ambiguous_query_contract
+    evidence:
+      - agents/project/CONTEXT-SOURCES.yml
+      - agents/lead_engineer/tasks/TASK-AR-214.md
+  hold_for_overlay:
+    cause: missing_or_stale_project_overlay
+    evidence:
+      - agents/project/PROJECT-CONTEXT.yml
+      - agents/project/ROADMAP.md
+      - agents/project/ORG.md
+      - agents/project/TEAMS.md
+      - agents/project/LINKS.md
+  hold_for_data:
+    cause: migration_or_dataset_evidence_gap
+    evidence:
+      - agents/project/MIGRATION-COMPAT-MAP.yml
+      - agents/project/MIGRATION-HOLD-ROUTING.yml
+      - agents/project/DATASET-CATALOG.yml
+  ready:
+    cause: all_hold_routes_closed_with_evidence
+    evidence:
+      - release-preflight-source
+      - release-preflight-bundle
+      - offline-eval
+      - reviewer-footer
+      - correction-trace
+      - a2a-trace
+  block:
+    cause: missing_required_evidence_or_warn_only_route
+    evidence:
+      - TASK-AR-204
+      - TASK-AR-210
+      - TASK-AR-223
+
+template:
+  release_state: release
+  release_cause: all_hold_routes_closed_with_evidence
+  decision_deadline: 2026-07-02
+  owner: lead-engineer
+  blocked_by: []
+  impact_on_version: v0.1.8 release execution evidence exists for local tag smoke; external GitHub publish remains remote-gated evidence.
+  evidence_bundle:
+    - agents/project/MIGRATION-HOLD-ROUTING.yml
+    - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-223-closeout-bundle-consolidation.md
+    - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-221-operating-chain-integration.md
+    - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-210-release-state-translation.md
+    - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-220-migration-approval-closure.md
+    - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-215-overlay-simulation-closure.md
+    - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-204-co-location-gate-closure.md
+    - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-210-ready-redecision.md
+  next_action: hold at ready governance review until owner approves release execution and final release artifact evidence is produced.

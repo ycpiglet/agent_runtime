@@ -1,0 +1,127 @@
+schema: agent-runtime-migration-compat-map/v1
+updated_at: 2026-06-18T10:20:00+09:00
+source_system: tag_manual
+source_root: C:/Users/ycpig/tag_manual
+
+items:
+  - id: scripts-core-kept
+    category: script
+    source_path: scripts/
+    runtime_path: src/agent_runtime/templates/project/scripts/
+    state: mapped
+    status: kept
+    owner: lead-engineer
+    approved_by: TASK-AR-213
+    decision_date: 2026-06-18
+    justification: 공통 스크립트 59개는 내용 해시·권한 경로·인터페이스를 비교한 결과 런타임과 동일하게 유지할 수 있어 재이식 불필요.
+    expiry: 2026-12-31
+    rationale: 공통 스크립트 59개는 해시 기준 동일 내용으로 유지.
+
+  - id: scripts-core-changed
+    category: script
+    source_path: scripts/
+    runtime_path: src/agent_runtime/templates/project/scripts/
+    state: mapped
+    status: changed
+    owner: lead-engineer
+    approved_by: TASK-AR-213
+    decision_date: 2026-06-18
+    justification: 공통 스크립트 59개는 런타임 동작 정합성 확보를 위해 인코딩/에러 메시지/메타포맷을 정리해 유지.
+    expiry: 2026-12-31
+    rationale: 공통 스크립트 59개는 이식 과정에서 보강/정규화.
+
+  - id: scripts-source-only
+    category: script
+    source_path: scripts/
+    runtime_path: none
+    state: mapped
+    status: missing
+    target_state: group-approved-source-only
+    release_blocking: false
+    owner: lead-engineer
+    approved_by: TASK-AR-218
+    risk_profile:
+      query_risk: medium
+      cost_impact: low
+      freshness_risk: medium
+    justification: source-side 스크립트 53개는 핵심 런타임 경로 미보유로 현재 단계 제외. `MIGRATION-HOLD-ROUTING.yml`에서 group별 target_state/approved_by/decision_date/expiry/justification이 채워져 v0.1.8 baseline release blocker에서는 해제되며, optional pack 또는 overlay follow-up으로 추적됨.
+    expiry: 2026-07-16
+    decision_date: 2026-06-18
+    rationale: source-only 53개(의도적 제외/legacy/점검 미확정) 후보.
+
+  - id: scripts-runtime-extra
+    category: script
+    source_path: none
+    runtime_path: src/agent_runtime/templates/project/scripts/
+    state: mapped
+    status: deprecated
+    target_state: runtime-extension-approved
+    release_blocking: false
+    owner: agent-runtime
+    approved_by: TASK-AR-218
+    risk_profile:
+      query_risk: low
+      cost_impact: low
+      freshness_risk: low
+    justification: runtime-only 2개(message_queue.py, summarize_warning_summary_gate_report.py)는 실행 안정성/운영 가시성 확보를 위한 신규 런타임 보강 모듈이며, 향후 감사 기준을 통해 유지기준 재평가 필요.
+    expiry: 2026-07-16
+    decision_date: 2026-06-18
+    rationale: runtime-only 2개(`message_queue.py`, `summarize_warning_summary_gate_report.py`) 존재.
+
+  - id: scripts-runschedule-legacy
+    category: script
+    source_path: scripts/run_schedule_task.cmd
+    runtime_path: none
+    state: dropped
+    status: deprecated
+    owner: owner
+    approved_by: owner
+    decision_date: 2026-06-13
+    justification: `run_schedule_task.cmd`는 Windows cmd 기반 구형 스케줄 실행 의존이 있어 agent_runtime 템플릿 범위를 벗어나며, 대체 스케줄러 경로 사용으로 이식 제외가 의도됨.
+    expiry: 2026-12-31
+    rationale: Windows cmd 의존성 제거 및 템플릿 정합성 관점에서 제외.
+
+  - id: skills-pack
+    category: skill
+    source_path: agents/**/*.SKILL.md
+    runtime_path: src/agent_runtime/templates/project/agents/**/*.SKILL.md
+    state: mapped
+    status: changed
+    target_state: runtime-hook-wrapper-approved
+    release_blocking: false
+    owner: doc-steward
+    approved_by: TASK-AR-213
+    decision_date: 2026-06-13
+    justification: 에이전트 오버레이 진입점 문구 톤/질문 템플릿/리스트가 각 프로젝트별 통합 정책에 맞도록 병합되어 실제 런타임 문구를 갱신.
+    expiry: 2026-12-31
+    rationale: `SKILL.md` 16개 중 15개가 변경, 1개만 동일.
+
+  - id: hooks-wrapper
+    category: hook
+    source_path: src/hooks/.gitkeep
+    runtime_path: src/agent_runtime/templates/project/scripts/*_hook.py
+    state: mapped
+    status: changed
+    owner: agent-runtime
+    approved_by: TASK-AR-213
+    risk_profile:
+      query_risk: medium
+      cost_impact: low
+      freshness_risk: low
+    justification: src/hooks 플레이스홀더 기반이 아니며 런타임 hook 재구성( *_hook.py 4개 )로 운용되므로 migration 차단 규칙에서 변경 근거가 필수.
+    expiry: 2026-07-16
+    decision_date: 2026-06-13
+    rationale: source hooks는 placeholder 중심이었고 runtime은 *_hook.py 4개로 재구성됨.
+
+summary:
+  total_source_items: 171
+  kept: 59
+  changed: 59
+  deprecated: 2
+  dropped: 1
+  missing: 53
+  notes: >
+    Scripts 기준으로 kept 59 / changed 59 / missing 53 / deprecated(runtime-only) 2 / dropped(의도적 제외) 1로 정렬.
+    `run_schedule_task.cmd`는 보안/플랫폼 정합성 이유로 `dropped`로 유지, 실제 이식 제외 사유를 Task 근거로 관리.
+    Skills는 16개 중 15 changed / 1 kept.
+    Hooks는 src/hooks 플레이스홀더(.gitkeep) 대비 runtime hook 4개 재구성 매핑.

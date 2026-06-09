@@ -89,9 +89,80 @@ def _write_host_config(root: Path, *, remote_url: str = "https://github.com/exam
 def _write_public_source(root: Path):
     _write(root / "pyproject.toml", "[tool.setuptools.package-data]\nagent_runtime=['templates/project/**/*']\n")
     _write(root / "README.md", "# agent_runtime\n")
-    _write(root / ".github" / "workflows" / "test.yml", "python -m pytest tests -q\npython -m agent_runtime.cli sanitize --root . --check\n")
+    _write(
+        root / ".github" / "workflows" / "test.yml",
+        "\n".join(
+            [
+                "python -m pytest tests -q",
+                "python -m agent_runtime.cli sanitize --root . --check",
+                "python scripts/owner_governance_gate.py",
+            ]
+        )
+        + "\n",
+    )
+    _write(root / ".codex" / "hooks.json", "{}\n")
+    _write(root / ".githooks" / "pre-commit", "#!/usr/bin/env sh\npython scripts/owner_governance_gate.py\n")
+    _write(
+        root / "BACKLOG-BOARD.md",
+        "\n".join(
+            [
+                "---",
+                "signal: pass",
+                "score: 90",
+                "---",
+                "# Backlog Board",
+                "",
+                "## Bottom Line",
+                "Fixture owner board is ready.",
+                "",
+                "## Signal",
+                "",
+                "| Item | Status |",
+                "|------|--------|",
+                "| fixture | pass |",
+                "",
+                "## Action Board",
+                "No action needed.",
+                "",
+                "## Risks / Blockers",
+                "None.",
+                "",
+                "## Decision",
+                "Use this fixture as the owner doc.",
+                "",
+                "## Next Steps",
+                "Continue.",
+            ]
+        )
+        + "\n",
+    )
+    _write(root / "owner-docs.yml", "owner_docs:\n  - BACKLOG-BOARD.md\n")
+    _write(root / "schemas" / "state-machines.schema.json", '{"type":"object"}\n')
+    state_machines = "\n".join(
+        [
+            "states: [pass, watch, block]",
+            "machines:",
+            "  - id: health_signal",
+            "  - id: cycle",
+            "  - id: task",
+            "  - id: agent_job",
+            "  - id: gate",
+            "  - id: review",
+            "  - id: release",
+            "  - id: owner_decision",
+            "  - id: hook_enforcement",
+            "  - id: ci",
+            "  - id: document",
+        ]
+    ) + "\n"
+    _write(root / "scripts" / "owner_governance_gate.py", "raise SystemExit(0)\n")
+    _write(root / "scripts" / "owner_doc_format_gate.py", "raise SystemExit(0)\n")
+    _write(root / "scripts" / "state_machine_gate.py", "raise SystemExit(0)\n")
     _write(root / "src" / "agent_runtime" / "__init__.py", "")
     _write(root / "src" / "agent_runtime" / "templates" / "project" / "scripts" / "agent_worker.py", "")
+    _write(root / "src" / "agent_runtime" / "templates" / "project" / ".codex" / "hooks.json", "{}\n")
+    _write(root / "src" / "agent_runtime" / "templates" / "project" / "agents" / "project" / "STATE-MACHINES.yml", state_machines)
+    _write(root / "src" / "agent_runtime" / "templates" / "project" / "schemas" / "state-machines.schema.json", '{"type":"object"}\n')
     _write(root / ".gitignore", "/templates/\n")
 
 
@@ -720,12 +791,7 @@ def test_update_plan_blocks_placeholder_upstream_remote(tmp_path):
 def test_release_preflight_aggregates_public_and_host_readiness(tmp_path):
     source = tmp_path / "source"
     host = tmp_path / "host"
-    _write(source / "pyproject.toml", "[tool.setuptools.package-data]\nagent_runtime=['templates/project/**/*']\n")
-    _write(source / "README.md", "# agent_runtime\n")
-    _write(source / ".github" / "workflows" / "test.yml", "python -m pytest tests -q\npython -m agent_runtime.cli sanitize --root . --check\n")
-    _write(source / "src" / "agent_runtime" / "__init__.py", "")
-    _write(source / "src" / "agent_runtime" / "templates" / "project" / "scripts" / "agent_worker.py", "")
-    _write(source / ".gitignore", "/templates/\n")
+    _write_public_source(source)
     _write(
         host / "agent_runtime.yml",
         "\n".join(
@@ -771,7 +837,7 @@ def test_release_preflight_aggregates_public_and_host_readiness(tmp_path):
     assert checks["host-upstream-match"].status == "ok"
     assert checks["sanitize"].status == "ok"
     assert checks["publish-check"].status == "ok"
-    assert checks["publish-bundle"].detail == "files=6"
+    assert checks["publish-bundle"].detail == "files=17"
     assert checks["local-tag-smoke-plan"].status == "ok"
     assert checks["github-publish-plan"].status == "ok"
     assert checks["host-update-plan"].status == "ok"
@@ -908,12 +974,7 @@ def test_release_preflight_reports_executable_host_update_findings(tmp_path):
 def test_release_preflight_reports_missing_host_upstream(tmp_path):
     source = tmp_path / "source"
     host = tmp_path / "host"
-    _write(source / "pyproject.toml", "[tool.setuptools.package-data]\nagent_runtime=['templates/project/**/*']\n")
-    _write(source / "README.md", "# agent_runtime\n")
-    _write(source / ".github" / "workflows" / "test.yml", "python -m pytest tests -q\npython -m agent_runtime.cli sanitize --root . --check\n")
-    _write(source / "src" / "agent_runtime" / "__init__.py", "")
-    _write(source / "src" / "agent_runtime" / "templates" / "project" / "scripts" / "agent_worker.py", "")
-    _write(source / ".gitignore", "/templates/\n")
+    _write_public_source(source)
     _write(host / "agent_runtime.yml", "project: demo\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\n")
 
     plan = build_preflight_plan(
@@ -1150,18 +1211,7 @@ def test_export_apply_copies_missing_templates_and_blocks_unsafe_content(tmp_pat
 
 
 def test_publish_check_requires_public_github_source_contract(tmp_path):
-    _write(
-        tmp_path / "pyproject.toml",
-        "[project]\nname='agent_runtime'\n[tool.setuptools.package-data]\nagent_runtime=['templates/project/**/*']\n",
-    )
-    _write(tmp_path / "README.md", "# agent_runtime\n")
-    _write(tmp_path / "src" / "agent_runtime" / "__init__.py", "")
-    _write(tmp_path / "src" / "agent_runtime" / "templates" / "project" / "scripts" / "agent_worker.py", "")
-    _write(
-        tmp_path / ".github" / "workflows" / "test.yml",
-        "python -m pytest tests -q\npython -m agent_runtime.cli sanitize --root . --check\n",
-    )
-    _write(tmp_path / ".gitignore", "/templates/\n/build/\n/src/*.egg-info/\n")
+    _write_public_source(tmp_path)
 
     findings = analyze_publish(tmp_path)
 
@@ -1213,15 +1263,7 @@ def test_publish_check_blocks_duplicate_top_level_templates_without_ignore(tmp_p
 def test_publish_bundle_copies_clean_public_source_only(tmp_path):
     source = tmp_path / "source"
     dest = tmp_path / "dest"
-    _write(
-        source / "pyproject.toml",
-        "[project]\nname='agent_runtime'\n[tool.setuptools.package-data]\nagent_runtime=['templates/project/**/*']\n",
-    )
-    _write(source / "README.md", "# agent_runtime\n")
-    _write(source / ".gitignore", "/templates/\n/build/\n/src/*.egg-info/\n")
-    _write(source / ".github" / "workflows" / "test.yml", "python -m pytest tests -q\npython -m agent_runtime.cli sanitize --root . --check\n")
-    _write(source / "src" / "agent_runtime" / "__init__.py", "")
-    _write(source / "src" / "agent_runtime" / "templates" / "project" / "scripts" / "agent_worker.py", "")
+    _write_public_source(source)
     _write(source / "tests" / "test_smoke.py", "def test_smoke():\n    assert True\n")
     _write(source / "build" / "lib" / "generated.py", "stale\n")
     _write(source / "templates" / "project" / "legacy.md", "duplicate\n")
@@ -1260,12 +1302,7 @@ def test_publish_tag_smoke_plan_uses_file_git_tag(tmp_path):
     source = tmp_path / "source"
     repo_dir = tmp_path / "repo"
     install_dir = tmp_path / "install"
-    _write(source / "pyproject.toml", "[tool.setuptools.package-data]\nagent_runtime=['templates/project/**/*']\n")
-    _write(source / "README.md", "# agent_runtime\n")
-    _write(source / ".github" / "workflows" / "test.yml", "python -m pytest tests -q\npython -m agent_runtime.cli sanitize --root . --check\n")
-    _write(source / "src" / "agent_runtime" / "__init__.py", "")
-    _write(source / "src" / "agent_runtime" / "templates" / "project" / "scripts" / "agent_worker.py", "")
-    _write(source / ".gitignore", "/templates/\n")
+    _write_public_source(source)
 
     plan = build_tag_smoke_plan(source, repo_dir, install_dir, "v0.1.0")
 
@@ -1297,12 +1334,7 @@ def test_publish_tag_smoke_refuses_non_empty_work_dirs(tmp_path):
 def test_publish_github_plan_builds_owner_approved_remote_commands(tmp_path):
     source = tmp_path / "source"
     install_dir = source / ".tmp" / "install"
-    _write(source / "pyproject.toml", "[tool.setuptools.package-data]\nagent_runtime=['templates/project/**/*']\n")
-    _write(source / "README.md", "# agent_runtime\n")
-    _write(source / ".github" / "workflows" / "test.yml", "python -m pytest tests -q\npython -m agent_runtime.cli sanitize --root . --check\n")
-    _write(source / "src" / "agent_runtime" / "__init__.py", "")
-    _write(source / "src" / "agent_runtime" / "templates" / "project" / "scripts" / "agent_worker.py", "")
-    _write(source / ".gitignore", "/templates/\n")
+    _write_public_source(source)
 
     plan = build_github_plan(
         source,

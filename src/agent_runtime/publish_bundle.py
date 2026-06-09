@@ -10,9 +10,18 @@ from .sanitize import analyze as analyze_sanitize
 
 
 INCLUDE_FILES = (
+    ".codex/hooks.json",
     ".gitignore",
+    ".githooks/pre-commit",
+    "BACKLOG-BOARD.md",
+    "owner-docs.yml",
     "pyproject.toml",
     "README.md",
+    "reviews/REVIEW-2026-06-09-backlog-board-restoration-owner-format-gate.md",
+    "schemas/state-machines.schema.json",
+    "scripts/owner_governance_gate.py",
+    "scripts/owner_doc_format_gate.py",
+    "scripts/state_machine_gate.py",
     "scripts/warning_summary_strict_ref_policy.py",
 )
 

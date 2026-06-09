@@ -1,0 +1,81 @@
+{
+  "schema": "agent-runtime-cross-project-overlay-simulation/v1",
+  "task_id": "TASK-AR-215",
+  "simulation_id": "mvp-client-2026-06-09",
+  "runtime_core_policy": "overlay-only",
+  "cases": [
+    {
+      "name": "mvp-client-overlay-swap",
+      "runtime_core_modified": false,
+      "expected_route": "ready_for_overlay_use",
+      "overlay_refs": {
+        "vision": "VISION.md",
+        "roadmap": "ROADMAP.md",
+        "organization": "ORG.md",
+        "team": "TEAMS.md",
+        "links": "LINKS.md",
+        "communication": "COMMUNICATION.md"
+      },
+      "overlay_changes": [
+        {
+          "path": "agents/project/overlays/simulations/mvp-client-2026-06-09/VISION.md",
+          "approved_by": "lead-engineer",
+          "decision_date": "2026-06-09",
+          "expiry": "2026-07-16",
+          "justification": "Project-specific product purpose is overlay context, not runtime core behavior."
+        },
+        {
+          "path": "agents/project/overlays/simulations/mvp-client-2026-06-09/ROADMAP.md",
+          "approved_by": "lead-engineer",
+          "decision_date": "2026-06-09",
+          "expiry": "2026-07-16",
+          "justification": "Project-specific MVP milestone is overlay context, not runtime core behavior."
+        }
+      ],
+      "query_routing_output": {
+        "question": "How should the agent team start this MVP without modifying common runtime skills?",
+        "vision": "Launch the client MVP through overlay-bound project context while preserving common runtime skills.",
+        "roadmap": "Use the MVP discovery milestone and 2026-07-02 checkpoint as the planning frame.",
+        "organization": "client-lead owns decisions; agent-runtime-owner handles release-impacting escalation.",
+        "team": "client-agent-team routes lead-engineer, qa, doc-steward, and product-owner roles.",
+        "links": "Use LINKS.md approval log and release gate reference before execution.",
+        "communication": "Use COMMUNICATION.md decision notes; do not infer undocumented goals.",
+        "release_route": "ready_for_overlay_use"
+      }
+    },
+    {
+      "name": "mvp-client-missing-communication",
+      "runtime_core_modified": false,
+      "expected_route": "hold_for_overlay",
+      "expected_missing_dimensions": ["communication"],
+      "escalation_task": "TASK-AR-204",
+      "handoff_task": "TASK-AR-216",
+      "overlay_refs": {
+        "vision": "VISION.md",
+        "roadmap": "ROADMAP.md",
+        "organization": "ORG.md",
+        "team": "TEAMS.md",
+        "links": "LINKS.md"
+      },
+      "overlay_changes": [
+        {
+          "path": "agents/project/overlays/simulations/mvp-client-2026-06-09/LINKS.md",
+          "approved_by": "lead-engineer",
+          "decision_date": "2026-06-09",
+          "expiry": "2026-07-16",
+          "justification": "Missing communication context must block release routing instead of allowing inferred project goals."
+        }
+      ],
+      "query_routing_output": {
+        "question": "Can this project proceed if the communication context is missing?",
+        "vision": "Known, but insufficient without communication record.",
+        "roadmap": "Known, but release route remains blocked until communication context is restored.",
+        "organization": "Escalate to client-lead and release gate owner.",
+        "team": "client-agent-team cannot proceed without doc-steward context completion.",
+        "links": "Approval log exists, but required communication context is absent.",
+        "communication": "missing: route to hold_for_overlay; do not infer undocumented decisions.",
+        "release_route": "hold_for_overlay"
+      }
+    }
+  ]
+}

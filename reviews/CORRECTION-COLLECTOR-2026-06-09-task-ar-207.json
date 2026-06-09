@@ -1,0 +1,11 @@
+{
+  "schema": "agent-runtime-correction-collector-report/v1",
+  "status": "pass",
+  "reports_scanned": 2,
+  "written": [
+    "agents/project/corrections/2026-06-09-offline-eval-2026-06-09-task-ar-217-1-goldset-metadata-completion.md",
+    "agents/project/corrections/2026-06-09-live-reviewer-gate-2026-06-09-task-ar-207-failure-sample-1-reviewer-footer-failure.md"
+  ],
+  "skipped": [],
+  "errors": []
+}

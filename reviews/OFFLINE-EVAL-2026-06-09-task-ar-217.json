@@ -1,0 +1,66 @@
+{
+  "schema": "agent-runtime-offline-eval-report/v1",
+  "generated_at": "2026-06-09T05:41:26.717157+00:00",
+  "catalog": "agents/project/DATASET-CATALOG.yml",
+  "policy": "agents/project/EVAL-POLICY.yml",
+  "minimum_score_by_domain": 0.9,
+  "status": "block",
+  "datasets": [
+    {
+      "id": "project-overlay-routing-gold",
+      "location": "agents/project/evals/overlay-routing-v1.jsonl",
+      "minimum_score": 0.9,
+      "score": 0.6667,
+      "status": "block",
+      "cases": 2,
+      "domains": [
+        "overlay-routing"
+      ],
+      "missing_case_types": [
+        "access-controlled",
+        "adversarial",
+        "ambiguous",
+        "edge",
+        "typical"
+      ],
+      "findings": [
+        "route-001:missing:case_type,source_refs,query_contract",
+        "route-002:missing:case_type,source_refs,query_contract",
+        "missing_case_types:access-controlled,adversarial,ambiguous,edge,typical",
+        "insufficient_cases:2<5"
+      ]
+    },
+    {
+      "id": "project-metadata-gov-gold",
+      "location": "agents/project/evals/gov-metadata-v1.jsonl",
+      "minimum_score": 0.9,
+      "score": 0.6667,
+      "status": "block",
+      "cases": 2,
+      "domains": [
+        "metadata-governance"
+      ],
+      "missing_case_types": [
+        "access-controlled",
+        "adversarial",
+        "ambiguous",
+        "edge",
+        "typical"
+      ],
+      "findings": [
+        "meta-001:missing:case_type,source_refs,query_contract",
+        "meta-002:missing:case_type,source_refs,query_contract",
+        "missing_case_types:access-controlled,adversarial,ambiguous,edge,typical",
+        "insufficient_cases:2<5"
+      ]
+    }
+  ],
+  "correction_proposals": [
+    {
+      "type": "goldset_metadata_completion",
+      "owner": "lead_engineer",
+      "route": "TASK-AR-205",
+      "next_action": "add case_type, source_refs, query_contract, and required case coverage before release readiness can pass"
+    }
+  ]
+}

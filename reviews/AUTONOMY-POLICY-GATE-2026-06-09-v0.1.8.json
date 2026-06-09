@@ -1,0 +1,13 @@
+{
+  "schema": "agent-runtime-autonomy-policy-gate/v1",
+  "evaluation_mode": "autonomous_delivery_and_executive_brief_policy",
+  "generated_at": "2026-06-09T09:58:33.498686+00:00",
+  "status": "pass",
+  "release_route": "autonomy_policy_ready",
+  "findings": [],
+  "inputs": {
+    "policy": "src/agent_runtime/templates/project/agents/project/AUTONOMY-POLICY.example.yml",
+    "agents": "src/agent_runtime/templates/project/AGENTS.md",
+    "reporting": "src/agent_runtime/templates/project/agents/lead_engineer/REPORTING-FORMAT.md"
+  }
+}

@@ -1,0 +1,17 @@
+schema: agent-runtime-owner-approval/v1
+target_version: 0.1.8
+target_tag: v0.1.8
+status: agent_council_approved
+owner: owner
+decision_date: 2026-06-09
+approved_by: agent-release-council
+approval_scope:
+  - version bump from 0.1.6 to 0.1.8
+  - local release smoke
+  - external publish execution if remote is provided
+  - release_state transition from ready to release
+required_owner_decision:
+  - approve_release_execution
+  - hold_at_ready
+  - reject_release_execution
+notes: Agent release council approved this noncritical patch/minor release path under the autonomy policy requested by the user. Owner approval remains required only for critical boundaries.

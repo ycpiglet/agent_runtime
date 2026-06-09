@@ -1,0 +1,67 @@
+schema: agent-runtime-eval-policy/v1
+updated_at: 2026-06-13T10:10:00+09:00
+
+offline_eval:
+  gate: blocking
+  minimum_score_by_domain: 0.90
+  dataset_catalog: agents/project/DATASET-CATALOG.yml
+  required_case_types:
+    - typical
+    - edge
+    - adversarial
+    - ambiguous
+    - access-controlled
+  required_metrics:
+    - answer_correctness
+    - context_recall
+    - context_precision
+    - source_selection
+    - citation_presence
+    - policy_compliance
+  required_tradeoff_fields:
+    - accuracy_vs_speed
+    - accuracy_vs_cost
+    - ambiguity_resolution_rate
+    - human_correction_rate
+
+live_verification:
+  gate: advisory_until_configured
+  reviewer_agent: independent-auditor
+  output_requirements:
+    - source_footer
+    - confidence_tag
+    - source_tier_tag
+    - unresolved_ambiguity_tag
+  tradeoffs:
+    improves:
+      - accuracy
+      - auditability
+      - model_feedback_quality
+    costs:
+      - time
+      - model_spend
+      - orchestration_cost
+
+correction_loop:
+  gate: scheduled
+  collector_agent: doc-steward
+  scan_sources:
+    - agents/messages/
+    - agents/lead_engineer/reviews/
+    - agents/lead_engineer/tasks/
+    - agents/project/LINKS.md
+  output:
+    path: agents/project/corrections/
+    type: correction_proposal
+  schedule:
+    cron: "0 2 * * *"
+    timezone: Asia/Seoul
+    lookback_days: 7
+  rule: "Corrections are proposals; final definitions require owner/accountable human sign-off."
+  required_metadata_capture:
+    - user_technical_level
+    - task_complexity
+    - acceptable_error_rate
+    - decision_deadline
+    - correction_owner
+    - correction_expiry

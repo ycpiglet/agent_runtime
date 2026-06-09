@@ -30,10 +30,21 @@ def analyze(root: Path) -> list[PublishFinding]:
     findings: list[PublishFinding] = []
 
     required_files = (
+        ".codex/hooks.json",
+        ".githooks/pre-commit",
+        "BACKLOG-BOARD.md",
+        "owner-docs.yml",
         "pyproject.toml",
         "README.md",
         ".github/workflows/test.yml",
+        "schemas/state-machines.schema.json",
+        "scripts/owner_governance_gate.py",
+        "scripts/owner_doc_format_gate.py",
+        "scripts/state_machine_gate.py",
         "src/agent_runtime/__init__.py",
+        "src/agent_runtime/templates/project/.codex/hooks.json",
+        "src/agent_runtime/templates/project/agents/project/STATE-MACHINES.yml",
+        "src/agent_runtime/templates/project/schemas/state-machines.schema.json",
     )
     for rel in required_files:
         if not (root / rel).exists():
@@ -51,6 +62,22 @@ def analyze(root: Path) -> list[PublishFinding]:
     if "sanitize --root . --check" not in workflow:
         findings.append(
             PublishFinding(".github/workflows/test.yml", "missing-ci-sanitize", "public source must run sanitize gate")
+        )
+    if "owner_doc_format_gate.py --manifest owner-docs.yml" not in workflow and "owner_governance_gate.py" not in workflow:
+        findings.append(
+            PublishFinding(
+                ".github/workflows/test.yml",
+                "missing-ci-owner-doc-format",
+                "Owner-facing docs must pass the executable format gate in CI",
+            )
+        )
+    if "owner_governance_gate.py" not in workflow:
+        findings.append(
+            PublishFinding(
+                ".github/workflows/test.yml",
+                "missing-ci-owner-governance",
+                "Owner-facing docs and state machines must pass the shared governance gate in CI",
+            )
         )
 
     package_template = root / "src" / "agent_runtime" / "templates" / "project"

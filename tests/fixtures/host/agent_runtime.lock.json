@@ -1,7 +1,9 @@
 {
   "installed": {
     "managed_files": {
+      ".codex/hooks.json": "sha256:ea9e1961145524963b9479577681f562d2cc1301c3035999340e74ebb8ce3ee3",
       ".githooks/pre-commit": "sha256:850b1f91882fd3ec4d7335cbe9d0e5678af7d111d2754a5da9134d70b2d1c65b",
+      ".github/workflows/owner-doc-format.yml": "sha256:173fdbbd463b87c882a38651d6caeddf24ddfee7dbe4de7df72725da7b77537e",
       "AGENTS.md": "sha256:2dc905a8437809e0f4c7ecd1b9129ea2b764b283a2f3fb6c4084e20972cecb65",
       "AGENT_RUNTIME.md": "sha256:e1fea0c100683f01b39d9038f970ffd17b6ccb2885f02251731e4aafb9e6fe78",
       "CLAUDE.md": "sha256:0e7d39713d8ba3bd20fa2d098b13a31800f92d158a0227563ad982d6a674659d",
@@ -18,7 +20,7 @@
       "agents/independent_auditor/SKILL.md": "sha256:ad7e9d90894a60baafe2dc8da3821ec2c6c725ed7a66872ed10467e77da716a1",
       "agents/lead_engineer/GOTCHAS.md": "sha256:d0d4e67e8edbbd59cc1ff43e92cac31da305ae4c87412b1f8215604ab7040acf",
       "agents/lead_engineer/RALPH-PROMPT-SCAFFOLD.md": "sha256:c2d06b9ddce89df2cb5548e0a2e0dd0321ec652e777aa4a603d3977d46b8bbf9",
-      "agents/lead_engineer/REPORTING-FORMAT.md": "sha256:571734362368f4192a3145765fa3d16d24d0077055cc7b4afb96b80125b0b55d",
+      "agents/lead_engineer/REPORTING-FORMAT.md": "sha256:f1bea30f9a261205e8f40c175b679bb5438b149d2b446c3bda2de5024b55c085",
       "agents/lead_engineer/SKILL.md": "sha256:a988661985458b2d9e28f86f6757eacccf91805c4a3bbf0a60e0cba8fb4b177e",
       "agents/lead_engineer/TOKEN-BUDGET.md": "sha256:437a3e676948572f37737e71db55edd29c62f8fea916feb864954349cccc402a",
       "agents/managing_partner/SKILL.md": "sha256:0d54db960eeb111e2b863007e897f5f1ae96db32b4611ee14a832159c5f79e12",
@@ -35,6 +37,7 @@
       "agents/project/ROADMAP.md": "sha256:50dac5ec32d2eb6386aa11fd98e4a19583564cfe053ac32da2d7a7a5e4f94ba6",
       "agents/project/SKILL-DATA-MAP.example.yml": "sha256:05da0f74b8a9a62a715091d164622efb6c3bb6fe0692e96a072edd19af121957",
       "agents/project/SKILL-GOVERNANCE.md": "sha256:26913eefd63a8dcf4d8ae6e4694a4128ae96a037cc12c9d0342c106546f9bbca",
+      "agents/project/STATE-MACHINES.yml": "sha256:bf0e2c1078c8dae16b7e8ccd9cd06ddd19aacc7c2888acd9a97767a6acf074fb",
       "agents/project/TEAMS.md": "sha256:dbe2079d5f29ff7ec3d48277e1e8a9a403943cc228b9da1948d27f5b2ce6fa4c",
       "agents/project/teams/.gitkeep": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
       "agents/qa/SKILL.md": "sha256:4bb9495507a0ef045f59bfe5f200d7072792b06e1a74264b1465ad6e0698d6e0",
@@ -52,6 +55,9 @@
       "docs/agent_bootstrap/cursor.md": "sha256:6a3feec0ffd4167747378176ee4d05510cf5bd658058c79da97306476d662f1b",
       "docs/agent_bootstrap/gemini.md": "sha256:17c8177ca619fff9dabab3b5a2382055df65b2d97e3ef3bddeb420932585799d",
       "docs/agent_bootstrap/scheduled_prompts.md": "sha256:efd76fc89efc8e967e0f2828d782228196a477136e381e6059b46fd686c9a672",
+      "docs/examples/state-machines.example.yml": "sha256:b09cef83d7bd37dcb069074a410949ef5613d28f8293cd1e0cc876f5e4f3d2ee",
+      "owner-docs.yml": "sha256:20c836791f2263a7b7a61eeac7893da9f8c22f93b06a7e1cac0e0bc89a02582e",
+      "schemas/state-machines.schema.json": "sha256:3a1dfcc04fd7e73f9f4792c8f41b7613734dfdf40f9f86aad8696dab4b2dc950",
       "schemas/task.schema.json": "sha256:32fb117be55e7508fdfc49050d2565a0c57a905c7cbe39270329d7780b106329",
       "scripts/agent_console.py": "sha256:2f4c430fbfc08bc1b0af16da1eeeb32115f49ea6ae6486c229fe1689fb7060a1",
       "scripts/agent_context_packet.py": "sha256:131b31a5a479d449f34c335a85ea43bf0516e08c052e89d3ae40600c99a8a595",
@@ -68,6 +74,7 @@
       "scripts/auto_dispatch.py": "sha256:cb0bd6da9c79bb670503283e7d589a14e17f269bffe166cf2fb20867f2d63129",
       "scripts/auto_merge.py": "sha256:2f96df3f64fa7ea3b186fdab441993c9ee948de49f9e8cda36101f6abe338600",
       "scripts/auto_runner.py": "sha256:d0168f9cee6e149925db326f2bfb62a59b5b6485ae2a39e9c35ac9ca6dc28549",
+      "scripts/backlog_board.py": "sha256:efb2a060184d9de1f0bff8f028392044a5a27c584f40ef551f2d97c363128eda",
       "scripts/backlog_sweep.py": "sha256:f9698b5f05fcce53b522c8c5ccf6053cfd525e5f2156f2206b23e3667fa2e92d",
       "scripts/beta_tester_due.py": "sha256:32e9d7b142a4ca829f15dc7cdf403873dc08fe1ebceaf5c02226f2314b03c85f",
       "scripts/budget_estimate.py": "sha256:5d180aa4854f8923a631790d38eeeeb26639ca836d4738d600d0900fa8d31d13",
@@ -97,6 +104,8 @@
       "scripts/model_routing.py": "sha256:fffc78d8a9aaee9f5f102ee071a9e6253b53963713044048c2e1c0dc1113c23e",
       "scripts/now.py": "sha256:6d6d6fcc9f1a4599a6735a15013fd263c887ae9910388e741134870abf446c9f",
       "scripts/orchestrator_safety_gate.py": "sha256:ff588238e9e0ab497f7a82caf52cb674c362409ca0583b33e402321efb29c7c7",
+      "scripts/owner_doc_format_gate.py": "sha256:0ad323c0b4344d3071fa08f79e2f8720498b8d83e43fd03fc721dc1472b61815",
+      "scripts/owner_governance_gate.py": "sha256:84377be2d666691f7e9965435947d1609e8c81981de49f1b4d5962daf6647915",
       "scripts/pipeline.py": "sha256:4abd82e5f09c9d3cc80d30542df7569bc1d7a2509303c1de704f213a49c03d97",
       "scripts/precommit_check.py": "sha256:ca4134f95ed06cb84151dec02a2397b51ed670e31d4cf2d97d545b3469e251ce",
       "scripts/promote_retro_forward.py": "sha256:219117e052e2d8e31c463e6260aa94bc2231ba0815e434b9d18fb8d8e5a1c3f5",
@@ -120,6 +129,7 @@
       "scripts/scribe_due.py": "sha256:a764a6b314fab1d1283126e95080c6eeb6d923862c4be67e08c41e1504dfef91",
       "scripts/secretary_digest.py": "sha256:66a5e85681877eec911fc3dca0f1b19b71004a840f87500d1c78f10cda55b004",
       "scripts/session_start_hook.py": "sha256:a688e6e77d3bf156ddac3409082b224775732ec0d86bd581332b1274b5ef4e86",
+      "scripts/state_machine_gate.py": "sha256:24ec95033448c17ce735c2df54f8037791adda73d38d6af418946a1c9af52f20",
       "scripts/subagent_council.py": "sha256:d86012bb61ab057f299cf994c1ff6f04d1a8e84c39d1b2e4712a94c27e62d608",
       "scripts/subagent_dispatch.py": "sha256:a07ead3b8b38bb800322acbe4e24025a12f54d99ea1105b88156d5713b46380c",
       "scripts/summarize_warning_summary_gate_report.py": "sha256:1c77c2d444b3d732dd2aff431317f4468dfed1fa3fad8b18fbefd1294b2b5c53",
@@ -176,8 +186,8 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.1.8",
-    "template_digest": "sha256:8367919e6e9d00a1725a00576591ff281f865a9874173c923c782b686ba09768",
-    "template_files": 173
+    "template_digest": "sha256:7943287605562dfa99263aa9e90407c0a8aae9e46c03188bc8ab6060506cc60f",
+    "template_files": 183
   },
   "project": "fixture-host",
   "schema": "agent-runtime-lock/v1",

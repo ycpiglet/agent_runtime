@@ -1,0 +1,105 @@
+{
+  "schema": "agent-runtime-offline-prediction-score/v1",
+  "evaluation_mode": "prediction_scoring",
+  "accuracy_claim": "contract_baseline_output_accuracy",
+  "generated_at": "2026-06-09T05:58:17.144516+00:00",
+  "catalog": "agents/project/DATASET-CATALOG.yml",
+  "predictions": "agents/project/evals/predictions/contract-baseline-2026-06-09.jsonl",
+  "status": "pass",
+  "prediction_file_findings": [],
+  "datasets": [
+    {
+      "id": "project-overlay-routing-gold",
+      "location": "agents/project/evals/overlay-routing-v1.jsonl",
+      "minimum_score": 0.9,
+      "score": 1.0,
+      "status": "pass",
+      "cases": 5,
+      "findings": [],
+      "case_results": [
+        {
+          "id": "route-001",
+          "score": 1.0,
+          "passed": 10,
+          "total": 10,
+          "findings": []
+        },
+        {
+          "id": "route-002",
+          "score": 1.0,
+          "passed": 10,
+          "total": 10,
+          "findings": []
+        },
+        {
+          "id": "route-003",
+          "score": 1.0,
+          "passed": 11,
+          "total": 11,
+          "findings": []
+        },
+        {
+          "id": "route-004",
+          "score": 1.0,
+          "passed": 11,
+          "total": 11,
+          "findings": []
+        },
+        {
+          "id": "route-005",
+          "score": 1.0,
+          "passed": 11,
+          "total": 11,
+          "findings": []
+        }
+      ]
+    },
+    {
+      "id": "project-metadata-gov-gold",
+      "location": "agents/project/evals/gov-metadata-v1.jsonl",
+      "minimum_score": 0.9,
+      "score": 1.0,
+      "status": "pass",
+      "cases": 5,
+      "findings": [],
+      "case_results": [
+        {
+          "id": "meta-001",
+          "score": 1.0,
+          "passed": 9,
+          "total": 9,
+          "findings": []
+        },
+        {
+          "id": "meta-002",
+          "score": 1.0,
+          "passed": 9,
+          "total": 9,
+          "findings": []
+        },
+        {
+          "id": "meta-003",
+          "score": 1.0,
+          "passed": 9,
+          "total": 9,
+          "findings": []
+        },
+        {
+          "id": "meta-004",
+          "score": 1.0,
+          "passed": 9,
+          "total": 9,
+          "findings": []
+        },
+        {
+          "id": "meta-005",
+          "score": 1.0,
+          "passed": 9,
+          "total": 9,
+          "findings": []
+        }
+      ]
+    }
+  ],
+  "correction_proposals": []
+}

@@ -145,6 +145,8 @@ jobs:
           REQUIRE_SEND_TARGETS: ${{ steps.resolve_warning_summary_strict_refs.outputs.require_send_targets }}
       - name: Install test dependencies
         run: python -m pip install --upgrade pip pytest
+      - name: Check Owner governance gates
+        run: python scripts/owner_governance_gate.py
       - name: Run package tests
         run: PYTHONPATH=src python -m pytest tests -q
       - name: Run latency policy gate (warning-only) for queue metrics
@@ -259,4 +261,3 @@ jobs:
             --tag v0.1.8 \
             --warning-summary-gate-strict-refs "${{ steps.resolve_warning_summary_strict_refs.outputs.strict_refs }}" \
             --check
-
