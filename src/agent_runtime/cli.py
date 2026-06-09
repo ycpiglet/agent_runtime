@@ -18,6 +18,7 @@ from . import publish_tag_smoke
 from . import release_preflight
 from . import sanitize
 from . import sync
+from . import ui_console
 from . import ui_state
 
 
@@ -163,6 +164,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     ui_state_parser.add_argument("--json", action="store_true", help="Emit JSON")
 
+    ui_console_parser = subparsers.add_parser("ui-console", help="Serve the read-only UI runtime console")
+    ui_console_parser.add_argument("--root", type=ui_console.Path, default=ui_console.Path.cwd(), help="Host project root")
+    ui_console_parser.add_argument("--host", default="127.0.0.1", help="Bind host")
+    ui_console_parser.add_argument("--port", type=int, default=8765, help="Bind port")
+
     return parser
 
 
@@ -272,6 +278,8 @@ def main(argv: list[str] | None = None) -> int:
         return doctor.run_doctor(args.root, check=args.check, repair=args.repair)
     if args.command == "ui-state":
         return ui_state.run_ui_state(args.root, resource=args.resource, json_output=args.json)
+    if args.command == "ui-console":
+        return ui_console.run_server(args.root, host=args.host, port=args.port)
 
     parser.print_help()
     return 0

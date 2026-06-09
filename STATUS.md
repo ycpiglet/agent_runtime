@@ -624,3 +624,37 @@ Decision
 | Start Read-Only Web Console MVP | lead-engineer | `TASK-AR-228` |
 | Use adapter JSON as UI fixture | lead-engineer | `docs/UI_STATE_API_EXAMPLES.md` |
 | Preserve source/freshness metadata in panels | lead-engineer | adapter response contract |
+
+## 2026-06-10 - Read-Only UI Console MVP Cycle
+
+### Bottom Line
+
+- Summary: completed `TASK-AR-228`; a dependency-free local web console serves current runtime state through the `TASK-AR-227` adapter.
+- Output: `src/agent_runtime/ui_console.py`, `tests/test_ui_console.py`, and `docs/UI_CONSOLE_MVP.md`.
+- State machine: `cycle=done`, `task=TASK-AR-228 completed`, `gate=pass`, `document=formatted`.
+
+### Signal
+
+| Signal | State | Evidence |
+| --- | --- | --- |
+| Runnable UI | pass | `agent_runtime ui-console --root . --host 127.0.0.1 --port 8765` |
+| Dashboard/backlog | pass | browser smoke rendered 29 task cards and 6 lanes |
+| Detail drawer | pass | task click showed source and freshness metadata |
+| Mobile layout | pass | 390px Chromium smoke rendered 29 cards, 6 lanes, 5 tabs |
+| Empty states | pass | agents/messages/events render absent runtime dirs as empty panels |
+| Mutation boundary | pass | no write controls exposed before `TASK-AR-229` |
+| Full tests | pass | `PYTHONPATH=.;src pytest tests -q` -> 228 passed |
+
+### Decision
+
+- Decision: use `agent_runtime ui-console` as the read-only inspection surface.
+- Decision: keep the console dependency-free until UI complexity justifies a larger frontend stack.
+- Decision: route all future writes through `TASK-AR-229`; do not add browser file mutation.
+
+### Next Steps
+
+| Step | Owner | Evidence |
+| --- | --- | --- |
+| Start Task CRUD and Backlog Ordering | lead-engineer | `TASK-AR-229` |
+| Define canonical task order/write-through | lead-engineer | required before drag/drop or status edits |
+| Keep read-only smoke passing | lead-engineer | `tests/test_ui_console.py` and Chromium smoke |

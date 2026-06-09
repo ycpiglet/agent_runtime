@@ -1,6 +1,6 @@
 ---
 id: TASK-AR-228
-status: planned
+status: completed
 owner: lead-engineer
 priority: P0
 difficulty: L
@@ -16,6 +16,10 @@ audit_log:
   - AGENT_RUNTIME_UI_CONSOLE_BRIEF.md
   - agents/lead_engineer/tasks/TASK-AR-226.md
   - agents/lead_engineer/tasks/TASK-AR-227.md
+  - docs/UI_CONSOLE_MVP.md
+  - docs/UI_STATE_API_EXAMPLES.md
+  - src/agent_runtime/ui_console.py
+  - tests/test_ui_console.py
   - BACKLOG.md
   - BACKLOG-BOARD.md
 created: 2026-06-10
@@ -56,3 +60,22 @@ Build the first read-only web console so the user can see backlog, current work,
 
 - Run frontend unit/smoke checks for the UI if a frontend test stack is added.
 - Verify with a local browser screenshot or equivalent UI smoke pass after implementation.
+
+## State Machine Mapping
+
+| Machine | Current State | Trigger | Evidence |
+|---|---|---|---|
+| `cycle` | `done` | `gates_pass` | Browser desktop/mobile smoke loaded the local UI and runtime data. |
+| `task` | `completed` | `done_criteria_met` | `src/agent_runtime/ui_console.py` and CLI `ui-console` are present. |
+| `gate` | `pass` | `verification_passed` | `pytest tests/test_ui_console.py -q` and Playwright smoke passed. |
+| `document` | `formatted` | `document_regenerated` | `docs/UI_CONSOLE_MVP.md` records run command, routes, and verification. |
+
+## Completion Evidence
+
+- 2026-06-10: Added read-only stdlib web server `src/agent_runtime/ui_console.py`.
+- 2026-06-10: Added CLI `agent_runtime ui-console --root . --host 127.0.0.1 --port 8765`.
+- 2026-06-10: Added dashboard, backlog Kanban, agent, message, event, source, and task-detail views.
+- 2026-06-10: Added tests for HTML/assets, `/api/state`, resource routes, 404 behavior, and CLI dispatch.
+- 2026-06-10: Verified desktop and mobile Chromium smoke with real runtime state.
+- 2026-06-10: Full suite passed: `PYTHONPATH=.;src pytest tests -q` -> 228 passed.
+- 2026-06-10: Next implementation pointer is `TASK-AR-229` Task CRUD and Backlog Ordering.

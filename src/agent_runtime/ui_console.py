@@ -1,0 +1,524 @@
+from __future__ import annotations
+
+import json
+from dataclasses import dataclass
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from urllib.parse import urlparse
+
+from . import ui_state
+
+
+@dataclass(frozen=True)
+class ConsoleResponse:
+    status: int
+    content_type: str
+    body: bytes
+
+
+HTML = """<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent Runtime Console</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <div id="runtime-console-app" class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 48 48" role="img" aria-label="Agent Runtime">
+          <rect x="6" y="8" width="36" height="32" rx="6"></rect>
+          <path d="M14 18h20M14 24h12M14 30h16"></path>
+          <circle cx="35" cy="30" r="3"></circle>
+        </svg>
+        <div>
+          <h1>Agent Runtime Console</h1>
+          <p id="status-line">Loading runtime state</p>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button id="refresh-button" type="button">Refresh</button>
+        <span id="poll-state" class="state-chip">polling</span>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="dashboard" aria-label="Dashboard">
+        <div class="metric"><span>Total Tasks</span><strong id="metric-tasks">0</strong></div>
+        <div class="metric"><span>Active</span><strong id="metric-active">0</strong></div>
+        <div class="metric"><span>Blocked</span><strong id="metric-blocked">0</strong></div>
+        <div class="metric"><span>Warnings</span><strong id="metric-warnings">0</strong></div>
+      </section>
+
+      <section class="work-surface">
+        <nav class="tabs" aria-label="Views">
+          <button class="tab is-active" type="button" data-view="board">Backlog</button>
+          <button class="tab" type="button" data-view="agents">Agents</button>
+          <button class="tab" type="button" data-view="messages">Messages</button>
+          <button class="tab" type="button" data-view="events">Events</button>
+          <button class="tab" type="button" data-view="sources">Sources</button>
+        </nav>
+
+        <div id="view-board" class="view is-active">
+          <div id="kanban" class="kanban" aria-label="Kanban"></div>
+        </div>
+        <div id="view-agents" class="view">
+          <div id="agents-list" class="list-panel"></div>
+        </div>
+        <div id="view-messages" class="view">
+          <div id="messages-list" class="list-panel"></div>
+        </div>
+        <div id="view-events" class="view">
+          <div id="events-list" class="list-panel"></div>
+        </div>
+        <div id="view-sources" class="view">
+          <div id="sources-list" class="list-panel"></div>
+        </div>
+      </section>
+
+      <aside id="detail-panel" class="detail-panel" aria-label="Task detail">
+        <div class="detail-empty">No task selected</div>
+      </aside>
+    </main>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>
+"""
+
+
+CSS = """:root {
+  --paper: #f4f1ea;
+  --panel: #fffaf0;
+  --ink: #1e2320;
+  --muted: #6f756e;
+  --line: #d8d1c2;
+  --teal: #0f766e;
+  --blue: #1d4ed8;
+  --amber: #b7791f;
+  --red: #b42318;
+  --violet: #6d28d9;
+  --shadow: 0 18px 44px rgba(39, 32, 21, 0.10);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background:
+    linear-gradient(90deg, rgba(30, 35, 32, 0.04) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(30, 35, 32, 0.04) 1px, transparent 1px),
+    var(--paper);
+  background-size: 24px 24px;
+  font-family: "Aptos", "Segoe UI", sans-serif;
+}
+
+.shell { min-height: 100vh; padding: 16px; }
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  background: rgba(255, 250, 240, 0.92);
+  box-shadow: var(--shadow);
+}
+
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand-mark { width: 44px; height: 44px; flex: 0 0 auto; fill: #f8efe0; stroke: var(--ink); stroke-width: 2; }
+h1 { margin: 0; font-size: 18px; line-height: 1.15; letter-spacing: 0; }
+p { margin: 4px 0 0; color: var(--muted); }
+
+.toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+button {
+  min-height: 36px;
+  border: 1px solid var(--ink);
+  border-radius: 6px;
+  background: var(--ink);
+  color: var(--panel);
+  font: inherit;
+  cursor: pointer;
+}
+button:hover { filter: brightness(1.08); }
+.state-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #edf7f4;
+  color: var(--teal);
+  font-size: 13px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  grid-template-areas:
+    "dashboard detail"
+    "work detail";
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.dashboard { grid-area: dashboard; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.metric {
+  min-height: 88px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+.metric span { display: block; color: var(--muted); font-size: 13px; }
+.metric strong { display: block; margin-top: 8px; font-size: 30px; line-height: 1; }
+
+.work-surface { grid-area: work; min-width: 0; }
+.tabs { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; }
+.tab { flex: 0 0 auto; background: #ffffff; color: var(--ink); border-color: var(--line); padding: 0 12px; }
+.tab.is-active { background: var(--teal); border-color: var(--teal); color: #ffffff; }
+.view { display: none; }
+.view.is-active { display: block; }
+
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(180px, 1fr));
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+.lane {
+  min-height: 460px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 250, 240, 0.88);
+}
+.lane header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px;
+  border-bottom: 1px solid var(--line);
+  background: #fffdf7;
+  font-weight: 700;
+}
+.lane-body { display: grid; gap: 8px; padding: 10px; }
+.task-card {
+  width: 100%;
+  min-height: 92px;
+  padding: 10px;
+  text-align: left;
+  border-color: var(--line);
+  background: #ffffff;
+  color: var(--ink);
+}
+.task-card strong { display: block; font-size: 13px; overflow-wrap: anywhere; }
+.task-card span { display: block; margin-top: 6px; color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+.task-card small { display: inline-block; margin-top: 8px; color: var(--teal); font-weight: 700; }
+
+.list-panel {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 12px;
+  min-height: 360px;
+}
+.list-row {
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--blue);
+  border-radius: 6px;
+  background: #ffffff;
+  overflow-wrap: anywhere;
+}
+.list-row.warn { border-left-color: var(--amber); }
+.list-row.error { border-left-color: var(--red); }
+.list-row.ok { border-left-color: var(--teal); }
+.list-row b { display: block; margin-bottom: 4px; }
+.list-row code { font-family: "Cascadia Mono", Consolas, monospace; font-size: 12px; }
+
+.detail-panel {
+  grid-area: detail;
+  position: sticky;
+  top: 16px;
+  align-self: start;
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fffdf7;
+  box-shadow: var(--shadow);
+}
+.detail-panel article { padding: 14px; }
+.detail-panel h2 { margin: 0 0 10px; font-size: 18px; letter-spacing: 0; }
+.detail-empty { padding: 16px; color: var(--muted); }
+.meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+.meta-grid div { padding: 8px; border: 1px solid var(--line); border-radius: 6px; background: #ffffff; }
+.meta-grid span { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; }
+.meta-grid strong { display: block; margin-top: 4px; font-size: 12px; overflow-wrap: anywhere; }
+
+.empty {
+  display: grid;
+  place-items: center;
+  min-height: 140px;
+  color: var(--muted);
+  border: 1px dashed var(--line);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+@media (max-width: 960px) {
+  .layout { grid-template-columns: 1fr; grid-template-areas: "dashboard" "work" "detail"; }
+  .detail-panel { position: static; max-height: none; }
+  .dashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 560px) {
+  .shell { padding: 10px; }
+  .topbar { align-items: flex-start; flex-direction: column; }
+  .toolbar { justify-content: flex-start; }
+  .dashboard { grid-template-columns: 1fr; }
+  .kanban { grid-template-columns: repeat(6, minmax(220px, 84vw)); }
+  .meta-grid { grid-template-columns: 1fr; }
+}
+"""
+
+
+JS = """const lanes = ["Backlog", "Ready", "In Progress", "Review", "Blocked", "Done"];
+let runtimeState = null;
+let selectedTaskId = null;
+
+const $ = (id) => document.getElementById(id);
+const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#039;"
+}[char]));
+
+function setText(id, value) {
+  const node = $(id);
+  if (node) node.textContent = value;
+}
+
+async function loadState() {
+  setText("poll-state", "refreshing");
+  try {
+    const response = await fetch("/api/state", { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    runtimeState = await response.json();
+    renderAll();
+    setText("poll-state", "polling");
+  } catch (error) {
+    setText("poll-state", "error");
+    $("status-line").textContent = `State load failed: ${error.message}`;
+  }
+}
+
+function taskCounts(tasks) {
+  return {
+    active: tasks.filter((task) => task.lane === "In Progress").length,
+    blocked: tasks.filter((task) => task.lane === "Blocked").length
+  };
+}
+
+function renderDashboard() {
+  const tasks = runtimeState.tasks || [];
+  const counts = taskCounts(tasks);
+  setText("metric-tasks", tasks.length);
+  setText("metric-active", counts.active);
+  setText("metric-blocked", counts.blocked);
+  setText("metric-warnings", (runtimeState.warnings || []).length + (runtimeState.gaps || []).length);
+  $("status-line").textContent = `Generated ${runtimeState.generated_at} - ${tasks.length} tasks`;
+}
+
+function taskCard(task) {
+  return `<button class="task-card" type="button" data-task-id="${escapeHtml(task.id)}">
+    <strong>${escapeHtml(task.id)} - ${escapeHtml(task.title)}</strong>
+    <span>${escapeHtml(task.description || "No summary")}</span>
+    <small>${escapeHtml(task.owner_agent || "unassigned")} / ${escapeHtml(task.priority || "P?")}</small>
+  </button>`;
+}
+
+function renderKanban() {
+  const tasks = runtimeState.tasks || [];
+  $("kanban").innerHTML = lanes.map((lane) => {
+    const laneTasks = tasks.filter((task) => task.lane === lane);
+    const body = laneTasks.length ? laneTasks.map(taskCard).join("") : `<div class="empty">No ${escapeHtml(lane)} tasks</div>`;
+    return `<section class="lane"><header><span>${escapeHtml(lane)}</span><span>${laneTasks.length}</span></header><div class="lane-body">${body}</div></section>`;
+  }).join("");
+  document.querySelectorAll(".task-card").forEach((button) => {
+    button.addEventListener("click", () => {
+      selectedTaskId = button.dataset.taskId;
+      renderDetail();
+    });
+  });
+}
+
+function renderAgents() {
+  const agents = runtimeState.agents || [];
+  $("agents-list").innerHTML = agents.length ? agents.map((agent) => `
+    <article class="list-row ${agent.online ? "ok" : "warn"}">
+      <b>${escapeHtml(agent.display_name || agent.role)}</b>
+      <span>${escapeHtml(agent.status || "offline")} / ${escapeHtml(agent.current_task_id || "no task")}</span>
+      <code>${escapeHtml(agent.source_path)}</code>
+    </article>
+  `).join("") : `<div class="empty">No active sessions</div>`;
+}
+
+function renderMessages() {
+  const messages = runtimeState.messages || [];
+  $("messages-list").innerHTML = messages.length ? messages.map((message) => `
+    <article class="list-row">
+      <b>${escapeHtml(message.id)}</b>
+      <span>${escapeHtml(message.from)} -> ${escapeHtml(message.to)} / ${escapeHtml(message.status)}</span>
+      <p>${escapeHtml(message.body).slice(0, 220)}</p>
+      <code>${escapeHtml(message.source_path)}</code>
+    </article>
+  `).join("") : `<div class="empty">No messages</div>`;
+}
+
+function renderEvents() {
+  const events = runtimeState.events || [];
+  $("events-list").innerHTML = events.length ? events.slice(-80).reverse().map((event) => `
+    <article class="list-row ${event.severity === "error" ? "error" : "ok"}">
+      <b>${escapeHtml(event.type || event.event || event.id)}</b>
+      <span>${escapeHtml(event.created_at || event.ts)} / ${escapeHtml(event.actor || event.role || "runtime")}</span>
+      <code>${escapeHtml(event.id)}</code>
+    </article>
+  `).join("") : `<div class="empty">No events</div>`;
+}
+
+function renderSources() {
+  const rows = [...(runtimeState.sources || []), ...(runtimeState.gaps || []), ...(runtimeState.warnings || [])];
+  $("sources-list").innerHTML = rows.length ? rows.map((row) => `
+    <article class="list-row ${row.fresh === false || row.kind?.includes("error") ? "warn" : "ok"}">
+      <b>${escapeHtml(row.id || row.kind)}</b>
+      <span>${escapeHtml(row.freshness || row.detail || row.mutation_boundary || "")}</span>
+      <code>${escapeHtml(row.path)}</code>
+    </article>
+  `).join("") : `<div class="empty">No sources</div>`;
+}
+
+function renderDetail() {
+  const panel = $("detail-panel");
+  const task = (runtimeState.tasks || []).find((item) => item.id === selectedTaskId);
+  if (!task) {
+    panel.innerHTML = `<div class="detail-empty">No task selected</div>`;
+    return;
+  }
+  panel.innerHTML = `<article>
+    <h2>${escapeHtml(task.id)}</h2>
+    <p>${escapeHtml(task.description || task.title)}</p>
+    <div class="meta-grid">
+      <div><span>Status</span><strong>${escapeHtml(task.status)}</strong></div>
+      <div><span>Lane</span><strong>${escapeHtml(task.lane)}</strong></div>
+      <div><span>Owner</span><strong>${escapeHtml(task.owner_agent || "unassigned")}</strong></div>
+      <div><span>Priority</span><strong>${escapeHtml(task.priority || "none")}</strong></div>
+      <div><span>Source</span><strong>${escapeHtml(task.source_path)}</strong></div>
+      <div><span>Freshness</span><strong>${escapeHtml(task.freshness)}</strong></div>
+      <div><span>Updated</span><strong>${escapeHtml(task.last_updated || "unknown")}</strong></div>
+      <div><span>Blocked</span><strong>${escapeHtml(task.blocked_reason || "none")}</strong></div>
+    </div>
+  </article>`;
+}
+
+function renderAll() {
+  renderDashboard();
+  renderKanban();
+  renderAgents();
+  renderMessages();
+  renderEvents();
+  renderSources();
+  renderDetail();
+}
+
+document.querySelectorAll(".tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach((item) => item.classList.remove("is-active"));
+    document.querySelectorAll(".view").forEach((item) => item.classList.remove("is-active"));
+    tab.classList.add("is-active");
+    $(`view-${tab.dataset.view}`).classList.add("is-active");
+  });
+});
+
+$("refresh-button").addEventListener("click", loadState);
+loadState();
+setInterval(loadState, 4000);
+"""
+
+
+def _bytes(text: str) -> bytes:
+    return text.encode("utf-8")
+
+
+def _json_response(payload: object) -> ConsoleResponse:
+    return ConsoleResponse(
+        status=200,
+        content_type="application/json; charset=utf-8",
+        body=_bytes(json.dumps(payload, ensure_ascii=False, indent=2)),
+    )
+
+
+def build_response(path: str, root: Path | str) -> ConsoleResponse:
+    root_path = Path(root)
+    request_path = urlparse(path).path
+    if request_path in {"", "/"}:
+        return ConsoleResponse(200, "text/html; charset=utf-8", _bytes(HTML))
+    if request_path == "/app.css":
+        return ConsoleResponse(200, "text/css; charset=utf-8", _bytes(CSS))
+    if request_path == "/app.js":
+        return ConsoleResponse(200, "application/javascript; charset=utf-8", _bytes(JS))
+    if request_path == "/api/state":
+        return _json_response(ui_state.build_state(root_path))
+
+    api_resources = {
+        "/api/tasks": "tasks",
+        "/api/agents": "agents",
+        "/api/messages": "messages",
+        "/api/events": "events",
+        "/api/goals": "goals",
+        "/api/sources": "sources",
+    }
+    if request_path in api_resources:
+        return _json_response(ui_state.build_resource(root_path, api_resources[request_path]))
+    return ConsoleResponse(404, "text/plain; charset=utf-8", b"not found\n")
+
+
+class _ConsoleHandler(BaseHTTPRequestHandler):
+    root: Path = Path.cwd()
+
+    def do_GET(self) -> None:  # noqa: N802 - BaseHTTPRequestHandler API
+        response = build_response(self.path, self.root)
+        self.send_response(response.status)
+        self.send_header("Content-Type", response.content_type)
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Content-Length", str(len(response.body)))
+        self.end_headers()
+        self.wfile.write(response.body)
+
+    def log_message(self, format: str, *args: object) -> None:
+        return
+
+
+def run_server(root: Path, *, host: str = "127.0.0.1", port: int = 8765) -> int:
+    root_path = Path(root).resolve()
+    handler = type("AgentRuntimeConsoleHandler", (_ConsoleHandler,), {"root": root_path})
+    with ThreadingHTTPServer((host, port), handler) as server:
+        actual_host, actual_port = server.server_address[:2]
+        print(f"Agent Runtime Console: http://{actual_host}:{actual_port}/")
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            print("Agent Runtime Console stopped.")
+    return 0
