@@ -27,6 +27,7 @@ CLAIMS_DIR = RUNTIME_DIR / "claims"
 CLAIM_TTL_SECONDS = 30 * 60
 MAX_CLAIM_CREATE_ATTEMPTS = 4
 CLAIM_CREATE_RETRY_DELAY_SECONDS = 0.01
+CLAIM_LOCK_STALE_SECONDS = 30.0
 
 
 def _safe_int(value: object, default: int = 0) -> int:
@@ -416,6 +417,38 @@ def _claim_path(message_id: str) -> Path:
     return CLAIMS_DIR / f"{message_id}.claim"
 
 
+def _claim_lock_path(message_id: str) -> Path:
+    return CLAIMS_DIR / f"{message_id}.claim.lock"
+
+
+def _acquire_claim_file_lock(lock_path: Path) -> bool:
+    for attempt in range(MAX_CLAIM_CREATE_ATTEMPTS * 10):
+        try:
+            lock_path.mkdir()
+            return True
+        except FileExistsError:
+            try:
+                age = _now_epoch() - lock_path.stat().st_mtime
+                if age > CLAIM_LOCK_STALE_SECONDS:
+                    lock_path.rmdir()
+                    continue
+            except FileNotFoundError:
+                continue
+            except Exception:
+                pass
+            if attempt == (MAX_CLAIM_CREATE_ATTEMPTS * 10) - 1:
+                return False
+            time.sleep(CLAIM_CREATE_RETRY_DELAY_SECONDS)
+    return False
+
+
+def _release_claim_file_lock(lock_path: Path) -> None:
+    try:
+        lock_path.rmdir()
+    except Exception:
+        pass
+
+
 def _worker_identity(role: str | None = None, *, pid: int | None = None,
                     hostname: str | None = None) -> dict[str, object]:
     return {
@@ -646,7 +679,6 @@ def _acquire_claim(
     if not p.parent.exists():
         p.parent.mkdir(parents=True, exist_ok=True)
 
-    # If an existing lease is stale or malformed, allow takeover.
     marker = {
         "message_id": message_id,
         "role": role,
@@ -658,44 +690,39 @@ def _acquire_claim(
         "path": message_path or str(message_id),
     }
     marker_text = json.dumps(marker, ensure_ascii=False, indent=2, sort_keys=True)
-    for attempt in range(MAX_CLAIM_CREATE_ATTEMPTS):
-        try:
-            claim = _read_claim(p)
-            if claim is not None:
-                if _is_stale_claim(claim, now=now_val):
-                    try:
-                        p.unlink(missing_ok=True)
-                    except Exception:
-                        pass
-                elif claim == {}:
-                    # Partial or malformed payloads can appear briefly during
-                    # concurrent writes. Do not unlink here: another worker
-                    # may own a just-created lease that is still being flushed.
-                    time.sleep(CLAIM_CREATE_RETRY_DELAY_SECONDS)
-                    continue
-                else:
-                    return False
 
-            with open(p, "x", encoding="utf-8") as f:
-                f.write(marker_text)
-            return True
-        except FileExistsError:
-            return False
-        except Exception:
-            # Best-effort: transient filesystem races on shared volumes are
-            # retried briefly when claim recovery conditions are still plausible.
-            observed = _read_claim(p)
-            if observed is not None and not _is_stale_claim(observed, now=now_val):
-                return False
-            if observed is not None:
+    lock_path = _claim_lock_path(message_id)
+    if not _acquire_claim_file_lock(lock_path):
+        return False
+
+    try:
+        # If an existing lease is stale or malformed, allow takeover. The
+        # directory lock keeps stale recovery and fresh creation serialized
+        # across both threads and processes.
+        claim = _read_claim(p)
+        if claim is not None:
+            if _is_stale_claim(claim, now=now_val) or claim == {}:
                 try:
                     p.unlink(missing_ok=True)
                 except Exception:
                     pass
-            if attempt == MAX_CLAIM_CREATE_ATTEMPTS - 1:
+            else:
                 return False
-            time.sleep(CLAIM_CREATE_RETRY_DELAY_SECONDS)
-    return False
+
+        try:
+            with open(p, "x", encoding="utf-8") as f:
+                f.write(marker_text)
+            observed = _read_claim(p)
+            return bool(
+                isinstance(observed, dict)
+                and str(observed.get("token")) == str(marker.get("token"))
+            )
+        except FileExistsError:
+            return False
+        except Exception:
+            return False
+    finally:
+        _release_claim_file_lock(lock_path)
 
 
 def _release_claim(message_id: str) -> None:
