@@ -1,5 +1,12 @@
 ---
 id: TASK-AR-204
+display_id: TASK-AR-204
+task_uid: d384f27a-4077-48a2-98ae-cf4e9e07c7d9
+registered_at: 2026-06-09
+created_at: 2026-06-09
+started_at: 2026-06-09
+updated_at: 2026-06-11T00:00:00+09:00
+completed_at: 2026-06-11T00:00:00+09:00
 status: completed
 owner: agent-runtime
 priority: P0

@@ -1,5 +1,12 @@
 ---
 id: TASK-AR-228
+display_id: TASK-AR-228
+task_uid: 1b4f4177-8cba-4a49-b4a3-c3f65efaf0e8
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
+updated_at: 2026-06-11T00:00:00+09:00
+completed_at: 2026-06-11T00:00:00+09:00
 status: completed
 owner: lead-engineer
 priority: P0

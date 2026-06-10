@@ -1,5 +1,12 @@
 ---
 id: TASK-AR-232
+display_id: TASK-AR-232
+task_uid: bd41c885-08dc-4ff9-bed7-d727b9210333
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
+updated_at: 2026-06-11T00:00:00+09:00
+completed_at: 2026-06-11T00:00:00+09:00
 status: completed
 owner: lead-engineer
 priority: P2

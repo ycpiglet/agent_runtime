@@ -18,6 +18,12 @@ audit_log:
   - reviews/SEMINAR-2026-06-14-agent-runtime-task-ar-222-closeout-sync.md
   - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-223-source-output-coverage.md
 id: TASK-AR-220
+display_id: TASK-AR-220
+task_uid: d447eec2-3687-4968-a556-1e667b631693
+registered_at: 2026-06-09
+created_at: 2026-06-09
+updated_at: 2026-06-11T00:00:00+09:00
+completed_at: 2026-06-11T00:00:00+09:00
 status: completed
 owner: lead-engineer
 priority: P0

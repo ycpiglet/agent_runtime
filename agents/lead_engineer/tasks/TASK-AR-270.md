@@ -1,5 +1,12 @@
 ---
 id: TASK-AR-270
+display_id: TASK-AR-270
+task_uid: a7032c6f-4392-47e4-a7e8-8244bf6cebb1
+registered_at: 2026-06-11
+created_at: 2026-06-11
+started_at: 2026-06-11
+updated_at: 2026-06-11T00:00:00+09:00
+completed_at: 2026-06-11T00:00:00+09:00
 title: Close Agent Runtime UI design task set
 status: completed
 priority: high

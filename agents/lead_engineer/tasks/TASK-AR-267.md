@@ -1,5 +1,12 @@
 ---
 id: TASK-AR-267
+display_id: TASK-AR-267
+task_uid: a751c680-e52f-42f9-a904-84e889ea4025
+registered_at: 2026-06-11
+created_at: 2026-06-11
+started_at: 2026-06-11
+updated_at: 2026-06-11T00:00:00+09:00
+completed_at: 2026-06-11T00:00:00+09:00
 title: Restyle Agent Runtime operational views
 status: completed
 priority: medium

@@ -1,5 +1,10 @@
 ---
 id: TASK-AR-253
+display_id: TASK-AR-253
+task_uid: 485edce3-c9c4-4c41-9a8b-6da311b89f97
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
 title: Enforce single-writer SSoT through concurrency gate
 status: completed
 priority: P0

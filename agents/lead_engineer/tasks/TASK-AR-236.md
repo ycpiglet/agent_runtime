@@ -1,6 +1,12 @@
 ---
 completed_at: 2026-06-10T22:56:04+09:00
 id: TASK-AR-236
+display_id: TASK-AR-236
+task_uid: c6b42720-2e6b-46d7-90e6-85d3b976cbbc
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
+updated_at: 2026-06-11T00:00:00+09:00
 status: completed
 verification_status: passed
 owner: lead-engineer

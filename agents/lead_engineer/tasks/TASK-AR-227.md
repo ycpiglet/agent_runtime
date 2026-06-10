@@ -1,5 +1,12 @@
 ---
 id: TASK-AR-227
+display_id: TASK-AR-227
+task_uid: 808cdda2-38cf-4fe7-a054-edc1245e3157
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
+updated_at: 2026-06-11T00:00:00+09:00
+completed_at: 2026-06-11T00:00:00+09:00
 status: completed
 owner: lead-engineer
 priority: P0

@@ -101,6 +101,18 @@ TASK_SET_DEFINITIONS = [
         78,
     ),
     TaskSetInfo(
+        "TASKSET-AR-TASK-IDENTITY",
+        "Identity Steward",
+        "Collision-proof task identity, UUID metadata, lifecycle timestamps, and recovery visibility.",
+        79,
+    ),
+    TaskSetInfo(
+        "TASKSET-AR-UI-DESIGN-SYSTEM",
+        "Design Operator",
+        "Agent Runtime UI research, design-system guidance, and console visual implementation.",
+        79,
+    ),
+    TaskSetInfo(
         "TASKSET-AR-REPO-HYGIENE",
         "Repo Custodian",
         "Working-tree cleanup, backlog cycle hygiene, and handoff publication.",
@@ -125,6 +137,14 @@ class Task:
     @property
     def task_id(self) -> str:
         return str(self.meta.get("id", self.path.stem))
+
+    @property
+    def task_uid(self) -> str:
+        return str(self.meta.get("task_uid", ""))
+
+    @property
+    def display_id(self) -> str:
+        return str(self.meta.get("display_id", self.task_id))
 
     @property
     def status(self) -> str:
@@ -166,6 +186,22 @@ class Task:
         if isinstance(value, str):
             return [part.strip() for part in value.split(",") if part.strip()]
         return []
+
+    @property
+    def registered_at(self) -> str:
+        return str(self.meta.get("registered_at") or self.meta.get("created_at") or self.meta.get("created") or "")
+
+    @property
+    def started_at(self) -> str:
+        return str(self.meta.get("started_at") or "")
+
+    @property
+    def updated_at(self) -> str:
+        return str(self.meta.get("updated_at") or "")
+
+    @property
+    def completed_at(self) -> str:
+        return str(self.meta.get("completed_at") or "")
 
 
 def strip_comment(line: str) -> str:
@@ -529,6 +565,34 @@ def render(tasks: list[Task]) -> str:
                         set_info.summary,
                         f"`{len(set_completed)}/{len(total_set_tasks)}` done",
                         f"`{len(set_completed)}` completed task files archived",
+                    ]
+                )
+                + " |"
+            )
+
+    if completed_tasks:
+        lines.extend([
+            "",
+            "## Archived Task Files",
+            "",
+            "- Restore rule: completed tasks stay hidden from the live Action Board, but every completed task file remains visible here with identity and lifecycle metadata.",
+            "| Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |",
+            "|---|---|---|---|---|---|---|---|---|",
+        ])
+        for task in sorted(completed_tasks, key=task_set_sort_key):
+            lines.append(
+                "| "
+                + " | ".join(
+                    [
+                        f"`{task.display_id}`",
+                        f"`{shorten(task.task_uid, 13)}`" if task.task_uid else "-",
+                        f"`{task.task_set_id}`",
+                        task.status,
+                        task.registered_at or "-",
+                        task.started_at or "-",
+                        task.completed_at or "-",
+                        task.updated_at or "-",
+                        task.goal.replace("|", "/"),
                     ]
                 )
                 + " |"

@@ -1,5 +1,10 @@
 ---
 id: TASK-AR-257
+display_id: TASK-AR-257
+task_uid: 278344d7-3348-4d88-8c60-7369115e3212
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
 title: Governance operations plan and taskset registration
 status: completed
 priority: P0

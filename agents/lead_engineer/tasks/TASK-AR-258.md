@@ -1,5 +1,10 @@
 ---
 id: TASK-AR-258
+display_id: TASK-AR-258
+task_uid: f3096efc-ab50-4258-9a10-cce4221b4881
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
 title: Collaboration waiver burn-down and root capability promotion
 status: completed
 priority: P0

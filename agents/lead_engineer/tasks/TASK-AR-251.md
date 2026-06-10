@@ -1,5 +1,10 @@
 ---
 id: TASK-AR-251
+display_id: TASK-AR-251
+task_uid: 262e447d-0f05-428d-bf24-80549e72bd17
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
 title: Record realtime collaboration conflict research
 status: completed
 priority: P0

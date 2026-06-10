@@ -1,5 +1,11 @@
 ---
 id: TASK-AR-215
+display_id: TASK-AR-215
+task_uid: 08b01bc0-2eed-437e-9462-c6dc85479327
+registered_at: 2026-06-09
+created_at: 2026-06-09
+updated_at: 2026-06-11T00:00:00+09:00
+completed_at: 2026-06-11T00:00:00+09:00
 status: completed
 started_at: 2026-06-09T11:00:00+09:00
 owner: lead-engineer

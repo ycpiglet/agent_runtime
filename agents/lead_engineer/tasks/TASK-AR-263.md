@@ -1,5 +1,10 @@
 ---
 id: TASK-AR-263
+display_id: TASK-AR-263
+task_uid: f8e9f655-d3e5-4eb6-87a0-3577ee257fa7
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
 title: Governance operations report and deprecation decision loop
 status: completed
 priority: P1

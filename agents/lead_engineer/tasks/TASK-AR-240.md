@@ -1,5 +1,10 @@
 ---
 id: TASK-AR-240
+display_id: TASK-AR-240
+task_uid: a82d6c89-9971-42ad-8e5f-0aacb7a03738
+registered_at: 2026-06-10
+created_at: 2026-06-10
+updated_at: 2026-06-11T00:00:00+09:00
 status: completed
 completed_at: 2026-06-10T22:50:00+09:00
 owner: lead-engineer

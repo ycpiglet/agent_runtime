@@ -1,5 +1,12 @@
 ---
 id: TASK-AR-264
+display_id: TASK-AR-264
+task_uid: 9484fb10-d2b4-48c2-9da5-ffa39da147c9
+registered_at: 2026-06-11
+created_at: 2026-06-11
+started_at: 2026-06-11
+updated_at: 2026-06-11T00:00:00+09:00
+completed_at: 2026-06-11T00:00:00+09:00
 title: Capture Agent Runtime UI research and plan
 status: completed
 priority: high

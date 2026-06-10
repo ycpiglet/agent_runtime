@@ -1,6 +1,12 @@
 ---
 completed_at: 2026-06-10T22:56:04+09:00
 id: TASK-AR-235
+display_id: TASK-AR-235
+task_uid: cdc49e24-4481-4a21-9f79-1d9b980cad34
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
+updated_at: 2026-06-11T00:00:00+09:00
 status: completed
 verification_status: passed
 owner: lead-engineer

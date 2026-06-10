@@ -1,5 +1,10 @@
 ---
 id: TASK-AR-261
+display_id: TASK-AR-261
+task_uid: 38a4b41b-8318-465f-ad5f-b8cae196c19c
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
 title: Realtime backlog status pointer sync enforcement
 status: completed
 priority: P0

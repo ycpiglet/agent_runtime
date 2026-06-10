@@ -1,5 +1,11 @@
 ---
 id: TASK-AR-206
+display_id: TASK-AR-206
+task_uid: 739ed262-4fe4-4c3b-bac7-6daa9ac98cf5
+registered_at: 2026-06-11
+created_at: 2026-06-11
+started_at: 2026-06-11
+updated_at: 2026-06-11T00:00:00+09:00
 status: completed
 completed_at: 2026-06-10T22:04:00+09:00
 owner: agent-runtime

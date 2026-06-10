@@ -13,6 +13,8 @@ def _write_task(tasks_dir: Path, task_id: str, task_set_id: str, status: str = "
     (tasks_dir / f"{task_id}.md").write_text(
         f"""---
 id: {task_id}
+task_uid: 11111111-1111-4111-8111-{task_id[-3:]}000000000
+registered_at: 2026-06-10T12:00:00+09:00
 status: {status}
 priority: {priority}
 difficulty: M
@@ -75,11 +77,16 @@ def test_backlog_board_hides_completed_tasks_and_completed_task_sets(tmp_path: P
     archived_sets = board.split("## Archived Task Sets", 1)[1]
     assert "| Quality Sentinel (`TASKSET-AR-QUALITY-LOOP`) |" in archived_sets
     assert "| `2/2` done |" in archived_sets
-    assert "TASK-AR-901" not in archived_sets
-    assert "TASK-AR-902" not in archived_sets
+    archived_set_summary = archived_sets.split("## Archived Task Files", 1)[0]
+    assert "TASK-AR-901" not in archived_set_summary
+    assert "TASK-AR-902" not in archived_set_summary
+    archived_files = board.split("## Archived Task Files", 1)[1]
+    assert "TASK-AR-901" in archived_files
+    assert "TASK-AR-902" in archived_files
+    assert "registered_at" in archived_files
 
 
-def test_real_backlog_tasks_are_classified_into_eleven_task_sets() -> None:
+def test_real_backlog_tasks_are_classified_into_twelve_task_sets() -> None:
     tasks = backlog_board.load_tasks(ROOT / "agents" / "lead_engineer" / "tasks")
     task_set_ids = {task.task_set_id for task in tasks}
 
@@ -94,6 +101,7 @@ def test_real_backlog_tasks_are_classified_into_eleven_task_sets() -> None:
         "TASKSET-AR-PANE-PROGRESS",
         "TASKSET-AR-COLLAB-CONCURRENCY",
         "TASKSET-AR-GOVERNANCE-OPS",
+        "TASKSET-AR-TASK-IDENTITY",
         "TASKSET-AR-UI-DESIGN-SYSTEM",
         "TASKSET-AR-REPO-HYGIENE",
     }

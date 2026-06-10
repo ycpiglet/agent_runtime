@@ -1,5 +1,10 @@
 ---
 id: TASK-AR-254
+display_id: TASK-AR-254
+task_uid: 1515a1ec-6b56-4d60-a684-313ce4de7447
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
 title: Create task worktree before task-set claim
 status: completed
 priority: P0

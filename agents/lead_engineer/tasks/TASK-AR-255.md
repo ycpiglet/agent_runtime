@@ -1,5 +1,10 @@
 ---
 id: TASK-AR-255
+display_id: TASK-AR-255
+task_uid: f65fb879-d507-4324-9e2a-a5fe2f309a4c
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
 title: Integrate collaboration concurrency gate into governance
 status: completed
 priority: P0

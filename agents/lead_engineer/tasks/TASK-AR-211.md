@@ -1,5 +1,10 @@
 ---
 id: TASK-AR-211
+display_id: TASK-AR-211
+task_uid: d477effb-70e0-490d-b8fd-6daacd7f61fd
+registered_at: 2026-06-11
+created_at: 2026-06-11
+updated_at: 2026-06-11T00:00:00+09:00
 status: in_progress
 owner: agent-runtime
 priority: P0

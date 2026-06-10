@@ -1,5 +1,11 @@
 ---
 id: TASK-AR-243
+display_id: TASK-AR-243
+task_uid: 97d57c17-96d1-46b8-ab2b-05412c059aef
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
+updated_at: 2026-06-11T00:00:00+09:00
 status: completed
 completed_at: 2026-06-10T23:22:00+09:00
 owner: lead-engineer

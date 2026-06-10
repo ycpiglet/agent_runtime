@@ -1,5 +1,10 @@
 ---
 id: TASK-AR-259
+display_id: TASK-AR-259
+task_uid: 59a01025-c27c-4c08-875a-e450451d4dfd
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
 title: Lifecycle drift cleanup and claim normalization
 status: completed
 priority: P0

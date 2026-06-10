@@ -1,5 +1,11 @@
 ---
 id: TASK-AR-218
+display_id: TASK-AR-218
+task_uid: aa5a97ba-86b8-4ca6-a6ab-afa96b53b2d4
+registered_at: 2026-06-09
+created_at: 2026-06-09
+updated_at: 2026-06-11T00:00:00+09:00
+completed_at: 2026-06-11T00:00:00+09:00
 status: completed
 owner: lead-engineer
 priority: P0

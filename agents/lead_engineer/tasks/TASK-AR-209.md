@@ -1,5 +1,11 @@
 ---
 id: TASK-AR-209
+display_id: TASK-AR-209
+task_uid: 914d9b65-a634-482d-928c-1fd3cb19d2c8
+registered_at: 2026-06-09
+created_at: 2026-06-09
+updated_at: 2026-06-11T00:00:00+09:00
+completed_at: 2026-06-11T00:00:00+09:00
 status: completed
 owner: agent-runtime
 priority: P0
