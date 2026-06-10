@@ -89,6 +89,7 @@ HTML = """<!doctype html>
           <button class="tab" type="button" data-view="messages">Messages</button>
           <button class="tab" type="button" data-view="events">Events</button>
           <button class="tab" type="button" data-view="evidence">Evidence</button>
+          <button class="tab" type="button" data-view="map">Map</button>
           <button class="tab" type="button" data-view="sources">Sources</button>
           <button class="tab" type="button" data-view="writes">Writes</button>
         </nav>
@@ -125,6 +126,22 @@ HTML = """<!doctype html>
             <section>
               <h2>Replay</h2>
               <div id="replay-list" class="list-panel"></div>
+            </section>
+          </div>
+        </div>
+        <div id="view-map" class="view">
+          <div class="evidence-grid">
+            <section>
+              <h2>Graph</h2>
+              <div id="graph-list" class="list-panel"></div>
+            </section>
+            <section>
+              <h2>State Machines</h2>
+              <div id="state-machine-list" class="list-panel"></div>
+            </section>
+            <section>
+              <h2>Roadmap</h2>
+              <div id="roadmap-list" class="list-panel"></div>
             </section>
           </div>
         </div>
@@ -564,6 +581,33 @@ function renderEvidence() {
   `).join("") : `<div class="empty">No replay records</div>`;
 }
 
+function renderMap() {
+  const graph = runtimeState.graph || { nodes: [], edges: [] };
+  const machines = runtimeState.state_machines || [];
+  const roadmap = runtimeState.roadmap || { milestones: [] };
+  $("graph-list").innerHTML = graph.edges.length ? graph.edges.slice(0, 80).map((edge) => `
+    <article class="list-row">
+      <b>${escapeHtml(edge.from)} -> ${escapeHtml(edge.to)}</b>
+      <span>${escapeHtml(edge.kind)} / ${escapeHtml(edge.task_id || "no task")}</span>
+      <code>${escapeHtml(edge.source_path || edge.id || "")}</code>
+    </article>
+  `).join("") : `<div class="empty">No graph edges</div>`;
+  $("state-machine-list").innerHTML = machines.length ? machines.map((machine) => `
+    <article class="list-row ok">
+      <b>${escapeHtml(machine.id)}: ${escapeHtml(machine.current_state || machine.initial || "unknown")}</b>
+      <span>${escapeHtml(machine.scope || "")} / ${escapeHtml((machine.states || []).join(" -> "))}</span>
+      <code>${escapeHtml(machine.source_path || "")}</code>
+    </article>
+  `).join("") : `<div class="empty">No state machines</div>`;
+  $("roadmap-list").innerHTML = (roadmap.milestones || []).length ? (roadmap.milestones || []).slice(0, 40).map((item) => `
+    <article class="list-row ${item.done ? "ok" : "warn"}">
+      <b>${escapeHtml(item.date)} - ${escapeHtml(item.title)}</b>
+      <span>${escapeHtml(item.done ? "done" : "open")} / ${escapeHtml(roadmap.phase || "no phase")}</span>
+      <code>${escapeHtml(roadmap.source_path || "")}</code>
+    </article>
+  `).join("") : `<div class="empty">No roadmap milestones</div>`;
+}
+
 function renderSources() {
   const rows = [...(runtimeState.sources || []), ...(runtimeState.gaps || []), ...(runtimeState.warnings || [])];
   $("sources-list").innerHTML = rows.length ? rows.map((row) => `
@@ -670,6 +714,7 @@ function renderAll() {
   renderMessages();
   renderEvents();
   renderEvidence();
+  renderMap();
   renderSources();
   renderCommands();
   renderDetail();
@@ -814,6 +859,9 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/errors": "errors",
         "/api/evidence": "evidence",
         "/api/replay": "replay",
+        "/api/graph": "graph",
+        "/api/state-machines": "state_machines",
+        "/api/roadmap": "roadmap",
         "/api/commands": "commands",
     }
     if request_path in api_resources:

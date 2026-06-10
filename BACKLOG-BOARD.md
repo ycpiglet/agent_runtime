@@ -9,17 +9,17 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-10
 task_count: 33
-open_count: 22
+open_count: 21
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `33` total tasks; `22` open or active.
+- Summary: `33` total tasks; `21` open or active.
 - Recommended next: `TASK-AR-205` - 오프라인에서 정답 보유 영역은 구조화된 데이터셋으로 재현 가능한 평가를 수행하고, 90% 미만이면 릴리스를 막는다.
 
 ## Signal
-- Status: Action `19` / Ask `2` / Review `0` / Later `1` / Done `11`.
+- Status: Action `19` / Ask `2` / Review `0` / Later `0` / Done `12`.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -76,7 +76,7 @@ open_count: 22
 
 | Task | Status | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-232` | planned | P2 | Medium | High | 16h/2600tok | Low | 5 | agent-runtime-core | lead-engineer | Wait for dependency | Add the post-MVP visualizations that make the runtime understandable as an agent orga… |
+| - | - | - | - | - | - | - | - | - | - | - | - |
 
 ### Done
 
@@ -93,6 +93,7 @@ open_count: 22
 | `TASK-AR-229` | completed | P1 | High | Medium | 12h/2200tok | Low | 5 | agent-runtime-core | lead-engineer | Archive/evidence only | Let the UI manage tasks safely by sending changes through runtime APIs or a command o… |
 | `TASK-AR-230` | completed | P1 | High | Medium | 10h/2000tok | Low | 5 | agent-runtime-core | lead-engineer | Archive/evidence only | Allow the user to control runtime work from the UI by sending prompts and lifecycle c… |
 | `TASK-AR-231` | completed | P1 | High | Medium | 12h/2200tok | Low | 5 | agent-runtime-core | lead-engineer | Archive/evidence only | Make the UI trustworthy during long `/goal` runs by surfacing freshness, live event c… |
+| `TASK-AR-232` | completed | P2 | Medium | High | 16h/2600tok | Low | 3 | agent-runtime-core | lead-engineer | Archive/evidence only | Add the post-MVP visualizations that make the runtime understandable as an agent orga… |
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

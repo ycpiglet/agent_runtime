@@ -766,3 +766,37 @@ Decision
 | Start Graph, State Machine, Roadmap Views | lead-engineer | `TASK-AR-232` |
 | Keep graph/state-machine views read-only first | lead-engineer | avoid direct lifecycle mutation |
 | Preserve source links in visual summaries | lead-engineer | `docs/UI_LIVE_OBSERVABILITY.md` |
+
+## 2026-06-10 - Graph, State Machine, Roadmap Views Cycle
+
+### Bottom Line
+
+- Summary: completed `TASK-AR-232`; the UI console now has static graph, state-machine, and roadmap map views.
+- Output: `/api/graph`, `/api/state-machines`, `/api/roadmap`, Map tab, and `docs/UI_MAP_VIEWS.md`.
+- State machine: `cycle=done`, `task=TASK-AR-232 completed`, `gate=pass`, `document=formatted`.
+- Boundary: graph/state-machine/roadmap views are read-only derived summaries; no graph library or command execution is introduced yet.
+
+### Signal
+
+| Signal | State | Evidence |
+| --- | --- | --- |
+| Previous cycle | pass | `TASK-AR-231` committed as `8e7ea6e` and pushed |
+| Current task | pass | `agents/lead_engineer/tasks/TASK-AR-232.md` |
+| Graph view | pass | messages/tasks derive nodes and edges |
+| State-machine view | pass | `agents/project/STATE-MACHINES.yml` parsed into cards |
+| Roadmap view | pass | `agents/project/ROADMAP.md` phase and milestones parsed |
+| Route smoke | pass | graph returned two edges; state-machines one machine; roadmap one milestone |
+
+### Decision
+
+- Decision: ship static cards/lists derived from messages, tasks, sessions, state machines, and roadmap markdown.
+- Decision: report missing state/roadmap sources as gaps instead of fabricating hierarchy.
+- Decision: defer React Flow or game-like visualization until the derived graph data is stable.
+
+### Next Steps
+
+| Step | Owner | Evidence |
+| --- | --- | --- |
+| Return to release/governance backlog | lead-engineer | `TASK-AR-223` |
+| Keep UI initiative closed through TASK-AR-232 | lead-engineer | `BACKLOG.md` |
+| Use Map views as read-only operator context | lead-engineer | `docs/UI_MAP_VIEWS.md` |

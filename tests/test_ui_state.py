@@ -238,6 +238,89 @@ def test_ui_state_filters_events_and_derives_error_evidence_replay_views(tmp_pat
     assert all(record["freshness"] == "present" and record["last_updated"] for record in state["events"])
 
 
+def test_ui_state_builds_graph_state_machine_and_roadmap_views(tmp_path):
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-UI-232-graph.md",
+        _task_text("TASK-UI-232", status="in_progress", owner="lead-engineer"),
+    )
+    _write(
+        tmp_path / "agents" / "messages" / "inbox" / "MSG-20260610-graph.md",
+        "\n".join(
+            [
+                "---",
+                "id: MSG-20260610-graph",
+                "from: owner",
+                "to: qa",
+                "type: instruction",
+                "status: queued",
+                "ts: 2026-06-10T12:10:00+09:00",
+                "intent: graph-check",
+                "task_id: TASK-UI-232",
+                "---",
+                "",
+                "Check the graph view.",
+                "",
+            ]
+        ),
+    )
+    _write(
+        tmp_path / "agents" / "runtime" / "sessions" / "qa.json",
+        json.dumps({"agent_id": "agent-qa", "role": "qa", "status": "active", "task_id": "TASK-UI-232"}),
+    )
+    _write(
+        tmp_path / "agents" / "project" / "STATE-MACHINES.yml",
+        "\n".join(
+            [
+                "schema: test",
+                "machines:",
+                "  - id: task",
+                "    scope: backlog_task",
+                "    owner: lead-engineer",
+                "    initial: planned",
+                "    states:",
+                "      - id: planned",
+                "      - id: in_progress",
+                "      - id: completed",
+                "  - id: agent_job",
+                "    scope: agent_execution",
+                "    owner: agent-runtime-core",
+                "    initial: idle",
+                "    states:",
+                "      - id: idle",
+                "      - id: working",
+            ]
+        ),
+    )
+    _write(
+        tmp_path / "agents" / "project" / "ROADMAP.md",
+        "\n".join(
+            [
+                "# Roadmap",
+                "",
+                "## Current Phase",
+                "",
+                "- phase: UI console",
+                "- next_milestone: Graph view",
+                "",
+                "## Milestones",
+                "",
+                "- [ ] 2026-06-20: Graph view ready",
+            ]
+        ),
+    )
+
+    state = ui_state.build_state(tmp_path, now="2026-06-10T12:15:00+09:00")
+
+    assert {"owner", "qa"}.issubset({node["id"] for node in state["graph"]["nodes"]})
+    assert any(edge["from"] == "owner" and edge["to"] == "qa" and edge["kind"] == "message" for edge in state["graph"]["edges"])
+    task_machine = next(machine for machine in state["state_machines"] if machine["id"] == "task")
+    assert "in_progress" in task_machine["states"]
+    assert task_machine["current_state"] == "in_progress"
+    assert state["roadmap"]["phase"] == "UI console"
+    assert state["roadmap"]["milestones"][0]["title"] == "Graph view ready"
+    assert state["roadmap"]["milestones"][0]["done"] is False
+
+
 def test_ui_state_cli_emits_selected_resource_json(tmp_path, capsys):
     _write(
         tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-227-ui-state-api.md",

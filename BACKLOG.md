@@ -461,26 +461,25 @@
   - 상태: completed
   - 내용: freshness 표시, event filtering, logs/errors/evidence panel, replay/daily brief 기반을 추가. polling 우선, SSE는 후속.
 - P2-UI-6: `TASK-AR-232` Graph, State Machine, Roadmap Views
-  - 상태: next
+  - 상태: completed
   - 내용: agent communication graph, state-machine stepper, roadmap/goals/milestones hierarchy, workload heatmap/command palette 후보를 post-MVP로 구현.
 
 ## 다음 세션 우선순위
 
-1. `TASK-AR-232` Graph, State Machine, Roadmap Views: graph/state-machine/roadmap post-MVP 뷰 추가
-2. `TASK-AR-223` 버전 업데이트 closeout 통합(강제 규칙/오버레이/마이그레이션 재수합)
-3. `TASK-AR-221` 운영 정합 통합(Task-합의 마감)
-4. `TASK-AR-210` 재판정: boundaries closure 후 `ready` 가능 여부 확인
-5. `TASK-AR-219` 공식 권고 반영 및 판정 근거 고정
-6. `TASK-AR-220` tag_manual 이식 근거 마감(스크립트/훅/스킬 누락·의도적 제외 정렬)
-7. `TASK-AR-216` v0.1.8 후보 이관 사유 정렬
-8. `TASK-AR-222` v0.1.8 closeout 번들 완성
-9. `TASK-AR-218` migration 무결성 정합 + migration-map block rule 정비
-10. `TASK-AR-214` 질의 계약/메타데이터 게이트 마무리
-11. `TASK-AR-215` 오버레이 context packet 확정
-12. `TASK-AR-204` co-location 강제 룰 적용
-13. `TASK-AR-213` migration parity lock 완료
-14. `TASK-AR-202`/`TASK-AR-203` 병행 착수
-15. 멀티 프로젝트 오버레이 적용을 위한 `PROJECT-CONTEXT`/`ROADMAP`/`ORG`/`LINKS`/`TEAMS` 변경 시뮬레이션(1개 MVP 케이스) 완료
+1. `TASK-AR-223` 버전 업데이트 closeout 통합(강제 규칙/오버레이/마이그레이션 재수합)
+2. `TASK-AR-221` 운영 정합 통합(Task-합의 마감)
+3. `TASK-AR-210` 재판정: boundaries closure 후 `ready` 가능 여부 확인
+4. `TASK-AR-219` 공식 권고 반영 및 판정 근거 고정
+5. `TASK-AR-220` tag_manual 이식 근거 마감(스크립트/훅/스킬 누락·의도적 제외 정렬)
+6. `TASK-AR-216` v0.1.8 후보 이관 사유 정렬
+7. `TASK-AR-222` v0.1.8 closeout 번들 완성
+8. `TASK-AR-218` migration 무결성 정합 + migration-map block rule 정비
+9. `TASK-AR-214` 질의 계약/메타데이터 게이트 마무리
+10. `TASK-AR-215` 오버레이 context packet 확정
+11. `TASK-AR-204` co-location 강제 룰 적용
+12. `TASK-AR-213` migration parity lock 완료
+13. `TASK-AR-202`/`TASK-AR-203` 병행 착수
+14. 멀티 프로젝트 오버레이 적용을 위한 `PROJECT-CONTEXT`/`ROADMAP`/`ORG`/`LINKS`/`TEAMS` 변경 시뮬레이션(1개 MVP 케이스) 완료
 
 ## Done Log
 

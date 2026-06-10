@@ -48,6 +48,9 @@ def test_ui_console_serves_html_shell_and_assets(tmp_path):
     assert b"event-filter-type" in html.body
     assert b"evidence-list" in html.body
     assert b"errors-list" in html.body
+    assert b"graph-list" in html.body
+    assert b"state-machine-list" in html.body
+    assert b"roadmap-list" in html.body
     assert css.status == 200
     assert b"--ink" in css.body
     assert js.status == 200
@@ -57,6 +60,7 @@ def test_ui_console_serves_html_shell_and_assets(tmp_path):
     assert b"/api/commands" in js.body
     assert b"runtime.call_agent" in js.body
     assert b"filterEvents" in js.body
+    assert b"renderMap" in js.body
 
 
 def test_ui_console_api_state_uses_ui_state_adapter(tmp_path):
@@ -230,6 +234,58 @@ def test_ui_console_events_route_filters_by_query_params(tmp_path):
     assert response.status == 200
     assert payload["resource"] == "events"
     assert [event["event"] for event in payload["items"]] == ["agent.error"]
+
+
+def test_ui_console_graph_state_and_roadmap_routes(tmp_path):
+    _write_task(tmp_path, "TASK-UI-232")
+    _write(
+        tmp_path / "agents" / "messages" / "inbox" / "MSG-20260610-graph.md",
+        "\n".join(
+            [
+                "---",
+                "id: MSG-20260610-graph",
+                "from: owner",
+                "to: qa",
+                "type: instruction",
+                "status: queued",
+                "ts: 2026-06-10T12:10:00+09:00",
+                "intent: graph-check",
+                "task_id: TASK-UI-232",
+                "---",
+                "",
+                "Check graph routes.",
+                "",
+            ]
+        ),
+    )
+    _write(
+        tmp_path / "agents" / "project" / "STATE-MACHINES.yml",
+        "\n".join(
+            [
+                "machines:",
+                "  - id: task",
+                "    initial: planned",
+                "    states:",
+                "      - id: planned",
+                "      - id: in_progress",
+            ]
+        ),
+    )
+    _write(
+        tmp_path / "agents" / "project" / "ROADMAP.md",
+        "# Roadmap\n\n## Current Phase\n\n- phase: UI console\n\n## Milestones\n\n- [ ] 2026-06-20: Graph view ready\n",
+    )
+
+    graph = json.loads(ui_console.build_response("/api/graph", tmp_path).body.decode("utf-8"))
+    machines = json.loads(ui_console.build_response("/api/state-machines", tmp_path).body.decode("utf-8"))
+    roadmap = json.loads(ui_console.build_response("/api/roadmap", tmp_path).body.decode("utf-8"))
+
+    assert graph["resource"] == "graph"
+    assert any(edge["from"] == "owner" and edge["to"] == "qa" for edge in graph["items"]["edges"])
+    assert machines["resource"] == "state_machines"
+    assert machines["items"][0]["id"] == "task"
+    assert roadmap["resource"] == "roadmap"
+    assert roadmap["items"]["milestones"][0]["title"] == "Graph view ready"
 
 
 def test_ui_console_unknown_path_returns_404(tmp_path):

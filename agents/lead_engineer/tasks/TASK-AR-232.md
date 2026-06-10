@@ -1,6 +1,6 @@
 ---
 id: TASK-AR-232
-status: planned
+status: completed
 owner: lead-engineer
 priority: P2
 difficulty: L
@@ -16,6 +16,11 @@ audit_log:
   - AGENT_RUNTIME_UI_CONSOLE_BRIEF.md
   - agents/lead_engineer/tasks/TASK-AR-226.md
   - agents/lead_engineer/tasks/TASK-AR-231.md
+  - src/agent_runtime/ui_state.py
+  - src/agent_runtime/ui_console.py
+  - tests/test_ui_state.py
+  - tests/test_ui_console.py
+  - docs/UI_MAP_VIEWS.md
   - BACKLOG.md
   - BACKLOG-BOARD.md
 created: 2026-06-10
@@ -57,3 +62,21 @@ Add the post-MVP visualizations that make the runtime understandable as an agent
 
 - Add tests for transforming messages/tasks into graph edges.
 - Verify state names remain aligned with `agents/project/STATE-MACHINES.yml`.
+
+## State Machine Mapping
+
+- cycle: done
+- task: TASK-AR-232 completed
+- gate: pass
+- document: formatted
+
+## Progress Log
+
+- 2026-06-10: Started after `TASK-AR-231` landed. Implementation path is TDD-first static graph/state-machine/roadmap transforms before introducing a graph library.
+- 2026-06-10: Completed static graph, state-machine, and roadmap map views. Added `/api/graph`, `/api/state-machines`, `/api/roadmap`, plus Map UI tab. Rich graph libraries remain deferred.
+
+## Completion Evidence
+
+- `PYTHONPATH=src pytest tests/test_ui_state.py -q` -> 7 passed.
+- `PYTHONPATH=src pytest tests/test_ui_console.py -q` -> 11 passed.
+- Temporary-root route smoke: `/api/graph` returned two edges, `/api/state-machines` returned one machine, and `/api/roadmap` returned one milestone.

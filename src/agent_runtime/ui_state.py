@@ -19,6 +19,9 @@ RESOURCE_NAMES = (
     "errors",
     "evidence",
     "replay",
+    "graph",
+    "state_machines",
+    "roadmap",
     "commands",
 )
 
@@ -502,6 +505,148 @@ def build_replay(events: list[dict[str, Any]], messages: list[dict[str, Any]]) -
     return replay[-200:]
 
 
+def build_graph(tasks: list[dict[str, Any]], agents: list[dict[str, Any]], messages: list[dict[str, Any]], events: list[dict[str, Any]]) -> dict[str, Any]:
+    nodes: dict[str, dict[str, Any]] = {}
+    edges: list[dict[str, Any]] = []
+
+    def add_node(node_id: Any, kind: str, label: str | None = None) -> None:
+        if node_id is None or str(node_id).strip() == "":
+            return
+        key = str(node_id)
+        nodes.setdefault(key, {"id": key, "kind": kind, "label": label or key})
+
+    for agent in agents:
+        add_node(agent.get("role") or agent.get("id"), "agent", agent.get("display_name"))
+    for task in tasks:
+        add_node(task.get("id"), "task", task.get("title"))
+        add_node(task.get("owner_agent"), "agent")
+        if task.get("owner_agent"):
+            edges.append({"id": f"task-owner:{task.get('id')}", "from": str(task.get("owner_agent")), "to": str(task.get("id")), "kind": "owns_task", "task_id": task.get("id")})
+    for message in messages:
+        add_node(message.get("from"), "actor")
+        add_node(message.get("to"), "agent")
+        if message.get("from") and message.get("to"):
+            edges.append(
+                {
+                    "id": f"message:{message.get('id')}",
+                    "from": str(message.get("from")),
+                    "to": str(message.get("to")),
+                    "kind": "message",
+                    "task_id": message.get("task_id"),
+                    "source_path": message.get("source_path"),
+                }
+            )
+    for event in events:
+        add_node(event.get("role") or event.get("actor"), "agent")
+    return {
+        "nodes": sorted(nodes.values(), key=lambda item: (item["kind"], item["id"])),
+        "edges": edges,
+    }
+
+
+def _parse_state_machines_text(text: str) -> list[dict[str, Any]]:
+    machines: list[dict[str, Any]] = []
+    current: dict[str, Any] | None = None
+    in_states = False
+    for raw in text.splitlines():
+        line = raw.rstrip()
+        stripped = line.strip()
+        if line.startswith("  - id: "):
+            if current:
+                machines.append(current)
+            current = {"id": stripped.partition(":")[2].strip(), "states": []}
+            in_states = False
+            continue
+        if current is None:
+            continue
+        if line.startswith("    scope: "):
+            current["scope"] = stripped.partition(":")[2].strip()
+        elif line.startswith("    owner: "):
+            current["owner"] = stripped.partition(":")[2].strip()
+        elif line.startswith("    initial: "):
+            current["initial"] = stripped.partition(":")[2].strip()
+        elif line.startswith("    states:"):
+            in_states = True
+        elif in_states and line.startswith("      - id: "):
+            current.setdefault("states", []).append(stripped.partition(":")[2].strip())
+        elif line.startswith("    transitions:"):
+            in_states = False
+    if current:
+        machines.append(current)
+    return machines
+
+
+def _observed_machine_state(machine_id: str, tasks: list[dict[str, Any]], agents: list[dict[str, Any]], fallback: str | None) -> tuple[str | None, dict[str, int]]:
+    counts: dict[str, int] = {}
+    if machine_id == "task":
+        for task in tasks:
+            status = str(task.get("status") or "")
+            if status:
+                counts[status] = counts.get(status, 0) + 1
+        for preferred in ("blocked", "in_progress", "review", "ready", "planned", "completed"):
+            if counts.get(preferred):
+                return preferred, counts
+    if machine_id == "agent_job":
+        for agent in agents:
+            status = str(agent.get("status") or "")
+            if status:
+                counts[status] = counts.get(status, 0) + 1
+        if counts.get("active"):
+            return "working", counts
+    return fallback, counts
+
+
+def load_state_machines(root: Path, tasks: list[dict[str, Any]], agents: list[dict[str, Any]], now: str) -> list[dict[str, Any]]:
+    path = root / "agents" / "project" / "STATE-MACHINES.yml"
+    if not path.exists():
+        return []
+    try:
+        machines = _parse_state_machines_text(path.read_text(encoding="utf-8"))
+    except OSError:
+        return []
+    for machine in machines:
+        current, counts = _observed_machine_state(str(machine.get("id") or ""), tasks, agents, machine.get("initial"))
+        machine["current_state"] = current
+        machine["observed_counts"] = counts
+        machine["source_path"] = _rel(root, path)
+        machine["source_kind"] = "state_machine_yaml"
+        machine["source"] = _source_metadata(root, path, "state_machine_yaml", now)
+        machine["last_updated"] = _mtime_iso(path)
+        machine["freshness"] = "present"
+    return machines
+
+
+def load_roadmap(root: Path, now: str) -> dict[str, Any]:
+    path = root / "agents" / "project" / "ROADMAP.md"
+    if not path.exists():
+        return {"phase": None, "next_milestone": None, "milestones": [], "source_path": _rel(root, path), "source_kind": "roadmap_markdown", "freshness": "missing", "last_updated": None}
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return {"phase": None, "next_milestone": None, "milestones": [], "source_path": _rel(root, path), "source_kind": "roadmap_markdown", "freshness": "missing", "last_updated": None}
+    phase_match = re.search(r"^-\s+phase:\s*(.+)$", text, flags=re.MULTILINE)
+    next_match = re.search(r"^-\s+next_milestone:\s*(.+)$", text, flags=re.MULTILINE)
+    milestones: list[dict[str, Any]] = []
+    for match in re.finditer(r"^-\s+\[(?P<done>[ xX])\]\s+(?P<date>\d{4}-\d{2}-\d{2}):\s+(?P<title>.+)$", text, flags=re.MULTILINE):
+        milestones.append(
+            {
+                "date": match.group("date"),
+                "title": match.group("title").strip(),
+                "done": match.group("done").lower() == "x",
+            }
+        )
+    return {
+        "phase": phase_match.group(1).strip() if phase_match else None,
+        "next_milestone": next_match.group(1).strip() if next_match else None,
+        "milestones": milestones,
+        "source_path": _rel(root, path),
+        "source_kind": "roadmap_markdown",
+        "source": _source_metadata(root, path, "roadmap_markdown", now),
+        "last_updated": _mtime_iso(path),
+        "freshness": "present",
+    }
+
+
 def load_agents(root: Path, now: str, events: list[dict[str, Any]], warnings: list[dict[str, str]]) -> list[dict[str, Any]]:
     agents: list[dict[str, Any]] = []
     latest_event_by_role: dict[str, dict[str, Any]] = {}
@@ -592,10 +737,11 @@ def _collect_sources_and_gaps(root: Path, now: str) -> tuple[list[dict[str, Any]
         ("events", root / "agents" / "runtime" / "events", "event_directory", "append_only_runtime"),
         ("status", root / "STATUS.md", "status_markdown", "agent_doc_workflow"),
         ("state_machines", root / "agents" / "project" / "STATE-MACHINES.yml", "state_machine_yaml", "schema_first_task"),
+        ("roadmap", root / "agents" / "project" / "ROADMAP.md", "roadmap_markdown", "agent_doc_workflow"),
         ("ui_outbox", root / ".ui_outbox", "ui_command_outbox", "api_only"),
     )
     sources = [_source_entry(root, source_id, path, kind, now, boundary) for source_id, path, kind, boundary in source_specs]
-    optional = {"messages_inbox", "messages_archive", "sessions", "events", "status"}
+    optional = {"messages_inbox", "messages_archive", "sessions", "events", "status", "state_machines", "roadmap"}
     gaps = [
         _gap(source["id"], source["path"], "optional runtime source is not present")
         for source in sources
@@ -618,6 +764,9 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     errors = derive_errors(events)
     evidence = derive_evidence(events, messages)
     replay = build_replay(events, messages)
+    graph = build_graph(tasks, agents, messages, events)
+    state_machines = load_state_machines(root_path, tasks, agents, generated_at)
+    roadmap = load_roadmap(root_path, generated_at)
     return {
         "generated_at": generated_at,
         "sources": sources,
@@ -629,6 +778,9 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "errors": errors,
         "evidence": evidence,
         "replay": replay,
+        "graph": graph,
+        "state_machines": state_machines,
+        "roadmap": roadmap,
         "commands": commands,
         "gaps": gaps,
         "warnings": warnings,
