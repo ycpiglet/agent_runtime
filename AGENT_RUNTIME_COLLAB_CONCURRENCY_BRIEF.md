@@ -15,6 +15,7 @@ tags: [parallel-agents, collaboration, concurrency, worktree, owner-brief]
 
 - Summary: recorded the real-time collaboration research and implemented the first executable concurrency layer for pane work.
 - Result: `TASKSET-AR-COLLAB-CONCURRENCY` contains `TASK-AR-251` through `TASK-AR-256`.
+- Sync audit: the plan and task set are present; they can look missing because completed task sets are archived out of the live Action Board.
 - Boundary: this is local repo/runtime coordination; it does not claim external provider-live collaboration or remote publication evidence.
 
 ## Signal
@@ -22,6 +23,7 @@ tags: [parallel-agents, collaboration, concurrency, worktree, owner-brief]
 | Signal | State | Evidence |
 | --- | --- | --- |
 | Research mapping | pass | `reviews/RESEARCH-2026-06-10-realtime-collab-conflict-patterns.md` |
+| Implementation plan | pass | `docs/superpowers/plans/2026-06-10-collab-concurrency.md` |
 | Append-only pane event log | pass | `scripts/pane_event_log.py` |
 | SSoT write control | pass | `scripts/collaboration_concurrency_gate.py` |
 | Worktree-first taskset start | pass | `scripts/taskset_dispatcher.py` |
@@ -33,12 +35,14 @@ tags: [parallel-agents, collaboration, concurrency, worktree, owner-brief]
 - Google Docs-style OT solves concurrent text editing, but agent runtime conflicts are mostly task/worktree/SSoT ownership conflicts.
 - Figma/Notion-style object boundaries fit task, claim, pane, and worktree records better than whole-document merge.
 - SNS/event-stream patterns fit runtime auditability: workers append events, while canonical boards are regenerated.
+- The missing-work symptom came from presentation drift: the task set is complete and archived, while the live board only shows open work.
 
 ## Decision
 
 - Decision: root checkout remains the orchestrator and shared SSoT writer.
 - Decision: worker panes use actual task worktrees before claims are created.
 - Decision: pane state is recorded as append-only events; `BACKLOG.md`, `STATUS.md`, `BACKLOG-BOARD.md`, and pointer files remain derived or orchestrator-owned.
+- Decision: do not create a duplicate multi-pane task set; future follow-up work should either reopen by adding a new canonical task to `TASKSET-AR-COLLAB-CONCURRENCY` or create a clearly separate successor task set.
 
 ## Action Board
 
@@ -62,3 +66,4 @@ tags: [parallel-agents, collaboration, concurrency, worktree, owner-brief]
 1. Keep `TASKSET-AR-COLLAB-CONCURRENCY` archived unless a new canonical task is added.
 2. Use `scripts/pane_event_log.py record` for future pane lifecycle events.
 3. Treat any non-orchestrator `ssot_write_attempted` event as a blocking finding.
+4. When reporting this work, reference both the archived task set and the implementation plan so it is not mistaken for an omitted session plan.
