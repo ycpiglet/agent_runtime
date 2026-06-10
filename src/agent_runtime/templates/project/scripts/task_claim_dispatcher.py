@@ -30,6 +30,7 @@ ACTIVE_STATUSES = {
     "waiting_review",
     "working",
 }
+ORCHESTRATOR_ROLES = {"orchestrator", "release-orchestrator"}
 
 
 def _rel(root: Path, path: Path) -> str:
@@ -116,6 +117,63 @@ def _is_active(payload: dict[str, Any]) -> bool:
     return str(payload.get("status") or "").strip().lower() in ACTIVE_STATUSES
 
 
+def _resolved_worktree(root: Path, value: str) -> Path:
+    path = Path(value)
+    if not path.is_absolute():
+        path = root / path
+    try:
+        return path.resolve()
+    except OSError:
+        return path.absolute()
+
+
+def _has_git_worktree_marker(path: Path) -> bool:
+    return path.is_dir() and (path / ".git").exists()
+
+
+def _is_orchestrator_claim(payload: dict[str, Any]) -> bool:
+    role = str(payload.get("agent_role") or "").strip().lower()
+    if role in ORCHESTRATOR_ROLES:
+        return True
+    mode = str(payload.get("mode") or "").strip().lower()
+    scope = str(payload.get("worker_scope") or "").strip().lower()
+    return mode == "orchestrator" or scope == "orchestrator"
+
+
+def _claim_creation_errors(
+    root: Path,
+    claim: dict[str, Any],
+    records: list[tuple[Path, dict[str, Any]]],
+) -> list[str]:
+    errors: list[str] = []
+    if not _is_orchestrator_claim(claim):
+        worktree_value = str(claim.get("worktree_path") or "").strip()
+        if not worktree_value:
+            errors.append("task worktree is not ready: missing worktree_path")
+        else:
+            worktree = _resolved_worktree(root, worktree_value)
+            if worktree == root.resolve():
+                errors.append("task worktree is not ready: worker claims must not point at the main checkout")
+            elif not worktree.is_dir():
+                errors.append(
+                    f"task worktree is not ready: {worktree_value} does not exist; "
+                    f"run: git worktree add -b {claim.get('branch')} {worktree_value}"
+                )
+            elif not _has_git_worktree_marker(worktree):
+                errors.append(f"task worktree is not ready: {worktree_value} is not a git worktree")
+
+    task_set_id = str(claim.get("task_set_id") or "").strip()
+    allow_parallel = str(claim.get("allow_parallel_task_set") or "").strip().lower() == "true"
+    if task_set_id and not allow_parallel:
+        for path, payload in records:
+            if not _is_active(payload):
+                continue
+            if str(payload.get("task_set_id") or "").strip() == task_set_id:
+                errors.append(f"task set already has an active claim: {task_set_id} ({_rel(root, path)})")
+                break
+    return errors
+
+
 def _next_slot(records: list[tuple[Path, dict[str, Any]]], *, role: str, mode: str) -> int:
     display_prefix = f"{_display_role(role)}@{_slug(mode)}-"
     used: set[int] = set()
@@ -187,6 +245,7 @@ def _build_claim(args: argparse.Namespace, records: list[tuple[Path, dict[str, A
         "branch": branch,
         "claimed_at": claimed_at,
         "last_heartbeat": claimed_at,
+        "updated_at": claimed_at,
         "expires_at": expires_text,
         "lease": {
             "claimed_at": claimed_at,
@@ -195,8 +254,25 @@ def _build_claim(args: argparse.Namespace, records: list[tuple[Path, dict[str, A
         },
         "handoff_path": handoff_path,
         "log_path": log_path,
+        "allow_parallel_task_set": bool(args.allow_parallel_task_set),
         "tags": list(args.tag or ()),
     }
+
+
+def _validate_create_args(args: argparse.Namespace) -> list[str]:
+    errors: list[str] = []
+    if args.progress_pct < 0 or args.progress_pct > 100:
+        errors.append("progress_pct must be between 0 and 100")
+    if args.step_total < 1:
+        errors.append("step_total must be at least 1")
+    if args.step_index < 1 or args.step_index > args.step_total:
+        errors.append("step_index must be between 1 and step_total")
+    phase = str(args.phase or "").strip().lower()
+    if phase in {"done", "complete", "completed", "released"} and args.step_index < args.step_total:
+        errors.append("completion phase requires step_index to equal step_total")
+    if not str(args.status_text or "").strip():
+        errors.append("status_text is required")
+    return errors
 
 
 def _emit(payload: dict[str, Any], *, as_json: bool) -> None:
@@ -216,6 +292,11 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> None:
 
 def cmd_create(args: argparse.Namespace) -> int:
     root = args.root.resolve()
+    errors = _validate_create_args(args)
+    if errors:
+        for error in errors:
+            print(error, file=sys.stderr)
+        return 1
     records = _read_claims(root)
     for path, payload in records:
         if not _is_active(payload):
@@ -228,6 +309,11 @@ def cmd_create(args: argparse.Namespace) -> int:
             return 1
 
     claim = _build_claim(args, records)
+    creation_errors = _claim_creation_errors(root, claim, records)
+    if creation_errors:
+        for error in creation_errors:
+            print(error, file=sys.stderr)
+        return 1
     claim_dir = _claim_dir(root)
     claim_dir.mkdir(parents=True, exist_ok=True)
     claim_path = claim_dir / f"{claim['claim_id']}.json"
@@ -245,6 +331,11 @@ def cmd_create(args: argparse.Namespace) -> int:
                 f"- task_id: {claim['task_id']}",
                 f"- worktree_path: {claim['worktree_path']}",
                 f"- branch: {claim['branch']}",
+                f"- task_set_id: {claim['task_set_id']}",
+                f"- phase: {claim['phase']}",
+                f"- step: {claim['step_index']}/{claim['step_total']}",
+                f"- progress_pct: {claim['progress_pct']}",
+                f"- status_text: {claim['status_text']}",
                 "- status: claimed",
                 "",
             ]
@@ -259,6 +350,8 @@ def cmd_create(args: argparse.Namespace) -> int:
                 f"- claimed_at: {claim['claimed_at']}",
                 f"- agent_instance_id: {claim['agent_instance_id']}",
                 f"- callsite_id: {claim['callsite_id']}",
+                f"- task_set_id: {claim['task_set_id']}",
+                f"- status_text: {claim['status_text']}",
                 "",
             ]
         ),
@@ -297,6 +390,7 @@ def cmd_release(args: argparse.Namespace) -> int:
     claim["status"] = "released"
     claim["released_at"] = now_text
     claim["last_heartbeat"] = now_text
+    claim["updated_at"] = now_text
     lease = claim.get("lease")
     if isinstance(lease, dict):
         lease["heartbeat_at"] = now_text
@@ -319,9 +413,9 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--pane-id")
     create.add_argument("--phase", default="claim-created")
     create.add_argument("--progress-pct", type=int, default=0)
-    create.add_argument("--step-index", type=int, default=0)
-    create.add_argument("--step-total", type=int, default=0)
-    create.add_argument("--status-text", default="")
+    create.add_argument("--step-index", type=int, default=1)
+    create.add_argument("--step-total", type=int, default=6)
+    create.add_argument("--status-text", default="Claim created")
     create.add_argument("--tag", action="append", default=[])
     create.add_argument("--now")
     create.add_argument("--suffix")
@@ -334,6 +428,7 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--handoff-path")
     create.add_argument("--log-path")
     create.add_argument("--lease-minutes", type=int, default=30)
+    create.add_argument("--allow-parallel-task-set", action="store_true")
     create.add_argument("--json", action="store_true")
     create.set_defaults(func=cmd_create)
 

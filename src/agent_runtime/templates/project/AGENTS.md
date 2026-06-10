@@ -17,6 +17,10 @@ conflict, follow this file and the latest records under `agents/lead_engineer/`.
 5. A task is not complete until the result and verification are recorded.
 6. Do not guess timestamps. Use `python scripts/now.py`.
 7. Never commit secrets, credentials, private runtime state, or local tool data.
+8. Owner-facing chat responses must be Korean by default. Use another language
+   only when the Owner explicitly asks for it. Agent-to-agent notes, code
+   comments, machine fields, and evidence records may use English when that is
+   clearer or more parseable.
 
 ## 1. Start Protocol
 
@@ -314,6 +318,15 @@ an executable gate can fail when it is violated.
 
 Final task reports use the human-centered, machine-readable Executive BRIEF
 format. Keep it concise, visually scannable, and action-oriented.
+
+### Owner-Facing Language Contract
+
+- 사용자와 직접 대화할 때는 별도 요청이 없는 한 무조건 한국어로 답한다.
+- Owner-facing 보고, 상태 업데이트, 질문, 계획, 검토 요약은 한국어가 기본값이다.
+- 에이전트 간 메시지, 로그, machine-readable frontmatter, 코드 주석, 테스트명,
+  evidence record는 필요하면 영어를 사용할 수 있다.
+- 사용자가 영어로 말해도 "영어로 답해줘"처럼 명시 요청하지 않으면 한국어로 답한다.
+- 이 규칙은 짧은 진행 업데이트와 최종 보고 모두에 적용한다.
 
 ```yaml
 ---

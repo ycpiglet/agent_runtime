@@ -15,6 +15,19 @@ def _rel(root: Path, path: Path) -> str:
         return path.as_posix()
 
 
+def _normalize(text: str) -> str:
+    return text.replace("\r\n", "\n").strip()
+
+
+def _backlog_board_is_fresh(root: Path, board: Path, tasks: list[backlog_board.Task]) -> bool:
+    generated = backlog_board.render(tasks)
+    try:
+        existing = board.read_text(encoding="utf-8")
+    except OSError:
+        return False
+    return _normalize(existing) == _normalize(generated)
+
+
 def check_root(root: Path) -> list[str]:
     root = root.resolve()
     findings: list[str] = []
@@ -35,6 +48,12 @@ def check_root(root: Path) -> list[str]:
             findings.append("BACKLOG-BOARD.md: taskset:global-recommended-next")
         if "Routing rule: choose a task set first" not in text:
             findings.append("BACKLOG-BOARD.md: taskset:missing-routing-rule")
+        if not _backlog_board_is_fresh(root, board, tasks):
+            findings.append(
+                "BACKLOG-BOARD.md: stale:content-mismatch: run python scripts/backlog_board.py --write"
+            )
+    else:
+        findings.append("BACKLOG-BOARD.md: missing")
 
     return findings
 

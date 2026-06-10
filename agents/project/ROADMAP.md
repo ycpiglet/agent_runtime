@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-- phase: v0.1.8 release readiness consolidation + RSI planning loop and parallel-session protocol registration
-- next_milestone: TASK-AR-234 RSI planning loop contract -> TASK-AR-246 parallel worktree claim dispatcher -> TASK-AR-235 read-only planning scan -> TASK-AR-224 공식 가이드/이식 근거 동기화 -> TASK-AR-221 운영 정합 통합 -> TASK-AR-219 공식 권고 반영 -> TASK-AR-220 이식 근거 마감 -> TASK-AR-222 closeout 번들 -> TASK-AR-223 버전 판정 통합 closeout -> TASK-AR-216 결과 이관 완료 -> TASK-AR-218 migration hardening -> TASK-AR-217 rehearsal -> TASK-AR-210 최종 판단
+- phase: v0.1.8 local release evidence closed + remote publish scoped out of TASK-AR-210
+- next_milestone: TASK-AR-240 version/release consistency steward -> TASK-AR-223 closeout integration -> TASK-AR-234 RSI planning loop contract -> TASK-AR-235 read-only planning scan
 - target_date: 2026-07-02(1차), 2026-07-09(2차), 2026-07-16(최종)
 - owner: lead-engineer
 
@@ -12,6 +12,8 @@
  - [x] 2026-06-10: `TASK-AR-221`/`TASK-AR-219`/`TASK-AR-220`/`TASK-AR-216`/`TASK-AR-218` 순차 실행 사이클 킥오프 (기록 연속성 정비)
  - [x] 2026-06-10: `TASK-AR-234`~`TASK-AR-245` RSI planning loop B-C 장기 계획 등록
  - [x] 2026-06-10: `TASK-AR-246` parallel worktree/task-claim protocol 등록 및 gate 1차 구현
+ - [x] 2026-06-10: `TASK-AR-251`~`TASK-AR-256` collaboration concurrency task set 완료: append-only pane event, SSoT write gate, worktree-first dispatch preflight, UI collaboration state, governance integration
+ - [x] 2026-06-10: `TASK-AR-210` local `v0.1.8` release evidence closed as `release_evidence_ready`; external GitHub publish scoped out as `remote_publish_deferred_out_of_scope`
  - [x] 2026-06-12: v0.1.7 공개 사전 gate 조건 정리
  - [x] 2026-06-13: PROJECT-CONTEXT/ROADMAP/ORG/LINKS/TEAMS 오버레이 생성
 - [x] 2026-06-14: 오버레이 기반 `TASK-AR-201`/`TASK-AR-204` 연계 검증 및 `TASK-AR-213` 착수
@@ -90,7 +92,7 @@
 
 - risk: 병렬 터미널 작업 충돌
   - owner: worktree-dispatcher
-  - mitigation: `TASK-AR-246`에서 task claim + per-task git worktree + orchestrator merge protocol을 강제
+  - mitigation: `TASK-AR-246`에서 task claim + per-task git worktree + orchestrator merge protocol을 강제하고, `TASK-AR-251`~`TASK-AR-256`에서 pane event replay + orchestrator-approved SSoT write gate를 추가 강제
   - review_cycle: 매 parallel dispatch 전 및 Stop hook
 
 ## Definition of Releasable
@@ -98,6 +100,7 @@
 - Definition: 공통 런타임 변경 + 오버레이 변경이 컨텍스트 라우터 및 gate로 연결
 - Gate:
   - `TASK-AR-210` 보류/승인 사유가 완성되어야 함
+  - local release evidence and external GitHub publish evidence must remain separate unless remote PR/tag/CI proof is linked
   - `TASK-AR-204`/`209`/`212`/`213` 상태가 block 조건 없이 정합
   - `AGENTIC_KNOWLEDGE_EVAL_PLAN.md` 실행 순서와 증빙이 일치
   - RSI C-mode는 `TASK-AR-240`/`243`/`244` 통과 전에는 auto-apply 금지

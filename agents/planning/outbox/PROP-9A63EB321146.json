@@ -1,0 +1,39 @@
+{
+  "action_type": "doc_repair",
+  "created_at": "1970-01-01T00:00:00+00:00",
+  "dedupe_key": "doc_repair:missing-audit-link:agents/lead_engineer/tasks/TASK-AR-218.md",
+  "department": "planning-office",
+  "draft_task_path": "agents/planning/drafts/PROP-9A63EB321146.md",
+  "evidence": [
+    {
+      "confidence": 0.86,
+      "summary": "TASK-AR-218 references missing audit artifact reviews/MEETING-2026-06-09-agent-runtime-task-ar-217-release-rehearsal-plan.md"
+    }
+  ],
+  "evidence_hash": "d8397229f99a70be01cb9f104541c3296bb18941",
+  "id": "PROP-9A63EB321146",
+  "mode": "B",
+  "owner_boundary": "Low-risk local proposal; canonical mutation still requires approved apply.",
+  "reviewer_opinions": [],
+  "risk_tier": "low",
+  "rollback_path": "agents/planning/rollback/PROP-9A63EB321146.json",
+  "source_refs": [
+    {
+      "kind": "missing-audit-link",
+      "path": "agents/lead_engineer/tasks/TASK-AR-218.md"
+    }
+  ],
+  "status": "proposed",
+  "suggested_next_action": "restore the referenced audit artifact or mark the task audit entry as superseded",
+  "supersedes": [],
+  "target_files": [
+    "agents/lead_engineer/tasks/TASK-AR-218.md"
+  ],
+  "title": "missing-audit-link: agents/lead_engineer/tasks/TASK-AR-218.md",
+  "trace_id": null,
+  "updated_at": "1970-01-01T00:00:00+00:00",
+  "verifier_list": [
+    "python scripts/planning_loop.py gate --trigger manual --json",
+    "python scripts/owner_governance_gate.py"
+  ]
+}

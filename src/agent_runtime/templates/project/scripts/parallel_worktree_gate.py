@@ -135,6 +135,10 @@ def _resolved_worktree(root: Path, value: str) -> Path:
         return path.absolute()
 
 
+def _has_git_worktree_marker(path: Path) -> bool:
+    return path.is_dir() and (path / ".git").exists()
+
+
 def _is_orchestrator_claim(record: ClaimRecord) -> bool:
     if record.agent_role in ORCHESTRATOR_ROLES:
         return True
@@ -175,6 +179,15 @@ def _validate_claims(root: Path, records: Iterable[ClaimRecord]) -> list[str]:
                 findings.append(
                     f"{rel}: task-claim:main-checkout-worker: worker claims must use a task-specific git worktree"
                 )
+            elif not _is_orchestrator_claim(record):
+                if not worktree.exists():
+                    findings.append(
+                        f"{rel}: task-claim:worktree-path-missing: active worker claim points to a missing worktree"
+                    )
+                elif not _has_git_worktree_marker(worktree):
+                    findings.append(
+                        f"{rel}: task-claim:worktree-not-git-worktree: active worker claim must point to a git worktree"
+                    )
 
     by_task: dict[str, list[ClaimRecord]] = {}
     by_task_set: dict[str, list[ClaimRecord]] = {}

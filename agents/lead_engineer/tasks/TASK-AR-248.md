@@ -1,6 +1,6 @@
 ---
 id: TASK-AR-248
-status: planned
+status: completed
 owner: lead-engineer
 priority: P0
 difficulty: M
@@ -19,7 +19,10 @@ audit_log:
   - docs/superpowers/plans/2026-06-10-pane-progress-tasksets.md
   - docs/UI_STATE_API_EXAMPLES.md
   - docs/UI_CONSOLE_MVP.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-pane-progress-taskset.md
+  - scripts/verify_pane_progress_taskset.py
 created: 2026-06-10
+updated_at: 2026-06-10
 ---
 
 ## Goal
@@ -42,8 +45,15 @@ Show pane and task-set progress in the runtime UI using phase, step counter, rou
 
 ## State Machine Mapping
 
-- cycle: planned
-- task: TASK-AR-248 planned
-- gate: pending
-- review: draft
+- cycle: completed
+- task: TASK-AR-248 completed
+- gate: pass
+- review: REVIEW-2026-06-10-agent-runtime-pane-progress-taskset.md
 
+## Completion Log
+
+- Added pane/task-set progress projection through `ui_state` with `task_set_id`, `phase`, `step_index`, `step_total`, `progress_pct`, and `status_text`.
+- Added pane/task-set progress rendering in UI console cards and task set summary.
+- Updated task-state/API docs (`docs/UI_STATE_API_EXAMPLES.md`, `docs/UI_CONSOLE_MVP.md`) for the new fields.
+- Added/updated tests for UI state and console coverage.
+- Completed focused verification scope (`scripts/verify_pane_progress_taskset.py`) and it passed.

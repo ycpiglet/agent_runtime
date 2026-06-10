@@ -74,3 +74,23 @@ tags: [rsi, planning-loop, self-improvement, owner-brief]
 1. Start `TASK-AR-234` and define the planning loop state machine plus proposal schema.
 2. Implement `TASK-AR-235` read-only scan before any mutating proposal writer.
 3. Keep all canonical changes behind `TASK-AR-239` approval/apply/verify until C-mode promotion is explicitly earned.
+
+## RSI Planning Loop Implementation Path (2026-06-10)
+
+- Contract: `agents/project/PLANNING-LOOP-CONTRACT.md`.
+- Schema: `schemas/planning-proposal.schema.json`.
+- Guardrails: `agents/project/PLANNING-GUARDRAILS.yml`.
+- C-mode checklist: `agents/project/C-MODE-PROMOTION-CHECKLIST.md`.
+- Council protocol: `agents/project/DIVERSITY-COUNCIL-PROTOCOL.md`.
+- Runtime path: `scripts/planning_loop.py` supports read-only scan, proposal outbox, draft task writer, planning gate, approved apply skeleton, retro synthesis, trace/eval ingestion, and C-mode gate.
+- Release steward path: `scripts/release_version_consistency_steward.py` emits proposal-only release/version consistency reports.
+- UI path: `planning.scan` command requests and the read-only Planner panel expose scan/proposal/request/draft/apply records without canonical mutation.
+- Review: `reviews/REVIEW-2026-06-10-agent-runtime-rsi-planning-loop-implementation.md`.
+
+## Verification and Closeout Procedure
+
+- Verification command: `python scripts/verify_rsi_planning_taskset.py --out reviews/RSI-PLANNING-TASKSET-VERIFY.json`.
+- Closeout dry run: `python scripts/close_rsi_planning_taskset.py --verification-report reviews/RSI-PLANNING-TASKSET-VERIFY.json --json`.
+- Closeout apply after verification pass: `python scripts/close_rsi_planning_taskset.py --verification-report reviews/RSI-PLANNING-TASKSET-VERIFY.json --apply --json`.
+- Final completion proof: closeout apply must report `status=pass`, including backlog board regeneration, named task-set require-complete gate, and owner governance gate.
+- Boundary: no completion claim before this procedure passes.

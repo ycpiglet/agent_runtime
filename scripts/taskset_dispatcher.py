@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -27,6 +28,11 @@ ACTIVE_STATUSES = {
     "working",
 }
 
+DONE_STATUSES = {
+    "completed",
+    "done",
+}
+
 
 def _slug(value: str) -> str:
     text = re.sub(r"[^A-Za-z0-9]+", "-", value.strip().lower())
@@ -36,6 +42,10 @@ def _slug(value: str) -> str:
 
 def _taskset_slug(task_set_id: str) -> str:
     return _slug(re.sub(r"^TASKSET-AR-", "", task_set_id, flags=re.IGNORECASE))
+
+
+def _normalize_status(value: str) -> str:
+    return str(value or "").strip().lower()
 
 
 def _rel(root: Path, path: Path) -> str:
@@ -78,11 +88,11 @@ def _tasks_for(root: Path, task_set_id: str) -> list[backlog_board.Task]:
 
 def _next_task(tasks: list[backlog_board.Task]) -> backlog_board.Task:
     for task in tasks:
+        if _normalize_status(task.status) in DONE_STATUSES:
+            continue
         if backlog_board.lane_for(task) != "Done":
             return task
-    if tasks:
-        return tasks[0]
-    raise SystemExit("task set has no tasks")
+    raise SystemExit("task set has no open tasks")
 
 
 def _read_claim(path: Path) -> dict[str, Any] | None:
@@ -110,6 +120,122 @@ def _active_claims(root: Path) -> list[dict[str, Any]]:
 
 def _active_taskset_claims(root: Path, task_set_id: str) -> list[dict[str, Any]]:
     return [claim for claim in _active_claims(root) if str(claim.get("task_set_id") or "") == task_set_id]
+
+
+def _target_status_for_work_start(current: str | None) -> str | None:
+    normalized = _normalize_status(current)
+    if normalized in {"completed", "done"}:
+        return None
+    if normalized.startswith("hold") or normalized == "blocked":
+        return normalized
+    if normalized in {"review", "waiting_review", "ready_for_governance_review"}:
+        return normalized
+    if not normalized:
+        return "in_progress"
+    return "in_progress"
+
+
+def _set_task_status(task_path: Path, next_status: str) -> bool:
+    try:
+        original = task_path.read_text(encoding="utf-8")
+    except OSError:
+        print(f"failed_to_read_task_file:{_rel(Path.cwd(), task_path)}", file=sys.stderr)
+        return False
+    lines = original.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return False
+
+    close = None
+    for idx, line in enumerate(lines[1:], start=1):
+        if line.strip() == "---":
+            close = idx
+            break
+    if close is None or close == 1:
+        return False
+
+    header = lines[1:close]
+    updated = False
+    for idx, line in enumerate(header):
+        if re.match(r"^\s*status\s*:\s*", line):
+            prefix = re.match(r"^(\s*)", line)
+            indent = prefix.group(1) if prefix else ""
+            header[idx] = f"{indent}status: {next_status}"
+            updated = True
+            break
+
+    if not updated:
+        insert = 1
+        while insert < len(header) and not header[insert].strip():
+            insert += 1
+        header.insert(insert, f"status: {next_status}")
+
+    output = "\n".join(["---", *header, "---", *lines[close + 1 :]])
+    if original.endswith("\n"):
+        output += "\n"
+    if output == original:
+        return False
+    task_path.write_text(output, encoding="utf-8")
+    return True
+
+
+def _sync_backlog_board(root: Path) -> bool:
+    result = subprocess.run(
+        [sys.executable, str(Path(__file__).resolve().with_name("backlog_board.py")), "--write"],
+        cwd=root,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if result.returncode != 0:
+        if result.stderr:
+            print(result.stderr, file=sys.stderr, end="")
+        if result.stdout:
+            print(result.stdout, file=sys.stderr, end="")
+        return False
+    return True
+
+
+def _worktree_preflight_error(root: Path, payload: dict[str, Any]) -> str | None:
+    worktree_value = str(payload.get("worktree_path") or "").strip()
+    if not worktree_value:
+        return "task worktree is not ready: missing worktree_path"
+    worktree = Path(worktree_value)
+    if not worktree.is_absolute():
+        worktree = root / worktree
+    if not worktree.is_dir():
+        return f"task worktree is not ready: {worktree_value} does not exist"
+    if not (worktree / ".git").exists():
+        return f"task worktree is not ready: {worktree_value} is not a git worktree"
+    return None
+
+
+def _ensure_worktree(root: Path, payload: dict[str, Any]) -> bool:
+    if not _worktree_preflight_error(root, payload):
+        return True
+    worktree_command = list(payload["worktree_command"])
+    worktree_command[0] = os.environ.get("AGENT_RUNTIME_GIT") or worktree_command[0]
+    result = subprocess.run(
+        worktree_command,
+        cwd=root,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if result.returncode != 0:
+        if result.stderr:
+            print(result.stderr, file=sys.stderr, end="")
+        if result.stdout:
+            print(result.stdout, file=sys.stderr, end="")
+        return False
+    worktree_error = _worktree_preflight_error(root, payload)
+    if worktree_error:
+        print(worktree_error, file=sys.stderr)
+        return False
+    return True
 
 
 def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
@@ -173,6 +299,8 @@ def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
         "next_task_id": task.task_id,
         "step_index": step_index,
         "step_total": step_total,
+        "next_task_status": task.status,
+        "next_task_path": str((root / "agents" / "lead_engineer" / "tasks" / f"{task.task_id}.md")),
         "status_text": status_text,
         "worktree_path": worktree_path,
         "branch": branch,
@@ -218,6 +346,10 @@ def cmd_start(args: argparse.Namespace) -> int:
         )
         return 1
 
+    if not _ensure_worktree(root, payload):
+        print("worktree_command=" + " ".join(payload["worktree_command"]), file=sys.stderr)
+        return 1
+
     result = subprocess.run(
         payload["claim_command"],
         cwd=root,
@@ -234,12 +366,24 @@ def cmd_start(args: argparse.Namespace) -> int:
             print(result.stdout, file=sys.stderr, end="")
         return result.returncode
 
+    task_path = Path(payload["next_task_path"])
+    target_status = _target_status_for_work_start(payload["next_task_status"])
+    status_updated = False
+    if target_status and target_status != _normalize_status(payload["next_task_status"]):
+        status_updated = _set_task_status(task_path, target_status)
+
+    if not _sync_backlog_board(root):
+        print("failed to rewrite BACKLOG-BOARD.md after task start", file=sys.stderr)
+        return 1
+
     claim_payload: dict[str, Any]
     try:
         claim_payload = json.loads(result.stdout)
     except json.JSONDecodeError:
         claim_payload = {"raw": result.stdout.strip()}
     payload["claim"] = claim_payload
+    payload["task_status_updated"] = status_updated
+    payload["task_status"] = target_status
     _emit(payload, as_json=args.json)
     return 0
 

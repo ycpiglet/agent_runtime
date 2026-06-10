@@ -68,6 +68,29 @@ def test_response_contract_gate_requires_pre_answer_language_and_brief_rules(tmp
     assert result.returncode == 1
     assert "response-contract:pre-answer-check-missing" in result.stdout
     assert "response-contract:user-language-missing" in result.stdout
+    assert "response-contract:owner-default-korean-missing" in result.stdout
+
+
+def test_response_contract_gate_requires_owner_default_korean_not_only_user_language(tmp_path: Path):
+    _write_reporting_format(
+        tmp_path,
+        "\n".join(
+            [
+                "# 보고 형식",
+                "",
+                "### 대화 응답 전 자체 점검",
+                "",
+                "1. 사용자 언어를 따른다.",
+                "2. Bottom Line -> Signal -> Insight -> Decision 흐름을 지킨다.",
+                "3. 상태는 pass/watch/block + score: 0-100으로 쓴다.",
+            ]
+        ),
+    )
+
+    result = _run_gate(tmp_path)
+
+    assert result.returncode == 1
+    assert "response-contract:owner-default-korean-missing" in result.stdout
 
 
 def test_owner_governance_runs_response_contract_gate():

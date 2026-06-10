@@ -50,6 +50,7 @@
   - pragmatist
   - systems-thinker
   - user-impact-reviewer
+  - evidence-librarian
 
 ## Authority and Access
 
@@ -83,6 +84,9 @@
 - role: diversity-council
   level: internal
   boundary: 비판/옹호/탐색/안정화 관점 제공, 최종 승인권 없음
+- role: evidence-librarian
+  level: internal
+  boundary: planning proposal source refs, trace ids, verifier evidence 정합성 점검
 
 ## Escalation Policy
 

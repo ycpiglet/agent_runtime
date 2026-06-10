@@ -1,6 +1,7 @@
 ---
 id: TASK-AR-207
-status: in_progress
+status: completed
+completed_at: 2026-06-10T22:12:00+09:00
 owner: agent-runtime
 priority: P0
 difficulty: M
@@ -26,6 +27,11 @@ audit_log:
   - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-207-correction-collector-log.md
   - reviews/MEETING-2026-06-09-agent-runtime-task-ar-207-correction-collector-sync.md
   - reviews/CALL-2026-06-09-agent-runtime-task-ar-207-correction-followup-call.md
+  - reviews/LIVE-REVIEWER-GATE-2026-06-10-task-ar-207-failure-sample-current.json
+  - reviews/CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current.json
+  - agents/project/corrections/2026-06-10-offline-eval-2026-06-09-task-ar-217-1-goldset-metadata-completion.md
+  - agents/project/corrections/2026-06-10-live-reviewer-gate-2026-06-09-task-ar-207-failure-sample-1-reviewer-footer-failure.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-207-claim-closeout.md
 ---
 
 ## 목표
@@ -68,3 +74,11 @@ audit_log:
   - `agents/project/corrections/2026-06-09-live-reviewer-gate-2026-06-09-task-ar-207-failure-sample-1-reviewer-footer-failure.md`
 - Boundary: collector creates proposals only. Final definitions require owner/accountable human sign-off.
 - Verification: collector rerun returned `status=pass`, `written=2`; publish bundle check after correction artifacts returned `findings=0`.
+
+## Claim Closeout (2026-06-10)
+
+- Current claim: `agents/runtime/task_claims/CLAIM-20260610-213422-task-ar-207-2ccd.json`.
+- Current failure-sample reviewer gate intentionally returned `status=block`, `score=0.7059`, `findings=5`.
+- Current correction collector converted the known block reports into two owner-routed proposals and returned `status=pass`, `written=2`.
+- Closeout review: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-207-claim-closeout.md`.
+- Boundary: generated corrections are proposals only; final definition changes still require accountable owner approval.

@@ -1,6 +1,6 @@
 ---
 id: TASK-AR-210
-status: in_progress
+status: completed
 owner: agent-runtime
 priority: P0
 difficulty: M
@@ -28,6 +28,11 @@ audit_log:
   - reviews/CALL-2026-06-14-agent-runtime-task-ar-222-sync-call.md
   - reviews/SEMINAR-2026-06-14-agent-runtime-task-ar-222-closeout-sync.md
   - reviews/REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-210-release-steward-snapshot.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-210-remote-publish-boundary.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-210-completion-audit.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-210-remote-publish-deferral.md
+completed_at: 2026-06-10T20:55:00+09:00
 ---
 
 ## 목표
@@ -52,13 +57,15 @@ release-gate를 문서/결정/테스트 결과로 재현 가능하게 만든다.
 
 ## 현재 상태
 
-- 상태: gate 조정 진행 중
-- 현재 차단: `TASK-AR-201/204/209/212/213` 미완료, `release-preflight --source =.` 이슈(P0-1), `TASK-AR-216` 판정 이관 미종결
-- `v0.1.8` 판정 템플릿은 `TASK-AR-221` / `TASK-AR-219` / `TASK-AR-220` 동기화 후에만 최종 `ready`로 전환
+- 상태: completed for local release evidence scope
+- 현재 판정: `v0.1.8` local release evidence는 `release_evidence_ready`로 수렴했다.
+- 현재 release gate template: `release_state=release`, `release_cause=all_hold_routes_closed_with_evidence`, `blocked_by=[]`.
+- 현재 approval boundary: `agent_council_approved`; noncritical local release path는 autonomy policy와 release council gate 증거로 승인됨.
+- 현재 scope boundary: external GitHub publish는 `remote_publish_deferred_out_of_scope`이며, 원격 publish 성공으로 보고하면 안 된다.
 - 1차 판정 목표일: 2026-07-02, 미충족 시 `hold_for_*` 상태로 2026-07-09 2차 판정 전환
 - 2차 판정 목표: 2026-07-09, 보완 후 재판정
 - 3차(최종 freeze): 2026-07-16, 1차/2차 미충족 항목은 `hold_for_*` 유지
-- `TASK-AR-217`/`TASK-AR-218`/`TASK-AR-220` 이관 산출물은 즉시 `TASK-AR-210` 블로커 템플릿에 반영
+- `TASK-AR-217`/`TASK-AR-218`/`TASK-AR-220` 이관 산출물은 기존 hold 해소 증거로 반영됨.
 
 ## 완료 조건
 
@@ -173,3 +180,48 @@ release-gate를 문서/결정/테스트 결과로 재현 가능하게 만든다.
 - Installed package: `agent_runtime-0.1.8`.
 - Release state moved to `release` for local release evidence.
 - External GitHub publish remains not executed in this cycle.
+
+## Release Steward Snapshot (2026-06-10)
+
+- Decision entrypoint: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-210-release-steward-snapshot.md`.
+- Owner: `agent-release-council` for the noncritical autonomy-policy release path.
+- decision_date: `2026-06-09`.
+- decision_deadline: `2026-07-02`.
+- blocked_by: `[]` for local release evidence.
+- impact_on_version: `v0.1.8` local release evidence is complete; remote GitHub publish is still separate `not_executed` evidence.
+- current executable route: `release_evidence_ready`.
+- next_action: preserve the local release evidence and keep remote publish deferred until explicit remote command/PR/tag/CI evidence exists.
+
+## Remote Publish Boundary Deferral (2026-06-10)
+
+- Decision entrypoint: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-210-remote-publish-boundary.md`.
+- remote_publish_state: `remote_publish_deferred_out_of_scope`.
+- decision_owner: `lead-engineer`.
+- decision_date: `2026-06-10`.
+- reason: external GitHub publish is outside the local release evidence closure and needs explicit remote execution evidence.
+- required_evidence_to_close:
+  - remote publish command or PR merge record
+  - tag/push evidence
+  - CI or install smoke evidence tied to the remote ref
+  - rerun Release Steward gates after remote evidence is recorded
+
+## Completion Audit (2026-06-10)
+
+- Decision entrypoint: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-210-completion-audit.md`.
+- local_release_evidence: `pass`.
+- current_route: `release_evidence_ready`.
+- remote_publish_state: `remote_publish_deferred_out_of_scope`.
+- completion_status: `completed`.
+- reason: local release evidence is closed and remote publish is formally scoped out of this task.
+- next_action: continue Release Steward with the next task-set item; any future remote publish must add separate PR/tag/CI evidence and rerun Release Steward gates.
+
+## Final Closeout (2026-06-10)
+
+- Decision entrypoint: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-210-remote-publish-deferral.md`.
+- Formal deferral selected: remote publish remains outside this `TASK-AR-210` local release evidence closeout.
+- Verified gates:
+  - `python scripts/release_execution_gate.py` -> `status=pass`, `route=release_evidence_ready`, `findings=0`.
+  - `python scripts/owner_approval_gate.py` -> `status=pass`, `route=agent_council_approved_release_execution`, `findings=0`.
+  - `python scripts/pending_release_guard.py` -> `status=pass`, `route=release_decision_recorded`, `findings=0`.
+  - `python scripts/release_readiness_summary.py` -> `status=pass`, `route=release_evidence_ready`, `findings=0`.
+- Boundary: external GitHub publish remains `not_executed` and requires separate explicit publish evidence.

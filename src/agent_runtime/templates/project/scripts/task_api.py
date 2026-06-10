@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -107,6 +108,22 @@ def _update_index_status(task_id: str, status: str, index_md: Path = INDEX_MD) -
     return bool(n)
 
 
+def _sync_backlog_board(root: Path = ROOT) -> bool:
+    script = root / "scripts" / "backlog_board.py"
+    if not script.exists():
+        return False
+    result = subprocess.run(
+        [sys.executable, str(script), "--write"],
+        cwd=root,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    return result.returncode == 0
+
+
 def update_status(task_id: str, new_status: str, regenerate: bool = True,
                   emit_event: bool = True, actor: str = "task_api") -> dict:
     """status 를 3곳 정합 갱신 + 스키마 재검증(+옵션 재생성). {ok, errors, changed}.
@@ -141,18 +158,32 @@ def update_status(task_id: str, new_status: str, regenerate: bool = True,
         except Exception:
             pass
 
+    backlog_board_sync = _sync_backlog_board()
     changed = [str(path.relative_to(ROOT)).replace("\\", "/")]
     if index_ok:
         changed.append("agents/lead_engineer/tasks/INDEX.md")
+    if backlog_board_sync:
+        changed.append("BACKLOG-BOARD.md")
+    if not backlog_board_sync:
+        return {
+            "ok": False,
+            "task_id": task_id,
+            "status": new_status,
+            "changed": changed,
+            "errors": ["BACKLOG-BOARD.md 동기화 실패: python scripts/backlog_board.py --write"],
+        }
+    warning = None
     if regenerate:
         try:
             import generate_views
             generate_views.main()
             changed.append("generated views + tasks.index.json")
         except Exception as exc:
-            return {"ok": True, "task_id": task_id, "status": new_status,
-                    "changed": changed, "warn": f"재생성 생략: {exc}"}
-    return {"ok": True, "task_id": task_id, "status": new_status, "changed": changed}
+            warning = f"재생성 생략: {exc}" if warning is None else f"{warning}; 재생성 생략: {exc}"
+    result = {"ok": True, "task_id": task_id, "status": new_status, "changed": changed}
+    if warning:
+        result["warn"] = warning
+    return result
 
 
 def _emit(data, as_json: bool) -> None:

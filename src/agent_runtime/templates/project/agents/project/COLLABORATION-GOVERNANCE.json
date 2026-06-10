@@ -1,0 +1,55 @@
+{
+  "schema": "agent-runtime-collaboration-governance/v1",
+  "version": 1,
+  "updated_at": "2026-06-10",
+  "status_scale": ["pass", "watch", "block", "waived"],
+  "min_claims_for_role_coverage": 5,
+  "minimum_claim_roles": {
+    "lead-engineer": 1,
+    "qa": 1,
+    "doc-steward": 1,
+    "independent-auditor": 1,
+    "scribe": 1
+  },
+  "monitored_roles": [
+    "reviewer",
+    "skeptic",
+    "council",
+    "release-steward",
+    "progress-scout"
+  ],
+  "required_review_artifacts": [
+    "REVIEW",
+    "MEETING",
+    "CALL",
+    "SEMINAR",
+    "RESEARCH",
+    "RETRO"
+  ],
+  "required_root_capabilities": {
+    "ralph": ["scripts/ralph_loop.py", "scripts/agent_loop.py"],
+    "retro": ["scripts/agent_retro.py", "scripts/promote_retro_forward.py"],
+    "scribe": ["scripts/scribe_due.py"],
+    "doc-steward": ["scripts/doc_steward_due.py"],
+    "compound": ["agents/lead_engineer/compound_log.md"]
+  },
+  "lifecycle_thresholds": {
+    "future_heartbeat_watch_minutes": 5,
+    "released_claim_expected_phase": "taskset-completed",
+    "released_claim_expected_progress_pct": 100
+  },
+  "waiver_contract": {
+    "directory": "agents/project/waivers",
+    "schema": "agent-runtime-collaboration-waiver/v1",
+    "required_fields": [
+      "schema",
+      "id",
+      "subjects",
+      "reason",
+      "approved_by",
+      "created_at",
+      "expires_at",
+      "mitigation"
+    ]
+  }
+}

@@ -1,4 +1,4 @@
-"""Inject task-set dispatcher guidance for taskset-* user prompts."""
+"""Inject dispatcher and closeout guidance for recognized Owner prompts."""
 
 from __future__ import annotations
 
@@ -11,6 +11,11 @@ from typing import Any
 
 TASKSET_RE = re.compile(r"\btaskset[-_: ]*([A-Za-z0-9][A-Za-z0-9_-]*)", re.IGNORECASE)
 ACTION_RE = re.compile(r"(진행|시작|작업|run|start|work|execute)", re.IGNORECASE)
+FINISH_RE = re.compile(
+    r"(마무리|마무리해|정리해|정리해줘|정리해주세요|정리해달|깔끔하게|"
+    r"finish|wrap\s*up|close\s*out|clean\s*up|clean\s+working\s+tree)",
+    re.IGNORECASE,
+)
 
 
 def _prompt_from_stdin() -> str:
@@ -29,7 +34,7 @@ def _prompt_from_stdin() -> str:
     return raw
 
 
-def _context_for(prompt: str) -> str | None:
+def _taskset_context_for(prompt: str) -> str | None:
     match = TASKSET_RE.search(prompt)
     if not match:
         return None
@@ -46,6 +51,38 @@ def _context_for(prompt: str) -> str | None:
         "- Work in the returned git worktree/branch, keep progress fields updated, "
         "and run `python scripts/taskset_work_gate.py --check` before handoff."
     )
+
+
+def _finish_context_for(prompt: str) -> str | None:
+    if not FINISH_RE.search(prompt):
+        return None
+    return (
+        "[finish trigger]\n"
+        "- Owner standing instruction: expressions such as `마무리`, `정리해줘`, "
+        "`finish`, `wrap up`, `close out`, or `clean up` mean commit + PR + merge "
+        "+ clean working tree by default.\n"
+        "- Default workflow: inspect `git status`/diff scope, stage only intended "
+        "changes, run relevant local gates/tests, commit, push, create a PR, merge "
+        "the PR when required checks allow, sync the default branch, remove owned "
+        "merged worktrees/branches, and leave the working tree clean.\n"
+        "- Do not stop at a summary or handoff when this trigger fires. Continue "
+        "autonomously through safe reversible steps.\n"
+        "- Ask for approval only for critical boundaries: destructive discard/delete, "
+        "secrets or credentials, production data changes, irreversible external "
+        "side effects, mixed unrelated changes that cannot be scoped safely, failed "
+        "gates that would require an override, or missing/expired remote auth."
+    )
+
+
+def _context_for(prompt: str) -> str | None:
+    contexts = [
+        context
+        for context in (_taskset_context_for(prompt), _finish_context_for(prompt))
+        if context
+    ]
+    if not contexts:
+        return None
+    return "\n\n".join(contexts)
 
 
 def _emit_hook_context(context: str | None) -> None:

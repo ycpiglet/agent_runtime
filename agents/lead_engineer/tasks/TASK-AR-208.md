@@ -1,6 +1,7 @@
 ---
 id: TASK-AR-208
-status: in_progress
+status: completed
+completed_at: 2026-06-10T22:20:00+09:00
 owner: agent-runtime
 priority: P0
 difficulty: M
@@ -65,3 +66,10 @@ audit_log:
   - event chain: `request -> review -> decision -> correction`
 - Boundary: this proves baseline A2A trace reconstruction, idempotency key uniqueness, retry policy presence, and access-level metadata for the release rehearsal chain.
 - Verification: A2A gate rerun returned `status=pass`; publish bundle check after A2A artifacts returned `findings=0`.
+
+## Claim Closeout (2026-06-10)
+
+- Current claim: `agents/runtime/task_claims/CLAIM-20260610-214249-task-ar-208-3f5f.json`.
+- A2A trace rerun: `reviews/A2A-TRACE-GATE-2026-06-10-task-ar-208-current.json`.
+- Result: `status=pass`, `events=4`, `chains=1`, `findings=0`.
+- Closeout review: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-208-claim-closeout.md`.

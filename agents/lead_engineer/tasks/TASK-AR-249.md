@@ -1,6 +1,6 @@
 ---
 id: TASK-AR-249
-status: planned
+status: completed
 owner: lead-engineer
 priority: P1
 difficulty: M
@@ -18,9 +18,14 @@ tags:
   - no-ssot-write
 audit_log:
   - docs/superpowers/plans/2026-06-10-pane-progress-tasksets.md
+  - docs/PARALLEL_AGENT_WORKTREE_PROTOCOL.md
+  - AGENT_RUNTIME_PARALLEL_SESSION_PROTOCOL.md
   - agents/project/NEXT-SESSION-POINTER.yml
   - scripts/continuity_contract_gate.py
+  - reviews/REVIEW-2026-06-10-agent-runtime-pane-progress-taskset.md
+  - scripts/verify_pane_progress_taskset.py
 created: 2026-06-10
+updated_at: 2026-06-10
 ---
 
 ## Goal
@@ -43,8 +48,14 @@ Enforce progress updates in task claims and continuity pointers so new panes can
 
 ## State Machine Mapping
 
-- cycle: planned
-- task: TASK-AR-249 planned
-- gate: pending
-- review: draft
+- cycle: completed
+- task: TASK-AR-249 completed
+- gate: pass
+- review: REVIEW-2026-06-10-agent-runtime-pane-progress-taskset.md
 
+## Completion Log
+
+- Enforced claim progress fields (`task_set_id`, `step_index`, `step_total`, `status_text`) and validation in claim dispatcher/gate scripts.
+- Added continuity/pointer requirements for phase/step/progress metadata.
+- Added/updated tests for dispatcher and continuity gate enforcement.
+- Completed focused verification scope (`scripts/verify_pane_progress_taskset.py`) and it passed.

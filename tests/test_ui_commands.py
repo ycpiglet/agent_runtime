@@ -39,7 +39,22 @@ def _task(root: Path, task_id: str, *, order: int = 10, status: str = "planned")
     return path
 
 
+def _write_backlog_board_script(root: Path) -> None:
+    _write(
+        root / "scripts" / "backlog_board.py",
+        "\n".join(
+            [
+                "from pathlib import Path",
+                "Path('BACKLOG-BOARD.md').write_text('synced\\n', encoding='utf-8')",
+                "",
+            ]
+        ),
+    )
+
+
 def test_submit_create_task_writes_task_and_accepted_command(tmp_path):
+    _write_backlog_board_script(tmp_path)
+
     result = ui_commands.submit_command(
         tmp_path,
         {
@@ -75,6 +90,7 @@ def test_submit_create_task_writes_task_and_accepted_command(tmp_path):
 
 
 def test_submit_update_task_validates_and_preserves_source_truth(tmp_path):
+    _write_backlog_board_script(tmp_path)
     _task(tmp_path, "TASK-UI-101")
 
     result = ui_commands.submit_command(
@@ -104,6 +120,7 @@ def test_submit_update_task_validates_and_preserves_source_truth(tmp_path):
 
 
 def test_submit_reorder_persists_stable_order_across_refresh(tmp_path):
+    _write_backlog_board_script(tmp_path)
     _task(tmp_path, "TASK-UI-201", order=20)
     _task(tmp_path, "TASK-UI-202", order=30)
 
@@ -146,6 +163,7 @@ def test_submit_comment_writes_runtime_visible_message(tmp_path):
 
 
 def test_submit_archive_marks_task_completed_and_archived(tmp_path):
+    _write_backlog_board_script(tmp_path)
     path = _task(tmp_path, "TASK-UI-350", status="in_progress")
 
     result = ui_commands.submit_command(
@@ -205,6 +223,7 @@ def test_submit_missing_task_id_and_unsafe_direct_file_mutation_are_rejected(tmp
 
 
 def test_list_commands_returns_accepted_and_failed_write_states(tmp_path):
+    _write_backlog_board_script(tmp_path)
     _task(tmp_path, "TASK-UI-501")
     ui_commands.submit_command(
         tmp_path,

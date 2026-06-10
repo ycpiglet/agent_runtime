@@ -31,3 +31,12 @@
 ## Decision
 
 Proceed with `TASK-AR-217` rehearsal using `TASK-AR-225` as release artifact evidence and do not reopen root-source preflight as a release blocker unless the clean bundle path regresses.
+
+## Current Status Update (2026-06-10T21:17:37+09:00)
+
+- Validation lane status in `TASK-AR-217` is now bound to existing evidence:
+  - Offline eval 90%: `reviews/OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion.json` (`status=pass`).
+  - Live reviewer footer: `reviews/LIVE-REVIEWER-GATE-2026-06-09-task-ar-206.json` (`status=pass`, `source_tier/confidence/risk/ambiguity` present).
+  - Correction collector: `reviews/CORRECTION-COLLECTOR-2026-06-09-task-ar-207.json` (`status=pass`, proposals written).
+  - A2A trace: `reviews/A2A-TRACE-GATE-2026-06-09-task-ar-208.json` (`status=pass`, chain `request->review->decision->correction`).
+- No blocker regressions were observed in the clean-bundle artifact after the above validation lanes were linked to the rehearsal bundle.

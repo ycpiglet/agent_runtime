@@ -11,7 +11,8 @@ active_work:
   contract: >
     This is not only a next-session note. It is the live work pointer for active
     agents, teams, and panes. Keep task, status, phase, progress, worktree,
-    branch, claim, handoff, and last heartbeat visible while work is happening.
+    branch, claim, handoff, step index, step total, status text, and last
+    heartbeat visible while work is happening.
   current_agents:
     - display_name: lead_engineer@design-01
       agent_role: lead-engineer
@@ -21,6 +22,9 @@ active_work:
       status: claimed
       phase: claim-created
       progress_pct: 0
+      step_index: 1
+      step_total: 6
+      status_text: Claim created
       worktree_path: .worktrees/TASK-NNN
       branch: codex/task-nnn-work-01
       claim_path: agents/runtime/task_claims/CLAIM-example.json
@@ -31,7 +35,11 @@ active_work:
       status: watch
       phase: planning
       progress_pct: 0
+      step_index: 1
+      step_total: 6
+      status_text: Planning active task-set work
       active_task: TASK-NNN
+      task_set_id: TASKSET-AR-EXAMPLE
       pane_ids:
         - terminal:wt-task-id:tab-01
   canonical_live_sources:

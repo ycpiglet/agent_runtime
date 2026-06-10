@@ -34,6 +34,11 @@ COLOR_STATUS_PATTERNS = (
 REQUIRED_PATTERNS = {
     "pre-answer-check": re.compile(r"대화\s*응답\s*전\s*자체\s*점검"),
     "user-language": re.compile(r"사용자\s*언어"),
+    "owner-default-korean": re.compile(
+        r"(사용자|Owner|CEO).{0,40}(직접\s*)?대화.{0,40}(무조건|기본).{0,20}한국어|"
+        r"한국어.{0,40}(기본값|기본|무조건)",
+        re.IGNORECASE | re.DOTALL,
+    ),
     "brief-order": re.compile(r"Bottom Line\s*[-/>]+\s*Signal\s*[-/>]+\s*Insight\s*[-/>]+\s*Decision", re.IGNORECASE),
     "status-signal": re.compile(r"pass.*watch.*block|pass/watch/block", re.IGNORECASE | re.DOTALL),
     "score": re.compile(r"score\s*:\s*0-100|score`\s*:\s*`?0-100|0-100"),

@@ -1,6 +1,6 @@
 ---
 id: TASK-AR-224
-status: in_progress
+status: completed
 owner: lead-engineer
 priority: P0
 difficulty: M

@@ -1,0 +1,149 @@
+{
+  "schema": "agent-runtime-asset-registry/v1",
+  "version": 1,
+  "updated_at": "2026-06-10T23:35:00+09:00",
+  "status_scale": ["active", "watch", "deprecated", "removed"],
+  "lifecycle_decisions": ["keep", "modify", "deprecate", "remove", "observe"],
+  "assets": [
+    {
+      "id": "gate.owner_governance",
+      "kind": "gate",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": ["scripts/owner_governance_gate.py"],
+      "evidence_paths": [".githooks/pre-commit", ".codex/hooks.json"],
+      "tokens": ["owner_governance_gate.py"],
+      "min_recent_uses": 1
+    },
+    {
+      "id": "gate.collaboration_governance",
+      "kind": "gate",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": ["scripts/collaboration_governance_gate.py"],
+      "evidence_paths": ["scripts/owner_governance_gate.py", "reviews/REVIEW-2026-06-10-agent-runtime-collaboration-governance-redesign.md"],
+      "tokens": ["collaboration_governance_gate.py"],
+      "min_recent_uses": 1
+    },
+    {
+      "id": "gate.runtime_asset_usage",
+      "kind": "gate",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": ["scripts/runtime_asset_usage.py"],
+      "evidence_paths": ["scripts/owner_governance_gate.py", "agents/project/RUNTIME-ASSET-REGISTRY.json"],
+      "tokens": ["runtime_asset_usage.py", "gate.runtime_asset_usage"],
+      "min_recent_uses": 1
+    },
+    {
+      "id": "gate.state_sync",
+      "kind": "gate",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": ["scripts/state_sync_gate.py"],
+      "evidence_paths": ["scripts/owner_governance_gate.py", "agents/project/NEXT-SESSION-POINTER.yml"],
+      "tokens": ["state_sync_gate.py", "TASKSET-AR-GOVERNANCE-OPS"],
+      "min_recent_uses": 1
+    },
+    {
+      "id": "report.governance_ops",
+      "kind": "script",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": ["scripts/governance_ops_report.py"],
+      "evidence_paths": ["AGENT_RUNTIME_GOVERNANCE_OPS_BRIEF.md", "reviews/GOVERNANCE-OPS-REPORT-2026-06-10.md"],
+      "tokens": ["governance_ops_report.py", "GOVERNANCE-OPS-REPORT"],
+      "min_recent_uses": 1
+    },
+    {
+      "id": "hook.taskset_prompt",
+      "kind": "hook",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": ["scripts/taskset_prompt_hook.py", "scripts/taskset_prompt_hook.cmd"],
+      "evidence_paths": [".codex/hooks.json", "src/agent_runtime/templates/project/AGENTS.md"],
+      "tokens": ["taskset_prompt_hook", "UserPromptSubmit"],
+      "min_recent_uses": 1
+    },
+    {
+      "id": "hook.stop_owner_governance",
+      "kind": "hook",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": ["scripts/stop_hook_owner_governance.py", "scripts/stop_hook_owner_governance.cmd"],
+      "evidence_paths": [".codex/hooks.json", "scripts/stop_hook_owner_governance.py"],
+      "tokens": ["stop_hook_owner_governance", "Stop"],
+      "min_recent_uses": 1
+    },
+    {
+      "id": "trigger.planning",
+      "kind": "trigger",
+      "status": "watch",
+      "lifecycle": "observe",
+      "paths": ["scripts/planning_trigger.py"],
+      "evidence_paths": ["scripts/planning_trigger.py", "STATUS.md"],
+      "tokens": ["planning_trigger", "planning_loop"],
+      "min_recent_uses": 1
+    },
+    {
+      "id": "capability.ralph_loop",
+      "kind": "script",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": ["scripts/agent_loop.py"],
+      "evidence_paths": ["pyproject.toml", "AGENT_RUNTIME_GOVERNANCE_OPS_BRIEF.md"],
+      "tokens": ["ralph", "agent_loop.py"],
+      "min_recent_uses": 1
+    },
+    {
+      "id": "capability.agent_retro",
+      "kind": "script",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": ["scripts/agent_retro.py"],
+      "evidence_paths": ["agents/project/COLLABORATION-GOVERNANCE.json", "reviews/RETRO-2026-06-10-agent-runtime-governance-ops.md"],
+      "tokens": ["agent_retro.py", "RETRO"],
+      "min_recent_uses": 1
+    },
+    {
+      "id": "capability.retro_forward",
+      "kind": "script",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": ["scripts/promote_retro_forward.py"],
+      "evidence_paths": ["scripts/agent_loop.py", "reviews/RETRO-2026-06-10-agent-runtime-governance-ops.md"],
+      "tokens": ["promote_retro_forward", "Forward Actions"],
+      "min_recent_uses": 1
+    },
+    {
+      "id": "capability.scribe_due",
+      "kind": "script",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": ["scripts/scribe_due.py"],
+      "evidence_paths": ["agents/project/COLLABORATION-GOVERNANCE.json", "AGENT_RUNTIME_GOVERNANCE_OPS_BRIEF.md"],
+      "tokens": ["scribe_due.py", "scribe"],
+      "min_recent_uses": 1
+    },
+    {
+      "id": "capability.doc_steward_due",
+      "kind": "script",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": ["scripts/doc_steward_due.py"],
+      "evidence_paths": ["agents/project/COLLABORATION-GOVERNANCE.json", "AGENT_RUNTIME_GOVERNANCE_OPS_BRIEF.md"],
+      "tokens": ["doc_steward_due.py", "doc-steward"],
+      "min_recent_uses": 1
+    },
+    {
+      "id": "skill.taskset_dispatch",
+      "kind": "skill",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": ["src/agent_runtime/templates/project/skills/taskset-dispatch/SKILL.md"],
+      "evidence_paths": ["src/agent_runtime/templates/project/AGENTS.md", "src/agent_runtime/templates/project/scripts/taskset_prompt_hook.py"],
+      "tokens": ["taskset-dispatch", "taskset_dispatcher"],
+      "min_recent_uses": 1
+    }
+  ]
+}

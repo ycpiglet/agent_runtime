@@ -67,6 +67,8 @@ def test_continuity_contract_gate_requires_bilingual_readme_and_self_improvement
     assert result.returncode == 1
     assert "continuity:readme-korean-section-missing" in result.stdout
     assert "continuity:readme-english-section-missing" in result.stdout
+    assert "continuity:pointer-field-missing:step_index" in result.stdout
+    assert "continuity:pointer-field-missing:status_text" in result.stdout
     assert "continuity:repeated-request-api-rule-missing" in result.stdout
     assert "continuity:compound-auto-capture-rule-missing" in result.stdout
 

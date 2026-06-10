@@ -1,0 +1,39 @@
+{
+  "action_type": "doc_repair",
+  "created_at": "1970-01-01T00:00:00+00:00",
+  "dedupe_key": "doc_repair:orphaned-review:reviews/CALL-2026-06-09-agent-runtime-v018-owner-approval-gate-handoff-call.md",
+  "department": "planning-office",
+  "draft_task_path": "agents/planning/drafts/PROP-98C6DD10D7E2.md",
+  "evidence": [
+    {
+      "confidence": 0.61,
+      "summary": "Review reviews/CALL-2026-06-09-agent-runtime-v018-owner-approval-gate-handoff-call.md has no task reference"
+    }
+  ],
+  "evidence_hash": "009cc570cd9b0b11ded26c903953e0285670dabb",
+  "id": "PROP-98C6DD10D7E2",
+  "mode": "B",
+  "owner_boundary": "Low-risk local proposal; canonical mutation still requires approved apply.",
+  "reviewer_opinions": [],
+  "risk_tier": "low",
+  "rollback_path": "agents/planning/rollback/PROP-98C6DD10D7E2.json",
+  "source_refs": [
+    {
+      "kind": "orphaned-review",
+      "path": "reviews/CALL-2026-06-09-agent-runtime-v018-owner-approval-gate-handoff-call.md"
+    }
+  ],
+  "status": "proposed",
+  "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+  "supersedes": [],
+  "target_files": [
+    "reviews/CALL-2026-06-09-agent-runtime-v018-owner-approval-gate-handoff-call.md"
+  ],
+  "title": "orphaned-review: reviews/CALL-2026-06-09-agent-runtime-v018-owner-approval-gate-handoff-call.md",
+  "trace_id": null,
+  "updated_at": "1970-01-01T00:00:00+00:00",
+  "verifier_list": [
+    "python scripts/planning_loop.py gate --trigger manual --json",
+    "python scripts/owner_governance_gate.py"
+  ]
+}

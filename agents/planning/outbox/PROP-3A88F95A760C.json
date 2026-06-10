@@ -1,0 +1,41 @@
+{
+  "action_type": "doc_repair",
+  "created_at": "1970-01-01T00:00:00+00:00",
+  "dedupe_key": "doc_repair:missing-audit-link:agents/lead_engineer/tasks/TASK-AR-240.md",
+  "department": "planning-office",
+  "draft_task_path": "agents/planning/drafts/PROP-3A88F95A760C.md",
+  "evidence": [
+    {
+      "confidence": 0.86,
+      "summary": "TASK-AR-240 references missing audit artifact reviews/REVIEW-2026-06-10-agent-runtime-task-ar-240-claim-closeout.md"
+    }
+  ],
+  "evidence_hash": "e8321ecde37c5155273aee34046b4b4e8aef44d2",
+  "id": "PROP-3A88F95A760C",
+  "mode": "B",
+  "owner_boundary": "Low-risk local proposal; canonical mutation still requires approved apply.",
+  "reviewer_opinions": [],
+  "risk_tier": "low",
+  "rollback_path": "agents/planning/rollback/PROP-3A88F95A760C.json",
+  "source_refs": [
+    {
+      "kind": "missing-audit-link",
+      "path": "agents/lead_engineer/tasks/TASK-AR-240.md"
+    }
+  ],
+  "status": "proposed",
+  "suggested_next_action": "restore the referenced audit artifact or mark the task audit entry as superseded",
+  "supersedes": [
+    "PROP-4E287D09FAEA"
+  ],
+  "target_files": [
+    "agents/lead_engineer/tasks/TASK-AR-240.md"
+  ],
+  "title": "missing-audit-link: agents/lead_engineer/tasks/TASK-AR-240.md",
+  "trace_id": null,
+  "updated_at": "1970-01-01T00:00:00+00:00",
+  "verifier_list": [
+    "python scripts/planning_loop.py gate --trigger manual --json",
+    "python scripts/owner_governance_gate.py"
+  ]
+}

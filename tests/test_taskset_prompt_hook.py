@@ -28,3 +28,43 @@ def test_taskset_prompt_hook_injects_dispatcher_instruction_for_korean_prompt() 
     assert "scripts/taskset_dispatcher.py" in context.replace("\\", "/")
     assert "quality-loop" in context
     assert "worktree" in context.lower()
+
+
+def test_taskset_prompt_hook_injects_finish_instruction_for_korean_closeout() -> None:
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT), "--text", "마무리해줘"],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    context = payload["hookSpecificOutput"]["additionalContext"]
+    assert "finish trigger" in context
+    assert "commit + PR + merge" in context
+    assert "clean working tree" in context
+    assert "Ask for approval only for critical boundaries" in context
+
+
+def test_taskset_prompt_hook_combines_taskset_and_finish_guidance() -> None:
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT), "--text", "taskset-release-steward 진행하고 정리해줘"],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    context = payload["hookSpecificOutput"]["additionalContext"]
+    assert "taskset trigger" in context
+    assert "release-steward" in context
+    assert "finish trigger" in context
+    assert "commit + PR + merge" in context

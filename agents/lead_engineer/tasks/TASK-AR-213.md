@@ -1,6 +1,6 @@
 ---
 id: TASK-AR-213
-status: in_progress
+status: completed
 owner: agent-runtime
 priority: P0
 difficulty: M

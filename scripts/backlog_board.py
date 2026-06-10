@@ -1,8 +1,10 @@
 """Generate an Owner-facing backlog decision board from TASK frontmatter.
 
 The board restores the old ACT/ASK/REVIEW/DEFER idea with clearer labels:
-Action, Review, Ask, Later, Done. It is intentionally dependency-free so it can
-run inside host projects before optional packages are installed.
+Action, Review, Ask, Later. Completed tasks are archived out of the live board
+so completed task sets disappear automatically. It is intentionally
+dependency-free so it can run inside host projects before optional packages are
+installed.
 """
 
 from __future__ import annotations
@@ -30,6 +32,7 @@ STATUS_WEIGHT = {
     "completed": 1,
     "done": 1,
 }
+DONE_STATUSES = {"completed", "done", "released", "완료"}
 DIFFICULTY_LABEL = {"S": "Low", "M": "Medium", "L": "High", "XL": "Critical", "하": "Low", "중": "Medium", "상": "High"}
 DIFFICULTY_ORDER = {"Low": 0, "Medium": 1, "High": 2, "Critical": 3}
 
@@ -84,6 +87,18 @@ TASK_SET_DEFINITIONS = [
         "Progress Scout",
         "Pane/task-set progress, live continuity, claims, and resumable handoffs.",
         70,
+    ),
+    TaskSetInfo(
+        "TASKSET-AR-COLLAB-CONCURRENCY",
+        "Concurrency Steward",
+        "Real-time pane collaboration, event replay, SSoT ownership, and conflict gates.",
+        75,
+    ),
+    TaskSetInfo(
+        "TASKSET-AR-GOVERNANCE-OPS",
+        "Governance Operator",
+        "Waiver burn-down, lifecycle cleanup, runtime asset usage, sync enforcement, and verification hygiene.",
+        78,
     ),
     TaskSetInfo(
         "TASKSET-AR-REPO-HYGIENE",
@@ -306,7 +321,7 @@ def agent_for(task: Task) -> str:
 def lane_for(task: Task) -> str:
     status = task.status.lower()
     body_goal = task.goal.lower()
-    if status in {"completed", "done", "완료"}:
+    if is_done(task):
         return "Done"
     if "owner" in body_goal or "approval" in body_goal or status.startswith("hold") or "blocked" in status:
         return "Ask"
@@ -315,6 +330,10 @@ def lane_for(task: Task) -> str:
     if status in {"planned", "pending", "defer", "deferred"} and task.est_hours >= 16:
         return "Later"
     return "Action"
+
+
+def is_done(task: Task) -> bool:
+    return task.status.lower() in DONE_STATUSES
 
 
 def value_for(task: Task) -> str:
@@ -396,9 +415,16 @@ def lane_counts(tasks: Iterable[Task]) -> dict[str, int]:
 
 def render(tasks: list[Task]) -> str:
     today = date.today().isoformat()
-    open_tasks = [t for t in tasks if lane_for(t) != "Done"]
+    open_tasks = [t for t in tasks if not is_done(t)]
+    completed_tasks = [t for t in tasks if is_done(t)]
     counts = lane_counts(tasks)
-    task_set_ids = task_sets_for(tasks)
+    task_set_ids = task_sets_for(open_tasks)
+    all_task_set_ids = task_sets_for(tasks)
+    completed_task_set_ids = [
+        task_set_id
+        for task_set_id in all_task_set_ids
+        if task_set_id not in task_set_ids
+    ]
 
     lines: list[str] = [
         "---",
@@ -413,18 +439,20 @@ def render(tasks: list[Task]) -> str:
         f"generated_at: {today}",
         f"task_count: {len(tasks)}",
         f"open_count: {len(open_tasks)}",
+        f"completed_count: {len(completed_tasks)}",
         f"task_set_count: {len(task_set_ids)}",
+        f"completed_task_set_count: {len(completed_task_set_ids)}",
         "---",
         "",
         "# Backlog Decision Board",
         "",
         "## Bottom Line",
-        f"- Summary: `{len(tasks)}` total tasks; `{len(open_tasks)}` open or active.",
+        f"- Summary: `{len(open_tasks)}` open or active tasks; `{len(completed_tasks)}` completed tasks are archived from this live board.",
         "- Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.",
         "",
         "## Signal",
         f"- Status: Action `{counts.get('Action', 0)}` / Ask `{counts.get('Ask', 0)}` / Review `{counts.get('Review', 0)}` / Later `{counts.get('Later', 0)}` / Done `{counts.get('Done', 0)}`.",
-        f"- Task Sets: `{len(task_set_ids)}` related workflows; priority, cost, and difficulty sorting happens inside each task set.",
+        f"- Task Sets: `{len(task_set_ids)}` active workflows; `{len(completed_task_set_ids)}` completed workflows are hidden from the live action board.",
         "- Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.",
         "- Key Point: Every task includes difficulty, cost, value, importance, team, and agent.",
         "",
@@ -441,19 +469,20 @@ def render(tasks: list[Task]) -> str:
         "",
         "## Action Board",
         "",
-        "- Board rule: task sets are the primary panes of work. Lane is shown per task instead of used as the top-level grouping.",
+        "- Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.",
     ]
 
     for task_set_id in task_set_ids:
         set_info = task_set_info(task_set_id)
-        set_tasks = sorted([task for task in tasks if task.task_set_id == task_set_id], key=task_set_sort_key)
-        set_open = [task for task in set_tasks if lane_for(task) != "Done"]
+        set_tasks = sorted([task for task in open_tasks if task.task_set_id == task_set_id], key=task_set_sort_key)
+        total_set_tasks = [task for task in tasks if task.task_set_id == task_set_id]
+        set_completed = [task for task in total_set_tasks if is_done(task)]
         lines.extend([
             "",
             f"### {set_info.display_name} (`{task_set_id}`)",
             "",
             f"- Flow: {set_info.summary}",
-            f"- Progress: `{len(set_tasks) - len(set_open)}/{len(set_tasks)}` done; `{len(set_open)}` open or active.",
+            f"- Progress: `{len(set_completed)}/{len(total_set_tasks)}` done; `{len(set_tasks)}` open or active.",
             "| Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |",
             "|---|---|---|---:|---|---|---|---|---:|---|---|---|---|",
         ])
@@ -479,6 +508,32 @@ def render(tasks: list[Task]) -> str:
             ]
             lines.append("| " + " | ".join(row) + " |")
 
+    if completed_task_set_ids:
+        lines.extend([
+            "",
+            "## Archived Task Sets",
+            "",
+            "- Archive rule: completed task sets stay out of the live Action Board but remain visible as workflow-level completion evidence.",
+            "| Task Set | Flow | Progress | Evidence |",
+            "|---|---|---:|---|",
+        ])
+        for task_set_id in completed_task_set_ids:
+            set_info = task_set_info(task_set_id)
+            total_set_tasks = [task for task in tasks if task.task_set_id == task_set_id]
+            set_completed = [task for task in total_set_tasks if is_done(task)]
+            lines.append(
+                "| "
+                + " | ".join(
+                    [
+                        f"{set_info.display_name} (`{task_set_id}`)",
+                        set_info.summary,
+                        f"`{len(set_completed)}/{len(total_set_tasks)}` done",
+                        f"`{len(set_completed)}` completed task files archived",
+                    ]
+                )
+                + " |"
+            )
+
     lines.extend([
         "",
         "## Risks / Blockers",
@@ -491,6 +546,7 @@ def render(tasks: list[Task]) -> str:
         "- Run `python scripts/owner_doc_format_gate.py BACKLOG-BOARD.md` before sharing Owner-facing backlog/report docs.",
         "- Keep `task_set_id` in every task frontmatter so panes can claim related workflow bundles without reclassifying from prose.",
         "- Promote missing task metadata into frontmatter when repeated inference is needed.",
+        "- Use completed task files as archival evidence; do not render them in the live action board unless an explicit archive view is added.",
         "",
         "## Tags / References",
         "- tags: backlog, action-board, owner-brief, decision-support",

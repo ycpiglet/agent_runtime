@@ -48,6 +48,11 @@ def _write_claim(root: Path, name: str, **overrides: object) -> Path:
         "log_path": "reviews/REVIEW-2026-06-10-agent-runtime-parallel-session-protocol.md",
     }
     payload.update(overrides)
+    worktree_value = str(payload.get("worktree_path") or "")
+    if worktree_value and worktree_value != "." and not overrides.get("skip_worktree_marker"):
+        worktree = root / worktree_value
+        worktree.mkdir(parents=True, exist_ok=True)
+        (worktree / ".git").write_text("gitdir: ../../.git/worktrees/test\n", encoding="utf-8")
     path = claim_dir / f"{name}.json"
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return path
@@ -121,6 +126,28 @@ def test_gate_blocks_worker_claim_in_main_checkout(tmp_path: Path):
 
     assert result.returncode == 1
     assert "task-claim:main-checkout-worker" in result.stdout
+
+
+def test_gate_blocks_missing_worktree_for_active_claim(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_claim(tmp_path, "CLAIM-1", skip_worktree_marker=True)
+
+    result = _run_gate(tmp_path)
+
+    assert result.returncode == 1
+    assert "task-claim:worktree-path-missing" in result.stdout
+
+
+def test_gate_blocks_non_git_worktree_for_active_claim(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    worktree = tmp_path / ".worktrees" / "TASK-AR-246"
+    worktree.mkdir(parents=True, exist_ok=True)
+    _write_claim(tmp_path, "CLAIM-1", skip_worktree_marker=True)
+
+    result = _run_gate(tmp_path)
+
+    assert result.returncode == 1
+    assert "task-claim:worktree-not-git-worktree" in result.stdout
 
 
 def test_gate_blocks_missing_handoff_pointer_for_active_claim(tmp_path: Path):

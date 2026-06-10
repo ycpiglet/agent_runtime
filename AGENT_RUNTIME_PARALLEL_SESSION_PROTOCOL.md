@@ -24,8 +24,8 @@ tags: [parallel-agents, worktree, task-claim, handoff, owner-brief]
 | Same-directory multi-terminal risk | block | worker claim pointing at `.` fails as `task-claim:main-checkout-worker` |
 | Task single-occupancy | pass | duplicate active claim on one task fails as `task-claim:duplicate-active-task` |
 | Role multi-instance | pass | same role can run as `lead_engineer@design-01`, `lead_engineer@meeting-01`, etc. |
-| Resume continuity | pass | active claims require `handoff_path` and `log_path` |
-| Claim helper | watch | `scripts/task_claim_dispatcher.py create/release` now defines the display-name contract; full worktree spawn remains next |
+| Resume continuity | pass | active claims require `handoff_path`, `log_path`, `task_set_id`, step counters, progress percent, and status text |
+| Claim helper | watch | `scripts/task_claim_dispatcher.py create/release` now defines display-name and task-set progress contracts; full worktree spawn remains next |
 | Template propagation | pass | project template includes `parallel_worktree_gate.py` and governance gate wiring |
 
 ## Action Board
@@ -55,10 +55,10 @@ tags: [parallel-agents, worktree, task-claim, handoff, owner-brief]
 
 - Decision: use the main checkout as orchestrator only; worker agents use `.worktrees/<task-id>` and task branches.
 - Decision: shared SSoT files such as `BACKLOG.md`, `STATUS.md`, `owner-docs.yml`, and `STATE-MACHINES.yml` are merged by the orchestrator unless a task explicitly owns that doc.
-- Decision: every active claim must identify `agent_role`, `agent_instance_id`, `display_name`, `callsite_id`, `task_id`, `worktree_path`, `branch`, `handoff_path`, `log_path`, and policy/filter `tags`.
+- Decision: every active claim must identify `agent_role`, `agent_instance_id`, `display_name`, `callsite_id`, `task_id`, `task_set_id`, `phase`, `step_index`, `step_total`, `progress_pct`, `status_text`, `worktree_path`, `branch`, `handoff_path`, `log_path`, and policy/filter `tags`.
 
 ## Next Steps
 
 1. Extend `TASK-AR-246` dispatcher helpers from claim record creation/release to actual per-task worktree spawn/cleanup.
-2. Extend UI runtime state to show active task claims as session cards.
+2. Verify TASK-AR-248/TASK-AR-249 focused UI state, console, dispatcher, and continuity tests before marking pane progress complete.
 3. Keep `parallel_worktree_gate.py` in the Stop hook path so interrupted work leaves inspectable continuation pointers.

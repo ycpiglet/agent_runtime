@@ -33,7 +33,7 @@ tags:
     )
 
 
-def _run(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+def _run(root: Path, *args: str, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(SCRIPT), "--root", str(root), *args],
         cwd=REPO_ROOT,
@@ -42,6 +42,7 @@ def _run(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
         text=True,
         encoding="utf-8",
         errors="replace",
+        env=env,
     )
 
 
@@ -63,9 +64,33 @@ def test_plan_accepts_human_friendly_taskset_alias_and_emits_next_commands(tmp_p
     assert payload["branch"].startswith("codex/task-ar-901-quality-loop")
 
 
+def test_plan_skips_completed_tasks(tmp_path: Path) -> None:
+    _write_task(tmp_path, "TASK-AR-901", "TASKSET-AR-RELEASE-STEWARD", status="completed")
+    _write_task(tmp_path, "TASK-AR-902", "TASKSET-AR-RELEASE-STEWARD", status="planned")
+
+    result = _run(tmp_path, "plan", "release-steward", "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["next_task_id"] == "TASK-AR-902"
+    assert payload["next_task_status"] == "planned"
+
+
+def test_plan_fails_when_taskset_has_no_open_tasks(tmp_path: Path) -> None:
+    _write_task(tmp_path, "TASK-AR-901", "TASKSET-AR-RELEASE-STEWARD", status="completed")
+
+    result = _run(tmp_path, "plan", "release-steward", "--json")
+
+    assert result.returncode == 1
+    assert "task set has no open tasks" in (result.stderr or result.stdout)
+
+
 def test_start_creates_claim_with_taskset_progress_metadata(tmp_path: Path) -> None:
     (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
     _write_task(tmp_path, "TASK-AR-901", "TASKSET-AR-PANE-PROGRESS", status="planned")
+    worktree = tmp_path / ".worktrees" / "TASK-AR-901"
+    worktree.mkdir(parents=True, exist_ok=True)
+    (worktree / ".git").write_text("gitdir: ../../.git/worktrees/test\n", encoding="utf-8")
 
     result = _run(
         tmp_path,
@@ -94,6 +119,41 @@ def test_start_creates_claim_with_taskset_progress_metadata(tmp_path: Path) -> N
     assert claim["status_text"] == "Starting Progress Scout: TASK-AR-901"
     assert claim["phase"] == "taskset-claimed"
     assert claim["progress_pct"] == 0
+
+
+def test_start_creates_missing_worktree_before_claiming_taskset(tmp_path: Path, monkeypatch) -> None:
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_task(tmp_path, "TASK-AR-901", "TASKSET-AR-PANE-PROGRESS", status="planned")
+    fake_bin = tmp_path / "fake-bin"
+    fake_bin.mkdir()
+    fake_git = fake_bin / "git.cmd"
+    fake_git.write_text(
+        "\n".join(
+            [
+                "@echo off",
+                "echo %*>>\"%GIT_FAKE_LOG%\"",
+                "mkdir \"%CD%\\.worktrees\\TASK-AR-901\" 2>nul",
+                "echo gitdir: fake>\"%CD%\\.worktrees\\TASK-AR-901\\.git\"",
+                "exit /b 0",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    fake_log = tmp_path / "fake-git.log"
+    env = dict(**__import__("os").environ)
+    path_key = "Path" if "Path" in env else "PATH"
+    env[path_key] = f"{fake_bin};{env.get(path_key, '')}"
+    env["GIT_FAKE_LOG"] = str(fake_log)
+    env["AGENT_RUNTIME_GIT"] = str(fake_git)
+
+    result = _run(tmp_path, "start", "progress-scout", "--json", env=env)
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert "worktree add -b codex/task-ar-901-pane-progress .worktrees/TASK-AR-901" in fake_log.read_text(
+        encoding="utf-8"
+    )
+    assert (tmp_path / ".worktrees" / "TASK-AR-901" / ".git").exists()
+    assert list((tmp_path / "agents" / "runtime" / "task_claims").glob("*.json"))
 
 
 def test_start_blocks_when_taskset_already_has_active_claim(tmp_path: Path) -> None:

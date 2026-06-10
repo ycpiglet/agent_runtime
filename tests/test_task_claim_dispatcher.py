@@ -35,8 +35,15 @@ def _run_gate(root: Path) -> subprocess.CompletedProcess[str]:
     )
 
 
+def _write_worktree(root: Path, task_id: str) -> None:
+    worktree = root / ".worktrees" / task_id
+    worktree.mkdir(parents=True, exist_ok=True)
+    (worktree / ".git").write_text("gitdir: ../../.git/worktrees/test\n", encoding="utf-8")
+
+
 def test_create_claim_separates_system_identity_from_readable_display_name(tmp_path: Path):
     (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_worktree(tmp_path, "TASK-AR-246")
 
     result = _run_dispatcher(
         tmp_path,
@@ -71,9 +78,10 @@ def test_create_claim_separates_system_identity_from_readable_display_name(tmp_p
     assert claim["phase"] == "claim-created"
     assert claim["progress_pct"] == 0
     assert claim["task_set_id"] == ""
-    assert claim["step_index"] == 0
-    assert claim["step_total"] == 0
-    assert claim["status_text"] == "Claim created for TASK-AR-246"
+    assert claim["step_index"] == 1
+    assert claim["step_total"] == 6
+    assert claim["status_text"] == "Claim created"
+    assert claim["updated_at"] == "2026-06-10T14:30:12+09:00"
     assert claim["tags"] == ["planning", "no-ssot-write"]
     assert claim["worktree_path"] == ".worktrees/TASK-AR-246"
     assert claim["branch"] == "codex/task-ar-246-design-01"
@@ -89,6 +97,7 @@ def test_create_claim_separates_system_identity_from_readable_display_name(tmp_p
 
 def test_create_claim_refuses_task_that_is_already_active(tmp_path: Path):
     (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_worktree(tmp_path, "TASK-AR-246")
     first = _run_dispatcher(
         tmp_path,
         "create",
@@ -130,6 +139,7 @@ def test_create_claim_refuses_task_that_is_already_active(tmp_path: Path):
 
 def test_release_claim_requires_existing_handoff_and_log_files(tmp_path: Path):
     (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_worktree(tmp_path, "TASK-AR-246")
     created = _run_dispatcher(
         tmp_path,
         "create",
@@ -168,6 +178,7 @@ def test_release_claim_requires_existing_handoff_and_log_files(tmp_path: Path):
 
 def test_create_claim_accepts_taskset_progress_fields(tmp_path: Path):
     (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_worktree(tmp_path, "TASK-AR-248")
 
     result = _run_dispatcher(
         tmp_path,
@@ -205,3 +216,111 @@ def test_create_claim_accepts_taskset_progress_fields(tmp_path: Path):
     assert claim["step_index"] == 3
     assert claim["step_total"] == 6
     assert claim["status_text"] == "Rendering task-set progress in UI state"
+    assert claim["updated_at"] == "2026-06-10T19:45:00+09:00"
+
+
+def test_create_claim_rejects_missing_worktree(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        "TASK-AR-246",
+        "--agent-role",
+        "lead-engineer",
+    )
+
+    assert result.returncode == 1
+    assert "task worktree is not ready" in result.stderr
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
+
+
+def test_create_claim_refuses_duplicate_active_taskset(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_worktree(tmp_path, "TASK-AR-248")
+    _write_worktree(tmp_path, "TASK-AR-249")
+    first = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        "TASK-AR-248",
+        "--task-set-id",
+        "TASKSET-AR-PANE-PROGRESS",
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-06-10T19:45:00+09:00",
+        "--suffix",
+        "p2",
+        "--json",
+    )
+    assert first.returncode == 0, first.stderr or first.stdout
+
+    second = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        "TASK-AR-249",
+        "--task-set-id",
+        "TASKSET-AR-PANE-PROGRESS",
+        "--agent-role",
+        "qa-reviewer",
+        "--now",
+        "2026-06-10T19:46:00+09:00",
+        "--suffix",
+        "p3",
+        "--json",
+    )
+
+    assert second.returncode == 1
+    assert "task set already has an active claim" in second.stderr
+
+
+def test_create_claim_rejects_invalid_progress_and_step_state(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+
+    bad_progress = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        "TASK-AR-249",
+        "--agent-role",
+        "lead-engineer",
+        "--progress-pct",
+        "104",
+    )
+    bad_step = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        "TASK-AR-249",
+        "--agent-role",
+        "lead-engineer",
+        "--step-index",
+        "7",
+        "--step-total",
+        "6",
+    )
+    bad_done = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        "TASK-AR-249",
+        "--agent-role",
+        "lead-engineer",
+        "--phase",
+        "completed",
+        "--step-index",
+        "2",
+        "--step-total",
+        "6",
+    )
+
+    assert bad_progress.returncode == 1
+    assert "progress_pct must be between 0 and 100" in bad_progress.stderr
+    assert bad_step.returncode == 1
+    assert "step_index must be between 1 and step_total" in bad_step.stderr
+    assert bad_done.returncode == 1
+    assert "completion phase requires step_index to equal step_total" in bad_done.stderr

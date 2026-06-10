@@ -25,6 +25,7 @@ server validates them and stores the outcome in `.ui_outbox/COMMAND-*.json`.
 | `runtime.goal.pause` | Records an explicit lifecycle request for a future executor |
 | `runtime.goal.resume` | Records an explicit lifecycle request for a future executor |
 | `runtime.goal.stop` | Records an explicit lifecycle request for a future executor |
+| `planning.scan` | Records a gated proposal-only RSI planning scan request |
 
 ## Safety Metadata
 
@@ -43,6 +44,15 @@ Every command record includes:
 High-risk commands are not executed. Requests mentioning deletion, commit,
 push, pull request creation, dependency install, long-running goals, or
 irreversible external effects are stored with `status: approval_required`.
+
+Planning scan requests are always B-mode/proposal-only. The UI can queue a
+`planning.scan` request, but it cannot apply proposals, mutate canonical docs,
+or bypass `scripts/planning_loop.py gate --trigger ui --action scan`.
+
+Hook and schedule paths use the same boundary. `owner_governance_gate.py`
+checks `scripts/planning_loop.py gate --trigger hook --action scan`, and
+scheduled/manual runners can use `scripts/planning_trigger.py --trigger schedule`
+for a gated proposal-only scan.
 
 ## Runtime Boundary
 

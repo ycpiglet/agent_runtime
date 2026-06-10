@@ -1,6 +1,6 @@
 ---
 id: TASK-AR-205
-status: in_progress
+status: completed
 owner: agent-runtime
 priority: P0
 difficulty: M
@@ -26,6 +26,9 @@ audit_log:
   - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-205-offline-eval-gate-log.md
   - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-205-goldset-expansion-log.md
   - reviews/MEETING-2026-06-09-agent-runtime-task-ar-205-goldset-readiness-sync.md
+  - reviews/OFFLINE-EVAL-2026-06-10-task-ar-205-current.json
+  - reviews/OFFLINE-PREDICTION-SCORE-2026-06-10-task-ar-205-current.json
+  - reviews/OFFLINE-EVAL-2026-06-10-task-ar-205-current-log.md
 ---
 
 ## 목표
@@ -87,3 +90,17 @@ audit_log:
   - `reviews/MEETING-2026-06-09-agent-runtime-task-ar-205-prediction-scoring-sync.md`
 - Boundary: this proves deterministic contract-baseline output accuracy, not external LLM/provider accuracy.
 - Verification: prediction scorer rerun returned `status=pass`; publish bundle check after scorer/prediction addition returned `findings=0`.
+
+## Cycle Log (2026-06-10)
+
+- Re-ran offline evaluation and prediction scoring after adding missing `pane-progress` coverage.
+- Command: `python scripts/offline_eval_gate.py --out reviews/OFFLINE-EVAL-2026-06-10-task-ar-205-current.json`
+  - Result: `status=pass`, `score=1.0` across `project-overlay-routing-gold`, `project-metadata-gov-gold`, `pane-progress-gold`.
+- Command: `python scripts/offline_prediction_score.py --out reviews/OFFLINE-PREDICTION-SCORE-2026-06-10-task-ar-205-current.json`
+  - First run: `status=block` for missing `pane-progress` predictions.
+  - After coverage augmentation (`agents/project/evals/predictions/contract-baseline-2026-06-09.jsonl`): `status=pass`.
+- Evidence:
+  - `reviews/OFFLINE-EVAL-2026-06-10-task-ar-205-current.json`
+  - `reviews/OFFLINE-EVAL-2026-06-10-task-ar-205-current-log.md`
+  - `reviews/OFFLINE-PREDICTION-SCORE-2026-06-10-task-ar-205-current.json`
+- Boundary: deterministic `contract_baseline_output_accuracy` has no open failures; offline 90% threshold is no longer blocked from this lane.

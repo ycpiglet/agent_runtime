@@ -76,6 +76,7 @@ HTML = """<!doctype html>
             <option value="runtime.goal.pause">Pause Goal</option>
             <option value="runtime.goal.resume">Resume Goal</option>
             <option value="runtime.goal.stop">Stop Goal</option>
+            <option value="planning.scan">Planning Scan</option>
           </select>
           <input id="runtime-target-agent" name="target" placeholder="target agent">
           <input id="runtime-task-id" name="task_id" placeholder="task id">
@@ -89,6 +90,7 @@ HTML = """<!doctype html>
           <button class="tab" type="button" data-view="messages">Messages</button>
           <button class="tab" type="button" data-view="events">Events</button>
           <button class="tab" type="button" data-view="evidence">Evidence</button>
+          <button class="tab" type="button" data-view="planner">Planner</button>
           <button class="tab" type="button" data-view="map">Map</button>
           <button class="tab" type="button" data-view="sources">Sources</button>
           <button class="tab" type="button" data-view="writes">Writes</button>
@@ -98,6 +100,7 @@ HTML = """<!doctype html>
           <div id="kanban" class="kanban" aria-label="Kanban"></div>
         </div>
         <div id="view-agents" class="view">
+          <div id="tasksets-list" class="taskset-strip"></div>
           <div id="agents-list" class="list-panel"></div>
         </div>
         <div id="view-messages" class="view">
@@ -126,6 +129,22 @@ HTML = """<!doctype html>
             <section>
               <h2>Replay</h2>
               <div id="replay-list" class="list-panel"></div>
+            </section>
+          </div>
+        </div>
+        <div id="view-planner" class="view">
+          <div class="evidence-grid">
+            <section>
+              <h2>Planning Proposals</h2>
+              <div id="planning-proposals-list" class="list-panel"></div>
+            </section>
+            <section>
+              <h2>Planning Scans</h2>
+              <div id="planning-scans-list" class="list-panel"></div>
+            </section>
+            <section>
+              <h2>Requests and Drafts</h2>
+              <div id="planning-requests-list" class="list-panel"></div>
             </section>
           </div>
         </div>
@@ -345,6 +364,49 @@ textarea { min-height: 74px; resize: vertical; }
   padding: 12px;
   min-height: 360px;
 }
+.taskset-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.taskset-card {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fffdf7;
+}
+.taskset-card b, .agent-progress b { display: block; }
+.taskset-card span, .agent-progress span {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.progress-track {
+  height: 8px;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e7dfcf;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--teal), var(--blue));
+}
+.agent-progress {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0;
+}
+.agent-progress-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
 .list-row {
   padding: 10px;
   border: 1px solid var(--line);
@@ -413,7 +475,25 @@ textarea { min-height: 74px; resize: vertical; }
 
 
 JS = """const lanes = ["Backlog", "Ready", "In Progress", "Review", "Blocked", "Done"];
-const runtimeCommandTypes = ["runtime.call_agent", "runtime.assign_task", "runtime.request_review", "runtime.request_meeting", "runtime.goal.start", "runtime.goal.pause", "runtime.goal.resume", "runtime.goal.stop"];
+const taskStatusOptions = [
+  "assigned",
+  "blocked",
+  "claimed",
+  "completed",
+  "defer",
+  "deferred",
+  "done",
+  "hold",
+  "in_progress",
+  "pending",
+  "planned",
+  "ready",
+  "ready_for_governance_review",
+  "review",
+  "waiting_review",
+  "working",
+];
+const runtimeCommandTypes = ["runtime.call_agent", "runtime.assign_task", "runtime.request_review", "runtime.request_meeting", "runtime.goal.start", "runtime.goal.pause", "runtime.goal.resume", "runtime.goal.stop", "planning.scan"];
 let runtimeState = null;
 let selectedTaskId = null;
 let pendingWrites = [];
@@ -470,6 +550,21 @@ function taskCounts(tasks) {
   };
 }
 
+function numericPct(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return null;
+  return Math.max(0, Math.min(100, Math.round(number)));
+}
+
+function progressBar(value) {
+  const pct = numericPct(value);
+  const width = pct === null ? 0 : pct;
+  const label = pct === null ? "~" : `${pct}%`;
+  return `<div class="progress-track" role="img" aria-label="progress ${escapeHtml(label)}">
+    <div class="progress-fill" style="width: ${width}%"></div>
+  </div>`;
+}
+
 function renderDashboard() {
   const tasks = runtimeState.tasks || [];
   const counts = taskCounts(tasks);
@@ -478,6 +573,20 @@ function renderDashboard() {
   setText("metric-blocked", counts.blocked);
   setText("metric-warnings", (runtimeState.warnings || []).length + (runtimeState.gaps || []).length);
   $("status-line").textContent = `Generated ${runtimeState.generated_at} - ${tasks.length} tasks`;
+}
+
+function renderTaskSets() {
+  const host = $("tasksets-list");
+  if (!host) return;
+  const taskSets = runtimeState.task_sets || [];
+  host.innerHTML = taskSets.length ? taskSets.map((taskSet) => `
+    <article class="taskset-card">
+      <b>${escapeHtml(taskSet.id)}</b>
+      <span>${escapeHtml(taskSet.status_text || "active task set")}</span>
+      <span>${escapeHtml(taskSet.active || 0)} active / ${escapeHtml(taskSet.blocked || 0)} blocked / ${escapeHtml(taskSet.done || 0)} done</span>
+      ${progressBar(taskSet.progress_pct)}
+    </article>
+  `).join("") : "";
 }
 
 function taskCard(task) {
@@ -504,11 +613,22 @@ function renderKanban() {
 }
 
 function renderAgents() {
+  renderTaskSets();
   const agents = runtimeState.agents || [];
   $("agents-list").innerHTML = agents.length ? agents.map((agent) => `
     <article class="list-row ${agent.online ? "ok" : "warn"}">
       <b>${escapeHtml(agent.display_name || agent.role)}</b>
       <span>${escapeHtml(agent.status || "offline")} / ${escapeHtml(agent.current_task_id || "no task")}</span>
+      <div class="agent-progress">
+        <div class="agent-progress-meta">
+          <span>phase: ${escapeHtml(agent.phase || "unknown")}</span>
+          <span>step: ${escapeHtml(agent.step_index && agent.step_total ? `${agent.step_index}/${agent.step_total}` : "?")}</span>
+          <span>progress_pct: ${escapeHtml(numericPct(agent.progress_pct) ?? "~")}</span>
+        </div>
+        ${progressBar(agent.progress_pct)}
+        <span>${escapeHtml(agent.status_text || agent.phase || "working")}</span>
+        <code>${escapeHtml(agent.task_set_id || "no task set")}</code>
+      </div>
       <code>${escapeHtml(agent.source_path)}</code>
     </article>
   `).join("") : `<div class="empty">No active sessions</div>`;
@@ -608,6 +728,35 @@ function renderMap() {
   `).join("") : `<div class="empty">No roadmap milestones</div>`;
 }
 
+function renderPlanning() {
+  const planning = runtimeState.planning || { scan_reports: [], proposals: [], requests: [], draft_tasks: [], applied: [], summary: {} };
+  const proposals = planning.proposals || [];
+  const scans = planning.scan_reports || [];
+  const requests = [...(planning.requests || []), ...(planning.draft_tasks || []), ...(planning.applied || [])];
+  $("planning-proposals-list").innerHTML = proposals.length ? proposals.slice(0, 80).map((row) => `
+    <article class="list-row ${row.risk_tier === "high" || row.status === "blocked" ? "warn" : "ok"}">
+      <b>${escapeHtml(row.id || row.title || "proposal")}</b>
+      <span>${escapeHtml(row.status || "unknown")} / ${escapeHtml(row.action_type || "proposal")} / ${escapeHtml(row.risk_tier || "unknown")}</span>
+      <p>${escapeHtml(row.owner_boundary || row.suggested_next_action || "")}</p>
+      <code>${escapeHtml(row.source_path || (row.source_refs || [])[0]?.path || "")}</code>
+    </article>
+  `).join("") : `<div class="empty">No planning proposals</div>`;
+  $("planning-scans-list").innerHTML = scans.length ? scans.slice(0, 40).map((row) => `
+    <article class="list-row ${row.status === "block" || row.status === "watch" ? "warn" : "ok"}">
+      <b>${escapeHtml(row.id || "scan")}</b>
+      <span>${escapeHtml(row.status || "unknown")} / ${escapeHtml(row.trigger || "manual")} / findings ${escapeHtml((row.summary || {}).finding_count || 0)}</span>
+      <code>${escapeHtml(row.source_path || "")}</code>
+    </article>
+  `).join("") : `<div class="empty">No planning scans</div>`;
+  $("planning-requests-list").innerHTML = requests.length ? requests.slice(0, 80).map((row) => `
+    <article class="list-row ${row.status === "failed" ? "error" : "ok"}">
+      <b>${escapeHtml(row.id || row.source_path || "planning record")}</b>
+      <span>${escapeHtml(row.status || row.source_kind || "record")} / ${escapeHtml(row.type || row.mode || "planning")}</span>
+      <code>${escapeHtml(row.source_path || "")}</code>
+    </article>
+  `).join("") : `<div class="empty">No planning requests, drafts, or apply records</div>`;
+}
+
 function renderSources() {
   const rows = [...(runtimeState.sources || []), ...(runtimeState.gaps || []), ...(runtimeState.warnings || [])];
   $("sources-list").innerHTML = rows.length ? rows.map((row) => `
@@ -657,7 +806,9 @@ function renderDetail() {
     <form id="edit-task-form" class="edit-form">
       <div class="edit-row">
         <select id="detail-status">
-          ${["planned", "ready", "in_progress", "review", "blocked", "completed"].map((status) => `<option ${status === task.status ? "selected" : ""}>${status}</option>`).join("")}
+          ${[...new Set([...taskStatusOptions, task.status])]
+            .map((status) => `<option ${status === task.status ? "selected" : ""}>${status}</option>`)
+            .join("")}
         </select>
         <select id="detail-priority">
           ${["P0", "P1", "P2", "P3"].map((priority) => `<option ${priority === task.priority ? "selected" : ""}>${priority}</option>`).join("")}
@@ -714,6 +865,7 @@ function renderAll() {
   renderMessages();
   renderEvents();
   renderEvidence();
+  renderPlanning();
   renderMap();
   renderSources();
   renderCommands();
@@ -853,6 +1005,8 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
     api_resources = {
         "/api/tasks": "tasks",
         "/api/agents": "agents",
+        "/api/task-sets": "task_sets",
+        "/api/task_sets": "task_sets",
         "/api/messages": "messages",
         "/api/goals": "goals",
         "/api/sources": "sources",
@@ -862,6 +1016,7 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/graph": "graph",
         "/api/state-machines": "state_machines",
         "/api/roadmap": "roadmap",
+        "/api/planning": "planning",
         "/api/commands": "commands",
     }
     if request_path in api_resources:

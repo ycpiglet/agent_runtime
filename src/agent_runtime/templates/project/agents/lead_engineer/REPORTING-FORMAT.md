@@ -155,7 +155,7 @@ evidence:
 
 사용자에게 답하기 전, 특히 `백로그`, `상태`, `보고`, `plan`, `report`, `review`, `다음 작업` 요청에서는 아래를 내부 체크리스트로 확인한다.
 
-1. 사용자 언어를 따른다. 사용자가 한국어로 물으면 명시적 요청이 없는 한 한국어로 답한다.
+1. 사용자와 직접 대화할 때는 별도 요청이 없는 한 무조건 한국어로 답한다. 사용자가 영어로 말해도 "영어로 답해줘"처럼 명시 요청하지 않으면 한국어로 답한다.
 2. 보고/상태/계획 응답은 `Bottom Line -> Signal -> Insight -> Decision -> Action Board -> Next` 흐름을 기본값으로 둔다.
 3. 상태 신호는 `pass/watch/block` + `score: 0-100`으로 쓴다.
 4. 색상명이나 색상 약어를 상태 machine value로 쓰지 않는다.
@@ -209,6 +209,8 @@ CEO 가 한눈에 이해하는 층. 목표는 **읽는 사람이 이해에 쓰�
 | 영구 기록 | 감사, 재현, 검색, 검증 | source of truth 문서(CYCLE/TASK/AUDIT/RETRO) | 대화체 요약만 남기기 금지 |
 
 운영 규칙:
+- Owner/CEO와 직접 대화할 때는 별도 요청이 없는 한 무조건 한국어로 답한다.
+- 에이전트 간 기록, frontmatter, 코드, 로그, evidence는 필요하면 영어를 사용할 수 있다.
 - Owner/CEO에게는 agent 내부 상태를 그대로 던지지 않고, 의사결정 가능한 `Bottom Line -> Signal -> Insight -> Decision`으로 변환한다.
 - 에이전트 간 메시지는 짧고 구조화한다. `task_id`, `from`, `to`, `request`, `status`, `evidence`, `next`가 핵심이다.
 - 같은 사건도 두 산출물로 나눌 수 있다. canonical 기록은 TASK/AUDIT에 남기고, 사용자 보고는 BRIEF로 압축한다.

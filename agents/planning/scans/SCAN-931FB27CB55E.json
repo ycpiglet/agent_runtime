@@ -1,0 +1,2303 @@
+{
+  "findings": [
+    {
+      "category": "missing-audit-link",
+      "confidence": 0.86,
+      "evidence": [
+        {
+          "confidence": 0.86,
+          "summary": "TASK-AR-213 references missing audit artifact TASK-AR-209"
+        }
+      ],
+      "id": "FIND-646ECD35383E",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "agents/lead_engineer/tasks/TASK-AR-213.md",
+      "suggested_next_action": "restore the referenced audit artifact or mark the task audit entry as superseded",
+      "trace_id": null
+    },
+    {
+      "category": "missing-audit-link",
+      "confidence": 0.86,
+      "evidence": [
+        {
+          "confidence": 0.86,
+          "summary": "TASK-AR-213 references missing audit artifact TASK-AR-204"
+        }
+      ],
+      "id": "FIND-7810BDEF60D4",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "agents/lead_engineer/tasks/TASK-AR-213.md",
+      "suggested_next_action": "restore the referenced audit artifact or mark the task audit entry as superseded",
+      "trace_id": null
+    },
+    {
+      "category": "missing-audit-link",
+      "confidence": 0.86,
+      "evidence": [
+        {
+          "confidence": 0.86,
+          "summary": "TASK-AR-213 references missing audit artifact TASK-AR-212"
+        }
+      ],
+      "id": "FIND-790363414287",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "agents/lead_engineer/tasks/TASK-AR-213.md",
+      "suggested_next_action": "restore the referenced audit artifact or mark the task audit entry as superseded",
+      "trace_id": null
+    },
+    {
+      "category": "missing-audit-link",
+      "confidence": 0.86,
+      "evidence": [
+        {
+          "confidence": 0.86,
+          "summary": "TASK-AR-213 references missing audit artifact TASK-AR-210"
+        }
+      ],
+      "id": "FIND-921D3B92C509",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "agents/lead_engineer/tasks/TASK-AR-213.md",
+      "suggested_next_action": "restore the referenced audit artifact or mark the task audit entry as superseded",
+      "trace_id": null
+    },
+    {
+      "category": "missing-audit-link",
+      "confidence": 0.86,
+      "evidence": [
+        {
+          "confidence": 0.86,
+          "summary": "TASK-AR-218 references missing audit artifact reviews/MEETING-2026-06-09-agent-runtime-task-ar-217-release-rehearsal-plan.md"
+        }
+      ],
+      "id": "FIND-76E4E5A4DBE6",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "agents/lead_engineer/tasks/TASK-AR-218.md",
+      "suggested_next_action": "restore the referenced audit artifact or mark the task audit entry as superseded",
+      "trace_id": null
+    },
+    {
+      "category": "missing-audit-link",
+      "confidence": 0.86,
+      "evidence": [
+        {
+          "confidence": 0.86,
+          "summary": "TASK-AR-240 references missing audit artifact reviews/REVIEW-2026-06-10-agent-runtime-task-ar-240-steward-start.md"
+        }
+      ],
+      "id": "FIND-426FE56ED184",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "agents/lead_engineer/tasks/TASK-AR-240.md",
+      "suggested_next_action": "restore the referenced audit artifact or mark the task audit entry as superseded",
+      "trace_id": null
+    },
+    {
+      "category": "missing-audit-link",
+      "confidence": 0.86,
+      "evidence": [
+        {
+          "confidence": 0.86,
+          "summary": "TASK-AR-240 references missing audit artifact reviews/REVIEW-2026-06-10-agent-runtime-task-ar-240-version-consistency-report.md"
+        }
+      ],
+      "id": "FIND-AD2506898B7F",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "agents/lead_engineer/tasks/TASK-AR-240.md",
+      "suggested_next_action": "restore the referenced audit artifact or mark the task audit entry as superseded",
+      "trace_id": null
+    },
+    {
+      "category": "missing-audit-link",
+      "confidence": 0.86,
+      "evidence": [
+        {
+          "confidence": 0.86,
+          "summary": "TASK-AR-240 references missing audit artifact reviews/REVIEW-2026-06-10-agent-runtime-task-ar-240-doc-reconciliation-proposal.md"
+        }
+      ],
+      "id": "FIND-AF886E09414F",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "agents/lead_engineer/tasks/TASK-AR-240.md",
+      "suggested_next_action": "restore the referenced audit artifact or mark the task audit entry as superseded",
+      "trace_id": null
+    },
+    {
+      "category": "missing-audit-link",
+      "confidence": 0.86,
+      "evidence": [
+        {
+          "confidence": 0.86,
+          "summary": "TASK-AR-240 references missing audit artifact reviews/REVIEW-2026-06-10-agent-runtime-task-ar-240-claim-closeout.md"
+        }
+      ],
+      "id": "FIND-ED5976B5807E",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "agents/lead_engineer/tasks/TASK-AR-240.md",
+      "suggested_next_action": "restore the referenced audit artifact or mark the task audit entry as superseded",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/CALL-2026-06-09-agent-runtime-v018-local-smoke-plan-handoff-call.md has no task reference"
+        }
+      ],
+      "id": "FIND-68E40BF1907F",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/CALL-2026-06-09-agent-runtime-v018-local-smoke-plan-handoff-call.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/CALL-2026-06-09-agent-runtime-v018-owner-approval-gate-handoff-call.md has no task reference"
+        }
+      ],
+      "id": "FIND-2C764FE2AA7A",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/CALL-2026-06-09-agent-runtime-v018-owner-approval-gate-handoff-call.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/CALL-2026-06-09-agent-runtime-v018-owner-approval-handoff-call.md has no task reference"
+        }
+      ],
+      "id": "FIND-C9605852C310",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/CALL-2026-06-09-agent-runtime-v018-owner-approval-handoff-call.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/CALL-2026-06-09-agent-runtime-v018-pending-release-guard-handoff-call.md has no task reference"
+        }
+      ],
+      "id": "FIND-150632A5C858",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/CALL-2026-06-09-agent-runtime-v018-pending-release-guard-handoff-call.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/CALL-2026-06-09-agent-runtime-v018-release-handoff-call.md has no task reference"
+        }
+      ],
+      "id": "FIND-99A561182D21",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/CALL-2026-06-09-agent-runtime-v018-release-handoff-call.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/CALL-2026-06-09-agent-runtime-v018-release-readiness-summary-handoff-call.md has no task reference"
+        }
+      ],
+      "id": "FIND-F1A4A6B0E5ED",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/CALL-2026-06-09-agent-runtime-v018-release-readiness-summary-handoff-call.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/MEETING-2026-06-09-agent-runtime-v018-local-smoke-plan-sync.md has no task reference"
+        }
+      ],
+      "id": "FIND-0374961C88D3",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/MEETING-2026-06-09-agent-runtime-v018-local-smoke-plan-sync.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/MEETING-2026-06-09-agent-runtime-v018-owner-approval-gate-sync.md has no task reference"
+        }
+      ],
+      "id": "FIND-47856168F3EB",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/MEETING-2026-06-09-agent-runtime-v018-owner-approval-gate-sync.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/MEETING-2026-06-09-agent-runtime-v018-pending-release-guard-sync.md has no task reference"
+        }
+      ],
+      "id": "FIND-BA96567FC4CD",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/MEETING-2026-06-09-agent-runtime-v018-pending-release-guard-sync.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/MEETING-2026-06-09-agent-runtime-v018-release-council-sync.md has no task reference"
+        }
+      ],
+      "id": "FIND-7EEFC144128F",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/MEETING-2026-06-09-agent-runtime-v018-release-council-sync.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/MEETING-2026-06-09-agent-runtime-v018-release-execution-boundary-sync.md has no task reference"
+        }
+      ],
+      "id": "FIND-510E56D1CE5C",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/MEETING-2026-06-09-agent-runtime-v018-release-execution-boundary-sync.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/MEETING-2026-06-09-agent-runtime-v018-release-readiness-summary-sync.md has no task reference"
+        }
+      ],
+      "id": "FIND-841E2DB83EC1",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/MEETING-2026-06-09-agent-runtime-v018-release-readiness-summary-sync.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/RESEARCH-2026-06-09-agent-runtime-task-ar-official-guidance.md has no task reference"
+        }
+      ],
+      "id": "FIND-2989F2E2ABA7",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/RESEARCH-2026-06-09-agent-runtime-task-ar-official-guidance.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/RESEARCH-2026-06-10-agent-runtime-rsi-and-planning-loop-research.md has no task reference"
+        }
+      ],
+      "id": "FIND-0353C4E4C008",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/RESEARCH-2026-06-10-agent-runtime-rsi-and-planning-loop-research.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/RESEARCH-2026-06-10-continuity-loop-engineering.md has no task reference"
+        }
+      ],
+      "id": "FIND-6761F597EBAF",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/RESEARCH-2026-06-10-continuity-loop-engineering.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-after-pass-1.md has no task reference"
+        }
+      ],
+      "id": "FIND-409A0C88FC5B",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-after-pass-1.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-baseline.md has no task reference"
+        }
+      ],
+      "id": "FIND-0A8475AFC585",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-baseline.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25.md has no task reference"
+        }
+      ],
+      "id": "FIND-5F91EB92995F",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-critic-feedback-comparison-record.md has no task reference"
+        }
+      ],
+      "id": "FIND-C248BBAF013D",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-critic-feedback-comparison-record.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-critic-feedback-final-comparison-pass-26.md has no task reference"
+        }
+      ],
+      "id": "FIND-0D7D7EB40CF0",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-critic-feedback-final-comparison-pass-26.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-critic-feedback-post-pass-27-recompare.md has no task reference"
+        }
+      ],
+      "id": "FIND-3E754E13DF36",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-critic-feedback-post-pass-27-recompare.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-post-pass-2.md has no task reference"
+        }
+      ],
+      "id": "FIND-3C02BE17224C",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-post-pass-2.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-10.md has no task reference"
+        }
+      ],
+      "id": "FIND-97F529FB466E",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-10.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-11.md has no task reference"
+        }
+      ],
+      "id": "FIND-AC030F974C9E",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-11.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-12.md has no task reference"
+        }
+      ],
+      "id": "FIND-A2CA572BD10A",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-12.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-13.md has no task reference"
+        }
+      ],
+      "id": "FIND-1B760901DF55",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-13.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-14.md has no task reference"
+        }
+      ],
+      "id": "FIND-BEC31BB44533",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-14.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-15.md has no task reference"
+        }
+      ],
+      "id": "FIND-62B450794E19",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-15.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-16.md has no task reference"
+        }
+      ],
+      "id": "FIND-AE790F4921D4",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-16.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-17.md has no task reference"
+        }
+      ],
+      "id": "FIND-C3A62E128A6F",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-17.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-18.md has no task reference"
+        }
+      ],
+      "id": "FIND-4AE36CB11EF6",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-18.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-19-critic-feedback-archive.md has no task reference"
+        }
+      ],
+      "id": "FIND-0DC4B285134A",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-19-critic-feedback-archive.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-2.5.md has no task reference"
+        }
+      ],
+      "id": "FIND-49C10F42C2C1",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-2.5.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-2.md has no task reference"
+        }
+      ],
+      "id": "FIND-71580E2ECE7C",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-2.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-20-critic-feedback-retrospective.md has no task reference"
+        }
+      ],
+      "id": "FIND-E60ED48A753D",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-20-critic-feedback-retrospective.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-21-critic-feedback-comparison.md has no task reference"
+        }
+      ],
+      "id": "FIND-EB20C2684C55",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-21-critic-feedback-comparison.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-22-critic-feedback-continuation.md has no task reference"
+        }
+      ],
+      "id": "FIND-2445790CBCA5",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-22-critic-feedback-continuation.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-23-command-sandbox-review.md has no task reference"
+        }
+      ],
+      "id": "FIND-CE7703E05163",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-23-command-sandbox-review.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-24-critic-feedback-full-comparison.md has no task reference"
+        }
+      ],
+      "id": "FIND-DA18716944FC",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-24-critic-feedback-full-comparison.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-27-review-cycle.md has no task reference"
+        }
+      ],
+      "id": "FIND-82DDEE20B19F",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-27-review-cycle.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-3.md has no task reference"
+        }
+      ],
+      "id": "FIND-4D00EC8F2077",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-3.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-4.md has no task reference"
+        }
+      ],
+      "id": "FIND-9126DB196011",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-4.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-5.md has no task reference"
+        }
+      ],
+      "id": "FIND-BD6168EDEB0F",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-5.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-6.md has no task reference"
+        }
+      ],
+      "id": "FIND-8C0AE651DD56",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-6.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-7.md has no task reference"
+        }
+      ],
+      "id": "FIND-6D5BA4DDCCF4",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-7.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-8.md has no task reference"
+        }
+      ],
+      "id": "FIND-7715FDD387FD",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-8.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-9.md has no task reference"
+        }
+      ],
+      "id": "FIND-33C6CB10AF10",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-9.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-9b-critique-alignment.md has no task reference"
+        }
+      ],
+      "id": "FIND-A6B57698F2E8",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-08-agent-runtime-recompare-after-pass-9b-critique-alignment.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-100.md has no task reference"
+        }
+      ],
+      "id": "FIND-4C8EBAC30164",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-100.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-101.md has no task reference"
+        }
+      ],
+      "id": "FIND-53B921FDF3B1",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-101.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-102.md has no task reference"
+        }
+      ],
+      "id": "FIND-2F8BB62DD4DC",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-102.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-103.md has no task reference"
+        }
+      ],
+      "id": "FIND-3595A4023AD3",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-103.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-104.md has no task reference"
+        }
+      ],
+      "id": "FIND-AA4E265A7C2C",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-104.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-105.md has no task reference"
+        }
+      ],
+      "id": "FIND-9A2CD7ED6074",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-105.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-106.md has no task reference"
+        }
+      ],
+      "id": "FIND-DD6B71D1CDD8",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-106.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-107.md has no task reference"
+        }
+      ],
+      "id": "FIND-42CB25091598",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-107.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-108.md has no task reference"
+        }
+      ],
+      "id": "FIND-F05E8406956D",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-108.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-109.md has no task reference"
+        }
+      ],
+      "id": "FIND-C14DCF655104",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-109.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-110.md has no task reference"
+        }
+      ],
+      "id": "FIND-FD1EBE2E03F2",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-110.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-111.md has no task reference"
+        }
+      ],
+      "id": "FIND-88228CA683FB",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-111.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-112.md has no task reference"
+        }
+      ],
+      "id": "FIND-396B686841AD",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-112.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-113.md has no task reference"
+        }
+      ],
+      "id": "FIND-42E4A9531223",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-113.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-114.md has no task reference"
+        }
+      ],
+      "id": "FIND-8F1DC8F1F95F",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-114.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-28.md has no task reference"
+        }
+      ],
+      "id": "FIND-5096B131527A",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-28.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-29.md has no task reference"
+        }
+      ],
+      "id": "FIND-6DFECE799323",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-29.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-30.md has no task reference"
+        }
+      ],
+      "id": "FIND-A187214706BF",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-30.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-31.md has no task reference"
+        }
+      ],
+      "id": "FIND-55A794BFBF7D",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-31.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-32.md has no task reference"
+        }
+      ],
+      "id": "FIND-213E2C0A936D",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-32.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-33.md has no task reference"
+        }
+      ],
+      "id": "FIND-3C704D1FE951",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-33.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-34.md has no task reference"
+        }
+      ],
+      "id": "FIND-52DD0DC7425A",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-34.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-35.md has no task reference"
+        }
+      ],
+      "id": "FIND-D99466B3C135",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-35.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-36.md has no task reference"
+        }
+      ],
+      "id": "FIND-F829E3741015",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-36.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-37.md has no task reference"
+        }
+      ],
+      "id": "FIND-A8D2BA409ED0",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-37.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-38.md has no task reference"
+        }
+      ],
+      "id": "FIND-DD29DDE19B68",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-38.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-39.md has no task reference"
+        }
+      ],
+      "id": "FIND-4544AC0EF337",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-39.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-40.md has no task reference"
+        }
+      ],
+      "id": "FIND-76B7F7E3ADE3",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-40.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-41.md has no task reference"
+        }
+      ],
+      "id": "FIND-28A1827D4491",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-41.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-42.md has no task reference"
+        }
+      ],
+      "id": "FIND-323D816D72B5",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-42.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-43.md has no task reference"
+        }
+      ],
+      "id": "FIND-A3AB48721135",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-43.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-44.md has no task reference"
+        }
+      ],
+      "id": "FIND-C080CD4C202C",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-44.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-45.md has no task reference"
+        }
+      ],
+      "id": "FIND-30FF64D5D8F7",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-45.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-46.md has no task reference"
+        }
+      ],
+      "id": "FIND-023C4639D6D4",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-46.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-47.md has no task reference"
+        }
+      ],
+      "id": "FIND-D23DD44656E9",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-47.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-48.md has no task reference"
+        }
+      ],
+      "id": "FIND-D1B5F7ECC386",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-48.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-49.md has no task reference"
+        }
+      ],
+      "id": "FIND-DDA69CF4FA78",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-49.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-50.md has no task reference"
+        }
+      ],
+      "id": "FIND-90A19BC9FC0E",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-50.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-51.md has no task reference"
+        }
+      ],
+      "id": "FIND-27D19A69C7AA",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-51.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-52.md has no task reference"
+        }
+      ],
+      "id": "FIND-2C2B263A3C84",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-52.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-53.md has no task reference"
+        }
+      ],
+      "id": "FIND-8EFD6E29166C",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-53.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-54.md has no task reference"
+        }
+      ],
+      "id": "FIND-DA3EC4D1D0E2",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-54.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-55.md has no task reference"
+        }
+      ],
+      "id": "FIND-282B83795F56",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-55.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-56.md has no task reference"
+        }
+      ],
+      "id": "FIND-4D18CD4712D5",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-56.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-57.md has no task reference"
+        }
+      ],
+      "id": "FIND-25C2DFF7869D",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-57.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-58.md has no task reference"
+        }
+      ],
+      "id": "FIND-77FD6938D67B",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-58.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-59.md has no task reference"
+        }
+      ],
+      "id": "FIND-9CEA3F8801AF",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-59.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-60.md has no task reference"
+        }
+      ],
+      "id": "FIND-1A88EF32C711",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-60.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-61.md has no task reference"
+        }
+      ],
+      "id": "FIND-32C35E974E12",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-61.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-62.md has no task reference"
+        }
+      ],
+      "id": "FIND-F2297FB44377",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-62.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-63.md has no task reference"
+        }
+      ],
+      "id": "FIND-8843F81541CC",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-63.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-64.md has no task reference"
+        }
+      ],
+      "id": "FIND-47E43BD4CCCF",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-64.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-65.md has no task reference"
+        }
+      ],
+      "id": "FIND-7D67CB0A5927",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-65.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-66.md has no task reference"
+        }
+      ],
+      "id": "FIND-F49666EDD0F8",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-66.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-67.md has no task reference"
+        }
+      ],
+      "id": "FIND-78771C0A10D3",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-67.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-68.md has no task reference"
+        }
+      ],
+      "id": "FIND-C909EF5E07FB",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-68.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-69.md has no task reference"
+        }
+      ],
+      "id": "FIND-E2A51D47B887",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-69.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-70.md has no task reference"
+        }
+      ],
+      "id": "FIND-1F53F97CF56D",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-70.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-71.md has no task reference"
+        }
+      ],
+      "id": "FIND-4C110E4F9D13",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-71.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-72.md has no task reference"
+        }
+      ],
+      "id": "FIND-34291A3D1E14",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-72.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-73.md has no task reference"
+        }
+      ],
+      "id": "FIND-86AE64A14857",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-73.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-74.md has no task reference"
+        }
+      ],
+      "id": "FIND-AAE0CDACCAB3",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-74.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-75.md has no task reference"
+        }
+      ],
+      "id": "FIND-18BD19BCAC60",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-75.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-76.md has no task reference"
+        }
+      ],
+      "id": "FIND-F3934F39110D",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-76.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-77.md has no task reference"
+        }
+      ],
+      "id": "FIND-BEECC740FBBE",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-77.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-78.md has no task reference"
+        }
+      ],
+      "id": "FIND-349B0C8BB4C0",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-78.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-79.md has no task reference"
+        }
+      ],
+      "id": "FIND-6ACF2AB00472",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-79.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-80.md has no task reference"
+        }
+      ],
+      "id": "FIND-3FD0D270D04E",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-80.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-81.md has no task reference"
+        }
+      ],
+      "id": "FIND-7A54A95797F0",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-81.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-82.md has no task reference"
+        }
+      ],
+      "id": "FIND-BC5AFFFD2556",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-82.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-83.md has no task reference"
+        }
+      ],
+      "id": "FIND-BA11587AD4FE",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-83.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-84.md has no task reference"
+        }
+      ],
+      "id": "FIND-67CE6CED93CD",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-84.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-85.md has no task reference"
+        }
+      ],
+      "id": "FIND-506CFCF7073D",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-85.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-86.md has no task reference"
+        }
+      ],
+      "id": "FIND-D93B9AC72156",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-86.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-87.md has no task reference"
+        }
+      ],
+      "id": "FIND-CC5137967916",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-87.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-88.md has no task reference"
+        }
+      ],
+      "id": "FIND-321DE24B1907",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-88.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "orphaned-review",
+      "confidence": 0.61,
+      "evidence": [
+        {
+          "confidence": 0.61,
+          "summary": "Review reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-89.md has no task reference"
+        }
+      ],
+      "id": "FIND-5B2582955DC8",
+      "proposal_allowed": true,
+      "risk_tier": "low",
+      "source_path": "reviews/REVIEW-2026-06-09-agent-runtime-critic-feedback-recompare-pass-89.md",
+      "suggested_next_action": "link the review to a task, release, proposal, or mark it as general research",
+      "trace_id": null
+    },
+    {
+      "category": "release-version-consistency",
+      "confidence": 0.88,
+      "evidence": [
+        {
+          "confidence": 0.88,
+          "summary": "release/version steward status is watch"
+        }
+      ],
+      "id": "FIND-481BE451D80C",
+      "proposal_allowed": true,
+      "risk_tier": "medium",
+      "source_path": "reviews/RELEASE-VERSION-CONSISTENCY-STEWARD.json",
+      "suggested_next_action": "keep C-mode promotion blocked until steward findings are pass",
+      "trace_id": null
+    },
+    {
+      "category": "retro-compound-pattern",
+      "confidence": 0.76,
+      "evidence": [
+        {
+          "confidence": 0.76,
+          "summary": "continuity-gap pattern appears 26 times in compound log"
+        }
+      ],
+      "id": "FIND-800B566B6D4B",
+      "proposal_allowed": true,
+      "risk_tier": "medium",
+      "source_path": "agents/lead_engineer/compound_log.md",
+      "suggested_next_action": "create preventive work that turns the repeated correction into a gate, API, or runtime check",
+      "trace_id": null
+    },
+    {
+      "category": "retro-compound-pattern",
+      "confidence": 0.76,
+      "evidence": [
+        {
+          "confidence": 0.76,
+          "summary": "response-contract-drift pattern appears 23 times in compound log"
+        }
+      ],
+      "id": "FIND-F7E40704CCBB",
+      "proposal_allowed": true,
+      "risk_tier": "medium",
+      "source_path": "agents/lead_engineer/compound_log.md",
+      "suggested_next_action": "create preventive work that turns the repeated correction into a gate, API, or runtime check",
+      "trace_id": null
+    }
+  ],
+  "generated_at": "1970-01-01T00:00:00+00:00",
+  "id": "SCAN-931FB27CB55E",
+  "mode": "B",
+  "sources": [
+    {
+      "freshness": "present",
+      "kind": "backlog",
+      "path": "BACKLOG.md",
+      "required": true
+    },
+    {
+      "freshness": "present",
+      "kind": "generated_board",
+      "path": "BACKLOG-BOARD.md",
+      "required": true
+    },
+    {
+      "freshness": "present",
+      "kind": "status",
+      "path": "STATUS.md",
+      "required": true
+    },
+    {
+      "freshness": "present",
+      "kind": "brief",
+      "path": "AGENT_RUNTIME_RSI_PLANNING_BRIEF.md",
+      "required": true
+    },
+    {
+      "freshness": "present",
+      "kind": "plan",
+      "path": "docs/superpowers/plans/2026-06-10-rsi-planning-loop.md",
+      "required": true
+    },
+    {
+      "freshness": "present",
+      "kind": "state_machine",
+      "path": "agents/project/STATE-MACHINES.yml",
+      "required": true
+    },
+    {
+      "freshness": "present",
+      "kind": "contract",
+      "path": "agents/project/PLANNING-LOOP-CONTRACT.md",
+      "required": true
+    },
+    {
+      "freshness": "present",
+      "kind": "schema",
+      "path": "schemas/planning-proposal.schema.json",
+      "required": true
+    },
+    {
+      "freshness": "present",
+      "kind": "guardrail_policy",
+      "path": "agents/project/PLANNING-GUARDRAILS.yml",
+      "required": true
+    },
+    {
+      "freshness": "present",
+      "kind": "promotion_gate",
+      "path": "agents/project/C-MODE-PROMOTION-CHECKLIST.md",
+      "required": true
+    },
+    {
+      "freshness": "present",
+      "kind": "organization",
+      "path": "agents/project/ORG.md",
+      "required": true
+    },
+    {
+      "freshness": "present",
+      "kind": "teams",
+      "path": "agents/project/TEAMS.md",
+      "required": true
+    },
+    {
+      "freshness": "present",
+      "kind": "eval_artifacts",
+      "path": "agents/project/evals",
+      "required": false
+    },
+    {
+      "freshness": "present",
+      "kind": "correction_artifacts",
+      "path": "agents/project/corrections",
+      "required": false
+    },
+    {
+      "freshness": "present",
+      "kind": "a2a_artifacts",
+      "path": "agents/project/a2a",
+      "required": false
+    },
+    {
+      "freshness": "missing_optional",
+      "kind": "trace_artifacts",
+      "path": "traces",
+      "required": false
+    }
+  ],
+  "status": "pass",
+  "summary": {
+    "finding_count": 137,
+    "proposal_allowed_count": 137
+  },
+  "trigger": "schedule"
+}

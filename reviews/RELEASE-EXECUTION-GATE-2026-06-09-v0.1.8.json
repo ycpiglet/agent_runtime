@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-release-execution-gate/v1",
   "evaluation_mode": "ready_to_release_boundary",
-  "generated_at": "2026-06-09T09:59:09.663864+00:00",
+  "generated_at": "2026-06-10T12:06:40.074601+00:00",
   "status": "pass",
   "release_route": "release_evidence_ready",
   "target_version": "0.1.8",

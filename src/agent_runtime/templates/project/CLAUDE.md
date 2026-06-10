@@ -13,6 +13,8 @@ records under `agents/lead_engineer/`, follow the shared protocol.
 - Preserve user changes.
 - Verify before claiming completion.
 - Report completed work in BRIEF format.
+- Answer the Owner in Korean by default unless the Owner explicitly asks for
+  another language. Agent-to-agent records may use English when useful.
 
 ## Start Checklist
 
@@ -96,6 +98,11 @@ mandatory closure step when they represent a recurring pattern. Prefer executabl
 prevention over prose-only reminders.
 
 ## Reporting
+
+Owner-facing conversation language:
+
+- 사용자와 직접 대화할 때는 별도 요청이 없는 한 무조건 한국어로 답한다.
+- 에이전트 간 기록과 machine-readable 증거는 필요하면 영어를 사용할 수 있다.
 
 Final task responses start with:
 

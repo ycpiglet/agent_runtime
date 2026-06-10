@@ -51,11 +51,39 @@ def test_backlog_board_groups_tasks_by_task_set_before_lane(tmp_path: Path) -> N
     assert quality_section.index("TASK-AR-901") < quality_section.index("TASK-AR-902")
 
 
-def test_real_backlog_tasks_are_classified_into_eight_task_sets() -> None:
+def test_backlog_board_hides_completed_tasks_and_completed_task_sets(tmp_path: Path) -> None:
+    tasks_dir = tmp_path / "tasks"
+    _write_task(tasks_dir, "TASK-AR-901", "TASKSET-AR-QUALITY-LOOP", status="completed")
+    _write_task(tasks_dir, "TASK-AR-902", "TASKSET-AR-QUALITY-LOOP", status="done")
+    _write_task(tasks_dir, "TASK-AR-903", "TASKSET-AR-RELEASE-STEWARD", status="in_progress")
+
+    tasks = backlog_board.load_tasks(tasks_dir)
+    board = backlog_board.render(tasks)
+
+    assert "task_count: 3" in board
+    assert "open_count: 1" in board
+    assert "task_set_count: 1" in board
+    assert "completed_count: 2" in board
+    assert "completed_task_set_count: 1" in board
+    action_board = board.split("## Action Board", 1)[1].split("## Archived Task Sets", 1)[0]
+    assert "### Quality Sentinel (`TASKSET-AR-QUALITY-LOOP`)" not in action_board
+    assert "TASK-AR-901" not in action_board
+    assert "TASK-AR-902" not in action_board
+    assert "### Release Steward (`TASKSET-AR-RELEASE-STEWARD`)" in board
+    assert "TASK-AR-903" in board
+    assert "## Archived Task Sets" in board
+    archived_sets = board.split("## Archived Task Sets", 1)[1]
+    assert "| Quality Sentinel (`TASKSET-AR-QUALITY-LOOP`) |" in archived_sets
+    assert "| `2/2` done |" in archived_sets
+    assert "TASK-AR-901" not in archived_sets
+    assert "TASK-AR-902" not in archived_sets
+
+
+def test_real_backlog_tasks_are_classified_into_ten_task_sets() -> None:
     tasks = backlog_board.load_tasks(ROOT / "agents" / "lead_engineer" / "tasks")
     task_set_ids = {task.task_set_id for task in tasks}
 
-    assert len(tasks) >= 49
+    assert len(tasks) >= 55
     assert task_set_ids == {
         "TASKSET-AR-CONTEXT-KNOWLEDGE",
         "TASKSET-AR-QUALITY-LOOP",
@@ -64,5 +92,7 @@ def test_real_backlog_tasks_are_classified_into_eight_task_sets() -> None:
         "TASKSET-AR-UI-CONSOLE",
         "TASKSET-AR-RSI-PLANNING",
         "TASKSET-AR-PANE-PROGRESS",
+        "TASKSET-AR-COLLAB-CONCURRENCY",
+        "TASKSET-AR-GOVERNANCE-OPS",
         "TASKSET-AR-REPO-HYGIENE",
     }

@@ -58,3 +58,15 @@ it remains a proposal or becomes canonical work.
   proposal to source evidence, and block self-weakening gate changes.
 - Recursion hygiene: every RSI change must state what it improves, what it may
   degrade, how it will be measured, and how it can be reverted.
+
+## RSI Planning Loop Implementation Path (2026-06-10)
+
+- Contract: `agents/project/PLANNING-LOOP-CONTRACT.md`.
+- Schema: `schemas/planning-proposal.schema.json`.
+- Guardrails: `agents/project/PLANNING-GUARDRAILS.yml`.
+- C-mode checklist: `agents/project/C-MODE-PROMOTION-CHECKLIST.md`.
+- Council protocol: `agents/project/DIVERSITY-COUNCIL-PROTOCOL.md`.
+- Runtime path: `scripts/planning_loop.py` supports read-only scan, proposal outbox, draft task writer, planning gate, approved apply skeleton, retro synthesis, trace/eval ingestion, and C-mode gate.
+- Release steward path: `scripts/release_version_consistency_steward.py` emits proposal-only release/version consistency reports.
+- UI path: `planning.scan` command requests and the read-only Planner panel expose scan/proposal/request/draft/apply records without canonical mutation.
+- Review: `reviews/REVIEW-2026-06-10-agent-runtime-rsi-planning-loop-implementation.md`.

@@ -32,6 +32,10 @@ REQUIRED_POINTER_FIELDS = (
     "pointers:",
     "rules:",
     "verification:",
+    "task_set_id:",
+    "step_index:",
+    "step_total:",
+    "status_text:",
 )
 
 

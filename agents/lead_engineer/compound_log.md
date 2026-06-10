@@ -176,3 +176,46 @@
 - signal: pass
 - score: 94
 - Enforcement implemented in working tree and verified by full tests and release-facing gates.
+
+## COMPOUND-2026-06-10-004: Task-set completion inferred from claims instead of canonical tasks
+
+### Bottom Line
+- `TASKSET-AR-QUALITY-LOOP` was reported as effectively complete before all canonical task files in that set were complete.
+- Runtime claims were closed, but `agents/lead_engineer/tasks/TASK-AR-221.md` and `agents/lead_engineer/tasks/TASK-AR-243.md` still showed unfinished states.
+- The fix is an executable task-set completion gate, not another manual reminder.
+
+### 5W1H
+| Field | Record |
+|---|---|
+| Who | Assistant/Codex task-set closeout path; affected Owner progress view for task set 1. |
+| What | Completion was judged from active/released claims and UI task-set aggregation instead of the canonical task files for the whole task set. |
+| When | 2026-06-10 task-set closeout cycle. |
+| Where | `C:\Users\ycpig\agent_runtime`; surfaces: `agents/runtime/task_claims/`, `agents/lead_engineer/tasks/`, `agents/project/NEXT-SESSION-POINTER.yml`, task-set UI state. |
+| Why | `taskset_work_gate.py` checked task-set IDs and board freshness, but had no mode to require a named task set to have all tasks completed and all claims fully released. |
+| How | Closed claims for `TASK-AR-205` through `TASK-AR-208` and `TASK-AR-217` made the runtime view look done, while task-file scan still had `TASK-AR-221` as `in_progress` and `TASK-AR-243` as `planned`. |
+
+### Situation
+- The Owner asked for task set 1 to be progressed and finished.
+- Task set 1 maps to `TASKSET-AR-QUALITY-LOOP`.
+- The canonical set contains seven tasks: `TASK-AR-205`, `TASK-AR-206`, `TASK-AR-207`, `TASK-AR-208`, `TASK-AR-217`, `TASK-AR-221`, and `TASK-AR-243`.
+- Runtime claims only represented the subset currently claimed by dispatcher runs.
+
+### Cause
+- Primary cause: completion audit used runtime claims as the main source of truth instead of task files plus claims.
+- Secondary cause: `NEXT-SESSION-POINTER.yml` could mention multiple task sets even after one set was complete, confusing task-set progress interpretation.
+- Secondary cause: no `--require-complete --task-set-id` gate existed for explicit Owner requests like "finish task set 1".
+
+### Forced Rule
+- For "finish task set N" requests, identify the task-set ID and enumerate all canonical task files with that `task_set_id`.
+- Completion requires every canonical task in the set to be `completed` and every claim for the set to be non-active with `phase=taskset-completed` and `progress_pct=100`.
+- Do not use UI aggregation alone as proof of completion because it is claim-derived and omits unclaimed planned/in-progress task files.
+
+### Preventive Action
+- Extend `scripts/taskset_work_gate.py` with `--task-set-id` and `--require-complete`.
+- Add regression coverage so incomplete task files and stale released-claim metadata fail the gate.
+- Use `python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-QUALITY-LOOP --require-complete --check` before claiming task set 1 is complete.
+
+### Status
+- signal: pass
+- score: 95
+- Enforcement implemented in working tree; Quality Loop closeout uses the new named task-set completion gate.
