@@ -1,5 +1,14 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-11 - TASK-AR-279 backlog hierarchy closeout
+
+- Summary: completed `TASK-AR-279` for the `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` backlog pane visual hierarchy scope.
+- Output: task state now exposes `task_set_id`, `evidence_count`, and `evidence_label`; backlog cards show visible `Status`, `Priority`, `Owner`, `Task set`, and `Evidence` labels; lane headers expose count badges; mobile card metadata collapses to one column.
+- Verification: TDD RED/GREEN was exercised for state enrichment, card hierarchy, and mobile metadata collapse; focused UI/state/command/backlog tests passed with `43 passed`; template message queue passed with `49 passed`; template smoke/warning-summary/RSI subset passed with `20 passed`; `py_compile`, named task-set gate, Owner-doc format gates, Owner governance, and Playwright desktop/mobile checks passed.
+- Full-suite boundary: `python -m pytest -q` was attempted twice but exceeded local time limits without failure output, so no full-suite pass is claimed for this task.
+- Handoff: `TASK-AR-280` is the next UI design implementation task; `TASK-AR-279` is archived in `BACKLOG-BOARD.md`.
+- Evidence: `reviews/REVIEW-2026-06-11-agent-runtime-task-ar-279-backlog-hierarchy.md`.
+
 ## 2026-06-11 - TASK-AR-278 console shell closeout
 
 - Summary: completed `TASK-AR-278` for the `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` console shell scope.

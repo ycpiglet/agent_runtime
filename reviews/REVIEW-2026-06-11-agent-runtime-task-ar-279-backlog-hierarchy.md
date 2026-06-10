@@ -27,7 +27,9 @@ tags: [ui-console, ui-design, backlog, task-ar-279, verification]
 | Lane hierarchy | pass | Lanes now render explicit `.lane-header`, `.lane-title`, and `.lane-count` elements |
 | Mobile layout | pass | `.task-card-meta` collapses to one column inside `@media (max-width: 760px)` |
 | Focused tests | pass | `python -m pytest tests/test_ui_console.py tests/test_ui_state.py tests/test_ui_commands.py tests/test_backlog_board_tasksets.py -q`: `43 passed` |
+| Slow follow-up tests | pass | `tests/test_template_message_queue.py`: `49 passed`; template smoke/warning-summary/RSI verification subset: `20 passed` |
 | Browser verification | pass | Playwright on `http://127.0.0.1:8767/`: desktop `1440x1000` and mobile `390x844` had no horizontal overflow and `0` console errors/warnings |
+| Full suite | watch | `python -m pytest -q` exceeded local time limits twice without failure output, so full-suite pass is not claimed |
 
 ## Insight
 
@@ -57,6 +59,6 @@ tags: [ui-console, ui-design, backlog, task-ar-279, verification]
 
 ## Next Steps
 
-- Run `python scripts/backlog_board.py --write`.
-- Run `python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-UI-DESIGN-IMPLEMENTATION --check`.
+- Keep `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` active.
 - Start `TASK-AR-280` with a fresh claim after this closeout is merged.
+- Re-run full-suite pytest in a longer-lived shell before any release claim that needs broad test evidence.
