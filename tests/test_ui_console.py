@@ -113,6 +113,41 @@ def test_ui_console_shell_css_targets_served_dom_classes(tmp_path):
         assert selector in css
 
 
+def test_ui_console_backlog_cards_surface_status_priority_taskset_and_evidence(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    for marker in [
+        "task-card-header",
+        "task-card-title",
+        "task-card-summary",
+        "task-card-meta",
+        "task-card-evidence",
+        "task-card-taskset",
+        "evidenceCountForTask",
+    ]:
+        assert marker in js
+
+    for label in ["Status", "Priority", "Task set", "Evidence"]:
+        assert f">{label}<" in js
+
+    for selector in [
+        ".task-card-header",
+        ".task-card-title",
+        ".task-card-summary",
+        ".task-card-meta",
+        ".task-card-evidence",
+        ".task-card-taskset",
+        ".task-card.status-blocked",
+        ".task-card.status-completed",
+        ".lane-count",
+    ]:
+        assert selector in css
+
+    mobile_css = css.split("@media (max-width: 760px)", 1)[1]
+    assert ".task-card-meta" in mobile_css
+
+
 def test_ui_console_api_state_uses_ui_state_adapter(tmp_path):
     _write_task(tmp_path)
 

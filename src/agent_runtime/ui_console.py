@@ -441,7 +441,7 @@ textarea:focus {
   background: rgba(255, 255, 255, 0.032);
   padding: 10px;
 }
-.lane header {
+.lane-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -452,6 +452,25 @@ textarea:focus {
   text-transform: uppercase;
   padding-bottom: 8px;
   letter-spacing: 0;
+}
+.lane-title {
+  display: grid;
+  gap: 2px;
+  color: var(--ink);
+}
+.lane-title small {
+  color: var(--subtle);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+.lane-count {
+  min-width: 28px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 3px 8px;
+  background: rgba(94, 106, 210, 0.14);
+  color: var(--ink);
+  text-align: center;
 }
 .lane-body,
 .list-panel,
@@ -496,6 +515,63 @@ textarea:focus {
 .list-row:hover {
   border-color: var(--line-strong);
 }
+.task-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.task-id {
+  color: var(--primary-hover);
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 11px;
+}
+.task-card-title {
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.25;
+}
+.task-card-summary {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+.task-card-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+.task-card-meta > span,
+.task-status {
+  min-width: 0;
+  border: 1px solid rgba(52, 56, 68, 0.76);
+  border-radius: 6px;
+  background: rgba(1, 1, 2, 0.34);
+  padding: 6px;
+}
+.meta-label {
+  display: block;
+  color: var(--subtle);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.task-card-meta strong,
+.task-status strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink);
+  font-size: 11px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.task-card-evidence strong {
+  color: var(--teal);
+}
+.task-card-taskset strong {
+  color: var(--primary-hover);
+}
 .task-card b,
 .taskset-card b,
 .list-row b {
@@ -509,6 +585,18 @@ textarea:focus {
   font-size: 12px;
   line-height: 1.35;
 }
+.task-card .task-id {
+  color: var(--primary-hover);
+  font-size: 11px;
+}
+.task-card .task-card-summary {
+  color: var(--muted);
+}
+.task-card .meta-label {
+  color: var(--subtle);
+  font-size: 10px;
+  line-height: 1;
+}
 .task-card code,
 .taskset-card code,
 .list-row code {
@@ -517,15 +605,20 @@ textarea:focus {
   overflow-wrap: anywhere;
 }
 .list-row.ok,
-.task-card.completed {
+.task-card.status-completed,
+.task-card.status-done {
   border-left: 3px solid var(--success);
 }
 .list-row.warn,
-.task-card.in_progress {
+.task-card.status-in-progress,
+.task-card.status-active,
+.task-card.status-planned,
+.task-card.status-ready {
   border-left: 3px solid var(--warning);
 }
 .list-row.error,
-.task-card.blocked {
+.task-card.status-blocked,
+.task-card.status-hold {
   border-left: 3px solid var(--danger);
 }
 .state-chip,
@@ -651,6 +744,7 @@ pre {
   .runtime-form,
   .filter-row,
   .evidence-grid,
+  .task-card-meta,
   .meta-grid,
   .edit-row,
   .button-row {
@@ -774,11 +868,46 @@ function renderTaskSets() {
   `).join("") : "";
 }
 
+function statusClassName(status) {
+  const normalized = String(status || "unknown").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return `status-${normalized || "unknown"}`;
+}
+
+function laneClassName(lane) {
+  const normalized = String(lane || "backlog").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return `lane-${normalized || "backlog"}`;
+}
+
+function evidenceCountForTask(task) {
+  const directCount = Number(task.evidence_count);
+  if (Number.isFinite(directCount)) return directCount;
+  return (runtimeState.evidence || []).filter((item) => item.task_id === task.id).length;
+}
+
+function evidenceLabelForTask(task) {
+  if (task.evidence_label) return String(task.evidence_label);
+  const count = evidenceCountForTask(task);
+  return count === 1 ? "1 evidence" : `${count} evidence`;
+}
+
 function taskCard(task) {
-  return `<button class="task-card" type="button" data-task-id="${escapeHtml(task.id)}">
-    <strong>${escapeHtml(task.id)} - ${escapeHtml(task.title)}</strong>
-    <span>${escapeHtml(task.description || "No summary")}</span>
-    <small>${escapeHtml(task.owner_agent || "unassigned")} / ${escapeHtml(task.priority || "P?")}</small>
+  const status = task.status || "unknown";
+  const priority = task.priority || "P?";
+  const taskSet = task.task_set_id || "no task set";
+  const evidence = evidenceLabelForTask(task);
+  return `<button class="task-card ${statusClassName(status)}" type="button" data-task-id="${escapeHtml(task.id)}">
+    <div class="task-card-header">
+      <span class="task-id">${escapeHtml(task.id)}</span>
+      <span class="task-status"><span class="meta-label">Status</span><strong>${escapeHtml(status)}</strong></span>
+    </div>
+    <strong class="task-card-title">${escapeHtml(task.title)}</strong>
+    <span class="task-card-summary">${escapeHtml(task.description || "No summary")}</span>
+    <div class="task-card-meta" aria-label="Task metadata">
+      <span><span class="meta-label">Priority</span><strong>${escapeHtml(priority)}</strong></span>
+      <span><span class="meta-label">Owner</span><strong>${escapeHtml(task.owner_agent || "unassigned")}</strong></span>
+      <span class="task-card-taskset"><span class="meta-label">Task set</span><strong>${escapeHtml(taskSet)}</strong></span>
+      <span class="task-card-evidence"><span class="meta-label">Evidence</span><strong>${escapeHtml(evidence)}</strong></span>
+    </div>
   </button>`;
 }
 
@@ -787,7 +916,7 @@ function renderKanban() {
   $("kanban").innerHTML = lanes.map((lane) => {
     const laneTasks = tasks.filter((task) => task.lane === lane);
     const body = laneTasks.length ? laneTasks.map(taskCard).join("") : `<div class="empty">No ${escapeHtml(lane)} tasks</div>`;
-    return `<section class="lane"><header><span>${escapeHtml(lane)}</span><span>${laneTasks.length}</span></header><div class="lane-body">${body}</div></section>`;
+    return `<section class="lane ${laneClassName(lane)}" data-lane="${escapeHtml(lane)}"><header class="lane-header"><span class="lane-title">${escapeHtml(lane)}<small>Lane</small></span><span class="lane-count" aria-label="${escapeHtml(lane)} task count">${laneTasks.length}</span></header><div class="lane-body">${body}</div></section>`;
   }).join("");
   document.querySelectorAll(".task-card").forEach((button) => {
     button.addEventListener("click", () => {

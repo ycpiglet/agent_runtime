@@ -255,6 +255,7 @@ def load_tasks(root: Path, now: str, warnings: list[dict[str, str]]) -> list[dic
             "status": str(meta.get("status") or ""),
             "lane": _lane_for_status(str(meta.get("status") or "")),
             "priority": meta.get("priority"),
+            "task_set_id": meta.get("task_set_id"),
             "order": _task_order(meta, order),
             "owner_agent": meta.get("owner"),
             "team": meta.get("team"),
@@ -570,6 +571,18 @@ def derive_evidence(events: list[dict[str, Any]], messages: list[dict[str, Any]]
                 }
             )
     return evidence
+
+
+def enrich_tasks_with_evidence(tasks: list[dict[str, Any]], evidence: list[dict[str, Any]]) -> None:
+    counts: dict[str, int] = {}
+    for item in evidence:
+        task_id = str(item.get("task_id") or "").strip()
+        if task_id:
+            counts[task_id] = counts.get(task_id, 0) + 1
+    for task in tasks:
+        count = counts.get(str(task.get("id") or ""), 0)
+        task["evidence_count"] = count
+        task["evidence_label"] = "1 evidence" if count == 1 else f"{count} evidence"
 
 
 def build_replay(events: list[dict[str, Any]], messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -1088,6 +1101,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     commands = ui_commands.list_commands(root_path)
     errors = derive_errors(events)
     evidence = derive_evidence(events, messages)
+    enrich_tasks_with_evidence(tasks, evidence)
     replay = build_replay(events, messages)
     graph = build_graph(tasks, agents, messages, events)
     state_machines = load_state_machines(root_path, tasks, agents, generated_at)

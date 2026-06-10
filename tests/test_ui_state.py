@@ -111,6 +111,48 @@ def test_ui_state_adapter_normalizes_runtime_records_with_source_metadata(tmp_pa
     assert all("last_read_at" in source and "freshness" in source for source in state["sources"])
 
 
+def test_ui_state_enriches_tasks_with_task_set_and_evidence_count(tmp_path):
+    root = tmp_path
+    _write(
+        root / "agents" / "lead_engineer" / "tasks" / "TASK-AR-279.md",
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-279",
+                "status: in_progress",
+                "owner: lead-engineer",
+                "priority: P1",
+                "task_set_id: TASKSET-AR-UI-DESIGN-IMPLEMENTATION",
+                "---",
+                "",
+                "## Goal",
+                "",
+                "Apply visual hierarchy to backlog cards.",
+                "",
+            ]
+        ),
+    )
+    _write(
+        root / "agents" / "runtime" / "events" / "lead-engineer-2026-06-11.jsonl",
+        json.dumps(
+            {
+                "ts": "2026-06-11T04:55:00+09:00",
+                "role": "lead-engineer",
+                "event": "verification",
+                "task_id": "TASK-AR-279",
+                "evidence": ["tests/test_ui_console.py", "reviews/REVIEW-279.md"],
+            }
+        )
+        + "\n",
+    )
+
+    state = ui_state.build_state(root, now="2026-06-11T04:56:00+09:00")
+
+    assert state["tasks"][0]["task_set_id"] == "TASKSET-AR-UI-DESIGN-IMPLEMENTATION"
+    assert state["tasks"][0]["evidence_count"] == 2
+    assert state["tasks"][0]["evidence_label"] == "2 evidence"
+
+
 def test_ui_state_exposes_task_identity_and_lifecycle_metadata(tmp_path):
     _write(
         tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md",
