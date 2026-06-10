@@ -65,6 +65,23 @@ HTML = """<!doctype html>
           </select>
           <button type="submit">Create</button>
         </form>
+        <form id="runtime-command-form" class="runtime-form">
+          <select id="runtime-command-type" name="type">
+            <option value="runtime.call_agent">Call Agent</option>
+            <option value="runtime.assign_task">Assign Task</option>
+            <option value="runtime.request_review">Request Review</option>
+            <option value="runtime.request_meeting">Request Meeting</option>
+            <option value="runtime.goal.start">Start Goal</option>
+            <option value="runtime.goal.pause">Pause Goal</option>
+            <option value="runtime.goal.resume">Resume Goal</option>
+            <option value="runtime.goal.stop">Stop Goal</option>
+          </select>
+          <input id="runtime-target-agent" name="target" placeholder="target agent">
+          <input id="runtime-task-id" name="task_id" placeholder="task id">
+          <input id="runtime-goal-id" name="goal_id" placeholder="goal id">
+          <textarea id="runtime-instruction" name="instruction" placeholder="Instruction or lifecycle reason"></textarea>
+          <button type="submit">Send</button>
+        </form>
         <nav class="tabs" aria-label="Views">
           <button class="tab is-active" type="button" data-view="board">Backlog</button>
           <button class="tab" type="button" data-view="agents">Agents</button>
@@ -201,6 +218,12 @@ button:hover { filter: brightness(1.08); }
   gap: 8px;
   margin-bottom: 12px;
 }
+.runtime-form {
+  display: grid;
+  grid-template-columns: minmax(140px, 180px) minmax(120px, 160px) minmax(120px, 160px) minmax(120px, 160px) minmax(220px, 1fr) minmax(88px, auto);
+  gap: 8px;
+  margin-bottom: 12px;
+}
 input, select, textarea {
   min-height: 36px;
   width: 100%;
@@ -322,6 +345,7 @@ textarea { min-height: 74px; resize: vertical; }
   .topbar { align-items: flex-start; flex-direction: column; }
   .toolbar { justify-content: flex-start; }
   .create-form { grid-template-columns: 1fr; }
+  .runtime-form { grid-template-columns: 1fr; }
   .dashboard { grid-template-columns: 1fr; }
   .kanban { grid-template-columns: repeat(6, minmax(220px, 84vw)); }
   .meta-grid { grid-template-columns: 1fr; }
@@ -330,6 +354,7 @@ textarea { min-height: 74px; resize: vertical; }
 
 
 JS = """const lanes = ["Backlog", "Ready", "In Progress", "Review", "Blocked", "Done"];
+const runtimeCommandTypes = ["runtime.call_agent", "runtime.assign_task", "runtime.request_review", "runtime.request_meeting", "runtime.goal.start", "runtime.goal.pause", "runtime.goal.resume", "runtime.goal.stop"];
 let runtimeState = null;
 let selectedTaskId = null;
 let pendingWrites = [];
@@ -471,8 +496,9 @@ function renderCommands() {
   host.innerHTML = rows.length ? rows.slice(0, 80).map((row) => `
     <article class="list-row ${row.status === "failed" ? "error" : row.status === "pending" ? "warn" : "ok"}">
       <b>${escapeHtml(row.id || row.type)}</b>
-      <span>${escapeHtml(row.status)} / ${escapeHtml(row.type || "command")}</span>
+      <span>${escapeHtml(row.status)} / ${escapeHtml(row.type || "command")} / ${escapeHtml(row.risk_level || "unknown")}</span>
       <code>${escapeHtml(row.target || row.source_path || "")}</code>
+      ${row.approval_required ? `<p>approval required: ${escapeHtml((row.approval_reasons || []).join(", ") || "owner review")}</p>` : ""}
       ${row.errors ? `<p>${escapeHtml(row.errors.join("; "))}</p>` : ""}
     </article>
   `).join("") : `<div class="empty">No write commands</div>`;
@@ -588,6 +614,26 @@ $("create-task-form").addEventListener("submit", async (event) => {
   $("new-task-id").value = "";
   $("new-task-title").value = "";
 });
+$("runtime-command-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const commandType = $("runtime-command-type").value;
+  const payload = {
+    actor: "owner",
+    instruction: $("runtime-instruction").value,
+    reason: $("runtime-instruction").value,
+    task_id: $("runtime-task-id").value,
+    goal_id: $("runtime-goal-id").value
+  };
+  await sendJson("/api/commands", {
+    type: commandType,
+    payload: {
+      type: commandType,
+      target: $("runtime-target-agent").value || $("runtime-goal-id").value,
+      payload
+    }
+  });
+  $("runtime-instruction").value = "";
+});
 loadState();
 setInterval(loadState, 4000);
 """
@@ -619,7 +665,7 @@ def _decode_json_body(body: bytes | None) -> tuple[dict[str, object], list[str]]
 
 def _command_response(root_path: Path, command: dict[str, object]) -> ConsoleResponse:
     result = ui_commands.submit_command(root_path, command)
-    return _json_response(result, status=202 if result.get("status") == "accepted" else 400)
+    return _json_response(result, status=400 if result.get("status") == "failed" else 202)
 
 
 def build_response(path: str, root: Path | str, *, method: str = "GET", body: bytes | None = None) -> ConsoleResponse:
@@ -630,6 +676,8 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         payload, errors = _decode_json_body(body)
         if errors:
             return _json_response({"status": "failed", "errors": errors}, status=400)
+        if method == "POST" and request_path == "/api/commands":
+            return _command_response(root_path, payload)
         if method == "POST" and request_path == "/api/tasks":
             return _command_response(root_path, {"type": "task.create", "payload": payload})
         if method == "POST" and request_path == "/api/messages":

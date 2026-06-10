@@ -23,6 +23,7 @@ stores the accepted or failed command under `.ui_outbox/COMMAND-*.json`.
 | `task.reorder` | `POST /api/tasks/:id/reorder` | Persists `order` and optional status for stable UI ordering |
 | `task.comment` | `POST /api/messages` | Writes a queued message under `agents/messages/inbox` |
 | `task.archive` | `POST /api/tasks/:id/archive` | Marks the task `status: completed` and `archived: true` |
+| `runtime.*` | `POST /api/commands` | Queues agent prompts, approval-required requests, or unsupported lifecycle requests |
 
 ## Validation
 
@@ -48,6 +49,9 @@ The console displays write states in the `Writes` tab:
 |---|---|
 | `pending` | Browser request submitted and awaiting response |
 | `accepted` | Server validated and applied the command |
+| `queued` | Server translated the command into a runtime-visible message |
+| `approval_required` | High-risk command is held for owner approval before execution |
+| `pending_runtime_support` | Valid command is stored, but no executor exists yet |
 | `failed` | Server rejected the command and stored validation errors |
 
 ## Verification

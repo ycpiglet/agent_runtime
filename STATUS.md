@@ -694,3 +694,39 @@ Decision
 | Start Runtime Command Controls | lead-engineer | `TASK-AR-230` |
 | Add prompt/review/start/pause/resume/stop commands | lead-engineer | build on `ui_commands` |
 | Keep mutation smoke isolated from repo root | lead-engineer | temporary runtime roots |
+
+## 2026-06-10 - Runtime Command Controls Cycle
+
+### Bottom Line
+
+- Summary: completed `TASK-AR-230`; the UI console now submits runtime-safe command requests on top of `.ui_outbox`.
+- Output: `runtime.*` command types, `POST /api/commands`, UI command form, safety metadata, and `docs/UI_RUNTIME_COMMANDS.md`.
+- State machine: `cycle=done`, `task=TASK-AR-230 completed`, `gate=pass`, `document=formatted`.
+- Boundary: UI submits commands and status metadata; it does not embed or type into Claude/Codex terminal sessions.
+
+### Signal
+
+| Signal | State | Evidence |
+| --- | --- | --- |
+| Previous cycle | pass | `TASK-AR-229` committed as `607df7b` and pushed |
+| Current task | pass | `agents/lead_engineer/tasks/TASK-AR-230.md` |
+| Command route | pass | `POST /api/commands` accepts `runtime.call_agent` |
+| Message bridge | pass | safe agent prompts become queued `runtime-command` messages |
+| Approval boundary | pass | commit/push/PR/install/deletion/external/long-running triggers become `approval_required` |
+| Lifecycle boundary | pass | goal start/pause/resume/stop records become `pending_runtime_support` without claiming execution |
+| Targeted tests | pass | `tests/test_ui_commands.py` 11 passed; `tests/test_ui_console.py` 9 passed |
+| Route smoke | pass | temporary-root `runtime.call_agent` POST produced one queued command and message |
+
+### Decision
+
+- Decision: extend existing `ui_commands.submit_command` and `/api/commands` routing instead of adding terminal embedding.
+- Decision: represent unsupported lifecycle controls explicitly in command records until a runtime executor exists.
+- Decision: keep all UI-originated runtime requests auditable through `.ui_outbox/COMMAND-*.json`.
+
+### Next Steps
+
+| Step | Owner | Evidence |
+| --- | --- | --- |
+| Start Live Updates, Logs, Replay, Evidence | lead-engineer | `TASK-AR-231` |
+| Add event filtering and freshness tests first | lead-engineer | `tests/test_ui_state.py`, `tests/test_ui_console.py` |
+| Keep command execution claims separate from command submission | lead-engineer | runtime executor is a later task |

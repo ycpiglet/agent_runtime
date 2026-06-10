@@ -39,6 +39,7 @@ http://127.0.0.1:8765/
 | `/api/events` | event resource |
 | `/api/goals` | goal resource |
 | `/api/sources` | source/gap/warning resource |
+| `/api/commands` | write command log and runtime command submission |
 
 ## MVP Coverage
 
@@ -50,6 +51,7 @@ http://127.0.0.1:8765/
 | Messages | inbox/archive message list and empty state |
 | Events | runtime JSONL timeline and empty state |
 | Sources | source freshness, gaps, warnings |
+| Writes | pending, accepted, queued, approval-required, unsupported, and failed commands |
 | Task detail | source path, freshness, status, owner, priority, blocked reason |
 
 ## Verification
@@ -62,5 +64,7 @@ http://127.0.0.1:8765/
 
 The original MVP console was read-only. `TASK-AR-229` closes the first write
 follow-up by adding validated task create/update/reorder/comment/archive
-commands through the local server and `.ui_outbox`. Stop/resume and broader
-runtime lifecycle controls remain out of scope until `TASK-AR-230`.
+commands through the local server and `.ui_outbox`. `TASK-AR-230` adds
+runtime-safe command submission for agent prompts and lifecycle requests through
+`POST /api/commands`. Lifecycle execution remains explicit
+`pending_runtime_support` until a runtime executor exists.

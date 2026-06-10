@@ -44,12 +44,15 @@ def test_ui_console_serves_html_shell_and_assets(tmp_path):
     assert b"Backlog" in html.body
     assert b"Agents" in html.body
     assert b"command-log" in html.body
+    assert b"runtime-command-form" in html.body
     assert css.status == 200
     assert b"--ink" in css.body
     assert js.status == 200
     assert b"/api/state" in js.body
     assert b"/api/tasks" in js.body
     assert b"/api/messages" in js.body
+    assert b"/api/commands" in js.body
+    assert b"runtime.call_agent" in js.body
 
 
 def test_ui_console_api_state_uses_ui_state_adapter(tmp_path):
@@ -153,6 +156,36 @@ def test_ui_console_archive_route_marks_task_complete(tmp_path):
     assert response.status == 202
     assert state["tasks"][0]["status"] == "completed"
     assert "Archive" in ui_console.JS
+
+
+def test_ui_console_post_runtime_command_route_writes_agent_message(tmp_path):
+    _write_task(tmp_path, "TASK-UI-901")
+
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {
+                "type": "runtime.call_agent",
+                "target": "qa",
+                "payload": {
+                    "actor": "owner",
+                    "instruction": "Review TASK-UI-901.",
+                    "reason": "UI smoke for runtime command route.",
+                    "task_id": "TASK-UI-901",
+                },
+            }
+        ).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+    state = json.loads(ui_console.build_response("/api/state", tmp_path).body.decode("utf-8"))
+
+    assert response.status == 202
+    assert payload["status"] == "queued"
+    assert state["commands"][-1]["type"] == "runtime.call_agent"
+    assert state["messages"][-1]["intent"] == "runtime.call_agent"
+    assert state["messages"][-1]["to"] == "qa"
 
 
 def test_ui_console_unknown_path_returns_404(tmp_path):

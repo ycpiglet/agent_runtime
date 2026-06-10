@@ -9,8 +9,38 @@ from typing import Any
 
 VALID_STATUSES = ("planned", "ready", "in_progress", "review", "blocked", "completed")
 VALID_PRIORITIES = ("P0", "P1", "P2", "P3")
-COMMAND_TYPES = ("task.create", "task.update", "task.reorder", "task.comment", "task.archive")
+TASK_COMMAND_TYPES = ("task.create", "task.update", "task.reorder", "task.comment", "task.archive")
+RUNTIME_MESSAGE_COMMAND_TYPES = (
+    "runtime.call_agent",
+    "runtime.assign_task",
+    "runtime.request_review",
+    "runtime.request_meeting",
+)
+RUNTIME_LIFECYCLE_COMMAND_TYPES = (
+    "runtime.goal.start",
+    "runtime.goal.pause",
+    "runtime.goal.resume",
+    "runtime.goal.stop",
+)
+RUNTIME_COMMAND_TYPES = RUNTIME_MESSAGE_COMMAND_TYPES + RUNTIME_LIFECYCLE_COMMAND_TYPES
+COMMAND_TYPES = TASK_COMMAND_TYPES + RUNTIME_COMMAND_TYPES
 UNSAFE_PAYLOAD_KEYS = {"path", "source_path", "direct_file_path", "file_path", "filesystem_path"}
+HIGH_RISK_TERMS = (
+    ("delete", "deletion"),
+    ("remove", "deletion"),
+    ("commit", "git commit"),
+    ("push", "git push"),
+    ("pull request", "pull request"),
+    ("open a pr", "pull request"),
+    ("create pr", "pull request"),
+    ("install", "dependency install"),
+    ("dependency", "dependency install"),
+    ("package", "dependency install"),
+    ("long-running", "long-running goal"),
+    ("long running", "long-running goal"),
+    ("irreversible", "irreversible external effect"),
+    ("external", "irreversible external effect"),
+)
 
 
 def _now_iso() -> str:
@@ -159,6 +189,48 @@ def _payload_errors(payload: Any) -> list[str]:
     return errors
 
 
+def _runtime_text(payload: dict[str, Any]) -> str:
+    values = [
+        payload.get("instruction"),
+        payload.get("prompt"),
+        payload.get("comment"),
+        payload.get("reason"),
+        payload.get("title"),
+    ]
+    return " ".join(str(value) for value in values if value is not None)
+
+
+def _approval_reasons(command_type: str, payload: dict[str, Any]) -> list[str]:
+    text = _runtime_text(payload).lower()
+    reasons: list[str] = []
+    for token, reason in HIGH_RISK_TERMS:
+        if token in text and reason not in reasons:
+            reasons.append(reason)
+    if command_type == "runtime.goal.start" and payload.get("long_running") is True:
+        if "long-running goal" not in reasons:
+            reasons.append("long-running goal")
+    if payload.get("irreversible") is True or payload.get("external_effect") is True:
+        if "irreversible external effect" not in reasons:
+            reasons.append("irreversible external effect")
+    return reasons
+
+
+def _safety_metadata(command_type: str, target: str | None, payload: dict[str, Any]) -> dict[str, Any]:
+    reasons = _approval_reasons(command_type, payload)
+    goal_id = payload.get("goal_id")
+    if goal_id is None and command_type in RUNTIME_LIFECYCLE_COMMAND_TYPES:
+        goal_id = target
+    return {
+        "actor": str(payload.get("actor") or "ui"),
+        "reason": str(payload.get("reason") or ""),
+        "task_id": payload.get("task_id"),
+        "goal_id": goal_id,
+        "approval_required": bool(reasons),
+        "approval_reasons": reasons,
+        "risk_level": "high" if reasons else "low",
+    }
+
+
 def _goal_body(description: str) -> str:
     return "\n".join(["## Goal", "", description.strip() or "No description.", ""])
 
@@ -193,6 +265,7 @@ def _record(
     errors: list[str] | None = None,
     result: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    safety = _safety_metadata(command_type, target, payload)
     record: dict[str, Any] = {
         "id": command_id,
         "type": command_type,
@@ -201,7 +274,15 @@ def _record(
         "created_by": "ui",
         "created_at": now,
         "status": status,
+        "actor": safety["actor"],
+        "reason": safety["reason"],
+        "task_id": safety["task_id"],
+        "goal_id": safety["goal_id"],
+        "approval_required": safety["approval_required"],
+        "risk_level": safety["risk_level"],
     }
+    if safety["approval_reasons"]:
+        record["approval_reasons"] = safety["approval_reasons"]
     if errors:
         record["errors"] = errors
     if result:
@@ -326,6 +407,84 @@ def _comment_task(root: Path, target: str | None, payload: dict[str, Any], now: 
     return {"changed": [_rel(root, path)]}
 
 
+def _runtime_instruction(payload: dict[str, Any]) -> str:
+    instruction = str(payload.get("instruction") or payload.get("prompt") or payload.get("comment") or "").strip()
+    if instruction:
+        return instruction
+    task_id = str(payload.get("task_id") or "").strip()
+    if task_id:
+        return f"Run task {task_id}."
+    return ""
+
+
+def _queue_runtime_message(root: Path, command_type: str, target: str | None, payload: dict[str, Any], now: str) -> dict[str, Any]:
+    errors = _payload_errors(payload)
+    to_role = str(target or payload.get("to") or payload.get("agent") or "").strip()
+    if not to_role:
+        errors.append("target agent is required")
+    elif not re.fullmatch(r"[A-Za-z0-9_-]+", to_role):
+        errors.append(f"invalid target agent: {to_role!r}")
+    instruction = _runtime_instruction(payload)
+    if not instruction:
+        errors.append("instruction is required")
+    if errors:
+        return {"errors": errors}
+
+    message_id = _message_id(now)
+    path = root / "agents" / "messages" / "inbox" / f"{message_id}.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    task_id = payload.get("task_id")
+    goal_id = payload.get("goal_id")
+    body = "\n".join(
+        [
+            "---",
+            f"id: {message_id}",
+            "from: ui",
+            f"to: {to_role}",
+            "type: runtime-command",
+            "status: queued",
+            f"ts: {now}",
+            f"intent: {command_type}",
+            f"task_id: {task_id if task_id else 'none'}",
+            f"goal_id: {goal_id if goal_id else 'none'}",
+            "---",
+            "",
+            instruction,
+            "",
+        ]
+    )
+    path.write_text(body, encoding="utf-8")
+    return {
+        "status": "queued",
+        "result": {
+            "changed": [_rel(root, path)],
+            "message_id": message_id,
+            "runtime_support": "message_queue",
+        },
+    }
+
+
+def _runtime_command(root: Path, command_type: str, target: str | None, payload: dict[str, Any], now: str) -> dict[str, Any]:
+    safety = _safety_metadata(command_type, target, payload)
+    if safety["approval_required"]:
+        return {
+            "status": "approval_required",
+            "result": {
+                "runtime_support": "approval_queue",
+                "next": "owner approval is required before any runtime execution",
+            },
+        }
+    if command_type in RUNTIME_LIFECYCLE_COMMAND_TYPES:
+        return {
+            "status": "pending_runtime_support",
+            "result": {
+                "runtime_support": "unsupported",
+                "next": "runtime executor must consume this command before UI can claim execution",
+            },
+        }
+    return _queue_runtime_message(root, command_type, target, payload, now)
+
+
 def submit_command(
     root: Path | str,
     command: dict[str, Any],
@@ -356,8 +515,10 @@ def submit_command(
         outcome = _reorder_task(root_path, target_str, payload)
     elif command_type == "task.archive":
         outcome = _archive_task(root_path, target_str, payload)
-    else:
+    elif command_type == "task.comment":
         outcome = _comment_task(root_path, target_str, payload, created_at)
+    else:
+        outcome = _runtime_command(root_path, command_type, target_str, payload, created_at)
 
     if "errors" in outcome:
         return _fail(root_path, cid, command_type, target_str, payload, created_at, list(outcome["errors"]))
@@ -367,8 +528,8 @@ def submit_command(
         target=target_str,
         payload=payload,
         now=created_at,
-        status="accepted",
-        result=outcome,
+        status=str(outcome.get("status") or "accepted"),
+        result=outcome.get("result") if "result" in outcome else outcome,
     )
     _write_command(root_path, record)
     return record

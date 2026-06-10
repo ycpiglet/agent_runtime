@@ -223,3 +223,84 @@ def test_list_commands_returns_accepted_and_failed_write_states(tmp_path):
 
     assert [state["id"] for state in states] == ["COMMAND-20260610-123000-a", "COMMAND-20260610-123000-b"]
     assert [state["status"] for state in states] == ["accepted", "failed"]
+
+
+def test_submit_call_agent_writes_runtime_visible_message_with_safety_metadata(tmp_path):
+    _task(tmp_path, "TASK-UI-601")
+
+    result = ui_commands.submit_command(
+        tmp_path,
+        {
+            "type": "runtime.call_agent",
+            "target": "qa",
+            "payload": {
+                "actor": "owner",
+                "instruction": "Review TASK-UI-601 and report blockers.",
+                "reason": "Need a second-pass review before continuing.",
+                "task_id": "TASK-UI-601",
+            },
+        },
+        now=NOW,
+        command_id="COMMAND-20260610-123000-call-agent",
+    )
+
+    assert result["status"] == "queued"
+    assert result["actor"] == "owner"
+    assert result["reason"] == "Need a second-pass review before continuing."
+    assert result["task_id"] == "TASK-UI-601"
+    assert result["approval_required"] is False
+    assert result["risk_level"] == "low"
+    messages = ui_state.build_state(tmp_path, now=NOW)["messages"]
+    assert len(messages) == 1
+    assert messages[0]["to"] == "qa"
+    assert messages[0]["type"] == "runtime-command"
+    assert messages[0]["intent"] == "runtime.call_agent"
+    assert messages[0]["task_id"] == "TASK-UI-601"
+    assert "Review TASK-UI-601" in messages[0]["body"]
+
+
+def test_high_risk_runtime_command_requires_approval_before_execution(tmp_path):
+    result = ui_commands.submit_command(
+        tmp_path,
+        {
+            "type": "runtime.call_agent",
+            "target": "lead-engineer",
+            "payload": {
+                "actor": "owner",
+                "instruction": "Commit, push, and open a PR after installing dependencies.",
+                "reason": "Publish changes.",
+                "task_id": "TASK-UI-602",
+            },
+        },
+        now=NOW,
+        command_id="COMMAND-20260610-123000-approval",
+    )
+
+    assert result["status"] == "approval_required"
+    assert result["approval_required"] is True
+    assert result["risk_level"] == "high"
+    assert "commit" in " ".join(result["approval_reasons"])
+    assert ui_state.build_state(tmp_path, now=NOW)["messages"] == []
+
+
+def test_goal_lifecycle_command_records_explicit_unsupported_runtime_state(tmp_path):
+    result = ui_commands.submit_command(
+        tmp_path,
+        {
+            "type": "runtime.goal.pause",
+            "target": "goal-123",
+            "payload": {
+                "actor": "owner",
+                "goal_id": "goal-123",
+                "reason": "Pause until the owner reviews the next boundary.",
+            },
+        },
+        now=NOW,
+        command_id="COMMAND-20260610-123000-pause-goal",
+    )
+
+    assert result["status"] == "pending_runtime_support"
+    assert result["approval_required"] is False
+    assert result["goal_id"] == "goal-123"
+    assert result["result"]["runtime_support"] == "unsupported"
+    assert result["result"]["next"] == "runtime executor must consume this command before UI can claim execution"
