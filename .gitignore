@@ -11,3 +11,6 @@ __pycache__/
 
 # Legacy staging leftovers; canonical sync templates are package data.
 /templates/
+
+# Local git worktrees for isolated pane/task execution.
+/.worktrees/
