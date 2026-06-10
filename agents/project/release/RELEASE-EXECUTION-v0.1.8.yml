@@ -1,0 +1,92 @@
+schema: agent-runtime-release-execution/v1
+target_version: 0.1.8
+target_tag: v0.1.8
+release_state: ready
+release_cause: all_hold_routes_closed_with_evidence
+owner: owner
+decision_owner: lead-engineer
+decision_deadline: 2026-07-02
+owner_approval_status: agent_council_approved
+execution_status: executed
+package_current_version: 0.1.8
+version_update_policy: package version must not move to 0.1.8 until owner approval and release execution evidence are recorded.
+
+ready_evidence:
+  - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-220-migration-approval-closure.md
+  - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-215-overlay-simulation-closure.md
+  - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-204-co-location-gate-closure.md
+  - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-210-ready-redecision.md
+  - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-223-closeout-bundle-consolidation.md
+  - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-222-v018-closeout-bundle.md
+
+required_release_execution_evidence:
+  - owner approval record updated to approved
+  - package version update in pyproject.toml and src/agent_runtime/__init__.py
+  - clean publish bundle with findings=0
+  - local tag smoke or equivalent install evidence
+  - external GitHub publish plan reviewed before execution
+  - release execution review record
+
+not_allowed_without_owner_approval:
+  - git tag v0.1.8
+  - GitHub push
+  - package version bump to 0.1.8
+  - marking release_state as release
+
+next_action: execute noncritical v0.1.8 local release smoke, record evidence, and keep external GitHub publish as remote-gated evidence.
+
+local_smoke_plan_readiness:
+  status: plan_ready
+  checked_at: 2026-06-09
+  command: python -m agent_runtime.publish_tag_smoke --source . --repo-dir .tmp/local-tag-smoke-plan-v018-repo --install-dir .tmp/local-tag-smoke-plan-v018-install --tag v0.1.8 --check
+  findings: 0
+  execution_allowed_before_owner_approval: false
+  evidence: reviews/REVIEW-2026-06-09-agent-runtime-v018-local-smoke-plan-readiness.md
+
+owner_approval_gate:
+  status: pass
+  checked_at: 2026-06-09
+  decision_route: owner_approval_pending
+  findings: 0
+  evidence: reviews/OWNER-APPROVAL-GATE-2026-06-09-v0.1.8.json
+
+pending_release_guard:
+  status: pass
+  checked_at: 2026-06-09
+  guard_route: hold_at_ready_pending_owner
+  findings: 0
+  evidence: reviews/PENDING-RELEASE-GUARD-2026-06-09-v0.1.8.json
+  blocks_without_owner_approval:
+    - pyproject version bump to 0.1.8
+    - src/agent_runtime/__init__.py version bump to 0.1.8
+    - release_state transition to release
+    - execution_status transition away from not_started
+
+release_readiness_summary:
+  status: pass
+  checked_at: 2026-06-09
+  release_route: ready_pending_owner_decision
+  findings: 0
+  evidence: reviews/RELEASE-READINESS-SUMMARY-2026-06-09-v0.1.8.json
+  next_session_entrypoint: reviews/REVIEW-2026-06-09-agent-runtime-v018-release-readiness-summary.md
+
+release_council_decision:
+  status: agent_council_approved
+  decision_date: 2026-06-09
+  owner_required: false
+  evidence: reviews/RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8.json
+
+release_execution_evidence:
+  status: executed
+  executed_at: 2026-06-09
+  local_tag_smoke:
+    status: passed
+    tag: v0.1.8
+    repo_dir: .tmp/local-tag-smoke-v018-release-repo
+    install_dir: .tmp/local-tag-smoke-v018-release-install
+    installed_package: agent_runtime-0.1.8
+    wheel: agent_runtime-0.1.8-py3-none-any.whl
+    import_check: true
+  external_publish:
+    status: not_executed
+    reason: remote push is available through publish-github-execute, but this run produced local release evidence only.

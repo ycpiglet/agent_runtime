@@ -1,0 +1,120 @@
+{
+  "schema": "agent-runtime-co-location-gate/v1",
+  "evaluation_mode": "skill_data_code_colocation",
+  "generated_at": "2026-06-09T06:50:56.277029+00:00",
+  "status": "pass",
+  "release_route": "ready_for_release_redecision",
+  "blocked_task": null,
+  "inputs": {
+    "skill_map": "agents/project/SKILL-DATA-MAP.yml",
+    "migration_map": "agents/project/MIGRATION-COMPAT-MAP.yml",
+    "context_sources": "agents/project/CONTEXT-SOURCES.yml",
+    "dataset_catalog": "agents/project/DATASET-CATALOG.yml"
+  },
+  "findings": [],
+  "sections": {
+    "skill_data_map": {
+      "items": 5,
+      "findings": [],
+      "item_results": [
+        {
+          "id": "knowledge-router",
+          "findings": []
+        },
+        {
+          "id": "context-contract",
+          "findings": []
+        },
+        {
+          "id": "runbook-standard",
+          "findings": []
+        },
+        {
+          "id": "project-overlay-contract",
+          "findings": []
+        },
+        {
+          "id": "model-provider-doc-sync",
+          "findings": []
+        }
+      ]
+    },
+    "migration_compat_map": {
+      "items": 7,
+      "findings": [],
+      "item_results": [
+        {
+          "id": "scripts-core-kept",
+          "status": "kept",
+          "findings": []
+        },
+        {
+          "id": "scripts-core-changed",
+          "status": "changed",
+          "findings": []
+        },
+        {
+          "id": "scripts-source-only",
+          "status": "missing",
+          "findings": []
+        },
+        {
+          "id": "scripts-runtime-extra",
+          "status": "deprecated",
+          "findings": []
+        },
+        {
+          "id": "scripts-runschedule-legacy",
+          "status": "deprecated",
+          "findings": []
+        },
+        {
+          "id": "skills-pack",
+          "status": "changed",
+          "findings": []
+        },
+        {
+          "id": "hooks-wrapper",
+          "status": "changed",
+          "findings": []
+        }
+      ]
+    },
+    "context_sources": {
+      "items": 4,
+      "findings": [],
+      "item_results": [
+        {
+          "id": "cert-semantic-layer",
+          "findings": []
+        },
+        {
+          "id": "lineage",
+          "findings": []
+        },
+        {
+          "id": "history",
+          "findings": []
+        },
+        {
+          "id": "context-knowledge",
+          "findings": []
+        }
+      ]
+    },
+    "dataset_catalog": {
+      "items": 2,
+      "findings": [],
+      "item_results": [
+        {
+          "id": "project-overlay-routing-gold",
+          "findings": []
+        },
+        {
+          "id": "project-metadata-gov-gold",
+          "findings": []
+        }
+      ]
+    }
+  }
+}

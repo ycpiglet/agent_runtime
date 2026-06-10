@@ -1,0 +1,422 @@
+schema: agent-runtime-state-machines/v1
+version: 1
+owner: agent-runtime-core
+updated_at: 2026-06-10
+tags: [state-machine, cycle, agent-job, task-claim, governance, owner-brief]
+
+status_scale:
+  allowed: [pass, watch, block]
+  labels:
+    pass: "Proceed"
+    watch: "Needs attention"
+    block: "Stop until fixed"
+  score:
+    min: 0
+    max: 100
+    bands:
+      - signal: pass
+        range: "85-100"
+      - signal: watch
+        range: "60-84"
+      - signal: block
+        range: "0-59"
+
+machines:
+  - id: health_signal
+    scope: shared_status
+    owner: lead-engineer
+    initial: watch
+    states:
+      - id: pass
+        signal: pass
+        score: 100
+      - id: watch
+        signal: watch
+        score: 75
+      - id: block
+        signal: block
+        score: 0
+    transitions:
+      - from: watch
+        to: pass
+        trigger: evidence_complete
+      - from: watch
+        to: block
+        trigger: blocking_finding
+      - from: block
+        to: watch
+        trigger: mitigation_started
+
+  - id: cycle
+    scope: full_work_cycle
+    owner: lead-engineer
+    initial: intake
+    states:
+      - id: intake
+        signal: watch
+        score: 65
+      - id: planned
+        signal: watch
+        score: 75
+      - id: executing
+        signal: watch
+        score: 80
+      - id: review
+        signal: watch
+        score: 80
+      - id: blocked
+        signal: block
+        score: 20
+      - id: done
+        signal: pass
+        score: 95
+      - id: archived
+        signal: pass
+        score: 100
+    transitions:
+      - from: intake
+        to: planned
+        trigger: task_scope_defined
+      - from: planned
+        to: executing
+        trigger: owner_or_agent_decision
+      - from: executing
+        to: review
+        trigger: implementation_ready
+      - from: review
+        to: done
+        trigger: gates_pass
+      - from: "*"
+        to: blocked
+        trigger: critical_gate_failed
+      - from: done
+        to: archived
+        trigger: handoff_recorded
+
+  - id: task
+    scope: backlog_task
+    owner: lead-engineer
+    initial: planned
+    states:
+      - id: planned
+        signal: watch
+        score: 70
+      - id: in_progress
+        signal: watch
+        score: 80
+      - id: blocked
+        signal: block
+        score: 30
+      - id: completed
+        signal: pass
+        score: 95
+      - id: archived
+        signal: pass
+        score: 100
+    transitions:
+      - from: planned
+        to: in_progress
+        trigger: agent_claimed
+      - from: in_progress
+        to: blocked
+        trigger: blocker_found
+      - from: in_progress
+        to: completed
+        trigger: done_criteria_met
+      - from: completed
+        to: archived
+        trigger: evidence_linked
+
+  - id: task_claim
+    scope: parallel_agent_task_lease
+    owner: agent-runtime-core
+    initial: unclaimed
+    states:
+      - id: unclaimed
+        signal: pass
+        score: 90
+      - id: claimed
+        signal: watch
+        score: 75
+      - id: working
+        signal: watch
+        score: 80
+      - id: handoff_ready
+        signal: watch
+        score: 85
+      - id: released
+        signal: pass
+        score: 95
+      - id: stale
+        signal: watch
+        score: 55
+      - id: conflict
+        signal: block
+        score: 0
+    transitions:
+      - from: unclaimed
+        to: claimed
+        trigger: task_claim_record_written
+      - from: claimed
+        to: working
+        trigger: worker_heartbeat_seen
+      - from: working
+        to: handoff_ready
+        trigger: handoff_and_log_pointers_written
+      - from: handoff_ready
+        to: released
+        trigger: task_claim_released_or_completed
+      - from: "*"
+        to: stale
+        trigger: heartbeat_expired
+      - from: "*"
+        to: conflict
+        trigger: duplicate_task_or_main_checkout_worker_detected
+
+  - id: agent_job
+    scope: agent_execution
+    owner: agent-runtime-core
+    initial: idle
+    states:
+      - id: idle
+        signal: pass
+        score: 90
+      - id: assigned
+        signal: watch
+        score: 75
+      - id: clarifying
+        signal: watch
+        score: 65
+      - id: working
+        signal: watch
+        score: 80
+      - id: waiting_review
+        signal: watch
+        score: 75
+      - id: waiting_owner
+        signal: watch
+        score: 60
+      - id: blocked
+        signal: block
+        score: 20
+      - id: done
+        signal: pass
+        score: 95
+    transitions:
+      - from: idle
+        to: assigned
+        trigger: task_assigned
+      - from: assigned
+        to: clarifying
+        trigger: ambiguity_detected
+      - from: assigned
+        to: working
+        trigger: scope_clear
+      - from: working
+        to: waiting_review
+        trigger: review_required
+      - from: waiting_review
+        to: done
+        trigger: review_passed
+      - from: "*"
+        to: blocked
+        trigger: nonrecoverable_blocker
+
+  - id: gate
+    scope: executable_gate
+    owner: cicd-engineer
+    initial: pending
+    states:
+      - id: pending
+        signal: watch
+        score: 70
+      - id: pass
+        signal: pass
+        score: 100
+      - id: watch
+        signal: watch
+        score: 75
+      - id: block
+        signal: block
+        score: 0
+    transitions:
+      - from: pending
+        to: pass
+        trigger: findings_zero
+      - from: pending
+        to: watch
+        trigger: warning_found
+      - from: pending
+        to: block
+        trigger: blocker_found
+
+  - id: review
+    scope: review_document
+    owner: independent-auditor
+    initial: draft
+    states:
+      - id: draft
+        signal: watch
+        score: 70
+      - id: requested
+        signal: watch
+        score: 75
+      - id: changes_requested
+        signal: block
+        score: 40
+      - id: approved
+        signal: pass
+        score: 95
+      - id: archived
+        signal: pass
+        score: 100
+    transitions:
+      - from: draft
+        to: requested
+        trigger: review_requested
+      - from: requested
+        to: changes_requested
+        trigger: finding_found
+      - from: requested
+        to: approved
+        trigger: no_findings
+      - from: approved
+        to: archived
+        trigger: evidence_linked
+
+  - id: release
+    scope: release_governance
+    owner: agent-release-council
+    initial: hold_for_data
+    states:
+      - id: hold_for_data
+        signal: block
+        score: 30
+      - id: ready
+        signal: pass
+        score: 90
+      - id: approved
+        signal: pass
+        score: 95
+      - id: release
+        signal: pass
+        score: 100
+    transitions:
+      - from: hold_for_data
+        to: ready
+        trigger: all_hold_routes_closed
+      - from: ready
+        to: approved
+        trigger: council_or_owner_approval
+      - from: approved
+        to: release
+        trigger: execution_evidence_recorded
+
+  - id: owner_decision
+    scope: owner_boundary
+    owner: owner
+    initial: not_required
+    states:
+      - id: not_required
+        signal: pass
+        score: 95
+      - id: ask_owner
+        signal: watch
+        score: 65
+      - id: approved
+        signal: pass
+        score: 100
+      - id: rejected
+        signal: block
+        score: 20
+    transitions:
+      - from: not_required
+        to: ask_owner
+        trigger: critical_boundary_detected
+      - from: ask_owner
+        to: approved
+        trigger: owner_approved
+      - from: ask_owner
+        to: rejected
+        trigger: owner_rejected
+
+  - id: hook_enforcement
+    scope: local_automation
+    owner: cicd-engineer
+    initial: configured
+    states:
+      - id: configured
+        signal: watch
+        score: 80
+      - id: enforced
+        signal: pass
+        score: 100
+      - id: missing
+        signal: block
+        score: 0
+    transitions:
+      - from: configured
+        to: enforced
+        trigger: hooks_path_and_hooks_json_present
+      - from: configured
+        to: missing
+        trigger: hook_config_missing
+      - from: missing
+        to: enforced
+        trigger: hook_config_restored
+
+  - id: ci
+    scope: repository_ci
+    owner: cicd-engineer
+    initial: configured
+    states:
+      - id: configured
+        signal: watch
+        score: 80
+      - id: pass
+        signal: pass
+        score: 100
+      - id: fail
+        signal: block
+        score: 0
+    transitions:
+      - from: configured
+        to: pass
+        trigger: workflow_passed
+      - from: configured
+        to: fail
+        trigger: workflow_failed
+      - from: fail
+        to: pass
+        trigger: fix_verified
+
+  - id: document
+    scope: owner_facing_doc
+    owner: doc-steward
+    initial: draft
+    states:
+      - id: draft
+        signal: watch
+        score: 70
+      - id: formatted
+        signal: pass
+        score: 90
+      - id: stale
+        signal: watch
+        score: 60
+      - id: invalid
+        signal: block
+        score: 0
+    transitions:
+      - from: draft
+        to: formatted
+        trigger: owner_doc_format_gate_passed
+      - from: formatted
+        to: stale
+        trigger: source_task_changed
+      - from: stale
+        to: formatted
+        trigger: document_regenerated
+      - from: "*"
+        to: invalid
+        trigger: required_section_missing

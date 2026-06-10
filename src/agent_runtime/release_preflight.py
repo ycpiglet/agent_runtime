@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -108,6 +110,144 @@ def _warning_summary_gate_strict_refs_findings(raw: str | None) -> tuple[Publish
     return tuple(findings)
 
 
+OWNER_DOC_REQUIRED_GROUPS = {
+    "summary": (r"^##\s+(Summary|Bottom Line)\b", r"^Bottom Line\b"),
+    "signal": (r"^##\s+(Signal|Status|Key Points)\b",),
+    "action": (r"^##\s+(Action|Action Items|Action Board)\b",),
+    "risk": (r"^##\s+(Risk|Risks|Risks / Blockers|Blockers)\b",),
+    "decision": (r"^##\s+Decision\b",),
+    "next": (r"^##\s+(Next|Next Steps)\b",),
+}
+
+OWNER_DOC_FRONTMATTER_PATTERN = re.compile(r"\A---\r?\n.*?\r?\n---\r?\n", re.DOTALL)
+OWNER_DOC_SIGNAL_PATTERN = re.compile(r"^signal:\s*(pass|watch|block)\s*$", re.MULTILINE | re.IGNORECASE)
+OWNER_DOC_SCORE_PATTERN = re.compile(r"^score:\s*([0-9]{1,3})\s*$", re.MULTILINE | re.IGNORECASE)
+REQUIRED_STATE_MACHINES = {
+    "health_signal",
+    "cycle",
+    "task",
+    "task_claim",
+    "agent_job",
+    "gate",
+    "review",
+    "release",
+    "owner_decision",
+    "hook_enforcement",
+    "ci",
+    "document",
+}
+
+
+def _owner_doc_has_group(text: str, patterns: tuple[str, ...]) -> bool:
+    return any(re.search(pattern, text, flags=re.MULTILINE | re.IGNORECASE) for pattern in patterns)
+
+
+def _owner_doc_manifest_paths(source: Path) -> tuple[tuple[str, ...], tuple[PublishFinding, ...]]:
+    manifest = source / "owner-docs.yml"
+    if not manifest.exists():
+        return (), (
+            PublishFinding(
+                "owner-docs.yml",
+                "owner-doc-manifest-missing",
+                "release source must declare Owner-facing docs checked by the format gate",
+            ),
+        )
+    docs: list[str] = []
+    in_owner_docs = False
+    for raw in manifest.read_text(encoding="utf-8").splitlines():
+        stripped = raw.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if not raw.startswith((" ", "\t", "-")):
+            in_owner_docs = stripped in {"owner_docs:", "owner_docs: []"}
+            if stripped == "owner_docs: []":
+                in_owner_docs = False
+            continue
+        if not in_owner_docs:
+            continue
+        match = re.match(r"^-\s*(?:path:\s*)?(.+?)\s*$", stripped)
+        if not match:
+            continue
+        value = match.group(1).split("#", 1)[0].strip().strip("'\"")
+        if value:
+            docs.append(value)
+    return tuple(docs), ()
+
+
+def _owner_doc_format_findings(source: Path) -> tuple[PublishFinding, ...]:
+    docs, manifest_findings = _owner_doc_manifest_paths(source)
+    findings: list[PublishFinding] = list(manifest_findings)
+    if manifest_findings:
+        return tuple(findings)
+    if not docs:
+        findings.append(
+            PublishFinding(
+                "owner-docs.yml",
+                "owner-doc-manifest-empty",
+                "release source must list at least one Owner-facing doc",
+            )
+        )
+        return tuple(findings)
+    for rel in docs:
+        path = source / rel
+        if not path.exists():
+            findings.append(PublishFinding(rel, "owner-doc-missing", "manifest entry does not exist in release source"))
+            continue
+        text = path.read_text(encoding="utf-8")
+        frontmatter = OWNER_DOC_FRONTMATTER_PATTERN.search(text)
+        if not frontmatter:
+            findings.append(PublishFinding(rel, "owner-doc-frontmatter-missing", "Owner doc must start with YAML frontmatter"))
+        else:
+            frontmatter_text = frontmatter.group(0)
+            if not OWNER_DOC_SIGNAL_PATTERN.search(frontmatter_text):
+                findings.append(PublishFinding(rel, "owner-doc-signal-missing", "Owner doc frontmatter must include signal: pass|watch|block"))
+            score_match = OWNER_DOC_SCORE_PATTERN.search(frontmatter_text)
+            if not score_match:
+                findings.append(PublishFinding(rel, "owner-doc-score-missing", "Owner doc frontmatter must include score: 0-100"))
+            elif int(score_match.group(1)) > 100:
+                findings.append(PublishFinding(rel, "owner-doc-score-invalid", "Owner doc score must be 0-100"))
+        for group, patterns in OWNER_DOC_REQUIRED_GROUPS.items():
+            if not _owner_doc_has_group(text, patterns):
+                findings.append(PublishFinding(rel, f"owner-doc-{group}-missing", "Owner doc is missing a required executive section"))
+        if len(re.findall(r"^\|.+\|$", text, flags=re.MULTILINE)) < 3:
+            findings.append(PublishFinding(rel, "owner-doc-table-missing", "Owner doc must include a compact tracking table"))
+    return tuple(findings)
+
+
+def _state_machine_findings(source: Path) -> tuple[PublishFinding, ...]:
+    checks = (
+        ("schemas/state-machines.schema.json", True),
+        ("src/agent_runtime/templates/project/schemas/state-machines.schema.json", True),
+        ("src/agent_runtime/templates/project/agents/project/STATE-MACHINES.yml", True),
+        ("agents/project/STATE-MACHINES.yml", False),
+    )
+    findings: list[PublishFinding] = []
+    for rel, required in checks:
+        path = source / rel
+        if not path.exists():
+            if required:
+                findings.append(PublishFinding(rel, "state-machine-missing", "required state machine schema or SSoT file is missing"))
+            continue
+        text = path.read_text(encoding="utf-8")
+        if path.suffix == ".json":
+            try:
+                json.loads(text)
+            except json.JSONDecodeError as exc:
+                findings.append(PublishFinding(rel, "state-machine-schema-invalid-json", exc.msg))
+            continue
+        ids = set(re.findall(r"^\s*-\s*id:\s*([A-Za-z0-9_-]+)\s*$", text, flags=re.MULTILINE))
+        missing = REQUIRED_STATE_MACHINES - ids
+        findings.extend(
+            PublishFinding(rel, f"state-machine-missing-id:{machine_id}", "required machine id is absent")
+            for machine_id in sorted(missing)
+        )
+        if not re.search(r"\bpass\b", text) or not re.search(r"\bwatch\b", text) or not re.search(r"\bblock\b", text):
+            findings.append(PublishFinding(rel, "state-machine-signal-scale-missing", "must define pass/watch/block signal scale"))
+        if re.search(r"\b(Green|Yellow|Red)\b", text):
+            findings.append(PublishFinding(rel, "state-machine-color-label", "use pass/watch/block instead of color labels"))
+    return tuple(findings)
+
+
 def _source_work_dir(source_root: Path, path: Path) -> Path:
     return path if path.is_absolute() else source_root / path
 
@@ -180,6 +320,8 @@ def build_preflight_plan(
     strict_refs = _parse_warning_summary_gate_strict_refs(warning_summary_gate_strict_refs)
     strict_refs_detail = f"refs={';'.join(strict_refs)}" if strict_refs else "refs=<none>"
     strict_refs_status = "skipped" if warning_summary_gate_strict_refs is None else _status(strict_refs_findings)
+    owner_doc_findings = _owner_doc_format_findings(source)
+    state_machine_findings = _state_machine_findings(source)
     checks = (
         PreflightCheck("sanitize", _status(sanitize_findings), f"findings={len(sanitize_findings)}", sanitize_findings),
         PreflightCheck(
@@ -187,6 +329,18 @@ def build_preflight_plan(
             strict_refs_status,
             strict_refs_detail,
             strict_refs_findings,
+        ),
+        PreflightCheck(
+            "owner-doc-format",
+            _status(owner_doc_findings),
+            f"manifest=owner-docs.yml findings={len(owner_doc_findings)}",
+            owner_doc_findings,
+        ),
+        PreflightCheck(
+            "state-machines",
+            _status(state_machine_findings),
+            f"schema=state-machines findings={len(state_machine_findings)}",
+            state_machine_findings,
         ),
         PreflightCheck("publish-check", _status(publish_findings), f"findings={len(publish_findings)}", publish_findings),
         PreflightCheck(
@@ -315,4 +469,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

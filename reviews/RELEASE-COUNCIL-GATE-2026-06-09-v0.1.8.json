@@ -1,0 +1,23 @@
+{
+  "schema": "agent-runtime-release-council-gate/v1",
+  "evaluation_mode": "agent_council_release_decision",
+  "generated_at": "2026-06-09T09:58:33.378117+00:00",
+  "status": "pass",
+  "decision_route": "agent_council_approved_release_execution",
+  "target_version": "0.1.8",
+  "target_tag": "v0.1.8",
+  "criticality": "noncritical",
+  "owner_required": "false",
+  "approved_by": "agent-release-council",
+  "decision_date": "2026-06-09",
+  "roles": [
+    "doc-steward",
+    "independent-auditor",
+    "lead-engineer",
+    "qa"
+  ],
+  "findings": [],
+  "inputs": {
+    "decision": "agents/project/release/RELEASE-DECISION-v0.1.8.yml"
+  }
+}

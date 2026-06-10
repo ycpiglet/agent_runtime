@@ -52,6 +52,7 @@ REQUIRED_TEMPLATE_FILES = (
     "scripts/check_messages.py",
     "scripts/message_queue.py",
     "scripts/orchestrator_safety_gate.py",
+    "scripts/parallel_worktree_gate.py",
     "scripts/pipeline.py",
     "schemas/task.schema.json",
 )

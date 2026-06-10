@@ -23,6 +23,73 @@ Owner 또는 CEO가 적은 토큰으로 빠르게 판단하되, 단순 작업 �
 
 목표: 사람이 30초 안에 판단하고, 에이전트가 frontmatter/tag/evidence/action 필드로 필터링·정렬·후속 실행할 수 있게 한다.
 
+### Owner 공유 문서 공통 계약
+
+대상: `BACKLOG`, `REVIEW`, `REPORT`, `PLAN`, `STATUS`, `release`, `handoff`.
+
+원칙: 기존 `Bottom Line -> Signal -> Insight -> Decision` 구조를 유지한다. 개조식, metadata, action table은 추가 보강이며 대체 형식이 아니다.
+
+필수 출력 성격:
+
+- Brief title: 짧은 명사구.
+- Metadata/frontmatter: 필터링·정렬용 필드.
+- One-line summary: 결론 1줄.
+- Key points: 상태·이슈·원인·근거.
+- Action items: 다음 행동·담당·조건.
+- Risks / blockers: 차단·리스크·승인 필요.
+- Next steps: 바로 이어갈 순서.
+- Tags / references: 검색 태그·증거 링크.
+
+문체:
+
+- 명사구·전보식 표현 우선.
+- 문장 종결 과잉 제거.
+- 불릿 중심, 짧고 명시적.
+- 라벨 고정: `Summary`, `Status`, `Issue`, `Cause`, `Action`, `Risk`, `Decision`, `Next Step`.
+- 전문 보고서 톤 유지, 관료적 장문 금지.
+
+### Backlog Decision Board 계약
+
+`백로그`, `할 일 목록`, `작업 목록`, `다음 진행` 요청은 plain list가 아니라 decision board로 렌더링한다.
+
+Lane labels:
+
+| Lane | 이전 명칭 | 의미 | Owner 판단 |
+|------|-----------|------|------------|
+| `Action` | `ACT` | 바로 실행 가능한 작업 | 진행 순서 확인 |
+| `Review` | `REVIEW` | 검토·증거 확인 필요 | 승인 전 확인 |
+| `Ask` | `ASK` | Owner/agent 결정 필요 | 선택·승인 필요 |
+| `Later` | `DEFER` | 의존성·일정상 후순위 | 보류 수락 |
+| `Done` | 완료/Archive | 완료·증거 보존 | 추가 판단 없음 |
+
+모든 backlog row 필수 필드:
+
+| Field | Meaning |
+|-------|---------|
+| `task_id` | TASK ID |
+| `lane` | Action/Review/Ask/Later/Done |
+| `status` | planned/in_progress/completed/hold 등 |
+| `priority` | P0/P1/P2 또는 Critical/High/Medium/Low |
+| `importance` | 의사결정 영향도 |
+| `difficulty` | 난이도 |
+| `cost_hours` | 예상 시간 |
+| `cost_tokens` | 예상 토큰 |
+| `value` | 기대 가치 |
+| `team` | 담당 부서/팀 |
+| `agent` | 담당 에이전트 |
+| `decision` | Owner/agent가 판단할 것 |
+| `summary` | 한 줄 목적 |
+
+운영 규칙:
+
+- 모든 TASK를 보여준다. 완료 항목은 `Done` lane으로 접어도 목록에서 누락하지 않는다.
+- `Action`이 가장 위, `Ask`가 그 다음이다.
+- `Ask` 항목은 왜 결정이 필요한지 한 줄로 표시한다.
+- 비용은 `hours/tokens`를 함께 표시한다.
+- 가치와 중요도는 별도 필드로 둔다. 중요도는 위험/전략 영향, 가치는 작업 완료 시 효과다.
+- 생성/갱신 명령: `python scripts/backlog_board.py --write`.
+- 공유 전 검사: `python scripts/owner_doc_format_gate.py BACKLOG-BOARD.md`.
+
 ### Frontmatter 필수 필드
 
 ```yaml
@@ -44,17 +111,21 @@ evidence:
 ### Visible body 기본형
 
 ```text
-Bottom Line: <결론 한 줄>.
+## Bottom Line
+- Summary: <결론 한 줄>.
 
 ## Signal
 | Item | State | Evidence |
 |------|-------|----------|
-| <핵심 신호> | G/Y/R | <링크 또는 수치> |
+| <핵심 신호> | pass/watch/block + score | <링크 또는 수치> |
 
 ## Action
 | # | Action | Owner | Trigger |
 |---|--------|-------|---------|
 | 1 | <다음 행동> | <역할> | <조건> |
+
+## Risks / Blockers
+- <위험 또는 없음>
 
 ## Insight
 1. <판단에 영향을 주는 해석 한 줄>
@@ -74,8 +145,8 @@ Bottom Line: <결론 한 줄>.
 - 들여쓰기는 2단계 이하.
 - 불릿은 한 줄 중심.
 - 표는 4열 이하를 기본값으로.
-- 상태는 `G/Y/R`, 우선순위는 `Critical/High/Medium/Low`.
-- 제목은 판단 흐름 순서로 고정: `Bottom Line -> Signal -> Action -> Insight -> Decision -> Footer`.
+- 상태는 `pass/watch/block` + `score: 0-100`, 우선순위는 `Critical/High/Medium/Low`.
+- 제목은 판단 흐름 순서로 고정: `Bottom Line/Summary -> Signal/Status -> Action -> Risks/Blockers -> Insight -> Decision -> Next -> Footer`.
 - 장식 이모지 금지. 기능적 상태 마커도 남발 금지.
 - 기술 상세는 Executive 아래 `Technical` 또는 별도 evidence 링크로 분리.
 
@@ -86,7 +157,7 @@ CEO 가 한눈에 이해하는 층. 목표는 **읽는 사람이 이해에 쓰�
 - `Bottom Line:` 한 줄 — 무엇을 했고/제안하는가.
 - **기술 용어·파일명·함수명·토큰 수를 쓰지 않는다.** 전문 용어가 꼭 필요하면 그 자리에서 한 구절로 풀어쓴다.
 - **명료한 직설 서술**로. 문장을 짧게, 한 문단에 한 가지. **비유는 강제가 아니다** — 직설로 더 명확하면 비유하지 않는다. 비유는 직설로 설명이 안 될 때만 보조로.
-- 상태는 신호등(정상/주의/위험)으로. 숫자는 의사결정에 필요한 것만 (비용·일정·리스크).
+- 상태는 `pass/watch/block` + `score: 0-100`으로. 숫자는 의사결정에 필요한 것만 (비용·일정·리스크).
 - "이게 왜 중요한가 / CEO 가 결정할 것은 무엇인가" 를 명시.
 
 ### Insight (전략 통찰, Executive 에 필수)
@@ -140,10 +211,10 @@ CEO 가 한눈에 이해하는 층. 목표는 **읽는 사람이 이해에 쓰�
 |------|------|
 | 결론 우선 | 첫 줄에 `Bottom Line`을 둔다. |
 | 토큰 절약 | 기본은 5~12줄. Full은 사용자가 요청하거나 결정이 많을 때만 쓴다. |
-| 숫자 우선 | 형용사보다 `N건`, `%`, `ph`, `tokens`, `G/Y/R` 상태를 우선한다. |
+| 숫자 우선 | 형용사보다 `N건`, `%`, `ph`, `tokens`, `pass/watch/block`, `score` 상태를 우선한다. |
 | 인사이트 포함 | 모든 Standard 이상 보고에는 `Insight` 1~3개를 둔다. |
 | 장식 최소 | 장식용 이모지는 쓰지 않는다. O/X/체크박스 같은 단순 상태 마커는 허용 (남발 금지). §이모지 정책 참조. |
-| 시각 표현 | 표, ASCII bar, G/Y/R, delta(`+/-`)를 쓴다. |
+| 시각 표현 | 표, ASCII bar, pass/watch/block, score, delta(`+/-`)를 쓴다. |
 | 직관성 | 열거 라벨은 숫자(`1. 2. 3.`)로 통일, 항목 사이 한 줄 띄움, 평가 4요소(우선순위·중요도·시간·토큰) 표기. §항목·옵션 제시 규칙 참조. |
 
 ---
@@ -190,7 +261,7 @@ Full을 쓰는 조건:
 ### Mini BRIEF
 
 ```text
-Bottom Line: <결과 한 줄>. 상태 <G/Y/R>, 결정 <없음/1건>.
+Bottom Line: <결과 한 줄>. 상태 <pass/watch/block>, score <0-100>, 결정 <없음/1건>.
 Metric: <핵심 수치 1~2개>.
 Next: <다음 행동 또는 없음>.
 ```
@@ -202,7 +273,7 @@ Bottom Line: <결론 + 가장 중요한 의미>.
 
 | Signal | Value |
 |--------|-------|
-| Status | G/Y/R |
+| Status | pass/watch/block + score |
 | Scope | <완료/변경 범위> |
 | Cost | <실측 vs 추정> |
 | Verify | <검증 결과> |
@@ -250,7 +321,7 @@ Next:
 ```text
 Bottom Line: <목표 + 권장 접근>.
 Scope: in <X> / out <Y>.
-Cost: <N ph / ~N tokens>, risk <G/Y/R>.
+Cost: <N ph / ~N tokens>, risk <pass/watch/block>.
 Decision: <시작 전 필요한 결정 또는 없음>.
 ```
 
@@ -456,3 +527,18 @@ BRIEF/PLAN 응답은 in-conversation 출력으로 끝나지 않고 [agents/lead_
 - 2026-05-27 — Owner/CEO 분리 반영 (TASK-NNN). routine 보고·명령 판단은 CEO, 파괴적/고위험 에스컬레이션만 Owner로 라우팅.
 - 2026-05-22 — 자동 보관 절 추가 ([TASK-NNN](tasks/TASK-NNN-reporting-archive-harness.md)). BRIEF/PLAN 응답은 `agents/lead_engineer/reports/`에 누적 저장 + INDEX 갱신, `check_agent_docs.py` 가 무결성 검증.
 - 2026-05-27 — 이모지 정책 완화 (CEO 결정, AUDIT-YYYY-MM-DD-NNN). 장식 이모지 금지는 유지하되 O/X/체크박스 계열 단순 상태 마커(`✓✔✅✗✘❌☑☐☒⭕`)는 허용. `check_agent_docs.py` 가 허용 목록 + 남발(>20) WARN 으로 강제.
+
+
+---
+
+## Owner Status Signal and State Machine Contract
+
+- Status signal: `pass`, `watch`, `block`.
+- Numeric score: `0-100`.
+- Do not use color labels or `Good/Bad` as machine values.
+- Owner-facing frontmatter must include `signal` and `score`.
+- SSoT: `agents/project/STATE-MACHINES.yml`.
+- Schema: `schemas/state-machines.schema.json`.
+- Example: `agents/project/STATE-MACHINES.example.yml`.
+- Required machines: `health_signal`, `cycle`, `task`, `agent_job`, `gate`, `review`, `release`, `owner_decision`, `hook_enforcement`, `ci`, `document`.
+- Gate: `python scripts/owner_governance_gate.py`.

@@ -1,0 +1,16 @@
+schema: agent-runtime-owner-docs/v1
+owner_docs:
+  - BACKLOG-BOARD.md
+  - AGENT_RUNTIME_RSI_PLANNING_BRIEF.md
+  - AGENT_RUNTIME_PARALLEL_SESSION_PROTOCOL.md
+  - reviews/REVIEW-2026-06-09-backlog-board-restoration-owner-format-gate.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-worktree-cleanup-cycle-map.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-rsi-planning-registration.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-parallel-session-protocol.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-226-data-map.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-227-ui-state-api.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-228-ui-console-mvp.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-229-write-commands.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-230-runtime-commands.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-231-live-observability.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-232-map-views.md

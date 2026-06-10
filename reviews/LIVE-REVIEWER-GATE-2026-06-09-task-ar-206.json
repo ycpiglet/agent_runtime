@@ -1,0 +1,29 @@
+{
+  "schema": "agent-runtime-live-reviewer-gate/v1",
+  "evaluation_mode": "live_reviewer_footer",
+  "generated_at": "2026-06-09T06:03:42.067945+00:00",
+  "input": "agents/project/live_review/live-review-baseline-2026-06-09.jsonl",
+  "status": "pass",
+  "score": 1.0,
+  "records": 2,
+  "findings": [],
+  "record_results": [
+    {
+      "id": "live-001",
+      "task_id": "TASK-AR-217",
+      "score": 1.0,
+      "passed": 15,
+      "total": 15,
+      "findings": []
+    },
+    {
+      "id": "live-002",
+      "task_id": "TASK-AR-217",
+      "score": 1.0,
+      "passed": 17,
+      "total": 17,
+      "findings": []
+    }
+  ],
+  "correction_proposals": []
+}

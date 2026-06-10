@@ -26,6 +26,11 @@ FORBIDDEN_PATH_PREFIXES = (
     "supabase/",
 )
 
+ALLOWED_LOCAL_CONFIG_PATHS = {
+    ".codex/hooks.json",
+    "src/agent_runtime/templates/project/.codex/hooks.json",
+}
+
 FORBIDDEN_PATH_NAMES = {
     ".env",
     ".env.local",
@@ -96,6 +101,8 @@ def _rel(path: Path, root: Path) -> str:
 
 
 def _forbidden_path_kind(rel: str) -> str | None:
+    if rel in ALLOWED_LOCAL_CONFIG_PATHS:
+        return None
     if rel in FORBIDDEN_PATH_NAMES:
         return "forbidden-path"
     if any(rel.startswith(prefix) for prefix in FORBIDDEN_PATH_PREFIXES):

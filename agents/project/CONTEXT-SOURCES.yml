@@ -1,0 +1,90 @@
+schema: agent-runtime-context-sources/v1
+updated_at: 2026-06-09T13:20:00+09:00
+
+single_source_of_truth:
+  order:
+    - cert-semantic-layer
+    - lineage
+    - history
+    - context-knowledge
+  policy: "SSoT 충돌 시 상위 우선권, 하위는 보조 근거로만 사용."
+
+source_tiers:
+  - id: cert-semantic-layer
+    source_tier: cert-semantic-layer
+    owner: lead-engineer
+    access_level: internal
+    freshness_sla: 30d
+    lineage: agents/project/DATASET-CATALOG.yml -> agents/project/SKILL-DATA-MAP.yml -> agent_runtime scripts
+    description: 공식 승인된 정의, 지표, 계약, 데이터 스키마 근거
+    confidence_weight: 0.50
+    examples:
+      - path: agents/project/DATASET-CATALOG.yml
+      - path: agents/project/SKILL-DATA-MAP.yml
+
+  - id: lineage
+    source_tier: lineage
+    owner: doc-steward
+    access_level: internal
+    freshness_sla: 30d
+    lineage: scripts/migration_inventory.py -> migration reports
+    description: 이식 이력, 결정 근거, 태스크 및 review 링크
+    confidence_weight: 0.30
+    examples:
+      - path: agents/lead_engineer/reviews/MIGRATION-*.md
+      - path: reviews/MEETING-2026-06-13-agent-runtime-cross-project-governance-and-release-update.md
+
+  - id: history
+    source_tier: history
+    owner: doc-steward
+    access_level: internal
+    freshness_sla: 14d
+    lineage: audits and cycle docs
+    description: 태스크/회의/리뷰 중심의 실행 이력
+    confidence_weight: 0.15
+    examples:
+      - path: agents/lead_engineer/tasks/
+      - path: agents/lead_engineer/reviews/
+
+  - id: context-knowledge
+    source_tier: context-knowledge
+    owner: ceo
+    access_level: confidential
+    freshness_sla: 14d
+    lineage: roadmap/org/links docs
+    description: 프로젝트 의도, 조직, 커뮤니케이션 링크와 운영 판단
+    confidence_weight: 0.05
+    examples:
+      - path: agents/project/ROADMAP.md
+      - path: agents/project/ORG.md
+      - path: agents/project/LINKS.md
+      - path: agents/project/VISION.md
+
+definition_policy:
+  human_accountable_owner: owner
+  rule: "정의가 모호하면 중단하고 질문을 세분화한다. 쿼리는 source_tier, business_scope, time_window, tolerance를 명시한다."
+  required_metadata:
+    - owner
+    - updated_at
+    - source_tier
+    - access_level
+    - lineage
+    - confidence
+    - ambiguity_level
+
+query_policy:
+  rule: "질문은 ambiguity 점수 추정 후 의도/범위/시간/오류허용/트레이드오프를 분해해 실행한다."
+  required_fields:
+    - question
+    - business_scope
+    - source_tier
+    - time_window
+    - tolerance
+    - ambiguity_level
+    - access_check
+    - query_tolerance
+    - tradeoff_preference
+  required_blocks:
+    - source_footer (source_tier/source/confidence/risk/ambiguity/freshness_sla)
+    - reviewer_verdict
+    - correction_path

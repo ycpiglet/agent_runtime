@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-runtime.local/schemas/state-machines.schema.json",
+  "title": "Agent Runtime State Machines",
+  "type": "object",
+  "required": ["schema", "status_scale", "machines"],
+  "properties": {
+    "schema": { "const": "agent-runtime-state-machines/v1" },
+    "status_scale": {
+      "type": "object",
+      "required": ["allowed", "score"],
+      "properties": {
+        "allowed": {
+          "type": "array",
+          "items": { "enum": ["pass", "watch", "block"] },
+          "minItems": 3
+        },
+        "score": {
+          "type": "object",
+          "required": ["min", "max"],
+          "properties": {
+            "min": { "const": 0 },
+            "max": { "const": 100 }
+          }
+        }
+      }
+    },
+    "machines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "scope", "owner", "initial", "states", "transitions"],
+        "properties": {
+          "id": { "type": "string" },
+          "scope": { "type": "string" },
+          "owner": { "type": "string" },
+          "initial": { "type": "string" },
+          "states": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "signal", "score"],
+              "properties": {
+                "id": { "type": "string" },
+                "signal": { "enum": ["pass", "watch", "block"] },
+                "score": { "type": "integer", "minimum": 0, "maximum": 100 }
+              }
+            }
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["from", "to", "trigger"],
+              "properties": {
+                "from": { "type": "string" },
+                "to": { "type": "string" },
+                "trigger": { "type": "string" },
+                "guard": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

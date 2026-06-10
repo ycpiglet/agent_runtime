@@ -1,0 +1,40 @@
+{
+  "schema": "agent-runtime-live-reviewer-gate/v1",
+  "evaluation_mode": "live_reviewer_footer",
+  "generated_at": "2026-06-09T06:07:00.594199+00:00",
+  "input": "agents/project/live_review/live-review-failure-sample-2026-06-09.jsonl",
+  "status": "block",
+  "score": 0.7059,
+  "records": 1,
+  "findings": [
+    "live-fail-001:missing:evidence",
+    "live-fail-001:missing:source_footer",
+    "live-fail-001:missing_footer_tags:ambiguity,risk,source_footer,source_tier",
+    "live-fail-001:high_risk_requires_owner_or_auditor_route",
+    "live-fail-001:high_risk_missing_approved_by_or_escalation_owner"
+  ],
+  "record_results": [
+    {
+      "id": "live-fail-001",
+      "task_id": "TASK-AR-207",
+      "score": 0.7059,
+      "passed": 12,
+      "total": 17,
+      "findings": [
+        "missing:evidence",
+        "missing:source_footer",
+        "missing_footer_tags:ambiguity,risk,source_footer,source_tier",
+        "high_risk_requires_owner_or_auditor_route",
+        "high_risk_missing_approved_by_or_escalation_owner"
+      ]
+    }
+  ],
+  "correction_proposals": [
+    {
+      "type": "reviewer_footer_failure",
+      "owner": "independent_auditor",
+      "route": "TASK-AR-207",
+      "next_action": "create correction proposal for missing reviewer/footer metadata"
+    }
+  ]
+}
