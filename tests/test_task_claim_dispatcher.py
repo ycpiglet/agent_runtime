@@ -70,6 +70,10 @@ def test_create_claim_separates_system_identity_from_readable_display_name(tmp_p
     assert claim["mode"] == "design"
     assert claim["phase"] == "claim-created"
     assert claim["progress_pct"] == 0
+    assert claim["task_set_id"] == ""
+    assert claim["step_index"] == 0
+    assert claim["step_total"] == 0
+    assert claim["status_text"] == "Claim created for TASK-AR-246"
     assert claim["tags"] == ["planning", "no-ssot-write"]
     assert claim["worktree_path"] == ".worktrees/TASK-AR-246"
     assert claim["branch"] == "codex/task-ar-246-design-01"
@@ -160,3 +164,44 @@ def test_release_claim_requires_existing_handoff_and_log_files(tmp_path: Path):
     assert "handoff/log pointer is missing" in (failed.stderr or failed.stdout)
     saved = json.loads((tmp_path / payload["path"]).read_text(encoding="utf-8"))
     assert saved["status"] == "claimed"
+
+
+def test_create_claim_accepts_taskset_progress_fields(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        "TASK-AR-248",
+        "--task-set-id",
+        "TASKSET-AR-PANE-PROGRESS",
+        "--agent-role",
+        "lead-engineer",
+        "--team-id",
+        "agent-runtime-core",
+        "--mode",
+        "implement",
+        "--phase",
+        "implement",
+        "--progress-pct",
+        "48",
+        "--step-index",
+        "3",
+        "--step-total",
+        "6",
+        "--status-text",
+        "Rendering task-set progress in UI state",
+        "--now",
+        "2026-06-10T19:45:00+09:00",
+        "--suffix",
+        "p2",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    claim = json.loads(result.stdout)["claim"]
+    assert claim["task_set_id"] == "TASKSET-AR-PANE-PROGRESS"
+    assert claim["step_index"] == 3
+    assert claim["step_total"] == 6
+    assert claim["status_text"] == "Rendering task-set progress in UI state"

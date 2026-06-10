@@ -153,6 +153,34 @@ Allowed task states:
 - `완료`
 - `보류`
 
+## 5.5 Task Set Dispatch
+
+Task sets are the default unit for parallel panes. A "pane" may be a terminal
+pane, a separate terminal tab, or another worktree-backed agent session. The
+important boundary is not the UI container; it is the tuple
+`task_set_id + task_id + claim_id + worktree_path + branch + pane_id`.
+
+When the Owner says `taskset-xxx 진행해줘`, `taskset-xxx 시작`, or an equivalent
+request:
+
+1. Resolve the alias and inspect the lane:
+   `python scripts/taskset_dispatcher.py plan <taskset-alias> --json`.
+2. Claim the task set before editing:
+   `python scripts/taskset_dispatcher.py start <taskset-alias> --json`.
+3. Work only in the returned `worktree_path` and `branch`.
+4. Keep one active claim per `task_set_id` unless the claim explicitly records
+   `allow_parallel_task_set: true` and the reason is documented.
+5. Keep the claim and live pointer updated with `phase`, `progress_pct`,
+   `step_index`, `step_total`, and `status_text`.
+6. Before handoff or closure, run:
+   `python scripts/taskset_work_gate.py --check` and
+   `python scripts/parallel_worktree_gate.py --check`.
+
+Use human-friendly task-set display names in reports, for example
+`Quality Sentinel`, `Progress Scout`, `Console Operator`, or `Repo Custodian`.
+System identifiers remain stable machine fields; display names help humans read
+the board like RPG-style party/status labels.
+
 ## 6. Reversibility Gate
 
 Use reversibility and blast radius to decide whether to act or ask.

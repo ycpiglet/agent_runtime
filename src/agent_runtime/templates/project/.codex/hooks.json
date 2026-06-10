@@ -1,5 +1,15 @@
 {
   "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "scripts\\taskset_prompt_hook.cmd"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [

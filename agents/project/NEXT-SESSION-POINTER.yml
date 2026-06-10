@@ -1,13 +1,13 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-10T18:45:00+09:00
+updated_at: 2026-06-10T19:57:39+09:00
 updated_by: lead_engineer
 current_state:
   signal: pass
-  score: 92
+  score: 96
   summary: >
-    TASK-AR-247 is complete. The pane progress testset exists and passes
-    offline eval readiness. The next parallel-safe work is TASK-AR-248 for UI
-    state/console progress, with TASK-AR-249 waiting behind UI verification.
+    TASK-AR-250 is complete. Task-set prompts now route through dispatcher,
+    prompt hook, skill guidance, and gates so prompts like
+    `taskset-quality-loop 진행해줘` resolve to a claim/worktree/progress workflow.
 active_work:
   contract: >
     This is not only a next-session note. It is the game-style live work pointer:
@@ -17,9 +17,9 @@ active_work:
   current_agents: []
   current_teams:
     - team_id: agent-runtime-core
-      status: watch
-      phase: testset-complete
-      progress_pct: 33
+      status: pass
+      phase: taskset-dispatch-complete
+      progress_pct: 100
       active_task: TASK-AR-248
       task_set_id: TASKSET-AR-PANE-PROGRESS
       pane_ids: []
@@ -40,6 +40,7 @@ resume:
   next_actions:
     - Start TASK-AR-248 to expose pane/task-set progress in UI state and console.
     - Start TASK-AR-249 after UI state and console progress behavior is verified.
+    - Use `python scripts/taskset_dispatcher.py plan <taskset-alias> --json` before starting any task-set pane.
 roles:
   accountable: Lead Engineer
   reviewers:
@@ -48,10 +49,15 @@ roles:
     - Doc Steward
 pointers:
   task: agents/lead_engineer/tasks/TASK-AR-248.md
+  completed_taskset_dispatch: agents/lead_engineer/tasks/TASK-AR-250.md
+  taskset_dispatch_review: reviews/REVIEW-2026-06-10-agent-runtime-taskset-dispatcher.md
   completed_testset: agents/lead_engineer/tasks/TASK-AR-247.md
   task_set_plan: docs/superpowers/plans/2026-06-10-pane-progress-tasksets.md
   compound: agents/lead_engineer/compound_log.md
   protocol: AGENT_RUNTIME_PARALLEL_SESSION_PROTOCOL.md
+  taskset_dispatcher: scripts/taskset_dispatcher.py
+  taskset_gate: scripts/taskset_work_gate.py
+  taskset_hook: scripts/taskset_prompt_hook.py
   template_agents: src/agent_runtime/templates/project/AGENTS.md
   template_claude: src/agent_runtime/templates/project/CLAUDE.md
 rules:
@@ -73,9 +79,9 @@ rules:
     criteria and merge decisions for Owner.
 verification:
   required:
-    - PYTHONPATH=.;src pytest tests/test_continuity_contract_gate.py -q
-    - PYTHONPATH=.;src python scripts/continuity_contract_gate.py --check
+    - PYTHONPATH=.;src pytest tests/test_taskset_dispatcher.py tests/test_task_claim_dispatcher.py tests/test_parallel_worktree_gate.py tests/test_taskset_work_gate.py tests/test_taskset_prompt_hook.py -q
+    - PYTHONPATH=.;src python scripts/taskset_work_gate.py --check
     - PYTHONPATH=.;src python scripts/owner_governance_gate.py
   last_known:
     signal: pass
-    detail: Full tests, continuity gate, owner governance gate, sanitize, publish-check, and publish-bundle plan passed.
+    detail: Focused task-set tests, regression task-set/UI/template tests, py_compile, taskset gate, owner doc format gate, and owner governance gate passed.

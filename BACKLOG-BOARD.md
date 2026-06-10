@@ -8,7 +8,7 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-10
-task_count: 49
+task_count: 50
 open_count: 35
 task_set_count: 8
 ---
@@ -16,11 +16,11 @@ task_set_count: 8
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `49` total tasks; `35` open or active.
+- Summary: `50` total tasks; `35` open or active.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `28` / Ask `2` / Review `0` / Later `5` / Done `14`.
+- Status: Action `28` / Ask `2` / Review `0` / Later `5` / Done `15`.
 - Task Sets: `8` related workflows; priority, cost, and difficulty sorting happens inside each task set.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -129,12 +129,13 @@ task_set_count: 8
 ### Progress Scout (`TASKSET-AR-PANE-PROGRESS`)
 
 - Flow: Pane/task-set progress, live continuity, claims, and resumable handoffs.
-- Progress: `2/4` done; `2` open or active.
+- Progress: `3/5` done; `2` open or active.
 | Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-248` | planned | Action | P0 | Critical | Medium | 10h/2200tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Show pane and task-set progress in the runtime UI using phase, step counter, rough pe… |
 | `TASK-AR-249` | planned | Action | P1 | High | Medium | 8h/1800tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Enforce progress updates in task claims and continuity pointers so new panes can resu… |
 | `TASK-AR-247` | completed | Done | P0 | Critical | Medium | 8h/1600tok | Medium | 8 | validation-team | qa | Archive/evidence only | Create the fixed pane/task-set progress golden set before UI or enforcement changes. |
+| `TASK-AR-250` | completed | Done | P0 | Critical | Medium | 6h/1800tok | Low | 6 | agent-runtime-core | lead-engineer | Archive/evidence only | Make task-set work user-friendly enough that a prompt like `taskset-quality-loop 진행해줘… |
 | `TASK-AR-246` | completed | Done | P0 | Critical | Medium | 12h/2200tok | Low | 6 | agent-runtime-core | lead-engineer | Archive/evidence only | Implement dispatcher helpers for safe parallel Codex/Claude work: one task per worktr… |
 
 ### Repo Custodian (`TASKSET-AR-REPO-HYGIENE`)

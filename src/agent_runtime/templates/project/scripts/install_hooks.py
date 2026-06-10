@@ -124,6 +124,18 @@ COMMANDS: dict[str, str] = {
         "`python scripts/task_api.py set-status TASK-NNN <대기|진행 중|완료|보류>` 를 사용하되, "
         "완료 전이는 TASK 완료 기록·검증·리뷰·AUDIT ceremony 를 먼저 채운 뒤 실행한다.\n"
     ),
+    "taskset": (
+        "---\n"
+        "description: task set 단위 병렬 작업 claim/worktree/진행 포인터 준비\n"
+        "---\n\n"
+        "`python scripts/taskset_dispatcher.py plan <taskset-alias> --json` 으로 다음 task, "
+        "worktree, branch, claim_command 를 확인하라. 실제 claim 은 "
+        "`python scripts/taskset_dispatcher.py start <taskset-alias> --json`. "
+        "한 task_set_id에는 기본적으로 active claim 하나만 허용된다. 작업 중 "
+        "`phase`, `progress_pct`, `step_index/step_total`, `status_text`, "
+        "`agents/project/NEXT-SESSION-POINTER.yml`을 갱신하고, handoff 전 "
+        "`python scripts/taskset_work_gate.py --check`를 실행한다.\n"
+    ),
     "events": (
         "---\n"
         "description: TASK 변경 이벤트 로그 조회(tasks.events.jsonl)\n"

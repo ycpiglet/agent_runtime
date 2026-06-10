@@ -156,6 +156,26 @@ COMPOUND 기록은 `agents/lead_engineer/compound_log.md`에 누적합니다.
 | 외부 근거·표준·선행 사례 조사 (evidence note) | Research Agent |
 | CYCLE/TASK/MEETING/AUDIT 연대기 재구성 | Timeline Agent |
 
+## Task Set 병렬 작업 절차
+
+Owner가 `taskset-xxx 진행해줘`처럼 task set 단위 작업을 요청하면 Lead Engineer는
+개별 task를 임의로 고르지 않고 dispatcher를 먼저 사용합니다.
+
+```powershell
+python scripts/taskset_dispatcher.py plan <taskset-alias> --json
+python scripts/taskset_dispatcher.py start <taskset-alias> --json
+```
+
+반환된 `display_name`, `task_set_id`, `next_task_id`, `worktree_path`,
+`branch`, `step_index/step_total`, `status_text`를 그대로 작업 포인터와 보고에
+반영합니다. 한 task set에는 기본적으로 active claim 하나만 허용하며, 예외는
+`allow_parallel_task_set: true`와 사유를 claim/handoff에 남겼을 때만 인정합니다.
+
+작업 중 단계가 바뀌면 `phase`, `progress_pct`, `status_text`,
+`agents/project/NEXT-SESSION-POINTER.yml`을 갱신합니다. 완료/인수인계 전에는
+`python scripts/taskset_work_gate.py --check`와
+`python scripts/parallel_worktree_gate.py --check`를 실행합니다.
+
 ## CEO 보고 형식
 
 ```

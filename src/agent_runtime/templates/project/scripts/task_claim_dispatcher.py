@@ -177,8 +177,12 @@ def _build_claim(args: argparse.Namespace, records: list[tuple[Path, dict[str, A
         "pane_id": args.pane_id or callsite_id,
         "mode": mode,
         "status": "claimed",
+        "task_set_id": args.task_set_id,
         "phase": args.phase,
         "progress_pct": args.progress_pct,
+        "step_index": args.step_index,
+        "step_total": args.step_total,
+        "status_text": args.status_text or f"Claim created for {args.task_id}",
         "worktree_path": worktree_path,
         "branch": branch,
         "claimed_at": claimed_at,
@@ -310,10 +314,14 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--task-id", required=True)
     create.add_argument("--agent-role", required=True)
     create.add_argument("--team-id", default="agent-runtime-core")
+    create.add_argument("--task-set-id", default="")
     create.add_argument("--mode", default="work")
     create.add_argument("--pane-id")
     create.add_argument("--phase", default="claim-created")
     create.add_argument("--progress-pct", type=int, default=0)
+    create.add_argument("--step-index", type=int, default=0)
+    create.add_argument("--step-total", type=int, default=0)
+    create.add_argument("--status-text", default="")
     create.add_argument("--tag", action="append", default=[])
     create.add_argument("--now")
     create.add_argument("--suffix")

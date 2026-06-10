@@ -53,6 +53,21 @@ generalist.
 
 For substantial work, record which roles or perspectives contributed.
 
+## Task Set Prompts
+
+When the prompt says `taskset-xxx 진행해줘`, first run:
+
+```powershell
+python scripts/taskset_dispatcher.py plan <taskset-alias> --json
+python scripts/taskset_dispatcher.py start <taskset-alias> --json
+```
+
+Then work in the returned `worktree_path` and `branch`. Do not let two active
+panes claim the same `task_set_id` unless an explicit `allow_parallel_task_set`
+exception is recorded. Keep claim progress fields and
+`agents/project/NEXT-SESSION-POINTER.yml` current while working, not only at the
+end.
+
 ## Implementation Rules
 
 1. Prefer existing local helpers and scripts.

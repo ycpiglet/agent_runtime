@@ -1,0 +1,272 @@
+"""Plan and claim a task-set lane for parallel pane work.
+
+This script is the user-friendly entrypoint behind prompts like
+``taskset-quality-loop 진행해줘``. It resolves human aliases, selects the next
+task inside that task set, and creates a task claim with progress metadata.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any
+
+import backlog_board
+
+
+ACTIVE_STATUSES = {
+    "assigned",
+    "claimed",
+    "in_progress",
+    "review",
+    "waiting_review",
+    "working",
+}
+
+
+def _slug(value: str) -> str:
+    text = re.sub(r"[^A-Za-z0-9]+", "-", value.strip().lower())
+    text = re.sub(r"-+", "-", text)
+    return text.strip("-") or "taskset"
+
+
+def _taskset_slug(task_set_id: str) -> str:
+    return _slug(re.sub(r"^TASKSET-AR-", "", task_set_id, flags=re.IGNORECASE))
+
+
+def _rel(root: Path, path: Path) -> str:
+    try:
+        return path.resolve().relative_to(root.resolve()).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def _taskset_aliases() -> dict[str, backlog_board.TaskSetInfo]:
+    aliases: dict[str, backlog_board.TaskSetInfo] = {}
+    for info in backlog_board.TASK_SET_DEFINITIONS:
+        values = {
+            info.task_set_id,
+            info.task_set_id.lower(),
+            _taskset_slug(info.task_set_id),
+            _slug(info.display_name),
+            _slug(info.task_set_id.replace("TASKSET-AR-", "")),
+        }
+        for value in values:
+            aliases[value.lower()] = info
+    return aliases
+
+
+def _resolve_taskset(value: str) -> backlog_board.TaskSetInfo:
+    normalized = value.strip().lower()
+    normalized = re.sub(r"^taskset[-_: ]*", "", normalized)
+    aliases = _taskset_aliases()
+    if value.strip().lower() in aliases:
+        return aliases[value.strip().lower()]
+    if normalized in aliases:
+        return aliases[normalized]
+    raise SystemExit(f"unknown task set alias: {value}")
+
+
+def _tasks_for(root: Path, task_set_id: str) -> list[backlog_board.Task]:
+    tasks = backlog_board.load_tasks(root / "agents" / "lead_engineer" / "tasks")
+    return sorted([task for task in tasks if task.task_set_id == task_set_id], key=backlog_board.task_set_sort_key)
+
+
+def _next_task(tasks: list[backlog_board.Task]) -> backlog_board.Task:
+    for task in tasks:
+        if backlog_board.lane_for(task) != "Done":
+            return task
+    if tasks:
+        return tasks[0]
+    raise SystemExit("task set has no tasks")
+
+
+def _read_claim(path: Path) -> dict[str, Any] | None:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _active_claims(root: Path) -> list[dict[str, Any]]:
+    claim_dir = root / "agents" / "runtime" / "task_claims"
+    if not claim_dir.is_dir():
+        return []
+    claims: list[dict[str, Any]] = []
+    for path in sorted(claim_dir.glob("*.json"), key=lambda item: item.name.lower()):
+        payload = _read_claim(path)
+        if not payload:
+            continue
+        if str(payload.get("status") or "").strip().lower() in ACTIVE_STATUSES:
+            payload["_path"] = _rel(root, path)
+            claims.append(payload)
+    return claims
+
+
+def _active_taskset_claims(root: Path, task_set_id: str) -> list[dict[str, Any]]:
+    return [claim for claim in _active_claims(root) if str(claim.get("task_set_id") or "") == task_set_id]
+
+
+def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
+    root = args.root.resolve()
+    info = _resolve_taskset(args.taskset)
+    tasks = _tasks_for(root, info.task_set_id)
+    task = _next_task(tasks)
+    task_set_slug = _taskset_slug(info.task_set_id)
+    task_slug = _slug(task.task_id)
+    worktree_path = f".worktrees/{task.task_id}"
+    branch = f"codex/{task_slug}-{task_set_slug}"
+    step_index = tasks.index(task) + 1
+    step_total = len(tasks)
+    status_text = f"Starting {info.display_name}: {task.task_id}"
+    mode = args.mode or task_set_slug
+    agent_role = args.agent_role or backlog_board.agent_for(task)
+    team_id = args.team_id or backlog_board.team_for(task)
+
+    claim_command = [
+        sys.executable or "python",
+        str(Path(__file__).resolve().with_name("task_claim_dispatcher.py")),
+        "--root",
+        str(root),
+        "create",
+        "--task-id",
+        task.task_id,
+        "--task-set-id",
+        info.task_set_id,
+        "--agent-role",
+        agent_role,
+        "--team-id",
+        team_id,
+        "--mode",
+        mode,
+        "--phase",
+        "taskset-claimed",
+        "--progress-pct",
+        "0",
+        "--step-index",
+        str(step_index),
+        "--step-total",
+        str(step_total),
+        "--status-text",
+        status_text,
+        "--worktree-path",
+        worktree_path,
+        "--branch",
+        branch,
+    ]
+    if args.now:
+        claim_command.extend(["--now", args.now])
+    if args.suffix:
+        claim_command.extend(["--suffix", args.suffix])
+    if args.json:
+        claim_command.append("--json")
+
+    return {
+        "task_set_id": info.task_set_id,
+        "display_name": info.display_name,
+        "summary": info.summary,
+        "next_task_id": task.task_id,
+        "step_index": step_index,
+        "step_total": step_total,
+        "status_text": status_text,
+        "worktree_path": worktree_path,
+        "branch": branch,
+        "worktree_command": [
+            "git",
+            "worktree",
+            "add",
+            "-b",
+            branch,
+            worktree_path,
+        ],
+        "claim_command": claim_command,
+    }
+
+
+def _emit(payload: dict[str, Any], *, as_json: bool) -> None:
+    if as_json:
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        return
+    print(f"taskset-dispatcher: {payload['display_name']} ({payload['task_set_id']})")
+    print(f"next_task={payload['next_task_id']}")
+    print(f"progress={payload['step_index']}/{payload['step_total']}")
+    print(f"status_text={payload['status_text']}")
+    print("worktree_command=" + " ".join(payload["worktree_command"]))
+    print("claim_command=" + " ".join(payload["claim_command"]))
+
+
+def cmd_plan(args: argparse.Namespace) -> int:
+    payload = _plan_payload(args)
+    _emit(payload, as_json=args.json)
+    return 0
+
+
+def cmd_start(args: argparse.Namespace) -> int:
+    root = args.root.resolve()
+    payload = _plan_payload(args)
+    active = _active_taskset_claims(root, payload["task_set_id"])
+    if active:
+        claim_paths = ", ".join(str(claim.get("_path") or claim.get("claim_id") or "?") for claim in active)
+        print(
+            f"task set already has an active claim: {payload['task_set_id']} ({claim_paths})",
+            file=sys.stderr,
+        )
+        return 1
+
+    result = subprocess.run(
+        payload["claim_command"],
+        cwd=root,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if result.returncode != 0:
+        if result.stderr:
+            print(result.stderr, file=sys.stderr, end="")
+        if result.stdout:
+            print(result.stdout, file=sys.stderr, end="")
+        return result.returncode
+
+    claim_payload: dict[str, Any]
+    try:
+        claim_payload = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        claim_payload = {"raw": result.stdout.strip()}
+    payload["claim"] = claim_payload
+    _emit(payload, as_json=args.json)
+    return 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Plan or claim one task set for parallel pane work")
+    parser.add_argument("--root", type=Path, default=Path.cwd(), help="Repository or host root")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    for name, func in (("plan", cmd_plan), ("start", cmd_start)):
+        command = sub.add_parser(name, help=f"{name} a task set")
+        command.add_argument("taskset", help="Task set id or human alias, e.g. quality-loop")
+        command.add_argument("--agent-role")
+        command.add_argument("--team-id")
+        command.add_argument("--mode")
+        command.add_argument("--now")
+        command.add_argument("--suffix")
+        command.add_argument("--json", action="store_true")
+        command.set_defaults(func=func)
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
