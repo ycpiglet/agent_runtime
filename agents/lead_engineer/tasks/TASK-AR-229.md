@@ -1,6 +1,6 @@
 ---
 id: TASK-AR-229
-status: planned
+status: completed
 owner: lead-engineer
 priority: P1
 difficulty: M
@@ -16,6 +16,10 @@ audit_log:
   - agents/lead_engineer/tasks/TASK-AR-226.md
   - agents/lead_engineer/tasks/TASK-AR-227.md
   - agents/lead_engineer/tasks/TASK-AR-228.md
+  - docs/UI_WRITE_COMMANDS.md
+  - src/agent_runtime/ui_commands.py
+  - src/agent_runtime/ui_console.py
+  - tests/test_ui_commands.py
   - BACKLOG.md
   - BACKLOG-BOARD.md
 created: 2026-06-10
@@ -55,3 +59,24 @@ Let the UI manage tasks safely by sending changes through runtime APIs or a comm
 
 - Add unit tests for write command payloads.
 - Add an integration or smoke test that creates a task and observes it through the read API.
+
+## State Machine Mapping
+
+| Machine | Current State | Trigger | Evidence |
+|---|---|---|---|
+| `cycle` | `done` | `gates_pass` | UI create/update/archive smoke passed on an isolated runtime root. |
+| `task` | `completed` | `done_criteria_met` | `ui_commands` and `ui_console` write routes cover task create/update/reorder/comment/archive. |
+| `gate` | `pass` | `verification_passed` | Targeted tests and browser smoke passed. |
+| `document` | `formatted` | `document_regenerated` | `docs/UI_WRITE_COMMANDS.md` records routes, validation, ordering, and states. |
+
+## Completion Evidence
+
+- 2026-06-10: Added `src/agent_runtime/ui_commands.py` with validated write-through/outbox commands.
+- 2026-06-10: Added POST/PATCH routes for task create, task update, reorder, comment/message, and archive.
+- 2026-06-10: Added UI controls for create, save, move earlier/later, comment, archive, and write-state display.
+- 2026-06-10: Added command state loading through `/api/commands` and `/api/state`.
+- 2026-06-10: Added canonical `order` frontmatter support in `ui_state`.
+- 2026-06-10: Targeted tests passed: `PYTHONPATH=src pytest tests/test_ui_commands.py tests/test_ui_console.py tests/test_ui_state.py -q` -> 21 passed.
+- 2026-06-10: Browser smoke created `TASK-UI-901`, updated it, archived it, and observed three accepted commands.
+- 2026-06-10: Full suite passed: `PYTHONPATH=.;src pytest tests -q` -> 239 passed.
+- 2026-06-10: Next implementation pointer is `TASK-AR-230` Runtime Command Controls.

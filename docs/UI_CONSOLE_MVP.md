@@ -60,6 +60,7 @@ http://127.0.0.1:8765/
 
 ## Mutation Boundary
 
-The console is read-only. It does not expose task edit, reorder, assignment,
-message send, stop, resume, or command controls. Those remain blocked until
-`TASK-AR-229` defines the write-through/outbox path.
+The original MVP console was read-only. `TASK-AR-229` closes the first write
+follow-up by adding validated task create/update/reorder/comment/archive
+commands through the local server and `.ui_outbox`. Stop/resume and broader
+runtime lifecycle controls remain out of scope until `TASK-AR-230`.

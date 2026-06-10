@@ -6,6 +6,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 
+from . import ui_commands
 from . import ui_state
 
 
@@ -53,12 +54,24 @@ HTML = """<!doctype html>
       </section>
 
       <section class="work-surface">
+        <form id="create-task-form" class="create-form">
+          <input id="new-task-id" name="id" placeholder="TASK-UI-001">
+          <input id="new-task-title" name="title" placeholder="New task title" required>
+          <select id="new-task-priority" name="priority">
+            <option>P1</option>
+            <option>P0</option>
+            <option>P2</option>
+            <option>P3</option>
+          </select>
+          <button type="submit">Create</button>
+        </form>
         <nav class="tabs" aria-label="Views">
           <button class="tab is-active" type="button" data-view="board">Backlog</button>
           <button class="tab" type="button" data-view="agents">Agents</button>
           <button class="tab" type="button" data-view="messages">Messages</button>
           <button class="tab" type="button" data-view="events">Events</button>
           <button class="tab" type="button" data-view="sources">Sources</button>
+          <button class="tab" type="button" data-view="writes">Writes</button>
         </nav>
 
         <div id="view-board" class="view is-active">
@@ -75,6 +88,9 @@ HTML = """<!doctype html>
         </div>
         <div id="view-sources" class="view">
           <div id="sources-list" class="list-panel"></div>
+        </div>
+        <div id="view-writes" class="view">
+          <div id="command-log" class="list-panel"></div>
         </div>
       </section>
 
@@ -179,6 +195,22 @@ button:hover { filter: brightness(1.08); }
 .metric strong { display: block; margin-top: 8px; font-size: 30px; line-height: 1; }
 
 .work-surface { grid-area: work; min-width: 0; }
+.create-form {
+  display: grid;
+  grid-template-columns: minmax(110px, 160px) minmax(180px, 1fr) minmax(84px, 100px) minmax(88px, auto);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+input, select, textarea {
+  min-height: 36px;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--ink);
+  font: inherit;
+}
+textarea { min-height: 74px; resize: vertical; }
 .tabs { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; }
 .tab { flex: 0 0 auto; background: #ffffff; color: var(--ink); border-color: var(--line); padding: 0 12px; }
 .tab.is-active { background: var(--teal); border-color: var(--teal); color: #ffffff; }
@@ -265,6 +297,9 @@ button:hover { filter: brightness(1.08); }
 .meta-grid div { padding: 8px; border: 1px solid var(--line); border-radius: 6px; background: #ffffff; }
 .meta-grid span { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; }
 .meta-grid strong { display: block; margin-top: 4px; font-size: 12px; overflow-wrap: anywhere; }
+.edit-form { display: grid; gap: 8px; margin-top: 14px; }
+.edit-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.button-row { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .empty {
   display: grid;
@@ -286,6 +321,7 @@ button:hover { filter: brightness(1.08); }
   .shell { padding: 10px; }
   .topbar { align-items: flex-start; flex-direction: column; }
   .toolbar { justify-content: flex-start; }
+  .create-form { grid-template-columns: 1fr; }
   .dashboard { grid-template-columns: 1fr; }
   .kanban { grid-template-columns: repeat(6, minmax(220px, 84vw)); }
   .meta-grid { grid-template-columns: 1fr; }
@@ -296,6 +332,7 @@ button:hover { filter: brightness(1.08); }
 JS = """const lanes = ["Backlog", "Ready", "In Progress", "Review", "Blocked", "Done"];
 let runtimeState = null;
 let selectedTaskId = null;
+let pendingWrites = [];
 
 const $ = (id) => document.getElementById(id);
 const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -323,6 +360,23 @@ async function loadState() {
     setText("poll-state", "error");
     $("status-line").textContent = `State load failed: ${error.message}`;
   }
+}
+
+async function sendJson(url, options) {
+  const requestId = `pending-${Date.now()}`;
+  pendingWrites.unshift({ id: requestId, type: options.type || "request", status: "pending", created_at: new Date().toISOString() });
+  renderCommands();
+  const response = await fetch(url, {
+    method: options.method || "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(options.payload || {})
+  });
+  const payload = await response.json();
+  pendingWrites = pendingWrites.filter((item) => item.id !== requestId);
+  pendingWrites.unshift(payload);
+  await loadState();
+  renderCommands();
+  return payload;
 }
 
 function taskCounts(tasks) {
@@ -410,6 +464,20 @@ function renderSources() {
   `).join("") : `<div class="empty">No sources</div>`;
 }
 
+function renderCommands() {
+  const rows = [...pendingWrites, ...((runtimeState && runtimeState.commands) || [])];
+  const host = $("command-log");
+  if (!host) return;
+  host.innerHTML = rows.length ? rows.slice(0, 80).map((row) => `
+    <article class="list-row ${row.status === "failed" ? "error" : row.status === "pending" ? "warn" : "ok"}">
+      <b>${escapeHtml(row.id || row.type)}</b>
+      <span>${escapeHtml(row.status)} / ${escapeHtml(row.type || "command")}</span>
+      <code>${escapeHtml(row.target || row.source_path || "")}</code>
+      ${row.errors ? `<p>${escapeHtml(row.errors.join("; "))}</p>` : ""}
+    </article>
+  `).join("") : `<div class="empty">No write commands</div>`;
+}
+
 function renderDetail() {
   const panel = $("detail-panel");
   const task = (runtimeState.tasks || []).find((item) => item.id === selectedTaskId);
@@ -430,7 +498,57 @@ function renderDetail() {
       <div><span>Updated</span><strong>${escapeHtml(task.last_updated || "unknown")}</strong></div>
       <div><span>Blocked</span><strong>${escapeHtml(task.blocked_reason || "none")}</strong></div>
     </div>
+    <form id="edit-task-form" class="edit-form">
+      <div class="edit-row">
+        <select id="detail-status">
+          ${["planned", "ready", "in_progress", "review", "blocked", "completed"].map((status) => `<option ${status === task.status ? "selected" : ""}>${status}</option>`).join("")}
+        </select>
+        <select id="detail-priority">
+          ${["P0", "P1", "P2", "P3"].map((priority) => `<option ${priority === task.priority ? "selected" : ""}>${priority}</option>`).join("")}
+        </select>
+      </div>
+      <input id="detail-owner" value="${escapeHtml(task.owner_agent || "")}" placeholder="owner">
+      <textarea id="detail-description">${escapeHtml(task.description || "")}</textarea>
+      <div class="button-row">
+        <button type="submit">Save</button>
+        <button id="move-earlier" type="button">Move Earlier</button>
+        <button id="move-later" type="button">Move Later</button>
+        <button id="archive-task" type="button">Archive</button>
+      </div>
+      <textarea id="detail-comment" placeholder="Comment or message"></textarea>
+      <button id="send-comment" type="button">Send Comment</button>
+    </form>
   </article>`;
+  $("edit-task-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await sendJson(`/api/tasks/${encodeURIComponent(task.id)}`, {
+      method: "PATCH",
+      type: "task.update",
+      payload: {
+        status: $("detail-status").value,
+        priority: $("detail-priority").value,
+        owner: $("detail-owner").value,
+        description: $("detail-description").value
+      }
+    });
+  });
+  $("move-earlier").addEventListener("click", () => sendJson(`/api/tasks/${encodeURIComponent(task.id)}/reorder`, {
+    type: "task.reorder",
+    payload: { order: Math.max(0, Number(task.order || 0) - 1) }
+  }));
+  $("move-later").addEventListener("click", () => sendJson(`/api/tasks/${encodeURIComponent(task.id)}/reorder`, {
+    type: "task.reorder",
+    payload: { order: Number(task.order || 0) + 1 }
+  }));
+  $("send-comment").addEventListener("click", () => sendJson("/api/messages", {
+    type: "task.comment",
+    payload: { task_id: task.id, comment: $("detail-comment").value, to: task.owner_agent || "lead-engineer" }
+  }));
+  $("archive-task").addEventListener("click", () => {
+    if (window.confirm(`Archive ${task.id}?`)) {
+      sendJson(`/api/tasks/${encodeURIComponent(task.id)}/archive`, { type: "task.archive", payload: {} });
+    }
+  });
 }
 
 function renderAll() {
@@ -440,6 +558,7 @@ function renderAll() {
   renderMessages();
   renderEvents();
   renderSources();
+  renderCommands();
   renderDetail();
 }
 
@@ -453,6 +572,22 @@ document.querySelectorAll(".tab").forEach((tab) => {
 });
 
 $("refresh-button").addEventListener("click", loadState);
+$("create-task-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  await sendJson("/api/tasks", {
+    type: "task.create",
+    payload: {
+      id: $("new-task-id").value,
+      title: $("new-task-title").value,
+      description: $("new-task-title").value,
+      priority: $("new-task-priority").value,
+      status: "planned",
+      owner: "lead-engineer"
+    }
+  });
+  $("new-task-id").value = "";
+  $("new-task-title").value = "";
+});
 loadState();
 setInterval(loadState, 4000);
 """
@@ -462,17 +597,52 @@ def _bytes(text: str) -> bytes:
     return text.encode("utf-8")
 
 
-def _json_response(payload: object) -> ConsoleResponse:
+def _json_response(payload: object, status: int = 200) -> ConsoleResponse:
     return ConsoleResponse(
-        status=200,
+        status=status,
         content_type="application/json; charset=utf-8",
         body=_bytes(json.dumps(payload, ensure_ascii=False, indent=2)),
     )
 
 
-def build_response(path: str, root: Path | str) -> ConsoleResponse:
+def _decode_json_body(body: bytes | None) -> tuple[dict[str, object], list[str]]:
+    if not body:
+        return {}, []
+    try:
+        payload = json.loads(body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        return {}, [f"invalid json body: {exc}"]
+    if not isinstance(payload, dict):
+        return {}, ["json body must be an object"]
+    return payload, []
+
+
+def _command_response(root_path: Path, command: dict[str, object]) -> ConsoleResponse:
+    result = ui_commands.submit_command(root_path, command)
+    return _json_response(result, status=202 if result.get("status") == "accepted" else 400)
+
+
+def build_response(path: str, root: Path | str, *, method: str = "GET", body: bytes | None = None) -> ConsoleResponse:
     root_path = Path(root)
     request_path = urlparse(path).path
+    method = method.upper()
+    if method in {"POST", "PATCH"}:
+        payload, errors = _decode_json_body(body)
+        if errors:
+            return _json_response({"status": "failed", "errors": errors}, status=400)
+        if method == "POST" and request_path == "/api/tasks":
+            return _command_response(root_path, {"type": "task.create", "payload": payload})
+        if method == "POST" and request_path == "/api/messages":
+            return _command_response(root_path, {"type": "task.comment", "target": payload.get("task_id"), "payload": payload})
+        task_match = re_api_task_route(request_path)
+        if task_match and method == "PATCH":
+            return _command_response(root_path, {"type": "task.update", "target": task_match[0], "payload": payload})
+        if task_match and method == "POST" and task_match[1] == "reorder":
+            return _command_response(root_path, {"type": "task.reorder", "target": task_match[0], "payload": payload})
+        if task_match and method == "POST" and task_match[1] == "archive":
+            return _command_response(root_path, {"type": "task.archive", "target": task_match[0], "payload": payload})
+        return ConsoleResponse(404, "text/plain; charset=utf-8", b"not found\n")
+
     if request_path in {"", "/"}:
         return ConsoleResponse(200, "text/html; charset=utf-8", _bytes(HTML))
     if request_path == "/app.css":
@@ -489,10 +659,20 @@ def build_response(path: str, root: Path | str) -> ConsoleResponse:
         "/api/events": "events",
         "/api/goals": "goals",
         "/api/sources": "sources",
+        "/api/commands": "commands",
     }
     if request_path in api_resources:
         return _json_response(ui_state.build_resource(root_path, api_resources[request_path]))
     return ConsoleResponse(404, "text/plain; charset=utf-8", b"not found\n")
+
+
+def re_api_task_route(request_path: str) -> tuple[str, str | None] | None:
+    parts = [part for part in request_path.split("/") if part]
+    if len(parts) == 3 and parts[:2] == ["api", "tasks"]:
+        return parts[2], None
+    if len(parts) == 4 and parts[:2] == ["api", "tasks"]:
+        return parts[2], parts[3]
+    return None
 
 
 class _ConsoleHandler(BaseHTTPRequestHandler):
@@ -500,6 +680,28 @@ class _ConsoleHandler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:  # noqa: N802 - BaseHTTPRequestHandler API
         response = build_response(self.path, self.root)
+        self.send_response(response.status)
+        self.send_header("Content-Type", response.content_type)
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Content-Length", str(len(response.body)))
+        self.end_headers()
+        self.wfile.write(response.body)
+
+    def _read_body(self) -> bytes:
+        length = int(self.headers.get("Content-Length", "0") or "0")
+        return self.rfile.read(length) if length else b""
+
+    def do_POST(self) -> None:  # noqa: N802 - BaseHTTPRequestHandler API
+        response = build_response(self.path, self.root, method="POST", body=self._read_body())
+        self.send_response(response.status)
+        self.send_header("Content-Type", response.content_type)
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Content-Length", str(len(response.body)))
+        self.end_headers()
+        self.wfile.write(response.body)
+
+    def do_PATCH(self) -> None:  # noqa: N802 - BaseHTTPRequestHandler API
+        response = build_response(self.path, self.root, method="PATCH", body=self._read_body())
         self.send_response(response.status)
         self.send_header("Content-Type", response.content_type)
         self.send_header("Cache-Control", "no-store")

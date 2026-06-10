@@ -6,7 +6,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-RESOURCE_NAMES = ("state", "tasks", "agents", "messages", "events", "goals", "sources")
+from . import ui_commands
+
+RESOURCE_NAMES = ("state", "tasks", "agents", "messages", "events", "goals", "sources", "commands")
 
 TASKS_GLOB = "agents/lead_engineer/tasks/TASK-*.md"
 SESSION_GLOB = "agents/runtime/sessions/*.json"
@@ -92,6 +94,10 @@ def _parse_scalar(value: str) -> Any:
         return True
     if value.lower() == "false":
         return False
+    try:
+        return int(value)
+    except ValueError:
+        pass
     return value.strip("\"'")
 
 
@@ -180,6 +186,13 @@ def _lane_for_status(status: str) -> str:
     return mapping.get(normalized, "Backlog")
 
 
+def _task_order(meta: dict[str, Any], fallback: int) -> int:
+    try:
+        return int(meta.get("order", fallback))
+    except (TypeError, ValueError):
+        return fallback
+
+
 def load_tasks(root: Path, now: str, warnings: list[dict[str, str]]) -> list[dict[str, Any]]:
     tasks_dir = root / "agents" / "lead_engineer" / "tasks"
     tasks: list[dict[str, Any]] = []
@@ -205,7 +218,7 @@ def load_tasks(root: Path, now: str, warnings: list[dict[str, str]]) -> list[dic
             "status": str(meta.get("status") or ""),
             "lane": _lane_for_status(str(meta.get("status") or "")),
             "priority": meta.get("priority"),
-            "order": order,
+            "order": _task_order(meta, order),
             "owner_agent": meta.get("owner"),
             "team": meta.get("team"),
             "labels": labels,
@@ -222,6 +235,7 @@ def load_tasks(root: Path, now: str, warnings: list[dict[str, str]]) -> list[dic
             "freshness": "present",
         }
         tasks.append(record)
+    tasks.sort(key=lambda item: (int(item.get("order", 0)), str(item.get("id", ""))))
     return tasks
 
 
@@ -406,6 +420,7 @@ def _collect_sources_and_gaps(root: Path, now: str) -> tuple[list[dict[str, Any]
         ("events", root / "agents" / "runtime" / "events", "event_directory", "append_only_runtime"),
         ("status", root / "STATUS.md", "status_markdown", "agent_doc_workflow"),
         ("state_machines", root / "agents" / "project" / "STATE-MACHINES.yml", "state_machine_yaml", "schema_first_task"),
+        ("ui_outbox", root / ".ui_outbox", "ui_command_outbox", "api_only"),
     )
     sources = [_source_entry(root, source_id, path, kind, now, boundary) for source_id, path, kind, boundary in source_specs]
     optional = {"messages_inbox", "messages_archive", "sessions", "events", "status"}
@@ -427,6 +442,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     agents = load_agents(root_path, generated_at, events, warnings)
     messages = load_messages(root_path, generated_at, warnings)
     goals = load_goals(root_path, generated_at)
+    commands = ui_commands.list_commands(root_path)
     return {
         "generated_at": generated_at,
         "sources": sources,
@@ -435,6 +451,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "messages": messages,
         "events": events,
         "goals": goals,
+        "commands": commands,
         "gaps": gaps,
         "warnings": warnings,
     }

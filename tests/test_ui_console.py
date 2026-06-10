@@ -43,10 +43,13 @@ def test_ui_console_serves_html_shell_and_assets(tmp_path):
     assert b'id="runtime-console-app"' in html.body
     assert b"Backlog" in html.body
     assert b"Agents" in html.body
+    assert b"command-log" in html.body
     assert css.status == 200
     assert b"--ink" in css.body
     assert js.status == 200
     assert b"/api/state" in js.body
+    assert b"/api/tasks" in js.body
+    assert b"/api/messages" in js.body
 
 
 def test_ui_console_api_state_uses_ui_state_adapter(tmp_path):
@@ -70,6 +73,86 @@ def test_ui_console_api_resource_routes_match_state_resources(tmp_path):
     assert payload["resource"] == "tasks"
     assert payload["items"][0]["id"] == "TASK-AR-229"
     assert payload["sources"]
+
+
+def test_ui_console_post_task_create_and_patch_update_routes(tmp_path):
+    create = ui_console.build_response(
+        "/api/tasks",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {
+                "id": "TASK-UI-601",
+                "title": "Created from route",
+                "description": "Route-created task.",
+                "status": "planned",
+                "priority": "P2",
+                "owner": "lead-engineer",
+            }
+        ).encode("utf-8"),
+    )
+    created = json.loads(create.body.decode("utf-8"))
+    patch = ui_console.build_response(
+        "/api/tasks/TASK-UI-601",
+        tmp_path,
+        method="PATCH",
+        body=json.dumps({"status": "in_progress", "priority": "P0"}).encode("utf-8"),
+    )
+    patched = json.loads(patch.body.decode("utf-8"))
+    state = json.loads(ui_console.build_response("/api/state", tmp_path).body.decode("utf-8"))
+
+    assert create.status == 202
+    assert created["status"] == "accepted"
+    assert patch.status == 202
+    assert patched["status"] == "accepted"
+    assert state["tasks"][0]["id"] == "TASK-UI-601"
+    assert state["tasks"][0]["status"] == "in_progress"
+    assert state["commands"][-1]["status"] == "accepted"
+
+
+def test_ui_console_reorder_message_and_invalid_routes(tmp_path):
+    _write_task(tmp_path, "TASK-UI-701")
+    reorder = ui_console.build_response(
+        "/api/tasks/TASK-UI-701/reorder",
+        tmp_path,
+        method="POST",
+        body=json.dumps({"order": 2, "status": "ready"}).encode("utf-8"),
+    )
+    message = ui_console.build_response(
+        "/api/messages",
+        tmp_path,
+        method="POST",
+        body=json.dumps({"task_id": "TASK-UI-701", "comment": "Route comment", "to": "qa"}).encode("utf-8"),
+    )
+    invalid = ui_console.build_response(
+        "/api/tasks/TASK-UI-701",
+        tmp_path,
+        method="PATCH",
+        body=json.dumps({"status": "bad"}).encode("utf-8"),
+    )
+
+    assert reorder.status == 202
+    assert message.status == 202
+    assert invalid.status == 400
+    failed = json.loads(invalid.body.decode("utf-8"))
+    assert failed["status"] == "failed"
+    assert "invalid status" in " ".join(failed["errors"])
+
+
+def test_ui_console_archive_route_marks_task_complete(tmp_path):
+    _write_task(tmp_path, "TASK-UI-801")
+
+    response = ui_console.build_response(
+        "/api/tasks/TASK-UI-801/archive",
+        tmp_path,
+        method="POST",
+        body=b"{}",
+    )
+    state = json.loads(ui_console.build_response("/api/state", tmp_path).body.decode("utf-8"))
+
+    assert response.status == 202
+    assert state["tasks"][0]["status"] == "completed"
+    assert "Archive" in ui_console.JS
 
 
 def test_ui_console_unknown_path_returns_404(tmp_path):

@@ -658,3 +658,39 @@ Decision
 | Start Task CRUD and Backlog Ordering | lead-engineer | `TASK-AR-229` |
 | Define canonical task order/write-through | lead-engineer | required before drag/drop or status edits |
 | Keep read-only smoke passing | lead-engineer | `tests/test_ui_console.py` and Chromium smoke |
+
+## 2026-06-10 - Task CRUD and Backlog Ordering Cycle
+
+### Bottom Line
+
+- Summary: completed `TASK-AR-229`; the UI console now writes through validated server routes and stores command outcomes in `.ui_outbox`.
+- Output: `src/agent_runtime/ui_commands.py`, updated `src/agent_runtime/ui_console.py`, `tests/test_ui_commands.py`, and `docs/UI_WRITE_COMMANDS.md`.
+- State machine: `cycle=done`, `task=TASK-AR-229 completed`, `gate=pass`, `document=formatted`.
+
+### Signal
+
+| Signal | State | Evidence |
+| --- | --- | --- |
+| Create/update | pass | `POST /api/tasks`, `PATCH /api/tasks/:id` |
+| Reorder | pass | `POST /api/tasks/:id/reorder`, frontmatter `order` |
+| Comment/message | pass | `POST /api/messages` writes queued message markdown |
+| Archive | pass | `POST /api/tasks/:id/archive` writes `status: completed`, `archived: true` |
+| Rejection path | pass | invalid status, missing task id, and direct-file keys fail with stored errors |
+| UI write states | pass | `Writes` tab shows pending/accepted/failed command records |
+| Targeted tests | pass | `PYTHONPATH=src pytest tests/test_ui_commands.py tests/test_ui_console.py tests/test_ui_state.py -q` -> 21 passed |
+| Browser smoke | pass | temporary-root UI flow created, updated, archived `TASK-UI-901` |
+| Full tests | pass | `PYTHONPATH=.;src pytest tests -q` -> 239 passed |
+
+### Decision
+
+- Decision: use `.ui_outbox/COMMAND-*.json` as the audit trail for UI-originated writes.
+- Decision: use task frontmatter `order` as the first canonical UI ordering field.
+- Decision: keep hard delete and runtime lifecycle controls out of `TASK-AR-229`; continue with `TASK-AR-230`.
+
+### Next Steps
+
+| Step | Owner | Evidence |
+| --- | --- | --- |
+| Start Runtime Command Controls | lead-engineer | `TASK-AR-230` |
+| Add prompt/review/start/pause/resume/stop commands | lead-engineer | build on `ui_commands` |
+| Keep mutation smoke isolated from repo root | lead-engineer | temporary runtime roots |

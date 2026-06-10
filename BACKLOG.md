@@ -452,10 +452,10 @@
   - 상태: completed
   - 내용: dashboard, backlog/kanban, agent cards, message log, event timeline, task detail drawer를 읽기 전용으로 구현.
 - P1-UI-3: `TASK-AR-229` Task CRUD and Backlog Ordering
-  - 상태: next
+  - 상태: completed
   - 내용: create/edit/status/priority/assignee/reorder/comment를 runtime API 또는 `.ui_outbox/COMMAND-*.json`로 제출하고 task order를 보존.
 - P1-UI-4: `TASK-AR-230` Runtime Command Controls
-  - 상태: planned
+  - 상태: next
   - 내용: send prompt to agent, send task to runtime, request review/meeting, start/pause/resume/stop goal을 안전 경계와 함께 UI에서 제출.
 - P1-UI-5: `TASK-AR-231` Live Updates, Logs, Replay, Evidence
   - 상태: planned
@@ -466,22 +466,23 @@
 
 ## 다음 세션 우선순위
 
-1. `TASK-AR-229` Task CRUD and Backlog Ordering: canonical order/write-through 전략 확정 후 쓰기 기능 추가
-2. `TASK-AR-223` 버전 업데이트 closeout 통합(강제 규칙/오버레이/마이그레이션 재수합)
-3. `TASK-AR-221` 운영 정합 통합(Task-합의 마감)
-4. `TASK-AR-210` 재판정: boundaries closure 후 `ready` 가능 여부 확인
-5. `TASK-AR-219` 공식 권고 반영 및 판정 근거 고정
-6. `TASK-AR-220` tag_manual 이식 근거 마감(스크립트/훅/스킬 누락·의도적 제외 정렬)
-7. `TASK-AR-216` v0.1.8 후보 이관 사유 정렬
-8. `TASK-AR-222` v0.1.8 closeout 번들 완성
-9. `TASK-AR-218` migration 무결성 정합 + migration-map block rule 정비
-10. `TASK-AR-214` 질의 계약/메타데이터 게이트 마무리
-11. `TASK-AR-215` 오버레이 context packet 확정
-12. `TASK-AR-210` release gate 최종 템플릿 완료
-13. `TASK-AR-204` co-location 강제 룰 적용
-14. `TASK-AR-213` migration parity lock 완료
-15. `TASK-AR-202`/`TASK-AR-203` 병행 착수
-16. 멀티 프로젝트 오버레이 적용을 위한 `PROJECT-CONTEXT`/`ROADMAP`/`ORG`/`LINKS`/`TEAMS` 변경 시뮬레이션(1개 MVP 케이스) 완료
+1. `TASK-AR-230` Runtime Command Controls: prompt/review/start/pause/resume/stop 명령을 안전 경계와 함께 추가
+2. `TASK-AR-231` Live Updates, Logs, Replay, Evidence: freshness/log/evidence filtering 보강
+3. `TASK-AR-232` Graph, State Machine, Roadmap Views: graph/state-machine/roadmap post-MVP 뷰 추가
+4. `TASK-AR-223` 버전 업데이트 closeout 통합(강제 규칙/오버레이/마이그레이션 재수합)
+5. `TASK-AR-221` 운영 정합 통합(Task-합의 마감)
+6. `TASK-AR-210` 재판정: boundaries closure 후 `ready` 가능 여부 확인
+7. `TASK-AR-219` 공식 권고 반영 및 판정 근거 고정
+8. `TASK-AR-220` tag_manual 이식 근거 마감(스크립트/훅/스킬 누락·의도적 제외 정렬)
+9. `TASK-AR-216` v0.1.8 후보 이관 사유 정렬
+10. `TASK-AR-222` v0.1.8 closeout 번들 완성
+11. `TASK-AR-218` migration 무결성 정합 + migration-map block rule 정비
+12. `TASK-AR-214` 질의 계약/메타데이터 게이트 마무리
+13. `TASK-AR-215` 오버레이 context packet 확정
+14. `TASK-AR-204` co-location 강제 룰 적용
+15. `TASK-AR-213` migration parity lock 완료
+16. `TASK-AR-202`/`TASK-AR-203` 병행 착수
+17. 멀티 프로젝트 오버레이 적용을 위한 `PROJECT-CONTEXT`/`ROADMAP`/`ORG`/`LINKS`/`TEAMS` 변경 시뮬레이션(1개 MVP 케이스) 완료
 
 ## Done Log
 
