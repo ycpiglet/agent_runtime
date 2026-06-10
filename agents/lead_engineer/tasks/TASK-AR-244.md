@@ -6,6 +6,7 @@ priority: P0
 difficulty: L
 est_hours: 16
 est_tokens: 2800
+task_set_id: TASKSET-AR-RSI-PLANNING
 tags:
   - rsi
   - safety

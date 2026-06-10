@@ -6,6 +6,7 @@ priority: P0
 difficulty: M
 est_hours: 10
 est_tokens: 1700
+task_set_id: TASKSET-AR-CONTEXT-KNOWLEDGE
 tags:
   - runbook
   - workflow-governance

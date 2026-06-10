@@ -6,6 +6,7 @@ priority: P1
 difficulty: L
 est_hours: 16
 est_tokens: 2600
+task_set_id: TASKSET-AR-RSI-PLANNING
 tags:
   - rsi
   - agent-departments

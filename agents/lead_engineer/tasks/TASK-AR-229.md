@@ -6,6 +6,7 @@ priority: P1
 difficulty: M
 est_hours: 12
 est_tokens: 2200
+task_set_id: TASKSET-AR-UI-CONSOLE
 tags:
   - ui-console
   - task-crud

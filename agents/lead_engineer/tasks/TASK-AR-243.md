@@ -6,6 +6,7 @@ priority: P0
 difficulty: L
 est_hours: 16
 est_tokens: 3000
+task_set_id: TASKSET-AR-QUALITY-LOOP
 tags:
   - rsi
   - trace-grading

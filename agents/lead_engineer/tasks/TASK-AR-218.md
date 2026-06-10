@@ -6,6 +6,7 @@ priority: P0
 difficulty: M
 est_hours: 12
 est_tokens: 2400
+task_set_id: TASKSET-AR-MIGRATION-PARITY
 tags:
   - migration-hardening
   - release-gate

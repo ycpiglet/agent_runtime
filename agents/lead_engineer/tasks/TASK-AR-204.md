@@ -6,6 +6,7 @@ priority: P0
 difficulty: M
 est_hours: 12
 est_tokens: 1800
+task_set_id: TASKSET-AR-CONTEXT-KNOWLEDGE
 tags:
   - skill-governance
   - ci-gate

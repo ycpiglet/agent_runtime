@@ -35,6 +35,7 @@ priority: P0
 difficulty: L
 est_hours: 16
 est_tokens: 3200
+task_set_id: TASKSET-AR-QUALITY-LOOP
 tags:
   - architecture
   - cross-project

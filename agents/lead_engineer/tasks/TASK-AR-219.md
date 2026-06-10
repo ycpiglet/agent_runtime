@@ -19,6 +19,7 @@ priority: P0
 difficulty: M
 est_hours: 10
 est_tokens: 1800
+task_set_id: TASKSET-AR-RELEASE-STEWARD
 started_at: 2026-06-10T09:00:00+09:00
 tags:
   - release-planning

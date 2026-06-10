@@ -7,6 +7,7 @@ priority: P0
 difficulty: M
 est_hours: 16
 est_tokens: 2600
+task_set_id: TASKSET-AR-CONTEXT-KNOWLEDGE
 tags:
   - query-contract
   - metadata-governance

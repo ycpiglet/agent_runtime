@@ -6,6 +6,7 @@ priority: P0
 difficulty: M
 est_hours: 8
 est_tokens: 1200
+task_set_id: TASKSET-AR-CONTEXT-KNOWLEDGE
 tags:
   - knowledge-router
   - context-source

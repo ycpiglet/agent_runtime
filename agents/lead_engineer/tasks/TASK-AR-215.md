@@ -7,6 +7,7 @@ priority: P0
 difficulty: M
 est_hours: 18
 est_tokens: 3000
+task_set_id: TASKSET-AR-CONTEXT-KNOWLEDGE
 tags:
   - project-overlay
   - cross-project

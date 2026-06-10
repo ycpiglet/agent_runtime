@@ -6,6 +6,7 @@ priority: P1
 difficulty: M
 est_hours: 14
 est_tokens: 2400
+task_set_id: TASKSET-AR-RSI-PLANNING
 tags:
   - rsi
   - planning-loop

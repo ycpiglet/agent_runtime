@@ -6,6 +6,7 @@ priority: P0
 difficulty: L
 est_hours: 14
 est_tokens: 2600
+task_set_id: TASKSET-AR-UI-CONSOLE
 tags:
   - ui-console
   - web-ui

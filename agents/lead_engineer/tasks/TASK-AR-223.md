@@ -6,6 +6,7 @@ priority: P0
 difficulty: M
 est_hours: 12
 est_tokens: 2600
+task_set_id: TASKSET-AR-RELEASE-STEWARD
 tags:
   - version-closeout
   - governance
