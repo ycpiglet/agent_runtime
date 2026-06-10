@@ -14,3 +14,7 @@ __pycache__/
 
 # Local git worktrees for isolated pane/task execution.
 /.worktrees/
+
+# Local hook diagnostics emitted by Codex/Owner governance hooks.
+/.codex/hook-logs/
+/agents/runtime/hook-logs/
