@@ -69,6 +69,15 @@ def _rel(root: Path, path: Path) -> str:
         return path.as_posix()
 
 
+def _mtime_iso(path: Path) -> str | None:
+    if not path.exists():
+        return None
+    try:
+        return datetime.fromtimestamp(path.stat().st_mtime, timezone.utc).astimezone().isoformat(timespec="seconds")
+    except OSError:
+        return None
+
+
 def _parse_scalar(value: str) -> Any:
     value = value.strip()
     if value.lower() == "true":
@@ -547,7 +556,17 @@ def list_commands(root: Path | str) -> list[dict[str, Any]]:
             payload = {"id": path.stem, "status": "failed", "errors": ["command file is malformed"]}
         if isinstance(payload, dict):
             payload.setdefault("id", path.stem)
-            payload["source_path"] = _rel(Path(root).resolve(), path)
+            rel_path = _rel(Path(root).resolve(), path)
+            last_updated = _mtime_iso(path)
+            payload["source_path"] = rel_path
             payload["source_kind"] = "ui_command"
+            payload["last_updated"] = last_updated
+            payload["freshness"] = "present"
+            payload["source"] = {
+                "path": rel_path,
+                "kind": "ui_command",
+                "last_updated": last_updated,
+                "freshness": "present",
+            }
             commands.append(payload)
     return commands

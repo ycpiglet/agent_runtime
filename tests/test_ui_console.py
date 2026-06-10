@@ -45,6 +45,9 @@ def test_ui_console_serves_html_shell_and_assets(tmp_path):
     assert b"Agents" in html.body
     assert b"command-log" in html.body
     assert b"runtime-command-form" in html.body
+    assert b"event-filter-type" in html.body
+    assert b"evidence-list" in html.body
+    assert b"errors-list" in html.body
     assert css.status == 200
     assert b"--ink" in css.body
     assert js.status == 200
@@ -53,6 +56,7 @@ def test_ui_console_serves_html_shell_and_assets(tmp_path):
     assert b"/api/messages" in js.body
     assert b"/api/commands" in js.body
     assert b"runtime.call_agent" in js.body
+    assert b"filterEvents" in js.body
 
 
 def test_ui_console_api_state_uses_ui_state_adapter(tmp_path):
@@ -186,6 +190,46 @@ def test_ui_console_post_runtime_command_route_writes_agent_message(tmp_path):
     assert state["commands"][-1]["type"] == "runtime.call_agent"
     assert state["messages"][-1]["intent"] == "runtime.call_agent"
     assert state["messages"][-1]["to"] == "qa"
+
+
+def test_ui_console_events_route_filters_by_query_params(tmp_path):
+    _write(
+        tmp_path / "agents" / "runtime" / "events" / "qa.jsonl",
+        "\n".join(
+            [
+                json.dumps(
+                    {
+                        "ts": "2026-06-10T12:00:00+09:00",
+                        "role": "qa",
+                        "event": "agent.error",
+                        "task_id": "TASK-UI-231",
+                        "goal_id": "goal-231",
+                        "error": "Replay failed on evidence gap",
+                    }
+                ),
+                json.dumps(
+                    {
+                        "ts": "2026-06-10T12:01:00+09:00",
+                        "role": "lead-engineer",
+                        "event": "task.completed",
+                        "task_id": "TASK-UI-232",
+                        "goal_id": "goal-232",
+                    }
+                ),
+            ]
+        )
+        + "\n",
+    )
+
+    response = ui_console.build_response(
+        "/api/events?type=agent.error&agent=qa&task_id=TASK-UI-231&goal_id=goal-231&q=evidence",
+        tmp_path,
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+
+    assert response.status == 200
+    assert payload["resource"] == "events"
+    assert [event["event"] for event in payload["items"]] == ["agent.error"]
 
 
 def test_ui_console_unknown_path_returns_404(tmp_path):

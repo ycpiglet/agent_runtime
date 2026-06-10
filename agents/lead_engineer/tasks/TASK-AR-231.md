@@ -1,6 +1,6 @@
 ---
 id: TASK-AR-231
-status: planned
+status: completed
 owner: lead-engineer
 priority: P1
 difficulty: M
@@ -17,6 +17,11 @@ audit_log:
   - agents/lead_engineer/tasks/TASK-AR-227.md
   - agents/lead_engineer/tasks/TASK-AR-228.md
   - agents/lead_engineer/tasks/TASK-AR-230.md
+  - src/agent_runtime/ui_state.py
+  - src/agent_runtime/ui_console.py
+  - tests/test_ui_state.py
+  - tests/test_ui_console.py
+  - docs/UI_LIVE_OBSERVABILITY.md
   - BACKLOG.md
   - BACKLOG-BOARD.md
 created: 2026-06-10
@@ -58,3 +63,22 @@ Make the UI trustworthy during long `/goal` runs by surfacing freshness, live ev
 
 - Add tests for event filtering and freshness metadata.
 - Run a local long-ish sample state replay or fixture-based UI smoke check.
+
+## State Machine Mapping
+
+- cycle: done
+- task: TASK-AR-231 completed
+- gate: pass
+- document: formatted
+
+## Progress Log
+
+- 2026-06-10: Started after `TASK-AR-230` landed. Implementation path is TDD-first event filtering, panel freshness metadata, error/evidence extraction, and read-only replay visibility.
+- 2026-06-10: Completed filterable events, derived `errors`/`evidence`/`replay` resources, Evidence UI tab, and `/api/events` query filtering. Streaming remains deferred; polling remains the active transport.
+
+## Completion Evidence
+
+- `PYTHONPATH=src pytest tests/test_ui_state.py -q` -> 6 passed.
+- `PYTHONPATH=src pytest tests/test_ui_console.py -q` -> 10 passed.
+- `PYTHONPATH=src pytest tests/test_ui_commands.py -q` -> 11 passed.
+- Temporary-root route smoke: filtered `/api/events` returned one `agent.error`; `/api/state` showed one error, one evidence link, and two replay records.

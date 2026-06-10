@@ -4,6 +4,7 @@ import json
 from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import parse_qs
 from urllib.parse import urlparse
 
 from . import ui_commands
@@ -87,6 +88,7 @@ HTML = """<!doctype html>
           <button class="tab" type="button" data-view="agents">Agents</button>
           <button class="tab" type="button" data-view="messages">Messages</button>
           <button class="tab" type="button" data-view="events">Events</button>
+          <button class="tab" type="button" data-view="evidence">Evidence</button>
           <button class="tab" type="button" data-view="sources">Sources</button>
           <button class="tab" type="button" data-view="writes">Writes</button>
         </nav>
@@ -101,7 +103,30 @@ HTML = """<!doctype html>
           <div id="messages-list" class="list-panel"></div>
         </div>
         <div id="view-events" class="view">
+          <div class="filter-row">
+            <input id="event-filter-type" placeholder="event type">
+            <input id="event-filter-agent" placeholder="agent">
+            <input id="event-filter-task" placeholder="task id">
+            <input id="event-filter-goal" placeholder="goal id">
+            <input id="event-filter-search" placeholder="search">
+          </div>
           <div id="events-list" class="list-panel"></div>
+        </div>
+        <div id="view-evidence" class="view">
+          <div class="evidence-grid">
+            <section>
+              <h2>Errors</h2>
+              <div id="errors-list" class="list-panel"></div>
+            </section>
+            <section>
+              <h2>Evidence</h2>
+              <div id="evidence-list" class="list-panel"></div>
+            </section>
+            <section>
+              <h2>Replay</h2>
+              <div id="replay-list" class="list-panel"></div>
+            </section>
+          </div>
         </div>
         <div id="view-sources" class="view">
           <div id="sources-list" class="list-panel"></div>
@@ -239,6 +264,22 @@ textarea { min-height: 74px; resize: vertical; }
 .tab.is-active { background: var(--teal); border-color: var(--teal); color: #ffffff; }
 .view { display: none; }
 .view.is-active { display: block; }
+.filter-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(120px, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.evidence-grid h2 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  letter-spacing: 0;
+}
 
 .kanban {
   display: grid;
@@ -348,6 +389,7 @@ textarea { min-height: 74px; resize: vertical; }
   .runtime-form { grid-template-columns: 1fr; }
   .dashboard { grid-template-columns: 1fr; }
   .kanban { grid-template-columns: repeat(6, minmax(220px, 84vw)); }
+  .filter-row, .evidence-grid { grid-template-columns: 1fr; }
   .meta-grid { grid-template-columns: 1fr; }
 }
 """
@@ -467,8 +509,24 @@ function renderMessages() {
   `).join("") : `<div class="empty">No messages</div>`;
 }
 
+function filterEvents(events) {
+  const type = $("event-filter-type")?.value.trim();
+  const agent = $("event-filter-agent")?.value.trim();
+  const task = $("event-filter-task")?.value.trim();
+  const goal = $("event-filter-goal")?.value.trim();
+  const search = $("event-filter-search")?.value.trim().toLowerCase();
+  return events.filter((event) => {
+    if (type && event.event !== type && event.type !== type) return false;
+    if (agent && event.role !== agent && event.actor !== agent) return false;
+    if (task && event.task_id !== task) return false;
+    if (goal && event.goal_id !== goal) return false;
+    if (search && !JSON.stringify(event).toLowerCase().includes(search)) return false;
+    return true;
+  });
+}
+
 function renderEvents() {
-  const events = runtimeState.events || [];
+  const events = filterEvents(runtimeState.events || []);
   $("events-list").innerHTML = events.length ? events.slice(-80).reverse().map((event) => `
     <article class="list-row ${event.severity === "error" ? "error" : "ok"}">
       <b>${escapeHtml(event.type || event.event || event.id)}</b>
@@ -476,6 +534,34 @@ function renderEvents() {
       <code>${escapeHtml(event.id)}</code>
     </article>
   `).join("") : `<div class="empty">No events</div>`;
+}
+
+function renderEvidence() {
+  const errors = runtimeState.errors || [];
+  const evidence = runtimeState.evidence || [];
+  const replay = runtimeState.replay || [];
+  $("errors-list").innerHTML = errors.length ? errors.slice(-40).reverse().map((item) => `
+    <article class="list-row error">
+      <b>${escapeHtml(item.message)}</b>
+      <span>${escapeHtml(item.actor || "runtime")} / ${escapeHtml(item.task_id || item.goal_id || "no context")}</span>
+      <code>${escapeHtml(item.source_path || item.event_id || "")}</code>
+    </article>
+  `).join("") : `<div class="empty">No recent errors</div>`;
+  $("evidence-list").innerHTML = evidence.length ? evidence.slice(-60).reverse().map((item) => `
+    <article class="list-row ok">
+      <b>${escapeHtml(item.evidence)}</b>
+      <span>${escapeHtml(item.source_type)} / ${escapeHtml(item.task_id || item.goal_id || "no context")}</span>
+      <code>${escapeHtml(item.source_path || item.source_id || "")}</code>
+    </article>
+  `).join("") : `<div class="empty">No evidence links</div>`;
+  $("replay-list").innerHTML = replay.length ? replay.slice(-80).reverse().map((item) => `
+    <article class="list-row">
+      <b>${escapeHtml(item.type || item.kind)}</b>
+      <span>${escapeHtml(item.created_at || "")} / ${escapeHtml(item.actor || "runtime")}</span>
+      <p>${escapeHtml(item.summary || "")}</p>
+      <code>${escapeHtml(item.task_id || item.goal_id || item.source_path || "")}</code>
+    </article>
+  `).join("") : `<div class="empty">No replay records</div>`;
 }
 
 function renderSources() {
@@ -583,6 +669,7 @@ function renderAll() {
   renderAgents();
   renderMessages();
   renderEvents();
+  renderEvidence();
   renderSources();
   renderCommands();
   renderDetail();
@@ -598,6 +685,10 @@ document.querySelectorAll(".tab").forEach((tab) => {
 });
 
 $("refresh-button").addEventListener("click", loadState);
+["event-filter-type", "event-filter-agent", "event-filter-task", "event-filter-goal", "event-filter-search"].forEach((id) => {
+  const node = $(id);
+  if (node) node.addEventListener("input", renderEvents);
+});
 $("create-task-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   await sendJson("/api/tasks", {
@@ -670,7 +761,8 @@ def _command_response(root_path: Path, command: dict[str, object]) -> ConsoleRes
 
 def build_response(path: str, root: Path | str, *, method: str = "GET", body: bytes | None = None) -> ConsoleResponse:
     root_path = Path(root)
-    request_path = urlparse(path).path
+    parsed_url = urlparse(path)
+    request_path = parsed_url.path
     method = method.upper()
     if method in {"POST", "PATCH"}:
         payload, errors = _decode_json_body(body)
@@ -699,14 +791,29 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         return ConsoleResponse(200, "application/javascript; charset=utf-8", _bytes(JS))
     if request_path == "/api/state":
         return _json_response(ui_state.build_state(root_path))
+    if request_path == "/api/events":
+        state = ui_state.build_state(root_path)
+        filters = {key: values[0] for key, values in parse_qs(parsed_url.query).items() if values}
+        return _json_response(
+            {
+                "generated_at": state["generated_at"],
+                "resource": "events",
+                "items": ui_state.filter_events(state["events"], filters),
+                "sources": state["sources"],
+                "gaps": state["gaps"],
+                "warnings": state["warnings"],
+            }
+        )
 
     api_resources = {
         "/api/tasks": "tasks",
         "/api/agents": "agents",
         "/api/messages": "messages",
-        "/api/events": "events",
         "/api/goals": "goals",
         "/api/sources": "sources",
+        "/api/errors": "errors",
+        "/api/evidence": "evidence",
+        "/api/replay": "replay",
         "/api/commands": "commands",
     }
     if request_path in api_resources:

@@ -8,7 +8,19 @@ from typing import Any
 
 from . import ui_commands
 
-RESOURCE_NAMES = ("state", "tasks", "agents", "messages", "events", "goals", "sources", "commands")
+RESOURCE_NAMES = (
+    "state",
+    "tasks",
+    "agents",
+    "messages",
+    "events",
+    "goals",
+    "sources",
+    "errors",
+    "evidence",
+    "replay",
+    "commands",
+)
 
 TASKS_GLOB = "agents/lead_engineer/tasks/TASK-*.md"
 SESSION_GLOB = "agents/runtime/sessions/*.json"
@@ -330,6 +342,166 @@ def load_events(root: Path, now: str, warnings: list[dict[str, str]]) -> list[di
     return events
 
 
+def _filter_text(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, list):
+        return " ".join(_filter_text(item) for item in value)
+    if isinstance(value, dict):
+        return json.dumps(value, ensure_ascii=False, sort_keys=True)
+    return str(value)
+
+
+def _first_filter(filters: dict[str, Any], *names: str) -> str:
+    for name in names:
+        value = filters.get(name)
+        if isinstance(value, list):
+            value = value[0] if value else ""
+        if value is not None and str(value).strip():
+            return str(value).strip()
+    return ""
+
+
+def filter_events(events: list[dict[str, Any]], filters: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+    filters = filters or {}
+    event_type = _first_filter(filters, "type", "event")
+    agent = _first_filter(filters, "agent", "role", "actor")
+    task_id = _first_filter(filters, "task_id", "task")
+    goal_id = _first_filter(filters, "goal_id", "goal")
+    query = _first_filter(filters, "q", "query", "search").lower()
+
+    filtered: list[dict[str, Any]] = []
+    for event in events:
+        if event_type and str(event.get("event") or event.get("type") or "") != event_type:
+            continue
+        if agent and str(event.get("role") or event.get("actor") or "") != agent:
+            continue
+        if task_id and str(event.get("task_id") or "") != task_id:
+            continue
+        if goal_id and str(event.get("goal_id") or "") != goal_id:
+            continue
+        if query and query not in _filter_text(event).lower():
+            continue
+        filtered.append(event)
+    return filtered
+
+
+def derive_errors(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    errors: list[dict[str, Any]] = []
+    for event in events:
+        if event.get("severity") != "error":
+            continue
+        message = str(event.get("error") or event.get("message") or event.get("detail") or event.get("event") or "runtime error")
+        errors.append(
+            {
+                "id": f"error:{event.get('id')}",
+                "event_id": event.get("id"),
+                "message": message,
+                "event": event.get("event"),
+                "actor": event.get("role") or event.get("actor"),
+                "task_id": event.get("task_id"),
+                "goal_id": event.get("goal_id"),
+                "created_at": event.get("created_at") or event.get("ts"),
+                "source_path": event.get("source_path"),
+                "source_kind": "derived_error",
+                "last_updated": event.get("last_updated"),
+                "freshness": event.get("freshness", "present"),
+            }
+        )
+    return errors
+
+
+def _evidence_values(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return [str(item) for item in value if str(item).strip()]
+    return [str(value)] if str(value).strip() else []
+
+
+def derive_evidence(events: list[dict[str, Any]], messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    evidence: list[dict[str, Any]] = []
+    for event in events:
+        for item in _evidence_values(event.get("evidence")):
+            evidence.append(
+                {
+                    "id": f"evidence:{event.get('id')}:{len(evidence) + 1}",
+                    "evidence": item,
+                    "source_id": event.get("id"),
+                    "source_type": "event",
+                    "task_id": event.get("task_id"),
+                    "goal_id": event.get("goal_id"),
+                    "created_at": event.get("created_at") or event.get("ts"),
+                    "source_path": event.get("source_path"),
+                    "source_kind": "derived_evidence",
+                    "last_updated": event.get("last_updated"),
+                    "freshness": event.get("freshness", "present"),
+                }
+            )
+    for message in messages:
+        for item in _evidence_values(message.get("evidence")):
+            evidence.append(
+                {
+                    "id": f"evidence:{message.get('id')}:{len(evidence) + 1}",
+                    "evidence": item,
+                    "source_id": message.get("id"),
+                    "source_type": "message",
+                    "task_id": message.get("task_id"),
+                    "goal_id": message.get("goal_id"),
+                    "created_at": message.get("created_at") or message.get("ts"),
+                    "source_path": message.get("source_path"),
+                    "source_kind": "derived_evidence",
+                    "last_updated": message.get("last_updated"),
+                    "freshness": message.get("freshness", "present"),
+                }
+            )
+    return evidence
+
+
+def build_replay(events: list[dict[str, Any]], messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    replay: list[dict[str, Any]] = []
+    for event in events:
+        if not event.get("goal_id") and not event.get("task_id"):
+            continue
+        replay.append(
+            {
+                "id": f"replay:{event.get('id')}",
+                "kind": "event",
+                "type": event.get("event") or event.get("type"),
+                "actor": event.get("role") or event.get("actor"),
+                "task_id": event.get("task_id"),
+                "goal_id": event.get("goal_id"),
+                "summary": str(event.get("error") or event.get("message") or event.get("event") or ""),
+                "created_at": event.get("created_at") or event.get("ts"),
+                "source_path": event.get("source_path"),
+                "source_kind": "replay_event",
+                "last_updated": event.get("last_updated"),
+                "freshness": event.get("freshness", "present"),
+            }
+        )
+    for message in messages:
+        if not message.get("task_id"):
+            continue
+        replay.append(
+            {
+                "id": f"replay:{message.get('id')}",
+                "kind": "message",
+                "type": message.get("intent") or message.get("type"),
+                "actor": message.get("from"),
+                "task_id": message.get("task_id"),
+                "goal_id": message.get("goal_id"),
+                "summary": _first_sentence(str(message.get("body") or "")),
+                "created_at": message.get("created_at") or message.get("ts"),
+                "source_path": message.get("source_path"),
+                "source_kind": "replay_message",
+                "last_updated": message.get("last_updated"),
+                "freshness": message.get("freshness", "present"),
+            }
+        )
+    replay.sort(key=lambda item: str(item.get("created_at") or ""))
+    return replay[-200:]
+
+
 def load_agents(root: Path, now: str, events: list[dict[str, Any]], warnings: list[dict[str, str]]) -> list[dict[str, Any]]:
     agents: list[dict[str, Any]] = []
     latest_event_by_role: dict[str, dict[str, Any]] = {}
@@ -443,6 +615,9 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     messages = load_messages(root_path, generated_at, warnings)
     goals = load_goals(root_path, generated_at)
     commands = ui_commands.list_commands(root_path)
+    errors = derive_errors(events)
+    evidence = derive_evidence(events, messages)
+    replay = build_replay(events, messages)
     return {
         "generated_at": generated_at,
         "sources": sources,
@@ -451,6 +626,9 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "messages": messages,
         "events": events,
         "goals": goals,
+        "errors": errors,
+        "evidence": evidence,
+        "replay": replay,
         "commands": commands,
         "gaps": gaps,
         "warnings": warnings,
@@ -484,6 +662,8 @@ def render_summary(state: dict[str, Any], resource: str) -> str:
             f"messages={len(state['messages'])}",
             f"events={len(state['events'])}",
             f"goals={len(state['goals'])}",
+            f"errors={len(state['errors'])}",
+            f"evidence={len(state['evidence'])}",
             f"gaps={len(state['gaps'])}",
             f"warnings={len(state['warnings'])}",
         ]

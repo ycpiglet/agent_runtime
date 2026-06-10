@@ -173,6 +173,71 @@ def test_ui_state_adapter_reports_malformed_records_as_warnings(tmp_path):
     assert "session-json-parse-error" in warning_kinds
 
 
+def test_ui_state_filters_events_and_derives_error_evidence_replay_views(tmp_path):
+    _write(
+        tmp_path / "agents" / "runtime" / "events" / "qa-2026-06-10.jsonl",
+        "\n".join(
+            [
+                json.dumps(
+                    {
+                        "ts": "2026-06-10T12:00:00+09:00",
+                        "role": "qa",
+                        "event": "agent.error",
+                        "task_id": "TASK-UI-231",
+                        "goal_id": "goal-231",
+                        "error": "Replay failed on evidence gap",
+                        "evidence": ["reviews/evidence-gap.md"],
+                    }
+                ),
+                json.dumps(
+                    {
+                        "ts": "2026-06-10T12:01:00+09:00",
+                        "role": "lead-engineer",
+                        "event": "task.completed",
+                        "task_id": "TASK-UI-232",
+                        "goal_id": "goal-232",
+                    }
+                ),
+            ]
+        )
+        + "\n",
+    )
+    _write(
+        tmp_path / "agents" / "messages" / "inbox" / "MSG-20260610-evidence.md",
+        "\n".join(
+            [
+                "---",
+                "id: MSG-20260610-evidence",
+                "from: qa",
+                "to: lead-engineer",
+                "type: review",
+                "status: queued",
+                "ts: 2026-06-10T12:02:00+09:00",
+                "intent: evidence-review",
+                "task_id: TASK-UI-231",
+                "evidence: reviews/evidence-message.md",
+                "---",
+                "",
+                "Evidence message body.",
+                "",
+            ]
+        ),
+    )
+
+    state = ui_state.build_state(tmp_path, now="2026-06-10T12:05:00+09:00")
+    filtered = ui_state.filter_events(
+        state["events"],
+        {"type": "agent.error", "agent": "qa", "task_id": "TASK-UI-231", "goal_id": "goal-231", "q": "evidence gap"},
+    )
+
+    assert [event["event"] for event in filtered] == ["agent.error"]
+    assert state["errors"][0]["event_id"] == state["events"][0]["id"]
+    assert state["errors"][0]["message"] == "Replay failed on evidence gap"
+    assert {item["evidence"] for item in state["evidence"]} == {"reviews/evidence-gap.md", "reviews/evidence-message.md"}
+    assert [item["goal_id"] for item in state["replay"] if item["goal_id"] == "goal-231"]
+    assert all(record["freshness"] == "present" and record["last_updated"] for record in state["events"])
+
+
 def test_ui_state_cli_emits_selected_resource_json(tmp_path, capsys):
     _write(
         tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-227-ui-state-api.md",

@@ -39,6 +39,9 @@ http://127.0.0.1:8765/
 | `/api/events` | event resource |
 | `/api/goals` | goal resource |
 | `/api/sources` | source/gap/warning resource |
+| `/api/errors` | derived recent error resource |
+| `/api/evidence` | derived evidence link resource |
+| `/api/replay` | derived task/goal replay resource |
 | `/api/commands` | write command log and runtime command submission |
 
 ## MVP Coverage
@@ -49,7 +52,8 @@ http://127.0.0.1:8765/
 | Backlog | read-only Kanban columns: Backlog, Ready, In Progress, Review, Blocked, Done |
 | Agents | runtime session cards and empty state |
 | Messages | inbox/archive message list and empty state |
-| Events | runtime JSONL timeline and empty state |
+| Events | runtime JSONL timeline, empty state, and type/agent/task/goal/search filters |
+| Evidence | recent errors, evidence links, and replay records |
 | Sources | source freshness, gaps, warnings |
 | Writes | pending, accepted, queued, approval-required, unsupported, and failed commands |
 | Task detail | source path, freshness, status, owner, priority, blocked reason |

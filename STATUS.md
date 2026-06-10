@@ -730,3 +730,39 @@ Decision
 | Start Live Updates, Logs, Replay, Evidence | lead-engineer | `TASK-AR-231` |
 | Add event filtering and freshness tests first | lead-engineer | `tests/test_ui_state.py`, `tests/test_ui_console.py` |
 | Keep command execution claims separate from command submission | lead-engineer | runtime executor is a later task |
+
+## 2026-06-10 - Live Updates, Logs, Replay, Evidence Cycle
+
+### Bottom Line
+
+- Summary: completed `TASK-AR-231`; the UI console now has filterable events and read-only error/evidence/replay views.
+- Output: `ui_state.filter_events`, derived `errors`/`evidence`/`replay` resources, `/api/events` query filtering, and an Evidence tab.
+- State machine: `cycle=done`, `task=TASK-AR-231 completed`, `gate=pass`, `document=formatted`.
+- Boundary: evidence/log/replay panels stay read-only; writes still go through dedicated command paths.
+
+### Signal
+
+| Signal | State | Evidence |
+| --- | --- | --- |
+| Previous cycle | pass | `TASK-AR-230` committed as `70e7c32` and pushed |
+| Current task | pass | `agents/lead_engineer/tasks/TASK-AR-231.md` |
+| Event filtering | pass | `ui_state.filter_events` and `/api/events?...` |
+| Error/evidence/replay | pass | derived `errors`, `evidence`, `replay` state resources |
+| UI visibility | pass | Evidence tab plus event type/agent/task/goal/search filters |
+| Targeted tests | pass | `test_ui_state.py` 6 passed; `test_ui_console.py` 10 passed; `test_ui_commands.py` 11 passed |
+| Route smoke | pass | temporary-root filter returned one `agent.error`; state showed errors/evidence/replay |
+| Runtime boundary | pass | polling remains active transport; SSE deferred |
+
+### Decision
+
+- Decision: add filterable event views and derived error/evidence/replay resources before adding any streaming transport.
+- Decision: preserve source/freshness metadata on records rendered in UI panels.
+- Decision: keep SSE deferred until the state API and executor state are stable enough to avoid false liveness claims.
+
+### Next Steps
+
+| Step | Owner | Evidence |
+| --- | --- | --- |
+| Start Graph, State Machine, Roadmap Views | lead-engineer | `TASK-AR-232` |
+| Keep graph/state-machine views read-only first | lead-engineer | avoid direct lifecycle mutation |
+| Preserve source links in visual summaries | lead-engineer | `docs/UI_LIVE_OBSERVABILITY.md` |
