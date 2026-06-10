@@ -1,5 +1,14 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-06-11 TASKSET-AR-UI-DESIGN-SYSTEM Restoration and Closeout
+
+- Restored missing UI design-system work as `TASKSET-AR-UI-DESIGN-SYSTEM`.
+- Registered and closed `TASK-AR-264` through `TASK-AR-270`.
+- Captured the UI research synthesis and selected Linear-like operator console direction.
+- Added `docs/design/agent-runtime/DESIGN.md` as the project-specific UI design guide.
+- Applied the first visual implementation pass to `src/agent_runtime/ui_console.py` while preserving existing DOM/API contracts.
+- Added UI token assertions to `tests/test_ui_console.py`.
+
 ## 2026-06-10 TASKSET-AR-GOVERNANCE-OPS Registration
 
 - New active task set: `TASKSET-AR-GOVERNANCE-OPS`.

@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-11
-task_count: 63
+task_count: 70
 open_count: 5
-completed_count: 58
+completed_count: 65
 task_set_count: 1
-completed_task_set_count: 9
+completed_task_set_count: 10
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `5` open or active tasks; `58` completed tasks are archived from this live board.
+- Summary: `5` open or active tasks; `65` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `3` / Ask `2` / Review `0` / Later `0` / Done `58`.
-- Task Sets: `1` active workflows; `9` completed workflows are hidden from the live action board.
+- Status: Action `3` / Ask `2` / Review `0` / Later `0` / Done `65`.
+- Task Sets: `1` active workflows; `10` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -67,6 +67,7 @@ completed_task_set_count: 9
 | Progress Scout (`TASKSET-AR-PANE-PROGRESS`) | Pane/task-set progress, live continuity, claims, and resumable handoffs. | `5/5` done | `5` completed task files archived |
 | Concurrency Steward (`TASKSET-AR-COLLAB-CONCURRENCY`) | Real-time pane collaboration, event replay, SSoT ownership, and conflict gates. | `6/6` done | `6` completed task files archived |
 | Governance Operator (`TASKSET-AR-GOVERNANCE-OPS`) | Waiver burn-down, lifecycle cleanup, runtime asset usage, sync enforcement, and verification hygiene. | `7/7` done | `7` completed task files archived |
+| Design Operator (`TASKSET-AR-UI-DESIGN-SYSTEM`) | Agent Runtime UI research, design-system guidance, and console visual implementation. | `7/7` done | `7` completed task files archived |
 | Repo Custodian (`TASKSET-AR-REPO-HYGIENE`) | Working-tree cleanup, backlog cycle hygiene, and handoff publication. | `1/1` done | `1` completed task files archived |
 
 ## Risks / Blockers

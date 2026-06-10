@@ -1,5 +1,14 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-11 - TASKSET-AR-UI-DESIGN-SYSTEM restoration and closeout
+
+- Restored the missing UI design-system task set as `TASK-AR-264` through `TASK-AR-270`.
+- Selected a Linear-like operator console as the primary Agent Runtime UI direction, with Raycast/Sentry/Vercel/Miro patterns used selectively.
+- Published `docs/design/agent-runtime/DESIGN.md` and `reviews/RESEARCH-2026-06-11-agent-runtime-ui-design-research.md`.
+- Updated `src/agent_runtime/ui_console.py` styling tokens and component surfaces without changing route or JavaScript contracts.
+- Added CSS token anchors in `tests/test_ui_console.py`.
+- Follow-up verification path: focused UI/backlog tests, Owner governance gate, and final git status.
+
 ## 2026-06-10 - TASKSET-AR-GOVERNANCE-OPS registration and implementation start
 
 ### Bottom Line

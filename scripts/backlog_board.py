@@ -101,6 +101,12 @@ TASK_SET_DEFINITIONS = [
         78,
     ),
     TaskSetInfo(
+        "TASKSET-AR-UI-DESIGN-SYSTEM",
+        "Design Operator",
+        "Agent Runtime UI research, design-system guidance, and console visual implementation.",
+        79,
+    ),
+    TaskSetInfo(
         "TASKSET-AR-REPO-HYGIENE",
         "Repo Custodian",
         "Working-tree cleanup, backlog cycle hygiene, and handoff publication.",

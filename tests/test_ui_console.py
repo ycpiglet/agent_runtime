@@ -66,6 +66,9 @@ def test_ui_console_serves_html_shell_and_assets(tmp_path):
     assert b"roadmap-list" in html.body
     assert css.status == 200
     assert b"--ink" in css.body
+    assert b"--canvas" in css.body
+    assert b"--primary" in css.body
+    assert b"#010102" in css.body
     assert js.status == 200
     assert b"/api/state" in js.body
     assert b"/api/tasks" in js.body
