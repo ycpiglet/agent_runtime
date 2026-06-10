@@ -27,6 +27,7 @@ tags: [ui-console, ui-design, task-ar-278, verification]
 | Desktop layout | pass | Playwright `1440x1000`: no horizontal overflow; active tab `Backlog`; active view `view-board` |
 | Mobile layout | pass | Playwright `390x844`: no horizontal overflow; forms, dashboard, kanban, and detail panel collapse to single column |
 | Focused tests | pass | `python -m pytest tests/test_ui_console.py -q`: `15 passed` |
+| Full tests | pass | `python -m pytest -q`: `342 passed` |
 
 ## Insight
 

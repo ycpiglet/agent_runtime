@@ -1,6 +1,8 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
   - BACKLOG-BOARD.md
+  - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-278-console-shell.md
+  - reviews/REVIEW-2026-06-11-current-session-final-closeout.md
   - reviews/REVIEW-2026-06-11-session-closeout-automation-registration.md
   - reviews/REVIEW-2026-06-11-multipane-runtime-assurance-registration.md
   - AGENT_RUNTIME_RSI_PLANNING_BRIEF.md

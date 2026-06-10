@@ -41,6 +41,7 @@ Apply the accepted Linear-like operator-console design system to the top-level c
 
 - RED: `python -m pytest tests\test_ui_console.py::test_ui_console_shell_css_targets_served_dom_classes -q` failed on missing `.shell`.
 - GREEN: `python -m pytest tests\test_ui_console.py -q` passed with `15 passed`.
+- Root full suite: `python -m pytest -q` passed with `342 passed`.
 - Browser: Playwright desktop `1440x1000` and mobile `390x844` checks reported no horizontal overflow and zero console errors or warnings on `http://127.0.0.1:8766/`.
 
 ## Evidence
