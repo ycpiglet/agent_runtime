@@ -1,3 +1,4 @@
+---
 id: TASK-AR-218
 status: in_progress
 owner: lead-engineer
@@ -30,6 +31,7 @@ audit_log:
   - reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-218-overlay-hardening-seminar.md
   - reviews/CALL-2026-06-09-agent-runtime-task-ar-218-handoff-call.md
   - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-218-migration-hardening-log.md
+---
 
 ## 목표
 

@@ -1,3 +1,4 @@
+---
 id: TASK-AR-214
 status: in_progress
 started_at: 2026-06-09T10:20:00+09:00
@@ -22,7 +23,6 @@ audit_log:
   - reviews/MEETING-2026-06-09-agent-runtime-task-ar-214-query-contract.md
   - reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md
   - reviews/CALL-2026-06-09-agent-runtime-task-ar-214-owner-sync.md
----
 ---
 
 ## 목표

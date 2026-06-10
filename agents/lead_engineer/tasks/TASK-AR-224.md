@@ -28,6 +28,7 @@ audit_log:
   - reviews/MEETING-2026-06-09-agent-runtime-task-ar-224-overlay-gate-sync.md
   - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-224-executable-proof.md
 created: 2026-06-19
+---
 
 ## 목표
 

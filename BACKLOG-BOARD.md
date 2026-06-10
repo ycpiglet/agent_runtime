@@ -8,18 +8,18 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-10
-task_count: 46
-open_count: 34
+task_count: 49
+open_count: 36
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `46` total tasks; `34` open or active.
+- Summary: `49` total tasks; `36` open or active.
 - Recommended next: `TASK-AR-205` - 오프라인에서 정답 보유 영역은 구조화된 데이터셋으로 재현 가능한 평가를 수행하고, 90% 미만이면 릴리스를 막는다.
 
 ## Signal
-- Status: Action `27` / Ask `2` / Review `0` / Later `5` / Done `12`.
+- Status: Action `29` / Ask `2` / Review `0` / Later `5` / Done `13`.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -47,6 +47,7 @@ open_count: 34
 | `TASK-AR-217` | in_progress | P0 | Critical | High | 14h/2800tok | Medium | 10 | validation-team | qa | Execute next | `v0.1.8` 공개 후보(2026-07-02/07-09/07-16)를 가정한 `release-preflight`, 오프라인 90% 게이트, review… |
 | `TASK-AR-223` | in_progress | P0 | Critical | Medium | 12h/2600tok | Medium | 10 | validation-team | qa | Execute next | `agent_runtime`에서 모델/핵심 루틴 재작성 없이 프로젝트 투입 시 오버레이 교체만으로 공식 가이드(Claude/Codex/OpenAI) 정합… |
 | `TASK-AR-240` | planned | P0 | Critical | Medium | 12h/2200tok | Medium | 10 | agent-runtime-core | lead-engineer | Execute next | Create a version and release consistency steward that checks release state, version s… |
+| `TASK-AR-247` | planned | P0 | Critical | Medium | 8h/1600tok | Medium | 10 | validation-team | qa | Execute next | Create the fixed pane/task-set progress golden set before UI or enforcement changes. |
 | `TASK-AR-206` | in_progress | P0 | Critical | Medium | 10h/1800tok | Medium | 9 | validation-team | qa | Execute next | 라이브 작업 종료 시 reviewer agent의 적대적 검토를 강제하고, 답변에 근거/태그를 붙인다. |
 | `TASK-AR-207` | in_progress | P0 | Critical | Medium | 12h/1800tok | Medium | 9 | validation-team | qa | Execute next | 채팅, 리뷰, 메시지에서 탐지된 오답/누락/모호성의 교정 제안을 자동 수집한다. |
 | `TASK-AR-208` | in_progress | P0 | Critical | Medium | 12h/1800tok | Medium | 9 | validation-team | qa | Execute next | 요청/리뷰/결정 이벤트를 추적 가능한 A2A 메시지 스키마로 관리해 멀티 에이전트/멀티 프로젝트 운영 안정성을 확보한다. |
@@ -63,9 +64,10 @@ open_count: 34
 | `TASK-AR-235` | planned | P0 | Critical | Medium | 12h/2200tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Implement a read-only planning scan that compares backlog, status, roadmap, task file… |
 | `TASK-AR-236` | planned | P0 | Critical | Medium | 12h/2200tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Add a proposal outbox and draft task writer so planning findings become inspectable p… |
 | `TASK-AR-237` | planned | P0 | Critical | Medium | 12h/2200tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Connect the planning loop to safe triggers: cycle completion, task completion, schedu… |
-| `TASK-AR-246` | planned | P0 | Critical | Medium | 12h/2200tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Implement dispatcher helpers for safe parallel Codex/Claude work: one task per worktr… |
+| `TASK-AR-248` | planned | P0 | Critical | Medium | 10h/2200tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Show pane and task-set progress in the runtime UI using phase, step counter, rough pe… |
 | `TASK-AR-238` | planned | P1 | High | Medium | 14h/2400tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Add a UI Planner panel that shows planning scans, proposals, evidence, risk tier, rev… |
 | `TASK-AR-241` | planned | P1 | High | Medium | 12h/2200tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Build a review/compound/retro synthesizer that reads historical tasks, reviews, compo… |
+| `TASK-AR-249` | planned | P1 | High | Medium | 8h/1800tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Enforce progress updates in task claims and continuity pointers so new panes can resu… |
 
 ### Ask
 
@@ -101,6 +103,7 @@ open_count: 34
 | `TASK-AR-226` | completed | P0 | Critical | Medium | 8h/1400tok | Low | 6 | agent-runtime-core | lead-engineer | Archive/evidence only | Map the current `agent_runtime` state sources before building a web UI, so the UI rea… |
 | `TASK-AR-227` | completed | P0 | Critical | Medium | 12h/2200tok | Low | 6 | agent-runtime-core | lead-engineer | Archive/evidence only | Expose a safe, read-first backend interface for the UI console, using runtime files a… |
 | `TASK-AR-233` | completed | P0 | Critical | Medium | 6h/1400tok | Low | 6 | agent-runtime-core | lead-engineer | Archive/evidence only | Clean the current working tree through an intentional commit and push, then keep back… |
+| `TASK-AR-246` | completed | P0 | Critical | Medium | 12h/2200tok | Low | 6 | agent-runtime-core | lead-engineer | Archive/evidence only | Implement dispatcher helpers for safe parallel Codex/Claude work: one task per worktr… |
 | `TASK-AR-228` | completed | P0 | Critical | High | 14h/2600tok | Low | 5 | agent-runtime-core | lead-engineer | Archive/evidence only | Build the first read-only web console so the user can see backlog, current work, agen… |
 | `TASK-AR-229` | completed | P1 | High | Medium | 12h/2200tok | Low | 5 | agent-runtime-core | lead-engineer | Archive/evidence only | Let the UI manage tasks safely by sending changes through runtime APIs or a command o… |
 | `TASK-AR-230` | completed | P1 | High | Medium | 10h/2000tok | Low | 5 | agent-runtime-core | lead-engineer | Archive/evidence only | Allow the user to control runtime work from the UI by sending prompts and lifecycle c… |

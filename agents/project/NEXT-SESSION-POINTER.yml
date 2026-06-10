@@ -1,13 +1,13 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-10T17:44:01+09:00
+updated_at: 2026-06-10T18:10:00+09:00
 updated_by: lead_engineer
 current_state:
   signal: pass
   score: 92
   summary: >
-    Continuity and measured-improvement enforcement was added to the runtime
-    source tree. Repeated Owner feedback is now represented by executable gates,
-    bilingual README guidance, Compound capture, and live work pointers.
+    TASK-AR-246 is closed. The next parallel-safe work packet is
+    TASKSET-AR-PANE-PROGRESS, ordered as testset first, UI second, then
+    enforcement and continuity cleanup.
 active_work:
   contract: >
     This is not only a next-session note. It is the game-style live work pointer:
@@ -18,9 +18,10 @@ active_work:
   current_teams:
     - team_id: agent-runtime-core
       status: watch
-      phase: cleanup
-      progress_pct: 90
-      active_task: TASK-AR-246
+      phase: backlog-registered
+      progress_pct: 5
+      active_task: TASK-AR-247
+      task_set_id: TASKSET-AR-PANE-PROGRESS
       pane_ids: []
   canonical_live_sources:
     - agents/runtime/task_claims/*.json
@@ -35,10 +36,11 @@ resume:
     - CLAUDE.md
     - STATUS.md
     - BACKLOG-BOARD.md
-  active_task: TASK-AR-246
+  active_task: TASK-AR-247
   next_actions:
-    - Keep this pointer updated before any closure that changes state or next action.
-    - Continue TASK-AR-246 follow-ups only through the parallel worktree protocol.
+    - Start TASK-AR-247 first to add the pane progress golden set.
+    - Start TASK-AR-248 only after the testset contract is merged or explicitly accepted.
+    - Start TASK-AR-249 after UI state and console progress behavior is verified.
 roles:
   accountable: Lead Engineer
   reviewers:
@@ -46,7 +48,8 @@ roles:
     - Independent Auditor
     - Doc Steward
 pointers:
-  task: agents/lead_engineer/tasks/TASK-AR-246.md
+  task: agents/lead_engineer/tasks/TASK-AR-247.md
+  task_set_plan: docs/superpowers/plans/2026-06-10-pane-progress-tasksets.md
   compound: agents/lead_engineer/compound_log.md
   protocol: AGENT_RUNTIME_PARALLEL_SESSION_PROTOCOL.md
   template_agents: src/agent_runtime/templates/project/AGENTS.md

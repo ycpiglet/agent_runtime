@@ -1,6 +1,6 @@
 ---
 id: TASK-AR-246
-status: in_progress
+status: completed
 owner: lead-engineer
 priority: P0
 difficulty: M
@@ -43,7 +43,14 @@ Implement dispatcher helpers for safe parallel Codex/Claude work: one task per w
 ## State Machine Mapping
 
 - cycle: planned
-- task: TASK-AR-246 in_progress
-- task_claim: claimed
+- task: TASK-AR-246 completed
+- task_claim: released
 - gate: pass
 - document: formatted
+
+## Completion Notes
+
+- Implemented identity-rich task claim records with `team_id`, `pane_id`, `phase`, and `progress_pct`.
+- Exposed active task claims through `agent_runtime.ui_state`.
+- Added live work continuity rules to the pointer, README, template AGENTS/CLAUDE docs, and continuity gate.
+- Verified before closure with full tests, owner governance gate, publish check, and continuity contract gate.
