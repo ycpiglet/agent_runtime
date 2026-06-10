@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-11
-task_count: 74
-open_count: 5
+task_count: 93
+open_count: 24
 completed_count: 69
-task_set_count: 1
+task_set_count: 4
 completed_task_set_count: 11
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `5` open or active tasks; `69` completed tasks are archived from this live board.
+- Summary: `24` open or active tasks; `69` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `3` / Ask `2` / Review `0` / Later `0` / Done `69`.
-- Task Sets: `1` active workflows; `11` completed workflows are hidden from the live action board.
+- Status: Action `20` / Ask `4` / Review `0` / Later `0` / Done `69`.
+- Task Sets: `4` active workflows; `11` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -53,6 +53,46 @@ completed_task_set_count: 11
 | `TASK-AR-214` | in_progress | Ask | P0 | Critical | Medium | 16h/2600tok | Medium | 10 | validation-team | qa | Owner/agent decision | 질의 실행 전후의 `source_tier`, `owner`, `access`, `freshness`, `lineage`, `ambiguity`, `tra… |
 | `TASK-AR-211` | in_progress | Action | P0 | Critical | Medium | 16h/2200tok | Medium | 9 | project-context | doc-steward | Execute next | 에이전트 런타임을 여러 프로젝트에서 공통 reuse할 때 프로젝트 고유의 vision/roadmap/조직/연결 문맥을 오버레이로 주입한다. |
 | `TASK-AR-203` | planned | Action | P0 | Critical | Medium | 8h/1500tok | Medium | 8 | project-context | doc-steward | Execute next | 지식창고 문서를 `빠른 참조, 차원 설명, 핵심 테이블, 주의사항/패턴, 상위 문맥 링크` 형식으로 표준화해 사람이 즉시 구조를 읽고 판단할 수 있게 한… |
+
+### Multi-Pane Auditor (`TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE`)
+
+- Flow: Live pane census, process compliance, event enforcement, role coverage, drift normalization, and assurance UI.
+- Progress: `0/7` done; `7` open or active.
+| Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-285` | planned | Action | P0 | Critical | Medium | 2h/900tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Count and classify live pane, claim, task-set, worktree, and event evidence in one re… |
+| `TASK-AR-286` | planned | Action | P0 | Critical | Medium | 3h/1200tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Verify whether plan, review, compound, retro, meeting, seminar, Ralph, scribe, and do… |
+| `TASK-AR-287` | planned | Action | P1 | High | Medium | 2h/900tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make pane lifecycle events mandatory enough that UI replay and audits can prove what… |
+| `TASK-AR-288` | planned | Action | P1 | High | Medium | 2h/900tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Track excluded, underused, waived, and lifecycle-stale agents across multi-pane colla… |
+| `TASK-AR-291` | planned | Action | P1 | High | Medium | 2h/900tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Close the multi-pane assurance task set only after census, process, role, event, drif… |
+| `TASK-AR-289` | planned | Action | P1 | High | Medium | 3h/1100tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Resolve or explain future heartbeat values, released-claim phase/progress drift, and… |
+| `TASK-AR-290` | planned | Action | P1 | High | Medium | 3h/1200tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make multi-pane census, process compliance, role coverage, drift, and event replay vi… |
+
+### Closeout Automation Steward (`TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION`)
+
+- Flow: Session baseline capture, dirty-intake routing, archive/issue preservation, and closeout skill/hook enforcement.
+- Progress: `0/5` done; `5` open or active.
+| Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-292` | planned | Action | P0 | Critical | Medium | 2h/900tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Define the canonical contract for session closeout, including how to separate baselin… |
+| `TASK-AR-293` | planned | Action | P0 | Critical | Medium | 2h/900tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Capture a compact baseline at session start so closeout can distinguish pre-existing… |
+| `TASK-AR-294` | planned | Action | P0 | Critical | Medium | 3h/1100tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Classify late dirty work and produce a safe route before any stash drop, branch delet… |
+| `TASK-AR-295` | planned | Action | P1 | High | Medium | 2h/900tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Wire the baseline and dirty-intake scripts into session lifecycle hooks without addin… |
+| `TASK-AR-296` | planned | Action | P1 | High | Medium | 2h/900tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Package the closeout workflow as a reusable skill and verify the full taskset through… |
+
+### Interface Stylist (`TASKSET-AR-UI-DESIGN-IMPLEMENTATION`)
+
+- Flow: Active UI design implementation work that applies the accepted design system across runtime panes.
+- Progress: `0/7` done; `7` open or active.
+| Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-278` | in_progress | Action | P1 | High | Medium | 2h/900tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Apply the accepted Linear-like operator-console design system to the top-level consol… |
+| `TASK-AR-279` | planned | Ask | P1 | High | Medium | 3h/1100tok | Low | 7 | agent-runtime-core | lead-engineer | Owner/agent decision | Make backlog lanes and task cards easier to scan for status, priority, owner, task se… |
+| `TASK-AR-280` | planned | Action | P1 | High | Medium | 3h/1100tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make active agent state, claims, progress, and command safety boundaries visible in t… |
+| `TASK-AR-281` | planned | Action | P1 | High | Medium | 3h/1100tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make events, errors, evidence, and replay records look audit-ready and severity-aware. |
+| `TASK-AR-283` | planned | Action | P2 | Medium | Medium | 2h/800tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Keep the dark operator console usable on desktop and mobile without relying on color-… |
+| `TASK-AR-284` | planned | Ask | P2 | Medium | Medium | 2h/800tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | Close the active UI design implementation task set only after focused checks, Owner g… |
+| `TASK-AR-282` | planned | Action | P2 | Medium | Medium | 3h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Bring graph, state-machine, roadmap, planner, source, and write surfaces into the sam… |
 
 ## Archived Task Sets
 

@@ -1,12 +1,16 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
   - BACKLOG-BOARD.md
+  - reviews/REVIEW-2026-06-11-session-closeout-automation-registration.md
+  - reviews/REVIEW-2026-06-11-multipane-runtime-assurance-registration.md
   - AGENT_RUNTIME_RSI_PLANNING_BRIEF.md
   - AGENT_RUNTIME_PARALLEL_SESSION_PROTOCOL.md
   - AGENT_RUNTIME_COLLAB_CONCURRENCY_BRIEF.md
   - AGENT_RUNTIME_GOVERNANCE_OPS_BRIEF.md
+  - reviews/RESEARCH-2026-06-11-ui-design-implementation-gap.md
   - reviews/RESEARCH-2026-06-10-realtime-collab-conflict-patterns.md
   - reviews/GOVERNANCE-OPS-REPORT-2026-06-10.md
+  - reviews/REVIEW-2026-06-11-agent-runtime-task-identity-taskset-closeout.md
   - reviews/REVIEW-2026-06-11-agent-runtime-ui-design-taskset-closeout.md
   - reviews/REVIEW-2026-06-09-backlog-board-restoration-owner-format-gate.md
   - reviews/REVIEW-2026-06-10-agent-runtime-worktree-cleanup-cycle-map.md

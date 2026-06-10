@@ -1,5 +1,43 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-06-11 TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION Registration
+
+- New planned task set: `TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION`.
+- Purpose: prevent repeat cleanup drift around session closeout, late dirty work, stash/archive refs, issue pointers, worktrees, active branches, and Owner-gated completion claims.
+- Registered planned tasks: `TASK-AR-292` through `TASK-AR-296`.
+- Plan entrypoint: `docs/superpowers/plans/2026-06-11-session-closeout-automation.md`.
+- Registration evidence: `reviews/REVIEW-2026-06-11-session-closeout-automation-registration.md`.
+- Boundary: this task set must not auto-merge, force-delete, push secrets, or apply archived work without explicit Owner-approved policy. It should classify and preserve first, then route to commit/PR/issue/archive.
+- Relationship: complements `TASKSET-AR-COLLAB-CONCURRENCY`, `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE`, and Owner governance; it does not replace those gates.
+
+## 2026-06-11 TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE Registration
+
+- New planned task set: `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE`.
+- Purpose: verify live multi-pane runtime operation across pane census, process compliance, event logging, role coverage, waiver lifecycle, timeline drift, stale worktrees, UI visibility, and Owner closeout.
+- Registered planned tasks: `TASK-AR-285` through `TASK-AR-291`.
+- Plan entrypoint: `docs/superpowers/plans/2026-06-11-multipane-runtime-assurance.md`.
+- Registration evidence: `reviews/REVIEW-2026-06-11-multipane-runtime-assurance-registration.md`.
+- Boundary: do not reopen `TASKSET-AR-PANE-PROGRESS` or `TASKSET-AR-COLLAB-CONCURRENCY`; this is the missing assurance layer for actual multi-pane operation.
+- Active pointer boundary: another pane currently owns `TASKSET-AR-UI-DESIGN-IMPLEMENTATION`, so this task set remains planned until claimed.
+
+## 2026-06-11 TASKSET-AR-UI-DESIGN-IMPLEMENTATION Registration
+
+- New active task set: `TASKSET-AR-UI-DESIGN-IMPLEMENTATION`.
+- Purpose: keep design implementation visible in the live backlog instead of hiding it inside completed design-system evidence.
+- Registered active tasks: `TASK-AR-278` through `TASK-AR-284`.
+- Relationship: `TASKSET-AR-UI-DESIGN-SYSTEM` remains completed research/design evidence; this task set tracks actual pane-by-pane application and visual QA.
+- Current active task: `TASK-AR-278` console shell design implementation.
+- Research entrypoint: `reviews/RESEARCH-2026-06-11-ui-design-implementation-gap.md`.
+- Plan entrypoint: `docs/superpowers/plans/2026-06-11-ui-design-implementation.md`.
+
+## 2026-06-11 TASKSET-AR-TASK-IDENTITY Completion and Omission Audit
+
+- Completed local task identity hardening as `TASKSET-AR-TASK-IDENTITY`.
+- Completed task records: `TASK-AR-20260611-001000-815e18ab` through `TASK-AR-20260611-001300-56389c0e`.
+- Added collision-proof `task_uid` and lifecycle metadata enforcement through `scripts/task_identity.py`.
+- Wired task identity into Owner governance and generated backlog archive visibility.
+- Added Owner-facing closeout review `reviews/REVIEW-2026-06-11-agent-runtime-task-identity-taskset-closeout.md`.
+
 ## 2026-06-11 TASKSET-AR-UI-DESIGN-SYSTEM Restoration and Closeout
 
 - Restored missing UI design-system work as `TASKSET-AR-UI-DESIGN-SYSTEM`.

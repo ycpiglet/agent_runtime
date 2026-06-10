@@ -1,5 +1,39 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-11 - TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION registration
+
+- Summary: registered a dedicated prevention layer for repeated closeout drift, late dirty work, stash/archive cleanup, branch/worktree residue, and issue handoff gaps.
+- Planned task set: `TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION`.
+- Task range: `TASK-AR-292` through `TASK-AR-296`.
+- Scope: session baseline capture, dirty-intake classification, safe archive/issue preservation, closeout skill packaging, Stop/SessionStart hook wiring, Owner-doc preflight, and closeout verification gates.
+- Boundary: archive/push/issue side effects remain policy-controlled and must be clearly separated from local read-only classification.
+- Handoff entrypoints: `docs/superpowers/plans/2026-06-11-session-closeout-automation.md` and `reviews/REVIEW-2026-06-11-session-closeout-automation-registration.md`.
+
+## 2026-06-11 - TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE registration
+
+- Summary: registered the missing assurance layer for live multi-pane operation.
+- Planned task set: `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE`.
+- Task range: `TASK-AR-285` through `TASK-AR-291`.
+- Scope: census active panes, audit process compliance, enforce pane events, measure role/waiver lifecycle, normalize heartbeat/claim/worktree drift, expose assurance in UI, and publish an Owner closeout report.
+- Boundary: existing `TASKSET-AR-PANE-PROGRESS` and `TASKSET-AR-COLLAB-CONCURRENCY` stay completed; this work verifies actual runtime behavior and unresolved audit follow-ups.
+- Active pointer boundary: current UI design implementation remains owned by another pane; this task set is registered but not claimed in the active pointer.
+
+## 2026-06-11 - TASKSET-AR-UI-DESIGN-IMPLEMENTATION registration
+
+- Summary: active UI design implementation work is now separated from completed design research evidence.
+- Active task set: `TASKSET-AR-UI-DESIGN-IMPLEMENTATION`.
+- Task range: `TASK-AR-278` through `TASK-AR-284`.
+- Current active task: `TASK-AR-278` for applying the accepted design system to the console shell.
+- Handoff entrypoints: `reviews/RESEARCH-2026-06-11-ui-design-implementation-gap.md` and `docs/superpowers/plans/2026-06-11-ui-design-implementation.md`.
+- Boundary: do not archive this task set until pane-level visual QA and Owner handoff are recorded.
+
+## 2026-06-11 - TASKSET-AR-TASK-IDENTITY completion and omission audit
+
+- Completed local task identity hardening as `TASKSET-AR-TASK-IDENTITY`.
+- Completed task files: `TASK-AR-20260611-001000-815e18ab`, `TASK-AR-20260611-001100-cf344293`, `TASK-AR-20260611-001200-f2b67a5a`, and `TASK-AR-20260611-001300-56389c0e`.
+- Added Owner closeout review `reviews/REVIEW-2026-06-11-agent-runtime-task-identity-taskset-closeout.md`.
+- Verification scope: task identity gate, taskset work gate, state sync gate, backlog taskset test, and Owner governance gate.
+
 ## 2026-06-11 - TASKSET-AR-UI-DESIGN-SYSTEM restoration and closeout
 
 - Restored the missing UI design-system task set as `TASK-AR-264` through `TASK-AR-270`.

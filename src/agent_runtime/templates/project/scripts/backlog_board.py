@@ -95,6 +95,18 @@ TASK_SET_DEFINITIONS = [
         75,
     ),
     TaskSetInfo(
+        "TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE",
+        "Multi-Pane Auditor",
+        "Live pane census, process compliance, event enforcement, role coverage, drift normalization, and assurance UI.",
+        76,
+    ),
+    TaskSetInfo(
+        "TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION",
+        "Closeout Automation Steward",
+        "Session baseline capture, dirty-intake routing, archive/issue preservation, and closeout skill/hook enforcement.",
+        77,
+    ),
+    TaskSetInfo(
         "TASKSET-AR-GOVERNANCE-OPS",
         "Governance Operator",
         "Waiver burn-down, lifecycle cleanup, runtime asset usage, sync enforcement, and verification hygiene.",
@@ -113,10 +125,16 @@ TASK_SET_DEFINITIONS = [
         79,
     ),
     TaskSetInfo(
+        "TASKSET-AR-UI-DESIGN-IMPLEMENTATION",
+        "Interface Stylist",
+        "Active UI design implementation work that applies the accepted design system across runtime panes.",
+        80,
+    ),
+    TaskSetInfo(
         "TASKSET-AR-REPO-HYGIENE",
         "Repo Custodian",
         "Working-tree cleanup, backlog cycle hygiene, and handoff publication.",
-        80,
+        90,
     ),
 ]
 TASK_SET_INFO = {item.task_set_id: item for item in TASK_SET_DEFINITIONS}
