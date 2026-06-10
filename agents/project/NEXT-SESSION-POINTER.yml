@@ -1,14 +1,14 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-10T23:55:00+09:00
+updated_at: 2026-06-11T00:31:19+09:00
 current_state:
-  summary: "TASKSET-AR-GOVERNANCE-OPS is complete for local governance enforcement; remaining watch items are scribe role evidence and low-frequency monitored roles."
+  summary: "TASKSET-AR-UI-DESIGN-SYSTEM is complete for local UI design-system closeout; remaining watch items stay with governance role evidence and low-frequency monitored roles."
   status: complete
   task_set_status: complete
-  task_set_id: "TASKSET-AR-GOVERNANCE-OPS"
+  task_set_id: "TASKSET-AR-UI-DESIGN-SYSTEM"
   step_index: 7
   step_total: 7
   progress_pct: 100
-  status_text: "Governance Ops completed: task registration, waiver burn-down, runtime asset usage metrics, state sync gate, pytest collection hygiene, and governance report are in place."
+  status_text: "UI Design System completed: task registration, research, design guide, console visual pass, backlog/status/board alignment, and Owner closeout review are in place."
 active_work:
   current_agents: []
   current_teams:
@@ -16,11 +16,11 @@ active_work:
       active_claims: []
 resume:
   active_task: none
-  active_task_set: TASKSET-AR-GOVERNANCE-OPS
+  active_task_set: TASKSET-AR-UI-DESIGN-SYSTEM
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
-  lead_engineer: "No active governance-ops implementation task; remaining work is watch/recurrence unless a new canonical task is added."
+  lead_engineer: "No active UI design-system implementation task; remaining work is watch/recurrence unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
@@ -75,7 +75,21 @@ pointers:
     - agents/lead_engineer/tasks/TASK-AR-261.md
     - agents/lead_engineer/tasks/TASK-AR-262.md
     - agents/lead_engineer/tasks/TASK-AR-263.md
+  ui_design_completed_tasks:
+    - agents/lead_engineer/tasks/TASK-AR-264.md
+    - agents/lead_engineer/tasks/TASK-AR-265.md
+    - agents/lead_engineer/tasks/TASK-AR-266.md
+    - agents/lead_engineer/tasks/TASK-AR-267.md
+    - agents/lead_engineer/tasks/TASK-AR-268.md
+    - agents/lead_engineer/tasks/TASK-AR-269.md
+    - agents/lead_engineer/tasks/TASK-AR-270.md
   recently_closed_reviews:
+    - reviews/REVIEW-2026-06-11-agent-runtime-ui-design-taskset-closeout.md
+    - reviews/RESEARCH-2026-06-11-agent-runtime-ui-design-research.md
+    - docs/superpowers/plans/2026-06-11-agent-runtime-ui-design-system.md
+    - docs/design/agent-runtime/DESIGN.md
+    - AGENT_RUNTIME_GOVERNANCE_OPS_BRIEF.md
+    - reviews/GOVERNANCE-OPS-REPORT-2026-06-10.md
     - AGENT_RUNTIME_COLLAB_CONCURRENCY_BRIEF.md
     - reviews/RESEARCH-2026-06-10-realtime-collab-conflict-patterns.md
     - reviews/REVIEW-2026-06-10-agent-runtime-pane-progress-taskset.md
@@ -89,6 +103,7 @@ pointers:
     - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-221-quality-loop-closeout.md
     - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-243-planning-evidence-link.md
 next_actions:
+  - "Do not reopen TASKSET-AR-UI-DESIGN-SYSTEM unless a new canonical task is explicitly added."
   - "Add real scribe claim/log evidence in a future governance/reporting cycle, then remove the remaining waiver."
   - "Review low-frequency monitored roles if council/progress-scout/release-steward/reviewer/skeptic watches persist."
   - "Do not reopen TASKSET-AR-RELEASE-STEWARD unless a new canonical task is explicitly added or Owner approves external release work."
@@ -105,11 +120,13 @@ verification:
   required_before_handoff:
     - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-QUALITY-LOOP --require-complete --check"
     - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-PANE-PROGRESS --require-complete --check"
+    - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-UI-DESIGN-SYSTEM --require-complete --check"
     - "python scripts/verify_pane_progress_taskset.py"
+    - "python scripts/owner_doc_format_gate.py --manifest owner-docs.yml"
     - "python scripts/owner_governance_gate.py"
     - "python scripts/parallel_worktree_gate.py --check"
     - "python scripts/collaboration_concurrency_gate.py --check"
-  last_known_scope: "TASKSET-AR-QUALITY-LOOP, TASKSET-AR-PANE-PROGRESS, TASKSET-AR-RSI-PLANNING, TASKSET-AR-RELEASE-STEWARD, and TASKSET-AR-COLLAB-CONCURRENCY final closeout for local scope; external publish remains Owner-gated and out of scope."
+  last_known_scope: "TASKSET-AR-QUALITY-LOOP, TASKSET-AR-PANE-PROGRESS, TASKSET-AR-RSI-PLANNING, TASKSET-AR-RELEASE-STEWARD, TASKSET-AR-COLLAB-CONCURRENCY, TASKSET-AR-GOVERNANCE-OPS, and TASKSET-AR-UI-DESIGN-SYSTEM final closeout for local scope; external publish remains Owner-gated and out of scope."
   rsi_planning_completed:
     - reviews/RSI-PLANNING-TASKSET-VERIFY.json
   rsi_planning_note: RSI planning completed verification report is the canonical closeout evidence.

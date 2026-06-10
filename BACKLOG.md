@@ -8,6 +8,8 @@
 - Added `docs/design/agent-runtime/DESIGN.md` as the project-specific UI design guide.
 - Applied the first visual implementation pass to `src/agent_runtime/ui_console.py` while preserving existing DOM/API contracts.
 - Added UI token assertions to `tests/test_ui_console.py`.
+- Added Owner-facing closeout review `reviews/REVIEW-2026-06-11-agent-runtime-ui-design-taskset-closeout.md`.
+- Reconciled `agents/project/NEXT-SESSION-POINTER.yml` and `owner-docs.yml` so the latest completed taskset is resumable.
 
 ## 2026-06-10 TASKSET-AR-GOVERNANCE-OPS Registration
 

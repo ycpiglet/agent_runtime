@@ -24,9 +24,16 @@ Closed the UI design task set with task records, design documentation, implement
 - `agents/lead_engineer/tasks/TASK-AR-268.md`
 - `agents/lead_engineer/tasks/TASK-AR-269.md`
 - `agents/lead_engineer/tasks/TASK-AR-270.md`
+- `docs/superpowers/plans/2026-06-11-agent-runtime-ui-design-system.md`
+- `reviews/RESEARCH-2026-06-11-agent-runtime-ui-design-research.md`
+- `docs/design/agent-runtime/DESIGN.md`
+- `reviews/REVIEW-2026-06-11-agent-runtime-ui-design-taskset-closeout.md`
 - `BACKLOG.md`
 - `STATUS.md`
+- `BACKLOG-BOARD.md`
+- `owner-docs.yml`
+- `agents/project/NEXT-SESSION-POINTER.yml`
 
 ## Notes
 
-Focused UI/backlog checks and Owner governance gate are the closeout verification path.
+Named task-set gate, focused UI/backlog checks, Owner doc format gate, and Owner governance gate are the closeout verification path.

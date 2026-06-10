@@ -64,6 +64,12 @@ generated_at: 2026-06-10T23:47:10+09:00
 | `capability.doc_steward_due` | script | keep | 5 | 2 | keep |
 | `skill.taskset_dispatch` | skill | keep | 4 | 2 | keep |
 
+## Risks / Blockers
+
+- Risk: recurring watch signals lose value if future sessions remove waivers without replacing them with real evidence.
+- Risk: low-reuse assets can stay in the registry too long unless later reports convert persistent watch items into tasks.
+- Blocker: none for the measured local governance report.
+
 ## Next
 - Add real scribe claim/log evidence in the next reporting cycle.
 - Promote recurring low-frequency role watches into tasks if they persist.
