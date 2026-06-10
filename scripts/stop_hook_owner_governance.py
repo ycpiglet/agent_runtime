@@ -56,8 +56,20 @@ def _selected_env() -> dict[str, str | None]:
 
 
 def write_diagnostic(result: subprocess.CompletedProcess[str], payload: dict[str, str], *, log_dir: Path | None = None) -> Path | None:
-    directory = log_dir or _hook_log_dir()
-    try:
+    directories = [log_dir or _hook_log_dir()]
+    fallback = ROOT / "agents" / "runtime" / "hook-logs"
+    if fallback not in directories:
+        directories.append(fallback)
+    for directory in directories:
+        try:
+            path = _write_diagnostic_file(directory, result, payload)
+            return path
+        except OSError:
+            continue
+    return None
+
+
+def _write_diagnostic_file(directory: Path, result: subprocess.CompletedProcess[str], payload: dict[str, str]) -> Path:
         directory.mkdir(parents=True, exist_ok=True)
         stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
         path = directory / f"stop-owner-governance-{stamp}-{os.getpid()}.json"
@@ -78,8 +90,6 @@ def write_diagnostic(result: subprocess.CompletedProcess[str], payload: dict[str
         }
         path.write_text(json.dumps(diagnostic, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         return path
-    except OSError:
-        return None
 
 
 def build_payload(result: subprocess.CompletedProcess[str], *, diagnostic_path: Path | None = None) -> dict[str, str]:

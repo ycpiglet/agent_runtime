@@ -7,7 +7,7 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-06-10
+generated_at: 2026-06-11
 task_count: 63
 open_count: 5
 completed_count: 58
