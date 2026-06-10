@@ -13,9 +13,12 @@ mixing file edits, git index state, or handoff records.
 3. One active task can have exactly one active claim.
 4. A role can have multiple active instances when each instance has unique
    `agent_instance_id` and `callsite_id`.
-5. Active claims require `handoff_path` and `log_path` so a later session can
+5. `display_name` is a readable UI/status label only. It must not be used as
+   the durable identity; use `agent_role`, `agent_instance_id`, `callsite_id`,
+   `claim_id`, `task_id`, `worktree_path`, and `tags` for system behavior.
+6. Active claims require `handoff_path` and `log_path` so a later session can
    resume from repo state without chat history.
-6. Shared SSoT files are not directly edited by workers unless the task packet
+7. Shared SSoT files are not directly edited by workers unless the task packet
    names them as owned files. Workers should write proposals or task-local docs.
 
 ## Claim Record
@@ -28,15 +31,19 @@ Claim files live under `agents/runtime/task_claims/*.json`.
   "claim_id": "CLAIM-YYYYMMDD-HHMMSS-task-example",
   "task_id": "TASK-EXAMPLE",
   "agent_role": "lead-engineer",
-  "agent_instance_id": "lead-engineer-A",
-  "callsite_id": "terminal-1",
+  "agent_instance_id": "le-20260610-143012-kst-a7f3",
+  "display_name": "lead_engineer@design-01",
+  "callsite_id": "terminal:wt-task-example:tab-01",
+  "mode": "design",
   "status": "working",
   "worktree_path": ".worktrees/TASK-EXAMPLE",
-  "branch": "codex/task-example-parallel-runtime",
+  "branch": "codex/task-example-design-01",
   "claimed_at": "2026-06-10T12:00:00+09:00",
   "last_heartbeat": "2026-06-10T12:05:00+09:00",
-  "handoff_path": "STATUS.md",
-  "log_path": "reviews/REVIEW-YYYYMMDD-parallel-session-protocol.md"
+  "expires_at": "2026-06-10T12:30:00+09:00",
+  "handoff_path": "agents/runtime/task_claims/CLAIM-YYYYMMDD-HHMMSS-task-example.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-YYYYMMDD-HHMMSS-task-example.log.md",
+  "tags": ["planning", "no-ssot-write"]
 }
 ```
 
@@ -50,17 +57,22 @@ python scripts/parallel_worktree_gate.py --check
 
 The gate fails for duplicate active task claims, worker claims in the main
 checkout, duplicate agent instances across tasks, duplicate worktrees across
-tasks, missing instance metadata, and missing handoff/log pointers.
+tasks, missing instance/display metadata, and missing handoff/log pointers.
 
 ## Dispatch Pattern
 
 ```bash
-git worktree add .worktrees/TASK-EXAMPLE -b codex/task-example-parallel-runtime main
+python scripts/task_claim_dispatcher.py create --task-id TASK-EXAMPLE --agent-role lead-engineer --mode design --tag planning --tag no-ssot-write
+git worktree add .worktrees/TASK-EXAMPLE -b codex/task-example-design-01 main
 ```
 
 Then start the agent inside that worktree with a task packet that names the task
 ID, allowed files, forbidden shared docs, verification commands, evidence
 outputs, and claim metadata.
+
+Good display names should read like RPG party/status labels: short, scannable,
+and distinct. Prefer labels such as `lead_engineer@meeting-01`,
+`lead_engineer@design-01`, or `claude:release_steward:task-ar-240:qa`.
 
 ## Recovery Pattern
 

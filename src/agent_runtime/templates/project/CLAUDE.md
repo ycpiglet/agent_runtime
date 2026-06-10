@@ -16,13 +16,27 @@ records under `agents/lead_engineer/`, follow the shared protocol.
 
 ## Start Checklist
 
-1. Read `AGENTS.md`.
-2. Read `README.md`.
-3. Read `AGENT_RUNTIME.md`.
-4. Read `agents/lead_engineer/STATUS.md`.
-5. Read `agents/roles.yml`.
-6. Read the relevant role `SKILL.md`.
-7. Read the active task or backlog item.
+1. Read `agents/project/NEXT-SESSION-POINTER.yml`.
+2. Read `AGENTS.md`.
+3. Read `README.md`.
+4. Read `AGENT_RUNTIME.md`.
+5. Read `agents/lead_engineer/STATUS.md`.
+6. Read `agents/roles.yml`.
+7. Read the relevant role `SKILL.md`.
+8. Read the active task or backlog item.
+
+## Live Work Continuity
+
+`agents/project/NEXT-SESSION-POINTER.yml` is the first live work pointer, not
+only a next-session note. Read it with `agents/runtime/task_claims/*.json` to
+recover active agent, team, pane_id, task, status, phase, progress_pct,
+worktree, branch, handoff, next action, and verification status after memory
+reset or reconnect.
+
+Update it while work is happening and before final reporting when non-trivial
+work changes state, decisions, roles, pane assignment, phase, progress, next
+actions, verification, or handoff risk. If it does not need an update, say so in
+the closure record.
 
 ## Collaboration
 
@@ -48,6 +62,23 @@ For substantial work, record which roles or perspectives contributed.
 5. If a bug is reported, reproduce it before and after the fix when feasible.
 6. Do not use external services, deployments, secrets, or destructive git actions
    without the required approval.
+7. If the Owner repeats a request or criticism twice, promote it into a
+   Repeated Request API: function/API, script, hook, gate, checklist, template,
+   or explicit task proposal.
+
+## Measured Improvement
+
+Process and prompt improvements use `Evaluate -> Propose -> Verify -> Merge`.
+Define the measurable score, golden set, failure notes, and edge cases before
+changing the behavior. Change one variable at a time unless the work is an
+explicitly separated parallel experiment.
+
+Owner owns the definition of "better" and the final merge decision. Agents
+produce proposals, evidence, and risk notes.
+
+Repeated failures or criticisms must be captured in Compound automatically as a
+mandatory closure step when they represent a recurring pattern. Prefer executable
+prevention over prose-only reminders.
 
 ## Reporting
 

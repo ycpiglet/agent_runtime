@@ -5,11 +5,14 @@
 
 모든 프롬프트는 아래 공통 전제를 가진다.
 
-1. [AGENTS.md](../../AGENTS.md)를 저장소 공통 운영 규칙으로 먼저 읽는다.
-2. [README.md](../../README.md)와 도구별 문서를 이어서 읽는다.
-3. `agents/lead_engineer/CYCLE-*.md` 중 파일명 숫자가 가장 큰 최신 사이클을 찾는다.
-4. 관련 TASK/BTC/BUG를 확인해서 중복 작업을 만들지 않는다.
-5. 작업 전 Context Snapshot을 만들고, 완료 후 검증 결과와 인수 사항을 남긴다.
+1. `agents/project/NEXT-SESSION-POINTER.yml`과 `agents/runtime/task_claims/*.json`을
+   먼저 읽고 현재 접속 중인 에이전트/팀/pane, 작업, 단계, 진행률, 중단 지점,
+   책임, 다음 행동을 복구한다.
+2. [AGENTS.md](../../AGENTS.md)를 저장소 공통 운영 규칙으로 읽는다.
+3. [README.md](../../README.md)와 도구별 문서를 이어서 읽는다.
+4. `agents/lead_engineer/CYCLE-*.md` 중 파일명 숫자가 가장 큰 최신 사이클을 찾는다.
+5. 관련 TASK/BTC/BUG를 확인해서 중복 작업을 만들지 않는다.
+6. 작업 전 Context Snapshot을 만들고, 완료 후 검증 결과와 인수 사항을 남긴다.
 
 ## 예시 목록
 

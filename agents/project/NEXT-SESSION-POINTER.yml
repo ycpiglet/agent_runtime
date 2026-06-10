@@ -1,0 +1,78 @@
+schema: agent-runtime-next-session-pointer/v1
+updated_at: 2026-06-10T17:44:01+09:00
+updated_by: lead_engineer
+current_state:
+  signal: pass
+  score: 92
+  summary: >
+    Continuity and measured-improvement enforcement was added to the runtime
+    source tree. Repeated Owner feedback is now represented by executable gates,
+    bilingual README guidance, Compound capture, and live work pointers.
+active_work:
+  contract: >
+    This is not only a next-session note. It is the game-style live work pointer:
+    every active agent, team, and pane must leave task, status, phase, progress,
+    worktree, branch, claim, handoff, and last heartbeat data through
+    agents/runtime/task_claims/*.json and this summary pointer.
+  current_agents: []
+  current_teams:
+    - team_id: agent-runtime-core
+      status: watch
+      phase: cleanup
+      progress_pct: 90
+      active_task: TASK-AR-246
+      pane_ids: []
+  canonical_live_sources:
+    - agents/runtime/task_claims/*.json
+    - agents/runtime/events/*.jsonl
+    - agents/project/NEXT-SESSION-POINTER.yml
+    - STATUS.md
+resume:
+  first_read:
+    - agents/project/NEXT-SESSION-POINTER.yml
+    - README.md
+    - AGENTS.md
+    - CLAUDE.md
+    - STATUS.md
+    - BACKLOG-BOARD.md
+  active_task: TASK-AR-246
+  next_actions:
+    - Keep this pointer updated before any closure that changes state or next action.
+    - Continue TASK-AR-246 follow-ups only through the parallel worktree protocol.
+roles:
+  accountable: Lead Engineer
+  reviewers:
+    - QA
+    - Independent Auditor
+    - Doc Steward
+pointers:
+  task: agents/lead_engineer/tasks/TASK-AR-246.md
+  compound: agents/lead_engineer/compound_log.md
+  protocol: AGENT_RUNTIME_PARALLEL_SESSION_PROTOCOL.md
+  template_agents: src/agent_runtime/templates/project/AGENTS.md
+  template_claude: src/agent_runtime/templates/project/CLAUDE.md
+rules:
+  live_work_continuity: >
+    Update this pointer and task claim records while work is happening, not only
+    at final handoff. It must answer who is working, from which team/pane, on
+    which task, in which phase, with what progress, in which worktree, and what
+    should happen next.
+  repeated_request_api: >
+    If the Owner repeats a request or criticism twice, convert it into a
+    function, API, script, hook, gate, or explicit task proposal instead of
+    leaving it as prose.
+  compound_capture: >
+    Repeated mistakes or criticisms must produce a Compound entry and an
+    executable prevention step when feasible.
+  measured_improvement: >
+    Use Evaluate -> Propose -> Verify -> Merge. Keep one variable per verified
+    change, preserve golden set failures and edge cases, and reserve final
+    criteria and merge decisions for Owner.
+verification:
+  required:
+    - PYTHONPATH=.;src pytest tests/test_continuity_contract_gate.py -q
+    - PYTHONPATH=.;src python scripts/continuity_contract_gate.py --check
+    - PYTHONPATH=.;src python scripts/owner_governance_gate.py
+  last_known:
+    signal: pass
+    detail: Full tests, continuity gate, owner governance gate, sanitize, publish-check, and publish-bundle plan passed.

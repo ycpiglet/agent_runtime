@@ -34,6 +34,7 @@ REQUIRED_ACTIVE_FIELDS = (
     "task_id",
     "agent_role",
     "agent_instance_id",
+    "display_name",
     "callsite_id",
     "status",
     "worktree_path",

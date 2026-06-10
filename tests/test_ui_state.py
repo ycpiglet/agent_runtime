@@ -157,6 +157,50 @@ def test_ui_state_adapter_uses_korean_goal_heading_for_description(tmp_path):
     assert state["tasks"][0]["description"] == "한국어 목표 문장을 UI 설명으로 사용한다."
 
 
+def test_ui_state_exposes_active_task_claims_as_readable_agent_instances(tmp_path):
+    _write(
+        tmp_path / "agents" / "runtime" / "task_claims" / "CLAIM-20260610-143012-task-ar-246-a7f3.json",
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-20260610-143012-task-ar-246-a7f3",
+                "task_id": "TASK-AR-246",
+                "agent_role": "lead-engineer",
+                "team_id": "agent-runtime-core",
+                "agent_instance_id": "le-20260610-143012-kst-a7f3",
+                "display_name": "lead_engineer@design-01",
+                "callsite_id": "terminal:wt-task-ar-246:tab-01",
+                "pane_id": "terminal:wt-task-ar-246:tab-01",
+                "mode": "design",
+                "status": "working",
+                "phase": "implementation",
+                "progress_pct": 45,
+                "worktree_path": ".worktrees/TASK-AR-246",
+                "branch": "codex/task-ar-246-design-01",
+                "claimed_at": "2026-06-10T14:30:12+09:00",
+                "last_heartbeat": "2026-06-10T14:30:12+09:00",
+                "handoff_path": "agents/runtime/task_claims/CLAIM-20260610-143012-task-ar-246-a7f3.handoff.md",
+                "log_path": "agents/runtime/task_claims/CLAIM-20260610-143012-task-ar-246-a7f3.log.md",
+                "tags": ["planning", "no-ssot-write"],
+            }
+        ),
+    )
+
+    state = ui_state.build_state(tmp_path, now="2026-06-10T14:31:00+09:00")
+
+    assert state["agents"][0]["id"] == "le-20260610-143012-kst-a7f3"
+    assert state["agents"][0]["role"] == "lead-engineer"
+    assert state["agents"][0]["team_id"] == "agent-runtime-core"
+    assert state["agents"][0]["display_name"] == "lead_engineer@design-01"
+    assert state["agents"][0]["current_task_id"] == "TASK-AR-246"
+    assert state["agents"][0]["pane_id"] == "terminal:wt-task-ar-246:tab-01"
+    assert state["agents"][0]["mode"] == "design"
+    assert state["agents"][0]["phase"] == "implementation"
+    assert state["agents"][0]["progress_pct"] == 45
+    assert state["agents"][0]["tags"] == ["planning", "no-ssot-write"]
+    assert state["agents"][0]["source_kind"] == "task_claim_json"
+
+
 def test_ui_state_adapter_reports_malformed_records_as_warnings(tmp_path):
     _write(
         tmp_path / "agents" / "runtime" / "events" / "lead-engineer-2026-06-10.jsonl",

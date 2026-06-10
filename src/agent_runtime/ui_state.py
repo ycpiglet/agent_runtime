@@ -15,6 +15,7 @@ RESOURCE_NAMES = (
     "messages",
     "events",
     "goals",
+    "task_claims",
     "sources",
     "errors",
     "evidence",
@@ -27,6 +28,7 @@ RESOURCE_NAMES = (
 
 TASKS_GLOB = "agents/lead_engineer/tasks/TASK-*.md"
 SESSION_GLOB = "agents/runtime/sessions/*.json"
+TASK_CLAIM_GLOB = "agents/runtime/task_claims/*.json"
 EVENT_GLOB = "agents/runtime/events/*.jsonl"
 MESSAGE_GLOBS = (
     ("messages_inbox", "agents/messages/inbox/*.md"),
@@ -647,8 +649,83 @@ def load_roadmap(root: Path, now: str) -> dict[str, Any]:
     }
 
 
-def load_agents(root: Path, now: str, events: list[dict[str, Any]], warnings: list[dict[str, str]]) -> list[dict[str, Any]]:
+def _is_active_task_claim(status: str) -> bool:
+    return status in {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
+
+
+def load_task_claims(root: Path, now: str, warnings: list[dict[str, str]]) -> list[dict[str, Any]]:
+    claims: list[dict[str, Any]] = []
+    for path in sorted(root.glob(TASK_CLAIM_GLOB)):
+        rel_path = _rel(root, path)
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            warnings.append(_warning("task-claim-json-parse-error", rel_path, str(exc)))
+            continue
+        except OSError as exc:
+            warnings.append(_warning("task-claim-read-error", rel_path, str(exc)))
+            continue
+        if not isinstance(payload, dict):
+            warnings.append(_warning("task-claim-invalid-record", rel_path, "task claim payload is not an object"))
+            continue
+        record = dict(payload)
+        record.update(
+            {
+                "id": payload.get("claim_id") or path.stem,
+                "source_path": rel_path,
+                "source_kind": "task_claim_json",
+                "source": _source_metadata(root, path, "task_claim_json", now),
+                "last_updated": _mtime_iso(path),
+                "freshness": "present",
+            }
+        )
+        claims.append(record)
+    return claims
+
+
+def load_agents(
+    root: Path,
+    now: str,
+    events: list[dict[str, Any]],
+    warnings: list[dict[str, str]],
+    task_claims: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
     agents: list[dict[str, Any]] = []
+    for claim in task_claims or []:
+        status = str(claim.get("status") or "")
+        if not _is_active_task_claim(status):
+            continue
+        agents.append(
+            {
+                "id": claim.get("agent_instance_id") or claim.get("claim_id"),
+                "role": claim.get("agent_role"),
+                "team_id": claim.get("team_id"),
+                "status": status,
+                "phase": claim.get("phase"),
+                "progress_pct": claim.get("progress_pct"),
+                "current_task_id": claim.get("task_id"),
+                "provider": claim.get("provider"),
+                "model": claim.get("model"),
+                "display_name": claim.get("display_name") or claim.get("agent_instance_id") or claim.get("agent_role"),
+                "mode": claim.get("mode"),
+                "tags": claim.get("tags") if isinstance(claim.get("tags"), list) else [],
+                "online": status in {"claimed", "in_progress", "review", "waiting_review", "working"},
+                "last_heartbeat": claim.get("last_heartbeat"),
+                "last_message": None,
+                "error_state": None,
+                "worktree_path": claim.get("worktree_path"),
+                "branch": claim.get("branch"),
+                "pane_id": claim.get("pane_id"),
+                "callsite_id": claim.get("callsite_id"),
+                "claim_id": claim.get("claim_id"),
+                "source_path": claim.get("source_path"),
+                "source_kind": "task_claim_json",
+                "source": claim.get("source"),
+                "last_updated": claim.get("last_updated"),
+                "freshness": claim.get("freshness", "present"),
+            }
+        )
+
     latest_event_by_role: dict[str, dict[str, Any]] = {}
     latest_error_by_role: dict[str, dict[str, Any]] = {}
     for event in events:
@@ -734,6 +811,7 @@ def _collect_sources_and_gaps(root: Path, now: str) -> tuple[list[dict[str, Any]
         ("messages_inbox", root / "agents" / "messages" / "inbox", "message_directory", "api_or_outbox"),
         ("messages_archive", root / "agents" / "messages" / "archive", "message_directory", "read_only"),
         ("sessions", root / "agents" / "runtime" / "sessions", "session_directory", "runtime_api"),
+        ("task_claims", root / "agents" / "runtime" / "task_claims", "task_claim_directory", "runtime_api"),
         ("events", root / "agents" / "runtime" / "events", "event_directory", "append_only_runtime"),
         ("status", root / "STATUS.md", "status_markdown", "agent_doc_workflow"),
         ("state_machines", root / "agents" / "project" / "STATE-MACHINES.yml", "state_machine_yaml", "schema_first_task"),
@@ -741,7 +819,16 @@ def _collect_sources_and_gaps(root: Path, now: str) -> tuple[list[dict[str, Any]
         ("ui_outbox", root / ".ui_outbox", "ui_command_outbox", "api_only"),
     )
     sources = [_source_entry(root, source_id, path, kind, now, boundary) for source_id, path, kind, boundary in source_specs]
-    optional = {"messages_inbox", "messages_archive", "sessions", "events", "status", "state_machines", "roadmap"}
+    optional = {
+        "messages_inbox",
+        "messages_archive",
+        "sessions",
+        "task_claims",
+        "events",
+        "status",
+        "state_machines",
+        "roadmap",
+    }
     gaps = [
         _gap(source["id"], source["path"], "optional runtime source is not present")
         for source in sources
@@ -757,7 +844,8 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     sources, gaps = _collect_sources_and_gaps(root_path, generated_at)
     tasks = load_tasks(root_path, generated_at, warnings)
     events = load_events(root_path, generated_at, warnings)
-    agents = load_agents(root_path, generated_at, events, warnings)
+    task_claims = load_task_claims(root_path, generated_at, warnings)
+    agents = load_agents(root_path, generated_at, events, warnings, task_claims)
     messages = load_messages(root_path, generated_at, warnings)
     goals = load_goals(root_path, generated_at)
     commands = ui_commands.list_commands(root_path)
@@ -772,6 +860,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "sources": sources,
         "tasks": tasks,
         "agents": agents,
+        "task_claims": task_claims,
         "messages": messages,
         "events": events,
         "goals": goals,

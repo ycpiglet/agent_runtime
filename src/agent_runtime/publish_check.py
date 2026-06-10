@@ -40,11 +40,22 @@ def analyze(root: Path) -> list[PublishFinding]:
         "schemas/state-machines.schema.json",
         "scripts/owner_governance_gate.py",
         "scripts/owner_doc_format_gate.py",
+        "scripts/continuity_contract_gate.py",
+        "scripts/response_contract_gate.py",
         "scripts/state_machine_gate.py",
+        "scripts/stop_hook_owner_governance.cmd",
+        "scripts/stop_hook_owner_governance.py",
+        "scripts/task_claim_dispatcher.py",
         "src/agent_runtime/__init__.py",
         "src/agent_runtime/templates/project/.codex/hooks.json",
+        "src/agent_runtime/templates/project/agents/project/NEXT-SESSION-POINTER.yml",
         "src/agent_runtime/templates/project/agents/project/STATE-MACHINES.yml",
         "src/agent_runtime/templates/project/schemas/state-machines.schema.json",
+        "src/agent_runtime/templates/project/scripts/stop_hook_owner_governance.cmd",
+        "src/agent_runtime/templates/project/scripts/stop_hook_owner_governance.py",
+        "src/agent_runtime/templates/project/scripts/response_contract_gate.py",
+        "src/agent_runtime/templates/project/scripts/continuity_contract_gate.py",
+        "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
     )
     for rel in required_files:
         if not (root / rel).exists():

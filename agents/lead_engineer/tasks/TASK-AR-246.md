@@ -1,6 +1,6 @@
 ---
 id: TASK-AR-246
-status: planned
+status: in_progress
 owner: lead-engineer
 priority: P0
 difficulty: M
@@ -26,14 +26,15 @@ Implement dispatcher helpers for safe parallel Codex/Claude work: one task per w
 ## Scope
 
 - Add commands or scripts to create and release `agents/runtime/task_claims/*.json`.
-- Generate recommended worktree path, branch name, `agent_instance_id`, and `callsite_id`.
+- Generate recommended worktree path, branch name, `agent_instance_id`, human-readable `display_name`, and `callsite_id`.
 - Produce a task packet that includes allowed files, forbidden shared SSoT files, verification commands, evidence outputs, and handoff path.
-- Show active claims in UI/runtime state so `lead_engineer(A)`, `lead_engineer(B)`, and other role instances are distinguishable.
+- Show active claims in UI/runtime state so `lead_engineer@design-01`, `lead_engineer@meeting-01`, and other role instances are distinguishable.
 - Keep orchestrator-only shared files protected unless a task explicitly owns them.
 
 ## Completion Criteria
 
 - Claim creation refuses a task already actively claimed.
+- Active claims require a readable `display_name`, while system identity remains `agent_role + agent_instance_id + callsite_id + claim_id + task_id + worktree_path + tags`.
 - Worker claims pointing at the main checkout are blocked.
 - Same role with different instance IDs can run in separate worktrees.
 - Claim release writes or verifies handoff/log pointers before marking released.
@@ -42,7 +43,7 @@ Implement dispatcher helpers for safe parallel Codex/Claude work: one task per w
 ## State Machine Mapping
 
 - cycle: planned
-- task: TASK-AR-246 planned
-- task_claim: unclaimed
+- task: TASK-AR-246 in_progress
+- task_claim: claimed
 - gate: pass
 - document: formatted

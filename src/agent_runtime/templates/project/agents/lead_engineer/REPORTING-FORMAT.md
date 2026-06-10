@@ -1,7 +1,7 @@
 # 보고·기획 형식 (BRIEF / PLAN)
 
 작성일: 2026-05-21
-최종 개정: 2026-05-22
+최종 개정: 2026-06-10
 Owner: Lead Engineer
 참조: [MEETING-YYYY-MM-DD-NNN](meetings/MEETING-YYYY-MM-DD-NNN.md), [TASK-NNN](tasks/TASK-NNN-briefing-format.md), [MEETING-YYYY-MM-DD-NNN](meetings/MEETING-YYYY-MM-DD-NNN.md), [TASK-NNN](tasks/TASK-NNN-reporting-format-efficiency.md)
 
@@ -97,7 +97,8 @@ Lane labels:
 type: brief|plan|review|release|handoff
 id: BRIEF-YYYY-MM-DD-NNN
 audience: owner|ceo|agent-team|public
-status: G|Y|R
+signal: pass|watch|block
+score: 0-100
 priority: Critical|High|Medium|Low
 tags: [release, automation, governance]
 actions: [approve, merge, release, review, no-action]
@@ -150,6 +151,16 @@ evidence:
 - 장식 이모지 금지. 기능적 상태 마커도 남발 금지.
 - 기술 상세는 Executive 아래 `Technical` 또는 별도 evidence 링크로 분리.
 
+### 대화 응답 전 자체 점검
+
+사용자에게 답하기 전, 특히 `백로그`, `상태`, `보고`, `plan`, `report`, `review`, `다음 작업` 요청에서는 아래를 내부 체크리스트로 확인한다.
+
+1. 사용자 언어를 따른다. 사용자가 한국어로 물으면 명시적 요청이 없는 한 한국어로 답한다.
+2. 보고/상태/계획 응답은 `Bottom Line -> Signal -> Insight -> Decision -> Action Board -> Next` 흐름을 기본값으로 둔다.
+3. 상태 신호는 `pass/watch/block` + `score: 0-100`으로 쓴다.
+4. 색상명이나 색상 약어를 상태 machine value로 쓰지 않는다.
+5. 짧게 답하더라도 `Bottom Line`, `Decision`, `Next`의 판단 정보는 유지한다.
+
 ### Executive Layer (먼저, 필수)
 
 CEO 가 한눈에 이해하는 층. 목표는 **읽는 사람이 이해에 쓰는 집중력·시간을 최소화**하는 것이다.
@@ -176,7 +187,7 @@ CEO 가 한눈에 이해하는 층. 목표는 **읽는 사람이 이해에 쓰�
 기술 상세 — 감사·재현·디버깅용. Executive 아래에 `<details>` 또는 명확한 `## Technical` 구분선 뒤에 둔다.
 
 - 파일·함수·변경 라인·토큰·검증 명령·테스트 수·PR 번호·AUDIT ID.
-- 기존 BRIEF/PLAN 형식(Signal 표·Insight·Decision·G/Y/R) 그대로.
+- 기존 BRIEF/PLAN 형식(Signal 표·Insight·Decision·pass/watch/block + score) 그대로.
 
 ### 작성 규칙
 
@@ -219,23 +230,22 @@ CEO 가 한눈에 이해하는 층. 목표는 **읽는 사람이 이해에 쓰�
 
 ---
 
-## 상태 색상
+## 상태 신호
 
-마크다운/터미널 호환을 위해 실제 색상 대신 텍스트 라벨을 쓴다. UI로 옮길 때만 색으로 렌더링한다.
+마크다운/터미널 호환을 위해 사람이 읽는 상태 신호를 텍스트 라벨로 쓴다. UI가 색으로 렌더링하더라도 원문 값과 machine value는 항상 `pass/watch/block` + `score: 0-100`이다.
 
-| 라벨 | 색상 의미 | 판단 기준 |
-|------|-----------|-----------|
-| `G` | Green | 정상, 결정 불필요, 계획 대비 허용 범위 |
-| `Y` | Yellow | 주의, 결정 또는 후속 확인 필요 |
-| `R` | Red | 차단, 비용/품질/보안 위험 |
-| `B` | Blue | 정보, 추세나 참고 데이터 |
+| 라벨 | 의미 | 판단 기준 |
+|------|------|-----------|
+| `pass` | 정상 | 결정 불필요, 계획 대비 허용 범위 |
+| `watch` | 주의 | 결정 또는 후속 확인 필요 |
+| `block` | 차단 | 비용/품질/보안 위험, 진행 불가 |
 
 간단한 bar:
 
 ```text
 진행  [####----] 50%
-부담  [######--] 75% Y
-리스크 [##------] 25% G
+부담  [######--] 75% watch
+리스크 [##------] 25% pass
 ```
 
 ---
@@ -251,7 +261,7 @@ CEO 가 한눈에 이해하는 층. 목표는 **읽는 사람이 이해에 쓰�
 Full을 쓰는 조건:
 - 사용자가 "전체", "종합", "비교", "기획서", "보고서"를 요청
 - 결정 항목이 4건 이상
-- 비용/보안/운영 리스크가 `R`
+- 비용/보안/운영 리스크가 `block`
 - 여러 역할 또는 여러 TASK의 trade-off가 핵심
 
 ---
@@ -434,7 +444,7 @@ DoD:
 - **열거 라벨은 숫자 하나로 통일**: `1.` `2.` `3.`. 알파벳(a/b/c)·기호·대소문자 혼용 금지.
 - canonical ID 가 있으면(예: `TASK-NNN`, todo `#6`) 본문에서 그 ID 로 지칭하되, 열거 자체는 숫자로 한다. ID 와 임의 라벨을 섞지 않는다.
 - **항목 사이 한 줄 띄움**(빈 줄). 붙여 쓰지 않는다.
-- 단위 표기 고정: 시간 `ph`, 토큰 `~K`, 상태 `G/Y/R/B`, 증감 `+/-%`.
+- 단위 표기 고정: 시간 `ph`, 토큰 `~K`, 상태 `pass/watch/block`, 점수 `score: 0-100`, 증감 `+/-%`.
 - 한 항목 = 가능하면 한 줄(또는 표 한 행).
 
 예시:
@@ -474,7 +484,7 @@ AskUserQuestion 은 옵션 최대 4개 + 자동 "Other"(자유 입력)를 제공
 - 실패/취소: `✗` `✘` `❌`
 - 체크박스: `☑` `☐` `☒`
 - 동그라미(O): `⭕`
-- 텍스트 라벨(`[완료]`, `G/Y/R`, `done`)도 그대로 유효 — 상황에 맞게 택일.
+- 텍스트 라벨(`[완료]`, `pass/watch/block`, `done`)도 그대로 유효 — 상황에 맞게 택일.
 
 금지 (장식용):
 - 얼굴/손/감정 이모지(🙂 👍 🎉 🔥 등), 트로피·로켓 등 데코레이션 픽토그램.
@@ -527,6 +537,7 @@ BRIEF/PLAN 응답은 in-conversation 출력으로 끝나지 않고 [agents/lead_
 - 2026-05-27 — Owner/CEO 분리 반영 (TASK-NNN). routine 보고·명령 판단은 CEO, 파괴적/고위험 에스컬레이션만 Owner로 라우팅.
 - 2026-05-22 — 자동 보관 절 추가 ([TASK-NNN](tasks/TASK-NNN-reporting-archive-harness.md)). BRIEF/PLAN 응답은 `agents/lead_engineer/reports/`에 누적 저장 + INDEX 갱신, `check_agent_docs.py` 가 무결성 검증.
 - 2026-05-27 — 이모지 정책 완화 (CEO 결정, AUDIT-YYYY-MM-DD-NNN). 장식 이모지 금지는 유지하되 O/X/체크박스 계열 단순 상태 마커(`✓✔✅✗✘❌☑☐☒⭕`)는 허용. `check_agent_docs.py` 가 허용 목록 + 남발(>20) WARN 으로 강제.
+- 2026-06-10 — 대화 응답 전 자체 점검과 사용자 언어 규칙을 명문화. 색상 상태표기 대신 `pass/watch/block` + `score: 0-100`을 강제.
 
 
 ---

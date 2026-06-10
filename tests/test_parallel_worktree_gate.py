@@ -31,6 +31,7 @@ def _write_claim(root: Path, name: str, **overrides: object) -> Path:
         "task_id": "TASK-AR-246",
         "agent_role": "lead-engineer",
         "agent_instance_id": "lead-engineer-A",
+        "display_name": "lead_engineer@design-01",
         "callsite_id": "terminal-1",
         "status": "working",
         "worktree_path": ".worktrees/TASK-AR-246",
@@ -124,3 +125,13 @@ def test_gate_blocks_missing_handoff_pointer_for_active_claim(tmp_path: Path):
     assert result.returncode == 1
     assert "task-claim:missing-handoff-path" in result.stdout
     assert "continuity:status-handoff-missing" in result.stdout
+
+
+def test_gate_blocks_missing_display_name_for_active_claim(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_claim(tmp_path, "CLAIM-1", display_name="")
+
+    result = _run_gate(tmp_path)
+
+    assert result.returncode == 1
+    assert "task-claim:missing-display-name" in result.stdout

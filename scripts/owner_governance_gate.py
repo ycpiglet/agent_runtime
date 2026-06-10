@@ -36,6 +36,8 @@ def main() -> int:
             "--path",
             "src/agent_runtime/templates/project/schemas/state-machines.schema.json",
         ],
+        ["scripts/response_contract_gate.py", "--check"],
+        ["scripts/continuity_contract_gate.py", "--check"],
         ["scripts/parallel_worktree_gate.py", "--check"],
     ]
 

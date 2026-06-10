@@ -875,3 +875,52 @@ Decision
 | Implement claim create/release helpers | lead-engineer | `TASK-AR-246` |
 | Surface active claims in UI state | lead-engineer | `TASK-AR-246` |
 | Run first parallel batch only through worktrees | lead-engineer | `TASK-AR-234`, `TASK-AR-240`, `TASK-AR-243`, `TASK-AR-241` |
+
+## 2026-06-10 - Continuity Contract And Repeated Request API Enforcement
+
+### Bottom Line
+
+- Summary: added the enforced continuity layer requested by the Owner.
+- Output: bilingual README, live `NEXT-SESSION-POINTER.yml`,
+  `continuity_contract_gate.py`, template AGENTS/CLAUDE rules, and Compound
+  recurrence record.
+- Boundary: this enforces documentation and governance contracts; it does not
+  automatically decide Owner-only merges or external release actions.
+
+### Signal
+
+| Signal | State | Evidence |
+| --- | --- | --- |
+| Bilingual README | pass | `README.md` |
+| Live work pointer | pass | `agents/project/NEXT-SESSION-POINTER.yml`, `agents/runtime/task_claims/*.json` |
+| Template pointer | pass | `src/agent_runtime/templates/project/agents/project/NEXT-SESSION-POINTER.yml` |
+| Protocol rules | pass | `src/agent_runtime/templates/project/AGENTS.md`, `CLAUDE.md` |
+| Gate wiring | pass | `scripts/owner_governance_gate.py` runs `continuity_contract_gate.py --check` |
+| Recurrence capture | pass | `agents/lead_engineer/compound_log.md` `COMPOUND-2026-06-10-003` |
+| Research grounding | pass | `reviews/RESEARCH-2026-06-10-continuity-loop-engineering.md` |
+
+### Insight
+
+- The project already had partial pointer concepts, but they were distributed
+  across status, backlog, tasks, reviews, claims, events, and memory.
+- The recurring failure was not lack of text; it was lack of a compact live work
+  state target and executable gate.
+- Repeated user requests now have a named promotion path: function/API, script,
+  hook, gate, checklist, template, or explicit task.
+
+### Decision
+
+- Decision: `agents/project/NEXT-SESSION-POINTER.yml` plus
+  `agents/runtime/task_claims/*.json` is now the first live work state surface.
+- Decision: repeated criticism must close through Compound plus executable
+  prevention when feasible.
+- Decision: measured improvement work uses `Evaluate -> Propose -> Verify -> Merge`
+  with golden set / failure / edge case preservation and Owner-owned criteria.
+
+### Next Steps
+
+| Step | Owner | Evidence |
+| --- | --- | --- |
+| Keep live pointer updated during work and before closure | lead-engineer | `agents/project/NEXT-SESSION-POINTER.yml`, `agents/runtime/task_claims/*.json` |
+| Use continuity gate in release preflight | lead-engineer | `scripts/continuity_contract_gate.py` |
+| Promote repeated Owner requests into API/gate/task | accountable task owner | `COMPOUND-2026-06-10-003` |

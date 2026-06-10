@@ -60,3 +60,119 @@
 ### Status
 - Recorded.
 - Needs enforcement task: response-format gate and backlog rendering contract.
+
+## COMPOUND-2026-06-10-002: Response contract enforcement gap
+
+### Bottom Line
+- The same response-format drift class recurred: status vocabulary and report shape were not applied in live chat.
+- Compound logging was working as a record, but not as a prevention loop.
+- The missing closure was an executable gate that fails when normative response rules still allow color-status contracts or omit the pre-answer checklist.
+
+### 5W1H
+| Field | Record |
+|---|---|
+| Who | Assistant/Codex response path; affected Owner-facing governance and status reports. |
+| What | A user-facing reply used the wrong language/format path and did not preserve the established `pass/watch/block` status vocabulary and BRIEF/report shape. |
+| When | 2026-06-10T17:00:08+09:00 investigation checkpoint. |
+| Where | Chat response for `C:\Users\ycpig\agent_runtime`; normative surfaces: `REPORTING-FORMAT.md`, template `AGENTS.md`, scheduled prompt templates, governance gate scripts. |
+| Why | The prior Compound entry said enforcement was needed, but the enforcement task had not been connected to `owner_governance_gate.py`, doctor, publish-check, or template sync. |
+| How | Stale `G/Y/R` examples remained in normative templates, and direct conversation output had no mandatory pre-answer check for user language, BRIEF order, or status vocabulary. |
+
+### Situation
+- The repo already had `COMPOUND-2026-06-09-001` for BRIEF format drift.
+- Memory and project guidance had also established `pass/watch/block + score` as the preferred status contract.
+- The live issue therefore was not discovery; it was missing enforcement and contradictory template text.
+
+### Cause
+- Primary cause: Compound entries were treated as retrospective notes, not as work items that must close with executable prevention.
+- Secondary cause: `REPORTING-FORMAT.md` contained both the newer `pass/watch/block` rule and older `G/Y/R` examples, so agents could follow either.
+- Secondary cause: `owner_governance_gate.py` did not run a response-contract gate.
+- Secondary cause: scheduled prompt and `AGENTS.md` templates could regenerate the old status vocabulary in future host installs.
+
+### Recurrence Count
+- Repo-local Compound count for this exact BRIEF/status drift class: 2 entries, including `COMPOUND-2026-06-09-001` and this entry.
+- Cross-session memory indicates older BRIEF/reporting drift corrections also exist, so this is not a first or isolated failure.
+- The accurate diagnosis is: Compound recorded recurrence, but did not yet force remediation closure.
+
+### Forced Rule
+- Any user-facing `status`, `report`, `brief`, `plan`, backlog, review, or summary answer must use the user's language unless explicitly requested otherwise.
+- Default visible order: `Bottom Line -> Signal -> Insight -> Decision -> Action Board -> Next`.
+- Status machine values: `pass/watch/block` + `score: 0-100`.
+- Color names or color abbreviations are not valid status machine values in normative response contracts.
+- If a Compound entry says "Needs enforcement", the next closure step must add or update an executable gate, not only another note.
+
+### Preventive Action
+- Add `scripts/response_contract_gate.py`.
+- Run it from `scripts/owner_governance_gate.py`.
+- Ship the gate in project templates and publish checks.
+- Update normative template docs so stale color status examples fail before release.
+
+### Status
+- signal: pass
+- score: 92
+- Enforcement implemented and verified in working tree.
+
+## COMPOUND-2026-06-10-003: Continuity pointer and repeated-request API gap
+
+### Bottom Line
+- The Owner repeated the same class of feedback: session continuity, language,
+  BRIEF shape, status vocabulary, and repeated-request promotion were still not
+  reliably applied.
+- The root issue was structural: rules existed in long documents and memory,
+  but there was no compact live work pointer plus executable continuity gate.
+- The closure must therefore be a gate and pointer contract, not another
+  prose-only reminder.
+
+### 5W1H
+| Field | Record |
+|---|---|
+| Who | Lead Engineer / agent response path; affected future memory-reset agents and host adopters. |
+| What | Repeated Owner requests were not automatically promoted into function/API, scripts, hooks, gates, tasks, live work pointers, or Compound remediation. |
+| When | 2026-06-10T17:38:07+09:00 |
+| Where | `C:\Users\ycpig\agent_runtime`; surfaces: README, template AGENTS/CLAUDE, pointer, owner governance gate. |
+| Why | The project had partial pointers (`STATUS.md`, backlog, task records, claims), but no single mandatory live work pointer contract and no continuity gate. |
+| How | Agents could read long docs selectively, miss a standing preference, answer in the wrong language/format, and still pass existing gates. |
+
+### Situation
+- `COMPOUND-2026-06-09-001` and `COMPOUND-2026-06-10-002` already recorded BRIEF/status drift.
+- The Owner then asked why repeated prompt requests were not converted into
+  reusable functions/APIs and why Compound did not prevent recurrence.
+- Existing docs were useful but too distributed for cold-start recovery.
+
+### Cause
+- Primary cause: no enforced live work pointer with current agent/team/pane,
+  task, status, phase, progress, worktree, responsibility, verification, and
+  next action.
+- Secondary cause: repeated-request handling was policy text, not a checked
+  contract.
+- Secondary cause: Compound entries did not force executable prevention when
+  feasible.
+- Secondary cause: README was acting as a dense technical record instead of a
+  friendly bilingual entry point that points humans and agents to deeper docs.
+
+### Forced Rule
+- Maintain `agents/project/NEXT-SESSION-POINTER.yml` and
+  `agents/runtime/task_claims/*.json` as the first live work read target.
+- README must stay bilingual (`한국어` and `English`) and point to deeper
+  protocol docs.
+- Template `AGENTS.md` and `CLAUDE.md` must define:
+  - session continuity pointer maintenance;
+  - `Evaluate -> Propose -> Verify -> Merge`;
+  - golden set / failure / edge case preservation;
+  - repeated request API promotion;
+  - Owner-owned criteria and merge decisions;
+  - mandatory Compound capture for repeated mistakes or criticism.
+- Owner governance must run a continuity contract gate.
+
+### Preventive Action
+- Add `scripts/continuity_contract_gate.py`.
+- Ship the gate in project templates.
+- Add `agents/project/NEXT-SESSION-POINTER.yml`, active_work fields, and
+  template pointer.
+- Wire the gate into `owner_governance_gate.py`, doctor, publish-check, and
+  publish-bundle.
+
+### Status
+- signal: pass
+- score: 94
+- Enforcement implemented in working tree and verified by full tests and release-facing gates.

@@ -50,10 +50,15 @@ REQUIRED_TEMPLATE_FILES = (
     "scripts/auto_runner.py",
     "scripts/auto_dispatch.py",
     "scripts/check_messages.py",
+    "scripts/continuity_contract_gate.py",
     "scripts/message_queue.py",
     "scripts/orchestrator_safety_gate.py",
     "scripts/parallel_worktree_gate.py",
     "scripts/pipeline.py",
+    "scripts/response_contract_gate.py",
+    "scripts/stop_hook_owner_governance.py",
+    "scripts/task_claim_dispatcher.py",
+    "agents/project/NEXT-SESSION-POINTER.yml",
     "schemas/task.schema.json",
 )
 
@@ -75,6 +80,9 @@ SCRIPT_HELP = (
     ("auto_runner.py", ("--help",)),
     ("auto_dispatch.py", ("--help",)),
     ("check_messages.py", ("--help",)),
+    ("continuity_contract_gate.py", ("--help",)),
+    ("response_contract_gate.py", ("--help",)),
+    ("task_claim_dispatcher.py", ("--help",)),
 )
 
 PROVIDER_MODULES = (
