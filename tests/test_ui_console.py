@@ -33,6 +33,19 @@ def _write_task(root: Path, task_id: str = "TASK-AR-228") -> None:
     )
 
 
+def _write_backlog_board_script(root: Path) -> None:
+    _write(
+        root / "scripts" / "backlog_board.py",
+        "\n".join(
+            [
+                "from pathlib import Path",
+                "Path('BACKLOG-BOARD.md').write_text('synced\\n', encoding='utf-8')",
+                "",
+            ]
+        ),
+    )
+
+
 def test_ui_console_serves_html_shell_and_assets(tmp_path):
     html = ui_console.build_response("/", tmp_path)
     css = ui_console.build_response("/app.css", tmp_path)
@@ -75,6 +88,46 @@ def test_ui_console_api_state_uses_ui_state_adapter(tmp_path):
     assert payload["tasks"][0]["source_path"] == "agents/lead_engineer/tasks/TASK-AR-228-console.md"
 
 
+def test_ui_console_agents_view_contains_progress_fields(tmp_path):
+    _write(
+        tmp_path / "agents" / "runtime" / "task_claims" / "CLAIM-progress.json",
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-progress",
+                "task_id": "TASK-AR-248",
+                "task_set_id": "TASKSET-AR-PROGRESS",
+                "agent_role": "lead-engineer",
+                "team_id": "agent-runtime-core",
+                "agent_instance_id": "le-1",
+                "display_name": "lead_engineer@ui-01",
+                "callsite_id": "terminal:wt-task-ar-248:tab-01",
+                "pane_id": "terminal:wt-task-ar-248:tab-01",
+                "status": "working",
+                "phase": "implement",
+                "step_index": 3,
+                "step_total": 6,
+                "progress_pct": 48,
+                "status_text": "Rendering task-set progress cards",
+                "worktree_path": ".worktrees/TASK-AR-248",
+                "branch": "codex/task-ar-248-ui-01",
+                "claimed_at": "2026-06-10T18:00:00+09:00",
+                "last_heartbeat": "2026-06-10T18:05:00+09:00",
+            }
+        ),
+    )
+
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    api = json.loads(ui_console.build_response("/api/task-sets", tmp_path).body.decode("utf-8"))
+
+    assert "status_text" in js
+    assert "step_index" in js
+    assert "progress_pct" in js
+    assert "renderTaskSets" in js
+    assert api["resource"] == "task_sets"
+    assert api["items"][0]["id"] == "TASKSET-AR-PROGRESS"
+
+
 def test_ui_console_api_resource_routes_match_state_resources(tmp_path):
     _write_task(tmp_path, "TASK-AR-229")
 
@@ -87,6 +140,8 @@ def test_ui_console_api_resource_routes_match_state_resources(tmp_path):
 
 
 def test_ui_console_post_task_create_and_patch_update_routes(tmp_path):
+    _write_backlog_board_script(tmp_path)
+
     create = ui_console.build_response(
         "/api/tasks",
         tmp_path,
@@ -121,7 +176,29 @@ def test_ui_console_post_task_create_and_patch_update_routes(tmp_path):
     assert state["commands"][-1]["status"] == "accepted"
 
 
+def test_ui_console_task_mutation_fails_when_backlog_board_sync_missing(tmp_path):
+    create = ui_console.build_response(
+        "/api/tasks",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {
+                "id": "TASK-UI-602",
+                "title": "Created without board sync",
+                "status": "planned",
+                "priority": "P2",
+            }
+        ).encode("utf-8"),
+    )
+    payload = json.loads(create.body.decode("utf-8"))
+
+    assert create.status == 400
+    assert payload["status"] == "failed"
+    assert "BACKLOG-BOARD.md sync failed" in " ".join(payload["errors"])
+
+
 def test_ui_console_reorder_message_and_invalid_routes(tmp_path):
+    _write_backlog_board_script(tmp_path)
     _write_task(tmp_path, "TASK-UI-701")
     reorder = ui_console.build_response(
         "/api/tasks/TASK-UI-701/reorder",
@@ -151,6 +228,7 @@ def test_ui_console_reorder_message_and_invalid_routes(tmp_path):
 
 
 def test_ui_console_archive_route_marks_task_complete(tmp_path):
+    _write_backlog_board_script(tmp_path)
     _write_task(tmp_path, "TASK-UI-801")
 
     response = ui_console.build_response(

@@ -1,3 +1,4 @@
+---
 id: TASK-AR-214
 status: in_progress
 started_at: 2026-06-09T10:20:00+09:00
@@ -6,6 +7,7 @@ priority: P0
 difficulty: M
 est_hours: 16
 est_tokens: 2600
+task_set_id: TASKSET-AR-CONTEXT-KNOWLEDGE
 tags:
   - query-contract
   - metadata-governance
@@ -22,7 +24,6 @@ audit_log:
   - reviews/MEETING-2026-06-09-agent-runtime-task-ar-214-query-contract.md
   - reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md
   - reviews/CALL-2026-06-09-agent-runtime-task-ar-214-owner-sync.md
----
 ---
 
 ## 목표

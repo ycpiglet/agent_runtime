@@ -1,11 +1,12 @@
 ---
 id: TASK-AR-209
-status: in_progress
+status: completed
 owner: agent-runtime
 priority: P0
 difficulty: M
 est_hours: 12
 est_tokens: 2200
+task_set_id: TASKSET-AR-MIGRATION-PARITY
 tags:
   - migration-audit
   - tag-manual

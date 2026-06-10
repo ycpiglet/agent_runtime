@@ -122,7 +122,9 @@
     - pragmatist
     - systems-thinker
     - user-impact-reviewer
+    - evidence-librarian
   canonical_context:
     - reviews/RESEARCH-2026-06-10-agent-runtime-rsi-and-planning-loop-research.md
     - AGENT_RUNTIME_RSI_PLANNING_BRIEF.md
     - agents/project/ORG.md
+    - agents/project/DIVERSITY-COUNCIL-PROTOCOL.md

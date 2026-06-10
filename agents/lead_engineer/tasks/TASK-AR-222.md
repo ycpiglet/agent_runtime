@@ -1,11 +1,20 @@
 ---
+audit_log:
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-start-checkpoint.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-closeout-evidence-map.md
+  - reviews/RELEASE-CLOSEOUT-BUNDLE-2026-06-10-task-ar-222.yml
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-bundle-index.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-watch-lane-disposition.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-source-output-coverage.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-claim-closeout.md
 id: TASK-AR-222
-status: in_progress
+status: completed
 owner: lead-engineer
 priority: P0
 difficulty: L
 est_hours: 14
 est_tokens: 2800
+task_set_id: TASKSET-AR-RELEASE-STEWARD
 tags:
   - release-closeout
   - official-guidance
@@ -14,6 +23,7 @@ tags:
   - validation-stack
 trigger_meeting: yes
 created: 2026-06-09
+completed_at: 2026-06-10T22:48:00+09:00
 ---
 
 ## 목표
@@ -153,3 +163,64 @@ created: 2026-06-09
 - Release execution plan and owner approval template are present under `agents/project/release/`.
 - Gate result: `ready_pending_owner_approval`, `findings=0`.
 - v0.1.8 remains at ready until owner approval is recorded.
+
+## Closeout Bridge from TASK-AR-223/TASK-AR-210 (2026-06-10)
+
+- Entry point: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-223-release-state-bridge.md`.
+- Closeout interpretation: `TASK-AR-223` supplies the baseline validation bundle, and `TASK-AR-210` supplies the later local release evidence closure.
+- Current local-evidence route: `release_evidence_ready`.
+- External publication boundary: `remote_publish_deferred_out_of_scope`; no remote tag push, PR merge, GitHub release, or CI evidence is claimed by this closeout.
+- Hold routing: `hold_for_data`, `hold_for_overlay`, and deterministic-baseline `hold_for_query_contract` are not active for the local `v0.1.8` evidence scope; live/provider-specific evidence remains a separate governance decision if requested.
+- Next closeout action: preserve this bridge in the Release Steward handoff and keep remote publication as a separate explicit execution record.
+
+## Release Steward Start Checkpoint (2026-06-10)
+
+- Active claim: `CLAIM-20260610-222448-task-ar-222-d4ee`.
+- Checkpoint artifact: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-start-checkpoint.md`.
+- `TASK-AR-219` schedule/guidance parity has been closed in root and is an input to this closeout bundle.
+- Current route to preserve: local `release_evidence_ready`.
+- Boundary retained: external GitHub publish, PR/tag, CI, and provider-live evidence remain out of scope unless separately proven or Owner-approved.
+
+## Closeout Evidence Map (2026-06-10)
+
+- Evidence map artifact: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-closeout-evidence-map.md`.
+- Worktree-local bridge evidence was folded into root:
+  - `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-219-claim-closeout.md`.
+  - `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-223-release-state-bridge.md`.
+- Requirements 1-17 are mapped to accepted local evidence, watch/pass boundary items, or explicit out-of-scope evidence.
+- Current closeout route remains `release_evidence_ready` for local evidence only.
+- Remote publish remains `remote_publish_deferred_out_of_scope`.
+
+## Machine-Readable Bundle Index (2026-06-10)
+
+- Bundle index: `reviews/RELEASE-CLOSEOUT-BUNDLE-2026-06-10-task-ar-222.yml`.
+- Review artifact: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-bundle-index.md`.
+- Disposition model: `accepted_local`, `accepted_baseline`, `accepted_baseline_with_later_bridge`, `watch`, and `out_of_scope`.
+- External publish remains `out_of_scope`.
+
+## Watch Lane Disposition (2026-06-10)
+
+- Disposition artifact: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-watch-lane-disposition.md`.
+- Fresh local gate from worktree: `python scripts/co_location_gate.py`.
+- Result: `status=pass`, `route=ready_for_release_redecision`, `findings=0`.
+- Map checks: `skill_data_map items=5 findings=0`, `migration_compat_map items=7 findings=0`, `context_sources items=4 findings=0`, `dataset_catalog items=3 findings=0`.
+- Updated bundle index: migration compatibility and skill/data map lanes now count as accepted local evidence.
+- Remaining watch boundaries: query-contract/human-definition interpretation, accuracy-speed-cost interpretation, external publish, and provider-live evidence.
+
+## Source Output Coverage (2026-06-10)
+
+- Coverage artifact: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-source-output-coverage.md`.
+- Source tasks mapped into the closeout bundle: `TASK-AR-210`, `TASK-AR-216`, `TASK-AR-217`, `TASK-AR-218`, `TASK-AR-219`, `TASK-AR-220`, `TASK-AR-221`, `TASK-AR-222`, and `TASK-AR-223`.
+- The local source-output chain is accepted for TASK-AR-222 handoff.
+- External publish and provider-live lanes remain out of scope and require separate Owner-approved evidence.
+
+## Claim Closeout (2026-06-10)
+
+- Closeout artifact: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-claim-closeout.md`.
+- Final task state: completed for local v0.1.8 closeout-bundle mapping.
+- Claim released: `CLAIM-20260610-222448-task-ar-222-d4ee`.
+- Verified handoff gates after root integration:
+  - `python scripts/owner_governance_gate.py` -> `status=pass`, `findings=0`.
+  - `python scripts/taskset_work_gate.py --check` -> `findings=0`.
+  - `python scripts/parallel_worktree_gate.py --check` -> `claims=15`, `findings=0`.
+- Boundary retained: no external GitHub publish, PR/tag, CI, or provider-live evidence is claimed by this closeout.

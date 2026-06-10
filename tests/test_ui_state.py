@@ -157,6 +157,148 @@ def test_ui_state_adapter_uses_korean_goal_heading_for_description(tmp_path):
     assert state["tasks"][0]["description"] == "한국어 목표 문장을 UI 설명으로 사용한다."
 
 
+def test_ui_state_exposes_active_task_claims_as_readable_agent_instances(tmp_path):
+    _write(
+        tmp_path / "agents" / "runtime" / "task_claims" / "CLAIM-20260610-143012-task-ar-246-a7f3.json",
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-20260610-143012-task-ar-246-a7f3",
+                "task_id": "TASK-AR-246",
+                "agent_role": "lead-engineer",
+                "team_id": "agent-runtime-core",
+                "agent_instance_id": "le-20260610-143012-kst-a7f3",
+                "display_name": "lead_engineer@design-01",
+                "callsite_id": "terminal:wt-task-ar-246:tab-01",
+                "pane_id": "terminal:wt-task-ar-246:tab-01",
+                "mode": "design",
+                "status": "working",
+                "phase": "implementation",
+                "progress_pct": 45,
+                "worktree_path": ".worktrees/TASK-AR-246",
+                "branch": "codex/task-ar-246-design-01",
+                "claimed_at": "2026-06-10T14:30:12+09:00",
+                "last_heartbeat": "2026-06-10T14:30:12+09:00",
+                "handoff_path": "agents/runtime/task_claims/CLAIM-20260610-143012-task-ar-246-a7f3.handoff.md",
+                "log_path": "agents/runtime/task_claims/CLAIM-20260610-143012-task-ar-246-a7f3.log.md",
+                "tags": ["planning", "no-ssot-write"],
+            }
+        ),
+    )
+
+    state = ui_state.build_state(tmp_path, now="2026-06-10T14:31:00+09:00")
+
+    assert state["agents"][0]["id"] == "le-20260610-143012-kst-a7f3"
+    assert state["agents"][0]["role"] == "lead-engineer"
+    assert state["agents"][0]["team_id"] == "agent-runtime-core"
+    assert state["agents"][0]["display_name"] == "lead_engineer@design-01"
+    assert state["agents"][0]["current_task_id"] == "TASK-AR-246"
+    assert state["agents"][0]["pane_id"] == "terminal:wt-task-ar-246:tab-01"
+    assert state["agents"][0]["mode"] == "design"
+    assert state["agents"][0]["phase"] == "implementation"
+    assert state["agents"][0]["progress_pct"] == 45
+    assert state["agents"][0]["tags"] == ["planning", "no-ssot-write"]
+    assert state["agents"][0]["source_kind"] == "task_claim_json"
+
+
+def test_ui_state_exposes_task_set_progress_and_status_text(tmp_path):
+    _write(
+        tmp_path / "agents" / "runtime" / "task_claims" / "CLAIM-progress.json",
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-progress",
+                "task_id": "TASK-AR-248",
+                "task_set_id": "TASKSET-AR-PROGRESS",
+                "agent_role": "lead-engineer",
+                "team_id": "agent-runtime-core",
+                "agent_instance_id": "le-1",
+                "display_name": "lead_engineer@ui-01",
+                "callsite_id": "terminal:wt-task-ar-248:tab-01",
+                "pane_id": "terminal:wt-task-ar-248:tab-01",
+                "status": "working",
+                "phase": "implement",
+                "step_index": 3,
+                "step_total": 6,
+                "progress_pct": 48,
+                "status_text": "Rendering task-set progress cards",
+                "worktree_path": ".worktrees/TASK-AR-248",
+                "branch": "codex/task-ar-248-ui-01",
+                "claimed_at": "2026-06-10T18:00:00+09:00",
+                "last_heartbeat": "2026-06-10T18:05:00+09:00",
+            }
+        ),
+    )
+
+    state = ui_state.build_state(tmp_path, now="2026-06-10T18:06:00+09:00")
+
+    assert state["agents"][0]["task_set_id"] == "TASKSET-AR-PROGRESS"
+    assert state["agents"][0]["step_index"] == 3
+    assert state["agents"][0]["step_total"] == 6
+    assert state["agents"][0]["status_text"] == "Rendering task-set progress cards"
+    assert state["task_sets"][0]["id"] == "TASKSET-AR-PROGRESS"
+    assert state["task_sets"][0]["progress_pct"] == 48
+    assert state["task_sets"][0]["active"] == 1
+
+
+def test_ui_state_cli_emits_task_sets_resource_json(tmp_path, capsys):
+    _write(
+        tmp_path / "agents" / "runtime" / "task_claims" / "CLAIM-progress.json",
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-progress",
+                "task_id": "TASK-AR-248",
+                "task_set_id": "TASKSET-AR-PROGRESS",
+                "agent_role": "lead-engineer",
+                "team_id": "agent-runtime-core",
+                "agent_instance_id": "le-1",
+                "display_name": "lead_engineer@ui-01",
+                "status": "working",
+                "phase": "implement",
+                "step_index": 3,
+                "step_total": 6,
+                "progress_pct": 48,
+                "status_text": "Rendering task-set progress cards",
+            }
+        ),
+    )
+
+    assert cli_module.main(["ui-state", "--root", str(tmp_path), "--resource", "task_sets", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["resource"] == "task_sets"
+    assert payload["items"][0]["id"] == "TASKSET-AR-PROGRESS"
+    assert payload["items"][0]["progress_pct"] == 48
+
+
+def test_ui_state_exposes_collaboration_concurrency_summary(tmp_path):
+    _write(
+        tmp_path / "agents" / "runtime" / "pane_events" / "pane-events.jsonl",
+        json.dumps(
+            {
+                "schema": "agent-runtime-pane-event/v1",
+                "seq": 1,
+                "ts": "2026-06-10T23:00:00+09:00",
+                "event": "claim_created",
+                "actor": "lead-engineer",
+                "task_id": "TASK-AR-251",
+                "task_set_id": "TASKSET-AR-COLLAB-CONCURRENCY",
+                "claim_id": "CLAIM-1",
+                "worktree_path": ".worktrees/TASK-AR-251",
+            }
+        )
+        + "\n",
+    )
+
+    state = ui_state.build_state(tmp_path, now="2026-06-10T23:05:00+09:00")
+
+    assert state["collaboration"]["summary"]["event_count"] == 1
+    assert state["collaboration"]["task_sets"][0]["task_set_id"] == "TASKSET-AR-COLLAB-CONCURRENCY"
+    assert state["collaboration"]["task_sets"][0]["active_claim_ids"] == ["CLAIM-1"]
+    assert any(source["id"] == "pane_events" for source in state["sources"])
+
+
 def test_ui_state_adapter_reports_malformed_records_as_warnings(tmp_path):
     _write(
         tmp_path / "agents" / "runtime" / "events" / "lead-engineer-2026-06-10.jsonl",

@@ -1,0 +1,52 @@
+{
+  "schema": "agent-runtime-offline-eval-report/v1",
+  "evaluation_mode": "goldset_readiness",
+  "accuracy_claim": "not_model_output_accuracy",
+  "generated_at": "2026-06-10T09:40:20.487831+00:00",
+  "catalog": "agents/project/DATASET-CATALOG.yml",
+  "policy": "agents/project/EVAL-POLICY.yml",
+  "minimum_score_by_domain": 0.9,
+  "status": "pass",
+  "datasets": [
+    {
+      "id": "project-overlay-routing-gold",
+      "location": "agents/project/evals/overlay-routing-v1.jsonl",
+      "minimum_score": 0.9,
+      "score": 1.0,
+      "status": "pass",
+      "cases": 5,
+      "domains": [
+        "overlay-routing"
+      ],
+      "missing_case_types": [],
+      "findings": []
+    },
+    {
+      "id": "project-metadata-gov-gold",
+      "location": "agents/project/evals/gov-metadata-v1.jsonl",
+      "minimum_score": 0.9,
+      "score": 1.0,
+      "status": "pass",
+      "cases": 5,
+      "domains": [
+        "metadata-governance"
+      ],
+      "missing_case_types": [],
+      "findings": []
+    },
+    {
+      "id": "pane-progress-gold",
+      "location": "agents/project/evals/pane-progress-v1.jsonl",
+      "minimum_score": 0.9,
+      "score": 1.0,
+      "status": "pass",
+      "cases": 6,
+      "domains": [
+        "runtime-progress"
+      ],
+      "missing_case_types": [],
+      "findings": []
+    }
+  ],
+  "correction_proposals": []
+}

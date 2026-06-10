@@ -6,6 +6,7 @@ priority: P0
 difficulty: M
 est_hours: 16
 est_tokens: 2200
+task_set_id: TASKSET-AR-CONTEXT-KNOWLEDGE
 tags:
   - project-overlay
   - multi-team

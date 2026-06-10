@@ -6,6 +6,7 @@ priority: P0
 difficulty: M
 est_hours: 8
 est_tokens: 1500
+task_set_id: TASKSET-AR-CONTEXT-KNOWLEDGE
 tags:
   - warehouse
   - knowledge-doc

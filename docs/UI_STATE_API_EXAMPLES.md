@@ -20,6 +20,7 @@ $env:PYTHONPATH='src'
 python -m agent_runtime.cli ui-state --root . --resource state --json
 python -m agent_runtime.cli ui-state --root . --resource tasks --json
 python -m agent_runtime.cli ui-state --root . --resource agents --json
+python -m agent_runtime.cli ui-state --root . --resource task_sets --json
 python -m agent_runtime.cli ui-state --root . --resource messages --json
 python -m agent_runtime.cli ui-state --root . --resource events --json
 python -m agent_runtime.cli ui-state --root . --resource goals --json
@@ -33,6 +34,7 @@ python -m agent_runtime.cli ui-state --root . --resource sources --json
 | `GET /api/state` | `--resource state` | Full aggregate state |
 | `GET /api/tasks` | `--resource tasks` | Normalized task cards/detail source |
 | `GET /api/agents` | `--resource agents` | Session-derived agent status |
+| `GET /api/task-sets` | `--resource task_sets` | Active task-set progress aggregated from claim records |
 | `GET /api/messages` | `--resource messages` | Inbox/archive markdown messages |
 | `GET /api/events` | `--resource events` | Runtime JSONL timeline |
 | `GET /api/goals` | `--resource goals` | `STATUS.md`-derived MVP goal record |
@@ -57,11 +59,52 @@ python -m agent_runtime.cli ui-state --root . --resource sources --json
   ],
   "tasks": [],
   "agents": [],
+  "task_sets": [],
   "messages": [],
   "events": [],
   "goals": [],
   "gaps": [],
   "warnings": []
+}
+```
+
+## Agent Claim Progress Shape
+
+Active task claim records are projected into `agents` so the console can show
+live pane progress:
+
+```json
+{
+  "id": "le-1",
+  "role": "lead-engineer",
+  "team_id": "agent-runtime-core",
+  "status": "working",
+  "phase": "implement",
+  "progress_pct": 48,
+  "current_task_id": "TASK-AR-248",
+  "task_set_id": "TASKSET-AR-PANE-PROGRESS",
+  "step_index": 3,
+  "step_total": 6,
+  "status_text": "Rendering task-set progress cards",
+  "pane_id": "terminal:wt-task-ar-248:tab-01",
+  "claim_id": "CLAIM-progress"
+}
+```
+
+## Task Set Progress Shape
+
+`task_sets` aggregates active agent panes by `task_set_id`:
+
+```json
+{
+  "id": "TASKSET-AR-PANE-PROGRESS",
+  "agents": 1,
+  "active": 1,
+  "blocked": 0,
+  "done": 0,
+  "current_task_ids": ["TASK-AR-248"],
+  "status_text": "Rendering task-set progress cards",
+  "progress_pct": 48
 }
 ```
 

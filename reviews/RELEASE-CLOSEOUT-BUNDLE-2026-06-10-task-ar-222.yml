@@ -1,0 +1,137 @@
+schema: agent-runtime-release-closeout-bundle/v1
+bundle_id: RELEASE-CLOSEOUT-BUNDLE-2026-06-10-task-ar-222
+task_id: TASK-AR-222
+task_set_id: TASKSET-AR-RELEASE-STEWARD
+updated_at: 2026-06-10T22:44:00+09:00
+status: pass
+signal: pass
+score: 93
+scope:
+  release_target: v0.1.8
+  decision_schedule:
+    first: 2026-07-02
+    second: 2026-07-09
+    final_freeze: 2026-07-16
+  current_local_route: release_evidence_ready
+  remote_publish_state: remote_publish_deferred_out_of_scope
+  boundary:
+    - local evidence only
+    - no external GitHub publish claim
+    - no PR merge claim
+    - no remote tag or CI claim
+    - no provider-live evidence claim
+source_documents:
+  current_task: agents/lead_engineer/tasks/TASK-AR-222.md
+  release_gate_task: agents/lead_engineer/tasks/TASK-AR-210.md
+  backlog: BACKLOG.md
+  status: STATUS.md
+  roadmap: agents/project/ROADMAP.md
+bridge_evidence:
+  task_ar_219_closeout:
+    path: reviews/REVIEW-2026-06-10-agent-runtime-task-ar-219-claim-closeout.md
+    disposition: accepted_local
+  task_ar_223_release_state_bridge:
+    path: reviews/REVIEW-2026-06-10-agent-runtime-task-ar-223-release-state-bridge.md
+    disposition: accepted_local
+  task_ar_221_operating_chain:
+    path: reviews/REVIEW-2026-06-09-agent-runtime-task-ar-221-operating-chain-integration.md
+    disposition: accepted_baseline
+  task_ar_222_v018_closeout:
+    path: reviews/REVIEW-2026-06-09-agent-runtime-task-ar-222-v018-closeout-bundle.md
+    disposition: accepted_baseline_with_later_bridge
+source_output_coverage:
+  disposition: accepted_local
+  evidence:
+    - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-source-output-coverage.md
+  source_tasks:
+    - TASK-AR-210
+    - TASK-AR-216
+    - TASK-AR-217
+    - TASK-AR-218
+    - TASK-AR-219
+    - TASK-AR-220
+    - TASK-AR-221
+    - TASK-AR-222
+    - TASK-AR-223
+lanes:
+  offline_prediction_scoring:
+    disposition: accepted_local
+    evidence:
+      - reviews/OFFLINE-PREDICTION-SCORE-2026-06-09-task-ar-217.json
+  live_reviewer_footer:
+    disposition: accepted_baseline
+    evidence:
+      - reviews/LIVE-REVIEWER-GATE-2026-06-09-task-ar-206.json
+  correction_collector:
+    disposition: accepted_baseline
+    evidence:
+      - reviews/CORRECTION-COLLECTOR-2026-06-09-task-ar-207.json
+  a2a_trace_reconstruction:
+    disposition: accepted_baseline
+    evidence:
+      - reviews/A2A-TRACE-GATE-2026-06-09-task-ar-208.json
+  overlay_simulation:
+    disposition: accepted_local
+    evidence:
+      - reviews/OVERLAY-SIMULATION-GATE-2026-06-09-task-ar-215.json
+  co_location_enforcement:
+    disposition: accepted_local
+    evidence:
+      - reviews/CO-LOCATION-GATE-2026-06-09-task-ar-204.json
+  migration_compatibility:
+    disposition: accepted_local
+    evidence:
+      - agents/project/MIGRATION-COMPAT-MAP.yml
+      - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-watch-lane-disposition.md
+    note: co_location_gate passed with migration_compat_map items=7 findings=0
+  skill_data_map:
+    disposition: accepted_local
+    evidence:
+      - agents/project/SKILL-DATA-MAP.yml
+      - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-watch-lane-disposition.md
+    note: co_location_gate passed with skill_data_map items=5 findings=0
+  project_overlay_packet:
+    disposition: accepted_local
+    evidence:
+      - agents/project/PROJECT-CONTEXT.yml
+      - agents/project/ROADMAP.md
+      - agents/project/ORG.md
+      - agents/project/LINKS.md
+      - agents/project/TEAMS.md
+  external_publish:
+    disposition: out_of_scope
+    evidence: []
+    required_to_close:
+      - explicit Owner approval
+      - remote publish or PR merge record
+      - remote tag push evidence
+      - CI or install smoke tied to remote ref
+  provider_live:
+    disposition: out_of_scope
+    evidence: []
+    required_to_close:
+      - explicit Owner approval or separate provider-live task
+      - provider-specific live transport evidence
+      - rerun release steward gates
+requirement_map:
+  "1": { disposition: accepted_baseline, evidence: [reviews/REVIEW-2026-06-09-agent-runtime-task-ar-221-operating-chain-integration.md] }
+  "2": { disposition: accepted_baseline, evidence: [reviews/REVIEW-2026-06-09-agent-runtime-task-ar-221-operating-chain-integration.md] }
+  "3": { disposition: accepted_baseline, evidence: [reviews/REVIEW-2026-06-09-agent-runtime-task-ar-221-operating-chain-integration.md] }
+  "4": { disposition: accepted_local, evidence: [agents/project/SKILL-DATA-MAP.yml, reviews/CO-LOCATION-GATE-2026-06-09-task-ar-204.json, reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-watch-lane-disposition.md] }
+  "5": { disposition: accepted_local, evidence: [reviews/OFFLINE-PREDICTION-SCORE-2026-06-09-task-ar-217.json] }
+  "6": { disposition: accepted_baseline, evidence: [reviews/LIVE-REVIEWER-GATE-2026-06-09-task-ar-206.json] }
+  "7": { disposition: accepted_baseline, evidence: [reviews/CORRECTION-COLLECTOR-2026-06-09-task-ar-207.json] }
+  "8": { disposition: watch, evidence: [reviews/REVIEW-2026-06-09-agent-runtime-task-ar-221-operating-chain-integration.md, reviews/REVIEW-2026-06-10-agent-runtime-task-ar-223-release-state-bridge.md] }
+  "9": { disposition: accepted_local, evidence: [reviews/CO-LOCATION-GATE-2026-06-09-task-ar-204.json] }
+  "10": { disposition: watch, evidence: [reviews/REVIEW-2026-06-09-agent-runtime-task-ar-221-operating-chain-integration.md] }
+  "11": { disposition: accepted_baseline, evidence: [reviews/REVIEW-2026-06-09-agent-runtime-task-ar-221-operating-chain-integration.md, agents/project/PROJECT-CONTEXT.yml] }
+  "12": { disposition: watch, evidence: [reviews/LIVE-REVIEWER-GATE-2026-06-09-task-ar-206.json] }
+  "13": { disposition: accepted_baseline, evidence: [reviews/REVIEW-2026-06-09-agent-runtime-task-ar-221-operating-chain-integration.md] }
+  "14": { disposition: accepted_local, evidence: [agents/project/PROJECT-CONTEXT.yml, agents/project/ROADMAP.md, agents/project/ORG.md, agents/project/LINKS.md, agents/project/TEAMS.md] }
+  "15": { disposition: accepted_local, evidence: [reviews/OVERLAY-SIMULATION-GATE-2026-06-09-task-ar-215.json] }
+  "16": { disposition: accepted_baseline, evidence: [reviews/A2A-TRACE-GATE-2026-06-09-task-ar-208.json] }
+  "17": { disposition: accepted_local, evidence: [agents/project/MIGRATION-COMPAT-MAP.yml, reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-watch-lane-disposition.md] }
+next_actions:
+  - prepare root handoff after governance gates pass
+  - keep remote publish deferred unless Owner approves a separate external publish task
+  - run owner governance, taskset work, and parallel worktree gates before handoff

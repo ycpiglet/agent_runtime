@@ -3,6 +3,8 @@ owner_docs:
   - BACKLOG-BOARD.md
   - AGENT_RUNTIME_RSI_PLANNING_BRIEF.md
   - AGENT_RUNTIME_PARALLEL_SESSION_PROTOCOL.md
+  - AGENT_RUNTIME_COLLAB_CONCURRENCY_BRIEF.md
+  - reviews/RESEARCH-2026-06-10-realtime-collab-conflict-patterns.md
   - reviews/REVIEW-2026-06-09-backlog-board-restoration-owner-format-gate.md
   - reviews/REVIEW-2026-06-10-agent-runtime-worktree-cleanup-cycle-map.md
   - reviews/REVIEW-2026-06-10-agent-runtime-rsi-planning-registration.md

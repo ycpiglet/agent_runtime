@@ -1,0 +1,42 @@
+{
+  "action_type": "doc_repair",
+  "created_at": "1970-01-01T00:00:00+00:00",
+  "dedupe_key": "doc_repair:missing-audit-link:agents/lead_engineer/tasks/TASK-AR-213.md",
+  "department": "planning-office",
+  "draft_task_path": "agents/planning/drafts/PROP-A067489BF476.md",
+  "evidence": [
+    {
+      "confidence": 0.86,
+      "summary": "TASK-AR-213 references missing audit artifact TASK-AR-212"
+    }
+  ],
+  "evidence_hash": "fe7c4f27add85eb18c6d2612e9e5125ebd760480",
+  "id": "PROP-A067489BF476",
+  "mode": "B",
+  "owner_boundary": "Low-risk local proposal; canonical mutation still requires approved apply.",
+  "reviewer_opinions": [],
+  "risk_tier": "low",
+  "rollback_path": "agents/planning/rollback/PROP-A067489BF476.json",
+  "source_refs": [
+    {
+      "kind": "missing-audit-link",
+      "path": "agents/lead_engineer/tasks/TASK-AR-213.md"
+    }
+  ],
+  "status": "superseded",
+  "suggested_next_action": "restore the referenced audit artifact or mark the task audit entry as superseded",
+  "superseded_by": "PROP-7E486FEEBDA1",
+  "supersedes": [
+    "PROP-F3AE867AB70B"
+  ],
+  "target_files": [
+    "agents/lead_engineer/tasks/TASK-AR-213.md"
+  ],
+  "title": "missing-audit-link: agents/lead_engineer/tasks/TASK-AR-213.md",
+  "trace_id": null,
+  "updated_at": "2026-06-10T23:15:00+09:00",
+  "verifier_list": [
+    "python scripts/planning_loop.py gate --trigger manual --json",
+    "python scripts/owner_governance_gate.py"
+  ]
+}

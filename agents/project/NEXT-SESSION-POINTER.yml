@@ -1,0 +1,115 @@
+schema: agent-runtime-next-session-pointer/v1
+updated_at: 2026-06-10T23:55:00+09:00
+current_state:
+  summary: "TASKSET-AR-GOVERNANCE-OPS is complete for local governance enforcement; remaining watch items are scribe role evidence and low-frequency monitored roles."
+  status: complete
+  task_set_status: complete
+  task_set_id: "TASKSET-AR-GOVERNANCE-OPS"
+  step_index: 7
+  step_total: 7
+  progress_pct: 100
+  status_text: "Governance Ops completed: task registration, waiver burn-down, runtime asset usage metrics, state sync gate, pytest collection hygiene, and governance report are in place."
+active_work:
+  current_agents: []
+  current_teams:
+    - team_id: agent-runtime-core
+      active_claims: []
+resume:
+  active_task: none
+  active_task_set: TASKSET-AR-GOVERNANCE-OPS
+  branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
+roles:
+  owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
+  lead_engineer: "No active governance-ops implementation task; remaining work is watch/recurrence unless a new canonical task is added."
+  qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
+  progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
+pointers:
+  active_claims: []
+  release_steward_completed_tasks:
+    - agents/lead_engineer/tasks/TASK-AR-219.md
+    - agents/lead_engineer/tasks/TASK-AR-222.md
+    - agents/lead_engineer/tasks/TASK-AR-216.md
+  release_steward_completed_claims:
+    - agents/runtime/task_claims/CLAIM-20260610-201521-task-ar-210-3db4.json
+    - agents/runtime/task_claims/CLAIM-20260610-213946-task-ar-240-7174.json
+    - agents/runtime/task_claims/CLAIM-20260610-220017-task-ar-219-3076.json
+    - agents/runtime/task_claims/CLAIM-20260610-222448-task-ar-222-d4ee.json
+    - agents/runtime/task_claims/CLAIM-20260610-225257-task-ar-216-993e.json
+    - agents/runtime/task_claims/CLAIM-20260610-225929-task-ar-216-de2d.json
+  rsi_planning_completed_claims:
+    - agents/runtime/task_claims/CLAIM-20260610-221124-task-ar-234-02c3.json
+  quality_loop_completed_tasks:
+    - agents/lead_engineer/tasks/TASK-AR-205.md
+    - agents/lead_engineer/tasks/TASK-AR-206.md
+    - agents/lead_engineer/tasks/TASK-AR-207.md
+    - agents/lead_engineer/tasks/TASK-AR-208.md
+    - agents/lead_engineer/tasks/TASK-AR-217.md
+    - agents/lead_engineer/tasks/TASK-AR-221.md
+    - agents/lead_engineer/tasks/TASK-AR-243.md
+  quality_loop_completed_claims:
+    - agents/runtime/task_claims/CLAIM-20260610-201615-task-ar-205-6a3b.json
+    - agents/runtime/task_claims/CLAIM-20260610-212814-task-ar-206-7388.json
+    - agents/runtime/task_claims/CLAIM-20260610-213422-task-ar-207-2ccd.json
+    - agents/runtime/task_claims/CLAIM-20260610-214249-task-ar-208-3f5f.json
+    - agents/runtime/task_claims/CLAIM-20260610-210321-task-ar-217-34bc.json
+  pane_progress_completed_tasks:
+    - agents/lead_engineer/tasks/TASK-AR-246.md
+    - agents/lead_engineer/tasks/TASK-AR-247.md
+    - agents/lead_engineer/tasks/TASK-AR-248.md
+    - agents/lead_engineer/tasks/TASK-AR-249.md
+    - agents/lead_engineer/tasks/TASK-AR-250.md
+  pane_progress_completed_claims:
+    - agents/runtime/task_claims/CLAIM-20260610-202116-task-ar-248-0d52.json
+  collab_concurrency_completed_tasks:
+    - agents/lead_engineer/tasks/TASK-AR-251.md
+    - agents/lead_engineer/tasks/TASK-AR-252.md
+    - agents/lead_engineer/tasks/TASK-AR-253.md
+    - agents/lead_engineer/tasks/TASK-AR-254.md
+    - agents/lead_engineer/tasks/TASK-AR-255.md
+    - agents/lead_engineer/tasks/TASK-AR-256.md
+  governance_ops_completed_tasks:
+    - agents/lead_engineer/tasks/TASK-AR-257.md
+    - agents/lead_engineer/tasks/TASK-AR-258.md
+    - agents/lead_engineer/tasks/TASK-AR-259.md
+    - agents/lead_engineer/tasks/TASK-AR-260.md
+    - agents/lead_engineer/tasks/TASK-AR-261.md
+    - agents/lead_engineer/tasks/TASK-AR-262.md
+    - agents/lead_engineer/tasks/TASK-AR-263.md
+  recently_closed_reviews:
+    - AGENT_RUNTIME_COLLAB_CONCURRENCY_BRIEF.md
+    - reviews/RESEARCH-2026-06-10-realtime-collab-conflict-patterns.md
+    - reviews/REVIEW-2026-06-10-agent-runtime-pane-progress-taskset.md
+    - reviews/REVIEW-2026-06-10-agent-runtime-taskset-dispatcher.md
+    - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-219-claim-closeout.md
+    - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-claim-closeout.md
+    - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-216-already-complete-claim-release.md
+    - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-216-duplicate-claim-release.md
+    - reviews/REVIEW-2026-06-10-agent-runtime-release-steward-claim-normalization.md
+    - reviews/REVIEW-2026-06-10-agent-runtime-release-steward-taskset-closeout.md
+    - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-221-quality-loop-closeout.md
+    - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-243-planning-evidence-link.md
+next_actions:
+  - "Add real scribe claim/log evidence in a future governance/reporting cycle, then remove the remaining waiver."
+  - "Review low-frequency monitored roles if council/progress-scout/release-steward/reviewer/skeptic watches persist."
+  - "Do not reopen TASKSET-AR-RELEASE-STEWARD unless a new canonical task is explicitly added or Owner approves external release work."
+  - "TASKSET-AR-RSI-PLANNING is complete; do not reopen unless a new canonical task is explicitly added."
+  - "TASKSET-AR-COLLAB-CONCURRENCY is complete; require pane event logs plus the SSoT ownership gate for future multi-pane work."
+  - "Do not reopen TASKSET-AR-QUALITY-LOOP unless a new canonical task is explicitly added to that set."
+  - "Do not reopen TASKSET-AR-PANE-PROGRESS unless a new canonical task is explicitly added to that set."
+rules:
+  - "For named task-set completion, verify canonical task files plus claims, not claims alone."
+  - "Do not infer remote publish, external CI, PR merge, or provider-live evidence from local gates."
+  - "Keep markdown task files canonical; derived UI/API/index layers must remain traceable back to task files and claims."
+  - "For 5+ pane work, use isolated worktrees per task and append-only pane events; only orchestrator-approved actors may write shared SSoT files."
+verification:
+  required_before_handoff:
+    - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-QUALITY-LOOP --require-complete --check"
+    - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-PANE-PROGRESS --require-complete --check"
+    - "python scripts/verify_pane_progress_taskset.py"
+    - "python scripts/owner_governance_gate.py"
+    - "python scripts/parallel_worktree_gate.py --check"
+    - "python scripts/collaboration_concurrency_gate.py --check"
+  last_known_scope: "TASKSET-AR-QUALITY-LOOP, TASKSET-AR-PANE-PROGRESS, TASKSET-AR-RSI-PLANNING, TASKSET-AR-RELEASE-STEWARD, and TASKSET-AR-COLLAB-CONCURRENCY final closeout for local scope; external publish remains Owner-gated and out of scope."
+  rsi_planning_completed:
+    - reviews/RSI-PLANNING-TASKSET-VERIFY.json
+  rsi_planning_note: RSI planning completed verification report is the canonical closeout evidence.

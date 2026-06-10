@@ -1,0 +1,51 @@
+{
+  "schema": "agent-runtime-planning-evidence-link/v1",
+  "generated_at": "2026-06-10T13:13:34.050252+00:00",
+  "status": "watch",
+  "scanned": [
+    {
+      "kind": "offline_eval",
+      "path": "reviews/OFFLINE-EVAL-2026-06-10-taskset-quality-loop-final.json"
+    },
+    {
+      "kind": "prediction",
+      "path": "reviews/OFFLINE-PREDICTION-SCORE-2026-06-10-taskset-quality-loop-final.json"
+    },
+    {
+      "kind": "live_review",
+      "path": "reviews/LIVE-REVIEWER-GATE-2026-06-10-taskset-quality-loop-final.json"
+    },
+    {
+      "kind": "correction",
+      "path": "reviews/CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final.json"
+    },
+    {
+      "kind": "a2a",
+      "path": "reviews/A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final.json"
+    }
+  ],
+  "findings": [],
+  "proposal_count": 2,
+  "proposals": [
+    {
+      "kind": "correction_proposal",
+      "severity": "watch",
+      "route": "TASK-AR-207",
+      "source_report": "reviews/CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final.json",
+      "evidence_id": "agents/project/corrections/2026-06-10-offline-eval-2026-06-09-task-ar-217-1-goldset-metadata-completion.md",
+      "trace_id": "",
+      "recommendation": "track correction proposal through owner approval before applying definitions",
+      "approval_required": true
+    },
+    {
+      "kind": "correction_proposal",
+      "severity": "watch",
+      "route": "TASK-AR-207",
+      "source_report": "reviews/CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final.json",
+      "evidence_id": "agents/project/corrections/2026-06-10-live-reviewer-gate-2026-06-09-task-ar-207-failure-sample-1-reviewer-footer-failure.md",
+      "trace_id": "",
+      "recommendation": "track correction proposal through owner approval before applying definitions",
+      "approval_required": true
+    }
+  ]
+}

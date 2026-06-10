@@ -158,12 +158,47 @@ def _write_public_source(root: Path):
     ) + "\n"
     _write(root / "scripts" / "owner_governance_gate.py", "raise SystemExit(0)\n")
     _write(root / "scripts" / "owner_doc_format_gate.py", "raise SystemExit(0)\n")
+    _write(root / "scripts" / "continuity_contract_gate.py", "raise SystemExit(0)\n")
+    _write(root / "scripts" / "response_contract_gate.py", "raise SystemExit(0)\n")
     _write(root / "scripts" / "state_machine_gate.py", "raise SystemExit(0)\n")
+    _write(root / "scripts" / "task_claim_dispatcher.py", "raise SystemExit(0)\n")
+    _write(
+        root / "scripts" / "stop_hook_owner_governance.py",
+        "import json\nprint(json.dumps({'decision':'approve','reason':'owner governance gate passed','systemMessage':'findings=0'}))\n",
+    )
+    _write(
+        root / "scripts" / "stop_hook_owner_governance.cmd",
+        "@echo off\npython \"%~dp0stop_hook_owner_governance.py\"\n",
+    )
     _write(root / "src" / "agent_runtime" / "__init__.py", "")
     _write(root / "src" / "agent_runtime" / "templates" / "project" / "scripts" / "agent_worker.py", "")
     _write(root / "src" / "agent_runtime" / "templates" / "project" / ".codex" / "hooks.json", "{}\n")
+    _write(
+        root / "src" / "agent_runtime" / "templates" / "project" / "agents" / "project" / "NEXT-SESSION-POINTER.yml",
+        "schema: agent-runtime-next-session-pointer/v1\nupdated_at: 2026-01-01T00:00:00+09:00\ncurrent_state: {}\nactive_work: {}\nresume: {}\nroles: {}\npointers: {}\nrules: {}\nverification: {}\n",
+    )
     _write(root / "src" / "agent_runtime" / "templates" / "project" / "agents" / "project" / "STATE-MACHINES.yml", state_machines)
     _write(root / "src" / "agent_runtime" / "templates" / "project" / "schemas" / "state-machines.schema.json", '{"type":"object"}\n')
+    _write(
+        root / "src" / "agent_runtime" / "templates" / "project" / "scripts" / "task_claim_dispatcher.py",
+        "raise SystemExit(0)\n",
+    )
+    _write(
+        root / "src" / "agent_runtime" / "templates" / "project" / "scripts" / "response_contract_gate.py",
+        "raise SystemExit(0)\n",
+    )
+    _write(
+        root / "src" / "agent_runtime" / "templates" / "project" / "scripts" / "continuity_contract_gate.py",
+        "raise SystemExit(0)\n",
+    )
+    _write(
+        root / "src" / "agent_runtime" / "templates" / "project" / "scripts" / "stop_hook_owner_governance.py",
+        "import json\nprint(json.dumps({'decision':'approve','reason':'owner governance gate passed','systemMessage':'findings=0'}))\n",
+    )
+    _write(
+        root / "src" / "agent_runtime" / "templates" / "project" / "scripts" / "stop_hook_owner_governance.cmd",
+        "@echo off\npython \"%~dp0stop_hook_owner_governance.py\"\n",
+    )
     _write(root / ".gitignore", "/templates/\n")
 
 
@@ -838,7 +873,7 @@ def test_release_preflight_aggregates_public_and_host_readiness(tmp_path):
     assert checks["host-upstream-match"].status == "ok"
     assert checks["sanitize"].status == "ok"
     assert checks["publish-check"].status == "ok"
-    assert checks["publish-bundle"].detail == "files=17"
+    assert checks["publish-bundle"].detail == "files=28"
     assert checks["local-tag-smoke-plan"].status == "ok"
     assert checks["github-publish-plan"].status == "ok"
     assert checks["host-update-plan"].status == "ok"

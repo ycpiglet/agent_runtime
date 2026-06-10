@@ -22,3 +22,23 @@
 ## Decision
 
 - 로그는 완료 즉시 `TASK-AR-216`과 `TASK-AR-217`에 링크하고, 다음 세션 `Handoff Checklist`의 상단 항목으로 반영한다.
+
+## Completion Evidence Bundle (2026-06-10)
+
+- `release-preflight` baseline:
+  - `TASK-AR-225` clean bundle result: `publish-bundle --source . --dest .tmp/release-bundle-verify-20260609-223217 --check` → `findings=0` (referenced in `reviews/REVIEW-2026-06-09-agent-runtime-task-ar-223-217-closeout-rehearsal-log.md`).
+- 오프라인 90% 게이트:
+  - `reviews/OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion.json` → `status=pass`, `project-overlay-routing-gold=1.0`, `gov-metadata-gold=1.0`.
+- 라이브 reviewer footer:
+  - `reviews/LIVE-REVIEWER-GATE-2026-06-09-task-ar-206.json` → `status=pass`, `score=1.0`, footer 필드 존재(`source_tier`, `confidence`, `risk`, `ambiguity`, `freshness_sla`).
+- correction 수집:
+  - `reviews/CORRECTION-COLLECTOR-2026-06-09-task-ar-207.json` → `status=pass`, `written=2`, 제안 파일 경로:
+    - `agents/project/corrections/2026-06-09-offline-eval-2026-06-09-task-ar-217-1-goldset-metadata-completion.md`
+    - `agents/project/corrections/2026-06-09-live-reviewer-gate-2026-06-09-task-ar-207-failure-sample-1-reviewer-footer-failure.md`
+- A2A trace:
+  - `reviews/A2A-TRACE-GATE-2026-06-09-task-ar-208.json` → `status=pass`, `events=4`, `chains=1`, chain=`request -> review -> decision -> correction`.
+
+## Decision
+
+- Rehearsal evidence is complete at the baseline pass level and ready for TASK-AR-210 release-state translation as a closed `TASK-AR-217` lane bundle.
+- Pending release blockers for `TASK-AR-210` are no longer artifact-lane specific; they are now bound to remaining migration/overlay/governance routes (`hold_for_data` or `hold_for_overlay`) in `TASK-AR-210`.

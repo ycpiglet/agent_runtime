@@ -6,6 +6,7 @@ priority: P0
 difficulty: M
 est_hours: 10
 est_tokens: 2200
+task_set_id: TASKSET-AR-RELEASE-STEWARD
 tags:
   - release-gate
   - versioning
@@ -28,6 +29,8 @@ audit_log:
   - reviews/CALL-2026-06-10-agent-runtime-task-ar-221-cycle-sync-call.md
   - reviews/MEETING-2026-06-10-agent-runtime-task-ar-221-cycle-sync.md
   - agents/lead_engineer/tasks/TASK-AR-219.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-216-already-complete-claim-release.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-216-duplicate-claim-release.md
 ---
 
 ## 목표
@@ -88,3 +91,17 @@ audit_log:
 - Result: `findings=0`.
 - Evidence: `reviews/REVIEW-2026-06-09-agent-runtime-v018-local-smoke-plan-readiness.md`.
 - Boundary: `--apply` is not executed until owner approval or explicit release execution instruction.
+
+## Already-Complete Claim Release (2026-06-10)
+
+- Release Steward dispatcher claim: `CLAIM-20260610-225257-task-ar-216-993e`.
+- Claim-release artifact: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-216-already-complete-claim-release.md`.
+- Task state was already `completed`; no implementation work was needed.
+- Claim released without release-state mutation, version bump, tag, remote publish, or provider-live evidence claim.
+
+## Duplicate Claim Release (2026-06-10)
+
+- Duplicate dispatcher claim: `CLAIM-20260610-225929-task-ar-216-de2d`.
+- Root cause fixed in `scripts/taskset_dispatcher.py`: completed/done tasks are skipped and fully completed task sets now fail with `task set has no open tasks`.
+- Regression proof: `pytest tests/test_taskset_dispatcher.py -q` -> `6 passed`.
+- Duplicate claim released without reopening `TASK-AR-216`.

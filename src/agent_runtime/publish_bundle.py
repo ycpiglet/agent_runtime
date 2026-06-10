@@ -24,8 +24,13 @@ INCLUDE_FILES = (
     "schemas/state-machines.schema.json",
     "scripts/owner_governance_gate.py",
     "scripts/owner_doc_format_gate.py",
+    "scripts/continuity_contract_gate.py",
     "scripts/parallel_worktree_gate.py",
+    "scripts/response_contract_gate.py",
     "scripts/state_machine_gate.py",
+    "scripts/stop_hook_owner_governance.cmd",
+    "scripts/stop_hook_owner_governance.py",
+    "scripts/task_claim_dispatcher.py",
     "scripts/warning_summary_strict_ref_policy.py",
 )
 

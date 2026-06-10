@@ -33,9 +33,15 @@ REQUIRED_ACTIVE_FIELDS = (
     "claim_id",
     "task_id",
     "agent_role",
+    "team_id",
     "agent_instance_id",
+    "display_name",
     "callsite_id",
+    "pane_id",
     "status",
+    "phase",
+    "progress_pct",
+    "status_text",
     "worktree_path",
     "branch",
     "claimed_at",
@@ -63,6 +69,10 @@ class ClaimRecord:
     @property
     def task_id(self) -> str:
         return str(self.payload.get("task_id", "")).strip()
+
+    @property
+    def task_set_id(self) -> str:
+        return str(self.payload.get("task_set_id", "")).strip()
 
     @property
     def agent_role(self) -> str:
@@ -125,6 +135,10 @@ def _resolved_worktree(root: Path, value: str) -> Path:
         return path.absolute()
 
 
+def _has_git_worktree_marker(path: Path) -> bool:
+    return path.is_dir() and (path / ".git").exists()
+
+
 def _is_orchestrator_claim(record: ClaimRecord) -> bool:
     if record.agent_role in ORCHESTRATOR_ROLES:
         return True
@@ -156,19 +170,34 @@ def _validate_claims(root: Path, records: Iterable[ClaimRecord]) -> list[str]:
         if record.branch in {"main", "master"} and not _is_orchestrator_claim(record):
             findings.append(f"{rel}: task-claim:main-branch-worker: worker claims must use a task branch")
 
+        if str(record.payload.get("phase", "")).strip() != "claim-created" and not record.task_set_id:
+            findings.append(f"{rel}: task-claim:missing-task-set-id: active task-set work claims must include task_set_id")
+
         if record.worktree_path:
             worktree = _resolved_worktree(root, record.worktree_path)
             if worktree == resolved_root and not _is_orchestrator_claim(record):
                 findings.append(
                     f"{rel}: task-claim:main-checkout-worker: worker claims must use a task-specific git worktree"
                 )
+            elif not _is_orchestrator_claim(record):
+                if not worktree.exists():
+                    findings.append(
+                        f"{rel}: task-claim:worktree-path-missing: active worker claim points to a missing worktree"
+                    )
+                elif not _has_git_worktree_marker(worktree):
+                    findings.append(
+                        f"{rel}: task-claim:worktree-not-git-worktree: active worker claim must point to a git worktree"
+                    )
 
     by_task: dict[str, list[ClaimRecord]] = {}
+    by_task_set: dict[str, list[ClaimRecord]] = {}
     by_instance: dict[tuple[str, str], list[ClaimRecord]] = {}
     by_worktree: dict[str, list[ClaimRecord]] = {}
     for record in active:
         if record.task_id:
             by_task.setdefault(record.task_id, []).append(record)
+        if record.task_set_id:
+            by_task_set.setdefault(record.task_set_id, []).append(record)
         if record.agent_role and record.agent_instance_id:
             by_instance.setdefault((record.agent_role, record.agent_instance_id), []).append(record)
         if record.worktree_path:
@@ -180,6 +209,20 @@ def _validate_claims(root: Path, records: Iterable[ClaimRecord]) -> list[str]:
             continue
         paths = ", ".join(_rel(root, record.path) for record in task_records)
         findings.append(f"{paths}: task-claim:duplicate-active-task:{task_id}: one task can have one active claim")
+
+    for task_set_id, task_set_records in sorted(by_task_set.items()):
+        if len(task_set_records) <= 1:
+            continue
+        allow_parallel = any(
+            str(record.payload.get("allow_parallel_task_set", "")).strip().lower() == "true"
+            for record in task_set_records
+        )
+        if allow_parallel:
+            continue
+        paths = ", ".join(_rel(root, record.path) for record in task_set_records)
+        findings.append(
+            f"{paths}: task-claim:duplicate-active-task-set:{task_set_id}: one task set can have one active claim"
+        )
 
     for (role, instance_id), instance_records in sorted(by_instance.items()):
         task_ids = {record.task_id for record in instance_records if record.task_id}

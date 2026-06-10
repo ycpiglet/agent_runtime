@@ -1,0 +1,96 @@
+schema: agent-runtime-next-session-pointer/v1
+updated_at: YYYY-MM-DDTHH:MM:SS+09:00
+updated_by: role-or-agent-id
+current_state:
+  signal: watch
+  score: 50
+  summary: >
+    Replace this with the compact current live work state. A returning agent
+    should be able to resume the project like reconnecting to an online game.
+active_work:
+  contract: >
+    This is not only a next-session note. It is the live work pointer for active
+    agents, teams, and panes. Keep task, status, phase, progress, worktree,
+    branch, claim, handoff, step index, step total, status text, and last
+    heartbeat visible while work is happening.
+  current_agents:
+    - display_name: lead_engineer@design-01
+      agent_role: lead-engineer
+      team_id: agent-runtime-core
+      pane_id: terminal:wt-task-id:tab-01
+      task_id: TASK-NNN
+      status: claimed
+      phase: claim-created
+      progress_pct: 0
+      step_index: 1
+      step_total: 6
+      status_text: Claim created
+      worktree_path: .worktrees/TASK-NNN
+      branch: codex/task-nnn-work-01
+      claim_path: agents/runtime/task_claims/CLAIM-example.json
+      handoff_path: agents/runtime/task_claims/CLAIM-example.handoff.md
+      last_heartbeat: YYYY-MM-DDTHH:MM:SS+09:00
+  current_teams:
+    - team_id: agent-runtime-core
+      status: watch
+      phase: planning
+      progress_pct: 0
+      step_index: 1
+      step_total: 6
+      status_text: Planning active task-set work
+      active_task: TASK-NNN
+      task_set_id: TASKSET-AR-EXAMPLE
+      pane_ids:
+        - terminal:wt-task-id:tab-01
+  canonical_live_sources:
+    - agents/runtime/task_claims/*.json
+    - agents/runtime/events/*.jsonl
+    - agents/project/NEXT-SESSION-POINTER.yml
+    - agents/lead_engineer/STATUS.md
+resume:
+  first_read:
+    - agents/project/NEXT-SESSION-POINTER.yml
+    - README.md
+    - AGENTS.md
+    - CLAUDE.md
+    - agents/lead_engineer/STATUS.md
+    - agents/lead_engineer/tasks/BACKLOG.md
+  active_task: TASK-NNN
+  next_actions:
+    - State the next concrete command or document to inspect.
+roles:
+  accountable: Lead Engineer
+  reviewers:
+    - QA
+    - Independent Auditor
+    - Doc Steward
+pointers:
+  status: agents/lead_engineer/STATUS.md
+  backlog: agents/lead_engineer/tasks/BACKLOG.md
+  task_index: agents/lead_engineer/tasks/INDEX.md
+  compound: agents/lead_engineer/compound_log.md
+rules:
+  live_work_continuity: >
+    Update this pointer and task claim records while work is happening, not only
+    at final handoff. It must answer who is working, from which team/pane, on
+    which task, in which phase, with what progress, in which worktree, and what
+    should happen next.
+  repeated_request_api: >
+    If the Owner repeats a request or criticism twice, convert it into a
+    function, API, script, hook, gate, or explicit task proposal instead of
+    leaving it as prose.
+  compound_capture: >
+    Repeated mistakes or criticisms must produce a Compound entry and an
+    executable prevention step when feasible.
+  measured_improvement: >
+    Use Evaluate -> Propose -> Verify -> Merge. Keep one variable per verified
+    change, preserve golden set failures and edge cases, and reserve final
+    criteria and merge decisions for Owner.
+verification:
+  required:
+    - python scripts/continuity_contract_gate.py --check
+    - python scripts/owner_governance_gate.py
+    - python scripts/check_agent_docs.py
+  last_known:
+    signal: watch
+    detail: Replace with latest verification result.

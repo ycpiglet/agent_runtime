@@ -1,0 +1,51 @@
+planning_loop:
+  default_mode: B
+  kill_switch_env: AGENT_RUNTIME_RSI_DISABLE
+  max_proposals_per_scan: 20
+  max_scan_frequency_minutes: 30
+  max_nested_planning_depth: 1
+  weak_evidence_confidence_below: 0.55
+  duplicate_policy: same_dedupe_key_and_same_evidence_hash
+  contradiction_policy: block_until_review
+  budget:
+    max_scan_seconds: 30
+    max_files_per_family: 200
+    max_trace_records: 500
+    max_draft_tasks_per_scan: 10
+  allowed_triggers:
+    - manual
+    - hook
+    - schedule
+    - ui
+    - task-complete
+    - cycle-complete
+  proposal_only_triggers:
+    - hook
+    - schedule
+    - ui
+  owner_approval_required:
+    - release_version_bump
+    - tag
+    - push
+    - external_publication
+    - pull_request
+    - dependency_install
+    - secret_or_prod_data
+    - destructive_change
+    - owner_only_decision
+    - gate_weakening
+  c_mode:
+    default_enabled: false
+    required_passing_b_cycles: 3
+    allowed_actions:
+      - generated_view_refresh
+      - stale_link_repair
+      - proposal_dedupe
+      - watch_only_reminder
+      - low_risk_plan_hygiene
+    demotion_triggers:
+      - owner_rejection
+      - guardrail_failure
+      - failed_verification
+      - proposal_churn_increase
+      - high_risk_proposal_seen

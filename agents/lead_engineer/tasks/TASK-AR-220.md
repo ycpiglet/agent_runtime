@@ -16,13 +16,15 @@ audit_log:
   - reviews/MEETING-2026-06-14-agent-runtime-task-ar-222-migration-closeout-sync.md
   - reviews/CALL-2026-06-14-agent-runtime-task-ar-222-sync-call.md
   - reviews/SEMINAR-2026-06-14-agent-runtime-task-ar-222-closeout-sync.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-223-source-output-coverage.md
 id: TASK-AR-220
-status: in_progress
+status: completed
 owner: lead-engineer
 priority: P0
 difficulty: M
 est_hours: 12
 est_tokens: 2200
+task_set_id: TASKSET-AR-MIGRATION-PARITY
 started_at: 2026-06-10T09:15:00+09:00
 tags:
   - migration-audit
@@ -103,3 +105,10 @@ created: 2026-06-09
 - Updated `agents/project/MIGRATION-COMPAT-MAP.yml` for `scripts-source-only`, `scripts-runtime-extra`, and `hooks-wrapper` with release-blocking metadata.
 - Result: migration source-only boundary is closed for the v0.1.8 baseline; source-only capabilities remain tracked as optional/plugin/overlay/follow-up work.
 - Verification: `publish-bundle --source . --dest .tmp/release-bundle-verify-20260609-migration-closure --check` returned `findings=0`.
+
+## TASK-AR-223 Coverage Input (2026-06-10)
+
+- Coverage entry point: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-223-source-output-coverage.md`.
+- `TASK-AR-223` consumes this task as the migration provenance closure source for local `v0.1.8` evidence.
+- Local release implication: migration/source-only evidence no longer forces `hold_for_data` when paired with `TASK-AR-204` co-location closure and `TASK-AR-210` release evidence.
+- Boundary: optional/plugin/overlay follow-up work remains tracked outside this local release evidence closeout.

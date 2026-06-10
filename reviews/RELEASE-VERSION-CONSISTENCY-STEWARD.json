@@ -1,0 +1,14 @@
+{
+  "findings": [],
+  "mutation_boundary": "no version bump, tag, push, publish, or release execution",
+  "package": "0.1.8",
+  "release_versions": [],
+  "route": "proposal_doc_reconciliation",
+  "status": "watch",
+  "warnings": [
+    {
+      "category": "release-state-missing",
+      "route": "proposal_doc_reconciliation"
+    }
+  ]
+}

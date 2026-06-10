@@ -1,10 +1,12 @@
+---
 id: TASK-AR-218
-status: in_progress
+status: completed
 owner: lead-engineer
 priority: P0
 difficulty: M
 est_hours: 12
 est_tokens: 2400
+task_set_id: TASKSET-AR-MIGRATION-PARITY
 tags:
   - migration-hardening
   - release-gate
@@ -30,6 +32,7 @@ audit_log:
   - reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-218-overlay-hardening-seminar.md
   - reviews/CALL-2026-06-09-agent-runtime-task-ar-218-handoff-call.md
   - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-218-migration-hardening-log.md
+---
 
 ## 목표
 

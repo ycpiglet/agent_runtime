@@ -35,6 +35,7 @@ http://127.0.0.1:8765/
 | `/api/state` | aggregate runtime state |
 | `/api/tasks` | task resource |
 | `/api/agents` | agent resource |
+| `/api/task-sets` | active task-set progress resource |
 | `/api/messages` | message resource |
 | `/api/events` | event resource |
 | `/api/goals` | goal resource |
@@ -53,7 +54,7 @@ http://127.0.0.1:8765/
 |---|---|
 | Dashboard | total tasks, active tasks, blocked tasks, warnings/gaps |
 | Backlog | read-only Kanban columns: Backlog, Ready, In Progress, Review, Blocked, Done |
-| Agents | runtime session cards and empty state |
+| Agents | runtime session cards, active task-set progress cards, phase, step counter, rough percent, status text, and empty state |
 | Messages | inbox/archive message list and empty state |
 | Events | runtime JSONL timeline, empty state, and type/agent/task/goal/search filters |
 | Evidence | recent errors, evidence links, and replay records |

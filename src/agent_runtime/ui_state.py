@@ -12,9 +12,12 @@ RESOURCE_NAMES = (
     "state",
     "tasks",
     "agents",
+    "task_sets",
+    "collaboration",
     "messages",
     "events",
     "goals",
+    "task_claims",
     "sources",
     "errors",
     "evidence",
@@ -22,12 +25,15 @@ RESOURCE_NAMES = (
     "graph",
     "state_machines",
     "roadmap",
+    "planning",
     "commands",
 )
 
 TASKS_GLOB = "agents/lead_engineer/tasks/TASK-*.md"
 SESSION_GLOB = "agents/runtime/sessions/*.json"
+TASK_CLAIM_GLOB = "agents/runtime/task_claims/*.json"
 EVENT_GLOB = "agents/runtime/events/*.jsonl"
+PANE_EVENT_GLOB = "agents/runtime/pane_events/*.jsonl"
 MESSAGE_GLOBS = (
     ("messages_inbox", "agents/messages/inbox/*.md"),
     ("messages_archive", "agents/messages/archive/*.md"),
@@ -345,6 +351,92 @@ def load_events(root: Path, now: str, warnings: list[dict[str, str]]) -> list[di
     return events
 
 
+def load_pane_events(root: Path, now: str, warnings: list[dict[str, str]]) -> list[dict[str, Any]]:
+    events: list[dict[str, Any]] = []
+    for path in sorted(root.glob(PANE_EVENT_GLOB)):
+        rel_path = _rel(root, path)
+        try:
+            lines = path.read_text(encoding="utf-8").splitlines()
+        except OSError as exc:
+            warnings.append(_warning("pane-event-read-error", rel_path, str(exc)))
+            continue
+        for line_number, line in enumerate(lines, start=1):
+            if not line.strip():
+                continue
+            try:
+                payload = json.loads(line)
+            except json.JSONDecodeError as exc:
+                warnings.append(_warning("pane-event-jsonl-parse-error", f"{rel_path}:{line_number}", str(exc)))
+                continue
+            if not isinstance(payload, dict):
+                warnings.append(_warning("pane-event-jsonl-invalid-record", f"{rel_path}:{line_number}", "record is not an object"))
+                continue
+            record = dict(payload)
+            record.update(
+                {
+                    "id": f"{rel_path}:{line_number}",
+                    "type": payload.get("event"),
+                    "actor": payload.get("actor"),
+                    "created_at": payload.get("ts"),
+                    "source_path": rel_path,
+                    "source_kind": "pane_event_jsonl",
+                    "source": _source_metadata(root, path, "pane_event_jsonl", now),
+                    "last_updated": _mtime_iso(path),
+                    "freshness": "present",
+                }
+            )
+            events.append(record)
+    return events
+
+
+def build_collaboration(pane_events: list[dict[str, Any]]) -> dict[str, Any]:
+    task_sets: dict[str, dict[str, Any]] = {}
+    active_claims: dict[str, str] = {}
+    ssot_write_attempts = 0
+    for event in pane_events:
+        task_set_id = str(event.get("task_set_id") or "").strip() or "unassigned"
+        group = task_sets.setdefault(
+            task_set_id,
+            {
+                "task_set_id": task_set_id,
+                "event_count": 0,
+                "active_claim_ids": set(),
+                "last_event": None,
+                "last_ts": None,
+            },
+        )
+        group["event_count"] += 1
+        group["last_event"] = event.get("event")
+        group["last_ts"] = event.get("ts")
+        claim_id = str(event.get("claim_id") or "").strip()
+        if claim_id:
+            if event.get("event") == "claim_released":
+                active_claims.pop(claim_id, None)
+            else:
+                active_claims[claim_id] = task_set_id
+        if event.get("event") == "ssot_write_attempted":
+            ssot_write_attempts += 1
+    for claim_id, task_set_id in active_claims.items():
+        task_sets.setdefault(
+            task_set_id,
+            {"task_set_id": task_set_id, "event_count": 0, "active_claim_ids": set(), "last_event": None, "last_ts": None},
+        )["active_claim_ids"].add(claim_id)
+    rows: list[dict[str, Any]] = []
+    for task_set_id in sorted(task_sets):
+        row = dict(task_sets[task_set_id])
+        row["active_claim_ids"] = sorted(row["active_claim_ids"])
+        rows.append(row)
+    return {
+        "summary": {
+            "event_count": len(pane_events),
+            "task_set_count": len(rows),
+            "ssot_write_attempts": ssot_write_attempts,
+        },
+        "task_sets": rows,
+        "events": pane_events[-200:],
+    }
+
+
 def _filter_text(value: Any) -> str:
     if value is None:
         return ""
@@ -647,8 +739,87 @@ def load_roadmap(root: Path, now: str) -> dict[str, Any]:
     }
 
 
-def load_agents(root: Path, now: str, events: list[dict[str, Any]], warnings: list[dict[str, str]]) -> list[dict[str, Any]]:
+def _is_active_task_claim(status: str) -> bool:
+    return status in {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
+
+
+def load_task_claims(root: Path, now: str, warnings: list[dict[str, str]]) -> list[dict[str, Any]]:
+    claims: list[dict[str, Any]] = []
+    for path in sorted(root.glob(TASK_CLAIM_GLOB)):
+        rel_path = _rel(root, path)
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            warnings.append(_warning("task-claim-json-parse-error", rel_path, str(exc)))
+            continue
+        except OSError as exc:
+            warnings.append(_warning("task-claim-read-error", rel_path, str(exc)))
+            continue
+        if not isinstance(payload, dict):
+            warnings.append(_warning("task-claim-invalid-record", rel_path, "task claim payload is not an object"))
+            continue
+        record = dict(payload)
+        record.update(
+            {
+                "id": payload.get("claim_id") or path.stem,
+                "source_path": rel_path,
+                "source_kind": "task_claim_json",
+                "source": _source_metadata(root, path, "task_claim_json", now),
+                "last_updated": _mtime_iso(path),
+                "freshness": "present",
+            }
+        )
+        claims.append(record)
+    return claims
+
+
+def load_agents(
+    root: Path,
+    now: str,
+    events: list[dict[str, Any]],
+    warnings: list[dict[str, str]],
+    task_claims: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
     agents: list[dict[str, Any]] = []
+    for claim in task_claims or []:
+        status = str(claim.get("status") or "")
+        if not _is_active_task_claim(status):
+            continue
+        agents.append(
+            {
+                "id": claim.get("agent_instance_id") or claim.get("claim_id"),
+                "role": claim.get("agent_role"),
+                "team_id": claim.get("team_id"),
+                "status": status,
+                "phase": claim.get("phase"),
+                "progress_pct": claim.get("progress_pct"),
+                "current_task_id": claim.get("task_id"),
+                "provider": claim.get("provider"),
+                "model": claim.get("model"),
+                "display_name": claim.get("display_name") or claim.get("agent_instance_id") or claim.get("agent_role"),
+                "mode": claim.get("mode"),
+                "tags": claim.get("tags") if isinstance(claim.get("tags"), list) else [],
+                "online": status in {"claimed", "in_progress", "review", "waiting_review", "working"},
+                "last_heartbeat": claim.get("last_heartbeat"),
+                "last_message": None,
+                "error_state": None,
+                "worktree_path": claim.get("worktree_path"),
+                "branch": claim.get("branch"),
+                "pane_id": claim.get("pane_id"),
+                "task_set_id": claim.get("task_set_id"),
+                "step_index": claim.get("step_index"),
+                "step_total": claim.get("step_total"),
+                "status_text": claim.get("status_text"),
+                "callsite_id": claim.get("callsite_id"),
+                "claim_id": claim.get("claim_id"),
+                "source_path": claim.get("source_path"),
+                "source_kind": "task_claim_json",
+                "source": claim.get("source"),
+                "last_updated": claim.get("last_updated"),
+                "freshness": claim.get("freshness", "present"),
+            }
+        )
+
     latest_event_by_role: dict[str, dict[str, Any]] = {}
     latest_error_by_role: dict[str, dict[str, Any]] = {}
     for event in events:
@@ -699,6 +870,65 @@ def load_agents(root: Path, now: str, events: list[dict[str, Any]], warnings: li
     return agents
 
 
+def _progress_pct(value: Any) -> int | None:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    if number < 0 or number > 100:
+        return None
+    return int(round(number))
+
+
+def build_task_sets(agents: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    groups: dict[str, dict[str, Any]] = {}
+    for agent in agents:
+        task_set_id = str(agent.get("task_set_id") or "").strip()
+        if not task_set_id:
+            continue
+        group = groups.setdefault(
+            task_set_id,
+            {
+                "id": task_set_id,
+                "agents": 0,
+                "active": 0,
+                "blocked": 0,
+                "done": 0,
+                "current_task_ids": set(),
+                "status_text": None,
+                "_progress_values": [],
+            },
+        )
+        group["agents"] += 1
+        status = str(agent.get("status") or "").strip().lower()
+        if status in {"blocked", "hold"}:
+            group["blocked"] += 1
+        elif status in {"completed", "done", "released"}:
+            group["done"] += 1
+        elif _is_active_task_claim(status) or agent.get("online"):
+            group["active"] += 1
+
+        task_id = str(agent.get("current_task_id") or "").strip()
+        if task_id:
+            group["current_task_ids"].add(task_id)
+        progress = _progress_pct(agent.get("progress_pct"))
+        if progress is not None:
+            group["_progress_values"].append(progress)
+        status_text = str(agent.get("status_text") or agent.get("phase") or "").strip()
+        if status_text and not group["status_text"]:
+            group["status_text"] = status_text
+
+    task_sets: list[dict[str, Any]] = []
+    for task_set_id in sorted(groups):
+        group = groups[task_set_id]
+        progress_values = group.pop("_progress_values")
+        current_task_ids = sorted(group.pop("current_task_ids"))
+        group["current_task_ids"] = current_task_ids
+        group["progress_pct"] = int(round(sum(progress_values) / len(progress_values))) if progress_values else None
+        task_sets.append(group)
+    return task_sets
+
+
 def load_goals(root: Path, now: str) -> list[dict[str, Any]]:
     status_path = root / "STATUS.md"
     if not status_path.exists():
@@ -734,20 +964,93 @@ def _collect_sources_and_gaps(root: Path, now: str) -> tuple[list[dict[str, Any]
         ("messages_inbox", root / "agents" / "messages" / "inbox", "message_directory", "api_or_outbox"),
         ("messages_archive", root / "agents" / "messages" / "archive", "message_directory", "read_only"),
         ("sessions", root / "agents" / "runtime" / "sessions", "session_directory", "runtime_api"),
+        ("task_claims", root / "agents" / "runtime" / "task_claims", "task_claim_directory", "runtime_api"),
         ("events", root / "agents" / "runtime" / "events", "event_directory", "append_only_runtime"),
+        ("pane_events", root / "agents" / "runtime" / "pane_events", "pane_event_directory", "append_only_collaboration"),
         ("status", root / "STATUS.md", "status_markdown", "agent_doc_workflow"),
         ("state_machines", root / "agents" / "project" / "STATE-MACHINES.yml", "state_machine_yaml", "schema_first_task"),
         ("roadmap", root / "agents" / "project" / "ROADMAP.md", "roadmap_markdown", "agent_doc_workflow"),
+        ("planning", root / "agents" / "planning", "planning_outbox", "proposal_only"),
         ("ui_outbox", root / ".ui_outbox", "ui_command_outbox", "api_only"),
     )
     sources = [_source_entry(root, source_id, path, kind, now, boundary) for source_id, path, kind, boundary in source_specs]
-    optional = {"messages_inbox", "messages_archive", "sessions", "events", "status", "state_machines", "roadmap"}
+    optional = {
+        "messages_inbox",
+        "messages_archive",
+        "sessions",
+        "task_claims",
+        "events",
+        "pane_events",
+        "status",
+        "state_machines",
+        "roadmap",
+        "planning",
+    }
     gaps = [
         _gap(source["id"], source["path"], "optional runtime source is not present")
         for source in sources
         if source["id"] in optional and not source["fresh"]
     ]
     return sources, gaps
+
+
+def _load_planning_json_records(root: Path, rel_dir: str) -> list[dict[str, Any]]:
+    directory = root / rel_dir
+    if not directory.is_dir():
+        return []
+    records: list[dict[str, Any]] = []
+    for path in sorted(directory.glob("*.json")):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            payload = {"id": path.stem, "status": "failed", "errors": ["planning record is malformed"]}
+        if isinstance(payload, dict):
+            payload.setdefault("id", path.stem)
+            payload["source_path"] = _rel(root, path)
+            payload["source_kind"] = "planning"
+            records.append(payload)
+    return records
+
+
+def _collect_planning(root: Path) -> dict[str, Any]:
+    scans = _load_planning_json_records(root, "agents/planning/scans")
+    proposals = _load_planning_json_records(root, "agents/planning/outbox")
+    requests = _load_planning_json_records(root, "agents/planning/requests")
+    applied = _load_planning_json_records(root, "agents/planning/applied")
+    drafts: list[dict[str, Any]] = []
+    draft_dir = root / "agents" / "planning" / "drafts"
+    if draft_dir.is_dir():
+        for path in sorted(draft_dir.glob("*.md")):
+            drafts.append(
+                {
+                    "id": path.stem,
+                    "source_path": _rel(root, path),
+                    "source_kind": "planning_draft",
+                    "status": "draft",
+                }
+            )
+    proposal_statuses: dict[str, int] = {}
+    risk_tiers: dict[str, int] = {}
+    for proposal in proposals:
+        status = str(proposal.get("status") or "unknown")
+        risk = str(proposal.get("risk_tier") or "unknown")
+        proposal_statuses[status] = proposal_statuses.get(status, 0) + 1
+        risk_tiers[risk] = risk_tiers.get(risk, 0) + 1
+    return {
+        "scan_reports": scans,
+        "proposals": proposals,
+        "requests": requests,
+        "draft_tasks": drafts,
+        "applied": applied,
+        "summary": {
+            "scan_count": len(scans),
+            "proposal_count": len(proposals),
+            "request_count": len(requests),
+            "draft_task_count": len(drafts),
+            "proposal_statuses": proposal_statuses,
+            "risk_tiers": risk_tiers,
+        },
+    }
 
 
 def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
@@ -757,7 +1060,10 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     sources, gaps = _collect_sources_and_gaps(root_path, generated_at)
     tasks = load_tasks(root_path, generated_at, warnings)
     events = load_events(root_path, generated_at, warnings)
-    agents = load_agents(root_path, generated_at, events, warnings)
+    pane_events = load_pane_events(root_path, generated_at, warnings)
+    task_claims = load_task_claims(root_path, generated_at, warnings)
+    agents = load_agents(root_path, generated_at, events, warnings, task_claims)
+    task_sets = build_task_sets(agents)
     messages = load_messages(root_path, generated_at, warnings)
     goals = load_goals(root_path, generated_at)
     commands = ui_commands.list_commands(root_path)
@@ -767,11 +1073,16 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     graph = build_graph(tasks, agents, messages, events)
     state_machines = load_state_machines(root_path, tasks, agents, generated_at)
     roadmap = load_roadmap(root_path, generated_at)
+    planning = _collect_planning(root_path)
+    collaboration = build_collaboration(pane_events)
     return {
         "generated_at": generated_at,
         "sources": sources,
         "tasks": tasks,
         "agents": agents,
+        "task_sets": task_sets,
+        "collaboration": collaboration,
+        "task_claims": task_claims,
         "messages": messages,
         "events": events,
         "goals": goals,
@@ -781,6 +1092,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "graph": graph,
         "state_machines": state_machines,
         "roadmap": roadmap,
+        "planning": planning,
         "commands": commands,
         "gaps": gaps,
         "warnings": warnings,
@@ -811,6 +1123,7 @@ def render_summary(state: dict[str, Any], resource: str) -> str:
             f"generated_at={state['generated_at']}",
             f"tasks={len(state['tasks'])}",
             f"agents={len(state['agents'])}",
+            f"task_sets={len(state['task_sets'])}",
             f"messages={len(state['messages'])}",
             f"events={len(state['events'])}",
             f"goals={len(state['goals'])}",

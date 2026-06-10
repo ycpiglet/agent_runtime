@@ -1,11 +1,12 @@
 ---
 id: TASK-AR-224
-status: in_progress
+status: completed
 owner: lead-engineer
 priority: P0
 difficulty: M
 est_hours: 8
 est_tokens: 1600
+task_set_id: TASKSET-AR-MIGRATION-PARITY
 tags:
   - official-guidance
   - migration-audit
@@ -28,6 +29,7 @@ audit_log:
   - reviews/MEETING-2026-06-09-agent-runtime-task-ar-224-overlay-gate-sync.md
   - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-224-executable-proof.md
 created: 2026-06-19
+---
 
 ## 목표
 

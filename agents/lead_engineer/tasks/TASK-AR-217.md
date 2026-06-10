@@ -1,11 +1,12 @@
 ---
 id: TASK-AR-217
-status: in_progress
+status: completed
 owner: lead-engineer
 priority: P0
 difficulty: L
 est_hours: 14
 est_tokens: 2800
+task_set_id: TASKSET-AR-QUALITY-LOOP
 tags:
   - release-rehearsal
   - release-gate
@@ -134,3 +135,15 @@ audit_log:
 - Covered events: `request -> review -> decision -> correction`.
 - Boundary: baseline trace reconstruction passes. Provider/network transport behavior remains separate if required.
 - Rehearsal status: release artifact, offline baseline scoring, live reviewer footer, correction collector, and A2A trace lanes now all have baseline evidence.
+
+## Rehearsal Bundle Closeout (2026-06-10)
+
+- Baseline 4-lane rehearsal evidence is now linked in
+  `reviews/REVIEW-2026-06-09-agent-runtime-task-ar-217-rehearsal-log.md`.
+- This closeout is routed to `TASK-AR-210` as release-state input:
+  - `release-preflight` and `.tmp/release-bundle` hygiene: clean (`findings=0`).
+  - Offline eval 90%: pass.
+  - Reviewer footer: pass.
+  - Correction collector: pass with owner-signoff-only proposals.
+  - A2A trace reconstruction: pass.
+- No TASK-AR-217-specific blocker is introduced by this lane; residual holds remain bound to migration/overlay/governance boundaries in the release-state process.

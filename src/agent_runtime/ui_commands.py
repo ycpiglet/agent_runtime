@@ -3,11 +3,30 @@ from __future__ import annotations
 import json
 import re
 import secrets
+import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-VALID_STATUSES = ("planned", "ready", "in_progress", "review", "blocked", "completed")
+VALID_STATUSES = (
+    "assigned",
+    "blocked",
+    "claimed",
+    "completed",
+    "defer",
+    "deferred",
+    "done",
+    "hold",
+    "in_progress",
+    "pending",
+    "planned",
+    "ready",
+    "ready_for_governance_review",
+    "review",
+    "waiting_review",
+    "working",
+)
 VALID_PRIORITIES = ("P0", "P1", "P2", "P3")
 TASK_COMMAND_TYPES = ("task.create", "task.update", "task.reorder", "task.comment", "task.archive")
 RUNTIME_MESSAGE_COMMAND_TYPES = (
@@ -23,7 +42,9 @@ RUNTIME_LIFECYCLE_COMMAND_TYPES = (
     "runtime.goal.stop",
 )
 RUNTIME_COMMAND_TYPES = RUNTIME_MESSAGE_COMMAND_TYPES + RUNTIME_LIFECYCLE_COMMAND_TYPES
-COMMAND_TYPES = TASK_COMMAND_TYPES + RUNTIME_COMMAND_TYPES
+PLANNING_COMMAND_TYPES = ("planning.scan",)
+TASK_BOARD_SYNC_COMMANDS = {"task.create", "task.update", "task.reorder", "task.archive"}
+COMMAND_TYPES = TASK_COMMAND_TYPES + RUNTIME_COMMAND_TYPES + PLANNING_COMMAND_TYPES
 UNSAFE_PAYLOAD_KEYS = {"path", "source_path", "direct_file_path", "file_path", "filesystem_path"}
 HIGH_RISK_TERMS = (
     ("delete", "deletion"),
@@ -76,6 +97,34 @@ def _mtime_iso(path: Path) -> str | None:
         return datetime.fromtimestamp(path.stat().st_mtime, timezone.utc).astimezone().isoformat(timespec="seconds")
     except OSError:
         return None
+
+
+def _sync_backlog_board(root: Path) -> bool:
+    script_path = root / "scripts" / "backlog_board.py"
+    if not script_path.exists():
+        print(f"backlog sync skipped: missing {script_path}", file=sys.stderr)
+        return False
+
+    result = subprocess.run(
+        [sys.executable, str(script_path), "--write"],
+        cwd=root,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if result.returncode != 0:
+        if result.stderr:
+            print(result.stderr, file=sys.stderr, end="")
+        if result.stdout:
+            print(result.stdout, file=sys.stderr, end="")
+        return False
+    return True
+
+
+def _requires_backlog_board_sync(command_type: str, payload: dict[str, Any]) -> bool:
+    return command_type in TASK_BOARD_SYNC_COMMANDS
 
 
 def _parse_scalar(value: str) -> Any:
@@ -494,6 +543,44 @@ def _runtime_command(root: Path, command_type: str, target: str | None, payload:
     return _queue_runtime_message(root, command_type, target, payload, now)
 
 
+def _planning_scan_command(root: Path, payload: dict[str, Any], now: str, command_id: str) -> dict[str, Any]:
+    errors = _payload_errors(payload)
+    trigger = str(payload.get("trigger") or "ui")
+    if trigger != "ui":
+        errors.append("UI planning scan requests must use trigger='ui'")
+    mode = str(payload.get("mode") or "B")
+    if mode != "B":
+        errors.append("UI planning scan requests are proposal-only B-mode")
+    if payload.get("apply") is True or payload.get("mutate") is True:
+        errors.append("UI planning scan requests cannot apply canonical mutations")
+    if errors:
+        return {"errors": errors}
+
+    request = {
+        "id": command_id.replace("COMMAND-", "PLANREQ-"),
+        "type": "planning.scan",
+        "trigger": "ui",
+        "mode": "B",
+        "status": "queued",
+        "created_at": now,
+        "requested_by": str(payload.get("actor") or "ui"),
+        "reason": str(payload.get("reason") or ""),
+        "gate": "scripts/planning_loop.py gate --trigger ui --action scan",
+        "canonical_mutation_allowed": False,
+    }
+    path = root / "agents" / "planning" / "requests" / f"{request['id']}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(request, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {
+        "status": "queued",
+        "result": {
+            "changed": [_rel(root, path)],
+            "planning_support": "proposal_only_scan_request",
+            "next": "runtime planner must run the planning gate before scan/proposal generation",
+        },
+    }
+
+
 def submit_command(
     root: Path | str,
     command: dict[str, Any],
@@ -526,11 +613,32 @@ def submit_command(
         outcome = _archive_task(root_path, target_str, payload)
     elif command_type == "task.comment":
         outcome = _comment_task(root_path, target_str, payload, created_at)
+    elif command_type == "planning.scan":
+        outcome = _planning_scan_command(root_path, payload, created_at, cid)
     else:
         outcome = _runtime_command(root_path, command_type, target_str, payload, created_at)
 
     if "errors" in outcome:
         return _fail(root_path, cid, command_type, target_str, payload, created_at, list(outcome["errors"]))
+
+    backlog_board_updated = False
+    if _requires_backlog_board_sync(command_type, payload):
+        backlog_board_updated = _sync_backlog_board(root_path)
+        if not backlog_board_updated:
+            return _fail(
+                root_path,
+                cid,
+                command_type,
+                target_str,
+                payload,
+                created_at,
+                ["BACKLOG-BOARD.md sync failed after task mutation; run python scripts/backlog_board.py --write"],
+            )
+
+    if command_type in TASK_BOARD_SYNC_COMMANDS and "result" not in outcome:
+        outcome = dict(outcome)
+        outcome["backlog_board_updated"] = backlog_board_updated
+
     record = _record(
         command_id=cid,
         command_type=command_type,

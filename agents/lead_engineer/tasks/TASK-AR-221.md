@@ -27,14 +27,23 @@ audit_log:
   - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-225-source-publication-hygiene-log.md
   - reviews/RESEARCH-2026-06-09-agent-runtime-task-ar-223-217-rehearsal-integration-research.md
   - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-223-217-closeout-rehearsal-log.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-223-release-state-bridge.md
+  - reviews/OFFLINE-EVAL-2026-06-10-taskset-quality-loop-final.json
+  - reviews/OFFLINE-PREDICTION-SCORE-2026-06-10-taskset-quality-loop-final.json
+  - reviews/LIVE-REVIEWER-GATE-2026-06-10-taskset-quality-loop-final.json
+  - reviews/CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final.json
+  - reviews/A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final.json
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-221-quality-loop-closeout.md
 id: TASK-AR-221
-status: in_progress
+status: completed
+completed_at: 2026-06-10T23:22:00+09:00
 started_at: 2026-06-09T18:00:00+09:00
 owner: lead-engineer
 priority: P0
 difficulty: L
 est_hours: 16
 est_tokens: 3200
+task_set_id: TASKSET-AR-QUALITY-LOOP
 tags:
   - architecture
   - cross-project
@@ -168,3 +177,21 @@ created: 2026-06-09
 - `TASK-AR-210` translated `ready_for_governance_review` to `hold_for_data`.
 - Operating-chain implication: requirements 5-7 and 16 have baseline evidence, but requirements 4, 14, 15 and migration governance keep the release out of `ready`.
 - Next operating-chain focus: co-location enforcement, overlay simulation, and migration approval closure.
+
+## Release-State Bridge from TASK-AR-223 (2026-06-10)
+
+- Entry point: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-223-release-state-bridge.md`.
+- Operating-chain interpretation: the `TASK-AR-223` bundle remains the requirements 1-16 evidence tree, and later closure evidence from `TASK-AR-220`, `TASK-AR-215`, and `TASK-AR-204` removes the local `hold_for_data` / `hold_for_overlay` blockers.
+- Current local-evidence route: `release_evidence_ready` through `TASK-AR-210`.
+- Remote publication boundary: external GitHub publish remains `remote_publish_deferred_out_of_scope` and is not an operating-chain completion claim.
+- Next operating-chain focus: preserve the boundary in final handoff so local release evidence is not confused with PR/tag/CI publication.
+
+## Quality Loop Closeout (2026-06-10)
+
+- Closeout review: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-221-quality-loop-closeout.md`.
+- Offline eval gate: `reviews/OFFLINE-EVAL-2026-06-10-taskset-quality-loop-final.json`, `status=pass`, all datasets `score=1.0`.
+- Prediction score gate: `reviews/OFFLINE-PREDICTION-SCORE-2026-06-10-taskset-quality-loop-final.json`, `status=pass`, all datasets `score=1.0`.
+- Live reviewer gate: `reviews/LIVE-REVIEWER-GATE-2026-06-10-taskset-quality-loop-final.json`, `status=pass`, `score=1.0`.
+- Correction collector: `reviews/CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final.json`, `status=pass`, `written=2`.
+- A2A trace gate: `reviews/A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final.json`, `status=pass`, `events=4`, `chains=1`, `findings=0`.
+- Boundary: this closes the local Quality Loop operating-chain evidence; remote publication and provider-live behavior remain separate approval-backed evidence.

@@ -29,10 +29,17 @@ def _write_claim(root: Path, name: str, **overrides: object) -> Path:
         "schema": "agent-runtime-task-claim/v1",
         "claim_id": name,
         "task_id": "TASK-AR-246",
+        "task_set_id": "TASKSET-AR-PANE-PROGRESS",
         "agent_role": "lead-engineer",
+        "team_id": "agent-runtime-core",
         "agent_instance_id": "lead-engineer-A",
+        "display_name": "lead_engineer@design-01",
         "callsite_id": "terminal-1",
+        "pane_id": "terminal-1",
         "status": "working",
+        "phase": "implement",
+        "progress_pct": 10,
+        "status_text": "Implementing task claim support",
         "worktree_path": ".worktrees/TASK-AR-246",
         "branch": "codex/task-ar-246-parallel-runtime",
         "claimed_at": "2026-06-10T12:00:00+09:00",
@@ -41,6 +48,11 @@ def _write_claim(root: Path, name: str, **overrides: object) -> Path:
         "log_path": "reviews/REVIEW-2026-06-10-agent-runtime-parallel-session-protocol.md",
     }
     payload.update(overrides)
+    worktree_value = str(payload.get("worktree_path") or "")
+    if worktree_value and worktree_value != "." and not overrides.get("skip_worktree_marker"):
+        worktree = root / worktree_value
+        worktree.mkdir(parents=True, exist_ok=True)
+        (worktree / ".git").write_text("gitdir: ../../.git/worktrees/test\n", encoding="utf-8")
     path = claim_dir / f"{name}.json"
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return path
@@ -93,6 +105,7 @@ def test_gate_allows_same_role_with_distinct_instances_and_worktrees(tmp_path: P
         "CLAIM-2",
         claim_id="CLAIM-2",
         task_id="TASK-AR-247",
+        task_set_id="TASKSET-AR-QUALITY-LOOP",
         agent_instance_id="lead-engineer-B",
         callsite_id="terminal-2",
         worktree_path=".worktrees/TASK-AR-247",
@@ -115,6 +128,28 @@ def test_gate_blocks_worker_claim_in_main_checkout(tmp_path: Path):
     assert "task-claim:main-checkout-worker" in result.stdout
 
 
+def test_gate_blocks_missing_worktree_for_active_claim(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_claim(tmp_path, "CLAIM-1", skip_worktree_marker=True)
+
+    result = _run_gate(tmp_path)
+
+    assert result.returncode == 1
+    assert "task-claim:worktree-path-missing" in result.stdout
+
+
+def test_gate_blocks_non_git_worktree_for_active_claim(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    worktree = tmp_path / ".worktrees" / "TASK-AR-246"
+    worktree.mkdir(parents=True, exist_ok=True)
+    _write_claim(tmp_path, "CLAIM-1", skip_worktree_marker=True)
+
+    result = _run_gate(tmp_path)
+
+    assert result.returncode == 1
+    assert "task-claim:worktree-not-git-worktree" in result.stdout
+
+
 def test_gate_blocks_missing_handoff_pointer_for_active_claim(tmp_path: Path):
     (tmp_path / "STATUS.md").write_text("## Current State\n- active\n", encoding="utf-8")
     _write_claim(tmp_path, "CLAIM-1", handoff_path="")
@@ -124,3 +159,44 @@ def test_gate_blocks_missing_handoff_pointer_for_active_claim(tmp_path: Path):
     assert result.returncode == 1
     assert "task-claim:missing-handoff-path" in result.stdout
     assert "continuity:status-handoff-missing" in result.stdout
+
+
+def test_gate_blocks_missing_display_name_for_active_claim(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_claim(tmp_path, "CLAIM-1", display_name="")
+
+    result = _run_gate(tmp_path)
+
+    assert result.returncode == 1
+    assert "task-claim:missing-display-name" in result.stdout
+
+
+def test_gate_blocks_duplicate_active_claims_for_one_task_set(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_claim(tmp_path, "CLAIM-1", task_id="TASK-AR-205", worktree_path=".worktrees/TASK-AR-205")
+    _write_claim(
+        tmp_path,
+        "CLAIM-2",
+        claim_id="CLAIM-2",
+        task_id="TASK-AR-206",
+        agent_instance_id="qa-B",
+        callsite_id="terminal-2",
+        worktree_path=".worktrees/TASK-AR-206",
+        branch="codex/task-ar-206-quality-loop",
+    )
+
+    result = _run_gate(tmp_path)
+
+    assert result.returncode == 1
+    assert "task-claim:duplicate-active-task-set:TASKSET-AR-PANE-PROGRESS" in result.stdout
+
+
+def test_gate_blocks_missing_taskset_progress_fields_for_active_claim(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_claim(tmp_path, "CLAIM-1", task_set_id="", status_text="")
+
+    result = _run_gate(tmp_path)
+
+    assert result.returncode == 1
+    assert "task-claim:missing-task-set-id" in result.stdout
+    assert "task-claim:missing-status-text" in result.stdout

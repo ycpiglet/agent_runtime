@@ -1,0 +1,192 @@
+{
+  "status": "pass",
+  "checks": [
+    {
+      "command": [
+        "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+        "-m",
+        "py_compile",
+        "scripts/planning_loop.py",
+        "scripts/planning_trigger.py",
+        "scripts/release_version_consistency_steward.py",
+        "scripts/close_rsi_planning_taskset.py"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "status": "passed"
+    },
+    {
+      "command": [
+        "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_planning_loop.py",
+        "tests/test_release_version_consistency_steward.py",
+        "tests/test_planning_ui.py",
+        "-q"
+      ],
+      "returncode": 0,
+      "stdout": "..............                                                           [100%]\n14 passed in 2.37s\n",
+      "stderr": "",
+      "status": "passed"
+    },
+    {
+      "command": [
+        "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+        "scripts/planning_loop.py",
+        "gate",
+        "--trigger",
+        "manual",
+        "--action",
+        "scan",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "{\n  \"action\": \"scan\",\n  \"policy\": \"agents/project/PLANNING-GUARDRAILS.yml\",\n  \"proposal_count\": 0,\n  \"reasons\": [],\n  \"score\": 100,\n  \"status\": \"pass\",\n  \"trigger\": \"manual\",\n  \"warnings\": []\n}\n",
+      "stderr": "",
+      "json": {
+        "action": "scan",
+        "policy": "agents/project/PLANNING-GUARDRAILS.yml",
+        "proposal_count": 0,
+        "reasons": [],
+        "score": 100,
+        "status": "pass",
+        "trigger": "manual",
+        "warnings": []
+      },
+      "status": "passed"
+    },
+    {
+      "command": [
+        "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+        "scripts/planning_loop.py",
+        "gate",
+        "--trigger",
+        "ui",
+        "--action",
+        "scan",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "{\n  \"action\": \"scan\",\n  \"policy\": \"agents/project/PLANNING-GUARDRAILS.yml\",\n  \"proposal_count\": 0,\n  \"reasons\": [],\n  \"score\": 100,\n  \"status\": \"pass\",\n  \"trigger\": \"ui\",\n  \"warnings\": []\n}\n",
+      "stderr": "",
+      "json": {
+        "action": "scan",
+        "policy": "agents/project/PLANNING-GUARDRAILS.yml",
+        "proposal_count": 0,
+        "reasons": [],
+        "score": 100,
+        "status": "pass",
+        "trigger": "ui",
+        "warnings": []
+      },
+      "status": "passed"
+    },
+    {
+      "command": [
+        "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+        "scripts/planning_loop.py",
+        "dedupe-outbox",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "{\n  \"changed\": [],\n  \"dedupe_groups\": [],\n  \"mode\": \"dry_run\",\n  \"status\": \"pass\"\n}\n",
+      "stderr": "",
+      "json": {
+        "changed": [],
+        "dedupe_groups": [],
+        "mode": "dry_run",
+        "status": "pass"
+      },
+      "status": "passed"
+    },
+    {
+      "command": [
+        "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+        "scripts/planning_trigger.py",
+        "--trigger",
+        "schedule",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "{\n  \"canonical_mutation_allowed\": false,\n  \"gate\": {\n    \"action\": \"scan\",\n    \"policy\": \"agents/project/PLANNING-GUARDRAILS.yml\",\n    \"proposal_count\": 0,\n    \"reasons\": [],\n    \"score\": 100,\n    \"status\": \"pass\",\n    \"trigger\": \"schedule\",\n    \"warnings\": []\n  },\n  \"proposal_result\": null,\n  \"scan_path\": \"agents/planning/scans/SCAN-931FB27CB55E.json\",\n  \"status\": \"pass\"\n}\n",
+      "stderr": "",
+      "json": {
+        "canonical_mutation_allowed": false,
+        "gate": {
+          "action": "scan",
+          "policy": "agents/project/PLANNING-GUARDRAILS.yml",
+          "proposal_count": 0,
+          "reasons": [],
+          "score": 100,
+          "status": "pass",
+          "trigger": "schedule",
+          "warnings": []
+        },
+        "proposal_result": null,
+        "scan_path": "agents/planning/scans/SCAN-931FB27CB55E.json",
+        "status": "pass"
+      },
+      "status": "passed"
+    },
+    {
+      "command": [
+        "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+        "scripts/planning_loop.py",
+        "c-mode-gate",
+        "--json"
+      ],
+      "returncode": 1,
+      "stdout": "{\n  \"checklist\": \"agents/project/C-MODE-PROMOTION-CHECKLIST.md\",\n  \"pass_cycles\": 0,\n  \"reasons\": [\n    \"at least three passing B-mode cycles are required\",\n    \"release/version steward status must be pass, got watch\"\n  ],\n  \"score\": 0,\n  \"status\": \"block\",\n  \"steward_status\": \"watch\"\n}\n",
+      "stderr": "",
+      "json": {
+        "checklist": "agents/project/C-MODE-PROMOTION-CHECKLIST.md",
+        "pass_cycles": 0,
+        "reasons": [
+          "at least three passing B-mode cycles are required",
+          "release/version steward status must be pass, got watch"
+        ],
+        "score": 0,
+        "status": "block",
+        "steward_status": "watch"
+      },
+      "status": "passed"
+    },
+    {
+      "command": [
+        "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+        "scripts/backlog_board.py",
+        "--write"
+      ],
+      "returncode": 0,
+      "stdout": "wrote=C:\\Users\\ycpig\\agent_runtime\\BACKLOG-BOARD.md\ntasks=50\n",
+      "stderr": "",
+      "status": "passed"
+    },
+    {
+      "command": [
+        "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+        "scripts/owner_governance_gate.py"
+      ],
+      "returncode": 0,
+      "stdout": "C:\\Users\\ycpig\\agent_runtime\\BACKLOG-BOARD.md: pass\nC:\\Users\\ycpig\\agent_runtime\\AGENT_RUNTIME_RSI_PLANNING_BRIEF.md: pass\nC:\\Users\\ycpig\\agent_runtime\\AGENT_RUNTIME_PARALLEL_SESSION_PROTOCOL.md: pass\nC:\\Users\\ycpig\\agent_runtime\\reviews\\REVIEW-2026-06-09-backlog-board-restoration-owner-format-gate.md: pass\nC:\\Users\\ycpig\\agent_runtime\\reviews\\REVIEW-2026-06-10-agent-runtime-worktree-cleanup-cycle-map.md: pass\nC:\\Users\\ycpig\\agent_runtime\\reviews\\REVIEW-2026-06-10-agent-runtime-rsi-planning-registration.md: pass\nC:\\Users\\ycpig\\agent_runtime\\reviews\\REVIEW-2026-06-10-agent-runtime-parallel-session-protocol.md: pass\nC:\\Users\\ycpig\\agent_runtime\\reviews\\REVIEW-2026-06-10-agent-runtime-task-ar-226-data-map.md: pass\nC:\\Users\\ycpig\\agent_runtime\\reviews\\REVIEW-2026-06-10-agent-runtime-task-ar-227-ui-state-api.md: pass\nC:\\Users\\ycpig\\agent_runtime\\reviews\\REVIEW-2026-06-10-agent-runtime-task-ar-228-ui-console-mvp.md: pass\nC:\\Users\\ycpig\\agent_runtime\\reviews\\REVIEW-2026-06-10-agent-runtime-task-ar-229-write-commands.md: pass\nC:\\Users\\ycpig\\agent_runtime\\reviews\\REVIEW-2026-06-10-agent-runtime-task-ar-230-runtime-commands.md: pass\nC:\\Users\\ycpig\\agent_runtime\\reviews\\REVIEW-2026-06-10-agent-runtime-task-ar-231-live-observability.md: pass\nC:\\Users\\ycpig\\agent_runtime\\reviews\\REVIEW-2026-06-10-agent-runtime-task-ar-232-map-views.md: pass\nfindings=0\nagents\\project\\STATE-MACHINES.yml: pass\nschemas\\state-machines.schema.json: pass\nsrc\\agent_runtime\\templates\\project\\agents\\project\\STATE-MACHINES.yml: pass\nsrc\\agent_runtime\\templates\\project\\schemas\\state-machines.schema.json: pass\nfindings=0\nresponse-contract-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\nfindings=0\ncontinuity-contract-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\nfindings=0\ntaskset-work-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\nfindings=0\nparallel-worktree-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\nclaims=15\nfindings=0\nstatus=pass\n",
+      "stderr": "",
+      "status": "passed"
+    },
+    {
+      "command": [
+        "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+        "scripts/taskset_work_gate.py",
+        "--task-set-id",
+        "TASKSET-AR-RSI-PLANNING",
+        "--check"
+      ],
+      "returncode": 0,
+      "stdout": "taskset-work-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\nfindings=0\n",
+      "stderr": "",
+      "status": "passed"
+    }
+  ],
+  "failed_count": 0
+}

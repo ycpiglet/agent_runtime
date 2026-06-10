@@ -35,9 +35,9 @@ Bottom Line: <open work count, ACT/ASK/DEFER shape, and one recommended focus>.
 ## Signal
 | Item | State | Evidence |
 |------|-------|----------|
-| Backlog | G/Y/R | <ACT/REVIEW/ASK/DEFER count> |
-| Schedule | G/Y/R | <latest schedule report or daemon heartbeat> |
-| Due Checks | G/Y/R | <doc/beta/scribe signals if available> |
+| Backlog | pass/watch/block + score | <ACT/REVIEW/ASK/DEFER count> |
+| Schedule | pass/watch/block + score | <latest schedule report or daemon heartbeat> |
+| Due Checks | pass/watch/block + score | <doc/beta/scribe signals if available> |
 
 ## Insight
 1. <What changed since the last brief, or "no material change".>

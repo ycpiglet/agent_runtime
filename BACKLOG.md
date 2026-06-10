@@ -1,5 +1,24 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-06-10 TASKSET-AR-GOVERNANCE-OPS Registration
+
+- New active task set: `TASKSET-AR-GOVERNANCE-OPS`.
+- Purpose: burn down collaboration waivers, clean lifecycle drift, measure skill/hook/trigger/gate/script usage and reuse, enforce realtime backlog/status/pointer sync, split broad pytest hygiene, and publish recurring governance operations reports.
+- Registered tasks: `TASK-AR-257` through `TASK-AR-263`.
+- Immediate implementation lane: `TASK-AR-258` root capability promotion and `TASK-AR-260` runtime asset usage metrics.
+- Completion boundary: do not mark this topic closed until waiver count, lifecycle watch count, runtime asset usage metrics, state sync, and verification tiers have direct gate/report evidence.
+- 2026-06-10 closeout: `TASK-AR-257` through `TASK-AR-263` completed for local enforcement scope.
+- Verification: focused tests `17 passed`; Owner gate `status=pass`; runtime asset usage `assets=14`, `block=0`, `watch=0`; state sync `findings=0`; collaboration governance `block=0`, `watch=5`, `waived=1`.
+- Remaining watch: real scribe claim/log evidence and low-frequency monitored roles.
+
+## 2026-06-10 TASK-AR-210 Release Steward Reconciliation
+
+- Current TASK-AR-210 route: `release_evidence_ready` for `v0.1.8` local release evidence.
+- Current release_state chain: historical `hold_for_data` -> `ready` -> local `release` evidence.
+- Reporting boundary: local release evidence does not by itself prove external GitHub publish. Remote publish is `remote_publish_deferred_out_of_scope`; claims require separate PR/tag/CI evidence and must not be inferred from `release_execution_gate.py`.
+- Evidence entrypoint: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-210-release-steward-snapshot.md`.
+- Gate evidence: release execution, owner approval, pending-release guard, readiness summary, task-set work gate, and parallel worktree gate all passed with `findings=0` during the Release Steward lane.
+
 ## 기준 일정
 
 - 기준일: 2026-06-09 (수요일, Asia/Seoul)
@@ -8,7 +27,7 @@
 - v0.1.8 후보 창(재설정): 2026-07-02(1차), 2026-07-09(2차), 2026-07-16(최종)
 - v0.1.8 버전 업데이트 실행 규칙:
   - 다음 판정 창: 2026-07-02(1차) → 2026-07-09(2차) → 2026-07-16(최종 freeze)
-  - 공개 판정은 `release_state`가 `release`로 변환되는 순간까지 `hold_for_query_contract`, `hold_for_overlay`, `hold_for_data`를 모두 정리해야 성립.
+  - 공개 판정은 `release_state`가 `release`로 변환되는 순간까지 `hold_for_query_contract`, `hold_for_overlay`, `hold_for_data`를 모두 정리해야 성립. 2026-06-10 기준 local release evidence는 이 조건을 통과했으며, external publish evidence는 별도 경계로 남긴다.
   - 문구, hold 사유, 결정 주체는 `BACKLOG`/`ROADMAP`/`STATUS`/`TASK-AR-210`에서 동일해야 함.
   - 미충족 항목은 즉시 `hold_for_query_contract`/`hold_for_overlay`/`hold_for_data`로 분리해 `TASK-AR-223` closeout 번들에서 재평가.
   - 2026-07-02 판정 통과 시 1차 `release-preflight` 증적 번들을 확정해 공개 준비로 이동.
@@ -61,7 +80,7 @@
 
 - v0.1.8 공개 목표
   - 목표일: 2026-07-02 (가중치 보완 1차)
-  - 상태: 후보 판정 강화 단계
+  - 상태: local release evidence 통과; remote publish boundary는 별도 증거 필요
   - 공개 창:
     - 1차 판정: 2026-07-02
     - fallback-1: 2026-07-09
@@ -175,6 +194,7 @@
     - block/allow matrix 완료
     - Owner 승인 템플릿 표준화
     - `BACKLOG`/`ROADMAP`/`STATUS`/`TASK` 참조 정합
+  - 2026-06-10 완료: local `v0.1.8` release evidence는 `release_evidence_ready`; remote GitHub publish는 `remote_publish_deferred_out_of_scope`로 별도 증거 없이는 완료로 간주하지 않는다.
 
 - P0-12: `TASK-AR-211` Project Overlay Standardization
   - 목적: 공통 런타임 + 프로젝트 고유 오버레이 분리
@@ -764,3 +784,48 @@
 
 - Add future Owner docs to `owner-docs.yml` only after they pass `signal/score` contract.
 - Add future lifecycle domains to `STATE-MACHINES.yml` before implementation.
+
+## 2026-06-10 Update - Collaboration Concurrency Task Set
+
+### Bottom Line
+
+- Summary: `TASKSET-AR-COLLAB-CONCURRENCY` is complete for local scope.
+- Signal: pass.
+- Score: 100.
+
+### Signal
+
+- Completed `TASK-AR-251` through `TASK-AR-256`.
+- Added append-only pane event logging for replayable multi-pane status.
+- Added SSoT concurrency guard for shared Owner/backlog/status files.
+- Added dispatcher worktree preflight before task-set start.
+- Added UI collaboration state exposure from pane event logs.
+- Added owner governance integration for the concurrency gate.
+
+### Decision
+
+- Decision: panes write events, not shared truth files.
+- Decision: shared SSoT writes require orchestrator approval.
+- Decision: dispatcher-created worktrees remain the default isolation boundary for task-set execution.
+
+### Action Items
+
+| Status | Action | Owner | Agent | Evidence |
+| --- | --- | --- | --- | --- |
+| Done | Record collaboration issue/research/plan | lead-engineer | codex | `AGENT_RUNTIME_COLLAB_CONCURRENCY_BRIEF.md`, `reviews/RESEARCH-2026-06-10-realtime-collab-conflict-patterns.md`, `docs/superpowers/plans/2026-06-10-collab-concurrency.md` |
+| Done | Implement pane event log | agent-runtime-core | codex | `scripts/pane_event_log.py` |
+| Done | Implement SSoT concurrency gate | agent-runtime-core | codex | `scripts/collaboration_concurrency_gate.py` |
+| Done | Enforce worktree-first dispatch | worktree-dispatcher | codex | `scripts/taskset_dispatcher.py` |
+| Done | Expose UI collaboration status | ui-console | codex | `src/agent_runtime/ui_state.py` |
+
+### Risks / Blockers
+
+- Risk: existing panes must adopt `scripts/pane_event_log.py record` to get full replay coverage.
+- Risk: external remote publish remains Owner-gated and was not implied by local completion.
+- Blocker: none for local scope.
+
+### Next Steps
+
+- For future 5+ pane work, start panes through task-set dispatcher worktrees.
+- Record pane lifecycle events before and after shared-state-affecting work.
+- Keep `scripts/collaboration_concurrency_gate.py --check` in Owner governance gates.

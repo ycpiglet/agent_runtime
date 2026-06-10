@@ -17,22 +17,27 @@ conflict, follow this file and the latest records under `agents/lead_engineer/`.
 5. A task is not complete until the result and verification are recorded.
 6. Do not guess timestamps. Use `python scripts/now.py`.
 7. Never commit secrets, credentials, private runtime state, or local tool data.
+8. Owner-facing chat responses must be Korean by default. Use another language
+   only when the Owner explicitly asks for it. Agent-to-agent notes, code
+   comments, machine fields, and evidence records may use English when that is
+   clearer or more parseable.
 
 ## 1. Start Protocol
 
 Before non-trivial work, read:
 
-1. `AGENTS.md`
-2. `README.md`
-3. `agents/project/PROJECT-CONTEXT.yml` if present
-4. `AGENT_RUNTIME.md`
-5. `agents/lead_engineer/STATUS.md`
-6. `agents/lead_engineer/AUDIT-LOG.md`
-7. `agents/roles.yml`
-8. Tool-specific guidance, if relevant
-9. Your role file: `agents/{role}/SKILL.md`
-10. `agents/lead_engineer/tasks/BACKLOG.md`
-11. The latest relevant `CYCLE`, `REVIEW`, and `TASK` files
+1. `agents/project/NEXT-SESSION-POINTER.yml`
+2. `AGENTS.md`
+3. `README.md`
+4. `agents/project/PROJECT-CONTEXT.yml` if present
+5. `AGENT_RUNTIME.md`
+6. `agents/lead_engineer/STATUS.md`
+7. `agents/lead_engineer/AUDIT-LOG.md`
+8. `agents/roles.yml`
+9. Tool-specific guidance, if relevant
+10. Your role file: `agents/{role}/SKILL.md`
+11. `agents/lead_engineer/tasks/BACKLOG.md`
+12. The latest relevant `CYCLE`, `REVIEW`, and `TASK` files
 
 Create an internal context snapshot:
 
@@ -49,6 +54,26 @@ verification:
 ```
 
 Only print the snapshot when it would clarify ambiguity or risk.
+
+## 1.5 Live Work Pointer
+
+`agents/project/NEXT-SESSION-POINTER.yml` is the compact live work pointer for
+the whole runtime, not only a next-session note. Together with
+`agents/runtime/task_claims/*.json`, it must identify which agent, team, and
+pane is working on which task, current status, phase, progress_pct, worktree,
+branch, claim, handoff, pointers, required rules, and next verification steps.
+
+Update it while work is happening and before closure whenever non-trivial state
+changes:
+
+1. active task, role, team, pane, owner, or responsibility changes;
+2. a decision or blocker changes the next action;
+3. status, phase, progress_pct, or verification status changes;
+4. a repeated request becomes a rule, function/API, script, hook, gate, or task;
+5. Compound captures a repeated mistake or criticism.
+
+If the pointer and longer records disagree, treat the pointer as a resume hint,
+then verify against the canonical task, status, backlog, and audit records.
 
 ## 2. Source Of Truth
 
@@ -132,6 +157,34 @@ Allowed task states:
 - `완료`
 - `보류`
 
+## 5.5 Task Set Dispatch
+
+Task sets are the default unit for parallel panes. A "pane" may be a terminal
+pane, a separate terminal tab, or another worktree-backed agent session. The
+important boundary is not the UI container; it is the tuple
+`task_set_id + task_id + claim_id + worktree_path + branch + pane_id`.
+
+When the Owner says `taskset-xxx 진행해줘`, `taskset-xxx 시작`, or an equivalent
+request:
+
+1. Resolve the alias and inspect the lane:
+   `python scripts/taskset_dispatcher.py plan <taskset-alias> --json`.
+2. Claim the task set before editing:
+   `python scripts/taskset_dispatcher.py start <taskset-alias> --json`.
+3. Work only in the returned `worktree_path` and `branch`.
+4. Keep one active claim per `task_set_id` unless the claim explicitly records
+   `allow_parallel_task_set: true` and the reason is documented.
+5. Keep the claim and live pointer updated with `phase`, `progress_pct`,
+   `step_index`, `step_total`, and `status_text`.
+6. Before handoff or closure, run:
+   `python scripts/taskset_work_gate.py --check` and
+   `python scripts/parallel_worktree_gate.py --check`.
+
+Use human-friendly task-set display names in reports, for example
+`Quality Sentinel`, `Progress Scout`, `Console Operator`, or `Repo Custodian`.
+System identifiers remain stable machine fields; display names help humans read
+the board like RPG-style party/status labels.
+
 ## 6. Reversibility Gate
 
 Use reversibility and blast radius to decide whether to act or ask.
@@ -187,6 +240,8 @@ smallest safe command scope.
 4. Keep generated, local, runtime, and secret files out of public release.
 5. Use structured parsers or existing scripts where available.
 6. If behavior changes, update the relevant docs and verification records.
+7. If a rule is repeated by the Owner, prefer a function/API, script, hook, gate,
+   or test over another prose-only instruction.
 
 ## 8. Records
 
@@ -219,18 +274,67 @@ Completion records must state:
 - changed files
 - verification commands and outcomes
 - remaining issues or handoff notes
+- whether `agents/project/NEXT-SESSION-POINTER.yml` was updated or did not need
+  an update
+- whether repeated criticism required Compound capture
+
+## 8.5 Measured Improvement Loop
+
+Use this loop for process, prompt, workflow, quality, and agent-behavior
+improvements:
+
+1. Evaluate: define a measurable score, golden set, failure cases, and edge
+   cases before changing behavior.
+2. Propose: suggest one change that should improve the score.
+3. Verify: rerun the same evaluation and record whether the score improved.
+4. Merge: keep the change only when it is valuable, meaningful, and safe.
+
+Keep one variable per verified change. If multiple variants are useful, run
+them as separate proposals or parallel experiments and keep only the verified
+winners. The problem-posing/proposer role and grader role should be separate
+when stakes justify the overhead.
+
+Owner defines what "better" means and owns final merge decisions. Agents may
+recommend criteria and present evidence, but they do not redefine success to fit
+their own proposal.
+
+## 8.6 Repeated Request API And Compound Capture
+
+Repeated Owner requests are signal, not noise. If the same request, criticism,
+or failure class appears twice:
+
+1. create or propose a Repeated Request API: function/API, script, hook, gate,
+   checklist item, template, or explicit task that prevents manual repetition;
+2. add or update tests when the behavior can be checked automatically;
+3. record the recurrence in `agents/lead_engineer/compound_log.md` when it is a
+   repeated mistake, drift, or governance failure;
+4. close the Compound item with an executable prevention step when feasible.
+
+Long documents are not sufficient prevention. A rule is considered durable only
+when a future agent can find it quickly from the pointer and, where practical,
+an executable gate can fail when it is violated.
 
 ## 9. Reporting
 
 Final task reports use the human-centered, machine-readable Executive BRIEF
 format. Keep it concise, visually scannable, and action-oriented.
 
+### Owner-Facing Language Contract
+
+- 사용자와 직접 대화할 때는 별도 요청이 없는 한 무조건 한국어로 답한다.
+- Owner-facing 보고, 상태 업데이트, 질문, 계획, 검토 요약은 한국어가 기본값이다.
+- 에이전트 간 메시지, 로그, machine-readable frontmatter, 코드 주석, 테스트명,
+  evidence record는 필요하면 영어를 사용할 수 있다.
+- 사용자가 영어로 말해도 "영어로 답해줘"처럼 명시 요청하지 않으면 한국어로 답한다.
+- 이 규칙은 짧은 진행 업데이트와 최종 보고 모두에 적용한다.
+
 ```yaml
 ---
 type: brief
 id: BRIEF-YYYY-MM-DD-NNN
 audience: owner|ceo|agent-team
-status: G|Y|R
+signal: pass|watch|block
+score: 0-100
 priority: Critical|High|Medium|Low
 tags: [release, automation]
 actions: [approve, review, no-action]
@@ -245,7 +349,7 @@ Bottom Line: <one-line outcome and decision>.
 ## Signal
 | Item | State | Evidence |
 |------|-------|----------|
-| Work | G/Y/R | <evidence> |
+| Work | pass/watch/block + score | <evidence> |
 
 ## Insight
 1. <short interpretation>
@@ -259,7 +363,7 @@ Bottom Line: <one-line outcome and decision>.
 | <action> | <role> | <condition> |
 ```
 
-Use `G`, `Y`, and `R` for state. Do not use emoji.
+Use `pass`, `watch`, and `block` with `score: 0-100` for state. Do not use color labels or emoji as machine values.
 
 ## 10. Time
 

@@ -1,5 +1,89 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-10 - TASKSET-AR-GOVERNANCE-OPS registration and implementation start
+
+### Bottom Line
+
+- Summary: governance operations work is now registered as `TASKSET-AR-GOVERNANCE-OPS` with `TASK-AR-257` through `TASK-AR-263`.
+- Status: active; current active task is `TASK-AR-260` for runtime asset usage measurement, with `TASK-AR-258` waiver burn-down running in the same local slice.
+- Boundary: broad pytest is not yet a completion signal; focused tests and Owner gates remain the near-term verification path.
+
+### Signal
+
+| Signal | State | Evidence |
+| --- | --- | --- |
+| Plan | pass | `docs/superpowers/plans/2026-06-10-governance-operations-metrics.md` |
+| Task registration | watch | `agents/lead_engineer/tasks/TASK-AR-257.md` through `TASK-AR-263.md` |
+| Owner brief | watch | `AGENT_RUNTIME_GOVERNANCE_OPS_BRIEF.md` |
+| Usage metrics | action | `agents/project/RUNTIME-ASSET-REGISTRY.json`, `scripts/runtime_asset_usage.py` |
+| Waiver burn-down | action | `TASK-AR-258` |
+
+### Decision
+
+- Start with safe local enforcement: root capability promotion, asset registry, usage gate, and Owner gate wiring.
+- Keep real role-usage gaps visible; do not fabricate scribe evidence.
+- Keep lifecycle cleanup, state sync, pytest hygiene, and governance report tasks open until their gates/reports exist.
+
+## 2026-06-10 - TASKSET-AR-GOVERNANCE-OPS final closeout
+
+### Bottom Line
+
+- Summary: `TASKSET-AR-GOVERNANCE-OPS` is complete for local governance enforcement.
+- Status: pass with watch signals.
+- Watch boundary: `role-usage:scribe` remains explicitly waived, and low-frequency monitored roles remain visible.
+
+### Signal
+
+| Signal | State | Evidence |
+| --- | --- | --- |
+| Focused tests | pass | `17 passed in 2.95s` |
+| Collaboration governance | watch | `block=0`, `watch=5`, `waived=1` |
+| Runtime asset usage | pass | `assets=14`, `usage_total=85`, `block=0`, `watch=0` |
+| State sync | pass | `findings=0`, `block=0`, `watch=0` |
+| Owner gate | pass | `status=pass` |
+| Governance report | watch | `reviews/GOVERNANCE-OPS-REPORT-2026-06-10.md` |
+
+### Decision
+
+- Close `TASK-AR-257` through `TASK-AR-263` for local scope.
+- Keep the remaining scribe waiver as a measured watch item, not an untracked gap.
+- Do not claim broad full-suite runtime pass; default collection hygiene is fixed, but full execution remains separate evidence.
+
+## 2026-06-10 - TASKSET-AR-RSI-PLANNING implementation checkpoint
+
+### Bottom Line
+
+- Summary: RSI planning loop implementation is patched across the full requested planning scope, but completion is not claimed because verification execution still needs explicit approval.
+- Status: watch; task files are in `review` with `verification_status: pending`.
+
+### Signal
+
+| Signal | State | Evidence |
+| --- | --- | --- |
+| Contract/schema | watch | `agents/project/PLANNING-LOOP-CONTRACT.md`, `schemas/planning-proposal.schema.json` |
+| Scan/proposal pipeline | watch | `scripts/planning_loop.py`, `agents/planning/scans/SCAN-20260610-rsi-planning.json`, `agents/planning/outbox/` |
+| UI Planner path | watch | `src/agent_runtime/ui_state.py`, `src/agent_runtime/ui_console.py`, `src/agent_runtime/ui_commands.py` |
+| Guardrails/C-mode | watch | `agents/project/PLANNING-GUARDRAILS.yml`, `agents/project/C-MODE-PROMOTION-CHECKLIST.md` |
+| Verification wrapper | watch | `scripts/verify_rsi_planning_taskset.py` exists but has not been run |
+
+### Decision
+
+- Keep `TASKSET-AR-RSI-PLANNING` open until focused tests, board regeneration, owner governance, and named task-set gate pass.
+- Do not infer completion from patched files or proposal artifacts alone.
+
+### Next Steps
+
+- Run `python scripts/verify_rsi_planning_taskset.py` after explicit verification approval.
+- If it passes, regenerate/confirm board state, mark RSI planning tasks complete, close the active claim, and then mark the goal complete.
+
+## 2026-06-10 TASK-AR-210 Release Steward Closure
+
+- Current route: `release_evidence_ready` for `v0.1.8` local release evidence.
+- Current boundary: external GitHub publish is `remote_publish_deferred_out_of_scope` and must be proven by separate PR/tag/CI evidence; do not infer it from local release gates.
+- Evidence entrypoint: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-210-remote-publish-deferral.md`.
+- `TASK-AR-210` is completed for local release evidence scope.
+- Next Release Steward item should start only after the active `TASK-AR-210` claim is released.
+
 ## Bottom Line
 
 - 다음 버전 업데이트는 `2026-07-02`(1차 판정) → `2026-07-09`(2차) → `2026-07-16`(최종 freeze)로 진행.
@@ -875,3 +959,226 @@ Decision
 | Implement claim create/release helpers | lead-engineer | `TASK-AR-246` |
 | Surface active claims in UI state | lead-engineer | `TASK-AR-246` |
 | Run first parallel batch only through worktrees | lead-engineer | `TASK-AR-234`, `TASK-AR-240`, `TASK-AR-243`, `TASK-AR-241` |
+
+## 2026-06-10 - Continuity Contract And Repeated Request API Enforcement
+
+### Bottom Line
+
+- Summary: added the enforced continuity layer requested by the Owner.
+- Output: bilingual README, live `NEXT-SESSION-POINTER.yml`,
+  `continuity_contract_gate.py`, template AGENTS/CLAUDE rules, and Compound
+  recurrence record.
+- Boundary: this enforces documentation and governance contracts; it does not
+  automatically decide Owner-only merges or external release actions.
+
+### Signal
+
+| Signal | State | Evidence |
+| --- | --- | --- |
+| Bilingual README | pass | `README.md` |
+| Live work pointer | pass | `agents/project/NEXT-SESSION-POINTER.yml`, `agents/runtime/task_claims/*.json` |
+| Template pointer | pass | `src/agent_runtime/templates/project/agents/project/NEXT-SESSION-POINTER.yml` |
+| Protocol rules | pass | `src/agent_runtime/templates/project/AGENTS.md`, `CLAUDE.md` |
+| Gate wiring | pass | `scripts/owner_governance_gate.py` runs `continuity_contract_gate.py --check` |
+| Recurrence capture | pass | `agents/lead_engineer/compound_log.md` `COMPOUND-2026-06-10-003` |
+| Research grounding | pass | `reviews/RESEARCH-2026-06-10-continuity-loop-engineering.md` |
+
+### Insight
+
+- The project already had partial pointer concepts, but they were distributed
+  across status, backlog, tasks, reviews, claims, events, and memory.
+- The recurring failure was not lack of text; it was lack of a compact live work
+  state target and executable gate.
+- Repeated user requests now have a named promotion path: function/API, script,
+  hook, gate, checklist, template, or explicit task.
+
+### Decision
+
+- Decision: `agents/project/NEXT-SESSION-POINTER.yml` plus
+  `agents/runtime/task_claims/*.json` is now the first live work state surface.
+- Decision: repeated criticism must close through Compound plus executable
+  prevention when feasible.
+- Decision: measured improvement work uses `Evaluate -> Propose -> Verify -> Merge`
+  with golden set / failure / edge case preservation and Owner-owned criteria.
+
+### Next Steps
+
+| Step | Owner | Evidence |
+| --- | --- | --- |
+| Keep live pointer updated during work and before closure | lead-engineer | `agents/project/NEXT-SESSION-POINTER.yml`, `agents/runtime/task_claims/*.json` |
+| Use continuity gate in release preflight | lead-engineer | `scripts/continuity_contract_gate.py` |
+| Promote repeated Owner requests into API/gate/task | accountable task owner | `COMPOUND-2026-06-10-003` |
+
+## 2026-06-10 - TASKSET-AR-PANE-PROGRESS continuation
+
+### Bottom Line
+- Historical pre-closeout note: `TASKSET-AR-PANE-PROGRESS` was active here. `TASK-AR-248` UI progress surfaces and `TASK-AR-249` dispatcher/protocol enforcement were patched, but not yet verified.
+- Status: superseded by `TASKSET-AR-PANE-PROGRESS final closeout` below.
+
+### Signal
+- `BACKLOG-BOARD.md` was regenerated from task metadata with `scripts/backlog_board.py --write` (`tasks=50`).
+- `scripts/generate_views.py` is not present in this repo, so broader `BACKLOG.md` regeneration was not performed through that older memory path.
+- Active claim remains `agents/runtime/task_claims/CLAIM-20260610-202116-task-ar-248-0d52.json` with verification pending.
+
+### Insight
+- The task-set can now be resumed from claim JSON, handoff/log notes, protocol docs, and the Owner-facing backlog board without relying on chat history.
+- The only safe remaining closeout step is explicit verification of UI state, console rendering, dispatcher validation, and continuity gates.
+
+### Decision
+- Superseded: `TASK-AR-248` and `TASK-AR-249` were kept open until verification passed.
+- Do not mark completion from patch presence alone.
+
+### Next Steps
+- Run focused checks when allowed: `pytest tests/test_ui_state.py tests/test_ui_console.py tests/test_task_claim_dispatcher.py tests/test_continuity_contract_gate.py -q`.
+- Run continuity/task-set gates when allowed: `python scripts/taskset_work_gate.py --check` and `python scripts/continuity_contract_gate.py --check`.
+
+## 2026-06-10 - TASKSET-AR-PANE-PROGRESS review checklist
+
+### Bottom Line
+- Historical pre-closeout note: `reviews/REVIEW-2026-06-10-agent-runtime-pane-progress-taskset.md` mapped `TASK-AR-248`/`TASK-AR-249` requirements before final verification ran.
+- Status: superseded by `TASKSET-AR-PANE-PROGRESS final closeout` below.
+
+### Signal
+- Review artifact links UI state, console, dispatcher, continuity gate, protocol, claim, and handoff surfaces.
+- `TASK-AR-248` and `TASK-AR-249` audit logs now point at the review artifact.
+
+### Decision
+- Superseded: the review artifact became the final closeout evidence after focused verification passed.
+
+### Next Steps
+- Run the focused pytest/gate commands listed in the review artifact when allowed.
+
+## 2026-06-10 - TASKSET-AR-PANE-PROGRESS live pointer alignment
+
+### Bottom Line
+- Historical pre-closeout note: active claim and next-session pointer reported `80%` progress for `TASKSET-AR-PANE-PROGRESS` before final verification.
+- Status: superseded by `TASKSET-AR-PANE-PROGRESS final closeout` below.
+
+### Signal
+- Patched implementation, protocol docs, regenerated board, status notes, handoff/log notes, and review checklist now agree on the same closeout boundary.
+- Remaining boundary: focused pytest and gate execution.
+
+### Decision
+- Superseded: the task set stayed open until verification passed.
+
+### Next Steps
+- Run the focused checks listed in `reviews/REVIEW-2026-06-10-agent-runtime-pane-progress-taskset.md` when explicitly allowed.
+
+## 2026-06-10 - TASKSET-AR-PANE-PROGRESS verification wrapper
+
+### Bottom Line
+- Historical pre-closeout note: `scripts/verify_pane_progress_taskset.py` was created to wrap the focused pytest and gate scope for `TASKSET-AR-PANE-PROGRESS` closeout.
+- Status: superseded by `TASKSET-AR-PANE-PROGRESS final closeout` below.
+
+### Signal
+- Wrapper command: `python scripts/verify_pane_progress_taskset.py`.
+- The wrapper runs UI state, UI console, task claim dispatcher, continuity contract tests, then task-set and continuity gates.
+
+### Decision
+- Superseded: the wrapper became closeout evidence after it passed.
+
+### Next Steps
+- Run `python scripts/verify_pane_progress_taskset.py` when approved, then update task statuses and board only if it passes.
+
+## 2026-06-10 - Owner-facing Korean response contract hardening
+
+### Bottom Line
+- Summary: Owner-facing chat language rule was strengthened: answer the user in Korean by default unless explicitly asked otherwise.
+- Status: watch; rule and gate were patched, but the response contract gate was not run in this turn.
+
+### Signal
+- Agent-to-agent notes and machine-readable records may still use English when useful.
+- User-facing conversation, status updates, plans, reviews, and questions must default to Korean.
+
+### Decision
+- Enforce the rule through `AGENTS.md`, `CLAUDE.md`, `REPORTING-FORMAT.md`, and `response_contract_gate.py`.
+
+### Next Steps
+- Run `python scripts/response_contract_gate.py --check` when verification is allowed for this contract change.
+
+## 2026-06-10 - Root AGENTS language contract
+
+### Bottom Line
+- Summary: root `AGENTS.md` was added so agents working directly in this checkout see the Owner-facing Korean response contract before reading templates.
+- Status: watch; no response contract gate was run after this addition.
+
+### Signal
+- Template and root instructions now both state: user-facing conversation defaults to Korean unless explicitly requested otherwise.
+- Agent-to-agent and machine-readable records may still use English.
+
+### Decision
+- Treat `AGENTS.md` as the local checkout rule and keep `src/agent_runtime/templates/project/AGENTS.md` as the reusable template rule.
+
+### Next Steps
+- Run the response contract gate when verification is allowed.
+
+## 2026-06-10 - TASKSET-AR-QUALITY-LOOP final closeout
+
+### Bottom Line
+
+- Summary: task set 1 (`TASKSET-AR-QUALITY-LOOP`) is closed across all seven canonical tasks: `TASK-AR-205`, `TASK-AR-206`, `TASK-AR-207`, `TASK-AR-208`, `TASK-AR-217`, `TASK-AR-221`, and `TASK-AR-243`.
+- Root cause recorded: `COMPOUND-2026-06-10-004` documents the prior claim-only completion mistake.
+- Prevention: `scripts/taskset_work_gate.py --task-set-id TASKSET-AR-QUALITY-LOOP --require-complete --check` now verifies named task-set completion.
+
+### Signal
+
+| Signal | State | Evidence |
+| --- | --- | --- |
+| Offline eval | pass | `reviews/OFFLINE-EVAL-2026-06-10-taskset-quality-loop-final.json` |
+| Prediction score | pass | `reviews/OFFLINE-PREDICTION-SCORE-2026-06-10-taskset-quality-loop-final.json` |
+| Live reviewer | pass | `reviews/LIVE-REVIEWER-GATE-2026-06-10-taskset-quality-loop-final.json` |
+| Correction collector | pass | `reviews/CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final.json` |
+| A2A trace | pass | `reviews/A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final.json` |
+| Planning evidence link | watch | `reviews/PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final.json` |
+
+### Decision
+
+- `TASKSET-AR-QUALITY-LOOP` is complete for local Quality Loop evidence.
+- Correction proposals remain proposal-only and require owner approval before definition changes.
+- Remote publish, external PR/tag/CI, and provider-live behavior remain separate approval-backed evidence.
+
+## 2026-06-10 - TASKSET-AR-PANE-PROGRESS final closeout
+
+### Bottom Line
+
+- Summary: task set 2 (`TASKSET-AR-PANE-PROGRESS`) is closed across all five canonical tasks: `TASK-AR-246`, `TASK-AR-247`, `TASK-AR-248`, `TASK-AR-249`, and `TASK-AR-250`.
+- Active handoff remains `TASKSET-AR-RELEASE-STEWARD` / `TASK-AR-222` and `TASKSET-AR-RSI-PLANNING` / `TASK-AR-234`; Progress Scout is now archive/evidence only.
+
+### Signal
+
+| Signal | State | Evidence |
+| --- | --- | --- |
+| Board task-set state | pass | `BACKLOG-BOARD.md` is fresh; completed workflows are archived from the live board |
+| Focused closeout wrapper | pass | `python scripts/verify_pane_progress_taskset.py`: `31 passed`, task-set gate pass, continuity gate pass |
+| Named completion gate | pass | `python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-PANE-PROGRESS --require-complete --check`: `findings=0` |
+| Review artifact | pass | `reviews/REVIEW-2026-06-10-agent-runtime-pane-progress-taskset.md` |
+
+### Decision
+
+- `TASKSET-AR-PANE-PROGRESS` is complete for local pane/task-set progress, continuity, dispatcher, UI state, and handoff evidence.
+- Do not reopen Progress Scout unless a new task file is explicitly added to that task set.
+- Remote publish, external PR/tag/CI, and provider-live behavior remain separate approval-backed evidence.
+
+## 2026-06-10 - TASKSET-AR-RSI-PLANNING final closeout
+
+### Bottom Line
+
+- Summary: task set `TASKSET-AR-RSI-PLANNING` is complete for local bounded RSI planning loop implementation.
+- Status: pass; verification report `reviews/RSI-PLANNING-TASKSET-VERIFY.json` passed before closeout.
+- Completed at: `2026-06-10T22:53:49+09:00`.
+
+### Signal
+
+| Signal | State | Evidence |
+| --- | --- | --- |
+| Contract/schema | pass | `agents/project/PLANNING-LOOP-CONTRACT.md`, `schemas/planning-proposal.schema.json` |
+| Scan/proposal/outbox | pass | `scripts/planning_loop.py`, `agents/planning/scans/`, `agents/planning/outbox/` |
+| UI Planner | pass | `src/agent_runtime/ui_state.py`, `src/agent_runtime/ui_console.py`, `src/agent_runtime/ui_commands.py` |
+| Guardrail/C-mode | pass | `agents/project/PLANNING-GUARDRAILS.yml`, `agents/project/C-MODE-PROMOTION-CHECKLIST.md` |
+| Verification | pass | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` |
+
+### Decision
+
+- B-mode proposal-only RSI planning is available locally.
+- C-mode remains blocked until the promotion gate prerequisites are met.
+- Owner-only/external/release/destructive actions remain out of scope.

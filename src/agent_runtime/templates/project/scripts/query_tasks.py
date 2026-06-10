@@ -176,6 +176,19 @@ def _regenerate_views() -> None:
                    cwd=ROOT, capture_output=True, text=True)
 
 
+def _sync_backlog_board() -> bool:
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "backlog_board.py"), "--write"],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    return result.returncode == 0
+
+
 def set_status(task_id: str, new_status: str) -> tuple[bool, str]:
     if new_status not in ALLOWED_STATES:
         return False, f"invalid status '{new_status}'. Use one of {sorted(ALLOWED_STATES)}."
@@ -189,7 +202,9 @@ def set_status(task_id: str, new_status: str) -> tuple[bool, str]:
             encoding="utf-8",
         )
     _regenerate_views()
-    return True, f"{task_id} → {new_status} (frontmatter+body+INDEX sync, views regenerated)"
+    if not _sync_backlog_board():
+        return False, f"{task_id} → {new_status}는 반영되었으나 BACKLOG-BOARD.md 동기화 실패"
+    return True, f"{task_id} → {new_status} (frontmatter+body+INDEX+BACKLOG-BOARD.md 동기화)"
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -1,3 +1,4 @@
+---
 id: TASK-AR-215
 status: completed
 started_at: 2026-06-09T11:00:00+09:00
@@ -6,6 +7,7 @@ priority: P0
 difficulty: M
 est_hours: 18
 est_tokens: 3000
+task_set_id: TASKSET-AR-CONTEXT-KNOWLEDGE
 tags:
   - project-overlay
   - cross-project

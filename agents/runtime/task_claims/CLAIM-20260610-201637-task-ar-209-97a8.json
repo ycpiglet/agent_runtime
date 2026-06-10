@@ -1,0 +1,32 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260610-201637-task-ar-209-97a8",
+  "task_id": "TASK-AR-209",
+  "agent_role": "independent-auditor",
+  "team_id": "governance-loop",
+  "agent_instance_id": "ia-20260610-201637-kst-97a8",
+  "display_name": "independent_auditor@migration-parity-01",
+  "callsite_id": "terminal:wt-task-ar-209:tab-01",
+  "pane_id": "terminal:wt-task-ar-209:tab-01",
+  "mode": "migration-parity",
+  "status": "completed",
+  "task_set_id": "TASKSET-AR-MIGRATION-PARITY",
+  "phase": "taskset-completed",
+  "progress_pct": 100,
+  "step_index": 6,
+  "step_total": 6,
+  "status_text": "Completed Migration Archivist: TASK-AR-209",
+  "worktree_path": ".worktrees/TASK-AR-209",
+  "branch": "codex/task-ar-209-migration-parity",
+  "claimed_at": "2026-06-10T20:16:37+09:00",
+  "last_heartbeat": "2026-06-10T20:16:37+09:00",
+  "expires_at": "2026-06-10T20:46:37+09:00",
+  "lease": {
+    "claimed_at": "2026-06-10T20:16:37+09:00",
+    "heartbeat_at": "2026-06-10T20:16:37+09:00",
+    "expires_at": "2026-06-10T20:46:37+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260610-201637-task-ar-209-97a8.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260610-201637-task-ar-209-97a8.log.md",
+  "tags": []
+}

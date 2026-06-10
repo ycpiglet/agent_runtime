@@ -1,0 +1,39 @@
+{
+  "agent_instance_id": "le-20260610-221124-kst-02c3",
+  "agent_role": "lead-engineer",
+  "branch": "codex/task-ar-234-rsi-planning",
+  "callsite_id": "terminal:wt-task-ar-234:tab-01",
+  "claim_id": "CLAIM-20260610-221124-task-ar-234-02c3",
+  "claimed_at": "2026-06-10T22:11:24+09:00",
+  "completed_at": "2026-06-10T22:56:04+09:00",
+  "display_name": "lead_engineer@rsi-planning-01",
+  "expires_at": "2026-06-11T00:00:00+09:00",
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260610-221124-task-ar-234-02c3.handoff.md",
+  "last_heartbeat": "2026-06-10T22:56:04+09:00",
+  "lease": {
+    "claimed_at": "2026-06-10T22:11:24+09:00",
+    "expires_at": "2026-06-11T00:00:00+09:00",
+    "heartbeat_at": "2026-06-10T23:00:00+09:00"
+  },
+  "log_path": "agents/runtime/task_claims/CLAIM-20260610-221124-task-ar-234-02c3.log.md",
+  "mode": "rsi-planning",
+  "pane_id": "terminal:wt-task-ar-234:tab-01",
+  "phase": "taskset-completed",
+  "progress_pct": 100,
+  "schema": "agent-runtime-task-claim/v1",
+  "status": "completed",
+  "status_text": "TASKSET-AR-RSI-PLANNING completed after verification report passed.",
+  "step_index": 10,
+  "step_total": 10,
+  "tags": [
+    "rsi",
+    "planning-loop",
+    "verification-pending"
+  ],
+  "task_id": "TASK-AR-234",
+  "task_set_id": "TASKSET-AR-RSI-PLANNING",
+  "team_id": "agent-runtime-core",
+  "updated_at": "2026-06-10T22:56:04+09:00",
+  "verification_report": "reviews/RSI-PLANNING-TASKSET-VERIFY.json",
+  "worktree_path": ".worktrees/TASK-AR-234"
+}

@@ -1,11 +1,12 @@
 ---
 id: TASK-AR-223
-status: in_progress
+status: completed
 owner: lead-engineer
 priority: P0
 difficulty: M
 est_hours: 12
 est_tokens: 2600
+task_set_id: TASKSET-AR-RELEASE-STEWARD
 tags:
   - version-closeout
   - governance
@@ -58,7 +59,16 @@ audit_log:
   - reviews/MEETING-2026-06-09-agent-runtime-task-ar-205-goldset-readiness-sync.md
   - reviews/MEETING-2026-06-09-agent-runtime-task-ar-205-offline-eval-block-sync.md
   - reviews/CALL-2026-06-09-agent-runtime-task-ar-205-offline-eval-followup-call.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-223-release-steward-integration-checkpoint.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-223-release-state-bridge.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-223-source-output-coverage.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-223-final-handoff.md
+  - reviews/OVERLAY-SIMULATION-GATE-2026-06-10-task-ar-223-root-current.json
+  - reviews/CO-LOCATION-GATE-2026-06-10-task-ar-223-root-current.json
+  - reviews/RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current.json
+  - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-223-root-integration-closeout.md
 created: 2026-06-14
+completed_at: 2026-06-10T22:12:00+09:00
 ---
 
 ## 목표
@@ -264,3 +274,51 @@ created: 2026-06-14
 - `TASK-AR-222` consolidated the v0.1.8 closeout state as `hold_for_data`.
 - Entry point: `reviews/REVIEW-2026-06-09-agent-runtime-task-ar-222-v018-closeout-bundle.md`.
 - `TASK-AR-223` evidence remains the validation baseline feeding that closeout.
+
+## Release Steward Integration Checkpoint (2026-06-10)
+
+- `TASK-AR-223` is active again under `TASKSET-AR-RELEASE-STEWARD` claim `CLAIM-20260610-213045-task-ar-223-c392` because root still needed selective artifact integration.
+- Integration entry point: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-223-release-steward-integration-checkpoint.md`.
+- Current closeout interpretation: the 2026-06-09 bundle remains the baseline evidence tree, and `TASK-AR-210` local release evidence can consume it without marking external GitHub publish as executed.
+- Release boundary: external publish remains a separate approval-backed action and must not be folded into this closeout bundle.
+
+## Release-State Bridge to TASK-AR-221/TASK-AR-222 (2026-06-10)
+
+- Bridge entry point: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-223-release-state-bridge.md`.
+- `TASK-AR-221` operating-chain language can consume `TASK-AR-223` as baseline evidence plus the later `TASK-AR-210` local release closure.
+- `TASK-AR-222` closeout language should use `release_evidence_ready` for local evidence and preserve `remote_publish_deferred_out_of_scope` for external GitHub publication.
+- Hold routing now reads as local-evidence cleared for `hold_for_data` and `hold_for_overlay`; live/provider-specific query contract behavior remains a separate governance boundary if required.
+- The closeout bundle must still not claim remote release, GitHub tag push, PR merge, or CI evidence.
+
+## Source Output Coverage Matrix (2026-06-10)
+
+- Coverage entry point: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-223-source-output-coverage.md`.
+- `TASK-AR-219` output is consumed as the schedule/template/official-guidance source for the 2026-07-02, 2026-07-09, and 2026-07-16 decision chain.
+- `TASK-AR-220` output is consumed as the migration provenance closure that prevents local `v0.1.8` evidence from falling back to `hold_for_data`.
+- `TASK-AR-221` output is consumed as the requirements 1-16 operating-chain map.
+- `TASK-AR-222` output is consumed as the v0.1.8 closeout bundle consumer and release-state handoff.
+- The coverage matrix is scoped to local release evidence; remote publish remains excluded unless future external PR/tag/CI evidence is added.
+
+## Final Handoff for Merge/Gate Review (2026-06-10)
+
+- Final handoff entry point: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-223-final-handoff.md`.
+- Current `TASK-AR-223` closeout bundle state is root-integrated for Release Steward review, not externally published release.
+- Covered inputs: `TASK-AR-219`, `TASK-AR-220`, `TASK-AR-221`, `TASK-AR-222`, and `TASK-AR-210`.
+- Current route: `release_evidence_ready` for local `v0.1.8` evidence.
+- External boundary: `remote_publish_deferred_out_of_scope`; this task must not be used as evidence of remote PR/tag/CI publication.
+- Next required action before marking this root task complete: run Release Steward gates if validation is approved.
+
+## Root Completion (2026-06-10)
+
+- Root integration is complete for the `TASK-AR-223` local closeout evidence package.
+- Gate evidence: `python scripts/owner_governance_gate.py` returned `findings=0` across owner-doc, state-machine, response-contract, continuity-contract, taskset-work, and parallel-worktree subgates.
+- Current route: `release_evidence_ready` for local `v0.1.8` evidence.
+- External boundary: `remote_publish_deferred_out_of_scope`; no remote PR/tag/CI publication is claimed.
+- Continuation claim `CLAIM-20260610-213045-task-ar-223-c392` is closed as duplicate root-integration follow-through after the prior completed Release Steward closeout.
+
+## Root Integration Gate Closeout (2026-06-10)
+
+- Overlay simulation gate: `reviews/OVERLAY-SIMULATION-GATE-2026-06-10-task-ar-223-root-current.json`, `status=pass`, `findings=0`.
+- Co-location gate: `reviews/CO-LOCATION-GATE-2026-06-10-task-ar-223-root-current.json`, `status=pass`, `findings=0`.
+- Release readiness summary: `reviews/RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current.json`, `status=pass`, `route=release_evidence_ready`, `findings=0`.
+- Closeout review: `reviews/REVIEW-2026-06-10-agent-runtime-task-ar-223-root-integration-closeout.md`.

@@ -12,7 +12,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def run(args: list[str]) -> int:
-    return subprocess.call([sys.executable, *args], cwd=ROOT)
+    label = " ".join(args)
+    print(f"owner-governance: start: {label}", flush=True)
+    rc = subprocess.call([sys.executable, *args], cwd=ROOT)
+    print(f"owner-governance: result: {label} -> {rc}", flush=True)
+    return rc
 
 
 def main() -> int:
@@ -31,8 +35,20 @@ def main() -> int:
             "agents/project/STATE-MACHINES.yml",
             "--path",
             "schemas/state-machines.schema.json",
+            "--path",
+            "src/agent_runtime/templates/project/agents/project/STATE-MACHINES.yml",
+            "--path",
+            "src/agent_runtime/templates/project/schemas/state-machines.schema.json",
         ],
+        ["scripts/response_contract_gate.py", "--check"],
+        ["scripts/continuity_contract_gate.py", "--check"],
+        ["scripts/taskset_work_gate.py", "--check"],
         ["scripts/parallel_worktree_gate.py", "--check"],
+        ["scripts/collaboration_concurrency_gate.py", "--check"],
+        ["scripts/collaboration_governance_gate.py", "--check"],
+        ["scripts/runtime_asset_usage.py", "--check"],
+        ["scripts/state_sync_gate.py", "--check"],
+        ["scripts/planning_loop.py", "gate", "--trigger", "hook", "--action", "scan"],
     ]
 
     failed = 0
