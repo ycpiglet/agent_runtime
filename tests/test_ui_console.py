@@ -79,6 +79,40 @@ def test_ui_console_serves_html_shell_and_assets(tmp_path):
     assert b"renderMap" in js.body
 
 
+def test_ui_console_shell_css_targets_served_dom_classes(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    for class_name in [
+        "shell",
+        "layout",
+        "work-surface",
+        "kanban",
+        "create-form",
+        "runtime-form",
+        "filter-row",
+        "evidence-grid",
+        "list-panel",
+        "is-active",
+    ]:
+        assert class_name in html
+
+    for selector in [
+        ".shell",
+        ".layout",
+        ".work-surface",
+        ".kanban",
+        ".create-form",
+        ".runtime-form",
+        ".filter-row",
+        ".evidence-grid",
+        ".list-panel",
+        ".tab.is-active",
+        ".view.is-active",
+    ]:
+        assert selector in css
+
+
 def test_ui_console_api_state_uses_ui_state_adapter(tmp_path):
     _write_task(tmp_path)
 
@@ -374,6 +408,14 @@ def test_ui_console_unknown_path_returns_404(tmp_path):
 
     assert response.status == 404
     assert response.content_type == "text/plain; charset=utf-8"
+
+
+def test_ui_console_favicon_route_is_quiet_for_browser_probe(tmp_path):
+    response = ui_console.build_response("/favicon.ico", tmp_path)
+
+    assert response.status == 204
+    assert response.content_type == "image/x-icon"
+    assert response.body == b""
 
 
 def test_ui_console_cli_dispatches_to_server(monkeypatch, tmp_path):
