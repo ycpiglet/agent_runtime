@@ -1,13 +1,13 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-10T18:10:00+09:00
+updated_at: 2026-06-10T18:45:00+09:00
 updated_by: lead_engineer
 current_state:
   signal: pass
   score: 92
   summary: >
-    TASK-AR-246 is closed. The next parallel-safe work packet is
-    TASKSET-AR-PANE-PROGRESS, ordered as testset first, UI second, then
-    enforcement and continuity cleanup.
+    TASK-AR-247 is complete. The pane progress testset exists and passes
+    offline eval readiness. The next parallel-safe work is TASK-AR-248 for UI
+    state/console progress, with TASK-AR-249 waiting behind UI verification.
 active_work:
   contract: >
     This is not only a next-session note. It is the game-style live work pointer:
@@ -18,9 +18,9 @@ active_work:
   current_teams:
     - team_id: agent-runtime-core
       status: watch
-      phase: backlog-registered
-      progress_pct: 5
-      active_task: TASK-AR-247
+      phase: testset-complete
+      progress_pct: 33
+      active_task: TASK-AR-248
       task_set_id: TASKSET-AR-PANE-PROGRESS
       pane_ids: []
   canonical_live_sources:
@@ -36,10 +36,9 @@ resume:
     - CLAUDE.md
     - STATUS.md
     - BACKLOG-BOARD.md
-  active_task: TASK-AR-247
+  active_task: TASK-AR-248
   next_actions:
-    - Start TASK-AR-247 first to add the pane progress golden set.
-    - Start TASK-AR-248 only after the testset contract is merged or explicitly accepted.
+    - Start TASK-AR-248 to expose pane/task-set progress in UI state and console.
     - Start TASK-AR-249 after UI state and console progress behavior is verified.
 roles:
   accountable: Lead Engineer
@@ -48,7 +47,8 @@ roles:
     - Independent Auditor
     - Doc Steward
 pointers:
-  task: agents/lead_engineer/tasks/TASK-AR-247.md
+  task: agents/lead_engineer/tasks/TASK-AR-248.md
+  completed_testset: agents/lead_engineer/tasks/TASK-AR-247.md
   task_set_plan: docs/superpowers/plans/2026-06-10-pane-progress-tasksets.md
   compound: agents/lead_engineer/compound_log.md
   protocol: AGENT_RUNTIME_PARALLEL_SESSION_PROTOCOL.md

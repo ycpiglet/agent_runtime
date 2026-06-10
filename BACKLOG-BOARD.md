@@ -9,17 +9,17 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-10
 task_count: 49
-open_count: 36
+open_count: 35
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `49` total tasks; `36` open or active.
+- Summary: `49` total tasks; `35` open or active.
 - Recommended next: `TASK-AR-205` - 오프라인에서 정답 보유 영역은 구조화된 데이터셋으로 재현 가능한 평가를 수행하고, 90% 미만이면 릴리스를 막는다.
 
 ## Signal
-- Status: Action `29` / Ask `2` / Review `0` / Later `5` / Done `13`.
+- Status: Action `28` / Ask `2` / Review `0` / Later `5` / Done `14`.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -47,7 +47,6 @@ open_count: 36
 | `TASK-AR-217` | in_progress | P0 | Critical | High | 14h/2800tok | Medium | 10 | validation-team | qa | Execute next | `v0.1.8` 공개 후보(2026-07-02/07-09/07-16)를 가정한 `release-preflight`, 오프라인 90% 게이트, review… |
 | `TASK-AR-223` | in_progress | P0 | Critical | Medium | 12h/2600tok | Medium | 10 | validation-team | qa | Execute next | `agent_runtime`에서 모델/핵심 루틴 재작성 없이 프로젝트 투입 시 오버레이 교체만으로 공식 가이드(Claude/Codex/OpenAI) 정합… |
 | `TASK-AR-240` | planned | P0 | Critical | Medium | 12h/2200tok | Medium | 10 | agent-runtime-core | lead-engineer | Execute next | Create a version and release consistency steward that checks release state, version s… |
-| `TASK-AR-247` | planned | P0 | Critical | Medium | 8h/1600tok | Medium | 10 | validation-team | qa | Execute next | Create the fixed pane/task-set progress golden set before UI or enforcement changes. |
 | `TASK-AR-206` | in_progress | P0 | Critical | Medium | 10h/1800tok | Medium | 9 | validation-team | qa | Execute next | 라이브 작업 종료 시 reviewer agent의 적대적 검토를 강제하고, 답변에 근거/태그를 붙인다. |
 | `TASK-AR-207` | in_progress | P0 | Critical | Medium | 12h/1800tok | Medium | 9 | validation-team | qa | Execute next | 채팅, 리뷰, 메시지에서 탐지된 오답/누락/모호성의 교정 제안을 자동 수집한다. |
 | `TASK-AR-208` | in_progress | P0 | Critical | Medium | 12h/1800tok | Medium | 9 | validation-team | qa | Execute next | 요청/리뷰/결정 이벤트를 추적 가능한 A2A 메시지 스키마로 관리해 멀티 에이전트/멀티 프로젝트 운영 안정성을 확보한다. |
@@ -98,6 +97,7 @@ open_count: 36
 |---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-204` | completed | P0 | Critical | Medium | 12h/1800tok | Medium | 8 | agent-runtime-core | lead-engineer | Archive/evidence only | 런타임의 스킬/런북 문서가 코드/데이터/스키마 변경과 동기화되지 않을 경우 릴리스가 차단되도록 한다. |
 | `TASK-AR-216` | completed | P0 | Critical | Medium | 10h/2200tok | Medium | 8 | agent-runtime-core | lead-engineer | Archive/evidence only | `v0.1.7` 공개 판정의 미충족 항목을 `v0.1.8` 판정으로 안전하게 이관하고, 릴리스 보드가 읽는 하나의 `release-state` 체인으로… |
+| `TASK-AR-247` | completed | P0 | Critical | Medium | 8h/1600tok | Medium | 8 | validation-team | qa | Archive/evidence only | Create the fixed pane/task-set progress golden set before UI or enforcement changes. |
 | `TASK-AR-215` | completed | P0 | Critical | Medium | 18h/3000tok | Low | 6 | project-context | doc-steward | Archive/evidence only | 다른 프로젝트로 에이전트를 투입할 때 공용 런타임은 유지하고 오버레이만 교체해 vision, roadmap, 조직도, 팀, 링크, 협의기록을 즉시 맥락에… |
 | `TASK-AR-225` | completed | P0 | Critical | Medium | 10h/1800tok | Low | 6 | agent-runtime-core | cicd-engineer | Archive/evidence only | Close the `release-preflight findings=358` blocker discovered by `TASK-AR-224` execut… |
 | `TASK-AR-226` | completed | P0 | Critical | Medium | 8h/1400tok | Low | 6 | agent-runtime-core | lead-engineer | Archive/evidence only | Map the current `agent_runtime` state sources before building a web UI, so the UI rea… |

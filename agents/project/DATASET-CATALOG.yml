@@ -34,6 +34,23 @@ datasets:
       - governance
       - metadata
 
+  - id: pane-progress-gold
+    purpose: pane/task-set 진행률, 단계, 상태 문구, rough percent 표시 계약 검증
+    owner: lead_engineer
+    source_tier: lineage
+    location: agents/project/evals/pane-progress-v1.jsonl
+    label_type: human_gold
+    minimum_score: 0.90
+    metrics:
+      - progress_contract
+      - phase_step_consistency
+      - task_set_aggregation
+      - status_text_presence
+    tags:
+      - pane
+      - progress
+      - task-set
+
   quality_gates:
   per_domain_minimum_score: 0.90
   block_release_on_regression: true

@@ -1,6 +1,6 @@
 ---
 id: TASK-AR-247
-status: planned
+status: completed
 owner: lead-engineer
 priority: P0
 difficulty: M
@@ -17,6 +17,8 @@ audit_log:
   - docs/superpowers/plans/2026-06-10-pane-progress-tasksets.md
   - agents/project/evals/pane-progress-v1.jsonl
   - agents/project/DATASET-CATALOG.yml
+  - tests/test_pane_progress_contract.py
+  - reviews/OFFLINE-EVAL-2026-06-10-task-ar-247-pane-progress.json
 created: 2026-06-10
 ---
 
@@ -39,8 +41,15 @@ Create the fixed pane/task-set progress golden set before UI or enforcement chan
 
 ## State Machine Mapping
 
-- cycle: planned
-- task: TASK-AR-247 planned
-- gate: pending
-- review: draft
+- cycle: evaluated
+- task: TASK-AR-247 completed
+- gate: pass
+- review: evidence-recorded
+
+## Completion Log
+
+- Added `agents/project/evals/pane-progress-v1.jsonl` with 6 fixed cases across typical, edge, adversarial, ambiguous, and access-controlled types.
+- Registered `pane-progress-gold` in `agents/project/DATASET-CATALOG.yml`.
+- Added `tests/test_pane_progress_contract.py` for committed testset contract validation.
+- Verified `pane-progress-gold status=pass score=1.0 cases=6 findings=0` with `scripts/offline_eval_gate.py`.
 
