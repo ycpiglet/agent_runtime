@@ -93,6 +93,9 @@ def test_ui_state_adapter_normalizes_runtime_records_with_source_metadata(tmp_pa
 
     assert state["generated_at"] == "2026-06-10T12:05:00+09:00"
     assert state["tasks"][0]["id"] == "TASK-AR-227"
+    assert state["tasks"][0]["display_id"] == "TASK-AR-227"
+    assert state["tasks"][0]["metadata"]["registered_at"] == "2026-06-10"
+    assert state["tasks"][0]["metadata"]["created_at"] == "2026-06-10"
     assert state["tasks"][0]["lane"] == "In Progress"
     assert state["tasks"][0]["owner_agent"] == "lead-engineer"
     assert state["tasks"][0]["blocked_reason"] == "waiting on sample data"
@@ -106,6 +109,47 @@ def test_ui_state_adapter_normalizes_runtime_records_with_source_metadata(tmp_pa
     assert state["agents"][0]["current_task_id"] == "TASK-AR-227"
     assert state["goals"][0]["source_path"] == "STATUS.md"
     assert all("last_read_at" in source and "freshness" in source for source in state["sources"])
+
+
+def test_ui_state_exposes_task_identity_and_lifecycle_metadata(tmp_path):
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md",
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-901",
+                "display_id: TASK-AR-901",
+                "task_uid: 11111111-1111-4111-8111-111111111111",
+                "status: completed",
+                "owner: lead-engineer",
+                "priority: P0",
+                "registered_at: 2026-06-10T12:00:00+09:00",
+                "started_at: 2026-06-10T12:05:00+09:00",
+                "updated_at: 2026-06-10T12:20:00+09:00",
+                "completed_at: 2026-06-10T12:30:00+09:00",
+                "---",
+                "",
+                "## Goal",
+                "",
+                "Expose lifecycle metadata.",
+                "",
+            ]
+        ),
+    )
+
+    state = ui_state.build_state(tmp_path, now="2026-06-10T12:35:00+09:00")
+
+    task = state["tasks"][0]
+    assert task["id"] == "TASK-AR-901"
+    assert task["task_uid"] == "11111111-1111-4111-8111-111111111111"
+    assert task["display_id"] == "TASK-AR-901"
+    assert task["metadata"]["registered_at"] == "2026-06-10T12:00:00+09:00"
+    assert task["metadata"]["started_at"] == "2026-06-10T12:05:00+09:00"
+    assert task["metadata"]["updated_at"] == "2026-06-10T12:20:00+09:00"
+    assert task["metadata"]["completed_at"] == "2026-06-10T12:30:00+09:00"
+    assert task["registered_at"] == "2026-06-10T12:00:00+09:00"
+    assert task["started_at"] == "2026-06-10T12:05:00+09:00"
+    assert task["completed_at"] == "2026-06-10T12:30:00+09:00"
 
 
 def test_ui_state_adapter_missing_optional_runtime_dirs_returns_empty_collections_and_gaps(tmp_path):

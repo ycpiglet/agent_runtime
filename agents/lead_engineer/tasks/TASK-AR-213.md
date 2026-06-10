@@ -1,5 +1,11 @@
 ---
 id: TASK-AR-213
+display_id: TASK-AR-213
+task_uid: 8cf05d05-ae04-4b15-a4ff-d588acc3feab
+registered_at: 2026-06-18
+created_at: 2026-06-18
+updated_at: 2026-06-11T00:00:00+09:00
+completed_at: 2026-06-11T00:00:00+09:00
 status: completed
 owner: agent-runtime
 priority: P0

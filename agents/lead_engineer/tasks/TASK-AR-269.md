@@ -1,5 +1,12 @@
 ---
 id: TASK-AR-269
+display_id: TASK-AR-269
+task_uid: d927d484-7f3e-47ce-a82c-2a8984ca784b
+registered_at: 2026-06-11
+created_at: 2026-06-11
+started_at: 2026-06-11
+updated_at: 2026-06-11T00:00:00+09:00
+completed_at: 2026-06-11T00:00:00+09:00
 title: Preserve mobile and accessibility behavior
 status: completed
 priority: medium

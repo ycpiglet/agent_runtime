@@ -1,5 +1,10 @@
 ---
 id: TASK-AR-262
+display_id: TASK-AR-262
+task_uid: 1da38bf4-98d7-42ae-9c61-6044dd0cb69e
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
 title: Broad pytest collection hygiene and verification tier split
 status: completed
 priority: P1

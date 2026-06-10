@@ -1,5 +1,12 @@
 ---
 id: TASK-AR-233
+display_id: TASK-AR-233
+task_uid: d475a04e-6c54-4826-8195-0ffaa2264910
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
+updated_at: 2026-06-11T00:00:00+09:00
+completed_at: 2026-06-11T00:00:00+09:00
 status: completed
 owner: lead-engineer
 priority: P0

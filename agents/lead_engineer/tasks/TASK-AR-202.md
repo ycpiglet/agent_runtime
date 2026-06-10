@@ -1,5 +1,10 @@
 ---
 id: TASK-AR-202
+display_id: TASK-AR-202
+task_uid: f4057c67-bc4c-4a63-b76b-fbd1c59daf52
+registered_at: 2026-06-11
+created_at: 2026-06-11
+updated_at: 2026-06-11T00:00:00+09:00
 status: planned
 owner: agent-runtime
 priority: P0

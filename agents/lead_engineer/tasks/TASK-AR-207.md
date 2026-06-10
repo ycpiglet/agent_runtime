@@ -1,5 +1,11 @@
 ---
 id: TASK-AR-207
+display_id: TASK-AR-207
+task_uid: 44bcf47c-75bd-44b1-a32d-4ec7408fd480
+registered_at: 2026-06-11
+created_at: 2026-06-11
+started_at: 2026-06-11
+updated_at: 2026-06-11T00:00:00+09:00
 status: completed
 completed_at: 2026-06-10T22:12:00+09:00
 owner: agent-runtime

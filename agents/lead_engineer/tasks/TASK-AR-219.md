@@ -19,6 +19,11 @@ audit_log:
   - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-219-gate-pass-handoff.md
   - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-219-claim-closeout.md
 id: TASK-AR-219
+display_id: TASK-AR-219
+task_uid: bc4aeb9b-e59b-4f3a-8b66-5080ca5a0311
+registered_at: 2026-06-09
+created_at: 2026-06-09
+updated_at: 2026-06-11T00:00:00+09:00
 status: completed
 owner: lead-engineer
 priority: P0

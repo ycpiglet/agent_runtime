@@ -35,6 +35,11 @@ audit_log:
   - reviews/A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final.json
   - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-221-quality-loop-closeout.md
 id: TASK-AR-221
+display_id: TASK-AR-221
+task_uid: f1d2c4ec-6d96-45bc-a227-a96006620124
+registered_at: 2026-06-09
+created_at: 2026-06-09
+updated_at: 2026-06-11T00:00:00+09:00
 status: completed
 completed_at: 2026-06-10T23:22:00+09:00
 started_at: 2026-06-09T18:00:00+09:00

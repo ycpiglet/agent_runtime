@@ -7,7 +7,9 @@
 - Published `docs/design/agent-runtime/DESIGN.md` and `reviews/RESEARCH-2026-06-11-agent-runtime-ui-design-research.md`.
 - Updated `src/agent_runtime/ui_console.py` styling tokens and component surfaces without changing route or JavaScript contracts.
 - Added CSS token anchors in `tests/test_ui_console.py`.
-- Follow-up verification path: focused UI/backlog tests, Owner governance gate, and final git status.
+- Added Owner closeout review `reviews/REVIEW-2026-06-11-agent-runtime-ui-design-taskset-closeout.md`.
+- Reconciled `agents/project/NEXT-SESSION-POINTER.yml` and `owner-docs.yml` so the latest taskset is the handoff state.
+- Follow-up verification path: named UI taskset gate, focused UI/backlog tests, Owner doc format gate, Owner governance gate, full tests, and final git status.
 
 ## 2026-06-10 - TASKSET-AR-GOVERNANCE-OPS registration and implementation start
 

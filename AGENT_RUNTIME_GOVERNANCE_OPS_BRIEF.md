@@ -55,6 +55,12 @@ updated_at: 2026-06-10T23:55:00+09:00
 | Done | Split broad pytest collection hygiene | qa | `TASK-AR-262` |
 | Done | Publish recurring governance ops report | independent-auditor | `TASK-AR-263` |
 
+## Risks / Blockers
+
+- Risk: `role-usage:scribe` remains a watch item until real claim/log evidence exists.
+- Risk: low-frequency monitored roles can drift again unless the recurring governance report stays in the closeout path.
+- Blocker: none for local governance enforcement closeout.
+
 ## Next
 
 - Add real scribe claim/log evidence, then remove the remaining waiver.

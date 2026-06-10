@@ -1,5 +1,12 @@
 ---
 id: TASK-AR-265
+display_id: TASK-AR-265
+task_uid: db774f7c-204e-4ed2-ba34-e6d64a83df3c
+registered_at: 2026-06-11
+created_at: 2026-06-11
+started_at: 2026-06-11
+updated_at: 2026-06-11T00:00:00+09:00
+completed_at: 2026-06-11T00:00:00+09:00
 title: Publish Agent Runtime UI design guide
 status: completed
 priority: high

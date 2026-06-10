@@ -1,5 +1,11 @@
 ---
 id: TASK-AR-249
+display_id: TASK-AR-249
+task_uid: 5437aec8-5722-44a6-9fce-a993e484d35c
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
+completed_at: 2026-06-10
 status: completed
 owner: lead-engineer
 priority: P1

@@ -8,6 +8,12 @@ audit_log:
   - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-source-output-coverage.md
   - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-222-claim-closeout.md
 id: TASK-AR-222
+display_id: TASK-AR-222
+task_uid: 59a6a708-6909-4615-bfa9-0e4f1dfa5faa
+registered_at: 2026-06-09
+created_at: 2026-06-09
+started_at: 2026-06-09
+updated_at: 2026-06-11T00:00:00+09:00
 status: completed
 owner: lead-engineer
 priority: P0

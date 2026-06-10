@@ -1,5 +1,10 @@
 ---
 id: TASK-AR-260
+display_id: TASK-AR-260
+task_uid: 17f86f7a-f7d3-4073-a377-8519544f16ca
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
 title: Runtime asset usage and reuse lifecycle metrics
 status: completed
 priority: P0

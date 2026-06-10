@@ -1,5 +1,10 @@
 ---
 id: TASK-AR-252
+display_id: TASK-AR-252
+task_uid: c702cf3c-d50b-49dc-a6b1-5b431d9342b2
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
 title: Add append-only pane collaboration event log
 status: completed
 priority: P0

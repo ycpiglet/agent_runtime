@@ -1,5 +1,10 @@
 ---
 id: TASK-AR-214
+display_id: TASK-AR-214
+task_uid: ba4b73b4-6344-4685-951d-9d0ee2fbca4e
+registered_at: 2026-06-09
+created_at: 2026-06-09
+updated_at: 2026-06-11T00:00:00+09:00
 status: in_progress
 started_at: 2026-06-09T10:20:00+09:00
 owner: agent-runtime

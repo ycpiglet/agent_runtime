@@ -1,5 +1,12 @@
 ---
 id: TASK-AR-266
+display_id: TASK-AR-266
+task_uid: c008f8b2-b12d-4523-a63c-4e2d0c87756d
+registered_at: 2026-06-11
+created_at: 2026-06-11
+started_at: 2026-06-11
+updated_at: 2026-06-11T00:00:00+09:00
+completed_at: 2026-06-11T00:00:00+09:00
 title: Apply Linear-like console shell styling
 status: completed
 priority: high

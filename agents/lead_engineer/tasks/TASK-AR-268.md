@@ -1,5 +1,12 @@
 ---
 id: TASK-AR-268
+display_id: TASK-AR-268
+task_uid: 8983774d-4974-4a00-b1ef-d0294c6f9046
+registered_at: 2026-06-11
+created_at: 2026-06-11
+started_at: 2026-06-11
+updated_at: 2026-06-11T00:00:00+09:00
+completed_at: 2026-06-11T00:00:00+09:00
 title: Elevate evidence and command visual states
 status: completed
 priority: medium

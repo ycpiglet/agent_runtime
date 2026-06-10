@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-11
-task_count: 70
+task_count: 74
 open_count: 5
-completed_count: 65
+completed_count: 69
 task_set_count: 1
-completed_task_set_count: 10
+completed_task_set_count: 11
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `5` open or active tasks; `65` completed tasks are archived from this live board.
+- Summary: `5` open or active tasks; `69` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `3` / Ask `2` / Review `0` / Later `0` / Done `65`.
-- Task Sets: `1` active workflows; `10` completed workflows are hidden from the live action board.
+- Status: Action `3` / Ask `2` / Review `0` / Later `0` / Done `69`.
+- Task Sets: `1` active workflows; `11` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -67,8 +67,84 @@ completed_task_set_count: 10
 | Progress Scout (`TASKSET-AR-PANE-PROGRESS`) | Pane/task-set progress, live continuity, claims, and resumable handoffs. | `5/5` done | `5` completed task files archived |
 | Concurrency Steward (`TASKSET-AR-COLLAB-CONCURRENCY`) | Real-time pane collaboration, event replay, SSoT ownership, and conflict gates. | `6/6` done | `6` completed task files archived |
 | Governance Operator (`TASKSET-AR-GOVERNANCE-OPS`) | Waiver burn-down, lifecycle cleanup, runtime asset usage, sync enforcement, and verification hygiene. | `7/7` done | `7` completed task files archived |
+| Identity Steward (`TASKSET-AR-TASK-IDENTITY`) | Collision-proof task identity, UUID metadata, lifecycle timestamps, and recovery visibility. | `4/4` done | `4` completed task files archived |
 | Design Operator (`TASKSET-AR-UI-DESIGN-SYSTEM`) | Agent Runtime UI research, design-system guidance, and console visual implementation. | `7/7` done | `7` completed task files archived |
 | Repo Custodian (`TASKSET-AR-REPO-HYGIENE`) | Working-tree cleanup, backlog cycle hygiene, and handoff publication. | `1/1` done | `1` completed task files archived |
+
+## Archived Task Files
+
+- Restore rule: completed tasks stay hidden from the live Action Board, but every completed task file remains visible here with identity and lifecycle metadata.
+| Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
+|---|---|---|---|---|---|---|---|---|
+| `TASK-AR-204` | `d384f27a-407…` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | 2026-06-09 | 2026-06-09 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | 런타임의 스킬/런북 문서가 코드/데이터/스키마 변경과 동기화되지 않을 경우 릴리스가 차단되도록 한다. |
+| `TASK-AR-215` | `08b01bc0-2ee…` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | 2026-06-09 | 2026-06-09T11:00:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | 다른 프로젝트로 에이전트를 투입할 때 공용 런타임은 유지하고 오버레이만 교체해 vision, roadmap, 조직도, 팀, 링크, 협의기록을 즉시 맥락에… |
+| `TASK-AR-205` | `fb3af52e-1ae…` | `TASKSET-AR-QUALITY-LOOP` | completed | 2026-06-11 | 2026-06-11 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | 오프라인에서 정답 보유 영역은 구조화된 데이터셋으로 재현 가능한 평가를 수행하고, 90% 미만이면 릴리스를 막는다. |
+| `TASK-AR-217` | `06b35d56-8b2…` | `TASKSET-AR-QUALITY-LOOP` | completed | 2026-06-09 | 2026-06-09 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `v0.1.8` 공개 후보(2026-07-02/07-09/07-16)를 가정한 `release-preflight`, 오프라인 90% 게이트, review… |
+| `TASK-AR-243` | `97d57c17-96d…` | `TASKSET-AR-QUALITY-LOOP` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:22:00+09:00 | 2026-06-11T00:00:00+09:00 | Connect trace, grader, eval, correction, live-review, and A2A evidence to planning pr… |
+| `TASK-AR-206` | `739ed262-4fe…` | `TASKSET-AR-QUALITY-LOOP` | completed | 2026-06-11 | 2026-06-11 | 2026-06-10T22:04:00+09:00 | 2026-06-11T00:00:00+09:00 | 라이브 작업 종료 시 reviewer agent의 적대적 검토를 강제하고, 답변에 근거/태그를 붙인다. |
+| `TASK-AR-207` | `44bcf47c-75b…` | `TASKSET-AR-QUALITY-LOOP` | completed | 2026-06-11 | 2026-06-11 | 2026-06-10T22:12:00+09:00 | 2026-06-11T00:00:00+09:00 | 채팅, 리뷰, 메시지에서 탐지된 오답/누락/모호성의 교정 제안을 자동 수집한다. |
+| `TASK-AR-208` | `9e6f55b7-ad4…` | `TASKSET-AR-QUALITY-LOOP` | completed | 2026-06-11 | 2026-06-11 | 2026-06-10T22:20:00+09:00 | 2026-06-11T00:00:00+09:00 | 요청/리뷰/결정 이벤트를 추적 가능한 A2A 메시지 스키마로 관리해 멀티 에이전트/멀티 프로젝트 운영 안정성을 확보한다. |
+| `TASK-AR-221` | `f1d2c4ec-6d9…` | `TASKSET-AR-QUALITY-LOOP` | completed | 2026-06-09 | 2026-06-09T18:00:00+09:00 | 2026-06-10T23:22:00+09:00 | 2026-06-11T00:00:00+09:00 | 에이전트 런타임을 한 번에 재사용 가능한 MVP/멀티 프로젝트 운영 구조로 정리한다. 공식 가이드(Claude/Codex/OpenAI 권고)에 맞추어 아… |
+| `TASK-AR-209` | `914d9b65-a63…` | `TASKSET-AR-MIGRATION-PARITY` | completed | 2026-06-09 | 2026-06-13T10:10:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `tag_manual`에서 `agent_runtime`로 이식할 때 누락·변형·의도적 제외 항목을 분리해, 다음 릴리스에서 추적 가능하게 증빙한다. |
+| `TASK-AR-218` | `aa5a97ba-86b…` | `TASKSET-AR-MIGRATION-PARITY` | completed | 2026-06-09 | 2026-06-09T16:00:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `TASK-AR-216`/`TASK-AR-217` 판정 전제 조건을 위해 `tag_manual` 이식 누락·변경 근거가 미정으로 남는 상태를 제거하고,… |
+| `TASK-AR-224` | `330694dc-a51…` | `TASKSET-AR-MIGRATION-PARITY` | completed | 2026-06-19 | 2026-06-19 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `v0.1.8` 판정에서 공통 정합 규칙(공식 가이드 반영, migration 근거, tag_manual 이식 누락 처리)이 줄지 않게 동작하도록 공식/… |
+| `TASK-AR-213` | `8cf05d05-ae0…` | `TASKSET-AR-MIGRATION-PARITY` | completed | 2026-06-18 | 2026-06-18T09:30:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `tag_manual` 이식에서 `skill / hook / script` 항목을 `kept/changed/deprecated/dropped/missin… |
+| `TASK-AR-220` | `d447eec2-368…` | `TASKSET-AR-MIGRATION-PARITY` | completed | 2026-06-09 | 2026-06-10T09:15:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `tag_manual`에서 `agent_runtime`으로 이동할 때 skill/hook/script 누락·변형·의도적 제외가 의도된 이유인지, 기술적… |
+| `TASK-AR-212` | `cc5a29c5-ad5…` | `TASKSET-AR-MIGRATION-PARITY` | completed | 2026-06-11 | 2026-06-13T10:25:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `TASK-AR-209`의 마이그레이션 감사 결과를 재현 가능한 증거로 완결하고, 향후 release-block 규칙에 연결한다. |
+| `TASK-AR-216` | `84debe84-e47…` | `TASKSET-AR-RELEASE-STEWARD` | completed | 2026-06-09 | 2026-06-09T13:00:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `v0.1.7` 공개 판정의 미충족 항목을 `v0.1.8` 판정으로 안전하게 이관하고, 릴리스 보드가 읽는 하나의 `release-state` 체인으로… |
+| `TASK-AR-210` | `a28ea57b-202…` | `TASKSET-AR-RELEASE-STEWARD` | completed | 2026-06-11 | 2026-06-12T09:30:00+09:00 | 2026-06-10T20:55:00+09:00 | 2026-06-11T00:00:00+09:00 | `v0.1.6`/`v0.1.7` 공개 판단을 근거 기반으로 고정하고, `v0.1.8` 판정(`07-02/07-09/07-16`)을 기준으로 release… |
+| `TASK-AR-240` | `a82d6c89-997…` | `TASKSET-AR-RELEASE-STEWARD` | completed | 2026-06-10 | 2026-06-10T22:22:00+09:00 | 2026-06-10T22:50:00+09:00 | 2026-06-11T00:00:00+09:00 | Create a version and release consistency steward that checks release state, version s… |
+| `TASK-AR-223` | `efce46d4-273…` | `TASKSET-AR-RELEASE-STEWARD` | completed | 2026-06-14 | 2026-06-14 | 2026-06-10T22:12:00+09:00 | 2026-06-11T00:00:00+09:00 | `agent_runtime`에서 모델/핵심 루틴 재작성 없이 프로젝트 투입 시 오버레이 교체만으로 공식 가이드(Claude/Codex/OpenAI) 정합… |
+| `TASK-AR-219` | `bc4aeb9b-e59…` | `TASKSET-AR-RELEASE-STEWARD` | completed | 2026-06-09 | 2026-06-10T09:00:00+09:00 | 2026-06-10T22:24:00+09:00 | 2026-06-11T00:00:00+09:00 | 현재 로드맵 기준으로 `v0.1.8` 후보 공개 판단을 한 번 더 고정하고, Claude/Codex 계열 공식 권고(컨텍스트 우선순위, trace-gra… |
+| `TASK-AR-225` | `046534c6-22d…` | `TASKSET-AR-RELEASE-STEWARD` | completed | 2026-06-09 | 2026-06-09 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Close the `release-preflight findings=358` blocker discovered by `TASK-AR-224` execut… |
+| `TASK-AR-222` | `59a6a708-690…` | `TASKSET-AR-RELEASE-STEWARD` | completed | 2026-06-09 | 2026-06-09 | 2026-06-10T22:48:00+09:00 | 2026-06-11T00:00:00+09:00 | `v0.1.8` 1차 판정(2026-07-02)을 위해 요구사항 1~16 및 공식 권고를 하나의 판정 번들로 정합한다. 특히 `agent_runtime`… |
+| `TASK-AR-226` | `8fe1f6c1-1ec…` | `TASKSET-AR-UI-CONSOLE` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Map the current `agent_runtime` state sources before building a web UI, so the UI rea… |
+| `TASK-AR-227` | `808cdda2-38c…` | `TASKSET-AR-UI-CONSOLE` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Expose a safe, read-first backend interface for the UI console, using runtime files a… |
+| `TASK-AR-230` | `ea8b33bf-62d…` | `TASKSET-AR-UI-CONSOLE` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Allow the user to control runtime work from the UI by sending prompts and lifecycle c… |
+| `TASK-AR-229` | `9d3ec2a8-472…` | `TASKSET-AR-UI-CONSOLE` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Let the UI manage tasks safely by sending changes through runtime APIs or a command o… |
+| `TASK-AR-231` | `4862fdea-931…` | `TASKSET-AR-UI-CONSOLE` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Make the UI trustworthy during long `/goal` runs by surfacing freshness, live event c… |
+| `TASK-AR-228` | `1b4f4177-8cb…` | `TASKSET-AR-UI-CONSOLE` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Build the first read-only web console so the user can see backlog, current work, agen… |
+| `TASK-AR-232` | `bd41c885-08d…` | `TASKSET-AR-UI-CONSOLE` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Add the post-MVP visualizations that make the runtime understandable as an agent orga… |
+| `TASK-AR-234` | `3b6a93f7-451…` | `TASKSET-AR-RSI-PLANNING` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T22:56:04+09:00 | 2026-06-11T00:00:00+09:00 | Define the planning loop contract and state machine for bounded recursive self-improv… |
+| `TASK-AR-235` | `cdc49e24-448…` | `TASKSET-AR-RSI-PLANNING` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T22:56:04+09:00 | 2026-06-11T00:00:00+09:00 | Implement a read-only planning scan that compares backlog, status, roadmap, task file… |
+| `TASK-AR-236` | `c6b42720-2e6…` | `TASKSET-AR-RSI-PLANNING` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T22:56:04+09:00 | 2026-06-11T00:00:00+09:00 | Add a proposal outbox and draft task writer so planning findings become inspectable p… |
+| `TASK-AR-237` | `8ffebe48-326…` | `TASKSET-AR-RSI-PLANNING` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T22:56:04+09:00 | 2026-06-11T00:00:00+09:00 | Connect the planning loop to safe triggers: cycle completion, task completion, schedu… |
+| `TASK-AR-241` | `4ef77297-594…` | `TASKSET-AR-RSI-PLANNING` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T22:56:04+09:00 | 2026-06-11T00:00:00+09:00 | Build a review/compound/retro synthesizer that reads historical tasks, reviews, compo… |
+| `TASK-AR-238` | `e79087b1-0d5…` | `TASKSET-AR-RSI-PLANNING` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T22:56:04+09:00 | 2026-06-11T00:00:00+09:00 | Add a UI Planner panel that shows planning scans, proposals, evidence, risk tier, rev… |
+| `TASK-AR-239` | `575111ea-51a…` | `TASKSET-AR-RSI-PLANNING` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T22:56:04+09:00 | 2026-06-11T00:00:00+09:00 | Implement approved proposal apply and verification so accepted planning proposals can… |
+| `TASK-AR-244` | `8fbd6e5d-d87…` | `TASKSET-AR-RSI-PLANNING` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T22:56:04+09:00 | 2026-06-11T00:00:00+09:00 | Add stability, budget, drift, and non-divergence guardrails for recursive planning lo… |
+| `TASK-AR-242` | `2decefad-5dd…` | `TASKSET-AR-RSI-PLANNING` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T22:56:04+09:00 | 2026-06-11T00:00:00+09:00 | Define an agent department and diversity council model so similar topics are reviewed… |
+| `TASK-AR-245` | `47b6de8b-c38…` | `TASKSET-AR-RSI-PLANNING` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T22:56:04+09:00 | 2026-06-11T00:00:00+09:00 | Define the long-term C-mode promotion gate for bounded auto-planning and low-risk aut… |
+| `TASK-AR-247` | `b025becb-046…` | `TASKSET-AR-PANE-PROGRESS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Create the fixed pane/task-set progress golden set before UI or enforcement changes. |
+| `TASK-AR-250` | `35989583-b68…` | `TASKSET-AR-PANE-PROGRESS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Make task-set work user-friendly enough that a prompt like `taskset-quality-loop 진행해줘… |
+| `TASK-AR-248` | `db637774-594…` | `TASKSET-AR-PANE-PROGRESS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10 | 2026-06-10 | Show pane and task-set progress in the runtime UI using phase, step counter, rough pe… |
+| `TASK-AR-246` | `db571ed2-737…` | `TASKSET-AR-PANE-PROGRESS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Implement dispatcher helpers for safe parallel Codex/Claude work: one task per worktr… |
+| `TASK-AR-249` | `5437aec8-572…` | `TASKSET-AR-PANE-PROGRESS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10 | 2026-06-10 | Enforce progress updates in task claims and continuity pointers so new panes can resu… |
+| `TASK-AR-255` | `f65fb879-d50…` | `TASKSET-AR-COLLAB-CONCURRENCY` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:20:00+09:00 | 2026-06-10T23:20:00+09:00 | Run collaboration concurrency checks with the rest of the owner governance gate. |
+| `TASK-AR-251` | `262e447d-0f0…` | `TASKSET-AR-COLLAB-CONCURRENCY` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:20:00+09:00 | 2026-06-10T23:20:00+09:00 | Record the conversation research on Google Docs/Slides, Figma, Notion, Firestore, Act… |
+| `TASK-AR-252` | `c702cf3c-d50…` | `TASKSET-AR-COLLAB-CONCURRENCY` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:20:00+09:00 | 2026-06-10T23:20:00+09:00 | Add an append-only event stream for pane lifecycle and task-set coordination events. |
+| `TASK-AR-253` | `485edce3-c9c…` | `TASKSET-AR-COLLAB-CONCURRENCY` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:20:00+09:00 | 2026-06-10T23:20:00+09:00 | Block worker pane attempts to write shared SSoT files directly. |
+| `TASK-AR-254` | `1515a1ec-6b5…` | `TASKSET-AR-COLLAB-CONCURRENCY` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:20:00+09:00 | 2026-06-10T23:20:00+09:00 | Make task-set start create the missing task worktree before claim creation, preventin… |
+| `TASK-AR-256` | `8188dea3-31d…` | `TASKSET-AR-COLLAB-CONCURRENCY` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:20:00+09:00 | 2026-06-10T23:20:00+09:00 | Expose pane collaboration events and task-set summaries through the UI state adapter. |
+| `TASK-AR-257` | `278344d7-334…` | `TASKSET-AR-GOVERNANCE-OPS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:55:00+09:00 | 2026-06-10T23:55:00+09:00 | Register the remaining collaboration-governance, waiver, lifecycle, usage, sync, and… |
+| `TASK-AR-258` | `f3096efc-ab5…` | `TASKSET-AR-GOVERNANCE-OPS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:55:00+09:00 | 2026-06-10T23:55:00+09:00 | Reduce explicit collaboration waivers by promoting safe root runtime capabilities and… |
+| `TASK-AR-259` | `59a01025-c27…` | `TASKSET-AR-GOVERNANCE-OPS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:55:00+09:00 | 2026-06-10T23:55:00+09:00 | Normalize lifecycle evidence so released claims, heartbeats, active worktrees, and ta… |
+| `TASK-AR-260` | `17f86f7a-f7d…` | `TASKSET-AR-GOVERNANCE-OPS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:55:00+09:00 | 2026-06-10T23:55:00+09:00 | Make developed skills, hooks, triggers, gates, and runtime scripts measurable for act… |
+| `TASK-AR-261` | `38a4b41b-831…` | `TASKSET-AR-GOVERNANCE-OPS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:55:00+09:00 | 2026-06-10T23:55:00+09:00 | Prevent task progress from drifting away from backlog board, status, and next-session… |
+| `TASK-AR-262` | `1da38bf4-98d…` | `TASKSET-AR-GOVERNANCE-OPS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:55:00+09:00 | 2026-06-10T23:55:00+09:00 | Separate root verification from generated-project template verification so broad test… |
+| `TASK-AR-263` | `f8e9f655-d3e…` | `TASKSET-AR-GOVERNANCE-OPS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:55:00+09:00 | 2026-06-10T23:55:00+09:00 | Publish a recurring governance operations report that turns watch/waived/unused/low-r… |
+| `TASK-AR-20260611-001100-cf344293` | `cf344293-778…` | `TASKSET-AR-TASK-IDENTITY` | completed | 2026-06-11T00:11:00+09:00 | 2026-06-11T00:11:00+09:00 | 2026-06-11T00:11:00+09:00 | 2026-06-11T00:11:00+09:00 | Backfill registered, started, updated, and completed timestamps across canonical task… |
+| `TASK-AR-20260611-001300-56389c0e` | `56389c0e-ba1…` | `TASKSET-AR-TASK-IDENTITY` | completed | 2026-06-11T00:13:00+09:00 | 2026-06-11T00:13:00+09:00 | 2026-06-11T00:13:00+09:00 | 2026-06-11T00:13:00+09:00 | Verify no task, plan, task set, identity, or board synchronization work was omitted. |
+| `TASK-AR-20260611-001000-815e18ab` | `815e18ab-168…` | `TASKSET-AR-TASK-IDENTITY` | completed | 2026-06-11T00:10:00+09:00 | 2026-06-11T00:10:00+09:00 | 2026-06-11T00:10:00+09:00 | 2026-06-11T00:10:00+09:00 | Implement collision-proof task_uid allocation and owner governance enforcement. |
+| `TASK-AR-20260611-001200-f2b67a5a` | `f2b67a5a-76b…` | `TASKSET-AR-TASK-IDENTITY` | completed | 2026-06-11T00:12:00+09:00 | 2026-06-11T00:12:00+09:00 | 2026-06-11T00:12:00+09:00 | 2026-06-11T00:12:00+09:00 | Expose task identity and lifecycle metadata through UI state and archived backlog boa… |
+| `TASK-AR-264` | `9484fb10-d2b…` | `TASKSET-AR-UI-DESIGN-SYSTEM` | completed | 2026-06-11 | 2026-06-11 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Completed the UI research synthesis and implementation plan for the Agent Runtime con… |
+| `TASK-AR-265` | `db774f7c-204…` | `TASKSET-AR-UI-DESIGN-SYSTEM` | completed | 2026-06-11 | 2026-06-11 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Published a project-specific UI design guide that maps the research result to concret… |
+| `TASK-AR-266` | `c008f8b2-b12…` | `TASKSET-AR-UI-DESIGN-SYSTEM` | completed | 2026-06-11 | 2026-06-11 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Applied the selected dark operator-console token system to the Agent Runtime UI shell… |
+| `TASK-AR-267` | `a751c680-e52…` | `TASKSET-AR-UI-DESIGN-SYSTEM` | completed | 2026-06-11 | 2026-06-11 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Restyled backlog lanes, task cards, agent cards, event cards, evidence cards, source… |
+| `TASK-AR-268` | `8983774d-497…` | `TASKSET-AR-UI-DESIGN-SYSTEM` | completed | 2026-06-11 | 2026-06-11 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Updated visual tokens and component styling so pass, warning, blocked, failed, active… |
+| `TASK-AR-269` | `d927d484-7f3…` | `TASKSET-AR-UI-DESIGN-SYSTEM` | completed | 2026-06-11 | 2026-06-11 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Kept the existing responsive layout, visible labels, status text, focus states, and m… |
+| `TASK-AR-270` | `a7032c6f-439…` | `TASKSET-AR-UI-DESIGN-SYSTEM` | completed | 2026-06-11 | 2026-06-11 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Closed the UI design task set with task records, design documentation, implementation… |
+| `TASK-AR-233` | `d475a04e-6c5…` | `TASKSET-AR-REPO-HYGIENE` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Clean the current working tree through an intentional commit and push, then keep back… |
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

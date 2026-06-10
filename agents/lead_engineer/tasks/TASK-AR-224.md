@@ -1,5 +1,12 @@
 ---
 id: TASK-AR-224
+display_id: TASK-AR-224
+task_uid: 330694dc-a510-41dc-a646-40ed723a2a63
+registered_at: 2026-06-19
+created_at: 2026-06-19
+started_at: 2026-06-19
+updated_at: 2026-06-11T00:00:00+09:00
+completed_at: 2026-06-11T00:00:00+09:00
 status: completed
 owner: lead-engineer
 priority: P0

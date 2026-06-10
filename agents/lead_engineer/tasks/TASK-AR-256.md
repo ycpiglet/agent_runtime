@@ -1,5 +1,10 @@
 ---
 id: TASK-AR-256
+display_id: TASK-AR-256
+task_uid: 8188dea3-31d9-452c-864a-792e257bcee6
+registered_at: 2026-06-10
+created_at: 2026-06-10
+started_at: 2026-06-10
 title: Expose collaboration concurrency state in UI API
 status: completed
 priority: P1

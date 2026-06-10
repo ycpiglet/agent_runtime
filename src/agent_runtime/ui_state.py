@@ -231,10 +231,26 @@ def load_tasks(root: Path, now: str, warnings: list[dict[str, str]]) -> list[dic
             warnings.append(_warning("task-frontmatter-missing", rel_path, "task file has no parseable frontmatter"))
             continue
         task_id = str(meta.get("id") or path.stem)
+        registered_at = meta.get("registered_at") or meta.get("created") or meta.get("created_at")
+        created_at = meta.get("created_at") or meta.get("created") or registered_at
+        updated_at = meta.get("updated_at")
+        started_at = meta.get("started_at")
+        completed_at = meta.get("completed_at")
         goal = _section_text(body, "Goal") or _section_text(body, "목표") or body
         labels = meta.get("tags") if isinstance(meta.get("tags"), list) else []
+        metadata = {
+            "task_uid": meta.get("task_uid"),
+            "display_id": meta.get("display_id") or task_id,
+            "registered_at": registered_at,
+            "created_at": created_at,
+            "started_at": started_at,
+            "updated_at": updated_at,
+            "completed_at": completed_at,
+        }
         record = {
             "id": task_id,
+            "task_uid": meta.get("task_uid"),
+            "display_id": meta.get("display_id") or task_id,
             "title": str(meta.get("title") or _title_from_path(path, task_id)),
             "status": str(meta.get("status") or ""),
             "lane": _lane_for_status(str(meta.get("status") or "")),
@@ -245,9 +261,12 @@ def load_tasks(root: Path, now: str, warnings: list[dict[str, str]]) -> list[dic
             "labels": labels,
             "description": _first_sentence(goal),
             "blocked_reason": meta.get("blocked_reason"),
-            "created_at": meta.get("created") or meta.get("created_at"),
-            "updated_at": meta.get("updated_at"),
-            "completed_at": meta.get("completed_at"),
+            "registered_at": registered_at,
+            "created_at": created_at,
+            "started_at": started_at,
+            "updated_at": updated_at,
+            "completed_at": completed_at,
+            "metadata": metadata,
             "audit_log": meta.get("audit_log") if isinstance(meta.get("audit_log"), list) else [],
             "source_path": rel_path,
             "source_kind": "task_markdown",
