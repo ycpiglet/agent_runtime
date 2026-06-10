@@ -32,6 +32,7 @@ def main() -> int:
             "--path",
             "schemas/state-machines.schema.json",
         ],
+        ["scripts/parallel_worktree_gate.py", "--check"],
     ]
 
     failed = 0

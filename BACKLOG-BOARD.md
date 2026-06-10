@@ -8,18 +8,18 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-10
-task_count: 33
-open_count: 21
+task_count: 46
+open_count: 34
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `33` total tasks; `21` open or active.
+- Summary: `46` total tasks; `34` open or active.
 - Recommended next: `TASK-AR-205` - 오프라인에서 정답 보유 영역은 구조화된 데이터셋으로 재현 가능한 평가를 수행하고, 90% 미만이면 릴리스를 막는다.
 
 ## Signal
-- Status: Action `19` / Ask `2` / Review `0` / Later `0` / Done `12`.
+- Status: Action `27` / Ask `2` / Review `0` / Later `5` / Done `12`.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -46,6 +46,7 @@ open_count: 21
 | `TASK-AR-202` | planned | P0 | Critical | Medium | 10h/1700tok | Medium | 10 | agent-runtime-core | lead-engineer | Execute next | `runbook`를 재사용 가능한 숙련 프로세스로 표준화해, 질문 명확화-자료 검색-실행-적대적 검토-검증-기록 흐름을 에이전트가 강제하도록 한다. |
 | `TASK-AR-217` | in_progress | P0 | Critical | High | 14h/2800tok | Medium | 10 | validation-team | qa | Execute next | `v0.1.8` 공개 후보(2026-07-02/07-09/07-16)를 가정한 `release-preflight`, 오프라인 90% 게이트, review… |
 | `TASK-AR-223` | in_progress | P0 | Critical | Medium | 12h/2600tok | Medium | 10 | validation-team | qa | Execute next | `agent_runtime`에서 모델/핵심 루틴 재작성 없이 프로젝트 투입 시 오버레이 교체만으로 공식 가이드(Claude/Codex/OpenAI) 정합… |
+| `TASK-AR-240` | planned | P0 | Critical | Medium | 12h/2200tok | Medium | 10 | agent-runtime-core | lead-engineer | Execute next | Create a version and release consistency steward that checks release state, version s… |
 | `TASK-AR-206` | in_progress | P0 | Critical | Medium | 10h/1800tok | Medium | 9 | validation-team | qa | Execute next | 라이브 작업 종료 시 reviewer agent의 적대적 검토를 강제하고, 답변에 근거/태그를 붙인다. |
 | `TASK-AR-207` | in_progress | P0 | Critical | Medium | 12h/1800tok | Medium | 9 | validation-team | qa | Execute next | 채팅, 리뷰, 메시지에서 탐지된 오답/누락/모호성의 교정 제안을 자동 수집한다. |
 | `TASK-AR-208` | in_progress | P0 | Critical | Medium | 12h/1800tok | Medium | 9 | validation-team | qa | Execute next | 요청/리뷰/결정 이벤트를 추적 가능한 A2A 메시지 스키마로 관리해 멀티 에이전트/멀티 프로젝트 운영 안정성을 확보한다. |
@@ -58,6 +59,13 @@ open_count: 21
 | `TASK-AR-203` | planned | P0 | Critical | Medium | 8h/1500tok | Medium | 8 | project-context | doc-steward | Execute next | 지식창고 문서를 `빠른 참조, 차원 설명, 핵심 테이블, 주의사항/패턴, 상위 문맥 링크` 형식으로 표준화해 사람이 즉시 구조를 읽고 판단할 수 있게 한… |
 | `TASK-AR-221` | in_progress | P0 | Critical | High | 16h/3200tok | Medium | 8 | validation-team | qa | Execute next | 에이전트 런타임을 한 번에 재사용 가능한 MVP/멀티 프로젝트 운영 구조로 정리한다. 공식 가이드(Claude/Codex/OpenAI 권고)에 맞추어 아… |
 | `TASK-AR-222` | in_progress | P0 | Critical | High | 14h/2800tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | `v0.1.8` 1차 판정(2026-07-02)을 위해 요구사항 1~16 및 공식 권고를 하나의 판정 번들로 정합한다. 특히 `agent_runtime`… |
+| `TASK-AR-234` | planned | P0 | Critical | Medium | 10h/1800tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Define the planning loop contract and state machine for bounded recursive self-improv… |
+| `TASK-AR-235` | planned | P0 | Critical | Medium | 12h/2200tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Implement a read-only planning scan that compares backlog, status, roadmap, task file… |
+| `TASK-AR-236` | planned | P0 | Critical | Medium | 12h/2200tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Add a proposal outbox and draft task writer so planning findings become inspectable p… |
+| `TASK-AR-237` | planned | P0 | Critical | Medium | 12h/2200tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Connect the planning loop to safe triggers: cycle completion, task completion, schedu… |
+| `TASK-AR-246` | planned | P0 | Critical | Medium | 12h/2200tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Implement dispatcher helpers for safe parallel Codex/Claude work: one task per worktr… |
+| `TASK-AR-238` | planned | P1 | High | Medium | 14h/2400tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Add a UI Planner panel that shows planning scans, proposals, evidence, risk tier, rev… |
+| `TASK-AR-241` | planned | P1 | High | Medium | 12h/2200tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Build a review/compound/retro synthesizer that reads historical tasks, reviews, compo… |
 
 ### Ask
 
@@ -76,7 +84,11 @@ open_count: 21
 
 | Task | Status | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---:|---|---|---|---|---:|---|---|---|---|
-| - | - | - | - | - | - | - | - | - | - | - | - |
+| `TASK-AR-243` | planned | P0 | Critical | High | 16h/3000tok | Medium | 9 | validation-team | qa | Wait for dependency | Connect trace, grader, eval, correction, live-review, and A2A evidence to planning pr… |
+| `TASK-AR-239` | planned | P0 | Critical | High | 16h/2800tok | Low | 7 | agent-runtime-core | lead-engineer | Wait for dependency | Implement approved proposal apply and verification so accepted planning proposals can… |
+| `TASK-AR-244` | planned | P0 | Critical | High | 16h/2800tok | Low | 7 | agent-runtime-core | lead-engineer | Wait for dependency | Add stability, budget, drift, and non-divergence guardrails for recursive planning lo… |
+| `TASK-AR-242` | planned | P1 | High | High | 16h/2600tok | Low | 6 | agent-runtime-core | lead-engineer | Wait for dependency | Define an agent department and diversity council model so similar topics are reviewed… |
+| `TASK-AR-245` | planned | P1 | High | High | 16h/2800tok | Low | 6 | agent-runtime-core | lead-engineer | Wait for dependency | Define the long-term C-mode promotion gate for bounded auto-planning and low-risk aut… |
 
 ### Done
 

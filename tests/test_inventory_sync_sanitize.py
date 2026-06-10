@@ -145,6 +145,7 @@ def _write_public_source(root: Path):
             "  - id: health_signal",
             "  - id: cycle",
             "  - id: task",
+            "  - id: task_claim",
             "  - id: agent_job",
             "  - id: gate",
             "  - id: review",
@@ -1281,6 +1282,55 @@ def test_publish_bundle_copies_clean_public_source_only(tmp_path):
     assert (dest / "templates").exists() is False
     assert (dest / "build").exists() is False
     assert analyze_publish(dest) == []
+
+
+def test_publish_bundle_includes_owner_docs_manifest_entries(tmp_path):
+    source = tmp_path / "source"
+    dest = tmp_path / "dest"
+    _write_public_source(source)
+    _write(
+        source / "AGENT_RUNTIME_CUSTOM_BRIEF.md",
+        "\n".join(
+            [
+                "---",
+                "signal: pass",
+                "score: 90",
+                "---",
+                "# Custom Brief",
+                "",
+                "## Bottom Line",
+                "Included through owner-docs manifest.",
+                "",
+                "## Signal",
+                "",
+                "| Item | Status |",
+                "| --- | --- |",
+                "| include | pass |",
+                "",
+                "## Action Board",
+                "No action needed.",
+                "",
+                "## Risks / Blockers",
+                "None.",
+                "",
+                "## Decision",
+                "Include manifest docs.",
+                "",
+                "## Next Steps",
+                "Continue.",
+            ]
+        )
+        + "\n",
+    )
+    _write(
+        source / "owner-docs.yml",
+        "owner_docs:\n  - BACKLOG-BOARD.md\n  - AGENT_RUNTIME_CUSTOM_BRIEF.md\n",
+    )
+
+    plan = build_bundle_plan(source, dest)
+    rels = {item.path for item in plan.files}
+
+    assert "AGENT_RUNTIME_CUSTOM_BRIEF.md" in rels
 
 
 def test_publish_bundle_refuses_non_empty_destination(tmp_path):

@@ -160,6 +160,38 @@ User request
   -> release evidence bundle
 ```
 
+## RSI Planning Loop / Trace-Eval-Grader Integration
+
+`TASK-AR-234`~`TASK-AR-245`는 기존 eval/correction/A2A 체인을 planning loop의 입력으로 승격한다.
+
+- `trace`: agent run의 model/tool/guardrail/handoff 흐름을 planning evidence로 저장한다.
+- `grader`: trace 또는 output의 실패 유형을 구조화해 proposal category와 acceptance criteria로 변환한다.
+- `eval`: 반복 가능한 dataset/run 결과를 release readiness뿐 아니라 future task 생성 근거로 사용한다.
+- `correction`: live reviewer와 correction collector 결과를 retro/compound synthesizer가 읽어 재발 방지 task로 제안한다.
+- `A2A`: `contextId`/`taskId`를 proposal lineage와 follow-up task 연결 키로 사용한다.
+- `task_claim`: 병렬 worker의 `task_id`/`agent_instance_id`/`callsite_id`/worktree/branch/handoff/log를 묶어 실행 충돌과 세션 중단을 감지한다.
+
+### RSI Task Mapping
+
+| Task | Eval/trace role | Output |
+| --- | --- | --- |
+| `TASK-AR-234` | Defines planning state/proposal schema | B/C boundary and state machine |
+| `TASK-AR-235` | Reads eval/review/release evidence | Read-only planning scan JSON |
+| `TASK-AR-236` | Converts evidence into proposals | Proposal outbox and draft task writer |
+| `TASK-AR-240` | Checks release/version drift | Version/release consistency report |
+| `TASK-AR-241` | Reads history/compound/retro | Preventive task proposals |
+| `TASK-AR-243` | Normalizes trace/eval/grader inputs | Evidence-linked planning proposals |
+| `TASK-AR-244` | Blocks unstable recursion | Non-divergence guardrails |
+| `TASK-AR-245` | Promotes/demotes C-mode | C-mode gate and rollback rules |
+| `TASK-AR-246` | Separates parallel execution state | Worktree claim dispatcher and resume pointers |
+
+### Promotion Rule
+
+- B-mode may scan and propose autonomously.
+- C-mode may auto-apply only low-risk planning hygiene after repeated passing cycles.
+- C-mode is blocked until version/release consistency, trace/eval/grader integration, and non-divergence guardrails pass together.
+- Any proposal that weakens gates, mutates release/version state, performs external publication, touches secrets/prod data, or performs destructive actions remains owner-required.
+
 ## Task Plan
 
 ### TASK-AR-221 운영 정합 통합(권고 반영 묶음)
@@ -341,3 +373,4 @@ User request
 20. `TASK-AR-206` (live reviewer)
 21. `TASK-AR-207` (correction)
 22. `TASK-AR-208` (A2A)
+23. `TASK-AR-246` (parallel worktree/task claim dispatcher)

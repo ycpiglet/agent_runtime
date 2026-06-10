@@ -464,22 +464,78 @@
   - 상태: completed
   - 내용: agent communication graph, state-machine stepper, roadmap/goals/milestones hierarchy, workload heatmap/command palette 후보를 post-MVP로 구현.
 
+## RSI Planning Loop Initiative - `AGENT_RUNTIME_RSI_PLANNING_BRIEF.md`
+
+- 목적: 사이클 반복, task 마무리, 릴리스/평가/리뷰 진척을 근거로 스스로 planning scan을 수행하고, 새 task/plan/doc 수정안을 제안하는 bounded RSI 루프를 만든다.
+- 원칙: B-mode는 read-only scan + proposal outbox + review/apply gate. C-mode는 반복 검증 후 low-risk planning hygiene에만 제한적으로 승격한다.
+- 안정성 기준:
+  - trace/eval/grader/correction/A2A evidence가 없는 제안은 watch-only.
+  - release/version/external/destructive/prod-data/owner-only 변경은 자동 적용 금지.
+  - 제안은 source refs, trace id, dedupe key, risk tier, rollback path, verifier list를 가져야 한다.
+  - 다양성 council은 비판/옹호/탐색/안정화 관점을 제공하되 최종 출력은 pass/watch/block와 next action으로 수렴한다.
+
+- P0-RSI-1: `TASK-AR-234` Planning Loop Contract And State Machine
+  - 상태: planned
+  - 내용: `planning_loop`/`rsi_improvement` 상태와 proposal schema, B/C 경계를 고정.
+- P0-RSI-2: `TASK-AR-235` Read-only Planning Scan JSON
+  - 상태: planned
+  - 내용: backlog/status/roadmap/task/review/eval/trace/release/state-machine drift를 read-only JSON으로 보고.
+- P0-RSI-3: `TASK-AR-236` Proposal Outbox And Draft Task Writer
+  - 상태: planned
+  - 내용: findings를 canonical mutation 전 proposal/draft task로 보관.
+- P0-RSI-4: `TASK-AR-237` Planning Gate, Hook, Schedule, And UI Trigger Integration
+  - 상태: planned
+  - 내용: task/cycle 종료, schedule, Stop hook, UI command에서 proposal-only scan을 안전하게 실행.
+- P1-RSI-5: `TASK-AR-238` UI Planner Panel And Proposal Review
+  - 상태: planned
+  - 내용: planning scan/proposal/evidence/disagreement/risk tier를 UI에서 검토.
+- P0-RSI-6: `TASK-AR-239` Approved Proposal Apply/Verify Flow
+  - 상태: planned
+  - 내용: 승인된 proposal만 task/backlog/status/roadmap에 적용하고 gate를 재실행.
+- P0-RSI-7: `TASK-AR-240` Version And Release Consistency Steward
+  - 상태: planned
+  - 내용: 버전, 릴리스 상태, 태그, owner approval, release evidence 정합을 점검.
+- P1-RSI-8: `TASK-AR-241` Review/Compound/Retro Synthesizer
+  - 상태: planned
+  - 내용: 과거 이력/review/compound/retro에서 재발 가능 문제와 예방 task를 제안.
+- P1-RSI-9: `TASK-AR-242` Agent Department And Diversity Council Model
+  - 상태: planned
+  - 내용: planning/release/rsi/eval/risk/diversity 부서와 관점별 reviewer 계약 정의.
+- P0-RSI-10: `TASK-AR-243` Trace/Eval/Grader Evidence Integration
+  - 상태: planned
+  - 내용: trace grading, graders, eval, correction, live review, A2A evidence를 proposal 근거로 연결.
+- P0-RSI-11: `TASK-AR-244` Stability, Budget, Drift, And Non-Divergence Guardrails
+  - 상태: planned
+  - 내용: proposal cap, scan frequency, token/time budget, self-weakening gate block, kill switch 고정.
+- P1-RSI-12: `TASK-AR-245` Long-term Auto Planner C-Mode Promotion Gate
+  - 상태: planned
+  - 내용: C-mode 승격/강등 조건과 auto-apply 허용/금지 범위를 gate로 정의.
+- P0-RSI-13: `TASK-AR-246` Parallel Worktree Task Claim Dispatcher
+  - 상태: planned
+  - 내용: task별 git worktree/branch/claim 생성과 해제, role instance/callsite 구분, handoff/log 포인터 강제를 구현.
+
 ## 다음 세션 우선순위
 
-1. `TASK-AR-223` 버전 업데이트 closeout 통합(강제 규칙/오버레이/마이그레이션 재수합)
-2. `TASK-AR-221` 운영 정합 통합(Task-합의 마감)
-3. `TASK-AR-210` 재판정: boundaries closure 후 `ready` 가능 여부 확인
-4. `TASK-AR-219` 공식 권고 반영 및 판정 근거 고정
-5. `TASK-AR-220` tag_manual 이식 근거 마감(스크립트/훅/스킬 누락·의도적 제외 정렬)
-6. `TASK-AR-216` v0.1.8 후보 이관 사유 정렬
-7. `TASK-AR-222` v0.1.8 closeout 번들 완성
-8. `TASK-AR-218` migration 무결성 정합 + migration-map block rule 정비
-9. `TASK-AR-214` 질의 계약/메타데이터 게이트 마무리
-10. `TASK-AR-215` 오버레이 context packet 확정
-11. `TASK-AR-204` co-location 강제 룰 적용
-12. `TASK-AR-213` migration parity lock 완료
-13. `TASK-AR-202`/`TASK-AR-203` 병행 착수
-14. 멀티 프로젝트 오버레이 적용을 위한 `PROJECT-CONTEXT`/`ROADMAP`/`ORG`/`LINKS`/`TEAMS` 변경 시뮬레이션(1개 MVP 케이스) 완료
+1. `TASK-AR-234` RSI planning loop contract/state machine부터 proposal-only B-mode 설계 착수
+2. `TASK-AR-235` read-only planning scan으로 현재 backlog/status/release/eval drift를 먼저 계측
+3. `TASK-AR-223` 버전 업데이트 closeout 통합(강제 규칙/오버레이/마이그레이션 재수합)
+4. `TASK-AR-221` 운영 정합 통합(Task-합의 마감)
+5. `TASK-AR-240` version/release consistency steward를 C-mode 선행 조건으로 설계
+6. `TASK-AR-243` trace/eval/grader evidence를 planning proposal 근거로 연결
+7. `TASK-AR-244` non-divergence guardrail을 planning gate와 연결
+8. `TASK-AR-246` parallel worktree/task claim dispatcher 구현
+9. `TASK-AR-210` 재판정: boundaries closure 후 `ready` 가능 여부 확인
+10. `TASK-AR-219` 공식 권고 반영 및 판정 근거 고정
+11. `TASK-AR-220` tag_manual 이식 근거 마감(스크립트/훅/스킬 누락·의도적 제외 정렬)
+12. `TASK-AR-216` v0.1.8 후보 이관 사유 정렬
+13. `TASK-AR-222` v0.1.8 closeout 번들 완성
+14. `TASK-AR-218` migration 무결성 정합 + migration-map block rule 정비
+15. `TASK-AR-214` 질의 계약/메타데이터 게이트 마무리
+16. `TASK-AR-215` 오버레이 context packet 확정
+17. `TASK-AR-204` co-location 강제 룰 적용
+18. `TASK-AR-213` migration parity lock 완료
+19. `TASK-AR-202`/`TASK-AR-203` 병행 착수
+20. 멀티 프로젝트 오버레이 적용을 위한 `PROJECT-CONTEXT`/`ROADMAP`/`ORG`/`LINKS`/`TEAMS` 변경 시뮬레이션(1개 MVP 케이스) 완료
 
 ## Done Log
 
@@ -489,6 +545,8 @@
 - 2026-06-09: `TASK-AR-216`/`217`/`218`/`219`/`220` 산출물 연결 규칙 초안 반영
 - 2026-06-14: `MEETING-2026-06-14-agent-runtime-task-ar-223-closeout-planning.md` 반영 (closeout bundle 통합/hold 규칙/overlay + migration 이관 경로)
 - 2026-06-15: `MEETING-2026-06-15-agent-runtime-task-ar-223-cycle-sync.md`, `RESEARCH-2026-06-15-agent-runtime-task-ar-223-hold-routing-and-overlay-edge-research.md`, `CALL-2026-06-15-agent-runtime-task-ar-223-sync-call.md`, `SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync.md` 반영
+- 2026-06-10: `AGENT_RUNTIME_RSI_PLANNING_BRIEF.md`, `TASK-AR-234`~`TASK-AR-245` 등록 (B-C RSI planning loop, version/release steward, trace/eval/grader, diversity council, non-divergence guardrail)
+- 2026-06-10: `AGENT_RUNTIME_PARALLEL_SESSION_PROTOCOL.md`, `TASK-AR-246`, `parallel_worktree_gate.py` 등록 (per-task worktree, role instance metadata, handoff/log pointer gate)
 
 
 ## Operating Cycle Update (2026-06-09): TASK-AR-215 Overlay Simulation Closure

@@ -800,3 +800,78 @@ Decision
 | Return to release/governance backlog | lead-engineer | `TASK-AR-223` |
 | Keep UI initiative closed through TASK-AR-232 | lead-engineer | `BACKLOG.md` |
 | Use Map views as read-only operator context | lead-engineer | `docs/UI_MAP_VIEWS.md` |
+
+## 2026-06-10 - RSI Planning Loop Registration
+
+### Bottom Line
+
+- Summary: B-C long-term recursive self-improvement planning path is registered.
+- Output: `AGENT_RUNTIME_RSI_PLANNING_BRIEF.md`, RSI research, meeting record, implementation plan, and `TASK-AR-234` through `TASK-AR-245`.
+- State machine: `planning_loop` and `rsi_improvement` added as lifecycle domains.
+- Boundary: scan/proposal is autonomous in B-mode; canonical apply and all release/version/external/destructive/prod-data changes remain gated.
+
+### Signal
+
+| Signal | State | Evidence |
+| --- | --- | --- |
+| Conversation record | pass | `reviews/MEETING-2026-06-10-agent-runtime-rsi-planning-loop.md` |
+| Research record | pass | `reviews/RESEARCH-2026-06-10-agent-runtime-rsi-and-planning-loop-research.md` |
+| Owner BRIEF | pass | `AGENT_RUNTIME_RSI_PLANNING_BRIEF.md` |
+| Task registration | pass | `TASK-AR-234` through `TASK-AR-245` |
+| Org overlay | pass | `agents/project/ORG.md`, `agents/project/TEAMS.md` |
+| Gate readiness | watch | implementation begins with `TASK-AR-234`; planner executor does not exist yet |
+
+### Insight
+
+- The durable version of the user's "second pane" idea is a runtime-owned planning loop with read-only scan, proposal outbox, review/apply gate, UI review, and promotion controls.
+- Trace/eval/grader evidence becomes task-generation evidence only after it is linked to source refs, risk tier, dedupe key, verifier list, and rollback path.
+- RSI remains useful when it improves planning assumptions and future work, but stays stable only when budgets, gates, diversity review, release/version stewardship, and demotion rules exist.
+
+### Decision
+
+- Decision: start with `TASK-AR-234` and `TASK-AR-235`.
+- Decision: keep C-mode blocked until `TASK-AR-240`, `TASK-AR-243`, and `TASK-AR-244` are implemented and repeatedly pass.
+- Decision: use planning/release/rsi/eval/risk/diversity departments as review lenses, not as unbounded parallel executors.
+
+### Next Steps
+
+| Step | Owner | Evidence |
+| --- | --- | --- |
+| Define planning loop schema/state | lead-engineer | `TASK-AR-234` |
+| Build read-only planning scan | lead-engineer | `TASK-AR-235` |
+| Wire version/release steward before C-mode | release-integrity | `TASK-AR-240` |
+| Wire trace/eval/grader evidence | evaluation-office | `TASK-AR-243` |
+| Add non-divergence guardrails | risk-and-safety | `TASK-AR-244` |
+
+## 2026-06-10 - Parallel Agent Worktree Protocol
+
+### Bottom Line
+
+- Summary: registered and partially enforced the safe parallel terminal/agent protocol.
+- Output: `AGENT_RUNTIME_PARALLEL_SESSION_PROTOCOL.md`, `docs/PARALLEL_AGENT_WORKTREE_PROTOCOL.md`, `TASK-AR-246`, `parallel_worktree_gate.py`, and parallel-agent research/review records.
+- State machine: added `task_claim` for one-task-one-claim leases.
+- Boundary: dispatcher helpers are planned next; current gate validates existing claim files and blocks unsafe worker claims.
+
+### Signal
+
+| Signal | State | Evidence |
+| --- | --- | --- |
+| Same checkout worker block | pass | `task-claim:main-checkout-worker` |
+| Duplicate task claim block | pass | `task-claim:duplicate-active-task` |
+| Same role multi-instance | pass | distinct `agent_instance_id` + `callsite_id` + worktree accepted |
+| Resume handoff | pass | active claims require `handoff_path` and `log_path` |
+| Hook/gate wiring | pass | `owner_governance_gate.py` now runs `parallel_worktree_gate.py --check` |
+
+### Decision
+
+- Decision: main checkout is orchestrator-only for parallel batches.
+- Decision: workers must use `.worktrees/<TASK-ID>` branches and write claim records under `agents/runtime/task_claims/`.
+- Decision: shared SSoT files are merged by orchestrator unless a task packet explicitly owns them.
+
+### Next Steps
+
+| Step | Owner | Evidence |
+| --- | --- | --- |
+| Implement claim create/release helpers | lead-engineer | `TASK-AR-246` |
+| Surface active claims in UI state | lead-engineer | `TASK-AR-246` |
+| Run first parallel batch only through worktrees | lead-engineer | `TASK-AR-234`, `TASK-AR-240`, `TASK-AR-243`, `TASK-AR-241` |

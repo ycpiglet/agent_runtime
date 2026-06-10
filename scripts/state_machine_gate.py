@@ -12,6 +12,7 @@ REQUIRED_MACHINES = {
     "health_signal",
     "cycle",
     "task",
+    "task_claim",
     "agent_job",
     "gate",
     "review",

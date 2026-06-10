@@ -1,8 +1,8 @@
 schema: agent-runtime-state-machines/v1
 version: 1
 owner: agent-runtime-core
-updated_at: 2026-06-09
-tags: [state-machine, cycle, agent-job, governance, owner-brief]
+updated_at: 2026-06-10
+tags: [state-machine, cycle, agent-job, task-claim, governance, owner-brief]
 
 status_scale:
   allowed: [pass, watch, block]
@@ -126,6 +126,52 @@ machines:
       - from: completed
         to: archived
         trigger: evidence_linked
+
+  - id: task_claim
+    scope: parallel_agent_task_lease
+    owner: agent-runtime-core
+    initial: unclaimed
+    states:
+      - id: unclaimed
+        signal: pass
+        score: 90
+      - id: claimed
+        signal: watch
+        score: 75
+      - id: working
+        signal: watch
+        score: 80
+      - id: handoff_ready
+        signal: watch
+        score: 85
+      - id: released
+        signal: pass
+        score: 95
+      - id: stale
+        signal: watch
+        score: 55
+      - id: conflict
+        signal: block
+        score: 0
+    transitions:
+      - from: unclaimed
+        to: claimed
+        trigger: task_claim_record_written
+      - from: claimed
+        to: working
+        trigger: worker_heartbeat_seen
+      - from: working
+        to: handoff_ready
+        trigger: handoff_and_log_pointers_written
+      - from: handoff_ready
+        to: released
+        trigger: task_claim_released_or_completed
+      - from: "*"
+        to: stale
+        trigger: heartbeat_expired
+      - from: "*"
+        to: conflict
+        trigger: duplicate_task_or_main_checkout_worker_detected
 
   - id: agent_job
     scope: agent_execution

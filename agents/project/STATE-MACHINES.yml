@@ -1,8 +1,8 @@
 schema: agent-runtime-state-machines/v1
 version: 1
 owner: agent-runtime-core
-updated_at: 2026-06-09
-tags: [state-machine, cycle, agent-job, governance, owner-brief]
+updated_at: 2026-06-10
+tags: [state-machine, cycle, agent-job, task-claim, governance, owner-brief]
 
 status_scale:
   allowed: [pass, watch, block]
@@ -126,6 +126,52 @@ machines:
       - from: completed
         to: archived
         trigger: evidence_linked
+
+  - id: task_claim
+    scope: parallel_agent_task_lease
+    owner: agent-runtime-core
+    initial: unclaimed
+    states:
+      - id: unclaimed
+        signal: pass
+        score: 90
+      - id: claimed
+        signal: watch
+        score: 75
+      - id: working
+        signal: watch
+        score: 80
+      - id: handoff_ready
+        signal: watch
+        score: 85
+      - id: released
+        signal: pass
+        score: 95
+      - id: stale
+        signal: watch
+        score: 55
+      - id: conflict
+        signal: block
+        score: 0
+    transitions:
+      - from: unclaimed
+        to: claimed
+        trigger: task_claim_record_written
+      - from: claimed
+        to: working
+        trigger: worker_heartbeat_seen
+      - from: working
+        to: handoff_ready
+        trigger: handoff_and_log_pointers_written
+      - from: handoff_ready
+        to: released
+        trigger: task_claim_released_or_completed
+      - from: "*"
+        to: stale
+        trigger: heartbeat_expired
+      - from: "*"
+        to: conflict
+        trigger: duplicate_task_or_main_checkout_worker_detected
 
   - id: agent_job
     scope: agent_execution
@@ -374,3 +420,104 @@ machines:
       - from: "*"
         to: invalid
         trigger: required_section_missing
+
+  - id: planning_loop
+    scope: recursive_planning
+    owner: planning-office
+    initial: idle
+    states:
+      - id: idle
+        signal: pass
+        score: 90
+      - id: scanning
+        signal: watch
+        score: 75
+      - id: proposing
+        signal: watch
+        score: 75
+      - id: reviewing
+        signal: watch
+        score: 70
+      - id: approved_apply
+        signal: watch
+        score: 80
+      - id: applied
+        signal: pass
+        score: 95
+      - id: blocked
+        signal: block
+        score: 20
+      - id: archived
+        signal: pass
+        score: 100
+    transitions:
+      - from: idle
+        to: scanning
+        trigger: cycle_or_schedule_due
+      - from: scanning
+        to: proposing
+        trigger: evidence_backed_gap_found
+      - from: scanning
+        to: archived
+        trigger: no_findings
+      - from: proposing
+        to: reviewing
+        trigger: proposal_written
+      - from: reviewing
+        to: approved_apply
+        trigger: proposal_approved
+      - from: approved_apply
+        to: applied
+        trigger: verification_passed
+      - from: "*"
+        to: blocked
+        trigger: budget_risk_or_owner_boundary_failed
+      - from: applied
+        to: archived
+        trigger: audit_recorded
+
+  - id: rsi_improvement
+    scope: bounded_self_improvement
+    owner: rsi-lab
+    initial: observing
+    states:
+      - id: observing
+        signal: watch
+        score: 70
+      - id: proposed
+        signal: watch
+        score: 75
+      - id: evaluated
+        signal: watch
+        score: 80
+      - id: promoted_b_mode
+        signal: pass
+        score: 90
+      - id: promoted_c_mode
+        signal: watch
+        score: 85
+      - id: demoted
+        signal: watch
+        score: 60
+      - id: blocked
+        signal: block
+        score: 20
+    transitions:
+      - from: observing
+        to: proposed
+        trigger: retro_or_trace_improvement_found
+      - from: proposed
+        to: evaluated
+        trigger: trace_eval_grader_evidence_linked
+      - from: evaluated
+        to: promoted_b_mode
+        trigger: proposal_only_loop_passed
+      - from: promoted_b_mode
+        to: promoted_c_mode
+        trigger: c_mode_promotion_gate_passed
+      - from: promoted_c_mode
+        to: demoted
+        trigger: churn_regression_or_owner_rejection
+      - from: "*"
+        to: blocked
+        trigger: self_weakening_or_high_risk_boundary_detected

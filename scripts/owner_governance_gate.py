@@ -36,6 +36,7 @@ def main() -> int:
             "--path",
             "src/agent_runtime/templates/project/schemas/state-machines.schema.json",
         ],
+        ["scripts/parallel_worktree_gate.py", "--check"],
     ]
 
     failed = 0

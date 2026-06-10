@@ -4,6 +4,7 @@ import argparse
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
+import re
 
 from .publish_check import PublishFinding, analyze as analyze_publish
 from .sanitize import analyze as analyze_sanitize
@@ -13,14 +14,17 @@ INCLUDE_FILES = (
     ".codex/hooks.json",
     ".gitignore",
     ".githooks/pre-commit",
+    "AGENT_RUNTIME_PARALLEL_SESSION_PROTOCOL.md",
     "BACKLOG-BOARD.md",
     "owner-docs.yml",
     "pyproject.toml",
     "README.md",
     "reviews/REVIEW-2026-06-09-backlog-board-restoration-owner-format-gate.md",
+    "reviews/REVIEW-2026-06-10-agent-runtime-parallel-session-protocol.md",
     "schemas/state-machines.schema.json",
     "scripts/owner_governance_gate.py",
     "scripts/owner_doc_format_gate.py",
+    "scripts/parallel_worktree_gate.py",
     "scripts/state_machine_gate.py",
     "scripts/warning_summary_strict_ref_policy.py",
 )
@@ -88,9 +92,39 @@ def _source_files(source_root: Path) -> list[Path]:
         path = source_root / rel
         if path.exists() and path.is_file():
             files.append(path)
+    for rel in _owner_doc_manifest_files(source_root):
+        path = source_root / rel
+        if path.exists() and path.is_file():
+            files.append(path)
     for rel_dir in INCLUDE_DIRS:
         files.extend(_iter_dir_files(source_root, rel_dir))
-    return sorted(files, key=lambda p: p.relative_to(source_root).as_posix().lower())
+    return sorted(set(files), key=lambda p: p.relative_to(source_root).as_posix().lower())
+
+
+def _owner_doc_manifest_files(source_root: Path) -> tuple[str, ...]:
+    manifest = source_root / "owner-docs.yml"
+    if not manifest.exists():
+        return ()
+    docs: list[str] = []
+    in_owner_docs = False
+    for raw in manifest.read_text(encoding="utf-8").splitlines():
+        stripped = raw.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if not raw.startswith((" ", "\t", "-")):
+            in_owner_docs = stripped in {"owner_docs:", "owner_docs: []"}
+            if stripped == "owner_docs: []":
+                in_owner_docs = False
+            continue
+        if not in_owner_docs:
+            continue
+        match = re.match(r"^-\s*(?:path:\s*)?(.+?)\s*$", stripped)
+        if not match:
+            continue
+        value = match.group(1).split("#", 1)[0].strip().strip("'\"")
+        if value and not value.startswith(("/", "\\")) and ".." not in Path(value).parts:
+            docs.append(value.replace("\\", "/"))
+    return tuple(docs)
 
 
 def build_bundle_plan(source_root: Path, dest_root: Path) -> BundlePlan:

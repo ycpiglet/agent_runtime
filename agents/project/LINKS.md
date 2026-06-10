@@ -43,6 +43,15 @@
   - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-224-overlay-and-gate-check.md
   - reviews/MEETING-2026-06-09-agent-runtime-task-ar-224-overlay-gate-sync.md
   - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-224-executable-proof.md
+  - AGENT_RUNTIME_RSI_PLANNING_BRIEF.md
+  - AGENT_RUNTIME_PARALLEL_SESSION_PROTOCOL.md
+  - reviews/MEETING-2026-06-10-agent-runtime-rsi-planning-loop.md
+  - reviews/RESEARCH-2026-06-10-agent-runtime-rsi-and-planning-loop-research.md
+  - reviews/RESEARCH-2026-06-10-agent-runtime-parallel-agents-and-worktrees.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-rsi-planning-registration.md
+  - reviews/REVIEW-2026-06-10-agent-runtime-parallel-session-protocol.md
+  - docs/superpowers/plans/2026-06-10-rsi-planning-loop.md
+  - docs/PARALLEL_AGENT_WORKTREE_PROTOCOL.md
 - architecture_refs:
   - src/agent_runtime/templates/project/scripts/agent_context_packet.py
   - src/agent_runtime/templates/project/agents/project/CONTEXT-SOURCES.example.yml
@@ -58,6 +67,8 @@
   - reviews/
   - agents/lead_engineer/tasks/
   - agents/project/corrections/
+  - proposal outbox planned by `TASK-AR-236`
+  - task claim/worktree lease planned by `TASK-AR-246`
 
 ## Repository/Issue References
 
@@ -83,6 +94,19 @@
 - https://code.claude.com/docs/en/security
 - https://code.claude.com/docs/en/hooks-guide
 - https://www.anthropic.com/engineering/claude-code-best-practices
+- https://developers.openai.com/codex/app/automations
+- https://developers.openai.com/codex/concepts/subagents
+- https://docs.anthropic.com/en/docs/claude-code/sub-agents
+- https://docs.anthropic.com/en/docs/claude-code/common-workflows#run-parallel-claude-code-sessions-with-git-worktrees
+- https://git-scm.com/docs/git-worktree
+- https://www.nist.gov/itl/ai-risk-management-framework
+- https://arxiv.org/abs/2604.14228
+- https://arxiv.org/abs/1502.06512
+- https://arxiv.org/abs/2310.02304
+- https://hbr.org/2007/09/performing-a-project-premortem
+- https://hbr.org/1991/05/teaching-smart-people-how-to-learn
+- https://www.rand.org/pubs/papers/P3558.html
+- https://arxiv.org/abs/2402.01427
 
 ## Cross-Project Overlay Simulation Approval Log
 
