@@ -245,6 +245,58 @@ def test_ui_console_agent_and_command_panes_surface_operational_hierarchy(tmp_pa
         assert selector in css
 
 
+def test_ui_console_event_and_evidence_panes_surface_audit_hierarchy(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    for control_id in [
+        "event-filter-type",
+        "event-filter-agent",
+        "event-filter-task",
+        "event-filter-goal",
+        "event-filter-search",
+    ]:
+        assert control_id in html
+
+    for marker in [
+        "audit-card",
+        "audit-card-meta",
+        "event-card",
+        "error-card",
+        "evidence-card",
+        "replay-card",
+        "auditToneClass",
+        "renderAuditMeta",
+    ]:
+        assert marker in js
+
+    for label in [
+        "Event",
+        "Severity",
+        "Actor",
+        "Task",
+        "Goal",
+        "Source",
+        "Evidence",
+        "Replay",
+    ]:
+        assert f">{label}<" in js
+
+    for selector in [
+        ".audit-card",
+        ".audit-card-meta",
+        ".event-card",
+        ".error-card",
+        ".evidence-card",
+        ".replay-card",
+        ".audit-card.pass",
+        ".audit-card.warn",
+        ".audit-card.fail",
+    ]:
+        assert selector in css
+
+
 def test_ui_console_api_resource_routes_match_state_resources(tmp_path):
     _write_task(tmp_path, "TASK-AR-229")
 
