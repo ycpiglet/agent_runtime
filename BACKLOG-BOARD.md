@@ -7,10 +7,10 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-06-11
+generated_at: 2026-06-12
 task_count: 153
-open_count: 55
-completed_count: 98
+open_count: 54
+completed_count: 99
 task_set_count: 7
 completed_task_set_count: 15
 ---
@@ -18,11 +18,11 @@ completed_task_set_count: 15
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `55` open or active tasks; `98` completed tasks are archived from this live board.
+- Summary: `54` open or active tasks; `99` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `49` / Ask `6` / Review `0` / Later `0` / Done `98`.
+- Status: Action `48` / Ask `6` / Review `0` / Later `0` / Done `99`.
 - Task Sets: `7` active workflows; `15` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -69,10 +69,9 @@ completed_task_set_count: 15
 ### Vision Integrator (`TASKSET-AR-VISION-GAP-CLOSURE`)
 
 - Flow: Legacy independence, A2A messaging, multi-agent RBAC, loop hardening, live eval, skill packaging, realtime UI, and doc traceability.
-- Progress: `2/10` done; `8` open or active.
+- Progress: `3/10` done; `7` open or active.
 | Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-311` | in_progress | Action | P1 | High | High | 8h/6000tok | Low | 7 | validation-team | qa | Execute next | 에이전트 간 통신을 태스크 상태/로그 추론 방식에서 명시적 메시지 패싱 API로 전환해 A2A 체인을 구조적으로 보장한다. |
 | `TASK-AR-312` | planned | Action | P1 | High | High | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 문서로만 정의된 역할 체계(TEAMS/ORG/diversity council)를 실제 2~3개 동시 에이전트 인스턴스 실행으로 증명하고, 역할별 쓰기 권… |
 | `TASK-AR-314` | planned | Action | P1 | High | High | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 리스 기반 클레임 원시 연산으로 다중 프로세스 환경의 중복 응답/소유권 경합을 구조적으로 차단한다. |
 | `TASK-AR-316` | planned | Action | P2 | Medium | Low | 4h/3000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | skills/(session-closeout, taskset-dispatch)를 버전·트리거 조건·메타데이터를 갖춘 재사용 가능한 패키지로 만들어 다른… |
@@ -270,6 +269,7 @@ completed_task_set_count: 15
 | `TASK-AR-306` | `9fc495d7-bfd…` | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | completed | 2026-06-11T17:34:00+09:00 | 2026-06-11T16:30:00+09:00 | 2026-06-11T17:34:00+09:00 | 2026-06-11T17:34:00+09:00 | Owner 7개 지시(브랜치/스태시 정리, UI 적용, 플러그인/훅 정리, 레거시 전신 프로젝트 정리, 구조 분석, 비전 분석, 기록/등록)를 단일 세션… |
 | `TASK-AR-310` | `9f5e2229-3d3…` | `TASKSET-AR-VISION-GAP-CLOSURE` | completed | 2026-06-11T17:58:45+09:00 | 2026-06-11T22:14:43+09:00 | 2026-06-11T23:01:07+09:00 | 2026-06-11T23:01:07+09:00 | 레거시 전신 프로젝트에 대한 라이브 의존을 모두 해소해 이관을 최종 마감하고, agent_runtime이 레거시 참조 없이 완전히 독립하도록 한다. |
 | `TASK-AR-313` | `753d8012-6dd…` | `TASKSET-AR-VISION-GAP-CLOSURE` | completed | 2026-06-11T17:58:45+09:00 | 2026-06-11T23:16:07+09:00 | 2026-06-11T23:26:35+09:00 | 2026-06-11T23:26:35+09:00 | 광범위한 python 허용 목록을 정확한 명령 프로파일(ci/owner/research)로 좁혀 임의 코드 실행 경로를 제거한다. |
+| `TASK-AR-311` | `6a155432-3a2…` | `TASKSET-AR-VISION-GAP-CLOSURE` | completed | 2026-06-11T17:58:45+09:00 | 2026-06-11T23:40:19+09:00 | 2026-06-12T00:02:26+09:00 | 2026-06-12T00:02:26+09:00 | 에이전트 간 통신을 태스크 상태/로그 추론 방식에서 명시적 메시지 패싱 API로 전환해 A2A 체인을 구조적으로 보장한다. |
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.
