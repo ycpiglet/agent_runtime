@@ -1,5 +1,5 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-12T00:37:16+09:00
+updated_at: 2026-06-12T00:44:07+09:00
 current_state:
   summary: "TASK-AR-298 is complete; TASKSET-AR-RSI-OPERATING-SYSTEM remains active with failure and compound casebooks next."
   status: in_progress
@@ -10,21 +10,10 @@ current_state:
   progress_pct: 22
   status_text: "TASK-AR-298 completed evaluation and verification registry hardening with TDD RED/GREEN; start TASK-AR-299 before claiming failure or compound casebook completion."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260612-003716-task-ar-314-fba7
-      task_id: TASK-AR-314
-      task_set_id: TASKSET-AR-VISION-GAP-CLOSURE
-      agent_role: lead-engineer
-      team_id: agent-runtime-core
-      agent_instance_id: le-20260612-003716-kst-fba7
-      display_name: lead_engineer@vision-gap-closure-01
-      callsite_id: terminal:wt-task-ar-314:tab-01
-      worktree_path: .worktrees/TASK-AR-314
-      branch: codex/task-ar-314-vision-gap-closure
+  current_agents: []
   current_teams:
     - team_id: agent-runtime-core
-      active_claims:
-        - CLAIM-20260612-003716-task-ar-314-fba7
+      active_claims: []
 resume:
   active_task: TASK-AR-299
   active_task_set: TASKSET-AR-RSI-OPERATING-SYSTEM
@@ -35,8 +24,7 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260612-003716-task-ar-314-fba7.json
+  active_claims: []
   release_steward_completed_tasks:
     - agents/lead_engineer/tasks/TASK-AR-219.md
     - agents/lead_engineer/tasks/TASK-AR-222.md
