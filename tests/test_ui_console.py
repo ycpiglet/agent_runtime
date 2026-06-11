@@ -351,6 +351,8 @@ def test_ui_console_map_planner_source_and_write_panes_surface_boundaries(tmp_pa
         ".source-card",
         ".boundary-read",
         ".boundary-write",
+        ".surface-card-meta strong.boundary-read",
+        ".command-card-meta strong.boundary-write",
     ]:
         assert selector in css
 

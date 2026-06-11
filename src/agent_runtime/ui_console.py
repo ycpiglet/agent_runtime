@@ -631,11 +631,14 @@ textarea:focus {
 .source-card b {
   color: var(--primary-hover);
 }
-.boundary-read strong,
-.boundary-api strong {
+.surface-card-meta strong.boundary-read,
+.surface-card-meta strong.boundary-api,
+.command-card-meta strong.boundary-read,
+.command-card-meta strong.boundary-api {
   color: var(--teal);
 }
-.boundary-write strong {
+.surface-card-meta strong.boundary-write,
+.command-card-meta strong.boundary-write {
   color: var(--amber);
 }
 .agent-score strong {
