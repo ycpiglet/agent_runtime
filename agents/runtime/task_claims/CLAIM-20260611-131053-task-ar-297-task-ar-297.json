@@ -11,21 +11,21 @@
   "mode": "orchestrator",
   "status": "released",
   "task_set_id": "TASKSET-AR-RSI-OPERATING-SYSTEM",
-  "phase": "taskset-step-completed",
-  "progress_pct": 11,
-  "step_index": 1,
+  "phase": "taskset-completed",
+  "progress_pct": 100,
+  "step_index": 9,
   "step_total": 9,
-  "status_text": "TASK-AR-297 completed evidence inbox and conversation capture contract hardening; TASK-AR-298 is next.",
+  "status_text": "TASKSET-AR-RSI-OPERATING-SYSTEM completed local Evidence-to-Proposal OS scope; this earlier TASK-AR-297 claim is normalized to taskset closeout.",
   "worktree_path": ".",
   "branch": "codex/runtime-assurance-closeout",
   "claimed_at": "2026-06-11T13:10:53+09:00",
-  "last_heartbeat": "2026-06-11T13:12:23+09:00",
-  "updated_at": "2026-06-11T13:12:23+09:00",
+  "last_heartbeat": "2026-06-11T20:12:00+09:00",
+  "updated_at": "2026-06-11T20:12:00+09:00",
   "expires_at": "2026-06-11T14:10:53+09:00",
-  "released_at": "2026-06-11T13:12:23+09:00",
+  "released_at": "2026-06-11T20:12:00+09:00",
   "lease": {
     "claimed_at": "2026-06-11T13:10:53+09:00",
-    "heartbeat_at": "2026-06-11T13:12:23+09:00",
+    "heartbeat_at": "2026-06-11T20:12:00+09:00",
     "expires_at": "2026-06-11T14:10:53+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260611-131053-task-ar-297-task-ar-297.handoff.md",
@@ -35,6 +35,7 @@
     "rsi",
     "evidence",
     "task-ar-297",
-    "taskset-step-completed"
+    "taskset-step-completed",
+    "taskset-completed"
   ]
 }

@@ -1,0 +1,18 @@
+{
+  "candidate_action": "no_action",
+  "context_id": "CTX-RSI-OS-001",
+  "dedupe_key": "a2a-lifecycle-CTX-RSI-OS-001",
+  "observed_failure": "none",
+  "observed_signal": "pass",
+  "owner_boundary": "local",
+  "proposed_routing": "archive",
+  "quality_check": "dedupe_key present; deterministic local fixture; full lifecycle reconstruction required before proposal use.",
+  "reconstruction_result": "pass",
+  "record_id": "A2A-LIFECYCLE-3202181D7805",
+  "signal": "pass",
+  "source_path": "agents/project/a2a/a2a-lifecycle-fixture-2026-06-11.jsonl",
+  "source_type": "A2A",
+  "summary": "A2A request, review, decision, correction, and proposal routing lifecycle reconstruction.",
+  "task_ref": "TASK-AR-302",
+  "task_set_id": "TASKSET-AR-RSI-OPERATING-SYSTEM"
+}
