@@ -19,3 +19,22 @@ continues to live at `src/agent_runtime/templates/project/AGENTS.md`.
 - For full shared protocol details, mirror updates into
   `src/agent_runtime/templates/project/AGENTS.md` when the rule should apply to
   generated host projects.
+
+## Project Management Decomposition Contract
+
+- Non-trivial work must be decomposed as `project -> taskset -> task -> unit`
+  before implementation begins. The backlog/board carries routing metadata;
+  detailed execution context belongs in linked project, taskset, task, or unit
+  spec files.
+- A task is not worker-ready until a lower-cost implementation model can execute
+  it from the record alone: context, target files, exact scope, out-of-scope
+  boundaries, acceptance criteria, verification commands, and handoff format
+  must be explicit.
+- Planning, research synthesis, architecture, risk classification, and task
+  decomposition are assigned to higher-capability planner roles/models. Routine
+  implementation units default to lower-cost worker models unless the unit is
+  ambiguous, high-risk, cross-cutting, security-sensitive, or repeatedly failing.
+- Agents should execute the smallest registered unit they can complete and
+  verify. Do not let implementation agents expand scope into planning,
+  reprioritization, or adjacent taskset work without a new planner-approved
+  record.

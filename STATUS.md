@@ -1,5 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-11 - TASKSET-AR-PM-OPERATING-SYSTEM registration
+
+- Summary: registered `TASKSET-AR-PM-OPERATING-SYSTEM` for project/taskset/task/unit decomposition, worker-ready specs, and model-tier routing enforcement.
+- New durable entrypoints: `AGENT_RUNTIME_PM_OPERATING_SYSTEM_BRIEF.md`, `agents/project/PROJECT-MANAGEMENT-CONTRACT.md`, `docs/superpowers/plans/2026-06-11-project-management-operating-system.md`, `reviews/RESEARCH-2026-06-11-agent-runtime-project-management-methods.md`, and `reviews/REVIEW-2026-06-11-agent-runtime-pm-operating-system-registration.md`.
+- Registered tasks: `TASK-AR-342` through `TASK-AR-350`.
+- Boundary: AGENTS soft rules are active now; unit readiness gate, model routing, dispatcher unit claims, WIP flow controls, and closeout wrapper are planned implementation work.
+- Handoff: do not repoint the current active RSI OS lane; start `TASK-AR-342` or `TASK-AR-343` with a fresh claim before implementing this PM taskset.
+
 ## 2026-06-11 - TASK-AR-298 eval verification registry closeout
 
 - Summary: completed `TASK-AR-298` for evaluation and verification record registry contracts.

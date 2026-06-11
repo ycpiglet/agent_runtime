@@ -166,6 +166,18 @@ TASK_SET_DEFINITIONS = [
         "Taskset CRUD, dependencies/timeline, custom properties/automation, attachments, import/export, search, calendar, state-machine viewer, team workload, notifications, ops dashboard, gamification, and workspace extensibility.",
         94,
     ),
+    TaskSetInfo(
+        "TASKSET-AR-UI-LIVING-CONSOLE",
+        "World Builder",
+        "Idea vault with resurfacing loop, drag-in meeting room, direct-manipulation layer, progression system with guardrails, 2D office map, and webhook-first external notifications.",
+        95,
+    ),
+    TaskSetInfo(
+        "TASKSET-AR-PM-OPERATING-SYSTEM",
+        "Project Workbreaker",
+        "Project-to-unit hierarchy, worker-ready specs, model-tier routing, WIP controls, dispatcher scope stops, and PM verification gates.",
+        96,
+    ),
 ]
 TASK_SET_INFO = {item.task_set_id: item for item in TASK_SET_DEFINITIONS}
 UNCLASSIFIED_TASK_SET = TaskSetInfo(

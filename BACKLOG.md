@@ -1,5 +1,27 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-06-11 TASKSET-AR-PM-OPERATING-SYSTEM Registration
+
+- New planned task set: `TASKSET-AR-PM-OPERATING-SYSTEM` (Project Workbreaker).
+- Purpose: 고급 planner 모델이 project/taskset/task/unit으로 업무를 세분화하고, 저비용 worker 모델은 상세 unit만 실행하도록 PM 운영 규칙과 gate를 강제한다.
+- Registered planned tasks: `TASK-AR-342`(project hierarchy SSoT) `TASK-AR-343`(unit spec template) `TASK-AR-344`(unit readiness gate) `TASK-AR-345`(model-tier routing metadata) `TASK-AR-346`(dispatcher unit claims and scope stop) `TASK-AR-347`(WIP/flow policy) `TASK-AR-348`(board hierarchy views) `TASK-AR-349`(template propagation) `TASK-AR-350`(verification closeout).
+- Research record: `reviews/RESEARCH-2026-06-11-agent-runtime-project-management-methods.md` (Scrum, Shape Up, Kanban, Linear Projects, AI task-splitting research synthesis).
+- Contract: `agents/project/PROJECT-MANAGEMENT-CONTRACT.md`.
+- Plan entrypoint: `docs/superpowers/plans/2026-06-11-project-management-operating-system.md`.
+- Owner brief: `AGENT_RUNTIME_PM_OPERATING_SYSTEM_BRIEF.md`.
+- Boundary: this registration adds AGENTS soft enforcement now; executable gates and dispatcher model/unit routing remain planned implementation work. Current active `TASKSET-AR-RSI-OPERATING-SYSTEM` pointer is preserved.
+
+## 2026-06-11 TASKSET-AR-UI-LIVING-CONSOLE Registration
+
+- New planned task set: `TASKSET-AR-UI-LIVING-CONSOLE` (World Builder).
+- Purpose: 딥리서치(27개 출처, 130개 주장) 기반 인터랙티브/게임화 기능 등록 — Owner 비전 "살아있는 게임 같은 콘솔" 반영.
+- Registered planned tasks: `TASK-AR-360`(Idea Vault 운영 규칙+재발굴 루프+A/B) `TASK-AR-361`(드래그 인 회의실) `TASK-AR-362`(hover peek+DnD 1급 동사+키보드 등가) `TASK-AR-363`(프로젝트 Lv/사업 단계/XP+게임화 가드레일) `TASK-AR-364`(2D 오피스 맵+이모지 글리프) `TASK-AR-365`(웹훅 퍼스트 외부 알림).
+- Numbering note: 342~350 대역은 동시 진행된 `TASKSET-AR-PM-OPERATING-SYSTEM` 등록이 선점하여 360~365로 재배치 등록했다.
+- New registry: `agents/project/idea-vault/IDEA-VAULT.md` — 보류 아이디어 11건 시드 등록(IV-001~011), 부활 조건·재검토 기한 포함.
+- Research record: `reviews/RESEARCH-2026-06-11-agent-runtime-interactive-gamification-research.md` (검증 단계는 사용량 한도로 미완 — 출처는 1차 자료 위주, 수치 사용 시 원문 재확인).
+- Evidence-based corrections to Owner proposals: 토큰=XP 직접 가산 금지(낭비 유인 — 경험/효율 분리), 스트릭 압박 금지(GitHub 제거 사례), 처벌 메커니즘 금지(Habitica 역효과 연구).
+- Boundary: KakaoTalk 알림톡·경로탐색 애니메이션·TTS·모바일 푸시·Webhook Objects는 Idea Vault 보류. 게임화는 전체 토글(TASK-AR-340 폴리시 통합).
+
 ## 2026-06-11 TASKSET-AR-UI-PLATFORM-EXTENSIONS Registration
 
 - New planned task set: `TASKSET-AR-UI-PLATFORM-EXTENSIONS` (Platform Builder).

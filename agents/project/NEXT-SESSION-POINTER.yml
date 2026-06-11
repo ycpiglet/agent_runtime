@@ -148,6 +148,22 @@ pointers:
     - docs/superpowers/plans/2026-06-11-rsi-operating-system-taskset.md
     - agents/project/evidence/README.md
     - agents/project/casebooks/failure-and-compound-casebook.md
+  pm_operating_system_tasks:
+    - agents/lead_engineer/tasks/TASK-AR-342.md
+    - agents/lead_engineer/tasks/TASK-AR-343.md
+    - agents/lead_engineer/tasks/TASK-AR-344.md
+    - agents/lead_engineer/tasks/TASK-AR-345.md
+    - agents/lead_engineer/tasks/TASK-AR-346.md
+    - agents/lead_engineer/tasks/TASK-AR-347.md
+    - agents/lead_engineer/tasks/TASK-AR-348.md
+    - agents/lead_engineer/tasks/TASK-AR-349.md
+    - agents/lead_engineer/tasks/TASK-AR-350.md
+  pm_operating_system_entrypoints:
+    - AGENT_RUNTIME_PM_OPERATING_SYSTEM_BRIEF.md
+    - agents/project/PROJECT-MANAGEMENT-CONTRACT.md
+    - reviews/RESEARCH-2026-06-11-agent-runtime-project-management-methods.md
+    - reviews/REVIEW-2026-06-11-agent-runtime-pm-operating-system-registration.md
+    - docs/superpowers/plans/2026-06-11-project-management-operating-system.md
   recently_closed_reviews:
     - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-298-eval-verification-registry.md
     - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-297-evidence-inbox-contract.md
@@ -183,6 +199,7 @@ pointers:
     - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-221-quality-loop-closeout.md
     - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-243-planning-evidence-link.md
 next_actions:
+  - "For PM operating-system work, start TASK-AR-342 or TASK-AR-343 with a fresh claim; keep current RSI OS pointer intact unless Owner explicitly switches lanes."
   - "Start TASK-AR-299 with a new claim before implementing failure or compound casebooks."
   - "Push local commits only after Owner approval; local closeout does not imply remote publish, PR, tag, or external CI evidence."
   - "Do not reopen TASKSET-AR-UI-DESIGN-IMPLEMENTATION unless a new canonical task is explicitly added."
@@ -212,6 +229,7 @@ verification:
     - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE --require-complete --check"
     - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION --require-complete --check"
     - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-RSI-OPERATING-SYSTEM --check"
+    - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-PM-OPERATING-SYSTEM --check"
     - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-UI-DESIGN-SYSTEM --require-complete --check"
     - "python scripts/verify_pane_progress_taskset.py"
     - "python scripts/owner_doc_format_gate.py --manifest owner-docs.yml"

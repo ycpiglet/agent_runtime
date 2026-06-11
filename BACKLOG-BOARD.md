@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-11
-task_count: 138
-open_count: 42
+task_count: 153
+open_count: 57
 completed_count: 96
-task_set_count: 5
+task_set_count: 7
 completed_task_set_count: 15
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `42` open or active tasks; `96` completed tasks are archived from this live board.
+- Summary: `57` open or active tasks; `96` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `37` / Ask `5` / Review `0` / Later `0` / Done `96`.
-- Task Sets: `5` active workflows; `15` completed workflows are hidden from the live action board.
+- Status: Action `50` / Ask `7` / Review `0` / Later `0` / Done `96`.
+- Task Sets: `7` active workflows; `15` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -118,6 +118,35 @@ completed_task_set_count: 15
 | `TASK-AR-335` | planned | Action | P2 | Medium | High | 10h/8000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 마일스톤/회의/완료 이력/예약 실행을 캘린더 뷰로 통합하고, taskset 디스패치를 예약·반복 실행할 수 있게 한다 (Notion Calendar/Mo… |
 | `TASK-AR-340` | planned | Action | P3 | Low | Medium | 8h/6000tok | Low | 4 | agent-runtime-core | lead-engineer | Execute next | 콘솔에 생동감을 더하는 애니메이션/이펙트와 RPG형 게임화 요소를 토글 가능한 폴리시 레이어로 추가한다 (기본은 차분한 진지 모드). |
 | `TASK-AR-341` | planned | Action | P3 | Low | High | 10h/8000tok | Low | 4 | agent-runtime-core | lead-engineer | Execute next | 멀티 호스트 프로젝트(agent_runtime, autofolio 등)를 Notion 워크스페이스처럼 전환하고, 대시보드 위젯 확장 포인트와 KR/EN… |
+
+### World Builder (`TASKSET-AR-UI-LIVING-CONSOLE`)
+
+- Flow: Idea vault with resurfacing loop, drag-in meeting room, direct-manipulation layer, progression system with guardrails, 2D office map, and webhook-first external notifications.
+- Progress: `0/6` done; `6` open or active.
+| Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-360` | planned | Ask | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | 기각/보류 아이디어를 폐기하지 않고 보존·재발굴하는 체계를 RSI 운영 원칙으로 정착시킨다 (Owner 통찰: 진화 시 과거를 잊지 않고 주기적으로 재평… |
+| `TASK-AR-361` | planned | Action | P1 | High | High | 12h/9000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 사이드탭의 회의실 공간에 에이전트를 마우스로 끌어다 넣고, 주제/태스크를 선택하면 참여 에이전트들이 의견을 주고받는 회의를 실행한다. |
+| `TASK-AR-362` | planned | Action | P2 | Medium | Medium | 8h/6000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | hover 미리보기와 드래그앤드롭을 콘솔 전역의 1급 상호작용 동사로 표준화한다 (Notion peek + Discord 접근성 DnD 패턴). |
+| `TASK-AR-363` | planned | Action | P2 | Medium | Medium | 8h/6000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 프로젝트의 성숙도를 진화하는 캐릭터처럼 측정·표시한다: 프로젝트 Lv.N(누적 경험), 사업 단계 칭호(garage→seed→startup→scaleup… |
+| `TASK-AR-365` | planned | Action | P2 | Medium | Medium | 8h/6000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 작업 이벤트(완료/차단/승인 대기)를 사용자가 쓰는 메신저로 내보낸다 — LangSmith 패턴(범용 웹훅 + 채널 레시피, 집계 윈도우 기반)을 채택. |
+| `TASK-AR-364` | planned | Action | P3 | Low | High | 12h/9000tok | Low | 4 | agent-runtime-core | lead-engineer | Execute next | 실제 회사 같은 2D 맵에 에이전트를 배치해 한눈에 조직 활동을 보여준다 (Smallville/Generative Agents 패턴 — arXiv 230… |
+
+### Project Workbreaker (`TASKSET-AR-PM-OPERATING-SYSTEM`)
+
+- Flow: Project-to-unit hierarchy, worker-ready specs, model-tier routing, WIP controls, dispatcher scope stops, and PM verification gates.
+- Progress: `0/9` done; `9` open or active.
+| Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-342` | planned | Action | P0 | Critical | Medium | 4h/3000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make `project -> taskset -> task -> unit` and short/mid/long horizon metadata a canon… |
+| `TASK-AR-343` | planned | Action | P0 | Critical | Medium | 4h/3000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Create the detailed unit document shape that lower-cost implementation models can exe… |
+| `TASK-AR-345` | planned | Action | P0 | Critical | Medium | 4h/4000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Add planner/worker/reviewer tier metadata and escalation triggers to task and unit re… |
+| `TASK-AR-350` | planned | Ask | P0 | Critical | Medium | 4h/3000tok | Low | 7 | agent-runtime-core | lead-engineer | Owner/agent decision | Add a taskset verification wrapper and Owner-facing closeout evidence for the PM oper… |
+| `TASK-AR-344` | planned | Action | P0 | Critical | High | 6h/5000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Block low-tier worker dispatch when task or unit records lack enough detail. |
+| `TASK-AR-346` | planned | Action | P0 | Critical | High | 6h/5000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Extend taskset dispatch so a worker can claim one unit and must stop at the taskset/u… |
+| `TASK-AR-347` | planned | Action | P1 | High | Medium | 4h/4000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Add Kanban-style WIP controls and flow signals for tasksets, teams, and worker units. |
+| `TASK-AR-349` | planned | Action | P1 | High | Medium | 4h/3000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Mirror the PM hierarchy, unit templates, schemas, and gates into generated host proje… |
+| `TASK-AR-348` | planned | Action | P1 | High | Medium | 5h/4000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Render project/taskset/task/unit hierarchy without stuffing detailed instructions int… |
 
 ## Archived Task Sets
 
