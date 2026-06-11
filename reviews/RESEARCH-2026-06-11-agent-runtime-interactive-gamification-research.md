@@ -1,7 +1,7 @@
 # RESEARCH-2026-06-11 — Interactive/Gamification Console Deep Research
 
 - Bottom Line: 게임·인터랙티브 플랫폼의 검증된 패턴 5개 각도(공간 시각화, 게임화, 직접 조작, 외부 알림, 아이디어 수명주기)를 27개 출처·130개 주장으로 딥리서치했고, 채택분을 `TASKSET-AR-UI-LIVING-CONSOLE`(TASK-AR-360~365)로 등록한다. 핵심 판정: 게임화는 "사회적 연결 중심·처벌 금지·스트릭 압박 금지" 가드레일과 함께만 채택, 토큰=경험치는 낭비 유인이라 산식 수정, KakaoTalk 알림톡은 사업자 제약으로 보류(Idea Vault 보관).
-- Signal: 검증 단계 한계 고지 — 적대적 검증 75에이전트가 세션 사용량 한도(11:50pm 리셋)로 전원 실패해 25개 주장이 "0표 미검증" 상태로 종료됐다. 본 문서의 인용은 **수집·출처 추출까지 성공한 미검증 주장**이며, 출처가 1차 자료(arXiv/SEC/학술지/공식 문서) 위주라 신뢰도는 양호하나 개별 수치는 사용 시 원문 재확인을 권한다.
+- Signal: 검증 현황(2026-06-12 갱신, 4차 누적 실행) — 25개 중 **7건이 3-0 만장일치 확정**(원문 인용 확보, §6 참조), 18건은 반복된 세션 한도로 미검증 잔류. 미검증분도 1차 자료(SEC/학술지/공식 문서) 위주라 신뢰도는 양호하나 개별 수치는 사용 시 원문 재확인을 권한다. 재검증 재개: Workflow run `wf_6642dfc5-cb9` resume.
 - Insight: 다섯 각도의 공통 결론 — "살아있는 느낌"은 그래픽이 아니라 **상태의 가시성**(이모지 글리프, 커서/선택 표시, 펄스)에서 나오고, 게임화의 효용은 점수가 아니라 **관계성**(relatedness)에서 나오며, 알림의 품질은 채널 수가 아니라 **집계 윈도우와 심각도 라우팅**에서 나온다.
 - Decision: Owner 제안 전부를 수용하되 증거 기반 수정 3건 — ① 토큰 소비를 XP에 직접 가산하지 않고 "누적 경험"과 "효율"을 분리, ② 스트릭형 압박 메커니즘 도입 금지, ③ KakaoTalk 연동은 보류·Telegram/Discord 우선.
 
@@ -59,5 +59,19 @@
 
 arxiv.org/pdf/2304.03442 (Generative Agents) · gather.town/roadmap · sciencedirect.com S1071581918305135 (Habitica 연구) · sec.gov Duolingo Q2 FY24 · springer 10.1007/s11423-023-10337-7 (메타분석) · github.com/isaacs/github/issues/627 · support.discord.com DnD 접근성 FAQ · figma.com/blog/multiplayer-editing-in-figma · x.com/NotionHQ peek · docs.langchain.com/langsmith/alerts · docs.devin.ai/integrations/slack · code.claude.com/docs hooks · docs.nhncloud.com 알림톡 API · linear.app/docs/delete-archive-issues · pivotaltracker.com workflow(icebox) · docs.aws.amazon.com ADR process · docs.readwise.io resurfacing · sre.google postmortem culture
 
-- Action Board: TASK-AR-360~365 등록(본 문서가 분석 근거; 342~350 대역은 병행 세션의 PM-OPERATING-SYSTEM이 선점하여 재배치), Idea Vault 시드 파일 생성.
-- Next: 검증 미완 25개 주장은 사용량 리셋 후 필요 시 재검증 가능(Workflow resume: wf_6642dfc5-cb9).
+## 6. 검증 확정 결과 (2026-06-12, 3-0 만장일치 + 원문 인용)
+
+| # | 확정 주장 | 영향 |
+| --- | --- | --- |
+| 1 | 2D 스프라이트 아바타 + 머리 위 이모지 글리프(행동 추상화) + 클릭 시 자연어 상세 = 자율 에이전트 공간 시각화의 최소 패턴. 인용: "Each agent is represented by a simple sprite avatar... displayed as a set of emojis... accessed by clicking on the agent's avatar." (arXiv 2304.03442) | TASK-AR-364 설계 근거 확정 |
+| 2 | 공간 모델 = 계층 트리(world→areas→objects), 에이전트는 관찰한 부분 그래프만 유지. (arXiv 2304.03442) | TASK-AR-364 데이터 구조 확정 |
+| 3 | Gather 공식 로드맵에 "AI in Your Space"(에이전트를 공간 내 가시적·인터랙티브 엔티티로) 항목 존재 — 'Coming Later' 단계. (gather.town/roadmap) | 방향성 검증 + 선행 기회 |
+| 4 | 해당 항목이 Gather 로드맵의 유일한 AI 항목이며 최원거리 단계 = 2026 중반 기준 출시된 공간형 AI 에이전트 제품은 없음. | 차별화 기회 확정 |
+| 5 | 게임화 요소가 의도와 반대 행동(예: 미루기)을 유발하는 "역효과"가 Habitica에서 실증됨. (ScienceDirect S1071581918305135) | AR-363 가드레일 근거 |
+| 6 | 45명 2주 현장 연구에서 전원이 역효과를 경험. (같은 연구) | AR-363 가드레일 근거 |
+| 7 | 최빈 실패 모드 = 실제로 생산적인 시기에 체크를 못해 처벌받는 구조; 사용자들은 처벌 회피를 위해 task를 무기한 습관으로 재분류하는 식으로 시스템을 우회. (같은 연구) | "처벌 금지" 원칙 확정 |
+
+- 미검증 잔류 18건: Duolingo 스트릭/소셜 수치(SEC), 게임화 메타분석 효과량(Springer), GitHub 스트릭 제거, Discord 키보드 DnD + 오픈소스 라이브러리, Figma 커서/아바타 패턴, LangSmith 알림 모델, Devin Slack 패턴, Claude Code hooks 등 — 출처는 모두 1차 자료.
+
+- Action Board: TASK-AR-360~365 등록(본 문서가 분석 근거; 342~350 대역은 병행 세션의 PM-OPERATING-SYSTEM이 선점하여 재배치), Idea Vault 시드 파일 생성. 검증 확정 7건 반영(2026-06-12).
+- Next: 잔여 18건 재검증은 사용량 리셋 후 Workflow resume(wf_6642dfc5-cb9)으로 누적 재개 가능.
