@@ -4,11 +4,11 @@ display_id: TASK-AR-289
 task_uid: 382b4490-69e8-40e1-b036-bcbf5f69268d
 registered_at: 2026-06-11T01:45:00+09:00
 created_at: 2026-06-11T01:45:00+09:00
-started_at: ""
-updated_at: 2026-06-11T01:45:00+09:00
-completed_at: ""
+started_at: 2026-06-11T11:53:49+09:00
+updated_at: 2026-06-11T11:53:49+09:00
+completed_at: 2026-06-11T11:53:49+09:00
 title: Normalize timeline claim and worktree drift
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 3
@@ -47,4 +47,3 @@ tags:
 - `scripts/multipane_drift_gate.py`
 - `tests/test_multipane_drift_gate.py`
 - `reviews/REVIEW-2026-06-10-agent-runtime-parallel-collaboration-audit.md`
-

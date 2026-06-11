@@ -4,11 +4,11 @@ display_id: TASK-AR-292
 task_uid: 76c8c0f6-2f02-4d6c-9d09-7f3e8e0f2921
 registered_at: 2026-06-11T02:30:00+09:00
 created_at: 2026-06-11T02:30:00+09:00
-started_at: ""
-updated_at: 2026-06-11T02:30:00+09:00
-completed_at: ""
+started_at: 2026-06-11T11:53:49+09:00
+updated_at: 2026-06-11T11:53:49+09:00
+completed_at: 2026-06-11T11:53:49+09:00
 title: Define session closeout contract and baseline schema
-status: planned
+status: completed
 priority: P0
 difficulty: M
 est_hours: 2
@@ -46,4 +46,3 @@ tags:
 - `agents/project/SESSION-CLOSEOUT-CONTRACT.md`
 - `schemas/session-baseline.schema.json`
 - `tests/test_session_baseline.py`
-

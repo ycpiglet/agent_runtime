@@ -1,11 +1,23 @@
 schema: agent-runtime-context-sources/v1
 updated_at: YYYY-MM-DDTHH:MM:SS+09:00
 
+single_source_of_truth:
+  order:
+    - cert-semantic-layer
+    - lineage
+    - history
+    - context-knowledge
+  policy: "When sources conflict, prefer the higher tier and keep lower tiers as supporting evidence only."
+
 source_tiers:
   - tier: 1
-    id: certified-semantic-layer
+    id: cert-semantic-layer
+    source_tier: cert-semantic-layer
     trust: highest
+    access_level: internal
+    lineage: docs/data/metrics.yml -> schemas/ -> runtime contracts
     description: Officially approved definitions, metrics, data contracts, APIs, and schema.
+    confidence_weight: 0.50
     examples:
       - path: docs/data/metrics.yml
       - path: schemas/
@@ -13,16 +25,24 @@ source_tiers:
     freshness_sla: 30d
   - tier: 2
     id: lineage
+    source_tier: lineage
     trust: high
+    access_level: internal
+    lineage: docs/data/lineage.md -> migration/review records
     description: Data lineage, source systems, transforms, owners, and access boundaries.
+    confidence_weight: 0.30
     examples:
       - path: docs/data/lineage.md
     owner: data-owner
     freshness_sla: 30d
   - tier: 3
     id: history
+    source_tier: history
     trust: medium
+    access_level: internal
+    lineage: agents/lead_engineer/tasks -> agents/lead_engineer/reviews
     description: Past decisions, correction notes, incidents, reviews, and accepted exceptions.
+    confidence_weight: 0.15
     examples:
       - path: agents/lead_engineer/reviews/
       - path: agents/lead_engineer/tasks/BACKLOG.md
@@ -30,8 +50,12 @@ source_tiers:
     freshness_sla: 14d
   - tier: 4
     id: context-knowledge
+    source_tier: context-knowledge
     trust: contextual
+    access_level: confidential
+    lineage: agents/project/ROADMAP.md -> agents/project/ORG.md -> agents/project/LINKS.md
     description: Roadmap, org chart, meeting notes, product intent, and communication records.
+    confidence_weight: 0.05
     examples:
       - path: agents/project/ROADMAP.md
       - path: agents/project/ORG.md
@@ -49,16 +73,32 @@ definition_policy:
     - access_level
     - lineage
     - confidence
+    - ambiguity_level
 
 query_policy:
   rule: "Queries must be refined until they name the source tier, metric/definition, scope, time window, and acceptable error tolerance."
   required_fields:
     - question
-    - source_tier
     - business_scope
+    - source_tier
     - time_window
     - tolerance
+    - ambiguity_level
     - access_check
+    - query_tolerance
+    - tradeoff_preference
+  required_blocks:
+    - source_footer (source_tier/source/confidence/access_level/ambiguity_score/freshness_sla/reviewer_verdict/lineage)
+    - reviewer_verdict
+    - correction_path
+  routing_outcomes:
+    missing_required_query_field: clarify_required
+    stale_or_access_risky_source: reviewer_review
+    query_contract_violation: hold_for_query_contract
+    correction_needed: correction_path
+  scoring:
+    ambiguity_score: "0.0-1.0, high ambiguity routes to clarify_required or reviewer_review before execution."
+    ssot_alignment_score: "0.0-1.0, ranked by cert-semantic-layer > lineage > history > context-knowledge."
 
 access_levels:
   - public

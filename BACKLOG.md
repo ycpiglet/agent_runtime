@@ -1,34 +1,60 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
-## 2026-06-11 TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION Registration
+## 2026-06-11 TASKSET-AR-RSI-OPERATING-SYSTEM Registration
 
-- New planned task set: `TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION`.
+- New planned task set: `TASKSET-AR-RSI-OPERATING-SYSTEM`.
+- Purpose: implement A안, an Evidence-to-Proposal OS that captures trace/eval/grader/A2A/correction/review/retro/failure/compound/conversation evidence, dedupes it, measures proposal quality, routes council review, and applies only through bounded gates.
+- Registered planned tasks: `TASK-AR-297` through `TASK-AR-305`.
+- Plan entrypoint: `docs/superpowers/plans/2026-06-11-rsi-operating-system-taskset.md`.
+- Owner brief: `AGENT_RUNTIME_RSI_OPERATING_SYSTEM_BRIEF.md`.
+- Conversation record: `reviews/MEETING-2026-06-11-agent-runtime-rsi-operating-system-registration.md`.
+- Registration evidence: `reviews/REVIEW-2026-06-11-agent-runtime-rsi-operating-system-registration.md`.
+- New registry scaffolds: `agents/project/evidence/` and `agents/project/casebooks/`.
+- Boundary: this does not reopen `TASKSET-AR-RSI-PLANNING`, does not claim A2A end-to-end execution, and keeps C-mode as a latent future option until repeated B-mode evidence justifies promotion.
+
+## 2026-06-11 TASKSET-AR-CONTEXT-KNOWLEDGE Closeout
+
+- Completed local context knowledge task set: `TASKSET-AR-CONTEXT-KNOWLEDGE`.
+- Closed task records: `TASK-AR-201`, `TASK-AR-202`, `TASK-AR-203`, `TASK-AR-204`, `TASK-AR-211`, `TASK-AR-214`, and `TASK-AR-215`.
+- Added executable closeout gate: `scripts/context_knowledge_gate.py`.
+- Evidence: `reviews/CONTEXT-KNOWLEDGE-GATE-2026-06-11-final.json`, `reviews/OVERLAY-SIMULATION-GATE-2026-06-11-context-knowledge-final.json`, `reviews/OFFLINE-EVAL-2026-06-11-context-knowledge-final.json`, and `reviews/OFFLINE-PREDICTION-SCORE-2026-06-11-context-knowledge-final.json`.
+- Owner closeout: `reviews/REVIEW-2026-06-11-agent-runtime-context-knowledge-taskset-closeout.md`.
+- Boundary: local contract/eval/gate evidence is complete; provider-live or remote release evidence remains separate.
+
+## 2026-06-11 TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION Closeout
+
+- Completed local task set: `TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION`.
 - Purpose: prevent repeat cleanup drift around session closeout, late dirty work, stash/archive refs, issue pointers, worktrees, active branches, and Owner-gated completion claims.
-- Registered planned tasks: `TASK-AR-292` through `TASK-AR-296`.
+- Completed tasks: `TASK-AR-292` through `TASK-AR-296`.
 - Plan entrypoint: `docs/superpowers/plans/2026-06-11-session-closeout-automation.md`.
 - Registration evidence: `reviews/REVIEW-2026-06-11-session-closeout-automation-registration.md`.
+- Closeout evidence: `reviews/REVIEW-2026-06-11-session-closeout-automation-closeout.md`.
+- Implemented: `scripts/session_baseline.py`, `scripts/dirty_intake.py`, `skills/session-closeout/SKILL.md`, `scripts/verify_session_closeout_taskset.py`, and `.codex/hooks.json` lifecycle wiring.
 - Boundary: this task set must not auto-merge, force-delete, push secrets, or apply archived work without explicit Owner-approved policy. It should classify and preserve first, then route to commit/PR/issue/archive.
 - Relationship: complements `TASKSET-AR-COLLAB-CONCURRENCY`, `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE`, and Owner governance; it does not replace those gates.
 
-## 2026-06-11 TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE Registration
+## 2026-06-11 TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE Closeout
 
-- New planned task set: `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE`.
+- Completed local task set: `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE`.
 - Purpose: verify live multi-pane runtime operation across pane census, process compliance, event logging, role coverage, waiver lifecycle, timeline drift, stale worktrees, UI visibility, and Owner closeout.
-- Registered planned tasks: `TASK-AR-285` through `TASK-AR-291`.
+- Completed tasks: `TASK-AR-285` through `TASK-AR-291`.
 - Plan entrypoint: `docs/superpowers/plans/2026-06-11-multipane-runtime-assurance.md`.
 - Registration evidence: `reviews/REVIEW-2026-06-11-multipane-runtime-assurance-registration.md`.
+- Closeout evidence: `reviews/REVIEW-2026-06-11-multipane-runtime-assurance-closeout.md`.
+- Implemented: `scripts/multipane_census.py`, `scripts/multipane_process_audit.py`, `scripts/multipane_drift_gate.py`, `agents/project/MULTIPANE-PROCESS-POLICY.yml`, lifecycle gate checks, and UI assurance surface.
 - Boundary: do not reopen `TASKSET-AR-PANE-PROGRESS` or `TASKSET-AR-COLLAB-CONCURRENCY`; this is the missing assurance layer for actual multi-pane operation.
-- Active pointer boundary: another pane currently owns `TASKSET-AR-UI-DESIGN-IMPLEMENTATION`, so this task set remains planned until claimed.
+- Active pointer boundary: `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` is now closed locally; remaining open work is `TASKSET-AR-RSI-OPERATING-SYSTEM`.
 
-## 2026-06-11 TASKSET-AR-UI-DESIGN-IMPLEMENTATION Registration
+## 2026-06-11 TASKSET-AR-UI-DESIGN-IMPLEMENTATION Completion
 
-- New active task set: `TASKSET-AR-UI-DESIGN-IMPLEMENTATION`.
+- Completed local task set: `TASKSET-AR-UI-DESIGN-IMPLEMENTATION`.
 - Purpose: keep design implementation visible in the live backlog instead of hiding it inside completed design-system evidence.
-- Registered active tasks: `TASK-AR-278` through `TASK-AR-284`.
+- Completed tasks: `TASK-AR-278` through `TASK-AR-284`.
 - Relationship: `TASKSET-AR-UI-DESIGN-SYSTEM` remains completed research/design evidence; this task set tracks actual pane-by-pane application and visual QA.
-- Current active task: `TASK-AR-278` console shell design implementation.
+- Closeout: `TASK-AR-284` records final visual QA and Owner handoff for the live UI console.
 - Research entrypoint: `reviews/RESEARCH-2026-06-11-ui-design-implementation-gap.md`.
 - Plan entrypoint: `docs/superpowers/plans/2026-06-11-ui-design-implementation.md`.
+- Closeout evidence: `reviews/REVIEW-2026-06-11-agent-runtime-ui-design-implementation-final-handoff.md`.
 
 ## 2026-06-11 TASKSET-AR-TASK-IDENTITY Completion and Omission Audit
 
@@ -168,7 +194,7 @@
 
 - P0-2: `TASK-AR-201` Knowledge Skill Router
   - 목적: 최상위 라우터 + owner/접근권한/신선도/계보 SSoT 메타 고정
-  - 상태: 진행 중
+  - 상태: 완료(`TASKSET-AR-CONTEXT-KNOWLEDGE` closeout)
   - 완료 조건:
     - `source_tier`, `owner`, `access_level`, `freshness_sla`, `lineage`, `definition_policy`, `query_policy` 출력
     - 질문은 `question / business_scope / time_window / tolerance / ambiguity_level`으로 고정
@@ -176,7 +202,7 @@
 
 - P0-3: `TASK-AR-202` Runbook Skill Contract
   - 목적: 질문 명확화-자료 탐색-실행-적대적 검토-검증 패턴을 runbook 스키마로 고정
-  - 상태: 진행 준비
+  - 상태: 완료(`TASKSET-AR-CONTEXT-KNOWLEDGE` closeout)
   - 완료 조건:
     - 6단계 증거 없이 완료 처리 금지
     - `verified pattern`이 없으면 completion 불가
@@ -184,7 +210,7 @@
 
 - P0-4: `TASK-AR-203` Warehouse Document Standard
   - 목적: `빠른 참조/차원설명/핵심테이블/주의사항 및 패턴/연결고리` 템플릿 고정
-  - 상태: 진행 준비
+  - 상태: 완료(`TASKSET-AR-CONTEXT-KNOWLEDGE` closeout)
   - 완료 조건:
     - 템플릿 채택
     - stale/staleness 경고가 CI에 연결
@@ -192,7 +218,7 @@
 
 - P0-5: `TASK-AR-204` Skill/Data Co-Location Enforcement
   - 목적: skill 문서와 코드/데이터/모델 변경 동시 갱신 강제
-  - 상태: BLOCKED(선행: `TASK-AR-201` 완료)
+  - 상태: 완료(`TASKSET-AR-CONTEXT-KNOWLEDGE` closeout; 기존 co-location gate 완료)
   - 완료 조건:
     - `SKILL-DATA-MAP.yml` 스키마 확정
     - 스킬 문서는 코드/모델/데이터와 동일 오버레이 트리에서 관리
@@ -247,7 +273,7 @@
 
 - P0-12: `TASK-AR-211` Project Overlay Standardization
   - 목적: 공통 런타임 + 프로젝트 고유 오버레이 분리
-  - 상태: 진행 중
+  - 상태: 완료(`TASKSET-AR-CONTEXT-KNOWLEDGE` closeout)
   - 완료 조건:
     - `vision/roadmap/org/links/team/communication` 오버레이 반영
     - 오버레이 누락이 `high-risk` 또는 `clarify`로 이관
@@ -261,7 +287,7 @@
 
 - P0-14: Multi-team context packet definition chain
   - 목적: 팀/조직/로드맵/의사소통 기록을 오버레이로 즉시 반영
-  - 상태: 진행
+  - 상태: 완료(`TASKSET-AR-CONTEXT-KNOWLEDGE` closeout)
   - 완료 조건:
     - 오버레이 파일 변경만으로 프로젝트 이식 가능
     - 누락 시 경고 없이 `TASK-AR-204` 경유차단
@@ -599,12 +625,12 @@
 12. `TASK-AR-216` v0.1.8 후보 이관 사유 정렬
 13. `TASK-AR-222` v0.1.8 closeout 번들 완성
 14. `TASK-AR-218` migration 무결성 정합 + migration-map block rule 정비
-15. `TASK-AR-214` 질의 계약/메타데이터 게이트 마무리
-16. `TASK-AR-215` 오버레이 context packet 확정
-17. `TASK-AR-204` co-location 강제 룰 적용
+15. `TASKSET-AR-CONTEXT-KNOWLEDGE`는 완료/아카이브 상태로 유지하고, 새 canonical task 없이는 재오픈하지 않음
+16. `TASK-AR-214`/`TASK-AR-215`/`TASK-AR-204`는 context knowledge closeout 증거로 완료됨
+17. `scripts/context_knowledge_gate.py --check`를 future context/query/warehouse 변경 전후에 유지
 18. `TASK-AR-213` migration parity lock 완료
-19. `TASK-AR-202`/`TASK-AR-203` 병행 착수
-20. 멀티 프로젝트 오버레이 적용을 위한 `PROJECT-CONTEXT`/`ROADMAP`/`ORG`/`LINKS`/`TEAMS` 변경 시뮬레이션(1개 MVP 케이스) 완료
+19. `TASK-AR-202`/`TASK-AR-203`은 runbook/warehouse closeout으로 완료됨
+20. 멀티 프로젝트 오버레이 시뮬레이션은 `OVERLAY-SIMULATION-GATE-2026-06-11-context-knowledge-final.json`로 완료됨
 
 ## Done Log
 

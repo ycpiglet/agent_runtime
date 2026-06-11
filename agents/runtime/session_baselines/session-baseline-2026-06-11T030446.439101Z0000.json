@@ -1,0 +1,24 @@
+{
+  "schema": "agent-runtime-session-baseline/v1",
+  "captured_at": "2026-06-11T03:04:46.439101+00:00",
+  "cwd": "C:\\Users\\ycpig\\agent_runtime",
+  "head": "1102776",
+  "branch": "codex/runtime-assurance-closeout",
+  "status_fingerprint": "35727ae0391a6d750620acdb9cd28f96b3e6855e1a71c8078b153bd40ec59e93",
+  "stash_count": 0,
+  "worktrees": [
+    {
+      "path": "C:/Users/ycpig/agent_runtime",
+      "HEAD": "1102776a704530d72f8001ddced958cf04d8f7c3",
+      "branch": "codex/runtime-assurance-closeout"
+    }
+  ],
+  "active_codex_branches": [
+    "codex/runtime-assurance-closeout",
+    "codex/task-ar-278-ui-design-implementation",
+    "codex/task-ar-279-ui-design-implementation",
+    "codex/task-ar-280-ui-design-implementation",
+    "codex/task-ar-281-ui-design-implementation",
+    "codex/task-ar-282-ui-design-implementation"
+  ]
+}

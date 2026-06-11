@@ -20,6 +20,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+from pane_event_log import append_event
+
 
 SCHEMA = "agent-runtime-task-claim/v1"
 ACTIVE_STATUSES = {
@@ -358,6 +360,19 @@ def cmd_create(args: argparse.Namespace) -> int:
     )
 
     claim_path.write_text(json.dumps(claim, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    append_event(
+        root,
+        {
+            "event": "claim_created",
+            "actor": claim["agent_role"],
+            "task_id": claim["task_id"],
+            "task_set_id": claim["task_set_id"],
+            "claim_id": claim["claim_id"],
+            "worktree_path": claim["worktree_path"],
+            "message": claim["status_text"],
+            "ts": claim["claimed_at"],
+        },
+    )
     _emit({"status": "created", "path": _rel(root, claim_path), "claim": claim}, as_json=args.json)
     return 0
 

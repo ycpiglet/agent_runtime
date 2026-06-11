@@ -71,3 +71,27 @@ def test_collaboration_concurrency_gate_accepts_orchestrator_ssot_write_event(tm
 
     assert result.returncode == 0
     assert "collaboration-concurrency-gate: pass" in result.stdout
+
+
+def test_collaboration_concurrency_gate_blocks_active_claim_without_lifecycle_events(tmp_path: Path) -> None:
+    claim_path = tmp_path / "agents" / "runtime" / "task_claims" / "CLAIM-1.json"
+    claim_path.parent.mkdir(parents=True, exist_ok=True)
+    claim_path.write_text(
+        json.dumps(
+            {
+                "claim_id": "CLAIM-1",
+                "task_id": "TASK-AR-287",
+                "task_set_id": "TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE",
+                "agent_role": "lead-engineer",
+                "status": "working",
+                "phase": "implement",
+                "progress_pct": 50,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = _run_gate(tmp_path)
+
+    assert result.returncode == 1
+    assert "pane-event:missing-lifecycle:CLAIM-1" in result.stdout

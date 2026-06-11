@@ -100,6 +100,7 @@ HTML = """<!doctype html>
           <div id="kanban" class="kanban" aria-label="Kanban"></div>
         </div>
         <div id="view-agents" class="view">
+          <div id="multipane-assurance-list" class="assurance-grid"></div>
           <div id="tasksets-list" class="taskset-strip"></div>
           <div id="agents-list" class="list-panel"></div>
         </div>
@@ -303,7 +304,8 @@ button {
 }
 button:hover { transform: translateY(-1px); }
 button:focus-visible {
-  outline: none;
+  outline: 2px solid var(--primary-hover);
+  outline-offset: 2px;
   box-shadow: var(--focus);
 }
 button:disabled {
@@ -336,6 +338,8 @@ textarea::placeholder {
 input:focus,
 select:focus,
 textarea:focus {
+  outline: 2px solid var(--primary-hover);
+  outline-offset: 2px;
   border-color: rgba(130, 143, 255, 0.72);
   box-shadow: var(--focus);
 }
@@ -417,6 +421,17 @@ textarea:focus {
   color: var(--muted);
   padding: 8px 10px;
 }
+.tab:focus-visible,
+.task-card:focus-visible,
+.agent-card:focus-visible,
+.command-card:focus-visible,
+.audit-card:focus-visible,
+.surface-card:focus-visible {
+  outline: 2px solid var(--primary-hover);
+  outline-offset: 2px;
+  border-color: var(--primary-hover);
+  box-shadow: var(--focus);
+}
 .tab.is-active {
   color: #ffffff;
   background: rgba(94, 106, 210, 0.18);
@@ -474,7 +489,8 @@ textarea:focus {
 }
 .lane-body,
 .list-panel,
-.taskset-strip {
+.taskset-strip,
+.assurance-grid {
   display: grid;
   gap: 8px;
 }
@@ -498,6 +514,7 @@ textarea:focus {
 .task-card,
 .taskset-card,
 .agent-card,
+.assurance-card,
 .command-card,
 .audit-card,
 .surface-card,
@@ -517,6 +534,7 @@ textarea:focus {
 .task-card:hover,
 .taskset-card:hover,
 .agent-card:hover,
+.assurance-card:hover,
 .command-card:hover,
 .audit-card:hover,
 .surface-card:hover,
@@ -849,10 +867,39 @@ pre {
   .topbar {
     align-items: flex-start;
     flex-direction: column;
+    flex-wrap: wrap;
     padding: 16px;
+  }
+  .toolbar {
+    justify-content: flex-start;
+    width: 100%;
   }
   h1 { font-size: 24px; }
   .layout { padding: 14px; }
+  .tabs {
+    flex-wrap: nowrap;
+    margin-inline: -2px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scroll-snap-type: x proximity;
+  }
+  .tab {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+  .task-card-header,
+  .agent-card-header,
+  .command-card-header,
+  .audit-card-header,
+  .surface-card-header {
+    flex-wrap: wrap;
+  }
+  .state-chip,
+  .pill {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
   .dashboard,
   .kanban,
   .create-form,
@@ -987,6 +1034,35 @@ function renderTaskSets() {
   `).join("") : "";
 }
 
+function renderMultipaneAssurance() {
+  const host = $("multipane-assurance-list");
+  if (!host) return;
+  const assurance = runtimeState.multipane_assurance || {};
+  const census = assurance.census || {};
+  const process = assurance.process || {};
+  const drift = assurance.drift || {};
+  const roleCoverage = assurance.role_coverage || {};
+  const activePanes = census.active_claims || 0;
+  const roleCount = Object.keys(roleCoverage).length;
+  const driftCount = ((drift.watch || []).length || 0) + ((drift.block || []).length || 0);
+  host.innerHTML = `
+    <article class="assurance-card ${escapeHtml(assurance.status || "watch")}">
+      <div class="agent-card-header">
+        <b>Multi-pane assurance</b>
+        <span class="state-chip">${escapeHtml(assurance.status || "unknown")}</span>
+      </div>
+      <div class="agent-card-meta" aria-label="Multi-pane assurance metadata">
+        <span><span class="meta-label">active panes</span><strong>${escapeHtml(activePanes)}</strong></span>
+        <span><span class="meta-label">role coverage</span><strong>${escapeHtml(roleCount)}</strong></span>
+        <span><span class="meta-label">drift</span><strong>${escapeHtml(driftCount)}</strong></span>
+        <span><span class="meta-label">process</span><strong>${escapeHtml(process.status || "unknown")}</strong></span>
+        <span><span class="meta-label">events</span><strong>${escapeHtml((assurance.event_summary || {}).event_count || 0)}</strong></span>
+        <span><span class="meta-label">Source</span><strong>${escapeHtml((assurance.source_paths || {}).policy || "multipane assurance")}</strong></span>
+      </div>
+    </article>
+  `;
+}
+
 function statusClassName(status) {
   const normalized = String(status || "unknown").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   return `status-${normalized || "unknown"}`;
@@ -1051,6 +1127,7 @@ function agentProgressLabel(agent) {
 }
 
 function renderAgents() {
+  renderMultipaneAssurance();
   renderTaskSets();
   const agents = runtimeState.agents || [];
   $("agents-list").innerHTML = agents.length ? agents.map((agent) => `

@@ -4,11 +4,11 @@ display_id: TASK-AR-295
 task_uid: b75fac0b-3f44-4b4d-96a1-98288a7c591f
 registered_at: 2026-06-11T02:30:00+09:00
 created_at: 2026-06-11T02:30:00+09:00
-started_at: ""
-updated_at: 2026-06-11T02:30:00+09:00
-completed_at: ""
+started_at: 2026-06-11T11:53:49+09:00
+updated_at: 2026-06-11T11:53:49+09:00
+completed_at: 2026-06-11T11:53:49+09:00
 title: Wire closeout hooks and Owner-doc preflight
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 2
@@ -49,4 +49,3 @@ tags:
 - `scripts/session_baseline.py`
 - `tests/test_stop_hook_owner_governance.py`
 - `tests/test_owner_doc_format_gate.py`
-

@@ -124,10 +124,20 @@ def _valid_waivers(root: Path, policy: dict[str, Any], now: datetime, findings: 
             findings.append(Finding("block", "waiver:invalid-json", rel, "waiver must be a JSON object"))
             continue
         waiver_id = str(waiver.get("id") or path.stem)
+        missing_fields: list[str] = []
         for field in required_fields:
             value = waiver.get(str(field))
             if value is None or value == "" or value == []:
-                findings.append(Finding("block", f"waiver:missing-field:{field}", rel, f"waiver {waiver_id} is missing {field}"))
+                missing_fields.append(str(field))
+        if missing_fields:
+            findings.append(
+                Finding(
+                    "block",
+                    "waiver:invalid",
+                    rel,
+                    f"waiver {waiver_id} is missing required fields: {', '.join(missing_fields)}",
+                )
+            )
         if waiver.get("schema") != expected_schema:
             findings.append(Finding("block", "waiver:schema", rel, f"waiver {waiver_id} has invalid schema"))
             continue

@@ -4,9 +4,11 @@ display_id: TASK-AR-283
 task_uid: d39df02e-7bfa-4f0e-a15a-bcf10b0e6283
 registered_at: 2026-06-11
 created_at: 2026-06-11
-updated_at: 2026-06-11T00:00:00+09:00
+started_at: 2026-06-11T12:16:38+09:00
+completed_at: 2026-06-11T12:34:25+09:00
+updated_at: 2026-06-11T12:34:25+09:00
 title: Polish responsive and accessibility behavior for console design
-status: planned
+status: completed
 priority: P2
 difficulty: M
 est_hours: 2

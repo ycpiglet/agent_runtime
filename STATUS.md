@@ -1,5 +1,57 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-11 - TASK-AR-298 eval verification registry closeout
+
+- Summary: completed `TASK-AR-298` for evaluation and verification record registry contracts.
+- Output: evaluation and verification README files now define normalized record fields, add procedures, source command/path, `scope_boundary`, required metrics, and local-vs-provider-live boundaries.
+- Verification: TDD RED/GREEN was exercised in `tests/test_rsi_operating_system_docs.py`; focused TASK-AR-298 contract test passed with `1 passed`.
+- Handoff: `TASK-AR-299` is next for failure and compound casebook registry work.
+- Evidence: `reviews/REVIEW-2026-06-11-agent-runtime-task-ar-298-eval-verification-registry.md`.
+
+## 2026-06-11 - TASK-AR-297 evidence inbox contract closeout
+
+- Summary: completed `TASK-AR-297` for evidence inbox and conversation capture contract hardening.
+- Output: evidence registry and inbox docs now require source type/path, task/taskset links, observed failure or signal, owner boundary, proposed routing, dedupe, and quality-check fields before proposal generation.
+- Verification: TDD RED/GREEN was exercised in `tests/test_rsi_operating_system_docs.py`; focused doc contract test passed with `1 passed`.
+- Handoff: `TASK-AR-298` is next for evaluation and verification record registries.
+- Evidence: `reviews/REVIEW-2026-06-11-agent-runtime-task-ar-297-evidence-inbox-contract.md`.
+
+## 2026-06-11 - TASKSET-AR-UI-DESIGN-IMPLEMENTATION final handoff
+
+- Summary: completed `TASK-AR-283`, `TASK-AR-284`, and local `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` for responsive/accessibility polish plus final pane-level visual QA.
+- Output: root now includes the visible focus-state contract, mobile tab/header/chip wrapping, final visual QA handoff, released task claims, and regenerated `BACKLOG-BOARD.md` archive state.
+- Verification: focused UI/backlog tests passed in the TASK-AR-284 branch with `23 passed`; Playwright desktop/mobile visual QA passed across Backlog, Agents, Messages, Events, Evidence, Planner, Map, Sources, and Writes; branch Owner governance passed with no blocking findings.
+- Handoff: `TASKSET-AR-RSI-OPERATING-SYSTEM` is the only remaining open task set on the root board; start `TASK-AR-297` with a fresh claim before implementing it.
+- Evidence: `reviews/REVIEW-2026-06-11-agent-runtime-task-ar-283-responsive-accessibility-polish.md` and `reviews/REVIEW-2026-06-11-agent-runtime-ui-design-implementation-final-handoff.md`.
+
+## 2026-06-11 - TASKSET-AR-RSI-OPERATING-SYSTEM registration
+
+- Summary: registered A안 as `TASKSET-AR-RSI-OPERATING-SYSTEM`, a planned Evidence-to-Proposal OS follow-up to the completed RSI planning loop.
+- Registered tasks: `TASK-AR-297` through `TASK-AR-305`.
+- New durable entrypoints: `AGENT_RUNTIME_RSI_OPERATING_SYSTEM_BRIEF.md`, `docs/superpowers/plans/2026-06-11-rsi-operating-system-taskset.md`, `reviews/MEETING-2026-06-11-agent-runtime-rsi-operating-system-registration.md`, and `reviews/REVIEW-2026-06-11-agent-runtime-rsi-operating-system-registration.md`.
+- Registry scaffolds: `agents/project/evidence/` for inbox/eval/verification records and `agents/project/casebooks/` for failure/compound case lookup.
+- Boundary: registration only; A2A lifecycle execution, quantified proposal precision/recall, and C-mode auto-apply remain planned/watch, not complete.
+- Handoff: start `TASK-AR-297` with a new claim before implementing this taskset.
+
+## 2026-06-11 - Runtime assurance and session closeout automation closeout
+
+- Summary: completed `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE` and `TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION` for local runtime assurance and closeout automation scope.
+- Completed tasks: `TASK-AR-285` through `TASK-AR-291`, and `TASK-AR-292` through `TASK-AR-296`.
+- Output: added multi-pane census/process/drift commands, active-claim pane lifecycle enforcement, waiver invalid metadata reporting, UI `multipane_assurance` state/panel, session baseline capture, dirty-intake classification, closeout hooks, closeout skill, and verification wrapper.
+- Verification: focused regression passed with `27 passed in 25.26s`; named completion gates for both tasksets passed with `findings=0`; `py_compile`, Owner-doc format gate, `verify_session_closeout_taskset.py`, and Owner governance all exited `0`.
+- Evidence: `reviews/REVIEW-2026-06-11-multipane-runtime-assurance-closeout.md` and `reviews/REVIEW-2026-06-11-session-closeout-automation-closeout.md`.
+- Boundary: watch findings are visible assurance signals; external archive/push/issue/merge/delete side effects remain Owner-gated.
+- Handoff: do not reopen these two tasksets unless a new canonical task is added; remaining open work is `TASKSET-AR-RSI-OPERATING-SYSTEM`.
+
+## 2026-06-11 - TASKSET-AR-CONTEXT-KNOWLEDGE closeout
+
+- Summary: completed `TASKSET-AR-CONTEXT-KNOWLEDGE` for local context routing, runbook, warehouse, overlay, and query-contract governance.
+- Completed tasks: `TASK-AR-201`, `TASK-AR-202`, `TASK-AR-203`, `TASK-AR-204`, `TASK-AR-211`, `TASK-AR-214`, and `TASK-AR-215`.
+- Output: added `scripts/context_knowledge_gate.py`, strengthened `agent_context_packet.py` source footer/routing score output, added warehouse template and lead-engineer role doc, and wired context knowledge checks into Owner governance.
+- Verification: context knowledge gate passed with `findings=0`; overlay simulation passed with `cases=2`; offline eval and prediction score passed with all domains `score=1.0`; focused tests passed with `5 passed`.
+- Evidence: `reviews/REVIEW-2026-06-11-agent-runtime-context-knowledge-taskset-closeout.md`.
+- Handoff: keep `TASKSET-AR-CONTEXT-KNOWLEDGE` archived unless a new canonical task is added; remaining open work is `TASKSET-AR-RSI-OPERATING-SYSTEM`.
+
 ## 2026-06-11 - TASK-AR-282 map planner source write pane closeout
 
 - Summary: completed `TASK-AR-282` for the `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` map/planner/source/write pane hierarchy scope.

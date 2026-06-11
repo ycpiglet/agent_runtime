@@ -4,8 +4,9 @@ display_id: TASK-AR-202
 task_uid: f4057c67-bc4c-4a63-b76b-fbd1c59daf52
 registered_at: 2026-06-11
 created_at: 2026-06-11
-updated_at: 2026-06-11T00:00:00+09:00
-status: planned
+updated_at: 2026-06-11T11:50:00+09:00
+completed_at: 2026-06-11T11:50:00+09:00
+status: completed
 owner: agent-runtime
 priority: P0
 difficulty: M
@@ -19,9 +20,14 @@ tags:
   - release-gate
 trigger_meeting: yes
 created: 2026-06-11
+started_at: 2026-06-11T11:45:00+09:00
 audit_log:
   - BACKLOG.md
   - AGENTIC_KNOWLEDGE_EVAL_PLAN.md
+  - agents/project/SKILL-GOVERNANCE.md
+  - src/agent_runtime/templates/project/agents/project/SKILL-GOVERNANCE.md
+  - scripts/context_knowledge_gate.py
+  - reviews/CONTEXT-KNOWLEDGE-GATE-2026-06-11-final.json
 ---
 
 ## 목표
@@ -50,3 +56,9 @@ audit_log:
 
 - 선행: `TASK-AR-201`
 - 의존: `TASK-AR-204`의 감사 기준과 문서 매핑과 연동
+
+## Completion Log (2026-06-11)
+
+- `SKILL-GOVERNANCE.md`와 생성 프로젝트 템플릿에 clarify/retrieve/execute/review/verify/record 6단계 runbook 계약을 반영했다.
+- 완료 evidence는 `source_footer`, `review_verdict`, `evidence`, `verified_pattern`, `correction_path`, `record_path`가 모두 있어야 한다.
+- `query contract violation`은 `hold_for_query_contract`로 이관되도록 문서화하고 게이트에서 검사한다.

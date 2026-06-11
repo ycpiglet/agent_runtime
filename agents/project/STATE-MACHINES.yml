@@ -1,7 +1,7 @@
 schema: agent-runtime-state-machines/v1
 version: 1
 owner: agent-runtime-core
-updated_at: 2026-06-10
+updated_at: 2026-06-11
 tags: [state-machine, cycle, agent-job, task-claim, governance, owner-brief]
 
 status_scale:
@@ -364,6 +364,49 @@ machines:
       - from: missing
         to: enforced
         trigger: hook_config_restored
+
+  - id: session_closeout
+    scope: session_boundary
+    owner: lead-engineer
+    initial: baseline_pending
+    states:
+      - id: baseline_pending
+        signal: watch
+        score: 70
+      - id: baseline_captured
+        signal: watch
+        score: 80
+      - id: classified
+        signal: watch
+        score: 85
+      - id: preservation_required
+        signal: watch
+        score: 65
+      - id: blocked
+        signal: block
+        score: 20
+      - id: verified
+        signal: pass
+        score: 100
+    transitions:
+      - from: baseline_pending
+        to: baseline_captured
+        trigger: session_start_snapshot_written
+      - from: baseline_captured
+        to: classified
+        trigger: dirty_intake_completed
+      - from: classified
+        to: preservation_required
+        trigger: unknown_or_late_dirty_work_found
+      - from: preservation_required
+        to: classified
+        trigger: archive_ref_and_issue_handoff_recorded
+      - from: "*"
+        to: blocked
+        trigger: unsafe_side_effect_or_owner_boundary_detected
+      - from: classified
+        to: verified
+        trigger: fresh_closeout_evidence_passed
 
   - id: ci
     scope: repository_ci

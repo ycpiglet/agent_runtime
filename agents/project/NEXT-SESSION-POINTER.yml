@@ -1,26 +1,26 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-11T10:59:38+09:00
+updated_at: 2026-06-11T13:16:20+09:00
 current_state:
-  summary: "TASK-AR-282 is complete for map, planner, source, and write pane hierarchy; TASKSET-AR-UI-DESIGN-IMPLEMENTATION remains active with responsive and accessibility polish next."
+  summary: "TASK-AR-298 is complete; TASKSET-AR-RSI-OPERATING-SYSTEM remains active with failure and compound casebooks next."
   status: in_progress
   task_set_status: active
-  task_set_id: "TASKSET-AR-UI-DESIGN-IMPLEMENTATION"
-  step_index: 6
-  step_total: 7
-  progress_pct: 86
-  status_text: "TASK-AR-282 completed with focused UI/state/command tests, py_compile, owner governance, and headless Playwright desktop/mobile map/planner/source/write checks; TASK-AR-283 is the next planned handoff."
+  task_set_id: "TASKSET-AR-RSI-OPERATING-SYSTEM"
+  step_index: 3
+  step_total: 9
+  progress_pct: 22
+  status_text: "TASK-AR-298 completed evaluation and verification registry hardening with TDD RED/GREEN; start TASK-AR-299 before claiming failure or compound casebook completion."
 active_work:
   current_agents: []
   current_teams:
     - team_id: agent-runtime-core
       active_claims: []
 resume:
-  active_task: TASK-AR-283
-  active_task_set: TASKSET-AR-UI-DESIGN-IMPLEMENTATION
+  active_task: TASK-AR-299
+  active_task_set: TASKSET-AR-RSI-OPERATING-SYSTEM
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
-  lead_engineer: "Start TASK-AR-283 with a fresh claim before changing responsive or accessibility behavior; keep UI-DESIGN-SYSTEM closed as research/design evidence."
+  lead_engineer: "Start TASK-AR-299 with a fresh claim before implementing failure or compound casebooks; keep closed tasksets closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
@@ -52,6 +52,16 @@ pointers:
     - agents/runtime/task_claims/CLAIM-20260610-213422-task-ar-207-2ccd.json
     - agents/runtime/task_claims/CLAIM-20260610-214249-task-ar-208-3f5f.json
     - agents/runtime/task_claims/CLAIM-20260610-210321-task-ar-217-34bc.json
+  context_knowledge_completed_tasks:
+    - agents/lead_engineer/tasks/TASK-AR-201.md
+    - agents/lead_engineer/tasks/TASK-AR-202.md
+    - agents/lead_engineer/tasks/TASK-AR-203.md
+    - agents/lead_engineer/tasks/TASK-AR-204.md
+    - agents/lead_engineer/tasks/TASK-AR-211.md
+    - agents/lead_engineer/tasks/TASK-AR-214.md
+    - agents/lead_engineer/tasks/TASK-AR-215.md
+  context_knowledge_completed_claims:
+    - agents/runtime/task_claims/CLAIM-20260610-201352-task-ar-201-ca7e.json
   pane_progress_completed_tasks:
     - agents/lead_engineer/tasks/TASK-AR-246.md
     - agents/lead_engineer/tasks/TASK-AR-247.md
@@ -109,6 +119,7 @@ pointers:
     - agents/lead_engineer/tasks/TASK-AR-291.md
   multipane_runtime_assurance_entrypoints:
     - reviews/REVIEW-2026-06-11-multipane-runtime-assurance-registration.md
+    - reviews/REVIEW-2026-06-11-multipane-runtime-assurance-closeout.md
     - docs/superpowers/plans/2026-06-11-multipane-runtime-assurance.md
   session_closeout_automation_tasks:
     - agents/lead_engineer/tasks/TASK-AR-292.md
@@ -118,8 +129,33 @@ pointers:
     - agents/lead_engineer/tasks/TASK-AR-296.md
   session_closeout_automation_entrypoints:
     - reviews/REVIEW-2026-06-11-session-closeout-automation-registration.md
+    - reviews/REVIEW-2026-06-11-session-closeout-automation-closeout.md
     - docs/superpowers/plans/2026-06-11-session-closeout-automation.md
+  rsi_operating_system_tasks:
+    - agents/lead_engineer/tasks/TASK-AR-297.md
+    - agents/lead_engineer/tasks/TASK-AR-298.md
+    - agents/lead_engineer/tasks/TASK-AR-299.md
+    - agents/lead_engineer/tasks/TASK-AR-300.md
+    - agents/lead_engineer/tasks/TASK-AR-301.md
+    - agents/lead_engineer/tasks/TASK-AR-302.md
+    - agents/lead_engineer/tasks/TASK-AR-303.md
+    - agents/lead_engineer/tasks/TASK-AR-304.md
+    - agents/lead_engineer/tasks/TASK-AR-305.md
+  rsi_operating_system_entrypoints:
+    - AGENT_RUNTIME_RSI_OPERATING_SYSTEM_BRIEF.md
+    - reviews/MEETING-2026-06-11-agent-runtime-rsi-operating-system-registration.md
+    - reviews/REVIEW-2026-06-11-agent-runtime-rsi-operating-system-registration.md
+    - docs/superpowers/plans/2026-06-11-rsi-operating-system-taskset.md
+    - agents/project/evidence/README.md
+    - agents/project/casebooks/failure-and-compound-casebook.md
   recently_closed_reviews:
+    - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-298-eval-verification-registry.md
+    - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-297-evidence-inbox-contract.md
+    - reviews/REVIEW-2026-06-11-agent-runtime-ui-design-implementation-final-handoff.md
+    - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-283-responsive-accessibility-polish.md
+    - reviews/REVIEW-2026-06-11-session-closeout-automation-closeout.md
+    - reviews/REVIEW-2026-06-11-multipane-runtime-assurance-closeout.md
+    - reviews/REVIEW-2026-06-11-agent-runtime-context-knowledge-taskset-closeout.md
     - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-282-map-planner-source-write-panes.md
     - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-281-evidence-event-panes.md
     - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-280-agent-command-panes.md
@@ -147,10 +183,10 @@ pointers:
     - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-221-quality-loop-closeout.md
     - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-243-planning-evidence-link.md
 next_actions:
-  - "Start TASK-AR-283 before claiming responsive or accessibility polish progress."
+  - "Start TASK-AR-299 with a new claim before implementing failure or compound casebooks."
   - "Push local commits only after Owner approval; local closeout does not imply remote publish, PR, tag, or external CI evidence."
-  - "Keep TASKSET-AR-UI-DESIGN-IMPLEMENTATION active until TASK-AR-278 through TASK-AR-284 have pane-level visual QA and Owner handoff evidence."
-  - "Treat TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE and TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION as planned follow-up tasksets until an explicit claim starts them."
+  - "Do not reopen TASKSET-AR-UI-DESIGN-IMPLEMENTATION unless a new canonical task is explicitly added."
+  - "Do not reopen TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE or TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION unless a new canonical task is explicitly added."
   - "Do not reopen TASKSET-AR-TASK-IDENTITY unless a new canonical task is explicitly added."
   - "Do not reopen TASKSET-AR-UI-DESIGN-SYSTEM unless a new canonical task is explicitly added."
   - "Add real scribe claim/log evidence in a future governance/reporting cycle, then remove the remaining waiver."
@@ -170,17 +206,19 @@ verification:
     - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-QUALITY-LOOP --require-complete --check"
     - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-PANE-PROGRESS --require-complete --check"
     - "python scripts/task_identity.py check --check"
+    - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-CONTEXT-KNOWLEDGE --require-complete --check"
     - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-TASK-IDENTITY --require-complete --check"
-    - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-UI-DESIGN-IMPLEMENTATION --check"
-    - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE --check"
-    - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION --check"
+    - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-UI-DESIGN-IMPLEMENTATION --require-complete --check"
+    - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE --require-complete --check"
+    - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION --require-complete --check"
+    - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-RSI-OPERATING-SYSTEM --check"
     - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-UI-DESIGN-SYSTEM --require-complete --check"
     - "python scripts/verify_pane_progress_taskset.py"
     - "python scripts/owner_doc_format_gate.py --manifest owner-docs.yml"
     - "python scripts/owner_governance_gate.py"
     - "python scripts/parallel_worktree_gate.py --check"
     - "python scripts/collaboration_concurrency_gate.py --check"
-  last_known_scope: "TASKSET-AR-QUALITY-LOOP, TASKSET-AR-PANE-PROGRESS, TASKSET-AR-RSI-PLANNING, TASKSET-AR-RELEASE-STEWARD, TASKSET-AR-COLLAB-CONCURRENCY, TASKSET-AR-GOVERNANCE-OPS, TASKSET-AR-TASK-IDENTITY, and TASKSET-AR-UI-DESIGN-SYSTEM final closeout for local scope; TASKSET-AR-UI-DESIGN-IMPLEMENTATION is active with TASK-AR-278 through TASK-AR-282 complete; external publish remains Owner-gated and out of scope."
+  last_known_scope: "TASKSET-AR-CONTEXT-KNOWLEDGE, TASKSET-AR-QUALITY-LOOP, TASKSET-AR-PANE-PROGRESS, TASKSET-AR-RSI-PLANNING, TASKSET-AR-RELEASE-STEWARD, TASKSET-AR-COLLAB-CONCURRENCY, TASKSET-AR-GOVERNANCE-OPS, TASKSET-AR-TASK-IDENTITY, TASKSET-AR-UI-DESIGN-SYSTEM, TASKSET-AR-UI-DESIGN-IMPLEMENTATION, TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE, and TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION final closeout for local scope; TASKSET-AR-RSI-OPERATING-SYSTEM is active with TASK-AR-297 and TASK-AR-298 complete and TASK-AR-299 next; external publish remains Owner-gated and out of scope."
   rsi_planning_completed:
     - reviews/RSI-PLANNING-TASKSET-VERIFY.json
   rsi_planning_note: RSI planning completed verification report is the canonical closeout evidence.

@@ -4,8 +4,9 @@ display_id: TASK-AR-214
 task_uid: ba4b73b4-6344-4685-951d-9d0ee2fbca4e
 registered_at: 2026-06-09
 created_at: 2026-06-09
-updated_at: 2026-06-11T00:00:00+09:00
-status: in_progress
+updated_at: 2026-06-11T11:50:00+09:00
+completed_at: 2026-06-11T11:50:00+09:00
+status: completed
 started_at: 2026-06-09T10:20:00+09:00
 owner: agent-runtime
 priority: P0
@@ -29,6 +30,13 @@ audit_log:
   - reviews/MEETING-2026-06-09-agent-runtime-task-ar-214-query-contract.md
   - reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md
   - reviews/CALL-2026-06-09-agent-runtime-task-ar-214-owner-sync.md
+  - agents/project/evals/overlay-routing-v1.jsonl
+  - agents/project/evals/gov-metadata-v1.jsonl
+  - agents/project/evals/predictions/contract-baseline-2026-06-09.jsonl
+  - reviews/OFFLINE-EVAL-2026-06-11-context-knowledge-final.json
+  - reviews/OFFLINE-PREDICTION-SCORE-2026-06-11-context-knowledge-final.json
+  - scripts/context_knowledge_gate.py
+  - reviews/CONTEXT-KNOWLEDGE-GATE-2026-06-11-final.json
 ---
 
 ## 목표
@@ -58,3 +66,9 @@ audit_log:
 - `agents/project/CONTEXT-SOURCES.yml`
 - `agents/project/EVAL-POLICY.yml`
 - `reviews/RESEARCH-` 또는 `reviews/MEETING-` 중 본 과제 증빙 문서
+
+## Completion Log (2026-06-11)
+
+- query contract 필수 필드에 `question`, `query_tolerance`, `tradeoff_preference`를 포함하고 packet/source footer 출력 계약에 반영했다.
+- ambiguous goldset 샘플은 별도 라벨과 full query contract를 갖도록 보강했다.
+- offline eval 및 deterministic prediction score가 context knowledge closeout 기준으로 모두 통과했다.

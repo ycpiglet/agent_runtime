@@ -1,0 +1,54 @@
+{
+  "schema": "agent-runtime-context-knowledge-gate/v1",
+  "generated_at": "2026-06-11T02:46:40.926692+00:00",
+  "root": "C:/Users/ycpig/agent_runtime",
+  "status": "pass",
+  "blocked_task_set": null,
+  "findings": [],
+  "sections": {
+    "context_sources": {
+      "findings": [],
+      "files": [
+        {
+          "path": "agents/project/CONTEXT-SOURCES.yml",
+          "findings": []
+        },
+        {
+          "path": "src/agent_runtime/templates/project/agents/project/CONTEXT-SOURCES.example.yml",
+          "findings": []
+        }
+      ]
+    },
+    "packet_builder": {
+      "findings": []
+    },
+    "skill_governance": {
+      "findings": [],
+      "files": [
+        {
+          "path": "agents/project/SKILL-GOVERNANCE.md",
+          "findings": []
+        },
+        {
+          "path": "src/agent_runtime/templates/project/agents/project/SKILL-GOVERNANCE.md",
+          "findings": []
+        }
+      ]
+    },
+    "warehouse_docs": {
+      "findings": [],
+      "checked_files": [
+        "agents/project/AGENT-KNOWLEDGE-WAREHOUSE.md",
+        "src/agent_runtime/templates/project/agents/project/AGENT-KNOWLEDGE-WAREHOUSE.md",
+        "agents/project/knowledge/lead-engineer.md"
+      ],
+      "valid_role_docs": 1
+    },
+    "eval_ambiguity": {
+      "findings": []
+    },
+    "overlay_simulation": {
+      "findings": []
+    }
+  }
+}

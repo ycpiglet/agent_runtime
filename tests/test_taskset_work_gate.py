@@ -135,3 +135,21 @@ tags: []
     assert "taskset:incomplete-task:TASKSET-AR-QUALITY-LOOP:TASK-AR-901:planned" in result.stdout
     assert "taskset:released-claim-phase-not-complete:TASKSET-AR-QUALITY-LOOP:CLAIM-901:taskset-in-progress" in result.stdout
     assert "taskset:released-claim-progress-not-100:TASKSET-AR-QUALITY-LOOP:CLAIM-901:0" in result.stdout
+
+
+def test_session_closeout_verifier_runs_taskset_and_owner_governance() -> None:
+    from scripts import verify_session_closeout_taskset
+
+    commands = [" ".join(command) for command in verify_session_closeout_taskset.COMMANDS]
+
+    assert any("TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION" in command for command in commands)
+    assert any("--require-complete" in command for command in commands)
+    assert any("scripts/owner_governance_gate.py" in command for command in commands)
+
+
+def test_session_closeout_verifier_invokes_taskset_and_owner_gates() -> None:
+    script = (REPO_ROOT / "scripts" / "verify_session_closeout_taskset.py").read_text(encoding="utf-8")
+
+    assert "TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION" in script
+    assert "scripts/taskset_work_gate.py" in script
+    assert "scripts/owner_governance_gate.py" in script

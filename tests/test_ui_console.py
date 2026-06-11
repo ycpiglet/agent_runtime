@@ -200,6 +200,20 @@ def test_ui_console_agents_view_contains_progress_fields(tmp_path):
     assert api["items"][0]["id"] == "TASKSET-AR-PROGRESS"
 
 
+def test_ui_console_surfaces_multipane_assurance_panel(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    assert "multipane-assurance-list" in html
+    assert "Multi-pane assurance" in js
+    assert "active panes" in js
+    assert "role coverage" in js
+    assert "drift" in js
+    assert "renderMultipaneAssurance" in js
+    assert ".assurance-card" in css
+
+
 def test_ui_console_agent_and_command_panes_surface_operational_hierarchy(tmp_path):
     js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
     css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
@@ -355,6 +369,47 @@ def test_ui_console_map_planner_source_and_write_panes_surface_boundaries(tmp_pa
         ".command-card-meta strong.boundary-write",
     ]:
         assert selector in css
+
+
+def test_ui_console_responsive_accessibility_polish_contract(tmp_path):
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    for selector in [
+        ".tab:focus-visible",
+        ".task-card:focus-visible",
+        ".agent-card:focus-visible",
+        ".command-card:focus-visible",
+        ".audit-card:focus-visible",
+        ".surface-card:focus-visible",
+    ]:
+        assert selector in css
+
+    assert "outline: 2px solid var(--primary-hover)" in css
+    assert "outline-offset: 2px" in css
+
+    mobile_css = css.split("@media (max-width: 760px)", 1)[1]
+    for selector in [
+        ".topbar",
+        ".toolbar",
+        ".tabs",
+        ".task-card-header",
+        ".agent-card-header",
+        ".command-card-header",
+        ".audit-card-header",
+        ".surface-card-header",
+        ".state-chip",
+        ".pill",
+    ]:
+        assert selector in mobile_css
+
+    for marker in [
+        "overflow-x: auto",
+        "scroll-snap-type: x proximity",
+        "flex-wrap: wrap",
+        "max-width: 100%",
+        "overflow-wrap: anywhere",
+    ]:
+        assert marker in mobile_css
 
 
 def test_ui_console_api_resource_routes_match_state_resources(tmp_path):

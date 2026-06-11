@@ -4,11 +4,11 @@ display_id: TASK-AR-294
 task_uid: 21597a69-4e08-419f-a6b1-4bd271c39c39
 registered_at: 2026-06-11T02:30:00+09:00
 created_at: 2026-06-11T02:30:00+09:00
-started_at: ""
-updated_at: 2026-06-11T02:30:00+09:00
-completed_at: ""
+started_at: 2026-06-11T11:53:49+09:00
+updated_at: 2026-06-11T11:53:49+09:00
+completed_at: 2026-06-11T11:53:49+09:00
 title: Implement dirty intake classifier and archive plan
-status: planned
+status: completed
 priority: P0
 difficulty: M
 est_hours: 3
@@ -48,4 +48,3 @@ tags:
 - `scripts/dirty_intake.py`
 - `tests/test_dirty_intake.py`
 - `reviews/REVIEW-2026-06-11-session-closeout-automation-closeout.md`
-

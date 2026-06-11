@@ -149,6 +149,28 @@ def test_collaboration_governance_gate_accepts_explicit_unexpired_waivers(tmp_pa
     assert "waiver=WAIVER-test" in result.stdout
 
 
+def test_collaboration_governance_gate_blocks_waiver_missing_lifecycle_metadata(tmp_path: Path) -> None:
+    _write_json(tmp_path / "agents" / "project" / "COLLABORATION-GOVERNANCE.json", _policy())
+    _write_json(
+        tmp_path / "agents" / "project" / "waivers" / "WAIVER-bad.json",
+        {
+            "schema": "agent-runtime-collaboration-waiver/v1",
+            "id": "WAIVER-bad",
+            "subjects": ["role-usage:scribe"],
+            "reason": "missing metadata",
+            "created_at": "2026-06-10T22:00:00+09:00",
+        },
+    )
+
+    result = _run_gate(tmp_path)
+
+    assert result.returncode == 1
+    assert "waiver:invalid" in result.stdout
+    assert "approved_by" in result.stdout
+    assert "expires_at" in result.stdout
+    assert "mitigation" in result.stdout
+
+
 def test_collaboration_governance_gate_reports_lifecycle_watch_without_blocking(tmp_path: Path) -> None:
     _write_json(tmp_path / "agents" / "project" / "COLLABORATION-GOVERNANCE.json", _policy())
     active = _claim("lead-engineer", claim_id="CLAIM-active")

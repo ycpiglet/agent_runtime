@@ -1,6 +1,13 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
   - BACKLOG-BOARD.md
+  - AGENT_RUNTIME_RSI_OPERATING_SYSTEM_BRIEF.md
+  - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-298-eval-verification-registry.md
+  - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-297-evidence-inbox-contract.md
+  - reviews/REVIEW-2026-06-11-agent-runtime-rsi-operating-system-registration.md
+  - reviews/REVIEW-2026-06-11-agent-runtime-ui-design-implementation-final-handoff.md
+  - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-283-responsive-accessibility-polish.md
+  - reviews/REVIEW-2026-06-11-agent-runtime-context-knowledge-taskset-closeout.md
   - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-282-map-planner-source-write-panes.md
   - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-281-evidence-event-panes.md
   - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-280-agent-command-panes.md
@@ -8,7 +15,9 @@ owner_docs:
   - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-278-console-shell.md
   - reviews/REVIEW-2026-06-11-current-session-final-closeout.md
   - reviews/REVIEW-2026-06-11-session-closeout-automation-registration.md
+  - reviews/REVIEW-2026-06-11-session-closeout-automation-closeout.md
   - reviews/REVIEW-2026-06-11-multipane-runtime-assurance-registration.md
+  - reviews/REVIEW-2026-06-11-multipane-runtime-assurance-closeout.md
   - AGENT_RUNTIME_RSI_PLANNING_BRIEF.md
   - AGENT_RUNTIME_PARALLEL_SESSION_PROTOCOL.md
   - AGENT_RUNTIME_COLLAB_CONCURRENCY_BRIEF.md

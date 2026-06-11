@@ -85,6 +85,14 @@ query_policy:
     - query_tolerance
     - tradeoff_preference
   required_blocks:
-    - source_footer (source_tier/source/confidence/risk/ambiguity/freshness_sla)
+    - source_footer (source_tier/source/confidence/access_level/ambiguity_score/freshness_sla/reviewer_verdict/lineage)
     - reviewer_verdict
     - correction_path
+  routing_outcomes:
+    missing_required_query_field: clarify_required
+    stale_or_access_risky_source: reviewer_review
+    query_contract_violation: hold_for_query_contract
+    correction_needed: correction_path
+  scoring:
+    ambiguity_score: "0.0-1.0, high ambiguity routes to clarify_required or reviewer_review before execution."
+    ssot_alignment_score: "0.0-1.0, ranked by cert-semantic-layer > lineage > history > context-knowledge."

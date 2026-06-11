@@ -4,11 +4,11 @@ display_id: TASK-AR-296
 task_uid: eef9ec3b-5b4c-42b3-976a-5fa62bffb296
 registered_at: 2026-06-11T02:30:00+09:00
 created_at: 2026-06-11T02:30:00+09:00
-started_at: ""
-updated_at: 2026-06-11T02:30:00+09:00
-completed_at: ""
+started_at: 2026-06-11T11:53:49+09:00
+updated_at: 2026-06-11T11:53:49+09:00
+completed_at: 2026-06-11T11:53:49+09:00
 title: Package session-closeout skill and verification closeout gate
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 2
@@ -47,4 +47,3 @@ tags:
 - `skills/session-closeout/SKILL.md`
 - `scripts/verify_session_closeout_taskset.py`
 - `reviews/REVIEW-2026-06-11-session-closeout-automation-closeout.md`
-

@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-11
-task_count: 93
-open_count: 19
-completed_count: 74
-task_set_count: 4
-completed_task_set_count: 11
+task_count: 102
+open_count: 7
+completed_count: 95
+task_set_count: 1
+completed_task_set_count: 15
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `19` open or active tasks; `74` completed tasks are archived from this live board.
+- Summary: `7` open or active tasks; `95` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `16` / Ask `3` / Review `0` / Later `0` / Done `74`.
-- Task Sets: `4` active workflows; `11` completed workflows are hidden from the live action board.
+- Status: Action `7` / Ask `0` / Review `0` / Later `0` / Done `95`.
+- Task Sets: `1` active workflows; `15` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -42,58 +42,26 @@ completed_task_set_count: 11
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
 
-### Context Cartographer (`TASKSET-AR-CONTEXT-KNOWLEDGE`)
+### Evidence-to-Proposal Operator (`TASKSET-AR-RSI-OPERATING-SYSTEM`)
 
-- Flow: Project context, source routing, and reusable knowledge structure.
-- Progress: `2/7` done; `5` open or active.
+- Flow: Evidence inboxes, failure casebooks, proposal quality metrics, council review, and bounded apply gates.
+- Progress: `2/9` done; `7` open or active.
 | Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-201` | in_progress | Ask | P0 | Critical | Medium | 8h/1200tok | High | 12 | project-context | doc-steward | Owner/agent decision | `agent_runtime`가 프로젝트별 요청을 처리할 때 source-tier, owner, 접근권한, freshness를 기준으로 지식 소스를 라우팅… |
-| `TASK-AR-202` | planned | Action | P0 | Critical | Medium | 10h/1700tok | Medium | 10 | agent-runtime-core | lead-engineer | Execute next | `runbook`를 재사용 가능한 숙련 프로세스로 표준화해, 질문 명확화-자료 검색-실행-적대적 검토-검증-기록 흐름을 에이전트가 강제하도록 한다. |
-| `TASK-AR-214` | in_progress | Ask | P0 | Critical | Medium | 16h/2600tok | Medium | 10 | validation-team | qa | Owner/agent decision | 질의 실행 전후의 `source_tier`, `owner`, `access`, `freshness`, `lineage`, `ambiguity`, `tra… |
-| `TASK-AR-211` | in_progress | Action | P0 | Critical | Medium | 16h/2200tok | Medium | 9 | project-context | doc-steward | Execute next | 에이전트 런타임을 여러 프로젝트에서 공통 reuse할 때 프로젝트 고유의 vision/roadmap/조직/연결 문맥을 오버레이로 주입한다. |
-| `TASK-AR-203` | planned | Action | P0 | Critical | Medium | 8h/1500tok | Medium | 8 | project-context | doc-steward | Execute next | 지식창고 문서를 `빠른 참조, 차원 설명, 핵심 테이블, 주의사항/패턴, 상위 문맥 링크` 형식으로 표준화해 사람이 즉시 구조를 읽고 판단할 수 있게 한… |
-
-### Multi-Pane Auditor (`TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE`)
-
-- Flow: Live pane census, process compliance, event enforcement, role coverage, drift normalization, and assurance UI.
-- Progress: `0/7` done; `7` open or active.
-| Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-285` | planned | Action | P0 | Critical | Medium | 2h/900tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Count and classify live pane, claim, task-set, worktree, and event evidence in one re… |
-| `TASK-AR-286` | planned | Action | P0 | Critical | Medium | 3h/1200tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Verify whether plan, review, compound, retro, meeting, seminar, Ralph, scribe, and do… |
-| `TASK-AR-287` | planned | Action | P1 | High | Medium | 2h/900tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make pane lifecycle events mandatory enough that UI replay and audits can prove what… |
-| `TASK-AR-288` | planned | Action | P1 | High | Medium | 2h/900tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Track excluded, underused, waived, and lifecycle-stale agents across multi-pane colla… |
-| `TASK-AR-291` | planned | Action | P1 | High | Medium | 2h/900tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Close the multi-pane assurance task set only after census, process, role, event, drif… |
-| `TASK-AR-289` | planned | Action | P1 | High | Medium | 3h/1100tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Resolve or explain future heartbeat values, released-claim phase/progress drift, and… |
-| `TASK-AR-290` | planned | Action | P1 | High | Medium | 3h/1200tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make multi-pane census, process compliance, role coverage, drift, and event replay vi… |
-
-### Closeout Automation Steward (`TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION`)
-
-- Flow: Session baseline capture, dirty-intake routing, archive/issue preservation, and closeout skill/hook enforcement.
-- Progress: `0/5` done; `5` open or active.
-| Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-292` | planned | Action | P0 | Critical | Medium | 2h/900tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Define the canonical contract for session closeout, including how to separate baselin… |
-| `TASK-AR-293` | planned | Action | P0 | Critical | Medium | 2h/900tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Capture a compact baseline at session start so closeout can distinguish pre-existing… |
-| `TASK-AR-294` | planned | Action | P0 | Critical | Medium | 3h/1100tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Classify late dirty work and produce a safe route before any stash drop, branch delet… |
-| `TASK-AR-295` | planned | Action | P1 | High | Medium | 2h/900tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Wire the baseline and dirty-intake scripts into session lifecycle hooks without addin… |
-| `TASK-AR-296` | planned | Action | P1 | High | Medium | 2h/900tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Package the closeout workflow as a reusable skill and verify the full taskset through… |
-
-### Interface Stylist (`TASKSET-AR-UI-DESIGN-IMPLEMENTATION`)
-
-- Flow: Active UI design implementation work that applies the accepted design system across runtime panes.
-- Progress: `5/7` done; `2` open or active.
-| Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-283` | planned | Action | P2 | Medium | Medium | 2h/800tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Keep the dark operator console usable on desktop and mobile without relying on color-… |
-| `TASK-AR-284` | planned | Ask | P2 | Medium | Medium | 2h/800tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | Close the active UI design implementation task set only after focused checks, Owner g… |
+| `TASK-AR-299` | planned | Action | P0 | Critical | Medium | 2h/900tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Convert scattered failure, compound, retro, and review notes into a single searchable… |
+| `TASK-AR-300` | planned | Action | P0 | Critical | High | 3h/1200tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Define how normalized evidence becomes task, plan, doc, eval, release, or skill propo… |
+| `TASK-AR-301` | planned | Action | P1 | High | Medium | 2h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make the council layer measurable: different viewpoints should improve proposal quali… |
+| `TASK-AR-303` | planned | Action | P1 | High | Medium | 2h/900tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Keep C-mode as a potential long-term department runtime without promoting it before B… |
+| `TASK-AR-305` | planned | Action | P1 | High | Medium | 2h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Close the A안 taskset only after the registries, casebook, proposal contract, council… |
+| `TASK-AR-302` | planned | Action | P1 | High | High | 3h/1200tok | Low | 7 | validation-team | qa | Execute next | Close the gap between A2A evidence fields existing in documents and an actual end-to-… |
+| `TASK-AR-304` | planned | Action | P1 | High | High | 3h/1200tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Add the missing skill layer so future sessions follow the RSI operating process witho… |
 
 ## Archived Task Sets
 
 - Archive rule: completed task sets stay out of the live Action Board but remain visible as workflow-level completion evidence.
 | Task Set | Flow | Progress | Evidence |
 |---|---|---:|---|
+| Context Cartographer (`TASKSET-AR-CONTEXT-KNOWLEDGE`) | Project context, source routing, and reusable knowledge structure. | `7/7` done | `7` completed task files archived |
 | Quality Sentinel (`TASKSET-AR-QUALITY-LOOP`) | Offline evals, live review, correction loops, and traceable validation. | `7/7` done | `7` completed task files archived |
 | Migration Archivist (`TASKSET-AR-MIGRATION-PARITY`) | tag_manual parity, migration evidence, and skill/hook/script provenance. | `6/6` done | `6` completed task files archived |
 | Release Steward (`TASKSET-AR-RELEASE-STEWARD`) | Version decisions, release closeout, and consistency checks. | `7/7` done | `7` completed task files archived |
@@ -101,9 +69,12 @@ completed_task_set_count: 11
 | Planning Architect (`TASKSET-AR-RSI-PLANNING`) | Bounded recursive self-improvement, planning scans, and proposal review. | `10/10` done | `10` completed task files archived |
 | Progress Scout (`TASKSET-AR-PANE-PROGRESS`) | Pane/task-set progress, live continuity, claims, and resumable handoffs. | `5/5` done | `5` completed task files archived |
 | Concurrency Steward (`TASKSET-AR-COLLAB-CONCURRENCY`) | Real-time pane collaboration, event replay, SSoT ownership, and conflict gates. | `6/6` done | `6` completed task files archived |
+| Multi-Pane Auditor (`TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE`) | Live pane census, process compliance, event enforcement, role coverage, drift normalization, and assurance UI. | `7/7` done | `7` completed task files archived |
+| Closeout Automation Steward (`TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION`) | Session baseline capture, dirty-intake routing, archive/issue preservation, and closeout skill/hook enforcement. | `5/5` done | `5` completed task files archived |
 | Governance Operator (`TASKSET-AR-GOVERNANCE-OPS`) | Waiver burn-down, lifecycle cleanup, runtime asset usage, sync enforcement, and verification hygiene. | `7/7` done | `7` completed task files archived |
 | Identity Steward (`TASKSET-AR-TASK-IDENTITY`) | Collision-proof task identity, UUID metadata, lifecycle timestamps, and recovery visibility. | `4/4` done | `4` completed task files archived |
 | Design Operator (`TASKSET-AR-UI-DESIGN-SYSTEM`) | Agent Runtime UI research, design-system guidance, and console visual implementation. | `7/7` done | `7` completed task files archived |
+| Interface Stylist (`TASKSET-AR-UI-DESIGN-IMPLEMENTATION`) | Active UI design implementation work that applies the accepted design system across runtime panes. | `7/7` done | `7` completed task files archived |
 | Repo Custodian (`TASKSET-AR-REPO-HYGIENE`) | Working-tree cleanup, backlog cycle hygiene, and handoff publication. | `1/1` done | `1` completed task files archived |
 
 ## Archived Task Files
@@ -111,7 +82,12 @@ completed_task_set_count: 11
 - Restore rule: completed tasks stay hidden from the live Action Board, but every completed task file remains visible here with identity and lifecycle metadata.
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
 |---|---|---|---|---|---|---|---|---|
+| `TASK-AR-201` | `c3c2b9a3-a92…` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | 2026-06-09 | 2026-06-09T09:20:00+09:00 | 2026-06-11T11:50:00+09:00 | 2026-06-11T11:50:00+09:00 | `agent_runtime`가 프로젝트별 요청을 처리할 때 source-tier, owner, 접근권한, freshness를 기준으로 지식 소스를 라우팅… |
+| `TASK-AR-202` | `f4057c67-bc4…` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | 2026-06-11 | 2026-06-11T11:45:00+09:00 | 2026-06-11T11:50:00+09:00 | 2026-06-11T11:50:00+09:00 | `runbook`를 재사용 가능한 숙련 프로세스로 표준화해, 질문 명확화-자료 검색-실행-적대적 검토-검증-기록 흐름을 에이전트가 강제하도록 한다. |
 | `TASK-AR-204` | `d384f27a-407…` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | 2026-06-09 | 2026-06-09 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | 런타임의 스킬/런북 문서가 코드/데이터/스키마 변경과 동기화되지 않을 경우 릴리스가 차단되도록 한다. |
+| `TASK-AR-214` | `ba4b73b4-634…` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | 2026-06-09 | 2026-06-09T10:20:00+09:00 | 2026-06-11T11:50:00+09:00 | 2026-06-11T11:50:00+09:00 | 질의 실행 전후의 `source_tier`, `owner`, `access`, `freshness`, `lineage`, `ambiguity`, `tra… |
+| `TASK-AR-203` | `cb363212-ce9…` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | 2026-06-11 | 2026-06-11T11:45:00+09:00 | 2026-06-11T11:50:00+09:00 | 2026-06-11T11:50:00+09:00 | 지식창고 문서를 `빠른 참조, 차원 설명, 핵심 테이블, 주의사항/패턴, 상위 문맥 링크` 형식으로 표준화해 사람이 즉시 구조를 읽고 판단할 수 있게 한… |
+| `TASK-AR-211` | `d477effb-70e…` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | 2026-06-11 | 2026-06-11T11:45:00+09:00 | 2026-06-11T11:50:00+09:00 | 2026-06-11T11:50:00+09:00 | 에이전트 런타임을 여러 프로젝트에서 공통 reuse할 때 프로젝트 고유의 vision/roadmap/조직/연결 문맥을 오버레이로 주입한다. |
 | `TASK-AR-215` | `08b01bc0-2ee…` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | 2026-06-09 | 2026-06-09T11:00:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | 다른 프로젝트로 에이전트를 투입할 때 공용 런타임은 유지하고 오버레이만 교체해 vision, roadmap, 조직도, 팀, 링크, 협의기록을 즉시 맥락에… |
 | `TASK-AR-205` | `fb3af52e-1ae…` | `TASKSET-AR-QUALITY-LOOP` | completed | 2026-06-11 | 2026-06-11 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | 오프라인에서 정답 보유 영역은 구조화된 데이터셋으로 재현 가능한 평가를 수행하고, 90% 미만이면 릴리스를 막는다. |
 | `TASK-AR-217` | `06b35d56-8b2…` | `TASKSET-AR-QUALITY-LOOP` | completed | 2026-06-09 | 2026-06-09 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `v0.1.8` 공개 후보(2026-07-02/07-09/07-16)를 가정한 `release-preflight`, 오프라인 90% 게이트, review… |
@@ -150,6 +126,8 @@ completed_task_set_count: 11
 | `TASK-AR-244` | `8fbd6e5d-d87…` | `TASKSET-AR-RSI-PLANNING` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T22:56:04+09:00 | 2026-06-11T00:00:00+09:00 | Add stability, budget, drift, and non-divergence guardrails for recursive planning lo… |
 | `TASK-AR-242` | `2decefad-5dd…` | `TASKSET-AR-RSI-PLANNING` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T22:56:04+09:00 | 2026-06-11T00:00:00+09:00 | Define an agent department and diversity council model so similar topics are reviewed… |
 | `TASK-AR-245` | `47b6de8b-c38…` | `TASKSET-AR-RSI-PLANNING` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T22:56:04+09:00 | 2026-06-11T00:00:00+09:00 | Define the long-term C-mode promotion gate for bounded auto-planning and low-risk aut… |
+| `TASK-AR-297` | `1570ec36-9aa…` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | 2026-06-11T12:10:00+09:00 | 2026-06-11T13:10:53+09:00 | 2026-06-11T13:12:23+09:00 | 2026-06-11T13:12:23+09:00 | Create the canonical place to capture trace, eval, grader, A2A, correction, review, r… |
+| `TASK-AR-298` | `7b4e4dc4-915…` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | 2026-06-11T12:10:00+09:00 | 2026-06-11T13:14:53+09:00 | 2026-06-11T13:16:20+09:00 | 2026-06-11T13:16:20+09:00 | Make evaluation and verification evidence queryable instead of scattered across revie… |
 | `TASK-AR-247` | `b025becb-046…` | `TASKSET-AR-PANE-PROGRESS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Create the fixed pane/task-set progress golden set before UI or enforcement changes. |
 | `TASK-AR-250` | `35989583-b68…` | `TASKSET-AR-PANE-PROGRESS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Make task-set work user-friendly enough that a prompt like `taskset-quality-loop 진행해줘… |
 | `TASK-AR-248` | `db637774-594…` | `TASKSET-AR-PANE-PROGRESS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10 | 2026-06-10 | Show pane and task-set progress in the runtime UI using phase, step counter, rough pe… |
@@ -161,6 +139,18 @@ completed_task_set_count: 11
 | `TASK-AR-253` | `485edce3-c9c…` | `TASKSET-AR-COLLAB-CONCURRENCY` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:20:00+09:00 | 2026-06-10T23:20:00+09:00 | Block worker pane attempts to write shared SSoT files directly. |
 | `TASK-AR-254` | `1515a1ec-6b5…` | `TASKSET-AR-COLLAB-CONCURRENCY` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:20:00+09:00 | 2026-06-10T23:20:00+09:00 | Make task-set start create the missing task worktree before claim creation, preventin… |
 | `TASK-AR-256` | `8188dea3-31d…` | `TASKSET-AR-COLLAB-CONCURRENCY` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:20:00+09:00 | 2026-06-10T23:20:00+09:00 | Expose pane collaboration events and task-set summaries through the UI state adapter. |
+| `TASK-AR-285` | `49555bdd-520…` | `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE` | completed | 2026-06-11T01:45:00+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | Count and classify live pane, claim, task-set, worktree, and event evidence in one re… |
+| `TASK-AR-286` | `e1b6076f-bb1…` | `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE` | completed | 2026-06-11T01:45:00+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | Verify whether plan, review, compound, retro, meeting, seminar, Ralph, scribe, and do… |
+| `TASK-AR-287` | `326fe2d8-f5a…` | `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE` | completed | 2026-06-11T01:45:00+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | Make pane lifecycle events mandatory enough that UI replay and audits can prove what… |
+| `TASK-AR-288` | `3de2947c-1b6…` | `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE` | completed | 2026-06-11T01:45:00+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | Track excluded, underused, waived, and lifecycle-stale agents across multi-pane colla… |
+| `TASK-AR-291` | `b7cb44f9-75c…` | `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE` | completed | 2026-06-11T01:45:00+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | Close the multi-pane assurance task set only after census, process, role, event, drif… |
+| `TASK-AR-289` | `382b4490-69e…` | `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE` | completed | 2026-06-11T01:45:00+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | Resolve or explain future heartbeat values, released-claim phase/progress drift, and… |
+| `TASK-AR-290` | `2ce7f36f-3bd…` | `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE` | completed | 2026-06-11T01:45:00+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | Make multi-pane census, process compliance, role coverage, drift, and event replay vi… |
+| `TASK-AR-292` | `76c8c0f6-2f0…` | `TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION` | completed | 2026-06-11T02:30:00+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | Define the canonical contract for session closeout, including how to separate baselin… |
+| `TASK-AR-293` | `5dd9af8e-fbb…` | `TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION` | completed | 2026-06-11T02:30:00+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | Capture a compact baseline at session start so closeout can distinguish pre-existing… |
+| `TASK-AR-294` | `21597a69-4e0…` | `TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION` | completed | 2026-06-11T02:30:00+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | Classify late dirty work and produce a safe route before any stash drop, branch delet… |
+| `TASK-AR-295` | `b75fac0b-3f4…` | `TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION` | completed | 2026-06-11T02:30:00+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | Wire the baseline and dirty-intake scripts into session lifecycle hooks without addin… |
+| `TASK-AR-296` | `eef9ec3b-5b4…` | `TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION` | completed | 2026-06-11T02:30:00+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | 2026-06-11T11:53:49+09:00 | Package the closeout workflow as a reusable skill and verify the full taskset through… |
 | `TASK-AR-257` | `278344d7-334…` | `TASKSET-AR-GOVERNANCE-OPS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:55:00+09:00 | 2026-06-10T23:55:00+09:00 | Register the remaining collaboration-governance, waiver, lifecycle, usage, sync, and… |
 | `TASK-AR-258` | `f3096efc-ab5…` | `TASKSET-AR-GOVERNANCE-OPS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:55:00+09:00 | 2026-06-10T23:55:00+09:00 | Reduce explicit collaboration waivers by promoting safe root runtime capabilities and… |
 | `TASK-AR-259` | `59a01025-c27…` | `TASKSET-AR-GOVERNANCE-OPS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T23:55:00+09:00 | 2026-06-10T23:55:00+09:00 | Normalize lifecycle evidence so released claims, heartbeats, active worktrees, and ta… |
@@ -183,6 +173,8 @@ completed_task_set_count: 11
 | `TASK-AR-279` | `3cf6f3eb-bd8…` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | 2026-06-11 | 2026-06-11T04:51:27+09:00 | 2026-06-11T08:01:53+09:00 | 2026-06-11T08:01:53+09:00 | Make backlog lanes and task cards easier to scan for status, priority, owner, task se… |
 | `TASK-AR-280` | `d9f3edb5-70e…` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | 2026-06-11 | 2026-06-11T08:42:47+09:00 | 2026-06-11T09:05:05+09:00 | 2026-06-11T09:05:05+09:00 | Make active agent state, claims, progress, and command safety boundaries visible in t… |
 | `TASK-AR-281` | `082e33ce-bc3…` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | 2026-06-11 | 2026-06-11T10:17:46+09:00 | 2026-06-11T10:32:26+09:00 | 2026-06-11T10:32:26+09:00 | Make events, errors, evidence, and replay records look audit-ready and severity-aware. |
+| `TASK-AR-283` | `d39df02e-7bf…` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | 2026-06-11 | 2026-06-11T12:16:38+09:00 | 2026-06-11T12:34:25+09:00 | 2026-06-11T12:34:25+09:00 | Keep the dark operator console usable on desktop and mobile without relying on color-… |
+| `TASK-AR-284` | `539c16e9-2ff…` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | 2026-06-11 | 2026-06-11T12:45:13+09:00 | 2026-06-11T12:55:13+09:00 | 2026-06-11T12:55:13+09:00 | Close the active UI design implementation task set only after focused checks, Owner g… |
 | `TASK-AR-282` | `3d7b5d8e-d81…` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | 2026-06-11 | 2026-06-11T10:47:46+09:00 | 2026-06-11T10:59:38+09:00 | 2026-06-11T10:59:38+09:00 | Bring graph, state-machine, roadmap, planner, source, and write surfaces into the sam… |
 | `TASK-AR-233` | `d475a04e-6c5…` | `TASKSET-AR-REPO-HYGIENE` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Clean the current working tree through an intentional commit and push, then keep back… |
 

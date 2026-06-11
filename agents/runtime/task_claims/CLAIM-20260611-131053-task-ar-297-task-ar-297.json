@@ -1,0 +1,40 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260611-131053-task-ar-297-task-ar-297",
+  "task_id": "TASK-AR-297",
+  "agent_role": "orchestrator",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "orch-20260611-131053-kst-task-ar-297",
+  "display_name": "orchestrator@root-01",
+  "callsite_id": "terminal:root-rsi-os:tab-01",
+  "pane_id": "terminal:root-rsi-os:tab-01",
+  "mode": "orchestrator",
+  "status": "released",
+  "task_set_id": "TASKSET-AR-RSI-OPERATING-SYSTEM",
+  "phase": "taskset-step-completed",
+  "progress_pct": 11,
+  "step_index": 1,
+  "step_total": 9,
+  "status_text": "TASK-AR-297 completed evidence inbox and conversation capture contract hardening; TASK-AR-298 is next.",
+  "worktree_path": ".",
+  "branch": "codex/runtime-assurance-closeout",
+  "claimed_at": "2026-06-11T13:10:53+09:00",
+  "last_heartbeat": "2026-06-11T13:12:23+09:00",
+  "updated_at": "2026-06-11T13:12:23+09:00",
+  "expires_at": "2026-06-11T14:10:53+09:00",
+  "released_at": "2026-06-11T13:12:23+09:00",
+  "lease": {
+    "claimed_at": "2026-06-11T13:10:53+09:00",
+    "heartbeat_at": "2026-06-11T13:12:23+09:00",
+    "expires_at": "2026-06-11T14:10:53+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260611-131053-task-ar-297-task-ar-297.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260611-131053-task-ar-297-task-ar-297.log.md",
+  "allow_parallel_task_set": false,
+  "tags": [
+    "rsi",
+    "evidence",
+    "task-ar-297",
+    "taskset-step-completed"
+  ]
+}

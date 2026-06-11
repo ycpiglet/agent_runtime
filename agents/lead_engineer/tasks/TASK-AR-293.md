@@ -4,11 +4,11 @@ display_id: TASK-AR-293
 task_uid: 5dd9af8e-fbb8-4f23-aee3-8c6e567f75a3
 registered_at: 2026-06-11T02:30:00+09:00
 created_at: 2026-06-11T02:30:00+09:00
-started_at: ""
-updated_at: 2026-06-11T02:30:00+09:00
-completed_at: ""
+started_at: 2026-06-11T11:53:49+09:00
+updated_at: 2026-06-11T11:53:49+09:00
+completed_at: 2026-06-11T11:53:49+09:00
 title: Implement SessionStart baseline capture
-status: planned
+status: completed
 priority: P0
 difficulty: M
 est_hours: 2
@@ -46,4 +46,3 @@ tags:
 - `scripts/session_baseline.py`
 - `tests/test_session_baseline.py`
 - `agents/runtime/session_baselines/`
-

@@ -9,6 +9,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "task_claim_dispatcher.py"
 GATE = REPO_ROOT / "scripts" / "parallel_worktree_gate.py"
+CONCURRENCY_GATE = REPO_ROOT / "scripts" / "collaboration_concurrency_gate.py"
 
 
 def _run_dispatcher(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
@@ -26,6 +27,18 @@ def _run_dispatcher(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
 def _run_gate(root: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(GATE), "--root", str(root), "--check"],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+
+def _run_concurrency_gate(root: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(CONCURRENCY_GATE), "--root", str(root), "--check"],
         cwd=REPO_ROOT,
         check=False,
         capture_output=True,
@@ -90,9 +103,16 @@ def test_create_claim_separates_system_identity_from_readable_display_name(tmp_p
     assert claim_path.exists()
     assert (tmp_path / claim["handoff_path"]).exists()
     assert (tmp_path / claim["log_path"]).exists()
+    event_log = tmp_path / "agents" / "runtime" / "pane_events" / "pane-events.jsonl"
+    events = [json.loads(line) for line in event_log.read_text(encoding="utf-8").splitlines()]
+    assert events[-1]["event"] == "claim_created"
+    assert events[-1]["claim_id"] == claim["claim_id"]
+    assert events[-1]["task_id"] == "TASK-AR-246"
 
     gate = _run_gate(tmp_path)
     assert gate.returncode == 0, gate.stdout
+    concurrency_gate = _run_concurrency_gate(tmp_path)
+    assert concurrency_gate.returncode == 0, concurrency_gate.stdout
 
 
 def test_create_claim_refuses_task_that_is_already_active(tmp_path: Path):

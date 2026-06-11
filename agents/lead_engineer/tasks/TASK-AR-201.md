@@ -4,8 +4,9 @@ display_id: TASK-AR-201
 task_uid: c3c2b9a3-a92a-4285-86f1-95351d833d02
 registered_at: 2026-06-09
 created_at: 2026-06-09
-updated_at: 2026-06-11T00:00:00+09:00
-status: in_progress
+updated_at: 2026-06-11T11:50:00+09:00
+completed_at: 2026-06-11T11:50:00+09:00
+status: completed
 owner: agent-runtime
 priority: P0
 difficulty: M
@@ -28,6 +29,9 @@ audit_log:
   - reviews/MEETING-2026-06-10-task-ar-201-definition-policy.md
   - reviews/RESEARCH-2026-06-09-agent-runtime-task-ar-official-guidance.md
   - reviews/MEETING-2026-06-13-agent-runtime-cross-project-governance-and-release-update.md
+  - scripts/context_knowledge_gate.py
+  - tests/test_context_knowledge_gate.py
+  - reviews/CONTEXT-KNOWLEDGE-GATE-2026-06-11-final.json
 ---
 
 ## 목표
@@ -68,3 +72,9 @@ audit_log:
 - `agent_context_packet.py`에서 컨텍스트 요약/경고 출력이 가능해진 상태로 보고됨.
 - 다음 단계는 경고를 `TASK-AR-204`의 실차단 규칙(오퍼레이션 경고→block)으로 승격할지 최종 합의.
 - 2026-06-10 연구/회의 의사결정을 반영해 `access_level`, `lineage` 가시화를 우선 반영함.
+
+## Completion Log (2026-06-11)
+
+- `CONTEXT-SOURCES.yml` 및 템플릿의 source-tier, definition_policy, query_policy, source_footer, routing outcome, score 필드를 검증 가능하게 고정했다.
+- `agent_context_packet.py`는 `source_footer_fields`, `routing_outcomes`, `scoring_fields`를 JSON/Markdown packet에 노출한다.
+- 완료 증거: `scripts/context_knowledge_gate.py --check`, `tests/test_context_knowledge_gate.py`.

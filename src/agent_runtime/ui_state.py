@@ -18,6 +18,7 @@ RESOURCE_NAMES = (
     "events",
     "goals",
     "task_claims",
+    "multipane_assurance",
     "sources",
     "errors",
     "evidence",
@@ -1013,6 +1014,7 @@ def _collect_sources_and_gaps(root: Path, now: str) -> tuple[list[dict[str, Any]
         ("task_claims", root / "agents" / "runtime" / "task_claims", "task_claim_directory", "runtime_api"),
         ("events", root / "agents" / "runtime" / "events", "event_directory", "append_only_runtime"),
         ("pane_events", root / "agents" / "runtime" / "pane_events", "pane_event_directory", "append_only_collaboration"),
+        ("multipane_assurance", root / "agents" / "project" / "MULTIPANE-PROCESS-POLICY.yml", "assurance_policy", "read_only"),
         ("status", root / "STATUS.md", "status_markdown", "agent_doc_workflow"),
         ("state_machines", root / "agents" / "project" / "STATE-MACHINES.yml", "state_machine_yaml", "schema_first_task"),
         ("roadmap", root / "agents" / "project" / "ROADMAP.md", "roadmap_markdown", "agent_doc_workflow"),
@@ -1027,6 +1029,7 @@ def _collect_sources_and_gaps(root: Path, now: str) -> tuple[list[dict[str, Any]
         "task_claims",
         "events",
         "pane_events",
+        "multipane_assurance",
         "status",
         "state_machines",
         "roadmap",
@@ -1099,6 +1102,60 @@ def _collect_planning(root: Path) -> dict[str, Any]:
     }
 
 
+def _collect_multipane_assurance(
+    root: Path,
+    now: str,
+    pane_events: list[dict[str, Any]],
+    warnings: list[dict[str, str]],
+) -> dict[str, Any]:
+    try:
+        from scripts import multipane_census
+        from scripts import multipane_drift_gate
+        from scripts import multipane_process_audit
+    except ImportError as exc:
+        warnings.append(_warning("multipane-assurance-import-error", "scripts", str(exc)))
+        return {
+            "status": "watch",
+            "error": str(exc),
+            "census": {},
+            "process": {},
+            "role_coverage": {},
+            "drift": {},
+            "event_summary": {},
+        }
+    try:
+        census = multipane_census.build_report(root)
+        process = multipane_process_audit.audit(root)
+        drift = multipane_drift_gate.check_root(root, now=now)
+    except Exception as exc:  # pragma: no cover - defensive UI adapter boundary
+        warnings.append(_warning("multipane-assurance-read-error", "multipane_assurance", str(exc)))
+        return {
+            "status": "watch",
+            "error": str(exc),
+            "census": {},
+            "process": {},
+            "role_coverage": {},
+            "drift": {},
+            "event_summary": {},
+        }
+    statuses = {str(census.get("status")), str(process.get("status")), str(drift.get("status"))}
+    status = "block" if "block" in statuses else "watch" if "watch" in statuses else "pass"
+    return {
+        "status": status,
+        "generated_at": now,
+        "census": census,
+        "process": process,
+        "role_coverage": process.get("observed", {}).get("roles", {}),
+        "drift": drift,
+        "event_summary": build_collaboration(pane_events).get("summary", {}),
+        "source_paths": {
+            "policy": "agents/project/MULTIPANE-PROCESS-POLICY.yml",
+            "claims": "agents/runtime/task_claims",
+            "pane_events": "agents/runtime/pane_events",
+        },
+    }
+
+
 def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     root_path = Path(root).resolve()
     generated_at = now or _now_iso()
@@ -1122,6 +1179,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     roadmap = load_roadmap(root_path, generated_at)
     planning = _collect_planning(root_path)
     collaboration = build_collaboration(pane_events)
+    multipane_assurance = _collect_multipane_assurance(root_path, generated_at, pane_events, warnings)
     return {
         "generated_at": generated_at,
         "sources": sources,
@@ -1130,6 +1188,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "task_sets": task_sets,
         "collaboration": collaboration,
         "task_claims": task_claims,
+        "multipane_assurance": multipane_assurance,
         "messages": messages,
         "events": events,
         "goals": goals,

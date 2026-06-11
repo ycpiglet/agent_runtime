@@ -4,8 +4,9 @@ display_id: TASK-AR-211
 task_uid: d477effb-70e0-490d-b8fd-6daacd7f61fd
 registered_at: 2026-06-11
 created_at: 2026-06-11
-updated_at: 2026-06-11T00:00:00+09:00
-status: in_progress
+updated_at: 2026-06-11T11:50:00+09:00
+completed_at: 2026-06-11T11:50:00+09:00
+status: completed
 owner: agent-runtime
 priority: P0
 difficulty: M
@@ -18,7 +19,7 @@ tags:
   - context
 trigger_meeting: yes
 created: 2026-06-11
-started_at: 2026-06-13T09:40:00+09:00
+started_at: 2026-06-11T11:45:00+09:00
 audit_log:
   - BACKLOG.md
   - AGENTIC_KNOWLEDGE_EVAL_PLAN.md
@@ -31,6 +32,10 @@ audit_log:
   - reviews/SEMINAR-2026-06-13-agent-runtime-task-ar-211-overlay-seminar-notes.md
   - reviews/RESEARCH-2026-06-13-agent-runtime-task-ar-211-official-multi-project-overlay.md
   - reviews/REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review.md
+  - scripts/overlay_simulation_gate.py
+  - reviews/OVERLAY-SIMULATION-GATE-2026-06-11-context-knowledge-final.json
+  - scripts/context_knowledge_gate.py
+  - reviews/CONTEXT-KNOWLEDGE-GATE-2026-06-11-final.json
 ---
 
 ## 목표
@@ -62,3 +67,9 @@ audit_log:
   - `agents/project/*` 오버레이 에셋 생성 및 경로·권한·메타 정책 고정
   - 오버레이 누락을 고위험 라우팅으로 전환해 `TASK-AR-204` 차단 게이트로 이관
   - `TASK-AR-209`/`212` 공통 감사 키(MIGRATION-COMPAT-MAP)로 정렬
+
+## Completion Log (2026-06-11)
+
+- 공용 runtime는 유지하고 프로젝트 고유 항목은 `agents/project/*` 및 simulation overlay 파일로만 확장했다.
+- `overlay_simulation_gate.py`가 2개 시나리오(`ready_for_overlay_use`, `hold_for_overlay`)를 통과해 overlay 누락 시 `TASK-AR-204`/`TASK-AR-216` 경로가 검증됐다.
+- `context_knowledge_gate.py`가 overlay output dimension과 warehouse/query 계약을 함께 검사한다.

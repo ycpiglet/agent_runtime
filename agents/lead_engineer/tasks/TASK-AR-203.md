@@ -4,8 +4,9 @@ display_id: TASK-AR-203
 task_uid: cb363212-ce90-4ecf-a4d2-3e279dfeb31e
 registered_at: 2026-06-11
 created_at: 2026-06-11
-updated_at: 2026-06-11T00:00:00+09:00
-status: planned
+updated_at: 2026-06-11T11:50:00+09:00
+completed_at: 2026-06-11T11:50:00+09:00
+status: completed
 owner: agent-runtime
 priority: P0
 difficulty: M
@@ -18,9 +19,15 @@ tags:
   - data-governance
 trigger_meeting: yes
 created: 2026-06-11
+started_at: 2026-06-11T11:45:00+09:00
 audit_log:
   - BACKLOG.md
   - AGENTIC_KNOWLEDGE_EVAL_PLAN.md
+  - agents/project/AGENT-KNOWLEDGE-WAREHOUSE.md
+  - agents/project/knowledge/lead-engineer.md
+  - src/agent_runtime/templates/project/agents/project/AGENT-KNOWLEDGE-WAREHOUSE.md
+  - scripts/context_knowledge_gate.py
+  - reviews/CONTEXT-KNOWLEDGE-GATE-2026-06-11-final.json
 ---
 
 ## 목표
@@ -47,3 +54,9 @@ audit_log:
 ## 비고
 
 - 선행: `TASK-AR-202`
+
+## Completion Log (2026-06-11)
+
+- `AGENT-KNOWLEDGE-WAREHOUSE` 템플릿과 `lead-engineer` role 문서를 추가했다.
+- 문서 필수 섹션은 `빠른 참조`, `차원설명`, `핵심 테이블`, `주의사항/패턴`, `연결고리`로 고정했다.
+- `source tier`, `lineage`, `history`, `context knowledge`, `freshness_sla` 누락은 `context_knowledge_gate.py`에서 pre-check finding으로 잡힌다.

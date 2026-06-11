@@ -92,6 +92,28 @@ CONTEXT_QUERY_REQUIRED_FIELDS = (
     "tolerance",
     "ambiguity_level",
     "access_check",
+    "query_tolerance",
+    "tradeoff_preference",
+)
+CONTEXT_SOURCE_FOOTER_FIELDS = (
+    "source_tier",
+    "source",
+    "confidence",
+    "access_level",
+    "ambiguity_score",
+    "freshness_sla",
+    "reviewer_verdict",
+    "lineage",
+)
+CONTEXT_ROUTING_OUTCOMES = (
+    "clarify_required",
+    "reviewer_review",
+    "hold_for_query_contract",
+    "correction_path",
+)
+CONTEXT_SCORING_FIELDS = (
+    "ambiguity_score",
+    "ssot_alignment_score",
 )
 
 
@@ -294,6 +316,9 @@ class Packet:
     context_source_warnings: list[str]
     required_routing_fields: list[str]
     definition_policy: str | None
+    source_footer_fields: list[str]
+    routing_outcomes: list[str]
+    scoring_fields: list[str]
 
     def to_dict(self) -> dict:
         return {
@@ -313,6 +338,9 @@ class Packet:
             "context_source_warnings": self.context_source_warnings,
             "required_routing_fields": self.required_routing_fields,
             "definition_policy": self.definition_policy,
+            "source_footer_fields": self.source_footer_fields,
+            "routing_outcomes": self.routing_outcomes,
+            "scoring_fields": self.scoring_fields,
             "notes": self.notes,
         }
 
@@ -623,6 +651,9 @@ def build_packet(roles_doc: dict, role_arg: str, task_arg: str | None) -> Packet
         context_source_warnings=context_warnings,
         required_routing_fields=required_routing_fields,
         definition_policy=definition_policy,
+        source_footer_fields=list(CONTEXT_SOURCE_FOOTER_FIELDS),
+        routing_outcomes=list(CONTEXT_ROUTING_OUTCOMES),
+        scoring_fields=list(CONTEXT_SCORING_FIELDS),
     )
 
 
@@ -656,6 +687,18 @@ def render_markdown(p: Packet) -> str:
     lines.append("- required_routing_fields:")
     for row in p.required_routing_fields:
         lines.append(f"  - {row}")
+    lines.append("")
+    lines.append("## Source footer contract")
+    for row in p.source_footer_fields:
+        lines.append(f"- {row}")
+    lines.append("")
+    lines.append("## Routing outcomes")
+    for row in p.routing_outcomes:
+        lines.append(f"- {row}")
+    lines.append("")
+    lines.append("## Routing scores")
+    for row in p.scoring_fields:
+        lines.append(f"- {row}")
     lines.append("")
     if p.task_summary:
         lines.append("## Active TASK")

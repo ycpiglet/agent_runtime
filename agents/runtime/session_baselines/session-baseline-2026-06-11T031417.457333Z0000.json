@@ -1,0 +1,30 @@
+{
+  "schema": "agent-runtime-session-baseline/v1",
+  "captured_at": "2026-06-11T03:14:17.457333+00:00",
+  "cwd": "C:\\Users\\ycpig\\agent_runtime",
+  "head": "1102776",
+  "branch": "codex/runtime-assurance-closeout",
+  "status_fingerprint": "d1708443a17b8706ebe8a546312ce843261e31828bf923f14d228fe07b7854f7",
+  "stash_count": 0,
+  "worktrees": [
+    {
+      "path": "C:/Users/ycpig/agent_runtime",
+      "HEAD": "1102776a704530d72f8001ddced958cf04d8f7c3",
+      "branch": "codex/runtime-assurance-closeout"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-283",
+      "HEAD": "1102776a704530d72f8001ddced958cf04d8f7c3",
+      "branch": "codex/task-ar-283-ui-design-implementation"
+    }
+  ],
+  "active_codex_branches": [
+    "codex/runtime-assurance-closeout",
+    "codex/task-ar-278-ui-design-implementation",
+    "codex/task-ar-279-ui-design-implementation",
+    "codex/task-ar-280-ui-design-implementation",
+    "codex/task-ar-281-ui-design-implementation",
+    "codex/task-ar-282-ui-design-implementation",
+    "+ codex/task-ar-283-ui-design-implementation"
+  ]
+}

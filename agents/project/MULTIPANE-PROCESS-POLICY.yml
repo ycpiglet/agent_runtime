@@ -1,0 +1,23 @@
+schema: agent-runtime-multipane-process-policy/v1
+required_artifacts:
+  - PLAN
+  - REVIEW
+  - MEETING
+  - CALL
+  - SEMINAR
+  - RESEARCH
+  - RETRO
+required_roles:
+  - lead-engineer
+  - qa
+  - doc-steward
+  - independent-auditor
+  - scribe
+monitored_roles:
+  - reviewer
+  - skeptic
+  - council
+  - release-steward
+  - progress-scout
+waived_subjects:
+  - role:scribe

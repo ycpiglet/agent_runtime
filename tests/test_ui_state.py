@@ -419,6 +419,39 @@ def test_ui_state_exposes_collaboration_concurrency_summary(tmp_path):
     assert any(source["id"] == "pane_events" for source in state["sources"])
 
 
+def test_ui_state_exposes_multipane_assurance_summary(tmp_path):
+    _write(
+        tmp_path / "agents" / "runtime" / "task_claims" / "CLAIM-assurance.json",
+        json.dumps(
+            {
+                "claim_id": "CLAIM-assurance",
+                "task_id": "TASK-AR-285",
+                "task_set_id": "TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE",
+                "agent_role": "lead-engineer",
+                "status": "working",
+                "phase": "implement",
+                "progress_pct": 50,
+                "worktree_path": ".worktrees/TASK-AR-285",
+            }
+        ),
+    )
+    _write(
+        tmp_path / "agents" / "project" / "MULTIPANE-PROCESS-POLICY.yml",
+        "required_artifacts:\n  - REVIEW\nrequired_roles:\n  - lead-engineer\n",
+    )
+    _write(tmp_path / "reviews" / "REVIEW-assurance.md", "# Review\n")
+
+    state = ui_state.build_state(tmp_path, now="2026-06-11T12:05:00+09:00")
+
+    assurance = state["multipane_assurance"]
+    assert assurance["census"]["active_claims"] == 1
+    assert assurance["process"]["status"] in {"pass", "watch"}
+    assert "role_coverage" in assurance
+    assert "drift" in assurance
+    assert "event_summary" in assurance
+    assert any(source["id"] == "multipane_assurance" for source in state["sources"])
+
+
 def test_ui_state_adapter_reports_malformed_records_as_warnings(tmp_path):
     _write(
         tmp_path / "agents" / "runtime" / "events" / "lead-engineer-2026-06-10.jsonl",

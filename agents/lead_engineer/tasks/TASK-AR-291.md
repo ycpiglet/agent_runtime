@@ -4,11 +4,11 @@ display_id: TASK-AR-291
 task_uid: b7cb44f9-75cb-4767-8207-db0a33343e2f
 registered_at: 2026-06-11T01:45:00+09:00
 created_at: 2026-06-11T01:45:00+09:00
-started_at: ""
-updated_at: 2026-06-11T01:45:00+09:00
-completed_at: ""
+started_at: 2026-06-11T11:53:49+09:00
+updated_at: 2026-06-11T11:53:49+09:00
+completed_at: 2026-06-11T11:53:49+09:00
 title: Publish multi-pane assurance closeout report
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 2
@@ -48,4 +48,3 @@ tags:
 - `STATUS.md`
 - `BACKLOG-BOARD.md`
 - `scripts/owner_governance_gate.py`
-

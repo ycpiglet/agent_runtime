@@ -4,11 +4,11 @@ display_id: TASK-AR-290
 task_uid: 2ce7f36f-3bdf-41b3-9040-f32cc3db4034
 registered_at: 2026-06-11T01:45:00+09:00
 created_at: 2026-06-11T01:45:00+09:00
-started_at: ""
-updated_at: 2026-06-11T01:45:00+09:00
-completed_at: ""
+started_at: 2026-06-11T11:53:49+09:00
+updated_at: 2026-06-11T11:53:49+09:00
+completed_at: 2026-06-11T11:53:49+09:00
 title: Surface multi-pane assurance in UI
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 3
@@ -47,4 +47,3 @@ tags:
 - `src/agent_runtime/ui_console.py`
 - `tests/test_ui_state.py`
 - `tests/test_ui_console.py`
-

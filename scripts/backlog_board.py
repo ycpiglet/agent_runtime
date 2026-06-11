@@ -83,6 +83,12 @@ TASK_SET_DEFINITIONS = [
         60,
     ),
     TaskSetInfo(
+        "TASKSET-AR-RSI-OPERATING-SYSTEM",
+        "Evidence-to-Proposal Operator",
+        "Evidence inboxes, failure casebooks, proposal quality metrics, council review, and bounded apply gates.",
+        61,
+    ),
+    TaskSetInfo(
         "TASKSET-AR-PANE-PROGRESS",
         "Progress Scout",
         "Pane/task-set progress, live continuity, claims, and resumable handoffs.",

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Runtime Session Baseline",
+  "type": "object",
+  "required": [
+    "schema",
+    "captured_at",
+    "cwd",
+    "head",
+    "branch",
+    "status_fingerprint",
+    "stash_count",
+    "worktrees",
+    "active_codex_branches"
+  ],
+  "properties": {
+    "schema": { "const": "agent-runtime-session-baseline/v1" },
+    "captured_at": { "type": "string" },
+    "cwd": { "type": "string" },
+    "head": { "type": "string" },
+    "branch": { "type": "string" },
+    "status_fingerprint": { "type": "string" },
+    "stash_count": { "type": "integer", "minimum": 0 },
+    "worktrees": { "type": "array", "items": { "type": "object" } },
+    "active_codex_branches": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

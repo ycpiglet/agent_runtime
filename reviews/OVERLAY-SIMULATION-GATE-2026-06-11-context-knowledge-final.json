@@ -1,0 +1,31 @@
+{
+  "schema": "agent-runtime-overlay-simulation-gate/v1",
+  "evaluation_mode": "cross_project_overlay_simulation",
+  "generated_at": "2026-06-11T02:47:11.524085+00:00",
+  "input": "agents/project/overlays/simulations/mvp-client-2026-06-09/context-packet-simulation.json",
+  "status": "pass",
+  "required_dimensions": [
+    "vision",
+    "roadmap",
+    "organization",
+    "team",
+    "links",
+    "communication"
+  ],
+  "cases": 2,
+  "findings": [],
+  "case_results": [
+    {
+      "name": "mvp-client-overlay-swap",
+      "status": "pass",
+      "expected_route": "ready_for_overlay_use",
+      "findings": []
+    },
+    {
+      "name": "mvp-client-missing-communication",
+      "status": "pass",
+      "expected_route": "hold_for_overlay",
+      "findings": []
+    }
+  ]
+}

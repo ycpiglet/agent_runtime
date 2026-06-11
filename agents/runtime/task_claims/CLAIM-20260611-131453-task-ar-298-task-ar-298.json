@@ -1,0 +1,41 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260611-131453-task-ar-298-task-ar-298",
+  "task_id": "TASK-AR-298",
+  "agent_role": "orchestrator",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "orch-20260611-131453-kst-task-ar-298",
+  "display_name": "orchestrator@root-01",
+  "callsite_id": "terminal:root-rsi-os:tab-01",
+  "pane_id": "terminal:root-rsi-os:tab-01",
+  "mode": "orchestrator",
+  "status": "released",
+  "task_set_id": "TASKSET-AR-RSI-OPERATING-SYSTEM",
+  "phase": "taskset-step-completed",
+  "progress_pct": 22,
+  "step_index": 2,
+  "step_total": 9,
+  "status_text": "TASK-AR-298 completed evaluation and verification registry hardening; TASK-AR-299 is next.",
+  "worktree_path": ".",
+  "branch": "codex/runtime-assurance-closeout",
+  "claimed_at": "2026-06-11T13:14:53+09:00",
+  "last_heartbeat": "2026-06-11T13:16:20+09:00",
+  "updated_at": "2026-06-11T13:16:20+09:00",
+  "expires_at": "2026-06-11T14:14:53+09:00",
+  "released_at": "2026-06-11T13:16:20+09:00",
+  "lease": {
+    "claimed_at": "2026-06-11T13:14:53+09:00",
+    "heartbeat_at": "2026-06-11T13:16:20+09:00",
+    "expires_at": "2026-06-11T14:14:53+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260611-131453-task-ar-298-task-ar-298.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260611-131453-task-ar-298-task-ar-298.log.md",
+  "allow_parallel_task_set": false,
+  "tags": [
+    "rsi",
+    "eval",
+    "verification",
+    "task-ar-298",
+    "taskset-step-completed"
+  ]
+}

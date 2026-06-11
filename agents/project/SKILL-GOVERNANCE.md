@@ -2,12 +2,23 @@
 
 ## Runbook Contract
 
-1. 질문 명확화
-2. 소스 탐색 (`CONTEXT-SOURCES.yml`의 source_tier 우선순위 준수)
-3. 실행
-4. 적대적 검토(adversarial review)
-5. 검증 점수 기록
-6. 교정 제안 수집
+Runbook 항목은 아래 6단계 증거가 모두 남아야 완료로 간주한다.
+
+1. clarify: 질문, business_scope, time_window, tolerance, query_tolerance, tradeoff_preference를 명확화한다.
+2. retrieve: `CONTEXT-SOURCES.yml`의 source_tier 우선순위와 access_level을 확인한다.
+3. execute: 실행 범위와 변경 경계를 기록하고 검증된 스크립트/패턴을 우선 재사용한다.
+4. review: 적대적 검토(adversarial review) 또는 reviewer_review 결과를 남긴다.
+5. verify: 검증 명령, 점수, 실패/경고 수, source_footer를 기록한다.
+6. record: evidence, review_verdict, verified_pattern, correction_path를 task/review/status에 연결한다.
+
+완료 필수 evidence:
+
+- `source_footer`
+- `review_verdict`
+- `evidence`
+- `verified_pattern`
+- `correction_path`
+- `record_path`
 
 ## Context + Verification First (정확도 = 맥락 + 검증)
 
@@ -20,6 +31,7 @@
 각 요청은 최소 아래 메타가 함께 들어와야 한다.
 
 - `owner`
+- `question`
 - `source_tier`
 - `business_scope`
 - `time_window`
@@ -31,6 +43,8 @@
 
 - 메타 미기재 시 `clarify_required`
 - 잘못된 출처 참조 시 `reviewer_review` 후 실행
+- query contract violation이 남으면 release routing은 `hold_for_query_contract`
+- 고위험·stale·access 불명확 요청은 기본 답변으로 종료하지 않고 `clarify_required` 또는 `reviewer_review`
 
 ## Required Footer (지식 응답)
 
@@ -49,6 +63,19 @@
 - `lineage`
 - `review_cycle_id`
 - `correction_status`
+
+## Warehouse Document Shape
+
+지식창고 문서는 최소 1개 role 단위 문서부터 아래 순서를 지킨다.
+
+1. 빠른 참조
+2. 차원설명
+3. 핵심 테이블
+4. 주의사항/패턴
+5. 연결고리
+
+각 문서는 `source tier`, `lineage`, `history`, `context knowledge`, `freshness_sla`, `owner`, `updated_at`를 포함한다.
+stale 또는 메타 누락은 pre-check 경고로 남기고, 반복되면 `TASK-AR-204`의 block 경로로 이관한다.
 
 ## Source Ranking Priority
 
