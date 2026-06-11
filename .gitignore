@@ -18,3 +18,6 @@ __pycache__/
 # Local hook diagnostics emitted by Codex/Owner governance hooks.
 /.codex/hook-logs/
 /agents/runtime/hook-logs/
+
+# Local browser verification artifacts.
+/.playwright-mcp/

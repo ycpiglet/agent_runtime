@@ -44,6 +44,17 @@ def _taskset_slug(task_set_id: str) -> str:
     return _slug(re.sub(r"^TASKSET-AR-", "", task_set_id, flags=re.IGNORECASE))
 
 
+def _letter_alias(index: int) -> str:
+    if index < 1:
+        return ""
+    letters: list[str] = []
+    value = index
+    while value:
+        value, remainder = divmod(value - 1, 26)
+        letters.append(chr(ord("A") + remainder))
+    return "".join(reversed(letters))
+
+
 def _normalize_status(value: str) -> str:
     return str(value or "").strip().lower()
 
@@ -57,10 +68,17 @@ def _rel(root: Path, path: Path) -> str:
 
 def _taskset_aliases() -> dict[str, backlog_board.TaskSetInfo]:
     aliases: dict[str, backlog_board.TaskSetInfo] = {}
-    for info in backlog_board.TASK_SET_DEFINITIONS:
+    for index, info in enumerate(backlog_board.TASK_SET_DEFINITIONS, start=1):
+        letter = _letter_alias(index)
         values = {
             info.task_set_id,
             info.task_set_id.lower(),
+            str(index),
+            letter,
+            f"taskset {index}",
+            f"taskset-{index}",
+            f"taskset {letter}",
+            f"taskset-{letter}",
             _taskset_slug(info.task_set_id),
             _slug(info.display_name),
             _slug(info.task_set_id.replace("TASKSET-AR-", "")),
@@ -395,7 +413,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     for name, func in (("plan", cmd_plan), ("start", cmd_start)):
         command = sub.add_parser(name, help=f"{name} a task set")
-        command.add_argument("taskset", help="Task set id or human alias, e.g. quality-loop")
+        command.add_argument("taskset", help="Task set id or human alias, e.g. 2, B, quality-loop")
         command.add_argument("--agent-role")
         command.add_argument("--team-id")
         command.add_argument("--mode")

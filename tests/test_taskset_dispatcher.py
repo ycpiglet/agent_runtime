@@ -64,6 +64,21 @@ def test_plan_accepts_human_friendly_taskset_alias_and_emits_next_commands(tmp_p
     assert payload["branch"].startswith("codex/task-ar-901-quality-loop")
 
 
+def test_plan_accepts_numeric_and_letter_taskset_aliases(tmp_path: Path) -> None:
+    _write_task(tmp_path, "TASK-AR-901", "TASKSET-AR-QUALITY-LOOP", status="planned")
+
+    by_number = _run(tmp_path, "plan", "2", "--json")
+    by_letter = _run(tmp_path, "plan", "B", "--json")
+    by_prefixed_letter = _run(tmp_path, "plan", "taskset B", "--json")
+
+    assert by_number.returncode == 0, by_number.stderr or by_number.stdout
+    assert by_letter.returncode == 0, by_letter.stderr or by_letter.stdout
+    assert by_prefixed_letter.returncode == 0, by_prefixed_letter.stderr or by_prefixed_letter.stdout
+    assert json.loads(by_number.stdout)["task_set_id"] == "TASKSET-AR-QUALITY-LOOP"
+    assert json.loads(by_letter.stdout)["task_set_id"] == "TASKSET-AR-QUALITY-LOOP"
+    assert json.loads(by_prefixed_letter.stdout)["task_set_id"] == "TASKSET-AR-QUALITY-LOOP"
+
+
 def test_plan_skips_completed_tasks(tmp_path: Path) -> None:
     _write_task(tmp_path, "TASK-AR-901", "TASKSET-AR-RELEASE-STEWARD", status="completed")
     _write_task(tmp_path, "TASK-AR-902", "TASKSET-AR-RELEASE-STEWARD", status="planned")

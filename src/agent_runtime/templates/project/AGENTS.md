@@ -157,6 +157,40 @@ Allowed task states:
 - `완료`
 - `보류`
 
+## 5.4 Project Management Decomposition
+
+Non-trivial work uses this hierarchy:
+
+```text
+project -> taskset -> task -> unit
+```
+
+The backlog/board is a routing index, not the full task specification. Keep
+only metadata there: ids, status, priority, owner, model tier, difficulty,
+task_set_id, project_id, and evidence pointers. Put detailed work instructions
+in linked project, taskset, task, or unit spec files.
+
+A worker-ready unit must include:
+
+1. context and source links;
+2. exact target files or components;
+3. in-scope and out-of-scope boundaries;
+4. step-by-step execution notes when needed;
+5. acceptance criteria;
+6. verification commands;
+7. handoff/report format.
+
+Planning, research synthesis, architecture, risk classification, and
+decomposition belong to higher-capability planner roles/models. Routine
+implementation units should be assigned to lower-cost worker models when the
+unit is precise, reversible, and verifiable. Escalate the model tier when the
+unit is ambiguous, high-risk, cross-cutting, security-sensitive, or repeatedly
+failing.
+
+Implementation agents execute the smallest registered unit. They must not
+expand into reprioritization, adjacent tasksets, or new planning unless a
+planner-approved record says so.
+
 ## 5.5 Task Set Dispatch
 
 Task sets are the default unit for parallel panes. A "pane" may be a terminal

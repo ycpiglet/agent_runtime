@@ -86,7 +86,7 @@ def test_backlog_board_hides_completed_tasks_and_completed_task_sets(tmp_path: P
     assert "registered_at" in archived_files
 
 
-def test_real_backlog_tasks_are_classified_into_twenty_task_sets() -> None:
+def test_real_backlog_tasks_are_classified_into_twenty_two_task_sets() -> None:
     tasks = backlog_board.load_tasks(ROOT / "agents" / "lead_engineer" / "tasks")
     task_set_ids = {task.task_set_id for task in tasks}
 
@@ -112,4 +112,6 @@ def test_real_backlog_tasks_are_classified_into_twenty_task_sets() -> None:
         "TASKSET-AR-VISION-GAP-CLOSURE",
         "TASKSET-AR-UI-UX-V2",
         "TASKSET-AR-UI-PLATFORM-EXTENSIONS",
+        "TASKSET-AR-UI-LIVING-CONSOLE",
+        "TASKSET-AR-PM-OPERATING-SYSTEM",
     }
