@@ -146,6 +146,7 @@ pointers:
     - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-243-planning-evidence-link.md
 next_actions:
   - "Start TASK-AR-281 before claiming evidence/event pane visual hierarchy progress."
+  - "A RED test seed for TASK-AR-281 is preserved on branch codex/task-ar-281-ui-design-implementation at commit 16fad03."
   - "Push local commits only after Owner approval; local closeout does not imply remote publish, PR, tag, or external CI evidence."
   - "Keep TASKSET-AR-UI-DESIGN-IMPLEMENTATION active until TASK-AR-278 through TASK-AR-284 have pane-level visual QA and Owner handoff evidence."
   - "Treat TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE and TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION as planned follow-up tasksets until an explicit claim starts them."
