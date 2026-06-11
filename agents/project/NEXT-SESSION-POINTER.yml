@@ -1,26 +1,26 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-11T09:05:05+09:00
+updated_at: 2026-06-11T10:32:26+09:00
 current_state:
-  summary: "TASK-AR-280 is complete for agent and command pane hierarchy; TASKSET-AR-UI-DESIGN-IMPLEMENTATION remains active with evidence/event hierarchy next."
+  summary: "TASK-AR-281 is complete for evidence and event pane hierarchy; TASKSET-AR-UI-DESIGN-IMPLEMENTATION remains active with map/planner/source/write pane hierarchy next."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-UI-DESIGN-IMPLEMENTATION"
-  step_index: 4
+  step_index: 5
   step_total: 7
-  progress_pct: 57
-  status_text: "TASK-AR-280 completed with TDD, focused UI/state/command tests, py_compile, HTTP probes, and Playwright desktop/mobile checks; TASK-AR-281 is the next planned handoff."
+  progress_pct: 71
+  status_text: "TASK-AR-281 completed with TDD, focused UI/state/command tests, py_compile, HTTP probes, and headless Playwright desktop/mobile checks; TASK-AR-282 is the next planned handoff."
 active_work:
   current_agents: []
   current_teams:
     - team_id: agent-runtime-core
       active_claims: []
 resume:
-  active_task: TASK-AR-281
+  active_task: TASK-AR-282
   active_task_set: TASKSET-AR-UI-DESIGN-IMPLEMENTATION
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
-  lead_engineer: "Start TASK-AR-281 with a fresh claim before changing evidence/event pane hierarchy; keep UI-DESIGN-SYSTEM closed as research/design evidence."
+  lead_engineer: "Start TASK-AR-282 with a fresh claim before changing map, planner, source, or write pane hierarchy; keep UI-DESIGN-SYSTEM closed as research/design evidence."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
@@ -120,6 +120,7 @@ pointers:
     - reviews/REVIEW-2026-06-11-session-closeout-automation-registration.md
     - docs/superpowers/plans/2026-06-11-session-closeout-automation.md
   recently_closed_reviews:
+    - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-281-evidence-event-panes.md
     - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-280-agent-command-panes.md
     - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-279-backlog-hierarchy.md
     - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-278-console-shell.md
@@ -145,8 +146,7 @@ pointers:
     - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-221-quality-loop-closeout.md
     - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-243-planning-evidence-link.md
 next_actions:
-  - "Start TASK-AR-281 before claiming evidence/event pane visual hierarchy progress."
-  - "A RED test seed for TASK-AR-281 is preserved on branch codex/task-ar-281-ui-design-implementation at commit 16fad03."
+  - "Start TASK-AR-282 before claiming map/planner/source/write pane visual hierarchy progress."
   - "Push local commits only after Owner approval; local closeout does not imply remote publish, PR, tag, or external CI evidence."
   - "Keep TASKSET-AR-UI-DESIGN-IMPLEMENTATION active until TASK-AR-278 through TASK-AR-284 have pane-level visual QA and Owner handoff evidence."
   - "Treat TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE and TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION as planned follow-up tasksets until an explicit claim starts them."
@@ -179,7 +179,7 @@ verification:
     - "python scripts/owner_governance_gate.py"
     - "python scripts/parallel_worktree_gate.py --check"
     - "python scripts/collaboration_concurrency_gate.py --check"
-  last_known_scope: "TASKSET-AR-QUALITY-LOOP, TASKSET-AR-PANE-PROGRESS, TASKSET-AR-RSI-PLANNING, TASKSET-AR-RELEASE-STEWARD, TASKSET-AR-COLLAB-CONCURRENCY, TASKSET-AR-GOVERNANCE-OPS, TASKSET-AR-TASK-IDENTITY, and TASKSET-AR-UI-DESIGN-SYSTEM final closeout for local scope; TASKSET-AR-UI-DESIGN-IMPLEMENTATION is active with TASK-AR-278 through TASK-AR-280 complete; external publish remains Owner-gated and out of scope."
+  last_known_scope: "TASKSET-AR-QUALITY-LOOP, TASKSET-AR-PANE-PROGRESS, TASKSET-AR-RSI-PLANNING, TASKSET-AR-RELEASE-STEWARD, TASKSET-AR-COLLAB-CONCURRENCY, TASKSET-AR-GOVERNANCE-OPS, TASKSET-AR-TASK-IDENTITY, and TASKSET-AR-UI-DESIGN-SYSTEM final closeout for local scope; TASKSET-AR-UI-DESIGN-IMPLEMENTATION is active with TASK-AR-278 through TASK-AR-281 complete; external publish remains Owner-gated and out of scope."
   rsi_planning_completed:
     - reviews/RSI-PLANNING-TASKSET-VERIFY.json
   rsi_planning_note: RSI planning completed verification report is the canonical closeout evidence.

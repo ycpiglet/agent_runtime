@@ -1,6 +1,7 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
   - BACKLOG-BOARD.md
+  - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-281-evidence-event-panes.md
   - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-280-agent-command-panes.md
   - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-279-backlog-hierarchy.md
   - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-278-console-shell.md

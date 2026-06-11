@@ -1,5 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-11 - TASK-AR-281 evidence and event pane closeout
+
+- Summary: completed `TASK-AR-281` for the `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` evidence/event/replay/error pane hierarchy scope.
+- Output: event, error, evidence, and replay records now render as audit cards with visible labels for Event/Evidence/Replay, Severity, Actor, Task, Goal, and Source plus pass/warn/fail treatment.
+- Verification: TDD RED/GREEN was exercised for audit-card markers, visible labels, event filters, and CSS tone selectors; focused UI/state/command tests passed with `43 passed`; `py_compile` passed; HTTP asset/API probes passed; headless Playwright desktop/mobile checks showed no horizontal overflow or console warnings/errors.
+- Handoff: `TASK-AR-282` is the next UI design implementation task; `TASK-AR-281` is archived in `BACKLOG-BOARD.md`.
+- Evidence: `reviews/REVIEW-2026-06-11-agent-runtime-task-ar-281-evidence-event-panes.md`.
+
 ## 2026-06-11 - TASK-AR-280 agent and command pane closeout
 
 - Summary: completed `TASK-AR-280` for the `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` agent and command pane hierarchy scope.
