@@ -499,6 +499,7 @@ textarea:focus {
 .taskset-card,
 .agent-card,
 .command-card,
+.audit-card,
 .list-row {
   width: 100%;
   min-width: 0;
@@ -516,6 +517,7 @@ textarea:focus {
 .taskset-card:hover,
 .agent-card:hover,
 .command-card:hover,
+.audit-card:hover,
 .list-row:hover {
   border-color: var(--line-strong);
 }
@@ -546,7 +548,8 @@ textarea:focus {
   gap: 6px;
 }
 .agent-card-meta,
-.command-card-meta {
+.command-card-meta,
+.audit-card-meta {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
@@ -554,6 +557,7 @@ textarea:focus {
 .task-card-meta > span,
 .agent-card-meta > span,
 .command-card-meta > span,
+.audit-card-meta > span,
 .task-status {
   min-width: 0;
   border: 1px solid rgba(52, 56, 68, 0.76);
@@ -572,6 +576,7 @@ textarea:focus {
 .task-card-meta strong,
 .agent-card-meta strong,
 .command-card-meta strong,
+.audit-card-meta strong,
 .task-status strong {
   display: block;
   margin-top: 4px;
@@ -587,11 +592,28 @@ textarea:focus {
   color: var(--primary-hover);
 }
 .agent-card-header,
-.command-card-header {
+.command-card-header,
+.audit-card-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
+}
+.audit-card p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.event-card,
+.error-card,
+.evidence-card,
+.replay-card {
+  gap: 10px;
+}
+.audit-card-meta strong,
+.evidence-card b,
+.replay-card b {
+  color: var(--primary-hover);
 }
 .agent-score strong {
   color: var(--teal);
@@ -615,6 +637,7 @@ textarea:focus {
 .taskset-card b,
 .agent-card b,
 .command-card b,
+.audit-card b,
 .list-row b {
   overflow-wrap: anywhere;
 }
@@ -622,6 +645,7 @@ textarea:focus {
 .taskset-card span,
 .agent-card span,
 .command-card span,
+.audit-card span,
 .list-row span,
 .list-row p {
   color: var(--muted);
@@ -637,7 +661,8 @@ textarea:focus {
 }
 .task-card .meta-label,
 .agent-card .meta-label,
-.command-card .meta-label {
+.command-card .meta-label,
+.audit-card .meta-label {
   color: var(--subtle);
   font-size: 10px;
   line-height: 1;
@@ -646,6 +671,7 @@ textarea:focus {
 .taskset-card code,
 .agent-card code,
 .command-card code,
+.audit-card code,
 .list-row code {
   color: var(--subtle);
   font-size: 11px;
@@ -654,6 +680,7 @@ textarea:focus {
 .list-row.ok,
 .agent-card.ok,
 .command-card.risk-low,
+.audit-card.pass,
 .task-card.status-completed,
 .task-card.status-done {
   border-left: 3px solid var(--success);
@@ -661,6 +688,7 @@ textarea:focus {
 .list-row.warn,
 .agent-card.warn,
 .command-card.risk-unknown,
+.audit-card.warn,
 .task-card.status-in-progress,
 .task-card.status-active,
 .task-card.status-planned,
@@ -670,6 +698,7 @@ textarea:focus {
 .list-row.error,
 .command-card.risk-high,
 .command-card.risk-failed,
+.audit-card.fail,
 .task-card.status-blocked,
 .task-card.status-hold {
   border-left: 3px solid var(--danger);
@@ -800,6 +829,7 @@ pre {
   .task-card-meta,
   .agent-card-meta,
   .command-card-meta,
+  .audit-card-meta,
   .meta-grid,
   .edit-row,
   .button-row {
@@ -1038,13 +1068,40 @@ function filterEvents(events) {
   });
 }
 
+function auditSeverityLabel(row, fallback = "info") {
+  return String(row.severity || row.status || row.event || row.type || row.kind || fallback);
+}
+
+function auditToneClass(row, fallback = "pass") {
+  const text = JSON.stringify(row || {}).toLowerCase();
+  if (text.includes("error") || text.includes("failed") || text.includes("fail") || text.includes("blocked")) return "fail";
+  if (text.includes("warn") || text.includes("missing") || text.includes("gap") || text.includes("hold")) return "warn";
+  if (text.includes("completed") || text.includes("done") || text.includes("pass") || text.includes("ok")) return "pass";
+  return fallback;
+}
+
+function renderAuditMeta(content) {
+  return `<div class="audit-card-meta" aria-label="Audit metadata">${content}</div>`;
+}
+
 function renderEvents() {
   const events = filterEvents(runtimeState.events || []);
   $("events-list").innerHTML = events.length ? events.slice(-80).reverse().map((event) => `
-    <article class="list-row ${event.severity === "error" ? "error" : "ok"}">
-      <b>${escapeHtml(event.type || event.event || event.id)}</b>
-      <span>${escapeHtml(event.created_at || event.ts)} / ${escapeHtml(event.actor || event.role || "runtime")}</span>
-      <code>${escapeHtml(event.id)}</code>
+    <article class="audit-card event-card ${auditToneClass(event)}">
+      <div class="audit-card-header">
+        <b>${escapeHtml(event.type || event.event || event.id || "event")}</b>
+        <span class="state-chip">${escapeHtml(auditSeverityLabel(event))}</span>
+      </div>
+      ${renderAuditMeta(`
+        <span><span class="meta-label">Event</span><strong>${escapeHtml(event.type || event.event || "unknown")}</strong></span>
+        <span><span class="meta-label">Severity</span><strong>${escapeHtml(auditSeverityLabel(event))}</strong></span>
+        <span><span class="meta-label">Actor</span><strong>${escapeHtml(event.actor || event.role || "runtime")}</strong></span>
+        <span><span class="meta-label">Task</span><strong>${escapeHtml(event.task_id || "no task")}</strong></span>
+        <span><span class="meta-label">Goal</span><strong>${escapeHtml(event.goal_id || "no goal")}</strong></span>
+        <span><span class="meta-label">Source</span><strong>${escapeHtml(event.source_path || event.id || "event stream")}</strong></span>
+      `)}
+      ${event.error || event.message ? `<p>${escapeHtml(event.error || event.message)}</p>` : ""}
+      <code>${escapeHtml(event.id || event.created_at || event.ts || "")}</code>
     </article>
   `).join("") : `<div class="empty">No events</div>`;
 }
@@ -1054,25 +1111,52 @@ function renderEvidence() {
   const evidence = runtimeState.evidence || [];
   const replay = runtimeState.replay || [];
   $("errors-list").innerHTML = errors.length ? errors.slice(-40).reverse().map((item) => `
-    <article class="list-row error">
-      <b>${escapeHtml(item.message)}</b>
-      <span>${escapeHtml(item.actor || "runtime")} / ${escapeHtml(item.task_id || item.goal_id || "no context")}</span>
-      <code>${escapeHtml(item.source_path || item.event_id || "")}</code>
+    <article class="audit-card error-card fail">
+      <div class="audit-card-header">
+        <b>${escapeHtml(item.message || item.error || "runtime error")}</b>
+        <span class="state-chip">fail</span>
+      </div>
+      ${renderAuditMeta(`
+        <span><span class="meta-label">Event</span><strong>${escapeHtml(item.event_id || item.type || "error")}</strong></span>
+        <span><span class="meta-label">Severity</span><strong>fail</strong></span>
+        <span><span class="meta-label">Actor</span><strong>${escapeHtml(item.actor || item.role || "runtime")}</strong></span>
+        <span><span class="meta-label">Task</span><strong>${escapeHtml(item.task_id || "no task")}</strong></span>
+        <span><span class="meta-label">Goal</span><strong>${escapeHtml(item.goal_id || "no goal")}</strong></span>
+        <span><span class="meta-label">Source</span><strong>${escapeHtml(item.source_path || item.event_id || "error stream")}</strong></span>
+      `)}
     </article>
   `).join("") : `<div class="empty">No recent errors</div>`;
   $("evidence-list").innerHTML = evidence.length ? evidence.slice(-60).reverse().map((item) => `
-    <article class="list-row ok">
-      <b>${escapeHtml(item.evidence)}</b>
-      <span>${escapeHtml(item.source_type)} / ${escapeHtml(item.task_id || item.goal_id || "no context")}</span>
-      <code>${escapeHtml(item.source_path || item.source_id || "")}</code>
+    <article class="audit-card evidence-card pass">
+      <div class="audit-card-header">
+        <b>${escapeHtml(item.evidence || item.source_path || "evidence")}</b>
+        <span class="state-chip">pass</span>
+      </div>
+      ${renderAuditMeta(`
+        <span><span class="meta-label">Evidence</span><strong>${escapeHtml(item.evidence || "linked")}</strong></span>
+        <span><span class="meta-label">Severity</span><strong>pass</strong></span>
+        <span><span class="meta-label">Actor</span><strong>${escapeHtml(item.actor || item.role || item.source_type || "runtime")}</strong></span>
+        <span><span class="meta-label">Task</span><strong>${escapeHtml(item.task_id || "no task")}</strong></span>
+        <span><span class="meta-label">Goal</span><strong>${escapeHtml(item.goal_id || "no goal")}</strong></span>
+        <span><span class="meta-label">Source</span><strong>${escapeHtml(item.source_path || item.source_id || "evidence index")}</strong></span>
+      `)}
     </article>
   `).join("") : `<div class="empty">No evidence links</div>`;
   $("replay-list").innerHTML = replay.length ? replay.slice(-80).reverse().map((item) => `
-    <article class="list-row">
-      <b>${escapeHtml(item.type || item.kind)}</b>
-      <span>${escapeHtml(item.created_at || "")} / ${escapeHtml(item.actor || "runtime")}</span>
-      <p>${escapeHtml(item.summary || "")}</p>
-      <code>${escapeHtml(item.task_id || item.goal_id || item.source_path || "")}</code>
+    <article class="audit-card replay-card ${auditToneClass(item, "warn")}">
+      <div class="audit-card-header">
+        <b>${escapeHtml(item.type || item.kind || "replay")}</b>
+        <span class="state-chip">${escapeHtml(auditSeverityLabel(item, "replay"))}</span>
+      </div>
+      ${renderAuditMeta(`
+        <span><span class="meta-label">Replay</span><strong>${escapeHtml(item.type || item.kind || "record")}</strong></span>
+        <span><span class="meta-label">Severity</span><strong>${escapeHtml(auditSeverityLabel(item, "replay"))}</strong></span>
+        <span><span class="meta-label">Actor</span><strong>${escapeHtml(item.actor || item.role || "runtime")}</strong></span>
+        <span><span class="meta-label">Task</span><strong>${escapeHtml(item.task_id || "no task")}</strong></span>
+        <span><span class="meta-label">Goal</span><strong>${escapeHtml(item.goal_id || "no goal")}</strong></span>
+        <span><span class="meta-label">Source</span><strong>${escapeHtml(item.source_path || item.source_id || "replay log")}</strong></span>
+      `)}
+      ${item.summary ? `<p>${escapeHtml(item.summary)}</p>` : ""}
     </article>
   `).join("") : `<div class="empty">No replay records</div>`;
 }
