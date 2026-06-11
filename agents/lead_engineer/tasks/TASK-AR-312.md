@@ -4,9 +4,10 @@ display_id: TASK-AR-312
 task_uid: 13d31d8a-bac0-4a5f-aae5-38c50cf30918
 registered_at: 2026-06-11T17:58:45+09:00
 created_at: 2026-06-11T17:58:45+09:00
-updated_at: 2026-06-11T17:58:45+09:00
+started_at: 2026-06-12T00:08:33+09:00
+updated_at: 2026-06-12T00:08:33+09:00
 title: 멀티에이전트 동시 실행 검증 및 RBAC 역할 강제
-status: planned
+status: in_progress
 priority: P1
 difficulty: L
 est_hours: 8

@@ -1,5 +1,14 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-06-12 TASKSET-AR-DOC-TO-PLAN Registration
+
+- New planned task set: `TASKSET-AR-DOC-TO-PLAN` (Pitch Alchemist).
+- Purpose: Owner 비전 "기획서/pitch deck을 넣으면 스스로 분석→plan→task 분해→자동 등록" + 동일 비전 오픈소스 **Paperclip**(github.com/paperclipai/paperclip, MIT) 기능 갭 채택.
+- Registered planned tasks: `TASK-AR-366`(문서→플랜 파이프라인 — PM-OPERATING-SYSTEM 계층·B-mode 승인 경유) `TASK-AR-367`(Paperclip 갭 분석: 에이전트별 예산 하드 스톱·heartbeat 수명주기·멀티테넌시·out-of-process 플러그인) `TASK-AR-368`(actual_tokens/actual_hours/team 실측 캡처 + 다요소 정렬·평가 — 우선순위/난이도/예상·실제 토큰/예상·실제 시간/부서).
+- Research record: `reviews/RESEARCH-2026-06-12-agent-runtime-paperclip-and-doc-to-plan.md` (Paperclip 기능 전수 매핑 — 문서 인입은 Paperclip에 없는 차별 영역).
+- Idea Vault update: IV-006을 계정/커뮤니티/레벨 랭킹으로 확장, IV-012(다요소 리더보드) 신설.
+- Boundary: 자동 등록은 반드시 B-mode planning 제안→Owner 승인 경유(자동 적용 금지). 계정/랭킹은 Vault 보류 유지.
+
 ## 2026-06-11 TASKSET-AR-PM-OPERATING-SYSTEM Registration
 
 - New planned task set: `TASKSET-AR-PM-OPERATING-SYSTEM` (Project Workbreaker).

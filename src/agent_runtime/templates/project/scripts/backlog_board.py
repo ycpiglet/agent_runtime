@@ -172,6 +172,12 @@ TASK_SET_DEFINITIONS = [
         "Project-to-unit hierarchy, worker-ready specs, model-tier routing, WIP controls, dispatcher scope stops, and PM verification gates.",
         96,
     ),
+    TaskSetInfo(
+        "TASKSET-AR-DOC-TO-PLAN",
+        "Pitch Alchemist",
+        "Document-to-plan intake pipeline, Paperclip gap adoption, actuals capture, and multi-factor evaluation/sorting.",
+        97,
+    ),
 ]
 TASK_SET_INFO = {item.task_set_id: item for item in TASK_SET_DEFINITIONS}
 UNCLASSIFIED_TASK_SET = TaskSetInfo(

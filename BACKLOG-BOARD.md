@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-12
-task_count: 153
-open_count: 54
+task_count: 156
+open_count: 57
 completed_count: 99
-task_set_count: 7
+task_set_count: 8
 completed_task_set_count: 15
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `54` open or active tasks; `99` completed tasks are archived from this live board.
+- Summary: `57` open or active tasks; `99` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `48` / Ask `6` / Review `0` / Later `0` / Done `99`.
-- Task Sets: `7` active workflows; `15` completed workflows are hidden from the live action board.
+- Status: Action `50` / Ask `6` / Review `0` / Later `1` / Done `99`.
+- Task Sets: `8` active workflows; `15` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -72,7 +72,7 @@ completed_task_set_count: 15
 - Progress: `3/10` done; `7` open or active.
 | Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-312` | planned | Action | P1 | High | High | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 문서로만 정의된 역할 체계(TEAMS/ORG/diversity council)를 실제 2~3개 동시 에이전트 인스턴스 실행으로 증명하고, 역할별 쓰기 권… |
+| `TASK-AR-312` | in_progress | Action | P1 | High | High | 8h/6000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 문서로만 정의된 역할 체계(TEAMS/ORG/diversity council)를 실제 2~3개 동시 에이전트 인스턴스 실행으로 증명하고, 역할별 쓰기 권… |
 | `TASK-AR-314` | planned | Action | P1 | High | High | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 리스 기반 클레임 원시 연산으로 다중 프로세스 환경의 중복 응답/소유권 경합을 구조적으로 차단한다. |
 | `TASK-AR-316` | planned | Action | P2 | Medium | Low | 4h/3000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | skills/(session-closeout, taskset-dispatch)를 버전·트리거 조건·메타데이터를 갖춘 재사용 가능한 패키지로 만들어 다른… |
 | `TASK-AR-315` | planned | Action | P2 | Medium | Medium | 6h/5000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 결정적 계약 베이스라인(현 1.0 대체 통과)이 가리고 있는 실제 모델 출력 정확도(offline 0.6667 vs 목표 0.90) 격차를 provide… |
@@ -144,6 +144,16 @@ completed_task_set_count: 15
 | `TASK-AR-347` | planned | Action | P1 | High | Medium | 4h/4000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Add Kanban-style WIP controls and flow signals for tasksets, teams, and worker units. |
 | `TASK-AR-349` | planned | Action | P1 | High | Medium | 4h/3000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Mirror the PM hierarchy, unit templates, schemas, and gates into generated host proje… |
 | `TASK-AR-348` | planned | Action | P1 | High | Medium | 5h/4000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Render project/taskset/task/unit hierarchy without stuffing detailed instructions int… |
+
+### Pitch Alchemist (`TASKSET-AR-DOC-TO-PLAN`)
+
+- Flow: Document-to-plan intake pipeline, Paperclip gap adoption, actuals capture, and multi-factor evaluation/sorting.
+- Progress: `0/3` done; `3` open or active.
+| Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-367` | planned | Action | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 비전이 동일한 오픈소스 Paperclip(github.com/paperclipai/paperclip, MIT)의 기능 중 agent_runtime에 없는… |
+| `TASK-AR-368` | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 예상치(est_*)만 있는 현 체계에 실측치를 더해, task/taskset을 우선순위·난이도·예상/실제 토큰·예상/실제 시간·부서 등 다요소로 정렬·필… |
+| `TASK-AR-366` | planned | Later | P1 | High | Critical | 16h/12000tok | Low | 6 | agent-runtime-core | lead-engineer | Wait for dependency | pitch deck/기획서/아이디어 문서(PPT, PDF, Word, HTML, md)를 넣으면 시스템이 스스로 분석해 plan을 짜고 실현 가능한 ta… |
 
 ## Archived Task Sets
 
