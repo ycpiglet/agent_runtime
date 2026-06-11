@@ -1,5 +1,33 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-06-11 TASKSET-AR-VISION-GAP-CLOSURE Registration
+
+- New planned task set: `TASKSET-AR-VISION-GAP-CLOSURE` (Vision Integrator).
+- Purpose: 2026-06-11 기능·비전 분석에서 식별된 미흡 항목 전부와 tag_manual 완전 독립을 실행 태스크로 전환 (Owner 지시).
+- Registered planned tasks:
+  - `TASK-AR-310` tag_manual 의존성 해소 및 완전 독립 (co_location_gate/픽스처 의존 해소, MIGRATION YAML 라이브 제거 + 스냅샷 보존, 활성 문서 표기 일반화)
+  - `TASK-AR-311` A2A 전용 메시지 라우팅 레이어
+  - `TASK-AR-312` 멀티에이전트 동시 실행 검증 + RBAC 역할 강제
+  - `TASK-AR-313` ToolRunner 명령 정책 강화 (IMPLEMENTATION_PLAN Phase 3)
+  - `TASK-AR-314` Race-safe message claiming + stale-leader 복구 (Phase 4)
+  - `TASK-AR-315` Provider-live eval 0.90 목표 검증
+  - `TASK-AR-316` 스킬 레이어 패키징
+  - `TASK-AR-317` UI 실시간화(SSE) + Planner 승인/거절 워크플로
+  - `TASK-AR-318` 증거 타임 스크러버/리플레이 뷰
+  - `TASK-AR-319` 추적 문서 자동화 (EVIDENCE-INDEX, stale-doc 게이트, 역링크 검증)
+- Boundary: Evidence-to-Proposal OS 격차(제안 품질 지표, 회귀 케이스북, A2A 라이프사이클 검증)는 기존 `TASKSET-AR-RSI-OPERATING-SYSTEM`(`TASK-AR-297`~`TASK-AR-305`)에 이미 등록되어 있어 중복 등록하지 않는다. C-mode 승격은 여전히 latent watch.
+- Analysis source: `reviews/REVIEW-2026-06-11-agent-runtime-ops-feedback-analysis-session.md`.
+
+## 2026-06-11 TASKSET-AR-OPS-FEEDBACK-ANALYSIS Registration
+
+- New task set: `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` (Feedback Analyst).
+- Purpose: 2026-06-11 Owner 운영 정비 세션의 feedback/plan/analysis 산출물 등록 — 구현/개발 없음.
+- Registered tasks: `TASK-AR-306` (completed, 세션 closeout 기록), `TASK-AR-307` (planned, 전사 구조 개선 후속 계획), `TASK-AR-308` (planned, 기능·비전 전략 우선순위), `TASK-AR-309` (planned, UI 배포 경로 가드 계획).
+- Conversation record: `reviews/REVIEW-2026-06-11-agent-runtime-ops-feedback-analysis-session.md`.
+- Branch cleanup manifest: `reviews/REVIEW-2026-06-11-agent-runtime-branch-cleanup-sha-manifest.md`.
+- Session outcomes: 로컬/원격 브랜치 25개 정리(main만 잔존), UI 미반영 근본 원인 해결(editable 재설치 + 구버전 서버 재시작), Claude Code 플러그인 4종 비활성화(serena/discord/telegram/github), tag_manual 라이브 참조 제거(감사 YAML은 보존), .tmp 73.8MB 정리.
+- Boundary: MIGRATION-COMPAT-MAP.yml 등 마감된 감사 증거와 reviews/ 역사 기록은 수정하지 않는다.
+
 ## 2026-06-11 TASKSET-AR-RSI-OPERATING-SYSTEM Registration
 
 - New planned task set: `TASKSET-AR-RSI-OPERATING-SYSTEM`.
