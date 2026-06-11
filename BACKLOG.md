@@ -1,5 +1,13 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-06-11 TASKSET-AR-UI-PLATFORM-EXTENSIONS Registration
+
+- New planned task set: `TASKSET-AR-UI-PLATFORM-EXTENSIONS` (Platform Builder).
+- Purpose: 시중 플랫폼(Notion/Linear/Jira/Asana/ClickUp/Monday/Slack/Miro/Motion 등) 기능 전수 리서치에서 도출한 확장 기능 등록 — Owner 요구 외 보완 기능 포함.
+- Registered planned tasks: `TASK-AR-329`(Taskset CRUD/벌크/템플릿) `TASK-AR-330`(의존성/타임라인) `TASK-AR-331`(커스텀 속성/자동화/트리아지) `TASK-AR-332`(파일 첨부) `TASK-AR-333`(가져오기/내보내기) `TASK-AR-334`(전역 검색) `TASK-AR-335`(캘린더/스케줄링) `TASK-AR-336`(상태머신 뷰어) `TASK-AR-337`(팀 배정/워크로드) `TASK-AR-338`(알림 센터/멘션) `TASK-AR-339`(운영 대시보드) `TASK-AR-340`(게임화 폴리시) `TASK-AR-341`(워크스페이스/위젯/i18n).
+- Research record: `reviews/RESEARCH-2026-06-11-agent-runtime-console-platform-feature-research.md` (60여 기능 분석, 보류 항목과 재검토 조건 포함).
+- Boundary: Cycles/워크플로 UI 편집/위키 직접 편집/외부 캘린더 동기화/에이전트 스폰 UI/멀티유저는 명시적 보류(연구 기록 §4). 실행은 V2 Phase와 인터리브하되 P1(329, 330, 332, 334, 337) 우선.
+
 ## 2026-06-11 TASKSET-AR-UI-UX-V2 Registration
 
 - New planned task set: `TASKSET-AR-UI-UX-V2` (Console Experience Architect).
