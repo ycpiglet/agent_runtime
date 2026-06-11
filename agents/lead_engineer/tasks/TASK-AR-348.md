@@ -4,18 +4,22 @@ display_id: TASK-AR-348
 task_uid: 79254591-b673-4000-affb-9ba5dbcbd0a2
 registered_at: 2026-06-11T19:50:16+09:00
 created_at: 2026-06-11T19:50:16+09:00
-updated_at: 2026-06-11T19:50:16+09:00
-status: planned
+started_at: 2026-06-12T01:38:36+09:00
+updated_at: 2026-06-12T01:38:36+09:00
+completed_at: 2026-06-12T01:38:36+09:00
+status: completed
 priority: P1
 difficulty: M
 est_hours: 5
 est_tokens: 4000
 owner: lead_engineer
 task_set_id: TASKSET-AR-PM-OPERATING-SYSTEM
+project_id: PROJECT-AGENT-RUNTIME-PM-OS
 horizon: medium
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+escalation_triggers: [ambiguity, cross_cutting, repeated_failure]
 tags:
   - project-management
   - backlog-board

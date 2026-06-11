@@ -11,8 +11,8 @@
   "mode": "orchestrator",
   "status": "released",
   "task_set_id": "TASKSET-AR-RSI-OPERATING-SYSTEM",
-  "phase": "taskset-step-completed",
-  "progress_pct": 11,
+  "phase": "taskset-completed",
+  "progress_pct": 100,
   "step_index": 1,
   "step_total": 9,
   "status_text": "TASK-AR-297 completed evidence inbox and conversation capture contract hardening; TASK-AR-298 is next.",
@@ -35,6 +35,6 @@
     "rsi",
     "evidence",
     "task-ar-297",
-    "taskset-step-completed"
+    "taskset-completed"
   ]
 }

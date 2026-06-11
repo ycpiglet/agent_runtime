@@ -9,6 +9,7 @@
     "mode",
     "status",
     "action_type",
+    "proposal_output",
     "risk_tier",
     "title",
     "dedupe_key",
@@ -17,7 +18,10 @@
     "target_files",
     "rollback_path",
     "verifier_list",
-    "owner_boundary"
+    "owner_boundary",
+    "affected_owner_boundary",
+    "expected_verification_command",
+    "blast_radius"
   ],
   "properties": {
     "id": { "type": "string", "pattern": "^PROP-[A-Fa-f0-9]{12}$" },
@@ -36,8 +40,14 @@
         "release_version_consistency",
         "retro_compound_follow_up",
         "watch_only",
+        "skill_proposal",
+        "no_action",
         "c_mode_promotion"
       ]
+    },
+    "proposal_output": {
+      "type": "string",
+      "enum": ["task", "plan", "doc", "eval", "release", "skill", "no_action"]
     },
     "risk_tier": { "type": "string", "enum": ["low", "medium", "high", "owner"] },
     "title": { "type": "string", "minLength": 1 },
@@ -76,6 +86,10 @@
     "rollback_path": { "type": "string" },
     "verifier_list": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
     "owner_boundary": { "type": "string", "minLength": 1 },
+    "affected_owner_boundary": { "type": "string", "minLength": 1 },
+    "expected_verification_command": { "type": "string", "minLength": 1 },
+    "blast_radius": { "type": "string", "minLength": 1 },
+    "rejection_reason": { "type": ["string", "null"] },
     "department": { "type": "string" },
     "reviewer_opinions": { "type": "array", "items": { "type": "object" } },
     "supersedes": { "type": "array", "items": { "type": "string" } },

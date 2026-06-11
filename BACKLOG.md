@@ -66,27 +66,30 @@
 - Boundary: Evidence-to-Proposal OS 격차(제안 품질 지표, 회귀 케이스북, A2A 라이프사이클 검증)는 기존 `TASKSET-AR-RSI-OPERATING-SYSTEM`(`TASK-AR-297`~`TASK-AR-305`)에 이미 등록되어 있어 중복 등록하지 않는다. C-mode 승격은 여전히 latent watch.
 - Analysis source: `reviews/REVIEW-2026-06-11-agent-runtime-ops-feedback-analysis-session.md`.
 
-## 2026-06-11 TASKSET-AR-OPS-FEEDBACK-ANALYSIS Registration
+## 2026-06-11 TASKSET-AR-OPS-FEEDBACK-ANALYSIS Closeout
 
-- New task set: `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` (Feedback Analyst).
+- Completed planning task set: `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` (Feedback Analyst).
 - Purpose: 2026-06-11 Owner 운영 정비 세션의 feedback/plan/analysis 산출물 등록 — 구현/개발 없음.
-- Registered tasks: `TASK-AR-306` (completed, 세션 closeout 기록), `TASK-AR-307` (planned, 전사 구조 개선 후속 계획), `TASK-AR-308` (planned, 기능·비전 전략 우선순위), `TASK-AR-309` (planned, UI 배포 경로 가드 계획).
+- Closed tasks: `TASK-AR-306` (세션 closeout 기록), `TASK-AR-307` (전사 구조 개선 후속 계획), `TASK-AR-308` (기능·비전 전략 우선순위), `TASK-AR-309` (UI 배포 경로 가드 계획).
 - Conversation record: `reviews/REVIEW-2026-06-11-agent-runtime-ops-feedback-analysis-session.md`.
+- Closeout decision record: `reviews/REVIEW-2026-06-12-agent-runtime-ops-feedback-analysis-closeout.md`.
 - Branch cleanup manifest: `reviews/REVIEW-2026-06-11-agent-runtime-branch-cleanup-sha-manifest.md`.
 - Session outcomes: 로컬/원격 브랜치 25개 정리(main만 잔존), UI 미반영 근본 원인 해결(editable 재설치 + 구버전 서버 재시작), Claude Code 플러그인 4종 비활성화(serena/discord/telegram/github), 레거시 전신 프로젝트 라이브 참조 제거(감사 스냅샷은 reviews/ 보존), .tmp 73.8MB 정리.
-- Boundary: 마감된 감사 증거와 reviews/ 역사 기록은 수정하지 않는다.
+- Decision: 구조 개선/전략 무브/UI stale 가드는 채택·보류 기준을 확정했고, 실행은 기존 PM/Vision/RSI taskset 또는 신규 task로만 진행한다.
+- Boundary: 마감된 감사 증거와 reviews/ 역사 기록은 수정하지 않는다. 이 closeout은 계획 확정이며 구현 완료 주장이 아니다.
 
-## 2026-06-11 TASKSET-AR-RSI-OPERATING-SYSTEM Registration
+## 2026-06-11 TASKSET-AR-RSI-OPERATING-SYSTEM Closeout
 
-- New planned task set: `TASKSET-AR-RSI-OPERATING-SYSTEM`.
+- Completed local task set: `TASKSET-AR-RSI-OPERATING-SYSTEM`.
 - Purpose: implement A안, an Evidence-to-Proposal OS that captures trace/eval/grader/A2A/correction/review/retro/failure/compound/conversation evidence, dedupes it, measures proposal quality, routes council review, and applies only through bounded gates.
-- Registered planned tasks: `TASK-AR-297` through `TASK-AR-305`.
+- Completed tasks: `TASK-AR-297` through `TASK-AR-305`.
 - Plan entrypoint: `docs/superpowers/plans/2026-06-11-rsi-operating-system-taskset.md`.
 - Owner brief: `AGENT_RUNTIME_RSI_OPERATING_SYSTEM_BRIEF.md`.
 - Conversation record: `reviews/MEETING-2026-06-11-agent-runtime-rsi-operating-system-registration.md`.
 - Registration evidence: `reviews/REVIEW-2026-06-11-agent-runtime-rsi-operating-system-registration.md`.
-- New registry scaffolds: `agents/project/evidence/` and `agents/project/casebooks/`.
-- Boundary: this does not reopen `TASKSET-AR-RSI-PLANNING`, does not claim A2A end-to-end execution, and keeps C-mode as a latent future option until repeated B-mode evidence justifies promotion.
+- Closeout evidence: `reviews/REVIEW-2026-06-12-agent-runtime-rsi-operating-system-closeout.md`.
+- Implemented: evidence inbox, eval/verification registries, failure/compound casebook, evidence-to-proposal contract, council metrics, deterministic A2A lifecycle gate, latent C-mode roadmap, RSI skill layer, and verification wrapper.
+- Boundary: this does not reopen `TASKSET-AR-RSI-PLANNING`, does not claim external/provider-live A2A transport, and keeps C-mode as a latent blocked option until repeated B-mode evidence justifies promotion.
 
 ## 2026-06-11 TASKSET-AR-CONTEXT-KNOWLEDGE Closeout
 

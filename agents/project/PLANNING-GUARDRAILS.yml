@@ -49,3 +49,28 @@ planning_loop:
       - failed_verification
       - proposal_churn_increase
       - high_risk_proposal_seen
+  apply_gate:
+    default: proposal_only
+    repeated_pass_threshold: 3
+    kill_switch_required: true
+    rollback_required: true
+    verifier_list_required: true
+    blast_radius_required: true
+    unresolved_block_verdict: block
+    auto_apply_allowed_only:
+      - generated_view_refresh
+      - stale_link_repair
+      - proposal_dedupe
+      - watch_only_reminder
+      - low_risk_plan_hygiene
+    owner_approval_always_required:
+      - release_version_bump
+      - tag
+      - push
+      - pull_request
+      - external_publication
+      - dependency_install
+      - secret_or_prod_data
+      - destructive_change
+      - owner_only_decision
+      - gate_weakening

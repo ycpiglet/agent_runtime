@@ -4,9 +4,11 @@ display_id: TASK-AR-309
 task_uid: d5458ef2-2dd5-47a3-9695-8c57a9eb6a31
 registered_at: 2026-06-11T17:34:00+09:00
 created_at: 2026-06-11T17:34:00+09:00
-updated_at: 2026-06-11T17:34:00+09:00
+updated_at: 2026-06-12T02:08:54+09:00
+started_at: 2026-06-12T02:08:54+09:00
+completed_at: 2026-06-12T02:08:54+09:00
 title: UI 배포 경로 가드 계획 (stale install/process 재발 방지)
-status: planned
+status: completed
 priority: P2
 difficulty: S
 est_hours: 2
@@ -39,3 +41,10 @@ tags:
 ## Evidence Targets
 
 - `reviews/REVIEW-2026-06-11-agent-runtime-ops-feedback-analysis-session.md`
+
+## Completion Evidence
+
+- Closeout decision record: `reviews/REVIEW-2026-06-12-agent-runtime-ops-feedback-analysis-closeout.md`.
+- Adopted guard plan: doctor install-path check, UI build/commit identifier exposure, and long-lived ui-console process detector.
+- Cost/effect: install-path and build-id checks are low-cost/high-signal; process detector is medium-cost because it must avoid killing user-owned servers without approval.
+- Boundary: this task records the guard plan only; implementation requires a new task or explicit inclusion in a related taskset.

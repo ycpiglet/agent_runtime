@@ -45,7 +45,8 @@ def _write_backlog_board_script(root: Path) -> None:
         "\n".join(
             [
                 "from pathlib import Path",
-                "Path('BACKLOG-BOARD.md').write_text('synced\\n', encoding='utf-8')",
+                "ROOT = Path(__file__).resolve().parents[1]",
+                "(ROOT / 'BACKLOG-BOARD.md').write_text('synced\\n', encoding='utf-8')",
                 "",
             ]
         ),

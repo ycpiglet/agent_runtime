@@ -1,0 +1,112 @@
+{
+  "schema": "agent-runtime-provider-live-eval/v1",
+  "record_id": "provider-live-eval-2026-06-12-task-ar-315",
+  "task_ref": "TASK-AR-315",
+  "task_set_id": "TASKSET-AR-VISION-GAP-CLOSURE",
+  "generated_at": "2026-06-11T17:02:17.304941+00:00",
+  "source_command": "python scripts/provider_live_eval_runner.py --out agents/project/evidence/evaluations/provider-live-eval-2026-06-12.json",
+  "catalog": "agents/project/DATASET-CATALOG.yml",
+  "prediction_source": "agents/project/evals/predictions/contract-baseline-2026-06-09.jsonl",
+  "scope_boundary": "local_replay_provider_live_unconfigured",
+  "provider_live_configured": false,
+  "metric_name": "model_output_accuracy",
+  "metric_value": 1.0,
+  "minimum_score": 0.9,
+  "threshold_met": true,
+  "status": "watch",
+  "case_count": 16,
+  "case_results": [
+    {
+      "case_id": "route-001",
+      "score": 1.0,
+      "findings": []
+    },
+    {
+      "case_id": "route-002",
+      "score": 1.0,
+      "findings": []
+    },
+    {
+      "case_id": "route-003",
+      "score": 1.0,
+      "findings": []
+    },
+    {
+      "case_id": "route-004",
+      "score": 1.0,
+      "findings": []
+    },
+    {
+      "case_id": "route-005",
+      "score": 1.0,
+      "findings": []
+    },
+    {
+      "case_id": "meta-001",
+      "score": 1.0,
+      "findings": []
+    },
+    {
+      "case_id": "meta-002",
+      "score": 1.0,
+      "findings": []
+    },
+    {
+      "case_id": "meta-003",
+      "score": 1.0,
+      "findings": []
+    },
+    {
+      "case_id": "meta-004",
+      "score": 1.0,
+      "findings": []
+    },
+    {
+      "case_id": "meta-005",
+      "score": 1.0,
+      "findings": []
+    },
+    {
+      "case_id": "pane-progress-001",
+      "score": 1.0,
+      "findings": []
+    },
+    {
+      "case_id": "pane-progress-002",
+      "score": 1.0,
+      "findings": []
+    },
+    {
+      "case_id": "pane-progress-003",
+      "score": 1.0,
+      "findings": []
+    },
+    {
+      "case_id": "pane-progress-004",
+      "score": 1.0,
+      "findings": []
+    },
+    {
+      "case_id": "pane-progress-005",
+      "score": 1.0,
+      "findings": []
+    },
+    {
+      "case_id": "pane-progress-006",
+      "score": 1.0,
+      "findings": []
+    }
+  ],
+  "findings": [
+    "provider-live-unconfigured:no OPENAI_API_KEY or ANTHROPIC_API_KEY in environment"
+  ],
+  "correction_proposals": [
+    {
+      "type": "provider_live_eval_gap",
+      "owner": "lead_engineer",
+      "route": "TASK-AR-315",
+      "severity": "high",
+      "next_action": "configure provider credentials and rerun provider-live eval; if score remains below 0.90, add failure cases to correction_collector loop before release readiness"
+    }
+  ]
+}

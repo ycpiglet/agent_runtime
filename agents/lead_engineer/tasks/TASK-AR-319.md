@@ -4,9 +4,11 @@ display_id: TASK-AR-319
 task_uid: 6c03c440-54dc-4d35-9635-82fa00c55710
 registered_at: 2026-06-11T17:58:45+09:00
 created_at: 2026-06-11T17:58:45+09:00
-updated_at: 2026-06-11T17:58:45+09:00
+started_at: 2026-06-12T02:02:59+09:00
+updated_at: 2026-06-12T02:02:59+09:00
+completed_at: 2026-06-12T02:02:59+09:00
 title: 추적 문서 자동화 (EVIDENCE-INDEX, stale-doc 게이트, 역링크 검증)
-status: planned
+status: completed
 priority: P2
 difficulty: M
 est_hours: 6
@@ -39,3 +41,10 @@ tags:
 
 - `scripts/evidence_index_generator.py`, `reviews/INDEX.md`
 - owner governance gate 체인 등록 기록
+
+## Completion Evidence
+
+- `scripts/evidence_index_generator.py`
+- `reviews/INDEX.md`
+- `scripts/owner_governance_gate.py`
+- `tests/test_evidence_index_generator.py`

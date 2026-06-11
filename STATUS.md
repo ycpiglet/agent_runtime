@@ -1,5 +1,14 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-12 - PM/Vision/Ops/RSI requested closeout
+
+- Summary: completed the requested sequence for `TASKSET-AR-PM-OPERATING-SYSTEM`, `TASKSET-AR-VISION-GAP-CLOSURE`, `TASKSET-AR-OPS-FEEDBACK-ANALYSIS`, and `TASKSET-AR-RSI-OPERATING-SYSTEM`.
+- Output: PM unit/model routing gates, Vision provider-live watch/evidence index/SSE/replay closeout, Ops decision closeout, and RSI Evidence-to-Proposal OS closeout are recorded in task files and Owner reviews.
+- Verification: named taskset gates are expected to pass after generated `BACKLOG-BOARD.md` and `reviews/INDEX.md` refresh; RSI wrapper is `python scripts/verify_rsi_operating_system_taskset.py`.
+- Boundary: provider-live credentials remain unconfigured, external A2A transport is not claimed, C-mode remains blocked/latent, and remote publish/PR/tag/version actions remain Owner-gated.
+- Handoff: next ready workflow is `TASKSET-AR-UI-UX-V2` from `BACKLOG-BOARD.md`; no task claim is active yet.
+- Evidence: `reviews/REVIEW-2026-06-12-agent-runtime-pm-operating-system-closeout.md`, `reviews/REVIEW-2026-06-12-agent-runtime-vision-gap-closure-closeout.md`, `reviews/REVIEW-2026-06-12-agent-runtime-ops-feedback-analysis-closeout.md`, and `reviews/REVIEW-2026-06-12-agent-runtime-rsi-operating-system-closeout.md`.
+
 ## 2026-06-11 - TASKSET-AR-PM-OPERATING-SYSTEM registration
 
 - Summary: registered `TASKSET-AR-PM-OPERATING-SYSTEM` for project/taskset/task/unit decomposition, worker-ready specs, and model-tier routing enforcement.

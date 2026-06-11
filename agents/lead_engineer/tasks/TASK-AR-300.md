@@ -4,9 +4,11 @@ display_id: TASK-AR-300
 task_uid: 6fd3e4b4-ee09-4f63-8288-dcf6b6f27350
 registered_at: 2026-06-11T12:10:00+09:00
 created_at: 2026-06-11T12:10:00+09:00
-updated_at: 2026-06-11T12:10:00+09:00
+updated_at: 2026-06-12T02:17:42+09:00
+started_at: 2026-06-12T02:17:42+09:00
+completed_at: 2026-06-12T02:17:42+09:00
 title: Define evidence-to-proposal engine contract
-status: planned
+status: completed
 priority: P0
 difficulty: L
 est_hours: 3
@@ -46,3 +48,8 @@ tags:
 - `schemas/planning-proposal.schema.json`
 - `scripts/planning_loop.py`
 
+## Completion Evidence
+
+- Added `agents/project/EVIDENCE-TO-PROPOSAL-CONTRACT.md`.
+- Extended proposal schema and `scripts/planning_loop.py` with `proposal_output`, owner boundary, expected verification command, blast radius, and rejection/no-action fields.
+- Verification: focused RSI/planning tests passed and `python scripts/planning_loop.py gate --trigger manual --action scan --json` returned `status: pass`.

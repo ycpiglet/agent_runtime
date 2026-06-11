@@ -10,9 +10,10 @@ installed.
 from __future__ import annotations
 
 import argparse
+import json
 import re
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Iterable
 
@@ -38,6 +39,8 @@ STATUS_WEIGHT = {
     "done": 1,
 }
 DONE_STATUSES = {"completed", "done", "released", "완료"}
+ACTIVE_CLAIM_STATUSES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
+DEFAULT_WIP_LIMIT = 3
 DIFFICULTY_LABEL = {"S": "Low", "M": "Medium", "L": "High", "XL": "Critical", "하": "Low", "중": "Medium", "상": "High"}
 DIFFICULTY_ORDER = {"Low": 0, "Medium": 1, "High": 2, "Critical": 3}
 
@@ -229,6 +232,14 @@ class Task:
     def task_set_id(self) -> str:
         raw = str(self.meta.get("task_set_id", "")).strip()
         return raw or UNCLASSIFIED_TASK_SET.task_set_id
+
+    @property
+    def project_id(self) -> str:
+        return str(self.meta.get("project_id") or "-").strip() or "-"
+
+    @property
+    def unit_spec(self) -> str:
+        return str(self.meta.get("unit_spec") or "").strip()
 
     @property
     def difficulty(self) -> str:
@@ -515,6 +526,59 @@ def task_set_sort_key(task: Task) -> tuple[int, int, int, float, int, str]:
     return (set_info.order, done_penalty, -score_for(task), task.est_hours, difficulty_rank, task.task_id)
 
 
+def _load_claims(root: Path) -> list[dict[str, object]]:
+    claim_dir = root / "agents" / "runtime" / "task_claims"
+    if not claim_dir.is_dir():
+        return []
+    claims: list[dict[str, object]] = []
+    for path in sorted(claim_dir.glob("*.json")):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if isinstance(payload, dict):
+            claims.append(payload)
+    return claims
+
+
+def _parse_dt(value: object) -> datetime | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        normalized = text[:-1] + "+00:00" if text.endswith("Z") else text
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed
+
+
+def flow_by_task_set(root: Path | None) -> dict[str, dict[str, object]]:
+    if root is None:
+        return {}
+    now = datetime.now(timezone.utc).astimezone()
+    flows: dict[str, dict[str, object]] = {}
+    for claim in _load_claims(root):
+        status = str(claim.get("status") or "").strip().lower()
+        task_set_id = str(claim.get("task_set_id") or "").strip()
+        if not task_set_id or status not in ACTIVE_CLAIM_STATUSES:
+            continue
+        flow = flows.setdefault(
+            task_set_id,
+            {"active": 0, "wip_limit": DEFAULT_WIP_LIMIT, "oldest_age_hours": 0.0, "stale": 0},
+        )
+        flow["active"] = int(flow["active"]) + 1
+        started = _parse_dt(claim.get("claimed_at") or claim.get("updated_at"))
+        if started is not None:
+            age_hours = max(0.0, (now - started).total_seconds() / 3600)
+            flow["oldest_age_hours"] = max(float(flow["oldest_age_hours"]), age_hours)
+            if age_hours >= 24:
+                flow["stale"] = int(flow["stale"]) + 1
+    return flows
+
+
 def task_sets_for(tasks: Iterable[Task]) -> list[str]:
     return sorted({task.task_set_id for task in tasks}, key=lambda raw: (task_set_info(raw).order, raw))
 
@@ -526,7 +590,7 @@ def lane_counts(tasks: Iterable[Task]) -> dict[str, int]:
     return counts
 
 
-def render(tasks: list[Task]) -> str:
+def render(tasks: list[Task], *, root: Path | None = None) -> str:
     today = date.today().isoformat()
     open_tasks = [t for t in tasks if not is_done(t)]
     completed_tasks = [t for t in tasks if is_done(t)]
@@ -538,6 +602,7 @@ def render(tasks: list[Task]) -> str:
         for task_set_id in all_task_set_ids
         if task_set_id not in task_set_ids
     ]
+    flow = flow_by_task_set(root)
 
     lines: list[str] = [
         "---",
@@ -590,14 +655,16 @@ def render(tasks: list[Task]) -> str:
         set_tasks = sorted([task for task in open_tasks if task.task_set_id == task_set_id], key=task_set_sort_key)
         total_set_tasks = [task for task in tasks if task.task_set_id == task_set_id]
         set_completed = [task for task in total_set_tasks if is_done(task)]
+        set_flow = flow.get(task_set_id, {"active": 0, "wip_limit": DEFAULT_WIP_LIMIT, "oldest_age_hours": 0.0, "stale": 0})
         lines.extend([
             "",
             f"### {set_info.display_name} (`{task_set_id}`)",
             "",
             f"- Flow: {set_info.summary}",
             f"- Progress: `{len(set_completed)}/{len(total_set_tasks)}` done; `{len(set_tasks)}` open or active.",
-            "| Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |",
-            "|---|---|---|---:|---|---|---|---|---:|---|---|---|---|",
+            f"- WIP: active `{set_flow['active']}/{set_flow['wip_limit']}`; oldest `{float(set_flow['oldest_age_hours']):.1f}h`; stale `{set_flow['stale']}`.",
+            "| Task | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |",
+            "|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|",
         ])
         if not set_tasks:
             lines.append("| - | - | - | - | - | - | - | - | - | - | - | - | - |")
@@ -606,6 +673,8 @@ def render(tasks: list[Task]) -> str:
             cost = f"{task.est_hours:g}h/{task.est_tokens}tok"
             row = [
                 f"`{task.task_id}`",
+                task.project_id,
+                task.unit_spec or "-",
                 task.status,
                 lane_for(task),
                 task.priority,
@@ -689,7 +758,7 @@ def render(tasks: list[Task]) -> str:
         "- Promote missing task metadata into frontmatter when repeated inference is needed.",
         "- Use completed task files as archival evidence; do not render them in the live action board unless an explicit archive view is added.",
         "",
-        "## Tags / References",
+            "## Tags / References",
         "- tags: backlog, action-board, owner-brief, decision-support",
         "- references: `BACKLOG.md`, `STATUS.md`, `agents/lead_engineer/tasks/*.md`",
         "",
@@ -705,7 +774,7 @@ def main() -> int:
     args = parser.parse_args()
 
     tasks = load_tasks(Path(args.tasks_dir))
-    text = render(tasks)
+    text = render(tasks, root=ROOT)
     if args.write:
         output = Path(args.output)
         output.parent.mkdir(parents=True, exist_ok=True)

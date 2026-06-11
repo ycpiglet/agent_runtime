@@ -1,30 +1,29 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-12T00:44:07+09:00
+updated_at: 2026-06-12T02:17:42+09:00
 current_state:
-  summary: "TASK-AR-298 is complete; TASKSET-AR-RSI-OPERATING-SYSTEM remains active with failure and compound casebooks next."
-  status: in_progress
-  task_set_status: active
-  task_set_id: "TASKSET-AR-RSI-OPERATING-SYSTEM"
-  step_index: 3
-  step_total: 9
-  progress_pct: 22
-  status_text: "TASK-AR-298 completed evaluation and verification registry hardening with TDD RED/GREEN; start TASK-AR-299 before claiming failure or compound casebook completion."
+  summary: "Requested PM, Vision, Ops, and RSI tasksets are complete locally; next ready workflow is TASKSET-AR-UI-UX-V2 from the live backlog board."
+  status: ready
+  task_set_status: ready
+  task_set_id: "TASKSET-AR-UI-UX-V2"
+  step_index: 0
+  step_total: 0
+  progress_pct: 100
+  status_text: "PM/Vision/Ops/RSI closeout records are aligned; TASKSET-AR-UI-UX-V2 is a ready pointer only, not an active claim."
 active_work:
   current_agents: []
-  current_teams:
-    - team_id: agent-runtime-core
-      active_claims: []
+  current_teams: []
 resume:
-  active_task: TASK-AR-299
-  active_task_set: TASKSET-AR-RSI-OPERATING-SYSTEM
+  active_task: none
+  active_task_set: TASKSET-AR-UI-UX-V2
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
-  lead_engineer: "Start TASK-AR-299 with a fresh claim before implementing failure or compound casebooks; keep closed tasksets closed unless a new canonical task is added."
+  lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260612-005555-task-ar-316-72b4.json
   release_steward_completed_tasks:
     - agents/lead_engineer/tasks/TASK-AR-219.md
     - agents/lead_engineer/tasks/TASK-AR-222.md
@@ -199,8 +198,8 @@ pointers:
     - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-221-quality-loop-closeout.md
     - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-243-planning-evidence-link.md
 next_actions:
-  - "For PM operating-system work, start TASK-AR-342 or TASK-AR-343 with a fresh claim; keep current RSI OS pointer intact unless Owner explicitly switches lanes."
-  - "Start TASK-AR-299 with a new claim before implementing failure or compound casebooks."
+  - "Select the next open taskset from BACKLOG-BOARD.md and create a fresh claim before implementation."
+  - "Keep TASKSET-AR-PM-OPERATING-SYSTEM, TASKSET-AR-VISION-GAP-CLOSURE, TASKSET-AR-OPS-FEEDBACK-ANALYSIS, and TASKSET-AR-RSI-OPERATING-SYSTEM closed unless a new canonical task is added."
   - "Push local commits only after Owner approval; local closeout does not imply remote publish, PR, tag, or external CI evidence."
   - "Do not reopen TASKSET-AR-UI-DESIGN-IMPLEMENTATION unless a new canonical task is explicitly added."
   - "Do not reopen TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE or TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION unless a new canonical task is explicitly added."
@@ -228,15 +227,18 @@ verification:
     - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-UI-DESIGN-IMPLEMENTATION --require-complete --check"
     - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE --require-complete --check"
     - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION --require-complete --check"
-    - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-RSI-OPERATING-SYSTEM --check"
-    - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-PM-OPERATING-SYSTEM --check"
+    - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-RSI-OPERATING-SYSTEM --require-complete --check"
+    - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-PM-OPERATING-SYSTEM --require-complete --check"
+    - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-VISION-GAP-CLOSURE --require-complete --check"
+    - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-OPS-FEEDBACK-ANALYSIS --require-complete --check"
+    - "python scripts/verify_rsi_operating_system_taskset.py"
     - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-UI-DESIGN-SYSTEM --require-complete --check"
     - "python scripts/verify_pane_progress_taskset.py"
     - "python scripts/owner_doc_format_gate.py --manifest owner-docs.yml"
     - "python scripts/owner_governance_gate.py"
     - "python scripts/parallel_worktree_gate.py --check"
     - "python scripts/collaboration_concurrency_gate.py --check"
-  last_known_scope: "TASKSET-AR-CONTEXT-KNOWLEDGE, TASKSET-AR-QUALITY-LOOP, TASKSET-AR-PANE-PROGRESS, TASKSET-AR-RSI-PLANNING, TASKSET-AR-RELEASE-STEWARD, TASKSET-AR-COLLAB-CONCURRENCY, TASKSET-AR-GOVERNANCE-OPS, TASKSET-AR-TASK-IDENTITY, TASKSET-AR-UI-DESIGN-SYSTEM, TASKSET-AR-UI-DESIGN-IMPLEMENTATION, TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE, and TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION final closeout for local scope; TASKSET-AR-RSI-OPERATING-SYSTEM is active with TASK-AR-297 and TASK-AR-298 complete and TASK-AR-299 next; external publish remains Owner-gated and out of scope."
+  last_known_scope: "TASKSET-AR-CONTEXT-KNOWLEDGE, TASKSET-AR-QUALITY-LOOP, TASKSET-AR-PANE-PROGRESS, TASKSET-AR-RSI-PLANNING, TASKSET-AR-RELEASE-STEWARD, TASKSET-AR-COLLAB-CONCURRENCY, TASKSET-AR-GOVERNANCE-OPS, TASKSET-AR-TASK-IDENTITY, TASKSET-AR-UI-DESIGN-SYSTEM, TASKSET-AR-UI-DESIGN-IMPLEMENTATION, TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE, TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION, TASKSET-AR-PM-OPERATING-SYSTEM, TASKSET-AR-VISION-GAP-CLOSURE, TASKSET-AR-OPS-FEEDBACK-ANALYSIS, and TASKSET-AR-RSI-OPERATING-SYSTEM final closeout for local scope; provider-live credentials, external transport, C-mode promotion, and external publish remain Owner-gated/out of scope."
   rsi_planning_completed:
     - reviews/RSI-PLANNING-TASKSET-VERIFY.json
   rsi_planning_note: RSI planning completed verification report is the canonical closeout evidence.

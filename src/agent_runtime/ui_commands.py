@@ -42,7 +42,7 @@ RUNTIME_LIFECYCLE_COMMAND_TYPES = (
     "runtime.goal.stop",
 )
 RUNTIME_COMMAND_TYPES = RUNTIME_MESSAGE_COMMAND_TYPES + RUNTIME_LIFECYCLE_COMMAND_TYPES
-PLANNING_COMMAND_TYPES = ("planning.scan",)
+PLANNING_COMMAND_TYPES = ("planning.scan", "planning.approve", "planning.reject")
 TASK_BOARD_SYNC_COMMANDS = {"task.create", "task.update", "task.reorder", "task.archive"}
 COMMAND_TYPES = TASK_COMMAND_TYPES + RUNTIME_COMMAND_TYPES + PLANNING_COMMAND_TYPES
 UNSAFE_PAYLOAD_KEYS = {"path", "source_path", "direct_file_path", "file_path", "filesystem_path"}
@@ -581,6 +581,45 @@ def _planning_scan_command(root: Path, payload: dict[str, Any], now: str, comman
     }
 
 
+def _planning_decision_command(root: Path, command_type: str, payload: dict[str, Any], now: str, command_id: str) -> dict[str, Any]:
+    errors = _payload_errors(payload)
+    proposal_id = str(payload.get("proposal_id") or payload.get("id") or "").strip()
+    if not proposal_id:
+        errors.append("proposal_id is required")
+    reason = str(payload.get("reason") or "").strip()
+    if not reason:
+        errors.append("reason is required")
+    if payload.get("apply") is True or payload.get("mutate") is True:
+        errors.append("planner decision commands cannot apply canonical mutations")
+    if errors:
+        return {"errors": errors}
+    action = "approved" if command_type == "planning.approve" else "rejected"
+    decision = {
+        "id": command_id.replace("COMMAND-", "PLANDEC-"),
+        "type": command_type,
+        "proposal_id": proposal_id,
+        "status": action,
+        "created_at": now,
+        "decided_by": str(payload.get("actor") or "ui"),
+        "reason": reason,
+        "gate": "scripts/planning_loop.py gate --trigger ui --action scan",
+        "canonical_mutation_allowed": False,
+        "next": "planner gate must consume this decision before any apply step",
+    }
+    path = root / "agents" / "planning" / "decisions" / f"{decision['id']}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(decision, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {
+        "status": "queued",
+        "result": {
+            "changed": [_rel(root, path)],
+            "planning_support": "decision_audit_record",
+            "canonical_mutation_allowed": False,
+            "next": decision["next"],
+        },
+    }
+
+
 def submit_command(
     root: Path | str,
     command: dict[str, Any],
@@ -615,6 +654,8 @@ def submit_command(
         outcome = _comment_task(root_path, target_str, payload, created_at)
     elif command_type == "planning.scan":
         outcome = _planning_scan_command(root_path, payload, created_at, cid)
+    elif command_type in {"planning.approve", "planning.reject"}:
+        outcome = _planning_decision_command(root_path, command_type, payload, created_at, cid)
     else:
         outcome = _runtime_command(root_path, command_type, target_str, payload, created_at)
 

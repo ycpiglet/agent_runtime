@@ -1,0 +1,40 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260612-005555-task-ar-316-72b4",
+  "task_id": "TASK-AR-316",
+  "agent_role": "lead-engineer",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "le-20260612-005555-kst-72b4",
+  "display_name": "lead_engineer@vision-gap-closure-01",
+  "callsite_id": "terminal:wt-task-ar-316:tab-01",
+  "pane_id": "terminal:wt-task-ar-316:tab-01",
+  "mode": "vision-gap-closure",
+  "status": "completed",
+  "task_set_id": "TASKSET-AR-VISION-GAP-CLOSURE",
+  "phase": "taskset-completed",
+  "progress_pct": 100,
+  "step_index": 10,
+  "step_total": 10,
+  "status_text": "Completed Vision Integrator taskset closeout, including TASK-AR-315 through TASK-AR-319 and skill packaging.",
+  "worktree_path": ".worktrees/TASK-AR-316",
+  "branch": "codex/task-ar-316-vision-gap-closure",
+  "claimed_at": "2026-06-12T00:55:55+09:00",
+  "last_heartbeat": "2026-06-12T02:02:59+09:00",
+  "updated_at": "2026-06-12T02:02:59+09:00",
+  "completed_at": "2026-06-12T02:02:59+09:00",
+  "expires_at": null,
+  "lease": {
+    "claimed_at": "2026-06-12T00:55:55+09:00",
+    "heartbeat_at": "2026-06-12T02:02:59+09:00",
+    "expires_at": null
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260612-005555-task-ar-316-72b4.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260612-005555-task-ar-316-72b4.log.md",
+  "allow_parallel_task_set": false,
+  "verification": [
+    "python scripts/provider_live_eval_runner.py --out agents/project/evidence/evaluations/provider-live-eval-2026-06-12.json -> status=watch, provider_live_configured=false",
+    "python scripts/correction_collector.py --report agents/project/evidence/evaluations/provider-live-eval-2026-06-12.json --summary agents/project/corrections/provider-live-eval-2026-06-12-summary.json -> pass",
+    "pytest tests/test_provider_live_eval_runner.py tests/test_evidence_index_generator.py tests/test_ui_console.py tests/test_ui_state.py -q -> 44 passed"
+  ],
+  "tags": ["completed", "verified"]
+}

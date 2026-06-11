@@ -4,9 +4,11 @@ display_id: TASK-AR-308
 task_uid: 0985351f-c25e-4f9e-84ba-05246ce4f7ca
 registered_at: 2026-06-11T17:34:00+09:00
 created_at: 2026-06-11T17:34:00+09:00
-updated_at: 2026-06-11T17:34:00+09:00
+updated_at: 2026-06-12T02:08:54+09:00
+started_at: 2026-06-12T02:08:54+09:00
+completed_at: 2026-06-12T02:08:54+09:00
 title: 기능·비전 전략 분석 후속 우선순위 결정
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 4
@@ -40,3 +42,10 @@ tags:
 ## Evidence Targets
 
 - `reviews/REVIEW-2026-06-11-agent-runtime-ops-feedback-analysis-session.md` (분석 전문 수록)
+
+## Completion Evidence
+
+- Closeout decision record: `reviews/REVIEW-2026-06-12-agent-runtime-ops-feedback-analysis-closeout.md`.
+- Priority order confirmed: Evidence-to-Proposal OS, ToolRunner/race-safe claim, A2A lifecycle/RBAC, skill packaging, SSE plus Planner approval workflow.
+- C-mode remains blocked until RSI proposal quality metrics, regression casebooks, and bounded apply gates pass repeatedly.
+- Boundary: 전략 무브는 기존 RSI/Vision/PM taskset으로 라우팅하며 Ops 아래에서 중복 구현하지 않는다.

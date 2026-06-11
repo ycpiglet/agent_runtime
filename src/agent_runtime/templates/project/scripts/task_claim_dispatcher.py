@@ -238,6 +238,12 @@ def _build_claim(args: argparse.Namespace, records: list[tuple[Path, dict[str, A
         "mode": mode,
         "status": "claimed",
         "task_set_id": args.task_set_id,
+        "project_id": args.project_id,
+        "unit_id": args.unit_id,
+        "unit_spec": args.unit_spec,
+        "model_tier": args.model_tier,
+        "wip_slot": args.wip_slot,
+        "stop_condition": args.stop_condition,
         "phase": args.phase,
         "progress_pct": args.progress_pct,
         "step_index": args.step_index,
@@ -334,6 +340,12 @@ def cmd_create(args: argparse.Namespace) -> int:
                 f"- worktree_path: {claim['worktree_path']}",
                 f"- branch: {claim['branch']}",
                 f"- task_set_id: {claim['task_set_id']}",
+                f"- project_id: {claim['project_id']}",
+                f"- unit_id: {claim['unit_id']}",
+                f"- unit_spec: {claim['unit_spec']}",
+                f"- model_tier: {claim['model_tier']}",
+                f"- wip_slot: {claim['wip_slot']}",
+                f"- stop_condition: {claim['stop_condition']}",
                 f"- phase: {claim['phase']}",
                 f"- step: {claim['step_index']}/{claim['step_total']}",
                 f"- progress_pct: {claim['progress_pct']}",
@@ -353,6 +365,12 @@ def cmd_create(args: argparse.Namespace) -> int:
                 f"- agent_instance_id: {claim['agent_instance_id']}",
                 f"- callsite_id: {claim['callsite_id']}",
                 f"- task_set_id: {claim['task_set_id']}",
+                f"- project_id: {claim['project_id']}",
+                f"- unit_id: {claim['unit_id']}",
+                f"- unit_spec: {claim['unit_spec']}",
+                f"- model_tier: {claim['model_tier']}",
+                f"- wip_slot: {claim['wip_slot']}",
+                f"- stop_condition: {claim['stop_condition']}",
                 f"- status_text: {claim['status_text']}",
                 "",
             ]
@@ -424,6 +442,12 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--agent-role", required=True)
     create.add_argument("--team-id", default="agent-runtime-core")
     create.add_argument("--task-set-id", default="")
+    create.add_argument("--project-id", default="")
+    create.add_argument("--unit-id", default="")
+    create.add_argument("--unit-spec", default="")
+    create.add_argument("--model-tier", default="")
+    create.add_argument("--wip-slot", type=int, default=0)
+    create.add_argument("--stop-condition", default="")
     create.add_argument("--mode", default="work")
     create.add_argument("--pane-id")
     create.add_argument("--phase", default="claim-created")

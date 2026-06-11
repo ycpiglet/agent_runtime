@@ -4,9 +4,11 @@ display_id: TASK-AR-318
 task_uid: 367a501a-c74b-4762-b9f5-b0c0ce0d2b03
 registered_at: 2026-06-11T17:58:45+09:00
 created_at: 2026-06-11T17:58:45+09:00
-updated_at: 2026-06-11T17:58:45+09:00
+started_at: 2026-06-12T02:02:59+09:00
+updated_at: 2026-06-12T02:02:59+09:00
+completed_at: 2026-06-12T02:02:59+09:00
 title: 증거 타임 스크러버/리플레이 뷰
-status: planned
+status: completed
 priority: P3
 difficulty: M
 est_hours: 6
@@ -37,3 +39,9 @@ tags:
 ## Evidence Targets
 
 - `src/agent_runtime/ui_console.py` Evidence 패널
+
+## Completion Evidence
+
+- `src/agent_runtime/ui_state.py` adds `build_replay_snapshot`.
+- `src/agent_runtime/ui_console.py` adds `/api/replay/snapshot`.
+- `tests/test_ui_state.py` and `tests/test_ui_console.py` verify timestamped replay snapshot behavior.

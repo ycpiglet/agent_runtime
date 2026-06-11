@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-runtime.local/schemas/task-unit.schema.json",
+  "title": "Agent Runtime task unit",
+  "description": "Worker-ready unit frontmatter and section contract.",
+  "type": "object",
+  "required": [
+    "unit_id",
+    "task_id",
+    "task_set_id",
+    "project_id",
+    "status",
+    "model_tier",
+    "context",
+    "inputs",
+    "target_files",
+    "scope",
+    "acceptance",
+    "verification",
+    "handoff",
+    "stop_condition"
+  ],
+  "properties": {
+    "unit_id": { "type": "string", "pattern": "^UNIT-[A-Za-z0-9_.-]+$" },
+    "task_id": { "type": "string", "pattern": "^TASK-[A-Za-z0-9_.-]+$" },
+    "task_set_id": { "type": "string", "pattern": "^TASKSET-[A-Za-z0-9_.-]+$" },
+    "project_id": { "type": "string", "minLength": 3 },
+    "status": {
+      "type": "string",
+      "enum": ["planned", "worker_ready", "in_progress", "blocked", "completed", "planner_refine_required"]
+    },
+    "horizon": { "type": "string", "enum": ["unit", "short", "medium", "long"] },
+    "model_tier": {
+      "type": "string",
+      "enum": ["worker_low", "worker_standard", "planner_high", "reviewer_standard", "reviewer_high"]
+    },
+    "escalation_triggers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["ambiguity", "high_risk", "security", "cross_cutting", "external_effect", "repeated_failure"]
+      }
+    },
+    "context": { "type": "string", "minLength": 1 },
+    "inputs": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "target_files": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "scope": { "type": "string", "minLength": 1 },
+    "acceptance": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "verification": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "handoff": { "type": "string", "minLength": 1 },
+    "stop_condition": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": true
+}

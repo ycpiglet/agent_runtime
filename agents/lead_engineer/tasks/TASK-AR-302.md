@@ -4,9 +4,11 @@ display_id: TASK-AR-302
 task_uid: 0f90a9b0-18f2-4ac9-9b56-652c3e7e1242
 registered_at: 2026-06-11T12:10:00+09:00
 created_at: 2026-06-11T12:10:00+09:00
-updated_at: 2026-06-11T12:10:00+09:00
+updated_at: 2026-06-12T02:17:42+09:00
+started_at: 2026-06-12T02:17:42+09:00
+completed_at: 2026-06-12T02:17:42+09:00
 title: Verify A2A message lifecycle as planning evidence
-status: planned
+status: completed
 priority: P1
 difficulty: L
 est_hours: 3
@@ -46,3 +48,8 @@ tags:
 - `scripts/a2a_lifecycle_gate.py`
 - `tests/test_a2a_lifecycle_gate.py`
 
+## Completion Evidence
+
+- Added deterministic lifecycle fixture: `agents/project/evidence/a2a/A2A-LIFECYCLE-2026-06-12.json`.
+- Added `scripts/a2a_lifecycle_gate.py`; missing request/review/decision/correction/proposal-routing events block the gate.
+- Verification: `python scripts/a2a_lifecycle_gate.py --check` passed and `tests/test_a2a_lifecycle_gate.py` covers a missing decision block case.

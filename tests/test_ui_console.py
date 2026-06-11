@@ -39,7 +39,8 @@ def _write_backlog_board_script(root: Path) -> None:
         "\n".join(
             [
                 "from pathlib import Path",
-                "Path('BACKLOG-BOARD.md').write_text('synced\\n', encoding='utf-8')",
+                "ROOT = Path(__file__).resolve().parents[1]",
+                "(ROOT / 'BACKLOG-BOARD.md').write_text('synced\\n', encoding='utf-8')",
                 "",
             ]
         ),
@@ -74,10 +75,13 @@ def test_ui_console_serves_html_shell_and_assets(tmp_path):
     assert b"#010102" in css.body
     assert js.status == 200
     assert b"/api/state" in js.body
+    assert b"/api/stream" in js.body
     assert b"/api/tasks" in js.body
     assert b"/api/messages" in js.body
     assert b"/api/commands" in js.body
     assert b"runtime.call_agent" in js.body
+    assert b"planning.approve" in js.body
+    assert b"planning.reject" in js.body
     assert b"filterEvents" in js.body
     assert b"queueTaskSetCommand" in js.body
     assert b"renderMap" in js.body
@@ -644,6 +648,59 @@ def test_ui_console_events_route_filters_by_query_params(tmp_path):
     assert response.status == 200
     assert payload["resource"] == "events"
     assert [event["event"] for event in payload["items"]] == ["agent.error"]
+
+
+def test_ui_console_stream_and_replay_snapshot_routes(tmp_path):
+    _write(
+        tmp_path / "agents" / "runtime" / "events" / "qa.jsonl",
+        json.dumps(
+            {
+                "ts": "2026-06-10T12:00:00+09:00",
+                "role": "qa",
+                "event": "agent.error",
+                "task_id": "TASK-UI-231",
+                "goal_id": "goal-231",
+            }
+        )
+        + "\n",
+    )
+
+    stream = ui_console.build_response("/api/stream", tmp_path)
+    snapshot = ui_console.build_response("/api/replay/snapshot?at=2026-06-10T12:00:00%2B09:00", tmp_path)
+    payload = json.loads(snapshot.body.decode("utf-8"))
+
+    assert stream.status == 200
+    assert stream.content_type == "text/event-stream; charset=utf-8"
+    assert stream.body.startswith(b"event: state\n")
+    assert payload["resource"] == "replay_snapshot"
+    assert payload["task_ids"] == ["TASK-UI-231"]
+
+
+def test_ui_console_planner_decision_routes_write_audit_record_without_apply(tmp_path):
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {
+                "type": "planning.approve",
+                "payload": {
+                    "actor": "owner",
+                    "proposal_id": "PLAN-1",
+                    "reason": "accept bounded proposal",
+                    "apply": False,
+                },
+            }
+        ).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+    decisions = list((tmp_path / "agents" / "planning" / "decisions").glob("*.json"))
+    decision = json.loads(decisions[0].read_text(encoding="utf-8"))
+
+    assert response.status == 202
+    assert payload["status"] == "queued"
+    assert decision["proposal_id"] == "PLAN-1"
+    assert decision["canonical_mutation_allowed"] is False
 
 
 def test_ui_console_graph_state_and_roadmap_routes(tmp_path):
