@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260612-003716-task-ar-314-fba7",
+  "task_id": "TASK-AR-314",
+  "agent_role": "lead-engineer",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "le-20260612-003716-kst-fba7",
+  "display_name": "lead_engineer@vision-gap-closure-01",
+  "callsite_id": "terminal:wt-task-ar-314:tab-01",
+  "pane_id": "terminal:wt-task-ar-314:tab-01",
+  "mode": "vision-gap-closure",
+  "status": "completed",
+  "task_set_id": "TASKSET-AR-VISION-GAP-CLOSURE",
+  "phase": "taskset-step-completed",
+  "progress_pct": 50,
+  "step_index": 5,
+  "step_total": 10,
+  "status_text": "Completed Vision Integrator step TASK-AR-314; 5/10 tasks completed.",
+  "worktree_path": ".worktrees/TASK-AR-314",
+  "branch": "codex/task-ar-314-vision-gap-closure",
+  "claimed_at": "2026-06-12T00:37:16+09:00",
+  "last_heartbeat": "2026-06-12T00:44:07+09:00",
+  "updated_at": "2026-06-12T00:44:07+09:00",
+  "completed_at": "2026-06-12T00:44:07+09:00",
+  "expires_at": null,
+  "lease": {
+    "claimed_at": "2026-06-12T00:37:16+09:00",
+    "heartbeat_at": "2026-06-12T00:44:07+09:00",
+    "expires_at": null
+  },
+  "completion_commit": "5ae04b8",
+  "verification": [
+    "python -m py_compile scripts/claim_lease.py src/agent_runtime/templates/project/scripts/claim_lease.py -> pass",
+    "pytest tests/test_claim_lease.py -q -> 2 passed",
+    "PYTHONPATH=src python -m agent_runtime.cli lock --root tests/fixtures/host --check -> findings=0",
+    "pytest tests/test_claim_lease.py tests/test_template_smoke.py::test_sync_and_smoke_runtime_scripts -q -> 3 passed",
+    "python scripts/owner_governance_gate.py -> exit 0"
+  ],
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260612-003716-task-ar-314-fba7.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260612-003716-task-ar-314-fba7.log.md",
+  "allow_parallel_task_set": false,
+  "tags": []
+}

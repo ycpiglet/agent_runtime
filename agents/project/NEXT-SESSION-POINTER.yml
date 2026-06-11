@@ -1,5 +1,5 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-11T13:16:20+09:00
+updated_at: 2026-06-12T00:44:07+09:00
 current_state:
   summary: "TASK-AR-298 is complete; TASKSET-AR-RSI-OPERATING-SYSTEM remains active with failure and compound casebooks next."
   status: in_progress

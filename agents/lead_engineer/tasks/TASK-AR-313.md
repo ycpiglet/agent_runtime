@@ -4,9 +4,11 @@ display_id: TASK-AR-313
 task_uid: 753d8012-6dd1-46ef-a8b1-7a1da9d0f1f1
 registered_at: 2026-06-11T17:58:45+09:00
 created_at: 2026-06-11T17:58:45+09:00
-updated_at: 2026-06-11T17:58:45+09:00
+started_at: 2026-06-11T23:16:07+09:00
+updated_at: 2026-06-11T23:26:35+09:00
 title: ToolRunner 명령 정책 강화 (IMPLEMENTATION_PLAN Phase 3)
-status: planned
+status: completed
+completed_at: 2026-06-11T23:26:35+09:00
 priority: P1
 difficulty: M
 est_hours: 6
@@ -39,3 +41,24 @@ tags:
 
 - `IMPLEMENTATION_PLAN.md` Phase 3 섹션
 - ToolRunner 정책 코드 및 테스트
+
+## Completion - 2026-06-11
+
+- Result: `src/agent_runtime/templates/project/scripts/providers/agent_tools.py`의 기존 profile-scoped ToolRunner 정책이 Phase 3 기준을 충족하는지 재검증하고, profile별 부정 테스트를 보강했다.
+- Existing policy confirmed:
+  - default `ci` profile is strict and deterministic.
+  - read-only git is allowed by default; mutable git is blocked outside explicit owner allowlist.
+  - Python execution is restricted to `python -m pytest`, `scripts/check_agent_docs.py`, `scripts/check_messages.py`, and `scripts/agent_orchestrator.py status --json`.
+  - `python -c`, `python -`, pip/module installs, shell control tokens, and repo path escapes are denied.
+- Added test coverage:
+  - research profile blocks mutable git, pip, and non-help agent worker execution.
+  - owner profile blocks mutable git path escapes.
+  - pytest unknown flags are blocked.
+- Closeout review: `reviews/REVIEW-2026-06-11-toolrunner-policy-closeout.md`.
+- Verification:
+  - `pytest tests/test_template_agent_tools.py -q` -> 19 passed.
+  - `python -m py_compile src/agent_runtime/templates/project/scripts/providers/agent_tools.py` -> pass.
+  - `pytest tests -q` -> 390 passed in 372.82s.
+  - `python -m py_compile scripts/backlog_board.py` -> pass.
+  - `pytest tests/test_backlog_board_tasksets.py tests/test_template_agent_tools.py -q` -> 22 passed.
+  - `python scripts/owner_governance_gate.py` -> exit 0.

@@ -53,6 +53,102 @@ def test_archive_plan_lists_preservation_before_cleanup() -> None:
     assert "GitHub issue" in plan["issue_handoff"]
 
 
+def test_active_claimed_worktree_residue_is_preserved_watch() -> None:
+    plan = build_plan(
+        [],
+        active_codex_branches=["+ codex/task-ar-310-vision-gap-closure"],
+        extra_worktrees=[
+            {
+                "path": "C:/repo/.worktrees/TASK-AR-310",
+                "branch": "refs/heads/codex/task-ar-310-vision-gap-closure",
+            }
+        ],
+        preserved_active={
+            "branches": ["codex/task-ar-310-vision-gap-closure"],
+            "worktrees": ["C:/repo/.worktrees/TASK-AR-310"],
+        },
+    )
+
+    assert plan["decision"] == "watch"
+    assert plan["residue"]["preserved_active"]["branches"] == ["codex/task-ar-310-vision-gap-closure"]
+    assert plan["residue"]["preserved_active"]["worktrees"] == ["C:/repo/.worktrees/TASK-AR-310"]
+    assert plan["residue"]["unresolved"]["branches"] == []
+    assert plan["residue"]["unresolved"]["worktrees"] == []
+
+
+def test_nested_active_claim_worktree_residue_is_preserved_watch() -> None:
+    plan = build_plan(
+        [],
+        active_codex_branches=[
+            "+ codex/taskset-ar-ops-feedback",
+            "+ codex/task-ar-309-ops-feedback-analysis",
+        ],
+        extra_worktrees=[
+            {
+                "path": "C:/repo/.worktrees/TASKSET-AR-OPS-FEEDBACK-ANALYSIS",
+                "branch": "refs/heads/codex/taskset-ar-ops-feedback",
+            },
+            {
+                "path": "C:/repo/.worktrees/TASKSET-AR-OPS-FEEDBACK-ANALYSIS/.worktrees/TASK-AR-309",
+                "branch": "refs/heads/codex/task-ar-309-ops-feedback-analysis",
+            },
+        ],
+        preserved_active={
+            "branches": ["codex/taskset-ar-ops-feedback", "codex/task-ar-309-ops-feedback-analysis"],
+            "worktrees": [
+                "C:/repo/.worktrees/TASKSET-AR-OPS-FEEDBACK-ANALYSIS",
+                "C:/repo/.worktrees/TASKSET-AR-OPS-FEEDBACK-ANALYSIS/.worktrees/TASK-AR-309",
+            ],
+        },
+    )
+
+    assert plan["decision"] == "watch"
+    assert plan["residue"]["unresolved"]["branches"] == []
+    assert plan["residue"]["unresolved"]["worktrees"] == []
+
+
+def test_remote_preserved_branch_residue_is_watch_not_block() -> None:
+    plan = build_plan(
+        [],
+        active_codex_branches=["+ codex/taskset-ar-rsi-os"],
+        extra_worktrees=[
+            {
+                "path": "C:/repo/.worktrees/TASKSET-AR-RSI-OPERATING-SYSTEM",
+                "branch": "refs/heads/codex/taskset-ar-rsi-os",
+            }
+        ],
+        preserved_remote={
+            "branches": ["codex/taskset-ar-rsi-os"],
+            "worktrees": ["C:/repo/.worktrees/TASKSET-AR-RSI-OPERATING-SYSTEM"],
+        },
+    )
+
+    assert plan["decision"] == "watch"
+    assert plan["residue"]["preserved_remote"]["branches"] == ["codex/taskset-ar-rsi-os"]
+    assert plan["residue"]["unresolved"]["branches"] == []
+
+
+def test_head_preserved_branch_residue_is_watch_not_block() -> None:
+    plan = build_plan(
+        [],
+        active_codex_branches=["+ codex/task-ar-310-vision-gap-closure"],
+        extra_worktrees=[
+            {
+                "path": "C:/repo/.worktrees/TASK-AR-310",
+                "branch": "refs/heads/codex/task-ar-310-vision-gap-closure",
+            }
+        ],
+        preserved_head={
+            "branches": ["codex/task-ar-310-vision-gap-closure"],
+            "worktrees": ["C:/repo/.worktrees/TASK-AR-310"],
+        },
+    )
+
+    assert plan["decision"] == "watch"
+    assert plan["residue"]["preserved_head"]["branches"] == ["codex/task-ar-310-vision-gap-closure"]
+    assert plan["residue"]["unresolved"]["branches"] == []
+
+
 def test_cli_check_blocks_unknown_dirty_state(tmp_path: Path) -> None:
     result = subprocess.run(
         [

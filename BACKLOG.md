@@ -1,5 +1,14 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-06-12 TASKSET-AR-DOC-TO-PLAN Registration
+
+- New planned task set: `TASKSET-AR-DOC-TO-PLAN` (Pitch Alchemist).
+- Purpose: Owner 비전 "기획서/pitch deck을 넣으면 스스로 분석→plan→task 분해→자동 등록" + 동일 비전 오픈소스 **Paperclip**(github.com/paperclipai/paperclip, MIT) 기능 갭 채택.
+- Registered planned tasks: `TASK-AR-366`(문서→플랜 파이프라인 — PM-OPERATING-SYSTEM 계층·B-mode 승인 경유) `TASK-AR-367`(Paperclip 갭 분석: 에이전트별 예산 하드 스톱·heartbeat 수명주기·멀티테넌시·out-of-process 플러그인) `TASK-AR-368`(actual_tokens/actual_hours/team 실측 캡처 + 다요소 정렬·평가 — 우선순위/난이도/예상·실제 토큰/예상·실제 시간/부서).
+- Research record: `reviews/RESEARCH-2026-06-12-agent-runtime-paperclip-and-doc-to-plan.md` (Paperclip 기능 전수 매핑 — 문서 인입은 Paperclip에 없는 차별 영역).
+- Idea Vault update: IV-006을 계정/커뮤니티/레벨 랭킹으로 확장, IV-012(다요소 리더보드) 신설.
+- Boundary: 자동 등록은 반드시 B-mode planning 제안→Owner 승인 경유(자동 적용 금지). 계정/랭킹은 Vault 보류 유지.
+
 ## 2026-06-11 TASKSET-AR-PM-OPERATING-SYSTEM Registration
 
 - New planned task set: `TASKSET-AR-PM-OPERATING-SYSTEM` (Project Workbreaker).
@@ -42,9 +51,9 @@
 ## 2026-06-11 TASKSET-AR-VISION-GAP-CLOSURE Registration
 
 - New planned task set: `TASKSET-AR-VISION-GAP-CLOSURE` (Vision Integrator).
-- Purpose: 2026-06-11 기능·비전 분석에서 식별된 미흡 항목 전부와 tag_manual 완전 독립을 실행 태스크로 전환 (Owner 지시).
+- Purpose: 2026-06-11 기능·비전 분석에서 식별된 미흡 항목 전부와 레거시 전신 프로젝트 완전 독립을 실행 태스크로 전환 (Owner 지시).
 - Registered planned tasks:
-  - `TASK-AR-310` tag_manual 의존성 해소 및 완전 독립 (co_location_gate/픽스처 의존 해소, MIGRATION YAML 라이브 제거 + 스냅샷 보존, 활성 문서 표기 일반화)
+  - `TASK-AR-310` 레거시 전신 프로젝트 의존성 해소 및 완전 독립 (co_location_gate/픽스처 의존 해소, 이관 YAML 라이브 제거 + 스냅샷 보존, 활성 문서 표기 일반화)
   - `TASK-AR-311` A2A 전용 메시지 라우팅 레이어
   - `TASK-AR-312` 멀티에이전트 동시 실행 검증 + RBAC 역할 강제
   - `TASK-AR-313` ToolRunner 명령 정책 강화 (IMPLEMENTATION_PLAN Phase 3)
@@ -64,8 +73,8 @@
 - Registered tasks: `TASK-AR-306` (completed, 세션 closeout 기록), `TASK-AR-307` (planned, 전사 구조 개선 후속 계획), `TASK-AR-308` (planned, 기능·비전 전략 우선순위), `TASK-AR-309` (planned, UI 배포 경로 가드 계획).
 - Conversation record: `reviews/REVIEW-2026-06-11-agent-runtime-ops-feedback-analysis-session.md`.
 - Branch cleanup manifest: `reviews/REVIEW-2026-06-11-agent-runtime-branch-cleanup-sha-manifest.md`.
-- Session outcomes: 로컬/원격 브랜치 25개 정리(main만 잔존), UI 미반영 근본 원인 해결(editable 재설치 + 구버전 서버 재시작), Claude Code 플러그인 4종 비활성화(serena/discord/telegram/github), tag_manual 라이브 참조 제거(감사 YAML은 보존), .tmp 73.8MB 정리.
-- Boundary: MIGRATION-COMPAT-MAP.yml 등 마감된 감사 증거와 reviews/ 역사 기록은 수정하지 않는다.
+- Session outcomes: 로컬/원격 브랜치 25개 정리(main만 잔존), UI 미반영 근본 원인 해결(editable 재설치 + 구버전 서버 재시작), Claude Code 플러그인 4종 비활성화(serena/discord/telegram/github), 레거시 전신 프로젝트 라이브 참조 제거(감사 스냅샷은 reviews/ 보존), .tmp 73.8MB 정리.
+- Boundary: 마감된 감사 증거와 reviews/ 역사 기록은 수정하지 않는다.
 
 ## 2026-06-11 TASKSET-AR-RSI-OPERATING-SYSTEM Registration
 
@@ -183,8 +192,8 @@
   - 실무 규칙:
     - 판정 오탈자/버전 불일치/경고 미해결은 `warn`가 아니라 `hold_*` 라우팅.
     - `release_state`·`release_cause`·`decision_deadline`은 4개 핵심 문서의 판정 필드와 매 판정일 대조.
-  - `tag_manual` 이식 이력이 완전 정렬되어야 함:
-    - `MIGRATION-COMPAT-MAP.yml` 기준: `scripts-source-only` 53, `scripts-runtime-extra` 2, `hooks-wrapper` 1건.
+  - 레거시 전신 프로젝트 이식 이력이 완전 정렬되어야 함:
+    - reviews/ 보존 스냅샷 기준: `scripts-source-only` 53, `scripts-runtime-extra` 2, `hooks-wrapper` 1건.
     - 미결 항목이 남아 있으면 `approved_by/expiry/justification` 보완 또는 `hold_for_data`/`hold_for_overlay` 라우팅으로만 통과.
 - 핵심 제약:
   - `TASK-AR-210` 최종 판정/차단사유 확정 + `TASK-AR-213` parity lock 증빙이 동시 완료되어야 유효
@@ -321,13 +330,13 @@
     - envelope/retry/access control/idempotency가 chain reconstruct 가능하게 정합
     - 미승인 event는 reject + audit 남김
 
-- P0-10: `TASK-AR-209` tag_manual Migration Audit
+- P0-10: `TASK-AR-209` Legacy Source Migration Audit
   - 목적: 이식 누락/변경/의도적 제외를 분리 보관
   - 상태: 진행 중
   - 완료 조건:
     - `kept/changed/deprecated/dropped/missing` 분류 완료
     - `kept`/`missing`/`runtime-only` 이유별 보류 근거 분리
-    - `MIGRATION-COMPAT-MAP` 동기화
+    - 레거시 이관 감사 스냅샷 동기화
 
 - P0-11: `TASK-AR-210` Release Gate Governance
   - 목적: v0.1.6/0.1.7 공개 판단과 v0.1.8 이관 사유 고정
@@ -359,7 +368,7 @@
     - 오버레이 파일 변경만으로 프로젝트 이식 가능
     - 누락 시 경고 없이 `TASK-AR-204` 경유차단
 
-- P0-15: `TASK-AR-213` migration parity lock
+- P0-15: `TASK-AR-213` legacy parity lock
   - 목적: 이식 차이를 release lock 규칙으로 고정
   - 상태: 진행 중
   - 완료 조건:
@@ -381,11 +390,11 @@
     - 도메인별 90% + 실패 케이스 correction 연결
     - reviewer/verdict + footer + A2A trace 동시 증빙
 
-- P0-18: `TASK-AR-218` Migration Integrity Hardening
-  - 목적: migration-map 근거/승인 미정이 릴리스에서 block로 반영되게 정합
+- P0-18: `TASK-AR-218` Legacy Integrity Hardening
+  - 목적: 레거시 이관 근거/승인 미정이 릴리스에서 block로 반영되게 정합
   - 상태: 진행 중
   - 완료 조건:
-    - `MIGRATION-COMPAT-MAP.yml` 승인 근거 미정 0건 또는 `hold` 이관
+    - 이관 승인 근거 미정 0건 또는 `hold` 이관
     - stale/overlay 누락 시 `hold_for_overlay` 경로 적용
 
 - P0-19: `TASK-AR-219` 공식 권고·버전 판정 정합
@@ -396,16 +405,16 @@
     - 오프라인 90%/live reviewer/correction/A2A/overlay/migration evidence 번들 증빙
     - `release-state` 상태 머신이 판정로그에 남음
 
-- P0-20: `TASK-AR-220` tag_manual 이식 근거 마감
+- P0-20: `TASK-AR-220` 레거시 이식 근거 마감
   - 목적: 누락·의도적 제외·미확정 항목 분리와 block 경로 정합
   - 상태: 진행 준비
   - 완료 조건:
     - `scripts-source-only`, `scripts-runtime-extra`, `hooks-wrapper` 근거 보강
-    - `MIGRATION-COMPAT-MAP`와 `TASK-AR-204`/`TASK-AR-210`/`TASK-AR-213` 동기
+    - 레거시 이관 감사 스냅샷과 `TASK-AR-204`/`TASK-AR-210`/`TASK-AR-213` 동기
     - `hold_for_data` / `hold_for_overlay` 이관 규칙이 실제 차단으로 동작
 
 - P0-21: `TASK-AR-221` 운영 정합 통합
-  - 목적: 요구사항 1~16을 `query contract + overlay + evaluation + migration evidence`로 묶은 통합 게이트
+  - 목적: 요구사항 1~16을 `query contract + overlay + evaluation + legacy evidence`로 묶은 통합 게이트
   - 상태: 진행 준비
   - 완료 조건:
     - `TASK-AR-201`~`218`/`219`/`220` 산출물이 동일 release bundle에서 재현 가능
@@ -424,14 +433,14 @@
   - 목적: 요구사항 1~16의 운영 체인을 v0.1.8 판정으로 동기화
   - 상태: 진행 준비
   - 완료 조건:
-    - 요구사항 1~16이 오프라인, live review, correction, A2A, migration 근거에 모두 연결됨
+    - 요구사항 1~16이 오프라인, live review, correction, A2A, 레거시 근거에 모두 연결됨
     - `TASK-AR-221`/`TASK-AR-219`/`TASK-AR-220`/`TASK-AR-216`/`TASK-AR-218`/`TASK-AR-217` 결과가 `TASK-AR-210` 판정 템플릿에 반영됨
     - 2026-07-02/07-09/07-16 판정 텍스트/hold 경로/decision_deadline가 `release-state`와 정합
-    - `TASK-AR-222` 산출물(요건 매핑표 + migration 이관표 + closeout 번들 증적)이 1개로 고정
-    - `tag_manual` 이식 누락/변경/의도적 제외 항목이 `approved_by/expiry/justification`으로 미해결 0건
+    - `TASK-AR-222` 산출물(요건 매핑표 + 레거시 이관표 + closeout 번들 증적)이 1개로 고정
+    - 레거시 이식 누락/변경/의도적 제외 항목이 `approved_by/expiry/justification`으로 미해결 0건
 
 - P0-24: `TASK-AR-223` 멀티프로젝트 버전 업데이트 closeout 통합
-  - 목적: one-runtime multi-project 운영 원칙에 맞춰 오버레이/강제 규칙/migration 근거를 closeout 번들로 고정
+  - 목적: one-runtime multi-project 운영 원칙에 맞춰 오버레이/강제 규칙/레거시 근거를 closeout 번들로 고정
   - 상태: 진행 중
   - 완료 조건:
     - `TASK-AR-221`~`222`/`219`~`220` 증적 번들이 1개 closeout bundle로 재수합
@@ -519,9 +528,9 @@
   - release artifact check: `publish-bundle --source . --dest .tmp/release-bundle-verify-20260609-v018-closeout --check` 결과 `findings=0`.
   - 다음 단계: `TASK-AR-220`, `TASK-AR-215`, `TASK-AR-204` boundary closure.
 - 2026-06-09: `TASK-AR-220` migration approval closure 완료.
-  - `MIGRATION-HOLD-ROUTING.yml` release_state를 `hold_for_data`에서 `ready`로 전환.
+  - 레거시 hold routing release_state를 `hold_for_data`에서 `ready`로 전환.
   - source-only 53건은 group별 target_state/approved_by/decision_date/expiry/justification으로 승인.
-  - migration release blocker는 v0.1.8 baseline 기준 해소.
+  - 레거시 이관 release blocker는 v0.1.8 baseline 기준 해소.
   - release artifact check: `publish-bundle --source . --dest .tmp/release-bundle-verify-20260609-migration-closure --check` 결과 `findings=0`.
   - 남은 release boundaries: `TASK-AR-215` overlay simulation, `TASK-AR-204` co-location enforcement.
 - 2026-06-10: `TASK-AR-221`/`TASK-AR-219`/`TASK-AR-220` 사이클 킥오프 완료.
@@ -529,20 +538,20 @@
   - 다음 단계 진입 준비: `TASK-AR-216` 이관 조건 정합 점검 후 `TASK-AR-218`/`TASK-AR-217` 진행.
 - 2026-06-09: `TASK-AR-224` 공식/이식 근거 동기화 cycle 시작.
   - `RESEARCH-2026-06-09-agent-runtime-task-ar-224-official-and-migration-sync.md`, `MEETING-2026-06-09-agent-runtime-task-ar-224-gate-sync.md`, `CALL-2026-06-09-agent-runtime-task-ar-224-sync-call.md`, `SEMINAR-2026-06-09-agent-runtime-task-ar-224-governance-seminar.md` 생성.
-  - `MIGRATION-HOLD-ROUTING.yml` 생성: `scripts-source-only` 53건을 placeholder/external-deploy/project-report/runtime-gap/legacy/test-only로 1차 세분류.
+  - 레거시 hold routing 생성: `scripts-source-only` 53건을 placeholder/external-deploy/project-report/runtime-gap/legacy/test-only로 1차 세분류.
   - `REVIEW-2026-06-09-agent-runtime-task-ar-224-overlay-and-gate-check.md` 및 `RELEASE-GATE-TEMPLATE.yml` 생성.
   - `REVIEW-2026-06-09-agent-runtime-task-ar-224-executable-proof.md` 생성: packet proof 성공, release-preflight 실행 결과 `findings=358` block.
   - 다음 cycle은 source publication hygiene blocker 해소 계획.
 - 2026-06-10: `TASK-AR-222` closeout 계획 프레임워크 추가.
-  - 요구사항 1~16(쿼리 계약, 오프라인 평가, live 리뷰, 교정/A2A, migration/provenance)과 공식 권고 반영을 판정 한 번의 번들로 묶음.
-- 2026-06-14: `TASK-AR-220` migration 근거 정합 사이클 진행.
-  - `MIGRATION-COMPAT-MAP.yml`의 scripts-core-kept/scripts-core-changed/scripts-runschedule-legacy/skills-pack 항목에 `justification`·`expiry` 보강 완료.
+  - 요구사항 1~16(쿼리 계약, 오프라인 평가, live 리뷰, 교정/A2A, 레거시/provenance)과 공식 권고 반영을 판정 한 번의 번들로 묶음.
+- 2026-06-14: `TASK-AR-220` 레거시 근거 정합 사이클 진행.
+  - 레거시 감사 스냅샷의 scripts-core-kept/scripts-core-changed/scripts-runschedule-legacy/skills-pack 항목에 `justification`·`expiry` 보강 완료.
 - 2026-06-15: `TASK-AR-223` closeout 통합 체인 정합.
   - 06-15 회의/연구/콜/세미나 산출을 closeout 감사 체인으로 고정.
   - `hold_for_query_contract` / `hold_for_overlay` / `hold_for_data` 라우팅을 판정 문자열/decision_deadline와 연결.
 - 2026-06-19: 공식 가이드 근거 최신화 반영.
   - Claude hook precedence/trace-grading/A2A multi-turn continuity 규칙을 `TASK-AR-223` closeout 템플릿에 고정.
-  - `MIGRATION-COMPAT-MAP.yml`의 `source-only`/`runtime-only`/`hooks-wrapper` 분류와 hold routing의 1:1 매핑을 closeout 체인에 반영.
+  - 레거시 감사 스냅샷의 `source-only`/`runtime-only`/`hooks-wrapper` 분류와 hold routing의 1:1 매핑을 closeout 체인에 반영.
 
 - P0-25: `TASK-AR-224` 공식 소스 리뷰 동기화
   - 목적: 공식 문서 기반 운영 규칙 변화(Claude hooks, OpenAI trace, Codex 안전, A2A)를 릴리스 템플릿에 즉시 반영.
@@ -688,7 +697,7 @@
 8. `TASK-AR-246` parallel worktree/task claim dispatcher 구현
 9. `TASK-AR-210` 재판정: boundaries closure 후 `ready` 가능 여부 확인
 10. `TASK-AR-219` 공식 권고 반영 및 판정 근거 고정
-11. `TASK-AR-220` tag_manual 이식 근거 마감(스크립트/훅/스킬 누락·의도적 제외 정렬)
+11. `TASK-AR-220` 레거시 이식 근거 마감(스크립트/훅/스킬 누락·의도적 제외 정렬)
 12. `TASK-AR-216` v0.1.8 후보 이관 사유 정렬
 13. `TASK-AR-222` v0.1.8 closeout 번들 완성
 14. `TASK-AR-218` migration 무결성 정합 + migration-map block rule 정비

@@ -1,7 +1,7 @@
 """Skill/data co-location enforcement gate for agent_runtime.
 
 This gate turns TASK-AR-204 governance rules into an executable release check:
-skill, data, migration, source, and overlay mappings must carry owner,
+skill, data, source, and overlay mappings must carry owner,
 approval, expiry, justification, and release-routing metadata. Missing fields
 are treated as block, not warn.
 """
@@ -16,7 +16,6 @@ from typing import Any
 
 
 DEFAULT_SKILL_MAP = Path("agents/project/SKILL-DATA-MAP.yml")
-DEFAULT_MIGRATION_MAP = Path("agents/project/MIGRATION-COMPAT-MAP.yml")
 DEFAULT_CONTEXT_SOURCES = Path("agents/project/CONTEXT-SOURCES.yml")
 DEFAULT_DATASET_CATALOG = Path("agents/project/DATASET-CATALOG.yml")
 DEFAULT_OUT = Path("reviews/CO-LOCATION-GATE-2026-06-09-task-ar-204.json")
@@ -179,7 +178,15 @@ def _check_skill_map(path: Path) -> dict[str, Any]:
     return {"items": len(items), "findings": findings, "item_results": item_results}
 
 
-def _check_migration_map(path: Path) -> dict[str, Any]:
+def _check_migration_map(path: Path | None) -> dict[str, Any]:
+    if path is None:
+        return {
+            "items": 0,
+            "findings": [],
+            "item_results": [],
+            "status": "skipped",
+            "reason": "no live migration compatibility map configured",
+        }
     lines, findings = _read(path)
     items = _parse_section_items(lines, "items")
     item_results: list[dict[str, Any]] = []
@@ -243,7 +250,7 @@ def _check_dataset_catalog(path: Path) -> dict[str, Any]:
 
 def evaluate(
     skill_map: Path,
-    migration_map: Path,
+    migration_map: Path | None,
     context_sources: Path,
     dataset_catalog: Path,
 ) -> dict[str, Any]:
@@ -265,7 +272,7 @@ def evaluate(
         "blocked_task": None if not findings else "TASK-AR-204",
         "inputs": {
             "skill_map": skill_map.as_posix(),
-            "migration_map": migration_map.as_posix(),
+            "migration_map": migration_map.as_posix() if migration_map else None,
             "context_sources": context_sources.as_posix(),
             "dataset_catalog": dataset_catalog.as_posix(),
         },
@@ -277,7 +284,12 @@ def evaluate(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--skill-map", type=Path, default=DEFAULT_SKILL_MAP)
-    parser.add_argument("--migration-map", type=Path, default=DEFAULT_MIGRATION_MAP)
+    parser.add_argument(
+        "--migration-map",
+        type=Path,
+        default=None,
+        help="Optional archival migration compatibility map. No live map is required by default.",
+    )
     parser.add_argument("--context-sources", type=Path, default=DEFAULT_CONTEXT_SOURCES)
     parser.add_argument("--dataset-catalog", type=Path, default=DEFAULT_DATASET_CATALOG)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)

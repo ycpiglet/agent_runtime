@@ -1,0 +1,54 @@
+{
+  "schema": "agent-runtime-session-baseline/v1",
+  "captured_at": "2026-06-11T15:20:21.185101+00:00",
+  "cwd": "C:\\Users\\ycpig\\agent_runtime",
+  "head": "03dacb9",
+  "branch": "main",
+  "status_fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stash_count": 0,
+  "worktrees": [
+    {
+      "path": "C:/Users/ycpig/agent_runtime",
+      "HEAD": "03dacb96fd160743d804dff0f3bdcea4120e2407",
+      "branch": "main"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-310",
+      "HEAD": "0bf6f7dc8720188aa953addd9ae02c0db2de0df8",
+      "branch": "codex/task-ar-310-vision-gap-closure"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-311",
+      "HEAD": "9178810533e93e960728f9e70f633fa0a695b447",
+      "branch": "codex/task-ar-311-vision-gap-closure"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-312",
+      "HEAD": "f58b9f3c876c3cb5039c45fcc722f38a9e57541d",
+      "branch": "codex/task-ar-312-vision-gap-closure"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-313",
+      "HEAD": "26d89364864b2a42c37623cf61ecc924e2a80210",
+      "branch": "codex/task-ar-313-vision-gap-closure"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASKSET-AR-OPS-FEEDBACK-ANALYSIS",
+      "HEAD": "9ebe5419b99d5a689b78ae1bbc26653646d4c1a6",
+      "branch": "codex/taskset-ar-ops-feedback"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASKSET-AR-RSI-OPERATING-SYSTEM",
+      "HEAD": "846602dbe68edf242fed0c98eae7c8f082502bed",
+      "branch": "codex/taskset-ar-rsi-os"
+    }
+  ],
+  "active_codex_branches": [
+    "+ codex/task-ar-310-vision-gap-closure",
+    "+ codex/task-ar-311-vision-gap-closure",
+    "+ codex/task-ar-312-vision-gap-closure",
+    "+ codex/task-ar-313-vision-gap-closure",
+    "+ codex/taskset-ar-ops-feedback",
+    "+ codex/taskset-ar-rsi-os"
+  ]
+}

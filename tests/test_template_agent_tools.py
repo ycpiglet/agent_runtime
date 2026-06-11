@@ -348,6 +348,59 @@ def test_run_command_profile_split_for_git_access(tmp_path, monkeypatch):
     assert "Allowed for profile='ci'" in out
 
 
+def test_run_command_research_profile_blocks_mutating_git_and_pip(tmp_path, monkeypatch):
+    module = _load_agent_tools_module()
+    calls = []
+    monkeypatch.setattr(module.subprocess, "run", _deny_subprocess(calls))
+
+    safe_file = tmp_path / "notes.txt"
+    safe_file.write_text("ok\n", encoding="utf-8")
+
+    runner = module.ToolRunner(tmp_path, command_profile="research")
+    blocked = [
+        "git add notes.txt",
+        "git restore notes.txt",
+        "git stash push",
+        "python -m pip install requests",
+        "python scripts/agent_worker.py --once",
+    ]
+    for command in blocked:
+        out = runner.run_command(command)
+        assert out.startswith("ERROR:"), out
+        assert "Allowed for profile='research'" in out
+    assert calls == []
+
+
+def test_run_command_owner_profile_blocks_mutable_git_path_escape(tmp_path, monkeypatch):
+    module = _load_agent_tools_module()
+    calls = []
+    monkeypatch.setattr(module.subprocess, "run", _deny_subprocess(calls))
+
+    runner = module.ToolRunner(tmp_path, command_profile="owner")
+    blocked = [
+        "git add ../outside.txt",
+        "git restore ../outside.txt",
+        "git add C:/tmp/outside.txt",
+    ]
+    for command in blocked:
+        out = runner.run_command(command)
+        assert out.startswith("ERROR: git subcommand not allowed in profile='owner'"), out
+        assert "Allowed for profile='owner'" in out
+    assert calls == []
+
+
+def test_run_command_pytest_unknown_flags_are_blocked(monkeypatch):
+    module = _load_agent_tools_module()
+    calls = []
+    monkeypatch.setattr(module.subprocess, "run", _deny_subprocess(calls))
+
+    runner = module.ToolRunner(REPO_ROOT)
+    out = runner.run_command("python -m pytest --capture=no tests/test_template_smoke.py")
+    assert out.startswith("ERROR: python execution profile not allowed"), out
+    assert "Allowed for profile='ci'" in out
+    assert calls == []
+
+
 def test_run_command_audit_log_records_allowed_and_blocked(monkeypatch):
     module = _load_agent_tools_module()
     calls = []

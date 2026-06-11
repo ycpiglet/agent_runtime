@@ -1,0 +1,36 @@
+{
+  "schema": "agent-runtime-session-baseline/v1",
+  "captured_at": "2026-06-11T14:15:47.901422+00:00",
+  "cwd": "C:\\Users\\ycpig\\agent_runtime",
+  "head": "caafd84",
+  "branch": "main",
+  "status_fingerprint": "c15116659eedf516f7296b423c7863a977e7304a8cffd7d1e00e4482de9169fa",
+  "stash_count": 0,
+  "worktrees": [
+    {
+      "path": "C:/Users/ycpig/agent_runtime",
+      "HEAD": "caafd8498b1f60b60e1fa2e94c0ee5ce7f13ee3c",
+      "branch": "main"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-310",
+      "HEAD": "0bf6f7dc8720188aa953addd9ae02c0db2de0df8",
+      "branch": "codex/task-ar-310-vision-gap-closure"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASKSET-AR-OPS-FEEDBACK-ANALYSIS",
+      "HEAD": "9ebe5419b99d5a689b78ae1bbc26653646d4c1a6",
+      "branch": "codex/taskset-ar-ops-feedback"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASKSET-AR-RSI-OPERATING-SYSTEM",
+      "HEAD": "846602dbe68edf242fed0c98eae7c8f082502bed",
+      "branch": "codex/taskset-ar-rsi-os"
+    }
+  ],
+  "active_codex_branches": [
+    "+ codex/task-ar-310-vision-gap-closure",
+    "+ codex/taskset-ar-ops-feedback",
+    "+ codex/taskset-ar-rsi-os"
+  ]
+}

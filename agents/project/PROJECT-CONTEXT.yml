@@ -77,9 +77,9 @@ links:
   - label: overlay policy
     path: agents/lead_engineer/tasks/TASK-AR-211.md
     owner: lead-engineer
-  - label: migration compatibility
-    path: agents/project/MIGRATION-COMPAT-MAP.yml
-    owner: owner
+  - label: legacy portability closeout archive
+    path: reviews/REVIEW-2026-06-11-tag-manual-independence-closeout.md
+    owner: lead-engineer
   - label: dataset policy
     path: agents/project/DATASET-CATALOG.yml
     owner: owner
