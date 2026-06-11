@@ -1,14 +1,14 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-11T08:30:09+09:00
+updated_at: 2026-06-11T09:05:28+09:00
 current_state:
-  summary: "TASK-AR-279 is complete for backlog pane visual hierarchy; TASKSET-AR-UI-DESIGN-IMPLEMENTATION remains active with agent/runtime state hierarchy next."
+  summary: "TASK-AR-279 is complete and TASK-AR-280 implementation progress is preserved; TASKSET-AR-UI-DESIGN-IMPLEMENTATION remains active with visual QA and closeout next."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-UI-DESIGN-IMPLEMENTATION"
   step_index: 3
   step_total: 7
   progress_pct: 43
-  status_text: "TASK-AR-279 completed with TDD, focused/slow regression subsets, Owner gates, and Playwright desktop/mobile checks; TASK-AR-280 is the next planned handoff."
+  status_text: "TASK-AR-280 implementation progress was preserved in main; resume with visual/browser QA, Owner review, and completion metadata before starting TASK-AR-281."
 active_work:
   current_agents: []
   current_teams:
@@ -20,7 +20,7 @@ resume:
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
-  lead_engineer: "Start TASK-AR-280 with a fresh claim before changing active agent/runtime state hierarchy; keep UI-DESIGN-SYSTEM closed as research/design evidence."
+  lead_engineer: "Resume TASK-AR-280 visual/browser QA and closeout before starting TASK-AR-281; keep UI-DESIGN-SYSTEM closed as research/design evidence."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
@@ -144,7 +144,7 @@ pointers:
     - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-221-quality-loop-closeout.md
     - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-243-planning-evidence-link.md
 next_actions:
-  - "Start TASK-AR-280 before claiming active agent/runtime state visual hierarchy progress."
+  - "Resume TASK-AR-280 visual/browser QA and closeout; implementation progress is already preserved in main."
   - "Push local commits only after Owner approval; local closeout does not imply remote publish, PR, tag, or external CI evidence."
   - "Keep TASKSET-AR-UI-DESIGN-IMPLEMENTATION active until TASK-AR-278 through TASK-AR-284 have pane-level visual QA and Owner handoff evidence."
   - "Treat TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE and TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION as planned follow-up tasksets until an explicit claim starts them."

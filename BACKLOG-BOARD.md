@@ -86,7 +86,7 @@ completed_task_set_count: 11
 - Progress: `2/7` done; `5` open or active.
 | Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-280` | planned | Action | P1 | High | Medium | 3h/1100tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make active agent state, claims, progress, and command safety boundaries visible in t… |
+| `TASK-AR-280` | in_progress | Action | P1 | High | Medium | 3h/1100tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Make active agent state, claims, progress, and command safety boundaries visible in t… |
 | `TASK-AR-281` | planned | Action | P1 | High | Medium | 3h/1100tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make events, errors, evidence, and replay records look audit-ready and severity-aware. |
 | `TASK-AR-283` | planned | Action | P2 | Medium | Medium | 2h/800tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Keep the dark operator console usable on desktop and mobile without relying on color-… |
 | `TASK-AR-284` | planned | Ask | P2 | Medium | Medium | 2h/800tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | Close the active UI design implementation task set only after focused checks, Owner g… |
