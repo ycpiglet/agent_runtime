@@ -72,7 +72,7 @@ completed_task_set_count: 15
 - Progress: `2/10` done; `8` open or active.
 | Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-311` | planned | Action | P1 | High | High | 8h/6000tok | Low | 6 | validation-team | qa | Execute next | 에이전트 간 통신을 태스크 상태/로그 추론 방식에서 명시적 메시지 패싱 API로 전환해 A2A 체인을 구조적으로 보장한다. |
+| `TASK-AR-311` | in_progress | Action | P1 | High | High | 8h/6000tok | Low | 7 | validation-team | qa | Execute next | 에이전트 간 통신을 태스크 상태/로그 추론 방식에서 명시적 메시지 패싱 API로 전환해 A2A 체인을 구조적으로 보장한다. |
 | `TASK-AR-312` | planned | Action | P1 | High | High | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 문서로만 정의된 역할 체계(TEAMS/ORG/diversity council)를 실제 2~3개 동시 에이전트 인스턴스 실행으로 증명하고, 역할별 쓰기 권… |
 | `TASK-AR-314` | planned | Action | P1 | High | High | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 리스 기반 클레임 원시 연산으로 다중 프로세스 환경의 중복 응답/소유권 경합을 구조적으로 차단한다. |
 | `TASK-AR-316` | planned | Action | P2 | Medium | Low | 4h/3000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | skills/(session-closeout, taskset-dispatch)를 버전·트리거 조건·메타데이터를 갖춘 재사용 가능한 패키지로 만들어 다른… |

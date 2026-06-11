@@ -18,6 +18,9 @@ from typing import Any
 DEFAULT_INPUT = Path("agents/project/a2a/a2a-trace-baseline-2026-06-09.jsonl")
 DEFAULT_OUT = Path("reviews/A2A-TRACE-GATE-2026-06-09-task-ar-208.json")
 
+TRACE_SCHEMA_VERSION = "agent-runtime-a2a-envelope/v1"
+MESSAGE_SCHEMA_VERSION = "agent-runtime-a2a-message/v1"
+VALID_SCHEMA_VERSIONS = {TRACE_SCHEMA_VERSION, MESSAGE_SCHEMA_VERSION}
 REQUIRED_EVENT_TYPES = ["request", "review", "decision", "correction"]
 REQUIRED_FIELDS = [
     "schema_version",
@@ -75,16 +78,61 @@ def _validate_retry_policy(value: Any) -> list[str]:
     return findings
 
 
+def _validate_message_route(row: dict[str, Any]) -> list[str]:
+    findings: list[str] = []
+    if not row.get("message_id"):
+        findings.append("missing:message_id")
+
+    route = row.get("route")
+    if not isinstance(route, dict):
+        findings.append("missing:route")
+    else:
+        if route.get("from") != row.get("sender"):
+            findings.append("invalid:route.from")
+        if route.get("to") != row.get("receiver"):
+            findings.append("invalid:route.to")
+
+    task_context = row.get("task_context")
+    if not isinstance(task_context, dict):
+        findings.append("missing:task_context")
+    else:
+        for field in ("contextId", "taskId", "decision_cycle_id"):
+            if task_context.get(field) != row.get(field):
+                findings.append(f"invalid:task_context.{field}")
+    return findings
+
+
 def _validate_event(row: dict[str, Any]) -> list[str]:
     findings: list[str] = []
     for field in REQUIRED_FIELDS:
         if not row.get(field):
             findings.append(f"missing:{field}")
+    schema_version = row.get("schema_version")
+    if schema_version not in VALID_SCHEMA_VERSIONS:
+        findings.append("invalid:schema_version")
     findings.extend(_validate_retry_policy(row.get("retry_policy")))
     if row.get("event_type") not in REQUIRED_EVENT_TYPES:
         findings.append("invalid:event_type")
     if row.get("access_level") not in {"public", "project", "restricted", "owner-required"}:
         findings.append("invalid:access_level")
+    if schema_version == MESSAGE_SCHEMA_VERSION:
+        findings.extend(_validate_message_route(row))
+    return findings
+
+
+def _validate_message_chain(ordered: list[dict[str, Any]]) -> list[str]:
+    if not ordered:
+        return []
+    if any(event.get("schema_version") != MESSAGE_SCHEMA_VERSION for event in ordered):
+        return []
+    findings: list[str] = []
+    for previous, current in zip(ordered, ordered[1:]):
+        previous_id = str(previous.get("event_id") or "")
+        current_type = str(current.get("event_type") or "unknown")
+        if str(current.get("parent_event_id") or "") != previous_id:
+            findings.append(f"message-parent-link:{current_type}")
+        if current.get("sender") != previous.get("receiver"):
+            findings.append(f"message-route-handoff:{current_type}")
     return findings
 
 
@@ -120,14 +168,17 @@ def evaluate(input_path: Path) -> dict[str, Any]:
     chain_results: list[dict[str, Any]] = []
     for chain_key, events in by_chain.items():
         context_id, task_id, decision_cycle_id = chain_key
-        types = [str(event.get("event_type")) for event in events]
         chain_findings: list[str] = []
         for required in REQUIRED_EVENT_TYPES:
-            if required not in types:
+            if required not in [str(event.get("event_type")) for event in events]:
                 chain_findings.append(f"missing-event-type:{required}")
         ordered = sorted(events, key=lambda event: str(event.get("timestamp") or ""))
-        if [event.get("event_type") for event in ordered] != types:
+        ordered_types = [str(event.get("event_type")) for event in ordered]
+        if [event.get("event_type") for event in ordered] != [event.get("event_type") for event in events]:
             chain_findings.append("events-not-timestamp-ordered")
+        if ordered_types != REQUIRED_EVENT_TYPES:
+            chain_findings.append("events-not-required-order")
+        chain_findings.extend(_validate_message_chain(ordered))
         if chain_findings:
             findings.extend(f"{context_id}/{task_id}/{decision_cycle_id}:{item}" for item in chain_findings)
         chain_results.append(
@@ -135,12 +186,14 @@ def evaluate(input_path: Path) -> dict[str, Any]:
                 "contextId": context_id,
                 "taskId": task_id,
                 "decision_cycle_id": decision_cycle_id,
-                "event_types": types,
+                "event_types": ordered_types,
+                "schema_versions": sorted({str(event.get("schema_version") or "") for event in events}),
                 "findings": chain_findings,
             }
         )
 
     status = "pass" if rows and not findings else "block"
+    message_events = [row for row in rows if row.get("schema_version") == MESSAGE_SCHEMA_VERSION]
     return {
         "schema": "agent-runtime-a2a-trace-gate/v1",
         "evaluation_mode": "a2a_trace_reconstruction",
@@ -148,6 +201,7 @@ def evaluate(input_path: Path) -> dict[str, Any]:
         "input": input_path.as_posix(),
         "status": status,
         "events": len(rows),
+        "message_events": len(message_events),
         "chains": len(chain_results),
         "findings": findings,
         "event_results": event_results,

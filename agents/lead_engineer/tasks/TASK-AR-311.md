@@ -4,9 +4,10 @@ display_id: TASK-AR-311
 task_uid: 6a155432-3a24-4ada-9f5a-cd15526a66d4
 registered_at: 2026-06-11T17:58:45+09:00
 created_at: 2026-06-11T17:58:45+09:00
-updated_at: 2026-06-11T17:58:45+09:00
+started_at: 2026-06-11T23:40:19+09:00
+updated_at: 2026-06-11T23:40:19+09:00
 title: A2A 전용 메시지 라우팅 레이어 도입
-status: planned
+status: in_progress
 priority: P1
 difficulty: L
 est_hours: 8
