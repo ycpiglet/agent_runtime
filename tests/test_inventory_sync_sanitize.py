@@ -5,6 +5,8 @@ import sys
 
 from pathlib import Path
 
+import pytest
+
 from agent_runtime import __version__
 from agent_runtime import cli as cli_module
 from agent_runtime.cli import main
@@ -255,6 +257,14 @@ def test_sync_diff_replaces_unencodable_stdout_characters(tmp_path, monkeypatch)
     assert run_sync(host, "diff", template_root=templates) == 0
 
     assert "new ? template" in stdout.output
+
+
+def test_build_sync_plan_rejects_config_object_as_template_root(tmp_path):
+    _write_host_config(tmp_path)
+    config = load_config(tmp_path)
+
+    with pytest.raises(TypeError, match="template_root must be path-like"):
+        build_sync_plan(tmp_path, template_root=config)
 
 
 def test_config_reads_upstream_dependency_contract(tmp_path):

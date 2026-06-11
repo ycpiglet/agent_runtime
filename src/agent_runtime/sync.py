@@ -83,7 +83,10 @@ def _load_managed_files(root: Path) -> dict[str, str]:
 
 def build_sync_plan(root: Path, template_root: Path | None = None) -> SyncPlan:
     config = load_config(root)
-    resolved_template_root = template_root or default_template_root()
+    try:
+        resolved_template_root = Path(template_root) if template_root is not None else default_template_root()
+    except TypeError as exc:
+        raise TypeError("template_root must be path-like") from exc
     managed_files = _load_managed_files(root)
     unmanaged_paths = set(config.unmanaged_paths)
     updates: list[TemplateUpdate] = []
