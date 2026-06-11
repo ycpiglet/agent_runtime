@@ -22,10 +22,13 @@ continues to live at `src/agent_runtime/templates/project/AGENTS.md`.
 
 ## Project Management Decomposition Contract
 
-- Non-trivial work must be decomposed as `project -> taskset -> task -> unit`
-  before implementation begins. The backlog/board carries routing metadata;
-  detailed execution context belongs in linked project, taskset, task, or unit
-  spec files.
+- Non-trivial work must be decomposed as
+  `initiative -> taskset -> task -> unit` before implementation begins. Use
+  `project` only for the host/repository/product lane such as `agent_runtime`;
+  use `initiative` for the taskset parent grouping the Owner wants planned or
+  tracked.
+- The backlog/board carries routing metadata; detailed execution context
+  belongs in linked initiative, taskset, task, or unit spec files.
 - A task is not worker-ready until a lower-cost implementation model can execute
   it from the record alone: context, target files, exact scope, out-of-scope
   boundaries, acceptance criteria, verification commands, and handoff format

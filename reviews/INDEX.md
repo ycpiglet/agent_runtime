@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-12T02:20:15+09:00
-record_count: 384
+generated_at: 2026-06-12T08:28:08+09:00
+record_count: 386
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `384` review and evidence records under `reviews/`.
+- Summary: indexed `386` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `384` files |
+| Reviews covered | pass | `386` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -167,6 +167,7 @@ record_count: 384
 | `reviews/RESEARCH-2026-06-11-agent-runtime-ui-design-research.md` | `RESEARCH-2026-06-11-agent-runtime-ui-design-research` | md | accepted | n/a | Agent Runtime UI Research Synthesis |
 | `reviews/RESEARCH-2026-06-11-ui-design-implementation-gap.md` | `RESEARCH-2026-06-11-ui-design-implementation-gap` | research | accepted | watch | UI Design Implementation Gap Review |
 | `reviews/RESEARCH-2026-06-12-agent-runtime-paperclip-and-doc-to-plan.md` | `RESEARCH-2026-06-12-agent-runtime-paperclip-and-doc-to-plan` | md | record | n/a | RESEARCH-2026-06-12 — Paperclip 분석 및 문서→플랜 파이프라인 기획 |
+| `reviews/RESEARCH-2026-06-12-work-hierarchy-taxonomy.md` | `RESEARCH-2026-06-12-work-hierarchy-taxonomy` | research | pass | pass | Work Hierarchy Taxonomy Research |
 | `reviews/RESEARCH-2026-06-13-agent-runtime-task-ar-211-official-multi-project-overlay.md` | `RESEARCH-2026-06-13-agent-runtime-task-ar-211-official-multi-project-overlay` | md | record | n/a | RESEARCH-2026-06-13-agent-runtime-task-ar-211-official-multi-project-overlay |
 | `reviews/RESEARCH-2026-06-14-agent-runtime-task-ar-222-cross-project-overlay-and-governance-research.md` | `RESEARCH-2026-06-14-agent-runtime-task-ar-222-cross-project-overlay-and-governance-research` | md | record | n/a | RESEARCH: TASK-AR-222 closeout을 위한 운영 연구 반영 |
 | `reviews/RESEARCH-2026-06-15-agent-runtime-task-ar-223-hold-routing-and-overlay-edge-research.md` | `RESEARCH-2026-06-15-agent-runtime-task-ar-223-hold-routing-and-overlay-edge-research` | md | record | n/a | RESEARCH: TASK-AR-223 hold-routing + overlay-edge risk 반영 (2026-06-15) |
@@ -404,6 +405,7 @@ record_count: 384
 | `reviews/REVIEW-2026-06-12-agent-runtime-vision-gap-closure-closeout.md` | `REVIEW-2026-06-12-agent-runtime-vision-gap-closure-closeout` | review | pass | pass | Vision Gap Closure Closeout Review |
 | `reviews/REVIEW-2026-06-12-claim-lease-closeout.md` | `REVIEW-2026-06-12-claim-lease-closeout` | brief | record | pass | REVIEW-2026-06-12-claim-lease-closeout |
 | `reviews/REVIEW-2026-06-12-rbac-write-gate-closeout.md` | `REVIEW-2026-06-12-rbac-write-gate-closeout` | md | record | n/a | REVIEW: TASK-AR-312 RBAC Write Gate Closeout |
+| `reviews/REVIEW-2026-06-12-work-hierarchy-conflict-closure-registration.md` | `REVIEW-2026-06-12-work-hierarchy-conflict-closure-registration` | review | pass | pass | Work Hierarchy Conflict Closure Registration Review |
 | `reviews/REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review.md` | `REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review` | md | record | n/a | REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review |
 | `reviews/REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log.md` | `REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log` | md | record | n/a | REVIEW: TASK-AR-222 closeout 실행 로그 |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |

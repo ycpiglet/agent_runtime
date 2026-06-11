@@ -7,19 +7,35 @@ without losing the intent created by stronger planning models.
 
 ## Hierarchy
 
+Owner-facing work uses this hierarchy:
+
 ```text
-project -> taskset -> task -> unit
+initiative -> taskset -> task -> unit
 ```
 
 | Level | Purpose | Canonical record | Typical owner |
 | --- | --- | --- | --- |
-| Project | Long/mid/short objective, strategy, horizon, success signal | `agents/project/projects/<project_id>/PROJECT.md` or `agents/project/*.md` | lead-engineer / planning-office |
+| Workspace / Host Project | Repository, product, customer host, or durable operating lane | `agents/project/PROJECT-CONTEXT.yml` and `agents/project/*.md` | lead-engineer / planning-office |
+| Initiative | Outcome-level parent for one or more tasksets | `agents/project/initiatives/<initiative_id>.md` | lead-engineer / planning-office |
 | Taskset | Coherent workflow bundle with one completion boundary | `docs/superpowers/plans/<date>-<taskset>.md` plus board metadata | lead-engineer |
 | Task | Deliverable with one accountable owner and evidence target | `agents/lead_engineer/tasks/TASK-*.md` | assigned role/team |
 | Unit | Smallest executable worker assignment | `agents/lead_engineer/tasks/units/<task_id>/UNIT-*.md` | worker agent |
 
 Backlog and board files are routing surfaces. They should expose metadata,
 progress, and links, but they should not carry the full execution context.
+
+`project_id` remains supported for legacy routing and host/project identity.
+New Owner-facing planning should use `initiative_id` for the taskset parent so
+`project` does not ambiguously mean both the whole repository and a work bundle.
+
+## Owner Request Vocabulary
+
+| Owner phrase | Agent action |
+| --- | --- |
+| `initiative 작성/등록해줘` | Create or update the parent outcome record and propose tasksets under it |
+| `taskset 작성/등록해줘` | Create an executable batch plan and task files under an initiative |
+| `task 작성/등록해줘` | Add one canonical task to an existing taskset |
+| `unit 작성해줘` | Split one task into worker-ready unit specs with exact scope and verification |
 
 ## Metadata Conventions
 
@@ -28,6 +44,7 @@ Use stable IDs in frontmatter so worker models can route without chat history:
 | Field | Level | Required when | Example |
 | --- | --- | --- | --- |
 | `project_id` | project/task/task unit | A task belongs to a durable project or operating-system lane | `PROJECT-AGENT-RUNTIME-PM-OS` |
+| `initiative_id` | initiative/taskset/task/task unit | A taskset belongs to an outcome parent above taskset | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` |
 | `task_set_id` | task/task unit | Any registered taskset work | `TASKSET-AR-PM-OPERATING-SYSTEM` |
 | `task_id` | task unit | Any unit spec | `TASK-AR-344` |
 | `unit_id` | task unit | Any unit spec | `UNIT-TASK-AR-344-001` |
