@@ -268,8 +268,8 @@
 - 공개 가능 판정은 모델 점수보다 `release-state + query contract + 오버레이 + migration evidence + reviewer/correction/A2A` 충족 증적이 우선이다.
 - 다음 공개 판정 전제는 `TASK-AR-221` + `TASK-AR-222` closeout 번들 동기화 후에만 `TASK-AR-210`에서 `ready`로 전환.
 - 1차 판정 이전 `TASK-AR-224`에서 공식 가이드 링크/핵심 항목 재점검이 실패하면 판정 진입 자체가 보류됨.
-- 1차 판정에서 `tag_manual` 이식 누락은 `hold_for_data` 또는 `hold_for_overlay`로만 이관되어야 함.
-- 공식 반영 조건: closeout 번들에는 쿼리 계약 라우팅(`clarify_required`/`reviewer_review`), trace-grading 증적, reviewer footer, A2A 추적 키(contextId/taskId), `MIGRATION-COMPAT-MAP` 승인 근거가 모두 함께 남아야 한다.
+- 1차 판정에서 레거시 이식 누락은 `hold_for_data` 또는 `hold_for_overlay`로만 이관되어야 함.
+- 공식 반영 조건: closeout 번들에는 쿼리 계약 라우팅(`clarify_required`/`reviewer_review`), trace-grading 증적, reviewer footer, A2A 추적 키(contextId/taskId), 레거시 이관 승인 근거가 모두 함께 남아야 한다.
 - 최종 판정 도달 조건은 `hold_for_query_contract`, `hold_for_overlay`, `hold_for_data` 미해결이 0건이거나 모두 `TASK-AR-210` 승인/차단 이관 상태가 될 것.
 
 ## Signal
@@ -298,8 +298,8 @@
 - 핵심 문서
   - `BACKLOG.md` (버전 스케줄 + P0 우선순위)
   - `AGENTIC_KNOWLEDGE_EVAL_PLAN.md` (쿼리/평가/교정 체인)
-  - `agents/project/MIGRATION-COMPAT-MAP.yml` (tag_manual 이식 근거)
-  - `agents/project/MIGRATION-HOLD-ROUTING.yml` (`scripts-source-only` 53건 hold 분류)
+  - `reviews/MIGRATION-COMPAT-MAP-2026-06-11-SNAPSHOT.yml` (레거시 이식 근거)
+  - `reviews/MIGRATION-HOLD-ROUTING-2026-06-11-SNAPSHOT.yml` (`scripts-source-only` 53건 hold 분류)
   - `agents/project/RELEASE-GATE-TEMPLATE.yml` (`TASK-AR-210` 판정 필드 템플릿)
   - `agents/project/ROADMAP.md`
   - `agents/project/PROJECT-CONTEXT.yml`
@@ -363,15 +363,15 @@
 ## Insight
 
 - 멀티 프로젝트 재사용의 핵심은 런타임 자체보다 오버레이(`VISION/ROADMAP/ORG/LINKS/TEAMS`) 동기화 강도이다.
-- `tag_manual` 이식은 `scripts-source-only`, `scripts-runtime-extra`, `hooks-wrapper`, `skills-pack` 근거를
+- 레거시 이식은 `scripts-source-only`, `scripts-runtime-extra`, `hooks-wrapper`, `skills-pack` 근거를
 분리해 정렬하지 않으면 재사용 시 같은 실수를 반복한다.
 - 요구사항 1~16 closeout는 `TASK-AR-222`로 묶어 다음 판정까지 추적한다.
 - 오프라인 90%와 live reviewer/교정/A2A는 동시에 남지 않으면 실제 정확도 보장은 불가하다.
 - 질문 자체가 애매하면 데이터 정합만으로는 해소되지 않는다. 정확도 = 맥락 + 검증.
 - 규칙은 경고 단계만으로 두면 2~3개월 내 강하게 역류한다. `warn`는 추적, `block`은 종료 조건이어야 함.
-- `tag_manual` 이식 항목은 `MIGRATION-COMPAT-MAP.yml`에서 `approved_by/expiry/justification`이 모두 채워진 항목만 pass로 전환; 미비 항목은 `TASK-AR-220`로 되돌아가서 이유 보강 후 재평가한다.
-- `MIGRATION-COMPAT-MAP.yml` 기준 이식 요약: `scripts-source-only` 53건, `scripts-runtime-extra` 2건(런타임 확장), `hooks-wrapper` 1건, `scripts-core` 계열은 kept/changed로 분류.
-- `TASK-AR-224`는 공식 가이드/스펙과 tag_manual 이식 결측을 한 번에 점검하는 “source-control gate” 라인으로 유지.
+- 레거시 이식 항목은 보존 감사 스냅샷에서 `approved_by/expiry/justification`이 모두 채워진 항목만 pass로 전환; 미비 항목은 `TASK-AR-220`로 되돌아가서 이유 보강 후 재평가한다.
+- 보존 감사 스냅샷 기준 이식 요약: `scripts-source-only` 53건, `scripts-runtime-extra` 2건(런타임 확장), `hooks-wrapper` 1건, `scripts-core` 계열은 kept/changed로 분류.
+- `TASK-AR-224`는 공식 가이드/스펙과 레거시 이식 결측을 한 번에 점검하는 “source-control gate” 라인으로 유지.
 - `TASK-AR-224` 현재 상태는 `in_progress`; packet proof는 성공했고 release-preflight는 실행됐으나 `findings=358`로 block. 다음 미완 항목은 source publication hygiene blocker 해소 계획이다.
 - `TASK-AR-225`는 완료. `release-preflight findings=358`은 clean bundle release path, sanitizer 보정, generic template sanitization, fixture lock refresh로 해소됐다.
 - 공개용 source는 repo root가 아니라 `publish-bundle` 산출물이어야 한다. repo root에는 host governance/task/review 기록이 남는 것이 정상이다.

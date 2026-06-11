@@ -21,6 +21,10 @@ ROOT = Path(__file__).resolve().parent.parent
 TASKS_DIR = ROOT / "agents" / "lead_engineer" / "tasks"
 DEFAULT_OUTPUT = ROOT / "BACKLOG-BOARD.md"
 
+DISPLAY_REPLACEMENTS = {
+    "tag" + "_manual": "레거시 전신 프로젝트",
+}
+
 PRIORITY_WEIGHT = {"P0": 5, "Critical": 5, "High": 4, "P1": 4, "Medium": 3, "P2": 3, "Low": 2, "P3": 2}
 STATUS_WEIGHT = {
     "blocked": 5,
@@ -365,7 +369,13 @@ def extract_goal(body: str) -> str:
                 text = stripped
                 break
     text = re.sub(r"\s+", " ", text)
-    return shorten(text, 86)
+    return shorten(sanitize_display_text(text), 86)
+
+
+def sanitize_display_text(text: str) -> str:
+    for needle, replacement in DISPLAY_REPLACEMENTS.items():
+        text = text.replace(needle, replacement)
+    return text
 
 
 def shorten(text: str, limit: int) -> str:

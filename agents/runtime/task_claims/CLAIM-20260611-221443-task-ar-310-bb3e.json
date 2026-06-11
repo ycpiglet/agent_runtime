@@ -9,26 +9,34 @@
   "callsite_id": "terminal:wt-task-ar-310:tab-01",
   "pane_id": "terminal:wt-task-ar-310:tab-01",
   "mode": "vision-gap-closure",
-  "status": "claimed",
+  "status": "completed",
   "task_set_id": "TASKSET-AR-VISION-GAP-CLOSURE",
-  "phase": "taskset-claimed",
-  "progress_pct": 0,
+  "phase": "taskset-step-completed",
+  "progress_pct": 10,
   "step_index": 1,
   "step_total": 10,
-  "status_text": "Starting Vision Integrator: TASK-AR-310",
+  "status_text": "Completed Vision Integrator step 1/10: TASK-AR-310 legacy independence closeout",
   "worktree_path": ".worktrees/TASK-AR-310",
   "branch": "codex/task-ar-310-vision-gap-closure",
   "claimed_at": "2026-06-11T22:14:43+09:00",
-  "last_heartbeat": "2026-06-11T22:14:43+09:00",
-  "updated_at": "2026-06-11T22:14:43+09:00",
-  "expires_at": "2026-06-11T22:44:43+09:00",
+  "last_heartbeat": "2026-06-11T23:10:05+09:00",
+  "updated_at": "2026-06-11T23:10:05+09:00",
+  "completed_at": "2026-06-11T23:10:05+09:00",
+  "expires_at": null,
   "lease": {
     "claimed_at": "2026-06-11T22:14:43+09:00",
-    "heartbeat_at": "2026-06-11T22:14:43+09:00",
-    "expires_at": "2026-06-11T22:44:43+09:00"
+    "heartbeat_at": "2026-06-11T23:10:05+09:00",
+    "expires_at": null
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260611-221443-task-ar-310-bb3e.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260611-221443-task-ar-310-bb3e.log.md",
   "allow_parallel_task_set": false,
-  "tags": []
+  "completion_commit": "0bf6f7d",
+  "verification": [
+    "rg -n -i tag_manual with live-path exclusions -> no matches",
+    "python scripts/co_location_gate.py --out reviews/CO-LOCATION-GATE-2026-06-11-task-ar-310.json -> pass",
+    "python scripts/owner_governance_gate.py -> exit 0",
+    "pytest tests -q -> 384 passed"
+  ],
+  "tags": ["completed", "verified"]
 }

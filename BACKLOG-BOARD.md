@@ -9,8 +9,8 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-11
 task_count: 153
-open_count: 57
-completed_count: 96
+open_count: 56
+completed_count: 97
 task_set_count: 7
 completed_task_set_count: 15
 ---
@@ -18,11 +18,11 @@ completed_task_set_count: 15
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `57` open or active tasks; `96` completed tasks are archived from this live board.
+- Summary: `56` open or active tasks; `97` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `50` / Ask `7` / Review `0` / Later `0` / Done `96`.
+- Status: Action `49` / Ask `7` / Review `0` / Later `0` / Done `97`.
 - Task Sets: `7` active workflows; `15` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -69,10 +69,9 @@ completed_task_set_count: 15
 ### Vision Integrator (`TASKSET-AR-VISION-GAP-CLOSURE`)
 
 - Flow: Legacy independence, A2A messaging, multi-agent RBAC, loop hardening, live eval, skill packaging, realtime UI, and doc traceability.
-- Progress: `0/10` done; `10` open or active.
+- Progress: `1/10` done; `9` open or active.
 | Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-310` | in_progress | Action | P1 | High | Medium | 4h/3000tok | Medium | 8 | governance-loop | independent-auditor | Execute next | 레거시 전신 프로젝트(tag_manual)에 대한 라이브 의존을 모두 해소해 이관을 최종 마감하고, agent_runtime이 레거시 참조 없이 완전히… |
 | `TASK-AR-313` | planned | Ask | P1 | High | Medium | 6h/4000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | 광범위한 python 허용 목록을 정확한 명령 프로파일(ci/owner/research)로 좁혀 임의 코드 실행 경로를 제거한다. |
 | `TASK-AR-311` | planned | Action | P1 | High | High | 8h/6000tok | Low | 6 | validation-team | qa | Execute next | 에이전트 간 통신을 태스크 상태/로그 추론 방식에서 명시적 메시지 패싱 API로 전환해 A2A 체인을 구조적으로 보장한다. |
 | `TASK-AR-312` | planned | Action | P1 | High | High | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 문서로만 정의된 역할 체계(TEAMS/ORG/diversity council)를 실제 2~3개 동시 에이전트 인스턴스 실행으로 증명하고, 역할별 쓰기 권… |
@@ -188,11 +187,11 @@ completed_task_set_count: 15
 | `TASK-AR-207` | `44bcf47c-75b…` | `TASKSET-AR-QUALITY-LOOP` | completed | 2026-06-11 | 2026-06-11 | 2026-06-10T22:12:00+09:00 | 2026-06-11T00:00:00+09:00 | 채팅, 리뷰, 메시지에서 탐지된 오답/누락/모호성의 교정 제안을 자동 수집한다. |
 | `TASK-AR-208` | `9e6f55b7-ad4…` | `TASKSET-AR-QUALITY-LOOP` | completed | 2026-06-11 | 2026-06-11 | 2026-06-10T22:20:00+09:00 | 2026-06-11T00:00:00+09:00 | 요청/리뷰/결정 이벤트를 추적 가능한 A2A 메시지 스키마로 관리해 멀티 에이전트/멀티 프로젝트 운영 안정성을 확보한다. |
 | `TASK-AR-221` | `f1d2c4ec-6d9…` | `TASKSET-AR-QUALITY-LOOP` | completed | 2026-06-09 | 2026-06-09T18:00:00+09:00 | 2026-06-10T23:22:00+09:00 | 2026-06-11T00:00:00+09:00 | 에이전트 런타임을 한 번에 재사용 가능한 MVP/멀티 프로젝트 운영 구조로 정리한다. 공식 가이드(Claude/Codex/OpenAI 권고)에 맞추어 아… |
-| `TASK-AR-209` | `914d9b65-a63…` | `TASKSET-AR-MIGRATION-PARITY` | completed | 2026-06-09 | 2026-06-13T10:10:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `tag_manual`에서 `agent_runtime`로 이식할 때 누락·변형·의도적 제외 항목을 분리해, 다음 릴리스에서 추적 가능하게 증빙한다. |
-| `TASK-AR-218` | `aa5a97ba-86b…` | `TASKSET-AR-MIGRATION-PARITY` | completed | 2026-06-09 | 2026-06-09T16:00:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `TASK-AR-216`/`TASK-AR-217` 판정 전제 조건을 위해 `tag_manual` 이식 누락·변경 근거가 미정으로 남는 상태를 제거하고,… |
-| `TASK-AR-224` | `330694dc-a51…` | `TASKSET-AR-MIGRATION-PARITY` | completed | 2026-06-19 | 2026-06-19 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `v0.1.8` 판정에서 공통 정합 규칙(공식 가이드 반영, migration 근거, tag_manual 이식 누락 처리)이 줄지 않게 동작하도록 공식/… |
-| `TASK-AR-213` | `8cf05d05-ae0…` | `TASKSET-AR-MIGRATION-PARITY` | completed | 2026-06-18 | 2026-06-18T09:30:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `tag_manual` 이식에서 `skill / hook / script` 항목을 `kept/changed/deprecated/dropped/missin… |
-| `TASK-AR-220` | `d447eec2-368…` | `TASKSET-AR-MIGRATION-PARITY` | completed | 2026-06-09 | 2026-06-10T09:15:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `tag_manual`에서 `agent_runtime`으로 이동할 때 skill/hook/script 누락·변형·의도적 제외가 의도된 이유인지, 기술적… |
+| `TASK-AR-209` | `914d9b65-a63…` | `TASKSET-AR-MIGRATION-PARITY` | completed | 2026-06-09 | 2026-06-13T10:10:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `레거시 전신 프로젝트`에서 `agent_runtime`로 이식할 때 누락·변형·의도적 제외 항목을 분리해, 다음 릴리스에서 추적 가능하게 증빙한다. |
+| `TASK-AR-218` | `aa5a97ba-86b…` | `TASKSET-AR-MIGRATION-PARITY` | completed | 2026-06-09 | 2026-06-09T16:00:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `TASK-AR-216`/`TASK-AR-217` 판정 전제 조건을 위해 `레거시 전신 프로젝트` 이식 누락·변경 근거가 미정으로 남는 상태를 제거하고,… |
+| `TASK-AR-224` | `330694dc-a51…` | `TASKSET-AR-MIGRATION-PARITY` | completed | 2026-06-19 | 2026-06-19 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `v0.1.8` 판정에서 공통 정합 규칙(공식 가이드 반영, migration 근거, 레거시 전신 프로젝트 이식 누락 처리)이 줄지 않게 동작하도록 공식… |
+| `TASK-AR-213` | `8cf05d05-ae0…` | `TASKSET-AR-MIGRATION-PARITY` | completed | 2026-06-18 | 2026-06-18T09:30:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `레거시 전신 프로젝트` 이식에서 `skill / hook / script` 항목을 `kept/changed/deprecated/dropped/missi… |
+| `TASK-AR-220` | `d447eec2-368…` | `TASKSET-AR-MIGRATION-PARITY` | completed | 2026-06-09 | 2026-06-10T09:15:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `레거시 전신 프로젝트`에서 `agent_runtime`으로 이동할 때 skill/hook/script 누락·변형·의도적 제외가 의도된 이유인지, 기술적… |
 | `TASK-AR-212` | `cc5a29c5-ad5…` | `TASKSET-AR-MIGRATION-PARITY` | completed | 2026-06-11 | 2026-06-13T10:25:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `TASK-AR-209`의 마이그레이션 감사 결과를 재현 가능한 증거로 완결하고, 향후 release-block 규칙에 연결한다. |
 | `TASK-AR-216` | `84debe84-e47…` | `TASKSET-AR-RELEASE-STEWARD` | completed | 2026-06-09 | 2026-06-09T13:00:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `v0.1.7` 공개 판정의 미충족 항목을 `v0.1.8` 판정으로 안전하게 이관하고, 릴리스 보드가 읽는 하나의 `release-state` 체인으로… |
 | `TASK-AR-210` | `a28ea57b-202…` | `TASKSET-AR-RELEASE-STEWARD` | completed | 2026-06-11 | 2026-06-12T09:30:00+09:00 | 2026-06-10T20:55:00+09:00 | 2026-06-11T00:00:00+09:00 | `v0.1.6`/`v0.1.7` 공개 판단을 근거 기반으로 고정하고, `v0.1.8` 판정(`07-02/07-09/07-16`)을 기준으로 release… |
@@ -269,7 +268,8 @@ completed_task_set_count: 15
 | `TASK-AR-284` | `539c16e9-2ff…` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | 2026-06-11 | 2026-06-11T12:45:13+09:00 | 2026-06-11T12:55:13+09:00 | 2026-06-11T12:55:13+09:00 | Close the active UI design implementation task set only after focused checks, Owner g… |
 | `TASK-AR-282` | `3d7b5d8e-d81…` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | 2026-06-11 | 2026-06-11T10:47:46+09:00 | 2026-06-11T10:59:38+09:00 | 2026-06-11T10:59:38+09:00 | Bring graph, state-machine, roadmap, planner, source, and write surfaces into the sam… |
 | `TASK-AR-233` | `d475a04e-6c5…` | `TASKSET-AR-REPO-HYGIENE` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Clean the current working tree through an intentional commit and push, then keep back… |
-| `TASK-AR-306` | `9fc495d7-bfd…` | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | completed | 2026-06-11T17:34:00+09:00 | 2026-06-11T16:30:00+09:00 | 2026-06-11T17:34:00+09:00 | 2026-06-11T17:34:00+09:00 | Owner 7개 지시(브랜치/스태시 정리, UI 적용, 플러그인/훅 정리, tag_manual 정리, 구조 분석, 비전 분석, 기록/등록)를 단일 세션에… |
+| `TASK-AR-306` | `9fc495d7-bfd…` | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | completed | 2026-06-11T17:34:00+09:00 | 2026-06-11T16:30:00+09:00 | 2026-06-11T17:34:00+09:00 | 2026-06-11T17:34:00+09:00 | Owner 7개 지시(브랜치/스태시 정리, UI 적용, 플러그인/훅 정리, 레거시 전신 프로젝트 정리, 구조 분석, 비전 분석, 기록/등록)를 단일 세션… |
+| `TASK-AR-310` | `9f5e2229-3d3…` | `TASKSET-AR-VISION-GAP-CLOSURE` | completed | 2026-06-11T17:58:45+09:00 | 2026-06-11T22:14:43+09:00 | 2026-06-11T23:01:07+09:00 | 2026-06-11T23:01:07+09:00 | 레거시 전신 프로젝트(레거시 전신 프로젝트)에 대한 라이브 의존을 모두 해소해 이관을 최종 마감하고, agent_runtime이 레거시 참조 없이 완전히… |
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.
