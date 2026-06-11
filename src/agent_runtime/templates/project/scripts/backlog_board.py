@@ -148,6 +148,12 @@ TASK_SET_DEFINITIONS = [
         "Legacy independence, A2A messaging, multi-agent RBAC, loop hardening, live eval, skill packaging, realtime UI, and doc traceability.",
         92,
     ),
+    TaskSetInfo(
+        "TASKSET-AR-UI-UX-V2",
+        "Console Experience Architect",
+        "Notion-like light theme, sidebar IA, sort/filter/density patterns, taskset-first views, org chart, roadmap, live presence, comms, and taskset-scope guard.",
+        93,
+    ),
 ]
 TASK_SET_INFO = {item.task_set_id: item for item in TASK_SET_DEFINITIONS}
 UNCLASSIFIED_TASK_SET = TaskSetInfo(

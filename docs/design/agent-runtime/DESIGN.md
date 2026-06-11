@@ -74,3 +74,7 @@ Do not use a generic SaaS dashboard style. Do not hide evidence behind secondary
 ## Implementation target
 
 The first implementation target is `src/agent_runtime/ui_console.py`. The DOM and API contracts must stay stable while the CSS moves toward the operator-console visual model.
+
+## Amendment 2026-06-11 (Owner decision)
+
+The default theme changes from dark to **light (Notion-like)**. The dark token set above is preserved verbatim as the optional Dark Mode. All components must consume semantic tokens only so both themes share one structure. The single-page tab navigation is superseded by a collapsible sidebar IA. See `docs/superpowers/plans/2026-06-11-ui-ux-v2-console.md` (TASKSET-AR-UI-UX-V2) for the full V2 plan; the rest of this guide (density, evidence-first, status colors, component guidance) remains in force.

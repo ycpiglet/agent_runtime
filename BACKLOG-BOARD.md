@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-11
-task_count: 116
-open_count: 20
+task_count: 125
+open_count: 29
 completed_count: 96
-task_set_count: 3
+task_set_count: 4
 completed_task_set_count: 15
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `20` open or active tasks; `96` completed tasks are archived from this live board.
+- Summary: `29` open or active tasks; `96` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `18` / Ask `2` / Review `0` / Later `0` / Done `96`.
-- Task Sets: `3` active workflows; `15` completed workflows are hidden from the live action board.
+- Status: Action `25` / Ask `4` / Review `0` / Later `0` / Done `96`.
+- Task Sets: `4` active workflows; `15` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -82,6 +82,22 @@ completed_task_set_count: 15
 | `TASK-AR-319` | planned | Action | P2 | Medium | Medium | 6h/4000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 368+개 reviews/ 증거를 수동 탐색에서 자동 색인/검증 체계로 전환해 문서 추적성을 규모에 견디게 만든다. |
 | `TASK-AR-317` | planned | Action | P2 | Medium | High | 10h/8000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | UI 콘솔을 읽기 전용 스냅샷 대시보드에서 운영 제어 표면으로 승격한다: 에이전트 루프 진행이 실시간 반영되고, 제안 승인/거절이 UI에서 가능해야 한다. |
 | `TASK-AR-318` | planned | Action | P3 | Low | Medium | 6h/5000tok | Low | 4 | agent-runtime-core | lead-engineer | Execute next | 이벤트/수정 기록을 나열에서 인과 체인 재생으로 승격해, 상태 변화를 프레임 단위로 거슬러 볼 수 있게 한다. |
+
+### Console Experience Architect (`TASKSET-AR-UI-UX-V2`)
+
+- Flow: Notion-like light theme, sidebar IA, sort/filter/density patterns, taskset-first views, org chart, roadmap, live presence, comms, and taskset-scope guard.
+- Progress: `0/9` done; `9` open or active.
+| Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-320` | planned | Action | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 기본 테마를 Notion형 라이트로 전환하고 기존 Linear 다크 토큰을 Dark Mode 옵션으로 보존한다. |
+| `TASK-AR-328` | planned | Action | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 특정 taskset 실행을 지시했을 때 해당 taskset 완료 후 scope 밖 작업으로 이탈하지 않고 정지·보고하도록 런타임 정책으로 강제한다 (Ow… |
+| `TASK-AR-321` | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 9개 수평 탭을 접이식 좌측 사이드바(Home / WORK / AGENTS / COMMS / RECORDS / OPS 그룹)로 전환해 V2 뷰 확장을 수… |
+| `TASK-AR-324` | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | TEAMS/ORG/roles 데이터로 조직도 트리를 렌더링하고, 에이전트 카드를 온라인 RPG 길드 멤버처럼 상태가 살아있는 프레즌스로 보여준다. |
+| `TASK-AR-322` | planned | Action | P1 | High | High | 10h/8000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 모든 리스트 뷰(task/agent/event/message/evidence)에 Notion/Linear형 정렬·필터·그룹·검색 바와 간략히/자세히 밀도… |
+| `TASK-AR-323` | planned | Ask | P1 | High | High | 10h/8000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | task 평면 나열 대신 taskset 단위로 묶인 직관적 작업 뷰를 기본 진입점으로 만들고, Owner가 진행 중 흐름에 task를 안전하게 삽입할 수… |
+| `TASK-AR-325` | planned | Action | P2 | Medium | Medium | 6h/5000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Vision → Milestone/Release → Taskset 3계층을 한 뷰에서 보여줘 고수준 방향과 실제 진행률을 연결한다. |
+| `TASK-AR-327` | planned | Ask | P2 | Medium | High | 10h/8000tok | Low | 5 | agent-runtime-core | lead-engineer | Owner/agent decision | 에이전트 간 대화를 Slack/Discord처럼 채널/스레드로 관전하고, Owner가 UI에서 meeting/seminar를 소집할 수 있게 한다. |
+| `TASK-AR-326` | planned | Action | P2 | Medium | High | 12h/9000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 에이전트/업무/메시지가 온라인 RPG처럼 실시간으로 살아 움직이는 감각을 SSE 이벤트 스트림과 라이브 그래프로 구현한다. |
 
 ## Archived Task Sets
 
