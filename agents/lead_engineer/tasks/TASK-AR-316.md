@@ -4,9 +4,10 @@ display_id: TASK-AR-316
 task_uid: e60e5407-f2bc-441a-97f8-0770cc927d8b
 registered_at: 2026-06-11T17:58:45+09:00
 created_at: 2026-06-11T17:58:45+09:00
-updated_at: 2026-06-11T17:58:45+09:00
+started_at: 2026-06-12T00:55:55+09:00
+updated_at: 2026-06-12T00:55:55+09:00
 title: 스킬 레이어 패키징 (메타데이터/버전/레지스트리)
-status: planned
+status: in_progress
 priority: P2
 difficulty: S
 est_hours: 4
