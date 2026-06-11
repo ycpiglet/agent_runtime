@@ -1,5 +1,15 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-06-11 TASKSET-AR-OPS-FEEDBACK-ANALYSIS Registration
+
+- New task set: `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` (Feedback Analyst).
+- Purpose: 2026-06-11 Owner 운영 정비 세션의 feedback/plan/analysis 산출물 등록 — 구현/개발 없음.
+- Registered tasks: `TASK-AR-306` (completed, 세션 closeout 기록), `TASK-AR-307` (planned, 전사 구조 개선 후속 계획), `TASK-AR-308` (planned, 기능·비전 전략 우선순위), `TASK-AR-309` (planned, UI 배포 경로 가드 계획).
+- Conversation record: `reviews/REVIEW-2026-06-11-agent-runtime-ops-feedback-analysis-session.md`.
+- Branch cleanup manifest: `reviews/REVIEW-2026-06-11-agent-runtime-branch-cleanup-sha-manifest.md`.
+- Session outcomes: 로컬/원격 브랜치 25개 정리(main만 잔존), UI 미반영 근본 원인 해결(editable 재설치 + 구버전 서버 재시작), Claude Code 플러그인 4종 비활성화(serena/discord/telegram/github), tag_manual 라이브 참조 제거(감사 YAML은 보존), .tmp 73.8MB 정리.
+- Boundary: MIGRATION-COMPAT-MAP.yml 등 마감된 감사 증거와 reviews/ 역사 기록은 수정하지 않는다.
+
 ## 2026-06-11 TASKSET-AR-RSI-OPERATING-SYSTEM Registration
 
 - New planned task set: `TASKSET-AR-RSI-OPERATING-SYSTEM`.

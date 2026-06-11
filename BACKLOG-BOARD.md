@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-11
-task_count: 102
-open_count: 7
-completed_count: 95
-task_set_count: 1
+task_count: 106
+open_count: 10
+completed_count: 96
+task_set_count: 2
 completed_task_set_count: 15
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `7` open or active tasks; `95` completed tasks are archived from this live board.
+- Summary: `10` open or active tasks; `96` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `7` / Ask `0` / Review `0` / Later `0` / Done `95`.
-- Task Sets: `1` active workflows; `15` completed workflows are hidden from the live action board.
+- Status: Action `9` / Ask `1` / Review `0` / Later `0` / Done `96`.
+- Task Sets: `2` active workflows; `15` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -56,6 +56,16 @@ completed_task_set_count: 15
 | `TASK-AR-302` | planned | Action | P1 | High | High | 3h/1200tok | Low | 7 | validation-team | qa | Execute next | Close the gap between A2A evidence fields existing in documents and an actual end-to-… |
 | `TASK-AR-304` | planned | Action | P1 | High | High | 3h/1200tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Add the missing skill layer so future sessions follow the RSI operating process witho… |
 
+### Feedback Analyst (`TASKSET-AR-OPS-FEEDBACK-ANALYSIS`)
+
+- Flow: Owner feedback intake, enterprise-wide structure/vision analysis, and follow-up planning records.
+- Progress: `1/4` done; `3` open or active.
+| Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-309` | planned | Action | P2 | Medium | Low | 2h/1500tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 2026-06-11 "UI 미반영" 사건의 두 원인(비-editable stale 설치, 장수 구버전 서버 프로세스)이 재발하지 않도록 가드 방안을 계획… |
+| `TASK-AR-307` | planned | Ask | P1 | High | Medium | 4h/3000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | 2026-06-11 전사 구조 분석에서 식별된 개선 항목을 Owner가 우선순위 결정할 수 있는 실행 계획으로 확정한다 (분석/계획 전용, 구현 없음). |
+| `TASK-AR-308` | planned | Action | P1 | High | Medium | 4h/3000tok | Low | 6 | validation-team | qa | Execute next | Ralph/Loop Engineering, Multi-agent/A2A, 측정 가능한 평가·검증, backlog UI/task management, 추적… |
+
 ## Archived Task Sets
 
 - Archive rule: completed task sets stay out of the live Action Board but remain visible as workflow-level completion evidence.
@@ -63,7 +73,7 @@ completed_task_set_count: 15
 |---|---|---:|---|
 | Context Cartographer (`TASKSET-AR-CONTEXT-KNOWLEDGE`) | Project context, source routing, and reusable knowledge structure. | `7/7` done | `7` completed task files archived |
 | Quality Sentinel (`TASKSET-AR-QUALITY-LOOP`) | Offline evals, live review, correction loops, and traceable validation. | `7/7` done | `7` completed task files archived |
-| Migration Archivist (`TASKSET-AR-MIGRATION-PARITY`) | tag_manual parity, migration evidence, and skill/hook/script provenance. | `6/6` done | `6` completed task files archived |
+| Migration Archivist (`TASKSET-AR-MIGRATION-PARITY`) | Legacy-source parity, migration evidence, and skill/hook/script provenance. | `6/6` done | `6` completed task files archived |
 | Release Steward (`TASKSET-AR-RELEASE-STEWARD`) | Version decisions, release closeout, and consistency checks. | `7/7` done | `7` completed task files archived |
 | Console Operator (`TASKSET-AR-UI-CONSOLE`) | Runtime UI console surfaces, command paths, and observability views. | `7/7` done | `7` completed task files archived |
 | Planning Architect (`TASKSET-AR-RSI-PLANNING`) | Bounded recursive self-improvement, planning scans, and proposal review. | `10/10` done | `10` completed task files archived |
@@ -177,6 +187,7 @@ completed_task_set_count: 15
 | `TASK-AR-284` | `539c16e9-2ff…` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | 2026-06-11 | 2026-06-11T12:45:13+09:00 | 2026-06-11T12:55:13+09:00 | 2026-06-11T12:55:13+09:00 | Close the active UI design implementation task set only after focused checks, Owner g… |
 | `TASK-AR-282` | `3d7b5d8e-d81…` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | 2026-06-11 | 2026-06-11T10:47:46+09:00 | 2026-06-11T10:59:38+09:00 | 2026-06-11T10:59:38+09:00 | Bring graph, state-machine, roadmap, planner, source, and write surfaces into the sam… |
 | `TASK-AR-233` | `d475a04e-6c5…` | `TASKSET-AR-REPO-HYGIENE` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Clean the current working tree through an intentional commit and push, then keep back… |
+| `TASK-AR-306` | `9fc495d7-bfd…` | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | completed | 2026-06-11T17:34:00+09:00 | 2026-06-11T16:30:00+09:00 | 2026-06-11T17:34:00+09:00 | 2026-06-11T17:34:00+09:00 | Owner 7개 지시(브랜치/스태시 정리, UI 적용, 플러그인/훅 정리, tag_manual 정리, 구조 분석, 비전 분석, 기록/등록)를 단일 세션에… |
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

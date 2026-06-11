@@ -61,7 +61,7 @@ TASK_SET_DEFINITIONS = [
     TaskSetInfo(
         "TASKSET-AR-MIGRATION-PARITY",
         "Migration Archivist",
-        "tag_manual parity, migration evidence, and skill/hook/script provenance.",
+        "Legacy-source parity, migration evidence, and skill/hook/script provenance.",
         30,
     ),
     TaskSetInfo(
@@ -141,6 +141,12 @@ TASK_SET_DEFINITIONS = [
         "Repo Custodian",
         "Working-tree cleanup, backlog cycle hygiene, and handoff publication.",
         90,
+    ),
+    TaskSetInfo(
+        "TASKSET-AR-OPS-FEEDBACK-ANALYSIS",
+        "Feedback Analyst",
+        "Owner feedback intake, enterprise-wide structure/vision analysis, and follow-up planning records.",
+        91,
     ),
 ]
 TASK_SET_INFO = {item.task_set_id: item for item in TASK_SET_DEFINITIONS}

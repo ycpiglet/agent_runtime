@@ -13,7 +13,7 @@ Agent Runtime은 공통 런타임(`agents/*/SKILL.md`, `scripts/*`)을 유지하
 - `LINKS.md`: 결정 로그 및 외부 의존성 링크
 - `SKILL-GOVERNANCE.md`: 지식/런북/오버레이 운영 규칙
 - `SKILL-DATA-MAP.yml`: 스킬·데이터·스크립트 변경 동기화 맵
-- `MIGRATION-COMPAT-MAP.yml`: `tag_manual` 이식 근거 분류
+- `MIGRATION-COMPAT-MAP.yml`: 레거시 소스 이식 근거 분류 (이관 완료, 감사 기록)
 - `DATASET-CATALOG.yml`, `EVAL-POLICY.yml`: 오프라인/라이브 평가 정책
 - `VISION.md`: 문제/성공 지표/비목표 정의
 - `TASK-AR-214`: 질의/메타데이터 게이트 (정의 책임 + 모호성 조정)
