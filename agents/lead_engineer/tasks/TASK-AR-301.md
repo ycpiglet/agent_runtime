@@ -4,9 +4,11 @@ display_id: TASK-AR-301
 task_uid: 8a5e638a-7f0c-4528-aaa2-5fb2c07323b0
 registered_at: 2026-06-11T12:10:00+09:00
 created_at: 2026-06-11T12:10:00+09:00
-updated_at: 2026-06-11T12:10:00+09:00
+updated_at: 2026-06-12T02:17:42+09:00
+started_at: 2026-06-12T02:17:42+09:00
+completed_at: 2026-06-12T02:17:42+09:00
 title: Add council review and quantitative proposal metrics
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 2
@@ -46,3 +48,8 @@ tags:
 - `agents/project/evidence/evaluations/README.md`
 - `scripts/planning_loop.py`
 
+## Completion Evidence
+
+- Added council verdict fields for role, evidence reference, decision, score, reason, and owner boundary.
+- Added proposal quality record fields and `false_positive_proposal_rate` to the evaluation registry.
+- Added `python scripts/planning_loop.py metrics --json` support for proposal precision and unresolved block verdict visibility.

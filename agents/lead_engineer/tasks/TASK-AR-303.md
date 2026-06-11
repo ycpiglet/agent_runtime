@@ -4,9 +4,11 @@ display_id: TASK-AR-303
 task_uid: 5cccc334-b5c9-465a-a083-2712624cb640
 registered_at: 2026-06-11T12:10:00+09:00
 created_at: 2026-06-11T12:10:00+09:00
-updated_at: 2026-06-11T12:10:00+09:00
+updated_at: 2026-06-12T02:17:42+09:00
+started_at: 2026-06-12T02:17:42+09:00
+completed_at: 2026-06-12T02:17:42+09:00
 title: Preserve latent C-mode and bounded apply gate roadmap
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 2
@@ -46,3 +48,8 @@ tags:
 - `agents/project/C-MODE-PROMOTION-CHECKLIST.md`
 - `agents/project/PLANNING-GUARDRAILS.yml`
 
+## Completion Evidence
+
+- Added `agents/project/C-MODE-LATENT-ROADMAP.md`.
+- Extended `agents/project/PLANNING-GUARDRAILS.yml` with apply-gate thresholds, rollback/verifier/blast-radius requirements, and owner approval boundaries.
+- Verification: `python scripts/planning_loop.py c-mode-gate --json` returns the expected `status: block`, preserving C-mode as latent.

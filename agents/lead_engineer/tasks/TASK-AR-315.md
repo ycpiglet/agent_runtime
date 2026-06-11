@@ -4,9 +4,11 @@ display_id: TASK-AR-315
 task_uid: ee3763c2-877b-499f-8bb2-5aa0bfeb5686
 registered_at: 2026-06-11T17:58:45+09:00
 created_at: 2026-06-11T17:58:45+09:00
-updated_at: 2026-06-11T17:58:45+09:00
+started_at: 2026-06-12T02:02:59+09:00
+updated_at: 2026-06-12T02:02:59+09:00
+completed_at: 2026-06-12T02:02:59+09:00
 title: Provider-live eval로 모델 정확도 0.90 목표 검증
-status: planned
+status: completed
 priority: P2
 difficulty: M
 est_hours: 6
@@ -40,3 +42,10 @@ tags:
 
 - `agents/project/evidence/evaluations/`
 - eval 러너 스크립트 및 리포트
+
+## Completion Evidence
+
+- `scripts/provider_live_eval_runner.py`
+- `agents/project/evidence/evaluations/provider-live-eval-2026-06-12.json`
+- `agents/project/corrections/provider-live-eval-2026-06-12-summary.json`
+- `agents/project/corrections/2026-06-12-provider-live-eval-2026-06-12-1-provider-live-eval-gap.md`

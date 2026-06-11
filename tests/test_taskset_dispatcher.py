@@ -60,6 +60,12 @@ def test_plan_accepts_human_friendly_taskset_alias_and_emits_next_commands(tmp_p
     assert payload["claim_command"][0].endswith("python.exe") or payload["claim_command"][0].endswith("python")
     assert "--task-set-id" in payload["claim_command"]
     assert "TASKSET-AR-QUALITY-LOOP" in payload["claim_command"]
+    assert payload["project_id"] == "PROJECT-AGENT-RUNTIME"
+    assert payload["model_tier"] == "worker_standard"
+    assert payload["wip_slot"] == 1
+    assert payload["stop_condition"] == "stop_after:TASK-AR-901:no_adjacent_taskset"
+    assert "--project-id" in payload["claim_command"]
+    assert "--model-tier" in payload["claim_command"]
     assert payload["worktree_path"] == ".worktrees/TASK-AR-901"
     assert payload["branch"].startswith("codex/task-ar-901-quality-loop")
 
@@ -129,6 +135,10 @@ def test_start_creates_claim_with_taskset_progress_metadata(tmp_path: Path) -> N
     claim = payload["claim"]["claim"]
     assert payload["next_task_id"] == "TASK-AR-901"
     assert claim["task_set_id"] == "TASKSET-AR-PANE-PROGRESS"
+    assert claim["project_id"] == "PROJECT-AGENT-RUNTIME"
+    assert claim["model_tier"] == "worker_standard"
+    assert claim["wip_slot"] == 1
+    assert claim["stop_condition"] == "stop_after:TASK-AR-901:no_adjacent_taskset"
     assert claim["step_index"] == 1
     assert claim["step_total"] == 1
     assert claim["status_text"] == "Starting Progress Scout: TASK-AR-901"

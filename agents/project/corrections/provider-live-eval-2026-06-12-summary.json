@@ -1,0 +1,10 @@
+{
+  "schema": "agent-runtime-correction-collector-report/v1",
+  "status": "pass",
+  "reports_scanned": 1,
+  "written": [
+    "agents/project/corrections/2026-06-12-provider-live-eval-2026-06-12-1-provider-live-eval-gap.md"
+  ],
+  "skipped": [],
+  "errors": []
+}

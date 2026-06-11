@@ -4,9 +4,11 @@ display_id: TASK-AR-304
 task_uid: 023a2874-3b90-47ee-810d-913a5d348b63
 registered_at: 2026-06-11T12:10:00+09:00
 created_at: 2026-06-11T12:10:00+09:00
-updated_at: 2026-06-11T12:10:00+09:00
+updated_at: 2026-06-12T02:17:42+09:00
+started_at: 2026-06-12T02:17:42+09:00
+completed_at: 2026-06-12T02:17:42+09:00
 title: Package RSI operating-system skill layer
-status: planned
+status: completed
 priority: P1
 difficulty: L
 est_hours: 3
@@ -46,3 +48,9 @@ tags:
 - `skills/failure-to-regression/SKILL.md`
 - `skills/session-closeout/SKILL.md`
 
+## Completion Evidence
+
+- Added `skills/rsi-planning-loop/SKILL.md`.
+- Added `skills/failure-to-regression/SKILL.md`.
+- Registered both skills in `agents/project/SKILL-DATA-MAP.yml`.
+- Verification: RSI docs test confirms skills route through evidence inbox, proposal contract, council protocol, C-mode roadmap, casebook, reproduction/non-repro, and task proposal flow.

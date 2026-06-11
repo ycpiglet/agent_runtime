@@ -47,10 +47,44 @@ def test_backlog_board_groups_tasks_by_task_set_before_lane(tmp_path: Path) -> N
     assert "## Action Board" in board
     assert "### Quality Sentinel (`TASKSET-AR-QUALITY-LOOP`)" in board
     assert "### Progress Scout (`TASKSET-AR-PANE-PROGRESS`)" in board
-    assert "| Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |" in board
+    assert "| Task | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |" in board
 
     quality_section = board.split("### Quality Sentinel (`TASKSET-AR-QUALITY-LOOP`)", 1)[1].split("### Progress Scout", 1)[0]
     assert quality_section.index("TASK-AR-901") < quality_section.index("TASK-AR-902")
+
+
+def test_backlog_board_shows_project_unit_and_wip_claim_summary(tmp_path: Path) -> None:
+    tasks_dir = tmp_path / "agents" / "lead_engineer" / "tasks"
+    _write_task(tasks_dir, "TASK-AR-901", "TASKSET-AR-QUALITY-LOOP", status="in_progress")
+    task_path = tasks_dir / "TASK-AR-901.md"
+    text = task_path.read_text(encoding="utf-8")
+    text = text.replace(
+        "task_set_id: TASKSET-AR-QUALITY-LOOP\n",
+        "task_set_id: TASKSET-AR-QUALITY-LOOP\n"
+        "project_id: PROJECT-TEST\n"
+        "unit_spec: agents/lead_engineer/tasks/units/TASK-AR-901/UNIT-TASK-AR-901-001.md\n",
+    )
+    task_path.write_text(text, encoding="utf-8")
+    claims_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    claims_dir.mkdir(parents=True)
+    (claims_dir / "CLAIM-901.json").write_text(
+        """{
+  "claim_id": "CLAIM-901",
+  "task_id": "TASK-AR-901",
+  "task_set_id": "TASKSET-AR-QUALITY-LOOP",
+  "status": "working",
+  "claimed_at": "2026-06-10T00:00:00+09:00"
+}
+""",
+        encoding="utf-8",
+    )
+
+    tasks = backlog_board.load_tasks(tasks_dir)
+    board = backlog_board.render(tasks, root=tmp_path)
+
+    assert "- WIP: active `1/3`;" in board
+    assert "PROJECT-TEST" in board
+    assert "agents/lead_engineer/tasks/units/TASK-AR-901/UNIT-TASK-AR-901-001.md" in board
 
 
 def test_backlog_board_hides_completed_tasks_and_completed_task_sets(tmp_path: Path) -> None:

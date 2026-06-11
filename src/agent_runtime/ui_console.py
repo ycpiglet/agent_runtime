@@ -1022,10 +1022,11 @@ const taskStatusOptions = [
   "waiting_review",
   "working",
 ];
-const runtimeCommandTypes = ["runtime.call_agent", "runtime.assign_task", "runtime.request_review", "runtime.request_meeting", "runtime.goal.start", "runtime.goal.pause", "runtime.goal.resume", "runtime.goal.stop", "planning.scan"];
+const runtimeCommandTypes = ["runtime.call_agent", "runtime.assign_task", "runtime.request_review", "runtime.request_meeting", "runtime.goal.start", "runtime.goal.pause", "runtime.goal.resume", "runtime.goal.stop", "planning.scan", "planning.approve", "planning.reject"];
 let runtimeState = null;
 let selectedTaskId = null;
 let pendingWrites = [];
+let eventStream = null;
 
 const $ = (id) => document.getElementById(id);
 const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -1053,6 +1054,19 @@ async function loadState() {
     setText("poll-state", "error");
     $("status-line").textContent = `State load failed: ${error.message}`;
   }
+}
+
+function connectEventStream() {
+  if (!window.EventSource || eventStream) return;
+  eventStream = new EventSource("/api/stream");
+  eventStream.addEventListener("state", (event) => {
+    runtimeState = JSON.parse(event.data);
+    renderAll();
+    setText("poll-state", "live");
+  });
+  eventStream.onerror = () => {
+    setText("poll-state", "polling");
+  };
 }
 
 async function sendJson(url, options) {
@@ -1571,6 +1585,10 @@ function renderPlanning() {
         <span><span class="meta-label">Source</span><strong>${escapeHtml(row.source_path || (row.source_refs || [])[0]?.path || "planning proposal")}</strong></span>
         <span><span class="meta-label">Mutation</span><strong>${escapeHtml(row.suggested_next_action || "no direct mutation")}</strong></span>
       `)}
+      <div class="taskset-actions">
+        <button class="taskset-action" type="button" onclick="queuePlanningDecision('planning.approve', '${escapeHtml(row.id || row.title || "proposal")}')">Approve</button>
+        <button class="taskset-action" type="button" onclick="queuePlanningDecision('planning.reject', '${escapeHtml(row.id || row.title || "proposal")}')">Reject</button>
+      </div>
     </article>
   `).join("") : `<div class="empty">No planning proposals</div>`;
   $("planning-scans-list").innerHTML = scans.length ? scans.slice(0, 40).map((row) => `
@@ -1605,6 +1623,21 @@ function renderPlanning() {
       `)}
     </article>
   `).join("") : `<div class="empty">No planning requests, drafts, or apply records</div>`;
+}
+
+function queuePlanningDecision(type, proposalId) {
+  return sendJson("/api/commands", {
+    type,
+    payload: {
+      type,
+      payload: {
+        actor: "ui",
+        proposal_id: proposalId,
+        reason: `${type} from planner panel`,
+        apply: false
+      }
+    }
+  });
 }
 
 function renderSources() {
@@ -1821,6 +1854,7 @@ $("runtime-command-form").addEventListener("submit", async (event) => {
   $("runtime-instruction").value = "";
 });
 loadState();
+connectEventStream();
 setInterval(loadState, 4000);
 """
 
@@ -1835,6 +1869,11 @@ def _json_response(payload: object, status: int = 200) -> ConsoleResponse:
         content_type="application/json; charset=utf-8",
         body=_bytes(json.dumps(payload, ensure_ascii=False, indent=2)),
     )
+
+
+def _sse_response(payload: object) -> ConsoleResponse:
+    body = "event: state\n" + "data: " + json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n\n"
+    return ConsoleResponse(200, "text/event-stream; charset=utf-8", _bytes(body))
 
 
 def _decode_json_body(body: bytes | None) -> tuple[dict[str, object], list[str]]:
@@ -1888,6 +1927,8 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         return ConsoleResponse(200, "application/javascript; charset=utf-8", _bytes(JS))
     if request_path == "/api/state":
         return _json_response(ui_state.build_state(root_path))
+    if request_path == "/api/stream":
+        return _sse_response(ui_state.build_state(root_path))
     if request_path == "/api/events":
         state = ui_state.build_state(root_path)
         filters = {key: values[0] for key, values in parse_qs(parsed_url.query).items() if values}
@@ -1901,6 +1942,10 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
                 "warnings": state["warnings"],
             }
         )
+    if request_path == "/api/replay/snapshot":
+        state = ui_state.build_state(root_path)
+        filters = {key: values[0] for key, values in parse_qs(parsed_url.query).items() if values}
+        return _json_response(ui_state.build_replay_snapshot(state["replay"], filters.get("at")))
 
     api_resources = {
         "/api/tasks": "tasks",

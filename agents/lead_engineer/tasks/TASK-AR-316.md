@@ -5,9 +5,10 @@ task_uid: e60e5407-f2bc-441a-97f8-0770cc927d8b
 registered_at: 2026-06-11T17:58:45+09:00
 created_at: 2026-06-11T17:58:45+09:00
 started_at: 2026-06-12T00:55:55+09:00
-updated_at: 2026-06-12T00:55:55+09:00
+updated_at: 2026-06-12T02:02:59+09:00
+completed_at: 2026-06-12T02:02:59+09:00
 title: 스킬 레이어 패키징 (메타데이터/버전/레지스트리)
-status: in_progress
+status: completed
 priority: P2
 difficulty: S
 est_hours: 4
@@ -39,3 +40,11 @@ tags:
 ## Evidence Targets
 
 - `skills/*/SKILL.md`, 스킬 레지스트리 파일
+
+## Completion Evidence
+
+- `skills/session-closeout/SKILL.md`
+- `skills/taskset-dispatch/SKILL.md`
+- `agents/project/SKILL-DATA-MAP.yml`
+- `src/agent_runtime/templates/project/skills/session-closeout/SKILL.md`
+- `src/agent_runtime/templates/project/skills/taskset-dispatch/SKILL.md`

@@ -1,3 +1,19 @@
+---
+name: taskset-dispatch
+version: 1.0.0
+description: Use when the user asks to work on a taskset lane, TASKSET-AR-* workflow, or parallel pane/task-set lane.
+triggers:
+  - taskset
+  - TASKSET-AR
+  - 진행
+dependencies:
+  - scripts/taskset_dispatcher.py
+  - scripts/taskset_work_gate.py
+  - scripts/parallel_worktree_gate.py
+registry_id: taskset-dispatch
+template_path: src/agent_runtime/templates/project/skills/taskset-dispatch/SKILL.md
+---
+
 # Task Set Dispatch
 
 Use this skill when the user asks to work on a `taskset-*`, `TASKSET-AR-*`, or

@@ -4,9 +4,11 @@ display_id: TASK-AR-317
 task_uid: 4ffc5085-45ba-4e42-8d7c-ca06f4fd3fdc
 registered_at: 2026-06-11T17:58:45+09:00
 created_at: 2026-06-11T17:58:45+09:00
-updated_at: 2026-06-11T17:58:45+09:00
+started_at: 2026-06-12T02:02:59+09:00
+updated_at: 2026-06-12T02:02:59+09:00
+completed_at: 2026-06-12T02:02:59+09:00
 title: UI 실시간화(SSE) 및 Planner 승인/거절 워크플로
-status: planned
+status: completed
 priority: P2
 difficulty: L
 est_hours: 10
@@ -41,3 +43,9 @@ tags:
 
 - `src/agent_runtime/ui_console.py`, `ui_state.py`, `ui_commands.py`
 - Playwright 검증 기록
+
+## Completion Evidence
+
+- `src/agent_runtime/ui_console.py` adds `/api/stream` SSE and planner decision UI buttons.
+- `src/agent_runtime/ui_commands.py` adds `planning.approve` and `planning.reject` audit records without canonical apply.
+- `tests/test_ui_console.py` verifies SSE and planner decision routes.

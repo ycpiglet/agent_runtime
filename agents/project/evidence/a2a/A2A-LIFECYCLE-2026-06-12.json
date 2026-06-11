@@ -1,0 +1,63 @@
+{
+  "schema": "agent-runtime-a2a-lifecycle/v1",
+  "record_id": "A2A-LIFECYCLE-2026-06-12",
+  "context_id": "ctx-rsi-os-20260612",
+  "task_id": "TASK-AR-302",
+  "task_set_id": "TASKSET-AR-RSI-OPERATING-SYSTEM",
+  "owner_boundary": "local_deterministic",
+  "retry_idempotency_key": "a2a-rsi-os-20260612-v1",
+  "events": [
+    {
+      "event_id": "evt-request",
+      "event_type": "request",
+      "actor_role": "planning-coordinator",
+      "access_boundary": "local",
+      "summary": "Request deterministic A2A lifecycle evidence for RSI planning."
+    },
+    {
+      "event_id": "evt-review",
+      "event_type": "review",
+      "actor_role": "evaluation-office",
+      "access_boundary": "local",
+      "summary": "Review required lifecycle fields and reconstruction criteria."
+    },
+    {
+      "event_id": "evt-decision",
+      "event_type": "decision",
+      "actor_role": "diversity-council",
+      "access_boundary": "local",
+      "summary": "Accept local deterministic lifecycle as planning evidence only."
+    },
+    {
+      "event_id": "evt-correction",
+      "event_type": "correction",
+      "actor_role": "rsi-lab",
+      "access_boundary": "local",
+      "summary": "Route missing lifecycle evidence through inbox and casebook before proposal creation."
+    },
+    {
+      "event_id": "evt-proposal",
+      "event_type": "proposal_routing",
+      "actor_role": "planning-coordinator",
+      "access_boundary": "local",
+      "summary": "Planning loop may cite this record as A2A lifecycle evidence.",
+      "proposal_id": "PROP-A2ALIFECYCLE"
+    }
+  ],
+  "reconstruction_result": "pass",
+  "inbox_record": {
+    "source_type": "A2A",
+    "source_path": "agents/project/evidence/a2a/A2A-LIFECYCLE-2026-06-12.json",
+    "task_ref": "TASK-AR-302",
+    "task_set_id": "TASKSET-AR-RSI-OPERATING-SYSTEM",
+    "dedupe_key": "a2a-lifecycle-rsi-os-local",
+    "observed_failure": "none",
+    "observed_signal": "local deterministic A2A lifecycle reconstructed",
+    "signal": "pass",
+    "candidate_action": "no_action",
+    "proposed_routing": "archive",
+    "owner_boundary": "local",
+    "quality_check": "deduped local deterministic fixture; not provider-live or external transport evidence"
+  }
+}
+

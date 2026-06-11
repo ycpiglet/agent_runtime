@@ -25,7 +25,7 @@ def _normalize(text: str) -> str:
 
 
 def _backlog_board_is_fresh(root: Path, board: Path, tasks: list[backlog_board.Task]) -> bool:
-    generated = backlog_board.render(tasks)
+    generated = backlog_board.render(tasks, root=root)
     try:
         existing = board.read_text(encoding="utf-8")
     except OSError:

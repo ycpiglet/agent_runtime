@@ -434,7 +434,7 @@ def _acquire_claim_file_lock(lock_path: Path) -> bool:
         try:
             lock_path.mkdir()
             return True
-        except FileExistsError:
+        except (FileExistsError, PermissionError):
             try:
                 age = _now_epoch() - lock_path.stat().st_mtime
                 if age > CLAIM_LOCK_STALE_SECONDS:

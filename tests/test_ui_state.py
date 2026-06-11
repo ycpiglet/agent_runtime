@@ -610,6 +610,9 @@ def test_ui_state_filters_events_and_derives_error_evidence_replay_views(tmp_pat
     assert {item["evidence"] for item in state["evidence"]} == {"reviews/evidence-gap.md", "reviews/evidence-message.md"}
     assert [item["goal_id"] for item in state["replay"] if item["goal_id"] == "goal-231"]
     assert all(record["freshness"] == "present" and record["last_updated"] for record in state["events"])
+    snapshot = ui_state.build_replay_snapshot(state["replay"], "2026-06-10T12:00:00+09:00")
+    assert snapshot["resource"] == "replay_snapshot"
+    assert snapshot["task_ids"] == ["TASK-UI-231"]
 
 
 def test_ui_state_builds_graph_state_machine_and_roadmap_views(tmp_path):

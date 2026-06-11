@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 import backlog_board
+import model_routing
 
 
 ACTIVE_STATUSES = {
@@ -111,6 +112,40 @@ def _next_task(tasks: list[backlog_board.Task]) -> backlog_board.Task:
         if backlog_board.lane_for(task) != "Done":
             return task
     raise SystemExit("task set has no open tasks")
+
+
+def _unit_specs_for_task(root: Path, task_id: str) -> list[tuple[Path, dict[str, Any], str]]:
+    units_dir = root / "agents" / "lead_engineer" / "tasks" / "units" / task_id
+    if not units_dir.is_dir():
+        return []
+    specs: list[tuple[Path, dict[str, Any], str]] = []
+    for path in sorted(units_dir.glob("UNIT-*.md")):
+        text = path.read_text(encoding="utf-8")
+        meta, body = backlog_board.parse_frontmatter(text)
+        specs.append((path, meta, body))
+    return specs
+
+
+def _ready_unit_for_task(root: Path, task_id: str) -> tuple[Path, dict[str, Any], str] | None:
+    units = _unit_specs_for_task(root, task_id)
+    if not units:
+        return None
+    ready = [
+        unit
+        for unit in units
+        if str(unit[1].get("status") or "").strip() in {"worker_ready", "ready", "in_progress"}
+    ]
+    return (ready or units)[0]
+
+
+def _project_id_for(task: backlog_board.Task, unit_meta: dict[str, Any] | None = None) -> str:
+    unit_meta = unit_meta or {}
+    return str(unit_meta.get("project_id") or task.meta.get("project_id") or "PROJECT-AGENT-RUNTIME").strip()
+
+
+def _stop_condition_for(task: backlog_board.Task, unit_id: str) -> str:
+    target = unit_id or task.task_id
+    return f"stop_after:{target}:no_adjacent_taskset"
 
 
 def _read_claim(path: Path) -> dict[str, Any] | None:
@@ -267,6 +302,15 @@ def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
     branch = f"codex/{task_slug}-{task_set_slug}"
     step_index = tasks.index(task) + 1
     step_total = len(tasks)
+    unit = _ready_unit_for_task(root, task.task_id)
+    unit_path = unit[0] if unit else None
+    unit_meta = unit[1] if unit else {}
+    unit_id = str(unit_meta.get("unit_id") or task.meta.get("unit_id") or "").strip()
+    project_id = _project_id_for(task, unit_meta)
+    routing_decision = model_routing.resolve_work_item_tier(task.meta, unit_meta)
+    active_claims = _active_taskset_claims(root, info.task_set_id)
+    wip_slot = len(active_claims) + 1
+    stop_condition = str(unit_meta.get("stop_condition") or task.meta.get("stop_condition") or _stop_condition_for(task, unit_id)).strip()
     status_text = f"Starting {info.display_name}: {task.task_id}"
     mode = args.mode or task_set_slug
     agent_role = args.agent_role or backlog_board.agent_for(task)
@@ -282,6 +326,18 @@ def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
         task.task_id,
         "--task-set-id",
         info.task_set_id,
+        "--project-id",
+        project_id,
+        "--unit-id",
+        unit_id,
+        "--unit-spec",
+        _rel(root, unit_path) if unit_path else str(task.meta.get("unit_spec") or ""),
+        "--model-tier",
+        str(routing_decision["selected_tier"]),
+        "--wip-slot",
+        str(wip_slot),
+        "--stop-condition",
+        stop_condition,
         "--agent-role",
         agent_role,
         "--team-id",
@@ -319,6 +375,13 @@ def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
         "step_total": step_total,
         "next_task_status": task.status,
         "next_task_path": str((root / "agents" / "lead_engineer" / "tasks" / f"{task.task_id}.md")),
+        "project_id": project_id,
+        "unit_id": unit_id,
+        "unit_spec_path": _rel(root, unit_path) if unit_path else str(task.meta.get("unit_spec") or ""),
+        "model_routing": routing_decision,
+        "model_tier": str(routing_decision["selected_tier"]),
+        "wip_slot": wip_slot,
+        "stop_condition": stop_condition,
         "status_text": status_text,
         "worktree_path": worktree_path,
         "branch": branch,
@@ -340,6 +403,11 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> None:
         return
     print(f"taskset-dispatcher: {payload['display_name']} ({payload['task_set_id']})")
     print(f"next_task={payload['next_task_id']}")
+    print(f"project_id={payload.get('project_id', '')}")
+    print(f"unit_id={payload.get('unit_id', '')}")
+    print(f"model_tier={payload.get('model_tier', '')}")
+    print(f"wip_slot={payload.get('wip_slot', '')}")
+    print(f"stop_condition={payload.get('stop_condition', '')}")
     print(f"progress={payload['step_index']}/{payload['step_total']}")
     print(f"status_text={payload['status_text']}")
     print("worktree_command=" + " ".join(payload["worktree_command"]))
@@ -363,6 +431,34 @@ def cmd_start(args: argparse.Namespace) -> int:
             file=sys.stderr,
         )
         return 1
+
+    if str(payload.get("unit_spec_path") or "").strip() and str(payload.get("model_tier") or "").startswith("worker_"):
+        gate = subprocess.run(
+            [
+                sys.executable,
+                str(Path(__file__).resolve().with_name("task_unit_readiness_gate.py")),
+                "--root",
+                str(root),
+                "--task-id",
+                str(payload["next_task_id"]),
+                "--unit-id",
+                str(payload.get("unit_id") or ""),
+                "--require-ready",
+                "--check",
+            ],
+            cwd=root,
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        if gate.returncode != 0:
+            if gate.stdout:
+                print(gate.stdout, file=sys.stderr, end="")
+            if gate.stderr:
+                print(gate.stderr, file=sys.stderr, end="")
+            return gate.returncode
 
     if not _ensure_worktree(root, payload):
         print("worktree_command=" + " ".join(payload["worktree_command"]), file=sys.stderr)

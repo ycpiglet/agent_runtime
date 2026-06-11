@@ -668,6 +668,19 @@ def build_replay(events: list[dict[str, Any]], messages: list[dict[str, Any]]) -
     return replay[-200:]
 
 
+def build_replay_snapshot(replay: list[dict[str, Any]], at: str | None = None) -> dict[str, Any]:
+    cutoff = str(at or "").strip()
+    selected = [item for item in replay if not cutoff or str(item.get("created_at") or "") <= cutoff]
+    return {
+        "resource": "replay_snapshot",
+        "at": cutoff or None,
+        "event_count": len(selected),
+        "task_ids": sorted({str(item.get("task_id")) for item in selected if item.get("task_id")}),
+        "goal_ids": sorted({str(item.get("goal_id")) for item in selected if item.get("goal_id")}),
+        "items": selected[-80:],
+    }
+
+
 def build_graph(tasks: list[dict[str, Any]], agents: list[dict[str, Any]], messages: list[dict[str, Any]], events: list[dict[str, Any]]) -> dict[str, Any]:
     nodes: dict[str, dict[str, Any]] = {}
     edges: list[dict[str, Any]] = []

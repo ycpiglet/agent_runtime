@@ -11,8 +11,8 @@
   "mode": "orchestrator",
   "status": "released",
   "task_set_id": "TASKSET-AR-RSI-OPERATING-SYSTEM",
-  "phase": "taskset-step-completed",
-  "progress_pct": 22,
+  "phase": "taskset-completed",
+  "progress_pct": 100,
   "step_index": 2,
   "step_total": 9,
   "status_text": "TASK-AR-298 completed evaluation and verification registry hardening; TASK-AR-299 is next.",
@@ -36,6 +36,6 @@
     "eval",
     "verification",
     "task-ar-298",
-    "taskset-step-completed"
+    "taskset-completed"
   ]
 }

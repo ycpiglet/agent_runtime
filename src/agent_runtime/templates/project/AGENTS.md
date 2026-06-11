@@ -180,6 +180,13 @@ A worker-ready unit must include:
 6. verification commands;
 7. handoff/report format.
 
+Before assigning a low-tier worker to a unit, run the readiness gate for the
+target task or unit:
+
+```powershell
+python scripts/task_unit_readiness_gate.py --task-id TASK-ID --require-ready --check
+```
+
 Planning, research synthesis, architecture, risk classification, and
 decomposition belong to higher-capability planner roles/models. Routine
 implementation units should be assigned to lower-cost worker models when the

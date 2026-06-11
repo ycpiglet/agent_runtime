@@ -21,6 +21,27 @@ project -> taskset -> task -> unit
 Backlog and board files are routing surfaces. They should expose metadata,
 progress, and links, but they should not carry the full execution context.
 
+## Metadata Conventions
+
+Use stable IDs in frontmatter so worker models can route without chat history:
+
+| Field | Level | Required when | Example |
+| --- | --- | --- | --- |
+| `project_id` | project/task/task unit | A task belongs to a durable project or operating-system lane | `PROJECT-AGENT-RUNTIME-PM-OS` |
+| `task_set_id` | task/task unit | Any registered taskset work | `TASKSET-AR-PM-OPERATING-SYSTEM` |
+| `task_id` | task unit | Any unit spec | `TASK-AR-344` |
+| `unit_id` | task unit | Any unit spec | `UNIT-TASK-AR-344-001` |
+| `horizon` | project/task | Planning horizon is known | `short`, `medium`, `long`, `unit` |
+| `unit_spec` | task/claim | A worker should follow a linked unit spec | `agents/lead_engineer/tasks/units/TASK-AR-344/UNIT-TASK-AR-344-001.md` |
+| `planner_model_tier` | task/unit | Planner decomposition is needed or already done | `planner_high` |
+| `worker_model_tier` | task/unit | Implementation can be routed to a worker | `worker_low`, `worker_standard` |
+| `reviewer_model_tier` | task/unit | Independent verification is required | `reviewer_standard`, `reviewer_high` |
+| `escalation_triggers` | task/unit | Low-tier execution must stop or route upward under named conditions | `ambiguity`, `security`, `cross_cutting`, `external_effect`, `repeated_failure` |
+
+Task files may omit some fields during migration. New worker-dispatched units
+must not: dispatchers and readiness gates treat missing unit detail as
+`planner_refine_required`.
+
 ## Horizon Classes
 
 | Horizon | Scope | Use |

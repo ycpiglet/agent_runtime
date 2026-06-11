@@ -128,3 +128,116 @@ updated_at: 2026-06-19T10:10:00+09:00
   linked_tasks:
     - TASK-AR-204
     - TASK-AR-221
+
+- skill_id: taskset-dispatch
+  owner: lead-engineer
+  scope: taskset-claim-and-parallel-pane-routing
+  criticality: high
+  version: 1.0.0
+  triggers:
+    - taskset
+    - TASKSET-AR
+    - 진행
+  artifacts:
+    - path: skills/taskset-dispatch/SKILL.md
+      kind: skill
+    - path: src/agent_runtime/templates/project/skills/taskset-dispatch/SKILL.md
+      kind: template-skill
+    - path: scripts/taskset_dispatcher.py
+      kind: runtime-script
+    - path: scripts/taskset_work_gate.py
+      kind: gate
+  change_policy: hard
+  required_when:
+    - taskset-dispatch-contract-changed
+    - claim-schema-changed
+    - taskset-work-gate-changed
+  linked_tasks:
+    - TASK-AR-316
+    - TASK-AR-346
+
+- skill_id: session-closeout
+  owner: lead-engineer
+  scope: session-closeout-and-dirty-state-handoff
+  criticality: high
+  version: 1.0.0
+  triggers:
+    - 마무리
+    - 정리
+    - closeout
+    - cleanup
+  artifacts:
+    - path: skills/session-closeout/SKILL.md
+      kind: skill
+    - path: src/agent_runtime/templates/project/skills/session-closeout/SKILL.md
+      kind: template-skill
+    - path: scripts/session_baseline.py
+      kind: runtime-script
+    - path: scripts/dirty_intake.py
+      kind: runtime-script
+  change_policy: hard
+  required_when:
+    - session-closeout-contract-changed
+    - dirty-intake-policy-changed
+    - closeout-gate-changed
+  linked_tasks:
+    - TASK-AR-316
+    - TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION
+
+- skill_id: rsi-planning-loop
+  owner: planning-coordinator
+  scope: evidence-to-proposal-operating-system
+  criticality: critical
+  version: 1.0.0
+  triggers:
+    - RSI
+    - evidence-to-proposal
+    - planning proposal
+  artifacts:
+    - path: skills/rsi-planning-loop/SKILL.md
+      kind: skill
+    - path: agents/project/EVIDENCE-TO-PROPOSAL-CONTRACT.md
+      kind: contract
+    - path: agents/project/DIVERSITY-COUNCIL-PROTOCOL.md
+      kind: governance-doc
+    - path: scripts/planning_loop.py
+      kind: runtime-script
+    - path: scripts/a2a_lifecycle_gate.py
+      kind: gate
+  change_policy: hard
+  required_when:
+    - evidence-to-proposal-contract-changed
+    - planning-loop-policy-changed
+    - council-metrics-changed
+  linked_tasks:
+    - TASK-AR-300
+    - TASK-AR-301
+    - TASK-AR-302
+    - TASK-AR-304
+
+- skill_id: failure-to-regression
+  owner: rsi-lab
+  scope: failure-casebook-to-regression-routing
+  criticality: high
+  version: 1.0.0
+  triggers:
+    - repeated failure
+    - compound
+    - regression
+  artifacts:
+    - path: skills/failure-to-regression/SKILL.md
+      kind: skill
+    - path: agents/project/casebooks/README.md
+      kind: registry-doc
+    - path: agents/project/casebooks/failure-and-compound-casebook.md
+      kind: casebook
+    - path: agents/project/EVIDENCE-TO-PROPOSAL-CONTRACT.md
+      kind: contract
+  change_policy: hard
+  required_when:
+    - compound-case-added
+    - repeated-failure-observed
+    - regression-fixture-policy-changed
+  linked_tasks:
+    - TASK-AR-299
+    - TASK-AR-304

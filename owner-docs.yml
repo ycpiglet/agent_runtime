@@ -2,9 +2,14 @@ schema: agent-runtime-owner-docs/v1
 owner_docs:
   - BACKLOG-BOARD.md
   - AGENT_RUNTIME_PM_OPERATING_SYSTEM_BRIEF.md
+  - reviews/REVIEW-2026-06-12-agent-runtime-pm-operating-system-closeout.md
   - reviews/REVIEW-2026-06-11-agent-runtime-pm-operating-system-registration.md
   - reviews/RESEARCH-2026-06-11-agent-runtime-project-management-methods.md
+  - reviews/REVIEW-2026-06-12-agent-runtime-vision-gap-closure-closeout.md
+  - reviews/REVIEW-2026-06-12-agent-runtime-ops-feedback-analysis-closeout.md
+  - reviews/INDEX.md
   - AGENT_RUNTIME_RSI_OPERATING_SYSTEM_BRIEF.md
+  - reviews/REVIEW-2026-06-12-agent-runtime-rsi-operating-system-closeout.md
   - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-298-eval-verification-registry.md
   - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-297-evidence-inbox-contract.md
   - reviews/REVIEW-2026-06-11-agent-runtime-rsi-operating-system-registration.md

@@ -239,6 +239,48 @@ def test_create_claim_accepts_taskset_progress_fields(tmp_path: Path):
     assert claim["updated_at"] == "2026-06-10T19:45:00+09:00"
 
 
+def test_create_claim_accepts_pm_unit_scope_fields(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_worktree(tmp_path, "TASK-AR-344")
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        "TASK-AR-344",
+        "--task-set-id",
+        "TASKSET-AR-PM-OPERATING-SYSTEM",
+        "--project-id",
+        "PROJECT-AGENT-RUNTIME-PM-OS",
+        "--unit-id",
+        "UNIT-TASK-AR-344-001",
+        "--unit-spec",
+        "agents/lead_engineer/tasks/units/TASK-AR-344/UNIT-TASK-AR-344-001.md",
+        "--model-tier",
+        "worker_standard",
+        "--wip-slot",
+        "2",
+        "--stop-condition",
+        "stop_after:UNIT-TASK-AR-344-001:no_adjacent_taskset",
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-06-10T19:45:00+09:00",
+        "--suffix",
+        "pm1",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    claim = json.loads(result.stdout)["claim"]
+    assert claim["project_id"] == "PROJECT-AGENT-RUNTIME-PM-OS"
+    assert claim["unit_id"] == "UNIT-TASK-AR-344-001"
+    assert claim["unit_spec"].endswith("UNIT-TASK-AR-344-001.md")
+    assert claim["model_tier"] == "worker_standard"
+    assert claim["wip_slot"] == 2
+    assert claim["stop_condition"] == "stop_after:UNIT-TASK-AR-344-001:no_adjacent_taskset"
+
+
 def test_create_claim_rejects_missing_worktree(tmp_path: Path):
     (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
 

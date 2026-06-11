@@ -187,6 +187,8 @@ def _scan_required_sources(root: Path, findings: list[dict[str, Any]]) -> list[d
         ("schemas/planning-proposal.schema.json", True, "schema"),
         ("agents/project/PLANNING-GUARDRAILS.yml", True, "guardrail_policy"),
         ("agents/project/C-MODE-PROMOTION-CHECKLIST.md", True, "promotion_gate"),
+        ("agents/project/C-MODE-LATENT-ROADMAP.md", True, "promotion_roadmap"),
+        ("agents/project/EVIDENCE-TO-PROPOSAL-CONTRACT.md", True, "proposal_contract"),
         ("agents/project/ORG.md", True, "organization"),
         ("agents/project/TEAMS.md", True, "teams"),
         ("agents/project/evals", False, "eval_artifacts"),
@@ -340,8 +342,10 @@ def _iter_jsonish_files(path: Path) -> list[Path]:
 def _scan_eval_trace(root: Path, findings: list[dict[str, Any]]) -> None:
     families = [
         root / "agents" / "project" / "evals",
+        root / "agents" / "project" / "evidence" / "evaluations",
         root / "agents" / "project" / "corrections",
         root / "agents" / "project" / "a2a",
+        root / "agents" / "project" / "evidence" / "a2a",
         root / "traces",
     ]
     for family in families:
@@ -431,10 +435,33 @@ def _action_type(category: str) -> str:
     return "watch_only"
 
 
+def _proposal_output(action_type: str) -> str:
+    mapping = {
+        "new_task": "task",
+        "plan_update": "plan",
+        "doc_repair": "doc",
+        "eval_expansion": "eval",
+        "release_version_consistency": "release",
+        "retro_compound_follow_up": "task",
+        "skill_proposal": "skill",
+        "watch_only": "no_action",
+        "no_action": "no_action",
+    }
+    return mapping.get(action_type, "no_action")
+
+
 def _owner_boundary(action_type: str, risk_tier: str) -> str:
     if risk_tier in {"high", "owner"} or action_type in HIGH_RISK_ACTIONS:
         return "Owner approval required before canonical mutation; proposal-only output is allowed."
     return "Low-risk local proposal; canonical mutation still requires approved apply."
+
+
+def _blast_radius(action_type: str, risk_tier: str) -> str:
+    if risk_tier in {"high", "owner"} or action_type in HIGH_RISK_ACTIONS:
+        return "High-impact or Owner-boundary proposal; no canonical mutation without explicit approval."
+    if action_type in {"doc_repair", "plan_update", "watch_only", "no_action"}:
+        return "Local documentation or planning surface only."
+    return "Local repository change with verifier-backed rollback required."
 
 
 def _default_verifiers(action_type: str) -> list[str]:
@@ -592,6 +619,7 @@ def create_proposals(
             "mode": "B",
             "status": "proposed",
             "action_type": action_type,
+            "proposal_output": _proposal_output(action_type),
             "risk_tier": risk_tier,
             "title": f"{finding.get('category')}: {finding.get('source_path')}",
             "created_at": _now(now),
@@ -604,7 +632,11 @@ def create_proposals(
             "target_files": target_files,
             "rollback_path": f"agents/planning/rollback/{proposal_id}.json",
             "verifier_list": _default_verifiers(action_type),
+            "expected_verification_command": _default_verifiers(action_type)[0],
             "owner_boundary": _owner_boundary(action_type, risk_tier),
+            "affected_owner_boundary": _owner_boundary(action_type, risk_tier),
+            "blast_radius": _blast_radius(action_type, risk_tier),
+            "rejection_reason": None,
             "department": _department_for_action(action_type),
             "reviewer_opinions": [],
             "suggested_next_action": str(finding.get("suggested_next_action") or ""),
@@ -636,6 +668,53 @@ def _department_for_action(action_type: str) -> str:
         "c_mode_promotion": "risk-and-safety",
     }
     return mapping.get(action_type, "planning-office")
+
+
+def proposal_metrics(root: Path) -> dict[str, Any]:
+    outbox = root / "agents" / "planning" / "outbox"
+    proposals: list[dict[str, Any]] = []
+    if outbox.is_dir():
+        for path in sorted(outbox.glob("PROP-*.json")):
+            try:
+                payload = json.loads(_read(path))
+            except json.JSONDecodeError:
+                continue
+            if isinstance(payload, dict):
+                proposals.append(payload)
+
+    total = len(proposals)
+    accepted_statuses = {"approved", "applied"}
+    rejected_statuses = {"rejected", "blocked"}
+    no_action_statuses = {"no_action", "superseded"}
+    accepted = sum(1 for item in proposals if item.get("status") in accepted_statuses)
+    rejected = sum(1 for item in proposals if item.get("status") in rejected_statuses)
+    no_action = sum(
+        1
+        for item in proposals
+        if item.get("status") in no_action_statuses or item.get("proposal_output") == "no_action"
+    )
+    unresolved_blocks = [
+        item.get("id")
+        for item in proposals
+        for verdict in item.get("reviewer_opinions", [])
+        if isinstance(verdict, dict) and verdict.get("decision") == "block" and not verdict.get("resolved")
+    ]
+    precision = accepted / total if total else 0.0
+    false_positive_rate = (rejected + no_action) / total if total else 0.0
+    status = "block" if unresolved_blocks else "pass"
+    return {
+        "status": status,
+        "proposal_count": total,
+        "accepted_count": accepted,
+        "rejected_count": rejected,
+        "no_action_count": no_action,
+        "proposal_precision": round(precision, 4),
+        "proposal_recall": "not_enough_labeled_data" if not total else "requires_casebook_window",
+        "false_positive_proposal_rate": round(false_positive_rate, 4),
+        "eval_regression_rate": "requires_eval_window",
+        "repeated_failure_closure_rate": "requires_casebook_window",
+        "unresolved_block_verdicts": unresolved_blocks,
+    }
 
 
 def planning_gate(
@@ -884,6 +963,9 @@ def main(argv: list[str] | None = None) -> int:
     dedupe_p.add_argument("--now")
     dedupe_p.add_argument("--json", action="store_true")
 
+    metrics_p = sub.add_parser("metrics")
+    metrics_p.add_argument("--json", action="store_true")
+
     args = parser.parse_args(argv)
     root = Path(args.root).resolve()
     if args.command == "scan":
@@ -920,6 +1002,8 @@ def main(argv: list[str] | None = None) -> int:
             _write_json(root / args.out, payload)
     elif args.command == "c-mode-gate":
         payload = c_mode_gate(root)
+    elif args.command == "metrics":
+        payload = proposal_metrics(root)
     else:
         payload = dedupe_outbox(root, apply=args.apply, now=args.now)
 

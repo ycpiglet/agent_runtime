@@ -4,9 +4,11 @@ display_id: TASK-AR-307
 task_uid: 2457f407-5d44-4f83-a1e0-0d3176541638
 registered_at: 2026-06-11T17:34:00+09:00
 created_at: 2026-06-11T17:34:00+09:00
-updated_at: 2026-06-11T17:34:00+09:00
+updated_at: 2026-06-12T02:08:54+09:00
+started_at: 2026-06-12T02:08:54+09:00
+completed_at: 2026-06-12T02:08:54+09:00
 title: 전사 구조 개선 분석 후속 계획 확정
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 4
@@ -40,3 +42,10 @@ tags:
 ## Evidence Targets
 
 - `reviews/REVIEW-2026-06-11-agent-runtime-ops-feedback-analysis-session.md` (분석 전문 수록)
+
+## Completion Evidence
+
+- Closeout decision record: `reviews/REVIEW-2026-06-12-agent-runtime-ops-feedback-analysis-closeout.md`.
+- Adopted: hook-log 통합, template drift gate, `.tmp` 수명 정책, reviews index, backlog board SSoT 원칙.
+- Deferred: agents/project config/release 분리, tests 카테고리화, hook timeout SLA, .gitignore 정리.
+- Boundary: 이 태스크는 구조 계획 결정만 닫고, 구현은 별도 task/taskset으로 라우팅한다.

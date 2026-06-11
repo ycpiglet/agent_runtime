@@ -38,6 +38,18 @@ regression records queryable for the RSI operating system.
 | `eval_regression_rate` | Passing eval cases that later fail in the same area. |
 | `repeated_failure_closure_rate` | Repeated failures that gained a fixture, gate, or accepted task. |
 | `evidence_to_task_latency` | Time from evidence record to accepted task or explicit no-action decision. |
+| `false_positive_proposal_rate` | Rejected or no-action proposals divided by generated proposals. |
+
+## Proposal Quality Record Shape
+
+| Field | Meaning |
+| --- | --- |
+| `proposal_id` | Proposal being measured. |
+| `proposal_status` | accepted, rejected, deferred, blocked, superseded, applied, or no_action. |
+| `council_verdicts` | Structured verdict records from `agents/project/DIVERSITY-COUNCIL-PROTOCOL.md`. |
+| `precision_label` | useful, duplicate, weak_evidence, unsafe, or no_action. |
+| `recall_source` | Casebook/evidence item that should have produced a proposal, or `none`. |
+| `metric_window` | Measurement period or scan id. |
 
 ## How To Add
 
