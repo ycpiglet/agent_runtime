@@ -56,14 +56,23 @@ def classify_status(lines: list[str], declared_paths: set[str] | None = None) ->
 
 
 def _git_status(root: Path) -> list[str]:
-    result = subprocess.run(
-        ["git", "status", "--porcelain=v1"],
-        cwd=root,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    return result.stdout.splitlines()
+    files: list[str] = []
+    seen: set[str] = set()
+    for args in (
+        ["git", "diff", "--name-only", "--cached"],
+        ["git", "diff", "--name-only"],
+    ):
+        for path in _git_output(root, args).splitlines():
+            normalized = path.strip().replace("\\", "/")
+            if normalized and normalized not in seen:
+                seen.add(normalized)
+                files.append(f" M {normalized}")
+    for path in _git_output(root, ["git", "ls-files", "--others", "--exclude-standard"]).splitlines():
+        normalized = path.strip().replace("\\", "/")
+        if normalized and normalized not in seen:
+            seen.add(normalized)
+            files.append(f"?? {normalized}")
+    return files
 
 
 def _git_output(root: Path, args: list[str]) -> str:
