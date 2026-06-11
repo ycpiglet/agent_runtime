@@ -87,6 +87,7 @@
       "scripts/check_messages.py": "sha256:88d82bfb0a0786ad1b33391c294a152b93f1007309f75f94a328bc2ee511e3ab",
       "scripts/check_repo_structure.py": "sha256:57914d739308ab831191c8f7dd2c66a2b73e2cd5742d604a9cbe0f03f6bb2a6f",
       "scripts/check_skill_structure.py": "sha256:b7b2626a713a0689b0b94a3875c65dcf844f4d636710305b4d3ad4e325f09aea",
+      "scripts/claim_lease.py": "sha256:92cdee8010b4ddd056d07da033a7e0ad7238ab9e96f6627deca2e3ea34ea08cc",
       "scripts/claude_cli_probe.py": "sha256:857eebf768b715805eff01545b5c2bbb4fa97decda597b9c2ec0ab1bd3fb891e",
       "scripts/codex_subagent_bridge.py": "sha256:fb4814510196d0ef763cceb1973d6d2baa73e8a767365fde88235d582789bad5",
       "scripts/collab_log.py": "sha256:594cd860b176507271e65d2d30edf003c1fce166481c392888e78bc625148083",
@@ -209,8 +210,8 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.1.8",
-    "template_digest": "sha256:7b8ae6cc803a02d624db5046efa112b8d26800f5892f4f7df520aba1a3e2129e",
-    "template_files": 206
+    "template_digest": "sha256:2b3defab748e2e7e5d34f2963d0965395604b18b51fde6bfe76435de1cda3105",
+    "template_files": 207
   },
   "project": "fixture-host",
   "schema": "agent-runtime-lock/v1",
