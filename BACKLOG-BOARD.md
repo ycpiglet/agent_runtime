@@ -9,21 +9,21 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-11
 task_count: 138
-open_count: 42
-completed_count: 96
-task_set_count: 5
-completed_task_set_count: 15
+open_count: 35
+completed_count: 103
+task_set_count: 4
+completed_task_set_count: 16
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `42` open or active tasks; `96` completed tasks are archived from this live board.
+- Summary: `35` open or active tasks; `103` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `37` / Ask `5` / Review `0` / Later `0` / Done `96`.
-- Task Sets: `5` active workflows; `15` completed workflows are hidden from the live action board.
+- Status: Action `30` / Ask `5` / Review `0` / Later `0` / Done `103`.
+- Task Sets: `4` active workflows; `16` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -41,20 +41,6 @@ completed_task_set_count: 15
 ## Action Board
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
-
-### Evidence-to-Proposal Operator (`TASKSET-AR-RSI-OPERATING-SYSTEM`)
-
-- Flow: Evidence inboxes, failure casebooks, proposal quality metrics, council review, and bounded apply gates.
-- Progress: `2/9` done; `7` open or active.
-| Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-299` | planned | Action | P0 | Critical | Medium | 2h/900tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Convert scattered failure, compound, retro, and review notes into a single searchable… |
-| `TASK-AR-300` | planned | Action | P0 | Critical | High | 3h/1200tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Define how normalized evidence becomes task, plan, doc, eval, release, or skill propo… |
-| `TASK-AR-301` | planned | Action | P1 | High | Medium | 2h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make the council layer measurable: different viewpoints should improve proposal quali… |
-| `TASK-AR-303` | planned | Action | P1 | High | Medium | 2h/900tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Keep C-mode as a potential long-term department runtime without promoting it before B… |
-| `TASK-AR-305` | planned | Action | P1 | High | Medium | 2h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Close the A안 taskset only after the registries, casebook, proposal contract, council… |
-| `TASK-AR-302` | planned | Action | P1 | High | High | 3h/1200tok | Low | 7 | validation-team | qa | Execute next | Close the gap between A2A evidence fields existing in documents and an actual end-to-… |
-| `TASK-AR-304` | planned | Action | P1 | High | High | 3h/1200tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Add the missing skill layer so future sessions follow the RSI operating process witho… |
 
 ### Feedback Analyst (`TASKSET-AR-OPS-FEEDBACK-ANALYSIS`)
 
@@ -130,6 +116,7 @@ completed_task_set_count: 15
 | Release Steward (`TASKSET-AR-RELEASE-STEWARD`) | Version decisions, release closeout, and consistency checks. | `7/7` done | `7` completed task files archived |
 | Console Operator (`TASKSET-AR-UI-CONSOLE`) | Runtime UI console surfaces, command paths, and observability views. | `7/7` done | `7` completed task files archived |
 | Planning Architect (`TASKSET-AR-RSI-PLANNING`) | Bounded recursive self-improvement, planning scans, and proposal review. | `10/10` done | `10` completed task files archived |
+| Evidence-to-Proposal Operator (`TASKSET-AR-RSI-OPERATING-SYSTEM`) | Evidence inboxes, failure casebooks, proposal quality metrics, council review, and bounded apply gates. | `9/9` done | `9` completed task files archived |
 | Progress Scout (`TASKSET-AR-PANE-PROGRESS`) | Pane/task-set progress, live continuity, claims, and resumable handoffs. | `5/5` done | `5` completed task files archived |
 | Concurrency Steward (`TASKSET-AR-COLLAB-CONCURRENCY`) | Real-time pane collaboration, event replay, SSoT ownership, and conflict gates. | `6/6` done | `6` completed task files archived |
 | Multi-Pane Auditor (`TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE`) | Live pane census, process compliance, event enforcement, role coverage, drift normalization, and assurance UI. | `7/7` done | `7` completed task files archived |
@@ -191,6 +178,13 @@ completed_task_set_count: 15
 | `TASK-AR-245` | `47b6de8b-c38…` | `TASKSET-AR-RSI-PLANNING` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10T22:56:04+09:00 | 2026-06-11T00:00:00+09:00 | Define the long-term C-mode promotion gate for bounded auto-planning and low-risk aut… |
 | `TASK-AR-297` | `1570ec36-9aa…` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | 2026-06-11T12:10:00+09:00 | 2026-06-11T13:10:53+09:00 | 2026-06-11T13:12:23+09:00 | 2026-06-11T13:12:23+09:00 | Create the canonical place to capture trace, eval, grader, A2A, correction, review, r… |
 | `TASK-AR-298` | `7b4e4dc4-915…` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | 2026-06-11T12:10:00+09:00 | 2026-06-11T13:14:53+09:00 | 2026-06-11T13:16:20+09:00 | 2026-06-11T13:16:20+09:00 | Make evaluation and verification evidence queryable instead of scattered across revie… |
+| `TASK-AR-299` | `4a99d83d-eed…` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | 2026-06-11T12:10:00+09:00 | 2026-06-11T19:58:00+09:00 | 2026-06-11T20:02:00+09:00 | 2026-06-11T20:02:00+09:00 | Convert scattered failure, compound, retro, and review notes into a single searchable… |
+| `TASK-AR-300` | `6fd3e4b4-ee0…` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | 2026-06-11T12:10:00+09:00 | 2026-06-11T20:02:00+09:00 | 2026-06-11T20:05:00+09:00 | 2026-06-11T20:05:00+09:00 | Define how normalized evidence becomes task, plan, doc, eval, release, or skill propo… |
+| `TASK-AR-301` | `8a5e638a-7f0…` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | 2026-06-11T12:10:00+09:00 | 2026-06-11T20:05:00+09:00 | 2026-06-11T20:07:00+09:00 | 2026-06-11T20:07:00+09:00 | Make the council layer measurable: different viewpoints should improve proposal quali… |
+| `TASK-AR-303` | `5cccc334-b5c…` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | 2026-06-11T12:10:00+09:00 | 2026-06-11T20:09:00+09:00 | 2026-06-11T20:10:00+09:00 | 2026-06-11T20:10:00+09:00 | Keep C-mode as a potential long-term department runtime without promoting it before B… |
+| `TASK-AR-305` | `d273c1a0-c43…` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | 2026-06-11T12:10:00+09:00 | 2026-06-11T20:11:00+09:00 | 2026-06-11T20:12:00+09:00 | 2026-06-11T20:12:00+09:00 | Close the A안 taskset only after the registries, casebook, proposal contract, council… |
+| `TASK-AR-302` | `0f90a9b0-18f…` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | 2026-06-11T12:10:00+09:00 | 2026-06-11T20:07:00+09:00 | 2026-06-11T20:09:00+09:00 | 2026-06-11T20:09:00+09:00 | Close the gap between A2A evidence fields existing in documents and an actual end-to-… |
+| `TASK-AR-304` | `023a2874-3b9…` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | 2026-06-11T12:10:00+09:00 | 2026-06-11T20:10:00+09:00 | 2026-06-11T20:11:00+09:00 | 2026-06-11T20:11:00+09:00 | Add the missing skill layer so future sessions follow the RSI operating process witho… |
 | `TASK-AR-247` | `b025becb-046…` | `TASKSET-AR-PANE-PROGRESS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Create the fixed pane/task-set progress golden set before UI or enforcement changes. |
 | `TASK-AR-250` | `35989583-b68…` | `TASKSET-AR-PANE-PROGRESS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Make task-set work user-friendly enough that a prompt like `taskset-quality-loop 진행해줘… |
 | `TASK-AR-248` | `db637774-594…` | `TASKSET-AR-PANE-PROGRESS` | completed | 2026-06-10 | 2026-06-10 | 2026-06-10 | 2026-06-10 | Show pane and task-set progress in the runtime UI using phase, step counter, rough pe… |

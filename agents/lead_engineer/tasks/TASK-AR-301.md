@@ -4,9 +4,11 @@ display_id: TASK-AR-301
 task_uid: 8a5e638a-7f0c-4528-aaa2-5fb2c07323b0
 registered_at: 2026-06-11T12:10:00+09:00
 created_at: 2026-06-11T12:10:00+09:00
-updated_at: 2026-06-11T12:10:00+09:00
+started_at: 2026-06-11T20:05:00+09:00
+completed_at: 2026-06-11T20:07:00+09:00
+updated_at: 2026-06-11T20:07:00+09:00
 title: Add council review and quantitative proposal metrics
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 2
@@ -45,4 +47,12 @@ tags:
 - `agents/project/DIVERSITY-COUNCIL-PROTOCOL.md`
 - `agents/project/evidence/evaluations/README.md`
 - `scripts/planning_loop.py`
+
+## Completion Evidence
+
+- Added structured council verdict requirements and proposal metrics, including
+  false-positive proposal rate.
+- Added apply-gate blocking for unresolved council block verdicts.
+- Verification coverage: `tests/test_rsi_operating_system_docs.py` and
+  `tests/test_planning_loop.py`.
 

@@ -4,9 +4,11 @@ display_id: TASK-AR-302
 task_uid: 0f90a9b0-18f2-4ac9-9b56-652c3e7e1242
 registered_at: 2026-06-11T12:10:00+09:00
 created_at: 2026-06-11T12:10:00+09:00
-updated_at: 2026-06-11T12:10:00+09:00
+started_at: 2026-06-11T20:07:00+09:00
+completed_at: 2026-06-11T20:09:00+09:00
+updated_at: 2026-06-11T20:09:00+09:00
 title: Verify A2A message lifecycle as planning evidence
-status: planned
+status: completed
 priority: P1
 difficulty: L
 est_hours: 3
@@ -45,4 +47,11 @@ tags:
 - `agents/project/evidence/inbox/README.md`
 - `scripts/a2a_lifecycle_gate.py`
 - `tests/test_a2a_lifecycle_gate.py`
+
+## Completion Evidence
+
+- Added deterministic A2A lifecycle fixture reconstruction for request, review,
+  decision, correction, and proposal routing events.
+- Added evidence inbox record writing for verified A2A lifecycle evidence.
+- Verification coverage: `tests/test_a2a_lifecycle_gate.py`.
 

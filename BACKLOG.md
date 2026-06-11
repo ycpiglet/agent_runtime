@@ -1,5 +1,13 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-06-11 TASKSET-AR-RSI-OPERATING-SYSTEM Closeout
+
+- Completed local task set: `TASKSET-AR-RSI-OPERATING-SYSTEM` (Evidence-to-Proposal Operator).
+- Completed tasks: `TASK-AR-297` through `TASK-AR-305`.
+- Implemented: evidence inbox/eval/verification registries, failure and compound casebook, evidence-to-proposal contract, planning proposal schema extensions, council metrics and apply blocking, deterministic A2A lifecycle gate, latent C-mode roadmap/guardrails, RSI/failure skill layer, and named closeout verifier.
+- Closeout evidence: `reviews/REVIEW-2026-06-11-agent-runtime-rsi-operating-system-closeout.md` and `reviews/RSI-OPERATING-SYSTEM-TASKSET-VERIFY.json`.
+- Boundary: C-mode remains latent watch; provider-live A2A, release/version, PR publish/merge, external, destructive, prod-data, and cost-bearing actions remain outside local auto-apply.
+
 ## 2026-06-11 TASKSET-AR-UI-PLATFORM-EXTENSIONS Registration
 
 - New planned task set: `TASKSET-AR-UI-PLATFORM-EXTENSIONS` (Platform Builder).

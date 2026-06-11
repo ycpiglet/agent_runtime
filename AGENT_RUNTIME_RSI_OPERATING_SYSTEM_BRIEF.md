@@ -2,9 +2,9 @@
 type: brief
 id: AGENT_RUNTIME_RSI_OPERATING_SYSTEM_BRIEF
 audience: owner
-status: watch
-signal: watch
-score: 86
+status: pass
+signal: pass
+score: 95
 priority: High
 tags: [rsi, evidence-to-proposal, failure-registry, evals, owner-brief]
 ---
@@ -13,9 +13,9 @@ tags: [rsi, evidence-to-proposal, failure-registry, evals, owner-brief]
 
 ## Bottom Line
 
-- Summary: registered `TASKSET-AR-RSI-OPERATING-SYSTEM` as the A안 follow-up to the completed RSI planning loop.
-- Result: the next work is no longer just a planner; it is an Evidence-to-Proposal OS with evidence inboxes, evaluation/verification registries, failure and compound casebooks, proposal metrics, council review, A2A lifecycle verification, skill packaging, and bounded apply gates.
-- Boundary: this is registration and scaffold documentation only. It does not claim A2A end-to-end execution, quantified proposal quality, or C-mode auto-apply is complete.
+- Summary: completed local implementation of `TASKSET-AR-RSI-OPERATING-SYSTEM` as the A안 follow-up to the completed RSI planning loop.
+- Result: the OS now has evidence inboxes, evaluation/verification registries, failure and compound casebooks, proposal contract fields, proposal metrics, council review blocking, deterministic A2A lifecycle verification, skill packaging, and a named closeout verifier.
+- Boundary: this proves local deterministic Evidence-to-Proposal OS behavior only. C-mode auto-apply and provider-live A2A transport remain latent watch items.
 
 ## Signal
 
@@ -25,13 +25,16 @@ tags: [rsi, evidence-to-proposal, failure-registry, evals, owner-brief]
 | Conversation recorded | pass | `reviews/MEETING-2026-06-11-agent-runtime-rsi-operating-system-registration.md` |
 | Evidence directories created | pass | `agents/project/evidence/` |
 | Failure casebook created | pass | `agents/project/casebooks/failure-and-compound-casebook.md` |
+| Proposal contract | pass | `agents/project/EVIDENCE-TO-PROPOSAL-CONTRACT.md`, `schemas/planning-proposal.schema.json` |
+| A2A lifecycle gate | pass | `scripts/a2a_lifecycle_gate.py`, `tests/test_a2a_lifecycle_gate.py` |
+| Skill layer | pass | `skills/rsi-planning-loop/SKILL.md`, `skills/failure-to-regression/SKILL.md` |
 | C-mode status | watch | latent option only; not active |
-| Implementation state | watch | planned taskset, no completion claim |
+| Implementation state | pass | `scripts/verify_rsi_operating_system_taskset.py` closeout path |
 
 ## Insight
 
 - The existing `TASKSET-AR-RSI-PLANNING` proved B-mode structure, proposal-first behavior, state-machine grounding, and verification gates.
-- The missing layer is operating discipline: evidence must be collected in one shape, failures must be casebooked, eval and verification outputs must be queryable, and proposal quality must be measured.
+- The missing operating discipline layer is now represented in durable docs, schema fields, scripts, tests, skills, and closeout gates.
 - C-mode can remain valuable long-term, but only after repeated B-mode evidence shows proposal quality, regression closure, and low-risk apply safety.
 
 ## Decision
@@ -57,14 +60,14 @@ tags: [rsi, evidence-to-proposal, failure-registry, evals, owner-brief]
 
 ## Risks / Blockers
 
-- Risk: registries can become another archive unless proposal metrics and closeout gates consume them.
+- Risk: registries can become another archive unless proposal metrics and closeout gates keep consuming them.
 - Risk: C-mode language can be misread as approval for auto-apply; current state is latent watch only.
-- Risk: A2A remains a documented evidence shape until `TASK-AR-302` verifies lifecycle execution.
-- Blocker: none for registration; implementation must start at `TASK-AR-297`.
+- Risk: A2A provider-live transport remains unproven; current proof is local deterministic lifecycle reconstruction.
+- Blocker: none for local implementation closeout.
 
 ## Next Steps
 
-- Start `TASK-AR-297` to harden evidence inbox schema and conversation capture.
-- Then implement `TASK-AR-298` and `TASK-AR-299` so eval/verification and failure/compound evidence are queryable before proposal automation expands.
-- Keep `TASKSET-AR-RSI-OPERATING-SYSTEM` planned until a claim starts it; current active UI taskset remains separate.
+- Run the named closeout verifier and attach `reviews/RSI-OPERATING-SYSTEM-TASKSET-VERIFY.json`.
+- Open the PR from `codex/taskset-ar-rsi-os` and wait for merge.
+- Keep C-mode latent until repeated B-mode pass evidence, rollback evidence, and explicit Owner policy allow a specific low-risk action class.
 

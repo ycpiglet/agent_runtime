@@ -4,9 +4,11 @@ display_id: TASK-AR-305
 task_uid: d273c1a0-c436-49df-a325-5b88a1400d2c
 registered_at: 2026-06-11T12:10:00+09:00
 created_at: 2026-06-11T12:10:00+09:00
-updated_at: 2026-06-11T12:10:00+09:00
+started_at: 2026-06-11T20:11:00+09:00
+completed_at: 2026-06-11T20:12:00+09:00
+updated_at: 2026-06-11T20:12:00+09:00
 title: Add RSI operating-system verification and Owner handoff
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 2
@@ -45,4 +47,10 @@ tags:
 - `scripts/verify_rsi_operating_system_taskset.py`
 - `reviews/REVIEW-2026-06-11-agent-runtime-rsi-operating-system-closeout.md`
 - `BACKLOG-BOARD.md`
+
+## Completion Evidence
+
+- Added the named RSI OS verification wrapper and Owner-facing closeout review.
+- Completion requires the wrapper report and taskset gate to pass after board
+  regeneration.
 

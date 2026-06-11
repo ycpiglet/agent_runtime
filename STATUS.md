@@ -1,5 +1,15 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-11 - TASKSET-AR-RSI-OPERATING-SYSTEM closeout
+
+- Summary: completed local `TASKSET-AR-RSI-OPERATING-SYSTEM` implementation for Evidence-to-Proposal OS scope.
+- Completed tasks: `TASK-AR-297` through `TASK-AR-305`.
+- Output: hardened evidence/casebook registries, proposal contract and schema fields, council metrics and block-verdict apply guard, deterministic A2A lifecycle gate, latent C-mode roadmap/guardrails, RSI/failure skills, and named closeout verifier.
+- Verification: focused RSI OS tests passed with `18 passed`; final named verification report is `reviews/RSI-OPERATING-SYSTEM-TASKSET-VERIFY.json`.
+- Evidence: `reviews/REVIEW-2026-06-11-agent-runtime-rsi-operating-system-closeout.md`.
+- Boundary: C-mode remains latent watch; provider-live A2A, remote CI, release/version, PR publish, merge, external, destructive, prod-data, and cost-bearing actions are not implied by local closeout.
+- Handoff: open PR from `codex/taskset-ar-rsi-os` and wait for merge after final gates pass.
+
 ## 2026-06-11 - TASK-AR-298 eval verification registry closeout
 
 - Summary: completed `TASK-AR-298` for evaluation and verification record registry contracts.

@@ -4,9 +4,11 @@ display_id: TASK-AR-304
 task_uid: 023a2874-3b90-47ee-810d-913a5d348b63
 registered_at: 2026-06-11T12:10:00+09:00
 created_at: 2026-06-11T12:10:00+09:00
-updated_at: 2026-06-11T12:10:00+09:00
+started_at: 2026-06-11T20:10:00+09:00
+completed_at: 2026-06-11T20:11:00+09:00
+updated_at: 2026-06-11T20:11:00+09:00
 title: Package RSI operating-system skill layer
-status: planned
+status: completed
 priority: P1
 difficulty: L
 est_hours: 3
@@ -45,4 +47,10 @@ tags:
 - `skills/rsi-planning-loop/SKILL.md`
 - `skills/failure-to-regression/SKILL.md`
 - `skills/session-closeout/SKILL.md`
+
+## Completion Evidence
+
+- Added RSI planning-loop and failure-to-regression skills, and clarified
+  parallel-session closeout behavior in the existing closeout skill.
+- Verification coverage: `tests/test_rsi_operating_system_docs.py`.
 

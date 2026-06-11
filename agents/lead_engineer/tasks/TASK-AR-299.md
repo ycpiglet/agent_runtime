@@ -4,9 +4,11 @@ display_id: TASK-AR-299
 task_uid: 4a99d83d-eed4-4d80-a768-dace8d7434c3
 registered_at: 2026-06-11T12:10:00+09:00
 created_at: 2026-06-11T12:10:00+09:00
-updated_at: 2026-06-11T12:10:00+09:00
+started_at: 2026-06-11T19:58:00+09:00
+completed_at: 2026-06-11T20:02:00+09:00
+updated_at: 2026-06-11T20:02:00+09:00
 title: Build failure and compound casebook registry
-status: planned
+status: completed
 priority: P0
 difficulty: M
 est_hours: 2
@@ -44,4 +46,10 @@ tags:
 - `agents/project/casebooks/README.md`
 - `agents/project/casebooks/failure-and-compound-casebook.md`
 - `agents/lead_engineer/compound_log.md`
+
+## Completion Evidence
+
+- Added casebook fields for symptom, trigger, owner boundary, affected gate,
+  recurrence count, linked regression fixture, and needs enforcement routing.
+- Verification coverage: `tests/test_rsi_operating_system_docs.py`.
 
