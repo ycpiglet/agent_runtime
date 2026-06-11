@@ -154,6 +154,12 @@ TASK_SET_DEFINITIONS = [
         "Notion-like light theme, sidebar IA, sort/filter/density patterns, taskset-first views, org chart, roadmap, live presence, comms, and taskset-scope guard.",
         93,
     ),
+    TaskSetInfo(
+        "TASKSET-AR-UI-PLATFORM-EXTENSIONS",
+        "Platform Builder",
+        "Taskset CRUD, dependencies/timeline, custom properties/automation, attachments, import/export, search, calendar, state-machine viewer, team workload, notifications, ops dashboard, gamification, and workspace extensibility.",
+        94,
+    ),
 ]
 TASK_SET_INFO = {item.task_set_id: item for item in TASK_SET_DEFINITIONS}
 UNCLASSIFIED_TASK_SET = TaskSetInfo(
