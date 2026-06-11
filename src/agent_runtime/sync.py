@@ -4,6 +4,7 @@ import argparse
 import difflib
 import hashlib
 import json
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -155,10 +156,18 @@ def render_diff(plan: SyncPlan) -> str:
     return "\n\n".join(_diff_update(update) for update in all_items)
 
 
+def _print_output(text: str) -> None:
+    encoding = getattr(sys.stdout, "encoding", None)
+    if encoding:
+        text = text.encode(encoding, errors="replace").decode(encoding, errors="replace")
+    sys.stdout.write(text)
+    sys.stdout.write("\n")
+
+
 def apply_updates(plan: SyncPlan) -> int:
     if plan.conflicts:
-        print(render_check(plan))
-        print("applied=0")
+        _print_output(render_check(plan))
+        _print_output("applied=0")
         return 1
     applied = 0
     for update in plan.updates:
@@ -166,25 +175,25 @@ def apply_updates(plan: SyncPlan) -> int:
         update.target.write_text(_read(update.source), encoding="utf-8")
         applied += 1
     if not plan.updates:
-        print("No template updates available.")
+        _print_output("No template updates available.")
     else:
-        print(render_check(plan))
-    print(f"applied={applied}")
+        _print_output(render_check(plan))
+    _print_output(f"applied={applied}")
     return 0
 
 
 def run_sync(root: Path, mode: str, template_root: Path | None = None) -> int:
     plan = build_sync_plan(root, template_root=template_root)
     if plan.config.allow_silent_overwrite:
-        print(render_check(plan))
-        print("ERROR: sync.allow_silent_overwrite must be false.")
+        _print_output(render_check(plan))
+        _print_output("ERROR: sync.allow_silent_overwrite must be false.")
         return 1
 
     if mode == "check":
-        print(render_check(plan))
+        _print_output(render_check(plan))
         return 1 if plan.conflicts else 0
     elif mode == "diff":
-        print(render_diff(plan))
+        _print_output(render_diff(plan))
     elif mode == "apply":
         return apply_updates(plan)
     else:

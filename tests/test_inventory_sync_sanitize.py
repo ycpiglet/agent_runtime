@@ -31,6 +31,7 @@ from agent_runtime.publish_tag_smoke import build_tag_smoke_plan
 from agent_runtime.sanitize import analyze as analyze_sanitize
 from agent_runtime.sync import _template_files
 from agent_runtime.sync import build_sync_plan
+from agent_runtime.sync import run_sync
 
 CURRENT_RELEASE_VERSION = "0.1.8"
 CURRENT_RELEASE_TAG = f"v{CURRENT_RELEASE_VERSION}"
@@ -224,6 +225,36 @@ def test_sync_check_reads_host_config_without_writing(tmp_path, capsys):
     assert "project=demo" in out
     assert "allow_silent_overwrite=false" in out
     assert config.read_text(encoding="utf-8").startswith("project: demo")
+
+
+def test_sync_diff_replaces_unencodable_stdout_characters(tmp_path, monkeypatch):
+    class Cp949Stdout:
+        encoding = "cp949"
+
+        def __init__(self):
+            self.output = ""
+
+        def write(self, text):
+            safe = text.encode(self.encoding, errors="replace").decode(self.encoding)
+            self.output += safe
+            if safe != text:
+                raise UnicodeEncodeError(self.encoding, text, 0, len(text), "cannot encode")
+            return len(text)
+
+        def flush(self):
+            return None
+
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    _write_host_config(host)
+    _write(templates / "docs" / "NOTE.md", "new — template\n")
+    _write(host / "docs" / "NOTE.md", "old host\n")
+    stdout = Cp949Stdout()
+    monkeypatch.setattr(sys, "stdout", stdout)
+
+    assert run_sync(host, "diff", template_root=templates) == 0
+
+    assert "new ? template" in stdout.output
 
 
 def test_config_reads_upstream_dependency_contract(tmp_path):
