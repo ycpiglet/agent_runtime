@@ -1,0 +1,180 @@
+{
+  "status": "pass",
+  "task_set_id": "TASKSET-AR-RSI-OPERATING-SYSTEM",
+  "checks": [
+    {
+      "command": [
+        "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+        "-m",
+        "py_compile",
+        "scripts/planning_loop.py",
+        "scripts/a2a_lifecycle_gate.py",
+        "scripts/verify_rsi_operating_system_taskset.py"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "status": "passed"
+    },
+    {
+      "command": [
+        "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_rsi_operating_system_docs.py",
+        "tests/test_a2a_lifecycle_gate.py",
+        "tests/test_planning_loop.py",
+        "-q"
+      ],
+      "returncode": 0,
+      "stdout": "..................                                                       [100%]\n18 passed in 3.89s\n",
+      "stderr": "",
+      "status": "passed"
+    },
+    {
+      "command": [
+        "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+        "scripts/a2a_lifecycle_gate.py",
+        "--json",
+        "--write-record"
+      ],
+      "returncode": 0,
+      "stdout": "{\n  \"context_id\": \"CTX-RSI-OS-001\",\n  \"event_types\": [\n    \"correction\",\n    \"decision\",\n    \"proposal_routing\",\n    \"request\",\n    \"review\"\n  ],\n  \"evidence_record\": {\n    \"candidate_action\": \"no_action\",\n    \"context_id\": \"CTX-RSI-OS-001\",\n    \"dedupe_key\": \"a2a-lifecycle-CTX-RSI-OS-001\",\n    \"observed_failure\": \"none\",\n    \"observed_signal\": \"pass\",\n    \"owner_boundary\": \"local\",\n    \"proposed_routing\": \"archive\",\n    \"quality_check\": \"dedupe_key present; deterministic local fixture; full lifecycle reconstruction required before proposal use.\",\n    \"reconstruction_result\": \"pass\",\n    \"record_id\": \"A2A-LIFECYCLE-3202181D7805\",\n    \"signal\": \"pass\",\n    \"source_path\": \"agents/project/a2a/a2a-lifecycle-fixture-2026-06-11.jsonl\",\n    \"source_type\": \"A2A\",\n    \"summary\": \"A2A request, review, decision, correction, and proposal routing lifecycle reconstruction.\",\n    \"task_ref\": \"TASK-AR-302\",\n    \"task_set_id\": \"TASKSET-AR-RSI-OPERATING-SYSTEM\"\n  },\n  \"findings\": [],\n  \"fixture\": \"agents/project/a2a/a2a-lifecycle-fixture-2026-06-11.jsonl\",\n  \"record_path\": \"agents/project/evidence/inbox/A2A-LIFECYCLE-3202181D7805.json\",\n  \"score\": 100,\n  \"status\": \"pass\",\n  \"task_id\": \"TASK-AR-302\"\n}\n",
+      "stderr": "",
+      "json": {
+        "context_id": "CTX-RSI-OS-001",
+        "event_types": [
+          "correction",
+          "decision",
+          "proposal_routing",
+          "request",
+          "review"
+        ],
+        "evidence_record": {
+          "candidate_action": "no_action",
+          "context_id": "CTX-RSI-OS-001",
+          "dedupe_key": "a2a-lifecycle-CTX-RSI-OS-001",
+          "observed_failure": "none",
+          "observed_signal": "pass",
+          "owner_boundary": "local",
+          "proposed_routing": "archive",
+          "quality_check": "dedupe_key present; deterministic local fixture; full lifecycle reconstruction required before proposal use.",
+          "reconstruction_result": "pass",
+          "record_id": "A2A-LIFECYCLE-3202181D7805",
+          "signal": "pass",
+          "source_path": "agents/project/a2a/a2a-lifecycle-fixture-2026-06-11.jsonl",
+          "source_type": "A2A",
+          "summary": "A2A request, review, decision, correction, and proposal routing lifecycle reconstruction.",
+          "task_ref": "TASK-AR-302",
+          "task_set_id": "TASKSET-AR-RSI-OPERATING-SYSTEM"
+        },
+        "findings": [],
+        "fixture": "agents/project/a2a/a2a-lifecycle-fixture-2026-06-11.jsonl",
+        "record_path": "agents/project/evidence/inbox/A2A-LIFECYCLE-3202181D7805.json",
+        "score": 100,
+        "status": "pass",
+        "task_id": "TASK-AR-302"
+      },
+      "status": "passed"
+    },
+    {
+      "command": [
+        "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+        "scripts/planning_loop.py",
+        "gate",
+        "--trigger",
+        "manual",
+        "--action",
+        "scan",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "{\n  \"action\": \"scan\",\n  \"policy\": \"agents/project/PLANNING-GUARDRAILS.yml\",\n  \"proposal_count\": 0,\n  \"reasons\": [],\n  \"score\": 100,\n  \"status\": \"pass\",\n  \"trigger\": \"manual\",\n  \"warnings\": []\n}\n",
+      "stderr": "",
+      "json": {
+        "action": "scan",
+        "policy": "agents/project/PLANNING-GUARDRAILS.yml",
+        "proposal_count": 0,
+        "reasons": [],
+        "score": 100,
+        "status": "pass",
+        "trigger": "manual",
+        "warnings": []
+      },
+      "status": "passed"
+    },
+    {
+      "command": [
+        "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+        "scripts/planning_loop.py",
+        "c-mode-gate",
+        "--json"
+      ],
+      "returncode": 1,
+      "stdout": "{\n  \"checklist\": \"agents/project/C-MODE-PROMOTION-CHECKLIST.md\",\n  \"pass_cycles\": 0,\n  \"reasons\": [\n    \"at least three passing B-mode cycles are required\",\n    \"release/version steward status must be pass, got watch\"\n  ],\n  \"score\": 0,\n  \"status\": \"block\",\n  \"steward_status\": \"watch\"\n}\n",
+      "stderr": "",
+      "json": {
+        "checklist": "agents/project/C-MODE-PROMOTION-CHECKLIST.md",
+        "pass_cycles": 0,
+        "reasons": [
+          "at least three passing B-mode cycles are required",
+          "release/version steward status must be pass, got watch"
+        ],
+        "score": 0,
+        "status": "block",
+        "steward_status": "watch"
+      },
+      "status": "passed"
+    },
+    {
+      "command": [
+        "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+        "scripts/backlog_board.py",
+        "--write"
+      ],
+      "returncode": 0,
+      "stdout": "wrote=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\BACKLOG-BOARD.md\ntasks=138\n",
+      "stderr": "",
+      "status": "passed"
+    },
+    {
+      "command": [
+        "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+        "scripts/owner_doc_format_gate.py",
+        "--manifest",
+        "owner-docs.yml"
+      ],
+      "returncode": 0,
+      "stdout": "C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\BACKLOG-BOARD.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\AGENT_RUNTIME_RSI_OPERATING_SYSTEM_BRIEF.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-11-agent-runtime-rsi-operating-system-closeout.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-11-agent-runtime-task-ar-298-eval-verification-registry.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-11-agent-runtime-task-ar-297-evidence-inbox-contract.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-11-agent-runtime-rsi-operating-system-registration.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-11-agent-runtime-ui-design-implementation-final-handoff.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-11-agent-runtime-task-ar-283-responsive-accessibility-polish.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-11-agent-runtime-context-knowledge-taskset-closeout.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-11-agent-runtime-task-ar-282-map-planner-source-write-panes.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-11-agent-runtime-task-ar-281-evidence-event-panes.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-11-agent-runtime-task-ar-280-agent-command-panes.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-11-agent-runtime-task-ar-279-backlog-hierarchy.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-11-agent-runtime-task-ar-278-console-shell.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-11-current-session-final-closeout.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-11-session-closeout-automation-registration.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-11-session-closeout-automation-closeout.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-11-multipane-runtime-assurance-registration.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-11-multipane-runtime-assurance-closeout.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\AGENT_RUNTIME_RSI_PLANNING_BRIEF.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\AGENT_RUNTIME_PARALLEL_SESSION_PROTOCOL.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\AGENT_RUNTIME_COLLAB_CONCURRENCY_BRIEF.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\AGENT_RUNTIME_GOVERNANCE_OPS_BRIEF.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\RESEARCH-2026-06-11-ui-design-implementation-gap.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\RESEARCH-2026-06-10-realtime-collab-conflict-patterns.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\GOVERNANCE-OPS-REPORT-2026-06-10.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-11-agent-runtime-task-identity-taskset-closeout.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-11-agent-runtime-ui-design-taskset-closeout.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-09-backlog-board-restoration-owner-format-gate.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-10-agent-runtime-worktree-cleanup-cycle-map.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-10-agent-runtime-rsi-planning-registration.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-10-agent-runtime-parallel-session-protocol.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-10-agent-runtime-task-ar-226-data-map.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-10-agent-runtime-task-ar-227-ui-state-api.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-10-agent-runtime-task-ar-228-ui-console-mvp.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-10-agent-runtime-task-ar-229-write-commands.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-10-agent-runtime-task-ar-230-runtime-commands.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-10-agent-runtime-task-ar-231-live-observability.md: pass\nC:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\\reviews\\REVIEW-2026-06-10-agent-runtime-task-ar-232-map-views.md: pass\nfindings=0\n",
+      "stderr": "",
+      "status": "passed"
+    },
+    {
+      "command": [
+        "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+        "scripts/task_identity.py",
+        "check",
+        "--check"
+      ],
+      "returncode": 0,
+      "stdout": "task-identity: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\nfindings=0\n",
+      "stderr": "",
+      "status": "passed"
+    },
+    {
+      "command": [
+        "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+        "scripts/taskset_work_gate.py",
+        "--task-set-id",
+        "TASKSET-AR-RSI-OPERATING-SYSTEM",
+        "--require-complete",
+        "--check"
+      ],
+      "returncode": 0,
+      "stdout": "taskset-work-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASKSET-AR-RSI-OPERATING-SYSTEM\nfindings=0\n",
+      "stderr": "",
+      "status": "passed"
+    }
+  ],
+  "failed_count": 0
+}
