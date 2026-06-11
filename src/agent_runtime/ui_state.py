@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import re
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -206,6 +208,42 @@ def _lane_for_status(status: str) -> str:
         "완료": "Done",
     }
     return mapping.get(normalized, "Backlog")
+
+
+def _slug(value: str) -> str:
+    text = re.sub(r"[^A-Za-z0-9]+", "-", value.strip().lower())
+    text = re.sub(r"-+", "-", text)
+    return text.strip("-") or "taskset"
+
+
+def _taskset_slug(task_set_id: str) -> str:
+    return _slug(re.sub(r"^TASKSET-AR-", "", task_set_id, flags=re.IGNORECASE))
+
+
+def _letter_alias(index: int) -> str:
+    if index < 1:
+        return ""
+    letters: list[str] = []
+    value = index
+    while value:
+        value, remainder = divmod(value - 1, 26)
+        letters.append(chr(ord("A") + remainder))
+    return "".join(reversed(letters))
+
+
+def _dedupe_strings(values: list[str]) -> list[str]:
+    seen: set[str] = set()
+    result: list[str] = []
+    for value in values:
+        text = str(value or "").strip()
+        if not text:
+            continue
+        key = text.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(text)
+    return result
 
 
 def _task_order(meta: dict[str, Any], fallback: int) -> int:
@@ -927,25 +965,198 @@ def _progress_pct(value: Any) -> int | None:
     return int(round(number))
 
 
-def build_task_sets(agents: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _task_set_info_from_item(item: Any, sequence: int | None = None) -> dict[str, Any] | None:
+    task_set_id = str(getattr(item, "task_set_id", "") or "").strip()
+    if not task_set_id:
+        return None
+    try:
+        order = int(getattr(item, "order", 999))
+    except (TypeError, ValueError):
+        order = 999
+    return {
+        "id": task_set_id,
+        "display_name": str(getattr(item, "display_name", "") or task_set_id),
+        "summary": str(getattr(item, "summary", "") or ""),
+        "sort_order": order,
+        "sequence": sequence,
+    }
+
+
+def _load_task_set_info(root: Path | None, warnings: list[dict[str, str]] | None = None) -> dict[str, dict[str, Any]]:
+    if root is None:
+        return {}
+    path = root / "scripts" / "backlog_board.py"
+    if not path.exists():
+        return {}
+    module_name = f"_agent_runtime_ui_backlog_board_{abs(hash(path.resolve()))}"
+    try:
+        spec = importlib.util.spec_from_file_location(module_name, path)
+        if spec is None or spec.loader is None:
+            return {}
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+    except Exception as exc:  # pragma: no cover - defensive adapter boundary
+        if warnings is not None:
+            warnings.append(_warning("task-set-info-import-error", _rel(root, path), str(exc)))
+        return {}
+
+    infos: dict[str, dict[str, Any]] = {}
+    for sequence, item in enumerate(getattr(module, "TASK_SET_DEFINITIONS", []) or [], start=1):
+        info = _task_set_info_from_item(item, sequence)
+        if info:
+            infos[info["id"]] = info
+    unclassified = _task_set_info_from_item(getattr(module, "UNCLASSIFIED_TASK_SET", None), None)
+    if unclassified:
+        infos[unclassified["id"]] = unclassified
+    return infos
+
+
+def _fallback_task_set_info(task_set_id: str) -> dict[str, Any]:
+    display = _taskset_slug(task_set_id).replace("-", " ").title()
+    return {
+        "id": task_set_id,
+        "display_name": display or task_set_id,
+        "summary": f"Tasks grouped under {task_set_id}.",
+        "sort_order": 999,
+        "sequence": None,
+    }
+
+
+def _status_bucket(task: dict[str, Any]) -> str:
+    status = str(task.get("status") or "").strip().lower()
+    if status in {"blocked", "hold", "보류"}:
+        return "blocked"
+    if status in {"completed", "done", "released", "완료"} or task.get("lane") == "Done":
+        return "done"
+    if status in {"review", "waiting_review", "ready_for_governance_review"} or task.get("lane") == "Review":
+        return "review"
+    if status in {"in_progress", "active", "claimed", "working", "assigned"} or task.get("lane") == "In Progress":
+        return "in_progress"
+    if status in {"ready"} or task.get("lane") == "Ready":
+        return "ready"
+    return "planned"
+
+
+def _task_is_open(task: dict[str, Any]) -> bool:
+    return _status_bucket(task) != "done"
+
+
+def _task_set_status(group: dict[str, Any]) -> str:
+    if int(group.get("active", 0) or 0) > 0:
+        return "active"
+    if int(group.get("tasks_blocked", 0) or 0) > 0:
+        return "blocked"
+    if int(group.get("tasks_total", 0) or 0) > 0 and int(group.get("tasks_open", 0) or 0) == 0:
+        return "completed"
+    if int(group.get("tasks_in_progress", 0) or 0) > 0:
+        return "in_progress"
+    return "planned"
+
+
+def _task_set_aliases(task_set_id: str, info: dict[str, Any], sequence: int) -> list[str]:
+    letter = _letter_alias(sequence)
+    return _dedupe_strings(
+        [
+            f"taskset {sequence}",
+            f"taskset-{sequence}",
+            f"taskset {letter}",
+            f"taskset-{letter}",
+            str(sequence),
+            letter,
+            _taskset_slug(task_set_id),
+            _slug(str(info.get("display_name") or "")),
+            _slug(task_set_id.replace("TASKSET-AR-", "")),
+            task_set_id,
+        ]
+    )
+
+
+def _command_alias(sequence: int) -> str:
+    return str(sequence)
+
+
+def build_task_sets(
+    agents: list[dict[str, Any]],
+    tasks: list[dict[str, Any]] | None = None,
+    *,
+    root: Path | None = None,
+    warnings: list[dict[str, str]] | None = None,
+) -> list[dict[str, Any]]:
     groups: dict[str, dict[str, Any]] = {}
-    for agent in agents:
-        task_set_id = str(agent.get("task_set_id") or "").strip()
-        if not task_set_id:
-            continue
-        group = groups.setdefault(
+    info_by_id = _load_task_set_info(root, warnings)
+
+    def group_for(task_set_id: str) -> dict[str, Any]:
+        info = info_by_id.get(task_set_id) or _fallback_task_set_info(task_set_id)
+        return groups.setdefault(
             task_set_id,
             {
                 "id": task_set_id,
+                "display_name": info["display_name"],
+                "summary": info["summary"],
+                "sort_order": info["sort_order"],
+                "sequence": info.get("sequence"),
                 "agents": 0,
                 "active": 0,
                 "blocked": 0,
                 "done": 0,
                 "current_task_ids": set(),
+                "active_claim_ids": set(),
+                "task_ids": set(),
                 "status_text": None,
+                "tasks_total": 0,
+                "tasks_open": 0,
+                "tasks_done": 0,
+                "tasks_blocked": 0,
+                "tasks_in_progress": 0,
+                "tasks_ready": 0,
+                "tasks_review": 0,
+                "next_task_id": None,
+                "next_task_title": None,
+                "next_task_status": None,
+                "_next_task_order": None,
                 "_progress_values": [],
             },
         )
+
+    for task in tasks or []:
+        task_set_id = str(task.get("task_set_id") or "").strip()
+        if not task_set_id:
+            continue
+        group = group_for(task_set_id)
+        group["tasks_total"] += 1
+        task_id = str(task.get("id") or "").strip()
+        if task_id:
+            group["task_ids"].add(task_id)
+        bucket = _status_bucket(task)
+        if bucket == "done":
+            group["tasks_done"] += 1
+            group["done"] += 1
+        else:
+            group["tasks_open"] += 1
+        if bucket == "blocked":
+            group["tasks_blocked"] += 1
+        elif bucket == "in_progress":
+            group["tasks_in_progress"] += 1
+        elif bucket == "ready":
+            group["tasks_ready"] += 1
+        elif bucket == "review":
+            group["tasks_review"] += 1
+
+        if _task_is_open(task):
+            order_value = _task_order({"order": task.get("order")}, 999999)
+            current_order = group.get("_next_task_order")
+            if current_order is None or order_value < int(current_order):
+                group["_next_task_order"] = order_value
+                group["next_task_id"] = task_id or None
+                group["next_task_title"] = task.get("title")
+                group["next_task_status"] = task.get("status")
+
+    for agent in agents:
+        task_set_id = str(agent.get("task_set_id") or "").strip()
+        if not task_set_id:
+            continue
+        group = group_for(task_set_id)
         group["agents"] += 1
         status = str(agent.get("status") or "").strip().lower()
         if status in {"blocked", "hold"}:
@@ -958,6 +1169,9 @@ def build_task_sets(agents: list[dict[str, Any]]) -> list[dict[str, Any]]:
         task_id = str(agent.get("current_task_id") or "").strip()
         if task_id:
             group["current_task_ids"].add(task_id)
+        claim_id = str(agent.get("claim_id") or "").strip()
+        if claim_id:
+            group["active_claim_ids"].add(claim_id)
         progress = _progress_pct(agent.get("progress_pct"))
         if progress is not None:
             group["_progress_values"].append(progress)
@@ -966,12 +1180,42 @@ def build_task_sets(agents: list[dict[str, Any]]) -> list[dict[str, Any]]:
             group["status_text"] = status_text
 
     task_sets: list[dict[str, Any]] = []
-    for task_set_id in sorted(groups):
+    sorted_ids = sorted(groups, key=lambda raw: (int(groups[raw].get("sort_order", 999)), raw))
+    for fallback_sequence, task_set_id in enumerate(sorted_ids, start=1):
         group = groups[task_set_id]
+        sequence = int(group.get("sequence") or fallback_sequence)
         progress_values = group.pop("_progress_values")
         current_task_ids = sorted(group.pop("current_task_ids"))
+        active_claim_ids = sorted(group.pop("active_claim_ids"))
+        task_ids = sorted(group.pop("task_ids"))
+        group.pop("_next_task_order", None)
+        task_progress = (
+            int(round((int(group["tasks_done"]) / int(group["tasks_total"])) * 100))
+            if int(group.get("tasks_total", 0) or 0)
+            else None
+        )
+        live_progress = int(round(sum(progress_values) / len(progress_values))) if progress_values else None
         group["current_task_ids"] = current_task_ids
-        group["progress_pct"] = int(round(sum(progress_values) / len(progress_values))) if progress_values else None
+        group["active_claim_ids"] = active_claim_ids
+        group["task_ids"] = task_ids
+        group["task_progress_pct"] = task_progress
+        group["live_progress_pct"] = live_progress
+        group["progress_pct"] = live_progress if live_progress is not None else task_progress
+        group["status"] = _task_set_status(group)
+        group["sequence"] = sequence
+        group["alias_number"] = sequence
+        group["alias_letter"] = _letter_alias(sequence)
+        group["primary_alias"] = f"taskset {sequence}"
+        group["letter_alias"] = f"taskset {group['alias_letter']}"
+        group["slug_alias"] = _taskset_slug(task_set_id)
+        group["aliases"] = _task_set_aliases(task_set_id, group, sequence)
+        group["quick_aliases"] = [group["primary_alias"], group["letter_alias"], group["slug_alias"]]
+        command_alias = _command_alias(sequence)
+        group["commands"] = {
+            "plan": f"python scripts/taskset_dispatcher.py plan {command_alias} --json",
+            "start": f"python scripts/taskset_dispatcher.py start {command_alias} --json",
+            "gate": f"python scripts/taskset_work_gate.py --task-set-id {task_set_id} --check",
+        }
         task_sets.append(group)
     return task_sets
 
@@ -1166,7 +1410,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     pane_events = load_pane_events(root_path, generated_at, warnings)
     task_claims = load_task_claims(root_path, generated_at, warnings)
     agents = load_agents(root_path, generated_at, events, warnings, task_claims)
-    task_sets = build_task_sets(agents)
+    task_sets = build_task_sets(agents, tasks=tasks, root=root_path, warnings=warnings)
     messages = load_messages(root_path, generated_at, warnings)
     goals = load_goals(root_path, generated_at)
     commands = ui_commands.list_commands(root_path)

@@ -154,6 +154,22 @@ pointers:
     - scripts/verify_rsi_operating_system_taskset.py
     - skills/rsi-planning-loop/SKILL.md
     - skills/failure-to-regression/SKILL.md
+  pm_operating_system_tasks:
+    - agents/lead_engineer/tasks/TASK-AR-342.md
+    - agents/lead_engineer/tasks/TASK-AR-343.md
+    - agents/lead_engineer/tasks/TASK-AR-344.md
+    - agents/lead_engineer/tasks/TASK-AR-345.md
+    - agents/lead_engineer/tasks/TASK-AR-346.md
+    - agents/lead_engineer/tasks/TASK-AR-347.md
+    - agents/lead_engineer/tasks/TASK-AR-348.md
+    - agents/lead_engineer/tasks/TASK-AR-349.md
+    - agents/lead_engineer/tasks/TASK-AR-350.md
+  pm_operating_system_entrypoints:
+    - AGENT_RUNTIME_PM_OPERATING_SYSTEM_BRIEF.md
+    - agents/project/PROJECT-MANAGEMENT-CONTRACT.md
+    - reviews/RESEARCH-2026-06-11-agent-runtime-project-management-methods.md
+    - reviews/REVIEW-2026-06-11-agent-runtime-pm-operating-system-registration.md
+    - docs/superpowers/plans/2026-06-11-project-management-operating-system.md
   recently_closed_reviews:
     - reviews/REVIEW-2026-06-11-agent-runtime-rsi-operating-system-closeout.md
     - reviews/REVIEW-2026-06-11-agent-runtime-task-ar-298-eval-verification-registry.md
@@ -192,6 +208,7 @@ pointers:
 next_actions:
   - "Open PR from codex/taskset-ar-rsi-os after final gates, then wait for merge."
   - "Keep TASKSET-AR-RSI-OPERATING-SYSTEM closed for local scope unless a new canonical task is explicitly added."
+  - "For PM operating-system work, start TASK-AR-342 or TASK-AR-343 with a fresh claim; keep current RSI OS pointer intact unless Owner explicitly switches lanes."
   - "Push local commits only after Owner approval; local closeout does not imply remote publish, PR, tag, or external CI evidence."
   - "Do not reopen TASKSET-AR-UI-DESIGN-IMPLEMENTATION unless a new canonical task is explicitly added."
   - "Do not reopen TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE or TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION unless a new canonical task is explicitly added."
@@ -221,6 +238,7 @@ verification:
     - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION --require-complete --check"
     - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-RSI-OPERATING-SYSTEM --require-complete --check"
     - "python scripts/verify_rsi_operating_system_taskset.py --out reviews/RSI-OPERATING-SYSTEM-TASKSET-VERIFY.json"
+    - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-PM-OPERATING-SYSTEM --check"
     - "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-UI-DESIGN-SYSTEM --require-complete --check"
     - "python scripts/verify_pane_progress_taskset.py"
     - "python scripts/owner_doc_format_gate.py --manifest owner-docs.yml"

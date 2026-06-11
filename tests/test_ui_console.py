@@ -55,9 +55,12 @@ def test_ui_console_serves_html_shell_and_assets(tmp_path):
     assert html.content_type == "text/html; charset=utf-8"
     assert b'id="runtime-console-app"' in html.body
     assert b"Backlog" in html.body
+    assert b"Tasksets" in html.body
     assert b"Agents" in html.body
     assert b"command-log" in html.body
     assert b"runtime-command-form" in html.body
+    assert b"taskset-filter" in html.body
+    assert b"taskset-quick-list" in html.body
     assert b"event-filter-type" in html.body
     assert b"evidence-list" in html.body
     assert b"errors-list" in html.body
@@ -76,6 +79,7 @@ def test_ui_console_serves_html_shell_and_assets(tmp_path):
     assert b"/api/commands" in js.body
     assert b"runtime.call_agent" in js.body
     assert b"filterEvents" in js.body
+    assert b"queueTaskSetCommand" in js.body
     assert b"renderMap" in js.body
 
 
@@ -91,6 +95,8 @@ def test_ui_console_shell_css_targets_served_dom_classes(tmp_path):
         "create-form",
         "runtime-form",
         "filter-row",
+        "taskset-toolbar",
+        "taskset-grid",
         "evidence-grid",
         "list-panel",
         "is-active",
@@ -105,6 +111,8 @@ def test_ui_console_shell_css_targets_served_dom_classes(tmp_path):
         ".create-form",
         ".runtime-form",
         ".filter-row",
+        ".taskset-toolbar",
+        ".taskset-grid",
         ".evidence-grid",
         ".list-panel",
         ".tab.is-active",
@@ -196,8 +204,48 @@ def test_ui_console_agents_view_contains_progress_fields(tmp_path):
     assert "step_index" in js
     assert "progress_pct" in js
     assert "renderTaskSets" in js
+    assert "primary_alias" in js
+    assert "taskset-action" in js
+    assert "renderTaskSetDirectory" in js
     assert api["resource"] == "task_sets"
     assert api["items"][0]["id"] == "TASKSET-AR-PROGRESS"
+
+
+def test_ui_console_taskset_directory_surfaces_aliases_and_safe_commands(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    for marker in [
+        "view-tasksets",
+        "taskset-filter",
+        "taskset-status-filter",
+        "taskset-quick-list",
+    ]:
+        assert marker in html
+
+    for marker in [
+        "taskSetCards",
+        "taskSetInstruction",
+        "queueTaskSetCommand",
+        "primary_alias",
+        "runtime.assign_task",
+        "runtime.request_review",
+        "taskSetCommand",
+    ]:
+        assert marker in js
+
+    for selector in [
+        ".taskset-toolbar",
+        ".taskset-grid",
+        ".taskset-card-header",
+        ".taskset-card-meta",
+        ".alias-row",
+        ".taskset-actions",
+        ".taskset-action",
+        ".taskset-card.taskset-status-active",
+    ]:
+        assert selector in css
 
 
 def test_ui_console_surfaces_multipane_assurance_panel(tmp_path):

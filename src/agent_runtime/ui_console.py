@@ -86,6 +86,7 @@ HTML = """<!doctype html>
         </form>
         <nav class="tabs" aria-label="Views">
           <button class="tab is-active" type="button" data-view="board">Backlog</button>
+          <button class="tab" type="button" data-view="tasksets">Tasksets</button>
           <button class="tab" type="button" data-view="agents">Agents</button>
           <button class="tab" type="button" data-view="messages">Messages</button>
           <button class="tab" type="button" data-view="events">Events</button>
@@ -98,6 +99,19 @@ HTML = """<!doctype html>
 
         <div id="view-board" class="view is-active">
           <div id="kanban" class="kanban" aria-label="Kanban"></div>
+        </div>
+        <div id="view-tasksets" class="view">
+          <div class="taskset-toolbar">
+            <input id="taskset-filter" placeholder="taskset alias, name, task id">
+            <select id="taskset-status-filter">
+              <option value="">All states</option>
+              <option value="active">Active</option>
+              <option value="blocked">Blocked</option>
+              <option value="planned">Planned</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+          <div id="taskset-quick-list" class="taskset-grid"></div>
         </div>
         <div id="view-agents" class="view">
           <div id="multipane-assurance-list" class="assurance-grid"></div>
@@ -422,6 +436,7 @@ textarea:focus {
   padding: 8px 10px;
 }
 .tab:focus-visible,
+.taskset-card:focus-visible,
 .task-card:focus-visible,
 .agent-card:focus-visible,
 .command-card:focus-visible,
@@ -493,6 +508,17 @@ textarea:focus {
 .assurance-grid {
   display: grid;
   gap: 8px;
+}
+.taskset-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(150px, 0.28fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.taskset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(280px, 1fr));
+  gap: 10px;
 }
 .evidence-grid {
   display: grid;
@@ -568,6 +594,7 @@ textarea:focus {
   gap: 6px;
 }
 .agent-card-meta,
+.taskset-card-meta,
 .command-card-meta,
 .audit-card-meta,
 .surface-card-meta {
@@ -576,6 +603,7 @@ textarea:focus {
   gap: 6px;
 }
 .task-card-meta > span,
+.taskset-card-meta > span,
 .agent-card-meta > span,
 .command-card-meta > span,
 .audit-card-meta > span,
@@ -596,6 +624,7 @@ textarea:focus {
   text-transform: uppercase;
 }
 .task-card-meta strong,
+.taskset-card-meta strong,
 .agent-card-meta strong,
 .command-card-meta strong,
 .audit-card-meta strong,
@@ -615,6 +644,7 @@ textarea:focus {
   color: var(--primary-hover);
 }
 .agent-card-header,
+.taskset-card-header,
 .command-card-header,
 .audit-card-header,
 .surface-card-header {
@@ -622,6 +652,50 @@ textarea:focus {
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
+}
+.taskset-title {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.taskset-title b {
+  font-size: 14px;
+}
+.taskset-title span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.alias-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.alias-row code {
+  border: 1px solid rgba(130, 143, 255, 0.24);
+  border-radius: 999px;
+  padding: 4px 7px;
+  background: rgba(94, 106, 210, 0.12);
+  color: var(--primary-hover);
+  font-size: 11px;
+}
+.taskset-summary,
+.taskset-command {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.taskset-command {
+  overflow-wrap: anywhere;
+}
+.taskset-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.taskset-action {
+  min-height: 32px;
+  padding: 7px 9px;
+  font-size: 12px;
 }
 .audit-card p {
   color: var(--muted);
@@ -730,6 +804,7 @@ textarea:focus {
 .command-card.risk-low,
 .audit-card.pass,
 .surface-card.pass,
+.taskset-card.taskset-status-completed,
 .task-card.status-completed,
 .task-card.status-done {
   border-left: 3px solid var(--success);
@@ -739,6 +814,9 @@ textarea:focus {
 .command-card.risk-unknown,
 .audit-card.warn,
 .surface-card.warn,
+.taskset-card.taskset-status-active,
+.taskset-card.taskset-status-in-progress,
+.taskset-card.taskset-status-planned,
 .task-card.status-in-progress,
 .task-card.status-active,
 .task-card.status-planned,
@@ -750,6 +828,7 @@ textarea:focus {
 .command-card.risk-failed,
 .audit-card.fail,
 .surface-card.fail,
+.taskset-card.taskset-status-blocked,
 .task-card.status-blocked,
 .task-card.status-hold {
   border-left: 3px solid var(--danger);
@@ -888,6 +967,7 @@ pre {
     scroll-snap-align: start;
   }
   .task-card-header,
+  .taskset-card-header,
   .agent-card-header,
   .command-card-header,
   .audit-card-header,
@@ -905,12 +985,16 @@ pre {
   .create-form,
   .runtime-form,
   .filter-row,
+  .taskset-toolbar,
+  .taskset-grid,
   .evidence-grid,
   .task-card-meta,
+  .taskset-card-meta,
   .agent-card-meta,
   .command-card-meta,
   .audit-card-meta,
   .surface-card-meta,
+  .taskset-actions,
   .meta-grid,
   .edit-row,
   .button-row {
@@ -1023,15 +1107,132 @@ function renderDashboard() {
 function renderTaskSets() {
   const host = $("tasksets-list");
   if (!host) return;
-  const taskSets = runtimeState.task_sets || [];
-  host.innerHTML = taskSets.length ? taskSets.map((taskSet) => `
-    <article class="taskset-card">
-      <b>${escapeHtml(taskSet.id)}</b>
-      <span>${escapeHtml(taskSet.status_text || "active task set")}</span>
-      <span>${escapeHtml(taskSet.active || 0)} active / ${escapeHtml(taskSet.blocked || 0)} blocked / ${escapeHtml(taskSet.done || 0)} done</span>
-      ${progressBar(taskSet.progress_pct)}
-    </article>
-  `).join("") : "";
+  const taskSets = (runtimeState.task_sets || []).filter((taskSet) => taskSet.status !== "completed" || taskSet.active);
+  host.innerHTML = taskSets.length ? taskSetCards(taskSets.slice(0, 6), { compact: true }) : "";
+}
+
+function taskSetById(taskSetId) {
+  return (runtimeState.task_sets || []).find((taskSet) => taskSet.id === taskSetId);
+}
+
+function taskSetSearchText(taskSet) {
+  return [
+    taskSet.id,
+    taskSet.display_name,
+    taskSet.summary,
+    taskSet.status,
+    taskSet.next_task_id,
+    taskSet.next_task_title,
+    ...(taskSet.aliases || []),
+    ...(taskSet.task_ids || [])
+  ].join(" ").toLowerCase();
+}
+
+function filteredTaskSets() {
+  const query = $("taskset-filter")?.value.trim().toLowerCase() || "";
+  const status = $("taskset-status-filter")?.value.trim() || "";
+  return (runtimeState.task_sets || []).filter((taskSet) => {
+    if (status && taskSet.status !== status) return false;
+    if (query && !taskSetSearchText(taskSet).includes(query)) return false;
+    return true;
+  });
+}
+
+function taskSetCommand(taskSet, action) {
+  return (taskSet.commands || {})[action] || "";
+}
+
+function taskSetStatusClass(status) {
+  const normalized = String(status || "planned").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return `taskset-status-${normalized || "planned"}`;
+}
+
+function taskSetInstruction(taskSet, action) {
+  const alias = taskSet.primary_alias || taskSet.slug_alias || taskSet.id;
+  const command = taskSetCommand(taskSet, action);
+  if (action === "plan") {
+    return `${alias} 계획: ${command} 실행 후 next task, worktree, claim 경계를 보고해줘.`;
+  }
+  if (action === "start") {
+    return `${alias} 진행: ${command} 실행 후 ${taskSet.id} 범위 안에서만 진행하고 완료 시 정지/보고해줘.`;
+  }
+  return `${alias} gate 확인: ${command} 실행 후 결과를 보고해줘.`;
+}
+
+async function queueTaskSetCommand(taskSet, action) {
+  const commandType = action === "gate" ? "runtime.request_review" : "runtime.assign_task";
+  await sendJson("/api/commands", {
+    type: commandType,
+    payload: {
+      type: commandType,
+      target: "lead-engineer",
+      payload: {
+        actor: "owner",
+        instruction: taskSetInstruction(taskSet, action),
+        reason: `${taskSet.primary_alias || taskSet.id} ${action}`,
+        task_id: taskSet.next_task_id || "",
+        goal_id: taskSet.id
+      }
+    }
+  });
+}
+
+function wireTaskSetActions(host) {
+  host.querySelectorAll("[data-taskset-action]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const taskSet = taskSetById(button.dataset.tasksetId);
+      if (!taskSet) return;
+      queueTaskSetCommand(taskSet, button.dataset.tasksetAction);
+    });
+  });
+}
+
+function taskSetCards(taskSets, options = {}) {
+  const compact = Boolean(options.compact);
+  return taskSets.map((taskSet) => {
+    const aliases = (taskSet.quick_aliases || taskSet.aliases || []).slice(0, compact ? 2 : 4);
+    const nextTask = taskSet.next_task_id || "no open task";
+    const taskCount = `${taskSet.tasks_done || 0}/${taskSet.tasks_total || 0}`;
+    const command = taskSetCommand(taskSet, "start") || taskSetCommand(taskSet, "plan");
+    return `
+      <article class="taskset-card ${taskSetStatusClass(taskSet.status)}" tabindex="0">
+        <div class="taskset-card-header">
+          <div class="taskset-title">
+            <b>${escapeHtml(taskSet.primary_alias || taskSet.id)}</b>
+            <span>${escapeHtml(taskSet.display_name || taskSet.id)}</span>
+          </div>
+          <span class="state-chip">${escapeHtml(taskSet.letter_alias || taskSet.status || "")}</span>
+        </div>
+        <div class="alias-row" aria-label="Task set aliases">
+          ${aliases.map((alias) => `<code>${escapeHtml(alias)}</code>`).join("")}
+        </div>
+        ${compact ? "" : `<p class="taskset-summary">${escapeHtml(taskSet.summary || "No summary")}</p>`}
+        <div class="taskset-card-meta" aria-label="Task set metadata">
+          <span><span class="meta-label">Status</span><strong>${escapeHtml(taskSet.status || "planned")}</strong></span>
+          <span><span class="meta-label">Tasks</span><strong>${escapeHtml(taskCount)}</strong></span>
+          <span><span class="meta-label">Open</span><strong>${escapeHtml(taskSet.tasks_open || 0)}</strong></span>
+          <span><span class="meta-label">Active</span><strong>${escapeHtml(taskSet.active || 0)}</strong></span>
+          <span><span class="meta-label">Blocked</span><strong>${escapeHtml(taskSet.tasks_blocked || taskSet.blocked || 0)}</strong></span>
+          <span><span class="meta-label">Next</span><strong>${escapeHtml(nextTask)}</strong></span>
+        </div>
+        ${progressBar(taskSet.progress_pct)}
+        ${compact ? "" : `<code class="taskset-command">${escapeHtml(command)}</code>`}
+        ${compact ? "" : `<div class="taskset-actions">
+          <button class="taskset-action" type="button" data-taskset-action="plan" data-taskset-id="${escapeHtml(taskSet.id)}">Plan</button>
+          <button class="taskset-action" type="button" data-taskset-action="start" data-taskset-id="${escapeHtml(taskSet.id)}">Start</button>
+          <button class="taskset-action" type="button" data-taskset-action="gate" data-taskset-id="${escapeHtml(taskSet.id)}">Gate</button>
+        </div>`}
+      </article>
+    `;
+  }).join("");
+}
+
+function renderTaskSetDirectory() {
+  const host = $("taskset-quick-list");
+  if (!host) return;
+  const taskSets = filteredTaskSets();
+  host.innerHTML = taskSets.length ? taskSetCards(taskSets) : `<div class="empty">No task sets</div>`;
+  wireTaskSetActions(host);
 }
 
 function renderMultipaneAssurance() {
@@ -1088,7 +1289,10 @@ function evidenceLabelForTask(task) {
 function taskCard(task) {
   const status = task.status || "unknown";
   const priority = task.priority || "P?";
-  const taskSet = task.task_set_id || "no task set";
+  const taskSetInfo = taskSetById(task.task_set_id);
+  const taskSet = taskSetInfo
+    ? `${taskSetInfo.primary_alias || taskSetInfo.id} - ${taskSetInfo.display_name || taskSetInfo.id}`
+    : task.task_set_id || "no task set";
   const evidence = evidenceLabelForTask(task);
   return `<button class="task-card ${statusClassName(status)}" type="button" data-task-id="${escapeHtml(task.id)}">
     <div class="task-card-header">
@@ -1547,6 +1751,7 @@ function renderDetail() {
 function renderAll() {
   renderDashboard();
   renderKanban();
+  renderTaskSetDirectory();
   renderAgents();
   renderMessages();
   renderEvents();
@@ -1571,6 +1776,13 @@ $("refresh-button").addEventListener("click", loadState);
 ["event-filter-type", "event-filter-agent", "event-filter-task", "event-filter-goal", "event-filter-search"].forEach((id) => {
   const node = $(id);
   if (node) node.addEventListener("input", renderEvents);
+});
+["taskset-filter", "taskset-status-filter"].forEach((id) => {
+  const node = $(id);
+  if (node) {
+    node.addEventListener("input", renderTaskSetDirectory);
+    node.addEventListener("change", renderTaskSetDirectory);
+  }
 });
 $("create-task-form").addEventListener("submit", async (event) => {
   event.preventDefault();

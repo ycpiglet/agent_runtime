@@ -361,6 +361,85 @@ def test_ui_state_exposes_task_set_progress_and_status_text(tmp_path):
     assert state["task_sets"][0]["active"] == 1
 
 
+def test_ui_state_exposes_taskset_numeric_letter_aliases_and_commands(tmp_path):
+    _write(
+        tmp_path / "scripts" / "backlog_board.py",
+        "\n".join(
+            [
+                "from dataclasses import dataclass",
+                "@dataclass(frozen=True)",
+                "class TaskSetInfo:",
+                "    task_set_id: str",
+                "    display_name: str",
+                "    summary: str",
+                "    order: int",
+                "TASK_SET_DEFINITIONS = [",
+                "    TaskSetInfo('TASKSET-AR-CONTEXT-KNOWLEDGE', 'Context Cartographer', 'Context work.', 10),",
+                "    TaskSetInfo('TASKSET-AR-QUALITY-LOOP', 'Quality Sentinel', 'Quality work.', 20),",
+                "]",
+                "UNCLASSIFIED_TASK_SET = TaskSetInfo('TASKSET-AR-UNCLASSIFIED', 'Unclassified', 'No task set.', 999)",
+                "",
+            ]
+        ),
+    )
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md",
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-901",
+                "status: completed",
+                "owner: lead-engineer",
+                "priority: P0",
+                "task_set_id: TASKSET-AR-QUALITY-LOOP",
+                "---",
+                "",
+                "## Goal",
+                "",
+                "Completed quality task.",
+            ]
+        ),
+    )
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-902.md",
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-902",
+                "status: planned",
+                "owner: lead-engineer",
+                "priority: P0",
+                "task_set_id: TASKSET-AR-QUALITY-LOOP",
+                "---",
+                "",
+                "## Goal",
+                "",
+                "Next quality task.",
+            ]
+        ),
+    )
+
+    state = ui_state.build_state(tmp_path, now="2026-06-11T18:30:00+09:00")
+    task_set = state["task_sets"][0]
+
+    assert task_set["id"] == "TASKSET-AR-QUALITY-LOOP"
+    assert task_set["display_name"] == "Quality Sentinel"
+    assert task_set["alias_number"] == 2
+    assert task_set["alias_letter"] == "B"
+    assert "taskset 2" in task_set["aliases"]
+    assert "taskset B" in task_set["aliases"]
+    assert "quality-loop" in task_set["aliases"]
+    assert task_set["primary_alias"] == "taskset 2"
+    assert task_set["letter_alias"] == "taskset B"
+    assert task_set["next_task_id"] == "TASK-AR-902"
+    assert task_set["tasks_total"] == 2
+    assert task_set["tasks_done"] == 1
+    assert task_set["progress_pct"] == 50
+    assert task_set["commands"]["plan"] == "python scripts/taskset_dispatcher.py plan 2 --json"
+    assert task_set["commands"]["start"] == "python scripts/taskset_dispatcher.py start 2 --json"
+    assert task_set["commands"]["gate"] == "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-QUALITY-LOOP --check"
+
+
 def test_ui_state_cli_emits_task_sets_resource_json(tmp_path, capsys):
     _write(
         tmp_path / "agents" / "runtime" / "task_claims" / "CLAIM-progress.json",

@@ -10,6 +10,14 @@
 - Boundary: C-mode remains latent watch; provider-live A2A, remote CI, release/version, PR publish, merge, external, destructive, prod-data, and cost-bearing actions are not implied by local closeout.
 - Handoff: open PR from `codex/taskset-ar-rsi-os` and wait for merge after final gates pass.
 
+## 2026-06-11 - TASKSET-AR-PM-OPERATING-SYSTEM registration
+
+- Summary: registered `TASKSET-AR-PM-OPERATING-SYSTEM` for project/taskset/task/unit decomposition, worker-ready specs, and model-tier routing enforcement.
+- New durable entrypoints: `AGENT_RUNTIME_PM_OPERATING_SYSTEM_BRIEF.md`, `agents/project/PROJECT-MANAGEMENT-CONTRACT.md`, `docs/superpowers/plans/2026-06-11-project-management-operating-system.md`, `reviews/RESEARCH-2026-06-11-agent-runtime-project-management-methods.md`, and `reviews/REVIEW-2026-06-11-agent-runtime-pm-operating-system-registration.md`.
+- Registered tasks: `TASK-AR-342` through `TASK-AR-350`.
+- Boundary: AGENTS soft rules are active now; unit readiness gate, model routing, dispatcher unit claims, WIP flow controls, and closeout wrapper are planned implementation work.
+- Handoff: PM implementation should start with a fresh claim; RSI OS is now closed locally and only PR/merge wait remains for this branch.
+
 ## 2026-06-11 - TASK-AR-298 eval verification registry closeout
 
 - Summary: completed `TASK-AR-298` for evaluation and verification record registry contracts.
