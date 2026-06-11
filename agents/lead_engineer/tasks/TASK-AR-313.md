@@ -4,9 +4,10 @@ display_id: TASK-AR-313
 task_uid: 753d8012-6dd1-46ef-a8b1-7a1da9d0f1f1
 registered_at: 2026-06-11T17:58:45+09:00
 created_at: 2026-06-11T17:58:45+09:00
-updated_at: 2026-06-11T17:58:45+09:00
+started_at: 2026-06-11T23:16:07+09:00
+updated_at: 2026-06-11T23:16:07+09:00
 title: ToolRunner 명령 정책 강화 (IMPLEMENTATION_PLAN Phase 3)
-status: planned
+status: in_progress
 priority: P1
 difficulty: M
 est_hours: 6

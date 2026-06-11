@@ -128,6 +128,27 @@ def test_remote_preserved_branch_residue_is_watch_not_block() -> None:
     assert plan["residue"]["unresolved"]["branches"] == []
 
 
+def test_head_preserved_branch_residue_is_watch_not_block() -> None:
+    plan = build_plan(
+        [],
+        active_codex_branches=["+ codex/task-ar-310-vision-gap-closure"],
+        extra_worktrees=[
+            {
+                "path": "C:/repo/.worktrees/TASK-AR-310",
+                "branch": "refs/heads/codex/task-ar-310-vision-gap-closure",
+            }
+        ],
+        preserved_head={
+            "branches": ["codex/task-ar-310-vision-gap-closure"],
+            "worktrees": ["C:/repo/.worktrees/TASK-AR-310"],
+        },
+    )
+
+    assert plan["decision"] == "watch"
+    assert plan["residue"]["preserved_head"]["branches"] == ["codex/task-ar-310-vision-gap-closure"]
+    assert plan["residue"]["unresolved"]["branches"] == []
+
+
 def test_cli_check_blocks_unknown_dirty_state(tmp_path: Path) -> None:
     result = subprocess.run(
         [

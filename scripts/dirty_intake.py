@@ -184,6 +184,44 @@ def _git_remote_preserved_residue(root: Path, extra_worktrees: list[dict[str, st
     return {"branches": sorted(branches), "worktrees": sorted(worktrees)}
 
 
+def _git_is_ancestor(root: Path, branch: str, target: str = "HEAD") -> bool:
+    result = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", branch, target],
+        cwd=root,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return result.returncode == 0
+
+
+def _git_worktree_is_clean(path: Path) -> bool:
+    try:
+        output = _git_output(
+            path,
+            ["git", "-c", f"safe.directory={path.resolve().as_posix()}", "status", "--porcelain=v1"],
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return False
+    return not output.strip()
+
+
+def _git_head_preserved_residue(root: Path, extra_worktrees: list[dict[str, str]] | None = None) -> dict[str, list[str]]:
+    """Residue is preserved when a clean codex worktree's branch is already in HEAD."""
+    branches: set[str] = set()
+    worktrees: set[str] = set()
+    for item in extra_worktrees or []:
+        branch = _norm_branch(str(item.get("branch") or ""))
+        path_text = str(item.get("path") or "").strip()
+        if not branch.startswith("codex/") or not path_text:
+            continue
+        path = Path(path_text)
+        if _git_is_ancestor(root, branch, "HEAD") and _git_worktree_is_clean(path):
+            branches.add(branch)
+            worktrees.add(path.resolve().as_posix().rstrip("/"))
+    return {"branches": sorted(branches), "worktrees": sorted(worktrees)}
+
+
 def _archive_slug(files: Iterable[str]) -> str:
     parts = [Path(path).stem.lower().replace("_", "-") for path in files if path]
     slug = "-".join(part for part in parts if part)[:48].strip("-")
@@ -206,6 +244,9 @@ def _decision(route: str, residue: dict[str, object]) -> str:
     preserved_remote = residue.get("preserved_remote", {})
     if isinstance(preserved_remote, dict) and (preserved_remote.get("branches") or preserved_remote.get("worktrees")):
         return "watch"
+    preserved_head = residue.get("preserved_head", {})
+    if isinstance(preserved_head, dict) and (preserved_head.get("branches") or preserved_head.get("worktrees")):
+        return "watch"
     return "pass"
 
 
@@ -216,6 +257,7 @@ def build_plan(
     extra_worktrees: list[dict[str, str]] | None = None,
     preserved_active: dict[str, list[str]] | None = None,
     preserved_remote: dict[str, list[str]] | None = None,
+    preserved_head: dict[str, list[str]] | None = None,
     stash_count: int = 0,
     stamp: str | None = None,
 ) -> dict[str, object]:
@@ -229,12 +271,15 @@ def build_plan(
     payload["files"] = list(route.files)
     preserved_active = preserved_active or {"branches": [], "worktrees": []}
     preserved_remote = preserved_remote or {"branches": [], "worktrees": []}
+    preserved_head = preserved_head or {"branches": [], "worktrees": []}
     active_branches = {_norm_branch(item) for item in preserved_active.get("branches", [])}
     active_worktrees = {item.replace("\\", "/").rstrip("/") for item in preserved_active.get("worktrees", [])}
     remote_branches = {_norm_branch(item) for item in preserved_remote.get("branches", [])}
     remote_worktrees = {item.replace("\\", "/").rstrip("/") for item in preserved_remote.get("worktrees", [])}
-    preserved_branches = active_branches | remote_branches
-    preserved_worktrees = active_worktrees | remote_worktrees
+    head_branches = {_norm_branch(item) for item in preserved_head.get("branches", [])}
+    head_worktrees = {item.replace("\\", "/").rstrip("/") for item in preserved_head.get("worktrees", [])}
+    preserved_branches = active_branches | remote_branches | head_branches
+    preserved_worktrees = active_worktrees | remote_worktrees | head_worktrees
     all_branches = [_norm_branch(item) for item in (active_codex_branches or [])]
     all_worktrees = [
         item.get("path", "").replace("\\", "/").rstrip("/")
@@ -253,6 +298,10 @@ def build_plan(
         "preserved_remote": {
             "branches": [item for item in all_branches if item in remote_branches],
             "worktrees": [item for item in all_worktrees if item in remote_worktrees],
+        },
+        "preserved_head": {
+            "branches": [item for item in all_branches if item in head_branches],
+            "worktrees": [item for item in all_worktrees if item in head_worktrees],
         },
         "unresolved": {
             "branches": unresolved_branches,
@@ -298,6 +347,7 @@ def main(argv: list[str] | None = None) -> int:
         extra_worktrees=extra_worktrees,
         preserved_active=_git_active_claim_residue(root, extra_worktrees) if not args.status_line else {"branches": [], "worktrees": []},
         preserved_remote=_git_remote_preserved_residue(root, extra_worktrees) if not args.status_line else {"branches": [], "worktrees": []},
+        preserved_head=_git_head_preserved_residue(root, extra_worktrees) if not args.status_line else {"branches": [], "worktrees": []},
         stash_count=_git_stash_count(root) if not args.status_line else 0,
         stamp=args.stamp,
     )
