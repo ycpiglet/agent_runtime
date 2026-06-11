@@ -74,18 +74,44 @@
 | Done | tag_manual 라이브 참조 제거 | lead-engineer | claude | `scripts/backlog_board.py`, `agents/project/README.md`, `BACKLOG-BOARD.md` |
 | Done | 전사 구조/기능·비전 분석 기록 | lead-engineer | claude | 본 문서 2.5–2.6 |
 | Done | taskset 등록 (TASK-AR-306~309) | lead-engineer | claude | `agents/lead_engineer/tasks/TASK-AR-30[6-9].md`, `BACKLOG.md` |
-| Planned | 구조 개선 후속 계획 확정 | owner | - | `TASK-AR-307` |
-| Planned | 비전 전략 우선순위 결정 | owner | - | `TASK-AR-308` |
-| Planned | UI 배포 경로 가드 계획 | lead-engineer | - | `TASK-AR-309` |
+| Done | 구조 개선 후속 계획 확정 | lead-engineer | codex | `TASK-AR-307` |
+| Done | 비전 전략 우선순위 결정 | lead-engineer | codex | `TASK-AR-308` |
+| Done | UI 배포 경로 가드 계획 | lead-engineer | codex | `TASK-AR-309` |
 
 ## 4. Risks / Blockers
 
 - Risk: 삭제된 원격 브랜치 복구는 GitHub dangling object 보존 기간 내에서만 SHA로 가능 — 매니페스트 참조.
 - Risk: serena/github 플러그인 비활성화는 사용자 전역 설정 변경 — 다른 프로젝트에서 필요하면 `/plugin`으로 재활성화.
-- Risk: ui-console 서버(PID 30400)는 세션 외부 프로세스 — 재부팅 시 수동/자동 재기동 필요(TASK-AR-309에서 가드 계획).
+- Risk: ui-console 서버(PID 30400)는 세션 외부 프로세스 — 재부팅 시 수동/자동 재기동 필요(`TASK-AR-20260611-2230-UI-STALE-GUARD`에서 구현 계획).
 - Blocker: 없음.
 
 ## 5. Next
 
-- Owner 결정 대기: TASK-AR-307(구조 개선 채택 여부), TASK-AR-308(전략 무브 순서), TASK-AR-309(가드 방식).
-- 본 세션 변경분 커밋/푸시 후 closeout.
+- `TASKSET-AR-OPS-FEEDBACK-ANALYSIS`는 planning/decision 범위에서 closeout한다.
+- 실행 후속은 새로 등록된 구조 위생/UI stale guard task 및 기존 RSI/Vision/UI tasksets에서 진행한다.
+
+## 6. Follow-up Decision Closeout
+
+### 6.1 TASK-AR-307 구조 개선 결정
+
+- 채택: hook/runtime log SSoT 및 로테이션, backlog board/template drift gate, `.tmp` lifecycle policy, `BACKLOG.md` vs `BACKLOG-BOARD.md` 역할 분리, `reviews/` evidence namespace/index, `agents/project/` config/release 분리.
+- 완료 유지: task identity 검증 게이트는 `TASKSET-AR-TASK-IDENTITY`에서 이미 완료.
+- 보류: tests 카테고리화, docs/README 재구성, hook timeout SLA, `.gitignore` 정리는 선행 구조 위생 결과 또는 반복 findings 발생 뒤 재평가.
+- 신규 후속: `TASK-AR-20260611-2230-STRUCT-HOOK-LOGS`, `TASK-AR-20260611-2230-STRUCT-BOARD-TMP`, `TASK-AR-20260611-2230-STRUCT-DOC-NAMESPACE`.
+
+### 6.2 TASK-AR-308 전략 우선순위
+
+1. Evidence-to-Proposal OS 완성: `TASKSET-AR-RSI-OPERATING-SYSTEM` (`TASK-AR-297`~`TASK-AR-305`).
+2. ToolRunner 강화 + race-safe claim: `TASK-AR-313`, `TASK-AR-314`.
+3. A2A lifecycle 검증 + RBAC: `TASK-AR-302`, `TASK-AR-311`, `TASK-AR-312`.
+4. 스킬 레이어 패키징: `TASK-AR-304`, `TASK-AR-316`.
+5. UI 실시간화 + Planner 승인 워크플로: `TASK-AR-317`, `TASK-AR-326`.
+
+- C-mode 자동 적용은 보류한다. 승격 조건은 `TASK-AR-299`/`300`/`301`/`302`/`315`의 품질 및 검증 증거가 채워지는 것이다.
+
+### 6.3 TASK-AR-309 UI stale guard
+
+- 채택: install-path doctor check, UI commit/build identifier exposure, long-running `ui-console` process detection.
+- 기각: Owner visibility 없는 automatic kill/restart.
+- 보류: full UI packaging/deployment redesign.
+- 신규 후속: `TASK-AR-20260611-2230-UI-STALE-GUARD`.

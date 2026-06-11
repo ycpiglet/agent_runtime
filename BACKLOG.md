@@ -66,6 +66,7 @@
 - Branch cleanup manifest: `reviews/REVIEW-2026-06-11-agent-runtime-branch-cleanup-sha-manifest.md`.
 - Session outcomes: 로컬/원격 브랜치 25개 정리(main만 잔존), UI 미반영 근본 원인 해결(editable 재설치 + 구버전 서버 재시작), Claude Code 플러그인 4종 비활성화(serena/discord/telegram/github), tag_manual 라이브 참조 제거(감사 YAML은 보존), .tmp 73.8MB 정리.
 - Boundary: MIGRATION-COMPAT-MAP.yml 등 마감된 감사 증거와 reviews/ 역사 기록은 수정하지 않는다.
+- Closeout: `TASK-AR-307`/`308`/`309` completed as planning/decision records. Follow-ups registered without implementation: `TASK-AR-20260611-2230-STRUCT-HOOK-LOGS`, `TASK-AR-20260611-2230-STRUCT-BOARD-TMP`, `TASK-AR-20260611-2230-STRUCT-DOC-NAMESPACE`, and `TASK-AR-20260611-2230-UI-STALE-GUARD`.
 
 ## 2026-06-11 TASKSET-AR-RSI-OPERATING-SYSTEM Registration
 

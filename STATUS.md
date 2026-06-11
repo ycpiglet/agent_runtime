@@ -1,5 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-11 - TASKSET-AR-OPS-FEEDBACK-ANALYSIS closeout
+
+- Summary: completed the remaining planning/decision records for `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` (`TASK-AR-307`, `TASK-AR-308`, `TASK-AR-309`) without implementing code changes.
+- Output: structure decisions, strategy ordering, C-mode hold conditions, and UI stale-guard choices are now recorded in the task files and session review.
+- Follow-ups registered: `TASK-AR-20260611-2230-STRUCT-HOOK-LOGS`, `TASK-AR-20260611-2230-STRUCT-BOARD-TMP`, `TASK-AR-20260611-2230-STRUCT-DOC-NAMESPACE`, and `TASK-AR-20260611-2230-UI-STALE-GUARD`.
+- Boundary: root worktree had unrelated `TASK-AR-310` changes from another pane; this closeout was performed in `.worktrees/TASKSET-AR-OPS-FEEDBACK-ANALYSIS`.
+- Evidence: `reviews/REVIEW-2026-06-11-agent-runtime-ops-feedback-analysis-session.md`.
+
 ## 2026-06-11 - TASKSET-AR-PM-OPERATING-SYSTEM registration
 
 - Summary: registered `TASKSET-AR-PM-OPERATING-SYSTEM` for project/taskset/task/unit decomposition, worker-ready specs, and model-tier routing enforcement.

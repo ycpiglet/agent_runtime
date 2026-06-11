@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-11
-task_count: 153
-open_count: 57
-completed_count: 96
-task_set_count: 7
-completed_task_set_count: 15
+task_count: 157
+open_count: 58
+completed_count: 99
+task_set_count: 8
+completed_task_set_count: 14
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `57` open or active tasks; `96` completed tasks are archived from this live board.
+- Summary: `58` open or active tasks; `99` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `50` / Ask `7` / Review `0` / Later `0` / Done `96`.
-- Task Sets: `7` active workflows; `15` completed workflows are hidden from the live action board.
+- Status: Action `51` / Ask `7` / Review `0` / Later `0` / Done `99`.
+- Task Sets: `8` active workflows; `14` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -42,6 +42,14 @@ completed_task_set_count: 15
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
 
+### Console Operator (`TASKSET-AR-UI-CONSOLE`)
+
+- Flow: Runtime UI console surfaces, command paths, and observability views.
+- Progress: `7/8` done; `1` open or active.
+| Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-20260611-2230-UI-STALE-GUARD` | planned | Action | P1 | High | Medium | 4h/3000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Prevent a stale installed package or old `ui-console` process from hiding current UI… |
+
 ### Evidence-to-Proposal Operator (`TASKSET-AR-RSI-OPERATING-SYSTEM`)
 
 - Flow: Evidence inboxes, failure casebooks, proposal quality metrics, council review, and bounded apply gates.
@@ -56,15 +64,15 @@ completed_task_set_count: 15
 | `TASK-AR-302` | planned | Action | P1 | High | High | 3h/1200tok | Low | 7 | validation-team | qa | Execute next | Close the gap between A2A evidence fields existing in documents and an actual end-to-… |
 | `TASK-AR-304` | planned | Action | P1 | High | High | 3h/1200tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Add the missing skill layer so future sessions follow the RSI operating process witho… |
 
-### Feedback Analyst (`TASKSET-AR-OPS-FEEDBACK-ANALYSIS`)
+### Repo Custodian (`TASKSET-AR-REPO-HYGIENE`)
 
-- Flow: Owner feedback intake, enterprise-wide structure/vision analysis, and follow-up planning records.
+- Flow: Working-tree cleanup, backlog cycle hygiene, and handoff publication.
 - Progress: `1/4` done; `3` open or active.
 | Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-309` | planned | Action | P2 | Medium | Low | 2h/1500tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 2026-06-11 "UI 미반영" 사건의 두 원인(비-editable stale 설치, 장수 구버전 서버 프로세스)이 재발하지 않도록 가드 방안을 계획… |
-| `TASK-AR-307` | planned | Ask | P1 | High | Medium | 4h/3000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | 2026-06-11 전사 구조 분석에서 식별된 개선 항목을 Owner가 우선순위 결정할 수 있는 실행 계획으로 확정한다 (분석/계획 전용, 구현 없음). |
-| `TASK-AR-308` | planned | Action | P1 | High | Medium | 4h/3000tok | Low | 6 | validation-team | qa | Execute next | Ralph/Loop Engineering, Multi-agent/A2A, 측정 가능한 평가·검증, backlog UI/task management, 추적… |
+| `TASK-AR-20260611-2230-STRUCT-HOOK-LOGS` | planned | Ask | P1 | High | Medium | 4h/3000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | Unify hook/runtime log ownership so closeout, dirty-intake, and owner governance read… |
+| `TASK-AR-20260611-2230-STRUCT-BOARD-TMP` | planned | Action | P1 | High | Medium | 5h/3500tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Prevent live/template backlog board drift and make `.tmp` retention predictable witho… |
+| `TASK-AR-20260611-2230-STRUCT-DOC-NAMESPACE` | planned | Action | P2 | Medium | Medium | 5h/3500tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Make evidence and project configuration navigable at current repository scale without… |
 
 ### Vision Integrator (`TASKSET-AR-VISION-GAP-CLOSURE`)
 
@@ -157,7 +165,6 @@ completed_task_set_count: 15
 | Quality Sentinel (`TASKSET-AR-QUALITY-LOOP`) | Offline evals, live review, correction loops, and traceable validation. | `7/7` done | `7` completed task files archived |
 | Migration Archivist (`TASKSET-AR-MIGRATION-PARITY`) | Legacy-source parity, migration evidence, and skill/hook/script provenance. | `6/6` done | `6` completed task files archived |
 | Release Steward (`TASKSET-AR-RELEASE-STEWARD`) | Version decisions, release closeout, and consistency checks. | `7/7` done | `7` completed task files archived |
-| Console Operator (`TASKSET-AR-UI-CONSOLE`) | Runtime UI console surfaces, command paths, and observability views. | `7/7` done | `7` completed task files archived |
 | Planning Architect (`TASKSET-AR-RSI-PLANNING`) | Bounded recursive self-improvement, planning scans, and proposal review. | `10/10` done | `10` completed task files archived |
 | Progress Scout (`TASKSET-AR-PANE-PROGRESS`) | Pane/task-set progress, live continuity, claims, and resumable handoffs. | `5/5` done | `5` completed task files archived |
 | Concurrency Steward (`TASKSET-AR-COLLAB-CONCURRENCY`) | Real-time pane collaboration, event replay, SSoT ownership, and conflict gates. | `6/6` done | `6` completed task files archived |
@@ -167,7 +174,7 @@ completed_task_set_count: 15
 | Identity Steward (`TASKSET-AR-TASK-IDENTITY`) | Collision-proof task identity, UUID metadata, lifecycle timestamps, and recovery visibility. | `4/4` done | `4` completed task files archived |
 | Design Operator (`TASKSET-AR-UI-DESIGN-SYSTEM`) | Agent Runtime UI research, design-system guidance, and console visual implementation. | `7/7` done | `7` completed task files archived |
 | Interface Stylist (`TASKSET-AR-UI-DESIGN-IMPLEMENTATION`) | Active UI design implementation work that applies the accepted design system across runtime panes. | `7/7` done | `7` completed task files archived |
-| Repo Custodian (`TASKSET-AR-REPO-HYGIENE`) | Working-tree cleanup, backlog cycle hygiene, and handoff publication. | `1/1` done | `1` completed task files archived |
+| Feedback Analyst (`TASKSET-AR-OPS-FEEDBACK-ANALYSIS`) | Owner feedback intake, enterprise-wide structure/vision analysis, and follow-up planning records. | `4/4` done | `4` completed task files archived |
 
 ## Archived Task Files
 
@@ -270,6 +277,9 @@ completed_task_set_count: 15
 | `TASK-AR-282` | `3d7b5d8e-d81…` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | 2026-06-11 | 2026-06-11T10:47:46+09:00 | 2026-06-11T10:59:38+09:00 | 2026-06-11T10:59:38+09:00 | Bring graph, state-machine, roadmap, planner, source, and write surfaces into the sam… |
 | `TASK-AR-233` | `d475a04e-6c5…` | `TASKSET-AR-REPO-HYGIENE` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Clean the current working tree through an intentional commit and push, then keep back… |
 | `TASK-AR-306` | `9fc495d7-bfd…` | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | completed | 2026-06-11T17:34:00+09:00 | 2026-06-11T16:30:00+09:00 | 2026-06-11T17:34:00+09:00 | 2026-06-11T17:34:00+09:00 | Owner 7개 지시(브랜치/스태시 정리, UI 적용, 플러그인/훅 정리, tag_manual 정리, 구조 분석, 비전 분석, 기록/등록)를 단일 세션에… |
+| `TASK-AR-309` | `d5458ef2-2dd…` | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | completed | 2026-06-11T17:34:00+09:00 | 2026-06-11T22:24:37+09:00 | 2026-06-11T22:28:32+09:00 | 2026-06-11T22:28:32+09:00 | 2026-06-11 "UI 미반영" 사건의 두 원인(비-editable stale 설치, 장수 구버전 서버 프로세스)이 재발하지 않도록 가드 방안을 계획… |
+| `TASK-AR-307` | `2457f407-5d4…` | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | completed | 2026-06-11T17:34:00+09:00 | 2026-06-11T22:28:32+09:00 | 2026-06-11T22:28:32+09:00 | 2026-06-11T22:28:32+09:00 | 2026-06-11 전사 구조 분석에서 식별된 개선 항목을 Owner가 우선순위 결정할 수 있는 실행 계획으로 확정한다 (분석/계획 전용, 구현 없음). |
+| `TASK-AR-308` | `0985351f-c25…` | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | completed | 2026-06-11T17:34:00+09:00 | 2026-06-11T22:28:32+09:00 | 2026-06-11T22:28:32+09:00 | 2026-06-11T22:28:32+09:00 | Ralph/Loop Engineering, Multi-agent/A2A, 측정 가능한 평가·검증, backlog UI/task management, 추적… |
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.
