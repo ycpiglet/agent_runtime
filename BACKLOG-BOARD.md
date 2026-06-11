@@ -72,7 +72,7 @@ completed_task_set_count: 15
 - Progress: `4/10` done; `6` open or active.
 | Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-314` | planned | Action | P1 | High | High | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 리스 기반 클레임 원시 연산으로 다중 프로세스 환경의 중복 응답/소유권 경합을 구조적으로 차단한다. |
+| `TASK-AR-314` | in_progress | Action | P1 | High | High | 8h/6000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 리스 기반 클레임 원시 연산으로 다중 프로세스 환경의 중복 응답/소유권 경합을 구조적으로 차단한다. |
 | `TASK-AR-316` | planned | Action | P2 | Medium | Low | 4h/3000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | skills/(session-closeout, taskset-dispatch)를 버전·트리거 조건·메타데이터를 갖춘 재사용 가능한 패키지로 만들어 다른… |
 | `TASK-AR-315` | planned | Action | P2 | Medium | Medium | 6h/5000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 결정적 계약 베이스라인(현 1.0 대체 통과)이 가리고 있는 실제 모델 출력 정확도(offline 0.6667 vs 목표 0.90) 격차를 provide… |
 | `TASK-AR-319` | planned | Action | P2 | Medium | Medium | 6h/4000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 368+개 reviews/ 증거를 수동 탐색에서 자동 색인/검증 체계로 전환해 문서 추적성을 규모에 견디게 만든다. |

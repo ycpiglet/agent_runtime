@@ -4,9 +4,10 @@ display_id: TASK-AR-314
 task_uid: 616a4093-befe-4d53-bbdb-d0b49ad9cc9c
 registered_at: 2026-06-11T17:58:45+09:00
 created_at: 2026-06-11T17:58:45+09:00
+started_at: 2026-06-12T00:37:16+09:00
 updated_at: 2026-06-11T17:58:45+09:00
 title: Race-safe message claiming 및 stale-leader 복구 (Phase 4)
-status: planned
+status: in_progress
 priority: P1
 difficulty: L
 est_hours: 8
