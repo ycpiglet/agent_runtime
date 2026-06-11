@@ -287,6 +287,40 @@ def test_ui_state_exposes_active_task_claims_as_readable_agent_instances(tmp_pat
     assert state["agents"][0]["source_kind"] == "task_claim_json"
 
 
+def test_ui_state_exposes_agent_score_label_from_task_claim(tmp_path):
+    _write(
+        tmp_path / "agents" / "runtime" / "task_claims" / "CLAIM-score.json",
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-score",
+                "task_id": "TASK-AR-280",
+                "task_set_id": "TASKSET-AR-UI-DESIGN-IMPLEMENTATION",
+                "agent_role": "lead-engineer",
+                "team_id": "agent-runtime-core",
+                "agent_instance_id": "le-score",
+                "display_name": "lead_engineer@score-01",
+                "callsite_id": "terminal:wt-task-ar-280:tab-01",
+                "pane_id": "terminal:wt-task-ar-280:tab-01",
+                "status": "working",
+                "phase": "implement",
+                "progress_pct": 64,
+                "score": 91,
+                "status_text": "Designing command hierarchy",
+                "worktree_path": ".worktrees/TASK-AR-280",
+                "branch": "codex/task-ar-280-ui",
+                "claimed_at": "2026-06-11T08:42:47+09:00",
+                "last_heartbeat": "2026-06-11T08:50:00+09:00",
+            }
+        ),
+    )
+
+    state = ui_state.build_state(tmp_path, now="2026-06-11T08:51:00+09:00")
+
+    assert state["agents"][0]["score"] == 91
+    assert state["agents"][0]["score_label"] == "91/100"
+
+
 def test_ui_state_exposes_task_set_progress_and_status_text(tmp_path):
     _write(
         tmp_path / "agents" / "runtime" / "task_claims" / "CLAIM-progress.json",

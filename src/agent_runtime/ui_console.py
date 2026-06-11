@@ -497,6 +497,8 @@ textarea:focus {
 }
 .task-card,
 .taskset-card,
+.agent-card,
+.command-card,
 .list-row {
   width: 100%;
   min-width: 0;
@@ -512,6 +514,8 @@ textarea:focus {
 }
 .task-card:hover,
 .taskset-card:hover,
+.agent-card:hover,
+.command-card:hover,
 .list-row:hover {
   border-color: var(--line-strong);
 }
@@ -541,7 +545,15 @@ textarea:focus {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
 }
+.agent-card-meta,
+.command-card-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
 .task-card-meta > span,
+.agent-card-meta > span,
+.command-card-meta > span,
 .task-status {
   min-width: 0;
   border: 1px solid rgba(52, 56, 68, 0.76);
@@ -558,6 +570,8 @@ textarea:focus {
   text-transform: uppercase;
 }
 .task-card-meta strong,
+.agent-card-meta strong,
+.command-card-meta strong,
 .task-status strong {
   display: block;
   margin-top: 4px;
@@ -572,13 +586,42 @@ textarea:focus {
 .task-card-taskset strong {
   color: var(--primary-hover);
 }
+.agent-card-header,
+.command-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.agent-score strong {
+  color: var(--teal);
+}
+.agent-claim strong,
+.command-card-meta strong {
+  color: var(--primary-hover);
+}
+.agent-status-text,
+.command-approval {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+.command-payload,
+.command-result {
+  max-height: 128px;
+  white-space: pre-wrap;
+}
 .task-card b,
 .taskset-card b,
+.agent-card b,
+.command-card b,
 .list-row b {
   overflow-wrap: anywhere;
 }
 .task-card span,
 .taskset-card span,
+.agent-card span,
+.command-card span,
 .list-row span,
 .list-row p {
   color: var(--muted);
@@ -592,24 +635,32 @@ textarea:focus {
 .task-card .task-card-summary {
   color: var(--muted);
 }
-.task-card .meta-label {
+.task-card .meta-label,
+.agent-card .meta-label,
+.command-card .meta-label {
   color: var(--subtle);
   font-size: 10px;
   line-height: 1;
 }
 .task-card code,
 .taskset-card code,
+.agent-card code,
+.command-card code,
 .list-row code {
   color: var(--subtle);
   font-size: 11px;
   overflow-wrap: anywhere;
 }
 .list-row.ok,
+.agent-card.ok,
+.command-card.risk-low,
 .task-card.status-completed,
 .task-card.status-done {
   border-left: 3px solid var(--success);
 }
 .list-row.warn,
+.agent-card.warn,
+.command-card.risk-unknown,
 .task-card.status-in-progress,
 .task-card.status-active,
 .task-card.status-planned,
@@ -617,6 +668,8 @@ textarea:focus {
   border-left: 3px solid var(--warning);
 }
 .list-row.error,
+.command-card.risk-high,
+.command-card.risk-failed,
 .task-card.status-blocked,
 .task-card.status-hold {
   border-left: 3px solid var(--danger);
@@ -745,6 +798,8 @@ pre {
   .filter-row,
   .evidence-grid,
   .task-card-meta,
+  .agent-card-meta,
+  .command-card-meta,
   .meta-grid,
   .edit-row,
   .button-row {
@@ -926,24 +981,31 @@ function renderKanban() {
   });
 }
 
+function agentProgressLabel(agent) {
+  const pct = numericPct(agent.progress_pct);
+  return pct === null ? "~" : `${pct}%`;
+}
+
 function renderAgents() {
   renderTaskSets();
   const agents = runtimeState.agents || [];
   $("agents-list").innerHTML = agents.length ? agents.map((agent) => `
-    <article class="list-row ${agent.online ? "ok" : "warn"}">
-      <b>${escapeHtml(agent.display_name || agent.role)}</b>
-      <span>${escapeHtml(agent.status || "offline")} / ${escapeHtml(agent.current_task_id || "no task")}</span>
-      <div class="agent-progress">
-        <div class="agent-progress-meta">
-          <span>phase: ${escapeHtml(agent.phase || "unknown")}</span>
-          <span>step: ${escapeHtml(agent.step_index && agent.step_total ? `${agent.step_index}/${agent.step_total}` : "?")}</span>
-          <span>progress_pct: ${escapeHtml(numericPct(agent.progress_pct) ?? "~")}</span>
-        </div>
-        ${progressBar(agent.progress_pct)}
-        <span>${escapeHtml(agent.status_text || agent.phase || "working")}</span>
-        <code>${escapeHtml(agent.task_set_id || "no task set")}</code>
+    <article class="agent-card ${agent.online ? "ok" : "warn"}">
+      <div class="agent-card-header">
+        <b>${escapeHtml(agent.display_name || agent.role || "agent")}</b>
+        <span class="state-chip">${escapeHtml(agent.status || "offline")}</span>
       </div>
-      <code>${escapeHtml(agent.source_path)}</code>
+      <div class="agent-card-meta" aria-label="Agent metadata">
+        <span><span class="meta-label">Role</span><strong>${escapeHtml(agent.role || "unknown")}</strong></span>
+        <span><span class="meta-label">Status</span><strong>${escapeHtml(agent.status || "offline")}</strong></span>
+        <span class="agent-score"><span class="meta-label">Score</span><strong>${escapeHtml(agent.score_label || "not scored")}</strong></span>
+        <span class="agent-claim"><span class="meta-label">Claim</span><strong>${escapeHtml(agent.claim_id || agent.current_task_id || "no claim")}</strong></span>
+        <span><span class="meta-label">Progress</span><strong>${escapeHtml(agent.step_index && agent.step_total ? `${agent.step_index}/${agent.step_total} - ${agentProgressLabel(agent)}` : agentProgressLabel(agent))}</strong></span>
+        <span><span class="meta-label">Task set</span><strong>${escapeHtml(agent.task_set_id || "no task set")}</strong></span>
+      </div>
+      ${progressBar(agent.progress_pct)}
+      <span class="agent-status-text">${escapeHtml(agent.status_text || agent.phase || "working")}</span>
+      <code>${escapeHtml(agent.source_path || agent.worktree_path || "")}</code>
     </article>
   `).join("") : `<div class="empty">No active sessions</div>`;
 }
@@ -1082,17 +1144,47 @@ function renderSources() {
   `).join("") : `<div class="empty">No sources</div>`;
 }
 
+function formatCommandValue(value) {
+  if (value === undefined || value === null || value === "") return "none";
+  if (typeof value === "string") return value;
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch (error) {
+    return String(value);
+  }
+}
+
+function commandRiskClass(row) {
+  if (row.status === "failed") return "risk-failed";
+  if (row.approval_required || row.risk_level === "high") return "risk-high";
+  if (row.risk_level === "low" || row.status === "accepted" || row.status === "queued") return "risk-low";
+  return "risk-unknown";
+}
+
 function renderCommands() {
   const rows = [...pendingWrites, ...((runtimeState && runtimeState.commands) || [])];
   const host = $("command-log");
   if (!host) return;
   host.innerHTML = rows.length ? rows.slice(0, 80).map((row) => `
-    <article class="list-row ${row.status === "failed" ? "error" : row.status === "pending" ? "warn" : "ok"}">
-      <b>${escapeHtml(row.id || row.type)}</b>
-      <span>${escapeHtml(row.status)} / ${escapeHtml(row.type || "command")} / ${escapeHtml(row.risk_level || "unknown")}</span>
-      <code>${escapeHtml(row.target || row.source_path || "")}</code>
-      ${row.approval_required ? `<p>approval required: ${escapeHtml((row.approval_reasons || []).join(", ") || "owner review")}</p>` : ""}
-      ${row.errors ? `<p>${escapeHtml(row.errors.join("; "))}</p>` : ""}
+    <article class="command-card ${commandRiskClass(row)}">
+      <div class="command-card-header">
+        <b>${escapeHtml(row.id || row.type || "command")}</b>
+        <span class="state-chip">${escapeHtml(row.status || "pending")}</span>
+      </div>
+      <div class="command-card-meta" aria-label="Command metadata">
+        <span><span class="meta-label">Type</span><strong>${escapeHtml(row.type || "command")}</strong></span>
+        <span><span class="meta-label">Target</span><strong>${escapeHtml(row.target || "no target")}</strong></span>
+        <span><span class="meta-label">Risk</span><strong>${escapeHtml(row.risk_level || (row.approval_required ? "high" : "unknown"))}</strong></span>
+      </div>
+      <div>
+        <span class="meta-label">Payload</span>
+        <pre class="command-payload">${escapeHtml(formatCommandValue(row.payload))}</pre>
+      </div>
+      <div>
+        <span class="meta-label">Result</span>
+        <pre class="command-result">${escapeHtml(formatCommandValue(row.result || row.errors || row.status))}</pre>
+      </div>
+      ${row.approval_required ? `<p class="command-approval">approval required: ${escapeHtml((row.approval_reasons || []).join(", ") || "owner review")}</p>` : ""}
     </article>
   `).join("") : `<div class="empty">No write commands</div>`;
 }

@@ -775,6 +775,14 @@ def _is_active_task_claim(status: str) -> bool:
     return status in {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
 
 
+def _score_label(value: Any) -> tuple[int | None, str]:
+    try:
+        score = int(value)
+    except (TypeError, ValueError):
+        return None, "not scored"
+    return max(0, min(100, score)), f"{max(0, min(100, score))}/100"
+
+
 def load_task_claims(root: Path, now: str, warnings: list[dict[str, str]]) -> list[dict[str, Any]]:
     claims: list[dict[str, Any]] = []
     for path in sorted(root.glob(TASK_CLAIM_GLOB)):
@@ -817,12 +825,15 @@ def load_agents(
         status = str(claim.get("status") or "")
         if not _is_active_task_claim(status):
             continue
+        score, score_label = _score_label(claim.get("score"))
         agents.append(
             {
                 "id": claim.get("agent_instance_id") or claim.get("claim_id"),
                 "role": claim.get("agent_role"),
                 "team_id": claim.get("team_id"),
                 "status": status,
+                "score": score,
+                "score_label": score_label,
                 "phase": claim.get("phase"),
                 "progress_pct": claim.get("progress_pct"),
                 "current_task_id": claim.get("task_id"),
@@ -879,11 +890,14 @@ def load_agents(
         latest_event = latest_event_by_role.get(role)
         error_event = latest_error_by_role.get(role)
         status = str(payload.get("status") or "")
+        score, score_label = _score_label(payload.get("score"))
         agents.append(
             {
                 "id": payload.get("agent_id") or payload.get("id") or path.stem,
                 "role": role,
                 "status": status,
+                "score": score,
+                "score_label": score_label,
                 "current_task_id": payload.get("task_id") or payload.get("current_task_id"),
                 "provider": payload.get("provider"),
                 "model": payload.get("model"),

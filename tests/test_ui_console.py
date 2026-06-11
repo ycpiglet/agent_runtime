@@ -200,6 +200,51 @@ def test_ui_console_agents_view_contains_progress_fields(tmp_path):
     assert api["items"][0]["id"] == "TASKSET-AR-PROGRESS"
 
 
+def test_ui_console_agent_and_command_panes_surface_operational_hierarchy(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    for marker in [
+        "agent-card",
+        "agent-card-meta",
+        "agent-score",
+        "agent-claim",
+        "command-card",
+        "command-card-meta",
+        "command-payload",
+        "command-result",
+        "formatCommandValue",
+    ]:
+        assert marker in js
+
+    for label in [
+        "Role",
+        "Status",
+        "Score",
+        "Claim",
+        "Progress",
+        "Type",
+        "Target",
+        "Payload",
+        "Result",
+        "Risk",
+    ]:
+        assert f">{label}<" in js
+
+    for selector in [
+        ".agent-card",
+        ".agent-card-meta",
+        ".agent-score",
+        ".agent-claim",
+        ".command-card",
+        ".command-card-meta",
+        ".command-payload",
+        ".command-result",
+        ".command-card.risk-high",
+    ]:
+        assert selector in css
+
+
 def test_ui_console_api_resource_routes_match_state_resources(tmp_path):
     _write_task(tmp_path, "TASK-AR-229")
 
