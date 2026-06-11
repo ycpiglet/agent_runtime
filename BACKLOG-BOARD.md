@@ -72,7 +72,7 @@ completed_task_set_count: 15
 - Progress: `0/10` done; `10` open or active.
 | Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-310` | planned | Action | P1 | High | Medium | 4h/3000tok | Low | 7 | governance-loop | independent-auditor | Execute next | 레거시 전신 프로젝트(tag_manual)에 대한 라이브 의존을 모두 해소해 이관을 최종 마감하고, agent_runtime이 레거시 참조 없이 완전히… |
+| `TASK-AR-310` | in_progress | Action | P1 | High | Medium | 4h/3000tok | Medium | 8 | governance-loop | independent-auditor | Execute next | 레거시 전신 프로젝트(tag_manual)에 대한 라이브 의존을 모두 해소해 이관을 최종 마감하고, agent_runtime이 레거시 참조 없이 완전히… |
 | `TASK-AR-313` | planned | Ask | P1 | High | Medium | 6h/4000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | 광범위한 python 허용 목록을 정확한 명령 프로파일(ci/owner/research)로 좁혀 임의 코드 실행 경로를 제거한다. |
 | `TASK-AR-311` | planned | Action | P1 | High | High | 8h/6000tok | Low | 6 | validation-team | qa | Execute next | 에이전트 간 통신을 태스크 상태/로그 추론 방식에서 명시적 메시지 패싱 API로 전환해 A2A 체인을 구조적으로 보장한다. |
 | `TASK-AR-312` | planned | Action | P1 | High | High | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 문서로만 정의된 역할 체계(TEAMS/ORG/diversity council)를 실제 2~3개 동시 에이전트 인스턴스 실행으로 증명하고, 역할별 쓰기 권… |

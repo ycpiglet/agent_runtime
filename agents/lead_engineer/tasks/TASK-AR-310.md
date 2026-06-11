@@ -4,9 +4,10 @@ display_id: TASK-AR-310
 task_uid: 9f5e2229-3d3e-44df-9466-0727be021341
 registered_at: 2026-06-11T17:58:45+09:00
 created_at: 2026-06-11T17:58:45+09:00
-updated_at: 2026-06-11T17:58:45+09:00
+started_at: 2026-06-11T22:14:43+09:00
+updated_at: 2026-06-11T22:14:43+09:00
 title: tag_manual 의존성 해소 및 완전 독립
-status: planned
+status: in_progress
 priority: P1
 difficulty: M
 est_hours: 4
