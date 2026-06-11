@@ -22,6 +22,7 @@ TASKS_DIR = ROOT / "agents" / "lead_engineer" / "tasks"
 DEFAULT_OUTPUT = ROOT / "BACKLOG-BOARD.md"
 
 DISPLAY_REPLACEMENTS = {
+    "레거시 전신 프로젝트(" + "tag" + "_manual)": "레거시 전신 프로젝트",
     "tag" + "_manual": "레거시 전신 프로젝트",
 }
 
