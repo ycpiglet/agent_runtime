@@ -297,6 +297,64 @@ def test_ui_console_event_and_evidence_panes_surface_audit_hierarchy(tmp_path):
         assert selector in css
 
 
+def test_ui_console_map_planner_source_and_write_panes_surface_boundaries(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    for host_id in [
+        "graph-list",
+        "state-machine-list",
+        "roadmap-list",
+        "planning-proposals-list",
+        "planning-scans-list",
+        "planning-requests-list",
+        "sources-list",
+        "command-log",
+    ]:
+        assert host_id in html
+
+    for marker in [
+        "surface-card",
+        "surface-card-meta",
+        "map-card",
+        "graph-card",
+        "state-machine-card",
+        "roadmap-card",
+        "planning-card",
+        "source-card",
+        "boundaryClass",
+        "renderSurfaceMeta",
+    ]:
+        assert marker in js
+
+    for label in [
+        "Boundary",
+        "Kind",
+        "Source",
+        "From",
+        "To",
+        "Status",
+        "Risk",
+        "Mutation",
+    ]:
+        assert f">{label}<" in js
+
+    for selector in [
+        ".surface-card",
+        ".surface-card-meta",
+        ".map-card",
+        ".graph-card",
+        ".state-machine-card",
+        ".roadmap-card",
+        ".planning-card",
+        ".source-card",
+        ".boundary-read",
+        ".boundary-write",
+    ]:
+        assert selector in css
+
+
 def test_ui_console_api_resource_routes_match_state_resources(tmp_path):
     _write_task(tmp_path, "TASK-AR-229")
 

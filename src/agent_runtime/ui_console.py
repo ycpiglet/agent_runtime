@@ -500,6 +500,7 @@ textarea:focus {
 .agent-card,
 .command-card,
 .audit-card,
+.surface-card,
 .list-row {
   width: 100%;
   min-width: 0;
@@ -518,6 +519,7 @@ textarea:focus {
 .agent-card:hover,
 .command-card:hover,
 .audit-card:hover,
+.surface-card:hover,
 .list-row:hover {
   border-color: var(--line-strong);
 }
@@ -549,7 +551,8 @@ textarea:focus {
 }
 .agent-card-meta,
 .command-card-meta,
-.audit-card-meta {
+.audit-card-meta,
+.surface-card-meta {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
@@ -558,6 +561,7 @@ textarea:focus {
 .agent-card-meta > span,
 .command-card-meta > span,
 .audit-card-meta > span,
+.surface-card-meta > span,
 .task-status {
   min-width: 0;
   border: 1px solid rgba(52, 56, 68, 0.76);
@@ -577,6 +581,7 @@ textarea:focus {
 .agent-card-meta strong,
 .command-card-meta strong,
 .audit-card-meta strong,
+.surface-card-meta strong,
 .task-status strong {
   display: block;
   margin-top: 4px;
@@ -593,7 +598,8 @@ textarea:focus {
 }
 .agent-card-header,
 .command-card-header,
-.audit-card-header {
+.audit-card-header,
+.surface-card-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -607,13 +613,30 @@ textarea:focus {
 .event-card,
 .error-card,
 .evidence-card,
-.replay-card {
+.replay-card,
+.map-card,
+.graph-card,
+.state-machine-card,
+.roadmap-card,
+.planning-card,
+.source-card {
   gap: 10px;
 }
 .audit-card-meta strong,
+.surface-card-meta strong,
 .evidence-card b,
-.replay-card b {
+.replay-card b,
+.map-card b,
+.planning-card b,
+.source-card b {
   color: var(--primary-hover);
+}
+.boundary-read strong,
+.boundary-api strong {
+  color: var(--teal);
+}
+.boundary-write strong {
+  color: var(--amber);
 }
 .agent-score strong {
   color: var(--teal);
@@ -638,6 +661,7 @@ textarea:focus {
 .agent-card b,
 .command-card b,
 .audit-card b,
+.surface-card b,
 .list-row b {
   overflow-wrap: anywhere;
 }
@@ -646,6 +670,7 @@ textarea:focus {
 .agent-card span,
 .command-card span,
 .audit-card span,
+.surface-card span,
 .list-row span,
 .list-row p {
   color: var(--muted);
@@ -662,7 +687,8 @@ textarea:focus {
 .task-card .meta-label,
 .agent-card .meta-label,
 .command-card .meta-label,
-.audit-card .meta-label {
+.audit-card .meta-label,
+.surface-card .meta-label {
   color: var(--subtle);
   font-size: 10px;
   line-height: 1;
@@ -672,6 +698,7 @@ textarea:focus {
 .agent-card code,
 .command-card code,
 .audit-card code,
+.surface-card code,
 .list-row code {
   color: var(--subtle);
   font-size: 11px;
@@ -681,6 +708,7 @@ textarea:focus {
 .agent-card.ok,
 .command-card.risk-low,
 .audit-card.pass,
+.surface-card.pass,
 .task-card.status-completed,
 .task-card.status-done {
   border-left: 3px solid var(--success);
@@ -689,6 +717,7 @@ textarea:focus {
 .agent-card.warn,
 .command-card.risk-unknown,
 .audit-card.warn,
+.surface-card.warn,
 .task-card.status-in-progress,
 .task-card.status-active,
 .task-card.status-planned,
@@ -699,6 +728,7 @@ textarea:focus {
 .command-card.risk-high,
 .command-card.risk-failed,
 .audit-card.fail,
+.surface-card.fail,
 .task-card.status-blocked,
 .task-card.status-hold {
   border-left: 3px solid var(--danger);
@@ -830,6 +860,7 @@ pre {
   .agent-card-meta,
   .command-card-meta,
   .audit-card-meta,
+  .surface-card-meta,
   .meta-grid,
   .edit-row,
   .button-row {
@@ -1161,29 +1192,78 @@ function renderEvidence() {
   `).join("") : `<div class="empty">No replay records</div>`;
 }
 
+function boundaryLabel(value, fallback = "read-only") {
+  return String(value || fallback).replace(/_/g, " ");
+}
+
+function boundaryClass(value) {
+  const text = boundaryLabel(value).toLowerCase();
+  if (text.includes("write") || text.includes("mutation") || text.includes("command")) return "boundary-write";
+  if (text.includes("api") || text.includes("outbox")) return "boundary-api";
+  return "boundary-read";
+}
+
+function renderSurfaceMeta(content) {
+  return `<div class="surface-card-meta" aria-label="Surface metadata">${content}</div>`;
+}
+
+function surfaceTone(row, fallback = "pass") {
+  const text = JSON.stringify(row || {}).toLowerCase();
+  if (text.includes("failed") || text.includes("error") || text.includes("block")) return "fail";
+  if (text.includes("warn") || text.includes("watch") || text.includes("pending") || text.includes("missing")) return "warn";
+  return fallback;
+}
+
 function renderMap() {
   const graph = runtimeState.graph || { nodes: [], edges: [] };
   const machines = runtimeState.state_machines || [];
   const roadmap = runtimeState.roadmap || { milestones: [] };
   $("graph-list").innerHTML = graph.edges.length ? graph.edges.slice(0, 80).map((edge) => `
-    <article class="list-row">
-      <b>${escapeHtml(edge.from)} -> ${escapeHtml(edge.to)}</b>
-      <span>${escapeHtml(edge.kind)} / ${escapeHtml(edge.task_id || "no task")}</span>
-      <code>${escapeHtml(edge.source_path || edge.id || "")}</code>
+    <article class="surface-card map-card graph-card pass">
+      <div class="surface-card-header">
+        <b>${escapeHtml(edge.from)} -> ${escapeHtml(edge.to)}</b>
+        <span class="state-chip">read-only</span>
+      </div>
+      ${renderSurfaceMeta(`
+        <span><span class="meta-label">From</span><strong>${escapeHtml(edge.from || "unknown")}</strong></span>
+        <span><span class="meta-label">To</span><strong>${escapeHtml(edge.to || "unknown")}</strong></span>
+        <span><span class="meta-label">Kind</span><strong>${escapeHtml(edge.kind || "edge")}</strong></span>
+        <span><span class="meta-label">Boundary</span><strong class="${boundaryClass("read-only")}">${escapeHtml(boundaryLabel("read-only"))}</strong></span>
+        <span><span class="meta-label">Source</span><strong>${escapeHtml(edge.source_path || edge.id || "graph")}</strong></span>
+        <span><span class="meta-label">Status</span><strong>${escapeHtml(edge.task_id || "no task")}</strong></span>
+      `)}
     </article>
   `).join("") : `<div class="empty">No graph edges</div>`;
   $("state-machine-list").innerHTML = machines.length ? machines.map((machine) => `
-    <article class="list-row ok">
-      <b>${escapeHtml(machine.id)}: ${escapeHtml(machine.current_state || machine.initial || "unknown")}</b>
-      <span>${escapeHtml(machine.scope || "")} / ${escapeHtml((machine.states || []).join(" -> "))}</span>
-      <code>${escapeHtml(machine.source_path || "")}</code>
+    <article class="surface-card map-card state-machine-card pass">
+      <div class="surface-card-header">
+        <b>${escapeHtml(machine.id)}: ${escapeHtml(machine.current_state || machine.initial || "unknown")}</b>
+        <span class="state-chip">read-only</span>
+      </div>
+      ${renderSurfaceMeta(`
+        <span><span class="meta-label">Kind</span><strong>state machine</strong></span>
+        <span><span class="meta-label">Status</span><strong>${escapeHtml(machine.current_state || machine.initial || "unknown")}</strong></span>
+        <span><span class="meta-label">Boundary</span><strong class="${boundaryClass("read-only")}">${escapeHtml(boundaryLabel("read-only"))}</strong></span>
+        <span><span class="meta-label">Source</span><strong>${escapeHtml(machine.source_path || "state machine file")}</strong></span>
+        <span><span class="meta-label">From</span><strong>${escapeHtml(machine.initial || "initial")}</strong></span>
+        <span><span class="meta-label">To</span><strong>${escapeHtml((machine.states || []).join(" -> ") || "states")}</strong></span>
+      `)}
     </article>
   `).join("") : `<div class="empty">No state machines</div>`;
   $("roadmap-list").innerHTML = (roadmap.milestones || []).length ? (roadmap.milestones || []).slice(0, 40).map((item) => `
-    <article class="list-row ${item.done ? "ok" : "warn"}">
-      <b>${escapeHtml(item.date)} - ${escapeHtml(item.title)}</b>
-      <span>${escapeHtml(item.done ? "done" : "open")} / ${escapeHtml(roadmap.phase || "no phase")}</span>
-      <code>${escapeHtml(roadmap.source_path || "")}</code>
+    <article class="surface-card map-card roadmap-card ${item.done ? "pass" : "warn"}">
+      <div class="surface-card-header">
+        <b>${escapeHtml(item.date)} - ${escapeHtml(item.title)}</b>
+        <span class="state-chip">${escapeHtml(item.done ? "done" : "open")}</span>
+      </div>
+      ${renderSurfaceMeta(`
+        <span><span class="meta-label">Kind</span><strong>roadmap</strong></span>
+        <span><span class="meta-label">Status</span><strong>${escapeHtml(item.done ? "done" : "open")}</strong></span>
+        <span><span class="meta-label">Boundary</span><strong class="${boundaryClass("read-only")}">${escapeHtml(boundaryLabel("read-only"))}</strong></span>
+        <span><span class="meta-label">Source</span><strong>${escapeHtml(roadmap.source_path || "roadmap")}</strong></span>
+        <span><span class="meta-label">From</span><strong>${escapeHtml(roadmap.phase || "phase")}</strong></span>
+        <span><span class="meta-label">To</span><strong>${escapeHtml(item.title || "milestone")}</strong></span>
+      `)}
     </article>
   `).join("") : `<div class="empty">No roadmap milestones</div>`;
 }
@@ -1194,25 +1274,51 @@ function renderPlanning() {
   const scans = planning.scan_reports || [];
   const requests = [...(planning.requests || []), ...(planning.draft_tasks || []), ...(planning.applied || [])];
   $("planning-proposals-list").innerHTML = proposals.length ? proposals.slice(0, 80).map((row) => `
-    <article class="list-row ${row.risk_tier === "high" || row.status === "blocked" ? "warn" : "ok"}">
-      <b>${escapeHtml(row.id || row.title || "proposal")}</b>
-      <span>${escapeHtml(row.status || "unknown")} / ${escapeHtml(row.action_type || "proposal")} / ${escapeHtml(row.risk_tier || "unknown")}</span>
-      <p>${escapeHtml(row.owner_boundary || row.suggested_next_action || "")}</p>
-      <code>${escapeHtml(row.source_path || (row.source_refs || [])[0]?.path || "")}</code>
+    <article class="surface-card planning-card ${surfaceTone(row, row.risk_tier === "high" || row.status === "blocked" ? "warn" : "pass")}">
+      <div class="surface-card-header">
+        <b>${escapeHtml(row.id || row.title || "proposal")}</b>
+        <span class="state-chip">${escapeHtml(row.status || "unknown")}</span>
+      </div>
+      ${renderSurfaceMeta(`
+        <span><span class="meta-label">Kind</span><strong>${escapeHtml(row.action_type || "proposal")}</strong></span>
+        <span><span class="meta-label">Status</span><strong>${escapeHtml(row.status || "unknown")}</strong></span>
+        <span><span class="meta-label">Risk</span><strong>${escapeHtml(row.risk_tier || "unknown")}</strong></span>
+        <span><span class="meta-label">Boundary</span><strong class="${boundaryClass(row.owner_boundary || "proposal-only")}">${escapeHtml(boundaryLabel(row.owner_boundary || "proposal-only"))}</strong></span>
+        <span><span class="meta-label">Source</span><strong>${escapeHtml(row.source_path || (row.source_refs || [])[0]?.path || "planning proposal")}</strong></span>
+        <span><span class="meta-label">Mutation</span><strong>${escapeHtml(row.suggested_next_action || "no direct mutation")}</strong></span>
+      `)}
     </article>
   `).join("") : `<div class="empty">No planning proposals</div>`;
   $("planning-scans-list").innerHTML = scans.length ? scans.slice(0, 40).map((row) => `
-    <article class="list-row ${row.status === "block" || row.status === "watch" ? "warn" : "ok"}">
-      <b>${escapeHtml(row.id || "scan")}</b>
-      <span>${escapeHtml(row.status || "unknown")} / ${escapeHtml(row.trigger || "manual")} / findings ${escapeHtml((row.summary || {}).finding_count || 0)}</span>
-      <code>${escapeHtml(row.source_path || "")}</code>
+    <article class="surface-card planning-card ${surfaceTone(row, row.status === "block" || row.status === "watch" ? "warn" : "pass")}">
+      <div class="surface-card-header">
+        <b>${escapeHtml(row.id || "scan")}</b>
+        <span class="state-chip">${escapeHtml(row.status || "unknown")}</span>
+      </div>
+      ${renderSurfaceMeta(`
+        <span><span class="meta-label">Kind</span><strong>${escapeHtml(row.trigger || "manual scan")}</strong></span>
+        <span><span class="meta-label">Status</span><strong>${escapeHtml(row.status || "unknown")}</strong></span>
+        <span><span class="meta-label">Risk</span><strong>${escapeHtml((row.summary || {}).finding_count || 0)} findings</strong></span>
+        <span><span class="meta-label">Boundary</span><strong class="${boundaryClass("read-only scan")}">${escapeHtml(boundaryLabel("read-only scan"))}</strong></span>
+        <span><span class="meta-label">Source</span><strong>${escapeHtml(row.source_path || "planning scan")}</strong></span>
+        <span><span class="meta-label">Mutation</span><strong>none</strong></span>
+      `)}
     </article>
   `).join("") : `<div class="empty">No planning scans</div>`;
   $("planning-requests-list").innerHTML = requests.length ? requests.slice(0, 80).map((row) => `
-    <article class="list-row ${row.status === "failed" ? "error" : "ok"}">
-      <b>${escapeHtml(row.id || row.source_path || "planning record")}</b>
-      <span>${escapeHtml(row.status || row.source_kind || "record")} / ${escapeHtml(row.type || row.mode || "planning")}</span>
-      <code>${escapeHtml(row.source_path || "")}</code>
+    <article class="surface-card planning-card ${surfaceTone(row)}">
+      <div class="surface-card-header">
+        <b>${escapeHtml(row.id || row.source_path || "planning record")}</b>
+        <span class="state-chip">${escapeHtml(row.status || row.source_kind || "record")}</span>
+      </div>
+      ${renderSurfaceMeta(`
+        <span><span class="meta-label">Kind</span><strong>${escapeHtml(row.type || row.mode || "planning")}</strong></span>
+        <span><span class="meta-label">Status</span><strong>${escapeHtml(row.status || row.source_kind || "record")}</strong></span>
+        <span><span class="meta-label">Risk</span><strong>${escapeHtml(row.risk_tier || "unknown")}</strong></span>
+        <span><span class="meta-label">Boundary</span><strong class="${boundaryClass(row.mutation_boundary || "proposal-only")}">${escapeHtml(boundaryLabel(row.mutation_boundary || "proposal-only"))}</strong></span>
+        <span><span class="meta-label">Source</span><strong>${escapeHtml(row.source_path || "planning record")}</strong></span>
+        <span><span class="meta-label">Mutation</span><strong>${escapeHtml(row.action || "queued record")}</strong></span>
+      `)}
     </article>
   `).join("") : `<div class="empty">No planning requests, drafts, or apply records</div>`;
 }
@@ -1220,10 +1326,19 @@ function renderPlanning() {
 function renderSources() {
   const rows = [...(runtimeState.sources || []), ...(runtimeState.gaps || []), ...(runtimeState.warnings || [])];
   $("sources-list").innerHTML = rows.length ? rows.map((row) => `
-    <article class="list-row ${row.fresh === false || row.kind?.includes("error") ? "warn" : "ok"}">
-      <b>${escapeHtml(row.id || row.kind)}</b>
-      <span>${escapeHtml(row.freshness || row.detail || row.mutation_boundary || "")}</span>
-      <code>${escapeHtml(row.path)}</code>
+    <article class="surface-card source-card ${row.fresh === false || row.kind?.includes("error") ? "warn" : "pass"}">
+      <div class="surface-card-header">
+        <b>${escapeHtml(row.id || row.kind || "source")}</b>
+        <span class="state-chip">${escapeHtml(row.freshness || row.detail || "source")}</span>
+      </div>
+      ${renderSurfaceMeta(`
+        <span><span class="meta-label">Kind</span><strong>${escapeHtml(row.kind || "source")}</strong></span>
+        <span><span class="meta-label">Status</span><strong>${escapeHtml(row.fresh === false ? "watch" : "pass")}</strong></span>
+        <span><span class="meta-label">Boundary</span><strong class="${boundaryClass(row.mutation_boundary)}">${escapeHtml(boundaryLabel(row.mutation_boundary))}</strong></span>
+        <span><span class="meta-label">Source</span><strong>${escapeHtml(row.path || "no path")}</strong></span>
+        <span><span class="meta-label">Risk</span><strong>${escapeHtml(row.detail || row.freshness || "known")}</strong></span>
+        <span><span class="meta-label">Mutation</span><strong>${escapeHtml(row.mutation_boundary || "read-only")}</strong></span>
+      `)}
     </article>
   `).join("") : `<div class="empty">No sources</div>`;
 }
@@ -1259,6 +1374,7 @@ function renderCommands() {
         <span><span class="meta-label">Type</span><strong>${escapeHtml(row.type || "command")}</strong></span>
         <span><span class="meta-label">Target</span><strong>${escapeHtml(row.target || "no target")}</strong></span>
         <span><span class="meta-label">Risk</span><strong>${escapeHtml(row.risk_level || (row.approval_required ? "high" : "unknown"))}</strong></span>
+        <span><span class="meta-label">Boundary</span><strong class="${boundaryClass("write command")}">${escapeHtml(boundaryLabel("write command"))}</strong></span>
       </div>
       <div>
         <span class="meta-label">Payload</span>

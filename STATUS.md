@@ -1,5 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-11 - TASK-AR-282 map planner source write pane closeout
+
+- Summary: completed `TASK-AR-282` for the `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` map/planner/source/write pane hierarchy scope.
+- Output: graph, state-machine, roadmap, planning, source, and write command records now render as operator-console surface cards with visible Kind, Status, Boundary, Source, Risk, and Mutation labels.
+- Verification: focused UI/state/command tests passed with `44 passed`; `py_compile` passed; `owner_governance_gate.py` passed; headless Playwright desktop/mobile checks over map, planner, source, and write tabs showed no horizontal overflow or console warnings/errors.
+- Handoff: `TASK-AR-283` is the next UI design implementation task; `TASK-AR-282` is archived in `BACKLOG-BOARD.md`.
+- Evidence: `reviews/REVIEW-2026-06-11-agent-runtime-task-ar-282-map-planner-source-write-panes.md`.
+
 ## 2026-06-11 - TASK-AR-281 evidence and event pane closeout
 
 - Summary: completed `TASK-AR-281` for the `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` evidence/event/replay/error pane hierarchy scope.

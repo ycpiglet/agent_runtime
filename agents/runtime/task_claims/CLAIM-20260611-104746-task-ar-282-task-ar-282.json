@@ -1,0 +1,41 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260611-104746-task-ar-282-task-ar-282",
+  "task_id": "TASK-AR-282",
+  "agent_role": "lead-engineer",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "le-20260611-104746-kst-task-ar-282",
+  "display_name": "lead_engineer@sequential-01",
+  "callsite_id": "terminal:wt-task-ar-282:tab-01",
+  "pane_id": "terminal:wt-task-ar-282:tab-01",
+  "mode": "sequential",
+  "status": "released",
+  "task_set_id": "TASKSET-AR-UI-DESIGN-IMPLEMENTATION",
+  "phase": "taskset-completed",
+  "progress_pct": 100,
+  "step_index": 6,
+  "step_total": 7,
+  "status_text": "TASK-AR-282 completed with tests, headless browser verification, Owner review, and backlog closeout; TASK-AR-283 is next.",
+  "worktree_path": ".worktrees/TASK-AR-282",
+  "branch": "codex/task-ar-282-ui-design-implementation",
+  "claimed_at": "2026-06-11T10:47:46+09:00",
+  "last_heartbeat": "2026-06-11T10:59:38+09:00",
+  "updated_at": "2026-06-11T10:59:38+09:00",
+  "expires_at": "2026-06-11T11:17:46+09:00",
+  "lease": {
+    "claimed_at": "2026-06-11T10:47:46+09:00",
+    "heartbeat_at": "2026-06-11T10:59:38+09:00",
+    "expires_at": "2026-06-11T11:17:46+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260611-104746-task-ar-282-task-ar-282.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260611-104746-task-ar-282-task-ar-282.log.md",
+  "allow_parallel_task_set": false,
+  "tags": [
+    "ui-console",
+    "task-ar-282",
+    "taskset-completed"
+  ],
+  "released_at": "2026-06-11T10:59:38+09:00",
+  "release_reason": "task_completed",
+  "preserved_branch": "codex/task-ar-282-ui-design-implementation"
+}
