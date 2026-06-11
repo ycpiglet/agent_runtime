@@ -1,0 +1,17 @@
+{
+  "schema": "agent-runtime-session-baseline/v1",
+  "captured_at": "2026-06-11T09:15:02.326068+00:00",
+  "cwd": "C:\\Users\\ycpig\\agent_runtime",
+  "head": "1837087",
+  "branch": "main",
+  "status_fingerprint": "88e5956bec9c956e6dd37246ec206718bbe05f58767ce60668c98b5fdd882e2f",
+  "stash_count": 0,
+  "worktrees": [
+    {
+      "path": "C:/Users/ycpig/agent_runtime",
+      "HEAD": "1837087871cbf2ec28f0e741e9f7bd201af7bf53",
+      "branch": "main"
+    }
+  ],
+  "active_codex_branches": []
+}

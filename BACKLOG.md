@@ -1,5 +1,14 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-06-11 TASKSET-AR-UI-UX-V2 Registration
+
+- New planned task set: `TASKSET-AR-UI-UX-V2` (Console Experience Architect).
+- Purpose: Owner UI/UX 기획 지시 반영 — Notion형 라이트 테마 기본(+Dark Mode), 사이드바 IA, 전 리스트 정렬/필터/그룹/밀도 토글, taskset 중심 작업 뷰 + Owner task 주입, Agent 조직도/RPG 프레즌스, Vision/Roadmap/Milestone, SSE 실시간 + rqt형 라이브 그래프, Slack형 채널 + meeting/seminar 소집, taskset 경계 실행 가드.
+- Registered planned tasks: `TASK-AR-320`(테마 시스템) `TASK-AR-321`(사이드바 IA) `TASK-AR-322`(공통 정렬/필터/밀도) `TASK-AR-323`(Tasksets 뷰+task 주입) `TASK-AR-324`(조직도+프레즌스) `TASK-AR-325`(Roadmap) `TASK-AR-326`(실시간+그래프, TASK-AR-317 의존) `TASK-AR-327`(채널+meeting/seminar) `TASK-AR-328`(taskset 경계 가드).
+- Plan entrypoint: `docs/superpowers/plans/2026-06-11-ui-ux-v2-console.md`.
+- Design decision: `docs/design/agent-runtime/DESIGN.md` Amendment 2026-06-11 — 기본 테마 다크→라이트 전환, 기존 다크 토큰은 Dark Mode로 보존.
+- Boundary: 선행 디자인 작업(TASKSET-AR-UI-DESIGN-SYSTEM/IMPLEMENTATION)은 main에 반영 완료된 CSS/시각 계층 범위였고, 본 taskset이 기능적 UX의 첫 등록이다. 기술 스택 전환(React+Vite 분리) 여부는 Phase C 진입 전 Owner 결정 포인트.
+
 ## 2026-06-11 TASKSET-AR-VISION-GAP-CLOSURE Registration
 
 - New planned task set: `TASKSET-AR-VISION-GAP-CLOSURE` (Vision Integrator).
