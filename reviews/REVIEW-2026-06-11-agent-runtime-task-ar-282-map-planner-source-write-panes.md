@@ -28,7 +28,7 @@ tags: [ui-console, ui-design, maps, planner, sources, writes, task-ar-282, verif
 | Focused tests | pass | `python -m pytest tests/test_ui_console.py tests/test_ui_state.py tests/test_ui_commands.py -q`: `44 passed` |
 | Syntax check | pass | `python -m py_compile src/agent_runtime/ui_console.py` |
 | Owner governance | pass | `python scripts/owner_governance_gate.py` |
-| Browser verification | pass | Headless Playwright on `http://127.0.0.1:8770/`: desktop `1440x1000` and mobile `390x844` map/planner/source/write checks had no horizontal overflow and no console errors/warnings |
+| Browser verification | pass | Headless Playwright against an in-process UI HTTP server: desktop `1440x1000` and mobile `390x844` map/planner/source/write checks had no horizontal overflow, no console errors/warnings, and expected read/write boundary colors |
 
 ## Insight
 
@@ -48,7 +48,7 @@ tags: [ui-console, ui-design, maps, planner, sources, writes, task-ar-282, verif
 | --- | --- | --- |
 | `TASK-AR-282` | completed | Archive from live board after board regeneration |
 | `TASK-AR-283` | planned | Polish responsive and accessibility behavior |
-| UI server | stopped | Local verification used `http://127.0.0.1:8770/`; temporary server was stopped after checks |
+| UI server | stopped | Local verification used an in-process temporary HTTP server that was shut down after checks |
 
 ## Risks / Blockers
 
