@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-11
-task_count: 106
-open_count: 10
+task_count: 116
+open_count: 20
 completed_count: 96
-task_set_count: 2
+task_set_count: 3
 completed_task_set_count: 15
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `10` open or active tasks; `96` completed tasks are archived from this live board.
+- Summary: `20` open or active tasks; `96` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `9` / Ask `1` / Review `0` / Later `0` / Done `96`.
-- Task Sets: `2` active workflows; `15` completed workflows are hidden from the live action board.
+- Status: Action `18` / Ask `2` / Review `0` / Later `0` / Done `96`.
+- Task Sets: `3` active workflows; `15` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -65,6 +65,23 @@ completed_task_set_count: 15
 | `TASK-AR-309` | planned | Action | P2 | Medium | Low | 2h/1500tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 2026-06-11 "UI 미반영" 사건의 두 원인(비-editable stale 설치, 장수 구버전 서버 프로세스)이 재발하지 않도록 가드 방안을 계획… |
 | `TASK-AR-307` | planned | Ask | P1 | High | Medium | 4h/3000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | 2026-06-11 전사 구조 분석에서 식별된 개선 항목을 Owner가 우선순위 결정할 수 있는 실행 계획으로 확정한다 (분석/계획 전용, 구현 없음). |
 | `TASK-AR-308` | planned | Action | P1 | High | Medium | 4h/3000tok | Low | 6 | validation-team | qa | Execute next | Ralph/Loop Engineering, Multi-agent/A2A, 측정 가능한 평가·검증, backlog UI/task management, 추적… |
+
+### Vision Integrator (`TASKSET-AR-VISION-GAP-CLOSURE`)
+
+- Flow: Legacy independence, A2A messaging, multi-agent RBAC, loop hardening, live eval, skill packaging, realtime UI, and doc traceability.
+- Progress: `0/10` done; `10` open or active.
+| Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-310` | planned | Action | P1 | High | Medium | 4h/3000tok | Low | 7 | governance-loop | independent-auditor | Execute next | 레거시 전신 프로젝트(tag_manual)에 대한 라이브 의존을 모두 해소해 이관을 최종 마감하고, agent_runtime이 레거시 참조 없이 완전히… |
+| `TASK-AR-313` | planned | Ask | P1 | High | Medium | 6h/4000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | 광범위한 python 허용 목록을 정확한 명령 프로파일(ci/owner/research)로 좁혀 임의 코드 실행 경로를 제거한다. |
+| `TASK-AR-311` | planned | Action | P1 | High | High | 8h/6000tok | Low | 6 | validation-team | qa | Execute next | 에이전트 간 통신을 태스크 상태/로그 추론 방식에서 명시적 메시지 패싱 API로 전환해 A2A 체인을 구조적으로 보장한다. |
+| `TASK-AR-312` | planned | Action | P1 | High | High | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 문서로만 정의된 역할 체계(TEAMS/ORG/diversity council)를 실제 2~3개 동시 에이전트 인스턴스 실행으로 증명하고, 역할별 쓰기 권… |
+| `TASK-AR-314` | planned | Action | P1 | High | High | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 리스 기반 클레임 원시 연산으로 다중 프로세스 환경의 중복 응답/소유권 경합을 구조적으로 차단한다. |
+| `TASK-AR-316` | planned | Action | P2 | Medium | Low | 4h/3000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | skills/(session-closeout, taskset-dispatch)를 버전·트리거 조건·메타데이터를 갖춘 재사용 가능한 패키지로 만들어 다른… |
+| `TASK-AR-315` | planned | Action | P2 | Medium | Medium | 6h/5000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 결정적 계약 베이스라인(현 1.0 대체 통과)이 가리고 있는 실제 모델 출력 정확도(offline 0.6667 vs 목표 0.90) 격차를 provide… |
+| `TASK-AR-319` | planned | Action | P2 | Medium | Medium | 6h/4000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 368+개 reviews/ 증거를 수동 탐색에서 자동 색인/검증 체계로 전환해 문서 추적성을 규모에 견디게 만든다. |
+| `TASK-AR-317` | planned | Action | P2 | Medium | High | 10h/8000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | UI 콘솔을 읽기 전용 스냅샷 대시보드에서 운영 제어 표면으로 승격한다: 에이전트 루프 진행이 실시간 반영되고, 제안 승인/거절이 UI에서 가능해야 한다. |
+| `TASK-AR-318` | planned | Action | P3 | Low | Medium | 6h/5000tok | Low | 4 | agent-runtime-core | lead-engineer | Execute next | 이벤트/수정 기록을 나열에서 인과 체인 재생으로 승격해, 상태 변화를 프레임 단위로 거슬러 볼 수 있게 한다. |
 
 ## Archived Task Sets
 

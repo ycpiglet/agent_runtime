@@ -142,6 +142,12 @@ TASK_SET_DEFINITIONS = [
         "Owner feedback intake, enterprise-wide structure/vision analysis, and follow-up planning records.",
         91,
     ),
+    TaskSetInfo(
+        "TASKSET-AR-VISION-GAP-CLOSURE",
+        "Vision Integrator",
+        "Legacy independence, A2A messaging, multi-agent RBAC, loop hardening, live eval, skill packaging, realtime UI, and doc traceability.",
+        92,
+    ),
 ]
 TASK_SET_INFO = {item.task_set_id: item for item in TASK_SET_DEFINITIONS}
 UNCLASSIFIED_TASK_SET = TaskSetInfo(
