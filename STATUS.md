@@ -1,5 +1,14 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-11 - TASK-AR-280 agent and command pane closeout
+
+- Summary: completed `TASK-AR-280` for the `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` agent and command pane hierarchy scope.
+- Output: agent cards now expose role, status, score, claim, progress, task set, and source metadata; command cards now expose type, target, risk, payload, result, and approval-required text with explicit high-risk styling.
+- Verification: TDD RED/GREEN was exercised for score labels and pane hierarchy markers; focused UI/state/command tests passed with `42 passed`; `py_compile` passed; HTTP asset/API probes passed; Playwright desktop/mobile checks showed no horizontal overflow for injected agent and high-risk command cards.
+- Browser boundary: in-app Browser setup failed with a local Node runtime sandbox error, so Playwright MCP was used as the browser verification fallback.
+- Handoff: `TASK-AR-281` is the next UI design implementation task; `TASK-AR-280` is archived in `BACKLOG-BOARD.md`.
+- Evidence: `reviews/REVIEW-2026-06-11-agent-runtime-task-ar-280-agent-command-panes.md`.
+
 ## 2026-06-11 - TASK-AR-279 backlog hierarchy closeout
 
 - Summary: completed `TASK-AR-279` for the `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` backlog pane visual hierarchy scope.

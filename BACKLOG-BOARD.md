@@ -9,8 +9,8 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-11
 task_count: 93
-open_count: 22
-completed_count: 71
+open_count: 21
+completed_count: 72
 task_set_count: 4
 completed_task_set_count: 11
 ---
@@ -18,11 +18,11 @@ completed_task_set_count: 11
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `22` open or active tasks; `71` completed tasks are archived from this live board.
+- Summary: `21` open or active tasks; `72` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `19` / Ask `3` / Review `0` / Later `0` / Done `71`.
+- Status: Action `18` / Ask `3` / Review `0` / Later `0` / Done `72`.
 - Task Sets: `4` active workflows; `11` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -83,10 +83,9 @@ completed_task_set_count: 11
 ### Interface Stylist (`TASKSET-AR-UI-DESIGN-IMPLEMENTATION`)
 
 - Flow: Active UI design implementation work that applies the accepted design system across runtime panes.
-- Progress: `2/7` done; `5` open or active.
+- Progress: `3/7` done; `4` open or active.
 | Task | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-280` | in_progress | Action | P1 | High | Medium | 3h/1100tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Make active agent state, claims, progress, and command safety boundaries visible in t… |
 | `TASK-AR-281` | planned | Action | P1 | High | Medium | 3h/1100tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make events, errors, evidence, and replay records look audit-ready and severity-aware. |
 | `TASK-AR-283` | planned | Action | P2 | Medium | Medium | 2h/800tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Keep the dark operator console usable on desktop and mobile without relying on color-… |
 | `TASK-AR-284` | planned | Ask | P2 | Medium | Medium | 2h/800tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | Close the active UI design implementation task set only after focused checks, Owner g… |
@@ -184,6 +183,7 @@ completed_task_set_count: 11
 | `TASK-AR-270` | `a7032c6f-439…` | `TASKSET-AR-UI-DESIGN-SYSTEM` | completed | 2026-06-11 | 2026-06-11 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Closed the UI design task set with task records, design documentation, implementation… |
 | `TASK-AR-278` | `1238e8f8-9a3…` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | 2026-06-11 | 2026-06-11 | 2026-06-11T02:48:39+09:00 | 2026-06-11T02:48:39+09:00 | Apply the accepted Linear-like operator-console design system to the top-level consol… |
 | `TASK-AR-279` | `3cf6f3eb-bd8…` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | 2026-06-11 | 2026-06-11T04:51:27+09:00 | 2026-06-11T08:01:53+09:00 | 2026-06-11T08:01:53+09:00 | Make backlog lanes and task cards easier to scan for status, priority, owner, task se… |
+| `TASK-AR-280` | `d9f3edb5-70e…` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | 2026-06-11 | 2026-06-11T08:42:47+09:00 | 2026-06-11T09:05:05+09:00 | 2026-06-11T09:05:05+09:00 | Make active agent state, claims, progress, and command safety boundaries visible in t… |
 | `TASK-AR-233` | `d475a04e-6c5…` | `TASKSET-AR-REPO-HYGIENE` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Clean the current working tree through an intentional commit and push, then keep back… |
 
 ## Risks / Blockers

@@ -11,20 +11,20 @@
   "mode": "sequential",
   "status": "released",
   "task_set_id": "TASKSET-AR-UI-DESIGN-IMPLEMENTATION",
-  "phase": "progress-preserved",
-  "progress_pct": 55,
-  "step_index": 1,
+  "phase": "taskset-completed",
+  "progress_pct": 100,
+  "step_index": 4,
   "step_total": 7,
-  "status_text": "Released during session closeout after preserving TASK-AR-280 implementation progress; visual QA and closeout remain next.",
+  "status_text": "TASK-AR-280 completed with tests, browser verification, Owner review, and backlog closeout; TASK-AR-281 is next.",
   "worktree_path": ".worktrees/TASK-AR-280",
   "branch": "codex/task-ar-280-ui-design-implementation",
   "claimed_at": "2026-06-11T08:42:47+09:00",
-  "last_heartbeat": "2026-06-11T08:44:59+09:00",
-  "updated_at": "2026-06-11T08:44:59+09:00",
+  "last_heartbeat": "2026-06-11T09:05:05+09:00",
+  "updated_at": "2026-06-11T09:05:05+09:00",
   "expires_at": "2026-06-11T09:12:47+09:00",
   "lease": {
     "claimed_at": "2026-06-11T08:42:47+09:00",
-    "heartbeat_at": "2026-06-11T08:44:59+09:00",
+    "heartbeat_at": "2026-06-11T09:05:05+09:00",
     "expires_at": "2026-06-11T09:12:47+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260611-084247-task-ar-280-task-ar-280.handoff.md",
@@ -33,8 +33,8 @@
   "tags": [
     "ui-console",
     "task-ar-280",
-    "progress-preserved"
+    "taskset-completed"
   ],
-  "released_at": "2026-06-11T08:44:59+09:00",
-  "release_reason": "session_closeout_progress_preserved"
+  "released_at": "2026-06-11T09:05:05+09:00",
+  "release_reason": "task_completed"
 }
