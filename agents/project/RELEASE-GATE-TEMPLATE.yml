@@ -43,10 +43,8 @@ route_mapping:
       - agents/project/TEAMS.md
       - agents/project/LINKS.md
   hold_for_data:
-    cause: migration_or_dataset_evidence_gap
+    cause: dataset_or_external_data_evidence_gap
     evidence:
-      - agents/project/MIGRATION-COMPAT-MAP.yml
-      - agents/project/MIGRATION-HOLD-ROUTING.yml
       - agents/project/DATASET-CATALOG.yml
   ready:
     cause: all_hold_routes_closed_with_evidence
@@ -72,7 +70,6 @@ template:
   blocked_by: []
   impact_on_version: v0.1.8 release execution evidence exists for local tag smoke; external GitHub publish remains remote-gated evidence.
   evidence_bundle:
-    - agents/project/MIGRATION-HOLD-ROUTING.yml
     - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-223-closeout-bundle-consolidation.md
     - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-221-operating-chain-integration.md
     - reviews/REVIEW-2026-06-09-agent-runtime-task-ar-210-release-state-translation.md

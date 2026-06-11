@@ -4,9 +4,11 @@ display_id: TASK-AR-310
 task_uid: 9f5e2229-3d3e-44df-9466-0727be021341
 registered_at: 2026-06-11T17:58:45+09:00
 created_at: 2026-06-11T17:58:45+09:00
-updated_at: 2026-06-11T17:58:45+09:00
+started_at: 2026-06-11T22:14:43+09:00
+updated_at: 2026-06-11T23:01:07+09:00
 title: tag_manual 의존성 해소 및 완전 독립
-status: planned
+status: completed
+completed_at: 2026-06-11T23:01:07+09:00
 priority: P1
 difficulty: M
 est_hours: 4
@@ -46,3 +48,28 @@ tags:
 - `reviews/REVIEW-*-tag-manual-independence-closeout.md`
 - `scripts/co_location_gate.py`
 - `tests/fixtures/host/agent_runtime.lock.json`
+
+## Completion - 2026-06-11
+
+- Result: 라이브 전신 프로젝트 의존을 제거하고 이관 증거를 `reviews/` 스냅샷으로 고정했다.
+- Gate change: `scripts/co_location_gate.py`는 기본 실행에서 live migration map을 요구하지 않고, `--migration-map`이 명시된 경우에만 archive map을 검증한다.
+- Removed live overlay files:
+  - `agents/project/MIGRATION-COMPAT-MAP.yml`
+  - `agents/project/MIGRATION-HOLD-ROUTING.yml`
+  - `agents/project/MIGRATION-COMPAT-MAP.example.yml`
+  - `src/agent_runtime/templates/project/agents/project/MIGRATION-COMPAT-MAP.example.yml`
+- Preserved snapshots:
+  - `reviews/MIGRATION-COMPAT-MAP-2026-06-11-SNAPSHOT.yml`
+  - `reviews/MIGRATION-HOLD-ROUTING-2026-06-11-SNAPSHOT.yml`
+  - `reviews/MIGRATION-COMPAT-MAP-EXAMPLE-2026-06-11-SNAPSHOT.yml`
+  - `reviews/TEMPLATE-MIGRATION-COMPAT-MAP-EXAMPLE-2026-06-11-SNAPSHOT.yml`
+- Active docs updated: `BACKLOG.md`, `STATUS.md`, `AGENTIC_KNOWLEDGE_EVAL_PLAN.md`, `BACKLOG-BOARD.md`, `agents/project/README.md`, `agents/project/PROJECT-CONTEXT.yml`, `agents/project/RELEASE-GATE-TEMPLATE.yml`, `src/agent_runtime/templates/project/AGENTS.md`.
+- Fixture updated: `tests/fixtures/host/agent_runtime.lock.json` regenerated after template example removal.
+- Closeout review: `reviews/REVIEW-2026-06-11-tag-manual-independence-closeout.md`.
+- Verification:
+  - `rg -n -i "tag_manual" -g "!reviews/**" -g "!agents/lead_engineer/tasks/**" -g "!agents/runtime/task_claims/**" .` -> exit 1, no live matches.
+  - `python scripts/co_location_gate.py --out reviews/CO-LOCATION-GATE-2026-06-11-task-ar-310.json` -> pass, findings=0.
+  - `pytest tests/test_co_location_gate.py -q` -> 2 passed.
+  - `python -m py_compile scripts/co_location_gate.py scripts/backlog_board.py` -> pass.
+  - `python scripts/owner_governance_gate.py` -> exit 0.
+  - `pytest tests -q` -> 384 passed in 457.08s.

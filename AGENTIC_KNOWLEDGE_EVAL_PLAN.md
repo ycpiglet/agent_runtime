@@ -5,7 +5,7 @@
 `v0.1.6`은 Hold, `v0.1.7`은 미통과 판정 종료, `v0.1.8`은 2026-07-02 후보 판정으로 재설정한다.
 
 - 핵심 전략: 모델 점수보다 **정답 보유 데이터 자체보다 쿼리 정의 + 근거 체인 + 검증 루프**가 안정성의 핵심이다.
-- 필수 게이트: 오프라인 90% + reviewer footer + correction collector + A2A trace + `tag_manual` 이식 증빙
+- 필수 게이트: 오프라인 90% + reviewer footer + correction collector + A2A trace + 레거시 이식 증빙
 - 다음 공개 판정 창: `2026-07-02`, `2026-07-09`, `2026-07-16`
 
 ## Source Research
@@ -139,7 +139,7 @@
 15. 멀티 프로젝트 오버레이 구조: `TASK-AR-211`, `TASK-AR-215`
 16. A2A 메시지 버스: `TASK-AR-208`
 17. 공식 가이드 반영: `TASK-AR-219`
-18. tag_manual 이식 근거: `TASK-AR-220`
+18. 레거시 이식 근거: `TASK-AR-220`
 19. 전체 통합 오케스트레이션: `TASK-AR-221`
 20. v0.1.8 closeout 번들 정합: `TASK-AR-222`
 21. closeout 통합과 hold/판정 템플릿 정합: `TASK-AR-223`
@@ -219,9 +219,9 @@ User request
 
 ### TASK-AR-220 이식 근거 분리 및 보존
 
-- 목적: tag_manual에서 skill/hook/script 이식 차이를 source/run-time/provenance 단위로 영구 추적한다.
+- 목적: 레거시 전신 프로젝트의 skill/hook/script 이식 차이를 source/run-time/provenance 단위로 영구 추적한다.
 - 산출:
-  - `MIGRATION-COMPAT-MAP.yml` 근거 정합 강화
+  - 레거시 감사 스냅샷 근거 정합 강화
   - 누락/의도적 제외의 보류 사유와 승인 경로 템플릿
   - `TASK-AR-204`/`TASK-AR-213`/`TASK-AR-210` 연동 증적
 - 완료 조건:
@@ -231,7 +231,7 @@ User request
 
 ### TASK-AR-222 Closeout Bundle And Cross-Project Version Readiness
 
-- 목적: 요구사항 1~16 + 공식 가이드 + tag_manual 이식 근거를 v0.1.8 판정 번들 하나로 마감.
+- 목적: 요구사항 1~16 + 공식 가이드 + 레거시 이식 근거를 v0.1.8 판정 번들 하나로 마감.
 - 산출:
   - `TASK-AR-221` 실행 증적과 `TASK-AR-219` 공식 가이드 항목의 1:1 추적표
   - migration 누락/변경/의도적 제외 근거와 hold 경로 매핑표
@@ -250,7 +250,7 @@ User request
 - 산출:
   - 판정 템플릿(1차/2차/최종)과 hold 라우팅(`hold_for_query_contract`/`hold_for_overlay`/`hold_for_data`)의 일치 규칙
   - `TASK-AR-204` 강제 규칙이 미반영 시 block로 동작하는 감사 증적
-  - `MIGRATION-COMPAT-MAP.yml` 미완 항목이 `TASK-AR-204`/`TASK-AR-213`/`TASK-AR-210`으로 즉시 이관되는 근거 체인
+  - 레거시 감사 스냅샷 미완 항목이 `TASK-AR-204`/`TASK-AR-213`/`TASK-AR-210`으로 즉시 이관되는 근거 체인
   - 오버레이 변경만으로 프로젝트 투입하는 멀티 프로젝트 시뮬레이션 결과 1건 이상
 - 완료 조건:
   - 오프라인 90% + reviewer footer + correction collector + A2A trace + migration 근거가 같은 번들 내 재현
@@ -260,11 +260,11 @@ User request
 
 ### TASK-AR-224 Official And Migration Source-Control Gate
 
-- 목표: 공식 근거와 `tag_manual` 이식 근거를 v0.1.8 closeout 번들에 선행 결합.
+- 목표: 공식 근거와 레거시 이식 근거를 v0.1.8 closeout 번들에 선행 결합.
 - 현재 상태: `in_progress`
 - 완료 조건:
   - 공식 근거 링크가 research/meeting/call/seminar cycle에 남음
-  - `scripts-source-only` 53건이 `MIGRATION-HOLD-ROUTING.yml`에서 세부 이유군으로 분리됨
+  - `scripts-source-only` 53건이 레거시 hold routing 스냅샷에서 세부 이유군으로 분리됨
   - migration hold routing table이 `TASK-AR-223` closeout 번들로 이관됨
   - `RELEASE-GATE-TEMPLATE.yml` required fields가 `TASK-AR-210`과 정합
   - executable packet proof와 release-preflight proof가 review로 남음

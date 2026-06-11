@@ -497,8 +497,8 @@ Every downstream bug report must follow the 6W1H structure:
 2. Apply labels: `bug` + severity (`critical`/`high`/`medium`/`low`) + `downstream-report`.
 3. Link to the host EVIDENCE file if provided.
 4. Prioritize `high` and above within one release cycle.
-5. Add a CHANGELOG entry and update `MIGRATION-COMPAT-MAP.example.yml` when
-   fixing a public API change (function signature rename, removed export, etc.).
+5. Add a CHANGELOG entry and update public compatibility evidence when fixing
+   a public API change (function signature rename, removed export, etc.).
 
 ### Known standing issues from downstream
 
