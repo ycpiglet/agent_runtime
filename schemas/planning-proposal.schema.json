@@ -17,7 +17,12 @@
     "target_files",
     "rollback_path",
     "verifier_list",
-    "owner_boundary"
+    "owner_boundary",
+    "evidence_ids",
+    "affected_owner_boundary",
+    "expected_verification_command",
+    "estimated_blast_radius",
+    "proposal_output"
   ],
   "properties": {
     "id": { "type": "string", "pattern": "^PROP-[A-Fa-f0-9]{12}$" },
@@ -35,6 +40,7 @@
         "eval_expansion",
         "release_version_consistency",
         "retro_compound_follow_up",
+        "skill_package",
         "watch_only",
         "c_mode_promotion"
       ]
@@ -59,6 +65,8 @@
         }
       }
     },
+    "category": { "type": "string" },
+    "source_path": { "type": "string" },
     "evidence": {
       "type": "array",
       "items": {
@@ -72,13 +80,30 @@
         }
       }
     },
+    "evidence_ids": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
     "target_files": { "type": "array", "items": { "type": "string" } },
     "rollback_path": { "type": "string" },
     "verifier_list": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
     "owner_boundary": { "type": "string", "minLength": 1 },
+    "affected_owner_boundary": { "type": "string", "minLength": 1 },
+    "expected_verification_command": { "type": "string", "minLength": 1 },
+    "estimated_blast_radius": {
+      "type": "string",
+      "enum": ["single_file", "multi_file", "owner_gated"]
+    },
+    "proposal_output": {
+      "type": "string",
+      "enum": ["task", "plan", "doc", "eval", "release", "skill", "no_action"]
+    },
+    "quality_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "rejection_reason": { "type": ["string", "null"] },
+    "failure_regression_links": { "type": "array", "items": { "type": "string" } },
     "department": { "type": "string" },
     "reviewer_opinions": { "type": "array", "items": { "type": "object" } },
+    "council_review": { "type": "object" },
+    "suggested_next_action": { "type": "string" },
     "supersedes": { "type": "array", "items": { "type": "string" } },
+    "draft_task_path": { "type": "string" },
     "apply": { "type": "object" }
   }
 }

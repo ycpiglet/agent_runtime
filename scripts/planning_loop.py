@@ -21,6 +21,17 @@ HIGH_RISK_ACTIONS = {
     "release_version_consistency",
     "c_mode_promotion",
 }
+PROPOSAL_OUTPUT_BY_ACTION = {
+    "new_task": "task",
+    "plan_update": "plan",
+    "doc_repair": "doc",
+    "eval_expansion": "eval",
+    "release_version_consistency": "release",
+    "retro_compound_follow_up": "task",
+    "watch_only": "no_action",
+    "c_mode_promotion": "plan",
+    "skill_package": "skill",
+}
 OWNER_BOUNDARY_TERMS = (
     "release",
     "version",
@@ -449,6 +460,69 @@ def _default_verifiers(action_type: str) -> list[str]:
     return verifiers
 
 
+def _proposal_output(action_type: str) -> str:
+    return PROPOSAL_OUTPUT_BY_ACTION.get(action_type, "no_action")
+
+
+def _blast_radius(action_type: str, risk_tier: str, target_files: list[str]) -> str:
+    if risk_tier in {"high", "owner"} or action_type in HIGH_RISK_ACTIONS:
+        return "owner_gated"
+    if len(target_files) <= 1:
+        return "single_file"
+    return "multi_file"
+
+
+def _evidence_ids(evidence: list[dict[str, Any]], trace_id: str | None) -> list[str]:
+    ids: list[str] = []
+    if trace_id:
+        ids.append(str(trace_id))
+    for item in evidence:
+        for key in ("record_id", "evidence_id", "id"):
+            value = item.get(key)
+            if value and str(value) not in ids:
+                ids.append(str(value))
+                break
+        else:
+            summary = str(item.get("summary") or "")
+            if summary:
+                ids.append(_stable_id("EVID", summary))
+    return ids
+
+
+def proposal_has_blocking_council_verdict(proposal: dict[str, Any]) -> bool:
+    records: list[dict[str, Any]] = []
+    for item in proposal.get("reviewer_opinions", []):
+        if isinstance(item, dict):
+            records.append(item)
+    council_review = proposal.get("council_review")
+    if isinstance(council_review, dict):
+        for item in council_review.get("verdicts", []):
+            if isinstance(item, dict):
+                records.append(item)
+    for record in records:
+        decision = str(record.get("decision") or record.get("verdict") or "").lower()
+        if decision == "block" and record.get("resolved") is not True:
+            return True
+    return False
+
+
+def proposal_quality_metrics(proposals: list[dict[str, Any]]) -> dict[str, Any]:
+    total = len(proposals)
+    accepted = sum(1 for item in proposals if item.get("status") in {"approved", "applied"})
+    rejected = sum(1 for item in proposals if item.get("status") == "rejected")
+    deferred = sum(1 for item in proposals if item.get("status") in {"blocked", "superseded"})
+    denominator = total or 1
+    return {
+        "proposal_count": total,
+        "accepted_count": accepted,
+        "rejected_count": rejected,
+        "deferred_count": deferred,
+        "proposal_precision": round(accepted / denominator, 3),
+        "proposal_recall": round(accepted / max(accepted + deferred, 1), 3),
+        "false_positive_proposal_rate": round(rejected / denominator, 3),
+    }
+
+
 def _risk_rank(risk_tier: str) -> int:
     return {"low": 1, "medium": 2, "high": 3, "owner": 4}.get(risk_tier, 2)
 
@@ -587,6 +661,8 @@ def create_proposals(
         proposal_id = _stable_id("PROP", proposal_core)
         risk_tier = str(finding.get("risk_tier") or "medium")
         target_files = [str(finding.get("source_path"))] if finding.get("source_path") else []
+        verifiers = _default_verifiers(action_type)
+        evidence_items = list(finding.get("evidence", []))
         proposal: dict[str, Any] = {
             "id": proposal_id,
             "mode": "B",
@@ -600,13 +676,28 @@ def create_proposals(
             "dedupe_key": dedupe_key,
             "evidence_hash": evidence_hash,
             "source_refs": [{"path": str(finding.get("source_path")), "kind": str(finding.get("category"))}],
-            "evidence": list(finding.get("evidence", [])),
+            "evidence": evidence_items,
+            "evidence_ids": _evidence_ids(evidence_items, finding.get("trace_id")),
             "target_files": target_files,
             "rollback_path": f"agents/planning/rollback/{proposal_id}.json",
-            "verifier_list": _default_verifiers(action_type),
+            "verifier_list": verifiers,
             "owner_boundary": _owner_boundary(action_type, risk_tier),
+            "affected_owner_boundary": _owner_boundary(action_type, risk_tier),
+            "expected_verification_command": verifiers[0],
+            "estimated_blast_radius": _blast_radius(action_type, risk_tier, target_files),
+            "proposal_output": _proposal_output(action_type),
+            "quality_score": round(float(finding.get("confidence") or 0), 3),
+            "rejection_reason": None,
+            "failure_regression_links": [
+                item for item in _evidence_ids(evidence_items, finding.get("trace_id")) if "TRACE" in item or "EVID" in item
+            ],
             "department": _department_for_action(action_type),
             "reviewer_opinions": [],
+            "council_review": {
+                "required": risk_tier in {"medium", "high", "owner"},
+                "status": "pending" if risk_tier in {"medium", "high", "owner"} else "not_required",
+                "verdicts": [],
+            },
             "suggested_next_action": str(finding.get("suggested_next_action") or ""),
             "supersedes": [previous["id"]] if previous and previous.get("id") else [],
         }
@@ -692,6 +783,8 @@ def _approval_allows(proposal: dict[str, Any], approval_file: Path | None) -> bo
 
 def apply_proposal(root: Path, proposal_id: str, *, approval_file: Path | None = None, dry_run: bool = False) -> dict[str, Any]:
     path, proposal = _load_proposal(root, proposal_id)
+    if proposal_has_blocking_council_verdict(proposal):
+        return {"status": "block", "reasons": ["unresolved council block verdict prevents apply-gate execution"]}
     if not _approval_allows(proposal, approval_file):
         return {"status": "block", "reasons": ["proposal is not approved"]}
     if proposal.get("risk_tier") in {"high", "owner"} and not approval_file:

@@ -36,13 +36,26 @@ planning_loop:
     - gate_weakening
   c_mode:
     default_enabled: false
+    status: latent_option
+    roadmap: agents/project/C-MODE-LATENT-ROADMAP.md
     required_passing_b_cycles: 3
+    activation_from_single_run_allowed: false
+    rollback_evidence_required: true
     allowed_actions:
       - generated_view_refresh
       - stale_link_repair
       - proposal_dedupe
       - watch_only_reminder
       - low_risk_plan_hygiene
+    owner_gated_actions:
+      - release
+      - version
+      - external
+      - destructive
+      - prod_data
+      - cost_bearing
+      - pull_request
+      - publish
     demotion_triggers:
       - owner_rejection
       - guardrail_failure

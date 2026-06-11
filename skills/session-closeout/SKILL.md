@@ -14,3 +14,12 @@ description: Use when the Owner says 마무리, 정리, closeout, cleanup, or as
 5. Create or update an issue with every archive ref that replaces local state.
 6. Delete only active work branches that have been merged or archived.
 7. Final claim requires clean `git status -sb`, empty stash list, root-only worktree list, and documented residual archive refs.
+
+## Parallel Session Closeout
+
+- Treat parallel-session closeout as the same sequence with an added ownership
+  check: only close the branch/worktree for the declared taskset.
+- Do not repoint unrelated active panes just to make the current taskset look
+  active.
+- Preserve unrelated dirty files, branches, claims, and worktrees for their
+  owning pane.

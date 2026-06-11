@@ -69,6 +69,12 @@ def test_proposal_outbox_dedupes_and_writes_draft_task(tmp_path: Path) -> None:
     assert repeated["deduped_count"] == 1
     proposal = created["created"][0]
     assert len(proposal["evidence"]) == 2
+    assert proposal["evidence_ids"]
+    assert proposal["affected_owner_boundary"] == proposal["owner_boundary"]
+    assert proposal["expected_verification_command"] == proposal["verifier_list"][0]
+    assert proposal["estimated_blast_radius"] == "single_file"
+    assert proposal["proposal_output"] == "doc"
+    assert proposal["rejection_reason"] is None
     draft = tmp_path / proposal["draft_task_path"]
     text = draft.read_text(encoding="utf-8")
     assert "## Completion Criteria" in text
@@ -141,6 +147,43 @@ def test_eval_trace_and_retro_inputs_create_proposal_categories(tmp_path: Path) 
     categories = {item["category"] for item in report["findings"]}
     assert "eval-trace-regression" in categories
     assert "retro-compound-pattern" in categories
+
+
+def test_apply_blocks_unresolved_council_block_verdict(tmp_path: Path) -> None:
+    seed_repo(tmp_path)
+    proposal = {
+        "id": "PROP-AAAAAAAAAAAA",
+        "mode": "B",
+        "status": "approved",
+        "action_type": "new_task",
+        "risk_tier": "low",
+        "title": "blocked by council",
+        "dedupe_key": "new_task:test",
+        "source_refs": [{"path": "reviews/example.md"}],
+        "evidence": [{"summary": "evidence"}],
+        "target_files": ["agents/lead_engineer/tasks/DRAFT-TASK-AAAAAAAAAAAA.md"],
+        "rollback_path": "agents/planning/rollback/PROP-AAAAAAAAAAAA.json",
+        "verifier_list": ["python scripts/planning_loop.py gate --trigger manual --json"],
+        "owner_boundary": "Low-risk local proposal; canonical mutation still requires approved apply.",
+        "reviewer_opinions": [
+            {
+                "role": "skeptic",
+                "evidence_ref": "reviews/example.md",
+                "decision": "block",
+                "score": 20,
+                "reason": "missing verifier",
+            }
+        ],
+        "draft_task_path": "agents/planning/drafts/PROP-AAAAAAAAAAAA.md",
+    }
+    outbox = tmp_path / "agents/planning/outbox"
+    outbox.mkdir(parents=True)
+    (outbox / "PROP-AAAAAAAAAAAA.json").write_text(json.dumps(proposal), encoding="utf-8")
+
+    result = planning_loop.apply_proposal(tmp_path, "PROP-AAAAAAAAAAAA")
+
+    assert result["status"] == "block"
+    assert "unresolved council block verdict" in result["reasons"][0]
 
 
 def test_c_mode_gate_requires_three_cycles_and_release_pass(tmp_path: Path) -> None:

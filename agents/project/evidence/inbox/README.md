@@ -29,4 +29,5 @@ decides whether to create work.
 - `watch` evidence with repeated recurrence should route to council review before task creation.
 - Conversation evidence should preserve the Owner decision and constraints, then route through the proposal engine.
 - A2A lifecycle evidence must include context ID, task ID, request, review, decision, correction, and reconstruction result before it is considered verified.
+- Local A2A lifecycle evidence is verified with `python scripts/a2a_lifecycle_gate.py --json --write-record`; provider-live transport remains out of scope until deterministic fixtures pass.
 - Inbox records route to proposal generation only after `dedupe_key` and `quality_check` are reviewed.

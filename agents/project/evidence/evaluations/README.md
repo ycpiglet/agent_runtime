@@ -37,6 +37,7 @@ regression records queryable for the RSI operating system.
 | `proposal_recall` | Known actionable failures that received an adequate proposal. |
 | `eval_regression_rate` | Passing eval cases that later fail in the same area. |
 | `repeated_failure_closure_rate` | Repeated failures that gained a fixture, gate, or accepted task. |
+| `false_positive_proposal_rate` | Rejected or no-action proposals divided by all generated proposals in a window. |
 | `evidence_to_task_latency` | Time from evidence record to accepted task or explicit no-action decision. |
 
 ## How To Add

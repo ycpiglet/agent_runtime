@@ -1,0 +1,5 @@
+{"context_id":"CTX-RSI-OS-001","task_id":"TASK-AR-302","event_type":"request","actor_role":"owner","access_boundary":"local","idempotency_key":"CTX-RSI-OS-001"}
+{"context_id":"CTX-RSI-OS-001","task_id":"TASK-AR-302","event_type":"review","actor_role":"evaluation-office","access_boundary":"local","idempotency_key":"CTX-RSI-OS-001"}
+{"context_id":"CTX-RSI-OS-001","task_id":"TASK-AR-302","event_type":"decision","actor_role":"lead-engineer","access_boundary":"local","idempotency_key":"CTX-RSI-OS-001"}
+{"context_id":"CTX-RSI-OS-001","task_id":"TASK-AR-302","event_type":"correction","actor_role":"qa","access_boundary":"local","idempotency_key":"CTX-RSI-OS-001"}
+{"context_id":"CTX-RSI-OS-001","task_id":"TASK-AR-302","event_type":"proposal_routing","actor_role":"planning-coordinator","access_boundary":"local","idempotency_key":"CTX-RSI-OS-001","reconstruction_result":"pass"}
