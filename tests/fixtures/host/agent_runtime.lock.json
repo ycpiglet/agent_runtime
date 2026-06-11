@@ -78,7 +78,7 @@
       "scripts/auto_dispatch.py": "sha256:cb0bd6da9c79bb670503283e7d589a14e17f269bffe166cf2fb20867f2d63129",
       "scripts/auto_merge.py": "sha256:2f96df3f64fa7ea3b186fdab441993c9ee948de49f9e8cda36101f6abe338600",
       "scripts/auto_runner.py": "sha256:d0168f9cee6e149925db326f2bfb62a59b5b6485ae2a39e9c35ac9ca6dc28549",
-      "scripts/backlog_board.py": "sha256:cb5304470be6672fd2032192b48457d993ecc379cd731ea00fbc034981dc1811",
+      "scripts/backlog_board.py": "sha256:b6eb5b868ff555d91d5ad66e84021cde1b290d776a994713f93952fd383c79b3",
       "scripts/backlog_sweep.py": "sha256:f9698b5f05fcce53b522c8c5ccf6053cfd525e5f2156f2206b23e3667fa2e92d",
       "scripts/beta_tester_due.py": "sha256:32e9d7b142a4ca829f15dc7cdf403873dc08fe1ebceaf5c02226f2314b03c85f",
       "scripts/budget_estimate.py": "sha256:5d180aa4854f8923a631790d38eeeeb26639ca836d4738d600d0900fa8d31d13",
@@ -113,7 +113,7 @@
       "scripts/now.py": "sha256:6d6d6fcc9f1a4599a6735a15013fd263c887ae9910388e741134870abf446c9f",
       "scripts/orchestrator_safety_gate.py": "sha256:ff588238e9e0ab497f7a82caf52cb674c362409ca0583b33e402321efb29c7c7",
       "scripts/owner_doc_format_gate.py": "sha256:0ad323c0b4344d3071fa08f79e2f8720498b8d83e43fd03fc721dc1472b61815",
-      "scripts/owner_governance_gate.py": "sha256:55a94f779dd8a4c0cc57db4db19620d301dc42873879a3ce08137507ce7edbfa",
+      "scripts/owner_governance_gate.py": "sha256:ff8799d83bba2de883ccfb8eda38369997b5665f07e51bd595ac6e73ea445185",
       "scripts/pane_event_log.py": "sha256:fbd90c177b8dfa9cfe6326e1adb43c3f8f7f56a55170d6dd0f9e3503176d53f3",
       "scripts/parallel_worktree_gate.py": "sha256:b127e0da8daaf739e791615b158814ecdcc4427272970fbef770fc28c11adb54",
       "scripts/pipeline.py": "sha256:4abd82e5f09c9d3cc80d30542df7569bc1d7a2509303c1de704f213a49c03d97",
@@ -133,6 +133,7 @@
       "scripts/query_reports.py": "sha256:1ccb0756bfc0be436116980d335bf657b6b8d882ab6d8a6bfb642d176f503aa5",
       "scripts/query_tasks.py": "sha256:a7ad83ed124cc480fa83d0917c20a5d7b49867f6c858da18fd54ba26dbb4c067",
       "scripts/ralph_migration_inventory.py": "sha256:5118836e61c3e855397b4401c5bd2f5499c482683c2bcab657541b7d897545e3",
+      "scripts/rbac_write_gate.py": "sha256:6ac6c8996b9ec3ed853c89f8b2e78d364c72ac0dd9a0464ec5bcb37d90c9d84c",
       "scripts/response_contract_gate.py": "sha256:83f26ab8dd7c2317bb2b408809190e32324cada770b13eef0c241e501f49e74a",
       "scripts/role_mentions.py": "sha256:d5f0488c514f7e6c43c0291f9bb46c4ebf7971b59ec8f01e197ccfda4c81738d",
       "scripts/runtime_asset_usage.py": "sha256:5209e4446b96a1a7752856865492debab0d69eaeed62e38d8c1843d28eecff38",
@@ -208,8 +209,8 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.1.8",
-    "template_digest": "sha256:8c8e9a4f64e32e370d1ac22bdb1829057596bb965c1a3d2fc73d41c7034f4ff1",
-    "template_files": 205
+    "template_digest": "sha256:7b8ae6cc803a02d624db5046efa112b8d26800f5892f4f7df520aba1a3e2129e",
+    "template_files": 206
   },
   "project": "fixture-host",
   "schema": "agent-runtime-lock/v1",
