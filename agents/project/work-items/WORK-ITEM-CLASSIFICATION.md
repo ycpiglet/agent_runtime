@@ -7,14 +7,14 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-12T23:17:09+09:00
-record_count: 204
+generated_at: 2026-06-12T23:24:21+09:00
+record_count: 205
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `204` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `205` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
@@ -22,7 +22,7 @@ record_count: 204
 | --- | --- | --- |
 | Initiatives | pass | `3` records |
 | Tasksets | pass | `25` records |
-| Tasks | pass | `175` records |
+| Tasks | pass | `176` records |
 | Units | pass | `1` records |
 | Findings | pass | `0` findings |
 
@@ -243,6 +243,7 @@ record_count: 204
 | 2.1.7 | Task 2.1.7 | task | `TASK-AR-506` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-506.md` | 이번 taskset에만 수동 적용된 지연평가 규율(T0 스냅샷/T2 착수 체크)과 W0~W6 수명주기를 **모든 작업의 기본값**으로 만든다 — Owne… |
 | 2.1.8 | Task 2.1.8 | task | `TASK-AR-507` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-507.md` | Owner 규칙 "작업자가 스스로 검증 금지, 항상 다른 에이전트가 검증"을 실행 가능하게 강제한다: claim release/closeout 시 ver… |
 | 2.1.9 | Task 2.1.9 | task | `TASK-AR-508` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-508.md` | dirty intake와 session baseline의 residue 보존 규칙이 `codex/*` 브랜치에 하드코딩되어 있어 `claude/*` 브랜… |
+| 2.1.10 | Task 2.1.10 | task | `TASK-AR-513` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-513.md` | main 보드가 미머지 브랜치의 진행 상황을 모르는 인식 오류를 없앤다. Owner 보고(2026-06-12): "main의 백로그만 보면 아직 진행이… |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

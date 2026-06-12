@@ -8,8 +8,8 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-12
-task_count: 175
-open_count: 47
+task_count: 176
+open_count: 48
 completed_count: 128
 task_set_count: 8
 completed_task_set_count: 17
@@ -18,11 +18,11 @@ completed_task_set_count: 17
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `47` open or active tasks; `128` completed tasks are archived from this live board.
+- Summary: `48` open or active tasks; `128` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `41` / Ask `5` / Review `0` / Later `1` / Done `128`.
+- Status: Action `41` / Ask `6` / Review `0` / Later `1` / Done `128`.
 - Task Sets: `8` active workflows; `17` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -141,7 +141,7 @@ completed_task_set_count: 17
 ### Wave Conductor (`TASKSET-AR-PARALLEL-WAVE-EXECUTION`)
 
 - Flow: Claim-time footprint conflict gate, wave dispatcher with cascade/parallel modes, integrator merge queue, and claim-first enforcement.
-- Progress: `2/9` done; `7` open or active.
+- Progress: `2/10` done; `8` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
@@ -150,6 +150,7 @@ completed_task_set_count: 17
 | `TASK-AR-505` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 작업 수명주기의 W5(통합 후 정리) 단계를 실행 가능하게 만든다: merge 완료 + claim released 상태의 좀비 워크트리/브랜치를 검출하고… |
 | `TASK-AR-507` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Ask | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | Owner 규칙 "작업자가 스스로 검증 금지, 항상 다른 에이전트가 검증"을 실행 가능하게 강제한다: claim release/closeout 시 ver… |
 | `TASK-AR-506` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Medium | 7h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 이번 taskset에만 수동 적용된 지연평가 규율(T0 스냅샷/T2 착수 체크)과 W0~W6 수명주기를 **모든 작업의 기본값**으로 만든다 — Owne… |
+| `TASK-AR-513` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Ask | P1 | High | Medium | 7h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | main 보드가 미머지 브랜치의 진행 상황을 모르는 인식 오류를 없앤다. Owner 보고(2026-06-12): "main의 백로그만 보면 아직 진행이… |
 | `TASK-AR-501` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | High | 10h/8000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | planner가 unit 의존성 DAG를 topological wave로 분해하고, 디스패처가 같은 wave의 K개 unit에 대해 claim+workt… |
 | `TASK-AR-502` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P2 | Medium | Medium | 8h/6000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 워커 브랜치의 main 합류를 단일 통합자(orchestrator)가 직렬 rebase-test-merge 큐로 처리해, 병렬 구현 기간에도 merge… |
 

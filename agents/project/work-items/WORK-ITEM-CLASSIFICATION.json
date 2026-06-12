@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-12T23:17:09+09:00",
-  "record_count": 204,
+  "generated_at": "2026-06-12T23:24:21+09:00",
+  "record_count": 205,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -2248,6 +2248,17 @@
       "path": "agents/lead_engineer/tasks/TASK-AR-508.md",
       "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
       "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-513",
+      "level": "task",
+      "number": "2.1.10",
+      "label": "Task 2.1.10",
+      "id": "TASK-AR-513",
+      "title": "main 보드가 미머지 브랜치의 진행 상황을 모르는 인식 오류를 없앤다. Owner 보고(2026-06-12): \"main의 백로그만 보면 아직 진행이…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-513.md",
+      "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
+      "status": "planned"
     }
   ]
 }
