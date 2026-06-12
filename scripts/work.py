@@ -18,6 +18,7 @@ from typing import Any
 
 import backlog_board
 import evidence_index_generator
+import now as now_util
 import task_identity
 import work_item_classifier
 
@@ -66,7 +67,7 @@ def _rel(root: Path, path: Path) -> str:
 def _now_text(value: str | None) -> str:
     if value:
         return value
-    return datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
+    return now_util.local_iso()
 
 
 def _parse_datetime(value: str) -> datetime:
@@ -945,6 +946,11 @@ def cmd_new(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_now(args: argparse.Namespace) -> int:
+    print(now_util.value(utc=args.utc, date=args.date, epoch=args.epoch))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Create and manage Work Items")
     parser.add_argument("--root", type=Path, default=ROOT)
@@ -961,6 +967,13 @@ def build_parser() -> argparse.ArgumentParser:
     register_cmd.add_argument("--now")
     register_cmd.add_argument("--json", action="store_true")
     register_cmd.set_defaults(func=cmd_new)
+
+    now_cmd = sub.add_parser("now", help="Print the canonical project timestamp")
+    now_group = now_cmd.add_mutually_exclusive_group()
+    now_group.add_argument("--utc", action="store_true", help="UTC timestamp with Z suffix")
+    now_group.add_argument("--date", action="store_true", help="local date only, YYYY-MM-DD")
+    now_group.add_argument("--epoch", action="store_true", help="Unix epoch seconds")
+    now_cmd.set_defaults(func=cmd_now)
     return parser
 
 
@@ -968,7 +981,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     args.root = args.root.resolve()
-    if not args.input.is_absolute():
+    if hasattr(args, "input") and not args.input.is_absolute():
         args.input = (Path.cwd() / args.input).resolve()
     return args.func(args)
 
