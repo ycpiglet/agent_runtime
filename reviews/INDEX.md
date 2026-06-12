@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-12T19:29:00+09:00
-record_count: 411
+generated_at: 2026-06-13T00:47:25+09:00
+record_count: 418
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `411` review and evidence records under `reviews/`.
+- Summary: indexed `418` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `411` files |
+| Reviews covered | pass | `418` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -119,8 +119,12 @@ record_count: 411
 | `reviews/MEETING-2026-06-11-agent-runtime-rsi-operating-system-registration.md` | `MEETING-2026-06-11-agent-runtime-rsi-operating-system-registration` | meeting | recorded | pass | RSI Operating System Registration Meeting |
 | `reviews/MEETING-2026-06-11-agent-runtime-task-ar-summary-and-version-closeout.md` | `MEETING-2026-06-11-agent-runtime-task-ar-summary-and-version-closeout` | md | record | n/a | MEETING-2026-06-11-agent-runtime-task-ar-summary-and-version-closeout |
 | `reviews/MEETING-2026-06-12-agent-runtime-task-ar-210-gate-coordination.md` | `MEETING-2026-06-12-agent-runtime-task-ar-210-gate-coordination` | md | record | n/a | MEETING-2026-06-12-agent-runtime-task-ar-210-gate-coordination |
+| `reviews/MEETING-2026-06-12-independent-verification-rule.md` | `MEETING-2026-06-12-independent-verification-rule` | meeting | pass | pass | Independent Verification Rule Meeting |
+| `reviews/MEETING-2026-06-12-parallel-work-lifecycle-rules.md` | `MEETING-2026-06-12-parallel-work-lifecycle-rules` | meeting | pass | pass | Parallel Work Lifecycle Rules Meeting |
+| `reviews/MEETING-2026-06-12-plan-assumption-deferred-revalidation.md` | `MEETING-2026-06-12-plan-assumption-deferred-revalidation` | meeting | pass | pass | Plan Assumption Deferred Revalidation Meeting |
 | `reviews/MEETING-2026-06-12-work-hierarchy-numbering-and-recording.md` | `MEETING-2026-06-12-work-hierarchy-numbering-and-recording` | meeting | pass | pass | Work Hierarchy Numbering And Recording Meeting |
 | `reviews/MEETING-2026-06-12-work-item-generator-metadata-agent-identity.md` | `MEETING-2026-06-12-work-item-generator-metadata-agent-identity` | meeting | pass | pass | Work Item Generator, Metadata, And Agent Identity Intake |
+| `reviews/MEETING-2026-06-12-work-metadata-a2a-registration-audit.md` | `MEETING-2026-06-12-work-metadata-a2a-registration-audit` | meeting | pass | pass | Work Metadata And A2A Registration Audit |
 | `reviews/MEETING-2026-06-13-agent-runtime-cross-project-governance-and-release-update.md` | `MEETING-2026-06-13-agent-runtime-cross-project-governance-and-release-update` | md | record | n/a | MEETING-2026-06-13-agent-runtime-cross-project-governance-and-release-update |
 | `reviews/MEETING-2026-06-13-agent-runtime-task-ar-211-overlay-implementation-checkpoint.md` | `MEETING-2026-06-13-agent-runtime-task-ar-211-overlay-implementation-checkpoint` | md | record | n/a | MEETING-2026-06-13-agent-runtime-task-ar-211-overlay-implementation-checkpoint |
 | `reviews/MEETING-2026-06-14-agent-runtime-task-ar-222-migration-closeout-sync.md` | `MEETING-2026-06-14-agent-runtime-task-ar-222-migration-closeout-sync` | md | record | n/a | MEETING: TASK-AR-220/222 closeout 동기화 정합 미팅 |
@@ -400,8 +404,11 @@ record_count: 411
 | `reviews/REVIEW-2026-06-11-tag-manual-independence-closeout.md` | `REVIEW-2026-06-11-tag-manual-independence-closeout` | brief | record | pass | REVIEW-2026-06-11-tag-manual-independence-closeout |
 | `reviews/REVIEW-2026-06-11-toolrunner-policy-closeout.md` | `REVIEW-2026-06-11-toolrunner-policy-closeout` | brief | record | pass | REVIEW-2026-06-11-toolrunner-policy-closeout |
 | `reviews/REVIEW-2026-06-12-a2a-message-routing-closeout.md` | `REVIEW-2026-06-12-a2a-message-routing-closeout` | md | record | n/a | REVIEW: TASK-AR-311 A2A Message Routing Closeout |
+| `reviews/REVIEW-2026-06-12-agent-runtime-live-structure-two-layer-decision.md` | `REVIEW-2026-06-12-agent-runtime-live-structure-two-layer-decision` | review | pass | pass | Live Structure Two-Layer Decision Review |
 | `reviews/REVIEW-2026-06-12-agent-runtime-ops-feedback-analysis-closeout.md` | `REVIEW-2026-06-12-agent-runtime-ops-feedback-analysis-closeout` | review | pass | pass | Ops Feedback Analysis Closeout Review |
+| `reviews/REVIEW-2026-06-12-agent-runtime-parallel-wave-scheduling-design.md` | `REVIEW-2026-06-12-agent-runtime-parallel-wave-scheduling-design` | review | pass | pass | Parallel Wave Scheduling Design Review |
 | `reviews/REVIEW-2026-06-12-agent-runtime-pm-operating-system-closeout.md` | `REVIEW-2026-06-12-agent-runtime-pm-operating-system-closeout` | review | pass | pass | PM Operating System Closeout Review |
+| `reviews/REVIEW-2026-06-12-agent-runtime-release-plan-v019-v020.md` | `REVIEW-2026-06-12-agent-runtime-release-plan-v019-v020` | review | pass | pass | Release Plan v0.1.9 / v0.2.0 Review |
 | `reviews/REVIEW-2026-06-12-agent-runtime-rsi-operating-system-closeout.md` | `REVIEW-2026-06-12-agent-runtime-rsi-operating-system-closeout` | review | pass | pass | RSI Operating System Closeout Review |
 | `reviews/REVIEW-2026-06-12-agent-runtime-task-ar-210-release-gate.md` | `REVIEW-2026-06-12-agent-runtime-task-ar-210-release-gate` | md | record | n/a | REVIEW-2026-06-12-agent-runtime-task-ar-210-release-gate |
 | `reviews/REVIEW-2026-06-12-agent-runtime-vision-gap-closure-closeout.md` | `REVIEW-2026-06-12-agent-runtime-vision-gap-closure-closeout` | review | pass | pass | Vision Gap Closure Closeout Review |

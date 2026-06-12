@@ -1,5 +1,33 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-06-12 TASKSET-AR-WORK-METADATA-ANALYTICS Registration
+
+- New planned task set: `TASKSET-AR-WORK-METADATA-ANALYTICS` (Work Metadata Analyst).
+- Purpose: Owner/Claude/Codex 토의에서 나온 A2A, Work Item metadata, frontmatter/footer/reference/tag/team/query/statistics, agent instance attribution, 검증 freshness 요구를 chat-only 또는 넓은 platform task에 흩어두지 않고 canonical work로 보이게 한다.
+- Registered planned tasks: `TASK-AR-514`(conversation-to-work traceability and registration audit) `TASK-AR-515`(Work metadata schema catalog and envelope fields) `TASK-AR-516`(Work Explorer tree roll-up and facet filters) `TASK-AR-517`(Work query/stats/export and saved views) `TASK-AR-518`(agent instance attribution across A2A/evidence/commits) `TASK-AR-519`(verification freshness and stale evidence gate).
+- Audit record: `reviews/MEETING-2026-06-12-work-metadata-a2a-registration-audit.md`.
+- Initiative record: `agents/project/initiatives/INIT-AR-WORK-METADATA-ANALYTICS.md`.
+- Boundary: A2A core routing/lifecycle proof remains completed archived evidence (`TASK-AR-311`, `TASK-AR-302`). This taskset covers the missing visibility, metadata, analytics, attribution, and stale-verification follow-through.
+
+## 2026-06-12 TASKSET-AR-PARALLEL-WAVE-EXECUTION Registration
+
+- New planned task set: `TASKSET-AR-PARALLEL-WAVE-EXECUTION` (Wave Conductor).
+- Purpose: 순차 cascade 루프를 옵트인 병렬 실행으로 전환 — wave(서로소 `target_files` footprint + 무의존 unit 묶음) 단위 동시 디스패치, 풀 사이클은 task가 아니라 wave 경계에서 실행. cascade/parallel(depth·max-panes)을 Owner 옵션으로 두어 필요할 때만 가속 비용을 지불한다.
+- Hierarchy note: wave는 기록 계층이 아니라 실행 스케줄링 메타데이터로, taskset(목표 묶음)과 직교한다. 한 wave에 여러 taskset의 unit이 실릴 수 있다.
+- Registered planned tasks: `TASK-AR-500`(claim-time footprint 충돌 게이트) `TASK-AR-501`(wave 디스패처 — DAG/topological wave + cascade/parallel 모드) `TASK-AR-502`(integrator 머지 큐 — 직렬 rebase-test-merge) `TASK-AR-503`(claim-first 강제 — main 클레임 없는 워크트리 작업 감지).
+- Completed task: `TASK-AR-504`(plan assumption gate — 지연평가식 계획 재검증). codex 미머지 구조 변경과의 plan 드리프트를 다단계 트리거(T0 등록 스냅샷 / T1 merge 후 관찰 / T2 착수 전 차단 / T3 replan 후 re-record)로 처리. 전제 8개 스냅샷 완료(`agents/project/work-items/PLAN-ASSUMPTIONS.json`) — AR-500~503은 착수 전 `plan_assumption_gate --check` 필수. 회의 기록: `reviews/MEETING-2026-06-12-plan-assumption-deferred-revalidation.md`.
+- Lifecycle expansion (2026-06-12): Owner 요구 "모든 작업이 충돌 없이 정확한 규칙과 순서로" — 증상별 갭 매트릭스 점검 결과 2개 구멍을 추가 등록: `TASK-AR-505`(worktree/branch 수명주기 게이트 — 좀비 검출+retention 정리; 실측 좀비 3개: AR-316 behind=14, AR-320, AR-369) `TASK-AR-506`(W0~W6 수명주기 기본화 — 등록/디스패치 플로우에 T0/T2 자동 편입 + 계약 명문화, codex merge 후 착수). 표준 수명주기 W0~W6 결정 기록: `reviews/MEETING-2026-06-12-parallel-work-lifecycle-rules.md`.
+- Verification independence (2026-06-12): Owner 규칙 "작업자 자기검증 금지, 항상 다른 에이전트가 검증" — 라이브 실행 강제 부재 확인 후 W4를 W4a(작업자 verification 실행)/W4b(독립 검증 승인)로 분리하고 `TASK-AR-507`(cross-verification gate — verifier ≠ worker 강제, codex identity merge 후 착수) 등록. 과도기 운영 규칙 즉시 발효. 결정 기록: `reviews/MEETING-2026-06-12-independent-verification-rule.md`.
+- Branch namespace gap (2026-06-12): codex 세션이 `claude/task-ar-500-*` 브랜치가 "codex-residue 보존 규칙에서 빠져 있다"고 보고 — `dirty_intake.py`/`session_baseline.py`가 `codex/*` 하드코딩임을 확인하고 `TASK-AR-508`(agent-agnostic 브랜치 네임스페이스 보존 — codex/* + claude/*) 등록. AR-500 클레임 소실 사건과 같은 뿌리(claude 산출물 보존 규칙 부재).
+- Host update notification (2026-06-12): Owner 요청 "호스트(autofolio)가 자동으로 업데이트 소식을 받게" — `TASK-AR-509`를 `TASKSET-AR-RELEASE-STEWARD`에 신규 canonical task로 등록(포인터 규칙이 허용하는 재개 경로). 실측: autofolio는 최신 릴리스 v0.1.8 고정 중이며 main은 81커밋 전진(미릴리스) — 알림은 릴리스 태그 기준. autofolio 동기화 권장 시점: codex 미머지 taskset merge → v0.1.9 릴리스 게이트 통과 → ref bump + `update-plan`/`update`.
+- Release plan + cadence (2026-06-12): 빅뱅 대신 2단계 릴리스 확정 — v0.1.9(현 main, 추가형 81커밋) → v0.2.0(codex work-schema merge 후, 호스트 계약 변경=minor). 버전 정책(patch=추가형/minor=파괴형)과 v0.1.9 집행 체크리스트 9단계는 `reviews/REVIEW-2026-06-12-agent-runtime-release-plan-v019-v020.md`. 케이던스 자동화는 `TASK-AR-510`(release-lag watch 트리거 — 알림 전용, 실행은 council/Owner 게이트 유지) 등록.
+- SCM hygiene automation (2026-06-12): Owner 요청 "branch/worktree/stash/PR/issue를 트리거·훅·전문 스킬로 깔끔하게" — `TASKSET-AR-REPO-HYGIENE`에 canonical task 2건 추가: `TASK-AR-511`(.gitattributes 줄바꿈·인코딩 정규화 — 전 커밋 CRLF 경고 실측, 재정규화는 codex merge 후 1회) `TASK-AR-512`(scm-steward 스킬 — 좀비/stale claim/미회수 stash/PR aging 주기 점검 루프 + gh draft PR·issue 양방향 동기, 정리는 보고-승인-실행). 기존 등록분(AR-502/503/505/510)과 합쳐 SCM 수명주기 전 단계가 자동화 커버리지에 들어감.
+- In-flight visibility (2026-06-12): Owner 보고 "main 백로그만 보면 브랜치/다른 환경 작업이 진행 안 된 걸로 인식" — 체크아웃 없는 감지(`git show branch:taskfile` + ahead + 클레임 합성) 데모로 검증: AR-370이 main=planned인데 codex 브랜치 3개에서 completed(ahead 12~13), AR-372는 4개 브랜치에서 in_progress. `TASK-AR-513`(in-flight overlay — 독립 스크립트 → ui-console → merge 후 보드 통합) 등록.
+- Numbering note: 500 대역은 의도적 예약 — 동시 진행 중인 codex 미머지 등록이 TASK-AR-375를 선점한 것을 확인하여 display ID 충돌을 회피했다. codex의 `TASK-ID-RESERVATIONS.json`(agent-runtime-task-id-reservation/v1) merge 후 동일 원장에 소급 기재한다.
+- Initiative record: `agents/project/initiatives/INIT-AR-PARALLEL-WAVE-EXECUTION.md`.
+- Design record: `reviews/REVIEW-2026-06-12-agent-runtime-parallel-wave-scheduling-design.md` (순차 실행 실측 증거, Amdahl 분석, wave/taskset 직교 결정, 사이클 granularity 결정).
+- Boundary: registration only. 구현 착수는 codex `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE`(AR-372 디스패처 CLI)와 agent-identity 브랜치 merge 이후 — 디스패처·work-items 파일이 겹친다. merge 시 `TASKSET-DEFINITIONS.json` 신규 레지스트리가 들어오면 본 taskset 항목을 그쪽으로 이관한다.
+
 ## 2026-06-12 TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE Registration
 
 - New planned task set: `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` (Work Taxonomist).

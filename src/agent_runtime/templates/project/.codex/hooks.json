@@ -15,7 +15,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "scripts\\stop_hook_owner_governance.cmd"
+            "command": "scripts\\stop_hook_owner_governance.cmd",
+            "timeout": 120
           }
         ]
       }

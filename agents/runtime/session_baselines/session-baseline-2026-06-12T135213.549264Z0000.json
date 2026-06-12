@@ -1,0 +1,90 @@
+{
+  "schema": "agent-runtime-session-baseline/v1",
+  "captured_at": "2026-06-12T13:52:13.549264+00:00",
+  "cwd": "C:\\Users\\ycpig\\agent_runtime",
+  "head": "31fbd17",
+  "branch": "main",
+  "status_fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stash_count": 1,
+  "worktrees": [
+    {
+      "path": "C:/Users/ycpig/agent_runtime",
+      "HEAD": "31fbd173d44139ba98512425d42d4b23aeaadcaa",
+      "branch": "main"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/AGENT-IDENTITY-CONTRACT",
+      "HEAD": "37424b844b98a5406f843bf5ca2f989e5d6875d6",
+      "branch": "codex/agent-identity-contract"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-316",
+      "HEAD": "d5c62a6abe8e40da138f9eb25388a46cf0a06b41",
+      "branch": "codex/task-ar-316-vision-gap-closure"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-320",
+      "HEAD": "4019fd2062b80edfa22059bf7a68dc191a4109d1",
+      "branch": "codex/task-ar-320-ui-ux-v2"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-369",
+      "HEAD": "ff615589dc2a2e2d4b4ae13be653b5094b4b7234",
+      "branch": "codex/task-ar-369-work-hierarchy-conflict-closure"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-372-WORK-ASSIGN",
+      "HEAD": "df24b8c0d022448016d7376b6fd6be8f6a741e69",
+      "branch": "codex/task-ar-372-work-assign"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-372-WORK-CLOSE",
+      "HEAD": "bb8741bbe0854f52a922704833d0301e85ba51bd",
+      "branch": "codex/task-ar-372-work-close"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-372-WORK-CRITERIA",
+      "HEAD": "f8afef2e9b83b22ec88b75cc3a107185c2a5e7c7",
+      "branch": "codex/task-ar-372-work-criteria"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-372-WORK-SPLIT",
+      "HEAD": "e562a78c75aec6b6c8c647eea00ab9048729fd6d",
+      "branch": "codex/task-ar-372-work-split"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-500",
+      "HEAD": "8361566d8e964fc0df67831915b4713a3d179ea6",
+      "branch": "claude/task-ar-500-footprint-conflict-gate"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-508",
+      "HEAD": "02768bd288a8c71b57fa5de1b0cd232723b758f7",
+      "branch": "claude/task-ar-508-agent-branch-namespace"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/WORK-SCHEMA-CONTRACT",
+      "HEAD": "bf3a5248f33f8938151cf26489951af37e30cf5d",
+      "branch": "codex/work-schema-contract"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/WORK-STATS-CLI",
+      "HEAD": "c4df78006f63a826e982baf96b1f42096317afd2",
+      "branch": "codex/work-stats-cli"
+    }
+  ],
+  "active_codex_branches": [
+    "+ claude/task-ar-500-footprint-conflict-gate",
+    "+ claude/task-ar-508-agent-branch-namespace",
+    "+ codex/agent-identity-contract",
+    "+ codex/task-ar-316-vision-gap-closure",
+    "+ codex/task-ar-320-ui-ux-v2",
+    "+ codex/task-ar-369-work-hierarchy-conflict-closure",
+    "+ codex/task-ar-372-work-assign",
+    "+ codex/task-ar-372-work-close",
+    "+ codex/task-ar-372-work-criteria",
+    "+ codex/task-ar-372-work-split",
+    "+ codex/work-schema-contract",
+    "+ codex/work-stats-cli"
+  ]
+}

@@ -183,5 +183,7 @@ def test_real_backlog_tasks_are_classified_into_twenty_five_task_sets() -> None:
         "TASKSET-AR-PM-OPERATING-SYSTEM",
         "TASKSET-AR-DOC-TO-PLAN",
         "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
+        "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
         "TASKSET-AR-AGENT-IDENTITY-CONTRACT",
+        "TASKSET-AR-WORK-METADATA-ANALYTICS",
     }

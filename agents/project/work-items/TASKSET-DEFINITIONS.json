@@ -6,6 +6,18 @@
       "display_name": "Agent Identity Contract",
       "summary": "Add role/instance/display identity records, spawn provenance, and attribution gates for multi-agent work.",
       "order": 512
+    },
+    {
+      "task_set_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
+      "display_name": "Work Metadata Analyst",
+      "summary": "Conversation-to-work traceability, Work Item metadata, Explorer roll-ups, query/export, agent attribution, and stale verification evidence.",
+      "order": 513
+    },
+    {
+      "task_set_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
+      "display_name": "Wave Conductor",
+      "summary": "Claim-time footprint conflict gate, wave dispatcher with cascade/parallel modes, integrator merge queue, and claim-first enforcement.",
+      "order": 514
     }
   ]
 }

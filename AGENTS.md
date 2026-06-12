@@ -20,6 +20,27 @@ continues to live at `src/agent_runtime/templates/project/AGENTS.md`.
   `src/agent_runtime/templates/project/AGENTS.md` when the rule should apply to
   generated host projects.
 
+## Live Checkout Layout vs Host Scaffold (Two-Layer Structure)
+
+- This checkout intentionally keeps `agents/` flat with four lanes:
+  `lead_engineer` (task records), `planning`, `project` (product/PM overlay),
+  `runtime` (claims, pane events, session baselines). Roles such as `qa`,
+  `doc-steward`, `independent-auditor`, `scribe`, `ceo`, `uiux` exist here as
+  claim/gate **metadata** (`agent_role` in
+  `agents/runtime/task_claims/*.json`, `required_roles` in
+  `agents/project/MULTIPANE-PROCESS-POLICY.yml`), not as directories.
+- The full per-role scaffold (role directories plus `agents/roles.yml`) is
+  product surface for generated host projects and lives only under
+  `src/agent_runtime/templates/project/agents/`. Do not recreate per-role
+  directories in this checkout, and do not fork `roles.yml` into the live
+  tree: `agents/project/PROJECT-CONTEXT.yml` lists it under
+  `do_not_customize_for_project`, and a live copy would create a second
+  source of truth.
+- `doctor.py`, `agent_orchestrator.py`, and `agents/messages/**` expectations
+  are host-runtime checks for installed projects, not gaps in this checkout.
+- Decision record:
+  `reviews/REVIEW-2026-06-12-agent-runtime-live-structure-two-layer-decision.md`.
+
 ## Project Management Decomposition Contract
 
 - Non-trivial work must be decomposed as

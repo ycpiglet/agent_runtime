@@ -66,7 +66,7 @@ macOS/Linux에서는 같은 흐름을 `python3`, `. .venv/bin/activate`, `cp`로
 | 공통 작업 규칙 | `AGENTS.md` 또는 `src/agent_runtime/templates/project/AGENTS.md` |
 | Claude 계열 도구 규칙 | `CLAUDE.md` 또는 `src/agent_runtime/templates/project/CLAUDE.md` |
 | 호스트 프로젝트 정체성 | `agents/project/PROJECT-CONTEXT.yml` |
-| 역할과 책임 | `agents/roles.yml` |
+| 역할과 책임 | `agents/roles.yml` (호스트) 또는 `src/agent_runtime/templates/project/agents/roles.yml` (이 저장소의 정본) |
 | 열린 작업과 우선순위 | `agents/lead_engineer/tasks/BACKLOG.md` |
 | 현재 운영 상태 | `agents/lead_engineer/STATUS.md` |
 | 반복 실수와 개선 기록 | `agents/lead_engineer/compound_log.md` |
@@ -160,7 +160,7 @@ cp agents/project/PROJECT-CONTEXT.example.yml agents/project/PROJECT-CONTEXT.yml
 | Shared agent rules | `AGENTS.md` or `src/agent_runtime/templates/project/AGENTS.md` |
 | Claude-specific guidance | `CLAUDE.md` or `src/agent_runtime/templates/project/CLAUDE.md` |
 | Host project identity | `agents/project/PROJECT-CONTEXT.yml` |
-| Roles and responsibilities | `agents/roles.yml` |
+| Roles and responsibilities | `agents/roles.yml` (host) or `src/agent_runtime/templates/project/agents/roles.yml` (canonical in this repo) |
 | Open work | `agents/lead_engineer/tasks/BACKLOG.md` |
 | Current operating status | `agents/lead_engineer/STATUS.md` |
 | Recurring mistakes and improvements | `agents/lead_engineer/compound_log.md` |
