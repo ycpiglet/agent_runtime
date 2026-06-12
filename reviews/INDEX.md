@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-12T21:26:12+09:00
-record_count: 392
+generated_at: 2026-06-12T22:57:41+09:00
+record_count: 393
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `392` review and evidence records under `reviews/`.
+- Summary: indexed `393` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `392` files |
+| Reviews covered | pass | `393` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -406,6 +406,7 @@ record_count: 392
 | `reviews/REVIEW-2026-06-12-agent-runtime-ops-feedback-analysis-closeout.md` | `REVIEW-2026-06-12-agent-runtime-ops-feedback-analysis-closeout` | review | pass | pass | Ops Feedback Analysis Closeout Review |
 | `reviews/REVIEW-2026-06-12-agent-runtime-parallel-wave-scheduling-design.md` | `REVIEW-2026-06-12-agent-runtime-parallel-wave-scheduling-design` | review | pass | pass | Parallel Wave Scheduling Design Review |
 | `reviews/REVIEW-2026-06-12-agent-runtime-pm-operating-system-closeout.md` | `REVIEW-2026-06-12-agent-runtime-pm-operating-system-closeout` | review | pass | pass | PM Operating System Closeout Review |
+| `reviews/REVIEW-2026-06-12-agent-runtime-release-plan-v019-v020.md` | `REVIEW-2026-06-12-agent-runtime-release-plan-v019-v020` | review | pass | pass | Release Plan v0.1.9 / v0.2.0 Review |
 | `reviews/REVIEW-2026-06-12-agent-runtime-rsi-operating-system-closeout.md` | `REVIEW-2026-06-12-agent-runtime-rsi-operating-system-closeout` | review | pass | pass | RSI Operating System Closeout Review |
 | `reviews/REVIEW-2026-06-12-agent-runtime-task-ar-210-release-gate.md` | `REVIEW-2026-06-12-agent-runtime-task-ar-210-release-gate` | md | record | n/a | REVIEW-2026-06-12-agent-runtime-task-ar-210-release-gate |
 | `reviews/REVIEW-2026-06-12-agent-runtime-vision-gap-closure-closeout.md` | `REVIEW-2026-06-12-agent-runtime-vision-gap-closure-closeout` | review | pass | pass | Vision Gap Closure Closeout Review |

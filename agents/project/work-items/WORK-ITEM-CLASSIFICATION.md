@@ -7,14 +7,14 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-12T22:43:33+09:00
-record_count: 201
+generated_at: 2026-06-12T22:57:39+09:00
+record_count: 202
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `201` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `202` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
@@ -22,7 +22,7 @@ record_count: 201
 | --- | --- | --- |
 | Initiatives | pass | `3` records |
 | Tasksets | pass | `25` records |
-| Tasks | pass | `172` records |
+| Tasks | pass | `173` records |
 | Units | pass | `1` records |
 | Findings | pass | `0` findings |
 
@@ -71,7 +71,8 @@ record_count: 201
 | 0.4.5 | Task 0.4.5 | task | `TASK-AR-240` | `TASKSET-AR-RELEASE-STEWARD` | completed | `agents/lead_engineer/tasks/TASK-AR-240.md` | Create a version and release consistency steward that checks release state, version s… |
 | 0.4.6 | Task 0.4.6 | task | `TASK-AR-210` | `TASKSET-AR-RELEASE-STEWARD` | completed | `agents/lead_engineer/tasks/TASK-AR-210.md` | `v0.1.6`/`v0.1.7` 공개 판단을 근거 기반으로 고정하고, `v0.1.8` 판정(`07-02/07-09/07-16`)을 기준으로 release… |
 | 0.4.7 | Task 0.4.7 | task | `TASK-AR-509` | `TASKSET-AR-RELEASE-STEWARD` | planned | `agents/lead_engineer/tasks/TASK-AR-509.md` | 호스트 프로젝트(autofolio 등)가 agent_runtime 새 릴리스를 자동으로 인지하게 한다: 세션 시작 시 업스트림 최신 태그와 호스트 고정… |
-| 0.4.8 | Task 0.4.8 | task | `TASK-AR-223` | `TASKSET-AR-RELEASE-STEWARD` | completed | `agents/lead_engineer/tasks/TASK-AR-223.md` | `agent_runtime`에서 모델/핵심 루틴 재작성 없이 프로젝트 투입 시 오버레이 교체만으로 공식 가이드(Claude/Codex/OpenAI) 정합… |
+| 0.4.8 | Task 0.4.8 | task | `TASK-AR-510` | `TASKSET-AR-RELEASE-STEWARD` | planned | `agents/lead_engineer/tasks/TASK-AR-510.md` | 릴리스 타이밍을 사람이 기억하는 대신 트리거가 감지하게 한다: 마지막 릴리스 태그 이후 누적 변경이 임계치를 넘거나 taskset closeout wav… |
+| 0.4.9 | Task 0.4.9 | task | `TASK-AR-223` | `TASKSET-AR-RELEASE-STEWARD` | completed | `agents/lead_engineer/tasks/TASK-AR-223.md` | `agent_runtime`에서 모델/핵심 루틴 재작성 없이 프로젝트 투입 시 오버레이 교체만으로 공식 가이드(Claude/Codex/OpenAI) 정합… |
 | 0.5 | Taskset 0.5 | taskset | `TASKSET-AR-UI-CONSOLE` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Console Operator |
 | 0.5.1 | Task 0.5.1 | task | `TASK-AR-226` | `TASKSET-AR-UI-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-226.md` | Map the current `agent_runtime` state sources before building a web UI, so the UI rea… |
 | 0.5.2 | Task 0.5.2 | task | `TASK-AR-227` | `TASKSET-AR-UI-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-227.md` | Expose a safe, read-first backend interface for the UI console, using runtime files a… |

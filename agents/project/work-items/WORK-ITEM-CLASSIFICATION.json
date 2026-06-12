@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-12T22:43:33+09:00",
-  "record_count": 201,
+  "generated_at": "2026-06-12T22:57:39+09:00",
+  "record_count": 202,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -358,10 +358,21 @@
       "status": "planned"
     },
     {
-      "key": "task:TASK-AR-223",
+      "key": "task:TASK-AR-510",
       "level": "task",
       "number": "0.4.8",
       "label": "Task 0.4.8",
+      "id": "TASK-AR-510",
+      "title": "릴리스 타이밍을 사람이 기억하는 대신 트리거가 감지하게 한다: 마지막 릴리스 태그 이후 누적 변경이 임계치를 넘거나 taskset closeout wav…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-510.md",
+      "parent_id": "TASKSET-AR-RELEASE-STEWARD",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-223",
+      "level": "task",
+      "number": "0.4.9",
+      "label": "Task 0.4.9",
       "id": "TASK-AR-223",
       "title": "`agent_runtime`에서 모델/핵심 루틴 재작성 없이 프로젝트 투입 시 오버레이 교체만으로 공식 가이드(Claude/Codex/OpenAI) 정합…",
       "path": "agents/lead_engineer/tasks/TASK-AR-223.md",

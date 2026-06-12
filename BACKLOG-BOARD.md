@@ -8,8 +8,8 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-12
-task_count: 172
-open_count: 44
+task_count: 173
+open_count: 45
 completed_count: 128
 task_set_count: 7
 completed_task_set_count: 18
@@ -18,11 +18,11 @@ completed_task_set_count: 18
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `44` open or active tasks; `128` completed tasks are archived from this live board.
+- Summary: `45` open or active tasks; `128` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `38` / Ask `5` / Review `0` / Later `1` / Done `128`.
+- Status: Action `39` / Ask `5` / Review `0` / Later `1` / Done `128`.
 - Task Sets: `7` active workflows; `18` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -45,11 +45,12 @@ completed_task_set_count: 18
 ### Release Steward (`TASKSET-AR-RELEASE-STEWARD`)
 
 - Flow: Version decisions, release closeout, and consistency checks.
-- Progress: `7/8` done; `1` open or active.
+- Progress: `7/9` done; `2` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-509` | - | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P2 | Medium | Medium | 6h/5000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 호스트 프로젝트(autofolio 등)가 agent_runtime 새 릴리스를 자동으로 인지하게 한다: 세션 시작 시 업스트림 최신 태그와 호스트 고정… |
+| `TASK-AR-510` | - | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P2 | Medium | Medium | 6h/5000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 릴리스 타이밍을 사람이 기억하는 대신 트리거가 감지하게 한다: 마지막 릴리스 태그 이후 누적 변경이 임계치를 넘거나 taskset closeout wav… |
 
 ### Console Experience Architect (`TASKSET-AR-UI-UX-V2`)
 
