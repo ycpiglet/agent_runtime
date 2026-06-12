@@ -1,0 +1,24 @@
+{
+  "schema": "agent-runtime-session-baseline/v1",
+  "captured_at": "2026-06-11T16:33:15.223683+00:00",
+  "cwd": "C:\\Users\\ycpig\\agent_runtime",
+  "head": "a82573e",
+  "branch": "main",
+  "status_fingerprint": "946d49e866a2a863a3aa6aa48bf11cd04267dd03eab67c82ecb4d54b8427bb52",
+  "stash_count": 0,
+  "worktrees": [
+    {
+      "path": "C:/Users/ycpig/agent_runtime",
+      "HEAD": "a82573e0298435b3d8e5fc6414f78b5e01f231cf",
+      "branch": "main"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-316",
+      "HEAD": "d5c62a6abe8e40da138f9eb25388a46cf0a06b41",
+      "branch": "codex/task-ar-316-vision-gap-closure"
+    }
+  ],
+  "active_codex_branches": [
+    "+ codex/task-ar-316-vision-gap-closure"
+  ]
+}
