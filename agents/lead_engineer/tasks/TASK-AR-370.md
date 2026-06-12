@@ -81,6 +81,7 @@ tags:
 
 - `python -m py_compile scripts\task_identity.py` -> pass
 - `pytest tests\test_task_identity.py tests\test_work_item_classifier.py -q` -> `9 passed`
+- `pytest tests -q` -> `432 passed`
 - `python scripts/task_identity.py check --check` -> pass, `findings=0`
 - `python scripts/work_item_classifier.py --check` -> pass, `findings=0`
 - `python scripts/evidence_index_generator.py --write` -> pass, `findings=0`

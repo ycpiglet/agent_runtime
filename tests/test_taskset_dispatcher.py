@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -151,23 +152,38 @@ def test_start_creates_missing_worktree_before_claiming_taskset(tmp_path: Path, 
     _write_task(tmp_path, "TASK-AR-901", "TASKSET-AR-PANE-PROGRESS", status="planned")
     fake_bin = tmp_path / "fake-bin"
     fake_bin.mkdir()
-    fake_git = fake_bin / "git.cmd"
-    fake_git.write_text(
-        "\n".join(
-            [
-                "@echo off",
-                "echo %*>>\"%GIT_FAKE_LOG%\"",
-                "mkdir \"%CD%\\.worktrees\\TASK-AR-901\" 2>nul",
-                "echo gitdir: fake>\"%CD%\\.worktrees\\TASK-AR-901\\.git\"",
-                "exit /b 0",
-            ]
-        ),
-        encoding="utf-8",
-    )
+    fake_git = fake_bin / ("git.cmd" if os.name == "nt" else "git")
+    if os.name == "nt":
+        fake_git.write_text(
+            "\n".join(
+                [
+                    "@echo off",
+                    "echo %*>>\"%GIT_FAKE_LOG%\"",
+                    "mkdir \"%CD%\\.worktrees\\TASK-AR-901\" 2>nul",
+                    "echo gitdir: fake>\"%CD%\\.worktrees\\TASK-AR-901\\.git\"",
+                    "exit /b 0",
+                ]
+            ),
+            encoding="utf-8",
+        )
+    else:
+        fake_git.write_text(
+            "\n".join(
+                [
+                    "#!/bin/sh",
+                    "echo \"$@\" >> \"$GIT_FAKE_LOG\"",
+                    "mkdir -p \"$PWD/.worktrees/TASK-AR-901\"",
+                    "printf 'gitdir: fake\\n' > \"$PWD/.worktrees/TASK-AR-901/.git\"",
+                    "exit 0",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        fake_git.chmod(0o755)
     fake_log = tmp_path / "fake-git.log"
-    env = dict(**__import__("os").environ)
+    env = dict(**os.environ)
     path_key = "Path" if "Path" in env else "PATH"
-    env[path_key] = f"{fake_bin};{env.get(path_key, '')}"
+    env[path_key] = f"{fake_bin}{os.pathsep}{env.get(path_key, '')}"
     env["GIT_FAKE_LOG"] = str(fake_log)
     env["AGENT_RUNTIME_GIT"] = str(fake_git)
 
