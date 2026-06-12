@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-12
-task_count: 173
-open_count: 45
+task_count: 175
+open_count: 47
 completed_count: 128
-task_set_count: 7
-completed_task_set_count: 18
+task_set_count: 8
+completed_task_set_count: 17
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `45` open or active tasks; `128` completed tasks are archived from this live board.
+- Summary: `47` open or active tasks; `128` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `39` / Ask `5` / Review `0` / Later `1` / Done `128`.
-- Task Sets: `7` active workflows; `18` completed workflows are hidden from the live action board.
+- Status: Action `41` / Ask `5` / Review `0` / Later `1` / Done `128`.
+- Task Sets: `8` active workflows; `17` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -51,6 +51,16 @@ completed_task_set_count: 18
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-509` | - | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P2 | Medium | Medium | 6h/5000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 호스트 프로젝트(autofolio 등)가 agent_runtime 새 릴리스를 자동으로 인지하게 한다: 세션 시작 시 업스트림 최신 태그와 호스트 고정… |
 | `TASK-AR-510` | - | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P2 | Medium | Medium | 6h/5000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 릴리스 타이밍을 사람이 기억하는 대신 트리거가 감지하게 한다: 마지막 릴리스 태그 이후 누적 변경이 임계치를 넘거나 taskset closeout wav… |
+
+### Repo Custodian (`TASKSET-AR-REPO-HYGIENE`)
+
+- Flow: Working-tree cleanup, backlog cycle hygiene, and handoff publication.
+- Progress: `1/3` done; `2` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-511` | - | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Low | 3h/3000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 서로 다른 OS/LLM/페인에서 작업한 파일이 줄바꿈·인코딩 차이로 가짜 diff와 경고를 만드는 것을 차단한다. 현재 `.gitattributes`가… |
+| `TASK-AR-512` | - | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | High | 10h/8000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 형상관리 산출물(branch/worktree/stash/PR/issue/claim)의 "지저분함"을 사람이 인지하기 전에 주기 점검 루프가 감지·보고·정… |
 
 ### Console Experience Architect (`TASKSET-AR-UI-UX-V2`)
 
@@ -162,7 +172,6 @@ completed_task_set_count: 18
 | Identity Steward (`TASKSET-AR-TASK-IDENTITY`) | Collision-proof task identity, UUID metadata, lifecycle timestamps, and recovery visibility. | `4/4` done | `4` completed task files archived |
 | Design Operator (`TASKSET-AR-UI-DESIGN-SYSTEM`) | Agent Runtime UI research, design-system guidance, and console visual implementation. | `7/7` done | `7` completed task files archived |
 | Interface Stylist (`TASKSET-AR-UI-DESIGN-IMPLEMENTATION`) | Active UI design implementation work that applies the accepted design system across runtime panes. | `7/7` done | `7` completed task files archived |
-| Repo Custodian (`TASKSET-AR-REPO-HYGIENE`) | Working-tree cleanup, backlog cycle hygiene, and handoff publication. | `1/1` done | `1` completed task files archived |
 | Feedback Analyst (`TASKSET-AR-OPS-FEEDBACK-ANALYSIS`) | Owner feedback intake, enterprise-wide structure/vision analysis, and follow-up planning records. | `4/4` done | `4` completed task files archived |
 | Vision Integrator (`TASKSET-AR-VISION-GAP-CLOSURE`) | Legacy independence, A2A messaging, multi-agent RBAC, loop hardening, live eval, skill packaging, realtime UI, and doc traceability. | `10/10` done | `10` completed task files archived |
 | Project Workbreaker (`TASKSET-AR-PM-OPERATING-SYSTEM`) | Project-to-unit hierarchy, worker-ready specs, model-tier routing, WIP controls, dispatcher scope stops, and PM verification gates. | `9/9` done | `9` completed task files archived |

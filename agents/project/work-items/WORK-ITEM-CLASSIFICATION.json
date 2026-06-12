@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-12T22:57:39+09:00",
-  "record_count": 202,
+  "generated_at": "2026-06-12T23:17:09+09:00",
+  "record_count": 204,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -1323,7 +1323,7 @@
       "title": "Repo Custodian",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-UNASSIGNED",
-      "status": "complete"
+      "status": "active"
     },
     {
       "key": "task:TASK-AR-233",
@@ -1335,6 +1335,28 @@
       "path": "agents/lead_engineer/tasks/TASK-AR-233.md",
       "parent_id": "TASKSET-AR-REPO-HYGIENE",
       "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-511",
+      "level": "task",
+      "number": "0.16.2",
+      "label": "Task 0.16.2",
+      "id": "TASK-AR-511",
+      "title": "서로 다른 OS/LLM/페인에서 작업한 파일이 줄바꿈·인코딩 차이로 가짜 diff와 경고를 만드는 것을 차단한다. 현재 `.gitattributes`가…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-511.md",
+      "parent_id": "TASKSET-AR-REPO-HYGIENE",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-512",
+      "level": "task",
+      "number": "0.16.3",
+      "label": "Task 0.16.3",
+      "id": "TASK-AR-512",
+      "title": "형상관리 산출물(branch/worktree/stash/PR/issue/claim)의 \"지저분함\"을 사람이 인지하기 전에 주기 점검 루프가 감지·보고·정…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-512.md",
+      "parent_id": "TASKSET-AR-REPO-HYGIENE",
+      "status": "planned"
     },
     {
       "key": "taskset:TASKSET-AR-OPS-FEEDBACK-ANALYSIS",

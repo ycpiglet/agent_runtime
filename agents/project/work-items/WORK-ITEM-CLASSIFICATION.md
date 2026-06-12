@@ -7,14 +7,14 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-12T22:57:39+09:00
-record_count: 202
+generated_at: 2026-06-12T23:17:09+09:00
+record_count: 204
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `202` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `204` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
@@ -22,7 +22,7 @@ record_count: 202
 | --- | --- | --- |
 | Initiatives | pass | `3` records |
 | Tasksets | pass | `25` records |
-| Tasks | pass | `173` records |
+| Tasks | pass | `175` records |
 | Units | pass | `1` records |
 | Findings | pass | `0` findings |
 
@@ -158,8 +158,10 @@ record_count: 202
 | 0.15.5 | Task 0.15.5 | task | `TASK-AR-282` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | `agents/lead_engineer/tasks/TASK-AR-282.md` | Bring graph, state-machine, roadmap, planner, source, and write surfaces into the sam… |
 | 0.15.6 | Task 0.15.6 | task | `TASK-AR-283` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | `agents/lead_engineer/tasks/TASK-AR-283.md` | Keep the dark operator console usable on desktop and mobile without relying on color-… |
 | 0.15.7 | Task 0.15.7 | task | `TASK-AR-284` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | `agents/lead_engineer/tasks/TASK-AR-284.md` | Close the active UI design implementation task set only after focused checks, Owner g… |
-| 0.16 | Taskset 0.16 | taskset | `TASKSET-AR-REPO-HYGIENE` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Repo Custodian |
+| 0.16 | Taskset 0.16 | taskset | `TASKSET-AR-REPO-HYGIENE` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Repo Custodian |
 | 0.16.1 | Task 0.16.1 | task | `TASK-AR-233` | `TASKSET-AR-REPO-HYGIENE` | completed | `agents/lead_engineer/tasks/TASK-AR-233.md` | Clean the current working tree through an intentional commit and push, then keep back… |
+| 0.16.2 | Task 0.16.2 | task | `TASK-AR-511` | `TASKSET-AR-REPO-HYGIENE` | planned | `agents/lead_engineer/tasks/TASK-AR-511.md` | 서로 다른 OS/LLM/페인에서 작업한 파일이 줄바꿈·인코딩 차이로 가짜 diff와 경고를 만드는 것을 차단한다. 현재 `.gitattributes`가… |
+| 0.16.3 | Task 0.16.3 | task | `TASK-AR-512` | `TASKSET-AR-REPO-HYGIENE` | planned | `agents/lead_engineer/tasks/TASK-AR-512.md` | 형상관리 산출물(branch/worktree/stash/PR/issue/claim)의 "지저분함"을 사람이 인지하기 전에 주기 점검 루프가 감지·보고·정… |
 | 0.17 | Taskset 0.17 | taskset | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Feedback Analyst |
 | 0.17.1 | Task 0.17.1 | task | `TASK-AR-306` | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | completed | `agents/lead_engineer/tasks/TASK-AR-306.md` | Owner 7개 지시(브랜치/스태시 정리, UI 적용, 플러그인/훅 정리, 레거시 전신 프로젝트 정리, 구조 분석, 비전 분석, 기록/등록)를 단일 세션… |
 | 0.17.2 | Task 0.17.2 | task | `TASK-AR-307` | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | completed | `agents/lead_engineer/tasks/TASK-AR-307.md` | 2026-06-11 전사 구조 분석에서 식별된 개선 항목을 Owner가 우선순위 결정할 수 있는 실행 계획으로 확정한다 (분석/계획 전용, 구현 없음). |
