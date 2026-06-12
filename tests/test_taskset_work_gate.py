@@ -1,12 +1,30 @@
 from __future__ import annotations
 
+import json
+import re
 import subprocess
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "taskset_work_gate.py"
+
+TASK_TEMPLATE = """---
+id: {task_id}
+status: {status}
+priority: P0
+difficulty: M
+est_hours: 1
+est_tokens: 100
+task_set_id: TASKSET-AR-QUALITY-LOOP
+tags: []
+---
+
+## Goal
+- Sample task for board freshness tests.
+"""
 
 
 def _run(root: Path) -> subprocess.CompletedProcess[str]:
@@ -40,6 +58,95 @@ def _run_require_complete(root: Path, task_set_id: str) -> subprocess.CompletedP
         encoding="utf-8",
         errors="replace",
     )
+
+
+def _write_task(root: Path, task_id: str, status: str) -> None:
+    tasks_dir = root / "agents" / "lead_engineer" / "tasks"
+    tasks_dir.mkdir(parents=True, exist_ok=True)
+    (tasks_dir / f"{task_id}.md").write_text(
+        TASK_TEMPLATE.format(task_id=task_id, status=status), encoding="utf-8"
+    )
+
+
+def _write_claim(root: Path, claim_id: str, claimed_at: str) -> None:
+    claims_dir = root / "agents" / "runtime" / "task_claims"
+    claims_dir.mkdir(parents=True, exist_ok=True)
+    (claims_dir / f"{claim_id}.json").write_text(
+        json.dumps(
+            {
+                "claim_id": claim_id,
+                "task_id": "TASK-AR-901",
+                "task_set_id": "TASKSET-AR-QUALITY-LOOP",
+                "status": "claimed",
+                "claimed_at": claimed_at,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
+def _write_rendered_board(root: Path) -> str:
+    from scripts import backlog_board
+
+    tasks = backlog_board.load_tasks(root / "agents" / "lead_engineer" / "tasks")
+    text = backlog_board.render(tasks, root=root)
+    (root / "BACKLOG-BOARD.md").write_text(text, encoding="utf-8")
+    return text
+
+
+def test_gate_accepts_board_with_only_wall_clock_drift(tmp_path: Path) -> None:
+    _write_task(tmp_path, "TASK-AR-901", "planned")
+    claimed_at = (datetime.now(timezone.utc) - timedelta(hours=25)).isoformat()
+    _write_claim(tmp_path, "CLAIM-901", claimed_at)
+    board = _write_rendered_board(tmp_path)
+
+    # Simulate a board generated hours/days earlier: younger WIP age, no stale
+    # claims yet, older generated_at date. Only wall-clock derived tokens differ.
+    aged = re.sub(r"oldest `[0-9.]+h`; stale `\d+`", "oldest `0.1h`; stale `0`", board)
+    aged = re.sub(r"(?m)^generated_at: .*$", "generated_at: 2026-06-01", aged)
+    assert aged != board
+    (tmp_path / "BACKLOG-BOARD.md").write_text(aged, encoding="utf-8")
+
+    result = _run(tmp_path)
+
+    assert "stale:content-mismatch" not in result.stdout
+    assert result.returncode == 0
+
+
+def test_gate_flags_stale_board_after_task_status_change(tmp_path: Path) -> None:
+    _write_task(tmp_path, "TASK-AR-901", "planned")
+    _write_rendered_board(tmp_path)
+
+    _write_task(tmp_path, "TASK-AR-901", "in_progress")
+
+    result = _run(tmp_path)
+
+    assert result.returncode == 1
+    assert "stale:content-mismatch" in result.stdout
+
+
+def test_gate_flags_stale_board_after_task_added(tmp_path: Path) -> None:
+    _write_task(tmp_path, "TASK-AR-901", "planned")
+    _write_rendered_board(tmp_path)
+
+    _write_task(tmp_path, "TASK-AR-902", "planned")
+
+    result = _run(tmp_path)
+
+    assert result.returncode == 1
+    assert "stale:content-mismatch" in result.stdout
+
+
+def test_gate_flags_stale_board_after_new_claim(tmp_path: Path) -> None:
+    _write_task(tmp_path, "TASK-AR-901", "planned")
+    _write_rendered_board(tmp_path)
+
+    _write_claim(tmp_path, "CLAIM-901", datetime.now(timezone.utc).isoformat())
+
+    result = _run(tmp_path)
+
+    assert result.returncode == 1
+    assert "stale:content-mismatch" in result.stdout
 
 
 def test_gate_blocks_task_without_task_set_id(tmp_path: Path) -> None:

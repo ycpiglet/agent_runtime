@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 
 import backlog_board
@@ -11,6 +12,17 @@ import backlog_board
 
 ACTIVE_CLAIM_STATUSES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
 DONE_TASK_STATUSES = {"completed", "done", "released"}
+
+# Board fields derived from the current wall clock rather than from task/claim
+# records. They drift with the passage of time even when no record changed, so
+# the freshness comparison masks them on both sides. Record-derived fields
+# (task rows, lane counts, WIP `active` counts) stay unmasked so real
+# staleness — task add/remove, status change, claim change — is still caught.
+_WALL_CLOCK_GENERATED_AT = re.compile(r"^generated_at: \d{4}-\d{2}-\d{2}$", re.MULTILINE)
+_WALL_CLOCK_WIP = re.compile(
+    r"^(- WIP: active `[^`\n]*`; oldest `)[0-9.]+h(`; stale `)\d+(`\.)$",
+    re.MULTILINE,
+)
 
 
 def _rel(root: Path, path: Path) -> str:
@@ -24,13 +36,20 @@ def _normalize(text: str) -> str:
     return text.replace("\r\n", "\n").strip()
 
 
+def _mask_wall_clock_fields(text: str) -> str:
+    """Mask wall-clock derived tokens so only record changes affect freshness."""
+    text = _WALL_CLOCK_GENERATED_AT.sub("generated_at: <wall-clock>", text)
+    text = _WALL_CLOCK_WIP.sub(r"\g<1><wall-clock>\g<2><wall-clock>\g<3>", text)
+    return text
+
+
 def _backlog_board_is_fresh(root: Path, board: Path, tasks: list[backlog_board.Task]) -> bool:
     generated = backlog_board.render(tasks, root=root)
     try:
         existing = board.read_text(encoding="utf-8")
     except OSError:
         return False
-    return _normalize(existing) == _normalize(generated)
+    return _mask_wall_clock_fields(_normalize(existing)) == _mask_wall_clock_fields(_normalize(generated))
 
 
 def _load_claims(root: Path) -> list[dict]:
