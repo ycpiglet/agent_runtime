@@ -9,8 +9,8 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-13
 task_count: 186
-open_count: 50
-completed_count: 136
+open_count: 49
+completed_count: 137
 task_set_count: 8
 completed_task_set_count: 19
 ---
@@ -18,11 +18,11 @@ completed_task_set_count: 19
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `50` open or active tasks; `136` completed tasks are archived from this live board.
+- Summary: `49` open or active tasks; `137` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `42` / Ask `7` / Review `0` / Later `1` / Done `136`.
+- Status: Action `42` / Ask `6` / Review `0` / Later `1` / Done `137`.
 - Task Sets: `8` active workflows; `19` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -46,7 +46,7 @@ completed_task_set_count: 19
 
 - Flow: Working-tree cleanup, backlog cycle hygiene, and handoff publication.
 - Progress: `1/6` done; `5` open or active.
-- WIP: active `2/3`; oldest `0.0h`; stale `0`.
+- WIP: active `2/3`; oldest `5.1h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-511` | - | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Low | 3h/3000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 서로 다른 OS/LLM/페인에서 작업한 파일이 줄바꿈·인코딩 차이로 가짜 diff와 경고를 만드는 것을 차단한다. 현재 `.gitattributes`가… |
@@ -133,11 +133,10 @@ completed_task_set_count: 19
 ### Work Metadata Analyst (`TASKSET-AR-WORK-METADATA-ANALYTICS`)
 
 - Flow: Conversation-to-work traceability, Work Item metadata, Explorer roll-ups, query/export, agent attribution, and stale verification evidence.
-- Progress: `1/6` done; `5` open or active.
-- WIP: active `5/3`; oldest `1.4h`; stale `0`.
+- Progress: `2/6` done; `4` open or active.
+- WIP: active `4/3`; oldest `5.3h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-514` | INIT-AR-WORK-METADATA-ANALYTICS | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Ask | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | Owner/Claude/Codex planning discussions must map to review records, task records, boa… |
 | `TASK-AR-517` | INIT-AR-WORK-METADATA-ANALYTICS | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Turn Work Item metadata into queryable statistics, JSON/CSV export, and reusable save… |
 | `TASK-AR-519` | INIT-AR-WORK-METADATA-ANALYTICS | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Mark verification evidence stale when source files, commits, claims, or task records… |
 | `TASK-AR-518` | INIT-AR-WORK-METADATA-ANALYTICS | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | High | 10h/8000tok | Low | 6 | validation-team | qa | Execute next | Require instance_uid actor attribution across claims, A2A messages, evidence, closeou… |
@@ -147,7 +146,7 @@ completed_task_set_count: 19
 
 - Flow: Claim-time footprint conflict gate, wave dispatcher with cascade/parallel modes, integrator merge queue, and claim-first enforcement.
 - Progress: `5/10` done; `5` open or active.
-- WIP: active `2/3`; oldest `0.2h`; stale `0`.
+- WIP: active `2/3`; oldest `5.3h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-500` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | in_progress | Action | P1 | High | Medium | 6h/5000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 충돌 발견 시점을 merge-time(사후)에서 claim-time(사전)으로 옮긴다. 새 클레임 생성 시 활성 클레임들의 선언 footprint(`ta… |
@@ -316,6 +315,7 @@ completed_task_set_count: 19
 | `TASK-AR-369` | `9d171d09-6c3…` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | 2026-06-12T08:17:54+09:00 | 2026-06-12T08:42:59+09:00 | 2026-06-12T09:04:46+09:00 | 2026-06-12T09:04:46+09:00 | Finish the terminology migration from ambiguous `project -> taskset -> task -> unit`… |
 | `TASK-AR-370` | `5655d2cb-a03…` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | 2026-06-12T08:17:54+09:00 | 2026-06-12T09:43:38+09:00 | 2026-06-12T11:06:57+09:00 | 2026-06-12T11:06:57+09:00 | Prevent concurrent panes from selecting the same human display ID before a task file… |
 | `TASK-AR-375` | `fe4cf218-9eb…` | `TASKSET-AR-AGENT-IDENTITY-CONTRACT` | completed | 2026-06-12T14:50:00+09:00 | 2026-06-12T15:05:12+09:00 | 2026-06-12T15:25:40+09:00 | 2026-06-12T15:25:40+09:00 | Create durable instance-level identity records and a deterministic gate that rejects… |
+| `TASK-AR-514` | `5b5f167a-3a1…` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | 2026-06-12T23:30:00+09:00 | 2026-06-13T01:33:45+09:00 | 2026-06-13T04:30:00+09:00 | 2026-06-13T04:30:00+09:00 | Owner/Claude/Codex planning discussions must map to review records, task records, boa… |
 | `TASK-AR-515` | `9c205ef4-f27…` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | 2026-06-12T23:31:00+09:00 | 2026-06-13T01:33:46+09:00 | 2026-06-13T02:55:00+09:00 | 2026-06-13T02:55:00+09:00 | Define and gate the Work Item metadata catalog for provenance, resolution, relationsh… |
 | `TASK-AR-504` | `acd02367-581…` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | 2026-06-12T18:51:54+09:00 | 2026-06-12T18:51:54+09:00 | 2026-06-12T18:55:00+09:00 | 2026-06-12T18:55:00+09:00 | 병렬 세션(codex/claude)이 서로의 미머지 변경을 모른 채 세운 계획이 merge 후 조용히 무효화되는 문제를 지연평가로 해결한다: 계획의 전제… |
 | `TASK-AR-508` | `41f58968-7dc…` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | 2026-06-12T21:53:22+09:00 | 2026-06-12T21:55:08+09:00 | 2026-06-12T22:15:00+09:00 | 2026-06-12T22:15:00+09:00 | dirty intake와 session baseline의 residue 보존 규칙이 `codex/*` 브랜치에 하드코딩되어 있어 `claude/*` 브랜… |
