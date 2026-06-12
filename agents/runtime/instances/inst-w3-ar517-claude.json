@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "inst-w3-ar517-claude",
+  "callsign": "claude/stats-shrike",
+  "callsite_id": "claude-w3-ar517",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260613-024516-task-ar-517-04c8.json"
+  ],
+  "created_at": "2026-06-13T02:45:16+09:00",
+  "decision_cycle_id": "",
+  "display_name": "claude/stats-shrike",
+  "model": "",
+  "model_tier": "",
+  "on_behalf_of": "TASK-AR-517",
+  "pane_id": "claude-w3-ar517",
+  "parent_instance_id": "",
+  "project_id": "",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "lead-engineer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-13T02:45:16+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-517",
+  "task_set_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
+  "team_id": "agent-runtime-core",
+  "unit_id": "",
+  "unit_spec": "",
+  "updated_at": "2026-06-13T02:45:16+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-517"
+}

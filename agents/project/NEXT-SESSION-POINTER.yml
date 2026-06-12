@@ -51,6 +51,26 @@ active_work:
       agent_instance_id: inst-w2-ar515-claude
       display_name: claude/schema-finch
       callsite_id: claude-w2-ar515
+    - claim_id: CLAIM-20260613-024516-task-ar-501-4a8a
+      agent_role: lead-engineer
+      agent_instance_id: inst-w3-ar501-claude
+      display_name: claude/wave-condor
+      callsite_id: claude-w3-ar501
+    - claim_id: CLAIM-20260613-024516-task-ar-517-04c8
+      agent_role: lead-engineer
+      agent_instance_id: inst-w3-ar517-claude
+      display_name: claude/stats-shrike
+      callsite_id: claude-w3-ar517
+    - claim_id: CLAIM-20260613-024517-task-ar-518-463e
+      agent_role: lead-engineer
+      agent_instance_id: inst-w3-ar518-claude
+      display_name: claude/attrib-osprey
+      callsite_id: claude-w3-ar518
+    - claim_id: CLAIM-20260613-024517-task-ar-519-759f
+      agent_role: lead-engineer
+      agent_instance_id: inst-w3-ar519-claude
+      display_name: claude/fresh-tern
+      callsite_id: claude-w3-ar519
   current_teams: []
 resume:
   active_task: TASK-AR-500
