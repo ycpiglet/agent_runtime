@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-12T14:16:13+09:00",
-  "record_count": 197,
+  "generated_at": "2026-06-12T14:32:30+09:00",
+  "record_count": 198,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -2147,6 +2147,17 @@
       "id": "UNIT-TASK-AR-372-008",
       "title": "UNIT-TASK-AR-372-008 - Proposal-Only Work Assign Command",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-008.md",
+      "parent_id": "TASK-AR-372",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-372-009",
+      "level": "unit",
+      "number": "1.1.4.9",
+      "label": "Unit 1.1.4.9",
+      "id": "UNIT-TASK-AR-372-009",
+      "title": "UNIT-TASK-AR-372-009 - Proposal-Only Work Split Command",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-009.md",
       "parent_id": "TASK-AR-372",
       "status": "completed"
     },

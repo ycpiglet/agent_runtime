@@ -7,14 +7,14 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-12T14:16:13+09:00
-record_count: 197
+generated_at: 2026-06-12T14:32:30+09:00
+record_count: 198
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `197` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `198` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
@@ -23,7 +23,7 @@ record_count: 197
 | Initiatives | pass | `2` records |
 | Tasksets | pass | `24` records |
 | Tasks | pass | `162` records |
-| Units | pass | `9` records |
+| Units | pass | `10` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -234,6 +234,7 @@ record_count: 197
 | 1.1.4.6 | Unit 1.1.4.6 | unit | `UNIT-TASK-AR-372-006` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-006.md` | UNIT-TASK-AR-372-006 - Deterministic Work Close Command |
 | 1.1.4.7 | Unit 1.1.4.7 | unit | `UNIT-TASK-AR-372-007` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-007.md` | UNIT-TASK-AR-372-007 - Proposal-Only Work Criteria Command |
 | 1.1.4.8 | Unit 1.1.4.8 | unit | `UNIT-TASK-AR-372-008` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-008.md` | UNIT-TASK-AR-372-008 - Proposal-Only Work Assign Command |
+| 1.1.4.9 | Unit 1.1.4.9 | unit | `UNIT-TASK-AR-372-009` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-009.md` | UNIT-TASK-AR-372-009 - Proposal-Only Work Split Command |
 | 1.1.5 | Task 1.1.5 | task | `TASK-AR-373` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-373.md` | Make it visible which planned tasks are worker-ready and which still require planner… |
 | 1.1.6 | Task 1.1.6 | task | `TASK-AR-374` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-374.md` | Prove that the work hierarchy and registration conflict surfaces are actually closed… |
 

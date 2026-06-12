@@ -1528,6 +1528,310 @@ def assign_work(
     return result
 
 
+def _load_task_for_split(root: Path, task_ref: str) -> tuple[Path, dict[str, Any], str]:
+    raw = Path(task_ref)
+    if raw.exists():
+        path = raw.resolve()
+    elif not raw.is_absolute() and (root / raw).exists():
+        path = (root / raw).resolve()
+    elif TASK_DISPLAY_RE.match(task_ref):
+        path = (root / TASKS_DIR / f"{task_ref}.md").resolve()
+    else:
+        raise WorkRegistrationError([f"work-split:not-found:{task_ref}"])
+    if not path.exists():
+        raise WorkRegistrationError([f"work-split:not-found:{task_ref}"])
+    text = path.read_text(encoding="utf-8")
+    meta, body = backlog_board.parse_frontmatter(text)
+    if not meta:
+        raise WorkRegistrationError([f"{_rel(root, path)}: missing-frontmatter"])
+    kind = str(meta.get("kind") or ("task" if TASK_DISPLAY_RE.match(path.stem) else "")).strip()
+    if kind and kind != "task":
+        raise WorkRegistrationError([f"work-split:not-task:{task_ref}:{kind}"])
+    return path, dict(meta), body
+
+
+def _existing_unit_paths(root: Path, task_id: str) -> list[Path]:
+    unit_dir = root / UNITS_DIR / task_id
+    if not unit_dir.is_dir():
+        return []
+    return sorted(unit_dir.glob("UNIT-*.md"), key=lambda item: item.name.lower())
+
+
+def _short_text(value: str, limit: int = 72) -> str:
+    text = re.sub(r"\s+", " ", value).strip()
+    if len(text) <= limit:
+        return text
+    return text[: limit - 3].rstrip() + "..."
+
+
+def _task_target_files(meta: dict[str, Any], body: str) -> list[str]:
+    return _text_lines(meta.get("target_files")) or _section_list(body, "Target Files")
+
+
+def _task_inputs(meta: dict[str, Any], body: str, target_files: list[str]) -> list[str]:
+    return _text_lines(meta.get("inputs")) or _section_list(body, "Inputs") or target_files
+
+
+def _proposed_split_units(task_id: str, meta: dict[str, Any], body: str) -> list[dict[str, Any]]:
+    title = str(meta.get("title") or task_id).strip()
+    context = str(meta.get("summary") or meta.get("context") or "").strip()
+    if not context:
+        sections = _section_blocks(body)
+        context = sections.get("goal") or sections.get("context") or f"Implement {title}."
+    target_files = _task_target_files(meta, body)
+    inputs = _task_inputs(meta, body, target_files)
+    acceptance = _acceptance_criteria(meta, body) or [f"Complete {title} in a verifiable implementation unit."]
+    commands = [command for command in _criteria_verification_commands(meta, body) if _is_executable_verification(command)]
+    if not commands:
+        commands = [f"python scripts/work.py split {task_id} --json"]
+
+    units: list[dict[str, Any]] = []
+    max_units = 5
+    for index, criterion in enumerate(acceptance[:max_units], start=1):
+        extra = acceptance[max_units:] if index == max_units else []
+        criteria = [criterion, *extra]
+        scope = " ".join(criteria)
+        units.append(
+            {
+                "proposed_unit_ref": f"{task_id}-PROPOSED-{index:03d}",
+                "title": f"{_short_text(title, 44)} - {_short_text(criterion, 64)}",
+                "context": context,
+                "inputs": inputs,
+                "target_files": target_files,
+                "scope": scope,
+                "steps": [
+                    f"Implement the bounded outcome: {_short_text(scope, 96)}",
+                    "Update the focused tests, docs, or evidence required by the touched surface.",
+                    "Run the declared verification commands and record handoff notes.",
+                ],
+                "acceptance": criteria,
+                "verification": commands,
+                "handoff": f"Report files changed, verification results, and any follow-up split needed for {task_id}.",
+                "stop_condition": "Stop after this proposed unit is implemented, verified, and ready for closeout.",
+            }
+        )
+        if index == max_units:
+            break
+    return units
+
+
+def _proposed_unit_readiness_findings(units: list[dict[str, Any]]) -> list[str]:
+    findings: list[str] = []
+    for index, unit in enumerate(units, start=1):
+        ref = str(unit.get("proposed_unit_ref") or f"proposed-{index}")
+        for field in sorted(UNIT_REQUIRED_FIELDS):
+            value = unit.get(field)
+            if isinstance(value, list):
+                ready = any(str(item).strip() for item in value)
+            else:
+                ready = bool(str(value or "").strip())
+            if not ready:
+                findings.append(f"{ref}:split-readiness:missing:{field}")
+        commands = _text_lines(unit.get("verification"))
+        if not any(_is_executable_verification(command) for command in commands):
+            findings.append(f"{ref}:split-readiness:no-executable-verification")
+    return findings
+
+
+def _render_split_draft(proposal: dict[str, Any]) -> str:
+    evidence = "\n".join(f"- {item.get('summary', '')}" for item in proposal.get("evidence", [])) or "- No evidence."
+    verifiers = "\n".join(f"- `{item}`" for item in proposal.get("verifier_list", []))
+    unit_sections: list[str] = []
+    for unit in proposal.get("proposed_units", []):
+        if not isinstance(unit, dict):
+            continue
+        unit_sections.extend(
+            [
+                f"### {unit.get('proposed_unit_ref')} - {unit.get('title')}",
+                "",
+                f"- Scope: {unit.get('scope')}",
+                "- Target files:",
+                *[f"  - `{item}`" for item in _text_lines(unit.get("target_files"))],
+                "- Acceptance:",
+                *[f"  - {item}" for item in _text_lines(unit.get("acceptance"))],
+                "- Verification:",
+                *[f"  - `{item}`" for item in _text_lines(unit.get("verification"))],
+                "",
+            ]
+        )
+    readiness = "\n".join(f"- {item}" for item in proposal.get("readiness_findings", [])) or "- pass"
+    return "\n".join(
+        [
+            "---",
+            "status: draft",
+            "origin_type: planning_proposal",
+            f"origin_ref: agents/planning/outbox/{proposal['id']}.json",
+            "tags:",
+            "  - proposal-draft",
+            "  - work-split",
+            "---",
+            "",
+            f"# {proposal['title']}",
+            "",
+            "## Goal",
+            "",
+            proposal["suggested_next_action"],
+            "",
+            "## Proposed Units",
+            "",
+            *unit_sections,
+            "## Readiness Check",
+            "",
+            readiness,
+            "",
+            "## Source Evidence",
+            "",
+            evidence,
+            "",
+            "## Verifier List",
+            "",
+            verifiers,
+            "",
+            "## Risk Boundary",
+            "",
+            proposal["owner_boundary"],
+            "",
+        ]
+    )
+
+
+def _write_split_proposal(
+    root: Path,
+    *,
+    task_id: str,
+    task_path: str,
+    proposed_units: list[dict[str, Any]],
+    readiness_findings: list[str],
+    actor: str,
+    now_text: str,
+    outbox: Path,
+    draft_dir: Path,
+) -> tuple[dict[str, Any], str, str]:
+    proposal_core = {
+        "action_type": "plan_update",
+        "task_id": task_id,
+        "task_path": task_path,
+        "proposed_units": proposed_units,
+        "readiness_findings": readiness_findings,
+    }
+    proposal_id = _stable_id("PROP", proposal_core)
+    evidence_hash = _stable_hash(proposal_core)
+    proposal_path = outbox / f"{proposal_id}.json"
+    draft_path = draft_dir / f"{proposal_id}.md"
+    verifier_list = [
+        f"python scripts/work.py split {task_id} --json",
+        "python scripts/task_unit_readiness_gate.py --task-id <approved-task-id> --require-ready --check",
+        "python scripts/owner_governance_gate.py",
+    ]
+    readiness_status = "pass" if not readiness_findings else "watch"
+    proposal: dict[str, Any] = {
+        "id": proposal_id,
+        "mode": "B",
+        "status": "proposed",
+        "action_type": "plan_update",
+        "proposal_output": "plan",
+        "risk_tier": "medium" if readiness_findings else "low",
+        "title": f"work split: {task_id}",
+        "created_at": now_text,
+        "updated_at": now_text,
+        "trace_id": None,
+        "dedupe_key": f"work-split:{task_id}:{evidence_hash}",
+        "evidence_hash": evidence_hash,
+        "source_refs": [{"path": task_path, "kind": "work_split"}],
+        "evidence": [
+            {
+                "summary": f"{task_id} has no registered unit specs; propose {len(proposed_units)} worker-ready unit draft(s).",
+                "confidence": 0.82,
+                "severity": "watch",
+            },
+            {
+                "summary": f"Internal split readiness status: {readiness_status}.",
+                "confidence": 0.8,
+                "severity": "watch" if readiness_findings else "info",
+            },
+        ],
+        "target_files": [task_path],
+        "rollback_path": f"agents/planning/rollback/{proposal_id}.json",
+        "verifier_list": verifier_list,
+        "expected_verification_command": verifier_list[0],
+        "owner_boundary": "B-mode split proposal only; do not create unit files, reserve IDs, or mutate canonical work items without approved apply.",
+        "affected_owner_boundary": "Local task-to-unit planning metadata only after approved apply.",
+        "blast_radius": "Proposed unit specs for the target task only.",
+        "rejection_reason": None,
+        "department": "planning-office",
+        "reviewer_opinions": [],
+        "suggested_next_action": f"Review and approve proposed unit specs for `{task_id}` before creating canonical unit files.",
+        "supersedes": [],
+        "draft_task_path": _proposal_rel(draft_path, root),
+        "task_id": task_id,
+        "proposed_units": proposed_units,
+        "readiness_status": readiness_status,
+        "readiness_findings": readiness_findings,
+        "proposed_by": actor,
+    }
+    proposal_path.parent.mkdir(parents=True, exist_ok=True)
+    draft_path.parent.mkdir(parents=True, exist_ok=True)
+    proposal_path.write_text(json.dumps(proposal, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    draft_path.write_text(_render_split_draft(proposal), encoding="utf-8")
+    return proposal, _proposal_rel(proposal_path, root), _proposal_rel(draft_path, root)
+
+
+def split_work(
+    root: Path,
+    task_ref: str,
+    *,
+    actor: str,
+    now: str | None = None,
+    outbox: Path | None = None,
+    draft_dir: Path | None = None,
+) -> dict[str, Any]:
+    root = root.resolve()
+    now_text = _now_text(now)
+    path, meta, body = _load_task_for_split(root, task_ref)
+    task_id = str(meta.get("display_id") or meta.get("id") or meta.get("work_id") or path.stem).strip()
+    rel_path = _rel(root, path)
+    existing_units = [_rel(root, item) for item in _existing_unit_paths(root, task_id)]
+    result: dict[str, Any] = {
+        "status": "pass" if existing_units else "proposed",
+        "task_id": task_id,
+        "task_path": rel_path,
+        "existing_unit_count": len(existing_units),
+        "existing_units": existing_units,
+        "proposed_unit_count": 0,
+        "readiness_status": "pass",
+        "readiness_findings": [],
+        "proposal": "",
+        "draft": "",
+    }
+    if existing_units:
+        return result
+
+    proposed_units = _proposed_split_units(task_id, meta, body)
+    readiness_findings = _proposed_unit_readiness_findings(proposed_units)
+    proposal, proposal_ref, draft_ref = _write_split_proposal(
+        root,
+        task_id=task_id,
+        task_path=rel_path,
+        proposed_units=proposed_units,
+        readiness_findings=readiness_findings,
+        actor=actor,
+        now_text=now_text,
+        outbox=(outbox if outbox and outbox.is_absolute() else root / (outbox or PLANNING_OUTBOX_DIR)),
+        draft_dir=(draft_dir if draft_dir and draft_dir.is_absolute() else root / (draft_dir or PLANNING_DRAFTS_DIR)),
+    )
+    result.update(
+        {
+            "proposed_unit_count": len(proposed_units),
+            "readiness_status": proposal["readiness_status"],
+            "readiness_findings": readiness_findings,
+            "proposal": proposal_ref,
+            "draft": draft_ref,
+            "proposal_id": proposal["id"],
+        }
+    )
+    return result
+
+
 def _compact_stamp(now_text: str) -> str:
     return re.sub(r"[^0-9]", "", now_text)[:14] or now_util.epoch_seconds()
 
@@ -1961,6 +2265,32 @@ def cmd_assign(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_split(args: argparse.Namespace) -> int:
+    try:
+        result = split_work(
+            args.root,
+            args.task_id,
+            actor=args.actor,
+            now=args.now,
+            outbox=args.outbox,
+            draft_dir=args.draft_dir,
+        )
+    except WorkRegistrationError as exc:
+        print("work-split: fail", file=sys.stderr)
+        print(f"findings={len(exc.findings)}", file=sys.stderr)
+        for finding in exc.findings:
+            print(f"- {finding}", file=sys.stderr)
+        return 1
+    print(f"work-split: {result['status']}")
+    if args.json:
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+    else:
+        for key, value in result.items():
+            if key not in {"existing_units", "readiness_findings"}:
+                print(f"{key}={value}")
+    return 0
+
+
 def cmd_close(args: argparse.Namespace) -> int:
     try:
         result = close_work(
@@ -2037,6 +2367,15 @@ def build_parser() -> argparse.ArgumentParser:
     assign_cmd.add_argument("--draft-dir", type=Path)
     assign_cmd.add_argument("--json", action="store_true")
     assign_cmd.set_defaults(func=cmd_assign)
+
+    split_cmd = sub.add_parser("split", help="Propose worker-ready unit specs for a task without canonical unit files")
+    split_cmd.add_argument("task_id", help="Task ID or path to a task work item")
+    split_cmd.add_argument("--actor", default="work.py split")
+    split_cmd.add_argument("--now")
+    split_cmd.add_argument("--outbox", type=Path)
+    split_cmd.add_argument("--draft-dir", type=Path)
+    split_cmd.add_argument("--json", action="store_true")
+    split_cmd.set_defaults(func=cmd_split)
 
     close_cmd = sub.add_parser("close", help="Close a work item after passed verification evidence")
     close_cmd.add_argument("work_id", help="Unit ID, task ID, or path to a work item")

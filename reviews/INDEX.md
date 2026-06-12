@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-12T14:16:30+09:00
-record_count: 400
+generated_at: 2026-06-12T14:32:44+09:00
+record_count: 402
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `400` review and evidence records under `reviews/`.
+- Summary: indexed `402` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `400` files |
+| Reviews covered | pass | `402` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -415,6 +415,7 @@ record_count: 400
 | `reviews/REVIEW-2026-06-12-work-registration-cli.md` | `REVIEW-2026-06-12-work-registration-cli` | md | record | pass | Work Registration CLI Closeout |
 | `reviews/REVIEW-2026-06-12-work-registration-unit-scaffold.md` | `REVIEW-2026-06-12-work-registration-unit-scaffold` | md | record | pass | Work Registration Unit Scaffold Closeout |
 | `reviews/REVIEW-2026-06-12-work-schema-ssot-gate.md` | `REVIEW-2026-06-12-work-schema-ssot-gate` | md | record | pass | Work Schema SSoT Gate Closeout |
+| `reviews/REVIEW-2026-06-12-work-split-command.md` | `REVIEW-2026-06-12-work-split-command` | md | record | pass | Work Split Command |
 | `reviews/REVIEW-2026-06-12-work-verify-command.md` | `REVIEW-2026-06-12-work-verify-command` | md | record | pass | Work Verify Command Closeout |
 | `reviews/REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review.md` | `REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review` | md | record | n/a | REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review |
 | `reviews/REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log.md` | `REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log` | md | record | n/a | REVIEW: TASK-AR-222 closeout 실행 로그 |
@@ -434,6 +435,7 @@ record_count: 400
 | `reviews/VERIFY-2026-06-12-unit-task-ar-372-006-20260612133100.json` | `VERIFY-2026-06-12-unit-task-ar-372-006-20260612133100` | json | record | n/a | VERIFY-2026-06-12-unit-task-ar-372-006-20260612133100 |
 | `reviews/VERIFY-2026-06-12-unit-task-ar-372-007-20260612135400.json` | `VERIFY-2026-06-12-unit-task-ar-372-007-20260612135400` | json | record | n/a | VERIFY-2026-06-12-unit-task-ar-372-007-20260612135400 |
 | `reviews/VERIFY-2026-06-12-unit-task-ar-372-008-20260612141409.json` | `VERIFY-2026-06-12-unit-task-ar-372-008-20260612141409` | json | record | n/a | VERIFY-2026-06-12-unit-task-ar-372-008-20260612141409 |
+| `reviews/VERIFY-2026-06-12-unit-task-ar-372-009-20260612143100.json` | `VERIFY-2026-06-12-unit-task-ar-372-009-20260612143100` | json | record | n/a | VERIFY-2026-06-12-unit-task-ar-372-009-20260612143100 |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.
