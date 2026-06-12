@@ -1,20 +1,20 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-12T21:58:00+09:00
+updated_at: 2026-06-12T23:35:00+09:00
 current_state:
-  summary: "Requested PM, Vision, Ops, and RSI tasksets are complete locally; next ready workflow is TASKSET-AR-UI-UX-V2 from the live backlog board."
+  summary: "Owner/Claude/Codex metadata, A2A, agent attribution, query/statistics, and stale-verification follow-ups are now registered as TASKSET-AR-WORK-METADATA-ANALYTICS."
   status: ready
   task_set_status: ready
-  task_set_id: "TASKSET-AR-UI-UX-V2"
+  task_set_id: "TASKSET-AR-WORK-METADATA-ANALYTICS"
   step_index: 0
   step_total: 0
   progress_pct: 100
-  status_text: "PM/Vision/Ops/RSI closeout records are aligned; TASKSET-AR-UI-UX-V2 is a ready pointer only, not an active claim."
+  status_text: "Start with TASK-AR-514 conversation-to-work traceability or TASK-AR-515 metadata schema catalog after root/worktree cleanup; this is a ready pointer only, not an active claim."
 active_work:
   current_agents: []
   current_teams: []
 resume:
   active_task: none
-  active_task_set: TASKSET-AR-UI-UX-V2
+  active_task_set: TASKSET-AR-WORK-METADATA-ANALYTICS
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -197,6 +197,7 @@ pointers:
     - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-221-quality-loop-closeout.md
     - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-243-planning-evidence-link.md
 next_actions:
+  - "For the Owner's A2A/metadata follow-up, start TASKSET-AR-WORK-METADATA-ANALYTICS from BACKLOG-BOARD.md; first candidates are TASK-AR-514 and TASK-AR-515."
   - "Select the next open taskset from BACKLOG-BOARD.md and create a fresh claim before implementation."
   - "Keep TASKSET-AR-PM-OPERATING-SYSTEM, TASKSET-AR-VISION-GAP-CLOSURE, TASKSET-AR-OPS-FEEDBACK-ANALYSIS, and TASKSET-AR-RSI-OPERATING-SYSTEM closed unless a new canonical task is added."
   - "Push local commits only after Owner approval; local closeout does not imply remote publish, PR, tag, or external CI evidence."

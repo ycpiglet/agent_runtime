@@ -199,6 +199,12 @@ TASK_SET_DEFINITIONS = [
         98,
     ),
     TaskSetInfo(
+        "TASKSET-AR-WORK-METADATA-ANALYTICS",
+        "Work Metadata Analyst",
+        "Conversation-to-work traceability, Work Item metadata, Explorer roll-ups, query/export, agent attribution, and stale verification evidence.",
+        98,
+    ),
+    TaskSetInfo(
         "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
         "Wave Conductor",
         "Claim-time footprint conflict gate, wave dispatcher with cascade/parallel modes, integrator merge queue, and claim-first enforcement.",

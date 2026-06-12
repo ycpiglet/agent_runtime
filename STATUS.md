@@ -1,12 +1,21 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-12 - TASKSET-AR-WORK-METADATA-ANALYTICS registration
+
+- Summary: Owner/Claude/Codex discussion about A2A, Work Item metadata, frontmatter/footer/reference/tag/team/query/statistics, agent instance attribution, and stale verification is now registered as `TASKSET-AR-WORK-METADATA-ANALYTICS`.
+- Registered tasks: `TASK-AR-514` conversation-to-work traceability, `TASK-AR-515` Work metadata schema catalog, `TASK-AR-516` Work Explorer roll-up/facets, `TASK-AR-517` query/stats/export/saved views, `TASK-AR-518` agent instance attribution across A2A/evidence/commits, and `TASK-AR-519` verification freshness/stale evidence.
+- Output: `BACKLOG.md`, `BACKLOG-BOARD.md`, `agents/project/NEXT-SESSION-POINTER.yml`, `agents/project/initiatives/INIT-AR-WORK-METADATA-ANALYTICS.md`, `agents/project/work-items/WORK-ITEM-CLASSIFICATION.md`, and `reviews/MEETING-2026-06-12-work-metadata-a2a-registration-audit.md` now point to this follow-up lane.
+- Verification: task identity, work-item classifier, taskset work gate, evidence index, owner-doc format gate, and Owner governance are the required registration checks for this state.
+- Boundary: A2A core routing/lifecycle proof remains completed archived evidence in `TASK-AR-311`, `TASK-AR-302`, and `TASK-AR-243`; this new taskset covers the missing visibility, metadata, analytics, attribution, and stale-verification follow-through.
+- Handoff: next ready workflow is `TASKSET-AR-WORK-METADATA-ANALYTICS`; start with `TASK-AR-514` or `TASK-AR-515` after root/worktree cleanup and without creating an active claim in the root checkout.
+
 ## 2026-06-12 - PM/Vision/Ops/RSI requested closeout
 
 - Summary: completed the requested sequence for `TASKSET-AR-PM-OPERATING-SYSTEM`, `TASKSET-AR-VISION-GAP-CLOSURE`, `TASKSET-AR-OPS-FEEDBACK-ANALYSIS`, and `TASKSET-AR-RSI-OPERATING-SYSTEM`.
 - Output: PM unit/model routing gates, Vision provider-live watch/evidence index/SSE/replay closeout, Ops decision closeout, and RSI Evidence-to-Proposal OS closeout are recorded in task files and Owner reviews.
 - Verification: named taskset gates are expected to pass after generated `BACKLOG-BOARD.md` and `reviews/INDEX.md` refresh; RSI wrapper is `python scripts/verify_rsi_operating_system_taskset.py`.
 - Boundary: provider-live credentials remain unconfigured, external A2A transport is not claimed, C-mode remains blocked/latent, and remote publish/PR/tag/version actions remain Owner-gated.
-- Handoff: next ready workflow is `TASKSET-AR-UI-UX-V2` from `BACKLOG-BOARD.md`; no task claim is active yet.
+- Historical handoff: this previously pointed to `TASKSET-AR-UI-UX-V2`; current handoff is superseded by `TASKSET-AR-WORK-METADATA-ANALYTICS` after the Owner's A2A/metadata registration request.
 - Evidence: `reviews/REVIEW-2026-06-12-agent-runtime-pm-operating-system-closeout.md`, `reviews/REVIEW-2026-06-12-agent-runtime-vision-gap-closure-closeout.md`, `reviews/REVIEW-2026-06-12-agent-runtime-ops-feedback-analysis-closeout.md`, and `reviews/REVIEW-2026-06-12-agent-runtime-rsi-operating-system-closeout.md`.
 
 ## 2026-06-11 - TASKSET-AR-PM-OPERATING-SYSTEM registration

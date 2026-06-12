@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-12T23:24:21+09:00",
-  "record_count": 205,
+  "generated_at": "2026-06-13T00:07:13+09:00",
+  "record_count": 213,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -2258,6 +2258,94 @@
       "title": "main 보드가 미머지 브랜치의 진행 상황을 모르는 인식 오류를 없앤다. Owner 보고(2026-06-12): \"main의 백로그만 보면 아직 진행이…",
       "path": "agents/lead_engineer/tasks/TASK-AR-513.md",
       "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
+      "status": "planned"
+    },
+    {
+      "key": "initiative:INIT-AR-WORK-METADATA-ANALYTICS",
+      "level": "initiative",
+      "number": "3",
+      "label": "Initiative 3",
+      "id": "INIT-AR-WORK-METADATA-ANALYTICS",
+      "title": "Work Metadata Analytics Initiative",
+      "path": "agents/project/initiatives/INIT-AR-WORK-METADATA-ANALYTICS.md",
+      "parent_id": "",
+      "status": "planned"
+    },
+    {
+      "key": "taskset:TASKSET-AR-WORK-METADATA-ANALYTICS",
+      "level": "taskset",
+      "number": "3.1",
+      "label": "Taskset 3.1",
+      "id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
+      "title": "Work Metadata Analyst",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-WORK-METADATA-ANALYTICS",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-514",
+      "level": "task",
+      "number": "3.1.1",
+      "label": "Task 3.1.1",
+      "id": "TASK-AR-514",
+      "title": "Owner/Claude/Codex planning discussions must map to review records, task records, boa…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-514.md",
+      "parent_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-515",
+      "level": "task",
+      "number": "3.1.2",
+      "label": "Task 3.1.2",
+      "id": "TASK-AR-515",
+      "title": "Define and gate the Work Item metadata catalog for provenance, resolution, relationsh…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-515.md",
+      "parent_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-516",
+      "level": "task",
+      "number": "3.1.3",
+      "label": "Task 3.1.3",
+      "id": "TASK-AR-516",
+      "title": "Make initiative/taskset/task/unit progress and metadata visible through one Work Expl…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-516.md",
+      "parent_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-517",
+      "level": "task",
+      "number": "3.1.4",
+      "label": "Task 3.1.4",
+      "id": "TASK-AR-517",
+      "title": "Turn Work Item metadata into queryable statistics, JSON/CSV export, and reusable save…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-517.md",
+      "parent_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-518",
+      "level": "task",
+      "number": "3.1.5",
+      "label": "Task 3.1.5",
+      "id": "TASK-AR-518",
+      "title": "Require instance_uid actor attribution across claims, A2A messages, evidence, closeou…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-518.md",
+      "parent_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-519",
+      "level": "task",
+      "number": "3.1.6",
+      "label": "Task 3.1.6",
+      "id": "TASK-AR-519",
+      "title": "Mark verification evidence stale when source files, commits, claims, or task records…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-519.md",
+      "parent_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
       "status": "planned"
     }
   ]

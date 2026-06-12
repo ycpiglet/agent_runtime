@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-06-12
-task_count: 176
-open_count: 48
+generated_at: 2026-06-13
+task_count: 182
+open_count: 54
 completed_count: 128
-task_set_count: 8
+task_set_count: 9
 completed_task_set_count: 17
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `48` open or active tasks; `128` completed tasks are archived from this live board.
+- Summary: `54` open or active tasks; `128` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `41` / Ask `6` / Review `0` / Later `1` / Done `128`.
-- Task Sets: `8` active workflows; `17` completed workflows are hidden from the live action board.
+- Status: Action `46` / Ask `7` / Review `0` / Later `1` / Done `128`.
+- Task Sets: `9` active workflows; `17` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -137,6 +137,20 @@ completed_task_set_count: 17
 | `TASK-AR-372` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | High | 12h/9000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Provide one structured registration command path so planners stop hand-editing board… |
 | `TASK-AR-373` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P3 | Low | Medium | 6h/5000tok | Low | 5 | governance-loop | independent-auditor | Execute next | Make it visible which planned tasks are worker-ready and which still require planner… |
 | `TASK-AR-374` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P3 | Low | Low | 8h/4000tok | Low | 4 | agent-runtime-core | lead-engineer | Execute next | Prove that the work hierarchy and registration conflict surfaces are actually closed… |
+
+### Work Metadata Analyst (`TASKSET-AR-WORK-METADATA-ANALYTICS`)
+
+- Flow: Conversation-to-work traceability, Work Item metadata, Explorer roll-ups, query/export, agent attribution, and stale verification evidence.
+- Progress: `0/6` done; `6` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-514` | INIT-AR-WORK-METADATA-ANALYTICS | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Ask | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | Owner/Claude/Codex planning discussions must map to review records, task records, boa… |
+| `TASK-AR-517` | INIT-AR-WORK-METADATA-ANALYTICS | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Turn Work Item metadata into queryable statistics, JSON/CSV export, and reusable save… |
+| `TASK-AR-519` | INIT-AR-WORK-METADATA-ANALYTICS | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Mark verification evidence stale when source files, commits, claims, or task records… |
+| `TASK-AR-515` | INIT-AR-WORK-METADATA-ANALYTICS | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | High | 10h/8000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Define and gate the Work Item metadata catalog for provenance, resolution, relationsh… |
+| `TASK-AR-518` | INIT-AR-WORK-METADATA-ANALYTICS | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | High | 10h/8000tok | Low | 6 | validation-team | qa | Execute next | Require instance_uid actor attribution across claims, A2A messages, evidence, closeou… |
+| `TASK-AR-516` | INIT-AR-WORK-METADATA-ANALYTICS | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | High | 12h/9000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Make initiative/taskset/task/unit progress and metadata visible through one Work Expl… |
 
 ### Wave Conductor (`TASKSET-AR-PARALLEL-WAVE-EXECUTION`)
 

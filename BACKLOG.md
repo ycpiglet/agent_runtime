@@ -1,5 +1,14 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-06-12 TASKSET-AR-WORK-METADATA-ANALYTICS Registration
+
+- New planned task set: `TASKSET-AR-WORK-METADATA-ANALYTICS` (Work Metadata Analyst).
+- Purpose: Owner/Claude/Codex 토의에서 나온 A2A, Work Item metadata, frontmatter/footer/reference/tag/team/query/statistics, agent instance attribution, 검증 freshness 요구를 chat-only 또는 넓은 platform task에 흩어두지 않고 canonical work로 보이게 한다.
+- Registered planned tasks: `TASK-AR-514`(conversation-to-work traceability and registration audit) `TASK-AR-515`(Work metadata schema catalog and envelope fields) `TASK-AR-516`(Work Explorer tree roll-up and facet filters) `TASK-AR-517`(Work query/stats/export and saved views) `TASK-AR-518`(agent instance attribution across A2A/evidence/commits) `TASK-AR-519`(verification freshness and stale evidence gate).
+- Audit record: `reviews/MEETING-2026-06-12-work-metadata-a2a-registration-audit.md`.
+- Initiative record: `agents/project/initiatives/INIT-AR-WORK-METADATA-ANALYTICS.md`.
+- Boundary: A2A core routing/lifecycle proof remains completed archived evidence (`TASK-AR-311`, `TASK-AR-302`). This taskset covers the missing visibility, metadata, analytics, attribution, and stale-verification follow-through.
+
 ## 2026-06-12 TASKSET-AR-PARALLEL-WAVE-EXECUTION Registration
 
 - New planned task set: `TASKSET-AR-PARALLEL-WAVE-EXECUTION` (Wave Conductor).

@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-12T22:57:41+09:00
-record_count: 393
+generated_at: 2026-06-13T00:07:14+09:00
+record_count: 394
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `393` review and evidence records under `reviews/`.
+- Summary: indexed `394` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `393` files |
+| Reviews covered | pass | `394` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -123,6 +123,7 @@ record_count: 393
 | `reviews/MEETING-2026-06-12-parallel-work-lifecycle-rules.md` | `MEETING-2026-06-12-parallel-work-lifecycle-rules` | meeting | pass | pass | Parallel Work Lifecycle Rules Meeting |
 | `reviews/MEETING-2026-06-12-plan-assumption-deferred-revalidation.md` | `MEETING-2026-06-12-plan-assumption-deferred-revalidation` | meeting | pass | pass | Plan Assumption Deferred Revalidation Meeting |
 | `reviews/MEETING-2026-06-12-work-hierarchy-numbering-and-recording.md` | `MEETING-2026-06-12-work-hierarchy-numbering-and-recording` | meeting | pass | pass | Work Hierarchy Numbering And Recording Meeting |
+| `reviews/MEETING-2026-06-12-work-metadata-a2a-registration-audit.md` | `MEETING-2026-06-12-work-metadata-a2a-registration-audit` | meeting | pass | pass | Work Metadata And A2A Registration Audit |
 | `reviews/MEETING-2026-06-13-agent-runtime-cross-project-governance-and-release-update.md` | `MEETING-2026-06-13-agent-runtime-cross-project-governance-and-release-update` | md | record | n/a | MEETING-2026-06-13-agent-runtime-cross-project-governance-and-release-update |
 | `reviews/MEETING-2026-06-13-agent-runtime-task-ar-211-overlay-implementation-checkpoint.md` | `MEETING-2026-06-13-agent-runtime-task-ar-211-overlay-implementation-checkpoint` | md | record | n/a | MEETING-2026-06-13-agent-runtime-task-ar-211-overlay-implementation-checkpoint |
 | `reviews/MEETING-2026-06-14-agent-runtime-task-ar-222-migration-closeout-sync.md` | `MEETING-2026-06-14-agent-runtime-task-ar-222-migration-closeout-sync` | md | record | n/a | MEETING: TASK-AR-220/222 closeout 동기화 정합 미팅 |
