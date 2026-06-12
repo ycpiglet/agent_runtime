@@ -1,0 +1,66 @@
+{
+  "schema": "agent-runtime-session-baseline/v1",
+  "captured_at": "2026-06-12T08:02:44.487970+00:00",
+  "cwd": "C:\\Users\\ycpig\\agent_runtime",
+  "head": "f8699fd",
+  "branch": "main",
+  "status_fingerprint": "94517ef2caaa7f3a2ac215bade42497bbc9a7bd746c241bf7179941fa0627ffd",
+  "stash_count": 0,
+  "worktrees": [
+    {
+      "path": "C:/Users/ycpig/agent_runtime",
+      "HEAD": "f8699fd1347cc7a72e49b790fc327bccaa4e25c2",
+      "branch": "main"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/AGENT-IDENTITY-CONTRACT",
+      "HEAD": "37424b844b98a5406f843bf5ca2f989e5d6875d6",
+      "branch": "codex/agent-identity-contract"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-316",
+      "HEAD": "d5c62a6abe8e40da138f9eb25388a46cf0a06b41",
+      "branch": "codex/task-ar-316-vision-gap-closure"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-320",
+      "HEAD": "4019fd2062b80edfa22059bf7a68dc191a4109d1",
+      "branch": "codex/task-ar-320-ui-ux-v2"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-369",
+      "HEAD": "ff615589dc2a2e2d4b4ae13be653b5094b4b7234",
+      "branch": "codex/task-ar-369-work-hierarchy-conflict-closure"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-372-WORK-ASSIGN",
+      "HEAD": "df24b8c0d022448016d7376b6fd6be8f6a741e69",
+      "branch": "codex/task-ar-372-work-assign"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-372-WORK-CLOSE",
+      "HEAD": "bb8741bbe0854f52a922704833d0301e85ba51bd",
+      "branch": "codex/task-ar-372-work-close"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-372-WORK-CRITERIA",
+      "HEAD": "f8afef2e9b83b22ec88b75cc3a107185c2a5e7c7",
+      "branch": "codex/task-ar-372-work-criteria"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-372-WORK-SPLIT",
+      "HEAD": "e562a78c75aec6b6c8c647eea00ab9048729fd6d",
+      "branch": "codex/task-ar-372-work-split"
+    }
+  ],
+  "active_codex_branches": [
+    "+ codex/agent-identity-contract",
+    "+ codex/task-ar-316-vision-gap-closure",
+    "+ codex/task-ar-320-ui-ux-v2",
+    "+ codex/task-ar-369-work-hierarchy-conflict-closure",
+    "+ codex/task-ar-372-work-assign",
+    "+ codex/task-ar-372-work-close",
+    "+ codex/task-ar-372-work-criteria",
+    "+ codex/task-ar-372-work-split"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "schema": "agent-runtime-session-baseline/v1",
+  "captured_at": "2026-06-12T03:38:58.609088+00:00",
+  "cwd": "C:\\Users\\ycpig\\agent_runtime",
+  "head": "4019fd2",
+  "branch": "main",
+  "status_fingerprint": "2b5e264263565eb6a8c0904b2bd027370aa1ebd14d72abf43c01e9d7dff9b014",
+  "stash_count": 0,
+  "worktrees": [
+    {
+      "path": "C:/Users/ycpig/agent_runtime",
+      "HEAD": "4019fd2062b80edfa22059bf7a68dc191a4109d1",
+      "branch": "main"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-316",
+      "HEAD": "d5c62a6abe8e40da138f9eb25388a46cf0a06b41",
+      "branch": "codex/task-ar-316-vision-gap-closure"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-320",
+      "HEAD": "4019fd2062b80edfa22059bf7a68dc191a4109d1",
+      "branch": "codex/task-ar-320-ui-ux-v2"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-369",
+      "HEAD": "ff615589dc2a2e2d4b4ae13be653b5094b4b7234",
+      "branch": "codex/task-ar-369-work-hierarchy-conflict-closure"
+    }
+  ],
+  "active_codex_branches": [
+    "+ codex/task-ar-316-vision-gap-closure",
+    "+ codex/task-ar-320-ui-ux-v2",
+    "+ codex/task-ar-369-work-hierarchy-conflict-closure"
+  ]
+}
