@@ -27,7 +27,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "scripts\\stop_hook_owner_governance.cmd"
+            "command": "scripts\\stop_hook_owner_governance.cmd",
+            "timeout": 120
           }
         ]
       },
@@ -37,7 +38,7 @@
           {
             "type": "command",
             "command": "scripts\\stop_hook_dirty_intake.cmd",
-            "timeout": 20
+            "timeout": 60
           }
         ]
       }
