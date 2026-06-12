@@ -48,6 +48,7 @@ def main() -> int:
         ["scripts/parallel_worktree_gate.py", "--check"],
         ["scripts/collaboration_concurrency_gate.py", "--check"],
         ["scripts/rbac_write_gate.py", "--check"],
+        ["scripts/agent_identity_gate.py", "--check"],
         ["scripts/collaboration_governance_gate.py", "--check"],
         ["scripts/runtime_asset_usage.py", "--check"],
         ["scripts/state_sync_gate.py", "--check"],

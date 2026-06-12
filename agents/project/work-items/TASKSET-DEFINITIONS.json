@@ -1,0 +1,11 @@
+{
+  "schema": "agent-runtime-taskset-definitions/v1",
+  "tasksets": [
+    {
+      "task_set_id": "TASKSET-AR-AGENT-IDENTITY-CONTRACT",
+      "display_name": "Agent Identity Contract",
+      "summary": "Add role/instance/display identity records, spawn provenance, and attribution gates for multi-agent work.",
+      "order": 512
+    }
+  ]
+}

@@ -20,6 +20,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+from agent_instance_registry import record_claim_instance
 from pane_event_log import append_event
 
 
@@ -378,11 +379,16 @@ def cmd_create(args: argparse.Namespace) -> int:
     )
 
     claim_path.write_text(json.dumps(claim, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    record_claim_instance(root, claim, claim_path=claim_path)
     append_event(
         root,
         {
             "event": "claim_created",
-            "actor": claim["agent_role"],
+            "actor": claim["agent_instance_id"],
+            "actor_role": claim["agent_role"],
+            "agent_instance_id": claim["agent_instance_id"],
+            "display_name": claim["display_name"],
+            "callsite_id": claim["callsite_id"],
             "task_id": claim["task_id"],
             "task_set_id": claim["task_set_id"],
             "claim_id": claim["claim_id"],

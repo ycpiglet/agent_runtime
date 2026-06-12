@@ -284,3 +284,5 @@ def test_owner_governance_runs_rbac_write_gate() -> None:
 
     assert "rbac_write_gate.py" in root_gate
     assert "rbac_write_gate.py" in template_gate
+    assert "agent_identity_gate.py" in root_gate
+    assert "agent_identity_gate.py" in template_gate
