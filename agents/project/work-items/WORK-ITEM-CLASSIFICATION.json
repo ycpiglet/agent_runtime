@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-13T02:56:29+09:00",
+  "generated_at": "2026-06-13T07:59:23+09:00",
   "record_count": 229,
   "finding_count": 0,
   "findings": [],
@@ -2467,7 +2467,7 @@
       "title": "Owner/Claude/Codex planning discussions must map to review records, task records, boa…",
       "path": "agents/lead_engineer/tasks/TASK-AR-514.md",
       "parent_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-515",

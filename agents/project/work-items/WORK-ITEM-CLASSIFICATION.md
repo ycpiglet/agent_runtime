@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-13T02:56:29+09:00
+generated_at: 2026-06-13T07:59:23+09:00
 record_count: 229
 ---
 
@@ -262,7 +262,7 @@ record_count: 229
 | 3.1.10 | Task 3.1.10 | task | `TASK-AR-513` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-513.md` | main 보드가 미머지 브랜치의 진행 상황을 모르는 인식 오류를 없앤다. Owner 보고(2026-06-12): "main의 백로그만 보면 아직 진행이… |
 | 4 | Initiative 4 | initiative | `INIT-AR-WORK-METADATA-ANALYTICS` | - | planned | `agents/project/initiatives/INIT-AR-WORK-METADATA-ANALYTICS.md` | Work Metadata Analytics Initiative |
 | 4.1 | Taskset 4.1 | taskset | `TASKSET-AR-WORK-METADATA-ANALYTICS` | `INIT-AR-WORK-METADATA-ANALYTICS` | active | `BACKLOG-BOARD.md` | Work Metadata Analyst |
-| 4.1.1 | Task 4.1.1 | task | `TASK-AR-514` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-514.md` | Owner/Claude/Codex planning discussions must map to review records, task records, boa… |
+| 4.1.1 | Task 4.1.1 | task | `TASK-AR-514` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | `agents/lead_engineer/tasks/TASK-AR-514.md` | Owner/Claude/Codex planning discussions must map to review records, task records, boa… |
 | 4.1.2 | Task 4.1.2 | task | `TASK-AR-515` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | `agents/lead_engineer/tasks/TASK-AR-515.md` | Define and gate the Work Item metadata catalog for provenance, resolution, relationsh… |
 | 4.1.3 | Task 4.1.3 | task | `TASK-AR-516` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-516.md` | Make initiative/taskset/task/unit progress and metadata visible through one Work Expl… |
 | 4.1.4 | Task 4.1.4 | task | `TASK-AR-517` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-517.md` | Turn Work Item metadata into queryable statistics, JSON/CSV export, and reusable save… |

@@ -4,9 +4,11 @@ display_id: TASK-AR-514
 task_uid: 5b5f167a-3a1c-4065-8b64-af69e8bba46a
 registered_at: 2026-06-12T23:30:00+09:00
 created_at: 2026-06-12T23:30:00+09:00
-updated_at: 2026-06-12T23:30:00+09:00
+updated_at: 2026-06-13T04:30:00+09:00
+started_at: 2026-06-13T01:33:45+09:00
+completed_at: 2026-06-13T04:30:00+09:00
 title: Conversation-to-work traceability and registration audit
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 6
@@ -69,3 +71,13 @@ tags:
 - Audit script/gate + tests.
 - Updated planning trigger guidance.
 - Closeout review showing the audit catches this exact failure mode.
+
+## Completion Evidence
+
+- PR #55: scripts/conversation_work_audit.py + chain wiring (both gate copies) + template mirror + PLANNING-LOOP-CONTRACT.md guidance + 7 tests.
+
+## Verification Results
+
+- pytest tests/test_conversation_work_audit.py -q -> 7 passed
+- python scripts/conversation_work_audit.py --check (real repo) -> pass, planning_records=9, findings=0
+- W4b inst-w4b-ar514-verifier -> APPROVE
