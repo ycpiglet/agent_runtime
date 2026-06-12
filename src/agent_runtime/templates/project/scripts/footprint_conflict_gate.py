@@ -47,7 +47,8 @@ ACTIVE_CLAIM_STATUSES = {
 
 
 def _normalize(entry: str) -> str:
-    return entry.replace("\\", "/").lstrip("./").strip()
+    entry = entry.replace("\\", "/").strip()
+    return entry.removeprefix("./")
 
 
 def _prefix_of(entry: str) -> str | None:
@@ -86,7 +87,8 @@ def _load_active_claims(root: Path) -> list[dict]:
     for path in sorted(claims_dir.glob("CLAIM-*.json")):
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
+        except (OSError, json.JSONDecodeError) as exc:
+            print(f"warning: skipping unreadable claim {path.name}: {exc}", file=sys.stderr)
             continue
         if data.get("status") in ACTIVE_CLAIM_STATUSES:
             claims.append(data)

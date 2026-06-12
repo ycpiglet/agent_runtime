@@ -87,3 +87,15 @@ def test_entry_overlap_semantics() -> None:
     assert not overlap("scripts/a.py", "scripts/b.py")
     assert not overlap("scripts/**", "docs/a.md")
     assert not overlap("", "scripts/a.py")
+
+
+def test_dotfile_paths_not_corrupted() -> None:
+    # regression: lstrip("./") was a character-set strip and corrupted
+    # dotfile paths (reviewer finding, 2026-06-12)
+    overlap = footprint_conflict_gate.entries_overlap
+    normalize = footprint_conflict_gate._normalize
+    assert normalize(".github/workflows/ci.yml") == ".github/workflows/ci.yml"
+    assert normalize("./scripts/a.py") == "scripts/a.py"
+    assert not overlap(".gitignore", "gitignore")
+    assert overlap(".github/**", ".github/workflows/ci.yml")
+    assert overlap("./scripts/a.py", "scripts/a.py")
