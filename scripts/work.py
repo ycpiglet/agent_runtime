@@ -8,6 +8,7 @@ backlog board are refreshed afterward.
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
 import re
@@ -95,6 +96,26 @@ ASSIGNMENT_RULES: list[tuple[str, str, tuple[str, ...]]] = [
         ("planning", "proposal", "split", "criteria", "assign", "work item", "backlog", "taskset", "initiative"),
     ),
 ]
+WORK_ITEM_PATH_PATTERNS = (
+    INITIATIVES_DIR / "*.md",
+    PLANS_DIR / "*.md",
+    TASKS_DIR / "TASK-*.md",
+    UNITS_DIR / "**" / "*.md",
+)
+STATS_NUMERIC_METRICS = {
+    "actual_tokens",
+    "actual_hours",
+    "est_tokens",
+    "est_hours",
+    "est_cost",
+    "actual_cost",
+    "budget_cap",
+    "rework_count",
+    "gate_failure_count",
+}
+STATS_COMPUTED_METRICS = {"lead_time"}
+STATS_METRICS = {"count"} | STATS_NUMERIC_METRICS | STATS_COMPUTED_METRICS
+MISSING_GROUP_VALUE = "(none)"
 
 
 class WorkRegistrationError(RuntimeError):
@@ -2171,6 +2192,210 @@ def close_work(
     }
 
 
+def _iter_work_item_records(root: Path) -> list[tuple[Path, dict[str, Any]]]:
+    paths: dict[Path, None] = {}
+    for pattern in WORK_ITEM_PATH_PATTERNS:
+        for path in (root / pattern.parent).glob(pattern.name) if "**" not in pattern.as_posix() else root.glob(pattern.as_posix()):
+            if path.is_file():
+                paths[path] = None
+    records: list[tuple[Path, dict[str, Any]]] = []
+    for path in sorted(paths):
+        try:
+            meta, _body = backlog_board.parse_frontmatter(path.read_text(encoding="utf-8"))
+        except OSError:
+            continue
+        if str(meta.get("schema_version") or "").strip() != WORK_ITEM_SCHEMA:
+            continue
+        records.append((path, dict(meta)))
+    return records
+
+
+def _stats_group_fields(raw: str | None) -> list[str]:
+    if not raw:
+        return []
+    return [part.strip() for part in raw.split(",") if part.strip()]
+
+
+def _stats_where_filters(raw: list[str] | None) -> list[tuple[str, str]]:
+    filters: list[tuple[str, str]] = []
+    for item in raw or []:
+        if "=" not in item:
+            raise WorkRegistrationError([f"work-stats:invalid-where:{item}"])
+        key, value = item.split("=", 1)
+        key = key.strip()
+        if not key:
+            raise WorkRegistrationError([f"work-stats:invalid-where:{item}"])
+        filters.append((key, value.strip()))
+    return filters
+
+
+def _stats_matches(meta: dict[str, Any], *, kinds: list[str], statuses: list[str], filters: list[tuple[str, str]]) -> bool:
+    if kinds and str(meta.get("kind") or "") not in kinds:
+        return False
+    if statuses and str(meta.get("status") or "") not in statuses:
+        return False
+    for key, value in filters:
+        current = meta.get(key)
+        if isinstance(current, list):
+            if value not in [str(item) for item in current]:
+                return False
+        elif str(current or "") != value:
+            return False
+    return True
+
+
+def _stats_decimal(value: Any) -> Decimal | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    try:
+        parsed = Decimal(text)
+    except InvalidOperation:
+        return None
+    return parsed
+
+
+def _stats_datetime(value: Any) -> datetime | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        return _parse_datetime(text)
+    except ValueError:
+        return None
+
+
+def _stats_metric_value(meta: dict[str, Any], metric: str) -> Decimal | None:
+    if metric == "count":
+        return Decimal(1)
+    if metric in STATS_NUMERIC_METRICS:
+        return _stats_decimal(meta.get(metric))
+    if metric == "lead_time":
+        finished = _stats_datetime(meta.get("completed_at"))
+        started = _stats_datetime(meta.get("started_at")) or _stats_datetime(meta.get("created_at"))
+        if not finished or not started or finished < started:
+            return None
+        return Decimal(str((finished - started).total_seconds() / 3600))
+    raise WorkRegistrationError([f"work-stats:invalid-metric:{metric}"])
+
+
+def _stats_json_number(value: Decimal | None) -> int | float | None:
+    if value is None:
+        return None
+    normalized = value.normalize()
+    if normalized == normalized.to_integral_value():
+        return int(normalized)
+    return float(normalized)
+
+
+def _stats_text_number(value: Decimal | None) -> str:
+    if value is None:
+        return ""
+    normalized = value.normalize()
+    if normalized == normalized.to_integral_value():
+        return str(int(normalized))
+    return format(normalized, "f")
+
+
+def work_stats(
+    root: Path,
+    *,
+    by: str | None = None,
+    metric: str = "count",
+    kinds: list[str] | None = None,
+    statuses: list[str] | None = None,
+    where: list[str] | None = None,
+) -> dict[str, Any]:
+    root = root.resolve()
+    if metric not in STATS_METRICS:
+        raise WorkRegistrationError([f"work-stats:invalid-metric:{metric}"])
+    group_fields = _stats_group_fields(by)
+    filters = _stats_where_filters(where)
+    kinds = [item for value in kinds or [] for item in _stats_group_fields(value)]
+    statuses = [item for value in statuses or [] for item in _stats_group_fields(value)]
+
+    groups: dict[tuple[str, ...], dict[str, Any]] = {}
+    total_items = 0
+    for _path, meta in _iter_work_item_records(root):
+        if not _stats_matches(meta, kinds=kinds, statuses=statuses, filters=filters):
+            continue
+        total_items += 1
+        key = tuple(str(meta.get(field) or MISSING_GROUP_VALUE).strip() or MISSING_GROUP_VALUE for field in group_fields)
+        group = groups.setdefault(
+            key,
+            {
+                "group": {field: key[index] for index, field in enumerate(group_fields)},
+                "count": 0,
+                "values": [],
+            },
+        )
+        group["count"] += 1
+        value = _stats_metric_value(meta, metric)
+        if value is not None:
+            group["values"].append(value)
+
+    rows: list[dict[str, Any]] = []
+    for key in sorted(groups):
+        group = groups[key]
+        values: list[Decimal] = group.pop("values")
+        count = int(group["count"])
+        value_count = len(values)
+        total = sum(values, Decimal(0)) if values else Decimal(0)
+        avg = (total / Decimal(value_count)) if value_count else None
+        row = {
+            "group": group["group"],
+            "count": count,
+            "value_count": value_count,
+            "sum": _stats_json_number(total),
+            "avg": _stats_json_number(avg),
+            "min": _stats_json_number(min(values) if values else None),
+            "max": _stats_json_number(max(values) if values else None),
+        }
+        rows.append(row)
+
+    return {
+        "status": "pass",
+        "metric": metric,
+        "group_by": group_fields,
+        "filters": {
+            "kind": kinds,
+            "status": statuses,
+            "where": [f"{key}={value}" for key, value in filters],
+        },
+        "total_items": total_items,
+        "group_count": len(rows),
+        "rows": rows,
+    }
+
+
+def _print_stats_csv(result: dict[str, Any]) -> None:
+    group_fields = list(result["group_by"])
+    fieldnames = group_fields + ["count", "value_count", "sum", "avg", "min", "max"]
+    writer = csv.DictWriter(sys.stdout, fieldnames=fieldnames, lineterminator="\n")
+    writer.writeheader()
+    for row in result["rows"]:
+        values = {field: row["group"].get(field, "") for field in group_fields}
+        for field in ("count", "value_count", "sum", "avg", "min", "max"):
+            number = row[field]
+            values[field] = "" if number is None else str(number)
+        writer.writerow(values)
+
+
+def _print_stats_table(result: dict[str, Any]) -> None:
+    group_fields = list(result["group_by"])
+    headers = group_fields + ["count", "value_count", "sum", "avg", "min", "max"]
+    print(f"work-stats: {result['status']}")
+    print(f"metric={result['metric']}")
+    print(f"total_items={result['total_items']}")
+    print("\t".join(headers))
+    for row in result["rows"]:
+        values = [str(row["group"].get(field, "")) for field in group_fields]
+        values.extend("" if row[field] is None else str(row[field]) for field in ("count", "value_count", "sum", "avg", "min", "max"))
+        print("\t".join(values))
+
+
 def cmd_new(args: argparse.Namespace) -> int:
     try:
         result = register(args.root, args.input, now=args.now)
@@ -2318,6 +2543,32 @@ def cmd_close(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_stats(args: argparse.Namespace) -> int:
+    try:
+        result = work_stats(
+            args.root,
+            by=args.by,
+            metric=args.metric,
+            kinds=args.kind,
+            statuses=args.status,
+            where=args.where,
+        )
+    except WorkRegistrationError as exc:
+        print("work-stats: fail", file=sys.stderr)
+        print(f"findings={len(exc.findings)}", file=sys.stderr)
+        for finding in exc.findings:
+            print(f"- {finding}", file=sys.stderr)
+        return 1
+    if args.csv:
+        _print_stats_csv(result)
+    elif args.json:
+        print(f"work-stats: {result['status']}")
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+    else:
+        _print_stats_table(result)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Create and manage Work Items")
     parser.add_argument("--root", type=Path, default=ROOT)
@@ -2387,6 +2638,17 @@ def build_parser() -> argparse.ArgumentParser:
     close_cmd.add_argument("--now")
     close_cmd.add_argument("--json", action="store_true")
     close_cmd.set_defaults(func=cmd_close)
+
+    stats_cmd = sub.add_parser("stats", help="Aggregate v1 Work Item metadata without mutating files")
+    stats_cmd.add_argument("--by", help="Comma-separated group-by fields, for example team,worker_model_tier")
+    stats_cmd.add_argument("--metric", default="count", help=f"Metric to aggregate: {', '.join(sorted(STATS_METRICS))}")
+    stats_cmd.add_argument("--kind", action="append", help="Filter by kind; accepts comma-separated values and may repeat")
+    stats_cmd.add_argument("--status", action="append", help="Filter by status; accepts comma-separated values and may repeat")
+    stats_cmd.add_argument("--where", action="append", help="Filter by exact field=value; may repeat")
+    output_group = stats_cmd.add_mutually_exclusive_group()
+    output_group.add_argument("--json", action="store_true")
+    output_group.add_argument("--csv", action="store_true")
+    stats_cmd.set_defaults(func=cmd_stats)
     return parser
 
 
