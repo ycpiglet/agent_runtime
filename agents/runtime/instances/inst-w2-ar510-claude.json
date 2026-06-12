@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "inst-w2-ar510-claude",
+  "callsign": "claude/cadence-crane",
+  "callsite_id": "claude-w2-ar510",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260613-013344-task-ar-510-e1c1.json"
+  ],
+  "created_at": "2026-06-13T01:33:44+09:00",
+  "decision_cycle_id": "",
+  "display_name": "claude/cadence-crane",
+  "model": "",
+  "model_tier": "",
+  "on_behalf_of": "TASK-AR-510",
+  "pane_id": "claude-w2-ar510",
+  "parent_instance_id": "",
+  "project_id": "",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "lead-engineer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-13T01:33:44+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-510",
+  "task_set_id": "TASKSET-AR-RELEASE-STEWARD",
+  "team_id": "agent-runtime-core",
+  "unit_id": "",
+  "unit_spec": "",
+  "updated_at": "2026-06-13T01:33:44+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-510"
+}
