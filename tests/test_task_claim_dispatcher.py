@@ -376,6 +376,219 @@ def test_create_claim_refuses_duplicate_active_taskset(tmp_path: Path):
     assert "task set already has an active claim" in second.stderr
 
 
+def test_create_claim_rejects_intersecting_footprint_listing_conflicting_claim(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_worktree(tmp_path, "TASK-AR-501")
+    _write_worktree(tmp_path, "TASK-AR-502")
+    first = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        "TASK-AR-501",
+        "--agent-role",
+        "lead-engineer",
+        "--target-file",
+        "scripts/shared.py",
+        "--target-file",
+        "docs/notes.md",
+        "--now",
+        "2026-06-13T10:00:00+09:00",
+        "--suffix",
+        "fp1",
+        "--json",
+    )
+    assert first.returncode == 0, first.stderr or first.stdout
+    first_claim = json.loads(first.stdout)["claim"]
+    assert first_claim["target_files"] == ["scripts/shared.py", "docs/notes.md"]
+
+    second = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        "TASK-AR-502",
+        "--agent-role",
+        "qa-reviewer",
+        "--target-file",
+        "scripts/shared.py",
+        "--now",
+        "2026-06-13T10:05:00+09:00",
+        "--suffix",
+        "fp2",
+        "--json",
+    )
+
+    assert second.returncode == 1
+    assert "footprint conflict with active claims" in second.stderr
+    assert first_claim["claim_id"] in second.stderr
+    claim_files = list((tmp_path / "agents" / "runtime" / "task_claims").glob("*.json"))
+    assert len(claim_files) == 1
+
+
+def test_create_claims_with_disjoint_footprints_coexist(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    footprints = {
+        "TASK-AR-501": "scripts/alpha.py",
+        "TASK-AR-502": "scripts/beta.py",
+        "TASK-AR-503": "docs/gamma.md",
+    }
+    for index, (task_id, target) in enumerate(sorted(footprints.items()), start=1):
+        _write_worktree(tmp_path, task_id)
+        result = _run_dispatcher(
+            tmp_path,
+            "create",
+            "--task-id",
+            task_id,
+            "--agent-role",
+            "lead-engineer",
+            "--target-file",
+            target,
+            "--now",
+            f"2026-06-13T10:0{index}:00+09:00",
+            "--suffix",
+            f"dj{index}",
+            "--json",
+        )
+        assert result.returncode == 0, result.stderr or result.stdout
+    claim_files = list((tmp_path / "agents" / "runtime" / "task_claims").glob("*.json"))
+    assert len(claim_files) == len(footprints)
+
+
+def test_create_claim_rejects_glob_prefix_footprint_overlap(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_worktree(tmp_path, "TASK-AR-501")
+    _write_worktree(tmp_path, "TASK-AR-502")
+    first = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        "TASK-AR-501",
+        "--agent-role",
+        "lead-engineer",
+        "--target-file",
+        "scripts/**",
+        "--now",
+        "2026-06-13T11:00:00+09:00",
+        "--suffix",
+        "gl1",
+        "--json",
+    )
+    assert first.returncode == 0, first.stderr or first.stdout
+    first_claim = json.loads(first.stdout)["claim"]
+
+    second = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        "TASK-AR-502",
+        "--agent-role",
+        "qa-reviewer",
+        "--target-file",
+        "scripts/sub/module.py",
+        "--now",
+        "2026-06-13T11:05:00+09:00",
+        "--suffix",
+        "gl2",
+        "--json",
+    )
+
+    assert second.returncode == 1
+    assert "footprint conflict with active claims" in second.stderr
+    assert first_claim["claim_id"] in second.stderr
+
+
+def test_create_claim_footprint_less_legacy_claim_does_not_block(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_worktree(tmp_path, "TASK-AR-501")
+    _write_worktree(tmp_path, "TASK-AR-502")
+    legacy = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        "TASK-AR-501",
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-06-13T12:00:00+09:00",
+        "--suffix",
+        "lg1",
+        "--json",
+    )
+    assert legacy.returncode == 0, legacy.stderr or legacy.stdout
+    assert "footprint-less" in legacy.stderr
+    legacy_claim = json.loads(legacy.stdout)["claim"]
+    assert legacy_claim["target_files"] == []
+
+    second = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        "TASK-AR-502",
+        "--agent-role",
+        "qa-reviewer",
+        "--target-file",
+        "scripts/shared.py",
+        "--now",
+        "2026-06-13T12:05:00+09:00",
+        "--suffix",
+        "lg2",
+        "--json",
+    )
+
+    assert second.returncode == 0, second.stderr or second.stdout
+    assert "footprint-less" in second.stderr
+    assert legacy_claim["claim_id"] in second.stderr
+    claim_files = list((tmp_path / "agents" / "runtime" / "task_claims").glob("*.json"))
+    assert len(claim_files) == 2
+
+
+def test_create_claim_derives_target_files_from_unit_spec(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_worktree(tmp_path, "TASK-AR-503")
+    unit_rel = "agents/lead_engineer/tasks/units/TASK-AR-503/UNIT-TASK-AR-503-001.md"
+    unit_path = tmp_path / unit_rel
+    unit_path.parent.mkdir(parents=True, exist_ok=True)
+    unit_path.write_text(
+        "\n".join(
+            [
+                "---",
+                "unit_id: UNIT-TASK-AR-503-001",
+                "task_id: TASK-AR-503",
+                "status: worker_ready",
+                "target_files:",
+                "  - scripts/unit_target.py",
+                "  - docs/unit_target.md",
+                "---",
+                "",
+                "## Context",
+                "",
+                "Unit spec for footprint derivation.",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        "TASK-AR-503",
+        "--agent-role",
+        "lead-engineer",
+        "--unit-spec",
+        unit_rel,
+        "--now",
+        "2026-06-13T13:00:00+09:00",
+        "--suffix",
+        "us1",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    claim = json.loads(result.stdout)["claim"]
+    assert claim["target_files"] == ["scripts/unit_target.py", "docs/unit_target.md"]
+
+
 def test_create_claim_rejects_invalid_progress_and_step_state(tmp_path: Path):
     (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
 

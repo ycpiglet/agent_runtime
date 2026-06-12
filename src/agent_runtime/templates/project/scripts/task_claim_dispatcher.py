@@ -20,7 +20,10 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+import backlog_board
 from agent_instance_registry import record_claim_instance
+from footprint_conflict_gate import ACTIVE_CLAIM_STATUSES as FOOTPRINT_ACTIVE_STATUSES
+from footprint_conflict_gate import footprints_overlap
 from pane_event_log import append_event
 
 
@@ -177,6 +180,83 @@ def _claim_creation_errors(
     return errors
 
 
+def _unit_spec_target_files(root: Path, unit_spec: str) -> list[str]:
+    spec_value = str(unit_spec or "").strip()
+    if not spec_value:
+        return []
+    spec_path = Path(spec_value)
+    if not spec_path.is_absolute():
+        spec_path = root / spec_path
+    if not spec_path.is_file():
+        return []
+    try:
+        text = spec_path.read_text(encoding="utf-8")
+    except OSError:
+        return []
+    meta, _ = backlog_board.parse_frontmatter(text)
+    value = meta.get("target_files")
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    if isinstance(value, str) and value.strip():
+        return [value.strip()]
+    return []
+
+
+def _resolve_target_files(root: Path, args: argparse.Namespace) -> list[str]:
+    declared = [str(entry).strip() for entry in (args.target_file or []) if str(entry).strip()]
+    if declared:
+        return declared
+    return _unit_spec_target_files(root, args.unit_spec)
+
+
+def _is_footprint_active(payload: dict[str, Any]) -> bool:
+    return str(payload.get("status") or "").strip().lower() in FOOTPRINT_ACTIVE_STATUSES
+
+
+def _footprint_conflict_errors(
+    root: Path,
+    claim: dict[str, Any],
+    records: list[tuple[Path, dict[str, Any]]],
+) -> tuple[list[str], list[str]]:
+    """Check the new claim's declared footprint against all active claims.
+
+    Returns (errors, warnings). A footprint-less claim (legacy or new)
+    conflicts with nothing but is reported as a one-line warning.
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+    target_files = [str(item) for item in (claim.get("target_files") or [])]
+    if not target_files:
+        warnings.append(
+            f"warning: claim {claim.get('claim_id')} is footprint-less (no target_files); "
+            "footprint conflict check skipped"
+        )
+        return errors, warnings
+    conflicts: dict[str, list[tuple[str, str]]] = {}
+    for path, payload in records:
+        if not _is_footprint_active(payload):
+            continue
+        if str(payload.get("task_id") or "") == str(claim.get("task_id") or ""):
+            continue
+        other_id = str(payload.get("claim_id") or _rel(root, path))
+        other_files = [str(item) for item in (payload.get("target_files") or [])]
+        if not other_files:
+            warnings.append(
+                f"warning: active claim {other_id} is footprint-less (no target_files); "
+                "it cannot block on footprint"
+            )
+            continue
+        pairs = footprints_overlap(target_files, other_files)
+        if pairs:
+            conflicts.setdefault(other_id, []).extend(pairs)
+    if conflicts:
+        errors.append("footprint conflict with active claims: " + ", ".join(sorted(conflicts)))
+        for other_id in sorted(conflicts):
+            for a, b in conflicts[other_id]:
+                errors.append(f"  overlap: {a} <-> {other_id}:{b}")
+    return errors, warnings
+
+
 def _next_slot(records: list[tuple[Path, dict[str, Any]]], *, role: str, mode: str) -> int:
     display_prefix = f"{_display_role(role)}@{_slug(mode)}-"
     used: set[int] = set()
@@ -204,7 +284,12 @@ def _ensure_text_file(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
-def _build_claim(args: argparse.Namespace, records: list[tuple[Path, dict[str, Any]]]) -> dict[str, Any]:
+def _build_claim(
+    args: argparse.Namespace,
+    records: list[tuple[Path, dict[str, Any]]],
+    *,
+    target_files: list[str],
+) -> dict[str, Any]:
     now = _parse_now(args.now)
     expires_at = now + timedelta(minutes=args.lease_minutes)
     suffix = _slug(args.suffix or uuid.uuid4().hex[:4])
@@ -265,6 +350,7 @@ def _build_claim(args: argparse.Namespace, records: list[tuple[Path, dict[str, A
         "log_path": log_path,
         "allow_parallel_task_set": bool(args.allow_parallel_task_set),
         "tags": list(args.tag or ()),
+        "target_files": list(target_files),
     }
 
 
@@ -317,10 +403,17 @@ def cmd_create(args: argparse.Namespace) -> int:
             )
             return 1
 
-    claim = _build_claim(args, records)
+    claim = _build_claim(args, records, target_files=_resolve_target_files(root, args))
     creation_errors = _claim_creation_errors(root, claim, records)
     if creation_errors:
         for error in creation_errors:
+            print(error, file=sys.stderr)
+        return 1
+    footprint_errors, footprint_warnings = _footprint_conflict_errors(root, claim, records)
+    for warning in footprint_warnings:
+        print(warning, file=sys.stderr)
+    if footprint_errors:
+        for error in footprint_errors:
             print(error, file=sys.stderr)
         return 1
     claim_dir = _claim_dir(root)
@@ -451,6 +544,12 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--project-id", default="")
     create.add_argument("--unit-id", default="")
     create.add_argument("--unit-spec", default="")
+    create.add_argument(
+        "--target-file",
+        action="append",
+        default=[],
+        help="Declared footprint entry, repo-relative (repeatable); derived from --unit-spec when omitted",
+    )
     create.add_argument("--model-tier", default="")
     create.add_argument("--wip-slot", type=int, default=0)
     create.add_argument("--stop-condition", default="")

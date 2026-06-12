@@ -20,9 +20,9 @@ Footprint entries are repo-relative paths. A trailing `/**` declares a
 directory prefix (e.g. `scripts/**`); `*` patterns are matched with fnmatch
 in both directions.
 
-Dispatcher wiring (reject at `task_claim_dispatcher.py create`) is
-deferred until the unmerged codex branches land — see TASK-AR-500
-Preconditions and PLAN-ASSUMPTIONS anchors.
+Dispatcher wiring (TASK-AR-500): `task_claim_dispatcher.py create` imports
+`footprints_overlap` / `ACTIVE_CLAIM_STATUSES` from this module and refuses
+a new claim whose declared footprint intersects an active claim's footprint.
 """
 
 from __future__ import annotations
