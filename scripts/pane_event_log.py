@@ -17,10 +17,24 @@ from typing import Any
 
 SCHEMA = "agent-runtime-pane-event/v1"
 DEFAULT_LOG = "agents/runtime/pane_events/pane-events.jsonl"
+CENSUS_EVENTS = ("instance_spawned", "instance_heartbeat", "instance_terminated")
 
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
+
+
+def _parse_ts(value: str | None) -> datetime | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.astimezone()
+    return parsed
 
 
 def _rel(root: Path, path: Path) -> str:
@@ -89,6 +103,115 @@ def append_event(root: Path, event: dict[str, Any]) -> dict[str, Any]:
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n")
     return payload
+
+
+def append_census_event(
+    root: Path,
+    event: str,
+    *,
+    agent_instance_id: str,
+    actor_role: str = "",
+    display_name: str = "",
+    callsite_id: str = "",
+    task_id: str = "",
+    task_set_id: str = "",
+    claim_id: str = "",
+    worktree_path: str = "",
+    message: str = "",
+    ts: str | None = None,
+) -> dict[str, Any]:
+    """Append an instance lifecycle census event.
+
+    Census events (``instance_spawned``/``instance_heartbeat``/
+    ``instance_terminated``) always carry ``agent_instance_id`` so
+    point-in-time census queries can replay the log per instance.
+    """
+    if event not in CENSUS_EVENTS:
+        raise ValueError(f"census event must be one of {', '.join(CENSUS_EVENTS)}")
+    instance_id = str(agent_instance_id or "").strip()
+    if not instance_id:
+        raise ValueError("agent_instance_id is required for census events")
+    return append_event(
+        root,
+        {
+            "event": event,
+            "actor": instance_id,
+            "agent_instance_id": instance_id,
+            "actor_role": actor_role,
+            "display_name": display_name,
+            "callsite_id": callsite_id,
+            "task_id": task_id,
+            "task_set_id": task_set_id,
+            "claim_id": claim_id,
+            "worktree_path": worktree_path,
+            "message": message,
+            "ts": ts,
+        },
+    )
+
+
+def census(events: list[dict[str, Any]], *, at: str | None = None) -> dict[str, Any]:
+    """Build a point-in-time instance census from lifecycle events.
+
+    Events newer than ``at`` are ignored. Events whose timestamp cannot be
+    parsed are included conservatively so instances never silently disappear
+    from the census because of a malformed timestamp.
+    """
+    cutoff = _parse_ts(at)
+    instances: dict[str, dict[str, Any]] = {}
+    for event in sorted(events, key=lambda item: int(item.get("seq") or 0)):
+        name = str(event.get("event") or "")
+        if name not in CENSUS_EVENTS:
+            continue
+        instance_id = str(event.get("agent_instance_id") or event.get("actor") or "").strip()
+        if not instance_id:
+            continue
+        ts = str(event.get("ts") or "")
+        if cutoff is not None:
+            parsed = _parse_ts(ts)
+            if parsed is not None and parsed > cutoff:
+                continue
+        row = instances.setdefault(
+            instance_id,
+            {
+                "agent_instance_id": instance_id,
+                "active": False,
+                "spawned_at": "",
+                "terminated_at": "",
+                "last_seen": "",
+                "actor_role": "",
+                "display_name": "",
+                "task_id": "",
+                "task_set_id": "",
+            },
+        )
+        for field in ("actor_role", "display_name", "task_id", "task_set_id"):
+            value = str(event.get(field) or "").strip()
+            if value:
+                row[field] = value
+        row["last_seen"] = ts or row["last_seen"]
+        if name == "instance_spawned":
+            row["active"] = True
+            row["spawned_at"] = ts
+            row["terminated_at"] = ""
+        elif name == "instance_heartbeat":
+            if not row["terminated_at"]:
+                row["active"] = True
+        elif name == "instance_terminated":
+            row["active"] = False
+            row["terminated_at"] = ts
+
+    rows = [instances[key] for key in sorted(instances)]
+    active = [row for row in rows if row["active"]]
+    return {
+        "at": at or "",
+        "summary": {
+            "instance_count": len(rows),
+            "active_count": len(active),
+            "terminated_count": len(rows) - len(active),
+        },
+        "instances": rows,
+    }
 
 
 def summarize_events(events: list[dict[str, Any]]) -> dict[str, Any]:
@@ -168,6 +291,37 @@ def cmd_summary(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_census_record(args: argparse.Namespace) -> int:
+    event = append_census_event(
+        args.root,
+        args.event,
+        agent_instance_id=args.agent_instance_id,
+        actor_role=args.actor_role,
+        display_name=args.display_name,
+        callsite_id=args.callsite_id,
+        task_id=args.task_id,
+        task_set_id=args.task_set_id,
+        claim_id=args.claim_id,
+        worktree_path=args.worktree_path,
+        message=args.message,
+        ts=args.now,
+    )
+    payload = {"status": "recorded", "path": _rel(args.root.resolve(), event_log_path(args.root.resolve())), "event": event}
+    print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else f"pane-event-log: recorded seq={event['seq']}")
+    return 0
+
+
+def cmd_census(args: argparse.Namespace) -> int:
+    payload = census(load_events(args.root.resolve()), at=args.at)
+    summary = payload["summary"]
+    print(
+        json.dumps(payload, ensure_ascii=False, indent=2)
+        if args.json
+        else f"pane-event-log: instances={summary['instance_count']} active={summary['active_count']}"
+    )
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Append/read pane collaboration events")
     parser.add_argument("--root", type=Path, default=Path.cwd())
@@ -190,6 +344,26 @@ def build_parser() -> argparse.ArgumentParser:
     summary = sub.add_parser("summary")
     summary.add_argument("--json", action="store_true")
     summary.set_defaults(func=cmd_summary)
+
+    census_record = sub.add_parser("census-record", help="Append an instance lifecycle census event")
+    census_record.add_argument("--event", required=True, choices=CENSUS_EVENTS)
+    census_record.add_argument("--agent-instance-id", required=True)
+    census_record.add_argument("--actor-role", default="")
+    census_record.add_argument("--display-name", default="")
+    census_record.add_argument("--callsite-id", default="")
+    census_record.add_argument("--task-id", default="")
+    census_record.add_argument("--task-set-id", default="")
+    census_record.add_argument("--claim-id", default="")
+    census_record.add_argument("--worktree-path", default="")
+    census_record.add_argument("--message", default="")
+    census_record.add_argument("--now")
+    census_record.add_argument("--json", action="store_true")
+    census_record.set_defaults(func=cmd_census_record)
+
+    census_query = sub.add_parser("census", help="Point-in-time instance census from lifecycle events")
+    census_query.add_argument("--at", default=None, help="ISO timestamp; ignore lifecycle events newer than this")
+    census_query.add_argument("--json", action="store_true")
+    census_query.set_defaults(func=cmd_census)
     return parser
 
 

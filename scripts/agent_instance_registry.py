@@ -9,6 +9,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from pane_event_log import append_census_event
+
 
 SCHEMA = "agent-runtime-agent-instance/v1"
 INSTANCES_DIR = Path("agents/runtime/instances")
@@ -66,6 +68,8 @@ def build_instance_record(
     *,
     claim_path: Path | None = None,
     spawned_by: str = "task_claim_dispatcher",
+    skill_versions: dict[str, str] | None = None,
+    prompt_config_hash: str = "",
 ) -> dict[str, Any]:
     agent_instance_id = str(claim.get("agent_instance_id") or "").strip()
     if not agent_instance_id:
@@ -89,8 +93,8 @@ def build_instance_record(
         "provider": str(claim.get("provider") or "").strip(),
         "model": str(claim.get("model") or "").strip(),
         "model_tier": str(claim.get("model_tier") or "").strip(),
-        "skill_versions": _skill_versions(claim.get("skill_versions")),
-        "prompt_config_hash": str(claim.get("prompt_config_hash") or "").strip(),
+        "skill_versions": _skill_versions(skill_versions if skill_versions is not None else claim.get("skill_versions")),
+        "prompt_config_hash": str(prompt_config_hash or claim.get("prompt_config_hash") or "").strip(),
         "parent_instance_id": str(claim.get("parent_instance_id") or "").strip(),
         "on_behalf_of": str(claim.get("on_behalf_of") or claim.get("unit_id") or claim.get("task_id") or "").strip(),
         "decision_cycle_id": str(claim.get("decision_cycle_id") or "").strip(),
@@ -133,6 +137,10 @@ def _merge_existing(
         if ref and ref not in refs:
             refs.append(ref)
     existing["claim_refs"] = refs
+    if not existing.get("skill_versions") and fresh.get("skill_versions"):
+        existing["skill_versions"] = fresh["skill_versions"]
+    if not str(existing.get("prompt_config_hash") or "").strip() and fresh.get("prompt_config_hash"):
+        existing["prompt_config_hash"] = fresh["prompt_config_hash"]
     existing["updated_at"] = fresh.get("updated_at") or existing.get("updated_at")
     return existing
 
@@ -143,16 +151,43 @@ def record_claim_instance(
     *,
     claim_path: Path | None = None,
     spawned_by: str = "task_claim_dispatcher",
+    skill_versions: dict[str, str] | None = None,
+    prompt_config_hash: str = "",
+    emit_spawn_event: bool = True,
 ) -> tuple[Path, dict[str, Any]]:
     root = root.resolve()
-    fresh = build_instance_record(root, claim, claim_path=claim_path, spawned_by=spawned_by)
+    fresh = build_instance_record(
+        root,
+        claim,
+        claim_path=claim_path,
+        spawned_by=spawned_by,
+        skill_versions=skill_versions,
+        prompt_config_hash=prompt_config_hash,
+    )
     path = instance_path(root, str(fresh["agent_instance_id"]))
-    if path.exists():
-        payload = _merge_existing(root, path, _read_json(path), fresh)
-    else:
+    is_new_instance = not path.exists()
+    if is_new_instance:
         payload = fresh
+    else:
+        payload = _merge_existing(root, path, _read_json(path), fresh)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    if emit_spawn_event and is_new_instance:
+        # Census event carries the instance id plus join keys only; the full
+        # claim payload stays in the claim record referenced by claim_id.
+        append_census_event(
+            root,
+            "instance_spawned",
+            agent_instance_id=str(payload["agent_instance_id"]),
+            actor_role=str(payload.get("role") or ""),
+            display_name=str(payload.get("display_name") or ""),
+            callsite_id=str(payload.get("callsite_id") or ""),
+            task_id=str(payload.get("task_id") or ""),
+            task_set_id=str(payload.get("task_set_id") or ""),
+            claim_id=str(claim.get("claim_id") or ""),
+            worktree_path=str(payload.get("worktree_path") or ""),
+            ts=str(payload.get("spawned_at") or "") or None,
+        )
     return path, payload
 
 
