@@ -6,7 +6,7 @@ registered_at: 2026-06-12T08:17:54+09:00
 created_at: 2026-06-12T08:17:54+09:00
 updated_at: 2026-06-12T08:17:54+09:00
 title: Generated work-item numbering classifier + task ID reservation ledger
-status: planned
+status: in_progress
 priority: P1
 difficulty: M
 est_hours: 8

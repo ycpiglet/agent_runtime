@@ -46,10 +46,10 @@ completed_task_set_count: 19
 
 - Flow: Notion-like light theme, sidebar IA, sort/filter/density patterns, taskset-first views, org chart, roadmap, live presence, comms, and taskset-scope guard.
 - Progress: `0/9` done; `9` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-320` | - | - | - | planned | Action | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 기본 테마를 Notion형 라이트로 전환하고 기존 Linear 다크 토큰을 Dark Mode 옵션으로 보존한다. |
+| `TASK-AR-320` | - | - | - | in_progress | Action | P1 | High | Medium | 6h/5000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 기본 테마를 Notion형 라이트로 전환하고 기존 Linear 다크 토큰을 Dark Mode 옵션으로 보존한다. |
 | `TASK-AR-328` | - | - | - | planned | Action | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 특정 taskset 실행을 지시했을 때 해당 taskset 완료 후 scope 밖 작업으로 이탈하지 않고 정지·보고하도록 런타임 정책으로 강제한다 (Ow… |
 | `TASK-AR-321` | - | - | - | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 9개 수평 탭을 접이식 좌측 사이드바(Home / WORK / AGENTS / COMMS / RECORDS / OPS 그룹)로 전환해 V2 뷰 확장을 수… |
 | `TASK-AR-324` | - | - | - | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | TEAMS/ORG/roles 데이터로 조직도 트리를 렌더링하고, 에이전트 카드를 온라인 RPG 길드 멤버처럼 상태가 살아있는 프레즌스로 보여준다. |
@@ -109,10 +109,10 @@ completed_task_set_count: 19
 
 - Flow: Initiative vocabulary, collision-free task registration, shared backlog deconfliction, and unit-readiness migration.
 - Progress: `1/6` done; `5` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `1.2h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-370` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Prevent concurrent panes from selecting the same human display ID before a task file… |
+| `TASK-AR-370` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | in_progress | Action | P1 | High | Medium | 8h/6000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Prevent concurrent panes from selecting the same human display ID before a task file… |
 | `TASK-AR-371` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Remove `BACKLOG.md` as a top-of-file shared manual registration hotspot while preserv… |
 | `TASK-AR-372` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | High | 12h/9000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Provide one structured registration command path so planners stop hand-editing board… |
 | `TASK-AR-373` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P3 | Low | Medium | 6h/5000tok | Low | 5 | governance-loop | independent-auditor | Execute next | Make it visible which planned tasks are worker-ready and which still require planner… |
