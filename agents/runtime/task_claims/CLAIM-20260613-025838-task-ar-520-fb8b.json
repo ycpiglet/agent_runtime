@@ -9,7 +9,7 @@
   "callsite_id": "claude-w4-ar520",
   "pane_id": "claude-w4-ar520",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-REPO-HYGIENE",
   "project_id": "",
   "unit_id": "",
@@ -17,20 +17,20 @@
   "model_tier": "",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "implementing",
-  "progress_pct": 0,
+  "phase": "complete",
+  "progress_pct": 100,
   "step_index": 1,
   "step_total": 6,
   "status_text": "AR-520: board freshness ignores wall-clock derived fields",
   "worktree_path": ".worktrees/TASK-AR-520",
   "branch": "claude/task-ar-520-board-freshness",
   "claimed_at": "2026-06-13T02:58:38+09:00",
-  "last_heartbeat": "2026-06-13T02:58:38+09:00",
-  "updated_at": "2026-06-13T02:58:38+09:00",
+  "last_heartbeat": "2026-06-13T08:41:03+09:00",
+  "updated_at": "2026-06-13T08:41:03+09:00",
   "expires_at": "2026-06-13T03:28:38+09:00",
   "lease": {
     "claimed_at": "2026-06-13T02:58:38+09:00",
-    "heartbeat_at": "2026-06-13T02:58:38+09:00",
+    "heartbeat_at": "2026-06-13T08:41:03+09:00",
     "expires_at": "2026-06-13T03:28:38+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260613-025838-task-ar-520-fb8b.handoff.md",
@@ -41,5 +41,6 @@
     "scripts/taskset_work_gate.py",
     "tests/test_taskset_work_gate.py",
     "src/agent_runtime/templates/project/scripts/taskset_work_gate.py"
-  ]
+  ],
+  "released_at": "2026-06-13T08:41:03+09:00"
 }

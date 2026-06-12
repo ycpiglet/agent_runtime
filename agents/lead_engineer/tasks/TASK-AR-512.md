@@ -4,9 +4,11 @@ display_id: TASK-AR-512
 task_uid: 94b7763f-4362-4e53-9bd6-b3459c0140dc
 registered_at: 2026-06-12T23:15:32+09:00
 created_at: 2026-06-12T23:15:32+09:00
-updated_at: 2026-06-12T23:15:32+09:00
+updated_at: 2026-06-13T07:50:00+09:00
+started_at: 2026-06-13T02:58:37+09:00
+completed_at: 2026-06-13T07:50:00+09:00
 title: SCM steward skill — periodic hygiene loop + gh PR/issue automation
-status: planned
+status: completed
 priority: P1
 difficulty: L
 est_hours: 10
@@ -86,3 +88,14 @@ tags:
 - `scripts/scm_steward.py` + 테스트 + `skills/scm-steward/SKILL.md`
 - steward 리포트 실데이터 1장 + draft PR 데모
 - closeout review record
+
+## Completion Evidence
+
+- PR #57 (f934d2e): scripts/scm_steward.py report/clean/pr-open/pr-close/issue-sync with report-approve-execute discipline, gh mutations Owner-gated behind --execute-gh; skills/scm-steward/SKILL.md; mirrors; 25 tests.
+
+## Verification Results
+
+- pytest tests/test_scm_steward.py -q -> 25 passed
+- pytest tests -q -> 602 passed (+1 pre-existing)
+- real-repo report: zombies=0, 3 unregistered bug issues flagged
+- W4b inst-w4b-ar512-verifier -> APPROVE

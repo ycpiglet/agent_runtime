@@ -9,7 +9,7 @@
   "callsite_id": "claude-w3-ar518",
   "pane_id": "claude-w3-ar518",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
   "project_id": "",
   "unit_id": "",
@@ -17,20 +17,20 @@
   "model_tier": "",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "implementing",
-  "progress_pct": 0,
+  "phase": "complete",
+  "progress_pct": 100,
   "step_index": 1,
   "step_total": 6,
   "status_text": "AR-518: instance attribution gate + spawn record extension + lifecycle census",
   "worktree_path": ".worktrees/TASK-AR-518",
   "branch": "claude/task-ar-518-attribution-gate",
   "claimed_at": "2026-06-13T02:45:17+09:00",
-  "last_heartbeat": "2026-06-13T02:45:17+09:00",
-  "updated_at": "2026-06-13T02:45:17+09:00",
+  "last_heartbeat": "2026-06-13T08:41:02+09:00",
+  "updated_at": "2026-06-13T08:41:02+09:00",
   "expires_at": "2026-06-13T03:15:17+09:00",
   "lease": {
     "claimed_at": "2026-06-13T02:45:17+09:00",
-    "heartbeat_at": "2026-06-13T02:45:17+09:00",
+    "heartbeat_at": "2026-06-13T08:41:02+09:00",
     "expires_at": "2026-06-13T03:15:17+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260613-024517-task-ar-518-463e.handoff.md",
@@ -43,5 +43,6 @@
     "scripts/pane_event_log.py",
     "tests/test_attribution_gate.py",
     "src/agent_runtime/templates/project/scripts/attribution_gate.py"
-  ]
+  ],
+  "released_at": "2026-06-13T08:41:02+09:00"
 }

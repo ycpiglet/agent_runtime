@@ -9,7 +9,7 @@
   "callsite_id": "claude-w4-ar512",
   "pane_id": "claude-w4-ar512",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-REPO-HYGIENE",
   "project_id": "",
   "unit_id": "",
@@ -17,20 +17,20 @@
   "model_tier": "",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "implementing",
-  "progress_pct": 0,
+  "phase": "complete",
+  "progress_pct": 100,
   "step_index": 1,
   "step_total": 6,
   "status_text": "AR-512: scm-steward hygiene loop + gh PR/issue sync skill",
   "worktree_path": ".worktrees/TASK-AR-512",
   "branch": "claude/task-ar-512-scm-steward",
   "claimed_at": "2026-06-13T02:58:37+09:00",
-  "last_heartbeat": "2026-06-13T02:58:37+09:00",
-  "updated_at": "2026-06-13T02:58:37+09:00",
+  "last_heartbeat": "2026-06-13T08:41:03+09:00",
+  "updated_at": "2026-06-13T08:41:03+09:00",
   "expires_at": "2026-06-13T03:28:37+09:00",
   "lease": {
     "claimed_at": "2026-06-13T02:58:37+09:00",
-    "heartbeat_at": "2026-06-13T02:58:37+09:00",
+    "heartbeat_at": "2026-06-13T08:41:03+09:00",
     "expires_at": "2026-06-13T03:28:37+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260613-025837-task-ar-512-f90f.handoff.md",
@@ -42,5 +42,6 @@
     "skills/scm-steward/SKILL.md",
     "tests/test_scm_steward.py",
     "src/agent_runtime/templates/project/scripts/scm_steward.py"
-  ]
+  ],
+  "released_at": "2026-06-13T08:41:03+09:00"
 }

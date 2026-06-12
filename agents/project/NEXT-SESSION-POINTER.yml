@@ -21,36 +21,16 @@ active_work:
       agent_instance_id: inst-w3-ar517-claude
       display_name: claude/stats-shrike
       callsite_id: claude-w3-ar517
-    - claim_id: CLAIM-20260613-024517-task-ar-518-463e
-      agent_role: lead-engineer
-      agent_instance_id: inst-w3-ar518-claude
-      display_name: claude/attrib-osprey
-      callsite_id: claude-w3-ar518
     - claim_id: CLAIM-20260613-024517-task-ar-519-759f
       agent_role: lead-engineer
       agent_instance_id: inst-w3-ar519-claude
       display_name: claude/fresh-tern
       callsite_id: claude-w3-ar519
-    - claim_id: CLAIM-20260613-025836-task-ar-502-4dbd
-      agent_role: lead-engineer
-      agent_instance_id: inst-w4-ar502-claude
-      display_name: claude/queue-pelican
-      callsite_id: claude-w4-ar502
-    - claim_id: CLAIM-20260613-025837-task-ar-512-f90f
-      agent_role: lead-engineer
-      agent_instance_id: inst-w4-ar512-claude
-      display_name: claude/steward-kestrel
-      callsite_id: claude-w4-ar512
     - claim_id: CLAIM-20260613-025837-task-ar-516-d821
       agent_role: lead-engineer
       agent_instance_id: inst-w4-ar516-claude
       display_name: claude/explorer-egret
       callsite_id: claude-w4-ar516
-    - claim_id: CLAIM-20260613-025838-task-ar-520-fb8b
-      agent_role: lead-engineer
-      agent_instance_id: inst-w4-ar520-claude
-      display_name: claude/fresh-plover
-      callsite_id: claude-w4-ar520
     - claim_id: CLAIM-20260613-083743-task-ar-507-5abe
       agent_role: lead-engineer
       agent_instance_id: inst-w5-ar507-claude
