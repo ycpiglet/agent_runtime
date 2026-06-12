@@ -10,7 +10,7 @@
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "09834bfe56aa6c85b5fbbb2cbabbe393a519370a0eaa2827ffe7d52ef2f33be3"
+          "value": "54189e6caddb4ebac894b9299e7f2b1db5bd84308228153e2b7c6c076127ac0f"
         },
         {
           "kind": "sha256",
@@ -23,32 +23,32 @@
           "value": "367344d9e8943c6a8a3cc99b5711509df90e223f3fe42d481cf3f8417df712f9"
         },
         {
-          "kind": "absent",
+          "kind": "sha256",
           "path": "agents/project/WORK-SCHEMA.yml",
-          "value": ""
+          "value": "6d1e3994f031261d2cc2b14dc393fbb9e8dd6d6b2bb045e23a862005a13598d3"
         },
         {
-          "kind": "absent",
+          "kind": "sha256",
           "path": "agents/project/work-items/TASKSET-DEFINITIONS.json",
-          "value": ""
+          "value": "7b83f398b9b48ce90a66f4e8faba48fdc2718a42c31e9a224ba6cc6490860698"
         },
         {
-          "kind": "absent",
+          "kind": "sha256",
           "path": "agents/project/work-items/TASK-ID-RESERVATIONS.json",
-          "value": ""
+          "value": "2c4e2eb89f78f80cb38e451beb2e2ab1adf129f81cb483ee5be3d048374c7b76"
         },
         {
-          "kind": "absent",
+          "kind": "sha256",
           "path": "scripts/work.py",
-          "value": ""
+          "value": "94a7b86eaf32c31d94e071afca02cf29b534d7084560d6218b1cc2533ef72e78"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-06-12-agent-runtime-parallel-wave-scheduling-design.md",
-      "recorded_at": "2026-06-12T18:52:58+09:00",
+      "design_record": "reviews/MEETING-2026-06-13-parallel-wave-replan-post-codex-merge.md",
+      "recorded_at": "2026-06-13T01:18:34+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION"
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-12T18:52:58+09:00"
+  "updated_at": "2026-06-13T01:18:34+09:00"
 }
