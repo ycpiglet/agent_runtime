@@ -21,6 +21,8 @@ from typing import Iterable
 ROOT = Path(__file__).resolve().parent.parent
 TASKS_DIR = ROOT / "agents" / "lead_engineer" / "tasks"
 DEFAULT_OUTPUT = ROOT / "BACKLOG-BOARD.md"
+TASK_SET_REGISTRY = Path("agents/project/work-items/TASKSET-DEFINITIONS.json")
+TASK_SET_REGISTRY_SCHEMA = "agent-runtime-taskset-definitions/v1"
 
 DISPLAY_REPLACEMENTS = {
     "레거시 전신 프로젝트(" + "tag" + "_manual)": "레거시 전신 프로젝트",
@@ -206,6 +208,40 @@ UNCLASSIFIED_TASK_SET = TaskSetInfo(
     "Tasks missing task_set_id metadata.",
     999,
 )
+
+
+def _load_task_set_registry(root: Path | None = None) -> dict[str, TaskSetInfo]:
+    base = (root or ROOT).resolve()
+    path = base / TASK_SET_REGISTRY
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    if str(payload.get("schema") or "") != TASK_SET_REGISTRY_SCHEMA:
+        return {}
+    loaded: dict[str, TaskSetInfo] = {}
+    for row in payload.get("tasksets", []):
+        if not isinstance(row, dict):
+            continue
+        task_set_id = str(row.get("task_set_id") or "").strip()
+        display_name = str(row.get("display_name") or "").strip()
+        summary = str(row.get("summary") or "").strip()
+        if not task_set_id or not display_name or not summary:
+            continue
+        try:
+            order = int(row.get("order", 500))
+        except (TypeError, ValueError):
+            order = 500
+        loaded[task_set_id] = TaskSetInfo(task_set_id, display_name, summary, order)
+    return loaded
+
+
+def _task_set_info_map(root: Path | None = None) -> dict[str, TaskSetInfo]:
+    merged = dict(TASK_SET_INFO)
+    merged.update(_load_task_set_registry(root))
+    return merged
 
 
 @dataclass
@@ -525,12 +561,12 @@ def sort_key(task: Task) -> tuple[int, int, str]:
     return (lane_order.get(lane_for(task), 9), -score_for(task), task.task_id)
 
 
-def task_set_info(task_set_id: str) -> TaskSetInfo:
-    return TASK_SET_INFO.get(task_set_id, UNCLASSIFIED_TASK_SET)
+def task_set_info(task_set_id: str, root: Path | None = None) -> TaskSetInfo:
+    return _task_set_info_map(root).get(task_set_id, UNCLASSIFIED_TASK_SET)
 
 
-def task_set_sort_key(task: Task) -> tuple[int, int, int, float, int, str]:
-    set_info = task_set_info(task.task_set_id)
+def task_set_sort_key(task: Task, root: Path | None = None) -> tuple[int, int, int, float, int, str]:
+    set_info = task_set_info(task.task_set_id, root)
     done_penalty = 1 if lane_for(task) == "Done" else 0
     difficulty_rank = DIFFICULTY_ORDER.get(task.difficulty, 9)
     return (set_info.order, done_penalty, -score_for(task), task.est_hours, difficulty_rank, task.task_id)
@@ -589,8 +625,8 @@ def flow_by_task_set(root: Path | None) -> dict[str, dict[str, object]]:
     return flows
 
 
-def task_sets_for(tasks: Iterable[Task]) -> list[str]:
-    return sorted({task.task_set_id for task in tasks}, key=lambda raw: (task_set_info(raw).order, raw))
+def task_sets_for(tasks: Iterable[Task], root: Path | None = None) -> list[str]:
+    return sorted({task.task_set_id for task in tasks}, key=lambda raw: (task_set_info(raw, root).order, raw))
 
 
 def lane_counts(tasks: Iterable[Task]) -> dict[str, int]:
@@ -605,8 +641,8 @@ def render(tasks: list[Task], *, root: Path | None = None) -> str:
     open_tasks = [t for t in tasks if not is_done(t)]
     completed_tasks = [t for t in tasks if is_done(t)]
     counts = lane_counts(tasks)
-    task_set_ids = task_sets_for(open_tasks)
-    all_task_set_ids = task_sets_for(tasks)
+    task_set_ids = task_sets_for(open_tasks, root)
+    all_task_set_ids = task_sets_for(tasks, root)
     completed_task_set_ids = [
         task_set_id
         for task_set_id in all_task_set_ids
@@ -661,8 +697,8 @@ def render(tasks: list[Task], *, root: Path | None = None) -> str:
     ]
 
     for task_set_id in task_set_ids:
-        set_info = task_set_info(task_set_id)
-        set_tasks = sorted([task for task in open_tasks if task.task_set_id == task_set_id], key=task_set_sort_key)
+        set_info = task_set_info(task_set_id, root)
+        set_tasks = sorted([task for task in open_tasks if task.task_set_id == task_set_id], key=lambda task: task_set_sort_key(task, root))
         total_set_tasks = [task for task in tasks if task.task_set_id == task_set_id]
         set_completed = [task for task in total_set_tasks if is_done(task)]
         set_flow = flow.get(task_set_id, {"active": 0, "wip_limit": DEFAULT_WIP_LIMIT, "oldest_age_hours": 0.0, "stale": 0})
@@ -711,7 +747,7 @@ def render(tasks: list[Task], *, root: Path | None = None) -> str:
             "|---|---|---:|---|",
         ])
         for task_set_id in completed_task_set_ids:
-            set_info = task_set_info(task_set_id)
+            set_info = task_set_info(task_set_id, root)
             total_set_tasks = [task for task in tasks if task.task_set_id == task_set_id]
             set_completed = [task for task in total_set_tasks if is_done(task)]
             lines.append(
@@ -736,7 +772,7 @@ def render(tasks: list[Task], *, root: Path | None = None) -> str:
             "| Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |",
             "|---|---|---|---|---|---|---|---|---|",
         ])
-        for task in sorted(completed_tasks, key=task_set_sort_key):
+        for task in sorted(completed_tasks, key=lambda task: task_set_sort_key(task, root)):
             lines.append(
                 "| "
                 + " | ".join(
