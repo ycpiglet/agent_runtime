@@ -85,4 +85,5 @@ tags:
 - `python scripts/task_identity.py check --check` -> pass, `findings=0`
 - `python scripts/work_item_classifier.py --check` -> pass, `findings=0`
 - `python scripts/evidence_index_generator.py --write` -> pass, `findings=0`
+- `PYTHONPATH=src python -m agent_runtime.cli sanitize --root . --check` -> pass, `findings=0`
 
