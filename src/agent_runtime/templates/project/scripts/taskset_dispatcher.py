@@ -3,6 +3,11 @@
 This script is the user-friendly entrypoint behind prompts like
 ``taskset-quality-loop 진행해줘``. It resolves human aliases, selects the next
 task inside that task set, and creates a task claim with progress metadata.
+
+For multi-unit wave execution (topological waves over unit ``depends_on``
+plus cascade/parallel batch dispatch) use ``scripts/wave_dispatcher.py``;
+the plan payload exposes the matching planner command as
+``wave_plan_command`` (TASK-AR-501).
 """
 
 from __future__ import annotations
@@ -394,6 +399,15 @@ def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
             worktree_path,
         ],
         "claim_command": claim_command,
+        "wave_plan_command": [
+            sys.executable or "python",
+            str(Path(__file__).resolve().with_name("wave_dispatcher.py")),
+            "--root",
+            str(root),
+            "--taskset",
+            info.task_set_id,
+            "--plan",
+        ],
     }
 
 
@@ -412,6 +426,8 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> None:
     print(f"status_text={payload['status_text']}")
     print("worktree_command=" + " ".join(payload["worktree_command"]))
     print("claim_command=" + " ".join(payload["claim_command"]))
+    if payload.get("wave_plan_command"):
+        print("wave_plan_command=" + " ".join(payload["wave_plan_command"]))
 
 
 def cmd_plan(args: argparse.Namespace) -> int:
