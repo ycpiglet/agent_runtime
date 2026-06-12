@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-12T18:55:00+09:00",
-  "record_count": 196,
+  "generated_at": "2026-06-12T21:17:08+09:00",
+  "record_count": 198,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -2160,6 +2160,28 @@
       "path": "agents/lead_engineer/tasks/TASK-AR-504.md",
       "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
       "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-505",
+      "level": "task",
+      "number": "2.1.6",
+      "label": "Task 2.1.6",
+      "id": "TASK-AR-505",
+      "title": "작업 수명주기의 W5(통합 후 정리) 단계를 실행 가능하게 만든다: merge 완료 + claim released 상태의 좀비 워크트리/브랜치를 검출하고…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-505.md",
+      "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-506",
+      "level": "task",
+      "number": "2.1.7",
+      "label": "Task 2.1.7",
+      "id": "TASK-AR-506",
+      "title": "이번 taskset에만 수동 적용된 지연평가 규율(T0 스냅샷/T2 착수 체크)과 W0~W6 수명주기를 **모든 작업의 기본값**으로 만든다 — Owne…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-506.md",
+      "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
+      "status": "planned"
     }
   ]
 }
