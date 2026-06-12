@@ -4,9 +4,11 @@ display_id: TASK-AR-505
 task_uid: 69f8bed3-e0df-47d8-a847-4d16529b6a33
 registered_at: 2026-06-12T21:15:09+09:00
 created_at: 2026-06-12T21:15:09+09:00
-updated_at: 2026-06-12T21:15:09+09:00
+updated_at: 2026-06-13T02:25:00+09:00
+started_at: 2026-06-13T01:23:31+09:00
+completed_at: 2026-06-13T02:25:00+09:00
 title: Worktree/branch lifecycle gate — zombie detection and retention policy
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 6
@@ -80,3 +82,14 @@ tags:
 - `scripts/worktree_lifecycle_gate.py` + 테스트
 - 기존 좀비 3개 처리 기록
 - closeout review record
+
+## Completion Evidence
+
+- PR #46 (8173581): worktree_lifecycle_gate.py with zombie verdict (ahead=0 + claim released + clean), retention (7d/PRESERVE/preserve tag), --check watch-only, --clean with safety re-checks; chain wiring + mirror; 20 tests.
+
+## Verification Results
+
+- pytest tests/test_worktree_lifecycle_gate.py -q -> 20 passed
+- pytest tests -q -> 510 passed
+- real-repo --check -> zombies=0 stale_claims=4 (watch)
+- W4b inst-w4b-ar505-verifier -> APPROVE

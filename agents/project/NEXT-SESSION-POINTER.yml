@@ -1,56 +1,21 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-13T01:35:00+09:00
+updated_at: 2026-06-13T03:20:00+09:00
 current_state:
-  summary: "Post-codex-merge replan recorded; wave-1 parallel dispatch active for AR-500 residual, AR-505, AR-513, AR-509 under TASKSET-AR-PARALLEL-WAVE-EXECUTION and TASKSET-AR-RELEASE-STEWARD."
+  summary: "Waves 1-2 closed (AR-500/503/505/509/510/513/515 merged via PRs #45-#51 with W4b approvals); wave-3 workers active (AR-501/517/518/519); AR-514 worker in flight."
   status: in_progress
   task_set_status: in_progress
   task_set_id: "TASKSET-AR-PARALLEL-WAVE-EXECUTION"
-  step_index: 1
+  step_index: 3
   step_total: 5
-  progress_pct: 10
-  status_text: "Wave-1 worktrees dispatched (AR-500/505/513/509); next waves: AR-503/510/514/515 then AR-501/517/518/519 then AR-502/506/512/516 then AR-507, AR-511 last (renormalize)."
+  progress_pct: 45
+  status_text: "Remaining: AR-514 (in flight), wave-3 AR-501/517/518/519 (workers active), then wave-4 AR-502/506/512/516, then AR-507, AR-511 renormalize last."
 active_work:
   current_agents:
-    - claim_id: CLAIM-20260613-012330-task-ar-500-10f4
-      agent_role: lead-engineer
-      agent_instance_id: inst-w1-ar500-claude
-      display_name: claude/wiring-otter
-      callsite_id: claude-w1-ar500
-    - claim_id: CLAIM-20260613-012331-task-ar-505-0719
-      agent_role: lead-engineer
-      agent_instance_id: inst-w1-ar505-claude
-      display_name: claude/lifecycle-heron
-      callsite_id: claude-w1-ar505
-    - claim_id: CLAIM-20260613-012331-task-ar-513-8831
-      agent_role: lead-engineer
-      agent_instance_id: inst-w1-ar513-claude
-      display_name: claude/overlay-lynx
-      callsite_id: claude-w1-ar513
-    - claim_id: CLAIM-20260613-012331-task-ar-509-6ab3
-      agent_role: lead-engineer
-      agent_instance_id: inst-w1-ar509-claude
-      display_name: claude/notify-petrel
-      callsite_id: claude-w1-ar509
-    - claim_id: CLAIM-20260613-013343-task-ar-503-97eb
-      agent_role: lead-engineer
-      agent_instance_id: inst-w2-ar503-claude
-      display_name: claude/claimfirst-ibis
-      callsite_id: claude-w2-ar503
-    - claim_id: CLAIM-20260613-013344-task-ar-510-e1c1
-      agent_role: lead-engineer
-      agent_instance_id: inst-w2-ar510-claude
-      display_name: claude/cadence-crane
-      callsite_id: claude-w2-ar510
     - claim_id: CLAIM-20260613-013345-task-ar-514-1609
       agent_role: lead-engineer
       agent_instance_id: inst-w2-ar514-claude
       display_name: claude/audit-magpie
       callsite_id: claude-w2-ar514
-    - claim_id: CLAIM-20260613-013346-task-ar-515-c6ad
-      agent_role: lead-engineer
-      agent_instance_id: inst-w2-ar515-claude
-      display_name: claude/schema-finch
-      callsite_id: claude-w2-ar515
     - claim_id: CLAIM-20260613-024516-task-ar-501-4a8a
       agent_role: lead-engineer
       agent_instance_id: inst-w3-ar501-claude
@@ -73,7 +38,7 @@ active_work:
       callsite_id: claude-w3-ar519
   current_teams: []
 resume:
-  active_task: TASK-AR-500
+  active_task: TASK-AR-501
   active_task_set: TASKSET-AR-PARALLEL-WAVE-EXECUTION
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:

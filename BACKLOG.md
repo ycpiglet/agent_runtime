@@ -1,5 +1,12 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-06-13 Parallel Wave 1-2 Closeout + Follow-up Registration
+
+- Completed and merged with W4a/W4b dual verification: `TASK-AR-500`(footprint 디스패처 배선, PR #45) `TASK-AR-503`(claim-first 강제, PR #50) `TASK-AR-505`(워크트리 수명주기 게이트, PR #46) `TASK-AR-509`(update-notify, PR #47) `TASK-AR-510`(릴리스 케이던스 트리거, PR #51) `TASK-AR-513`(in-flight 오버레이, PR #48) `TASK-AR-515`(메타데이터 카탈로그 확장, PR #49).
+- Follow-up tasks from W4b findings: `TASK-AR-520`(보드 wall-clock staleness 정규화) `TASK-AR-521`(템플릿 거버넌스 체인 패리티) `TASK-AR-522`(소형 게이트/생성기 정합 수정) — `TASKSET-AR-REPO-HYGIENE`, reservation ledger 경유 등록.
+- In flight: `TASK-AR-514`(워커 진행 중), wave-3 `TASK-AR-501/517/518/519`(워커 4기 활성, footprint 선언 클레임).
+- Closeout record: `reviews/REVIEW-2026-06-13-parallel-wave-1-2-closeout.md`.
+
 ## 2026-06-12 TASKSET-AR-WORK-METADATA-ANALYTICS Registration
 
 - New planned task set: `TASKSET-AR-WORK-METADATA-ANALYTICS` (Work Metadata Analyst).

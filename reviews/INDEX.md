@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-13T01:18:54+09:00
-record_count: 419
+generated_at: 2026-06-13T02:56:30+09:00
+record_count: 420
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `419` review and evidence records under `reviews/`.
+- Summary: indexed `420` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `419` files |
+| Reviews covered | pass | `420` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -428,6 +428,7 @@ record_count: 419
 | `reviews/REVIEW-2026-06-12-work-stats-command.md` | `REVIEW-2026-06-12-work-stats-command` | md | record | pass | Work Stats Command |
 | `reviews/REVIEW-2026-06-12-work-verify-command.md` | `REVIEW-2026-06-12-work-verify-command` | md | record | pass | Work Verify Command Closeout |
 | `reviews/REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review.md` | `REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review` | md | record | n/a | REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review |
+| `reviews/REVIEW-2026-06-13-parallel-wave-1-2-closeout.md` | `REVIEW-2026-06-13-parallel-wave-1-2-closeout` | review | pass | pass | Parallel Wave 1-2 Closeout (AR-500/503/505/509/510/513/515) |
 | `reviews/REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log.md` | `REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log` | md | record | n/a | REVIEW: TASK-AR-222 closeout 실행 로그 |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |

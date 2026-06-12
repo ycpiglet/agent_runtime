@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-13T00:47:23+09:00",
-  "record_count": 226,
+  "generated_at": "2026-06-13T02:56:29+09:00",
+  "record_count": 229,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -278,7 +278,7 @@
       "title": "Release Steward",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-UNASSIGNED",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-216",
@@ -355,7 +355,7 @@
       "title": "호스트 프로젝트(autofolio 등)가 agent_runtime 새 릴리스를 자동으로 인지하게 한다: 세션 시작 시 업스트림 최신 태그와 호스트 고정…",
       "path": "agents/lead_engineer/tasks/TASK-AR-509.md",
       "parent_id": "TASKSET-AR-RELEASE-STEWARD",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-510",
@@ -366,7 +366,7 @@
       "title": "릴리스 타이밍을 사람이 기억하는 대신 트리거가 감지하게 한다: 마지막 릴리스 태그 이후 누적 변경이 임계치를 넘거나 taskset closeout wav…",
       "path": "agents/lead_engineer/tasks/TASK-AR-510.md",
       "parent_id": "TASKSET-AR-RELEASE-STEWARD",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-223",
@@ -1359,6 +1359,39 @@
       "status": "planned"
     },
     {
+      "key": "task:TASK-AR-520",
+      "level": "task",
+      "number": "0.16.4",
+      "label": "Task 0.16.4",
+      "id": "TASK-AR-520",
+      "title": "taskset_work_gate judges BACKLOG-BOARD.md stale within minutes because the generator…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-520.md",
+      "parent_id": "TASKSET-AR-REPO-HYGIENE",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-521",
+      "level": "task",
+      "number": "0.16.5",
+      "label": "Task 0.16.5",
+      "id": "TASK-AR-521",
+      "title": "Template owner_governance_gate.py is missing evidence_index_generator/context_knowled…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-521.md",
+      "parent_id": "TASKSET-AR-REPO-HYGIENE",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-522",
+      "level": "task",
+      "number": "0.16.6",
+      "label": "Task 0.16.6",
+      "id": "TASK-AR-522",
+      "title": "Bundle of independently-verified small fixes: (1) work.py emits verification_status p…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-522.md",
+      "parent_id": "TASKSET-AR-REPO-HYGIENE",
+      "status": "planned"
+    },
+    {
       "key": "taskset:TASKSET-AR-OPS-FEEDBACK-ANALYSIS",
       "level": "taskset",
       "number": "0.17",
@@ -2335,7 +2368,7 @@
       "title": "워크트리 작업은 반드시 main 체크아웃에 활성 클레임을 먼저 남기고 시작하도록 강제한다. 클레임 없는 워크트리 작업은 보드/ui-console 양쪽에서…",
       "path": "agents/lead_engineer/tasks/TASK-AR-503.md",
       "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-504",
@@ -2357,7 +2390,7 @@
       "title": "작업 수명주기의 W5(통합 후 정리) 단계를 실행 가능하게 만든다: merge 완료 + claim released 상태의 좀비 워크트리/브랜치를 검출하고…",
       "path": "agents/lead_engineer/tasks/TASK-AR-505.md",
       "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-506",
@@ -2401,7 +2434,7 @@
       "title": "main 보드가 미머지 브랜치의 진행 상황을 모르는 인식 오류를 없앤다. Owner 보고(2026-06-12): \"main의 백로그만 보면 아직 진행이…",
       "path": "agents/lead_engineer/tasks/TASK-AR-513.md",
       "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "initiative:INIT-AR-WORK-METADATA-ANALYTICS",
@@ -2445,7 +2478,7 @@
       "title": "Define and gate the Work Item metadata catalog for provenance, resolution, relationsh…",
       "path": "agents/lead_engineer/tasks/TASK-AR-515.md",
       "parent_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-516",

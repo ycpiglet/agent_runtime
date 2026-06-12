@@ -4,9 +4,11 @@ display_id: TASK-AR-509
 task_uid: 734a1b79-485c-4889-bf4a-faf4a45b8a55
 registered_at: 2026-06-12T22:42:24+09:00
 created_at: 2026-06-12T22:42:24+09:00
-updated_at: 2026-06-12T22:42:24+09:00
+updated_at: 2026-06-13T02:30:00+09:00
+started_at: 2026-06-13T01:23:31+09:00
+completed_at: 2026-06-13T02:30:00+09:00
 title: Host update notification — upstream release check at session start
-status: planned
+status: completed
 priority: P2
 difficulty: M
 est_hours: 6
@@ -77,3 +79,14 @@ tags:
 - CLI 변경분 + 테스트, 템플릿 훅 배선
 - autofolio 적용 데모 기록
 - closeout review record
+
+## Completion Evidence
+
+- PR #47 (ccb19e4): update-notify subcommand (semver tag vs pinned ref, always exit 0, 24h cache, GIT_TERMINAL_PROMPT=0), template SessionStart hook + cmd wrapper, host runbook (README ko/en, template CLAUDE.md/AGENTS.md); 18 tests.
+
+## Verification Results
+
+- pytest tests/test_update_notify.py -q -> 18 passed
+- pytest tests -q -> 508 passed
+- live demo: up-to-date@v0.1.8 / update-available v0.1.7->v0.1.8 / cache-hit
+- W4b inst-w4b-ar509-verifier -> APPROVE. Boundary: autofolio live run after next release
