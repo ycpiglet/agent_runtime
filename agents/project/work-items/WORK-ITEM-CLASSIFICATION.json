@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-12T13:33:06+09:00",
-  "record_count": 195,
+  "generated_at": "2026-06-12T13:54:53+09:00",
+  "record_count": 196,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -2125,6 +2125,17 @@
       "id": "UNIT-TASK-AR-372-006",
       "title": "UNIT-TASK-AR-372-006 - Deterministic Work Close Command",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-006.md",
+      "parent_id": "TASK-AR-372",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-372-007",
+      "level": "unit",
+      "number": "1.1.4.7",
+      "label": "Unit 1.1.4.7",
+      "id": "UNIT-TASK-AR-372-007",
+      "title": "UNIT-TASK-AR-372-007 - Proposal-Only Work Criteria Command",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-007.md",
       "parent_id": "TASK-AR-372",
       "status": "completed"
     },
