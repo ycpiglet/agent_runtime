@@ -4,7 +4,7 @@ display_id: TASK-AR-518
 task_uid: 93485297-6326-4af3-86d2-03e2e968860f
 registered_at: 2026-06-12T23:34:00+09:00
 created_at: 2026-06-12T23:34:00+09:00
-updated_at: 2026-06-12T23:34:00+09:00
+updated_at: 2026-06-13T00:05:00+09:00
 title: Agent instance attribution across A2A evidence and commits
 status: planned
 priority: P1
@@ -49,6 +49,11 @@ tags:
   the primary actor ID.
 - Add causal links: parent_instance, on_behalf_of claim/unit, and
   decision_cycle_id where applicable.
+- Extend the spawn record with `skill_versions` and `prompt_config_hash` so
+  instance behavior can be traced to the class (skill) version that spawned it
+  (registration-audit gap vs `record.txt` 2026-06-12 discussion).
+- Record lifecycle events (spawn/heartbeat/terminate) into pane events so
+  point-in-time instance census queries work (multipane census extension).
 
 ## Out Of Scope
 
