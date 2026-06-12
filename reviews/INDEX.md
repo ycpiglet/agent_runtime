@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-12T12:59:58+09:00
-record_count: 392
+generated_at: 2026-06-12T13:14:33+09:00
+record_count: 394
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `392` review and evidence records under `reviews/`.
+- Summary: indexed `394` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `392` files |
+| Reviews covered | pass | `394` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -412,6 +412,7 @@ record_count: 392
 | `reviews/REVIEW-2026-06-12-work-registration-cli.md` | `REVIEW-2026-06-12-work-registration-cli` | md | record | pass | Work Registration CLI Closeout |
 | `reviews/REVIEW-2026-06-12-work-registration-unit-scaffold.md` | `REVIEW-2026-06-12-work-registration-unit-scaffold` | md | record | pass | Work Registration Unit Scaffold Closeout |
 | `reviews/REVIEW-2026-06-12-work-schema-ssot-gate.md` | `REVIEW-2026-06-12-work-schema-ssot-gate` | md | record | pass | Work Schema SSoT Gate Closeout |
+| `reviews/REVIEW-2026-06-12-work-verify-command.md` | `REVIEW-2026-06-12-work-verify-command` | md | record | pass | Work Verify Command Closeout |
 | `reviews/REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review.md` | `REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review` | md | record | n/a | REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review |
 | `reviews/REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log.md` | `REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log` | md | record | n/a | REVIEW: TASK-AR-222 closeout 실행 로그 |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
@@ -426,6 +427,7 @@ record_count: 392
 | `reviews/SEMINAR-2026-06-13-agent-runtime-task-ar-211-overlay-seminar-notes.md` | `SEMINAR-2026-06-13-agent-runtime-task-ar-211-overlay-seminar-notes` | md | record | n/a | SEMINAR-2026-06-13-agent-runtime-task-ar-211-overlay-seminar-notes |
 | `reviews/SEMINAR-2026-06-14-agent-runtime-task-ar-222-closeout-sync.md` | `SEMINAR-2026-06-14-agent-runtime-task-ar-222-closeout-sync` | md | record | n/a | SEMINAR: TASK-AR-222 closeout 번들 운영 동기화 세미나 |
 | `reviews/SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync.md` | `SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync` | md | record | n/a | SEMINAR (2026-06-15) - TASK-AR-223 governance sync |
+| `reviews/VERIFY-2026-06-12-unit-task-ar-372-005-20260612131309.json` | `VERIFY-2026-06-12-unit-task-ar-372-005-20260612131309` | json | record | n/a | VERIFY-2026-06-12-unit-task-ar-372-005-20260612131309 |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.

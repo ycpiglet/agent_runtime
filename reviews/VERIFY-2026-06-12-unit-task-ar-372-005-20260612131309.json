@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-12-unit-task-ar-372-005-20260612131309",
+  "work_id": "UNIT-TASK-AR-372-005",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-005.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-372",
+  "unit_id": "UNIT-TASK-AR-372-005",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-12T13:13:09+09:00",
+  "verified_by": "codex",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python -m py_compile scripts\\\\work.py",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T13:14:02+09:00",
+      "finished_at": "2026-06-12T13:14:02+09:00",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "pytest tests/test_work_verify.py tests/test_work_registration.py tests/test_now.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T13:14:02+09:00",
+      "finished_at": "2026-06-12T13:14:12+09:00",
+      "stdout": ".............                                                            [100%]\n13 passed in 3.93s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/work.py --help",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T13:14:12+09:00",
+      "finished_at": "2026-06-12T13:14:12+09:00",
+      "stdout": "usage: work.py [-h] [--root ROOT] {new,register,now,verify} ...\n\nCreate and manage Work Items\n\npositional arguments:\n  {new,register,now,verify}\n    new                 Create work records from structured JSON input\n    register            Alias for new\n    now                 Print the canonical project timestamp\n    verify              Run a work item's verification commands and write\n                        evidence\n\noptions:\n  -h, --help            show this help message and exit\n  --root ROOT\n",
+      "stderr": ""
+    }
+  ]
+}

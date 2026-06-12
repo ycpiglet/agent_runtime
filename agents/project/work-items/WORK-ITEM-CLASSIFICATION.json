@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-12T12:59:40+09:00",
-  "record_count": 193,
+  "generated_at": "2026-06-12T13:14:24+09:00",
+  "record_count": 194,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -2103,6 +2103,17 @@
       "id": "UNIT-TASK-AR-372-004",
       "title": "UNIT-TASK-AR-372-004 - Canonical Timestamp Source And Work Now",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-004.md",
+      "parent_id": "TASK-AR-372",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-372-005",
+      "level": "unit",
+      "number": "1.1.4.5",
+      "label": "Unit 1.1.4.5",
+      "id": "UNIT-TASK-AR-372-005",
+      "title": "UNIT-TASK-AR-372-005 - Deterministic Work Verify Command",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-005.md",
       "parent_id": "TASK-AR-372",
       "status": "completed"
     },

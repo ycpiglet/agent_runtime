@@ -6,7 +6,7 @@ registered_at: 2026-06-12T08:17:54+09:00
 created_at: 2026-06-12T08:17:54+09:00
 title: Registration CLI/API for initiative, taskset, task, and unit records
 started_at: 2026-06-12T11:58:44+09:00
-updated_at: 2026-06-12T12:58:47+09:00
+updated_at: 2026-06-12T13:13:09+09:00
 status: in_progress
 priority: P1
 difficulty: L
@@ -55,6 +55,7 @@ tags:
 - A sample structured input creates an initiative, taskset plan, two task files, and a registration review in one repeatable command.
 - The structured input can optionally create worker-ready unit specs that pass the readiness gate.
 - Timestamp metadata can be produced from a single canonical root script and the Work CLI surface.
+- Verification commands can be executed through the Work CLI and recorded as evidence.
 - The command is idempotent or reports exact existing-record conflicts.
 - Tests cover missing required fields, duplicate display IDs, and partial failure cleanup.
 
@@ -67,6 +68,7 @@ tags:
 - `python scripts/task_unit_readiness_gate.py --task-id TASK-AR-372 --require-ready --check`
 - `python scripts/now.py --utc`
 - `python scripts/work.py now --utc`
+- `python scripts/work.py verify UNIT-TASK-AR-372-005 --json`
 - `python scripts/backlog_board.py --write`
 - `python scripts/owner_doc_format_gate.py --manifest owner-docs.yml`
 
@@ -80,5 +82,6 @@ tags:
 - `UNIT-TASK-AR-372-002` completed: Added `scripts/work.py new --input <json>` for deterministic initiative/taskset/task/review registration using the reservation ledger.
 - `UNIT-TASK-AR-372-003` completed: Extended `scripts/work.py new --input <json>` to create optional worker-ready unit specs from `tasks[].units[]` input and verify them with the readiness gate.
 - `UNIT-TASK-AR-372-004` completed: Restored root `scripts/now.py` and added `scripts/work.py now` as the canonical timestamp surface for generated metadata.
-- Remaining: add `work close` and `work verify`, then B-mode proposal-gated AI split/criteria/assign behavior.
+- `UNIT-TASK-AR-372-005` completed: Added `scripts/work.py verify <id>` to execute declared verification commands, write JSON evidence, update verification metadata, and refresh the evidence index.
+- Remaining: add `work close`, then B-mode proposal-gated AI split/criteria/assign behavior.
 
