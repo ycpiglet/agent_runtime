@@ -97,3 +97,14 @@ generation only; they cannot apply canonical mutations.
 Approved apply must check the proposal status, risk tier, verifier list,
 rollback path, owner boundary, and guardrails. Failed verification must leave
 canonical docs unchanged or create an explicit reverted audit record.
+
+## Registration Traceability
+
+Planning discussions recorded as planning records in `reviews/` (frontmatter
+`type: meeting`/`type: planning` or the `planning-record` tag) must register
+their follow-up work, not only describe it: referenced task files must exist,
+referenced task sets must appear on `BACKLOG-BOARD.md`, and
+`agents/project/NEXT-SESSION-POINTER.yml` must stay consistent. Registration is
+complete only when `python scripts/conversation_work_audit.py --check` (also
+run inside `scripts/owner_governance_gate.py`) reports no block findings for
+the record.
