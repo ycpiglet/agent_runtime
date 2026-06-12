@@ -7,14 +7,14 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-12T22:09:45+09:00
-record_count: 200
+generated_at: 2026-06-12T22:43:33+09:00
+record_count: 201
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `200` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `201` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
@@ -22,7 +22,7 @@ record_count: 200
 | --- | --- | --- |
 | Initiatives | pass | `3` records |
 | Tasksets | pass | `25` records |
-| Tasks | pass | `171` records |
+| Tasks | pass | `172` records |
 | Units | pass | `1` records |
 | Findings | pass | `0` findings |
 
@@ -63,14 +63,15 @@ record_count: 200
 | 0.3.4 | Task 0.3.4 | task | `TASK-AR-212` | `TASKSET-AR-MIGRATION-PARITY` | completed | `agents/lead_engineer/tasks/TASK-AR-212.md` | `TASK-AR-209`의 마이그레이션 감사 결과를 재현 가능한 증거로 완결하고, 향후 release-block 규칙에 연결한다. |
 | 0.3.5 | Task 0.3.5 | task | `TASK-AR-213` | `TASKSET-AR-MIGRATION-PARITY` | completed | `agents/lead_engineer/tasks/TASK-AR-213.md` | `레거시 전신 프로젝트` 이식에서 `skill / hook / script` 항목을 `kept/changed/deprecated/dropped/missi… |
 | 0.3.6 | Task 0.3.6 | task | `TASK-AR-224` | `TASKSET-AR-MIGRATION-PARITY` | completed | `agents/lead_engineer/tasks/TASK-AR-224.md` | `v0.1.8` 판정에서 공통 정합 규칙(공식 가이드 반영, migration 근거, 레거시 전신 프로젝트 이식 누락 처리)이 줄지 않게 동작하도록 공식… |
-| 0.4 | Taskset 0.4 | taskset | `TASKSET-AR-RELEASE-STEWARD` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Release Steward |
+| 0.4 | Taskset 0.4 | taskset | `TASKSET-AR-RELEASE-STEWARD` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Release Steward |
 | 0.4.1 | Task 0.4.1 | task | `TASK-AR-216` | `TASKSET-AR-RELEASE-STEWARD` | completed | `agents/lead_engineer/tasks/TASK-AR-216.md` | `v0.1.7` 공개 판정의 미충족 항목을 `v0.1.8` 판정으로 안전하게 이관하고, 릴리스 보드가 읽는 하나의 `release-state` 체인으로… |
 | 0.4.2 | Task 0.4.2 | task | `TASK-AR-219` | `TASKSET-AR-RELEASE-STEWARD` | completed | `agents/lead_engineer/tasks/TASK-AR-219.md` | 현재 로드맵 기준으로 `v0.1.8` 후보 공개 판단을 한 번 더 고정하고, Claude/Codex 계열 공식 권고(컨텍스트 우선순위, trace-gra… |
 | 0.4.3 | Task 0.4.3 | task | `TASK-AR-222` | `TASKSET-AR-RELEASE-STEWARD` | completed | `agents/lead_engineer/tasks/TASK-AR-222.md` | `v0.1.8` 1차 판정(2026-07-02)을 위해 요구사항 1~16 및 공식 권고를 하나의 판정 번들로 정합한다. 특히 `agent_runtime`… |
 | 0.4.4 | Task 0.4.4 | task | `TASK-AR-225` | `TASKSET-AR-RELEASE-STEWARD` | completed | `agents/lead_engineer/tasks/TASK-AR-225.md` | Close the `release-preflight findings=358` blocker discovered by `TASK-AR-224` execut… |
 | 0.4.5 | Task 0.4.5 | task | `TASK-AR-240` | `TASKSET-AR-RELEASE-STEWARD` | completed | `agents/lead_engineer/tasks/TASK-AR-240.md` | Create a version and release consistency steward that checks release state, version s… |
 | 0.4.6 | Task 0.4.6 | task | `TASK-AR-210` | `TASKSET-AR-RELEASE-STEWARD` | completed | `agents/lead_engineer/tasks/TASK-AR-210.md` | `v0.1.6`/`v0.1.7` 공개 판단을 근거 기반으로 고정하고, `v0.1.8` 판정(`07-02/07-09/07-16`)을 기준으로 release… |
-| 0.4.7 | Task 0.4.7 | task | `TASK-AR-223` | `TASKSET-AR-RELEASE-STEWARD` | completed | `agents/lead_engineer/tasks/TASK-AR-223.md` | `agent_runtime`에서 모델/핵심 루틴 재작성 없이 프로젝트 투입 시 오버레이 교체만으로 공식 가이드(Claude/Codex/OpenAI) 정합… |
+| 0.4.7 | Task 0.4.7 | task | `TASK-AR-509` | `TASKSET-AR-RELEASE-STEWARD` | planned | `agents/lead_engineer/tasks/TASK-AR-509.md` | 호스트 프로젝트(autofolio 등)가 agent_runtime 새 릴리스를 자동으로 인지하게 한다: 세션 시작 시 업스트림 최신 태그와 호스트 고정… |
+| 0.4.8 | Task 0.4.8 | task | `TASK-AR-223` | `TASKSET-AR-RELEASE-STEWARD` | completed | `agents/lead_engineer/tasks/TASK-AR-223.md` | `agent_runtime`에서 모델/핵심 루틴 재작성 없이 프로젝트 투입 시 오버레이 교체만으로 공식 가이드(Claude/Codex/OpenAI) 정합… |
 | 0.5 | Taskset 0.5 | taskset | `TASKSET-AR-UI-CONSOLE` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Console Operator |
 | 0.5.1 | Task 0.5.1 | task | `TASK-AR-226` | `TASKSET-AR-UI-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-226.md` | Map the current `agent_runtime` state sources before building a web UI, so the UI rea… |
 | 0.5.2 | Task 0.5.2 | task | `TASK-AR-227` | `TASKSET-AR-UI-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-227.md` | Expose a safe, read-first backend interface for the UI console, using runtime files a… |

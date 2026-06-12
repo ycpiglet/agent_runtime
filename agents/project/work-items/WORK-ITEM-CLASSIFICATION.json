@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-12T22:09:45+09:00",
-  "record_count": 200,
+  "generated_at": "2026-06-12T22:43:33+09:00",
+  "record_count": 201,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -278,7 +278,7 @@
       "title": "Release Steward",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-UNASSIGNED",
-      "status": "complete"
+      "status": "active"
     },
     {
       "key": "task:TASK-AR-216",
@@ -347,10 +347,21 @@
       "status": "completed"
     },
     {
-      "key": "task:TASK-AR-223",
+      "key": "task:TASK-AR-509",
       "level": "task",
       "number": "0.4.7",
       "label": "Task 0.4.7",
+      "id": "TASK-AR-509",
+      "title": "호스트 프로젝트(autofolio 등)가 agent_runtime 새 릴리스를 자동으로 인지하게 한다: 세션 시작 시 업스트림 최신 태그와 호스트 고정…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-509.md",
+      "parent_id": "TASKSET-AR-RELEASE-STEWARD",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-223",
+      "level": "task",
+      "number": "0.4.8",
+      "label": "Task 0.4.8",
       "id": "TASK-AR-223",
       "title": "`agent_runtime`에서 모델/핵심 루틴 재작성 없이 프로젝트 투입 시 오버레이 교체만으로 공식 가이드(Claude/Codex/OpenAI) 정합…",
       "path": "agents/lead_engineer/tasks/TASK-AR-223.md",
