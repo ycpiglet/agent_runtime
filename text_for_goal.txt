@@ -1,0 +1,356 @@
+❯ frontmatter, footer, date/time 등등 metadata를 생성하는 생성기는 따로 없나? 알아서 붙여주는 tool이 있으면 작업이 편해지지 않을까 하는데 어떻게 생각해? 그리고 initative/taskset/task/unit을 통틀어서 어떤 개념으로 부르면 좋을까? work? 예를 들어 work라고 하면 각 work를 작성하는 데에도 생성기가 있으면 좋을 것 같은데. 예를 들면 task를 unit으로 쪼개는 tool이라던가, 해당 task/unit을 평가하는 평가요소/검증방법/...을 맥락에 맞게 스스로 생성하는 tool이라던가. 맥락을 보고서 더 작고 명확하고 실현 가능한 단위로 쪼개고, 그것을 특정 에이전트나 팀한테 자동으로 할당하고, 그리고 그게 잘 구현이 되었는지 검증하기 위한 측정 가능한 무언가가 있어야 할 것 같아서. 이 외에도 이런 것들을 관리하기 위해 필요한 기능이나 규칙, 프로토콜, 구조 같은게 뭐가 있을지 아이디어좀 줘. 마찬가지로 codex한테 내가 알아서 시킬게.
+
+● 확인 결과를 깔고 답하겠습니다. 부분 생성기는 있는데 반쪽짜리입니다: task_identity.py
+  create(UUID·타임스탬프 등 신원 필드 생성)는 존재하지만, 본문 골격·unit 스펙·closeout
+  푸터·ID 채번까지 해주는 풀 스캐폴더는 없습니다. 심지어 CLAUDE.md가 참조하는
+  scripts/now.py는 파일 자체가 없습니다(깨진 참조 — 어제 제가 게이트에 걸렸던
+  started_at 누락도 결국 수동 작성 때문). 생성기 아이디어는 정확한 방향입니다. 아래
+  전체를 codex에게 넘기시면 됩니다.
+
+  1. 통칭: Work Item (강력 추천 — 이름보다 '공통 스키마'가 진짜 보상)
+
+  - initiative/taskset/task/unit/routine/spike를 통틀어 Work Item(한국어: 작업)으로
+  부르는 걸 권합니다. Azure DevOps가 정확히 이 용법의 선례고, "work" 단독보다 동사와의
+  혼동이 없습니다.
+  - 핵심은 호칭이 아니라 공통 envelope 스키마입니다: 모든 work item이 공유하는
+  frontmatter 코어(work_id, work_uid, kind: initiative|taskset|task|unit|routine|spike,
+  parent_id, status, owner, 타임스탬프, 모델 티어) + kind별 확장 필드. 이렇게 하면
+  생성기 1개, 검증 게이트 1개, 뷰어 1개가 전 계층을 커버합니다. 지금처럼 계층마다
+  도구를 따로 만들면 4벌씩 유지보수하게 됩니다.
+
+  2. Work CLI — 결정적 생성기 (scripts/work.py 또는 agent-runtime work)
+
+  LLM 없이 도는 결정적 도구부터. 기존 task_identity.py create를 흡수·확장:
+
+  ┌────────────────┬───────────────────────────────────────────────────────────────┐
+  │      명령      │                             기능                              │
+  ├────────────────┼───────────────────────────────────────────────────────────────┤
+  │ work new       │ frontmatter 자동 생성(UUID, 단일 시간원 타임스탬프, 티어      │
+  │ <kind>         │ 기본값은 PM 계약에서), kind별 본문                            │
+  │ --parent <id>  │ 골격(task=Goal/Scope/Acceptance/Evidence, unit=9개 필수 섹션) │
+  │ --title "..."  │  생성, 보드 재생성까지                                        │
+  ├────────────────┼───────────────────────────────────────────────────────────────┤
+  │ work           │ ID 채번 예약 — 어제 342~350 충돌의 근본 해결. 방금 만든       │
+  │ reserve-id     │ claim_lease.py(AR-314)를 그대로 재사용해 원자적 카운터 잠금   │
+  │ <kind>         │                                                               │
+  ├────────────────┼───────────────────────────────────────────────────────────────┤
+  │ work close     │ Completion 푸터 표준 생성(completed_at, 검증 명령 결과,       │
+  │ <id> --actuals │ actual_tokens/actual_hours — AR-368 연동), 보드 재생성        │
+  ├────────────────┼───────────────────────────────────────────────────────────────┤
+  │ work now       │ 누락된 now.py 복원 — 전 도구가 쓰는 단일 시간원               │
+  ├────────────────┼───────────────────────────────────────────────────────────────┤
+  │ work tree <id> │ CLI 계층 뷰 (4절의 뷰어와 데이터 공유)                        │
+  └────────────────┴───────────────────────────────────────────────────────────────┘
+
+  핵심 규칙: 사람도 에이전트도 frontmatter를 손으로 안 씁니다. 생성기가 만들고 게이트가
+  검증. 어제 같은 "completed인데 started_at 없음" 류의 실수가 구조적으로 사라집니다.
+
+  3. AI 생성기 3종 — planner 도구 (전부 B-mode 제안 경유)
+
+  말씀하신 "맥락을 보고 쪼개고, 할당하고, 측정 가능하게 검증"이 정확히 3개 도구입니다:
+
+  1. work split <task_id> — planner 티어 에이전트가 task+맥락(target files, 계약,
+  코드)을 읽고 worker-ready unit들(9섹션 충족)로 분해 → task_unit_readiness_gate로 자가
+  검증 → 제안으로 제출, 승인 시 파일 생성. 사실상 doc-to-plan 엔진(AR-366)을 내부로
+  돌린 것이라 구현을 공유하면 됩니다.
+  2. work criteria <id> — 맥락 기반으로 수용 기준과 검증 방법을 생성하되, 철칙 하나:
+  모든 수용 기준은 실행 가능한 검증 명령(또는 측정 가능한 임계값) 1개 이상과 짝지어져야
+  함. 짝 없는 기준은 게이트가 unverifiable watch 처리. "측정 가능한 무언가"를 규칙으로
+  강제하는 지점이 여기입니다.
+  3. work assign <id> — task 태그·target files ↔ 팀 스킬 맵(TEAMS.md, SKILL-DATA-MAP)
+  매칭 + 워크로드 히트맵(AR-337) + WIP 한도(AR-347) 고려해 담당 팀/에이전트 제안 →
+  디스패처 claim으로 확정.
+
+  보조로 work verify <id>: 구현 후 unit의 검증 명령을 일괄 실행하고 결과를 evidence
+  레코드로 기록 — "잘 구현됐는지"의 기계 판정.
+
+  4. 계층 뷰어 — 필요합니다. 단, 탭 4개가 아니라 트리 1개
+
+  - 보드는 이미 Project/Unit 컬럼과 WIP 집계를 얻었지만(AR-348) 평면입니다. 제안: 기존
+  Tasksets 뷰(AR-323)를 Work Explorer로 일반화 — Initiative→Taskset→Task→Unit 접이식
+  트리 + 각 노드에 하위 집계 진행률 바(roll-up) + 빵부스러기. 계층별 탭 4개를 만들면
+  같은 데이터를 4번 구현하게 되니, 트리 하나에 "레벨 필터"를 두는 쪽이 쌉니다.
+  - 직교 축(milestone/horizon/team)은 트리가 아니라 패싯 필터로. 생성 보드도 같은 원리:
+  BACKLOG-BOARD.md 하나에 initiative 단위 접이식 섹션(별도 파일 분리는 drift만 늘림).
+  - roll-up 규칙: progress_pct는 절대 손으로 안 쓰고 하위에서 상향 계산만.
+
+  5. 함께 필요한 규칙/프로토콜 (codex 지시에 포함 권장)
+
+  1. 고아 차단 게이트: unit→task→taskset→initiative 부모 링크 필수, 끊기면 block.
+  2. 규모 휴리스틱 watch: taskset>9 tasks, task>5 units면 분할 제안 (지난 답변의
+  휴리스틱을 게이트화).
+  3. kind별 상태기계를 STATE-MACHINES.yml에 등록 — routine은 완료가 없고 주기 실행이라
+  별도 머신.
+  4. DoR/DoD 명문화: DoR = readiness gate 통과(unit), DoD = 검증 명령 통과 + evidence +
+  actuals 기록. work close가 DoD를 기계적으로 요구.
+  5. 스코프 변경 프로토콜: 작업 중 범위 확장 = 기존 item 수정이 아니라 work new로 신규
+  unit/task (PM 계약 규칙 5를 도구가 쉽게 만들어줌).
+  6. 백필 마이그레이션: 기존 150+ task는 work backfill로 envelope 스키마에 점진
+  편입(task_identity backfill 패턴 재사용), 일괄 변환 금지.
+
+  codex 지시용 요약
+
+  ▎ 통칭 Work Item 도입: 공통 envelope
+  ▎ frontmatter(work_id/work_uid/kind/parent_id/status/owner/티어) + kind별
+  ▎ 확장(initiative|taskset|task|unit|routine|spike). 결정적 CLI
+  ▎ work(new/reserve-id/close/now/tree) 구현 — task_identity.py create를 흡수, ID
+  ▎ 채번은 claim_lease 재사용, frontmatter 수동 작성 금지·생성기 경유 원칙. AI 도구
+  ▎ 3종은 B-mode 제안 경유: split(task→worker-ready units, readiness gate 자가검증),
+  ▎ criteria(수용 기준마다 실행 가능 검증 명령 1+ 강제), assign(스킬 맵+워크로드+WIP
+  ▎ 기반 팀 배정 제안). UI는 Work Explorer 트리(접이식 4계층+roll-up 진행률+패싯
+  ▎ 필터)로 Tasksets 뷰를 일반화. 게이트 추가: 고아 차단, 규모 휴리스틱, kind별
+  ▎ 상태기계, DoR/DoD, 스코프 변경=신규 item. 기존 task는 backfill로 점진 편입.
+
+  한 가지만 주의 전달 부탁드립니다: AI 생성기(split/criteria/assign)는 반드시 기존
+  B-mode planning gate(제안→승인)를 경유하게 — 자동 적용으로 만들면 C-mode 경계를
+  침범합니다.
+
+❯ metadata에는 frontmatter, footer 외에도 reference, tag, team 등등 검색/조회/CRUD/... 같은 데이터 가공, 통계, 쿼리작업,... 앞으로 하게될 모든 작업에 유용한 정보들이 담기면 좋을 것 같은데. 더 담을만한 내용이 있을까?
+
+● 좋은 타이밍입니다 — envelope 스키마를 정할 때 필드 카탈로그를 같이 확정해야 나중에
+  backfill 비용이 안 듭니다. 원칙 하나만 먼저: "수집 가능한 모든 것"이 아니라 "답하고
+  싶은 쿼리가 있는 것"만 넣어야 합니다. 각 필드는 ①누가 채우는지(생성기/게이트/사람)
+  ②어떤 쿼리·통계에 쓰이는지가 정의돼야 살아남습니다. 그 기준으로 추린 카탈로그입니다.
+
+  1. 계보/출처 (Provenance) — 가장 가치 높은 추가
+
+  ┌─────────────────┬──────────────────────────────────────────────────────────────┐
+  │      필드       │                        용도 (쿼리 예)                        │
+  ├─────────────────┼──────────────────────────────────────────────────────────────┤
+  │                 │ 이 작업이 왜 생겼나: owner_request | planning_proposal |     │
+  │ origin_type +   │ doc_intake(AR-366) | idea_vault_revival | retro |            │
+  │ origin_ref      │ automation_rule. "Owner 지시에서 나온 작업 vs 시스템이       │
+  │                 │ 스스로 제안한 작업 비율" — RSI 성숙도 핵심 지표              │
+  ├─────────────────┼──────────────────────────────────────────────────────────────┤
+  │ created_by      │ 사람/에이전트 인스턴스/페인 ID — 어제 342~350 충돌 추적 때   │
+  │                 │ 정확히 이게 없어서 고생했습니다                              │
+  ├─────────────────┼──────────────────────────────────────────────────────────────┤
+  │ split_from /    │ work split 산출물 추적, 분해 품질 통계("planner가 쪼갠       │
+  │ merged_into     │ unit의 재작업률")                                            │
+  ├─────────────────┼──────────────────────────────────────────────────────────────┤
+  │ supersedes /    │ ADR 패턴 — Idea Vault·결정 변경 이력과 연결                  │
+  │ superseded_by   │                                                              │
+  ├─────────────────┼──────────────────────────────────────────────────────────────┤
+  │ duplicate_of    │ 중복 등록 정리 (Evidence-to-Proposal dedup과 연동)           │
+  └─────────────────┴──────────────────────────────────────────────────────────────┘
+
+  2. 닫힘 의미론 — 지금 체계의 실제 구멍
+
+  현재 status는 completed뿐이라 "기각됨"과 "완료됨"을 구분 못 합니다:
+
+  ┌────────────────┬────────────────────────────────────────────────────────────────┐
+  │      필드      │                              용도                              │
+  ├────────────────┼────────────────────────────────────────────────────────────────┤
+  │ resolution     │ done | wontfix | duplicate | superseded | moved_to_vault —     │
+  │                │ 닫힘 사유. "기각된 작업이 Vault로 갔는가" 게이트 가능          │
+  ├────────────────┼────────────────────────────────────────────────────────────────┤
+  │ reopened_count │ 품질 신호 ("닫았다 다시 연 작업" 통계)                         │
+  └────────────────┴────────────────────────────────────────────────────────────────┘
+
+  3. 비용/품질 측정 (AR-368 확장)
+
+  ┌─────────────────────────────┬──────────────────────────────────────────────────┐
+  │            필드             │                       용도                       │
+  ├─────────────────────────────┼──────────────────────────────────────────────────┤
+  │ est_/actual_cost (화폐)     │ 토큰×단가 — Paperclip식 예산 하드 스톱(AR-367)의 │
+  │                             │  데이터 기반                                     │
+  ├─────────────────────────────┼──────────────────────────────────────────────────┤
+  │ budget_cap                  │ taskset/initiative 단위 상한                     │
+  ├─────────────────────────────┼──────────────────────────────────────────────────┤
+  │ rework_count,               │ "어느 팀/티어의 산출물이 게이트에 자주 걸리나" — │
+  │ gate_failure_count          │  모델 티어 라우팅 조정 근거                      │
+  ├─────────────────────────────┼──────────────────────────────────────────────────┤
+  │ verification_status +       │ pass/fail/stale(코드가 변했는데 재검증 안 됨) —  │
+  │ verified_at/by              │ stale 감지가 핵심                                │
+  ├─────────────────────────────┼──────────────────────────────────────────────────┤
+  │ xp_value (산출 캐시)        │ AR-363 성장 시스템 — 저장하되 산식에서만 갱신    │
+  └─────────────────────────────┴──────────────────────────────────────────────────┘
+
+  4. 관계 (그래프 쿼리의 원료)
+
+  ┌────────────────────────────────┬───────────────────────────────────────────────┐
+  │              필드              │                     용도                      │
+  ├────────────────────────────────┼───────────────────────────────────────────────┤
+  │ blocks/blocked_by (AR-330      │ 의존 그래프, 임계 경로                        │
+  │ 기등록) + relates_to           │                                               │
+  ├────────────────────────────────┼───────────────────────────────────────────────┤
+  │ evidence_refs, review_refs     │ "증거 없는 completed" 게이트 (이미 관행 —     │
+  │                                │ 필드로 승격)                                  │
+  ├────────────────────────────────┼───────────────────────────────────────────────┤
+  │ commit_refs/pr_refs            │ "이 task가 바꾼 커밋" — 검색(AR-334)·역링크   │
+  │                                │ 검증(AR-319 완료분)과 직결                    │
+  ├────────────────────────────────┼───────────────────────────────────────────────┤
+  │ a2a_context_id                 │ task ↔ A2A 메시지 체인(AR-311 완료) 연결 —    │
+  │                                │ "이 작업을 둘러싼 에이전트 대화" 쿼리         │
+  ├────────────────────────────────┼───────────────────────────────────────────────┤
+  │ claim_refs                     │ 런타임 클레임 이력                            │
+  └────────────────────────────────┴───────────────────────────────────────────────┘
+
+  5. 라우팅/거버넌스 보강
+
+  ┌─────────────────────────────┬──────────────────────────────────────────────────┐
+  │            필드             │                       용도                       │
+  ├─────────────────────────────┼──────────────────────────────────────────────────┤
+  │ risk_tier +                 │ low/medium/high — Owner 승인 큐(AR-317) 자동     │
+  │ approval_required           │ 분류                                             │
+  ├─────────────────────────────┼──────────────────────────────────────────────────┤
+  │ security_sensitive          │ 시크릿/외부 효과 작업 표시 — reviewer_high 강제  │
+  │                             │ 트리거                                           │
+  ├─────────────────────────────┼──────────────────────────────────────────────────┤
+  │ stakeholders/watchers       │ 알림 구독(AR-338) — "이 작업 변화를 누가         │
+  │                             │ 통지받나"                                        │
+  ├─────────────────────────────┼──────────────────────────────────────────────────┤
+  │ due_date, blocked_since     │ flow 통계(AR-347 WIP/age가 이미 시작) —          │
+  │                             │ 지연·정체 쿼리                                   │
+  └─────────────────────────────┴──────────────────────────────────────────────────┘
+
+  6. 표시/검색 보조
+
+  ┌──────────────────────┬─────────────────────────────────────────────────────────┐
+  │         필드         │                          용도                           │
+  ├──────────────────────┼─────────────────────────────────────────────────────────┤
+  │ summary (한 줄)      │ 보드·hover peek(AR-362)·검색 결과 발췌 — 본문 첫 줄     │
+  │                      │ 파싱 의존 제거                                          │
+  ├──────────────────────┼─────────────────────────────────────────────────────────┤
+  │ area/component       │ area:ui, component:scripts/backlog_board.py — "이 파일  │
+  │ (네임스페이스 라벨)  │ 건드리는 열린 작업" 쿼리, work assign의 매칭 원료       │
+  └──────────────────────┴─────────────────────────────────────────────────────────┘
+
+  7. 스키마 자체의 메타데이터 — 빠지면 나중에 후회하는 것
+
+  1. schema_version — envelope이 진화할 때 점진 마이그레이션의 전제. 이게 없으면 두
+  번째 스키마 변경부터 지옥입니다.
+  2. 필드 사전 agents/project/WORK-SCHEMA.yml을 SSoT로 — 필드명/타입/kind별
+  required·optional/채우는 주체/소비하는 도구를 선언. 게이트가 unknown field를 watch
+  처리(오타 방어), 생성기·뷰어·통계가 전부 이 사전을 읽음. 커스텀 속성(AR-331)도 이
+  사전에 등록하는 방식으로 통합 — 별도 체계 두 개 만들지 말 것.
+  3. 파생값은 저장 금지 원칙: progress_pct, age, est-actual 편차는 항상 하위/이력에서
+  계산 (보드 생성 시 캐시만). 손으로 고칠 수 있는 곳에 파생값을 두면 반드시 어긋납니다.
+  4. 통계 진입점: work stats --by team|tier|origin_type --metric
+  actual_tokens|rework|lead_time — 필드를 넣는 이유가 결국 이 명령 하나로 수렴합니다.
+
+  codex 지시용 요약
+
+  ▎ WORK-SCHEMA.yml 필드 사전을 SSoT로 envelope 확장:
+  ▎ 계보(origin_type/origin_ref/created_by(pane
+  ▎ 포함)/split_from/supersedes/duplicate_of), 닫힘 의미론(resolution:
+  ▎ done|wontfix|duplicate|superseded|moved_to_vault, reopened_count),
+  ▎ 측정(est/actual_cost, budget_cap, rework_count, gate_failure_count,
+  ▎ verification_status+stale 감지, xp_value 캐시), 관계(relates_to, evidence_refs,
+  ▎ commit_refs, a2a_context_id, claim_refs), 거버넌스(risk_tier, approval_required,
+  ▎ security_sensitive, watchers, due_date, blocked_since), 표시(summary,
+  ▎ area/component 네임스페이스 라벨), 그리고 schema_version 필수.
+  ▎ 파생값(progress_pct/age/편차)은 저장 금지·계산 전용. kind별 required/optional
+  ▎ 매트릭스는 사전에 선언, 게이트는 unknown field watch. 커스텀 속성(AR-331)은 같은
+  ▎ 사전으로 통합. work stats 쿼리 명령이 최종 소비자.
+
+  비대화 경고도 함께 전달해 주세요: 위 카탈로그도 전부 한 번에 넣지 말고, kind별
+  required는 최소(신원+계보+닫힘 의미론)로 시작해서 소비 도구(통계/게이트/뷰어)가
+  실제로 생길 때 optional→required로 승격하는 점진 방식이 안전합니다.
+
+❯ 에이전트 스킬은 클래스/팩토리같은 존재잖아? 같은 페르소나를 갖는 에이전트는 동시에
+  여러 개가 생성이 될 수 있는데, 어떤 팀/어떤 에이전트인지 명확히 구분할 수 있는
+  방법론이 필요해. qa1, qa2, ...가 있는데 단순히 qa가 진행했다고 하면 언제 어떻게
+  발생했는지 원인을 분석하고 책임을 따지기가 어려울 것 같아. 그리고 이런 메타데이터는
+  정렬/필터링 등등 통계를 내서 빅데이터 분석을 하거나, 사용자가 임의로 데이터를
+  조작하면서 insight를 얻을 수 있는 도구이기도 해야할 것 같아.
+
+● 핵심을 정확히 짚으셨습니다 — 이건 객체지향 그대로입니다: 역할(스킬/페르소나) =
+  클래스, 실행 중인 에이전트 = 인스턴스. 그리고 이 프로젝트엔 이미 부분 자산이
+  있습니다(PARALLEL_SESSION_PROTOCOL의 agent_instance_id/display_name/callsite_id,
+  pane_events, multipane_census, A2A 라우터). 빠진 것은 이를 하나의 신원 계약으로 묶고,
+  모든 산출물에 인스턴스 귀속을 강제하고, 통계로 소비하는 체계입니다. codex 지시용으로
+  정리합니다.
+
+  1. 신원 모델 — ID는 불투명하게, 속성은 분리해서
+
+  qa2 같은 이름에 의미를 욱여넣는 건 안티패턴입니다(이름이 곧 데이터가 되면 변경·충돌에
+  취약). 관측성(observability) 표준 방식으로:
+
+  ┌───────────────┬───────────────────────────────────────────────┬────────────────┐
+  │    레이어     │                     정의                      │       예       │
+  ├───────────────┼───────────────────────────────────────────────┼────────────────┤
+  │ Role (클래스) │ roles.yml/TEAMS.md의 페르소나 정의            │ qa             │
+  ├───────────────┼───────────────────────────────────────────────┼────────────────┤
+  │ Instance      │ 스폰 시 발급되는 불투명 UUID                  │ inst-7f3a…     │
+  │ (객체)        │                                               │                │
+  ├───────────────┼───────────────────────────────────────────────┼────────────────┤
+  │ Callsign      │ 사람이 기억할 자동 생성 호출명 — Docker       │ qa/swift-otter │
+  │ (표시명)      │ 컨테이너 명명 방식                            │                │
+  └───────────────┴───────────────────────────────────────────────┴────────────────┘
+
+  - 쿼리는 항상 속성으로: "qa 역할의 모든 인스턴스", "swift-otter가 한 일". RPG
+  비전(AR-324/363)과도 맞물립니다 — 에이전트가 이름을 가진 캐릭터가 되고, XP·전적이
+  callsign에 쌓이는 거죠.
+
+  2. 출생증명서 (Spawn Record) — 책임 추적의 시작점
+
+  모든 인스턴스는 스폰 시점에 등록 레코드를 남깁니다 (agents/runtime/instances/
+  append-only):
+
+  instance_uid, role, team, callsign
+  spawned_at, spawned_by(orchestrator|dispatcher|owner|parent_instance)
+  session_id, pane_id, workspace/worktree
+  provider, model, model_tier
+  skill_versions: {qa-skill: v1.3, …}   # ← 핵심
+  prompt_config_hash
+
+  skill_versions가 책임 분석의 숨은 열쇠입니다 — 클래스(스킬 정의)도 진화하므로, "qa2가
+  이상했던 건 그 인스턴스가 스킬 v1.2를 로드했기 때문"을 재현하려면 인스턴스가 어떤
+  버전의 클래스에서 생성됐는지를 기록해야 합니다. 스킬 패키징(AR-316, 진행 중)의 버전
+  필드와 정확히 맞물립니다.
+
+  3. 귀속 강제 (Attribution Gate) — "qa가 했다"를 금지
+
+  - 규칙: 모든 산출물의 actor는 instance_uid여야 한다. task closeout, claim, pane
+  event, A2A 메시지(sender/receiver — AR-311 라우터 확장), evidence, 커밋
+  트레일러(Agent-Instance: qa/swift-otter)까지.
+  - 게이트가 role-only 귀속(actor: qa)을 watch/block 처리. 이러면 "언제 누가" 질문이
+  구조적으로 항상 답을 가집니다.
+  - 수명주기 이벤트: spawn/heartbeat/idle/terminate를 pane_events에 적재 → "그 시각에
+  qa 인스턴스가 몇 개 살아있었나"(multipane_census가 이미 절반 구현), "qa2는 언제
+  태어나 언제 죽었나" 쿼리 가능.
+  - 인과 체인: parent_instance(누가 스폰) + on_behalf_of(어느 claim/unit 수행 중) +
+  기존 decision_cycle_id(A2A) — OpenTelemetry의 trace/span 구조와 동형입니다. 장애 분석
+  시 "이 잘못된 결정 → 어느 인스턴스 → 어느 unit → 누가 스폰 → 어떤 스킬 버전"을 한
+  체인으로 역추적.
+  - 책임 의미론 한 줄 명문화 권장: 실행 책임은 인스턴스에, 결과 책임은 task
+  owner(역할/팀)와 Owner 승인 체인에 — 귀속은 비난용이 아니라 분석용(SRE blameless
+  원칙, 이미 casebook 문화와 일치).
+
+  4. 통계/인사이트 레이어 — 이 메타데이터의 최종 소비자
+
+  수집의 목적이 분석이라는 지적이 정확합니다. 차원(dimension)과 지표(measure)를
+  분리하면 피벗 테이블처럼 자유 탐색이 됩니다:
+
+  - 차원: instance, callsign, role, team, model, model_tier, skill_version, pane,
+  taskset, origin_type, 시간 윈도우
+  - 지표: 완료 unit 수, actual_tokens/hours(AR-368), 재작업률, 게이트 실패율, 리드타임,
+  blocked 시간, XP
+  - CLI: agent stats --by role,model_tier --metric rework_rate / work stats와 동일 엔진
+  - UI: 탐색기(Explorer)에 group-by/필터 차원 선택 + 저장된 뷰(AR-322) + CSV/JSON
+  내보내기(AR-333) → pandas/BI로 외부 분석 가능
+  - 이게 열어주는 결정적 분석: "worker_low vs worker_standard의 재작업률 비교", "스킬
+  v1.2 vs v1.3 인스턴스의 게이트 실패율" — 즉 모델 티어 라우팅(PM 계약)과 스킬
+  개선(RSI)의 A/B 검증이 데이터로 가능해집니다. 말씀하신 Idea Vault A/B 철학이 에이전트
+  운영에도 적용되는 지점입니다.
+
+  codex 지시용 요약
+
+  ▎ AGENT-IDENTITY 계약 신설: Role(클래스)/Instance(불투명 UUID)/Callsign(자동 생성
+  ▎ 표시명) 3층 분리. 스폰 시 출생증명서 레코드(agents/runtime/instances/,
+  ▎ append-only): role/team/callsign/spawned_by/session/pane/worktree/provider/model/ti
+  ▎ er/skill_versions/prompt_hash. 귀속 게이트: 모든 산출물(closeout/claim/pane
+  ▎ event/A2A 메시지/evidence/커밋 트레일러)의 actor는 instance_uid 필수, role-only
+  ▎ 귀속은 watch. 수명주기 이벤트(spawn/heartbeat/terminate)를 pane_events에 적재해
+  ▎ 시점별 센서스 가능하게(multipane_census 확장). 인과 체인: parent_instance +
+  ▎ on_behalf_of(claim/unit) + decision_cycle_id. 통계:
+  ▎ 차원(instance/role/team/model/skill_version/시간)×지표(완료/토큰/재작업/게이트
+  ▎ 실패/리드타임) 분리, agent stats CLI + Explorer group-by/저장 뷰/내보내기. 기존
+  ▎ 자산 재사용: PARALLEL_SESSION_PROTOCOL 필드, task_claims,
+  ▎ a2a_message_router(AR-311), multipane_census, 스킬 버전은 AR-316과 연동. 책임
+  ▎ 의미론은 blameless — 분석용 귀속.
+
+  추가 아이디어 하나: callsign 자동 생성기를 work/스폰 도구에 넣을 때 역할별 접두 +
+  형용사-동물 형식(qa/swift-otter, lead/quiet-falcon)으로 하면, 오피스 맵(AR-364)에서
+  캐릭터 이름표·레벨과 자연스럽게 연결되고 로그 가독성도 사람 친화적이 됩니다.
