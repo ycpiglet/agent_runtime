@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-12T09:06:27+09:00
-record_count: 387
+generated_at: 2026-06-12T14:33:38+09:00
+record_count: 388
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `387` review and evidence records under `reviews/`.
+- Summary: indexed `388` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `387` files |
+| Reviews covered | pass | `388` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -399,6 +399,7 @@ record_count: 387
 | `reviews/REVIEW-2026-06-11-tag-manual-independence-closeout.md` | `REVIEW-2026-06-11-tag-manual-independence-closeout` | brief | record | pass | REVIEW-2026-06-11-tag-manual-independence-closeout |
 | `reviews/REVIEW-2026-06-11-toolrunner-policy-closeout.md` | `REVIEW-2026-06-11-toolrunner-policy-closeout` | brief | record | pass | REVIEW-2026-06-11-toolrunner-policy-closeout |
 | `reviews/REVIEW-2026-06-12-a2a-message-routing-closeout.md` | `REVIEW-2026-06-12-a2a-message-routing-closeout` | md | record | n/a | REVIEW: TASK-AR-311 A2A Message Routing Closeout |
+| `reviews/REVIEW-2026-06-12-agent-runtime-live-structure-two-layer-decision.md` | `REVIEW-2026-06-12-agent-runtime-live-structure-two-layer-decision` | review | pass | pass | Live Structure Two-Layer Decision Review |
 | `reviews/REVIEW-2026-06-12-agent-runtime-ops-feedback-analysis-closeout.md` | `REVIEW-2026-06-12-agent-runtime-ops-feedback-analysis-closeout` | review | pass | pass | Ops Feedback Analysis Closeout Review |
 | `reviews/REVIEW-2026-06-12-agent-runtime-pm-operating-system-closeout.md` | `REVIEW-2026-06-12-agent-runtime-pm-operating-system-closeout` | review | pass | pass | PM Operating System Closeout Review |
 | `reviews/REVIEW-2026-06-12-agent-runtime-rsi-operating-system-closeout.md` | `REVIEW-2026-06-12-agent-runtime-rsi-operating-system-closeout` | review | pass | pass | RSI Operating System Closeout Review |
