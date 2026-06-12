@@ -72,6 +72,15 @@ def _has_text(value: Any) -> bool:
     return bool(str(value).strip())
 
 
+def depends_on_refs(meta: dict[str, Any]) -> list[str]:
+    """Return the optional `depends_on` references (unit and/or task ids)."""
+    value = meta.get("depends_on")
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    text = str(value or "").strip()
+    return [text] if text else []
+
+
 def load_unit_specs(root: Path) -> list[tuple[Path, dict[str, Any], str]]:
     base = root / "agents" / "lead_engineer" / "tasks" / "units"
     if not base.is_dir():
@@ -123,6 +132,27 @@ def validate_unit(root: Path, path: Path, meta: dict[str, Any], body: str, *, re
     return findings
 
 
+def _depends_on_findings(
+    root: Path,
+    units: list[tuple[Path, dict[str, Any], str]],
+    selected_units: list[tuple[Path, dict[str, Any], str]],
+) -> list[str]:
+    """Validate optional `depends_on` references against known unit/task ids."""
+    findings: list[str] = []
+    known_unit_ids = {str(meta.get("unit_id") or "").strip() for _, meta, _ in units}
+    known_unit_ids.discard("")
+    tasks_dir = root / "agents" / "lead_engineer" / "tasks"
+    for path, meta, _body in selected_units:
+        rel = _rel(root, path)
+        own_unit_id = str(meta.get("unit_id") or "").strip()
+        for ref in depends_on_refs(meta):
+            if own_unit_id and ref == own_unit_id:
+                findings.append(f"{rel}: unit:depends-on-self:{ref}")
+            elif ref not in known_unit_ids and not (tasks_dir / f"{ref}.md").is_file():
+                findings.append(f"{rel}: unit:depends-on-unknown-ref:{ref}")
+    return findings
+
+
 def _task_units(units: list[tuple[Path, dict[str, Any], str]], task_id: str) -> list[tuple[Path, dict[str, Any], str]]:
     return [unit for unit in units if str(unit[1].get("task_id") or "").strip() == task_id]
 
@@ -162,6 +192,8 @@ def check_root(
 
     for path, meta, body in selected_units:
         findings.extend(validate_unit(root, path, meta, body, require_ready=require_ready))
+
+    findings.extend(_depends_on_findings(root, units, selected_units))
 
     if strict_migration:
         tasks = backlog_board.load_tasks(root / "agents" / "lead_engineer" / "tasks")
