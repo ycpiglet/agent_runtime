@@ -1,5 +1,5 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-12T02:17:42+09:00
+updated_at: 2026-06-12T21:58:00+09:00
 current_state:
   summary: "Requested PM, Vision, Ops, and RSI tasksets are complete locally; next ready workflow is TASKSET-AR-UI-UX-V2 from the live backlog board."
   status: ready
@@ -10,7 +10,15 @@ current_state:
   progress_pct: 100
   status_text: "PM/Vision/Ops/RSI closeout records are aligned; TASKSET-AR-UI-UX-V2 is a ready pointer only, not an active claim."
 active_work:
-  current_agents: []
+  current_agents:
+    - claim_id: CLAIM-20260612-215508-task-ar-508-a9e0
+      agent_role: lead-engineer
+      agent_instance_id: le-claude-20260612-212800
+      display_name: lead_engineer@branch-namespace-01
+      callsite_id: terminal:claude-main:tab-01
+      task_id: TASK-AR-508
+      worktree_path: .worktrees/TASK-AR-508
+      branch: claude/task-ar-508-agent-branch-namespace
   current_teams: []
 resume:
   active_task: none
@@ -23,7 +31,7 @@ roles:
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
   active_claims:
-    - agents/runtime/task_claims/CLAIM-20260612-005555-task-ar-316-72b4.json
+    - agents/runtime/task_claims/CLAIM-20260612-215508-task-ar-508-a9e0.json
   release_steward_completed_tasks:
     - agents/lead_engineer/tasks/TASK-AR-219.md
     - agents/lead_engineer/tasks/TASK-AR-222.md
