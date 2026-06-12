@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-12T12:28:23+09:00",
-  "record_count": 191,
+  "generated_at": "2026-06-12T12:46:42+09:00",
+  "record_count": 192,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -2081,6 +2081,17 @@
       "id": "UNIT-TASK-AR-372-002",
       "title": "UNIT-TASK-AR-372-002 - Deterministic Work Registration CLI",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-002.md",
+      "parent_id": "TASK-AR-372",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-372-003",
+      "level": "unit",
+      "number": "1.1.4.3",
+      "label": "Unit 1.1.4.3",
+      "id": "UNIT-TASK-AR-372-003",
+      "title": "UNIT-TASK-AR-372-003 - Worker-Ready Unit Generation In Work CLI",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-003.md",
       "parent_id": "TASK-AR-372",
       "status": "completed"
     },

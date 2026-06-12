@@ -8,6 +8,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "work.py"
+UNIT_GATE = REPO_ROOT / "scripts" / "task_unit_readiness_gate.py"
 
 
 def _run(root: Path, input_path: Path, *args: str) -> subprocess.CompletedProcess[str]:
@@ -28,7 +29,33 @@ def _write_input(root: Path, payload: dict[str, object]) -> Path:
     return path
 
 
-def _payload(*, duplicate: bool = False, missing_goal: bool = False) -> dict[str, object]:
+def _payload(
+    *,
+    duplicate: bool = False,
+    missing_goal: bool = False,
+    include_units: bool = False,
+    missing_unit_context: bool = False,
+) -> dict[str, object]:
+    units: list[dict[str, object]] = []
+    if include_units:
+        units = [
+            {
+                "title": "Worker-ready implementation unit",
+                "context": "Create a focused unit from structured registration input.",
+                "inputs": ["registration.json", "agents/lead_engineer/tasks/TASK-AR-901.md"],
+                "target_files": ["scripts/work.py", "tests/test_work_registration.py"],
+                "scope": "Generate one worker-ready unit spec for the first registered task.",
+                "steps": ["Add unit rendering.", "Run the readiness gate."],
+                "acceptance": ["The unit spec file exists.", "The readiness gate passes for the generated unit."],
+                "verification": [
+                    "python scripts/task_unit_readiness_gate.py --task-id TASK-AR-901 --unit-id UNIT-TASK-AR-901-001 --require-ready --check"
+                ],
+                "handoff": "Report the generated unit path and gate result.",
+                "stop_condition": "Stop after this generated unit spec is verified.",
+            }
+        ]
+        if missing_unit_context:
+            units[0].pop("context")
     task_two_id = "TASK-AR-901" if duplicate else "TASK-AR-902"
     task_two: dict[str, object] = {
         "display_id": task_two_id,
@@ -66,6 +93,7 @@ def _payload(*, duplicate: bool = False, missing_goal: bool = False) -> dict[str
                 "goal": "Create the first task from structured input.",
                 "acceptance": ["First task exists."],
                 "verification": ["python scripts/task_identity.py check --check"],
+                "units": units,
             },
             task_two,
         ],
@@ -82,6 +110,18 @@ def _frontmatter(path: Path) -> dict[str, str]:
         key, value = line.split(":", 1)
         meta[key.strip()] = value.strip().strip("\"'")
     return meta
+
+
+def _run_unit_gate(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(UNIT_GATE), "--root", str(root), *args],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
 
 
 def test_work_new_creates_initiative_taskset_tasks_review_and_views(tmp_path: Path) -> None:
@@ -174,6 +214,69 @@ def test_work_new_allocates_missing_display_ids_through_reservation_ledger(tmp_p
     assert [row["status"] for row in ledger["reservations"]] == ["fulfilled", "fulfilled"]
 
 
+def test_work_new_creates_worker_ready_unit_specs_from_task_input(tmp_path: Path) -> None:
+    input_path = _write_input(tmp_path, _payload(include_units=True))
+
+    result = _run(tmp_path, input_path)
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    created = json.loads(result.stdout[result.stdout.index("{") :])
+    assert created["units"] == [
+        "agents/lead_engineer/tasks/units/TASK-AR-901/UNIT-TASK-AR-901-001.md"
+    ]
+    task_meta = _frontmatter(tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md")
+    assert task_meta["unit_spec"] == "agents/lead_engineer/tasks/units/TASK-AR-901/UNIT-TASK-AR-901-001.md"
+
+    unit_path = tmp_path / "agents" / "lead_engineer" / "tasks" / "units" / "TASK-AR-901" / "UNIT-TASK-AR-901-001.md"
+    assert unit_path.exists()
+    unit_meta = _frontmatter(unit_path)
+    assert unit_meta["schema_version"] == "agent-runtime-work-item/v1"
+    assert unit_meta["kind"] == "unit"
+    assert unit_meta["work_id"] == "UNIT-TASK-AR-901-001"
+    assert unit_meta["parent_id"] == "TASK-AR-901"
+    assert unit_meta["status"] == "worker_ready"
+    assert unit_meta["verification_status"] == "pending"
+
+    body = unit_path.read_text(encoding="utf-8")
+    for heading in (
+        "## Context",
+        "## Inputs",
+        "## Target Files",
+        "## Scope",
+        "## Steps",
+        "## Acceptance Criteria",
+        "## Verification",
+        "## Handoff",
+        "## Stop Boundary",
+    ):
+        assert heading in body
+
+    gate = _run_unit_gate(
+        tmp_path,
+        "--task-id",
+        "TASK-AR-901",
+        "--unit-id",
+        "UNIT-TASK-AR-901-001",
+        "--require-ready",
+        "--check",
+    )
+    assert gate.returncode == 0, gate.stdout + gate.stderr
+    assert "task-unit-readiness-gate: pass" in gate.stdout
+
+    classification = (tmp_path / "agents" / "project" / "work-items" / "WORK-ITEM-CLASSIFICATION.md").read_text(
+        encoding="utf-8"
+    )
+    assert "`UNIT-TASK-AR-901-001`" in classification
+
+    second = _run(tmp_path, input_path)
+    assert second.returncode == 0, second.stderr or second.stdout
+    again = json.loads(second.stdout[second.stdout.index("{") :])
+    assert again["status"] == "already_exists"
+    assert again["units"] == [
+        "agents/lead_engineer/tasks/units/TASK-AR-901/UNIT-TASK-AR-901-001.md"
+    ]
+
+
 def test_work_new_blocks_duplicate_display_ids_without_partial_files(tmp_path: Path) -> None:
     input_path = _write_input(tmp_path, _payload(duplicate=True))
 
@@ -191,4 +294,14 @@ def test_work_new_blocks_missing_required_fields_without_partial_files(tmp_path:
 
     assert result.returncode == 1
     assert "input:tasks[2]:missing:goal" in result.stderr
+    assert not (tmp_path / "agents").exists()
+
+
+def test_work_new_blocks_missing_unit_required_fields_without_partial_files(tmp_path: Path) -> None:
+    input_path = _write_input(tmp_path, _payload(include_units=True, missing_unit_context=True))
+
+    result = _run(tmp_path, input_path)
+
+    assert result.returncode == 1
+    assert "input:tasks[1].units[1]:missing:context" in result.stderr
     assert not (tmp_path / "agents").exists()
