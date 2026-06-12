@@ -192,6 +192,12 @@ TASK_SET_DEFINITIONS = [
         "Document-to-plan intake pipeline, Paperclip gap adoption, actuals capture, and multi-factor evaluation/sorting.",
         97,
     ),
+    TaskSetInfo(
+        "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
+        "Work Taxonomist",
+        "Initiative vocabulary, collision-free task registration, shared backlog deconfliction, and unit-readiness migration.",
+        98,
+    ),
 ]
 TASK_SET_INFO = {item.task_set_id: item for item in TASK_SET_DEFINITIONS}
 UNCLASSIFIED_TASK_SET = TaskSetInfo(
@@ -236,6 +242,10 @@ class Task:
     @property
     def project_id(self) -> str:
         return str(self.meta.get("project_id") or "-").strip() or "-"
+
+    @property
+    def initiative_id(self) -> str:
+        return str(self.meta.get("initiative_id") or "-").strip() or "-"
 
     @property
     def unit_spec(self) -> str:
@@ -663,16 +673,17 @@ def render(tasks: list[Task], *, root: Path | None = None) -> str:
             f"- Flow: {set_info.summary}",
             f"- Progress: `{len(set_completed)}/{len(total_set_tasks)}` done; `{len(set_tasks)}` open or active.",
             f"- WIP: active `{set_flow['active']}/{set_flow['wip_limit']}`; oldest `{float(set_flow['oldest_age_hours']):.1f}h`; stale `{set_flow['stale']}`.",
-            "| Task | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |",
-            "|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|",
+            "| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |",
+            "|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|",
         ])
         if not set_tasks:
-            lines.append("| - | - | - | - | - | - | - | - | - | - | - | - | - |")
+            lines.append("| - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - |")
             continue
         for task in set_tasks:
             cost = f"{task.est_hours:g}h/{task.est_tokens}tok"
             row = [
                 f"`{task.task_id}`",
+                task.initiative_id,
                 task.project_id,
                 task.unit_spec or "-",
                 task.status,

@@ -14,7 +14,7 @@ tags: [project-management, taskset, model-routing, decomposition]
 ## Bottom Line
 
 - Summary: implemented `TASKSET-AR-PM-OPERATING-SYSTEM` to turn high-level planning into detailed worker-ready units.
-- Result: future work should flow through `project -> taskset -> task -> unit`, with backlog files acting as metadata indexes rather than full task specifications.
+- Result: future work should flow through `initiative -> taskset -> task -> unit`, with `project_id` reserved for host/repository lanes and backlog files acting as metadata indexes rather than full task specifications.
 - Boundary: AGENTS rules, research, contract, taskset registration, executable unit gates, dispatcher metadata, board view, template propagation, and closeout verification are complete for this taskset.
 
 ## Signal
@@ -37,7 +37,7 @@ tags: [project-management, taskset, model-routing, decomposition]
 
 ## Decision
 
-- Decision: use `project -> taskset -> task -> unit` as the canonical PM hierarchy.
+- Decision: use `initiative -> taskset -> task -> unit` as the canonical Owner-facing PM hierarchy; keep `project_id` for host/project identity and legacy routing.
 - Decision: keep backlog/board metadata compact and move detailed execution instructions into linked specs.
 - Decision: use model-tier metadata and readiness gates before dispatching low-tier workers.
 - Decision: keep executable enforcement as a taskset-backed runtime contract rather than chat guidance.

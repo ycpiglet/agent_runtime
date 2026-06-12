@@ -30,6 +30,10 @@ ALLOWED_LOCAL_CONFIG_PATHS = {
     ".codex/hooks.json",
     "src/agent_runtime/templates/project/.codex/hooks.json",
 }
+ALLOWED_PROJECT_TEMPLATE_HOST_PATHS = {
+    "agents/lead_engineer/tasks/units/README.md",
+    "agents/lead_engineer/tasks/units/examples/UNIT-EXAMPLE-001.md",
+}
 
 FORBIDDEN_PATH_NAMES = {
     ".env",
@@ -110,6 +114,8 @@ def _forbidden_path_kind(rel: str) -> str | None:
     template_prefix = "src/agent_runtime/templates/project/"
     if rel.startswith(template_prefix):
         template_rel = rel.removeprefix(template_prefix)
+        if template_rel in ALLOWED_PROJECT_TEMPLATE_HOST_PATHS:
+            return None
         if template_rel in FORBIDDEN_PATH_NAMES or any(template_rel.startswith(prefix) for prefix in FORBIDDEN_PATH_PREFIXES):
             return "forbidden-template-path"
     return None

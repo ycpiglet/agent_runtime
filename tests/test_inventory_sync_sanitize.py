@@ -1191,6 +1191,19 @@ def test_sanitize_blocks_forbidden_paths_nested_under_project_templates(tmp_path
     _write_public_source(source)
     nested_task = source / "src" / "agent_runtime" / "templates" / "project" / "agents" / "lead_engineer" / "tasks" / "TASK-private.md"
     _write(nested_task, "# private task\n")
+    allowed_unit_template = (
+        source
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "README.md"
+    )
+    _write(allowed_unit_template, "# Worker-ready unit template\n")
 
     sanitize_findings = {(finding.path, finding.kind) for finding in analyze_sanitize(source)}
     github_plan = build_github_plan(
@@ -1200,6 +1213,7 @@ def test_sanitize_blocks_forbidden_paths_nested_under_project_templates(tmp_path
     )
 
     assert (nested_task.relative_to(source).as_posix(), "forbidden-template-path") in sanitize_findings
+    assert (allowed_unit_template.relative_to(source).as_posix(), "forbidden-template-path") not in sanitize_findings
     assert "sanitize:forbidden-template-path" in {finding.kind for finding in github_plan.findings}
 
 

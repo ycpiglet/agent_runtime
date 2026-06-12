@@ -1,5 +1,18 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-06-12 TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE Registration
+
+- New planned task set: `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` (Work Taxonomist).
+- Purpose: Claude exchange에서 확인된 남은 충돌 표면을 닫는다 — `project` 용어 과부하, task 번호 선점 충돌, `BACKLOG.md` 수동 공유 편집, worker-ready unit 미작성 상태의 디스패치 혼선을 해결한다.
+- Hierarchy decision: Owner-facing 계층은 `initiative -> taskset -> task -> unit`; `project`는 `agent_runtime` 같은 호스트/레포/제품 lane 의미로 보존한다.
+- Registered planned tasks: `TASK-AR-369`(initiative vocabulary and PM contract migration) `TASK-AR-370`(generated work-item numbering classifier + task ID reservation ledger) `TASK-AR-371`(`BACKLOG.md` shared-write deconfliction) `TASK-AR-372`(registration CLI/API for initiative/taskset/task/unit) `TASK-AR-373`(unit-readiness migration report) `TASK-AR-374`(conflict-surface verification and closeout gate).
+- Initiative record: `agents/project/initiatives/INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE.md`.
+- Research record: `reviews/RESEARCH-2026-06-12-work-hierarchy-taxonomy.md` (Linear/Shape Up/Scrum 사례 기반 용어 결정).
+- Numbering record: `agents/project/work-items/WORK-ITEM-CLASSIFICATION.md` (generated Owner-facing numbers: Initiative 1 -> Taskset 1.1 -> Task 1.1.1 -> Unit 1.1.1.1).
+- Discussion record: `reviews/MEETING-2026-06-12-work-hierarchy-numbering-and-recording.md` (Claude/Owner/Codex hierarchy-numbering and recording decision).
+- Plan entrypoint: `docs/superpowers/plans/2026-06-12-work-hierarchy-conflict-closure.md`.
+- Boundary: registration only. 현재 `NEXT-SESSION-POINTER.yml`의 ready lane은 이동하지 않고, 구현은 dispatcher claim 후 진행한다.
+
 ## 2026-06-12 TASKSET-AR-DOC-TO-PLAN Registration
 
 - New planned task set: `TASKSET-AR-DOC-TO-PLAN` (Pitch Alchemist).
@@ -12,7 +25,7 @@
 ## 2026-06-11 TASKSET-AR-PM-OPERATING-SYSTEM Registration
 
 - New planned task set: `TASKSET-AR-PM-OPERATING-SYSTEM` (Project Workbreaker).
-- Purpose: 고급 planner 모델이 project/taskset/task/unit으로 업무를 세분화하고, 저비용 worker 모델은 상세 unit만 실행하도록 PM 운영 규칙과 gate를 강제한다.
+- Purpose: 고급 planner 모델이 project/taskset/task/unit(후속 결정상 Owner-facing `initiative -> taskset -> task -> unit`)으로 업무를 세분화하고, 저비용 worker 모델은 상세 unit만 실행하도록 PM 운영 규칙과 gate를 강제한다.
 - Registered planned tasks: `TASK-AR-342`(project hierarchy SSoT) `TASK-AR-343`(unit spec template) `TASK-AR-344`(unit readiness gate) `TASK-AR-345`(model-tier routing metadata) `TASK-AR-346`(dispatcher unit claims and scope stop) `TASK-AR-347`(WIP/flow policy) `TASK-AR-348`(board hierarchy views) `TASK-AR-349`(template propagation) `TASK-AR-350`(verification closeout).
 - Research record: `reviews/RESEARCH-2026-06-11-agent-runtime-project-management-methods.md` (Scrum, Shape Up, Kanban, Linear Projects, AI task-splitting research synthesis).
 - Contract: `agents/project/PROJECT-MANAGEMENT-CONTRACT.md`.

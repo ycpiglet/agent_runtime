@@ -43,6 +43,7 @@ def main() -> int:
         ["scripts/response_contract_gate.py", "--check"],
         ["scripts/continuity_contract_gate.py", "--check"],
         ["scripts/task_identity.py", "check", "--check"],
+        ["scripts/work_item_classifier.py", "--check"],
         ["scripts/taskset_work_gate.py", "--check"],
         ["scripts/parallel_worktree_gate.py", "--check"],
         ["scripts/collaboration_concurrency_gate.py", "--check"],

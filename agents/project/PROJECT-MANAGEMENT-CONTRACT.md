@@ -7,19 +7,35 @@ without losing the intent created by stronger planning models.
 
 ## Hierarchy
 
+Owner-facing work uses this hierarchy:
+
 ```text
-project -> taskset -> task -> unit
+initiative -> taskset -> task -> unit
 ```
 
 | Level | Purpose | Canonical record | Typical owner |
 | --- | --- | --- | --- |
-| Project | Long/mid/short objective, strategy, horizon, success signal | `agents/project/projects/<project_id>/PROJECT.md` or `agents/project/*.md` | lead-engineer / planning-office |
+| Workspace / Host Project | Repository, product, customer host, or durable operating lane | `agents/project/PROJECT-CONTEXT.yml` and `agents/project/*.md` | lead-engineer / planning-office |
+| Initiative | Outcome-level parent for one or more tasksets | `agents/project/initiatives/<initiative_id>.md` | lead-engineer / planning-office |
 | Taskset | Coherent workflow bundle with one completion boundary | `docs/superpowers/plans/<date>-<taskset>.md` plus board metadata | lead-engineer |
 | Task | Deliverable with one accountable owner and evidence target | `agents/lead_engineer/tasks/TASK-*.md` | assigned role/team |
 | Unit | Smallest executable worker assignment | `agents/lead_engineer/tasks/units/<task_id>/UNIT-*.md` | worker agent |
 
 Backlog and board files are routing surfaces. They should expose metadata,
 progress, and links, but they should not carry the full execution context.
+
+`project_id` remains supported for legacy routing and host/project identity.
+New Owner-facing planning should use `initiative_id` for the taskset parent so
+`project` does not ambiguously mean both the whole repository and a work bundle.
+
+## Owner Request Vocabulary
+
+| Owner phrase | Agent action |
+| --- | --- |
+| `initiative 작성/등록해줘` | Create or update the parent outcome record and propose tasksets under it |
+| `taskset 작성/등록해줘` | Create an executable batch plan and task files under an initiative |
+| `task 작성/등록해줘` | Add one canonical task to an existing taskset |
+| `unit 작성해줘` | Split one task into worker-ready unit specs with exact scope and verification |
 
 ## Metadata Conventions
 
@@ -28,10 +44,13 @@ Use stable IDs in frontmatter so worker models can route without chat history:
 | Field | Level | Required when | Example |
 | --- | --- | --- | --- |
 | `project_id` | project/task/task unit | A task belongs to a durable project or operating-system lane | `PROJECT-AGENT-RUNTIME-PM-OS` |
+| `initiative_id` | initiative/taskset/task/task unit | A taskset belongs to an outcome parent above taskset | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` |
 | `task_set_id` | task/task unit | Any registered taskset work | `TASKSET-AR-PM-OPERATING-SYSTEM` |
 | `task_id` | task unit | Any unit spec | `TASK-AR-344` |
 | `unit_id` | task unit | Any unit spec | `UNIT-TASK-AR-344-001` |
 | `horizon` | project/task | Planning horizon is known | `short`, `medium`, `long`, `unit` |
+| `milestone` | initiative/taskset/task | Work maps to a release, demo, or date-bound goal | `v0.1.9`, `demo-day` |
+| `team` | task/unit | Ownership, workload, or reporting axis is needed | `agent-runtime-core` |
 | `unit_spec` | task/claim | A worker should follow a linked unit spec | `agents/lead_engineer/tasks/units/TASK-AR-344/UNIT-TASK-AR-344-001.md` |
 | `planner_model_tier` | task/unit | Planner decomposition is needed or already done | `planner_high` |
 | `worker_model_tier` | task/unit | Implementation can be routed to a worker | `worker_low`, `worker_standard` |
@@ -41,6 +60,37 @@ Use stable IDs in frontmatter so worker models can route without chat history:
 Task files may omit some fields during migration. New worker-dispatched units
 must not: dispatchers and readiness gates treat missing unit detail as
 `planner_refine_required`.
+
+## Numbering And Classification
+
+Human-facing hierarchy numbers are generated, not manually reserved by
+planners. Stable file identity remains UUID/timestamp backed. The classifier
+renders:
+
+```text
+Initiative 1 -> Taskset 1.1 -> Task 1.1.1 -> Unit 1.1.1.1
+```
+
+Use `scripts/work_item_classifier.py --write` after hierarchy metadata changes.
+Use `scripts/work_item_classifier.py --check` in governance and before
+handoff. `0.*` numbers are legacy or unassigned work that predates
+`initiative_id`; add `initiative_id` when that work is next touched.
+
+## Orthogonal Axes And Non-Tree Work
+
+Milestone, horizon, team, owner, role, priority, and phase are orthogonal axes,
+not hierarchy levels. Keep them as metadata so one taskset can report to a
+release, a team, and a horizon without breaking the tree.
+
+Two work types may live outside the goal-oriented tree:
+
+| Type | Use | Record shape |
+| --- | --- | --- |
+| Routine | Recurring operational work such as log rotation, daily briefs, board regeneration, or idea-vault scans | `agents/lead_engineer/routines/ROUTINE-*.md` plus schedule/trigger metadata |
+| Spike | Time-boxed research or experiment whose output is a decision, not necessarily implementation | Task or unit with `type: spike`, timebox, decision output, and stop boundary |
+
+Display skins may rename the same data model without changing canonical fields:
+`Initiative=Saga`, `Taskset=Quest`, `Task=Mission`, `Unit=Step`.
 
 ## Horizon Classes
 
@@ -97,6 +147,8 @@ worker-ready.
    current worker assignment.
 6. Backlog entries without linked detail specs are not enough for low-tier
    worker dispatch.
+7. Planning discussions and hierarchy/numbering decisions must be recorded in
+   `reviews/` before closeout; chat-only planning is not durable state.
 
 ## Enforcement Targets
 
@@ -109,4 +161,5 @@ The PM operating-system taskset must implement executable enforcement for:
 | Scope boundary | Dispatcher claim records project/taskset/task/unit and blocks out-of-scope continuation |
 | WIP | Active unit count per taskset/team stays under configured limits |
 | Verification | Completion claims include acceptance evidence and runnable checks |
+| Classification | Work-item classifier output is current and no orphan unit points to a missing task |
 

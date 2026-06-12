@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 from datetime import datetime
@@ -95,16 +96,21 @@ def _write_diagnostic_file(directory: Path, result: subprocess.CompletedProcess[
 def build_payload(result: subprocess.CompletedProcess[str], *, diagnostic_path: Path | None = None) -> dict[str, str]:
     output = ((result.stdout or "") + (result.stderr or "")).strip()
     prefix = f"hook diagnostic: {diagnostic_path}\n" if diagnostic_path else ""
+    findings = re.findall(r"\bfindings=\d+\b", output)
+    summary = f"owner governance summary: returncode={result.returncode}"
+    if findings:
+        summary += f"; {findings[-1]}"
+    summary += "\n"
     if result.returncode == 0:
         return {
             "decision": "approve",
             "reason": "owner governance gate passed",
-            "systemMessage": _clip(prefix + output),
+            "systemMessage": _clip(prefix + summary + output),
         }
     return {
         "decision": "block",
         "reason": f"owner governance gate failed with code {result.returncode}",
-        "systemMessage": _clip(prefix + output),
+        "systemMessage": _clip(prefix + summary + output),
     }
 
 

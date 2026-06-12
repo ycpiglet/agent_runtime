@@ -162,13 +162,37 @@ Allowed task states:
 Non-trivial work uses this hierarchy:
 
 ```text
-project -> taskset -> task -> unit
+initiative -> taskset -> task -> unit
 ```
+
+Use `project` only for the host/repository/product lane. Use `initiative` for
+the Owner-facing parent above one or more tasksets.
 
 The backlog/board is a routing index, not the full task specification. Keep
 only metadata there: ids, status, priority, owner, model tier, difficulty,
-task_set_id, project_id, and evidence pointers. Put detailed work instructions
-in linked project, taskset, task, or unit spec files.
+task_set_id, project_id, initiative_id, and evidence pointers. Put detailed
+work instructions in linked initiative, taskset, task, or unit spec files.
+
+Owner request vocabulary:
+
+- `initiative 작성/등록해줘`: create or update the parent outcome record and
+  propose tasksets under it.
+- `taskset 작성/등록해줘`: create an executable batch plan and task files under
+  an initiative.
+- `task 작성/등록해줘`: add one canonical task to an existing taskset.
+- `unit 작성해줘`: split one task into worker-ready unit specs with exact scope
+  and verification.
+
+Human-facing numbers are generated, not planner-reserved. Use generated
+`Initiative N -> Taskset N.N -> Task N.N.N -> Unit N.N.N.N` labels for Owner
+recognition, and keep UUID/timestamp-backed file IDs for collision resistance.
+
+Milestone, horizon, team, owner, role, priority, and phase are metadata axes,
+not extra hierarchy levels. Routine recurring work and spike research may use
+their own record type instead of being forced into the goal tree.
+
+Planning or design discussion must be recorded in `reviews/` before closeout;
+do not leave hierarchy, numbering, or workflow decisions as chat-only state.
 
 A worker-ready unit must include:
 

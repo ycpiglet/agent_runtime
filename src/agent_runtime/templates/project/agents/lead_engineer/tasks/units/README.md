@@ -16,6 +16,7 @@ agents/lead_engineer/tasks/units/<task_id>/UNIT-<task_id>-NNN.md
 unit_id: UNIT-TASK-AR-344-001
 task_id: TASK-AR-344
 task_set_id: TASKSET-AR-PM-OPERATING-SYSTEM
+initiative_id: INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE
 project_id: PROJECT-AGENT-RUNTIME-PM-OS
 status: worker_ready
 horizon: unit
