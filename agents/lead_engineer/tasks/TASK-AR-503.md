@@ -4,9 +4,11 @@ display_id: TASK-AR-503
 task_uid: 4966fce3-64b3-4b7b-a484-e4e503a993e2
 registered_at: 2026-06-12T18:35:45+09:00
 created_at: 2026-06-12T18:35:45+09:00
-updated_at: 2026-06-12T18:35:45+09:00
+updated_at: 2026-06-13T02:50:00+09:00
+started_at: 2026-06-13T01:33:43+09:00
+completed_at: 2026-06-13T02:50:00+09:00
 title: Claim-first enforcement — no worktree work without a main-side claim
-status: planned
+status: completed
 priority: P1
 difficulty: S
 est_hours: 4
@@ -75,3 +77,14 @@ tags:
 
 - 게이트 변경분 + 테스트
 - closeout review record
+
+## Completion Evidence
+
+- PR #50 (b826f25): claim-less worktrees watch/block by dirty/ahead, untracked CLAIM-*.json block, SPIKE exemption, primary-root path fallback removing nested-worktree false blocks; mirror + 9 tests.
+
+## Verification Results
+
+- pytest tests/test_parallel_worktree_gate.py -q -> 20 passed
+- pytest tests -q -> 498 passed (+1 pre-existing baseline failure proven at base)
+- primary checkout read-only run -> pass, claims=43, findings=0
+- W4b inst-w4b-ar503-verifier -> APPROVE

@@ -5,7 +5,7 @@ task_uid: 15e90de2-ca81-4611-8b6d-078de0a04e18
 registered_at: 2026-06-12T18:35:45+09:00
 created_at: 2026-06-12T18:35:45+09:00
 started_at: 2026-06-12T21:27:17+09:00
-updated_at: 2026-06-12T21:35:00+09:00
+updated_at: 2026-06-13T02:05:00+09:00
 title: Claim-time footprint conflict gate (target_files intersection)
 status: in_progress
 priority: P1
@@ -74,3 +74,14 @@ tags:
 - `scripts/footprint_conflict_gate.py` + 테스트
 - `scripts/task_claim_dispatcher.py` 변경분
 - closeout review record
+
+## Completion Evidence
+
+- PR #45 (3e3480d): claims gain target_files; create path blocks footprint intersection listing conflicting claim ids; legacy claims warn only; chain + template mirrors synced.
+
+## Verification Results
+
+- pytest tests/test_task_claim_dispatcher.py tests/test_footprint_conflict_gate.py -q -> 22 passed
+- pytest tests -q -> 495 passed
+- owner_governance_gate.py (worktree) -> exit 0
+- W4b inst-w4b-ar500-verifier -> APPROVE (template findings resolved in 3e3480d)

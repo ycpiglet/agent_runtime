@@ -4,9 +4,11 @@ display_id: TASK-AR-515
 task_uid: 9c205ef4-f279-4409-8580-2345bbdbd605
 registered_at: 2026-06-12T23:31:00+09:00
 created_at: 2026-06-12T23:31:00+09:00
-updated_at: 2026-06-12T23:31:00+09:00
+updated_at: 2026-06-13T02:55:00+09:00
+started_at: 2026-06-13T01:33:46+09:00
+completed_at: 2026-06-13T02:55:00+09:00
 title: Work metadata schema catalog and envelope fields
-status: planned
+status: completed
 priority: P1
 difficulty: L
 est_hours: 10
@@ -68,3 +70,14 @@ tags:
 - `WORK-SCHEMA.yml` update.
 - Gate tests.
 - Owner-facing schema catalog review.
+
+## Completion Evidence
+
+- PR #49 (97026da): WORK-SCHEMA.yml catalog extension (source classes on 86 fields, promotion policy, 3 new optional fields, allowed_values on 13 enums, variance computed-only) + gate validation + mirrors; 13 new tests. minimum_required_by_kind unchanged (anti-bloat).
+
+## Verification Results
+
+- pytest tests/test_work_schema_gate.py -q -> 21 passed
+- pytest tests -q -> 502 passed (+1 pre-existing)
+- work_schema_gate --items --check pass before/after on real tree
+- W4b inst-w4b-ar515-verifier -> APPROVE (follow-up: verification_status pending enum)

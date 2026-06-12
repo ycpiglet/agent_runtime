@@ -4,9 +4,11 @@ display_id: TASK-AR-510
 task_uid: 9da9903c-2508-4dc5-92cc-6f73ee4a374e
 registered_at: 2026-06-12T22:55:34+09:00
 created_at: 2026-06-12T22:55:34+09:00
-updated_at: 2026-06-12T22:55:34+09:00
+updated_at: 2026-06-13T03:05:00+09:00
+started_at: 2026-06-13T01:33:44+09:00
+completed_at: 2026-06-13T03:05:00+09:00
 title: Release cadence trigger — release-lag watch and version policy check
-status: planned
+status: completed
 priority: P2
 difficulty: M
 est_hours: 6
@@ -78,3 +80,13 @@ tags:
 - `scripts/release_cadence_trigger.py` + 테스트
 - 실데이터 데모 출력
 - closeout review record
+
+## Completion Evidence
+
+- PR #51 (498931a): release_cadence_trigger.py watch-only proposal (commits>=40|feat>=5|days>=14; minor on template delete/rename or schemas change), steward bump-target reuse, chain wiring + mirror; 12 synthetic-repo tests. Real-repo demo: minor 0.2.0 (108 commits, feat=9).
+
+## Verification Results
+
+- pytest tests/test_release_cadence_trigger.py -q -> 12 passed
+- pytest tests -q -> 501 passed (+1 pre-existing)
+- W4b inst-w4b-ar510-verifier -> APPROVE (never-block verified)

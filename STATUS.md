@@ -1,5 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-13 - Parallel wave 1-2 closeout (7 tasks merged)
+
+- Summary: `TASK-AR-500/503/505/509/510/513/515` implemented by parallel worker instances, dual-verified (W4a worker + W4b independent), merged via PRs #45-#51, claims released with evidence, worktrees/branches cleaned (W5).
+- Live infrastructure: claim-time footprint conflict gate, claim-first enforcement, worktree lifecycle (zombie) gate, in-flight overlay, update-notify, release cadence trigger, extended work metadata catalog — all active in the owner governance chain (main chain exit 0).
+- Follow-ups registered from W4b findings via reservation ledger: `TASK-AR-520`(board wall-clock staleness) `TASK-AR-521`(template chain parity) `TASK-AR-522`(small gate/generator fixes).
+- In flight: `TASK-AR-514` worker, wave-3 workers `TASK-AR-501/517/518/519` (footprint-declared claims). Remaining after wave 3: `TASK-AR-502/506/512/516`, then `TASK-AR-507`, `TASK-AR-511` last.
+- Evidence: `reviews/REVIEW-2026-06-13-parallel-wave-1-2-closeout.md`.
+
 ## 2026-06-13 - TASKSET-AR-PARALLEL-WAVE-EXECUTION wave-1 dispatch
 
 - Summary: after the codex merges (#26, #28-#39) were integrated via PR #41 and the T3 replan re-recorded all 8 plan anchors (`plan_assumption_gate --check` findings=0), wave-1 parallel implementation started for `TASKSET-AR-PARALLEL-WAVE-EXECUTION` and `TASKSET-AR-RELEASE-STEWARD`.

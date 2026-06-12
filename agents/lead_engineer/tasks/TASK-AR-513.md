@@ -4,9 +4,11 @@ display_id: TASK-AR-513
 task_uid: 7dcaf575-5835-4dda-94d0-900cc20ad57f
 registered_at: 2026-06-12T23:22:49+09:00
 created_at: 2026-06-12T23:22:49+09:00
-updated_at: 2026-06-12T23:22:49+09:00
+updated_at: 2026-06-13T02:45:00+09:00
+started_at: 2026-06-13T01:23:31+09:00
+completed_at: 2026-06-13T02:45:00+09:00
 title: In-flight overlay — branch-side task status visible from main board
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 7
@@ -82,3 +84,14 @@ tags:
 - `scripts/inflight_overlay.py` + 테스트
 - ui_state 리소스 + 콘솔 표기
 - closeout review record
+
+## Completion Evidence
+
+- PR #48 (fbabf6d): inflight_overlay.py (checkout-free branch scan, claim join, JSON/table/--summary, claimless flag), ui_state inflight resource (60s TTL) + /api/inflight + board annotation; mirror; 11 tests.
+
+## Verification Results
+
+- pytest tests/test_inflight_overlay.py -q -> 11 passed
+- pytest tests -q -> 499 passed (+1 pre-existing proven at base)
+- /api/inflight -> 200; real-repo --summary demo
+- W4b inst-w4b-ar513-verifier -> APPROVE
