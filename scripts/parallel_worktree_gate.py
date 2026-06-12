@@ -7,15 +7,29 @@ The runtime protocol is intentionally simple:
   agent_instance_id/callsite/worktree;
 - worker claims must not point at the orchestrator checkout;
 - active claims must leave handoff and log pointers so the next session can
-  resume without reconstructing state from chat history.
+  resume without reconstructing state from chat history;
+- claim-first: every task worktree must be covered by an active claim
+  (watch by default; block when claim-less work is already happening);
+- claim files must be committed immediately -- untracked CLAIM-*.json files
+  are erased by a concurrent session's reset+clean (2026-06-12 incident:
+  CLAIM-...-task-ar-500-25db was lost and had to be recreated as -66ed).
+
+The gate evaluates the repository it runs in (``--root``). When it runs from
+a linked git worktree, the claim snapshot may predate claims committed on the
+primary checkout afterwards, so claim-less worktree findings are capped at
+watch severity there; the authoritative claim-first run is the one executed
+from the primary checkout.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
+import re
+import subprocess
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Iterable
 
 
@@ -51,6 +65,28 @@ REQUIRED_ACTIVE_FIELDS = (
 )
 
 ORCHESTRATOR_ROLES = {"orchestrator", "release-orchestrator"}
+
+TASK_WORKTREE_NAME_RE = re.compile(r"^TASK-", re.IGNORECASE)
+WORKER_BRANCH_RE = re.compile(r"^(?:codex|claude)/", re.IGNORECASE)
+TASK_ID_RE = re.compile(r"(TASK-[A-Z]+-\d+)", re.IGNORECASE)
+SPIKE_MARKER_NAMES = ("SPIKE", "SPIKE.md")
+AHEAD_BASE_REFS = ("origin/main", "origin/master", "main", "master")
+CLAIM_LOSS_INCIDENT = (
+    "untracked claims are erased by a concurrent session's reset+clean "
+    "(2026-06-12 incident: CLAIM-...-task-ar-500-25db lost, recreated as -66ed)"
+)
+
+
+@dataclass(frozen=True)
+class Finding:
+    severity: str  # "block" | "watch"
+    message: str
+
+
+@dataclass(frozen=True)
+class WorktreeInfo:
+    path: Path
+    branch: str
 
 
 @dataclass(frozen=True)
@@ -94,12 +130,33 @@ class ClaimRecord:
     def branch(self) -> str:
         return str(self.payload.get("branch", "")).strip()
 
+    @property
+    def tags(self) -> set[str]:
+        raw = self.payload.get("tags")
+        if isinstance(raw, str):
+            return {part.strip().lower() for part in re.split(r"[,\s]+", raw) if part.strip()}
+        if isinstance(raw, (list, tuple)):
+            return {str(item).strip().lower() for item in raw if str(item).strip()}
+        return set()
+
+    @property
+    def spike(self) -> bool:
+        return "spike" in self.tags or self.payload.get("spike") is True
+
 
 def _rel(root: Path, path: Path) -> str:
     try:
         return path.relative_to(root).as_posix()
     except ValueError:
         return path.as_posix()
+
+
+def _norm(path: Path) -> str:
+    try:
+        resolved = path.resolve()
+    except OSError:
+        resolved = path.absolute()
+    return os.path.normcase(str(resolved))
 
 
 def _claim_files(root: Path) -> list[Path]:
@@ -125,14 +182,67 @@ def _read_claims(root: Path) -> tuple[list[ClaimRecord], list[str]]:
     return records, findings
 
 
-def _resolved_worktree(root: Path, value: str) -> Path:
-    path = Path(value)
-    if not path.is_absolute():
-        path = root / path
+def _git(cwd: Path, *args: str) -> tuple[int, str]:
     try:
-        return path.resolve()
+        proc = subprocess.run(
+            ["git", "-C", str(cwd), *args],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
     except OSError:
-        return path.absolute()
+        return 1, ""
+    return proc.returncode, proc.stdout
+
+
+def _git_toplevel(root: Path) -> Path | None:
+    code, out = _git(root, "rev-parse", "--show-toplevel")
+    if code != 0 or not out.strip():
+        return None
+    return Path(out.strip())
+
+
+def _git_primary_root(root: Path) -> Path | None:
+    """Primary checkout root of the repository containing root (if any)."""
+    code, out = _git(root, "rev-parse", "--git-common-dir")
+    if code != 0 or not out.strip():
+        return None
+    common = Path(out.strip())
+    if not common.is_absolute():
+        common = root / common
+    try:
+        return common.resolve().parent
+    except OSError:
+        return common.absolute().parent
+
+
+def _resolved_worktree(root: Path, value: str, primary_root: Path | None = None) -> Path:
+    """Resolve a claim worktree_path.
+
+    Relative claim paths are recorded against the primary checkout root by
+    protocol, so when the path does not exist under root (e.g. the gate runs
+    inside a linked worktree) fall back to resolving against the primary root.
+    """
+    path = Path(value)
+    candidates: list[Path] = []
+    if path.is_absolute():
+        candidates.append(path)
+    else:
+        candidates.append(root / path)
+        if primary_root is not None and _norm(primary_root) != _norm(root):
+            candidates.append(primary_root / path)
+    resolved_candidates: list[Path] = []
+    for candidate in candidates:
+        try:
+            resolved_candidates.append(candidate.resolve())
+        except OSError:
+            resolved_candidates.append(candidate.absolute())
+    for resolved in resolved_candidates:
+        if resolved.exists():
+            return resolved
+    return resolved_candidates[0]
 
 
 def _has_git_worktree_marker(path: Path) -> bool:
@@ -147,10 +257,14 @@ def _is_orchestrator_claim(record: ClaimRecord) -> bool:
     return mode == "orchestrator" or scope == "orchestrator"
 
 
-def _validate_claims(root: Path, records: Iterable[ClaimRecord]) -> list[str]:
+def _validate_claims(root: Path, records: Iterable[ClaimRecord], primary_root: Path | None) -> list[str]:
     findings: list[str] = []
     active: list[ClaimRecord] = []
     resolved_root = root.resolve()
+    # Worker claims must not point at the orchestrator checkout. With git
+    # context that is the primary worktree root; without it (plain host dirs)
+    # the gate root itself plays that role.
+    orchestrator_roots = {_norm(primary_root)} if primary_root is not None else {_norm(resolved_root)}
 
     for record in records:
         rel = _rel(root, record.path)
@@ -174,8 +288,8 @@ def _validate_claims(root: Path, records: Iterable[ClaimRecord]) -> list[str]:
             findings.append(f"{rel}: task-claim:missing-task-set-id: active task-set work claims must include task_set_id")
 
         if record.worktree_path:
-            worktree = _resolved_worktree(root, record.worktree_path)
-            if worktree == resolved_root and not _is_orchestrator_claim(record):
+            worktree = _resolved_worktree(root, record.worktree_path, primary_root)
+            if _norm(worktree) in orchestrator_roots and not _is_orchestrator_claim(record):
                 findings.append(
                     f"{rel}: task-claim:main-checkout-worker: worker claims must use a task-specific git worktree"
                 )
@@ -201,7 +315,7 @@ def _validate_claims(root: Path, records: Iterable[ClaimRecord]) -> list[str]:
         if record.agent_role and record.agent_instance_id:
             by_instance.setdefault((record.agent_role, record.agent_instance_id), []).append(record)
         if record.worktree_path:
-            key = _resolved_worktree(root, record.worktree_path).as_posix().lower()
+            key = _resolved_worktree(root, record.worktree_path, primary_root).as_posix().lower()
             by_worktree.setdefault(key, []).append(record)
 
     for task_id, task_records in sorted(by_task.items()):
@@ -269,31 +383,234 @@ def _continuity_findings(root: Path, active_claims: Iterable[ClaimRecord]) -> li
     return findings
 
 
-def check_root(root: Path) -> list[str]:
-    root = root.resolve()
-    records, findings = _read_claims(root)
-    findings.extend(_validate_claims(root, records))
+def _git_scans_enabled(root: Path) -> bool:
+    """Git-backed scans only run when root is the toplevel of a git checkout.
+
+    This keeps plain-directory fixtures (and roots nested inside unrelated
+    repositories) on the legacy claim-only behaviour.
+    """
+    toplevel = _git_toplevel(root)
+    return toplevel is not None and _norm(toplevel) == _norm(root)
+
+
+def _list_worktrees(root: Path) -> list[WorktreeInfo]:
+    code, out = _git(root, "worktree", "list", "--porcelain")
+    if code != 0:
+        return []
+    worktrees: list[WorktreeInfo] = []
+    path: Path | None = None
+    branch = ""
+    bare = False
+
+    def _flush() -> None:
+        nonlocal path, branch, bare
+        if path is not None and not bare:
+            worktrees.append(WorktreeInfo(path=path, branch=branch))
+        path = None
+        branch = ""
+        bare = False
+
+    for line in out.splitlines():
+        line = line.rstrip()
+        if not line:
+            _flush()
+            continue
+        if line.startswith("worktree "):
+            path = Path(line[len("worktree "):])
+        elif line.startswith("branch "):
+            branch = line[len("branch "):]
+            if branch.startswith("refs/heads/"):
+                branch = branch[len("refs/heads/"):]
+        elif line == "bare":
+            bare = True
+    _flush()
+    return worktrees
+
+
+def _is_task_worktree(info: WorktreeInfo) -> bool:
+    return bool(TASK_WORKTREE_NAME_RE.match(info.path.name) or WORKER_BRANCH_RE.match(info.branch))
+
+
+def _worktree_task_ids(info: WorktreeInfo) -> set[str]:
+    candidates: set[str] = set()
+    for source in (info.path.name, info.branch):
+        match = TASK_ID_RE.search(source)
+        if match:
+            candidates.add(match.group(1).upper())
+    return candidates
+
+
+def _worktree_dirty(path: Path) -> bool:
+    code, out = _git(path, "status", "--porcelain")
+    return code == 0 and any(line.strip() for line in out.splitlines())
+
+
+def _worktree_ahead(path: Path) -> tuple[int, str]:
+    for ref in AHEAD_BASE_REFS:
+        code, _ = _git(path, "rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}")
+        if code != 0:
+            continue
+        code, out = _git(path, "rev-list", "--count", f"{ref}..HEAD")
+        if code != 0:
+            continue
+        try:
+            return int(out.strip() or "0"), ref
+        except ValueError:
+            return 0, ref
+    return 0, ""
+
+
+def _spike_marker(path: Path) -> bool:
+    return any((path / name).exists() for name in SPIKE_MARKER_NAMES)
+
+
+def _claim_first_findings(root: Path, records: list[ClaimRecord], primary_root: Path | None) -> list[Finding]:
+    if not _git_scans_enabled(root):
+        return []
+    findings: list[Finding] = []
+    root_is_primary = primary_root is not None and _norm(primary_root) == _norm(root)
+
     active = [record for record in records if record.active]
-    findings.extend(_continuity_findings(root, active))
+    active_task_ids = {record.task_id.upper() for record in active if record.task_id}
+    active_paths = {
+        _norm(_resolved_worktree(root, record.worktree_path, primary_root))
+        for record in active
+        if record.worktree_path
+    }
+    spike_claims = [record for record in records if record.spike]
+    spike_task_ids = {record.task_id.upper() for record in spike_claims if record.task_id}
+    spike_paths = {
+        _norm(_resolved_worktree(root, record.worktree_path, primary_root))
+        for record in spike_claims
+        if record.worktree_path
+    }
+
+    for info in _list_worktrees(root):
+        if primary_root is not None and _norm(info.path) == _norm(primary_root):
+            continue
+        if not _is_task_worktree(info):
+            continue
+        task_ids = _worktree_task_ids(info)
+        wt_key = _norm(info.path)
+        if wt_key in active_paths or task_ids & active_task_ids:
+            continue
+        rel = _rel(root, info.path)
+        if _spike_marker(info.path):
+            findings.append(
+                Finding("watch", f"{rel}: worktree:spike-exempt: claim-less task worktree exempted by SPIKE marker file")
+            )
+            continue
+        if wt_key in spike_paths or task_ids & spike_task_ids:
+            findings.append(
+                Finding("watch", f"{rel}: worktree:spike-exempt: claim-less task worktree exempted by spike-tagged claim")
+            )
+            continue
+        dirty = _worktree_dirty(info.path)
+        ahead, base = _worktree_ahead(info.path)
+        if dirty or ahead > 0:
+            state_bits = []
+            if dirty:
+                state_bits.append("uncommitted changes")
+            if ahead > 0:
+                state_bits.append(f"ahead of {base or 'base'} by {ahead} commit(s)")
+            state = " and ".join(state_bits)
+            if root_is_primary:
+                code = "worktree:missing-claim-dirty" if dirty else "worktree:missing-claim-ahead"
+                findings.append(
+                    Finding(
+                        "block",
+                        f"{rel}: {code}: claim-less task worktree has {state}; "
+                        "commit an active claim on the primary checkout before working (claim-first protocol)",
+                    )
+                )
+            else:
+                findings.append(
+                    Finding(
+                        "watch",
+                        f"{rel}: worktree:missing-claim: claim-less task worktree has {state}; "
+                        "severity kept at watch because this snapshot may predate the claim commit "
+                        "(run the gate from the primary checkout for the authoritative result)",
+                    )
+                )
+            continue
+        findings.append(
+            Finding(
+                "watch",
+                f"{rel}: worktree:missing-claim: task worktree has no active claim in "
+                "agents/runtime/task_claims (claim-first protocol)",
+            )
+        )
+    return findings
+
+
+def _untracked_claim_findings(root: Path, records: list[ClaimRecord]) -> list[Finding]:
+    if not _git_scans_enabled(root):
+        return []
+    code, out = _git(root, "ls-files", "--others", "--exclude-standard", "--", "agents/runtime/task_claims")
+    if code != 0:
+        return []
+    by_rel = {_rel(root, record.path).lower(): record for record in records}
+    findings: list[Finding] = []
+    for line in out.splitlines():
+        rel_path = line.strip().strip('"')
+        if not rel_path:
+            continue
+        name = PurePosixPath(rel_path).name
+        if not (name.startswith("CLAIM-") and name.endswith(".json")):
+            continue
+        record = by_rel.get(rel_path.lower())
+        if record is not None and record.spike:
+            findings.append(
+                Finding(
+                    "watch",
+                    f"{rel_path}: task-claim:claim-not-committed: spike-tagged claim file is not tracked by git; "
+                    f"{CLAIM_LOSS_INCIDENT}",
+                )
+            )
+            continue
+        findings.append(
+            Finding(
+                "block",
+                f"{rel_path}: task-claim:claim-not-committed: claim file is not tracked by git; "
+                f"{CLAIM_LOSS_INCIDENT}; commit claim files immediately",
+            )
+        )
+    return findings
+
+
+def check_root(root: Path) -> list[Finding]:
+    root = root.resolve()
+    primary_root = _git_primary_root(root)
+    records, parse_findings = _read_claims(root)
+    findings = [Finding("block", message) for message in parse_findings]
+    findings.extend(Finding("block", message) for message in _validate_claims(root, records, primary_root))
+    active = [record for record in records if record.active]
+    findings.extend(Finding("block", message) for message in _continuity_findings(root, active))
+    findings.extend(_claim_first_findings(root, records, primary_root))
+    findings.extend(_untracked_claim_findings(root, records))
     return findings
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Parallel worktree/task claim gate")
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Repository or host root")
-    parser.add_argument("--check", action="store_true", help="Return non-zero when findings exist")
+    parser.add_argument("--check", action="store_true", help="Return non-zero when block findings exist")
     args = parser.parse_args(argv)
 
     root = args.root.resolve()
     findings = check_root(root)
-    status = "fail" if findings else "pass"
+    block = [finding for finding in findings if finding.severity == "block"]
+    watch = [finding for finding in findings if finding.severity == "watch"]
+    status = "fail" if block else "pass"
     print(f"parallel-worktree-gate: {status}")
     print(f"root={root}")
     print(f"claims={len(_claim_files(root))}")
     print(f"findings={len(findings)}")
+    print(f"block={len(block)}")
+    print(f"watch={len(watch)}")
     for finding in findings:
-        print(f"- {finding}")
-    return 1 if args.check and findings else 0
+        print(f"- {finding.severity} {finding.message}")
+    return 1 if args.check and block else 0
 
 
 if __name__ == "__main__":
