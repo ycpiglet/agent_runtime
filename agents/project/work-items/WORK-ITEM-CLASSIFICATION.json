@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-12T14:32:30+09:00",
-  "record_count": 198,
+  "generated_at": "2026-06-12T15:36:41+09:00",
+  "record_count": 202,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -2182,6 +2182,50 @@
       "path": "agents/lead_engineer/tasks/TASK-AR-374.md",
       "parent_id": "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
       "status": "planned"
+    },
+    {
+      "key": "initiative:INIT-AR-AGENT-IDENTITY-OBSERVABILITY",
+      "level": "initiative",
+      "number": "2",
+      "label": "Initiative 2",
+      "id": "INIT-AR-AGENT-IDENTITY-OBSERVABILITY",
+      "title": "Agent Identity Observability",
+      "path": "agents/project/initiatives/INIT-AR-AGENT-IDENTITY-OBSERVABILITY.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-AGENT-IDENTITY-CONTRACT",
+      "level": "taskset",
+      "number": "2.1",
+      "label": "Taskset 2.1",
+      "id": "TASKSET-AR-AGENT-IDENTITY-CONTRACT",
+      "title": "Agent Identity Contract",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-AGENT-IDENTITY-OBSERVABILITY",
+      "status": "complete"
+    },
+    {
+      "key": "task:TASK-AR-375",
+      "level": "task",
+      "number": "2.1.1",
+      "label": "Task 2.1.1",
+      "id": "TASK-AR-375",
+      "title": "Create durable instance-level identity records and a deterministic gate that rejects…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-375.md",
+      "parent_id": "TASKSET-AR-AGENT-IDENTITY-CONTRACT",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-375-001",
+      "level": "unit",
+      "number": "2.1.1.1",
+      "label": "Unit 2.1.1.1",
+      "id": "UNIT-TASK-AR-375-001",
+      "title": "UNIT-TASK-AR-375-001 - Agent Instance Registry And Gate Foundation",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-375/UNIT-TASK-AR-375-001.md",
+      "parent_id": "TASK-AR-375",
+      "status": "completed"
     }
   ]
 }

@@ -1,5 +1,7 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
+  - agents/project/AGENT-IDENTITY-CONTRACT.md
+  - reviews/REVIEW-2026-06-12-taskset-ar-agent-identity-contract-registration.md
   - BACKLOG-BOARD.md
   - agents/project/work-items/WORK-ITEM-CLASSIFICATION.md
   - reviews/REVIEW-2026-06-12-work-split-command.md

@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-12T14:32:30+09:00
-record_count: 198
+generated_at: 2026-06-12T15:36:41+09:00
+record_count: 202
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `198` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `202` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `2` records |
-| Tasksets | pass | `24` records |
-| Tasks | pass | `162` records |
-| Units | pass | `10` records |
+| Initiatives | pass | `3` records |
+| Tasksets | pass | `25` records |
+| Tasks | pass | `163` records |
+| Units | pass | `11` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -237,6 +237,10 @@ record_count: 198
 | 1.1.4.9 | Unit 1.1.4.9 | unit | `UNIT-TASK-AR-372-009` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-009.md` | UNIT-TASK-AR-372-009 - Proposal-Only Work Split Command |
 | 1.1.5 | Task 1.1.5 | task | `TASK-AR-373` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-373.md` | Make it visible which planned tasks are worker-ready and which still require planner… |
 | 1.1.6 | Task 1.1.6 | task | `TASK-AR-374` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-374.md` | Prove that the work hierarchy and registration conflict surfaces are actually closed… |
+| 2 | Initiative 2 | initiative | `INIT-AR-AGENT-IDENTITY-OBSERVABILITY` | - | active | `agents/project/initiatives/INIT-AR-AGENT-IDENTITY-OBSERVABILITY.md` | Agent Identity Observability |
+| 2.1 | Taskset 2.1 | taskset | `TASKSET-AR-AGENT-IDENTITY-CONTRACT` | `INIT-AR-AGENT-IDENTITY-OBSERVABILITY` | complete | `BACKLOG-BOARD.md` | Agent Identity Contract |
+| 2.1.1 | Task 2.1.1 | task | `TASK-AR-375` | `TASKSET-AR-AGENT-IDENTITY-CONTRACT` | completed | `agents/lead_engineer/tasks/TASK-AR-375.md` | Create durable instance-level identity records and a deterministic gate that rejects… |
+| 2.1.1.1 | Unit 2.1.1.1 | unit | `UNIT-TASK-AR-375-001` | `TASK-AR-375` | completed | `agents/lead_engineer/tasks/units/TASK-AR-375/UNIT-TASK-AR-375-001.md` | UNIT-TASK-AR-375-001 - Agent Instance Registry And Gate Foundation |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

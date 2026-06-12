@@ -1,0 +1,52 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151220",
+  "work_id": "TASKSET-AR-AGENT-IDENTITY-CONTRACT",
+  "work_path": "docs/superpowers/plans/2026-06-12-agent-identity-contract.md",
+  "kind": "taskset",
+  "task_id": "TASKSET-AR-AGENT-IDENTITY-CONTRACT",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-12T15:12:20+09:00",
+  "verified_by": "codex",
+  "command_count": 4,
+  "commands": [
+    {
+      "command": "python scripts/task_identity.py check --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T15:14:13+09:00",
+      "finished_at": "2026-06-12T15:14:13+09:00",
+      "stdout": "task-identity: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\AGENT-IDENTITY-CONTRACT\nfindings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/work_item_classifier.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T15:14:13+09:00",
+      "finished_at": "2026-06-12T15:14:14+09:00",
+      "stdout": "work-item-classifier: pass\nfindings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-AGENT-IDENTITY-CONTRACT --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T15:14:14+09:00",
+      "finished_at": "2026-06-12T15:14:15+09:00",
+      "stdout": "taskset-work-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\AGENT-IDENTITY-CONTRACT\nfindings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/owner_governance_gate.py",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T15:14:15+09:00",
+      "finished_at": "2026-06-12T15:14:22+09:00",
+      "stdout": "collaboration-concurrency-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\AGENT-IDENTITY-CONTRACT\nfindings=0\nowner-governance: result: scripts/collaboration_concurrency_gate.py --check -> 0\nowner-governance: start: scripts/rbac_write_gate.py --check\nrbac-write-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\AGENT-IDENTITY-CONTRACT\nfindings=0\nowner-governance: result: scripts/rbac_write_gate.py --check -> 0\nowner-governance: start: scripts/agent_identity_gate.py --check\nagent-identity-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\AGENT-IDENTITY-CONTRACT\nfindings=0\nowner-governance: result: scripts/agent_identity_gate.py --check -> 0\nowner-governance: start: scripts/collaboration_governance_gate.py --check\ncollaboration-governance-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\AGENT-IDENTITY-CONTRACT\nfindings=6\nblock=0\nwatch=5\nwaived=1\n- waived role-usage:scribe agents/runtime/task_claims: waiver=WAIVER-2026-06-10-collaboration-runtime-promotion role scribe has 0 claims, expected at least 1\n- watch role-monitor:council agents/runtime/task_claims: role council has no claim evidence in this window\n- watch role-monitor:progress-scout agents/runtime/task_claims: role progress-scout has no claim evidence in this window\n- watch role-monitor:release-steward agents/runtime/task_claims: role release-steward has no claim evidence in this window\n- watch role-monitor:reviewer agents/runtime/task_claims: role reviewer has no claim evidence in this window\n- watch role-monitor:skeptic agents/runtime/task_claims: role skeptic has no claim evidence in this window\nowner-governance: result: scripts/collaboration_governance_gate.py --check -> 0\nowner-governance: start: scripts/runtime_asset_usage.py --check\nruntime-asset-usage: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\AGENT-IDENTITY-CONTRACT\nassets=14\nusage_total=87\nblock=0\nwatch=0\nby_kind={\"gate\": 4, \"hook\": 2, \"script\": 6, \"skill\": 1, \"trigger\": 1}\nby_lifecycle={\"keep\": 13, \"observe\": 1}\n- metric gate.owner_governance kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=2 reuse=1\n- metric gate.collaboration_governance kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=12 reuse=2\n- metric gate.runtime_asset_usage kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=7 reuse=2\n- metric gate.state_sync kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=2\n- metric report.governance_ops kind=script status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=1\n- metric hook.taskset_prompt kind=hook status=active lifecycle=keep paths=2 evidence=2 usage=2 reuse=1\n- metric hook.stop_owner_governance kind=hook status=active lifecycle=keep paths=2 evidence=2 usage=9 reuse=2\n- metric trigger.planning kind=trigger status=watch lifecycle=observe paths=1 evidence=2 usage=9 reuse=2\n- metric capability.ralph_loop kind=script status=active lifecycle=keep paths=1 evidence=2 usage=2 reuse=2\n- metric capability.agent_retro kind=script status=active lifecycle=keep paths=1 evidence=2 usage=11 reuse=2\n- metric capability.retro_forward kind=script status=active lifecycle=keep paths=1 evidence=2 usage=7 reuse=2\n- metric capability.scribe_due kind=script status=active lifecycle=keep paths=1 evidence=2 usage=11 reuse=2\n- metric capability.doc_steward_due kind=script status=active lifecycle=keep paths=1 evidence=2 usage=5 reuse=2\n- metric skill.taskset_dispatch kind=skill status=active lifecycle=keep paths=1 evidence=2 usage=4 reuse=2\nowner-governance: result: scripts/runtime_asset_usage.py --check -> 0\nowner-governance: start: scripts/state_sync_gate.py --check\nstate-sync-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\AGENT-IDENTITY-CONTRACT\nfindings=0\nblock=0\nwatch=0\nowner-governance: result: scripts/state_sync_gate.py --check -> 0\nowner-governance: start: scripts/planning_loop.py gate --trigger hook --action scan\nstatus=pass\nowner-governance: result: scripts/planning_loop.py gate --trigger hook --action scan -> 0\n",
+      "stderr": ""
+    }
+  ]
+}
