@@ -11,7 +11,9 @@ DEFAULT_SCHEMA_PATH = Path("agents/project/WORK-SCHEMA.yml")
 SCHEMA_VERSION = "agent-runtime-work-schema/v1"
 WORK_ITEM_SCHEMA_VERSION = "agent-runtime-work-item/v1"
 REQUIRED_KINDS = {"initiative", "taskset", "task", "unit", "routine", "spike"}
-REQUIRED_FIELD_METADATA = ("type", "required_for", "populated_by", "consumed_by", "query_use")
+REQUIRED_FIELD_METADATA = ("type", "required_for", "source", "populated_by", "consumed_by", "query_use")
+FIELD_SOURCE_VALUES = {"generator", "gate", "human", "runtime", "derived"}
+COUNTER_FIELDS = ("gate_failure_count", "reopened_count", "rework_count")
 REQUIRED_CORE_FIELDS = {
     "schema_version",
     "work_id",
@@ -86,9 +88,24 @@ REQUIRED_CATALOG_FIELDS = REQUIRED_CORE_FIELDS | {
     "gate_failure_count",
     "verified_at",
     "verified_by",
+    "started_at",
+    "split_from",
+    "merged_into",
+    "supersedes",
+    "superseded_by",
+    "duplicate_of",
+    "reopened_count",
+    "blocks",
+    "blocked_by",
+    "relates_to",
+    "stakeholders",
+    "watchers",
+    "due_date",
+    "blocked_since",
+    "xp_value",
 }
 REQUIRED_RESOLUTIONS = {"done", "wontfix", "duplicate", "superseded", "moved_to_vault"}
-COMPUTED_ONLY_FIELDS = {"progress_pct", "age", "lead_time", "est_actual_delta", "rollup_progress_pct"}
+COMPUTED_ONLY_FIELDS = {"progress_pct", "age", "lead_time", "est_actual_delta", "variance", "rollup_progress_pct"}
 WORK_ITEM_PATTERNS = (
     "agents/project/initiatives/*.md",
     "docs/superpowers/plans/*.md",
@@ -226,6 +243,7 @@ def check_items(root: Path, schema_path: Path) -> tuple[list[str], list[str]]:
     computed_fields = set(_named_blocks(_mapping_block(text, "computed_only_fields")))
     required_by_kind = _minimum_required_by_kind(text)
     closed_required = _list_block_items(text, "required_when_closed")
+    closed_resolutions = _list_block_items(text, "closed_resolution_values")
 
     for path in _iter_work_item_paths(root):
         meta = _frontmatter(path.read_text(encoding="utf-8"))
@@ -246,6 +264,19 @@ def check_items(root: Path, schema_path: Path) -> tuple[list[str], list[str]]:
             for field in sorted(closed_required):
                 if _missing(meta.get(field)):
                     findings.append(f"{rel_path}: work-item:closed-missing-required:{field}")
+
+        resolution = meta.get("resolution")
+        if not _missing(resolution) and str(resolution).strip() not in closed_resolutions:
+            findings.append(f"{rel_path}: work-item:invalid-resolution:{resolution}")
+
+        for field in COUNTER_FIELDS:
+            if field not in meta:
+                continue
+            value = meta.get(field)
+            if _missing(value):
+                continue
+            if not re.fullmatch(r"\d+", str(value).strip()):
+                findings.append(f"{rel_path}: work-item:invalid-counter:{field}:{value}")
 
         for field in sorted(computed_fields):
             if field in meta:
@@ -296,6 +327,15 @@ def check_path(path: Path) -> list[str]:
         if field not in closed_required:
             findings.append(f"{path.as_posix()}: work-schema:closed-required-missing:{field}")
 
+    promotion = _mapping_block(text, "field_promotion_policy")
+    if not promotion.strip():
+        findings.append(f"{path.as_posix()}: work-schema:missing-promotion-policy")
+    else:
+        if not re.search(r"^\s{2}default_entry:\s*optional\s*$", promotion, flags=re.MULTILINE):
+            findings.append(f"{path.as_posix()}: work-schema:promotion-policy-default-not-optional")
+        if not re.search(r"^\s{2}promote_to_required_when:\s*consuming_tool_exists\s*$", promotion, flags=re.MULTILINE):
+            findings.append(f"{path.as_posix()}: work-schema:promotion-policy-missing-promotion-rule")
+
     computed_blocks = _named_blocks(_mapping_block(text, "computed_only_fields"))
     for field in sorted(COMPUTED_ONLY_FIELDS):
         block = computed_blocks.get(field, "")
@@ -313,6 +353,15 @@ def check_path(path: Path) -> list[str]:
         for meta_key in REQUIRED_FIELD_METADATA:
             if not re.search(rf"^\s{{4}}{re.escape(meta_key)}:\s*.+$", block, flags=re.MULTILINE):
                 findings.append(f"{path.as_posix()}: work-schema:field-missing-metadata:{field}:{meta_key}")
+        source_match = re.search(r"^\s{4}source:\s*(?P<value>\S+)\s*$", block, flags=re.MULTILINE)
+        if source_match and source_match.group("value") not in FIELD_SOURCE_VALUES:
+            findings.append(
+                f"{path.as_posix()}: work-schema:field-invalid-source:{field}:{source_match.group('value')}"
+            )
+        if re.search(r"^\s{4}type:\s*enum\s*$", block, flags=re.MULTILINE) and not re.search(
+            r"^\s{4}allowed_values:\s*\[.+\]\s*$", block, flags=re.MULTILINE
+        ):
+            findings.append(f"{path.as_posix()}: work-schema:enum-missing-allowed-values:{field}")
     return findings
 
 
