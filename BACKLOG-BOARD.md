@@ -46,7 +46,7 @@ completed_task_set_count: 19
 
 - Flow: Working-tree cleanup, backlog cycle hygiene, and handoff publication.
 - Progress: `1/6` done; `5` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `2/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-511` | - | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Low | 3h/3000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 서로 다른 OS/LLM/페인에서 작업한 파일이 줄바꿈·인코딩 차이로 가짜 diff와 경고를 만드는 것을 차단한다. 현재 `.gitattributes`가… |
@@ -134,7 +134,7 @@ completed_task_set_count: 19
 
 - Flow: Conversation-to-work traceability, Work Item metadata, Explorer roll-ups, query/export, agent attribution, and stale verification evidence.
 - Progress: `1/6` done; `5` open or active.
-- WIP: active `4/3`; oldest `1.4h`; stale `0`.
+- WIP: active `5/3`; oldest `1.4h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-514` | INIT-AR-WORK-METADATA-ANALYTICS | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Ask | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | Owner/Claude/Codex planning discussions must map to review records, task records, boa… |
@@ -147,7 +147,7 @@ completed_task_set_count: 19
 
 - Flow: Claim-time footprint conflict gate, wave dispatcher with cascade/parallel modes, integrator merge queue, and claim-first enforcement.
 - Progress: `5/10` done; `5` open or active.
-- WIP: active `1/3`; oldest `0.2h`; stale `0`.
+- WIP: active `2/3`; oldest `0.2h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-500` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | in_progress | Action | P1 | High | Medium | 6h/5000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 충돌 발견 시점을 merge-time(사후)에서 claim-time(사전)으로 옮긴다. 새 클레임 생성 시 활성 클레임들의 선언 footprint(`ta… |
