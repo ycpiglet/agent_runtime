@@ -44,7 +44,7 @@ def main() -> int:
         ["scripts/continuity_contract_gate.py", "--check"],
         ["scripts/task_identity.py", "check", "--check"],
         ["scripts/work_item_classifier.py", "--check"],
-        ["scripts/work_schema_gate.py", "--check"],
+        ["scripts/work_schema_gate.py", "--items", "--check"],
         ["scripts/taskset_work_gate.py", "--check"],
         ["scripts/evidence_index_generator.py", "--check"],
         ["scripts/context_knowledge_gate.py", "--check"],

@@ -44,6 +44,7 @@
       "agents/project/SKILL-GOVERNANCE.md": "sha256:29ba10607a25f7db5d4f9e8d990a06547c864fbfb9d6e2dcc6e41a659591faeb",
       "agents/project/STATE-MACHINES.yml": "sha256:fa5e02b56f3f9e0b1070a76a7e21820b926aff6d5cca366272a30a571aa8edf3",
       "agents/project/TEAMS.md": "sha256:dbe2079d5f29ff7ec3d48277e1e8a9a403943cc228b9da1948d27f5b2ce6fa4c",
+      "agents/project/WORK-SCHEMA.yml": "sha256:4aa8074ab501edcc1640483a3b7f84411292a53ccfe25da6497670418bdfa891",
       "agents/project/teams/.gitkeep": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
       "agents/qa/SKILL.md": "sha256:4bb9495507a0ef045f59bfe5f200d7072792b06e1a74264b1465ad6e0698d6e0",
       "agents/qa/TEST-STRATEGY.md": "sha256:6749798428424c36e25bfd77e5b4ada88b5f604eb834ffd9b07ef496f023639b",
@@ -119,7 +120,7 @@
       "scripts/now.py": "sha256:6d6d6fcc9f1a4599a6735a15013fd263c887ae9910388e741134870abf446c9f",
       "scripts/orchestrator_safety_gate.py": "sha256:ff588238e9e0ab497f7a82caf52cb674c362409ca0583b33e402321efb29c7c7",
       "scripts/owner_doc_format_gate.py": "sha256:0ad323c0b4344d3071fa08f79e2f8720498b8d83e43fd03fc721dc1472b61815",
-      "scripts/owner_governance_gate.py": "sha256:dbfb569221d7122b578be3dcf43824ecd2c70549fdce2b5ecba126538312e827",
+      "scripts/owner_governance_gate.py": "sha256:0529e853d788bc90e9c000889f80e2de308e8af732930145fc7b54e8a19225c2",
       "scripts/pane_event_log.py": "sha256:38d1574b2369e10f27e61cfe009a75eac0d8e4ebc777b538a9396f3a4df8423f",
       "scripts/parallel_worktree_gate.py": "sha256:b127e0da8daaf739e791615b158814ecdcc4427272970fbef770fc28c11adb54",
       "scripts/pipeline.py": "sha256:4abd82e5f09c9d3cc80d30542df7569bc1d7a2509303c1de704f213a49c03d97",
@@ -213,13 +214,14 @@
       "scripts/validate_task_schema.py": "sha256:2063ead0eb31b7293f74e545da7ef66a54ff8e28e4ad3ce1c5c8f1a2f0864881",
       "scripts/verify_sdk_backend.py": "sha256:d3b25541b8ea286ba630d4da1d01644b4e0da1d6b14ac1b193610e4d4e8d7e9f",
       "scripts/work_item_classifier.py": "sha256:d1d1ec4e1394bcee0f393e496e67ff1e8b579798380594989af200344d8e4c92",
+      "scripts/work_schema_gate.py": "sha256:51a2c626a3aab1715fb367b0bac1502ec2f73b55fbd4a3fcfccb6b372e352989",
       "skills/session-closeout/SKILL.md": "sha256:547d28dca609519a3940d453eb11b563f53ffe8308e6bb4881bcbead93fa0570",
       "skills/taskset-dispatch/SKILL.md": "sha256:5322aca4780a9e79eb876ef431ce951db6b6ce7a013c07a741929c3a18325b2a",
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.1.8",
-    "template_digest": "sha256:5cca1e7309d1a3b73b3f127fab8436a014f8774e089c175b0fa7c4d922e74136",
-    "template_files": 215
+    "template_digest": "sha256:97d09ff50c84a1888e988aeeb73212ab40f1e936a143f993c830ed61b3951a24",
+    "template_files": 217
   },
   "project": "fixture-host",
   "schema": "agent-runtime-lock/v1",

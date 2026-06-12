@@ -72,4 +72,3 @@ tags: [work-items, metadata, agent-identity, task-ar-370, owner-claude-intake]
 
 - Finish `TASK-AR-370` verification and closeout.
 - Route the remaining conversation items into `TASK-AR-372` or a new Work Item schema/agent identity taskset, rather than expanding this task after it passes.
-
