@@ -20,6 +20,7 @@ from . import sanitize
 from . import sync
 from . import ui_console
 from . import ui_state
+from . import update_notify
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -124,6 +125,20 @@ def build_parser() -> argparse.ArgumentParser:
     update_mode.add_argument("--check", action="store_true", help="Install upstream and report available host updates")
     update_mode.add_argument("--diff", action="store_true", help="Install upstream and show exact host update diff")
     update_mode.add_argument("--apply", action="store_true", help="Install upstream, apply safe updates, and write agent_runtime.lock.json")
+
+    update_notify_parser = subparsers.add_parser(
+        "update-notify",
+        help="Print a non-blocking notice when a newer upstream release tag exists",
+    )
+    update_notify_parser.add_argument(
+        "--root", type=update_notify.Path, default=update_notify.Path.cwd(), help="Host project root"
+    )
+    update_notify_parser.add_argument(
+        "--no-cache", action="store_true", help="Bypass the 24h cache and query the upstream remote"
+    )
+    update_notify_parser.add_argument(
+        "--verbose", action="store_true", help="Explain skipped or failed checks on stderr"
+    )
 
     lock_parser = subparsers.add_parser("lock", help="Check or write the host Agent Runtime upstream lock")
     lock_parser.add_argument("--root", type=lock.Path, default=lock.Path.cwd(), help="Host project root")
@@ -258,6 +273,8 @@ def main(argv: list[str] | None = None) -> int:
             mode = "apply"
         install_dir = args.install_dir or host_update.default_install_dir(args.root)
         return host_update.run_update(args.root, install_dir, mode=mode)
+    if args.command == "update-notify":
+        return update_notify.run_update_notify(args.root, no_cache=args.no_cache, verbose=args.verbose)
     if args.command == "lock":
         return lock.run_lock(args.root, mode="write" if args.write else "check", template_root=args.template_root)
     if args.command == "release-preflight":

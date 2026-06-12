@@ -1,5 +1,16 @@
 {
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "scripts\\update_notify_hook.cmd",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
     "UserPromptSubmit": [
       {
         "hooks": [

@@ -46,6 +46,27 @@ Copy-Item agents\project\PROJECT-CONTEXT.example.yml agents\project\PROJECT-CONT
 
 macOS/Linux에서는 같은 흐름을 `python3`, `. .venv/bin/activate`, `cp`로 실행하면 됩니다.
 
+### 업데이트 알림
+
+템플릿이 적용된 호스트는 세션 시작 시 `.codex/hooks.json`의 SessionStart 훅이
+`agent_runtime update-notify`를 실행해 업스트림 최신 릴리스 태그를 확인합니다.
+고정된 `upstream.ref`보다 새 태그가 있으면 한 줄 알림을 출력하고, 오프라인이나
+실패 시에는 조용히 통과합니다(비차단, exit 0). 결과는
+`.tmp/update-notify-cache.json`에 24시간 캐시됩니다.
+
+알림을 받으면 다음 순서로 적용합니다.
+
+```powershell
+# 1. agent_runtime.yml 의 upstream.ref 를 새 태그로 변경
+# 2. 계획 확인 후 적용
+agent_runtime update-plan --check
+agent_runtime update --check
+agent_runtime update --diff
+agent_runtime update --apply
+```
+
+수동 강제 확인: `agent_runtime update-notify --no-cache --verbose`
+
 ### 핵심 개념
 
 | 개념 | 설명 |
@@ -139,6 +160,27 @@ agent_runtime update --diff
 agent_runtime update --apply
 cp agents/project/PROJECT-CONTEXT.example.yml agents/project/PROJECT-CONTEXT.yml
 ```
+
+### Update Notifications
+
+Once the templates are applied, the host's `.codex/hooks.json` SessionStart
+hook runs `agent_runtime update-notify` at session start. When the upstream
+has a release tag newer than the pinned `upstream.ref`, it prints a one-line
+notice; offline or failed checks pass silently (non-blocking, exit 0). The
+result is cached for 24 hours in `.tmp/update-notify-cache.json`.
+
+When you receive the notice:
+
+```bash
+# 1. Bump upstream.ref in agent_runtime.yml to the new tag
+# 2. Review the plan, then apply
+agent_runtime update-plan --check
+agent_runtime update --check
+agent_runtime update --diff
+agent_runtime update --apply
+```
+
+Manual check: `agent_runtime update-notify --no-cache --verbose`
 
 ### Core Concepts
 
