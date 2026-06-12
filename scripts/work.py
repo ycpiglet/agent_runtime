@@ -8,6 +8,7 @@ backlog board are refreshed afterward.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import subprocess
@@ -54,6 +55,8 @@ UNIT_REQUIRED_FIELDS = {
 RESOLUTION_VALUES = {"done", "wontfix", "duplicate", "superseded", "moved_to_vault"}
 CLOSEOUT_START = "<!-- work-close:start -->"
 CLOSEOUT_END = "<!-- work-close:end -->"
+PLANNING_OUTBOX_DIR = Path("agents/planning/outbox")
+PLANNING_DRAFTS_DIR = Path("agents/planning/drafts")
 
 
 class WorkRegistrationError(RuntimeError):
@@ -100,6 +103,15 @@ def _read_json(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _stable_hash(payload: Any) -> str:
+    raw = json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha1(raw.encode("utf-8")).hexdigest()
+
+
+def _stable_id(prefix: str, payload: Any) -> str:
+    return f"{prefix}-{_stable_hash(payload)[:12].upper()}"
+
+
 def _as_dict(value: Any, name: str, findings: list[str]) -> dict[str, Any]:
     if isinstance(value, dict):
         return value
@@ -134,6 +146,36 @@ def _text_lines(value: Any) -> list[str]:
         return [str(item).strip() for item in value if str(item).strip()]
     if isinstance(value, str) and value.strip():
         return [line.strip() for line in value.splitlines() if line.strip()]
+    return []
+
+
+def _section_blocks(body: str) -> dict[str, str]:
+    sections: dict[str, list[str]] = {}
+    current: str | None = None
+    for line in body.splitlines():
+        match = re.match(r"^##+\s+(.+?)\s*$", line)
+        if match:
+            current = re.sub(r"\s+", " ", match.group(1).strip()).lower()
+            sections.setdefault(current, [])
+            continue
+        if current is not None:
+            sections[current].append(line)
+    return {name: "\n".join(lines).strip() for name, lines in sections.items()}
+
+
+def _clean_bullet_line(line: str) -> str:
+    text = re.sub(r"^\s*(?:[-*]|\d+\.)\s+", "", line).strip()
+    if text.startswith("`") and text.endswith("`") and len(text) > 1:
+        text = text[1:-1].strip()
+    return text
+
+
+def _section_list(body: str, *names: str) -> list[str]:
+    sections = _section_blocks(body)
+    for name in names:
+        text = sections.get(name.lower(), "")
+        if text:
+            return [line for line in (_clean_bullet_line(raw) for raw in text.splitlines()) if line]
     return []
 
 
@@ -993,6 +1035,171 @@ def _verification_commands(meta: dict[str, Any]) -> list[str]:
     return _text_lines(meta.get("verification"))
 
 
+def _acceptance_criteria(meta: dict[str, Any], body: str) -> list[str]:
+    return _text_lines(meta.get("acceptance")) or _section_list(body, "Acceptance Criteria", "Acceptance")
+
+
+def _criteria_verification_commands(meta: dict[str, Any], body: str) -> list[str]:
+    return _verification_commands(meta) or _section_list(body, "Verification")
+
+
+def _is_executable_verification(command: str) -> bool:
+    text = command.strip()
+    if not text:
+        return False
+    lower = text.lower()
+    if lower.startswith(("manual:", "owner:", "note:", "n/a", "none")):
+        return False
+    return bool(
+        re.match(r"^(python|pytest|git|gh|npm|node|pwsh|powershell|cmd|cargo|ruff|mypy)\b", text)
+        or " scripts/" in f" {text}"
+        or " scripts\\" in f" {text}"
+    )
+
+
+def _criteria_gap_rows(acceptance: list[str], commands: list[str]) -> list[dict[str, Any]]:
+    executable = [command for command in commands if _is_executable_verification(command)]
+    rows: list[dict[str, Any]] = []
+    for criterion in acceptance:
+        rows.append(
+            {
+                "acceptance": criterion,
+                "verification_commands": executable,
+                "verifiable": bool(executable),
+            }
+        )
+    return rows
+
+
+def _proposal_rel(path: Path, root: Path) -> str:
+    return _rel(root, path)
+
+
+def _render_criteria_draft(proposal: dict[str, Any], rows: list[dict[str, Any]]) -> str:
+    evidence = "\n".join(f"- {item.get('summary', '')}" for item in proposal.get("evidence", [])) or "- No evidence."
+    verifiers = "\n".join(f"- `{item}`" for item in proposal.get("verifier_list", []))
+    criteria_rows = "\n".join(
+        "| "
+        + " | ".join(
+            [
+                str(index),
+                row["acceptance"].replace("|", "/"),
+                "yes" if row["verifiable"] else "no",
+                ", ".join(f"`{cmd}`" for cmd in row["verification_commands"]) or "-",
+            ]
+        )
+        + " |"
+        for index, row in enumerate(rows, start=1)
+    )
+    return "\n".join(
+        [
+            "---",
+            "status: draft",
+            "origin_type: planning_proposal",
+            f"origin_ref: agents/planning/outbox/{proposal['id']}.json",
+            "tags:",
+            "  - proposal-draft",
+            "  - work-criteria",
+            "---",
+            "",
+            f"# {proposal['title']}",
+            "",
+            "## Goal",
+            "",
+            proposal["suggested_next_action"],
+            "",
+            "## Criteria Map",
+            "",
+            "| # | Acceptance | Verifiable | Verification Commands |",
+            "| --- | --- | --- | --- |",
+            criteria_rows or "| - | - | - | - |",
+            "",
+            "## Source Evidence",
+            "",
+            evidence,
+            "",
+            "## Verifier List",
+            "",
+            verifiers,
+            "",
+            "## Risk Boundary",
+            "",
+            proposal["owner_boundary"],
+            "",
+        ]
+    )
+
+
+def _write_criteria_proposal(
+    root: Path,
+    *,
+    work_id: str,
+    work_path: str,
+    rows: list[dict[str, Any]],
+    actor: str,
+    now_text: str,
+    outbox: Path,
+    draft_dir: Path,
+) -> tuple[dict[str, Any], str, str]:
+    gaps = [row for row in rows if not row["verifiable"]]
+    proposal_core = {
+        "action_type": "plan_update",
+        "work_id": work_id,
+        "work_path": work_path,
+        "gaps": gaps,
+    }
+    proposal_id = _stable_id("PROP", proposal_core)
+    evidence_hash = _stable_hash(gaps)
+    proposal_path = outbox / f"{proposal_id}.json"
+    draft_path = draft_dir / f"{proposal_id}.md"
+    summaries = [
+        {
+            "summary": f"{work_id} acceptance criterion lacks an executable verification command: {row['acceptance']}",
+            "confidence": 0.86,
+            "severity": "watch",
+        }
+        for row in gaps
+    ]
+    verifier_list = [
+        f"python scripts/work.py criteria {work_id} --json",
+        "python scripts/owner_governance_gate.py",
+    ]
+    proposal: dict[str, Any] = {
+        "id": proposal_id,
+        "mode": "B",
+        "status": "proposed",
+        "action_type": "plan_update",
+        "proposal_output": "plan",
+        "risk_tier": "low",
+        "title": f"work criteria: {work_id}",
+        "created_at": now_text,
+        "updated_at": now_text,
+        "trace_id": None,
+        "dedupe_key": f"work-criteria:{work_id}:{evidence_hash}",
+        "evidence_hash": evidence_hash,
+        "source_refs": [{"path": work_path, "kind": "work_criteria"}],
+        "evidence": summaries,
+        "target_files": [work_path],
+        "rollback_path": f"agents/planning/rollback/{proposal_id}.json",
+        "verifier_list": verifier_list,
+        "expected_verification_command": verifier_list[0],
+        "owner_boundary": "B-mode proposal only; do not mutate canonical work item criteria without approved apply.",
+        "affected_owner_boundary": "Local planning/work item criteria only after approved apply.",
+        "blast_radius": "Local work item acceptance and verification metadata/body only.",
+        "rejection_reason": None,
+        "department": "planning-office",
+        "reviewer_opinions": [],
+        "suggested_next_action": "Add executable verification commands so every acceptance criterion is measurable before closeout.",
+        "supersedes": [],
+        "draft_task_path": _proposal_rel(draft_path, root),
+    }
+    proposal_path.parent.mkdir(parents=True, exist_ok=True)
+    draft_path.parent.mkdir(parents=True, exist_ok=True)
+    proposal_path.write_text(json.dumps(proposal, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    draft_path.write_text(_render_criteria_draft(proposal, rows), encoding="utf-8")
+    return proposal, _proposal_rel(proposal_path, root), _proposal_rel(draft_path, root)
+
+
 def _compact_stamp(now_text: str) -> str:
     return re.sub(r"[^0-9]", "", now_text)[:14] or now_util.epoch_seconds()
 
@@ -1201,6 +1408,60 @@ def verify_work(root: Path, work_id: str, *, actor: str, now: str | None = None,
     }
 
 
+def criteria_work(
+    root: Path,
+    work_id: str,
+    *,
+    actor: str,
+    now: str | None = None,
+    outbox: Path | None = None,
+    draft_dir: Path | None = None,
+) -> dict[str, Any]:
+    root = root.resolve()
+    now_text = _now_text(now)
+    path, meta, body = _load_work_item(root, work_id, command_name="work-criteria")
+    resolved_id = _work_id_from_meta(path, meta)
+    rel_path = _rel(root, path)
+    acceptance = _acceptance_criteria(meta, body)
+    commands = _criteria_verification_commands(meta, body)
+    rows = _criteria_gap_rows(acceptance, commands)
+    if not acceptance:
+        rows = [
+            {
+                "acceptance": "missing acceptance criteria",
+                "verification_commands": [command for command in commands if _is_executable_verification(command)],
+                "verifiable": False,
+            }
+        ]
+    gaps = [row for row in rows if not row["verifiable"]]
+    result: dict[str, Any] = {
+        "status": "pass" if not gaps else "proposed",
+        "work_id": resolved_id,
+        "work_path": rel_path,
+        "criterion_count": len(acceptance),
+        "verification_count": len(commands),
+        "gap_count": len(gaps),
+        "criteria": rows,
+        "proposal": "",
+        "draft": "",
+    }
+    if gaps:
+        proposal, proposal_ref, draft_ref = _write_criteria_proposal(
+            root,
+            work_id=resolved_id,
+            work_path=rel_path,
+            rows=rows,
+            actor=actor,
+            now_text=now_text,
+            outbox=(outbox if outbox and outbox.is_absolute() else root / (outbox or PLANNING_OUTBOX_DIR)),
+            draft_dir=(draft_dir if draft_dir and draft_dir.is_absolute() else root / (draft_dir or PLANNING_DRAFTS_DIR)),
+        )
+        result["proposal"] = proposal_ref
+        result["draft"] = draft_ref
+        result["proposal_id"] = proposal["id"]
+    return result
+
+
 def close_work(
     root: Path,
     work_id: str,
@@ -1320,6 +1581,32 @@ def cmd_verify(args: argparse.Namespace) -> int:
     return 0 if result["status"] == "passed" else 1
 
 
+def cmd_criteria(args: argparse.Namespace) -> int:
+    try:
+        result = criteria_work(
+            args.root,
+            args.work_id,
+            actor=args.actor,
+            now=args.now,
+            outbox=args.outbox,
+            draft_dir=args.draft_dir,
+        )
+    except WorkRegistrationError as exc:
+        print("work-criteria: fail", file=sys.stderr)
+        print(f"findings={len(exc.findings)}", file=sys.stderr)
+        for finding in exc.findings:
+            print(f"- {finding}", file=sys.stderr)
+        return 1
+    print(f"work-criteria: {result['status']}")
+    if args.json:
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+    else:
+        for key, value in result.items():
+            if key != "criteria":
+                print(f"{key}={value}")
+    return 0
+
+
 def cmd_close(args: argparse.Namespace) -> int:
     try:
         result = close_work(
@@ -1378,6 +1665,15 @@ def build_parser() -> argparse.ArgumentParser:
     verify_cmd.add_argument("--timeout", type=int, default=300)
     verify_cmd.add_argument("--json", action="store_true")
     verify_cmd.set_defaults(func=cmd_verify)
+
+    criteria_cmd = sub.add_parser("criteria", help="Evaluate criteria verifiability and write B-mode proposals for gaps")
+    criteria_cmd.add_argument("work_id", help="Unit ID, task ID, or path to a work item")
+    criteria_cmd.add_argument("--actor", default="work.py criteria")
+    criteria_cmd.add_argument("--now")
+    criteria_cmd.add_argument("--outbox", type=Path)
+    criteria_cmd.add_argument("--draft-dir", type=Path)
+    criteria_cmd.add_argument("--json", action="store_true")
+    criteria_cmd.set_defaults(func=cmd_criteria)
 
     close_cmd = sub.add_parser("close", help="Close a work item after passed verification evidence")
     close_cmd.add_argument("work_id", help="Unit ID, task ID, or path to a work item")
