@@ -2,6 +2,7 @@ schema: agent-runtime-owner-docs/v1
 owner_docs:
   - BACKLOG-BOARD.md
   - agents/project/work-items/WORK-ITEM-CLASSIFICATION.md
+  - reviews/REVIEW-2026-06-12-work-assign-command.md
   - reviews/REVIEW-2026-06-12-work-criteria-command.md
   - reviews/REVIEW-2026-06-12-work-close-command.md
   - reviews/REVIEW-2026-06-12-work-verify-command.md

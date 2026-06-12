@@ -57,6 +57,44 @@ CLOSEOUT_START = "<!-- work-close:start -->"
 CLOSEOUT_END = "<!-- work-close:end -->"
 PLANNING_OUTBOX_DIR = Path("agents/planning/outbox")
 PLANNING_DRAFTS_DIR = Path("agents/planning/drafts")
+ACTIVE_CLAIM_STATUSES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
+ASSIGNMENT_RULES: list[tuple[str, str, tuple[str, ...]]] = [
+    (
+        "agent-runtime-core",
+        "lead-engineer",
+        (
+            "scripts/",
+            "scripts\\",
+            "src/agent_runtime",
+            "src\\agent_runtime",
+            "tests/",
+            "tests\\",
+            "runtime",
+            "cli",
+            "gate",
+        ),
+    ),
+    (
+        "risk-and-safety",
+        "drift-guard",
+        ("risk", "security", "approval", "sandbox", "budget", "secret", "external effect"),
+    ),
+    (
+        "release-integrity",
+        "version-steward",
+        ("release", "version", "tag", "changelog", "compatibility", "migration"),
+    ),
+    (
+        "evaluation-office",
+        "trace-analyst",
+        ("evidence", "verify", "verification", "eval", "trace", "grader", "regression"),
+    ),
+    (
+        "planning-office",
+        "planning-coordinator",
+        ("planning", "proposal", "split", "criteria", "assign", "work item", "backlog", "taskset", "initiative"),
+    ),
+]
 
 
 class WorkRegistrationError(RuntimeError):
@@ -1200,6 +1238,296 @@ def _write_criteria_proposal(
     return proposal, _proposal_rel(proposal_path, root), _proposal_rel(draft_path, root)
 
 
+def _load_team_leads(root: Path) -> dict[str, str]:
+    teams_path = root / "agents" / "project" / "TEAMS.md"
+    if not teams_path.exists():
+        return {}
+    team_leads: dict[str, str] = {}
+    current_team = ""
+    for raw in teams_path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        team_match = re.match(r"^-\s+team_id:\s*(\S+)\s*$", line)
+        if team_match:
+            current_team = team_match.group(1)
+            continue
+        lead_match = re.match(r"^lead:\s*(\S+)\s*$", line)
+        if current_team and lead_match:
+            team_leads[current_team] = lead_match.group(1)
+    return team_leads
+
+
+def _assignment_text(meta: dict[str, Any], body: str) -> str:
+    values: list[str] = []
+    scalar_fields = (
+        "work_id",
+        "kind",
+        "title",
+        "summary",
+        "context",
+        "scope",
+        "handoff",
+        "stop_condition",
+        "owner",
+        "team",
+        "team_id",
+    )
+    for field in scalar_fields:
+        value = meta.get(field)
+        if value is not None:
+            values.append(str(value))
+    for field in ("tags", "inputs", "target_files", "acceptance", "verification", "escalation_triggers"):
+        values.extend(_text_lines(meta.get(field)))
+    values.append(body)
+    return "\n".join(values).lower()
+
+
+def _recommend_assignment(root: Path, meta: dict[str, Any], body: str) -> tuple[str, str, str]:
+    team_leads = _load_team_leads(root)
+    text = _assignment_text(meta, body)
+    for team, default_owner, needles in ASSIGNMENT_RULES:
+        if any(needle in text for needle in needles):
+            return team, team_leads.get(team, default_owner), f"matched assignment rule for {team}"
+    current_team = str(meta.get("team") or meta.get("team_id") or "").strip()
+    current_owner = str(meta.get("owner") or "").strip()
+    if current_team:
+        return current_team, current_owner or team_leads.get(current_team, "planning-coordinator"), "kept existing team"
+    return "planning-office", team_leads.get("planning-office", "planning-coordinator"), "defaulted to planning-office"
+
+
+def _active_claim_workload(root: Path) -> dict[str, Any]:
+    claims_dir = root / "agents" / "runtime" / "task_claims"
+    by_team: dict[str, int] = {}
+    by_role: dict[str, int] = {}
+    total = 0
+    if claims_dir.is_dir():
+        for path in sorted(claims_dir.glob("*.json"), key=lambda item: item.name.lower()):
+            try:
+                payload = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if not isinstance(payload, dict):
+                continue
+            status = str(payload.get("status") or "").strip().lower()
+            if status not in ACTIVE_CLAIM_STATUSES:
+                continue
+            total += 1
+            team = str(payload.get("team_id") or "unassigned").strip() or "unassigned"
+            role = str(payload.get("agent_role") or "unassigned").strip() or "unassigned"
+            by_team[team] = by_team.get(team, 0) + 1
+            by_role[role] = by_role.get(role, 0) + 1
+    return {
+        "active_claim_count": total,
+        "by_team": dict(sorted(by_team.items())),
+        "by_role": dict(sorted(by_role.items())),
+    }
+
+
+def _render_assign_draft(proposal: dict[str, Any]) -> str:
+    evidence = "\n".join(f"- {item.get('summary', '')}" for item in proposal.get("evidence", [])) or "- No evidence."
+    verifiers = "\n".join(f"- `{item}`" for item in proposal.get("verifier_list", []))
+    workload = proposal.get("workload") if isinstance(proposal.get("workload"), dict) else {}
+    by_team = workload.get("by_team") if isinstance(workload.get("by_team"), dict) else {}
+    workload_rows = "\n".join(f"| {team} | {count} |" for team, count in by_team.items())
+    if not workload_rows:
+        workload_rows = "| - | 0 |"
+    return "\n".join(
+        [
+            "---",
+            "status: draft",
+            "origin_type: planning_proposal",
+            f"origin_ref: agents/planning/outbox/{proposal['id']}.json",
+            "tags:",
+            "  - proposal-draft",
+            "  - work-assign",
+            "---",
+            "",
+            f"# {proposal['title']}",
+            "",
+            "## Goal",
+            "",
+            proposal["suggested_next_action"],
+            "",
+            "## Assignment",
+            "",
+            "| Field | Current | Recommended |",
+            "| --- | --- | --- |",
+            f"| Team | {proposal.get('current_team') or '-'} | {proposal.get('recommended_team') or '-'} |",
+            f"| Owner | {proposal.get('current_owner') or '-'} | {proposal.get('recommended_owner') or '-'} |",
+            "",
+            "## Workload",
+            "",
+            "| Team | Active Claims |",
+            "| --- | ---: |",
+            workload_rows,
+            "",
+            "## Source Evidence",
+            "",
+            evidence,
+            "",
+            "## Verifier List",
+            "",
+            verifiers,
+            "",
+            "## Risk Boundary",
+            "",
+            proposal["owner_boundary"],
+            "",
+        ]
+    )
+
+
+def _write_assign_proposal(
+    root: Path,
+    *,
+    work_id: str,
+    work_path: str,
+    current_team: str,
+    current_owner: str,
+    recommended_team: str,
+    recommended_owner: str,
+    reason: str,
+    workload: dict[str, Any],
+    actor: str,
+    now_text: str,
+    outbox: Path,
+    draft_dir: Path,
+) -> tuple[dict[str, Any], str, str]:
+    proposal_core = {
+        "action_type": "plan_update",
+        "work_id": work_id,
+        "work_path": work_path,
+        "current_team": current_team,
+        "current_owner": current_owner,
+        "recommended_team": recommended_team,
+        "recommended_owner": recommended_owner,
+        "reason": reason,
+    }
+    proposal_id = _stable_id("PROP", proposal_core)
+    evidence_hash = _stable_hash(proposal_core)
+    proposal_path = outbox / f"{proposal_id}.json"
+    draft_path = draft_dir / f"{proposal_id}.md"
+    missing = []
+    if not current_team:
+        missing.append("team")
+    if not current_owner:
+        missing.append("owner")
+    missing_summary = ", ".join(missing) if missing else "assignment"
+    verifier_list = [
+        f"python scripts/work.py assign {work_id} --json",
+        "python scripts/owner_governance_gate.py",
+    ]
+    proposal: dict[str, Any] = {
+        "id": proposal_id,
+        "mode": "B",
+        "status": "proposed",
+        "action_type": "plan_update",
+        "proposal_output": "plan",
+        "risk_tier": "low",
+        "title": f"work assign: {work_id}",
+        "created_at": now_text,
+        "updated_at": now_text,
+        "trace_id": None,
+        "dedupe_key": f"work-assign:{work_id}:{evidence_hash}",
+        "evidence_hash": evidence_hash,
+        "source_refs": [{"path": work_path, "kind": "work_assignment"}],
+        "evidence": [
+            {
+                "summary": f"{work_id} is missing {missing_summary}; recommend {recommended_team}/{recommended_owner} because {reason}.",
+                "confidence": 0.82,
+                "severity": "watch",
+            },
+            {
+                "summary": f"Current active claim count: {workload.get('active_claim_count', 0)}.",
+                "confidence": 0.78,
+                "severity": "info",
+            },
+        ],
+        "target_files": [work_path],
+        "rollback_path": f"agents/planning/rollback/{proposal_id}.json",
+        "verifier_list": verifier_list,
+        "expected_verification_command": verifier_list[0],
+        "owner_boundary": "B-mode assignment proposal only; do not mutate canonical work item metadata or create claims without approved apply.",
+        "affected_owner_boundary": "Local work item team/owner metadata only after approved apply.",
+        "blast_radius": "Local work item assignment metadata and dispatcher input only.",
+        "rejection_reason": None,
+        "department": "planning-office",
+        "reviewer_opinions": [],
+        "suggested_next_action": f"Assign `{work_id}` to `{recommended_team}` / `{recommended_owner}` before dispatch.",
+        "supersedes": [],
+        "draft_task_path": _proposal_rel(draft_path, root),
+        "current_team": current_team,
+        "current_owner": current_owner,
+        "recommended_team": recommended_team,
+        "recommended_owner": recommended_owner,
+        "recommendation_reason": reason,
+        "workload": workload,
+        "proposed_by": actor,
+    }
+    proposal_path.parent.mkdir(parents=True, exist_ok=True)
+    draft_path.parent.mkdir(parents=True, exist_ok=True)
+    proposal_path.write_text(json.dumps(proposal, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    draft_path.write_text(_render_assign_draft(proposal), encoding="utf-8")
+    return proposal, _proposal_rel(proposal_path, root), _proposal_rel(draft_path, root)
+
+
+def assign_work(
+    root: Path,
+    work_id: str,
+    *,
+    actor: str,
+    now: str | None = None,
+    outbox: Path | None = None,
+    draft_dir: Path | None = None,
+) -> dict[str, Any]:
+    root = root.resolve()
+    now_text = _now_text(now)
+    path, meta, body = _load_work_item(root, work_id, command_name="work-assign")
+    resolved_id = _work_id_from_meta(path, meta)
+    rel_path = _rel(root, path)
+    current_team = str(meta.get("team") or meta.get("team_id") or "").strip()
+    current_owner = str(meta.get("owner") or "").strip()
+    recommended_team, recommended_owner, reason = _recommend_assignment(root, meta, body)
+    if current_team and current_owner:
+        recommended_team = current_team
+        recommended_owner = current_owner
+        reason = "existing assignment is explicit"
+    workload = _active_claim_workload(root)
+    needs_proposal = not (current_team and current_owner)
+    result: dict[str, Any] = {
+        "status": "pass" if not needs_proposal else "proposed",
+        "work_id": resolved_id,
+        "work_path": rel_path,
+        "current_team": current_team,
+        "current_owner": current_owner,
+        "recommended_team": recommended_team,
+        "recommended_owner": recommended_owner,
+        "recommendation_reason": reason,
+        "workload": workload,
+        "proposal": "",
+        "draft": "",
+    }
+    if needs_proposal:
+        proposal, proposal_ref, draft_ref = _write_assign_proposal(
+            root,
+            work_id=resolved_id,
+            work_path=rel_path,
+            current_team=current_team,
+            current_owner=current_owner,
+            recommended_team=recommended_team,
+            recommended_owner=recommended_owner,
+            reason=reason,
+            workload=workload,
+            actor=actor,
+            now_text=now_text,
+            outbox=(outbox if outbox and outbox.is_absolute() else root / (outbox or PLANNING_OUTBOX_DIR)),
+            draft_dir=(draft_dir if draft_dir and draft_dir.is_absolute() else root / (draft_dir or PLANNING_DRAFTS_DIR)),
+        )
+        result["proposal"] = proposal_ref
+        result["draft"] = draft_ref
+        result["proposal_id"] = proposal["id"]
+    return result
+
+
 def _compact_stamp(now_text: str) -> str:
     return re.sub(r"[^0-9]", "", now_text)[:14] or now_util.epoch_seconds()
 
@@ -1607,6 +1935,32 @@ def cmd_criteria(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_assign(args: argparse.Namespace) -> int:
+    try:
+        result = assign_work(
+            args.root,
+            args.work_id,
+            actor=args.actor,
+            now=args.now,
+            outbox=args.outbox,
+            draft_dir=args.draft_dir,
+        )
+    except WorkRegistrationError as exc:
+        print("work-assign: fail", file=sys.stderr)
+        print(f"findings={len(exc.findings)}", file=sys.stderr)
+        for finding in exc.findings:
+            print(f"- {finding}", file=sys.stderr)
+        return 1
+    print(f"work-assign: {result['status']}")
+    if args.json:
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+    else:
+        for key, value in result.items():
+            if key != "workload":
+                print(f"{key}={value}")
+    return 0
+
+
 def cmd_close(args: argparse.Namespace) -> int:
     try:
         result = close_work(
@@ -1674,6 +2028,15 @@ def build_parser() -> argparse.ArgumentParser:
     criteria_cmd.add_argument("--draft-dir", type=Path)
     criteria_cmd.add_argument("--json", action="store_true")
     criteria_cmd.set_defaults(func=cmd_criteria)
+
+    assign_cmd = sub.add_parser("assign", help="Recommend team/owner assignment and write B-mode proposals for gaps")
+    assign_cmd.add_argument("work_id", help="Unit ID, task ID, or path to a work item")
+    assign_cmd.add_argument("--actor", default="work.py assign")
+    assign_cmd.add_argument("--now")
+    assign_cmd.add_argument("--outbox", type=Path)
+    assign_cmd.add_argument("--draft-dir", type=Path)
+    assign_cmd.add_argument("--json", action="store_true")
+    assign_cmd.set_defaults(func=cmd_assign)
 
     close_cmd = sub.add_parser("close", help="Close a work item after passed verification evidence")
     close_cmd.add_argument("work_id", help="Unit ID, task ID, or path to a work item")
