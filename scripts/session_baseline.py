@@ -51,6 +51,14 @@ def parse_worktrees(raw: str) -> list[dict[str, str]]:
     return _parse_worktrees(raw)
 
 
+AGENT_BRANCH_PREFIXES = ("codex/", "claude/")
+AGENT_BRANCH_PATTERNS = tuple(f"{prefix}*" for prefix in AGENT_BRANCH_PREFIXES)
+
+
+def is_agent_branch(branch: str) -> bool:
+    return branch.startswith(AGENT_BRANCH_PREFIXES)
+
+
 def parse_codex_branches(raw: str) -> list[str]:
     return [line.strip().lstrip("* ").strip() for line in raw.splitlines() if line.strip()]
 
@@ -59,7 +67,7 @@ def capture(root: Path) -> dict[str, object]:
     root = root.resolve()
     status = run_git(["git", "status", "--porcelain=v1"], root)
     stashes = [line for line in run_git(["git", "stash", "list", "--format=%H"], root).splitlines() if line.strip()]
-    branches = parse_codex_branches(run_git(["git", "branch", "--list", "codex/*"], root))
+    branches = parse_codex_branches(run_git(["git", "branch", "--list", *AGENT_BRANCH_PATTERNS], root))
     return {
         "schema": SCHEMA,
         "captured_at": datetime.now(timezone.utc).isoformat(),
