@@ -1,5 +1,14 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-13 - TASKSET-AR-PARALLEL-WAVE-EXECUTION wave-1 dispatch
+
+- Summary: after the codex merges (#26, #28-#39) were integrated via PR #41 and the T3 replan re-recorded all 8 plan anchors (`plan_assumption_gate --check` findings=0), wave-1 parallel implementation started for `TASKSET-AR-PARALLEL-WAVE-EXECUTION` and `TASKSET-AR-RELEASE-STEWARD`.
+- Active task: `TASK-AR-500` residual (footprint gate dispatcher wiring) plus parallel `TASK-AR-505` (worktree lifecycle gate), `TASK-AR-513` (in-flight overlay), `TASK-AR-509` (update notification).
+- SCM state: branches/worktrees/stash/PRs cleaned — 12 merged worktrees removed, 12 local + 13 remote merged branches deleted, PR #22 closed as superseded, issues #27/#40 closed with recovery evidence, superseded codex tasksets preserved under `archive/branches/20260612/`.
+- Claims: `CLAIM-20260613-012330-task-ar-500-10f4`, `CLAIM-20260613-012331-task-ar-505-0719`, `CLAIM-20260613-012331-task-ar-513-8831`, `CLAIM-20260613-012331-task-ar-509-6ab3` with per-instance identity in `agents/runtime/instances/`.
+- Next waves: AR-503/510/514/515 -> AR-501/517/518/519 -> AR-502/506/512/516 -> AR-507, with AR-511 (.gitattributes renormalization) last on a quiet tree.
+- Evidence: `reviews/MEETING-2026-06-13-parallel-wave-replan-post-codex-merge.md`.
+
 ## 2026-06-12 - TASKSET-AR-WORK-METADATA-ANALYTICS registration
 
 - Summary: Owner/Claude/Codex discussion about A2A, Work Item metadata, frontmatter/footer/reference/tag/team/query/statistics, agent instance attribution, and stale verification is now registered as `TASKSET-AR-WORK-METADATA-ANALYTICS`.
