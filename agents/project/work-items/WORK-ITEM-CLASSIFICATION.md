@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-13T00:07:13+09:00
-record_count: 213
+generated_at: 2026-06-13T00:47:23+09:00
+record_count: 226
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `213` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `226` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `4` records |
-| Tasksets | pass | `26` records |
-| Tasks | pass | `182` records |
-| Units | pass | `1` records |
+| Initiatives | pass | `5` records |
+| Tasksets | pass | `27` records |
+| Tasks | pass | `183` records |
+| Units | pass | `11` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -227,31 +227,44 @@ record_count: 213
 | 1 | Initiative 1 | initiative | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | - | planned | `agents/project/initiatives/INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE.md` | Work Hierarchy Conflict Closure Initiative |
 | 1.1 | Taskset 1.1 | taskset | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | active | `BACKLOG-BOARD.md` | Work Taxonomist |
 | 1.1.1 | Task 1.1.1 | task | `TASK-AR-369` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-369.md` | Finish the terminology migration from ambiguous `project -> taskset -> task -> unit`… |
-| 1.1.2 | Task 1.1.2 | task | `TASK-AR-370` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-370.md` | Prevent concurrent panes from selecting the same human display ID before a task file… |
+| 1.1.2 | Task 1.1.2 | task | `TASK-AR-370` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-370.md` | Prevent concurrent panes from selecting the same human display ID before a task file… |
 | 1.1.3 | Task 1.1.3 | task | `TASK-AR-371` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-371.md` | Remove `BACKLOG.md` as a top-of-file shared manual registration hotspot while preserv… |
-| 1.1.4 | Task 1.1.4 | task | `TASK-AR-372` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-372.md` | Provide one structured registration command path so planners stop hand-editing board… |
+| 1.1.4 | Task 1.1.4 | task | `TASK-AR-372` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | in_progress | `agents/lead_engineer/tasks/TASK-AR-372.md` | Provide one structured registration command path so planners stop hand-editing board… |
+| 1.1.4.1 | Unit 1.1.4.1 | unit | `UNIT-TASK-AR-372-001` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-001.md` | UNIT-TASK-AR-372-001 - Work Schema SSoT And Gate |
+| 1.1.4.2 | Unit 1.1.4.2 | unit | `UNIT-TASK-AR-372-002` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-002.md` | UNIT-TASK-AR-372-002 - Deterministic Work Registration CLI |
+| 1.1.4.3 | Unit 1.1.4.3 | unit | `UNIT-TASK-AR-372-003` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-003.md` | UNIT-TASK-AR-372-003 - Worker-Ready Unit Generation In Work CLI |
+| 1.1.4.4 | Unit 1.1.4.4 | unit | `UNIT-TASK-AR-372-004` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-004.md` | UNIT-TASK-AR-372-004 - Canonical Timestamp Source And Work Now |
+| 1.1.4.5 | Unit 1.1.4.5 | unit | `UNIT-TASK-AR-372-005` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-005.md` | UNIT-TASK-AR-372-005 - Deterministic Work Verify Command |
+| 1.1.4.6 | Unit 1.1.4.6 | unit | `UNIT-TASK-AR-372-006` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-006.md` | UNIT-TASK-AR-372-006 - Deterministic Work Close Command |
+| 1.1.4.7 | Unit 1.1.4.7 | unit | `UNIT-TASK-AR-372-007` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-007.md` | UNIT-TASK-AR-372-007 - Proposal-Only Work Criteria Command |
+| 1.1.4.8 | Unit 1.1.4.8 | unit | `UNIT-TASK-AR-372-008` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-008.md` | UNIT-TASK-AR-372-008 - Proposal-Only Work Assign Command |
+| 1.1.4.9 | Unit 1.1.4.9 | unit | `UNIT-TASK-AR-372-009` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-009.md` | UNIT-TASK-AR-372-009 - Proposal-Only Work Split Command |
 | 1.1.5 | Task 1.1.5 | task | `TASK-AR-373` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-373.md` | Make it visible which planned tasks are worker-ready and which still require planner… |
 | 1.1.6 | Task 1.1.6 | task | `TASK-AR-374` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-374.md` | Prove that the work hierarchy and registration conflict surfaces are actually closed… |
-| 2 | Initiative 2 | initiative | `INIT-AR-PARALLEL-WAVE-EXECUTION` | - | planned | `agents/project/initiatives/INIT-AR-PARALLEL-WAVE-EXECUTION.md` | Parallel Wave Execution Initiative |
-| 2.1 | Taskset 2.1 | taskset | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | `INIT-AR-PARALLEL-WAVE-EXECUTION` | active | `BACKLOG-BOARD.md` | Wave Conductor |
-| 2.1.1 | Task 2.1.1 | task | `TASK-AR-500` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | in_progress | `agents/lead_engineer/tasks/TASK-AR-500.md` | 충돌 발견 시점을 merge-time(사후)에서 claim-time(사전)으로 옮긴다. 새 클레임 생성 시 활성 클레임들의 선언 footprint(`ta… |
-| 2.1.2 | Task 2.1.2 | task | `TASK-AR-501` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-501.md` | planner가 unit 의존성 DAG를 topological wave로 분해하고, 디스패처가 같은 wave의 K개 unit에 대해 claim+workt… |
-| 2.1.3 | Task 2.1.3 | task | `TASK-AR-502` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-502.md` | 워커 브랜치의 main 합류를 단일 통합자(orchestrator)가 직렬 rebase-test-merge 큐로 처리해, 병렬 구현 기간에도 merge… |
-| 2.1.4 | Task 2.1.4 | task | `TASK-AR-503` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-503.md` | 워크트리 작업은 반드시 main 체크아웃에 활성 클레임을 먼저 남기고 시작하도록 강제한다. 클레임 없는 워크트리 작업은 보드/ui-console 양쪽에서… |
-| 2.1.5 | Task 2.1.5 | task | `TASK-AR-504` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-504.md` | 병렬 세션(codex/claude)이 서로의 미머지 변경을 모른 채 세운 계획이 merge 후 조용히 무효화되는 문제를 지연평가로 해결한다: 계획의 전제… |
-| 2.1.6 | Task 2.1.6 | task | `TASK-AR-505` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-505.md` | 작업 수명주기의 W5(통합 후 정리) 단계를 실행 가능하게 만든다: merge 완료 + claim released 상태의 좀비 워크트리/브랜치를 검출하고… |
-| 2.1.7 | Task 2.1.7 | task | `TASK-AR-506` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-506.md` | 이번 taskset에만 수동 적용된 지연평가 규율(T0 스냅샷/T2 착수 체크)과 W0~W6 수명주기를 **모든 작업의 기본값**으로 만든다 — Owne… |
-| 2.1.8 | Task 2.1.8 | task | `TASK-AR-507` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-507.md` | Owner 규칙 "작업자가 스스로 검증 금지, 항상 다른 에이전트가 검증"을 실행 가능하게 강제한다: claim release/closeout 시 ver… |
-| 2.1.9 | Task 2.1.9 | task | `TASK-AR-508` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-508.md` | dirty intake와 session baseline의 residue 보존 규칙이 `codex/*` 브랜치에 하드코딩되어 있어 `claude/*` 브랜… |
-| 2.1.10 | Task 2.1.10 | task | `TASK-AR-513` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-513.md` | main 보드가 미머지 브랜치의 진행 상황을 모르는 인식 오류를 없앤다. Owner 보고(2026-06-12): "main의 백로그만 보면 아직 진행이… |
-| 3 | Initiative 3 | initiative | `INIT-AR-WORK-METADATA-ANALYTICS` | - | planned | `agents/project/initiatives/INIT-AR-WORK-METADATA-ANALYTICS.md` | Work Metadata Analytics Initiative |
-| 3.1 | Taskset 3.1 | taskset | `TASKSET-AR-WORK-METADATA-ANALYTICS` | `INIT-AR-WORK-METADATA-ANALYTICS` | active | `BACKLOG-BOARD.md` | Work Metadata Analyst |
-| 3.1.1 | Task 3.1.1 | task | `TASK-AR-514` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-514.md` | Owner/Claude/Codex planning discussions must map to review records, task records, boa… |
-| 3.1.2 | Task 3.1.2 | task | `TASK-AR-515` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-515.md` | Define and gate the Work Item metadata catalog for provenance, resolution, relationsh… |
-| 3.1.3 | Task 3.1.3 | task | `TASK-AR-516` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-516.md` | Make initiative/taskset/task/unit progress and metadata visible through one Work Expl… |
-| 3.1.4 | Task 3.1.4 | task | `TASK-AR-517` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-517.md` | Turn Work Item metadata into queryable statistics, JSON/CSV export, and reusable save… |
-| 3.1.5 | Task 3.1.5 | task | `TASK-AR-518` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-518.md` | Require instance_uid actor attribution across claims, A2A messages, evidence, closeou… |
-| 3.1.6 | Task 3.1.6 | task | `TASK-AR-519` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-519.md` | Mark verification evidence stale when source files, commits, claims, or task records… |
+| 2 | Initiative 2 | initiative | `INIT-AR-AGENT-IDENTITY-OBSERVABILITY` | - | active | `agents/project/initiatives/INIT-AR-AGENT-IDENTITY-OBSERVABILITY.md` | Agent Identity Observability |
+| 2.1 | Taskset 2.1 | taskset | `TASKSET-AR-AGENT-IDENTITY-CONTRACT` | `INIT-AR-AGENT-IDENTITY-OBSERVABILITY` | complete | `BACKLOG-BOARD.md` | Agent Identity Contract |
+| 2.1.1 | Task 2.1.1 | task | `TASK-AR-375` | `TASKSET-AR-AGENT-IDENTITY-CONTRACT` | completed | `agents/lead_engineer/tasks/TASK-AR-375.md` | Create durable instance-level identity records and a deterministic gate that rejects… |
+| 2.1.1.1 | Unit 2.1.1.1 | unit | `UNIT-TASK-AR-375-001` | `TASK-AR-375` | completed | `agents/lead_engineer/tasks/units/TASK-AR-375/UNIT-TASK-AR-375-001.md` | UNIT-TASK-AR-375-001 - Agent Instance Registry And Gate Foundation |
+| 3 | Initiative 3 | initiative | `INIT-AR-PARALLEL-WAVE-EXECUTION` | - | planned | `agents/project/initiatives/INIT-AR-PARALLEL-WAVE-EXECUTION.md` | Parallel Wave Execution Initiative |
+| 3.1 | Taskset 3.1 | taskset | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | `INIT-AR-PARALLEL-WAVE-EXECUTION` | active | `BACKLOG-BOARD.md` | Wave Conductor |
+| 3.1.1 | Task 3.1.1 | task | `TASK-AR-500` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | in_progress | `agents/lead_engineer/tasks/TASK-AR-500.md` | 충돌 발견 시점을 merge-time(사후)에서 claim-time(사전)으로 옮긴다. 새 클레임 생성 시 활성 클레임들의 선언 footprint(`ta… |
+| 3.1.2 | Task 3.1.2 | task | `TASK-AR-501` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-501.md` | planner가 unit 의존성 DAG를 topological wave로 분해하고, 디스패처가 같은 wave의 K개 unit에 대해 claim+workt… |
+| 3.1.3 | Task 3.1.3 | task | `TASK-AR-502` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-502.md` | 워커 브랜치의 main 합류를 단일 통합자(orchestrator)가 직렬 rebase-test-merge 큐로 처리해, 병렬 구현 기간에도 merge… |
+| 3.1.4 | Task 3.1.4 | task | `TASK-AR-503` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-503.md` | 워크트리 작업은 반드시 main 체크아웃에 활성 클레임을 먼저 남기고 시작하도록 강제한다. 클레임 없는 워크트리 작업은 보드/ui-console 양쪽에서… |
+| 3.1.5 | Task 3.1.5 | task | `TASK-AR-504` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-504.md` | 병렬 세션(codex/claude)이 서로의 미머지 변경을 모른 채 세운 계획이 merge 후 조용히 무효화되는 문제를 지연평가로 해결한다: 계획의 전제… |
+| 3.1.6 | Task 3.1.6 | task | `TASK-AR-505` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-505.md` | 작업 수명주기의 W5(통합 후 정리) 단계를 실행 가능하게 만든다: merge 완료 + claim released 상태의 좀비 워크트리/브랜치를 검출하고… |
+| 3.1.7 | Task 3.1.7 | task | `TASK-AR-506` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-506.md` | 이번 taskset에만 수동 적용된 지연평가 규율(T0 스냅샷/T2 착수 체크)과 W0~W6 수명주기를 **모든 작업의 기본값**으로 만든다 — Owne… |
+| 3.1.8 | Task 3.1.8 | task | `TASK-AR-507` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-507.md` | Owner 규칙 "작업자가 스스로 검증 금지, 항상 다른 에이전트가 검증"을 실행 가능하게 강제한다: claim release/closeout 시 ver… |
+| 3.1.9 | Task 3.1.9 | task | `TASK-AR-508` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-508.md` | dirty intake와 session baseline의 residue 보존 규칙이 `codex/*` 브랜치에 하드코딩되어 있어 `claude/*` 브랜… |
+| 3.1.10 | Task 3.1.10 | task | `TASK-AR-513` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-513.md` | main 보드가 미머지 브랜치의 진행 상황을 모르는 인식 오류를 없앤다. Owner 보고(2026-06-12): "main의 백로그만 보면 아직 진행이… |
+| 4 | Initiative 4 | initiative | `INIT-AR-WORK-METADATA-ANALYTICS` | - | planned | `agents/project/initiatives/INIT-AR-WORK-METADATA-ANALYTICS.md` | Work Metadata Analytics Initiative |
+| 4.1 | Taskset 4.1 | taskset | `TASKSET-AR-WORK-METADATA-ANALYTICS` | `INIT-AR-WORK-METADATA-ANALYTICS` | active | `BACKLOG-BOARD.md` | Work Metadata Analyst |
+| 4.1.1 | Task 4.1.1 | task | `TASK-AR-514` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-514.md` | Owner/Claude/Codex planning discussions must map to review records, task records, boa… |
+| 4.1.2 | Task 4.1.2 | task | `TASK-AR-515` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-515.md` | Define and gate the Work Item metadata catalog for provenance, resolution, relationsh… |
+| 4.1.3 | Task 4.1.3 | task | `TASK-AR-516` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-516.md` | Make initiative/taskset/task/unit progress and metadata visible through one Work Expl… |
+| 4.1.4 | Task 4.1.4 | task | `TASK-AR-517` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-517.md` | Turn Work Item metadata into queryable statistics, JSON/CSV export, and reusable save… |
+| 4.1.5 | Task 4.1.5 | task | `TASK-AR-518` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-518.md` | Require instance_uid actor attribution across claims, A2A messages, evidence, closeou… |
+| 4.1.6 | Task 4.1.6 | task | `TASK-AR-519` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-519.md` | Mark verification evidence stale when source files, commits, claims, or task records… |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

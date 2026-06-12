@@ -10,6 +10,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "task_claim_dispatcher.py"
 GATE = REPO_ROOT / "scripts" / "parallel_worktree_gate.py"
 CONCURRENCY_GATE = REPO_ROOT / "scripts" / "collaboration_concurrency_gate.py"
+IDENTITY_GATE = REPO_ROOT / "scripts" / "agent_identity_gate.py"
 
 
 def _run_dispatcher(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
@@ -39,6 +40,18 @@ def _run_gate(root: Path) -> subprocess.CompletedProcess[str]:
 def _run_concurrency_gate(root: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(CONCURRENCY_GATE), "--root", str(root), "--check"],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+
+def _run_identity_gate(root: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(IDENTITY_GATE), "--root", str(root), "--check"],
         cwd=REPO_ROOT,
         check=False,
         capture_output=True,
@@ -101,11 +114,32 @@ def test_create_claim_separates_system_identity_from_readable_display_name(tmp_p
 
     claim_path = tmp_path / payload["path"]
     assert claim_path.exists()
+    instance_path = tmp_path / "agents" / "runtime" / "instances" / "le-20260610-143012-kst-a7f3.json"
+    assert instance_path.exists()
+    instance = json.loads(instance_path.read_text(encoding="utf-8"))
+    assert instance["schema"] == "agent-runtime-agent-instance/v1"
+    assert instance["role"] == "lead-engineer"
+    assert instance["team_id"] == "agent-runtime-core"
+    assert instance["agent_instance_id"] == "le-20260610-143012-kst-a7f3"
+    assert instance["display_name"] == "lead_engineer@design-01"
+    assert instance["callsign"] == "lead_engineer@design-01"
+    assert instance["callsite_id"] == "terminal:wt-task-ar-246:tab-01"
+    assert instance["pane_id"] == "terminal:wt-task-ar-246:tab-01"
+    assert instance["spawned_at"] == "2026-06-10T14:30:12+09:00"
+    assert instance["spawned_by"] == "task_claim_dispatcher"
+    assert instance["task_id"] == "TASK-AR-246"
+    assert instance["worktree_path"] == ".worktrees/TASK-AR-246"
+    assert instance["claim_refs"] == [payload["path"]]
     assert (tmp_path / claim["handoff_path"]).exists()
     assert (tmp_path / claim["log_path"]).exists()
     event_log = tmp_path / "agents" / "runtime" / "pane_events" / "pane-events.jsonl"
     events = [json.loads(line) for line in event_log.read_text(encoding="utf-8").splitlines()]
     assert events[-1]["event"] == "claim_created"
+    assert events[-1]["actor"] == "le-20260610-143012-kst-a7f3"
+    assert events[-1]["actor_role"] == "lead-engineer"
+    assert events[-1]["agent_instance_id"] == "le-20260610-143012-kst-a7f3"
+    assert events[-1]["display_name"] == "lead_engineer@design-01"
+    assert events[-1]["callsite_id"] == "terminal:wt-task-ar-246:tab-01"
     assert events[-1]["claim_id"] == claim["claim_id"]
     assert events[-1]["task_id"] == "TASK-AR-246"
 
@@ -113,6 +147,8 @@ def test_create_claim_separates_system_identity_from_readable_display_name(tmp_p
     assert gate.returncode == 0, gate.stdout
     concurrency_gate = _run_concurrency_gate(tmp_path)
     assert concurrency_gate.returncode == 0, concurrency_gate.stdout
+    identity_gate = _run_identity_gate(tmp_path)
+    assert identity_gate.returncode == 0, identity_gate.stdout
 
 
 def test_create_claim_refuses_task_that_is_already_active(tmp_path: Path):

@@ -73,7 +73,15 @@ def append_event(root: Path, event: dict[str, Any]) -> dict[str, Any]:
         "claim_id": event.get("claim_id") or "",
         "worktree_path": event.get("worktree_path") or "",
     }
-    for key in ("ssot_path", "message", "orchestrator_approved"):
+    for key in (
+        "actor_role",
+        "agent_instance_id",
+        "display_name",
+        "callsite_id",
+        "ssot_path",
+        "message",
+        "orchestrator_approved",
+    ):
         if key in event and event[key] not in (None, ""):
             payload[key] = event[key]
     path = event_log_path(root)

@@ -1,8 +1,20 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
+  - agents/project/AGENT-IDENTITY-CONTRACT.md
+  - reviews/REVIEW-2026-06-12-taskset-ar-agent-identity-contract-registration.md
   - BACKLOG-BOARD.md
   - agents/project/work-items/WORK-ITEM-CLASSIFICATION.md
   - reviews/MEETING-2026-06-12-work-metadata-a2a-registration-audit.md
+  - reviews/REVIEW-2026-06-12-work-stats-command.md
+  - reviews/REVIEW-2026-06-12-work-split-command.md
+  - reviews/REVIEW-2026-06-12-work-assign-command.md
+  - reviews/REVIEW-2026-06-12-work-criteria-command.md
+  - reviews/REVIEW-2026-06-12-work-close-command.md
+  - reviews/REVIEW-2026-06-12-work-verify-command.md
+  - reviews/REVIEW-2026-06-12-work-now-timestamp-source.md
+  - reviews/REVIEW-2026-06-12-work-registration-unit-scaffold.md
+  - reviews/REVIEW-2026-06-12-work-registration-cli.md
+  - reviews/REVIEW-2026-06-12-work-schema-ssot-gate.md
   - reviews/MEETING-2026-06-12-work-hierarchy-numbering-and-recording.md
   - reviews/REVIEW-2026-06-12-work-hierarchy-conflict-closure-registration.md
   - reviews/RESEARCH-2026-06-12-work-hierarchy-taxonomy.md

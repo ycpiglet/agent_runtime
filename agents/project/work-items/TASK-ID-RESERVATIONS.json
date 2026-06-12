@@ -1,0 +1,25 @@
+{
+  "reservations": [
+    {
+      "display_id": "TASK-AR-375",
+      "expires_at": "2026-06-13T14:50:00+09:00",
+      "fulfilled_at": "2026-06-12T14:50:00+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-375.md",
+      "fulfilled_task_id": "TASK-AR-375",
+      "fulfilled_task_uid": "fe4cf218-9eb5-4597-b8a9-1df6826e3e04",
+      "initiative_id": "INIT-AR-AGENT-IDENTITY-OBSERVABILITY",
+      "kind": "task",
+      "owner_id": "codex",
+      "reason": "work registration TASKSET-AR-AGENT-IDENTITY-CONTRACT",
+      "reservation_group_id": "RES-20260612-145000-73c415fc",
+      "reservation_id": "RES-20260612-145000-73c415fc-01",
+      "reserved_at": "2026-06-12T14:50:00+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-AGENT-IDENTITY-CONTRACT",
+      "ttl_seconds": 86400
+    }
+  ],
+  "schema": "agent-runtime-task-id-reservations/v1",
+  "updated_at": "2026-06-12T14:50:00+09:00"
+}

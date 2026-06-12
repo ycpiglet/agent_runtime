@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-13T00:07:13+09:00",
-  "record_count": 213,
+  "generated_at": "2026-06-13T00:47:23+09:00",
+  "record_count": 226,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -2082,7 +2082,7 @@
       "title": "Prevent concurrent panes from selecting the same human display ID before a task file…",
       "path": "agents/lead_engineer/tasks/TASK-AR-370.md",
       "parent_id": "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-371",
@@ -2104,7 +2104,106 @@
       "title": "Provide one structured registration command path so planners stop hand-editing board…",
       "path": "agents/lead_engineer/tasks/TASK-AR-372.md",
       "parent_id": "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
-      "status": "planned"
+      "status": "in_progress"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-372-001",
+      "level": "unit",
+      "number": "1.1.4.1",
+      "label": "Unit 1.1.4.1",
+      "id": "UNIT-TASK-AR-372-001",
+      "title": "UNIT-TASK-AR-372-001 - Work Schema SSoT And Gate",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-001.md",
+      "parent_id": "TASK-AR-372",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-372-002",
+      "level": "unit",
+      "number": "1.1.4.2",
+      "label": "Unit 1.1.4.2",
+      "id": "UNIT-TASK-AR-372-002",
+      "title": "UNIT-TASK-AR-372-002 - Deterministic Work Registration CLI",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-002.md",
+      "parent_id": "TASK-AR-372",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-372-003",
+      "level": "unit",
+      "number": "1.1.4.3",
+      "label": "Unit 1.1.4.3",
+      "id": "UNIT-TASK-AR-372-003",
+      "title": "UNIT-TASK-AR-372-003 - Worker-Ready Unit Generation In Work CLI",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-003.md",
+      "parent_id": "TASK-AR-372",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-372-004",
+      "level": "unit",
+      "number": "1.1.4.4",
+      "label": "Unit 1.1.4.4",
+      "id": "UNIT-TASK-AR-372-004",
+      "title": "UNIT-TASK-AR-372-004 - Canonical Timestamp Source And Work Now",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-004.md",
+      "parent_id": "TASK-AR-372",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-372-005",
+      "level": "unit",
+      "number": "1.1.4.5",
+      "label": "Unit 1.1.4.5",
+      "id": "UNIT-TASK-AR-372-005",
+      "title": "UNIT-TASK-AR-372-005 - Deterministic Work Verify Command",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-005.md",
+      "parent_id": "TASK-AR-372",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-372-006",
+      "level": "unit",
+      "number": "1.1.4.6",
+      "label": "Unit 1.1.4.6",
+      "id": "UNIT-TASK-AR-372-006",
+      "title": "UNIT-TASK-AR-372-006 - Deterministic Work Close Command",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-006.md",
+      "parent_id": "TASK-AR-372",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-372-007",
+      "level": "unit",
+      "number": "1.1.4.7",
+      "label": "Unit 1.1.4.7",
+      "id": "UNIT-TASK-AR-372-007",
+      "title": "UNIT-TASK-AR-372-007 - Proposal-Only Work Criteria Command",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-007.md",
+      "parent_id": "TASK-AR-372",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-372-008",
+      "level": "unit",
+      "number": "1.1.4.8",
+      "label": "Unit 1.1.4.8",
+      "id": "UNIT-TASK-AR-372-008",
+      "title": "UNIT-TASK-AR-372-008 - Proposal-Only Work Assign Command",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-008.md",
+      "parent_id": "TASK-AR-372",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-372-009",
+      "level": "unit",
+      "number": "1.1.4.9",
+      "label": "Unit 1.1.4.9",
+      "id": "UNIT-TASK-AR-372-009",
+      "title": "UNIT-TASK-AR-372-009 - Proposal-Only Work Split Command",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-009.md",
+      "parent_id": "TASK-AR-372",
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-373",
@@ -2129,10 +2228,54 @@
       "status": "planned"
     },
     {
-      "key": "initiative:INIT-AR-PARALLEL-WAVE-EXECUTION",
+      "key": "initiative:INIT-AR-AGENT-IDENTITY-OBSERVABILITY",
       "level": "initiative",
       "number": "2",
       "label": "Initiative 2",
+      "id": "INIT-AR-AGENT-IDENTITY-OBSERVABILITY",
+      "title": "Agent Identity Observability",
+      "path": "agents/project/initiatives/INIT-AR-AGENT-IDENTITY-OBSERVABILITY.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-AGENT-IDENTITY-CONTRACT",
+      "level": "taskset",
+      "number": "2.1",
+      "label": "Taskset 2.1",
+      "id": "TASKSET-AR-AGENT-IDENTITY-CONTRACT",
+      "title": "Agent Identity Contract",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-AGENT-IDENTITY-OBSERVABILITY",
+      "status": "complete"
+    },
+    {
+      "key": "task:TASK-AR-375",
+      "level": "task",
+      "number": "2.1.1",
+      "label": "Task 2.1.1",
+      "id": "TASK-AR-375",
+      "title": "Create durable instance-level identity records and a deterministic gate that rejects…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-375.md",
+      "parent_id": "TASKSET-AR-AGENT-IDENTITY-CONTRACT",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-375-001",
+      "level": "unit",
+      "number": "2.1.1.1",
+      "label": "Unit 2.1.1.1",
+      "id": "UNIT-TASK-AR-375-001",
+      "title": "UNIT-TASK-AR-375-001 - Agent Instance Registry And Gate Foundation",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-375/UNIT-TASK-AR-375-001.md",
+      "parent_id": "TASK-AR-375",
+      "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-PARALLEL-WAVE-EXECUTION",
+      "level": "initiative",
+      "number": "3",
+      "label": "Initiative 3",
       "id": "INIT-AR-PARALLEL-WAVE-EXECUTION",
       "title": "Parallel Wave Execution Initiative",
       "path": "agents/project/initiatives/INIT-AR-PARALLEL-WAVE-EXECUTION.md",
@@ -2142,8 +2285,8 @@
     {
       "key": "taskset:TASKSET-AR-PARALLEL-WAVE-EXECUTION",
       "level": "taskset",
-      "number": "2.1",
-      "label": "Taskset 2.1",
+      "number": "3.1",
+      "label": "Taskset 3.1",
       "id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
       "title": "Wave Conductor",
       "path": "BACKLOG-BOARD.md",
@@ -2153,8 +2296,8 @@
     {
       "key": "task:TASK-AR-500",
       "level": "task",
-      "number": "2.1.1",
-      "label": "Task 2.1.1",
+      "number": "3.1.1",
+      "label": "Task 3.1.1",
       "id": "TASK-AR-500",
       "title": "충돌 발견 시점을 merge-time(사후)에서 claim-time(사전)으로 옮긴다. 새 클레임 생성 시 활성 클레임들의 선언 footprint(`ta…",
       "path": "agents/lead_engineer/tasks/TASK-AR-500.md",
@@ -2164,8 +2307,8 @@
     {
       "key": "task:TASK-AR-501",
       "level": "task",
-      "number": "2.1.2",
-      "label": "Task 2.1.2",
+      "number": "3.1.2",
+      "label": "Task 3.1.2",
       "id": "TASK-AR-501",
       "title": "planner가 unit 의존성 DAG를 topological wave로 분해하고, 디스패처가 같은 wave의 K개 unit에 대해 claim+workt…",
       "path": "agents/lead_engineer/tasks/TASK-AR-501.md",
@@ -2175,8 +2318,8 @@
     {
       "key": "task:TASK-AR-502",
       "level": "task",
-      "number": "2.1.3",
-      "label": "Task 2.1.3",
+      "number": "3.1.3",
+      "label": "Task 3.1.3",
       "id": "TASK-AR-502",
       "title": "워커 브랜치의 main 합류를 단일 통합자(orchestrator)가 직렬 rebase-test-merge 큐로 처리해, 병렬 구현 기간에도 merge…",
       "path": "agents/lead_engineer/tasks/TASK-AR-502.md",
@@ -2186,8 +2329,8 @@
     {
       "key": "task:TASK-AR-503",
       "level": "task",
-      "number": "2.1.4",
-      "label": "Task 2.1.4",
+      "number": "3.1.4",
+      "label": "Task 3.1.4",
       "id": "TASK-AR-503",
       "title": "워크트리 작업은 반드시 main 체크아웃에 활성 클레임을 먼저 남기고 시작하도록 강제한다. 클레임 없는 워크트리 작업은 보드/ui-console 양쪽에서…",
       "path": "agents/lead_engineer/tasks/TASK-AR-503.md",
@@ -2197,8 +2340,8 @@
     {
       "key": "task:TASK-AR-504",
       "level": "task",
-      "number": "2.1.5",
-      "label": "Task 2.1.5",
+      "number": "3.1.5",
+      "label": "Task 3.1.5",
       "id": "TASK-AR-504",
       "title": "병렬 세션(codex/claude)이 서로의 미머지 변경을 모른 채 세운 계획이 merge 후 조용히 무효화되는 문제를 지연평가로 해결한다: 계획의 전제…",
       "path": "agents/lead_engineer/tasks/TASK-AR-504.md",
@@ -2208,8 +2351,8 @@
     {
       "key": "task:TASK-AR-505",
       "level": "task",
-      "number": "2.1.6",
-      "label": "Task 2.1.6",
+      "number": "3.1.6",
+      "label": "Task 3.1.6",
       "id": "TASK-AR-505",
       "title": "작업 수명주기의 W5(통합 후 정리) 단계를 실행 가능하게 만든다: merge 완료 + claim released 상태의 좀비 워크트리/브랜치를 검출하고…",
       "path": "agents/lead_engineer/tasks/TASK-AR-505.md",
@@ -2219,8 +2362,8 @@
     {
       "key": "task:TASK-AR-506",
       "level": "task",
-      "number": "2.1.7",
-      "label": "Task 2.1.7",
+      "number": "3.1.7",
+      "label": "Task 3.1.7",
       "id": "TASK-AR-506",
       "title": "이번 taskset에만 수동 적용된 지연평가 규율(T0 스냅샷/T2 착수 체크)과 W0~W6 수명주기를 **모든 작업의 기본값**으로 만든다 — Owne…",
       "path": "agents/lead_engineer/tasks/TASK-AR-506.md",
@@ -2230,8 +2373,8 @@
     {
       "key": "task:TASK-AR-507",
       "level": "task",
-      "number": "2.1.8",
-      "label": "Task 2.1.8",
+      "number": "3.1.8",
+      "label": "Task 3.1.8",
       "id": "TASK-AR-507",
       "title": "Owner 규칙 \"작업자가 스스로 검증 금지, 항상 다른 에이전트가 검증\"을 실행 가능하게 강제한다: claim release/closeout 시 ver…",
       "path": "agents/lead_engineer/tasks/TASK-AR-507.md",
@@ -2241,8 +2384,8 @@
     {
       "key": "task:TASK-AR-508",
       "level": "task",
-      "number": "2.1.9",
-      "label": "Task 2.1.9",
+      "number": "3.1.9",
+      "label": "Task 3.1.9",
       "id": "TASK-AR-508",
       "title": "dirty intake와 session baseline의 residue 보존 규칙이 `codex/*` 브랜치에 하드코딩되어 있어 `claude/*` 브랜…",
       "path": "agents/lead_engineer/tasks/TASK-AR-508.md",
@@ -2252,8 +2395,8 @@
     {
       "key": "task:TASK-AR-513",
       "level": "task",
-      "number": "2.1.10",
-      "label": "Task 2.1.10",
+      "number": "3.1.10",
+      "label": "Task 3.1.10",
       "id": "TASK-AR-513",
       "title": "main 보드가 미머지 브랜치의 진행 상황을 모르는 인식 오류를 없앤다. Owner 보고(2026-06-12): \"main의 백로그만 보면 아직 진행이…",
       "path": "agents/lead_engineer/tasks/TASK-AR-513.md",
@@ -2263,8 +2406,8 @@
     {
       "key": "initiative:INIT-AR-WORK-METADATA-ANALYTICS",
       "level": "initiative",
-      "number": "3",
-      "label": "Initiative 3",
+      "number": "4",
+      "label": "Initiative 4",
       "id": "INIT-AR-WORK-METADATA-ANALYTICS",
       "title": "Work Metadata Analytics Initiative",
       "path": "agents/project/initiatives/INIT-AR-WORK-METADATA-ANALYTICS.md",
@@ -2274,8 +2417,8 @@
     {
       "key": "taskset:TASKSET-AR-WORK-METADATA-ANALYTICS",
       "level": "taskset",
-      "number": "3.1",
-      "label": "Taskset 3.1",
+      "number": "4.1",
+      "label": "Taskset 4.1",
       "id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
       "title": "Work Metadata Analyst",
       "path": "BACKLOG-BOARD.md",
@@ -2285,8 +2428,8 @@
     {
       "key": "task:TASK-AR-514",
       "level": "task",
-      "number": "3.1.1",
-      "label": "Task 3.1.1",
+      "number": "4.1.1",
+      "label": "Task 4.1.1",
       "id": "TASK-AR-514",
       "title": "Owner/Claude/Codex planning discussions must map to review records, task records, boa…",
       "path": "agents/lead_engineer/tasks/TASK-AR-514.md",
@@ -2296,8 +2439,8 @@
     {
       "key": "task:TASK-AR-515",
       "level": "task",
-      "number": "3.1.2",
-      "label": "Task 3.1.2",
+      "number": "4.1.2",
+      "label": "Task 4.1.2",
       "id": "TASK-AR-515",
       "title": "Define and gate the Work Item metadata catalog for provenance, resolution, relationsh…",
       "path": "agents/lead_engineer/tasks/TASK-AR-515.md",
@@ -2307,8 +2450,8 @@
     {
       "key": "task:TASK-AR-516",
       "level": "task",
-      "number": "3.1.3",
-      "label": "Task 3.1.3",
+      "number": "4.1.3",
+      "label": "Task 4.1.3",
       "id": "TASK-AR-516",
       "title": "Make initiative/taskset/task/unit progress and metadata visible through one Work Expl…",
       "path": "agents/lead_engineer/tasks/TASK-AR-516.md",
@@ -2318,8 +2461,8 @@
     {
       "key": "task:TASK-AR-517",
       "level": "task",
-      "number": "3.1.4",
-      "label": "Task 3.1.4",
+      "number": "4.1.4",
+      "label": "Task 4.1.4",
       "id": "TASK-AR-517",
       "title": "Turn Work Item metadata into queryable statistics, JSON/CSV export, and reusable save…",
       "path": "agents/lead_engineer/tasks/TASK-AR-517.md",
@@ -2329,8 +2472,8 @@
     {
       "key": "task:TASK-AR-518",
       "level": "task",
-      "number": "3.1.5",
-      "label": "Task 3.1.5",
+      "number": "4.1.5",
+      "label": "Task 4.1.5",
       "id": "TASK-AR-518",
       "title": "Require instance_uid actor attribution across claims, A2A messages, evidence, closeou…",
       "path": "agents/lead_engineer/tasks/TASK-AR-518.md",
@@ -2340,8 +2483,8 @@
     {
       "key": "task:TASK-AR-519",
       "level": "task",
-      "number": "3.1.6",
-      "label": "Task 3.1.6",
+      "number": "4.1.6",
+      "label": "Task 4.1.6",
       "id": "TASK-AR-519",
       "title": "Mark verification evidence stale when source files, commits, claims, or task records…",
       "path": "agents/lead_engineer/tasks/TASK-AR-519.md",

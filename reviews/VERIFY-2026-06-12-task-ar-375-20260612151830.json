@@ -1,0 +1,61 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-12-task-ar-375-20260612151830",
+  "work_id": "TASK-AR-375",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-375.md",
+  "kind": "task",
+  "task_id": "TASK-AR-375",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-12T15:18:30+09:00",
+  "verified_by": "codex",
+  "command_count": 5,
+  "commands": [
+    {
+      "command": "python -m py_compile scripts/agent_instance_registry.py scripts/agent_identity_gate.py scripts/task_claim_dispatcher.py scripts/pane_event_log.py",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T15:24:53+09:00",
+      "finished_at": "2026-06-12T15:24:53+09:00",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python -m py_compile src/agent_runtime/templates/project/scripts/agent_instance_registry.py src/agent_runtime/templates/project/scripts/agent_identity_gate.py src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py src/agent_runtime/templates/project/scripts/pane_event_log.py src/agent_runtime/templates/project/scripts/owner_governance_gate.py",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T15:24:53+09:00",
+      "finished_at": "2026-06-12T15:24:54+09:00",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "pytest tests/test_agent_identity_gate.py tests/test_task_claim_dispatcher.py tests/test_rbac_write_gate.py tests/test_backlog_board_tasksets.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T15:24:54+09:00",
+      "finished_at": "2026-06-12T15:25:16+09:00",
+      "stdout": ".....................                                                    [100%]\n21 passed in 8.31s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/agent_identity_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T15:25:16+09:00",
+      "finished_at": "2026-06-12T15:25:18+09:00",
+      "stdout": "agent-identity-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\AGENT-IDENTITY-CONTRACT\nfindings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/owner_governance_gate.py",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T15:25:18+09:00",
+      "finished_at": "2026-06-12T15:25:27+09:00",
+      "stdout": "collaboration-concurrency-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\AGENT-IDENTITY-CONTRACT\nfindings=0\nowner-governance: result: scripts/collaboration_concurrency_gate.py --check -> 0\nowner-governance: start: scripts/rbac_write_gate.py --check\nrbac-write-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\AGENT-IDENTITY-CONTRACT\nfindings=0\nowner-governance: result: scripts/rbac_write_gate.py --check -> 0\nowner-governance: start: scripts/agent_identity_gate.py --check\nagent-identity-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\AGENT-IDENTITY-CONTRACT\nfindings=0\nowner-governance: result: scripts/agent_identity_gate.py --check -> 0\nowner-governance: start: scripts/collaboration_governance_gate.py --check\ncollaboration-governance-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\AGENT-IDENTITY-CONTRACT\nfindings=6\nblock=0\nwatch=5\nwaived=1\n- waived role-usage:scribe agents/runtime/task_claims: waiver=WAIVER-2026-06-10-collaboration-runtime-promotion role scribe has 0 claims, expected at least 1\n- watch role-monitor:council agents/runtime/task_claims: role council has no claim evidence in this window\n- watch role-monitor:progress-scout agents/runtime/task_claims: role progress-scout has no claim evidence in this window\n- watch role-monitor:release-steward agents/runtime/task_claims: role release-steward has no claim evidence in this window\n- watch role-monitor:reviewer agents/runtime/task_claims: role reviewer has no claim evidence in this window\n- watch role-monitor:skeptic agents/runtime/task_claims: role skeptic has no claim evidence in this window\nowner-governance: result: scripts/collaboration_governance_gate.py --check -> 0\nowner-governance: start: scripts/runtime_asset_usage.py --check\nruntime-asset-usage: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\AGENT-IDENTITY-CONTRACT\nassets=14\nusage_total=87\nblock=0\nwatch=0\nby_kind={\"gate\": 4, \"hook\": 2, \"script\": 6, \"skill\": 1, \"trigger\": 1}\nby_lifecycle={\"keep\": 13, \"observe\": 1}\n- metric gate.owner_governance kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=2 reuse=1\n- metric gate.collaboration_governance kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=12 reuse=2\n- metric gate.runtime_asset_usage kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=7 reuse=2\n- metric gate.state_sync kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=2\n- metric report.governance_ops kind=script status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=1\n- metric hook.taskset_prompt kind=hook status=active lifecycle=keep paths=2 evidence=2 usage=2 reuse=1\n- metric hook.stop_owner_governance kind=hook status=active lifecycle=keep paths=2 evidence=2 usage=9 reuse=2\n- metric trigger.planning kind=trigger status=watch lifecycle=observe paths=1 evidence=2 usage=9 reuse=2\n- metric capability.ralph_loop kind=script status=active lifecycle=keep paths=1 evidence=2 usage=2 reuse=2\n- metric capability.agent_retro kind=script status=active lifecycle=keep paths=1 evidence=2 usage=11 reuse=2\n- metric capability.retro_forward kind=script status=active lifecycle=keep paths=1 evidence=2 usage=7 reuse=2\n- metric capability.scribe_due kind=script status=active lifecycle=keep paths=1 evidence=2 usage=11 reuse=2\n- metric capability.doc_steward_due kind=script status=active lifecycle=keep paths=1 evidence=2 usage=5 reuse=2\n- metric skill.taskset_dispatch kind=skill status=active lifecycle=keep paths=1 evidence=2 usage=4 reuse=2\nowner-governance: result: scripts/runtime_asset_usage.py --check -> 0\nowner-governance: start: scripts/state_sync_gate.py --check\nstate-sync-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\AGENT-IDENTITY-CONTRACT\nfindings=0\nblock=0\nwatch=0\nowner-governance: result: scripts/state_sync_gate.py --check -> 0\nowner-governance: start: scripts/planning_loop.py gate --trigger hook --action scan\nstatus=pass\nowner-governance: result: scripts/planning_loop.py gate --trigger hook --action scan -> 0\n",
+      "stderr": ""
+    }
+  ]
+}

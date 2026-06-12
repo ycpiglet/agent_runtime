@@ -1,0 +1,617 @@
+schema_version: agent-runtime-work-schema/v1
+schema_owner: planning-office
+updated_at: 2026-06-12T17:29:24+09:00
+unknown_field_policy: watch
+derived_field_policy: computed_only
+custom_property_policy: register_here_first
+
+work_kinds:
+  - initiative
+  - taskset
+  - task
+  - unit
+  - routine
+  - spike
+
+closed_resolution_values:
+  - done
+  - wontfix
+  - duplicate
+  - superseded
+  - moved_to_vault
+
+required_core_fields:
+  - schema_version
+  - work_id
+  - work_uid
+  - kind
+  - status
+  - owner
+  - created_at
+  - updated_at
+  - origin_type
+  - origin_ref
+  - created_by
+
+minimum_required_by_kind:
+  initiative:
+    - schema_version
+    - work_id
+    - work_uid
+    - kind
+    - status
+    - owner
+    - created_at
+    - updated_at
+    - origin_type
+    - origin_ref
+    - created_by
+  taskset:
+    - schema_version
+    - work_id
+    - work_uid
+    - kind
+    - parent_id
+    - status
+    - owner
+    - created_at
+    - updated_at
+    - origin_type
+    - origin_ref
+    - created_by
+  task:
+    - schema_version
+    - work_id
+    - work_uid
+    - kind
+    - parent_id
+    - status
+    - owner
+    - created_at
+    - updated_at
+    - origin_type
+    - origin_ref
+    - created_by
+  unit:
+    - schema_version
+    - work_id
+    - work_uid
+    - kind
+    - parent_id
+    - status
+    - owner
+    - created_at
+    - updated_at
+    - origin_type
+    - origin_ref
+    - created_by
+    - verification_status
+  routine:
+    - schema_version
+    - work_id
+    - work_uid
+    - kind
+    - status
+    - owner
+    - created_at
+    - updated_at
+    - origin_type
+    - origin_ref
+    - created_by
+  spike:
+    - schema_version
+    - work_id
+    - work_uid
+    - kind
+    - parent_id
+    - status
+    - owner
+    - created_at
+    - updated_at
+    - origin_type
+    - origin_ref
+    - created_by
+
+required_when_closed:
+  - resolution
+  - completed_at
+  - verification_status
+
+computed_only_fields:
+  progress_pct:
+    storage_policy: computed_only
+    computed_from: child_status_rollup
+  age:
+    storage_policy: computed_only
+    computed_from: created_at_and_now
+  lead_time:
+    storage_policy: computed_only
+    computed_from: started_at_and_completed_at
+  est_actual_delta:
+    storage_policy: computed_only
+    computed_from: estimate_minus_actual
+  rollup_progress_pct:
+    storage_policy: computed_only
+    computed_from: child_progress_pct
+
+fields:
+  schema_version:
+    type: string
+    required_for: [initiative, taskset, task, unit, routine, spike]
+    populated_by: work_cli
+    consumed_by: [work_schema_gate, work_cli]
+    query_use: Distinguish envelope versions during migration.
+  work_id:
+    type: string
+    required_for: [initiative, taskset, task, unit, routine, spike]
+    populated_by: work_cli
+    consumed_by: [work_cli, board, stats]
+    query_use: Stable human-searchable work item ID.
+  work_uid:
+    type: uuid
+    required_for: [initiative, taskset, task, unit, routine, spike]
+    populated_by: work_cli
+    consumed_by: [work_cli, gates, stats]
+    query_use: Collision-resistant identity independent of display labels.
+  kind:
+    type: enum
+    required_for: [initiative, taskset, task, unit, routine, spike]
+    populated_by: work_cli
+    consumed_by: [work_schema_gate, board, stats]
+    query_use: Filter and validate records by work item kind.
+  status:
+    type: enum
+    required_for: [initiative, taskset, task, unit, routine, spike]
+    populated_by: lifecycle_tools
+    consumed_by: [board, gates, stats]
+    query_use: Filter active, blocked, closed, and waiting work.
+  owner:
+    type: string
+    required_for: [initiative, taskset, task, unit, routine, spike]
+    populated_by: planner
+    consumed_by: [board, assigner, stats]
+    query_use: Group accountability by owner role or team.
+  created_at:
+    type: datetime
+    required_for: [initiative, taskset, task, unit, routine, spike]
+    populated_by: work_cli
+    consumed_by: [board, stats]
+    query_use: Calculate age and intake trends.
+  updated_at:
+    type: datetime
+    required_for: [initiative, taskset, task, unit, routine, spike]
+    populated_by: lifecycle_tools
+    consumed_by: [board, stale_gate, stats]
+    query_use: Detect stale records and recent changes.
+  origin_type:
+    type: enum
+    required_for: [initiative, taskset, task, unit, routine, spike]
+    populated_by: planner
+    consumed_by: [stats, board]
+    query_use: Compare owner, proposal, intake, retro, and automation origins.
+  origin_ref:
+    type: string
+    required_for: [initiative, taskset, task, unit, routine, spike]
+    populated_by: planner
+    consumed_by: [review_index, stats, board]
+    query_use: Link each item to the source that created it.
+  created_by:
+    type: string
+    required_for: [initiative, taskset, task, unit, routine, spike]
+    populated_by: work_cli
+    consumed_by: [audit, stats]
+    query_use: Attribute creation to Owner, pane, tool, or agent instance.
+  parent_id:
+    type: string
+    required_for: [taskset, task, unit, spike]
+    populated_by: work_cli
+    consumed_by: [work_item_classifier, orphan_gate, board]
+    query_use: Traverse initiative to taskset to task to unit lineage.
+  id:
+    type: string
+    required_for: []
+    populated_by: work_cli
+    consumed_by: [legacy_tools, board, search]
+    query_use: Preserve legacy IDs while work_id remains canonical.
+  display_id:
+    type: string
+    required_for: []
+    populated_by: work_cli
+    consumed_by: [board, search]
+    query_use: Show the human-facing task label.
+  task_uid:
+    type: uuid
+    required_for: []
+    populated_by: work_cli
+    consumed_by: [task_identity, gates]
+    query_use: Preserve task identity compatibility during migration.
+  registered_at:
+    type: datetime
+    required_for: []
+    populated_by: work_cli
+    consumed_by: [task_identity, stats]
+    query_use: Distinguish registration time from creation or start time.
+  started_at:
+    type: datetime
+    required_for: []
+    populated_by: claim_dispatcher
+    consumed_by: [task_identity_gate, stats]
+    query_use: Calculate queue time and lead time.
+  completed_at:
+    type: datetime
+    required_for: []
+    populated_by: work_close
+    consumed_by: [task_identity_gate, stats]
+    query_use: Calculate cycle time and closeout history.
+  resolution:
+    type: enum
+    required_for: []
+    populated_by: work_close
+    consumed_by: [work_close, stats]
+    query_use: Separate done from duplicate, superseded, wontfix, or vault moves.
+  closed_by:
+    type: string
+    required_for: []
+    populated_by: work_close
+    consumed_by: [audit, stats]
+    query_use: Attribute closeout to a tool, actor, or agent instance.
+  verification_status:
+    type: enum
+    required_for: [unit]
+    populated_by: work_verify
+    consumed_by: [closeout_gate, board, stats]
+    query_use: Show pass, fail, blocked, or stale verification state.
+  created_by_instance:
+    type: string
+    required_for: []
+    populated_by: agent_identity
+    consumed_by: [audit, agent_stats]
+    query_use: Attribute generated records to a concrete agent instance.
+  last_actor_instance:
+    type: string
+    required_for: []
+    populated_by: lifecycle_tools
+    consumed_by: [audit, agent_stats]
+    query_use: Trace the most recent concrete actor that changed the item.
+  team:
+    type: string
+    required_for: []
+    populated_by: planner
+    consumed_by: [assigner, workload_stats, board]
+    query_use: Filter and balance work by team.
+  title:
+    type: string
+    required_for: []
+    populated_by: planner
+    consumed_by: [board, search, explorer]
+    query_use: Display item labels without parsing headings.
+  summary:
+    type: string
+    required_for: []
+    populated_by: planner
+    consumed_by: [board, search, explorer]
+    query_use: Show one-line search and hover summaries.
+  tags:
+    type: list
+    required_for: []
+    populated_by: planner
+    consumed_by: [search, board, stats]
+    query_use: Filter by topic, capability, risk, or tool surface.
+  area:
+    type: string
+    required_for: []
+    populated_by: planner
+    consumed_by: [assigner, stats, search]
+    query_use: Find open work by product or repository area.
+  component:
+    type: string
+    required_for: []
+    populated_by: planner
+    consumed_by: [assigner, code_owner_gate, stats]
+    query_use: Find work by concrete module, script, package, or document surface.
+  priority:
+    type: enum
+    required_for: []
+    populated_by: planner
+    consumed_by: [board, dispatcher, stats]
+    query_use: Sort and filter work by urgency or owner priority.
+  difficulty:
+    type: enum
+    required_for: []
+    populated_by: planner
+    consumed_by: [dispatcher, stats]
+    query_use: Route harder items to stronger models or reviewers.
+  initiative_id:
+    type: string
+    required_for: []
+    populated_by: work_cli
+    consumed_by: [work_item_classifier, board, explorer]
+    query_use: Query all descendants of an initiative.
+  project_id:
+    type: string
+    required_for: []
+    populated_by: work_cli
+    consumed_by: [board, explorer, stats]
+    query_use: Filter host, repository, or product lane.
+  task_set_id:
+    type: string
+    required_for: []
+    populated_by: work_cli
+    consumed_by: [taskset_work_gate, dispatcher, board]
+    query_use: Group tasks and units under their taskset.
+  task_id:
+    type: string
+    required_for: []
+    populated_by: work_cli
+    consumed_by: [task_unit_readiness_gate, dispatcher, board]
+    query_use: Link a unit back to its parent task.
+  unit_id:
+    type: string
+    required_for: []
+    populated_by: work_cli
+    consumed_by: [task_unit_readiness_gate, board, stats]
+    query_use: Identify worker-ready units in views.
+  unit_spec:
+    type: string
+    required_for: []
+    populated_by: work_cli
+    consumed_by: [dispatcher, taskset_work_gate, board]
+    query_use: Link task records to canonical unit specs.
+  reservation_id:
+    type: string
+    required_for: []
+    populated_by: work_cli
+    consumed_by: [task_identity, audit]
+    query_use: Trace display ID reservations to the atomic lease.
+  horizon:
+    type: enum
+    required_for: []
+    populated_by: planner
+    consumed_by: [board, dispatcher, stats]
+    query_use: Separate unit, short, mid, and long horizon work.
+  model_tier:
+    type: enum
+    required_for: []
+    populated_by: planner
+    consumed_by: [dispatcher, model_routing, stats]
+    query_use: Route unit execution to a cost and capability tier.
+  planner_model_tier:
+    type: enum
+    required_for: []
+    populated_by: planner
+    consumed_by: [dispatcher, model_routing, stats]
+    query_use: Route planning and decomposition to an appropriate model.
+  worker_model_tier:
+    type: enum
+    required_for: []
+    populated_by: planner
+    consumed_by: [dispatcher, model_routing, stats]
+    query_use: Route implementation to a cost-appropriate worker.
+  reviewer_model_tier:
+    type: enum
+    required_for: []
+    populated_by: planner
+    consumed_by: [dispatcher, model_routing, stats]
+    query_use: Select verification strength for item risk.
+  escalation_triggers:
+    type: list
+    required_for: []
+    populated_by: planner
+    consumed_by: [model_routing, dispatcher, gates]
+    query_use: Escalate ambiguous, cross-cutting, failing, or sensitive units.
+  risk_tier:
+    type: enum
+    required_for: []
+    populated_by: planner
+    consumed_by: [approval_gate, reviewer_router, stats]
+    query_use: Filter high-risk work and compare adjusted failure rates.
+  approval_required:
+    type: boolean
+    required_for: []
+    populated_by: planner
+    consumed_by: [approval_gate, dispatcher]
+    query_use: Hold external, destructive, or high-risk work before execution.
+  security_sensitive:
+    type: boolean
+    required_for: []
+    populated_by: planner
+    consumed_by: [security_gate, reviewer_router]
+    query_use: Force stronger review for secret, auth, data, or security boundaries.
+  stakeholders:
+    type: list
+    required_for: []
+    populated_by: planner
+    consumed_by: [notifications, board]
+    query_use: Notify interested roles when the item changes.
+  watchers:
+    type: list
+    required_for: []
+    populated_by: planner
+    consumed_by: [notifications, board]
+    query_use: Let optional subscribers follow changes without owning the work.
+  due_date:
+    type: date
+    required_for: []
+    populated_by: planner
+    consumed_by: [flow_stats, board]
+    query_use: Identify overdue work and horizon risk.
+  blocked_since:
+    type: datetime
+    required_for: []
+    populated_by: lifecycle_tools
+    consumed_by: [flow_stats, board]
+    query_use: Measure blocked time and stale work.
+  blocks:
+    type: list
+    required_for: []
+    populated_by: planner
+    consumed_by: [dependency_graph, board]
+    query_use: Build dependency and critical-path views.
+  blocked_by:
+    type: list
+    required_for: []
+    populated_by: planner
+    consumed_by: [dependency_graph, board]
+    query_use: Explain why work cannot start or close.
+  relates_to:
+    type: list
+    required_for: []
+    populated_by: planner
+    consumed_by: [search, graph]
+    query_use: Keep non-blocking relationships queryable.
+  evidence_refs:
+    type: list
+    required_for: []
+    populated_by: work_close
+    consumed_by: [evidence_index, closeout_gate]
+    query_use: Prove completed work has linked evidence.
+  review_refs:
+    type: list
+    required_for: []
+    populated_by: planner_or_reviewer
+    consumed_by: [review_index, owner_doc_gate]
+    query_use: Link planning, review, and closeout records.
+  commit_refs:
+    type: list
+    required_for: []
+    populated_by: closeout_tools
+    consumed_by: [search, release_notes]
+    query_use: Trace which commits changed an item.
+  pr_refs:
+    type: list
+    required_for: []
+    populated_by: closeout_tools
+    consumed_by: [search, release_notes]
+    query_use: Trace which PRs delivered an item.
+  a2a_context_id:
+    type: string
+    required_for: []
+    populated_by: a2a_router
+    consumed_by: [a2a_trace_gate, audit]
+    query_use: Connect work to agent-to-agent decision chains.
+  claim_refs:
+    type: list
+    required_for: []
+    populated_by: claim_dispatcher
+    consumed_by: [parallel_worktree_gate, audit, stats]
+    query_use: Link work to runtime claims and pane handoffs.
+  est_tokens:
+    type: integer
+    required_for: []
+    populated_by: planner
+    consumed_by: [budget_gate, stats]
+    query_use: Estimate model cost before execution.
+  est_hours:
+    type: decimal
+    required_for: []
+    populated_by: planner
+    consumed_by: [budget_gate, flow_stats, stats]
+    query_use: Estimate effort before execution.
+  est_cost:
+    type: decimal
+    required_for: []
+    populated_by: planner
+    consumed_by: [budget_gate, stats]
+    query_use: Estimate money cost before execution.
+  budget_cap:
+    type: decimal
+    required_for: []
+    populated_by: planner
+    consumed_by: [budget_gate, dispatcher]
+    query_use: Stop or escalate work before it exceeds an approved cap.
+  actual_tokens:
+    type: integer
+    required_for: []
+    populated_by: work_close
+    consumed_by: [budget_gate, stats]
+    query_use: Measure actual token spend after closeout.
+  actual_hours:
+    type: decimal
+    required_for: []
+    populated_by: work_close
+    consumed_by: [budget_gate, flow_stats, stats]
+    query_use: Measure actual effort after closeout.
+  actual_cost:
+    type: decimal
+    required_for: []
+    populated_by: work_close
+    consumed_by: [budget_gate, stats]
+    query_use: Measure actual money cost after closeout.
+  rework_count:
+    type: integer
+    required_for: []
+    populated_by: gate_or_reviewer
+    consumed_by: [stats, model_routing]
+    query_use: Compare quality by team, role, model tier, or skill version.
+  gate_failure_count:
+    type: integer
+    required_for: []
+    populated_by: gates
+    consumed_by: [stats, model_routing]
+    query_use: Identify repeated failure patterns and routing adjustments.
+  verified_at:
+    type: datetime
+    required_for: []
+    populated_by: work_verify
+    consumed_by: [stale_verification_gate, stats]
+    query_use: Detect stale verification after source changes.
+  verified_by:
+    type: string
+    required_for: []
+    populated_by: work_verify
+    consumed_by: [audit, stats]
+    query_use: Attribute verification to a tool, actor, or agent instance.
+  verification:
+    type: list
+    required_for: []
+    populated_by: planner
+    consumed_by: [work_verify, criteria_gate, closeout_gate]
+    query_use: Run executable checks and match criteria to measurable evidence.
+  context:
+    type: string
+    required_for: []
+    populated_by: planner
+    consumed_by: [task_unit_readiness_gate, dispatcher]
+    query_use: Give workers local context to execute without chat history.
+  inputs:
+    type: list
+    required_for: []
+    populated_by: planner
+    consumed_by: [task_unit_readiness_gate, dispatcher]
+    query_use: List source documents, records, or files the unit depends on.
+  target_files:
+    type: list
+    required_for: []
+    populated_by: planner
+    consumed_by: [task_unit_readiness_gate, assigner, code_owner_gate]
+    query_use: Match units to teams and detect file-level collisions.
+  scope:
+    type: string
+    required_for: []
+    populated_by: planner
+    consumed_by: [task_unit_readiness_gate, dispatcher]
+    query_use: Bound what the worker may change.
+  acceptance:
+    type: list
+    required_for: []
+    populated_by: planner
+    consumed_by: [criteria_gate, task_unit_readiness_gate, closeout_gate]
+    query_use: Define measurable outcomes before implementation starts.
+  handoff:
+    type: string
+    required_for: []
+    populated_by: planner
+    consumed_by: [task_unit_readiness_gate, closeout_tools]
+    query_use: Standardize what workers report after execution.
+  stop_condition:
+    type: string
+    required_for: []
+    populated_by: planner
+    consumed_by: [task_unit_readiness_gate, dispatcher]
+    query_use: Prevent units from expanding into unapproved scope.
+  xp_value:
+    type: integer
+    required_for: []
+    populated_by: stats_engine
+    consumed_by: [gamification, stats]
+    query_use: Cache score outputs from measured completion and quality signals.

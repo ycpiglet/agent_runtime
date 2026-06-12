@@ -1,0 +1,61 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-12-unit-task-ar-375-001-20260612151810",
+  "work_id": "UNIT-TASK-AR-375-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-375/UNIT-TASK-AR-375-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-375",
+  "unit_id": "UNIT-TASK-AR-375-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-12T15:18:10+09:00",
+  "verified_by": "codex",
+  "command_count": 5,
+  "commands": [
+    {
+      "command": "python -m py_compile scripts/agent_instance_registry.py scripts/agent_identity_gate.py scripts/task_claim_dispatcher.py scripts/pane_event_log.py",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T15:24:26+09:00",
+      "finished_at": "2026-06-12T15:24:26+09:00",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python -m py_compile src/agent_runtime/templates/project/scripts/agent_instance_registry.py src/agent_runtime/templates/project/scripts/agent_identity_gate.py src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py src/agent_runtime/templates/project/scripts/pane_event_log.py src/agent_runtime/templates/project/scripts/owner_governance_gate.py",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T15:24:26+09:00",
+      "finished_at": "2026-06-12T15:24:26+09:00",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "pytest tests/test_agent_identity_gate.py tests/test_task_claim_dispatcher.py tests/test_rbac_write_gate.py tests/test_backlog_board_tasksets.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T15:24:26+09:00",
+      "finished_at": "2026-06-12T15:24:35+09:00",
+      "stdout": ".....................                                                    [100%]\n21 passed in 6.78s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/agent_identity_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T15:24:35+09:00",
+      "finished_at": "2026-06-12T15:24:35+09:00",
+      "stdout": "agent-identity-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\AGENT-IDENTITY-CONTRACT\nfindings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/task_unit_readiness_gate.py --task-id TASK-AR-375 --unit-id UNIT-TASK-AR-375-001 --require-ready --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T15:24:35+09:00",
+      "finished_at": "2026-06-12T15:24:35+09:00",
+      "stdout": "task-unit-readiness-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\AGENT-IDENTITY-CONTRACT\nfindings=0\n",
+      "stderr": ""
+    }
+  ]
+}

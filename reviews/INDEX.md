@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-13T00:07:14+09:00
-record_count: 394
+generated_at: 2026-06-13T00:47:25+09:00
+record_count: 418
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `394` review and evidence records under `reviews/`.
+- Summary: indexed `418` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `394` files |
+| Reviews covered | pass | `418` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -123,6 +123,7 @@ record_count: 394
 | `reviews/MEETING-2026-06-12-parallel-work-lifecycle-rules.md` | `MEETING-2026-06-12-parallel-work-lifecycle-rules` | meeting | pass | pass | Parallel Work Lifecycle Rules Meeting |
 | `reviews/MEETING-2026-06-12-plan-assumption-deferred-revalidation.md` | `MEETING-2026-06-12-plan-assumption-deferred-revalidation` | meeting | pass | pass | Plan Assumption Deferred Revalidation Meeting |
 | `reviews/MEETING-2026-06-12-work-hierarchy-numbering-and-recording.md` | `MEETING-2026-06-12-work-hierarchy-numbering-and-recording` | meeting | pass | pass | Work Hierarchy Numbering And Recording Meeting |
+| `reviews/MEETING-2026-06-12-work-item-generator-metadata-agent-identity.md` | `MEETING-2026-06-12-work-item-generator-metadata-agent-identity` | meeting | pass | pass | Work Item Generator, Metadata, And Agent Identity Intake |
 | `reviews/MEETING-2026-06-12-work-metadata-a2a-registration-audit.md` | `MEETING-2026-06-12-work-metadata-a2a-registration-audit` | meeting | pass | pass | Work Metadata And A2A Registration Audit |
 | `reviews/MEETING-2026-06-13-agent-runtime-cross-project-governance-and-release-update.md` | `MEETING-2026-06-13-agent-runtime-cross-project-governance-and-release-update` | md | record | n/a | MEETING-2026-06-13-agent-runtime-cross-project-governance-and-release-update |
 | `reviews/MEETING-2026-06-13-agent-runtime-task-ar-211-overlay-implementation-checkpoint.md` | `MEETING-2026-06-13-agent-runtime-task-ar-211-overlay-implementation-checkpoint` | md | record | n/a | MEETING-2026-06-13-agent-runtime-task-ar-211-overlay-implementation-checkpoint |
@@ -413,7 +414,18 @@ record_count: 394
 | `reviews/REVIEW-2026-06-12-agent-runtime-vision-gap-closure-closeout.md` | `REVIEW-2026-06-12-agent-runtime-vision-gap-closure-closeout` | review | pass | pass | Vision Gap Closure Closeout Review |
 | `reviews/REVIEW-2026-06-12-claim-lease-closeout.md` | `REVIEW-2026-06-12-claim-lease-closeout` | brief | record | pass | REVIEW-2026-06-12-claim-lease-closeout |
 | `reviews/REVIEW-2026-06-12-rbac-write-gate-closeout.md` | `REVIEW-2026-06-12-rbac-write-gate-closeout` | md | record | n/a | REVIEW: TASK-AR-312 RBAC Write Gate Closeout |
+| `reviews/REVIEW-2026-06-12-taskset-ar-agent-identity-contract-registration.md` | `REVIEW-2026-06-12-taskset-ar-agent-identity-contract-registration` | md | record | pass | Agent Identity Contract Registration |
+| `reviews/REVIEW-2026-06-12-work-assign-command.md` | `REVIEW-2026-06-12-work-assign-command` | md | record | pass | Work Assign Command |
+| `reviews/REVIEW-2026-06-12-work-close-command.md` | `REVIEW-2026-06-12-work-close-command` | md | record | pass | Work Close Command |
+| `reviews/REVIEW-2026-06-12-work-criteria-command.md` | `REVIEW-2026-06-12-work-criteria-command` | md | record | pass | Work Criteria Command |
 | `reviews/REVIEW-2026-06-12-work-hierarchy-conflict-closure-registration.md` | `REVIEW-2026-06-12-work-hierarchy-conflict-closure-registration` | review | pass | pass | Work Hierarchy Conflict Closure Registration Review |
+| `reviews/REVIEW-2026-06-12-work-now-timestamp-source.md` | `REVIEW-2026-06-12-work-now-timestamp-source` | md | record | pass | Work Now Timestamp Source Closeout |
+| `reviews/REVIEW-2026-06-12-work-registration-cli.md` | `REVIEW-2026-06-12-work-registration-cli` | md | record | pass | Work Registration CLI Closeout |
+| `reviews/REVIEW-2026-06-12-work-registration-unit-scaffold.md` | `REVIEW-2026-06-12-work-registration-unit-scaffold` | md | record | pass | Work Registration Unit Scaffold Closeout |
+| `reviews/REVIEW-2026-06-12-work-schema-ssot-gate.md` | `REVIEW-2026-06-12-work-schema-ssot-gate` | md | record | pass | Work Schema SSoT Gate Closeout |
+| `reviews/REVIEW-2026-06-12-work-split-command.md` | `REVIEW-2026-06-12-work-split-command` | md | record | pass | Work Split Command |
+| `reviews/REVIEW-2026-06-12-work-stats-command.md` | `REVIEW-2026-06-12-work-stats-command` | md | record | pass | Work Stats Command |
+| `reviews/REVIEW-2026-06-12-work-verify-command.md` | `REVIEW-2026-06-12-work-verify-command` | md | record | pass | Work Verify Command Closeout |
 | `reviews/REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review.md` | `REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review` | md | record | n/a | REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review |
 | `reviews/REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log.md` | `REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log` | md | record | n/a | REVIEW: TASK-AR-222 closeout 실행 로그 |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
@@ -428,6 +440,18 @@ record_count: 394
 | `reviews/SEMINAR-2026-06-13-agent-runtime-task-ar-211-overlay-seminar-notes.md` | `SEMINAR-2026-06-13-agent-runtime-task-ar-211-overlay-seminar-notes` | md | record | n/a | SEMINAR-2026-06-13-agent-runtime-task-ar-211-overlay-seminar-notes |
 | `reviews/SEMINAR-2026-06-14-agent-runtime-task-ar-222-closeout-sync.md` | `SEMINAR-2026-06-14-agent-runtime-task-ar-222-closeout-sync` | md | record | n/a | SEMINAR: TASK-AR-222 closeout 번들 운영 동기화 세미나 |
 | `reviews/SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync.md` | `SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync` | md | record | n/a | SEMINAR (2026-06-15) - TASK-AR-223 governance sync |
+| `reviews/VERIFY-2026-06-12-task-ar-375-20260612150820.json` | `VERIFY-2026-06-12-task-ar-375-20260612150820` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612150820 |
+| `reviews/VERIFY-2026-06-12-task-ar-375-20260612151830.json` | `VERIFY-2026-06-12-task-ar-375-20260612151830` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612151830 |
+| `reviews/VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030.json` | `VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030` | json | record | n/a | VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030 |
+| `reviews/VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151220.json` | `VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151220` | json | record | n/a | VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151220 |
+| `reviews/VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612153000.json` | `VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612153000` | json | record | n/a | VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612153000 |
+| `reviews/VERIFY-2026-06-12-unit-task-ar-372-005-20260612131309.json` | `VERIFY-2026-06-12-unit-task-ar-372-005-20260612131309` | json | record | n/a | VERIFY-2026-06-12-unit-task-ar-372-005-20260612131309 |
+| `reviews/VERIFY-2026-06-12-unit-task-ar-372-006-20260612133100.json` | `VERIFY-2026-06-12-unit-task-ar-372-006-20260612133100` | json | record | n/a | VERIFY-2026-06-12-unit-task-ar-372-006-20260612133100 |
+| `reviews/VERIFY-2026-06-12-unit-task-ar-372-007-20260612135400.json` | `VERIFY-2026-06-12-unit-task-ar-372-007-20260612135400` | json | record | n/a | VERIFY-2026-06-12-unit-task-ar-372-007-20260612135400 |
+| `reviews/VERIFY-2026-06-12-unit-task-ar-372-008-20260612141409.json` | `VERIFY-2026-06-12-unit-task-ar-372-008-20260612141409` | json | record | n/a | VERIFY-2026-06-12-unit-task-ar-372-008-20260612141409 |
+| `reviews/VERIFY-2026-06-12-unit-task-ar-372-009-20260612143100.json` | `VERIFY-2026-06-12-unit-task-ar-372-009-20260612143100` | json | record | n/a | VERIFY-2026-06-12-unit-task-ar-372-009-20260612143100 |
+| `reviews/VERIFY-2026-06-12-unit-task-ar-375-001-20260612150512.json` | `VERIFY-2026-06-12-unit-task-ar-375-001-20260612150512` | json | record | n/a | VERIFY-2026-06-12-unit-task-ar-375-001-20260612150512 |
+| `reviews/VERIFY-2026-06-12-unit-task-ar-375-001-20260612151810.json` | `VERIFY-2026-06-12-unit-task-ar-375-001-20260612151810` | json | record | n/a | VERIFY-2026-06-12-unit-task-ar-375-001-20260612151810 |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.
