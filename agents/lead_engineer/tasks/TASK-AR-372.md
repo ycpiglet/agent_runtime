@@ -6,7 +6,7 @@ registered_at: 2026-06-12T08:17:54+09:00
 created_at: 2026-06-12T08:17:54+09:00
 title: Registration CLI/API for initiative, taskset, task, and unit records
 started_at: 2026-06-12T11:58:44+09:00
-updated_at: 2026-06-12T12:03:41+09:00
+updated_at: 2026-06-12T12:27:29+09:00
 status: in_progress
 priority: P1
 difficulty: L
@@ -72,5 +72,6 @@ tags:
 ## Units
 
 - `UNIT-TASK-AR-372-001` completed: Established `WORK-SCHEMA.yml` as the field dictionary SSoT and added a deterministic schema gate before full registration CLI/API work.
-- Remaining: implement the structured registration command/API that consumes this schema and the `TASK-AR-370` reservation allocator.
+- `UNIT-TASK-AR-372-002` completed: Added `scripts/work.py new --input <json>` for deterministic initiative/taskset/task/review registration using the reservation ledger.
+- Remaining: add optional worker-ready unit generation, then closeout verification for the full registration API.
 

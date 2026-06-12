@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+import json
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -51,6 +52,36 @@ def test_backlog_board_groups_tasks_by_task_set_before_lane(tmp_path: Path) -> N
 
     quality_section = board.split("### Quality Sentinel (`TASKSET-AR-QUALITY-LOOP`)", 1)[1].split("### Progress Scout", 1)[0]
     assert quality_section.index("TASK-AR-901") < quality_section.index("TASK-AR-902")
+
+
+def test_backlog_board_reads_registered_taskset_definitions(tmp_path: Path) -> None:
+    tasks_dir = tmp_path / "agents" / "lead_engineer" / "tasks"
+    _write_task(tasks_dir, "TASK-AR-901", "TASKSET-TEST-WORK-CLI", status="planned")
+    registry = tmp_path / "agents" / "project" / "work-items" / "TASKSET-DEFINITIONS.json"
+    registry.parent.mkdir(parents=True)
+    registry.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-taskset-definitions/v1",
+                "tasksets": [
+                    {
+                        "task_set_id": "TASKSET-TEST-WORK-CLI",
+                        "display_name": "Work CLI Test",
+                        "summary": "Structured registration test taskset.",
+                        "order": 501,
+                    }
+                ],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    tasks = backlog_board.load_tasks(tasks_dir)
+    board = backlog_board.render(tasks, root=tmp_path)
+
+    assert "### Work CLI Test (`TASKSET-TEST-WORK-CLI`)" in board
+    assert "- Flow: Structured registration test taskset." in board
 
 
 def test_backlog_board_shows_project_unit_and_wip_claim_summary(tmp_path: Path) -> None:
