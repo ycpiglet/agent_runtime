@@ -51,6 +51,11 @@ active_work:
       agent_instance_id: inst-w4-ar520-claude
       display_name: claude/fresh-plover
       callsite_id: claude-w4-ar520
+    - claim_id: CLAIM-20260613-083743-task-ar-507-5abe
+      agent_role: lead-engineer
+      agent_instance_id: inst-w5-ar507-claude
+      display_name: claude/verify-falcon
+      callsite_id: claude-w5-ar507
   current_teams: []
 resume:
   active_task: TASK-AR-501
