@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-12T13:14:33+09:00
-record_count: 394
+generated_at: 2026-06-12T13:33:06+09:00
+record_count: 396
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `394` review and evidence records under `reviews/`.
+- Summary: indexed `396` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `394` files |
+| Reviews covered | pass | `396` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -407,6 +407,7 @@ record_count: 394
 | `reviews/REVIEW-2026-06-12-agent-runtime-vision-gap-closure-closeout.md` | `REVIEW-2026-06-12-agent-runtime-vision-gap-closure-closeout` | review | pass | pass | Vision Gap Closure Closeout Review |
 | `reviews/REVIEW-2026-06-12-claim-lease-closeout.md` | `REVIEW-2026-06-12-claim-lease-closeout` | brief | record | pass | REVIEW-2026-06-12-claim-lease-closeout |
 | `reviews/REVIEW-2026-06-12-rbac-write-gate-closeout.md` | `REVIEW-2026-06-12-rbac-write-gate-closeout` | md | record | n/a | REVIEW: TASK-AR-312 RBAC Write Gate Closeout |
+| `reviews/REVIEW-2026-06-12-work-close-command.md` | `REVIEW-2026-06-12-work-close-command` | md | record | pass | Work Close Command |
 | `reviews/REVIEW-2026-06-12-work-hierarchy-conflict-closure-registration.md` | `REVIEW-2026-06-12-work-hierarchy-conflict-closure-registration` | review | pass | pass | Work Hierarchy Conflict Closure Registration Review |
 | `reviews/REVIEW-2026-06-12-work-now-timestamp-source.md` | `REVIEW-2026-06-12-work-now-timestamp-source` | md | record | pass | Work Now Timestamp Source Closeout |
 | `reviews/REVIEW-2026-06-12-work-registration-cli.md` | `REVIEW-2026-06-12-work-registration-cli` | md | record | pass | Work Registration CLI Closeout |
@@ -428,6 +429,7 @@ record_count: 394
 | `reviews/SEMINAR-2026-06-14-agent-runtime-task-ar-222-closeout-sync.md` | `SEMINAR-2026-06-14-agent-runtime-task-ar-222-closeout-sync` | md | record | n/a | SEMINAR: TASK-AR-222 closeout 번들 운영 동기화 세미나 |
 | `reviews/SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync.md` | `SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync` | md | record | n/a | SEMINAR (2026-06-15) - TASK-AR-223 governance sync |
 | `reviews/VERIFY-2026-06-12-unit-task-ar-372-005-20260612131309.json` | `VERIFY-2026-06-12-unit-task-ar-372-005-20260612131309` | json | record | n/a | VERIFY-2026-06-12-unit-task-ar-372-005-20260612131309 |
+| `reviews/VERIFY-2026-06-12-unit-task-ar-372-006-20260612133100.json` | `VERIFY-2026-06-12-unit-task-ar-372-006-20260612133100` | json | record | n/a | VERIFY-2026-06-12-unit-task-ar-372-006-20260612133100 |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.

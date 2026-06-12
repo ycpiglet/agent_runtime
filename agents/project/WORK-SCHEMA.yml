@@ -1,6 +1,6 @@
 schema_version: agent-runtime-work-schema/v1
 schema_owner: planning-office
-updated_at: 2026-06-12T11:58:44+09:00
+updated_at: 2026-06-12T13:30:00+09:00
 unknown_field_policy: watch
 derived_field_policy: computed_only
 custom_property_policy: register_here_first
@@ -225,6 +225,13 @@ fields:
     populated_by: work_close
     consumed_by: [task_identity_gate, stats]
     query_use: Calculate cycle time and closeout history.
+    mutable: closeout_only
+  closed_by:
+    type: string
+    required_for: []
+    populated_by: work_close
+    consumed_by: [audit, stats]
+    query_use: Attribute closeout to the concrete tool, actor, or agent instance that closed the item.
     mutable: closeout_only
   origin_type:
     type: enum
@@ -456,6 +463,13 @@ fields:
     populated_by: work_close
     consumed_by: [budget_gate, stats]
     query_use: Measure actual token spend after closeout.
+    mutable: closeout_only
+  actual_hours:
+    type: decimal
+    required_for: []
+    populated_by: work_close
+    consumed_by: [budget_gate, flow_stats, stats]
+    query_use: Measure actual human or agent elapsed effort after closeout.
     mutable: closeout_only
   est_cost:
     type: decimal

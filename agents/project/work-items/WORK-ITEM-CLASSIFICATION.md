@@ -7,14 +7,14 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-12T13:14:24+09:00
-record_count: 194
+generated_at: 2026-06-12T13:33:06+09:00
+record_count: 195
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `194` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `195` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
@@ -23,7 +23,7 @@ record_count: 194
 | Initiatives | pass | `2` records |
 | Tasksets | pass | `24` records |
 | Tasks | pass | `162` records |
-| Units | pass | `6` records |
+| Units | pass | `7` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -231,6 +231,7 @@ record_count: 194
 | 1.1.4.3 | Unit 1.1.4.3 | unit | `UNIT-TASK-AR-372-003` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-003.md` | UNIT-TASK-AR-372-003 - Worker-Ready Unit Generation In Work CLI |
 | 1.1.4.4 | Unit 1.1.4.4 | unit | `UNIT-TASK-AR-372-004` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-004.md` | UNIT-TASK-AR-372-004 - Canonical Timestamp Source And Work Now |
 | 1.1.4.5 | Unit 1.1.4.5 | unit | `UNIT-TASK-AR-372-005` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-005.md` | UNIT-TASK-AR-372-005 - Deterministic Work Verify Command |
+| 1.1.4.6 | Unit 1.1.4.6 | unit | `UNIT-TASK-AR-372-006` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-006.md` | UNIT-TASK-AR-372-006 - Deterministic Work Close Command |
 | 1.1.5 | Task 1.1.5 | task | `TASK-AR-373` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-373.md` | Make it visible which planned tasks are worker-ready and which still require planner… |
 | 1.1.6 | Task 1.1.6 | task | `TASK-AR-374` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-374.md` | Prove that the work hierarchy and registration conflict surfaces are actually closed… |
 

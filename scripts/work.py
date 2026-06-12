@@ -14,6 +14,7 @@ import subprocess
 import sys
 import uuid
 from datetime import datetime, timedelta, timezone
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
@@ -50,6 +51,9 @@ UNIT_REQUIRED_FIELDS = {
     "handoff",
     "stop_condition",
 }
+RESOLUTION_VALUES = {"done", "wontfix", "duplicate", "superseded", "moved_to_vault"}
+CLOSEOUT_START = "<!-- work-close:start -->"
+CLOSEOUT_END = "<!-- work-close:end -->"
 
 
 class WorkRegistrationError(RuntimeError):
@@ -957,18 +961,22 @@ def _candidate_work_paths(root: Path, work_id: str) -> list[Path]:
     return [path for path in candidates if path.exists()]
 
 
-def _load_verifiable_work(root: Path, work_id: str) -> tuple[Path, dict[str, Any], str]:
+def _load_work_item(root: Path, work_id: str, *, command_name: str) -> tuple[Path, dict[str, Any], str]:
     paths = _candidate_work_paths(root, work_id)
     if not paths:
-        raise WorkRegistrationError([f"work-verify:not-found:{work_id}"])
+        raise WorkRegistrationError([f"{command_name}:not-found:{work_id}"])
     if len(paths) > 1 and not UNIT_DISPLAY_RE.match(work_id):
-        raise WorkRegistrationError([f"work-verify:ambiguous:{work_id}:{','.join(_rel(root, path) for path in paths)}"])
+        raise WorkRegistrationError([f"{command_name}:ambiguous:{work_id}:{','.join(_rel(root, path) for path in paths)}"])
     path = paths[0]
     text = path.read_text(encoding="utf-8")
     meta, body = backlog_board.parse_frontmatter(text)
     if not meta:
         raise WorkRegistrationError([f"{_rel(root, path)}: missing-frontmatter"])
     return path, dict(meta), body
+
+
+def _load_verifiable_work(root: Path, work_id: str) -> tuple[Path, dict[str, Any], str]:
+    return _load_work_item(root, work_id, command_name="work-verify")
 
 
 def _work_id_from_meta(path: Path, meta: dict[str, Any]) -> str:
@@ -993,6 +1001,115 @@ def _evidence_path(root: Path, work_id: str, now_text: str) -> Path:
     date_part = _parse_datetime(now_text).date().isoformat()
     stamp = _compact_stamp(now_text)
     return root / REVIEWS_DIR / f"VERIFY-{date_part}-{_slug(work_id)}-{stamp}.json"
+
+
+def _resolve_ref(root: Path, ref: str) -> Path:
+    path = Path(ref)
+    return path if path.is_absolute() else root / path
+
+
+def _validate_actual_number(value: str | int | None, field: str, findings: list[str]) -> str:
+    text = "" if value is None else str(value).strip()
+    if not text:
+        findings.append(f"work-close:missing-{field}")
+        return ""
+    try:
+        parsed = Decimal(text)
+    except InvalidOperation:
+        findings.append(f"work-close:invalid-{field}:{text}")
+        return ""
+    if parsed < 0:
+        findings.append(f"work-close:negative-{field}:{text}")
+        return ""
+    return text
+
+
+def _validate_done_closeout(
+    root: Path,
+    path: Path,
+    meta: dict[str, Any],
+    resolved_id: str,
+    *,
+    actual_hours: str | None,
+    actual_tokens: int | None,
+) -> list[str]:
+    findings: list[str] = []
+    rel_path = _rel(root, path)
+    status = str(meta.get("verification_status") or "").strip()
+    if status != "passed":
+        findings.append(f"{rel_path}: closeout:verification-status-not-passed:{status or 'missing'}")
+    _validate_actual_number(actual_hours, "actual-hours", findings)
+    _validate_actual_number(actual_tokens, "actual-tokens", findings)
+
+    refs = _list_value(meta.get("evidence_refs"))
+    if not refs:
+        findings.append(f"{rel_path}: closeout:no-evidence-refs")
+        return findings
+
+    passed_refs: list[str] = []
+    for ref in refs:
+        ref_path = _resolve_ref(root, ref)
+        if not ref_path.exists():
+            findings.append(f"{ref}: closeout:evidence-missing")
+            continue
+        try:
+            payload = json.loads(ref_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            findings.append(f"{ref}: closeout:evidence-invalid-json:{exc}")
+            continue
+        if not isinstance(payload, dict):
+            findings.append(f"{ref}: closeout:evidence-invalid-root")
+            continue
+        evidence_work_id = str(payload.get("work_id") or "").strip()
+        if evidence_work_id and evidence_work_id != resolved_id:
+            findings.append(f"{ref}: closeout:evidence-work-mismatch:{evidence_work_id}:{resolved_id}")
+            continue
+        evidence_status = str(payload.get("status") or "").strip()
+        evidence_signal = str(payload.get("signal") or "").strip()
+        if evidence_status == "passed" and evidence_signal in {"", "pass", "passed"}:
+            passed_refs.append(ref)
+            continue
+        findings.append(f"{ref}: closeout:evidence-not-passed:{evidence_status or 'missing'}")
+
+    if not passed_refs:
+        findings.append(f"{rel_path}: closeout:no-passed-verification-evidence:{resolved_id}")
+    return findings
+
+
+def _closeout_block(
+    *,
+    completed_at: str,
+    resolution: str,
+    actual_hours: str,
+    actual_tokens: str,
+    actual_cost: str,
+    closed_by: str,
+    evidence_refs: list[str],
+) -> str:
+    lines = [
+        CLOSEOUT_START,
+        "## Closeout",
+        "",
+        f"- Completed at: `{completed_at}`",
+        f"- Resolution: `{resolution}`",
+        f"- Actual hours: `{actual_hours or '-'}`",
+        f"- Actual tokens: `{actual_tokens or '-'}`",
+    ]
+    if actual_cost:
+        lines.append(f"- Actual cost: `{actual_cost}`")
+    lines.append(f"- Closed by: `{closed_by}`")
+    lines.extend(["- Evidence:", *[f"  - `{ref}`" for ref in evidence_refs], CLOSEOUT_END])
+    return "\n".join(lines)
+
+
+def _replace_closeout_block(body: str, block: str) -> str:
+    if CLOSEOUT_START in body and CLOSEOUT_END in body:
+        pattern = re.compile(
+            rf"{re.escape(CLOSEOUT_START)}.*?{re.escape(CLOSEOUT_END)}",
+            flags=re.DOTALL,
+        )
+        return pattern.sub(block, body, count=1)
+    return body.rstrip() + "\n\n" + block + "\n"
 
 
 def _run_verification_command(root: Path, command: str, timeout: int) -> dict[str, Any]:
@@ -1084,6 +1201,83 @@ def verify_work(root: Path, work_id: str, *, actor: str, now: str | None = None,
     }
 
 
+def close_work(
+    root: Path,
+    work_id: str,
+    *,
+    actor: str,
+    resolution: str = "done",
+    actual_hours: str | None = None,
+    actual_tokens: int | None = None,
+    actual_cost: str | None = None,
+    now: str | None = None,
+) -> dict[str, Any]:
+    root = root.resolve()
+    now_text = _now_text(now)
+    if resolution not in RESOLUTION_VALUES:
+        raise WorkRegistrationError([f"work-close:invalid-resolution:{resolution}"])
+    path, meta, body = _load_work_item(root, work_id, command_name="work-close")
+    resolved_id = _work_id_from_meta(path, meta)
+    findings: list[str] = []
+    actual_hours_text = "" if actual_hours is None else str(actual_hours).strip()
+    actual_tokens_text = "" if actual_tokens is None else str(actual_tokens).strip()
+    actual_cost_text = "" if actual_cost is None else str(actual_cost).strip()
+
+    if resolution == "done":
+        findings.extend(
+            _validate_done_closeout(
+                root,
+                path,
+                meta,
+                resolved_id,
+                actual_hours=actual_hours_text,
+                actual_tokens=actual_tokens,
+            )
+        )
+    if actual_cost_text:
+        _validate_actual_number(actual_cost_text, "actual-cost", findings)
+    if findings:
+        raise WorkRegistrationError(findings)
+
+    refs = _list_value(meta.get("evidence_refs"))
+    meta["status"] = "completed"
+    meta["resolution"] = resolution
+    meta["completed_at"] = now_text
+    meta["updated_at"] = now_text
+    meta["closed_by"] = actor
+    if resolution != "done" and not str(meta.get("verification_status") or "").strip():
+        meta["verification_status"] = "not_applicable"
+    if actual_hours_text:
+        meta["actual_hours"] = actual_hours_text
+    if actual_tokens_text:
+        meta["actual_tokens"] = actual_tokens_text
+    if actual_cost_text:
+        meta["actual_cost"] = actual_cost_text
+
+    closeout = _closeout_block(
+        completed_at=now_text,
+        resolution=resolution,
+        actual_hours=actual_hours_text,
+        actual_tokens=actual_tokens_text,
+        actual_cost=actual_cost_text,
+        closed_by=actor,
+        evidence_refs=refs,
+    )
+    _rewrite_frontmatter(path, meta, _replace_closeout_block(body, closeout))
+    _refresh_generated_views(root)
+    return {
+        "status": "closed",
+        "work_id": resolved_id,
+        "work_path": _rel(root, path),
+        "resolution": resolution,
+        "completed_at": now_text,
+        "evidence_refs": refs,
+        "actual_hours": actual_hours_text,
+        "actual_tokens": actual_tokens_text,
+        "actual_cost": actual_cost_text,
+    }
+
+
 def cmd_new(args: argparse.Namespace) -> int:
     try:
         result = register(args.root, args.input, now=args.now)
@@ -1126,6 +1320,33 @@ def cmd_verify(args: argparse.Namespace) -> int:
     return 0 if result["status"] == "passed" else 1
 
 
+def cmd_close(args: argparse.Namespace) -> int:
+    try:
+        result = close_work(
+            args.root,
+            args.work_id,
+            actor=args.actor,
+            resolution=args.resolution,
+            actual_hours=args.actual_hours,
+            actual_tokens=args.actual_tokens,
+            actual_cost=args.actual_cost,
+            now=args.now,
+        )
+    except WorkRegistrationError as exc:
+        print("work-close: fail", file=sys.stderr)
+        print(f"findings={len(exc.findings)}", file=sys.stderr)
+        for finding in exc.findings:
+            print(f"- {finding}", file=sys.stderr)
+        return 1
+    print(f"work-close: {result['status']}")
+    if args.json:
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+    else:
+        for key, value in result.items():
+            print(f"{key}={value}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Create and manage Work Items")
     parser.add_argument("--root", type=Path, default=ROOT)
@@ -1157,6 +1378,17 @@ def build_parser() -> argparse.ArgumentParser:
     verify_cmd.add_argument("--timeout", type=int, default=300)
     verify_cmd.add_argument("--json", action="store_true")
     verify_cmd.set_defaults(func=cmd_verify)
+
+    close_cmd = sub.add_parser("close", help="Close a work item after passed verification evidence")
+    close_cmd.add_argument("work_id", help="Unit ID, task ID, or path to a work item")
+    close_cmd.add_argument("--actor", default="work.py close")
+    close_cmd.add_argument("--resolution", choices=sorted(RESOLUTION_VALUES), default="done")
+    close_cmd.add_argument("--actual-hours")
+    close_cmd.add_argument("--actual-tokens", type=int)
+    close_cmd.add_argument("--actual-cost")
+    close_cmd.add_argument("--now")
+    close_cmd.add_argument("--json", action="store_true")
+    close_cmd.set_defaults(func=cmd_close)
     return parser
 
 
