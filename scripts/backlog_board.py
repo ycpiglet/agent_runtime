@@ -198,6 +198,12 @@ TASK_SET_DEFINITIONS = [
         "Initiative vocabulary, collision-free task registration, shared backlog deconfliction, and unit-readiness migration.",
         98,
     ),
+    TaskSetInfo(
+        "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
+        "Wave Conductor",
+        "Claim-time footprint conflict gate, wave dispatcher with cascade/parallel modes, integrator merge queue, and claim-first enforcement.",
+        99,
+    ),
 ]
 TASK_SET_INFO = {item.task_set_id: item for item in TASK_SET_DEFINITIONS}
 UNCLASSIFIED_TASK_SET = TaskSetInfo(

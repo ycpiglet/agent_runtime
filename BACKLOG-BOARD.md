@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-12
-task_count: 162
-open_count: 36
+task_count: 166
+open_count: 40
 completed_count: 126
-task_set_count: 5
+task_set_count: 6
 completed_task_set_count: 19
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `36` open or active tasks; `126` completed tasks are archived from this live board.
+- Summary: `40` open or active tasks; `126` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `31` / Ask `4` / Review `0` / Later `1` / Done `126`.
-- Task Sets: `5` active workflows; `19` completed workflows are hidden from the live action board.
+- Status: Action `35` / Ask `4` / Review `0` / Later `1` / Done `126`.
+- Task Sets: `6` active workflows; `19` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -117,6 +117,18 @@ completed_task_set_count: 19
 | `TASK-AR-372` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | High | 12h/9000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Provide one structured registration command path so planners stop hand-editing board… |
 | `TASK-AR-373` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P3 | Low | Medium | 6h/5000tok | Low | 5 | governance-loop | independent-auditor | Execute next | Make it visible which planned tasks are worker-ready and which still require planner… |
 | `TASK-AR-374` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P3 | Low | Low | 8h/4000tok | Low | 4 | agent-runtime-core | lead-engineer | Execute next | Prove that the work hierarchy and registration conflict surfaces are actually closed… |
+
+### Wave Conductor (`TASKSET-AR-PARALLEL-WAVE-EXECUTION`)
+
+- Flow: Claim-time footprint conflict gate, wave dispatcher with cascade/parallel modes, integrator merge queue, and claim-first enforcement.
+- Progress: `0/4` done; `4` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-503` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Low | 4h/3000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 워크트리 작업은 반드시 main 체크아웃에 활성 클레임을 먼저 남기고 시작하도록 강제한다. 클레임 없는 워크트리 작업은 보드/ui-console 양쪽에서… |
+| `TASK-AR-500` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 충돌 발견 시점을 merge-time(사후)에서 claim-time(사전)으로 옮긴다. 새 클레임 생성 시 활성 클레임들의 선언 footprint(`ta… |
+| `TASK-AR-501` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | High | 10h/8000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | planner가 unit 의존성 DAG를 topological wave로 분해하고, 디스패처가 같은 wave의 K개 unit에 대해 claim+workt… |
+| `TASK-AR-502` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P2 | Medium | Medium | 8h/6000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 워커 브랜치의 main 합류를 단일 통합자(orchestrator)가 직렬 rebase-test-merge 큐로 처리해, 병렬 구현 기간에도 merge… |
 
 ## Archived Task Sets
 

@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-12T09:07:04+09:00",
-  "record_count": 189,
+  "generated_at": "2026-06-12T18:42:09+09:00",
+  "record_count": 195,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -2082,6 +2082,72 @@
       "title": "Prove that the work hierarchy and registration conflict surfaces are actually closed…",
       "path": "agents/lead_engineer/tasks/TASK-AR-374.md",
       "parent_id": "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
+      "status": "planned"
+    },
+    {
+      "key": "initiative:INIT-AR-PARALLEL-WAVE-EXECUTION",
+      "level": "initiative",
+      "number": "2",
+      "label": "Initiative 2",
+      "id": "INIT-AR-PARALLEL-WAVE-EXECUTION",
+      "title": "Parallel Wave Execution Initiative",
+      "path": "agents/project/initiatives/INIT-AR-PARALLEL-WAVE-EXECUTION.md",
+      "parent_id": "",
+      "status": "planned"
+    },
+    {
+      "key": "taskset:TASKSET-AR-PARALLEL-WAVE-EXECUTION",
+      "level": "taskset",
+      "number": "2.1",
+      "label": "Taskset 2.1",
+      "id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
+      "title": "Wave Conductor",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-PARALLEL-WAVE-EXECUTION",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-500",
+      "level": "task",
+      "number": "2.1.1",
+      "label": "Task 2.1.1",
+      "id": "TASK-AR-500",
+      "title": "충돌 발견 시점을 merge-time(사후)에서 claim-time(사전)으로 옮긴다. 새 클레임 생성 시 활성 클레임들의 선언 footprint(`ta…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-500.md",
+      "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-501",
+      "level": "task",
+      "number": "2.1.2",
+      "label": "Task 2.1.2",
+      "id": "TASK-AR-501",
+      "title": "planner가 unit 의존성 DAG를 topological wave로 분해하고, 디스패처가 같은 wave의 K개 unit에 대해 claim+workt…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-501.md",
+      "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-502",
+      "level": "task",
+      "number": "2.1.3",
+      "label": "Task 2.1.3",
+      "id": "TASK-AR-502",
+      "title": "워커 브랜치의 main 합류를 단일 통합자(orchestrator)가 직렬 rebase-test-merge 큐로 처리해, 병렬 구현 기간에도 merge…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-502.md",
+      "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-503",
+      "level": "task",
+      "number": "2.1.4",
+      "label": "Task 2.1.4",
+      "id": "TASK-AR-503",
+      "title": "워크트리 작업은 반드시 main 체크아웃에 활성 클레임을 먼저 남기고 시작하도록 강제한다. 클레임 없는 워크트리 작업은 보드/ui-console 양쪽에서…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-503.md",
+      "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
       "status": "planned"
     }
   ]
