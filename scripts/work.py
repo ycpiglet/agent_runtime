@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -149,6 +150,10 @@ def _frontmatter(meta: dict[str, Any]) -> str:
             lines.append(f"{key}: {value}")
     lines.append("---")
     return "\n".join(lines)
+
+
+def _rewrite_frontmatter(path: Path, meta: dict[str, Any], body: str) -> None:
+    path.write_text(_frontmatter(meta) + "\n\n" + body.lstrip("\n"), encoding="utf-8")
 
 
 def _title_from_task(task: dict[str, Any], display_id: str) -> str:
@@ -652,6 +657,15 @@ def _refresh_generated_views(root: Path) -> None:
     )
 
 
+def _refresh_evidence_index(root: Path) -> None:
+    index_out = root / evidence_index_generator.DEFAULT_OUT
+    index_out.parent.mkdir(parents=True, exist_ok=True)
+    index_out.write_text(
+        evidence_index_generator.render(root, evidence_index_generator.collect(root)),
+        encoding="utf-8",
+    )
+
+
 def _assign_missing_display_ids(
     root: Path,
     payload: dict[str, Any],
@@ -928,6 +942,148 @@ def register(root: Path, input_path: Path, *, now: str | None = None) -> dict[st
     }
 
 
+def _candidate_work_paths(root: Path, work_id: str) -> list[Path]:
+    raw = Path(work_id)
+    if raw.exists():
+        return [raw.resolve()]
+    if not raw.is_absolute() and (root / raw).exists():
+        return [(root / raw).resolve()]
+    candidates: list[Path] = []
+    if UNIT_DISPLAY_RE.match(work_id):
+        candidates.extend(sorted((root / UNITS_DIR).glob(f"*/{work_id}.md")))
+    if TASK_DISPLAY_RE.match(work_id):
+        candidates.append(root / TASKS_DIR / f"{work_id}.md")
+        candidates.extend(sorted((root / UNITS_DIR / work_id).glob("UNIT-*.md")))
+    return [path for path in candidates if path.exists()]
+
+
+def _load_verifiable_work(root: Path, work_id: str) -> tuple[Path, dict[str, Any], str]:
+    paths = _candidate_work_paths(root, work_id)
+    if not paths:
+        raise WorkRegistrationError([f"work-verify:not-found:{work_id}"])
+    if len(paths) > 1 and not UNIT_DISPLAY_RE.match(work_id):
+        raise WorkRegistrationError([f"work-verify:ambiguous:{work_id}:{','.join(_rel(root, path) for path in paths)}"])
+    path = paths[0]
+    text = path.read_text(encoding="utf-8")
+    meta, body = backlog_board.parse_frontmatter(text)
+    if not meta:
+        raise WorkRegistrationError([f"{_rel(root, path)}: missing-frontmatter"])
+    return path, dict(meta), body
+
+
+def _work_id_from_meta(path: Path, meta: dict[str, Any]) -> str:
+    return str(
+        meta.get("unit_id")
+        or meta.get("work_id")
+        or meta.get("id")
+        or meta.get("display_id")
+        or path.stem
+    ).strip()
+
+
+def _verification_commands(meta: dict[str, Any]) -> list[str]:
+    return _text_lines(meta.get("verification"))
+
+
+def _compact_stamp(now_text: str) -> str:
+    return re.sub(r"[^0-9]", "", now_text)[:14] or now_util.epoch_seconds()
+
+
+def _evidence_path(root: Path, work_id: str, now_text: str) -> Path:
+    date_part = _parse_datetime(now_text).date().isoformat()
+    stamp = _compact_stamp(now_text)
+    return root / REVIEWS_DIR / f"VERIFY-{date_part}-{_slug(work_id)}-{stamp}.json"
+
+
+def _run_verification_command(root: Path, command: str, timeout: int) -> dict[str, Any]:
+    started_at = now_util.local_iso()
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=root,
+            shell=True,
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=timeout,
+        )
+        finished_at = now_util.local_iso()
+        return {
+            "command": command,
+            "status": "passed" if completed.returncode == 0 else "failed",
+            "returncode": completed.returncode,
+            "started_at": started_at,
+            "finished_at": finished_at,
+            "stdout": (completed.stdout or "")[-4000:],
+            "stderr": (completed.stderr or "")[-4000:],
+        }
+    except subprocess.TimeoutExpired as exc:
+        finished_at = now_util.local_iso()
+        return {
+            "command": command,
+            "status": "timeout",
+            "returncode": None,
+            "started_at": started_at,
+            "finished_at": finished_at,
+            "stdout": str(exc.stdout or "")[-4000:],
+            "stderr": str(exc.stderr or "")[-4000:],
+        }
+
+
+def verify_work(root: Path, work_id: str, *, actor: str, now: str | None = None, timeout: int = 300) -> dict[str, Any]:
+    root = root.resolve()
+    now_text = _now_text(now)
+    path, meta, body = _load_verifiable_work(root, work_id)
+    resolved_id = _work_id_from_meta(path, meta)
+    commands = _verification_commands(meta)
+    if not commands:
+        raise WorkRegistrationError([f"{_rel(root, path)}: verification:no-commands"])
+
+    results = [_run_verification_command(root, command, timeout) for command in commands]
+    passed = all(result["status"] == "passed" for result in results)
+    status = "passed" if passed else "failed"
+    evidence_path = _evidence_path(root, resolved_id, now_text)
+    evidence = {
+        "schema": "agent-runtime-work-verification/v1",
+        "id": evidence_path.stem,
+        "work_id": resolved_id,
+        "work_path": _rel(root, path),
+        "kind": str(meta.get("kind") or ("unit" if resolved_id.startswith("UNIT-") else "task")),
+        "task_id": str(meta.get("task_id") or meta.get("id") or meta.get("display_id") or ""),
+        "unit_id": str(meta.get("unit_id") or ""),
+        "status": status,
+        "signal": "pass" if passed else "fail",
+        "verified_at": now_text,
+        "verified_by": actor,
+        "command_count": len(results),
+        "commands": results,
+    }
+    evidence_path.parent.mkdir(parents=True, exist_ok=True)
+    evidence_path.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    existing_refs = _list_value(meta.get("evidence_refs"))
+    evidence_ref = _rel(root, evidence_path)
+    if evidence_ref not in existing_refs:
+        existing_refs.append(evidence_ref)
+    meta["verification_status"] = status
+    meta["verified_at"] = now_text
+    meta["verified_by"] = actor
+    meta["evidence_refs"] = existing_refs
+    meta["updated_at"] = now_text
+    _rewrite_frontmatter(path, meta, body)
+    _refresh_evidence_index(root)
+    return {
+        "status": status,
+        "work_id": resolved_id,
+        "work_path": _rel(root, path),
+        "evidence": evidence_ref,
+        "command_count": len(results),
+        "commands": results,
+    }
+
+
 def cmd_new(args: argparse.Namespace) -> int:
     try:
         result = register(args.root, args.input, now=args.now)
@@ -949,6 +1105,25 @@ def cmd_new(args: argparse.Namespace) -> int:
 def cmd_now(args: argparse.Namespace) -> int:
     print(now_util.value(utc=args.utc, date=args.date, epoch=args.epoch))
     return 0
+
+
+def cmd_verify(args: argparse.Namespace) -> int:
+    try:
+        result = verify_work(args.root, args.work_id, actor=args.actor, now=args.now, timeout=args.timeout)
+    except WorkRegistrationError as exc:
+        print("work-verify: fail", file=sys.stderr)
+        print(f"findings={len(exc.findings)}", file=sys.stderr)
+        for finding in exc.findings:
+            print(f"- {finding}", file=sys.stderr)
+        return 1
+    print(f"work-verify: {result['status']}")
+    if args.json:
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+    else:
+        for key, value in result.items():
+            if key != "commands":
+                print(f"{key}={value}")
+    return 0 if result["status"] == "passed" else 1
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -974,6 +1149,14 @@ def build_parser() -> argparse.ArgumentParser:
     now_group.add_argument("--date", action="store_true", help="local date only, YYYY-MM-DD")
     now_group.add_argument("--epoch", action="store_true", help="Unix epoch seconds")
     now_cmd.set_defaults(func=cmd_now)
+
+    verify_cmd = sub.add_parser("verify", help="Run a work item's verification commands and write evidence")
+    verify_cmd.add_argument("work_id", help="Unit ID, task ID, or path to a verifiable work item")
+    verify_cmd.add_argument("--actor", default="work.py verify")
+    verify_cmd.add_argument("--now")
+    verify_cmd.add_argument("--timeout", type=int, default=300)
+    verify_cmd.add_argument("--json", action="store_true")
+    verify_cmd.set_defaults(func=cmd_verify)
     return parser
 
 
