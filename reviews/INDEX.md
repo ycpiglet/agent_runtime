@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-13T00:47:25+09:00
-record_count: 418
+generated_at: 2026-06-13T01:18:54+09:00
+record_count: 419
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `418` review and evidence records under `reviews/`.
+- Summary: indexed `419` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `418` files |
+| Reviews covered | pass | `419` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -127,6 +127,7 @@ record_count: 418
 | `reviews/MEETING-2026-06-12-work-metadata-a2a-registration-audit.md` | `MEETING-2026-06-12-work-metadata-a2a-registration-audit` | meeting | pass | pass | Work Metadata And A2A Registration Audit |
 | `reviews/MEETING-2026-06-13-agent-runtime-cross-project-governance-and-release-update.md` | `MEETING-2026-06-13-agent-runtime-cross-project-governance-and-release-update` | md | record | n/a | MEETING-2026-06-13-agent-runtime-cross-project-governance-and-release-update |
 | `reviews/MEETING-2026-06-13-agent-runtime-task-ar-211-overlay-implementation-checkpoint.md` | `MEETING-2026-06-13-agent-runtime-task-ar-211-overlay-implementation-checkpoint` | md | record | n/a | MEETING-2026-06-13-agent-runtime-task-ar-211-overlay-implementation-checkpoint |
+| `reviews/MEETING-2026-06-13-parallel-wave-replan-post-codex-merge.md` | `MEETING-2026-06-13-parallel-wave-replan-post-codex-merge` | meeting | pass | pass | Parallel Wave Replan After Codex Merge (T3) |
 | `reviews/MEETING-2026-06-14-agent-runtime-task-ar-222-migration-closeout-sync.md` | `MEETING-2026-06-14-agent-runtime-task-ar-222-migration-closeout-sync` | md | record | n/a | MEETING: TASK-AR-220/222 closeout 동기화 정합 미팅 |
 | `reviews/MEETING-2026-06-14-agent-runtime-task-ar-223-closeout-planning.md` | `MEETING-2026-06-14-agent-runtime-task-ar-223-closeout-planning` | md | record | n/a | MEETING (2026-06-14) - TASK-AR-223 closeout planning |
 | `reviews/MEETING-2026-06-15-agent-runtime-task-ar-223-cycle-sync.md` | `MEETING-2026-06-15-agent-runtime-task-ar-223-cycle-sync` | md | record | n/a | MEETING (2026-06-15) - TASK-AR-223 closeout cycle sync |
