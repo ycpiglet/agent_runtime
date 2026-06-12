@@ -42,6 +42,10 @@ tags:
 - 병렬 wave 완료 시 N개 브랜치가 동시에 합류 대기 — 순서 없는 머지는
   보드/INDEX/BACKLOG 재생성 경합을 만든다.
 
+## Preconditions
+
+- 착수(claim) 전 `python scripts/plan_assumption_gate.py --check --taskset TASKSET-AR-PARALLEL-WAVE-EXECUTION` 실행 — drift 발견 시 replan 리뷰(차분 재계획 + anchor 갱신) 선행 필수. 근거: `reviews/MEETING-2026-06-12-plan-assumption-deferred-revalidation.md`.
+
 ## Scope
 
 - `scripts/merge_queue.py`: 합류 대기 브랜치 등록 → 순차 rebase → 좁은

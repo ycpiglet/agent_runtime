@@ -8,9 +8,9 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-12
-task_count: 166
+task_count: 167
 open_count: 40
-completed_count: 126
+completed_count: 127
 task_set_count: 6
 completed_task_set_count: 19
 ---
@@ -18,11 +18,11 @@ completed_task_set_count: 19
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `40` open or active tasks; `126` completed tasks are archived from this live board.
+- Summary: `40` open or active tasks; `127` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `35` / Ask `4` / Review `0` / Later `1` / Done `126`.
+- Status: Action `35` / Ask `4` / Review `0` / Later `1` / Done `127`.
 - Task Sets: `6` active workflows; `19` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -121,7 +121,7 @@ completed_task_set_count: 19
 ### Wave Conductor (`TASKSET-AR-PARALLEL-WAVE-EXECUTION`)
 
 - Flow: Claim-time footprint conflict gate, wave dispatcher with cascade/parallel modes, integrator merge queue, and claim-first enforcement.
-- Progress: `0/4` done; `4` open or active.
+- Progress: `1/5` done; `4` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
@@ -286,6 +286,7 @@ completed_task_set_count: 19
 | `TASK-AR-349` | `7e8741f0-87d…` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | 2026-06-11T19:50:16+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | Mirror the PM hierarchy, unit templates, schemas, and gates into generated host proje… |
 | `TASK-AR-348` | `79254591-b67…` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | 2026-06-11T19:50:16+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | Render project/taskset/task/unit hierarchy without stuffing detailed instructions int… |
 | `TASK-AR-369` | `9d171d09-6c3…` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | 2026-06-12T08:17:54+09:00 | 2026-06-12T08:42:59+09:00 | 2026-06-12T09:04:46+09:00 | 2026-06-12T09:04:46+09:00 | Finish the terminology migration from ambiguous `project -> taskset -> task -> unit`… |
+| `TASK-AR-504` | `acd02367-581…` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | 2026-06-12T18:51:54+09:00 | 2026-06-12T18:51:54+09:00 | 2026-06-12T18:55:00+09:00 | 2026-06-12T18:55:00+09:00 | 병렬 세션(codex/claude)이 서로의 미머지 변경을 모른 채 세운 계획이 merge 후 조용히 무효화되는 문제를 지연평가로 해결한다: 계획의 전제… |
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

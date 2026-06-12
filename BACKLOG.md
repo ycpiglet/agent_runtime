@@ -6,6 +6,7 @@
 - Purpose: 순차 cascade 루프를 옵트인 병렬 실행으로 전환 — wave(서로소 `target_files` footprint + 무의존 unit 묶음) 단위 동시 디스패치, 풀 사이클은 task가 아니라 wave 경계에서 실행. cascade/parallel(depth·max-panes)을 Owner 옵션으로 두어 필요할 때만 가속 비용을 지불한다.
 - Hierarchy note: wave는 기록 계층이 아니라 실행 스케줄링 메타데이터로, taskset(목표 묶음)과 직교한다. 한 wave에 여러 taskset의 unit이 실릴 수 있다.
 - Registered planned tasks: `TASK-AR-500`(claim-time footprint 충돌 게이트) `TASK-AR-501`(wave 디스패처 — DAG/topological wave + cascade/parallel 모드) `TASK-AR-502`(integrator 머지 큐 — 직렬 rebase-test-merge) `TASK-AR-503`(claim-first 강제 — main 클레임 없는 워크트리 작업 감지).
+- Completed task: `TASK-AR-504`(plan assumption gate — 지연평가식 계획 재검증). codex 미머지 구조 변경과의 plan 드리프트를 다단계 트리거(T0 등록 스냅샷 / T1 merge 후 관찰 / T2 착수 전 차단 / T3 replan 후 re-record)로 처리. 전제 8개 스냅샷 완료(`agents/project/work-items/PLAN-ASSUMPTIONS.json`) — AR-500~503은 착수 전 `plan_assumption_gate --check` 필수. 회의 기록: `reviews/MEETING-2026-06-12-plan-assumption-deferred-revalidation.md`.
 - Numbering note: 500 대역은 의도적 예약 — 동시 진행 중인 codex 미머지 등록이 TASK-AR-375를 선점한 것을 확인하여 display ID 충돌을 회피했다. codex의 `TASK-ID-RESERVATIONS.json`(agent-runtime-task-id-reservation/v1) merge 후 동일 원장에 소급 기재한다.
 - Initiative record: `agents/project/initiatives/INIT-AR-PARALLEL-WAVE-EXECUTION.md`.
 - Design record: `reviews/REVIEW-2026-06-12-agent-runtime-parallel-wave-scheduling-design.md` (순차 실행 실측 증거, Amdahl 분석, wave/taskset 직교 결정, 사이클 granularity 결정).

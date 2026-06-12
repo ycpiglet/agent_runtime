@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-12T18:42:09+09:00",
-  "record_count": 195,
+  "generated_at": "2026-06-12T18:55:00+09:00",
+  "record_count": 196,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -2149,6 +2149,17 @@
       "path": "agents/lead_engineer/tasks/TASK-AR-503.md",
       "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
       "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-504",
+      "level": "task",
+      "number": "2.1.5",
+      "label": "Task 2.1.5",
+      "id": "TASK-AR-504",
+      "title": "병렬 세션(codex/claude)이 서로의 미머지 변경을 모른 채 세운 계획이 merge 후 조용히 무효화되는 문제를 지연평가로 해결한다: 계획의 전제…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-504.md",
+      "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
+      "status": "completed"
     }
   ]
 }

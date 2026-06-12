@@ -1,0 +1,54 @@
+{
+  "assumption_sets": [
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "scripts/taskset_dispatcher.py",
+          "value": "09ec472af9d9fe2375037294752f8184657f0ce0806747ca1e4c477c7fd8e5d4"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "09834bfe56aa6c85b5fbbb2cbabbe393a519370a0eaa2827ffe7d52ef2f33be3"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/parallel_worktree_gate.py",
+          "value": "c46f5e52babac45a92a6ac549e7276be2dc8df7a785247234c957900846a2eeb"
+        },
+        {
+          "kind": "sha256",
+          "path": "agents/lead_engineer/tasks/units/README.md",
+          "value": "367344d9e8943c6a8a3cc99b5711509df90e223f3fe42d481cf3f8417df712f9"
+        },
+        {
+          "kind": "absent",
+          "path": "agents/project/WORK-SCHEMA.yml",
+          "value": ""
+        },
+        {
+          "kind": "absent",
+          "path": "agents/project/work-items/TASKSET-DEFINITIONS.json",
+          "value": ""
+        },
+        {
+          "kind": "absent",
+          "path": "agents/project/work-items/TASK-ID-RESERVATIONS.json",
+          "value": ""
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/work.py",
+          "value": ""
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-06-12-agent-runtime-parallel-wave-scheduling-design.md",
+      "recorded_at": "2026-06-12T18:52:58+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION"
+    }
+  ],
+  "schema": "agent-runtime-plan-assumptions/v1",
+  "updated_at": "2026-06-12T18:52:58+09:00"
+}

@@ -44,6 +44,10 @@ tags:
 - wave는 taskset과 직교하는 실행 묶음이며 기록 계층이 아니다(설계 기록
   Decision 참조). 한 wave에 여러 taskset의 unit이 실릴 수 있다.
 
+## Preconditions
+
+- 착수(claim) 전 `python scripts/plan_assumption_gate.py --check --taskset TASKSET-AR-PARALLEL-WAVE-EXECUTION` 실행 — drift 발견 시 replan 리뷰(차분 재계획 + anchor 갱신) 선행 필수. 근거: `reviews/MEETING-2026-06-12-plan-assumption-deferred-revalidation.md`.
+
 ## Scope
 
 - unit frontmatter에 `depends_on`(unit/task id 목록) 선택 필드 추가 및

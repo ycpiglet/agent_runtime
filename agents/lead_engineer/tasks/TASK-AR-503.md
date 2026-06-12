@@ -43,6 +43,10 @@ tags:
 - `parallel_worktree_gate`는 클레임이 "있을 때"의 정합만 검사하고, 클레임
   없이 존재하는 작업 워크트리는 잡지 않는다.
 
+## Preconditions
+
+- 착수(claim) 전 `python scripts/plan_assumption_gate.py --check --taskset TASKSET-AR-PARALLEL-WAVE-EXECUTION` 실행 — drift 발견 시 replan 리뷰(차분 재계획 + anchor 갱신) 선행 필수. 근거: `reviews/MEETING-2026-06-12-plan-assumption-deferred-revalidation.md`.
+
 ## Scope
 
 - `parallel_worktree_gate.py`(또는 신규 검사) 확장: `.worktrees/` 하위

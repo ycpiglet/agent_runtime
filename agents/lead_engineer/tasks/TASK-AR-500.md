@@ -43,6 +43,10 @@ tags:
   다른 task가 같은 파일을 만지는 경우는 merge에서야 발각된다.
 - 설계 기록: `reviews/REVIEW-2026-06-12-agent-runtime-parallel-wave-scheduling-design.md`.
 
+## Preconditions
+
+- 착수(claim) 전 `python scripts/plan_assumption_gate.py --check --taskset TASKSET-AR-PARALLEL-WAVE-EXECUTION` 실행 — drift 발견 시 replan 리뷰(차분 재계획 + anchor 갱신) 선행 필수. 근거: `reviews/MEETING-2026-06-12-plan-assumption-deferred-revalidation.md`.
+
 ## Scope
 
 - claim 레코드에 `target_files`(또는 unit 참조 시 unit에서 파생) 필드 채움.
