@@ -183,6 +183,17 @@ Owner request vocabulary:
 - `unit 작성해줘`: split one task into worker-ready unit specs with exact scope
   and verification.
 
+Human-facing numbers are generated, not planner-reserved. Use generated
+`Initiative N -> Taskset N.N -> Task N.N.N -> Unit N.N.N.N` labels for Owner
+recognition, and keep UUID/timestamp-backed file IDs for collision resistance.
+
+Milestone, horizon, team, owner, role, priority, and phase are metadata axes,
+not extra hierarchy levels. Routine recurring work and spike research may use
+their own record type instead of being forced into the goal tree.
+
+Planning or design discussion must be recorded in `reviews/` before closeout;
+do not leave hierarchy, numbering, or workflow decisions as chat-only state.
+
 A worker-ready unit must include:
 
 1. context and source links;

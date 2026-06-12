@@ -32,11 +32,12 @@ tags:
 
 ## Goal
 
-- Provide one structured registration command path so planners stop hand-editing board definitions, backlog sections, task files, owner-doc manifests, and evidence pointers independently.
+- Provide one structured registration command path so planners stop hand-editing board definitions, backlog sections, task files, owner-doc manifests, evidence pointers, and human-facing ordinal numbers independently.
 
 ## Scope
 
 - Add a planner-facing command or API that can create/update initiative, taskset plan, task records, and optional worker-ready unit specs from a structured input file.
+- The command should create stable records first; `scripts/work_item_classifier.py` assigns readable hierarchy numbers afterward.
 - Integrate the task ID reservation allocator from `TASK-AR-370`.
 - Update board taskset definitions and generated backlog surfaces consistently.
 - Emit a registration review/evidence record and update the owner-doc manifest when the output is Owner-facing.
@@ -58,6 +59,8 @@ tags:
 
 - Focused unit tests for the registration command.
 - `python scripts/task_identity.py check --check`
+- `python scripts/work_item_classifier.py --write`
+- `python scripts/work_item_classifier.py --check`
 - `python scripts/backlog_board.py --write`
 - `python scripts/owner_doc_format_gate.py --manifest owner-docs.yml`
 

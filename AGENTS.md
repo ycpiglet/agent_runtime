@@ -33,6 +33,15 @@ continues to live at `src/agent_runtime/templates/project/AGENTS.md`.
   it from the record alone: context, target files, exact scope, out-of-scope
   boundaries, acceptance criteria, verification commands, and handoff format
   must be explicit.
+- Human-facing numbers are assigned by the work-item classifier, not manually
+  by planners. Use generated `Initiative N -> Taskset N.N -> Task N.N.N ->
+  Unit N.N.N.N` labels for recognition; keep UUID/timestamp-backed file IDs for
+  collision resistance.
+- Milestone, horizon, team, owner, role, priority, and phase are metadata axes,
+  not extra hierarchy levels. Routine recurring work and spike research may use
+  their own record type instead of being forced into the goal tree.
+- Planning or design discussion must be recorded in `reviews/` before closeout;
+  do not leave hierarchy, numbering, or workflow decisions as chat-only state.
 - Planning, research synthesis, architecture, risk classification, and task
   decomposition are assigned to higher-capability planner roles/models. Routine
   implementation units default to lower-cost worker models unless the unit is

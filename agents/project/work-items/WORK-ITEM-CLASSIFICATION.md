@@ -1,0 +1,238 @@
+---
+type: work_item_classification
+id: WORK-ITEM-CLASSIFICATION-agent-runtime
+audience: owner
+status: pass
+signal: pass
+score: 95
+priority: High
+tags: [work-items, hierarchy, numbering, generated-index]
+generated_at: 2026-06-12T09:07:04+09:00
+record_count: 189
+---
+
+# Work Item Classification
+
+## Bottom Line
+- Summary: generated Owner-facing numbers for `189` initiative/taskset/task/unit records.
+- Result: planners can register stable records without manually reserving human task numbers.
+
+## Signal
+| Metric | State | Evidence |
+| --- | --- | --- |
+| Initiatives | pass | `2` records |
+| Tasksets | pass | `24` records |
+| Tasks | pass | `162` records |
+| Units | pass | `1` records |
+| Findings | pass | `0` findings |
+
+## Insight
+- Human-readable numbers are generated views, not canonical identities.
+- Canonical identity remains stable IDs plus UUID metadata; this avoids concurrent pane number collisions.
+- `0.*` numbers are legacy/unassigned work that predates initiative metadata.
+
+## Decision
+- Decision: use generated `Initiative N -> Taskset N.N -> Task N.N.N -> Unit N.N.N.N` labels for Owner-facing recognition.
+- Decision: do not let planners hand-allocate display ordinals during registration.
+- Decision: keep `scripts/work_item_classifier.py --check` in governance so stale classification is blocked.
+
+## Action Board
+| Number | Label | Level | ID | Parent | Status | Path | Title |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 0 | Initiative 0 | initiative | `INIT-UNASSIGNED` | - | synthetic | `-` | Unassigned / legacy work |
+| 0.1 | Taskset 0.1 | taskset | `TASKSET-AR-CONTEXT-KNOWLEDGE` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Context Cartographer |
+| 0.1.1 | Task 0.1.1 | task | `TASK-AR-201` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | `agents/lead_engineer/tasks/TASK-AR-201.md` | `agent_runtime`가 프로젝트별 요청을 처리할 때 source-tier, owner, 접근권한, freshness를 기준으로 지식 소스를 라우팅… |
+| 0.1.2 | Task 0.1.2 | task | `TASK-AR-204` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | `agents/lead_engineer/tasks/TASK-AR-204.md` | 런타임의 스킬/런북 문서가 코드/데이터/스키마 변경과 동기화되지 않을 경우 릴리스가 차단되도록 한다. |
+| 0.1.3 | Task 0.1.3 | task | `TASK-AR-214` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | `agents/lead_engineer/tasks/TASK-AR-214.md` | 질의 실행 전후의 `source_tier`, `owner`, `access`, `freshness`, `lineage`, `ambiguity`, `tra… |
+| 0.1.4 | Task 0.1.4 | task | `TASK-AR-215` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | `agents/lead_engineer/tasks/TASK-AR-215.md` | 다른 프로젝트로 에이전트를 투입할 때 공용 런타임은 유지하고 오버레이만 교체해 vision, roadmap, 조직도, 팀, 링크, 협의기록을 즉시 맥락에… |
+| 0.1.5 | Task 0.1.5 | task | `TASK-AR-202` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | `agents/lead_engineer/tasks/TASK-AR-202.md` | `runbook`를 재사용 가능한 숙련 프로세스로 표준화해, 질문 명확화-자료 검색-실행-적대적 검토-검증-기록 흐름을 에이전트가 강제하도록 한다. |
+| 0.1.6 | Task 0.1.6 | task | `TASK-AR-203` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | `agents/lead_engineer/tasks/TASK-AR-203.md` | 지식창고 문서를 `빠른 참조, 차원 설명, 핵심 테이블, 주의사항/패턴, 상위 문맥 링크` 형식으로 표준화해 사람이 즉시 구조를 읽고 판단할 수 있게 한… |
+| 0.1.7 | Task 0.1.7 | task | `TASK-AR-211` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | `agents/lead_engineer/tasks/TASK-AR-211.md` | 에이전트 런타임을 여러 프로젝트에서 공통 reuse할 때 프로젝트 고유의 vision/roadmap/조직/연결 문맥을 오버레이로 주입한다. |
+| 0.2 | Taskset 0.2 | taskset | `TASKSET-AR-QUALITY-LOOP` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Quality Sentinel |
+| 0.2.1 | Task 0.2.1 | task | `TASK-AR-217` | `TASKSET-AR-QUALITY-LOOP` | completed | `agents/lead_engineer/tasks/TASK-AR-217.md` | `v0.1.8` 공개 후보(2026-07-02/07-09/07-16)를 가정한 `release-preflight`, 오프라인 90% 게이트, review… |
+| 0.2.2 | Task 0.2.2 | task | `TASK-AR-221` | `TASKSET-AR-QUALITY-LOOP` | completed | `agents/lead_engineer/tasks/TASK-AR-221.md` | 에이전트 런타임을 한 번에 재사용 가능한 MVP/멀티 프로젝트 운영 구조로 정리한다. 공식 가이드(Claude/Codex/OpenAI 권고)에 맞추어 아… |
+| 0.2.3 | Task 0.2.3 | task | `TASK-AR-243` | `TASKSET-AR-QUALITY-LOOP` | completed | `agents/lead_engineer/tasks/TASK-AR-243.md` | Connect trace, grader, eval, correction, live-review, and A2A evidence to planning pr… |
+| 0.2.4 | Task 0.2.4 | task | `TASK-AR-205` | `TASKSET-AR-QUALITY-LOOP` | completed | `agents/lead_engineer/tasks/TASK-AR-205.md` | 오프라인에서 정답 보유 영역은 구조화된 데이터셋으로 재현 가능한 평가를 수행하고, 90% 미만이면 릴리스를 막는다. |
+| 0.2.5 | Task 0.2.5 | task | `TASK-AR-206` | `TASKSET-AR-QUALITY-LOOP` | completed | `agents/lead_engineer/tasks/TASK-AR-206.md` | 라이브 작업 종료 시 reviewer agent의 적대적 검토를 강제하고, 답변에 근거/태그를 붙인다. |
+| 0.2.6 | Task 0.2.6 | task | `TASK-AR-207` | `TASKSET-AR-QUALITY-LOOP` | completed | `agents/lead_engineer/tasks/TASK-AR-207.md` | 채팅, 리뷰, 메시지에서 탐지된 오답/누락/모호성의 교정 제안을 자동 수집한다. |
+| 0.2.7 | Task 0.2.7 | task | `TASK-AR-208` | `TASKSET-AR-QUALITY-LOOP` | completed | `agents/lead_engineer/tasks/TASK-AR-208.md` | 요청/리뷰/결정 이벤트를 추적 가능한 A2A 메시지 스키마로 관리해 멀티 에이전트/멀티 프로젝트 운영 안정성을 확보한다. |
+| 0.3 | Taskset 0.3 | taskset | `TASKSET-AR-MIGRATION-PARITY` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Migration Archivist |
+| 0.3.1 | Task 0.3.1 | task | `TASK-AR-209` | `TASKSET-AR-MIGRATION-PARITY` | completed | `agents/lead_engineer/tasks/TASK-AR-209.md` | `레거시 전신 프로젝트`에서 `agent_runtime`로 이식할 때 누락·변형·의도적 제외 항목을 분리해, 다음 릴리스에서 추적 가능하게 증빙한다. |
+| 0.3.2 | Task 0.3.2 | task | `TASK-AR-218` | `TASKSET-AR-MIGRATION-PARITY` | completed | `agents/lead_engineer/tasks/TASK-AR-218.md` | `TASK-AR-216`/`TASK-AR-217` 판정 전제 조건을 위해 `레거시 전신 프로젝트` 이식 누락·변경 근거가 미정으로 남는 상태를 제거하고,… |
+| 0.3.3 | Task 0.3.3 | task | `TASK-AR-220` | `TASKSET-AR-MIGRATION-PARITY` | completed | `agents/lead_engineer/tasks/TASK-AR-220.md` | `레거시 전신 프로젝트`에서 `agent_runtime`으로 이동할 때 skill/hook/script 누락·변형·의도적 제외가 의도된 이유인지, 기술적… |
+| 0.3.4 | Task 0.3.4 | task | `TASK-AR-212` | `TASKSET-AR-MIGRATION-PARITY` | completed | `agents/lead_engineer/tasks/TASK-AR-212.md` | `TASK-AR-209`의 마이그레이션 감사 결과를 재현 가능한 증거로 완결하고, 향후 release-block 규칙에 연결한다. |
+| 0.3.5 | Task 0.3.5 | task | `TASK-AR-213` | `TASKSET-AR-MIGRATION-PARITY` | completed | `agents/lead_engineer/tasks/TASK-AR-213.md` | `레거시 전신 프로젝트` 이식에서 `skill / hook / script` 항목을 `kept/changed/deprecated/dropped/missi… |
+| 0.3.6 | Task 0.3.6 | task | `TASK-AR-224` | `TASKSET-AR-MIGRATION-PARITY` | completed | `agents/lead_engineer/tasks/TASK-AR-224.md` | `v0.1.8` 판정에서 공통 정합 규칙(공식 가이드 반영, migration 근거, 레거시 전신 프로젝트 이식 누락 처리)이 줄지 않게 동작하도록 공식… |
+| 0.4 | Taskset 0.4 | taskset | `TASKSET-AR-RELEASE-STEWARD` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Release Steward |
+| 0.4.1 | Task 0.4.1 | task | `TASK-AR-216` | `TASKSET-AR-RELEASE-STEWARD` | completed | `agents/lead_engineer/tasks/TASK-AR-216.md` | `v0.1.7` 공개 판정의 미충족 항목을 `v0.1.8` 판정으로 안전하게 이관하고, 릴리스 보드가 읽는 하나의 `release-state` 체인으로… |
+| 0.4.2 | Task 0.4.2 | task | `TASK-AR-219` | `TASKSET-AR-RELEASE-STEWARD` | completed | `agents/lead_engineer/tasks/TASK-AR-219.md` | 현재 로드맵 기준으로 `v0.1.8` 후보 공개 판단을 한 번 더 고정하고, Claude/Codex 계열 공식 권고(컨텍스트 우선순위, trace-gra… |
+| 0.4.3 | Task 0.4.3 | task | `TASK-AR-222` | `TASKSET-AR-RELEASE-STEWARD` | completed | `agents/lead_engineer/tasks/TASK-AR-222.md` | `v0.1.8` 1차 판정(2026-07-02)을 위해 요구사항 1~16 및 공식 권고를 하나의 판정 번들로 정합한다. 특히 `agent_runtime`… |
+| 0.4.4 | Task 0.4.4 | task | `TASK-AR-225` | `TASKSET-AR-RELEASE-STEWARD` | completed | `agents/lead_engineer/tasks/TASK-AR-225.md` | Close the `release-preflight findings=358` blocker discovered by `TASK-AR-224` execut… |
+| 0.4.5 | Task 0.4.5 | task | `TASK-AR-240` | `TASKSET-AR-RELEASE-STEWARD` | completed | `agents/lead_engineer/tasks/TASK-AR-240.md` | Create a version and release consistency steward that checks release state, version s… |
+| 0.4.6 | Task 0.4.6 | task | `TASK-AR-210` | `TASKSET-AR-RELEASE-STEWARD` | completed | `agents/lead_engineer/tasks/TASK-AR-210.md` | `v0.1.6`/`v0.1.7` 공개 판단을 근거 기반으로 고정하고, `v0.1.8` 판정(`07-02/07-09/07-16`)을 기준으로 release… |
+| 0.4.7 | Task 0.4.7 | task | `TASK-AR-223` | `TASKSET-AR-RELEASE-STEWARD` | completed | `agents/lead_engineer/tasks/TASK-AR-223.md` | `agent_runtime`에서 모델/핵심 루틴 재작성 없이 프로젝트 투입 시 오버레이 교체만으로 공식 가이드(Claude/Codex/OpenAI) 정합… |
+| 0.5 | Taskset 0.5 | taskset | `TASKSET-AR-UI-CONSOLE` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Console Operator |
+| 0.5.1 | Task 0.5.1 | task | `TASK-AR-226` | `TASKSET-AR-UI-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-226.md` | Map the current `agent_runtime` state sources before building a web UI, so the UI rea… |
+| 0.5.2 | Task 0.5.2 | task | `TASK-AR-227` | `TASKSET-AR-UI-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-227.md` | Expose a safe, read-first backend interface for the UI console, using runtime files a… |
+| 0.5.3 | Task 0.5.3 | task | `TASK-AR-228` | `TASKSET-AR-UI-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-228.md` | Build the first read-only web console so the user can see backlog, current work, agen… |
+| 0.5.4 | Task 0.5.4 | task | `TASK-AR-229` | `TASKSET-AR-UI-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-229.md` | Let the UI manage tasks safely by sending changes through runtime APIs or a command o… |
+| 0.5.5 | Task 0.5.5 | task | `TASK-AR-230` | `TASKSET-AR-UI-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-230.md` | Allow the user to control runtime work from the UI by sending prompts and lifecycle c… |
+| 0.5.6 | Task 0.5.6 | task | `TASK-AR-231` | `TASKSET-AR-UI-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-231.md` | Make the UI trustworthy during long `/goal` runs by surfacing freshness, live event c… |
+| 0.5.7 | Task 0.5.7 | task | `TASK-AR-232` | `TASKSET-AR-UI-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-232.md` | Add the post-MVP visualizations that make the runtime understandable as an agent orga… |
+| 0.6 | Taskset 0.6 | taskset | `TASKSET-AR-RSI-PLANNING` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Planning Architect |
+| 0.6.1 | Task 0.6.1 | task | `TASK-AR-234` | `TASKSET-AR-RSI-PLANNING` | completed | `agents/lead_engineer/tasks/TASK-AR-234.md` | Define the planning loop contract and state machine for bounded recursive self-improv… |
+| 0.6.2 | Task 0.6.2 | task | `TASK-AR-235` | `TASKSET-AR-RSI-PLANNING` | completed | `agents/lead_engineer/tasks/TASK-AR-235.md` | Implement a read-only planning scan that compares backlog, status, roadmap, task file… |
+| 0.6.3 | Task 0.6.3 | task | `TASK-AR-236` | `TASKSET-AR-RSI-PLANNING` | completed | `agents/lead_engineer/tasks/TASK-AR-236.md` | Add a proposal outbox and draft task writer so planning findings become inspectable p… |
+| 0.6.4 | Task 0.6.4 | task | `TASK-AR-237` | `TASKSET-AR-RSI-PLANNING` | completed | `agents/lead_engineer/tasks/TASK-AR-237.md` | Connect the planning loop to safe triggers: cycle completion, task completion, schedu… |
+| 0.6.5 | Task 0.6.5 | task | `TASK-AR-238` | `TASKSET-AR-RSI-PLANNING` | completed | `agents/lead_engineer/tasks/TASK-AR-238.md` | Add a UI Planner panel that shows planning scans, proposals, evidence, risk tier, rev… |
+| 0.6.6 | Task 0.6.6 | task | `TASK-AR-239` | `TASKSET-AR-RSI-PLANNING` | completed | `agents/lead_engineer/tasks/TASK-AR-239.md` | Implement approved proposal apply and verification so accepted planning proposals can… |
+| 0.6.7 | Task 0.6.7 | task | `TASK-AR-241` | `TASKSET-AR-RSI-PLANNING` | completed | `agents/lead_engineer/tasks/TASK-AR-241.md` | Build a review/compound/retro synthesizer that reads historical tasks, reviews, compo… |
+| 0.6.8 | Task 0.6.8 | task | `TASK-AR-242` | `TASKSET-AR-RSI-PLANNING` | completed | `agents/lead_engineer/tasks/TASK-AR-242.md` | Define an agent department and diversity council model so similar topics are reviewed… |
+| 0.6.9 | Task 0.6.9 | task | `TASK-AR-244` | `TASKSET-AR-RSI-PLANNING` | completed | `agents/lead_engineer/tasks/TASK-AR-244.md` | Add stability, budget, drift, and non-divergence guardrails for recursive planning lo… |
+| 0.6.10 | Task 0.6.10 | task | `TASK-AR-245` | `TASKSET-AR-RSI-PLANNING` | completed | `agents/lead_engineer/tasks/TASK-AR-245.md` | Define the long-term C-mode promotion gate for bounded auto-planning and low-risk aut… |
+| 0.7 | Taskset 0.7 | taskset | `TASKSET-AR-RSI-OPERATING-SYSTEM` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Evidence-to-Proposal Operator |
+| 0.7.1 | Task 0.7.1 | task | `TASK-AR-297` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-297.md` | Create the canonical place to capture trace, eval, grader, A2A, correction, review, r… |
+| 0.7.2 | Task 0.7.2 | task | `TASK-AR-298` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-298.md` | Make evaluation and verification evidence queryable instead of scattered across revie… |
+| 0.7.3 | Task 0.7.3 | task | `TASK-AR-299` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-299.md` | Convert scattered failure, compound, retro, and review notes into a single searchable… |
+| 0.7.4 | Task 0.7.4 | task | `TASK-AR-300` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-300.md` | Define how normalized evidence becomes task, plan, doc, eval, release, or skill propo… |
+| 0.7.5 | Task 0.7.5 | task | `TASK-AR-301` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-301.md` | Make the council layer measurable: different viewpoints should improve proposal quali… |
+| 0.7.6 | Task 0.7.6 | task | `TASK-AR-302` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-302.md` | Close the gap between A2A evidence fields existing in documents and an actual end-to-… |
+| 0.7.7 | Task 0.7.7 | task | `TASK-AR-303` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-303.md` | Keep C-mode as a potential long-term department runtime without promoting it before B… |
+| 0.7.8 | Task 0.7.8 | task | `TASK-AR-304` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-304.md` | Add the missing skill layer so future sessions follow the RSI operating process witho… |
+| 0.7.9 | Task 0.7.9 | task | `TASK-AR-305` | `TASKSET-AR-RSI-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-305.md` | Close the A안 taskset only after the registries, casebook, proposal contract, council… |
+| 0.8 | Taskset 0.8 | taskset | `TASKSET-AR-PANE-PROGRESS` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Progress Scout |
+| 0.8.1 | Task 0.8.1 | task | `TASK-AR-246` | `TASKSET-AR-PANE-PROGRESS` | completed | `agents/lead_engineer/tasks/TASK-AR-246.md` | Implement dispatcher helpers for safe parallel Codex/Claude work: one task per worktr… |
+| 0.8.2 | Task 0.8.2 | task | `TASK-AR-247` | `TASKSET-AR-PANE-PROGRESS` | completed | `agents/lead_engineer/tasks/TASK-AR-247.md` | Create the fixed pane/task-set progress golden set before UI or enforcement changes. |
+| 0.8.3 | Task 0.8.3 | task | `TASK-AR-248` | `TASKSET-AR-PANE-PROGRESS` | completed | `agents/lead_engineer/tasks/TASK-AR-248.md` | Show pane and task-set progress in the runtime UI using phase, step counter, rough pe… |
+| 0.8.4 | Task 0.8.4 | task | `TASK-AR-249` | `TASKSET-AR-PANE-PROGRESS` | completed | `agents/lead_engineer/tasks/TASK-AR-249.md` | Enforce progress updates in task claims and continuity pointers so new panes can resu… |
+| 0.8.5 | Task 0.8.5 | task | `TASK-AR-250` | `TASKSET-AR-PANE-PROGRESS` | completed | `agents/lead_engineer/tasks/TASK-AR-250.md` | Make task-set work user-friendly enough that a prompt like `taskset-quality-loop 진행해줘… |
+| 0.9 | Taskset 0.9 | taskset | `TASKSET-AR-COLLAB-CONCURRENCY` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Concurrency Steward |
+| 0.9.1 | Task 0.9.1 | task | `TASK-AR-251` | `TASKSET-AR-COLLAB-CONCURRENCY` | completed | `agents/lead_engineer/tasks/TASK-AR-251.md` | Record the conversation research on Google Docs/Slides, Figma, Notion, Firestore, Act… |
+| 0.9.2 | Task 0.9.2 | task | `TASK-AR-252` | `TASKSET-AR-COLLAB-CONCURRENCY` | completed | `agents/lead_engineer/tasks/TASK-AR-252.md` | Add an append-only event stream for pane lifecycle and task-set coordination events. |
+| 0.9.3 | Task 0.9.3 | task | `TASK-AR-253` | `TASKSET-AR-COLLAB-CONCURRENCY` | completed | `agents/lead_engineer/tasks/TASK-AR-253.md` | Block worker pane attempts to write shared SSoT files directly. |
+| 0.9.4 | Task 0.9.4 | task | `TASK-AR-254` | `TASKSET-AR-COLLAB-CONCURRENCY` | completed | `agents/lead_engineer/tasks/TASK-AR-254.md` | Make task-set start create the missing task worktree before claim creation, preventin… |
+| 0.9.5 | Task 0.9.5 | task | `TASK-AR-255` | `TASKSET-AR-COLLAB-CONCURRENCY` | completed | `agents/lead_engineer/tasks/TASK-AR-255.md` | Run collaboration concurrency checks with the rest of the owner governance gate. |
+| 0.9.6 | Task 0.9.6 | task | `TASK-AR-256` | `TASKSET-AR-COLLAB-CONCURRENCY` | completed | `agents/lead_engineer/tasks/TASK-AR-256.md` | Expose pane collaboration events and task-set summaries through the UI state adapter. |
+| 0.10 | Taskset 0.10 | taskset | `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Multi-Pane Auditor |
+| 0.10.1 | Task 0.10.1 | task | `TASK-AR-285` | `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE` | completed | `agents/lead_engineer/tasks/TASK-AR-285.md` | Count and classify live pane, claim, task-set, worktree, and event evidence in one re… |
+| 0.10.2 | Task 0.10.2 | task | `TASK-AR-286` | `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE` | completed | `agents/lead_engineer/tasks/TASK-AR-286.md` | Verify whether plan, review, compound, retro, meeting, seminar, Ralph, scribe, and do… |
+| 0.10.3 | Task 0.10.3 | task | `TASK-AR-287` | `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE` | completed | `agents/lead_engineer/tasks/TASK-AR-287.md` | Make pane lifecycle events mandatory enough that UI replay and audits can prove what… |
+| 0.10.4 | Task 0.10.4 | task | `TASK-AR-288` | `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE` | completed | `agents/lead_engineer/tasks/TASK-AR-288.md` | Track excluded, underused, waived, and lifecycle-stale agents across multi-pane colla… |
+| 0.10.5 | Task 0.10.5 | task | `TASK-AR-289` | `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE` | completed | `agents/lead_engineer/tasks/TASK-AR-289.md` | Resolve or explain future heartbeat values, released-claim phase/progress drift, and… |
+| 0.10.6 | Task 0.10.6 | task | `TASK-AR-290` | `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE` | completed | `agents/lead_engineer/tasks/TASK-AR-290.md` | Make multi-pane census, process compliance, role coverage, drift, and event replay vi… |
+| 0.10.7 | Task 0.10.7 | task | `TASK-AR-291` | `TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE` | completed | `agents/lead_engineer/tasks/TASK-AR-291.md` | Close the multi-pane assurance task set only after census, process, role, event, drif… |
+| 0.11 | Taskset 0.11 | taskset | `TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Closeout Automation Steward |
+| 0.11.1 | Task 0.11.1 | task | `TASK-AR-292` | `TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION` | completed | `agents/lead_engineer/tasks/TASK-AR-292.md` | Define the canonical contract for session closeout, including how to separate baselin… |
+| 0.11.2 | Task 0.11.2 | task | `TASK-AR-293` | `TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION` | completed | `agents/lead_engineer/tasks/TASK-AR-293.md` | Capture a compact baseline at session start so closeout can distinguish pre-existing… |
+| 0.11.3 | Task 0.11.3 | task | `TASK-AR-294` | `TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION` | completed | `agents/lead_engineer/tasks/TASK-AR-294.md` | Classify late dirty work and produce a safe route before any stash drop, branch delet… |
+| 0.11.4 | Task 0.11.4 | task | `TASK-AR-295` | `TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION` | completed | `agents/lead_engineer/tasks/TASK-AR-295.md` | Wire the baseline and dirty-intake scripts into session lifecycle hooks without addin… |
+| 0.11.5 | Task 0.11.5 | task | `TASK-AR-296` | `TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION` | completed | `agents/lead_engineer/tasks/TASK-AR-296.md` | Package the closeout workflow as a reusable skill and verify the full taskset through… |
+| 0.12 | Taskset 0.12 | taskset | `TASKSET-AR-GOVERNANCE-OPS` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Governance Operator |
+| 0.12.1 | Task 0.12.1 | task | `TASK-AR-257` | `TASKSET-AR-GOVERNANCE-OPS` | completed | `agents/lead_engineer/tasks/TASK-AR-257.md` | Register the remaining collaboration-governance, waiver, lifecycle, usage, sync, and… |
+| 0.12.2 | Task 0.12.2 | task | `TASK-AR-258` | `TASKSET-AR-GOVERNANCE-OPS` | completed | `agents/lead_engineer/tasks/TASK-AR-258.md` | Reduce explicit collaboration waivers by promoting safe root runtime capabilities and… |
+| 0.12.3 | Task 0.12.3 | task | `TASK-AR-259` | `TASKSET-AR-GOVERNANCE-OPS` | completed | `agents/lead_engineer/tasks/TASK-AR-259.md` | Normalize lifecycle evidence so released claims, heartbeats, active worktrees, and ta… |
+| 0.12.4 | Task 0.12.4 | task | `TASK-AR-260` | `TASKSET-AR-GOVERNANCE-OPS` | completed | `agents/lead_engineer/tasks/TASK-AR-260.md` | Make developed skills, hooks, triggers, gates, and runtime scripts measurable for act… |
+| 0.12.5 | Task 0.12.5 | task | `TASK-AR-261` | `TASKSET-AR-GOVERNANCE-OPS` | completed | `agents/lead_engineer/tasks/TASK-AR-261.md` | Prevent task progress from drifting away from backlog board, status, and next-session… |
+| 0.12.6 | Task 0.12.6 | task | `TASK-AR-262` | `TASKSET-AR-GOVERNANCE-OPS` | completed | `agents/lead_engineer/tasks/TASK-AR-262.md` | Separate root verification from generated-project template verification so broad test… |
+| 0.12.7 | Task 0.12.7 | task | `TASK-AR-263` | `TASKSET-AR-GOVERNANCE-OPS` | completed | `agents/lead_engineer/tasks/TASK-AR-263.md` | Publish a recurring governance operations report that turns watch/waived/unused/low-r… |
+| 0.13 | Taskset 0.13 | taskset | `TASKSET-AR-TASK-IDENTITY` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Identity Steward |
+| 0.13.1 | Task 0.13.1 | task | `TASK-AR-20260611-001000-815e18ab` | `TASKSET-AR-TASK-IDENTITY` | completed | `agents/lead_engineer/tasks/TASK-AR-20260611-001000-815e18ab.md` | Implement collision-proof task_uid allocation and owner governance enforcement. |
+| 0.13.2 | Task 0.13.2 | task | `TASK-AR-20260611-001100-cf344293` | `TASKSET-AR-TASK-IDENTITY` | completed | `agents/lead_engineer/tasks/TASK-AR-20260611-001100-cf344293.md` | Backfill registered, started, updated, and completed timestamps across canonical task… |
+| 0.13.3 | Task 0.13.3 | task | `TASK-AR-20260611-001200-f2b67a5a` | `TASKSET-AR-TASK-IDENTITY` | completed | `agents/lead_engineer/tasks/TASK-AR-20260611-001200-f2b67a5a.md` | Expose task identity and lifecycle metadata through UI state and archived backlog boa… |
+| 0.13.4 | Task 0.13.4 | task | `TASK-AR-20260611-001300-56389c0e` | `TASKSET-AR-TASK-IDENTITY` | completed | `agents/lead_engineer/tasks/TASK-AR-20260611-001300-56389c0e.md` | Verify no task, plan, task set, identity, or board synchronization work was omitted. |
+| 0.14 | Taskset 0.14 | taskset | `TASKSET-AR-UI-DESIGN-SYSTEM` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Design Operator |
+| 0.14.1 | Task 0.14.1 | task | `TASK-AR-264` | `TASKSET-AR-UI-DESIGN-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-264.md` | Completed the UI research synthesis and implementation plan for the Agent Runtime con… |
+| 0.14.2 | Task 0.14.2 | task | `TASK-AR-265` | `TASKSET-AR-UI-DESIGN-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-265.md` | Published a project-specific UI design guide that maps the research result to concret… |
+| 0.14.3 | Task 0.14.3 | task | `TASK-AR-266` | `TASKSET-AR-UI-DESIGN-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-266.md` | Applied the selected dark operator-console token system to the Agent Runtime UI shell… |
+| 0.14.4 | Task 0.14.4 | task | `TASK-AR-267` | `TASKSET-AR-UI-DESIGN-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-267.md` | Restyled backlog lanes, task cards, agent cards, event cards, evidence cards, source… |
+| 0.14.5 | Task 0.14.5 | task | `TASK-AR-268` | `TASKSET-AR-UI-DESIGN-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-268.md` | Updated visual tokens and component styling so pass, warning, blocked, failed, active… |
+| 0.14.6 | Task 0.14.6 | task | `TASK-AR-269` | `TASKSET-AR-UI-DESIGN-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-269.md` | Kept the existing responsive layout, visible labels, status text, focus states, and m… |
+| 0.14.7 | Task 0.14.7 | task | `TASK-AR-270` | `TASKSET-AR-UI-DESIGN-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-270.md` | Closed the UI design task set with task records, design documentation, implementation… |
+| 0.15 | Taskset 0.15 | taskset | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Interface Stylist |
+| 0.15.1 | Task 0.15.1 | task | `TASK-AR-278` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | `agents/lead_engineer/tasks/TASK-AR-278.md` | Apply the accepted Linear-like operator-console design system to the top-level consol… |
+| 0.15.2 | Task 0.15.2 | task | `TASK-AR-279` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | `agents/lead_engineer/tasks/TASK-AR-279.md` | Make backlog lanes and task cards easier to scan for status, priority, owner, task se… |
+| 0.15.3 | Task 0.15.3 | task | `TASK-AR-280` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | `agents/lead_engineer/tasks/TASK-AR-280.md` | Make active agent state, claims, progress, and command safety boundaries visible in t… |
+| 0.15.4 | Task 0.15.4 | task | `TASK-AR-281` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | `agents/lead_engineer/tasks/TASK-AR-281.md` | Make events, errors, evidence, and replay records look audit-ready and severity-aware. |
+| 0.15.5 | Task 0.15.5 | task | `TASK-AR-282` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | `agents/lead_engineer/tasks/TASK-AR-282.md` | Bring graph, state-machine, roadmap, planner, source, and write surfaces into the sam… |
+| 0.15.6 | Task 0.15.6 | task | `TASK-AR-283` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | `agents/lead_engineer/tasks/TASK-AR-283.md` | Keep the dark operator console usable on desktop and mobile without relying on color-… |
+| 0.15.7 | Task 0.15.7 | task | `TASK-AR-284` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | `agents/lead_engineer/tasks/TASK-AR-284.md` | Close the active UI design implementation task set only after focused checks, Owner g… |
+| 0.16 | Taskset 0.16 | taskset | `TASKSET-AR-REPO-HYGIENE` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Repo Custodian |
+| 0.16.1 | Task 0.16.1 | task | `TASK-AR-233` | `TASKSET-AR-REPO-HYGIENE` | completed | `agents/lead_engineer/tasks/TASK-AR-233.md` | Clean the current working tree through an intentional commit and push, then keep back… |
+| 0.17 | Taskset 0.17 | taskset | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Feedback Analyst |
+| 0.17.1 | Task 0.17.1 | task | `TASK-AR-306` | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | completed | `agents/lead_engineer/tasks/TASK-AR-306.md` | Owner 7개 지시(브랜치/스태시 정리, UI 적용, 플러그인/훅 정리, 레거시 전신 프로젝트 정리, 구조 분석, 비전 분석, 기록/등록)를 단일 세션… |
+| 0.17.2 | Task 0.17.2 | task | `TASK-AR-307` | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | completed | `agents/lead_engineer/tasks/TASK-AR-307.md` | 2026-06-11 전사 구조 분석에서 식별된 개선 항목을 Owner가 우선순위 결정할 수 있는 실행 계획으로 확정한다 (분석/계획 전용, 구현 없음). |
+| 0.17.3 | Task 0.17.3 | task | `TASK-AR-308` | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | completed | `agents/lead_engineer/tasks/TASK-AR-308.md` | Ralph/Loop Engineering, Multi-agent/A2A, 측정 가능한 평가·검증, backlog UI/task management, 추적… |
+| 0.17.4 | Task 0.17.4 | task | `TASK-AR-309` | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | completed | `agents/lead_engineer/tasks/TASK-AR-309.md` | 2026-06-11 "UI 미반영" 사건의 두 원인(비-editable stale 설치, 장수 구버전 서버 프로세스)이 재발하지 않도록 가드 방안을 계획… |
+| 0.18 | Taskset 0.18 | taskset | `TASKSET-AR-VISION-GAP-CLOSURE` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Vision Integrator |
+| 0.18.1 | Task 0.18.1 | task | `TASK-AR-310` | `TASKSET-AR-VISION-GAP-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-310.md` | 레거시 전신 프로젝트에 대한 라이브 의존을 모두 해소해 이관을 최종 마감하고, agent_runtime이 레거시 참조 없이 완전히 독립하도록 한다. |
+| 0.18.2 | Task 0.18.2 | task | `TASK-AR-311` | `TASKSET-AR-VISION-GAP-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-311.md` | 에이전트 간 통신을 태스크 상태/로그 추론 방식에서 명시적 메시지 패싱 API로 전환해 A2A 체인을 구조적으로 보장한다. |
+| 0.18.3 | Task 0.18.3 | task | `TASK-AR-312` | `TASKSET-AR-VISION-GAP-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-312.md` | 문서로만 정의된 역할 체계(TEAMS/ORG/diversity council)를 실제 2~3개 동시 에이전트 인스턴스 실행으로 증명하고, 역할별 쓰기 권… |
+| 0.18.4 | Task 0.18.4 | task | `TASK-AR-313` | `TASKSET-AR-VISION-GAP-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-313.md` | 광범위한 python 허용 목록을 정확한 명령 프로파일(ci/owner/research)로 좁혀 임의 코드 실행 경로를 제거한다. |
+| 0.18.5 | Task 0.18.5 | task | `TASK-AR-314` | `TASKSET-AR-VISION-GAP-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-314.md` | 리스 기반 클레임 원시 연산으로 다중 프로세스 환경의 중복 응답/소유권 경합을 구조적으로 차단한다. |
+| 0.18.6 | Task 0.18.6 | task | `TASK-AR-315` | `TASKSET-AR-VISION-GAP-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-315.md` | 결정적 계약 베이스라인(현 1.0 대체 통과)이 가리고 있는 실제 모델 출력 정확도(offline 0.6667 vs 목표 0.90) 격차를 provide… |
+| 0.18.7 | Task 0.18.7 | task | `TASK-AR-316` | `TASKSET-AR-VISION-GAP-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-316.md` | skills/(session-closeout, taskset-dispatch)를 버전·트리거 조건·메타데이터를 갖춘 재사용 가능한 패키지로 만들어 다른… |
+| 0.18.8 | Task 0.18.8 | task | `TASK-AR-317` | `TASKSET-AR-VISION-GAP-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-317.md` | UI 콘솔을 읽기 전용 스냅샷 대시보드에서 운영 제어 표면으로 승격한다: 에이전트 루프 진행이 실시간 반영되고, 제안 승인/거절이 UI에서 가능해야 한다. |
+| 0.18.9 | Task 0.18.9 | task | `TASK-AR-318` | `TASKSET-AR-VISION-GAP-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-318.md` | 이벤트/수정 기록을 나열에서 인과 체인 재생으로 승격해, 상태 변화를 프레임 단위로 거슬러 볼 수 있게 한다. |
+| 0.18.10 | Task 0.18.10 | task | `TASK-AR-319` | `TASKSET-AR-VISION-GAP-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-319.md` | 368+개 reviews/ 증거를 수동 탐색에서 자동 색인/검증 체계로 전환해 문서 추적성을 규모에 견디게 만든다. |
+| 0.19 | Taskset 0.19 | taskset | `TASKSET-AR-UI-UX-V2` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Console Experience Architect |
+| 0.19.1 | Task 0.19.1 | task | `TASK-AR-320` | `TASKSET-AR-UI-UX-V2` | planned | `agents/lead_engineer/tasks/TASK-AR-320.md` | 기본 테마를 Notion형 라이트로 전환하고 기존 Linear 다크 토큰을 Dark Mode 옵션으로 보존한다. |
+| 0.19.2 | Task 0.19.2 | task | `TASK-AR-321` | `TASKSET-AR-UI-UX-V2` | planned | `agents/lead_engineer/tasks/TASK-AR-321.md` | 9개 수평 탭을 접이식 좌측 사이드바(Home / WORK / AGENTS / COMMS / RECORDS / OPS 그룹)로 전환해 V2 뷰 확장을 수… |
+| 0.19.3 | Task 0.19.3 | task | `TASK-AR-322` | `TASKSET-AR-UI-UX-V2` | planned | `agents/lead_engineer/tasks/TASK-AR-322.md` | 모든 리스트 뷰(task/agent/event/message/evidence)에 Notion/Linear형 정렬·필터·그룹·검색 바와 간략히/자세히 밀도… |
+| 0.19.4 | Task 0.19.4 | task | `TASK-AR-323` | `TASKSET-AR-UI-UX-V2` | planned | `agents/lead_engineer/tasks/TASK-AR-323.md` | task 평면 나열 대신 taskset 단위로 묶인 직관적 작업 뷰를 기본 진입점으로 만들고, Owner가 진행 중 흐름에 task를 안전하게 삽입할 수… |
+| 0.19.5 | Task 0.19.5 | task | `TASK-AR-324` | `TASKSET-AR-UI-UX-V2` | planned | `agents/lead_engineer/tasks/TASK-AR-324.md` | TEAMS/ORG/roles 데이터로 조직도 트리를 렌더링하고, 에이전트 카드를 온라인 RPG 길드 멤버처럼 상태가 살아있는 프레즌스로 보여준다. |
+| 0.19.6 | Task 0.19.6 | task | `TASK-AR-325` | `TASKSET-AR-UI-UX-V2` | planned | `agents/lead_engineer/tasks/TASK-AR-325.md` | Vision → Milestone/Release → Taskset 3계층을 한 뷰에서 보여줘 고수준 방향과 실제 진행률을 연결한다. |
+| 0.19.7 | Task 0.19.7 | task | `TASK-AR-326` | `TASKSET-AR-UI-UX-V2` | planned | `agents/lead_engineer/tasks/TASK-AR-326.md` | 에이전트/업무/메시지가 온라인 RPG처럼 실시간으로 살아 움직이는 감각을 SSE 이벤트 스트림과 라이브 그래프로 구현한다. |
+| 0.19.8 | Task 0.19.8 | task | `TASK-AR-327` | `TASKSET-AR-UI-UX-V2` | planned | `agents/lead_engineer/tasks/TASK-AR-327.md` | 에이전트 간 대화를 Slack/Discord처럼 채널/스레드로 관전하고, Owner가 UI에서 meeting/seminar를 소집할 수 있게 한다. |
+| 0.19.9 | Task 0.19.9 | task | `TASK-AR-328` | `TASKSET-AR-UI-UX-V2` | planned | `agents/lead_engineer/tasks/TASK-AR-328.md` | 특정 taskset 실행을 지시했을 때 해당 taskset 완료 후 scope 밖 작업으로 이탈하지 않고 정지·보고하도록 런타임 정책으로 강제한다 (Ow… |
+| 0.20 | Taskset 0.20 | taskset | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Platform Builder |
+| 0.20.1 | Task 0.20.1 | task | `TASK-AR-329` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-329.md` | Owner가 UI에서 taskset을 직접 만들고, task를 넣고 빼고, 일괄 편집할 수 있게 한다 (Linear Projects / Notion DB… |
+| 0.20.2 | Task 0.20.2 | task | `TASK-AR-330` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-330.md` | task 계층(서브태스크)과 의존성(blocks/blocked-by)을 데이터 모델로 정식화하고 타임라인(Gantt)·의존 그래프로 시각화한다. |
+| 0.20.3 | Task 0.20.3 | task | `TASK-AR-331` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-331.md` | Notion형 커스텀 속성과 Monday/ClickUp형 "when X then Y" 자동화 규칙, Linear형 트리아지 큐를 제공한다. |
+| 0.20.4 | Task 0.20.4 | task | `TASK-AR-332` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-332.md` | 사진/문서를 task·메시지에 드래그드롭/붙여넣기로 첨부하고, 미리보기·다운로드할 수 있게 한다 (Notion/Slack/Jira 모델). |
+| 0.20.5 | Task 0.20.5 | task | `TASK-AR-333` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-333.md` | taskset/보드/이벤트를 표준 포맷으로 내보내고, 외부 목록을 task로 일괄 가져올 수 있게 한다 (Notion/Jira 모델). |
+| 0.20.6 | Task 0.20.6 | task | `TASK-AR-334` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-334.md` | task/taskset/메시지/이벤트/evidence/reviews 문서를 한 검색창에서 풀텍스트로 찾고 즉시 이동한다 (Notion 검색 + Slack… |
+| 0.20.7 | Task 0.20.7 | task | `TASK-AR-335` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-335.md` | 마일스톤/회의/완료 이력/예약 실행을 캘린더 뷰로 통합하고, taskset 디스패치를 예약·반복 실행할 수 있게 한다 (Notion Calendar/Mo… |
+| 0.20.8 | Task 0.20.8 | task | `TASK-AR-336` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-336.md` | `agents/project/STATE-MACHINES.yml`의 라이프사이클(task/claim/role)을 인터랙티브 그래프로 보여주고, 선택한 ta… |
+| 0.20.9 | Task 0.20.9 | task | `TASK-AR-337` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-337.md` | task/taskset을 개인 에이전트가 아닌 팀/역할 단위로 배정하고, 에이전트·팀별 부하를 히트맵으로 보여준다 (Jira 컴포넌트 + Asana Wo… |
+| 0.20.10 | Task 0.20.10 | task | `TASK-AR-338` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-338.md` | 중요한 변화(blocked, 승인 대기, 마감 임박, 멘션)를 인앱 알림 인박스로 모으고, 채널에 멘션·핀·리액션을 더한다 (Slack + Linear… |
+| 0.20.11 | Task 0.20.11 | task | `TASK-AR-339` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-339.md` | 운영 지표를 Grafana/Sentry형 대시보드로 상시 노출한다: 토큰/비용 추이, eval 점수, 게이트 pass/watch/block 보드, tas… |
+| 0.20.12 | Task 0.20.12 | task | `TASK-AR-340` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-340.md` | 콘솔에 생동감을 더하는 애니메이션/이펙트와 RPG형 게임화 요소를 토글 가능한 폴리시 레이어로 추가한다 (기본은 차분한 진지 모드). |
+| 0.20.13 | Task 0.20.13 | task | `TASK-AR-341` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-341.md` | 멀티 호스트 프로젝트(agent_runtime, autofolio 등)를 Notion 워크스페이스처럼 전환하고, 대시보드 위젯 확장 포인트와 KR/EN… |
+| 0.21 | Taskset 0.21 | taskset | `TASKSET-AR-UI-LIVING-CONSOLE` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | World Builder |
+| 0.21.1 | Task 0.21.1 | task | `TASK-AR-360` | `TASKSET-AR-UI-LIVING-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-360.md` | 기각/보류 아이디어를 폐기하지 않고 보존·재발굴하는 체계를 RSI 운영 원칙으로 정착시킨다 (Owner 통찰: 진화 시 과거를 잊지 않고 주기적으로 재평… |
+| 0.21.2 | Task 0.21.2 | task | `TASK-AR-361` | `TASKSET-AR-UI-LIVING-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-361.md` | 사이드탭의 회의실 공간에 에이전트를 마우스로 끌어다 넣고, 주제/태스크를 선택하면 참여 에이전트들이 의견을 주고받는 회의를 실행한다. |
+| 0.21.3 | Task 0.21.3 | task | `TASK-AR-362` | `TASKSET-AR-UI-LIVING-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-362.md` | hover 미리보기와 드래그앤드롭을 콘솔 전역의 1급 상호작용 동사로 표준화한다 (Notion peek + Discord 접근성 DnD 패턴). |
+| 0.21.4 | Task 0.21.4 | task | `TASK-AR-363` | `TASKSET-AR-UI-LIVING-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-363.md` | 프로젝트의 성숙도를 진화하는 캐릭터처럼 측정·표시한다: 프로젝트 Lv.N(누적 경험), 사업 단계 칭호(garage→seed→startup→scaleup… |
+| 0.21.5 | Task 0.21.5 | task | `TASK-AR-364` | `TASKSET-AR-UI-LIVING-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-364.md` | 실제 회사 같은 2D 맵에 에이전트를 배치해 한눈에 조직 활동을 보여준다 (Smallville/Generative Agents 패턴 — arXiv 230… |
+| 0.21.6 | Task 0.21.6 | task | `TASK-AR-365` | `TASKSET-AR-UI-LIVING-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-365.md` | 작업 이벤트(완료/차단/승인 대기)를 사용자가 쓰는 메신저로 내보낸다 — LangSmith 패턴(범용 웹훅 + 채널 레시피, 집계 윈도우 기반)을 채택. |
+| 0.22 | Taskset 0.22 | taskset | `TASKSET-AR-PM-OPERATING-SYSTEM` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Project Workbreaker |
+| 0.22.1 | Task 0.22.1 | task | `TASK-AR-342` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-342.md` | Make `project -> taskset -> task -> unit` and short/mid/long horizon metadata a canon… |
+| 0.22.2 | Task 0.22.2 | task | `TASK-AR-343` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-343.md` | Create the detailed unit document shape that lower-cost implementation models can exe… |
+| 0.22.3 | Task 0.22.3 | task | `TASK-AR-344` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-344.md` | Block low-tier worker dispatch when task or unit records lack enough detail. |
+| 0.22.4 | Task 0.22.4 | task | `TASK-AR-345` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-345.md` | Add planner/worker/reviewer tier metadata and escalation triggers to task and unit re… |
+| 0.22.5 | Task 0.22.5 | task | `TASK-AR-346` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-346.md` | Extend taskset dispatch so a worker can claim one unit and must stop at the taskset/u… |
+| 0.22.6 | Task 0.22.6 | task | `TASK-AR-347` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-347.md` | Add Kanban-style WIP controls and flow signals for tasksets, teams, and worker units. |
+| 0.22.7 | Task 0.22.7 | task | `TASK-AR-348` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-348.md` | Render project/taskset/task/unit hierarchy without stuffing detailed instructions int… |
+| 0.22.8 | Task 0.22.8 | task | `TASK-AR-349` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-349.md` | Mirror the PM hierarchy, unit templates, schemas, and gates into generated host proje… |
+| 0.22.9 | Task 0.22.9 | task | `TASK-AR-350` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-350.md` | Add a taskset verification wrapper and Owner-facing closeout evidence for the PM oper… |
+| 0.22.9.1 | Unit 0.22.9.1 | unit | `UNIT-TASK-AR-350-001` | `TASK-AR-350` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-350/UNIT-TASK-AR-350-001.md` | UNIT-TASK-AR-350-001 - PM OS Closeout Verification |
+| 0.23 | Taskset 0.23 | taskset | `TASKSET-AR-DOC-TO-PLAN` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Pitch Alchemist |
+| 0.23.1 | Task 0.23.1 | task | `TASK-AR-366` | `TASKSET-AR-DOC-TO-PLAN` | planned | `agents/lead_engineer/tasks/TASK-AR-366.md` | pitch deck/기획서/아이디어 문서(PPT, PDF, Word, HTML, md)를 넣으면 시스템이 스스로 분석해 plan을 짜고 실현 가능한 ta… |
+| 0.23.2 | Task 0.23.2 | task | `TASK-AR-367` | `TASKSET-AR-DOC-TO-PLAN` | planned | `agents/lead_engineer/tasks/TASK-AR-367.md` | 비전이 동일한 오픈소스 Paperclip(github.com/paperclipai/paperclip, MIT)의 기능 중 agent_runtime에 없는… |
+| 0.23.3 | Task 0.23.3 | task | `TASK-AR-368` | `TASKSET-AR-DOC-TO-PLAN` | planned | `agents/lead_engineer/tasks/TASK-AR-368.md` | 예상치(est_*)만 있는 현 체계에 실측치를 더해, task/taskset을 우선순위·난이도·예상/실제 토큰·예상/실제 시간·부서 등 다요소로 정렬·필… |
+| 1 | Initiative 1 | initiative | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | - | planned | `agents/project/initiatives/INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE.md` | Work Hierarchy Conflict Closure Initiative |
+| 1.1 | Taskset 1.1 | taskset | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | active | `BACKLOG-BOARD.md` | Work Taxonomist |
+| 1.1.1 | Task 1.1.1 | task | `TASK-AR-369` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-369.md` | Finish the terminology migration from ambiguous `project -> taskset -> task -> unit`… |
+| 1.1.2 | Task 1.1.2 | task | `TASK-AR-370` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-370.md` | Prevent concurrent panes from selecting the same human display ID before a task file… |
+| 1.1.3 | Task 1.1.3 | task | `TASK-AR-371` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-371.md` | Remove `BACKLOG.md` as a top-of-file shared manual registration hotspot while preserv… |
+| 1.1.4 | Task 1.1.4 | task | `TASK-AR-372` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-372.md` | Provide one structured registration command path so planners stop hand-editing board… |
+| 1.1.5 | Task 1.1.5 | task | `TASK-AR-373` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-373.md` | Make it visible which planned tasks are worker-ready and which still require planner… |
+| 1.1.6 | Task 1.1.6 | task | `TASK-AR-374` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-374.md` | Prove that the work hierarchy and registration conflict surfaces are actually closed… |
+
+## Risks / Blockers
+- Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.
+- Risk: this generated view prevents human number collisions, but task file creation still needs the planned reservation API for strict concurrent writes.
+
+## Next Steps
+- Run `python scripts/work_item_classifier.py --write` after hierarchy metadata changes.
+- Run `python scripts/work_item_classifier.py --check` before closeout or owner-facing handoff.

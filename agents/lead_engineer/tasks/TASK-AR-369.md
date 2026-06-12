@@ -4,9 +4,11 @@ display_id: TASK-AR-369
 task_uid: 9d171d09-6c3d-4d1c-a8e7-fdee77a75d2c
 registered_at: 2026-06-12T08:17:54+09:00
 created_at: 2026-06-12T08:17:54+09:00
-updated_at: 2026-06-12T08:17:54+09:00
+started_at: 2026-06-12T08:42:59+09:00
+updated_at: 2026-06-12T09:04:46+09:00
+completed_at: 2026-06-12T09:04:46+09:00
 title: Initiative vocabulary and PM contract migration
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 4
@@ -60,4 +62,11 @@ tags:
 ## Handoff
 
 - Report changed docs and any remaining legacy mentions that are intentionally preserved for historical review records.
+
+## Completion Evidence
+
+- Added generated work-item classification outputs under `agents/project/work-items/`.
+- Recorded the hierarchy/numbering/planning-discussion decision in `reviews/MEETING-2026-06-12-work-hierarchy-numbering-and-recording.md`.
+- Added planning-discussion prompt-hook guidance and owner-governance classifier checks.
+- Verified with `python scripts\work_item_classifier.py --write --check`, focused pytest, `python scripts\taskset_work_gate.py --check`, and `python scripts\owner_governance_gate.py`.
 
