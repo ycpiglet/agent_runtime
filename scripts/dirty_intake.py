@@ -224,7 +224,7 @@ def _git_worktree_is_clean(path: Path) -> bool:
 
 
 def _git_head_preserved_residue(root: Path, extra_worktrees: list[dict[str, str]] | None = None) -> dict[str, list[str]]:
-    """Residue is preserved when a clean codex worktree's branch is already in HEAD."""
+    """Residue is preserved when a clean agent worktree's branch is already in HEAD."""
     branches: set[str] = set()
     worktrees: set[str] = set()
     for item in extra_worktrees or []:
