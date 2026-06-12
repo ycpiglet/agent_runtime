@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-12T21:26:11+09:00
+generated_at: 2026-06-12T21:29:53+09:00
 record_count: 199
 ---
 
@@ -230,7 +230,7 @@ record_count: 199
 | 1.1.6 | Task 1.1.6 | task | `TASK-AR-374` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-374.md` | Prove that the work hierarchy and registration conflict surfaces are actually closed… |
 | 2 | Initiative 2 | initiative | `INIT-AR-PARALLEL-WAVE-EXECUTION` | - | planned | `agents/project/initiatives/INIT-AR-PARALLEL-WAVE-EXECUTION.md` | Parallel Wave Execution Initiative |
 | 2.1 | Taskset 2.1 | taskset | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | `INIT-AR-PARALLEL-WAVE-EXECUTION` | active | `BACKLOG-BOARD.md` | Wave Conductor |
-| 2.1.1 | Task 2.1.1 | task | `TASK-AR-500` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-500.md` | 충돌 발견 시점을 merge-time(사후)에서 claim-time(사전)으로 옮긴다. 새 클레임 생성 시 활성 클레임들의 선언 footprint(`ta… |
+| 2.1.1 | Task 2.1.1 | task | `TASK-AR-500` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | in_progress | `agents/lead_engineer/tasks/TASK-AR-500.md` | 충돌 발견 시점을 merge-time(사후)에서 claim-time(사전)으로 옮긴다. 새 클레임 생성 시 활성 클레임들의 선언 footprint(`ta… |
 | 2.1.2 | Task 2.1.2 | task | `TASK-AR-501` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-501.md` | planner가 unit 의존성 DAG를 topological wave로 분해하고, 디스패처가 같은 wave의 K개 unit에 대해 claim+workt… |
 | 2.1.3 | Task 2.1.3 | task | `TASK-AR-502` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-502.md` | 워커 브랜치의 main 합류를 단일 통합자(orchestrator)가 직렬 rebase-test-merge 큐로 처리해, 병렬 구현 기간에도 merge… |
 | 2.1.4 | Task 2.1.4 | task | `TASK-AR-503` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-503.md` | 워크트리 작업은 반드시 main 체크아웃에 활성 클레임을 먼저 남기고 시작하도록 강제한다. 클레임 없는 워크트리 작업은 보드/ui-console 양쪽에서… |
