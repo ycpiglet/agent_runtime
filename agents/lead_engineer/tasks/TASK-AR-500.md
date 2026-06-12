@@ -4,9 +4,10 @@ display_id: TASK-AR-500
 task_uid: 15e90de2-ca81-4611-8b6d-078de0a04e18
 registered_at: 2026-06-12T18:35:45+09:00
 created_at: 2026-06-12T18:35:45+09:00
-updated_at: 2026-06-12T18:35:45+09:00
+started_at: 2026-06-12T21:27:17+09:00
+updated_at: 2026-06-12T21:35:00+09:00
 title: Claim-time footprint conflict gate (target_files intersection)
-status: planned
+status: in_progress
 priority: P1
 difficulty: M
 est_hours: 6

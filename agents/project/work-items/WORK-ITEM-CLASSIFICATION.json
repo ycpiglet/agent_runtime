@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-12T21:26:11+09:00",
+  "generated_at": "2026-06-12T21:29:53+09:00",
   "record_count": 199,
   "finding_count": 0,
   "findings": [],
@@ -2115,7 +2115,7 @@
       "title": "충돌 발견 시점을 merge-time(사후)에서 claim-time(사전)으로 옮긴다. 새 클레임 생성 시 활성 클레임들의 선언 footprint(`ta…",
       "path": "agents/lead_engineer/tasks/TASK-AR-500.md",
       "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
-      "status": "planned"
+      "status": "in_progress"
     },
     {
       "key": "task:TASK-AR-501",
