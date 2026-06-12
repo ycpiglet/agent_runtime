@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-12T11:08:07+09:00",
-  "record_count": 189,
+  "generated_at": "2026-06-12T12:04:06+09:00",
+  "record_count": 190,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -2060,7 +2060,18 @@
       "title": "Provide one structured registration command path so planners stop hand-editing board…",
       "path": "agents/lead_engineer/tasks/TASK-AR-372.md",
       "parent_id": "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
-      "status": "planned"
+      "status": "in_progress"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-372-001",
+      "level": "unit",
+      "number": "1.1.4.1",
+      "label": "Unit 1.1.4.1",
+      "id": "UNIT-TASK-AR-372-001",
+      "title": "UNIT-TASK-AR-372-001 - Work Schema SSoT And Gate",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-001.md",
+      "parent_id": "TASK-AR-372",
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-373",
