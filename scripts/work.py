@@ -28,12 +28,26 @@ WORK_ITEM_SCHEMA = "agent-runtime-work-item/v1"
 TASKSET_REGISTRY_SCHEMA = "agent-runtime-taskset-definitions/v1"
 TASKSET_REGISTRY_PATH = Path("agents/project/work-items/TASKSET-DEFINITIONS.json")
 TASKS_DIR = Path("agents/lead_engineer/tasks")
+UNITS_DIR = Path("agents/lead_engineer/tasks/units")
 INITIATIVES_DIR = Path("agents/project/initiatives")
 PLANS_DIR = Path("docs/superpowers/plans")
 REVIEWS_DIR = Path("reviews")
 OWNER_DOCS_PATH = Path("owner-docs.yml")
 RESERVATION_TTL_SECONDS = 86400
 TASK_DISPLAY_RE = re.compile(r"^TASK-AR-\d+$")
+UNIT_DISPLAY_RE = re.compile(r"^UNIT-(TASK-AR-\d+)-\d{3}$")
+UNIT_REQUIRED_FIELDS = {
+    "title",
+    "context",
+    "inputs",
+    "target_files",
+    "scope",
+    "steps",
+    "acceptance",
+    "verification",
+    "handoff",
+    "stop_condition",
+}
 
 
 class WorkRegistrationError(RuntimeError):
@@ -109,6 +123,18 @@ def _list_value(value: Any) -> list[str]:
     return []
 
 
+def _text_lines(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    if isinstance(value, str) and value.strip():
+        return [line.strip() for line in value.splitlines() if line.strip()]
+    return []
+
+
+def _has_text_value(value: Any) -> bool:
+    return bool(_text_lines(value))
+
+
 def _frontmatter(meta: dict[str, Any]) -> str:
     lines = ["---"]
     for key, value in meta.items():
@@ -130,6 +156,14 @@ def _title_from_task(task: dict[str, Any], display_id: str) -> str:
 
 def _task_path(root: Path, display_id: str) -> Path:
     return root / TASKS_DIR / f"{display_id}.md"
+
+
+def _unit_path(root: Path, task_id: str, unit_id: str) -> Path:
+    return root / UNITS_DIR / task_id / f"{unit_id}.md"
+
+
+def _unit_rel_path(task_id: str, unit_id: str) -> str:
+    return (UNITS_DIR / task_id / f"{unit_id}.md").as_posix()
 
 
 def _initiative_path(root: Path, initiative_id: str) -> Path:
@@ -223,6 +257,22 @@ def _render_plan(
     ]
     for task in tasks:
         lines.append(f"| `{task['display_id']}` | {task['title']} |")
+    unit_rows = [
+        f"| `{unit['unit_id']}` | `{task['display_id']}` | {unit['title']} |"
+        for task in tasks
+        for unit in _units_for(task)
+    ]
+    if unit_rows:
+        lines.extend(
+            [
+                "",
+                "## Unit Specs",
+                "",
+                "| Unit | Task | Title |",
+                "| --- | --- | --- |",
+                *unit_rows,
+            ]
+        )
     lines.extend(
         [
             "",
@@ -272,6 +322,7 @@ def _render_task(
         "initiative_id": initiative["id"],
         "project_id": payload.get("project_id", "PROJECT-AGENT-RUNTIME-PM-OS"),
         "task_set_id": taskset["id"],
+        "unit_spec": task.get("unit_spec", ""),
         "reservation_id": reservation_id,
         "origin_type": payload["origin_type"],
         "origin_ref": payload["origin_ref"],
@@ -299,6 +350,75 @@ def _render_task(
     )
 
 
+def _render_unit(
+    *,
+    now_text: str,
+    payload: dict[str, Any],
+    initiative: dict[str, Any],
+    taskset: dict[str, Any],
+    task: dict[str, Any],
+    unit: dict[str, Any],
+    unit_uid: str,
+) -> str:
+    task_id = str(task["display_id"])
+    unit_id = str(unit["unit_id"])
+    owner = unit.get("owner", task.get("owner", taskset.get("owner", initiative["owner"])))
+    model_tier = unit.get("model_tier", task.get("worker_model_tier", taskset.get("worker_model_tier", "worker_standard")))
+    status = unit.get("status", "worker_ready")
+    meta = {
+        "schema_version": WORK_ITEM_SCHEMA,
+        "work_id": unit_id,
+        "work_uid": unit_uid,
+        "kind": "unit",
+        "parent_id": task_id,
+        "unit_id": unit_id,
+        "task_id": task_id,
+        "task_set_id": taskset["id"],
+        "initiative_id": initiative["id"],
+        "project_id": payload.get("project_id", "PROJECT-AGENT-RUNTIME-PM-OS"),
+        "status": status,
+        "verification_status": unit.get("verification_status", "pending"),
+        "owner": owner,
+        "created_at": now_text,
+        "updated_at": now_text,
+        "origin_type": payload["origin_type"],
+        "origin_ref": payload["origin_ref"],
+        "created_by": payload["created_by"],
+        "summary": unit["title"],
+        "horizon": unit.get("horizon", "unit"),
+        "model_tier": model_tier,
+        "escalation_triggers": _list_value(unit.get("escalation_triggers")) or ["ambiguity", "data_integrity"],
+        "context": unit["context"],
+        "inputs": _text_lines(unit.get("inputs")),
+        "target_files": _text_lines(unit.get("target_files")),
+        "scope": unit["scope"],
+        "acceptance": _text_lines(unit.get("acceptance")),
+        "verification": _text_lines(unit.get("verification")),
+        "handoff": unit["handoff"],
+        "stop_condition": unit["stop_condition"],
+    }
+    steps = _text_lines(unit.get("steps"))
+    sections = [
+        ("Context", str(unit["context"]).strip()),
+        ("Inputs", "\n".join(f"- {item}" for item in _text_lines(unit.get("inputs")))),
+        ("Target Files", "\n".join(f"- {item}" for item in _text_lines(unit.get("target_files")))),
+        ("Scope", str(unit["scope"]).strip()),
+        ("Steps", "\n".join(f"{index}. {item}" for index, item in enumerate(steps, start=1))),
+        ("Acceptance Criteria", "\n".join(f"- {item}" for item in _text_lines(unit.get("acceptance")))),
+        ("Verification", "\n".join(f"- `{item}`" for item in _text_lines(unit.get("verification")))),
+        ("Handoff", str(unit["handoff"]).strip()),
+        ("Stop Boundary", str(unit["stop_condition"]).strip()),
+    ]
+    body = "\n\n".join(f"## {title}\n\n{text}" for title, text in sections)
+    return (
+        _frontmatter(meta)
+        + "\n\n"
+        + f"# {unit_id} - {unit['title']}\n\n"
+        + body
+        + "\n"
+    )
+
+
 def _render_review(
     *,
     now_text: str,
@@ -309,6 +429,13 @@ def _render_review(
 ) -> str:
     title = f"{taskset['display_name']} Registration"
     rows = "\n".join(f"| `{task['display_id']}` | {task['title']} | planned |" for task in tasks)
+    unit_count = sum(len(_units_for(task)) for task in tasks)
+    unit_signal = "unit specs included" if unit_count else "unit specs deferred"
+    next_unit_line = (
+        "- Continue into `work close`, `work verify`, and AI proposal tools after unit generation is covered."
+        if unit_count
+        else "- Continue into unit spec generation, `work close`, `work verify`, and AI proposal tools."
+    )
     return f"""---
 title: {title}
 date: {_parse_datetime(now_text).date().isoformat()}
@@ -322,7 +449,8 @@ tags: [work-registration, task-ar-372, work-cli]
 ## Bottom Line
 
 Structured work registration created initiative `{initiative['id']}`, taskset
-`{taskset['id']}`, and `{len(tasks)}` task records from one input file.
+`{taskset['id']}`, `{len(tasks)}` task records, and `{unit_count}` unit specs
+from one input file.
 
 ## Signal
 
@@ -330,7 +458,7 @@ Structured work registration created initiative `{initiative['id']}`, taskset
 | --- | --- | --- |
 | Input schema | pass | `{REGISTRATION_SCHEMA}` |
 | Reservation ledger | pass | task display IDs fulfilled during registration |
-| Generated records | pass | initiative, taskset plan, task files, and generated views refreshed |
+| Generated records | pass | initiative, taskset plan, task files, {unit_signal}, and generated views refreshed |
 
 ## Decision
 
@@ -347,13 +475,15 @@ registration path for this taskset shape.
 
 - This deterministic path does not perform AI decomposition, assignment, or
   approval bypass.
-- Additional work is still needed for units and closeout automation.
+- Additional work is still needed for closeout automation and proposal-backed
+  AI split/criteria/assign behavior.
 
 ## Next
 
 - Run `python scripts/work_item_classifier.py --check` and
   `python scripts/taskset_work_gate.py --check` before handoff.
 - Keep AI `split`, `criteria`, and `assign` tools behind B-mode proposal review.
+{next_unit_line}
 """
 
 
@@ -386,6 +516,29 @@ def _validate_payload(payload: dict[str, Any]) -> tuple[dict[str, Any], dict[str
             if not TASK_DISPLAY_RE.match(display_id):
                 findings.append(f"input:{prefix}:invalid:display_id:{display_id}")
             display_ids.append(display_id)
+        units = task.get("units")
+        if units is None:
+            continue
+        if not isinstance(units, list) or not all(isinstance(item, dict) for item in units):
+            findings.append(f"input:{prefix}:units:missing-or-invalid")
+            continue
+        unit_ids: list[str] = []
+        for unit_index, unit in enumerate(units, start=1):
+            unit_prefix = f"{prefix}.units[{unit_index}]"
+            for field in sorted(UNIT_REQUIRED_FIELDS):
+                if not _has_text_value(unit.get(field)):
+                    findings.append(f"input:{unit_prefix}:missing:{field}")
+            unit_id = str(unit.get("unit_id") or "").strip()
+            if unit_id:
+                match = UNIT_DISPLAY_RE.match(unit_id)
+                if not match:
+                    findings.append(f"input:{unit_prefix}:invalid:unit_id:{unit_id}")
+                elif display_id and match.group(1) != display_id:
+                    findings.append(f"input:{unit_prefix}:unit-task-mismatch:{unit_id}:{display_id}")
+                unit_ids.append(unit_id)
+        duplicate_units = sorted({unit_id for unit_id in unit_ids if unit_ids.count(unit_id) > 1})
+        for unit_id in duplicate_units:
+            findings.append(f"input:{prefix}:units:duplicate-unit-id:{unit_id}")
     duplicates = sorted({display_id for display_id in display_ids if display_ids.count(display_id) > 1})
     for display_id in duplicates:
         findings.append(f"input:tasks:duplicate-display-id:{display_id}")
@@ -526,6 +679,55 @@ def _assign_missing_display_ids(
             break
 
 
+def _units_for(task: dict[str, Any]) -> list[dict[str, Any]]:
+    units = task.get("units")
+    if isinstance(units, list):
+        return [unit for unit in units if isinstance(unit, dict)]
+    return []
+
+
+def _assign_unit_ids(tasks: list[dict[str, Any]]) -> None:
+    seen: set[str] = set()
+    findings: list[str] = []
+    for task in tasks:
+        task_id = str(task["display_id"])
+        units = _units_for(task)
+        for index, unit in enumerate(units, start=1):
+            unit_id = str(unit.get("unit_id") or "").strip() or f"UNIT-{task_id}-{index:03d}"
+            match = UNIT_DISPLAY_RE.match(unit_id)
+            if not match:
+                findings.append(f"input:tasks:{task_id}:units:invalid-unit-id:{unit_id}")
+                continue
+            if match.group(1) != task_id:
+                findings.append(f"input:tasks:{task_id}:units:unit-task-mismatch:{unit_id}")
+                continue
+            if unit_id in seen:
+                findings.append(f"input:tasks:{task_id}:units:duplicate-unit-id:{unit_id}")
+                continue
+            seen.add(unit_id)
+            unit["unit_id"] = unit_id
+        if units:
+            task["unit_spec"] = _unit_rel_path(task_id, str(units[0]["unit_id"]))
+    if findings:
+        raise WorkRegistrationError(findings)
+
+
+def _unit_targets(root: Path, tasks: list[dict[str, Any]]) -> list[Path]:
+    targets: list[Path] = []
+    for task in tasks:
+        task_id = str(task["display_id"])
+        for unit in _units_for(task):
+            targets.append(_unit_path(root, task_id, str(unit["unit_id"])))
+    return targets
+
+
+def _existing_unit_matches(path: Path, task_id: str, unit_id: str) -> bool:
+    if not path.exists():
+        return False
+    meta, _ = backlog_board.parse_frontmatter(path.read_text(encoding="utf-8"))
+    return str(meta.get("unit_id") or path.stem) == unit_id and str(meta.get("task_id") or "") == task_id
+
+
 def _preflight_existing(
     root: Path,
     initiative: dict[str, Any],
@@ -535,7 +737,13 @@ def _preflight_existing(
     plan_path: Path,
     review_path: Path,
 ) -> str:
-    targets = [initiative_path, plan_path, review_path, *[_task_path(root, str(task["display_id"])) for task in tasks]]
+    targets = [
+        initiative_path,
+        plan_path,
+        review_path,
+        *[_task_path(root, str(task["display_id"])) for task in tasks],
+        *_unit_targets(root, tasks),
+    ]
     existing = [path for path in targets if path.exists()]
     if not existing:
         return "create"
@@ -550,6 +758,11 @@ def _preflight_existing(
         task_path = _task_path(root, str(task["display_id"]))
         if not _existing_task_matches(task_path, str(taskset["id"]), str(initiative["id"])):
             findings.append(f"{_rel(root, task_path)}: existing-task-conflict:{task['display_id']}")
+        for unit in _units_for(task):
+            unit_id = str(unit["unit_id"])
+            unit_path = _unit_path(root, str(task["display_id"]), unit_id)
+            if not _existing_unit_matches(unit_path, str(task["display_id"]), unit_id):
+                findings.append(f"{_rel(root, unit_path)}: existing-unit-conflict:{unit_id}")
     if findings:
         raise WorkRegistrationError(findings)
     return "already_exists"
@@ -575,6 +788,7 @@ def register(root: Path, input_path: Path, *, now: str | None = None) -> dict[st
         if error:
             raise WorkRegistrationError([f"{_rel(root, ledger_path)}: invalid-ledger"])
         _assign_missing_display_ids(root, ledger, tasks, now_dt)
+        _assign_unit_ids(tasks)
 
         display_ids = [str(task["display_id"]) for task in tasks]
         if len(display_ids) != len(set(display_ids)):
@@ -604,9 +818,11 @@ def register(root: Path, input_path: Path, *, now: str | None = None) -> dict[st
                 "plan": _rel(root, plan_path),
                 "review": _rel(root, review_path),
                 "tasks": [_rel(root, _task_path(root, str(task["display_id"]))) for task in tasks],
+                "units": [_rel(root, path) for path in _unit_targets(root, tasks)],
             }
 
         prepared_tasks: list[dict[str, Any]] = []
+        prepared_units: list[dict[str, Any]] = []
         group_id = f"RES-{now_dt.strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:8]}"
         for index, task in enumerate(tasks, start=1):
             display_id = str(task["display_id"])
@@ -630,6 +846,25 @@ def register(root: Path, input_path: Path, *, now: str | None = None) -> dict[st
                     ),
                 }
             )
+            for unit in _units_for(task):
+                unit_uid = str(uuid.uuid4())
+                unit_id = str(unit["unit_id"])
+                prepared_units.append(
+                    {
+                        "unit": unit,
+                        "unit_uid": unit_uid,
+                        "path": _unit_path(root, display_id, unit_id),
+                        "text": _render_unit(
+                            now_text=now_text,
+                            payload=payload,
+                            initiative=initiative,
+                            taskset=taskset,
+                            task=task,
+                            unit=unit,
+                            unit_uid=unit_uid,
+                        ),
+                    }
+                )
 
         initiative_path.parent.mkdir(parents=True, exist_ok=True)
         plan_path.parent.mkdir(parents=True, exist_ok=True)
@@ -640,6 +875,9 @@ def register(root: Path, input_path: Path, *, now: str | None = None) -> dict[st
             encoding="utf-8",
         )
         for prepared in prepared_tasks:
+            prepared["path"].parent.mkdir(parents=True, exist_ok=True)
+            prepared["path"].write_text(str(prepared["text"]), encoding="utf-8")
+        for prepared in prepared_units:
             prepared["path"].parent.mkdir(parents=True, exist_ok=True)
             prepared["path"].write_text(str(prepared["text"]), encoding="utf-8")
         review_path.write_text(
@@ -684,6 +922,7 @@ def register(root: Path, input_path: Path, *, now: str | None = None) -> dict[st
         "plan": _rel(root, plan_path),
         "review": _rel(root, review_path),
         "tasks": [_rel(root, _task_path(root, str(task["display_id"]))) for task in tasks],
+        "units": [_rel(root, path) for path in _unit_targets(root, tasks)],
         "reservation_group_id": group_id,
     }
 

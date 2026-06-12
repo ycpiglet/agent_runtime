@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-12T12:28:26+09:00
-record_count: 390
+generated_at: 2026-06-12T12:47:06+09:00
+record_count: 391
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `390` review and evidence records under `reviews/`.
+- Summary: indexed `391` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `390` files |
+| Reviews covered | pass | `391` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -409,6 +409,7 @@ record_count: 390
 | `reviews/REVIEW-2026-06-12-rbac-write-gate-closeout.md` | `REVIEW-2026-06-12-rbac-write-gate-closeout` | md | record | n/a | REVIEW: TASK-AR-312 RBAC Write Gate Closeout |
 | `reviews/REVIEW-2026-06-12-work-hierarchy-conflict-closure-registration.md` | `REVIEW-2026-06-12-work-hierarchy-conflict-closure-registration` | review | pass | pass | Work Hierarchy Conflict Closure Registration Review |
 | `reviews/REVIEW-2026-06-12-work-registration-cli.md` | `REVIEW-2026-06-12-work-registration-cli` | md | record | pass | Work Registration CLI Closeout |
+| `reviews/REVIEW-2026-06-12-work-registration-unit-scaffold.md` | `REVIEW-2026-06-12-work-registration-unit-scaffold` | md | record | pass | Work Registration Unit Scaffold Closeout |
 | `reviews/REVIEW-2026-06-12-work-schema-ssot-gate.md` | `REVIEW-2026-06-12-work-schema-ssot-gate` | md | record | pass | Work Schema SSoT Gate Closeout |
 | `reviews/REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review.md` | `REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review` | md | record | n/a | REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review |
 | `reviews/REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log.md` | `REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log` | md | record | n/a | REVIEW: TASK-AR-222 closeout 실행 로그 |
