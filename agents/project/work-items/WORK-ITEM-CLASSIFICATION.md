@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-12T21:54:33+09:00
+generated_at: 2026-06-12T22:03:10+09:00
 record_count: 200
 ---
 
@@ -238,7 +238,7 @@ record_count: 200
 | 2.1.6 | Task 2.1.6 | task | `TASK-AR-505` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-505.md` | 작업 수명주기의 W5(통합 후 정리) 단계를 실행 가능하게 만든다: merge 완료 + claim released 상태의 좀비 워크트리/브랜치를 검출하고… |
 | 2.1.7 | Task 2.1.7 | task | `TASK-AR-506` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-506.md` | 이번 taskset에만 수동 적용된 지연평가 규율(T0 스냅샷/T2 착수 체크)과 W0~W6 수명주기를 **모든 작업의 기본값**으로 만든다 — Owne… |
 | 2.1.8 | Task 2.1.8 | task | `TASK-AR-507` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-507.md` | Owner 규칙 "작업자가 스스로 검증 금지, 항상 다른 에이전트가 검증"을 실행 가능하게 강제한다: claim release/closeout 시 ver… |
-| 2.1.9 | Task 2.1.9 | task | `TASK-AR-508` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-508.md` | dirty intake와 session baseline의 residue 보존 규칙이 `codex/*` 브랜치에 하드코딩되어 있어 `claude/*` 브랜… |
+| 2.1.9 | Task 2.1.9 | task | `TASK-AR-508` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | in_progress | `agents/lead_engineer/tasks/TASK-AR-508.md` | dirty intake와 session baseline의 residue 보존 규칙이 `codex/*` 브랜치에 하드코딩되어 있어 `claude/*` 브랜… |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

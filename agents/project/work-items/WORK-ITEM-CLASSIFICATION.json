@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-12T21:54:33+09:00",
+  "generated_at": "2026-06-12T22:03:10+09:00",
   "record_count": 200,
   "finding_count": 0,
   "findings": [],
@@ -2203,7 +2203,7 @@
       "title": "dirty intake와 session baseline의 residue 보존 규칙이 `codex/*` 브랜치에 하드코딩되어 있어 `claude/*` 브랜…",
       "path": "agents/lead_engineer/tasks/TASK-AR-508.md",
       "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
-      "status": "planned"
+      "status": "in_progress"
     }
   ]
 }

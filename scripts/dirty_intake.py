@@ -11,9 +11,21 @@ from pathlib import Path
 from typing import Iterable
 
 try:
-    from scripts.session_baseline import parse_codex_branches, parse_worktrees
+    from scripts.session_baseline import (
+        AGENT_BRANCH_PATTERNS,
+        AGENT_BRANCH_PREFIXES,
+        is_agent_branch,
+        parse_codex_branches,
+        parse_worktrees,
+    )
 except ModuleNotFoundError:  # pragma: no cover - direct script execution path
-    from session_baseline import parse_codex_branches, parse_worktrees
+    from session_baseline import (
+        AGENT_BRANCH_PATTERNS,
+        AGENT_BRANCH_PREFIXES,
+        is_agent_branch,
+        parse_codex_branches,
+        parse_worktrees,
+    )
 
 
 LOG_PREFIXES = ("agents/runtime/hook-logs/", "agents/runtime/session_baselines/")
@@ -85,7 +97,7 @@ def _git_stash_count(root: Path) -> int:
 
 
 def _git_codex_branches(root: Path) -> list[str]:
-    return parse_codex_branches(_git_output(root, ["git", "branch", "--list", "codex/*"]))
+    return parse_codex_branches(_git_output(root, ["git", "branch", "--list", *AGENT_BRANCH_PATTERNS]))
 
 
 def _git_extra_worktrees(root: Path) -> list[dict[str, str]]:
@@ -158,7 +170,7 @@ def _git_active_claim_residue(root: Path, extra_worktrees: list[dict[str, str]] 
         if root_has_active_claim and claim_root_text != root_text:
             worktrees.add(claim_root_text)
             branch = branch_by_worktree.get(claim_root_text, "")
-            if branch.startswith("codex/"):
+            if is_agent_branch(branch):
                 branches.add(branch)
     return {"branches": sorted(branches), "worktrees": sorted(worktrees)}
 
@@ -167,7 +179,12 @@ def _git_remote_preserved_residue(root: Path, extra_worktrees: list[dict[str, st
     try:
         output = _git_output(
             root,
-            ["git", "for-each-ref", "--format=%(refname:short)\t%(upstream:short)", "refs/heads/codex"],
+            [
+                "git",
+                "for-each-ref",
+                "--format=%(refname:short)\t%(upstream:short)",
+                *[f"refs/heads/{prefix.rstrip('/')}" for prefix in AGENT_BRANCH_PREFIXES],
+            ],
         )
     except subprocess.CalledProcessError:
         return {"branches": [], "worktrees": []}
@@ -213,7 +230,7 @@ def _git_head_preserved_residue(root: Path, extra_worktrees: list[dict[str, str]
     for item in extra_worktrees or []:
         branch = _norm_branch(str(item.get("branch") or ""))
         path_text = str(item.get("path") or "").strip()
-        if not branch.startswith("codex/") or not path_text:
+        if not is_agent_branch(branch) or not path_text:
             continue
         path = Path(path_text)
         if _git_is_ancestor(root, branch, "HEAD") and _git_worktree_is_clean(path):

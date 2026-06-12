@@ -4,9 +4,10 @@ display_id: TASK-AR-508
 task_uid: 41f58968-7dc2-4649-935c-7d327b075c9b
 registered_at: 2026-06-12T21:53:22+09:00
 created_at: 2026-06-12T21:53:22+09:00
-updated_at: 2026-06-12T21:53:22+09:00
+started_at: 2026-06-12T21:55:08+09:00
+updated_at: 2026-06-12T22:05:00+09:00
 title: Agent-agnostic branch namespace in residue preservation (codex/* + claude/*)
-status: planned
+status: in_progress
 priority: P1
 difficulty: S
 est_hours: 3

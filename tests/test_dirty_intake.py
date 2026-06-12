@@ -171,3 +171,34 @@ def test_cli_check_blocks_unknown_dirty_state(tmp_path: Path) -> None:
     payload = json.loads(result.stdout)
     assert payload["decision"] == "block"
     assert payload["route"] == "archive_required"
+
+
+def test_claude_branch_residue_is_preserved_like_codex() -> None:
+    # TASK-AR-508: preservation rules must be agent-agnostic, not codex/*-only
+    plan = build_plan(
+        [" M scripts/backlog_board.py"],
+        declared_paths=set(),
+        active_codex_branches=["claude/task-ar-508-agent-branch-namespace"],
+        extra_worktrees=[
+            {
+                "path": "C:/repo/.worktrees/TASK-AR-508",
+                "branch": "refs/heads/claude/task-ar-508-agent-branch-namespace",
+            }
+        ],
+        stash_count=0,
+        stamp="20260612T215800Z",
+    )
+
+    assert plan["residue"]["branches"] == [
+        "claude/task-ar-508-agent-branch-namespace"
+    ]
+    assert plan["residue"]["worktrees"] == ["C:/repo/.worktrees/TASK-AR-508"]
+
+
+def test_is_agent_branch_covers_codex_and_claude() -> None:
+    from scripts.session_baseline import is_agent_branch
+
+    assert is_agent_branch("codex/task-ar-999")
+    assert is_agent_branch("claude/task-ar-508-agent-branch-namespace")
+    assert not is_agent_branch("main")
+    assert not is_agent_branch("feature/own-branch")
