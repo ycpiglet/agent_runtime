@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-12T09:07:04+09:00",
+  "generated_at": "2026-06-12T11:08:07+09:00",
   "record_count": 189,
   "finding_count": 0,
   "findings": [],
@@ -2038,7 +2038,7 @@
       "title": "Prevent concurrent panes from selecting the same human display ID before a task file…",
       "path": "agents/lead_engineer/tasks/TASK-AR-370.md",
       "parent_id": "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-371",

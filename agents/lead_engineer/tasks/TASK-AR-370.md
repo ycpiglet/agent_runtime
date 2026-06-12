@@ -4,9 +4,11 @@ display_id: TASK-AR-370
 task_uid: 5655d2cb-a038-4c74-8a50-6e707e4ece98
 registered_at: 2026-06-12T08:17:54+09:00
 created_at: 2026-06-12T08:17:54+09:00
-updated_at: 2026-06-12T08:17:54+09:00
+updated_at: 2026-06-12T11:06:57+09:00
+started_at: 2026-06-12T09:43:38+09:00
+completed_at: 2026-06-12T11:06:57+09:00
 title: Generated work-item numbering classifier + task ID reservation ledger
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 8
@@ -67,4 +69,19 @@ tags:
 ## Handoff
 
 - Report the ledger path, allocator command, race behavior, and rollback path for abandoned reservations.
+
+## Completion Evidence
+
+- Implemented `python scripts/task_identity.py reserve-id` with a lock-protected JSON ledger at `agents/project/work-items/TASK-ID-RESERVATIONS.json`.
+- Extended `python scripts/task_identity.py create --reservation-id <id>` so creating a task from a reservation marks that reservation `fulfilled` with task path, task ID, task UID, and timestamp.
+- Extended `python scripts/task_identity.py check --check` to report duplicate display IDs, duplicate active reservations, stale active reservations, active reservations that point to existing tasks, and invalid fulfilled reservations.
+- Recorded the Owner/Claude Work Item generator, metadata envelope, and agent identity design discussion in `reviews/MEETING-2026-06-12-work-item-generator-metadata-agent-identity.md`.
+
+## Verification Results
+
+- `python -m py_compile scripts\task_identity.py` -> pass
+- `pytest tests\test_task_identity.py tests\test_work_item_classifier.py -q` -> `9 passed`
+- `python scripts/task_identity.py check --check` -> pass, `findings=0`
+- `python scripts/work_item_classifier.py --check` -> pass, `findings=0`
+- `python scripts/evidence_index_generator.py --write` -> pass, `findings=0`
 

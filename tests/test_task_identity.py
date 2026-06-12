@@ -1,6 +1,7 @@
 import re
 import subprocess
 import sys
+import json
 from pathlib import Path
 
 
@@ -112,3 +113,125 @@ def test_task_identity_create_uses_uuid_backed_task_id_and_metadata(tmp_path: Pa
     assert UUID_RE.match(meta["task_uid"])
     assert meta["registered_at"] == "2026-06-10T12:00:00+09:00"
     assert meta["updated_at"] == "2026-06-10T12:00:00+09:00"
+
+
+def test_task_identity_reserve_id_blocks_duplicate_active_reservations(tmp_path: Path) -> None:
+    first = _run(
+        tmp_path,
+        "reserve-id",
+        "--display-id",
+        "TASK-AR-901",
+        "--owner-id",
+        "planner-a",
+        "--task-set-id",
+        "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
+        "--now",
+        "2026-06-10T12:00:00+09:00",
+    )
+    second = _run(
+        tmp_path,
+        "reserve-id",
+        "--display-id",
+        "TASK-AR-901",
+        "--owner-id",
+        "planner-b",
+        "--task-set-id",
+        "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
+        "--now",
+        "2026-06-10T12:01:00+09:00",
+    )
+
+    assert first.returncode == 0, first.stderr or first.stdout
+    assert "task-id-reserve: pass" in first.stdout
+    assert second.returncode == 1
+    assert "reservation-active:TASK-AR-901" in second.stderr
+
+
+def test_task_identity_create_fulfills_reservation(tmp_path: Path) -> None:
+    reserve = _run(
+        tmp_path,
+        "reserve-id",
+        "--display-id",
+        "TASK-AR-901",
+        "--owner-id",
+        "planner-a",
+        "--task-set-id",
+        "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
+        "--initiative-id",
+        "INIT-TEST",
+        "--now",
+        "2026-06-10T12:00:00+09:00",
+        "--json",
+    )
+    payload = json.loads(reserve.stdout[reserve.stdout.index("{") : reserve.stdout.rindex("}") + 1])
+    reservation_id = payload["reservations"][0]["reservation_id"]
+
+    create = _run(
+        tmp_path,
+        "create",
+        "--reservation-id",
+        reservation_id,
+        "--task-set-id",
+        "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
+        "--initiative-id",
+        "INIT-TEST",
+        "--title",
+        "Reserved task",
+        "--goal",
+        "Create from a reserved display ID.",
+        "--now",
+        "2026-06-10T12:05:00+09:00",
+    )
+
+    assert create.returncode == 0, create.stderr or create.stdout
+    task_path = tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md"
+    meta = _frontmatter(task_path)
+    assert meta["id"] == "TASK-AR-901"
+    assert meta["display_id"] == "TASK-AR-901"
+    assert meta["reservation_id"] == reservation_id
+    ledger = json.loads(
+        (tmp_path / "agents" / "project" / "work-items" / "TASK-ID-RESERVATIONS.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert ledger["reservations"][0]["status"] == "fulfilled"
+    assert ledger["reservations"][0]["fulfilled_by"] == "agents/lead_engineer/tasks/TASK-AR-901.md"
+
+    check = _run(tmp_path, "check", "--check")
+    assert check.returncode == 0, check.stdout
+
+
+def test_task_identity_check_fails_stale_and_duplicate_live_reservations(tmp_path: Path) -> None:
+    ledger = tmp_path / "agents" / "project" / "work-items" / "TASK-ID-RESERVATIONS.json"
+    ledger.parent.mkdir(parents=True, exist_ok=True)
+    ledger.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-id-reservations/v1",
+                "reservations": [
+                    {
+                        "reservation_id": "RES-1",
+                        "display_id": "TASK-AR-901",
+                        "status": "active",
+                        "owner_id": "planner-a",
+                        "expires_at": "2026-06-10T12:00:00+09:00",
+                    },
+                    {
+                        "reservation_id": "RES-2",
+                        "display_id": "TASK-AR-901",
+                        "status": "active",
+                        "owner_id": "planner-b",
+                        "expires_at": "2999-01-01T00:00:00+00:00",
+                    },
+                ],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    result = _run(tmp_path, "check", "--check")
+
+    assert result.returncode == 1
+    assert "task-reservation:stale-active:TASK-AR-901:RES-1" in result.stdout
+    assert "task-reservation:duplicate-live-reservation:TASK-AR-901:RES-1,RES-2" in result.stdout
