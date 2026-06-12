@@ -2,6 +2,7 @@ schema: agent-runtime-owner-docs/v1
 owner_docs:
   - BACKLOG-BOARD.md
   - agents/project/work-items/WORK-ITEM-CLASSIFICATION.md
+  - reviews/REVIEW-2026-06-12-work-schema-ssot-gate.md
   - reviews/MEETING-2026-06-12-work-hierarchy-numbering-and-recording.md
   - reviews/REVIEW-2026-06-12-work-hierarchy-conflict-closure-registration.md
   - reviews/RESEARCH-2026-06-12-work-hierarchy-taxonomy.md

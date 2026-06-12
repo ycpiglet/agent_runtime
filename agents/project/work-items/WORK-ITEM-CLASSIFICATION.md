@@ -7,14 +7,14 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-12T11:08:07+09:00
-record_count: 189
+generated_at: 2026-06-12T12:04:06+09:00
+record_count: 190
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `189` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `190` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
@@ -23,7 +23,7 @@ record_count: 189
 | Initiatives | pass | `2` records |
 | Tasksets | pass | `24` records |
 | Tasks | pass | `162` records |
-| Units | pass | `1` records |
+| Units | pass | `2` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -225,7 +225,8 @@ record_count: 189
 | 1.1.1 | Task 1.1.1 | task | `TASK-AR-369` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-369.md` | Finish the terminology migration from ambiguous `project -> taskset -> task -> unit`… |
 | 1.1.2 | Task 1.1.2 | task | `TASK-AR-370` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-370.md` | Prevent concurrent panes from selecting the same human display ID before a task file… |
 | 1.1.3 | Task 1.1.3 | task | `TASK-AR-371` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-371.md` | Remove `BACKLOG.md` as a top-of-file shared manual registration hotspot while preserv… |
-| 1.1.4 | Task 1.1.4 | task | `TASK-AR-372` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-372.md` | Provide one structured registration command path so planners stop hand-editing board… |
+| 1.1.4 | Task 1.1.4 | task | `TASK-AR-372` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | in_progress | `agents/lead_engineer/tasks/TASK-AR-372.md` | Provide one structured registration command path so planners stop hand-editing board… |
+| 1.1.4.1 | Unit 1.1.4.1 | unit | `UNIT-TASK-AR-372-001` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-001.md` | UNIT-TASK-AR-372-001 - Work Schema SSoT And Gate |
 | 1.1.5 | Task 1.1.5 | task | `TASK-AR-373` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-373.md` | Make it visible which planned tasks are worker-ready and which still require planner… |
 | 1.1.6 | Task 1.1.6 | task | `TASK-AR-374` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-374.md` | Prove that the work hierarchy and registration conflict surfaces are actually closed… |
 
