@@ -7,14 +7,14 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-12T21:17:08+09:00
-record_count: 198
+generated_at: 2026-06-12T21:26:11+09:00
+record_count: 199
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `198` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `199` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
@@ -22,7 +22,7 @@ record_count: 198
 | --- | --- | --- |
 | Initiatives | pass | `3` records |
 | Tasksets | pass | `25` records |
-| Tasks | pass | `169` records |
+| Tasks | pass | `170` records |
 | Units | pass | `1` records |
 | Findings | pass | `0` findings |
 
@@ -237,6 +237,7 @@ record_count: 198
 | 2.1.5 | Task 2.1.5 | task | `TASK-AR-504` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-504.md` | 병렬 세션(codex/claude)이 서로의 미머지 변경을 모른 채 세운 계획이 merge 후 조용히 무효화되는 문제를 지연평가로 해결한다: 계획의 전제… |
 | 2.1.6 | Task 2.1.6 | task | `TASK-AR-505` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-505.md` | 작업 수명주기의 W5(통합 후 정리) 단계를 실행 가능하게 만든다: merge 완료 + claim released 상태의 좀비 워크트리/브랜치를 검출하고… |
 | 2.1.7 | Task 2.1.7 | task | `TASK-AR-506` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-506.md` | 이번 taskset에만 수동 적용된 지연평가 규율(T0 스냅샷/T2 착수 체크)과 W0~W6 수명주기를 **모든 작업의 기본값**으로 만든다 — Owne… |
+| 2.1.8 | Task 2.1.8 | task | `TASK-AR-507` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-507.md` | Owner 규칙 "작업자가 스스로 검증 금지, 항상 다른 에이전트가 검증"을 실행 가능하게 강제한다: claim release/closeout 시 ver… |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

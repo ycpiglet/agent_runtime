@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-12T21:17:11+09:00
-record_count: 391
+generated_at: 2026-06-12T21:26:12+09:00
+record_count: 392
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `391` review and evidence records under `reviews/`.
+- Summary: indexed `392` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `391` files |
+| Reviews covered | pass | `392` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -119,6 +119,7 @@ record_count: 391
 | `reviews/MEETING-2026-06-11-agent-runtime-rsi-operating-system-registration.md` | `MEETING-2026-06-11-agent-runtime-rsi-operating-system-registration` | meeting | recorded | pass | RSI Operating System Registration Meeting |
 | `reviews/MEETING-2026-06-11-agent-runtime-task-ar-summary-and-version-closeout.md` | `MEETING-2026-06-11-agent-runtime-task-ar-summary-and-version-closeout` | md | record | n/a | MEETING-2026-06-11-agent-runtime-task-ar-summary-and-version-closeout |
 | `reviews/MEETING-2026-06-12-agent-runtime-task-ar-210-gate-coordination.md` | `MEETING-2026-06-12-agent-runtime-task-ar-210-gate-coordination` | md | record | n/a | MEETING-2026-06-12-agent-runtime-task-ar-210-gate-coordination |
+| `reviews/MEETING-2026-06-12-independent-verification-rule.md` | `MEETING-2026-06-12-independent-verification-rule` | meeting | pass | pass | Independent Verification Rule Meeting |
 | `reviews/MEETING-2026-06-12-parallel-work-lifecycle-rules.md` | `MEETING-2026-06-12-parallel-work-lifecycle-rules` | meeting | pass | pass | Parallel Work Lifecycle Rules Meeting |
 | `reviews/MEETING-2026-06-12-plan-assumption-deferred-revalidation.md` | `MEETING-2026-06-12-plan-assumption-deferred-revalidation` | meeting | pass | pass | Plan Assumption Deferred Revalidation Meeting |
 | `reviews/MEETING-2026-06-12-work-hierarchy-numbering-and-recording.md` | `MEETING-2026-06-12-work-hierarchy-numbering-and-recording` | meeting | pass | pass | Work Hierarchy Numbering And Recording Meeting |
