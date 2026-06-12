@@ -1,20 +1,40 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-12T23:35:00+09:00
+updated_at: 2026-06-13T01:35:00+09:00
 current_state:
-  summary: "Owner/Claude/Codex metadata, A2A, agent attribution, query/statistics, and stale-verification follow-ups are now registered as TASKSET-AR-WORK-METADATA-ANALYTICS."
-  status: ready
-  task_set_status: ready
-  task_set_id: "TASKSET-AR-WORK-METADATA-ANALYTICS"
-  step_index: 0
-  step_total: 0
-  progress_pct: 100
-  status_text: "Start with TASK-AR-514 conversation-to-work traceability or TASK-AR-515 metadata schema catalog after root/worktree cleanup; this is a ready pointer only, not an active claim."
+  summary: "Post-codex-merge replan recorded; wave-1 parallel dispatch active for AR-500 residual, AR-505, AR-513, AR-509 under TASKSET-AR-PARALLEL-WAVE-EXECUTION and TASKSET-AR-RELEASE-STEWARD."
+  status: in_progress
+  task_set_status: in_progress
+  task_set_id: "TASKSET-AR-PARALLEL-WAVE-EXECUTION"
+  step_index: 1
+  step_total: 5
+  progress_pct: 10
+  status_text: "Wave-1 worktrees dispatched (AR-500/505/513/509); next waves: AR-503/510/514/515 then AR-501/517/518/519 then AR-502/506/512/516 then AR-507, AR-511 last (renormalize)."
 active_work:
-  current_agents: []
+  current_agents:
+    - claim_id: CLAIM-20260613-012330-task-ar-500-10f4
+      agent_role: lead-engineer
+      agent_instance_id: inst-w1-ar500-claude
+      display_name: claude/wiring-otter
+      callsite_id: claude-w1-ar500
+    - claim_id: CLAIM-20260613-012331-task-ar-505-0719
+      agent_role: lead-engineer
+      agent_instance_id: inst-w1-ar505-claude
+      display_name: claude/lifecycle-heron
+      callsite_id: claude-w1-ar505
+    - claim_id: CLAIM-20260613-012331-task-ar-513-8831
+      agent_role: lead-engineer
+      agent_instance_id: inst-w1-ar513-claude
+      display_name: claude/overlay-lynx
+      callsite_id: claude-w1-ar513
+    - claim_id: CLAIM-20260613-012331-task-ar-509-6ab3
+      agent_role: lead-engineer
+      agent_instance_id: inst-w1-ar509-claude
+      display_name: claude/notify-petrel
+      callsite_id: claude-w1-ar509
   current_teams: []
 resume:
-  active_task: none
-  active_task_set: TASKSET-AR-WORK-METADATA-ANALYTICS
+  active_task: TASK-AR-500
+  active_task_set: TASKSET-AR-PARALLEL-WAVE-EXECUTION
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
