@@ -4,6 +4,7 @@ import importlib.util
 import json
 import re
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -21,6 +22,7 @@ RESOURCE_NAMES = (
     "goals",
     "task_claims",
     "multipane_assurance",
+    "inflight",
     "sources",
     "errors",
     "evidence",
@@ -1413,6 +1415,55 @@ def _collect_multipane_assurance(
     }
 
 
+# Branch scanning shells out to git per agent branch, so cache overlays per
+# root to keep the 4s console polling loop cheap.
+INFLIGHT_TTL_SECONDS = 60.0
+_INFLIGHT_CACHE: dict[str, tuple[float, dict[str, Any]]] = {}
+
+
+def _empty_inflight(now: str, error: str) -> dict[str, Any]:
+    return {
+        "schema": "agent-runtime-inflight-overlay/v1",
+        "generated_at": now,
+        "base": None,
+        "branches_scanned": 0,
+        "records": [],
+        "summary": {
+            "divergent_tasks": 0,
+            "divergent_records": 0,
+            "branches_with_divergence": 0,
+            "claimless": 0,
+        },
+        "error": error,
+    }
+
+
+def load_inflight(
+    root: Path,
+    now: str,
+    warnings: list[dict[str, str]],
+    *,
+    ttl_seconds: float | None = None,
+) -> dict[str, Any]:
+    """Branch-side task status divergence vs main (cached per root)."""
+    ttl = INFLIGHT_TTL_SECONDS if ttl_seconds is None else ttl_seconds
+    key = str(Path(root).resolve())
+    cached = _INFLIGHT_CACHE.get(key)
+    if cached is not None and time.monotonic() - cached[0] < ttl:
+        overlay = cached[1]
+    else:
+        try:
+            from scripts import inflight_overlay
+
+            overlay = inflight_overlay.build_overlay(Path(root))
+        except Exception as exc:  # pragma: no cover - defensive adapter boundary
+            overlay = _empty_inflight(now, str(exc))
+        _INFLIGHT_CACHE[key] = (time.monotonic(), overlay)
+    if overlay.get("error"):
+        warnings.append(_warning("inflight-overlay-unavailable", "scripts/inflight_overlay.py", str(overlay["error"])))
+    return overlay
+
+
 def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     root_path = Path(root).resolve()
     generated_at = now or _now_iso()
@@ -1437,6 +1488,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     planning = _collect_planning(root_path)
     collaboration = build_collaboration(pane_events)
     multipane_assurance = _collect_multipane_assurance(root_path, generated_at, pane_events, warnings)
+    inflight = load_inflight(root_path, generated_at, warnings)
     return {
         "generated_at": generated_at,
         "sources": sources,
@@ -1446,6 +1498,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "collaboration": collaboration,
         "task_claims": task_claims,
         "multipane_assurance": multipane_assurance,
+        "inflight": inflight,
         "messages": messages,
         "events": events,
         "goals": goals,

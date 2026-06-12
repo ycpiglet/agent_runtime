@@ -588,6 +588,12 @@ textarea:focus {
   font-size: 12px;
   line-height: 1.35;
 }
+.task-card .task-card-inflight {
+  color: var(--amber);
+  font-size: 11px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
 .task-card-meta {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1300,6 +1306,18 @@ function evidenceLabelForTask(task) {
   return count === 1 ? "1 evidence" : `${count} evidence`;
 }
 
+function inflightRecordsForTask(taskId) {
+  return (((runtimeState || {}).inflight || {}).records || []).filter((row) => row.task_id === taskId);
+}
+
+function inflightAnnotation(task) {
+  const rows = inflightRecordsForTask(task.id);
+  if (!rows.length) return "";
+  const first = rows[0];
+  const extra = rows.length > 1 ? ` (+${rows.length - 1} more branches)` : "";
+  return `<span class="task-card-inflight">${escapeHtml(first.main_status || "?")} (main) / ${escapeHtml(first.branch_status || "?")} @${escapeHtml(first.branch)} +${escapeHtml(first.ahead ?? "?")}${extra}</span>`;
+}
+
 function taskCard(task) {
   const status = task.status || "unknown";
   const priority = task.priority || "P?";
@@ -1315,6 +1333,7 @@ function taskCard(task) {
     </div>
     <strong class="task-card-title">${escapeHtml(task.title)}</strong>
     <span class="task-card-summary">${escapeHtml(task.description || "No summary")}</span>
+    ${inflightAnnotation(task)}
     <div class="task-card-meta" aria-label="Task metadata">
       <span><span class="meta-label">Priority</span><strong>${escapeHtml(priority)}</strong></span>
       <span><span class="meta-label">Owner</span><strong>${escapeHtml(task.owner_agent || "unassigned")}</strong></span>
@@ -1954,6 +1973,7 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/task_sets": "task_sets",
         "/api/messages": "messages",
         "/api/goals": "goals",
+        "/api/inflight": "inflight",
         "/api/sources": "sources",
         "/api/errors": "errors",
         "/api/evidence": "evidence",
