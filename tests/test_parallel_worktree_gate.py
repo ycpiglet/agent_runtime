@@ -200,3 +200,179 @@ def test_gate_blocks_missing_taskset_progress_fields_for_active_claim(tmp_path: 
     assert result.returncode == 1
     assert "task-claim:missing-task-set-id" in result.stdout
     assert "task-claim:missing-status-text" in result.stdout
+
+
+def _git(cwd: Path, *args: str) -> None:
+    subprocess.run(
+        ["git", "-C", str(cwd), *args],
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+
+def _init_git_repo(tmp_path: Path) -> Path:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git(repo, "init", "-b", "main")
+    _git(repo, "config", "user.email", "gate-test@example.com")
+    _git(repo, "config", "user.name", "Gate Test")
+    _git(repo, "config", "commit.gpgsign", "false")
+    (repo / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    review = repo / "reviews" / "REVIEW-2026-06-10-agent-runtime-parallel-session-protocol.md"
+    review.parent.mkdir(parents=True, exist_ok=True)
+    review.write_text("parallel session handoff log\n", encoding="utf-8")
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-m", "init")
+    return repo
+
+
+def _add_task_worktree(repo: Path, name: str = "TASK-AR-900", branch: str = "claude/task-ar-900-demo") -> Path:
+    path = repo / ".worktrees" / name
+    _git(repo, "worktree", "add", "-b", branch, str(path), "main")
+    return path
+
+
+def test_gate_watches_claimless_clean_task_worktree(tmp_path: Path):
+    repo = _init_git_repo(tmp_path)
+    _add_task_worktree(repo)
+
+    result = _run_gate(repo)
+
+    assert result.returncode == 0, result.stdout
+    assert "worktree:missing-claim" in result.stdout
+    assert "worktree:missing-claim-dirty" not in result.stdout
+    assert "worktree:missing-claim-ahead" not in result.stdout
+    assert "block=0" in result.stdout
+    assert "- watch" in result.stdout
+
+
+def test_gate_blocks_claimless_dirty_task_worktree(tmp_path: Path):
+    repo = _init_git_repo(tmp_path)
+    worktree = _add_task_worktree(repo)
+    (worktree / "wip.txt").write_text("uncommitted work without a claim\n", encoding="utf-8")
+
+    result = _run_gate(repo)
+
+    assert result.returncode == 1
+    assert "worktree:missing-claim-dirty" in result.stdout
+    assert "- block" in result.stdout
+
+
+def test_gate_blocks_claimless_ahead_task_worktree(tmp_path: Path):
+    repo = _init_git_repo(tmp_path)
+    worktree = _add_task_worktree(repo)
+    (worktree / "done.txt").write_text("committed work without a claim\n", encoding="utf-8")
+    _git(worktree, "add", "done.txt")
+    _git(worktree, "commit", "-m", "work without claim")
+
+    result = _run_gate(repo)
+
+    assert result.returncode == 1
+    assert "worktree:missing-claim-ahead" in result.stdout
+
+
+def test_gate_passes_claimed_task_worktree(tmp_path: Path):
+    repo = _init_git_repo(tmp_path)
+    _add_task_worktree(repo, name="TASK-AR-900", branch="claude/task-ar-900-demo")
+    _write_claim(
+        repo,
+        "CLAIM-1",
+        task_id="TASK-AR-900",
+        worktree_path=".worktrees/TASK-AR-900",
+        branch="claude/task-ar-900-demo",
+        skip_worktree_marker=True,
+    )
+    _git(repo, "add", "agents")
+    _git(repo, "commit", "-m", "open claim")
+
+    result = _run_gate(repo)
+
+    assert result.returncode == 0, result.stdout
+    assert "worktree:missing-claim" not in result.stdout
+    assert "findings=0" in result.stdout
+
+
+def test_gate_blocks_untracked_claim_file(tmp_path: Path):
+    repo = _init_git_repo(tmp_path)
+    _write_claim(repo, "CLAIM-1")
+
+    result = _run_gate(repo)
+
+    assert result.returncode == 1
+    assert "task-claim:claim-not-committed" in result.stdout
+    assert "2026-06-12" in result.stdout
+
+
+def test_gate_exempts_spike_marker_worktree_with_watch_note(tmp_path: Path):
+    repo = _init_git_repo(tmp_path)
+    worktree = _add_task_worktree(repo)
+    (worktree / "SPIKE").write_text("experimental spike worktree\n", encoding="utf-8")
+    (worktree / "wip.txt").write_text("spike experiment in flight\n", encoding="utf-8")
+
+    result = _run_gate(repo)
+
+    assert result.returncode == 0, result.stdout
+    assert "worktree:spike-exempt" in result.stdout
+    assert "worktree:missing-claim" not in result.stdout
+    assert "block=0" in result.stdout
+
+
+def test_gate_exempts_spike_tagged_claim_worktree_with_watch_note(tmp_path: Path):
+    repo = _init_git_repo(tmp_path)
+    worktree = _add_task_worktree(repo, name="TASK-AR-901", branch="claude/task-ar-901-spike")
+    (worktree / "wip.txt").write_text("spike experiment in flight\n", encoding="utf-8")
+    _write_claim(
+        repo,
+        "CLAIM-1",
+        task_id="TASK-AR-901",
+        worktree_path=".worktrees/TASK-AR-901",
+        branch="claude/task-ar-901-spike",
+        status="released",
+        tags=["spike"],
+        skip_worktree_marker=True,
+    )
+    _git(repo, "add", "agents")
+    _git(repo, "commit", "-m", "spike claim")
+
+    result = _run_gate(repo)
+
+    assert result.returncode == 0, result.stdout
+    assert "worktree:spike-exempt" in result.stdout
+    assert "worktree:missing-claim" not in result.stdout
+
+
+def test_gate_caps_missing_claim_at_watch_when_run_from_linked_worktree(tmp_path: Path):
+    repo = _init_git_repo(tmp_path)
+    worktree = _add_task_worktree(repo)
+    (worktree / "wip.txt").write_text("work whose claim may postdate this snapshot\n", encoding="utf-8")
+
+    result = _run_gate(worktree)
+
+    assert result.returncode == 0, result.stdout
+    assert "worktree:missing-claim" in result.stdout
+    assert "block=0" in result.stdout
+    assert "snapshot may predate the claim commit" in result.stdout
+
+
+def test_gate_resolves_claim_worktree_path_against_primary_checkout(tmp_path: Path):
+    repo = _init_git_repo(tmp_path)
+    _write_claim(
+        repo,
+        "CLAIM-1",
+        task_id="TASK-AR-900",
+        worktree_path=".worktrees/TASK-AR-900",
+        branch="claude/task-ar-900-demo",
+        skip_worktree_marker=True,
+    )
+    _git(repo, "add", "agents")
+    _git(repo, "commit", "-m", "open claim before worktree")
+    worktree = _add_task_worktree(repo, name="TASK-AR-900", branch="claude/task-ar-900-demo")
+
+    result = _run_gate(worktree)
+
+    assert result.returncode == 0, result.stdout
+    assert "task-claim:worktree-path-missing" not in result.stdout
+    assert "findings=0" in result.stdout
