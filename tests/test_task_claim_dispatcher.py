@@ -589,6 +589,269 @@ def test_create_claim_derives_target_files_from_unit_spec(tmp_path: Path):
     assert claim["target_files"] == ["scripts/unit_target.py", "docs/unit_target.md"]
 
 
+def _create_release_candidate(tmp_path: Path, *, task_id: str = "TASK-AR-507", suffix: str = "cv1") -> dict:
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_worktree(tmp_path, task_id)
+    created = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--agent-role",
+        "lead-engineer",
+        "--mode",
+        "implement",
+        "--now",
+        "2026-06-13T09:00:00+09:00",
+        "--suffix",
+        suffix,
+        "--json",
+    )
+    assert created.returncode == 0, created.stderr or created.stdout
+    return json.loads(created.stdout)
+
+
+def _write_evidence(tmp_path: Path, rel: str = "agents/runtime/task_claims/evidence/W4B-VERIFICATION.md") -> str:
+    evidence = tmp_path / rel
+    evidence.parent.mkdir(parents=True, exist_ok=True)
+    evidence.write_text("# W4b verification\n\n- result: pass\n", encoding="utf-8")
+    return rel
+
+
+def test_release_without_verifier_is_refused(tmp_path: Path):
+    payload = _create_release_candidate(tmp_path)
+    claim = payload["claim"]
+    evidence_rel = _write_evidence(tmp_path)
+
+    refused = _run_dispatcher(
+        tmp_path,
+        "release",
+        "--claim-id",
+        claim["claim_id"],
+        "--verification-evidence",
+        evidence_rel,
+        "--now",
+        "2026-06-13T10:00:00+09:00",
+        "--json",
+    )
+
+    assert refused.returncode == 1
+    assert "cross-verification required" in refused.stderr
+    assert "--verified-by" in refused.stderr
+    saved = json.loads((tmp_path / payload["path"]).read_text(encoding="utf-8"))
+    assert saved["status"] == "claimed"
+    assert "verified_by" not in saved
+
+
+def test_release_refuses_worker_self_verification_listing_both_ids(tmp_path: Path):
+    payload = _create_release_candidate(tmp_path)
+    claim = payload["claim"]
+    worker_id = claim["agent_instance_id"]
+    evidence_rel = _write_evidence(tmp_path)
+
+    refused = _run_dispatcher(
+        tmp_path,
+        "release",
+        "--claim-id",
+        claim["claim_id"],
+        "--verified-by",
+        worker_id,
+        "--verifier-role",
+        "lead-engineer",
+        "--verification-evidence",
+        evidence_rel,
+        "--now",
+        "2026-06-13T10:00:00+09:00",
+        "--json",
+    )
+
+    assert refused.returncode == 1
+    assert "cross-verification violation" in refused.stderr
+    assert f"verified_by={worker_id}" in refused.stderr
+    assert f"worker agent_instance_id={worker_id}" in refused.stderr
+    saved = json.loads((tmp_path / payload["path"]).read_text(encoding="utf-8"))
+    assert saved["status"] == "claimed"
+
+
+def test_release_with_distinct_verifier_records_fields_and_pane_event(tmp_path: Path):
+    payload = _create_release_candidate(tmp_path)
+    claim = payload["claim"]
+    evidence_rel = _write_evidence(tmp_path)
+
+    released = _run_dispatcher(
+        tmp_path,
+        "release",
+        "--claim-id",
+        claim["claim_id"],
+        "--verified-by",
+        "qa-20260613-101500-kst-w4b1",
+        "--verifier-role",
+        "qa-reviewer",
+        "--verification-evidence",
+        evidence_rel,
+        "--now",
+        "2026-06-13T10:15:00+09:00",
+        "--json",
+    )
+
+    assert released.returncode == 0, released.stderr or released.stdout
+    saved = json.loads((tmp_path / payload["path"]).read_text(encoding="utf-8"))
+    assert saved["status"] == "released"
+    assert saved["released_at"] == "2026-06-13T10:15:00+09:00"
+    assert saved["verified_by"] == "qa-20260613-101500-kst-w4b1"
+    assert saved["verifier_role"] == "qa-reviewer"
+    assert saved["verification_evidence"] == evidence_rel
+    event_log = tmp_path / "agents" / "runtime" / "pane_events" / "pane-events.jsonl"
+    events = [json.loads(line) for line in event_log.read_text(encoding="utf-8").splitlines()]
+    release_event = events[-1]
+    assert release_event["event"] == "claim_released"
+    assert release_event["claim_id"] == claim["claim_id"]
+    assert release_event["actor"] == claim["agent_instance_id"]
+    assert release_event["verified_by"] == "qa-20260613-101500-kst-w4b1"
+    assert release_event["verifier_role"] == "qa-reviewer"
+
+
+def test_release_requires_evidence_ref_by_default(tmp_path: Path):
+    payload = _create_release_candidate(tmp_path)
+    claim = payload["claim"]
+
+    refused = _run_dispatcher(
+        tmp_path,
+        "release",
+        "--claim-id",
+        claim["claim_id"],
+        "--verified-by",
+        "qa-20260613-101500-kst-w4b1",
+        "--verifier-role",
+        "qa-reviewer",
+        "--now",
+        "2026-06-13T10:15:00+09:00",
+        "--json",
+    )
+
+    assert refused.returncode == 1
+    assert "verification evidence required" in refused.stderr
+    saved = json.loads((tmp_path / payload["path"]).read_text(encoding="utf-8"))
+    assert saved["status"] == "claimed"
+
+
+def test_release_refuses_nonexistent_evidence_ref(tmp_path: Path):
+    payload = _create_release_candidate(tmp_path)
+    claim = payload["claim"]
+
+    refused = _run_dispatcher(
+        tmp_path,
+        "release",
+        "--claim-id",
+        claim["claim_id"],
+        "--verified-by",
+        "qa-20260613-101500-kst-w4b1",
+        "--verifier-role",
+        "qa-reviewer",
+        "--verification-evidence",
+        "agents/runtime/task_claims/evidence/does-not-exist.md",
+        "--now",
+        "2026-06-13T10:15:00+09:00",
+        "--json",
+    )
+
+    assert refused.returncode == 1
+    assert "verification evidence not found" in refused.stderr
+
+
+def test_release_allow_missing_evidence_escape_prints_loud_warning(tmp_path: Path):
+    payload = _create_release_candidate(tmp_path)
+    claim = payload["claim"]
+
+    released = _run_dispatcher(
+        tmp_path,
+        "release",
+        "--claim-id",
+        claim["claim_id"],
+        "--verified-by",
+        "qa-20260613-101500-kst-w4b1",
+        "--verifier-role",
+        "qa-reviewer",
+        "--allow-missing-evidence",
+        "--now",
+        "2026-06-13T10:15:00+09:00",
+        "--json",
+    )
+
+    assert released.returncode == 0, released.stderr or released.stdout
+    assert "WARNING" in released.stderr
+    assert "--allow-missing-evidence" in released.stderr
+    saved = json.loads((tmp_path / payload["path"]).read_text(encoding="utf-8"))
+    assert saved["status"] == "released"
+    assert saved["verified_by"] == "qa-20260613-101500-kst-w4b1"
+    assert saved["verification_evidence"] == ""
+
+
+def test_release_still_refuses_self_verification_with_missing_evidence_escape(tmp_path: Path):
+    payload = _create_release_candidate(tmp_path)
+    claim = payload["claim"]
+    worker_id = claim["agent_instance_id"]
+
+    refused = _run_dispatcher(
+        tmp_path,
+        "release",
+        "--claim-id",
+        claim["claim_id"],
+        "--verified-by",
+        worker_id,
+        "--verifier-role",
+        "lead-engineer",
+        "--allow-missing-evidence",
+        "--now",
+        "2026-06-13T10:15:00+09:00",
+        "--json",
+    )
+
+    assert refused.returncode == 1
+    assert "cross-verification violation" in refused.stderr
+
+
+def test_legacy_released_claims_without_verifier_fields_pass_check_gates(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    claim_dir.mkdir(parents=True, exist_ok=True)
+    legacy = {
+        "schema": "agent-runtime-task-claim/v1",
+        "claim_id": "CLAIM-20260601-090000-task-ar-400-old1",
+        "task_id": "TASK-AR-400",
+        "agent_role": "lead-engineer",
+        "team_id": "agent-runtime-core",
+        "agent_instance_id": "le-20260601-090000-kst-old1",
+        "display_name": "lead_engineer@implement-01",
+        "callsite_id": "terminal:wt-task-ar-400:tab-01",
+        "pane_id": "terminal:wt-task-ar-400:tab-01",
+        "mode": "implement",
+        "status": "released",
+        "task_set_id": "",
+        "worktree_path": ".worktrees/TASK-AR-400",
+        "branch": "codex/task-ar-400-implement-01",
+        "claimed_at": "2026-06-01T09:00:00+09:00",
+        "released_at": "2026-06-01T12:00:00+09:00",
+        "last_heartbeat": "2026-06-01T12:00:00+09:00",
+        "updated_at": "2026-06-01T12:00:00+09:00",
+        "expires_at": "2026-06-01T09:30:00+09:00",
+        "handoff_path": "agents/runtime/task_claims/CLAIM-20260601-090000-task-ar-400-old1.handoff.md",
+        "log_path": "agents/runtime/task_claims/CLAIM-20260601-090000-task-ar-400-old1.log.md",
+        "tags": [],
+        "target_files": [],
+    }
+    (claim_dir / f"{legacy['claim_id']}.json").write_text(
+        json.dumps(legacy, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+
+    gate = _run_gate(tmp_path)
+    assert gate.returncode == 0, gate.stdout
+    concurrency_gate = _run_concurrency_gate(tmp_path)
+    assert concurrency_gate.returncode == 0, concurrency_gate.stdout
+    identity_gate = _run_identity_gate(tmp_path)
+    assert identity_gate.returncode == 0, identity_gate.stdout
+
+
 def test_create_claim_rejects_invalid_progress_and_step_state(tmp_path: Path):
     (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
 

@@ -81,6 +81,8 @@ def append_event(root: Path, event: dict[str, Any]) -> dict[str, Any]:
         "ssot_path",
         "message",
         "orchestrator_approved",
+        "verified_by",
+        "verifier_role",
     ):
         if key in event and event[key] not in (None, ""):
             payload[key] = event[key]
