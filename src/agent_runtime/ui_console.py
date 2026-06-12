@@ -86,6 +86,7 @@ HTML = """<!doctype html>
         </form>
         <nav class="tabs" aria-label="Views">
           <button class="tab is-active" type="button" data-view="board">Backlog</button>
+          <button class="tab" type="button" data-view="work">Work Explorer</button>
           <button class="tab" type="button" data-view="tasksets">Tasksets</button>
           <button class="tab" type="button" data-view="agents">Agents</button>
           <button class="tab" type="button" data-view="messages">Messages</button>
@@ -99,6 +100,25 @@ HTML = """<!doctype html>
 
         <div id="view-board" class="view is-active">
           <div id="kanban" class="kanban" aria-label="Kanban"></div>
+        </div>
+        <div id="view-work" class="view">
+          <div class="work-toolbar">
+            <input id="work-search" placeholder="search work items">
+            <select id="work-depth-filter" aria-label="Work tree depth">
+              <option value="3">All levels</option>
+              <option value="0">Initiatives</option>
+              <option value="1">+ Tasksets</option>
+              <option value="2">+ Tasks</option>
+            </select>
+            <button id="work-expand-all" type="button">Expand all</button>
+            <button id="work-collapse-all" type="button">Collapse all</button>
+          </div>
+          <p id="work-staleness" class="work-staleness"></p>
+          <div id="work-facets" class="work-facets" aria-label="Work facet filters"></div>
+          <div class="work-grid">
+            <div id="work-tree" class="work-tree" aria-label="Work Explorer tree"></div>
+            <aside id="work-node-detail" class="work-node-detail" aria-label="Work node detail"></aside>
+          </div>
         </div>
         <div id="view-tasksets" class="view">
           <div class="taskset-toolbar">
@@ -881,6 +901,205 @@ textarea:focus {
   border-radius: 999px;
   background: linear-gradient(90deg, var(--teal), var(--primary-hover));
 }
+.work-toolbar {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) minmax(150px, 0.4fr) auto auto;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.work-staleness {
+  color: var(--subtle);
+  font-size: 11px;
+  margin-bottom: 8px;
+  overflow-wrap: anywhere;
+}
+.work-facets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.facet-group {
+  min-width: 0;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 6px 8px;
+}
+.facet-group legend {
+  color: var(--subtle);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0 4px;
+}
+.facet-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 460px;
+}
+.facet-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 9px;
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+}
+.facet-option:hover { border-color: var(--line-strong); }
+.facet-option input {
+  width: auto;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  accent-color: var(--primary);
+}
+.work-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(240px, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+.work-tree {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.work-node {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.work-node-children {
+  display: grid;
+  gap: 4px;
+  margin-left: 18px;
+  min-width: 0;
+}
+.work-node-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.044);
+  color: var(--ink);
+  padding: 8px 10px;
+  text-align: left;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.026);
+}
+.work-node-row:hover { border-color: var(--line-strong); }
+.work-node-row:focus-visible {
+  outline: 2px solid var(--primary-hover);
+  outline-offset: 2px;
+  box-shadow: var(--focus);
+}
+.work-node-row.is-selected {
+  border-color: var(--primary-hover);
+  box-shadow: var(--focus);
+}
+.work-node-row.bucket-completed { border-left: 3px solid var(--success); }
+.work-node-row.bucket-in-progress { border-left: 3px solid var(--warning); }
+.work-node-row.bucket-planned { border-left: 3px solid var(--line-strong); }
+.work-toggle {
+  min-height: 24px;
+  min-width: 24px;
+  padding: 2px 6px;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  color: var(--muted);
+  font-size: 11px;
+}
+.work-node-number {
+  color: var(--primary-hover);
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.work-node-id {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.work-node-title {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.3;
+  min-width: 0;
+  flex: 1 1 180px;
+  overflow-wrap: anywhere;
+}
+.rollup-badge {
+  border: 1px solid rgba(49, 208, 170, 0.24);
+  border-radius: 999px;
+  background: rgba(49, 208, 170, 0.10);
+  color: var(--teal);
+  font-size: 11px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+.evidence-badge {
+  border: 1px solid rgba(130, 143, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(94, 106, 210, 0.12);
+  color: var(--primary-hover);
+  font-size: 11px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+.work-node-detail {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.026);
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.work-node-detail h3 {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.work-node-detail p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.work-detail-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+.work-detail-meta > span {
+  min-width: 0;
+  border: 1px solid rgba(52, 56, 68, 0.76);
+  border-radius: 6px;
+  background: rgba(1, 1, 2, 0.34);
+  padding: 6px;
+}
+.work-detail-meta strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink);
+  font-size: 11px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.evidence-ref {
+  display: block;
+  color: var(--subtle);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
 .detail-panel {
   padding: 14px;
   align-self: start;
@@ -993,6 +1212,9 @@ pre {
   .filter-row,
   .taskset-toolbar,
   .taskset-grid,
+  .work-toolbar,
+  .work-grid,
+  .work-detail-meta,
   .evidence-grid,
   .task-card-meta,
   .taskset-card-meta,
@@ -1033,6 +1255,10 @@ let runtimeState = null;
 let selectedTaskId = null;
 let pendingWrites = [];
 let eventStream = null;
+let selectedWorkNodeId = null;
+let collapsedWorkNodes = new Set();
+let workFacetSelections = {};
+let workFacetSignature = "";
 
 const $ = (id) => document.getElementById(id);
 const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -1725,6 +1951,214 @@ function renderCommands() {
   `).join("") : `<div class="empty">No write commands</div>`;
 }
 
+function workExplorerData() {
+  return (runtimeState && runtimeState.work_explorer) || { nodes: [], roots: [], facets: {}, staleness_note: "" };
+}
+
+function workNodeIndex() {
+  const byId = new Map();
+  (workExplorerData().nodes || []).forEach((node) => byId.set(node.id, node));
+  return byId;
+}
+
+function workBucketClass(node) {
+  const normalized = String(node.status_bucket || "planned").replace(/[^a-z0-9]+/g, "-");
+  return `bucket-${normalized || "planned"}`;
+}
+
+function workMaxDepth() {
+  const value = Number($("work-depth-filter")?.value);
+  return Number.isFinite(value) ? value : 3;
+}
+
+function workSearchQuery() {
+  return $("work-search")?.value.trim().toLowerCase() || "";
+}
+
+function workNodeMatchesFacets(node) {
+  return Object.entries(workFacetSelections).every(([facet, values]) => {
+    if (!values || values.size === 0) return true;
+    const value = (node.facets || {})[facet];
+    return value !== undefined && values.has(String(value));
+  });
+}
+
+function workNodeMatchesSearch(node, query) {
+  if (!query) return true;
+  return [node.id, node.number, node.title, node.status, node.level, JSON.stringify(node.facets || {})]
+    .join(" ")
+    .toLowerCase()
+    .includes(query);
+}
+
+function workNodeMatches(node, query) {
+  return workNodeMatchesFacets(node) && workNodeMatchesSearch(node, query);
+}
+
+function workNodeVisible(node, byId, query, memo) {
+  if (memo.has(node.id)) return memo.get(node.id);
+  let visible = workNodeMatches(node, query);
+  if (!visible) {
+    visible = (node.children || []).some((childId) => {
+      const child = byId.get(childId);
+      return child ? workNodeVisible(child, byId, query, memo) : false;
+    });
+  }
+  memo.set(node.id, visible);
+  return visible;
+}
+
+function workRollupBadge(node) {
+  const rollup = node.rollup || {};
+  if (!rollup.total) return "";
+  const pct = rollup.pct === null || rollup.pct === undefined ? "~" : `${rollup.pct}%`;
+  const title = `completed ${rollup.completed}/${rollup.total} | in progress ${rollup.in_progress} | planned ${rollup.planned}`;
+  return `<span class="rollup-badge" title="${escapeHtml(title)}">${escapeHtml(rollup.completed)}/${escapeHtml(rollup.total)} done - ${escapeHtml(pct)}</span>`;
+}
+
+function workEvidenceBadge(node) {
+  const count = (node.evidence_refs || []).length + (node.descendant_evidence_refs || []).length;
+  return count ? `<span class="evidence-badge">${escapeHtml(count)} refs</span>` : "";
+}
+
+function workNodeMarkup(node, byId, query, memo) {
+  if (!workNodeVisible(node, byId, query, memo)) return "";
+  const maxDepth = workMaxDepth();
+  const collapsed = collapsedWorkNodes.has(node.id);
+  const childNodes = (node.children || []).map((childId) => byId.get(childId)).filter(Boolean);
+  const renderableChildren = node.depth < maxDepth && !collapsed
+    ? childNodes.map((child) => workNodeMarkup(child, byId, query, memo)).join("")
+    : "";
+  const hasToggle = childNodes.length > 0 && node.depth < maxDepth;
+  const toggle = hasToggle
+    ? `<button class="work-toggle" type="button" data-work-toggle="${escapeHtml(node.id)}" aria-label="${collapsed ? "Expand" : "Collapse"} ${escapeHtml(node.id)}">${collapsed ? "+" : "-"}</button>`
+    : `<span class="work-toggle" aria-hidden="true"></span>`;
+  return `<div class="work-node work-level-${escapeHtml(node.level || "unknown")}">
+    <div class="work-node-row ${workBucketClass(node)} ${node.id === selectedWorkNodeId ? "is-selected" : ""}" role="button" tabindex="0" data-work-node="${escapeHtml(node.id)}">
+      ${toggle}
+      <span class="work-node-number">${escapeHtml(node.number || "")}</span>
+      <span class="work-node-id">${escapeHtml(node.id)}</span>
+      <span class="work-node-title">${escapeHtml(node.title || "")}</span>
+      <span class="state-chip">${escapeHtml(node.status || "unknown")}</span>
+      ${workRollupBadge(node)}
+      ${workEvidenceBadge(node)}
+    </div>
+    ${renderableChildren ? `<div class="work-node-children">${renderableChildren}</div>` : ""}
+  </div>`;
+}
+
+function renderWorkFacets() {
+  const host = $("work-facets");
+  if (!host) return;
+  const facets = workExplorerData().facets || {};
+  const signature = JSON.stringify(facets);
+  if (signature === workFacetSignature && host.childElementCount) return;
+  workFacetSignature = signature;
+  const names = Object.keys(facets).filter((name) => (facets[name] || []).length);
+  host.innerHTML = names.map((name) => `
+    <fieldset class="facet-group">
+      <legend>${escapeHtml(name.replace(/_/g, " "))}</legend>
+      <div class="facet-options">
+        ${(facets[name] || []).map((value) => {
+          const checked = workFacetSelections[name]?.has(String(value)) ? "checked" : "";
+          return `<label class="facet-option"><input type="checkbox" data-facet="${escapeHtml(name)}" value="${escapeHtml(value)}" ${checked}> ${escapeHtml(value)}</label>`;
+        }).join("")}
+      </div>
+    </fieldset>
+  `).join("");
+  host.querySelectorAll("input[type=checkbox]").forEach((box) => {
+    box.addEventListener("change", () => {
+      const facet = box.dataset.facet;
+      const selections = workFacetSelections[facet] || (workFacetSelections[facet] = new Set());
+      if (box.checked) selections.add(box.value);
+      else selections.delete(box.value);
+      renderWorkTree();
+    });
+  });
+}
+
+function renderWorkNodeDetail() {
+  const host = $("work-node-detail");
+  if (!host) return;
+  const node = workNodeIndex().get(selectedWorkNodeId);
+  if (!node) {
+    host.innerHTML = `<div class="detail-empty">No work item selected</div>`;
+    return;
+  }
+  const rollup = node.rollup || {};
+  const facets = node.facets || {};
+  const ownRefs = node.evidence_refs || [];
+  const childRefs = node.descendant_evidence_refs || [];
+  const refsMarkup = (refs) => refs.map((ref) => `<code class="evidence-ref">${escapeHtml(ref)}</code>`).join("");
+  host.innerHTML = `
+    <h3>${escapeHtml(node.label || node.id)} - ${escapeHtml(node.id)}</h3>
+    <p>${escapeHtml(node.title || "")}</p>
+    <div class="work-detail-meta" aria-label="Work node metadata">
+      <span><span class="meta-label">Level</span><strong>${escapeHtml(node.level || "unknown")}</strong></span>
+      <span><span class="meta-label">Status</span><strong>${escapeHtml(node.status || "unknown")}</strong></span>
+      <span><span class="meta-label">Roll-up</span><strong>${escapeHtml(rollup.total ? `${rollup.completed}/${rollup.total} done (${rollup.pct}%)` : "no children")}</strong></span>
+      <span><span class="meta-label">In progress</span><strong>${escapeHtml(rollup.in_progress ?? 0)}</strong></span>
+      <span><span class="meta-label">Planned</span><strong>${escapeHtml(rollup.planned ?? 0)}</strong></span>
+      <span><span class="meta-label">Taskset</span><strong>${escapeHtml(node.taskset_id || "none")}</strong></span>
+      ${Object.entries(facets).map(([name, value]) => `<span><span class="meta-label">${escapeHtml(name.replace(/_/g, " "))}</span><strong>${escapeHtml(value)}</strong></span>`).join("")}
+    </div>
+    <code class="evidence-ref">${escapeHtml(node.path || "")}</code>
+    <div>
+      <span class="meta-label">Evidence and review refs</span>
+      ${ownRefs.length ? refsMarkup(ownRefs) : `<span class="evidence-ref">no direct refs</span>`}
+    </div>
+    <div>
+      <span class="meta-label">Archived child evidence</span>
+      ${childRefs.length ? refsMarkup(childRefs) : `<span class="evidence-ref">no child refs</span>`}
+    </div>
+  `;
+}
+
+function renderWorkTree() {
+  const host = $("work-tree");
+  if (!host) return;
+  const explorer = workExplorerData();
+  const byId = workNodeIndex();
+  const query = workSearchQuery();
+  const memo = new Map();
+  const markup = (explorer.roots || [])
+    .map((rootId) => byId.get(rootId))
+    .filter(Boolean)
+    .map((node) => workNodeMarkup(node, byId, query, memo))
+    .join("");
+  host.innerHTML = markup || `<div class="empty">No work items match the current filters</div>`;
+  host.querySelectorAll("[data-work-toggle]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const nodeId = button.dataset.workToggle;
+      if (collapsedWorkNodes.has(nodeId)) collapsedWorkNodes.delete(nodeId);
+      else collapsedWorkNodes.add(nodeId);
+      renderWorkTree();
+    });
+  });
+  host.querySelectorAll("[data-work-node]").forEach((row) => {
+    const select = () => {
+      selectedWorkNodeId = row.dataset.workNode;
+      renderWorkTree();
+      renderWorkNodeDetail();
+    };
+    row.addEventListener("click", select);
+    row.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        select();
+      }
+    });
+  });
+}
+
+function renderWorkExplorer() {
+  setText("work-staleness", workExplorerData().staleness_note || "");
+  renderWorkFacets();
+  renderWorkTree();
+  renderWorkNodeDetail();
+}
+
 function renderDetail() {
   const panel = $("detail-panel");
   const task = (runtimeState.tasks || []).find((item) => item.id === selectedTaskId);
@@ -1803,6 +2237,7 @@ function renderDetail() {
 function renderAll() {
   renderDashboard();
   renderKanban();
+  renderWorkExplorer();
   renderTaskSetDirectory();
   renderAgents();
   renderMessages();
@@ -1835,6 +2270,21 @@ $("refresh-button").addEventListener("click", loadState);
     node.addEventListener("input", renderTaskSetDirectory);
     node.addEventListener("change", renderTaskSetDirectory);
   }
+});
+["work-search", "work-depth-filter"].forEach((id) => {
+  const node = $(id);
+  if (node) {
+    node.addEventListener("input", renderWorkTree);
+    node.addEventListener("change", renderWorkTree);
+  }
+});
+$("work-expand-all")?.addEventListener("click", () => {
+  collapsedWorkNodes = new Set();
+  renderWorkTree();
+});
+$("work-collapse-all")?.addEventListener("click", () => {
+  collapsedWorkNodes = new Set((workExplorerData().nodes || []).filter((node) => (node.children || []).length).map((node) => node.id));
+  renderWorkTree();
 });
 $("create-task-form").addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -1974,6 +2424,8 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/messages": "messages",
         "/api/goals": "goals",
         "/api/inflight": "inflight",
+        "/api/work_explorer": "work_explorer",
+        "/api/work-explorer": "work_explorer",
         "/api/sources": "sources",
         "/api/errors": "errors",
         "/api/evidence": "evidence",

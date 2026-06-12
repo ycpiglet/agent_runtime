@@ -698,6 +698,231 @@ def test_ui_state_builds_graph_state_machine_and_roadmap_views(tmp_path):
     assert state["roadmap"]["milestones"][0]["done"] is False
 
 
+def _write_work_classification(root: Path, records: list[dict]) -> None:
+    _write(
+        root / "agents" / "project" / "work-items" / "WORK-ITEM-CLASSIFICATION.json",
+        json.dumps(
+            {
+                "schema": "agent-runtime-work-item-classification/v1",
+                "generated_at": "2026-06-13T02:56:29+09:00",
+                "record_count": len(records),
+                "finding_count": 0,
+                "findings": [],
+                "records": records,
+            },
+            ensure_ascii=False,
+        ),
+    )
+
+
+def _work_explorer_records() -> list[dict]:
+    return [
+        {
+            "key": "initiative:INIT-AR-WORK-METADATA-ANALYTICS",
+            "level": "initiative",
+            "number": "1",
+            "label": "Initiative 1",
+            "id": "INIT-AR-WORK-METADATA-ANALYTICS",
+            "title": "Work Metadata Analytics Initiative",
+            "path": "agents/project/initiatives/INIT-AR-WORK-METADATA-ANALYTICS.md",
+            "parent_id": "",
+            "status": "planned",
+        },
+        {
+            "key": "taskset:TASKSET-AR-WORK-METADATA-ANALYTICS",
+            "level": "taskset",
+            "number": "1.1",
+            "label": "Taskset 1.1",
+            "id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
+            "title": "Work Metadata Analyst",
+            "path": "BACKLOG-BOARD.md",
+            "parent_id": "INIT-AR-WORK-METADATA-ANALYTICS",
+            "status": "active",
+            "progress_pct": 95,
+        },
+        {
+            "key": "task:TASK-AR-514",
+            "level": "task",
+            "number": "1.1.1",
+            "label": "Task 1.1.1",
+            "id": "TASK-AR-514",
+            "title": "Work metadata schema",
+            "path": "agents/lead_engineer/tasks/TASK-AR-514.md",
+            "parent_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
+            "status": "completed",
+        },
+        {
+            "key": "task:TASK-AR-515",
+            "level": "task",
+            "number": "1.1.2",
+            "label": "Task 1.1.2",
+            "id": "TASK-AR-515",
+            "title": "Work metadata ingestion",
+            "path": "agents/lead_engineer/tasks/TASK-AR-515.md",
+            "parent_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
+            "status": "in_progress",
+        },
+        {
+            "key": "task:TASK-AR-516",
+            "level": "task",
+            "number": "1.1.3",
+            "label": "Task 1.1.3",
+            "id": "TASK-AR-516",
+            "title": "Work Explorer tree",
+            "path": "agents/lead_engineer/tasks/TASK-AR-516.md",
+            "parent_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
+            "status": "planned",
+        },
+        {
+            "key": "unit:UNIT-TASK-AR-514-001",
+            "level": "unit",
+            "number": "1.1.1.1",
+            "label": "Unit 1.1.1.1",
+            "id": "UNIT-TASK-AR-514-001",
+            "title": "Schema catalog unit",
+            "path": "agents/lead_engineer/tasks/units/TASK-AR-514/UNIT-TASK-AR-514-001.md",
+            "parent_id": "TASK-AR-514",
+            "status": "completed",
+        },
+    ]
+
+
+def _write_work_explorer_task_markdown(root: Path) -> None:
+    _write(
+        root / "agents" / "lead_engineer" / "tasks" / "TASK-AR-514.md",
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-514",
+                "status: completed",
+                "owner: lead_engineer",
+                "priority: P1",
+                "difficulty: M",
+                "team: agent-runtime-core",
+                "worker_model_tier: worker_standard",
+                "origin_type: owner_request",
+                "verification_status: passed",
+                "task_set_id: TASKSET-AR-WORK-METADATA-ANALYTICS",
+                "evidence_refs:",
+                "  - reviews/VERIFY-2026-06-12-task-ar-514.json",
+                "audit_log:",
+                "  - reviews/MEETING-2026-06-12-work-metadata.md",
+                "---",
+                "",
+                "## Goal",
+                "",
+                "Define the work metadata schema.",
+                "",
+            ]
+        ),
+    )
+
+
+def _work_explorer_node(state: dict, node_id: str) -> dict:
+    return next(node for node in state["work_explorer"]["nodes"] if node["id"] == node_id)
+
+
+def test_ui_state_work_explorer_builds_tree_with_computed_rollups_and_facets(tmp_path):
+    _write_work_classification(tmp_path, _work_explorer_records())
+    _write_work_explorer_task_markdown(tmp_path)
+
+    state = ui_state.build_state(tmp_path, now="2026-06-13T03:00:00+09:00")
+    explorer = state["work_explorer"]
+
+    assert explorer["schema"] == "agent-runtime-work-explorer/v1"
+    assert explorer["freshness"] == "present"
+    assert explorer["record_count"] == 6
+    assert explorer["source_path"] == "agents/project/work-items/WORK-ITEM-CLASSIFICATION.json"
+    assert explorer["source_last_updated"] is not None
+    assert "work_item_classifier" in explorer["staleness_note"]
+    assert explorer["roots"] == ["INIT-AR-WORK-METADATA-ANALYTICS"]
+
+    initiative = _work_explorer_node(state, "INIT-AR-WORK-METADATA-ANALYTICS")
+    taskset = _work_explorer_node(state, "TASKSET-AR-WORK-METADATA-ANALYTICS")
+    completed_task = _work_explorer_node(state, "TASK-AR-514")
+    planned_task = _work_explorer_node(state, "TASK-AR-516")
+    unit = _work_explorer_node(state, "UNIT-TASK-AR-514-001")
+
+    assert initiative["children"] == ["TASKSET-AR-WORK-METADATA-ANALYTICS"]
+    assert taskset["children"] == ["TASK-AR-514", "TASK-AR-515", "TASK-AR-516"]
+    assert completed_task["children"] == ["UNIT-TASK-AR-514-001"]
+    assert (initiative["depth"], taskset["depth"], completed_task["depth"], unit["depth"]) == (0, 1, 2, 3)
+    assert unit["taskset_id"] == "TASKSET-AR-WORK-METADATA-ANALYTICS"
+
+    assert taskset["rollup"] == {"total": 3, "completed": 1, "in_progress": 1, "planned": 1, "pct": 33}
+    assert completed_task["rollup"] == {"total": 1, "completed": 1, "in_progress": 0, "planned": 0, "pct": 100}
+    assert planned_task["rollup"] == {"total": 0, "completed": 0, "in_progress": 0, "planned": 0, "pct": None}
+    assert initiative["rollup"] == {"total": 1, "completed": 0, "in_progress": 1, "planned": 0, "pct": 0}
+
+    assert completed_task["facets"]["owner"] == "lead_engineer"
+    assert completed_task["facets"]["priority"] == "P1"
+    assert completed_task["facets"]["difficulty"] == "M"
+    assert completed_task["facets"]["team"] == "agent-runtime-core"
+    assert completed_task["facets"]["model_tier"] == "worker_standard"
+    assert completed_task["facets"]["origin"] == "owner_request"
+    assert completed_task["facets"]["verification"] == "passed"
+    assert completed_task["facets"]["taskset"] == "TASKSET-AR-WORK-METADATA-ANALYTICS"
+    assert explorer["facets"]["owner"] == ["lead_engineer"]
+    assert explorer["facets"]["priority"] == ["P1"]
+    assert explorer["facets"]["difficulty"] == ["M"]
+    assert explorer["facets"]["team"] == ["agent-runtime-core"]
+    assert explorer["facets"]["verification"] == ["passed"]
+    assert "TASKSET-AR-WORK-METADATA-ANALYTICS" in explorer["facets"]["taskset"]
+    assert {"planned", "active", "completed", "in_progress"}.issubset(set(explorer["facets"]["status"]))
+    assert {"initiative", "taskset", "task", "unit"}.issubset(set(explorer["facets"]["kind"]))
+
+    assert "reviews/VERIFY-2026-06-12-task-ar-514.json" in completed_task["evidence_refs"]
+    assert "reviews/MEETING-2026-06-12-work-metadata.md" in completed_task["evidence_refs"]
+    assert "reviews/VERIFY-2026-06-12-task-ar-514.json" in taskset["descendant_evidence_refs"]
+    assert "reviews/VERIFY-2026-06-12-task-ar-514.json" in initiative["descendant_evidence_refs"]
+
+    payload = ui_state.build_resource(tmp_path, "work_explorer", now="2026-06-13T03:00:00+09:00")
+    assert payload["resource"] == "work_explorer"
+    assert payload["items"]["record_count"] == 6
+
+
+def test_ui_state_work_explorer_rollups_change_only_from_child_state(tmp_path):
+    records = _work_explorer_records()
+    _write_work_classification(tmp_path, records)
+    baseline = ui_state.build_state(tmp_path, now="2026-06-13T03:00:00+09:00")
+    baseline_rollup = _work_explorer_node(baseline, "TASKSET-AR-WORK-METADATA-ANALYTICS")["rollup"]
+    assert baseline_rollup["completed"] == 1
+    assert baseline_rollup["pct"] == 33
+
+    # Mutating stored parent progress alone never moves the computed roll-up.
+    records[1]["progress_pct"] = 5
+    _write_work_classification(tmp_path, records)
+    unchanged = ui_state.build_state(tmp_path, now="2026-06-13T03:01:00+09:00")
+    assert _work_explorer_node(unchanged, "TASKSET-AR-WORK-METADATA-ANALYTICS")["rollup"] == baseline_rollup
+
+    # Mutating a child record's status is the only thing that moves it.
+    records[4]["status"] = "completed"
+    _write_work_classification(tmp_path, records)
+    mutated = ui_state.build_state(tmp_path, now="2026-06-13T03:02:00+09:00")
+    mutated_rollup = _work_explorer_node(mutated, "TASKSET-AR-WORK-METADATA-ANALYTICS")["rollup"]
+    assert mutated_rollup == {"total": 3, "completed": 2, "in_progress": 1, "planned": 0, "pct": 67}
+
+
+def test_ui_state_work_explorer_missing_or_malformed_snapshot_degrades_safely(tmp_path):
+    missing_root = tmp_path / "missing"
+    missing_root.mkdir()
+    state = ui_state.build_state(missing_root, now="2026-06-13T03:00:00+09:00")
+    explorer = state["work_explorer"]
+    assert explorer["freshness"] == "missing"
+    assert explorer["nodes"] == []
+    assert explorer["record_count"] == 0
+    assert "work_item_classifier" in explorer["staleness_note"]
+    assert any(warning["kind"] == "work-explorer-source-missing" for warning in state["warnings"])
+    assert any(gap["path"] == "agents/project/work-items/WORK-ITEM-CLASSIFICATION.json" for gap in state["gaps"])
+
+    malformed_root = tmp_path / "malformed"
+    _write(malformed_root / "agents" / "project" / "work-items" / "WORK-ITEM-CLASSIFICATION.json", "{not-json")
+    state = ui_state.build_state(malformed_root, now="2026-06-13T03:00:00+09:00")
+    assert state["work_explorer"]["freshness"] == "missing"
+    assert state["work_explorer"]["error"]
+    assert any(warning["kind"] == "work-explorer-source-error" for warning in state["warnings"])
+
+
 def test_ui_state_cli_emits_selected_resource_json(tmp_path, capsys):
     _write(
         tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-227-ui-state-api.md",

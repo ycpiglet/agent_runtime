@@ -464,6 +464,173 @@ def test_ui_console_responsive_accessibility_polish_contract(tmp_path):
         assert marker in mobile_css
 
 
+def _write_work_classification(root: Path) -> None:
+    records = [
+        {
+            "key": "initiative:INIT-AR-WORK-METADATA-ANALYTICS",
+            "level": "initiative",
+            "number": "1",
+            "label": "Initiative 1",
+            "id": "INIT-AR-WORK-METADATA-ANALYTICS",
+            "title": "Work Metadata Analytics Initiative",
+            "path": "agents/project/initiatives/INIT-AR-WORK-METADATA-ANALYTICS.md",
+            "parent_id": "",
+            "status": "planned",
+        },
+        {
+            "key": "taskset:TASKSET-AR-WORK-METADATA-ANALYTICS",
+            "level": "taskset",
+            "number": "1.1",
+            "label": "Taskset 1.1",
+            "id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
+            "title": "Work Metadata Analyst",
+            "path": "BACKLOG-BOARD.md",
+            "parent_id": "INIT-AR-WORK-METADATA-ANALYTICS",
+            "status": "active",
+        },
+        {
+            "key": "task:TASK-AR-514",
+            "level": "task",
+            "number": "1.1.1",
+            "label": "Task 1.1.1",
+            "id": "TASK-AR-514",
+            "title": "Work metadata schema",
+            "path": "agents/lead_engineer/tasks/TASK-AR-514.md",
+            "parent_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
+            "status": "completed",
+        },
+        {
+            "key": "task:TASK-AR-516",
+            "level": "task",
+            "number": "1.1.2",
+            "label": "Task 1.1.2",
+            "id": "TASK-AR-516",
+            "title": "Work Explorer tree",
+            "path": "agents/lead_engineer/tasks/TASK-AR-516.md",
+            "parent_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
+            "status": "planned",
+        },
+    ]
+    _write(
+        root / "agents" / "project" / "work-items" / "WORK-ITEM-CLASSIFICATION.json",
+        json.dumps(
+            {
+                "schema": "agent-runtime-work-item-classification/v1",
+                "generated_at": "2026-06-13T02:56:29+09:00",
+                "record_count": len(records),
+                "finding_count": 0,
+                "findings": [],
+                "records": records,
+            },
+            ensure_ascii=False,
+        ),
+    )
+
+
+def test_ui_console_work_explorer_route_serves_tree_resource(tmp_path):
+    _write_work_classification(tmp_path)
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-514.md",
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-514",
+                "status: completed",
+                "owner: lead_engineer",
+                "priority: P1",
+                "task_set_id: TASKSET-AR-WORK-METADATA-ANALYTICS",
+                "evidence_refs:",
+                "  - reviews/VERIFY-2026-06-12-task-ar-514.json",
+                "---",
+                "",
+                "## Goal",
+                "",
+                "Define the work metadata schema.",
+                "",
+            ]
+        ),
+    )
+
+    response = ui_console.build_response("/api/work_explorer", tmp_path)
+    payload = json.loads(response.body.decode("utf-8"))
+    alias = json.loads(ui_console.build_response("/api/work-explorer", tmp_path).body.decode("utf-8"))
+
+    assert response.status == 200
+    assert payload["resource"] == "work_explorer"
+    assert alias["resource"] == "work_explorer"
+    nodes = {node["id"]: node for node in payload["items"]["nodes"]}
+    taskset = nodes["TASKSET-AR-WORK-METADATA-ANALYTICS"]
+    assert taskset["children"] == ["TASK-AR-514", "TASK-AR-516"]
+    assert taskset["rollup"]["total"] == 2
+    assert taskset["rollup"]["completed"] == 1
+    assert taskset["rollup"]["pct"] == 50
+    assert "reviews/VERIFY-2026-06-12-task-ar-514.json" in taskset["descendant_evidence_refs"]
+    assert payload["items"]["roots"] == ["INIT-AR-WORK-METADATA-ANALYTICS"]
+    assert payload["items"]["staleness_note"]
+
+
+def test_ui_console_work_explorer_tab_tree_and_facet_anchors(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    assert 'data-view="work"' in html
+    assert "Work Explorer" in html
+    for host_id in [
+        "view-work",
+        "work-search",
+        "work-depth-filter",
+        "work-expand-all",
+        "work-collapse-all",
+        "work-staleness",
+        "work-facets",
+        "work-tree",
+        "work-node-detail",
+    ]:
+        assert host_id in html
+
+    for marker in [
+        "renderWorkExplorer",
+        "renderWorkTree",
+        "renderWorkFacets",
+        "renderWorkNodeDetail",
+        "workNodeMatchesFacets",
+        "workNodeMatchesSearch",
+        "workRollupBadge",
+        "collapsedWorkNodes",
+        "workFacetSelections",
+        "descendant_evidence_refs",
+        "staleness_note",
+        "data-work-toggle",
+        "data-work-node",
+        "work_explorer",
+    ]:
+        assert marker in js
+
+    for selector in [
+        ".work-toolbar",
+        ".work-staleness",
+        ".work-facets",
+        ".facet-group",
+        ".facet-option",
+        ".work-grid",
+        ".work-tree",
+        ".work-node-row",
+        ".work-node-children",
+        ".rollup-badge",
+        ".evidence-badge",
+        ".work-node-detail",
+        ".evidence-ref",
+        ".work-node-row.bucket-completed",
+        ".work-node-row.is-selected",
+    ]:
+        assert selector in css
+
+    mobile_css = css.split("@media (max-width: 760px)", 1)[1]
+    assert ".work-toolbar" in mobile_css
+    assert ".work-grid" in mobile_css
+
+
 def test_ui_console_api_resource_routes_match_state_resources(tmp_path):
     _write_task(tmp_path, "TASK-AR-229")
 

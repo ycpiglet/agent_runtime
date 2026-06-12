@@ -23,6 +23,7 @@ RESOURCE_NAMES = (
     "task_claims",
     "multipane_assurance",
     "inflight",
+    "work_explorer",
     "sources",
     "errors",
     "evidence",
@@ -35,6 +36,7 @@ RESOURCE_NAMES = (
 )
 
 TASKS_GLOB = "agents/lead_engineer/tasks/TASK-*.md"
+WORK_ITEM_CLASSIFICATION_REL = "agents/project/work-items/WORK-ITEM-CLASSIFICATION.json"
 SESSION_GLOB = "agents/runtime/sessions/*.json"
 TASK_CLAIM_GLOB = "agents/runtime/task_claims/*.json"
 EVENT_GLOB = "agents/runtime/events/*.jsonl"
@@ -1274,6 +1276,7 @@ def _collect_sources_and_gaps(root: Path, now: str) -> tuple[list[dict[str, Any]
         ("events", root / "agents" / "runtime" / "events", "event_directory", "append_only_runtime"),
         ("pane_events", root / "agents" / "runtime" / "pane_events", "pane_event_directory", "append_only_collaboration"),
         ("multipane_assurance", root / "agents" / "project" / "MULTIPANE-PROCESS-POLICY.yml", "assurance_policy", "read_only"),
+        ("work_items", root / "agents" / "project" / "work-items" / "WORK-ITEM-CLASSIFICATION.json", "work_item_classification", "read_only"),
         ("status", root / "STATUS.md", "status_markdown", "agent_doc_workflow"),
         ("state_machines", root / "agents" / "project" / "STATE-MACHINES.yml", "state_machine_yaml", "schema_first_task"),
         ("roadmap", root / "agents" / "project" / "ROADMAP.md", "roadmap_markdown", "agent_doc_workflow"),
@@ -1289,6 +1292,7 @@ def _collect_sources_and_gaps(root: Path, now: str) -> tuple[list[dict[str, Any]
         "events",
         "pane_events",
         "multipane_assurance",
+        "work_items",
         "status",
         "state_machines",
         "roadmap",
@@ -1464,6 +1468,255 @@ def load_inflight(
     return overlay
 
 
+# --- Work Explorer (TASK-AR-516) -------------------------------------------
+# Read-only tree over the generated WORK-ITEM-CLASSIFICATION.json snapshot:
+# Initiative -> Taskset -> Task -> Unit, with roll-ups computed from children
+# only (stored progress fields are never trusted) plus facet values for
+# client-side filtering and archived evidence/review refs per node.
+
+WORK_FACET_KEYS = (
+    "status",
+    "owner",
+    "taskset",
+    "kind",
+    "priority",
+    "difficulty",
+    "team",
+    "model_tier",
+    "origin",
+    "component",
+    "verification",
+)
+_WORK_EVIDENCE_LIST_KEYS = ("evidence_refs", "audit_log")
+_WORK_EVIDENCE_SCALAR_KEYS = ("origin_ref", "unit_spec")
+_WORK_DESCENDANT_EVIDENCE_LIMIT = 40
+
+
+def _work_status_bucket(status: Any) -> str:
+    normalized = str(status or "").strip().lower()
+    if normalized in {"completed", "complete", "done", "released", "verified", "archived", "완료"}:
+        return "completed"
+    if normalized in {"in_progress", "active", "working", "claimed", "assigned", "review", "waiting_review", "진행 중"}:
+        return "in_progress"
+    return "planned"
+
+
+def _work_record_frontmatter(root: Path, rel_path: str, warnings: list[dict[str, str]]) -> dict[str, Any]:
+    if not rel_path or not rel_path.endswith(".md") or rel_path in {"-", "BACKLOG-BOARD.md"}:
+        return {}
+    path = root / rel_path
+    if not path.is_file():
+        return {}
+    try:
+        meta, _ = parse_frontmatter(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        warnings.append(_warning("work-explorer-record-read-error", rel_path, str(exc)))
+        return {}
+    return meta
+
+
+def _work_evidence_refs(meta: dict[str, Any]) -> list[str]:
+    refs: list[str] = []
+    for key in _WORK_EVIDENCE_LIST_KEYS:
+        value = meta.get(key)
+        if isinstance(value, list):
+            refs.extend(str(item) for item in value)
+    for key in _WORK_EVIDENCE_SCALAR_KEYS:
+        value = meta.get(key)
+        if isinstance(value, str) and value.strip():
+            refs.append(value.strip())
+    return _dedupe_strings(refs)
+
+
+def _work_node_facets(node: dict[str, Any], meta: dict[str, Any], taskset_id: str | None) -> dict[str, str]:
+    facets = {
+        "status": str(node.get("status") or "") or "unknown",
+        "kind": str(meta.get("kind") or node.get("level") or ""),
+    }
+    if taskset_id:
+        facets["taskset"] = taskset_id
+    for facet, key in (
+        ("owner", "owner"),
+        ("priority", "priority"),
+        ("difficulty", "difficulty"),
+        ("team", "team"),
+        ("origin", "origin_type"),
+        ("component", "component"),
+        ("verification", "verification_status"),
+    ):
+        value = meta.get(key)
+        if value not in (None, "", []):
+            facets[facet] = str(value)
+    model_tier = meta.get("worker_model_tier") or meta.get("model_tier")
+    if model_tier not in (None, "", []):
+        facets["model_tier"] = str(model_tier)
+    return facets
+
+
+def _work_number_sort_key(number: Any) -> tuple[Any, ...]:
+    parts: list[int] = []
+    for part in str(number or "").split("."):
+        try:
+            parts.append(int(part))
+        except ValueError:
+            parts.append(0)
+    return tuple(parts)
+
+
+def _empty_work_explorer(now: str, *, freshness: str, staleness_note: str, error: str | None = None) -> dict[str, Any]:
+    return {
+        "schema": "agent-runtime-work-explorer/v1",
+        "generated_at": now,
+        "source_path": WORK_ITEM_CLASSIFICATION_REL,
+        "source_generated_at": None,
+        "source_last_updated": None,
+        "staleness_note": staleness_note,
+        "freshness": freshness,
+        "record_count": 0,
+        "roots": [],
+        "nodes": [],
+        "facets": {key: [] for key in WORK_FACET_KEYS},
+        "summary": {"levels": {}, "status_buckets": {}},
+        "error": error,
+    }
+
+
+def load_work_explorer(root: Path, now: str, warnings: list[dict[str, str]]) -> dict[str, Any]:
+    """Read-only Work Explorer tree built from WORK-ITEM-CLASSIFICATION.json."""
+    path = root / "agents" / "project" / "work-items" / "WORK-ITEM-CLASSIFICATION.json"
+    refresh_hint = "regenerate with python scripts/work_item_classifier.py --write"
+    if not path.is_file():
+        warnings.append(_warning("work-explorer-source-missing", WORK_ITEM_CLASSIFICATION_REL, refresh_hint))
+        return _empty_work_explorer(now, freshness="missing", staleness_note=f"classification snapshot missing; {refresh_hint}")
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        warnings.append(_warning("work-explorer-source-error", WORK_ITEM_CLASSIFICATION_REL, str(exc)))
+        return _empty_work_explorer(
+            now,
+            freshness="missing",
+            staleness_note=f"classification snapshot unreadable; {refresh_hint}",
+            error=str(exc),
+        )
+    records = payload.get("records") if isinstance(payload, dict) else None
+    if not isinstance(records, list):
+        records = []
+
+    nodes: dict[str, dict[str, Any]] = {}
+    order: list[str] = []
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        node_id = str(record.get("id") or "").strip()
+        if not node_id or node_id in nodes:
+            continue
+        nodes[node_id] = {
+            "key": record.get("key"),
+            "level": str(record.get("level") or ""),
+            "number": str(record.get("number") or ""),
+            "label": record.get("label"),
+            "id": node_id,
+            "title": record.get("title"),
+            "path": str(record.get("path") or ""),
+            "parent_id": str(record.get("parent_id") or ""),
+            "status": str(record.get("status") or ""),
+            "status_bucket": _work_status_bucket(record.get("status")),
+            "children": [],
+        }
+        order.append(node_id)
+
+    roots: list[str] = []
+    for node_id in order:
+        node = nodes[node_id]
+        parent = nodes.get(node["parent_id"])
+        if parent is not None and parent is not node:
+            parent["children"].append(node_id)
+        else:
+            roots.append(node_id)
+    for node_id in order:
+        nodes[node_id]["children"].sort(key=lambda child_id: (_work_number_sort_key(nodes[child_id]["number"]), child_id))
+    roots.sort(key=lambda node_id: (_work_number_sort_key(nodes[node_id]["number"]), node_id))
+
+    # Per-node enrichment: depth and nearest taskset come from tree position,
+    # facets/evidence come from the record's markdown frontmatter (read-only).
+    meta_by_id = {node_id: _work_record_frontmatter(root, nodes[node_id]["path"], warnings) for node_id in order}
+    visited: set[str] = set()
+    stack: list[tuple[str, int, str | None]] = [(node_id, 0, None) for node_id in reversed(roots)]
+    while stack:
+        node_id, depth, taskset_id = stack.pop()
+        if node_id in visited:
+            continue
+        visited.add(node_id)
+        node = nodes[node_id]
+        if node["level"] == "taskset":
+            taskset_id = node_id
+        node["depth"] = depth
+        node["taskset_id"] = taskset_id
+        node["facets"] = _work_node_facets(node, meta_by_id[node_id], taskset_id)
+        node["evidence_refs"] = _work_evidence_refs(meta_by_id[node_id])
+        for child_id in reversed(node["children"]):
+            stack.append((child_id, depth + 1, taskset_id))
+    for node_id in order:
+        if node_id in visited:
+            continue
+        node = nodes[node_id]
+        node["depth"] = 0
+        node["taskset_id"] = node_id if node["level"] == "taskset" else None
+        node["facets"] = _work_node_facets(node, meta_by_id[node_id], node["taskset_id"])
+        node["evidence_refs"] = _work_evidence_refs(meta_by_id[node_id])
+
+    # Roll-ups are computed from direct children only; stored progress fields
+    # in the snapshot (e.g. progress_pct) are intentionally never read.
+    for node_id in sorted(order, key=lambda value: -int(nodes[value].get("depth", 0))):
+        node = nodes[node_id]
+        rollup = {"total": 0, "completed": 0, "in_progress": 0, "planned": 0, "pct": None}
+        descendant_refs: list[str] = []
+        for child_id in node["children"]:
+            child = nodes[child_id]
+            rollup["total"] += 1
+            rollup[child["status_bucket"]] += 1
+            descendant_refs.extend(child.get("evidence_refs", []))
+            descendant_refs.extend(child.get("descendant_evidence_refs", []))
+        if rollup["total"]:
+            rollup["pct"] = int(round(rollup["completed"] / rollup["total"] * 100))
+        node["rollup"] = rollup
+        node["descendant_evidence_refs"] = _dedupe_strings(descendant_refs)[:_WORK_DESCENDANT_EVIDENCE_LIMIT]
+
+    facet_values: dict[str, set[str]] = {key: set() for key in WORK_FACET_KEYS}
+    level_counts: dict[str, int] = {}
+    bucket_counts: dict[str, int] = {}
+    for node_id in order:
+        node = nodes[node_id]
+        level_counts[node["level"]] = level_counts.get(node["level"], 0) + 1
+        bucket_counts[node["status_bucket"]] = bucket_counts.get(node["status_bucket"], 0) + 1
+        for facet, value in node["facets"].items():
+            if facet in facet_values and str(value).strip():
+                facet_values[facet].add(str(value))
+
+    mtime = _mtime_iso(path)
+    source_generated_at = payload.get("generated_at") if isinstance(payload, dict) else None
+    staleness_note = (
+        f"read-only snapshot of {WORK_ITEM_CLASSIFICATION_REL} "
+        f"(generated_at={source_generated_at}, file mtime={mtime}); {refresh_hint}"
+    )
+    sorted_order = sorted(order, key=lambda node_id: (_work_number_sort_key(nodes[node_id]["number"]), node_id))
+    return {
+        "schema": "agent-runtime-work-explorer/v1",
+        "generated_at": now,
+        "source_path": WORK_ITEM_CLASSIFICATION_REL,
+        "source_generated_at": source_generated_at,
+        "source_last_updated": mtime,
+        "staleness_note": staleness_note,
+        "freshness": "present",
+        "record_count": len(order),
+        "roots": roots,
+        "nodes": [nodes[node_id] for node_id in sorted_order],
+        "facets": {key: sorted(values) for key, values in facet_values.items()},
+        "summary": {"levels": level_counts, "status_buckets": bucket_counts},
+        "error": None,
+    }
+
+
 def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     root_path = Path(root).resolve()
     generated_at = now or _now_iso()
@@ -1489,6 +1742,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     collaboration = build_collaboration(pane_events)
     multipane_assurance = _collect_multipane_assurance(root_path, generated_at, pane_events, warnings)
     inflight = load_inflight(root_path, generated_at, warnings)
+    work_explorer = load_work_explorer(root_path, generated_at, warnings)
     return {
         "generated_at": generated_at,
         "sources": sources,
@@ -1499,6 +1753,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "task_claims": task_claims,
         "multipane_assurance": multipane_assurance,
         "inflight": inflight,
+        "work_explorer": work_explorer,
         "messages": messages,
         "events": events,
         "goals": goals,
