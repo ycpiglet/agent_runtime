@@ -52,6 +52,10 @@ tags:
 - `parallel_worktree_gate.py`(또는 신규 검사) 확장: `.worktrees/` 하위
   task 브랜치 워크트리 중 대응하는 main 클레임(활성 또는 released)이 없는
   경우 watch/block finding 생성.
+- 클레임 생성 즉시 커밋 강제: 미추적 클레임 파일은 동시 세션의 main
+  체크아웃 정리(reset+clean)에 소실됨 — 2026-06-12 실측
+  (CLAIM-...-task-ar-500-25db 소실, ...-66ed로 재생성). 미추적 CLAIM-*.json
+  발견 시 finding.
 - 예외 허용 목록(예: 실험용 spike 워크트리)을 명시적 태그로 정의.
 - Stop hook / owner governance 체인에 포함 확인.
 - 템플릿 미러 동기화.
