@@ -1,0 +1,52 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-12-unit-task-ar-372-008-20260612141409",
+  "work_id": "UNIT-TASK-AR-372-008",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-008.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-372",
+  "unit_id": "UNIT-TASK-AR-372-008",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-12T14:14:09+09:00",
+  "verified_by": "codex",
+  "command_count": 4,
+  "commands": [
+    {
+      "command": "python -m py_compile scripts/work.py",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T14:14:21+09:00",
+      "finished_at": "2026-06-12T14:14:21+09:00",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "pytest tests/test_work_assign.py tests/test_work_criteria.py tests/test_work_close.py tests/test_work_verify.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T14:14:21+09:00",
+      "finished_at": "2026-06-12T14:14:28+09:00",
+      "stdout": "............                                                             [100%]\n12 passed in 6.21s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/work.py assign UNIT-TASK-AR-372-008 --json",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T14:14:28+09:00",
+      "finished_at": "2026-06-12T14:14:29+09:00",
+      "stdout": "work-assign: pass\n{\n  \"status\": \"pass\",\n  \"work_id\": \"UNIT-TASK-AR-372-008\",\n  \"work_path\": \"agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-008.md\",\n  \"current_team\": \"agent-runtime-core\",\n  \"current_owner\": \"lead_engineer\",\n  \"recommended_team\": \"agent-runtime-core\",\n  \"recommended_owner\": \"lead_engineer\",\n  \"recommendation_reason\": \"existing assignment is explicit\",\n  \"workload\": {\n    \"active_claim_count\": 0,\n    \"by_team\": {},\n    \"by_role\": {}\n  },\n  \"proposal\": \"\",\n  \"draft\": \"\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/work.py assign --help",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-12T14:14:29+09:00",
+      "finished_at": "2026-06-12T14:14:30+09:00",
+      "stdout": "usage: work.py assign [-h] [--actor ACTOR] [--now NOW] [--outbox OUTBOX]\n                      [--draft-dir DRAFT_DIR] [--json]\n                      work_id\n\npositional arguments:\n  work_id               Unit ID, task ID, or path to a work item\n\noptions:\n  -h, --help            show this help message and exit\n  --actor ACTOR\n  --now NOW\n  --outbox OUTBOX\n  --draft-dir DRAFT_DIR\n  --json\n",
+      "stderr": ""
+    }
+  ]
+}

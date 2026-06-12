@@ -6,7 +6,7 @@ registered_at: 2026-06-12T08:17:54+09:00
 created_at: 2026-06-12T08:17:54+09:00
 title: Registration CLI/API for initiative, taskset, task, and unit records
 started_at: 2026-06-12T11:58:44+09:00
-updated_at: 2026-06-12T13:55:00+09:00
+updated_at: 2026-06-12T14:15:00+09:00
 status: in_progress
 priority: P1
 difficulty: L
@@ -74,6 +74,9 @@ tags:
 - `python scripts/work.py criteria UNIT-TASK-AR-372-007 --json`
 - `python scripts/work.py verify UNIT-TASK-AR-372-007 --json`
 - `python scripts/work.py close UNIT-TASK-AR-372-007 --actual-hours <hours> --actual-tokens <tokens> --json`
+- `python scripts/work.py assign UNIT-TASK-AR-372-008 --json`
+- `python scripts/work.py verify UNIT-TASK-AR-372-008 --json`
+- `python scripts/work.py close UNIT-TASK-AR-372-008 --actual-hours <hours> --actual-tokens <tokens> --json`
 - `python scripts/backlog_board.py --write`
 - `python scripts/owner_doc_format_gate.py --manifest owner-docs.yml`
 
@@ -90,5 +93,6 @@ tags:
 - `UNIT-TASK-AR-372-005` completed: Added `scripts/work.py verify <id>` to execute declared verification commands, write JSON evidence, update verification metadata, and refresh the evidence index.
 - `UNIT-TASK-AR-372-006` completed: Added `scripts/work.py close <id>` to require passed evidence, record actuals/resolution metadata, generate a closeout block, and refresh generated views.
 - `UNIT-TASK-AR-372-007` completed: Added `scripts/work.py criteria <id>` to evaluate acceptance-to-verification coverage and write B-mode proposal records for gaps without mutating source work items.
-- Remaining: add B-mode proposal-gated split and assign behavior.
+- `UNIT-TASK-AR-372-008` completed: Added `scripts/work.py assign <id>` to recommend team/owner metadata and write B-mode proposal records for assignment gaps without mutating source work items or creating claims.
+- Remaining: add B-mode proposal-gated split behavior.
 
