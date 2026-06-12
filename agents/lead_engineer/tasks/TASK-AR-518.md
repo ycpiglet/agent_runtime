@@ -4,9 +4,11 @@ display_id: TASK-AR-518
 task_uid: 93485297-6326-4af3-86d2-03e2e968860f
 registered_at: 2026-06-12T23:34:00+09:00
 created_at: 2026-06-12T23:34:00+09:00
-updated_at: 2026-06-13T00:05:00+09:00
+updated_at: 2026-06-13T08:40:00+09:00
+started_at: 2026-06-13T02:45:17+09:00
+completed_at: 2026-06-13T08:40:00+09:00
 title: Agent instance attribution across A2A evidence and commits
-status: planned
+status: completed
 priority: P1
 difficulty: L
 est_hours: 10
@@ -71,3 +73,13 @@ tags:
 - Attribution gate + tests.
 - A2A/evidence fixture updates.
 - Owner review showing role-only ambiguity is closed for new artifacts.
+
+## Completion Evidence
+
+- PR #61 (1a878f9): scripts/attribution_gate.py (cutoff-based block/watch), spawn-record skill_versions/prompt_config_hash, lifecycle census events, Agent-Instance commit trailer convention, chain wiring + 3 mirrors; 16 tests.
+
+## Verification Results
+
+- pytest tests/test_attribution_gate.py -q -> 16 passed
+- attribution_gate --check (real repo) -> exit 0, historical watch only
+- W4b inst-w4b-ar518-verifier -> APPROVE

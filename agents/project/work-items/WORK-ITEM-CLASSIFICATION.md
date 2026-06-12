@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-13T07:59:23+09:00
+generated_at: 2026-06-13T08:42:11+09:00
 record_count: 229
 ---
 
@@ -161,7 +161,7 @@ record_count: 229
 | 0.16 | Taskset 0.16 | taskset | `TASKSET-AR-REPO-HYGIENE` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Repo Custodian |
 | 0.16.1 | Task 0.16.1 | task | `TASK-AR-233` | `TASKSET-AR-REPO-HYGIENE` | completed | `agents/lead_engineer/tasks/TASK-AR-233.md` | Clean the current working tree through an intentional commit and push, then keep back… |
 | 0.16.2 | Task 0.16.2 | task | `TASK-AR-511` | `TASKSET-AR-REPO-HYGIENE` | planned | `agents/lead_engineer/tasks/TASK-AR-511.md` | 서로 다른 OS/LLM/페인에서 작업한 파일이 줄바꿈·인코딩 차이로 가짜 diff와 경고를 만드는 것을 차단한다. 현재 `.gitattributes`가… |
-| 0.16.3 | Task 0.16.3 | task | `TASK-AR-512` | `TASKSET-AR-REPO-HYGIENE` | planned | `agents/lead_engineer/tasks/TASK-AR-512.md` | 형상관리 산출물(branch/worktree/stash/PR/issue/claim)의 "지저분함"을 사람이 인지하기 전에 주기 점검 루프가 감지·보고·정… |
+| 0.16.3 | Task 0.16.3 | task | `TASK-AR-512` | `TASKSET-AR-REPO-HYGIENE` | completed | `agents/lead_engineer/tasks/TASK-AR-512.md` | 형상관리 산출물(branch/worktree/stash/PR/issue/claim)의 "지저분함"을 사람이 인지하기 전에 주기 점검 루프가 감지·보고·정… |
 | 0.16.4 | Task 0.16.4 | task | `TASK-AR-520` | `TASKSET-AR-REPO-HYGIENE` | planned | `agents/lead_engineer/tasks/TASK-AR-520.md` | taskset_work_gate judges BACKLOG-BOARD.md stale within minutes because the generator… |
 | 0.16.5 | Task 0.16.5 | task | `TASK-AR-521` | `TASKSET-AR-REPO-HYGIENE` | planned | `agents/lead_engineer/tasks/TASK-AR-521.md` | Template owner_governance_gate.py is missing evidence_index_generator/context_knowled… |
 | 0.16.6 | Task 0.16.6 | task | `TASK-AR-522` | `TASKSET-AR-REPO-HYGIENE` | planned | `agents/lead_engineer/tasks/TASK-AR-522.md` | Bundle of independently-verified small fixes: (1) work.py emits verification_status p… |
@@ -252,7 +252,7 @@ record_count: 229
 | 3.1 | Taskset 3.1 | taskset | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | `INIT-AR-PARALLEL-WAVE-EXECUTION` | active | `BACKLOG-BOARD.md` | Wave Conductor |
 | 3.1.1 | Task 3.1.1 | task | `TASK-AR-500` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | in_progress | `agents/lead_engineer/tasks/TASK-AR-500.md` | 충돌 발견 시점을 merge-time(사후)에서 claim-time(사전)으로 옮긴다. 새 클레임 생성 시 활성 클레임들의 선언 footprint(`ta… |
 | 3.1.2 | Task 3.1.2 | task | `TASK-AR-501` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-501.md` | planner가 unit 의존성 DAG를 topological wave로 분해하고, 디스패처가 같은 wave의 K개 unit에 대해 claim+workt… |
-| 3.1.3 | Task 3.1.3 | task | `TASK-AR-502` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-502.md` | 워커 브랜치의 main 합류를 단일 통합자(orchestrator)가 직렬 rebase-test-merge 큐로 처리해, 병렬 구현 기간에도 merge… |
+| 3.1.3 | Task 3.1.3 | task | `TASK-AR-502` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-502.md` | 워커 브랜치의 main 합류를 단일 통합자(orchestrator)가 직렬 rebase-test-merge 큐로 처리해, 병렬 구현 기간에도 merge… |
 | 3.1.4 | Task 3.1.4 | task | `TASK-AR-503` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-503.md` | 워크트리 작업은 반드시 main 체크아웃에 활성 클레임을 먼저 남기고 시작하도록 강제한다. 클레임 없는 워크트리 작업은 보드/ui-console 양쪽에서… |
 | 3.1.5 | Task 3.1.5 | task | `TASK-AR-504` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-504.md` | 병렬 세션(codex/claude)이 서로의 미머지 변경을 모른 채 세운 계획이 merge 후 조용히 무효화되는 문제를 지연평가로 해결한다: 계획의 전제… |
 | 3.1.6 | Task 3.1.6 | task | `TASK-AR-505` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-505.md` | 작업 수명주기의 W5(통합 후 정리) 단계를 실행 가능하게 만든다: merge 완료 + claim released 상태의 좀비 워크트리/브랜치를 검출하고… |
@@ -266,7 +266,7 @@ record_count: 229
 | 4.1.2 | Task 4.1.2 | task | `TASK-AR-515` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | `agents/lead_engineer/tasks/TASK-AR-515.md` | Define and gate the Work Item metadata catalog for provenance, resolution, relationsh… |
 | 4.1.3 | Task 4.1.3 | task | `TASK-AR-516` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-516.md` | Make initiative/taskset/task/unit progress and metadata visible through one Work Expl… |
 | 4.1.4 | Task 4.1.4 | task | `TASK-AR-517` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-517.md` | Turn Work Item metadata into queryable statistics, JSON/CSV export, and reusable save… |
-| 4.1.5 | Task 4.1.5 | task | `TASK-AR-518` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-518.md` | Require instance_uid actor attribution across claims, A2A messages, evidence, closeou… |
+| 4.1.5 | Task 4.1.5 | task | `TASK-AR-518` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | `agents/lead_engineer/tasks/TASK-AR-518.md` | Require instance_uid actor attribution across claims, A2A messages, evidence, closeou… |
 | 4.1.6 | Task 4.1.6 | task | `TASK-AR-519` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-519.md` | Mark verification evidence stale when source files, commits, claims, or task records… |
 
 ## Risks / Blockers

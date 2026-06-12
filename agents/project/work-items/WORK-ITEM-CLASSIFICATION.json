@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-13T07:59:23+09:00",
+  "generated_at": "2026-06-13T08:42:11+09:00",
   "record_count": 229,
   "finding_count": 0,
   "findings": [],
@@ -1356,7 +1356,7 @@
       "title": "형상관리 산출물(branch/worktree/stash/PR/issue/claim)의 \"지저분함\"을 사람이 인지하기 전에 주기 점검 루프가 감지·보고·정…",
       "path": "agents/lead_engineer/tasks/TASK-AR-512.md",
       "parent_id": "TASKSET-AR-REPO-HYGIENE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-520",
@@ -2357,7 +2357,7 @@
       "title": "워커 브랜치의 main 합류를 단일 통합자(orchestrator)가 직렬 rebase-test-merge 큐로 처리해, 병렬 구현 기간에도 merge…",
       "path": "agents/lead_engineer/tasks/TASK-AR-502.md",
       "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-503",
@@ -2511,7 +2511,7 @@
       "title": "Require instance_uid actor attribution across claims, A2A messages, evidence, closeou…",
       "path": "agents/lead_engineer/tasks/TASK-AR-518.md",
       "parent_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-519",

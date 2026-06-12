@@ -4,9 +4,11 @@ display_id: TASK-AR-502
 task_uid: 59fda519-2e92-43bb-b20a-5233183b9d25
 registered_at: 2026-06-12T18:35:45+09:00
 created_at: 2026-06-12T18:35:45+09:00
-updated_at: 2026-06-12T18:35:45+09:00
+updated_at: 2026-06-13T08:20:00+09:00
+started_at: 2026-06-13T02:58:36+09:00
+completed_at: 2026-06-13T08:20:00+09:00
 title: Integrator merge queue — serial rebase-test-merge for worker branches
-status: planned
+status: completed
 priority: P2
 difficulty: M
 est_hours: 8
@@ -72,3 +74,13 @@ tags:
 - `scripts/merge_queue.py` + 테스트
 - 큐 상태 JSON 스키마
 - closeout review record
+
+## Completion Evidence
+
+- PR #58 (aeb0b67): scripts/merge_queue.py serial rebase-test-merge queue with queue-state JSON, failure isolation + feedback files, --pr-mode handoff, never force-push/delete; mirror + 6 tests.
+
+## Verification Results
+
+- pytest tests/test_merge_queue.py -q -> 6 passed
+- pytest tests -q -> 582 passed (+1 pre-existing)
+- W4b inst-w4b-ar502-verifier -> APPROVE (follow-ups in TASK-AR-522)

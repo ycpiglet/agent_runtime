@@ -9,7 +9,7 @@
   "callsite_id": "claude-w4-ar502",
   "pane_id": "claude-w4-ar502",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
   "project_id": "",
   "unit_id": "",
@@ -17,20 +17,20 @@
   "model_tier": "",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "implementing",
-  "progress_pct": 0,
+  "phase": "complete",
+  "progress_pct": 100,
   "step_index": 1,
   "step_total": 6,
   "status_text": "AR-502: integrator merge queue - serial rebase-test-merge",
   "worktree_path": ".worktrees/TASK-AR-502",
   "branch": "claude/task-ar-502-merge-queue",
   "claimed_at": "2026-06-13T02:58:36+09:00",
-  "last_heartbeat": "2026-06-13T02:58:36+09:00",
-  "updated_at": "2026-06-13T02:58:36+09:00",
+  "last_heartbeat": "2026-06-13T08:41:04+09:00",
+  "updated_at": "2026-06-13T08:41:04+09:00",
   "expires_at": "2026-06-13T03:28:36+09:00",
   "lease": {
     "claimed_at": "2026-06-13T02:58:36+09:00",
-    "heartbeat_at": "2026-06-13T02:58:36+09:00",
+    "heartbeat_at": "2026-06-13T08:41:04+09:00",
     "expires_at": "2026-06-13T03:28:36+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260613-025836-task-ar-502-4dbd.handoff.md",
@@ -41,5 +41,6 @@
     "scripts/merge_queue.py",
     "tests/test_merge_queue.py",
     "src/agent_runtime/templates/project/scripts/merge_queue.py"
-  ]
+  ],
+  "released_at": "2026-06-13T08:41:04+09:00"
 }
