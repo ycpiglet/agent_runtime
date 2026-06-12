@@ -403,3 +403,36 @@ def test_template_mirror_is_identical() -> None:
     root_script = SCRIPT.read_text(encoding="utf-8")
     template_script = TEMPLATE_SCRIPT.read_text(encoding="utf-8")
     assert root_script == template_script
+
+
+def test_readiness_gate_template_mirror_is_identical() -> None:
+    root = (REPO_ROOT / "scripts" / "task_unit_readiness_gate.py").read_text(encoding="utf-8")
+    template = (
+        REPO_ROOT
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "scripts"
+        / "task_unit_readiness_gate.py"
+    ).read_text(encoding="utf-8")
+    assert root == template
+
+
+def test_units_readme_mirrors_document_depends_on() -> None:
+    for path in (
+        REPO_ROOT / "agents" / "lead_engineer" / "tasks" / "units" / "README.md",
+        REPO_ROOT
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "README.md",
+    ):
+        text = path.read_text(encoding="utf-8")
+        assert "## Optional Frontmatter" in text, path
+        assert "depends_on" in text, path

@@ -58,3 +58,22 @@ updates the record.
 ## Example
 
 See `examples/UNIT-EXAMPLE-001.md` for a reusable worker-ready example.
+
+## Optional Frontmatter
+
+- `depends_on`: list of unit ids (`UNIT-...`) and/or task ids (`TASK-...`)
+  that must be completed before this unit may start. Every reference must
+  resolve to an existing unit spec or task file;
+  `scripts/task_unit_readiness_gate.py` reports
+  `unit:depends-on-unknown-ref:<ref>` for dangling references and
+  `unit:depends-on-self:<ref>` for self references.
+  `scripts/wave_dispatcher.py` consumes this field to decompose units into
+  topological waves: units in the same wave have no `depends_on` edges
+  between them and pairwise-disjoint `target_files` footprints. A task id
+  reference means "after every selected unit of that task".
+
+```yaml
+depends_on:
+  - UNIT-TASK-AR-344-001
+  - TASK-AR-350
+```
