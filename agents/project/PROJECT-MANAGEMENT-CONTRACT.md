@@ -49,6 +49,8 @@ Use stable IDs in frontmatter so worker models can route without chat history:
 | `task_id` | task unit | Any unit spec | `TASK-AR-344` |
 | `unit_id` | task unit | Any unit spec | `UNIT-TASK-AR-344-001` |
 | `horizon` | project/task | Planning horizon is known | `short`, `medium`, `long`, `unit` |
+| `milestone` | initiative/taskset/task | Work maps to a release, demo, or date-bound goal | `v0.1.9`, `demo-day` |
+| `team` | task/unit | Ownership, workload, or reporting axis is needed | `agent-runtime-core` |
 | `unit_spec` | task/claim | A worker should follow a linked unit spec | `agents/lead_engineer/tasks/units/TASK-AR-344/UNIT-TASK-AR-344-001.md` |
 | `planner_model_tier` | task/unit | Planner decomposition is needed or already done | `planner_high` |
 | `worker_model_tier` | task/unit | Implementation can be routed to a worker | `worker_low`, `worker_standard` |
@@ -58,6 +60,37 @@ Use stable IDs in frontmatter so worker models can route without chat history:
 Task files may omit some fields during migration. New worker-dispatched units
 must not: dispatchers and readiness gates treat missing unit detail as
 `planner_refine_required`.
+
+## Numbering And Classification
+
+Human-facing hierarchy numbers are generated, not manually reserved by
+planners. Stable file identity remains UUID/timestamp backed. The classifier
+renders:
+
+```text
+Initiative 1 -> Taskset 1.1 -> Task 1.1.1 -> Unit 1.1.1.1
+```
+
+Use `scripts/work_item_classifier.py --write` after hierarchy metadata changes.
+Use `scripts/work_item_classifier.py --check` in governance and before
+handoff. `0.*` numbers are legacy or unassigned work that predates
+`initiative_id`; add `initiative_id` when that work is next touched.
+
+## Orthogonal Axes And Non-Tree Work
+
+Milestone, horizon, team, owner, role, priority, and phase are orthogonal axes,
+not hierarchy levels. Keep them as metadata so one taskset can report to a
+release, a team, and a horizon without breaking the tree.
+
+Two work types may live outside the goal-oriented tree:
+
+| Type | Use | Record shape |
+| --- | --- | --- |
+| Routine | Recurring operational work such as log rotation, daily briefs, board regeneration, or idea-vault scans | `agents/lead_engineer/routines/ROUTINE-*.md` plus schedule/trigger metadata |
+| Spike | Time-boxed research or experiment whose output is a decision, not necessarily implementation | Task or unit with `type: spike`, timebox, decision output, and stop boundary |
+
+Display skins may rename the same data model without changing canonical fields:
+`Initiative=Saga`, `Taskset=Quest`, `Task=Mission`, `Unit=Step`.
 
 ## Horizon Classes
 
@@ -114,6 +147,8 @@ worker-ready.
    current worker assignment.
 6. Backlog entries without linked detail specs are not enough for low-tier
    worker dispatch.
+7. Planning discussions and hierarchy/numbering decisions must be recorded in
+   `reviews/` before closeout; chat-only planning is not durable state.
 
 ## Enforcement Targets
 
@@ -126,4 +161,5 @@ The PM operating-system taskset must implement executable enforcement for:
 | Scope boundary | Dispatcher claim records project/taskset/task/unit and blocks out-of-scope continuation |
 | WIP | Active unit count per taskset/team stays under configured limits |
 | Verification | Completion claims include acceptance evidence and runnable checks |
+| Classification | Work-item classifier output is current and no orphan unit points to a missing task |
 
