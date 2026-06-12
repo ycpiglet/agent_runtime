@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-12T21:41:38+09:00",
-  "record_count": 199,
+  "generated_at": "2026-06-12T21:54:33+09:00",
+  "record_count": 200,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -2191,6 +2191,17 @@
       "id": "TASK-AR-507",
       "title": "Owner 규칙 \"작업자가 스스로 검증 금지, 항상 다른 에이전트가 검증\"을 실행 가능하게 강제한다: claim release/closeout 시 ver…",
       "path": "agents/lead_engineer/tasks/TASK-AR-507.md",
+      "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-508",
+      "level": "task",
+      "number": "2.1.9",
+      "label": "Task 2.1.9",
+      "id": "TASK-AR-508",
+      "title": "dirty intake와 session baseline의 residue 보존 규칙이 `codex/*` 브랜치에 하드코딩되어 있어 `claude/*` 브랜…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-508.md",
       "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
       "status": "planned"
     }

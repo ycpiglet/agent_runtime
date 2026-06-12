@@ -8,8 +8,8 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-12
-task_count: 170
-open_count: 43
+task_count: 171
+open_count: 44
 completed_count: 127
 task_set_count: 6
 completed_task_set_count: 19
@@ -18,11 +18,11 @@ completed_task_set_count: 19
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `43` open or active tasks; `127` completed tasks are archived from this live board.
+- Summary: `44` open or active tasks; `127` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `37` / Ask `5` / Review `0` / Later `1` / Done `127`.
+- Status: Action `38` / Ask `5` / Review `0` / Later `1` / Done `127`.
 - Task Sets: `6` active workflows; `19` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -121,11 +121,12 @@ completed_task_set_count: 19
 ### Wave Conductor (`TASKSET-AR-PARALLEL-WAVE-EXECUTION`)
 
 - Flow: Claim-time footprint conflict gate, wave dispatcher with cascade/parallel modes, integrator merge queue, and claim-first enforcement.
-- Progress: `1/8` done; `7` open or active.
+- Progress: `1/9` done; `8` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-500` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | in_progress | Action | P1 | High | Medium | 6h/5000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 충돌 발견 시점을 merge-time(사후)에서 claim-time(사전)으로 옮긴다. 새 클레임 생성 시 활성 클레임들의 선언 footprint(`ta… |
+| `TASK-AR-508` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Low | 3h/3000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | dirty intake와 session baseline의 residue 보존 규칙이 `codex/*` 브랜치에 하드코딩되어 있어 `claude/*` 브랜… |
 | `TASK-AR-503` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Low | 4h/3000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 워크트리 작업은 반드시 main 체크아웃에 활성 클레임을 먼저 남기고 시작하도록 강제한다. 클레임 없는 워크트리 작업은 보드/ui-console 양쪽에서… |
 | `TASK-AR-505` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 작업 수명주기의 W5(통합 후 정리) 단계를 실행 가능하게 만든다: merge 완료 + claim released 상태의 좀비 워크트리/브랜치를 검출하고… |
 | `TASK-AR-507` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Ask | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | Owner 규칙 "작업자가 스스로 검증 금지, 항상 다른 에이전트가 검증"을 실행 가능하게 강제한다: claim release/closeout 시 ver… |
