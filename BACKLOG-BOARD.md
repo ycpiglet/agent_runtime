@@ -9,8 +9,8 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-13
 task_count: 186
-open_count: 40
-completed_count: 146
+open_count: 39
+completed_count: 147
 task_set_count: 7
 completed_task_set_count: 20
 ---
@@ -18,11 +18,11 @@ completed_task_set_count: 20
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `40` open or active tasks; `146` completed tasks are archived from this live board.
+- Summary: `39` open or active tasks; `147` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `34` / Ask `5` / Review `0` / Later `1` / Done `146`.
+- Status: Action `33` / Ask `5` / Review `0` / Later `1` / Done `147`.
 - Task Sets: `7` active workflows; `20` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -45,11 +45,10 @@ completed_task_set_count: 20
 ### Repo Custodian (`TASKSET-AR-REPO-HYGIENE`)
 
 - Flow: Working-tree cleanup, backlog cycle hygiene, and handoff publication.
-- Progress: `2/6` done; `4` open or active.
-- WIP: active `1/3`; oldest `0.0h`; stale `0`.
+- Progress: `3/6` done; `3` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-511` | - | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Low | 3h/3000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 서로 다른 OS/LLM/페인에서 작업한 파일이 줄바꿈·인코딩 차이로 가짜 diff와 경고를 만드는 것을 차단한다. 현재 `.gitattributes`가… |
 | `TASK-AR-520` | - | - | - | planned | Action | P1 | High | Low | 3h/3000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | taskset_work_gate judges BACKLOG-BOARD.md stale within minutes because the generator… |
 | `TASK-AR-521` | - | - | - | planned | Ask | P2 | Medium | Low | 3h/3000tok | Low | 5 | agent-runtime-core | lead-engineer | Owner/agent decision | Template owner_governance_gate.py is missing evidence_index_generator/context_knowled… |
 | `TASK-AR-522` | - | - | - | planned | Action | P2 | Medium | Low | 4h/4000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Bundle of independently-verified small fixes: (1) work.py emits verification_status p… |
@@ -273,6 +272,7 @@ completed_task_set_count: 20
 | `TASK-AR-284` | `539c16e9-2ff…` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | 2026-06-11 | 2026-06-11T12:45:13+09:00 | 2026-06-11T12:55:13+09:00 | 2026-06-11T12:55:13+09:00 | Close the active UI design implementation task set only after focused checks, Owner g… |
 | `TASK-AR-282` | `3d7b5d8e-d81…` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | 2026-06-11 | 2026-06-11T10:47:46+09:00 | 2026-06-11T10:59:38+09:00 | 2026-06-11T10:59:38+09:00 | Bring graph, state-machine, roadmap, planner, source, and write surfaces into the sam… |
 | `TASK-AR-233` | `d475a04e-6c5…` | `TASKSET-AR-REPO-HYGIENE` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Clean the current working tree through an intentional commit and push, then keep back… |
+| `TASK-AR-511` | `bf47ce08-f7a…` | `TASKSET-AR-REPO-HYGIENE` | completed | 2026-06-12T23:15:32+09:00 | 2026-06-13T12:30:36+09:00 | 2026-06-13T13:20:00+09:00 | 2026-06-13T13:20:00+09:00 | 서로 다른 OS/LLM/페인에서 작업한 파일이 줄바꿈·인코딩 차이로 가짜 diff와 경고를 만드는 것을 차단한다. 현재 `.gitattributes`가… |
 | `TASK-AR-512` | `94b7763f-436…` | `TASKSET-AR-REPO-HYGIENE` | completed | 2026-06-12T23:15:32+09:00 | 2026-06-13T02:58:37+09:00 | 2026-06-13T07:50:00+09:00 | 2026-06-13T07:50:00+09:00 | 형상관리 산출물(branch/worktree/stash/PR/issue/claim)의 "지저분함"을 사람이 인지하기 전에 주기 점검 루프가 감지·보고·정… |
 | `TASK-AR-306` | `9fc495d7-bfd…` | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | completed | 2026-06-11T17:34:00+09:00 | 2026-06-11T16:30:00+09:00 | 2026-06-11T17:34:00+09:00 | 2026-06-11T17:34:00+09:00 | Owner 7개 지시(브랜치/스태시 정리, UI 적용, 플러그인/훅 정리, 레거시 전신 프로젝트 정리, 구조 분석, 비전 분석, 기록/등록)를 단일 세션… |
 | `TASK-AR-309` | `d5458ef2-2dd…` | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | completed | 2026-06-11T17:34:00+09:00 | 2026-06-12T02:08:54+09:00 | 2026-06-12T02:08:54+09:00 | 2026-06-12T02:08:54+09:00 | 2026-06-11 "UI 미반영" 사건의 두 원인(비-editable stale 설치, 장수 구버전 서버 프로세스)이 재발하지 않도록 가드 방안을 계획… |

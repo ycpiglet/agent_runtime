@@ -5,27 +5,27 @@
         {
           "kind": "sha256",
           "path": "scripts/taskset_dispatcher.py",
-          "value": "09ec472af9d9fe2375037294752f8184657f0ce0806747ca1e4c477c7fd8e5d4"
+          "value": "ac78599e2197c7999eaffc406449034dab76e34f11c1dd41da4f555478499a6b"
         },
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "54189e6caddb4ebac894b9299e7f2b1db5bd84308228153e2b7c6c076127ac0f"
+          "value": "4b40869d5e6362bd72f8b08f74f6751cab08c6894f779310dc924c876a6dbe2a"
         },
         {
           "kind": "sha256",
           "path": "scripts/parallel_worktree_gate.py",
-          "value": "c46f5e52babac45a92a6ac549e7276be2dc8df7a785247234c957900846a2eeb"
+          "value": "003158b98a43191a0fd54a256cea8c177dc18f3220c47372fbb11d9f83c694bf"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/README.md",
-          "value": "367344d9e8943c6a8a3cc99b5711509df90e223f3fe42d481cf3f8417df712f9"
+          "value": "0a6942f16246dd63f523de26cf76ade9ed9d95a22d809f5a6c87eef55e1d3c43"
         },
         {
           "kind": "sha256",
           "path": "agents/project/WORK-SCHEMA.yml",
-          "value": "6d1e3994f031261d2cc2b14dc393fbb9e8dd6d6b2bb045e23a862005a13598d3"
+          "value": "0c145e4c80a599b1f51a676cc9afb967275d55f7c0c83f1a62133cd7d71f826e"
         },
         {
           "kind": "sha256",
@@ -35,20 +35,40 @@
         {
           "kind": "sha256",
           "path": "agents/project/work-items/TASK-ID-RESERVATIONS.json",
-          "value": "2c4e2eb89f78f80cb38e451beb2e2ab1adf129f81cb483ee5be3d048374c7b76"
+          "value": "47b317b2215c936af3b313e5e22e19566213e2ec8562f4df85808dc1be14cd95"
         },
         {
           "kind": "sha256",
           "path": "scripts/work.py",
-          "value": "94a7b86eaf32c31d94e071afca02cf29b534d7084560d6218b1cc2533ef72e78"
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/wave_dispatcher.py",
+          "value": "2a7b4971f20809da0c91bee62836d2d35232241e6ffef2719f03289f41a6222c"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/merge_queue.py",
+          "value": "cee77756f5dab54498efa152b4c8f07c24cb22e15f9549d86d677dd19b531b53"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/footprint_conflict_gate.py",
+          "value": "33a5ce2117deff2a341723473791e77ec897c4d9115b06dc8be418f4facd2b32"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/worktree_lifecycle_gate.py",
+          "value": "2cb1ff5c3ad5d72ac0e63479ee89af77e5aee5d449a508d365b3321ecf289560"
         }
       ],
       "design_record": "reviews/MEETING-2026-06-13-parallel-wave-replan-post-codex-merge.md",
-      "recorded_at": "2026-06-13T01:18:34+09:00",
+      "recorded_at": "2026-06-13T13:16:22+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION"
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-13T01:18:34+09:00"
+  "updated_at": "2026-06-13T13:16:22+09:00"
 }
