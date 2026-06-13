@@ -50,3 +50,36 @@ tags:
 ## Evidence Targets
 
 - `agents/project/idea-vault/IDEA-VAULT.md`, planning scan 연동 코드, 테스트
+
+## W4a Self-Verification (inst-ui1-ar360)
+
+- Branch `claude/task-ar-360-ui` rebased on `origin/main` (cb22565).
+- Files: `scripts/idea_vault.py` (new), `tests/test_idea_vault.py` (new),
+  `scripts/planning_loop.py` (`_scan_idea_vault` + `idea_vault_revival` action
+  mapping), `agents/project/idea-vault/IDEA-VAULT.md` (operating rules + A/B
+  protocol + precedent map), `agents/project/WORK-SCHEMA.yml` and template copy
+  (`origin_type` enum += `idea_vault_revival`).
+- Focused: `python -m pytest tests/test_idea_vault.py -q` -> 12 passed.
+- Full: `python -m pytest tests -q` -> 741 passed (0:10:04).
+- Gate: `python scripts/owner_governance_gate.py` -> exit 0, all sub-gates
+  findings=0.
+- Demo: `python scripts/idea_vault.py due --now 2027-01-01` -> 12 due seeds,
+  exit 0, ASCII-safe stdout.
+- Revive verified proposal-only: emits `origin_type: idea_vault_revival`,
+  `proposal_output: owner_decision`, `canonical_mutation_allowed: false`, no
+  task created.
+
+### W4b follow-up (REQUEST-CHANGES addressed)
+
+- Finding 1 (important): `cmd_defer` lacked a terminal-status guard, so deferring
+  an `adopted`/`retired` entry would corrupt permanent decision-history. Fixed by
+  adding the same `TERMINAL_STATUS` guard `cmd_revive` uses (extracted to a shared
+  `TERMINAL_STATUS = {"adopted", "retired"}` constant).
+- Note A: parametrized `test_revive_rejects_terminal_status` over `adopted`+`retired`
+  and added `test_defer_rejects_terminal_status` (same coverage).
+- Note B: documented `revive` idempotency on already-`revived` entries in
+  IDEA-VAULT.md command rules.
+- Note C: tightened `test_real_registry_validates` seed-count assertion to `>= 12`.
+- Re-verify: focused 15 passed; full `pytest tests -q` -> 744 passed (0:05:49);
+  `owner_governance_gate.py` -> exit 0; defer-on-adopted CLI demo -> exit 1, entry
+  unchanged.
