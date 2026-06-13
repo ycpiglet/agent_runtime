@@ -14,7 +14,11 @@ registered_at: 2026-06-11T18:56:35+09:00
 created_at: 2026-06-11T18:56:35+09:00
 updated_at: 2026-06-11T18:56:35+09:00
 title: 마이크로인터랙션/게임화 폴리시 (토글형)
-status: planned
+status: completed
+started_at: 2026-06-13T23:59:13+09:00
+completed_at: 2026-06-14T01:30:00+09:00
+resolution: done
+verification_status: passed
 priority: P3
 difficulty: M
 est_hours: 8

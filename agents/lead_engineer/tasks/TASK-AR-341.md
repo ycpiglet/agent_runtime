@@ -14,7 +14,11 @@ registered_at: 2026-06-11T18:56:35+09:00
 created_at: 2026-06-11T18:56:35+09:00
 updated_at: 2026-06-11T18:56:35+09:00
 title: 워크스페이스 스위처 + 위젯 확장 포인트 + i18n
-status: planned
+status: completed
+started_at: 2026-06-13T23:59:13+09:00
+completed_at: 2026-06-14T01:45:00+09:00
+resolution: done
+verification_status: passed
 priority: P3
 difficulty: L
 est_hours: 10

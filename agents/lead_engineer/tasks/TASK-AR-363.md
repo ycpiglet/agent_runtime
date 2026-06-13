@@ -14,7 +14,11 @@ registered_at: 2026-06-11T19:48:00+09:00
 created_at: 2026-06-11T19:48:00+09:00
 updated_at: 2026-06-11T19:48:00+09:00
 title: 성장 시스템 — 프로젝트 Lv·사업 단계·XP 산식 + 게임화 가드레일
-status: planned
+status: completed
+started_at: 2026-06-14T00:35:13+09:00
+completed_at: 2026-06-14T01:20:00+09:00
+resolution: done
+verification_status: passed
 priority: P2
 difficulty: M
 est_hours: 8

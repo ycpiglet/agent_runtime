@@ -14,7 +14,11 @@ registered_at: 2026-06-11T19:48:00+09:00
 created_at: 2026-06-11T19:48:00+09:00
 updated_at: 2026-06-11T19:48:00+09:00
 title: 외부 알림 라우팅 — 웹훅 퍼스트 (Discord/Telegram/email)
-status: planned
+status: completed
+started_at: 2026-06-14T00:35:14+09:00
+completed_at: 2026-06-14T01:15:00+09:00
+resolution: done
+verification_status: passed
 priority: P2
 difficulty: M
 est_hours: 8

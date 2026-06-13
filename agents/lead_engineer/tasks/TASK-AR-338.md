@@ -14,7 +14,11 @@ registered_at: 2026-06-11T18:56:35+09:00
 created_at: 2026-06-11T18:56:35+09:00
 updated_at: 2026-06-11T18:56:35+09:00
 title: 알림 센터 + 멘션/핀/리액션 + 데일리 브리프
-status: planned
+status: completed
+started_at: 2026-06-13T23:59:12+09:00
+completed_at: 2026-06-14T01:10:00+09:00
+resolution: done
+verification_status: passed
 priority: P2
 difficulty: M
 est_hours: 8
