@@ -26,6 +26,7 @@ RESOURCE_NAMES = (
     "work_explorer",
     "meeting_room",
     "tasksets_board",
+    "taskset_completion",
     "team_agents",
     "sources",
     "errors",
@@ -1849,6 +1850,75 @@ def _taskset_phase(status: Any, bucket: str) -> str:
     return "plan"
 
 
+TASKSET_COMPLETION_SCHEMA = "agent-runtime-taskset-completion/v1"
+
+
+def _suggest_next_taskset(
+    task_sets: list[dict[str, Any]],
+    completed_id: str,
+) -> dict[str, Any] | None:
+    """Lowest-sequence taskset that still has open work, excluding the one
+    that just completed. Surfaced as a suggestion that AWAITS owner approval;
+    no work is auto-started."""
+    candidates = [
+        ts
+        for ts in task_sets
+        if str(ts.get("id") or "") != completed_id
+        and str(ts.get("status") or "") != "completed"
+        and int(ts.get("tasks_open", 0) or 0) > 0
+    ]
+    candidates.sort(key=lambda ts: int(ts.get("sequence") or 9999))
+    if not candidates:
+        return None
+    nxt = candidates[0]
+    return {
+        "id": nxt.get("id"),
+        "display_name": nxt.get("display_name"),
+        "primary_alias": nxt.get("primary_alias"),
+        "tasks_open": nxt.get("tasks_open"),
+        "tasks_total": nxt.get("tasks_total"),
+        "start_command": (nxt.get("commands") or {}).get("start"),
+        "approval_state": "awaiting_approval",
+    }
+
+
+def build_taskset_completion(
+    pane_events: list[dict[str, Any]],
+    task_sets: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Completion banner state for the Home / Tasksets view.
+
+    Derived only from the latest ``taskset.completed`` pane event plus the
+    computed task-set summary. When a taskset has just completed, the runtime
+    boundary policy is STOP-and-report; the UI shows a completion banner and a
+    next-taskset suggestion that explicitly awaits owner approval (no
+    auto-start). When no completion event exists the banner is inactive.
+    """
+    completed_events = [
+        event
+        for event in pane_events
+        if str(event.get("event") or event.get("type") or "") == "taskset.completed"
+    ]
+    completed_events.sort(key=lambda event: str(event.get("ts") or event.get("created_at") or ""))
+    if not completed_events:
+        return {"schema": TASKSET_COMPLETION_SCHEMA, "active": False}
+
+    latest = completed_events[-1]
+    completed_id = str(latest.get("task_set_id") or "").strip()
+    info = next((ts for ts in task_sets if str(ts.get("id") or "") == completed_id), {})
+    return {
+        "schema": TASKSET_COMPLETION_SCHEMA,
+        "active": True,
+        "completed_task_set_id": completed_id,
+        "completed_display_name": info.get("display_name") or completed_id,
+        "completed_at": latest.get("ts") or latest.get("created_at"),
+        "message": latest.get("message")
+        or f"Taskset {completed_id} completed; stop and report.",
+        "policy": "stop_and_report",
+        "next_suggestion": _suggest_next_taskset(task_sets, completed_id),
+    }
+
+
 def build_tasksets_board(
     work_explorer: dict[str, Any],
     tasks: list[dict[str, Any]],
@@ -2426,6 +2496,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     work_explorer = load_work_explorer(root_path, generated_at, warnings)
     meeting_room = build_meeting_room(agents, tasks, now=generated_at)
     tasksets_board = build_tasksets_board(work_explorer, tasks, events, generated_at)
+    taskset_completion = build_taskset_completion(pane_events, task_sets)
     roadmap_timeline = build_roadmap_timeline(roadmap, work_explorer, root_path, generated_at, warnings)
     instances = _load_instances(root_path, generated_at, warnings)
     team_agents = build_team_agents(root_path, instances, agents, task_claims, events, generated_at)
@@ -2442,6 +2513,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "work_explorer": work_explorer,
         "meeting_room": meeting_room,
         "tasksets_board": tasksets_board,
+        "taskset_completion": taskset_completion,
         "team_agents": team_agents,
         "messages": messages,
         "events": events,

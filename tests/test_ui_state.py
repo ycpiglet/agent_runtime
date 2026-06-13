@@ -1314,3 +1314,73 @@ def test_ui_state_team_agents_resource_payload_and_safe_degrade(tmp_path):
     # No instances present -> empty, well-formed payload (no crash).
     assert payload["items"]["teams"] == []
     assert payload["items"]["totals"] == {"teams": 0, "agents": 0, "online": 0}
+
+
+def _write_taskset_task(root: Path, task_id: str, task_set_id: str, status: str) -> None:
+    _write(
+        root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md",
+        "\n".join(
+            [
+                "---",
+                f"id: {task_id}",
+                f"status: {status}",
+                "owner: lead-engineer",
+                "priority: P0",
+                f"task_set_id: {task_set_id}",
+                "tags: []",
+                "---",
+                "",
+                "## Goal",
+                "",
+                "Sample.",
+                "",
+            ]
+        ),
+    )
+
+
+def test_ui_state_taskset_completion_inactive_without_event(tmp_path):
+    _write_taskset_task(tmp_path, "TASK-AR-901", "TASKSET-AR-QUALITY-LOOP", "in_progress")
+    state = ui_state.build_state(tmp_path, now="2026-06-13T11:00:00+09:00")
+    completion = state["taskset_completion"]
+    assert completion["schema"] == "agent-runtime-taskset-completion/v1"
+    assert completion["active"] is False
+
+
+def test_ui_state_taskset_completion_banner_and_next_suggestion(tmp_path):
+    # Completed taskset (all tasks done) plus a second taskset with open work.
+    _write_taskset_task(tmp_path, "TASK-AR-901", "TASKSET-AR-QUALITY-LOOP", "completed")
+    _write_taskset_task(tmp_path, "TASK-AR-911", "TASKSET-AR-UI-UX-V2", "planned")
+    _write(
+        tmp_path / "agents" / "runtime" / "pane_events" / "pane-events.jsonl",
+        json.dumps(
+            {
+                "schema": "agent-runtime-pane-event/v1",
+                "seq": 1,
+                "ts": "2026-06-13T10:30:00+09:00",
+                "event": "taskset.completed",
+                "actor": "le-1",
+                "task_set_id": "TASKSET-AR-QUALITY-LOOP",
+                "claim_id": "CLAIM-DONE",
+                "message": "Taskset TASKSET-AR-QUALITY-LOOP completed; stop and report.",
+            }
+        )
+        + "\n",
+    )
+
+    state = ui_state.build_state(tmp_path, now="2026-06-13T11:00:00+09:00")
+    completion = state["taskset_completion"]
+
+    assert completion["active"] is True
+    assert completion["completed_task_set_id"] == "TASKSET-AR-QUALITY-LOOP"
+    assert completion["policy"] == "stop_and_report"
+    assert "stop and report" in completion["message"]
+    nxt = completion["next_suggestion"]
+    assert nxt is not None
+    assert nxt["id"] == "TASKSET-AR-UI-UX-V2"
+    assert nxt["approval_state"] == "awaiting_approval"
+    assert nxt["start_command"]
+
+    payload = ui_state.build_resource(tmp_path, "taskset_completion", now="2026-06-13T11:00:00+09:00")
+    assert payload["resource"] == "taskset_completion"
+    assert payload["items"]["active"] is True

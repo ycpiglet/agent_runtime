@@ -898,3 +898,99 @@ def test_create_claim_rejects_invalid_progress_and_step_state(tmp_path: Path):
     assert "step_index must be between 1 and step_total" in bad_step.stderr
     assert bad_done.returncode == 1
     assert "completion phase requires step_index to equal step_total" in bad_done.stderr
+
+
+def test_create_claim_records_active_scope_boundary(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_worktree(tmp_path, "TASK-AR-328")
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        "TASK-AR-328",
+        "--task-set-id",
+        "TASKSET-AR-UI-UX-V2",
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-06-13T09:00:00+09:00",
+        "--suffix",
+        "sc1",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    claim = json.loads(result.stdout)["claim"]
+    # Active scope defaults to the task_set_id so the boundary guard has a
+    # recorded scope to enforce against.
+    assert claim["active_scope"] == "TASKSET-AR-UI-UX-V2"
+    assert claim["scope_transition_approved"] is False
+
+
+def test_release_with_taskset_completed_phase_emits_completion_event(tmp_path: Path):
+    payload = _create_release_candidate(tmp_path, task_id="TASK-AR-329", suffix="tc1")
+    claim = payload["claim"]
+    evidence_rel = _write_evidence(tmp_path)
+
+    # Mark the claim's scope + completion phase before release so the dispatcher
+    # emits the taskset.completed boundary signal.
+    claim_path = tmp_path / payload["path"]
+    saved = json.loads(claim_path.read_text(encoding="utf-8"))
+    saved["active_scope"] = "TASKSET-AR-UI-UX-V2"
+    saved["phase"] = "taskset-completed"
+    saved["progress_pct"] = 100
+    claim_path.write_text(json.dumps(saved), encoding="utf-8")
+
+    released = _run_dispatcher(
+        tmp_path,
+        "release",
+        "--claim-id",
+        claim["claim_id"],
+        "--verified-by",
+        "qa-20260613-101500-kst-w4b1",
+        "--verifier-role",
+        "qa-reviewer",
+        "--verification-evidence",
+        evidence_rel,
+        "--now",
+        "2026-06-13T10:15:00+09:00",
+        "--json",
+    )
+
+    assert released.returncode == 0, released.stderr or released.stdout
+    event_log = tmp_path / "agents" / "runtime" / "pane_events" / "pane-events.jsonl"
+    events = [json.loads(line) for line in event_log.read_text(encoding="utf-8").splitlines()]
+    completed = [event for event in events if event["event"] == "taskset.completed"]
+    assert completed, "expected a taskset.completed event to be emitted"
+    event = completed[-1]
+    assert event["task_set_id"] == "TASKSET-AR-UI-UX-V2"
+    assert event["claim_id"] == claim["claim_id"]
+    assert "stop and report" in event["message"]
+
+
+def test_release_without_completion_phase_emits_no_completion_event(tmp_path: Path):
+    payload = _create_release_candidate(tmp_path, task_id="TASK-AR-330", suffix="nc1")
+    claim = payload["claim"]
+    evidence_rel = _write_evidence(tmp_path)
+
+    released = _run_dispatcher(
+        tmp_path,
+        "release",
+        "--claim-id",
+        claim["claim_id"],
+        "--verified-by",
+        "qa-20260613-101500-kst-w4b1",
+        "--verifier-role",
+        "qa-reviewer",
+        "--verification-evidence",
+        evidence_rel,
+        "--now",
+        "2026-06-13T10:15:00+09:00",
+        "--json",
+    )
+
+    assert released.returncode == 0, released.stderr or released.stdout
+    event_log = tmp_path / "agents" / "runtime" / "pane_events" / "pane-events.jsonl"
+    events = [json.loads(line) for line in event_log.read_text(encoding="utf-8").splitlines()]
+    assert not [event for event in events if event["event"] == "taskset.completed"]

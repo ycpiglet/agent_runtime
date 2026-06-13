@@ -1620,6 +1620,43 @@ def test_ui_console_command_palette_and_keyboard_nav_handlers_present(tmp_path):
     assert "function activateListCursor" in js
 
 
+def test_ui_console_taskset_completion_banner_anchors_and_route(tmp_path):
+    # TASK-AR-328: completion banner + next-taskset suggestion on the Tasksets view.
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    # Banner host lives inside the tasksets view, hidden until a completion event.
+    assert 'id="taskset-completion-banner"' in html
+
+    for marker in [
+        "function renderTasksetCompletion",
+        "taskset_completion",
+        "next_suggestion",
+        "awaiting approval",
+        "stop &amp; report",
+    ]:
+        assert marker in js
+    # renderTasksetCompletion is wired into the render loop.
+    assert "renderTasksetCompletion();" in js
+
+    for selector in [
+        ".taskset-completion",
+        ".taskset-completion-head",
+        ".taskset-completion-badge",
+        ".taskset-completion-next",
+    ]:
+        assert selector in css
+
+    # API route serves the resource.
+    underscore = ui_console.build_response("/api/taskset_completion", tmp_path)
+    hyphen = ui_console.build_response("/api/taskset-completion", tmp_path)
+    assert underscore.status == 200
+    assert hyphen.status == 200
+    payload = json.loads(hyphen.body.decode("utf-8"))
+    assert payload["resource"] == "taskset_completion"
+
+
 def test_ui_console_list_app_js_node_check(tmp_path):
     # Guard: the generated app.js must remain syntactically valid JavaScript.
     import shutil

@@ -47,6 +47,7 @@ def main() -> int:
         ["scripts/work_schema_gate.py", "--items", "--check"],
         ["scripts/footprint_conflict_gate.py", "--check"],
         ["scripts/taskset_work_gate.py", "--check"],
+        ["scripts/taskset_boundary_gate.py", "--check"],
         ["scripts/evidence_index_generator.py", "--check"],
         ["scripts/verification_freshness_gate.py", "--check"],
         # intentionally omitted: scripts/context_knowledge_gate.py -- root-repo-specific
