@@ -2803,3 +2803,182 @@ def test_ui_state_office_map_in_meeting_agents_move_to_meeting_room(tmp_path):
     assert office["totals"]["in_meeting"] == 1
     meeting_room = next(room for room in office["rooms"] if room["id"] == "meeting")
     assert le["id"] in meeting_room["occupant_ids"]
+
+
+# --- Growth system: project Lv / business stage / XP (TASK-AR-363) ----------
+
+
+def _write_growth_event(root: Path, name: str, *, event_id: str, **fields) -> None:
+    record = {"ts": "2026-06-13T12:00:00+09:00", "role": "lead-engineer", "event": name}
+    record.update(fields)
+    _write(
+        root / "agents" / "runtime" / "events" / f"{event_id}.jsonl",
+        json.dumps(record) + "\n",
+    )
+
+
+def test_growth_xp_excludes_token_spend_token_heavy_no_completion_is_zero(tmp_path):
+    # A token-heavy event with NO completion/gate/test/review outcome must add 0
+    # XP. This is the anti-waste guardrail: tokens never contribute XP.
+    _write_growth_event(tmp_path, "agent_thinking", event_id="ev-tokens", tokens=999999)
+    growth = ui_state.build_state(tmp_path, now="2026-06-13T13:00:00+09:00")["growth"]
+
+    assert growth["project"]["cumulative_xp"] == 0
+    assert growth["xp_formula"]["token_spend_excluded"] is True
+    # No token weight exists in the formula at all.
+    assert "token" not in str(growth["xp_formula"]["weights"]).lower()
+    # The token spend IS captured -- but only in the separate efficiency stat.
+    assert growth["efficiency"]["token_total"] == 999999
+
+
+def test_growth_xp_awarded_for_completed_task_gate_test_review(tmp_path):
+    # Each outcome type contributes XP via its weight; the cumulative equals the
+    # published weighted sum.
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-950-done.md",
+        _task_text("TASK-AR-950", status="completed"),
+    )
+    _write_growth_event(tmp_path, "gate_passed", event_id="ev-gate")
+    _write_growth_event(tmp_path, "tests_added", event_id="ev-test", count=3)
+    _write(
+        tmp_path / "reviews" / "REVIEW-AR-950.md",
+        "---\nid: REVIEW-AR-950\ntitle: Review 950\ntype: review\n---\n\nBody.\n",
+    )
+    growth = ui_state.build_state(tmp_path, now="2026-06-13T13:00:00+09:00")["growth"]
+
+    counts = growth["xp_formula"]["counts"]
+    weights = growth["xp_formula"]["weights"]
+    assert counts["completed_tasks"] == 1
+    assert counts["gate_passes"] == 1
+    assert counts["test_growth"] == 3
+    assert counts["review_outputs"] == 1
+    expected = (
+        counts["completed_tasks"] * weights["completed_task"]
+        + counts["gate_passes"] * weights["gate_pass"]
+        + counts["test_growth"] * weights["test_growth"]
+        + counts["review_outputs"] * weights["review_output"]
+    )
+    assert growth["project"]["cumulative_xp"] == expected
+    assert expected > 0
+    assert growth["project"]["level"] >= 1
+
+
+def test_growth_efficiency_stats_computed_separately(tmp_path):
+    # tokens/task and rework rate are derived from completion + token/rework
+    # signals and live in the efficiency block, never in XP.
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-951-done.md",
+        _task_text("TASK-AR-951", status="completed"),
+    )
+    _write_growth_event(tmp_path, "agent_step", event_id="ev-tok", tokens=400)
+    _write_growth_event(tmp_path, "task_reopened", event_id="ev-rework")
+    growth = ui_state.build_state(tmp_path, now="2026-06-13T13:00:00+09:00")["growth"]
+
+    eff = growth["efficiency"]
+    assert eff["completed_tasks"] == 1
+    assert eff["token_total"] == 400
+    assert eff["tokens_per_task"] == 400
+    assert eff["rework_events"] == 1
+    assert eff["rework_rate_pct"] == 100.0
+    # Rework is NOT a penalty: it does not lower XP (XP comes only from outcomes).
+    assert growth["project"]["cumulative_xp"] == growth["xp_formula"]["weights"]["completed_task"]
+
+
+def test_growth_project_level_curve_and_business_stage_thresholds(tmp_path):
+    # Business stage is unlocked by milestone/release achievement, not XP/tokens.
+    # garage at 0 achievements.
+    empty = ui_state.build_growth(
+        [], [], [], [], {"teams": []}, {"summary": {}, "releases": []}, {"enabled": True}, "now"
+    )
+    assert empty["business_stage"]["key"] == "garage"
+    assert empty["project"]["level"] == 1
+
+    # 3 milestones done -> startup (threshold 3); next is scaleup.
+    roadmap_tl = {"summary": {"milestones_done": 3}, "releases": []}
+    startup = ui_state.build_growth([], [], [], [], {"teams": []}, roadmap_tl, {"enabled": True}, "now")
+    assert startup["business_stage"]["key"] == "startup"
+    assert startup["business_stage"]["next_key"] == "scaleup"
+
+    # 10 combined achievements -> unicorn (top stage, no next).
+    roadmap_tl2 = {
+        "summary": {"milestones_done": 6},
+        "releases": [{"status_bucket": "completed"} for _ in range(4)],
+    }
+    unicorn = ui_state.build_growth([], [], [], [], {"teams": []}, roadmap_tl2, {"enabled": True}, "now")
+    assert unicorn["business_stage"]["key"] == "unicorn"
+    assert unicorn["business_stage"]["next_key"] is None
+
+
+def test_growth_per_agent_xp_is_role_based_and_reuses_team_agents(tmp_path):
+    # Per-agent XP rows reuse the AR-324 team_agents computed XP (role-based);
+    # they are not recomputed here. Team XP roll-up prioritizes team achievement.
+    _write_instance(tmp_path, "inst-le-01", role="lead-engineer", team_id="agent-runtime-core")
+    _write_team_claim(tmp_path, "CLAIM-done", "inst-le-01", status="completed", task_id="TASK-AR-960")
+    state = ui_state.build_state(tmp_path, now="2026-06-13T13:00:00+09:00")
+    growth = state["growth"]
+    card = _team_agent_card(state, "inst-le-01")
+
+    agent_row = next(row for row in growth["agents"] if row["id"] == "inst-le-01")
+    assert agent_row["role"] == "lead-engineer"
+    assert agent_row["xp"] == card["xp"]
+    assert agent_row["level"] == card["level"]
+    team_row = next(row for row in growth["teams"] if row["team_id"] == "agent-runtime-core")
+    assert team_row["xp"] >= agent_row["xp"]
+
+
+def test_growth_has_no_streak_or_punishment_fields(tmp_path):
+    # GUARDRAIL: no streak/consecutive-day counter and no punishment/decay field
+    # may exist anywhere in the growth payload (recursively).
+    growth = ui_state.build_state(tmp_path, now="2026-06-13T13:00:00+09:00")["growth"]
+
+    banned = ("streak", "consecutive", "penalt", "punish", "decay", "demote", "lose")
+
+    def _scan(node, path=""):
+        if isinstance(node, dict):
+            for key, value in node.items():
+                lowered = str(key).lower()
+                # The "guardrails" manifest legitimately uses negative descriptor
+                # keys (no_streak_pressure, ...) to assert the mechanics are
+                # ABSENT; it is the only allowed mention. Skip it from the scan.
+                if path == "" and key == "guardrails":
+                    continue
+                assert not any(b in lowered for b in banned), f"banned field {path}.{key}"
+                _scan(value, f"{path}.{key}")
+        elif isinstance(node, list):
+            for index, value in enumerate(node):
+                _scan(value, f"{path}[{index}]")
+
+    _scan(growth)
+    assert growth["guardrails"]["no_streak_pressure"] is True
+    assert growth["guardrails"]["no_punishment_mechanic"] is True
+    assert growth["guardrails"]["monotonic_cumulative_xp"] is True
+
+
+def test_growth_global_toggle_self_contained_without_ar340_policy(tmp_path):
+    # With NO AR-340 policy file present, growth is self-contained and defaults
+    # to enabled; the policy roll-up reports present=False / source=default.
+    growth = ui_state.build_state(tmp_path, now="2026-06-13T13:00:00+09:00")["growth"]
+    assert growth["enabled"] is True
+    assert growth["policy"]["present"] is False
+    assert growth["policy"]["source"] == "default"
+    assert growth["guardrails"]["global_toggle"] is True
+
+
+def test_growth_global_toggle_honours_ar340_policy_when_present(tmp_path):
+    # When the AR-340 policy file lands and disables gamification, growth honours
+    # it (degrades to disabled) -- integration without a hard dependency.
+    _write(
+        tmp_path / "agents" / "project" / "ui" / "GAMIFICATION-POLICY.json",
+        json.dumps({"enabled": False}),
+    )
+    growth = ui_state.build_state(tmp_path, now="2026-06-13T13:00:00+09:00")["growth"]
+    assert growth["enabled"] is False
+    assert growth["policy"]["present"] is True
+    assert growth["policy"]["source"] == "policy"
+
+
+def test_growth_registered_as_resource_and_in_state(tmp_path):
+    assert "growth" in ui_state.RESOURCE_NAMES
+    resource = ui_state.build_resource(tmp_path, "growth", now="2026-06-13T13:00:00+09:00")
+    assert resource["resource"] == "growth"
+    assert resource["items"]["schema"] == "agent-runtime-growth/v1"
