@@ -228,7 +228,9 @@ def _audit_pointer(root: Path, board_text: str, findings: list[Finding]) -> None
     active_task = re.search(r"(?m)^\s*active_task:\s*[\"']?([A-Za-z0-9-]+)", text)
     if active_task:
         task_id = active_task.group(1)
-        if not (root / TASKS_DIR / f"{task_id}.md").exists():
+        # `none`/empty and other non-task-id sentinels mean "no active task";
+        # only a real TASK-* id should be resolved to a file on disk.
+        if task_id.startswith("TASK-") and not (root / TASKS_DIR / f"{task_id}.md").exists():
             findings.append(
                 Finding(
                     "watch",
