@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-13T22:31:42+09:00
-record_count: 444
+generated_at: 2026-06-13T23:47:35+09:00
+record_count: 447
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `444` review and evidence records under `reviews/`.
+- Summary: indexed `447` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `444` files |
+| Reviews covered | pass | `447` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -477,6 +477,9 @@ record_count: 444
 | `reviews/W4B-2026-06-13-TASK-AR-332.md` | `W4B-2026-06-13-TASK-AR-332` | verification | record | n/a | W4b Independent Verification — TASK-AR-332 (File Attachments) |
 | `reviews/W4B-2026-06-13-TASK-AR-333.md` | `W4B-2026-06-13-TASK-AR-333` | verification | record | n/a | W4b Independent Verification — TASK-AR-333 (Import/Export) |
 | `reviews/W4B-2026-06-13-TASK-AR-334.md` | `W4B-2026-06-13-TASK-AR-334` | verification | record | n/a | W4b Independent Verification — TASK-AR-334 (Global Search + Quick Open) |
+| `reviews/W4B-2026-06-13-TASK-AR-335.md` | `W4B-2026-06-13-TASK-AR-335` | verification | record | n/a | W4b Independent Verification — TASK-AR-335 (Calendar + Scheduled Dispatch) |
+| `reviews/W4B-2026-06-13-TASK-AR-336.md` | `W4B-2026-06-13-TASK-AR-336` | verification | record | n/a | W4b Independent Verification — TASK-AR-336 (State-Machine Viewer) |
+| `reviews/W4B-2026-06-13-TASK-AR-337.md` | `W4B-2026-06-13-TASK-AR-337` | verification | record | n/a | W4b Independent Verification — TASK-AR-337 (Team/Role Assignment + Workload Heatmap) |
 | `reviews/W4B-2026-06-13-TASK-AR-362.md` | `W4B-2026-06-13-TASK-AR-362` | verification | record | n/a | W4b Independent Verification — TASK-AR-362 (Board Peek + DnD + Quick Actions) |
 
 ## Risks / Blockers

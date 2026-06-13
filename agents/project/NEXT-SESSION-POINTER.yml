@@ -1,20 +1,20 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-13T22:12:00+09:00
+updated_at: 2026-06-13T23:42:00+09:00
 current_state:
-  summary: "UI console waves 1-6 complete (22/28): UI-UX-V2 done (12); UI-PLATFORM-EXTENSIONS AR-329/330/331 (wave-5) + AR-332 file attachments / AR-333 import-export / AR-334 global search (wave-6) merged via PRs #92-#115 with W4a+W4b dual verification. W4b caught real defects pre-merge (AR-327 HTTP-400, AR-329 template reader gap, AR-334 dead-code guard) all fixed. Claims released, worktrees/branches clean."
+  summary: "UI console waves 1-7 complete (21/28 UI tasks): UI-UX-V2 done (9/9); UI-PLATFORM-EXTENSIONS AR-329..337 done (9/13); UI-LIVING-CONSOLE AR-360/361/362 done (3/6). Wave-7 (AR-335 calendar/scheduled dispatch, AR-336 state-machine viewer, AR-337 team/role assignment heatmap) merged via PRs #117-#119 with W4a+W4b dual verification; claims released, worktrees/branches clean."
   status: ready
   task_set_status: in_progress
   task_set_id: "TASKSET-AR-UI-PLATFORM-EXTENSIONS"
   step_index: 4
   step_total: 5
-  progress_pct: 79
-  status_text: "Waves 1-6 done (22/28). Remaining UI backlog: UI-PLATFORM-EXTENSIONS 335-341 (7); UI-LIVING-CONSOLE 363/364/365 (3). Next waves dispatch from the V2 shell (theme tokens + sidebar groups + list toolbar + command path + gate chain + search/export/attachments)."
+  progress_pct: 75
+  status_text: "Waves 1-7 done (21/28). Remaining UI backlog: UI-PLATFORM-EXTENSIONS 338-341 (4); UI-LIVING-CONSOLE 363/364/365 (3). Next waves dispatch from the V2 shell."
 active_work:
   current_agents: []
   current_teams: []
 resume:
   active_task: none
-  active_task_set: TASKSET-AR-PARALLEL-WAVE-EXECUTION
+  active_task_set: TASKSET-AR-UI-PLATFORM-EXTENSIONS
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -22,7 +22,10 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260613-224455-task-ar-335-516a.json
+    - agents/runtime/task_claims/CLAIM-20260613-224455-task-ar-336-4220.json
+    - agents/runtime/task_claims/CLAIM-20260613-224456-task-ar-337-a262.json
   release_steward_completed_tasks:
     - agents/lead_engineer/tasks/TASK-AR-219.md
     - agents/lead_engineer/tasks/TASK-AR-222.md

@@ -9,8 +9,8 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-13
 task_count: 189
-open_count: 17
-completed_count: 172
+open_count: 14
+completed_count: 175
 task_set_count: 4
 completed_task_set_count: 24
 ---
@@ -18,11 +18,11 @@ completed_task_set_count: 24
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `17` open or active tasks; `172` completed tasks are archived from this live board.
+- Summary: `14` open or active tasks; `175` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `16` / Ask `0` / Review `0` / Later `1` / Done `172`.
+- Status: Action `13` / Ask `0` / Review `0` / Later `1` / Done `175`.
 - Task Sets: `4` active workflows; `24` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -45,15 +45,12 @@ completed_task_set_count: 24
 ### Platform Builder (`TASKSET-AR-UI-PLATFORM-EXTENSIONS`)
 
 - Flow: Taskset CRUD, dependencies/timeline, custom properties/automation, attachments, import/export, search, calendar, state-machine viewer, team workload, notifications, ops dashboard, gamification, and workspace extensibility.
-- Progress: `6/13` done; `7` open or active.
+- Progress: `9/13` done; `4` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-337` | - | - | - | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | task/taskset을 개인 에이전트가 아닌 팀/역할 단위로 배정하고, 에이전트·팀별 부하를 히트맵으로 보여준다 (Jira 컴포넌트 + Asana Wo… |
-| `TASK-AR-336` | - | - | - | planned | Action | P2 | Medium | Medium | 6h/5000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | `agents/project/STATE-MACHINES.yml`의 라이프사이클(task/claim/role)을 인터랙티브 그래프로 보여주고, 선택한 ta… |
 | `TASK-AR-338` | - | - | - | planned | Action | P2 | Medium | Medium | 8h/6000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 중요한 변화(blocked, 승인 대기, 마감 임박, 멘션)를 인앱 알림 인박스로 모으고, 채널에 멘션·핀·리액션을 더한다 (Slack + Linear… |
 | `TASK-AR-339` | - | - | - | planned | Action | P2 | Medium | Medium | 8h/6000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 운영 지표를 Grafana/Sentry형 대시보드로 상시 노출한다: 토큰/비용 추이, eval 점수, 게이트 pass/watch/block 보드, tas… |
-| `TASK-AR-335` | - | - | - | planned | Action | P2 | Medium | High | 10h/8000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 마일스톤/회의/완료 이력/예약 실행을 캘린더 뷰로 통합하고, taskset 디스패치를 예약·반복 실행할 수 있게 한다 (Notion Calendar/Mo… |
 | `TASK-AR-340` | - | - | - | planned | Action | P3 | Low | Medium | 8h/6000tok | Low | 4 | agent-runtime-core | lead-engineer | Execute next | 콘솔에 생동감을 더하는 애니메이션/이펙트와 RPG형 게임화 요소를 토글 가능한 폴리시 레이어로 추가한다 (기본은 차분한 진지 모드). |
 | `TASK-AR-341` | - | - | - | planned | Action | P3 | Low | High | 10h/8000tok | Low | 4 | agent-runtime-core | lead-engineer | Execute next | 멀티 호스트 프로젝트(agent_runtime, autofolio 등)를 Notion 워크스페이스처럼 전환하고, 대시보드 위젯 확장 포인트와 KR/EN… |
 
@@ -260,10 +257,13 @@ completed_task_set_count: 24
 | `TASK-AR-326` | `b7f20335-3e0…` | `TASKSET-AR-UI-UX-V2` | completed | 2026-06-11T18:39:01+09:00 | 2026-06-13T19:12:22+09:00 | 2026-06-13T19:30:00+09:00 | 2026-06-11T18:39:01+09:00 | 에이전트/업무/메시지가 온라인 RPG처럼 실시간으로 살아 움직이는 감각을 SSE 이벤트 스트림과 라이브 그래프로 구현한다. |
 | `TASK-AR-332` | `171785e6-b82…` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | 2026-06-11T18:56:35+09:00 | 2026-06-13T21:39:27+09:00 | 2026-06-13T22:00:00+09:00 | 2026-06-11T18:56:35+09:00 | 사진/문서를 task·메시지에 드래그드롭/붙여넣기로 첨부하고, 미리보기·다운로드할 수 있게 한다 (Notion/Slack/Jira 모델). |
 | `TASK-AR-334` | `6c29d210-c19…` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | 2026-06-11T18:56:35+09:00 | 2026-06-13T21:39:28+09:00 | 2026-06-13T22:10:00+09:00 | 2026-06-11T18:56:35+09:00 | task/taskset/메시지/이벤트/evidence/reviews 문서를 한 검색창에서 풀텍스트로 찾고 즉시 이동한다 (Notion 검색 + Slack… |
+| `TASK-AR-337` | `fa90ed9a-ed2…` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | 2026-06-11T18:56:35+09:00 | 2026-06-13T22:44:56+09:00 | 2026-06-13T23:40:00+09:00 | 2026-06-11T18:56:35+09:00 | task/taskset을 개인 에이전트가 아닌 팀/역할 단위로 배정하고, 에이전트·팀별 부하를 히트맵으로 보여준다 (Jira 컴포넌트 + Asana Wo… |
 | `TASK-AR-329` | `7e0540ad-8cc…` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | 2026-06-11T18:56:35+09:00 | 2026-06-13T20:08:18+09:00 | 2026-06-13T20:55:00+09:00 | 2026-06-11T18:56:35+09:00 | Owner가 UI에서 taskset을 직접 만들고, task를 넣고 빼고, 일괄 편집할 수 있게 한다 (Linear Projects / Notion DB… |
 | `TASK-AR-330` | `7bd76418-976…` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | 2026-06-11T18:56:35+09:00 | 2026-06-13T20:08:19+09:00 | 2026-06-13T21:00:00+09:00 | 2026-06-11T18:56:35+09:00 | task 계층(서브태스크)과 의존성(blocks/blocked-by)을 데이터 모델로 정식화하고 타임라인(Gantt)·의존 그래프로 시각화한다. |
 | `TASK-AR-333` | `53e47fbc-3a5…` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | 2026-06-11T18:56:35+09:00 | 2026-06-13T21:39:28+09:00 | 2026-06-13T22:05:00+09:00 | 2026-06-11T18:56:35+09:00 | taskset/보드/이벤트를 표준 포맷으로 내보내고, 외부 목록을 task로 일괄 가져올 수 있게 한다 (Notion/Jira 모델). |
+| `TASK-AR-336` | `8176e789-20e…` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | 2026-06-11T18:56:35+09:00 | 2026-06-13T22:44:55+09:00 | 2026-06-13T23:35:00+09:00 | 2026-06-11T18:56:35+09:00 | `agents/project/STATE-MACHINES.yml`의 라이프사이클(task/claim/role)을 인터랙티브 그래프로 보여주고, 선택한 ta… |
 | `TASK-AR-331` | `4e31081e-e14…` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | 2026-06-11T18:56:35+09:00 | 2026-06-13T20:08:19+09:00 | 2026-06-13T21:05:00+09:00 | 2026-06-11T18:56:35+09:00 | Notion형 커스텀 속성과 Monday/ClickUp형 "when X then Y" 자동화 규칙, Linear형 트리아지 큐를 제공한다. |
+| `TASK-AR-335` | `3908d50e-cd4…` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | 2026-06-11T18:56:35+09:00 | 2026-06-13T22:44:55+09:00 | 2026-06-13T23:30:00+09:00 | 2026-06-11T18:56:35+09:00 | 마일스톤/회의/완료 이력/예약 실행을 캘린더 뷰로 통합하고, taskset 디스패치를 예약·반복 실행할 수 있게 한다 (Notion Calendar/Mo… |
 | `TASK-AR-360` | `762e5eb1-726…` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | 2026-06-11T19:48:00+09:00 | 2026-06-13T16:29:50+09:00 | 2026-06-13T16:50:00+09:00 | 2026-06-13T16:50:00+09:00 | 기각/보류 아이디어를 폐기하지 않고 보존·재발굴하는 체계를 RSI 운영 원칙으로 정착시킨다 (Owner 통찰: 진화 시 과거를 잊지 않고 주기적으로 재평… |
 | `TASK-AR-361` | `f078b413-65d…` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | 2026-06-11T19:48:00+09:00 | 2026-06-13T16:29:50+09:00 | 2026-06-13T16:50:00+09:00 | 2026-06-13T16:50:00+09:00 | 사이드탭의 회의실 공간에 에이전트를 마우스로 끌어다 넣고, 주제/태스크를 선택하면 참여 에이전트들이 의견을 주고받는 회의를 실행한다. |
 | `TASK-AR-362` | `c8740b62-ba0…` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | 2026-06-11T19:48:00+09:00 | 2026-06-13T17:19:48+09:00 | 2026-06-13T18:20:00+09:00 | 2026-06-11T19:48:00+09:00 | hover 미리보기와 드래그앤드롭을 콘솔 전역의 1급 상호작용 동사로 표준화한다 (Notion peek + Discord 접근성 DnD 패턴). |
