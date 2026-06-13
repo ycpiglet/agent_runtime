@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-13T12:29:18+09:00
+generated_at: 2026-06-13T13:17:35+09:00
 record_count: 229
 ---
 
@@ -160,7 +160,7 @@ record_count: 229
 | 0.15.7 | Task 0.15.7 | task | `TASK-AR-284` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | `agents/lead_engineer/tasks/TASK-AR-284.md` | Close the active UI design implementation task set only after focused checks, Owner g… |
 | 0.16 | Taskset 0.16 | taskset | `TASKSET-AR-REPO-HYGIENE` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Repo Custodian |
 | 0.16.1 | Task 0.16.1 | task | `TASK-AR-233` | `TASKSET-AR-REPO-HYGIENE` | completed | `agents/lead_engineer/tasks/TASK-AR-233.md` | Clean the current working tree through an intentional commit and push, then keep back… |
-| 0.16.2 | Task 0.16.2 | task | `TASK-AR-511` | `TASKSET-AR-REPO-HYGIENE` | planned | `agents/lead_engineer/tasks/TASK-AR-511.md` | 서로 다른 OS/LLM/페인에서 작업한 파일이 줄바꿈·인코딩 차이로 가짜 diff와 경고를 만드는 것을 차단한다. 현재 `.gitattributes`가… |
+| 0.16.2 | Task 0.16.2 | task | `TASK-AR-511` | `TASKSET-AR-REPO-HYGIENE` | completed | `agents/lead_engineer/tasks/TASK-AR-511.md` | 서로 다른 OS/LLM/페인에서 작업한 파일이 줄바꿈·인코딩 차이로 가짜 diff와 경고를 만드는 것을 차단한다. 현재 `.gitattributes`가… |
 | 0.16.3 | Task 0.16.3 | task | `TASK-AR-512` | `TASKSET-AR-REPO-HYGIENE` | completed | `agents/lead_engineer/tasks/TASK-AR-512.md` | 형상관리 산출물(branch/worktree/stash/PR/issue/claim)의 "지저분함"을 사람이 인지하기 전에 주기 점검 루프가 감지·보고·정… |
 | 0.16.4 | Task 0.16.4 | task | `TASK-AR-520` | `TASKSET-AR-REPO-HYGIENE` | planned | `agents/lead_engineer/tasks/TASK-AR-520.md` | taskset_work_gate judges BACKLOG-BOARD.md stale within minutes because the generator… |
 | 0.16.5 | Task 0.16.5 | task | `TASK-AR-521` | `TASKSET-AR-REPO-HYGIENE` | planned | `agents/lead_engineer/tasks/TASK-AR-521.md` | Template owner_governance_gate.py is missing evidence_index_generator/context_knowled… |

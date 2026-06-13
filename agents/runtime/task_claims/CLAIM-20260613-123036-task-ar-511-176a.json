@@ -9,7 +9,7 @@
   "callsite_id": "claude-w7-ar511",
   "pane_id": "claude-w7-ar511",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-REPO-HYGIENE",
   "project_id": "",
   "unit_id": "",
@@ -17,20 +17,20 @@
   "model_tier": "",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "implementing",
-  "progress_pct": 0,
+  "phase": "complete",
+  "progress_pct": 100,
   "step_index": 1,
   "step_total": 6,
   "status_text": "AR-511: .gitattributes line-ending + encoding normalization",
   "worktree_path": ".worktrees/TASK-AR-511",
   "branch": "claude/task-ar-511-gitattributes",
   "claimed_at": "2026-06-13T12:30:36+09:00",
-  "last_heartbeat": "2026-06-13T12:30:36+09:00",
-  "updated_at": "2026-06-13T12:30:36+09:00",
+  "last_heartbeat": "2026-06-13T13:15:14+09:00",
+  "updated_at": "2026-06-13T13:15:14+09:00",
   "expires_at": "2026-06-13T13:00:36+09:00",
   "lease": {
     "claimed_at": "2026-06-13T12:30:36+09:00",
-    "heartbeat_at": "2026-06-13T12:30:36+09:00",
+    "heartbeat_at": "2026-06-13T13:15:14+09:00",
     "expires_at": "2026-06-13T13:00:36+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260613-123036-task-ar-511-176a.handoff.md",
@@ -40,5 +40,9 @@
   "target_files": [
     ".gitattributes",
     "src/agent_runtime/templates/project/.gitattributes"
-  ]
+  ],
+  "released_at": "2026-06-13T13:15:14+09:00",
+  "verified_by": "inst-w4b-ar511-orchestrator",
+  "verifier_role": "reviewer",
+  "verification_evidence": "agents/runtime/task_claims/CLAIM-20260613-123036-task-ar-511-176a.handoff.md"
 }

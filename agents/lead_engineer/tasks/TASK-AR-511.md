@@ -4,9 +4,11 @@ display_id: TASK-AR-511
 task_uid: bf47ce08-f7a8-44e9-8590-14bc9eeabbcf
 registered_at: 2026-06-12T23:15:32+09:00
 created_at: 2026-06-12T23:15:32+09:00
-updated_at: 2026-06-12T23:15:32+09:00
+updated_at: 2026-06-13T13:20:00+09:00
+started_at: 2026-06-13T12:30:36+09:00
+completed_at: 2026-06-13T13:20:00+09:00
 title: Cross-environment normalization — .gitattributes line-ending and encoding policy
-status: planned
+status: completed
 priority: P1
 difficulty: S
 est_hours: 3
@@ -73,3 +75,15 @@ tags:
 - `.gitattributes` + 템플릿 미러
 - 재정규화 커밋 + 경고 0 실증
 - closeout review record
+
+## Completion Evidence
+
+- PR #79 (70bb549): .gitattributes (root + template mirror) with text=auto eol=lf default, .cmd/.bat/.ps1 CRLF, binary guards; content-rewrite zero.
+
+## Verification Results
+
+- git add probe -> zero CRLF warning
+- check-attr README.md text:auto eol:lf; .cmd eol:crlf (LF blob)
+- owner_governance_gate -> exit 0
+- pytest tests -q -> 712 passed
+- W4b -> APPROVE

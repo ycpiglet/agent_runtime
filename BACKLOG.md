@@ -1,5 +1,12 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-06-13 500-Series Parallel Execution COMPLETE
+
+- All 19 implementation tasks (`TASK-AR-500`..`522`) merged to main with W4a worker self-verification + W4b independent verification (distinct instances) via PRs #45-#79. Claims released, worktrees/branches/stash clean, plan anchors T3 re-recorded (findings=0).
+- New live infrastructure: footprint conflict gate, wave dispatcher, merge queue, claim-first + worktree-lifecycle + cross-verification gates, W0-W6 lifecycle defaults, attribution + verification-freshness gates, work stats/views, Work Explorer, in-flight overlay, scm-steward, release cadence/update-notify, .gitattributes normalization, board-freshness fix, template chain parity.
+- Final closeout: `reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md`.
+- Deferred residuals (registered, not dropped): case-fold instance-id hardening (AR-507/518), backlog_board.py LF output.
+
 ## 2026-06-13 Parallel Wave 1-2 Closeout + Follow-up Registration
 
 - Completed and merged with W4a/W4b dual verification: `TASK-AR-500`(footprint 디스패처 배선, PR #45) `TASK-AR-503`(claim-first 강제, PR #50) `TASK-AR-505`(워크트리 수명주기 게이트, PR #46) `TASK-AR-509`(update-notify, PR #47) `TASK-AR-510`(릴리스 케이던스 트리거, PR #51) `TASK-AR-513`(in-flight 오버레이, PR #48) `TASK-AR-515`(메타데이터 카탈로그 확장, PR #49).
