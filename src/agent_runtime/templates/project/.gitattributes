@@ -1,0 +1,43 @@
+# Cross-environment line-ending and encoding policy (TASK-AR-511)
+#
+# Goal: text files are stored normalized as LF in the repository so that files
+# authored on different OS / panes / LLM workers do not generate phantom diffs
+# or "LF will be replaced by CRLF" warnings. This removes the dependency on the
+# per-user `core.autocrlf` setting.
+#
+# Semantics reminder: for a `text` file git stores the blob as LF; the `eol`
+# attribute only controls what the WORKING TREE receives on checkout.
+
+# Default: let git auto-detect text vs binary, and normalize all text to LF
+# (both in the repo blob and in the working tree). This single rule covers
+# .py / .md / .json / .jsonl / .yml / .toml / extensionless POSIX hooks, etc.
+* text=auto eol=lf
+
+# --- Windows scripts that REQUIRE CRLF in the working tree to execute ---
+# Batch / command files are run by cmd.exe and must have CRLF line endings.
+# (The repo blob is still stored as LF; checkout converts to CRLF on disk.)
+*.cmd text eol=crlf
+*.bat text eol=crlf
+# PowerShell scripts are conventionally CRLF on Windows.
+*.ps1 text eol=crlf
+
+# --- Binary types: never normalize or diff as text ---
+# None are tracked today, but these guard against future additions being
+# corrupted by line-ending normalization.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.pdf   binary
+*.zip   binary
+*.gz    binary
+*.tar   binary
+*.whl   binary
+*.so    binary
+*.dll   binary
+*.exe   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary
