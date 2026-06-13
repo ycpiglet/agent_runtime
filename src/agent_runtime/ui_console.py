@@ -110,6 +110,9 @@ HTML = """<!doctype html>
           <button class="sidebar-link" type="button" role="tab" data-view="timeline" data-route="work/timeline" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9776;</span><span class="sidebar-label">Timeline</span>
           </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="calendar" data-route="work/calendar" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9993;</span><span class="sidebar-label">Calendar</span>
+          </button>
           <button class="sidebar-link" type="button" role="tab" data-view="deps" data-route="work/dependencies" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Dependencies</span>
           </button>
@@ -441,6 +444,50 @@ HTML = """<!doctype html>
             </header>
             <p id="timeline-cycle-warning" class="dep-cycle-warning" role="alert" hidden></p>
             <div id="timeline-grid" class="timeline-grid" aria-label="Taskset bars by lane"></div>
+          </section>
+        </div>
+        <div id="view-calendar" class="view">
+          <section class="calendar" aria-label="Calendar and scheduling">
+            <header class="calendar-header">
+              <h2>Calendar</h2>
+              <div class="calendar-nav" role="group" aria-label="Calendar navigation">
+                <button id="calendar-prev" class="calendar-nav-btn" type="button" aria-label="Previous period">&#8592;</button>
+                <span id="calendar-period" class="calendar-period" role="status" aria-live="polite"></span>
+                <button id="calendar-next" class="calendar-nav-btn" type="button" aria-label="Next period">&#8594;</button>
+                <button id="calendar-today" class="calendar-nav-btn" type="button">Today</button>
+                <span class="calendar-view-toggle" role="group" aria-label="Calendar view mode">
+                  <button id="calendar-view-month" class="calendar-mode is-active" type="button" aria-pressed="true">Month</button>
+                  <button id="calendar-view-week" class="calendar-mode" type="button" aria-pressed="false">Week</button>
+                </span>
+              </div>
+            </header>
+            <p id="calendar-summary" class="calendar-summary" role="status" aria-live="polite"></p>
+            <div id="calendar-reminders" class="calendar-reminders" aria-label="Due-soon and overdue reminders"></div>
+            <ul class="calendar-legend" aria-label="Calendar legend">
+              <li><span class="calendar-dot calendar-dot-milestone" aria-hidden="true"></span>Milestone</li>
+              <li><span class="calendar-dot calendar-dot-meeting" aria-hidden="true"></span>Meeting/Seminar</li>
+              <li><span class="calendar-dot calendar-dot-completion" aria-hidden="true"></span>Completion</li>
+              <li><span class="calendar-dot calendar-dot-deadline" aria-hidden="true"></span>Deadline</li>
+              <li><span class="calendar-dot calendar-dot-scheduled" aria-hidden="true"></span>Scheduled dispatch</li>
+            </ul>
+            <div id="calendar-grid" class="calendar-grid" role="grid" aria-label="Calendar grid"></div>
+            <section class="calendar-schedule-panel" aria-label="Scheduled dispatches">
+              <h3>Scheduled dispatches</h3>
+              <p class="calendar-hint">Reserve a one-time or repeating (cron-like) taskset dispatch. This records a proposal only &mdash; a local scheduler dispatches when due. The console never runs the dispatcher.</p>
+              <form id="schedule-form" class="config-form" aria-label="Reserve a scheduled dispatch">
+                <input id="schedule-name" name="name" placeholder="Schedule name" required>
+                <input id="schedule-taskset" name="taskset_id" placeholder="taskset id (e.g. TASKSET-AR-...)" required>
+                <select id="schedule-mode" name="mode" aria-label="Schedule mode">
+                  <option value="reserve">Reserve (once)</option>
+                  <option value="repeat">Repeat (cron)</option>
+                </select>
+                <input id="schedule-runat" name="run_at" placeholder="run at (YYYY-MM-DDTHH:MM)">
+                <input id="schedule-cron" name="cron" placeholder="cron: min hour dom mon dow (e.g. 0 9 * * 1)" hidden>
+                <button type="submit">Reserve</button>
+              </form>
+              <p id="schedule-summary" class="config-summary" role="status" aria-live="polite"></p>
+              <div id="schedule-list" class="config-grid" aria-label="Scheduled dispatches"></div>
+            </section>
           </section>
         </div>
         <div id="view-deps" class="view">
@@ -3163,6 +3210,102 @@ pre {
   font-weight: 600;
 }
 .rule-flow-arrow { color: var(--muted); }
+/* Calendar / scheduling (TASK-AR-335). All colors are theme tokens. */
+.calendar-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.calendar-header h2 { margin: 0; font-size: 16px; color: var(--ink); }
+.calendar-nav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.calendar-period { font-weight: 600; color: var(--ink); min-width: 140px; text-align: center; }
+.calendar-nav-btn, .calendar-mode {
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line-strong);
+  background: var(--raise);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.calendar-nav-btn:hover, .calendar-mode:hover { background: var(--raise-strong); }
+.calendar-mode.is-active { background: var(--primary-soft); color: var(--primary-hover); border-color: var(--primary-line); }
+.calendar-view-toggle { display: inline-flex; gap: 4px; }
+.calendar-summary { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
+.calendar-summary strong { color: var(--ink); }
+.calendar-reminders { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.calendar-reminder {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--warning-line);
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+.calendar-reminder.is-overdue { border-color: var(--danger-line); background: var(--danger-soft); color: var(--danger); }
+.calendar-reminder strong { color: var(--ink); }
+.calendar-reminder-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.calendar-legend { display: flex; flex-wrap: wrap; gap: 8px 16px; list-style: none; padding: 0; margin: 0 0 12px; font-size: 12px; color: var(--muted); }
+.calendar-legend li { display: flex; align-items: center; gap: 6px; }
+.calendar-dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; background: var(--muted); }
+.calendar-dot-milestone { background: var(--violet); }
+.calendar-dot-meeting { background: var(--primary); }
+.calendar-dot-completion { background: var(--success); }
+.calendar-dot-deadline { background: var(--warning); }
+.calendar-dot-scheduled { background: var(--teal); }
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-grad);
+  padding: 6px;
+}
+.calendar-weekday { font-size: 11px; font-weight: 600; color: var(--muted); text-align: center; padding: 4px 0; text-transform: uppercase; }
+.calendar-cell {
+  min-height: 84px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--tile);
+  padding: 4px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow: hidden;
+}
+.calendar-cell.is-outside { background: var(--inset-soft); color: var(--subtle); }
+.calendar-cell.is-today { border-color: var(--primary-line); box-shadow: var(--focus); }
+.calendar-cell-date { font-size: 12px; font-weight: 600; color: var(--ink); }
+.calendar-cell.is-outside .calendar-cell-date { color: var(--subtle); }
+.calendar-event {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--raise);
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.calendar-event-milestone { border-color: var(--violet); background: var(--violet-soft); }
+.calendar-event-meeting,
+.calendar-event-seminar { border-color: var(--primary-line); background: var(--primary-soft); }
+.calendar-event-completion { border-color: var(--success-line); background: var(--success-soft); }
+.calendar-event-deadline { border-color: var(--warning-line); background: var(--warning-soft); }
+.calendar-event-scheduled { border-color: var(--teal-line); background: var(--teal-soft); }
+.calendar-event.is-overdue { border-color: var(--danger-line); background: var(--danger-soft); color: var(--danger); }
+.calendar-schedule-panel { margin-top: 18px; }
+.calendar-schedule-panel h3 { margin: 0 0 4px; font-size: 14px; color: var(--ink); }
+.calendar-hint { color: var(--muted); font-size: 12px; margin: 0 0 12px; }
+.calendar-cron-badge { font-family: monospace; font-size: 11px; color: var(--teal); }
 .triage-summary { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
 .triage-summary strong { color: var(--ink); }
 .triage-toolbar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
@@ -4023,6 +4166,9 @@ let peekTimer = null;
 let peekAnchorId = null;
 let boardDragId = null;
 let boardLifted = null;
+// TASK-AR-335: calendar view state (anchor day + month/week mode).
+let calendarAnchor = null;
+let calendarMode = "month";
 
 const $ = (id) => document.getElementById(id);
 const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -6539,6 +6685,173 @@ function renderTriage() {
   `).join("") : `<div class="empty">Triage inbox is clear</div>`;
 }
 
+// ----- Calendar / scheduling (TASK-AR-335) -----
+const CALENDAR_WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const CALENDAR_MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+function calendarToday() {
+  const data = (runtimeState && runtimeState.calendar) || {};
+  if (data.today) {
+    const parts = String(data.today).split("-");
+    if (parts.length === 3) return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+  }
+  return new Date();
+}
+
+function calendarDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function calendarAnchorDate() {
+  if (!calendarAnchor) calendarAnchor = calendarToday();
+  return calendarAnchor;
+}
+
+function calendarShift(days, months) {
+  const base = calendarAnchorDate();
+  calendarAnchor = new Date(base.getFullYear(), base.getMonth() + (months || 0), base.getDate() + (days || 0));
+  renderCalendar();
+}
+
+function calendarVisibleDays() {
+  const anchor = calendarAnchorDate();
+  const days = [];
+  if (calendarMode === "week") {
+    const start = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() - anchor.getDay());
+    for (let i = 0; i < 7; i += 1) {
+      const date = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+      days.push({ date, outside: false });
+    }
+    return days;
+  }
+  const first = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+  const gridStart = new Date(first.getFullYear(), first.getMonth(), 1 - first.getDay());
+  for (let i = 0; i < 42; i += 1) {
+    const date = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + i);
+    days.push({ date, outside: date.getMonth() !== anchor.getMonth() });
+  }
+  return days;
+}
+
+function calendarPeriodLabel() {
+  const anchor = calendarAnchorDate();
+  if (calendarMode === "week") {
+    const start = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() - anchor.getDay());
+    const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
+    return `${calendarDateKey(start)} - ${calendarDateKey(end)}`;
+  }
+  return `${CALENDAR_MONTHS[anchor.getMonth()]} ${anchor.getFullYear()}`;
+}
+
+function renderCalendar() {
+  const grid = $("calendar-grid");
+  if (!grid) return;
+  const data = (runtimeState && runtimeState.calendar) || { by_date: {}, reminders: [], totals: {} };
+  const byDate = data.by_date || {};
+  const totals = data.totals || {};
+  const todayKey = data.today || calendarDateKey(new Date());
+
+  const period = $("calendar-period");
+  if (period) period.textContent = calendarPeriodLabel();
+  const modeMonth = $("calendar-view-month");
+  const modeWeek = $("calendar-view-week");
+  if (modeMonth) { modeMonth.classList.toggle("is-active", calendarMode === "month"); modeMonth.setAttribute("aria-pressed", calendarMode === "month" ? "true" : "false"); }
+  if (modeWeek) { modeWeek.classList.toggle("is-active", calendarMode === "week"); modeWeek.setAttribute("aria-pressed", calendarMode === "week" ? "true" : "false"); }
+
+  const summary = $("calendar-summary");
+  if (summary) {
+    const byKind = totals.by_kind || {};
+    summary.innerHTML = `<strong>${escapeHtml(totals.events || 0)}</strong> events`
+      + ` &middot; milestones <strong>${escapeHtml(byKind.milestone || 0)}</strong>`
+      + ` &middot; meetings <strong>${escapeHtml((byKind.meeting || 0) + (byKind.seminar || 0))}</strong>`
+      + ` &middot; completions <strong>${escapeHtml(byKind.completion || 0)}</strong>`
+      + ` &middot; scheduled <strong>${escapeHtml(byKind.scheduled || 0)}</strong>`
+      + ` &middot; reminders <strong>${escapeHtml(totals.reminders || 0)}</strong>`;
+  }
+
+  const reminderHost = $("calendar-reminders");
+  if (reminderHost) {
+    const reminders = data.reminders || [];
+    reminderHost.innerHTML = reminders.length ? reminders.map((item) => {
+      const overdue = item.severity === "overdue";
+      const label = overdue ? "overdue" : "due soon";
+      return `<div class="calendar-reminder ${overdue ? "is-overdue" : ""}">
+        <span class="calendar-reminder-badge">${escapeHtml(label)}</span>
+        <span><strong>${escapeHtml(item.title || item.entity_id || "")}</strong> ${item.date ? "&middot; " + escapeHtml(item.date) : ""} (${escapeHtml(item.calendar_kind || "")})</span>
+      </div>`;
+    }).join("") : "";
+  }
+
+  const days = calendarVisibleDays();
+  const header = CALENDAR_WEEKDAYS.map((name) => `<div class="calendar-weekday" role="columnheader">${escapeHtml(name)}</div>`).join("");
+  const cells = days.map(({ date, outside }) => {
+    const key = calendarDateKey(date);
+    const events = byDate[key] || [];
+    const isToday = key === todayKey;
+    const eventHtml = events.map((event) => {
+      const overdue = event.reminder === "overdue";
+      const kindClass = `calendar-event-${(event.kind || "").replace(/[^a-z]/g, "")}`;
+      return `<span class="calendar-event ${kindClass} ${overdue ? "is-overdue" : ""}" title="${escapeHtml(event.title || "")}" data-entity-id="${escapeHtml(event.id || "")}">${escapeHtml(event.title || "")}</span>`;
+    }).join("");
+    return `<div class="calendar-cell ${outside ? "is-outside" : ""} ${isToday ? "is-today" : ""}" role="gridcell">
+      <span class="calendar-cell-date">${escapeHtml(date.getDate())}</span>
+      ${eventHtml}
+    </div>`;
+  }).join("");
+  grid.innerHTML = header + cells;
+}
+
+function renderSchedules() {
+  const host = $("schedule-list");
+  if (!host) return;
+  const data = (runtimeState && runtimeState.schedules) || { schedules: [], totals: {} };
+  const totals = data.totals || {};
+  const summary = $("schedule-summary");
+  if (summary) {
+    summary.innerHTML = `<strong>${escapeHtml(totals.schedules || 0)}</strong> schedules`
+      + ` &middot; active <strong>${escapeHtml(totals.active || 0)}</strong>`
+      + ` &middot; reserve <strong>${escapeHtml(totals.reserve || 0)}</strong>`
+      + ` &middot; repeat <strong>${escapeHtml(totals.repeat || 0)}</strong>`
+      + ` &middot; proposal-only (local scheduler dispatches)`;
+  }
+  const schedules = data.schedules || [];
+  host.innerHTML = schedules.length ? schedules.map((schedule) => {
+    const invalid = (schedule.invalid || []).length > 0;
+    const stateClass = invalid ? "is-invalid" : (schedule.active ? "is-active" : "is-inactive");
+    const stateLabel = invalid ? "invalid" : (schedule.active ? "active" : "inactive");
+    const cadence = schedule.mode === "repeat"
+      ? `<span class="calendar-cron-badge">${escapeHtml(schedule.cron || "?")}</span>`
+      : `<span>${escapeHtml(schedule.run_at || "?")}</span>`;
+    return `
+    <article class="config-card">
+      <div class="config-card-header">
+        <b>${escapeHtml(schedule.name || schedule.id)}</b>
+        <span class="rule-state ${stateClass}">${escapeHtml(stateLabel)}</span>
+      </div>
+      <div class="rule-flow">
+        <span class="rule-token">${escapeHtml(schedule.mode || "?")}</span>
+        <span class="rule-flow-arrow" aria-hidden="true">&#8594;</span>
+        ${cadence}
+      </div>
+      <div class="config-card-meta">
+        <span>Taskset <strong>${escapeHtml(schedule.taskset_id || "?")}</strong></span>
+        <span>Id <strong>${escapeHtml(schedule.id)}</strong></span>
+        ${invalid ? `<span>Issue <strong>${escapeHtml((schedule.invalid || []).join("; "))}</strong></span>` : ""}
+      </div>
+      <div class="config-card-actions">
+        <button class="config-action" type="button" onclick="cancelSchedule('${escapeHtml(schedule.id)}')">Cancel</button>
+      </div>
+    </article>`;
+  }).join("") : `<div class="empty">No scheduled dispatches</div>`;
+}
+
+function cancelSchedule(scheduleId) {
+  return sendJson("/api/commands", { type: "schedule.cancel", payload: { type: "schedule.cancel", target: scheduleId, payload: { actor: "ui" } } });
+}
+
 function renderAutomation() {
   const host = $("automation-list");
   if (!host) return;
@@ -7570,6 +7883,8 @@ function renderAll() {
   renderSources();
   renderCommands();
   renderTriage();
+  renderCalendar();
+  renderSchedules();
   renderAutomation();
   renderProperties();
   renderLabels();
@@ -8107,6 +8422,32 @@ $("label-form")?.addEventListener("submit", async (event) => {
   $("label-description").value = "";
 });
 
+// ----- Calendar / scheduling listeners (TASK-AR-335) -----
+$("calendar-prev")?.addEventListener("click", () => calendarShift(calendarMode === "week" ? -7 : 0, calendarMode === "week" ? 0 : -1));
+$("calendar-next")?.addEventListener("click", () => calendarShift(calendarMode === "week" ? 7 : 0, calendarMode === "week" ? 0 : 1));
+$("calendar-today")?.addEventListener("click", () => { calendarAnchor = calendarToday(); renderCalendar(); });
+$("calendar-view-month")?.addEventListener("click", () => { calendarMode = "month"; renderCalendar(); });
+$("calendar-view-week")?.addEventListener("click", () => { calendarMode = "week"; renderCalendar(); });
+$("schedule-mode")?.addEventListener("change", (event) => {
+  const repeat = event.target.value === "repeat";
+  const runAt = $("schedule-runat");
+  const cron = $("schedule-cron");
+  if (runAt) runAt.hidden = repeat;
+  if (cron) cron.hidden = !repeat;
+});
+$("schedule-form")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const mode = $("schedule-mode").value;
+  const payload = { actor: "ui", name: $("schedule-name").value, taskset_id: $("schedule-taskset").value, mode };
+  if (mode === "repeat") payload.cron = ($("schedule-cron").value || "").trim();
+  else payload.run_at = ($("schedule-runat").value || "").trim();
+  await sendJson("/api/commands", { type: "schedule.create", payload: { type: "schedule.create", payload } });
+  $("schedule-name").value = "";
+  $("schedule-taskset").value = "";
+  $("schedule-runat").value = "";
+  $("schedule-cron").value = "";
+});
+
 // ----- Import/Export (TASK-AR-333) -----
 // Import is preview-first: parse + duplicate-check server-side, render an
 // advisory preview, then commit creates task.create proposals only.
@@ -8487,6 +8828,8 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/automation-rules": "automation_rules",
         "/api/triage": "triage",
         "/api/reviews": "reviews",
+        "/api/schedules": "schedules",
+        "/api/calendar": "calendar",
         "/api/search_index": "search_index",
         "/api/search-index": "search_index",
         "/api/commands": "commands",

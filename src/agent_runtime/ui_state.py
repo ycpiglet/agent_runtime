@@ -51,6 +51,8 @@ RESOURCE_NAMES = (
     "automation_rules",
     "triage",
     "reviews",
+    "schedules",
+    "calendar",
     "search_index",
     "commands",
 )
@@ -3477,6 +3479,15 @@ CUSTOM_PROPERTIES_SCHEMA = "agent-runtime-custom-properties/v1"
 LABELS_SCHEMA = "agent-runtime-labels/v1"
 AUTOMATION_RULES_SCHEMA = "agent-runtime-automation-rules/v1"
 TRIAGE_SCHEMA = "agent-runtime-triage/v1"
+# TASK-AR-335: calendar/scheduling.
+SCHEDULES_SCHEMA = "agent-runtime-schedules/v1"
+CALENDAR_SCHEMA = "agent-runtime-calendar/v1"
+SCHEDULES_GLOB = "agents/project/schedules/*.json"
+SCHEDULE_DISPATCH_EVENT_GLOB = "agents/runtime/events/scheduled_dispatch.jsonl"
+SCHEDULE_MODES = ("reserve", "repeat")
+# Reminder horizons (days). A schedule/milestone/task with a due date within
+# DUE_SOON_DAYS is "due_soon"; once the date is in the past it is "overdue".
+CALENDAR_DUE_SOON_DAYS = 3
 
 CUSTOM_PROPERTIES_REL = "agents/project/ui/custom-properties.json"
 LABELS_REL = "agents/project/ui/labels.json"
@@ -3953,6 +3964,309 @@ def build_triage(
 
 
 # ---------------------------------------------------------------------------
+# Calendar / scheduling (TASK-AR-335)
+# ---------------------------------------------------------------------------
+
+
+def _date_key(value: Any) -> str | None:
+    """Normalize a timestamp/date string to a ``YYYY-MM-DD`` day key, or None."""
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    match = re.match(r"\d{4}-\d{2}-\d{2}", raw)
+    return match.group(0) if match else None
+
+
+def _reminder_status(date_key: str | None, now: str) -> str | None:
+    """Classify a due date against ``now`` as overdue / due_soon / upcoming.
+
+    Returns None when there is no parseable date. Day-granular: comparison uses
+    the calendar day so a same-day deadline reads as due_soon (0 days), and any
+    earlier day reads as overdue.
+    """
+    if not date_key:
+        return None
+    today = _date_key(now) or datetime.now(timezone.utc).date().isoformat()
+    try:
+        due = datetime.strptime(date_key, "%Y-%m-%d").date()
+        today_date = datetime.strptime(today, "%Y-%m-%d").date()
+    except ValueError:
+        return None
+    delta_days = (due - today_date).days
+    if delta_days < 0:
+        return "overdue"
+    if delta_days <= CALENDAR_DUE_SOON_DAYS:
+        return "due_soon"
+    return "upcoming"
+
+
+def load_schedules(root: Path, now: str, warnings: list[dict[str, str]]) -> dict[str, Any]:
+    """Load declarative scheduled-dispatch records (one JSON file per schedule).
+
+    Read-only: the records are authored proposal-only from the Calendar view and
+    applied by a runtime executor to ``agents/project/schedules/*.json``. The
+    LOCAL ``scripts/scheduled_dispatch_gate.py`` is the only point that dispatches
+    when due; this loader merely surfaces the schedules for the calendar.
+    """
+    schedules: list[dict[str, Any]] = []
+    for path in sorted(root.glob(SCHEDULES_GLOB)):
+        rel_path = _rel(root, path)
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            warnings.append(_warning("schedule-parse-error", rel_path, str(exc)))
+            continue
+        except OSError as exc:
+            warnings.append(_warning("schedule-read-error", rel_path, str(exc)))
+            continue
+        if not isinstance(payload, dict):
+            warnings.append(_warning("schedule-invalid-record", rel_path, "schedule payload is not an object"))
+            continue
+        mode = str(payload.get("mode") or "").strip().lower()
+        invalid: list[str] = []
+        if mode not in SCHEDULE_MODES:
+            invalid.append(f"unknown mode: {mode!r}")
+        run_at = payload.get("run_at")
+        cron = payload.get("cron")
+        if mode == "reserve" and not run_at:
+            invalid.append("reserve schedule missing run_at")
+        if mode == "repeat" and not cron:
+            invalid.append("repeat schedule missing cron expression")
+        schedules.append(
+            {
+                "id": str(payload.get("id") or path.stem),
+                "name": str(payload.get("name") or payload.get("id") or path.stem),
+                "taskset_id": str(payload.get("taskset_id") or payload.get("task_set_id") or ""),
+                "mode": mode,
+                "run_at": run_at,
+                "cron": cron,
+                "cron_fields": payload.get("cron_fields") if isinstance(payload.get("cron_fields"), dict) else None,
+                "note": str(payload.get("note") or ""),
+                "active": bool(payload.get("active", True)),
+                "invalid": invalid,
+                "created_at": payload.get("created_at"),
+                "source_path": rel_path,
+                "source_kind": "schedule_json",
+                "source": _source_metadata(root, path, "schedule_json", now),
+                "last_updated": _mtime_iso(path),
+                "freshness": "present",
+            }
+        )
+    active = [item for item in schedules if item["active"] and not item["invalid"]]
+    return {
+        "schema": SCHEDULES_SCHEMA,
+        "generated_at": now,
+        "source_glob": SCHEDULES_GLOB,
+        "modes": list(SCHEDULE_MODES),
+        "schedules": schedules,
+        "totals": {
+            "schedules": len(schedules),
+            "active": len(active),
+            "reserve": sum(1 for item in schedules if item["mode"] == "reserve"),
+            "repeat": sum(1 for item in schedules if item["mode"] == "repeat"),
+            "invalid": sum(1 for item in schedules if item["invalid"]),
+        },
+    }
+
+
+def _calendar_event(
+    *,
+    kind: str,
+    date_key: str | None,
+    title: str,
+    entity_id: str,
+    now: str,
+    source_path: Any = None,
+    extra: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    event = {
+        "kind": kind,
+        "date": date_key,
+        "title": title,
+        "id": entity_id,
+        "reminder": _reminder_status(date_key, now),
+        "source_path": source_path,
+    }
+    if extra:
+        event.update(extra)
+    return event
+
+
+def build_calendar(
+    tasks: list[dict[str, Any]],
+    roadmap: dict[str, Any],
+    reviews: list[dict[str, Any]],
+    taskset_completion: dict[str, Any],
+    schedules: dict[str, Any],
+    now: str,
+) -> dict[str, Any]:
+    """Aggregate a month/week calendar from read-only state + scheduled items.
+
+    Sources (all read-only derivations except schedules, which are authored
+    proposal-only and surfaced here):
+
+    - ``milestone`` deadlines from the roadmap,
+    - ``meeting``/``seminar`` records from ``reviews/`` (by date),
+    - ``completion`` history from completed tasks (``completed_at``),
+    - ``deadline`` markers from open tasks with a ``due`` date,
+    - ``scheduled`` dispatch items (reserve run_at / repeat cron preview).
+
+    Also emits due-soon/overdue ``reminders`` (records/events for the future
+    notification center TASK-AR-338; this task only PUBLISHES them).
+    """
+    events: list[dict[str, Any]] = []
+    reminders: list[dict[str, Any]] = []
+    done_statuses = _TRIAGE_DONE_STATUSES
+
+    # Milestones (roadmap deadlines).
+    for index, milestone in enumerate(roadmap.get("milestones", []) or []):
+        date_key = _date_key(milestone.get("date"))
+        title = str(milestone.get("title") or "milestone")
+        done = bool(milestone.get("done"))
+        event = _calendar_event(
+            kind="milestone",
+            date_key=date_key,
+            title=title,
+            entity_id=f"milestone-{index + 1}",
+            now=now,
+            source_path=roadmap.get("source_path"),
+            extra={"done": done},
+        )
+        events.append(event)
+        if not done and event["reminder"] in {"due_soon", "overdue"}:
+            reminders.append(_reminder_record("milestone", event, now))
+
+    # Meetings / seminars (review records by date).
+    for review in reviews:
+        review_type = str(review.get("type") or "review").strip().lower()
+        if review_type not in {"meeting", "seminar"}:
+            continue
+        date_key = _date_key(review.get("created_at"))
+        events.append(
+            _calendar_event(
+                kind=review_type,
+                date_key=date_key,
+                title=str(review.get("title") or review.get("id")),
+                entity_id=str(review.get("id")),
+                now=now,
+                source_path=review.get("source_path"),
+            )
+        )
+
+    # Task completion history + open-task deadlines.
+    for task in tasks:
+        status = str(task.get("status") or "").strip().lower()
+        completed_at = task.get("completed_at") or (task.get("metadata") or {}).get("completed_at")
+        completed_key = _date_key(completed_at)
+        if completed_key and (status in done_statuses or completed_at):
+            events.append(
+                _calendar_event(
+                    kind="completion",
+                    date_key=completed_key,
+                    title=str(task.get("title") or task.get("id")),
+                    entity_id=str(task.get("id")),
+                    now=now,
+                    source_path=task.get("source_path"),
+                    extra={"status": status},
+                )
+            )
+        due_key = _date_key(task.get("due"))
+        if due_key and status not in done_statuses:
+            event = _calendar_event(
+                kind="deadline",
+                date_key=due_key,
+                title=str(task.get("title") or task.get("id")),
+                entity_id=str(task.get("id")),
+                now=now,
+                source_path=task.get("source_path"),
+                extra={"status": status, "priority": task.get("priority")},
+            )
+            events.append(event)
+            if event["reminder"] in {"due_soon", "overdue"}:
+                reminders.append(_reminder_record("task", event, now))
+
+    # Scheduled dispatches (reserve = dated; repeat = cron preview, no fixed day).
+    for schedule in schedules.get("schedules", []) or []:
+        if not schedule.get("active") or schedule.get("invalid"):
+            continue
+        if schedule.get("mode") == "reserve":
+            date_key = _date_key(schedule.get("run_at"))
+        else:
+            date_key = None  # recurring: rendered as a cron badge, not a fixed cell
+        events.append(
+            _calendar_event(
+                kind="scheduled",
+                date_key=date_key,
+                title=str(schedule.get("name") or schedule.get("id")),
+                entity_id=str(schedule.get("id")),
+                now=now,
+                source_path=schedule.get("source_path"),
+                extra={
+                    "mode": schedule.get("mode"),
+                    "taskset_id": schedule.get("taskset_id"),
+                    "cron": schedule.get("cron"),
+                    "run_at": schedule.get("run_at"),
+                },
+            )
+        )
+
+    # Index events by day for month/week grids.
+    by_date: dict[str, list[dict[str, Any]]] = {}
+    for event in events:
+        key = event.get("date")
+        if not key:
+            continue
+        by_date.setdefault(key, []).append(event)
+
+    kind_counts: dict[str, int] = {}
+    for event in events:
+        kind_counts[event["kind"]] = kind_counts.get(event["kind"], 0) + 1
+
+    reminders.sort(key=lambda item: (item.get("severity") != "overdue", str(item.get("date") or "")))
+    return {
+        "schema": CALENDAR_SCHEMA,
+        "generated_at": now,
+        "today": _date_key(now),
+        "due_soon_days": CALENDAR_DUE_SOON_DAYS,
+        "events": events,
+        "by_date": by_date,
+        "reminders": reminders,
+        "totals": {
+            "events": len(events),
+            "dated": sum(1 for event in events if event.get("date")),
+            "undated": sum(1 for event in events if not event.get("date")),
+            "reminders": len(reminders),
+            "due_soon": sum(1 for item in reminders if item["severity"] == "due_soon"),
+            "overdue": sum(1 for item in reminders if item["severity"] == "overdue"),
+            "by_kind": kind_counts,
+        },
+    }
+
+
+def _reminder_record(entity_kind: str, event: dict[str, Any], now: str) -> dict[str, Any]:
+    """Build a due-soon/overdue reminder record for the notification center.
+
+    These are PUBLISHED here (TASK-AR-335); TASK-AR-338 will consume them. The
+    record is event-shaped so a future executor can append it to a runtime event
+    log without reshaping.
+    """
+    severity = "overdue" if event.get("reminder") == "overdue" else "due_soon"
+    return {
+        "id": f"reminder:{entity_kind}:{event.get('id')}",
+        "event": "calendar_reminder",
+        "severity": severity,
+        "entity_kind": entity_kind,
+        "calendar_kind": event.get("kind"),
+        "entity_id": event.get("id"),
+        "title": event.get("title"),
+        "date": event.get("date"),
+        "source_path": event.get("source_path"),
+        "generated_at": now,
+        "consumer": "TASK-AR-338 notification-center (pending)",
+    }
+
+
+# ---------------------------------------------------------------------------
 # Global search + quick open (TASK-AR-334)
 # ---------------------------------------------------------------------------
 
@@ -4248,6 +4562,11 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     automation_rules = load_automation_rules(root_path, generated_at, warnings)
     triage = build_triage(tasks, generated_at)
     reviews = load_reviews(root_path, generated_at, warnings)
+    # Calendar / scheduling (TASK-AR-335): schedules are declarative records;
+    # the calendar aggregates read-only milestones/meetings/completions/deadlines
+    # plus scheduled dispatches and publishes due-soon/overdue reminders.
+    schedules = load_schedules(root_path, generated_at, warnings)
+    calendar = build_calendar(tasks, roadmap, reviews, taskset_completion, schedules, generated_at)
     state: dict[str, Any] = {
         "generated_at": generated_at,
         "sources": sources,
@@ -4284,6 +4603,8 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "automation_rules": automation_rules,
         "triage": triage,
         "reviews": reviews,
+        "schedules": schedules,
+        "calendar": calendar,
         "commands": commands,
         "gaps": gaps,
         "warnings": warnings,
