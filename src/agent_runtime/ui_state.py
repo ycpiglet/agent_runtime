@@ -42,6 +42,7 @@ RESOURCE_NAMES = (
     "replay",
     "graph",
     "live_map",
+    "office_map",
     "dependency_graph",
     "timeline",
     "state_machines",
@@ -3701,6 +3702,266 @@ def build_team_agents(
     }
 
 
+# --- 2D Office Map (TASK-AR-364) -------------------------------------------
+# Place agents on a company-like 2D map so org activity reads at a glance
+# (Smallville / Generative Agents pattern, arXiv 2304.03442). This derivation
+# is READ-ONLY: it computes a world -> areas tree (one room per team function)
+# plus a per-agent position + action snapshot, all from the already-derived
+# team_agents presence cards and the runtime event log. Nothing here mutates
+# stored state and no pathfinding is performed -- agents teleport to the room
+# their role (or live meeting) maps to.
+#
+# Emoji glyphs are served from THIS (Python) side only. The console JS guard
+# requires app.js to stay ASCII (cp949 node-check), so the front-end renders the
+# glyph from the ``glyph`` field on each agent / the ACTION glyph table here and
+# never inlines a non-ASCII literal of its own.
+OFFICE_MAP_SCHEMA = "agent-runtime-office-map/v1"
+OFFICE_MAP_WORLD_ID = "headquarters"
+OFFICE_MAP_WORLD_NAME = "Agent Runtime HQ"
+
+# Action -> wordless emoji glyph. The four canonical actions in the task spec are
+# working / recording / reviewing / idle; ``meeting`` is an additional state for
+# agents pulled into a live meeting. Glyphs are unicode literals kept on the
+# Python side so the served JS stays ASCII.
+OFFICE_ACTION_GLYPHS: dict[str, str] = {
+    "working": "\U0001F4BB",    # laptop computer
+    "recording": "\U0001F4DD",  # memo
+    "reviewing": "\U0001F50D",  # magnifying glass
+    "meeting": "\U0001F465",    # busts in silhouette
+    "idle": "\U0001F4A4",       # zzz / sleep
+}
+OFFICE_ACTION_LABELS: dict[str, str] = {
+    "working": "working",
+    "recording": "recording",
+    "reviewing": "reviewing",
+    "meeting": "in meeting",
+    "idle": "idle",
+}
+
+# Static rooms (areas) of the office. Each room is a function/team space with a
+# grid rectangle (col/row spans on an OFFICE_MAP_COLS x OFFICE_MAP_ROWS lattice)
+# and a semantic color token (defined in BOTH console theme blocks). ``role_kinds``
+# are substring markers matched against a normalized role to assign a room.
+OFFICE_MAP_COLS = 12
+OFFICE_MAP_ROWS = 8
+OFFICE_ROOMS: tuple[dict[str, Any], ...] = (
+    {
+        "id": "planning",
+        "name": "Planning Room",
+        "token": "violet",
+        "rect": {"col": 0, "row": 0, "cols": 6, "rows": 4},
+        "role_markers": (
+            "plan", "roadmap", "task-architect", "prioritization",
+            "ceo", "owner", "secretary", "product",
+        ),
+    },
+    {
+        "id": "dev",
+        "name": "Dev Room",
+        "token": "blue",
+        "rect": {"col": 6, "row": 0, "cols": 6, "rows": 4},
+        "role_markers": (
+            "lead-engineer", "engineer", "backend", "frontend",
+            "ci-cd", "worktree", "dispatcher", "dev",
+        ),
+    },
+    {
+        "id": "qa",
+        "name": "QA Room",
+        "token": "amber",
+        "rect": {"col": 0, "row": 4, "cols": 4, "rows": 4},
+        "role_markers": ("qa", "audit", "compatibility", "test", "quality"),
+    },
+    {
+        "id": "release",
+        "name": "Release Room",
+        "token": "success",
+        "rect": {"col": 8, "row": 4, "cols": 4, "rows": 4},
+        "role_markers": (
+            "version", "release", "evidence", "doc-steward",
+            "scribe", "librarian", "governor", "deploy",
+        ),
+    },
+    {
+        "id": "meeting",
+        "name": "Meeting Room",
+        "token": "primary",
+        "rect": {"col": 4, "row": 4, "cols": 4, "rows": 4},
+        # The meeting room is reached by live state (in-meeting agents), not by a
+        # role mapping; it is the fallback room for any unmatched role too.
+        "role_markers": (),
+    },
+)
+OFFICE_DEFAULT_ROOM_ID = "meeting"
+
+
+def _office_room_for_role(role: str) -> str:
+    """Map a normalized role to a room id by substring markers (fallback room)."""
+    normalized = _normalize_role(role)
+    if not normalized:
+        return OFFICE_DEFAULT_ROOM_ID
+    for room in OFFICE_ROOMS:
+        for marker in room["role_markers"]:
+            if marker in normalized:
+                return room["id"]
+    return OFFICE_DEFAULT_ROOM_ID
+
+
+# Event-name (substring, lowercased) -> office action. Used to upgrade an
+# otherwise "working" agent to "recording" when its most recent runtime activity
+# was a write/record/log/note style event (the memo glyph). Order is irrelevant;
+# any marker match flips the action to recording.
+_OFFICE_RECORDING_EVENT_MARKERS = (
+    "record", "write", "wrote", "log", "note", "memo",
+    "evidence", "report", "scribe", "document", "minutes",
+)
+
+
+def _office_action_for_card(card: dict[str, Any], activity: dict[str, Any] | None) -> str:
+    """Derive the wordless action for an agent presence card.
+
+    Presence is the primary signal (working / reviewing / in_meeting), with an
+    upgrade to ``recording`` when the agent's most recent event looks like a
+    write/log/record. Anything else (online without a claim, offline) reads as
+    ``idle``.
+    """
+    presence = str(card.get("presence") or "offline").strip().lower()
+    if presence == "in_meeting":
+        return "meeting"
+    if presence == "reviewing":
+        return "reviewing"
+    if presence == "working":
+        event_name = str((activity or {}).get("event") or "").lower()
+        if any(marker in event_name for marker in _OFFICE_RECORDING_EVENT_MARKERS):
+            return "recording"
+        return "working"
+    # online (session up but no active claim) or offline both read as idle.
+    return "idle"
+
+
+def build_office_map(
+    team_agents: dict[str, Any],
+    events: list[dict[str, Any]],
+    now: str,
+) -> dict[str, Any]:
+    """Derive the 2D office map: world -> areas tree + per-agent placement.
+
+    Read-only. Agents are placed in the room their role maps to, EXCEPT agents
+    in a live meeting (presence ``in_meeting``) who are relocated to the meeting
+    room (TASK-AR-361 integration). Each agent carries an (x, y) cell within its
+    room, a wordless action, and the emoji glyph for that action (served from the
+    Python side so app.js stays ASCII). Degrades to an empty-but-well-formed map
+    when there are no agents.
+    """
+    # Most-recent event per role (for the recording-action upgrade).
+    activity_by_role: dict[str, dict[str, Any]] = {}
+    for event in events or []:
+        role = _normalize_role(event.get("role") or event.get("actor") or "")
+        if not role:
+            continue
+        ts = str(event.get("created_at") or event.get("ts") or "")
+        existing = activity_by_role.get(role)
+        if existing is None or ts > str(existing.get("ts") or ""):
+            activity_by_role[role] = {
+                "event": event.get("event") or event.get("type") or "",
+                "task_id": event.get("task_id") or "",
+                "ts": ts,
+            }
+
+    # Flatten the team_agents cards into placement-ready agent records.
+    agents_out: list[dict[str, Any]] = []
+    for team in team_agents.get("teams", []) or []:
+        team_id = str(team.get("team_id") or team.get("id") or "")
+        for card in team.get("agents", []) or []:
+            role = str(card.get("role") or "").strip()
+            if not role:
+                continue
+            activity = activity_by_role.get(_normalize_role(role))
+            action = _office_action_for_card(card, activity)
+            # Meeting integration: an in-meeting agent always sits in the meeting
+            # room regardless of its role's home room.
+            room_id = "meeting" if action == "meeting" else _office_room_for_role(role)
+            agents_out.append(
+                {
+                    "id": card.get("id"),
+                    "role": role,
+                    "callsign": card.get("callsign") or role,
+                    "display_name": card.get("display_name") or card.get("callsign") or role,
+                    "avatar": card.get("avatar") or "AG",
+                    "team_id": team_id,
+                    "presence": card.get("presence") or "offline",
+                    "online": bool(card.get("online")),
+                    "current_task_id": card.get("current_task_id"),
+                    "room_id": room_id,
+                    "action": action,
+                    "action_label": OFFICE_ACTION_LABELS.get(action, action),
+                    "glyph": OFFICE_ACTION_GLYPHS.get(action, OFFICE_ACTION_GLYPHS["idle"]),
+                }
+            )
+
+    # Stable ordering so the layout is identical across refreshes.
+    agents_out.sort(key=lambda a: (str(a.get("room_id")), str(a.get("role")), str(a.get("id"))))
+
+    # Assign a deterministic cell (x, y) to each agent inside its room. Agents in
+    # the same room are laid out left-to-right, top-to-bottom on a small grid so
+    # they never overlap; coordinates are normalized 0..1 within the room rect.
+    by_room: dict[str, list[dict[str, Any]]] = {}
+    for agent in agents_out:
+        by_room.setdefault(str(agent["room_id"]), []).append(agent)
+
+    rooms_out: list[dict[str, Any]] = []
+    action_counts: dict[str, int] = {}
+    for room in OFFICE_ROOMS:
+        occupants = by_room.get(room["id"], [])
+        count = len(occupants)
+        # Pack occupants into a near-square sub-grid within the room.
+        per_row = max(1, int(count ** 0.5 + 0.999)) if count else 1
+        for index, agent in enumerate(occupants):
+            col = index % per_row
+            row = index // per_row
+            rows_used = max(1, (count + per_row - 1) // per_row)
+            # Normalized cell center within the room (0..1), padded from edges.
+            fx = (col + 0.5) / per_row
+            fy = (row + 0.5) / rows_used
+            agent["cell"] = {"fx": round(fx, 4), "fy": round(fy, 4)}
+            agent["room_name"] = room["name"]
+            action_counts[agent["action"]] = action_counts.get(agent["action"], 0) + 1
+        rooms_out.append(
+            {
+                "id": room["id"],
+                "name": room["name"],
+                "token": room["token"],
+                "rect": dict(room["rect"]),
+                "occupant_count": count,
+                "occupant_ids": [str(a.get("id")) for a in occupants],
+            }
+        )
+
+    world = {
+        "id": OFFICE_MAP_WORLD_ID,
+        "name": OFFICE_MAP_WORLD_NAME,
+        "cols": OFFICE_MAP_COLS,
+        "rows": OFFICE_MAP_ROWS,
+        "areas": [room["id"] for room in OFFICE_ROOMS],
+    }
+
+    return {
+        "schema": OFFICE_MAP_SCHEMA,
+        "generated_at": now,
+        "world": world,
+        "rooms": rooms_out,
+        "agents": agents_out,
+        "action_glyphs": dict(OFFICE_ACTION_GLYPHS),
+        "action_labels": dict(OFFICE_ACTION_LABELS),
+        "totals": {
+            "agents": len(agents_out),
+            "rooms": len(rooms_out),
+            "actions": dict(sorted(action_counts.items())),
+            "in_meeting": sum(1 for a in agents_out if a["action"] == "meeting"),
+        },
+    }
+
+
 # --- Workload heatmap (TASK-AR-337) ----------------------------------------
 # A per-agent and per-team load grid (assignee/team x period) derived from the
 # resolved task assignments. Each open task contributes one "load unit" to its
@@ -6042,6 +6303,10 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     teams["taskset_defaults"] = taskset_team_defaults
     workload = build_workload_heatmap(tasks, teams, taskset_team_defaults, generated_at)
     live_map = build_live_map(tasks, agents, messages, team_agents, generated_at)
+    # 2D office map (TASK-AR-364): world->areas tree + per-agent placement,
+    # derived from the team_agents presence cards (+ events for the recording
+    # action). In-meeting agents are relocated to the meeting room.
+    office_map = build_office_map(team_agents, events, generated_at)
     dependency_graph = build_dependency_graph(tasks, generated_at)
     timeline = build_timeline(tasks, generated_at)
     # Custom properties / labels / automation rules / triage (TASK-AR-331).
@@ -6093,6 +6358,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "replay": replay,
         "graph": graph,
         "live_map": live_map,
+        "office_map": office_map,
         "dependency_graph": dependency_graph,
         "timeline": timeline,
         "state_machines": state_machines,

@@ -2686,3 +2686,120 @@ def test_extract_mentions_dedupes_and_lowercases():
     assert ui_state.extract_mentions("no mentions here") == []
     # An email-like token must not be treated as a mention.
     assert ui_state.extract_mentions("mail me at a@b.com") == []
+
+
+# ----- TASK-AR-364: 2D office map -----
+
+
+def test_ui_state_office_map_resource_shape_and_safe_degrade(tmp_path):
+    # Empty root -> well-formed map with the static rooms but no agents.
+    payload = ui_state.build_resource(tmp_path, "office_map", now="2026-06-14T11:00:00+09:00")
+    assert payload["resource"] == "office_map"
+    office = payload["items"]
+    assert office["schema"] == "agent-runtime-office-map/v1"
+    assert set(office.keys()) >= {
+        "schema", "generated_at", "world", "rooms", "agents", "action_glyphs", "totals"
+    }
+    # World -> areas tree exposes one room per team function (planning/dev/qa/
+    # release/meeting) even when no agents exist.
+    assert office["world"]["areas"] == ["planning", "dev", "qa", "release", "meeting"]
+    assert {room["id"] for room in office["rooms"]} == {
+        "planning", "dev", "qa", "release", "meeting"
+    }
+    assert office["agents"] == []
+    assert office["totals"]["agents"] == 0
+    assert all(room["occupant_count"] == 0 for room in office["rooms"])
+
+
+def test_ui_state_office_map_action_glyph_table_covers_required_actions(tmp_path):
+    office = ui_state.build_resource(tmp_path, "office_map", now="2026-06-14T11:00:00+09:00")["items"]
+    glyphs = office["action_glyphs"]
+    # The four wordless actions from the task spec each map to a distinct emoji.
+    assert glyphs["working"] == "\U0001F4BB"     # computer
+    assert glyphs["recording"] == "\U0001F4DD"   # memo
+    assert glyphs["reviewing"] == "\U0001F50D"   # magnifier
+    assert glyphs["idle"] == "\U0001F4A4"        # sleep
+    assert len({glyphs["working"], glyphs["recording"], glyphs["reviewing"], glyphs["idle"]}) == 4
+
+
+def test_ui_state_office_map_places_agents_by_role_room(tmp_path):
+    # Each role lands in its functional room; coordinates are normalized cells.
+    _write_instance(tmp_path, "inst-le", role="lead-engineer", team_id="agent-runtime-core")
+    _write_instance(tmp_path, "inst-qa", role="qa", team_id="agent-runtime-core")
+    _write_instance(tmp_path, "inst-pl", role="planning-coordinator", team_id="planning-office")
+    _write_instance(tmp_path, "inst-ver", role="version-steward", team_id="release-integrity")
+    _write_team_claim(tmp_path, "CLAIM-le", "inst-le", status="in_progress", task_id="TASK-AR-910")
+
+    state = ui_state.build_state(tmp_path, now="2026-06-14T11:00:00+09:00")
+    office = state["office_map"]
+    by_role = {agent["role"]: agent for agent in office["agents"]}
+
+    assert by_role["lead-engineer"]["room_id"] == "dev"
+    assert by_role["qa"]["room_id"] == "qa"
+    assert by_role["planning-coordinator"]["room_id"] == "planning"
+    assert by_role["version-steward"]["room_id"] == "release"
+
+    # Working agent (active claim) gets the working action + computer glyph.
+    le = by_role["lead-engineer"]
+    assert le["action"] == "working"
+    assert le["glyph"] == "\U0001F4BB"
+    # Offline agent (no claim) reads as idle.
+    assert by_role["qa"]["action"] == "idle"
+    assert by_role["qa"]["glyph"] == "\U0001F4A4"
+
+    # Every placed agent carries a normalized in-room cell.
+    for agent in office["agents"]:
+        assert 0.0 <= agent["cell"]["fx"] <= 1.0
+        assert 0.0 <= agent["cell"]["fy"] <= 1.0
+
+
+def test_ui_state_office_map_reviewing_action_from_presence(tmp_path):
+    # A claim in review -> reviewing presence -> reviewing action + magnifier.
+    _write_instance(tmp_path, "inst-le", role="lead-engineer")
+    _write_team_claim(tmp_path, "CLAIM-rev", "inst-le", status="review", task_id="TASK-AR-920")
+
+    office = ui_state.build_state(tmp_path, now="2026-06-14T11:00:00+09:00")["office_map"]
+    le = next(agent for agent in office["agents"] if agent["role"] == "lead-engineer")
+    assert le["action"] == "reviewing"
+    assert le["glyph"] == "\U0001F50D"
+
+
+def test_ui_state_office_map_recording_action_from_recent_write_event(tmp_path):
+    # A working agent whose most recent event looks like a write/record/log is
+    # upgraded to the recording action (memo glyph).
+    _write_instance(tmp_path, "inst-le", role="lead-engineer")
+    _write_team_claim(tmp_path, "CLAIM-work", "inst-le", status="in_progress", task_id="TASK-AR-930")
+    _write(
+        tmp_path / "agents" / "runtime" / "events" / "lead-engineer-2026-06-14.jsonl",
+        json.dumps(
+            {
+                "ts": "2026-06-14T10:59:00+09:00",
+                "role": "lead-engineer",
+                "event": "evidence_recorded",
+                "task_id": "TASK-AR-930",
+            }
+        )
+        + "\n",
+    )
+
+    office = ui_state.build_state(tmp_path, now="2026-06-14T11:00:00+09:00")["office_map"]
+    le = next(agent for agent in office["agents"] if agent["role"] == "lead-engineer")
+    assert le["action"] == "recording"
+    assert le["glyph"] == "\U0001F4DD"
+
+
+def test_ui_state_office_map_in_meeting_agents_move_to_meeting_room(tmp_path):
+    # TASK-AR-361 integration: a claim with mode=meeting relocates the agent to
+    # the meeting room regardless of its role's home room (dev).
+    _write_instance(tmp_path, "inst-le", role="lead-engineer", team_id="agent-runtime-core")
+    _write_team_claim(
+        tmp_path, "CLAIM-meet", "inst-le", status="in_progress", task_id="TASK-AR-940", mode="meeting"
+    )
+
+    office = ui_state.build_state(tmp_path, now="2026-06-14T11:00:00+09:00")["office_map"]
+    le = next(agent for agent in office["agents"] if agent["role"] == "lead-engineer")
+    assert le["action"] == "meeting"
+    assert le["room_id"] == "meeting"
+    assert office["totals"]["in_meeting"] == 1
+    meeting_room = next(room for room in office["rooms"] if room["id"] == "meeting")
+    assert le["id"] in meeting_room["occupant_ids"]
