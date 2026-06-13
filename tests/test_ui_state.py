@@ -1591,3 +1591,137 @@ def test_ui_state_channels_empty_repo_is_well_formed(tmp_path):
     # Even with no messages, #general + #governance exist and the payload is sane.
     assert {"general", "governance"} <= by_id
     assert channels["message_count"] == 0
+
+
+# ----- TASK-AR-330: subtask + dependency model, timeline, dependency graph -----
+
+def _dep_task(
+    task_id: str,
+    *,
+    status: str = "planned",
+    parent_id: str | None = None,
+    blocks: list[str] | None = None,
+    blocked_by: list[str] | None = None,
+) -> str:
+    lines = ["---", f"id: {task_id}", f"status: {status}", "owner: lead-engineer"]
+    if parent_id:
+        lines.append(f"parent_id: {parent_id}")
+    if blocks:
+        lines.append("blocks:")
+        lines.extend(f"  - {dep}" for dep in blocks)
+    if blocked_by:
+        lines.append("blocked_by:")
+        lines.extend(f"  - {dep}" for dep in blocked_by)
+    lines += ["---", "", "## Goal", "", f"Work {task_id}.", ""]
+    return "\n".join(lines)
+
+
+def test_ui_state_load_tasks_parses_parent_blocks_and_blocked_by(tmp_path):
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-900.md",
+        _dep_task("TASK-AR-900", parent_id="TASKSET-AR-DEP", blocks=["TASK-AR-901"]),
+    )
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md",
+        _dep_task("TASK-AR-901", parent_id="TASKSET-AR-DEP", blocked_by=["TASK-AR-900"]),
+    )
+    tasks = {t["id"]: t for t in ui_state.build_resource(tmp_path, "tasks", now="2026-06-13T00:00:00+09:00")["items"]}
+    assert tasks["TASK-AR-900"]["parent_id"] == "TASKSET-AR-DEP"
+    assert tasks["TASK-AR-900"]["blocks"] == ["TASK-AR-901"]
+    assert tasks["TASK-AR-901"]["blocked_by"] == ["TASK-AR-900"]
+    # Empty/missing keys degrade to empty lists, not None.
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-902.md",
+        _dep_task("TASK-AR-902"),
+    )
+    bare = next(
+        t for t in ui_state.build_resource(tmp_path, "tasks", now="2026-06-13T00:00:00+09:00")["items"]
+        if t["id"] == "TASK-AR-902"
+    )
+    assert bare["blocks"] == [] and bare["blocked_by"] == [] and bare["parent_id"] == ""
+
+
+def test_ui_state_dependency_graph_derives_consistent_edges(tmp_path):
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-900.md",
+        _dep_task("TASK-AR-900", parent_id="TASKSET-AR-DEP", blocks=["TASK-AR-901"]),
+    )
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md",
+        _dep_task("TASK-AR-901", parent_id="TASKSET-AR-DEP", blocked_by=["TASK-AR-900"]),
+    )
+    payload = ui_state.build_resource(tmp_path, "dependency_graph", now="2026-06-13T00:00:00+09:00")
+    graph = payload["items"]
+    assert payload["resource"] == "dependency_graph"
+    assert graph["schema"] == "agent-runtime-dependency-graph/v1"
+    dep_edges = [e for e in graph["edges"] if e["kind"] == "dependency"]
+    parent_edges = [e for e in graph["edges"] if e["kind"] == "parent"]
+    # blocks + blocked_by both fold into a single deduped blocker->blocked edge.
+    assert len(dep_edges) == 1
+    assert dep_edges[0]["from"] == "TASK-AR-900" and dep_edges[0]["to"] == "TASK-AR-901"
+    # Subtask hierarchy edges from parent_id.
+    assert {(e["from"], e["to"]) for e in parent_edges} == {
+        ("TASKSET-AR-DEP", "TASK-AR-900"),
+        ("TASKSET-AR-DEP", "TASK-AR-901"),
+    }
+    assert graph["has_cycle"] is False
+    assert graph["cycles"] == []
+
+
+def test_ui_state_dependency_graph_and_timeline_flag_cycle(tmp_path):
+    # A <- blocks - B <- blocks - C <- blocks - A  forms a 3-cycle.
+    _write(tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-900.md",
+           _dep_task("TASK-AR-900", blocks=["TASK-AR-901"]))
+    _write(tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md",
+           _dep_task("TASK-AR-901", blocks=["TASK-AR-902"]))
+    _write(tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-902.md",
+           _dep_task("TASK-AR-902", blocks=["TASK-AR-900"]))
+    state = ui_state.build_state(tmp_path, now="2026-06-13T00:00:00+09:00")
+    graph = state["dependency_graph"]
+    timeline = state["timeline"]
+    assert graph["has_cycle"] is True
+    assert timeline["has_cycle"] is True
+    # Graph and timeline report the same cycle membership.
+    cycle_nodes = {n for cycle in graph["cycles"] for n in cycle}
+    assert {"TASK-AR-900", "TASK-AR-901", "TASK-AR-902"} <= cycle_nodes
+    in_cycle_edges = [e for e in graph["edges"] if e.get("in_cycle")]
+    assert len(in_cycle_edges) == 3
+    # The pure cycle detector agrees and is empty on an empty edge set.
+    assert ui_state.detect_dependency_cycles([]) == []
+
+
+def test_ui_state_timeline_groups_bars_by_taskset_with_arrows(tmp_path):
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-900.md",
+        _dep_task("TASK-AR-900", status="completed", parent_id="TASKSET-AR-DEP", blocks=["TASK-AR-901"]),
+    )
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md",
+        _dep_task("TASK-AR-901", status="in_progress", parent_id="TASKSET-AR-DEP", blocked_by=["TASK-AR-900"]),
+    )
+    payload = ui_state.build_resource(tmp_path, "timeline", now="2026-06-13T00:00:00+09:00")
+    timeline = payload["items"]
+    assert payload["resource"] == "timeline"
+    assert timeline["schema"] == "agent-runtime-timeline/v1"
+    lanes = {lane["id"]: lane for lane in timeline["lanes"]}
+    assert "TASKSET-AR-DEP" in lanes
+    bars = {bar["id"]: bar for bar in lanes["TASKSET-AR-DEP"]["bars"]}
+    assert set(bars) == {"TASK-AR-900", "TASK-AR-901"}
+    assert bars["TASK-AR-900"]["status_bucket"] == "completed"
+    assert bars["TASK-AR-901"]["status_bucket"] == "in_progress"
+    # Bars carry distinct lane columns so they render as horizontal positions.
+    assert bars["TASK-AR-900"]["start"] != bars["TASK-AR-901"]["start"]
+    # Exactly one dependency arrow, matching the graph derivation.
+    assert len(timeline["arrows"]) == 1
+    arrow = timeline["arrows"][0]
+    assert arrow["from"] == "TASK-AR-900" and arrow["to"] == "TASK-AR-901"
+
+
+def test_ui_state_dependency_views_empty_when_no_deps(tmp_path):
+    # No blocks/blocked_by anywhere -> no dependency edges, no cycle (no-op safe).
+    _write(tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-900.md", _dep_task("TASK-AR-900"))
+    state = ui_state.build_state(tmp_path, now="2026-06-13T00:00:00+09:00")
+    assert state["dependency_graph"]["totals"]["dependency_edges"] == 0
+    assert state["dependency_graph"]["has_cycle"] is False
+    assert state["timeline"]["totals"]["arrows"] == 0
+    assert state["timeline"]["has_cycle"] is False

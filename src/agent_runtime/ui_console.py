@@ -97,6 +97,12 @@ HTML = """<!doctype html>
           <button class="sidebar-link" type="button" role="tab" data-view="roadmap" data-route="work/roadmap" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9776;</span><span class="sidebar-label">Roadmap</span>
           </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="timeline" data-route="work/timeline" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9776;</span><span class="sidebar-label">Timeline</span>
+          </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="deps" data-route="work/dependencies" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Dependencies</span>
+          </button>
         </div>
         <div class="sidebar-group" data-group="agents">
           <span class="sidebar-group-title">AGENTS</span>
@@ -373,6 +379,29 @@ HTML = """<!doctype html>
         <div id="view-roadmap" class="view">
           <p id="roadmap-timeline-summary" class="roadmap-timeline-summary" role="status"></p>
           <div id="roadmap-timeline" class="roadmap-timeline" aria-label="Roadmap timeline"></div>
+        </div>
+        <div id="view-timeline" class="view">
+          <section class="timeline" aria-label="Task timeline">
+            <header class="timeline-header">
+              <h2>Timeline</h2>
+              <p id="timeline-summary" class="timeline-summary" role="status"></p>
+            </header>
+            <p id="timeline-cycle-warning" class="dep-cycle-warning" role="alert" hidden></p>
+            <div id="timeline-grid" class="timeline-grid" aria-label="Taskset bars by lane"></div>
+          </section>
+        </div>
+        <div id="view-deps" class="view">
+          <section class="dep-graph" aria-label="Dependency graph">
+            <header class="dep-graph-header">
+              <h2>Dependencies</h2>
+              <p id="dep-graph-summary" class="dep-graph-summary" role="status"></p>
+            </header>
+            <p id="dep-cycle-warning" class="dep-cycle-warning" role="alert" hidden></p>
+            <div class="dep-graph-stage">
+              <svg id="dep-graph-svg" class="dep-graph-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Task dependency graph"></svg>
+            </div>
+            <ul id="dep-graph-legend" class="dep-graph-legend" aria-label="Dependency legend"></ul>
+          </section>
         </div>
         <div id="view-map" class="view">
           <section class="live-map" aria-label="Live map">
@@ -2710,6 +2739,173 @@ pre {
   color: var(--amber);
 }
 
+/* ===== Subtask + dependency model: timeline + graph (TASK-AR-330) ===== */
+.timeline,
+.dep-graph {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-grad);
+}
+.timeline-header,
+.dep-graph-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.timeline-header h2,
+.dep-graph-header h2 { margin: 0; }
+.timeline-summary,
+.dep-graph-summary {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.dep-cycle-warning {
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--danger-line);
+  border-radius: var(--radius);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 600;
+}
+.timeline-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-x: auto;
+}
+.timeline-lane {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+.timeline-lane-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.timeline-track {
+  position: relative;
+  display: flex;
+  gap: 6px;
+  min-height: 30px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--tile);
+}
+.timeline-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--raise);
+  color: var(--ink);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.timeline-bar.status-completed { border-color: var(--success-line); background: var(--success-soft); }
+.timeline-bar.status-in_progress { border-color: var(--warning-line); background: var(--warning-soft); }
+.timeline-bar.status-planned { border-color: var(--primary-line); background: var(--primary-soft); }
+.timeline-bar.is-cycle {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.timeline-bar-id { font-weight: 600; }
+.timeline-bar-dep {
+  font-size: 10px;
+  color: var(--muted);
+}
+.timeline-arrows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.timeline-arrow {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+.timeline-arrow.is-cycle { color: var(--danger); }
+.dep-graph-stage {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--canvas-grad);
+  overflow: hidden;
+}
+.dep-graph-svg {
+  display: block;
+  width: 100%;
+  height: 420px;
+}
+.dep-edge {
+  stroke: var(--line-strong);
+  stroke-width: 1.5;
+  fill: none;
+  opacity: 0.6;
+}
+.dep-edge.kind-parent { stroke: var(--subtle); stroke-dasharray: 4 3; }
+.dep-edge.kind-dependency { stroke: var(--blue); }
+.dep-edge.is-cycle {
+  stroke: var(--danger);
+  stroke-width: 3;
+  opacity: 1;
+}
+.dep-node circle {
+  stroke: var(--line-strong);
+  stroke-width: 1.5;
+  fill: var(--panel);
+}
+.dep-node.kind-task circle { fill: var(--panel-strong); }
+.dep-node.kind-parent circle { fill: var(--primary-soft-strong); stroke: var(--primary-line); }
+.dep-node.kind-missing circle { fill: var(--warning-soft); stroke: var(--warning-line); }
+.dep-node.is-cycle circle { stroke: var(--danger); stroke-width: 2.5; }
+.dep-node text {
+  fill: var(--muted);
+  font-size: 10px;
+  text-anchor: middle;
+}
+.dep-graph-empty { fill: var(--subtle); font-size: 14px; }
+.dep-graph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 11px;
+  color: var(--muted);
+}
+.dep-graph-legend .legend-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 5px;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+.dep-graph-legend .legend-dependency { background: var(--blue); }
+.dep-graph-legend .legend-parent { background: var(--subtle); }
+.dep-graph-legend .legend-cycle { background: var(--danger); }
+
 /* ===== Common list pattern toolbar / density / groups (TASK-AR-322) ===== */
 .list-toolbar-mount {
   margin-bottom: 10px;
@@ -4741,6 +4937,164 @@ function renderRoadmapTimeline() {
     + (releaseItems || `<div class="empty">No releases</div>`);
 }
 
+// ----- Subtask + dependency model: timeline + graph (TASK-AR-330) -----
+const DEP_KIND_LABELS = { dependency: "Dependency (blocks)", parent: "Subtask (parent)", cycle: "Cycle" };
+
+function timelineData() {
+  return runtimeState.timeline || { lanes: [], arrows: [], cycles: [], has_cycle: false, totals: {} };
+}
+
+function dependencyGraphData() {
+  return runtimeState.dependency_graph || { nodes: [], edges: [], cycles: [], has_cycle: false, totals: {} };
+}
+
+function renderCycleWarning(id, cycles) {
+  const host = $(id);
+  if (!host) return;
+  const list = cycles || [];
+  if (!list.length) {
+    host.hidden = true;
+    host.textContent = "";
+    return;
+  }
+  host.hidden = false;
+  const chains = list.map((cycle) => (cycle || []).map((node) => escapeHtml(node)).join(" -> "));
+  host.innerHTML = `(!) Dependency cycle detected (${list.length}): ` + chains.join("; ");
+}
+
+function renderTimeline() {
+  const data = timelineData();
+  const totals = data.totals || {};
+  setText("timeline-summary",
+    `${totals.lanes || 0} lanes - ${totals.bars || 0} tasks - ${totals.arrows || 0} dependencies`
+    + (data.has_cycle ? ` - ${(data.cycles || []).length} cycle(s)` : ""));
+  renderCycleWarning("timeline-cycle-warning", data.cycles);
+
+  const cycleEdges = new Set();
+  (data.arrows || []).forEach((arrow) => { if (arrow.in_cycle) cycleEdges.add(arrow.id); });
+  const cycleNodes = new Set();
+  (data.cycles || []).forEach((cycle) => (cycle || []).forEach((node) => cycleNodes.add(node)));
+
+  const grid = $("timeline-grid");
+  if (!grid) return;
+  const lanes = data.lanes || [];
+  if (!lanes.length) {
+    grid.innerHTML = `<div class="empty">No timeline data</div>`;
+    return;
+  }
+  const laneHtml = lanes.map((lane) => {
+    const bars = (lane.bars || []).map((bar) => {
+      const bucket = bar.status_bucket || "planned";
+      const isCycle = cycleNodes.has(bar.id);
+      const deps = [];
+      if ((bar.blocked_by || []).length) deps.push(`waits: ${bar.blocked_by.map(escapeHtml).join(", ")}`);
+      if ((bar.blocks || []).length) deps.push(`blocks: ${bar.blocks.map(escapeHtml).join(", ")}`);
+      const depLabel = deps.length ? `<span class="timeline-bar-dep">${deps.join(" / ")}</span>` : "";
+      return `<span class="timeline-bar status-${escapeHtml(bucket)} ${isCycle ? "is-cycle" : ""}" data-task-id="${escapeHtml(bar.id)}" title="${escapeHtml(bar.label || bar.id)}">`
+        + `<span class="timeline-bar-id">${escapeHtml(bar.id)}</span>${depLabel}</span>`;
+    }).join("");
+    return `<div class="timeline-lane" data-lane-id="${escapeHtml(lane.id)}">`
+      + `<div class="timeline-lane-label" title="${escapeHtml(lane.label || lane.id)}">${escapeHtml(lane.label || lane.id)}</div>`
+      + `<div class="timeline-track">${bars || `<span class="empty">empty lane</span>`}</div></div>`;
+  }).join("");
+
+  const arrows = (data.arrows || []).map((arrow) =>
+    `<div class="timeline-arrow ${arrow.in_cycle ? "is-cycle" : ""}" data-arrow-id="${escapeHtml(arrow.id)}">`
+    + `<span>${escapeHtml(arrow.from)}</span><span>-&gt;</span><span>${escapeHtml(arrow.to)}</span></div>`).join("");
+  const arrowBlock = arrows
+    ? `<div class="timeline-arrows" aria-label="Dependency arrows">${arrows}</div>`
+    : "";
+  grid.innerHTML = laneHtml + arrowBlock;
+}
+
+function dependencyNodePositions(nodes) {
+  // Deterministic ring layout (mirrors the live map) so the graph reads the
+  // same across refreshes; parent nodes sit on an inner ring.
+  const positions = {};
+  const cx = 500;
+  const cy = 300;
+  const parents = nodes.filter((node) => node.kind === "parent");
+  const others = nodes.filter((node) => node.kind !== "parent");
+  parents.forEach((node, index) => {
+    const angle = (index / Math.max(parents.length, 1)) * Math.PI * 2 - Math.PI / 2;
+    positions[node.id] = { x: cx + Math.cos(angle) * 110, y: cy + Math.sin(angle) * 90 };
+  });
+  others.forEach((node, index) => {
+    const angle = (index / Math.max(others.length, 1)) * Math.PI * 2 - Math.PI / 2;
+    positions[node.id] = { x: cx + Math.cos(angle) * 230, y: cy + Math.sin(angle) * 200 };
+  });
+  return positions;
+}
+
+function renderDependencyGraph() {
+  const data = dependencyGraphData();
+  const totals = data.totals || {};
+  setText("dep-graph-summary",
+    `${totals.nodes || 0} nodes - ${totals.dependency_edges || 0} deps - ${totals.parent_edges || 0} subtasks`
+    + (data.has_cycle ? ` - ${(data.cycles || []).length} cycle(s)` : ""));
+  renderCycleWarning("dep-cycle-warning", data.cycles);
+
+  const legend = $("dep-graph-legend");
+  if (legend) {
+    legend.innerHTML = ["dependency", "parent", "cycle"].map((kind) =>
+      `<li><span class="legend-swatch legend-${kind}"></span>${escapeHtml(DEP_KIND_LABELS[kind] || kind)}</li>`).join("");
+  }
+
+  const svg = $("dep-graph-svg");
+  if (!svg) return;
+  const nodes = data.nodes || [];
+  const edges = data.edges || [];
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  if (!nodes.length) {
+    const note = document.createElementNS(SVG_NS, "text");
+    note.setAttribute("x", "500");
+    note.setAttribute("y", "300");
+    note.setAttribute("class", "dep-graph-empty");
+    note.setAttribute("text-anchor", "middle");
+    note.textContent = "No dependency data";
+    svg.appendChild(note);
+    return;
+  }
+  const positions = dependencyNodePositions(nodes);
+
+  const edgeLayer = document.createElementNS(SVG_NS, "g");
+  edges.forEach((edge) => {
+    const a = positions[edge.from];
+    const b = positions[edge.to];
+    if (!a || !b) return;
+    const line = document.createElementNS(SVG_NS, "line");
+    line.setAttribute("x1", a.x);
+    line.setAttribute("y1", a.y);
+    line.setAttribute("x2", b.x);
+    line.setAttribute("y2", b.y);
+    line.setAttribute("class", `dep-edge kind-${edge.kind || "dependency"} ${edge.in_cycle ? "is-cycle" : ""}`);
+    line.setAttribute("data-edge-id", edge.id);
+    edgeLayer.appendChild(line);
+  });
+  svg.appendChild(edgeLayer);
+
+  const nodeLayer = document.createElementNS(SVG_NS, "g");
+  nodes.forEach((node) => {
+    const pos = positions[node.id];
+    if (!pos) return;
+    const group = document.createElementNS(SVG_NS, "g");
+    group.setAttribute("class", `dep-node kind-${node.kind || "task"} ${node.in_cycle ? "is-cycle" : ""}`);
+    group.setAttribute("data-node-id", node.id);
+    const circle = document.createElementNS(SVG_NS, "circle");
+    circle.setAttribute("cx", pos.x);
+    circle.setAttribute("cy", pos.y);
+    circle.setAttribute("r", node.kind === "parent" ? "20" : "14");
+    group.appendChild(circle);
+    const label = document.createElementNS(SVG_NS, "text");
+    label.setAttribute("x", pos.x);
+    label.setAttribute("y", pos.y + 28);
+    label.textContent = String(node.id).slice(0, 18);
+    group.appendChild(label);
+    nodeLayer.appendChild(group);
+  });
+  svg.appendChild(nodeLayer);
+}
+
 function renderPlanning() {
   const planning = runtimeState.planning || { scan_reports: [], proposals: [], requests: [], draft_tasks: [], applied: [], summary: {} };
   const proposals = planning.proposals || [];
@@ -5593,6 +5947,8 @@ function renderAll() {
   renderEvidence();
   renderPlanning();
   renderRoadmapTimeline();
+  renderTimeline();
+  renderDependencyGraph();
   renderMap();
   renderSources();
   renderCommands();
