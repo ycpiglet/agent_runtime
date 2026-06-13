@@ -25,6 +25,7 @@ RESOURCE_NAMES = (
     "inflight",
     "work_explorer",
     "meeting_room",
+    "channels",
     "tasksets_board",
     "taskset_completion",
     "team_agents",
@@ -2012,6 +2013,214 @@ def build_meeting_room(
     }
 
 
+# --- Channels (TASK-AR-327) ------------------------------------------------
+# Spectate agent-to-agent conversations as Slack/Discord-style channels and
+# threads. Channels = one auto channel per taskset + #general + #governance.
+# Threads = per-task. Each message carries a sender, a role color that maps to
+# an existing semantic status token (consumed as var(--<token>) in the console),
+# and an avatar initial. This resource is read-only and derived from messages +
+# tasks + task_sets; it never mutates anything.
+
+CHANNELS_SCHEMA = "agent-runtime-channels/v1"
+GENERAL_CHANNEL_ID = "general"
+GOVERNANCE_CHANNEL_ID = "governance"
+_GOVERNANCE_INTENT_TOKENS = ("governance", "review", "meeting", "seminar", "gate", "approval", "consensus")
+# Stable role -> semantic token mapping. Tokens already exist in BOTH :root and
+# the dark theme block, so per-role coloring needs no new raw color literals.
+_ROLE_COLOR_TOKENS = (
+    "primary",
+    "success",
+    "warning",
+    "danger",
+    "violet",
+    "teal",
+    "amber",
+    "info",
+    "purple",
+    "blue",
+)
+
+
+def _role_color_token(role: str) -> str:
+    """Deterministic role -> semantic token name (stable across renders)."""
+    key = str(role or "").strip().lower() or "unknown"
+    fixed = {
+        "owner": "primary",
+        "lead-engineer": "blue",
+        "lead_engineer": "blue",
+        "planner": "violet",
+        "qa": "warning",
+        "governance": "danger",
+        "ui": "subtle",
+    }
+    if key in fixed:
+        return fixed[key]
+    digest = sum(ord(char) for char in key)
+    return _ROLE_COLOR_TOKENS[digest % len(_ROLE_COLOR_TOKENS)]
+
+
+def _avatar_initials(name: str) -> str:
+    text = re.sub(r"[^A-Za-z0-9]+", " ", str(name or "")).strip()
+    if not text:
+        return "?"
+    parts = text.split()
+    if len(parts) == 1:
+        return parts[0][:2].upper()
+    return (parts[0][0] + parts[1][0]).upper()
+
+
+def _channel_message(message: dict[str, Any]) -> dict[str, Any]:
+    sender = str(message.get("from") or "unknown")
+    return {
+        "id": message.get("id"),
+        "from": sender,
+        "to": message.get("to"),
+        "role": sender,
+        "role_color": _role_color_token(sender),
+        "avatar": _avatar_initials(sender),
+        "task_id": message.get("task_id"),
+        "intent": message.get("intent"),
+        "type": message.get("type"),
+        "status": message.get("status"),
+        "ts": message.get("ts"),
+        "body": message.get("body") or "",
+        "thread_root_id": message.get("thread_root_id"),
+        "source_path": message.get("source_path"),
+    }
+
+
+def _is_governance_message(message: dict[str, Any]) -> bool:
+    haystack = " ".join(
+        str(message.get(key) or "").lower()
+        for key in ("intent", "type", "to", "from")
+    )
+    return any(token in haystack for token in _GOVERNANCE_INTENT_TOKENS)
+
+
+def build_channels(
+    messages: list[dict[str, Any]],
+    tasks: list[dict[str, Any]],
+    task_sets: list[dict[str, Any]],
+    *,
+    now: str,
+) -> dict[str, Any]:
+    task_by_id = {str(task.get("id")): task for task in tasks if task.get("id")}
+    taskset_of_task = {
+        str(task.get("id")): str(task.get("task_set_id") or "")
+        for task in tasks
+        if task.get("id")
+    }
+
+    # Channel scaffolding: #general + #governance + one per taskset.
+    channels: dict[str, dict[str, Any]] = {}
+
+    def ensure_channel(channel_id: str, *, name: str, kind: str, task_set_id: str | None = None) -> dict[str, Any]:
+        return channels.setdefault(
+            channel_id,
+            {
+                "id": channel_id,
+                "name": name,
+                "kind": kind,
+                "task_set_id": task_set_id,
+                "threads": {},
+                "message_count": 0,
+                "last_ts": None,
+            },
+        )
+
+    ensure_channel(GENERAL_CHANNEL_ID, name="#general", kind="general")
+    ensure_channel(GOVERNANCE_CHANNEL_ID, name="#governance", kind="governance")
+    for task_set in task_sets:
+        ts_id = str(task_set.get("id") or "").strip()
+        if not ts_id:
+            continue
+        ensure_channel(
+            _taskset_slug(ts_id),
+            name="#" + _taskset_slug(ts_id),
+            kind="taskset",
+            task_set_id=ts_id,
+        )
+
+    def ensure_thread(channel: dict[str, Any], thread_id: str, title: str, task_id: str | None) -> dict[str, Any]:
+        return channel["threads"].setdefault(
+            thread_id,
+            {
+                "id": thread_id,
+                "title": title,
+                "task_id": task_id,
+                "messages": [],
+                "last_ts": None,
+            },
+        )
+
+    for message in messages:
+        rendered = _channel_message(message)
+        task_id = str(message.get("task_id") or "").strip()
+        if task_id and task_id.lower() != "none":
+            ts_id = taskset_of_task.get(task_id, "")
+            channel_id = _taskset_slug(ts_id) if ts_id else GENERAL_CHANNEL_ID
+            channel = ensure_channel(
+                channel_id,
+                name="#" + channel_id,
+                kind="taskset" if ts_id else "general",
+                task_set_id=ts_id or None,
+            )
+            task = task_by_id.get(task_id) or {}
+            thread = ensure_thread(channel, task_id, str(task.get("title") or task_id), task_id)
+        elif _is_governance_message(message):
+            channel = channels[GOVERNANCE_CHANNEL_ID]
+            thread = ensure_thread(channel, "governance", "Governance", None)
+        else:
+            channel = channels[GENERAL_CHANNEL_ID]
+            thread = ensure_thread(channel, "general", "General", None)
+        thread["messages"].append(rendered)
+        ts_value = rendered.get("ts")
+        if ts_value:
+            if not thread["last_ts"] or str(ts_value) > str(thread["last_ts"]):
+                thread["last_ts"] = ts_value
+            if not channel["last_ts"] or str(ts_value) > str(channel["last_ts"]):
+                channel["last_ts"] = ts_value
+        channel["message_count"] += 1
+
+    channel_list: list[dict[str, Any]] = []
+    for channel in channels.values():
+        threads = sorted(
+            channel.pop("threads").values(),
+            key=lambda thread: (str(thread.get("last_ts") or ""), str(thread.get("id"))),
+            reverse=True,
+        )
+        channel["threads"] = threads
+        channel["thread_count"] = len(threads)
+        channel_list.append(channel)
+
+    # Stable ordering: #general, #governance, then tasksets alphabetically.
+    def channel_sort_key(channel: dict[str, Any]) -> tuple[int, str]:
+        if channel["id"] == GENERAL_CHANNEL_ID:
+            return (0, "")
+        if channel["id"] == GOVERNANCE_CHANNEL_ID:
+            return (1, "")
+        return (2, channel["id"])
+
+    channel_list.sort(key=channel_sort_key)
+
+    return {
+        "schema": CHANNELS_SCHEMA,
+        "generated_at": now,
+        "channels": channel_list,
+        "channel_count": len(channel_list),
+        "message_count": sum(channel["message_count"] for channel in channel_list),
+        "role_color_tokens": list(_ROLE_COLOR_TOKENS),
+        "owner_input": {
+            "message_command": "runtime.call_agent",
+            "slash_commands": [
+                {"command": "/meeting", "type": "meeting.start", "usage": "/meeting <topic> @role @role"},
+                {"command": "/seminar", "type": "seminar.start", "usage": "/seminar <topic>"},
+            ],
+            "mutation_boundary": "proposal_only",
+        },
+    }
+
+
 TASKSETS_BOARD_SCHEMA = "agent-runtime-tasksets-board/v1"
 _TASKSETS_BOARD_ACTIVITY_LIMIT = 5
 _TASKSET_CHILD_STATUS_PHASES = {
@@ -2679,6 +2888,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     inflight = load_inflight(root_path, generated_at, warnings)
     work_explorer = load_work_explorer(root_path, generated_at, warnings)
     meeting_room = build_meeting_room(agents, tasks, now=generated_at)
+    channels = build_channels(messages, tasks, task_sets, now=generated_at)
     tasksets_board = build_tasksets_board(work_explorer, tasks, events, generated_at)
     taskset_completion = build_taskset_completion(pane_events, task_sets)
     roadmap_timeline = build_roadmap_timeline(roadmap, work_explorer, root_path, generated_at, warnings)
@@ -2697,6 +2907,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "inflight": inflight,
         "work_explorer": work_explorer,
         "meeting_room": meeting_room,
+        "channels": channels,
         "tasksets_board": tasksets_board,
         "taskset_completion": taskset_completion,
         "team_agents": team_agents,

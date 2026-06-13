@@ -1496,3 +1496,98 @@ def test_ui_state_taskset_completion_banner_and_next_suggestion(tmp_path):
     payload = ui_state.build_resource(tmp_path, "taskset_completion", now="2026-06-13T11:00:00+09:00")
     assert payload["resource"] == "taskset_completion"
     assert payload["items"]["active"] is True
+
+
+# ----- TASK-AR-327: Channels resource (spectate agent conversations) -----
+
+
+def _channel_message(root: Path, msg_id: str, *, sender: str, to: str, intent: str, task_id: str | None) -> None:
+    lines = [
+        "---",
+        f"id: {msg_id}",
+        f"from: {sender}",
+        f"to: {to}",
+        "type: instruction",
+        "status: queued",
+        "ts: 2026-06-12T10:00:00+09:00",
+        f"intent: {intent}",
+    ]
+    if task_id:
+        lines.append(f"task_id: {task_id}")
+    lines.extend(["---", "", "Hello <b>there</b>", ""])
+    _write(root / "agents" / "messages" / "inbox" / f"{msg_id}.md", "\n".join(lines))
+
+
+def test_ui_state_channels_resource_shape(tmp_path):
+    root = tmp_path
+    _write(
+        root / "agents" / "lead_engineer" / "tasks" / "TASK-AR-900-demo.md",
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-900",
+                "title: Demo task",
+                "status: in_progress",
+                "owner: lead-engineer",
+                "priority: P1",
+                "task_set_id: TASKSET-AR-DEMO",
+                "---",
+                "",
+                "## Goal",
+                "",
+                "Demo.",
+                "",
+            ]
+        ),
+    )
+    _channel_message(root, "MSG-1", sender="lead-engineer", to="qa", intent="build", task_id="TASK-AR-900")
+    _channel_message(root, "MSG-2", sender="planner", to="governance", intent="governance review", task_id=None)
+    _channel_message(root, "MSG-3", sender="qa", to="lead-engineer", intent="chat", task_id=None)
+
+    channels = ui_state.build_resource(root, "channels", now="2026-06-12T12:00:00+09:00")["items"]
+    assert channels["schema"] == "agent-runtime-channels/v1"
+    by_id = {channel["id"]: channel for channel in channels["channels"]}
+
+    # Auto channels: #general + #governance always present.
+    assert "general" in by_id and by_id["general"]["kind"] == "general"
+    assert "governance" in by_id and by_id["governance"]["kind"] == "governance"
+    # One auto channel per taskset.
+    assert "demo" in by_id and by_id["demo"]["kind"] == "taskset"
+    assert by_id["demo"]["task_set_id"] == "TASKSET-AR-DEMO"
+
+    # Threads are per-task inside the taskset channel.
+    demo_threads = {thread["id"]: thread for thread in by_id["demo"]["threads"]}
+    assert "TASK-AR-900" in demo_threads
+    assert demo_threads["TASK-AR-900"]["task_id"] == "TASK-AR-900"
+    assert len(demo_threads["TASK-AR-900"]["messages"]) == 1
+
+    # Governance-intent message lands in #governance; chat lands in #general.
+    assert by_id["governance"]["message_count"] == 1
+    assert by_id["general"]["message_count"] == 1
+
+    # Owner input affordances expose meeting/seminar slash commands.
+    slash = {entry["command"]: entry["type"] for entry in channels["owner_input"]["slash_commands"]}
+    assert slash["/meeting"] == "meeting.start"
+    assert slash["/seminar"] == "seminar.start"
+    assert channels["owner_input"]["mutation_boundary"] == "proposal_only"
+
+
+def test_ui_state_channels_messages_carry_role_color_and_avatar(tmp_path):
+    root = tmp_path
+    _channel_message(root, "MSG-9", sender="lead-engineer", to="qa", intent="chat", task_id=None)
+    channels = ui_state.build_resource(root, "channels", now="2026-06-12T12:00:00+09:00")["items"]
+    general = next(channel for channel in channels["channels"] if channel["id"] == "general")
+    message = general["threads"][0]["messages"][0]
+    # Role color maps to a known semantic token (no raw hex).
+    assert message["role_color"] in channels["role_color_tokens"] or message["role_color"] == "subtle"
+    assert message["avatar"]  # avatar initials present
+    # Raw body is preserved unescaped here; escaping happens at render time.
+    assert message["body"] == "Hello <b>there</b>"
+
+
+def test_ui_state_channels_empty_repo_is_well_formed(tmp_path):
+    channels = ui_state.build_resource(tmp_path, "channels", now="2026-06-12T12:00:00+09:00")["items"]
+    by_id = {channel["id"] for channel in channels["channels"]}
+    # Even with no messages, #general + #governance exist and the payload is sane.
+    assert {"general", "governance"} <= by_id
+    assert channels["message_count"] == 0

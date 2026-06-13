@@ -1761,3 +1761,65 @@ def test_ui_console_list_app_js_node_check(tmp_path):
         text=True,
     )
     assert proc.returncode == 0, proc.stderr
+
+
+# ----- TASK-AR-327: Channels view (agent conversation + meeting/seminar) -----
+
+
+def test_ui_console_channels_view_registered_in_comms_sidebar(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+
+    # New Channels view lives in the COMMS group with a data-view + data-route.
+    assert 'data-view="channels"' in html
+    assert 'data-route="comms/channels"' in html
+    # And a dedicated view container (not the old horizontal tabs / list view).
+    assert 'id="view-channels"' in html
+    assert 'id="channels-list"' in html
+    assert 'id="channels-threads"' in html
+    # Owner directive input box + slash-command affordance.
+    assert 'id="channels-input-form"' in html
+    assert 'id="channels-input-box"' in html
+    assert "/meeting" in html and "/seminar" in html
+
+
+def test_ui_console_channels_role_colors_use_tokens_via_var(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    # Role colors are applied as var(--token); no raw hex injected from JS.
+    assert "function channelRoleColorVar" in js
+    assert "var(--${safe" in js
+    # Avatar + sender consume the --role-color custom property in the stylesheet.
+    assert ".channel-avatar" in css
+    assert "var(--role-color, var(--primary))" in css
+    assert "--role-color:" in js  # inline binding to the semantic token
+
+
+def test_ui_console_channels_slash_command_parsing(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+
+    # The parser recognises /meeting and /seminar and maps them to the
+    # meeting.start / seminar.start command types (proposal-only).
+    assert "function parseChannelInput" in js
+    assert "meeting.start" in js
+    assert "seminar.start" in js
+    assert "/(meeting|seminar)" in js
+    # @role mention extraction for participants.
+    assert "@[\\w.-]+" in js
+    # A plain directive falls back to runtime.call_agent.
+    assert "runtime.call_agent" in js
+    # The channel form is wired to the command API.
+    assert 'channels-input-form' in js
+    assert "renderChannels" in js
+
+
+def test_ui_console_channels_messages_escape_html(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+
+    # Every rendered message/sender/avatar field passes through escapeHtml (XSS).
+    assert "function channelMessageTemplate" in js
+    assert "escapeHtml(message.body" in js
+    assert "escapeHtml(message.from" in js
+    assert "escapeHtml(message.avatar" in js
+    assert "function channelThreadTemplate" in js
+    assert "escapeHtml(thread.title" in js
