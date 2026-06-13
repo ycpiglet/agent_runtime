@@ -7,6 +7,11 @@
             "type": "command",
             "command": "scripts\\update_notify_hook.cmd",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "python scripts/session_dashboard.py --root .",
+            "timeout": 20
           }
         ]
       }
