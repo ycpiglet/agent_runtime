@@ -1,9 +1,11 @@
+import base64
 import json
 import re
 from pathlib import Path
 
 from agent_runtime import cli as cli_module
 from agent_runtime import ui_console
+from agent_runtime import ui_state
 
 
 def _write(path: Path, text: str) -> None:
@@ -2102,3 +2104,162 @@ def test_ui_console_task_move_post_changes_taskset(tmp_path):
     assert payload["status"] == "accepted"
     moved = (tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-962-console.md").read_text(encoding="utf-8")
     assert "task_set_id: TASKSET-AR-OTHER" in moved
+
+
+# ----- TASK-AR-332: file attachments (upload/download/preview + evidence) -----
+
+
+def _upload(tmp_path, *, filename, content_type, data, task_id=None):
+    body = {
+        "filename": filename,
+        "content_type": content_type,
+        "content_b64": base64.b64encode(data).decode("ascii"),
+    }
+    if task_id:
+        body["task_id"] = task_id
+    return ui_console.build_response(
+        "/api/attachments",
+        tmp_path,
+        method="POST",
+        body=json.dumps(body).encode("utf-8"),
+    )
+
+
+def test_attachment_upload_roundtrip_lists_on_task_and_downloads_bytes(tmp_path):
+    _write_task(tmp_path, "TASK-AR-332A")
+    png = b"\x89PNG\r\n\x1a\nhello-bytes"
+
+    upload = _upload(tmp_path, filename="shot.png", content_type="image/png", data=png, task_id="TASK-AR-332A")
+    created = json.loads(upload.body.decode("utf-8"))
+    attachment_id = created["attachment"]["id"]
+
+    # Stored under the attachments dir only.
+    blob_rel = created["attachment"]["blob_rel"]
+    assert blob_rel.startswith("agents/project/evidence/attachments/")
+    assert (tmp_path / blob_rel).read_bytes() == png
+
+    # Listed on task detail (enrich_tasks_with_attachments).
+    state = json.loads(ui_console.build_response("/api/state", tmp_path).body.decode("utf-8"))
+    task = next(item for item in state["tasks"] if item["id"] == "TASK-AR-332A")
+    assert task["attachment_count"] == 1
+    assert task["attachments"][0]["filename"] == "shot.png"
+
+    # Download returns the original bytes with the stored content-type.
+    download = ui_console.build_response(f"/api/attachments/{attachment_id}/download", tmp_path)
+
+    assert upload.status == 201
+    assert created["status"] == "accepted"
+    assert download.status == 200
+    assert download.body == png
+    assert download.content_type == "image/png"
+
+
+def test_attachment_upload_rejects_path_traversal_filenames(tmp_path):
+    base = ui_state.attachments_dir(tmp_path)
+    for evil in ["../../../etc/passwd", "..\\..\\windows\\system32\\evil.png", "/abs/secret.png", "C:\\Windows\\x.png"]:
+        upload = _upload(tmp_path, filename=evil, content_type="image/png", data=b"\x89PNGdata")
+        created = json.loads(upload.body.decode("utf-8"))
+        assert upload.status == 201, evil
+        blob = (tmp_path / created["attachment"]["blob_rel"]).resolve()
+        # The resolved blob never escapes the attachments dir, and the basename
+        # carries no separators / parent refs.
+        assert base.resolve() in blob.parents, f"escaped for {evil}: {blob}"
+        assert ".." not in created["attachment"]["filename"]
+        assert "/" not in created["attachment"]["filename"]
+        assert "\\" not in created["attachment"]["filename"]
+    # Nothing was written outside the attachments dir.
+    assert not (tmp_path / "etc" / "passwd").exists()
+
+
+def test_attachment_upload_enforces_size_and_type_limits(tmp_path):
+    too_big = b"x" * (ui_state.ATTACHMENT_MAX_BYTES + 1)
+    size_resp = _upload(tmp_path, filename="big.txt", content_type="text/plain", data=too_big)
+    size_payload = json.loads(size_resp.body.decode("utf-8"))
+
+    type_resp = _upload(tmp_path, filename="evil.svg", content_type="image/svg+xml", data=b"<svg/>")
+    type_payload = json.loads(type_resp.body.decode("utf-8"))
+
+    assert size_resp.status == 400
+    assert size_payload["status"] == "failed"
+    assert "size limit" in " ".join(size_payload["errors"])
+    assert type_resp.status == 400
+    assert "unsupported content type" in " ".join(type_payload["errors"])
+
+
+def test_attachment_upload_creates_evidence_record_and_link(tmp_path):
+    _write_task(tmp_path, "TASK-AR-332E")
+    _upload(tmp_path, filename="proof.md", content_type="text/markdown", data=b"# closeout\n", task_id="TASK-AR-332E")
+
+    state = json.loads(ui_console.build_response("/api/state", tmp_path).body.decode("utf-8"))
+    attach_evidence = [item for item in state["evidence"] if item.get("source_type") == "attachment"]
+    assert len(attach_evidence) == 1
+    assert attach_evidence[0]["task_id"] == "TASK-AR-332E"
+    assert attach_evidence[0]["download_url"].startswith("/api/attachments/")
+
+    # The sidecar record IS the evidence record (markdown sidecar on disk).
+    records = list((ui_state.attachments_dir(tmp_path)).glob("*.json"))
+    assert len(records) == 1
+    record = json.loads(records[0].read_text(encoding="utf-8"))
+    assert record["task_id"] == "TASK-AR-332E"
+    assert record["evidence"].startswith("attachment:")
+
+
+def test_attachment_link_command_is_proposal_only(tmp_path):
+    _write_task(tmp_path, "TASK-AR-332L")
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {
+                "type": "attachment.link",
+                "target": "TASK-AR-332L",
+                "payload": {"attachment_id": "att-20260612-abcd"},
+            }
+        ).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+
+    assert response.status == 202
+    assert payload["status"] == "queued"
+    assert payload["result"]["mutation_boundary"] == "proposal_only"
+    proposals = list((tmp_path / ".ui_outbox" / "attachments").glob("ATTACHREQ-*.json"))
+    assert len(proposals) == 1
+
+
+def test_attachment_filename_rendering_is_xss_safe(tmp_path):
+    _write_task(tmp_path, "TASK-AR-332X")
+    upload = _upload(
+        tmp_path,
+        filename='<img src=x onerror=alert(1)>.png',
+        content_type="image/png",
+        data=b"\x89PNGdata",
+        task_id="TASK-AR-332X",
+    )
+    created = json.loads(upload.body.decode("utf-8"))
+    # The stored filename is normalized to a safe charset (angle brackets and
+    # the script payload stripped), so no markup survives to the DOM.
+    stored = created["attachment"]["filename"]
+    assert "<" not in stored
+    assert ">" not in stored
+    assert "onerror" not in stored or "=" not in stored
+    # The JS renderer escapes every filename it prints.
+    assert "escapeHtml(item.filename" in ui_console.JS
+
+
+def test_attachment_download_unknown_id_returns_404(tmp_path):
+    bad = ui_console.build_response("/api/attachments/not-a-real-id/download", tmp_path)
+    traversal = ui_console.build_response("/api/attachments/..%2f..%2fsecret/download", tmp_path)
+    assert bad.status == 404
+    assert traversal.status == 404
+
+
+def test_attachment_css_uses_tokens_not_raw_hex(tmp_path):
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    # Pull just the attachment block and assert no raw hex/rgba leaked in.
+    start = css.index(".attachments {")
+    end = css.index("@media (max-width: 1200px)", start)
+    block = css[start:end]
+    assert "var(--" in block
+    assert not re.search(r"#[0-9a-fA-F]{3,8}\b", block)
+    assert not re.search(r"rgba?\(", block)
