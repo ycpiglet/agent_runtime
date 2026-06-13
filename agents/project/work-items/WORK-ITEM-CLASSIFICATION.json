@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-13T09:19:24+09:00",
+  "generated_at": "2026-06-13T09:28:17+09:00",
   "record_count": 229,
   "finding_count": 0,
   "findings": [],
@@ -2412,7 +2412,7 @@
       "title": "Owner 규칙 \"작업자가 스스로 검증 금지, 항상 다른 에이전트가 검증\"을 실행 가능하게 강제한다: claim release/closeout 시 ver…",
       "path": "agents/lead_engineer/tasks/TASK-AR-507.md",
       "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-508",

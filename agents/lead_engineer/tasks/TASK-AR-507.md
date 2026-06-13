@@ -4,9 +4,11 @@ display_id: TASK-AR-507
 task_uid: 2df22d07-ceab-4402-99d2-b455dbdc8c53
 registered_at: 2026-06-12T21:24:50+09:00
 created_at: 2026-06-12T21:24:50+09:00
-updated_at: 2026-06-12T21:24:50+09:00
+updated_at: 2026-06-13T10:30:00+09:00
+started_at: 2026-06-13T08:37:43+09:00
+completed_at: 2026-06-13T10:30:00+09:00
 title: Cross-verification gate — verifier must differ from worker
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 6
@@ -69,3 +71,14 @@ tags:
 
 - 게이트 변경분 + 테스트
 - closeout review record
+
+## Completion Evidence
+
+- PR #66 (9a91fdf): release path enforces verifier != worker with evidence requirement; claim JSON + pane event carry W4b actor; mirrors; 8 new tests.
+
+## Verification Results
+
+- pytest tests/test_task_claim_dispatcher.py -q -> 21 passed
+- pytest tests -q -> 627 passed (+1 environment, patch-roundtrip proven at base)
+- tmp-repo demo: self-release refused / distinct verifier passes
+- W4b inst-w4b-ar507-verifier2 -> APPROVE
