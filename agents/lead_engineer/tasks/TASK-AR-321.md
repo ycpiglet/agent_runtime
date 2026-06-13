@@ -14,7 +14,11 @@ registered_at: 2026-06-11T18:39:01+09:00
 created_at: 2026-06-11T18:39:01+09:00
 updated_at: 2026-06-11T18:39:01+09:00
 title: 사이드바 정보 구조 개편 + 해시 라우팅
-status: planned
+status: completed
+started_at: 2026-06-13T18:20:18+09:00
+completed_at: 2026-06-13T18:50:00+09:00
+resolution: done
+verification_status: passed
 priority: P1
 difficulty: M
 est_hours: 8

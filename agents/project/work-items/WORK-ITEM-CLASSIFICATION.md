@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-13T18:13:16+09:00
+generated_at: 2026-06-13T19:08:07+09:00
 record_count: 235
 ---
 
@@ -182,9 +182,9 @@ record_count: 235
 | 0.18.9 | Task 0.18.9 | task | `TASK-AR-318` | `TASKSET-AR-VISION-GAP-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-318.md` | 이벤트/수정 기록을 나열에서 인과 체인 재생으로 승격해, 상태 변화를 프레임 단위로 거슬러 볼 수 있게 한다. |
 | 0.18.10 | Task 0.18.10 | task | `TASK-AR-319` | `TASKSET-AR-VISION-GAP-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-319.md` | 368+개 reviews/ 증거를 수동 탐색에서 자동 색인/검증 체계로 전환해 문서 추적성을 규모에 견디게 만든다. |
 | 0.19 | Taskset 0.19 | taskset | `TASKSET-AR-UI-UX-V2` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Console Experience Architect |
-| 0.19.1 | Task 0.19.1 | task | `TASK-AR-320` | `TASKSET-AR-UI-UX-V2` | planned | `agents/lead_engineer/tasks/TASK-AR-320.md` | 기본 테마를 Notion형 라이트로 전환하고 기존 Linear 다크 토큰을 Dark Mode 옵션으로 보존한다. |
-| 0.19.2 | Task 0.19.2 | task | `TASK-AR-321` | `TASKSET-AR-UI-UX-V2` | planned | `agents/lead_engineer/tasks/TASK-AR-321.md` | 9개 수평 탭을 접이식 좌측 사이드바(Home / WORK / AGENTS / COMMS / RECORDS / OPS 그룹)로 전환해 V2 뷰 확장을 수… |
-| 0.19.3 | Task 0.19.3 | task | `TASK-AR-322` | `TASKSET-AR-UI-UX-V2` | planned | `agents/lead_engineer/tasks/TASK-AR-322.md` | 모든 리스트 뷰(task/agent/event/message/evidence)에 Notion/Linear형 정렬·필터·그룹·검색 바와 간략히/자세히 밀도… |
+| 0.19.1 | Task 0.19.1 | task | `TASK-AR-320` | `TASKSET-AR-UI-UX-V2` | completed | `agents/lead_engineer/tasks/TASK-AR-320.md` | 기본 테마를 Notion형 라이트로 전환하고 기존 Linear 다크 토큰을 Dark Mode 옵션으로 보존한다. |
+| 0.19.2 | Task 0.19.2 | task | `TASK-AR-321` | `TASKSET-AR-UI-UX-V2` | completed | `agents/lead_engineer/tasks/TASK-AR-321.md` | 9개 수평 탭을 접이식 좌측 사이드바(Home / WORK / AGENTS / COMMS / RECORDS / OPS 그룹)로 전환해 V2 뷰 확장을 수… |
+| 0.19.3 | Task 0.19.3 | task | `TASK-AR-322` | `TASKSET-AR-UI-UX-V2` | completed | `agents/lead_engineer/tasks/TASK-AR-322.md` | 모든 리스트 뷰(task/agent/event/message/evidence)에 Notion/Linear형 정렬·필터·그룹·검색 바와 간략히/자세히 밀도… |
 | 0.19.4 | Task 0.19.4 | task | `TASK-AR-323` | `TASKSET-AR-UI-UX-V2` | completed | `agents/lead_engineer/tasks/TASK-AR-323.md` | task 평면 나열 대신 taskset 단위로 묶인 직관적 작업 뷰를 기본 진입점으로 만들고, Owner가 진행 중 흐름에 task를 안전하게 삽입할 수… |
 | 0.19.5 | Task 0.19.5 | task | `TASK-AR-324` | `TASKSET-AR-UI-UX-V2` | completed | `agents/lead_engineer/tasks/TASK-AR-324.md` | TEAMS/ORG/roles 데이터로 조직도 트리를 렌더링하고, 에이전트 카드를 온라인 RPG 길드 멤버처럼 상태가 살아있는 프레즌스로 보여준다. |
 | 0.19.6 | Task 0.19.6 | task | `TASK-AR-325` | `TASKSET-AR-UI-UX-V2` | completed | `agents/lead_engineer/tasks/TASK-AR-325.md` | Vision → Milestone/Release → Taskset 3계층을 한 뷰에서 보여줘 고수준 방향과 실제 진행률을 연결한다. |

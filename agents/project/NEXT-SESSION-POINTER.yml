@@ -1,14 +1,14 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-13T18:25:00+09:00
+updated_at: 2026-06-13T18:58:00+09:00
 current_state:
-  summary: "500-series parallel execution complete: all 19 implementation tasks (AR-500..522) merged with W4a+W4b dual verification via PRs #45-#79; claims released, worktrees/branches/stash clean, plan anchors T3 re-recorded."
+  summary: "UI console waves 1-3 complete: AR-323/360/361 (wave-1), AR-324/325/362 (wave-2), AR-320/321/322 (wave-3) merged with W4a+W4b dual verification via PRs #92-#103; claims released, worktrees/branches clean. Theme system (light default + dark toggle), grouped sidebar + hash routing, and common list toolbar now form the V2 console shell; all later UI views must use the semantic color tokens and the shared list pattern."
   status: ready
-  task_set_status: complete
-  task_set_id: "TASKSET-AR-PARALLEL-WAVE-EXECUTION"
+  task_set_status: in_progress
+  task_set_id: "TASKSET-AR-UI-UX-V2"
   step_index: 3
   step_total: 5
-  progress_pct: 100
-  status_text: "500-series closed. Next: Owner-gated v0.2.0 release decision (AR-510 cadence trigger proposes minor); optional follow-ups backlog_board LF output + case-fold hardening."
+  progress_pct: 60
+  status_text: "UI wave-3 closed. Remaining UI backlog: UI-UX-V2 326/327/328; UI-PLATFORM-EXTENSIONS 329-341; UI-LIVING-CONSOLE 363/364/365. Next waves dispatch from current shell (theme tokens + sidebar groups + list toolbar already in)."
 active_work:
   current_agents: []
   current_teams: []
