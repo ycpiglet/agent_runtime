@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-13T18:13:16+09:00",
+  "generated_at": "2026-06-13T19:08:07+09:00",
   "record_count": 235,
   "finding_count": 0,
   "findings": [],
@@ -1587,7 +1587,7 @@
       "title": "기본 테마를 Notion형 라이트로 전환하고 기존 Linear 다크 토큰을 Dark Mode 옵션으로 보존한다.",
       "path": "agents/lead_engineer/tasks/TASK-AR-320.md",
       "parent_id": "TASKSET-AR-UI-UX-V2",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-321",
@@ -1598,7 +1598,7 @@
       "title": "9개 수평 탭을 접이식 좌측 사이드바(Home / WORK / AGENTS / COMMS / RECORDS / OPS 그룹)로 전환해 V2 뷰 확장을 수…",
       "path": "agents/lead_engineer/tasks/TASK-AR-321.md",
       "parent_id": "TASKSET-AR-UI-UX-V2",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-322",
@@ -1609,7 +1609,7 @@
       "title": "모든 리스트 뷰(task/agent/event/message/evidence)에 Notion/Linear형 정렬·필터·그룹·검색 바와 간략히/자세히 밀도…",
       "path": "agents/lead_engineer/tasks/TASK-AR-322.md",
       "parent_id": "TASKSET-AR-UI-UX-V2",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-323",

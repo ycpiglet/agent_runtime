@@ -14,7 +14,11 @@ registered_at: 2026-06-11T18:39:01+09:00
 created_at: 2026-06-11T18:39:01+09:00
 updated_at: 2026-06-11T18:39:01+09:00
 title: 공통 리스트 패턴 — 정렬/필터/그룹/검색 + 밀도 토글
-status: planned
+status: completed
+started_at: 2026-06-13T18:20:18+09:00
+completed_at: 2026-06-13T18:55:00+09:00
+resolution: done
+verification_status: passed
 priority: P1
 difficulty: L
 est_hours: 10
