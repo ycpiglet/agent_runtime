@@ -719,6 +719,118 @@ def test_ui_state_builds_graph_state_machine_and_roadmap_views(tmp_path):
     assert state["roadmap"]["milestones"][0]["done"] is False
 
 
+# ----- TASK-AR-326: realtime presence + live map -----
+
+
+def test_ui_state_live_map_resource_shape_and_safe_degrade(tmp_path):
+    # Empty root -> well-formed, owner-only live map with no crash.
+    payload = ui_state.build_resource(tmp_path, "live_map", now="2026-06-13T11:00:00+09:00")
+    assert payload["resource"] == "live_map"
+    live_map = payload["items"]
+    assert live_map["schema"] == "agent-runtime-live-map/v1"
+    assert set(live_map.keys()) >= {"schema", "generated_at", "presence", "nodes", "edges", "totals"}
+    assert live_map["presence"] == {"counts": {}, "online": 0, "agents": []}
+    # Owner is always the apex node even when nothing else exists.
+    assert [node["kind"] for node in live_map["nodes"]] == ["owner"]
+    assert live_map["totals"]["node_kinds"] == {"owner": 1}
+    assert live_map["edges"] == []
+
+
+def test_ui_state_live_map_derives_typed_nodes_and_edges(tmp_path):
+    # A review task + a message produce taskset/gate nodes and typed edges.
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-700-review.md",
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-700",
+                "status: review",
+                "owner: lead-engineer",
+                "task_set_id: TASKSET-AR-LIVE",
+                "priority: P1",
+                "---",
+                "",
+                "## Goal",
+                "",
+                "Review the live map.",
+                "",
+            ]
+        ),
+    )
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-701-blocked.md",
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-701",
+                "status: blocked",
+                "owner: qa",
+                "task_set_id: TASKSET-AR-LIVE",
+                "priority: P1",
+                "blocked_reason: waiting on data",
+                "---",
+                "",
+                "## Goal",
+                "",
+                "Blocked work.",
+                "",
+            ]
+        ),
+    )
+    _write(
+        tmp_path / "agents" / "messages" / "inbox" / "MSG-20260613-live.md",
+        "\n".join(
+            [
+                "---",
+                "id: MSG-20260613-live",
+                "from: owner",
+                "to: lead-engineer",
+                "type: instruction",
+                "status: queued",
+                "ts: 2026-06-13T10:00:00+09:00",
+                "task_id: TASK-AR-700",
+                "---",
+                "",
+                "Ship the live map.",
+                "",
+            ]
+        ),
+    )
+    _write_instance(tmp_path, "inst-le-01", role="lead-engineer", team_id="agent-runtime-core")
+    _write_team_claim(tmp_path, "CLAIM-live", "inst-le-01", status="in_progress", task_id="TASK-AR-700")
+
+    state = ui_state.build_state(tmp_path, now="2026-06-13T11:00:00+09:00")
+    live_map = state["live_map"]
+
+    node_kinds = {node["id"]: node["kind"] for node in live_map["nodes"]}
+    assert node_kinds.get("owner") == "owner"
+    assert node_kinds.get("TASKSET-AR-LIVE") == "taskset"
+    assert node_kinds.get("lead-engineer") == "agent"
+    # Gate node derived from the review/blocked work.
+    assert any(kind == "gate" for kind in node_kinds.values())
+
+    edge_kinds = {edge["kind"] for edge in live_map["edges"]}
+    assert "message" in edge_kinds       # owner -> lead-engineer message
+    assert "assignment" in edge_kinds    # owner -> taskset assignment
+    assert "review" in edge_kinds        # review-state task -> gate
+    assert "block" in edge_kinds         # blocked task -> gate
+
+    # Edges carry stable ids and endpoints so the front-end can pulse them.
+    msg_edge = next(edge for edge in live_map["edges"] if edge["kind"] == "message")
+    assert msg_edge["from"] == "owner" and msg_edge["to"] == "lead-engineer"
+    assert msg_edge["id"] == "message:MSG-20260613-live"
+
+    # Presence roll-up reflects the team_agents view (lead-engineer is working).
+    presence = live_map["presence"]
+    assert presence["online"] >= 1
+    assert presence["counts"].get("working", 0) >= 1
+    roles = {agent["role"]: agent["presence"] for agent in presence["agents"]}
+    assert roles.get("lead-engineer") == "working"
+
+    assert live_map["totals"]["edges"] == len(live_map["edges"])
+    assert live_map["totals"]["nodes"] == len(live_map["nodes"])
+
+
 def _write_work_classification(root: Path, records: list[dict]) -> None:
     _write(
         root / "agents" / "project" / "work-items" / "WORK-ITEM-CLASSIFICATION.json",

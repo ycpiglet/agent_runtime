@@ -346,6 +346,17 @@ HTML = """<!doctype html>
           <div id="roadmap-timeline" class="roadmap-timeline" aria-label="Roadmap timeline"></div>
         </div>
         <div id="view-map" class="view">
+          <section class="live-map" aria-label="Live map">
+            <header class="live-map-header">
+              <h2>Live Map</h2>
+              <p id="live-map-presence" class="live-map-presence" role="status">presence offline</p>
+            </header>
+            <div class="live-map-stage">
+              <svg id="live-map-graph" class="live-map-graph" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Agent network graph"></svg>
+            </div>
+            <ul id="live-map-legend" class="live-map-legend" aria-label="Edge legend"></ul>
+          </section>
+          <div id="activity-feed" class="activity-feed" aria-live="polite" aria-label="Activity feed"></div>
           <div class="evidence-grid">
             <section>
               <h2>Graph</h2>
@@ -469,6 +480,9 @@ CSS = """/*
   --accent: var(--primary);
   --border: var(--line-strong);
   --bg: var(--canvas);
+  /* Live map pulse highlight (TASK-AR-326) */
+  --pulse: var(--primary);
+  --pulse-soft: var(--primary-soft-strong);
 }
 [data-theme="dark"] {
   color-scheme: dark;
@@ -543,6 +557,9 @@ CSS = """/*
   --accent: #5b8def;
   --border: #2a2a3a;
   --bg: #11111a;
+  /* Live map pulse highlight (TASK-AR-326) */
+  --pulse: var(--primary-hover);
+  --pulse-soft: var(--primary-soft-strong);
 }
 * { box-sizing: border-box; }
 html { background: var(--canvas); }
@@ -1360,6 +1377,140 @@ textarea:focus {
   font-size: 12px;
   line-height: 1.4;
 }
+/* ----- Live map: presence + node/edge graph (TASK-AR-326) ----- */
+.live-map {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-grad);
+}
+.live-map-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.live-map-header h2 { margin: 0; }
+.live-map-presence {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.live-map-stage {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--canvas-grad);
+  overflow: hidden;
+}
+.live-map-graph {
+  display: block;
+  width: 100%;
+  height: 420px;
+}
+.live-map-edge {
+  stroke: var(--line-strong);
+  stroke-width: 1.5;
+  fill: none;
+  opacity: 0.55;
+  transition: stroke 0.2s ease, opacity 0.2s ease, stroke-width 0.2s ease;
+}
+.live-map-edge.kind-message { stroke: var(--blue); }
+.live-map-edge.kind-assignment { stroke: var(--success); }
+.live-map-edge.kind-review { stroke: var(--amber); }
+.live-map-edge.kind-block { stroke: var(--danger); }
+.live-map-edge.is-pulsing {
+  stroke: var(--pulse);
+  stroke-width: 3.5;
+  opacity: 1;
+  filter: drop-shadow(0 0 6px var(--pulse-soft));
+}
+.live-map-node circle {
+  stroke: var(--line-strong);
+  stroke-width: 1.5;
+  fill: var(--panel);
+  transition: fill 0.2s ease, stroke 0.2s ease;
+}
+.live-map-node.kind-owner circle { fill: var(--primary-soft-strong); stroke: var(--primary-line); }
+.live-map-node.kind-agent circle { fill: var(--panel-strong); }
+.live-map-node.kind-taskset circle { fill: var(--success-soft); stroke: var(--success-line); }
+.live-map-node.kind-gate circle { fill: var(--warning-soft); stroke: var(--warning-line); }
+.live-map-node.presence-working circle { stroke: var(--blue); }
+.live-map-node.presence-reviewing circle { stroke: var(--amber); }
+.live-map-node.presence-in_meeting circle { stroke: var(--violet); }
+.live-map-node.presence-online circle { stroke: var(--success); }
+.live-map-node.is-pulsing circle {
+  fill: var(--pulse-soft);
+  stroke: var(--pulse);
+}
+.live-map-node text {
+  fill: var(--ink);
+  font-size: 11px;
+  text-anchor: middle;
+}
+.live-map-empty {
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--subtle);
+}
+.live-map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 11px;
+  color: var(--muted);
+}
+.live-map-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.live-map-legend .legend-swatch {
+  width: 14px;
+  height: 0;
+  border-top: 3px solid var(--line-strong);
+}
+.live-map-legend .legend-message { border-top-color: var(--blue); }
+.live-map-legend .legend-assignment { border-top-color: var(--success); }
+.live-map-legend .legend-review { border-top-color: var(--amber); }
+.live-map-legend .legend-block { border-top-color: var(--danger); }
+.activity-feed {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 320px;
+  pointer-events: none;
+}
+.activity-toast {
+  pointer-events: auto;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow-pop);
+  font-size: 12px;
+  color: var(--ink);
+  opacity: 1;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.activity-toast.is-leaving { opacity: 0; transform: translateY(6px); }
+.activity-toast.kind-message { border-left-color: var(--blue); }
+.activity-toast.kind-assignment { border-left-color: var(--success); }
+.activity-toast.kind-review { border-left-color: var(--amber); }
+.activity-toast.kind-block { border-left-color: var(--danger); }
+.activity-toast b { display: block; font-size: 11px; color: var(--muted); }
 .event-card,
 .error-card,
 .evidence-card,
@@ -2635,9 +2786,13 @@ function connectEventStream() {
   if (!window.EventSource || eventStream) return;
   eventStream = new EventSource("/api/stream");
   eventStream.addEventListener("state", (event) => {
+    const previous = runtimeState;
     runtimeState = JSON.parse(event.data);
     renderAll();
     setText("poll-state", "live");
+    // Phase-2 SSE-live: diff successive snapshots and pulse the edges /
+    // presence nodes that changed, surfacing a toast in the activity feed.
+    reconcileLiveMap(previous, runtimeState);
   });
   eventStream.onerror = () => {
     setText("poll-state", "polling");
@@ -3925,7 +4080,169 @@ function surfaceTone(row, fallback = "pass") {
   return fallback;
 }
 
+// ----- Live map: presence + node/edge graph + activity feed (TASK-AR-326) -----
+const SVG_NS = "http://www.w3.org/2000/svg";
+const LIVE_MAP_KIND_LABELS = { message: "Message", assignment: "Assignment", review: "Review", block: "Block" };
+let livePulseTimers = {};
+
+function liveMapData() {
+  return runtimeState.live_map || { nodes: [], edges: [], presence: { counts: {}, online: 0, agents: [] }, totals: {} };
+}
+
+function liveMapNodePositions(nodes) {
+  // Deterministic radial layout: owner at the apex, everyone else on a ring
+  // grouped by kind so the graph reads the same across refreshes.
+  const positions = {};
+  const cx = 500;
+  const cy = 300;
+  const owner = nodes.find((node) => node.kind === "owner");
+  if (owner) positions[owner.id] = { x: cx, y: 70 };
+  const ring = nodes.filter((node) => node.kind !== "owner");
+  const radius = 220;
+  ring.forEach((node, index) => {
+    const angle = (index / Math.max(ring.length, 1)) * Math.PI * 2 - Math.PI / 2;
+    positions[node.id] = { x: cx + Math.cos(angle) * radius, y: cy + 40 + Math.sin(angle) * (radius * 0.7) };
+  });
+  return positions;
+}
+
+function renderLiveMap() {
+  const svg = $("live-map-graph");
+  if (!svg) return;
+  const data = liveMapData();
+  const presence = data.presence || { counts: {}, online: 0, agents: [] };
+  const counts = presence.counts || {};
+  const summaryParts = Object.keys(counts).sort().map((key) => `${key} ${counts[key]}`);
+  setText("live-map-presence", `${presence.online || 0} online - ${summaryParts.join(" / ") || "no presence"}`);
+
+  const legend = $("live-map-legend");
+  if (legend) {
+    legend.innerHTML = Object.keys(LIVE_MAP_KIND_LABELS).map((kind) =>
+      `<li><span class="legend-swatch legend-${kind}"></span>${escapeHtml(LIVE_MAP_KIND_LABELS[kind])}</li>`
+    ).join("");
+  }
+
+  const nodes = data.nodes || [];
+  const edges = data.edges || [];
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  if (!nodes.length) {
+    const note = document.createElementNS(SVG_NS, "text");
+    note.setAttribute("x", "500");
+    note.setAttribute("y", "210");
+    note.setAttribute("class", "live-map-empty");
+    note.setAttribute("text-anchor", "middle");
+    note.textContent = "No live map data";
+    svg.appendChild(note);
+    return;
+  }
+  const positions = liveMapNodePositions(nodes);
+
+  const edgeLayer = document.createElementNS(SVG_NS, "g");
+  edges.forEach((edge) => {
+    const a = positions[edge.from];
+    const b = positions[edge.to];
+    if (!a || !b) return;
+    const line = document.createElementNS(SVG_NS, "line");
+    line.setAttribute("x1", a.x);
+    line.setAttribute("y1", a.y);
+    line.setAttribute("x2", b.x);
+    line.setAttribute("y2", b.y);
+    line.setAttribute("class", `live-map-edge kind-${edge.kind || "edge"}`);
+    line.setAttribute("data-edge-id", edge.id);
+    edgeLayer.appendChild(line);
+  });
+  svg.appendChild(edgeLayer);
+
+  const nodeLayer = document.createElementNS(SVG_NS, "g");
+  nodes.forEach((node) => {
+    const pos = positions[node.id];
+    if (!pos) return;
+    const group = document.createElementNS(SVG_NS, "g");
+    group.setAttribute("class", `live-map-node kind-${node.kind || "node"} presence-${node.presence || "offline"}`);
+    group.setAttribute("data-node-id", node.id);
+    const circle = document.createElementNS(SVG_NS, "circle");
+    circle.setAttribute("cx", pos.x);
+    circle.setAttribute("cy", pos.y);
+    circle.setAttribute("r", node.kind === "owner" ? "26" : "18");
+    group.appendChild(circle);
+    const label = document.createElementNS(SVG_NS, "text");
+    label.setAttribute("x", pos.x);
+    label.setAttribute("y", pos.y + 34);
+    label.textContent = String(node.label || node.id).slice(0, 18);
+    group.appendChild(label);
+    nodeLayer.appendChild(group);
+  });
+  svg.appendChild(nodeLayer);
+}
+
+function pulseLiveElement(selector) {
+  const el = document.querySelector(selector);
+  if (!el) return;
+  el.classList.add("is-pulsing");
+  if (livePulseTimers[selector]) clearTimeout(livePulseTimers[selector]);
+  livePulseTimers[selector] = setTimeout(() => {
+    el.classList.remove("is-pulsing");
+    delete livePulseTimers[selector];
+  }, 1400);
+}
+
+function pulseLiveEdge(edgeId) {
+  if (!edgeId) return;
+  pulseLiveElement(`.live-map-edge[data-edge-id="${(window.CSS && CSS.escape) ? CSS.escape(edgeId) : edgeId}"]`);
+}
+
+function pulseLiveNode(nodeId) {
+  if (!nodeId) return;
+  pulseLiveElement(`.live-map-node[data-node-id="${(window.CSS && CSS.escape) ? CSS.escape(nodeId) : nodeId}"]`);
+}
+
+function pushActivityToast(kind, title, body) {
+  const host = $("activity-feed");
+  if (!host) return;
+  const toast = document.createElement("div");
+  toast.className = `activity-toast kind-${kind || "message"}`;
+  toast.innerHTML = `<b>${escapeHtml(title || kind || "event")}</b>${escapeHtml(body || "")}`;
+  host.appendChild(toast);
+  while (host.children.length > 4) host.removeChild(host.firstChild);
+  setTimeout(() => {
+    toast.classList.add("is-leaving");
+    setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 420);
+  }, 4200);
+}
+
+function presenceMapFor(state) {
+  const map = {};
+  const lm = (state && state.live_map) || {};
+  const presence = lm.presence || {};
+  (presence.agents || []).forEach((agent) => { map[agent.role] = agent.presence; });
+  return map;
+}
+
+function reconcileLiveMap(previous, next) {
+  if (!next || !next.live_map) return;
+  // New edges since the last snapshot -> pulse them and toast the activity.
+  const prevEdges = new Set((((previous || {}).live_map || {}).edges || []).map((edge) => edge.id));
+  (next.live_map.edges || []).forEach((edge) => {
+    if (!prevEdges.has(edge.id)) {
+      pulseLiveEdge(edge.id);
+      pulseLiveNode(edge.from);
+      pulseLiveNode(edge.to);
+      pushActivityToast(edge.kind, LIVE_MAP_KIND_LABELS[edge.kind] || edge.kind, `${edge.from} -> ${edge.to}`);
+    }
+  });
+  // Presence transitions -> pulse the agent node and toast the new state.
+  const before = presenceMapFor(previous);
+  const after = presenceMapFor(next);
+  Object.keys(after).forEach((role) => {
+    if (before[role] !== undefined && before[role] !== after[role]) {
+      pulseLiveNode(role);
+      pushActivityToast("review", "Presence", `${role}: ${before[role]} -> ${after[role]}`);
+    }
+  });
+}
+
 function renderMap() {
+  renderLiveMap();
   const graph = runtimeState.graph || { nodes: [], edges: [] };
   const machines = runtimeState.state_machines || [];
   const roadmap = runtimeState.roadmap || { milestones: [] };
@@ -5327,6 +5644,8 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/evidence": "evidence",
         "/api/replay": "replay",
         "/api/graph": "graph",
+        "/api/live_map": "live_map",
+        "/api/live-map": "live_map",
         "/api/state-machines": "state_machines",
         "/api/roadmap": "roadmap",
         "/api/roadmap-timeline": "roadmap_timeline",
