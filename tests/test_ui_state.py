@@ -923,6 +923,105 @@ def test_ui_state_work_explorer_missing_or_malformed_snapshot_degrades_safely(tm
     assert any(warning["kind"] == "work-explorer-source-error" for warning in state["warnings"])
 
 
+def _tasksets_board_card(state: dict, taskset_id: str) -> dict:
+    return next(card for card in state["tasksets_board"]["cards"] if card["id"] == taskset_id)
+
+
+def test_ui_state_tasksets_board_groups_tasks_with_computed_progress(tmp_path):
+    _write_work_classification(tmp_path, _work_explorer_records())
+    _write_work_explorer_task_markdown(tmp_path)
+    # A live task record that should be joined into the board child by id.
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-515.md",
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-515",
+                "status: in_progress",
+                "owner: worker-ui1",
+                "priority: P2",
+                "task_set_id: TASKSET-AR-WORK-METADATA-ANALYTICS",
+                "---",
+                "",
+                "## Goal",
+                "",
+                "Ingest work metadata.",
+                "",
+            ]
+        ),
+    )
+
+    state = ui_state.build_state(tmp_path, now="2026-06-13T03:00:00+09:00")
+    board = state["tasksets_board"]
+
+    assert board["schema"] == "agent-runtime-tasksets-board/v1"
+    assert board["freshness"] == "present"
+    assert board["create_command"] == "task.create"
+    assert board["source_path"] == "agents/project/work-items/WORK-ITEM-CLASSIFICATION.json"
+
+    card = _tasksets_board_card(state, "TASKSET-AR-WORK-METADATA-ANALYTICS")
+    # Progress is computed from child status only (1 of 3 complete -> 33%).
+    assert card["progress"] == {"done": 1, "total": 3}
+    assert card["progress_pct"] == 33
+    assert card["status_distribution"] == {"completed": 1, "in_progress": 1, "planned": 1}
+    assert "worker-ui1" in card["assigned_agents"]
+
+    children = {child["id"]: child for child in card["children"]}
+    assert set(children) == {"TASK-AR-514", "TASK-AR-515", "TASK-AR-516"}
+    assert children["TASK-AR-514"]["phase"] == "done"
+    assert children["TASK-AR-515"]["phase"] == "work"
+    assert children["TASK-AR-516"]["phase"] == "plan"
+    # Live record wins for owner/priority on the joined child.
+    assert children["TASK-AR-515"]["owner"] == "worker-ui1"
+    assert children["TASK-AR-515"]["priority"] == "P2"
+
+    payload = ui_state.build_resource(tmp_path, "tasksets_board", now="2026-06-13T03:00:00+09:00")
+    assert payload["resource"] == "tasksets_board"
+    assert payload["items"]["totals"]["tasksets"] >= 1
+
+
+def test_ui_state_tasksets_board_progress_changes_only_from_child_state(tmp_path):
+    records = _work_explorer_records()
+    _write_work_classification(tmp_path, records)
+    baseline = _tasksets_board_card(
+        ui_state.build_state(tmp_path, now="2026-06-13T03:00:00+09:00"),
+        "TASKSET-AR-WORK-METADATA-ANALYTICS",
+    )
+    assert baseline["progress"] == {"done": 1, "total": 3}
+    assert baseline["progress_pct"] == 33
+
+    # Stored snapshot progress field must never move the computed board card.
+    records[1]["progress_pct"] = 5
+    _write_work_classification(tmp_path, records)
+    unchanged = _tasksets_board_card(
+        ui_state.build_state(tmp_path, now="2026-06-13T03:01:00+09:00"),
+        "TASKSET-AR-WORK-METADATA-ANALYTICS",
+    )
+    assert unchanged["progress"] == baseline["progress"]
+    assert unchanged["progress_pct"] == baseline["progress_pct"]
+
+    # Flipping a child status is the only thing that moves the board.
+    records[4]["status"] = "completed"
+    _write_work_classification(tmp_path, records)
+    mutated = _tasksets_board_card(
+        ui_state.build_state(tmp_path, now="2026-06-13T03:02:00+09:00"),
+        "TASKSET-AR-WORK-METADATA-ANALYTICS",
+    )
+    assert mutated["progress"] == {"done": 2, "total": 3}
+    assert mutated["progress_pct"] == 67
+
+
+def test_ui_state_tasksets_board_degrades_safely_when_snapshot_missing(tmp_path):
+    missing_root = tmp_path / "missing"
+    missing_root.mkdir()
+    state = ui_state.build_state(missing_root, now="2026-06-13T03:00:00+09:00")
+    board = state["tasksets_board"]
+    assert board["freshness"] == "missing"
+    assert board["cards"] == []
+    assert board["totals"]["tasksets"] == 0
+    assert board["create_command"] == "task.create"
+
+
 def test_ui_state_cli_emits_selected_resource_json(tmp_path, capsys):
     _write(
         tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-227-ui-state-api.md",
