@@ -1,20 +1,35 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-13T22:12:00+09:00
+updated_at: 2026-06-13T23:16:29+09:00
 current_state:
-  summary: "UI console waves 1-6 complete (22/28): UI-UX-V2 done (12); UI-PLATFORM-EXTENSIONS AR-329/330/331 (wave-5) + AR-332 file attachments / AR-333 import-export / AR-334 global search (wave-6) merged via PRs #92-#115 with W4a+W4b dual verification. W4b caught real defects pre-merge (AR-327 HTTP-400, AR-329 template reader gap, AR-334 dead-code guard) all fixed. Claims released, worktrees/branches clean."
-  status: ready
+  summary: "UI console waves 1-6 complete (22/28), and UI wave-7 claims are open for AR-335 calendar/scheduled dispatch, AR-336 state-machine viewer, and AR-337 team/role assignment heatmap. The active claims are preserved in the root checkout so parallel worktrees remain resumable."
+  status: active
   task_set_status: in_progress
   task_set_id: "TASKSET-AR-UI-PLATFORM-EXTENSIONS"
   step_index: 4
   step_total: 5
   progress_pct: 79
-  status_text: "Waves 1-6 done (22/28). Remaining UI backlog: UI-PLATFORM-EXTENSIONS 335-341 (7); UI-LIVING-CONSOLE 363/364/365 (3). Next waves dispatch from the V2 shell (theme tokens + sidebar groups + list toolbar + command path + gate chain + search/export/attachments)."
+  status_text: "Waves 1-6 done (22/28). Wave-7 active: AR-335/336/337 in dispatcher-created worktrees. Remaining after wave-7: UI-PLATFORM-EXTENSIONS 338-341 (4); UI-LIVING-CONSOLE 363/364/365 (3)."
 active_work:
-  current_agents: []
+  current_agents:
+    - claim_id: CLAIM-20260613-224455-task-ar-335-516a
+      agent_role: lead-engineer
+      agent_instance_id: inst-ui7-ar335
+      display_name: claude/cal-puma
+      callsite_id: claude-ui7-335
+    - claim_id: CLAIM-20260613-224455-task-ar-336-4220
+      agent_role: lead-engineer
+      agent_instance_id: inst-ui7-ar336
+      display_name: claude/fsm-newt
+      callsite_id: claude-ui7-336
+    - claim_id: CLAIM-20260613-224456-task-ar-337-a262
+      agent_role: lead-engineer
+      agent_instance_id: inst-ui7-ar337
+      display_name: claude/load-bison
+      callsite_id: claude-ui7-337
   current_teams: []
 resume:
   active_task: none
-  active_task_set: TASKSET-AR-PARALLEL-WAVE-EXECUTION
+  active_task_set: TASKSET-AR-UI-PLATFORM-EXTENSIONS
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -22,7 +37,10 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260613-224455-task-ar-335-516a.json
+    - agents/runtime/task_claims/CLAIM-20260613-224455-task-ar-336-4220.json
+    - agents/runtime/task_claims/CLAIM-20260613-224456-task-ar-337-a262.json
   release_steward_completed_tasks:
     - agents/lead_engineer/tasks/TASK-AR-219.md
     - agents/lead_engineer/tasks/TASK-AR-222.md

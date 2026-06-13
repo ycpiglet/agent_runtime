@@ -1,5 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-13 - TASKSET-AR-UI-PLATFORM-EXTENSIONS wave-7 active
+
+- Summary: UI console waves 1-6 are complete (22/28), and wave-7 is now active for `TASK-AR-335`, `TASK-AR-336`, and `TASK-AR-337`.
+- Active claims: `CLAIM-20260613-224455-task-ar-335-516a`, `CLAIM-20260613-224455-task-ar-336-4220`, and `CLAIM-20260613-224456-task-ar-337-a262`.
+- Runtime preservation: claim, instance, pane-event, `NEXT-SESSION-POINTER.yml`, and `BACKLOG-BOARD.md` surfaces are being preserved in the root checkout so the three dispatcher-created worktrees remain resumable.
+- Boundary: implementation remains in `.worktrees/TASK-AR-335`, `.worktrees/TASK-AR-336`, and `.worktrees/TASK-AR-337`; root edits are limited to live claim/pointer/board/status metadata.
+
 ## 2026-06-13 - Parallel wave 1-2 closeout (7 tasks merged)
 
 - Summary: `TASK-AR-500/503/505/509/510/513/515` implemented by parallel worker instances, dual-verified (W4a worker + W4b independent), merged via PRs #45-#51, claims released with evidence, worktrees/branches cleaned (W5).
