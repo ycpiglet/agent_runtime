@@ -89,6 +89,7 @@ HTML = """<!doctype html>
           <button class="tab" type="button" data-view="work">Work Explorer</button>
           <button class="tab" type="button" data-view="meeting">Meeting Room</button>
           <button class="tab" type="button" data-view="tasksets">Tasksets</button>
+          <button class="tab" type="button" data-view="tsboard">Taskset Board</button>
           <button class="tab" type="button" data-view="agents">Agents</button>
           <button class="tab" type="button" data-view="messages">Messages</button>
           <button class="tab" type="button" data-view="events">Events</button>
@@ -175,6 +176,20 @@ HTML = """<!doctype html>
             </select>
           </div>
           <div id="taskset-quick-list" class="taskset-grid"></div>
+        </div>
+        <div id="view-tsboard" class="view">
+          <div class="tsboard-toolbar">
+            <input id="tsboard-filter" placeholder="taskset, task id, owner">
+            <label class="tsboard-swimlane-toggle">
+              <input id="tsboard-swimlane-toggle" type="checkbox">
+              <span>Kanban swimlanes</span>
+            </label>
+            <button id="tsboard-expand-all" type="button">Expand all</button>
+            <button id="tsboard-collapse-all" type="button">Collapse all</button>
+          </div>
+          <p id="tsboard-staleness" class="tsboard-staleness"></p>
+          <div id="tsboard-cards" class="tsboard-cards" aria-label="Taskset board"></div>
+          <div id="tsboard-swimlanes" class="tsboard-swimlanes" aria-label="Taskset swimlanes" hidden></div>
         </div>
         <div id="view-agents" class="view">
           <div id="multipane-assurance-list" class="assurance-grid"></div>
@@ -1336,6 +1351,151 @@ pre {
   .detail-panel { position: static; }
   .kanban { grid-template-columns: repeat(2, minmax(220px, 1fr)); }
 }
+.tsboard-toolbar {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.tsboard-swimlane-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.tsboard-staleness {
+  color: var(--subtle);
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+.tsboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
+}
+.tsboard-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.tsboard-card.bucket-completed { border-left: 3px solid var(--success); }
+.tsboard-card.bucket-in_progress { border-left: 3px solid var(--blue); }
+.tsboard-card.bucket-planned { border-left: 3px solid var(--subtle); }
+.tsboard-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.tsboard-title { display: flex; flex-direction: column; gap: 2px; }
+.tsboard-title span { color: var(--muted); font-size: 13px; }
+.tsboard-toggle {
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+.tsboard-card-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 13px;
+}
+.tsboard-distribution { display: flex; flex-wrap: wrap; gap: 6px; }
+.dist-chip {
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  border: 1px solid var(--line-strong);
+}
+.dist-completed { color: var(--success); }
+.dist-in_progress { color: var(--blue); }
+.dist-planned { color: var(--muted); }
+.agent-stack { display: flex; gap: 4px; flex-wrap: wrap; }
+.agent-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--surface-raised);
+  border: 1px solid var(--line-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+.agent-stack-empty { color: var(--subtle); font-size: 12px; }
+.tsboard-activity { list-style: none; margin: 0; padding: 0; font-size: 12px; }
+.tsboard-activity li { color: var(--muted); }
+.tsboard-add-row { display: flex; gap: 6px; }
+.tsboard-add-title { flex: 1; }
+.tsboard-add-task {
+  background: var(--primary);
+  border: none;
+  color: var(--ink);
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.tsboard-children { display: flex; flex-direction: column; gap: 4px; }
+.tsboard-child {
+  display: grid;
+  grid-template-columns: auto 90px 1fr auto auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 6px;
+  border-top: 1px solid var(--line);
+  cursor: pointer;
+  font-size: 12px;
+}
+.tsboard-child:hover { background: var(--surface-raised); }
+.tsboard-child-id { font-family: monospace; color: var(--muted); }
+.phase-chip {
+  border-radius: 999px;
+  padding: 1px 7px;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+.phase-plan { background: rgba(98, 102, 109, 0.25); color: var(--muted); }
+.phase-work { background: rgba(87, 160, 255, 0.18); color: var(--blue); }
+.phase-review { background: rgba(217, 154, 43, 0.18); color: var(--amber); }
+.phase-done { background: rgba(39, 166, 68, 0.18); color: var(--success); }
+.tsboard-swimlanes { display: flex; flex-direction: column; gap: 16px; }
+.tsboard-swimlane {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px;
+  background: var(--panel);
+}
+.tsboard-swimlane-header { display: flex; gap: 8px; align-items: baseline; margin-bottom: 8px; }
+.tsboard-swimlane-header span { color: var(--muted); font-size: 13px; }
+.tsboard-swimlane-cols {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.tsboard-swim-col { background: var(--surface-raised); border-radius: 6px; padding: 8px; }
+.tsboard-swim-col header { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.tsboard-swim-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  background: var(--panel);
+  border-radius: 4px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.tsboard-swim-card code { color: var(--muted); }
+
 @media (max-width: 760px) {
   .topbar {
     align-items: flex-start;
@@ -1383,6 +1543,9 @@ pre {
   .taskset-grid,
   .work-toolbar,
   .work-grid,
+  .tsboard-toolbar,
+  .tsboard-cards,
+  .tsboard-swimlane-cols,
   .work-detail-meta,
   .evidence-grid,
   .task-card-meta,
@@ -1430,6 +1593,8 @@ let workFacetSelections = {};
 let workFacetSignature = "";
 let meetingParticipants = [];
 let meetingKeyboardHeld = null;
+let expandedTasksetCards = new Set();
+let tasksetSwimlaneMode = false;
 
 const $ = (id) => document.getElementById(id);
 const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -2473,6 +2638,193 @@ async function submitMeetingPlan(event) {
   });
 }
 
+function tasksetsBoardData() {
+  return (runtimeState && runtimeState.tasksets_board) || { cards: [], totals: {}, staleness_note: "" };
+}
+
+function tasksetCardSearchText(card) {
+  return [
+    card.id,
+    card.title,
+    card.status,
+    ...(card.assigned_agents || []),
+    ...(card.children || []).map((child) => `${child.id} ${child.title} ${child.owner}`)
+  ].join(" ").toLowerCase();
+}
+
+function filteredTasksetCards() {
+  const query = $("tsboard-filter")?.value.trim().toLowerCase() || "";
+  const cards = tasksetsBoardData().cards || [];
+  if (!query) return cards;
+  return cards.filter((card) => tasksetCardSearchText(card).includes(query));
+}
+
+function tasksetPhaseChip(child) {
+  const phase = String(child.phase || "plan");
+  return `<span class="phase-chip phase-${escapeHtml(phase)}">${escapeHtml(phase)}</span>`;
+}
+
+function tasksetStatusDistribution(card) {
+  const dist = card.status_distribution || {};
+  return ["completed", "in_progress", "planned"]
+    .filter((bucket) => dist[bucket])
+    .map((bucket) => `<span class="dist-chip dist-${escapeHtml(bucket)}">${escapeHtml(bucket)} ${escapeHtml(dist[bucket])}</span>`)
+    .join("");
+}
+
+function tasksetAgentStack(card) {
+  const agents = card.assigned_agents || [];
+  if (!agents.length) return `<span class="agent-stack-empty">unassigned</span>`;
+  return agents.slice(0, 6)
+    .map((agent) => `<span class="agent-avatar" title="${escapeHtml(agent)}">${escapeHtml(String(agent).slice(0, 2).toUpperCase())}</span>`)
+    .join("");
+}
+
+function tasksetRecentActivity(card) {
+  const recent = card.recent_activity || [];
+  if (!recent.length) return "";
+  return `<ul class="tsboard-activity">${recent.map((item) =>
+    `<li><code>${escapeHtml(item.task_id)}</code> ${escapeHtml(item.event)} <small>${escapeHtml(item.ts || "")}</small></li>`
+  ).join("")}</ul>`;
+}
+
+function tasksetChildRows(card) {
+  const children = card.children || [];
+  if (!children.length) return `<div class="empty">No tasks</div>`;
+  return children.map((child) => `
+    <div class="tsboard-child" data-child-id="${escapeHtml(child.id)}">
+      ${tasksetPhaseChip(child)}
+      <span class="tsboard-child-id">${escapeHtml(child.id)}</span>
+      <span class="tsboard-child-title">${escapeHtml(child.title)}</span>
+      <span class="tsboard-child-owner">${escapeHtml(child.owner || "unassigned")}</span>
+      <span class="tsboard-child-priority">${escapeHtml(child.priority || "-")}</span>
+      <span class="tsboard-child-pct">${escapeHtml(numericPct(child.progress_pct) ?? 0)}%</span>
+    </div>
+  `).join("");
+}
+
+function tasksetBoardCards(cards) {
+  return cards.map((card) => {
+    const expanded = expandedTasksetCards.has(card.id);
+    const progress = card.progress || { done: 0, total: 0 };
+    return `
+      <article class="tsboard-card ${escapeHtml("bucket-" + (card.status_bucket || "planned"))}" data-taskset-id="${escapeHtml(card.id)}">
+        <header class="tsboard-card-header">
+          <div class="tsboard-title">
+            <b>${escapeHtml(card.id)}</b>
+            <span>${escapeHtml(card.title || card.id)}</span>
+          </div>
+          <button class="tsboard-toggle" type="button" data-tsboard-toggle="${escapeHtml(card.id)}" aria-expanded="${expanded}">${expanded ? "Collapse" : "Expand"}</button>
+        </header>
+        <div class="tsboard-card-meta">
+          <span><span class="meta-label">Progress</span><strong>${escapeHtml(progress.done)}/${escapeHtml(progress.total)}</strong></span>
+          <span><span class="meta-label">Status</span><strong>${escapeHtml(card.status || "planned")}</strong></span>
+        </div>
+        ${progressBar(card.progress_pct)}
+        <div class="tsboard-distribution">${tasksetStatusDistribution(card)}</div>
+        <div class="agent-stack" aria-label="Assigned agents">${tasksetAgentStack(card)}</div>
+        ${tasksetRecentActivity(card)}
+        <div class="tsboard-add-row">
+          <input class="tsboard-add-title" data-tsboard-add-input="${escapeHtml(card.id)}" placeholder="new task title">
+          <button class="tsboard-add-task" type="button" data-tsboard-add="${escapeHtml(card.id)}">+ Add task</button>
+        </div>
+        ${expanded ? `<div class="tsboard-children">${tasksetChildRows(card)}</div>` : ""}
+      </article>
+    `;
+  }).join("");
+}
+
+async function queueTasksetAddTask(taskSetId, title) {
+  const cleanTitle = String(title || "").trim();
+  if (!cleanTitle) return;
+  await sendJson("/api/tasks", {
+    type: "task.create",
+    payload: {
+      title: cleanTitle,
+      description: cleanTitle,
+      status: "planned",
+      owner: "lead-engineer",
+      task_set_id: taskSetId,
+      queue_position: "front"
+    }
+  });
+}
+
+function wireTasksetBoardActions(host) {
+  host.querySelectorAll("[data-tsboard-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const id = button.dataset.tsboardToggle;
+      if (expandedTasksetCards.has(id)) {
+        expandedTasksetCards.delete(id);
+      } else {
+        expandedTasksetCards.add(id);
+      }
+      renderTasksetBoard();
+    });
+  });
+  host.querySelectorAll("[data-tsboard-add]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const id = button.dataset.tsboardAdd;
+      const input = host.querySelector(`[data-tsboard-add-input="${CSS.escape(id)}"]`);
+      queueTasksetAddTask(id, input ? input.value : "");
+      if (input) input.value = "";
+    });
+  });
+  host.querySelectorAll(".tsboard-child").forEach((row) => {
+    row.addEventListener("click", () => {
+      selectedTaskId = row.dataset.childId;
+      renderDetail();
+    });
+  });
+}
+
+function tasksetSwimlanes(cards) {
+  const phases = [
+    ["plan", "Plan"],
+    ["work", "Work"],
+    ["review", "Review"],
+    ["done", "Done"]
+  ];
+  return cards.map((card) => `
+    <section class="tsboard-swimlane" data-taskset-id="${escapeHtml(card.id)}">
+      <header class="tsboard-swimlane-header"><b>${escapeHtml(card.id)}</b><span>${escapeHtml(card.title || "")}</span></header>
+      <div class="tsboard-swimlane-cols">
+        ${phases.map(([phase, label]) => {
+          const items = (card.children || []).filter((child) => String(child.phase) === phase);
+          const body = items.length
+            ? items.map((child) => `<div class="tsboard-swim-card" data-child-id="${escapeHtml(child.id)}"><code>${escapeHtml(child.id)}</code><span>${escapeHtml(child.title)}</span></div>`).join("")
+            : `<div class="empty">-</div>`;
+          return `<div class="tsboard-swim-col phase-${escapeHtml(phase)}"><header>${escapeHtml(label)} <small>${items.length}</small></header>${body}</div>`;
+        }).join("")}
+      </div>
+    </section>
+  `).join("");
+}
+
+function renderTasksetBoard() {
+  const cardsHost = $("tsboard-cards");
+  const swimHost = $("tsboard-swimlanes");
+  if (!cardsHost || !swimHost) return;
+  setText("tsboard-staleness", tasksetsBoardData().staleness_note || "");
+  const cards = filteredTasksetCards();
+  if (tasksetSwimlaneMode) {
+    cardsHost.hidden = true;
+    swimHost.hidden = false;
+    swimHost.innerHTML = cards.length ? tasksetSwimlanes(cards) : `<div class="empty">No task sets</div>`;
+    swimHost.querySelectorAll(".tsboard-swim-card").forEach((row) => {
+      row.addEventListener("click", () => {
+        selectedTaskId = row.dataset.childId;
+        renderDetail();
+      });
+    });
+  } else {
+    swimHost.hidden = true;
+    cardsHost.hidden = false;
+    cardsHost.innerHTML = cards.length ? tasksetBoardCards(cards) : `<div class="empty">No task sets</div>`;
+    wireTasksetBoardActions(cardsHost);
+  }
+}
+
 function renderDetail() {
   const panel = $("detail-panel");
   const task = (runtimeState.tasks || []).find((item) => item.id === selectedTaskId);
@@ -2554,6 +2906,7 @@ function renderAll() {
   renderWorkExplorer();
   renderMeetingRoom();
   renderTaskSetDirectory();
+  renderTasksetBoard();
   renderAgents();
   renderMessages();
   renderEvents();
@@ -2585,6 +2938,19 @@ $("refresh-button").addEventListener("click", loadState);
     node.addEventListener("input", renderTaskSetDirectory);
     node.addEventListener("change", renderTaskSetDirectory);
   }
+});
+$("tsboard-filter")?.addEventListener("input", renderTasksetBoard);
+$("tsboard-swimlane-toggle")?.addEventListener("change", (event) => {
+  tasksetSwimlaneMode = Boolean(event.target.checked);
+  renderTasksetBoard();
+});
+$("tsboard-expand-all")?.addEventListener("click", () => {
+  expandedTasksetCards = new Set((tasksetsBoardData().cards || []).map((card) => card.id));
+  renderTasksetBoard();
+});
+$("tsboard-collapse-all")?.addEventListener("click", () => {
+  expandedTasksetCards = new Set();
+  renderTasksetBoard();
 });
 ["work-search", "work-depth-filter"].forEach((id) => {
   const node = $(id);
@@ -2774,6 +3140,8 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/work-explorer": "work_explorer",
         "/api/meeting_room": "meeting_room",
         "/api/meeting-room": "meeting_room",
+        "/api/tasksets_board": "tasksets_board",
+        "/api/tasksets-board": "tasksets_board",
         "/api/sources": "sources",
         "/api/errors": "errors",
         "/api/evidence": "evidence",

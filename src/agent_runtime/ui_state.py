@@ -25,6 +25,7 @@ RESOURCE_NAMES = (
     "inflight",
     "work_explorer",
     "meeting_room",
+    "tasksets_board",
     "sources",
     "errors",
     "evidence",
@@ -1812,6 +1813,143 @@ def build_meeting_room(
     }
 
 
+TASKSETS_BOARD_SCHEMA = "agent-runtime-tasksets-board/v1"
+_TASKSETS_BOARD_ACTIVITY_LIMIT = 5
+_TASKSET_CHILD_STATUS_PHASES = {
+    "plan": ("planned", "backlog", "todo", "proposed", "draft"),
+    "work": ("in_progress", "active", "working", "claimed", "assigned", "started"),
+    "review": ("review", "waiting_review", "in_review", "verifying", "verification"),
+}
+
+
+def _taskset_phase(status: Any, bucket: str) -> str:
+    """Map a child status to a coarse plan/work/review/done phase chip."""
+    normalized = str(status or "").strip().lower()
+    if bucket == "completed":
+        return "done"
+    for phase, tokens in _TASKSET_CHILD_STATUS_PHASES.items():
+        if normalized in tokens:
+            return phase
+    if bucket == "in_progress":
+        return "work"
+    return "plan"
+
+
+def build_tasksets_board(
+    work_explorer: dict[str, Any],
+    tasks: list[dict[str, Any]],
+    events: list[dict[str, Any]],
+    now: str,
+) -> dict[str, Any]:
+    """Taskset-grouped board derived from the classification hierarchy.
+
+    Progress and status distribution are computed from child task state only;
+    no stored progress field from the snapshot is read. Live task records and
+    runtime events are joined by id for owner and recent-activity context.
+    """
+    nodes = {node["id"]: node for node in work_explorer.get("nodes", [])}
+    task_by_id = {str(task.get("id")): task for task in tasks if task.get("id")}
+
+    # Most recent runtime activity per task id (events are append-only logs).
+    activity_by_task: dict[str, dict[str, Any]] = {}
+    for event in events:
+        task_id = str(event.get("task_id") or "").strip()
+        if not task_id:
+            continue
+        ts = str(event.get("created_at") or event.get("ts") or "")
+        existing = activity_by_task.get(task_id)
+        if existing is None or ts > str(existing.get("ts") or ""):
+            activity_by_task[task_id] = {
+                "task_id": task_id,
+                "event": event.get("event") or event.get("type") or "activity",
+                "actor": event.get("role") or event.get("actor") or "",
+                "ts": ts,
+            }
+
+    cards: list[dict[str, Any]] = []
+    for node in work_explorer.get("nodes", []):
+        if str(node.get("level") or "") != "taskset":
+            continue
+        taskset_id = node["id"]
+        children: list[dict[str, Any]] = []
+        status_distribution: dict[str, int] = {}
+        assigned_agents: list[str] = []
+        recent: list[dict[str, Any]] = []
+        for child_id in node.get("children", []):
+            child = nodes.get(child_id)
+            if child is None:
+                continue
+            live = task_by_id.get(child_id, {})
+            facets = child.get("facets", {})
+            owner = live.get("owner_agent") or facets.get("owner") or ""
+            priority = live.get("priority") or facets.get("priority") or ""
+            bucket = child.get("status_bucket", "planned")
+            status = child.get("status") or live.get("status") or ""
+            child_rollup = child.get("rollup") or {}
+            child_pct = child_rollup.get("pct")
+            if child_pct is None:
+                child_pct = 100 if bucket == "completed" else 0
+            last_updated = live.get("last_updated") or live.get("updated_at")
+            status_distribution[bucket] = status_distribution.get(bucket, 0) + 1
+            if owner:
+                assigned_agents.append(str(owner))
+            activity = activity_by_task.get(child_id)
+            if activity:
+                recent.append(activity)
+            children.append(
+                {
+                    "id": child_id,
+                    "title": child.get("title") or live.get("title") or child_id,
+                    "status": status,
+                    "status_bucket": bucket,
+                    "phase": _taskset_phase(status, bucket),
+                    "owner": str(owner),
+                    "priority": str(priority),
+                    "progress_pct": child_pct,
+                    "last_updated": last_updated,
+                    "source_path": child.get("path") or live.get("source_path") or "",
+                }
+            )
+
+        rollup = node.get("rollup") or {"total": 0, "completed": 0, "in_progress": 0, "planned": 0, "pct": None}
+        recent.sort(key=lambda item: str(item.get("ts") or ""), reverse=True)
+        cards.append(
+            {
+                "id": taskset_id,
+                "title": node.get("title") or taskset_id,
+                "status": node.get("status") or "",
+                "status_bucket": node.get("status_bucket", "planned"),
+                "initiative_id": node.get("parent_id") or "",
+                "progress_pct": rollup.get("pct"),
+                "progress": {"done": rollup.get("completed", 0), "total": rollup.get("total", 0)},
+                "status_distribution": status_distribution,
+                "assigned_agents": sorted(set(assigned_agents)),
+                "recent_activity": recent[:_TASKSETS_BOARD_ACTIVITY_LIMIT],
+                "source_path": node.get("path") or "",
+                "children": children,
+            }
+        )
+
+    cards.sort(key=lambda card: (_work_number_sort_key(nodes[card["id"]].get("number")), card["id"]))
+    totals = {
+        "tasksets": len(cards),
+        "tasks": sum(card["progress"]["total"] for card in cards),
+        "completed": sum(card["progress"]["done"] for card in cards),
+    }
+    return {
+        "schema": TASKSETS_BOARD_SCHEMA,
+        "generated_at": now,
+        "source_path": WORK_ITEM_CLASSIFICATION_REL,
+        "source_generated_at": work_explorer.get("source_generated_at"),
+        "source_last_updated": work_explorer.get("source_last_updated"),
+        "staleness_note": work_explorer.get("staleness_note", ""),
+        "freshness": work_explorer.get("freshness", "missing"),
+        "create_command": "task.create",
+        "totals": totals,
+        "cards": cards,
+    }
+
+
 def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     root_path = Path(root).resolve()
     generated_at = now or _now_iso()
@@ -1839,6 +1977,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     inflight = load_inflight(root_path, generated_at, warnings)
     work_explorer = load_work_explorer(root_path, generated_at, warnings)
     meeting_room = build_meeting_room(agents, tasks, now=generated_at)
+    tasksets_board = build_tasksets_board(work_explorer, tasks, events, generated_at)
     return {
         "generated_at": generated_at,
         "sources": sources,
@@ -1851,6 +1990,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "inflight": inflight,
         "work_explorer": work_explorer,
         "meeting_room": meeting_room,
+        "tasksets_board": tasksets_board,
         "messages": messages,
         "events": events,
         "goals": goals,

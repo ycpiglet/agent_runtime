@@ -631,6 +631,87 @@ def test_ui_console_work_explorer_tab_tree_and_facet_anchors(tmp_path):
     assert ".work-grid" in mobile_css
 
 
+def test_ui_console_tasksets_board_route_serves_grouped_cards(tmp_path):
+    _write_work_classification(tmp_path)
+
+    response = ui_console.build_response("/api/tasksets_board", tmp_path)
+    payload = json.loads(response.body.decode("utf-8"))
+    alias = json.loads(ui_console.build_response("/api/tasksets-board", tmp_path).body.decode("utf-8"))
+
+    assert response.status == 200
+    assert payload["resource"] == "tasksets_board"
+    assert alias["resource"] == "tasksets_board"
+    assert payload["items"]["schema"] == "agent-runtime-tasksets-board/v1"
+    assert payload["items"]["create_command"] == "task.create"
+
+    card = next(c for c in payload["items"]["cards"] if c["id"] == "TASKSET-AR-WORK-METADATA-ANALYTICS")
+    # Computed progress: 1 completed of 2 child tasks.
+    assert card["progress"] == {"done": 1, "total": 2}
+    assert card["progress_pct"] == 50
+    assert {child["id"] for child in card["children"]} == {"TASK-AR-514", "TASK-AR-516"}
+
+
+def test_ui_console_tasksets_board_tab_panel_and_css_anchors(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    assert 'data-view="tsboard"' in html
+    for host_id in [
+        "view-tsboard",
+        "tsboard-filter",
+        "tsboard-swimlane-toggle",
+        "tsboard-expand-all",
+        "tsboard-collapse-all",
+        "tsboard-staleness",
+        "tsboard-cards",
+        "tsboard-swimlanes",
+    ]:
+        assert host_id in html
+
+    for marker in [
+        "renderTasksetBoard",
+        "tasksetsBoardData",
+        "tasksetBoardCards",
+        "tasksetSwimlanes",
+        "expandedTasksetCards",
+        "tasksetSwimlaneMode",
+        "queueTasksetAddTask",
+        "tasksets_board",
+        "data-tsboard-toggle",
+        "data-tsboard-add",
+    ]:
+        assert marker in js
+
+    for selector in [
+        ".tsboard-toolbar",
+        ".tsboard-cards",
+        ".tsboard-card",
+        ".tsboard-card.bucket-completed",
+        ".phase-chip",
+        ".dist-chip",
+        ".agent-avatar",
+        ".tsboard-children",
+        ".tsboard-swimlane",
+        ".tsboard-swim-card",
+    ]:
+        assert selector in css
+
+    mobile_css = css.split("@media (max-width: 760px)", 1)[1]
+    assert ".tsboard-cards" in mobile_css
+
+
+def test_ui_console_tasksets_board_add_task_uses_command_path_not_file_write(tmp_path):
+    # The add-task affordance must route through the task.create command path
+    # (proposal-only) rather than mutating a task file directly.
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    add_block = js.split("async function queueTasksetAddTask", 1)[1].split("\n}", 1)[0]
+    assert '"/api/tasks"' in add_block
+    assert 'type: "task.create"' in add_block
+    assert "writeFile" not in add_block
+    assert "fs." not in add_block
+
+
 def test_ui_console_api_resource_routes_match_state_resources(tmp_path):
     _write_task(tmp_path, "TASK-AR-229")
 
