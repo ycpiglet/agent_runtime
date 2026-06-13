@@ -161,6 +161,9 @@ HTML = """<!doctype html>
         </div>
         <div class="sidebar-group" data-group="ops">
           <span class="sidebar-group-title">OPS</span>
+          <button class="sidebar-link" type="button" role="tab" data-view="dashboard" data-route="ops/dashboard" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9683;</span><span class="sidebar-label">Dashboard</span>
+          </button>
           <button class="sidebar-link" type="button" role="tab" data-view="automation" data-route="ops/automation" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9889;</span><span class="sidebar-label">Automation</span>
           </button>
@@ -671,6 +674,46 @@ HTML = """<!doctype html>
             </form>
             <p id="import-summary" class="portability-summary" role="status" aria-live="polite"></p>
             <div id="import-preview" class="portability-preview" aria-label="Import preview"></div>
+          </section>
+        </div>
+        <div id="view-dashboard" class="view">
+          <section class="opsdash" aria-label="Operations dashboard">
+            <header class="opsdash-header">
+              <h2>Ops Dashboard</h2>
+              <p id="opsdash-summary" class="opsdash-summary" role="status"></p>
+            </header>
+            <div class="opsdash-grid">
+              <article class="opsdash-card" aria-label="Token and cost trend">
+                <header class="opsdash-card-head">
+                  <h3>Token &amp; Cost</h3>
+                  <span id="opsdash-tokens-meta" class="opsdash-card-meta"></span>
+                </header>
+                <div id="opsdash-tokens" class="opsdash-tokens"></div>
+                <a id="opsdash-tokens-src" class="opsdash-src" href="#" hidden>source</a>
+              </article>
+              <article class="opsdash-card" aria-label="Eval score trend">
+                <header class="opsdash-card-head">
+                  <h3>Eval Scores</h3>
+                  <span id="opsdash-eval-meta" class="opsdash-card-meta"></span>
+                </header>
+                <div id="opsdash-eval" class="opsdash-eval"></div>
+              </article>
+              <article class="opsdash-card" aria-label="Gate status board">
+                <header class="opsdash-card-head">
+                  <h3>Gate Board</h3>
+                  <span id="opsdash-gates-meta" class="opsdash-card-meta"></span>
+                </header>
+                <div id="opsdash-gates" class="opsdash-gates"></div>
+              </article>
+              <article class="opsdash-card" aria-label="Taskset burndown and velocity">
+                <header class="opsdash-card-head">
+                  <h3>Burndown &amp; Velocity</h3>
+                  <span id="opsdash-burndown-meta" class="opsdash-card-meta"></span>
+                </header>
+                <div id="opsdash-burndown" class="opsdash-burndown"></div>
+                <div id="opsdash-velocity" class="opsdash-velocity"></div>
+              </article>
+            </div>
           </section>
         </div>
       </section>
@@ -4314,6 +4357,276 @@ pre {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
   box-shadow: var(--shadow-pop);
+}
+/* ----- TASK-AR-339: ops dashboard (token/cost, eval, gates, burndown) ----- */
+/* All colors reference theme tokens; charts are inline SVG / token-styled divs
+   so they retheme automatically and pass the no-raw-color tokenization gate. */
+.opsdash {
+  padding: 4px 2px 16px;
+}
+.opsdash-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.opsdash-summary {
+  color: var(--muted);
+  font-size: 13px;
+}
+.opsdash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 14px;
+}
+.opsdash-card {
+  background: var(--tile);
+  border: 1px solid var(--tile-line);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+.opsdash-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.opsdash-card-head h3 {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink);
+}
+.opsdash-card-meta {
+  color: var(--muted);
+  font-size: 12px;
+}
+.opsdash-src {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--primary);
+  font-size: 12px;
+  text-decoration: none;
+}
+.opsdash-empty {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 10px 0;
+}
+/* Token/cost bars: estimate track + actual fill over token colors. */
+.opsdash-bar-row {
+  margin-bottom: 10px;
+}
+.opsdash-bar-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.opsdash-bar-label small {
+  color: var(--muted);
+}
+.opsdash-bar-track {
+  position: relative;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--progress-track);
+  overflow: hidden;
+}
+.opsdash-bar-est {
+  position: absolute;
+  inset: 0 auto 0 0;
+  height: 100%;
+  background: var(--primary-soft-strong);
+}
+.opsdash-bar-actual {
+  position: absolute;
+  inset: 0 auto 0 0;
+  height: 100%;
+  background: var(--primary);
+}
+.opsdash-bar-actual.is-over {
+  background: var(--danger);
+}
+.opsdash-totals {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+.opsdash-stat {
+  display: flex;
+  flex-direction: column;
+}
+.opsdash-stat b {
+  font-size: 18px;
+  color: var(--ink);
+}
+.opsdash-stat span {
+  font-size: 11px;
+  color: var(--muted);
+}
+/* Eval trend: inline SVG line + axis labels, stroke via token. */
+.opsdash-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.opsdash-line {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2;
+}
+.opsdash-line-min {
+  fill: none;
+  stroke: var(--warning);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+.opsdash-dot {
+  fill: var(--primary);
+}
+.opsdash-dot.is-watch {
+  fill: var(--warning);
+}
+.opsdash-dot.is-block {
+  fill: var(--danger);
+}
+.opsdash-axis {
+  fill: var(--muted);
+  font-size: 9px;
+}
+.opsdash-grid-line {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+/* Gate board: pass/watch/block pills mapped to semantic tokens. */
+.opsdash-gate-counts {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.opsdash-gate-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 56px;
+  padding: 6px 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+}
+.opsdash-gate-count b {
+  font-size: 18px;
+}
+.opsdash-gate-count span {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.opsdash-gate-count.is-pass {
+  background: var(--success-soft);
+  border-color: var(--success-line);
+  color: var(--success);
+}
+.opsdash-gate-count.is-watch {
+  background: var(--warning-soft);
+  border-color: var(--warning-line);
+  color: var(--warning);
+}
+.opsdash-gate-count.is-block {
+  background: var(--danger-soft);
+  border-color: var(--danger-line);
+  color: var(--danger);
+}
+.opsdash-gate-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 260px;
+  overflow-y: auto;
+}
+.opsdash-gate-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+.opsdash-gate-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--muted);
+}
+.opsdash-gate-dot.is-pass {
+  background: var(--success);
+}
+.opsdash-gate-dot.is-watch {
+  background: var(--warning);
+}
+.opsdash-gate-dot.is-block {
+  background: var(--danger);
+}
+.opsdash-gate-name {
+  flex: 1;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.opsdash-gate-ref {
+  color: var(--muted);
+  font-size: 11px;
+}
+/* Burndown + velocity: token-styled progress + SVG bar chart. */
+.opsdash-burndown-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.opsdash-velocity-head {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.opsdash-velocity-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 80px;
+}
+.opsdash-vbar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  gap: 2px;
+}
+.opsdash-vbar-fill {
+  width: 100%;
+  background: var(--success);
+  border-radius: 3px 3px 0 0;
+  min-height: 2px;
+}
+.opsdash-vbar-label {
+  font-size: 9px;
+  color: var(--muted);
+}
+.opsdash-vbar-count {
+  font-size: 10px;
+  color: var(--ink);
 }
 """
 
@@ -8187,6 +8500,213 @@ function setWorkloadScope(scope) {
   renderWorkloadHeatmap();
 }
 
+// ----- TASK-AR-339: ops dashboard (token/cost, eval, gates, burndown) -----
+// Read-only render over runtimeState.ops_metrics. Charts are inline SVG or
+// token-styled divs so they retheme automatically; all classes carry color via
+// CSS var(--token), never a literal color from JS. Every rendered field is
+// escapeHtml'd. Strings are ASCII-only to satisfy the cp949 node-check guard.
+function opsMetricsData() {
+  return (runtimeState && runtimeState.ops_metrics) || {
+    resources: { tasksets: [], tasks: [] },
+    eval_trend: { points: [], available: false },
+    gates: { gates: [], counts: {}, total: 0 },
+    burndown: { tasksets: [] },
+    velocity: { weeks: [], available: false },
+  };
+}
+
+function opsFormatTokens(value) {
+  const n = Number(value) || 0;
+  if (n >= 1000000) return (n / 1000000).toFixed(2) + "M";
+  if (n >= 1000) return (n / 1000).toFixed(1) + "k";
+  return String(n);
+}
+
+function opsFormatCost(value) {
+  return "$" + (Number(value) || 0).toFixed(2);
+}
+
+function renderOpsResources(data) {
+  const host = $("opsdash-tokens");
+  if (!host) return;
+  const res = data.resources || {};
+  setText("opsdash-tokens-meta", `${res.actuals_label || "estimate-only"} - ` +
+    `${opsFormatTokens(res.est_tokens)} est tokens`);
+  const totals =
+    `<div class="opsdash-totals">` +
+    `<div class="opsdash-stat"><b>${escapeHtml(opsFormatTokens(res.est_tokens))}</b><span>est tokens</span></div>` +
+    `<div class="opsdash-stat"><b>${escapeHtml(opsFormatTokens(res.actual_tokens))}</b><span>actual tokens</span></div>` +
+    `<div class="opsdash-stat"><b>${escapeHtml(opsFormatCost(res.est_cost))}</b><span>est cost</span></div>` +
+    `<div class="opsdash-stat"><b>${escapeHtml(opsFormatCost(res.actual_cost))}</b><span>actual cost</span></div>` +
+    `</div>`;
+  const rows = (res.tasksets || []).slice(0, 8);
+  if (!rows.length) {
+    host.innerHTML = totals + `<div class="opsdash-empty">No token estimates recorded</div>`;
+    return;
+  }
+  const maxEst = Math.max(1, ...rows.map((r) => Number(r.est_tokens) || 0));
+  const bars = rows.map((row) => {
+    const est = Number(row.est_tokens) || 0;
+    const actual = Number(row.actual_tokens) || 0;
+    // The est bar scales tokens against the largest taskset; the actual bar is
+    // the consumed fraction of that taskset's own estimate (capped at est).
+    const estPct = Math.max(0, Math.min(100, (est / maxEst) * 100));
+    const actualWidth = est ? Math.max(0, Math.min(estPct, (actual / est) * estPct)) : 0;
+    const over = row.over_budget ? " is-over" : "";
+    const consumed = (row.consumed_pct === null || row.consumed_pct === undefined)
+      ? "est-only"
+      : `${escapeHtml(row.consumed_pct)}% used`;
+    const name = escapeHtml(row.display_name || row.task_set_id || "");
+    return `<div class="opsdash-bar-row">` +
+      `<div class="opsdash-bar-label"><span>${name}</span>` +
+      `<small>${escapeHtml(opsFormatTokens(est))} est - ${consumed}</small></div>` +
+      `<div class="opsdash-bar-track" role="img" aria-label="${name}: ${escapeHtml(opsFormatTokens(est))} estimated tokens">` +
+      `<div class="opsdash-bar-est" style="width: ${estPct.toFixed(1)}%"></div>` +
+      `<div class="opsdash-bar-actual${over}" style="width: ${actualWidth.toFixed(1)}%"></div>` +
+      `</div></div>`;
+  }).join("");
+  host.innerHTML = totals + bars;
+  const src = $("opsdash-tokens-src");
+  if (src) src.hidden = true;
+}
+
+function renderOpsEvalTrend(data) {
+  const host = $("opsdash-eval");
+  if (!host) return;
+  const trend = data.eval_trend || {};
+  const points = trend.points || [];
+  if (!points.length) {
+    setText("opsdash-eval-meta", "no eval evidence");
+    host.innerHTML = `<div class="opsdash-empty">No eval evidence found</div>`;
+    return;
+  }
+  setText("opsdash-eval-meta",
+    `${trend.count || points.length} runs - latest ${escapeHtml(String(trend.latest_score))}`);
+  // Inline SVG line chart. Y axis fixed to 0..1 (scores are ratios). Stroke and
+  // dot fills come from token-backed CSS classes (no literal color here).
+  const W = 300;
+  const H = 120;
+  const padL = 26;
+  const padB = 16;
+  const padT = 8;
+  const innerW = W - padL - 6;
+  const innerH = H - padB - padT;
+  const n = points.length;
+  const xFor = (i) => padL + (n <= 1 ? innerW / 2 : (i / (n - 1)) * innerW);
+  const yFor = (score) => padT + (1 - Math.max(0, Math.min(1, Number(score) || 0))) * innerH;
+  const linePts = points.map((p, i) => `${xFor(i).toFixed(1)},${yFor(p.score).toFixed(1)}`).join(" ");
+  const gridY = [0, 0.5, 1].map((v) => {
+    const y = yFor(v).toFixed(1);
+    return `<line class="opsdash-grid-line" x1="${padL}" y1="${y}" x2="${W - 6}" y2="${y}"></line>` +
+      `<text class="opsdash-axis" x="2" y="${(Number(y) + 3).toFixed(1)}">${v}</text>`;
+  }).join("");
+  const dots = points.map((p, i) => {
+    const cls = p.status === "block" ? " is-block" : (p.status === "watch" ? " is-watch" : "");
+    const label = `${escapeHtml(p.id)}: ${escapeHtml(String(p.score))}`;
+    return `<circle class="opsdash-dot${cls}" cx="${xFor(i).toFixed(1)}" cy="${yFor(p.score).toFixed(1)}" r="3">` +
+      `<title>${label}</title></circle>`;
+  }).join("");
+  host.innerHTML =
+    `<svg class="opsdash-chart" viewBox="0 0 ${W} ${H}" role="img" ` +
+    `aria-label="Eval score trend, ${escapeHtml(String(trend.count || n))} runs">` +
+    gridY +
+    `<polyline class="opsdash-line" points="${linePts}"></polyline>` +
+    dots +
+    `</svg>`;
+}
+
+function renderOpsGateBoard(data) {
+  const host = $("opsdash-gates");
+  if (!host) return;
+  const board = data.gates || {};
+  const counts = board.counts || {};
+  const gates = board.gates || [];
+  setText("opsdash-gates-meta", `${board.total || gates.length} gates - ${counts.block || 0} blocking`);
+  if (!gates.length) {
+    host.innerHTML = `<div class="opsdash-empty">No gate records found</div>`;
+    return;
+  }
+  const countsRow =
+    `<div class="opsdash-gate-counts">` +
+    ["pass", "watch", "block"].map((status) =>
+      `<div class="opsdash-gate-count is-${status}"><b>${escapeHtml(counts[status] || 0)}</b><span>${escapeHtml(status)}</span></div>`
+    ).join("") +
+    `</div>`;
+  const items = gates.slice(0, 30).map((gate) => {
+    const status = ["pass", "watch", "block"].indexOf(gate.status) >= 0 ? gate.status : "";
+    const ref = gate.task_ref ? `<span class="opsdash-gate-ref">${escapeHtml(gate.task_ref)}</span>` : "";
+    return `<li class="opsdash-gate-item">` +
+      `<span class="opsdash-gate-dot is-${escapeHtml(status)}" aria-hidden="true"></span>` +
+      `<span class="opsdash-gate-name" title="${escapeHtml(gate.id)}">${escapeHtml(gate.kind || gate.id)}</span>` +
+      ref +
+      `<span class="opsdash-gate-ref">${escapeHtml(gate.status)}</span>` +
+      `</li>`;
+  }).join("");
+  host.innerHTML = countsRow + `<ul class="opsdash-gate-list">${items}</ul>`;
+}
+
+function renderOpsBurndown(data) {
+  const burnHost = $("opsdash-burndown");
+  const velHost = $("opsdash-velocity");
+  const burn = data.burndown || {};
+  const vel = data.velocity || {};
+  if (burnHost) {
+    setText("opsdash-burndown-meta",
+      `${burn.done || 0}/${burn.total || 0} done - ${escapeHtml(String(burn.pct_done || 0))}%`);
+    const rows = (burn.tasksets || []).filter((r) => Number(r.total) > 0).slice(0, 8);
+    if (!rows.length) {
+      burnHost.innerHTML = `<div class="opsdash-empty">No taskset progress</div>`;
+    } else {
+      const bars = rows.map((row) => {
+        const name = escapeHtml(row.display_name || row.task_set_id || "");
+        const label = `${escapeHtml(row.done)}/${escapeHtml(row.total)} done`;
+        return `<div class="opsdash-bar-row">` +
+          `<div class="opsdash-bar-label"><span>${name}</span><small>${label}</small></div>` +
+          progressBar(row.pct_done) +
+          `</div>`;
+      }).join("");
+      burnHost.innerHTML = `<div class="opsdash-burndown-bars">${bars}</div>`;
+    }
+  }
+  if (velHost) {
+    const weeks = vel.weeks || [];
+    if (!weeks.length) {
+      velHost.innerHTML = `<div class="opsdash-velocity-head">Weekly velocity</div>` +
+        `<div class="opsdash-empty">No completion history</div>`;
+      return;
+    }
+    const peak = Math.max(1, ...weeks.map((w) => Number(w.done) || 0));
+    const bars = weeks.map((w) => {
+      const h = Math.max(2, Math.round(((Number(w.done) || 0) / peak) * 70));
+      const wk = String(w.week || "").slice(5);
+      return `<div class="opsdash-vbar" title="${escapeHtml(w.week)}: ${escapeHtml(w.done)} done">` +
+        `<span class="opsdash-vbar-count">${escapeHtml(w.done)}</span>` +
+        `<span class="opsdash-vbar-fill" style="height: ${h}px"></span>` +
+        `<span class="opsdash-vbar-label">${escapeHtml(wk)}</span>` +
+        `</div>`;
+    }).join("");
+    velHost.innerHTML = `<div class="opsdash-velocity-head">Weekly velocity - ` +
+      `avg ${escapeHtml(String(vel.avg_per_week || 0))}/wk, peak ${escapeHtml(String(vel.peak_week || 0))}</div>` +
+      `<div class="opsdash-velocity-bars">${bars}</div>`;
+  }
+}
+
+function renderOpsDashboard() {
+  if (!$("opsdash-tokens")) return;
+  const data = opsMetricsData();
+  const res = data.resources || {};
+  const board = data.gates || {};
+  const trend = data.eval_trend || {};
+  setText("opsdash-summary",
+    `${res.task_count || 0} tasks tracked - ${opsFormatTokens(res.est_tokens)} est tokens - ` +
+    `${(board.counts && board.counts.block) || 0} blocking gates - ` +
+    `eval ${trend.available ? trend.latest_score : "n/a"}`);
+  renderOpsResources(data);
+  renderOpsEvalTrend(data);
+  renderOpsGateBoard(data);
+  renderOpsBurndown(data);
+}
+
 // ----- TASK-AR-332: file attachments (drag/drop + paste, preview, lightbox) -----
 const ATTACH_MAX_BYTES = 5 * 1024 * 1024;
 const ATTACH_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/gif", "image/webp", "text/plain", "text/markdown", "text/x-markdown", "application/pdf"];
@@ -8471,6 +8991,7 @@ function renderAll() {
   renderTasksetBoard();
   renderTeamAgents();
   renderWorkloadHeatmap();
+  renderOpsDashboard();
   renderAgents();
   renderChannels();
   renderMessages();
