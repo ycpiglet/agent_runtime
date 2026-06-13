@@ -102,6 +102,13 @@ PROPERTY_COMMAND_TYPES = ("property.create", "property.update", "property.delete
 LABEL_COMMAND_TYPES = ("label.create", "label.update", "label.delete")
 AUTOMATION_COMMAND_TYPES = ("automation.create", "automation.update", "automation.delete", "automation.toggle")
 UI_CONFIG_COMMAND_TYPES = PROPERTY_COMMAND_TYPES + LABEL_COMMAND_TYPES + AUTOMATION_COMMAND_TYPES
+# TASK-AR-332: link an already-uploaded attachment to a task as closeout
+# evidence. The bytes are written by the upload route (ui_state.save_attachment);
+# RE-targeting that attachment's evidence linkage is a NON-upload mutation and is
+# therefore PROPOSAL-ONLY: the handler records a proposal under
+# .ui_outbox/attachments that a runtime executor consumes to update the canonical
+# task frontmatter / evidence index. The console NEVER edits the task file here.
+ATTACHMENT_COMMAND_TYPES = ("attachment.link",)
 
 CUSTOM_PROPERTY_TYPES = ("text", "select", "number", "date")
 AUTOMATION_TRIGGERS = ("status_change", "due_passed", "blocked_too_long")
@@ -133,6 +140,7 @@ COMMAND_TYPES = (
     + PLANNING_COMMAND_TYPES
     + MEETING_COMMAND_TYPES
     + UI_CONFIG_COMMAND_TYPES
+    + ATTACHMENT_COMMAND_TYPES
 )
 UNSAFE_PAYLOAD_KEYS = {"path", "source_path", "direct_file_path", "file_path", "filesystem_path"}
 HIGH_RISK_TERMS = (
@@ -1265,6 +1273,53 @@ def _automation_command(root: Path, command_type: str, target: str | None, paylo
     }
 
 
+def _attachment_link_command(root: Path, target: str | None, payload: dict[str, Any], now: str, command_id: str) -> dict[str, Any]:
+    """Propose linking an already-uploaded attachment to a task (proposal-only).
+
+    The attachment id is normalized to a safe slug; the task id is validated. The
+    console NEVER edits the task file -- it records a declarative proposal for a
+    runtime executor to apply to the task frontmatter / evidence index.
+    """
+    attachment_id = re.sub(r"[^a-z0-9-]+", "", str(payload.get("attachment_id") or "").strip().lower())
+    task_id = str(target or payload.get("task_id") or "").strip()
+    errors: list[str] = []
+    if not attachment_id:
+        errors.append("attachment id is required")
+    task_error = _validate_task_id(task_id)
+    if task_error:
+        errors.append(task_error)
+    if errors:
+        return {"errors": errors}
+
+    proposal = {
+        "id": command_id.replace("COMMAND-", "ATTACHREQ-"),
+        "type": "attachment.link",
+        "action": "link",
+        "target_file": "agents/lead_engineer/tasks/",
+        "status": "queued",
+        "created_at": now,
+        "requested_by": str(payload.get("actor") or "ui"),
+        "attachment_id": attachment_id,
+        "task_id": task_id,
+        "evidence_ref": f"agents/project/evidence/attachments/{attachment_id}.json",
+        "mutation_boundary": "proposal_only",
+        "next": "runtime executor links this attachment evidence record to the task closeout",
+    }
+    changed = _write_ui_proposal(root, "attachments", proposal)
+    return {
+        "status": "queued",
+        "result": {
+            "changed": [changed],
+            "proposal_id": proposal["id"],
+            "action": "link",
+            "attachment_id": attachment_id,
+            "task_id": task_id,
+            "mutation_boundary": "proposal_only",
+            "next": proposal["next"],
+        },
+    }
+
+
 def submit_command(
     root: Path | str,
     command: dict[str, Any],
@@ -1317,6 +1372,8 @@ def submit_command(
         outcome = _label_command(root_path, command_type, target_str, payload, created_at, cid)
     elif command_type in AUTOMATION_COMMAND_TYPES:
         outcome = _automation_command(root_path, command_type, target_str, payload, created_at, cid)
+    elif command_type in ATTACHMENT_COMMAND_TYPES:
+        outcome = _attachment_link_command(root_path, target_str, payload, created_at, cid)
     else:
         outcome = _runtime_command(root_path, command_type, target_str, payload, created_at)
 

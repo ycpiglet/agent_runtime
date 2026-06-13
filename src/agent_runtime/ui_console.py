@@ -2580,6 +2580,169 @@ pre {
   padding: 8px;
 }
 .hidden { display: none !important; }
+/* TASK-AR-332: file attachments (drop zone, thumbnails, lightbox, preview) */
+.attachments {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+.attachments-title {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+.attach-dropzone {
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  padding: 14px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  background: var(--inset-soft);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.attach-dropzone:hover,
+.attach-dropzone:focus-within {
+  border-color: var(--primary-line);
+  background: var(--primary-soft);
+}
+.attach-dropzone.is-dragover {
+  border-color: var(--primary);
+  background: var(--primary-soft-strong);
+  color: var(--ink);
+}
+.attach-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--subtle);
+}
+.attach-error {
+  margin-top: 8px;
+  color: var(--danger);
+  font-size: 12px;
+}
+.attach-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.attach-item {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 8px;
+  background: var(--tile);
+}
+.attach-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  cursor: zoom-in;
+  flex: 0 0 auto;
+}
+.attach-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  flex: 0 0 auto;
+}
+.attach-body {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.attach-name {
+  display: block;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+}
+.attach-meta {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.attach-actions {
+  display: flex;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+.attach-actions a,
+.attach-actions button {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-raised);
+  color: var(--primary);
+  cursor: pointer;
+  text-decoration: none;
+}
+.attach-preview {
+  margin-top: 8px;
+  max-width: 100%;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--pre-bg);
+  color: var(--pre-ink);
+  padding: 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.attach-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--scrim);
+  padding: 24px;
+}
+.attach-lightbox img {
+  max-width: 92vw;
+  max-height: 88vh;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+  background: var(--paper);
+}
+.attach-lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  font-size: 22px;
+  line-height: 1;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-raised);
+  color: var(--ink);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+}
 @media (max-width: 1200px) {
   .layout { grid-template-columns: 1fr; }
   .detail-panel { position: static; }
@@ -6635,6 +6798,201 @@ function renderTeamAgents() {
   host.innerHTML = teams.length ? teams.map(teamGroupBlock).join("") : `<div class="empty">No teams</div>`;
 }
 
+// ----- TASK-AR-332: file attachments (drag/drop + paste, preview, lightbox) -----
+const ATTACH_MAX_BYTES = 5 * 1024 * 1024;
+const ATTACH_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/gif", "image/webp", "text/plain", "text/markdown", "text/x-markdown", "application/pdf"];
+
+function attachExtBadge(item) {
+  const name = String(item.filename || "");
+  const dot = name.lastIndexOf(".");
+  const ext = dot >= 0 ? name.slice(dot + 1) : (item.content_type || "file");
+  return escapeHtml(ext.slice(0, 4));
+}
+
+function formatBytes(value) {
+  const n = Number(value || 0);
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function attachmentItemTemplate(item) {
+  // filename / metadata are user-controlled => escapeHtml everything rendered.
+  const url = escapeHtml(item.download_url || `/api/attachments/${encodeURIComponent(item.id)}/download`);
+  const name = escapeHtml(item.filename || "attachment");
+  const id = escapeHtml(item.id || "");
+  const thumb = item.is_image
+    ? `<img class="attach-thumb" src="${url}" alt="${name}" data-attach-zoom="${url}" data-attach-alt="${name}">`
+    : `<span class="attach-icon" aria-hidden="true">${attachExtBadge(item)}</span>`;
+  const previewBtn = (item.is_text || item.is_image)
+    ? `<button type="button" class="attach-preview-btn" data-attach-preview="${id}">Preview</button>`
+    : "";
+  return `<li class="attach-item" data-attach-id="${id}">
+    ${thumb}
+    <span class="attach-body">
+      <span class="attach-name">${name}</span>
+      <span class="attach-meta">${escapeHtml(item.content_type || "")} | ${escapeHtml(formatBytes(item.size_bytes))}</span>
+    </span>
+    <span class="attach-actions">
+      ${previewBtn}
+      <a href="${url}" download="${name}">Download</a>
+    </span>
+  </li>`;
+}
+
+function attachmentsSection(task) {
+  const items = task.attachments || [];
+  const list = items.length
+    ? `<ul class="attach-list">${items.map(attachmentItemTemplate).join("")}</ul>`
+    : `<div class="empty">No attachments yet</div>`;
+  return `<section class="attachments" id="attachments-section">
+    <div class="attachments-title">Attachments (${items.length})</div>
+    <div id="attach-dropzone" class="attach-dropzone" tabindex="0" role="button" aria-label="Attach files: drop, paste, or click to browse">
+      Drop files, paste a screenshot, or click to browse
+      <span class="attach-hint">images / md / text / pdf, up to ${formatBytes(ATTACH_MAX_BYTES)}</span>
+      <input id="attach-input" type="file" multiple hidden accept="image/*,text/plain,text/markdown,.md,.markdown,application/pdf">
+    </div>
+    <div id="attach-error" class="attach-error" hidden></div>
+    <div id="attach-preview" class="attach-preview" hidden></div>
+    ${list}
+  </section>`;
+}
+
+function attachError(message) {
+  const node = $("attach-error");
+  if (!node) return;
+  node.textContent = message || "";
+  node.hidden = !message;
+}
+
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result || "");
+      const comma = result.indexOf(",");
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = () => reject(reader.error || new Error("read failed"));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadAttachment(task, file) {
+  const type = (file.type || "").split(";")[0].trim().toLowerCase();
+  if (!ATTACH_TYPES.includes(type)) {
+    attachError(`Unsupported type: ${type || "unknown"}`);
+    return;
+  }
+  if (file.size > ATTACH_MAX_BYTES) {
+    attachError(`Too large: ${formatBytes(file.size)} (max ${formatBytes(ATTACH_MAX_BYTES)})`);
+    return;
+  }
+  attachError("");
+  let content_b64;
+  try {
+    content_b64 = await readFileAsBase64(file);
+  } catch (error) {
+    attachError(`Read failed: ${error.message}`);
+    return;
+  }
+  const response = await fetch("/api/attachments", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      filename: file.name || "pasted-image.png",
+      content_type: type,
+      content_b64,
+      task_id: task.id,
+      actor: "ui",
+    }),
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || payload.status === "failed") {
+    attachError((payload.errors || ["upload failed"]).join("; "));
+    return;
+  }
+  await loadState();
+}
+
+async function uploadFiles(task, files) {
+  for (const file of Array.from(files || [])) {
+    await uploadAttachment(task, file);
+  }
+}
+
+function openAttachLightbox(url, alt) {
+  closeAttachLightbox();
+  const box = document.createElement("div");
+  box.className = "attach-lightbox";
+  box.id = "attach-lightbox";
+  box.innerHTML = `<button type="button" class="attach-lightbox-close" aria-label="Close">&times;</button><img src="${escapeHtml(url)}" alt="${escapeHtml(alt || "attachment")}">`;
+  box.addEventListener("click", (event) => {
+    if (event.target === box || event.target.classList.contains("attach-lightbox-close")) closeAttachLightbox();
+  });
+  document.body.appendChild(box);
+}
+
+function closeAttachLightbox() {
+  const box = $("attach-lightbox");
+  if (box) box.remove();
+}
+
+async function showAttachPreview(item) {
+  const node = $("attach-preview");
+  if (!node) return;
+  if (item.is_image) {
+    openAttachLightbox(item.download_url, item.filename);
+    return;
+  }
+  try {
+    const response = await fetch(item.download_url, { cache: "no-store" });
+    const text = await response.text();
+    node.textContent = text.slice(0, 20000);
+    node.hidden = false;
+  } catch (error) {
+    attachError(`Preview failed: ${error.message}`);
+  }
+}
+
+function bindAttachments(task) {
+  const zone = $("attach-dropzone");
+  const input = $("attach-input");
+  if (!zone || !input) return;
+  zone.addEventListener("click", () => input.click());
+  zone.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") { event.preventDefault(); input.click(); }
+  });
+  input.addEventListener("change", () => uploadFiles(task, input.files));
+  zone.addEventListener("dragover", (event) => { event.preventDefault(); zone.classList.add("is-dragover"); });
+  zone.addEventListener("dragleave", () => zone.classList.remove("is-dragover"));
+  zone.addEventListener("drop", (event) => {
+    event.preventDefault();
+    zone.classList.remove("is-dragover");
+    if (event.dataTransfer && event.dataTransfer.files) uploadFiles(task, event.dataTransfer.files);
+  });
+  zone.addEventListener("paste", (event) => {
+    const items = (event.clipboardData && event.clipboardData.items) || [];
+    const files = [];
+    for (const it of items) {
+      if (it.kind === "file") { const f = it.getAsFile(); if (f) files.push(f); }
+    }
+    if (files.length) { event.preventDefault(); uploadFiles(task, files); }
+  });
+  const section = $("attachments-section");
+  if (section) {
+    section.querySelectorAll("[data-attach-zoom]").forEach((img) => {
+      img.addEventListener("click", () => openAttachLightbox(img.dataset.attachZoom, img.dataset.attachAlt));
+    });
+    section.querySelectorAll("[data-attach-preview]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const item = (task.attachments || []).find((a) => a.id === btn.dataset.attachPreview);
+        if (item) showAttachPreview(item);
+      });
+    });
+  }
+}
+
 function renderDetail() {
   const panel = $("detail-panel");
   const task = (runtimeState.tasks || []).find((item) => item.id === selectedTaskId);
@@ -6677,7 +7035,9 @@ function renderDetail() {
       <textarea id="detail-comment" placeholder="Comment or message"></textarea>
       <button id="send-comment" type="button">Send Comment</button>
     </form>
+    ${attachmentsSection(task)}
   </article>`;
+  bindAttachments(task);
   $("edit-task-form").addEventListener("submit", async (event) => {
     event.preventDefault();
     await sendJson(`/api/tasks/${encodeURIComponent(task.id)}`, {
@@ -6887,6 +7247,10 @@ document.addEventListener("keydown", (event) => {
       event.preventDefault();
       runActivePaletteCommand();
     }
+    return;
+  }
+  if (event.key === "Escape" && $("attach-lightbox")) {
+    closeAttachLightbox();
     return;
   }
   if (event.key === "Escape" && peekAnchorId) {
@@ -7169,6 +7533,39 @@ def _command_response(root_path: Path, command: dict[str, object]) -> ConsoleRes
     return _json_response(result, status=400 if result.get("status") == "failed" else 202)
 
 
+def _attachment_upload_response(root_path: Path, payload: dict[str, object]) -> ConsoleResponse:
+    """Validate + persist an uploaded attachment, returning the evidence record."""
+    try:
+        data = ui_state.decode_attachment_payload(payload.get("content_b64") or payload.get("content"))
+        record = ui_state.save_attachment(
+            root_path,
+            filename=payload.get("filename"),
+            content_type=payload.get("content_type"),
+            data=data,
+            task_id=payload.get("task_id"),
+            message_id=payload.get("message_id"),
+            actor=payload.get("actor"),
+        )
+    except ui_state.AttachmentError as exc:
+        return _json_response({"status": "failed", "errors": [str(exc)]}, status=400)
+    return _json_response({"status": "accepted", "attachment": record}, status=201)
+
+
+def _attachment_download_id(request_path: str) -> str | None:
+    parts = [part for part in request_path.split("/") if part]
+    if len(parts) == 4 and parts[:2] == ["api", "attachments"] and parts[3] == "download":
+        return parts[2]
+    return None
+
+
+def _attachment_download_response(root_path: Path, attachment_id: str) -> ConsoleResponse:
+    result = ui_state.read_attachment_blob(root_path, attachment_id)
+    if result is None:
+        return ConsoleResponse(404, "text/plain; charset=utf-8", b"not found\n")
+    body, content_type, _filename = result
+    return ConsoleResponse(200, content_type, body)
+
+
 def build_response(path: str, root: Path | str, *, method: str = "GET", body: bytes | None = None) -> ConsoleResponse:
     root_path = Path(root)
     parsed_url = urlparse(path)
@@ -7191,6 +7588,11 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
             return _command_response(root_path, {"type": "task.reorder", "target": task_match[0], "payload": payload})
         if task_match and method == "POST" and task_match[1] == "archive":
             return _command_response(root_path, {"type": "task.archive", "target": task_match[0], "payload": payload})
+        # TASK-AR-332: file upload is the ONE legitimate file-write path. It is
+        # NOT a ui_commands proposal: it validates/normalizes and writes the
+        # bytes + an evidence sidecar under the attachments dir only.
+        if method == "POST" and request_path == "/api/attachments":
+            return _attachment_upload_response(root_path, payload)
         return ConsoleResponse(404, "text/plain; charset=utf-8", b"not found\n")
 
     if request_path in {"", "/"}:
@@ -7222,6 +7624,9 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         state = ui_state.build_state(root_path)
         filters = {key: values[0] for key, values in parse_qs(parsed_url.query).items() if values}
         return _json_response(ui_state.build_replay_snapshot(state["replay"], filters.get("at")))
+    download_id = _attachment_download_id(request_path)
+    if download_id is not None:
+        return _attachment_download_response(root_path, download_id)
 
     api_resources = {
         "/api/tasks": "tasks",
@@ -7244,6 +7649,7 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/sources": "sources",
         "/api/errors": "errors",
         "/api/evidence": "evidence",
+        "/api/attachments": "attachments",
         "/api/replay": "replay",
         "/api/graph": "graph",
         "/api/live_map": "live_map",

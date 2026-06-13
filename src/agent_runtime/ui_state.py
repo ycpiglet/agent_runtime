@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import base64
+import binascii
+import hashlib
 import importlib.util
 import json
 import re
+import secrets
 import sys
 import time
 from datetime import datetime, timezone
@@ -32,6 +36,7 @@ RESOURCE_NAMES = (
     "sources",
     "errors",
     "evidence",
+    "attachments",
     "replay",
     "graph",
     "live_map",
@@ -678,6 +683,275 @@ def enrich_tasks_with_evidence(tasks: list[dict[str, Any]], evidence: list[dict[
         count = counts.get(str(task.get("id") or ""), 0)
         task["evidence_count"] = count
         task["evidence_label"] = "1 evidence" if count == 1 else f"{count} evidence"
+
+
+# ----- TASK-AR-332: file attachments (upload/download/preview + evidence) -----
+#
+# Storage layout (the upload route in ui_console is the ONLY file-write path for
+# uploaded bytes; everything here reads or is called BY that route):
+#   agents/project/evidence/attachments/<attachment_id>/<safe_filename>  <- bytes
+#   agents/project/evidence/attachments/<attachment_id>.json             <- record
+# The sidecar JSON IS the evidence record: it links the stored file to a task /
+# message and is surfaced both as an "attachments" resource and (for closeout)
+# inside the derived evidence index.
+ATTACHMENTS_REL = "agents/project/evidence/attachments"
+# Hard cap on a single uploaded payload (decoded bytes). Keeps the in-memory,
+# JSON+base64 upload path bounded.
+ATTACHMENT_MAX_BYTES = 5 * 1024 * 1024
+# Content-type allowlist. Each entry maps the accepted upload content-type to the
+# canonical type stored/served back. Only images, plain text, markdown and pdf
+# are accepted; executables / html / svg (script vectors) are rejected.
+ATTACHMENT_CONTENT_TYPES = {
+    "image/png": "image/png",
+    "image/jpeg": "image/jpeg",
+    "image/jpg": "image/jpeg",
+    "image/gif": "image/gif",
+    "image/webp": "image/webp",
+    "text/plain": "text/plain; charset=utf-8",
+    "text/markdown": "text/markdown; charset=utf-8",
+    "text/x-markdown": "text/markdown; charset=utf-8",
+    "application/pdf": "application/pdf",
+}
+# Extensions allowed in the stored filename. Anything else is normalized to .bin
+# so an upload can never land an executable/script extension on disk.
+ATTACHMENT_ALLOWED_EXTS = {
+    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".txt", ".md", ".markdown", ".pdf", ".bin",
+}
+_ATTACHMENT_ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,63}$")
+
+
+class AttachmentError(ValueError):
+    """Raised when an upload fails validation (caller maps to HTTP 400)."""
+
+
+def attachments_dir(root: Path) -> Path:
+    return (Path(root).resolve() / ATTACHMENTS_REL).resolve()
+
+
+def _attachment_id(now: str) -> str:
+    compact = re.sub(r"[^0-9]", "", now)[:14] or datetime.now().strftime("%Y%m%d%H%M%S")
+    return f"att-{compact}-{secrets.token_hex(4)}"
+
+
+def normalize_attachment_filename(raw: Any) -> str:
+    """Strip any path components and force a safe, allowlisted filename.
+
+    Defends against path traversal: drive letters, leading slashes, ``..`` and
+    embedded separators are all discarded -- only the final basename survives,
+    and its extension is constrained to the allowlist.
+    """
+    name = str(raw or "").strip()
+    # Drop anything before the last path separator (handles ``../``, ``/etc/``,
+    # ``C:\\Windows\\`` and mixed separators alike).
+    name = re.split(r"[\\/]", name)[-1]
+    # Reject NUL and control chars; keep a conservative filename charset.
+    name = "".join(ch for ch in name if ch.isprintable() and ch not in '\\/:*?"<>|')
+    name = name.strip().lstrip(".") or "upload"
+    stem, dot, ext = name.rpartition(".")
+    if not dot:
+        stem, ext = name, ""
+    ext = ("." + ext.lower()) if ext else ""
+    if ext not in ATTACHMENT_ALLOWED_EXTS:
+        ext = ".bin"
+    stem = re.sub(r"[^A-Za-z0-9._-]+", "-", stem).strip("-._") or "upload"
+    return f"{stem[:120]}{ext}"
+
+
+def _assert_within(base: Path, candidate: Path) -> Path:
+    """Resolve ``candidate`` and assert it stays inside ``base`` (or raise)."""
+    base_resolved = base.resolve()
+    resolved = candidate.resolve()
+    if resolved != base_resolved and base_resolved not in resolved.parents:
+        raise AttachmentError("resolved path escapes the attachments directory")
+    return resolved
+
+
+def save_attachment(
+    root: Path | str,
+    *,
+    filename: Any,
+    content_type: Any,
+    data: bytes,
+    task_id: Any = None,
+    message_id: Any = None,
+    actor: Any = None,
+    now: str | None = None,
+) -> dict[str, Any]:
+    """Validate + persist an uploaded file and its evidence sidecar record.
+
+    This is the single trusted file-write entry point for uploads. It enforces a
+    size cap, a content-type allowlist, and writes ONLY under the attachments
+    directory after re-resolving and asserting containment.
+    """
+    root_path = Path(root).resolve()
+    created_at = now or _now_iso()
+
+    ctype_raw = str(content_type or "").split(";", 1)[0].strip().lower()
+    if ctype_raw not in ATTACHMENT_CONTENT_TYPES:
+        raise AttachmentError(f"unsupported content type: {ctype_raw or 'unknown'!r}")
+    stored_content_type = ATTACHMENT_CONTENT_TYPES[ctype_raw]
+
+    if not isinstance(data, (bytes, bytearray)):
+        raise AttachmentError("attachment data must be bytes")
+    data = bytes(data)
+    if not data:
+        raise AttachmentError("attachment is empty")
+    if len(data) > ATTACHMENT_MAX_BYTES:
+        raise AttachmentError(
+            f"attachment exceeds size limit ({len(data)} > {ATTACHMENT_MAX_BYTES} bytes)"
+        )
+
+    safe_name = normalize_attachment_filename(filename)
+    attachment_id = _attachment_id(created_at)
+
+    base = attachments_dir(root_path)
+    base.mkdir(parents=True, exist_ok=True)
+    item_dir = _assert_within(base, base / attachment_id)
+    item_dir.mkdir(parents=True, exist_ok=True)
+    blob_path = _assert_within(item_dir, item_dir / safe_name)
+    blob_path.write_bytes(data)
+
+    record = {
+        "id": attachment_id,
+        "schema_version": "agent-runtime-attachment/v1",
+        "filename": safe_name,
+        "original_filename": str(filename or safe_name),
+        "content_type": stored_content_type,
+        "size_bytes": len(data),
+        "sha256": hashlib.sha256(data).hexdigest(),
+        "task_id": (str(task_id).strip() or None) if task_id is not None else None,
+        "message_id": (str(message_id).strip() or None) if message_id is not None else None,
+        "uploaded_by": str(actor or "ui"),
+        "created_at": created_at,
+        "blob_rel": _rel(root_path, blob_path),
+        "is_image": stored_content_type.startswith("image/"),
+        "is_text": stored_content_type.startswith("text/"),
+        "evidence": f"attachment:{safe_name}",
+        "source_kind": "attachment_evidence",
+    }
+    record_path = _assert_within(base, base / f"{attachment_id}.json")
+    record_path.write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    record = dict(record)
+    record["source_path"] = _rel(root_path, record_path)
+    return record
+
+
+def load_attachments(root: Path | str, now: str | None = None) -> list[dict[str, Any]]:
+    """Read all attachment evidence sidecars (newest first)."""
+    root_path = Path(root).resolve()
+    base = attachments_dir(root_path)
+    if not base.is_dir():
+        return []
+    generated_at = now or _now_iso()
+    items: list[dict[str, Any]] = []
+    for path in sorted(base.glob("*.json")):
+        try:
+            record = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(record, dict):
+            continue
+        record.setdefault("id", path.stem)
+        record["source_path"] = _rel(root_path, path)
+        record["source_kind"] = "attachment_evidence"
+        record["last_updated"] = _mtime_iso(path)
+        record["last_read_at"] = generated_at
+        blob_rel = str(record.get("blob_rel") or "")
+        record["freshness"] = "present" if blob_rel and (root_path / blob_rel).is_file() else "missing"
+        record["download_url"] = f"/api/attachments/{record['id']}/download"
+        items.append(record)
+    items.sort(key=lambda item: str(item.get("created_at") or ""), reverse=True)
+    return items
+
+
+def read_attachment_blob(root: Path | str, attachment_id: Any) -> tuple[bytes, str, str] | None:
+    """Return (bytes, content_type, filename) for an attachment id, or None.
+
+    The id is constrained to a safe charset and the resolved blob path is
+    asserted to live inside the attachments dir before any read.
+    """
+    aid = str(attachment_id or "").strip()
+    if not _ATTACHMENT_ID_RE.match(aid):
+        return None
+    root_path = Path(root).resolve()
+    base = attachments_dir(root_path)
+    record_path = base / f"{aid}.json"
+    if not record_path.is_file():
+        return None
+    try:
+        _assert_within(base, record_path)
+        record = json.loads(record_path.read_text(encoding="utf-8"))
+    except (AttachmentError, OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(record, dict):
+        return None
+    blob_rel = str(record.get("blob_rel") or "")
+    if not blob_rel:
+        return None
+    try:
+        blob_path = _assert_within(base, root_path / blob_rel)
+    except AttachmentError:
+        return None
+    if not blob_path.is_file():
+        return None
+    content_type = str(record.get("content_type") or "application/octet-stream")
+    filename = str(record.get("filename") or "attachment")
+    try:
+        return blob_path.read_bytes(), content_type, filename
+    except OSError:
+        return None
+
+
+def decode_attachment_payload(content_b64: Any) -> bytes:
+    """Decode a base64 upload payload, raising AttachmentError on bad input."""
+    raw = str(content_b64 or "")
+    if "," in raw and raw.strip().lower().startswith("data:"):
+        # Tolerate a data: URL prefix (clipboard paste produces these).
+        raw = raw.split(",", 1)[1]
+    raw = raw.strip()
+    if not raw:
+        raise AttachmentError("attachment content is empty")
+    try:
+        return base64.b64decode(raw, validate=True)
+    except (binascii.Error, ValueError) as exc:
+        raise AttachmentError(f"invalid base64 content: {exc}") from None
+
+
+def attachment_evidence(attachments: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Project attachments into the shared evidence index for task closeout."""
+    evidence: list[dict[str, Any]] = []
+    for item in attachments:
+        evidence.append(
+            {
+                "id": f"evidence:{item.get('id')}",
+                "evidence": item.get("evidence") or f"attachment:{item.get('filename')}",
+                "source_id": item.get("id"),
+                "source_type": "attachment",
+                "task_id": item.get("task_id"),
+                "goal_id": None,
+                "created_at": item.get("created_at"),
+                "source_path": item.get("source_path"),
+                "source_kind": "attachment_evidence",
+                "last_updated": item.get("last_updated"),
+                "freshness": item.get("freshness", "present"),
+                "download_url": item.get("download_url"),
+                "filename": item.get("filename"),
+                "content_type": item.get("content_type"),
+            }
+        )
+    return evidence
+
+
+def enrich_tasks_with_attachments(tasks: list[dict[str, Any]], attachments: list[dict[str, Any]]) -> None:
+    by_task: dict[str, list[dict[str, Any]]] = {}
+    for item in attachments:
+        task_id = str(item.get("task_id") or "").strip()
+        if task_id:
+            by_task.setdefault(task_id, []).append(item)
+    for task in tasks:
+        linked = by_task.get(str(task.get("id") or ""), [])
+        task["attachments"] = linked
+        task["attachment_count"] = len(linked)
 
 
 def build_replay(events: list[dict[str, Any]], messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -3628,7 +3902,10 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     commands = ui_commands.list_commands(root_path)
     errors = derive_errors(events)
     evidence = derive_evidence(events, messages)
+    attachments = load_attachments(root_path, generated_at)
+    evidence.extend(attachment_evidence(attachments))
     enrich_tasks_with_evidence(tasks, evidence)
+    enrich_tasks_with_attachments(tasks, attachments)
     replay = build_replay(events, messages)
     graph = build_graph(tasks, agents, messages, events)
     state_machines = load_state_machines(root_path, tasks, agents, generated_at)
@@ -3675,6 +3952,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "goals": goals,
         "errors": errors,
         "evidence": evidence,
+        "attachments": attachments,
         "replay": replay,
         "graph": graph,
         "live_map": live_map,
