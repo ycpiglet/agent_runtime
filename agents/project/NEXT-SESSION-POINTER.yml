@@ -11,6 +11,21 @@ current_state:
   status_text: "500-series closed. Next: Owner-gated v0.2.0 release decision (AR-510 cadence trigger proposes minor); optional follow-ups backlog_board LF output + case-fold hardening."
 active_work:
   current_agents:
+    - claim_id: CLAIM-20260613-142149-task-ar-523-e3be
+      agent_role: lead-engineer
+      agent_instance_id: inst-w8-ar523-claude
+      display_name: claude/dash-owl
+      callsite_id: claude-w8-ar523
+    - claim_id: CLAIM-20260613-142149-task-ar-524-214b
+      agent_role: lead-engineer
+      agent_instance_id: inst-w8-ar524-claude
+      display_name: claude/skill-wren
+      callsite_id: claude-w8-ar524
+    - claim_id: CLAIM-20260613-142150-task-ar-525-4740
+      agent_role: lead-engineer
+      agent_instance_id: inst-w8-ar525-claude
+      display_name: claude/registry-jay
+      callsite_id: claude-w8-ar525
   current_teams: []
 resume:
   active_task: none

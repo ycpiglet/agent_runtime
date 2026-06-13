@@ -18,6 +18,12 @@
       "display_name": "Wave Conductor",
       "summary": "Claim-time footprint conflict gate, wave dispatcher with cascade/parallel modes, integrator merge queue, and claim-first enforcement.",
       "order": 514
+    },
+    {
+      "task_set_id": "TASKSET-AR-OPS-ERGONOMICS",
+      "display_name": "Ops Ergonomics",
+      "summary": "Make the 500-series infrastructure easy to operate: session-start W0 dashboard hook, trigger-based skills for wave/merge/verify/work-analytics/release, asset registry entries, and an ops command reference.",
+      "order": 523
     }
   ]
 }
