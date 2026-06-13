@@ -109,6 +109,14 @@ UI_CONFIG_COMMAND_TYPES = PROPERTY_COMMAND_TYPES + LABEL_COMMAND_TYPES + AUTOMAT
 # .ui_outbox/attachments that a runtime executor consumes to update the canonical
 # task frontmatter / evidence index. The console NEVER edits the task file here.
 ATTACHMENT_COMMAND_TYPES = ("attachment.link",)
+# TASK-AR-335: reserve / repeat (cron-like) taskset dispatch from the Calendar
+# view. Every one of these is PROPOSAL-ONLY: the handler records a declarative
+# schedule record under agents/project/schedules/*.json (via a proposal in
+# .ui_outbox/schedules). The console NEVER runs taskset_dispatcher and NEVER
+# writes the SSoT. A LOCAL scheduler/gate (scripts/scheduled_dispatch_gate.py)
+# is the single point that reads due schedules and emits dispatch + reminder
+# events; no external services or network are involved.
+SCHEDULE_COMMAND_TYPES = ("schedule.create", "schedule.cancel")
 
 CUSTOM_PROPERTY_TYPES = ("text", "select", "number", "date")
 AUTOMATION_TRIGGERS = ("status_change", "due_passed", "blocked_too_long")
@@ -141,7 +149,14 @@ COMMAND_TYPES = (
     + MEETING_COMMAND_TYPES
     + UI_CONFIG_COMMAND_TYPES
     + ATTACHMENT_COMMAND_TYPES
+    + SCHEDULE_COMMAND_TYPES
 )
+# TASK-AR-335: a schedule fires either once at a fixed time (``reserve``) or on a
+# recurring cron-like cadence (``repeat``). The cron expression is a 5-field
+# POSIX-style schedule (minute hour day-of-month month day-of-week) restricted to
+# ``*`` / integers / comma lists / ``*/step``; we only PARSE + validate it here so
+# the proposal carries a normalized spec. The local scheduler does the matching.
+SCHEDULE_MODES = ("reserve", "repeat")
 UNSAFE_PAYLOAD_KEYS = {"path", "source_path", "direct_file_path", "file_path", "filesystem_path"}
 HIGH_RISK_TERMS = (
     ("delete", "deletion"),
@@ -1320,6 +1335,194 @@ def _attachment_link_command(root: Path, target: str | None, payload: dict[str, 
     }
 
 
+# --- TASK-AR-335: cron-like repeat parsing -------------------------------------
+# Bounds for each of the 5 cron fields (minute hour day-of-month month day-of-week).
+_CRON_FIELD_BOUNDS = (
+    (0, 59),  # minute
+    (0, 23),  # hour
+    (1, 31),  # day of month
+    (1, 12),  # month
+    (0, 6),  # day of week (0 = Sunday)
+)
+_CRON_FIELD_NAMES = ("minute", "hour", "day_of_month", "month", "day_of_week")
+
+
+def _parse_cron_field(token: str, low: int, high: int) -> list[int] | str | None:
+    """Parse one cron field. Returns sorted ints, "*" wildcard, or None on error.
+
+    Supports ``*``, a plain integer, comma lists, and ``*/step`` (step over the
+    full range). Deliberately small: no ranges/names so the local scheduler match
+    stays trivial and proposal-only.
+    """
+    token = token.strip()
+    if not token:
+        return None
+    if token == "*":
+        return "*"
+    if token.startswith("*/"):
+        step_raw = token[2:]
+        if not step_raw.isdigit() or int(step_raw) <= 0:
+            return None
+        step = int(step_raw)
+        return [value for value in range(low, high + 1) if (value - low) % step == 0]
+    values: list[int] = []
+    for part in token.split(","):
+        part = part.strip()
+        if not part or not re.fullmatch(r"-?\d+", part):
+            return None
+        value = int(part)
+        if value < low or value > high:
+            return None
+        values.append(value)
+    return sorted(set(values))
+
+
+def parse_cron(expression: Any) -> dict[str, Any]:
+    """Validate + normalize a 5-field cron-like expression.
+
+    Returns ``{"valid": bool, "expression": str, "fields": {...}, "errors": [...]}``.
+    ``fields`` maps each field name to ``"*"`` or a sorted int list. This is a pure
+    parser: it never schedules or dispatches anything.
+    """
+    raw = str(expression or "").strip()
+    if not raw:
+        return {"valid": False, "expression": raw, "fields": {}, "errors": ["cron expression is required"]}
+    tokens = raw.split()
+    if len(tokens) != 5:
+        return {
+            "valid": False,
+            "expression": raw,
+            "fields": {},
+            "errors": [f"cron expression must have 5 fields (minute hour day-of-month month day-of-week); got {len(tokens)}"],
+        }
+    fields: dict[str, Any] = {}
+    errors: list[str] = []
+    for token, name, (low, high) in zip(tokens, _CRON_FIELD_NAMES, _CRON_FIELD_BOUNDS):
+        parsed = _parse_cron_field(token, low, high)
+        if parsed is None:
+            errors.append(f"invalid {name} field: {token!r} (expected *, int {low}-{high}, comma list, or */step)")
+        else:
+            fields[name] = parsed
+    if errors:
+        return {"valid": False, "expression": raw, "fields": {}, "errors": errors}
+    return {"valid": True, "expression": " ".join(tokens), "fields": fields, "errors": []}
+
+
+def _schedule_command(root: Path, command_type: str, target: str | None, payload: dict[str, Any], now: str, command_id: str) -> dict[str, Any]:
+    """Reserve / repeat a taskset dispatch -- PROPOSAL ONLY (TASK-AR-335).
+
+    The console NEVER executes ``taskset_dispatcher`` and NEVER writes the SSoT.
+    It records a declarative schedule proposal under ``.ui_outbox/schedules`` that
+    a runtime executor applies to ``agents/project/schedules/<id>.json``; the LOCAL
+    ``scripts/scheduled_dispatch_gate.py`` is the single point that reads due
+    schedules and emits dispatch + reminder events. No external services.
+    """
+    action = command_type.split(".", 1)[1]
+    schedule_id = _ui_key(target or payload.get("id") or payload.get("schedule_id"))
+
+    if action == "cancel":
+        if not schedule_id:
+            return {"errors": ["schedule id is required to cancel"]}
+        proposal = {
+            "id": command_id.replace("COMMAND-", "SCHEDREQ-"),
+            "type": command_type,
+            "action": "cancel",
+            "schedule_id": schedule_id,
+            "target_file": f"agents/project/schedules/{schedule_id}.json",
+            "status": "queued",
+            "created_at": now,
+            "requested_by": str(payload.get("actor") or "ui"),
+            "schedule": None,
+            "mutation_boundary": "proposal_only",
+            "execution_boundary": "local_scheduler",
+            "executor": "scripts/scheduled_dispatch_gate.py",
+            "next": "runtime executor removes/deactivates the declarative schedule file; no dispatch is run by the console",
+        }
+        changed = _write_ui_proposal(root, "schedules", proposal)
+        return {
+            "status": "queued",
+            "result": {
+                "changed": [changed],
+                "proposal_id": proposal["id"],
+                "action": "cancel",
+                "schedule_id": schedule_id,
+                "mutation_boundary": "proposal_only",
+                "execution_boundary": "local_scheduler",
+                "next": proposal["next"],
+            },
+        }
+
+    # create
+    taskset_id = str(payload.get("taskset_id") or payload.get("task_set_id") or "").strip()
+    mode = str(payload.get("mode") or "").strip().lower()
+    errors: list[str] = []
+    if not taskset_id:
+        errors.append("taskset_id is required")
+    if mode not in SCHEDULE_MODES:
+        errors.append(f"invalid mode: {mode!r} (expected {', '.join(SCHEDULE_MODES)})")
+
+    run_at = str(payload.get("run_at") or payload.get("at") or "").strip()
+    cron_spec: dict[str, Any] | None = None
+    if mode == "reserve":
+        if not run_at:
+            errors.append("reserve mode requires a run_at timestamp")
+        elif _parse_scalar(run_at) is None and not re.match(r"^\d{4}-\d{2}-\d{2}", run_at):
+            errors.append(f"invalid run_at timestamp: {run_at!r}")
+    elif mode == "repeat":
+        cron_spec = parse_cron(payload.get("cron") or payload.get("repeat"))
+        if not cron_spec["valid"]:
+            errors.extend(cron_spec["errors"])
+
+    if errors:
+        return {"errors": errors}
+
+    if not schedule_id:
+        schedule_id = "SCHED-" + (_ui_key(taskset_id) or re.sub(r"[^0-9]", "", now)[:14])
+
+    schedule = {
+        "id": schedule_id,
+        "name": str(payload.get("name") or schedule_id),
+        "taskset_id": taskset_id,
+        "mode": mode,
+        "run_at": run_at if mode == "reserve" else None,
+        "cron": cron_spec["expression"] if (mode == "repeat" and cron_spec) else None,
+        "cron_fields": cron_spec["fields"] if (mode == "repeat" and cron_spec) else None,
+        "actor": str(payload.get("actor") or "ui"),
+        "note": str(payload.get("note") or ""),
+        "active": bool(payload.get("active", True)),
+        "created_at": now,
+    }
+    proposal = {
+        "id": command_id.replace("COMMAND-", "SCHEDREQ-"),
+        "type": command_type,
+        "action": "create",
+        "schedule_id": schedule_id,
+        "target_file": f"agents/project/schedules/{schedule_id}.json",
+        "status": "queued",
+        "created_at": now,
+        "requested_by": str(payload.get("actor") or "ui"),
+        "schedule": schedule,
+        "mutation_boundary": "proposal_only",
+        "execution_boundary": "local_scheduler",
+        "executor": "scripts/scheduled_dispatch_gate.py",
+        "next": "runtime executor applies this proposal to agents/project/schedules/<id>.json; the local scheduler dispatches when due (no external services)",
+    }
+    changed = _write_ui_proposal(root, "schedules", proposal)
+    return {
+        "status": "queued",
+        "result": {
+            "changed": [changed],
+            "proposal_id": proposal["id"],
+            "action": "create",
+            "schedule_id": schedule_id,
+            "mode": mode,
+            "mutation_boundary": "proposal_only",
+            "execution_boundary": "local_scheduler",
+            "next": proposal["next"],
+        },
+    }
+
+
 def submit_command(
     root: Path | str,
     command: dict[str, Any],
@@ -1374,6 +1577,8 @@ def submit_command(
         outcome = _automation_command(root_path, command_type, target_str, payload, created_at, cid)
     elif command_type in ATTACHMENT_COMMAND_TYPES:
         outcome = _attachment_link_command(root_path, target_str, payload, created_at, cid)
+    elif command_type in SCHEDULE_COMMAND_TYPES:
+        outcome = _schedule_command(root_path, command_type, target_str, payload, created_at, cid)
     else:
         outcome = _runtime_command(root_path, command_type, target_str, payload, created_at)
 

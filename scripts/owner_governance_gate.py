@@ -62,6 +62,7 @@ def main() -> int:
         ["scripts/runtime_asset_usage.py", "--check"],
         ["scripts/state_sync_gate.py", "--check"],
         ["scripts/automation_rules_gate.py", "--check"],
+        ["scripts/scheduled_dispatch_gate.py", "--check"],
         ["scripts/release_cadence_trigger.py", "--check"],
         ["scripts/conversation_work_audit.py", "--check"],
         ["scripts/planning_loop.py", "gate", "--trigger", "hook", "--action", "scan"],
