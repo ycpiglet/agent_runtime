@@ -78,3 +78,14 @@ The first implementation target is `src/agent_runtime/ui_console.py`. The DOM an
 ## Amendment 2026-06-11 (Owner decision)
 
 The default theme changes from dark to **light (Notion-like)**. The dark token set above is preserved verbatim as the optional Dark Mode. All components must consume semantic tokens only so both themes share one structure. The single-page tab navigation is superseded by a collapsible sidebar IA. See `docs/superpowers/plans/2026-06-11-ui-ux-v2-console.md` (TASKSET-AR-UI-UX-V2) for the full V2 plan; the rest of this guide (density, evidence-first, status colors, component guidance) remains in force.
+
+## Amendment 2026-06-13 (TASK-AR-320 — theme token system implemented)
+
+The theme system from the V2 plan is implemented in `src/agent_runtime/ui_console.py`.
+
+- **Dual token scopes.** `:root` defines the default **light (Notion-style)** palette; `[data-theme="dark"]` overrides the same token names with the **Linear dark** values. Each block sets `color-scheme` so native form controls follow the surface. The previous hard-coded color literals throughout the stylesheet were replaced with `var(--token)` references — the only raw color literals that remain live inside these two token-definition blocks (plus the brand glyph, which is intentionally white-on-gradient in both themes).
+- **Semantic token set.** Surfaces (`--canvas/--panel/--panel-strong/--surface-raised`), text (`--ink/--muted/--subtle/--on-accent`), lines (`--line/--line-strong`), status (`--primary/--success/--warning/--danger/--info/--purple` plus legacy aliases `--teal/--blue/--amber/--red/--violet`), soft status fills (`--*-soft`, `--*-line`), generic overlays (`--raise/--tile/--inset-soft`), and effect tokens (`--shadow/--shadow-pop/--focus`, plus brand/canvas/progress gradients). Components reference tokens only.
+- **Status colors stay consistent and labelled.** The green/amber/red/blue/purple meanings are identical in both themes and are always paired with a visible text label (status chips, pills, lane names, phase chips) — color is never the sole signal. Light-theme status values keep WCAG-adequate contrast against the warm white canvas.
+- **Toggle + auto-detection + persistence.** A header `#theme-toggle` button switches light/dark and persists the choice in `localStorage` (`agent-runtime-theme`). First load resolves: saved choice → OS `prefers-color-scheme` → light default. An inline `<head>` bootstrap applies `data-theme` before first paint (no flash); `app.js` re-applies, wires the toggle, and live-follows OS preference changes until the user makes an explicit choice.
+
+DOM ids and structure are unchanged so the sibling V2 foundation tasks (sidebar IA, list patterns) merge cleanly.

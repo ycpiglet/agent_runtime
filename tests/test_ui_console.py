@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 from agent_runtime import cli as cli_module
@@ -1265,3 +1266,140 @@ def test_ui_console_team_agents_card_fields_are_escaped(tmp_path):
     card_block = js.split("function agentCharacterCard", 1)[1].split("\n}", 1)[0]
     for field in ["card.avatar", "card.callsign", "card.role", "card.model"]:
         assert f"escapeHtml({field}" in card_block
+
+
+# --- Theme system: Notion-style light default + dark toggle (TASK-AR-320) ----
+
+
+def _root_token_block(css: str) -> str:
+    # Isolate the :root { ... } declaration block (the default light theme).
+    start = css.index(":root {")
+    return css[start : css.index("}", start)]
+
+
+def _dark_theme_block(css: str) -> str:
+    # Isolate the [data-theme="dark"] { ... } override block.
+    start = css.index('[data-theme="dark"] {')
+    return css[start : css.index("}", start)]
+
+
+def test_ui_console_theme_light_tokens_default_on_root(tmp_path):
+    # (a) The default :root block carries the Notion-style LIGHT palette.
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    root = _root_token_block(css)
+
+    # Light-theme draft values from the V2 plan §2.1.
+    for token, value in [
+        ("--canvas", "#ffffff"),
+        ("--panel", "#f7f7f5"),
+        ("--panel-strong", "#f1f1ef"),
+        ("--ink", "#37352f"),
+        ("--muted", "#787774"),
+        ("--subtle", "#9b9a97"),
+        ("--line", "#e9e9e7"),
+        ("--line-strong", "#d3d1cb"),
+        ("--primary", "#2e6fdb"),
+        ("--success", "#0f7b55"),
+        ("--warning", "#cb7509"),
+        ("--danger", "#e03e3e"),
+    ]:
+        assert f"{token}: {value};" in root, f"missing light token {token}: {value}"
+
+    # color-scheme hint so native form controls match the light surface.
+    assert "color-scheme: light;" in root
+
+
+def test_ui_console_theme_dark_override_block_preserves_linear_palette(tmp_path):
+    # (b) A dark-theme override block restores the original Linear dark tokens.
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    assert '[data-theme="dark"] {' in css
+    dark = _dark_theme_block(css)
+
+    for token, value in [
+        ("--canvas", "#010102"),
+        ("--panel", "#0f1011"),
+        ("--ink", "#f7f8f8"),
+        ("--muted", "#a2a8b3"),
+        ("--line", "#23252a"),
+        ("--primary", "#5e6ad2"),
+        ("--success", "#27a644"),
+        ("--warning", "#d99a2b"),
+        ("--danger", "#f04438"),
+    ]:
+        assert f"{token}: {value};" in dark, f"dark token {token} not preserved"
+
+    assert "color-scheme: dark;" in dark
+
+
+def test_ui_console_theme_status_colors_consistent_across_themes(tmp_path):
+    # Status semantic tokens (green/amber/red/blue/purple) exist in both themes
+    # so meaning stays stable; labels (not color) remain the primary signal.
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    root = _root_token_block(css)
+    dark = _dark_theme_block(css)
+    for token in ["--success", "--warning", "--danger", "--info", "--purple"]:
+        assert token in root, f"{token} missing from light theme"
+        assert token in dark, f"{token} missing from dark theme"
+
+
+def test_ui_console_theme_toggle_control_and_bootstrap_served(tmp_path):
+    # (c) Toggle control in served HTML; localStorage + prefers-color-scheme
+    #     bootstrap present in both the no-flash head script and app.js.
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+
+    # Header toggle button shipped in the served shell.
+    assert 'id="theme-toggle"' in html
+    assert 'id="theme-toggle-label"' in html
+    assert 'aria-pressed' in html
+
+    # No-flash inline bootstrap in <head> reads storage + OS preference.
+    assert "agent-runtime-theme" in html
+    assert "prefers-color-scheme: dark" in html
+    assert 'setAttribute("data-theme"' in html
+
+    # app.js wires the toggle, persistence, and auto-detection.
+    for marker in [
+        "THEME_STORAGE_KEY",
+        "prefers-color-scheme: dark",
+        "localStorage",
+        "toggleTheme",
+        "initTheme",
+        "systemPrefersDark",
+        'setAttribute("data-theme"',
+    ]:
+        assert marker in js, f"theme bootstrap marker missing from app.js: {marker}"
+
+
+def test_ui_console_theme_key_panels_use_tokens_not_raw_hex(tmp_path):
+    # (d) The themed selectors converted in this task must reference var(--...)
+    #     and carry no raw hex/rgba literals (those live only in token blocks).
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    # Strip the two token-definition blocks; the rest of the stylesheet should
+    # be literal-color free (the brand glyph keeps deliberate white strokes).
+    root = _root_token_block(css)
+    dark = _dark_theme_block(css)
+    body_css = css.replace(root, "").replace(dark, "")
+
+    hex_pattern = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+    rgba_pattern = re.compile(r"rgba?\(")
+    for line in body_css.splitlines():
+        if ".brand-mark" in line:
+            continue
+        # The brand-mark rect/stroke rules span a few lines; skip the literal
+        # white values that intentionally sit on the colored brand gradient.
+        if "stroke: #ffffff;" in line or "rgba(255, 255, 255, 0.14)" in line or "rgba(255, 255, 255, 0.72)" in line:
+            continue
+        assert not hex_pattern.search(line), f"raw hex outside token blocks: {line.strip()}"
+        assert not rgba_pattern.search(line), f"raw rgba outside token blocks: {line.strip()}"
+
+    # Spot-check that key panels consume tokens.
+    for needle in [
+        ".work-surface,",  # surface uses var(--surface-grad)
+        "background: var(--surface-grad);",
+        "background: var(--raise);",
+        "background: var(--tile);",
+        "background: var(--progress-fill);",
+    ]:
+        assert needle in css

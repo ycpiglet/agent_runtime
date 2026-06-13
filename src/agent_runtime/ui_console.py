@@ -24,6 +24,19 @@ HTML = """<!doctype html>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Agent Runtime Console</title>
+  <script>
+    // No-flash theme bootstrap: apply saved/preferred theme before first paint.
+    (function () {
+      try {
+        var saved = window.localStorage.getItem("agent-runtime-theme");
+        var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var theme = (saved === "dark" || saved === "light") ? saved : (prefersDark ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (error) {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="/app.css">
 </head>
 <body>
@@ -41,6 +54,10 @@ HTML = """<!doctype html>
         </div>
       </div>
       <div class="toolbar">
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Toggle dark mode" title="Toggle light/dark theme">
+          <span class="theme-toggle-icon" aria-hidden="true"></span>
+          <span id="theme-toggle-label" class="theme-toggle-label">Light</span>
+        </button>
         <button id="refresh-button" type="button">Refresh</button>
         <span id="poll-state" class="state-chip">polling</span>
       </div>
@@ -296,30 +313,154 @@ HTML = """<!doctype html>
 """
 
 
-CSS = """:root {
+CSS = """/*
+ * Theme tokens (TASK-AR-320).
+ * :root is the default Notion-style LIGHT theme. [data-theme="dark"] restores
+ * the original Linear dark palette. Every component consumes var(--token) only
+ * so both themes share one structure. Status colors (success/warning/danger/
+ * info/primary) keep the same semantic meaning across themes and are always
+ * paired with text labels (never color-only signalling).
+ */
+:root {
+  color-scheme: light;
+  /* Surfaces */
+  --canvas: #ffffff;
+  --paper: #ffffff;
+  --panel: #f7f7f5;
+  --panel-strong: #f1f1ef;
+  --surface-raised: #ffffff;
+  /* Text */
+  --ink: #37352f;
+  --muted: #787774;
+  --subtle: #9b9a97;
+  --on-accent: #ffffff;
+  /* Lines */
+  --line: #e9e9e7;
+  --line-strong: #d3d1cb;
+  /* Status / semantic (consistent meaning in both themes) */
+  --primary: #2e6fdb;
+  --primary-hover: #1f5bc0;
+  --success: #0f7b55;
+  --warning: #cb7509;
+  --danger: #e03e3e;
+  --teal: #0f7b55;
+  --blue: #2e6fdb;
+  --amber: #cb7509;
+  --red: #e03e3e;
+  --violet: #6a48c9;
+  --info: #2e6fdb;
+  --purple: #6a48c9;
+  /* Soft status fills (label chips, pills, left borders backgrounds) */
+  --primary-soft: rgba(46, 111, 219, 0.10);
+  --primary-soft-strong: rgba(46, 111, 219, 0.16);
+  --primary-line: rgba(46, 111, 219, 0.30);
+  --success-soft: rgba(15, 123, 85, 0.12);
+  --success-line: rgba(15, 123, 85, 0.28);
+  --warning-soft: rgba(203, 117, 9, 0.14);
+  --warning-line: rgba(203, 117, 9, 0.30);
+  --danger-soft: rgba(224, 62, 62, 0.12);
+  --danger-line: rgba(224, 62, 62, 0.30);
+  --teal-soft: rgba(15, 123, 85, 0.12);
+  --teal-line: rgba(15, 123, 85, 0.28);
+  --info-soft: rgba(46, 111, 219, 0.12);
+  --violet-soft: rgba(106, 72, 201, 0.14);
+  /* Generic raised/inset overlays used by cards and meta tiles */
+  --raise: rgba(55, 53, 47, 0.03);
+  --raise-strong: rgba(55, 53, 47, 0.05);
+  --inset-soft: rgba(55, 53, 47, 0.02);
+  --tile: #ffffff;
+  --tile-line: var(--line-strong);
+  --top-line: rgba(55, 53, 47, 0.08);
+  --top-bg: rgba(255, 255, 255, 0.85);
+  --hairline-top: rgba(0, 0, 0, 0.02);
+  /* Effects */
+  --radius: 8px;
+  --shadow: 0 1px 2px rgba(15, 15, 15, 0.06), 0 8px 24px rgba(15, 15, 15, 0.06);
+  --shadow-pop: 0 10px 30px rgba(15, 15, 15, 0.16);
+  --focus: 0 0 0 3px rgba(46, 111, 219, 0.22);
+  /* Decorative / brand */
+  --brand-grad: linear-gradient(135deg, var(--primary), #6a48c9);
+  --surface-grad: linear-gradient(180deg, var(--panel), var(--panel));
+  --metric-grad: linear-gradient(180deg, var(--panel), var(--panel-strong));
+  --canvas-grad: linear-gradient(180deg, #ffffff 0%, var(--canvas) 48%, #fbfbfa 100%);
+  --grid-line: rgba(55, 53, 47, 0.035);
+  --progress-track: rgba(55, 53, 47, 0.08);
+  --progress-fill: linear-gradient(90deg, var(--success), var(--primary));
+  --pre-bg: #f5f5f3;
+  --pre-ink: #37352f;
+  --accent: var(--primary);
+  --border: var(--line-strong);
+  --bg: var(--canvas);
+}
+[data-theme="dark"] {
+  color-scheme: dark;
+  /* Surfaces */
   --canvas: #010102;
   --paper: #010102;
   --panel: #0f1011;
   --panel-strong: #15171a;
   --surface-raised: #1b1d22;
+  /* Text */
   --ink: #f7f8f8;
   --muted: #a2a8b3;
   --subtle: #62666d;
+  --on-accent: #ffffff;
+  /* Lines */
   --line: #23252a;
   --line-strong: #343844;
-  --teal: #31d0aa;
-  --blue: #57a0ff;
-  --amber: #d99a2b;
-  --red: #f04438;
-  --violet: #5e6ad2;
+  /* Status / semantic */
   --primary: #5e6ad2;
   --primary-hover: #828fff;
   --success: #27a644;
   --warning: #d99a2b;
   --danger: #f04438;
-  --radius: 8px;
+  --teal: #31d0aa;
+  --blue: #57a0ff;
+  --amber: #d99a2b;
+  --red: #f04438;
+  --violet: #5e6ad2;
+  --info: #57a0ff;
+  --purple: #5e6ad2;
+  /* Soft status fills */
+  --primary-soft: rgba(94, 106, 210, 0.12);
+  --primary-soft-strong: rgba(94, 106, 210, 0.18);
+  --primary-line: rgba(130, 143, 255, 0.36);
+  --success-soft: rgba(39, 166, 68, 0.18);
+  --success-line: rgba(39, 166, 68, 0.30);
+  --warning-soft: rgba(217, 154, 43, 0.18);
+  --warning-line: rgba(217, 154, 43, 0.24);
+  --danger-soft: rgba(240, 68, 56, 0.10);
+  --danger-line: rgba(240, 68, 56, 0.24);
+  --teal-soft: rgba(49, 208, 170, 0.10);
+  --teal-line: rgba(49, 208, 170, 0.20);
+  --info-soft: rgba(87, 160, 255, 0.18);
+  --violet-soft: rgba(94, 106, 210, 0.18);
+  /* Generic raised/inset overlays */
+  --raise: rgba(255, 255, 255, 0.044);
+  --raise-strong: rgba(255, 255, 255, 0.032);
+  --inset-soft: rgba(255, 255, 255, 0.026);
+  --tile: rgba(1, 1, 2, 0.34);
+  --tile-line: rgba(52, 56, 68, 0.76);
+  --top-line: rgba(255, 255, 255, 0.08);
+  --top-bg: rgba(12, 13, 16, 0.88);
+  --hairline-top: rgba(255, 255, 255, 0.035);
+  /* Effects */
   --shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
+  --shadow-pop: 0 10px 30px rgba(0, 0, 0, 0.5);
   --focus: 0 0 0 3px rgba(130, 143, 255, 0.22);
+  /* Decorative / brand */
+  --brand-grad: linear-gradient(135deg, var(--primary), #20233b);
+  --surface-grad: linear-gradient(180deg, rgba(15, 16, 17, 0.96), rgba(10, 11, 13, 0.96));
+  --metric-grad: linear-gradient(180deg, rgba(21, 23, 26, 0.94), rgba(15, 16, 17, 0.94));
+  --canvas-grad: linear-gradient(180deg, #08090b 0%, var(--canvas) 48%, #040405 100%);
+  --grid-line: rgba(247, 248, 248, 0.035);
+  --progress-track: rgba(255, 255, 255, 0.08);
+  --progress-fill: linear-gradient(90deg, var(--teal), var(--primary-hover));
+  --pre-bg: #050608;
+  --pre-ink: #e9ebf0;
+  --accent: #5b8def;
+  --border: #2a2a3a;
+  --bg: #11111a;
 }
 * { box-sizing: border-box; }
 html { background: var(--canvas); }
@@ -328,9 +469,9 @@ body {
   min-height: 100vh;
   font-family: "Geist", "IBM Plex Sans", "Segoe UI", sans-serif;
   background:
-    linear-gradient(rgba(247, 248, 248, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(247, 248, 248, 0.035) 1px, transparent 1px),
-    linear-gradient(180deg, #08090b 0%, var(--canvas) 48%, #040405 100%);
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+    var(--canvas-grad);
   background-size: 44px 44px, 44px 44px, auto;
   color: var(--ink);
 }
@@ -350,13 +491,13 @@ a:hover { text-decoration: underline; }
   align-items: center;
   gap: 20px;
   padding: 18px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(12, 13, 16, 0.88);
+  border-bottom: 1px solid var(--top-line);
+  background: var(--top-bg);
   backdrop-filter: blur(18px);
   position: sticky;
   top: 0;
   z-index: 4;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
+  box-shadow: 0 1px 0 var(--hairline-top);
 }
 .brand {
   display: flex;
@@ -369,17 +510,17 @@ a:hover { text-decoration: underline; }
   height: 40px;
   flex: 0 0 auto;
   border-radius: var(--radius);
-  background: linear-gradient(135deg, var(--primary), #20233b);
-  box-shadow: 0 0 0 1px rgba(130, 143, 255, 0.22), 0 16px 34px rgba(94, 106, 210, 0.16);
+  background: var(--brand-grad);
+  box-shadow: 0 0 0 1px var(--primary-line), 0 16px 34px var(--primary-soft);
 }
 .brand-mark rect {
-  fill: rgba(1, 1, 2, 0.20);
-  stroke: rgba(247, 248, 248, 0.54);
+  fill: rgba(255, 255, 255, 0.14);
+  stroke: rgba(255, 255, 255, 0.72);
 }
 .brand-mark path,
 .brand-mark circle {
   fill: none;
-  stroke: var(--ink);
+  stroke: #ffffff;
   stroke-width: 2;
   stroke-linecap: round;
 }
@@ -401,7 +542,7 @@ h1 {
   flex-wrap: wrap;
 }
 button {
-  border: 1px solid rgba(130, 143, 255, 0.42);
+  border: 1px solid var(--primary-line);
   border-radius: var(--radius);
   padding: 9px 12px;
   min-height: 36px;
@@ -409,10 +550,35 @@ button {
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  background: linear-gradient(180deg, var(--primary-hover), var(--primary));
-  color: #ffffff;
-  box-shadow: 0 10px 22px rgba(94, 106, 210, 0.22);
+  background: linear-gradient(180deg, var(--primary), var(--primary-hover));
+  color: var(--on-accent);
+  box-shadow: 0 10px 22px var(--primary-soft);
   transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--raise);
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+  box-shadow: none;
+}
+.theme-toggle:hover { border-color: var(--primary); }
+.theme-toggle-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--warning);
+  box-shadow: 0 0 0 2px var(--warning-soft);
+}
+[data-theme="dark"] .theme-toggle-icon {
+  background: transparent;
+  box-shadow: inset -4px -2px 0 0 var(--ink);
+}
+.theme-toggle-label {
+  font-size: 12px;
+  font-weight: 700;
 }
 button:hover { transform: translateY(-1px); }
 button:focus-visible {
@@ -435,7 +601,7 @@ textarea {
   padding: 9px 10px;
   font: inherit;
   font-size: 13px;
-  background: rgba(1, 1, 2, 0.64);
+  background: var(--surface-raised);
   color: var(--ink);
   outline: none;
 }
@@ -452,7 +618,7 @@ select:focus,
 textarea:focus {
   outline: 2px solid var(--primary-hover);
   outline-offset: 2px;
-  border-color: rgba(130, 143, 255, 0.72);
+  border-color: var(--primary);
   box-shadow: var(--focus);
 }
 .layout {
@@ -472,9 +638,9 @@ textarea:focus {
   min-height: 82px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: linear-gradient(180deg, rgba(21, 23, 26, 0.94), rgba(15, 16, 17, 0.94));
+  background: var(--metric-grad);
   padding: 14px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  box-shadow: inset 0 1px 0 var(--hairline-top);
 }
 .metric strong {
   display: block;
@@ -491,7 +657,7 @@ textarea:focus {
 .detail-panel {
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: linear-gradient(180deg, rgba(15, 16, 17, 0.96), rgba(10, 11, 13, 0.96));
+  background: var(--surface-grad);
   box-shadow: var(--shadow);
 }
 .work-surface {
@@ -546,9 +712,9 @@ textarea:focus {
   box-shadow: var(--focus);
 }
 .tab.is-active {
-  color: #ffffff;
-  background: rgba(94, 106, 210, 0.18);
-  border-color: rgba(130, 143, 255, 0.36);
+  color: var(--primary);
+  background: var(--primary-soft-strong);
+  border-color: var(--primary-line);
 }
 .view {
   display: none;
@@ -566,7 +732,7 @@ textarea:focus {
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.032);
+  background: var(--raise-strong);
   padding: 10px;
 }
 .lane-header {
@@ -596,7 +762,7 @@ textarea:focus {
   border: 1px solid var(--line-strong);
   border-radius: 999px;
   padding: 3px 8px;
-  background: rgba(94, 106, 210, 0.14);
+  background: var(--primary-soft-strong);
   color: var(--ink);
   text-align: center;
 }
@@ -618,7 +784,7 @@ textarea:focus {
 }
 .lane.is-drop-target {
   border-color: var(--primary-hover);
-  background: rgba(94, 106, 210, 0.12);
+  background: var(--primary-soft);
 }
 .lane-body.is-dragover {
   outline: 2px dashed var(--primary-hover);
@@ -649,7 +815,7 @@ textarea:focus {
   padding: 3px 9px;
   border-radius: 6px;
   border: 1px solid var(--line-strong);
-  background: rgba(1, 1, 2, 0.34);
+  background: var(--tile);
   color: var(--ink);
   cursor: pointer;
 }
@@ -667,7 +833,7 @@ textarea:focus {
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
   background: var(--surface-raised);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-pop);
   padding: 12px;
   color: var(--ink);
   font-size: 12px;
@@ -724,7 +890,7 @@ textarea:focus {
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.026);
+  background: var(--inset-soft);
   padding: 10px;
 }
 .evidence-grid h2 {
@@ -744,13 +910,13 @@ textarea:focus {
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.044);
+  background: var(--raise);
   color: var(--ink);
   padding: 10px;
   display: grid;
   gap: 7px;
   text-align: left;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.026);
+  box-shadow: inset 0 1px 0 var(--inset-soft);
 }
 .task-card:hover,
 .taskset-card:hover,
@@ -811,9 +977,9 @@ textarea:focus {
 .surface-card-meta > span,
 .task-status {
   min-width: 0;
-  border: 1px solid rgba(52, 56, 68, 0.76);
+  border: 1px solid var(--tile-line);
   border-radius: 6px;
-  background: rgba(1, 1, 2, 0.34);
+  background: var(--tile);
   padding: 6px;
 }
 .meta-label {
@@ -872,11 +1038,11 @@ textarea:focus {
   gap: 6px;
 }
 .alias-row code {
-  border: 1px solid rgba(130, 143, 255, 0.24);
+  border: 1px solid var(--primary-line);
   border-radius: 999px;
   padding: 4px 7px;
-  background: rgba(94, 106, 210, 0.12);
-  color: var(--primary-hover);
+  background: var(--primary-soft);
+  color: var(--primary);
   font-size: 11px;
 }
 .taskset-summary,
@@ -1042,13 +1208,13 @@ textarea:focus {
   gap: 6px;
   border-radius: 999px;
   padding: 5px 8px;
-  border: 1px solid rgba(49, 208, 170, 0.20);
-  background: rgba(49, 208, 170, 0.10);
+  border: 1px solid var(--teal-line);
+  background: var(--teal-soft);
   color: var(--teal);
   font-size: 12px;
 }
-.pill.high { color: var(--red); border-color: rgba(240, 68, 56, 0.24); background: rgba(240, 68, 56, 0.10); }
-.pill.medium { color: var(--amber); border-color: rgba(217, 154, 43, 0.24); background: rgba(217, 154, 43, 0.10); }
+.pill.high { color: var(--red); border-color: var(--danger-line); background: var(--danger-soft); }
+.pill.medium { color: var(--amber); border-color: var(--warning-line); background: var(--warning-soft); }
 .pill.low { color: var(--teal); }
 .agent-progress,
 .meta-grid {
@@ -1069,12 +1235,12 @@ textarea:focus {
   height: 7px;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--progress-track);
 }
 .progress-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--teal), var(--primary-hover));
+  background: var(--progress-fill);
 }
 .work-toolbar {
   display: grid;
@@ -1164,11 +1330,11 @@ textarea:focus {
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.044);
+  background: var(--raise);
   color: var(--ink);
   padding: 8px 10px;
   text-align: left;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.026);
+  box-shadow: inset 0 1px 0 var(--inset-soft);
 }
 .work-node-row:hover { border-color: var(--line-strong); }
 .work-node-row:focus-visible {
@@ -1214,19 +1380,19 @@ textarea:focus {
   overflow-wrap: anywhere;
 }
 .rollup-badge {
-  border: 1px solid rgba(49, 208, 170, 0.24);
+  border: 1px solid var(--teal-line);
   border-radius: 999px;
-  background: rgba(49, 208, 170, 0.10);
+  background: var(--teal-soft);
   color: var(--teal);
   font-size: 11px;
   padding: 3px 8px;
   white-space: nowrap;
 }
 .evidence-badge {
-  border: 1px solid rgba(130, 143, 255, 0.24);
+  border: 1px solid var(--primary-line);
   border-radius: 999px;
-  background: rgba(94, 106, 210, 0.12);
-  color: var(--primary-hover);
+  background: var(--primary-soft);
+  color: var(--primary);
   font-size: 11px;
   padding: 3px 8px;
   white-space: nowrap;
@@ -1234,7 +1400,7 @@ textarea:focus {
 .work-node-detail {
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.026);
+  background: var(--inset-soft);
   padding: 10px;
   display: grid;
   gap: 8px;
@@ -1256,9 +1422,9 @@ textarea:focus {
 }
 .work-detail-meta > span {
   min-width: 0;
-  border: 1px solid rgba(52, 56, 68, 0.76);
+  border: 1px solid var(--tile-line);
   border-radius: 6px;
-  background: rgba(1, 1, 2, 0.34);
+  background: var(--tile);
   padding: 6px;
 }
 .work-detail-meta strong {
@@ -1285,7 +1451,7 @@ textarea:focus {
 .meeting-room {
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.026);
+  background: var(--inset-soft);
   padding: 12px;
   min-width: 0;
 }
@@ -1312,13 +1478,13 @@ textarea:focus {
   gap: 8px;
   border: 1px solid var(--line-strong);
   border-radius: 8px;
-  background: rgba(1, 1, 2, 0.34);
+  background: var(--tile);
   padding: 8px;
   cursor: grab;
   min-width: 0;
 }
 .meeting-card:focus-visible {
-  outline: 2px solid var(--accent, #5b8def);
+  outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
 .meeting-card.is-placed {
@@ -1336,17 +1502,17 @@ textarea:focus {
 .meeting-dropzone {
   border: 2px dashed var(--line-strong);
   border-radius: var(--radius);
-  background: rgba(1, 1, 2, 0.24);
+  background: var(--inset-soft);
   padding: 12px;
   min-height: 96px;
   margin-bottom: 10px;
 }
 .meeting-dropzone.is-dragover {
-  border-color: var(--accent, #5b8def);
-  background: rgba(91, 141, 239, 0.12);
+  border-color: var(--accent);
+  background: var(--info-soft);
 }
 .meeting-dropzone:focus-visible {
-  outline: 2px solid var(--accent, #5b8def);
+  outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
 .meeting-dropzone-empty {
@@ -1361,9 +1527,9 @@ textarea:focus {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  border: 1px solid var(--accent, #5b8def);
+  border: 1px solid var(--accent);
   border-radius: 8px;
-  background: rgba(91, 141, 239, 0.1);
+  background: var(--info-soft);
   padding: 8px;
 }
 .meeting-participant button {
@@ -1395,11 +1561,11 @@ textarea:focus {
 .meeting-validation {
   margin-top: 8px;
   font-size: 12px;
-  color: var(--warning, #e0a23a);
+  color: var(--warning);
   min-height: 16px;
 }
 .meeting-validation.is-ok {
-  color: var(--success, #4caf7d);
+  color: var(--success);
 }
 .detail-panel {
   padding: 14px;
@@ -1431,7 +1597,7 @@ textarea:focus {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 8px;
-  background: rgba(255, 255, 255, 0.026);
+  background: var(--inset-soft);
 }
 .meta-grid span {
   display: block;
@@ -1453,8 +1619,8 @@ pre {
   overflow: auto;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: #050608;
-  color: #e9ebf0;
+  background: var(--pre-bg);
+  color: var(--pre-ink);
   padding: 10px;
 }
 .empty {
@@ -1580,10 +1746,10 @@ pre {
   font-size: 10px;
   text-transform: uppercase;
 }
-.phase-plan { background: rgba(98, 102, 109, 0.25); color: var(--muted); }
-.phase-work { background: rgba(87, 160, 255, 0.18); color: var(--blue); }
-.phase-review { background: rgba(217, 154, 43, 0.18); color: var(--amber); }
-.phase-done { background: rgba(39, 166, 68, 0.18); color: var(--success); }
+.phase-plan { background: var(--raise-strong); color: var(--muted); }
+.phase-work { background: var(--info-soft); color: var(--blue); }
+.phase-review { background: var(--warning-soft); color: var(--amber); }
+.phase-done { background: var(--success-soft); color: var(--success); }
 .tsboard-swimlanes { display: flex; flex-direction: column; gap: 16px; }
 .tsboard-swimlane {
   border: 1px solid var(--line);
@@ -1787,7 +1953,7 @@ pre {
   flex-direction: column;
   gap: 14px;
   padding-left: 22px;
-  border-left: 2px solid var(--border, #2a2a3a);
+  border-left: 2px solid var(--border);
 }
 .roadmap-tl-item {
   position: relative;
@@ -1801,7 +1967,7 @@ pre {
   height: 12px;
   border-radius: 50%;
   background: var(--muted);
-  border: 2px solid var(--bg, #11111a);
+  border: 2px solid var(--bg);
 }
 .roadmap-tl-marker.is-done {
   background: var(--teal);
@@ -1850,7 +2016,67 @@ pre {
 }
 """
 
-JS = """const lanes = ["Backlog", "Ready", "In Progress", "Review", "Blocked", "Done"];
+JS = """// --- Theme system (TASK-AR-320) -------------------------------------------
+// Default is the Notion-style light theme. Dark mode restores the Linear
+// palette. Resolution order on first load: saved localStorage choice, then the
+// OS prefers-color-scheme hint; thereafter the header toggle persists a choice.
+const THEME_STORAGE_KEY = "agent-runtime-theme";
+function systemPrefersDark() {
+  return Boolean(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+}
+function storedTheme() {
+  try {
+    const value = window.localStorage.getItem(THEME_STORAGE_KEY);
+    return value === "dark" || value === "light" ? value : null;
+  } catch (error) {
+    return null;
+  }
+}
+function resolveInitialTheme() {
+  return storedTheme() || (systemPrefersDark() ? "dark" : "light");
+}
+function applyTheme(theme) {
+  const mode = theme === "dark" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", mode);
+  const toggle = document.getElementById("theme-toggle");
+  const label = document.getElementById("theme-toggle-label");
+  if (toggle) {
+    toggle.setAttribute("aria-pressed", mode === "dark" ? "true" : "false");
+    toggle.setAttribute("aria-label", mode === "dark" ? "Switch to light mode" : "Switch to dark mode");
+  }
+  if (label) label.textContent = mode === "dark" ? "Dark" : "Light";
+}
+function setTheme(theme, persist) {
+  const mode = theme === "dark" ? "dark" : "light";
+  applyTheme(mode);
+  if (persist) {
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, mode);
+    } catch (error) {
+      /* localStorage unavailable (private mode) - theme still applies for the session */
+    }
+  }
+}
+function toggleTheme() {
+  const current = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+  setTheme(current === "dark" ? "light" : "dark", true);
+}
+function initTheme() {
+  applyTheme(resolveInitialTheme());
+  const toggle = document.getElementById("theme-toggle");
+  if (toggle) toggle.addEventListener("click", toggleTheme);
+  if (window.matchMedia) {
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = (event) => {
+      if (!storedTheme()) setTheme(event.matches ? "dark" : "light", false);
+    };
+    if (media.addEventListener) media.addEventListener("change", onChange);
+    else if (media.addListener) media.addListener(onChange);
+  }
+}
+initTheme();
+
+const lanes = ["Backlog", "Ready", "In Progress", "Review", "Blocked", "Done"];
 const taskStatusOptions = [
   "assigned",
   "blocked",
