@@ -47,7 +47,12 @@ def main() -> int:
         ["scripts/work_schema_gate.py", "--items", "--check"],
         ["scripts/footprint_conflict_gate.py", "--check"],
         ["scripts/taskset_work_gate.py", "--check"],
+        ["scripts/evidence_index_generator.py", "--check"],
         ["scripts/verification_freshness_gate.py", "--check"],
+        # intentionally omitted: scripts/context_knowledge_gate.py -- root-repo-specific
+        # (validates TASKSET-AR-CONTEXT-KNOWLEDGE contracts against src/agent_runtime/templates/**,
+        # agents/project/overlays/**, and agents/project/evals/* evidence that generated projects
+        # do not ship). Mirrored in tests/test_owner_governance_chain_parity.py exceptions.
         ["scripts/parallel_worktree_gate.py", "--check"],
         ["scripts/worktree_lifecycle_gate.py", "--check"],
         ["scripts/collaboration_concurrency_gate.py", "--check"],
