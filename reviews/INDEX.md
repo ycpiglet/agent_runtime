@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-13T14:13:44+09:00
-record_count: 422
+generated_at: 2026-06-13T15:51:40+09:00
+record_count: 426
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `422` review and evidence records under `reviews/`.
+- Summary: indexed `426` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `422` files |
+| Reviews covered | pass | `426` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -150,9 +150,12 @@ record_count: 422
 | `reviews/PENDING-RELEASE-GUARD-2026-06-09-v0.1.8.json` | `PENDING-RELEASE-GUARD-2026-06-09-v0.1.8` | json | record | n/a | PENDING-RELEASE-GUARD-2026-06-09-v0.1.8 |
 | `reviews/PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final.json` | `PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final` | json | record | n/a | PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final |
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8.json` | `RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8 |
+| `reviews/RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0.json` | `RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0 |
 | `reviews/RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8.json` | `RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8 |
+| `reviews/RELEASE-EXECUTION-GATE-2026-06-13-v0.2.0.json` | `RELEASE-EXECUTION-GATE-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-EXECUTION-GATE-2026-06-13-v0.2.0 |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-09-v0.1.8.json` | `RELEASE-READINESS-SUMMARY-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-09-v0.1.8 |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current.json` | `RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current |
+| `reviews/RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0.json` | `RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0 |
 | `reviews/RELEASE-VERSION-CONSISTENCY-STEWARD.json` | `RELEASE-VERSION-CONSISTENCY-STEWARD` | json | record | n/a | RELEASE-VERSION-CONSISTENCY-STEWARD |
 | `reviews/RESEARCH-2026-06-09-agent-runtime-official-recommendation-update.md` | `RESEARCH-2026-06-09-agent-runtime-official-recommendation-update` | md | record | n/a | RESEARCH-2026-06-09-agent-runtime-official-recommendation-update.md |
 | `reviews/RESEARCH-2026-06-09-agent-runtime-official-runtime-ops-update.md` | `RESEARCH-2026-06-09-agent-runtime-official-runtime-ops-update` | md | record | n/a | RESEARCH-2026-06-09-agent-runtime-official-runtime-ops-update |
@@ -431,6 +434,7 @@ record_count: 422
 | `reviews/REVIEW-2026-06-13-parallel-wave-1-2-closeout.md` | `REVIEW-2026-06-13-parallel-wave-1-2-closeout` | review | pass | pass | Parallel Wave 1-2 Closeout (AR-500/503/505/509/510/513/515) |
 | `reviews/REVIEW-2026-06-13-parallel-wave-500-series-capability-analysis.md` | `REVIEW-2026-06-13-parallel-wave-500-series-capability-analysis` | review | pass | pass | 500-Series Capability Analysis — Implemented, Applied, Verified |
 | `reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md` | `REVIEW-2026-06-13-parallel-wave-500-series-final-closeout` | review | pass | pass | 500-Series Parallel Execution — Final Closeout |
+| `reviews/REVIEW-2026-06-13-v0.2.0-release-readiness.md` | `REVIEW-2026-06-13-v0.2.0-release-readiness` | review | pass | pass | v0.2.0 Release Readiness |
 | `reviews/REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log.md` | `REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log` | md | record | n/a | REVIEW: TASK-AR-222 closeout 실행 로그 |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |

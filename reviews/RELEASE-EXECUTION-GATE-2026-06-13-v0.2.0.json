@@ -1,0 +1,31 @@
+{
+  "schema": "agent-runtime-release-execution-gate/v1",
+  "evaluation_mode": "ready_to_release_boundary",
+  "generated_at": "2026-06-13T06:24:56.967034+00:00",
+  "status": "block",
+  "release_route": "block",
+  "target_version": "",
+  "target_tag": "",
+  "package_version": "0.2.0",
+  "init_version": "0.2.0",
+  "release_state": "release",
+  "owner_approval_status": "",
+  "execution_status": "",
+  "findings": [
+    "release-template:not-ready:release",
+    "target_version:not-0.1.8:<missing>",
+    "target_tag:not-v0.1.8:<missing>",
+    "ready_evidence:missing:reviews/REVIEW-2026-06-09-agent-runtime-task-ar-220-migration-approval-closure.md",
+    "ready_evidence:missing:reviews/REVIEW-2026-06-09-agent-runtime-task-ar-215-overlay-simulation-closure.md",
+    "ready_evidence:missing:reviews/REVIEW-2026-06-09-agent-runtime-task-ar-204-co-location-gate-closure.md",
+    "ready_evidence:missing:reviews/REVIEW-2026-06-09-agent-runtime-task-ar-210-ready-redecision.md",
+    "owner_approval_status:invalid:<missing>",
+    "execution_status:invalid:<missing>"
+  ],
+  "inputs": {
+    "plan": "agents/project/RELEASE-GATE-TEMPLATE.yml",
+    "template": "agents/project/RELEASE-GATE-TEMPLATE.yml",
+    "pyproject": "pyproject.toml",
+    "init": "src/agent_runtime/__init__.py"
+  }
+}

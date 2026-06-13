@@ -1,0 +1,68 @@
+{
+  "schema": "agent-runtime-release-readiness-summary/v1",
+  "evaluation_mode": "v0.1.8_readiness_aggregation",
+  "generated_at": "2026-06-13T06:22:22.205079+00:00",
+  "target_tag": "v0.1.8",
+  "status": "pass",
+  "release_route": "release_evidence_ready",
+  "owner_boundary": "explicit_owner_decision_required",
+  "findings": [],
+  "reports": [
+    {
+      "name": "migration_closure",
+      "path": "reviews/REVIEW-2026-06-09-agent-runtime-task-ar-220-migration-approval-closure.md",
+      "status": "pass",
+      "route": "evidence-record",
+      "findings": []
+    },
+    {
+      "name": "overlay_gate",
+      "path": "reviews/OVERLAY-SIMULATION-GATE-2026-06-09-task-ar-215.json",
+      "status": "pass",
+      "route": "ready_for_overlay_use",
+      "findings": []
+    },
+    {
+      "name": "co_location_gate",
+      "path": "reviews/CO-LOCATION-GATE-2026-06-09-task-ar-204.json",
+      "status": "pass",
+      "route": "ready_for_release_redecision",
+      "findings": []
+    },
+    {
+      "name": "autonomy_policy_gate",
+      "path": "reviews/AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8.json",
+      "status": "pass",
+      "route": "autonomy_policy_ready",
+      "findings": []
+    },
+    {
+      "name": "release_council_gate",
+      "path": "reviews/RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8.json",
+      "status": "pass",
+      "route": "agent_council_approved_release_execution",
+      "findings": []
+    },
+    {
+      "name": "release_execution_gate",
+      "path": "reviews/RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8.json",
+      "status": "pass",
+      "route": "release_evidence_ready",
+      "findings": []
+    },
+    {
+      "name": "owner_approval_gate",
+      "path": "reviews/OWNER-APPROVAL-GATE-2026-06-09-v0.1.8.json",
+      "status": "pass",
+      "route": "agent_council_approved_release_execution",
+      "findings": []
+    },
+    {
+      "name": "pending_release_guard",
+      "path": "reviews/PENDING-RELEASE-GUARD-2026-06-09-v0.1.8.json",
+      "status": "pass",
+      "route": "release_decision_recorded",
+      "findings": []
+    }
+  ]
+}

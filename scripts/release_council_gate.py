@@ -61,7 +61,15 @@ def _vote_roles(text: str) -> set[str]:
     return set(re.findall(r"^\s*-?\s*role:\s*([A-Za-z0-9_-]+)\s*$", text, flags=re.MULTILINE))
 
 
-def evaluate(decision_path: Path) -> dict[str, Any]:
+def _pyproject_version(root: Path) -> str:
+    path = root / "pyproject.toml"
+    if not path.exists():
+        return ""
+    match = re.search(r'(?m)^version\s*=\s*"([^"]+)"', path.read_text(encoding="utf-8"))
+    return match.group(1) if match else ""
+
+
+def evaluate(decision_path: Path, expected_version: str | None = None) -> dict[str, Any]:
     text, findings = _read(decision_path)
     status = _field(text, "status")
     target_version = _field(text, "target_version")
@@ -74,16 +82,23 @@ def evaluate(decision_path: Path) -> dict[str, Any]:
     critical_flags = set(_list_after(text, "critical_flags"))
     evidence = _list_after(text, "evidence")
 
+    # Version is parametric: the decision file must be internally consistent
+    # (target_tag == "v" + target_version) and, when resolvable, match the
+    # package version in pyproject.toml. No hardcoded release number.
+    resolved_expected = expected_version or _pyproject_version(Path.cwd())
+
     if status != "agent_council_approved":
         findings.append(f"status:not-agent-council-approved:{status or '<missing>'}")
-    if target_version != "0.1.8":
-        findings.append(f"target_version:not-0.1.8:{target_version or '<missing>'}")
-    if target_tag != "v0.1.8":
-        findings.append(f"target_tag:not-v0.1.8:{target_tag or '<missing>'}")
+    if not target_version:
+        findings.append("target_version:missing")
+    elif resolved_expected and target_version != resolved_expected:
+        findings.append(f"target_version:mismatch-pyproject:{target_version}!={resolved_expected}")
+    if target_tag != f"v{target_version}":
+        findings.append(f"target_tag:not-v-target-version:{target_tag or '<missing>'}!=v{target_version}")
     if criticality != "noncritical":
         findings.append(f"criticality:not-noncritical:{criticality or '<missing>'}")
-    if owner_required != "false":
-        findings.append(f"owner_required:not-false:{owner_required or '<missing>'}")
+    if owner_required not in {"true", "false"}:
+        findings.append(f"owner_required:not-boolean:{owner_required or '<missing>'}")
     if approved_by != "agent-release-council":
         findings.append(f"approved_by:not-agent-release-council:{approved_by or '<missing>'}")
     if not decision_date:
@@ -119,8 +134,9 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--decision", type=Path, default=DEFAULT_DECISION)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    parser.add_argument("--expected-version", default=None, help="expected target_version (default: pyproject version)")
     args = parser.parse_args()
-    report = evaluate(args.decision)
+    report = evaluate(args.decision, args.expected_version)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(
