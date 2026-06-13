@@ -2263,3 +2263,160 @@ def test_attachment_css_uses_tokens_not_raw_hex(tmp_path):
     assert "var(--" in block
     assert not re.search(r"#[0-9a-fA-F]{3,8}\b", block)
     assert not re.search(r"rgba?\(", block)
+
+
+# --------------------------------------------------------------------------- #
+# Import/Export console routes (TASK-AR-333)
+# --------------------------------------------------------------------------- #
+def test_ui_console_registers_import_export_view_in_ops_group(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    # Sidebar link registered in the OPS group.
+    ops_start = html.index('data-group="ops"')
+    ops_block = html[ops_start : html.index("</div>", ops_start) + 6]
+    assert 'data-view="portability"' in ops_block
+    assert "Import/Export" in ops_block
+    # View container exists with the export anchors + import form.
+    assert 'id="view-portability"' in html
+    assert 'href="/api/export/board.csv"' in html
+    assert 'href="/api/export/backup.zip"' in html
+    assert 'id="import-form"' in html
+
+
+def test_ui_console_export_board_csv_route(tmp_path):
+    _write_task(tmp_path, "TASK-AR-963")
+    response = ui_console.build_response("/api/export/board.csv", tmp_path)
+    assert response.status == 200
+    assert response.content_type == "text/csv; charset=utf-8"
+    body = response.body.decode("utf-8")
+    assert body.splitlines()[0].startswith("id,display_id,title,")
+    assert "TASK-AR-963" in body
+
+
+def test_ui_console_export_taskset_md_route(tmp_path):
+    _write_task(tmp_path, "TASK-AR-964")
+    response = ui_console.build_response("/api/export/taskset.md", tmp_path)
+    assert response.status == 200
+    assert response.content_type == "text/markdown; charset=utf-8"
+    assert response.body.decode("utf-8").startswith("# Taskset Export Package")
+
+
+def test_ui_console_export_status_json_route(tmp_path):
+    _write_task(tmp_path, "TASK-AR-965")
+    response = ui_console.build_response("/api/export/status.json", tmp_path)
+    assert response.status == 200
+    payload = json.loads(response.body.decode("utf-8"))
+    assert payload["resource"] == "status_snapshot"
+    assert payload["totals"]["tasks"] == 1
+
+
+def test_ui_console_export_backup_zip_route(tmp_path):
+    import io
+    import zipfile
+
+    _write_task(tmp_path, "TASK-AR-966")
+    response = ui_console.build_response("/api/export/backup.zip", tmp_path)
+    assert response.status == 200
+    assert response.content_type == "application/zip"
+    with zipfile.ZipFile(io.BytesIO(response.body)) as archive:
+        assert "manifest.json" in archive.namelist()
+        assert "board.csv" in archive.namelist()
+
+
+def test_ui_console_export_unknown_format_404(tmp_path):
+    response = ui_console.build_response("/api/export/bogus.xml", tmp_path)
+    assert response.status == 404
+
+
+def test_ui_console_import_preview_route_detects_duplicates(tmp_path):
+    _write_task(tmp_path, "TASK-AR-967")
+    body = json.dumps(
+        {
+            "format": "csv",
+            "content": "id,title,status,priority\r\nTASK-AR-967,Existing,in_progress,P0\r\nTASK-AR-968,Fresh,planned,P1\r\n",
+        }
+    ).encode("utf-8")
+    response = ui_console.build_response("/api/import/preview", tmp_path, method="POST", body=body)
+    assert response.status == 200
+    payload = json.loads(response.body.decode("utf-8"))
+    assert payload["resource"] == "import_preview"
+    assert payload["counts"]["total"] == 2
+    assert payload["counts"]["duplicate"] == 1
+    assert payload["counts"]["new"] == 1
+
+
+def test_ui_console_import_commit_creates_task_create_proposals_not_direct_writes(tmp_path):
+    _write_backlog_board_script(tmp_path)
+    body = json.dumps(
+        {
+            "format": "csv",
+            "content": "id,title,status,priority\r\nTASK-AR-969,Imported task,planned,P1\r\n",
+        }
+    ).encode("utf-8")
+    response = ui_console.build_response("/api/import/commit", tmp_path, method="POST", body=body)
+    assert response.status == 202
+    payload = json.loads(response.body.decode("utf-8"))
+    assert payload["resource"] == "import_commit"
+    assert payload["counts"]["created"] == 1
+    # A task.create command proposal was recorded in the outbox (the only writer).
+    outbox = list((tmp_path / ".ui_outbox").glob("COMMAND-*.json"))
+    assert outbox, "expected a task.create command proposal in .ui_outbox"
+    record = json.loads(outbox[0].read_text(encoding="utf-8"))
+    assert record["type"] == "task.create"
+    assert record["status"] == "accepted"
+
+
+def test_ui_console_import_commit_skips_duplicate(tmp_path):
+    _write_backlog_board_script(tmp_path)
+    _write_task(tmp_path, "TASK-AR-970")
+    body = json.dumps(
+        {
+            "format": "csv",
+            "content": "id,title,status,priority\r\nTASK-AR-970,Existing,in_progress,P0\r\n",
+        }
+    ).encode("utf-8")
+    response = ui_console.build_response("/api/import/commit", tmp_path, method="POST", body=body)
+    payload = json.loads(response.body.decode("utf-8"))
+    assert payload["counts"]["created"] == 0
+    assert payload["counts"]["skipped"] == 1
+
+
+def test_ui_console_import_preview_rejects_unknown_format(tmp_path):
+    body = json.dumps({"format": "xml", "content": "<x/>"}).encode("utf-8")
+    response = ui_console.build_response("/api/import/preview", tmp_path, method="POST", body=body)
+    assert response.status == 400
+
+
+def test_ui_console_csv_round_trip_through_console_no_loss(tmp_path):
+    # Acceptance: export a board to CSV, then re-import it; the round-trip is
+    # lossless (every exported row maps back to a candidate with the same
+    # fields and is correctly detected as an existing duplicate).
+    _write_backlog_board_script(tmp_path)
+    _write_task(tmp_path, "TASK-AR-971")
+    _write_task(tmp_path, "TASK-AR-972")
+
+    exported = ui_console.build_response("/api/export/board.csv", tmp_path).body.decode("utf-8")
+    body = json.dumps({"format": "csv", "content": exported}).encode("utf-8")
+    preview = json.loads(
+        ui_console.build_response("/api/import/preview", tmp_path, method="POST", body=body).body.decode("utf-8")
+    )
+    assert preview["counts"]["total"] == 2
+    assert preview["counts"]["duplicate"] == 2
+    assert preview["counts"]["new"] == 0
+
+
+def test_ui_console_portability_css_uses_tokens_not_raw_color(tmp_path):
+    # (TASK-AR-333 tokenization guard) Every color the portability CSS
+    # introduces must flow through var(--token); no raw hex/rgba.
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    body_css = css.replace(_root_token_block(css), "").replace(_dark_theme_block(css), "")
+    hex_pattern = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+    rgba_pattern = re.compile(r"rgba?\(")
+    portability_lines = [
+        line
+        for line in body_css.splitlines()
+        if ".portability" in line or line.strip().startswith("#import-")
+    ]
+    assert portability_lines, "expected portability CSS rules to exist"
+    for line in portability_lines:
+        assert not hex_pattern.search(line), f"raw hex in portability CSS: {line.strip()}"
+        assert not rgba_pattern.search(line), f"raw rgba in portability CSS: {line.strip()}"

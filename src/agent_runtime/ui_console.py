@@ -8,6 +8,7 @@ from urllib.parse import parse_qs
 from urllib.parse import urlparse
 
 from . import ui_commands
+from . import ui_export
 from . import ui_state
 
 
@@ -153,6 +154,9 @@ HTML = """<!doctype html>
           </button>
           <button class="sidebar-link" type="button" role="tab" data-view="labels" data-route="ops/labels" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9750;</span><span class="sidebar-label">Labels</span>
+          </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="portability" data-route="ops/portability" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#8645;</span><span class="sidebar-label">Import/Export</span>
           </button>
           <button class="sidebar-link" type="button" role="tab" data-view="writes" data-route="ops/writes" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9881;</span><span class="sidebar-label">Writes</span>
@@ -537,6 +541,38 @@ HTML = """<!doctype html>
           </form>
           <p id="label-summary" class="config-summary" role="status" aria-live="polite"></p>
           <div id="label-list" class="config-grid" aria-label="Labels"></div>
+        </div>
+        <div id="view-portability" class="view">
+          <section class="portability-section" aria-label="Export">
+            <h2>Export</h2>
+            <p class="portability-hint">Download the current state in a portable format. Export is read-only.</p>
+            <div class="portability-actions">
+              <a class="portability-btn" href="/api/export/board.csv" download="board.csv">Board &rarr; CSV</a>
+              <a class="portability-btn" href="/api/export/taskset.md" download="taskset.md">Taskset &rarr; Markdown</a>
+              <a class="portability-btn" href="/api/export/status.json" download="status.json">Status &rarr; JSON</a>
+              <a class="portability-btn" href="/api/export/backup.zip" download="agent-runtime-backup.zip">Full backup &rarr; ZIP</a>
+            </div>
+          </section>
+          <section class="portability-section" aria-label="Import">
+            <h2>Import</h2>
+            <p class="portability-hint">Paste a CSV (exported board) or a Markdown checklist. Preview detects duplicates; nothing is created until you commit. Import creates <code>task.create</code> proposals only.</p>
+            <form id="import-form" class="portability-import" aria-label="Import tasks">
+              <label class="portability-field">
+                <span>Format</span>
+                <select id="import-format" name="format" aria-label="Import format">
+                  <option value="csv">CSV</option>
+                  <option value="md">Markdown checklist</option>
+                </select>
+              </label>
+              <textarea id="import-content" name="content" rows="8" placeholder="Paste CSV or Markdown checklist here" aria-label="Import content"></textarea>
+              <div class="portability-actions">
+                <button id="import-preview-btn" type="submit">Preview</button>
+                <button id="import-commit-btn" type="button" disabled>Commit selected</button>
+              </div>
+            </form>
+            <p id="import-summary" class="portability-summary" role="status" aria-live="polite"></p>
+            <div id="import-preview" class="portability-preview" aria-label="Import preview"></div>
+          </section>
         </div>
       </section>
 
@@ -3144,6 +3180,74 @@ pre {
   font-size: 12px;
   color: var(--muted);
 }
+.portability-section {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-grad);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.portability-section h2 { margin: 0 0 6px; font-size: 15px; color: var(--ink); }
+.portability-hint { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+.portability-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.portability-btn {
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line-strong);
+  background: var(--raise);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.portability-btn:hover { background: var(--raise-strong); }
+#import-commit-btn {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--on-accent);
+}
+#import-commit-btn:hover:not(:disabled) { background: var(--primary-hover); }
+#import-commit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.portability-import { display: flex; flex-direction: column; gap: 10px; }
+.portability-field { display: flex; flex-direction: column; gap: 4px; max-width: 220px; }
+.portability-field span { font-size: 12px; color: var(--muted); }
+.portability-import select,
+.portability-import textarea {
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line-strong);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+.portability-import textarea { font-family: ui-monospace, monospace; font-size: 12px; }
+.portability-summary { color: var(--muted); font-size: 13px; margin: 12px 0 8px; }
+.portability-summary strong { color: var(--ink); }
+.portability-preview { display: flex; flex-direction: column; gap: 6px; }
+.portability-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  font-size: 13px;
+}
+.portability-row .portability-row-title { flex: 1; color: var(--ink); }
+.portability-row .portability-row-id { color: var(--muted); font-size: 12px; }
+.portability-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+}
+.portability-badge.is-new { color: var(--success); background: var(--success-soft); border-color: var(--success-line); }
+.portability-badge.is-duplicate { color: var(--warning); background: var(--warning-soft); border-color: var(--warning-line); }
+.portability-badge.is-invalid { color: var(--danger); background: var(--danger-soft); border-color: var(--danger-line); }
+.portability-row-reason { color: var(--muted); font-size: 12px; }
 
 @media (max-width: 760px) {
   .topbar {
@@ -4198,7 +4302,7 @@ function renderGroupedList(view, items, rowTemplate, emptyLabel) {
 const COMMAND_PALETTE_VIEWS = [
   "board", "work", "meeting", "tasksets", "tsboard", "team", "agents",
   "messages", "events", "evidence", "planner", "triage", "roadmap", "map", "sources",
-  "automation", "properties", "labels", "writes",
+  "automation", "properties", "labels", "portability", "writes",
 ];
 let commandPaletteIndex = 0;
 
@@ -7493,6 +7597,90 @@ $("label-form")?.addEventListener("submit", async (event) => {
   $("label-name").value = "";
   $("label-description").value = "";
 });
+
+// ----- Import/Export (TASK-AR-333) -----
+// Import is preview-first: parse + duplicate-check server-side, render an
+// advisory preview, then commit creates task.create proposals only.
+let importPreviewState = null;
+
+function renderImportPreview(preview) {
+  importPreviewState = preview;
+  const host = $("import-preview");
+  const summary = $("import-summary");
+  const commitBtn = $("import-commit-btn");
+  const counts = (preview && preview.counts) || { total: 0, new: 0, duplicate: 0, invalid: 0 };
+  if (summary) {
+    summary.innerHTML = `<strong>${escapeHtml(counts.total)}</strong> rows`
+      + ` &middot; new <strong>${escapeHtml(counts.new)}</strong>`
+      + ` &middot; duplicate <strong>${escapeHtml(counts.duplicate)}</strong>`
+      + ` &middot; invalid <strong>${escapeHtml(counts.invalid)}</strong>`;
+  }
+  if (commitBtn) commitBtn.disabled = !(counts.new > 0);
+  const items = (preview && preview.items) || [];
+  if (!host) return;
+  host.innerHTML = items.length ? items.map((item) => {
+    const invalid = (item.errors || []).length > 0;
+    const badgeClass = invalid ? "is-invalid" : (item.duplicate ? "is-duplicate" : "is-new");
+    const badgeLabel = invalid ? "invalid" : (item.duplicate ? "duplicate" : "new");
+    const reasons = invalid ? (item.errors || []) : (item.duplicate_reasons || []);
+    return `<div class="portability-row">
+      <span class="portability-badge ${badgeClass}">${escapeHtml(badgeLabel)}</span>
+      <span class="portability-row-title">${escapeHtml(item.title || "(no title)")}</span>
+      ${item.id ? `<span class="portability-row-id">${escapeHtml(item.id)}</span>` : ""}
+      ${reasons.length ? `<span class="portability-row-reason">${escapeHtml(reasons.join("; "))}</span>` : ""}
+    </div>`;
+  }).join("") : `<div class="empty">No rows parsed</div>`;
+}
+
+async function requestImportPreview() {
+  const format = $("import-format").value;
+  const content = $("import-content").value;
+  const response = await fetch("/api/import/preview", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ format, content }),
+  });
+  const payload = await response.json();
+  if (!response.ok) {
+    const summary = $("import-summary");
+    if (summary) summary.innerHTML = `<strong>Preview failed:</strong> ${escapeHtml((payload.errors || ["unknown error"]).join("; "))}`;
+    return;
+  }
+  renderImportPreview(payload);
+}
+
+async function commitImport() {
+  if (!importPreviewState) return;
+  const format = $("import-format").value;
+  const content = $("import-content").value;
+  const commitBtn = $("import-commit-btn");
+  if (commitBtn) commitBtn.disabled = true;
+  const response = await fetch("/api/import/commit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ format, content }),
+  });
+  const payload = await response.json();
+  const summary = $("import-summary");
+  if (summary) {
+    const counts = (payload && payload.counts) || { created: 0, skipped: 0 };
+    summary.innerHTML = `Committed: created <strong>${escapeHtml(counts.created)}</strong>`
+      + ` &middot; skipped <strong>${escapeHtml(counts.skipped)}</strong>`
+      + ` (task.create proposals)`;
+  }
+  importPreviewState = null;
+  await loadState();
+}
+
+$("import-form")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  await requestImportPreview();
+});
+$("import-commit-btn")?.addEventListener("click", async (event) => {
+  event.preventDefault();
+  await commitImport();
+});
+
 loadState();
 connectEventStream();
 setInterval(loadState, 4000);
@@ -7566,6 +7754,97 @@ def _attachment_download_response(root_path: Path, attachment_id: str) -> Consol
     return ConsoleResponse(200, content_type, body)
 
 
+def _export_response(root_path: Path, fmt: str) -> ConsoleResponse:
+    """Serialize the current state snapshot to a read-only download.
+
+    Supported formats: ``board.csv``, ``taskset.md``, ``status.json``,
+    ``backup.zip``. Export never mutates state.
+    """
+
+    state = ui_state.build_state(root_path)
+    if fmt == "board.csv":
+        body = ui_export.export_board_csv(state).encode("utf-8")
+        return ConsoleResponse(200, "text/csv; charset=utf-8", body)
+    if fmt == "taskset.md":
+        body = ui_export.export_taskset_markdown(state).encode("utf-8")
+        return ConsoleResponse(200, "text/markdown; charset=utf-8", body)
+    if fmt == "status.json":
+        body = ui_export.export_status_snapshot(state).encode("utf-8")
+        return ConsoleResponse(200, "application/json; charset=utf-8", body)
+    if fmt == "backup.zip":
+        body = ui_export.export_backup_zip(state)
+        return ConsoleResponse(200, "application/zip", body)
+    return ConsoleResponse(404, "text/plain; charset=utf-8", b"unknown export format\n")
+
+
+def _import_candidates_from_payload(payload: dict[str, object]) -> tuple[list[dict[str, object]], list[str]]:
+    """Parse an upload payload (``format`` + ``content``) into candidates."""
+
+    fmt = str(payload.get("format") or "").strip().lower()
+    content = payload.get("content")
+    if not isinstance(content, str):
+        return [], ["content must be a string"]
+    if fmt == "csv":
+        return ui_export.parse_csv_import(content), []
+    if fmt in {"md", "markdown"}:
+        return ui_export.parse_markdown_import(content), []
+    return [], [f"unsupported import format: {fmt!r} (expected csv or md)"]
+
+
+def _import_preview_response(root_path: Path, payload: dict[str, object]) -> ConsoleResponse:
+    candidates, errors = _import_candidates_from_payload(payload)
+    if errors:
+        return _json_response({"status": "failed", "errors": errors}, status=400)
+    state = ui_state.build_state(root_path)
+    preview = ui_export.build_import_preview(candidates, state)
+    return _json_response(preview, status=200)
+
+
+def _import_commit_response(root_path: Path, payload: dict[str, object]) -> ConsoleResponse:
+    """Create task.create proposals for each non-duplicate candidate.
+
+    Re-parses + re-checks server-side (never trusts the client's preview) and
+    only emits a task.create command for candidates the server considers new
+    and valid. Each command flows through ui_commands.submit_command, so the
+    proposal/board-sync gate chain is the only writer.
+    """
+
+    candidates, errors = _import_candidates_from_payload(payload)
+    if errors:
+        return _json_response({"status": "failed", "errors": errors}, status=400)
+    state = ui_state.build_state(root_path)
+    preview = ui_export.build_import_preview(candidates, state)
+
+    results: list[dict[str, object]] = []
+    created = 0
+    skipped = 0
+    for item in preview["items"]:
+        if item.get("action") != "create":
+            skipped += 1
+            results.append({"line": item.get("line"), "title": item.get("title"), "status": "skipped", "reason": item.get("duplicate_reasons") or item.get("errors")})
+            continue
+        create_payload = ui_export.candidate_to_task_create_payload(item)
+        command_result = ui_commands.submit_command(root_path, {"type": "task.create", "payload": create_payload})
+        if command_result.get("status") == "accepted":
+            created += 1
+        else:
+            skipped += 1
+        results.append({
+            "line": item.get("line"),
+            "title": item.get("title"),
+            "status": command_result.get("status"),
+            "command_id": command_result.get("id"),
+            "errors": command_result.get("errors"),
+        })
+    summary = {
+        "status": "accepted",
+        "resource": "import_commit",
+        "counts": {"created": created, "skipped": skipped, "total": len(preview["items"])},
+        "results": results,
+    }
+    return _json_response(summary, status=202)
+
+
 def build_response(path: str, root: Path | str, *, method: str = "GET", body: bytes | None = None) -> ConsoleResponse:
     root_path = Path(root)
     parsed_url = urlparse(path)
@@ -7581,6 +7860,15 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
             return _command_response(root_path, {"type": "task.create", "payload": payload})
         if method == "POST" and request_path == "/api/messages":
             return _command_response(root_path, {"type": "task.comment", "target": payload.get("task_id"), "payload": payload})
+        # Import preview (TASK-AR-333): parse the uploaded payload and return a
+        # duplicate-checked preview. This NEVER writes — preview only.
+        if method == "POST" and request_path == "/api/import/preview":
+            return _import_preview_response(root_path, payload)
+        # Import commit (TASK-AR-333): turn each selected, non-duplicate
+        # candidate into a task.create proposal via submit_command. No direct
+        # task-file writes happen in the console.
+        if method == "POST" and request_path == "/api/import/commit":
+            return _import_commit_response(root_path, payload)
         task_match = re_api_task_route(request_path)
         if task_match and method == "PATCH":
             return _command_response(root_path, {"type": "task.update", "target": task_match[0], "payload": payload})
@@ -7627,6 +7915,11 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
     download_id = _attachment_download_id(request_path)
     if download_id is not None:
         return _attachment_download_response(root_path, download_id)
+
+    # Export routes (TASK-AR-333) are strictly read-only downloads: they
+    # serialize the current ui_state snapshot to a portable format.
+    if request_path.startswith("/api/export/"):
+        return _export_response(root_path, request_path[len("/api/export/") :])
 
     api_resources = {
         "/api/tasks": "tasks",
