@@ -47,3 +47,16 @@ tags:
 ## Evidence Targets
 
 - `src/agent_runtime/ui_console.py`, `ui_commands.py`, MEETING 기록 샘플
+
+## Verification Results
+
+- scope delivered as structured shell (server-rendered); live multi-agent dialogue is a follow-up.
+- `scripts/meeting_room.py plan`: proposal-only command; validates config and writes a `reviews/MEETING-<date>-<topic-slug>.md` skeleton (frontmatter `type: meeting` + participants + agenda rounds). Never mutates `reviews/` from the console directly.
+- ui_state.py: `meeting_room` resource (available agents deduped by role, open-task topic options, config + constraints, proposal-only command descriptor).
+- ui_console.py: Meeting Room tab/view with drag-drop drop-zone + keyboard equivalents (Enter/Space add, Delete remove), config form, `/api/meeting_room` (+ `/api/meeting-room`) route.
+- pytest tests/test_meeting_room.py -q -> 13 passed
+- pytest tests/test_ui_state.py tests/test_ui_console.py -q -> 45 passed
+- pytest tests -q -> 742 passed
+- `python scripts/owner_governance_gate.py` -> exit 0 (in worktree)
+- real-repo demo: console on ephemeral port, GET /api/meeting_room -> HTTP 200, schema agent-runtime-meeting-room/v1
+- meeting.plan demo (tmp dir): recorded MEETING-2026-06-13-meeting-room-demo-sync.md skeleton; failure path (1 participant) -> exit 1 with ASCII error.

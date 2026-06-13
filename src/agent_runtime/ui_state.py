@@ -24,6 +24,7 @@ RESOURCE_NAMES = (
     "multipane_assurance",
     "inflight",
     "work_explorer",
+    "meeting_room",
     "sources",
     "errors",
     "evidence",
@@ -1717,6 +1718,100 @@ def load_work_explorer(root: Path, now: str, warnings: list[dict[str, str]]) -> 
     }
 
 
+# --- Meeting Room (TASK-AR-361) --------------------------------------------
+# Server-rendered shell for a "Meeting Room" where agents are dragged into
+# participant slots, a topic/task is chosen, and a meeting (rounds) is planned.
+# This resource is computed from runtime instances + tasks; it never mutates
+# reviews/. The "start" affordance in the console emits a proposal-only
+# meeting.plan command (scripts/meeting_room.py) which records the skeleton.
+
+MEETING_TYPES = ("meeting", "seminar", "review")
+MEETING_DEFAULT_ROUNDS = 3
+MEETING_MIN_PARTICIPANTS = 2
+
+
+def _meeting_available_agents(agents: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Distinct draggable agent cards keyed by role (fall back to id)."""
+    cards: dict[str, dict[str, Any]] = {}
+    for agent in agents:
+        role = str(agent.get("role") or agent.get("id") or "").strip()
+        if not role:
+            continue
+        card = cards.get(role)
+        if card is None:
+            cards[role] = {
+                "id": role,
+                "role": role,
+                "display_name": str(agent.get("display_name") or role),
+                "status": str(agent.get("status") or ""),
+                "online": bool(agent.get("online")),
+                "current_task_id": agent.get("current_task_id"),
+                "provider": agent.get("provider"),
+                "model": agent.get("model"),
+                "instances": 1,
+            }
+        else:
+            card["instances"] += 1
+            if agent.get("online"):
+                card["online"] = True
+    return sorted(cards.values(), key=lambda card: (not card["online"], card["id"]))
+
+
+def _meeting_topic_options(tasks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Open tasks offered as meeting topics, plus a free-form option."""
+    options: list[dict[str, Any]] = []
+    for task in tasks:
+        if not _task_is_open(task):
+            continue
+        options.append(
+            {
+                "id": str(task.get("id") or ""),
+                "title": str(task.get("title") or task.get("id") or ""),
+                "status": str(task.get("status") or ""),
+                "task_set_id": task.get("task_set_id"),
+            }
+        )
+    options.sort(key=lambda option: (str(option.get("task_set_id") or ""), option["id"]))
+    return options
+
+
+def build_meeting_room(
+    agents: list[dict[str, Any]],
+    tasks: list[dict[str, Any]],
+    *,
+    now: str,
+) -> dict[str, Any]:
+    available = _meeting_available_agents(agents)
+    topics = _meeting_topic_options(tasks)
+    return {
+        "schema": "agent-runtime-meeting-room/v1",
+        "generated_at": now,
+        "available_agents": available,
+        "participant_slots": [],
+        "topic_options": topics,
+        "config": {
+            "topic": None,
+            "task_id": None,
+            "meeting_type": "meeting",
+            "rounds": MEETING_DEFAULT_ROUNDS,
+        },
+        "meeting_types": list(MEETING_TYPES),
+        "constraints": {
+            "min_participants": MEETING_MIN_PARTICIPANTS,
+            "min_rounds": 1,
+            "default_rounds": MEETING_DEFAULT_ROUNDS,
+        },
+        "command": {
+            "type": "runtime.request_meeting",
+            "script": "python scripts/meeting_room.py plan",
+            "records_to": "reviews/MEETING-<date>-<topic-slug>.md",
+            "mutation_boundary": "proposal_only",
+        },
+        "available_count": len(available),
+        "topic_count": len(topics),
+    }
+
+
 def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     root_path = Path(root).resolve()
     generated_at = now or _now_iso()
@@ -1743,6 +1838,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     multipane_assurance = _collect_multipane_assurance(root_path, generated_at, pane_events, warnings)
     inflight = load_inflight(root_path, generated_at, warnings)
     work_explorer = load_work_explorer(root_path, generated_at, warnings)
+    meeting_room = build_meeting_room(agents, tasks, now=generated_at)
     return {
         "generated_at": generated_at,
         "sources": sources,
@@ -1754,6 +1850,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "multipane_assurance": multipane_assurance,
         "inflight": inflight,
         "work_explorer": work_explorer,
+        "meeting_room": meeting_room,
         "messages": messages,
         "events": events,
         "goals": goals,

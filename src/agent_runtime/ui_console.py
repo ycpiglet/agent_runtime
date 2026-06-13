@@ -87,6 +87,7 @@ HTML = """<!doctype html>
         <nav class="tabs" aria-label="Views">
           <button class="tab is-active" type="button" data-view="board">Backlog</button>
           <button class="tab" type="button" data-view="work">Work Explorer</button>
+          <button class="tab" type="button" data-view="meeting">Meeting Room</button>
           <button class="tab" type="button" data-view="tasksets">Tasksets</button>
           <button class="tab" type="button" data-view="agents">Agents</button>
           <button class="tab" type="button" data-view="messages">Messages</button>
@@ -118,6 +119,48 @@ HTML = """<!doctype html>
           <div class="work-grid">
             <div id="work-tree" class="work-tree" aria-label="Work Explorer tree"></div>
             <aside id="work-node-detail" class="work-node-detail" aria-label="Work node detail"></aside>
+          </div>
+        </div>
+        <div id="view-meeting" class="view">
+          <div class="meeting-grid">
+            <section class="meeting-roster" aria-label="Available agents">
+              <h2>Available agents</h2>
+              <p class="meeting-hint">Drag a card into the room, or focus a card and press Enter to add it. Keyboard: Enter/Space adds; Delete removes a participant.</p>
+              <div id="meeting-available" class="meeting-card-list" aria-label="Available agent cards"></div>
+            </section>
+            <section class="meeting-room" aria-label="Meeting room">
+              <h2>Meeting room</h2>
+              <div id="meeting-dropzone" class="meeting-dropzone" role="group" aria-label="Participant drop zone" aria-dropeffect="move" tabindex="0">
+                <p class="meeting-dropzone-empty">Drop agents here to add participants</p>
+                <div id="meeting-participants" class="meeting-participant-list" aria-label="Selected participants"></div>
+              </div>
+              <form id="meeting-config-form" class="meeting-config" aria-label="Meeting configuration">
+                <label class="meeting-field">
+                  <span>Topic</span>
+                  <input id="meeting-topic" name="topic" placeholder="meeting topic or pick a task">
+                </label>
+                <label class="meeting-field">
+                  <span>Task</span>
+                  <select id="meeting-task" name="task_id">
+                    <option value="">(free-form topic)</option>
+                  </select>
+                </label>
+                <label class="meeting-field">
+                  <span>Type</span>
+                  <select id="meeting-type" name="meeting_type">
+                    <option value="meeting">meeting</option>
+                    <option value="seminar">seminar</option>
+                    <option value="review">review</option>
+                  </select>
+                </label>
+                <label class="meeting-field">
+                  <span>Rounds</span>
+                  <input id="meeting-rounds" name="rounds" type="number" min="1" max="20" value="3">
+                </label>
+                <button id="meeting-start" type="submit">Start meeting</button>
+              </form>
+              <p id="meeting-validation" class="meeting-validation" role="status" aria-live="polite"></p>
+            </section>
           </div>
         </div>
         <div id="view-tasksets" class="view">
@@ -1100,6 +1143,132 @@ textarea:focus {
   font-size: 11px;
   overflow-wrap: anywhere;
 }
+.meeting-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(0, 1.6fr);
+  gap: 12px;
+  align-items: start;
+}
+.meeting-roster,
+.meeting-room {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.026);
+  padding: 12px;
+  min-width: 0;
+}
+.meeting-roster h2,
+.meeting-room h2 {
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+.meeting-hint {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+.meeting-card-list,
+.meeting-participant-list {
+  display: grid;
+  gap: 6px;
+}
+.meeting-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: rgba(1, 1, 2, 0.34);
+  padding: 8px;
+  cursor: grab;
+  min-width: 0;
+}
+.meeting-card:focus-visible {
+  outline: 2px solid var(--accent, #5b8def);
+  outline-offset: 1px;
+}
+.meeting-card.is-placed {
+  opacity: 0.45;
+}
+.meeting-card-name {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.meeting-card-meta {
+  color: var(--muted);
+  font-size: 10px;
+  white-space: nowrap;
+}
+.meeting-dropzone {
+  border: 2px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: rgba(1, 1, 2, 0.24);
+  padding: 12px;
+  min-height: 96px;
+  margin-bottom: 10px;
+}
+.meeting-dropzone.is-dragover {
+  border-color: var(--accent, #5b8def);
+  background: rgba(91, 141, 239, 0.12);
+}
+.meeting-dropzone:focus-visible {
+  outline: 2px solid var(--accent, #5b8def);
+  outline-offset: 1px;
+}
+.meeting-dropzone-empty {
+  color: var(--muted);
+  font-size: 12px;
+}
+.meeting-dropzone.has-participants .meeting-dropzone-empty {
+  display: none;
+}
+.meeting-participant {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid var(--accent, #5b8def);
+  border-radius: 8px;
+  background: rgba(91, 141, 239, 0.1);
+  padding: 8px;
+}
+.meeting-participant button {
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--subtle);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 8px;
+}
+.meeting-config {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  align-items: end;
+}
+.meeting-field {
+  display: grid;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--muted);
+  min-width: 0;
+}
+.meeting-field input,
+.meeting-field select {
+  min-width: 0;
+}
+.meeting-validation {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--warning, #e0a23a);
+  min-height: 16px;
+}
+.meeting-validation.is-ok {
+  color: var(--success, #4caf7d);
+}
 .detail-panel {
   padding: 14px;
   align-self: start;
@@ -1259,6 +1428,8 @@ let selectedWorkNodeId = null;
 let collapsedWorkNodes = new Set();
 let workFacetSelections = {};
 let workFacetSignature = "";
+let meetingParticipants = [];
+let meetingKeyboardHeld = null;
 
 const $ = (id) => document.getElementById(id);
 const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -2159,6 +2330,149 @@ function renderWorkExplorer() {
   renderWorkNodeDetail();
 }
 
+function meetingRoomData() {
+  return (runtimeState && runtimeState.meeting_room) || {
+    available_agents: [],
+    topic_options: [],
+    meeting_types: ["meeting", "seminar", "review"],
+    constraints: { min_participants: 2, min_rounds: 1 }
+  };
+}
+
+function meetingConstraints() {
+  return meetingRoomData().constraints || { min_participants: 2, min_rounds: 1 };
+}
+
+function meetingAddParticipant(id) {
+  const name = String(id || "").trim();
+  if (!name) return;
+  if (!meetingParticipants.some((existing) => existing.toLowerCase() === name.toLowerCase())) {
+    meetingParticipants.push(name);
+    renderMeetingRoom();
+  }
+}
+
+function meetingRemoveParticipant(id) {
+  meetingParticipants = meetingParticipants.filter((existing) => existing !== id);
+  renderMeetingRoom();
+}
+
+function renderMeetingAvailable() {
+  const host = $("meeting-available");
+  if (!host) return;
+  const placed = new Set(meetingParticipants.map((name) => name.toLowerCase()));
+  const cards = meetingRoomData().available_agents || [];
+  host.innerHTML = cards.length
+    ? cards.map((agent) => {
+        const isPlaced = placed.has(String(agent.id).toLowerCase());
+        const meta = `${agent.online ? "online" : "offline"}${agent.instances > 1 ? " x" + agent.instances : ""}`;
+        return `<div class="meeting-card ${isPlaced ? "is-placed" : ""}" draggable="true" tabindex="0" role="button" data-meeting-agent="${escapeHtml(agent.id)}" aria-label="Add ${escapeHtml(agent.display_name || agent.id)} to meeting">
+          <span class="meeting-card-name">${escapeHtml(agent.display_name || agent.id)}</span>
+          <span class="meeting-card-meta">${escapeHtml(meta)}</span>
+        </div>`;
+      }).join("")
+    : `<div class="empty">No runtime agents available</div>`;
+  host.querySelectorAll("[data-meeting-agent]").forEach((card) => {
+    const id = card.dataset.meetingAgent;
+    card.addEventListener("dragstart", (event) => {
+      event.dataTransfer.setData("text/plain", id);
+      event.dataTransfer.effectAllowed = "move";
+    });
+    card.addEventListener("click", () => meetingAddParticipant(id));
+    card.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        meetingAddParticipant(id);
+      }
+    });
+  });
+}
+
+function renderMeetingParticipants() {
+  const zone = $("meeting-dropzone");
+  const host = $("meeting-participants");
+  if (!host || !zone) return;
+  zone.classList.toggle("has-participants", meetingParticipants.length > 0);
+  host.innerHTML = meetingParticipants
+    .map((name) => `<div class="meeting-participant" data-participant="${escapeHtml(name)}">
+        <span class="meeting-card-name">${escapeHtml(name)}</span>
+        <button type="button" data-remove-participant="${escapeHtml(name)}" aria-label="Remove ${escapeHtml(name)}">Remove</button>
+      </div>`)
+    .join("");
+  host.querySelectorAll("[data-remove-participant]").forEach((button) => {
+    button.addEventListener("click", () => meetingRemoveParticipant(button.dataset.removeParticipant));
+  });
+}
+
+function renderMeetingTaskOptions() {
+  const select = $("meeting-task");
+  if (!select) return;
+  const topics = meetingRoomData().topic_options || [];
+  const current = select.value;
+  select.innerHTML = `<option value="">(free-form topic)</option>` +
+    topics.map((topic) => `<option value="${escapeHtml(topic.id)}">${escapeHtml(topic.id)} - ${escapeHtml(topic.title)}</option>`).join("");
+  if (topics.some((topic) => topic.id === current)) select.value = current;
+}
+
+function meetingValidationMessage() {
+  const constraints = meetingConstraints();
+  const minParticipants = constraints.min_participants || 2;
+  const rounds = Number($("meeting-rounds")?.value);
+  const topic = ($("meeting-topic")?.value || "").trim();
+  const taskId = $("meeting-task")?.value || "";
+  if (meetingParticipants.length < minParticipants) {
+    return { ok: false, message: `Add at least ${minParticipants} participants (have ${meetingParticipants.length}).` };
+  }
+  if (!topic && !taskId) {
+    return { ok: false, message: "Pick a task or enter a topic." };
+  }
+  if (!Number.isFinite(rounds) || rounds < 1) {
+    return { ok: false, message: "Rounds must be > 0." };
+  }
+  return { ok: true, message: `Ready: ${meetingParticipants.length} participants, ${rounds} round(s).` };
+}
+
+function renderMeetingValidation() {
+  const node = $("meeting-validation");
+  if (!node) return;
+  const result = meetingValidationMessage();
+  node.textContent = result.message;
+  node.classList.toggle("is-ok", result.ok);
+  const start = $("meeting-start");
+  if (start) start.disabled = !result.ok;
+}
+
+function renderMeetingRoom() {
+  renderMeetingAvailable();
+  renderMeetingParticipants();
+  renderMeetingTaskOptions();
+  renderMeetingValidation();
+}
+
+async function submitMeetingPlan(event) {
+  event.preventDefault();
+  const result = meetingValidationMessage();
+  if (!result.ok) {
+    renderMeetingValidation();
+    return;
+  }
+  const topic = ($("meeting-topic").value || "").trim();
+  const taskId = $("meeting-task").value || "";
+  await sendJson("/api/commands", {
+    type: "runtime.request_meeting",
+    payload: {
+      to: meetingParticipants[0],
+      meeting_type: $("meeting-type").value,
+      rounds: Number($("meeting-rounds").value),
+      topic: topic || taskId,
+      task_id: taskId || null,
+      participants: meetingParticipants.slice(),
+      instruction: `Plan ${$("meeting-type").value} on ${topic || taskId} with ${meetingParticipants.join(", ")}`,
+      script: "python scripts/meeting_room.py plan"
+    }
+  });
+}
+
 function renderDetail() {
   const panel = $("detail-panel");
   const task = (runtimeState.tasks || []).find((item) => item.id === selectedTaskId);
@@ -2238,6 +2552,7 @@ function renderAll() {
   renderDashboard();
   renderKanban();
   renderWorkExplorer();
+  renderMeetingRoom();
   renderTaskSetDirectory();
   renderAgents();
   renderMessages();
@@ -2286,6 +2601,37 @@ $("work-collapse-all")?.addEventListener("click", () => {
   collapsedWorkNodes = new Set((workExplorerData().nodes || []).filter((node) => (node.children || []).length).map((node) => node.id));
   renderWorkTree();
 });
+(() => {
+  const zone = $("meeting-dropzone");
+  if (zone) {
+    zone.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+      zone.classList.add("is-dragover");
+    });
+    zone.addEventListener("dragleave", () => zone.classList.remove("is-dragover"));
+    zone.addEventListener("drop", (event) => {
+      event.preventDefault();
+      zone.classList.remove("is-dragover");
+      meetingAddParticipant(event.dataTransfer.getData("text/plain"));
+    });
+    zone.addEventListener("keydown", (event) => {
+      if ((event.key === "Delete" || event.key === "Backspace") && meetingParticipants.length) {
+        event.preventDefault();
+        meetingRemoveParticipant(meetingParticipants[meetingParticipants.length - 1]);
+      }
+    });
+  }
+  const form = $("meeting-config-form");
+  if (form) form.addEventListener("submit", submitMeetingPlan);
+  ["meeting-topic", "meeting-task", "meeting-rounds", "meeting-type"].forEach((id) => {
+    const node = $(id);
+    if (node) {
+      node.addEventListener("input", renderMeetingValidation);
+      node.addEventListener("change", renderMeetingValidation);
+    }
+  });
+})();
 $("create-task-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   await sendJson("/api/tasks", {
@@ -2426,6 +2772,8 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/inflight": "inflight",
         "/api/work_explorer": "work_explorer",
         "/api/work-explorer": "work_explorer",
+        "/api/meeting_room": "meeting_room",
+        "/api/meeting-room": "meeting_room",
         "/api/sources": "sources",
         "/api/errors": "errors",
         "/api/evidence": "evidence",
