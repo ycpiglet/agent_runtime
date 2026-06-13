@@ -461,6 +461,61 @@ def test_ui_state_exposes_taskset_numeric_letter_aliases_and_commands(tmp_path):
     assert task_set["commands"]["gate"] == "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-QUALITY-LOOP --check"
 
 
+def test_ui_state_surfaces_registry_defined_taskset(tmp_path):
+    # TASK-AR-329: a UI-created taskset is registered into TASKSET-DEFINITIONS.json
+    # via backlog_board.sync_taskset_registry. The console adapter must surface it
+    # (display name + summary) exactly as the generated board does, so the UI and
+    # the board agree. Use the real backlog_board so _task_set_info_map runs.
+    import shutil
+
+    repo_root = Path(__file__).resolve().parents[1]
+    (tmp_path / "scripts").mkdir(parents=True, exist_ok=True)
+    shutil.copy(repo_root / "scripts" / "backlog_board.py", tmp_path / "scripts" / "backlog_board.py")
+
+    registry = tmp_path / "agents" / "project" / "work-items" / "TASKSET-DEFINITIONS.json"
+    registry.parent.mkdir(parents=True, exist_ok=True)
+    registry.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-taskset-definitions/v1",
+                "tasksets": [
+                    {
+                        "task_set_id": "TASKSET-UI-CONSOLE-MADE",
+                        "display_name": "Console Made",
+                        "summary": "Created from the console UI.",
+                        "order": 700,
+                    }
+                ],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-970.md",
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-970",
+                "status: planned",
+                "owner: lead-engineer",
+                "priority: P1",
+                "task_set_id: TASKSET-UI-CONSOLE-MADE",
+                "---",
+                "",
+                "## Goal",
+                "",
+                "Task inside a UI-created taskset.",
+            ]
+        ),
+    )
+
+    state = ui_state.build_state(tmp_path, now="2026-06-12T18:30:00+09:00")
+    made = next(ts for ts in state["task_sets"] if ts["id"] == "TASKSET-UI-CONSOLE-MADE")
+    assert made["display_name"] == "Console Made"
+    assert made["summary"] == "Created from the console UI."
+
+
 def test_ui_state_cli_emits_task_sets_resource_json(tmp_path, capsys):
     _write(
         tmp_path / "agents" / "runtime" / "task_claims" / "CLAIM-progress.json",

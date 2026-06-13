@@ -244,6 +244,90 @@ def _task_set_info_map(root: Path | None = None) -> dict[str, TaskSetInfo]:
     return merged
 
 
+def sync_taskset_registry(
+    root: Path | str,
+    task_set_id: str,
+    *,
+    display_name: str,
+    summary: str,
+    order: int | None = None,
+    archived: bool = False,
+) -> dict[str, object]:
+    """Upsert a taskset definition into ``TASKSET-DEFINITIONS.json``.
+
+    This is the registry auto-sync path used by the runtime executor when a UI
+    command (``taskset.create`` / ``taskset.rename`` / ``taskset.archive``)
+    proposal is consumed. The console NEVER calls this directly: it only emits a
+    proposal under ``.ui_outbox``. Keeping the writer here (rather than in the
+    console) keeps the canonical registry, the generated board, and the
+    state-sync gate consistent: the same module that renders the board also owns
+    the registry mutation, so a UI-created taskset shows up in the board on the
+    next ``--write`` without a second source of truth.
+
+    Returns a small result dict describing the action taken.
+    """
+    base = Path(root).resolve()
+    path = base / TASK_SET_REGISTRY
+    task_set_id = str(task_set_id or "").strip()
+    if not task_set_id:
+        raise ValueError("task_set_id is required")
+
+    if path.exists():
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            payload = {}
+    else:
+        payload = {}
+    if not isinstance(payload, dict) or str(payload.get("schema") or "") != TASK_SET_REGISTRY_SCHEMA:
+        payload = {"schema": TASK_SET_REGISTRY_SCHEMA, "tasksets": []}
+    rows = payload.get("tasksets")
+    if not isinstance(rows, list):
+        rows = []
+
+    existing_orders = [int(r.get("order", 500)) for r in rows if isinstance(r, dict) and str(r.get("order", "")).strip().lstrip("-").isdigit()]
+    next_order = (max(existing_orders) + 1) if existing_orders else 500
+    resolved_order = int(order) if order is not None else next_order
+
+    action = "created"
+    found = False
+    for row in rows:
+        if isinstance(row, dict) and str(row.get("task_set_id") or "").strip() == task_set_id:
+            found = True
+            action = "archived" if archived else "updated"
+            row["task_set_id"] = task_set_id
+            if display_name:
+                row["display_name"] = display_name
+            if summary:
+                row["summary"] = summary
+            if order is not None:
+                row["order"] = resolved_order
+            row["archived"] = bool(archived)
+            break
+    if not found:
+        rows.append(
+            {
+                "task_set_id": task_set_id,
+                "display_name": display_name or task_set_id,
+                "summary": summary or f"Tasks grouped under {task_set_id}.",
+                "order": resolved_order,
+                "archived": bool(archived),
+            }
+        )
+
+    payload["schema"] = TASK_SET_REGISTRY_SCHEMA
+    payload["tasksets"] = rows
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {
+        "action": action,
+        "task_set_id": task_set_id,
+        "order": resolved_order,
+        "archived": bool(archived),
+        "registry": TASK_SET_REGISTRY.as_posix(),
+    }
+
+
 @dataclass
 class Task:
     path: Path

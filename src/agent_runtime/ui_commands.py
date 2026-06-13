@@ -28,7 +28,50 @@ VALID_STATUSES = (
     "working",
 )
 VALID_PRIORITIES = ("P0", "P1", "P2", "P3")
-TASK_COMMAND_TYPES = ("task.create", "task.update", "task.reorder", "task.comment", "task.archive")
+TASK_COMMAND_TYPES = (
+    "task.create",
+    "task.update",
+    "task.reorder",
+    "task.comment",
+    "task.archive",
+    "task.move",
+    "task.bulk_edit",
+)
+# TASK-AR-329: Owner-driven taskset lifecycle from the Tasksets view. These are
+# proposal-only: the handler records a proposal under .ui_outbox/tasksets that a
+# runtime executor consumes (via scripts/backlog_board.py sync_taskset_registry)
+# to write the canonical TASKSET-DEFINITIONS.json registry. The console NEVER
+# writes the registry/board directly.
+TASKSET_COMMAND_TYPES = (
+    "taskset.create",
+    "taskset.rename",
+    "taskset.archive",
+    "taskset.template",
+)
+# Built-in 1-click taskset templates (Linear Projects / Notion DB recurring
+# patterns). Each instantiation emits a registry-create proposal for the new
+# taskset plus task.create proposals for the template tasks.
+TASKSET_TEMPLATES = {
+    "analysis-suite": {
+        "display_name": "Analysis Suite",
+        "summary": "Recurring 4-step analysis taskset: intake, structure mapping, gap finding, and follow-up planning.",
+        "tasks": [
+            {"title": "Intake and scope the analysis", "priority": "P1"},
+            {"title": "Map current structure and sources", "priority": "P1"},
+            {"title": "Find gaps and risks", "priority": "P1"},
+            {"title": "Draft follow-up plan and decisions", "priority": "P2"},
+        ],
+    },
+    "release-cycle": {
+        "display_name": "Release Cycle",
+        "summary": "Recurring release taskset: version decision, preflight checks, closeout evidence.",
+        "tasks": [
+            {"title": "Decide version bump", "priority": "P1"},
+            {"title": "Run release preflight checks", "priority": "P0"},
+            {"title": "Record closeout evidence", "priority": "P2"},
+        ],
+    },
+}
 RUNTIME_MESSAGE_COMMAND_TYPES = (
     "runtime.call_agent",
     "runtime.assign_task",
@@ -82,9 +125,10 @@ MEETING_TYPES = ("meeting", "seminar", "review")
 MEETING_MIN_PARTICIPANTS = 2
 MEETING_DEFAULT_ROUNDS = 3
 MEETING_MAX_ROUNDS = 20
-TASK_BOARD_SYNC_COMMANDS = {"task.create", "task.update", "task.reorder", "task.archive"}
+TASK_BOARD_SYNC_COMMANDS = {"task.create", "task.update", "task.reorder", "task.archive", "task.move", "task.bulk_edit"}
 COMMAND_TYPES = (
     TASK_COMMAND_TYPES
+    + TASKSET_COMMAND_TYPES
     + RUNTIME_COMMAND_TYPES
     + PLANNING_COMMAND_TYPES
     + MEETING_COMMAND_TYPES
@@ -268,6 +312,19 @@ def _validate_task_id(task_id: Any) -> str | None:
     if not re.fullmatch(r"TASK-[A-Za-z0-9-]+", task_id.strip()):
         return f"invalid task id: {task_id!r}"
     return None
+
+
+def _validate_task_set_id(task_set_id: Any) -> str | None:
+    if not isinstance(task_set_id, str) or not task_set_id.strip():
+        return "missing taskset id"
+    if not re.fullmatch(r"TASKSET-[A-Za-z0-9-]+", task_set_id.strip()):
+        return f"invalid taskset id: {task_set_id!r}"
+    return None
+
+
+def _taskset_id_from_name(name: str) -> str:
+    slug = re.sub(r"[^A-Za-z0-9]+", "-", name.strip()).strip("-").upper()
+    return f"TASKSET-{slug or 'NEW'}"
 
 
 def _payload_errors(payload: Any) -> list[str]:
@@ -471,6 +528,252 @@ def _archive_task(root: Path, target: str | None, payload: dict[str, Any]) -> di
     archive_payload["archived"] = True
     archive_payload.setdefault("status", "completed")
     return _update_task(root, target, archive_payload)
+
+
+def _move_task(root: Path, target: str | None, payload: dict[str, Any]) -> dict[str, Any]:
+    """Move a task into another taskset by updating its task_set_id frontmatter.
+
+    Reuses the established task-update mutation path (the runtime executor writes
+    the task file and re-syncs the board); the console only proposes the move.
+    """
+    task_set_id = str(payload.get("task_set_id") or payload.get("to_task_set_id") or "").strip()
+    error = _validate_task_set_id(task_set_id)
+    if error:
+        return {"errors": [error]}
+    if not target:
+        return {"errors": ["missing task id"]}
+    path = _task_path(root, target)
+    if path is None:
+        return {"errors": [f"task not found: {target}"]}
+    meta, body = parse_frontmatter(path.read_text(encoding="utf-8"))
+    meta["task_set_id"] = task_set_id
+    path.write_text(serialize_frontmatter(meta, body), encoding="utf-8")
+    return {"changed": [_rel(root, path)], "task_set_id": task_set_id}
+
+
+def _bulk_edit_tasks(root: Path, payload: dict[str, Any]) -> dict[str, Any]:
+    """Apply the same status/priority/owner change to multiple tasks at once.
+
+    The result captures a per-task before/after snapshot so the UI can render an
+    undo toast; the inverse edit is itself a task.bulk_edit command.
+    """
+    task_ids = payload.get("task_ids")
+    if not isinstance(task_ids, list) or not task_ids:
+        return {"errors": ["task_ids must be a non-empty list"]}
+    fields = {key: payload[key] for key in ("status", "priority", "owner") if key in payload}
+    if not fields:
+        return {"errors": ["bulk edit requires at least one of status/priority/owner"]}
+    field_errors = _payload_errors(fields)
+    if field_errors:
+        return {"errors": field_errors}
+
+    changed: list[str] = []
+    undo: list[dict[str, Any]] = []
+    errors: list[str] = []
+    for raw_id in task_ids:
+        task_id = str(raw_id or "").strip()
+        id_error = _validate_task_id(task_id)
+        if id_error:
+            errors.append(id_error)
+            continue
+        path = _task_path(root, task_id)
+        if path is None:
+            errors.append(f"task not found: {task_id}")
+            continue
+        meta, body = parse_frontmatter(path.read_text(encoding="utf-8"))
+        before = {key: meta.get(key) for key in fields}
+        meta.update(fields)
+        path.write_text(serialize_frontmatter(meta, body), encoding="utf-8")
+        changed.append(_rel(root, path))
+        undo.append({"id": task_id, "before": before})
+    if errors:
+        return {"errors": errors}
+    return {
+        "changed": changed,
+        "result": {
+            "changed": changed,
+            "applied": fields,
+            "count": len(changed),
+            "undo": {"type": "task.bulk_edit", "items": undo, "fields": list(fields)},
+        },
+    }
+
+
+def _taskset_lifecycle_command(
+    root: Path,
+    command_type: str,
+    target: str | None,
+    payload: dict[str, Any],
+    now: str,
+    command_id: str,
+) -> dict[str, Any]:
+    """Record a proposal-only taskset create/rename/archive request.
+
+    The console does NOT write the canonical TASKSET-DEFINITIONS.json registry
+    or BACKLOG-BOARD.md; it emits a proposal under .ui_outbox/tasksets plus a
+    runtime event. A runtime executor consumes the proposal and runs
+    ``scripts/backlog_board.py`` ``sync_taskset_registry`` to write the registry,
+    then ``--write`` to regenerate the board, keeping registry, board, and the
+    state-sync gate consistent.
+    """
+    if command_type == "taskset.create":
+        display_name = str(payload.get("display_name") or payload.get("name") or "").strip()
+        if not display_name:
+            return {"errors": ["display_name is required"]}
+        task_set_id = str(payload.get("task_set_id") or "").strip() or _taskset_id_from_name(display_name)
+    else:
+        task_set_id = str(payload.get("task_set_id") or target or "").strip()
+        display_name = str(payload.get("display_name") or payload.get("name") or "").strip()
+    id_error = _validate_task_set_id(task_set_id)
+    if id_error:
+        return {"errors": [id_error]}
+    if command_type == "taskset.rename" and not display_name:
+        return {"errors": ["display_name is required"]}
+
+    summary = str(payload.get("summary") or "").strip()
+    archived = command_type == "taskset.archive"
+    action = {"taskset.create": "create", "taskset.rename": "rename", "taskset.archive": "archive"}[command_type]
+    order_value = payload.get("order")
+    try:
+        order = int(order_value) if order_value is not None else None
+    except (TypeError, ValueError):
+        return {"errors": ["order must be an integer"]}
+
+    proposal = {
+        "id": command_id.replace("COMMAND-", "TASKSETREQ-"),
+        "type": command_type,
+        "action": action,
+        "status": "queued",
+        "created_at": now,
+        "requested_by": str(payload.get("actor") or "owner"),
+        "task_set_id": task_set_id,
+        "display_name": display_name or None,
+        "summary": summary or None,
+        "order": order,
+        "archived": archived,
+        "registry": "agents/project/work-items/TASKSET-DEFINITIONS.json",
+        "sync": (
+            "python -c \"import sys; sys.path.insert(0, 'scripts'); import backlog_board;"
+            f" backlog_board.sync_taskset_registry('.', {json.dumps(task_set_id)},"
+            f" display_name={json.dumps(display_name)}, summary={json.dumps(summary)},"
+            f" order={order!r}, archived={archived!r})\""
+        ),
+        "regenerate_board": "python scripts/backlog_board.py --write",
+        "mutation_boundary": "proposal_only",
+        "next": "runtime executor must call sync_taskset_registry then regenerate the board",
+    }
+    path = root / ".ui_outbox" / "tasksets" / f"{proposal['id']}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(proposal, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    event_path = root / "agents" / "runtime" / "events" / "ui_taskset_requests.jsonl"
+    event_path.parent.mkdir(parents=True, exist_ok=True)
+    event = {
+        "ts": now,
+        "event": command_type,
+        "role": str(payload.get("actor") or "owner"),
+        "task_set_id": task_set_id,
+        "display_name": display_name or None,
+        "proposal_id": proposal["id"],
+        "source": "ui_console",
+    }
+    with event_path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(event, ensure_ascii=False) + "\n")
+
+    return {
+        "status": "queued",
+        "result": {
+            "changed": [_rel(root, path), _rel(root, event_path)],
+            "proposal_id": proposal["id"],
+            "task_set_id": task_set_id,
+            "action": action,
+            "runtime_support": "taskset_registry_proposal",
+            "mutation_boundary": "proposal_only",
+            "next": proposal["next"],
+        },
+    }
+
+
+def _taskset_template_command(
+    root: Path,
+    payload: dict[str, Any],
+    now: str,
+    command_id: str,
+) -> dict[str, Any]:
+    """Instantiate a recurring taskset template in one click (proposal-only).
+
+    Emits one taskset-create proposal for the new taskset plus a task.create
+    proposal for each template task, all under .ui_outbox. The runtime executor
+    registers the taskset and creates the tasks.
+    """
+    template_key = str(payload.get("template") or payload.get("template_key") or "").strip()
+    template = TASKSET_TEMPLATES.get(template_key)
+    if template is None:
+        return {"errors": [f"unknown taskset template: {template_key!r}"]}
+    display_name = str(payload.get("display_name") or payload.get("name") or template["display_name"]).strip()
+    task_set_id = str(payload.get("task_set_id") or "").strip() or _taskset_id_from_name(display_name)
+    id_error = _validate_task_set_id(task_set_id)
+    if id_error:
+        return {"errors": [id_error]}
+
+    template_tasks = template.get("tasks", [])
+    proposed_tasks = []
+    for index, spec in enumerate(template_tasks, start=1):
+        proposed_tasks.append(
+            {
+                "type": "task.create",
+                "payload": {
+                    "title": spec["title"],
+                    "priority": spec.get("priority", "P1"),
+                    "status": "planned",
+                    "task_set_id": task_set_id,
+                    "owner": str(payload.get("owner") or "lead-engineer"),
+                    "actor": str(payload.get("actor") or "owner"),
+                },
+            }
+        )
+
+    proposal = {
+        "id": command_id.replace("COMMAND-", "TASKSETTPL-"),
+        "type": "taskset.template",
+        "action": "template_instantiate",
+        "status": "queued",
+        "created_at": now,
+        "requested_by": str(payload.get("actor") or "owner"),
+        "template": template_key,
+        "task_set_id": task_set_id,
+        "display_name": display_name,
+        "summary": template["summary"],
+        "taskset_create": {
+            "type": "taskset.create",
+            "payload": {
+                "task_set_id": task_set_id,
+                "display_name": display_name,
+                "summary": template["summary"],
+            },
+        },
+        "tasks": proposed_tasks,
+        "task_count": len(proposed_tasks),
+        "registry": "agents/project/work-items/TASKSET-DEFINITIONS.json",
+        "mutation_boundary": "proposal_only",
+        "next": "runtime executor registers the taskset then creates each template task",
+    }
+    path = root / ".ui_outbox" / "tasksets" / f"{proposal['id']}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(proposal, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {
+        "status": "queued",
+        "result": {
+            "changed": [_rel(root, path)],
+            "proposal_id": proposal["id"],
+            "task_set_id": task_set_id,
+            "template": template_key,
+            "task_count": len(proposed_tasks),
+            "runtime_support": "taskset_template_proposal",
+            "mutation_boundary": "proposal_only",
+            "next": proposal["next"],
+        },
+    }
 
 
 def _comment_task(root: Path, target: str | None, payload: dict[str, Any], now: str) -> dict[str, Any]:
@@ -992,6 +1295,14 @@ def submit_command(
         outcome = _reorder_task(root_path, target_str, payload)
     elif command_type == "task.archive":
         outcome = _archive_task(root_path, target_str, payload)
+    elif command_type == "task.move":
+        outcome = _move_task(root_path, target_str, payload)
+    elif command_type == "task.bulk_edit":
+        outcome = _bulk_edit_tasks(root_path, payload)
+    elif command_type in {"taskset.create", "taskset.rename", "taskset.archive"}:
+        outcome = _taskset_lifecycle_command(root_path, command_type, target_str, payload, created_at, cid)
+    elif command_type == "taskset.template":
+        outcome = _taskset_template_command(root_path, payload, created_at, cid)
     elif command_type == "task.comment":
         outcome = _comment_task(root_path, target_str, payload, created_at)
     elif command_type == "planning.scan":

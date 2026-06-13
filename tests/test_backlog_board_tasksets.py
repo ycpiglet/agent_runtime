@@ -153,6 +153,108 @@ def test_backlog_board_hides_completed_tasks_and_completed_task_sets(tmp_path: P
     assert "registered_at" in archived_files
 
 
+def test_sync_taskset_registry_creates_updates_and_archives(tmp_path: Path) -> None:
+    # TASK-AR-329: the registry auto-sync path used when a UI taskset proposal is
+    # consumed. The registry-lock test below pins task-file classification; this
+    # gives that lock an automated registry-write path so a UI-created taskset
+    # lands in TASKSET-DEFINITIONS.json without a hand edit.
+    created = backlog_board.sync_taskset_registry(
+        tmp_path,
+        "TASKSET-UI-NEW",
+        display_name="UI New",
+        summary="made in the console",
+        order=600,
+    )
+    assert created["action"] == "created"
+    assert created["order"] == 600
+
+    registry_path = tmp_path / "agents" / "project" / "work-items" / "TASKSET-DEFINITIONS.json"
+    payload = json.loads(registry_path.read_text(encoding="utf-8"))
+    assert payload["schema"] == "agent-runtime-taskset-definitions/v1"
+    assert payload["tasksets"][0]["task_set_id"] == "TASKSET-UI-NEW"
+
+    # The board picks the new taskset up via the merged registry info map.
+    info_map = backlog_board._task_set_info_map(tmp_path)
+    assert "TASKSET-UI-NEW" in info_map
+    assert info_map["TASKSET-UI-NEW"].display_name == "UI New"
+
+    # Rename = upsert/update; archive flips the flag, both idempotent.
+    updated = backlog_board.sync_taskset_registry(
+        tmp_path, "TASKSET-UI-NEW", display_name="UI Renamed", summary="made in the console"
+    )
+    assert updated["action"] == "updated"
+    payload = json.loads(registry_path.read_text(encoding="utf-8"))
+    assert payload["tasksets"][0]["display_name"] == "UI Renamed"
+    assert len(payload["tasksets"]) == 1
+
+    archived = backlog_board.sync_taskset_registry(
+        tmp_path, "TASKSET-UI-NEW", display_name="", summary="", archived=True
+    )
+    assert archived["action"] == "archived"
+    payload = json.loads(registry_path.read_text(encoding="utf-8"))
+    assert payload["tasksets"][0]["archived"] is True
+
+
+def test_ui_created_taskset_renders_on_the_board(tmp_path: Path) -> None:
+    # A UI-created taskset (registry row) plus a task assigned to it must render
+    # in the generated board, proving registry/board consistency.
+    tasks_dir = tmp_path / "agents" / "lead_engineer" / "tasks"
+    _write_task(tasks_dir, "TASK-AR-950", "TASKSET-UI-MADE", status="in_progress")
+    backlog_board.sync_taskset_registry(
+        tmp_path,
+        "TASKSET-UI-MADE",
+        display_name="Console Made",
+        summary="created from the console UI",
+        order=700,
+    )
+
+    tasks = backlog_board.load_tasks(tasks_dir)
+    board = backlog_board.render(tasks, root=tmp_path)
+
+    assert "### Console Made (`TASKSET-UI-MADE`)" in board
+    assert "- Flow: created from the console UI" in board
+
+
+def test_template_backlog_board_merges_registry_reader(tmp_path: Path) -> None:
+    # TASK-AR-329 (W4b fix): the shipped template board must mirror BOTH the
+    # registry writer AND the reader merge, so a UI-created taskset renders with
+    # its registered name in downstream host projects instead of "Unclassified".
+    import importlib.util
+
+    tmpl_path = (
+        ROOT
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "scripts"
+        / "backlog_board.py"
+    )
+    spec = importlib.util.spec_from_file_location("tmpl_backlog_board", tmpl_path)
+    tmpl = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = tmpl
+    spec.loader.exec_module(tmpl)
+
+    tasks_dir = tmp_path / "agents" / "lead_engineer" / "tasks"
+    _write_task(tasks_dir, "TASK-AR-951", "TASKSET-TMPL-MADE", status="in_progress")
+    tmpl.sync_taskset_registry(
+        tmp_path,
+        "TASKSET-TMPL-MADE",
+        display_name="Template Console Made",
+        summary="created from the console UI in a host project",
+        order=700,
+    )
+
+    # Reader merge resolves the registered name (not the Unclassified fallback).
+    assert tmpl.task_set_info("TASKSET-TMPL-MADE", tmp_path).display_name == "Template Console Made"
+    assert tmpl.task_set_info("TASKSET-TMPL-MADE").display_name == "Unclassified"  # no root -> base only
+
+    tasks = tmpl.load_tasks(tasks_dir)
+    board = tmpl.render(tasks, root=tmp_path)
+    assert "Template Console Made" in board
+    assert "`TASKSET-TMPL-MADE`" in board
+
+
 def test_real_backlog_tasks_are_classified_into_twenty_five_task_sets() -> None:
     tasks = backlog_board.load_tasks(ROOT / "agents" / "lead_engineer" / "tasks")
     task_set_ids = {task.task_set_id for task in tasks}
