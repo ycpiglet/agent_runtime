@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-13T08:42:11+09:00",
+  "generated_at": "2026-06-13T09:19:24+09:00",
   "record_count": 229,
   "finding_count": 0,
   "findings": [],
@@ -2346,7 +2346,7 @@
       "title": "planner가 unit 의존성 DAG를 topological wave로 분해하고, 디스패처가 같은 wave의 K개 unit에 대해 claim+workt…",
       "path": "agents/lead_engineer/tasks/TASK-AR-501.md",
       "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-502",
@@ -2489,7 +2489,7 @@
       "title": "Make initiative/taskset/task/unit progress and metadata visible through one Work Expl…",
       "path": "agents/lead_engineer/tasks/TASK-AR-516.md",
       "parent_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-517",
