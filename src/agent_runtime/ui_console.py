@@ -90,6 +90,7 @@ HTML = """<!doctype html>
           <button class="tab" type="button" data-view="meeting">Meeting Room</button>
           <button class="tab" type="button" data-view="tasksets">Tasksets</button>
           <button class="tab" type="button" data-view="tsboard">Taskset Board</button>
+          <button class="tab" type="button" data-view="team">Team</button>
           <button class="tab" type="button" data-view="agents">Agents</button>
           <button class="tab" type="button" data-view="messages">Messages</button>
           <button class="tab" type="button" data-view="events">Events</button>
@@ -191,6 +192,17 @@ HTML = """<!doctype html>
           <p id="tsboard-staleness" class="tsboard-staleness"></p>
           <div id="tsboard-cards" class="tsboard-cards" aria-label="Taskset board"></div>
           <div id="tsboard-swimlanes" class="tsboard-swimlanes" aria-label="Taskset swimlanes" hidden></div>
+        </div>
+        <div id="view-team" class="view">
+          <div class="team-toolbar">
+            <input id="team-filter" placeholder="team, role, callsign, agent id">
+            <label class="team-online-toggle">
+              <input id="team-online-toggle" type="checkbox">
+              <span>Online only</span>
+            </label>
+          </div>
+          <p id="team-summary" class="team-summary"></p>
+          <div id="team-org" class="team-org" aria-label="Team agent organisation"></div>
         </div>
         <div id="view-agents" class="view">
           <div id="multipane-assurance-list" class="assurance-grid"></div>
@@ -1501,6 +1513,101 @@ pre {
 }
 .tsboard-swim-card code { color: var(--muted); }
 
+.team-toolbar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+.team-online-toggle { display: flex; gap: 6px; align-items: center; color: var(--muted); font-size: 13px; }
+.team-summary { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+.team-org { display: flex; flex-direction: column; gap: 18px; }
+.team-group {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  background: var(--panel);
+}
+.team-group-header { display: flex; gap: 10px; align-items: baseline; margin-bottom: 12px; }
+.team-group-header b { font-size: 15px; }
+.team-group-header span { color: var(--muted); font-size: 13px; }
+.team-role-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.team-role-badge {
+  border-radius: 999px;
+  padding: 2px 9px;
+  font-size: 11px;
+  border: 1px solid var(--line-strong);
+  color: var(--muted);
+}
+.team-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+.agent-character-card {
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.agent-character-card.presence-working { border-left: 3px solid var(--blue); }
+.agent-character-card.presence-reviewing { border-left: 3px solid var(--amber); }
+.agent-character-card.presence-in_meeting { border-left: 3px solid var(--violet); }
+.agent-character-card.presence-online { border-left: 3px solid var(--success); }
+.agent-character-card.presence-offline { border-left: 3px solid var(--subtle); }
+.agent-character-header { display: flex; gap: 12px; align-items: center; }
+.agent-character-avatar {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--surface-raised);
+  border: 2px solid var(--line-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  flex: 0 0 auto;
+}
+.agent-character-avatar .presence-ring {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--panel-strong);
+  background: var(--subtle);
+}
+.agent-character-card.presence-working .presence-ring { background: var(--blue); }
+.agent-character-card.presence-reviewing .presence-ring { background: var(--amber); }
+.agent-character-card.presence-in_meeting .presence-ring { background: var(--violet); }
+.agent-character-card.presence-online .presence-ring { background: var(--success); }
+.agent-character-identity { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.agent-character-identity b { overflow-wrap: anywhere; }
+.agent-character-identity span { color: var(--muted); font-size: 12px; }
+.agent-character-level {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+}
+.agent-character-level strong { color: var(--ink); }
+.agent-character-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 12px;
+}
+.agent-character-task { font-size: 12px; color: var(--muted); }
+.agent-character-task code { color: var(--ink); }
+.agent-character-activity { list-style: none; margin: 0; padding: 0; font-size: 12px; color: var(--muted); }
+
 @media (max-width: 760px) {
   .topbar {
     align-items: flex-start;
@@ -1551,6 +1658,9 @@ pre {
   .tsboard-toolbar,
   .tsboard-cards,
   .tsboard-swimlane-cols,
+  .team-toolbar,
+  .team-cards,
+  .agent-character-meta,
   .work-detail-meta,
   .evidence-grid,
   .task-card-meta,
@@ -1672,6 +1782,7 @@ let meetingParticipants = [];
 let meetingKeyboardHeld = null;
 let expandedTasksetCards = new Set();
 let tasksetSwimlaneMode = false;
+let teamOnlineOnly = false;
 
 const $ = (id) => document.getElementById(id);
 const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -2982,6 +3093,89 @@ function renderTasksetBoard() {
   }
 }
 
+function teamAgentsData() {
+  return (runtimeState && runtimeState.team_agents) || { teams: [], totals: {} };
+}
+
+function teamAgentSearchText(card) {
+  return [card.id, card.role, card.callsign, card.display_name, card.model, (card.current_claim || {}).task_id]
+    .join(" ").toLowerCase();
+}
+
+function agentLevelBar(card) {
+  const pct = numericPct(card.xp_pct) ?? 0;
+  return `<div class="agent-character-level"><span>Lv <strong>${escapeHtml(card.level ?? 1)}</strong></span><span>${escapeHtml(card.xp ?? 0)} XP (${escapeHtml(card.xp_for_next ?? 0)} to next)</span></div>
+    <div class="progress-track" role="img" aria-label="XP ${escapeHtml(pct)}%"><div class="progress-fill" style="width: ${pct}%"></div></div>`;
+}
+
+function agentRecentActivity(card) {
+  const recent = card.recent_activity || [];
+  if (!recent.length) return "";
+  return `<ul class="agent-character-activity">${recent.map((item) =>
+    `<li>${escapeHtml(item.event || "activity")} <small>${escapeHtml(item.ts || "")}</small></li>`
+  ).join("")}</ul>`;
+}
+
+function agentCharacterCard(card) {
+  const claim = card.current_claim || {};
+  const presence = String(card.presence || "offline");
+  const currentTask = claim.task_id
+    ? `<code>${escapeHtml(claim.task_id)}</code> ${escapeHtml(claim.phase || claim.status || "")}`
+    : "idle - no claim";
+  return `
+    <article class="agent-character-card presence-${escapeHtml(presence)}" data-agent-id="${escapeHtml(card.id)}">
+      <header class="agent-character-header">
+        <span class="agent-character-avatar">${escapeHtml(card.avatar || "AG")}<span class="presence-ring" title="${escapeHtml(presence)}"></span></span>
+        <div class="agent-character-identity">
+          <b>${escapeHtml(card.callsign || card.id)}</b>
+          <span>${escapeHtml(card.role || "unknown")} - ${escapeHtml(presence)}</span>
+        </div>
+      </header>
+      ${agentLevelBar(card)}
+      <div class="agent-character-meta">
+        <span><span class="meta-label">Model</span><strong>${escapeHtml(card.model || "default")}</strong></span>
+        <span><span class="meta-label">Skills</span><strong>${escapeHtml(card.skill_count ?? 0)}</strong></span>
+        <span><span class="meta-label">Tasks done</span><strong>${escapeHtml((card.lifetime || {}).completed_tasks ?? 0)}</strong></span>
+        <span><span class="meta-label">Units done</span><strong>${escapeHtml((card.lifetime || {}).completed_units ?? 0)}</strong></span>
+      </div>
+      <p class="agent-character-task"><span class="meta-label">Current</span> ${currentTask}</p>
+      ${agentRecentActivity(card)}
+    </article>
+  `;
+}
+
+function teamGroupBlock(group) {
+  const roles = group.role_distribution || {};
+  const badges = Object.keys(roles).map((role) =>
+    `<span class="team-role-badge">${escapeHtml(role)} ${escapeHtml(roles[role])}</span>`
+  ).join("");
+  let agents = group.agents || [];
+  const query = $("team-filter")?.value.trim().toLowerCase() || "";
+  if (teamOnlineOnly) agents = agents.filter((card) => card.online);
+  if (query) agents = agents.filter((card) => teamAgentSearchText(card).includes(query));
+  const cards = agents.length ? agents.map(agentCharacterCard).join("") : `<div class="empty">No agents</div>`;
+  return `
+    <section class="team-group" data-team-id="${escapeHtml(group.id)}">
+      <header class="team-group-header">
+        <b>${escapeHtml(group.team_id || group.id)}</b>
+        <span>${escapeHtml(group.online_count ?? 0)} online / ${escapeHtml(group.agent_count ?? 0)} agents</span>
+      </header>
+      <div class="team-role-badges">${badges}</div>
+      <div class="team-cards">${cards}</div>
+    </section>
+  `;
+}
+
+function renderTeamAgents() {
+  const host = $("team-org");
+  if (!host) return;
+  const data = teamAgentsData();
+  const totals = data.totals || {};
+  setText("team-summary", `${totals.teams ?? 0} teams - ${totals.agents ?? 0} agents - ${totals.online ?? 0} online`);
+  const teams = data.teams || [];
+  host.innerHTML = teams.length ? teams.map(teamGroupBlock).join("") : `<div class="empty">No teams</div>`;
+}
+
 function renderDetail() {
   const panel = $("detail-panel");
   const task = (runtimeState.tasks || []).find((item) => item.id === selectedTaskId);
@@ -3064,6 +3258,7 @@ function renderAll() {
   renderMeetingRoom();
   renderTaskSetDirectory();
   renderTasksetBoard();
+  renderTeamAgents();
   renderAgents();
   renderMessages();
   renderEvents();
@@ -3109,6 +3304,11 @@ $("tsboard-expand-all")?.addEventListener("click", () => {
 $("tsboard-collapse-all")?.addEventListener("click", () => {
   expandedTasksetCards = new Set();
   renderTasksetBoard();
+});
+$("team-filter")?.addEventListener("input", renderTeamAgents);
+$("team-online-toggle")?.addEventListener("change", (event) => {
+  teamOnlineOnly = Boolean(event.target.checked);
+  renderTeamAgents();
 });
 ["work-search", "work-depth-filter"].forEach((id) => {
   const node = $(id);
@@ -3300,6 +3500,8 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/meeting-room": "meeting_room",
         "/api/tasksets_board": "tasksets_board",
         "/api/tasksets-board": "tasksets_board",
+        "/api/team_agents": "team_agents",
+        "/api/team-agents": "team_agents",
         "/api/sources": "sources",
         "/api/errors": "errors",
         "/api/evidence": "evidence",

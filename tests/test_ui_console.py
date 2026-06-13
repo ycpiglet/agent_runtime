@@ -1075,3 +1075,94 @@ def test_ui_console_roadmap_timeline_panel_and_routes(tmp_path):
     assert timeline["vision"]["statement"]
     assert timeline["milestones"][0]["linked_work"][0]["id"] == "TASK-AR-516"
     assert timeline["releases"][0]["owner_required"] is True
+
+
+# --- Team / Agent RPG presence (TASK-AR-324) -------------------------------
+
+
+def _write_team_instance(root: Path, instance_id: str, **overrides) -> None:
+    record = {
+        "schema": "agent-runtime-agent-instance/v1",
+        "agent_instance_id": instance_id,
+        "callsign": f"claude/{instance_id}",
+        "display_name": f"claude/{instance_id}",
+        "role": "lead-engineer",
+        "team_id": "agent-runtime-core",
+        "model": "claude-opus",
+        "skill_versions": {"lead_engineer": "1.0.0"},
+        "spawned_at": "2026-06-13T10:00:00+09:00",
+    }
+    record.update(overrides)
+    _write(root / "agents" / "runtime" / "instances" / f"{instance_id}.json", json.dumps(record))
+
+
+def test_ui_console_team_agents_route_serves_team_hierarchy(tmp_path):
+    _write_team_instance(tmp_path, "inst-le-01", role="lead-engineer", team_id="agent-runtime-core")
+    _write_team_instance(tmp_path, "inst-mp-02", role="managing-partner", team_id="governance-loop")
+
+    response = ui_console.build_response("/api/team_agents", tmp_path)
+    payload = json.loads(response.body.decode("utf-8"))
+    alias = json.loads(ui_console.build_response("/api/team-agents", tmp_path).body.decode("utf-8"))
+
+    assert response.status == 200
+    assert payload["resource"] == "team_agents"
+    assert alias["resource"] == "team_agents"
+    assert payload["items"]["schema"] == "agent-runtime-team-agents/v1"
+
+    teams = {team["team_id"]: team for team in payload["items"]["teams"]}
+    assert set(teams) == {"agent-runtime-core", "governance-loop"}
+    card = teams["agent-runtime-core"]["agents"][0]
+    assert card["id"] == "inst-le-01"
+    assert card["role"] == "lead-engineer"
+    assert card["level"] >= 1
+    assert "xp_pct" in card
+
+
+def test_ui_console_team_agents_tab_panel_and_css_anchors(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    assert 'data-view="team"' in html
+    for host_id in [
+        "view-team",
+        "team-filter",
+        "team-online-toggle",
+        "team-summary",
+        "team-org",
+    ]:
+        assert host_id in html
+
+    for marker in [
+        "renderTeamAgents",
+        "teamAgentsData",
+        "agentCharacterCard",
+        "teamGroupBlock",
+        "agentLevelBar",
+        "teamOnlineOnly",
+        "team_agents",
+    ]:
+        assert marker in js
+
+    for selector in [
+        ".team-org",
+        ".team-group",
+        ".team-cards",
+        ".agent-character-card",
+        ".agent-character-card.presence-working",
+        ".agent-character-avatar",
+        ".presence-ring",
+        ".agent-character-meta",
+    ]:
+        assert selector in css
+
+    mobile_css = css.split("@media (max-width: 760px)", 1)[1]
+    assert ".team-cards" in mobile_css
+
+
+def test_ui_console_team_agents_card_fields_are_escaped(tmp_path):
+    # All rendered agent-card fields must flow through escapeHtml.
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    card_block = js.split("function agentCharacterCard", 1)[1].split("\n}", 1)[0]
+    for field in ["card.avatar", "card.callsign", "card.role", "card.model"]:
+        assert f"escapeHtml({field}" in card_block
