@@ -53,6 +53,8 @@ COLUMNS = (
 #   retired     -> permanently dropped (kept for decision history)
 ALLOWED_STATUS = {"shelved", "revived", "re-deferred", "adopted", "retired"}
 ACTIVE_STATUS = {"shelved", "re-deferred"}
+# Permanent decision-history states: never mutated by revive/defer.
+TERMINAL_STATUS = {"adopted", "retired"}
 
 ID_RE = re.compile(r"^IV-\d{3}$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -328,7 +330,7 @@ def cmd_revive(args: argparse.Namespace) -> int:
     if entry is None:
         print(f"idea-vault: error: unknown id {args.id}")
         return 1
-    if entry.get("status") in {"adopted", "retired"}:
+    if entry.get("status") in TERMINAL_STATUS:
         print(f"idea-vault: error: {args.id} is {entry.get('status')}; cannot revive")
         return 1
     outbox = Path(args.outbox).resolve() if args.outbox else None
@@ -350,6 +352,9 @@ def cmd_defer(args: argparse.Namespace) -> int:
     entry = _find(entries, args.id)
     if entry is None:
         print(f"idea-vault: error: unknown id {args.id}")
+        return 1
+    if entry.get("status") in TERMINAL_STATUS:
+        print(f"idea-vault: error: {args.id} is {entry.get('status')}; cannot defer")
         return 1
     try:
         until = _normalize_date(args.until)

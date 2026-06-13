@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from scripts import idea_vault, planning_loop
 
 VAULT_HEADER = (
@@ -101,11 +103,24 @@ def test_revive_emits_proposal_not_a_task(tmp_path: Path) -> None:
     assert "revived" in path.read_text(encoding="utf-8")
 
 
-def test_revive_rejects_terminal_status(tmp_path: Path) -> None:
-    seed_vault(tmp_path, [_row(id="IV-001", revisit="2026-09-01", status="retired")])
+@pytest.mark.parametrize("status", ["retired", "adopted"])
+def test_revive_rejects_terminal_status(tmp_path: Path, status: str) -> None:
+    seed_vault(tmp_path, [_row(id="IV-001", revisit="2026-09-01", status=status)])
     rc = idea_vault.main(["--root", str(tmp_path), "revive", "IV-001", "--json"])
     assert rc == 1
     assert not (tmp_path / "agents" / "planning" / "outbox").exists()
+
+
+@pytest.mark.parametrize("status", ["retired", "adopted"])
+def test_defer_rejects_terminal_status(tmp_path: Path, status: str) -> None:
+    path = seed_vault(tmp_path, [_row(id="IV-001", revisit="2026-09-01", status=status)])
+    rc = idea_vault.main(["--root", str(tmp_path), "defer", "IV-001", "--until", "2027-12-01", "--json"])
+    assert rc == 1
+    # Terminal decision-history is preserved unchanged.
+    _, entries = idea_vault.load_registry(tmp_path)
+    assert entries[0]["status"] == status
+    assert entries[0]["revisit_after"] == "2026-09-01"
+    assert status in path.read_text(encoding="utf-8")
 
 
 def test_defer_updates_revisit_after_and_status(tmp_path: Path) -> None:
@@ -160,7 +175,7 @@ def test_real_registry_validates(tmp_path: Path) -> None:
     # The shipped registry must always pass its own schema check.
     root = Path(idea_vault.ROOT)
     _, entries = idea_vault.load_registry(root)
-    assert len(entries) >= 11
+    assert len(entries) >= 12  # 12 shipped seeds; guards against silent seed deletion
     assert idea_vault.validate_entries(entries) == []
 
 

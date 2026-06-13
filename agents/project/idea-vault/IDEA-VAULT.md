@@ -56,8 +56,8 @@
 
 - `list` — 전체 항목 출력.
 - `due [--now YYYY-MM-DD]` — `revisit_after` 도래 활성 항목 출력. 읽기 전용, **항상 exit 0**.
-- `revive <id>` — **제안 전용**. planning outbox에 B-mode owner 제안(`origin_type: idea_vault_revival`, `proposal_output: owner_decision`)을 발행하고 항목을 `revived`로 표시한다. **절대 task를 자동 생성하지 않는다.**
-- `defer <id> --until <date>` — `revisit_after`를 갱신하고 `re-deferred`로 표시.
+- `revive <id>` — **제안 전용**. planning outbox에 B-mode owner 제안(`origin_type: idea_vault_revival`, `proposal_output: owner_decision`)을 발행하고 항목을 `revived`로 표시한다. **절대 task를 자동 생성하지 않는다.** `adopted`/`retired`(종결) 항목은 거부. 이미 `revived`인 항목에 재실행하면 동일 제안을 덮어써 멱등(idempotent)이다 (`revived`는 active가 아니므로 scan이 다시 재상정하지 않음).
+- `defer <id> --until <date>` — `revisit_after`를 갱신하고 `re-deferred`로 표시. `adopted`/`retired`(종결) 항목은 거부 — 결정 이력은 영구 보존된다.
 - `validate` — 레지스트리 스키마 검증 (id 형식·중복, status 허용값, 날짜 형식, 필수 컬럼).
 
 ### 재발굴 루프 연동
