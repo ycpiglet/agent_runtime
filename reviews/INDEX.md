@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-13T19:34:15+09:00
-record_count: 433
+generated_at: 2026-06-13T19:59:18+09:00
+record_count: 436
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `433` review and evidence records under `reviews/`.
+- Summary: indexed `436` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `433` files |
+| Reviews covered | pass | `436` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -466,6 +466,9 @@ record_count: 433
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
 | `reviews/W4B-2026-06-13-TASK-AR-324.md` | `W4B-2026-06-13-TASK-AR-324` | verification | record | n/a | W4b Independent Verification — TASK-AR-324 (Team/Agent RPG Cards) |
 | `reviews/W4B-2026-06-13-TASK-AR-325.md` | `W4B-2026-06-13-TASK-AR-325` | verification | record | n/a | W4b Independent Verification — TASK-AR-325 (Roadmap Timeline) |
+| `reviews/W4B-2026-06-13-TASK-AR-326.md` | `W4B-2026-06-13-TASK-AR-326` | verification | record | n/a | W4b Independent Verification — TASK-AR-326 (Realtime Presence + Live Map) |
+| `reviews/W4B-2026-06-13-TASK-AR-327.md` | `W4B-2026-06-13-TASK-AR-327` | verification | record | n/a | W4b Independent Verification — TASK-AR-327 (Channels View + Meeting/Seminar) |
+| `reviews/W4B-2026-06-13-TASK-AR-328.md` | `W4B-2026-06-13-TASK-AR-328` | verification | record | n/a | W4b Independent Verification — TASK-AR-328 (Taskset Boundary Execution Guard) |
 | `reviews/W4B-2026-06-13-TASK-AR-362.md` | `W4B-2026-06-13-TASK-AR-362` | verification | record | n/a | W4b Independent Verification — TASK-AR-362 (Board Peek + DnD + Quick Actions) |
 
 ## Risks / Blockers

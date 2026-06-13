@@ -9,21 +9,21 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-13
 task_count: 189
-open_count: 26
-completed_count: 163
-task_set_count: 5
-completed_task_set_count: 23
+open_count: 23
+completed_count: 166
+task_set_count: 4
+completed_task_set_count: 24
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `26` open or active tasks; `163` completed tasks are archived from this live board.
+- Summary: `23` open or active tasks; `166` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `23` / Ask `2` / Review `0` / Later `1` / Done `163`.
-- Task Sets: `5` active workflows; `23` completed workflows are hidden from the live action board.
+- Status: Action `21` / Ask `1` / Review `0` / Later `1` / Done `166`.
+- Task Sets: `4` active workflows; `24` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -41,17 +41,6 @@ completed_task_set_count: 23
 ## Action Board
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
-
-### Console Experience Architect (`TASKSET-AR-UI-UX-V2`)
-
-- Flow: Notion-like light theme, sidebar IA, sort/filter/density patterns, taskset-first views, org chart, roadmap, live presence, comms, and taskset-scope guard.
-- Progress: `6/9` done; `3` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-328` | - | - | - | planned | Action | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 특정 taskset 실행을 지시했을 때 해당 taskset 완료 후 scope 밖 작업으로 이탈하지 않고 정지·보고하도록 런타임 정책으로 강제한다 (Ow… |
-| `TASK-AR-327` | - | - | - | planned | Ask | P2 | Medium | High | 10h/8000tok | Low | 5 | agent-runtime-core | lead-engineer | Owner/agent decision | 에이전트 간 대화를 Slack/Discord처럼 채널/스레드로 관전하고, Owner가 UI에서 meeting/seminar를 소집할 수 있게 한다. |
-| `TASK-AR-326` | - | - | - | planned | Action | P2 | Medium | High | 12h/9000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 에이전트/업무/메시지가 온라인 RPG처럼 실시간으로 살아 움직이는 감각을 SSE 이벤트 스트림과 라이브 그래프로 구현한다. |
 
 ### Platform Builder (`TASKSET-AR-UI-PLATFORM-EXTENSIONS`)
 
@@ -131,6 +120,7 @@ completed_task_set_count: 23
 | Repo Custodian (`TASKSET-AR-REPO-HYGIENE`) | Working-tree cleanup, backlog cycle hygiene, and handoff publication. | `6/6` done | `6` completed task files archived |
 | Feedback Analyst (`TASKSET-AR-OPS-FEEDBACK-ANALYSIS`) | Owner feedback intake, enterprise-wide structure/vision analysis, and follow-up planning records. | `4/4` done | `4` completed task files archived |
 | Vision Integrator (`TASKSET-AR-VISION-GAP-CLOSURE`) | Legacy independence, A2A messaging, multi-agent RBAC, loop hardening, live eval, skill packaging, realtime UI, and doc traceability. | `10/10` done | `10` completed task files archived |
+| Console Experience Architect (`TASKSET-AR-UI-UX-V2`) | Notion-like light theme, sidebar IA, sort/filter/density patterns, taskset-first views, org chart, roadmap, live presence, comms, and taskset-scope guard. | `9/9` done | `9` completed task files archived |
 | Project Workbreaker (`TASKSET-AR-PM-OPERATING-SYSTEM`) | Project-to-unit hierarchy, worker-ready specs, model-tier routing, WIP controls, dispatcher scope stops, and PM verification gates. | `9/9` done | `9` completed task files archived |
 | Agent Identity Contract (`TASKSET-AR-AGENT-IDENTITY-CONTRACT`) | Add role/instance/display identity records, spawn provenance, and attribution gates for multi-agent work. | `1/1` done | `1` completed task files archived |
 | Work Metadata Analyst (`TASKSET-AR-WORK-METADATA-ANALYTICS`) | Conversation-to-work traceability, Work Item metadata, Explorer roll-ups, query/export, agent attribution, and stale verification evidence. | `6/6` done | `6` completed task files archived |
@@ -266,11 +256,14 @@ completed_task_set_count: 23
 | `TASK-AR-317` | `4ffc5085-45b…` | `TASKSET-AR-VISION-GAP-CLOSURE` | completed | 2026-06-11T17:58:45+09:00 | 2026-06-12T02:02:59+09:00 | 2026-06-12T02:02:59+09:00 | 2026-06-12T02:02:59+09:00 | UI 콘솔을 읽기 전용 스냅샷 대시보드에서 운영 제어 표면으로 승격한다: 에이전트 루프 진행이 실시간 반영되고, 제안 승인/거절이 UI에서 가능해야 한다. |
 | `TASK-AR-318` | `367a501a-c74…` | `TASKSET-AR-VISION-GAP-CLOSURE` | completed | 2026-06-11T17:58:45+09:00 | 2026-06-12T02:02:59+09:00 | 2026-06-12T02:02:59+09:00 | 2026-06-12T02:02:59+09:00 | 이벤트/수정 기록을 나열에서 인과 체인 재생으로 승격해, 상태 변화를 프레임 단위로 거슬러 볼 수 있게 한다. |
 | `TASK-AR-320` | `02490505-11c…` | `TASKSET-AR-UI-UX-V2` | completed | 2026-06-11T18:39:01+09:00 | 2026-06-13T18:20:17+09:00 | 2026-06-13T18:45:00+09:00 | 2026-06-11T18:39:01+09:00 | 기본 테마를 Notion형 라이트로 전환하고 기존 Linear 다크 토큰을 Dark Mode 옵션으로 보존한다. |
+| `TASK-AR-328` | `35bf745d-faa…` | `TASKSET-AR-UI-UX-V2` | completed | 2026-06-11T18:39:01+09:00 | 2026-06-13T19:12:23+09:00 | 2026-06-13T19:40:00+09:00 | 2026-06-11T18:39:01+09:00 | 특정 taskset 실행을 지시했을 때 해당 taskset 완료 후 scope 밖 작업으로 이탈하지 않고 정지·보고하도록 런타임 정책으로 강제한다 (Ow… |
 | `TASK-AR-321` | `94aac41d-b95…` | `TASKSET-AR-UI-UX-V2` | completed | 2026-06-11T18:39:01+09:00 | 2026-06-13T18:20:18+09:00 | 2026-06-13T18:50:00+09:00 | 2026-06-11T18:39:01+09:00 | 9개 수평 탭을 접이식 좌측 사이드바(Home / WORK / AGENTS / COMMS / RECORDS / OPS 그룹)로 전환해 V2 뷰 확장을 수… |
 | `TASK-AR-324` | `cf51aa7e-b10…` | `TASKSET-AR-UI-UX-V2` | completed | 2026-06-11T18:39:01+09:00 | 2026-06-13T17:19:47+09:00 | 2026-06-13T18:10:00+09:00 | 2026-06-11T18:39:01+09:00 | TEAMS/ORG/roles 데이터로 조직도 트리를 렌더링하고, 에이전트 카드를 온라인 RPG 길드 멤버처럼 상태가 살아있는 프레즌스로 보여준다. |
 | `TASK-AR-322` | `144350a0-85c…` | `TASKSET-AR-UI-UX-V2` | completed | 2026-06-11T18:39:01+09:00 | 2026-06-13T18:20:18+09:00 | 2026-06-13T18:55:00+09:00 | 2026-06-11T18:39:01+09:00 | 모든 리스트 뷰(task/agent/event/message/evidence)에 Notion/Linear형 정렬·필터·그룹·검색 바와 간략히/자세히 밀도… |
 | `TASK-AR-323` | `e6d32d94-52e…` | `TASKSET-AR-UI-UX-V2` | completed | 2026-06-11T18:39:01+09:00 | 2026-06-13T16:29:49+09:00 | 2026-06-13T16:50:00+09:00 | 2026-06-13T16:50:00+09:00 | task 평면 나열 대신 taskset 단위로 묶인 직관적 작업 뷰를 기본 진입점으로 만들고, Owner가 진행 중 흐름에 task를 안전하게 삽입할 수… |
 | `TASK-AR-325` | `49b8b641-aaa…` | `TASKSET-AR-UI-UX-V2` | completed | 2026-06-11T18:39:01+09:00 | 2026-06-13T17:19:47+09:00 | 2026-06-13T18:05:00+09:00 | 2026-06-11T18:39:01+09:00 | Vision → Milestone/Release → Taskset 3계층을 한 뷰에서 보여줘 고수준 방향과 실제 진행률을 연결한다. |
+| `TASK-AR-327` | `32d13202-2b7…` | `TASKSET-AR-UI-UX-V2` | completed | 2026-06-11T18:39:01+09:00 | 2026-06-13T19:12:22+09:00 | 2026-06-13T19:35:00+09:00 | 2026-06-11T18:39:01+09:00 | 에이전트 간 대화를 Slack/Discord처럼 채널/스레드로 관전하고, Owner가 UI에서 meeting/seminar를 소집할 수 있게 한다. |
+| `TASK-AR-326` | `b7f20335-3e0…` | `TASKSET-AR-UI-UX-V2` | completed | 2026-06-11T18:39:01+09:00 | 2026-06-13T19:12:22+09:00 | 2026-06-13T19:30:00+09:00 | 2026-06-11T18:39:01+09:00 | 에이전트/업무/메시지가 온라인 RPG처럼 실시간으로 살아 움직이는 감각을 SSE 이벤트 스트림과 라이브 그래프로 구현한다. |
 | `TASK-AR-360` | `762e5eb1-726…` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | 2026-06-11T19:48:00+09:00 | 2026-06-13T16:29:50+09:00 | 2026-06-13T16:50:00+09:00 | 2026-06-13T16:50:00+09:00 | 기각/보류 아이디어를 폐기하지 않고 보존·재발굴하는 체계를 RSI 운영 원칙으로 정착시킨다 (Owner 통찰: 진화 시 과거를 잊지 않고 주기적으로 재평… |
 | `TASK-AR-361` | `f078b413-65d…` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | 2026-06-11T19:48:00+09:00 | 2026-06-13T16:29:50+09:00 | 2026-06-13T16:50:00+09:00 | 2026-06-13T16:50:00+09:00 | 사이드탭의 회의실 공간에 에이전트를 마우스로 끌어다 넣고, 주제/태스크를 선택하면 참여 에이전트들이 의견을 주고받는 회의를 실행한다. |
 | `TASK-AR-362` | `c8740b62-ba0…` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | 2026-06-11T19:48:00+09:00 | 2026-06-13T17:19:48+09:00 | 2026-06-13T18:20:00+09:00 | 2026-06-11T19:48:00+09:00 | hover 미리보기와 드래그앤드롭을 콘솔 전역의 1급 상호작용 동사로 표준화한다 (Notion peek + Discord 접근성 DnD 패턴). |

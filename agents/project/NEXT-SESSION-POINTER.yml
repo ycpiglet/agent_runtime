@@ -1,14 +1,14 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-13T18:58:00+09:00
+updated_at: 2026-06-13T19:42:00+09:00
 current_state:
-  summary: "UI console waves 1-3 complete: AR-323/360/361 (wave-1), AR-324/325/362 (wave-2), AR-320/321/322 (wave-3) merged with W4a+W4b dual verification via PRs #92-#103; claims released, worktrees/branches clean. Theme system (light default + dark toggle), grouped sidebar + hash routing, and common list toolbar now form the V2 console shell; all later UI views must use the semantic color tokens and the shared list pattern."
+  summary: "UI console waves 1-4 complete: wave-1 (AR-323/360/361), wave-2 (AR-324/325/362), wave-3 (AR-320/321/322 shell: theme tokens + sidebar/hash-routing + list toolbar), wave-4 (AR-326 live map, AR-327 channels, AR-328 taskset boundary guard) merged with W4a+W4b dual verification via PRs #92-#107; claims released, worktrees/branches clean. UI-UX-V2 taskset fully done (12/12). W4b caught and fixed a real critical bug in AR-327 (channel actions HTTP 400) before merge."
   status: ready
   task_set_status: in_progress
-  task_set_id: "TASKSET-AR-UI-UX-V2"
-  step_index: 3
+  task_set_id: "TASKSET-AR-UI-PLATFORM-EXTENSIONS"
+  step_index: 4
   step_total: 5
-  progress_pct: 60
-  status_text: "UI wave-3 closed. Remaining UI backlog: UI-UX-V2 326/327/328; UI-PLATFORM-EXTENSIONS 329-341; UI-LIVING-CONSOLE 363/364/365. Next waves dispatch from current shell (theme tokens + sidebar groups + list toolbar already in)."
+  progress_pct: 43
+  status_text: "UI-UX-V2 complete (12/12). Remaining UI backlog: UI-PLATFORM-EXTENSIONS 329-341 (13); UI-LIVING-CONSOLE 363/364/365 (3). Next waves dispatch from the V2 shell (theme tokens + sidebar groups + list toolbar + command path)."
 active_work:
   current_agents: []
   current_teams: []
