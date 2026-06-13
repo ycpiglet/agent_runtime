@@ -1504,3 +1504,136 @@ def test_ui_console_collapsed_rail_and_mobile_overlay_css(tmp_path):
     assert ".sidebar.is-open" in mobile_css
     assert ".sidebar-toggle" in mobile_css
     assert ".sidebar-scrim" in css
+
+
+# ---- TASK-AR-322: common list pattern (sort/filter/group/search + density) ----
+
+
+def test_ui_console_list_toolbar_mounts_present_in_html(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    # The shared toolbar must mount into >=3 existing list views without
+    # disturbing the existing list container ids/render entry points.
+    for mount in [
+        'id="list-toolbar-agents"',
+        'id="list-toolbar-messages"',
+        'id="list-toolbar-events"',
+    ]:
+        assert mount in html
+    # Existing list ids must be preserved.
+    for preserved in ['id="agents-list"', 'id="messages-list"', 'id="events-list"']:
+        assert preserved in html
+    # Command palette dialog groundwork is present in the shell.
+    assert 'id="command-palette"' in html
+    assert 'id="command-palette-input"' in html
+
+
+def test_ui_console_list_toolbar_controls_render(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    # Toolbar render helper plus the filter/sort/group/density control classes.
+    for marker in [
+        "function renderListToolbar",
+        "function applyListControls",
+        "list-search",
+        "list-filter",
+        "list-sort",
+        "list-group",
+        "list-density-btn",
+        "list-saved-views",
+        "list-save-view",
+    ]:
+        assert marker in js
+
+    # Filters: status / priority / owner / taskset / tag / date.
+    for facet in ['"status"', '"priority"', '"owner"', '"taskset"', '"tag"', '"date"']:
+        assert facet in js
+    assert "LIST_FILTER_KEYS" in js
+
+    # Grouping options: taskset (default) / status / owner.
+    assert "LIST_GROUP_OPTIONS" in js
+    assert 'group: "taskset"' in js  # default group
+
+    # Sorting: priority / updated-time / progress.
+    assert "LIST_SORT_OPTIONS" in js
+    for sort in ['value: "priority"', 'value: "updated"', 'value: "progress"']:
+        assert sort in js
+
+    # Density toggle: compact / cozy / detail (3 levels).
+    assert 'LIST_DENSITY_LEVELS = ["compact", "cozy", "detail"]' in js
+
+    # Toolbar + density CSS targets the served DOM classes.
+    for selector in [
+        ".list-toolbar",
+        ".list-density-btn",
+        ".list-density-btn.is-active",
+        ".list-panel.density-compact",
+        ".list-panel.density-cozy",
+        ".list-panel.density-detail",
+        ".command-palette",
+    ]:
+        assert selector in css
+
+
+def test_ui_console_list_component_reused_in_at_least_three_views(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    # The SAME component (renderGroupedList -> renderListToolbar/applyListControls)
+    # must be wired into at least 3 list views.
+    wired = [
+        view
+        for view in ("agents", "messages", "events", "evidence")
+        if f'renderGroupedList("{view}"' in js
+    ]
+    assert len(wired) >= 3, wired
+    assert {"agents", "messages", "events"}.issubset(set(wired))
+
+
+def test_ui_console_list_controls_persist_to_url_and_localstorage(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    # Persistence wiring: URL query params + localStorage, plus named saved views.
+    for marker in [
+        "function persistListControls",
+        "function loadListControls",
+        "window.localStorage.setItem",
+        "window.localStorage.getItem",
+        "window.history.replaceState",
+        "URLSearchParams",
+        "function saveNamedView",
+        "function applyNamedView",
+        "readUrlListControls",
+    ]:
+        assert marker in js
+
+
+def test_ui_console_command_palette_and_keyboard_nav_handlers_present(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    # Command palette (Ctrl+K) groundwork.
+    assert "function openCommandPalette" in js
+    assert "function closeCommandPalette" in js
+    assert 'event.key === "k"' in js
+    assert "event.ctrlKey || event.metaKey" in js
+    # Keyboard navigation (j / k / Enter) over list rows.
+    assert "function handleListKeyboardNav" in js
+    assert 'event.key === "j"' in js
+    assert 'event.key === "k"' in js
+    assert "function moveListCursor" in js
+    assert "function activateListCursor" in js
+
+
+def test_ui_console_list_app_js_node_check(tmp_path):
+    # Guard: the generated app.js must remain syntactically valid JavaScript.
+    import shutil
+    import subprocess
+
+    if shutil.which("node") is None:
+        import pytest
+
+        pytest.skip("node not available")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    proc = subprocess.run(
+        ["node", "--check", "-"],
+        input=js,
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 0, proc.stderr

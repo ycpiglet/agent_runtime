@@ -290,9 +290,11 @@ HTML = """<!doctype html>
         <div id="view-agents" class="view">
           <div id="multipane-assurance-list" class="assurance-grid"></div>
           <div id="tasksets-list" class="taskset-strip"></div>
+          <div id="list-toolbar-agents" class="list-toolbar-mount" data-list-view="agents"></div>
           <div id="agents-list" class="list-panel"></div>
         </div>
         <div id="view-messages" class="view">
+          <div id="list-toolbar-messages" class="list-toolbar-mount" data-list-view="messages"></div>
           <div id="messages-list" class="list-panel"></div>
         </div>
         <div id="view-events" class="view">
@@ -303,6 +305,7 @@ HTML = """<!doctype html>
             <input id="event-filter-goal" placeholder="goal id">
             <input id="event-filter-search" placeholder="search">
           </div>
+          <div id="list-toolbar-events" class="list-toolbar-mount" data-list-view="events"></div>
           <div id="events-list" class="list-panel"></div>
         </div>
         <div id="view-evidence" class="view">
@@ -369,6 +372,13 @@ HTML = """<!doctype html>
         <div class="detail-empty">No task selected</div>
       </aside>
     </main>
+  </div>
+  <div id="command-palette" class="command-palette" role="dialog" aria-modal="true" aria-label="Command palette" hidden>
+    <div class="command-palette-backdrop" data-command-dismiss="1"></div>
+    <div class="command-palette-panel" role="document">
+      <input id="command-palette-input" class="command-palette-input" type="text" placeholder="Type a command or view (Ctrl+K)" aria-label="Command palette search" autocomplete="off">
+      <div id="command-palette-results" class="command-palette-results" role="listbox" aria-label="Command palette results"></div>
+    </div>
   </div>
   <script src="/app.js"></script>
 </body>
@@ -2258,6 +2268,185 @@ pre {
 .roadmap-tl-link-in_progress .roadmap-tl-link-status {
   color: var(--amber);
 }
+
+/* ===== Common list pattern toolbar / density / groups (TASK-AR-322) ===== */
+.list-toolbar-mount {
+  margin-bottom: 10px;
+}
+.list-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+.list-toolbar-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.list-toolbar-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.list-toolbar input,
+.list-toolbar select {
+  background: var(--panel-strong);
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  color: var(--ink);
+  padding: 5px 8px;
+  font-size: 12px;
+}
+.list-toolbar input:focus,
+.list-toolbar select:focus {
+  outline: none;
+  box-shadow: var(--focus);
+}
+.list-search {
+  min-width: 160px;
+}
+.list-density {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.list-density-btn {
+  border: 1px solid var(--line-strong);
+  background: var(--panel-strong);
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.list-density-btn.is-active {
+  background: var(--primary-soft-strong);
+  border-color: var(--primary-hover);
+  color: var(--ink);
+}
+.list-save-view {
+  border: 1px solid var(--line-strong);
+  background: var(--panel-strong);
+  color: var(--ink);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.list-group-block {
+  margin-bottom: 12px;
+}
+.list-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  padding: 4px 2px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 6px;
+}
+.list-group-count {
+  background: var(--primary-soft);
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 1px 8px;
+  color: var(--ink);
+}
+.list-panel.density-compact .agent-card,
+.list-panel.density-compact .list-row,
+.list-panel.density-compact .audit-card {
+  padding: 6px 8px;
+  font-size: 11px;
+  line-height: 1.25;
+}
+.list-panel.density-compact .agent-card-meta span,
+.list-panel.density-compact .audit-card-meta span {
+  font-size: 10px;
+}
+.list-panel.density-cozy .agent-card,
+.list-panel.density-cozy .list-row,
+.list-panel.density-cozy .audit-card {
+  padding: 10px 12px;
+}
+.list-panel.density-detail .agent-card,
+.list-panel.density-detail .list-row,
+.list-panel.density-detail .audit-card {
+  padding: 16px 18px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.list-row.is-cursor,
+.agent-card.is-cursor,
+.audit-card.is-cursor {
+  outline: 2px solid var(--primary-hover);
+  outline-offset: 1px;
+}
+.command-palette {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.command-palette[hidden] {
+  display: none;
+}
+.command-palette-backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--scrim);
+}
+.command-palette-panel {
+  position: relative;
+  margin-top: 12vh;
+  width: min(560px, 90vw);
+  background: var(--panel-strong);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.command-palette-input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  padding: 14px 16px;
+  font-size: 15px;
+}
+.command-palette-input:focus {
+  outline: none;
+}
+.command-palette-results {
+  max-height: 50vh;
+  overflow-y: auto;
+}
+.command-palette-item {
+  padding: 10px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--ink);
+}
+.command-palette-item.is-active,
+.command-palette-item:hover {
+  background: var(--primary-soft-strong);
+}
+.command-palette-empty {
+  padding: 14px 16px;
+  color: var(--muted);
+  font-size: 13px;
+}
 """
 
 JS = """// --- Theme system (TASK-AR-320) -------------------------------------------
@@ -2436,6 +2625,486 @@ function progressBar(value) {
   return `<div class="progress-track" role="img" aria-label="progress ${escapeHtml(label)}">
     <div class="progress-fill" style="width: ${width}%"></div>
   </div>`;
+}
+
+/* ===== Common list pattern: sort / filter / group / search + density (TASK-AR-322) ===== */
+const LIST_DENSITY_LEVELS = ["compact", "cozy", "detail"];
+const LIST_GROUP_OPTIONS = [
+  { value: "taskset", label: "Task set" },
+  { value: "status", label: "Status" },
+  { value: "owner", label: "Owner" },
+];
+const LIST_SORT_OPTIONS = [
+  { value: "priority", label: "Priority" },
+  { value: "updated", label: "Updated time" },
+  { value: "progress", label: "Progress" },
+];
+const LIST_FILTER_KEYS = ["status", "priority", "owner", "taskset", "tag", "date"];
+const PRIORITY_RANK = { P0: 0, P1: 1, P2: 2, P3: 3, P4: 4 };
+
+// Per-view active control state, hydrated from URL + localStorage.
+let listControls = {};
+// Per-view keyboard cursor index for j/k navigation.
+let listCursor = {};
+
+function listStorageKey(view) {
+  return `ar.listControls.${view}`;
+}
+
+function defaultListControls() {
+  return { search: "", sort: "priority", group: "taskset", density: "cozy", filters: {}, view: "" };
+}
+
+function readUrlListControls(view) {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const raw = params.get(`lc_${view}`);
+    if (!raw) return null;
+    return JSON.parse(decodeURIComponent(raw));
+  } catch (error) {
+    return null;
+  }
+}
+
+function readStoredListControls(view) {
+  try {
+    const raw = window.localStorage.getItem(listStorageKey(view));
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function loadListControls(view) {
+  if (listControls[view]) return listControls[view];
+  const base = defaultListControls();
+  // URL wins over localStorage so a shared link reproduces the same list state.
+  const stored = readStoredListControls(view) || {};
+  const fromUrl = readUrlListControls(view) || {};
+  const merged = Object.assign(base, stored, fromUrl);
+  merged.filters = Object.assign({}, base.filters, stored.filters || {}, fromUrl.filters || {});
+  listControls[view] = merged;
+  return merged;
+}
+
+function persistListControls(view) {
+  const controls = listControls[view];
+  if (!controls) return;
+  try {
+    window.localStorage.setItem(listStorageKey(view), JSON.stringify(controls));
+  } catch (error) { /* storage may be unavailable */ }
+  try {
+    const params = new URLSearchParams(window.location.search);
+    params.set(`lc_${view}`, encodeURIComponent(JSON.stringify(controls)));
+    const next = `${window.location.pathname}?${params.toString()}${window.location.hash}`;
+    window.history.replaceState(null, "", next);
+  } catch (error) { /* history may be unavailable */ }
+}
+
+function savedViewsKey(view) {
+  return `ar.savedViews.${view}`;
+}
+
+function loadSavedViews(view) {
+  try {
+    const raw = window.localStorage.getItem(savedViewsKey(view));
+    return raw ? JSON.parse(raw) : {};
+  } catch (error) {
+    return {};
+  }
+}
+
+function saveNamedView(view, name) {
+  if (!name) return;
+  const views = loadSavedViews(view);
+  views[name] = JSON.parse(JSON.stringify(listControls[view] || defaultListControls()));
+  try {
+    window.localStorage.setItem(savedViewsKey(view), JSON.stringify(views));
+  } catch (error) { /* storage may be unavailable */ }
+}
+
+function applyNamedView(view, name) {
+  const views = loadSavedViews(view);
+  if (!views[name]) return;
+  const base = defaultListControls();
+  const next = Object.assign(base, views[name]);
+  next.filters = Object.assign({}, views[name].filters || {});
+  listControls[view] = next;
+  persistListControls(view);
+}
+
+// Normalised accessors so the same logic spans task/agent/event/message/evidence rows.
+function listItemStatus(item) {
+  return String(item.status || item.lane || item.state || "").toLowerCase();
+}
+function listItemPriority(item) {
+  return String(item.priority || "").toUpperCase();
+}
+function listItemOwner(item) {
+  return String(item.owner_agent || item.owner || item.actor || item.role || item.from || "").toLowerCase();
+}
+function listItemTaskset(item) {
+  return String(item.task_set_id || item.taskset || "").toLowerCase();
+}
+function listItemTags(item) {
+  const tags = item.labels || item.tags || [];
+  return Array.isArray(tags) ? tags.map((tag) => String(tag).toLowerCase()) : [];
+}
+function listItemDate(item) {
+  return String(item.updated_at || item.last_updated || item.created_at || item.ts || item.generated_at || "");
+}
+function listItemProgress(item) {
+  const pct = numericPct(item.progress_pct);
+  return pct === null ? -1 : pct;
+}
+
+// Build facet option sets directly from the supplied rows (client-side, no server help needed).
+function computeListFacets(items) {
+  const facets = { status: new Set(), priority: new Set(), owner: new Set(), taskset: new Set(), tag: new Set() };
+  (items || []).forEach((item) => {
+    const status = listItemStatus(item);
+    if (status) facets.status.add(status);
+    const priority = listItemPriority(item);
+    if (priority) facets.priority.add(priority);
+    const owner = listItemOwner(item);
+    if (owner) facets.owner.add(owner);
+    const taskset = listItemTaskset(item);
+    if (taskset) facets.taskset.add(taskset);
+    listItemTags(item).forEach((tag) => { if (tag) facets.tag.add(tag); });
+  });
+  const out = {};
+  Object.keys(facets).forEach((key) => { out[key] = Array.from(facets[key]).sort(); });
+  return out;
+}
+
+function listItemMatchesFilters(item, filters, searchText) {
+  if (filters.status && listItemStatus(item) !== filters.status) return false;
+  if (filters.priority && listItemPriority(item) !== filters.priority) return false;
+  if (filters.owner && listItemOwner(item) !== filters.owner) return false;
+  if (filters.taskset && listItemTaskset(item) !== filters.taskset) return false;
+  if (filters.tag && !listItemTags(item).includes(filters.tag)) return false;
+  if (filters.date && !listItemDate(item).startsWith(filters.date)) return false;
+  if (searchText) {
+    if (!JSON.stringify(item).toLowerCase().includes(searchText.toLowerCase())) return false;
+  }
+  return true;
+}
+
+function sortListItems(items, sort) {
+  const copy = items.slice();
+  copy.sort((a, b) => {
+    if (sort === "priority") {
+      const ra = PRIORITY_RANK[listItemPriority(a)] ?? 99;
+      const rb = PRIORITY_RANK[listItemPriority(b)] ?? 99;
+      return ra - rb;
+    }
+    if (sort === "updated") {
+      return listItemDate(b).localeCompare(listItemDate(a));
+    }
+    if (sort === "progress") {
+      return listItemProgress(b) - listItemProgress(a);
+    }
+    return 0;
+  });
+  return copy;
+}
+
+function groupListItems(items, group) {
+  const buckets = new Map();
+  items.forEach((item) => {
+    let key = "ungrouped";
+    if (group === "status") key = listItemStatus(item) || "unknown";
+    else if (group === "owner") key = listItemOwner(item) || "unassigned";
+    else key = listItemTaskset(item) || "unassigned";
+    if (!buckets.has(key)) buckets.set(key, []);
+    buckets.get(key).push(item);
+  });
+  return Array.from(buckets.entries()).map(([key, rows]) => ({ key, rows }));
+}
+
+// Single entry point: returns filtered + sorted + grouped rows for a view.
+function applyListControls(view, items) {
+  const controls = loadListControls(view);
+  const filtered = (items || []).filter((item) => listItemMatchesFilters(item, controls.filters || {}, controls.search));
+  const sorted = sortListItems(filtered, controls.sort);
+  const groups = groupListItems(sorted, controls.group);
+  return { controls, filtered: sorted, groups };
+}
+
+function facetSelectHtml(view, key, label, options, selected) {
+  const opts = [`<option value="">All ${escapeHtml(label.toLowerCase())}</option>`]
+    .concat(options.map((value) => `<option value="${escapeHtml(value)}"${value === selected ? " selected" : ""}>${escapeHtml(value)}</option>`))
+    .join("");
+  return `<label class="list-toolbar-field"><span class="list-toolbar-label">${escapeHtml(label)}</span><select class="list-filter" data-list-view="${escapeHtml(view)}" data-filter-key="${escapeHtml(key)}">${opts}</select></label>`;
+}
+
+// Render the shared toolbar (search + filters + sort + group + density + saved views) into a mount.
+function renderListToolbar(view, items) {
+  const mount = $(`list-toolbar-${view}`);
+  if (!mount) return;
+  const controls = loadListControls(view);
+  const facets = computeListFacets(items);
+  const savedViews = loadSavedViews(view);
+  const sortOpts = LIST_SORT_OPTIONS.map((opt) => `<option value="${opt.value}"${opt.value === controls.sort ? " selected" : ""}>${escapeHtml(opt.label)}</option>`).join("");
+  const groupOpts = LIST_GROUP_OPTIONS.map((opt) => `<option value="${opt.value}"${opt.value === controls.group ? " selected" : ""}>${escapeHtml(opt.label)}</option>`).join("");
+  const densityBtns = LIST_DENSITY_LEVELS.map((level) => `<button type="button" class="list-density-btn${level === controls.density ? " is-active" : ""}" data-list-view="${escapeHtml(view)}" data-density="${level}">${escapeHtml(level)}</button>`).join("");
+  const savedOpts = [`<option value="">Saved views</option>`]
+    .concat(Object.keys(savedViews).map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`))
+    .join("");
+  mount.innerHTML = `
+    <div class="list-toolbar" role="toolbar" aria-label="List controls">
+      <input type="search" class="list-search" data-list-view="${escapeHtml(view)}" placeholder="search" aria-label="Search ${escapeHtml(view)}" value="${escapeHtml(controls.search || "")}">
+      ${facetSelectHtml(view, "status", "Status", facets.status, controls.filters.status || "")}
+      ${facetSelectHtml(view, "priority", "Priority", facets.priority, controls.filters.priority || "")}
+      ${facetSelectHtml(view, "owner", "Owner", facets.owner, controls.filters.owner || "")}
+      ${facetSelectHtml(view, "taskset", "Task set", facets.taskset, controls.filters.taskset || "")}
+      ${facetSelectHtml(view, "tag", "Tag", facets.tag, controls.filters.tag || "")}
+      <label class="list-toolbar-field"><span class="list-toolbar-label">Date</span><input type="text" class="list-filter list-filter-date" data-list-view="${escapeHtml(view)}" data-filter-key="date" placeholder="YYYY-MM-DD" value="${escapeHtml(controls.filters.date || "")}"></label>
+      <label class="list-toolbar-field"><span class="list-toolbar-label">Sort</span><select class="list-sort" data-list-view="${escapeHtml(view)}">${sortOpts}</select></label>
+      <label class="list-toolbar-field"><span class="list-toolbar-label">Group</span><select class="list-group" data-list-view="${escapeHtml(view)}">${groupOpts}</select></label>
+      <div class="list-density" role="group" aria-label="Density"><span class="list-toolbar-label">Density</span>${densityBtns}</div>
+      <label class="list-toolbar-field"><span class="list-toolbar-label">Views</span><select class="list-saved-views" data-list-view="${escapeHtml(view)}">${savedOpts}</select></label>
+      <button type="button" class="list-save-view" data-list-view="${escapeHtml(view)}">Save view</button>
+    </div>`;
+  mount.dataset.density = controls.density;
+}
+
+// Apply density class onto the actual list container so compact/cozy/detail change row height.
+function applyListDensity(view) {
+  const controls = loadListControls(view);
+  const panel = $(`${view}-list`);
+  if (panel) {
+    LIST_DENSITY_LEVELS.forEach((level) => panel.classList.remove(`density-${level}`));
+    panel.classList.add(`density-${controls.density}`);
+  }
+}
+
+// Centralised re-render hook so toolbar changes refresh the owning view.
+function rerenderListView(view) {
+  if (view === "agents") renderAgents();
+  else if (view === "messages") renderMessages();
+  else if (view === "events") renderEvents();
+  else if (view === "evidence") renderEvidence();
+}
+
+// Delegated wiring for every list toolbar (search / filters / sort / group / density / saved views).
+function wireListToolbars() {
+  document.addEventListener("input", (event) => {
+    const search = event.target.closest(".list-search");
+    if (search) {
+      const view = search.dataset.listView;
+      loadListControls(view).search = search.value;
+      persistListControls(view);
+      rerenderListView(view);
+      return;
+    }
+    const dateFilter = event.target.closest(".list-filter-date");
+    if (dateFilter) {
+      const view = dateFilter.dataset.listView;
+      loadListControls(view).filters[dateFilter.dataset.filterKey] = dateFilter.value.trim();
+      persistListControls(view);
+      rerenderListView(view);
+    }
+  });
+  document.addEventListener("change", (event) => {
+    const filter = event.target.closest("select.list-filter");
+    if (filter) {
+      const view = filter.dataset.listView;
+      loadListControls(view).filters[filter.dataset.filterKey] = filter.value;
+      persistListControls(view);
+      rerenderListView(view);
+      return;
+    }
+    const sort = event.target.closest(".list-sort");
+    if (sort) {
+      const view = sort.dataset.listView;
+      loadListControls(view).sort = sort.value;
+      persistListControls(view);
+      rerenderListView(view);
+      return;
+    }
+    const group = event.target.closest(".list-group");
+    if (group) {
+      const view = group.dataset.listView;
+      loadListControls(view).group = group.value;
+      persistListControls(view);
+      rerenderListView(view);
+      return;
+    }
+    const saved = event.target.closest(".list-saved-views");
+    if (saved && saved.value) {
+      const view = saved.dataset.listView;
+      applyNamedView(view, saved.value);
+      rerenderListView(view);
+    }
+  });
+  document.addEventListener("click", (event) => {
+    const density = event.target.closest(".list-density-btn");
+    if (density) {
+      const view = density.dataset.listView;
+      loadListControls(view).density = density.dataset.density;
+      persistListControls(view);
+      rerenderListView(view);
+      return;
+    }
+    const save = event.target.closest(".list-save-view");
+    if (save) {
+      const view = save.dataset.listView;
+      const name = window.prompt ? window.prompt("Name this view") : "";
+      if (name) {
+        saveNamedView(view, name);
+        rerenderListView(view);
+      }
+    }
+  });
+}
+
+// Render grouped rows with group headers using a per-row template fn.
+function renderGroupedList(view, items, rowTemplate, emptyLabel) {
+  const panel = $(`${view}-list`);
+  if (!panel) return;
+  renderListToolbar(view, items);
+  const { groups, filtered } = applyListControls(view, items);
+  if (!filtered.length) {
+    panel.innerHTML = `<div class="empty">${escapeHtml(emptyLabel || "No items")}</div>`;
+    applyListDensity(view);
+    return;
+  }
+  panel.innerHTML = groups.map((group) => {
+    const rows = group.rows.map((item, index) => rowTemplate(item, index)).join("");
+    return `<div class="list-group-block"><div class="list-group-header"><span>${escapeHtml(group.key)}</span><span class="list-group-count">${group.rows.length}</span></div>${rows}</div>`;
+  }).join("");
+  applyListDensity(view);
+}
+
+/* ===== Command palette (Ctrl+K) groundwork ===== */
+const COMMAND_PALETTE_VIEWS = [
+  "board", "work", "meeting", "tasksets", "tsboard", "team", "agents",
+  "messages", "events", "evidence", "planner", "roadmap", "map", "sources", "writes",
+];
+let commandPaletteIndex = 0;
+
+function commandPaletteCommands() {
+  const commands = COMMAND_PALETTE_VIEWS.map((view) => ({
+    id: `view:${view}`,
+    label: `Go to ${view}`,
+    run: () => activateView(view),
+  }));
+  commands.push({ id: "action:refresh", label: "Refresh state", run: loadState });
+  return commands;
+}
+
+function activateView(view) {
+  const tab = document.querySelector(`.tab[data-view="${view}"]`);
+  if (!tab) return;
+  document.querySelectorAll(".tab").forEach((item) => item.classList.remove("is-active"));
+  document.querySelectorAll(".view").forEach((item) => item.classList.remove("is-active"));
+  tab.classList.add("is-active");
+  const node = $(`view-${view}`);
+  if (node) node.classList.add("is-active");
+}
+
+function openCommandPalette() {
+  const palette = $("command-palette");
+  if (!palette) return;
+  palette.hidden = false;
+  commandPaletteIndex = 0;
+  const input = $("command-palette-input");
+  if (input) {
+    input.value = "";
+    input.focus();
+  }
+  renderCommandPalette();
+}
+
+function closeCommandPalette() {
+  const palette = $("command-palette");
+  if (palette) palette.hidden = true;
+}
+
+function paletteIsOpen() {
+  const palette = $("command-palette");
+  return Boolean(palette && !palette.hidden);
+}
+
+function filteredPaletteCommands() {
+  const input = $("command-palette-input");
+  const query = (input ? input.value : "").trim().toLowerCase();
+  const commands = commandPaletteCommands();
+  if (!query) return commands;
+  return commands.filter((cmd) => cmd.label.toLowerCase().includes(query) || cmd.id.toLowerCase().includes(query));
+}
+
+function renderCommandPalette() {
+  const results = $("command-palette-results");
+  if (!results) return;
+  const commands = filteredPaletteCommands();
+  if (commandPaletteIndex >= commands.length) commandPaletteIndex = Math.max(0, commands.length - 1);
+  results.innerHTML = commands.length
+    ? commands.map((cmd, index) => `<div class="command-palette-item${index === commandPaletteIndex ? " is-active" : ""}" role="option" data-command-id="${escapeHtml(cmd.id)}" data-command-index="${index}">${escapeHtml(cmd.label)}</div>`).join("")
+    : `<div class="command-palette-empty">No matching commands</div>`;
+}
+
+function runActivePaletteCommand() {
+  const commands = filteredPaletteCommands();
+  const cmd = commands[commandPaletteIndex];
+  if (cmd) {
+    closeCommandPalette();
+    cmd.run();
+  }
+}
+
+/* ===== Keyboard navigation (j / k / Enter) over list rows ===== */
+function activeListView() {
+  const active = document.querySelector(".view.is-active");
+  if (!active) return null;
+  const view = active.id.replace(/^view-/, "");
+  return ["agents", "messages", "events", "evidence"].includes(view) ? view : null;
+}
+
+function listRowsFor(view) {
+  if (view === "evidence") return Array.from(document.querySelectorAll("#evidence-list .audit-card, #evidence-list .list-row"));
+  return Array.from(document.querySelectorAll(`#${view}-list .list-row, #${view}-list .agent-card, #${view}-list .audit-card`));
+}
+
+function moveListCursor(view, delta) {
+  const rows = listRowsFor(view);
+  if (!rows.length) return;
+  let index = listCursor[view] ?? -1;
+  index = Math.max(0, Math.min(rows.length - 1, index + delta));
+  listCursor[view] = index;
+  rows.forEach((row) => row.classList.remove("is-cursor"));
+  const target = rows[index];
+  if (target) {
+    target.classList.add("is-cursor");
+    target.setAttribute("tabindex", "-1");
+    target.focus({ preventScroll: false });
+    target.scrollIntoView({ block: "nearest" });
+  }
+}
+
+function activateListCursor(view) {
+  const rows = listRowsFor(view);
+  const index = listCursor[view] ?? -1;
+  const target = rows[index];
+  if (target) target.click();
+}
+
+function handleListKeyboardNav(event) {
+  if (paletteIsOpen()) return;
+  const tag = (event.target.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "textarea" || tag === "select") return;
+  const view = activeListView();
+  if (!view) return;
+  if (event.key === "j") {
+    event.preventDefault();
+    moveListCursor(view, 1);
+  } else if (event.key === "k") {
+    event.preventDefault();
+    moveListCursor(view, -1);
+  } else if (event.key === "Enter") {
+    activateListCursor(view);
+  }
 }
 
 function renderDashboard() {
@@ -2988,11 +3657,8 @@ function agentProgressLabel(agent) {
   return pct === null ? "~" : `${pct}%`;
 }
 
-function renderAgents() {
-  renderMultipaneAssurance();
-  renderTaskSets();
-  const agents = runtimeState.agents || [];
-  $("agents-list").innerHTML = agents.length ? agents.map((agent) => `
+function agentCardTemplate(agent) {
+  return `
     <article class="agent-card ${agent.online ? "ok" : "warn"}">
       <div class="agent-card-header">
         <b>${escapeHtml(agent.display_name || agent.role || "agent")}</b>
@@ -3010,19 +3676,30 @@ function renderAgents() {
       <span class="agent-status-text">${escapeHtml(agent.status_text || agent.phase || "working")}</span>
       <code>${escapeHtml(agent.source_path || agent.worktree_path || "")}</code>
     </article>
-  `).join("") : `<div class="empty">No active sessions</div>`;
+  `;
 }
 
-function renderMessages() {
-  const messages = runtimeState.messages || [];
-  $("messages-list").innerHTML = messages.length ? messages.map((message) => `
+function renderAgents() {
+  renderMultipaneAssurance();
+  renderTaskSets();
+  const agents = runtimeState.agents || [];
+  renderGroupedList("agents", agents, agentCardTemplate, "No active sessions");
+}
+
+function messageRowTemplate(message) {
+  return `
     <article class="list-row">
       <b>${escapeHtml(message.id)}</b>
       <span>${escapeHtml(message.from)} -> ${escapeHtml(message.to)} / ${escapeHtml(message.status)}</span>
       <p>${escapeHtml(message.body).slice(0, 220)}</p>
       <code>${escapeHtml(message.source_path)}</code>
     </article>
-  `).join("") : `<div class="empty">No messages</div>`;
+  `;
+}
+
+function renderMessages() {
+  const messages = runtimeState.messages || [];
+  renderGroupedList("messages", messages, messageRowTemplate, "No messages");
 }
 
 function filterEvents(events) {
@@ -3057,9 +3734,8 @@ function renderAuditMeta(content) {
   return `<div class="audit-card-meta" aria-label="Audit metadata">${content}</div>`;
 }
 
-function renderEvents() {
-  const events = filterEvents(runtimeState.events || []);
-  $("events-list").innerHTML = events.length ? events.slice(-80).reverse().map((event) => `
+function eventCardTemplate(event) {
+  return `
     <article class="audit-card event-card ${auditToneClass(event)}">
       <div class="audit-card-header">
         <b>${escapeHtml(event.type || event.event || event.id || "event")}</b>
@@ -3076,7 +3752,13 @@ function renderEvents() {
       ${event.error || event.message ? `<p>${escapeHtml(event.error || event.message)}</p>` : ""}
       <code>${escapeHtml(event.id || event.created_at || event.ts || "")}</code>
     </article>
-  `).join("") : `<div class="empty">No events</div>`;
+  `;
+}
+
+function renderEvents() {
+  // Legacy filter-row narrows first, then the shared list toolbar applies filter/sort/group/density.
+  const events = filterEvents(runtimeState.events || []).slice(-80).reverse();
+  renderGroupedList("events", events, eventCardTemplate, "No events");
 }
 
 function renderEvidence() {
@@ -4272,14 +4954,61 @@ function boardViewActive() {
 }
 
 document.addEventListener("keydown", (event) => {
+  // Command palette toggle (Ctrl+K / Cmd+K).
+  if ((event.ctrlKey || event.metaKey) && (event.key === "k" || event.key === "K")) {
+    event.preventDefault();
+    if (paletteIsOpen()) closeCommandPalette();
+    else openCommandPalette();
+    return;
+  }
+  if (paletteIsOpen()) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeCommandPalette();
+    } else if (event.key === "ArrowDown") {
+      event.preventDefault();
+      commandPaletteIndex += 1;
+      renderCommandPalette();
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      commandPaletteIndex = Math.max(0, commandPaletteIndex - 1);
+      renderCommandPalette();
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      runActivePaletteCommand();
+    }
+    return;
+  }
   if (event.key === "Escape" && peekAnchorId) {
     hidePeek();
     return;
   }
+  // j / k / Enter list-row navigation on list views.
+  handleListKeyboardNav(event);
   if (!boardViewActive()) return;
   handleBoardKeyboardDnd(event);
 });
 document.addEventListener("scroll", hidePeek, true);
+
+// Command palette interaction wiring.
+wireListToolbars();
+(() => {
+  const palette = $("command-palette");
+  if (!palette) return;
+  const input = $("command-palette-input");
+  if (input) input.addEventListener("input", () => { commandPaletteIndex = 0; renderCommandPalette(); });
+  palette.addEventListener("click", (event) => {
+    if (event.target.dataset.commandDismiss) {
+      closeCommandPalette();
+      return;
+    }
+    const item = event.target.closest(".command-palette-item");
+    if (item) {
+      commandPaletteIndex = Number(item.dataset.commandIndex) || 0;
+      runActivePaletteCommand();
+    }
+  });
+})();
 
 $("refresh-button").addEventListener("click", loadState);
 ["event-filter-type", "event-filter-agent", "event-filter-task", "event-filter-goal", "event-filter-search"].forEach((id) => {
