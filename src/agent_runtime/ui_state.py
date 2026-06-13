@@ -1301,36 +1301,182 @@ def build_live_map(
     }
 
 
+# --- State-machine interactive viewer (TASK-AR-336) ------------------------
+# The lifecycles in agents/project/STATE-MACHINES.yml are the single source of
+# truth (SSoT) for task / claim / role state machines. This adapter parses that
+# YAML into a render-ready node+edge graph (state nodes carry the declared
+# signal/score; transition edges carry from/to/trigger and a wildcard flag for
+# ``from: "*"``) and derives, per task, the current state + the transition path
+# the task has traversed -- computed strictly from the append-only event log.
+# Nothing here mutates the YAML or any runtime state; the viewer is read-only.
+
+STATE_MACHINES_REL = "agents/project/STATE-MACHINES.yml"
+STATE_MACHINES_SCHEMA = "agent-runtime-state-machines-view/v1"
+# Declared signal -> existing semantic token name (defined in BOTH theme blocks
+# of the console stylesheet). Used by the front-end as var(--<token>), so no raw
+# colors leak into the rendered graph. Anything unknown falls back to "subtle".
+STATE_SIGNAL_TOKENS = {
+    "pass": "success",
+    "watch": "warning",
+    "block": "danger",
+}
+# Wildcard source used by STATE-MACHINES.yml transitions (``from: "*"``): the
+# transition can fire from ANY state of the machine.
+_STATE_WILDCARD = "*"
+# Event-name (substring, lowercased) -> task-machine state. The event log is
+# append-only and heterogeneous, so we match on tolerant substrings and map an
+# event to the lifecycle state it implies. Order is longest-first at match time.
+_TASK_EVENT_STATE_MARKERS: tuple[tuple[str, str], ...] = (
+    ("archiv", "archived"),
+    ("complet", "completed"),
+    ("done", "completed"),
+    ("verif", "completed"),
+    ("block", "blocked"),
+    ("blocker", "blocked"),
+    ("claim", "in_progress"),
+    ("start", "in_progress"),
+    ("progress", "in_progress"),
+    ("assign", "in_progress"),
+    ("resume", "in_progress"),
+    ("plan", "planned"),
+    ("creat", "planned"),
+    ("intake", "planned"),
+)
+
+
 def _parse_state_machines_text(text: str) -> list[dict[str, Any]]:
+    """Parse the STATE-MACHINES.yml ``machines:`` list into structured records.
+
+    Each machine keeps the legacy ``states`` list of ids (consumed by the live
+    map summary) plus a structured ``state_defs`` list (id/signal/score) and a
+    ``transitions`` list (from/to/trigger). The shape mirrors the YAML so the
+    viewer can render the lifecycle without trusting any derived state.
+    """
     machines: list[dict[str, Any]] = []
     current: dict[str, Any] | None = None
-    in_states = False
+    # section is one of: None, "states", "transitions".
+    section: str | None = None
+    state_entry: dict[str, Any] | None = None
+    transition_entry: dict[str, Any] | None = None
+
+    def _flush_state() -> None:
+        nonlocal state_entry
+        if current is not None and state_entry is not None and state_entry.get("id"):
+            current["state_defs"].append(state_entry)
+            current["states"].append(state_entry["id"])
+        state_entry = None
+
+    def _flush_transition() -> None:
+        nonlocal transition_entry
+        if current is not None and transition_entry is not None and transition_entry.get("from") and transition_entry.get("to"):
+            current["transitions"].append(transition_entry)
+        transition_entry = None
+
+    def _flush_machine() -> None:
+        nonlocal current
+        _flush_state()
+        _flush_transition()
+        if current is not None:
+            machines.append(current)
+        current = None
+
     for raw in text.splitlines():
         line = raw.rstrip()
         stripped = line.strip()
         if line.startswith("  - id: "):
-            if current:
-                machines.append(current)
-            current = {"id": stripped.partition(":")[2].strip(), "states": []}
-            in_states = False
+            _flush_machine()
+            current = {"id": stripped.partition(":")[2].strip(), "states": [], "state_defs": [], "transitions": []}
+            section = None
             continue
         if current is None:
             continue
         if line.startswith("    scope: "):
+            _flush_state()
+            _flush_transition()
             current["scope"] = stripped.partition(":")[2].strip()
         elif line.startswith("    owner: "):
+            _flush_state()
+            _flush_transition()
             current["owner"] = stripped.partition(":")[2].strip()
         elif line.startswith("    initial: "):
+            _flush_state()
+            _flush_transition()
             current["initial"] = stripped.partition(":")[2].strip()
         elif line.startswith("    states:"):
-            in_states = True
-        elif in_states and line.startswith("      - id: "):
-            current.setdefault("states", []).append(stripped.partition(":")[2].strip())
+            _flush_state()
+            _flush_transition()
+            section = "states"
         elif line.startswith("    transitions:"):
-            in_states = False
-    if current:
-        machines.append(current)
+            _flush_state()
+            _flush_transition()
+            section = "transitions"
+        elif section == "states" and line.startswith("      - id: "):
+            _flush_state()
+            state_entry = {"id": stripped.partition(":")[2].strip().strip("\"'")}
+        elif section == "states" and state_entry is not None and line.startswith("        signal: "):
+            state_entry["signal"] = stripped.partition(":")[2].strip().strip("\"'")
+        elif section == "states" and state_entry is not None and line.startswith("        score: "):
+            try:
+                state_entry["score"] = int(stripped.partition(":")[2].strip())
+            except ValueError:
+                state_entry["score"] = None
+        elif section == "transitions" and line.startswith("      - from: "):
+            _flush_transition()
+            transition_entry = {"from": stripped.partition(":")[2].strip().strip("\"'")}
+        elif section == "transitions" and transition_entry is not None and line.startswith("        to: "):
+            transition_entry["to"] = stripped.partition(":")[2].strip().strip("\"'")
+        elif section == "transitions" and transition_entry is not None and line.startswith("        trigger: "):
+            transition_entry["trigger"] = stripped.partition(":")[2].strip().strip("\"'")
+    _flush_machine()
     return machines
+
+
+def _machine_graph(machine: dict[str, Any]) -> dict[str, Any]:
+    """Build the render-ready node + edge graph for one parsed machine.
+
+    State nodes carry the declared signal/score plus a stable signal token and a
+    flag marking the initial state. Transition edges carry from/to/trigger; a
+    ``from: "*"`` edge is marked ``wildcard`` and expanded to per-state target
+    hints so the front-end can highlight "from any state" transitions.
+    """
+    initial = str(machine.get("initial") or "").strip()
+    defs = machine.get("state_defs") or [{"id": sid} for sid in machine.get("states") or []]
+    known_ids = [str(entry.get("id")) for entry in defs if entry.get("id")]
+    nodes: list[dict[str, Any]] = []
+    for entry in defs:
+        sid = str(entry.get("id") or "").strip()
+        if not sid:
+            continue
+        signal = str(entry.get("signal") or "").strip()
+        nodes.append(
+            {
+                "id": sid,
+                "signal": signal or None,
+                "signal_token": STATE_SIGNAL_TOKENS.get(signal, "subtle"),
+                "score": entry.get("score"),
+                "is_initial": sid == initial,
+            }
+        )
+    edges: list[dict[str, Any]] = []
+    for index, transition in enumerate(machine.get("transitions") or []):
+        frm = str(transition.get("from") or "").strip()
+        to = str(transition.get("to") or "").strip()
+        if not frm or not to:
+            continue
+        wildcard = frm == _STATE_WILDCARD
+        edges.append(
+            {
+                "id": f"{machine.get('id')}:{frm}->{to}:{index}",
+                "from": frm,
+                "to": to,
+                "trigger": str(transition.get("trigger") or "").strip() or None,
+                "wildcard": wildcard,
+                # For a wildcard edge the concrete sources are every state but
+                # the target itself; this lets the viewer fan the edge out.
+                "wildcard_sources": [sid for sid in known_ids if sid != to] if wildcard else [],
+            }
+        )
+    return {"nodes": nodes, "edges": edges}
 
 
 def _observed_machine_state(machine_id: str, tasks: list[dict[str, Any]], agents: list[dict[str, Any]], fallback: str | None) -> tuple[str | None, dict[str, int]]:
@@ -1353,7 +1499,154 @@ def _observed_machine_state(machine_id: str, tasks: list[dict[str, Any]], agents
     return fallback, counts
 
 
-def load_state_machines(root: Path, tasks: list[dict[str, Any]], agents: list[dict[str, Any]], now: str) -> list[dict[str, Any]]:
+def _task_state_from_status(status: str, known_ids: set[str]) -> str | None:
+    """Map a task's stored status onto a state id of the task machine."""
+    normalized = (status or "").strip().lower()
+    if not normalized:
+        return None
+    if normalized in known_ids:
+        return normalized
+    alias = {
+        "active": "in_progress",
+        "claimed": "in_progress",
+        "working": "in_progress",
+        "assigned": "in_progress",
+        "review": "in_progress",
+        "waiting_review": "in_progress",
+        "ready": "planned",
+        "hold": "blocked",
+        "보류": "blocked",
+        "진행 중": "in_progress",
+        "대기": "planned",
+        "done": "completed",
+        "released": "completed",
+        "완료": "completed",
+    }
+    mapped = alias.get(normalized)
+    return mapped if mapped in known_ids else (mapped or None)
+
+
+def _event_state_marker(event_name: str, known_ids: set[str]) -> str | None:
+    """Map an append-only event name onto a task-machine state id (or None)."""
+    name = str(event_name or "").strip().lower()
+    if not name:
+        return None
+    # Longest marker key first so e.g. "blocker" wins over "block" only when it
+    # would change the outcome; both map to the same state here, but ordering
+    # keeps the match deterministic.
+    for marker, state in sorted(_TASK_EVENT_STATE_MARKERS, key=lambda item: -len(item[0])):
+        if marker in name and state in known_ids:
+            return state
+    return None
+
+
+def _resolve_transition_path(machine: dict[str, Any], state_sequence: list[str]) -> list[dict[str, Any]]:
+    """Resolve consecutive distinct states into the transition edges traversed.
+
+    For each (prev -> curr) hop we prefer an explicit edge (prev -> curr); if
+    none exists we fall back to a wildcard edge (``from: "*"`` -> curr). Edges
+    are returned with the edge id so the viewer can highlight them in place.
+    """
+    transitions = machine.get("transitions") or []
+    explicit: dict[tuple[str, str], int] = {}
+    wildcard_to: dict[str, int] = {}
+    for index, transition in enumerate(transitions):
+        frm = str(transition.get("from") or "").strip()
+        to = str(transition.get("to") or "").strip()
+        if not frm or not to:
+            continue
+        if frm == _STATE_WILDCARD:
+            wildcard_to.setdefault(to, index)
+        else:
+            explicit.setdefault((frm, to), index)
+    path: list[dict[str, Any]] = []
+    machine_id = machine.get("id")
+    for prev, curr in zip(state_sequence, state_sequence[1:]):
+        if prev == curr:
+            continue
+        index = explicit.get((prev, curr))
+        wildcard = False
+        if index is None:
+            index = wildcard_to.get(curr)
+            wildcard = index is not None
+        if index is None:
+            continue
+        transition = transitions[index]
+        frm = str(transition.get("from") or "").strip()
+        path.append(
+            {
+                "id": f"{machine_id}:{frm}->{curr}:{index}",
+                "from": prev,
+                "to": curr,
+                "trigger": str(transition.get("trigger") or "").strip() or None,
+                "wildcard": wildcard,
+            }
+        )
+    return path
+
+
+def derive_task_state_paths(machine: dict[str, Any], tasks: list[dict[str, Any]], events: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Per-task current state + traversed transition path for the task machine.
+
+    The state SEQUENCE is read from the append-only event log (ordered by ts):
+    every event that maps to a lifecycle state contributes a step. The task's
+    stored status seeds the start (initial) and is appended as the authoritative
+    current state. Transitions are then resolved against the machine definition.
+    Returns a mapping keyed by task id; only tasks with a resolvable current
+    state are included.
+    """
+    known_ids = {str(entry.get("id")) for entry in (machine.get("state_defs") or []) if entry.get("id")}
+    known_ids.update(str(sid) for sid in (machine.get("states") or []))
+    initial = str(machine.get("initial") or "").strip() or None
+
+    # Bucket events by task id, ordered by timestamp (stable, append-only log).
+    events_by_task: dict[str, list[dict[str, Any]]] = {}
+    for event in events:
+        task_id = str(event.get("task_id") or "").strip()
+        if not task_id:
+            continue
+        events_by_task.setdefault(task_id, []).append(event)
+
+    result: dict[str, dict[str, Any]] = {}
+    for task in tasks:
+        task_id = str(task.get("id") or "").strip()
+        if not task_id:
+            continue
+        ordered = sorted(events_by_task.get(task_id, []), key=lambda ev: str(ev.get("created_at") or ev.get("ts") or ""))
+        sequence: list[str] = []
+        if initial and initial in known_ids:
+            sequence.append(initial)
+        for event in ordered:
+            state = _event_state_marker(event.get("event") or event.get("type"), known_ids)
+            if state and (not sequence or sequence[-1] != state):
+                sequence.append(state)
+        current = _task_state_from_status(str(task.get("status") or ""), known_ids)
+        if current and (not sequence or sequence[-1] != current):
+            sequence.append(current)
+        if not current:
+            current = sequence[-1] if sequence else initial
+        if not current:
+            continue
+        result[task_id] = {
+            "task_id": task_id,
+            "title": task.get("title"),
+            "current_state": current,
+            "state_sequence": sequence,
+            "transition_path": _resolve_transition_path(machine, sequence),
+            "source_path": task.get("source_path"),
+        }
+    return result
+
+
+def load_state_machines(root: Path, tasks: list[dict[str, Any]], agents: list[dict[str, Any]], now: str, events: list[dict[str, Any]] | None = None) -> list[dict[str, Any]]:
+    """Read STATE-MACHINES.yml into render-ready machine records (read-only).
+
+    Every machine carries the parsed lifecycle (state nodes + transition edges)
+    so the interactive viewer can render it directly. The ``task`` machine is
+    additionally annotated with a per-task ``task_states`` map (current state +
+    event-log-derived traversed transition path), keyed by task id, so the
+    "view in state machine" deep-link from a task can highlight its position.
+    """
     path = root / "agents" / "project" / "STATE-MACHINES.yml"
     if not path.exists():
         return []
@@ -1361,10 +1654,20 @@ def load_state_machines(root: Path, tasks: list[dict[str, Any]], agents: list[di
         machines = _parse_state_machines_text(path.read_text(encoding="utf-8"))
     except OSError:
         return []
+    events = events or []
     for machine in machines:
-        current, counts = _observed_machine_state(str(machine.get("id") or ""), tasks, agents, machine.get("initial"))
+        machine_id = str(machine.get("id") or "")
+        current, counts = _observed_machine_state(machine_id, tasks, agents, machine.get("initial"))
+        graph = _machine_graph(machine)
         machine["current_state"] = current
         machine["observed_counts"] = counts
+        machine["state_nodes"] = graph["nodes"]
+        machine["transition_edges"] = graph["edges"]
+        machine["totals"] = {"states": len(graph["nodes"]), "transitions": len(graph["edges"])}
+        # Per-task traversed-path highlighting is meaningful for the backlog task
+        # lifecycle; other machines render the graph without per-task overlays.
+        if machine_id == "task":
+            machine["task_states"] = derive_task_state_paths(machine, tasks, events)
         machine["source_path"] = _rel(root, path)
         machine["source_kind"] = "state_machine_yaml"
         machine["source"] = _source_metadata(root, path, "state_machine_yaml", now)
@@ -4538,7 +4841,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     enrich_tasks_with_attachments(tasks, attachments)
     replay = build_replay(events, messages)
     graph = build_graph(tasks, agents, messages, events)
-    state_machines = load_state_machines(root_path, tasks, agents, generated_at)
+    state_machines = load_state_machines(root_path, tasks, agents, generated_at, events)
     roadmap = load_roadmap(root_path, generated_at)
     planning = _collect_planning(root_path)
     collaboration = build_collaboration(pane_events)

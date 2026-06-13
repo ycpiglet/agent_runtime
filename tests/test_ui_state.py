@@ -1958,3 +1958,220 @@ def test_ui_state_run_search_query_is_tokenization_safe(tmp_path):
     for hostile in ['<script>alert(1)</script>', 'a"b)(*&^', 'type:task ".*"', '한국어 검색', '   ']:
         results = ui_state.run_search(index, hostile)
         assert isinstance(results, list)
+
+
+# ----- TASK-AR-336: interactive state-machine viewer (data layer) -----
+
+# A trimmed STATE-MACHINES.yml that still carries the three lifecycle machines
+# named in the task (task / claim / role), full state metadata and a wildcard
+# transition, so the viewer derivation can be exercised end to end.
+_STATE_MACHINES_FIXTURE = "\n".join(
+    [
+        "schema: agent-runtime-state-machines/v1",
+        "version: 1",
+        "machines:",
+        "  - id: task",
+        "    scope: backlog_task",
+        "    owner: lead-engineer",
+        "    initial: planned",
+        "    states:",
+        "      - id: planned",
+        "        signal: watch",
+        "        score: 70",
+        "      - id: in_progress",
+        "        signal: watch",
+        "        score: 80",
+        "      - id: blocked",
+        "        signal: block",
+        "        score: 30",
+        "      - id: completed",
+        "        signal: pass",
+        "        score: 95",
+        "      - id: archived",
+        "        signal: pass",
+        "        score: 100",
+        "    transitions:",
+        "      - from: planned",
+        "        to: in_progress",
+        "        trigger: agent_claimed",
+        "      - from: in_progress",
+        "        to: blocked",
+        "        trigger: blocker_found",
+        "      - from: in_progress",
+        "        to: completed",
+        "        trigger: done_criteria_met",
+        "      - from: completed",
+        "        to: archived",
+        "        trigger: evidence_linked",
+        "  - id: task_claim",
+        "    scope: parallel_agent_task_lease",
+        "    owner: agent-runtime-core",
+        "    initial: unclaimed",
+        "    states:",
+        "      - id: unclaimed",
+        "        signal: pass",
+        "        score: 90",
+        "      - id: claimed",
+        "        signal: watch",
+        "        score: 75",
+        "      - id: stale",
+        "        signal: watch",
+        "        score: 55",
+        "    transitions:",
+        "      - from: unclaimed",
+        "        to: claimed",
+        "        trigger: task_claim_record_written",
+        '      - from: "*"',
+        "        to: stale",
+        "        trigger: heartbeat_expired",
+        "  - id: agent_job",
+        "    scope: agent_execution",
+        "    owner: agent-runtime-core",
+        "    initial: idle",
+        "    states:",
+        "      - id: idle",
+        "        signal: pass",
+        "        score: 90",
+        "      - id: working",
+        "        signal: watch",
+        "        score: 80",
+        "    transitions:",
+        "      - from: idle",
+        "        to: working",
+        "        trigger: scope_clear",
+    ]
+)
+
+
+def _started_then_blocked_events():
+    return [
+        {"task_id": "TASK-AR-900", "event": "task_started", "ts": "2026-06-12T10:00:00+09:00"},
+        {"task_id": "TASK-AR-900", "event": "task_blocked", "ts": "2026-06-12T11:00:00+09:00"},
+        {"task_id": "TASK-AR-900", "event": "task_unblocked_resume", "ts": "2026-06-12T12:00:00+09:00"},
+    ]
+
+
+def test_state_machines_every_defined_machine_renders_nodes_and_edges(tmp_path):
+    # Acceptance: every machine defined in STATE-MACHINES.yml renders nodes+edges.
+    _write(tmp_path / "agents" / "project" / "STATE-MACHINES.yml", _STATE_MACHINES_FIXTURE)
+    machines = ui_state.load_state_machines(tmp_path, [], [], now="2026-06-13T00:00:00+09:00", events=[])
+    assert {m["id"] for m in machines} == {"task", "task_claim", "agent_job"}
+    for machine in machines:
+        assert machine["state_nodes"], f"{machine['id']} must have state nodes"
+        assert machine["transition_edges"], f"{machine['id']} must have transition edges"
+        assert machine["totals"]["states"] == len(machine["state_nodes"])
+        assert machine["totals"]["transitions"] == len(machine["transition_edges"])
+        # The declared initial is flagged on exactly one node.
+        initial_nodes = [n for n in machine["state_nodes"] if n["is_initial"]]
+        assert len(initial_nodes) == 1
+        assert initial_nodes[0]["id"] == machine["initial"]
+
+
+def test_state_machines_canonical_file_all_machines_render(tmp_path):
+    # Render the SHIPPED STATE-MACHINES.yml (SSoT) so a new machine added there
+    # is guaranteed to render without code changes.
+    repo_yaml = Path(__file__).resolve().parents[1] / "agents" / "project" / "STATE-MACHINES.yml"
+    _write(tmp_path / "agents" / "project" / "STATE-MACHINES.yml", repo_yaml.read_text(encoding="utf-8"))
+    machines = ui_state.load_state_machines(tmp_path, [], [], now="2026-06-13T00:00:00+09:00", events=[])
+    assert len(machines) >= 3
+    for machine in machines:
+        assert machine["state_nodes"], f"{machine['id']} renders no states"
+        assert machine["transition_edges"], f"{machine['id']} renders no transitions"
+
+
+def test_state_machines_state_nodes_carry_signal_token_and_score(tmp_path):
+    _write(tmp_path / "agents" / "project" / "STATE-MACHINES.yml", _STATE_MACHINES_FIXTURE)
+    machines = ui_state.load_state_machines(tmp_path, [], [], now="2026-06-13T00:00:00+09:00", events=[])
+    task = next(m for m in machines if m["id"] == "task")
+    by_id = {n["id"]: n for n in task["state_nodes"]}
+    assert by_id["completed"]["signal"] == "pass"
+    assert by_id["completed"]["signal_token"] == "success"
+    assert by_id["completed"]["score"] == 95
+    assert by_id["blocked"]["signal_token"] == "danger"
+    assert by_id["planned"]["signal_token"] == "warning"
+
+
+def test_state_machines_wildcard_transition_is_flagged_and_expanded(tmp_path):
+    _write(tmp_path / "agents" / "project" / "STATE-MACHINES.yml", _STATE_MACHINES_FIXTURE)
+    machines = ui_state.load_state_machines(tmp_path, [], [], now="2026-06-13T00:00:00+09:00", events=[])
+    claim = next(m for m in machines if m["id"] == "task_claim")
+    wildcard_edges = [e for e in claim["transition_edges"] if e["wildcard"]]
+    assert len(wildcard_edges) == 1
+    edge = wildcard_edges[0]
+    assert edge["to"] == "stale"
+    assert edge["from"] == "*"
+    # Wildcard sources are every state except the target itself.
+    assert "stale" not in edge["wildcard_sources"]
+    assert set(edge["wildcard_sources"]) == {"unclaimed", "claimed"}
+
+
+def test_state_machines_task_current_state_identified_in_graph(tmp_path):
+    # Acceptance: an arbitrary task's current state is identifiable in the graph.
+    _write(tmp_path / "agents" / "project" / "STATE-MACHINES.yml", _STATE_MACHINES_FIXTURE)
+    tasks = [{"id": "TASK-AR-900", "status": "in_progress", "title": "demo", "source_path": "x.md"}]
+    machines = ui_state.load_state_machines(tmp_path, tasks, [], now="2026-06-13T00:00:00+09:00", events=[])
+    task = next(m for m in machines if m["id"] == "task")
+    assert "TASK-AR-900" in task["task_states"]
+    info = task["task_states"]["TASK-AR-900"]
+    assert info["current_state"] == "in_progress"
+    # The current state is a real node id in the rendered graph.
+    assert info["current_state"] in {n["id"] for n in task["state_nodes"]}
+
+
+def test_state_machines_traversed_path_derived_from_event_log(tmp_path):
+    _write(tmp_path / "agents" / "project" / "STATE-MACHINES.yml", _STATE_MACHINES_FIXTURE)
+    tasks = [{"id": "TASK-AR-900", "status": "in_progress", "title": "demo", "source_path": "x.md"}]
+    machines = ui_state.load_state_machines(
+        tmp_path, tasks, [], now="2026-06-13T00:00:00+09:00", events=_started_then_blocked_events()
+    )
+    task = next(m for m in machines if m["id"] == "task")
+    info = task["task_states"]["TASK-AR-900"]
+    # Event log: started -> blocked -> resumed; status seeds in_progress current.
+    assert info["state_sequence"][0] == "planned"  # initial seed
+    assert "blocked" in info["state_sequence"]
+    assert info["current_state"] == "in_progress"
+    # The traversed transition path references real edge ids from the graph.
+    edge_ids = {e["id"] for e in task["transition_edges"]}
+    path_ids = [hop["id"] for hop in info["transition_path"]]
+    assert path_ids, "expected a non-empty traversed path"
+    for hop in info["transition_path"]:
+        # Either an explicit edge in the graph or a wildcard fallback edge id.
+        assert hop["id"] in edge_ids or hop["wildcard"]
+    # The planned->in_progress claim hop is the first traversal.
+    assert info["transition_path"][0]["from"] == "planned"
+    assert info["transition_path"][0]["to"] == "in_progress"
+
+
+def test_state_machines_missing_file_returns_empty_no_crash(tmp_path):
+    # Graceful when STATE-MACHINES.yml is missing entirely.
+    machines = ui_state.load_state_machines(tmp_path, [], [], now="2026-06-13T00:00:00+09:00", events=[])
+    assert machines == []
+    payload = ui_state.build_resource(tmp_path, "state_machines", now="2026-06-13T00:00:00+09:00")
+    assert payload["resource"] == "state_machines"
+    assert payload["items"] == []
+
+
+def test_state_machines_empty_file_returns_empty_no_crash(tmp_path):
+    # Graceful when the file exists but defines no machines.
+    _write(tmp_path / "agents" / "project" / "STATE-MACHINES.yml", "schema: x\nversion: 1\nmachines:\n")
+    machines = ui_state.load_state_machines(tmp_path, [], [], now="2026-06-13T00:00:00+09:00", events=[])
+    assert machines == []
+
+
+def test_state_machines_build_state_wires_events_into_task_states(tmp_path):
+    # End-to-end through build_state: the task machine carries per-task overlays
+    # derived from the event log without an explicit events argument.
+    _write(tmp_path / "agents" / "project" / "STATE-MACHINES.yml", _STATE_MACHINES_FIXTURE)
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-900-demo.md",
+        _task_text("TASK-AR-900", status="in_progress"),
+    )
+    _write(
+        tmp_path / "agents" / "runtime" / "events" / "lead-engineer-2026-06-12.jsonl",
+        "\n".join(json.dumps(ev) for ev in _started_then_blocked_events()) + "\n",
+    )
+    state = ui_state.build_state(tmp_path, now="2026-06-13T00:00:00+09:00")
+    task = next(m for m in state["state_machines"] if m["id"] == "task")
+    assert "TASK-AR-900" in task["task_states"]
+    assert task["task_states"]["TASK-AR-900"]["current_state"] == "in_progress"
+    assert any(hop["to"] == "blocked" for hop in task["task_states"]["TASK-AR-900"]["transition_path"])

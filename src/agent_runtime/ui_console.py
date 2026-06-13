@@ -149,6 +149,9 @@ HTML = """<!doctype html>
           <button class="sidebar-link" type="button" role="tab" data-view="evidence" data-route="records/evidence" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9745;</span><span class="sidebar-label">Evidence</span>
           </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="statemachines" data-route="records/state-machines" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9881;</span><span class="sidebar-label">State Machines</span>
+          </button>
           <button class="sidebar-link" type="button" role="tab" data-view="sources" data-route="records/sources" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Sources</span>
           </button>
@@ -530,6 +533,29 @@ HTML = """<!doctype html>
             </section>
           </div>
         </div>
+        <div id="view-statemachines" class="view">
+          <section class="state-machine-viewer" aria-label="State machine viewer">
+            <header class="state-machine-header">
+              <h2>State Machines</h2>
+              <p class="state-machine-hint">Read-only lifecycle viewer. The YAML at <code>agents/project/STATE-MACHINES.yml</code> is the source of truth. Pick a machine to render its states and transitions; pick a task to highlight its current state and the path it has traversed (from the event log).</p>
+              <div class="state-machine-toolbar">
+                <label class="state-machine-field">
+                  <span class="state-machine-field-label">Machine</span>
+                  <select id="state-machine-select" aria-label="State machine"></select>
+                </label>
+                <label class="state-machine-field" id="state-machine-task-field" hidden>
+                  <span class="state-machine-field-label">Highlight task</span>
+                  <select id="state-machine-task-select" aria-label="Highlight task in state machine"></select>
+                </label>
+              </div>
+              <p id="state-machine-summary" class="state-machine-summary" role="status" aria-live="polite"></p>
+            </header>
+            <div class="state-machine-stage">
+              <svg id="state-machine-svg" class="state-machine-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label="State machine graph"></svg>
+            </div>
+            <ul id="state-machine-legend" class="state-machine-legend" aria-label="State machine legend"></ul>
+          </section>
+        </div>
         <div id="view-sources" class="view">
           <div id="sources-list" class="list-panel"></div>
         </div>
@@ -740,6 +766,9 @@ CSS = """/*
   /* Live map pulse highlight (TASK-AR-326) */
   --pulse: var(--primary);
   --pulse-soft: var(--primary-soft-strong);
+  /* State machine viewer highlights (TASK-AR-336) */
+  --sm-current: var(--primary);
+  --sm-path: var(--violet);
 }
 [data-theme="dark"] {
   color-scheme: dark;
@@ -817,6 +846,9 @@ CSS = """/*
   /* Live map pulse highlight (TASK-AR-326) */
   --pulse: var(--primary-hover);
   --pulse-soft: var(--primary-soft-strong);
+  /* State machine viewer highlights (TASK-AR-336) */
+  --sm-current: var(--primary-hover);
+  --sm-path: var(--violet);
 }
 * { box-sizing: border-box; }
 html { background: var(--canvas); }
@@ -3732,6 +3764,121 @@ pre {
 .dep-graph-legend .legend-parent { background: var(--subtle); }
 .dep-graph-legend .legend-cycle { background: var(--danger); }
 
+/* ===== State machine interactive viewer (TASK-AR-336) ===== */
+.state-machine-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.state-machine-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 4px 0 0;
+}
+.state-machine-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  margin-top: 8px;
+}
+.state-machine-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.state-machine-field-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.state-machine-field select {
+  background: var(--panel-strong);
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  color: var(--ink);
+  padding: 5px 8px;
+  font-size: 12px;
+  min-width: 180px;
+}
+.state-machine-summary {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+}
+.state-machine-stage {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+.state-machine-svg {
+  display: block;
+  width: 100%;
+  height: 460px;
+}
+.state-machine-edge {
+  stroke: var(--line-strong);
+  stroke-width: 1.5;
+  fill: none;
+  opacity: 0.6;
+}
+.state-machine-edge.is-wildcard { stroke-dasharray: 5 4; opacity: 0.4; }
+.state-machine-edge.is-traversed {
+  stroke: var(--sm-path);
+  stroke-width: 3;
+  opacity: 1;
+}
+.state-machine-edge-label {
+  fill: var(--subtle);
+  font-size: 9px;
+  text-anchor: middle;
+}
+.state-machine-node circle {
+  stroke: var(--line-strong);
+  stroke-width: 1.5;
+  fill: var(--panel-strong);
+}
+.state-machine-node.signal-success circle { fill: var(--success-soft); stroke: var(--success-line); }
+.state-machine-node.signal-warning circle { fill: var(--warning-soft); stroke: var(--warning-line); }
+.state-machine-node.signal-danger circle { fill: var(--danger-soft); stroke: var(--danger-line); }
+.state-machine-node.is-initial circle { stroke: var(--primary); stroke-width: 2.5; }
+.state-machine-node.is-current circle {
+  stroke: var(--sm-current);
+  stroke-width: 4;
+}
+.state-machine-node.is-traversed circle { stroke: var(--sm-path); stroke-width: 2.5; }
+.state-machine-node text {
+  fill: var(--ink);
+  font-size: 10px;
+  text-anchor: middle;
+}
+.state-machine-node-score { fill: var(--muted); font-size: 8px; text-anchor: middle; }
+.state-machine-empty { fill: var(--subtle); font-size: 14px; }
+.state-machine-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 11px;
+  color: var(--muted);
+}
+.state-machine-legend .legend-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 5px;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+.state-machine-legend .legend-pass { background: var(--success); }
+.state-machine-legend .legend-watch { background: var(--warning); }
+.state-machine-legend .legend-block { background: var(--danger); }
+.state-machine-legend .legend-current { background: var(--sm-current); }
+.state-machine-legend .legend-path { background: var(--sm-path); }
+
 /* ===== Common list pattern toolbar / density / groups (TASK-AR-322) ===== */
 .list-toolbar-mount {
   margin-bottom: 10px;
@@ -4155,6 +4302,9 @@ let meetingParticipants = [];
 let meetingKeyboardHeld = null;
 let expandedTasksetCards = new Set();
 let tasksetSwimlaneMode = false;
+// TASK-AR-336: interactive state-machine viewer selection (machine + task).
+let selectedStateMachineId = null;
+let selectedStateMachineTaskId = null;
 // TASK-AR-329: taskset lifecycle UI selection + templates.
 let selectedBulkTaskIds = new Set();
 const tasksetTemplates = [
@@ -6255,6 +6405,205 @@ function renderMap() {
   `).join("") : `<div class="empty">No roadmap milestones</div>`;
 }
 
+// ----- TASK-AR-336: interactive state-machine viewer -----
+const SM_SIGNAL_LABELS = { pass: "Proceed (pass)", watch: "Needs attention (watch)", block: "Stop until fixed (block)" };
+
+function stateMachinesData() {
+  return runtimeState.state_machines || [];
+}
+
+function selectedStateMachine() {
+  const machines = stateMachinesData();
+  if (!machines.length) return null;
+  return machines.find((machine) => machine.id === selectedStateMachineId) || machines[0];
+}
+
+// Public entry: deep-link from a task into the state-machine viewer with the
+// task machine selected and the task highlighted. Read-only navigation.
+function viewTaskInStateMachine(taskId) {
+  selectedStateMachineId = "task";
+  selectedStateMachineTaskId = taskId || null;
+  activateView("statemachines");
+  renderStateMachineViewer();
+}
+
+function stateMachineNodePositions(nodes) {
+  // Deterministic horizontal lifecycle layout: states are laid out left to
+  // right in declaration order and wrapped onto rows so larger machines stay
+  // readable. Same input always yields the same coordinates.
+  const positions = {};
+  const perRow = Math.min(4, Math.max(1, nodes.length));
+  const marginX = 140;
+  const marginY = 110;
+  const spanX = nodes.length > 1 ? (1000 - marginX * 2) / Math.max(1, perRow - 1) : 0;
+  const rows = Math.ceil(nodes.length / perRow) || 1;
+  const spanY = rows > 1 ? (600 - marginY * 2) / (rows - 1) : 0;
+  nodes.forEach((node, index) => {
+    const row = Math.floor(index / perRow);
+    let col = index % perRow;
+    // Serpentine rows so consecutive states stay adjacent across wraps.
+    if (row % 2 === 1) col = perRow - 1 - col;
+    positions[node.id] = {
+      x: perRow === 1 ? 500 : marginX + col * spanX,
+      y: rows === 1 ? 300 : marginY + row * spanY,
+    };
+  });
+  return positions;
+}
+
+function renderStateMachineViewer() {
+  const machines = stateMachinesData();
+  const select = $("state-machine-select");
+  if (select) {
+    select.innerHTML = machines.length
+      ? machines.map((machine) => `<option value="${escapeHtml(machine.id)}">${escapeHtml(machine.id)} (${(machine.scope || "lifecycle")})</option>`).join("")
+      : `<option value="">No machines</option>`;
+    if (selectedStateMachine()) select.value = selectedStateMachine().id;
+  }
+
+  const machine = selectedStateMachine();
+  const taskField = $("state-machine-task-field");
+  const taskSelect = $("state-machine-task-select");
+  const taskStates = (machine && machine.task_states) || {};
+  const taskIds = Object.keys(taskStates).sort();
+  if (taskField) taskField.hidden = !(machine && machine.id === "task" && taskIds.length);
+  if (taskSelect) {
+    taskSelect.innerHTML = `<option value="">None (machine only)</option>`
+      + taskIds.map((tid) => {
+          const info = taskStates[tid] || {};
+          return `<option value="${escapeHtml(tid)}">${escapeHtml(tid)} - ${escapeHtml(info.current_state || "?")}</option>`;
+        }).join("");
+    if (selectedStateMachineTaskId && taskStates[selectedStateMachineTaskId]) {
+      taskSelect.value = selectedStateMachineTaskId;
+    } else {
+      taskSelect.value = "";
+      selectedStateMachineTaskId = null;
+    }
+  }
+
+  const legend = $("state-machine-legend");
+  if (legend) {
+    legend.innerHTML = [
+      `<li><span class="legend-swatch legend-pass"></span>pass</li>`,
+      `<li><span class="legend-swatch legend-watch"></span>watch</li>`,
+      `<li><span class="legend-swatch legend-block"></span>block</li>`,
+      `<li><span class="legend-swatch legend-current"></span>current state</li>`,
+      `<li><span class="legend-swatch legend-path"></span>traversed path</li>`,
+    ].join("");
+  }
+
+  const svg = $("state-machine-svg");
+  if (!svg) return;
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+  if (!machine) {
+    setText("state-machine-summary", "No state machines defined (agents/project/STATE-MACHINES.yml missing or empty).");
+    const note = document.createElementNS(SVG_NS, "text");
+    note.setAttribute("x", "500");
+    note.setAttribute("y", "300");
+    note.setAttribute("class", "state-machine-empty");
+    note.setAttribute("text-anchor", "middle");
+    note.textContent = "No state machine data";
+    svg.appendChild(note);
+    return;
+  }
+
+  const nodes = machine.state_nodes || [];
+  const edges = machine.transition_edges || [];
+  const taskInfo = selectedStateMachineTaskId ? (taskStates[selectedStateMachineTaskId] || null) : null;
+  const currentState = taskInfo ? taskInfo.current_state : machine.current_state;
+  const traversedEdgeIds = new Set((taskInfo ? (taskInfo.transition_path || []) : []).map((edge) => edge.id));
+  const traversedStates = new Set();
+  (taskInfo ? (taskInfo.state_sequence || []) : []).forEach((sid) => traversedStates.add(sid));
+
+  const summaryParts = [
+    `${nodes.length} states`,
+    `${edges.length} transitions`,
+    `current: ${currentState || machine.initial || "unknown"}`,
+  ];
+  if (taskInfo) summaryParts.push(`task ${selectedStateMachineTaskId}: ${(taskInfo.transition_path || []).length} hops traversed`);
+  setText("state-machine-summary", summaryParts.join(" - "));
+
+  if (!nodes.length) {
+    const note = document.createElementNS(SVG_NS, "text");
+    note.setAttribute("x", "500");
+    note.setAttribute("y", "300");
+    note.setAttribute("class", "state-machine-empty");
+    note.setAttribute("text-anchor", "middle");
+    note.textContent = "Machine has no states";
+    svg.appendChild(note);
+    return;
+  }
+
+  const positions = stateMachineNodePositions(nodes);
+
+  const edgeLayer = document.createElementNS(SVG_NS, "g");
+  edges.forEach((edge) => {
+    // A wildcard edge (from "*") is drawn from the current/last-traversed state
+    // (if known) or its declared target's incoming hub, falling back skipped.
+    let fromId = edge.from;
+    if (edge.wildcard) {
+      const hub = currentState && currentState !== edge.to ? currentState : (edge.wildcard_sources || [])[0];
+      fromId = hub || edge.from;
+    }
+    const a = positions[fromId];
+    const b = positions[edge.to];
+    if (!a || !b) return;
+    const traversed = traversedEdgeIds.has(edge.id);
+    const line = document.createElementNS(SVG_NS, "line");
+    line.setAttribute("x1", a.x);
+    line.setAttribute("y1", a.y);
+    line.setAttribute("x2", b.x);
+    line.setAttribute("y2", b.y);
+    line.setAttribute("class", `state-machine-edge ${edge.wildcard ? "is-wildcard" : ""} ${traversed ? "is-traversed" : ""}`);
+    line.setAttribute("data-edge-id", edge.id);
+    edgeLayer.appendChild(line);
+    if (edge.trigger) {
+      const label = document.createElementNS(SVG_NS, "text");
+      label.setAttribute("x", (a.x + b.x) / 2);
+      label.setAttribute("y", (a.y + b.y) / 2 - 4);
+      label.setAttribute("class", "state-machine-edge-label");
+      label.textContent = String(edge.trigger).slice(0, 22);
+      edgeLayer.appendChild(label);
+    }
+  });
+  svg.appendChild(edgeLayer);
+
+  const nodeLayer = document.createElementNS(SVG_NS, "g");
+  nodes.forEach((node) => {
+    const pos = positions[node.id];
+    if (!pos) return;
+    const isCurrent = node.id === currentState;
+    const isTraversed = traversedStates.has(node.id);
+    const group = document.createElementNS(SVG_NS, "g");
+    group.setAttribute(
+      "class",
+      `state-machine-node signal-${node.signal_token || "subtle"} ${node.is_initial ? "is-initial" : ""} ${isCurrent ? "is-current" : ""} ${isTraversed ? "is-traversed" : ""}`
+    );
+    group.setAttribute("data-state-id", node.id);
+    const circle = document.createElementNS(SVG_NS, "circle");
+    circle.setAttribute("cx", pos.x);
+    circle.setAttribute("cy", pos.y);
+    circle.setAttribute("r", "26");
+    group.appendChild(circle);
+    const label = document.createElementNS(SVG_NS, "text");
+    label.setAttribute("x", pos.x);
+    label.setAttribute("y", pos.y + 2);
+    label.textContent = String(node.id).slice(0, 14);
+    group.appendChild(label);
+    if (node.score !== null && node.score !== undefined) {
+      const score = document.createElementNS(SVG_NS, "text");
+      score.setAttribute("x", pos.x);
+      score.setAttribute("y", pos.y + 42);
+      score.setAttribute("class", "state-machine-node-score");
+      score.textContent = `${node.signal || ""} ${node.score}`.trim();
+      group.appendChild(score);
+    }
+    nodeLayer.appendChild(group);
+  });
+  svg.appendChild(nodeLayer);
+}
+
 function renderRoadmapTimeline() {
   const timeline = runtimeState.roadmap_timeline || { vision: {}, milestones: [], releases: [], summary: {} };
   const summary = timeline.summary || {};
@@ -7822,6 +8171,7 @@ function renderDetail() {
         <button id="move-earlier" type="button">Move Earlier</button>
         <button id="move-later" type="button">Move Later</button>
         <button id="archive-task" type="button">Archive</button>
+        <button id="view-state-machine" type="button">View in state machine</button>
       </div>
       <textarea id="detail-comment" placeholder="Comment or message"></textarea>
       <button id="send-comment" type="button">Send Comment</button>
@@ -7859,6 +8209,7 @@ function renderDetail() {
       sendJson(`/api/tasks/${encodeURIComponent(task.id)}/archive`, { type: "task.archive", payload: {} });
     }
   });
+  $("view-state-machine")?.addEventListener("click", () => viewTaskInStateMachine(task.id));
 }
 
 function renderAll() {
@@ -7880,6 +8231,7 @@ function renderAll() {
   renderTimeline();
   renderDependencyGraph();
   renderMap();
+  renderStateMachineViewer();
   renderSources();
   renderCommands();
   renderTriage();
@@ -8252,6 +8604,16 @@ $("team-filter")?.addEventListener("input", renderTeamAgents);
 $("team-online-toggle")?.addEventListener("change", (event) => {
   teamOnlineOnly = Boolean(event.target.checked);
   renderTeamAgents();
+});
+$("state-machine-select")?.addEventListener("change", (event) => {
+  selectedStateMachineId = event.target.value || null;
+  // Switching machines drops a task overlay that may not apply to the new one.
+  selectedStateMachineTaskId = null;
+  renderStateMachineViewer();
+});
+$("state-machine-task-select")?.addEventListener("change", (event) => {
+  selectedStateMachineTaskId = event.target.value || null;
+  renderStateMachineViewer();
 });
 ["work-search", "work-depth-filter"].forEach((id) => {
   const node = $(id);
