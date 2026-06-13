@@ -12,7 +12,7 @@
           {
             "type": "command",
             "command": "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe scripts/session_dashboard.py --root .",
-            "timeout": 20
+            "timeout": 35
           }
         ]
       }

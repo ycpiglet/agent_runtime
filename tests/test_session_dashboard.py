@@ -242,13 +242,25 @@ def test_is_clean_false_when_section_errored(monkeypatch: pytest.MonkeyPatch) ->
 # ---------------------------------------------------------------------------
 
 
-def _session_start_commands(hooks_path: Path) -> list[str]:
+def _session_start_hooks(hooks_path: Path) -> list[dict]:
     data = json.loads(hooks_path.read_text(encoding="utf-8"))
-    commands: list[str] = []
+    hooks: list[dict] = []
     for group in data["hooks"]["SessionStart"]:
-        for hook in group["hooks"]:
-            commands.append(hook["command"])
-    return commands
+        hooks.extend(group["hooks"])
+    return hooks
+
+
+def _session_start_commands(hooks_path: Path) -> list[str]:
+    return [hook["command"] for hook in _session_start_hooks(hooks_path)]
+
+
+# Worst case the script body waits on two serial network ops, each internally
+# bounded at 10s (update_notify ls-remote + scm_steward subprocess). The outer
+# hook timeout must exceed their sum plus startup, or the runner preempts the
+# process and the always-exit-0 guarantee is voided.
+_MIN_DASHBOARD_HOOK_TIMEOUT = (
+    int(session_dashboard.SCM_TIMEOUT_SECONDS) + 10  # scm + update_notify ls-remote
+)
 
 
 def test_main_hooks_json_wires_dashboard_after_baseline() -> None:
@@ -267,6 +279,25 @@ def test_template_hooks_json_wires_dashboard() -> None:
     )
     commands = _session_start_commands(template_hooks)
     assert any("session_dashboard.py" in cmd for cmd in commands)
+
+
+@pytest.mark.parametrize(
+    "hooks_path",
+    [
+        REPO_ROOT / ".codex" / "hooks.json",
+        REPO_ROOT / "src" / "agent_runtime" / "templates" / "project" / ".codex" / "hooks.json",
+    ],
+)
+def test_dashboard_hook_timeout_exceeds_internal_network_budget(hooks_path: Path) -> None:
+    dashboard_hooks = [
+        hook for hook in _session_start_hooks(hooks_path) if "session_dashboard.py" in hook["command"]
+    ]
+    assert dashboard_hooks, f"no session_dashboard hook in {hooks_path}"
+    for hook in dashboard_hooks:
+        assert hook["timeout"] > _MIN_DASHBOARD_HOOK_TIMEOUT, (
+            f"hook timeout {hook['timeout']} must exceed worst-case serial "
+            f"network budget {_MIN_DASHBOARD_HOOK_TIMEOUT}s in {hooks_path}"
+        )
 
 
 def test_template_script_is_byte_identical_mirror() -> None:

@@ -17,7 +17,11 @@ Guarantees:
 - always exit 0 (never blocks a session start);
 - cp949-safe (ASCII only on the human path, ensure_ascii JSON);
 - a hard timeout on every git/network subprocess so a hang cannot block the
-  session start; any failing section degrades to a single note line;
+  session start; any failing section degrades to a single note line. The two
+  network ops run serially -- update_notify's ls-remote (10s internal cap) and
+  the scm subprocess (``SCM_TIMEOUT_SECONDS``) -- so the SessionStart hook's
+  outer timeout must exceed their sum plus startup (wired at 35s) or the runner
+  preempts the process and voids the always-exit-0 guarantee;
 - ``--json`` for machine use; ``--quiet`` suppresses the panel when clean.
 """
 

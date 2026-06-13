@@ -11,7 +11,7 @@
           {
             "type": "command",
             "command": "python scripts/session_dashboard.py --root .",
-            "timeout": 20
+            "timeout": 35
           }
         ]
       }
