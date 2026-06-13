@@ -1823,3 +1823,100 @@ def test_ui_console_channels_messages_escape_html(tmp_path):
     assert "escapeHtml(message.avatar" in js
     assert "function channelThreadTemplate" in js
     assert "escapeHtml(thread.title" in js
+
+
+def test_ui_console_channels_input_wraps_command_for_sendjson(tmp_path):
+    # Regression (W4b): sendJson transmits options.payload as the HTTP body, so
+    # the channels submit handler MUST wrap the full command under `payload`
+    # (matching every other /api/commands caller). Passing parsed.command
+    # directly would drop the top-level `type` and the server would reject it.
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert 'sendJson("/api/commands", parsed.command)' not in js
+    assert 'sendJson("/api/commands", { type: parsed.command.type, payload: parsed.command })' in js
+
+
+def _send_json_body(call_payload):
+    """Mirror the JS sendJson contract: the HTTP body is `options.payload`."""
+    return json.dumps(call_payload["payload"]).encode("utf-8")
+
+
+def test_ui_console_channels_meeting_command_reaches_server_end_to_end(tmp_path):
+    # End-to-end through the exact body shape the channels form sends. The fixed
+    # call site wraps the full command, so submit_command sees a top-level type
+    # and records a proposal-only meeting request -> HTTP 202.
+    parsed_command = {
+        "type": "meeting.start",
+        "payload": {
+            "actor": "owner",
+            "topic": "Release readiness sync",
+            "participants": ["lead-engineer", "qa"],
+            "channel": "general",
+            "rounds": 3,
+        },
+    }
+    call_payload = {"type": parsed_command["type"], "payload": parsed_command}
+
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=_send_json_body(call_payload),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+
+    assert response.status == 202
+    assert payload["status"] == "queued"
+    assert payload["type"] == "meeting.start"
+    assert payload["result"]["mutation_boundary"] == "proposal_only"
+    # Proposal written, reviews/ left untouched (console never writes it).
+    assert list((tmp_path / ".ui_outbox" / "meetings").glob("MEETREQ-*.json"))
+    assert not (tmp_path / "reviews").exists()
+
+
+def test_ui_console_channels_directive_reaches_server_end_to_end(tmp_path):
+    _write_task(tmp_path, "TASK-UI-950")
+    # Plain directive -> runtime.call_agent, wrapped the same way.
+    parsed_command = {
+        "type": "runtime.call_agent",
+        "target": "qa",
+        "payload": {
+            "actor": "owner",
+            "instruction": "Please look at TASK-UI-950.",
+            "reason": "Owner directive in #general",
+            "channel": "general",
+        },
+    }
+    call_payload = {"type": parsed_command["type"], "payload": parsed_command}
+
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=_send_json_body(call_payload),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+
+    assert response.status == 202
+    assert payload["status"] == "queued"
+    assert payload["type"] == "runtime.call_agent"
+
+
+def test_ui_console_channels_unwrapped_command_would_be_rejected(tmp_path):
+    # Documents the W4b failure mode: if the inner payload (no top-level type) is
+    # sent as the body, the server rejects it. This is what the old buggy call
+    # site produced.
+    inner_payload = {
+        "actor": "owner",
+        "topic": "Release readiness sync",
+        "participants": ["lead-engineer", "qa"],
+        "rounds": 3,
+    }
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(inner_payload).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+    assert response.status == 400
+    assert payload["status"] == "failed"

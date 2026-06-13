@@ -5908,7 +5908,10 @@ $("channels-input-form")?.addEventListener("submit", async (event) => {
     }
     return;
   }
-  const result = await sendJson("/api/commands", parsed.command);
+  // sendJson transmits options.payload as the HTTP body; the body must be the
+  // full command {type,target,payload} so the server's submit_command sees a
+  // top-level type. Match the convention used by every other /api/commands call.
+  const result = await sendJson("/api/commands", { type: parsed.command.type, payload: parsed.command });
   if (hint) {
     const ok = result && result.status !== "failed";
     hint.textContent = ok
