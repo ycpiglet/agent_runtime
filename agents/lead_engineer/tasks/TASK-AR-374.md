@@ -1,4 +1,12 @@
 ---
+schema_version: agent-runtime-work-item/v1
+work_id: TASK-AR-374
+work_uid: e08dd19a-3998-44ff-8b16-4a1eaa7c4ccf
+kind: task
+parent_id: TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE
+origin_type: planning_proposal
+origin_ref: TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE
+created_by: planner
 id: TASK-AR-374
 display_id: TASK-AR-374
 task_uid: e08dd19a-3998-44ff-8b16-4a1eaa7c4ccf

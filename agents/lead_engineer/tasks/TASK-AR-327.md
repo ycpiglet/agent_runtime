@@ -1,4 +1,12 @@
 ---
+schema_version: agent-runtime-work-item/v1
+work_id: TASK-AR-327
+work_uid: 32d13202-2b7c-4633-95b4-f709871abb22
+kind: task
+parent_id: TASKSET-AR-UI-UX-V2
+origin_type: planning_proposal
+origin_ref: TASKSET-AR-UI-UX-V2
+created_by: planner
 id: TASK-AR-327
 display_id: TASK-AR-327
 task_uid: 32d13202-2b7c-4633-95b4-f709871abb22

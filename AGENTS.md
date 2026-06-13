@@ -81,6 +81,10 @@ opt-in. Decision record:
 `reviews/MEETING-2026-06-12-parallel-work-lifecycle-rules.md`. No step may run
 out of order.
 
+Full rule reference (metadata envelope, unit decomposition, wave registration,
+verification, agent/skill attribution): `agents/project/WORK-MODEL-2.0.md`.
+Command/skill map: `OPS-COMMAND-REFERENCE.md`.
+
 - W0 Visibility (session start): run `python scripts/work.py status` to see
   active claims, git worktrees, and unmerged agent-branch divergence in one
   read-only view. Never enter a problem that already has an active claim.
