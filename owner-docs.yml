@@ -1,5 +1,6 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
+  - OPS-COMMAND-REFERENCE.md
   - agents/project/AGENT-IDENTITY-CONTRACT.md
   - reviews/REVIEW-2026-06-12-taskset-ar-agent-identity-contract-registration.md
   - BACKLOG-BOARD.md
