@@ -61,6 +61,9 @@ RESOURCE_NAMES = (
     "notifications",
     "daily_brief",
     "notification_routing",
+    "workspaces",
+    "widgets",
+    "i18n",
     "search_index",
     "commands",
 )
@@ -2174,6 +2177,384 @@ def load_goals(root: Path, now: str) -> list[dict[str, Any]]:
             "freshness": "present",
         }
     ]
+
+
+# ----- TASK-AR-341: workspace switcher + widget extension points + i18n -----
+#
+# These three features are *navigation/config* surfaces, not write surfaces. The
+# console already takes ``--root``; the workspace switcher lists registered host
+# projects (read-only) and offers a safe relaunch command — it never execs an
+# arbitrary path or writes the SSoT. Widgets are declarative data definitions
+# (JSON/YAML) rendered with every field HTML-escaped (no eval / no raw HTML).
+# i18n strings live Python-side (here) so the served app.js stays ASCII; the KR
+# values are delivered to the browser as JSON via /api/i18n + /api/state.
+
+# Default language is Korean (the owner-facing default).
+DEFAULT_LANGUAGE = "ko"
+I18N_LANGUAGES = ("ko", "en")
+
+# Key shell strings only (high-traffic nav groups, view titles, common buttons).
+# This is the *mechanism* + the high-traffic conversions; remaining strings stay
+# English literals in the DOM and can be migrated incrementally using t(key).
+I18N_STRINGS: dict[str, dict[str, str]] = {
+    "nav.group.home": {"ko": "홈", "en": "Home"},
+    "nav.group.work": {"ko": "작업", "en": "Work"},
+    "nav.group.agents": {"ko": "에이전트", "en": "Agents"},
+    "nav.group.comms": {"ko": "소통", "en": "Comms"},
+    "nav.group.records": {"ko": "기록", "en": "Records"},
+    "nav.group.ops": {"ko": "운영", "en": "Ops"},
+    "view.board.title": {"ko": "홈 대시보드", "en": "Home Dashboard"},
+    "view.tasksets.title": {"ko": "태스크셋", "en": "Tasksets"},
+    "view.work.title": {"ko": "작업 탐색기", "en": "Work Explorer"},
+    "view.agents.title": {"ko": "에이전트", "en": "Agents"},
+    "view.channels.title": {"ko": "채널", "en": "Channels"},
+    "view.events.title": {"ko": "이벤트", "en": "Events"},
+    "button.refresh": {"ko": "새로고침", "en": "Refresh"},
+    "button.create": {"ko": "생성", "en": "Create"},
+    "button.send": {"ko": "보내기", "en": "Send"},
+    "button.save": {"ko": "저장", "en": "Save"},
+    "button.cancel": {"ko": "취소", "en": "Cancel"},
+    "common.loading": {"ko": "런타임 상태 불러오는 중", "en": "Loading runtime state"},
+    "common.language": {"ko": "언어", "en": "Language"},
+    "workspace.title": {"ko": "워크스페이스", "en": "Workspace"},
+    "workspace.switch": {"ko": "전환", "en": "Switch"},
+    "workspace.current": {"ko": "현재", "en": "Current"},
+    "workspace.relaunch_hint": {
+        "ko": "선택한 워크스페이스로 콘솔을 다시 실행하려면 아래 명령을 복사하세요.",
+        "en": "Copy the command below to relaunch the console for the selected workspace.",
+    },
+    "widgets.title": {"ko": "위젯", "en": "Widgets"},
+    "widgets.empty": {"ko": "등록된 위젯이 없습니다", "en": "No widgets registered"},
+}
+
+
+def lookup_i18n(key: str, lang: str | None = None) -> str:
+    """Resolve an i18n key for ``lang`` with KR/EN fallbacks (server mirror of t())."""
+
+    language = lang if lang in I18N_LANGUAGES else DEFAULT_LANGUAGE
+    entry = I18N_STRINGS.get(key)
+    if not entry:
+        return key
+    return entry.get(language) or entry.get(DEFAULT_LANGUAGE) or entry.get("en") or key
+
+
+def build_i18n(now: str | None = None) -> dict[str, Any]:
+    """Build the i18n resource: string table + language metadata + default."""
+
+    return {
+        "generated_at": now or _now_iso(),
+        "default_language": DEFAULT_LANGUAGE,
+        "languages": list(I18N_LANGUAGES),
+        "strings": {key: dict(values) for key, values in I18N_STRINGS.items()},
+    }
+
+
+# Read-only workspace registry lookup order. A registry is a JSON list/object of
+# host projects; the current root is always included. None of these are executed
+# or written — they are *links* the operator may relaunch the console against.
+WORKSPACE_REGISTRY_RELPATHS = (
+    "agents/runtime/workspaces.json",
+    ".agent-runtime/workspaces.json",
+)
+WORKSPACE_REGISTRY_HOME = Path.home() / ".codex" / "autofolio" / "workspaces.json"
+
+
+def _workspace_id(path: Path) -> str:
+    raw = path.name or path.as_posix()
+    return _slug(raw) or "workspace"
+
+
+def _workspace_recent_state(path: Path, now: str) -> dict[str, Any]:
+    """Read-only recent-state preview for a registered host project.
+
+    Only stats a couple of well-known marker files; never opens task bodies or
+    runs anything. Missing markers degrade to ``available: false``.
+    """
+
+    if not path.exists() or not path.is_dir():
+        return {"available": False, "last_activity": None, "open_tasks": None, "status_title": None}
+    tasks_dir = path / "agents" / "lead_engineer" / "tasks"
+    open_tasks: int | None = None
+    last_activity: str | None = None
+    if tasks_dir.is_dir():
+        try:
+            task_files = list(tasks_dir.glob("TASK-*.md"))
+        except OSError:
+            task_files = []
+        open_tasks = len(task_files)
+        for task_file in task_files:
+            stamp = _mtime_iso(task_file)
+            if stamp and (last_activity is None or stamp > last_activity):
+                last_activity = stamp
+    status_path = path / "STATUS.md"
+    status_title: str | None = None
+    if status_path.exists():
+        status_stamp = _mtime_iso(status_path)
+        if status_stamp and (last_activity is None or status_stamp > last_activity):
+            last_activity = status_stamp
+        try:
+            text = status_path.read_text(encoding="utf-8")
+            headings = list(re.finditer(r"^##\s+(.+)$", text, flags=re.MULTILINE))
+            if headings:
+                status_title = headings[-1].group(1).strip()
+        except OSError:
+            status_title = None
+    return {
+        "available": True,
+        "last_activity": last_activity,
+        "open_tasks": open_tasks,
+        "status_title": status_title,
+    }
+
+
+def _parse_workspace_registry(raw: Any) -> list[dict[str, Any]]:
+    """Normalize a registry document into a list of {path, name?} candidates."""
+
+    rows: list[Any]
+    if isinstance(raw, dict):
+        if isinstance(raw.get("workspaces"), list):
+            rows = raw["workspaces"]
+        elif isinstance(raw.get("projects"), list):
+            rows = raw["projects"]
+        else:
+            rows = []
+    elif isinstance(raw, list):
+        rows = raw
+    else:
+        rows = []
+    candidates: list[dict[str, Any]] = []
+    for row in rows:
+        if isinstance(row, str):
+            candidates.append({"path": row, "name": None})
+        elif isinstance(row, dict):
+            path_value = row.get("path") or row.get("root") or row.get("dir")
+            if path_value:
+                candidates.append({"path": str(path_value), "name": row.get("name") or row.get("label")})
+    return candidates
+
+
+def _load_workspace_registry_candidates(root: Path) -> list[dict[str, Any]]:
+    seen_files: list[Path] = []
+    for rel in WORKSPACE_REGISTRY_RELPATHS:
+        seen_files.append(root / rel)
+    seen_files.append(WORKSPACE_REGISTRY_HOME)
+    candidates: list[dict[str, Any]] = []
+    for registry_path in seen_files:
+        if not registry_path.exists():
+            continue
+        try:
+            raw = json.loads(registry_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        candidates.extend(_parse_workspace_registry(raw))
+    return candidates
+
+
+def load_workspaces(root: Path | str, now: str | None = None) -> dict[str, Any]:
+    """Derive the read-only list of registered host-project workspaces.
+
+    The current ``--root`` is always present and marked ``current``. Registered
+    hosts are read from the registry files (read-only). Switching is a navigation
+    action: each entry carries a ``relaunch_command`` (``agent-runtime ui-console
+    --root <path>``) the operator can copy — the console NEVER execs the path or
+    writes any SSoT here.
+    """
+
+    root_path = Path(root).resolve()
+    generated_at = now or _now_iso()
+    items: list[dict[str, Any]] = []
+    seen_paths: set[str] = set()
+
+    def add(path: Path, name: str | None, *, current: bool) -> None:
+        resolved = path.resolve()
+        key = resolved.as_posix()
+        if key in seen_paths:
+            return
+        seen_paths.add(key)
+        items.append(
+            {
+                "id": _workspace_id(resolved),
+                "name": name or resolved.name or key,
+                "path": key,
+                "current": current,
+                "exists": resolved.exists() and resolved.is_dir(),
+                "recent_state": _workspace_recent_state(resolved, generated_at),
+                # Navigation-only relaunch hint. NOT executed by the console.
+                "relaunch_command": f"agent-runtime ui-console --root {key}",
+            }
+        )
+
+    add(root_path, root_path.name or "current", current=True)
+    for candidate in _load_workspace_registry_candidates(root_path):
+        raw_path = candidate.get("path")
+        if not raw_path:
+            continue
+        expanded = Path(str(raw_path)).expanduser()
+        if not expanded.is_absolute():
+            expanded = (root_path / expanded)
+        add(expanded, candidate.get("name"), current=False)
+
+    return {
+        "generated_at": generated_at,
+        "current_path": root_path.as_posix(),
+        "items": items,
+    }
+
+
+# Declarative widget extension point. Widget defs are data files dropped into the
+# widgets dir; each describes a Home dashboard card. Fields are rendered escaped.
+WIDGETS_DIR_RELPATHS = (
+    "agents/runtime/widgets",
+    ".agent-runtime/widgets",
+)
+WIDGET_ALLOWED_KINDS = ("metric", "list", "shortcut", "note")
+WIDGET_MAX = 24
+
+# Built-in sample widgets so the extension point renders out-of-the-box and the
+# acceptance criterion ("a sample custom widget renders by declaration only") is
+# satisfied without requiring the operator to author a file first.
+BUILTIN_WIDGETS: tuple[dict[str, Any], ...] = (
+    {
+        "id": "sample-shortcuts",
+        "kind": "shortcut",
+        "title": "Shortcuts",
+        "items": [
+            {"label": "New Task", "shortcut": "Ctrl+Shift+N", "route": "home/board"},
+            {"label": "Command Palette", "shortcut": "Ctrl+K", "route": "home/board"},
+            {"label": "Tasksets", "shortcut": "g t", "route": "work/tasksets"},
+        ],
+        "builtin": True,
+    },
+    {
+        "id": "sample-note",
+        "kind": "note",
+        "title": "About Widgets",
+        "body": "Drop a JSON/YAML file in agents/runtime/widgets to add a card.",
+        "builtin": True,
+    },
+)
+
+
+def _coerce_widget(raw: Any, source: str) -> dict[str, Any] | None:
+    """Validate + normalize one declarative widget definition (data only)."""
+
+    if not isinstance(raw, dict):
+        return None
+    kind = str(raw.get("kind") or "note").strip().lower()
+    if kind not in WIDGET_ALLOWED_KINDS:
+        kind = "note"
+    widget: dict[str, Any] = {
+        "id": str(raw.get("id") or source or "widget"),
+        "kind": kind,
+        "title": str(raw.get("title") or raw.get("name") or "Widget"),
+        "source": source,
+        "builtin": bool(raw.get("builtin", False)),
+    }
+    if kind == "metric":
+        widget["value"] = "" if raw.get("value") is None else str(raw.get("value"))
+        widget["caption"] = str(raw.get("caption") or "")
+    elif kind == "list":
+        raw_items = raw.get("items") if isinstance(raw.get("items"), list) else []
+        widget["items"] = [
+            {
+                "label": str(item.get("label") if isinstance(item, dict) else item),
+                "value": str(item.get("value")) if isinstance(item, dict) and item.get("value") is not None else "",
+            }
+            for item in raw_items
+        ][:20]
+    elif kind == "shortcut":
+        raw_items = raw.get("items") if isinstance(raw.get("items"), list) else []
+        widget["items"] = [
+            {
+                "label": str(item.get("label", "")),
+                "shortcut": str(item.get("shortcut", "")),
+                "route": str(item.get("route", "")),
+            }
+            for item in raw_items
+            if isinstance(item, dict)
+        ][:20]
+    else:  # note
+        widget["body"] = str(raw.get("body") or raw.get("text") or "")
+    return widget
+
+
+def _parse_widget_document(text: str, suffix: str) -> list[Any]:
+    """Parse a widget file into one-or-many raw widget dicts (JSON or YAML)."""
+
+    suffix = suffix.lower()
+    parsed: Any = None
+    if suffix == ".json":
+        try:
+            parsed = json.loads(text)
+        except json.JSONDecodeError:
+            return []
+    elif suffix in {".yaml", ".yml"}:
+        try:
+            import yaml  # PyYAML ships with the project deps; degrade if absent.
+
+            parsed = yaml.safe_load(text)
+        except Exception:
+            return []
+    else:
+        return []
+    if isinstance(parsed, list):
+        return parsed
+    if isinstance(parsed, dict):
+        if isinstance(parsed.get("widgets"), list):
+            return parsed["widgets"]
+        return [parsed]
+    return []
+
+
+def load_widgets(root: Path | str, now: str | None = None) -> dict[str, Any]:
+    """Load declarative Home dashboard widget definitions (read-only data).
+
+    Built-in samples are always present; operator-authored JSON/YAML files in the
+    widgets dir are appended. Every field is plain data — the renderer escapes it
+    and never evals or injects raw HTML/JS from a definition.
+    """
+
+    root_path = Path(root).resolve()
+    generated_at = now or _now_iso()
+    widgets: list[dict[str, Any]] = [dict(widget) for widget in BUILTIN_WIDGETS]
+    seen_ids: set[str] = {widget["id"] for widget in widgets}
+    sources: list[str] = []
+    for rel in WIDGETS_DIR_RELPATHS:
+        widgets_dir = root_path / rel
+        if not widgets_dir.is_dir():
+            continue
+        try:
+            files = sorted(
+                p
+                for p in widgets_dir.iterdir()
+                if p.is_file() and p.suffix.lower() in {".json", ".yaml", ".yml"}
+            )
+        except OSError:
+            files = []
+        for widget_file in files:
+            try:
+                text = widget_file.read_text(encoding="utf-8")
+            except OSError:
+                continue
+            sources.append(_rel(root_path, widget_file))
+            for raw in _parse_widget_document(text, widget_file.suffix):
+                widget = _coerce_widget(raw, _rel(root_path, widget_file))
+                if widget is None:
+                    continue
+                if widget["id"] in seen_ids:
+                    widget["id"] = f"{widget['id']}-{len(widgets)}"
+                seen_ids.add(widget["id"])
+                widgets.append(widget)
+                if len(widgets) >= WIDGET_MAX:
+                    break
+            if len(widgets) >= WIDGET_MAX:
+                break
+    return {
+        "generated_at": generated_at,
+        "dir_candidates": list(WIDGETS_DIR_RELPATHS),
+        "sources": sources,
+        "items": widgets,
+    }
 
 
 def _collect_sources_and_gaps(root: Path, now: str) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
@@ -6663,6 +7044,11 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         gamification_policy,
         generated_at,
     )
+    # Platform extensions (TASK-AR-341): workspace switcher list, declarative
+    # Home widgets, and the KR/EN i18n string table. All read-only / data-only.
+    workspaces = load_workspaces(root_path, generated_at)
+    widgets = load_widgets(root_path, generated_at)
+    i18n = build_i18n(generated_at)
     state: dict[str, Any] = {
         "generated_at": generated_at,
         "sources": sources,
@@ -6709,6 +7095,9 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "notifications": notifications,
         "daily_brief": daily_brief,
         "notification_routing": notification_routing,
+        "workspaces": workspaces,
+        "widgets": widgets,
+        "i18n": i18n,
         "commands": commands,
         "gaps": gaps,
         "warnings": warnings,
