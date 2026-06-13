@@ -43,8 +43,18 @@ RUNTIME_LIFECYCLE_COMMAND_TYPES = (
 )
 RUNTIME_COMMAND_TYPES = RUNTIME_MESSAGE_COMMAND_TYPES + RUNTIME_LIFECYCLE_COMMAND_TYPES
 PLANNING_COMMAND_TYPES = ("planning.scan", "planning.approve", "planning.reject")
+# TASK-AR-327: Owner-summoned consensus rounds from the Channels view. Both are
+# proposal-only: the handler records a proposal under .ui_outbox that a runtime
+# executor consumes (via scripts/meeting_room.py plan) to write the canonical
+# reviews/MEETING-* or reviews/SEMINAR-* record. The console NEVER writes the
+# reviews/ file directly.
+MEETING_COMMAND_TYPES = ("meeting.start", "seminar.start")
+MEETING_TYPES = ("meeting", "seminar", "review")
+MEETING_MIN_PARTICIPANTS = 2
+MEETING_DEFAULT_ROUNDS = 3
+MEETING_MAX_ROUNDS = 20
 TASK_BOARD_SYNC_COMMANDS = {"task.create", "task.update", "task.reorder", "task.archive"}
-COMMAND_TYPES = TASK_COMMAND_TYPES + RUNTIME_COMMAND_TYPES + PLANNING_COMMAND_TYPES
+COMMAND_TYPES = TASK_COMMAND_TYPES + RUNTIME_COMMAND_TYPES + PLANNING_COMMAND_TYPES + MEETING_COMMAND_TYPES
 UNSAFE_PAYLOAD_KEYS = {"path", "source_path", "direct_file_path", "file_path", "filesystem_path"}
 HIGH_RISK_TERMS = (
     ("delete", "deletion"),
@@ -620,6 +630,141 @@ def _planning_decision_command(root: Path, command_type: str, payload: dict[str,
     }
 
 
+def _normalize_participants(value: Any) -> list[str]:
+    """Dedupe (case-insensitive, first wins) and drop blanks, preserving order."""
+    if isinstance(value, str):
+        candidates: list[Any] = re.split(r"[,\n]", value)
+    elif isinstance(value, (list, tuple)):
+        candidates = list(value)
+    else:
+        candidates = []
+    seen: set[str] = set()
+    result: list[str] = []
+    for candidate in candidates:
+        name = str(candidate if candidate is not None else "").strip().lstrip("@")
+        if not name:
+            continue
+        key = name.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(name)
+    return result
+
+
+def _meeting_date_and_slug(topic: str, now: str) -> tuple[str, str]:
+    today = re.match(r"(\d{4}-\d{2}-\d{2})", now)
+    date = today.group(1) if today else datetime.now().strftime("%Y-%m-%d")
+    return date, _slug(topic)
+
+
+def _meeting_command(
+    root: Path,
+    command_type: str,
+    target: str | None,
+    payload: dict[str, Any],
+    now: str,
+    command_id: str,
+) -> dict[str, Any]:
+    """Record a proposal-only meeting/seminar consensus-round request.
+
+    The console does NOT write the reviews/ record directly; it emits a proposal
+    under .ui_outbox describing the consensus round (topic, participants, rounds)
+    plus a runtime event so the conversation is traceable. A runtime executor
+    consumes the proposal and runs ``scripts/meeting_room.py plan`` to write the
+    canonical reviews/MEETING-* or reviews/SEMINAR-* record.
+    """
+    meeting_type = "seminar" if command_type == "seminar.start" else "meeting"
+    topic = str(payload.get("topic") or payload.get("instruction") or "").strip()
+    participants = _normalize_participants(
+        payload.get("participants")
+        or payload.get("roles")
+        or ([target] if target else [])
+    )
+    task_id = payload.get("task_id")
+    channel = str(payload.get("channel") or "").strip()
+    try:
+        rounds = int(payload.get("rounds", MEETING_DEFAULT_ROUNDS))
+    except (TypeError, ValueError):
+        rounds = -1
+
+    errors: list[str] = []
+    if not topic:
+        errors.append("topic is required")
+    if meeting_type == "meeting" and len(participants) < MEETING_MIN_PARTICIPANTS:
+        errors.append(f"at least {MEETING_MIN_PARTICIPANTS} participants are required for a meeting")
+    if rounds < 1:
+        errors.append("rounds must be > 0")
+    elif rounds > MEETING_MAX_ROUNDS:
+        errors.append(f"rounds must be <= {MEETING_MAX_ROUNDS}")
+    if errors:
+        return {"errors": errors}
+
+    date, topic_slug = _meeting_date_and_slug(topic, now)
+    record_prefix = "SEMINAR" if meeting_type == "seminar" else "MEETING"
+    records_to = f"reviews/{record_prefix}-{date}-{topic_slug}.md"
+    proposal = {
+        "id": command_id.replace("COMMAND-", "MEETREQ-"),
+        "type": command_type,
+        "meeting_type": meeting_type,
+        "status": "queued",
+        "created_at": now,
+        "requested_by": str(payload.get("actor") or "owner"),
+        "topic": topic,
+        "task_id": task_id,
+        "channel": channel or None,
+        "participants": participants,
+        "rounds": rounds,
+        "consensus_round": True,
+        "records_to": records_to,
+        "script": (
+            f"python scripts/meeting_room.py plan --type {meeting_type}"
+            f" --topic {json.dumps(topic, ensure_ascii=False)} --rounds {rounds}"
+            + ("".join(f" --participant {p}" for p in participants))
+            + (f" --task-id {task_id}" if task_id else "")
+        ),
+        "mutation_boundary": "proposal_only",
+        "next": "runtime meeting executor must run the consensus round and write the reviews/ record",
+    }
+    path = root / ".ui_outbox" / "meetings" / f"{proposal['id']}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(proposal, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    # Runtime event so the summon is traceable from the Channels conversation.
+    event_path = root / "agents" / "runtime" / "events" / "ui_meeting_requests.jsonl"
+    event_path.parent.mkdir(parents=True, exist_ok=True)
+    event = {
+        "ts": now,
+        "event": f"{meeting_type}.start",
+        "role": str(payload.get("actor") or "owner"),
+        "task_id": task_id,
+        "topic": topic,
+        "channel": channel or None,
+        "participants": participants,
+        "rounds": rounds,
+        "proposal_id": proposal["id"],
+        "records_to": records_to,
+        "source": "ui_console",
+    }
+    with event_path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(event, ensure_ascii=False) + "\n")
+
+    return {
+        "status": "queued",
+        "result": {
+            "changed": [_rel(root, path), _rel(root, event_path)],
+            "proposal_id": proposal["id"],
+            "meeting_type": meeting_type,
+            "records_to": records_to,
+            "participants": participants,
+            "rounds": rounds,
+            "runtime_support": "consensus_round_proposal",
+            "mutation_boundary": "proposal_only",
+            "next": proposal["next"],
+        },
+    }
+
+
 def submit_command(
     root: Path | str,
     command: dict[str, Any],
@@ -656,6 +801,8 @@ def submit_command(
         outcome = _planning_scan_command(root_path, payload, created_at, cid)
     elif command_type in {"planning.approve", "planning.reject"}:
         outcome = _planning_decision_command(root_path, command_type, payload, created_at, cid)
+    elif command_type in MEETING_COMMAND_TYPES:
+        outcome = _meeting_command(root_path, command_type, target_str, payload, created_at, cid)
     else:
         outcome = _runtime_command(root_path, command_type, target_str, payload, created_at)
 

@@ -324,3 +324,90 @@ def test_goal_lifecycle_command_records_explicit_unsupported_runtime_state(tmp_p
     assert result["goal_id"] == "goal-123"
     assert result["result"]["runtime_support"] == "unsupported"
     assert result["result"]["next"] == "runtime executor must consume this command before UI can claim execution"
+
+
+# ----- TASK-AR-327: meeting.start / seminar.start (proposal-only) -----
+
+
+def test_meeting_and_seminar_commands_in_allowlist():
+    assert "meeting.start" in ui_commands.COMMAND_TYPES
+    assert "seminar.start" in ui_commands.COMMAND_TYPES
+
+
+def test_meeting_start_writes_proposal_not_direct_reviews_file(tmp_path):
+    result = ui_commands.submit_command(
+        tmp_path,
+        {
+            "type": "meeting.start",
+            "payload": {
+                "actor": "owner",
+                "topic": "Release readiness sync",
+                "participants": ["lead-engineer", "qa"],
+                "rounds": 3,
+                "channel": "general",
+            },
+        },
+        now=NOW,
+        command_id="COMMAND-20260610-123000-meeting",
+    )
+
+    assert result["status"] == "queued"
+    assert result["result"]["meeting_type"] == "meeting"
+    assert result["result"]["records_to"] == "reviews/MEETING-2026-06-10-release-readiness-sync.md"
+    assert result["result"]["mutation_boundary"] == "proposal_only"
+
+    # The handler writes a proposal under .ui_outbox, NOT a reviews/ file.
+    proposals = list((tmp_path / ".ui_outbox" / "meetings").glob("MEETREQ-*.json"))
+    assert len(proposals) == 1
+    proposal = json.loads(proposals[0].read_text(encoding="utf-8"))
+    assert proposal["meeting_type"] == "meeting"
+    assert proposal["participants"] == ["lead-engineer", "qa"]
+    assert proposal["consensus_round"] is True
+    assert not (tmp_path / "reviews").exists()
+
+    # A runtime event is recorded so the summon is traceable.
+    event_text = (tmp_path / "agents" / "runtime" / "events" / "ui_meeting_requests.jsonl").read_text(encoding="utf-8")
+    event = json.loads(event_text.strip())
+    assert event["event"] == "meeting.start"
+    assert event["topic"] == "Release readiness sync"
+    assert event["records_to"] == "reviews/MEETING-2026-06-10-release-readiness-sync.md"
+
+
+def test_seminar_start_records_seminar_path_and_single_participant_ok(tmp_path):
+    result = ui_commands.submit_command(
+        tmp_path,
+        {
+            "type": "seminar.start",
+            "payload": {
+                "actor": "owner",
+                "topic": "Async runtime patterns",
+                "rounds": 2,
+            },
+        },
+        now=NOW,
+        command_id="COMMAND-20260610-123000-seminar",
+    )
+
+    assert result["status"] == "queued"
+    assert result["result"]["meeting_type"] == "seminar"
+    assert result["result"]["records_to"] == "reviews/SEMINAR-2026-06-10-async-runtime-patterns.md"
+
+
+def test_meeting_start_rejects_missing_topic_and_too_few_participants(tmp_path):
+    missing_topic = ui_commands.submit_command(
+        tmp_path,
+        {"type": "meeting.start", "payload": {"participants": ["a", "b"]}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-notopic",
+    )
+    assert missing_topic["status"] == "failed"
+    assert "topic is required" in missing_topic["errors"]
+
+    too_few = ui_commands.submit_command(
+        tmp_path,
+        {"type": "meeting.start", "payload": {"topic": "Solo", "participants": ["only-one"]}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-solo",
+    )
+    assert too_few["status"] == "failed"
+    assert any("participants" in error for error in too_few["errors"])

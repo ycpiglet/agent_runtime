@@ -1761,3 +1761,162 @@ def test_ui_console_list_app_js_node_check(tmp_path):
         text=True,
     )
     assert proc.returncode == 0, proc.stderr
+
+
+# ----- TASK-AR-327: Channels view (agent conversation + meeting/seminar) -----
+
+
+def test_ui_console_channels_view_registered_in_comms_sidebar(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+
+    # New Channels view lives in the COMMS group with a data-view + data-route.
+    assert 'data-view="channels"' in html
+    assert 'data-route="comms/channels"' in html
+    # And a dedicated view container (not the old horizontal tabs / list view).
+    assert 'id="view-channels"' in html
+    assert 'id="channels-list"' in html
+    assert 'id="channels-threads"' in html
+    # Owner directive input box + slash-command affordance.
+    assert 'id="channels-input-form"' in html
+    assert 'id="channels-input-box"' in html
+    assert "/meeting" in html and "/seminar" in html
+
+
+def test_ui_console_channels_role_colors_use_tokens_via_var(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    # Role colors are applied as var(--token); no raw hex injected from JS.
+    assert "function channelRoleColorVar" in js
+    assert "var(--${safe" in js
+    # Avatar + sender consume the --role-color custom property in the stylesheet.
+    assert ".channel-avatar" in css
+    assert "var(--role-color, var(--primary))" in css
+    assert "--role-color:" in js  # inline binding to the semantic token
+
+
+def test_ui_console_channels_slash_command_parsing(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+
+    # The parser recognises /meeting and /seminar and maps them to the
+    # meeting.start / seminar.start command types (proposal-only).
+    assert "function parseChannelInput" in js
+    assert "meeting.start" in js
+    assert "seminar.start" in js
+    assert "/(meeting|seminar)" in js
+    # @role mention extraction for participants.
+    assert "@[\\w.-]+" in js
+    # A plain directive falls back to runtime.call_agent.
+    assert "runtime.call_agent" in js
+    # The channel form is wired to the command API.
+    assert 'channels-input-form' in js
+    assert "renderChannels" in js
+
+
+def test_ui_console_channels_messages_escape_html(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+
+    # Every rendered message/sender/avatar field passes through escapeHtml (XSS).
+    assert "function channelMessageTemplate" in js
+    assert "escapeHtml(message.body" in js
+    assert "escapeHtml(message.from" in js
+    assert "escapeHtml(message.avatar" in js
+    assert "function channelThreadTemplate" in js
+    assert "escapeHtml(thread.title" in js
+
+
+def test_ui_console_channels_input_wraps_command_for_sendjson(tmp_path):
+    # Regression (W4b): sendJson transmits options.payload as the HTTP body, so
+    # the channels submit handler MUST wrap the full command under `payload`
+    # (matching every other /api/commands caller). Passing parsed.command
+    # directly would drop the top-level `type` and the server would reject it.
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert 'sendJson("/api/commands", parsed.command)' not in js
+    assert 'sendJson("/api/commands", { type: parsed.command.type, payload: parsed.command })' in js
+
+
+def _send_json_body(call_payload):
+    """Mirror the JS sendJson contract: the HTTP body is `options.payload`."""
+    return json.dumps(call_payload["payload"]).encode("utf-8")
+
+
+def test_ui_console_channels_meeting_command_reaches_server_end_to_end(tmp_path):
+    # End-to-end through the exact body shape the channels form sends. The fixed
+    # call site wraps the full command, so submit_command sees a top-level type
+    # and records a proposal-only meeting request -> HTTP 202.
+    parsed_command = {
+        "type": "meeting.start",
+        "payload": {
+            "actor": "owner",
+            "topic": "Release readiness sync",
+            "participants": ["lead-engineer", "qa"],
+            "channel": "general",
+            "rounds": 3,
+        },
+    }
+    call_payload = {"type": parsed_command["type"], "payload": parsed_command}
+
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=_send_json_body(call_payload),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+
+    assert response.status == 202
+    assert payload["status"] == "queued"
+    assert payload["type"] == "meeting.start"
+    assert payload["result"]["mutation_boundary"] == "proposal_only"
+    # Proposal written, reviews/ left untouched (console never writes it).
+    assert list((tmp_path / ".ui_outbox" / "meetings").glob("MEETREQ-*.json"))
+    assert not (tmp_path / "reviews").exists()
+
+
+def test_ui_console_channels_directive_reaches_server_end_to_end(tmp_path):
+    _write_task(tmp_path, "TASK-UI-950")
+    # Plain directive -> runtime.call_agent, wrapped the same way.
+    parsed_command = {
+        "type": "runtime.call_agent",
+        "target": "qa",
+        "payload": {
+            "actor": "owner",
+            "instruction": "Please look at TASK-UI-950.",
+            "reason": "Owner directive in #general",
+            "channel": "general",
+        },
+    }
+    call_payload = {"type": parsed_command["type"], "payload": parsed_command}
+
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=_send_json_body(call_payload),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+
+    assert response.status == 202
+    assert payload["status"] == "queued"
+    assert payload["type"] == "runtime.call_agent"
+
+
+def test_ui_console_channels_unwrapped_command_would_be_rejected(tmp_path):
+    # Documents the W4b failure mode: if the inner payload (no top-level type) is
+    # sent as the body, the server rejects it. This is what the old buggy call
+    # site produced.
+    inner_payload = {
+        "actor": "owner",
+        "topic": "Release readiness sync",
+        "participants": ["lead-engineer", "qa"],
+        "rounds": 3,
+    }
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(inner_payload).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+    assert response.status == 400
+    assert payload["status"] == "failed"

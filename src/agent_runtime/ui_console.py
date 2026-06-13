@@ -112,8 +112,11 @@ HTML = """<!doctype html>
         </div>
         <div class="sidebar-group" data-group="comms">
           <span class="sidebar-group-title">COMMS</span>
-          <button class="sidebar-link" type="button" role="tab" data-view="messages" data-route="comms/channels" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9993;</span><span class="sidebar-label">Channels</span>
+          <button class="sidebar-link" type="button" role="tab" data-view="channels" data-route="comms/channels" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Channels</span>
+          </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="messages" data-route="comms/messages" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9993;</span><span class="sidebar-label">Messages</span>
           </button>
           <button class="sidebar-link" type="button" role="tab" data-view="meeting" data-route="comms/meetings" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9786;</span><span class="sidebar-label">Meetings</span>
@@ -293,6 +296,32 @@ HTML = """<!doctype html>
           <div id="tasksets-list" class="taskset-strip"></div>
           <div id="list-toolbar-agents" class="list-toolbar-mount" data-list-view="agents"></div>
           <div id="agents-list" class="list-panel"></div>
+        </div>
+        <div id="view-channels" class="view">
+          <div class="channels-grid">
+            <aside class="channels-sidebar" aria-label="Channels">
+              <h2 class="channels-heading">Channels</h2>
+              <div id="channels-list" class="channels-list" role="tablist" aria-label="Channel list"></div>
+            </aside>
+            <section class="channels-main" aria-label="Channel conversation">
+              <header class="channels-topbar">
+                <h2 id="channels-active-name" class="channels-active-name">#general</h2>
+                <span id="channels-active-meta" class="channels-active-meta"></span>
+              </header>
+              <div id="channels-threads" class="channels-threads" aria-label="Threads"></div>
+              <form id="channels-input-form" class="channels-input" aria-label="Owner directive input">
+                <label class="channels-input-label" for="channels-input-box">
+                  Send a directive, or use <code>/meeting &lt;topic&gt; @role</code> or <code>/seminar &lt;topic&gt;</code>
+                </label>
+                <div class="channels-input-row">
+                  <input id="channels-input-target" name="target" placeholder="@role (for directives)" aria-label="Target agent role">
+                  <input id="channels-input-box" name="message" placeholder="Message #general, /meeting <topic> @role, /seminar <topic>" autocomplete="off" aria-label="Owner message or slash command">
+                  <button id="channels-send" type="submit">Send</button>
+                </div>
+                <p id="channels-input-hint" class="channels-input-hint" role="status" aria-live="polite"></p>
+              </form>
+            </section>
+          </div>
         </div>
         <div id="view-messages" class="view">
           <div id="list-toolbar-messages" class="list-toolbar-mount" data-list-view="messages"></div>
@@ -2007,6 +2036,211 @@ textarea:focus {
   min-height: 16px;
 }
 .meeting-validation.is-ok {
+  color: var(--success);
+}
+/* ===== Channels view (TASK-AR-327): Slack/Discord-style spectating ===== */
+.channels-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+.channels-sidebar {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  padding: 10px;
+}
+.channels-heading {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--subtle);
+  margin-bottom: 8px;
+}
+.channels-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.channel-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  padding: 7px 9px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 13px;
+}
+.channel-link:hover {
+  background: var(--raise-strong);
+}
+.channel-link.is-active {
+  background: var(--primary-soft);
+  color: var(--nav-active-text);
+  font-weight: 600;
+}
+.channel-link .channel-count {
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--raise);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+.channels-main {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  min-height: 360px;
+}
+.channels-topbar {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.channels-active-name {
+  font-size: 16px;
+}
+.channels-active-meta {
+  font-size: 12px;
+  color: var(--muted);
+}
+.channels-threads {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.channel-thread {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--inset-soft);
+  padding: 10px 12px;
+}
+.channel-thread-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.channel-thread-title {
+  font-weight: 600;
+  font-size: 13px;
+}
+.channel-thread-task {
+  font-size: 11px;
+  color: var(--muted);
+}
+.channel-message {
+  display: flex;
+  gap: 9px;
+  padding: 6px 0;
+}
+.channel-message + .channel-message {
+  border-top: 1px solid var(--line);
+}
+.channel-avatar {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--on-accent);
+  background: var(--role-color, var(--primary));
+}
+.channel-message-body {
+  flex: 1;
+  min-width: 0;
+}
+.channel-message-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.channel-sender {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--role-color, var(--ink));
+}
+.channel-ts {
+  font-size: 11px;
+  color: var(--subtle);
+}
+.channel-message-text {
+  font-size: 13px;
+  color: var(--ink);
+  line-height: 1.4;
+  margin-top: 2px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.channels-empty {
+  color: var(--muted);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  padding: 18px;
+  text-align: center;
+}
+.channels-input {
+  border-top: 1px solid var(--line);
+  padding: 10px 14px 12px;
+  background: var(--panel);
+}
+.channels-input-label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.channels-input-label code {
+  background: var(--raise);
+  border-radius: 4px;
+  padding: 0 4px;
+}
+.channels-input-row {
+  display: flex;
+  gap: 8px;
+}
+.channels-input-row input {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  color: var(--ink);
+  padding: 8px 10px;
+  font-size: 13px;
+}
+#channels-input-target {
+  flex: 0 0 150px;
+}
+#channels-input-box {
+  flex: 1;
+}
+.channels-input-hint {
+  font-size: 11px;
+  color: var(--muted);
+  min-height: 14px;
+  margin-top: 6px;
+}
+.channels-input-hint.is-error {
+  color: var(--danger);
+}
+.channels-input-hint.is-ok {
   color: var(--success);
 }
 .detail-panel {
@@ -3944,6 +4178,137 @@ function renderMessages() {
   renderGroupedList("messages", messages, messageRowTemplate, "No messages");
 }
 
+// ----- Channels view (TASK-AR-327) -----
+let activeChannelId = null;
+
+function channelsData() {
+  return (runtimeState && runtimeState.channels) || { channels: [], owner_input: {} };
+}
+
+function channelRoleColorVar(token) {
+  // Role colors map to existing semantic tokens; reference them as var(--token).
+  const safe = String(token || "primary").replace(/[^a-z0-9-]/gi, "");
+  return `var(--${safe || "primary"})`;
+}
+
+function channelMessageTemplate(message) {
+  const color = channelRoleColorVar(message.role_color);
+  return `
+    <div class="channel-message">
+      <span class="channel-avatar" style="--role-color: ${color}" aria-hidden="true">${escapeHtml(message.avatar || "?")}</span>
+      <div class="channel-message-body">
+        <div class="channel-message-head">
+          <span class="channel-sender" style="--role-color: ${color}">${escapeHtml(message.from || "unknown")}</span>
+          <span class="channel-ts">${escapeHtml(message.ts || "")}</span>
+        </div>
+        <div class="channel-message-text">${escapeHtml(message.body || "")}</div>
+      </div>
+    </div>`;
+}
+
+function channelThreadTemplate(thread) {
+  const messages = (thread.messages || []).map(channelMessageTemplate).join("");
+  return `
+    <article class="channel-thread" data-thread-id="${escapeHtml(thread.id)}">
+      <div class="channel-thread-head">
+        <span class="channel-thread-title">${escapeHtml(thread.title || thread.id)}</span>
+        ${thread.task_id ? `<span class="channel-thread-task">${escapeHtml(thread.task_id)}</span>` : ""}
+      </div>
+      ${messages || `<div class="channels-empty">No messages in this thread</div>`}
+    </article>`;
+}
+
+function renderChannelsList() {
+  const host = $("channels-list");
+  if (!host) return;
+  const channels = channelsData().channels || [];
+  if (!channels.length) {
+    host.innerHTML = `<div class="channels-empty">No channels</div>`;
+    return;
+  }
+  if (!activeChannelId || !channels.some((channel) => channel.id === activeChannelId)) {
+    activeChannelId = channels[0].id;
+  }
+  host.innerHTML = channels
+    .map((channel) => `
+      <button type="button" role="tab" class="channel-link${channel.id === activeChannelId ? " is-active" : ""}" data-channel-id="${escapeHtml(channel.id)}" aria-selected="${channel.id === activeChannelId ? "true" : "false"}">
+        <span class="channel-name">${escapeHtml(channel.name || ("#" + channel.id))}</span>
+        <span class="channel-count">${escapeHtml(Number(channel.message_count || 0))}</span>
+      </button>`)
+    .join("");
+  host.querySelectorAll("[data-channel-id]").forEach((button) => {
+    button.addEventListener("click", () => {
+      activeChannelId = button.dataset.channelId;
+      renderChannels();
+    });
+  });
+}
+
+function renderChannelsMain() {
+  const channels = channelsData().channels || [];
+  const channel = channels.find((item) => item.id === activeChannelId) || channels[0] || null;
+  setText("channels-active-name", channel ? (channel.name || "#" + channel.id) : "#general");
+  const meta = $("channels-active-meta");
+  if (meta) {
+    meta.textContent = channel
+      ? `${channel.thread_count || (channel.threads || []).length} thread(s) | ${channel.message_count || 0} message(s)`
+      : "";
+  }
+  const host = $("channels-threads");
+  if (!host) return;
+  const threads = channel ? (channel.threads || []) : [];
+  host.innerHTML = threads.length
+    ? threads.map(channelThreadTemplate).join("")
+    : `<div class="channels-empty">No conversation yet in this channel</div>`;
+}
+
+function renderChannels() {
+  renderChannelsList();
+  renderChannelsMain();
+}
+
+// Parse the owner input box into a runtime command. Slash commands:
+//   /meeting <topic> @role @role   -> meeting.start
+//   /seminar <topic>               -> seminar.start
+// Anything else is a directive (runtime.call_agent) to the @target / channel.
+function parseChannelInput(raw, { target, channel } = {}) {
+  const text = String(raw || "").trim();
+  if (!text) return { error: "Enter a message or slash command." };
+  const meetingMatch = text.match(/^\/(meeting|seminar)\b\s*(.*)$/i);
+  if (meetingMatch) {
+    const kind = meetingMatch[1].toLowerCase();
+    const rest = meetingMatch[2].trim();
+    const roles = (rest.match(/@[\w.-]+/g) || []).map((token) => token.slice(1));
+    const topic = rest.replace(/@[\w.-]+/g, "").trim();
+    if (!topic) return { error: `Usage: /${kind} <topic>${kind === "meeting" ? " @role @role" : ""}` };
+    if (kind === "meeting" && roles.length < 2) {
+      return { error: "A meeting needs at least 2 participants: /meeting <topic> @role @role" };
+    }
+    return {
+      command: {
+        type: kind === "seminar" ? "seminar.start" : "meeting.start",
+        payload: {
+          actor: "owner",
+          topic,
+          participants: roles,
+          channel: channel || null,
+          rounds: 3,
+        },
+      },
+    };
+  }
+  // Plain directive message to an agent / channel.
+  const to = String(target || "").replace(/^@/, "").trim();
+  if (!to) return { error: "Add a @role target for a directive, or use /meeting or /seminar." };
+  return {
+    command: {
+      type: "runtime.call_agent",
+      target: to,
+      payload: { actor: "owner", instruction: text, reason: `Owner directive in #${channel || "general"}`, channel: channel || null },
+    },
+  };
+}
+
 function filterEvents(events) {
   const type = $("event-filter-type")?.value.trim();
   const agent = $("event-filter-agent")?.value.trim();
@@ -5222,6 +5587,7 @@ function renderAll() {
   renderTasksetBoard();
   renderTeamAgents();
   renderAgents();
+  renderChannels();
   renderMessages();
   renderEvents();
   renderEvidence();
@@ -5526,6 +5892,37 @@ $("runtime-command-form").addEventListener("submit", async (event) => {
     }
   });
   $("runtime-instruction").value = "";
+});
+$("channels-input-form")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const hint = $("channels-input-hint");
+  const parsed = parseChannelInput($("channels-input-box").value, {
+    target: $("channels-input-target").value,
+    channel: activeChannelId || "general",
+  });
+  if (parsed.error) {
+    if (hint) {
+      hint.textContent = parsed.error;
+      hint.classList.add("is-error");
+      hint.classList.remove("is-ok");
+    }
+    return;
+  }
+  // sendJson transmits options.payload as the HTTP body; the body must be the
+  // full command {type,target,payload} so the server's submit_command sees a
+  // top-level type. Match the convention used by every other /api/commands call.
+  const result = await sendJson("/api/commands", { type: parsed.command.type, payload: parsed.command });
+  if (hint) {
+    const ok = result && result.status !== "failed";
+    hint.textContent = ok
+      ? `Submitted ${parsed.command.type} (${result.status}).`
+      : `Failed: ${(result.errors || ["unknown error"]).join("; ")}`;
+    hint.classList.toggle("is-ok", ok);
+    hint.classList.toggle("is-error", !ok);
+  }
+  if (result && result.status !== "failed") {
+    $("channels-input-box").value = "";
+  }
 });
 loadState();
 connectEventStream();
