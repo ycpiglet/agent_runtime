@@ -1031,3 +1031,47 @@ def test_ui_console_cli_dispatches_to_server(monkeypatch, tmp_path):
 
     assert cli_module.main(["ui-console", "--root", str(tmp_path), "--host", "127.0.0.1", "--port", "8765"]) == 0
     assert captured == {"root": tmp_path, "host": "127.0.0.1", "port": 8765}
+
+
+def test_ui_console_roadmap_timeline_panel_and_routes(tmp_path):
+    _write(
+        tmp_path / "agents" / "project" / "VISION.md",
+        "# Vision\n\n## Problem\n\nDrift.\n\n## Vision\n\nStandardize overlays.\n\n## Success metric\n\nMatches.\n",
+    )
+    _write(
+        tmp_path / "agents" / "project" / "ROADMAP.md",
+        "# Roadmap\n\n## Current Phase\n\n- phase: UI console\n\n## Milestones\n\n- [ ] 2026-06-20: `TASK-AR-516` ready\n",
+    )
+    _write(
+        tmp_path / "agents" / "project" / "release" / "RELEASE-DECISION-v0.2.0.yml",
+        "schema: agent-runtime-release-decision/v1\ntarget_version: 0.2.0\ntarget_tag: v0.2.0\nstatus: agent_council_approved\nowner_required: true\ndecision_date: 2026-06-13\n",
+    )
+
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    # Tab + view host anchors
+    for anchor in ['data-view="roadmap"', 'id="view-roadmap"', 'id="roadmap-timeline"', 'id="roadmap-timeline-summary"']:
+        assert anchor in html
+
+    # JS render function and escaping wired in
+    for marker in ["renderRoadmapTimeline", "roadmap_timeline", "roadmap-tl-milestone", "roadmap-tl-release", "escapeHtml(milestone.title"]:
+        assert marker in js
+
+    # CSS timeline anchors
+    for selector in [".roadmap-timeline", ".roadmap-tl-marker", ".roadmap-tl-links", ".roadmap-tl-marker.is-release"]:
+        assert selector in css
+
+    # Routes: underscore + hyphen alias both return the resource with HTTP 200
+    underscore = ui_console.build_response("/api/roadmap_timeline", tmp_path)
+    hyphen = ui_console.build_response("/api/roadmap-timeline", tmp_path)
+    assert underscore.status == 200
+    assert hyphen.status == 200
+    payload = json.loads(hyphen.body.decode("utf-8"))
+    assert payload["resource"] == "roadmap_timeline"
+    timeline = payload["items"]
+    assert timeline["schema"] == "agent-runtime-roadmap-timeline/v1"
+    assert timeline["vision"]["statement"]
+    assert timeline["milestones"][0]["linked_work"][0]["id"] == "TASK-AR-516"
+    assert timeline["releases"][0]["owner_required"] is True

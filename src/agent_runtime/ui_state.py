@@ -33,6 +33,7 @@ RESOURCE_NAMES = (
     "graph",
     "state_machines",
     "roadmap",
+    "roadmap_timeline",
     "planning",
     "commands",
 )
@@ -1950,6 +1951,198 @@ def build_tasksets_board(
     }
 
 
+# --- Roadmap Timeline (TASK-AR-325) ----------------------------------------
+# A computed-only Vision -> Milestone -> Release timeline. Milestones come from
+# ROADMAP.md, the vision header from VISION.md, releases from the recorded
+# release-decision YAMLs. Each milestone is linked to the initiatives/tasksets
+# whose ids appear in its title and gets a status roll-up computed from the
+# work-explorer hierarchy. Nothing here mutates state; every field is derived
+# from existing source files joined by id.
+
+ROADMAP_TIMELINE_SCHEMA = "agent-runtime-roadmap-timeline/v1"
+RELEASE_DECISION_GLOB = "agents/project/release/RELEASE-DECISION-*.yml"
+_WORK_ID_PATTERN = re.compile(r"\b(?:TASKSET-AR-[A-Z0-9-]+|INIT-AR-[A-Z0-9-]+|TASK-AR-\d+)\b")
+
+
+def _roadmap_vision(root: Path, now: str) -> dict[str, Any]:
+    """Top-of-timeline vision node parsed from VISION.md (computed-only)."""
+    path = root / "agents" / "project" / "VISION.md"
+    node: dict[str, Any] = {
+        "tier": "vision",
+        "title": "Vision",
+        "statement": None,
+        "problem": None,
+        "success_metric": None,
+        "source_path": _rel(root, path),
+        "source_kind": "vision_markdown",
+        "freshness": _path_freshness(path),
+        "last_updated": _mtime_iso(path),
+    }
+    if not path.exists():
+        return node
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        node["freshness"] = "missing"
+        return node
+    node["statement"] = _first_sentence(_section_text(text, "Vision")) or None
+    node["problem"] = _first_sentence(_section_text(text, "Problem")) or None
+    node["success_metric"] = _first_sentence(_section_text(text, "Success metric")) or None
+    node["source"] = _source_metadata(root, path, "vision_markdown", now)
+    return node
+
+
+def _roadmap_linked_work(
+    title: str,
+    nodes_by_id: dict[str, dict[str, Any]],
+) -> tuple[list[dict[str, Any]], dict[str, int]]:
+    """Resolve work ids mentioned in a milestone title to explorer nodes.
+
+    Returns the deduped linked-work records plus a status roll-up computed from
+    the linked nodes (and their explorer roll-ups for taskset/initiative ids).
+    """
+    linked: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    rollup = {"linked": 0, "completed": 0, "in_progress": 0, "planned": 0, "tasks_total": 0, "tasks_completed": 0}
+    for work_id in _WORK_ID_PATTERN.findall(title or ""):
+        if work_id in seen:
+            continue
+        seen.add(work_id)
+        node = nodes_by_id.get(work_id)
+        if node is None:
+            linked.append({"id": work_id, "level": "unknown", "title": work_id, "status_bucket": "planned", "resolved": False})
+            rollup["linked"] += 1
+            rollup["planned"] += 1
+            continue
+        bucket = node.get("status_bucket", "planned")
+        node_rollup = node.get("rollup") or {}
+        linked.append(
+            {
+                "id": work_id,
+                "level": node.get("level") or "",
+                "title": node.get("title") or work_id,
+                "status": node.get("status") or "",
+                "status_bucket": bucket,
+                "source_path": node.get("path") or "",
+                "progress_pct": node_rollup.get("pct"),
+                "resolved": True,
+            }
+        )
+        rollup["linked"] += 1
+        rollup[bucket] = rollup.get(bucket, 0) + 1
+        total = int(node_rollup.get("total") or 0)
+        completed = int(node_rollup.get("completed") or 0)
+        if total:
+            rollup["tasks_total"] += total
+            rollup["tasks_completed"] += completed
+        elif node.get("level") == "task":
+            rollup["tasks_total"] += 1
+            rollup["tasks_completed"] += 1 if bucket == "completed" else 0
+    if rollup["tasks_total"]:
+        rollup["pct"] = int(round(rollup["tasks_completed"] / rollup["tasks_total"] * 100))
+    elif rollup["linked"]:
+        rollup["pct"] = int(round(rollup["completed"] / rollup["linked"] * 100))
+    else:
+        rollup["pct"] = None
+    return linked, rollup
+
+
+def _roadmap_releases(root: Path, now: str, warnings: list[dict[str, str]]) -> list[dict[str, Any]]:
+    """Release-tier nodes parsed from recorded release-decision YAMLs."""
+    releases: list[dict[str, Any]] = []
+    for path in sorted(root.glob(RELEASE_DECISION_GLOB)):
+        rel_path = _rel(root, path)
+        try:
+            meta, _ = parse_frontmatter("---\n" + path.read_text(encoding="utf-8") + "\n---\n")
+        except OSError as exc:
+            warnings.append(_warning("roadmap-release-read-error", rel_path, str(exc)))
+            continue
+        version = str(meta.get("target_version") or "").strip()
+        status = str(meta.get("status") or "").strip()
+        releases.append(
+            {
+                "tier": "release",
+                "id": str(meta.get("target_tag") or version or path.stem),
+                "version": version,
+                "tag": str(meta.get("target_tag") or "").strip(),
+                "title": f"Release {meta.get('target_tag') or version or path.stem}",
+                "status": status,
+                "status_bucket": _work_status_bucket("completed" if status in {"released", "published"} else status),
+                "criticality": str(meta.get("criticality") or "").strip(),
+                "owner_required": bool(meta.get("owner_required")),
+                "approved_by": str(meta.get("approved_by") or "").strip(),
+                "date": str(meta.get("decision_date") or "").strip() or None,
+                "source_path": rel_path,
+                "source_kind": "release_decision_yaml",
+                "source": _source_metadata(root, path, "release_decision_yaml", now),
+                "last_updated": _mtime_iso(path),
+            }
+        )
+    releases.sort(key=lambda item: (str(item.get("version") or ""), item["id"]))
+    return releases
+
+
+def build_roadmap_timeline(
+    roadmap: dict[str, Any],
+    work_explorer: dict[str, Any],
+    root: Path,
+    now: str,
+    warnings: list[dict[str, str]],
+) -> dict[str, Any]:
+    """Vision -> Milestone -> Release vertical timeline (computed-only).
+
+    Milestones are reused from the flat roadmap parser; each one is enriched
+    with the initiatives/tasksets/tasks named in its title and a status
+    roll-up derived from the work-explorer hierarchy. No stored progress is
+    trusted - roll-ups come from joined explorer nodes only.
+    """
+    nodes_by_id = {str(node.get("id")): node for node in work_explorer.get("nodes", []) if node.get("id")}
+    vision = _roadmap_vision(root, now)
+
+    milestones: list[dict[str, Any]] = []
+    for index, item in enumerate(roadmap.get("milestones", [])):
+        title = str(item.get("title") or "")
+        linked, rollup = _roadmap_linked_work(title, nodes_by_id)
+        milestones.append(
+            {
+                "tier": "milestone",
+                "id": f"milestone-{index + 1}",
+                "date": item.get("date"),
+                "title": title,
+                "done": bool(item.get("done")),
+                "status_bucket": "completed" if item.get("done") else ("in_progress" if rollup.get("in_progress") else "planned"),
+                "linked_work": linked,
+                "rollup": rollup,
+                "source_path": roadmap.get("source_path") or "agents/project/ROADMAP.md",
+            }
+        )
+    # Timeline order: dated milestones ascending by date, undated last but stable.
+    milestones.sort(key=lambda entry: (str(entry.get("date") or "9999-99-99"), entry["id"]))
+
+    releases = _roadmap_releases(root, now, warnings)
+
+    summary = {
+        "milestones": len(milestones),
+        "milestones_done": sum(1 for entry in milestones if entry["done"]),
+        "milestones_open": sum(1 for entry in milestones if not entry["done"]),
+        "linked_work": sum(entry["rollup"]["linked"] for entry in milestones),
+        "releases": len(releases),
+    }
+    return {
+        "schema": ROADMAP_TIMELINE_SCHEMA,
+        "generated_at": now,
+        "phase": roadmap.get("phase"),
+        "next_milestone": roadmap.get("next_milestone"),
+        "vision": vision,
+        "milestones": milestones,
+        "releases": releases,
+        "summary": summary,
+        "source_path": roadmap.get("source_path") or "agents/project/ROADMAP.md",
+        "freshness": roadmap.get("freshness", "missing"),
+        "last_updated": roadmap.get("last_updated"),
+    }
+
+
 def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     root_path = Path(root).resolve()
     generated_at = now or _now_iso()
@@ -1978,6 +2171,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     work_explorer = load_work_explorer(root_path, generated_at, warnings)
     meeting_room = build_meeting_room(agents, tasks, now=generated_at)
     tasksets_board = build_tasksets_board(work_explorer, tasks, events, generated_at)
+    roadmap_timeline = build_roadmap_timeline(roadmap, work_explorer, root_path, generated_at, warnings)
     return {
         "generated_at": generated_at,
         "sources": sources,
@@ -2000,6 +2194,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "graph": graph,
         "state_machines": state_machines,
         "roadmap": roadmap,
+        "roadmap_timeline": roadmap_timeline,
         "planning": planning,
         "commands": commands,
         "gaps": gaps,
