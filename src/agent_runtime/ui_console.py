@@ -54,6 +54,7 @@ HTML = """<!doctype html>
         </div>
       </div>
       <div class="toolbar">
+        <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-controls="primary-sidebar" aria-expanded="true" aria-label="Toggle sidebar">&#9776;</button>
         <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Toggle dark mode" title="Toggle light/dark theme">
           <span class="theme-toggle-icon" aria-hidden="true"></span>
           <span id="theme-toggle-label" class="theme-toggle-label">Light</span>
@@ -62,6 +63,86 @@ HTML = """<!doctype html>
         <span id="poll-state" class="state-chip">polling</span>
       </div>
     </header>
+
+    <nav id="primary-sidebar" class="sidebar" aria-label="Primary navigation" data-collapsed="false">
+      <div class="sidebar-pinned" aria-label="Active taskset">
+        <div id="sidebar-active-taskset" class="sidebar-active-taskset" hidden>
+          <span class="sidebar-active-label">Active taskset</span>
+          <b id="sidebar-active-name" class="sidebar-active-name"></b>
+          <div id="sidebar-active-progress" class="sidebar-active-progress"></div>
+          <span id="sidebar-active-meta" class="sidebar-active-meta"></span>
+        </div>
+        <div id="sidebar-active-empty" class="sidebar-active-empty">No active taskset</div>
+      </div>
+      <div class="sidebar-nav" role="tablist" aria-label="Views">
+        <div class="sidebar-group" data-group="home">
+          <button class="sidebar-link is-active" type="button" role="tab" data-view="board" data-route="home/board" aria-selected="true">
+            <span class="sidebar-icon" aria-hidden="true">&#8962;</span><span class="sidebar-label">Home</span>
+          </button>
+        </div>
+        <div class="sidebar-group" data-group="work">
+          <span class="sidebar-group-title">WORK</span>
+          <button class="sidebar-link" type="button" role="tab" data-view="tasksets" data-route="work/tasksets" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9635;</span><span class="sidebar-label">Tasksets</span>
+          </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="tsboard" data-route="work/board" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Taskset Board</span>
+          </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="work" data-route="work/explorer" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9776;</span><span class="sidebar-label">Work Explorer</span>
+          </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="planner" data-route="work/planner" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9998;</span><span class="sidebar-label">Planner</span>
+          </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="roadmap" data-route="work/roadmap" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9776;</span><span class="sidebar-label">Roadmap</span>
+          </button>
+        </div>
+        <div class="sidebar-group" data-group="agents">
+          <span class="sidebar-group-title">AGENTS</span>
+          <button class="sidebar-link" type="button" role="tab" data-view="team" data-route="agents/team" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9733;</span><span class="sidebar-label">Team</span>
+          </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="agents" data-route="agents/list" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9737;</span><span class="sidebar-label">Agents</span>
+          </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="map" data-route="agents/map" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Live Map</span>
+          </button>
+        </div>
+        <div class="sidebar-group" data-group="comms">
+          <span class="sidebar-group-title">COMMS</span>
+          <button class="sidebar-link" type="button" role="tab" data-view="messages" data-route="comms/channels" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9993;</span><span class="sidebar-label">Channels</span>
+          </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="meeting" data-route="comms/meetings" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9786;</span><span class="sidebar-label">Meetings</span>
+          </button>
+        </div>
+        <div class="sidebar-group" data-group="records">
+          <span class="sidebar-group-title">RECORDS</span>
+          <button class="sidebar-link" type="button" role="tab" data-view="events" data-route="records/events" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9201;</span><span class="sidebar-label">Events</span>
+          </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="evidence" data-route="records/evidence" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9745;</span><span class="sidebar-label">Evidence</span>
+          </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="sources" data-route="records/sources" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Sources</span>
+          </button>
+        </div>
+        <div class="sidebar-group" data-group="ops">
+          <span class="sidebar-group-title">OPS</span>
+          <button class="sidebar-link" type="button" role="tab" data-view="writes" data-route="ops/writes" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9881;</span><span class="sidebar-label">Writes</span>
+          </button>
+        </div>
+      </div>
+      <button id="sidebar-collapse" class="sidebar-collapse" type="button" aria-label="Collapse sidebar">
+        <span class="sidebar-collapse-icon" aria-hidden="true">&#8676;</span><span class="sidebar-label">Collapse</span>
+      </button>
+    </nav>
+    <div id="sidebar-scrim" class="sidebar-scrim" hidden></div>
 
     <main class="layout">
       <section class="dashboard" aria-label="Dashboard">
@@ -101,24 +182,6 @@ HTML = """<!doctype html>
           <textarea id="runtime-instruction" name="instruction" placeholder="Instruction or lifecycle reason"></textarea>
           <button type="submit">Send</button>
         </form>
-        <nav class="tabs" aria-label="Views">
-          <button class="tab is-active" type="button" data-view="board">Backlog</button>
-          <button class="tab" type="button" data-view="work">Work Explorer</button>
-          <button class="tab" type="button" data-view="meeting">Meeting Room</button>
-          <button class="tab" type="button" data-view="tasksets">Tasksets</button>
-          <button class="tab" type="button" data-view="tsboard">Taskset Board</button>
-          <button class="tab" type="button" data-view="team">Team</button>
-          <button class="tab" type="button" data-view="agents">Agents</button>
-          <button class="tab" type="button" data-view="messages">Messages</button>
-          <button class="tab" type="button" data-view="events">Events</button>
-          <button class="tab" type="button" data-view="evidence">Evidence</button>
-          <button class="tab" type="button" data-view="planner">Planner</button>
-          <button class="tab" type="button" data-view="roadmap">Roadmap</button>
-          <button class="tab" type="button" data-view="map">Map</button>
-          <button class="tab" type="button" data-view="sources">Sources</button>
-          <button class="tab" type="button" data-view="writes">Writes</button>
-        </nav>
-
         <div id="view-board" class="view is-active">
           <p class="board-hint">Hover or focus a card for a peek. Drag a card between lanes to reorder, or focus it and press Ctrl+D to lift, arrows to move, Space to drop, Esc to cancel. Quick actions: Claim / Verify / Close.</p>
           <div id="kanban" class="kanban" aria-label="Kanban"></div>
@@ -373,6 +436,10 @@ CSS = """/*
   --top-line: rgba(55, 53, 47, 0.08);
   --top-bg: rgba(255, 255, 255, 0.85);
   --hairline-top: rgba(0, 0, 0, 0.02);
+  /* Sidebar / overlay scrim */
+  --sidebar-bg: rgba(247, 247, 245, 0.92);
+  --scrim: rgba(15, 15, 15, 0.40);
+  --nav-active-text: var(--primary-hover);
   /* Effects */
   --radius: 8px;
   --shadow: 0 1px 2px rgba(15, 15, 15, 0.06), 0 8px 24px rgba(15, 15, 15, 0.06);
@@ -444,6 +511,10 @@ CSS = """/*
   --top-line: rgba(255, 255, 255, 0.08);
   --top-bg: rgba(12, 13, 16, 0.88);
   --hairline-top: rgba(255, 255, 255, 0.035);
+  /* Sidebar / overlay scrim */
+  --sidebar-bg: rgba(12, 13, 16, 0.92);
+  --scrim: rgba(0, 0, 0, 0.5);
+  --nav-active-text: #ffffff;
   /* Effects */
   --shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
   --shadow-pop: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -484,6 +555,155 @@ a:hover { text-decoration: underline; }
 .shell {
   min-height: 100vh;
   position: relative;
+  --sidebar-width: 232px;
+  --sidebar-rail: 60px;
+}
+.sidebar {
+  position: fixed;
+  top: 77px;
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-width);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 10px;
+  border-right: 1px solid var(--line);
+  background: var(--sidebar-bg);
+  backdrop-filter: blur(14px);
+  overflow-y: auto;
+  z-index: 3;
+  transition: width 160ms ease, transform 200ms ease;
+}
+.sidebar[data-collapsed="true"] {
+  width: var(--sidebar-rail);
+}
+.sidebar[data-collapsed="true"] .sidebar-label,
+.sidebar[data-collapsed="true"] .sidebar-group-title,
+.sidebar[data-collapsed="true"] .sidebar-active-taskset,
+.sidebar[data-collapsed="true"] .sidebar-active-empty {
+  display: none;
+}
+.sidebar-pinned {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--primary-soft);
+  padding: 10px;
+  margin-bottom: 6px;
+}
+.sidebar-active-label {
+  display: block;
+  color: var(--subtle);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.sidebar-active-name {
+  display: block;
+  margin: 4px 0 6px;
+  color: var(--ink);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.sidebar-active-progress {
+  margin-bottom: 6px;
+}
+.sidebar-active-meta {
+  color: var(--muted);
+  font-size: 11px;
+}
+.sidebar-active-empty {
+  color: var(--subtle);
+  font-size: 11px;
+}
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+}
+.sidebar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 8px;
+}
+.sidebar-group-title {
+  color: var(--subtle);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 8px 10px 2px;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  box-shadow: none;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  padding: 8px 10px;
+}
+.sidebar-link:hover {
+  transform: none;
+  color: var(--ink);
+  background: var(--raise-strong);
+}
+.sidebar-link.is-active {
+  color: var(--nav-active-text);
+  background: var(--primary-soft-strong);
+  border-color: var(--primary-line);
+}
+.sidebar-link:focus-visible {
+  outline: 2px solid var(--primary-hover);
+  outline-offset: 2px;
+  box-shadow: var(--focus);
+}
+.sidebar-icon {
+  flex: 0 0 auto;
+  width: 20px;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1;
+}
+.sidebar[data-collapsed="true"] .sidebar-link {
+  justify-content: center;
+}
+.sidebar-collapse {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+  box-shadow: none;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 8px 10px;
+  margin-top: auto;
+}
+.sidebar-collapse:hover {
+  transform: none;
+  color: var(--ink);
+}
+.sidebar-toggle {
+  display: none;
+  padding: 9px 11px;
+}
+.sidebar-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  background: var(--scrim);
 }
 .topbar {
   display: flex;
@@ -627,6 +847,11 @@ textarea:focus {
   gap: 16px;
   align-items: start;
   padding: 18px 24px 28px;
+  margin-left: var(--sidebar-width);
+  transition: margin-left 160ms ease;
+}
+.shell[data-sidebar-collapsed="true"] .layout {
+  margin-left: var(--sidebar-rail);
 }
 .dashboard {
   grid-column: 1 / -1;
@@ -1886,17 +2111,36 @@ pre {
     width: 100%;
   }
   h1 { font-size: 24px; }
-  .layout { padding: 14px; }
-  .tabs {
-    flex-wrap: nowrap;
-    margin-inline: -2px;
-    overflow-x: auto;
-    padding-bottom: 8px;
-    scroll-snap-type: x proximity;
+  .layout {
+    padding: 14px;
+    margin-left: 0;
   }
-  .tab {
-    flex: 0 0 auto;
-    scroll-snap-align: start;
+  .shell[data-sidebar-collapsed="true"] .layout {
+    margin-left: 0;
+  }
+  .sidebar-toggle {
+    display: inline-flex;
+  }
+  .sidebar {
+    top: 0;
+    width: min(82vw, 300px);
+    transform: translateX(-100%);
+    box-shadow: var(--shadow);
+  }
+  .sidebar[data-collapsed="true"] {
+    width: min(82vw, 300px);
+  }
+  .sidebar[data-collapsed="true"] .sidebar-label,
+  .sidebar[data-collapsed="true"] .sidebar-group-title,
+  .sidebar[data-collapsed="true"] .sidebar-active-taskset,
+  .sidebar[data-collapsed="true"] .sidebar-active-empty {
+    display: revert;
+  }
+  .sidebar.is-open {
+    transform: translateX(0);
+  }
+  .sidebar-collapse {
+    display: none;
   }
   .task-card-header,
   .taskset-card-header,
@@ -3899,17 +4143,128 @@ function renderAll() {
   renderMap();
   renderSources();
   renderCommands();
+  renderSidebarActiveTaskset();
   renderDetail();
 }
 
-document.querySelectorAll(".tab").forEach((tab) => {
-  tab.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach((item) => item.classList.remove("is-active"));
-    document.querySelectorAll(".view").forEach((item) => item.classList.remove("is-active"));
-    tab.classList.add("is-active");
-    $(`view-${tab.dataset.view}`).classList.add("is-active");
+// ----- Sidebar navigation + URL hash routing -----
+function navLinks() {
+  return Array.from(document.querySelectorAll(".sidebar-link"));
+}
+
+function viewForRoute(route) {
+  const link = navLinks().find((item) => item.dataset.route === route);
+  return link ? link.dataset.view : null;
+}
+
+function routeForView(view) {
+  const link = navLinks().find((item) => item.dataset.view === view);
+  return link ? link.dataset.route : null;
+}
+
+function activateView(view, { updateHash = true } = {}) {
+  const target = $(`view-${view}`);
+  if (!target) return;
+  navLinks().forEach((item) => {
+    const isActive = item.dataset.view === view;
+    item.classList.toggle("is-active", isActive);
+    item.setAttribute("aria-selected", isActive ? "true" : "false");
   });
+  document.querySelectorAll(".view").forEach((item) => item.classList.remove("is-active"));
+  target.classList.add("is-active");
+  if (updateHash) {
+    const route = routeForView(view);
+    if (route) {
+      const desired = `#/${route}`;
+      if (window.location.hash !== desired) window.location.hash = desired;
+    }
+  }
+  closeMobileSidebar();
+}
+
+function routeFromHash() {
+  const raw = (window.location.hash || "").replace(/^#\/?/, "");
+  if (!raw) return null;
+  return viewForRoute(raw) ? raw : null;
+}
+
+function applyHashRoute() {
+  const route = routeFromHash();
+  const view = route ? viewForRoute(route) : "board";
+  activateView(view || "board", { updateHash: false });
+}
+
+function setSidebarCollapsed(collapsed) {
+  const sidebar = $("primary-sidebar");
+  const shell = $("runtime-console-app");
+  if (sidebar) sidebar.dataset.collapsed = collapsed ? "true" : "false";
+  if (shell) shell.dataset.sidebarCollapsed = collapsed ? "true" : "false";
+  const collapseBtn = $("sidebar-collapse");
+  if (collapseBtn) collapseBtn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+  try { window.localStorage.setItem("ar-sidebar-collapsed", collapsed ? "1" : "0"); } catch (error) {}
+}
+
+function openMobileSidebar() {
+  const sidebar = $("primary-sidebar");
+  const scrim = $("sidebar-scrim");
+  if (sidebar) sidebar.classList.add("is-open");
+  if (scrim) scrim.hidden = false;
+  const toggle = $("sidebar-toggle");
+  if (toggle) toggle.setAttribute("aria-expanded", "true");
+}
+
+function closeMobileSidebar() {
+  const sidebar = $("primary-sidebar");
+  const scrim = $("sidebar-scrim");
+  if (sidebar) sidebar.classList.remove("is-open");
+  if (scrim) scrim.hidden = true;
+  const toggle = $("sidebar-toggle");
+  if (toggle) toggle.setAttribute("aria-expanded", "false");
+}
+
+function renderSidebarActiveTaskset() {
+  const box = $("sidebar-active-taskset");
+  const empty = $("sidebar-active-empty");
+  if (!box || !empty) return;
+  const taskSets = runtimeState.task_sets || [];
+  const active = taskSets.find((set) => set.active) || taskSets.find((set) => set.status === "active") || null;
+  if (!active) {
+    box.hidden = true;
+    empty.hidden = false;
+    return;
+  }
+  box.hidden = false;
+  empty.hidden = true;
+  setText("sidebar-active-name", active.display_name || active.primary_alias || active.id);
+  const progress = $("sidebar-active-progress");
+  if (progress) progress.innerHTML = progressBar(active.progress_pct);
+  setText("sidebar-active-meta", `${active.tasks_done || 0}/${active.tasks_total || 0} done`);
+}
+
+navLinks().forEach((link) => {
+  link.addEventListener("click", () => activateView(link.dataset.view));
 });
+
+window.addEventListener("hashchange", applyHashRoute);
+
+$("sidebar-collapse")?.addEventListener("click", () => {
+  const sidebar = $("primary-sidebar");
+  const collapsed = sidebar ? sidebar.dataset.collapsed === "true" : false;
+  setSidebarCollapsed(!collapsed);
+});
+$("sidebar-toggle")?.addEventListener("click", () => {
+  const sidebar = $("primary-sidebar");
+  if (sidebar && sidebar.classList.contains("is-open")) closeMobileSidebar();
+  else openMobileSidebar();
+});
+$("sidebar-scrim")?.addEventListener("click", closeMobileSidebar);
+
+(() => {
+  let collapsed = false;
+  try { collapsed = window.localStorage.getItem("ar-sidebar-collapsed") === "1"; } catch (error) {}
+  setSidebarCollapsed(collapsed);
+  applyHashRoute();
+})();
 
 function boardViewActive() {
   const view = $("view-board");
