@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-13
-task_count: 186
-open_count: 35
+task_count: 189
+open_count: 38
 completed_count: 151
-task_set_count: 5
+task_set_count: 6
 completed_task_set_count: 22
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `35` open or active tasks; `151` completed tasks are archived from this live board.
+- Summary: `38` open or active tasks; `151` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `30` / Ask `4` / Review `0` / Later `1` / Done `151`.
-- Task Sets: `5` active workflows; `22` completed workflows are hidden from the live action board.
+- Status: Action `33` / Ask `4` / Review `0` / Later `1` / Done `151`.
+- Task Sets: `6` active workflows; `22` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -116,6 +116,17 @@ completed_task_set_count: 22
 | `TASK-AR-371` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Remove `BACKLOG.md` as a top-of-file shared manual registration hotspot while preserv… |
 | `TASK-AR-373` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P3 | Low | Medium | 6h/5000tok | Low | 5 | governance-loop | independent-auditor | Execute next | Make it visible which planned tasks are worker-ready and which still require planner… |
 | `TASK-AR-374` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P3 | Low | Low | 8h/4000tok | Low | 4 | agent-runtime-core | lead-engineer | Execute next | Prove that the work hierarchy and registration conflict surfaces are actually closed… |
+
+### Ops Ergonomics (`TASKSET-AR-OPS-ERGONOMICS`)
+
+- Flow: Make the 500-series infrastructure easy to operate: session-start W0 dashboard hook, trigger-based skills for wave/merge/verify/work-analytics/release, asset registry entries, and an ops command reference.
+- Progress: `0/3` done; `3` open or active.
+- WIP: active `3/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-523` | - | - | - | planned | Action | P1 | High | Medium | 5h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Nothing surfaces the 500-series observability at session start. Add scripts/session_d… |
+| `TASK-AR-524` | - | - | - | planned | Action | P1 | High | Medium | 5h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Make the new 500-series tools discoverable as trigger-based skills: wave-conductor (w… |
+| `TASK-AR-525` | - | - | - | planned | Action | P2 | Medium | Low | 3h/3000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Register the new dashboard hook + 5 skills + the standalone tools (wave_dispatcher/me… |
 
 ## Archived Task Sets
 

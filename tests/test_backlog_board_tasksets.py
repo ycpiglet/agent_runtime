@@ -186,4 +186,5 @@ def test_real_backlog_tasks_are_classified_into_twenty_five_task_sets() -> None:
         "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
         "TASKSET-AR-AGENT-IDENTITY-CONTRACT",
         "TASKSET-AR-WORK-METADATA-ANALYTICS",
+        "TASKSET-AR-OPS-ERGONOMICS",
     }

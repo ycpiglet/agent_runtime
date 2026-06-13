@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-13T13:49:26+09:00",
-  "record_count": 229,
+  "generated_at": "2026-06-13T14:21:03+09:00",
+  "record_count": 233,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -2071,6 +2071,50 @@
       "title": "예상치(est_*)만 있는 현 체계에 실측치를 더해, task/taskset을 우선순위·난이도·예상/실제 토큰·예상/실제 시간·부서 등 다요소로 정렬·필…",
       "path": "agents/lead_engineer/tasks/TASK-AR-368.md",
       "parent_id": "TASKSET-AR-DOC-TO-PLAN",
+      "status": "planned"
+    },
+    {
+      "key": "taskset:TASKSET-AR-OPS-ERGONOMICS",
+      "level": "taskset",
+      "number": "0.24",
+      "label": "Taskset 0.24",
+      "id": "TASKSET-AR-OPS-ERGONOMICS",
+      "title": "Ops Ergonomics",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-UNASSIGNED",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-523",
+      "level": "task",
+      "number": "0.24.1",
+      "label": "Task 0.24.1",
+      "id": "TASK-AR-523",
+      "title": "Nothing surfaces the 500-series observability at session start. Add scripts/session_d…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-523.md",
+      "parent_id": "TASKSET-AR-OPS-ERGONOMICS",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-524",
+      "level": "task",
+      "number": "0.24.2",
+      "label": "Task 0.24.2",
+      "id": "TASK-AR-524",
+      "title": "Make the new 500-series tools discoverable as trigger-based skills: wave-conductor (w…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-524.md",
+      "parent_id": "TASKSET-AR-OPS-ERGONOMICS",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-525",
+      "level": "task",
+      "number": "0.24.3",
+      "label": "Task 0.24.3",
+      "id": "TASK-AR-525",
+      "title": "Register the new dashboard hook + 5 skills + the standalone tools (wave_dispatcher/me…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-525.md",
+      "parent_id": "TASKSET-AR-OPS-ERGONOMICS",
       "status": "planned"
     },
     {

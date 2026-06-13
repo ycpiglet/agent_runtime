@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "inst-w8-ar523-claude",
+  "callsign": "claude/dash-owl",
+  "callsite_id": "claude-w8-ar523",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260613-142149-task-ar-523-e3be.json"
+  ],
+  "created_at": "2026-06-13T14:21:49+09:00",
+  "decision_cycle_id": "",
+  "display_name": "claude/dash-owl",
+  "model": "",
+  "model_tier": "",
+  "on_behalf_of": "TASK-AR-523",
+  "pane_id": "claude-w8-ar523",
+  "parent_instance_id": "",
+  "project_id": "",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "lead-engineer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-13T14:21:49+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-523",
+  "task_set_id": "TASKSET-AR-OPS-ERGONOMICS",
+  "team_id": "agent-runtime-core",
+  "unit_id": "",
+  "unit_spec": "",
+  "updated_at": "2026-06-13T14:21:49+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-523"
+}
