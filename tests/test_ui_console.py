@@ -3207,10 +3207,185 @@ def test_ui_console_growth_app_js_ascii_only_and_node_check(tmp_path):
     growth_block = js[start:end]
     non_ascii = [ch for ch in growth_block if ord(ch) > 127]
     assert not non_ascii, f"growth JS must be ASCII-only, found: {non_ascii[:5]}"
+    if shutil.which("node") is None:
+        import pytest
+
+        pytest.skip("node not available")
+    proc = subprocess.run(["node", "--check", "-"], input=js, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stderr
+
+
+# ----- TASK-AR-341: workspace switcher + widget extension points + i18n -----
+
+
+def test_ui_console_workspace_switcher_control_in_topbar(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    # Topbar carries the workspace switcher toggle + menu container.
+    assert 'id="workspace-switcher-toggle"' in html
+    assert 'id="workspace-switcher-menu"' in html
+    assert 'class="workspace-switcher"' in html
+
+
+def test_ui_console_workspaces_route_lists_current_root_safely(tmp_path):
+    response = ui_console.build_response("/api/workspaces", tmp_path)
+    payload = json.loads(response.body.decode("utf-8"))
+    assert response.status == 200
+    assert payload["resource"] == "workspaces"
+    items = payload["items"]["items"]
+    # The current root is always present and marked current.
+    current = [item for item in items if item["current"]]
+    assert len(current) == 1
+    # Switching is navigation-only: a relaunch command, never an exec/file write.
+    assert current[0]["relaunch_command"].startswith("agent-runtime ui-console --root ")
+    # Recent-state preview is read-only metadata (no task bodies / commands).
+    assert "recent_state" in current[0]
+
+
+def test_ui_console_workspace_switch_js_is_navigation_not_exec(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert "function switchWorkspace" in js
+    assert "function renderWorkspaces" in js
+    # Safe switch: self-reload for current, clipboard-copy of relaunch command for
+    # others. It must NOT spawn/exec/eval an arbitrary root.
+    assert "window.location.reload()" in js
+    assert "navigator.clipboard" in js
+    start = js.index("function switchWorkspace")
+    end = js.index("function renderWidgetCard", start)
+    block = js[start:end]
+    for forbidden in ("eval(", "child_process", "exec(", "spawn(", "new Function"):
+        assert forbidden not in block, f"workspace switch must not {forbidden}"
+
+
+def test_ui_console_widget_host_present_on_home(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    assert 'id="home-widgets"' in html
+    assert 'id="home-widgets-grid"' in html
+
+
+def test_ui_console_widgets_route_loads_declarative_definition(tmp_path):
+    # A declarative widget dropped as JSON renders with no code, only data.
+    _write(
+        tmp_path / "agents" / "runtime" / "widgets" / "custom.json",
+        json.dumps(
+            {
+                "id": "team-metric",
+                "kind": "metric",
+                "title": "Open PRs",
+                "value": 7,
+                "caption": "needs review",
+            }
+        ),
+    )
+    payload = json.loads(ui_console.build_response("/api/widgets", tmp_path).body.decode("utf-8"))
+    assert payload["resource"] == "widgets"
+    items = payload["items"]["items"]
+    ids = {widget["id"] for widget in items}
+    assert "team-metric" in ids
+    # Built-in samples are also present so the host renders out of the box.
+    assert any(widget.get("builtin") for widget in items)
+
+
+def test_ui_console_widget_render_escapes_html_no_injection(tmp_path):
+    # A widget whose fields carry markup must be rendered escaped (no injection).
+    _write(
+        tmp_path / "agents" / "runtime" / "widgets" / "evil.json",
+        json.dumps(
+            {
+                "id": "xss-widget",
+                "kind": "note",
+                "title": "<img src=x onerror=alert(1)>",
+                "body": "<script>alert('xss')</script>",
+            }
+        ),
+    )
+    payload = json.loads(ui_console.build_response("/api/widgets", tmp_path).body.decode("utf-8"))
+    items = payload["items"]["items"]
+    evil = next(widget for widget in items if widget["id"] == "xss-widget")
+    # The server stores the raw text as DATA (string); the JS renderer escapes it.
+    assert evil["title"] == "<img src=x onerror=alert(1)>"
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    start = js.index("function renderWidgetCard")
+    end = js.index("function renderWidgets", start)
+    block = js[start:end]
+    # Every interpolated widget field flows through escapeHtml; nothing is raw.
+    assert "escapeHtml(widget.title" in block
+    assert "escapeHtml(widget.body" in block
+    # The widget renderer carries no eval / Function / dangerous sink.
+    for forbidden in ("eval(", "new Function", "outerHTML"):
+        assert forbidden not in block
+
+
+def test_ui_console_i18n_route_has_kr_en_for_key_strings_default_kr(tmp_path):
+    payload = json.loads(ui_console.build_response("/api/i18n", tmp_path).body.decode("utf-8"))
+    table = payload["items"]
+    assert table["default_language"] == "ko"
+    assert "ko" in table["languages"] and "en" in table["languages"]
+    strings = table["strings"]
+    # Key shell strings carry both KR and EN.
+    for key in ("nav.group.work", "view.board.title", "button.refresh", "workspace.title"):
+        assert key in strings, f"missing i18n key {key}"
+        assert strings[key]["ko"], f"missing KR for {key}"
+        assert strings[key]["en"], f"missing EN for {key}"
+    # KR is genuine Korean text (non-ASCII), proving the table is resourced.
+    assert any(ord(ch) > 127 for ch in strings["button.refresh"]["ko"])
+
+
+def test_ui_console_i18n_t_helper_and_language_toggle_present(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    # Settings toggle for language lives in the topbar.
+    assert 'id="lang-toggle"' in html
+    assert 'value="ko"' in html and 'value="en"' in html
+    # data-i18n anchors mark high-traffic strings for translation.
+    assert 'data-i18n="nav.group.work"' in html
+    assert 'data-i18n="button.refresh"' in html
+    # t() lookup helper + default-KR mechanism + escape-safe application.
+    assert "function t(key)" in js
+    assert 'const DEFAULT_LANGUAGE = "ko";' in js
+    assert "function applyTranslations" in js
+    # Translations are applied via textContent (never innerHTML) -> escape-safe.
+    start = js.index("function applyTranslations")
+    end = js.index("function setLanguage", start)
+    block = js[start:end]
+    assert "textContent" in block
+    assert "innerHTML" not in block
+
+
+def test_ui_console_i18n_kr_strings_not_inlined_in_ar341_app_js(tmp_path):
+    # KR string VALUES must be served via JSON (state / /api/i18n), NOT inlined in
+    # app.js by this task. (Pre-existing KR literals from older tasks may remain;
+    # this guard checks the i18n/workspace/widget code blocks introduced here.)
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    start = js.index("// ----- TASK-AR-341: i18n")
+    end = js.index("async function loadState()", start)
+    block = js[start:end]
+    non_ascii = [ch for ch in block if ord(ch) > 127]
+    assert not non_ascii, f"AR-341 JS must be ASCII-only, found: {non_ascii[:5]}"
+
+
+def test_ui_console_ar341_css_uses_tokens_not_raw_color(tmp_path):
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    body_css = css.replace(_root_token_block(css), "").replace(_dark_theme_block(css), "")
+    hex_pattern = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+    rgba_pattern = re.compile(r"rgba?\(")
+    lines = [
+        line for line in body_css.splitlines()
+        if any(token in line for token in (".workspace-switcher", ".workspace-item", ".lang-toggle", ".home-widget"))
+    ]
+    assert lines, "expected AR-341 CSS rules to exist"
+    for line in lines:
+        assert not hex_pattern.search(line), f"raw hex in AR-341 CSS: {line.strip()}"
+        assert not rgba_pattern.search(line), f"raw rgba in AR-341 CSS: {line.strip()}"
+
+
+def test_ui_console_ar341_app_js_node_check(tmp_path):
+    import shutil
+    import subprocess
 
     if shutil.which("node") is None:
         import pytest
 
         pytest.skip("node not available")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
     proc = subprocess.run(["node", "--check", "-"], input=js, capture_output=True, text=True)
     assert proc.returncode == 0, proc.stderr

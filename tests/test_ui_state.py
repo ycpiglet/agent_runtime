@@ -2982,3 +2982,114 @@ def test_growth_registered_as_resource_and_in_state(tmp_path):
     resource = ui_state.build_resource(tmp_path, "growth", now="2026-06-13T13:00:00+09:00")
     assert resource["resource"] == "growth"
     assert resource["items"]["schema"] == "agent-runtime-growth/v1"
+
+
+# ----- TASK-AR-341: workspace switcher + widget extension points + i18n -----
+
+
+def test_load_workspaces_always_includes_current_root_as_current(tmp_path):
+    result = ui_state.load_workspaces(tmp_path, now="2026-06-14T00:00:00+09:00")
+    items = result["items"]
+    current = [item for item in items if item["current"]]
+    assert len(current) == 1
+    assert current[0]["path"] == tmp_path.resolve().as_posix()
+    # Relaunch command is navigation-only (never executed by the console).
+    assert current[0]["relaunch_command"] == f"agent-runtime ui-console --root {tmp_path.resolve().as_posix()}"
+
+
+def test_load_workspaces_reads_registered_hosts_read_only(tmp_path):
+    host_a = tmp_path / "host-a"
+    host_b = tmp_path / "host-b"
+    # host-a has a recent-state surface; host-b is registered but missing on disk.
+    _write(host_a / "agents" / "lead_engineer" / "tasks" / "TASK-AR-001.md", _task_text("TASK-AR-001"))
+    _write(host_a / "STATUS.md", "## 2026-06-14 - Host A\n\n- Summary: building.\n")
+    _write(
+        tmp_path / "agents" / "runtime" / "workspaces.json",
+        json.dumps(
+            {
+                "workspaces": [
+                    {"path": str(host_a), "name": "Host A"},
+                    {"path": str(host_b), "name": "Host B"},
+                ]
+            }
+        ),
+    )
+    result = ui_state.load_workspaces(tmp_path, now="2026-06-14T00:00:00+09:00")
+    by_name = {item["name"]: item for item in result["items"]}
+    assert "Host A" in by_name and "Host B" in by_name
+    # Registered hosts are not current; only the --root workspace is.
+    assert by_name["Host A"]["current"] is False
+    # Recent-state preview is derived read-only (open task count + activity).
+    assert by_name["Host A"]["recent_state"]["available"] is True
+    assert by_name["Host A"]["recent_state"]["open_tasks"] == 1
+    assert by_name["Host A"]["recent_state"]["status_title"] == "2026-06-14 - Host A"
+    # Missing host degrades gracefully (no crash, marked unavailable).
+    assert by_name["Host B"]["exists"] is False
+    assert by_name["Host B"]["recent_state"]["available"] is False
+
+
+def test_load_workspaces_ignores_malformed_registry(tmp_path):
+    _write(tmp_path / "agents" / "runtime" / "workspaces.json", "{not valid json")
+    result = ui_state.load_workspaces(tmp_path, now="2026-06-14T00:00:00+09:00")
+    # Still serves the current root; bad registry is silently skipped.
+    assert any(item["current"] for item in result["items"])
+
+
+def test_load_widgets_includes_builtins_and_declarative_defs(tmp_path):
+    _write(
+        tmp_path / "agents" / "runtime" / "widgets" / "metric.json",
+        json.dumps({"id": "open-prs", "kind": "metric", "title": "Open PRs", "value": 3}),
+    )
+    result = ui_state.load_widgets(tmp_path, now="2026-06-14T00:00:00+09:00")
+    ids = {widget["id"] for widget in result["items"]}
+    assert "open-prs" in ids
+    # Built-in samples present so the host renders by declaration alone.
+    assert any(widget.get("builtin") for widget in result["items"])
+    metric = next(widget for widget in result["items"] if widget["id"] == "open-prs")
+    assert metric["kind"] == "metric"
+    assert metric["value"] == "3"
+
+
+def test_load_widgets_normalizes_unknown_kind_and_keeps_fields_as_data(tmp_path):
+    # An unknown kind degrades to a safe "note"; fields are stored as plain data
+    # (strings) so the renderer can escape them. No code is ever executed.
+    _write(
+        tmp_path / "agents" / "runtime" / "widgets" / "weird.json",
+        json.dumps({"id": "weird", "kind": "iframe", "title": "<b>x</b>", "body": "<script>1</script>"}),
+    )
+    result = ui_state.load_widgets(tmp_path, now="2026-06-14T00:00:00+09:00")
+    weird = next(widget for widget in result["items"] if widget["id"] == "weird")
+    assert weird["kind"] == "note"
+    # Raw markup is preserved verbatim as data (the JS renderer escapes on output).
+    assert weird["title"] == "<b>x</b>"
+    assert weird["body"] == "<script>1</script>"
+
+
+def test_build_i18n_has_kr_en_for_key_strings_and_default_kr():
+    table = ui_state.build_i18n(now="2026-06-14T00:00:00+09:00")
+    assert table["default_language"] == "ko"
+    assert table["languages"] == ["ko", "en"]
+    for key in ("nav.group.work", "view.board.title", "button.refresh", "workspace.title", "widgets.title"):
+        assert table["strings"][key]["ko"]
+        assert table["strings"][key]["en"]
+
+
+def test_lookup_i18n_resolves_with_kr_default_and_fallbacks():
+    # Server-side mirror of the JS t() helper.
+    assert ui_state.lookup_i18n("button.refresh", "en") == "Refresh"
+    # Default language (KR) when lang omitted / unsupported.
+    assert ui_state.lookup_i18n("button.refresh") == ui_state.I18N_STRINGS["button.refresh"]["ko"]
+    assert ui_state.lookup_i18n("button.refresh", "fr") == ui_state.I18N_STRINGS["button.refresh"]["ko"]
+    # Unknown key falls back to the key itself.
+    assert ui_state.lookup_i18n("does.not.exist", "en") == "does.not.exist"
+
+
+def test_build_state_wires_workspaces_widgets_i18n(tmp_path):
+    state = ui_state.build_state(tmp_path, now="2026-06-14T00:00:00+09:00")
+    assert "workspaces" in state and state["workspaces"]["items"]
+    assert "widgets" in state and state["widgets"]["items"]
+    assert "i18n" in state and state["i18n"]["default_language"] == "ko"
+    # These resources are addressable via build_resource (route-backed).
+    for resource in ("workspaces", "widgets", "i18n"):
+        payload = ui_state.build_resource(tmp_path, resource, now="2026-06-14T00:00:00+09:00")
+        assert payload["resource"] == resource

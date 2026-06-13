@@ -72,7 +72,7 @@ HTML = """<!doctype html>
         </svg>
         <div>
           <h1>Agent Runtime Console</h1>
-          <p id="status-line">Loading runtime state</p>
+          <p id="status-line" data-i18n="common.loading">Loading runtime state</p>
         </div>
       </div>
       <div class="topbar-search">
@@ -83,11 +83,25 @@ HTML = """<!doctype html>
       </div>
       <div class="toolbar">
         <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-controls="primary-sidebar" aria-expanded="true" aria-label="Toggle sidebar">&#9776;</button>
+        <div class="workspace-switcher">
+          <button id="workspace-switcher-toggle" class="workspace-switcher-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="workspace-switcher-menu" title="Switch workspace">
+            <span class="workspace-switcher-icon" aria-hidden="true">&#9783;</span>
+            <span id="workspace-switcher-label" class="workspace-switcher-label">Workspace</span>
+          </button>
+          <div id="workspace-switcher-menu" class="workspace-switcher-menu" role="menu" aria-label="Registered workspaces" hidden></div>
+        </div>
+        <label class="lang-toggle" title="Language / Settings">
+          <span id="lang-toggle-label" class="lang-toggle-label">Lang</span>
+          <select id="lang-toggle" class="lang-toggle-select" aria-label="Language">
+            <option value="ko">KR</option>
+            <option value="en">EN</option>
+          </select>
+        </label>
         <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Toggle dark mode" title="Toggle light/dark theme">
           <span class="theme-toggle-icon" aria-hidden="true"></span>
           <span id="theme-toggle-label" class="theme-toggle-label">Light</span>
         </button>
-        <button id="refresh-button" type="button">Refresh</button>
+        <button id="refresh-button" type="button" data-i18n="button.refresh">Refresh</button>
         <button id="experience-settings-toggle" class="experience-settings-toggle" type="button"
                 aria-haspopup="dialog" aria-controls="experience-settings" aria-expanded="false"
                 aria-label="Experience settings" title="Microinteractions and gamification settings">
@@ -115,7 +129,7 @@ HTML = """<!doctype html>
           </button>
         </div>
         <div class="sidebar-group" data-group="work">
-          <span class="sidebar-group-title">WORK</span>
+          <span class="sidebar-group-title" data-i18n="nav.group.work">WORK</span>
           <button class="sidebar-link" type="button" role="tab" data-view="tasksets" data-route="work/tasksets" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9635;</span><span class="sidebar-label">Tasksets</span>
           </button>
@@ -145,7 +159,7 @@ HTML = """<!doctype html>
           </button>
         </div>
         <div class="sidebar-group" data-group="agents">
-          <span class="sidebar-group-title">AGENTS</span>
+          <span class="sidebar-group-title" data-i18n="nav.group.agents">AGENTS</span>
           <button class="sidebar-link" type="button" role="tab" data-view="team" data-route="agents/team" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9733;</span><span class="sidebar-label">Team</span>
           </button>
@@ -166,7 +180,7 @@ HTML = """<!doctype html>
           </button>
         </div>
         <div class="sidebar-group" data-group="comms">
-          <span class="sidebar-group-title">COMMS</span>
+          <span class="sidebar-group-title" data-i18n="nav.group.comms">COMMS</span>
           <button class="sidebar-link" type="button" role="tab" data-view="inbox" data-route="comms/inbox" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9993;</span><span class="sidebar-label">Inbox</span><span id="inbox-nav-badge" class="sidebar-badge" hidden>0</span>
           </button>
@@ -181,7 +195,7 @@ HTML = """<!doctype html>
           </button>
         </div>
         <div class="sidebar-group" data-group="records">
-          <span class="sidebar-group-title">RECORDS</span>
+          <span class="sidebar-group-title" data-i18n="nav.group.records">RECORDS</span>
           <button class="sidebar-link" type="button" role="tab" data-view="events" data-route="records/events" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9201;</span><span class="sidebar-label">Events</span>
           </button>
@@ -196,7 +210,7 @@ HTML = """<!doctype html>
           </button>
         </div>
         <div class="sidebar-group" data-group="ops">
-          <span class="sidebar-group-title">OPS</span>
+          <span class="sidebar-group-title" data-i18n="nav.group.ops">OPS</span>
           <button class="sidebar-link" type="button" role="tab" data-view="dashboard" data-route="ops/dashboard" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9683;</span><span class="sidebar-label">Dashboard</span>
           </button>
@@ -265,6 +279,12 @@ HTML = """<!doctype html>
           <button type="submit">Send</button>
         </form>
         <div id="view-board" class="view is-active">
+          <section id="home-widgets" class="home-widgets" aria-label="Dashboard widgets">
+            <header class="home-widgets-header">
+              <h2 id="home-widgets-title" class="home-widgets-title" data-i18n="widgets.title">Widgets</h2>
+            </header>
+            <div id="home-widgets-grid" class="home-widgets-grid"></div>
+          </section>
           <p class="board-hint">Hover or focus a card for a peek. Drag a card between lanes to reorder, or focus it and press Ctrl+D to lift, arrows to move, Space to drop, Esc to cancel. Quick actions: Claim / Verify / Close.</p>
           <div id="board-team-filter" class="board-team-filter" role="status" hidden></div>
           <div id="kanban" class="kanban" aria-label="Kanban"></div>
@@ -1432,6 +1452,180 @@ button {
   font-size: 12px;
   font-weight: 700;
 }
+/* TASK-AR-341: workspace switcher + language toggle (topbar) + home widgets.
+ * Every color flows through var(--token); no raw hex/rgba in these rules. */
+.workspace-switcher { position: relative; display: inline-flex; }
+.workspace-switcher-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--raise);
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+  box-shadow: none;
+}
+.workspace-switcher-toggle:hover { border-color: var(--primary); }
+.workspace-switcher-icon { font-size: 13px; }
+.workspace-switcher-label {
+  font-size: 12px;
+  font-weight: 700;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.workspace-switcher-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 40;
+  min-width: 280px;
+  max-width: 380px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 8px;
+  background: var(--surface-raised);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.workspace-switcher-menu[hidden] { display: none; }
+.workspace-switcher-hint {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 2px 4px 4px;
+}
+.workspace-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--raise);
+}
+.workspace-item.is-current { border-color: var(--primary); background: var(--tile); }
+.workspace-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.workspace-item-name { font-weight: 700; font-size: 13px; color: var(--ink); }
+.workspace-item-current-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--on-accent);
+  background: var(--primary);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+.workspace-item-path {
+  font-size: 11px;
+  color: var(--muted);
+  word-break: break-all;
+}
+.workspace-item-preview { font-size: 11px; color: var(--muted); }
+.workspace-item-cmd {
+  font-size: 11px;
+  font-family: var(--mono, monospace);
+  background: var(--tile);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 4px 6px;
+  color: var(--ink);
+  word-break: break-all;
+}
+.workspace-item-switch {
+  align-self: flex-start;
+  font-size: 11px;
+  padding: 4px 10px;
+}
+.lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.lang-toggle-select {
+  font: inherit;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line-strong);
+  background: var(--raise);
+  color: var(--ink);
+}
+.home-widgets { margin-bottom: 16px; }
+.home-widgets-header { margin-bottom: 8px; }
+.home-widgets-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 0;
+}
+.home-widgets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+.home-widget {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--tile);
+}
+.home-widget-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.home-widget-metric-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1.1;
+}
+.home-widget-caption, .home-widget-note { font-size: 12px; color: var(--muted); }
+.home-widget-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.home-widget-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink);
+}
+.home-widget-list-row .home-widget-list-value { color: var(--muted); font-weight: 700; }
+.home-widget-shortcut {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink);
+  padding: 3px 0;
+}
+.home-widget-shortcut kbd {
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  background: var(--raise);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 1px 6px;
+  color: var(--ink);
+}
+.home-widget-empty { font-size: 12px; color: var(--muted); }
 button:hover { transform: translateY(-1px); }
 button:focus-visible {
   outline: 2px solid var(--primary-hover);
@@ -5897,6 +6091,194 @@ function setText(id, value) {
 function setHtml(id, value) {
   const node = $(id);
   if (node) node.innerHTML = value;
+}
+
+// ----- TASK-AR-341: i18n (KR/EN) string lookup + language toggle -----
+// String VALUES are served from Python (runtimeState.i18n / /api/i18n) so this
+// app.js stays ASCII-only; t() looks them up with KR/EN fallback. Default KR.
+const LANGUAGE_STORAGE_KEY = "agent-runtime-language";
+const DEFAULT_LANGUAGE = "ko";
+const SUPPORTED_LANGUAGES = ["ko", "en"];
+let currentLanguage = DEFAULT_LANGUAGE;
+let i18nStrings = {};
+
+function storedLanguage() {
+  try {
+    const value = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    return SUPPORTED_LANGUAGES.indexOf(value) >= 0 ? value : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+// t(key): resolve a string for the active language; falls back to KR, then EN,
+// then the raw key. The return value is plain text (callers escape when they
+// inject it into innerHTML).
+function t(key) {
+  const entry = i18nStrings[key];
+  if (!entry) return key;
+  return entry[currentLanguage] || entry[DEFAULT_LANGUAGE] || entry.en || key;
+}
+
+// Apply translations to every [data-i18n] node via textContent (never innerHTML)
+// so KR/EN values can never inject markup.
+function applyTranslations() {
+  document.querySelectorAll("[data-i18n]").forEach((node) => {
+    const key = node.getAttribute("data-i18n");
+    if (key && i18nStrings[key]) node.textContent = t(key);
+  });
+  const wsLabel = $("workspace-switcher-label");
+  if (wsLabel && i18nStrings["workspace.title"]) wsLabel.textContent = t("workspace.title");
+  const langLabel = $("lang-toggle-label");
+  if (langLabel && i18nStrings["common.language"]) langLabel.textContent = t("common.language");
+  const widgetsTitle = $("home-widgets-title");
+  if (widgetsTitle && i18nStrings["widgets.title"]) widgetsTitle.textContent = t("widgets.title");
+}
+
+function setLanguage(lang, persist) {
+  currentLanguage = SUPPORTED_LANGUAGES.indexOf(lang) >= 0 ? lang : DEFAULT_LANGUAGE;
+  document.documentElement.setAttribute("lang", currentLanguage);
+  const select = $("lang-toggle");
+  if (select) select.value = currentLanguage;
+  if (persist) {
+    try { window.localStorage.setItem(LANGUAGE_STORAGE_KEY, currentLanguage); } catch (error) {}
+  }
+  applyTranslations();
+  // Re-render the surfaces that draw translated strings inline.
+  renderWorkspaces();
+  renderWidgets();
+}
+
+function initLanguage() {
+  currentLanguage = storedLanguage() || DEFAULT_LANGUAGE;
+  const select = $("lang-toggle");
+  if (select) {
+    select.value = currentLanguage;
+    select.addEventListener("change", () => setLanguage(select.value, true));
+  }
+  document.documentElement.setAttribute("lang", currentLanguage);
+}
+
+async function loadI18n() {
+  try {
+    const response = await fetch("/api/i18n", { cache: "no-store" });
+    if (!response.ok) return;
+    const payload = await response.json();
+    const data = (payload && payload.items) || payload;
+    if (data && data.strings) {
+      i18nStrings = data.strings;
+      if (!storedLanguage() && data.default_language) {
+        currentLanguage = SUPPORTED_LANGUAGES.indexOf(data.default_language) >= 0 ? data.default_language : DEFAULT_LANGUAGE;
+      }
+    }
+    setLanguage(currentLanguage, false);
+  } catch (error) {
+    /* i18n table unavailable: data-i18n nodes keep their literal English text */
+  }
+}
+
+// ----- TASK-AR-341: workspace switcher (read-only list + safe relaunch) -----
+// Switching workspaces is a NAVIGATION action. The menu lists registered host
+// projects with a recent-state preview and a copy-able relaunch command. It
+// NEVER execs an arbitrary path; the only "switch" is reloading the console for
+// the current root (a safe self-navigation) or copying the command for another.
+function renderWorkspaces() {
+  const menu = $("workspace-switcher-menu");
+  if (!menu) return;
+  const data = (runtimeState && runtimeState.workspaces) || { items: [] };
+  const items = data.items || [];
+  const current = items.find((item) => item.current);
+  const label = $("workspace-switcher-label");
+  if (label) label.textContent = current ? (current.name || current.path) : t("workspace.title");
+  if (!items.length) {
+    menu.innerHTML = `<div class="workspace-switcher-hint">${escapeHtml(t("workspace.title"))}</div>`;
+    return;
+  }
+  const hint = `<div class="workspace-switcher-hint">${escapeHtml(t("workspace.relaunch_hint"))}</div>`;
+  const rows = items.map((item) => {
+    const recent = item.recent_state || {};
+    const previewParts = [];
+    if (recent.open_tasks != null) previewParts.push(`${escapeHtml(recent.open_tasks)} tasks`);
+    if (recent.last_activity) previewParts.push(escapeHtml(recent.last_activity));
+    if (recent.status_title) previewParts.push(escapeHtml(recent.status_title));
+    const preview = previewParts.length
+      ? `<div class="workspace-item-preview">${previewParts.join(" &middot; ")}</div>`
+      : `<div class="workspace-item-preview">${escapeHtml(recent.available ? "no recent activity" : "unavailable")}</div>`;
+    const badge = item.current
+      ? `<span class="workspace-item-current-badge">${escapeHtml(t("workspace.current"))}</span>`
+      : `<button type="button" class="workspace-item-switch" data-workspace-switch="${escapeHtml(item.path)}" data-workspace-current="${item.current ? "1" : "0"}">${escapeHtml(t("workspace.switch"))}</button>`;
+    return `<div class="workspace-item${item.current ? " is-current" : ""}" role="menuitem">
+      <div class="workspace-item-head"><span class="workspace-item-name">${escapeHtml(item.name || item.path)}</span>${badge}</div>
+      <div class="workspace-item-path">${escapeHtml(item.path)}</div>
+      ${preview}
+      <code class="workspace-item-cmd">${escapeHtml(item.relaunch_command || "")}</code>
+    </div>`;
+  }).join("");
+  menu.innerHTML = hint + rows;
+}
+
+function toggleWorkspaceMenu(force) {
+  const menu = $("workspace-switcher-menu");
+  const toggle = $("workspace-switcher-toggle");
+  if (!menu || !toggle) return;
+  const willOpen = typeof force === "boolean" ? force : menu.hidden;
+  menu.hidden = !willOpen;
+  toggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
+}
+
+// Safe switch: for the current workspace this is a self-reload (no exec); for a
+// different registered host we copy the relaunch command and inform the user.
+// The console never spawns or execs an arbitrary root.
+function switchWorkspace(path) {
+  const data = (runtimeState && runtimeState.workspaces) || { items: [] };
+  const target = (data.items || []).find((item) => item.path === path);
+  if (!target) return;
+  if (target.current) {
+    window.location.reload();
+    return;
+  }
+  const command = target.relaunch_command || "";
+  if (command && navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(command).catch(() => {});
+  }
+  toggleWorkspaceMenu(false);
+  setText("status-line", command ? `Relaunch command copied: ${command}` : "Workspace relaunch ready");
+}
+
+// ----- TASK-AR-341: declarative Home dashboard widgets -----
+// Widget definitions are DATA (loaded server-side from JSON/YAML). Every field
+// is rendered through escapeHtml; no widget content is ever eval'd or injected
+// as raw HTML/JS.
+function renderWidgetCard(widget) {
+  const title = `<div class="home-widget-title">${escapeHtml(widget.title || "Widget")}</div>`;
+  let body = "";
+  if (widget.kind === "metric") {
+    body = `<div class="home-widget-metric-value">${escapeHtml(widget.value != null ? widget.value : "")}</div>`
+      + (widget.caption ? `<div class="home-widget-caption">${escapeHtml(widget.caption)}</div>` : "");
+  } else if (widget.kind === "list") {
+    const rows = (widget.items || []).map((item) =>
+      `<li class="home-widget-list-row"><span>${escapeHtml(item.label || "")}</span><span class="home-widget-list-value">${escapeHtml(item.value != null ? item.value : "")}</span></li>`
+    ).join("");
+    body = `<ul class="home-widget-list">${rows}</ul>`;
+  } else if (widget.kind === "shortcut") {
+    const rows = (widget.items || []).map((item) =>
+      `<div class="home-widget-shortcut"><span>${escapeHtml(item.label || "")}</span><kbd>${escapeHtml(item.shortcut || "")}</kbd></div>`
+    ).join("");
+    body = rows || `<div class="home-widget-empty">${escapeHtml(t("widgets.empty"))}</div>`;
+  } else {
+    body = `<div class="home-widget-note">${escapeHtml(widget.body || "")}</div>`;
+  }
+  return `<article class="home-widget" data-widget-id="${escapeHtml(widget.id || "")}" data-widget-kind="${escapeHtml(widget.kind || "note")}">${title}${body}</article>`;
+}
+
+function renderWidgets() {
+  const grid = $("home-widgets-grid");
+  if (!grid) return;
+  const data = (runtimeState && runtimeState.widgets) || { items: [] };
+  const widgets = data.items || [];
+  grid.innerHTML = widgets.length
+    ? widgets.map(renderWidgetCard).join("")
+    : `<div class="home-widget-empty">${escapeHtml(t("widgets.empty"))}</div>`;
 }
 
 async function loadState() {
@@ -10718,6 +11100,8 @@ function renderAll() {
   renderProperties();
   renderLabels();
   renderNotificationRouting();
+  renderWorkspaces();
+  renderWidgets();
   renderSidebarActiveTaskset();
   renderDetail();
 }
@@ -10865,6 +11249,23 @@ $("sidebar-toggle")?.addEventListener("click", () => {
   else openMobileSidebar();
 });
 $("sidebar-scrim")?.addEventListener("click", closeMobileSidebar);
+
+// TASK-AR-341: workspace switcher menu open/close + safe switch delegation.
+$("workspace-switcher-toggle")?.addEventListener("click", (event) => {
+  event.stopPropagation();
+  toggleWorkspaceMenu();
+});
+$("workspace-switcher-menu")?.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-workspace-switch]");
+  if (!button) return;
+  event.preventDefault();
+  switchWorkspace(button.getAttribute("data-workspace-switch"));
+});
+document.addEventListener("click", (event) => {
+  const switcher = $("workspace-switcher-menu");
+  if (!switcher || switcher.hidden) return;
+  if (!event.target.closest(".workspace-switcher")) toggleWorkspaceMenu(false);
+});
 
 (() => {
   let collapsed = false;
@@ -11439,6 +11840,9 @@ $("import-commit-btn")?.addEventListener("click", async (event) => {
 initExperienceSettings();
 initOnboardingTour();
 initContextualHelp();
+// TASK-AR-341: language bootstrap + i18n string load.
+initLanguage();
+loadI18n();
 
 loadState();
 connectEventStream();
@@ -11749,6 +12153,9 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/daily-brief": "daily_brief",
         "/api/notification_routing": "notification_routing",
         "/api/notification-routing": "notification_routing",
+        "/api/workspaces": "workspaces",
+        "/api/widgets": "widgets",
+        "/api/i18n": "i18n",
         "/api/search_index": "search_index",
         "/api/search-index": "search_index",
         "/api/commands": "commands",
