@@ -1258,6 +1258,23 @@ def _load_task_set_info(root: Path | None, warnings: list[dict[str, str]] | None
         info = _task_set_info_from_item(item, sequence)
         if info:
             infos[info["id"]] = info
+    # TASK-AR-329: merge the canonical TASKSET-DEFINITIONS.json registry so a
+    # UI-created taskset (registered via backlog_board.sync_taskset_registry)
+    # surfaces in the console exactly as it does on the generated board. The
+    # registry rows are sorted by order so the assigned sequence is stable.
+    info_map = getattr(module, "_task_set_info_map", None)
+    if callable(info_map):
+        try:
+            merged = info_map(root)
+        except Exception as exc:  # pragma: no cover - defensive adapter boundary
+            if warnings is not None:
+                warnings.append(_warning("task-set-registry-error", _rel(root, path), str(exc)))
+            merged = {}
+        ordered = sorted(merged.values(), key=lambda item: (getattr(item, "order", 999), getattr(item, "task_set_id", "")))
+        for sequence, item in enumerate(ordered, start=1):
+            info = _task_set_info_from_item(item, infos.get(str(getattr(item, "task_set_id", "")), {}).get("sequence") or sequence)
+            if info and info["id"] not in infos:
+                infos[info["id"]] = info
     unclassified = _task_set_info_from_item(getattr(module, "UNCLASSIFIED_TASK_SET", None), None)
     if unclassified:
         infos[unclassified["id"]] = unclassified

@@ -411,3 +411,194 @@ def test_meeting_start_rejects_missing_topic_and_too_few_participants(tmp_path):
     )
     assert too_few["status"] == "failed"
     assert any("participants" in error for error in too_few["errors"])
+
+
+# ----- TASK-AR-329: taskset lifecycle, move, bulk edit + undo, templates -----
+
+REGISTRY_REL = "agents/project/work-items/TASKSET-DEFINITIONS.json"
+
+
+def test_taskset_create_is_proposal_only_and_never_writes_registry(tmp_path):
+    result = ui_commands.submit_command(
+        tmp_path,
+        {"type": "taskset.create", "payload": {"actor": "owner", "display_name": "Risk Watch", "summary": "watch risks"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-tscreate",
+    )
+
+    assert result["status"] == "queued"
+    assert result["result"]["task_set_id"] == "TASKSET-RISK-WATCH"
+    assert result["result"]["mutation_boundary"] == "proposal_only"
+    # The console must NOT write the canonical registry directly.
+    assert not (tmp_path / REGISTRY_REL).exists()
+    proposal_files = list((tmp_path / ".ui_outbox" / "tasksets").glob("TASKSETREQ-*.json"))
+    assert len(proposal_files) == 1
+    proposal = json.loads(proposal_files[0].read_text(encoding="utf-8"))
+    assert proposal["action"] == "create"
+    assert proposal["task_set_id"] == "TASKSET-RISK-WATCH"
+    assert "sync_taskset_registry" in proposal["sync"]
+    # Runtime event recorded for traceability.
+    event_path = tmp_path / "agents" / "runtime" / "events" / "ui_taskset_requests.jsonl"
+    assert event_path.exists()
+
+
+def test_taskset_rename_and_archive_emit_proposals(tmp_path):
+    rename = ui_commands.submit_command(
+        tmp_path,
+        {"type": "taskset.rename", "target": "TASKSET-AR-DEMO", "payload": {"display_name": "Demo Renamed"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-tsrename",
+    )
+    assert rename["status"] == "queued"
+    assert rename["result"]["action"] == "rename"
+
+    archive = ui_commands.submit_command(
+        tmp_path,
+        {"type": "taskset.archive", "target": "TASKSET-AR-DEMO", "payload": {}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-tsarchive",
+    )
+    assert archive["status"] == "queued"
+    assert archive["result"]["action"] == "archive"
+    archive_proposal = json.loads(
+        (tmp_path / ".ui_outbox" / "tasksets" / "TASKSETREQ-20260610-123000-tsarchive.json").read_text(encoding="utf-8")
+    )
+    assert archive_proposal["archived"] is True
+    assert not (tmp_path / REGISTRY_REL).exists()
+
+
+def test_taskset_rename_requires_display_name(tmp_path):
+    result = ui_commands.submit_command(
+        tmp_path,
+        {"type": "taskset.rename", "target": "TASKSET-AR-DEMO", "payload": {}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-tsnoname",
+    )
+    assert result["status"] == "failed"
+    assert "display_name is required" in result["errors"]
+
+
+def test_taskset_template_instantiates_recurring_pattern(tmp_path):
+    result = ui_commands.submit_command(
+        tmp_path,
+        {"type": "taskset.template", "payload": {"actor": "owner", "template": "analysis-suite", "display_name": "Q3 Analysis"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-tstpl",
+    )
+    assert result["status"] == "queued"
+    assert result["result"]["task_count"] == 4
+    assert result["result"]["task_set_id"] == "TASKSET-Q3-ANALYSIS"
+    proposal = json.loads(
+        (tmp_path / ".ui_outbox" / "tasksets" / "TASKSETTPL-20260610-123000-tstpl.json").read_text(encoding="utf-8")
+    )
+    assert proposal["taskset_create"]["payload"]["task_set_id"] == "TASKSET-Q3-ANALYSIS"
+    assert len(proposal["tasks"]) == 4
+    assert all(t["payload"]["task_set_id"] == "TASKSET-Q3-ANALYSIS" for t in proposal["tasks"])
+    # No tasks or registry written directly by the console.
+    assert not (tmp_path / REGISTRY_REL).exists()
+    assert not list((tmp_path / "agents" / "lead_engineer" / "tasks").glob("TASK-*.md")) if (tmp_path / "agents" / "lead_engineer" / "tasks").exists() else True
+
+
+def test_taskset_template_rejects_unknown_key(tmp_path):
+    result = ui_commands.submit_command(
+        tmp_path,
+        {"type": "taskset.template", "payload": {"template": "nope"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-tsbad",
+    )
+    assert result["status"] == "failed"
+    assert any("unknown taskset template" in error for error in result["errors"])
+
+
+def test_task_move_changes_task_set_id_and_syncs_board(tmp_path):
+    _write_backlog_board_script(tmp_path)
+    path = _task(tmp_path, "TASK-UI-500")
+
+    result = ui_commands.submit_command(
+        tmp_path,
+        {"type": "task.move", "target": "TASK-UI-500", "payload": {"task_set_id": "TASKSET-AR-NEW-HOME"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-move",
+    )
+    assert result["status"] == "accepted"
+    assert result["result"]["backlog_board_updated"] is True
+    assert "task_set_id: TASKSET-AR-NEW-HOME" in path.read_text(encoding="utf-8")
+
+
+def test_task_move_rejects_invalid_taskset_id(tmp_path):
+    _write_backlog_board_script(tmp_path)
+    _task(tmp_path, "TASK-UI-501")
+    result = ui_commands.submit_command(
+        tmp_path,
+        {"type": "task.move", "target": "TASK-UI-501", "payload": {"task_set_id": "not-a-taskset"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-movebad",
+    )
+    assert result["status"] == "failed"
+    assert any("invalid taskset id" in error for error in result["errors"])
+
+
+def test_task_bulk_edit_applies_to_all_and_captures_undo_snapshot(tmp_path):
+    _write_backlog_board_script(tmp_path)
+    _task(tmp_path, "TASK-UI-600", status="planned")
+    _task(tmp_path, "TASK-UI-601", status="planned")
+
+    result = ui_commands.submit_command(
+        tmp_path,
+        {
+            "type": "task.bulk_edit",
+            "payload": {"task_ids": ["TASK-UI-600", "TASK-UI-601"], "status": "in_progress", "priority": "P0"},
+        },
+        now=NOW,
+        command_id="COMMAND-20260610-123000-bulk",
+    )
+    assert result["status"] == "accepted"
+    assert result["result"]["count"] == 2
+    undo = result["result"]["undo"]
+    assert undo["type"] == "task.bulk_edit"
+    befores = {item["id"]: item["before"] for item in undo["items"]}
+    assert befores["TASK-UI-600"]["status"] == "planned"
+    assert befores["TASK-UI-600"]["priority"] == "P1"
+
+    state = ui_state.build_state(tmp_path, now=NOW)
+    statuses = {task["id"]: task["status"] for task in state["tasks"]}
+    assert statuses["TASK-UI-600"] == "in_progress"
+    assert statuses["TASK-UI-601"] == "in_progress"
+
+    # Undo path is itself a bulk_edit using the captured before-state.
+    undo_result = ui_commands.submit_command(
+        tmp_path,
+        {"type": "task.bulk_edit", "payload": {"task_ids": ["TASK-UI-600", "TASK-UI-601"], "status": "planned", "priority": "P1"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-undo",
+    )
+    assert undo_result["status"] == "accepted"
+    state2 = ui_state.build_state(tmp_path, now=NOW)
+    statuses2 = {task["id"]: task["status"] for task in state2["tasks"]}
+    assert statuses2["TASK-UI-600"] == "planned"
+
+
+def test_task_bulk_edit_requires_ids_and_fields(tmp_path):
+    no_ids = ui_commands.submit_command(
+        tmp_path,
+        {"type": "task.bulk_edit", "payload": {"status": "planned"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-noids",
+    )
+    assert no_ids["status"] == "failed"
+    assert any("task_ids" in error for error in no_ids["errors"])
+
+    _task(tmp_path, "TASK-UI-700")
+    no_fields = ui_commands.submit_command(
+        tmp_path,
+        {"type": "task.bulk_edit", "payload": {"task_ids": ["TASK-UI-700"]}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-nofields",
+    )
+    assert no_fields["status"] == "failed"
+    assert any("at least one of status/priority/owner" in error for error in no_fields["errors"])
+
+
+def test_new_command_types_in_allowlist():
+    for command_type in ["taskset.create", "taskset.rename", "taskset.archive", "taskset.template", "task.move", "task.bulk_edit"]:
+        assert command_type in ui_commands.COMMAND_TYPES

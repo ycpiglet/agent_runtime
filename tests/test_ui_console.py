@@ -1987,3 +1987,118 @@ def test_ui_console_timeline_and_dependency_css_uses_tokens_not_raw_hex(tmp_path
     assert ".timeline-bar.status-completed { border-color: var(--success-line)" in css
     assert ".dep-edge.is-cycle {" in css
     assert "stroke: var(--danger);" in css
+
+
+# ----- TASK-AR-329: taskset lifecycle UI (create/rename/archive/move/bulk/undo/templates) -----
+
+
+def test_ui_console_taskset_lifecycle_surfaces_create_bulk_and_undo(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    # Create form, template buttons, bulk-edit bar, and an undo toast region.
+    for marker in [
+        "taskset-create-form",
+        "taskset-new-name",
+        "taskset-template-buttons",
+        "taskset-bulk-bar",
+        "taskset-bulk-status",
+        "taskset-bulk-priority",
+        "taskset-bulk-owner",
+        "taskset-bulk-move",
+        "undo-toast-region",
+    ]:
+        assert marker in html
+
+    for marker in [
+        "submitTasksetCreate",
+        "submitTasksetLifecycle",
+        "instantiateTasksetTemplate",
+        "applyBulkEdit",
+        "pushUndoToast",
+        "runUndo",
+        "toggleBulkTask",
+        "taskset.create",
+        "taskset.rename",
+        "taskset.archive",
+        "taskset.template",
+        "task.move",
+        "task.bulk_edit",
+    ]:
+        assert marker in js
+
+    for selector in [
+        ".taskset-create",
+        ".taskset-template-btn",
+        ".taskset-bulk-bar",
+        ".taskset-task-row",
+        ".undo-toast",
+    ]:
+        assert selector in css
+
+
+def test_ui_console_taskset_create_post_is_proposal_only(tmp_path):
+    # End-to-end: post the exact body the UI sends through build_response and
+    # confirm the console emits a proposal but never writes the registry.
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {"type": "taskset.create", "payload": {"actor": "owner", "display_name": "Console Set", "summary": "from ui"}}
+        ).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+
+    assert response.status == 202
+    assert payload["status"] == "queued"
+    assert payload["result"]["task_set_id"] == "TASKSET-CONSOLE-SET"
+    assert payload["result"]["mutation_boundary"] == "proposal_only"
+    assert not (tmp_path / "agents" / "project" / "work-items" / "TASKSET-DEFINITIONS.json").exists()
+    assert list((tmp_path / ".ui_outbox" / "tasksets").glob("TASKSETREQ-*.json"))
+
+
+def test_ui_console_bulk_edit_post_applies_and_returns_undo(tmp_path):
+    _write_backlog_board_script(tmp_path)
+    _write_task(tmp_path, "TASK-AR-960")
+    _write_task(tmp_path, "TASK-AR-961")
+
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {"type": "task.bulk_edit", "payload": {"task_ids": ["TASK-AR-960", "TASK-AR-961"], "status": "blocked"}}
+        ).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+
+    assert response.status == 202
+    assert payload["status"] == "accepted"
+    assert payload["result"]["count"] == 2
+    assert payload["result"]["undo"]["type"] == "task.bulk_edit"
+    state = json.loads(ui_console.build_response("/api/state", tmp_path).body.decode("utf-8"))
+    statuses = {task["id"]: task["status"] for task in state["tasks"]}
+    assert statuses["TASK-AR-960"] == "blocked"
+    assert statuses["TASK-AR-961"] == "blocked"
+
+
+def test_ui_console_task_move_post_changes_taskset(tmp_path):
+    _write_backlog_board_script(tmp_path)
+    _write_task(tmp_path, "TASK-AR-962")
+
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {"type": "task.move", "target": "TASK-AR-962", "payload": {"task_set_id": "TASKSET-AR-OTHER"}}
+        ).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+
+    assert response.status == 202
+    assert payload["status"] == "accepted"
+    moved = (tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-962-console.md").read_text(encoding="utf-8")
+    assert "task_set_id: TASKSET-AR-OTHER" in moved

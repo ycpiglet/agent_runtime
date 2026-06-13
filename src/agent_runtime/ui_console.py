@@ -272,6 +272,37 @@ HTML = """<!doctype html>
         </div>
         <div id="view-tasksets" class="view">
           <div id="taskset-completion-banner" class="taskset-completion" role="status" aria-live="polite" hidden></div>
+          <form id="taskset-create-form" class="taskset-create" aria-label="Create taskset">
+            <input id="taskset-new-name" name="display_name" placeholder="New taskset name" required>
+            <input id="taskset-new-summary" name="summary" placeholder="Summary (optional)">
+            <button type="submit">Create taskset</button>
+            <span class="taskset-template-label">Templates:</span>
+            <div id="taskset-template-buttons" class="taskset-template-buttons" aria-label="Taskset templates"></div>
+          </form>
+          <div id="taskset-bulk-bar" class="taskset-bulk-bar" role="toolbar" aria-label="Bulk edit selected tasks" hidden>
+            <span id="taskset-bulk-count" class="taskset-bulk-count">0 selected</span>
+            <select id="taskset-bulk-status" aria-label="Bulk status">
+              <option value="">Set status…</option>
+              <option value="planned">planned</option>
+              <option value="in_progress">in_progress</option>
+              <option value="review">review</option>
+              <option value="blocked">blocked</option>
+              <option value="completed">completed</option>
+            </select>
+            <select id="taskset-bulk-priority" aria-label="Bulk priority">
+              <option value="">Set priority…</option>
+              <option value="P0">P0</option>
+              <option value="P1">P1</option>
+              <option value="P2">P2</option>
+              <option value="P3">P3</option>
+            </select>
+            <input id="taskset-bulk-owner" placeholder="Set owner…" aria-label="Bulk owner">
+            <select id="taskset-bulk-move" aria-label="Move selected tasks to taskset">
+              <option value="">Move to taskset…</option>
+            </select>
+            <button id="taskset-bulk-apply" type="button">Apply</button>
+            <button id="taskset-bulk-clear" type="button" class="ghost">Clear</button>
+          </div>
           <div class="taskset-toolbar">
             <input id="taskset-filter" placeholder="taskset alias, name, task id">
             <select id="taskset-status-filter">
@@ -514,6 +545,7 @@ HTML = """<!doctype html>
       </aside>
     </main>
   </div>
+  <div id="undo-toast-region" class="undo-toast-region" role="region" aria-live="assertive" aria-label="Undo"></div>
   <div id="command-palette" class="command-palette" role="dialog" aria-modal="true" aria-label="Command palette" hidden>
     <div class="command-palette-backdrop" data-command-dismiss="1"></div>
     <div class="command-palette-panel" role="document">
@@ -1251,6 +1283,149 @@ textarea:focus {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+.taskset-create {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--tile);
+}
+.taskset-create input {
+  min-width: 160px;
+  flex: 1 1 160px;
+}
+.taskset-create button[type="submit"] {
+  background: var(--primary);
+  color: var(--on-accent);
+  border: 1px solid var(--primary-line);
+  border-radius: var(--radius);
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.taskset-template-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.taskset-template-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.taskset-template-btn {
+  font-size: 12px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--raise);
+  color: var(--ink);
+  padding: 5px 10px;
+  cursor: pointer;
+}
+.taskset-template-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.taskset-bulk-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--primary-line);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius);
+  background: var(--primary-soft);
+}
+.taskset-bulk-count {
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--ink);
+}
+.taskset-bulk-bar select,
+.taskset-bulk-bar input {
+  font-size: 12px;
+}
+.taskset-bulk-bar button {
+  border: 1px solid var(--primary-line);
+  border-radius: var(--radius);
+  background: var(--primary);
+  color: var(--on-accent);
+  padding: 5px 10px;
+  cursor: pointer;
+}
+.taskset-bulk-bar button.ghost {
+  background: var(--raise);
+  color: var(--muted);
+  border-color: var(--border);
+}
+.taskset-task-select {
+  margin-right: 6px;
+}
+.taskset-card-tasks {
+  display: grid;
+  gap: 4px;
+  margin-top: 6px;
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+}
+.taskset-task-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink);
+}
+.taskset-task-row.is-selected {
+  background: var(--primary-soft);
+  border-radius: var(--radius);
+}
+.taskset-task-row code {
+  color: var(--muted);
+}
+.undo-toast-region {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  gap: 8px;
+  z-index: 60;
+  pointer-events: none;
+}
+.undo-toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+  background: var(--panel-strong);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--success);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+  padding: 10px 14px;
+  font-size: 13px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.undo-toast.is-leaving {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.undo-toast button {
+  border: 1px solid var(--primary-line);
+  border-radius: var(--radius);
+  background: var(--primary);
+  color: var(--on-accent);
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 12px;
 }
 .taskset-toolbar {
   display: grid;
@@ -3394,6 +3569,10 @@ const taskStatusOptions = [
   "working",
 ];
 const runtimeCommandTypes = ["runtime.call_agent", "runtime.assign_task", "runtime.request_review", "runtime.request_meeting", "runtime.goal.start", "runtime.goal.pause", "runtime.goal.resume", "runtime.goal.stop", "planning.scan", "planning.approve", "planning.reject"];
+// TASK-AR-329: taskset lifecycle + bulk command types accepted by the
+// ui_commands COMMAND_TYPES allowlist. Every mutation below routes through
+// /api/commands -> submit_command (proposal-only for taskset.* registry writes).
+const tasksetCommandTypes = ["taskset.create", "taskset.rename", "taskset.archive", "taskset.template", "task.move", "task.bulk_edit"];
 let runtimeState = null;
 let selectedTaskId = null;
 let pendingWrites = [];
@@ -3406,6 +3585,12 @@ let meetingParticipants = [];
 let meetingKeyboardHeld = null;
 let expandedTasksetCards = new Set();
 let tasksetSwimlaneMode = false;
+// TASK-AR-329: taskset lifecycle UI selection + templates.
+let selectedBulkTaskIds = new Set();
+const tasksetTemplates = [
+  { key: "analysis-suite", label: "Analysis Suite" },
+  { key: "release-cycle", label: "Release Cycle" },
+];
 let teamOnlineOnly = false;
 let peekTimer = null;
 let peekAnchorId = null;
@@ -4068,6 +4253,197 @@ function wireTaskSetActions(host) {
       queueTaskSetCommand(taskSet, button.dataset.tasksetAction);
     });
   });
+  host.querySelectorAll("[data-taskset-lifecycle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      submitTasksetLifecycle(button.dataset.tasksetLifecycle, button.dataset.tasksetId, button.dataset.tasksetName);
+    });
+  });
+  host.querySelectorAll("[data-bulk-task-id]").forEach((box) => {
+    box.addEventListener("change", () => {
+      toggleBulkTask(box.dataset.bulkTaskId, box.checked);
+    });
+  });
+}
+
+function toggleBulkTask(taskId, on) {
+  if (on) selectedBulkTaskIds.add(taskId);
+  else selectedBulkTaskIds.delete(taskId);
+  renderBulkBar();
+  renderTaskSetDirectory();
+}
+
+function clearBulkSelection() {
+  selectedBulkTaskIds.clear();
+  renderBulkBar();
+  renderTaskSetDirectory();
+}
+
+function renderBulkBar() {
+  const bar = $("taskset-bulk-bar");
+  if (!bar) return;
+  const count = selectedBulkTaskIds.size;
+  bar.hidden = count === 0;
+  const label = $("taskset-bulk-count");
+  if (label) label.textContent = `${count} selected`;
+}
+
+function populateBulkMoveOptions() {
+  const select = $("taskset-bulk-move");
+  if (!select) return;
+  const current = select.value;
+  const options = ['<option value="">Move to taskset…</option>'].concat(
+    (runtimeState.task_sets || []).map((ts) => `<option value="${escapeHtml(ts.id)}">${escapeHtml(ts.display_name || ts.id)}</option>`)
+  );
+  select.innerHTML = options.join("");
+  select.value = current;
+}
+
+async function submitTasksetLifecycle(action, taskSetId, currentName) {
+  const payload = { actor: "owner", task_set_id: taskSetId };
+  let type = "taskset.archive";
+  if (action === "rename") {
+    type = "taskset.rename";
+    const name = window.prompt("New taskset name", currentName || taskSetId);
+    if (!name) return;
+    payload.display_name = name;
+  }
+  const result = await sendJson("/api/commands", { type, payload: { type, target: taskSetId, payload } });
+  pushActivityToast("assignment", `taskset ${action}`, `${taskSetId} (${(result && result.status) || "queued"})`);
+}
+
+async function submitTasksetCreate(displayName, summary) {
+  const payload = { actor: "owner", display_name: displayName };
+  if (summary) payload.summary = summary;
+  const result = await sendJson("/api/commands", { type: "taskset.create", payload: { type: "taskset.create", payload } });
+  pushActivityToast("assignment", "taskset created", `${displayName} (${(result && result.status) || "queued"})`);
+  return result;
+}
+
+async function instantiateTasksetTemplate(templateKey) {
+  const result = await sendJson("/api/commands", {
+    type: "taskset.template",
+    payload: { type: "taskset.template", payload: { actor: "owner", template: templateKey } }
+  });
+  const created = (result && result.result) || {};
+  pushActivityToast("assignment", "template instantiated", `${templateKey}: ${created.task_count || 0} tasks`);
+  return result;
+}
+
+async function applyBulkEdit() {
+  const ids = Array.from(selectedBulkTaskIds);
+  if (!ids.length) return;
+  const status = $("taskset-bulk-status")?.value || "";
+  const priority = $("taskset-bulk-priority")?.value || "";
+  const owner = $("taskset-bulk-owner")?.value.trim() || "";
+  const moveTo = $("taskset-bulk-move")?.value || "";
+
+  if (moveTo) {
+    for (const id of ids) {
+      await sendJson("/api/commands", { type: "task.move", payload: { type: "task.move", target: id, payload: { task_set_id: moveTo } } });
+    }
+    pushUndoToast(`${ids.length} task(s) moved`, null);
+    clearBulkSelection();
+    return;
+  }
+
+  const fields = {};
+  if (status) fields.status = status;
+  if (priority) fields.priority = priority;
+  if (owner) fields.owner = owner;
+  if (!Object.keys(fields).length) return;
+
+  const result = await sendJson("/api/commands", {
+    type: "task.bulk_edit",
+    payload: { type: "task.bulk_edit", payload: Object.assign({ task_ids: ids }, fields) }
+  });
+  const undo = result && result.result && result.result.undo;
+  pushUndoToast(`${ids.length} task(s) edited`, undo);
+  clearBulkSelection();
+}
+
+function pushUndoToast(message, undo) {
+  const host = $("undo-toast-region");
+  if (!host) return;
+  const toast = document.createElement("div");
+  toast.className = "undo-toast";
+  const text = document.createElement("span");
+  text.textContent = message;
+  toast.appendChild(text);
+  if (undo && Array.isArray(undo.items) && undo.items.length) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "Undo";
+    button.addEventListener("click", async () => {
+      await runUndo(undo);
+      dismissToast(toast);
+    });
+    toast.appendChild(button);
+  }
+  host.appendChild(toast);
+  while (host.children.length > 3) host.removeChild(host.firstChild);
+  setTimeout(() => dismissToast(toast), 8000);
+}
+
+function dismissToast(toast) {
+  if (!toast || !toast.parentNode) return;
+  toast.classList.add("is-leaving");
+  setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 240);
+}
+
+async function runUndo(undo) {
+  // Rebuild a single bulk_edit per restored field-value combination from the
+  // captured before-state. Each task may have had a distinct prior value, so we
+  // group identical restores into batched commands.
+  const byValue = {};
+  (undo.items || []).forEach((item) => {
+    const before = item.before || {};
+    const key = JSON.stringify(before);
+    (byValue[key] = byValue[key] || { fields: before, ids: [] }).ids.push(item.id);
+  });
+  for (const key of Object.keys(byValue)) {
+    const group = byValue[key];
+    const fields = {};
+    Object.keys(group.fields).forEach((field) => {
+      if (group.fields[field] !== null && group.fields[field] !== undefined) fields[field] = group.fields[field];
+    });
+    if (!Object.keys(fields).length) continue;
+    await sendJson("/api/commands", {
+      type: "task.bulk_edit",
+      payload: { type: "task.bulk_edit", payload: Object.assign({ task_ids: group.ids }, fields) }
+    });
+  }
+  pushActivityToast("review", "undo applied", `${(undo.items || []).length} task(s) restored`);
+}
+
+function renderTasksetTemplates() {
+  const host = $("taskset-template-buttons");
+  if (!host) return;
+  host.innerHTML = tasksetTemplates.map((tpl) =>
+    `<button class="taskset-template-btn" type="button" data-template-key="${escapeHtml(tpl.key)}">${escapeHtml(tpl.label)}</button>`
+  ).join("");
+  host.querySelectorAll("[data-template-key]").forEach((button) => {
+    button.addEventListener("click", () => instantiateTasksetTemplate(button.dataset.templateKey));
+  });
+}
+
+function tasksForTaskSet(taskSetId) {
+  return (runtimeState.tasks || []).filter((task) => (task.task_set_id || "") === taskSetId);
+}
+
+function tasksetTaskRows(taskSet) {
+  const tasks = tasksForTaskSet(taskSet.id);
+  if (!tasks.length) return "";
+  const rows = tasks.slice(0, 12).map((task) => {
+    const checked = selectedBulkTaskIds.has(task.id) ? " checked" : "";
+    const selectedClass = selectedBulkTaskIds.has(task.id) ? " is-selected" : "";
+    return `<label class="taskset-task-row${selectedClass}">
+      <input class="taskset-task-select" type="checkbox" data-bulk-task-id="${escapeHtml(task.id)}"${checked} aria-label="Select ${escapeHtml(task.id)}">
+      <code>${escapeHtml(task.id)}</code>
+      <span class="meta-label">${escapeHtml(task.status || "")}</span>
+      <span>${escapeHtml(task.title || "")}</span>
+    </label>`;
+  }).join("");
+  return `<div class="taskset-card-tasks" aria-label="Tasks in ${escapeHtml(taskSet.id)}">${rows}</div>`;
 }
 
 function taskSetCards(taskSets, options = {}) {
@@ -4099,11 +4475,14 @@ function taskSetCards(taskSets, options = {}) {
           <span><span class="meta-label">Next</span><strong>${escapeHtml(nextTask)}</strong></span>
         </div>
         ${progressBar(taskSet.progress_pct)}
+        ${compact ? "" : tasksetTaskRows(taskSet)}
         ${compact ? "" : `<code class="taskset-command">${escapeHtml(command)}</code>`}
         ${compact ? "" : `<div class="taskset-actions">
           <button class="taskset-action" type="button" data-taskset-action="plan" data-taskset-id="${escapeHtml(taskSet.id)}">Plan</button>
           <button class="taskset-action" type="button" data-taskset-action="start" data-taskset-id="${escapeHtml(taskSet.id)}">Start</button>
           <button class="taskset-action" type="button" data-taskset-action="gate" data-taskset-id="${escapeHtml(taskSet.id)}">Gate</button>
+          <button class="taskset-action" type="button" data-taskset-lifecycle="rename" data-taskset-id="${escapeHtml(taskSet.id)}" data-taskset-name="${escapeHtml(taskSet.display_name || taskSet.id)}">Rename</button>
+          <button class="taskset-action" type="button" data-taskset-lifecycle="archive" data-taskset-id="${escapeHtml(taskSet.id)}">Archive</button>
         </div>`}
       </article>
     `;
@@ -4116,6 +4495,9 @@ function renderTaskSetDirectory() {
   const taskSets = filteredTaskSets();
   host.innerHTML = taskSets.length ? taskSetCards(taskSets) : `<div class="empty">No task sets</div>`;
   wireTaskSetActions(host);
+  populateBulkMoveOptions();
+  renderBulkBar();
+  renderTasksetTemplates();
 }
 
 function renderTasksetCompletion() {
@@ -6550,6 +6932,17 @@ $("refresh-button").addEventListener("click", loadState);
     node.addEventListener("change", renderTaskSetDirectory);
   }
 });
+$("taskset-create-form")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const name = $("taskset-new-name")?.value.trim() || "";
+  if (!name) return;
+  const summary = $("taskset-new-summary")?.value.trim() || "";
+  await submitTasksetCreate(name, summary);
+  if ($("taskset-new-name")) $("taskset-new-name").value = "";
+  if ($("taskset-new-summary")) $("taskset-new-summary").value = "";
+});
+$("taskset-bulk-apply")?.addEventListener("click", applyBulkEdit);
+$("taskset-bulk-clear")?.addEventListener("click", clearBulkSelection);
 $("tsboard-filter")?.addEventListener("input", renderTasksetBoard);
 $("tsboard-swimlane-toggle")?.addEventListener("change", (event) => {
   tasksetSwimlaneMode = Boolean(event.target.checked);
