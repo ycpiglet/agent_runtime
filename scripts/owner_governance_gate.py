@@ -48,6 +48,7 @@ def main() -> int:
         ["scripts/footprint_conflict_gate.py", "--check"],
         ["scripts/taskset_work_gate.py", "--check"],
         ["scripts/evidence_index_generator.py", "--check"],
+        ["scripts/verification_freshness_gate.py", "--check"],
         ["scripts/context_knowledge_gate.py", "--check"],
         ["scripts/parallel_worktree_gate.py", "--check"],
         ["scripts/worktree_lifecycle_gate.py", "--check"],
