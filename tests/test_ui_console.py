@@ -56,7 +56,8 @@ def test_ui_console_serves_html_shell_and_assets(tmp_path):
     assert html.status == 200
     assert html.content_type == "text/html; charset=utf-8"
     assert b'id="runtime-console-app"' in html.body
-    assert b"Backlog" in html.body
+    assert b'id="primary-sidebar"' in html.body
+    assert b">Home<" in html.body
     assert b"Tasksets" in html.body
     assert b"Agents" in html.body
     assert b"command-log" in html.body
@@ -444,7 +445,8 @@ def test_ui_console_responsive_accessibility_polish_contract(tmp_path):
     for selector in [
         ".topbar",
         ".toolbar",
-        ".tabs",
+        ".sidebar-toggle",
+        ".sidebar.is-open",
         ".task-card-header",
         ".agent-card-header",
         ".command-card-header",
@@ -456,8 +458,8 @@ def test_ui_console_responsive_accessibility_polish_contract(tmp_path):
         assert selector in mobile_css
 
     for marker in [
-        "overflow-x: auto",
-        "scroll-snap-type: x proximity",
+        "translateX(-100%)",
+        "translateX(0)",
         "flex-wrap: wrap",
         "max-width: 100%",
         "overflow-wrap: anywhere",
@@ -1403,3 +1405,102 @@ def test_ui_console_theme_key_panels_use_tokens_not_raw_hex(tmp_path):
         "background: var(--progress-fill);",
     ]:
         assert needle in css
+
+
+# ----- TASK-AR-321: sidebar IA + hash routing -----
+
+ALL_VIEW_IDS = [
+    "board",
+    "work",
+    "meeting",
+    "tasksets",
+    "tsboard",
+    "team",
+    "agents",
+    "messages",
+    "events",
+    "evidence",
+    "planner",
+    "roadmap",
+    "map",
+    "sources",
+    "writes",
+]
+
+SIDEBAR_GROUPS = ["home", "work", "agents", "comms", "records", "ops"]
+
+
+def test_ui_console_sidebar_replaces_horizontal_tabs(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+
+    # Collapsible left sidebar nav is present and the old horizontal tabs nav is gone.
+    assert 'id="primary-sidebar"' in html
+    assert 'class="sidebar"' in html
+    assert '<nav class="tabs"' not in html
+    assert 'class="tab "' not in html
+    assert 'class="tab is-active"' not in html
+
+    # Grouped nav sections from plan section 2.2.
+    for group in SIDEBAR_GROUPS:
+        assert f'data-group="{group}"' in html
+    for label in ["WORK", "AGENTS", "COMMS", "RECORDS", "OPS"]:
+        assert f">{label}<" in html
+
+
+def test_ui_console_sidebar_keeps_all_nine_plus_views_reachable(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+
+    # Every existing view id must stay rendered AND reachable from a sidebar link.
+    for view in ALL_VIEW_IDS:
+        assert f'id="view-{view}"' in html
+        assert f'data-view="{view}"' in html
+
+
+def test_ui_console_sidebar_links_carry_hash_routes(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+
+    for route in [
+        "home/board",
+        "work/tasksets",
+        "work/board",
+        "agents/team",
+        "agents/map",
+        "comms/channels",
+        "comms/meetings",
+        "records/events",
+        "ops/writes",
+    ]:
+        assert f'data-route="{route}"' in html
+
+
+def test_ui_console_hash_routing_wiring_present(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+
+    # hashchange handler + initial-hash bootstrap.
+    assert 'addEventListener("hashchange"' in js
+    assert "applyHashRoute" in js
+    assert "window.location.hash" in js
+    assert "function activateView" in js
+    assert "function viewForRoute" in js
+    assert "function routeForView" in js
+    # Pinned active-taskset progress is always rendered.
+    assert "renderSidebarActiveTaskset" in js
+
+
+def test_ui_console_collapsed_rail_and_mobile_overlay_css(tmp_path):
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    # Collapsed icon-rail anchors.
+    assert ".sidebar" in css
+    assert '.sidebar[data-collapsed="true"]' in css
+    assert "--sidebar-rail" in css
+    assert ".sidebar-icon" in css
+    assert ".sidebar-active-taskset" in css
+
+    # Mobile overlay drawer anchors.
+    mobile_css = css.split("@media (max-width: 760px)", 1)[1]
+    assert ".sidebar" in mobile_css
+    assert "translateX(-100%)" in mobile_css
+    assert ".sidebar.is-open" in mobile_css
+    assert ".sidebar-toggle" in mobile_css
+    assert ".sidebar-scrim" in css
