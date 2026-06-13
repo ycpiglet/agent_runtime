@@ -95,6 +95,7 @@ HTML = """<!doctype html>
           <button class="tab" type="button" data-view="events">Events</button>
           <button class="tab" type="button" data-view="evidence">Evidence</button>
           <button class="tab" type="button" data-view="planner">Planner</button>
+          <button class="tab" type="button" data-view="roadmap">Roadmap</button>
           <button class="tab" type="button" data-view="map">Map</button>
           <button class="tab" type="button" data-view="sources">Sources</button>
           <button class="tab" type="button" data-view="writes">Writes</button>
@@ -240,6 +241,10 @@ HTML = """<!doctype html>
               <div id="planning-requests-list" class="list-panel"></div>
             </section>
           </div>
+        </div>
+        <div id="view-roadmap" class="view">
+          <p id="roadmap-timeline-summary" class="roadmap-timeline-summary" role="status"></p>
+          <div id="roadmap-timeline" class="roadmap-timeline" aria-label="Roadmap timeline"></div>
         </div>
         <div id="view-map" class="view">
           <div class="evidence-grid">
@@ -1561,6 +1566,78 @@ pre {
     grid-template-columns: 1fr;
   }
 }
+.roadmap-timeline-summary {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+.roadmap-timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-left: 22px;
+  border-left: 2px solid var(--border, #2a2a3a);
+}
+.roadmap-tl-item {
+  position: relative;
+  display: block;
+}
+.roadmap-tl-marker {
+  position: absolute;
+  left: -29px;
+  top: 6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--muted);
+  border: 2px solid var(--bg, #11111a);
+}
+.roadmap-tl-marker.is-done {
+  background: var(--teal);
+}
+.roadmap-tl-marker.is-release {
+  background: var(--amber);
+  border-radius: 2px;
+}
+.roadmap-tl-vision .roadmap-tl-marker {
+  background: var(--primary-hover);
+}
+.roadmap-tl-statement {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 4px 0 8px;
+}
+.roadmap-tl-links {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.roadmap-tl-link {
+  display: grid;
+  grid-template-columns: 120px 70px 1fr 90px;
+  gap: 8px;
+  font-size: 12px;
+  align-items: center;
+}
+.roadmap-tl-link-id strong,
+.roadmap-tl-link-id {
+  color: var(--primary-hover);
+  font-weight: 600;
+}
+.roadmap-tl-link-level,
+.roadmap-tl-link-status {
+  color: var(--muted);
+}
+.roadmap-tl-link-completed .roadmap-tl-link-status {
+  color: var(--teal);
+}
+.roadmap-tl-link-in_progress .roadmap-tl-link-status {
+  color: var(--amber);
+}
 """
 
 JS = """const lanes = ["Backlog", "Ready", "In Progress", "Review", "Blocked", "Done"];
@@ -2145,6 +2222,86 @@ function renderMap() {
       `)}
     </article>
   `).join("") : `<div class="empty">No roadmap milestones</div>`;
+}
+
+function renderRoadmapTimeline() {
+  const timeline = runtimeState.roadmap_timeline || { vision: {}, milestones: [], releases: [], summary: {} };
+  const summary = timeline.summary || {};
+  const vision = timeline.vision || {};
+  $("roadmap-timeline-summary").textContent =
+    `${summary.milestones_done || 0}/${summary.milestones || 0} milestones done`
+    + ` - ${summary.linked_work || 0} linked work items`
+    + ` - ${summary.releases || 0} releases`
+    + ` (phase: ${timeline.phase || "n/a"})`;
+
+  const visionItem = `
+    <article class="roadmap-tl-item roadmap-tl-vision" data-tier="vision">
+      <div class="roadmap-tl-marker"></div>
+      <div class="roadmap-tl-body surface-card pass">
+        <div class="surface-card-header">
+          <b>${escapeHtml(vision.title || "Vision")}</b>
+          <span class="state-chip">vision</span>
+        </div>
+        <p class="roadmap-tl-statement">${escapeHtml(vision.statement || vision.problem || "No vision statement")}</p>
+        ${renderSurfaceMeta(`
+          <span><span class="meta-label">Problem</span><strong>${escapeHtml(vision.problem || "n/a")}</strong></span>
+          <span><span class="meta-label">Success</span><strong>${escapeHtml(vision.success_metric || "n/a")}</strong></span>
+          <span><span class="meta-label">Source</span><strong>${escapeHtml(vision.source_path || "VISION.md")}</strong></span>
+        `)}
+      </div>
+    </article>`;
+
+  const milestoneItems = (timeline.milestones || []).map((milestone) => {
+    const rollup = milestone.rollup || {};
+    const pct = rollup.pct == null ? null : rollup.pct;
+    const tone = milestone.done ? "pass" : (milestone.status_bucket === "in_progress" ? "warn" : "");
+    const links = (milestone.linked_work || []).map((work) => `
+      <li class="roadmap-tl-link roadmap-tl-link-${escapeHtml(work.status_bucket || "planned")}">
+        <span class="roadmap-tl-link-id">${escapeHtml(work.id)}</span>
+        <span class="roadmap-tl-link-level">${escapeHtml(work.level || "")}</span>
+        <span class="roadmap-tl-link-title">${escapeHtml(work.title || work.id)}</span>
+        <span class="roadmap-tl-link-status">${escapeHtml(work.status_bucket || "")}</span>
+      </li>`).join("");
+    return `
+    <article class="roadmap-tl-item roadmap-tl-milestone" data-tier="milestone">
+      <div class="roadmap-tl-marker ${milestone.done ? "is-done" : ""}"></div>
+      <div class="roadmap-tl-body surface-card ${tone}">
+        <div class="surface-card-header">
+          <b>${escapeHtml(milestone.date || "undated")} - ${escapeHtml(milestone.title || "milestone")}</b>
+          <span class="state-chip">${escapeHtml(milestone.done ? "done" : milestone.status_bucket || "open")}</span>
+        </div>
+        ${renderSurfaceMeta(`
+          <span><span class="meta-label">Progress</span><strong>${pct == null ? "n/a" : escapeHtml(String(pct)) + "%"}</strong></span>
+          <span><span class="meta-label">Linked</span><strong>${escapeHtml(String(rollup.linked || 0))}</strong></span>
+          <span><span class="meta-label">Done</span><strong>${escapeHtml(String(rollup.completed || 0))}</strong></span>
+          <span><span class="meta-label">Source</span><strong>${escapeHtml(milestone.source_path || "ROADMAP.md")}</strong></span>
+        `)}
+        ${links ? `<ul class="roadmap-tl-links">${links}</ul>` : `<div class="empty">No linked work</div>`}
+      </div>
+    </article>`;
+  }).join("");
+
+  const releaseItems = (timeline.releases || []).map((release) => `
+    <article class="roadmap-tl-item roadmap-tl-release" data-tier="release">
+      <div class="roadmap-tl-marker is-release"></div>
+      <div class="roadmap-tl-body surface-card ${release.status_bucket === "completed" ? "pass" : "warn"}">
+        <div class="surface-card-header">
+          <b>${escapeHtml(release.title || release.version || "release")}</b>
+          <span class="state-chip">${escapeHtml(release.status || "release")}</span>
+        </div>
+        ${renderSurfaceMeta(`
+          <span><span class="meta-label">Version</span><strong>${escapeHtml(release.version || "n/a")}</strong></span>
+          <span><span class="meta-label">Decided</span><strong>${escapeHtml(release.date || "n/a")}</strong></span>
+          <span><span class="meta-label">Owner gate</span><strong>${release.owner_required ? "required" : "no"}</strong></span>
+          <span><span class="meta-label">Source</span><strong>${escapeHtml(release.source_path || "release decision")}</strong></span>
+        `)}
+      </div>
+    </article>`).join("");
+
+  $("roadmap-timeline").innerHTML =
+    visionItem
+    + (milestoneItems || `<div class="empty">No milestones</div>`)
+    + (releaseItems || `<div class="empty">No releases</div>`);
 }
 
 function renderPlanning() {
@@ -2912,6 +3069,7 @@ function renderAll() {
   renderEvents();
   renderEvidence();
   renderPlanning();
+  renderRoadmapTimeline();
   renderMap();
   renderSources();
   renderCommands();
@@ -3149,6 +3307,8 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/graph": "graph",
         "/api/state-machines": "state_machines",
         "/api/roadmap": "roadmap",
+        "/api/roadmap-timeline": "roadmap_timeline",
+        "/api/roadmap_timeline": "roadmap_timeline",
         "/api/planning": "planning",
         "/api/commands": "commands",
     }

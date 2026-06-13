@@ -1034,3 +1034,124 @@ def test_ui_state_cli_emits_selected_resource_json(tmp_path, capsys):
     assert payload["resource"] == "tasks"
     assert payload["items"][0]["id"] == "TASK-AR-227"
     assert payload["sources"]
+
+
+def _write_release_decision(root: Path, version: str, *, status: str = "agent_council_approved", owner_required: bool = False) -> None:
+    _write(
+        root / "agents" / "project" / "release" / f"RELEASE-DECISION-v{version}.yml",
+        "\n".join(
+            [
+                "schema: agent-runtime-release-decision/v1",
+                f"target_version: {version}",
+                f"target_tag: v{version}",
+                f"status: {status}",
+                "criticality: noncritical",
+                f"owner_required: {'true' if owner_required else 'false'}",
+                "approved_by: agent-release-council",
+                "decision_date: 2026-06-13",
+                "",
+            ]
+        ),
+    )
+
+
+def test_ui_state_roadmap_timeline_links_milestones_and_orders_tiers(tmp_path):
+    _write_work_classification(tmp_path, _work_explorer_records())
+    _write_work_explorer_task_markdown(tmp_path)
+    _write(
+        tmp_path / "agents" / "project" / "VISION.md",
+        "\n".join(
+            [
+                "# Vision",
+                "",
+                "## Problem",
+                "",
+                "Context drift across projects.",
+                "",
+                "## Vision",
+                "",
+                "Standardize project overlays while keeping the runtime shared.",
+                "",
+                "## Success metric",
+                "",
+                "Required context matches without runtime edits.",
+                "",
+            ]
+        ),
+    )
+    _write(
+        tmp_path / "agents" / "project" / "ROADMAP.md",
+        "\n".join(
+            [
+                "# Roadmap",
+                "",
+                "## Current Phase",
+                "",
+                "- phase: metadata analytics",
+                "- next_milestone: ship explorer",
+                "",
+                "## Milestones",
+                "",
+                "- [x] 2026-06-10: kickoff prep with no linked ids",
+                "- [ ] 2026-06-20: `TASKSET-AR-WORK-METADATA-ANALYTICS` rollup and `TASK-AR-516` proof",
+                "- [ ] 2026-06-15: `TASK-AR-514` schema landed",
+                "",
+            ]
+        ),
+    )
+    _write_release_decision(tmp_path, "0.1.8")
+    _write_release_decision(tmp_path, "0.2.0", owner_required=True)
+
+    state = ui_state.build_state(tmp_path, now="2026-06-13T03:00:00+09:00")
+    timeline = state["roadmap_timeline"]
+
+    # Resource shape
+    assert timeline["schema"] == "agent-runtime-roadmap-timeline/v1"
+    assert timeline["phase"] == "metadata analytics"
+    assert {"vision", "milestones", "releases", "summary"}.issubset(timeline.keys())
+
+    # Vision tier parsed from VISION.md
+    assert timeline["vision"]["tier"] == "vision"
+    assert "overlays" in (timeline["vision"]["statement"] or "")
+    assert timeline["vision"]["success_metric"]
+
+    # Timeline ordering: milestones ascending by date.
+    dates = [m["date"] for m in timeline["milestones"]]
+    assert dates == ["2026-06-10", "2026-06-15", "2026-06-20"]
+
+    # Milestone -> taskset/task linkage joined to the work-explorer hierarchy.
+    by_date = {m["date"]: m for m in timeline["milestones"]}
+    rollup_ms = by_date["2026-06-20"]
+    linked_ids = {link["id"] for link in rollup_ms["linked_work"]}
+    assert "TASKSET-AR-WORK-METADATA-ANALYTICS" in linked_ids
+    assert "TASK-AR-516" in linked_ids
+    taskset_link = next(link for link in rollup_ms["linked_work"] if link["id"] == "TASKSET-AR-WORK-METADATA-ANALYTICS")
+    assert taskset_link["level"] == "taskset"
+    assert taskset_link["resolved"] is True
+    # Roll-up pct is computed from joined task state, never a stored field.
+    assert rollup_ms["rollup"]["pct"] is not None
+
+    # A milestone with no recognizable ids resolves to zero linked work.
+    assert by_date["2026-06-10"]["rollup"]["linked"] == 0
+
+    # Release tier parsed from release-decision YAMLs, ordered by version.
+    versions = [r["version"] for r in timeline["releases"]]
+    assert versions == ["0.1.8", "0.2.0"]
+    assert timeline["releases"][1]["owner_required"] is True
+    assert all(r["tier"] == "release" for r in timeline["releases"])
+
+    assert timeline["summary"]["releases"] == 2
+    assert timeline["summary"]["milestones"] == 3
+
+
+def test_ui_state_roadmap_timeline_resource_shape_when_sources_missing(tmp_path):
+    state = ui_state.build_state(tmp_path, now="2026-06-13T03:00:00+09:00")
+    timeline = state["roadmap_timeline"]
+    assert timeline["schema"] == "agent-runtime-roadmap-timeline/v1"
+    assert timeline["milestones"] == []
+    assert timeline["releases"] == []
+    assert timeline["vision"]["freshness"] == "missing"
+
+    resource = ui_state.build_resource(tmp_path, "roadmap_timeline", now="2026-06-13T03:00:00+09:00")
+    assert resource["resource"] == "roadmap_timeline"
+    assert resource["items"]["schema"] == "agent-runtime-roadmap-timeline/v1"
