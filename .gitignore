@@ -21,3 +21,10 @@ __pycache__/
 
 # Local browser verification artifacts.
 /.playwright-mcp/
+
+# TASK-AR-365: external notification routing secrets (webhook URLs / bot tokens /
+# SMTP creds). NEVER commit the populated config; only the *.example template is
+# tracked. Cover both the canonical path and any .codex/ local placement.
+/agents/project/notifications.local.json
+/.codex/notifications.local.json
+notifications.local.json

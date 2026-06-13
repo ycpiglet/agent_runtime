@@ -179,6 +179,9 @@ HTML = """<!doctype html>
           <button class="sidebar-link" type="button" role="tab" data-view="labels" data-route="ops/labels" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9750;</span><span class="sidebar-label">Labels</span>
           </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="notifications" data-route="ops/notifications" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9993;</span><span class="sidebar-label">Notifications</span>
+          </button>
           <button class="sidebar-link" type="button" role="tab" data-view="portability" data-route="ops/portability" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#8645;</span><span class="sidebar-label">Import/Export</span>
           </button>
@@ -708,6 +711,36 @@ HTML = """<!doctype html>
           </form>
           <p id="label-summary" class="config-summary" role="status" aria-live="polite"></p>
           <div id="label-list" class="config-grid" aria-label="Labels"></div>
+        </div>
+        <div id="view-notifications" class="view">
+          <p id="routing-status" class="routing-status" role="status" aria-live="polite"></p>
+          <p class="routing-hint">External routing exports work events (completed / blocked / approval-pending) to your messenger. Secrets live in a LOCAL gitignored config &mdash; the console never sees them and never sends. This view does proposal-only subscription CRUD; an opt-in local runner performs the actual dispatch.</p>
+          <ul class="routing-legend" aria-label="Severity routing windows">
+            <li><span class="routing-dot routing-dot-immediate" aria-hidden="true"></span>Immediate &mdash; block / approval-pending</li>
+            <li><span class="routing-dot routing-dot-aggregate" aria-hidden="true"></span>Aggregate &mdash; watch (5 / 15-min window)</li>
+            <li><span class="routing-dot routing-dot-digest" aria-hidden="true"></span>Digest &mdash; pass / completed (daily)</li>
+          </ul>
+          <form id="subscription-form" class="config-form" aria-label="Create notification subscription rule">
+            <input id="subscription-channel" name="channel" placeholder="channel name (e.g. discord-ops)" required>
+            <select id="subscription-kind" name="kind" aria-label="Channel kind">
+              <option value="discord">Discord webhook</option>
+              <option value="telegram">Telegram bot</option>
+              <option value="email">Email / SMTP</option>
+            </select>
+            <select id="subscription-severity" name="severity" aria-label="Severity subscription">
+              <option value="all">All severities</option>
+              <option value="immediate">Immediate only</option>
+              <option value="aggregate">Aggregate (watch)</option>
+              <option value="digest">Digest (daily)</option>
+            </select>
+            <select id="subscription-window" name="aggregate_minutes" aria-label="Aggregate window">
+              <option value="5">5-min window</option>
+              <option value="15">15-min window</option>
+            </select>
+            <button type="submit">Propose rule</button>
+          </form>
+          <p id="subscription-summary" class="config-summary" role="status" aria-live="polite"></p>
+          <div id="subscription-list" class="config-grid" aria-label="Notification subscriptions"></div>
         </div>
         <div id="view-portability" class="view">
           <section class="portability-section" aria-label="Export">
@@ -3606,6 +3639,20 @@ pre {
   font-weight: 600;
 }
 .rule-flow-arrow { color: var(--muted); }
+/* External notification routing (TASK-AR-365). All colors are theme tokens. */
+.routing-status { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
+.routing-status strong { color: var(--ink); }
+.routing-hint { color: var(--muted); font-size: 12px; margin: 0 0 10px; max-width: 70ch; }
+.routing-legend { display: flex; flex-wrap: wrap; gap: 8px 16px; list-style: none; padding: 0; margin: 0 0 12px; font-size: 12px; color: var(--muted); }
+.routing-legend li { display: flex; align-items: center; gap: 6px; }
+.routing-dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; background: var(--muted); }
+.routing-dot-immediate { background: var(--danger); }
+.routing-dot-aggregate { background: var(--amber); }
+.routing-dot-digest { background: var(--success); }
+.routing-token { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); background: var(--raise); }
+.routing-token-immediate { color: var(--danger); background: var(--danger-soft); border-color: var(--danger-line); }
+.routing-token-aggregate { color: var(--warning); background: var(--warning-soft); border-color: var(--warning-line); }
+.routing-token-digest { color: var(--success); background: var(--success-soft); border-color: var(--success-line); }
 /* Calendar / scheduling (TASK-AR-335). All colors are theme tokens. */
 .calendar-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
 .calendar-header h2 { margin: 0; font-size: 16px; color: var(--ink); }
@@ -8417,6 +8464,63 @@ function renderLabels() {
   `).join("") : `<div class="empty">No labels</div>`;
 }
 
+function renderNotificationRouting() {
+  const host = $("subscription-list");
+  if (!host) return;
+  const data = (runtimeState && runtimeState.notification_routing) || { channels: [], totals: {} };
+  const totals = data.totals || {};
+  const status = $("routing-status");
+  if (status) {
+    const dormant = data.dormant !== false;
+    status.innerHTML = `Routing is <strong>${dormant ? "dormant" : "active"}</strong>`
+      + ` &middot; channels <strong>${escapeHtml(totals.channels || 0)}</strong>`
+      + ` &middot; enabled <strong>${escapeHtml(totals.enabled || 0)}</strong>`
+      + ` &middot; secrets configured <strong>${escapeHtml(totals.configured || 0)}</strong>`
+      + ` &middot; secrets stay in the local config (never served)`;
+  }
+  const summary = $("subscription-summary");
+  if (summary) {
+    summary.innerHTML = `Config ${data.config_present ? "present" : "absent"} at <strong>${escapeHtml(data.source_path || "local config")}</strong>`
+      + ` &middot; template <strong>${escapeHtml(data.example_path || "")}</strong>`
+      + ` &middot; proposal-only CRUD (dispatch is an opt-in local runner)`;
+  }
+  const channels = data.channels || [];
+  host.innerHTML = channels.length ? channels.map((channel) => {
+    const stateClass = channel.enabled ? (channel.configured ? "is-active" : "is-inactive") : "is-inactive";
+    const stateLabel = channel.enabled ? (channel.configured ? "enabled" : "enabled (no secret)") : "disabled";
+    const severities = (channel.severities || []).map((sev) =>
+      `<span class="routing-token routing-token-${escapeHtml(sev)}">${escapeHtml(sev)}</span>`).join("");
+    return `
+    <article class="config-card">
+      <div class="config-card-header">
+        <b>${escapeHtml(channel.name)}</b>
+        <span class="rule-state ${stateClass}">${escapeHtml(stateLabel)}</span>
+      </div>
+      <div class="rule-flow">
+        <span class="rule-token">${escapeHtml(channel.kind)}</span>
+        <span class="rule-flow-arrow" aria-hidden="true">&#8594;</span>
+        ${severities}
+      </div>
+      <div class="config-card-meta">
+        <span>Secret <strong>${escapeHtml(channel.configured ? "configured (hidden)" : "not set")}</strong></span>
+        <span>Window <strong>${escapeHtml(channel.aggregate_minutes || 5)} min</strong></span>
+      </div>
+      <div class="config-card-actions">
+        <button class="config-action" type="button" onclick="toggleSubscription('${escapeHtml(channel.name)}', ${channel.enabled ? "false" : "true"})">${channel.enabled ? "Disable" : "Enable"}</button>
+        <button class="config-action" type="button" onclick="deleteSubscription('${escapeHtml(channel.name)}')">Delete</button>
+      </div>
+    </article>`;
+  }).join("") : `<div class="empty">No notification channels &mdash; routing is dormant. Author the local config from the example template.</div>`;
+}
+
+function toggleSubscription(channel, enabled) {
+  return sendJson("/api/commands", { type: "subscription.toggle", payload: { type: "subscription.toggle", target: channel, payload: { actor: "ui", enabled } } });
+}
+
+function deleteSubscription(channel) {
+  return sendJson("/api/commands", { type: "subscription.delete", payload: { type: "subscription.delete", target: channel, payload: { actor: "ui" } } });
+}
+
 function toggleAutomationRule(ruleId, active) {
   return sendJson("/api/commands", { type: "automation.toggle", payload: { type: "automation.toggle", target: ruleId, payload: { actor: "ui", active } } });
 }
@@ -9671,6 +9775,7 @@ function renderAll() {
   renderAutomation();
   renderProperties();
   renderLabels();
+  renderNotificationRouting();
   renderSidebarActiveTaskset();
   renderDetail();
 }
@@ -10255,6 +10360,26 @@ $("label-form")?.addEventListener("submit", async (event) => {
   $("label-name").value = "";
   $("label-description").value = "";
 });
+$("subscription-form")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const severityChoice = $("subscription-severity").value;
+  const severities = severityChoice === "all" ? ["immediate", "aggregate", "digest"] : [severityChoice];
+  await sendJson("/api/commands", {
+    type: "subscription.create",
+    payload: {
+      type: "subscription.create",
+      payload: {
+        actor: "ui",
+        channel: $("subscription-channel").value,
+        kind: $("subscription-kind").value,
+        severities,
+        aggregate_minutes: Number($("subscription-window").value) || 5,
+        enabled: false,
+      },
+    },
+  });
+  $("subscription-channel").value = "";
+});
 
 // ----- Calendar / scheduling listeners (TASK-AR-335) -----
 $("calendar-prev")?.addEventListener("click", () => calendarShift(calendarMode === "week" ? -7 : 0, calendarMode === "week" ? 0 : -1));
@@ -10671,6 +10796,8 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/notifications": "notifications",
         "/api/daily_brief": "daily_brief",
         "/api/daily-brief": "daily_brief",
+        "/api/notification_routing": "notification_routing",
+        "/api/notification-routing": "notification_routing",
         "/api/search_index": "search_index",
         "/api/search-index": "search_index",
         "/api/commands": "commands",
