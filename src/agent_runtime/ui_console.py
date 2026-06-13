@@ -134,6 +134,9 @@ HTML = """<!doctype html>
         </div>
         <div class="sidebar-group" data-group="comms">
           <span class="sidebar-group-title">COMMS</span>
+          <button class="sidebar-link" type="button" role="tab" data-view="inbox" data-route="comms/inbox" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9993;</span><span class="sidebar-label">Inbox</span><span id="inbox-nav-badge" class="sidebar-badge" hidden>0</span>
+          </button>
           <button class="sidebar-link" type="button" role="tab" data-view="channels" data-route="comms/channels" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Channels</span>
           </button>
@@ -384,6 +387,53 @@ HTML = """<!doctype html>
           <div id="tasksets-list" class="taskset-strip"></div>
           <div id="list-toolbar-agents" class="list-toolbar-mount" data-list-view="agents"></div>
           <div id="agents-list" class="list-panel"></div>
+        </div>
+        <div id="view-inbox" class="view">
+          <div class="inbox-grid">
+            <section class="inbox-main" aria-label="Notification center">
+              <header class="inbox-header">
+                <h2>Inbox</h2>
+                <p id="inbox-summary" class="inbox-summary" role="status" aria-live="polite"></p>
+              </header>
+              <div class="inbox-toolbar" role="group" aria-label="Inbox filters">
+                <label class="inbox-field"><span>Kind</span>
+                  <select id="inbox-filter-kind" aria-label="Filter by kind"><option value="">All</option></select>
+                </label>
+                <label class="inbox-field"><span>Severity</span>
+                  <select id="inbox-filter-severity" aria-label="Filter by severity"><option value="">All</option></select>
+                </label>
+                <label class="inbox-checkbox"><input id="inbox-filter-unread" type="checkbox"> Unread only</label>
+                <label class="inbox-checkbox"><input id="inbox-show-muted" type="checkbox"> Show muted</label>
+                <button id="inbox-mark-all-read" class="inbox-action" type="button">Mark all read</button>
+              </div>
+              <p id="inbox-action-hint" class="inbox-action-hint" role="status" aria-live="polite"></p>
+              <div id="inbox-list" class="inbox-list" aria-label="Notifications"></div>
+            </section>
+            <aside class="inbox-side" aria-label="Daily brief and subscriptions">
+              <section class="daily-brief" aria-label="Daily brief">
+                <header class="daily-brief-header">
+                  <h3>Daily Brief</h3>
+                  <span id="daily-brief-date" class="daily-brief-date"></span>
+                </header>
+                <div id="daily-brief-body" class="daily-brief-body"></div>
+              </section>
+              <section class="inbox-subscribe" aria-label="Subscription rules">
+                <h3>Subscriptions</h3>
+                <p class="inbox-hint">Subscribe / mute by kind, severity, or taskset. Proposal-only &mdash; a runtime executor applies preferences to the canonical config.</p>
+                <form id="inbox-subscribe-form" class="config-form">
+                  <select id="inbox-sub-kind" aria-label="Subscribe kind"><option value="">kind (any)</option></select>
+                  <select id="inbox-sub-severity" aria-label="Subscribe severity"><option value="">severity (any)</option></select>
+                  <input id="inbox-sub-taskset" placeholder="taskset id (optional)" aria-label="Subscribe taskset">
+                  <button type="submit">Subscribe</button>
+                </form>
+                <form id="inbox-keyword-form" class="config-form">
+                  <input id="inbox-keyword" placeholder="mute keyword" aria-label="Mute keyword">
+                  <button type="submit">Mute keyword</button>
+                </form>
+                <p id="inbox-subscribe-hint" class="inbox-action-hint" role="status" aria-live="polite"></p>
+              </section>
+            </aside>
+          </div>
         </div>
         <div id="view-channels" class="view">
           <div class="channels-grid">
@@ -2688,6 +2738,17 @@ textarea:focus {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+.channel-message-actions { display: flex; gap: 6px; margin-top: 4px; }
+.channel-msg-action {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--raise);
+  color: var(--muted);
+  cursor: pointer;
+}
+.channel-msg-action:hover { border-color: var(--primary-line); color: var(--primary); }
 .channels-empty {
   color: var(--muted);
   border: 1px dashed var(--line-strong);
@@ -3492,6 +3553,133 @@ pre {
 .calendar-schedule-panel h3 { margin: 0 0 4px; font-size: 14px; color: var(--ink); }
 .calendar-hint { color: var(--muted); font-size: 12px; margin: 0 0 12px; }
 .calendar-cron-badge { font-family: monospace; font-size: 11px; color: var(--teal); }
+/* ===== TASK-AR-338: notification center + daily brief ===== */
+.sidebar-badge {
+  margin-left: auto;
+  min-width: 18px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: var(--tile);
+}
+.inbox-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); gap: 16px; }
+@media (max-width: 960px) { .inbox-grid { grid-template-columns: 1fr; } }
+.inbox-header { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.inbox-header h2 { margin: 0; }
+.inbox-summary { color: var(--muted); font-size: 13px; margin: 0; }
+.inbox-summary strong { color: var(--ink); }
+.inbox-toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+.inbox-field { display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: var(--muted); }
+.inbox-field select,
+.inbox-subscribe input,
+.inbox-subscribe select {
+  padding: 7px 9px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line-strong);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+.inbox-checkbox { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); }
+.inbox-action {
+  padding: 7px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line-strong);
+  background: var(--raise);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+.inbox-action:hover { border-color: var(--primary-line); }
+.inbox-action-hint { font-size: 12px; color: var(--muted); margin: 0 0 8px; min-height: 14px; }
+.inbox-action-hint.is-ok { color: var(--success); }
+.inbox-action-hint.is-error { color: var(--danger); }
+.inbox-list { display: flex; flex-direction: column; gap: 8px; }
+.inbox-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-left-width: 3px;
+  border-radius: var(--radius);
+  background: var(--tile);
+}
+.inbox-item.is-unread { background: var(--primary-soft); }
+.inbox-item.is-muted { opacity: 0.6; }
+.inbox-item.is-highlighted { box-shadow: var(--focus); }
+.inbox-item[data-severity="overdue"],
+.inbox-item[data-severity="blocked"],
+.inbox-item[data-severity="error"] { border-left-color: var(--danger); }
+.inbox-item[data-severity="approval"],
+.inbox-item[data-severity="due_soon"] { border-left-color: var(--warning); }
+.inbox-item[data-severity="mention"] { border-left-color: var(--primary); }
+.inbox-item[data-severity="info"] { border-left-color: var(--info); }
+.inbox-item-main { flex: 1; min-width: 0; }
+.inbox-item-title { font-weight: 600; color: var(--ink); font-size: 13px; }
+.inbox-item-body { color: var(--muted); font-size: 12px; margin-top: 2px; word-break: break-word; }
+.inbox-item-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; font-size: 11px; color: var(--subtle); }
+.inbox-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.inbox-badge[data-severity="overdue"],
+.inbox-badge[data-severity="blocked"],
+.inbox-badge[data-severity="error"] { color: var(--danger); background: var(--danger-soft); }
+.inbox-badge[data-severity="approval"],
+.inbox-badge[data-severity="due_soon"] { color: var(--warning); background: var(--warning-soft); }
+.inbox-badge[data-severity="mention"] { color: var(--primary); background: var(--primary-soft); }
+.inbox-badge[data-severity="info"] { color: var(--info); background: var(--info-soft); }
+.inbox-item-actions { display: flex; flex-direction: column; gap: 4px; }
+.inbox-item-actions button {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line-strong);
+  background: var(--raise);
+  color: var(--ink);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.inbox-item-actions button:hover { border-color: var(--primary-line); }
+.inbox-side { display: flex; flex-direction: column; gap: 16px; }
+.daily-brief,
+.inbox-subscribe {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-grad);
+  padding: 14px 16px;
+}
+.daily-brief-header { display: flex; align-items: baseline; justify-content: space-between; }
+.daily-brief-header h3 { margin: 0; font-size: 14px; color: var(--ink); }
+.daily-brief-date { font-size: 12px; color: var(--muted); }
+.daily-brief-section { margin-top: 10px; }
+.daily-brief-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--subtle); margin-bottom: 4px; }
+.daily-brief-section.is-completed .daily-brief-section-title { color: var(--success); }
+.daily-brief-section.is-blocked .daily-brief-section-title { color: var(--danger); }
+.daily-brief-section.is-decisions .daily-brief-section-title { color: var(--violet); }
+.daily-brief-section.is-next .daily-brief-section-title { color: var(--primary); }
+.daily-brief-item {
+  display: block;
+  font-size: 12px;
+  color: var(--ink);
+  padding: 4px 0;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+.daily-brief-item:last-child { border-bottom: none; }
+.daily-brief-item:hover { color: var(--primary); }
+.daily-brief-item code { font-size: 11px; color: var(--muted); }
+.daily-brief-empty { font-size: 12px; color: var(--subtle); }
+.inbox-subscribe h3 { margin: 0 0 4px; font-size: 14px; color: var(--ink); }
+.inbox-hint { color: var(--muted); font-size: 12px; margin: 0 0 10px; }
 .triage-summary { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
 .triage-summary strong { color: var(--ink); }
 .triage-toolbar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
@@ -6395,8 +6583,16 @@ function channelRoleColorVar(token) {
 
 function channelMessageTemplate(message) {
   const color = channelRoleColorVar(message.role_color);
+  const messageId = escapeHtml(message.id || "");
+  // Pin / react are proposal-only (TASK-AR-338); buttons need a valid id.
+  const actions = message.id
+    ? `<div class="channel-message-actions">
+        <button type="button" class="channel-msg-action" data-msg-pin="${messageId}" title="Pin message">Pin</button>
+        <button type="button" class="channel-msg-action" data-msg-react="${messageId}" title="React (ack)">Ack</button>
+      </div>`
+    : "";
   return `
-    <div class="channel-message">
+    <div class="channel-message" data-message-id="${messageId}">
       <span class="channel-avatar" style="--role-color: ${color}" aria-hidden="true">${escapeHtml(message.avatar || "?")}</span>
       <div class="channel-message-body">
         <div class="channel-message-head">
@@ -6404,8 +6600,17 @@ function channelMessageTemplate(message) {
           <span class="channel-ts">${escapeHtml(message.ts || "")}</span>
         </div>
         <div class="channel-message-text">${escapeHtml(message.body || "")}</div>
+        ${actions}
       </div>
     </div>`;
+}
+
+async function pinMessage(messageId) {
+  return sendJson("/api/commands", { type: "message.pin", payload: { type: "message.pin", target: messageId, payload: { actor: "owner" } } });
+}
+
+async function reactToMessage(messageId, reaction) {
+  return sendJson("/api/commands", { type: "message.react", payload: { type: "message.react", target: messageId, payload: { actor: "owner", reaction: reaction || "ack" } } });
 }
 
 function channelThreadTemplate(thread) {
@@ -6462,6 +6667,12 @@ function renderChannelsMain() {
   host.innerHTML = threads.length
     ? threads.map(channelThreadTemplate).join("")
     : `<div class="channels-empty">No conversation yet in this channel</div>`;
+  host.querySelectorAll("[data-msg-pin]").forEach((node) => {
+    node.addEventListener("click", () => pinMessage(node.dataset.msgPin));
+  });
+  host.querySelectorAll("[data-msg-react]").forEach((node) => {
+    node.addEventListener("click", () => reactToMessage(node.dataset.msgReact, "ack"));
+  });
 }
 
 function renderChannels() {
@@ -6469,13 +6680,193 @@ function renderChannels() {
   renderChannelsMain();
 }
 
+// ----- TASK-AR-338: notification center + daily brief -----
+const inboxFilters = { kind: "", severity: "", unread: false, showMuted: false };
+
+function notificationsData() {
+  return (runtimeState && runtimeState.notifications) || { inbox: [], muted: [], totals: {}, kinds: [], severities: [] };
+}
+
+function dailyBriefData() {
+  return (runtimeState && runtimeState.daily_brief) || { completed: [], blocked: [], decisions: [], next_recommended: [], totals: {} };
+}
+
+function inboxSeverityLabel(severity) {
+  const map = { overdue: "overdue", due_soon: "due soon", blocked: "blocked", approval: "approval", mention: "mention", error: "error", info: "info" };
+  return map[severity] || String(severity || "info");
+}
+
+function inboxItemTemplate(item) {
+  const severity = String(item.severity || "info").replace(/[^a-z_]/g, "");
+  const classes = ["inbox-item"];
+  if (!item.read) classes.push("is-unread");
+  if (item.muted) classes.push("is-muted");
+  if (item.highlighted) classes.push("is-highlighted");
+  const meta = [];
+  if (item.kind) meta.push(escapeHtml(item.kind));
+  if (item.task_id) meta.push(escapeHtml(item.task_id));
+  if (item.taskset_id) meta.push(escapeHtml(item.taskset_id));
+  if (item.created_at) meta.push(escapeHtml(item.created_at));
+  const link = item.deep_link ? escapeHtml(item.deep_link) : "";
+  return `
+    <article class="${classes.join(" ")}" data-severity="${escapeHtml(severity)}" data-notif-id="${escapeHtml(item.id || "")}" data-entity-id="${escapeHtml(item.entity_id || "")}">
+      <span class="inbox-badge" data-severity="${escapeHtml(severity)}">${escapeHtml(inboxSeverityLabel(item.severity))}</span>
+      <div class="inbox-item-main">
+        <div class="inbox-item-title">${escapeHtml(item.title || item.id || "notification")}</div>
+        <div class="inbox-item-body">${escapeHtml(item.body || "")}</div>
+        <div class="inbox-item-meta">${meta.map((value) => `<span>${value}</span>`).join("")}</div>
+      </div>
+      <div class="inbox-item-actions">
+        ${link ? `<button type="button" data-inbox-open="${link}">Open</button>` : ""}
+        ${item.read ? "" : `<button type="button" data-inbox-read="${escapeHtml(item.id || "")}">Mark read</button>`}
+        <button type="button" data-inbox-mute="${escapeHtml(item.id || "")}">Mute</button>
+      </div>
+    </article>`;
+}
+
+function renderInbox() {
+  const host = $("inbox-list");
+  if (!host) return;
+  const data = notificationsData();
+  const totals = data.totals || {};
+  populateInboxSelectors(data);
+
+  const summary = $("inbox-summary");
+  if (summary) {
+    summary.innerHTML = `<strong>${escapeHtml(totals.inbox || 0)}</strong> notifications`
+      + ` &middot; unread <strong>${escapeHtml(totals.unread || 0)}</strong>`
+      + ` &middot; muted <strong>${escapeHtml(totals.muted || 0)}</strong>`
+      + ` &middot; proposal-only actions`;
+  }
+
+  const badge = $("inbox-nav-badge");
+  if (badge) {
+    const unread = Number(totals.unread || 0);
+    badge.textContent = String(unread);
+    badge.hidden = unread <= 0;
+  }
+
+  const base = inboxFilters.showMuted ? (data.muted || []) : (data.inbox || []);
+  const rows = base.filter((item) => {
+    if (inboxFilters.kind && item.kind !== inboxFilters.kind) return false;
+    if (inboxFilters.severity && item.severity !== inboxFilters.severity) return false;
+    if (inboxFilters.unread && item.read) return false;
+    return true;
+  });
+  host.innerHTML = rows.length
+    ? rows.map(inboxItemTemplate).join("")
+    : `<div class="empty">No notifications</div>`;
+
+  host.querySelectorAll("[data-inbox-open]").forEach((node) => {
+    node.addEventListener("click", () => { window.location.hash = node.dataset.inboxOpen; });
+  });
+  host.querySelectorAll("[data-inbox-read]").forEach((node) => {
+    node.addEventListener("click", () => markNotificationRead(node.dataset.inboxRead));
+  });
+  host.querySelectorAll("[data-inbox-mute]").forEach((node) => {
+    node.addEventListener("click", () => muteNotification(node.dataset.inboxMute));
+  });
+
+  renderDailyBrief();
+}
+
+function populateInboxSelectors(data) {
+  const kinds = data.kinds || [];
+  const severities = data.severities || [];
+  const fillSelect = (id, values, selected, anyLabel) => {
+    const node = $(id);
+    if (!node) return;
+    const opts = [`<option value="">${escapeHtml(anyLabel)}</option>`]
+      .concat(values.map((value) => `<option value="${escapeHtml(value)}"${value === selected ? " selected" : ""}>${escapeHtml(value)}</option>`));
+    node.innerHTML = opts.join("");
+    node.value = selected || "";
+  };
+  fillSelect("inbox-filter-kind", kinds, inboxFilters.kind, "All");
+  fillSelect("inbox-filter-severity", severities, inboxFilters.severity, "All");
+  fillSelect("inbox-sub-kind", kinds, "", "kind (any)");
+  fillSelect("inbox-sub-severity", severities, "", "severity (any)");
+}
+
+function dailyBriefSection(kind, title, items, emptyLabel) {
+  const body = items.length
+    ? items.map((item) => {
+        const link = item.deep_link ? escapeHtml(item.deep_link) : "";
+        const idText = item.id ? `<code>${escapeHtml(item.id)}</code> ` : "";
+        return `<span class="daily-brief-item"${link ? ` data-inbox-open="${link}"` : ""}>${idText}${escapeHtml(item.title || item.id || "")}</span>`;
+      }).join("")
+    : `<div class="daily-brief-empty">${escapeHtml(emptyLabel)}</div>`;
+  return `<div class="daily-brief-section is-${escapeHtml(kind)}">
+    <div class="daily-brief-section-title">${escapeHtml(title)} (${items.length})</div>
+    ${body}
+  </div>`;
+}
+
+function renderDailyBrief() {
+  const host = $("daily-brief-body");
+  if (!host) return;
+  const data = dailyBriefData();
+  const dateNode = $("daily-brief-date");
+  if (dateNode) dateNode.textContent = data.date || "";
+  host.innerHTML = [
+    dailyBriefSection("completed", "Completed today", data.completed || [], "Nothing completed yet"),
+    dailyBriefSection("blocked", "Blocked", data.blocked || [], "No blocked work"),
+    dailyBriefSection("decisions", "Decisions", data.decisions || [], "No decisions today"),
+    dailyBriefSection("next", "Next recommended", data.next_recommended || [], "No recommendations"),
+  ].join("");
+  host.querySelectorAll("[data-inbox-open]").forEach((node) => {
+    node.addEventListener("click", () => { window.location.hash = node.dataset.inboxOpen; });
+  });
+}
+
+function inboxHint(message, ok) {
+  const hint = $("inbox-action-hint");
+  if (!hint) return;
+  hint.textContent = message;
+  hint.classList.toggle("is-ok", !!ok);
+  hint.classList.toggle("is-error", !ok);
+}
+
+async function markNotificationRead(notificationId) {
+  const result = await sendJson("/api/commands", { type: "notification.read", payload: { type: "notification.read", target: notificationId, payload: { actor: "ui" } } });
+  inboxHint(result && result.status !== "failed" ? "Marked read (proposal queued)." : `Failed: ${(result.errors || ["error"]).join("; ")}`, result && result.status !== "failed");
+}
+
+async function muteNotification(notificationId) {
+  const result = await sendJson("/api/commands", { type: "notification.mute", payload: { type: "notification.mute", target: notificationId, payload: { actor: "ui" } } });
+  inboxHint(result && result.status !== "failed" ? "Muted (proposal queued)." : `Failed: ${(result.errors || ["error"]).join("; ")}`, result && result.status !== "failed");
+}
+
+async function markAllNotificationsRead() {
+  const result = await sendJson("/api/commands", { type: "notification.read", payload: { type: "notification.read", payload: { actor: "ui", all: true } } });
+  inboxHint(result && result.status !== "failed" ? "Marked all read (proposal queued)." : `Failed: ${(result.errors || ["error"]).join("; ")}`, result && result.status !== "failed");
+}
+
 // Parse the owner input box into a runtime command. Slash commands:
 //   /meeting <topic> @role @role   -> meeting.start
 //   /seminar <topic>               -> seminar.start
+//   /mention @target <message>     -> mention.notify (TASK-AR-338)
+// A plain message that contains an @mention but no explicit target is routed to
+// mention.notify so the mentioned agent/role/Owner receives a runtime message.
 // Anything else is a directive (runtime.call_agent) to the @target / channel.
 function parseChannelInput(raw, { target, channel } = {}) {
   const text = String(raw || "").trim();
   if (!text) return { error: "Enter a message or slash command." };
+  const mentionMatch = text.match(/^\/mention\b\s*(.*)$/i);
+  if (mentionMatch) {
+    const rest = mentionMatch[1].trim();
+    const first = (rest.match(/@[\w.-]+/) || [])[0];
+    if (!first) return { error: "Usage: /mention @target <message>" };
+    const mentionTarget = first.slice(1);
+    const message = rest.replace(first, "").trim();
+    if (!message) return { error: "Usage: /mention @target <message>" };
+    return {
+      command: {
+        type: "mention.notify",
+        target: mentionTarget,
+        payload: { actor: "owner", message, channel: channel || null },
+      },
+    };
+  }
   const meetingMatch = text.match(/^\/(meeting|seminar)\b\s*(.*)$/i);
   if (meetingMatch) {
     const kind = meetingMatch[1].toLowerCase();
@@ -6501,7 +6892,20 @@ function parseChannelInput(raw, { target, channel } = {}) {
   }
   // Plain directive message to an agent / channel.
   const to = String(target || "").replace(/^@/, "").trim();
-  if (!to) return { error: "Add a @role target for a directive, or use /meeting or /seminar." };
+  if (!to) {
+    // No explicit target: if the message @mentions someone, notify them.
+    const mention = (text.match(/@[\w.-]+/) || [])[0];
+    if (mention) {
+      return {
+        command: {
+          type: "mention.notify",
+          target: mention.slice(1),
+          payload: { actor: "owner", message: text, channel: channel || null },
+        },
+      };
+    }
+    return { error: "Add a @role target or @mention, or use /meeting, /seminar, /mention." };
+  }
   return {
     command: {
       type: "runtime.call_agent",
@@ -8993,6 +9397,7 @@ function renderAll() {
   renderWorkloadHeatmap();
   renderOpsDashboard();
   renderAgents();
+  renderInbox();
   renderChannels();
   renderMessages();
   renderEvents();
@@ -9501,6 +9906,45 @@ $("channels-input-form")?.addEventListener("submit", async (event) => {
     $("channels-input-box").value = "";
   }
 });
+// ----- TASK-AR-338: notification inbox filters + subscription forms -----
+$("inbox-filter-kind")?.addEventListener("change", (event) => { inboxFilters.kind = event.target.value; renderInbox(); });
+$("inbox-filter-severity")?.addEventListener("change", (event) => { inboxFilters.severity = event.target.value; renderInbox(); });
+$("inbox-filter-unread")?.addEventListener("change", (event) => { inboxFilters.unread = event.target.checked; renderInbox(); });
+$("inbox-show-muted")?.addEventListener("change", (event) => { inboxFilters.showMuted = event.target.checked; renderInbox(); });
+$("inbox-mark-all-read")?.addEventListener("click", markAllNotificationsRead);
+$("inbox-subscribe-form")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const payload = { actor: "ui" };
+  const kind = $("inbox-sub-kind")?.value;
+  const severity = $("inbox-sub-severity")?.value;
+  const taskset = ($("inbox-sub-taskset")?.value || "").trim();
+  if (kind) payload.kinds = [kind];
+  if (severity) payload.severities = [severity];
+  if (taskset) payload.tasksets = [taskset];
+  const result = await sendJson("/api/commands", { type: "notification.subscribe", payload: { type: "notification.subscribe", payload } });
+  const hint = $("inbox-subscribe-hint");
+  if (hint) {
+    const ok = result && result.status !== "failed";
+    hint.textContent = ok ? "Subscription proposal queued." : `Failed: ${(result.errors || ["error"]).join("; ")}`;
+    hint.classList.toggle("is-ok", ok);
+    hint.classList.toggle("is-error", !ok);
+  }
+  if (taskset && $("inbox-sub-taskset")) $("inbox-sub-taskset").value = "";
+});
+$("inbox-keyword-form")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const keyword = ($("inbox-keyword")?.value || "").trim();
+  if (!keyword) return;
+  const result = await sendJson("/api/commands", { type: "notification.mute", payload: { type: "notification.mute", payload: { actor: "ui", keyword } } });
+  const hint = $("inbox-subscribe-hint");
+  if (hint) {
+    const ok = result && result.status !== "failed";
+    hint.textContent = ok ? "Keyword mute proposal queued." : `Failed: ${(result.errors || ["error"]).join("; ")}`;
+    hint.classList.toggle("is-ok", ok);
+    hint.classList.toggle("is-error", !ok);
+  }
+  if ($("inbox-keyword")) $("inbox-keyword").value = "";
+});
 // ----- TASK-AR-331: triage filters + property/label/automation CRUD forms -----
 ["triage-filter", "triage-reason-filter"].forEach((id) => {
   const node = $(id);
@@ -9967,6 +10411,9 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/reviews": "reviews",
         "/api/schedules": "schedules",
         "/api/calendar": "calendar",
+        "/api/notifications": "notifications",
+        "/api/daily_brief": "daily_brief",
+        "/api/daily-brief": "daily_brief",
         "/api/search_index": "search_index",
         "/api/search-index": "search_index",
         "/api/commands": "commands",

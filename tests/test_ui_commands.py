@@ -663,3 +663,141 @@ def test_assignment_set_rejects_direct_file_mutation(tmp_path):
 
 def test_assignment_command_type_in_allowlist():
     assert "assignment.set" in ui_commands.COMMAND_TYPES
+
+
+# --- TASK-AR-338: @mention, message pin/react, notification prefs ----------
+
+
+def test_mention_notify_emits_runtime_message_proposal(tmp_path):
+    result = ui_commands.submit_command(
+        tmp_path,
+        {"type": "mention.notify", "target": "@lead-engineer", "payload": {"message": "please look", "actor": "owner"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-mention",
+    )
+    assert result["status"] == "queued"
+    assert result["result"]["mention_target"] == "lead-engineer"
+    assert result["result"]["mutation_boundary"] == "proposal_only"
+    # A runtime message (proposal-only) is queued under agents/messages/inbox.
+    messages = list((tmp_path / "agents" / "messages" / "inbox").glob("MSG-*.md"))
+    assert len(messages) == 1
+    body = messages[0].read_text(encoding="utf-8")
+    assert "to: lead-engineer" in body
+    assert "@lead-engineer please look" in body
+    # The mention is then aggregated by the notification center.
+    notifications = ui_state.build_notifications(
+        [], {"reminders": []}, [], ui_state.load_messages(tmp_path, NOW, []), ui_state.load_notifications_config(tmp_path, NOW, []), NOW
+    )
+    mentions = [item for item in notifications["notifications"] if item["kind"] == "mention"]
+    assert any(item["mention_target"] == "lead-engineer" for item in mentions)
+
+
+def test_mention_notify_requires_target_and_message(tmp_path):
+    no_target = ui_commands.submit_command(
+        tmp_path,
+        {"type": "mention.notify", "payload": {"message": "hi", "actor": "owner"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-mention-notarget",
+    )
+    assert no_target["status"] == "failed"
+    assert any("mention target is required" in error for error in no_target["errors"])
+
+    no_msg = ui_commands.submit_command(
+        tmp_path,
+        {"type": "mention.notify", "target": "owner", "payload": {"actor": "owner"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-mention-nomsg",
+    )
+    assert no_msg["status"] == "failed"
+    assert any("mention message is required" in error for error in no_msg["errors"])
+
+
+def test_message_pin_is_proposal_only(tmp_path):
+    result = ui_commands.submit_command(
+        tmp_path,
+        {"type": "message.pin", "target": "MSG-20260610-1", "payload": {"actor": "owner"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-pin",
+    )
+    assert result["status"] == "queued"
+    assert result["result"]["mutation_boundary"] == "proposal_only"
+    assert result["result"]["pinned"] is True
+    proposals = list((tmp_path / ".ui_outbox" / "messages").glob("MSGREQ-*.json"))
+    assert len(proposals) == 1
+    stored = json.loads(proposals[0].read_text(encoding="utf-8"))
+    assert stored["action"] == "pin"
+    assert stored["message_id"] == "MSG-20260610-1"
+    # No canonical message file was written by the console.
+    assert not (tmp_path / "agents" / "messages" / "inbox").exists()
+
+
+def test_message_react_normalizes_to_safe_reaction(tmp_path):
+    ok = ui_commands.submit_command(
+        tmp_path,
+        {"type": "message.react", "target": "MSG-1", "payload": {"reaction": "ack", "actor": "ui"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-react-ok",
+    )
+    assert ok["status"] == "queued"
+    assert ok["result"]["reaction"] == "ack"
+
+    bad = ui_commands.submit_command(
+        tmp_path,
+        {"type": "message.react", "target": "MSG-1", "payload": {"reaction": "<script>", "actor": "ui"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-react-bad",
+    )
+    assert bad["status"] == "failed"
+    assert any("invalid reaction" in error for error in bad["errors"])
+
+
+def test_notification_commands_are_proposal_only(tmp_path):
+    read = ui_commands.submit_command(
+        tmp_path,
+        {"type": "notification.read", "target": "notif:blocked:TASK-AR-1", "payload": {"actor": "ui"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-read",
+    )
+    assert read["status"] == "queued"
+    assert read["result"]["mutation_boundary"] == "proposal_only"
+
+    sub = ui_commands.submit_command(
+        tmp_path,
+        {"type": "notification.subscribe", "payload": {"kinds": ["blocked", "bogus"], "severities": ["overdue"], "actor": "ui"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-sub",
+    )
+    assert sub["status"] == "queued"
+    # Unknown axis values are filtered out; only valid kinds/severities survive.
+    assert sub["result"]["preference"]["kinds"] == ["blocked"]
+    assert sub["result"]["preference"]["severities"] == ["overdue"]
+
+    mute = ui_commands.submit_command(
+        tmp_path,
+        {"type": "notification.mute", "payload": {"keyword": "noisy", "actor": "ui"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-mute",
+    )
+    assert mute["status"] == "queued"
+    assert mute["result"]["preference"]["keyword"] == "noisy"
+
+    # All write to .ui_outbox/notifications, never the canonical config file.
+    proposals = list((tmp_path / ".ui_outbox" / "notifications").glob("NOTIFREQ-*.json"))
+    assert len(proposals) == 3
+    assert not (tmp_path / "agents" / "project" / "ui" / "notifications.json").exists()
+
+
+def test_notification_subscribe_requires_an_axis(tmp_path):
+    empty = ui_commands.submit_command(
+        tmp_path,
+        {"type": "notification.subscribe", "payload": {"actor": "ui"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-sub-empty",
+    )
+    assert empty["status"] == "failed"
+    assert any("at least one of kinds/severities/tasksets" in error for error in empty["errors"])
+
+
+def test_ar338_command_types_in_allowlist():
+    for command_type in ["mention.notify", "message.pin", "message.react", "notification.read", "notification.mute", "notification.subscribe"]:
+        assert command_type in ui_commands.COMMAND_TYPES

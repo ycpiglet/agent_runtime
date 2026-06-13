@@ -2861,6 +2861,69 @@ def test_ui_console_ops_dashboard_app_js_ascii_only_and_node_check(tmp_path):
     block = js[start:end]
     non_ascii = [ch for ch in block if ord(ch) > 127]
     assert not non_ascii, f"ops-dashboard JS must be ASCII-only, found: {non_ascii[:5]}"
+    if shutil.which("node") is None:
+        import pytest
+
+        pytest.skip("node not available")
+    proc = subprocess.run(["node", "--check", "-"], input=js, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stderr
+
+
+# ----- TASK-AR-338: notification center + @mentions + daily brief -----
+
+
+def test_ui_console_inbox_view_registered_in_sidebar(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    # Inbox view container + sidebar link with a hash route in the COMMS group.
+    assert 'id="view-inbox"' in html
+    assert 'data-view="inbox"' in html
+    assert 'data-route="comms/inbox"' in html
+    # Daily-brief card + subscription forms live inside the inbox view.
+    assert 'id="daily-brief-body"' in html
+    assert 'id="inbox-subscribe-form"' in html
+    assert 'id="inbox-list"' in html
+
+
+def test_ui_console_inbox_and_daily_brief_resources(tmp_path):
+    for path, resource in [
+        ("/api/notifications", "notifications"),
+        ("/api/daily_brief", "daily_brief"),
+        ("/api/daily-brief", "daily_brief"),
+    ]:
+        payload = json.loads(ui_console.build_response(path, tmp_path).body.decode("utf-8"))
+        assert payload["resource"] == resource
+
+
+def test_ui_console_inbox_css_uses_tokens_not_raw_color(tmp_path):
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    # Pull only the inbox/daily-brief rules (after the AR-338 marker) so we test
+    # the new CSS independent of the global token-block guard.
+    marker = "/* ===== TASK-AR-338: notification center + daily brief ===== */"
+    assert marker in css
+    inbox_css = css[css.index(marker):css.index(".triage-summary", css.index(marker))]
+    hex_pattern = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+    rgba_pattern = re.compile(r"rgba?\(")
+    for line in inbox_css.splitlines():
+        assert not hex_pattern.search(line), f"raw hex in inbox CSS: {line.strip()}"
+        assert not rgba_pattern.search(line), f"raw rgba in inbox CSS: {line.strip()}"
+    # Severity colors map to the existing status tokens.
+    assert "var(--danger)" in inbox_css
+    assert "var(--warning)" in inbox_css
+    assert "var(--primary)" in inbox_css
+
+
+def test_ui_console_inbox_app_js_ascii_only_and_node_check(tmp_path):
+    import shutil
+    import subprocess
+
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    start = js.index("function renderInbox")
+    end = js.index("// Parse the owner input box")
+    block = js[start:end]
+    non_ascii = [ch for ch in block if ord(ch) > 127]
+    assert not non_ascii, f"inbox JS must be ASCII-only, found: {non_ascii[:5]}"
+    assert "function renderDailyBrief" in block
+    assert "markNotificationRead" in block
 
     if shutil.which("node") is None:
         import pytest
@@ -2880,3 +2943,34 @@ def test_ui_console_ops_dashboard_escapes_rendered_fields(tmp_path):
     assert "escapeHtml(gate.task_ref)" in block
     assert "escapeHtml(gate.id)" in block
     assert "escapeHtml(gate.status)" in block
+
+
+def test_ui_console_inbox_notification_fields_are_escaped(tmp_path):
+    # A blocked task with markup in its reason flows into a notification body;
+    # the rendered shell must not inline that markup unescaped.
+    (tmp_path / "agents" / "lead_engineer" / "tasks").mkdir(parents=True)
+    (tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-950-x.md").write_text(
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-950",
+                "status: blocked",
+                "owner: lead-engineer",
+                "priority: P0",
+                "blocked_reason: <script>alert(1)</script>",
+                "created: 2026-06-14",
+                "---",
+                "",
+                "## Goal",
+                "",
+                "x",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    payload = json.loads(ui_console.build_response("/api/notifications", tmp_path).body.decode("utf-8"))
+    bodies = [item["body"] for item in payload["items"]["notifications"]]
+    assert any("<script>alert(1)</script>" in body for body in bodies)
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    assert "<script>alert(1)</script>" not in html

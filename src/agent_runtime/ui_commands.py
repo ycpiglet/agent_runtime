@@ -122,6 +122,26 @@ SCHEDULE_COMMAND_TYPES = ("schedule.create", "schedule.cancel")
 # .ui_outbox/assignments that a runtime executor consumes to update the task
 # frontmatter (team/role/assignee). The console NEVER edits the task file here.
 ASSIGNMENT_COMMAND_TYPES = ("assignment.set",)
+# TASK-AR-338: notification center + @mentions + message pin/reaction. Every one
+# of these is PROPOSAL-ONLY.
+#   - mention.notify: an @mention emits a runtime message proposal to the target
+#     (reusing the runtime message-queue path) so the mentioned agent/role/Owner
+#     receives a runtime message; the inbox then surfaces the mention.
+#   - message.pin / message.react: record a declarative proposal under
+#     .ui_outbox/messages for a runtime executor to apply to the message record.
+#   - notification.read / notification.mute / notification.subscribe: record a
+#     declarative preferences proposal under .ui_outbox/notifications that a
+#     runtime executor applies to agents/project/ui/notifications.json. The
+#     console NEVER writes that canonical config file directly.
+MENTION_COMMAND_TYPES = ("mention.notify",)
+MESSAGE_COMMAND_TYPES = ("message.pin", "message.react")
+NOTIFICATION_COMMAND_TYPES = ("notification.read", "notification.mute", "notification.subscribe")
+# Reactions are normalized to a fixed safe set so a rendered chip can never carry
+# arbitrary user input as markup/CSS.
+MESSAGE_REACTIONS = ("ack", "thumbsup", "eyes", "celebrate", "question", "blocked")
+# Notification preference axes the inbox can subscribe to.
+NOTIFICATION_KINDS = ("reminder", "blocked", "approval", "mention", "error")
+NOTIFICATION_SEVERITIES = ("overdue", "blocked", "error", "approval", "due_soon", "mention", "info")
 
 CUSTOM_PROPERTY_TYPES = ("text", "select", "number", "date")
 AUTOMATION_TRIGGERS = ("status_change", "due_passed", "blocked_too_long")
@@ -156,6 +176,9 @@ COMMAND_TYPES = (
     + ATTACHMENT_COMMAND_TYPES
     + SCHEDULE_COMMAND_TYPES
     + ASSIGNMENT_COMMAND_TYPES
+    + MENTION_COMMAND_TYPES
+    + MESSAGE_COMMAND_TYPES
+    + NOTIFICATION_COMMAND_TYPES
 )
 # TASK-AR-335: a schedule fires either once at a fixed time (``reserve``) or on a
 # recurring cron-like cadence (``repeat``). The cron expression is a 5-field
@@ -1588,6 +1611,178 @@ def _assignment_set_command(root: Path, target: str | None, payload: dict[str, A
     }
 
 
+# ----- TASK-AR-338: @mentions, message pin/reaction, notification prefs --------
+
+
+def _mention_target(value: Any) -> str | None:
+    """Normalize an @mention target (agent id / role / owner) to a safe slug."""
+    target = str(value or "").strip().lstrip("@").lower()
+    target = re.sub(r"[^a-z0-9_.-]+", "", target).strip(".")
+    return target or None
+
+
+def _mention_notify_command(root: Path, target: str | None, payload: dict[str, Any], now: str) -> dict[str, Any]:
+    """An @mention -> a runtime message proposal to the mentioned target.
+
+    PROPOSAL-ONLY: this reuses the established runtime message-queue path (writes
+    a queued message under agents/messages/inbox so the mentioned agent/role/
+    Owner receives a runtime message); the notification center then surfaces the
+    mention from that message body. The console NEVER calls an agent directly.
+    """
+    mention_target = _mention_target(target or payload.get("target") or payload.get("to") or payload.get("agent"))
+    errors = _payload_errors(payload)
+    if not mention_target:
+        errors.append("mention target is required")
+    text = str(payload.get("message") or payload.get("instruction") or payload.get("comment") or "").strip()
+    if not text:
+        errors.append("mention message is required")
+    if errors:
+        return {"errors": errors}
+
+    # Carry the @mention in the body so the inbox aggregates it on the next scan.
+    body_text = text if f"@{mention_target}" in text.lower() else f"@{mention_target} {text}"
+    queue_payload = dict(payload)
+    queue_payload["instruction"] = body_text
+    outcome = _queue_runtime_message(root, "mention.notify", mention_target, queue_payload, now)
+    if "errors" in outcome:
+        return outcome
+    result = dict(outcome.get("result") or {})
+    result.update(
+        {
+            "mention_target": mention_target,
+            "runtime_support": "message_queue",
+            "mutation_boundary": "proposal_only",
+            "next": "the mentioned target receives a runtime message; the inbox surfaces the mention",
+        }
+    )
+    return {"status": str(outcome.get("status") or "queued"), "result": result}
+
+
+def _message_id_arg(value: Any) -> str | None:
+    """Validate a message id reference (alnum + ._- only)."""
+    message_id = str(value or "").strip()
+    if not message_id or not re.fullmatch(r"[A-Za-z0-9_.:-]+", message_id):
+        return None
+    return message_id
+
+
+def _message_command(root: Path, command_type: str, target: str | None, payload: dict[str, Any], now: str, command_id: str) -> dict[str, Any]:
+    """Pin or react to a channel message -- PROPOSAL ONLY (TASK-AR-338).
+
+    Records a declarative proposal under .ui_outbox/messages for a runtime
+    executor to apply to the canonical message record (pin flag / reaction list).
+    The console NEVER edits the message file.
+    """
+    action = command_type.split(".", 1)[1]
+    message_id = _message_id_arg(target or payload.get("message_id") or payload.get("id"))
+    errors = _payload_errors(payload)
+    if not message_id:
+        errors.append("a valid message id is required")
+    reaction: str | None = None
+    if action == "react":
+        reaction = str(payload.get("reaction") or payload.get("emoji") or "").strip().lower()
+        if reaction not in MESSAGE_REACTIONS:
+            errors.append(f"invalid reaction: {reaction!r} (expected {', '.join(MESSAGE_REACTIONS)})")
+    pinned = bool(payload.get("pinned", True)) if action == "pin" else None
+    if errors:
+        return {"errors": errors}
+
+    proposal = {
+        "id": command_id.replace("COMMAND-", "MSGREQ-"),
+        "type": command_type,
+        "action": action,
+        "target_file": "agents/messages/",
+        "status": "queued",
+        "created_at": now,
+        "requested_by": str(payload.get("actor") or "ui"),
+        "message_id": message_id,
+        "pinned": pinned,
+        "reaction": reaction,
+        "mutation_boundary": "proposal_only",
+        "next": "runtime executor applies this pin/reaction to the canonical message record",
+    }
+    changed = _write_ui_proposal(root, "messages", proposal)
+    return {
+        "status": "queued",
+        "result": {
+            "changed": [changed],
+            "proposal_id": proposal["id"],
+            "action": action,
+            "message_id": message_id,
+            "reaction": reaction,
+            "pinned": pinned,
+            "mutation_boundary": "proposal_only",
+            "next": proposal["next"],
+        },
+    }
+
+
+def _notification_command(root: Path, command_type: str, target: str | None, payload: dict[str, Any], now: str, command_id: str) -> dict[str, Any]:
+    """Mark-read / mute / subscribe for the notification inbox -- PROPOSAL ONLY.
+
+    Records a declarative preferences proposal under .ui_outbox/notifications
+    that a runtime executor applies to agents/project/ui/notifications.json. The
+    console NEVER writes that canonical config file directly.
+    """
+    action = command_type.split(".", 1)[1]
+    errors = _payload_errors(payload)
+    preference: dict[str, Any] = {"action": action}
+
+    if action == "read":
+        notification_id = str(target or payload.get("notification_id") or payload.get("id") or "").strip()
+        if not notification_id and not payload.get("all"):
+            errors.append("notification id is required to mark read (or set all=true)")
+        preference["notification_id"] = notification_id or None
+        preference["all"] = bool(payload.get("all", False))
+    elif action == "mute":
+        mute_id = str(target or payload.get("notification_id") or payload.get("id") or payload.get("entity_id") or "").strip()
+        keyword = str(payload.get("keyword") or "").strip()
+        if not mute_id and not keyword:
+            errors.append("mute requires a notification/entity id or a keyword")
+        preference["mute_id"] = mute_id or None
+        preference["keyword"] = keyword or None
+    elif action == "subscribe":
+        def _axis(value: Any, allowed: tuple[str, ...]) -> list[str]:
+            raw = value if isinstance(value, list) else ([value] if value else [])
+            return [str(item).strip().lower() for item in raw if str(item).strip().lower() in allowed]
+
+        tasksets = payload.get("tasksets") if isinstance(payload.get("tasksets"), list) else (
+            [payload.get("taskset_id")] if payload.get("taskset_id") else []
+        )
+        preference["kinds"] = _axis(payload.get("kinds") or payload.get("kind"), NOTIFICATION_KINDS)
+        preference["severities"] = _axis(payload.get("severities") or payload.get("severity"), NOTIFICATION_SEVERITIES)
+        preference["tasksets"] = [str(item).strip() for item in tasksets if str(item).strip()]
+        if not (preference["kinds"] or preference["severities"] or preference["tasksets"]):
+            errors.append("subscribe requires at least one of kinds/severities/tasksets")
+    if errors:
+        return {"errors": errors}
+
+    proposal = {
+        "id": command_id.replace("COMMAND-", "NOTIFREQ-"),
+        "type": command_type,
+        "action": action,
+        "target_file": "agents/project/ui/notifications.json",
+        "status": "queued",
+        "created_at": now,
+        "requested_by": str(payload.get("actor") or "ui"),
+        "preference": preference,
+        "mutation_boundary": "proposal_only",
+        "next": "runtime executor applies this preference to agents/project/ui/notifications.json",
+    }
+    changed = _write_ui_proposal(root, "notifications", proposal)
+    return {
+        "status": "queued",
+        "result": {
+            "changed": [changed],
+            "proposal_id": proposal["id"],
+            "action": action,
+            "preference": preference,
+            "mutation_boundary": "proposal_only",
+            "next": proposal["next"],
+        },
+    }
+
+
 def submit_command(
     root: Path | str,
     command: dict[str, Any],
@@ -1646,6 +1841,12 @@ def submit_command(
         outcome = _schedule_command(root_path, command_type, target_str, payload, created_at, cid)
     elif command_type in ASSIGNMENT_COMMAND_TYPES:
         outcome = _assignment_set_command(root_path, target_str, payload, created_at, cid)
+    elif command_type in MENTION_COMMAND_TYPES:
+        outcome = _mention_notify_command(root_path, target_str, payload, created_at)
+    elif command_type in MESSAGE_COMMAND_TYPES:
+        outcome = _message_command(root_path, command_type, target_str, payload, created_at, cid)
+    elif command_type in NOTIFICATION_COMMAND_TYPES:
+        outcome = _notification_command(root_path, command_type, target_str, payload, created_at, cid)
     else:
         outcome = _runtime_command(root_path, command_type, target_str, payload, created_at)
 

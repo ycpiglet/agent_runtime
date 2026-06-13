@@ -56,6 +56,8 @@ RESOURCE_NAMES = (
     "schedules",
     "calendar",
     "ops_metrics",
+    "notifications",
+    "daily_brief",
     "search_index",
     "commands",
 )
@@ -4118,6 +4120,21 @@ SCHEDULE_MODES = ("reserve", "repeat")
 # DUE_SOON_DAYS is "due_soon"; once the date is in the past it is "overdue".
 CALENDAR_DUE_SOON_DAYS = 3
 
+# TASK-AR-338: notification center + @mentions/pins/reactions + daily brief.
+NOTIFICATIONS_SCHEMA = "agent-runtime-notifications/v1"
+DAILY_BRIEF_SCHEMA = "agent-runtime-daily-brief/v1"
+# Declarative notification preferences (subscription rules / mutes / keyword
+# rules / read state). Authored proposal-only from the inbox view; a runtime
+# executor applies the proposal to this canonical file. The console NEVER writes
+# it directly. Read-only here.
+NOTIFICATIONS_CONFIG_REL = "agents/project/ui/notifications.json"
+# Notification event kinds the inbox aggregates. Each maps to a severity.
+NOTIFICATION_KINDS = ("reminder", "blocked", "approval", "mention", "error")
+# Severities, ordered most-to-least urgent. Severity tokens map to existing
+# status color tokens in the console CSS (overdue/blocked/error -> danger;
+# due_soon/approval -> warning; mention -> primary; info -> info).
+NOTIFICATION_SEVERITIES = ("overdue", "blocked", "error", "approval", "due_soon", "mention", "info")
+
 CUSTOM_PROPERTIES_REL = "agents/project/ui/custom-properties.json"
 LABELS_REL = "agents/project/ui/labels.json"
 AUTOMATION_RULES_GLOB = "agents/project/automation/rules/*.json"
@@ -4891,7 +4908,498 @@ def _reminder_record(entity_kind: str, event: dict[str, Any], now: str) -> dict[
         "date": event.get("date"),
         "source_path": event.get("source_path"),
         "generated_at": now,
-        "consumer": "TASK-AR-338 notification-center (pending)",
+        "consumer": "TASK-AR-338 notification-center",
+    }
+
+
+# ---------------------------------------------------------------------------
+# Notification center + @mentions + daily brief (TASK-AR-338)
+# ---------------------------------------------------------------------------
+
+# Approval / mention detection tokens. Kept small + lowercased; matched against a
+# joined text blob of the event/message fields.
+_APPROVAL_TOKENS = ("approval", "approve", "pending_approval", "awaiting_approval", "needs_approval", "승인")
+# Recognizes @agent / @role / @owner mentions in message bodies and event text.
+_MENTION_RE = re.compile(r"(?<![\w@])@([A-Za-z0-9][A-Za-z0-9_.-]*)")
+
+
+def _notification_severity_rank(severity: str) -> int:
+    """Position in NOTIFICATION_SEVERITIES (lower = more urgent); unknown last."""
+    try:
+        return NOTIFICATION_SEVERITIES.index(severity)
+    except ValueError:
+        return len(NOTIFICATION_SEVERITIES)
+
+
+def load_notifications_config(root: Path, now: str, warnings: list[dict[str, str]]) -> dict[str, Any]:
+    """Load declarative notification preferences (read-only).
+
+    Authored proposal-only from the inbox view (notification.subscribe /
+    notification.mute / notification.read); a runtime executor applies the
+    proposal to ``agents/project/ui/notifications.json``. The console NEVER
+    writes it directly. Missing file = permissive defaults (subscribe to all).
+
+    Shape::
+
+        {
+          "subscriptions": {"kinds": [...], "severities": [...], "tasksets": [...]},
+          "mutes": ["<notification id or entity id>", ...],
+          "keyword_rules": [{"keyword": "...", "action": "mute|highlight"}],
+          "read": ["<notification id>", ...]
+        }
+    """
+    path = root / NOTIFICATIONS_CONFIG_REL
+    rel_path = NOTIFICATIONS_CONFIG_REL
+    payload: dict[str, Any] = {}
+    present = path.exists()
+    if present:
+        try:
+            loaded = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            warnings.append(_warning("notifications-config-parse-error", rel_path, str(exc)))
+            loaded = {}
+        except OSError as exc:
+            warnings.append(_warning("notifications-config-read-error", rel_path, str(exc)))
+            loaded = {}
+        if isinstance(loaded, dict):
+            payload = loaded
+        else:
+            warnings.append(_warning("notifications-config-invalid-record", rel_path, "config payload is not an object"))
+
+    subs_raw = payload.get("subscriptions") if isinstance(payload.get("subscriptions"), dict) else {}
+    subscriptions = {
+        "kinds": [str(value).strip().lower() for value in _string_list(subs_raw.get("kinds")) if str(value).strip()],
+        "severities": [str(value).strip().lower() for value in _string_list(subs_raw.get("severities")) if str(value).strip()],
+        "tasksets": [str(value).strip() for value in _string_list(subs_raw.get("tasksets")) if str(value).strip()],
+    }
+    mutes = [str(value).strip() for value in _string_list(payload.get("mutes")) if str(value).strip()]
+    read = [str(value).strip() for value in _string_list(payload.get("read")) if str(value).strip()]
+    keyword_rules: list[dict[str, str]] = []
+    for rule in payload.get("keyword_rules") or []:
+        if not isinstance(rule, dict):
+            continue
+        keyword = str(rule.get("keyword") or "").strip()
+        if not keyword:
+            continue
+        action = str(rule.get("action") or "mute").strip().lower()
+        if action not in {"mute", "highlight"}:
+            action = "mute"
+        keyword_rules.append({"keyword": keyword, "action": action})
+    return {
+        "subscriptions": subscriptions,
+        "mutes": mutes,
+        "read": read,
+        "keyword_rules": keyword_rules,
+        "source_path": rel_path,
+        "freshness": "present" if present else "absent",
+        "config_present": present,
+        "generated_at": now,
+        "mutation_boundary": "proposal_only",
+    }
+
+
+def extract_mentions(text: Any) -> list[str]:
+    """Return distinct @mention targets (lowercased) found in free text.
+
+    Order-preserving, deduped. Targets are agent ids / role names / ``owner``.
+    """
+    seen: set[str] = set()
+    result: list[str] = []
+    for match in _MENTION_RE.finditer(str(text or "")):
+        target = match.group(1).strip().lower().rstrip(".")
+        if not target or target in seen:
+            continue
+        seen.add(target)
+        result.append(target)
+    return result
+
+
+def _notification(
+    *,
+    notification_id: str,
+    kind: str,
+    severity: str,
+    title: str,
+    body: str,
+    entity_kind: str,
+    entity_id: Any,
+    task_id: Any,
+    taskset_id: Any,
+    deep_link: str | None,
+    created_at: Any,
+    source_path: Any,
+    extra: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    record = {
+        "id": notification_id,
+        "kind": kind,
+        "severity": severity,
+        "title": title,
+        "body": body,
+        "entity_kind": entity_kind,
+        "entity_id": str(entity_id) if entity_id is not None else None,
+        "task_id": str(task_id) if task_id else None,
+        "taskset_id": str(taskset_id) if taskset_id else None,
+        "deep_link": deep_link,
+        "created_at": created_at,
+        "source_path": source_path,
+        "read": False,
+        "muted": False,
+        "highlighted": False,
+        "mute_reason": None,
+    }
+    if extra:
+        record.update(extra)
+    return record
+
+
+def build_notifications(
+    events: list[dict[str, Any]],
+    calendar: dict[str, Any],
+    tasks: list[dict[str, Any]],
+    messages: list[dict[str, Any]],
+    config: dict[str, Any],
+    now: str,
+) -> dict[str, Any]:
+    """Aggregate the in-app notification inbox (Slack + Linear Inbox model).
+
+    Sources (all read-only derivations):
+
+    - ``reminder``: due-soon / overdue reminders PUBLISHED by the calendar
+      (TASK-AR-335) -- consumed here, never re-emitted.
+    - ``blocked``: open tasks in the blocked bucket (deep-link to the task).
+    - ``approval``: approval-pending events / messages (high-risk command queue,
+      governance approvals).
+    - ``mention``: @agent / @role / @owner mentions found in message bodies.
+    - ``error``: error-severity runtime events.
+
+    Subscription rules (by kind/severity/taskset), mute rules, and keyword rules
+    are applied from the declarative config; read state is stamped from the
+    config's ``read`` list. Muted / unsubscribed notifications are retained in
+    the payload (flagged) so the UI can show a muted section and the totals stay
+    honest; ``inbox`` is the visible (subscribed, unmuted) subset.
+    """
+    task_by_id = {str(task.get("id")): task for task in tasks if task.get("id")}
+    taskset_of_task = {
+        str(task.get("id")): str(task.get("task_set_id") or "")
+        for task in tasks
+        if task.get("id")
+    }
+
+    notifications: list[dict[str, Any]] = []
+
+    # 1) Calendar reminders (due-soon / overdue) -- consumed from AR-335.
+    for reminder in calendar.get("reminders", []) or []:
+        severity = "overdue" if reminder.get("severity") == "overdue" else "due_soon"
+        entity_id = reminder.get("entity_id")
+        task_id = entity_id if reminder.get("entity_kind") == "task" else None
+        taskset_id = taskset_of_task.get(str(task_id or ""), "") or None
+        deep_link = f"#/work/calendar" if not task_id else f"#/home/board?select={task_id}"
+        notifications.append(
+            _notification(
+                notification_id=f"notif:{reminder.get('id')}",
+                kind="reminder",
+                severity=severity,
+                title=str(reminder.get("title") or entity_id or "reminder"),
+                body=f"{reminder.get('calendar_kind') or 'item'} {severity.replace('_', ' ')}"
+                + (f" on {reminder.get('date')}" if reminder.get("date") else ""),
+                entity_kind=str(reminder.get("entity_kind") or "calendar"),
+                entity_id=entity_id,
+                task_id=task_id,
+                taskset_id=taskset_id,
+                deep_link=deep_link,
+                created_at=reminder.get("date") or now,
+                source_path=reminder.get("source_path"),
+                extra={"date": reminder.get("date"), "calendar_kind": reminder.get("calendar_kind")},
+            )
+        )
+
+    # 2) Blocked tasks -> blocked notification with a task deep link.
+    for task in tasks:
+        if _status_bucket(task) != "blocked":
+            continue
+        task_id = str(task.get("id") or "")
+        if not task_id:
+            continue
+        reason = str(task.get("blocked_reason") or "").strip()
+        notifications.append(
+            _notification(
+                notification_id=f"notif:blocked:{task_id}",
+                kind="blocked",
+                severity="blocked",
+                title=f"Blocked: {task.get('title') or task_id}",
+                body=reason or "Task is blocked.",
+                entity_kind="task",
+                entity_id=task_id,
+                task_id=task_id,
+                taskset_id=task.get("task_set_id") or None,
+                deep_link=f"#/home/board?select={task_id}",
+                created_at=task.get("updated_at") or task.get("created_at") or now,
+                source_path=task.get("source_path"),
+            )
+        )
+
+    # 3) Approval-pending events / messages.
+    for event in events:
+        blob = " ".join(
+            str(event.get(key) or "")
+            for key in ("event", "type", "status", "intent", "approval_state", "message")
+        ).lower()
+        if not (any(token in blob for token in _APPROVAL_TOKENS) and "approv" in blob):
+            continue
+        event_id = event.get("id")
+        task_id = event.get("task_id")
+        notifications.append(
+            _notification(
+                notification_id=f"notif:approval:{event_id}",
+                kind="approval",
+                severity="approval",
+                title=f"Approval pending: {event.get('type') or event.get('event') or event_id}",
+                body=str(event.get("message") or event.get("reason") or "Owner approval is required."),
+                entity_kind="event",
+                entity_id=event_id,
+                task_id=task_id,
+                taskset_id=taskset_of_task.get(str(task_id or ""), "") or None,
+                deep_link=f"#/records/events?select={event_id}",
+                created_at=event.get("created_at") or event.get("ts") or now,
+                source_path=event.get("source_path"),
+            )
+        )
+
+    # 4) @mentions in message bodies -> one notification per (message, target).
+    for message in messages:
+        targets = extract_mentions(message.get("body"))
+        if not targets:
+            continue
+        message_id = str(message.get("id") or "")
+        task_id = message.get("task_id")
+        if task_id and str(task_id).lower() == "none":
+            task_id = None
+        for target in targets:
+            notifications.append(
+                _notification(
+                    notification_id=f"notif:mention:{message_id}:{target}",
+                    kind="mention",
+                    severity="mention",
+                    title=f"@{target} mentioned by {message.get('from') or 'unknown'}",
+                    body=str(message.get("body") or ""),
+                    entity_kind="message",
+                    entity_id=message_id,
+                    task_id=task_id,
+                    taskset_id=taskset_of_task.get(str(task_id or ""), "") or None,
+                    deep_link=f"#/comms/messages?select={message_id}",
+                    created_at=message.get("ts") or message.get("created_at") or now,
+                    source_path=message.get("source_path"),
+                    extra={"mention_target": target, "from": message.get("from")},
+                )
+            )
+
+    # 5) Error-severity runtime events.
+    for event in events:
+        if str(event.get("severity") or "").lower() != "error":
+            continue
+        event_id = event.get("id")
+        task_id = event.get("task_id")
+        notifications.append(
+            _notification(
+                notification_id=f"notif:error:{event_id}",
+                kind="error",
+                severity="error",
+                title=f"Error: {event.get('type') or event.get('event') or event_id}",
+                body=str(event.get("error") or event.get("message") or "Runtime error event."),
+                entity_kind="event",
+                entity_id=event_id,
+                task_id=task_id,
+                taskset_id=taskset_of_task.get(str(task_id or ""), "") or None,
+                deep_link=f"#/records/events?select={event_id}",
+                created_at=event.get("created_at") or event.get("ts") or now,
+                source_path=event.get("source_path"),
+            )
+        )
+
+    # --- Apply subscription / mute / keyword rules + read state. -------------
+    subscriptions = config.get("subscriptions") or {}
+    sub_kinds = set(subscriptions.get("kinds") or [])
+    sub_severities = set(subscriptions.get("severities") or [])
+    sub_tasksets = set(subscriptions.get("tasksets") or [])
+    mutes = set(config.get("mutes") or [])
+    read_ids = set(config.get("read") or [])
+    keyword_rules = config.get("keyword_rules") or []
+
+    def _subscribed(record: dict[str, Any]) -> bool:
+        # An empty subscription axis means "all" for that axis (permissive).
+        if sub_kinds and record["kind"] not in sub_kinds:
+            return False
+        if sub_severities and record["severity"] not in sub_severities:
+            return False
+        if sub_tasksets and (record.get("taskset_id") or "") not in sub_tasksets:
+            return False
+        return True
+
+    for record in notifications:
+        record["read"] = record["id"] in read_ids
+        record["subscribed"] = _subscribed(record)
+        # Mute by explicit notification id, or the underlying entity/task id.
+        if record["id"] in mutes or (record.get("entity_id") and record["entity_id"] in mutes) or (
+            record.get("task_id") and record["task_id"] in mutes
+        ):
+            record["muted"] = True
+            record["mute_reason"] = "muted"
+        # Keyword rules scan the title + body.
+        haystack = f"{record.get('title') or ''} {record.get('body') or ''}".lower()
+        for rule in keyword_rules:
+            if rule["keyword"].lower() in haystack:
+                if rule["action"] == "mute":
+                    record["muted"] = True
+                    record["mute_reason"] = f"keyword:{rule['keyword']}"
+                elif rule["action"] == "highlight":
+                    record["highlighted"] = True
+
+    # Stable, urgency-first ordering: severity rank, then unread first, then date.
+    notifications.sort(
+        key=lambda item: (
+            _notification_severity_rank(item["severity"]),
+            item["read"],
+            "" if (item.get("created_at") is None) else str(item.get("created_at")),
+        )
+    )
+
+    inbox = [item for item in notifications if item["subscribed"] and not item["muted"]]
+    muted = [item for item in notifications if item["muted"]]
+    unread = sum(1 for item in inbox if not item["read"])
+    by_kind: dict[str, int] = {}
+    by_severity: dict[str, int] = {}
+    for item in inbox:
+        by_kind[item["kind"]] = by_kind.get(item["kind"], 0) + 1
+        by_severity[item["severity"]] = by_severity.get(item["severity"], 0) + 1
+
+    return {
+        "schema": NOTIFICATIONS_SCHEMA,
+        "generated_at": now,
+        "kinds": list(NOTIFICATION_KINDS),
+        "severities": list(NOTIFICATION_SEVERITIES),
+        "notifications": notifications,
+        "inbox": inbox,
+        "muted": muted,
+        "config": config,
+        "totals": {
+            "total": len(notifications),
+            "inbox": len(inbox),
+            "unread": unread,
+            "muted": len(muted),
+            "by_kind": by_kind,
+            "by_severity": by_severity,
+        },
+        "mutation_boundary": "proposal_only",
+    }
+
+
+def build_daily_brief(
+    tasks: list[dict[str, Any]],
+    events: list[dict[str, Any]],
+    messages: list[dict[str, Any]],
+    reviews: list[dict[str, Any]],
+    notifications: dict[str, Any],
+    now: str,
+) -> dict[str, Any]:
+    """Auto-summary card: today's completed / blocked / decisions / next (brief 13.2).
+
+    All sections are read-only derivations of state:
+
+    - ``completed``: tasks completed today (``completed_at`` day == today).
+    - ``blocked``: currently-blocked tasks (from the notification inbox).
+    - ``decisions``: today's decision/meeting/governance review records.
+    - ``next_recommended``: top open, unblocked tasks by priority (the work the
+      Owner should pick up next).
+    """
+    today = _date_key(now)
+
+    def _section_item(entity_id: Any, title: Any, **extra: Any) -> dict[str, Any]:
+        item = {"id": str(entity_id) if entity_id is not None else None, "title": str(title or entity_id or "")}
+        item.update({key: value for key, value in extra.items() if value is not None})
+        return item
+
+    completed: list[dict[str, Any]] = []
+    blocked: list[dict[str, Any]] = []
+    next_recommended: list[dict[str, Any]] = []
+    for task in tasks:
+        bucket = _status_bucket(task)
+        completed_at = task.get("completed_at") or (task.get("metadata") or {}).get("completed_at")
+        if bucket == "done" and completed_at and _date_key(completed_at) == today:
+            completed.append(
+                _section_item(
+                    task.get("id"),
+                    task.get("title"),
+                    task_set_id=task.get("task_set_id") or None,
+                    completed_at=completed_at,
+                    deep_link=f"#/home/board?select={task.get('id')}",
+                )
+            )
+        if bucket == "blocked":
+            blocked.append(
+                _section_item(
+                    task.get("id"),
+                    task.get("title"),
+                    blocked_reason=str(task.get("blocked_reason") or "") or None,
+                    task_set_id=task.get("task_set_id") or None,
+                    deep_link=f"#/home/board?select={task.get('id')}",
+                )
+            )
+        if bucket in {"planned", "ready", "in_progress"}:
+            next_recommended.append(task)
+
+    # Next-recommended: highest priority (P0 first) then explicit order, capped.
+    def _priority_rank(task: dict[str, Any]) -> int:
+        priority = str(task.get("priority") or "P3").upper()
+        return {"P0": 0, "P1": 1, "P2": 2, "P3": 3}.get(priority, 4)
+
+    next_recommended.sort(key=lambda task: (_priority_rank(task), _task_order(task, 0), str(task.get("id") or "")))
+    next_items = [
+        _section_item(
+            task.get("id"),
+            task.get("title"),
+            priority=task.get("priority"),
+            status=task.get("status"),
+            task_set_id=task.get("task_set_id") or None,
+            deep_link=f"#/home/board?select={task.get('id')}",
+        )
+        for task in next_recommended[:5]
+    ]
+
+    # Decisions: review records typed as decision/meeting/governance dated today.
+    decisions: list[dict[str, Any]] = []
+    for review in reviews:
+        review_type = str(review.get("type") or "").strip().lower()
+        if review_type not in {"decision", "meeting", "governance", "release"}:
+            continue
+        created_at = review.get("created_at")
+        if _date_key(created_at) != today:
+            continue
+        decisions.append(
+            _section_item(
+                review.get("id"),
+                review.get("title"),
+                review_type=review_type,
+                summary=review.get("summary") or None,
+                deep_link=f"#/records/sources?select={review.get('id')}",
+            )
+        )
+
+    return {
+        "schema": DAILY_BRIEF_SCHEMA,
+        "generated_at": now,
+        "date": today,
+        "completed": completed,
+        "blocked": blocked,
+        "decisions": decisions,
+        "next_recommended": next_items,
+        "totals": {
+            "completed": len(completed),
+            "blocked": len(blocked),
+            "decisions": len(decisions),
+            "next_recommended": len(next_items),
+            "unread_notifications": (notifications.get("totals") or {}).get("unread", 0),
+        },
     }
 
 
@@ -5551,6 +6059,13 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     # Ops dashboard (TASK-AR-339): token/cost, eval trend, gate board, burndown.
     # Pure read-only derivation over tasks + task_sets + eval/gate evidence files.
     ops_metrics = build_ops_metrics(tasks, task_sets, root_path, generated_at)
+    # Notification center + @mentions + daily brief (TASK-AR-338). The inbox
+    # consumes the calendar's due-soon/overdue reminders plus blocked/approval/
+    # mention/error events; the daily brief summarizes today's work. Notification
+    # preferences are read-only here (authored proposal-only via ui_commands).
+    notifications_config = load_notifications_config(root_path, generated_at, warnings)
+    notifications = build_notifications(events, calendar, tasks, messages, notifications_config, generated_at)
+    daily_brief = build_daily_brief(tasks, events, messages, reviews, notifications, generated_at)
     state: dict[str, Any] = {
         "generated_at": generated_at,
         "sources": sources,
@@ -5592,6 +6107,8 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "schedules": schedules,
         "calendar": calendar,
         "ops_metrics": ops_metrics,
+        "notifications": notifications,
+        "daily_brief": daily_brief,
         "commands": commands,
         "gaps": gaps,
         "warnings": warnings,
