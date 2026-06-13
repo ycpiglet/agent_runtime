@@ -14,7 +14,11 @@ registered_at: 2026-06-11T18:39:01+09:00
 created_at: 2026-06-11T18:39:01+09:00
 updated_at: 2026-06-11T18:39:01+09:00
 title: Roadmap 뷰 — Vision/Milestone/Release 타임라인
-status: planned
+status: completed
+started_at: 2026-06-13T17:19:47+09:00
+completed_at: 2026-06-13T18:05:00+09:00
+resolution: done
+verification_status: passed
 priority: P2
 difficulty: M
 est_hours: 6

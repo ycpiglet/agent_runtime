@@ -9,7 +9,7 @@
   "callsite_id": "claude-ui2-325",
   "pane_id": "claude-ui2-325",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-UI-UX-V2",
   "project_id": "",
   "unit_id": "",
@@ -25,17 +25,21 @@
   "worktree_path": ".worktrees/TASK-AR-325",
   "branch": "claude/task-ar-325-ui",
   "claimed_at": "2026-06-13T17:19:47+09:00",
-  "last_heartbeat": "2026-06-13T17:19:47+09:00",
-  "updated_at": "2026-06-13T17:19:47+09:00",
+  "last_heartbeat": "2026-06-13T18:07:43+09:00",
+  "updated_at": "2026-06-13T18:07:43+09:00",
   "expires_at": "2026-06-13T17:49:47+09:00",
   "lease": {
     "claimed_at": "2026-06-13T17:19:47+09:00",
-    "heartbeat_at": "2026-06-13T17:19:47+09:00",
+    "heartbeat_at": "2026-06-13T18:07:43+09:00",
     "expires_at": "2026-06-13T17:49:47+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260613-171947-task-ar-325-7e16.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260613-171947-task-ar-325-7e16.log.md",
   "allow_parallel_task_set": true,
   "tags": [],
-  "target_files": []
+  "target_files": [],
+  "released_at": "2026-06-13T18:07:43+09:00",
+  "verified_by": "inst-w4b-ar325-verifier",
+  "verifier_role": "qa-reviewer",
+  "verification_evidence": "reviews/W4B-2026-06-13-TASK-AR-325.md"
 }
