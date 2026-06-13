@@ -9,7 +9,7 @@
   "callsite_id": "claude-w6-ar522",
   "pane_id": "claude-w6-ar522",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-REPO-HYGIENE",
   "project_id": "",
   "unit_id": "",
@@ -17,20 +17,20 @@
   "model_tier": "",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "implementing",
-  "progress_pct": 0,
+  "phase": "complete",
+  "progress_pct": 100,
   "step_index": 1,
   "step_total": 6,
   "status_text": "AR-522: gate/generator consistency fixes from W4b notes",
   "worktree_path": ".worktrees/TASK-AR-522",
   "branch": "claude/task-ar-522-gate-consistency",
   "claimed_at": "2026-06-13T10:33:54+09:00",
-  "last_heartbeat": "2026-06-13T10:33:54+09:00",
-  "updated_at": "2026-06-13T10:33:54+09:00",
+  "last_heartbeat": "2026-06-13T12:29:17+09:00",
+  "updated_at": "2026-06-13T12:29:17+09:00",
   "expires_at": "2026-06-13T11:03:54+09:00",
   "lease": {
     "claimed_at": "2026-06-13T10:33:54+09:00",
-    "heartbeat_at": "2026-06-13T10:33:54+09:00",
+    "heartbeat_at": "2026-06-13T12:29:17+09:00",
     "expires_at": "2026-06-13T11:03:54+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260613-103354-task-ar-522-4547.handoff.md",
@@ -43,5 +43,9 @@
     "src/agent_runtime/update_notify.py",
     "scripts/merge_queue.py",
     "agents/project/WORK-SCHEMA.yml"
-  ]
+  ],
+  "released_at": "2026-06-13T12:29:17+09:00",
+  "verified_by": "inst-w4b-ar522-verifier",
+  "verifier_role": "reviewer",
+  "verification_evidence": "agents/runtime/task_claims/CLAIM-20260613-103354-task-ar-522-4547.handoff.md"
 }
