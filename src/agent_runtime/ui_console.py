@@ -94,6 +94,9 @@ HTML = """<!doctype html>
           <button class="sidebar-link" type="button" role="tab" data-view="planner" data-route="work/planner" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9998;</span><span class="sidebar-label">Planner</span>
           </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="triage" data-route="work/triage" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9873;</span><span class="sidebar-label">Triage</span>
+          </button>
           <button class="sidebar-link" type="button" role="tab" data-view="roadmap" data-route="work/roadmap" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9776;</span><span class="sidebar-label">Roadmap</span>
           </button>
@@ -142,6 +145,15 @@ HTML = """<!doctype html>
         </div>
         <div class="sidebar-group" data-group="ops">
           <span class="sidebar-group-title">OPS</span>
+          <button class="sidebar-link" type="button" role="tab" data-view="automation" data-route="ops/automation" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9889;</span><span class="sidebar-label">Automation</span>
+          </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="properties" data-route="ops/properties" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9636;</span><span class="sidebar-label">Properties</span>
+          </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="labels" data-route="ops/labels" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9750;</span><span class="sidebar-label">Labels</span>
+          </button>
           <button class="sidebar-link" type="button" role="tab" data-view="writes" data-route="ops/writes" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9881;</span><span class="sidebar-label">Writes</span>
           </button>
@@ -435,6 +447,65 @@ HTML = """<!doctype html>
         </div>
         <div id="view-writes" class="view">
           <div id="command-log" class="list-panel"></div>
+        </div>
+        <div id="view-triage" class="view">
+          <p id="triage-summary" class="triage-summary" role="status" aria-live="polite"></p>
+          <div class="triage-toolbar">
+            <input id="triage-filter" placeholder="task id, title, owner">
+            <select id="triage-reason-filter" aria-label="Triage reason">
+              <option value="">All reasons</option>
+              <option value="unclassified">Unclassified</option>
+              <option value="overdue">Overdue</option>
+              <option value="long_blocked">Long blocked</option>
+            </select>
+          </div>
+          <div id="triage-list" class="list-panel" aria-label="Triage queue"></div>
+        </div>
+        <div id="view-automation" class="view">
+          <form id="automation-form" class="config-form" aria-label="Create automation rule">
+            <input id="automation-name" name="name" placeholder="Rule name" required>
+            <select id="automation-trigger" name="trigger" aria-label="Trigger">
+              <option value="status_change">When status changes</option>
+              <option value="due_passed">When due passes</option>
+              <option value="blocked_too_long">When blocked too long</option>
+            </select>
+            <span class="config-form-arrow" aria-hidden="true">&#8594;</span>
+            <select id="automation-action" name="action" aria-label="Action">
+              <option value="board_regen">Regenerate board</option>
+              <option value="escalation_message">Send escalation</option>
+              <option value="label_apply">Apply label</option>
+            </select>
+            <input id="automation-param" name="param" placeholder="param (status / label / days)">
+            <button type="submit">Create rule</button>
+          </form>
+          <p id="automation-summary" class="config-summary" role="status" aria-live="polite"></p>
+          <div id="automation-list" class="config-grid" aria-label="Automation rules"></div>
+        </div>
+        <div id="view-properties" class="view">
+          <form id="property-form" class="config-form" aria-label="Create custom property">
+            <input id="property-key" name="key" placeholder="property key (e.g. severity)" required>
+            <input id="property-label" name="label" placeholder="display label">
+            <select id="property-type" name="type" aria-label="Property type">
+              <option value="text">text</option>
+              <option value="select">select</option>
+              <option value="number">number</option>
+              <option value="date">date</option>
+            </select>
+            <input id="property-options" name="options" placeholder="select options (comma separated)">
+            <button type="submit">Create property</button>
+          </form>
+          <p id="property-summary" class="config-summary" role="status" aria-live="polite"></p>
+          <div id="property-list" class="config-grid" aria-label="Custom properties"></div>
+        </div>
+        <div id="view-labels" class="view">
+          <form id="label-form" class="config-form" aria-label="Create label">
+            <input id="label-name" name="name" placeholder="label name" required>
+            <select id="label-color" name="color" aria-label="Label color"></select>
+            <input id="label-description" name="description" placeholder="description (optional)">
+            <button type="submit">Create label</button>
+          </form>
+          <p id="label-summary" class="config-summary" role="status" aria-live="polite"></p>
+          <div id="label-list" class="config-grid" aria-label="Labels"></div>
         </div>
       </section>
 
@@ -2579,6 +2650,163 @@ pre {
 .agent-character-task code { color: var(--ink); }
 .agent-character-activity { list-style: none; margin: 0; padding: 0; font-size: 12px; color: var(--muted); }
 
+/* ===== Custom properties / labels / automation / triage (TASK-AR-331) ===== */
+/* Label colors flow through a FIXED token palette. The JS only ever sets
+ * data-color="<token>"; these rules resolve each token via var(--token) so no
+ * raw/user CSS is ever injected (tokenization gate stays green). */
+.label-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--raise);
+  border: 1px solid var(--line);
+}
+.label-chip::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--subtle);
+}
+.label-chip[data-color="primary"]::before { background: var(--primary); }
+.label-chip[data-color="success"]::before { background: var(--success); }
+.label-chip[data-color="warning"]::before { background: var(--warning); }
+.label-chip[data-color="danger"]::before { background: var(--danger); }
+.label-chip[data-color="violet"]::before { background: var(--violet); }
+.label-chip[data-color="teal"]::before { background: var(--teal); }
+.label-chip[data-color="amber"]::before { background: var(--amber); }
+.label-chip[data-color="info"]::before { background: var(--info); }
+.label-chip[data-color="purple"]::before { background: var(--purple); }
+.label-chip[data-color="blue"]::before { background: var(--blue); }
+.config-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.config-form input,
+.config-form select {
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line-strong);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+.config-form button {
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: var(--on-accent);
+  font: inherit;
+  cursor: pointer;
+}
+.config-form button:hover { background: var(--primary-hover); }
+.config-form-arrow { color: var(--muted); font-weight: 700; }
+.config-summary { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+.config-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-grad);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.config-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.config-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.config-card-meta strong { color: var(--ink); }
+.config-card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.config-action {
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line-strong);
+  background: var(--raise);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.config-action:hover { background: var(--raise-strong); }
+.rule-state {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+}
+.rule-state.is-active { color: var(--success); background: var(--success-soft); border-color: var(--success-line); }
+.rule-state.is-inactive { color: var(--muted); background: var(--raise); }
+.rule-state.is-invalid { color: var(--danger); background: var(--danger-soft); border-color: var(--danger-line); }
+.rule-flow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+.rule-token {
+  padding: 2px 8px;
+  border-radius: var(--radius);
+  background: var(--primary-soft);
+  color: var(--primary-hover);
+  font-weight: 600;
+}
+.rule-flow-arrow { color: var(--muted); }
+.triage-summary { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
+.triage-summary strong { color: var(--ink); }
+.triage-toolbar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.triage-toolbar input,
+.triage-toolbar select {
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line-strong);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+.triage-reason {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--warning-line);
+  color: var(--warning);
+  background: var(--warning-soft);
+}
+.triage-reason[data-reason="unclassified"] { color: var(--info); background: var(--info-soft); border-color: var(--primary-line); }
+.triage-reason[data-reason="long_blocked"] { color: var(--danger); background: var(--danger-soft); border-color: var(--danger-line); }
+.config-prop-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
 @media (max-width: 760px) {
   .topbar {
     align-items: flex-start;
@@ -3621,7 +3849,8 @@ function renderGroupedList(view, items, rowTemplate, emptyLabel) {
 /* ===== Command palette (Ctrl+K) groundwork ===== */
 const COMMAND_PALETTE_VIEWS = [
   "board", "work", "meeting", "tasksets", "tsboard", "team", "agents",
-  "messages", "events", "evidence", "planner", "roadmap", "map", "sources", "writes",
+  "messages", "events", "evidence", "planner", "triage", "roadmap", "map", "sources",
+  "automation", "properties", "labels", "writes",
 ];
 let commandPaletteIndex = 0;
 
@@ -5235,6 +5464,174 @@ function renderCommands() {
   `).join("") : `<div class="empty">No write commands</div>`;
 }
 
+/* ===== Custom properties / labels / automation / triage (TASK-AR-331) ===== */
+// Label colors are rendered ONLY via data-color="<token>" so the CSS resolves
+// var(--token); the JS never emits an inline color, keeping label colors as a
+// fixed, tokenized palette (no user-injected raw CSS).
+const LABEL_COLOR_TOKENS = ["primary", "success", "warning", "danger", "violet", "teal", "amber", "info", "purple", "blue"];
+
+function labelChip(label) {
+  const token = LABEL_COLOR_TOKENS.includes(label.color_token) ? label.color_token : "primary";
+  return `<span class="label-chip" data-color="${escapeHtml(token)}">${escapeHtml(label.name)}</span>`;
+}
+
+function renderTriage() {
+  const host = $("triage-list");
+  if (!host) return;
+  const triage = (runtimeState && runtimeState.triage) || { items: [], totals: {} };
+  const totals = triage.totals || {};
+  setText("triage-summary", "");
+  const summary = $("triage-summary");
+  if (summary) {
+    summary.innerHTML = `<strong>${escapeHtml(totals.total || 0)}</strong> tasks need triage`
+      + ` &middot; unclassified <strong>${escapeHtml(totals.unclassified || 0)}</strong>`
+      + ` &middot; overdue <strong>${escapeHtml(totals.overdue || 0)}</strong>`
+      + ` &middot; long blocked <strong>${escapeHtml(totals.long_blocked || 0)}</strong>`;
+  }
+  const query = ($("triage-filter")?.value || "").trim().toLowerCase();
+  const reasonFilter = $("triage-reason-filter")?.value || "";
+  const items = (triage.items || []).filter((item) => {
+    if (reasonFilter && !(item.reasons || []).includes(reasonFilter)) return false;
+    if (!query) return true;
+    return [item.id, item.title, item.owner_agent, item.status].join(" ").toLowerCase().includes(query);
+  });
+  host.innerHTML = items.length ? items.map((item) => `
+    <article class="config-card">
+      <div class="config-card-header">
+        <b>${escapeHtml(item.id || "task")}</b>
+        <span class="state-chip">${escapeHtml(item.status || "unknown")}</span>
+      </div>
+      <div>${escapeHtml(item.title || "")}</div>
+      <div class="rule-flow">
+        ${(item.reasons || []).map((reason) => `<span class="triage-reason" data-reason="${escapeHtml(reason)}">${escapeHtml(reason.replace(/_/g, " "))}</span>`).join("")}
+      </div>
+      <div class="config-card-meta">
+        <span>Owner <strong>${escapeHtml(item.owner_agent || "unassigned")}</strong></span>
+        <span>Taskset <strong>${escapeHtml(item.task_set_id || "none")}</strong></span>
+        ${item.details && item.details.blocked_days !== undefined ? `<span>Blocked <strong>${escapeHtml(item.details.blocked_days)}d</strong></span>` : ""}
+        ${item.details && item.details.overdue_days !== undefined ? `<span>Overdue <strong>${escapeHtml(item.details.overdue_days)}d</strong></span>` : ""}
+      </div>
+      ${(item.labels || []).length ? `<div class="config-prop-values">${item.labels.map((name) => labelChip({ name, color_token: "primary" })).join("")}</div>` : ""}
+    </article>
+  `).join("") : `<div class="empty">Triage inbox is clear</div>`;
+}
+
+function renderAutomation() {
+  const host = $("automation-list");
+  if (!host) return;
+  const data = (runtimeState && runtimeState.automation_rules) || { rules: [], totals: {} };
+  const totals = data.totals || {};
+  const summary = $("automation-summary");
+  if (summary) {
+    summary.innerHTML = `<strong>${escapeHtml(totals.rules || 0)}</strong> rules`
+      + ` &middot; active <strong>${escapeHtml(totals.active || 0)}</strong>`
+      + ` &middot; inactive <strong>${escapeHtml(totals.inactive || 0)}</strong>`
+      + ` &middot; invalid <strong>${escapeHtml(totals.invalid || 0)}</strong>`
+      + ` &middot; execution via gate chain (proposal-only CRUD)`;
+  }
+  const rules = data.rules || [];
+  host.innerHTML = rules.length ? rules.map((rule) => {
+    const invalid = (rule.invalid || []).length > 0;
+    const stateClass = invalid ? "is-invalid" : (rule.active ? "is-active" : "is-inactive");
+    const stateLabel = invalid ? "invalid" : (rule.active ? "active" : "inactive");
+    return `
+    <article class="config-card">
+      <div class="config-card-header">
+        <b>${escapeHtml(rule.name || rule.id)}</b>
+        <span class="rule-state ${stateClass}">${escapeHtml(stateLabel)}</span>
+      </div>
+      ${rule.description ? `<div>${escapeHtml(rule.description)}</div>` : ""}
+      <div class="rule-flow">
+        <span class="rule-token">${escapeHtml((rule.trigger || "?").replace(/_/g, " "))}</span>
+        <span class="rule-flow-arrow" aria-hidden="true">&#8594;</span>
+        <span class="rule-token">${escapeHtml((rule.action || "?").replace(/_/g, " "))}</span>
+      </div>
+      <div class="config-card-meta">
+        <span>Id <strong>${escapeHtml(rule.id)}</strong></span>
+        <span>Source <strong>${escapeHtml(rule.source_path || "declarative file")}</strong></span>
+        ${invalid ? `<span>Issue <strong>${escapeHtml((rule.invalid || []).join("; "))}</strong></span>` : ""}
+      </div>
+      <div class="config-card-actions">
+        <button class="config-action" type="button" onclick="toggleAutomationRule('${escapeHtml(rule.id)}', ${rule.active ? "false" : "true"})">${rule.active ? "Deactivate" : "Activate"}</button>
+        <button class="config-action" type="button" onclick="deleteAutomationRule('${escapeHtml(rule.id)}')">Delete</button>
+      </div>
+    </article>`;
+  }).join("") : `<div class="empty">No automation rules</div>`;
+}
+
+function renderProperties() {
+  const host = $("property-list");
+  if (!host) return;
+  const data = (runtimeState && runtimeState.custom_properties) || { definitions: [] };
+  const defs = data.definitions || [];
+  const summary = $("property-summary");
+  if (summary) summary.innerHTML = `<strong>${escapeHtml(defs.length)}</strong> custom properties (text / select / number / date) extend task frontmatter`;
+  host.innerHTML = defs.length ? defs.map((def) => `
+    <article class="config-card">
+      <div class="config-card-header">
+        <b>${escapeHtml(def.label || def.key)}</b>
+        <span class="state-chip">${escapeHtml(def.type)}</span>
+      </div>
+      <div class="config-card-meta">
+        <span>Key <strong>${escapeHtml(def.key)}</strong></span>
+        <span>Filterable <strong>${escapeHtml(def.filterable ? "yes" : "no")}</strong></span>
+        ${(def.options || []).length ? `<span>Options <strong>${escapeHtml((def.options || []).join(", "))}</strong></span>` : ""}
+      </div>
+      <div class="config-card-actions">
+        <button class="config-action" type="button" onclick="deleteProperty('${escapeHtml(def.key)}')">Delete</button>
+      </div>
+    </article>
+  `).join("") : `<div class="empty">No custom properties</div>`;
+}
+
+function renderLabels() {
+  const host = $("label-list");
+  if (!host) return;
+  const data = (runtimeState && runtimeState.labels) || { labels: [], totals: {}, color_tokens: LABEL_COLOR_TOKENS };
+  const select = $("label-color");
+  if (select && !select.dataset.populated) {
+    const tokens = data.color_tokens || LABEL_COLOR_TOKENS;
+    select.innerHTML = tokens.map((token) => `<option value="${escapeHtml(token)}">${escapeHtml(token)}</option>`).join("");
+    select.dataset.populated = "1";
+  }
+  const totals = data.totals || {};
+  const summary = $("label-summary");
+  if (summary) summary.innerHTML = `<strong>${escapeHtml(totals.labels || 0)}</strong> labels &middot; defined <strong>${escapeHtml(totals.defined || 0)}</strong> &middot; in use <strong>${escapeHtml(totals.used || 0)}</strong>`;
+  const labels = data.labels || [];
+  host.innerHTML = labels.length ? labels.map((label) => `
+    <article class="config-card">
+      <div class="config-card-header">
+        ${labelChip(label)}
+        <span class="state-chip">${escapeHtml(label.usage_count || 0)} uses</span>
+      </div>
+      <div class="config-card-meta">
+        <span>Color <strong>${escapeHtml(label.color_token)}</strong></span>
+        <span>Defined <strong>${escapeHtml(label.defined ? "yes" : "tag-only")}</strong></span>
+        ${label.description ? `<span>${escapeHtml(label.description)}</span>` : ""}
+      </div>
+      <div class="config-card-actions">
+        <button class="config-action" type="button" onclick="deleteLabel('${escapeHtml(label.name)}')">Delete</button>
+      </div>
+    </article>
+  `).join("") : `<div class="empty">No labels</div>`;
+}
+
+function toggleAutomationRule(ruleId, active) {
+  return sendJson("/api/commands", { type: "automation.toggle", payload: { type: "automation.toggle", target: ruleId, payload: { actor: "ui", active } } });
+}
+
+function deleteAutomationRule(ruleId) {
+  return sendJson("/api/commands", { type: "automation.delete", payload: { type: "automation.delete", target: ruleId, payload: { actor: "ui" } } });
+}
+
+function deleteProperty(key) {
+  return sendJson("/api/commands", { type: "property.delete", payload: { type: "property.delete", target: key, payload: { actor: "ui" } } });
+}
+
+function deleteLabel(name) {
+  return sendJson("/api/commands", { type: "label.delete", payload: { type: "label.delete", target: name, payload: { actor: "ui" } } });
+}
+
 function workExplorerData() {
   return (runtimeState && runtimeState.work_explorer) || { nodes: [], roots: [], facets: {}, staleness_note: "" };
 }
@@ -5952,6 +6349,10 @@ function renderAll() {
   renderMap();
   renderSources();
   renderCommands();
+  renderTriage();
+  renderAutomation();
+  renderProperties();
+  renderLabels();
   renderSidebarActiveTaskset();
   renderDetail();
 }
@@ -6280,6 +6681,61 @@ $("channels-input-form")?.addEventListener("submit", async (event) => {
     $("channels-input-box").value = "";
   }
 });
+// ----- TASK-AR-331: triage filters + property/label/automation CRUD forms -----
+["triage-filter", "triage-reason-filter"].forEach((id) => {
+  const node = $(id);
+  if (node) {
+    node.addEventListener("input", renderTriage);
+    node.addEventListener("change", renderTriage);
+  }
+});
+$("automation-form")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const trigger = $("automation-trigger").value;
+  const action = $("automation-action").value;
+  const paramRaw = ($("automation-param").value || "").trim();
+  const params = {};
+  if (paramRaw) {
+    if (trigger === "status_change") params.status = paramRaw;
+    else if (trigger === "blocked_too_long") params.days = Number(paramRaw) || paramRaw;
+    if (action === "label_apply") params.label = paramRaw;
+  }
+  await sendJson("/api/commands", {
+    type: "automation.create",
+    payload: {
+      type: "automation.create",
+      payload: { actor: "ui", name: $("automation-name").value, trigger, action, params, active: true },
+    },
+  });
+  $("automation-name").value = "";
+  $("automation-param").value = "";
+});
+$("property-form")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const options = ($("property-options").value || "").split(",").map((value) => value.trim()).filter(Boolean);
+  await sendJson("/api/commands", {
+    type: "property.create",
+    payload: {
+      type: "property.create",
+      payload: { actor: "ui", key: $("property-key").value, label: $("property-label").value, type: $("property-type").value, options },
+    },
+  });
+  $("property-key").value = "";
+  $("property-label").value = "";
+  $("property-options").value = "";
+});
+$("label-form")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  await sendJson("/api/commands", {
+    type: "label.create",
+    payload: {
+      type: "label.create",
+      payload: { actor: "ui", name: $("label-name").value, color: $("label-color").value, description: $("label-description").value },
+    },
+  });
+  $("label-name").value = "";
+  $("label-description").value = "";
+});
 loadState();
 connectEventStream();
 setInterval(loadState, 4000);
@@ -6404,6 +6860,12 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/roadmap-timeline": "roadmap_timeline",
         "/api/roadmap_timeline": "roadmap_timeline",
         "/api/planning": "planning",
+        "/api/custom_properties": "custom_properties",
+        "/api/custom-properties": "custom_properties",
+        "/api/labels": "labels",
+        "/api/automation_rules": "automation_rules",
+        "/api/automation-rules": "automation_rules",
+        "/api/triage": "triage",
         "/api/commands": "commands",
     }
     if request_path in api_resources:
