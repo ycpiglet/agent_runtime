@@ -19,6 +19,12 @@ __pycache__/
 /.codex/hook-logs/
 /agents/runtime/hook-logs/
 
+# Runtime instrumentation artifacts (agent_loop / stop-event / claim-reaper /
+# goal-supervisor). Derived state, regenerated each run — never canonical.
+/agents/runtime/events/
+/agents/runtime/stop_counters.json
+/agents/runtime/heartbeat.json
+
 # Local browser verification artifacts.
 /.playwright-mcp/
 

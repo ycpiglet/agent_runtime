@@ -79,6 +79,10 @@ class LoopConfig:
     dispatch_session_budget: int = 50_000  # token budget for one pass (live bound; dummy=irrelevant)
     explicit_auth: bool = False          # user explicitly asked for a bounded "until done" loop
     goal: str | None = None              # optional /goal text; implies explicit_auth in CLI
+    # deadlock guardrails — opt-in: commit a WIP checkpoint instead of stopping
+    # when the worktree is dirty on a feature branch (never on main/master).
+    # Default off preserves the existing dirty-worktree stop behavior.
+    checkpoint_dirty: bool = False
     # internal: indirection for sleep so tests can monkey-patch
     sleeper: object = None
 
@@ -132,6 +136,99 @@ def is_worktree_dirty() -> tuple[bool, str]:
         return False, "clean"
     lines = output.splitlines()
     return True, f"{len(lines)} change(s): {lines[0] if lines else ''}"
+
+
+PROTECTED_BRANCHES = ("main", "master")
+
+
+def current_branch(root: Path = REPO_ROOT) -> str:
+    """Return the current git branch name, or "" if unavailable/detached."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "--abbrev-ref", "HEAD"],
+            capture_output=True, text=True, timeout=10,
+            encoding="utf-8", errors="replace",
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return ""
+    if result.returncode != 0:
+        return ""
+    branch = result.stdout.strip()
+    return "" if branch == "HEAD" else branch  # HEAD == detached
+
+
+def git_checkpoint_commit(root: Path, message: str) -> tuple[bool, str]:
+    """Stage all changes and commit a WIP checkpoint. Returns (committed, detail).
+
+    Commit hooks are intentionally NOT bypassed: a checkpoint that cannot pass
+    the repo's commit hooks is not silently forced through — the loop then stops
+    honestly instead. The save-point is reversible (a clearly-labeled WIP commit
+    on a feature branch, meant to be squashed).
+    """
+    try:
+        add = subprocess.run(
+            ["git", "-C", str(root), "add", "-A"],
+            capture_output=True, text=True, timeout=30,
+            encoding="utf-8", errors="replace",
+        )
+        if add.returncode != 0:
+            return False, f"git add failed: {add.stderr.strip()}"
+        commit = subprocess.run(
+            ["git", "-C", str(root), "commit", "-m", message],
+            capture_output=True, text=True, timeout=60,
+            encoding="utf-8", errors="replace",
+        )
+        if commit.returncode != 0:
+            return False, f"git commit failed: {(commit.stderr or commit.stdout).strip()}"
+        return True, commit.stdout.strip()
+    except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
+        return False, f"git unavailable: {exc!r}"
+
+
+def _record_stop_event(cfg: LoopConfig, *, reason_code: str, action: str,
+                       iteration: int, message: str = "") -> None:
+    """Best-effort classified stop-event instrumentation. Never breaks the loop."""
+    try:
+        sys.path.insert(0, str(REPO_ROOT / "scripts"))
+        import stop_events
+        stop_events.record_stop_event(
+            REPO_ROOT, source="agent_loop", reason_code=reason_code,
+            action=action, goal=cfg.goal, iteration=iteration, message=message,
+        )
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def maybe_checkpoint_dirty(cfg: LoopConfig, iteration: int) -> str | None:
+    """When the worktree is dirty on a feature branch, commit a WIP checkpoint so
+    the loop can continue instead of stopping. Returns the commit detail if a
+    checkpoint was made, else None. Never auto-commits on main/master.
+    """
+    dirty, _summary = is_worktree_dirty()
+    if not dirty:
+        return None
+    branch = current_branch()
+    if not branch or branch in PROTECTED_BRANCHES:
+        _record_stop_event(
+            cfg, reason_code="dirty_worktree_main", action="stopped",
+            iteration=iteration,
+            message=f"dirty on protected/detached branch '{branch or '?'}': not auto-committing",
+        )
+        return None
+    message = f"wip: agent_loop checkpoint iter {iteration} ({cfg.goal or cfg.mode}) [auto; squash]"
+    committed, detail = git_checkpoint_commit(REPO_ROOT, message)
+    if committed:
+        append_event("dirty_checkpoint", iteration=iteration, branch=branch, detail=detail[:160])
+        _record_stop_event(
+            cfg, reason_code="dirty_worktree", action="checkpointed",
+            iteration=iteration, message=f"branch={branch}",
+        )
+        return detail
+    _record_stop_event(
+        cfg, reason_code="dirty_worktree", action="stopped", iteration=iteration,
+        message=f"checkpoint failed: {detail[:160]}",
+    )
+    return None
 
 
 def write_heartbeat(cfg: LoopConfig, iteration: int, status: str,
@@ -689,6 +786,10 @@ def run_loop(cfg: LoopConfig, out=None) -> int:
     failures = 0
     iteration = 1
     while True:
+        if cfg.checkpoint_dirty:
+            checkpoint = maybe_checkpoint_dirty(cfg, iteration)
+            if checkpoint:
+                out.write(f"  dirty-checkpoint: committed WIP before iteration {iteration}\n")
         should_stop, reason = check_stop_conditions(cfg, iteration, failures)
         if should_stop:
             append_event("loop_stop", iteration=iteration, reason=reason)
@@ -795,6 +896,9 @@ def build_parser() -> argparse.ArgumentParser:
                         help="user explicitly authorized a bounded multi-iteration loop")
     parser.add_argument("--goal", default=None,
                         help="optional /goal text; implies --explicit-auth and remains hard-capped")
+    parser.add_argument("--checkpoint-dirty", dest="checkpoint_dirty", action="store_true",
+                        help="commit a WIP checkpoint instead of stopping when the worktree is "
+                             "dirty on a feature branch (never on main/master)")
     return parser
 
 
@@ -818,6 +922,7 @@ def main(argv: list[str] | None = None) -> int:
         dispatch_session_budget=args.dispatch_session_budget,
         explicit_auth=bool(args.explicit_auth or args.goal),
         goal=args.goal,
+        checkpoint_dirty=args.checkpoint_dirty,
     )
     return run_loop(cfg)
 
