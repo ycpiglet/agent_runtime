@@ -1,5 +1,28 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-06-14 Owner 구조 개편 + 통합 콘솔 등록 (TASKSET-AR-WORK-STORE-RESTRUCTURE / TASKSET-AR-UNIFIED-DECISION-CONSOLE)
+
+- Owner 질문(archive 누적·도메인/상태머신 분리·메모리/검색 성능·통합 포인터 notice·번호 quantum-jump·통합 UI)에 대한 멀티에이전트 리서치(1차 출처) + 실측 후 2개 taskset 등록. 번호는 533~545 **연속 할당**(블록 점프 없이 — 번호 정책 시연).
+- 답 요지: (a) 상태별 디렉토리 이동은 안티패턴(성숙 도구 전부 단일 store+status 필드+뷰; git은 파일 이동해도 history 안 줆). (b) 진짜 문제는 보드의 archive 인라인 덤프(317줄 중 69%)와 reviews/ 무한 append(402개)뿐. (c) 번호 갭은 시퀀스의 본질 — classifier 동적 서수(`work_item_classifier.py`)를 공식 번호로 선언하면 해소. (d) ~1,100 파일은 성능 무영향, 10k+ 대비. (e) 통합 콘솔 = 타입드 엔티티 그래프 + 인덱스/디테일.
+- `TASKSET-AR-WORK-STORE-RESTRUCTURE` (Store Architect): `TASK-AR-533`(보드 3레인+archive 매니페스트 분리) `TASK-AR-534`(reviews 날짜 샤딩+압축 인덱스) `TASK-AR-535`(classifier 서수 공식화+번호 정책) `TASK-AR-536`(UUIDv7/ULID 안정키+예약원장 강등) `TASK-AR-537`(파생 read-index/캐시+repo perf config) `TASK-AR-538`(triage 인테이크 상태+needs-attention 레인).
+- `TASKSET-AR-UNIFIED-DECISION-CONSOLE` (Decision Cartographer): `TASK-AR-539`(통합 엔티티 모델+카탈로그 매니페스트 — 기반) `TASK-AR-540`(커맨드 팔레트+크로스 엔티티 검색) `TASK-AR-541`(엔티티 디테일+백링크) `TASK-AR-542`(활동/출처 타임라인+감사) `TASK-AR-543`(faceted saved views+rollup+needs-attention) `TASK-AR-544`(git/PR/branch/issue 라이브 SCM 서피스) `TASK-AR-545`(skill/council/seminar/plan/review 문서 서피스).
+- Initiative: `agents/project/initiatives/INIT-AR-WORK-STORE-RESTRUCTURE.md`, `agents/project/initiatives/INIT-AR-UNIFIED-DECISION-CONSOLE.md`.
+- Research: `reviews/RESEARCH-2026-06-14-work-store-architecture-and-numbering.md`, `reviews/RESEARCH-2026-06-14-unified-decision-console.md`.
+- Wave 계획: `reviews/MEETING-2026-06-14-wave-plan-host-store-console.md` (526~545 → W1/W2/W3 의존성·footprint 배치; dispatcher가 실체화).
+- Boundary: registration only. console(539~)은 store 개편(533~537) 위에 빌드; ready lane 미이동, 구현은 dispatcher claim 후.
+
+## 2026-06-14 TASKSET-AR-HOST-FEEDBACK-INTAKE Registration
+
+- New planned task set: `TASKSET-AR-HOST-FEEDBACK-INTAKE` (Host Liaison).
+- Purpose: host(autofolio) dogfooding 피드백을 "무시 못할 민원"으로 취급 — intake/triage → council/seminar(블라인드 Delphi) 심의 → 결정 → 이슈 회신 루프를 가동하고, 그 첫 입력으로 미해결 host 피드백·버그 이슈를 처리한다.
+- Issue intake: #131(intake 프로세스 — 우산), #121(관계·host-fit 갭), #125(병렬 wave footprint 사후검증 부재), #128(self-eval/RSI fitness gate), BUG #21/#20/#19.
+- Registered planned tasks — 파이프라인 캐노니컬: `TASK-AR-526`(host 피드백 intake+triage 분류기) `TASK-AR-527`(블라인드 Delphi council/seminar 심의 하네스 + 다양성/Owner 경계 가드레일) `TASK-AR-528`(결정→이슈 회신+추적성 루프).
+- Registered planned tasks — 후보(채택/보류/기각은 첫 심의 산출물로 결정, #131 가드레일): `TASK-AR-529`(actual vs declared footprint 사후검증 게이트, #125) `TASK-AR-530`(고정+변동 지표 self-eval 하네스 + RSI fitness gate, #128) `TASK-AR-531`(host-fit 갭 — wheel dotfile 패키징·read-location 규약·work_cli·status 현지화, #121) `TASK-AR-532`(미해결 BUG triage+수정 #21/#20/#19).
+- Guardrails: 관점 다양성(유사 모델 가짜 합의 방지), 제품 방향 최종 결정은 Owner(다수결 불가 — host 고유 IP), 안전/주문 경계는 항상 사람(R3), 투표는 우선순위 신호이지 방향 결정자 아님.
+- Initiative record: `agents/project/initiatives/INIT-AR-HOST-FEEDBACK-INTAKE.md`.
+- Discussion/registration record: `reviews/MEETING-2026-06-14-host-feedback-intake-registration.md` (토의 의제 + 등록 결정; owner-docs 매니페스트 등재).
+- Boundary: registration only. ready lane은 이동하지 않으며, 구현 착수는 dispatcher claim 후. 후보 529/531/532는 기존 AR-511/AR-525 작업과 중복 가능 — 구현 전 dedupe.
+
 ## 2026-06-13 500-Series Parallel Execution COMPLETE
 
 - All 19 implementation tasks (`TASK-AR-500`..`522`) merged to main with W4a worker self-verification + W4b independent verification (distinct instances) via PRs #45-#79. Claims released, worktrees/branches/stash clean, plan anchors T3 re-recorded (findings=0).

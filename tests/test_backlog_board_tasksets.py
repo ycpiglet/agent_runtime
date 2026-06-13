@@ -289,4 +289,7 @@ def test_real_backlog_tasks_are_classified_into_twenty_five_task_sets() -> None:
         "TASKSET-AR-AGENT-IDENTITY-CONTRACT",
         "TASKSET-AR-WORK-METADATA-ANALYTICS",
         "TASKSET-AR-OPS-ERGONOMICS",
+        "TASKSET-AR-HOST-FEEDBACK-INTAKE",
+        "TASKSET-AR-WORK-STORE-RESTRUCTURE",
+        "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
     }

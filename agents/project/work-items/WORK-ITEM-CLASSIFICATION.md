@@ -7,22 +7,22 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-13T23:47:34+09:00
-record_count: 235
+generated_at: 2026-06-14T08:35:52+09:00
+record_count: 261
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `235` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `261` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `5` records |
-| Tasksets | pass | `28` records |
-| Tasks | pass | `189` records |
+| Initiatives | pass | `8` records |
+| Tasksets | pass | `31` records |
+| Tasks | pass | `209` records |
 | Units | pass | `13` records |
 | Findings | pass | `0` findings |
 
@@ -191,7 +191,7 @@ record_count: 235
 | 0.19.7 | Task 0.19.7 | task | `TASK-AR-326` | `TASKSET-AR-UI-UX-V2` | completed | `agents/lead_engineer/tasks/TASK-AR-326.md` | 에이전트/업무/메시지가 온라인 RPG처럼 실시간으로 살아 움직이는 감각을 SSE 이벤트 스트림과 라이브 그래프로 구현한다. |
 | 0.19.8 | Task 0.19.8 | task | `TASK-AR-327` | `TASKSET-AR-UI-UX-V2` | completed | `agents/lead_engineer/tasks/TASK-AR-327.md` | 에이전트 간 대화를 Slack/Discord처럼 채널/스레드로 관전하고, Owner가 UI에서 meeting/seminar를 소집할 수 있게 한다. |
 | 0.19.9 | Task 0.19.9 | task | `TASK-AR-328` | `TASKSET-AR-UI-UX-V2` | completed | `agents/lead_engineer/tasks/TASK-AR-328.md` | 특정 taskset 실행을 지시했을 때 해당 taskset 완료 후 scope 밖 작업으로 이탈하지 않고 정지·보고하도록 런타임 정책으로 강제한다 (Ow… |
-| 0.20 | Taskset 0.20 | taskset | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Platform Builder |
+| 0.20 | Taskset 0.20 | taskset | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Platform Builder |
 | 0.20.1 | Task 0.20.1 | task | `TASK-AR-329` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | `agents/lead_engineer/tasks/TASK-AR-329.md` | Owner가 UI에서 taskset을 직접 만들고, task를 넣고 빼고, 일괄 편집할 수 있게 한다 (Linear Projects / Notion DB… |
 | 0.20.2 | Task 0.20.2 | task | `TASK-AR-330` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | `agents/lead_engineer/tasks/TASK-AR-330.md` | task 계층(서브태스크)과 의존성(blocks/blocked-by)을 데이터 모델로 정식화하고 타임라인(Gantt)·의존 그래프로 시각화한다. |
 | 0.20.3 | Task 0.20.3 | task | `TASK-AR-331` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | `agents/lead_engineer/tasks/TASK-AR-331.md` | Notion형 커스텀 속성과 Monday/ClickUp형 "when X then Y" 자동화 규칙, Linear형 트리아지 큐를 제공한다. |
@@ -201,17 +201,17 @@ record_count: 235
 | 0.20.7 | Task 0.20.7 | task | `TASK-AR-335` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | `agents/lead_engineer/tasks/TASK-AR-335.md` | 마일스톤/회의/완료 이력/예약 실행을 캘린더 뷰로 통합하고, taskset 디스패치를 예약·반복 실행할 수 있게 한다 (Notion Calendar/Mo… |
 | 0.20.8 | Task 0.20.8 | task | `TASK-AR-336` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | `agents/lead_engineer/tasks/TASK-AR-336.md` | `agents/project/STATE-MACHINES.yml`의 라이프사이클(task/claim/role)을 인터랙티브 그래프로 보여주고, 선택한 ta… |
 | 0.20.9 | Task 0.20.9 | task | `TASK-AR-337` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | `agents/lead_engineer/tasks/TASK-AR-337.md` | task/taskset을 개인 에이전트가 아닌 팀/역할 단위로 배정하고, 에이전트·팀별 부하를 히트맵으로 보여준다 (Jira 컴포넌트 + Asana Wo… |
-| 0.20.10 | Task 0.20.10 | task | `TASK-AR-338` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-338.md` | 중요한 변화(blocked, 승인 대기, 마감 임박, 멘션)를 인앱 알림 인박스로 모으고, 채널에 멘션·핀·리액션을 더한다 (Slack + Linear… |
-| 0.20.11 | Task 0.20.11 | task | `TASK-AR-339` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-339.md` | 운영 지표를 Grafana/Sentry형 대시보드로 상시 노출한다: 토큰/비용 추이, eval 점수, 게이트 pass/watch/block 보드, tas… |
-| 0.20.12 | Task 0.20.12 | task | `TASK-AR-340` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-340.md` | 콘솔에 생동감을 더하는 애니메이션/이펙트와 RPG형 게임화 요소를 토글 가능한 폴리시 레이어로 추가한다 (기본은 차분한 진지 모드). |
-| 0.20.13 | Task 0.20.13 | task | `TASK-AR-341` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-341.md` | 멀티 호스트 프로젝트(agent_runtime, autofolio 등)를 Notion 워크스페이스처럼 전환하고, 대시보드 위젯 확장 포인트와 KR/EN… |
-| 0.21 | Taskset 0.21 | taskset | `TASKSET-AR-UI-LIVING-CONSOLE` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | World Builder |
+| 0.20.10 | Task 0.20.10 | task | `TASK-AR-338` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | `agents/lead_engineer/tasks/TASK-AR-338.md` | 중요한 변화(blocked, 승인 대기, 마감 임박, 멘션)를 인앱 알림 인박스로 모으고, 채널에 멘션·핀·리액션을 더한다 (Slack + Linear… |
+| 0.20.11 | Task 0.20.11 | task | `TASK-AR-339` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | `agents/lead_engineer/tasks/TASK-AR-339.md` | 운영 지표를 Grafana/Sentry형 대시보드로 상시 노출한다: 토큰/비용 추이, eval 점수, 게이트 pass/watch/block 보드, tas… |
+| 0.20.12 | Task 0.20.12 | task | `TASK-AR-340` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | `agents/lead_engineer/tasks/TASK-AR-340.md` | 콘솔에 생동감을 더하는 애니메이션/이펙트와 RPG형 게임화 요소를 토글 가능한 폴리시 레이어로 추가한다 (기본은 차분한 진지 모드). |
+| 0.20.13 | Task 0.20.13 | task | `TASK-AR-341` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | `agents/lead_engineer/tasks/TASK-AR-341.md` | 멀티 호스트 프로젝트(agent_runtime, autofolio 등)를 Notion 워크스페이스처럼 전환하고, 대시보드 위젯 확장 포인트와 KR/EN… |
+| 0.21 | Taskset 0.21 | taskset | `TASKSET-AR-UI-LIVING-CONSOLE` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | World Builder |
 | 0.21.1 | Task 0.21.1 | task | `TASK-AR-360` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-360.md` | 기각/보류 아이디어를 폐기하지 않고 보존·재발굴하는 체계를 RSI 운영 원칙으로 정착시킨다 (Owner 통찰: 진화 시 과거를 잊지 않고 주기적으로 재평… |
 | 0.21.2 | Task 0.21.2 | task | `TASK-AR-361` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-361.md` | 사이드탭의 회의실 공간에 에이전트를 마우스로 끌어다 넣고, 주제/태스크를 선택하면 참여 에이전트들이 의견을 주고받는 회의를 실행한다. |
 | 0.21.3 | Task 0.21.3 | task | `TASK-AR-362` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-362.md` | hover 미리보기와 드래그앤드롭을 콘솔 전역의 1급 상호작용 동사로 표준화한다 (Notion peek + Discord 접근성 DnD 패턴). |
-| 0.21.4 | Task 0.21.4 | task | `TASK-AR-363` | `TASKSET-AR-UI-LIVING-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-363.md` | 프로젝트의 성숙도를 진화하는 캐릭터처럼 측정·표시한다: 프로젝트 Lv.N(누적 경험), 사업 단계 칭호(garage→seed→startup→scaleup… |
-| 0.21.5 | Task 0.21.5 | task | `TASK-AR-364` | `TASKSET-AR-UI-LIVING-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-364.md` | 실제 회사 같은 2D 맵에 에이전트를 배치해 한눈에 조직 활동을 보여준다 (Smallville/Generative Agents 패턴 — arXiv 230… |
-| 0.21.6 | Task 0.21.6 | task | `TASK-AR-365` | `TASKSET-AR-UI-LIVING-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-365.md` | 작업 이벤트(완료/차단/승인 대기)를 사용자가 쓰는 메신저로 내보낸다 — LangSmith 패턴(범용 웹훅 + 채널 레시피, 집계 윈도우 기반)을 채택. |
+| 0.21.4 | Task 0.21.4 | task | `TASK-AR-363` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-363.md` | 프로젝트의 성숙도를 진화하는 캐릭터처럼 측정·표시한다: 프로젝트 Lv.N(누적 경험), 사업 단계 칭호(garage→seed→startup→scaleup… |
+| 0.21.5 | Task 0.21.5 | task | `TASK-AR-364` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-364.md` | 실제 회사 같은 2D 맵에 에이전트를 배치해 한눈에 조직 활동을 보여준다 (Smallville/Generative Agents 패턴 — arXiv 230… |
+| 0.21.6 | Task 0.21.6 | task | `TASK-AR-365` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-365.md` | 작업 이벤트(완료/차단/승인 대기)를 사용자가 쓰는 메신저로 내보낸다 — LangSmith 패턴(범용 웹훅 + 채널 레시피, 집계 윈도우 기반)을 채택. |
 | 0.22 | Taskset 0.22 | taskset | `TASKSET-AR-PM-OPERATING-SYSTEM` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Project Workbreaker |
 | 0.22.1 | Task 0.22.1 | task | `TASK-AR-342` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-342.md` | Make `project -> taskset -> task -> unit` and short/mid/long horizon metadata a canon… |
 | 0.22.2 | Task 0.22.2 | task | `TASK-AR-343` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-343.md` | Create the detailed unit document shape that lower-cost implementation models can exe… |
@@ -231,6 +231,29 @@ record_count: 235
 | 0.24.1 | Task 0.24.1 | task | `TASK-AR-523` | `TASKSET-AR-OPS-ERGONOMICS` | completed | `agents/lead_engineer/tasks/TASK-AR-523.md` | Nothing surfaces the 500-series observability at session start. Add scripts/session_d… |
 | 0.24.2 | Task 0.24.2 | task | `TASK-AR-524` | `TASKSET-AR-OPS-ERGONOMICS` | completed | `agents/lead_engineer/tasks/TASK-AR-524.md` | Make the new 500-series tools discoverable as trigger-based skills: wave-conductor (w… |
 | 0.24.3 | Task 0.24.3 | task | `TASK-AR-525` | `TASKSET-AR-OPS-ERGONOMICS` | completed | `agents/lead_engineer/tasks/TASK-AR-525.md` | Register the new dashboard hook + 5 skills + the standalone tools (wave_dispatcher/me… |
+| 0.25 | Taskset 0.25 | taskset | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Host Liaison |
+| 0.25.1 | Task 0.25.1 | task | `TASK-AR-526` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | planned | `agents/lead_engineer/tasks/TASK-AR-526.md` | Treat host (autofolio) feedback issues as first-class, non-ignorable input: ingest th… |
+| 0.25.2 | Task 0.25.2 | task | `TASK-AR-527` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | planned | `agents/lead_engineer/tasks/TASK-AR-527.md` | Reactivate the currently-dormant council/seminar device so queued host feedback is ac… |
+| 0.25.3 | Task 0.25.3 | task | `TASK-AR-528` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | planned | `agents/lead_engineer/tasks/TASK-AR-528.md` | Close the loop so a deliberation outcome is written back to the originating host issu… |
+| 0.25.4 | Task 0.25.4 | task | `TASK-AR-529` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | planned | `agents/lead_engineer/tasks/TASK-AR-529.md` | Close the parallel-wave conflict-safety weak link: `footprint_conflict_gate --check`… |
+| 0.25.5 | Task 0.25.5 | task | `TASK-AR-530` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | planned | `agents/lead_engineer/tasks/TASK-AR-530.md` | Give the platform an objective, quantitative self-eval so each version can prove it i… |
+| 0.25.6 | Task 0.25.6 | task | `TASK-AR-531` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | planned | `agents/lead_engineer/tasks/TASK-AR-531.md` | Close the host-fit gaps that block deep adoption of agent_runtime as a reusable platf… |
+| 0.25.7 | Task 0.25.7 | task | `TASK-AR-532` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | planned | `agents/lead_engineer/tasks/TASK-AR-532.md` | Route the standing open bug issues through the same intake/triage pipeline (category… |
+| 0.26 | Taskset 0.26 | taskset | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Store Architect |
+| 0.26.1 | Task 0.26.1 | task | `TASK-AR-533` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | planned | `agents/lead_engineer/tasks/TASK-AR-533.md` | Turn `BACKLOG-BOARD.md` from a data dump (currently ~69% inline "Archived Task Files"… |
+| 0.26.2 | Task 0.26.2 | task | `TASK-AR-534` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | planned | `agents/lead_engineer/tasks/TASK-AR-534.md` | Treat `reviews/` (402 files, 2.4MB, pure append, never transitions state) as a logs/e… |
+| 0.26.3 | Task 0.26.3 | task | `TASK-AR-535` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | planned | `agents/lead_engineer/tasks/TASK-AR-535.md` | Dissolve the "quantum jump" (200s -> 300s -> no 400s -> 500s): gaps are inherent to a… |
+| 0.26.4 | Task 0.26.4 | task | `TASK-AR-536` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | planned | `agents/lead_engineer/tasks/TASK-AR-536.md` | Make the permanent key collision-free AND time-sortable so multiple agents mint IDs w… |
+| 0.26.5 | Task 0.26.5 | task | `TASK-AR-537` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | planned | `agents/lead_engineer/tasks/TASK-AR-537.md` | Keep the agent read surface small and fast as the store grows toward thousands of fil… |
+| 0.26.6 | Task 0.26.6 | task | `TASK-AR-538` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | planned | `agents/lead_engineer/tasks/TASK-AR-538.md` | Add an explicit intake state so new items wait in a triage inbox (excluded from the a… |
+| 0.27 | Taskset 0.27 | taskset | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Decision Cartographer |
+| 0.27.1 | Task 0.27.1 | task | `TASK-AR-539` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-539.md` | Make every meaningful artifact the product operates/archives a first-class, browsable… |
+| 0.27.2 | Task 0.27.2 | task | `TASK-AR-540` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-540.md` | One fuzzy input to jump to / act on ANY entity in the catalog — the proven universal-… |
+| 0.27.3 | Task 0.27.3 | task | `TASK-AR-541` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-541.md` | Make any entity a rich detail surface with pluggable tabs/cards (Backstage `EntityCon… |
+| 0.27.4 | Task 0.27.4 | task | `TASK-AR-542` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-542.md` | Answer "who/what/when/why did this change" for any entity by unifying scattered histo… |
+| 0.27.5 | Task 0.27.5 | task | `TASK-AR-543` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-543.md` | Give the decision-maker reusable lenses over the catalog and an exception-only attent… |
+| 0.27.6 | Task 0.27.6 | task | `TASK-AR-544` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-544.md` | Bring SCM artifacts the Owner listed (git log, branches, PRs, issues) into the catalo… |
+| 0.27.7 | Task 0.27.7 | task | `TASK-AR-545` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-545.md` | Make the product's governance/knowledge documents (skills, council records, seminar r… |
 | 1 | Initiative 1 | initiative | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | - | planned | `agents/project/initiatives/INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE.md` | Work Hierarchy Conflict Closure Initiative |
 | 1.1 | Taskset 1.1 | taskset | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | active | `BACKLOG-BOARD.md` | Work Taxonomist |
 | 1.1.1 | Task 1.1.1 | task | `TASK-AR-369` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-369.md` | Finish the terminology migration from ambiguous `project -> taskset -> task -> unit`… |
@@ -274,6 +297,9 @@ record_count: 235
 | 4.1.4 | Task 4.1.4 | task | `TASK-AR-517` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | `agents/lead_engineer/tasks/TASK-AR-517.md` | Turn Work Item metadata into queryable statistics, JSON/CSV export, and reusable save… |
 | 4.1.5 | Task 4.1.5 | task | `TASK-AR-518` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | `agents/lead_engineer/tasks/TASK-AR-518.md` | Require instance_uid actor attribution across claims, A2A messages, evidence, closeou… |
 | 4.1.6 | Task 4.1.6 | task | `TASK-AR-519` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | `agents/lead_engineer/tasks/TASK-AR-519.md` | Mark verification evidence stale when source files, commits, claims, or task records… |
+| 5 | Initiative 5 | initiative | `INIT-AR-HOST-FEEDBACK-INTAKE` | - | planned | `agents/project/initiatives/INIT-AR-HOST-FEEDBACK-INTAKE.md` | Host Feedback Intake Initiative |
+| 6 | Initiative 6 | initiative | `INIT-AR-UNIFIED-DECISION-CONSOLE` | - | planned | `agents/project/initiatives/INIT-AR-UNIFIED-DECISION-CONSOLE.md` | Unified Decision Console Initiative |
+| 7 | Initiative 7 | initiative | `INIT-AR-WORK-STORE-RESTRUCTURE` | - | planned | `agents/project/initiatives/INIT-AR-WORK-STORE-RESTRUCTURE.md` | Work Store Restructure Initiative |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

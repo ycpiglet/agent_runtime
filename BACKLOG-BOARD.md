@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-06-13
-task_count: 189
-open_count: 14
-completed_count: 175
-task_set_count: 4
-completed_task_set_count: 24
+generated_at: 2026-06-14
+task_count: 209
+open_count: 27
+completed_count: 182
+task_set_count: 5
+completed_task_set_count: 26
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `14` open or active tasks; `175` completed tasks are archived from this live board.
+- Summary: `27` open or active tasks; `182` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `13` / Ask `0` / Review `0` / Later `1` / Done `175`.
-- Task Sets: `4` active workflows; `24` completed workflows are hidden from the live action board.
+- Status: Action `25` / Ask `1` / Review `0` / Later `1` / Done `182`.
+- Task Sets: `5` active workflows; `26` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -41,29 +41,6 @@ completed_task_set_count: 24
 ## Action Board
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
-
-### Platform Builder (`TASKSET-AR-UI-PLATFORM-EXTENSIONS`)
-
-- Flow: Taskset CRUD, dependencies/timeline, custom properties/automation, attachments, import/export, search, calendar, state-machine viewer, team workload, notifications, ops dashboard, gamification, and workspace extensibility.
-- Progress: `9/13` done; `4` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-338` | - | - | - | planned | Action | P2 | Medium | Medium | 8h/6000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 중요한 변화(blocked, 승인 대기, 마감 임박, 멘션)를 인앱 알림 인박스로 모으고, 채널에 멘션·핀·리액션을 더한다 (Slack + Linear… |
-| `TASK-AR-339` | - | - | - | planned | Action | P2 | Medium | Medium | 8h/6000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 운영 지표를 Grafana/Sentry형 대시보드로 상시 노출한다: 토큰/비용 추이, eval 점수, 게이트 pass/watch/block 보드, tas… |
-| `TASK-AR-340` | - | - | - | planned | Action | P3 | Low | Medium | 8h/6000tok | Low | 4 | agent-runtime-core | lead-engineer | Execute next | 콘솔에 생동감을 더하는 애니메이션/이펙트와 RPG형 게임화 요소를 토글 가능한 폴리시 레이어로 추가한다 (기본은 차분한 진지 모드). |
-| `TASK-AR-341` | - | - | - | planned | Action | P3 | Low | High | 10h/8000tok | Low | 4 | agent-runtime-core | lead-engineer | Execute next | 멀티 호스트 프로젝트(agent_runtime, autofolio 등)를 Notion 워크스페이스처럼 전환하고, 대시보드 위젯 확장 포인트와 KR/EN… |
-
-### World Builder (`TASKSET-AR-UI-LIVING-CONSOLE`)
-
-- Flow: Idea vault with resurfacing loop, drag-in meeting room, direct-manipulation layer, progression system with guardrails, 2D office map, and webhook-first external notifications.
-- Progress: `3/6` done; `3` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-363` | - | - | - | planned | Action | P2 | Medium | Medium | 8h/6000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 프로젝트의 성숙도를 진화하는 캐릭터처럼 측정·표시한다: 프로젝트 Lv.N(누적 경험), 사업 단계 칭호(garage→seed→startup→scaleup… |
-| `TASK-AR-365` | - | - | - | planned | Action | P2 | Medium | Medium | 8h/6000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 작업 이벤트(완료/차단/승인 대기)를 사용자가 쓰는 메신저로 내보낸다 — LangSmith 패턴(범용 웹훅 + 채널 레시피, 집계 윈도우 기반)을 채택. |
-| `TASK-AR-364` | - | - | - | planned | Action | P3 | Low | High | 12h/9000tok | Low | 4 | agent-runtime-core | lead-engineer | Execute next | 실제 회사 같은 2D 맵에 에이전트를 배치해 한눈에 조직 활동을 보여준다 (Smallville/Generative Agents 패턴 — arXiv 230… |
 
 ### Pitch Alchemist (`TASKSET-AR-DOC-TO-PLAN`)
 
@@ -87,6 +64,50 @@ completed_task_set_count: 24
 | `TASK-AR-371` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Remove `BACKLOG.md` as a top-of-file shared manual registration hotspot while preserv… |
 | `TASK-AR-373` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | agents/lead_engineer/tasks/units/TASK-AR-373/UNIT-TASK-AR-373-001.md | worker_ready | Action | P3 | Low | Medium | 6h/5000tok | Low | 4 | governance-loop | independent-auditor | Execute next | Make it visible which planned tasks are worker-ready and which still require planner… |
 | `TASK-AR-374` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P3 | Low | Low | 8h/4000tok | Low | 4 | agent-runtime-core | lead-engineer | Execute next | Prove that the work hierarchy and registration conflict surfaces are actually closed… |
+
+### Host Liaison (`TASKSET-AR-HOST-FEEDBACK-INTAKE`)
+
+- Flow: Treat host (autofolio) dogfooding feedback as first-class input: intake/triage, blind-Delphi council/seminar deliberation with diversity + Owner-boundary guardrails, decision reply-back to issues, plus the feedback-derived footprint-gate, self-eval/RSI fitness, host-fit, and open-bug candidates whose adoption the first deliberation decides.
+- Progress: `0/7` done; `7` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-526` | - | - | - | planned | Action | P1 | High | Medium | 5h/4000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Treat host (autofolio) feedback issues as first-class, non-ignorable input: ingest th… |
+| `TASK-AR-529` | - | - | - | planned | Action | P1 | High | Medium | 5h/4500tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Close the parallel-wave conflict-safety weak link: `footprint_conflict_gate --check`… |
+| `TASK-AR-527` | - | - | - | planned | Action | P1 | High | High | 8h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Reactivate the currently-dormant council/seminar device so queued host feedback is ac… |
+| `TASK-AR-530` | - | - | - | planned | Action | P1 | High | High | 10h/9000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Give the platform an objective, quantitative self-eval so each version can prove it i… |
+| `TASK-AR-528` | - | - | - | planned | Action | P2 | Medium | Medium | 4h/3500tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Close the loop so a deliberation outcome is written back to the originating host issu… |
+| `TASK-AR-532` | - | - | - | planned | Action | P2 | Medium | Medium | 5h/4000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Route the standing open bug issues through the same intake/triage pipeline (category… |
+| `TASK-AR-531` | - | - | - | planned | Action | P2 | Medium | Medium | 6h/5500tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Close the host-fit gaps that block deep adoption of agent_runtime as a reusable platf… |
+
+### Store Architect (`TASKSET-AR-WORK-STORE-RESTRUCTURE`)
+
+- Flow: Stop the board from dumping the archive and reviews from accumulating unbounded: board attention-lanes (Triage/Active/Rollup) + extracted archive manifest, reviews date-shard + compacted index, classifier ordinal as canonical human ID with cosmetic TASK-AR-NNN gaps, UUIDv7/ULID stable keys, a manifest-first derived read-index + repo perf config, and a triage intake status. Single store + status field + views; no lifecycle directories.
+- Progress: `0/6` done; `6` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-535` | - | - | - | planned | Action | P1 | High | Medium | 5h/4500tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Dissolve the "quantum jump" (200s -> 300s -> no 400s -> 500s): gaps are inherent to a… |
+| `TASK-AR-533` | - | - | - | planned | Action | P1 | High | Medium | 6h/5500tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Turn `BACKLOG-BOARD.md` from a data dump (currently ~69% inline "Archived Task Files"… |
+| `TASK-AR-534` | - | - | - | planned | Action | P1 | High | Medium | 6h/5500tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Treat `reviews/` (402 files, 2.4MB, pure append, never transitions state) as a logs/e… |
+| `TASK-AR-538` | - | - | - | planned | Action | P2 | Medium | Low | 4h/3500tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Add an explicit intake state so new items wait in a triage inbox (excluded from the a… |
+| `TASK-AR-536` | - | - | - | planned | Action | P2 | Medium | Medium | 5h/4500tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Make the permanent key collision-free AND time-sortable so multiple agents mint IDs w… |
+| `TASK-AR-537` | - | - | - | planned | Action | P2 | Medium | Medium | 6h/5500tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Keep the agent read surface small and fast as the store grows toward thousands of fil… |
+
+### Decision Cartographer (`TASKSET-AR-UNIFIED-DECISION-CONSOLE`)
+
+- Flow: A decision/operations-optimized console over a typed entity catalog of every artifact (plan/review/issue/pr/git-log/branch/skill/council/seminar/work-items/waves/state/history): catalog model + manifest, universal command palette + cross-entity search, entity detail + backlinks, activity/provenance timeline + audit, faceted saved views + rollups + needs-attention inbox, live SCM surface, and governance-document surface.
+- Progress: `0/7` done; `7` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-540` | - | - | - | planned | Action | P1 | High | Medium | 7h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | One fuzzy input to jump to / act on ANY entity in the catalog — the proven universal-… |
+| `TASK-AR-541` | - | - | - | planned | Action | P1 | High | Medium | 7h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Make any entity a rich detail surface with pluggable tabs/cards (Backstage `EntityCon… |
+| `TASK-AR-543` | - | - | - | planned | Action | P1 | High | Medium | 7h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Give the decision-maker reusable lenses over the catalog and an exception-only attent… |
+| `TASK-AR-539` | - | - | - | planned | Action | P1 | High | High | 10h/9000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Make every meaningful artifact the product operates/archives a first-class, browsable… |
+| `TASK-AR-544` | - | - | - | planned | Ask | P2 | Medium | Medium | 6h/5500tok | Low | 5 | agent-runtime-core | lead-engineer | Owner/agent decision | Bring SCM artifacts the Owner listed (git log, branches, PRs, issues) into the catalo… |
+| `TASK-AR-545` | - | - | - | planned | Action | P2 | Medium | Medium | 6h/5500tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Make the product's governance/knowledge documents (skills, council records, seminar r… |
+| `TASK-AR-542` | - | - | - | planned | Action | P2 | Medium | Medium | 7h/6000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Answer "who/what/when/why did this change" for any entity by unifying scattered histo… |
 
 ## Archived Task Sets
 
@@ -112,6 +133,8 @@ completed_task_set_count: 24
 | Feedback Analyst (`TASKSET-AR-OPS-FEEDBACK-ANALYSIS`) | Owner feedback intake, enterprise-wide structure/vision analysis, and follow-up planning records. | `4/4` done | `4` completed task files archived |
 | Vision Integrator (`TASKSET-AR-VISION-GAP-CLOSURE`) | Legacy independence, A2A messaging, multi-agent RBAC, loop hardening, live eval, skill packaging, realtime UI, and doc traceability. | `10/10` done | `10` completed task files archived |
 | Console Experience Architect (`TASKSET-AR-UI-UX-V2`) | Notion-like light theme, sidebar IA, sort/filter/density patterns, taskset-first views, org chart, roadmap, live presence, comms, and taskset-scope guard. | `9/9` done | `9` completed task files archived |
+| Platform Builder (`TASKSET-AR-UI-PLATFORM-EXTENSIONS`) | Taskset CRUD, dependencies/timeline, custom properties/automation, attachments, import/export, search, calendar, state-machine viewer, team workload, notifications, ops dashboard, gamification, and workspace extensibility. | `13/13` done | `13` completed task files archived |
+| World Builder (`TASKSET-AR-UI-LIVING-CONSOLE`) | Idea vault with resurfacing loop, drag-in meeting room, direct-manipulation layer, progression system with guardrails, 2D office map, and webhook-first external notifications. | `6/6` done | `6` completed task files archived |
 | Project Workbreaker (`TASKSET-AR-PM-OPERATING-SYSTEM`) | Project-to-unit hierarchy, worker-ready specs, model-tier routing, WIP controls, dispatcher scope stops, and PM verification gates. | `9/9` done | `9` completed task files archived |
 | Agent Identity Contract (`TASKSET-AR-AGENT-IDENTITY-CONTRACT`) | Add role/instance/display identity records, spawn provenance, and attribution gates for multi-agent work. | `1/1` done | `1` completed task files archived |
 | Work Metadata Analyst (`TASKSET-AR-WORK-METADATA-ANALYTICS`) | Conversation-to-work traceability, Work Item metadata, Explorer roll-ups, query/export, agent attribution, and stale verification evidence. | `6/6` done | `6` completed task files archived |
@@ -262,11 +285,18 @@ completed_task_set_count: 24
 | `TASK-AR-330` | `7bd76418-976…` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | 2026-06-11T18:56:35+09:00 | 2026-06-13T20:08:19+09:00 | 2026-06-13T21:00:00+09:00 | 2026-06-11T18:56:35+09:00 | task 계층(서브태스크)과 의존성(blocks/blocked-by)을 데이터 모델로 정식화하고 타임라인(Gantt)·의존 그래프로 시각화한다. |
 | `TASK-AR-333` | `53e47fbc-3a5…` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | 2026-06-11T18:56:35+09:00 | 2026-06-13T21:39:28+09:00 | 2026-06-13T22:05:00+09:00 | 2026-06-11T18:56:35+09:00 | taskset/보드/이벤트를 표준 포맷으로 내보내고, 외부 목록을 task로 일괄 가져올 수 있게 한다 (Notion/Jira 모델). |
 | `TASK-AR-336` | `8176e789-20e…` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | 2026-06-11T18:56:35+09:00 | 2026-06-13T22:44:55+09:00 | 2026-06-13T23:35:00+09:00 | 2026-06-11T18:56:35+09:00 | `agents/project/STATE-MACHINES.yml`의 라이프사이클(task/claim/role)을 인터랙티브 그래프로 보여주고, 선택한 ta… |
+| `TASK-AR-338` | `d15c8e5a-6ef…` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | 2026-06-11T18:56:35+09:00 | 2026-06-13T23:59:12+09:00 | 2026-06-14T01:10:00+09:00 | 2026-06-11T18:56:35+09:00 | 중요한 변화(blocked, 승인 대기, 마감 임박, 멘션)를 인앱 알림 인박스로 모으고, 채널에 멘션·핀·리액션을 더한다 (Slack + Linear… |
+| `TASK-AR-339` | `9d3f5b16-fe2…` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | 2026-06-11T18:56:35+09:00 | 2026-06-13T23:59:12+09:00 | 2026-06-14T01:00:00+09:00 | 2026-06-11T18:56:35+09:00 | 운영 지표를 Grafana/Sentry형 대시보드로 상시 노출한다: 토큰/비용 추이, eval 점수, 게이트 pass/watch/block 보드, tas… |
 | `TASK-AR-331` | `4e31081e-e14…` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | 2026-06-11T18:56:35+09:00 | 2026-06-13T20:08:19+09:00 | 2026-06-13T21:05:00+09:00 | 2026-06-11T18:56:35+09:00 | Notion형 커스텀 속성과 Monday/ClickUp형 "when X then Y" 자동화 규칙, Linear형 트리아지 큐를 제공한다. |
 | `TASK-AR-335` | `3908d50e-cd4…` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | 2026-06-11T18:56:35+09:00 | 2026-06-13T22:44:55+09:00 | 2026-06-13T23:30:00+09:00 | 2026-06-11T18:56:35+09:00 | 마일스톤/회의/완료 이력/예약 실행을 캘린더 뷰로 통합하고, taskset 디스패치를 예약·반복 실행할 수 있게 한다 (Notion Calendar/Mo… |
+| `TASK-AR-340` | `0b3562e5-8bf…` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | 2026-06-11T18:56:35+09:00 | 2026-06-13T23:59:13+09:00 | 2026-06-14T01:30:00+09:00 | 2026-06-11T18:56:35+09:00 | 콘솔에 생동감을 더하는 애니메이션/이펙트와 RPG형 게임화 요소를 토글 가능한 폴리시 레이어로 추가한다 (기본은 차분한 진지 모드). |
+| `TASK-AR-341` | `b1d9446c-cfd…` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | 2026-06-11T18:56:35+09:00 | 2026-06-13T23:59:13+09:00 | 2026-06-14T01:45:00+09:00 | 2026-06-11T18:56:35+09:00 | 멀티 호스트 프로젝트(agent_runtime, autofolio 등)를 Notion 워크스페이스처럼 전환하고, 대시보드 위젯 확장 포인트와 KR/EN… |
 | `TASK-AR-360` | `762e5eb1-726…` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | 2026-06-11T19:48:00+09:00 | 2026-06-13T16:29:50+09:00 | 2026-06-13T16:50:00+09:00 | 2026-06-13T16:50:00+09:00 | 기각/보류 아이디어를 폐기하지 않고 보존·재발굴하는 체계를 RSI 운영 원칙으로 정착시킨다 (Owner 통찰: 진화 시 과거를 잊지 않고 주기적으로 재평… |
 | `TASK-AR-361` | `f078b413-65d…` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | 2026-06-11T19:48:00+09:00 | 2026-06-13T16:29:50+09:00 | 2026-06-13T16:50:00+09:00 | 2026-06-13T16:50:00+09:00 | 사이드탭의 회의실 공간에 에이전트를 마우스로 끌어다 넣고, 주제/태스크를 선택하면 참여 에이전트들이 의견을 주고받는 회의를 실행한다. |
 | `TASK-AR-362` | `c8740b62-ba0…` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | 2026-06-11T19:48:00+09:00 | 2026-06-13T17:19:48+09:00 | 2026-06-13T18:20:00+09:00 | 2026-06-11T19:48:00+09:00 | hover 미리보기와 드래그앤드롭을 콘솔 전역의 1급 상호작용 동사로 표준화한다 (Notion peek + Discord 접근성 DnD 패턴). |
+| `TASK-AR-363` | `86672244-5c1…` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | 2026-06-11T19:48:00+09:00 | 2026-06-14T00:35:13+09:00 | 2026-06-14T01:20:00+09:00 | 2026-06-11T19:48:00+09:00 | 프로젝트의 성숙도를 진화하는 캐릭터처럼 측정·표시한다: 프로젝트 Lv.N(누적 경험), 사업 단계 칭호(garage→seed→startup→scaleup… |
+| `TASK-AR-365` | `a11704bf-f62…` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | 2026-06-11T19:48:00+09:00 | 2026-06-14T00:35:14+09:00 | 2026-06-14T01:15:00+09:00 | 2026-06-11T19:48:00+09:00 | 작업 이벤트(완료/차단/승인 대기)를 사용자가 쓰는 메신저로 내보낸다 — LangSmith 패턴(범용 웹훅 + 채널 레시피, 집계 윈도우 기반)을 채택. |
+| `TASK-AR-364` | `e7f72328-33c…` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | 2026-06-11T19:48:00+09:00 | 2026-06-14T00:35:14+09:00 | 2026-06-14T01:05:00+09:00 | 2026-06-11T19:48:00+09:00 | 실제 회사 같은 2D 맵에 에이전트를 배치해 한눈에 조직 활동을 보여준다 (Smallville/Generative Agents 패턴 — arXiv 230… |
 | `TASK-AR-342` | `a9df4c1b-0cd…` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | 2026-06-11T19:50:16+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | Make `project -> taskset -> task -> unit` and short/mid/long horizon metadata a canon… |
 | `TASK-AR-343` | `8fa333a3-328…` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | 2026-06-11T19:50:16+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | Create the detailed unit document shape that lower-cost implementation models can exe… |
 | `TASK-AR-345` | `ece0f0d8-c21…` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | 2026-06-11T19:50:16+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | Add planner/worker/reviewer tier metadata and escalation triggers to task and unit re… |

@@ -1,5 +1,7 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
+  - reviews/MEETING-2026-06-14-host-feedback-intake-registration.md
+  - reviews/MEETING-2026-06-14-wave-plan-host-store-console.md
   - OPS-COMMAND-REFERENCE.md
   - agents/project/AGENT-IDENTITY-CONTRACT.md
   - reviews/REVIEW-2026-06-12-taskset-ar-agent-identity-contract-registration.md
