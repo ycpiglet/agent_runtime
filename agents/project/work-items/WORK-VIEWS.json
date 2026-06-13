@@ -1,0 +1,77 @@
+{
+  "schema": "agent-runtime-work-views/v1",
+  "updated_at": "2026-06-13T08:00:00+09:00",
+  "views": [
+    {
+      "name": "lead-time-by-kind",
+      "created_at": "2026-06-13T08:00:00+09:00",
+      "updated_at": "2026-06-13T08:00:00+09:00",
+      "query": {
+        "by": [
+          "kind"
+        ],
+        "metrics": [
+          "lead_time"
+        ],
+        "kind": [],
+        "status": [],
+        "where": [
+          "status=completed"
+        ]
+      }
+    },
+    {
+      "name": "rework-by-owner",
+      "created_at": "2026-06-13T08:00:00+09:00",
+      "updated_at": "2026-06-13T08:00:00+09:00",
+      "query": {
+        "by": [
+          "owner"
+        ],
+        "metrics": [
+          "rework_count",
+          "gate_failure_count"
+        ],
+        "kind": [],
+        "status": [],
+        "where": []
+      }
+    },
+    {
+      "name": "status-by-kind",
+      "created_at": "2026-06-13T08:00:00+09:00",
+      "updated_at": "2026-06-13T08:00:00+09:00",
+      "query": {
+        "by": [
+          "kind",
+          "status"
+        ],
+        "metrics": [
+          "count"
+        ],
+        "kind": [],
+        "status": [],
+        "where": []
+      }
+    },
+    {
+      "name": "team-actuals",
+      "created_at": "2026-06-13T08:00:00+09:00",
+      "updated_at": "2026-06-13T08:00:00+09:00",
+      "query": {
+        "by": [
+          "team"
+        ],
+        "metrics": [
+          "count",
+          "actual_tokens",
+          "actual_hours",
+          "actual_cost"
+        ],
+        "kind": [],
+        "status": [],
+        "where": []
+      }
+    }
+  ]
+}

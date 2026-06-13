@@ -112,9 +112,119 @@ STATS_NUMERIC_METRICS = {
     "budget_cap",
     "rework_count",
     "gate_failure_count",
+    "reopened_count",
 }
-STATS_COMPUTED_METRICS = {"lead_time"}
+STATS_COMPUTED_METRICS = {"lead_time", "age"}
 STATS_METRICS = {"count"} | STATS_NUMERIC_METRICS | STATS_COMPUTED_METRICS
+# WORK-SCHEMA.yml computed_only_fields: storing these in work-item frontmatter
+# is a schema violation, so stats must never read them from records.
+STATS_COMPUTED_ONLY_FIELDS = {
+    "progress_pct",
+    "age",
+    "lead_time",
+    "est_actual_delta",
+    "variance",
+    "rollup_progress_pct",
+}
+# Stable group-by dimensions (stored, non-derived fields from WORK-SCHEMA.yml).
+STATS_DIMENSIONS = {
+    "kind",
+    "status",
+    "resolution",
+    "verification_status",
+    "owner",
+    "team",
+    "created_by",
+    "created_by_instance",
+    "last_actor_instance",
+    "closed_by",
+    "verified_by",
+    "origin_type",
+    "priority",
+    "difficulty",
+    "risk_tier",
+    "horizon",
+    "area",
+    "component",
+    "project_id",
+    "initiative_id",
+    "task_set_id",
+    "task_id",
+    "unit_id",
+    "parent_id",
+    "model_tier",
+    "planner_model_tier",
+    "worker_model_tier",
+    "reviewer_model_tier",
+}
+STATS_ROW_AGGREGATES = ("value_count", "sum", "avg", "min", "max")
+STATS_EXPORT_FORMATS = {"json", "csv"}
+STATS_EXPORT_SCHEMA = "agent-runtime-work-stats-export/v1"
+STATS_EXPORT_TEXT_FIELDS = (
+    "work_id",
+    "work_uid",
+    "display_id",
+    "kind",
+    "status",
+    "resolution",
+    "verification_status",
+    "title",
+    "owner",
+    "team",
+    "origin_type",
+    "origin_ref",
+    "created_by",
+    "created_by_instance",
+    "last_actor_instance",
+    "closed_by",
+    "verified_by",
+    "priority",
+    "difficulty",
+    "risk_tier",
+    "horizon",
+    "area",
+    "component",
+    "project_id",
+    "initiative_id",
+    "task_set_id",
+    "task_id",
+    "unit_id",
+    "parent_id",
+    "model_tier",
+    "planner_model_tier",
+    "worker_model_tier",
+    "reviewer_model_tier",
+    "created_at",
+    "registered_at",
+    "started_at",
+    "updated_at",
+    "completed_at",
+    "verified_at",
+    "due_date",
+)
+STATS_EXPORT_NUMERIC_FIELDS = (
+    "est_tokens",
+    "actual_tokens",
+    "est_hours",
+    "actual_hours",
+    "est_cost",
+    "actual_cost",
+    "budget_cap",
+    "rework_count",
+    "gate_failure_count",
+    "reopened_count",
+)
+STATS_EXPORT_COLUMNS = (
+    *STATS_EXPORT_TEXT_FIELDS,
+    "tags",
+    *STATS_EXPORT_NUMERIC_FIELDS,
+    "lead_time_hours",
+    "age_hours",
+    "path",
+)
+WORK_VIEWS_SCHEMA = "agent-runtime-work-views/v1"
+WORK_VIEWS_PATH = Path("agents/project/work-items/WORK-VIEWS.json")
+VIEW_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 MISSING_GROUP_VALUE = "(none)"
 
 
@@ -2216,6 +2326,38 @@ def _stats_group_fields(raw: str | None) -> list[str]:
     return [part.strip() for part in raw.split(",") if part.strip()]
 
 
+def _stats_multi_values(raw: list[str] | None) -> list[str]:
+    return [item for value in raw or [] for item in _stats_group_fields(value)]
+
+
+def _stats_metrics(raw: str | None) -> list[str]:
+    parts = _stats_group_fields(raw) or ["count"]
+    metrics: list[str] = []
+    findings: list[str] = []
+    for part in parts:
+        if part not in STATS_METRICS:
+            findings.append(f"work-stats:invalid-metric:{part}")
+        elif part not in metrics:
+            metrics.append(part)
+    if findings:
+        raise WorkRegistrationError(findings)
+    return metrics
+
+
+def _validate_stats_fields(group_fields: list[str], filters: list[tuple[str, str]]) -> None:
+    findings: list[str] = []
+    for field in group_fields:
+        if field in STATS_COMPUTED_ONLY_FIELDS:
+            findings.append(f"work-stats:computed-only-dimension:{field}")
+        elif field not in STATS_DIMENSIONS:
+            findings.append(f"work-stats:invalid-dimension:{field}")
+    for key, _value in filters:
+        if key in STATS_COMPUTED_ONLY_FIELDS:
+            findings.append(f"work-stats:computed-only-filter:{key}")
+    if findings:
+        raise WorkRegistrationError(findings)
+
+
 def _stats_where_filters(raw: list[str] | None) -> list[tuple[str, str]]:
     filters: list[tuple[str, str]] = []
     for item in raw or []:
@@ -2267,7 +2409,7 @@ def _stats_datetime(value: Any) -> datetime | None:
         return None
 
 
-def _stats_metric_value(meta: dict[str, Any], metric: str) -> Decimal | None:
+def _stats_metric_value(meta: dict[str, Any], metric: str, now_dt: datetime) -> Decimal | None:
     if metric == "count":
         return Decimal(1)
     if metric in STATS_NUMERIC_METRICS:
@@ -2278,6 +2420,11 @@ def _stats_metric_value(meta: dict[str, Any], metric: str) -> Decimal | None:
         if not finished or not started or finished < started:
             return None
         return Decimal(str((finished - started).total_seconds() / 3600))
+    if metric == "age":
+        created = _stats_datetime(meta.get("created_at"))
+        if not created or now_dt < created:
+            return None
+        return Decimal(str((now_dt - created).total_seconds() / 3600))
     raise WorkRegistrationError([f"work-stats:invalid-metric:{metric}"])
 
 
@@ -2299,6 +2446,19 @@ def _stats_text_number(value: Decimal | None) -> str:
     return format(normalized, "f")
 
 
+def _stats_item_record(root: Path, path: Path, meta: dict[str, Any], now_dt: datetime) -> dict[str, Any]:
+    record: dict[str, Any] = {}
+    for field in STATS_EXPORT_TEXT_FIELDS:
+        record[field] = str(meta.get(field) or "").strip()
+    record["tags"] = _text_lines(meta.get("tags"))
+    for field in STATS_EXPORT_NUMERIC_FIELDS:
+        record[field] = _stats_json_number(_stats_decimal(meta.get(field)))
+    record["lead_time_hours"] = _stats_json_number(_stats_metric_value(meta, "lead_time", now_dt))
+    record["age_hours"] = _stats_json_number(_stats_metric_value(meta, "age", now_dt))
+    record["path"] = _rel(root, path)
+    return record
+
+
 def work_stats(
     root: Path,
     *,
@@ -2307,19 +2467,30 @@ def work_stats(
     kinds: list[str] | None = None,
     statuses: list[str] | None = None,
     where: list[str] | None = None,
+    now: str | None = None,
+    include_items: bool = False,
 ) -> dict[str, Any]:
     root = root.resolve()
-    if metric not in STATS_METRICS:
-        raise WorkRegistrationError([f"work-stats:invalid-metric:{metric}"])
+    metrics = _stats_metrics(metric)
     group_fields = _stats_group_fields(by)
     filters = _stats_where_filters(where)
-    kinds = [item for value in kinds or [] for item in _stats_group_fields(value)]
-    statuses = [item for value in statuses or [] for item in _stats_group_fields(value)]
+    _validate_stats_fields(group_fields, filters)
+    kinds = _stats_multi_values(kinds)
+    statuses = _stats_multi_values(statuses)
+    now_dt = _parse_datetime(_now_text(now))
 
     groups: dict[tuple[str, ...], dict[str, Any]] = {}
+    items: list[dict[str, Any]] = []
+    violations: list[str] = []
     total_items = 0
-    for _path, meta in _iter_work_item_records(root):
+    for path, meta in _iter_work_item_records(root):
         if not _stats_matches(meta, kinds=kinds, statuses=statuses, filters=filters):
+            continue
+        stored_computed = sorted(STATS_COMPUTED_ONLY_FIELDS & set(meta))
+        if stored_computed:
+            violations.extend(
+                f"{_rel(root, path)}: work-stats:computed-field-stored:{field}" for field in stored_computed
+            )
             continue
         total_items += 1
         key = tuple(str(meta.get(field) or MISSING_GROUP_VALUE).strip() or MISSING_GROUP_VALUE for field in group_fields)
@@ -2328,36 +2499,48 @@ def work_stats(
             {
                 "group": {field: key[index] for index, field in enumerate(group_fields)},
                 "count": 0,
-                "values": [],
+                "values": {name: [] for name in metrics},
             },
         )
         group["count"] += 1
-        value = _stats_metric_value(meta, metric)
-        if value is not None:
-            group["values"].append(value)
+        for name in metrics:
+            value = _stats_metric_value(meta, name, now_dt)
+            if value is not None:
+                group["values"][name].append(value)
+        if include_items:
+            items.append(_stats_item_record(root, path, meta, now_dt))
+    if violations:
+        raise WorkRegistrationError(violations)
 
     rows: list[dict[str, Any]] = []
     for key in sorted(groups):
         group = groups[key]
-        values: list[Decimal] = group.pop("values")
-        count = int(group["count"])
-        value_count = len(values)
-        total = sum(values, Decimal(0)) if values else Decimal(0)
-        avg = (total / Decimal(value_count)) if value_count else None
-        row = {
+        values: dict[str, list[Decimal]] = group.pop("values")
+        row: dict[str, Any] = {
             "group": group["group"],
-            "count": count,
-            "value_count": value_count,
-            "sum": _stats_json_number(total),
-            "avg": _stats_json_number(avg),
-            "min": _stats_json_number(min(values) if values else None),
-            "max": _stats_json_number(max(values) if values else None),
+            "count": int(group["count"]),
+            "metrics": {},
         }
+        for name in metrics:
+            metric_values = values[name]
+            value_count = len(metric_values)
+            total = sum(metric_values, Decimal(0)) if metric_values else Decimal(0)
+            avg = (total / Decimal(value_count)) if value_count else None
+            row["metrics"][name] = {
+                "value_count": value_count,
+                "sum": _stats_json_number(total),
+                "avg": _stats_json_number(avg),
+                "min": _stats_json_number(min(metric_values) if metric_values else None),
+                "max": _stats_json_number(max(metric_values) if metric_values else None),
+            }
+        if len(metrics) == 1:
+            row.update(row["metrics"][metrics[0]])
         rows.append(row)
 
-    return {
+    result: dict[str, Any] = {
         "status": "pass",
-        "metric": metric,
+        "metric": ",".join(metrics),
+        "metrics": metrics,
         "group_by": group_fields,
         "filters": {
             "kind": kinds,
@@ -2368,32 +2551,287 @@ def work_stats(
         "group_count": len(rows),
         "rows": rows,
     }
+    if include_items:
+        items.sort(key=lambda item: (str(item.get("work_id") or ""), str(item.get("path") or "")))
+        result["items"] = items
+    return result
+
+
+def _resolve_out_path(root: Path, out: str) -> Path:
+    path = Path(out)
+    return path if path.is_absolute() else root / path
+
+
+def _stats_export_format(export_format: str | None, out_path: Path) -> str:
+    if export_format:
+        if export_format not in STATS_EXPORT_FORMATS:
+            raise WorkRegistrationError([f"work-stats:invalid-format:{export_format}"])
+        return export_format
+    return "csv" if out_path.suffix.lower() == ".csv" else "json"
+
+
+def _stats_csv_cell(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, list):
+        return "|".join(str(item) for item in value)
+    return str(value)
+
+
+def _write_stats_export(
+    root: Path,
+    *,
+    out: str,
+    export_format: str,
+    result: dict[str, Any],
+    items: list[dict[str, Any]],
+    now_text: str,
+) -> dict[str, Any]:
+    out_path = _resolve_out_path(root, out)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    if export_format == "csv":
+        with out_path.open("w", encoding="utf-8", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=list(STATS_EXPORT_COLUMNS), lineterminator="\n")
+            writer.writeheader()
+            for item in items:
+                writer.writerow({column: _stats_csv_cell(item.get(column)) for column in STATS_EXPORT_COLUMNS})
+    else:
+        payload = {
+            "schema": STATS_EXPORT_SCHEMA,
+            "generated_at": now_text,
+            "query": {
+                "by": result["group_by"],
+                "metrics": result["metrics"],
+                "kind": result["filters"]["kind"],
+                "status": result["filters"]["status"],
+                "where": result["filters"]["where"],
+            },
+            "summary": result,
+            "item_count": len(items),
+            "items": items,
+        }
+        out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {
+        "export": _rel(root, out_path),
+        "export_format": export_format,
+        "export_items": len(items),
+    }
+
+
+def _execute_stats_query(
+    root: Path,
+    *,
+    by: str | None = None,
+    metric: str = "count",
+    kinds: list[str] | None = None,
+    statuses: list[str] | None = None,
+    where: list[str] | None = None,
+    now: str | None = None,
+    out: str | None = None,
+    export_format: str | None = None,
+) -> dict[str, Any]:
+    root = root.resolve()
+    now_text = _now_text(now)
+    out_text = str(out or "").strip()
+    if export_format and not out_text:
+        raise WorkRegistrationError(["work-stats:format-requires-out"])
+    result = work_stats(
+        root,
+        by=by,
+        metric=metric,
+        kinds=kinds,
+        statuses=statuses,
+        where=where,
+        now=now_text,
+        include_items=bool(out_text),
+    )
+    if out_text:
+        items = result.pop("items", [])
+        resolved_format = _stats_export_format(export_format, _resolve_out_path(root, out_text))
+        result.update(
+            _write_stats_export(
+                root,
+                out=out_text,
+                export_format=resolved_format,
+                result=result,
+                items=items,
+                now_text=now_text,
+            )
+        )
+    return result
+
+
+def _load_work_views(root: Path) -> dict[str, Any]:
+    path = root / WORK_VIEWS_PATH
+    if not path.exists():
+        return {"schema": WORK_VIEWS_SCHEMA, "updated_at": "", "views": []}
+    payload = _read_json(path)
+    if str(payload.get("schema") or "") != WORK_VIEWS_SCHEMA:
+        raise WorkRegistrationError([f"{_rel(root, path)}: work-view:invalid-schema:{payload.get('schema')}"])
+    views = payload.get("views")
+    if not isinstance(views, list):
+        raise WorkRegistrationError([f"{_rel(root, path)}: work-view:invalid-views"])
+    payload["views"] = [view for view in views if isinstance(view, dict)]
+    return payload
+
+
+def _find_view(payload: dict[str, Any], name: str) -> dict[str, Any] | None:
+    for view in payload["views"]:
+        if str(view.get("name") or "") == name:
+            return view
+    return None
+
+
+def save_view(
+    root: Path,
+    name: str,
+    *,
+    by: str | None = None,
+    metric: str = "count",
+    kinds: list[str] | None = None,
+    statuses: list[str] | None = None,
+    where: list[str] | None = None,
+    export_format: str | None = None,
+    out: str | None = None,
+    force: bool = False,
+    now: str | None = None,
+) -> dict[str, Any]:
+    root = root.resolve()
+    if not VIEW_NAME_RE.match(name or ""):
+        raise WorkRegistrationError([f"work-view:invalid-name:{name}"])
+    metrics = _stats_metrics(metric)
+    group_fields = _stats_group_fields(by)
+    filters = _stats_where_filters(where)
+    _validate_stats_fields(group_fields, filters)
+    out_text = str(out or "").strip()
+    if export_format and not out_text:
+        raise WorkRegistrationError(["work-view:format-requires-out"])
+
+    now_text = _now_text(now)
+    payload = _load_work_views(root)
+    existing = _find_view(payload, name)
+    if existing and not force:
+        raise WorkRegistrationError([f"work-view:exists:{name}"])
+    view: dict[str, Any] = {
+        "name": name,
+        "created_at": str(existing.get("created_at") or now_text) if existing else now_text,
+        "updated_at": now_text,
+        "query": {
+            "by": group_fields,
+            "metrics": metrics,
+            "kind": _stats_multi_values(kinds),
+            "status": _stats_multi_values(statuses),
+            "where": [f"{key}={value}" for key, value in filters],
+        },
+    }
+    if out_text:
+        view["export"] = {
+            "format": _stats_export_format(export_format, Path(out_text)),
+            "out": Path(out_text).as_posix(),
+        }
+    payload["schema"] = WORK_VIEWS_SCHEMA
+    payload["updated_at"] = now_text
+    payload["views"] = sorted(
+        [item for item in payload["views"] if str(item.get("name") or "") != name] + [view],
+        key=lambda item: str(item.get("name") or ""),
+    )
+    views_path = root / WORK_VIEWS_PATH
+    views_path.parent.mkdir(parents=True, exist_ok=True)
+    views_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {
+        "status": "updated" if existing else "saved",
+        "name": name,
+        "path": _rel(root, views_path),
+        "view": view,
+    }
+
+
+def run_view(
+    root: Path,
+    name: str,
+    *,
+    now: str | None = None,
+    out: str | None = None,
+    export_format: str | None = None,
+) -> dict[str, Any]:
+    root = root.resolve()
+    payload = _load_work_views(root)
+    view = _find_view(payload, name)
+    if view is None:
+        raise WorkRegistrationError([f"work-view:not-found:{name}"])
+    query = view.get("query") if isinstance(view.get("query"), dict) else {}
+    export = view.get("export") if isinstance(view.get("export"), dict) else {}
+    effective_out = str(out or "").strip() or str(export.get("out") or "").strip() or None
+    effective_format = str(export_format or "").strip() or str(export.get("format") or "").strip() or None
+    result = _execute_stats_query(
+        root,
+        by=",".join(_text_lines(query.get("by"))) or None,
+        metric=",".join(_text_lines(query.get("metrics"))) or "count",
+        kinds=_text_lines(query.get("kind")),
+        statuses=_text_lines(query.get("status")),
+        where=_text_lines(query.get("where")),
+        now=now,
+        out=effective_out,
+        export_format=effective_format,
+    )
+    result["view"] = name
+    return result
+
+
+def list_views(root: Path) -> dict[str, Any]:
+    root = root.resolve()
+    payload = _load_work_views(root)
+    views = sorted(payload["views"], key=lambda item: str(item.get("name") or ""))
+    return {
+        "status": "pass",
+        "path": _rel(root, root / WORK_VIEWS_PATH),
+        "view_count": len(views),
+        "views": views,
+    }
+
+
+def _stats_flat_headers(result: dict[str, Any]) -> list[str]:
+    metrics = list(result.get("metrics") or ["count"])
+    headers = list(result["group_by"]) + ["count"]
+    if len(metrics) == 1:
+        headers.extend(STATS_ROW_AGGREGATES)
+    else:
+        for name in metrics:
+            headers.extend(f"{name}_{aggregate}" for aggregate in STATS_ROW_AGGREGATES)
+    return headers
+
+
+def _stats_flat_row(result: dict[str, Any], row: dict[str, Any]) -> dict[str, str]:
+    metrics = list(result.get("metrics") or ["count"])
+    values = {field: str(row["group"].get(field, "")) for field in result["group_by"]}
+    values["count"] = str(row["count"])
+    for name in metrics:
+        stats = row["metrics"][name]
+        prefix = "" if len(metrics) == 1 else f"{name}_"
+        for aggregate in STATS_ROW_AGGREGATES:
+            number = stats[aggregate]
+            values[f"{prefix}{aggregate}"] = "" if number is None else str(number)
+    return values
 
 
 def _print_stats_csv(result: dict[str, Any]) -> None:
-    group_fields = list(result["group_by"])
-    fieldnames = group_fields + ["count", "value_count", "sum", "avg", "min", "max"]
-    writer = csv.DictWriter(sys.stdout, fieldnames=fieldnames, lineterminator="\n")
+    writer = csv.DictWriter(sys.stdout, fieldnames=_stats_flat_headers(result), lineterminator="\n")
     writer.writeheader()
     for row in result["rows"]:
-        values = {field: row["group"].get(field, "") for field in group_fields}
-        for field in ("count", "value_count", "sum", "avg", "min", "max"):
-            number = row[field]
-            values[field] = "" if number is None else str(number)
-        writer.writerow(values)
+        writer.writerow(_stats_flat_row(result, row))
 
 
 def _print_stats_table(result: dict[str, Any]) -> None:
-    group_fields = list(result["group_by"])
-    headers = group_fields + ["count", "value_count", "sum", "avg", "min", "max"]
+    headers = _stats_flat_headers(result)
     print(f"work-stats: {result['status']}")
     print(f"metric={result['metric']}")
     print(f"total_items={result['total_items']}")
+    if result.get("export"):
+        print(f"export={result['export']} ({result.get('export_format')}, {result.get('export_items')} items)")
     print("\t".join(headers))
     for row in result["rows"]:
-        values = [str(row["group"].get(field, "")) for field in group_fields]
-        values.extend("" if row[field] is None else str(row[field]) for field in ("count", "value_count", "sum", "avg", "min", "max"))
-        print("\t".join(values))
+        values = _stats_flat_row(result, row)
+        print("\t".join(values.get(header, "") for header in headers))
 
 
 def cmd_new(args: argparse.Namespace) -> int:
@@ -2543,21 +2981,32 @@ def cmd_close(args: argparse.Namespace) -> int:
     return 0
 
 
+def _print_findings(command: str, exc: WorkRegistrationError) -> None:
+    print(f"{command}: fail", file=sys.stderr)
+    print(f"findings={len(exc.findings)}", file=sys.stderr)
+    for finding in exc.findings:
+        print(f"- {finding}", file=sys.stderr)
+
+
+def _combined_filters(args: argparse.Namespace) -> list[str]:
+    return list(args.where or []) + list(args.filter or [])
+
+
 def cmd_stats(args: argparse.Namespace) -> int:
     try:
-        result = work_stats(
+        result = _execute_stats_query(
             args.root,
             by=args.by,
             metric=args.metric,
             kinds=args.kind,
             statuses=args.status,
-            where=args.where,
+            where=_combined_filters(args),
+            now=args.now,
+            out=str(args.out) if args.out else None,
+            export_format=args.format,
         )
     except WorkRegistrationError as exc:
-        print("work-stats: fail", file=sys.stderr)
-        print(f"findings={len(exc.findings)}", file=sys.stderr)
-        for finding in exc.findings:
-            print(f"- {finding}", file=sys.stderr)
+        _print_findings("work-stats", exc)
         return 1
     if args.csv:
         _print_stats_csv(result)
@@ -2566,6 +3015,75 @@ def cmd_stats(args: argparse.Namespace) -> int:
         print(json.dumps(result, ensure_ascii=False, indent=2))
     else:
         _print_stats_table(result)
+    return 0
+
+
+def cmd_view_save(args: argparse.Namespace) -> int:
+    try:
+        result = save_view(
+            args.root,
+            args.name,
+            by=args.by,
+            metric=args.metric,
+            kinds=args.kind,
+            statuses=args.status,
+            where=_combined_filters(args),
+            export_format=args.format,
+            out=str(args.out) if args.out else None,
+            force=args.force,
+            now=args.now,
+        )
+    except WorkRegistrationError as exc:
+        _print_findings("work-view-save", exc)
+        return 1
+    print(f"work-view-save: {result['status']}")
+    if args.json:
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+    else:
+        print(f"name={result['name']}")
+        print(f"path={result['path']}")
+    return 0
+
+
+def cmd_view_run(args: argparse.Namespace) -> int:
+    try:
+        result = run_view(
+            args.root,
+            args.name,
+            now=args.now,
+            out=str(args.out) if args.out else None,
+            export_format=args.format,
+        )
+    except WorkRegistrationError as exc:
+        _print_findings("work-view-run", exc)
+        return 1
+    if args.csv:
+        _print_stats_csv(result)
+    elif args.json:
+        print(f"work-view-run: {result['status']}")
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+    else:
+        print(f"work-view-run: view={result['view']}")
+        _print_stats_table(result)
+    return 0
+
+
+def cmd_view_list(args: argparse.Namespace) -> int:
+    try:
+        result = list_views(args.root)
+    except WorkRegistrationError as exc:
+        _print_findings("work-view-list", exc)
+        return 1
+    print(f"work-view-list: {result['status']}")
+    if args.json:
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+    else:
+        print(f"path={result['path']}")
+        print(f"view_count={result['view_count']}")
+        for view in result["views"]:
+            query = view.get("query") if isinstance(view.get("query"), dict) else {}
+            summary = json.dumps(query, ensure_ascii=False, sort_keys=True)
+            print(f"- {view.get('name')}: {summary}")
     return 0
 
 
@@ -2639,16 +3157,51 @@ def build_parser() -> argparse.ArgumentParser:
     close_cmd.add_argument("--json", action="store_true")
     close_cmd.set_defaults(func=cmd_close)
 
+    def add_stats_query_arguments(target: argparse.ArgumentParser) -> None:
+        target.add_argument("--by", help=f"Comma-separated group-by dimensions: {', '.join(sorted(STATS_DIMENSIONS))}")
+        target.add_argument(
+            "--metric",
+            default="count",
+            help=f"Comma-separated metrics to aggregate: {', '.join(sorted(STATS_METRICS))}",
+        )
+        target.add_argument("--kind", action="append", help="Filter by kind; accepts comma-separated values and may repeat")
+        target.add_argument("--status", action="append", help="Filter by status; accepts comma-separated values and may repeat")
+        target.add_argument("--filter", action="append", help="Filter by exact field=value; may repeat")
+        target.add_argument("--where", action="append", help="Alias of --filter; may repeat")
+        target.add_argument("--format", choices=sorted(STATS_EXPORT_FORMATS), help="Export format for --out (default inferred from suffix)")
+        target.add_argument("--out", type=Path, help="Export matched item rows to this path (relative paths resolve under --root)")
+        target.add_argument("--now", help="Override the timestamp used for computed metrics such as age")
+
     stats_cmd = sub.add_parser("stats", help="Aggregate v1 Work Item metadata without mutating files")
-    stats_cmd.add_argument("--by", help="Comma-separated group-by fields, for example team,worker_model_tier")
-    stats_cmd.add_argument("--metric", default="count", help=f"Metric to aggregate: {', '.join(sorted(STATS_METRICS))}")
-    stats_cmd.add_argument("--kind", action="append", help="Filter by kind; accepts comma-separated values and may repeat")
-    stats_cmd.add_argument("--status", action="append", help="Filter by status; accepts comma-separated values and may repeat")
-    stats_cmd.add_argument("--where", action="append", help="Filter by exact field=value; may repeat")
+    add_stats_query_arguments(stats_cmd)
     output_group = stats_cmd.add_mutually_exclusive_group()
     output_group.add_argument("--json", action="store_true")
     output_group.add_argument("--csv", action="store_true")
     stats_cmd.set_defaults(func=cmd_stats)
+
+    view_cmd = sub.add_parser("view", help="Save, list, and run reusable work stats views")
+    view_sub = view_cmd.add_subparsers(dest="view_command", required=True)
+
+    view_save = view_sub.add_parser("save", help="Persist a stats query as a named view in WORK-VIEWS.json")
+    view_save.add_argument("name", help="View name (letters, digits, dot, dash, underscore)")
+    add_stats_query_arguments(view_save)
+    view_save.add_argument("--force", action="store_true", help="Overwrite an existing view with the same name")
+    view_save.add_argument("--json", action="store_true")
+    view_save.set_defaults(func=cmd_view_save)
+
+    view_run = view_sub.add_parser("run", help="Execute a saved view exactly as stored")
+    view_run.add_argument("name", help="Saved view name")
+    view_run.add_argument("--format", choices=sorted(STATS_EXPORT_FORMATS), help="Override the saved export format")
+    view_run.add_argument("--out", type=Path, help="Override the saved export path")
+    view_run.add_argument("--now", help="Override the timestamp used for computed metrics such as age")
+    run_output_group = view_run.add_mutually_exclusive_group()
+    run_output_group.add_argument("--json", action="store_true")
+    run_output_group.add_argument("--csv", action="store_true")
+    view_run.set_defaults(func=cmd_view_run)
+
+    view_list = view_sub.add_parser("list", help="List saved views")
+    view_list.add_argument("--json", action="store_true")
+    view_list.set_defaults(func=cmd_view_list)
     return parser
 
 
