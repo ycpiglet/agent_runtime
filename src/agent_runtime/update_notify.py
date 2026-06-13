@@ -64,7 +64,9 @@ def parse_ls_remote_tags(output: str) -> list[str]:
 def latest_remote_tag(remote_url: str, *, timeout: float = LS_REMOTE_TIMEOUT_SECONDS) -> str | None:
     """Return the latest upstream vX.Y.Z tag, or None when unavailable."""
     env = dict(os.environ)
-    env.setdefault("GIT_TERMINAL_PROMPT", "0")
+    # Force (not setdefault): an inherited GIT_TERMINAL_PROMPT=1 must never
+    # let `git ls-remote` block a session start on a credential prompt.
+    env["GIT_TERMINAL_PROMPT"] = "0"
     result = subprocess.run(
         ["git", "ls-remote", "--tags", remote_url],
         capture_output=True,

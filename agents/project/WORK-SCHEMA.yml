@@ -662,12 +662,12 @@ fields:
     mutable: lifecycle_tools
   verification_status:
     type: enum
-    allowed_values: [passed, failed, blocked, stale]
+    allowed_values: [pending, passed, failed, blocked, stale]
     required_for: [unit]
     populated_by: work_verify
     source: runtime
     consumed_by: [closeout_gate, board, stats]
-    query_use: Show pass, fail, blocked, or stale verification state.
+    query_use: Show pending, pass, fail, blocked, or stale verification state.
     mutable: lifecycle_tools
   verified_at:
     type: datetime

@@ -1,5 +1,7 @@
 """Integrator merge queue: serial rebase-test-merge for worker branches.
 
+Not concurrent-safe: run at most one process invocation at a time.
+
 Parallel waves end with N worker branches waiting to join main. Unordered
 joins create rebase races and shared-SSoT regeneration contention
 (board/INDEX/BACKLOG). This script encodes the orchestrator's manually proven
@@ -40,6 +42,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
 import re
 import shlex
 import subprocess
@@ -55,13 +58,36 @@ DEFAULT_BASE = "origin/main"
 DEFAULT_VERIFY_CMD = "python scripts/owner_governance_gate.py"
 DEFAULT_REGEN_CMD = "python scripts/backlog_board.py --write"
 ACTIVE_STATUSES = {"pending", "rebasing", "testing", "merging"}
-ALL_STATUSES = {"pending", "rebasing", "testing", "merging", "merged", "failed"}
+# pr-handoff is terminal for this queue (the merge happens remotely via the
+# printed gh commands) but still blocks re-enqueue until the orchestrator
+# runs `remove` after the PR merges.
+ENQUEUE_BLOCKING_STATUSES = ACTIVE_STATUSES | {"pr-handoff"}
+ALL_STATUSES = {"pending", "rebasing", "testing", "merging", "pr-handoff", "merged", "failed"}
 OUTPUT_TAIL_LINES = 60
 PREFIX = "[merge-queue]"
+# Every git/verify/regen subprocess is bounded so one hung command cannot
+# wedge the queue. Override via the MERGE_QUEUE_TIMEOUT_SECONDS env var.
+DEFAULT_COMMAND_TIMEOUT_SECONDS = 600.0
 
 
 class MergeQueueError(Exception):
     """Environmental or preflight error that aborts the current command."""
+
+
+class CommandTimedOut(MergeQueueError):
+    """A bounded subprocess exceeded the configured timeout."""
+
+
+def _command_timeout_seconds() -> float:
+    raw = os.environ.get("MERGE_QUEUE_TIMEOUT_SECONDS", "").strip()
+    if raw:
+        try:
+            value = float(raw)
+        except ValueError:
+            value = 0.0
+        if value > 0:
+            return value
+    return DEFAULT_COMMAND_TIMEOUT_SECONDS
 
 
 def _now_iso() -> str:
@@ -129,15 +155,20 @@ def new_entry(
 
 
 def _git(root: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
-    result = subprocess.run(
-        ["git", *args],
-        cwd=str(root),
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        check=False,
-    )
+    timeout = _command_timeout_seconds()
+    try:
+        result = subprocess.run(
+            ["git", *args],
+            cwd=str(root),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise CommandTimedOut(f"git {' '.join(args)} exceeded {timeout}s") from exc
     if check and result.returncode != 0:
         detail = (result.stderr or result.stdout or "").strip()
         raise MergeQueueError(f"git {' '.join(args)} failed: {detail}")
@@ -159,15 +190,20 @@ def _run_command(root: Path, command: str) -> subprocess.CompletedProcess[str]:
     argv = _split_command(command)
     if not argv:
         raise MergeQueueError(f"empty command: {command!r}")
-    return subprocess.run(
-        argv,
-        cwd=str(root),
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        check=False,
-    )
+    timeout = _command_timeout_seconds()
+    try:
+        return subprocess.run(
+            argv,
+            cwd=str(root),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise CommandTimedOut(f"{command} exceeded {timeout}s") from exc
 
 
 def _output_tail(result: subprocess.CompletedProcess[str]) -> str:
@@ -384,6 +420,20 @@ def process_entry(
     ctx: ProcessContext, queue: dict[str, Any], entry: dict[str, Any]
 ) -> bool:
     """Process one entry. Returns True when merged (or handed off in PR mode)."""
+    try:
+        return _process_entry(ctx, queue, entry)
+    except CommandTimedOut as exc:
+        try:
+            _restore_worktree(ctx.root, ctx.start_branch)
+        except CommandTimedOut:
+            _say(f"WARN worktree restore also timed out for {entry['branch']}")
+        _fail_entry(ctx, ctx.root, queue, entry, "timeout", f"timed-out: {exc}")
+        return False
+
+
+def _process_entry(
+    ctx: ProcessContext, queue: dict[str, Any], entry: dict[str, Any]
+) -> bool:
     root = ctx.root
     branch = str(entry["branch"])
     _say(f"processing {branch} ({entry.get('task_id', '')})")
@@ -452,6 +502,9 @@ def process_entry(
             if pushed:
                 _say(f"  pushed {branch} to {ctx.remote}")
         _checkout(root, ctx.start_branch)
+        # Terminal handoff status: distinct from "merging" so observers can
+        # tell a completed PR handoff from a merge stuck mid-flight.
+        entry["status"] = "pr-handoff"
         entry["processed_at"] = _now_iso()
         save_queue(root, queue)
         _print_pr_handoff(ctx, entry, pushed)
@@ -494,7 +547,7 @@ def cmd_enqueue(args: argparse.Namespace) -> int:
         _say("ERROR --branch must not be empty")
         return 1
     for entry in queue["entries"]:
-        if entry.get("branch") == branch and entry.get("status") in ACTIVE_STATUSES:
+        if entry.get("branch") == branch and entry.get("status") in ENQUEUE_BLOCKING_STATUSES:
             _say(
                 f"ERROR branch {branch} already queued with status "
                 f"{entry.get('status')}; remove it first to re-enqueue"

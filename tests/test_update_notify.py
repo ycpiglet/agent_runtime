@@ -55,7 +55,7 @@ class _FakeRun:
         self.calls += 1
         assert args[:3] == ["git", "ls-remote", "--tags"]
         assert kwargs.get("timeout") == update_notify.LS_REMOTE_TIMEOUT_SECONDS
-        assert "GIT_TERMINAL_PROMPT" in kwargs.get("env", {})
+        assert kwargs.get("env", {}).get("GIT_TERMINAL_PROMPT") == "0"
         return subprocess.CompletedProcess(args, self.returncode, stdout=self.stdout, stderr="")
 
 
@@ -72,6 +72,21 @@ def test_newer_tag_prints_notice_once(tmp_path, capsys, monkeypatch):
     assert len(lines) == 2  # notice + recommended-procedure hint
     assert "update-plan" in lines[1]
     out.encode("ascii")  # notice must be plain ASCII
+
+
+def test_git_terminal_prompt_forced_to_zero_even_when_inherited(tmp_path, capsys, monkeypatch):
+    """An inherited GIT_TERMINAL_PROMPT=1 must be overridden, not kept."""
+    _write_host_config(tmp_path, ref="v0.1.8")
+    monkeypatch.setenv("GIT_TERMINAL_PROMPT", "1")
+    fake_run = _FakeRun()  # its __call__ asserts env["GIT_TERMINAL_PROMPT"] == "0"
+    monkeypatch.setattr(update_notify.subprocess, "run", fake_run)
+
+    assert main(["update-notify", "--root", str(tmp_path), "--no-cache"]) == 0
+    assert fake_run.calls == 1
+    # The notice proves the fake ran to completion: a failed env assertion
+    # inside _FakeRun would be swallowed by the non-blocking guarantee and
+    # leave stdout empty instead.
+    assert capsys.readouterr().out.splitlines()[0] == NOTICE_LINE
 
 
 def test_same_tag_is_silent(tmp_path, capsys, monkeypatch):

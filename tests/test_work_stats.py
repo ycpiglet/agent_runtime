@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import io
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -340,6 +341,70 @@ def test_work_stats_exports_json_with_query_summary_and_items(tmp_path: Path) ->
     assert items["TASK-A"]["actual_tokens"] == 100
     assert items["TASK-B"]["team"] == "evaluation-office"
     assert items["TASK-B"]["lead_time_hours"] == 2.5
+
+
+def test_work_stats_unknown_filter_key_warns_but_stays_non_fatal(tmp_path: Path) -> None:
+    _write(tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-A.md", _work_item(work_id="TASK-A"))
+
+    result = _run(tmp_path, "--filter", "statu=completed", "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = _json_payload(result.stdout)
+    assert payload["total_items"] == 0  # unknown keys still match nothing
+    assert "work-stats: warning unknown-filter-key:statu" in result.stderr
+    assert "valid dimensions:" in result.stderr
+    assert "status" in result.stderr  # the suggestion list names real dimensions
+
+    # Known stored fields keep filtering without a warning.
+    known = _run(tmp_path, "--filter", "status=completed", "--json")
+    assert known.returncode == 0, known.stderr or known.stdout
+    assert "unknown-filter-key" not in known.stderr
+    assert _json_payload(known.stdout)["total_items"] == 1
+
+
+def test_work_stats_csv_export_neutralizes_formula_cells(tmp_path: Path) -> None:
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-A.md",
+        _work_item(
+            work_id="TASK-A",
+            owner="=cmd|' /C calc'!A0",
+            team="+SUM(A1:A9)",
+            actual_hours="-1.5",
+            tags=["@alpha"],
+        ),
+    )
+
+    result = _run(tmp_path, "--by", "status", "--format", "csv", "--out", "reviews/export.csv", "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    export_path = tmp_path / "reviews" / "export.csv"
+    rows = list(csv.DictReader(io.StringIO(export_path.read_text(encoding="utf-8"))))
+    assert len(rows) == 1
+    row = rows[0]
+    assert row["owner"] == "'=cmd|' /C calc'!A0"
+    assert row["team"] == "'+SUM(A1:A9)"
+    assert row["tags"] == "'@alpha"
+    assert row["actual_hours"] == "-1.5"  # negative numbers stay unprefixed
+    assert row["work_id"] == "TASK-A"  # ordinary cells stay untouched
+
+
+def test_work_stats_stdout_csv_stays_utf8_on_cp949_console(tmp_path: Path) -> None:
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-A.md",
+        _work_item(work_id="TASK-A", owner="lead-ě"),  # U+011B is not encodable in cp949
+    )
+
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT), "--root", str(tmp_path), "stats", "--by", "owner", "--csv"],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        env={**os.environ, "PYTHONIOENCODING": "cp949"},
+    )
+
+    assert result.returncode == 0, result.stdout.decode("utf-8", "replace") + result.stderr.decode("utf-8", "replace")
+    rows = list(csv.DictReader(io.StringIO(result.stdout.decode("utf-8"))))
+    assert [row["owner"] for row in rows] == ["lead-ě"]
 
 
 def test_work_view_save_list_run_roundtrip_reproduces_query(tmp_path: Path) -> None:

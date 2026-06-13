@@ -315,6 +315,25 @@ def test_clean_skip_lines_reported(tmp_path: Path, capsys) -> None:
     assert (repo / ".worktrees" / "TASK-AR-925").exists()
 
 
+def test_clean_skips_when_dirty_recheck_is_unknown(tmp_path: Path, monkeypatch) -> None:
+    """An unknown dirty state at clean time must skip, not count as clean."""
+    repo = _make_repo(tmp_path)
+    worktree = _add_worktree(repo, "TASK-AR-929", "task-ar-929-branch")
+    _write_claim(repo, "CLAIM-929", "TASK-AR-929", released_at=OLD)
+
+    info = worktree_lifecycle_gate.WorktreeInfo(
+        path=worktree, branch="task-ar-929-branch", rel=".worktrees/TASK-AR-929"
+    )
+    verdict = worktree_lifecycle_gate.ZombieVerdict(worktree=info, zombie=True)
+    monkeypatch.setattr(worktree_lifecycle_gate, "_is_dirty", lambda path: None)
+
+    actions, failures = worktree_lifecycle_gate.clean_zombies(repo, [verdict])
+
+    assert actions == ["skip .worktrees/TASK-AR-929 reason=dirty-recheck-unknown"]
+    assert failures == 0
+    assert worktree.exists()
+
+
 def test_no_mode_prints_help(tmp_path: Path, capsys) -> None:
     repo = _make_repo(tmp_path)
     rc = worktree_lifecycle_gate.main(["--root", str(repo)])
