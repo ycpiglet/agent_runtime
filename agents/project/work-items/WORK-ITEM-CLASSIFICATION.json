@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-13T21:26:38+09:00",
+  "generated_at": "2026-06-13T22:31:40+09:00",
   "record_count": 235,
   "finding_count": 0,
   "findings": [],
@@ -1730,7 +1730,7 @@
       "title": "사진/문서를 task·메시지에 드래그드롭/붙여넣기로 첨부하고, 미리보기·다운로드할 수 있게 한다 (Notion/Slack/Jira 모델).",
       "path": "agents/lead_engineer/tasks/TASK-AR-332.md",
       "parent_id": "TASKSET-AR-UI-PLATFORM-EXTENSIONS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-333",
@@ -1741,7 +1741,7 @@
       "title": "taskset/보드/이벤트를 표준 포맷으로 내보내고, 외부 목록을 task로 일괄 가져올 수 있게 한다 (Notion/Jira 모델).",
       "path": "agents/lead_engineer/tasks/TASK-AR-333.md",
       "parent_id": "TASKSET-AR-UI-PLATFORM-EXTENSIONS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-334",
@@ -1752,7 +1752,7 @@
       "title": "task/taskset/메시지/이벤트/evidence/reviews 문서를 한 검색창에서 풀텍스트로 찾고 즉시 이동한다 (Notion 검색 + Slack…",
       "path": "agents/lead_engineer/tasks/TASK-AR-334.md",
       "parent_id": "TASKSET-AR-UI-PLATFORM-EXTENSIONS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-335",

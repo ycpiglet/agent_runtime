@@ -1,0 +1,36 @@
+{
+  "schema": "agent-runtime-session-baseline/v1",
+  "captured_at": "2026-06-13T13:22:05.028082+00:00",
+  "cwd": "C:\\Users\\ycpig\\agent_runtime",
+  "head": "da46f06",
+  "branch": "main",
+  "status_fingerprint": "41652344fecd477c958fa689e4eb5c639b29778ea3fe8c2ade9b98c99e7bb1cb",
+  "stash_count": 0,
+  "worktrees": [
+    {
+      "path": "C:/Users/ycpig/agent_runtime",
+      "HEAD": "da46f062090761059509a1f9476d139f18b7ed9b",
+      "branch": "main"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-332",
+      "HEAD": "5e8c24ebd2766eea25617f0c0ebe63e513db31ef",
+      "branch": "claude/task-ar-332-ui"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-333",
+      "HEAD": "8461f9003dd2825b191145b812947d801fd48881",
+      "branch": "claude/task-ar-333-ui"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-334",
+      "HEAD": "da46f062090761059509a1f9476d139f18b7ed9b",
+      "detached": ""
+    }
+  ],
+  "active_codex_branches": [
+    "+ claude/task-ar-332-ui",
+    "+ claude/task-ar-333-ui",
+    "claude/task-ar-334-ui"
+  ]
+}

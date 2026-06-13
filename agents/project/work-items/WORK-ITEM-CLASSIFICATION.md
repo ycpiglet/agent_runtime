@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-13T21:26:38+09:00
+generated_at: 2026-06-13T22:31:40+09:00
 record_count: 235
 ---
 
@@ -195,9 +195,9 @@ record_count: 235
 | 0.20.1 | Task 0.20.1 | task | `TASK-AR-329` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | `agents/lead_engineer/tasks/TASK-AR-329.md` | Owner가 UI에서 taskset을 직접 만들고, task를 넣고 빼고, 일괄 편집할 수 있게 한다 (Linear Projects / Notion DB… |
 | 0.20.2 | Task 0.20.2 | task | `TASK-AR-330` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | `agents/lead_engineer/tasks/TASK-AR-330.md` | task 계층(서브태스크)과 의존성(blocks/blocked-by)을 데이터 모델로 정식화하고 타임라인(Gantt)·의존 그래프로 시각화한다. |
 | 0.20.3 | Task 0.20.3 | task | `TASK-AR-331` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | `agents/lead_engineer/tasks/TASK-AR-331.md` | Notion형 커스텀 속성과 Monday/ClickUp형 "when X then Y" 자동화 규칙, Linear형 트리아지 큐를 제공한다. |
-| 0.20.4 | Task 0.20.4 | task | `TASK-AR-332` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-332.md` | 사진/문서를 task·메시지에 드래그드롭/붙여넣기로 첨부하고, 미리보기·다운로드할 수 있게 한다 (Notion/Slack/Jira 모델). |
-| 0.20.5 | Task 0.20.5 | task | `TASK-AR-333` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-333.md` | taskset/보드/이벤트를 표준 포맷으로 내보내고, 외부 목록을 task로 일괄 가져올 수 있게 한다 (Notion/Jira 모델). |
-| 0.20.6 | Task 0.20.6 | task | `TASK-AR-334` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-334.md` | task/taskset/메시지/이벤트/evidence/reviews 문서를 한 검색창에서 풀텍스트로 찾고 즉시 이동한다 (Notion 검색 + Slack… |
+| 0.20.4 | Task 0.20.4 | task | `TASK-AR-332` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | `agents/lead_engineer/tasks/TASK-AR-332.md` | 사진/문서를 task·메시지에 드래그드롭/붙여넣기로 첨부하고, 미리보기·다운로드할 수 있게 한다 (Notion/Slack/Jira 모델). |
+| 0.20.5 | Task 0.20.5 | task | `TASK-AR-333` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | `agents/lead_engineer/tasks/TASK-AR-333.md` | taskset/보드/이벤트를 표준 포맷으로 내보내고, 외부 목록을 task로 일괄 가져올 수 있게 한다 (Notion/Jira 모델). |
+| 0.20.6 | Task 0.20.6 | task | `TASK-AR-334` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | `agents/lead_engineer/tasks/TASK-AR-334.md` | task/taskset/메시지/이벤트/evidence/reviews 문서를 한 검색창에서 풀텍스트로 찾고 즉시 이동한다 (Notion 검색 + Slack… |
 | 0.20.7 | Task 0.20.7 | task | `TASK-AR-335` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-335.md` | 마일스톤/회의/완료 이력/예약 실행을 캘린더 뷰로 통합하고, taskset 디스패치를 예약·반복 실행할 수 있게 한다 (Notion Calendar/Mo… |
 | 0.20.8 | Task 0.20.8 | task | `TASK-AR-336` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-336.md` | `agents/project/STATE-MACHINES.yml`의 라이프사이클(task/claim/role)을 인터랙티브 그래프로 보여주고, 선택한 ta… |
 | 0.20.9 | Task 0.20.9 | task | `TASK-AR-337` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-337.md` | task/taskset을 개인 에이전트가 아닌 팀/역할 단위로 배정하고, 에이전트·팀별 부하를 히트맵으로 보여준다 (Jira 컴포넌트 + Asana Wo… |

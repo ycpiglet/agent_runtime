@@ -14,7 +14,11 @@ registered_at: 2026-06-11T18:56:35+09:00
 created_at: 2026-06-11T18:56:35+09:00
 updated_at: 2026-06-11T18:56:35+09:00
 title: 파일 첨부 — 업로드/다운로드/미리보기 + evidence 연동
-status: planned
+status: completed
+started_at: 2026-06-13T21:39:27+09:00
+completed_at: 2026-06-13T22:00:00+09:00
+resolution: done
+verification_status: passed
 priority: P1
 difficulty: M
 est_hours: 8

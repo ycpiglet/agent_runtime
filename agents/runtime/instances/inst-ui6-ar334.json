@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "inst-ui6-ar334",
+  "callsign": "claude/find-lynx",
+  "callsite_id": "claude-ui6-334",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260613-213928-task-ar-334-b0a2.json"
+  ],
+  "created_at": "2026-06-13T21:39:28+09:00",
+  "decision_cycle_id": "",
+  "display_name": "claude/find-lynx",
+  "model": "",
+  "model_tier": "",
+  "on_behalf_of": "TASK-AR-334",
+  "pane_id": "claude-ui6-334",
+  "parent_instance_id": "",
+  "project_id": "",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "lead-engineer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-13T21:39:28+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-334",
+  "task_set_id": "TASKSET-AR-UI-PLATFORM-EXTENSIONS",
+  "team_id": "agent-runtime-core",
+  "unit_id": "",
+  "unit_spec": "",
+  "updated_at": "2026-06-13T21:39:28+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-334"
+}
