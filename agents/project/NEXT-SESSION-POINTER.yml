@@ -16,11 +16,11 @@ active_work:
       agent_instance_id: inst-w3-ar517-claude
       display_name: claude/stats-shrike
       callsite_id: claude-w3-ar517
-    - claim_id: CLAIM-20260613-024517-task-ar-519-759f
+    - claim_id: CLAIM-20260613-094758-task-ar-521-9bce
       agent_role: lead-engineer
-      agent_instance_id: inst-w3-ar519-claude
-      display_name: claude/fresh-tern
-      callsite_id: claude-w3-ar519
+      agent_instance_id: inst-w6-ar521-claude
+      display_name: claude/parity-swift
+      callsite_id: claude-w6-ar521
   current_teams: []
 resume:
   active_task: TASK-AR-501

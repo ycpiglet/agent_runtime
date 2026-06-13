@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-13T09:28:17+09:00",
+  "generated_at": "2026-06-13T09:48:07+09:00",
   "record_count": 229,
   "finding_count": 0,
   "findings": [],
@@ -2522,7 +2522,7 @@
       "title": "Mark verification evidence stale when source files, commits, claims, or task records…",
       "path": "agents/lead_engineer/tasks/TASK-AR-519.md",
       "parent_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
-      "status": "planned"
+      "status": "completed"
     }
   ]
 }

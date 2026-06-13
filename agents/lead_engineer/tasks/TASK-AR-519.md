@@ -4,9 +4,11 @@ display_id: TASK-AR-519
 task_uid: f9b99655-ff0b-4e94-a3c4-e060b1a04bdc
 registered_at: 2026-06-12T23:35:00+09:00
 created_at: 2026-06-12T23:35:00+09:00
-updated_at: 2026-06-12T23:35:00+09:00
+updated_at: 2026-06-13T11:20:00+09:00
+started_at: 2026-06-13T02:45:17+09:00
+completed_at: 2026-06-13T11:20:00+09:00
 title: Verification freshness and stale evidence gate
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 8
@@ -65,3 +67,14 @@ tags:
 - Freshness gate + tests.
 - Evidence registry schema update.
 - Closeout review with stale/fresh fixture proof.
+
+## Completion Evidence
+
+- PR #68 (b77edab): verification_freshness_gate.py with strong/advisory signal model, block only for strong+open; registry README freshness schema; chain wiring + mirror; 11 tests.
+
+## Verification Results
+
+- pytest tests/test_verification_freshness_gate.py -q -> 11 passed
+- verification_freshness_gate --check (real repo) -> exit 0, records=12 legacy watch
+- pytest tests -q -> 595 passed (+1 pre-existing)
+- W4b inst-w4b-ar519-verifier -> APPROVE
