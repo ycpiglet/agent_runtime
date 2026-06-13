@@ -7,6 +7,13 @@ separate from the human-facing display name:
 - agent_instance_id: unique execution unit;
 - display_name: readable label for UI/status surfaces;
 - callsite_id: terminal or launcher origin.
+
+Release enforces the Owner rule "작업자 자기검증 금지 — 항상 다른 에이전트가 검증":
+the independent (W4b) verifier identity passed via --verified-by must DIFFER from
+the claim's worker agent_instance_id, and a verification evidence ref is required
+by default (--allow-missing-evidence is a loud transitional escape). Claims that
+were already released before this gate existed are exempt; only new release
+invocations enforce it.
 """
 
 from __future__ import annotations
@@ -501,6 +508,62 @@ def _find_claim(root: Path, claim_id: str) -> tuple[Path, dict[str, Any]] | None
     return None
 
 
+def _normalize_evidence_ref(root: Path, value: str) -> str:
+    """Normalize an evidence path into a repo-relative POSIX ref."""
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    path = Path(text)
+    if path.is_absolute():
+        return _rel(root, path)
+    return path.as_posix()
+
+
+def _cross_verification_errors(
+    root: Path,
+    claim: dict[str, Any],
+    *,
+    verified_by: str,
+    verifier_role: str,
+    evidence_ref: str,
+    require_evidence: bool,
+) -> list[str]:
+    """Enforce the cross-verification gate for release (Owner rule:
+
+    작업자 자기검증 금지 — 항상 다른 에이전트가 검증). The W4a worker may run
+    verification commands, but only a DIFFERENT agent instance (W4b) can
+    approve the release.
+    """
+    errors: list[str] = []
+    worker_id = str(claim.get("agent_instance_id") or "").strip()
+    if not verified_by:
+        errors.append(
+            "cross-verification required: missing --verified-by "
+            "(agent_instance_id of the independent W4b verifier); "
+            "worker self-verification alone cannot release a claim"
+        )
+    elif verified_by == worker_id:
+        errors.append(
+            "cross-verification violation: verifier identity matches worker identity "
+            f"(verified_by={verified_by}, worker agent_instance_id={worker_id}); "
+            "release requires a different agent instance as verifier"
+        )
+    if not verifier_role:
+        errors.append(
+            "cross-verification required: missing --verifier-role (role of the W4b verifier)"
+        )
+    if require_evidence:
+        if not evidence_ref:
+            errors.append(
+                "verification evidence required: missing --verification-evidence "
+                "(repo-relative ref to the W4b verification record); "
+                "--allow-missing-evidence is a transitional escape only"
+            )
+        elif not (root / evidence_ref).exists():
+            errors.append(f"verification evidence not found: {evidence_ref}")
+    return errors
+
+
 def cmd_release(args: argparse.Namespace) -> int:
     root = args.root.resolve()
     found = _find_claim(root, args.claim_id)
@@ -509,24 +572,72 @@ def cmd_release(args: argparse.Namespace) -> int:
         return 1
 
     path, claim = found
+    errors: list[str] = []
     missing = [
         str(claim.get(field) or "")
         for field in ("handoff_path", "log_path")
         if not str(claim.get(field) or "").strip() or not (root / str(claim.get(field))).exists()
     ]
     if missing:
-        print(f"handoff/log pointer is missing for claim: {args.claim_id}", file=sys.stderr)
+        errors.append(f"handoff/log pointer is missing for claim: {args.claim_id}")
+
+    verified_by = str(args.verified_by or "").strip()
+    verifier_role = str(args.verifier_role or "").strip()
+    evidence_ref = _normalize_evidence_ref(root, args.verification_evidence)
+    errors.extend(
+        _cross_verification_errors(
+            root,
+            claim,
+            verified_by=verified_by,
+            verifier_role=verifier_role,
+            evidence_ref=evidence_ref,
+            require_evidence=args.require_evidence,
+        )
+    )
+    if errors:
+        for error in errors:
+            print(error, file=sys.stderr)
         return 1
+    if not args.require_evidence and not evidence_ref:
+        print(
+            "WARNING: --allow-missing-evidence used: releasing claim "
+            f"{args.claim_id} WITHOUT a verification evidence ref. "
+            "This is a transitional escape; attach evidence and backfill "
+            "verification_evidence as soon as possible.",
+            file=sys.stderr,
+        )
 
     now_text = _parse_now(args.now).isoformat(timespec="seconds")
     claim["status"] = "released"
     claim["released_at"] = now_text
     claim["last_heartbeat"] = now_text
     claim["updated_at"] = now_text
+    claim["verified_by"] = verified_by
+    claim["verifier_role"] = verifier_role
+    claim["verification_evidence"] = evidence_ref
     lease = claim.get("lease")
     if isinstance(lease, dict):
         lease["heartbeat_at"] = now_text
     path.write_text(json.dumps(claim, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    append_event(
+        root,
+        {
+            "event": "claim_released",
+            "actor": claim.get("agent_instance_id") or "unknown",
+            "actor_role": claim.get("agent_role"),
+            "agent_instance_id": claim.get("agent_instance_id"),
+            "display_name": claim.get("display_name"),
+            "callsite_id": claim.get("callsite_id"),
+            "task_id": claim.get("task_id"),
+            "task_set_id": claim.get("task_set_id"),
+            "claim_id": claim.get("claim_id"),
+            "worktree_path": claim.get("worktree_path"),
+            "verified_by": verified_by,
+            "verifier_role": verifier_role,
+            "message": f"Released after cross-verification by {verified_by} ({verifier_role})",
+            "ts": now_text,
+        },
+    )
     _emit({"status": "released", "path": _rel(root, path), "claim": claim}, as_json=args.json)
     return 0
 
@@ -576,8 +687,48 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--json", action="store_true")
     create.set_defaults(func=cmd_create)
 
-    release = sub.add_parser("release", help="Release a task claim after handoff/log files exist")
+    release = sub.add_parser(
+        "release",
+        help=(
+            "Release a task claim after handoff/log files exist and an independent "
+            "(W4b) verifier signed off; the verifier must differ from the worker"
+        ),
+    )
     release.add_argument("--claim-id", required=True)
+    release.add_argument(
+        "--verified-by",
+        default="",
+        help=(
+            "agent_instance_id of the independent W4b verifier; "
+            "must differ from the claim's worker agent_instance_id"
+        ),
+    )
+    release.add_argument(
+        "--verifier-role",
+        default="",
+        help="Role of the independent W4b verifier (e.g. qa-reviewer)",
+    )
+    release.add_argument(
+        "--verification-evidence",
+        default="",
+        help="Repo-relative path to the W4b verification evidence record",
+    )
+    release.add_argument(
+        "--require-evidence",
+        dest="require_evidence",
+        action="store_true",
+        default=True,
+        help="Require a verification evidence ref (default: on)",
+    )
+    release.add_argument(
+        "--allow-missing-evidence",
+        dest="require_evidence",
+        action="store_false",
+        help=(
+            "Transitional escape: release without a verification evidence ref; "
+            "prints a loud warning and should be backfilled"
+        ),
+    )
     release.add_argument("--now")
     release.add_argument("--json", action="store_true")
     release.set_defaults(func=cmd_release)
