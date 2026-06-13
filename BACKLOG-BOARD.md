@@ -9,21 +9,21 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-13
 task_count: 186
-open_count: 42
-completed_count: 144
-task_set_count: 8
-completed_task_set_count: 19
+open_count: 41
+completed_count: 145
+task_set_count: 7
+completed_task_set_count: 20
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `42` open or active tasks; `144` completed tasks are archived from this live board.
+- Summary: `41` open or active tasks; `145` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `36` / Ask `5` / Review `0` / Later `1` / Done `144`.
-- Task Sets: `8` active workflows; `19` completed workflows are hidden from the live action board.
+- Status: Action `35` / Ask `5` / Review `0` / Later `1` / Done `145`.
+- Task Sets: `7` active workflows; `20` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -46,7 +46,7 @@ completed_task_set_count: 19
 
 - Flow: Working-tree cleanup, backlog cycle hygiene, and handoff publication.
 - Progress: `2/6` done; `4` open or active.
-- WIP: active `1/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.1h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-511` | - | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Low | 3h/3000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 서로 다른 OS/LLM/페인에서 작업한 파일이 줄바꿈·인코딩 차이로 가짜 diff와 경고를 만드는 것을 차단한다. 현재 `.gitattributes`가… |
@@ -129,20 +129,11 @@ completed_task_set_count: 19
 | `TASK-AR-373` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P3 | Low | Medium | 6h/5000tok | Low | 5 | governance-loop | independent-auditor | Execute next | Make it visible which planned tasks are worker-ready and which still require planner… |
 | `TASK-AR-374` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P3 | Low | Low | 8h/4000tok | Low | 4 | agent-runtime-core | lead-engineer | Execute next | Prove that the work hierarchy and registration conflict surfaces are actually closed… |
 
-### Work Metadata Analyst (`TASKSET-AR-WORK-METADATA-ANALYTICS`)
-
-- Flow: Conversation-to-work traceability, Work Item metadata, Explorer roll-ups, query/export, agent attribution, and stale verification evidence.
-- Progress: `5/6` done; `1` open or active.
-- WIP: active `1/3`; oldest `7.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-517` | INIT-AR-WORK-METADATA-ANALYTICS | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Turn Work Item metadata into queryable statistics, JSON/CSV export, and reusable save… |
-
 ### Wave Conductor (`TASKSET-AR-PARALLEL-WAVE-EXECUTION`)
 
 - Flow: Claim-time footprint conflict gate, wave dispatcher with cascade/parallel modes, integrator merge queue, and claim-first enforcement.
 - Progress: `8/10` done; `2` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-500` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | in_progress | Action | P1 | High | Medium | 6h/5000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 충돌 발견 시점을 merge-time(사후)에서 claim-time(사전)으로 옮긴다. 새 클레임 생성 시 활성 클레임들의 선언 footprint(`ta… |
@@ -172,6 +163,7 @@ completed_task_set_count: 19
 | Vision Integrator (`TASKSET-AR-VISION-GAP-CLOSURE`) | Legacy independence, A2A messaging, multi-agent RBAC, loop hardening, live eval, skill packaging, realtime UI, and doc traceability. | `10/10` done | `10` completed task files archived |
 | Project Workbreaker (`TASKSET-AR-PM-OPERATING-SYSTEM`) | Project-to-unit hierarchy, worker-ready specs, model-tier routing, WIP controls, dispatcher scope stops, and PM verification gates. | `9/9` done | `9` completed task files archived |
 | Agent Identity Contract (`TASKSET-AR-AGENT-IDENTITY-CONTRACT`) | Add role/instance/display identity records, spawn provenance, and attribution gates for multi-agent work. | `1/1` done | `1` completed task files archived |
+| Work Metadata Analyst (`TASKSET-AR-WORK-METADATA-ANALYTICS`) | Conversation-to-work traceability, Work Item metadata, Explorer roll-ups, query/export, agent attribution, and stale verification evidence. | `6/6` done | `6` completed task files archived |
 
 ## Archived Task Files
 
@@ -310,6 +302,7 @@ completed_task_set_count: 19
 | `TASK-AR-370` | `5655d2cb-a03…` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | 2026-06-12T08:17:54+09:00 | 2026-06-12T09:43:38+09:00 | 2026-06-12T11:06:57+09:00 | 2026-06-12T11:06:57+09:00 | Prevent concurrent panes from selecting the same human display ID before a task file… |
 | `TASK-AR-375` | `fe4cf218-9eb…` | `TASKSET-AR-AGENT-IDENTITY-CONTRACT` | completed | 2026-06-12T14:50:00+09:00 | 2026-06-12T15:05:12+09:00 | 2026-06-12T15:25:40+09:00 | 2026-06-12T15:25:40+09:00 | Create durable instance-level identity records and a deterministic gate that rejects… |
 | `TASK-AR-514` | `5b5f167a-3a1…` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | 2026-06-12T23:30:00+09:00 | 2026-06-13T01:33:45+09:00 | 2026-06-13T04:30:00+09:00 | 2026-06-13T04:30:00+09:00 | Owner/Claude/Codex planning discussions must map to review records, task records, boa… |
+| `TASK-AR-517` | `da2e7699-1f7…` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | 2026-06-12T23:33:00+09:00 | 2026-06-13T02:45:16+09:00 | 2026-06-13T11:50:00+09:00 | 2026-06-13T11:50:00+09:00 | Turn Work Item metadata into queryable statistics, JSON/CSV export, and reusable save… |
 | `TASK-AR-519` | `f9b99655-ff0…` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | 2026-06-12T23:35:00+09:00 | 2026-06-13T02:45:17+09:00 | 2026-06-13T11:20:00+09:00 | 2026-06-13T11:20:00+09:00 | Mark verification evidence stale when source files, commits, claims, or task records… |
 | `TASK-AR-515` | `9c205ef4-f27…` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | 2026-06-12T23:31:00+09:00 | 2026-06-13T01:33:46+09:00 | 2026-06-13T02:55:00+09:00 | 2026-06-13T02:55:00+09:00 | Define and gate the Work Item metadata catalog for provenance, resolution, relationsh… |
 | `TASK-AR-518` | `93485297-632…` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | 2026-06-12T23:34:00+09:00 | 2026-06-13T02:45:17+09:00 | 2026-06-13T08:40:00+09:00 | 2026-06-13T08:40:00+09:00 | Require instance_uid actor attribution across claims, A2A messages, evidence, closeou… |

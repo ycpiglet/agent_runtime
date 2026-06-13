@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "inst-w6-ar506-claude",
+  "callsign": "claude/default-heron",
+  "callsite_id": "claude-w6-ar506",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260613-095321-task-ar-506-02e9.json"
+  ],
+  "created_at": "2026-06-13T09:53:21+09:00",
+  "decision_cycle_id": "",
+  "display_name": "claude/default-heron",
+  "model": "",
+  "model_tier": "",
+  "on_behalf_of": "TASK-AR-506",
+  "pane_id": "claude-w6-ar506",
+  "parent_instance_id": "",
+  "project_id": "",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "lead-engineer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-13T09:53:21+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-506",
+  "task_set_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
+  "team_id": "agent-runtime-core",
+  "unit_id": "",
+  "unit_spec": "",
+  "updated_at": "2026-06-13T09:53:21+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-506"
+}
