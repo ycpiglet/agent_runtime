@@ -37,6 +37,27 @@ HTML = """<!doctype html>
         document.documentElement.setAttribute("data-theme", "light");
       }
     })();
+    // No-flash policy bootstrap (TASK-AR-340): apply the microinteraction /
+    // gamification policy attributes on the root BEFORE first paint so CSS keys
+    // off them with no flash of animation. Defaults = calm serious mode:
+    // motion ON (but always honors prefers-reduced-motion via CSS), gamify OFF.
+    (function () {
+      var root = document.documentElement;
+      var motion = "on";
+      var gamify = "off";
+      var quest = "off";
+      try {
+        var rawMotion = window.localStorage.getItem("agent-runtime-motion");
+        if (rawMotion === "off") motion = "off";
+        var prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (prefersReduced && rawMotion !== "on") motion = "off";
+        if (window.localStorage.getItem("agent-runtime-gamify") === "on") gamify = "on";
+        if (window.localStorage.getItem("agent-runtime-quest-mode") === "on") quest = "on";
+      } catch (error) { /* storage blocked: keep calm-serious defaults */ }
+      root.setAttribute("data-motion", motion);
+      root.setAttribute("data-gamify", gamify);
+      root.setAttribute("data-quest-mode", quest);
+    })();
   </script>
   <link rel="stylesheet" href="/app.css">
 </head>
@@ -67,6 +88,12 @@ HTML = """<!doctype html>
           <span id="theme-toggle-label" class="theme-toggle-label">Light</span>
         </button>
         <button id="refresh-button" type="button">Refresh</button>
+        <button id="experience-settings-toggle" class="experience-settings-toggle" type="button"
+                aria-haspopup="dialog" aria-controls="experience-settings" aria-expanded="false"
+                aria-label="Experience settings" title="Microinteractions and gamification settings">
+          <span class="experience-settings-icon" aria-hidden="true">&#9881;</span>
+          <span class="experience-settings-label">Experience</span>
+        </button>
         <span id="poll-state" class="state-chip">polling</span>
       </div>
     </header>
@@ -306,6 +333,9 @@ HTML = """<!doctype html>
           </div>
         </div>
         <div id="view-tasksets" class="view">
+          <h2 class="view-heading">
+            <span data-default-label>Tasksets</span><span data-quest-label>Quest Board</span>
+          </h2>
           <div id="taskset-completion-banner" class="taskset-completion" role="status" aria-live="polite" hidden></div>
           <form id="taskset-create-form" class="taskset-create" aria-label="Create taskset">
             <input id="taskset-new-name" name="display_name" placeholder="New taskset name" required>
@@ -858,6 +888,75 @@ HTML = """<!doctype html>
       <div id="quick-open-results" class="quick-open-results" role="listbox" aria-label="Quick open results"></div>
     </div>
   </div>
+  <!-- TASK-AR-340: experience policy settings (microinteractions + gamification).
+       Defaults to calm serious mode; gamification + sound are opt-in. -->
+  <div id="experience-settings" class="experience-settings" role="dialog" aria-modal="true" aria-label="Experience settings" hidden>
+    <div class="experience-settings-backdrop" data-experience-dismiss="1"></div>
+    <div class="experience-settings-panel" role="document">
+      <header class="experience-settings-head">
+        <h2>Experience</h2>
+        <button id="experience-settings-close" class="experience-settings-close" type="button" aria-label="Close settings">&times;</button>
+      </header>
+      <p class="experience-settings-hint">Default is a calm, serious mode. Animations always honor your system "reduced motion" setting. Gamification is opt-in and leaves no residue when off.</p>
+      <section class="experience-settings-group" aria-label="Microinteractions">
+        <h3>Microinteractions</h3>
+        <label class="experience-toggle">
+          <input id="setting-motion" type="checkbox" checked>
+          <span class="experience-toggle-text">
+            <strong>Animations</strong>
+            <small>State transitions, drag physics, skeleton loading, toasts. Disabled automatically under "reduced motion".</small>
+          </span>
+        </label>
+      </section>
+      <section class="experience-settings-group" aria-label="Gamification">
+        <h3>Gamification</h3>
+        <label class="experience-toggle">
+          <input id="setting-gamify" type="checkbox">
+          <span class="experience-toggle-text">
+            <strong>Gamification (opt-in)</strong>
+            <small>Taskset-completion confetti, agent XP / level / streak emphasis.</small>
+          </span>
+        </label>
+        <label class="experience-toggle">
+          <input id="setting-quest-mode" type="checkbox">
+          <span class="experience-toggle-text">
+            <strong>Quest-board terminology</strong>
+            <small>Reframe tasksets as quests and tasks as quest steps.</small>
+          </span>
+        </label>
+        <label class="experience-toggle">
+          <input id="setting-sound" type="checkbox">
+          <span class="experience-toggle-text">
+            <strong>Completion sound</strong>
+            <small>Play a short chime on taskset completion. Off by default.</small>
+          </span>
+        </label>
+      </section>
+      <footer class="experience-settings-foot">
+        <button id="experience-tour-start" class="experience-tour-start" type="button">Replay onboarding tour</button>
+      </footer>
+    </div>
+  </div>
+  <!-- TASK-AR-340: onboarding tour overlay (first-run + replayable). -->
+  <div id="onboarding-tour" class="onboarding-tour" role="dialog" aria-modal="true" aria-label="Onboarding tour" hidden>
+    <div class="onboarding-tour-backdrop" data-tour-dismiss="1"></div>
+    <div class="onboarding-tour-card" role="document">
+      <span class="onboarding-tour-step" id="onboarding-tour-step">1 / 1</span>
+      <h2 id="onboarding-tour-title">Welcome</h2>
+      <p id="onboarding-tour-body">Tour body</p>
+      <div class="onboarding-tour-actions">
+        <button id="onboarding-tour-skip" class="onboarding-tour-skip" type="button">Skip</button>
+        <button id="onboarding-tour-next" class="onboarding-tour-next" type="button">Next</button>
+      </div>
+    </div>
+  </div>
+  <!-- TASK-AR-340: contextual help bubble (anchored hints, dismissible). -->
+  <div id="contextual-help" class="contextual-help" role="status" aria-live="polite" hidden>
+    <span id="contextual-help-text" class="contextual-help-text"></span>
+    <button id="contextual-help-dismiss" class="contextual-help-dismiss" type="button" aria-label="Dismiss help">&times;</button>
+  </div>
+  <!-- TASK-AR-340: celebration canvas host (confetti uses token colors only). -->
+  <div id="celebration-layer" class="celebration-layer" aria-hidden="true"></div>
   <script src="/app.js"></script>
 </body>
 </html>
@@ -5102,6 +5201,351 @@ pre {
   font-size: 10px;
   color: var(--ink);
 }
+
+/* =====================================================================
+ * TASK-AR-340: Microinteractions + gamification policy layer.
+ * Calm serious mode is the DEFAULT. All animation classes are gated by
+ * the root data-motion attribute AND prefers-reduced-motion; all
+ * gamification visuals are gated by data-gamify. Confetti / celebration
+ * colors come from existing semantic tokens (no raw hex).
+ * ===================================================================== */
+:root {
+  /* Confetti / celebration palette is derived purely from semantic tokens
+     so it tracks the theme and passes the no-raw-hex gate. */
+  --confetti-1: var(--primary);
+  --confetti-2: var(--success);
+  --confetti-3: var(--warning);
+  --confetti-4: var(--violet);
+  --confetti-5: var(--blue);
+  --skeleton-base: var(--panel-strong);
+  --skeleton-sheen: var(--raise-strong);
+  --motion-fast: 140ms;
+  --motion-base: 240ms;
+  --motion-slow: 420ms;
+}
+
+@keyframes ar-fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes ar-pop-in {
+  0% { opacity: 0; transform: scale(0.94); }
+  60% { opacity: 1; transform: scale(1.02); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes ar-skeleton-shimmer {
+  0% { background-position: -160px 0; }
+  100% { background-position: 160px 0; }
+}
+@keyframes ar-confetti-fall {
+  0% { opacity: 1; transform: translate3d(0, -12px, 0) rotate(0deg); }
+  100% { opacity: 0; transform: translate3d(var(--confetti-dx, 0), 78vh, 0) rotate(540deg); }
+}
+@keyframes ar-xp-bump {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+/* --- Microinteractions: state transitions + optimistic updates --- */
+.ar-anim-enter {
+  animation: ar-fade-in-up var(--motion-base) ease both;
+}
+.ar-anim-pop {
+  animation: ar-pop-in var(--motion-base) cubic-bezier(0.2, 0.8, 0.3, 1.1) both;
+}
+.is-optimistic {
+  opacity: 0.62;
+  transition: opacity var(--motion-fast) ease;
+}
+.is-state-changed {
+  animation: ar-pop-in var(--motion-base) ease both;
+}
+
+/* --- Drag physics (lift + tilt while dragging board cards) --- */
+.ar-dragging {
+  transition: transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+  transform: scale(1.03) rotate(-1deg);
+  box-shadow: var(--shadow-pop);
+  cursor: grabbing;
+}
+
+/* --- Skeleton loading placeholders --- */
+.ar-skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--skeleton-base);
+  min-height: 14px;
+}
+.ar-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--skeleton-sheen), transparent);
+  background-size: 160px 100%;
+  background-repeat: no-repeat;
+  animation: ar-skeleton-shimmer 1.1s ease-in-out infinite;
+}
+
+/* View heading (carries quest-mode label swap). */
+.view-heading {
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: var(--ink);
+}
+
+/* --- Illustrated empty state (token-driven SVG) --- */
+.empty-illustration {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  font-style: normal;
+  padding: 24px 12px;
+  color: var(--muted);
+}
+.empty-illustration-art {
+  width: 56px;
+  height: 56px;
+  fill: var(--raise-strong);
+  stroke: var(--line-strong);
+  stroke-width: 2;
+  opacity: 0.9;
+}
+.empty-illustration-art path { stroke: var(--line-strong); fill: none; }
+.empty-illustration-title { color: var(--ink); font-weight: 600; }
+.empty-illustration-hint { color: var(--muted); font-size: 12px; }
+
+/* --- Experience settings control + dialog --- */
+.experience-settings-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.experience-settings-icon { font-size: 14px; line-height: 1; }
+.experience-settings {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+.experience-settings[hidden] { display: none; }
+.experience-settings-backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--scrim);
+}
+.experience-settings-panel {
+  position: relative;
+  width: min(380px, 92vw);
+  margin: 76px 16px 16px;
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+  padding: 16px;
+  animation: ar-fade-in-up var(--motion-base) ease both;
+}
+.experience-settings-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.experience-settings-head h2 { font-size: 16px; }
+.experience-settings-close {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+.experience-settings-hint { color: var(--muted); font-size: 12px; margin: 8px 0 14px; }
+.experience-settings-group { margin-bottom: 16px; }
+.experience-settings-group h3 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--subtle);
+  margin-bottom: 8px;
+}
+.experience-toggle {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.experience-toggle:hover { background: var(--raise); }
+.experience-toggle input { margin-top: 3px; }
+.experience-toggle-text { display: flex; flex-direction: column; gap: 2px; }
+.experience-toggle-text strong { font-size: 13px; color: var(--ink); }
+.experience-toggle-text small { font-size: 11px; color: var(--muted); }
+.experience-settings-foot { border-top: 1px solid var(--line); padding-top: 12px; }
+.experience-tour-start {
+  background: var(--primary-soft);
+  border: 1px solid var(--primary-line);
+  color: var(--primary-hover);
+  border-radius: var(--radius);
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+/* --- Onboarding tour overlay --- */
+.onboarding-tour {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.onboarding-tour[hidden] { display: none; }
+.onboarding-tour-backdrop { position: absolute; inset: 0; background: var(--scrim); }
+.onboarding-tour-card {
+  position: relative;
+  width: min(420px, 92vw);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+  padding: 20px;
+  animation: ar-pop-in var(--motion-base) ease both;
+}
+.onboarding-tour-step { font-size: 11px; color: var(--subtle); letter-spacing: 0.06em; }
+.onboarding-tour-card h2 { font-size: 18px; margin: 6px 0 8px; }
+.onboarding-tour-card p { color: var(--muted); font-size: 13px; }
+.onboarding-tour-actions { display: flex; justify-content: space-between; margin-top: 16px; }
+.onboarding-tour-skip {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+.onboarding-tour-next {
+  background: var(--primary);
+  color: var(--on-accent);
+  border: none;
+  border-radius: var(--radius);
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+/* --- Contextual help bubble --- */
+.contextual-help {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 38;
+  max-width: 300px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  background: var(--surface-raised);
+  border: 1px solid var(--primary-line);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 10px 12px;
+  animation: ar-fade-in-up var(--motion-base) ease both;
+}
+.contextual-help[hidden] { display: none; }
+.contextual-help-text { font-size: 12px; color: var(--ink); }
+.contextual-help-dismiss {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* --- Gamification: celebration / confetti (opt-in via data-gamify) --- */
+.celebration-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  overflow: hidden;
+}
+.celebration-layer:empty { display: none; }
+.confetti-piece {
+  position: absolute;
+  top: 0;
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.confetti-piece.tone-1 { background: var(--confetti-1); }
+.confetti-piece.tone-2 { background: var(--confetti-2); }
+.confetti-piece.tone-3 { background: var(--confetti-3); }
+.confetti-piece.tone-4 { background: var(--confetti-4); }
+.confetti-piece.tone-5 { background: var(--confetti-5); }
+
+/* Confetti only animates when gamification + motion are BOTH on. */
+:root[data-gamify="on"][data-motion="on"] .confetti-piece {
+  animation: ar-confetti-fall var(--motion-slow) ease-in forwards;
+}
+
+/* Gamification emphasis on the agent XP bar (opt-in). */
+:root[data-gamify="on"] .agent-character-level { font-weight: 600; }
+:root[data-gamify="on"][data-motion="on"] .agent-character-level.is-leveled {
+  animation: ar-xp-bump var(--motion-base) ease both;
+}
+.agent-character-streak {
+  display: none;
+  font-size: 11px;
+  color: var(--warning);
+}
+:root[data-gamify="on"] .agent-character-streak { display: inline; }
+
+/* Quest-board terminology mode swaps a few labels via [data-quest-*]. */
+:root:not([data-quest-mode="on"]) [data-quest-label] { display: none; }
+:root[data-quest-mode="on"] [data-default-label] { display: none; }
+
+/* =====================================================================
+ * ACCESSIBILITY (acceptance-critical): every animation is disabled when
+ * the global motion toggle is OFF, OR when the OS requests reduced motion.
+ * These rules MUST sit AFTER the animation definitions to win the cascade.
+ * ===================================================================== */
+:root[data-motion="off"] .ar-anim-enter,
+:root[data-motion="off"] .ar-anim-pop,
+:root[data-motion="off"] .is-state-changed,
+:root[data-motion="off"] .ar-dragging,
+:root[data-motion="off"] .ar-skeleton::after,
+:root[data-motion="off"] .confetti-piece,
+:root[data-motion="off"] .agent-character-level.is-leveled,
+:root[data-motion="off"] .experience-settings-panel,
+:root[data-motion="off"] .onboarding-tour-card,
+:root[data-motion="off"] .contextual-help {
+  animation: none !important;
+  transition: none !important;
+}
+:root[data-motion="off"] .ar-dragging { transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .confetti-piece,
+  .ar-skeleton::after {
+    animation: none !important;
+  }
+}
 """
 
 JS = """// --- Theme system (TASK-AR-320) -------------------------------------------
@@ -5163,6 +5607,224 @@ function initTheme() {
   }
 }
 initTheme();
+
+// --- Experience policy: microinteractions + gamification (TASK-AR-340) -----
+// Calm serious mode is the default. Motion always honors prefers-reduced-motion.
+// Gamification + completion sound are opt-in and persist via localStorage.
+// All state lives on the document root as data-motion / data-gamify /
+// data-quest-mode attributes; CSS keys off them so there is no residue when off.
+const MOTION_KEY = "agent-runtime-motion";
+const GAMIFY_KEY = "agent-runtime-gamify";
+const QUEST_KEY = "agent-runtime-quest-mode";
+const SOUND_KEY = "agent-runtime-completion-sound";
+const TOUR_KEY = "agent-runtime-tour-seen";
+
+function readPref(key) {
+  try { return window.localStorage.getItem(key); } catch (error) { return null; }
+}
+function writePref(key, value) {
+  try { window.localStorage.setItem(key, value); } catch (error) { /* storage blocked */ }
+}
+function prefersReducedMotion() {
+  return Boolean(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+}
+function motionEnabled() {
+  return document.documentElement.getAttribute("data-motion") === "on";
+}
+function gamifyEnabled() {
+  return document.documentElement.getAttribute("data-gamify") === "on";
+}
+function soundEnabled() {
+  return readPref(SOUND_KEY) === "on";
+}
+
+function resolveMotion() {
+  // Explicit user choice wins; otherwise default ON but yield to reduced-motion.
+  const raw = readPref(MOTION_KEY);
+  if (raw === "off") return false;
+  if (raw === "on") return true;
+  return !prefersReducedMotion();
+}
+
+function applyExperiencePolicy() {
+  const root = document.documentElement;
+  root.setAttribute("data-motion", resolveMotion() ? "on" : "off");
+  root.setAttribute("data-gamify", readPref(GAMIFY_KEY) === "on" ? "on" : "off");
+  root.setAttribute("data-quest-mode", readPref(QUEST_KEY) === "on" ? "on" : "off");
+  syncExperienceControls();
+}
+
+function syncExperienceControls() {
+  const motion = $("setting-motion");
+  const gamify = $("setting-gamify");
+  const quest = $("setting-quest-mode");
+  const sound = $("setting-sound");
+  if (motion) motion.checked = motionEnabled();
+  if (gamify) gamify.checked = gamifyEnabled();
+  if (quest) quest.checked = document.documentElement.getAttribute("data-quest-mode") === "on";
+  if (sound) sound.checked = soundEnabled();
+}
+
+function openExperienceSettings() {
+  const dialog = $("experience-settings");
+  const toggle = $("experience-settings-toggle");
+  if (!dialog) return;
+  syncExperienceControls();
+  dialog.hidden = false;
+  if (toggle) toggle.setAttribute("aria-expanded", "true");
+}
+function closeExperienceSettings() {
+  const dialog = $("experience-settings");
+  const toggle = $("experience-settings-toggle");
+  if (!dialog) return;
+  dialog.hidden = true;
+  if (toggle) toggle.setAttribute("aria-expanded", "false");
+}
+
+function initExperienceSettings() {
+  applyExperiencePolicy();
+  $("experience-settings-toggle")?.addEventListener("click", () => {
+    const dialog = $("experience-settings");
+    if (dialog && dialog.hidden) openExperienceSettings();
+    else closeExperienceSettings();
+  });
+  $("experience-settings-close")?.addEventListener("click", closeExperienceSettings);
+  document.querySelectorAll("[data-experience-dismiss]").forEach((node) =>
+    node.addEventListener("click", closeExperienceSettings));
+  $("setting-motion")?.addEventListener("change", (event) => {
+    writePref(MOTION_KEY, event.target.checked ? "on" : "off");
+    applyExperiencePolicy();
+  });
+  $("setting-gamify")?.addEventListener("change", (event) => {
+    writePref(GAMIFY_KEY, event.target.checked ? "on" : "off");
+    applyExperiencePolicy();
+    // Re-render so JS-driven labels/streaks reflect the new policy. Guard on
+    // runtimeState: a toggle can fire before the first state load resolves.
+    if (runtimeState) renderAll();
+  });
+  $("setting-quest-mode")?.addEventListener("change", (event) => {
+    writePref(QUEST_KEY, event.target.checked ? "on" : "off");
+    applyExperiencePolicy();
+    if (runtimeState) renderAll();
+  });
+  $("setting-sound")?.addEventListener("change", (event) => {
+    writePref(SOUND_KEY, event.target.checked ? "on" : "off");
+  });
+  $("experience-tour-start")?.addEventListener("click", () => {
+    closeExperienceSettings();
+    startOnboardingTour(true);
+  });
+  // React live to OS reduced-motion changes (only when no explicit choice).
+  if (window.matchMedia) {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onChange = () => { if (!readPref(MOTION_KEY)) applyExperiencePolicy(); };
+    if (media.addEventListener) media.addEventListener("change", onChange);
+    else if (media.addListener) media.addListener(onChange);
+  }
+}
+
+// Quest-board terminology helper: returns the quest term only when the mode is
+// on, else the plain default. Used for dynamic JS-rendered labels.
+function questTerm(plain, quest) {
+  return document.documentElement.getAttribute("data-quest-mode") === "on" ? quest : plain;
+}
+
+// Confetti celebration. Pieces are colored ONLY via token-driven CSS classes
+// (tone-1..5); JS never injects raw colors. Runs only when gamification AND
+// motion are both on. Pieces self-remove so nothing lingers when off.
+function celebrate(intensity) {
+  if (!gamifyEnabled() || !motionEnabled()) return;
+  const layer = $("celebration-layer");
+  if (!layer) return;
+  const count = Math.max(12, Math.min(80, Number(intensity) || 36));
+  for (let i = 0; i < count; i += 1) {
+    const piece = document.createElement("span");
+    piece.className = `confetti-piece tone-${(i % 5) + 1}`;
+    piece.style.left = `${Math.round(Math.random() * 100)}%`;
+    piece.style.setProperty("--confetti-dx", `${Math.round((Math.random() - 0.5) * 240)}px`);
+    piece.style.animationDelay = `${Math.round(Math.random() * 180)}ms`;
+    layer.appendChild(piece);
+    setTimeout(() => { if (piece.parentNode) piece.parentNode.removeChild(piece); }, 1400);
+  }
+}
+
+// Completion chime (WebAudio). Default OFF; only plays when explicitly enabled.
+function playCompletionSound() {
+  if (!soundEnabled()) return;
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    const ctx = new Ctx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(660, ctx.currentTime);
+    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.3);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.32);
+  } catch (error) { /* audio unavailable */ }
+}
+
+// Onboarding tour. Shown once on first run (unless reduced visuals); replayable
+// from the settings panel. Pure DOM, ASCII-only copy.
+const ONBOARDING_STEPS = [
+  { title: "Welcome to Agent Runtime", body: "This console is read-first: it shows live runtime state and proposes changes. Let us take a quick tour." },
+  { title: "Navigate with the sidebar", body: "Use the left sidebar to switch between work, agents, comms, records, and ops views. Press Ctrl+P to quick-open." },
+  { title: "Tune your experience", body: "Open Experience in the top bar to toggle animations, opt into gamification, or replay this tour. Calm serious mode is the default." },
+];
+let onboardingIndex = 0;
+
+function renderOnboardingStep() {
+  const step = ONBOARDING_STEPS[onboardingIndex];
+  if (!step) return;
+  setText("onboarding-tour-step", `${onboardingIndex + 1} / ${ONBOARDING_STEPS.length}`);
+  setText("onboarding-tour-title", step.title);
+  setText("onboarding-tour-body", step.body);
+  const next = $("onboarding-tour-next");
+  if (next) next.textContent = onboardingIndex === ONBOARDING_STEPS.length - 1 ? "Done" : "Next";
+}
+function startOnboardingTour(force) {
+  const dialog = $("onboarding-tour");
+  if (!dialog) return;
+  if (!force && readPref(TOUR_KEY) === "1") return;
+  onboardingIndex = 0;
+  renderOnboardingStep();
+  dialog.hidden = false;
+}
+function endOnboardingTour() {
+  const dialog = $("onboarding-tour");
+  if (dialog) dialog.hidden = true;
+  writePref(TOUR_KEY, "1");
+}
+function initOnboardingTour() {
+  $("onboarding-tour-next")?.addEventListener("click", () => {
+    if (onboardingIndex >= ONBOARDING_STEPS.length - 1) { endOnboardingTour(); return; }
+    onboardingIndex += 1;
+    renderOnboardingStep();
+  });
+  $("onboarding-tour-skip")?.addEventListener("click", endOnboardingTour);
+  document.querySelectorAll("[data-tour-dismiss]").forEach((node) =>
+    node.addEventListener("click", endOnboardingTour));
+  startOnboardingTour(false);
+}
+
+// Contextual help bubble: a small dismissible hint anchored bottom-right.
+function showContextualHelp(text) {
+  const host = $("contextual-help");
+  if (!host) return;
+  setText("contextual-help-text", text);
+  host.hidden = false;
+}
+function initContextualHelp() {
+  $("contextual-help-dismiss")?.addEventListener("click", () => {
+    const host = $("contextual-help");
+    if (host) host.hidden = true;
+  });
+}
 
 const lanes = ["Backlog", "Ready", "In Progress", "Review", "Blocked", "Done"];
 const taskStatusOptions = [
@@ -5304,6 +5966,21 @@ function progressBar(value) {
   const label = pct === null ? "~" : `${pct}%`;
   return `<div class="progress-track" role="img" aria-label="progress ${escapeHtml(label)}">
     <div class="progress-fill" style="width: ${width}%"></div>
+  </div>`;
+}
+
+// TASK-AR-340: illustrated empty state. The inline SVG uses currentColor /
+// token-driven fills only (no raw hex) so it tracks the theme. An optional hint
+// gives the user a next action. Falls back gracefully (text remains readable).
+function emptyState(title, hint) {
+  const hintMarkup = hint ? `<p class="empty-illustration-hint">${escapeHtml(hint)}</p>` : "";
+  return `<div class="empty empty-illustration" role="status">
+    <svg class="empty-illustration-art" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+      <rect x="10" y="14" width="44" height="36" rx="6"></rect>
+      <path d="M18 26h28M18 34h20M18 42h24"></path>
+    </svg>
+    <p class="empty-illustration-title">${escapeHtml(title || "Nothing here yet")}</p>
+    ${hintMarkup}
   </div>`;
 }
 
@@ -6333,12 +7010,18 @@ function renderTaskSetDirectory() {
   const host = $("taskset-quick-list");
   if (!host) return;
   const taskSets = filteredTaskSets();
-  host.innerHTML = taskSets.length ? taskSetCards(taskSets) : `<div class="empty">No task sets</div>`;
+  host.innerHTML = taskSets.length
+    ? taskSetCards(taskSets)
+    : emptyState(questTerm("No tasksets yet", "No quests yet"), "Create a taskset to start coordinating work.");
   wireTaskSetActions(host);
   populateBulkMoveOptions();
   renderBulkBar();
   renderTasksetTemplates();
 }
+
+// Track the most recent completed taskset so a celebration fires exactly once
+// per new completion (only when gamification is enabled).
+let lastCelebratedTasksetId = null;
 
 function renderTasksetCompletion() {
   const host = $("taskset-completion-banner");
@@ -6350,6 +7033,16 @@ function renderTasksetCompletion() {
     return;
   }
   host.hidden = false;
+  // Gamification: celebrate a freshly-completed taskset once. No-op when the
+  // gamify policy is off (celebrate() and playCompletionSound() both guard).
+  const completedId = completion.completed_task_set_id || completion.completed_display_name || null;
+  if (completedId && completedId !== lastCelebratedTasksetId) {
+    if (lastCelebratedTasksetId !== null && gamifyEnabled()) {
+      celebrate(48);
+      playCompletionSound();
+    }
+    lastCelebratedTasksetId = completedId;
+  }
   const next = completion.next_suggestion;
   const suggestionMarkup = next
     ? `
@@ -6649,6 +7342,8 @@ function wireBoardCard(card) {
   card.addEventListener("dragstart", (event) => {
     boardDragId = card.dataset.taskId;
     card.classList.add("is-dragging");
+    // Drag physics (lift + tilt) is motion-gated via CSS; safe to add always.
+    card.classList.add("ar-dragging");
     hidePeek();
     if (event.dataTransfer) {
       event.dataTransfer.setData("text/plain", card.dataset.taskId);
@@ -6657,6 +7352,7 @@ function wireBoardCard(card) {
   });
   card.addEventListener("dragend", () => {
     card.classList.remove("is-dragging");
+    card.classList.remove("ar-dragging");
     boardDragId = null;
     clearDropHighlights();
   });
@@ -9181,7 +9877,13 @@ function teamAgentSearchText(card) {
 
 function agentLevelBar(card) {
   const pct = numericPct(card.xp_pct) ?? 0;
-  return `<div class="agent-character-level"><span>Lv <strong>${escapeHtml(card.level ?? 1)}</strong></span><span>${escapeHtml(card.xp ?? 0)} XP (${escapeHtml(card.xp_for_next ?? 0)} to next)</span></div>
+  // Streak is derived from the AR-324 computed lifetime values; it is only
+  // visible under the gamify policy (CSS-gated) so calm mode stays clean.
+  const streak = Number((card.lifetime || {}).streak ?? card.streak ?? 0);
+  const streakMarkup = streak > 0
+    ? `<span class="agent-character-streak" title="Completion streak">&#9650; ${escapeHtml(streak)} streak</span>`
+    : "";
+  return `<div class="agent-character-level"><span>Lv <strong>${escapeHtml(card.level ?? 1)}</strong></span><span>${escapeHtml(card.xp ?? 0)} XP (${escapeHtml(card.xp_for_next ?? 0)} to next)</span>${streakMarkup}</div>
     <div class="progress-track" role="img" aria-label="XP ${escapeHtml(pct)}%"><div class="progress-fill" style="width: ${pct}%"></div></div>`;
 }
 
@@ -10730,6 +11432,13 @@ $("import-commit-btn")?.addEventListener("click", async (event) => {
   event.preventDefault();
   await commitImport();
 });
+
+// TASK-AR-340: experience policy + onboarding/help wiring. Policy attributes
+// are already set by the no-flash bootstrap; this re-applies after the DOM is
+// ready and wires the settings controls, tour, and contextual help.
+initExperienceSettings();
+initOnboardingTour();
+initContextualHelp();
 
 loadState();
 connectEventStream();
