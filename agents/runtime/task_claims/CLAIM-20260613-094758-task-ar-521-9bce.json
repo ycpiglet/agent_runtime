@@ -9,7 +9,7 @@
   "callsite_id": "claude-w6-ar521",
   "pane_id": "claude-w6-ar521",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-REPO-HYGIENE",
   "project_id": "",
   "unit_id": "",
@@ -17,20 +17,20 @@
   "model_tier": "",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "implementing",
-  "progress_pct": 0,
+  "phase": "complete",
+  "progress_pct": 100,
   "step_index": 1,
   "step_total": 6,
   "status_text": "AR-521: template governance chain parity sweep + parity test",
   "worktree_path": ".worktrees/TASK-AR-521",
   "branch": "claude/task-ar-521-template-chain-parity",
   "claimed_at": "2026-06-13T09:47:58+09:00",
-  "last_heartbeat": "2026-06-13T09:47:58+09:00",
-  "updated_at": "2026-06-13T09:47:58+09:00",
+  "last_heartbeat": "2026-06-13T12:24:49+09:00",
+  "updated_at": "2026-06-13T12:24:49+09:00",
   "expires_at": "2026-06-13T10:17:58+09:00",
   "lease": {
     "claimed_at": "2026-06-13T09:47:58+09:00",
-    "heartbeat_at": "2026-06-13T09:47:58+09:00",
+    "heartbeat_at": "2026-06-13T12:24:49+09:00",
     "expires_at": "2026-06-13T10:17:58+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260613-094758-task-ar-521-9bce.handoff.md",
@@ -40,5 +40,9 @@
   "target_files": [
     "src/agent_runtime/templates/project/scripts/owner_governance_gate.py",
     "tests/test_owner_governance_chain_parity.py"
-  ]
+  ],
+  "released_at": "2026-06-13T12:24:49+09:00",
+  "verified_by": "inst-w4b-ar521-verifier",
+  "verifier_role": "reviewer",
+  "verification_evidence": "agents/runtime/task_claims/CLAIM-20260613-094758-task-ar-521-9bce.handoff.md"
 }
