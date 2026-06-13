@@ -46,7 +46,7 @@ completed_task_set_count: 20
 
 - Flow: Working-tree cleanup, backlog cycle hygiene, and handoff publication.
 - Progress: `2/6` done; `4` open or active.
-- WIP: active `2/3`; oldest `0.8h`; stale `0`.
+- WIP: active `1/3`; oldest `1.9h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-511` | - | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Low | 3h/3000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 서로 다른 OS/LLM/페인에서 작업한 파일이 줄바꿈·인코딩 차이로 가짜 diff와 경고를 만드는 것을 차단한다. 현재 `.gitattributes`가… |
