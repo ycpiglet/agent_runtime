@@ -9,7 +9,7 @@
   "callsite_id": "claude-w5-ar507",
   "pane_id": "claude-w5-ar507",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
   "project_id": "",
   "unit_id": "",
@@ -17,20 +17,20 @@
   "model_tier": "",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "implementing",
-  "progress_pct": 0,
+  "phase": "complete",
+  "progress_pct": 100,
   "step_index": 1,
   "step_total": 6,
   "status_text": "AR-507: cross-verification gate - verifier must differ from worker",
   "worktree_path": ".worktrees/TASK-AR-507",
   "branch": "claude/task-ar-507-cross-verification",
   "claimed_at": "2026-06-13T08:37:43+09:00",
-  "last_heartbeat": "2026-06-13T08:37:43+09:00",
-  "updated_at": "2026-06-13T08:37:43+09:00",
+  "last_heartbeat": "2026-06-13T09:28:09+09:00",
+  "updated_at": "2026-06-13T09:28:09+09:00",
   "expires_at": "2026-06-13T09:07:43+09:00",
   "lease": {
     "claimed_at": "2026-06-13T08:37:43+09:00",
-    "heartbeat_at": "2026-06-13T08:37:43+09:00",
+    "heartbeat_at": "2026-06-13T09:28:09+09:00",
     "expires_at": "2026-06-13T09:07:43+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260613-083743-task-ar-507-5abe.handoff.md",
@@ -41,5 +41,9 @@
     "scripts/task_claim_dispatcher.py",
     "tests/test_task_claim_dispatcher.py",
     "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py"
-  ]
+  ],
+  "released_at": "2026-06-13T09:28:09+09:00",
+  "verified_by": "inst-w4b-ar507-verifier2",
+  "verifier_role": "reviewer",
+  "verification_evidence": "agents/runtime/task_claims/CLAIM-20260613-083743-task-ar-507-5abe.handoff.md"
 }
