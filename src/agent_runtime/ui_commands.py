@@ -117,6 +117,11 @@ ATTACHMENT_COMMAND_TYPES = ("attachment.link",)
 # is the single point that reads due schedules and emits dispatch + reminder
 # events; no external services or network are involved.
 SCHEDULE_COMMAND_TYPES = ("schedule.create", "schedule.cancel")
+# TASK-AR-337: change a task's team/role/assignee from the heatmap or org chart.
+# PROPOSAL-ONLY: the handler records a declarative proposal under
+# .ui_outbox/assignments that a runtime executor consumes to update the task
+# frontmatter (team/role/assignee). The console NEVER edits the task file here.
+ASSIGNMENT_COMMAND_TYPES = ("assignment.set",)
 
 CUSTOM_PROPERTY_TYPES = ("text", "select", "number", "date")
 AUTOMATION_TRIGGERS = ("status_change", "due_passed", "blocked_too_long")
@@ -150,6 +155,7 @@ COMMAND_TYPES = (
     + UI_CONFIG_COMMAND_TYPES
     + ATTACHMENT_COMMAND_TYPES
     + SCHEDULE_COMMAND_TYPES
+    + ASSIGNMENT_COMMAND_TYPES
 )
 # TASK-AR-335: a schedule fires either once at a fixed time (``reserve``) or on a
 # recurring cron-like cadence (``repeat``). The cron expression is a 5-field
@@ -1523,6 +1529,65 @@ def _schedule_command(root: Path, command_type: str, target: str | None, payload
     }
 
 
+def _assignment_set_command(root: Path, target: str | None, payload: dict[str, Any], now: str, command_id: str) -> dict[str, Any]:
+    """Propose changing a task's team/role/assignee (proposal-only, TASK-AR-337).
+
+    The team/role/assignee are normalized to safe slugs; the task id is
+    validated. At least one of team/role/assignee must be supplied. The console
+    NEVER edits the task file -- it records a declarative proposal for a runtime
+    executor to apply to the task frontmatter, keeping the assignment-change on
+    the command path (no direct task-file writes from the UI).
+    """
+    task_id = str(target or payload.get("task_id") or "").strip()
+    errors: list[str] = []
+    task_error = _validate_task_id(task_id)
+    if task_error:
+        errors.append(task_error)
+
+    def _slug_field(value: Any) -> str | None:
+        slug = re.sub(r"[^a-z0-9-]+", "-", str(value or "").strip().lower()).strip("-")
+        return slug or None
+
+    assignment: dict[str, Any] = {}
+    if "team" in payload:
+        assignment["team"] = _slug_field(payload.get("team"))
+    if "role" in payload:
+        assignment["role"] = _slug_field(payload.get("role"))
+    if "assignee" in payload:
+        assignment["assignee"] = _slug_field(payload.get("assignee"))
+    if not assignment:
+        errors.append("assignment requires at least one of team/role/assignee")
+    if errors:
+        return {"errors": errors}
+
+    proposal = {
+        "id": command_id.replace("COMMAND-", "ASSIGNREQ-"),
+        "type": "assignment.set",
+        "action": "set",
+        "target_file": "agents/lead_engineer/tasks/",
+        "status": "queued",
+        "created_at": now,
+        "requested_by": str(payload.get("actor") or "ui"),
+        "task_id": task_id,
+        "assignment": assignment,
+        "mutation_boundary": "proposal_only",
+        "next": "runtime executor applies this team/role/assignee change to the task frontmatter",
+    }
+    changed = _write_ui_proposal(root, "assignments", proposal)
+    return {
+        "status": "queued",
+        "result": {
+            "changed": [changed],
+            "proposal_id": proposal["id"],
+            "action": "set",
+            "task_id": task_id,
+            "assignment": assignment,
+            "mutation_boundary": "proposal_only",
+            "next": proposal["next"],
+        },
+    }
+
+
 def submit_command(
     root: Path | str,
     command: dict[str, Any],
@@ -1579,6 +1644,8 @@ def submit_command(
         outcome = _attachment_link_command(root_path, target_str, payload, created_at, cid)
     elif command_type in SCHEDULE_COMMAND_TYPES:
         outcome = _schedule_command(root_path, command_type, target_str, payload, created_at, cid)
+    elif command_type in ASSIGNMENT_COMMAND_TYPES:
+        outcome = _assignment_set_command(root_path, target_str, payload, created_at, cid)
     else:
         outcome = _runtime_command(root_path, command_type, target_str, payload, created_at)
 

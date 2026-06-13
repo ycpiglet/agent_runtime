@@ -1483,6 +1483,149 @@ def test_ui_state_team_agents_resource_payload_and_safe_degrade(tmp_path):
     assert payload["items"]["totals"] == {"teams": 0, "agents": 0, "online": 0}
 
 
+# --- Team/role assignment model + workload heatmap (TASK-AR-337) ------------
+
+
+def _write_teams_md(root: Path) -> None:
+    _write(
+        root / ui_state.TEAMS_REL,
+        "\n".join(
+            [
+                "# Teams (Host Overlay)",
+                "",
+                "- team_id: agent-runtime-core",
+                "  purpose: runtime",
+                "  lead: lead-engineer",
+                "  roles:",
+                "    - lead-engineer",
+                "    - qa",
+                "  canonical_context:",
+                "    - agents/project/ROADMAP.md",
+                "",
+                "- team_id: governance-loop",
+                "  purpose: governance",
+                "  lead: managing-partner",
+                "  roles:",
+                "    - managing-partner",
+                "    - scribe",
+                "",
+            ]
+        ),
+    )
+
+
+def _write_assign_task(root: Path, task_id: str, **fields) -> None:
+    lines = ["---", f"id: {task_id}", f"status: {fields.pop('status', 'in_progress')}", "priority: P1"]
+    for key, value in fields.items():
+        lines.append(f"{key}: {value}")
+    lines += ["---", "", "## Goal", "", "x", ""]
+    _write(root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md", "\n".join(lines))
+
+
+def test_ui_state_loads_teams_registry_with_role_index(tmp_path):
+    _write_teams_md(tmp_path)
+    teams = ui_state.load_teams(tmp_path, "2026-06-13T11:00:00+09:00")
+    assert teams["schema"] == ui_state.TEAMS_SCHEMA
+    assert teams["freshness"] == "present"
+    ids = [team["team_id"] for team in teams["teams"]]
+    assert ids == ["agent-runtime-core", "governance-loop"]
+    core = teams["teams"][0]
+    assert core["lead"] == "lead-engineer"
+    assert core["roles"] == ["lead-engineer", "qa"]
+    # Reverse role->team index used to resolve assignment.
+    assert teams["role_to_team"]["qa"] == "agent-runtime-core"
+    assert teams["role_to_team"]["scribe"] == "governance-loop"
+
+
+def test_ui_state_load_teams_degrades_when_file_missing(tmp_path):
+    teams = ui_state.load_teams(tmp_path, "2026-06-13T11:00:00+09:00")
+    assert teams["freshness"] == "missing"
+    assert teams["teams"] == []
+    assert teams["role_to_team"] == {}
+
+
+def test_ui_state_task_resolves_team_from_explicit_field(tmp_path):
+    _write_teams_md(tmp_path)
+    _write_assign_task(tmp_path, "TASK-AR-001", team="governance-loop", owner="qa")
+    state = ui_state.build_state(tmp_path, now="2026-06-13T11:00:00+09:00")
+    task = state["tasks"][0]
+    # Explicit team frontmatter wins over the role-derived team.
+    assert task["assigned_team"] == "governance-loop"
+    assert task["assignment_source"] == "task_team"
+
+
+def test_ui_state_task_resolves_team_from_role(tmp_path):
+    _write_teams_md(tmp_path)
+    _write_assign_task(tmp_path, "TASK-AR-001", owner="qa")
+    state = ui_state.build_state(tmp_path, now="2026-06-13T11:00:00+09:00")
+    task = state["tasks"][0]
+    assert task["assigned_role"] == "qa"
+    assert task["assigned_team"] == "agent-runtime-core"
+    assert task["assignment_source"] == "role"
+
+
+def test_ui_state_taskset_team_default_inherited_by_unassigned_task(tmp_path):
+    _write_teams_md(tmp_path)
+    # One sibling names a role (qa -> agent-runtime-core); the other names no
+    # team/role and must inherit the taskset's default team.
+    _write_assign_task(tmp_path, "TASK-AR-001", task_set_id="TASKSET-AR-X", owner="qa")
+    _write_assign_task(tmp_path, "TASK-AR-002", task_set_id="TASKSET-AR-X", owner="unknown-role")
+    state = ui_state.build_state(tmp_path, now="2026-06-13T11:00:00+09:00")
+    defaults = state["teams"]["taskset_defaults"]
+    assert defaults["TASKSET-AR-X"] == "agent-runtime-core"
+    inherited = next(t for t in state["tasks"] if t["id"] == "TASK-AR-002")
+    assert inherited["assigned_team"] == "agent-runtime-core"
+    assert inherited["assignment_source"] == "taskset_default"
+
+
+def test_ui_state_workload_heatmap_aggregates_agent_and_team_load(tmp_path):
+    _write_teams_md(tmp_path)
+    # qa agent gets 4 open tasks in one period -> overload band (> busy_max=3).
+    _write_assign_task(tmp_path, "TASK-AR-001", owner="qa", due="2026-06-10")
+    _write_assign_task(tmp_path, "TASK-AR-002", owner="qa", due="2026-06-11")
+    _write_assign_task(tmp_path, "TASK-AR-003", owner="qa", due="2026-06-12")
+    _write_assign_task(tmp_path, "TASK-AR-005", owner="qa", due="2026-06-12")
+    # A completed task must NOT count toward load.
+    _write_assign_task(tmp_path, "TASK-AR-004", owner="qa", due="2026-06-12", status="completed")
+    state = ui_state.build_state(tmp_path, now="2026-06-13T11:00:00+09:00")
+    workload = state["workload"]
+    assert workload["schema"] == ui_state.WORKLOAD_HEATMAP_SCHEMA
+    assert workload["periods"] == ["2026-06"]
+    qa_row = next(row for row in workload["agents"] if row["id"] == "qa")
+    assert qa_row["open_total"] == 4
+    cell = qa_row["cells"][0]
+    assert cell["load"] == 4
+    assert cell["band"] == "overload"
+    assert "TASK-AR-004" not in cell["task_ids"]  # completed excluded
+    # Intensity is a normalized 0..1 ratio (max_load drives it).
+    assert cell["intensity"] == 1.0
+    # Team rollup mirrors the agent load for the resolved team.
+    team_row = next(row for row in workload["teams"] if row["id"] == "agent-runtime-core")
+    assert team_row["open_total"] == 4
+    assert workload["totals"]["overloaded"] >= 1
+
+
+def test_ui_state_workload_idle_band_for_no_open_tasks(tmp_path):
+    _write_teams_md(tmp_path)
+    payload = ui_state.build_resource(tmp_path, "workload", now="2026-06-13T11:00:00+09:00")
+    assert payload["resource"] == "workload"
+    items = payload["items"]
+    assert items["schema"] == ui_state.WORKLOAD_HEATMAP_SCHEMA
+    assert items["agents"] == []
+    assert items["totals"]["open_tasks"] == 0
+
+
+def test_ui_state_assignment_consistent_across_heatmap_and_filter(tmp_path):
+    # Acceptance: the team a task resolves to is the SAME in the task record
+    # (board filter source) and in the workload heatmap aggregation.
+    _write_teams_md(tmp_path)
+    _write_assign_task(tmp_path, "TASK-AR-001", owner="qa", due="2026-06-12")
+    state = ui_state.build_state(tmp_path, now="2026-06-13T11:00:00+09:00")
+    task = state["tasks"][0]
+    team_rows = {row["id"] for row in state["workload"]["teams"]}
+    assert task["assigned_team"] in team_rows
+
+
 def _write_taskset_task(root: Path, task_id: str, task_set_id: str, status: str) -> None:
     _write(
         root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md",
