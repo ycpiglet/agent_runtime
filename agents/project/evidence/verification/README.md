@@ -21,6 +21,41 @@ Owner handoff, or C-mode promotion claims.
 | `evidence_path` | JSON, markdown, or log output path. |
 | `scope_boundary` | `local_deterministic`, `template_local`, `provider_live`, `remote_ci`, `release`, or `external`. |
 
+## Freshness Block (optional, `agent-runtime-work-verification/v1`)
+
+Verification evidence written to `reviews/VERIFY-*.json` may carry an optional
+`freshness` block recorded at verification time so
+`scripts/verification_freshness_gate.py` can detect stale evidence
+deterministically:
+
+```json
+"freshness": {
+  "commit_ref": "<git HEAD commit hash when the commands ran>",
+  "source_paths": [
+    { "path": "scripts/example.py", "sha256": "<sha256 hex of file bytes>" }
+  ]
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `freshness.commit_ref` | Commit checked out when the verification ran. Any commit in `git log <commit_ref>..HEAD -- <source paths>` marks the record stale. |
+| `freshness.source_paths[].path` | Repo-relative input the verification depended on (script, test, schema, doc). |
+| `freshness.source_paths[].sha256` | SHA-256 of the file bytes at verification time. A mismatch or a missing file marks the record stale. |
+
+Staleness rules consumed by `python scripts/verification_freshness_gate.py --check`:
+
+- A record with a `freshness` block is STALE when any tracked input moved after
+  verification: source hash mismatch, missing source file, commits touching the
+  tracked paths after `commit_ref`, or the verified work item's `updated_at`
+  moving past `verified_at` while the item is still open.
+- Stale evidence referenced by an open or closing work item blocks closeout;
+  stale evidence on completed or archived items is watch-only.
+- Legacy records without a `freshness` block report `freshness-unknown` as a
+  watch finding and never block.
+- Claim updates after `verified_at` are advisory (watch-only) because claims
+  mutate during normal progress reporting.
+
 ## Required Closeout Commands
 
 | Scope | Command |
