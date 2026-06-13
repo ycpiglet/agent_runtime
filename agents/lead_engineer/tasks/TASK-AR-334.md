@@ -14,7 +14,11 @@ registered_at: 2026-06-11T18:56:35+09:00
 created_at: 2026-06-11T18:56:35+09:00
 updated_at: 2026-06-11T18:56:35+09:00
 title: 전역 검색 + 빠른 열기
-status: planned
+status: completed
+started_at: 2026-06-13T21:39:28+09:00
+completed_at: 2026-06-13T22:10:00+09:00
+resolution: done
+verification_status: passed
 priority: P1
 difficulty: M
 est_hours: 8

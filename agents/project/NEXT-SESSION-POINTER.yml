@@ -1,14 +1,14 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-13T21:10:00+09:00
+updated_at: 2026-06-13T22:12:00+09:00
 current_state:
-  summary: "UI console waves 1-5 complete (17/28): UI-UX-V2 done (AR-320/321/322/323/324/325/326/327/328/360/361/362); UI-PLATFORM-EXTENSIONS wave-5 done (AR-329 taskset lifecycle, AR-330 subtask/dependency+timeline+graph, AR-331 custom properties/labels/automation/triage) merged via PRs #92-#111 with W4a+W4b dual verification. W4b caught real defects pre-merge: AR-327 channel HTTP-400 (fixed) and AR-329 template registry-reader gap (fixed + guard test). Claims released, worktrees/branches clean."
+  summary: "UI console waves 1-6 complete (22/28): UI-UX-V2 done (12); UI-PLATFORM-EXTENSIONS AR-329/330/331 (wave-5) + AR-332 file attachments / AR-333 import-export / AR-334 global search (wave-6) merged via PRs #92-#115 with W4a+W4b dual verification. W4b caught real defects pre-merge (AR-327 HTTP-400, AR-329 template reader gap, AR-334 dead-code guard) all fixed. Claims released, worktrees/branches clean."
   status: ready
   task_set_status: in_progress
   task_set_id: "TASKSET-AR-UI-PLATFORM-EXTENSIONS"
   step_index: 4
   step_total: 5
-  progress_pct: 61
-  status_text: "Waves 1-5 done (17/28). Remaining UI backlog: UI-PLATFORM-EXTENSIONS 332-341 (10); UI-LIVING-CONSOLE 363/364/365 (3). Next waves dispatch from the V2 shell (theme tokens + sidebar groups + list toolbar + command path + gate chain)."
+  progress_pct: 79
+  status_text: "Waves 1-6 done (22/28). Remaining UI backlog: UI-PLATFORM-EXTENSIONS 335-341 (7); UI-LIVING-CONSOLE 363/364/365 (3). Next waves dispatch from the V2 shell (theme tokens + sidebar groups + list toolbar + command path + gate chain + search/export/attachments)."
 active_work:
   current_agents: []
   current_teams: []
