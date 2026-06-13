@@ -12,9 +12,13 @@ display_id: TASK-AR-361
 task_uid: f078b413-65df-4ea1-9e90-200e67d8a07b
 registered_at: 2026-06-11T19:48:00+09:00
 created_at: 2026-06-11T19:48:00+09:00
-updated_at: 2026-06-11T19:48:00+09:00
+updated_at: 2026-06-13T16:50:00+09:00
+started_at: 2026-06-13T16:29:50+09:00
+completed_at: 2026-06-13T16:50:00+09:00
+resolution: done
+verification_status: passed
 title: Meeting Room — 에이전트 드래그 인 회의실
-status: planned
+status: completed
 priority: P1
 difficulty: L
 est_hours: 12
@@ -60,3 +64,11 @@ tags:
 - `python scripts/owner_governance_gate.py` -> exit 0 (in worktree)
 - real-repo demo: console on ephemeral port, GET /api/meeting_room -> HTTP 200, schema agent-runtime-meeting-room/v1
 - meeting.plan demo (tmp dir): recorded MEETING-2026-06-13-meeting-room-demo-sync.md skeleton; failure path (1 participant) -> exit 1 with ASCII error.
+
+## Completion Evidence
+
+- PR #92: meeting_room resource + drag-drop panel (a11y) + proposal-only plan writer; 13+45 focused/742 full; W4b APPROVE.
+
+## Verification Results
+
+- W4b APPROVE; full suite green; see claim handoff closeout.

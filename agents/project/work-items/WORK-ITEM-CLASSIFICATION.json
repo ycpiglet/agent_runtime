@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-13T16:11:15+09:00",
+  "generated_at": "2026-06-13T17:18:21+09:00",
   "record_count": 235,
   "finding_count": 0,
   "findings": [],
@@ -1620,7 +1620,7 @@
       "title": "task 평면 나열 대신 taskset 단위로 묶인 직관적 작업 뷰를 기본 진입점으로 만들고, Owner가 진행 중 흐름에 task를 안전하게 삽입할 수…",
       "path": "agents/lead_engineer/tasks/TASK-AR-323.md",
       "parent_id": "TASKSET-AR-UI-UX-V2",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-324",
@@ -1851,7 +1851,7 @@
       "title": "기각/보류 아이디어를 폐기하지 않고 보존·재발굴하는 체계를 RSI 운영 원칙으로 정착시킨다 (Owner 통찰: 진화 시 과거를 잊지 않고 주기적으로 재평…",
       "path": "agents/lead_engineer/tasks/TASK-AR-360.md",
       "parent_id": "TASKSET-AR-UI-LIVING-CONSOLE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-361",
@@ -1862,7 +1862,7 @@
       "title": "사이드탭의 회의실 공간에 에이전트를 마우스로 끌어다 넣고, 주제/태스크를 선택하면 참여 에이전트들이 의견을 주고받는 회의를 실행한다.",
       "path": "agents/lead_engineer/tasks/TASK-AR-361.md",
       "parent_id": "TASKSET-AR-UI-LIVING-CONSOLE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-362",

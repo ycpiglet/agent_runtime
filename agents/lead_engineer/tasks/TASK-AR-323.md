@@ -12,9 +12,13 @@ display_id: TASK-AR-323
 task_uid: e6d32d94-52e2-4872-a176-d3742e821dc2
 registered_at: 2026-06-11T18:39:01+09:00
 created_at: 2026-06-11T18:39:01+09:00
-updated_at: 2026-06-11T18:39:01+09:00
+updated_at: 2026-06-13T16:50:00+09:00
+started_at: 2026-06-13T16:29:49+09:00
+completed_at: 2026-06-13T16:50:00+09:00
+resolution: done
+verification_status: passed
 title: Tasksets 중심 작업 뷰 + Owner task 주입
-status: planned
+status: completed
 priority: P1
 difficulty: L
 est_hours: 10
@@ -46,3 +50,11 @@ tags:
 ## Evidence Targets
 
 - `src/agent_runtime/ui_console.py`, `src/agent_runtime/ui_commands.py`, UI 테스트
+
+## Completion Evidence
+
+- PR #93: tasksets_board resource + Taskset Board panel + task.create insertion; 51 focused/735 full; W4b APPROVE.
+
+## Verification Results
+
+- W4b APPROVE; full suite green; see claim handoff closeout.
