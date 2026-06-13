@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from . import ui_commands
+from . import notify_routing, ui_commands
 
 RESOURCE_NAMES = (
     "state",
@@ -59,6 +59,7 @@ RESOURCE_NAMES = (
     "ops_metrics",
     "notifications",
     "daily_brief",
+    "notification_routing",
     "search_index",
     "commands",
 )
@@ -6331,6 +6332,12 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     notifications_config = load_notifications_config(root_path, generated_at, warnings)
     notifications = build_notifications(events, calendar, tasks, messages, notifications_config, generated_at)
     daily_brief = build_daily_brief(tasks, events, messages, reviews, notifications, generated_at)
+    # External notification routing (TASK-AR-365): SECRET-FREE status only. The
+    # local config (webhook URLs / tokens / SMTP creds) is gitignored and is
+    # NEVER read into served state -- routing_status strips every secret value
+    # and reports only channel name / kind / enabled flag / subscribed
+    # severities. Default state is DORMANT (no channels => nothing sends).
+    notification_routing = notify_routing.routing_status(root_path, generated_at)
     state: dict[str, Any] = {
         "generated_at": generated_at,
         "sources": sources,
@@ -6375,6 +6382,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "ops_metrics": ops_metrics,
         "notifications": notifications,
         "daily_brief": daily_brief,
+        "notification_routing": notification_routing,
         "commands": commands,
         "gaps": gaps,
         "warnings": warnings,

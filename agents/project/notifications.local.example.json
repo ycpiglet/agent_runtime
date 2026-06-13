@@ -1,0 +1,44 @@
+{
+  "schema": "agent-runtime-notification-routing/v1",
+  "_README": [
+    "TASK-AR-365 external notification routing -- LOCAL config template.",
+    "Copy this file to agents/project/notifications.local.json (which is GITIGNORED)",
+    "and fill in your own secrets. NEVER commit the populated notifications.local.json.",
+    "External routing stays DORMANT until: (1) this local config exists with at least",
+    "one enabled channel that has its secret filled in, AND (2) an opt-in local runner",
+    "injects a real network transport. The console only proposes subscription-rule",
+    "edits; it never sends anything itself.",
+    "Severities: immediate (block/approval-pending), aggregate (watch, 5/15-min window),",
+    "digest (pass/completed, daily)."
+  ],
+  "channels": [
+    {
+      "name": "discord-ops",
+      "kind": "discord",
+      "enabled": false,
+      "severities": ["immediate", "aggregate", "digest"],
+      "aggregate_minutes": 5,
+      "webhook_url": "PUT-YOUR-DISCORD-WEBHOOK-URL-HERE"
+    },
+    {
+      "name": "telegram-ops",
+      "kind": "telegram",
+      "enabled": false,
+      "severities": ["immediate"],
+      "aggregate_minutes": 15,
+      "bot_token": "PUT-YOUR-TELEGRAM-BOT-TOKEN-HERE",
+      "chat_id": "PUT-YOUR-TELEGRAM-CHAT-ID-HERE"
+    },
+    {
+      "name": "email-digest",
+      "kind": "email",
+      "enabled": false,
+      "severities": ["digest"],
+      "aggregate_minutes": 5,
+      "smtp_host": "PUT-YOUR-SMTP-HOST-HERE",
+      "smtp_user": "PUT-YOUR-SMTP-USERNAME-HERE",
+      "smtp_password": "PUT-YOUR-SMTP-PASSWORD-HERE",
+      "to": "PUT-YOUR-RECIPIENT-EMAIL-HERE"
+    }
+  ]
+}

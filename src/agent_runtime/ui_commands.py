@@ -142,6 +142,36 @@ MESSAGE_REACTIONS = ("ack", "thumbsup", "eyes", "celebrate", "question", "blocke
 # Notification preference axes the inbox can subscribe to.
 NOTIFICATION_KINDS = ("reminder", "blocked", "approval", "mention", "error")
 NOTIFICATION_SEVERITIES = ("overdue", "blocked", "error", "approval", "due_soon", "mention", "info")
+# TASK-AR-365: per-channel notification subscription-rule CRUD from the external
+# notification-routing view. Every one of these is PROPOSAL-ONLY: the handler
+# records a declarative proposal under .ui_outbox/notifications that a runtime
+# executor applies to the LOCAL gitignored notifications config. The console
+# NEVER writes the local config, NEVER accepts secret values (webhook URLs /
+# tokens / SMTP creds are rejected if present), and NEVER sends to any external
+# service. Actual dispatch is a separate opt-in local runner.
+SUBSCRIPTION_COMMAND_TYPES = ("subscription.create", "subscription.update", "subscription.delete", "subscription.toggle")
+# Secret-bearing payload keys the console must NEVER carry on a proposal. A
+# subscription proposal only references a channel by name + recipe kind +
+# subscribed severities; the owner fills secrets directly into the local config.
+SUBSCRIPTION_SECRET_KEYS = {
+    "webhook_url",
+    "url",
+    "bot_token",
+    "token",
+    "chat_id",
+    "smtp_host",
+    "smtp_user",
+    "smtp_password",
+    "password",
+    "api_key",
+    "auth",
+    "authorization",
+}
+NOTIFICATION_CHANNEL_KINDS = ("discord", "telegram", "email")
+# Routing modes by severity (AR-365). Named distinctly from AR-338's
+# NOTIFICATION_SEVERITIES (notification kinds) to avoid a name collision.
+NOTIFICATION_ROUTING_MODES = ("immediate", "aggregate", "digest")
+NOTIFICATION_AGGREGATE_WINDOWS = (5, 15)
 
 CUSTOM_PROPERTY_TYPES = ("text", "select", "number", "date")
 AUTOMATION_TRIGGERS = ("status_change", "due_passed", "blocked_too_long")
@@ -179,6 +209,7 @@ COMMAND_TYPES = (
     + MENTION_COMMAND_TYPES
     + MESSAGE_COMMAND_TYPES
     + NOTIFICATION_COMMAND_TYPES
+    + SUBSCRIPTION_COMMAND_TYPES
 )
 # TASK-AR-335: a schedule fires either once at a fixed time (``reserve``) or on a
 # recurring cron-like cadence (``repeat``). The cron expression is a 5-field
@@ -1783,6 +1814,99 @@ def _notification_command(root: Path, command_type: str, target: str | None, pay
     }
 
 
+def _subscription_command(root: Path, command_type: str, target: str | None, payload: dict[str, Any], now: str, command_id: str) -> dict[str, Any]:
+    """Propose a per-channel notification subscription-rule edit (proposal-only).
+
+    TASK-AR-365. The console NEVER writes the LOCAL notifications config and NEVER
+    sends to any external service -- it records a declarative proposal under
+    .ui_outbox/notifications that a runtime executor applies to the gitignored
+    local config. SECRETS (webhook URLs / tokens / SMTP creds) are REJECTED if
+    present on the payload: the owner fills those directly into the local config,
+    never through the UI/command path.
+    """
+    action = command_type.split(".", 1)[1]
+    channel = re.sub(r"[^a-z0-9_-]+", "-", str(target or payload.get("channel") or payload.get("name") or "").strip().lower()).strip("-")
+    errors: list[str] = []
+
+    leaked = sorted(SUBSCRIPTION_SECRET_KEYS.intersection(payload))
+    if leaked:
+        errors.append(f"secret values are not allowed on subscription proposals: {', '.join(leaked)} (put secrets in the local config only)")
+    if not channel:
+        errors.append("channel name is required")
+
+    kind = str(payload.get("kind") or "").strip().lower()
+    if action in {"create", "update"} and kind not in NOTIFICATION_CHANNEL_KINDS:
+        errors.append(f"invalid channel kind: {kind!r} (expected {', '.join(NOTIFICATION_CHANNEL_KINDS)})")
+
+    raw_severities = payload.get("severities")
+    severities: list[str] = []
+    if isinstance(raw_severities, list):
+        for value in raw_severities:
+            sev = str(value or "").strip().lower()
+            if sev and sev not in NOTIFICATION_ROUTING_MODES:
+                errors.append(f"invalid severity: {sev!r} (expected {', '.join(NOTIFICATION_ROUTING_MODES)})")
+            elif sev and sev not in severities:
+                severities.append(sev)
+    if action in {"create", "update"} and not severities:
+        severities = list(NOTIFICATION_ROUTING_MODES)
+
+    aggregate_minutes = payload.get("aggregate_minutes")
+    if aggregate_minutes is not None:
+        try:
+            aggregate_minutes = int(aggregate_minutes)
+        except (TypeError, ValueError):
+            errors.append("aggregate_minutes must be an integer")
+            aggregate_minutes = None
+        else:
+            if aggregate_minutes not in NOTIFICATION_AGGREGATE_WINDOWS:
+                errors.append(f"invalid aggregate_minutes: {aggregate_minutes!r} (expected one of {', '.join(str(value) for value in NOTIFICATION_AGGREGATE_WINDOWS)})")
+    if action == "toggle" and not isinstance(payload.get("enabled"), bool):
+        errors.append("toggle requires a boolean 'enabled' field")
+    if errors:
+        return {"errors": errors}
+
+    rule = None
+    if action in {"create", "update"}:
+        rule = {
+            "name": channel,
+            "kind": kind,
+            "enabled": bool(payload.get("enabled", False)),
+            "severities": severities,
+            "aggregate_minutes": aggregate_minutes if aggregate_minutes in NOTIFICATION_AGGREGATE_WINDOWS else 5,
+        }
+
+    proposal = {
+        "id": command_id.replace("COMMAND-", "SUBREQ-"),
+        "type": command_type,
+        "action": action,
+        "target_file": "agents/project/notifications.local.json",
+        "status": "queued",
+        "created_at": now,
+        "requested_by": str(payload.get("actor") or "ui"),
+        "channel": channel,
+        "rule": rule,
+        "enabled": payload.get("enabled") if action == "toggle" else (rule["enabled"] if rule else None),
+        "mutation_boundary": "proposal_only",
+        "secrets_boundary": "local_config_only",
+        "dispatch_boundary": "opt_in_local_runner",
+        "next": "runtime executor applies this subscription rule to the LOCAL gitignored notifications config; secrets are authored by the owner directly, never via the UI; an opt-in local runner performs the actual dispatch",
+    }
+    changed = _write_ui_proposal(root, "notifications", proposal)
+    return {
+        "status": "queued",
+        "result": {
+            "changed": [changed],
+            "proposal_id": proposal["id"],
+            "action": action,
+            "channel": channel,
+            "mutation_boundary": "proposal_only",
+            "secrets_boundary": "local_config_only",
+            "dispatch_boundary": "opt_in_local_runner",
+            "next": proposal["next"],
+        },
+    }
+
+
 def submit_command(
     root: Path | str,
     command: dict[str, Any],
@@ -1847,6 +1971,8 @@ def submit_command(
         outcome = _message_command(root_path, command_type, target_str, payload, created_at, cid)
     elif command_type in NOTIFICATION_COMMAND_TYPES:
         outcome = _notification_command(root_path, command_type, target_str, payload, created_at, cid)
+    elif command_type in SUBSCRIPTION_COMMAND_TYPES:
+        outcome = _subscription_command(root_path, command_type, target_str, payload, created_at, cid)
     else:
         outcome = _runtime_command(root_path, command_type, target_str, payload, created_at)
 
