@@ -2318,3 +2318,166 @@ def test_state_machines_build_state_wires_events_into_task_states(tmp_path):
     assert "TASK-AR-900" in task["task_states"]
     assert task["task_states"]["TASK-AR-900"]["current_state"] == "in_progress"
     assert any(hop["to"] == "blocked" for hop in task["task_states"]["TASK-AR-900"]["transition_path"])
+
+
+# ----- TASK-AR-339: ops dashboard metrics -----
+
+
+def _write_token_task(
+    root: Path,
+    task_id: str,
+    *,
+    task_set_id: str,
+    est_tokens: int,
+    status: str = "in_progress",
+    actual_tokens: int | None = None,
+    completed_at: str | None = None,
+) -> None:
+    lines = [
+        "---",
+        f"id: {task_id}",
+        f"status: {status}",
+        "owner: lead-engineer",
+        "priority: P1",
+        f"task_set_id: {task_set_id}",
+        f"est_tokens: {est_tokens}",
+    ]
+    if actual_tokens is not None:
+        lines.append(f"actual_tokens: {actual_tokens}")
+    if completed_at is not None:
+        lines.append(f"completed_at: {completed_at}")
+    lines += ["tags: []", "---", "", "## Goal", "", "x", ""]
+    _write(root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md", "\n".join(lines))
+
+
+def _write_gate_json(root: Path, name: str, status: str, *, schema: str, task_ref: str = "") -> None:
+    payload = {"schema": schema, "status": status, "score": 1.0, "findings": []}
+    if task_ref:
+        payload["task_ref"] = task_ref
+    _write(root / "reviews" / name, json.dumps(payload))
+
+
+def test_ui_state_ops_metrics_aggregates_tokens_est_vs_actual_and_budget(tmp_path):
+    # est_tokens always counts; actual_tokens only when present. Per-taskset
+    # budget == sum of member estimates; consumed% derives from actuals.
+    _write_token_task(tmp_path, "TASK-AR-001", task_set_id="TASKSET-AR-X", est_tokens=4000, actual_tokens=2000)
+    _write_token_task(tmp_path, "TASK-AR-002", task_set_id="TASKSET-AR-X", est_tokens=6000)
+    _write_token_task(tmp_path, "TASK-AR-003", task_set_id="TASKSET-AR-Y", est_tokens=1000)
+    state = ui_state.build_state(tmp_path, now="2026-06-13T11:00:00+09:00")
+    ops = state["ops_metrics"]
+    assert ops["schema"] == ui_state.OPS_METRICS_SCHEMA
+    res = ops["resources"]
+    assert res["est_tokens"] == 11000
+    assert res["actual_tokens"] == 2000
+    assert res["has_actuals"] is True
+    assert res["actuals_label"] == "actual"
+    # Cost is a transparent linear derivation, not billing actuals.
+    assert res["est_cost"] == ui_state._ops_cost(11000)
+    x_row = next(r for r in res["tasksets"] if r["task_set_id"] == "TASKSET-AR-X")
+    assert x_row["est_tokens"] == 10000
+    assert x_row["budget_tokens"] == 10000
+    assert x_row["actual_tokens"] == 2000
+    assert x_row["tasks_with_actual"] == 1
+    # 2000 actual / 10000 budget => 20% consumed.
+    assert x_row["consumed_pct"] == 20.0
+    assert x_row["over_budget"] is False
+    y_row = next(r for r in res["tasksets"] if r["task_set_id"] == "TASKSET-AR-Y")
+    # No actuals in Y => est-only (consumed_pct None).
+    assert y_row["consumed_pct"] is None
+
+
+def test_ui_state_ops_metrics_est_only_label_when_no_actuals(tmp_path):
+    _write_token_task(tmp_path, "TASK-AR-010", task_set_id="TASKSET-AR-Z", est_tokens=5000)
+    ops = ui_state.build_resource(tmp_path, "ops_metrics", now="2026-06-13T11:00:00+09:00")["items"]
+    res = ops["resources"]
+    assert res["has_actuals"] is False
+    assert res["actuals_label"] == "estimate-only"
+    assert res["actual_tokens"] == 0
+
+
+def test_ui_state_ops_metrics_eval_trend_from_evidence(tmp_path):
+    # Two offline-eval reports + one live-reviewer gate => an ordered score trend.
+    _write(
+        tmp_path / "reviews" / "OFFLINE-EVAL-2026-06-09-task-ar-217.json",
+        json.dumps({"schema": "agent-runtime-offline-eval-report/v1", "status": "pass",
+                    "minimum_score_by_domain": 0.9, "score": 0.95,
+                    "generated_at": "2026-06-09T10:00:00+00:00", "task_ref": "TASK-AR-217"}),
+    )
+    _write(
+        tmp_path / "reviews" / "OFFLINE-EVAL-2026-06-10-task-ar-217.json",
+        json.dumps({"schema": "agent-runtime-offline-eval-report/v1", "status": "pass",
+                    "score": 1.0, "generated_at": "2026-06-10T10:00:00+00:00"}),
+    )
+    _write(
+        tmp_path / "agents" / "project" / "evidence" / "evaluations" / "provider-live.json",
+        json.dumps({"schema": "agent-runtime-provider-live-eval/v1", "status": "watch",
+                    "metric_value": 0.8, "generated_at": "2026-06-11T10:00:00+00:00",
+                    "task_ref": "TASK-AR-315"}),
+    )
+    ops = ui_state.build_state(tmp_path, now="2026-06-13T11:00:00+09:00")["ops_metrics"]
+    trend = ops["eval_trend"]
+    assert trend["available"] is True
+    assert trend["count"] == 3
+    # Ordered by generated_at; latest is the provider-live watch point.
+    assert [round(p["score"], 2) for p in trend["points"]] == [0.95, 1.0, 0.8]
+    assert trend["latest_score"] == 0.8
+    assert trend["latest_status"] == "watch"
+    assert trend["min_score"] == 0.8
+    assert trend["max_score"] == 1.0
+
+
+def test_ui_state_ops_metrics_eval_trend_graceful_when_absent(tmp_path):
+    _write_token_task(tmp_path, "TASK-AR-020", task_set_id="TASKSET-AR-Z", est_tokens=100)
+    ops = ui_state.build_state(tmp_path, now="2026-06-13T11:00:00+09:00")["ops_metrics"]
+    trend = ops["eval_trend"]
+    assert trend["available"] is False
+    assert trend["points"] == []
+    assert trend["latest_score"] is None
+
+
+def test_ui_state_ops_metrics_gate_board_pass_watch_block(tmp_path):
+    _write_gate_json(tmp_path, "CO-LOCATION-GATE-a.json", "pass", schema="agent-runtime-co-location-gate/v1")
+    _write_gate_json(tmp_path, "LIVE-REVIEWER-GATE-b.json", "block", schema="agent-runtime-live-reviewer-gate/v1", task_ref="TASK-AR-207")
+    _write_gate_json(tmp_path, "OFFLINE-EVAL-GATE-c.json", "watch", schema="agent-runtime-offline-eval-gate/v1")
+    ops = ui_state.build_state(tmp_path, now="2026-06-13T11:00:00+09:00")["ops_metrics"]
+    board = ops["gates"]
+    assert board["total"] == 3
+    assert board["counts"]["pass"] == 1
+    assert board["counts"]["watch"] == 1
+    assert board["counts"]["block"] == 1
+    assert board["blocking"] == 1
+    # Block sorts first so the operator sees failures at the top.
+    assert board["gates"][0]["status"] == "block"
+    assert board["gates"][0]["task_ref"] == "TASK-AR-207"
+    assert board["gates"][0]["kind"] == "live-reviewer-gate"
+
+
+def test_ui_state_ops_metrics_burndown_and_weekly_velocity(tmp_path):
+    # Two done (in distinct ISO weeks) + one open across one taskset.
+    _write_token_task(tmp_path, "TASK-AR-101", task_set_id="TASKSET-AR-B", est_tokens=100,
+                      status="completed", completed_at="2026-06-01T10:00:00+00:00")
+    _write_token_task(tmp_path, "TASK-AR-102", task_set_id="TASKSET-AR-B", est_tokens=100,
+                      status="completed", completed_at="2026-06-09T10:00:00+00:00")
+    _write_token_task(tmp_path, "TASK-AR-103", task_set_id="TASKSET-AR-B", est_tokens=100,
+                      status="in_progress")
+    ops = ui_state.build_state(tmp_path, now="2026-06-13T11:00:00+09:00")["ops_metrics"]
+    burn = ops["burndown"]
+    assert burn["total"] == 3
+    assert burn["done"] == 2
+    assert burn["remaining"] == 1
+    assert burn["pct_done"] == round((2 / 3) * 100, 1)
+    ts_row = next(r for r in burn["tasksets"] if r["task_set_id"] == "TASKSET-AR-B")
+    assert ts_row["total"] == 3 and ts_row["done"] == 2 and ts_row["remaining"] == 1
+    vel = ops["velocity"]
+    assert vel["available"] is True
+    # Two completions in two different ISO weeks.
+    assert vel["total_done"] == 2
+    assert len(vel["weeks"]) == 2
+    assert {w["done"] for w in vel["weeks"]} == {1}
+
+
+def test_ui_state_ops_metrics_in_resource_names_and_resource_endpoint(tmp_path):
+    assert "ops_metrics" in ui_state.RESOURCE_NAMES
+    payload = ui_state.build_resource(tmp_path, "ops_metrics", now="2026-06-13T11:00:00+09:00")
+    assert payload["resource"] == "ops_metrics"
+    assert payload["items"]["schema"] == ui_state.OPS_METRICS_SCHEMA

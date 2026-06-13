@@ -2789,3 +2789,94 @@ def test_ui_console_state_machine_graceful_when_yaml_missing(tmp_path):
     # The shell still serves the view container so the UI degrades gracefully.
     html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
     assert 'id="view-statemachines"' in html
+
+
+# ----- TASK-AR-339: ops dashboard view + tokenized charts -----
+
+
+def test_ui_console_ops_dashboard_view_registered_in_ops_group(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    # Sidebar link in the OPS group + hash route + view container, reusing the
+    # established data-view/data-route/view-* convention.
+    assert 'data-view="dashboard"' in html
+    assert 'data-route="ops/dashboard"' in html
+    assert 'id="view-dashboard"' in html
+    # The four metric widgets each have a mount point.
+    for mount in ["opsdash-tokens", "opsdash-eval", "opsdash-gates", "opsdash-burndown", "opsdash-velocity"]:
+        assert f'id="{mount}"' in html
+
+
+def test_ui_console_ops_dashboard_render_wired(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert "function renderOpsDashboard" in js
+    assert "renderOpsDashboard();" in js  # called from renderAll
+    assert "runtimeState && runtimeState.ops_metrics" in js
+
+
+def test_ui_console_ops_dashboard_css_uses_tokens_not_raw_color(tmp_path):
+    # Tokenization guard: every color in the ops-dashboard CSS (bars, gate
+    # pass/watch/block pills, chart strokes, velocity bars) flows through
+    # var(--token); no raw hex/rgba outside the token blocks.
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    body_css = css.replace(_root_token_block(css), "").replace(_dark_theme_block(css), "")
+    hex_pattern = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+    rgba_pattern = re.compile(r"rgba?\(")
+    ops_lines = [line for line in body_css.splitlines() if ".opsdash" in line]
+    assert ops_lines, "expected ops-dashboard CSS rules to exist"
+    for line in ops_lines:
+        assert not hex_pattern.search(line), f"raw hex in ops-dashboard CSS: {line.strip()}"
+        assert not rgba_pattern.search(line), f"raw rgba in ops-dashboard CSS: {line.strip()}"
+    # Gate pass/watch/block map onto the semantic success/warning/danger tokens.
+    assert ".opsdash-gate-count.is-pass" in css and "var(--success" in css
+    assert ".opsdash-gate-count.is-watch" in css and "var(--warning" in css
+    assert ".opsdash-gate-count.is-block" in css and "var(--danger" in css
+    # Chart lines/dots stroke/fill via tokens.
+    assert "stroke: var(--primary)" in css
+    assert "fill: var(--primary)" in css
+
+
+def test_ui_console_ops_dashboard_charts_tokenized_no_raw_color_in_js(tmp_path):
+    # The inline-SVG chart builders must NOT inject literal colors from JS; color
+    # comes only from token-backed CSS classes (opsdash-line / opsdash-dot etc.).
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    start = js.index("TASK-AR-339: ops dashboard")
+    end = js.index("TASK-AR-332: file attachments", start)
+    block = js[start:end]
+    hex_pattern = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+    rgba_pattern = re.compile(r"rgba?\(")
+    assert not hex_pattern.search(block), "raw hex literal in ops-dashboard JS"
+    assert not rgba_pattern.search(block), "raw rgba literal in ops-dashboard JS"
+    # SVG charts reference the token-styled classes only.
+    assert 'class="opsdash-line"' in block
+    assert 'class="opsdash-dot' in block
+
+
+def test_ui_console_ops_dashboard_app_js_ascii_only_and_node_check(tmp_path):
+    import shutil
+    import subprocess
+
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    start = js.index("TASK-AR-339: ops dashboard")
+    end = js.index("TASK-AR-332: file attachments", start)
+    block = js[start:end]
+    non_ascii = [ch for ch in block if ord(ch) > 127]
+    assert not non_ascii, f"ops-dashboard JS must be ASCII-only, found: {non_ascii[:5]}"
+
+    if shutil.which("node") is None:
+        import pytest
+
+        pytest.skip("node not available")
+    proc = subprocess.run(["node", "--check", "-"], input=js, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stderr
+
+
+def test_ui_console_ops_dashboard_escapes_rendered_fields(tmp_path):
+    # The render helpers must escapeHtml every field they emit (taskset names,
+    # gate ids/refs, status). Spot-check that the helpers wrap fields in escapeHtml.
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    start = js.index("function renderOpsGateBoard")
+    block = js[start:js.index("function renderOpsBurndown", start)]
+    # task_ref, id, kind, status are all escaped.
+    assert "escapeHtml(gate.task_ref)" in block
+    assert "escapeHtml(gate.id)" in block
+    assert "escapeHtml(gate.status)" in block

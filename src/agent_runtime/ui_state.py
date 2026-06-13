@@ -55,6 +55,7 @@ RESOURCE_NAMES = (
     "reviews",
     "schedules",
     "calendar",
+    "ops_metrics",
     "search_index",
     "commands",
 )
@@ -5144,6 +5145,350 @@ def run_search(index: list[dict[str, Any]], query: str, *, limit: int = 40) -> l
     return results[:limit]
 
 
+# --- Ops dashboard (TASK-AR-339) -------------------------------------------
+# A single read-only derivation that powers the Grafana/Sentry-style ops view:
+#   1. token + cost aggregation (estimated vs actual) per task and per taskset,
+#      with a per-taskset budget bar.
+#   2. eval score trend derived from existing eval/gate evidence files.
+#   3. a gate status board (pass / watch / block) from reviews/*GATE*.json.
+#   4. taskset burndown + weekly completion velocity.
+# Everything here is a pure derivation; no file is mutated and missing inputs
+# degrade gracefully (empty series / est-only labels) rather than raising.
+OPS_METRICS_SCHEMA = "agent-runtime-ops-metrics/v1"
+# Cost is a transparent linear derivation of tokens so the chart is meaningful
+# even before real billing actuals exist. USD per 1k tokens; documented in the
+# payload so the UI can label the figure as a derived estimate.
+_OPS_COST_PER_1K_TOKENS = 0.003
+# Eval/gate evidence locations. Eval *score* trend is derived from the offline
+# eval reports, the live-reviewer gates and the provider-live eval evidence.
+_OPS_EVAL_REVIEW_GLOBS = ("OFFLINE-EVAL-*.json", "LIVE-REVIEWER-GATE-*.json")
+_OPS_EVAL_EVIDENCE_GLOB = "agents/project/evidence/evaluations/*.json"
+# Gate board reads every *GATE*.json record under reviews/.
+_OPS_GATE_REVIEW_GLOB = "*GATE*.json"
+_OPS_GATE_STATUSES = ("pass", "watch", "block")
+# Cap long trend series so the inline SVG stays readable.
+_OPS_TREND_LIMIT = 24
+_OPS_VELOCITY_WEEKS = 8
+
+
+def _ops_int(value: Any) -> int:
+    """Coerce a frontmatter scalar to a non-negative int (0 on garbage)."""
+    if isinstance(value, bool):
+        return 0
+    if isinstance(value, (int, float)):
+        return max(0, int(value))
+    try:
+        return max(0, int(str(value).strip()))
+    except (TypeError, ValueError):
+        return 0
+
+
+def _ops_cost(tokens: int) -> float:
+    return round((max(0, int(tokens)) / 1000.0) * _OPS_COST_PER_1K_TOKENS, 4)
+
+
+def _ops_iso_week(value: Any) -> str | None:
+    """Return the ISO ``YYYY-Www`` week key for a date/timestamp, or None."""
+    text = str(value or "").strip()
+    if not text:
+        return None
+    for candidate in (text, text[:19], text[:10]):
+        try:
+            parsed = datetime.fromisoformat(candidate)
+        except ValueError:
+            continue
+        iso = parsed.isocalendar()
+        return f"{iso[0]:04d}-W{iso[1]:02d}"
+    return None
+
+
+def _ops_eval_record(path: Path, root: Path) -> dict[str, Any] | None:
+    """Normalize one eval/gate evidence file into a trend point, or None.
+
+    Score is read from ``score`` then ``metric_value``; only numeric scores
+    contribute to the trend. ``generated_at`` orders the series.
+    """
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if not isinstance(data, dict):
+        return None
+    raw_score = data.get("score")
+    if raw_score is None:
+        raw_score = data.get("metric_value")
+    try:
+        score = float(raw_score)
+    except (TypeError, ValueError):
+        return None
+    return {
+        "id": str(data.get("record_id") or path.stem),
+        "score": round(score, 4),
+        "status": str(data.get("status") or data.get("result") or "").strip().lower(),
+        "generated_at": str(data.get("generated_at") or ""),
+        "mode": str(
+            data.get("evaluation_mode")
+            or data.get("metric_name")
+            or data.get("scope_boundary")
+            or ""
+        ),
+        "task_ref": str(data.get("task_ref") or data.get("task_id") or ""),
+        "minimum_score": data.get("minimum_score") or data.get("minimum_score_by_domain"),
+        "source_path": _rel(root, path),
+    }
+
+
+def _ops_eval_trend(root: Path) -> dict[str, Any]:
+    """Eval score trend across offline/live/provider evidence (graceful if absent)."""
+    points: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    reviews_dir = root / "reviews"
+    if reviews_dir.is_dir():
+        for pattern in _OPS_EVAL_REVIEW_GLOBS:
+            for path in reviews_dir.glob(pattern):
+                point = _ops_eval_record(path, root)
+                if point and point["source_path"] not in seen:
+                    seen.add(point["source_path"])
+                    points.append(point)
+    for path in sorted(root.glob(_OPS_EVAL_EVIDENCE_GLOB)):
+        point = _ops_eval_record(path, root)
+        if point and point["source_path"] not in seen:
+            seen.add(point["source_path"])
+            points.append(point)
+    points.sort(key=lambda item: (item.get("generated_at") or "", item.get("id") or ""))
+    points = points[-_OPS_TREND_LIMIT:]
+    scores = [p["score"] for p in points]
+    latest = points[-1] if points else None
+    return {
+        "points": points,
+        "available": bool(points),
+        "count": len(points),
+        "latest_score": latest["score"] if latest else None,
+        "latest_status": latest["status"] if latest else "",
+        "min_score": round(min(scores), 4) if scores else None,
+        "max_score": round(max(scores), 4) if scores else None,
+        "avg_score": round(sum(scores) / len(scores), 4) if scores else None,
+    }
+
+
+def _ops_gate_board(root: Path) -> dict[str, Any]:
+    """Gate status board (pass/watch/block) from reviews/*GATE*.json."""
+    gates: list[dict[str, Any]] = []
+    counts = {status: 0 for status in _OPS_GATE_STATUSES}
+    counts["other"] = 0
+    reviews_dir = root / "reviews"
+    if reviews_dir.is_dir():
+        for path in sorted(reviews_dir.glob(_OPS_GATE_REVIEW_GLOB)):
+            try:
+                data = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            if not isinstance(data, dict):
+                continue
+            status = str(data.get("status") or data.get("result") or "").strip().lower()
+            bucket = status if status in counts else "other"
+            counts[bucket] += 1
+            schema = str(data.get("schema") or "")
+            kind = schema.split("/")[0].replace("agent-runtime-", "") if schema else path.stem
+            gates.append(
+                {
+                    "id": path.stem,
+                    "kind": kind,
+                    "status": status or "unknown",
+                    "score": data.get("score"),
+                    "task_ref": str(data.get("task_ref") or data.get("task_id") or ""),
+                    "generated_at": str(data.get("generated_at") or ""),
+                    "findings": len(data.get("findings") or []),
+                    "source_path": _rel(root, path),
+                }
+            )
+    # block first, then watch, then pass, most recent within each bucket.
+    order = {"block": 0, "watch": 1, "pass": 2}
+    gates.sort(
+        key=lambda g: (order.get(g["status"], 3), _invert_ts(g.get("generated_at"))),
+    )
+    return {
+        "gates": gates,
+        "counts": counts,
+        "total": len(gates),
+        "blocking": counts["block"],
+        "available": bool(gates),
+    }
+
+
+def _invert_ts(value: Any) -> str:
+    # Sort key helper: newer timestamps first within a status bucket.
+    text = str(value or "")
+    return "".join(chr(0x10FFFF - ord(c)) if ord(c) < 0x10FFFF else c for c in text) if text else "~"
+
+
+def build_ops_metrics(
+    tasks: list[dict[str, Any]],
+    task_sets: list[dict[str, Any]],
+    root: Path,
+    now: str,
+) -> dict[str, Any]:
+    """Aggregate the four ops-dashboard widgets from existing read-only inputs."""
+    # ---- Token + cost aggregation (estimated vs actual) -------------------
+    taskset_buckets: dict[str, dict[str, Any]] = {}
+    est_total = 0
+    actual_total = 0
+    any_actual = False
+    per_task: list[dict[str, Any]] = []
+    for task in tasks:
+        meta = task.get("custom_property_source") or {}
+        est = _ops_int(meta.get("est_tokens"))
+        has_actual = "actual_tokens" in meta and meta.get("actual_tokens") is not None
+        actual = _ops_int(meta.get("actual_tokens")) if has_actual else 0
+        if has_actual:
+            any_actual = True
+        est_total += est
+        actual_total += actual
+        ts_id = str(task.get("task_set_id") or "").strip() or "UNCLASSIFIED"
+        bucket = taskset_buckets.setdefault(
+            ts_id,
+            {
+                "task_set_id": ts_id,
+                "est_tokens": 0,
+                "actual_tokens": 0,
+                "tasks": 0,
+                "tasks_with_actual": 0,
+            },
+        )
+        bucket["est_tokens"] += est
+        bucket["actual_tokens"] += actual
+        bucket["tasks"] += 1
+        if has_actual:
+            bucket["tasks_with_actual"] += 1
+        if est or has_actual:
+            per_task.append(
+                {
+                    "id": str(task.get("id") or ""),
+                    "task_set_id": ts_id,
+                    "est_tokens": est,
+                    "actual_tokens": actual if has_actual else None,
+                    "has_actual": has_actual,
+                    "est_cost": _ops_cost(est),
+                    "actual_cost": _ops_cost(actual) if has_actual else None,
+                }
+            )
+    set_name = {str(ts.get("id") or ""): str(ts.get("display_name") or ts.get("id") or "") for ts in task_sets}
+    taskset_rows: list[dict[str, Any]] = []
+    for ts_id, bucket in taskset_buckets.items():
+        est = bucket["est_tokens"]
+        actual = bucket["actual_tokens"]
+        # The per-taskset *budget* is the sum of member estimates; actual vs
+        # budget gives a consumed-percentage bar (est-only when no actuals).
+        budget = est
+        consumed = actual if bucket["tasks_with_actual"] else 0
+        pct = round((consumed / budget) * 100, 1) if budget and bucket["tasks_with_actual"] else None
+        taskset_rows.append(
+            {
+                "task_set_id": ts_id,
+                "display_name": set_name.get(ts_id, ts_id),
+                "est_tokens": est,
+                "actual_tokens": actual,
+                "budget_tokens": budget,
+                "est_cost": _ops_cost(est),
+                "actual_cost": _ops_cost(actual),
+                "tasks": bucket["tasks"],
+                "tasks_with_actual": bucket["tasks_with_actual"],
+                "has_actual": bool(bucket["tasks_with_actual"]),
+                "consumed_pct": pct,
+                "over_budget": bool(pct is not None and pct > 100),
+            }
+        )
+    taskset_rows.sort(key=lambda row: (-row["est_tokens"], row["task_set_id"]))
+    per_task.sort(key=lambda row: (-row["est_tokens"], row["id"]))
+    resources = {
+        "schema_note": "cost derived from tokens at USD/1k; not billing actuals",
+        "cost_per_1k_tokens": _OPS_COST_PER_1K_TOKENS,
+        "est_tokens": est_total,
+        "actual_tokens": actual_total,
+        "est_cost": _ops_cost(est_total),
+        "actual_cost": _ops_cost(actual_total),
+        "has_actuals": any_actual,
+        "actuals_label": "actual" if any_actual else "estimate-only",
+        "tasksets": taskset_rows,
+        "tasks": per_task[:_OPS_TREND_LIMIT],
+        "task_count": len(per_task),
+    }
+
+    # ---- Eval trend + gate board ----------------------------------------
+    eval_trend = _ops_eval_trend(root)
+    gates = _ops_gate_board(root)
+
+    # ---- Taskset burndown + weekly velocity -----------------------------
+    open_total = 0
+    done_total = 0
+    for task in tasks:
+        if _status_bucket(task) == "done":
+            done_total += 1
+        else:
+            open_total += 1
+    grand_total = open_total + done_total
+    burndown = {
+        "total": grand_total,
+        "done": done_total,
+        "remaining": open_total,
+        "pct_done": round((done_total / grand_total) * 100, 1) if grand_total else 0.0,
+        "tasksets": [],
+    }
+    for ts in task_sets:
+        total = _ops_int(ts.get("tasks_total"))
+        done = _ops_int(ts.get("tasks_done"))
+        remaining = max(0, total - done)
+        burndown["tasksets"].append(
+            {
+                "task_set_id": str(ts.get("id") or ""),
+                "display_name": str(ts.get("display_name") or ts.get("id") or ""),
+                "total": total,
+                "done": done,
+                "remaining": remaining,
+                "pct_done": round((done / total) * 100, 1) if total else 0.0,
+            }
+        )
+    burndown["tasksets"].sort(key=lambda row: (-row["remaining"], row["task_set_id"]))
+
+    # Weekly completion velocity: count tasks whose completed_at falls in each
+    # ISO week. Falls back to updated_at for done tasks lacking completed_at.
+    week_counts: dict[str, int] = {}
+    for task in tasks:
+        if _status_bucket(task) != "done":
+            continue
+        when = task.get("completed_at") or task.get("updated_at")
+        week = _ops_iso_week(when)
+        if week:
+            week_counts[week] = week_counts.get(week, 0) + 1
+    weekly = [
+        {"week": week, "done": count}
+        for week, count in sorted(week_counts.items())
+    ][-_OPS_VELOCITY_WEEKS:]
+    velocity = {
+        "weeks": weekly,
+        "available": bool(weekly),
+        "total_done": sum(item["done"] for item in weekly),
+        "avg_per_week": round(sum(item["done"] for item in weekly) / len(weekly), 2) if weekly else 0.0,
+        "peak_week": max((item["done"] for item in weekly), default=0),
+    }
+
+    return {
+        "schema": OPS_METRICS_SCHEMA,
+        "generated_at": now,
+        "sources": {
+            "tokens": TASKS_GLOB,
+            "evals": [REVIEW_GLOB, _OPS_EVAL_EVIDENCE_GLOB],
+            "gates": "reviews/*GATE*.json",
+            "burndown": TASKS_GLOB,
+        },
+        "resources": resources,
+        "eval_trend": eval_trend,
+        "gates": gates,
+        "burndown": burndown,
+        "velocity": velocity,
+    }
+
+
 def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     root_path = Path(root).resolve()
     generated_at = now or _now_iso()
@@ -5203,6 +5548,9 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     # plus scheduled dispatches and publishes due-soon/overdue reminders.
     schedules = load_schedules(root_path, generated_at, warnings)
     calendar = build_calendar(tasks, roadmap, reviews, taskset_completion, schedules, generated_at)
+    # Ops dashboard (TASK-AR-339): token/cost, eval trend, gate board, burndown.
+    # Pure read-only derivation over tasks + task_sets + eval/gate evidence files.
+    ops_metrics = build_ops_metrics(tasks, task_sets, root_path, generated_at)
     state: dict[str, Any] = {
         "generated_at": generated_at,
         "sources": sources,
@@ -5243,6 +5591,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "reviews": reviews,
         "schedules": schedules,
         "calendar": calendar,
+        "ops_metrics": ops_metrics,
         "commands": commands,
         "gaps": gaps,
         "warnings": warnings,
