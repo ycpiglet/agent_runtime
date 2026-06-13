@@ -49,12 +49,47 @@ PLANNING_COMMAND_TYPES = ("planning.scan", "planning.approve", "planning.reject"
 # reviews/MEETING-* or reviews/SEMINAR-* record. The console NEVER writes the
 # reviews/ file directly.
 MEETING_COMMAND_TYPES = ("meeting.start", "seminar.start")
+# TASK-AR-331: Custom properties / labels / automation-rule CRUD. Every one of
+# these is PROPOSAL-ONLY: the handler records a declarative proposal under
+# .ui_outbox/{properties,labels,automation} that a runtime executor consumes to
+# write the canonical agents/project/ui/** or agents/project/automation/rules/**
+# file. The console NEVER writes those canonical files directly. Rule EXECUTION
+# is owned by scripts/automation_rules_gate.py in the gate chain.
+PROPERTY_COMMAND_TYPES = ("property.create", "property.update", "property.delete")
+LABEL_COMMAND_TYPES = ("label.create", "label.update", "label.delete")
+AUTOMATION_COMMAND_TYPES = ("automation.create", "automation.update", "automation.delete", "automation.toggle")
+UI_CONFIG_COMMAND_TYPES = PROPERTY_COMMAND_TYPES + LABEL_COMMAND_TYPES + AUTOMATION_COMMAND_TYPES
+
+CUSTOM_PROPERTY_TYPES = ("text", "select", "number", "date")
+AUTOMATION_TRIGGERS = ("status_change", "due_passed", "blocked_too_long")
+AUTOMATION_ACTIONS = ("board_regen", "escalation_message", "label_apply")
+# Fixed semantic label-color tokens (mirror ui_state.LABEL_COLOR_TOKENS). A
+# label color request is always normalized to one of these so a rendered chip
+# can only ever consume var(--<token>); user input never becomes raw CSS.
+LABEL_COLOR_TOKENS = (
+    "primary",
+    "success",
+    "warning",
+    "danger",
+    "violet",
+    "teal",
+    "amber",
+    "info",
+    "purple",
+    "blue",
+)
 MEETING_TYPES = ("meeting", "seminar", "review")
 MEETING_MIN_PARTICIPANTS = 2
 MEETING_DEFAULT_ROUNDS = 3
 MEETING_MAX_ROUNDS = 20
 TASK_BOARD_SYNC_COMMANDS = {"task.create", "task.update", "task.reorder", "task.archive"}
-COMMAND_TYPES = TASK_COMMAND_TYPES + RUNTIME_COMMAND_TYPES + PLANNING_COMMAND_TYPES + MEETING_COMMAND_TYPES
+COMMAND_TYPES = (
+    TASK_COMMAND_TYPES
+    + RUNTIME_COMMAND_TYPES
+    + PLANNING_COMMAND_TYPES
+    + MEETING_COMMAND_TYPES
+    + UI_CONFIG_COMMAND_TYPES
+)
 UNSAFE_PAYLOAD_KEYS = {"path", "source_path", "direct_file_path", "file_path", "filesystem_path"}
 HIGH_RISK_TERMS = (
     ("delete", "deletion"),
@@ -765,6 +800,168 @@ def _meeting_command(
     }
 
 
+# ----- TASK-AR-331: property / label / automation-rule CRUD (proposal-only) -----
+
+
+def _label_color_token(value: Any) -> str:
+    """Normalize any color request to a fixed semantic token (never raw CSS)."""
+    key = str(value or "").strip().lower()
+    if key in LABEL_COLOR_TOKENS:
+        return key
+    if not key:
+        return "primary"
+    digest = sum(ord(char) for char in key)
+    return LABEL_COLOR_TOKENS[digest % len(LABEL_COLOR_TOKENS)]
+
+
+def _ui_key(value: Any) -> str:
+    return re.sub(r"[^A-Za-z0-9_-]+", "-", str(value or "").strip()).strip("-").lower()
+
+
+def _write_ui_proposal(root: Path, subdir: str, proposal: dict[str, Any]) -> str:
+    path = root / ".ui_outbox" / subdir / f"{proposal['id']}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(proposal, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return _rel(root, path)
+
+
+def _property_command(root: Path, command_type: str, target: str | None, payload: dict[str, Any], now: str, command_id: str) -> dict[str, Any]:
+    action = command_type.split(".", 1)[1]
+    key = _ui_key(target or payload.get("key") or payload.get("id"))
+    errors: list[str] = []
+    if not key:
+        errors.append("property key is required")
+    prop_type = str(payload.get("type") or "text").strip().lower()
+    if action in {"create", "update"} and prop_type not in CUSTOM_PROPERTY_TYPES:
+        errors.append(f"invalid property type: {prop_type!r} (expected {', '.join(CUSTOM_PROPERTY_TYPES)})")
+    options = payload.get("options") if isinstance(payload.get("options"), list) else []
+    if action in {"create", "update"} and prop_type == "select" and not options:
+        errors.append("select property requires at least one option")
+    if errors:
+        return {"errors": errors}
+
+    proposal = {
+        "id": command_id.replace("COMMAND-", "PROPREQ-"),
+        "type": command_type,
+        "action": action,
+        "target_file": "agents/project/ui/custom-properties.json",
+        "status": "queued",
+        "created_at": now,
+        "requested_by": str(payload.get("actor") or "ui"),
+        "key": key,
+        "definition": None
+        if action == "delete"
+        else {
+            "key": key,
+            "label": str(payload.get("label") or key),
+            "type": prop_type,
+            "options": [str(option) for option in options if str(option).strip()],
+            "filterable": bool(payload.get("filterable", True)),
+        },
+        "mutation_boundary": "proposal_only",
+        "next": "runtime executor applies this proposal to agents/project/ui/custom-properties.json",
+    }
+    changed = _write_ui_proposal(root, "properties", proposal)
+    return {"status": "queued", "result": {"changed": [changed], "proposal_id": proposal["id"], "action": action, "mutation_boundary": "proposal_only", "next": proposal["next"]}}
+
+
+def _label_command(root: Path, command_type: str, target: str | None, payload: dict[str, Any], now: str, command_id: str) -> dict[str, Any]:
+    action = command_type.split(".", 1)[1]
+    name = str(target or payload.get("name") or "").strip()
+    errors: list[str] = []
+    if not name:
+        errors.append("label name is required")
+    if errors:
+        return {"errors": errors}
+
+    color_token = _label_color_token(payload.get("color") or payload.get("color_token"))
+    proposal = {
+        "id": command_id.replace("COMMAND-", "LABELREQ-"),
+        "type": command_type,
+        "action": action,
+        "target_file": "agents/project/ui/labels.json",
+        "status": "queued",
+        "created_at": now,
+        "requested_by": str(payload.get("actor") or "ui"),
+        "name": name,
+        "label": None
+        if action == "delete"
+        else {
+            "name": name,
+            "color_token": color_token,
+            "description": str(payload.get("description") or ""),
+        },
+        "mutation_boundary": "proposal_only",
+        "next": "runtime executor applies this proposal to agents/project/ui/labels.json",
+    }
+    changed = _write_ui_proposal(root, "labels", proposal)
+    return {"status": "queued", "result": {"changed": [changed], "proposal_id": proposal["id"], "action": action, "color_token": color_token, "mutation_boundary": "proposal_only", "next": proposal["next"]}}
+
+
+def _automation_command(root: Path, command_type: str, target: str | None, payload: dict[str, Any], now: str, command_id: str) -> dict[str, Any]:
+    action = command_type.split(".", 1)[1]
+    rule_id = str(target or payload.get("id") or payload.get("rule_id") or "").strip()
+    errors: list[str] = []
+    if action in {"update", "delete", "toggle"} and not rule_id:
+        errors.append("rule id is required")
+    trigger = str(payload.get("trigger") or "").strip()
+    action_kind = str(payload.get("action") or "").strip()
+    if action in {"create", "update"}:
+        if trigger not in AUTOMATION_TRIGGERS:
+            errors.append(f"invalid trigger: {trigger!r} (expected {', '.join(AUTOMATION_TRIGGERS)})")
+        if action_kind not in AUTOMATION_ACTIONS:
+            errors.append(f"invalid action: {action_kind!r} (expected {', '.join(AUTOMATION_ACTIONS)})")
+    if action == "toggle" and not isinstance(payload.get("active"), bool):
+        errors.append("toggle requires a boolean 'active' field")
+    if errors:
+        return {"errors": errors}
+
+    if action == "create" and not rule_id:
+        rule_id = "RULE-" + (_ui_key(payload.get("name")) or re.sub(r"[^0-9]", "", now)[:14])
+
+    rule = None
+    if action in {"create", "update"}:
+        rule = {
+            "id": rule_id,
+            "name": str(payload.get("name") or rule_id),
+            "description": str(payload.get("description") or ""),
+            "trigger": trigger,
+            "action": action_kind,
+            "params": payload.get("params") if isinstance(payload.get("params"), dict) else {},
+            "active": bool(payload.get("active", False)),
+        }
+
+    proposal = {
+        "id": command_id.replace("COMMAND-", "AUTOREQ-"),
+        "type": command_type,
+        "action": action,
+        "rule_id": rule_id,
+        "target_file": f"agents/project/automation/rules/{rule_id}.json" if rule_id else "agents/project/automation/rules/",
+        "status": "queued",
+        "created_at": now,
+        "requested_by": str(payload.get("actor") or "ui"),
+        "rule": rule,
+        "active": payload.get("active") if action == "toggle" else (rule["active"] if rule else None),
+        "mutation_boundary": "proposal_only",
+        "execution_boundary": "gate_chain",
+        "executor": "scripts/automation_rules_gate.py",
+        "next": "runtime executor applies this proposal to the declarative rule file; the gate chain executes active rules",
+    }
+    changed = _write_ui_proposal(root, "automation", proposal)
+    return {
+        "status": "queued",
+        "result": {
+            "changed": [changed],
+            "proposal_id": proposal["id"],
+            "action": action,
+            "rule_id": rule_id,
+            "mutation_boundary": "proposal_only",
+            "execution_boundary": "gate_chain",
+            "next": proposal["next"],
+        },
+    }
+
+
 def submit_command(
     root: Path | str,
     command: dict[str, Any],
@@ -803,6 +1000,12 @@ def submit_command(
         outcome = _planning_decision_command(root_path, command_type, payload, created_at, cid)
     elif command_type in MEETING_COMMAND_TYPES:
         outcome = _meeting_command(root_path, command_type, target_str, payload, created_at, cid)
+    elif command_type in PROPERTY_COMMAND_TYPES:
+        outcome = _property_command(root_path, command_type, target_str, payload, created_at, cid)
+    elif command_type in LABEL_COMMAND_TYPES:
+        outcome = _label_command(root_path, command_type, target_str, payload, created_at, cid)
+    elif command_type in AUTOMATION_COMMAND_TYPES:
+        outcome = _automation_command(root_path, command_type, target_str, payload, created_at, cid)
     else:
         outcome = _runtime_command(root_path, command_type, target_str, payload, created_at)
 

@@ -41,6 +41,10 @@ RESOURCE_NAMES = (
     "roadmap",
     "roadmap_timeline",
     "planning",
+    "custom_properties",
+    "labels",
+    "automation_rules",
+    "triage",
     "commands",
 )
 
@@ -348,12 +352,17 @@ def load_tasks(root: Path, now: str, warnings: list[dict[str, str]]) -> list[dic
             "description": _first_sentence(goal),
             "peek_summary": _peek_summary(meta, goal),
             "blocked_reason": meta.get("blocked_reason"),
+            "due": meta.get("due"),
+            "blocked_since": meta.get("blocked_since"),
             "registered_at": registered_at,
             "created_at": created_at,
             "started_at": started_at,
             "updated_at": updated_at,
             "completed_at": completed_at,
             "metadata": metadata,
+            # Raw frontmatter retained so custom-property definitions can be
+            # projected onto each task as a frontmatter extension (TASK-AR-331).
+            "custom_property_source": dict(meta),
             "audit_log": meta.get("audit_log") if isinstance(meta.get("audit_log"), list) else [],
             "source_path": rel_path,
             "source_kind": "task_markdown",
@@ -3097,6 +3106,253 @@ def build_dependency_graph(tasks: list[dict[str, Any]], now: str) -> dict[str, A
     }
 
 
+# --- Custom properties + labels + automation rules + triage (TASK-AR-331) ---
+# Notion-style custom properties, Monday/Linear-style labels, Monday/ClickUp
+# "when X then Y" automation rules, and a Linear-style triage queue. All four
+# are READ-ONLY derivations here: definitions come from declarative files under
+# agents/project/ui/** and agents/project/automation/rules/**; usage counts and
+# the triage inbox are computed from the canonical task files. Nothing in this
+# module mutates stored state - rule/label/property edits arrive as proposals in
+# .ui_outbox (see ui_commands) and a runtime executor applies them, while rule
+# EXECUTION happens in the gate chain (scripts/automation_rules_gate.py).
+
+CUSTOM_PROPERTIES_SCHEMA = "agent-runtime-custom-properties/v1"
+LABELS_SCHEMA = "agent-runtime-labels/v1"
+AUTOMATION_RULES_SCHEMA = "agent-runtime-automation-rules/v1"
+TRIAGE_SCHEMA = "agent-runtime-triage/v1"
+
+CUSTOM_PROPERTIES_REL = "agents/project/ui/custom-properties.json"
+LABELS_REL = "agents/project/ui/labels.json"
+AUTOMATION_RULES_GLOB = "agents/project/automation/rules/*.json"
+
+CUSTOM_PROPERTY_TYPES = ("text", "select", "number", "date")
+
+# Label colors map onto the SAME fixed semantic token palette used by channel
+# role colors. User-defined label colors NEVER inject raw CSS; they are mapped
+# to one of these token names, which the stylesheet resolves via var(--token)
+# (defined in BOTH theme blocks). This keeps the tokenization gate green.
+LABEL_COLOR_TOKENS = (
+    "primary",
+    "success",
+    "warning",
+    "danger",
+    "violet",
+    "teal",
+    "amber",
+    "info",
+    "purple",
+    "blue",
+)
+
+# Declarative automation rule triggers/actions. Execution lives in the gate
+# chain; the UI only does CRUD + the active/inactive toggle.
+AUTOMATION_TRIGGERS = ("status_change", "due_passed", "blocked_too_long")
+AUTOMATION_ACTIONS = ("board_regen", "escalation_message", "label_apply")
+
+# Triage collection thresholds (Linear-style inbox).
+TRIAGE_BLOCKED_DAYS = 3
+_TRIAGE_DONE_STATUSES = {"completed", "done", "released", "완료"}
+
+
+def _label_color_token(value: Any) -> str:
+    """Map an arbitrary label color request onto a fixed semantic token.
+
+    Accepts a token name directly (validated against the palette) or hashes any
+    other string deterministically. Guarantees the result is always a known
+    token so the rendered chip can only ever consume var(--<token>).
+    """
+    key = str(value or "").strip().lower()
+    if key in LABEL_COLOR_TOKENS:
+        return key
+    if not key:
+        return "primary"
+    digest = sum(ord(char) for char in key)
+    return LABEL_COLOR_TOKENS[digest % len(LABEL_COLOR_TOKENS)]
+
+
+def load_custom_properties(root: Path, now: str, warnings: list[dict[str, str]]) -> dict[str, Any]:
+    """Load custom-property DEFINITIONS (text/select/number/date) from the UI config file."""
+    path = root / CUSTOM_PROPERTIES_REL
+    definitions: list[dict[str, Any]] = []
+    if path.exists():
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            warnings.append(_warning("custom-properties-parse-error", _rel(root, path), str(exc)))
+            payload = {}
+        except OSError as exc:
+            warnings.append(_warning("custom-properties-read-error", _rel(root, path), str(exc)))
+            payload = {}
+        raw = payload.get("properties") if isinstance(payload, dict) else None
+        for entry in raw or []:
+            if not isinstance(entry, dict):
+                continue
+            key = str(entry.get("key") or entry.get("id") or "").strip()
+            if not key:
+                continue
+            prop_type = str(entry.get("type") or "text").strip().lower()
+            if prop_type not in CUSTOM_PROPERTY_TYPES:
+                prop_type = "text"
+            options = entry.get("options") if isinstance(entry.get("options"), list) else []
+            definitions.append(
+                {
+                    "key": key,
+                    "label": str(entry.get("label") or key),
+                    "type": prop_type,
+                    "options": [str(option) for option in options if str(option).strip()],
+                    "filterable": bool(entry.get("filterable", True)),
+                }
+            )
+    return {
+        "schema": CUSTOM_PROPERTIES_SCHEMA,
+        "generated_at": now,
+        "source_path": CUSTOM_PROPERTIES_REL,
+        "source_kind": "custom_properties_json",
+        "freshness": _path_freshness(path),
+        "last_updated": _mtime_iso(path),
+        "types": list(CUSTOM_PROPERTY_TYPES),
+        "definitions": definitions,
+    }
+
+
+def _coerce_property_value(prop_type: str, raw: Any) -> dict[str, Any]:
+    """Display/filter shape for a single task's value of one custom property."""
+    display = "" if raw is None else str(raw)
+    valid = True
+    if prop_type == "number" and display:
+        try:
+            float(display)
+        except ValueError:
+            valid = False
+    return {"raw": raw, "display": display, "valid": valid}
+
+
+def enrich_tasks_with_custom_properties(
+    tasks: list[dict[str, Any]],
+    custom_properties: dict[str, Any],
+) -> None:
+    """Project each definition onto every task (frontmatter extension), display + filter ready."""
+    definitions = custom_properties.get("definitions", [])
+    for task in tasks:
+        meta = task.get("custom_property_source") or {}
+        projected: dict[str, dict[str, Any]] = {}
+        for definition in definitions:
+            key = definition["key"]
+            projected[key] = _coerce_property_value(definition["type"], meta.get(key))
+        task["custom_properties"] = projected
+
+
+def filter_tasks_by_custom_properties(
+    tasks: list[dict[str, Any]],
+    filters: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    """Filter tasks by exact custom-property display value (computed-only)."""
+    filters = filters or {}
+    if not filters:
+        return list(tasks)
+    result: list[dict[str, Any]] = []
+    for task in tasks:
+        props = task.get("custom_properties") or {}
+        keep = True
+        for key, wanted in filters.items():
+            want = str(wanted).strip()
+            if not want:
+                continue
+            value = props.get(key) or {}
+            if str(value.get("display") or "") != want:
+                keep = False
+                break
+        if keep:
+            result.append(task)
+    return result
+
+
+def build_labels(
+    root: Path,
+    tasks: list[dict[str, Any]],
+    now: str,
+    warnings: list[dict[str, str]],
+) -> dict[str, Any]:
+    """Label registry (name/color-token) joined with computed usage counts from task tags."""
+    path = root / LABELS_REL
+    defined: dict[str, dict[str, Any]] = {}
+    if path.exists():
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            warnings.append(_warning("labels-parse-error", _rel(root, path), str(exc)))
+            payload = {}
+        except OSError as exc:
+            warnings.append(_warning("labels-read-error", _rel(root, path), str(exc)))
+            payload = {}
+        raw = payload.get("labels") if isinstance(payload, dict) else None
+        for entry in raw or []:
+            if not isinstance(entry, dict):
+                continue
+            name = str(entry.get("name") or "").strip()
+            if not name:
+                continue
+            defined[name.lower()] = {
+                "name": name,
+                "color_token": _label_color_token(entry.get("color") or entry.get("color_token")),
+                "description": str(entry.get("description") or ""),
+                "defined": True,
+            }
+
+    # Usage counts are COMPUTED from task tags/labels (never a stored count).
+    usage: dict[str, int] = {}
+    used_tasks: dict[str, list[str]] = {}
+    for task in tasks:
+        seen: set[str] = set()
+        for tag in task.get("labels") or []:
+            name = str(tag or "").strip()
+            if not name:
+                continue
+            low = name.lower()
+            if low in seen:
+                continue
+            seen.add(low)
+            usage[low] = usage.get(low, 0) + 1
+            used_tasks.setdefault(low, []).append(str(task.get("id") or ""))
+
+    labels: list[dict[str, Any]] = []
+    for low in sorted(set(defined) | set(usage)):
+        entry = defined.get(low)
+        if entry is None:
+            # Tag used on tasks but not formally defined - still surface it.
+            display = next(
+                (str(tag) for task in tasks for tag in (task.get("labels") or []) if str(tag).lower() == low),
+                low,
+            )
+            entry = {
+                "name": display,
+                "color_token": _label_color_token(display),
+                "description": "",
+                "defined": False,
+            }
+        record = dict(entry)
+        record["usage_count"] = usage.get(low, 0)
+        record["task_ids"] = sorted({tid for tid in used_tasks.get(low, []) if tid})
+        labels.append(record)
+
+    labels.sort(key=lambda item: (-item["usage_count"], item["name"].lower()))
+    return {
+        "schema": LABELS_SCHEMA,
+        "generated_at": now,
+        "source_path": LABELS_REL,
+        "source_kind": "labels_json",
+        "freshness": _path_freshness(path),
+        "last_updated": _mtime_iso(path),
+        "color_tokens": list(LABEL_COLOR_TOKENS),
+        "labels": labels,
+        "totals": {
+            "labels": len(labels),
+            "defined": sum(1 for label in labels if label["defined"]),
+            "used": sum(1 for label in labels if label["usage_count"]),
+        },
+    }
+
+
 def build_timeline(tasks: list[dict[str, Any]], now: str) -> dict[str, Any]:
     """Asana/ClickUp-style horizontal-bar timeline grouped by taskset.
 
@@ -3180,6 +3436,165 @@ def build_timeline(tasks: list[dict[str, Any]], now: str) -> dict[str, Any]:
     }
 
 
+def load_automation_rules(root: Path, now: str, warnings: list[dict[str, str]]) -> dict[str, Any]:
+    """Load declarative automation rules (one JSON file per rule, gate-executed)."""
+    rules: list[dict[str, Any]] = []
+    for path in sorted(root.glob(AUTOMATION_RULES_GLOB)):
+        rel_path = _rel(root, path)
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            warnings.append(_warning("automation-rule-parse-error", rel_path, str(exc)))
+            continue
+        except OSError as exc:
+            warnings.append(_warning("automation-rule-read-error", rel_path, str(exc)))
+            continue
+        if not isinstance(payload, dict):
+            warnings.append(_warning("automation-rule-invalid-record", rel_path, "rule payload is not an object"))
+            continue
+        trigger = str(payload.get("trigger") or "").strip()
+        action = str(payload.get("action") or "").strip()
+        invalid: list[str] = []
+        if trigger not in AUTOMATION_TRIGGERS:
+            invalid.append(f"unknown trigger: {trigger!r}")
+        if action not in AUTOMATION_ACTIONS:
+            invalid.append(f"unknown action: {action!r}")
+        rules.append(
+            {
+                "id": str(payload.get("id") or path.stem),
+                "name": str(payload.get("name") or payload.get("id") or path.stem),
+                "description": str(payload.get("description") or ""),
+                "trigger": trigger,
+                "action": action,
+                "params": payload.get("params") if isinstance(payload.get("params"), dict) else {},
+                "active": bool(payload.get("active", False)),
+                "invalid": invalid,
+                "source_path": rel_path,
+                "source_kind": "automation_rule_json",
+                "source": _source_metadata(root, path, "automation_rule_json", now),
+                "last_updated": _mtime_iso(path),
+                "freshness": "present",
+            }
+        )
+    active = [rule for rule in rules if rule["active"] and not rule["invalid"]]
+    return {
+        "schema": AUTOMATION_RULES_SCHEMA,
+        "generated_at": now,
+        "source_glob": AUTOMATION_RULES_GLOB,
+        "triggers": list(AUTOMATION_TRIGGERS),
+        "actions": list(AUTOMATION_ACTIONS),
+        "rules": rules,
+        "totals": {
+            "rules": len(rules),
+            "active": len(active),
+            "inactive": sum(1 for rule in rules if not rule["active"]),
+            "invalid": sum(1 for rule in rules if rule["invalid"]),
+        },
+    }
+
+
+def _days_since(value: Any, now: str) -> float | None:
+    """Whole+fractional days between an ISO timestamp/date and ``now`` (>= 0)."""
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+
+    def _parse(text: str) -> datetime | None:
+        text = text.strip()
+        for candidate in (text, text[:19], text[:10]):
+            try:
+                parsed = datetime.fromisoformat(candidate)
+                if parsed.tzinfo is None:
+                    parsed = parsed.replace(tzinfo=timezone.utc)
+                return parsed
+            except ValueError:
+                continue
+        return None
+
+    start = _parse(raw)
+    current = _parse(now) or datetime.now(timezone.utc)
+    if start is None:
+        return None
+    delta = (current - start).total_seconds() / 86400.0
+    return max(0.0, delta)
+
+
+def build_triage(
+    tasks: list[dict[str, Any]],
+    now: str,
+) -> dict[str, Any]:
+    """Linear-style triage inbox: unclassified / overdue / long-blocked tasks (computed-only).
+
+    Collection rules (each task can carry multiple reasons):
+    - ``unclassified``: an open task with no ``task_set_id``.
+    - ``overdue``: an open task whose ``due`` date has passed.
+    - ``long_blocked``: a blocked task blocked longer than ``TRIAGE_BLOCKED_DAYS``.
+    """
+    items: list[dict[str, Any]] = []
+    reason_counts = {"unclassified": 0, "overdue": 0, "long_blocked": 0}
+    for task in tasks:
+        bucket = _status_bucket(task)
+        if str(task.get("status") or "").strip().lower() in _TRIAGE_DONE_STATUSES or bucket == "done":
+            continue
+        reasons: list[str] = []
+        details: dict[str, Any] = {}
+
+        if not str(task.get("task_set_id") or "").strip():
+            reasons.append("unclassified")
+
+        due = task.get("due") or (task.get("metadata") or {}).get("due")
+        overdue_days = _days_since(due, now) if due else None
+        if overdue_days is not None and overdue_days > 0:
+            reasons.append("overdue")
+            details["overdue_days"] = round(overdue_days, 2)
+            details["due"] = str(due)
+
+        if bucket == "blocked":
+            since = (
+                task.get("blocked_since")
+                or task.get("updated_at")
+                or task.get("started_at")
+                or task.get("created_at")
+            )
+            blocked_days = _days_since(since, now)
+            if blocked_days is not None and blocked_days >= TRIAGE_BLOCKED_DAYS:
+                reasons.append("long_blocked")
+                details["blocked_days"] = round(blocked_days, 2)
+
+        if not reasons:
+            continue
+        for reason in reasons:
+            reason_counts[reason] += 1
+        items.append(
+            {
+                "id": task.get("id"),
+                "title": task.get("title"),
+                "status": task.get("status"),
+                "priority": task.get("priority"),
+                "owner_agent": task.get("owner_agent"),
+                "task_set_id": task.get("task_set_id") or None,
+                "labels": task.get("labels") or [],
+                "reasons": reasons,
+                "details": details,
+                "blocked_reason": task.get("blocked_reason"),
+                "source_path": task.get("source_path"),
+                "source_kind": "triage_item",
+                "last_updated": task.get("last_updated"),
+                "freshness": task.get("freshness", "present"),
+            }
+        )
+
+    # Most reasons first, then unclassified-priority, then id for stability.
+    items.sort(key=lambda item: (-len(item["reasons"]), str(item.get("id") or "")))
+    return {
+        "schema": TRIAGE_SCHEMA,
+        "generated_at": now,
+        "blocked_threshold_days": TRIAGE_BLOCKED_DAYS,
+        "items": items,
+        "totals": {"total": len(items), **reason_counts},
+    }
+
+
 def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     root_path = Path(root).resolve()
     generated_at = now or _now_iso()
@@ -3216,6 +3631,12 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     live_map = build_live_map(tasks, agents, messages, team_agents, generated_at)
     dependency_graph = build_dependency_graph(tasks, generated_at)
     timeline = build_timeline(tasks, generated_at)
+    # Custom properties / labels / automation rules / triage (TASK-AR-331).
+    custom_properties = load_custom_properties(root_path, generated_at, warnings)
+    enrich_tasks_with_custom_properties(tasks, custom_properties)
+    labels = build_labels(root_path, tasks, generated_at, warnings)
+    automation_rules = load_automation_rules(root_path, generated_at, warnings)
+    triage = build_triage(tasks, generated_at)
     return {
         "generated_at": generated_at,
         "sources": sources,
@@ -3246,6 +3667,10 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "roadmap": roadmap,
         "roadmap_timeline": roadmap_timeline,
         "planning": planning,
+        "custom_properties": custom_properties,
+        "labels": labels,
+        "automation_rules": automation_rules,
+        "triage": triage,
         "commands": commands,
         "gaps": gaps,
         "warnings": warnings,
