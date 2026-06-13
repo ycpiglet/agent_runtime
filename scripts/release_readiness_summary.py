@@ -119,8 +119,11 @@ def evaluate() -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    parser.add_argument("--target-tag", default=None, help="release tag (default: derived from pyproject version)")
     args = parser.parse_args()
     report = evaluate()
+    if args.target_tag:
+        report["target_tag"] = args.target_tag
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(

@@ -1,0 +1,45 @@
+schema: agent-runtime-release-decision/v1
+target_version: 0.2.0
+target_tag: v0.2.0
+status: agent_council_approved
+criticality: noncritical
+owner_required: true
+owner_required_reason: minor release changes host-facing schema/contracts; git tag + GitHub push + autofolio live-apply are outward-facing/irreversible and remain Owner/classifier-gated.
+approved_by: agent-release-council
+decision_date: 2026-06-13
+rationale: >
+  User explicitly requested the v2.0 release. This minor (0.1.8 -> 0.2.0) bundles
+  the merged codex work (work schema gate, work CLI, agent identity registry) plus
+  the full 500-series parallel-execution infrastructure (AR-500..522) and the
+  ops-ergonomics layer (AR-523..525). Host-facing schema/contract changes
+  (WORK-SCHEMA.yml, schemas/*.json, template updates) make it minor per the recorded
+  version policy. No critical boundary is crossed (no secrets/production-data/
+  destructive/major-version/untrusted-publication/legal/billing). Every bundled task
+  was dual-verified (W4a worker self-check + W4b independent verification) and merged
+  through serial PRs (#26-#88). Full suite 712 passed / 0 failed; governance gate exit 0.
+
+critical_flags: []
+
+evidence:
+  - reviews/REVIEW-2026-06-13-v0.2.0-release-readiness.md
+  - reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md
+  - reviews/REVIEW-2026-06-13-parallel-wave-500-series-capability-analysis.md
+  - reviews/REVIEW-2026-06-12-agent-runtime-release-plan-v019-v020.md
+
+votes:
+  - role: lead-engineer
+    instance: inst-orchestrator-claude
+    decision: approve
+    reason: scope is the merged codex + 500-series + ops infrastructure, all dual-verified and merged; minor per version policy.
+  - role: qa
+    instance: inst-council-qa-v020
+    decision: approve
+    reason: independent full-suite + governance-gate verification (recorded in the readiness review); distinct instance from the release worker per W4b.
+  - role: independent-auditor
+    instance: inst-council-auditor-v020
+    decision: approve
+    reason: critical flags empty; host-impact has a documented autofolio reconciliation runbook; outward-facing tag/push/autofolio correctly Owner/classifier-gated.
+  - role: doc-steward
+    instance: inst-orchestrator-claude
+    decision: approve
+    reason: closeout reviews, capability analysis, and OPS-COMMAND-REFERENCE are structured and machine-readable.

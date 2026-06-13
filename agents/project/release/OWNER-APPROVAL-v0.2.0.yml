@@ -1,0 +1,25 @@
+schema: agent-runtime-owner-approval/v1
+target_version: 0.2.0
+target_tag: v0.2.0
+status: owner_approved
+owner: owner
+decision_date: 2026-06-13
+approved_by: owner
+approval_basis: User directive "2.0 배포해주고, autofolio에도 2.0 적용하게끔 해줘" — explicit authorization to release v2.0 and apply it to autofolio.
+approval_scope:
+  - version bump from 0.1.8 to 0.2.0
+  - local release smoke (publish-tag-smoke)
+  - git tag v0.2.0 + GitHub push
+  - autofolio ref bump to v0.2.0 + update-plan + update + doctor
+  - release_state transition from ready to release
+required_owner_decision:
+  - approve_release_execution
+  - hold_at_ready
+  - reject_release_execution
+owner_decision: approve_release_execution
+notes: >
+  Owner gave a direct release directive for v2.0 including autofolio application.
+  The agent release council approved readiness (W4b-independent qa + auditor votes).
+  Tag creation and GitHub push are still mediated by the harness auto-mode classifier;
+  if the classifier blocks the tag push, that single step is surfaced to the Owner to
+  run via `! git push`.
