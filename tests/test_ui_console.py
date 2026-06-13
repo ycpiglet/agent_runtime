@@ -3110,3 +3110,107 @@ def test_ui_console_office_map_graceful_when_no_agents(tmp_path):
     assert {room["id"] for room in office["rooms"]} == {"planning", "dev", "qa", "release", "meeting"}
     html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
     assert 'id="view-office"' in html
+
+
+# --- Growth system view (TASK-AR-363) ---------------------------------------
+
+
+def test_ui_console_growth_view_registered_in_agents_sidebar(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    # New Growth view lives in the AGENTS group with a data-view + data-route.
+    assert 'data-view="growth"' in html
+    assert 'data-route="agents/growth"' in html
+    for host_id in [
+        "view-growth",
+        "growth-hero",
+        "growth-formula",
+        "growth-efficiency",
+        "growth-teams",
+        "growth-agents",
+        "growth-enabled-toggle",
+        "growth-disabled",
+    ]:
+        assert host_id in html
+
+
+def test_ui_console_growth_api_route_serves_resource(tmp_path):
+    response = ui_console.build_response("/api/growth", tmp_path)
+    assert response.status == 200
+    payload = json.loads(response.body.decode("utf-8"))
+    assert payload["resource"] == "growth"
+    assert payload["items"]["schema"] == "agent-runtime-growth/v1"
+    # The XP formula carries no token term (anti-waste) and reports the flag.
+    assert payload["items"]["xp_formula"]["token_spend_excluded"] is True
+    assert "token" not in str(payload["items"]["xp_formula"]["weights"]).lower()
+
+
+def test_ui_console_growth_render_markers_and_toggle_wired(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    for marker in [
+        "renderGrowth",
+        "growthData",
+        "growthHero",
+        "growthFormula",
+        "growthEfficiency",
+        "growthAgents",
+        "wireGrowthToggle",
+        "renderGrowth()",  # wired into renderAll
+        "wireGrowthToggle();",  # wired at setup
+    ]:
+        assert marker in js
+    # The toggle gates display on growth.enabled (global toggle, self-contained).
+    growth_block = js.split("function renderGrowth", 1)[1].split("function wireGrowthToggle", 1)[0]
+    assert "data.enabled" in growth_block
+
+
+def test_ui_console_growth_fields_are_escaped(tmp_path):
+    # Every interpolated growth field must flow through escapeHtml.
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    for fn, fields in [
+        ("function growthHero", ["project.level", "project.cumulative_xp", "stage.label_ko"]),
+        ("function growthEfficiency", ["stat[0]", "stat[1]"]),
+        ("function growthAgents", ["agent.role"]),
+    ]:
+        block = js.split(fn, 1)[1].split("\nfunction ", 1)[0]
+        for field in fields:
+            assert f"escapeHtml({field}" in block, f"{field} not escaped in {fn}"
+
+
+def test_ui_console_growth_css_uses_tokens_not_raw_color(tmp_path):
+    # (TASK-AR-363 tokenization guard) Every color the growth CSS introduces must
+    # be a var(--token); NO raw hex/rgba in any .growth-* rule.
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    body_css = css.replace(_root_token_block(css), "").replace(_dark_theme_block(css), "")
+    growth_rules = [line for line in body_css.splitlines() if ".growth" in line or "--growth" in line]
+    assert growth_rules, "expected growth CSS rules"
+    hex_pattern = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+    rgba_pattern = re.compile(r"rgba?\(")
+    for line in growth_rules:
+        assert not hex_pattern.search(line), f"raw hex in growth CSS: {line.strip()}"
+        assert not rgba_pattern.search(line), f"raw rgba in growth CSS: {line.strip()}"
+    # The new growth tokens are defined in BOTH theme blocks.
+    assert "--growth-xp:" in _root_token_block(css)
+    assert "--growth-xp:" in _dark_theme_block(css)
+    assert "--growth-stage:" in _root_token_block(css)
+    assert "--growth-stage:" in _dark_theme_block(css)
+
+
+def test_ui_console_growth_app_js_ascii_only_and_node_check(tmp_path):
+    # The growth JS must be ASCII-only (cp949 node-check guard) and the bundle
+    # must remain syntactically valid JavaScript.
+    import shutil
+    import subprocess
+
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    start = js.index("function growthData")
+    end = js.index("let workloadScope", start)
+    growth_block = js[start:end]
+    non_ascii = [ch for ch in growth_block if ord(ch) > 127]
+    assert not non_ascii, f"growth JS must be ASCII-only, found: {non_ascii[:5]}"
+
+    if shutil.which("node") is None:
+        import pytest
+
+        pytest.skip("node not available")
+    proc = subprocess.run(["node", "--check", "-"], input=js, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stderr

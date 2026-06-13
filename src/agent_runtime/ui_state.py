@@ -34,6 +34,7 @@ RESOURCE_NAMES = (
     "taskset_completion",
     "team_agents",
     "teams",
+    "growth",
     "workload",
     "sources",
     "errors",
@@ -3963,6 +3964,316 @@ def build_office_map(
     }
 
 
+# --- Growth system (TASK-AR-363) -------------------------------------------
+# Measure/display project maturity like an evolving character: a project level
+# from a cumulative-XP curve, a business-stage title (garage -> seed -> startup
+# -> scaleup -> unicorn) from milestone/release achievement, and per-agent XP
+# reused from the AR-324 team_agents cards (role-based completion, team first).
+#
+# RESEARCH-BACKED GUARDRAILS (acceptance-critical, enforced here in code):
+#   * Token consumption NEVER adds XP. XP is a weighted sum of *outcomes only*
+#     (completed tasks, gate passes, test growth, review outputs). Token spend
+#     feeds only the SEPARATE "efficiency" stat (tokens/task) -- this is the
+#     anti-waste guardrail: spending more tokens can never raise the score.
+#   * NO punishment / decay (Habitica backfire): XP is monotonic and cumulative;
+#     there is no field that subtracts XP. Rework is reported as a neutral
+#     efficiency stat, never as an XP penalty.
+#   * NO streak / consecutive-day pressure (GitHub removed it): there is NO
+#     streak or consecutive-day counter anywhere in this payload.
+#   * Feedback visibility: the formula weights and every contributing count are
+#     published in the payload so the score is explainable.
+#   * Global toggle: self-contained ``enabled`` flag (default on). Degrades
+#     gracefully if the AR-340 gamification policy is absent (policy not yet
+#     landed) -- when present its ``enabled`` value is honoured.
+GROWTH_SCHEMA = "agent-runtime-growth/v1"
+# Optional AR-340 gamification policy file. AR-340 lands separately; if the file
+# is missing the growth system stays fully self-contained and defaults to on.
+GAMIFICATION_POLICY_REL = "agents/project/ui/GAMIFICATION-POLICY.json"
+# XP weights -- a weighted sum of OUTCOME counts. Token spend is deliberately
+# absent: there is no token weight, so tokens can never contribute XP.
+_GROWTH_XP_PER_COMPLETED_TASK = 100
+_GROWTH_XP_PER_GATE_PASS = 40
+_GROWTH_XP_PER_TEST_GROWTH = 15
+_GROWTH_XP_PER_REVIEW = 25
+# Business-stage ladder. Stage is unlocked by cumulative milestone+release
+# achievement (a non-token, non-XP achievement signal). ASCII keys only so the
+# JS keeps no KR string literals (cp949 node-check guard); KR labels live here.
+GROWTH_STAGES: tuple[dict[str, Any], ...] = (
+    {"key": "garage", "label_ko": "가레이지", "min_achievements": 0},
+    {"key": "seed", "label_ko": "시드", "min_achievements": 1},
+    {"key": "startup", "label_ko": "스타트업", "min_achievements": 3},
+    {"key": "scaleup", "label_ko": "스케일업", "min_achievements": 6},
+    {"key": "unicorn", "label_ko": "유니콘", "min_achievements": 10},
+)
+# Tolerant event-name substrings -> growth signal. The event log is append-only
+# and heterogeneous, so we match lowercased substrings rather than exact names.
+_GROWTH_GATE_PASS_MARKERS = ("gate_pass", "gate.pass", "gate_passed", "gate.passed", "gate_green")
+_GROWTH_TEST_MARKERS = ("test_added", "tests_added", "test.added", "test_growth", "tests_passed", "test.pass")
+# Rework markers feed ONLY the neutral efficiency stat -- never XP, never a
+# penalty. A reopened/reverted/regressed signal counts as one rework unit.
+_GROWTH_REWORK_MARKERS = ("reopen", "revert", "regress", "rework", "rollback", "reverted")
+_GROWTH_COMPLETED_TASK_STATES = {"completed", "done", "released", "verified", "archived", "완료"}
+
+
+def _growth_int(value: Any) -> int:
+    """Coerce a tolerant numeric (int/float/str) into a non-negative int."""
+    try:
+        number = int(float(str(value).strip()))
+    except (TypeError, ValueError):
+        return 0
+    return max(0, number)
+
+
+def _growth_event_tokens(event: dict[str, Any]) -> int:
+    """Read an optional token-usage field off an event (efficiency stat only).
+
+    Tolerates several field names. CRITICAL: the returned value feeds ONLY the
+    efficiency stat (tokens/task); it is NEVER summed into XP.
+    """
+    for key in ("tokens", "tokens_used", "total_tokens", "token_count", "usage_tokens"):
+        if key in event:
+            return _growth_int(event.get(key))
+    usage = event.get("usage")
+    if isinstance(usage, dict):
+        for key in ("total_tokens", "tokens", "input_tokens"):
+            if key in usage:
+                return _growth_int(usage.get(key))
+    return 0
+
+
+def load_gamification_policy(root: Path, now: str) -> dict[str, Any]:
+    """Read the optional AR-340 gamification policy; self-contained default.
+
+    AR-340 lands separately. When the policy file is absent we return a
+    well-formed default (enabled=True, present=False) so the growth system never
+    depends on 340 having shipped. When present, its ``enabled`` flag is honoured.
+    """
+    path = root / GAMIFICATION_POLICY_REL
+    default = {
+        "enabled": True,
+        "present": False,
+        "source": "default",
+        "source_path": GAMIFICATION_POLICY_REL,
+    }
+    if not path.exists():
+        return default
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {**default, "present": True, "source": "unreadable"}
+    if not isinstance(payload, dict):
+        return {**default, "present": True, "source": "invalid"}
+    enabled = payload.get("enabled")
+    return {
+        "enabled": True if enabled is None else bool(enabled),
+        "present": True,
+        "source": "policy",
+        "source_path": GAMIFICATION_POLICY_REL,
+    }
+
+
+def _growth_business_stage(achievements: int) -> dict[str, Any]:
+    """Pick the business-stage title unlocked by milestone/release achievement.
+
+    Stage is a pure function of the achievement count (milestones done +
+    releases shipped). It is NOT a function of XP or tokens -- it is a separate
+    "release achievement" title as required by the spec.
+    """
+    safe = max(0, int(achievements))
+    current = GROWTH_STAGES[0]
+    next_stage: dict[str, Any] | None = None
+    for index, stage in enumerate(GROWTH_STAGES):
+        if safe >= int(stage["min_achievements"]):
+            current = stage
+            next_stage = GROWTH_STAGES[index + 1] if index + 1 < len(GROWTH_STAGES) else None
+    to_next = None
+    if next_stage is not None:
+        to_next = max(0, int(next_stage["min_achievements"]) - safe)
+    return {
+        "key": current["key"],
+        "label_ko": current["label_ko"],
+        "achievements": safe,
+        "next_key": next_stage["key"] if next_stage else None,
+        "next_label_ko": next_stage["label_ko"] if next_stage else None,
+        "achievements_to_next": to_next,
+        "ladder": [stage["key"] for stage in GROWTH_STAGES],
+    }
+
+
+def build_growth(
+    tasks: list[dict[str, Any]],
+    task_claims: list[dict[str, Any]],
+    events: list[dict[str, Any]],
+    reviews: list[dict[str, Any]],
+    team_agents: dict[str, Any],
+    roadmap_timeline: dict[str, Any],
+    policy: dict[str, Any],
+    now: str,
+) -> dict[str, Any]:
+    """Project-maturity growth payload (computed-only; tokens excluded from XP).
+
+    Cumulative XP = weighted sum of OUTCOME counts only:
+        completed-task count, gate passes, test growth, review outputs.
+    Token spend is NEVER summed into XP; it feeds only the SEPARATE efficiency
+    stat (tokens/task). XP is monotonic/cumulative -- no decay, no penalty, no
+    streak. Project Lv is read off the same cumulative-XP curve as the agent
+    cards (AR-324). Business stage is a milestone/release-achievement title.
+    """
+    # --- OUTCOME counts (XP inputs) ---------------------------------------
+    # Completed tasks: union of completed task claims and tasks already in a
+    # done lane/status. Counting ids (a set) keeps each task worth XP once.
+    completed_task_ids: set[str] = set()
+    for claim in task_claims:
+        if str(claim.get("status") or "").strip().lower() == "completed":
+            completed_task_ids.add(str(claim.get("task_id") or claim.get("claim_id") or ""))
+    for task in tasks:
+        status = str(task.get("status") or "").strip().lower()
+        if status in _GROWTH_COMPLETED_TASK_STATES or str(task.get("lane") or "") == "Done":
+            completed_task_ids.add(str(task.get("id") or ""))
+    completed_task_ids.discard("")
+    completed_tasks = len(completed_task_ids)
+
+    gate_passes = 0
+    test_growth = 0
+    rework_events = 0
+    token_total = 0
+    for event in events:
+        name = str(event.get("event") or event.get("type") or "").lower()
+        if any(marker in name for marker in _GROWTH_GATE_PASS_MARKERS):
+            gate_passes += 1
+        if any(marker in name for marker in _GROWTH_TEST_MARKERS):
+            test_growth += _growth_int(event.get("count")) or 1
+        if any(marker in name for marker in _GROWTH_REWORK_MARKERS):
+            rework_events += 1
+        # Token spend is read for the efficiency stat ONLY (never XP).
+        token_total += _growth_event_tokens(event)
+
+    review_outputs = len(reviews)
+
+    # --- Cumulative XP (weighted sum of OUTCOMES only; NO token term) ------
+    contributions = {
+        "completed_tasks": completed_tasks * _GROWTH_XP_PER_COMPLETED_TASK,
+        "gate_passes": gate_passes * _GROWTH_XP_PER_GATE_PASS,
+        "test_growth": test_growth * _GROWTH_XP_PER_TEST_GROWTH,
+        "review_outputs": review_outputs * _GROWTH_XP_PER_REVIEW,
+    }
+    cumulative_xp = sum(contributions.values())
+    project_curve = _team_agent_level(cumulative_xp)
+
+    # --- Business stage from milestone/release achievement (not XP/tokens) -
+    summary = roadmap_timeline.get("summary") if isinstance(roadmap_timeline, dict) else {}
+    summary = summary if isinstance(summary, dict) else {}
+    milestones_done = _growth_int(summary.get("milestones_done"))
+    releases = roadmap_timeline.get("releases") if isinstance(roadmap_timeline, dict) else []
+    releases_shipped = sum(
+        1
+        for release in (releases or [])
+        if isinstance(release, dict) and str(release.get("status_bucket") or "") == "completed"
+    )
+    achievements = milestones_done + releases_shipped
+    stage = _growth_business_stage(achievements)
+
+    # --- Per-agent XP (role-based; reuse AR-324 team_agents, team first) ---
+    agent_rows: list[dict[str, Any]] = []
+    for team in (team_agents.get("teams", []) if isinstance(team_agents, dict) else []) or []:
+        team_id = str(team.get("team_id") or team.get("id") or "")
+        for card in team.get("agents", []) or []:
+            agent_rows.append(
+                {
+                    "id": card.get("id"),
+                    "role": card.get("role"),
+                    "callsign": card.get("callsign"),
+                    "team_id": team_id,
+                    "level": card.get("level", 1),
+                    "xp": card.get("xp", 0),
+                    "xp_pct": card.get("xp_pct", 0),
+                    "completed_tasks": (card.get("lifetime") or {}).get("completed_tasks", 0),
+                }
+            )
+    # Team-level XP roll-up (team achievement prioritized over the individual).
+    team_rows: list[dict[str, Any]] = []
+    for team in (team_agents.get("teams", []) if isinstance(team_agents, dict) else []) or []:
+        team_id = str(team.get("team_id") or team.get("id") or "")
+        members = team.get("agents", []) or []
+        team_xp = sum(_growth_int(card.get("xp")) for card in members)
+        team_curve = _team_agent_level(team_xp)
+        team_rows.append(
+            {
+                "team_id": team_id,
+                "xp": team_xp,
+                "level": team_curve["level"],
+                "xp_pct": team_curve["xp_pct"],
+                "agent_count": len(members),
+            }
+        )
+    team_rows.sort(key=lambda row: (-int(row["xp"]), row["team_id"]))
+    agent_rows.sort(key=lambda row: (-int(row["xp"] or 0), str(row["role"] or "")))
+
+    # --- Efficiency stats (SEPARATE; tokens/task + rework rate) ------------
+    # These never affect XP. tokens/task is the anti-waste signal; rework rate is
+    # a neutral quality signal (NOT a penalty).
+    tokens_per_task = round(token_total / completed_tasks, 1) if completed_tasks else 0
+    rework_rate_pct = round((rework_events / completed_tasks) * 100, 1) if completed_tasks else 0
+    efficiency = {
+        "token_total": token_total,
+        "completed_tasks": completed_tasks,
+        "tokens_per_task": tokens_per_task,
+        "rework_events": rework_events,
+        "rework_rate_pct": rework_rate_pct,
+        "note": "efficiency stats are reported separately; they never affect XP",
+    }
+
+    return {
+        "schema": GROWTH_SCHEMA,
+        "generated_at": now,
+        # Global toggle (self-contained). Honour AR-340 policy when present.
+        "enabled": bool(policy.get("enabled", True)),
+        "policy": policy,
+        # Project level off the cumulative-XP curve.
+        "project": {
+            "level": project_curve["level"],
+            "cumulative_xp": cumulative_xp,
+            "xp_into_level": project_curve["xp_into_level"],
+            "xp_for_next": project_curve["xp_for_next"],
+            "xp_pct": project_curve["xp_pct"],
+        },
+        "business_stage": stage,
+        # XP formula is published for feedback visibility (no token term exists).
+        "xp_formula": {
+            "weights": {
+                "completed_task": _GROWTH_XP_PER_COMPLETED_TASK,
+                "gate_pass": _GROWTH_XP_PER_GATE_PASS,
+                "test_growth": _GROWTH_XP_PER_TEST_GROWTH,
+                "review_output": _GROWTH_XP_PER_REVIEW,
+            },
+            "counts": {
+                "completed_tasks": completed_tasks,
+                "gate_passes": gate_passes,
+                "test_growth": test_growth,
+                "review_outputs": review_outputs,
+            },
+            "contributions": contributions,
+            "cumulative_xp": cumulative_xp,
+            "token_spend_excluded": True,
+            "note": "token consumption is excluded from XP by design (anti-waste)",
+        },
+        "efficiency": efficiency,
+        "agents": agent_rows,
+        "teams": team_rows,
+        # Explicit guardrail manifest so the front-end and tests can assert the
+        # research-backed constraints are honoured. These flags are descriptive;
+        # the absence of streak/penalty fields elsewhere is what enforces them.
+        "guardrails": {
+            "token_spend_excluded_from_xp": True,
+            "monotonic_cumulative_xp": True,
+            "no_streak_pressure": True,
+            "no_punishment_mechanic": True,
+            "feedback_visible": True,
+            "global_toggle": True,
+        },
+    }
+
+
 # --- Workload heatmap (TASK-AR-337) ----------------------------------------
 # A per-agent and per-team load grid (assignee/team x period) derived from the
 # resolved task assignments. Each open task contributes one "load unit" to its
@@ -6338,6 +6649,20 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     # and reports only channel name / kind / enabled flag / subscribed
     # severities. Default state is DORMANT (no channels => nothing sends).
     notification_routing = notify_routing.routing_status(root_path, generated_at)
+    # Growth system (TASK-AR-363): project Lv / business stage / XP, computed
+    # ONLY from outcomes (completed tasks, gate passes, test growth, reviews) --
+    # token spend is excluded from XP and reported only as an efficiency stat.
+    gamification_policy = load_gamification_policy(root_path, generated_at)
+    growth = build_growth(
+        tasks,
+        task_claims,
+        events,
+        reviews,
+        team_agents,
+        roadmap_timeline,
+        gamification_policy,
+        generated_at,
+    )
     state: dict[str, Any] = {
         "generated_at": generated_at,
         "sources": sources,
@@ -6355,6 +6680,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "taskset_completion": taskset_completion,
         "team_agents": team_agents,
         "teams": teams,
+        "growth": growth,
         "workload": workload,
         "messages": messages,
         "events": events,

@@ -122,6 +122,9 @@ HTML = """<!doctype html>
           <button class="sidebar-link" type="button" role="tab" data-view="team" data-route="agents/team" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9733;</span><span class="sidebar-label">Team</span>
           </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="growth" data-route="agents/growth" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9650;</span><span class="sidebar-label">Growth</span>
+          </button>
           <button class="sidebar-link" type="button" role="tab" data-view="workload" data-route="agents/workload" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9638;</span><span class="sidebar-label">Workload</span>
           </button>
@@ -371,6 +374,25 @@ HTML = """<!doctype html>
           </div>
           <p id="team-summary" class="team-summary"></p>
           <div id="team-org" class="team-org" aria-label="Team agent organisation"></div>
+        </div>
+        <div id="view-growth" class="view">
+          <section class="growth" aria-label="Project growth">
+            <header class="growth-header">
+              <h2>Project Growth</h2>
+              <label class="growth-toggle">
+                <input id="growth-enabled-toggle" type="checkbox" checked>
+                <span>Show growth</span>
+              </label>
+            </header>
+            <p id="growth-disabled" class="growth-disabled" hidden>Growth display is turned off.</p>
+            <div id="growth-body" class="growth-body">
+              <div id="growth-hero" class="growth-hero" aria-label="Project level and business stage"></div>
+              <div id="growth-formula" class="growth-formula" aria-label="XP formula breakdown"></div>
+              <div id="growth-efficiency" class="growth-efficiency" aria-label="Efficiency stats (separate from XP)"></div>
+              <div id="growth-teams" class="growth-teams" aria-label="Team XP roll-up"></div>
+              <div id="growth-agents" class="growth-agents" aria-label="Per-agent XP"></div>
+            </div>
+          </section>
         </div>
         <div id="view-workload" class="view">
           <section class="workload" aria-label="Workload heatmap">
@@ -943,6 +965,11 @@ CSS = """/*
   --office-room-bg: var(--panel);
   --office-room-line: var(--line-strong);
   --office-avatar-bg: var(--panel-strong);
+  /* Growth system (TASK-AR-363). XP/level surfaces reuse existing semantic
+     tokens; --growth-xp drives the level bar, --growth-stage the stage chip. */
+  --growth-xp: var(--success);
+  --growth-stage: var(--primary);
+  --growth-efficiency: var(--teal);
 }
 [data-theme="dark"] {
   color-scheme: dark;
@@ -1034,6 +1061,10 @@ CSS = """/*
   --office-room-bg: var(--panel);
   --office-room-line: var(--line-strong);
   --office-avatar-bg: var(--panel-strong);
+  /* Growth system (TASK-AR-363) */
+  --growth-xp: var(--success);
+  --growth-stage: var(--primary-hover);
+  --growth-efficiency: var(--teal);
 }
 * { box-sizing: border-box; }
 html { background: var(--canvas); }
@@ -3457,6 +3488,63 @@ pre {
 .agent-character-task code { color: var(--ink); }
 .agent-character-activity { list-style: none; margin: 0; padding: 0; font-size: 12px; color: var(--muted); }
 
+/* ===== Growth system (TASK-AR-363) =====
+ * Project level / business-stage / XP surfaces. All colors are semantic tokens
+ * (--growth-*, status tokens, --progress-fill); no raw hex/rgba is emitted, so
+ * the tokenization gate stays green. */
+.growth-header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.growth-toggle { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; cursor: pointer; }
+.growth-disabled { color: var(--muted); font-size: 13px; }
+.growth-body { display: flex; flex-direction: column; gap: 16px; }
+.growth-hero {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+.growth-hero-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  background: var(--panel-strong);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.growth-hero-card .growth-hero-label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+.growth-level-value { font-size: 28px; font-weight: 700; color: var(--ink); }
+.growth-stage-chip {
+  align-self: flex-start;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--on-accent);
+  background: var(--growth-stage);
+}
+.growth-ladder { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 0; padding: 0; font-size: 11px; }
+.growth-ladder li { color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; }
+.growth-ladder li.is-current { color: var(--on-accent); background: var(--growth-stage); border-color: var(--growth-stage); }
+.growth-xp-bar { background: var(--growth-xp); height: 100%; border-radius: inherit; }
+.growth-formula, .growth-efficiency, .growth-teams, .growth-agents {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  background: var(--panel);
+}
+.growth-section-title { font-size: 13px; font-weight: 600; margin: 0 0 10px; color: var(--ink); }
+.growth-formula-rows { display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.growth-formula-row { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); }
+.growth-formula-row strong { color: var(--ink); }
+.growth-formula-total { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 8px; font-weight: 600; }
+.growth-note { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+.growth-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.growth-stat { border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: var(--tile); }
+.growth-stat .growth-stat-label { color: var(--muted); font-size: 11px; }
+.growth-stat .growth-stat-value { font-size: 18px; font-weight: 600; color: var(--growth-efficiency); }
+.growth-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.growth-row:last-child { border-bottom: 0; }
+.growth-row .growth-row-meta { color: var(--muted); font-size: 12px; }
+
 /* ===== Workload heatmap (TASK-AR-337) =====
  * Cell color is ALWAYS a semantic token (--heat-*); per-cell load is expressed
  * only as opacity via the inline --cell-intensity custom property, so no raw
@@ -4046,6 +4134,8 @@ pre {
   .tsboard-swimlane-cols,
   .team-toolbar,
   .team-cards,
+  .growth-hero,
+  .growth-stat-grid,
   .agent-character-meta,
   .work-detail-meta,
   .evidence-grid,
@@ -5140,6 +5230,11 @@ const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => 
 function setText(id, value) {
   const node = $(id);
   if (node) node.textContent = value;
+}
+
+function setHtml(id, value) {
+  const node = $(id);
+  if (node) node.innerHTML = value;
 }
 
 async function loadState() {
@@ -9180,6 +9275,150 @@ function renderTeamAgents() {
   wireTeamDrilldown(host);
 }
 
+// ----- TASK-AR-363: growth system (project Lv / business stage / XP) -----
+// Computed-only from outcomes; token spend is shown ONLY as a separate
+// efficiency stat and NEVER contributes XP. The view honours a self-contained
+// global toggle (growth.enabled, from the AR-340 policy when present) and an
+// in-session user override; there are NO streak/punishment surfaces.
+let growthUserShow = true;
+
+function growthData() {
+  return (runtimeState && runtimeState.growth) || { enabled: false };
+}
+
+// ASCII keys only here (cp949 node-check guard). The KR label is provided by the
+// Python payload (business_stage.label_ko) and rendered via escapeHtml.
+const GROWTH_STAGE_LABELS = {
+  garage: "Garage",
+  seed: "Seed",
+  startup: "Startup",
+  scaleup: "Scaleup",
+  unicorn: "Unicorn",
+};
+
+function growthStageLabel(stage) {
+  const key = String((stage && stage.key) || "garage");
+  return GROWTH_STAGE_LABELS[key] || key;
+}
+
+function growthHero(data) {
+  const project = data.project || {};
+  const stage = data.business_stage || {};
+  const pct = numericPct(project.xp_pct) ?? 0;
+  const ladder = (stage.ladder || []).map((key) =>
+    `<li class="${key === stage.key ? "is-current" : ""}">${escapeHtml(GROWTH_STAGE_LABELS[key] || key)}</li>`
+  ).join("");
+  const nextStage = stage.next_key
+    ? `${escapeHtml(stage.achievements_to_next ?? 0)} to ${escapeHtml(growthStageLabel({ key: stage.next_key }))}`
+    : "max stage";
+  return `
+    <div class="growth-hero-card">
+      <span class="growth-hero-label">Project Level</span>
+      <span class="growth-level-value">Lv ${escapeHtml(project.level ?? 1)}</span>
+      <div class="progress-track" role="img" aria-label="XP ${escapeHtml(pct)}%"><div class="growth-xp-bar" style="width: ${pct}%"></div></div>
+      <span class="growth-hero-label">${escapeHtml(project.cumulative_xp ?? 0)} XP - ${escapeHtml(project.xp_for_next ?? 0)} to next</span>
+    </div>
+    <div class="growth-hero-card">
+      <span class="growth-hero-label">Business Stage</span>
+      <span class="growth-stage-chip">${escapeHtml(growthStageLabel(stage))} (${escapeHtml(stage.label_ko || "")})</span>
+      <span class="growth-hero-label">${escapeHtml(stage.achievements ?? 0)} achievements - ${nextStage}</span>
+      <ul class="growth-ladder">${ladder}</ul>
+    </div>
+  `;
+}
+
+function growthFormula(data) {
+  const formula = data.xp_formula || {};
+  const weights = formula.weights || {};
+  const counts = formula.counts || {};
+  const contrib = formula.contributions || {};
+  const rows = [
+    ["Completed tasks", counts.completed_tasks, weights.completed_task, contrib.completed_tasks],
+    ["Gate passes", counts.gate_passes, weights.gate_pass, contrib.gate_passes],
+    ["Test growth", counts.test_growth, weights.test_growth, contrib.test_growth],
+    ["Review outputs", counts.review_outputs, weights.review_output, contrib.review_outputs],
+  ].map((row) =>
+    `<div class="growth-formula-row"><span>${escapeHtml(row[0])} (${escapeHtml(row[1] ?? 0)} x ${escapeHtml(row[2] ?? 0)})</span><strong>${escapeHtml(row[3] ?? 0)} XP</strong></div>`
+  ).join("");
+  return `
+    <p class="growth-section-title">XP Formula (outcomes only)</p>
+    <div class="growth-formula-rows">
+      ${rows}
+      <div class="growth-formula-row growth-formula-total"><span>Cumulative XP</span><strong>${escapeHtml(formula.cumulative_xp ?? 0)} XP</strong></div>
+    </div>
+    <p class="growth-note">Token consumption is excluded from XP by design (anti-waste).</p>
+  `;
+}
+
+function growthEfficiency(data) {
+  const eff = data.efficiency || {};
+  const stats = [
+    ["Tokens / task", eff.tokens_per_task],
+    ["Total tokens", eff.token_total],
+    ["Rework events", eff.rework_events],
+    ["Rework rate", `${escapeHtml(eff.rework_rate_pct ?? 0)}%`],
+  ].map((stat) =>
+    `<div class="growth-stat"><span class="growth-stat-label">${escapeHtml(stat[0])}</span><span class="growth-stat-value">${escapeHtml(stat[1] ?? 0)}</span></div>`
+  ).join("");
+  return `
+    <p class="growth-section-title">Efficiency (separate from XP)</p>
+    <div class="growth-stat-grid">${stats}</div>
+    <p class="growth-note">Efficiency stats never affect XP; they are not penalties.</p>
+  `;
+}
+
+function growthTeams(data) {
+  const teams = data.teams || [];
+  if (!teams.length) return "";
+  const rows = teams.map((team) =>
+    `<div class="growth-row"><span><strong>${escapeHtml(team.team_id || "team")}</strong> <span class="growth-row-meta">${escapeHtml(team.agent_count ?? 0)} agents</span></span><span>Lv ${escapeHtml(team.level ?? 1)} - ${escapeHtml(team.xp ?? 0)} XP</span></div>`
+  ).join("");
+  return `<p class="growth-section-title">Team XP (team achievement first)</p>${rows}`;
+}
+
+function growthAgents(data) {
+  const agents = data.agents || [];
+  if (!agents.length) return "";
+  const rows = agents.slice(0, 50).map((agent) =>
+    `<div class="growth-row"><span><strong>${escapeHtml(agent.callsign || agent.id || "agent")}</strong> <span class="growth-row-meta">${escapeHtml(agent.role || "unknown")}</span></span><span>Lv ${escapeHtml(agent.level ?? 1)} - ${escapeHtml(agent.xp ?? 0)} XP</span></div>`
+  ).join("");
+  return `<p class="growth-section-title">Per-agent XP (role-based)</p>${rows}`;
+}
+
+function renderGrowth() {
+  const body = $("growth-body");
+  if (!body) return;
+  const data = growthData();
+  const toggle = $("growth-enabled-toggle");
+  // The global toggle disables the whole feature; the user override only hides
+  // the display for this session. Both gates must allow it to show.
+  const globallyEnabled = data.enabled !== false;
+  if (toggle) toggle.disabled = !globallyEnabled;
+  const show = globallyEnabled && growthUserShow;
+  const disabledNote = $("growth-disabled");
+  if (disabledNote) {
+    disabledNote.hidden = show;
+    disabledNote.textContent = globallyEnabled ? "Growth display is turned off." : "Growth is disabled by policy.";
+  }
+  body.hidden = !show;
+  if (!show) return;
+  setHtml("growth-hero", growthHero(data));
+  setHtml("growth-formula", growthFormula(data));
+  setHtml("growth-efficiency", growthEfficiency(data));
+  setHtml("growth-teams", growthTeams(data));
+  setHtml("growth-agents", growthAgents(data));
+}
+
+function wireGrowthToggle() {
+  const toggle = $("growth-enabled-toggle");
+  if (!toggle || toggle.dataset.wired) return;
+  toggle.dataset.wired = "1";
+  toggle.addEventListener("change", () => {
+    growthUserShow = !!toggle.checked;
+    renderGrowth();
+  });
+}
+
 // ----- TASK-AR-337: workload heatmap (agent/team x period, overload/idle) -----
 let workloadScope = "agents";
 
@@ -9752,6 +9991,7 @@ function renderAll() {
   renderTasksetCompletion();
   renderTasksetBoard();
   renderTeamAgents();
+  renderGrowth();
   renderWorkloadHeatmap();
   renderOpsDashboard();
   renderAgents();
@@ -10141,6 +10381,7 @@ $("team-online-toggle")?.addEventListener("change", (event) => {
   teamOnlineOnly = Boolean(event.target.checked);
   renderTeamAgents();
 });
+wireGrowthToggle();
 $("state-machine-select")?.addEventListener("change", (event) => {
   selectedStateMachineId = event.target.value || null;
   // Switching machines drops a task overlay that may not apply to the new one.
@@ -10768,6 +11009,7 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/team_agents": "team_agents",
         "/api/team-agents": "team_agents",
         "/api/teams": "teams",
+        "/api/growth": "growth",
         "/api/workload": "workload",
         "/api/sources": "sources",
         "/api/errors": "errors",
