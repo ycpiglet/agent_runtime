@@ -33,6 +33,7 @@ RESOURCE_NAMES = (
     "evidence",
     "replay",
     "graph",
+    "live_map",
     "state_machines",
     "roadmap",
     "roadmap_timeline",
@@ -738,6 +739,189 @@ def build_graph(tasks: list[dict[str, Any]], agents: list[dict[str, Any]], messa
     return {
         "nodes": sorted(nodes.values(), key=lambda item: (item["kind"], item["id"])),
         "edges": edges,
+    }
+
+
+# --- Realtime presence + live map (TASK-AR-326) ----------------------------
+# A typed node/edge graph layered on the existing read-only state primitives so
+# the console can pulse-highlight edges as SSE events arrive. Nodes carry a
+# semantic ``kind`` (owner / agent / taskset / gate) and edges a semantic
+# ``kind`` (message / assignment / review / block); both expose stable ids so
+# the front-end can map an incoming event onto the edge(s) it touches.
+LIVE_MAP_SCHEMA = "agent-runtime-live-map/v1"
+LIVE_MAP_OWNER_ID = "owner"
+_LIVE_MAP_REVIEW_STATES = {"review", "waiting_review", "ready_for_governance_review", "reviewing"}
+_LIVE_MAP_BLOCKED_STATES = {"blocked", "hold", "보류"}
+
+
+def build_live_map(
+    tasks: list[dict[str, Any]],
+    agents: list[dict[str, Any]],
+    messages: list[dict[str, Any]],
+    team_agents: dict[str, Any],
+    now: str,
+) -> dict[str, Any]:
+    """Derive the presence-aware live map (nodes + typed edges + presence roll-up).
+
+    Read-only: every node/edge points back at a source primitive; nothing here
+    mutates stored state. ``presence`` summarises the team_agents view so the
+    front-end can animate state transitions without a full re-render.
+    """
+
+    nodes: dict[str, dict[str, Any]] = {}
+    edges: list[dict[str, Any]] = []
+    edge_ids: set[str] = set()
+
+    def add_node(node_id: Any, kind: str, label: str | None = None, **extra: Any) -> str | None:
+        if node_id is None or str(node_id).strip() == "":
+            return None
+        key = str(node_id)
+        node = nodes.get(key)
+        if node is None:
+            node = nodes[key] = {"id": key, "kind": kind, "label": label or key}
+        if label and node.get("label") in (None, key):
+            node["label"] = label
+        for name, value in extra.items():
+            if value is not None and node.get(name) in (None, ""):
+                node[name] = value
+        return key
+
+    def add_edge(edge_id: str, frm: str | None, to: str | None, kind: str, **extra: Any) -> None:
+        if not frm or not to or edge_id in edge_ids:
+            return
+        edge_ids.add(edge_id)
+        edge = {"id": edge_id, "from": frm, "to": to, "kind": kind}
+        for name, value in extra.items():
+            if value is not None:
+                edge[name] = value
+        edges.append(edge)
+
+    # Owner is always present as the apex node of the org graph.
+    add_node(LIVE_MAP_OWNER_ID, "owner", "Owner")
+
+    # Presence roll-up + agent nodes from the team_agents (RPG) view.
+    presence_counts: dict[str, int] = {}
+    presence_agents: list[dict[str, Any]] = []
+    for team in team_agents.get("teams", []) or []:
+        for card in team.get("agents", []) or []:
+            agent_id = str(card.get("role") or card.get("id") or "").strip()
+            if not agent_id:
+                continue
+            presence = str(card.get("presence") or "offline")
+            presence_counts[presence] = presence_counts.get(presence, 0) + 1
+            presence_agents.append(
+                {
+                    "id": card.get("id"),
+                    "role": agent_id,
+                    "callsign": card.get("callsign"),
+                    "presence": presence,
+                    "online": bool(card.get("online")),
+                    "current_task_id": card.get("current_task_id"),
+                    "team_id": team.get("team_id") or team.get("id"),
+                }
+            )
+            add_node(
+                agent_id,
+                "agent",
+                card.get("callsign") or agent_id,
+                presence=presence,
+                online=bool(card.get("online")),
+                team_id=team.get("team_id") or team.get("id"),
+            )
+
+    # Agent nodes from the live session view (covers agents without an instance).
+    for agent in agents:
+        agent_id = str(agent.get("role") or agent.get("id") or "").strip()
+        if not agent_id:
+            continue
+        node = add_node(agent_id, "agent", agent.get("display_name") or agent_id)
+        if node is not None and "presence" not in nodes[node]:
+            nodes[node]["presence"] = "online" if agent.get("online") else "offline"
+            nodes[node]["online"] = bool(agent.get("online"))
+
+    # Taskset + gate nodes and assignment / review / block edges from tasks.
+    for task in tasks:
+        task_id = str(task.get("id") or "").strip()
+        status = str(task.get("status") or "").lower()
+        owner = str(task.get("owner_agent") or "").strip()
+        taskset_id = str(task.get("task_set_id") or "").strip()
+        taskset_node = add_node(taskset_id, "taskset") if taskset_id else None
+
+        if owner:
+            add_node(owner, "agent")
+            if taskset_node:
+                add_edge(
+                    f"assignment:{task_id}",
+                    owner,
+                    taskset_node,
+                    "assignment",
+                    task_id=task_id,
+                    status=status,
+                    source_path=task.get("source_path"),
+                )
+
+        if status in _LIVE_MAP_REVIEW_STATES:
+            gate_id = f"gate:{taskset_id or task_id}"
+            add_node(gate_id, "gate", f"Gate {taskset_id or task_id}")
+            if owner:
+                add_edge(f"review:{task_id}", owner, gate_id, "review", task_id=task_id, status=status)
+            add_edge(f"review-gate:{task_id}", gate_id, LIVE_MAP_OWNER_ID, "review", task_id=task_id, status=status)
+
+        if status in _LIVE_MAP_BLOCKED_STATES:
+            gate_id = f"gate:{taskset_id or task_id}"
+            add_node(gate_id, "gate", f"Gate {taskset_id or task_id}")
+            if owner:
+                add_edge(
+                    f"block:{task_id}",
+                    owner,
+                    gate_id,
+                    "block",
+                    task_id=task_id,
+                    status=status,
+                    blocked_reason=task.get("blocked_reason"),
+                )
+
+    # Message edges (actor -> recipient) from the message inbox/archive.
+    for message in messages:
+        frm = str(message.get("from") or "").strip()
+        to = str(message.get("to") or "").strip()
+        if not frm or not to:
+            continue
+        add_node(frm, "agent")
+        add_node(to, "agent")
+        add_edge(
+            f"message:{message.get('id')}",
+            frm,
+            to,
+            "message",
+            task_id=message.get("task_id"),
+            status=message.get("status"),
+            source_path=message.get("source_path"),
+        )
+
+    edge_kind_counts: dict[str, int] = {}
+    for edge in edges:
+        edge_kind_counts[edge["kind"]] = edge_kind_counts.get(edge["kind"], 0) + 1
+    node_kind_counts: dict[str, int] = {}
+    for node in nodes.values():
+        node_kind_counts[node["kind"]] = node_kind_counts.get(node["kind"], 0) + 1
+
+    return {
+        "schema": LIVE_MAP_SCHEMA,
+        "generated_at": now,
+        "presence": {
+            "counts": dict(sorted(presence_counts.items())),
+            "online": sum(1 for agent in presence_agents if agent["online"]),
+            "agents": sorted(presence_agents, key=lambda a: (not a["online"], str(a["role"]))),
+        },
+        "nodes": sorted(nodes.values(), key=lambda item: (item["kind"], item["id"])),
+        "edges": edges,
+        "totals": {
+            "nodes": len(nodes),
+            "edges": len(edges),
+            "node_kinds": dict(sorted(node_kind_counts.items())),
+            "edge_kinds": dict(sorted(edge_kind_counts.items())),
+        },
     }
 
 
@@ -2500,6 +2684,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     roadmap_timeline = build_roadmap_timeline(roadmap, work_explorer, root_path, generated_at, warnings)
     instances = _load_instances(root_path, generated_at, warnings)
     team_agents = build_team_agents(root_path, instances, agents, task_claims, events, generated_at)
+    live_map = build_live_map(tasks, agents, messages, team_agents, generated_at)
     return {
         "generated_at": generated_at,
         "sources": sources,
@@ -2522,6 +2707,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "evidence": evidence,
         "replay": replay,
         "graph": graph,
+        "live_map": live_map,
         "state_machines": state_machines,
         "roadmap": roadmap,
         "roadmap_timeline": roadmap_timeline,

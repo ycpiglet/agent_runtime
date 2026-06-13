@@ -1006,6 +1006,93 @@ def test_ui_console_graph_state_and_roadmap_routes(tmp_path):
     assert roadmap["items"]["milestones"][0]["title"] == "Graph view ready"
 
 
+# ----- TASK-AR-326: realtime presence + live map -----
+
+
+def test_ui_console_live_map_route_serves_typed_graph(tmp_path):
+    _write_task(tmp_path, "TASK-UI-326")
+    _write(
+        tmp_path / "agents" / "messages" / "inbox" / "MSG-20260613-live.md",
+        "\n".join(
+            [
+                "---",
+                "id: MSG-20260613-live",
+                "from: owner",
+                "to: lead-engineer",
+                "type: instruction",
+                "status: queued",
+                "ts: 2026-06-13T10:00:00+09:00",
+                "task_id: TASK-UI-326",
+                "---",
+                "",
+                "Live map check.",
+                "",
+            ]
+        ),
+    )
+
+    underscore = ui_console.build_response("/api/live_map", tmp_path)
+    hyphen = ui_console.build_response("/api/live-map", tmp_path)
+    assert underscore.status == 200 and hyphen.status == 200
+    payload = json.loads(underscore.body.decode("utf-8"))
+    assert payload["resource"] == "live_map"
+    live_map = payload["items"]
+    assert live_map["schema"] == "agent-runtime-live-map/v1"
+    assert {"nodes", "edges", "presence", "totals"} <= set(live_map.keys())
+    assert any(node["kind"] == "owner" for node in live_map["nodes"])
+    assert any(edge["kind"] == "message" for edge in live_map["edges"])
+
+
+def test_ui_console_live_map_view_renders_graph_presence_and_activity_feed(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    # The live map enhances the existing map view (no brand-new top-level view).
+    assert 'id="view-map"' in html
+    assert 'id="live-map-graph"' in html       # SVG node/edge stage
+    assert 'id="live-map-presence"' in html     # presence summary line
+    assert 'id="activity-feed"' in html         # activity-feed toast host
+
+    # JS: live-map render + SSE pulse wiring + activity toast feed present.
+    assert "function renderLiveMap(" in js
+    assert "function reconcileLiveMap(" in js
+    assert "function pulseLiveEdge(" in js
+    assert "function pushActivityToast(" in js
+    assert "reconcileLiveMap(previous, runtimeState)" in js  # wired into the SSE stream
+    assert "renderLiveMap()" in js  # invoked from renderMap (periodic + live refresh)
+
+    # CSS styles the graph + pulse highlight + toast.
+    assert ".live-map-edge" in css
+    assert ".is-pulsing" in css
+    assert ".activity-toast" in css
+
+
+def test_ui_console_live_map_css_uses_tokens_not_raw_color(tmp_path):
+    # (TASK-AR-326 tokenization guard) Every color the live-map CSS introduces
+    # must flow through var(--token); no raw hex/rgba outside the token blocks.
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    body_css = css.replace(_root_token_block(css), "").replace(_dark_theme_block(css), "")
+    hex_pattern = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+    rgba_pattern = re.compile(r"rgba?\(")
+    live_lines = [
+        line for line in body_css.splitlines()
+        if any(token in line for token in (".live-map", ".activity-feed", ".activity-toast", "--pulse"))
+    ]
+    assert live_lines, "expected live-map CSS rules to exist"
+    for line in live_lines:
+        assert not hex_pattern.search(line), f"raw hex in live-map CSS: {line.strip()}"
+        assert not rgba_pattern.search(line), f"raw rgba in live-map CSS: {line.strip()}"
+
+    # The new pulse tokens are defined in BOTH theme blocks.
+    assert "--pulse:" in _root_token_block(css)
+    assert "--pulse:" in _dark_theme_block(css)
+    # And the live-map consumes semantic tokens.
+    assert "stroke: var(--pulse)" in css
+    assert "background: var(--surface-grad)" in css
+
+
 def test_ui_console_unknown_path_returns_404(tmp_path):
     response = ui_console.build_response("/missing", tmp_path)
 
