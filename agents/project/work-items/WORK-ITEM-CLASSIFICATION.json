@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-13T17:18:21+09:00",
+  "generated_at": "2026-06-13T18:13:16+09:00",
   "record_count": 235,
   "finding_count": 0,
   "findings": [],
@@ -1631,7 +1631,7 @@
       "title": "TEAMS/ORG/roles 데이터로 조직도 트리를 렌더링하고, 에이전트 카드를 온라인 RPG 길드 멤버처럼 상태가 살아있는 프레즌스로 보여준다.",
       "path": "agents/lead_engineer/tasks/TASK-AR-324.md",
       "parent_id": "TASKSET-AR-UI-UX-V2",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-325",
@@ -1642,7 +1642,7 @@
       "title": "Vision → Milestone/Release → Taskset 3계층을 한 뷰에서 보여줘 고수준 방향과 실제 진행률을 연결한다.",
       "path": "agents/lead_engineer/tasks/TASK-AR-325.md",
       "parent_id": "TASKSET-AR-UI-UX-V2",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-326",
@@ -1873,7 +1873,7 @@
       "title": "hover 미리보기와 드래그앤드롭을 콘솔 전역의 1급 상호작용 동사로 표준화한다 (Notion peek + Discord 접근성 DnD 패턴).",
       "path": "agents/lead_engineer/tasks/TASK-AR-362.md",
       "parent_id": "TASKSET-AR-UI-LIVING-CONSOLE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-363",

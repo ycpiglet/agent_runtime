@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-13T16:11:35+09:00
-record_count: 426
+generated_at: 2026-06-13T18:13:16+09:00
+record_count: 429
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `426` review and evidence records under `reviews/`.
+- Summary: indexed `429` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `426` files |
+| Reviews covered | pass | `429` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -460,6 +460,9 @@ record_count: 426
 | `reviews/VERIFY-2026-06-12-unit-task-ar-372-009-20260612143100.json` | `VERIFY-2026-06-12-unit-task-ar-372-009-20260612143100` | json | record | n/a | VERIFY-2026-06-12-unit-task-ar-372-009-20260612143100 |
 | `reviews/VERIFY-2026-06-12-unit-task-ar-375-001-20260612150512.json` | `VERIFY-2026-06-12-unit-task-ar-375-001-20260612150512` | json | record | n/a | VERIFY-2026-06-12-unit-task-ar-375-001-20260612150512 |
 | `reviews/VERIFY-2026-06-12-unit-task-ar-375-001-20260612151810.json` | `VERIFY-2026-06-12-unit-task-ar-375-001-20260612151810` | json | record | n/a | VERIFY-2026-06-12-unit-task-ar-375-001-20260612151810 |
+| `reviews/W4B-2026-06-13-TASK-AR-324.md` | `W4B-2026-06-13-TASK-AR-324` | verification | record | n/a | W4b Independent Verification — TASK-AR-324 (Team/Agent RPG Cards) |
+| `reviews/W4B-2026-06-13-TASK-AR-325.md` | `W4B-2026-06-13-TASK-AR-325` | verification | record | n/a | W4b Independent Verification — TASK-AR-325 (Roadmap Timeline) |
+| `reviews/W4B-2026-06-13-TASK-AR-362.md` | `W4B-2026-06-13-TASK-AR-362` | verification | record | n/a | W4b Independent Verification — TASK-AR-362 (Board Peek + DnD + Quick Actions) |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.

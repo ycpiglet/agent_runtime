@@ -14,7 +14,11 @@ registered_at: 2026-06-11T19:48:00+09:00
 created_at: 2026-06-11T19:48:00+09:00
 updated_at: 2026-06-11T19:48:00+09:00
 title: 전역 직접 조작 레이어 — hover peek + DnD 1급 동사 + 키보드 등가
-status: planned
+status: completed
+started_at: 2026-06-13T17:19:48+09:00
+completed_at: 2026-06-13T18:20:00+09:00
+resolution: done
+verification_status: passed
 priority: P2
 difficulty: M
 est_hours: 8
