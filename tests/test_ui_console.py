@@ -1359,6 +1359,91 @@ def test_ui_console_team_agents_card_fields_are_escaped(tmp_path):
         assert f"escapeHtml({field}" in card_block
 
 
+# --- Workload heatmap + team assignment view (TASK-AR-337) ------------------
+
+
+def test_ui_console_workload_view_registered_in_agents_sidebar(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    # New Workload view lives in the AGENTS group with a data-view + data-route.
+    assert 'data-view="workload"' in html
+    assert 'data-route="agents/workload"' in html
+    for host_id in ["view-workload", "workload-grid", "workload-summary", "workload-legend"]:
+        assert host_id in html
+    # Scope toggle (by agent / by team).
+    assert 'id="workload-scope-agents"' in html
+    assert 'id="workload-scope-teams"' in html
+
+
+def test_ui_console_workload_and_teams_api_routes(tmp_path):
+    workload = ui_console.build_response("/api/workload", tmp_path)
+    teams = ui_console.build_response("/api/teams", tmp_path)
+    assert workload.status == 200
+    assert teams.status == 200
+    wl = json.loads(workload.body.decode("utf-8"))
+    tm = json.loads(teams.body.decode("utf-8"))
+    assert wl["resource"] == "workload"
+    assert wl["items"]["schema"] == "agent-runtime-workload-heatmap/v1"
+    assert tm["resource"] == "teams"
+    assert tm["items"]["schema"] == "agent-runtime-teams/v1"
+
+
+def test_ui_console_workload_render_markers_and_drilldown(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    for marker in [
+        "renderWorkloadHeatmap",
+        "workloadData",
+        "workloadRow",
+        "workloadCell",
+        "setWorkloadScope",
+        "renderWorkloadHeatmap()",  # wired into renderAll
+        # Org-chart / heatmap drill-down filters the board by team/role.
+        "drillToTeamTasks",
+        "setBoardTeamFilter",
+        "taskMatchesTeamFilter",
+        "data-drill-team",
+        "data-drill-role",
+    ]:
+        assert marker in js
+
+
+def test_ui_console_workload_cell_fields_are_escaped(tmp_path):
+    # Heatmap cell render must escape every interpolated field.
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    cell_block = js.split("function workloadCell", 1)[1].split("\nfunction workloadRow", 1)[0]
+    for field in ["band", "count", "cell.period", "rowId"]:
+        assert f"escapeHtml({field}" in cell_block
+
+
+def test_ui_console_workload_heatmap_intensity_uses_tokens_not_raw_rgba(tmp_path):
+    # (TASK-AR-337 tokenization guard) Heatmap intensity must be opacity over a
+    # token color; NO raw hex/rgba in any .workload / .heat- / heatmap CSS rule.
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+
+    body_css = css.replace(_root_token_block(css), "").replace(_dark_theme_block(css), "")
+    hex_pattern = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+    rgba_pattern = re.compile(r"rgba?\(")
+    heat_lines = [
+        line for line in body_css.splitlines()
+        if any(token in line for token in (".workload", ".heat-", "--heat", "board-team-filter"))
+    ]
+    assert heat_lines, "expected workload heatmap CSS rules to exist"
+    for line in heat_lines:
+        assert not hex_pattern.search(line), f"raw hex in heatmap CSS: {line.strip()}"
+        assert not rgba_pattern.search(line), f"raw rgba in heatmap CSS: {line.strip()}"
+
+    # The heat tokens are declared in BOTH theme blocks.
+    assert "--heat-base:" in _root_token_block(css)
+    assert "--heat-base:" in _dark_theme_block(css)
+    # Intensity is applied ONLY as opacity via --cell-intensity (no raw rgba in JS).
+    assert "--cell-intensity" in js
+    assert "opacity: var(--cell-intensity" in css
+    # The fill consumes a single token color, not a per-cell computed color.
+    assert "background: var(--heat-base)" in css
+    # JS must not inject raw rgba(...) for intensity.
+    assert "rgba(" not in js.split("function workloadCell", 1)[1].split("\nfunction workloadRow", 1)[0]
+
+
 # --- Theme system: Notion-style light default + dark toggle (TASK-AR-320) ----
 
 

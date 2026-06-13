@@ -602,3 +602,64 @@ def test_task_bulk_edit_requires_ids_and_fields(tmp_path):
 def test_new_command_types_in_allowlist():
     for command_type in ["taskset.create", "taskset.rename", "taskset.archive", "taskset.template", "task.move", "task.bulk_edit"]:
         assert command_type in ui_commands.COMMAND_TYPES
+
+
+# --- Team/role assignment change command (TASK-AR-337) ---------------------
+
+
+def test_assignment_set_is_proposal_only(tmp_path):
+    result = ui_commands.submit_command(
+        tmp_path,
+        {"type": "assignment.set", "target": "TASK-AR-001", "payload": {"team": "Agent Runtime Core", "role": "qa", "actor": "owner"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-assign",
+    )
+    assert result["status"] == "queued"
+    assert result["result"]["mutation_boundary"] == "proposal_only"
+    # Team/role are normalized to safe slugs.
+    assert result["result"]["assignment"] == {"team": "agent-runtime-core", "role": "qa"}
+
+    # A proposal file is written under .ui_outbox/assignments -- NOT the task file.
+    proposals = list((tmp_path / ".ui_outbox" / "assignments").glob("ASSIGNREQ-*.json"))
+    assert len(proposals) == 1
+    stored = json.loads(proposals[0].read_text(encoding="utf-8"))
+    assert stored["type"] == "assignment.set"
+    assert stored["task_id"] == "TASK-AR-001"
+    assert stored["mutation_boundary"] == "proposal_only"
+    # No task file was created/edited by the console.
+    assert not (tmp_path / "agents" / "lead_engineer" / "tasks").exists()
+
+
+def test_assignment_set_requires_a_field_and_valid_task(tmp_path):
+    no_fields = ui_commands.submit_command(
+        tmp_path,
+        {"type": "assignment.set", "target": "TASK-AR-001", "payload": {"actor": "owner"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-assign-nofields",
+    )
+    assert no_fields["status"] == "failed"
+    assert any("at least one of team/role/assignee" in error for error in no_fields["errors"])
+
+    bad_id = ui_commands.submit_command(
+        tmp_path,
+        {"type": "assignment.set", "target": "NOT-A-TASK", "payload": {"team": "core"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-assign-badid",
+    )
+    assert bad_id["status"] == "failed"
+    assert any("invalid task id" in error for error in bad_id["errors"])
+
+
+def test_assignment_set_rejects_direct_file_mutation(tmp_path):
+    unsafe = ui_commands.submit_command(
+        tmp_path,
+        {"type": "assignment.set", "target": "TASK-AR-001", "payload": {"team": "core", "path": "/etc/passwd"}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-assign-unsafe",
+    )
+    assert unsafe["status"] == "failed"
+    assert any("direct file mutation is not allowed" in error for error in unsafe["errors"])
+
+
+def test_assignment_command_type_in_allowlist():
+    assert "assignment.set" in ui_commands.COMMAND_TYPES

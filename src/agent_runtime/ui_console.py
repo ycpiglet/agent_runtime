@@ -122,6 +122,9 @@ HTML = """<!doctype html>
           <button class="sidebar-link" type="button" role="tab" data-view="team" data-route="agents/team" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9733;</span><span class="sidebar-label">Team</span>
           </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="workload" data-route="agents/workload" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9638;</span><span class="sidebar-label">Workload</span>
+          </button>
           <button class="sidebar-link" type="button" role="tab" data-view="agents" data-route="agents/list" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9737;</span><span class="sidebar-label">Agents</span>
           </button>
@@ -221,6 +224,7 @@ HTML = """<!doctype html>
         </form>
         <div id="view-board" class="view is-active">
           <p class="board-hint">Hover or focus a card for a peek. Drag a card between lanes to reorder, or focus it and press Ctrl+D to lift, arrows to move, Space to drop, Esc to cancel. Quick actions: Claim / Verify / Close.</p>
+          <div id="board-team-filter" class="board-team-filter" role="status" hidden></div>
           <div id="kanban" class="kanban" aria-label="Kanban"></div>
           <div id="board-peek" class="board-peek" role="tooltip" aria-hidden="true" hidden></div>
           <div id="board-dnd-status" class="board-dnd-status" role="status" aria-live="polite"></div>
@@ -355,6 +359,22 @@ HTML = """<!doctype html>
           </div>
           <p id="team-summary" class="team-summary"></p>
           <div id="team-org" class="team-org" aria-label="Team agent organisation"></div>
+        </div>
+        <div id="view-workload" class="view">
+          <section class="workload" aria-label="Workload heatmap">
+            <header class="workload-header">
+              <h2>Workload Heatmap</h2>
+              <p id="workload-summary" class="workload-summary" role="status"></p>
+            </header>
+            <div class="workload-toolbar">
+              <div class="workload-scope" role="tablist" aria-label="Heatmap scope">
+                <button id="workload-scope-agents" class="workload-scope-btn is-active" type="button" role="tab" aria-selected="true">By agent</button>
+                <button id="workload-scope-teams" class="workload-scope-btn" type="button" role="tab" aria-selected="false">By team</button>
+              </div>
+              <ul id="workload-legend" class="workload-legend" aria-label="Load bands"></ul>
+            </div>
+            <div id="workload-grid" class="workload-grid" aria-label="Workload by period"></div>
+          </section>
         </div>
         <div id="view-agents" class="view">
           <div id="multipane-assurance-list" class="assurance-grid"></div>
@@ -769,6 +789,13 @@ CSS = """/*
   /* State machine viewer highlights (TASK-AR-336) */
   --sm-current: var(--primary);
   --sm-path: var(--violet);
+  /* Workload heatmap (TASK-AR-337). Cell intensity is opacity over --heat-base;
+     bands map to existing semantic tokens so no per-cell raw color is needed. */
+  --heat-base: var(--primary);
+  --heat-idle: var(--line);
+  --heat-normal: var(--primary);
+  --heat-busy: var(--warning);
+  --heat-overload: var(--danger);
 }
 [data-theme="dark"] {
   color-scheme: dark;
@@ -849,6 +876,12 @@ CSS = """/*
   /* State machine viewer highlights (TASK-AR-336) */
   --sm-current: var(--primary-hover);
   --sm-path: var(--violet);
+  /* Workload heatmap (TASK-AR-337) */
+  --heat-base: var(--primary-hover);
+  --heat-idle: var(--line-strong);
+  --heat-normal: var(--primary-hover);
+  --heat-busy: var(--warning);
+  --heat-overload: var(--danger);
 }
 * { box-sizing: border-box; }
 html { background: var(--canvas); }
@@ -1323,6 +1356,25 @@ textarea:focus {
   font-size: 11px;
   line-height: 1.4;
   margin-bottom: 8px;
+}
+.board-team-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--primary-line);
+  background: var(--primary-soft);
+  border-radius: 999px;
+  font-size: 13px;
+  width: fit-content;
+}
+.board-team-filter button {
+  background: transparent;
+  border: 0;
+  color: var(--primary-hover);
+  font-weight: 600;
+  cursor: pointer;
 }
 .lane.is-drop-target {
   border-color: var(--primary-hover);
@@ -3047,7 +3099,10 @@ pre {
   font-size: 11px;
   border: 1px solid var(--line-strong);
   color: var(--muted);
+  background: var(--panel);
+  cursor: pointer;
 }
+.team-role-badge:hover { color: var(--nav-active-text); border-color: var(--primary-line); background: var(--primary-soft); }
 .team-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -3115,6 +3170,62 @@ pre {
 .agent-character-task { font-size: 12px; color: var(--muted); }
 .agent-character-task code { color: var(--ink); }
 .agent-character-activity { list-style: none; margin: 0; padding: 0; font-size: 12px; color: var(--muted); }
+
+/* ===== Workload heatmap (TASK-AR-337) =====
+ * Cell color is ALWAYS a semantic token (--heat-*); per-cell load is expressed
+ * only as opacity via the inline --cell-intensity custom property, so no raw
+ * rgba/hex is ever emitted (tokenization gate stays green). */
+.workload-header { display: flex; align-items: baseline; gap: 12px; }
+.workload-summary { color: var(--muted); font-size: 13px; margin: 0; }
+.workload-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
+.workload-scope { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 999px; overflow: hidden; }
+.workload-scope-btn { background: var(--panel); color: var(--muted); border: 0; padding: 6px 14px; font-size: 13px; cursor: pointer; }
+.workload-scope-btn.is-active { background: var(--primary-soft); color: var(--nav-active-text); font-weight: 600; }
+.workload-legend { list-style: none; display: flex; gap: 12px; margin: 0; padding: 0; font-size: 12px; color: var(--muted); }
+.workload-legend li { display: inline-flex; align-items: center; gap: 6px; }
+.workload-legend .heat-swatch { width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--line); }
+.heat-swatch.band-idle { background: var(--heat-idle); }
+.heat-swatch.band-normal { background: var(--heat-normal); }
+.heat-swatch.band-busy { background: var(--heat-busy); }
+.heat-swatch.band-overload { background: var(--heat-overload); }
+.workload-grid { display: grid; gap: 4px; overflow-x: auto; }
+.workload-row { display: grid; grid-template-columns: var(--heat-label-col, 200px) 1fr; gap: 4px; align-items: stretch; }
+.workload-row.is-head .workload-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+.workload-label { display: flex; flex-direction: column; justify-content: center; padding: 6px 10px; font-size: 13px; overflow-wrap: anywhere; }
+.workload-label small { color: var(--muted); font-size: 11px; }
+.workload-cells { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(56px, 1fr); gap: 4px; }
+.workload-cell {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  background: var(--panel);
+}
+.workload-cell.is-head { background: transparent; border: 0; color: var(--muted); font-size: 11px; font-weight: 500; cursor: default; }
+/* The fill layer is a single token color; opacity (--cell-intensity) is the
+ * only per-cell variable, so the rendered color is always var(--heat-base). */
+.workload-cell .heat-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  background: var(--heat-base);
+  opacity: var(--cell-intensity, 0);
+  pointer-events: none;
+}
+.workload-cell.band-idle .heat-fill { background: var(--heat-idle); }
+.workload-cell.band-normal .heat-fill { background: var(--heat-normal); }
+.workload-cell.band-busy .heat-fill { background: var(--heat-busy); }
+.workload-cell.band-overload .heat-fill { background: var(--heat-overload); }
+.workload-cell .heat-count { position: relative; z-index: 1; }
+.workload-cell.band-overload { border-color: var(--danger-line); }
+.workload-empty { color: var(--muted); padding: 20px; }
 
 /* ===== Custom properties / labels / automation / triage (TASK-AR-331) ===== */
 /* Label colors flow through a FIXED token palette. The JS only ever sets
@@ -5859,8 +5970,42 @@ function handleBoardKeyboardDnd(event) {
   }
 }
 
+// Board team/role filter (AR-337). Set by org-chart / heatmap drill-down so the
+// board shows only the tasks RESOLVED to a team/role. Consistency: this reads
+// the same task.assigned_team/assigned_role the heatmap and org chart use.
+let boardTeamFilter = null;
+
+function setBoardTeamFilter(team, role) {
+  boardTeamFilter = (team || role) ? { team: team || null, role: role || null } : null;
+  renderKanban();
+}
+
+function taskMatchesTeamFilter(task) {
+  if (!boardTeamFilter) return true;
+  if (boardTeamFilter.team && task.assigned_team !== boardTeamFilter.team) return false;
+  if (boardTeamFilter.role && task.assigned_role !== boardTeamFilter.role) return false;
+  return true;
+}
+
+function renderBoardTeamFilterBanner() {
+  const host = $("board-team-filter");
+  if (!host) return;
+  if (!boardTeamFilter) {
+    host.hidden = true;
+    host.innerHTML = "";
+    return;
+  }
+  const label = [boardTeamFilter.team, boardTeamFilter.role].filter(Boolean).join(" / ");
+  host.hidden = false;
+  host.innerHTML = `<span>Filtered to <strong>${escapeHtml(label)}</strong></span>` +
+    `<button type="button" id="board-team-filter-clear">Clear</button>`;
+  const clear = $("board-team-filter-clear");
+  if (clear) clear.addEventListener("click", () => setBoardTeamFilter(null));
+}
+
 function renderKanban() {
-  const tasks = runtimeState.tasks || [];
+  const tasks = (runtimeState.tasks || []).filter(taskMatchesTeamFilter);
+  renderBoardTeamFilterBanner();
   if (boardLifted && !taskById(boardLifted.id)) clearLift();
   $("kanban").innerHTML = lanes.map((lane) => {
     const laneTasks = tasks.filter((task) => task.lane === lane);
@@ -7908,8 +8053,11 @@ function agentCharacterCard(card) {
 
 function teamGroupBlock(group) {
   const roles = group.role_distribution || {};
+  // Role badges drill down to the tasks assigned to that team/role (AR-337
+  // org-chart drill-down). Clicking navigates to the board with the team filter
+  // pre-applied so the org chart, heatmap and board all agree on the team.
   const badges = Object.keys(roles).map((role) =>
-    `<span class="team-role-badge">${escapeHtml(role)} ${escapeHtml(roles[role])}</span>`
+    `<button type="button" class="team-role-badge" data-drill-team="${escapeHtml(group.id)}" data-drill-role="${escapeHtml(role)}" title="Show ${escapeHtml(role)} tasks">${escapeHtml(role)} ${escapeHtml(roles[role])}</button>`
   ).join("");
   let agents = group.agents || [];
   const query = $("team-filter")?.value.trim().toLowerCase() || "";
@@ -7928,6 +8076,24 @@ function teamGroupBlock(group) {
   `;
 }
 
+// AR-337: a role node (org chart) or a heatmap row drills down to the board
+// filtered by that team/role. Single entry point keeps the team consistent.
+function drillToTeamTasks(team, role) {
+  if (!team && !role) return;
+  setBoardTeamFilter(team || null, role || null);
+  activateView("board");
+}
+
+function wireTeamDrilldown(host) {
+  if (!host) return;
+  host.querySelectorAll("[data-drill-team], [data-drill-role]").forEach((node) => {
+    const team = node.dataset.drillTeam || null;
+    const role = node.dataset.drillRole || null;
+    if (!team && !role) return;
+    node.addEventListener("click", () => drillToTeamTasks(team, role));
+  });
+}
+
 function renderTeamAgents() {
   const host = $("team-org");
   if (!host) return;
@@ -7936,6 +8102,89 @@ function renderTeamAgents() {
   setText("team-summary", `${totals.teams ?? 0} teams - ${totals.agents ?? 0} agents - ${totals.online ?? 0} online`);
   const teams = data.teams || [];
   host.innerHTML = teams.length ? teams.map(teamGroupBlock).join("") : `<div class="empty">No teams</div>`;
+  wireTeamDrilldown(host);
+}
+
+// ----- TASK-AR-337: workload heatmap (agent/team x period, overload/idle) -----
+let workloadScope = "agents";
+
+function workloadData() {
+  return (runtimeState && runtimeState.workload) || { agents: [], teams: [], periods: [], totals: {}, bands: [] };
+}
+
+function workloadCell(cell, rowId, rowKind) {
+  // Intensity is applied ONLY as opacity via the inline --cell-intensity custom
+  // property; the fill color is always the band token (no raw rgba from JS).
+  const intensity = Math.max(0, Math.min(1, Number(cell.intensity) || 0));
+  const band = String(cell.band || "idle");
+  const count = Number(cell.load) || 0;
+  const title = `${escapeHtml(rowId)} - ${escapeHtml(cell.period)}: ${escapeHtml(count)} open (${escapeHtml(band)})`;
+  const drill = rowKind === "team"
+    ? `data-drill-team="${escapeHtml(rowId)}"`
+    : `data-drill-role="${escapeHtml(rowId)}"`;
+  return `<button type="button" class="workload-cell band-${escapeHtml(band)}" style="--cell-intensity: ${intensity}" ` +
+    `${drill} data-wl-period="${escapeHtml(cell.period)}" title="${title}" aria-label="${title}">` +
+    `<span class="heat-fill" aria-hidden="true"></span><span class="heat-count">${escapeHtml(count)}</span></button>`;
+}
+
+function workloadRow(row, periods) {
+  const cells = periods.map((period) => {
+    const cell = (row.cells || []).find((item) => item.period === period) || { period, load: 0, band: "idle", intensity: 0 };
+    return workloadCell(cell, row.id, row.kind);
+  }).join("");
+  const drill = row.kind === "team"
+    ? `data-drill-team="${escapeHtml(row.id)}"`
+    : `data-drill-role="${escapeHtml(row.id)}"`;
+  return `<div class="workload-row">` +
+    `<button type="button" class="workload-label" ${drill} title="Show ${escapeHtml(row.id)} tasks">` +
+    `${escapeHtml(row.id)}<small>${escapeHtml(row.open_total ?? 0)} open - peak ${escapeHtml(row.peak_band || "idle")}</small></button>` +
+    `<div class="workload-cells">${cells}</div></div>`;
+}
+
+function renderWorkloadLegend(bands) {
+  const host = $("workload-legend");
+  if (!host) return;
+  const list = (bands && bands.length) ? bands : ["idle", "normal", "busy", "overload"];
+  host.innerHTML = list.map((band) =>
+    `<li><span class="heat-swatch band-${escapeHtml(band)}"></span>${escapeHtml(band)}</li>`
+  ).join("");
+}
+
+function renderWorkloadHeatmap() {
+  const grid = $("workload-grid");
+  if (!grid) return;
+  const data = workloadData();
+  const totals = data.totals || {};
+  setText("workload-summary",
+    `${totals.open_tasks ?? 0} open - ${totals.overloaded ?? 0} overloaded - ${totals.idle ?? 0} idle`);
+  renderWorkloadLegend(data.bands);
+  const periods = data.periods || [];
+  const rows = workloadScope === "teams" ? (data.teams || []) : (data.agents || []);
+  if (!rows.length) {
+    grid.innerHTML = `<div class="workload-empty">No workload data</div>`;
+    return;
+  }
+  const headCells = periods.map((period) =>
+    `<span class="workload-cell is-head">${escapeHtml(period)}</span>`
+  ).join("");
+  const head = `<div class="workload-row is-head"><span class="workload-label">${escapeHtml(workloadScope === "teams" ? "Team" : "Agent")}</span><div class="workload-cells">${headCells}</div></div>`;
+  grid.innerHTML = head + rows.map((row) => workloadRow(row, periods)).join("");
+  wireTeamDrilldown(grid);
+}
+
+function setWorkloadScope(scope) {
+  workloadScope = scope === "teams" ? "teams" : "agents";
+  const agentsBtn = $("workload-scope-agents");
+  const teamsBtn = $("workload-scope-teams");
+  if (agentsBtn) {
+    agentsBtn.classList.toggle("is-active", workloadScope === "agents");
+    agentsBtn.setAttribute("aria-selected", workloadScope === "agents" ? "true" : "false");
+  }
+  if (teamsBtn) {
+    teamsBtn.classList.toggle("is-active", workloadScope === "teams");
+    teamsBtn.setAttribute("aria-selected", workloadScope === "teams" ? "true" : "false");
+  }
+  renderWorkloadHeatmap();
 }
 
 // ----- TASK-AR-332: file attachments (drag/drop + paste, preview, lightbox) -----
@@ -8221,6 +8470,7 @@ function renderAll() {
   renderTasksetCompletion();
   renderTasksetBoard();
   renderTeamAgents();
+  renderWorkloadHeatmap();
   renderAgents();
   renderChannels();
   renderMessages();
@@ -8615,6 +8865,8 @@ $("state-machine-task-select")?.addEventListener("change", (event) => {
   selectedStateMachineTaskId = event.target.value || null;
   renderStateMachineViewer();
 });
+$("workload-scope-agents")?.addEventListener("click", () => setWorkloadScope("agents"));
+$("workload-scope-teams")?.addEventListener("click", () => setWorkloadScope("teams"));
 ["work-search", "work-depth-filter"].forEach((id) => {
   const node = $(id);
   if (node) {
@@ -9170,6 +9422,8 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/taskset-completion": "taskset_completion",
         "/api/team_agents": "team_agents",
         "/api/team-agents": "team_agents",
+        "/api/teams": "teams",
+        "/api/workload": "workload",
         "/api/sources": "sources",
         "/api/errors": "errors",
         "/api/evidence": "evidence",

@@ -33,6 +33,8 @@ RESOURCE_NAMES = (
     "tasksets_board",
     "taskset_completion",
     "team_agents",
+    "teams",
+    "workload",
     "sources",
     "errors",
     "evidence",
@@ -367,6 +369,11 @@ def load_tasks(root: Path, now: str, warnings: list[dict[str, str]]) -> list[dic
             "order": _task_order(meta, order),
             "owner_agent": meta.get("owner"),
             "team": meta.get("team"),
+            # Team/role assignment fields beyond assignee (TASK-AR-337). These are
+            # the raw frontmatter values; the canonical team is RESOLVED later by
+            # resolve_task_assignment so heatmap/org-chart/filters agree.
+            "role": _normalize_role(meta.get("role")) or None,
+            "assignee": meta.get("assignee"),
             "parent_id": parent_id,
             "blocks": blocks,
             "blocked_by": blocked_by,
@@ -3314,6 +3321,141 @@ def build_roadmap_timeline(
     }
 
 
+# --- Team / role assignment model (TASK-AR-337) ----------------------------
+# Canonical teams + roles are read once from agents/project/TEAMS.md (the host
+# overlay). A task's team/role assignment is RESOLVED against this registry so
+# the heatmap, the org chart and the board filters all agree on which team owns
+# a task. Resolution order for a task's team: explicit `team` frontmatter ->
+# the team that owns the task's `role`/`owner` role -> the taskset default team.
+
+TEAMS_SCHEMA = "agent-runtime-teams/v1"
+TEAMS_REL = "agents/project/TEAMS.md"
+
+
+def _normalize_role(value: Any) -> str:
+    """Canonicalize a role/owner token (lead_engineer / Lead Engineer -> lead-engineer)."""
+    text = str(value or "").strip().lower()
+    text = re.sub(r"[\s_]+", "-", text)
+    text = re.sub(r"-+", "-", text)
+    return text.strip("-")
+
+
+def load_teams(root: Path, now: str, warnings: list[dict[str, str]] | None = None) -> dict[str, Any]:
+    """Parse the canonical TEAMS.md host overlay into a team/role registry.
+
+    Each block (``- team_id: X``) yields a team with its lead and the list of
+    canonical roles it owns. A reverse role->team index lets task assignment be
+    resolved against the canonical roles (TASK-AR-337). Missing file degrades to
+    an empty, well-formed registry (no crash).
+    """
+    path = root / TEAMS_REL
+    teams: list[dict[str, Any]] = []
+    role_to_team: dict[str, str] = {}
+    freshness = "present"
+    last_updated = _mtime_iso(path)
+    if not path.exists():
+        freshness = "missing"
+    else:
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError as exc:
+            if warnings is not None:
+                warnings.append(_warning("teams-read-error", _rel(root, path), str(exc)))
+            text = ""
+            freshness = "missing"
+        current: dict[str, Any] | None = None
+        section: str | None = None
+        for raw in text.splitlines():
+            line = raw.rstrip()
+            if not line.strip():
+                continue
+            stripped = line.strip()
+            block = re.match(r"-\s*team_id:\s*(.+)$", stripped)
+            if block:
+                current = {"team_id": block.group(1).strip(), "purpose": "", "lead": "", "roles": []}
+                teams.append(current)
+                section = None
+                continue
+            if current is None:
+                continue
+            purpose = re.match(r"purpose:\s*(.+)$", stripped)
+            if purpose:
+                current["purpose"] = purpose.group(1).strip()
+                section = None
+                continue
+            lead = re.match(r"lead:\s*(.+)$", stripped)
+            if lead:
+                current["lead"] = _normalize_role(lead.group(1))
+                section = None
+                continue
+            if re.match(r"roles:\s*$", stripped):
+                section = "roles"
+                continue
+            if re.match(r"canonical_context:\s*$", stripped):
+                section = "context"
+                continue
+            item = re.match(r"-\s*(.+)$", stripped)
+            if item and section == "roles":
+                role = _normalize_role(item.group(1))
+                if role:
+                    current["roles"].append(role)
+                    role_to_team.setdefault(role, current["team_id"])
+                continue
+            if item and section == "context":
+                continue
+    for team in teams:
+        team["roles"] = _dedupe_strings(team["roles"])
+        team["role_count"] = len(team["roles"])
+    return {
+        "schema": TEAMS_SCHEMA,
+        "generated_at": now,
+        "source_path": TEAMS_REL,
+        "freshness": freshness,
+        "last_updated": last_updated,
+        "teams": teams,
+        "role_to_team": role_to_team,
+        "team_ids": [team["team_id"] for team in teams],
+    }
+
+
+def resolve_task_assignment(
+    task: dict[str, Any],
+    teams: dict[str, Any],
+    taskset_team_defaults: dict[str, str],
+) -> dict[str, Any]:
+    """Resolve a task's canonical team/role assignment (TASK-AR-337).
+
+    Returns the resolved ``team``, ``role`` and the ``assignment_source`` that
+    explains how the team was chosen. This is the SINGLE place the team is
+    decided so the heatmap, org chart and filters stay consistent.
+    """
+    role_to_team = teams.get("role_to_team") or {}
+    raw_team = str(task.get("team") or "").strip()
+    raw_role = _normalize_role(task.get("role") or task.get("owner_agent") or task.get("owner") or "")
+    assignee = str(task.get("assignee") or "").strip() or None
+
+    team = raw_team
+    source = "task_team" if raw_team else None
+    if not team and raw_role and raw_role in role_to_team:
+        team = role_to_team[raw_role]
+        source = "role"
+    if not team:
+        task_set_id = str(task.get("task_set_id") or "").strip()
+        default_team = taskset_team_defaults.get(task_set_id)
+        if default_team:
+            team = default_team
+            source = "taskset_default"
+    if not team:
+        team = "unassigned"
+        source = source or "unassigned"
+    return {
+        "team": team,
+        "role": raw_role or None,
+        "assignee": assignee,
+        "assignment_source": source,
+    }
+
+
 # --- Team / Agent RPG presence (TASK-AR-324) -------------------------------
 # Team -> Agent organisation hierarchy rendered as online-RPG-guild character
 # cards. The card "level" and "XP" are DERIVED on every build from completed
@@ -3553,6 +3695,189 @@ def build_team_agents(
         },
         "totals": totals,
         "teams": team_groups,
+    }
+
+
+# --- Workload heatmap (TASK-AR-337) ----------------------------------------
+# A per-agent and per-team load grid (assignee/team x period) derived from the
+# resolved task assignments. Each open task contributes one "load unit" to its
+# assignee's and its team's cell for the period its due/updated date falls in.
+# Cells are classified idle / normal / busy / overload from the load count so
+# the heatmap can color overload and idle without inventing per-cell colors.
+
+WORKLOAD_HEATMAP_SCHEMA = "agent-runtime-workload-heatmap/v1"
+# Per-period open-task thresholds. <= idle: idle; <= busy: normal; <= overload:
+# busy; above overload: overload. Tuned so a single agent juggling >3 open
+# tasks in one period reads as "overload".
+_WORKLOAD_IDLE_MAX = 0
+_WORKLOAD_NORMAL_MAX = 2
+_WORKLOAD_BUSY_MAX = 3
+_WORKLOAD_PERIODS = 6
+
+
+def _workload_period_key(value: Any, now: str) -> str:
+    """Bucket a task date into a YYYY-MM period key (falls back to current month)."""
+    text = str(value or "").strip()
+    match = re.match(r"(\d{4})-(\d{2})", text)
+    if match:
+        return f"{match.group(1)}-{match.group(2)}"
+    fallback = re.match(r"(\d{4})-(\d{2})", str(now or ""))
+    return f"{fallback.group(1)}-{fallback.group(2)}" if fallback else "unknown"
+
+
+def _workload_band(load: int) -> str:
+    if load <= _WORKLOAD_IDLE_MAX:
+        return "idle"
+    if load <= _WORKLOAD_NORMAL_MAX:
+        return "normal"
+    if load <= _WORKLOAD_BUSY_MAX:
+        return "busy"
+    return "overload"
+
+
+def derive_taskset_team_defaults(tasks: list[dict[str, Any]], teams: dict[str, Any]) -> dict[str, str]:
+    """Pick a default team per taskset from its tasks' explicit/role assignments.
+
+    A task that names no team but belongs to a taskset inherits the taskset's
+    default team (the team most of its siblings resolve to). This realizes the
+    "taskset -> team default assignment" requirement (TASK-AR-337) without a new
+    canonical field: the default is the consensus of the taskset's tasks.
+    """
+    role_to_team = teams.get("role_to_team") or {}
+    votes: dict[str, dict[str, int]] = {}
+    for task in tasks:
+        task_set_id = str(task.get("task_set_id") or "").strip()
+        if not task_set_id:
+            continue
+        explicit = str(task.get("team") or "").strip()
+        role = _normalize_role(task.get("role") or task.get("owner_agent") or task.get("owner") or "")
+        team = explicit or role_to_team.get(role)
+        if not team:
+            continue
+        tally = votes.setdefault(task_set_id, {})
+        # Explicit team assignments weigh more than role-derived ones.
+        tally[team] = tally.get(team, 0) + (2 if explicit else 1)
+    defaults: dict[str, str] = {}
+    for task_set_id, tally in votes.items():
+        defaults[task_set_id] = max(sorted(tally), key=lambda team: tally[team])
+    return defaults
+
+
+def enrich_tasks_with_assignment(
+    tasks: list[dict[str, Any]],
+    teams: dict[str, Any],
+    taskset_team_defaults: dict[str, str],
+) -> None:
+    """Stamp each task with its RESOLVED team/role assignment (TASK-AR-337).
+
+    The same resolution drives the heatmap, so a task shows the same assigned
+    team in the org chart, the heatmap and the board team filter. Mutates each
+    task dict in place by adding ``assigned_team`` / ``assigned_role`` /
+    ``assigned_assignee`` / ``assignment_source``.
+    """
+    for task in tasks:
+        assignment = resolve_task_assignment(task, teams, taskset_team_defaults)
+        task["assigned_team"] = assignment["team"]
+        task["assigned_role"] = assignment["role"]
+        task["assigned_assignee"] = assignment["assignee"]
+        task["assignment_source"] = assignment["assignment_source"]
+
+
+def build_workload_heatmap(
+    tasks: list[dict[str, Any]],
+    teams: dict[str, Any],
+    taskset_team_defaults: dict[str, str],
+    now: str,
+) -> dict[str, Any]:
+    """Aggregate open-task load per agent and per team across recent periods.
+
+    The same resolved team/role assignment used by the board filters and the org
+    chart feeds this grid, so a task's team is the same everywhere. Intensity is
+    expressed as a normalized 0..1 ``intensity`` plus a discrete ``band`` so the
+    renderer can map it to opacity over a single token color (never raw rgba).
+    """
+    periods: set[str] = set()
+    agents: dict[str, dict[str, Any]] = {}
+    team_rows: dict[str, dict[str, Any]] = {}
+
+    def _row(table: dict[str, dict[str, Any]], key: str, kind: str) -> dict[str, Any]:
+        row = table.get(key)
+        if row is None:
+            row = table[key] = {"id": key, "kind": kind, "cells": {}, "open_total": 0}
+        return row
+
+    for task in tasks:
+        if not _task_is_open(task):
+            continue
+        assignment = resolve_task_assignment(task, teams, taskset_team_defaults)
+        period = _workload_period_key(task.get("due") or task.get("updated_at") or task.get("created_at"), now)
+        periods.add(period)
+        team_id = assignment["team"]
+        agent_id = assignment["assignee"] or assignment["role"] or "unassigned"
+        for table, key, kind in ((agents, agent_id, "agent"), (team_rows, team_id, "team")):
+            row = _row(table, key, kind)
+            cell = row["cells"].setdefault(period, {"load": 0, "task_ids": []})
+            cell["load"] += 1
+            cell["task_ids"].append(str(task.get("id") or ""))
+            row["open_total"] += 1
+
+    period_list = sorted(periods)[-_WORKLOAD_PERIODS:] if periods else []
+    max_load = 1
+    for table in (agents, team_rows):
+        for row in table.values():
+            for cell in row["cells"].values():
+                max_load = max(max_load, int(cell["load"]))
+
+    def _finalize(table: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        for key in sorted(table):
+            row = table[key]
+            cells = []
+            for period in period_list:
+                cell = row["cells"].get(period, {"load": 0, "task_ids": []})
+                load = int(cell["load"])
+                cells.append(
+                    {
+                        "period": period,
+                        "load": load,
+                        "band": _workload_band(load),
+                        "intensity": round(load / max_load, 3) if max_load else 0.0,
+                        "task_ids": [tid for tid in cell.get("task_ids", []) if tid],
+                    }
+                )
+            rows.append(
+                {
+                    "id": row["id"],
+                    "kind": row["kind"],
+                    "open_total": row["open_total"],
+                    "cells": cells,
+                    "peak_band": _workload_band(max((c["load"] for c in cells), default=0)),
+                }
+            )
+        return rows
+
+    agent_rows = _finalize(agents)
+    finalized_team_rows = _finalize(team_rows)
+    return {
+        "schema": WORKLOAD_HEATMAP_SCHEMA,
+        "generated_at": now,
+        "periods": period_list,
+        "agents": agent_rows,
+        "teams": finalized_team_rows,
+        "max_load": max_load,
+        "bands": ["idle", "normal", "busy", "overload"],
+        "thresholds": {
+            "idle_max": _WORKLOAD_IDLE_MAX,
+            "normal_max": _WORKLOAD_NORMAL_MAX,
+            "busy_max": _WORKLOAD_BUSY_MAX,
+        },
+        "totals": {
+            "agents": len(agent_rows),
+            "teams": len(finalized_team_rows),
+            "open_tasks": sum(row["open_total"] for row in agent_rows),
+            "overloaded": sum(1 for row in agent_rows if row["peak_band"] == "overload"),
+            "idle": sum(1 for row in agent_rows if row["peak_band"] == "idle"),
+        },
     }
 
 
@@ -4855,6 +5180,14 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     roadmap_timeline = build_roadmap_timeline(roadmap, work_explorer, root_path, generated_at, warnings)
     instances = _load_instances(root_path, generated_at, warnings)
     team_agents = build_team_agents(root_path, instances, agents, task_claims, events, generated_at)
+    # Team/role assignment + workload heatmap (TASK-AR-337). Resolution against
+    # the canonical TEAMS.md registry is computed once and stamped onto tasks so
+    # the heatmap, org chart and board filters all read the same assigned team.
+    teams = load_teams(root_path, generated_at, warnings)
+    taskset_team_defaults = derive_taskset_team_defaults(tasks, teams)
+    enrich_tasks_with_assignment(tasks, teams, taskset_team_defaults)
+    teams["taskset_defaults"] = taskset_team_defaults
+    workload = build_workload_heatmap(tasks, teams, taskset_team_defaults, generated_at)
     live_map = build_live_map(tasks, agents, messages, team_agents, generated_at)
     dependency_graph = build_dependency_graph(tasks, generated_at)
     timeline = build_timeline(tasks, generated_at)
@@ -4886,6 +5219,8 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "tasksets_board": tasksets_board,
         "taskset_completion": taskset_completion,
         "team_agents": team_agents,
+        "teams": teams,
+        "workload": workload,
         "messages": messages,
         "events": events,
         "goals": goals,
