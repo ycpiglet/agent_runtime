@@ -1,0 +1,135 @@
+# PRODUCT-MATURITY-UI-RUBRIC.yml -- registered evaluation rubric for product
+# maturity and UI/UX level. This is an EVALUATION METRIC artifact: it defines the
+# dimensions, the 1-5 scoring scale, the current baseline scores (with evidence),
+# and the release-readiness thresholds so maturity/UI can be re-measured over time
+# instead of asserted ad hoc.
+#
+# Re-evaluate: re-score each dimension against the evidence anchors, set
+# `assessed_at`, and record the result as a reviews/RESEARCH-*.md assessment. The
+# companion verification cases live in docs/product-maturity-ui-verification-catalog.md.
+schema: agent-runtime-product-eval-rubric/v1
+id: PRODUCT-MATURITY-UI-RUBRIC
+owner: lead_engineer
+assessed_at: 2026-06-14T08:48:02+09:00
+assessed_by: research-agent-panel
+source_assessment: reviews/RESEARCH-2026-06-14-product-maturity-ui-assessment.md
+
+scoring_scale:
+  "1": prototype — works in the happy path only; no tests/guards; not safe to rely on
+  "2": alpha — core path covered; thin tests; known gaps; manual recovery
+  "3": beta — feature-complete for the core; partial tests/guards; some edge handling
+  "4": production-hardened — broad tests, guards, recovery, docs; minor gaps remain
+  "5": mature — adversarial/edge coverage, observability, distributed-safe, automated
+
+# --------------------------------------------------------------------------- A
+product_maturity:
+  overall_baseline: 4
+  overall_target: 5
+  dimensions:
+    - id: feature_breadth_depth
+      weight: 0.20
+      baseline: 4
+      target: 5
+      evidence:
+        - scripts/owner_governance_gate.py (47-gate chain)
+        - src/agent_runtime/ui_console.py (operator console)
+        - src/agent_runtime/release_preflight.py (6-stage release tooling)
+      gap: emerging metadata/analytics + provider-live execution still partial
+    - id: test_coverage
+      weight: 0.20
+      baseline: 4
+      target: 5
+      evidence:
+        - tests/ (~97 files, ~1,130 test functions; pyproject testpaths=["tests"])
+        - .github/workflows/test.yml (py3.10/3.11/3.12 matrix)
+      gap: heartbeat/lease refresh under concurrency lightly covered
+    - id: release_ops
+      weight: 0.20
+      baseline: 4
+      target: 5
+      evidence:
+        - src/agent_runtime/publish_*.py (check/bundle/tag-smoke/github-plan)
+        - src/agent_runtime/sync.py + update-notify (upstream pin + auto-check)
+      gap: remote publish/tag/merge are owner-gated check-only (no end-to-end automation)
+    - id: architecture_governance
+      weight: 0.20
+      baseline: 4
+      target: 5
+      evidence:
+        - owner_governance_gate sub-gate chain (state-machine, footprint, rbac, ...)
+        - reviews/ (~458 indexed records), AGENTS.md, docs/
+      gap: two-layer root/template duplication raises drift risk (kept in sync manually)
+    - id: reliability_observability
+      weight: 0.20
+      baseline: 4
+      target: 5
+      evidence:
+        - scripts/claim_reaper.py, goal_supervisor.py, stop_events.py, deadlock_watchdog.py
+        - agents/runtime/pane_events/pane-events.jsonl, stop_counters.json
+      gap: no external metrics export; single-host claim safety only
+
+# --------------------------------------------------------------------------- B
+ui_ux:
+  overall_baseline: 3.5
+  overall_target: 4.5
+  dimensions:
+    - id: feature_coverage
+      weight: 0.20
+      baseline: 4.5
+      target: 5
+      evidence:
+        - src/agent_runtime/ui_console.py (32 views; board, calendar, search, team, ...)
+        - src/agent_runtime/ui_commands.py (taskset templates, automation, reactions)
+      gap: drag-and-drop is a JS stub; some interaction models incomplete
+    - id: interaction_feedback
+      weight: 0.15
+      baseline: 3.5
+      target: 4.5
+      evidence:
+        - microinteractions (ar-fade-in-up/pop-in/skeleton/confetti/xp-bump)
+        - optimistic UI, skeleton/empty states, keyboard shortcuts (Ctrl+P/Ctrl+D)
+      gap: no progressive feedback for slow ops; no true history routing; limited undo
+    - id: i18n_localization
+      weight: 0.10
+      baseline: 3
+      target: 4
+      evidence:
+        - ui_state.py lookup_i18n()/build_i18n(); ~199 data-i18n usages; ko/en toggle
+      gap: error messages hardcoded en; no locale date/number formatting; inline-only strings
+    - id: accessibility
+      weight: 0.20
+      baseline: 3
+      target: 4.5
+      evidence:
+        - ~682 aria-/role= usages; tablist nav; prefers-reduced-motion + data-motion gate
+      gap: no skip links; no modal focus trap; div-not-table lists; weak label association/contrast
+    - id: theming_customization
+      weight: 0.15
+      baseline: 4
+      target: 4.5
+      evidence:
+        - data-theme light/dark (no-flash bootstrap); CSS token system; widget/workspace config
+      gap: no font-scale, no high-contrast mode, single responsive breakpoint
+    - id: ui_testing
+      weight: 0.20
+      baseline: 3
+      target: 4.5
+      evidence:
+        - tests/test_ui_*.py (~326 UI tests: console/state/commands/extensions/export/microinteractions)
+      gap: NO end-to-end browser tests (Playwright); no a11y scans; no responsive/keyboard behavior tests
+
+# --------------------------------------------------------------------------- gates
+release_readiness:
+  product_maturity_min: 4
+  ui_ux_min: 4
+  block_on_regression: true
+  required_case_types:        # mirror agents/project/EVAL-POLICY.yml
+    - typical
+    - edge
+    - adversarial
+    - ambiguous
+    - access-controlled
+  notes: >
+    A dimension may not regress below its baseline without a recorded waiver.
+    Raising a dimension to target requires the matching verification cases in
+    docs/product-maturity-ui-verification-catalog.md to pass.
