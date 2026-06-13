@@ -339,6 +339,8 @@ def _build_claim(
         "mode": mode,
         "status": "claimed",
         "task_set_id": args.task_set_id,
+        "active_scope": args.active_scope or args.task_set_id,
+        "scope_transition_approved": bool(args.scope_transition_approved),
         "project_id": args.project_id,
         "unit_id": args.unit_id,
         "unit_spec": args.unit_spec,
@@ -730,6 +732,31 @@ def cmd_release(args: argparse.Namespace) -> int:
             "ts": now_text,
         },
     )
+    if str(claim.get("phase") or "").strip().lower() == "taskset-completed":
+        # Taskset boundary reached: emit a completion signal so the runtime
+        # (boundary guard + UI banner) can enforce STOP-and-report rather than
+        # drifting into out-of-scope follow-on work.
+        scope = str(claim.get("active_scope") or claim.get("task_set_id") or "").strip()
+        append_event(
+            root,
+            {
+                "event": "taskset.completed",
+                "actor": claim.get("agent_instance_id") or "unknown",
+                "actor_role": claim.get("agent_role"),
+                "agent_instance_id": claim.get("agent_instance_id"),
+                "display_name": claim.get("display_name"),
+                "callsite_id": claim.get("callsite_id"),
+                "task_id": claim.get("task_id"),
+                "task_set_id": scope,
+                "claim_id": claim.get("claim_id"),
+                "worktree_path": claim.get("worktree_path"),
+                "message": (
+                    f"Taskset {scope} completed; stop and report. "
+                    "Out-of-scope follow-on work requires owner approval."
+                ),
+                "ts": now_text,
+            },
+        )
     _emit({"status": "released", "path": _rel(root, path), "claim": claim}, as_json=args.json)
     return 0
 
@@ -744,6 +771,24 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--agent-role", required=True)
     create.add_argument("--team-id", default="agent-runtime-core")
     create.add_argument("--task-set-id", default="")
+    create.add_argument(
+        "--active-scope",
+        default="",
+        help=(
+            "Active taskset boundary recorded on the claim (defaults to "
+            "--task-set-id). The taskset boundary guard treats work outside "
+            "this scope after completion as drift."
+        ),
+    )
+    create.add_argument(
+        "--scope-transition-approved",
+        action="store_true",
+        help=(
+            "Mark this claim as an owner-approved scope transition so the "
+            "taskset boundary guard does not block it after a prior taskset "
+            "completed"
+        ),
+    )
     create.add_argument("--project-id", default="")
     create.add_argument("--unit-id", default="")
     create.add_argument("--unit-spec", default="")

@@ -250,6 +250,7 @@ HTML = """<!doctype html>
           </div>
         </div>
         <div id="view-tasksets" class="view">
+          <div id="taskset-completion-banner" class="taskset-completion" role="status" aria-live="polite" hidden></div>
           <div class="taskset-toolbar">
             <input id="taskset-filter" placeholder="taskset alias, name, task id">
             <select id="taskset-status-filter">
@@ -1115,6 +1116,61 @@ textarea:focus {
   display: grid;
   grid-template-columns: repeat(2, minmax(280px, 1fr));
   gap: 10px;
+}
+.taskset-completion {
+  border: 1px solid var(--success-line);
+  border-left: 3px solid var(--success);
+  border-radius: var(--radius);
+  background: var(--success-soft);
+  color: var(--ink);
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.taskset-completion-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.taskset-completion-badge {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--success);
+}
+.taskset-completion-message {
+  color: var(--muted);
+  font-size: 13px;
+}
+.taskset-completion-next {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--tile);
+  padding: 8px 10px;
+}
+.taskset-completion-next-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--subtle);
+}
+.taskset-completion-next-meta {
+  font-size: 12px;
+  color: var(--muted);
+}
+.taskset-completion-next-cmd {
+  font-size: 12px;
+  color: var(--ink);
+  background: var(--raise);
+  border-radius: 4px;
+  padding: 2px 6px;
 }
 .evidence-grid {
   display: grid;
@@ -3248,6 +3304,37 @@ function renderTaskSetDirectory() {
   wireTaskSetActions(host);
 }
 
+function renderTasksetCompletion() {
+  const host = $("taskset-completion-banner");
+  if (!host) return;
+  const completion = (runtimeState && runtimeState.taskset_completion) || {};
+  if (!completion.active) {
+    host.hidden = true;
+    host.innerHTML = "";
+    return;
+  }
+  host.hidden = false;
+  const next = completion.next_suggestion;
+  const suggestionMarkup = next
+    ? `
+      <div class="taskset-completion-next" data-approval="${escapeHtml(next.approval_state || "awaiting_approval")}">
+        <span class="taskset-completion-next-label">Next taskset (awaiting approval)</span>
+        <strong>${escapeHtml(next.display_name || next.id || "")}</strong>
+        <span class="taskset-completion-next-meta">${escapeHtml(next.tasks_open || 0)}/${escapeHtml(next.tasks_total || 0)} open</span>
+        <code class="taskset-completion-next-cmd">${escapeHtml(next.start_command || "")}</code>
+      </div>`
+    : `<div class="taskset-completion-next"><span class="taskset-completion-next-label">No further taskset queued.</span></div>`;
+  host.innerHTML = `
+    <div class="taskset-completion-head">
+      <span class="taskset-completion-badge">Completed</span>
+      <b>${escapeHtml(completion.completed_display_name || completion.completed_task_set_id || "")}</b>
+      <span class="state-chip">stop &amp; report</span>
+    </div>
+    <p class="taskset-completion-message">${escapeHtml(completion.message || "")}</p>
+    ${suggestionMarkup}
+  `;
+}
+
 function renderMultipaneAssurance() {
   const host = $("multipane-assurance-list");
   if (!host) return;
@@ -4814,6 +4901,7 @@ function renderAll() {
   renderWorkExplorer();
   renderMeetingRoom();
   renderTaskSetDirectory();
+  renderTasksetCompletion();
   renderTasksetBoard();
   renderTeamAgents();
   renderAgents();
@@ -5230,6 +5318,8 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/meeting-room": "meeting_room",
         "/api/tasksets_board": "tasksets_board",
         "/api/tasksets-board": "tasksets_board",
+        "/api/taskset_completion": "taskset_completion",
+        "/api/taskset-completion": "taskset_completion",
         "/api/team_agents": "team_agents",
         "/api/team-agents": "team_agents",
         "/api/sources": "sources",

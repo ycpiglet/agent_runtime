@@ -331,6 +331,8 @@ def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
         task.task_id,
         "--task-set-id",
         info.task_set_id,
+        "--active-scope",
+        info.task_set_id,
         "--project-id",
         project_id,
         "--unit-id",

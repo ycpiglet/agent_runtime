@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-13T19:08:07+09:00
-record_count: 432
+generated_at: 2026-06-13T19:34:15+09:00
+record_count: 433
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `432` review and evidence records under `reviews/`.
+- Summary: indexed `433` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `432` files |
+| Reviews covered | pass | `433` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -434,6 +434,7 @@ record_count: 432
 | `reviews/REVIEW-2026-06-13-parallel-wave-1-2-closeout.md` | `REVIEW-2026-06-13-parallel-wave-1-2-closeout` | review | pass | pass | Parallel Wave 1-2 Closeout (AR-500/503/505/509/510/513/515) |
 | `reviews/REVIEW-2026-06-13-parallel-wave-500-series-capability-analysis.md` | `REVIEW-2026-06-13-parallel-wave-500-series-capability-analysis` | review | pass | pass | 500-Series Capability Analysis — Implemented, Applied, Verified |
 | `reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md` | `REVIEW-2026-06-13-parallel-wave-500-series-final-closeout` | review | pass | pass | 500-Series Parallel Execution — Final Closeout |
+| `reviews/REVIEW-2026-06-13-taskset-boundary-execution-guard.md` | `REVIEW-2026-06-13-taskset-boundary-execution-guard` | md | record | n/a | REVIEW-2026-06-13 taskset boundary execution guard (TASK-AR-328) |
 | `reviews/REVIEW-2026-06-13-v0.2.0-release-readiness.md` | `REVIEW-2026-06-13-v0.2.0-release-readiness` | review | pass | pass | v0.2.0 Release Readiness |
 | `reviews/REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log.md` | `REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log` | md | record | n/a | REVIEW: TASK-AR-222 closeout 실행 로그 |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
