@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from agent_runtime import cli as cli_module
+from agent_runtime import ui_console
 from agent_runtime import ui_state
 
 
@@ -2481,3 +2482,207 @@ def test_ui_state_ops_metrics_in_resource_names_and_resource_endpoint(tmp_path):
     payload = ui_state.build_resource(tmp_path, "ops_metrics", now="2026-06-13T11:00:00+09:00")
     assert payload["resource"] == "ops_metrics"
     assert payload["items"]["schema"] == ui_state.OPS_METRICS_SCHEMA
+
+
+# --- TASK-AR-338: notification center + @mentions + daily brief --------------
+
+AR338_NOW = "2026-06-14T10:00:00+09:00"
+
+
+def _ar338_task(task_id, *, status="in_progress", task_set_id="TASKSET-AR-X", **extra):
+    lines = [
+        "---",
+        f"id: {task_id}",
+        f"status: {status}",
+        "owner: lead-engineer",
+        "priority: P0",
+        f"task_set_id: {task_set_id}",
+    ]
+    for key, value in extra.items():
+        lines.append(f"{key}: {value}")
+    lines += ["created: 2026-06-14", "---", "", "## Goal", "", "Do a thing.", ""]
+    return "\n".join(lines)
+
+
+def _ar338_message(message_id, body, *, sender="owner", task_id="TASK-AR-900", ts="2026-06-14T09:00:00+09:00"):
+    return "\n".join(
+        [
+            "---",
+            f"id: {message_id}",
+            f"from: {sender}",
+            "to: lead-engineer",
+            "type: instruction",
+            f"ts: {ts}",
+            f"task_id: {task_id}",
+            "---",
+            "",
+            body,
+            "",
+        ]
+    )
+
+
+def _ar338_seed(tmp_path):
+    _write(tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-900-x.md",
+           _ar338_task("TASK-AR-900", status="blocked", blocked_reason="waiting on review"))
+    _write(tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901-y.md",
+           _ar338_task("TASK-AR-901", status="planned"))
+    _write(tmp_path / "agents" / "messages" / "inbox" / "MSG-1.md",
+           _ar338_message("MSG-1", "Hey @lead-engineer please look, and @owner FYI"))
+
+
+def test_notifications_aggregate_events_reminders_mentions_with_severity(tmp_path):
+    _ar338_seed(tmp_path)
+    state = ui_state.build_state(tmp_path, now=AR338_NOW)
+    notifications = state["notifications"]
+    assert notifications["schema"] == ui_state.NOTIFICATIONS_SCHEMA
+    kinds = {item["kind"] for item in notifications["notifications"]}
+    assert "blocked" in kinds
+    assert "mention" in kinds
+    blocked = next(item for item in notifications["notifications"] if item["kind"] == "blocked")
+    assert blocked["severity"] == "blocked"
+    assert blocked["task_id"] == "TASK-AR-900"
+    # Blocked notification deep-links to the task (the blocked->notify->deep-link flow).
+    assert blocked["deep_link"] == "#/home/board?select=TASK-AR-900"
+    # Two distinct mention targets become two mention notifications.
+    mentions = sorted(item["mention_target"] for item in notifications["notifications"] if item["kind"] == "mention")
+    assert mentions == ["lead-engineer", "owner"]
+
+
+def test_notifications_consume_calendar_reminders(tmp_path):
+    # A task with a near-future due date produces a calendar reminder that the
+    # notification center consumes as a due_soon reminder notification.
+    _write(tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-902-due.md",
+           _ar338_task("TASK-AR-902", status="in_progress", due="2026-06-15"))
+    state = ui_state.build_state(tmp_path, now=AR338_NOW)
+    reminders = [item for item in state["notifications"]["notifications"] if item["kind"] == "reminder"]
+    assert reminders, "expected a reminder consumed from the calendar"
+    assert reminders[0]["severity"] in {"due_soon", "overdue"}
+
+
+def test_notifications_apply_subscription_mute_keyword_and_read_state(tmp_path):
+    _ar338_seed(tmp_path)
+    # Subscribe to blocked+mention; mute the blocked task; mark the owner mention
+    # read; keyword-mute mentions containing FYI.
+    _write(
+        tmp_path / ui_state.NOTIFICATIONS_CONFIG_REL,
+        json.dumps(
+            {
+                "subscriptions": {"kinds": ["blocked", "mention"]},
+                "mutes": ["TASK-AR-900"],
+                "read": ["notif:mention:MSG-1:owner"],
+                "keyword_rules": [{"keyword": "FYI", "action": "mute"}],
+            }
+        ),
+    )
+    notifications = ui_state.build_notifications(
+        [], {"reminders": []},
+        ui_state.load_tasks(tmp_path, AR338_NOW, []),
+        ui_state.load_messages(tmp_path, AR338_NOW, []),
+        ui_state.load_notifications_config(tmp_path, AR338_NOW, []),
+        AR338_NOW,
+    )
+    by_id = {item["id"]: item for item in notifications["notifications"]}
+    # Blocked task notification is muted by the explicit task-id mute rule.
+    assert by_id["notif:blocked:TASK-AR-900"]["muted"] is True
+    # Keyword rule mutes the FYI mention; the owner mention carries FYI + is read.
+    assert by_id["notif:mention:MSG-1:owner"]["muted"] is True
+    assert by_id["notif:mention:MSG-1:owner"]["read"] is True
+    # The inbox excludes muted notifications.
+    inbox_ids = {item["id"] for item in notifications["inbox"]}
+    assert "notif:blocked:TASK-AR-900" not in inbox_ids
+
+
+def test_notifications_unsubscribed_kinds_excluded_from_inbox(tmp_path):
+    _ar338_seed(tmp_path)
+    _write(
+        tmp_path / ui_state.NOTIFICATIONS_CONFIG_REL,
+        json.dumps({"subscriptions": {"kinds": ["mention"]}}),
+    )
+    notifications = ui_state.build_notifications(
+        [], {"reminders": []},
+        ui_state.load_tasks(tmp_path, AR338_NOW, []),
+        ui_state.load_messages(tmp_path, AR338_NOW, []),
+        ui_state.load_notifications_config(tmp_path, AR338_NOW, []),
+        AR338_NOW,
+    )
+    inbox_kinds = {item["kind"] for item in notifications["inbox"]}
+    assert inbox_kinds == {"mention"}
+    # The blocked notification still exists in the full list but is not subscribed.
+    blocked = next(item for item in notifications["notifications"] if item["kind"] == "blocked")
+    assert blocked["subscribed"] is False
+
+
+def test_notifications_default_config_is_permissive(tmp_path):
+    _ar338_seed(tmp_path)
+    config = ui_state.load_notifications_config(tmp_path, AR338_NOW, [])
+    assert config["config_present"] is False
+    notifications = ui_state.build_notifications(
+        [], {"reminders": []},
+        ui_state.load_tasks(tmp_path, AR338_NOW, []),
+        ui_state.load_messages(tmp_path, AR338_NOW, []),
+        config,
+        AR338_NOW,
+    )
+    # With no config, every notification is subscribed and unmuted.
+    assert all(item["subscribed"] for item in notifications["notifications"])
+    assert notifications["totals"]["inbox"] == notifications["totals"]["total"]
+
+
+def test_notifications_render_is_xss_safe(tmp_path):
+    evil_task = _ar338_task("TASK-AR-903", status="blocked")
+    evil_task = evil_task.replace("Do a thing.", "irrelevant")
+    _write(tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-903-evil.md", evil_task)
+    # Carry the markup in the message body (escaped only at render time).
+    _write(tmp_path / "agents" / "messages" / "inbox" / "MSG-evil.md",
+           _ar338_message("MSG-evil", "@owner <img src=x onerror=alert(2)> <script>alert(1)</script>"))
+    state = ui_state.build_state(tmp_path, now=AR338_NOW)
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    bodies = [item["body"] for item in state["notifications"]["notifications"]]
+    # Raw markup survives verbatim in the JSON state (escaped only by escapeHtml
+    # at render time)...
+    assert any("<script>alert(1)</script>" in body for body in bodies)
+    # ...but the served shell never inlines the unescaped markup.
+    assert "<img src=x onerror=alert(2)>" not in html
+    assert "<script>alert(1)</script>" not in html
+
+
+def test_daily_brief_summarizes_completed_blocked_decisions_next(tmp_path):
+    _write(tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-900-x.md",
+           _ar338_task("TASK-AR-900", status="blocked", blocked_reason="waiting"))
+    _write(tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-904-done.md",
+           _ar338_task("TASK-AR-904", status="completed", completed_at="2026-06-14T08:00:00+09:00"))
+    _write(tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-905-next.md",
+           _ar338_task("TASK-AR-905", status="ready"))
+    _write(
+        tmp_path / "reviews" / "DECISION-2026-06-14-x.md",
+        "\n".join(["---", "id: DECISION-1", "title: Ship it", "type: decision",
+                   "date: 2026-06-14", "---", "", "## Bottom Line", "", "We ship.", ""]),
+    )
+    state = ui_state.build_state(tmp_path, now=AR338_NOW)
+    brief = state["daily_brief"]
+    assert brief["schema"] == ui_state.DAILY_BRIEF_SCHEMA
+    assert brief["date"] == "2026-06-14"
+    assert [item["id"] for item in brief["completed"]] == ["TASK-AR-904"]
+    assert any(item["id"] == "TASK-AR-900" for item in brief["blocked"])
+    assert [item["id"] for item in brief["decisions"]] == ["DECISION-1"]
+    next_ids = [item["id"] for item in brief["next_recommended"]]
+    assert "TASK-AR-905" in next_ids
+    # Completed/blocked tasks are not recommended as next work.
+    assert "TASK-AR-904" not in next_ids
+    assert "TASK-AR-900" not in next_ids
+
+
+def test_notifications_and_daily_brief_are_resources(tmp_path):
+    _ar338_seed(tmp_path)
+    for resource in ("notifications", "daily_brief"):
+        payload = ui_state.build_resource(tmp_path, resource, now=AR338_NOW)
+        assert payload["resource"] == resource
+        assert isinstance(payload["items"], dict)
+
+
+def test_extract_mentions_dedupes_and_lowercases():
+    assert ui_state.extract_mentions("@Owner ping @owner again @lead-engineer") == ["owner", "lead-engineer"]
+    assert ui_state.extract_mentions("no mentions here") == []
+    # An email-like token must not be treated as a mention.
+    assert ui_state.extract_mentions("mail me at a@b.com") == []
