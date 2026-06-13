@@ -11,6 +11,11 @@ current_state:
   status_text: "Remaining: AR-514 (in flight), wave-3 AR-501/517/518/519 (workers active), then wave-4 AR-502/506/512/516, then AR-507, AR-511 renormalize last."
 active_work:
   current_agents:
+    - claim_id: CLAIM-20260613-123036-task-ar-511-176a
+      agent_role: lead-engineer
+      agent_instance_id: inst-w7-ar511-claude
+      display_name: claude/eol-raven
+      callsite_id: claude-w7-ar511
   current_teams: []
 resume:
   active_task: TASK-AR-501
