@@ -250,6 +250,47 @@ Use human-friendly task-set display names in reports, for example
 System identifiers remain stable machine fields; display names help humans read
 the board like RPG-style party/status labels.
 
+## 5.6 Standard Work Lifecycle (W0~W6)
+
+The deferred-revalidation discipline (T0 plan snapshot at registration, T2
+drift check at dispatch) and the W0~W6 order below are the DEFAULT for every
+taskset, not an opt-in. No step may run out of order.
+
+- W0 Visibility (session start): inspect `agents/runtime/task_claims/*.json`,
+  `git worktree list`, and `python scripts/inflight_overlay.py --summary` to
+  see active claims, worktrees, and unmerged agent-branch divergence before
+  picking work. Never enter a problem that already has an active claim.
+- W1 Registration: search existing tasks/claims first (no duplicates), then
+  register the task records, and record the plan-assumption snapshot (T0)
+  with `python scripts/plan_assumption_gate.py record --taskset <id>
+  --design-record <review> --anchor <path>` covering the design record and
+  the scripts the plan depends on.
+- W2 Claim (claim-first): `python scripts/task_claim_dispatcher.py create`
+  re-verifies the recorded assumptions (T2) BEFORE writing the claim; drift
+  refuses the claim until a replan review re-records anchors (T3).
+  `--skip-plan-check` is a loud transitional escape. The claim is created in
+  the main checkout BEFORE any worktree work; footprint conflicts and
+  duplicate task/taskset claims block. Never create a worktree without a
+  claim.
+- W3 Implement: work only inside the claimed worktree/branch; keep
+  heartbeat/pane events current; no shared-SSoT writes (board, STATUS, INDEX,
+  registries are orchestrator-only); adjacent problems found mid-work go to
+  intake registration, never direct fixes.
+- W4 Verify: W4a — the worker runs the recorded verification commands and
+  writes the self-verification report; W4b — an INDEPENDENT agent instance
+  verifies and releases the claim (`release` enforces verifier != worker and
+  a verification evidence ref).
+- W5 Cleanup: serial merge-queue integration, board/index regeneration, then
+  worktree removal plus merged-branch cleanup — no zombie worktrees, no
+  standing ahead(N).
+- W6 Closeout: close the work record plus retro at wave boundaries; the next
+  session starts again at W0.
+
+T0/T2 wiring: T0 = snapshot at registration; T1 = informational
+`plan_assumption_gate --check` after merges; T2 = enforced at dispatch (claim
+creation refuses on drift); T3 = the replan review re-runs `record` to
+re-anchor the plan.
+
 ## 6. Reversibility Gate
 
 Use reversibility and blast radius to decide whether to act or ask.

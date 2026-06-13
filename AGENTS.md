@@ -71,3 +71,49 @@ continues to live at `src/agent_runtime/templates/project/AGENTS.md`.
   verify. Do not let implementation agents expand scope into planning,
   reprioritization, or adjacent taskset work without a new planner-approved
   record.
+
+## Standard Work Lifecycle (W0~W6) — Default For All Work
+
+Owner rule: "이번 건만이 아니라 앞으로 모든 작업들이 그렇게 되길 원한다" — the
+deferred-revalidation discipline (T0 snapshot at registration, T2 check at
+dispatch) and the W0~W6 order below are the DEFAULT for every taskset, not an
+opt-in. Decision record:
+`reviews/MEETING-2026-06-12-parallel-work-lifecycle-rules.md`. No step may run
+out of order.
+
+- W0 Visibility (session start): run `python scripts/work.py status` to see
+  active claims, git worktrees, and unmerged agent-branch divergence in one
+  read-only view. Never enter a problem that already has an active claim.
+- W1 Registration: search existing tasks/claims first (no duplicates), then
+  register through `python scripts/work.py new --input <json>`. Registration
+  automatically records the plan-assumption snapshot (T0) via
+  `scripts/plan_assumption_gate.py` — anchors default to the design record,
+  the registration/dispatch flow scripts (`scripts/work.py`,
+  `scripts/task_claim_dispatcher.py`), and every `scripts/*.py` the taskset's
+  tasks/units declare in `target_files`. `--no-plan-snapshot` is a discouraged
+  opt-out; if used, record manually before dispatch.
+- W2 Claim (claim-first): `python scripts/task_claim_dispatcher.py create`
+  re-verifies the recorded assumptions (T2) BEFORE writing the claim; drift
+  refuses the claim until a replan review re-records anchors (T3).
+  `--skip-plan-check` is a loud transitional escape. The claim is created in
+  the main checkout BEFORE any worktree work; footprint conflicts and
+  duplicate task/taskset claims block. Never create a worktree without a
+  claim.
+- W3 Implement: work only inside the claimed worktree/branch; keep
+  heartbeat/pane events current; no shared-SSoT writes (board, STATUS, INDEX,
+  registries are orchestrator-only); adjacent problems found mid-work go to
+  intake registration, never direct fixes.
+- W4 Verify: W4a — the worker runs the recorded verification commands and
+  writes the self-verification report; W4b — an INDEPENDENT agent instance
+  verifies and releases the claim (`release` enforces verifier != worker and
+  a verification evidence ref).
+- W5 Cleanup: serial merge-queue integration, board/index regeneration, then
+  worktree removal plus merged-branch cleanup — no zombie worktrees, no
+  standing ahead(N).
+- W6 Closeout: `work close` plus retro at wave boundaries; the next session
+  starts again at W0.
+
+T0/T2 wiring: T0 = snapshot at registration (`work.py new`); T1 =
+informational `plan_assumption_gate --check` after merges; T2 = enforced at
+dispatch (claim creation refuses on drift); T3 = the replan review re-runs
+`record` to re-anchor the plan.
