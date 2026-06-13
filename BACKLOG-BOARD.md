@@ -9,8 +9,8 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-13
 task_count: 186
-open_count: 46
-completed_count: 140
+open_count: 44
+completed_count: 142
 task_set_count: 8
 completed_task_set_count: 19
 ---
@@ -18,11 +18,11 @@ completed_task_set_count: 19
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `46` open or active tasks; `140` completed tasks are archived from this live board.
+- Summary: `44` open or active tasks; `142` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `39` / Ask `6` / Review `0` / Later `1` / Done `140`.
+- Status: Action `37` / Ask `6` / Review `0` / Later `1` / Done `142`.
 - Task Sets: `8` active workflows; `19` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -132,25 +132,23 @@ completed_task_set_count: 19
 ### Work Metadata Analyst (`TASKSET-AR-WORK-METADATA-ANALYTICS`)
 
 - Flow: Conversation-to-work traceability, Work Item metadata, Explorer roll-ups, query/export, agent attribution, and stale verification evidence.
-- Progress: `3/6` done; `3` open or active.
-- WIP: active `3/3`; oldest `5.9h`; stale `0`.
+- Progress: `4/6` done; `2` open or active.
+- WIP: active `2/3`; oldest `6.6h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-517` | INIT-AR-WORK-METADATA-ANALYTICS | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Turn Work Item metadata into queryable statistics, JSON/CSV export, and reusable save… |
 | `TASK-AR-519` | INIT-AR-WORK-METADATA-ANALYTICS | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Mark verification evidence stale when source files, commits, claims, or task records… |
-| `TASK-AR-516` | INIT-AR-WORK-METADATA-ANALYTICS | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | High | 12h/9000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Make initiative/taskset/task/unit progress and metadata visible through one Work Expl… |
 
 ### Wave Conductor (`TASKSET-AR-PARALLEL-WAVE-EXECUTION`)
 
 - Flow: Claim-time footprint conflict gate, wave dispatcher with cascade/parallel modes, integrator merge queue, and claim-first enforcement.
-- Progress: `6/10` done; `4` open or active.
-- WIP: active `2/3`; oldest `5.9h`; stale `0`.
+- Progress: `7/10` done; `3` open or active.
+- WIP: active `1/3`; oldest `0.7h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-500` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | in_progress | Action | P1 | High | Medium | 6h/5000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 충돌 발견 시점을 merge-time(사후)에서 claim-time(사전)으로 옮긴다. 새 클레임 생성 시 활성 클레임들의 선언 footprint(`ta… |
 | `TASK-AR-507` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Ask | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | Owner 규칙 "작업자가 스스로 검증 금지, 항상 다른 에이전트가 검증"을 실행 가능하게 강제한다: claim release/closeout 시 ver… |
 | `TASK-AR-506` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Medium | 7h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 이번 taskset에만 수동 적용된 지연평가 규율(T0 스냅샷/T2 착수 체크)과 W0~W6 수명주기를 **모든 작업의 기본값**으로 만든다 — Owne… |
-| `TASK-AR-501` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | High | 10h/8000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | planner가 unit 의존성 DAG를 topological wave로 분해하고, 디스패처가 같은 wave의 K개 unit에 대해 claim+workt… |
 
 ## Archived Task Sets
 
@@ -316,11 +314,13 @@ completed_task_set_count: 19
 | `TASK-AR-514` | `5b5f167a-3a1…` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | 2026-06-12T23:30:00+09:00 | 2026-06-13T01:33:45+09:00 | 2026-06-13T04:30:00+09:00 | 2026-06-13T04:30:00+09:00 | Owner/Claude/Codex planning discussions must map to review records, task records, boa… |
 | `TASK-AR-515` | `9c205ef4-f27…` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | 2026-06-12T23:31:00+09:00 | 2026-06-13T01:33:46+09:00 | 2026-06-13T02:55:00+09:00 | 2026-06-13T02:55:00+09:00 | Define and gate the Work Item metadata catalog for provenance, resolution, relationsh… |
 | `TASK-AR-518` | `93485297-632…` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | 2026-06-12T23:34:00+09:00 | 2026-06-13T02:45:17+09:00 | 2026-06-13T08:40:00+09:00 | 2026-06-13T08:40:00+09:00 | Require instance_uid actor attribution across claims, A2A messages, evidence, closeou… |
+| `TASK-AR-516` | `0d48b9fe-4c6…` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | 2026-06-12T23:32:00+09:00 | 2026-06-13T02:58:37+09:00 | 2026-06-13T09:10:00+09:00 | 2026-06-13T09:10:00+09:00 | Make initiative/taskset/task/unit progress and metadata visible through one Work Expl… |
 | `TASK-AR-504` | `acd02367-581…` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | 2026-06-12T18:51:54+09:00 | 2026-06-12T18:51:54+09:00 | 2026-06-12T18:55:00+09:00 | 2026-06-12T18:55:00+09:00 | 병렬 세션(codex/claude)이 서로의 미머지 변경을 모른 채 세운 계획이 merge 후 조용히 무효화되는 문제를 지연평가로 해결한다: 계획의 전제… |
 | `TASK-AR-508` | `41f58968-7dc…` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | 2026-06-12T21:53:22+09:00 | 2026-06-12T21:55:08+09:00 | 2026-06-12T22:15:00+09:00 | 2026-06-12T22:15:00+09:00 | dirty intake와 session baseline의 residue 보존 규칙이 `codex/*` 브랜치에 하드코딩되어 있어 `claude/*` 브랜… |
 | `TASK-AR-503` | `4966fce3-64b…` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | 2026-06-12T18:35:45+09:00 | 2026-06-13T01:33:43+09:00 | 2026-06-13T02:50:00+09:00 | 2026-06-13T02:50:00+09:00 | 워크트리 작업은 반드시 main 체크아웃에 활성 클레임을 먼저 남기고 시작하도록 강제한다. 클레임 없는 워크트리 작업은 보드/ui-console 양쪽에서… |
 | `TASK-AR-505` | `69f8bed3-e0d…` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | 2026-06-12T21:15:09+09:00 | 2026-06-13T01:23:31+09:00 | 2026-06-13T02:25:00+09:00 | 2026-06-13T02:25:00+09:00 | 작업 수명주기의 W5(통합 후 정리) 단계를 실행 가능하게 만든다: merge 완료 + claim released 상태의 좀비 워크트리/브랜치를 검출하고… |
 | `TASK-AR-513` | `7dcaf575-583…` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | 2026-06-12T23:22:49+09:00 | 2026-06-13T01:23:31+09:00 | 2026-06-13T02:45:00+09:00 | 2026-06-13T02:45:00+09:00 | main 보드가 미머지 브랜치의 진행 상황을 모르는 인식 오류를 없앤다. Owner 보고(2026-06-12): "main의 백로그만 보면 아직 진행이… |
+| `TASK-AR-501` | `cb503e0c-71f…` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | 2026-06-12T18:35:45+09:00 | 2026-06-13T02:45:16+09:00 | 2026-06-13T09:30:00+09:00 | 2026-06-13T09:30:00+09:00 | planner가 unit 의존성 DAG를 topological wave로 분해하고, 디스패처가 같은 wave의 K개 unit에 대해 claim+workt… |
 | `TASK-AR-502` | `59fda519-2e9…` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | 2026-06-12T18:35:45+09:00 | 2026-06-13T02:58:36+09:00 | 2026-06-13T08:20:00+09:00 | 2026-06-13T08:20:00+09:00 | 워커 브랜치의 main 합류를 단일 통합자(orchestrator)가 직렬 rebase-test-merge 큐로 처리해, 병렬 구현 기간에도 merge… |
 
 ## Risks / Blockers

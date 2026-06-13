@@ -4,9 +4,11 @@ display_id: TASK-AR-516
 task_uid: 0d48b9fe-4c6f-4ece-b298-3d3d8b738bb1
 registered_at: 2026-06-12T23:32:00+09:00
 created_at: 2026-06-12T23:32:00+09:00
-updated_at: 2026-06-12T23:32:00+09:00
+updated_at: 2026-06-13T09:10:00+09:00
+started_at: 2026-06-13T02:58:37+09:00
+completed_at: 2026-06-13T09:10:00+09:00
 title: Work Explorer tree roll-up and facet filters
-status: planned
+status: completed
 priority: P1
 difficulty: L
 est_hours: 12
@@ -66,3 +68,14 @@ tags:
 - UI/API state changes + tests.
 - Browser or console verification.
 - Owner review with before/after screenshots or output excerpts.
+
+## Completion Evidence
+
+- PR #63 (ef0d29e): ui_state work_explorer resource (computed-only roll-ups, facets, evidence refs) + Work Explorer console tab (tree, depth/facet filters, archived evidence panel) + dual API routes; 1099 lines, 18 new tests.
+
+## Verification Results
+
+- pytest tests/test_ui_state.py tests/test_ui_console.py -q -> 45 passed
+- pytest tests -q -> 582 passed (+1 pre-existing)
+- real-repo demo: /api/work_explorer 200, metadata taskset rollup pct=17
+- W4b inst-w4b-ar516-verifier -> APPROVE

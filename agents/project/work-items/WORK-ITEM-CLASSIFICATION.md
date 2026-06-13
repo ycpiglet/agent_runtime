@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-13T08:42:11+09:00
+generated_at: 2026-06-13T09:19:24+09:00
 record_count: 229
 ---
 
@@ -251,7 +251,7 @@ record_count: 229
 | 3 | Initiative 3 | initiative | `INIT-AR-PARALLEL-WAVE-EXECUTION` | - | planned | `agents/project/initiatives/INIT-AR-PARALLEL-WAVE-EXECUTION.md` | Parallel Wave Execution Initiative |
 | 3.1 | Taskset 3.1 | taskset | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | `INIT-AR-PARALLEL-WAVE-EXECUTION` | active | `BACKLOG-BOARD.md` | Wave Conductor |
 | 3.1.1 | Task 3.1.1 | task | `TASK-AR-500` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | in_progress | `agents/lead_engineer/tasks/TASK-AR-500.md` | 충돌 발견 시점을 merge-time(사후)에서 claim-time(사전)으로 옮긴다. 새 클레임 생성 시 활성 클레임들의 선언 footprint(`ta… |
-| 3.1.2 | Task 3.1.2 | task | `TASK-AR-501` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-501.md` | planner가 unit 의존성 DAG를 topological wave로 분해하고, 디스패처가 같은 wave의 K개 unit에 대해 claim+workt… |
+| 3.1.2 | Task 3.1.2 | task | `TASK-AR-501` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-501.md` | planner가 unit 의존성 DAG를 topological wave로 분해하고, 디스패처가 같은 wave의 K개 unit에 대해 claim+workt… |
 | 3.1.3 | Task 3.1.3 | task | `TASK-AR-502` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-502.md` | 워커 브랜치의 main 합류를 단일 통합자(orchestrator)가 직렬 rebase-test-merge 큐로 처리해, 병렬 구현 기간에도 merge… |
 | 3.1.4 | Task 3.1.4 | task | `TASK-AR-503` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-503.md` | 워크트리 작업은 반드시 main 체크아웃에 활성 클레임을 먼저 남기고 시작하도록 강제한다. 클레임 없는 워크트리 작업은 보드/ui-console 양쪽에서… |
 | 3.1.5 | Task 3.1.5 | task | `TASK-AR-504` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-504.md` | 병렬 세션(codex/claude)이 서로의 미머지 변경을 모른 채 세운 계획이 merge 후 조용히 무효화되는 문제를 지연평가로 해결한다: 계획의 전제… |
@@ -264,7 +264,7 @@ record_count: 229
 | 4.1 | Taskset 4.1 | taskset | `TASKSET-AR-WORK-METADATA-ANALYTICS` | `INIT-AR-WORK-METADATA-ANALYTICS` | active | `BACKLOG-BOARD.md` | Work Metadata Analyst |
 | 4.1.1 | Task 4.1.1 | task | `TASK-AR-514` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | `agents/lead_engineer/tasks/TASK-AR-514.md` | Owner/Claude/Codex planning discussions must map to review records, task records, boa… |
 | 4.1.2 | Task 4.1.2 | task | `TASK-AR-515` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | `agents/lead_engineer/tasks/TASK-AR-515.md` | Define and gate the Work Item metadata catalog for provenance, resolution, relationsh… |
-| 4.1.3 | Task 4.1.3 | task | `TASK-AR-516` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-516.md` | Make initiative/taskset/task/unit progress and metadata visible through one Work Expl… |
+| 4.1.3 | Task 4.1.3 | task | `TASK-AR-516` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | `agents/lead_engineer/tasks/TASK-AR-516.md` | Make initiative/taskset/task/unit progress and metadata visible through one Work Expl… |
 | 4.1.4 | Task 4.1.4 | task | `TASK-AR-517` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-517.md` | Turn Work Item metadata into queryable statistics, JSON/CSV export, and reusable save… |
 | 4.1.5 | Task 4.1.5 | task | `TASK-AR-518` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | `agents/lead_engineer/tasks/TASK-AR-518.md` | Require instance_uid actor attribution across claims, A2A messages, evidence, closeou… |
 | 4.1.6 | Task 4.1.6 | task | `TASK-AR-519` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | planned | `agents/lead_engineer/tasks/TASK-AR-519.md` | Mark verification evidence stale when source files, commits, claims, or task records… |

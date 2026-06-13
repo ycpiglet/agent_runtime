@@ -4,9 +4,11 @@ display_id: TASK-AR-501
 task_uid: cb503e0c-71fa-4aba-818b-5deec1412813
 registered_at: 2026-06-12T18:35:45+09:00
 created_at: 2026-06-12T18:35:45+09:00
-updated_at: 2026-06-12T18:35:45+09:00
+updated_at: 2026-06-13T09:30:00+09:00
+started_at: 2026-06-13T02:45:16+09:00
+completed_at: 2026-06-13T09:30:00+09:00
 title: Wave dispatcher — DAG/topological wave grouping + cascade/parallel mode
-status: planned
+status: completed
 priority: P1
 difficulty: L
 est_hours: 10
@@ -76,3 +78,14 @@ tags:
 - 디스패처 변경분 + 테스트
 - wave 발급 데모 클레임/이벤트 기록
 - closeout review record
+
+## Completion Evidence
+
+- PR #64 (7302cec + a282185): scripts/wave_dispatcher.py topological wave planning (list scheduling) + cascade/parallel dispatch via claim dispatcher with per-unit footprints; depends_on validation + docs; 3 mirrors; 15 tests.
+
+## Verification Results
+
+- pytest tests/test_wave_dispatcher.py -q -> 15 passed
+- pytest tests -q -> 590 passed (+1 pre-existing)
+- real-repo --plan demo: units=9 waves=8 deferrals=28
+- W4b inst-w4b-ar501-verifier -> Finding resolved (a282185), merged
