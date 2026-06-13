@@ -14,7 +14,11 @@ registered_at: 2026-06-11T18:39:01+09:00
 created_at: 2026-06-11T18:39:01+09:00
 updated_at: 2026-06-11T18:39:01+09:00
 title: Channels 뷰 — 에이전트 대화 + meeting/seminar 소집
-status: planned
+status: completed
+started_at: 2026-06-13T19:12:22+09:00
+completed_at: 2026-06-13T19:35:00+09:00
+resolution: done
+verification_status: passed
 priority: P2
 difficulty: L
 est_hours: 10

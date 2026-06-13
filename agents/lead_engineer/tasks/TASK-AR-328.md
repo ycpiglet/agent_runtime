@@ -14,7 +14,11 @@ registered_at: 2026-06-11T18:39:01+09:00
 created_at: 2026-06-11T18:39:01+09:00
 updated_at: 2026-06-11T18:39:01+09:00
 title: Taskset 경계 실행 가드 — 완료 시 정지
-status: planned
+status: completed
+started_at: 2026-06-13T19:12:23+09:00
+completed_at: 2026-06-13T19:40:00+09:00
+resolution: done
+verification_status: passed
 priority: P1
 difficulty: M
 est_hours: 6
