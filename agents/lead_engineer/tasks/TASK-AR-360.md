@@ -12,9 +12,13 @@ display_id: TASK-AR-360
 task_uid: 762e5eb1-7263-41c3-b8c8-a54a156d616b
 registered_at: 2026-06-11T19:48:00+09:00
 created_at: 2026-06-11T19:48:00+09:00
-updated_at: 2026-06-11T19:48:00+09:00
+updated_at: 2026-06-13T16:50:00+09:00
+started_at: 2026-06-13T16:29:50+09:00
+completed_at: 2026-06-13T16:50:00+09:00
+resolution: done
+verification_status: passed
 title: Idea Vault 운영 규칙 — 재발굴 루프 + 프로세스 A/B 실험
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 6
@@ -83,3 +87,11 @@ tags:
 - Re-verify: focused 15 passed; full `pytest tests -q` -> 744 passed (0:05:49);
   `owner_governance_gate.py` -> exit 0; defer-on-adopted CLI demo -> exit 1, entry
   unchanged.
+
+## Completion Evidence
+
+- PR #94: idea_vault.py revival loop + planning scan + A/B protocol; 15 focused/744 full; W4b REQUEST-CHANGES (defer guard) fixed + re-verified.
+
+## Verification Results
+
+- W4b APPROVE; full suite green; see claim handoff closeout.

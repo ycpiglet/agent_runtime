@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-13T16:11:15+09:00
+generated_at: 2026-06-13T17:18:21+09:00
 record_count: 235
 ---
 
@@ -185,7 +185,7 @@ record_count: 235
 | 0.19.1 | Task 0.19.1 | task | `TASK-AR-320` | `TASKSET-AR-UI-UX-V2` | planned | `agents/lead_engineer/tasks/TASK-AR-320.md` | 기본 테마를 Notion형 라이트로 전환하고 기존 Linear 다크 토큰을 Dark Mode 옵션으로 보존한다. |
 | 0.19.2 | Task 0.19.2 | task | `TASK-AR-321` | `TASKSET-AR-UI-UX-V2` | planned | `agents/lead_engineer/tasks/TASK-AR-321.md` | 9개 수평 탭을 접이식 좌측 사이드바(Home / WORK / AGENTS / COMMS / RECORDS / OPS 그룹)로 전환해 V2 뷰 확장을 수… |
 | 0.19.3 | Task 0.19.3 | task | `TASK-AR-322` | `TASKSET-AR-UI-UX-V2` | planned | `agents/lead_engineer/tasks/TASK-AR-322.md` | 모든 리스트 뷰(task/agent/event/message/evidence)에 Notion/Linear형 정렬·필터·그룹·검색 바와 간략히/자세히 밀도… |
-| 0.19.4 | Task 0.19.4 | task | `TASK-AR-323` | `TASKSET-AR-UI-UX-V2` | planned | `agents/lead_engineer/tasks/TASK-AR-323.md` | task 평면 나열 대신 taskset 단위로 묶인 직관적 작업 뷰를 기본 진입점으로 만들고, Owner가 진행 중 흐름에 task를 안전하게 삽입할 수… |
+| 0.19.4 | Task 0.19.4 | task | `TASK-AR-323` | `TASKSET-AR-UI-UX-V2` | completed | `agents/lead_engineer/tasks/TASK-AR-323.md` | task 평면 나열 대신 taskset 단위로 묶인 직관적 작업 뷰를 기본 진입점으로 만들고, Owner가 진행 중 흐름에 task를 안전하게 삽입할 수… |
 | 0.19.5 | Task 0.19.5 | task | `TASK-AR-324` | `TASKSET-AR-UI-UX-V2` | planned | `agents/lead_engineer/tasks/TASK-AR-324.md` | TEAMS/ORG/roles 데이터로 조직도 트리를 렌더링하고, 에이전트 카드를 온라인 RPG 길드 멤버처럼 상태가 살아있는 프레즌스로 보여준다. |
 | 0.19.6 | Task 0.19.6 | task | `TASK-AR-325` | `TASKSET-AR-UI-UX-V2` | planned | `agents/lead_engineer/tasks/TASK-AR-325.md` | Vision → Milestone/Release → Taskset 3계층을 한 뷰에서 보여줘 고수준 방향과 실제 진행률을 연결한다. |
 | 0.19.7 | Task 0.19.7 | task | `TASK-AR-326` | `TASKSET-AR-UI-UX-V2` | planned | `agents/lead_engineer/tasks/TASK-AR-326.md` | 에이전트/업무/메시지가 온라인 RPG처럼 실시간으로 살아 움직이는 감각을 SSE 이벤트 스트림과 라이브 그래프로 구현한다. |
@@ -206,8 +206,8 @@ record_count: 235
 | 0.20.12 | Task 0.20.12 | task | `TASK-AR-340` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-340.md` | 콘솔에 생동감을 더하는 애니메이션/이펙트와 RPG형 게임화 요소를 토글 가능한 폴리시 레이어로 추가한다 (기본은 차분한 진지 모드). |
 | 0.20.13 | Task 0.20.13 | task | `TASK-AR-341` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-341.md` | 멀티 호스트 프로젝트(agent_runtime, autofolio 등)를 Notion 워크스페이스처럼 전환하고, 대시보드 위젯 확장 포인트와 KR/EN… |
 | 0.21 | Taskset 0.21 | taskset | `TASKSET-AR-UI-LIVING-CONSOLE` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | World Builder |
-| 0.21.1 | Task 0.21.1 | task | `TASK-AR-360` | `TASKSET-AR-UI-LIVING-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-360.md` | 기각/보류 아이디어를 폐기하지 않고 보존·재발굴하는 체계를 RSI 운영 원칙으로 정착시킨다 (Owner 통찰: 진화 시 과거를 잊지 않고 주기적으로 재평… |
-| 0.21.2 | Task 0.21.2 | task | `TASK-AR-361` | `TASKSET-AR-UI-LIVING-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-361.md` | 사이드탭의 회의실 공간에 에이전트를 마우스로 끌어다 넣고, 주제/태스크를 선택하면 참여 에이전트들이 의견을 주고받는 회의를 실행한다. |
+| 0.21.1 | Task 0.21.1 | task | `TASK-AR-360` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-360.md` | 기각/보류 아이디어를 폐기하지 않고 보존·재발굴하는 체계를 RSI 운영 원칙으로 정착시킨다 (Owner 통찰: 진화 시 과거를 잊지 않고 주기적으로 재평… |
+| 0.21.2 | Task 0.21.2 | task | `TASK-AR-361` | `TASKSET-AR-UI-LIVING-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-361.md` | 사이드탭의 회의실 공간에 에이전트를 마우스로 끌어다 넣고, 주제/태스크를 선택하면 참여 에이전트들이 의견을 주고받는 회의를 실행한다. |
 | 0.21.3 | Task 0.21.3 | task | `TASK-AR-362` | `TASKSET-AR-UI-LIVING-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-362.md` | hover 미리보기와 드래그앤드롭을 콘솔 전역의 1급 상호작용 동사로 표준화한다 (Notion peek + Discord 접근성 DnD 패턴). |
 | 0.21.4 | Task 0.21.4 | task | `TASK-AR-363` | `TASKSET-AR-UI-LIVING-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-363.md` | 프로젝트의 성숙도를 진화하는 캐릭터처럼 측정·표시한다: 프로젝트 Lv.N(누적 경험), 사업 단계 칭호(garage→seed→startup→scaleup… |
 | 0.21.5 | Task 0.21.5 | task | `TASK-AR-364` | `TASKSET-AR-UI-LIVING-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-364.md` | 실제 회사 같은 2D 맵에 에이전트를 배치해 한눈에 조직 활동을 보여준다 (Smallville/Generative Agents 패턴 — arXiv 230… |
