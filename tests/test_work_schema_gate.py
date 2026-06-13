@@ -289,6 +289,26 @@ def test_gate_blocks_stored_variance_derived_field(tmp_path: Path) -> None:
     assert "work-item:computed-field-stored:variance" in result.stdout
 
 
+def test_verification_status_enum_includes_generator_default_pending() -> None:
+    # scripts/work.py _render_unit seeds new units with
+    # `verification_status: pending`; the catalog must allow that initial
+    # state in both schema copies (W4b AR-515 finding, TASK-AR-522).
+    expected = "allowed_values: [pending, passed, failed, blocked, stale]"
+    template_schema = (
+        REPO_ROOT
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "agents"
+        / "project"
+        / "WORK-SCHEMA.yml"
+    )
+
+    assert expected in _schema_path().read_text(encoding="utf-8")
+    assert expected in template_schema.read_text(encoding="utf-8")
+
+
 def test_template_schema_mirror_passes_gate() -> None:
     template_schema = (
         REPO_ROOT

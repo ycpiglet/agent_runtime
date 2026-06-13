@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -8,6 +9,9 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "merge_queue.py"
+TEMPLATE_SCRIPT = (
+    REPO_ROOT / "src" / "agent_runtime" / "templates" / "project" / "scripts" / "merge_queue.py"
+)
 QUEUE_REL = Path("agents/runtime/merge_queue/queue.json")
 
 PASS_VERIFY = "python -c \"print('verify-ok')\""
@@ -29,7 +33,7 @@ def _git(cwd: Path, *args: str) -> str:
     return (result.stdout or "").strip()
 
 
-def _run_mq(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+def _run_mq(root: Path, *args: str, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(SCRIPT), *args, "--root", str(root)],
         cwd=str(REPO_ROOT),
@@ -38,6 +42,7 @@ def _run_mq(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
         encoding="utf-8",
         errors="replace",
         check=False,
+        env={**os.environ, **env} if env else None,
     )
 
 
@@ -201,6 +206,65 @@ def test_stale_local_branch_fast_forwards_to_pushed_fix(tmp_path: Path):
     # The merge picked up the pushed fix, not the stale local copy.
     assert _queue(work)["entries"][0]["status"] == "merged"
     assert (work / "fix.txt").exists()
+
+
+def test_verification_timeout_fails_entry_with_timed_out_reason(tmp_path: Path):
+    work = _make_repos(tmp_path)
+    _make_branch(work, "feat/slow", "slow.txt")
+    slow_verify = 'python -c "import time; time.sleep(30)"'
+    _run_mq(work, "enqueue", "--branch", "feat/slow", "--task-id", "TASK-SLOW", "--verify", slow_verify)
+
+    result = _run_mq(
+        work,
+        "process",
+        "--all",
+        "--regen-cmd",
+        REGEN_CMD,
+        env={"MERGE_QUEUE_TIMEOUT_SECONDS": "2"},
+    )
+    assert result.returncode == 1, result.stdout + result.stderr
+
+    entry = _queue(work)["entries"][0]
+    assert entry["status"] == "failed"
+    assert entry["failure_reason"].startswith("timed-out")
+    assert (work / "agents/runtime/merge_queue/feedback-feat-slow.md").exists()
+
+    # The worktree was restored and main never received the branch.
+    assert _git(work, "rev-parse", "--abbrev-ref", "HEAD") == "main"
+    assert _git(work, "status", "--porcelain", "--untracked-files=no") == ""
+    assert not (work / "slow.txt").exists()
+
+
+def test_pr_mode_marks_entry_pr_handoff_and_blocks_reenqueue(tmp_path: Path):
+    work = _make_repos(tmp_path)
+    _make_branch(work, "feat/pr", "pr.txt")
+    _run_mq(work, "enqueue", "--branch", "feat/pr", "--task-id", "TASK-PR", "--verify", PASS_VERIFY)
+
+    result = _run_mq(work, "process", "--all", "--pr-mode", "--regen-cmd", REGEN_CMD)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "gh pr create" in result.stdout
+
+    entry = _queue(work)["entries"][0]
+    assert entry["status"] == "pr-handoff"  # terminal handoff, not "merging"
+    assert entry["processed_at"]
+
+    # No local merge happened; the gh commands were only printed.
+    assert _git(work, "rev-list", "--merges", "--count", "main") == "0"
+
+    # A pr-handoff entry still blocks re-enqueue until it is removed.
+    duplicate = _run_mq(work, "enqueue", "--branch", "feat/pr", "--task-id", "TASK-PR")
+    assert duplicate.returncode == 1
+    assert "already queued" in duplicate.stdout
+
+    removed = _run_mq(work, "remove", "--branch", "feat/pr")
+    assert removed.returncode == 0
+    assert _queue(work)["entries"] == []
+
+
+def test_module_documents_single_process_boundary_and_template_mirror():
+    text = SCRIPT.read_text(encoding="utf-8")
+    assert "Not concurrent-safe: run at most one process invocation at a time." in text
+    assert text == TEMPLATE_SCRIPT.read_text(encoding="utf-8")
 
 
 def test_enqueue_rejects_duplicate_active_branch_and_remove_clears_it(tmp_path: Path):

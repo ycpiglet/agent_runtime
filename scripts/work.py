@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import io
 import json
 import re
 import subprocess
@@ -230,6 +231,12 @@ STATS_EXPORT_COLUMNS = (
     "lead_time_hours",
     "age_hours",
     "path",
+)
+# Stored fields --filter/--where may match without an unknown-key warning.
+# Unknown keys still match nothing (zero results) but warn on stderr so a
+# typo does not silently look like an empty result set.
+STATS_FILTERABLE_FIELDS = (
+    STATS_DIMENSIONS | set(STATS_EXPORT_TEXT_FIELDS) | set(STATS_EXPORT_NUMERIC_FIELDS) | {"tags"}
 )
 WORK_VIEWS_SCHEMA = "agent-runtime-work-views/v1"
 WORK_VIEWS_PATH = Path("agents/project/work-items/WORK-VIEWS.json")
@@ -2425,6 +2432,13 @@ def _validate_stats_fields(group_fields: list[str], filters: list[tuple[str, str
     for key, _value in filters:
         if key in STATS_COMPUTED_ONLY_FIELDS:
             findings.append(f"work-stats:computed-only-filter:{key}")
+        elif key not in STATS_FILTERABLE_FIELDS:
+            # Non-fatal: unknown keys keep matching nothing by design.
+            print(
+                f"work-stats: warning unknown-filter-key:{key} "
+                f"(valid dimensions: {', '.join(sorted(STATS_DIMENSIONS))})",
+                file=sys.stderr,
+            )
     if findings:
         raise WorkRegistrationError(findings)
 
@@ -2486,6 +2500,10 @@ def _stats_metric_value(meta: dict[str, Any], metric: str, now_dt: datetime) -> 
     if metric in STATS_NUMERIC_METRICS:
         return _stats_decimal(meta.get(metric))
     if metric == "lead_time":
+        # Naming note (W4b AR-517): this metric prefers started_at and only
+        # falls back to created_at, so for claimed items it is closer to
+        # cycle time than lead time. Semantics are intentionally unchanged
+        # here; the lead_time/cycle_time rename is deferred.
         finished = _stats_datetime(meta.get("completed_at"))
         started = _stats_datetime(meta.get("started_at")) or _stats_datetime(meta.get("created_at"))
         if not finished or not started or finished < started:
@@ -2645,8 +2663,30 @@ def _stats_csv_cell(value: Any) -> str:
     if value is None:
         return ""
     if isinstance(value, list):
-        return "|".join(str(item) for item in value)
-    return str(value)
+        text = "|".join(str(item) for item in value)
+    else:
+        text = str(value)
+    return _neutralize_csv_formula(text)
+
+
+def _neutralize_csv_formula(text: str) -> str:
+    """Neutralize spreadsheet formula injection in file-exported CSV cells.
+
+    Cells starting with ``=``, ``+``, or ``@`` are prefixed with a single
+    quote. A leading ``-`` is prefixed only when the cell is not a plain
+    number, so negative numeric values stay machine-readable.
+    """
+    if not text:
+        return text
+    first = text[0]
+    if first in ("=", "+", "@"):
+        return "'" + text
+    if first == "-":
+        try:
+            float(text)
+        except ValueError:
+            return "'" + text
+    return text
 
 
 def _write_stats_export(
@@ -2886,10 +2926,17 @@ def _stats_flat_row(result: dict[str, Any], row: dict[str, Any]) -> dict[str, st
 
 
 def _print_stats_csv(result: dict[str, Any]) -> None:
-    writer = csv.DictWriter(sys.stdout, fieldnames=_stats_flat_headers(result), lineterminator="\n")
+    # Write CSV bytes as UTF-8 regardless of the console encoding so cp949
+    # consoles neither mangle non-ASCII group values nor crash on them.
+    buffer = getattr(sys.stdout, "buffer", None)
+    stream = io.TextIOWrapper(buffer, encoding="utf-8", newline="") if buffer is not None else sys.stdout
+    writer = csv.DictWriter(stream, fieldnames=_stats_flat_headers(result), lineterminator="\n")
     writer.writeheader()
     for row in result["rows"]:
         writer.writerow(_stats_flat_row(result, row))
+    if stream is not sys.stdout:
+        stream.flush()
+        stream.detach()  # keep the underlying stdout buffer open
 
 
 def _print_stats_table(result: dict[str, Any]) -> None:

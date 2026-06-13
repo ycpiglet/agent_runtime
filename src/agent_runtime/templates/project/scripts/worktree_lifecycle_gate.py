@@ -385,8 +385,14 @@ def clean_zombies(root: Path, verdicts: list[ZombieVerdict]) -> tuple[list[str],
             actions.append(f"skip {worktree.rel} reason={verdict.exempt_reason}")
             continue
         # Final safety guard: never remove a dirty worktree even if state
-        # changed between scan and clean.
-        if _is_dirty(worktree.path):
+        # changed between scan and clean. An unknown dirty state (git status
+        # failed) is skipped too, mirroring evaluate_worktree's status-unknown
+        # handling, instead of being treated as clean.
+        dirty = _is_dirty(worktree.path)
+        if dirty is None:
+            actions.append(f"skip {worktree.rel} reason=dirty-recheck-unknown")
+            continue
+        if dirty:
             actions.append(f"skip {worktree.rel} reason=dirty-recheck")
             continue
         rc, output = _git(root, "worktree", "remove", str(worktree.path))
