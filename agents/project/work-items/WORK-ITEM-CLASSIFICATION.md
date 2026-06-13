@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-13T09:52:39+09:00
+generated_at: 2026-06-13T10:33:09+09:00
 record_count: 229
 ---
 
@@ -256,7 +256,7 @@ record_count: 229
 | 3.1.4 | Task 3.1.4 | task | `TASK-AR-503` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-503.md` | 워크트리 작업은 반드시 main 체크아웃에 활성 클레임을 먼저 남기고 시작하도록 강제한다. 클레임 없는 워크트리 작업은 보드/ui-console 양쪽에서… |
 | 3.1.5 | Task 3.1.5 | task | `TASK-AR-504` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-504.md` | 병렬 세션(codex/claude)이 서로의 미머지 변경을 모른 채 세운 계획이 merge 후 조용히 무효화되는 문제를 지연평가로 해결한다: 계획의 전제… |
 | 3.1.6 | Task 3.1.6 | task | `TASK-AR-505` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-505.md` | 작업 수명주기의 W5(통합 후 정리) 단계를 실행 가능하게 만든다: merge 완료 + claim released 상태의 좀비 워크트리/브랜치를 검출하고… |
-| 3.1.7 | Task 3.1.7 | task | `TASK-AR-506` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | planned | `agents/lead_engineer/tasks/TASK-AR-506.md` | 이번 taskset에만 수동 적용된 지연평가 규율(T0 스냅샷/T2 착수 체크)과 W0~W6 수명주기를 **모든 작업의 기본값**으로 만든다 — Owne… |
+| 3.1.7 | Task 3.1.7 | task | `TASK-AR-506` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-506.md` | 이번 taskset에만 수동 적용된 지연평가 규율(T0 스냅샷/T2 착수 체크)과 W0~W6 수명주기를 **모든 작업의 기본값**으로 만든다 — Owne… |
 | 3.1.8 | Task 3.1.8 | task | `TASK-AR-507` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-507.md` | Owner 규칙 "작업자가 스스로 검증 금지, 항상 다른 에이전트가 검증"을 실행 가능하게 강제한다: claim release/closeout 시 ver… |
 | 3.1.9 | Task 3.1.9 | task | `TASK-AR-508` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-508.md` | dirty intake와 session baseline의 residue 보존 규칙이 `codex/*` 브랜치에 하드코딩되어 있어 `claude/*` 브랜… |
 | 3.1.10 | Task 3.1.10 | task | `TASK-AR-513` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | `agents/lead_engineer/tasks/TASK-AR-513.md` | main 보드가 미머지 브랜치의 진행 상황을 모르는 인식 오류를 없앤다. Owner 보고(2026-06-12): "main의 백로그만 보면 아직 진행이… |

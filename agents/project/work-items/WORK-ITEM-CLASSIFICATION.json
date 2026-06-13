@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-13T09:52:39+09:00",
+  "generated_at": "2026-06-13T10:33:09+09:00",
   "record_count": 229,
   "finding_count": 0,
   "findings": [],
@@ -2401,7 +2401,7 @@
       "title": "이번 taskset에만 수동 적용된 지연평가 규율(T0 스냅샷/T2 착수 체크)과 W0~W6 수명주기를 **모든 작업의 기본값**으로 만든다 — Owne…",
       "path": "agents/lead_engineer/tasks/TASK-AR-506.md",
       "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-507",
