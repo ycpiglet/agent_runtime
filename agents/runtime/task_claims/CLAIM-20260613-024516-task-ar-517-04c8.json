@@ -9,7 +9,7 @@
   "callsite_id": "claude-w3-ar517",
   "pane_id": "claude-w3-ar517",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
   "project_id": "",
   "unit_id": "",
@@ -17,20 +17,20 @@
   "model_tier": "",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "implementing",
-  "progress_pct": 0,
+  "phase": "complete",
+  "progress_pct": 100,
   "step_index": 1,
   "step_total": 6,
   "status_text": "AR-517: work query/stats/export/saved views",
   "worktree_path": ".worktrees/TASK-AR-517",
   "branch": "claude/task-ar-517-work-stats-views",
   "claimed_at": "2026-06-13T02:45:16+09:00",
-  "last_heartbeat": "2026-06-13T02:45:16+09:00",
-  "updated_at": "2026-06-13T02:45:16+09:00",
+  "last_heartbeat": "2026-06-13T09:52:31+09:00",
+  "updated_at": "2026-06-13T09:52:31+09:00",
   "expires_at": "2026-06-13T03:15:16+09:00",
   "lease": {
     "claimed_at": "2026-06-13T02:45:16+09:00",
-    "heartbeat_at": "2026-06-13T02:45:16+09:00",
+    "heartbeat_at": "2026-06-13T09:52:31+09:00",
     "expires_at": "2026-06-13T03:15:16+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260613-024516-task-ar-517-04c8.handoff.md",
@@ -41,5 +41,9 @@
     "scripts/work.py",
     "tests/test_work_stats.py",
     "src/agent_runtime/templates/project/scripts/work.py"
-  ]
+  ],
+  "released_at": "2026-06-13T09:52:31+09:00",
+  "verified_by": "inst-w4b-ar517-verifier",
+  "verifier_role": "reviewer",
+  "verification_evidence": "agents/runtime/task_claims/CLAIM-20260613-024516-task-ar-517-04c8.handoff.md"
 }

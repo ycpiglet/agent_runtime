@@ -4,9 +4,11 @@ display_id: TASK-AR-517
 task_uid: da2e7699-1f76-4156-8eeb-82bc543fba34
 registered_at: 2026-06-12T23:33:00+09:00
 created_at: 2026-06-12T23:33:00+09:00
-updated_at: 2026-06-12T23:33:00+09:00
+updated_at: 2026-06-13T11:50:00+09:00
+started_at: 2026-06-13T02:45:16+09:00
+completed_at: 2026-06-13T11:50:00+09:00
 title: Work query stats export and saved views
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 8
@@ -66,3 +68,14 @@ tags:
 - Work query/stats tests.
 - Example saved views.
 - Export fixture and Owner review.
+
+## Completion Evidence
+
+- PR #70 (2ba5b02): work.py stats dimensions/metrics/filters/export + view save/run/list with WORK-VIEWS.json (4 seeded views); 14 tests.
+
+## Verification Results
+
+- pytest tests/test_work_stats.py -q -> 14 passed
+- work_schema_gate --items --check -> pass
+- pytest tests -q -> 587 passed (+1 pre-existing)
+- W4b inst-w4b-ar517-verifier -> APPROVE

@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-13T09:48:07+09:00",
+  "generated_at": "2026-06-13T09:52:39+09:00",
   "record_count": 229,
   "finding_count": 0,
   "findings": [],
@@ -2456,7 +2456,7 @@
       "title": "Work Metadata Analyst",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-WORK-METADATA-ANALYTICS",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-514",
@@ -2500,7 +2500,7 @@
       "title": "Turn Work Item metadata into queryable statistics, JSON/CSV export, and reusable save…",
       "path": "agents/lead_engineer/tasks/TASK-AR-517.md",
       "parent_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-518",
