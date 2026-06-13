@@ -14,7 +14,11 @@ registered_at: 2026-06-11T18:56:35+09:00
 created_at: 2026-06-11T18:56:35+09:00
 updated_at: 2026-06-11T18:56:35+09:00
 title: 팀/역할 배정 모델 + 워크로드 히트맵
-status: planned
+status: completed
+started_at: 2026-06-13T22:44:56+09:00
+completed_at: 2026-06-13T23:40:00+09:00
+resolution: done
+verification_status: passed
 priority: P1
 difficulty: M
 est_hours: 8

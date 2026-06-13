@@ -14,7 +14,11 @@ registered_at: 2026-06-11T18:56:35+09:00
 created_at: 2026-06-11T18:56:35+09:00
 updated_at: 2026-06-11T18:56:35+09:00
 title: 캘린더/스케줄링 — 예약 디스패치·반복·리마인더
-status: planned
+status: completed
+started_at: 2026-06-13T22:44:55+09:00
+completed_at: 2026-06-13T23:30:00+09:00
+resolution: done
+verification_status: passed
 priority: P2
 difficulty: L
 est_hours: 10

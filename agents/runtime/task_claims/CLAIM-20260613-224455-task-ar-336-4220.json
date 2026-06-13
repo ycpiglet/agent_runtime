@@ -9,7 +9,7 @@
   "callsite_id": "claude-ui7-336",
   "pane_id": "claude-ui7-336",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-UI-PLATFORM-EXTENSIONS",
   "active_scope": "TASKSET-AR-UI-PLATFORM-EXTENSIONS",
   "scope_transition_approved": false,
@@ -27,17 +27,21 @@
   "worktree_path": ".worktrees/TASK-AR-336",
   "branch": "claude/task-ar-336-ui",
   "claimed_at": "2026-06-13T22:44:55+09:00",
-  "last_heartbeat": "2026-06-13T22:44:55+09:00",
-  "updated_at": "2026-06-13T22:44:55+09:00",
+  "last_heartbeat": "2026-06-13T23:47:20+09:00",
+  "updated_at": "2026-06-13T23:47:20+09:00",
   "expires_at": "2026-06-14T00:44:55+09:00",
   "lease": {
     "claimed_at": "2026-06-13T22:44:55+09:00",
-    "heartbeat_at": "2026-06-13T22:44:55+09:00",
+    "heartbeat_at": "2026-06-13T23:47:20+09:00",
     "expires_at": "2026-06-14T00:44:55+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260613-224455-task-ar-336-4220.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260613-224455-task-ar-336-4220.log.md",
   "allow_parallel_task_set": true,
   "tags": [],
-  "target_files": []
+  "target_files": [],
+  "released_at": "2026-06-13T23:47:20+09:00",
+  "verified_by": "inst-w4b-ar336-verifier",
+  "verifier_role": "qa-reviewer",
+  "verification_evidence": "reviews/W4B-2026-06-13-TASK-AR-336.md"
 }

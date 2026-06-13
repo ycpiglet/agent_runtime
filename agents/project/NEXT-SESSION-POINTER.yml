@@ -1,31 +1,16 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-13T23:16:29+09:00
+updated_at: 2026-06-13T23:42:00+09:00
 current_state:
-  summary: "UI console waves 1-6 complete (22/28), and UI wave-7 claims are open for AR-335 calendar/scheduled dispatch, AR-336 state-machine viewer, and AR-337 team/role assignment heatmap. The active claims are preserved in the root checkout so parallel worktrees remain resumable."
-  status: active
+  summary: "UI console waves 1-7 complete (21/28 UI tasks): UI-UX-V2 done (9/9); UI-PLATFORM-EXTENSIONS AR-329..337 done (9/13); UI-LIVING-CONSOLE AR-360/361/362 done (3/6). Wave-7 (AR-335 calendar/scheduled dispatch, AR-336 state-machine viewer, AR-337 team/role assignment heatmap) merged via PRs #117-#119 with W4a+W4b dual verification; claims released, worktrees/branches clean."
+  status: ready
   task_set_status: in_progress
   task_set_id: "TASKSET-AR-UI-PLATFORM-EXTENSIONS"
   step_index: 4
   step_total: 5
-  progress_pct: 79
-  status_text: "Waves 1-6 done (22/28). Wave-7 active: AR-335/336/337 in dispatcher-created worktrees. Remaining after wave-7: UI-PLATFORM-EXTENSIONS 338-341 (4); UI-LIVING-CONSOLE 363/364/365 (3)."
+  progress_pct: 75
+  status_text: "Waves 1-7 done (21/28). Remaining UI backlog: UI-PLATFORM-EXTENSIONS 338-341 (4); UI-LIVING-CONSOLE 363/364/365 (3). Next waves dispatch from the V2 shell."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260613-224455-task-ar-335-516a
-      agent_role: lead-engineer
-      agent_instance_id: inst-ui7-ar335
-      display_name: claude/cal-puma
-      callsite_id: claude-ui7-335
-    - claim_id: CLAIM-20260613-224455-task-ar-336-4220
-      agent_role: lead-engineer
-      agent_instance_id: inst-ui7-ar336
-      display_name: claude/fsm-newt
-      callsite_id: claude-ui7-336
-    - claim_id: CLAIM-20260613-224456-task-ar-337-a262
-      agent_role: lead-engineer
-      agent_instance_id: inst-ui7-ar337
-      display_name: claude/load-bison
-      callsite_id: claude-ui7-337
+  current_agents: []
   current_teams: []
 resume:
   active_task: none

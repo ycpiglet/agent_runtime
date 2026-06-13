@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-13T22:31:40+09:00",
+  "generated_at": "2026-06-13T23:47:34+09:00",
   "record_count": 235,
   "finding_count": 0,
   "findings": [],
@@ -1763,7 +1763,7 @@
       "title": "마일스톤/회의/완료 이력/예약 실행을 캘린더 뷰로 통합하고, taskset 디스패치를 예약·반복 실행할 수 있게 한다 (Notion Calendar/Mo…",
       "path": "agents/lead_engineer/tasks/TASK-AR-335.md",
       "parent_id": "TASKSET-AR-UI-PLATFORM-EXTENSIONS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-336",
@@ -1774,7 +1774,7 @@
       "title": "`agents/project/STATE-MACHINES.yml`의 라이프사이클(task/claim/role)을 인터랙티브 그래프로 보여주고, 선택한 ta…",
       "path": "agents/lead_engineer/tasks/TASK-AR-336.md",
       "parent_id": "TASKSET-AR-UI-PLATFORM-EXTENSIONS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-337",
@@ -1785,7 +1785,7 @@
       "title": "task/taskset을 개인 에이전트가 아닌 팀/역할 단위로 배정하고, 에이전트·팀별 부하를 히트맵으로 보여준다 (Jira 컴포넌트 + Asana Wo…",
       "path": "agents/lead_engineer/tasks/TASK-AR-337.md",
       "parent_id": "TASKSET-AR-UI-PLATFORM-EXTENSIONS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-338",
