@@ -54,6 +54,12 @@ HTML = """<!doctype html>
           <p id="status-line">Loading runtime state</p>
         </div>
       </div>
+      <div class="topbar-search">
+        <input id="global-search-input" class="global-search-input" type="search" autocomplete="off"
+               placeholder="Search tasks, tasksets, messages, events&hellip; (Ctrl+P)"
+               aria-label="Global search" aria-expanded="false" aria-controls="global-search-results" role="combobox">
+        <div id="global-search-results" class="global-search-results" role="listbox" aria-label="Search results" hidden></div>
+      </div>
       <div class="toolbar">
         <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-controls="primary-sidebar" aria-expanded="true" aria-label="Toggle sidebar">&#9776;</button>
         <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Toggle dark mode" title="Toggle light/dark theme">
@@ -587,6 +593,13 @@ HTML = """<!doctype html>
     <div class="command-palette-panel" role="document">
       <input id="command-palette-input" class="command-palette-input" type="text" placeholder="Type a command or view (Ctrl+K)" aria-label="Command palette search" autocomplete="off">
       <div id="command-palette-results" class="command-palette-results" role="listbox" aria-label="Command palette results"></div>
+    </div>
+  </div>
+  <div id="quick-open" class="quick-open" role="dialog" aria-modal="true" aria-label="Quick open" hidden>
+    <div class="quick-open-backdrop" data-quickopen-dismiss="1"></div>
+    <div class="quick-open-panel" role="document">
+      <input id="quick-open-input" class="quick-open-input" type="text" placeholder="Quick open entities &mdash; type:task status:blocked (Ctrl+P)" aria-label="Quick open search" autocomplete="off" role="combobox" aria-expanded="true" aria-controls="quick-open-results">
+      <div id="quick-open-results" class="quick-open-results" role="listbox" aria-label="Quick open results"></div>
     </div>
   </div>
   <script src="/app.js"></script>
@@ -3754,6 +3767,153 @@ pre {
   color: var(--muted);
   font-size: 13px;
 }
+/* Global search box in the topbar + results dropdown (TASK-AR-334). */
+.topbar-search {
+  position: relative;
+  flex: 1 1 320px;
+  max-width: 480px;
+  margin: 0 16px;
+}
+.global-search-input {
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+  color: var(--ink);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  font-size: 13px;
+}
+.global-search-input:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+.global-search-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 25;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--panel-strong);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.global-search-results[hidden] {
+  display: none;
+}
+.search-result {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  padding: 10px 14px;
+  cursor: pointer;
+  font: inherit;
+}
+.search-result.is-active,
+.search-result:hover {
+  background: var(--primary-soft-strong);
+}
+.search-result-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.search-result-type {
+  flex: none;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1px 6px;
+}
+.search-result-title {
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.search-result-meta {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.search-result-links {
+  font-size: 11px;
+  color: var(--primary);
+  margin-top: 2px;
+}
+.search-result-group {
+  padding: 6px 14px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+.search-empty {
+  padding: 14px;
+  color: var(--muted);
+  font-size: 13px;
+}
+/* Quick open overlay (Ctrl+P): recent + favorites + live search. */
+.quick-open {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.quick-open[hidden] {
+  display: none;
+}
+.quick-open-backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--scrim);
+}
+.quick-open-panel {
+  position: relative;
+  margin-top: 12vh;
+  width: min(620px, 92vw);
+  background: var(--panel-strong);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.quick-open-input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  padding: 14px 16px;
+  font-size: 15px;
+}
+.quick-open-input:focus {
+  outline: none;
+}
+.quick-open-results {
+  max-height: 56vh;
+  overflow-y: auto;
+}
+/* Deep-link target highlight applied after a search/quick-open jump. */
+.is-deeplinked {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: var(--shadow-pop);
+}
 """
 
 JS = """// --- Theme system (TASK-AR-320) -------------------------------------------
@@ -4376,6 +4536,218 @@ function runActivePaletteCommand() {
   }
 }
 
+/* ===== Global search + quick open (TASK-AR-334) =====================
+ * Full-text search across >=5 entity types (task/taskset/message/event/
+ * evidence/review) from a single box, with Slack-style operators
+ * (type:/status:/owner:/date:). Results deep-link via the AR-321 hash
+ * route. Ctrl+P opens a quick-open overlay (recent + favorites + live
+ * search) and is gated so it never collides with the Ctrl+K command
+ * palette nor hijacks typing inside inputs. */
+const SEARCH_RECENT_KEY = "ar-search-recent";
+const SEARCH_FAVORITES_KEY = "ar-search-favorites";
+let searchResults = [];
+let searchActiveIndex = 0;
+let searchDebounce = null;
+let quickOpenResults = [];
+let quickOpenActiveIndex = 0;
+let quickOpenDebounce = null;
+
+function readJsonStore(key) {
+  try {
+    const raw = window.localStorage.getItem(key);
+    const value = raw ? JSON.parse(raw) : [];
+    return Array.isArray(value) ? value : [];
+  } catch (error) { return []; }
+}
+
+function writeJsonStore(key, value) {
+  try { window.localStorage.setItem(key, JSON.stringify(value)); } catch (error) {}
+}
+
+function recordRecentEntity(entry) {
+  if (!entry || !entry.id) return;
+  const recent = readJsonStore(SEARCH_RECENT_KEY)
+    .filter((item) => !(item.id === entry.id && item.entity_type === entry.entity_type));
+  recent.unshift({ id: entry.id, entity_type: entry.entity_type, title: entry.title, deep_link: entry.deep_link });
+  writeJsonStore(SEARCH_RECENT_KEY, recent.slice(0, 12));
+}
+
+function favoriteEntities() {
+  return readJsonStore(SEARCH_FAVORITES_KEY);
+}
+
+async function fetchSearch(query) {
+  const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`, { cache: "no-store" });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return response.json();
+}
+
+function searchResultRow(item, index, active) {
+  const type = escapeHtml(item.entity_type || "");
+  const title = escapeHtml(item.title || item.id || "");
+  const metaParts = [];
+  if (item.status) metaParts.push(escapeHtml(item.status));
+  if (item.owner) metaParts.push(escapeHtml(item.owner));
+  if (item.date) metaParts.push(escapeHtml(item.date));
+  if (item.id) metaParts.push(escapeHtml(item.id));
+  const links = (item.related || []).map((rel) => {
+    if (rel.sha) return `commit ${escapeHtml(rel.label || rel.sha)}`;
+    return `doc ${escapeHtml(rel.label || rel.path || "")}`;
+  });
+  const linkHtml = links.length ? `<div class="search-result-links">${links.join(" &middot; ")}</div>` : "";
+  return `<button type="button" class="search-result${active ? " is-active" : ""}" role="option"`
+    + ` data-result-index="${index}" data-deep-link="${escapeHtml(item.deep_link || "")}"`
+    + ` data-entity-id="${escapeHtml(item.id || "")}" data-entity-type="${type}">`
+    + `<div class="search-result-head"><span class="search-result-type">${type}</span>`
+    + `<span class="search-result-title">${title}</span></div>`
+    + `<div class="search-result-meta">${metaParts.join(" &middot; ")}</div>${linkHtml}</button>`;
+}
+
+function renderGlobalSearchResults(query) {
+  const box = $("global-search-results");
+  const input = $("global-search-input");
+  if (!box) return;
+  if (!query) {
+    box.hidden = true;
+    if (input) input.setAttribute("aria-expanded", "false");
+    return;
+  }
+  box.hidden = false;
+  if (input) input.setAttribute("aria-expanded", "true");
+  if (!searchResults.length) {
+    // Query is echoed back to the user; escapeHtml guards against XSS.
+    box.innerHTML = `<div class="search-empty">No matches for &ldquo;${escapeHtml(query)}&rdquo;</div>`;
+    return;
+  }
+  if (searchActiveIndex >= searchResults.length) searchActiveIndex = searchResults.length - 1;
+  if (searchActiveIndex < 0) searchActiveIndex = 0;
+  box.innerHTML = searchResults
+    .map((item, index) => searchResultRow(item, index, index === searchActiveIndex))
+    .join("");
+}
+
+function runGlobalSearch() {
+  const input = $("global-search-input");
+  const query = input ? input.value.trim() : "";
+  if (!query) {
+    searchResults = [];
+    renderGlobalSearchResults("");
+    return;
+  }
+  fetchSearch(query)
+    .then((payload) => {
+      searchResults = payload.items || [];
+      searchActiveIndex = 0;
+      renderGlobalSearchResults(query);
+    })
+    .catch(() => {
+      searchResults = [];
+      renderGlobalSearchResults(query);
+    });
+}
+
+function navigateToResult(item) {
+  if (!item) return;
+  recordRecentEntity(item);
+  closeGlobalSearch();
+  closeQuickOpen();
+  const link = item.deep_link || (item.route ? `#/${item.route}` : "");
+  if (link) {
+    // Force hashchange even if only the select= param changed.
+    if (window.location.hash === link) applyHashRoute();
+    else window.location.hash = link;
+  }
+}
+
+function closeGlobalSearch() {
+  const box = $("global-search-results");
+  if (box) box.hidden = true;
+  const input = $("global-search-input");
+  if (input) input.setAttribute("aria-expanded", "false");
+}
+
+function globalSearchOpen() {
+  const box = $("global-search-results");
+  return Boolean(box && !box.hidden);
+}
+
+/* ----- Ctrl+P quick open ----- */
+function quickOpenIsOpen() {
+  const overlay = $("quick-open");
+  return Boolean(overlay && !overlay.hidden);
+}
+
+function quickOpenDefaultItems() {
+  const recent = readJsonStore(SEARCH_RECENT_KEY).map((item) => ({ ...item, _group: "Recent" }));
+  const favorites = favoriteEntities().map((item) => ({ ...item, _group: "Favorites" }));
+  return favorites.concat(recent);
+}
+
+function renderQuickOpen() {
+  const box = $("quick-open-results");
+  const input = $("quick-open-input");
+  if (!box) return;
+  const query = input ? input.value.trim() : "";
+  const items = query ? quickOpenResults : quickOpenDefaultItems();
+  if (!items.length) {
+    box.innerHTML = query
+      ? `<div class="search-empty">No matches for &ldquo;${escapeHtml(query)}&rdquo;</div>`
+      : `<div class="search-empty">Recent and favorite entities appear here.</div>`;
+    return;
+  }
+  if (quickOpenActiveIndex >= items.length) quickOpenActiveIndex = items.length - 1;
+  if (quickOpenActiveIndex < 0) quickOpenActiveIndex = 0;
+  let lastGroup = null;
+  const rows = [];
+  items.forEach((item, index) => {
+    if (item._group && item._group !== lastGroup) {
+      rows.push(`<div class="search-result-group">${escapeHtml(item._group)}</div>`);
+      lastGroup = item._group;
+    }
+    rows.push(searchResultRow(item, index, index === quickOpenActiveIndex));
+  });
+  box.innerHTML = rows.join("");
+}
+
+function quickOpenCurrentItems() {
+  const input = $("quick-open-input");
+  const query = input ? input.value.trim() : "";
+  return query ? quickOpenResults : quickOpenDefaultItems();
+}
+
+function runQuickOpenSearch() {
+  const input = $("quick-open-input");
+  const query = input ? input.value.trim() : "";
+  if (!query) {
+    quickOpenResults = [];
+    renderQuickOpen();
+    return;
+  }
+  fetchSearch(query)
+    .then((payload) => {
+      quickOpenResults = payload.items || [];
+      quickOpenActiveIndex = 0;
+      renderQuickOpen();
+    })
+    .catch(() => { quickOpenResults = []; renderQuickOpen(); });
+}
+
+function openQuickOpen() {
+  const overlay = $("quick-open");
+  if (!overlay) return;
+  overlay.hidden = false;
+  quickOpenActiveIndex = 0;
+  quickOpenResults = [];
+  const input = $("quick-open-input");
+  if (input) { input.value = ""; input.focus(); }
+  renderQuickOpen();
+}
+
+function closeQuickOpen() {
+  const overlay = $("quick-open");
+  if (overlay) overlay.hidden = true;
+}
+
 /* ===== Keyboard navigation (j / k / Enter) over list rows ===== */
 function activeListView() {
   const active = document.querySelector(".view.is-active");
@@ -4413,9 +4785,11 @@ function activateListCursor(view) {
 }
 
 function handleListKeyboardNav(event) {
-  if (paletteIsOpen()) return;
-  const tag = (event.target.tagName || "").toLowerCase();
-  if (tag === "input" || tag === "textarea" || tag === "select") return;
+  if (paletteIsOpen() || quickOpenIsOpen()) return;
+  // Single-key (j/k/Enter) nav must never fire while typing in a text field
+  // (input/textarea/select/contentEditable) -- shared guard, also used to
+  // reason about the Ctrl+P/Ctrl+K shortcuts below.
+  if (eventTargetIsTextInput(event)) return;
   const view = activeListView();
   if (!view) return;
   if (event.key === "j") {
@@ -4721,7 +5095,7 @@ function taskSetCards(taskSets, options = {}) {
     const taskCount = `${taskSet.tasks_done || 0}/${taskSet.tasks_total || 0}`;
     const command = taskSetCommand(taskSet, "start") || taskSetCommand(taskSet, "plan");
     return `
-      <article class="taskset-card ${taskSetStatusClass(taskSet.status)}" tabindex="0">
+      <article class="taskset-card ${taskSetStatusClass(taskSet.status)}" tabindex="0" data-taskset-id="${escapeHtml(taskSet.id)}" data-entity-id="${escapeHtml(taskSet.id)}">
         <div class="taskset-card-header">
           <div class="taskset-title">
             <b>${escapeHtml(taskSet.primary_alias || taskSet.id)}</b>
@@ -5238,7 +5612,7 @@ function renderAgents() {
 
 function messageRowTemplate(message) {
   return `
-    <article class="list-row">
+    <article class="list-row" data-entity-id="${escapeHtml(message.id)}">
       <b>${escapeHtml(message.id)}</b>
       <span>${escapeHtml(message.from)} -> ${escapeHtml(message.to)} / ${escapeHtml(message.status)}</span>
       <p>${escapeHtml(message.body).slice(0, 220)}</p>
@@ -5417,7 +5791,7 @@ function renderAuditMeta(content) {
 
 function eventCardTemplate(event) {
   return `
-    <article class="audit-card event-card ${auditToneClass(event)}">
+    <article class="audit-card event-card ${auditToneClass(event)}" data-entity-id="${escapeHtml(event.id || "")}">
       <div class="audit-card-header">
         <b>${escapeHtml(event.type || event.event || event.id || "event")}</b>
         <span class="state-chip">${escapeHtml(auditSeverityLabel(event))}</span>
@@ -5463,7 +5837,7 @@ function renderEvidence() {
     </article>
   `).join("") : `<div class="empty">No recent errors</div>`;
   $("evidence-list").innerHTML = evidence.length ? evidence.slice(-60).reverse().map((item) => `
-    <article class="audit-card evidence-card pass">
+    <article class="audit-card evidence-card pass" data-entity-id="${escapeHtml(item.id || "")}">
       <div class="audit-card-header">
         <b>${escapeHtml(item.evidence || item.source_path || "evidence")}</b>
         <span class="state-chip">pass</span>
@@ -7238,16 +7612,48 @@ function activateView(view, { updateHash = true } = {}) {
   closeMobileSidebar();
 }
 
-function routeFromHash() {
+function parseHash() {
+  // Hash shape: #/<route>?select=<entityId>  (AR-321 routing + AR-334 select).
   const raw = (window.location.hash || "").replace(/^#\/?/, "");
-  if (!raw) return null;
-  return viewForRoute(raw) ? raw : null;
+  if (!raw) return { route: null, select: null };
+  const [routePart, queryPart] = raw.split("?");
+  let select = null;
+  if (queryPart) {
+    try {
+      select = new URLSearchParams(queryPart).get("select");
+    } catch (error) { select = null; }
+  }
+  return { route: viewForRoute(routePart) ? routePart : null, select };
+}
+
+function routeFromHash() {
+  return parseHash().route;
+}
+
+// Deep-link selection: highlight + scroll the entity identified in the hash
+// (TASK-AR-334). Used after a search/quick-open result navigates to a view.
+function selectEntityFromHash(select) {
+  if (!select) return;
+  const apply = () => {
+    const safe = (window.CSS && CSS.escape) ? CSS.escape(select) : select.replace(/"/g, '\\"');
+    const node = document.querySelector(`[data-task-id="${safe}"], [data-entity-id="${safe}"], [data-peek-task="${safe}"], [data-taskset-id="${safe}"]`);
+    if (node) {
+      document.querySelectorAll(".is-deeplinked").forEach((el) => el.classList.remove("is-deeplinked"));
+      node.classList.add("is-deeplinked");
+      node.scrollIntoView({ block: "center", behavior: "smooth" });
+      if (typeof node.focus === "function") node.focus({ preventScroll: true });
+    }
+  };
+  // Defer one frame so the activated view has rendered its rows.
+  if (window.requestAnimationFrame) window.requestAnimationFrame(apply);
+  else setTimeout(apply, 0);
 }
 
 function applyHashRoute() {
-  const route = routeFromHash();
+  const { route, select } = parseHash();
   const view = route ? viewForRoute(route) : "board";
   activateView(view || "board", { updateHash: false });
+  selectEntityFromHash(select);
 }
 
 function setSidebarCollapsed(collapsed) {
@@ -7327,13 +7733,71 @@ function boardViewActive() {
   return Boolean(view && view.classList.contains("is-active"));
 }
 
+function eventTargetIsTextInput(event) {
+  const tag = (event.target && event.target.tagName ? event.target.tagName : "").toLowerCase();
+  return tag === "input" || tag === "textarea" || tag === "select" || (event.target && event.target.isContentEditable);
+}
+
 document.addEventListener("keydown", (event) => {
-  // Command palette toggle (Ctrl+K / Cmd+K).
+  // Command palette toggle (Ctrl+K / Cmd+K). Distinct from Ctrl+P quick open.
   if ((event.ctrlKey || event.metaKey) && (event.key === "k" || event.key === "K")) {
     event.preventDefault();
+    if (quickOpenIsOpen()) closeQuickOpen();
     if (paletteIsOpen()) closeCommandPalette();
     else openCommandPalette();
     return;
+  }
+  // Quick open toggle (Ctrl+P / Cmd+P) - entities, NOT the command palette.
+  // The Ctrl/Cmd modifier requirement means a plain "p" while typing in an
+  // input is never intercepted here; single-key nav (j/k) is separately gated
+  // by eventTargetIsTextInput in handleListKeyboardNav. It is a different key
+  // from Ctrl+K so the two overlays never collide.
+  if ((event.ctrlKey || event.metaKey) && (event.key === "p" || event.key === "P")) {
+    event.preventDefault();
+    if (paletteIsOpen()) closeCommandPalette();
+    if (quickOpenIsOpen()) closeQuickOpen();
+    else openQuickOpen();
+    return;
+  }
+  if (quickOpenIsOpen()) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeQuickOpen();
+    } else if (event.key === "ArrowDown") {
+      event.preventDefault();
+      quickOpenActiveIndex += 1;
+      renderQuickOpen();
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      quickOpenActiveIndex = Math.max(0, quickOpenActiveIndex - 1);
+      renderQuickOpen();
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      navigateToResult(quickOpenCurrentItems()[quickOpenActiveIndex]);
+    }
+    return;
+  }
+  // Global search box keyboard navigation (when its dropdown is open and the
+  // search input itself has focus - never steals keys from other inputs).
+  if (globalSearchOpen() && event.target === $("global-search-input")) {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      searchActiveIndex += 1;
+      renderGlobalSearchResults($("global-search-input").value.trim());
+      return;
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      searchActiveIndex = Math.max(0, searchActiveIndex - 1);
+      renderGlobalSearchResults($("global-search-input").value.trim());
+      return;
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      navigateToResult(searchResults[searchActiveIndex]);
+      return;
+    } else if (event.key === "Escape") {
+      closeGlobalSearch();
+      return;
+    }
   }
   if (paletteIsOpen()) {
     if (event.key === "Escape") {
@@ -7386,6 +7850,51 @@ wireListToolbars();
       runActivePaletteCommand();
     }
   });
+})();
+
+// Global search + quick open interaction wiring (TASK-AR-334).
+(() => {
+  const input = $("global-search-input");
+  if (input) {
+    input.addEventListener("input", () => {
+      searchActiveIndex = 0;
+      if (searchDebounce) clearTimeout(searchDebounce);
+      searchDebounce = setTimeout(runGlobalSearch, 140);
+    });
+    input.addEventListener("focus", () => {
+      if (input.value.trim() && searchResults.length) renderGlobalSearchResults(input.value.trim());
+    });
+  }
+  const box = $("global-search-results");
+  if (box) {
+    box.addEventListener("click", (event) => {
+      const row = event.target.closest(".search-result");
+      if (!row) return;
+      navigateToResult(searchResults[Number(row.dataset.resultIndex) || 0]);
+    });
+  }
+  // Click outside the search box closes the dropdown.
+  document.addEventListener("click", (event) => {
+    const wrap = document.querySelector(".topbar-search");
+    if (wrap && !wrap.contains(event.target)) closeGlobalSearch();
+  });
+
+  const overlay = $("quick-open");
+  if (overlay) {
+    const qinput = $("quick-open-input");
+    if (qinput) {
+      qinput.addEventListener("input", () => {
+        quickOpenActiveIndex = 0;
+        if (quickOpenDebounce) clearTimeout(quickOpenDebounce);
+        quickOpenDebounce = setTimeout(runQuickOpenSearch, 140);
+      });
+    }
+    overlay.addEventListener("click", (event) => {
+      if (event.target.dataset.quickopenDismiss) { closeQuickOpen(); return; }
+      const row = event.target.closest(".search-result");
+      if (row) navigateToResult(quickOpenCurrentItems()[Number(row.dataset.resultIndex) || 0]);
+    });
+  }
 })();
 
 $("refresh-button").addEventListener("click", loadState);
@@ -7921,6 +8430,25 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
     if request_path.startswith("/api/export/"):
         return _export_response(root_path, request_path[len("/api/export/") :])
 
+    if request_path == "/api/search":
+        state = ui_state.build_state(root_path)
+        params = parse_qs(parsed_url.query)
+        query = (params.get("q", [""])[0] or "").strip()
+        results = ui_state.run_search(state["search_index"], query) if query else []
+        parsed_query = ui_state.parse_search_query(query)
+        return _json_response(
+            {
+                "generated_at": state["generated_at"],
+                "resource": "search",
+                "query": query,
+                "operators": parsed_query["operators"],
+                "terms": parsed_query["terms"],
+                "entity_types": list(ui_state.SEARCH_ENTITY_TYPES),
+                "items": results,
+                "total": len(results),
+            }
+        )
+
     api_resources = {
         "/api/tasks": "tasks",
         "/api/agents": "agents",
@@ -7958,6 +8486,9 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/automation_rules": "automation_rules",
         "/api/automation-rules": "automation_rules",
         "/api/triage": "triage",
+        "/api/reviews": "reviews",
+        "/api/search_index": "search_index",
+        "/api/search-index": "search_index",
         "/api/commands": "commands",
     }
     if request_path in api_resources:

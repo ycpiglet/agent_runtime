@@ -50,6 +50,8 @@ RESOURCE_NAMES = (
     "labels",
     "automation_rules",
     "triage",
+    "reviews",
+    "search_index",
     "commands",
 )
 
@@ -64,6 +66,19 @@ MESSAGE_GLOBS = (
     ("messages_inbox", "agents/messages/inbox/*.md"),
     ("messages_archive", "agents/messages/archive/*.md"),
 )
+REVIEW_GLOB = "reviews/*.md"
+# Search entity types surfaced by the global search index (TASK-AR-334).
+SEARCH_ENTITY_TYPES = ("task", "taskset", "message", "event", "evidence", "review")
+# Each entity type deep-links to one of the AR-321 hash routes; clicking a
+# search result navigates the console to this route and selects the entity.
+SEARCH_ENTITY_ROUTES = {
+    "task": "home/board",
+    "taskset": "work/tasksets",
+    "message": "comms/messages",
+    "event": "records/events",
+    "evidence": "records/evidence",
+    "review": "records/sources",
+}
 
 
 def _now_iso() -> str:
@@ -423,6 +438,57 @@ def load_messages(root: Path, now: str, warnings: list[dict[str, str]]) -> list[
                 }
             )
     return messages
+
+
+def load_reviews(root: Path, now: str, warnings: list[dict[str, str]]) -> list[dict[str, Any]]:
+    """Load review/meeting/call records under ``reviews/`` as searchable docs.
+
+    Read-only: these are durable planning artefacts (meeting notes, call logs,
+    gate records, evidence indexes). We surface frontmatter (id/title/type/
+    status/tags) plus the document body so the global search can match free text.
+    """
+    reviews: list[dict[str, Any]] = []
+    for path in sorted(root.glob(REVIEW_GLOB)):
+        rel_path = _rel(root, path)
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError as exc:
+            warnings.append(_warning("review-read-error", rel_path, str(exc)))
+            continue
+        meta, body = parse_frontmatter(text)
+        review_id = str(meta.get("id") or path.stem)
+        # Title: explicit frontmatter, else the first markdown H1, else the slug.
+        title = str(meta.get("title") or "").strip()
+        if not title:
+            for line in body.splitlines():
+                if line.startswith("# "):
+                    title = line[2:].strip()
+                    break
+        if not title:
+            title = path.stem.replace("-", " ")
+        tags = meta.get("tags") if isinstance(meta.get("tags"), list) else _string_list(meta.get("tags"))
+        reviews.append(
+            {
+                "id": review_id,
+                "title": title,
+                "type": meta.get("type") or "review",
+                "status": meta.get("status"),
+                "signal": meta.get("signal"),
+                "score": meta.get("score"),
+                "priority": meta.get("priority"),
+                "audience": meta.get("audience"),
+                "tags": tags,
+                "summary": _first_sentence(_section_text(body, "Bottom Line") or body),
+                "body": body,
+                "created_at": meta.get("generated_at") or meta.get("date") or _mtime_iso(path),
+                "source_path": rel_path,
+                "source_kind": "review_markdown",
+                "source": _source_metadata(root, path, "review_markdown", now),
+                "last_updated": _mtime_iso(path),
+                "freshness": "present",
+            }
+        )
+    return reviews
 
 
 def _event_severity(payload: dict[str, Any]) -> str:
@@ -3886,6 +3952,256 @@ def build_triage(
     }
 
 
+# ---------------------------------------------------------------------------
+# Global search + quick open (TASK-AR-334)
+# ---------------------------------------------------------------------------
+
+# Slack-style operator tokens supported in the search box. Each maps to a
+# normalized field on the search-index entry.
+_SEARCH_OPERATORS = ("type", "status", "owner", "date")
+# Matches ``key:value`` pairs (value may be quoted to allow spaces).
+_SEARCH_OPERATOR_RE = re.compile(r'(\w+):("[^"]*"|\'[^\']*\'|\S+)')
+# Extracts bare commit SHAs (7-40 hex chars) referenced in task/review text so
+# results can surface a related-commit link.
+_COMMIT_SHA_RE = re.compile(r"\b([0-9a-f]{7,40})\b")
+
+
+def _search_text_blob(*parts: Any) -> str:
+    """Join arbitrary fields into one lowercased, searchable text blob."""
+    return " ".join(_filter_text(part) for part in parts if part is not None).strip()
+
+
+def _search_date_key(value: Any) -> str:
+    """Normalize a timestamp to a ``YYYY-MM-DD`` prefix for date: matching."""
+    text = str(value or "").strip()
+    return text[:10] if len(text) >= 10 else text
+
+
+def _review_links_for(entity_id: str, reviews: list[dict[str, Any]]) -> list[dict[str, str]]:
+    """Surface related review/meeting docs that mention this entity id."""
+    needle = str(entity_id or "").strip().lower()
+    links: list[dict[str, str]] = []
+    if not needle:
+        return links
+    for review in reviews:
+        haystack = f"{review.get('id', '')} {review.get('source_path', '')} {review.get('body', '')}".lower()
+        if needle in haystack:
+            links.append({"label": str(review.get("title") or review.get("id")), "path": str(review.get("source_path") or "")})
+        if len(links) >= 3:
+            break
+    return links
+
+
+def _commit_links_for(*texts: Any) -> list[dict[str, str]]:
+    """Surface commit SHAs mentioned in entity text as related-commit links."""
+    seen: list[dict[str, str]] = []
+    blob = " ".join(_filter_text(text) for text in texts if text is not None)
+    for match in _COMMIT_SHA_RE.findall(blob):
+        # Skip obvious non-SHA hex (pure digits read as IDs/years).
+        if match.isdigit():
+            continue
+        entry = {"label": match[:10], "sha": match}
+        if entry not in seen:
+            seen.append(entry)
+        if len(seen) >= 3:
+            break
+    return seen
+
+
+def build_search_index(state: dict[str, Any]) -> list[dict[str, Any]]:
+    """Derive a flat, read-only search index from the runtime state.
+
+    Each entry carries the normalized fields the search box needs:
+    ``entity_type`` / ``id`` / ``title`` / ``status`` / ``owner`` / ``date`` /
+    ``text`` (the lowercased searchable blob), the AR-321 hash ``route`` +
+    ``entity`` selector used for deep-linking, and any related commit/review
+    document links surfaced for that entity.
+    """
+    reviews = state.get("reviews") or []
+    index: list[dict[str, Any]] = []
+
+    def add(
+        entity_type: str,
+        entity_id: Any,
+        title: Any,
+        *,
+        status: Any = None,
+        owner: Any = None,
+        date: Any = None,
+        text: str = "",
+        source_path: Any = None,
+        related: list[dict[str, str]] | None = None,
+    ) -> None:
+        entity_id_str = str(entity_id or "").strip()
+        route = SEARCH_ENTITY_ROUTES.get(entity_type, "home/board")
+        index.append(
+            {
+                "entity_type": entity_type,
+                "id": entity_id_str,
+                "title": str(title or entity_id_str or "(untitled)"),
+                "status": str(status or "").strip() or None,
+                "owner": str(owner or "").strip() or None,
+                "date": _search_date_key(date),
+                "text": text.lower(),
+                "route": route,
+                # Deep-link target: hash route + selected entity id (AR-321).
+                "deep_link": f"#/{route}?select={entity_id_str}" if entity_id_str else f"#/{route}",
+                "entity": entity_id_str,
+                "source_path": str(source_path or "") or None,
+                "related": related or [],
+            }
+        )
+
+    for task in state.get("tasks") or []:
+        owner = task.get("owner_agent") or task.get("team")
+        text = _search_text_blob(
+            task.get("id"), task.get("title"), task.get("status"), task.get("priority"),
+            task.get("description"), task.get("peek_summary"), task.get("labels"),
+            task.get("task_set_id"), owner,
+        )
+        related = _review_links_for(task.get("id"), reviews) + _commit_links_for(
+            task.get("audit_log"), task.get("peek_summary"), task.get("description"),
+        )
+        add(
+            "task", task.get("id"), task.get("title"),
+            status=task.get("status"), owner=owner,
+            date=task.get("updated_at") or task.get("created_at"),
+            text=text, source_path=task.get("source_path"), related=related,
+        )
+
+    for ts in state.get("task_sets") or []:
+        text = _search_text_blob(
+            ts.get("id"), ts.get("display_name"), ts.get("summary"),
+            ts.get("status"), ts.get("status_text"), ts.get("aliases"),
+        )
+        add(
+            "taskset", ts.get("id"), ts.get("display_name") or ts.get("id"),
+            status=ts.get("status"),
+            text=text, related=_review_links_for(ts.get("id"), reviews),
+        )
+
+    for msg in state.get("messages") or []:
+        text = _search_text_blob(
+            msg.get("id"), msg.get("from"), msg.get("to"), msg.get("intent"),
+            msg.get("type"), msg.get("status"), msg.get("body"), msg.get("task_id"),
+        )
+        add(
+            "message", msg.get("id"), (str(msg.get("intent") or msg.get("type") or "message")),
+            status=msg.get("status"), owner=msg.get("from"),
+            date=msg.get("created_at") or msg.get("ts"),
+            text=text, source_path=msg.get("source_path"),
+        )
+
+    for ev in state.get("events") or []:
+        text = _search_text_blob(
+            ev.get("id"), ev.get("event") or ev.get("type"), ev.get("role") or ev.get("actor"),
+            ev.get("task_id"), ev.get("goal_id"), ev.get("severity"), ev.get("detail"),
+        )
+        add(
+            "event", ev.get("id"), (str(ev.get("event") or ev.get("type") or "event")),
+            status=ev.get("severity"), owner=ev.get("actor") or ev.get("role"),
+            date=ev.get("created_at") or ev.get("ts"),
+            text=text, source_path=ev.get("source_path"),
+        )
+
+    for item in state.get("evidence") or []:
+        text = _search_text_blob(
+            item.get("id"), item.get("evidence"), item.get("source_type"),
+            item.get("task_id"), item.get("goal_id"),
+        )
+        add(
+            "evidence", item.get("id"), (str(item.get("evidence") or "evidence")),
+            owner=item.get("source_type"), date=item.get("created_at"),
+            text=text, source_path=item.get("source_path"),
+            related=_commit_links_for(item.get("evidence")),
+        )
+
+    for review in reviews:
+        text = _search_text_blob(
+            review.get("id"), review.get("title"), review.get("type"),
+            review.get("status"), review.get("tags"), review.get("summary"), review.get("body"),
+        )
+        add(
+            "review", review.get("id"), review.get("title"),
+            status=review.get("status"), owner=review.get("audience"),
+            date=review.get("created_at"),
+            text=text, source_path=review.get("source_path"),
+            related=_commit_links_for(review.get("body")),
+        )
+
+    return index
+
+
+def parse_search_query(query: str) -> dict[str, Any]:
+    """Parse a Slack-style search string into operators + free text.
+
+    Supports ``type:`` / ``status:`` / ``owner:`` / ``date:`` operators (values
+    may be quoted). Everything else becomes the free-text term list. Unknown
+    ``key:value`` tokens are left in the free text so they still match literally.
+    """
+    operators: dict[str, str] = {}
+    remainder = query or ""
+    for match in _SEARCH_OPERATOR_RE.finditer(query or ""):
+        key = match.group(1).lower()
+        if key not in _SEARCH_OPERATORS:
+            continue
+        value = match.group(2).strip().strip("\"'")
+        operators[key] = value.lower()
+        remainder = remainder.replace(match.group(0), " ", 1)
+    terms = [token for token in remainder.lower().split() if token]
+    return {"operators": operators, "terms": terms, "raw": query or ""}
+
+
+def run_search(index: list[dict[str, Any]], query: str, *, limit: int = 40) -> list[dict[str, Any]]:
+    """Filter + rank the search index for a parsed query.
+
+    Operator filters are applied as exact/prefix matches; free-text terms must
+    all appear in the entity's searchable blob (AND semantics). Results are
+    ranked: title hits first, then entity-type grouping, then recency.
+    """
+    parsed = parse_search_query(query)
+    operators = parsed["operators"]
+    terms = parsed["terms"]
+    want_type = operators.get("type")
+    want_status = operators.get("status")
+    want_owner = operators.get("owner")
+    want_date = operators.get("date")
+
+    results: list[dict[str, Any]] = []
+    for entry in index:
+        if want_type and entry.get("entity_type") != want_type:
+            continue
+        if want_status and (entry.get("status") or "").lower() != want_status:
+            continue
+        if want_owner and want_owner not in (entry.get("owner") or "").lower():
+            continue
+        if want_date and not (entry.get("date") or "").startswith(want_date):
+            continue
+        text = entry.get("text") or ""
+        title = (entry.get("title") or "").lower()
+        if terms and not all(term in text for term in terms):
+            continue
+        title_hit = any(term in title for term in terms) if terms else False
+        scored = dict(entry)
+        scored["_title_hit"] = title_hit
+        results.append(scored)
+
+    results.sort(
+        key=lambda item: (
+            0 if item.get("_title_hit") else 1,
+            item.get("entity_type") or "",
+            # Newest first within a tier (descending date string).
+            "" if item.get("date") else "z",
+        )
+    )
+    results.sort(key=lambda item: (item.get("date") or ""), reverse=True)
+    results.sort(key=lambda item: (0 if item.get("_title_hit") else 1))
+    for item in results:
+        item.pop("_title_hit", None)
+        item.pop("text", None)
+    return results[:limit]
+
+
 def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     root_path = Path(root).resolve()
     generated_at = now or _now_iso()
@@ -3931,7 +4247,8 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     labels = build_labels(root_path, tasks, generated_at, warnings)
     automation_rules = load_automation_rules(root_path, generated_at, warnings)
     triage = build_triage(tasks, generated_at)
-    return {
+    reviews = load_reviews(root_path, generated_at, warnings)
+    state: dict[str, Any] = {
         "generated_at": generated_at,
         "sources": sources,
         "tasks": tasks,
@@ -3966,10 +4283,14 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "labels": labels,
         "automation_rules": automation_rules,
         "triage": triage,
+        "reviews": reviews,
         "commands": commands,
         "gaps": gaps,
         "warnings": warnings,
     }
+    # Global search index is derived from the assembled state (TASK-AR-334).
+    state["search_index"] = build_search_index(state)
+    return state
 
 
 def build_resource(root: Path | str, resource: str, now: str | None = None) -> dict[str, Any]:
