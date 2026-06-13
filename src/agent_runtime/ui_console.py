@@ -103,7 +103,10 @@ HTML = """<!doctype html>
         </nav>
 
         <div id="view-board" class="view is-active">
+          <p class="board-hint">Hover or focus a card for a peek. Drag a card between lanes to reorder, or focus it and press Ctrl+D to lift, arrows to move, Space to drop, Esc to cancel. Quick actions: Claim / Verify / Close.</p>
           <div id="kanban" class="kanban" aria-label="Kanban"></div>
+          <div id="board-peek" class="board-peek" role="tooltip" aria-hidden="true" hidden></div>
+          <div id="board-dnd-status" class="board-dnd-status" role="status" aria-live="polite"></div>
         </div>
         <div id="view-work" class="view">
           <div class="work-toolbar">
@@ -603,6 +606,103 @@ textarea:focus {
 .assurance-grid {
   display: grid;
   gap: 8px;
+}
+.lane-body {
+  min-height: 48px;
+}
+.board-hint {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+.lane.is-drop-target {
+  border-color: var(--primary-hover);
+  background: rgba(94, 106, 210, 0.12);
+}
+.lane-body.is-dragover {
+  outline: 2px dashed var(--primary-hover);
+  outline-offset: -2px;
+  border-radius: var(--radius);
+}
+.task-card.is-dragging {
+  opacity: 0.45;
+}
+.task-card.is-lifted {
+  outline: 2px solid var(--primary-hover);
+  outline-offset: 1px;
+}
+.drop-placeholder {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--primary-hover);
+  margin: 2px 0;
+}
+.task-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+.task-card-actions button {
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--line-strong);
+  background: rgba(1, 1, 2, 0.34);
+  color: var(--ink);
+  cursor: pointer;
+}
+.task-card-actions button:hover {
+  border-color: var(--primary-hover);
+}
+.task-card-actions button:focus-visible {
+  outline: 2px solid var(--primary-hover);
+  outline-offset: 1px;
+}
+.board-peek {
+  position: fixed;
+  z-index: 40;
+  max-width: 320px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  padding: 12px;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.45;
+  pointer-events: none;
+}
+.board-peek h3 {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+.board-peek code {
+  color: var(--primary-hover);
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 11px;
+}
+.board-peek dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 10px;
+  margin-top: 6px;
+}
+.board-peek dt {
+  color: var(--subtle);
+}
+.board-peek dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.board-dnd-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 .taskset-toolbar {
   display: grid;
@@ -1783,6 +1883,10 @@ let meetingKeyboardHeld = null;
 let expandedTasksetCards = new Set();
 let tasksetSwimlaneMode = false;
 let teamOnlineOnly = false;
+let peekTimer = null;
+let peekAnchorId = null;
+let boardDragId = null;
+let boardLifted = null;
 
 const $ = (id) => document.getElementById(id);
 const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -2076,7 +2180,7 @@ function taskCard(task) {
     ? `${taskSetInfo.primary_alias || taskSetInfo.id} - ${taskSetInfo.display_name || taskSetInfo.id}`
     : task.task_set_id || "no task set";
   const evidence = evidenceLabelForTask(task);
-  return `<button class="task-card ${statusClassName(status)}" type="button" data-task-id="${escapeHtml(task.id)}">
+  return `<div class="task-card ${statusClassName(status)}" role="button" tabindex="0" draggable="true" data-task-id="${escapeHtml(task.id)}" data-task-lane="${escapeHtml(task.lane || "")}" data-task-order="${escapeHtml(Number(task.order || 0))}" data-peek-task="${escapeHtml(task.id)}" aria-label="Task ${escapeHtml(task.id)}: ${escapeHtml(task.title)}">
     <div class="task-card-header">
       <span class="task-id">${escapeHtml(task.id)}</span>
       <span class="task-status"><span class="meta-label">Status</span><strong>${escapeHtml(status)}</strong></span>
@@ -2090,22 +2194,323 @@ function taskCard(task) {
       <span class="task-card-taskset"><span class="meta-label">Task set</span><strong>${escapeHtml(taskSet)}</strong></span>
       <span class="task-card-evidence"><span class="meta-label">Evidence</span><strong>${escapeHtml(evidence)}</strong></span>
     </div>
-  </button>`;
+    <div class="task-card-actions" aria-label="Quick actions">
+      <button type="button" data-quick-action="claim" data-task-id="${escapeHtml(task.id)}">Claim</button>
+      <button type="button" data-quick-action="verify" data-task-id="${escapeHtml(task.id)}">Verify</button>
+      <button type="button" data-quick-action="close" data-task-id="${escapeHtml(task.id)}">Close</button>
+    </div>
+  </div>`;
+}
+
+const laneStatusDefault = {
+  "Backlog": "planned",
+  "Ready": "ready",
+  "In Progress": "in_progress",
+  "Review": "review",
+  "Blocked": "blocked",
+  "Done": "completed",
+};
+
+function laneStatusFor(lane) {
+  return laneStatusDefault[lane] || "planned";
+}
+
+function boardAnnounce(message) {
+  setText("board-dnd-status", message || "");
+}
+
+function taskById(taskId) {
+  return (runtimeState.tasks || []).find((task) => task.id === taskId);
+}
+
+function buildPeekMarkup(task) {
+  if (!task) return "";
+  const taskSetInfo = taskSetById(task.task_set_id);
+  const taskSet = taskSetInfo
+    ? `${taskSetInfo.primary_alias || taskSetInfo.id} - ${taskSetInfo.display_name || taskSetInfo.id}`
+    : task.task_set_id || "no task set";
+  const summary = task.peek_summary || task.description || task.title || "No summary";
+  const rows = [
+    ["Status", task.status || "unknown"],
+    ["Lane", task.lane || "Backlog"],
+    ["Priority", task.priority || "none"],
+    ["Owner", task.owner_agent || "unassigned"],
+    ["Task set", taskSet],
+    ["Evidence", evidenceLabelForTask(task)],
+    ["Updated", task.last_updated || task.updated_at || "unknown"],
+  ];
+  if (task.blocked_reason) rows.push(["Blocked", task.blocked_reason]);
+  return `<h3><code>${escapeHtml(task.id)}</code> ${escapeHtml(task.title || "")}</h3>
+    <p>${escapeHtml(summary)}</p>
+    <dl>${rows.map(([label, value]) => `<dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd>`).join("")}</dl>`;
+}
+
+function positionPeek(anchor) {
+  const peek = $("board-peek");
+  if (!peek || !anchor) return;
+  const rect = anchor.getBoundingClientRect();
+  const margin = 8;
+  peek.style.visibility = "hidden";
+  peek.hidden = false;
+  const peekRect = peek.getBoundingClientRect();
+  let left = rect.right + margin;
+  if (left + peekRect.width > window.innerWidth - margin) {
+    left = Math.max(margin, rect.left - peekRect.width - margin);
+  }
+  let top = rect.top;
+  if (top + peekRect.height > window.innerHeight - margin) {
+    top = Math.max(margin, window.innerHeight - peekRect.height - margin);
+  }
+  peek.style.left = `${Math.round(left)}px`;
+  peek.style.top = `${Math.round(top)}px`;
+  peek.style.visibility = "visible";
+}
+
+function showPeek(anchor) {
+  const peek = $("board-peek");
+  if (!peek || !anchor) return;
+  const task = taskById(anchor.dataset.peekTask);
+  if (!task) return;
+  peek.innerHTML = buildPeekMarkup(task);
+  peek.hidden = false;
+  peek.setAttribute("aria-hidden", "false");
+  peekAnchorId = anchor.dataset.peekTask;
+  positionPeek(anchor);
+}
+
+function hidePeek() {
+  const peek = $("board-peek");
+  if (!peek) return;
+  peek.hidden = true;
+  peek.setAttribute("aria-hidden", "true");
+  peekAnchorId = null;
+  if (peekTimer) {
+    window.clearTimeout(peekTimer);
+    peekTimer = null;
+  }
+}
+
+function schedulePeek(anchor) {
+  if (peekTimer) window.clearTimeout(peekTimer);
+  peekTimer = window.setTimeout(() => showPeek(anchor), 300);
+}
+
+async function quickAction(action, taskId) {
+  const task = taskById(taskId);
+  if (!task) return;
+  if (action === "claim") {
+    await sendJson(`/api/tasks/${encodeURIComponent(taskId)}`, {
+      method: "PATCH",
+      type: "task.update",
+      payload: { status: "claimed", owner: task.owner_agent || "lead-engineer" }
+    });
+  } else if (action === "verify") {
+    await sendJson("/api/commands", {
+      type: "runtime.request_review",
+      payload: {
+        type: "runtime.request_review",
+        target: task.owner_agent || "lead-engineer",
+        payload: {
+          actor: "owner",
+          instruction: `${taskId} verify: run the gate chain and report results.`,
+          reason: `${taskId} quick verify`,
+          task_id: taskId,
+          goal_id: task.task_set_id || ""
+        }
+      }
+    });
+  } else if (action === "close") {
+    if (!window.confirm(`Close ${taskId}?`)) return;
+    await sendJson(`/api/tasks/${encodeURIComponent(taskId)}/archive`, { type: "task.archive", payload: {} });
+  }
+}
+
+function laneTasksFor(lane) {
+  return (runtimeState.tasks || []).filter((task) => task.lane === lane);
+}
+
+async function commitTaskMove(taskId, targetLane, targetIndex) {
+  const task = taskById(taskId);
+  if (!task) return;
+  const sameLane = task.lane === targetLane;
+  const siblings = laneTasksFor(targetLane).filter((item) => item.id !== taskId);
+  const clampedIndex = Math.max(0, Math.min(targetIndex, siblings.length));
+  const before = siblings[clampedIndex - 1];
+  const order = before ? Number(before.order || 0) + 1 : 0;
+  if (sameLane && Number(task.order || 0) === order) {
+    boardAnnounce(`${taskId} unchanged.`);
+    return;
+  }
+  const payload = { order };
+  if (!sameLane) payload.status = laneStatusFor(targetLane);
+  boardAnnounce(`Proposing ${taskId} -> ${targetLane} (position ${clampedIndex + 1}).`);
+  await sendJson(`/api/tasks/${encodeURIComponent(taskId)}/reorder`, {
+    type: "task.reorder",
+    payload
+  });
+}
+
+function clearDropHighlights() {
+  document.querySelectorAll(".lane.is-drop-target").forEach((node) => node.classList.remove("is-drop-target"));
+  document.querySelectorAll(".lane-body.is-dragover").forEach((node) => node.classList.remove("is-dragover"));
+  document.querySelectorAll(".drop-placeholder").forEach((node) => node.remove());
+}
+
+function dropIndexForY(laneBody, clientY) {
+  const cards = [...laneBody.querySelectorAll(".task-card")];
+  for (let index = 0; index < cards.length; index += 1) {
+    const rect = cards[index].getBoundingClientRect();
+    if (clientY < rect.top + rect.height / 2) return index;
+  }
+  return cards.length;
+}
+
+function wireBoardCard(card) {
+  card.addEventListener("click", (event) => {
+    if (event.target.closest("[data-quick-action]")) return;
+    selectedTaskId = card.dataset.taskId;
+    renderDetail();
+  });
+  card.addEventListener("keydown", (event) => {
+    if (boardLifted) return;
+    if (event.key === "Enter" || event.key === " ") {
+      if (event.target.closest("[data-quick-action]")) return;
+      event.preventDefault();
+      selectedTaskId = card.dataset.taskId;
+      renderDetail();
+    }
+  });
+  card.addEventListener("mouseenter", () => schedulePeek(card));
+  card.addEventListener("mouseleave", hidePeek);
+  card.addEventListener("focus", () => showPeek(card));
+  card.addEventListener("blur", hidePeek);
+  card.addEventListener("dragstart", (event) => {
+    boardDragId = card.dataset.taskId;
+    card.classList.add("is-dragging");
+    hidePeek();
+    if (event.dataTransfer) {
+      event.dataTransfer.setData("text/plain", card.dataset.taskId);
+      event.dataTransfer.effectAllowed = "move";
+    }
+  });
+  card.addEventListener("dragend", () => {
+    card.classList.remove("is-dragging");
+    boardDragId = null;
+    clearDropHighlights();
+  });
+  card.querySelectorAll("[data-quick-action]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      quickAction(button.dataset.quickAction, button.dataset.taskId);
+    });
+  });
+}
+
+function wireLaneDropTarget(lane) {
+  const laneName = lane.dataset.lane;
+  const body = lane.querySelector(".lane-body");
+  if (!body) return;
+  lane.addEventListener("dragover", (event) => {
+    if (!boardDragId) return;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+    lane.classList.add("is-drop-target");
+    body.classList.add("is-dragover");
+  });
+  lane.addEventListener("dragleave", (event) => {
+    if (lane.contains(event.relatedTarget)) return;
+    lane.classList.remove("is-drop-target");
+    body.classList.remove("is-dragover");
+  });
+  lane.addEventListener("drop", (event) => {
+    event.preventDefault();
+    const taskId = (event.dataTransfer && event.dataTransfer.getData("text/plain")) || boardDragId;
+    const index = dropIndexForY(body, event.clientY);
+    clearDropHighlights();
+    boardDragId = null;
+    if (taskId) commitTaskMove(taskId, laneName, index);
+  });
+}
+
+function clearLift() {
+  if (boardLifted) {
+    const node = document.querySelector(`.task-card[data-task-id="${CSS.escape(boardLifted.id)}"]`);
+    if (node) node.classList.remove("is-lifted");
+  }
+  boardLifted = null;
+}
+
+function renderLift() {
+  document.querySelectorAll(".task-card.is-lifted").forEach((node) => node.classList.remove("is-lifted"));
+  if (!boardLifted) return;
+  const node = document.querySelector(`.task-card[data-task-id="${CSS.escape(boardLifted.id)}"]`);
+  if (node) node.classList.add("is-lifted");
+}
+
+function liftDescribe() {
+  if (!boardLifted) return "";
+  const lane = lanes[boardLifted.laneIndex];
+  return `${boardLifted.id} held over ${lane}, position ${boardLifted.index + 1}. Arrows move, Space drops, Esc cancels.`;
+}
+
+function handleBoardKeyboardDnd(event) {
+  if (event.key === "d" && (event.ctrlKey || event.metaKey)) {
+    const card = event.target.closest(".task-card");
+    if (!card) return;
+    event.preventDefault();
+    const task = taskById(card.dataset.taskId);
+    if (!task) return;
+    const laneIndex = Math.max(0, lanes.indexOf(task.lane));
+    const index = laneTasksFor(lanes[laneIndex]).findIndex((item) => item.id === task.id);
+    boardLifted = { id: task.id, laneIndex, index: index < 0 ? 0 : index };
+    renderLift();
+    boardAnnounce(`Lifted ${liftDescribe()}`);
+    return;
+  }
+  if (!boardLifted) return;
+  if (event.key === "Escape") {
+    event.preventDefault();
+    const id = boardLifted.id;
+    clearLift();
+    boardAnnounce(`Cancelled move for ${id}.`);
+    return;
+  }
+  if (event.key === " " || event.key === "Enter") {
+    event.preventDefault();
+    const held = boardLifted;
+    clearLift();
+    commitTaskMove(held.id, lanes[held.laneIndex], held.index);
+    return;
+  }
+  if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+    event.preventDefault();
+    const delta = event.key === "ArrowRight" ? 1 : -1;
+    boardLifted.laneIndex = Math.max(0, Math.min(lanes.length - 1, boardLifted.laneIndex + delta));
+    const count = laneTasksFor(lanes[boardLifted.laneIndex]).filter((item) => item.id !== boardLifted.id).length;
+    boardLifted.index = Math.max(0, Math.min(boardLifted.index, count));
+    boardAnnounce(liftDescribe());
+    return;
+  }
+  if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+    event.preventDefault();
+    const delta = event.key === "ArrowDown" ? 1 : -1;
+    const count = laneTasksFor(lanes[boardLifted.laneIndex]).filter((item) => item.id !== boardLifted.id).length;
+    boardLifted.index = Math.max(0, Math.min(count, boardLifted.index + delta));
+    boardAnnounce(liftDescribe());
+  }
 }
 
 function renderKanban() {
   const tasks = runtimeState.tasks || [];
+  if (boardLifted && !taskById(boardLifted.id)) clearLift();
   $("kanban").innerHTML = lanes.map((lane) => {
     const laneTasks = tasks.filter((task) => task.lane === lane);
     const body = laneTasks.length ? laneTasks.map(taskCard).join("") : `<div class="empty">No ${escapeHtml(lane)} tasks</div>`;
     return `<section class="lane ${laneClassName(lane)}" data-lane="${escapeHtml(lane)}"><header class="lane-header"><span class="lane-title">${escapeHtml(lane)}<small>Lane</small></span><span class="lane-count" aria-label="${escapeHtml(lane)} task count">${laneTasks.length}</span></header><div class="lane-body">${body}</div></section>`;
   }).join("");
-  document.querySelectorAll(".task-card").forEach((button) => {
-    button.addEventListener("click", () => {
-      selectedTaskId = button.dataset.taskId;
-      renderDetail();
-    });
-  });
+  document.querySelectorAll("#kanban .task-card").forEach(wireBoardCard);
+  document.querySelectorAll("#kanban .lane").forEach(wireLaneDropTarget);
+  renderLift();
 }
 
 function agentProgressLabel(agent) {
@@ -3279,6 +3684,21 @@ document.querySelectorAll(".tab").forEach((tab) => {
     $(`view-${tab.dataset.view}`).classList.add("is-active");
   });
 });
+
+function boardViewActive() {
+  const view = $("view-board");
+  return Boolean(view && view.classList.contains("is-active"));
+}
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && peekAnchorId) {
+    hidePeek();
+    return;
+  }
+  if (!boardViewActive()) return;
+  handleBoardKeyboardDnd(event);
+});
+document.addEventListener("scroll", hidePeek, true);
 
 $("refresh-button").addEventListener("click", loadState);
 ["event-filter-type", "event-filter-agent", "event-filter-task", "event-filter-goal", "event-filter-search"].forEach((id) => {

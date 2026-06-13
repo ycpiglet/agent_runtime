@@ -111,6 +111,27 @@ def test_ui_state_adapter_normalizes_runtime_records_with_source_metadata(tmp_pa
     assert all("last_read_at" in source and "freshness" in source for source in state["sources"])
 
 
+def test_ui_state_task_exposes_peek_summary_for_board_hover(tmp_path):
+    root = tmp_path
+    _write(root / "agents" / "lead_engineer" / "tasks" / "TASK-AR-362-peek.md", _task_text("TASK-AR-362"))
+
+    state = ui_state.build_state(root, now="2026-06-13T12:05:00+09:00")
+    task = state["tasks"][0]
+
+    # peek_summary is a derived, additive field that folds the blocked reason
+    # into the goal sentence for a single hover-peek line.
+    assert task["peek_summary"] == "Blocked: waiting on sample data. Expose a safe read-only state API."
+
+    # Without a blocked reason it falls back to the goal description.
+    _write(
+        root / "agents" / "lead_engineer" / "tasks" / "TASK-AR-363-peek.md",
+        _task_text("TASK-AR-363").replace("blocked_reason: waiting on sample data\n", ""),
+    )
+    refreshed = ui_state.build_state(root, now="2026-06-13T12:06:00+09:00")
+    unblocked = next(item for item in refreshed["tasks"] if item["id"] == "TASK-AR-363")
+    assert unblocked["peek_summary"] == "Expose a safe read-only state API."
+
+
 def test_ui_state_enriches_tasks_with_task_set_and_evidence_count(tmp_path):
     root = tmp_path
     _write(
