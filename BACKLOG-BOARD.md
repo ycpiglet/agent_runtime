@@ -114,7 +114,7 @@ completed_task_set_count: 23
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-372` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | in_progress | Action | P1 | High | High | 12h/9000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Provide one structured registration command path so planners stop hand-editing board… |
 | `TASK-AR-371` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Remove `BACKLOG.md` as a top-of-file shared manual registration hotspot while preserv… |
-| `TASK-AR-373` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P3 | Low | Medium | 6h/5000tok | Low | 5 | governance-loop | independent-auditor | Execute next | Make it visible which planned tasks are worker-ready and which still require planner… |
+| `TASK-AR-373` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | agents/lead_engineer/tasks/units/TASK-AR-373/UNIT-TASK-AR-373-001.md | worker_ready | Action | P3 | Low | Medium | 6h/5000tok | Low | 4 | governance-loop | independent-auditor | Execute next | Make it visible which planned tasks are worker-ready and which still require planner… |
 | `TASK-AR-374` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P3 | Low | Low | 8h/4000tok | Low | 4 | agent-runtime-core | lead-engineer | Execute next | Prove that the work hierarchy and registration conflict surfaces are actually closed… |
 
 ## Archived Task Sets

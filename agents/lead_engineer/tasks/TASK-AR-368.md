@@ -1,4 +1,12 @@
 ---
+schema_version: agent-runtime-work-item/v1
+work_id: TASK-AR-368
+work_uid: 587a4f9e-5261-4a63-b7a8-300af15910d8
+kind: task
+parent_id: TASKSET-AR-DOC-TO-PLAN
+origin_type: planning_proposal
+origin_ref: TASKSET-AR-DOC-TO-PLAN
+created_by: planner
 id: TASK-AR-368
 display_id: TASK-AR-368
 task_uid: 587a4f9e-5261-4a63-b7a8-300af15910d8

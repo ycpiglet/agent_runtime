@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-13T15:51:39+09:00",
-  "record_count": 233,
+  "generated_at": "2026-06-13T16:11:15+09:00",
+  "record_count": 235,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -2291,7 +2291,29 @@
       "title": "Make it visible which planned tasks are worker-ready and which still require planner…",
       "path": "agents/lead_engineer/tasks/TASK-AR-373.md",
       "parent_id": "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
-      "status": "planned"
+      "status": "worker_ready"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-373-001",
+      "level": "unit",
+      "number": "1.1.5.1",
+      "label": "Unit 1.1.5.1",
+      "id": "UNIT-TASK-AR-373-001",
+      "title": "UNIT-TASK-AR-373-001 — worker-readiness classifier report",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-373/UNIT-TASK-AR-373-001.md",
+      "parent_id": "TASK-AR-373",
+      "status": "worker_ready"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-373-002",
+      "level": "unit",
+      "number": "1.1.5.2",
+      "label": "Unit 1.1.5.2",
+      "id": "UNIT-TASK-AR-373-002",
+      "title": "UNIT-TASK-AR-373-002 — migration report + dispatcher readiness guard",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-373/UNIT-TASK-AR-373-002.md",
+      "parent_id": "TASK-AR-373",
+      "status": "worker_ready"
     },
     {
       "key": "task:TASK-AR-374",

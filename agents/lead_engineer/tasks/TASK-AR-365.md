@@ -1,4 +1,12 @@
 ---
+schema_version: agent-runtime-work-item/v1
+work_id: TASK-AR-365
+work_uid: a11704bf-f62c-46c0-a3da-0cf324e703fa
+kind: task
+parent_id: TASKSET-AR-UI-LIVING-CONSOLE
+origin_type: planning_proposal
+origin_ref: TASKSET-AR-UI-LIVING-CONSOLE
+created_by: planner
 id: TASK-AR-365
 display_id: TASK-AR-365
 task_uid: a11704bf-f62c-46c0-a3da-0cf324e703fa

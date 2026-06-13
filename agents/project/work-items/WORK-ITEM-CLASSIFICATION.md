@@ -7,14 +7,14 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-13T15:51:39+09:00
-record_count: 233
+generated_at: 2026-06-13T16:11:15+09:00
+record_count: 235
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `233` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `235` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
@@ -23,7 +23,7 @@ record_count: 233
 | Initiatives | pass | `5` records |
 | Tasksets | pass | `28` records |
 | Tasks | pass | `189` records |
-| Units | pass | `11` records |
+| Units | pass | `13` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -246,7 +246,9 @@ record_count: 233
 | 1.1.4.7 | Unit 1.1.4.7 | unit | `UNIT-TASK-AR-372-007` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-007.md` | UNIT-TASK-AR-372-007 - Proposal-Only Work Criteria Command |
 | 1.1.4.8 | Unit 1.1.4.8 | unit | `UNIT-TASK-AR-372-008` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-008.md` | UNIT-TASK-AR-372-008 - Proposal-Only Work Assign Command |
 | 1.1.4.9 | Unit 1.1.4.9 | unit | `UNIT-TASK-AR-372-009` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-009.md` | UNIT-TASK-AR-372-009 - Proposal-Only Work Split Command |
-| 1.1.5 | Task 1.1.5 | task | `TASK-AR-373` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-373.md` | Make it visible which planned tasks are worker-ready and which still require planner… |
+| 1.1.5 | Task 1.1.5 | task | `TASK-AR-373` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | worker_ready | `agents/lead_engineer/tasks/TASK-AR-373.md` | Make it visible which planned tasks are worker-ready and which still require planner… |
+| 1.1.5.1 | Unit 1.1.5.1 | unit | `UNIT-TASK-AR-373-001` | `TASK-AR-373` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-373/UNIT-TASK-AR-373-001.md` | UNIT-TASK-AR-373-001 — worker-readiness classifier report |
+| 1.1.5.2 | Unit 1.1.5.2 | unit | `UNIT-TASK-AR-373-002` | `TASK-AR-373` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-373/UNIT-TASK-AR-373-002.md` | UNIT-TASK-AR-373-002 — migration report + dispatcher readiness guard |
 | 1.1.6 | Task 1.1.6 | task | `TASK-AR-374` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-374.md` | Prove that the work hierarchy and registration conflict surfaces are actually closed… |
 | 2 | Initiative 2 | initiative | `INIT-AR-AGENT-IDENTITY-OBSERVABILITY` | - | active | `agents/project/initiatives/INIT-AR-AGENT-IDENTITY-OBSERVABILITY.md` | Agent Identity Observability |
 | 2.1 | Taskset 2.1 | taskset | `TASKSET-AR-AGENT-IDENTITY-CONTRACT` | `INIT-AR-AGENT-IDENTITY-OBSERVABILITY` | complete | `BACKLOG-BOARD.md` | Agent Identity Contract |

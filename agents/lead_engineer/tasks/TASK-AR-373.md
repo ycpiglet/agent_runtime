@@ -1,12 +1,21 @@
 ---
+schema_version: agent-runtime-work-item/v1
+work_id: TASK-AR-373
+work_uid: d30bf31f-641a-4e5a-8968-51d14a267fed
+kind: task
+parent_id: TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE
+unit_spec: agents/lead_engineer/tasks/units/TASK-AR-373/UNIT-TASK-AR-373-001.md
+origin_type: planning_proposal
+origin_ref: TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE
+created_by: planner
 id: TASK-AR-373
 display_id: TASK-AR-373
 task_uid: d30bf31f-641a-4e5a-8968-51d14a267fed
 registered_at: 2026-06-12T08:17:54+09:00
 created_at: 2026-06-12T08:17:54+09:00
-updated_at: 2026-06-12T08:17:54+09:00
+updated_at: 2026-06-13T16:30:00+09:00
 title: Unit-readiness migration report for legacy planned tasks
-status: planned
+status: worker_ready
 priority: P3
 difficulty: M
 est_hours: 6
