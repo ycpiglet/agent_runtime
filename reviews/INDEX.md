@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-13T19:59:18+09:00
-record_count: 436
+generated_at: 2026-06-13T20:36:21+09:00
+record_count: 437
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `436` review and evidence records under `reviews/`.
+- Summary: indexed `437` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `436` files |
+| Reviews covered | pass | `437` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -431,6 +431,7 @@ record_count: 436
 | `reviews/REVIEW-2026-06-12-work-stats-command.md` | `REVIEW-2026-06-12-work-stats-command` | md | record | pass | Work Stats Command |
 | `reviews/REVIEW-2026-06-12-work-verify-command.md` | `REVIEW-2026-06-12-work-verify-command` | md | record | pass | Work Verify Command Closeout |
 | `reviews/REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review.md` | `REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review` | md | record | n/a | REVIEW-2026-06-13-agent-runtime-task-ar-211-overlay-bundle-review |
+| `reviews/REVIEW-2026-06-13-dependency-model-timeline-graph.md` | `REVIEW-2026-06-13-dependency-model-timeline-graph` | md | record | n/a | REVIEW-2026-06-13 subtask + dependency model, timeline, dependency graph (TASK-AR-330) |
 | `reviews/REVIEW-2026-06-13-parallel-wave-1-2-closeout.md` | `REVIEW-2026-06-13-parallel-wave-1-2-closeout` | review | pass | pass | Parallel Wave 1-2 Closeout (AR-500/503/505/509/510/513/515) |
 | `reviews/REVIEW-2026-06-13-parallel-wave-500-series-capability-analysis.md` | `REVIEW-2026-06-13-parallel-wave-500-series-capability-analysis` | review | pass | pass | 500-Series Capability Analysis — Implemented, Applied, Verified |
 | `reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md` | `REVIEW-2026-06-13-parallel-wave-500-series-final-closeout` | review | pass | pass | 500-Series Parallel Execution — Final Closeout |

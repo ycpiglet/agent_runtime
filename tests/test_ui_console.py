@@ -1920,3 +1920,70 @@ def test_ui_console_channels_unwrapped_command_would_be_rejected(tmp_path):
     payload = json.loads(response.body.decode("utf-8"))
     assert response.status == 400
     assert payload["status"] == "failed"
+
+
+# ----- TASK-AR-330: timeline (Gantt) + dependency graph views -----
+
+def test_ui_console_timeline_view_registered_in_work_sidebar(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+
+    # New WORK-group sidebar link + hash route + view container (no horizontal tabs).
+    assert 'data-view="timeline"' in html
+    assert 'data-route="work/timeline"' in html
+    assert 'id="view-timeline"' in html
+    assert ">Timeline<" in html
+    # Timeline render hosts: grid for bars + cycle warning host.
+    assert 'id="timeline-grid"' in html
+    assert 'id="timeline-cycle-warning"' in html
+
+
+def test_ui_console_dependency_graph_view_registered_in_work_sidebar(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+
+    assert 'data-view="deps"' in html
+    assert 'data-route="work/dependencies"' in html
+    assert 'id="view-deps"' in html
+    assert ">Dependencies<" in html
+    assert 'id="dep-graph-svg"' in html
+    assert 'id="dep-cycle-warning"' in html
+
+
+def test_ui_console_timeline_and_dependency_js_render_bars_arrows_and_cycle(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+
+    # Render functions exist and are wired into the periodic render loop.
+    assert "function renderTimeline(" in js
+    assert "function renderDependencyGraph(" in js
+    assert "renderTimeline();" in js
+    assert "renderDependencyGraph();" in js
+    # Timeline draws bars + dependency arrows; both share the cycle warning path.
+    assert "timeline-bar" in js
+    assert "timeline-arrow" in js
+    assert "function renderCycleWarning(" in js
+    assert "Dependency cycle detected" in js
+    # Dependency graph reuses the SVG node/edge primitives (like the live map).
+    assert "dep-edge" in js
+    assert "dep-node" in js
+    # Dynamic fields are escaped.
+    assert "escapeHtml(bar.id)" in js
+    assert "escapeHtml(arrow.from)" in js
+
+
+def test_ui_console_timeline_and_dependency_css_uses_tokens_not_raw_hex(tmp_path):
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    body_css = css.replace(_root_token_block(css), "").replace(_dark_theme_block(css), "")
+    hex_pattern = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+    rgba_pattern = re.compile(r"rgba?\(")
+    dep_lines = [
+        line for line in body_css.splitlines()
+        if any(token in line for token in (".timeline", ".dep-graph", ".dep-edge", ".dep-node", ".dep-cycle-warning"))
+    ]
+    assert dep_lines, "expected timeline/dependency CSS rules to exist"
+    for line in dep_lines:
+        assert not hex_pattern.search(line), f"raw hex in dependency CSS: {line.strip()}"
+        assert not rgba_pattern.search(line), f"raw rgba in dependency CSS: {line.strip()}"
+    # Spot-check semantic token consumption.
+    assert ".timeline-bar.status-completed { border-color: var(--success-line)" in css
+    assert ".dep-edge.is-cycle {" in css
+    assert "stroke: var(--danger);" in css

@@ -35,6 +35,8 @@ RESOURCE_NAMES = (
     "replay",
     "graph",
     "live_map",
+    "dependency_graph",
+    "timeline",
     "state_machines",
     "roadmap",
     "roadmap_timeline",
@@ -268,6 +270,22 @@ def _dedupe_strings(values: list[str]) -> list[str]:
     return result
 
 
+def _string_list(value: Any) -> list[str]:
+    """Normalize a frontmatter scalar/list into a deduped list of strings.
+
+    Tolerates both the YAML list shape (``blocks:`` followed by ``  - X``) and a
+    single inline scalar (``blocks: TASK-AR-1``) so dependency edges can be
+    declared either way. Empty/blank entries are dropped.
+    """
+    if value in (None, "", []):
+        return []
+    if isinstance(value, (list, tuple)):
+        items = [str(item) for item in value]
+    else:
+        items = [str(value)]
+    return _dedupe_strings(items)
+
+
 def _task_order(meta: dict[str, Any], fallback: int) -> int:
     try:
         return int(meta.get("order", fallback))
@@ -299,6 +317,9 @@ def load_tasks(root: Path, now: str, warnings: list[dict[str, str]]) -> list[dic
         completed_at = meta.get("completed_at")
         goal = _section_text(body, "Goal") or _section_text(body, "목표") or body
         labels = meta.get("tags") if isinstance(meta.get("tags"), list) else []
+        parent_id = str(meta.get("parent_id") or "").strip()
+        blocks = _string_list(meta.get("blocks"))
+        blocked_by = _string_list(meta.get("blocked_by"))
         metadata = {
             "task_uid": meta.get("task_uid"),
             "display_id": meta.get("display_id") or task_id,
@@ -320,6 +341,9 @@ def load_tasks(root: Path, now: str, warnings: list[dict[str, str]]) -> list[dic
             "order": _task_order(meta, order),
             "owner_agent": meta.get("owner"),
             "team": meta.get("team"),
+            "parent_id": parent_id,
+            "blocks": blocks,
+            "blocked_by": blocked_by,
             "labels": labels,
             "description": _first_sentence(goal),
             "peek_summary": _peek_summary(meta, goal),
@@ -2861,6 +2885,301 @@ def build_team_agents(
     }
 
 
+# --- Subtask + dependency model (TASK-AR-330) ------------------------------
+# A single read-only derivation of the task hierarchy (parent_id) and the
+# blocks/blocked_by dependency graph. The dependency *edges* computed here are
+# the one source of truth shared by the board, the timeline (Gantt) and the
+# dependency graph view, so a dependency renders identically in all three. The
+# same edge set feeds the cycle-detection gate (scripts/dependency_cycle_gate.py)
+# so a cycle the UI surfaces is exactly the cycle the gate warns on.
+
+DEPENDENCY_GRAPH_SCHEMA = "agent-runtime-dependency-graph/v1"
+TIMELINE_SCHEMA = "agent-runtime-timeline/v1"
+# Bar length when a task carries no explicit start/end span (in "units").
+_TIMELINE_DEFAULT_SPAN = 1
+
+
+def _normalize_dependency_edges(tasks: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]]]:
+    """Build the canonical directed blocker edges from task frontmatter.
+
+    Edge direction is *blocker -> blocked* (the arrow points at the work that
+    must wait). Both ``blocks`` (this task blocks X) and ``blocked_by`` (this
+    task waits on X) are folded into the same edge set so the two declaration
+    styles agree. Edges are deduped on (from, to). Returns the edge list plus a
+    by-id index of the known task nodes for convenience.
+    """
+    index: dict[str, dict[str, Any]] = {}
+    for task in tasks:
+        task_id = str(task.get("id") or "").strip()
+        if task_id:
+            index[task_id] = task
+
+    seen: set[tuple[str, str]] = set()
+    edges: list[dict[str, Any]] = []
+
+    def add_edge(blocker: str, blocked: str, declared_on: str, via: str) -> None:
+        blocker = str(blocker or "").strip()
+        blocked = str(blocked or "").strip()
+        if not blocker or not blocked or blocker == blocked:
+            return
+        key = (blocker, blocked)
+        if key in seen:
+            return
+        seen.add(key)
+        edges.append(
+            {
+                "id": f"dep:{blocker}->{blocked}",
+                "from": blocker,
+                "to": blocked,
+                "kind": "dependency",
+                "declared_on": declared_on,
+                "via": via,
+                "from_known": blocker in index,
+                "to_known": blocked in index,
+            }
+        )
+
+    for task in tasks:
+        task_id = str(task.get("id") or "").strip()
+        if not task_id:
+            continue
+        for blocked in task.get("blocks") or []:
+            add_edge(task_id, str(blocked), declared_on=task_id, via="blocks")
+        for blocker in task.get("blocked_by") or []:
+            add_edge(str(blocker), task_id, declared_on=task_id, via="blocked_by")
+    return edges, index
+
+
+def detect_dependency_cycles(edges: list[dict[str, Any]]) -> list[list[str]]:
+    """Return dependency cycles as ordered node-id chains (closing node repeated).
+
+    Pure function over the canonical edge set so the gate and the UI agree. When
+    no blocker edges exist the result is always ``[]`` (no-op safe), which keeps
+    the cycle gate silent on a repo that has not adopted blocks/blocked_by yet.
+    """
+    adjacency: dict[str, list[str]] = {}
+    for edge in edges:
+        adjacency.setdefault(str(edge["from"]), []).append(str(edge["to"]))
+    for node in list(adjacency):
+        adjacency[node].sort()
+
+    cycles: list[list[str]] = []
+    seen_signatures: set[tuple[str, ...]] = set()
+    WHITE, GREY, BLACK = 0, 1, 2
+    color: dict[str, int] = {}
+
+    def _record(cycle: list[str]) -> None:
+        # Canonicalize so the same loop discovered from different entry points
+        # is only reported once.
+        core = cycle[:-1]
+        if not core:
+            return
+        rotation = min(range(len(core)), key=lambda i: core[i])
+        normalized = core[rotation:] + core[:rotation]
+        signature = tuple(normalized)
+        if signature in seen_signatures:
+            return
+        seen_signatures.add(signature)
+        cycles.append(normalized + [normalized[0]])
+
+    def visit(node: str, stack: list[str]) -> None:
+        color[node] = GREY
+        stack.append(node)
+        for neighbour in adjacency.get(node, []):
+            state = color.get(neighbour, WHITE)
+            if state == WHITE:
+                visit(neighbour, stack)
+            elif state == GREY:
+                # Back edge: slice the live stack from the neighbour onwards.
+                start = stack.index(neighbour)
+                _record(stack[start:] + [neighbour])
+        stack.pop()
+        color[node] = BLACK
+
+    for node in sorted(adjacency):
+        if color.get(node, WHITE) == WHITE:
+            visit(node, [])
+    return cycles
+
+
+def build_dependency_graph(tasks: list[dict[str, Any]], now: str) -> dict[str, Any]:
+    """Dependency graph view sharing the board/timeline edge derivation.
+
+    Nodes mirror the Live Map shape (id/kind/label + status) so the same
+    rendering primitives apply; ``parent`` edges express the subtask hierarchy
+    and ``dependency`` edges express blocks/blocked_by. ``cycles`` lists any
+    circular blocker chains so the graph and the gate stay consistent.
+    """
+    edges, index = _normalize_dependency_edges(tasks)
+    nodes: dict[str, dict[str, Any]] = {}
+
+    def add_node(node_id: str, kind: str, label: str | None = None, **extra: Any) -> None:
+        node_id = str(node_id or "").strip()
+        if not node_id or node_id in nodes:
+            if node_id in nodes and label and nodes[node_id].get("label") in (None, node_id):
+                nodes[node_id]["label"] = label
+            return
+        node = {"id": node_id, "kind": kind, "label": label or node_id}
+        for name, value in extra.items():
+            if value not in (None, ""):
+                node[name] = value
+        nodes[node_id] = node
+
+    parent_edges: list[dict[str, Any]] = []
+    parent_seen: set[tuple[str, str]] = set()
+    for task in tasks:
+        task_id = str(task.get("id") or "").strip()
+        if not task_id:
+            continue
+        add_node(
+            task_id,
+            "task",
+            str(task.get("title") or task_id),
+            status=str(task.get("status") or ""),
+            status_bucket=_work_status_bucket(task.get("status")),
+            task_set_id=task.get("task_set_id"),
+            parent_id=task.get("parent_id") or "",
+            source_path=task.get("source_path"),
+        )
+        parent_id = str(task.get("parent_id") or "").strip()
+        if parent_id:
+            add_node(parent_id, "parent", parent_id)
+            key = (parent_id, task_id)
+            if key not in parent_seen:
+                parent_seen.add(key)
+                parent_edges.append(
+                    {
+                        "id": f"parent:{parent_id}->{task_id}",
+                        "from": parent_id,
+                        "to": task_id,
+                        "kind": "parent",
+                    }
+                )
+
+    # Ensure dependency endpoints exist even if the referenced task is missing
+    # (a dangling reference still has to render and feed cycle detection).
+    for edge in edges:
+        for endpoint in (edge["from"], edge["to"]):
+            if endpoint not in nodes:
+                add_node(endpoint, "missing", endpoint, missing=True)
+
+    cycles = detect_dependency_cycles(edges)
+    cycle_node_ids: set[str] = set()
+    cycle_edge_ids: set[str] = set()
+    for cycle in cycles:
+        for node_id in cycle:
+            cycle_node_ids.add(node_id)
+        for a, b in zip(cycle, cycle[1:]):
+            cycle_edge_ids.add(f"dep:{a}->{b}")
+    for node in nodes.values():
+        if node["id"] in cycle_node_ids:
+            node["in_cycle"] = True
+    for edge in edges:
+        if edge["id"] in cycle_edge_ids:
+            edge["in_cycle"] = True
+
+    all_edges = parent_edges + edges
+    return {
+        "schema": DEPENDENCY_GRAPH_SCHEMA,
+        "generated_at": now,
+        "nodes": sorted(nodes.values(), key=lambda item: (item["kind"], item["id"])),
+        "edges": all_edges,
+        "cycles": cycles,
+        "has_cycle": bool(cycles),
+        "totals": {
+            "nodes": len(nodes),
+            "edges": len(all_edges),
+            "dependency_edges": len(edges),
+            "parent_edges": len(parent_edges),
+            "cycles": len(cycles),
+            "missing_refs": sum(1 for node in nodes.values() if node.get("missing")),
+        },
+    }
+
+
+def build_timeline(tasks: list[dict[str, Any]], now: str) -> dict[str, Any]:
+    """Asana/ClickUp-style horizontal-bar timeline grouped by taskset.
+
+    Each task becomes a positioned bar inside its taskset lane; lanes are
+    ordered by task ``order``. Dependency arrows reuse the same canonical edge
+    set as the graph (blocker -> blocked) so a dependency line on the timeline
+    matches the graph and the gate. Bar positions are an integer "unit" grid
+    derived from task order within its lane (read-only; no stored geometry).
+    """
+    edges, _index = _normalize_dependency_edges(tasks)
+    groups: dict[str, dict[str, Any]] = {}
+    group_order: list[str] = []
+    bar_index: dict[str, dict[str, Any]] = {}
+
+    for task in tasks:
+        task_id = str(task.get("id") or "").strip()
+        if not task_id:
+            continue
+        taskset_id = str(task.get("task_set_id") or task.get("parent_id") or "").strip() or "UNGROUPED"
+        group = groups.get(taskset_id)
+        if group is None:
+            group = groups[taskset_id] = {
+                "id": taskset_id,
+                "label": taskset_id,
+                "bars": [],
+            }
+            group_order.append(taskset_id)
+        column = len(group["bars"])
+        bar = {
+            "id": task_id,
+            "label": str(task.get("title") or task_id),
+            "status": str(task.get("status") or ""),
+            "status_bucket": _work_status_bucket(task.get("status")),
+            "taskset_id": taskset_id,
+            "lane": column,
+            "start": column,
+            "span": _TIMELINE_DEFAULT_SPAN,
+            "blocks": list(task.get("blocks") or []),
+            "blocked_by": list(task.get("blocked_by") or []),
+            "source_path": task.get("source_path"),
+        }
+        group["bars"].append(bar)
+        bar_index[task_id] = bar
+
+    cycles = detect_dependency_cycles(edges)
+    cycle_edge_ids: set[str] = set()
+    for cycle in cycles:
+        for a, b in zip(cycle, cycle[1:]):
+            cycle_edge_ids.add(f"dep:{a}->{b}")
+
+    arrows: list[dict[str, Any]] = []
+    for edge in edges:
+        arrows.append(
+            {
+                "id": edge["id"],
+                "from": edge["from"],
+                "to": edge["to"],
+                "kind": "dependency",
+                "from_known": edge["from"] in bar_index,
+                "to_known": edge["to"] in bar_index,
+                "in_cycle": edge["id"] in cycle_edge_ids,
+            }
+        )
+
+    lanes = [groups[group_id] for group_id in group_order]
+    max_units = max((len(group["bars"]) for group in lanes), default=0)
+    return {
+        "schema": TIMELINE_SCHEMA,
+        "generated_at": now,
+        "lanes": lanes,
+        "arrows": arrows,
+        "cycles": cycles,
+        "has_cycle": bool(cycles),
+        "units": max_units,
+        "totals": {
+            "lanes": len(lanes),
+            "bars": sum(len(group["bars"]) for group in lanes),
+            "arrows": len(arrows),
+            "cycles": len(cycles),
+        },
+    }
+
+
 def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     root_path = Path(root).resolve()
     generated_at = now or _now_iso()
@@ -2895,6 +3214,8 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     instances = _load_instances(root_path, generated_at, warnings)
     team_agents = build_team_agents(root_path, instances, agents, task_claims, events, generated_at)
     live_map = build_live_map(tasks, agents, messages, team_agents, generated_at)
+    dependency_graph = build_dependency_graph(tasks, generated_at)
+    timeline = build_timeline(tasks, generated_at)
     return {
         "generated_at": generated_at,
         "sources": sources,
@@ -2919,6 +3240,8 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "replay": replay,
         "graph": graph,
         "live_map": live_map,
+        "dependency_graph": dependency_graph,
+        "timeline": timeline,
         "state_machines": state_machines,
         "roadmap": roadmap,
         "roadmap_timeline": roadmap_timeline,
