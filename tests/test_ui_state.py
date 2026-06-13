@@ -1780,3 +1780,181 @@ def test_ui_state_dependency_views_empty_when_no_deps(tmp_path):
     assert state["dependency_graph"]["has_cycle"] is False
     assert state["timeline"]["totals"]["arrows"] == 0
     assert state["timeline"]["has_cycle"] is False
+
+
+# ---------------------------------------------------------------------------
+# Global search + quick open (TASK-AR-334)
+# ---------------------------------------------------------------------------
+
+
+def _seed_search_corpus(root: Path) -> None:
+    """Seed one of every searchable entity type so the index covers >=5 kinds."""
+    _write(
+        root / "agents" / "lead_engineer" / "tasks" / "TASK-AR-334.md",
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-334",
+                "title: Global search and quick open",
+                "status: blocked",
+                "owner: lead-engineer",
+                "priority: P1",
+                "task_set_id: TASKSET-AR-UI",
+                "updated_at: 2026-06-12T10:00:00+09:00",
+                "audit_log:",
+                "  - commit 47d8e97 registered the overlay task",
+                "tags:",
+                "  - search",
+                "---",
+                "",
+                "## Goal",
+                "",
+                "Full-text search across entities with operators.",
+                "",
+            ]
+        ),
+    )
+    _write(
+        root / "agents" / "runtime" / "events" / "qa-2026-06-12.jsonl",
+        json.dumps(
+            {
+                "ts": "2026-06-12T11:00:00+09:00",
+                "role": "qa",
+                "event": "search.indexed",
+                "task_id": "TASK-AR-334",
+                "goal_id": "goal-334",
+                "evidence": ["reviews/search-evidence.md"],
+            }
+        )
+        + "\n",
+    )
+    _write(
+        root / "agents" / "messages" / "inbox" / "MSG-20260612-search.md",
+        "\n".join(
+            [
+                "---",
+                "id: MSG-20260612-search",
+                "from: qa",
+                "to: lead-engineer",
+                "type: review",
+                "status: queued",
+                "ts: 2026-06-12T11:05:00+09:00",
+                "intent: search-review",
+                "task_id: TASK-AR-334",
+                "evidence: reviews/search-message.md",
+                "---",
+                "",
+                "Please review the search index payload.",
+                "",
+            ]
+        ),
+    )
+    _write(
+        root / "reviews" / "MEETING-2026-06-12-search-design.md",
+        "\n".join(
+            [
+                "---",
+                "type: meeting",
+                "id: MEETING-2026-06-12-search-design",
+                "title: Search design review",
+                "status: pass",
+                "tags: [search, ui]",
+                "generated_at: 2026-06-12T12:00:00+09:00",
+                "---",
+                "",
+                "# Search Design Review",
+                "",
+                "## Bottom Line",
+                "",
+                "- Reviewed TASK-AR-334 search design; landed on commit 56c9c71.",
+                "",
+            ]
+        ),
+    )
+
+
+def test_ui_state_search_index_covers_at_least_five_entity_types(tmp_path):
+    _seed_search_corpus(tmp_path)
+    state = ui_state.build_state(tmp_path, now="2026-06-12T12:30:00+09:00")
+    index = state["search_index"]
+    types = {entry["entity_type"] for entry in index}
+    # >=5 entity types from a single corpus (acceptance criterion).
+    expected = {"task", "taskset", "message", "event", "evidence", "review"}
+    assert expected.issubset(types), f"missing entity types: {expected - types}"
+    assert len(types) >= 5
+    # search_index is exposed as a first-class resource.
+    payload = ui_state.build_resource(tmp_path, "search_index", now="2026-06-12T12:30:00+09:00")
+    assert payload["resource"] == "search_index"
+    assert len(payload["items"]) == len(index)
+
+
+def test_ui_state_run_search_returns_five_plus_types_for_single_query(tmp_path):
+    _seed_search_corpus(tmp_path)
+    state = ui_state.build_state(tmp_path, now="2026-06-12T12:30:00+09:00")
+    # One query ("search") matches task/taskset?/message/event/evidence/review.
+    results = ui_state.run_search(state["search_index"], "search")
+    types = {r["entity_type"] for r in results}
+    assert len(types) >= 5, f"single query returned too few types: {types}"
+    # Every result carries an AR-321 hash deep-link target with a select param.
+    for r in results:
+        assert r["deep_link"].startswith("#/")
+        assert r["route"] in ui_state.SEARCH_ENTITY_ROUTES.values()
+
+
+def test_ui_state_parse_search_query_operators(tmp_path):
+    parsed = ui_state.parse_search_query('type:task status:blocked owner:lead-engineer date:2026-06-12 quick open')
+    assert parsed["operators"] == {
+        "type": "task",
+        "status": "blocked",
+        "owner": "lead-engineer",
+        "date": "2026-06-12",
+    }
+    assert parsed["terms"] == ["quick", "open"]
+    # Quoted operator values keep spaces.
+    quoted = ui_state.parse_search_query('owner:"lead engineer" hello')
+    assert quoted["operators"]["owner"] == "lead engineer"
+    assert quoted["terms"] == ["hello"]
+    # Unknown key:value tokens stay as free text (still matched literally).
+    unknown = ui_state.parse_search_query("foo:bar baz")
+    assert unknown["operators"] == {}
+    assert "foo:bar" in unknown["terms"]
+
+
+def test_ui_state_run_search_applies_type_status_owner_date_operators(tmp_path):
+    _seed_search_corpus(tmp_path)
+    state = ui_state.build_state(tmp_path, now="2026-06-12T12:30:00+09:00")
+    index = state["search_index"]
+
+    by_type = ui_state.run_search(index, "type:task")
+    assert by_type and all(r["entity_type"] == "task" for r in by_type)
+
+    by_status = ui_state.run_search(index, "type:task status:blocked")
+    assert by_status and all(r["status"] == "blocked" for r in by_status)
+    assert any(r["id"] == "TASK-AR-334" for r in by_status)
+
+    by_owner = ui_state.run_search(index, "type:task owner:lead-engineer")
+    assert by_owner and all("lead-engineer" in (r["owner"] or "") for r in by_owner)
+
+    by_date = ui_state.run_search(index, "date:2026-06-12")
+    assert by_date and all((r["date"] or "").startswith("2026-06-12") for r in by_date)
+
+
+def test_ui_state_search_results_surface_related_commit_and_review_links(tmp_path):
+    _seed_search_corpus(tmp_path)
+    state = ui_state.build_state(tmp_path, now="2026-06-12T12:30:00+09:00")
+    index = state["search_index"]
+    task = next(e for e in index if e["entity_type"] == "task" and e["id"] == "TASK-AR-334")
+    labels = " ".join(str(rel) for rel in task["related"])
+    # Related links surface the review doc mentioning the task and the commit SHA.
+    assert any("path" in rel and "MEETING" in rel.get("path", "") for rel in task["related"]) or "MEETING" in labels
+    assert any(rel.get("sha") == "47d8e97" for rel in task["related"])
+
+
+def test_ui_state_run_search_query_is_tokenization_safe(tmp_path):
+    _seed_search_corpus(tmp_path)
+    state = ui_state.build_state(tmp_path, now="2026-06-12T12:30:00+09:00")
+    index = state["search_index"]
+    # Malicious / regex-special / unicode input must not raise and must filter.
+    for hostile in ['<script>alert(1)</script>', 'a"b)(*&^', 'type:task ".*"', '한국어 검색', '   ']:
+        results = ui_state.run_search(index, hostile)
+        assert isinstance(results, list)

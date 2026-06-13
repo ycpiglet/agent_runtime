@@ -2420,3 +2420,141 @@ def test_ui_console_portability_css_uses_tokens_not_raw_color(tmp_path):
     for line in portability_lines:
         assert not hex_pattern.search(line), f"raw hex in portability CSS: {line.strip()}"
         assert not rgba_pattern.search(line), f"raw rgba in portability CSS: {line.strip()}"
+
+
+# ---------------------------------------------------------------------------
+# Global search + quick open (TASK-AR-334)
+# ---------------------------------------------------------------------------
+
+
+def _seed_console_search_corpus(root: Path) -> None:
+    _write(
+        root / "agents" / "lead_engineer" / "tasks" / "TASK-AR-334.md",
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-334",
+                "title: Global search and quick open",
+                "status: blocked",
+                "owner: lead-engineer",
+                "task_set_id: TASKSET-AR-SEARCH",
+                "updated_at: 2026-06-12T10:00:00+09:00",
+                "---",
+                "",
+                "## Goal",
+                "",
+                "Full-text search across entities.",
+                "",
+            ]
+        ),
+    )
+    _write(
+        root / "agents" / "runtime" / "events" / "qa.jsonl",
+        json.dumps({"ts": "2026-06-12T11:00:00+09:00", "role": "qa", "event": "search.indexed", "task_id": "TASK-AR-334", "evidence": ["reviews/search-evidence.md"]}) + "\n",
+    )
+    _write(
+        root / "agents" / "messages" / "inbox" / "MSG-search.md",
+        "\n".join(["---", "id: MSG-search", "from: qa", "to: lead", "type: review", "status: queued", "ts: 2026-06-12T11:05:00+09:00", "intent: search", "task_id: TASK-AR-334", "---", "", "search body", ""]),
+    )
+    _write(
+        root / "reviews" / "MEETING-search.md",
+        "\n".join(["---", "type: meeting", "id: MEETING-search", "title: Search review", "status: pass", "---", "", "# Search Review", "", "search design"]),
+    )
+
+
+def test_ui_console_search_route_returns_five_plus_entity_types(tmp_path):
+    _seed_console_search_corpus(tmp_path)
+    response = ui_console.build_response("/api/search?q=search", tmp_path)
+    assert response.status == 200
+    payload = json.loads(response.body)
+    assert payload["resource"] == "search"
+    assert payload["query"] == "search"
+    types = {item["entity_type"] for item in payload["items"]}
+    assert len(types) >= 5, f"expected >=5 entity types, got {types}"
+    # Each result deep-links via an AR-321 hash route (data-view / data-route).
+    for item in payload["items"]:
+        assert item["deep_link"].startswith("#/")
+    # Empty query -> no items but still a well-formed envelope.
+    empty = json.loads(ui_console.build_response("/api/search", tmp_path).body)
+    assert empty["items"] == [] and empty["total"] == 0
+
+
+def test_ui_console_search_route_parses_operators(tmp_path):
+    _seed_console_search_corpus(tmp_path)
+    payload = json.loads(
+        ui_console.build_response("/api/search?q=type%3Atask%20status%3Ablocked%20search", tmp_path).body
+    )
+    assert payload["operators"] == {"type": "task", "status": "blocked"}
+    assert payload["terms"] == ["search"]
+    assert payload["items"] and all(item["entity_type"] == "task" for item in payload["items"])
+
+
+def test_ui_console_search_route_query_is_xss_safe_in_echo(tmp_path):
+    _seed_console_search_corpus(tmp_path)
+    # The API echoes the raw query (JSON, so inert), and the JS escapeHtml's it
+    # before rendering. Here we assert the API does not crash on hostile input
+    # and the JS guards the echo with escapeHtml.
+    hostile = "<script>alert(1)</script>"
+    from urllib.parse import quote
+
+    payload = json.loads(ui_console.build_response(f"/api/search?q={quote(hostile)}", tmp_path).body)
+    assert payload["query"] == hostile  # raw in JSON (not HTML), inert
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    # The "no matches" echo path runs the user query through escapeHtml.
+    assert "No matches for" in js
+    assert "escapeHtml(query)" in js
+
+
+def test_ui_console_search_box_and_quick_open_anchors_served(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    # Topbar search box + results dropdown.
+    assert 'id="global-search-input"' in html
+    assert 'id="global-search-results"' in html
+    # Ctrl+P quick-open overlay (distinct element from the Ctrl+K palette).
+    assert 'id="quick-open"' in html
+    assert 'id="quick-open-input"' in html
+    assert 'id="command-palette"' in html  # palette still present, separate.
+    # JS wiring exists for fetch + deep-link selection.
+    assert "/api/search?q=" in js
+    assert "selectEntityFromHash" in js
+    assert "data-deep-link" in js
+
+
+def test_ui_console_quick_open_ctrl_p_gated_and_distinct_from_ctrl_k(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    # Ctrl+K opens the command palette; Ctrl+P opens quick-open — two handlers.
+    assert 'event.key === "k" || event.key === "K"' in js
+    assert 'event.key === "p" || event.key === "P"' in js
+    assert "openCommandPalette" in js
+    assert "openQuickOpen" in js
+    # Both require a modifier so a plain "p" never hijacks typing; the shared
+    # text-input guard helper must be DEFINED and actually INVOKED (not dead
+    # code) so single-key (j/k) nav cannot fire while typing in a field.
+    assert "function eventTargetIsTextInput(event)" in js
+    nav_fn = js.split("function handleListKeyboardNav(event)", 1)[1].split("\n}", 1)[0]
+    assert "eventTargetIsTextInput(event)" in nav_fn, "text-input guard must be wired into list keyboard nav"
+    assert "isContentEditable" in js  # guard also covers contentEditable targets
+    # The two overlays are coordinated: opening one closes the other.
+    assert "closeQuickOpen" in js
+    assert "closeCommandPalette" in js
+
+
+def test_ui_console_search_css_uses_tokens_not_raw_color(tmp_path):
+    # (TASK-AR-334 tokenization guard) Search + quick-open CSS introduces no raw
+    # hex/rgba; every color flows through var(--token).
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    body_css = css.replace(_root_token_block(css), "").replace(_dark_theme_block(css), "")
+    hex_pattern = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+    rgba_pattern = re.compile(r"rgba?\(")
+    search_lines = [
+        line for line in body_css.splitlines()
+        if any(token in line for token in (".global-search", ".search-result", ".search-empty", ".quick-open", ".topbar-search", ".is-deeplinked"))
+    ]
+    assert search_lines, "expected search/quick-open CSS rules to exist"
+    for line in search_lines:
+        assert not hex_pattern.search(line), f"raw hex in search CSS: {line.strip()}"
+        assert not rgba_pattern.search(line), f"raw rgba in search CSS: {line.strip()}"
+    # Consumes existing semantic tokens.
+    assert "background: var(--primary-soft-strong)" in css
+    assert "outline: 2px solid var(--primary)" in css
