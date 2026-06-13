@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "inst-ui2-ar362",
+  "callsign": "claude/peek-lark",
+  "callsite_id": "claude-ui2-362",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260613-171948-task-ar-362-66f2.json"
+  ],
+  "created_at": "2026-06-13T17:19:48+09:00",
+  "decision_cycle_id": "",
+  "display_name": "claude/peek-lark",
+  "model": "",
+  "model_tier": "",
+  "on_behalf_of": "TASK-AR-362",
+  "pane_id": "claude-ui2-362",
+  "parent_instance_id": "",
+  "project_id": "",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "lead-engineer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-13T17:19:48+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-362",
+  "task_set_id": "TASKSET-AR-UI-LIVING-CONSOLE",
+  "team_id": "agent-runtime-core",
+  "unit_id": "",
+  "unit_spec": "",
+  "updated_at": "2026-06-13T17:19:48+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-362"
+}
