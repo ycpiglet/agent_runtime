@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "inst-ui9-ar363",
+  "callsign": "claude/grow-stag",
+  "callsite_id": "claude-ui9-363",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260614-003513-task-ar-363-a8f8.json"
+  ],
+  "created_at": "2026-06-14T00:35:13+09:00",
+  "decision_cycle_id": "",
+  "display_name": "claude/grow-stag",
+  "model": "",
+  "model_tier": "",
+  "on_behalf_of": "TASK-AR-363",
+  "pane_id": "claude-ui9-363",
+  "parent_instance_id": "",
+  "project_id": "",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "lead-engineer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-14T00:35:13+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-363",
+  "task_set_id": "TASKSET-AR-UI-LIVING-CONSOLE",
+  "team_id": "agent-runtime-core",
+  "unit_id": "",
+  "unit_spec": "",
+  "updated_at": "2026-06-14T00:35:13+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-363"
+}
