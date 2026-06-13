@@ -48,3 +48,9 @@ tags:
 ## Evidence Targets
 
 - DnD/peek 공통 모듈, Playwright 검증
+
+## Verification Results (W4a)
+
+- Scope delivered (board view): task-card hover-peek popover (300ms, hover+focus, Esc/scroll close, keyboard accessible), drag-drop reorder/cross-lane move emitting `task.reorder` proposals via `/api/tasks/{id}/reorder` (no direct file writes), keyboard DnD equivalents (Ctrl/Cmd+D lift, arrows move, Space/Enter drop, Esc cancel) with `aria-live` announcements, and Claim/Verify/Close quick actions routing through `task.update` / `runtime.request_review` / `task.archive` command endpoints.
+- Files: `src/agent_runtime/ui_console.py` (HTML shell peek/live-region hosts, CSS, board JS), `src/agent_runtime/ui_state.py` (additive derived `peek_summary` field), `tests/test_ui_console.py` (+4 tests), `tests/test_ui_state.py` (+1 test).
+- Focused UI tests: 56 passed. Full `python -m pytest tests -q`: 768 passed, exit 0. Owner governance gate exit 0. Real demo: console on 127.0.0.1:8791 served HTML/JS/CSS 200, 189 tasks rendered, board peek/DnD/quick-action anchors confirmed in live assets, `peek_summary` present in `/api/state`; node parsed served `app.js` with no syntax errors.

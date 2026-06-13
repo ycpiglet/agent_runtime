@@ -192,6 +192,16 @@ def _first_sentence(text: str) -> str:
     return ""
 
 
+def _peek_summary(meta: dict[str, Any], goal: str) -> str:
+    """Compact one-line summary reused by the board hover-peek (additive, derived)."""
+    summary = _first_sentence(goal)
+    blocked = str(meta.get("blocked_reason") or "").strip()
+    if blocked:
+        prefix = f"Blocked: {blocked}."
+        return f"{prefix} {summary}".strip() if summary else prefix
+    return summary
+
+
 def _title_from_path(path: Path, task_id: str) -> str:
     stem = path.stem
     if task_id and stem.startswith(task_id):
@@ -309,6 +319,7 @@ def load_tasks(root: Path, now: str, warnings: list[dict[str, str]]) -> list[dic
             "team": meta.get("team"),
             "labels": labels,
             "description": _first_sentence(goal),
+            "peek_summary": _peek_summary(meta, goal),
             "blocked_reason": meta.get("blocked_reason"),
             "registered_at": registered_at,
             "created_at": created_at,

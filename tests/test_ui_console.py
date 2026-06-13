@@ -1018,6 +1018,105 @@ def test_ui_console_favicon_route_is_quiet_for_browser_probe(tmp_path):
     assert response.body == b""
 
 
+def test_ui_console_board_card_exposes_peek_dnd_and_quick_action_anchors(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    # Shell hosts for peek popover and DnD live region.
+    for host_id in ["board-peek", "board-dnd-status"]:
+        assert host_id in html
+    assert 'role="tooltip"' in html
+
+    # Card markup carries peek, drag, and quick-action affordances.
+    for marker in [
+        'draggable="true"',
+        "data-peek-task",
+        "data-task-lane",
+        "data-task-order",
+        'data-quick-action="claim"',
+        'data-quick-action="verify"',
+        'data-quick-action="close"',
+        "buildPeekMarkup",
+        "showPeek",
+        "schedulePeek",
+        "hidePeek",
+        "wireLaneDropTarget",
+        "wireBoardCard",
+        "handleBoardKeyboardDnd",
+        "commitTaskMove",
+        "quickAction",
+    ]:
+        assert marker in js
+
+    for selector in [
+        ".board-peek",
+        ".board-dnd-status",
+        ".lane.is-drop-target",
+        ".lane-body.is-dragover",
+        ".task-card.is-dragging",
+        ".task-card.is-lifted",
+        ".task-card-actions",
+    ]:
+        assert selector in css
+
+
+def test_ui_console_board_dnd_has_keyboard_equivalents(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    handler = js.split("function handleBoardKeyboardDnd", 1)[1].split("\nfunction renderKanban", 1)[0]
+
+    # Lift (Ctrl/Cmd+D), move (arrows), drop (Space/Enter), cancel (Esc).
+    assert '"d"' in handler and "ctrlKey" in handler and "metaKey" in handler
+    assert '"Escape"' in handler
+    assert '" "' in handler
+    assert "ArrowLeft" in handler and "ArrowRight" in handler
+    assert "ArrowUp" in handler and "ArrowDown" in handler
+    # Keyboard drop routes through the same proposal command path.
+    assert "commitTaskMove" in handler
+
+
+def test_ui_console_board_dnd_and_quick_actions_use_command_path_not_file_write(tmp_path):
+    # Drag-drop reorder and quick actions must emit proposals through the
+    # command endpoints, never mutate task files directly from the console.
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+
+    move_block = js.split("async function commitTaskMove", 1)[1].split("\n}", 1)[0]
+    assert "/api/tasks/" in move_block and "/reorder" in move_block
+    assert 'type: "task.reorder"' in move_block
+    assert "writeFile" not in move_block and "fs." not in move_block
+
+    action_block = js.split("async function quickAction", 1)[1].split("\nfunction laneTasksFor", 1)[0]
+    assert "/api/commands" in action_block
+    assert "/archive" in action_block
+    assert 'type: "task.update"' in action_block
+    assert 'type: "runtime.request_review"' in action_block
+    assert 'type: "task.archive"' in action_block
+    assert "writeFile" not in action_block and "fs." not in action_block
+
+
+def test_ui_console_board_reorder_move_emits_proposal_command(tmp_path):
+    # A cross-lane move sends order + the new lane status through the reorder
+    # command route, producing an accepted (proposal) command record.
+    _write_backlog_board_script(tmp_path)
+    _write_task(tmp_path, "TASK-UI-362")
+
+    response = ui_console.build_response(
+        "/api/tasks/TASK-UI-362/reorder",
+        tmp_path,
+        method="POST",
+        body=json.dumps({"order": 0, "status": "review"}).encode("utf-8"),
+    )
+    record = json.loads(response.body.decode("utf-8"))
+    state = json.loads(ui_console.build_response("/api/state", tmp_path).body.decode("utf-8"))
+
+    assert response.status == 202
+    assert record["status"] == "accepted"
+    assert record["type"] == "task.reorder"
+    moved = next(task for task in state["tasks"] if task["id"] == "TASK-UI-362")
+    assert moved["status"] == "review"
+    assert moved["lane"] == "Review"
+
+
 def test_ui_console_cli_dispatches_to_server(monkeypatch, tmp_path):
     captured = {}
 
