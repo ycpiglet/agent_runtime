@@ -2558,3 +2558,149 @@ def test_ui_console_search_css_uses_tokens_not_raw_color(tmp_path):
     # Consumes existing semantic tokens.
     assert "background: var(--primary-soft-strong)" in css
     assert "outline: 2px solid var(--primary)" in css
+
+
+# ----- TASK-AR-336: interactive state-machine viewer -----
+
+
+def _write_state_machines(root: Path) -> None:
+    _write(
+        root / "agents" / "project" / "STATE-MACHINES.yml",
+        "\n".join(
+            [
+                "schema: agent-runtime-state-machines/v1",
+                "machines:",
+                "  - id: task",
+                "    scope: backlog_task",
+                "    initial: planned",
+                "    states:",
+                "      - id: planned",
+                "        signal: watch",
+                "        score: 70",
+                "      - id: in_progress",
+                "        signal: watch",
+                "        score: 80",
+                "      - id: completed",
+                "        signal: pass",
+                "        score: 95",
+                "    transitions:",
+                "      - from: planned",
+                "        to: in_progress",
+                "        trigger: agent_claimed",
+                "      - from: in_progress",
+                "        to: completed",
+                "        trigger: done_criteria_met",
+            ]
+        ),
+    )
+
+
+def test_ui_console_state_machine_view_registered_in_records_sidebar(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+
+    # New State Machines view lives in the RECORDS group with view + route.
+    assert 'data-view="statemachines"' in html
+    assert 'data-route="records/state-machines"' in html
+    # Dedicated view container + interactive graph stage + selectors.
+    assert 'id="view-statemachines"' in html
+    assert 'id="state-machine-svg"' in html
+    assert 'id="state-machine-select"' in html
+    assert 'id="state-machine-task-select"' in html
+    assert 'id="state-machine-legend"' in html
+
+
+def test_ui_console_state_machine_resource_route_serves_graph(tmp_path):
+    _write_state_machines(tmp_path)
+    _write_task(tmp_path, "TASK-AR-336")
+    machines = json.loads(ui_console.build_response("/api/state-machines", tmp_path).body.decode("utf-8"))
+    assert machines["resource"] == "state_machines"
+    task = next(item for item in machines["items"] if item["id"] == "task")
+    # Every machine renders nodes + edges (acceptance criterion).
+    assert task["state_nodes"], "task machine should render state nodes"
+    assert task["transition_edges"], "task machine should render transition edges"
+    # An arbitrary task's current state is identifiable in the graph.
+    assert "TASK-AR-336" in task["task_states"]
+    info = task["task_states"]["TASK-AR-336"]
+    assert info["current_state"] in {node["id"] for node in task["state_nodes"]}
+
+
+def test_ui_console_state_machine_deep_link_from_task_detail(tmp_path):
+    # The task detail panel exposes a "view in state machine" affordance that
+    # routes into the viewer with the task highlighted (read-only deep link).
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    # The button + handler are rendered into the task detail panel by JS.
+    assert 'id="view-state-machine"' in js
+    assert "function viewTaskInStateMachine" in js
+    assert "viewTaskInStateMachine(task.id)" in js
+    # The deep link selects the task machine and activates the viewer view.
+    assert 'selectedStateMachineId = "task"' in js
+    assert 'activateView("statemachines")' in js
+
+
+def test_ui_console_state_machine_render_escapes_labels_and_renders(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert "function renderStateMachineViewer" in js
+    # The render path is wired into renderAll so it refreshes with the state.
+    assert "renderStateMachineViewer();" in js
+    # State / transition labels are escaped before injection into the DOM.
+    assert "escapeHtml(machine.id)" in js
+    # Traversed-path + current-state highlighting consumes the derived fields.
+    assert "transition_path" in js
+    assert "current_state" in js
+    assert "is-traversed" in js
+    assert "is-current" in js
+
+
+def test_ui_console_state_machine_css_uses_tokens_not_raw_color(tmp_path):
+    # (TASK-AR-336 tokenization guard) Every color the state-machine CSS
+    # introduces must flow through var(--token); no raw hex/rgba outside the
+    # token blocks.
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    body_css = css.replace(_root_token_block(css), "").replace(_dark_theme_block(css), "")
+    hex_pattern = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+    rgba_pattern = re.compile(r"rgba?\(")
+    sm_lines = [
+        line for line in body_css.splitlines()
+        if ".state-machine" in line or "--sm-" in line
+    ]
+    assert sm_lines, "expected state-machine CSS rules to exist"
+    for line in sm_lines:
+        assert not hex_pattern.search(line), f"raw hex in state-machine CSS: {line.strip()}"
+        assert not rgba_pattern.search(line), f"raw rgba in state-machine CSS: {line.strip()}"
+    # The new highlight tokens are defined in BOTH theme blocks.
+    assert "--sm-current:" in _root_token_block(css)
+    assert "--sm-current:" in _dark_theme_block(css)
+    assert "--sm-path:" in _root_token_block(css)
+    assert "--sm-path:" in _dark_theme_block(css)
+
+
+def test_ui_console_state_machine_app_js_ascii_only_and_node_check(tmp_path):
+    # The state-machine JS must be ASCII-only (cp949 node-check guard) and the
+    # generated bundle must remain syntactically valid JavaScript.
+    import shutil
+    import subprocess
+
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    # Isolate the new render function and assert it carries no non-ASCII bytes.
+    start = js.index("function renderStateMachineViewer")
+    end = js.index("function renderRoadmapTimeline", start)
+    sm_block = js[start:end]
+    non_ascii = [ch for ch in sm_block if ord(ch) > 127]
+    assert not non_ascii, f"state-machine JS must be ASCII-only, found: {non_ascii[:5]}"
+
+    if shutil.which("node") is None:
+        import pytest
+
+        pytest.skip("node not available")
+    proc = subprocess.run(["node", "--check", "-"], input=js, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stderr
+
+
+def test_ui_console_state_machine_graceful_when_yaml_missing(tmp_path):
+    # No STATE-MACHINES.yml -> the route still serves a well-formed empty graph.
+    machines = json.loads(ui_console.build_response("/api/state-machines", tmp_path).body.decode("utf-8"))
+    assert machines["resource"] == "state_machines"
+    assert machines["items"] == []
+    # The shell still serves the view container so the UI degrades gracefully.
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    assert 'id="view-statemachines"' in html
