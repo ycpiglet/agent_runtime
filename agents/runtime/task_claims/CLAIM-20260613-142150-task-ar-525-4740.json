@@ -9,7 +9,7 @@
   "callsite_id": "claude-w8-ar525",
   "pane_id": "claude-w8-ar525",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-OPS-ERGONOMICS",
   "project_id": "",
   "unit_id": "",
@@ -17,20 +17,20 @@
   "model_tier": "",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "implementing",
-  "progress_pct": 0,
+  "phase": "complete",
+  "progress_pct": 100,
   "step_index": 1,
   "step_total": 6,
   "status_text": "AR-525: asset registry + ops command reference",
   "worktree_path": ".worktrees/TASK-AR-525",
   "branch": "claude/task-ar-525-asset-registry",
   "claimed_at": "2026-06-13T14:21:50+09:00",
-  "last_heartbeat": "2026-06-13T14:21:50+09:00",
-  "updated_at": "2026-06-13T14:21:50+09:00",
+  "last_heartbeat": "2026-06-13T15:16:52+09:00",
+  "updated_at": "2026-06-13T15:16:52+09:00",
   "expires_at": "2026-06-13T14:51:50+09:00",
   "lease": {
     "claimed_at": "2026-06-13T14:21:50+09:00",
-    "heartbeat_at": "2026-06-13T14:21:50+09:00",
+    "heartbeat_at": "2026-06-13T15:16:52+09:00",
     "expires_at": "2026-06-13T14:51:50+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260613-142150-task-ar-525-4740.handoff.md",
@@ -41,5 +41,9 @@
     "agents/project/RUNTIME-ASSET-REGISTRY.json",
     "OPS-COMMAND-REFERENCE.md",
     "owner-docs.yml"
-  ]
+  ],
+  "released_at": "2026-06-13T15:16:52+09:00",
+  "verified_by": "inst-w4b-ar525-verifier",
+  "verifier_role": "reviewer",
+  "verification_evidence": "agents/runtime/task_claims/CLAIM-20260613-142150-task-ar-525-4740.handoff.md"
 }

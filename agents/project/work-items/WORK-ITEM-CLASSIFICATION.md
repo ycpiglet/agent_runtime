@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-13T14:21:03+09:00
+generated_at: 2026-06-13T15:18:48+09:00
 record_count: 233
 ---
 
@@ -227,10 +227,10 @@ record_count: 233
 | 0.23.1 | Task 0.23.1 | task | `TASK-AR-366` | `TASKSET-AR-DOC-TO-PLAN` | planned | `agents/lead_engineer/tasks/TASK-AR-366.md` | pitch deck/기획서/아이디어 문서(PPT, PDF, Word, HTML, md)를 넣으면 시스템이 스스로 분석해 plan을 짜고 실현 가능한 ta… |
 | 0.23.2 | Task 0.23.2 | task | `TASK-AR-367` | `TASKSET-AR-DOC-TO-PLAN` | planned | `agents/lead_engineer/tasks/TASK-AR-367.md` | 비전이 동일한 오픈소스 Paperclip(github.com/paperclipai/paperclip, MIT)의 기능 중 agent_runtime에 없는… |
 | 0.23.3 | Task 0.23.3 | task | `TASK-AR-368` | `TASKSET-AR-DOC-TO-PLAN` | planned | `agents/lead_engineer/tasks/TASK-AR-368.md` | 예상치(est_*)만 있는 현 체계에 실측치를 더해, task/taskset을 우선순위·난이도·예상/실제 토큰·예상/실제 시간·부서 등 다요소로 정렬·필… |
-| 0.24 | Taskset 0.24 | taskset | `TASKSET-AR-OPS-ERGONOMICS` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Ops Ergonomics |
-| 0.24.1 | Task 0.24.1 | task | `TASK-AR-523` | `TASKSET-AR-OPS-ERGONOMICS` | planned | `agents/lead_engineer/tasks/TASK-AR-523.md` | Nothing surfaces the 500-series observability at session start. Add scripts/session_d… |
-| 0.24.2 | Task 0.24.2 | task | `TASK-AR-524` | `TASKSET-AR-OPS-ERGONOMICS` | planned | `agents/lead_engineer/tasks/TASK-AR-524.md` | Make the new 500-series tools discoverable as trigger-based skills: wave-conductor (w… |
-| 0.24.3 | Task 0.24.3 | task | `TASK-AR-525` | `TASKSET-AR-OPS-ERGONOMICS` | planned | `agents/lead_engineer/tasks/TASK-AR-525.md` | Register the new dashboard hook + 5 skills + the standalone tools (wave_dispatcher/me… |
+| 0.24 | Taskset 0.24 | taskset | `TASKSET-AR-OPS-ERGONOMICS` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Ops Ergonomics |
+| 0.24.1 | Task 0.24.1 | task | `TASK-AR-523` | `TASKSET-AR-OPS-ERGONOMICS` | completed | `agents/lead_engineer/tasks/TASK-AR-523.md` | Nothing surfaces the 500-series observability at session start. Add scripts/session_d… |
+| 0.24.2 | Task 0.24.2 | task | `TASK-AR-524` | `TASKSET-AR-OPS-ERGONOMICS` | completed | `agents/lead_engineer/tasks/TASK-AR-524.md` | Make the new 500-series tools discoverable as trigger-based skills: wave-conductor (w… |
+| 0.24.3 | Task 0.24.3 | task | `TASK-AR-525` | `TASKSET-AR-OPS-ERGONOMICS` | completed | `agents/lead_engineer/tasks/TASK-AR-525.md` | Register the new dashboard hook + 5 skills + the standalone tools (wave_dispatcher/me… |
 | 1 | Initiative 1 | initiative | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | - | planned | `agents/project/initiatives/INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE.md` | Work Hierarchy Conflict Closure Initiative |
 | 1.1 | Taskset 1.1 | taskset | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | active | `BACKLOG-BOARD.md` | Work Taxonomist |
 | 1.1.1 | Task 1.1.1 | task | `TASK-AR-369` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-369.md` | Finish the terminology migration from ambiguous `project -> taskset -> task -> unit`… |
