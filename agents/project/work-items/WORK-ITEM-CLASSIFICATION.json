@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-13T13:17:35+09:00",
+  "generated_at": "2026-06-13T13:49:26+09:00",
   "record_count": 229,
   "finding_count": 0,
   "findings": [],
@@ -1323,7 +1323,7 @@
       "title": "Repo Custodian",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-UNASSIGNED",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-233",
@@ -1367,7 +1367,7 @@
       "title": "taskset_work_gate judges BACKLOG-BOARD.md stale within minutes because the generator…",
       "path": "agents/lead_engineer/tasks/TASK-AR-520.md",
       "parent_id": "TASKSET-AR-REPO-HYGIENE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-521",
@@ -1378,7 +1378,7 @@
       "title": "Template owner_governance_gate.py is missing evidence_index_generator/context_knowled…",
       "path": "agents/lead_engineer/tasks/TASK-AR-521.md",
       "parent_id": "TASKSET-AR-REPO-HYGIENE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-522",
@@ -1389,7 +1389,7 @@
       "title": "Bundle of independently-verified small fixes: (1) work.py emits verification_status p…",
       "path": "agents/lead_engineer/tasks/TASK-AR-522.md",
       "parent_id": "TASKSET-AR-REPO-HYGIENE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "taskset:TASKSET-AR-OPS-FEEDBACK-ANALYSIS",
@@ -2324,7 +2324,7 @@
       "title": "Wave Conductor",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-PARALLEL-WAVE-EXECUTION",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-500",
@@ -2335,7 +2335,7 @@
       "title": "충돌 발견 시점을 merge-time(사후)에서 claim-time(사전)으로 옮긴다. 새 클레임 생성 시 활성 클레임들의 선언 footprint(`ta…",
       "path": "agents/lead_engineer/tasks/TASK-AR-500.md",
       "parent_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-501",

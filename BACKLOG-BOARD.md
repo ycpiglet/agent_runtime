@@ -9,21 +9,21 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-13
 task_count: 186
-open_count: 39
-completed_count: 147
-task_set_count: 7
-completed_task_set_count: 20
+open_count: 35
+completed_count: 151
+task_set_count: 5
+completed_task_set_count: 22
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `39` open or active tasks; `147` completed tasks are archived from this live board.
+- Summary: `35` open or active tasks; `151` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `33` / Ask `5` / Review `0` / Later `1` / Done `147`.
-- Task Sets: `7` active workflows; `20` completed workflows are hidden from the live action board.
+- Status: Action `30` / Ask `4` / Review `0` / Later `1` / Done `151`.
+- Task Sets: `5` active workflows; `22` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -41,17 +41,6 @@ completed_task_set_count: 20
 ## Action Board
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
-
-### Repo Custodian (`TASKSET-AR-REPO-HYGIENE`)
-
-- Flow: Working-tree cleanup, backlog cycle hygiene, and handoff publication.
-- Progress: `3/6` done; `3` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-520` | - | - | - | planned | Action | P1 | High | Low | 3h/3000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | taskset_work_gate judges BACKLOG-BOARD.md stale within minutes because the generator… |
-| `TASK-AR-521` | - | - | - | planned | Ask | P2 | Medium | Low | 3h/3000tok | Low | 5 | agent-runtime-core | lead-engineer | Owner/agent decision | Template owner_governance_gate.py is missing evidence_index_generator/context_knowled… |
-| `TASK-AR-522` | - | - | - | planned | Action | P2 | Medium | Low | 4h/4000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Bundle of independently-verified small fixes: (1) work.py emits verification_status p… |
 
 ### Console Experience Architect (`TASKSET-AR-UI-UX-V2`)
 
@@ -128,15 +117,6 @@ completed_task_set_count: 20
 | `TASK-AR-373` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P3 | Low | Medium | 6h/5000tok | Low | 5 | governance-loop | independent-auditor | Execute next | Make it visible which planned tasks are worker-ready and which still require planner… |
 | `TASK-AR-374` | INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE | PROJECT-AGENT-RUNTIME-PM-OS | - | planned | Action | P3 | Low | Low | 8h/4000tok | Low | 4 | agent-runtime-core | lead-engineer | Execute next | Prove that the work hierarchy and registration conflict surfaces are actually closed… |
 
-### Wave Conductor (`TASKSET-AR-PARALLEL-WAVE-EXECUTION`)
-
-- Flow: Claim-time footprint conflict gate, wave dispatcher with cascade/parallel modes, integrator merge queue, and claim-first enforcement.
-- Progress: `9/10` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-500` | INIT-AR-PARALLEL-WAVE-EXECUTION | PROJECT-AGENT-RUNTIME-PM-OS | - | in_progress | Action | P1 | High | Medium | 6h/5000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 충돌 발견 시점을 merge-time(사후)에서 claim-time(사전)으로 옮긴다. 새 클레임 생성 시 활성 클레임들의 선언 footprint(`ta… |
-
 ## Archived Task Sets
 
 - Archive rule: completed task sets stay out of the live Action Board but remain visible as workflow-level completion evidence.
@@ -157,11 +137,13 @@ completed_task_set_count: 20
 | Identity Steward (`TASKSET-AR-TASK-IDENTITY`) | Collision-proof task identity, UUID metadata, lifecycle timestamps, and recovery visibility. | `4/4` done | `4` completed task files archived |
 | Design Operator (`TASKSET-AR-UI-DESIGN-SYSTEM`) | Agent Runtime UI research, design-system guidance, and console visual implementation. | `7/7` done | `7` completed task files archived |
 | Interface Stylist (`TASKSET-AR-UI-DESIGN-IMPLEMENTATION`) | Active UI design implementation work that applies the accepted design system across runtime panes. | `7/7` done | `7` completed task files archived |
+| Repo Custodian (`TASKSET-AR-REPO-HYGIENE`) | Working-tree cleanup, backlog cycle hygiene, and handoff publication. | `6/6` done | `6` completed task files archived |
 | Feedback Analyst (`TASKSET-AR-OPS-FEEDBACK-ANALYSIS`) | Owner feedback intake, enterprise-wide structure/vision analysis, and follow-up planning records. | `4/4` done | `4` completed task files archived |
 | Vision Integrator (`TASKSET-AR-VISION-GAP-CLOSURE`) | Legacy independence, A2A messaging, multi-agent RBAC, loop hardening, live eval, skill packaging, realtime UI, and doc traceability. | `10/10` done | `10` completed task files archived |
 | Project Workbreaker (`TASKSET-AR-PM-OPERATING-SYSTEM`) | Project-to-unit hierarchy, worker-ready specs, model-tier routing, WIP controls, dispatcher scope stops, and PM verification gates. | `9/9` done | `9` completed task files archived |
 | Agent Identity Contract (`TASKSET-AR-AGENT-IDENTITY-CONTRACT`) | Add role/instance/display identity records, spawn provenance, and attribution gates for multi-agent work. | `1/1` done | `1` completed task files archived |
 | Work Metadata Analyst (`TASKSET-AR-WORK-METADATA-ANALYTICS`) | Conversation-to-work traceability, Work Item metadata, Explorer roll-ups, query/export, agent attribution, and stale verification evidence. | `6/6` done | `6` completed task files archived |
+| Wave Conductor (`TASKSET-AR-PARALLEL-WAVE-EXECUTION`) | Claim-time footprint conflict gate, wave dispatcher with cascade/parallel modes, integrator merge queue, and claim-first enforcement. | `10/10` done | `10` completed task files archived |
 
 ## Archived Task Files
 
@@ -273,7 +255,10 @@ completed_task_set_count: 20
 | `TASK-AR-282` | `3d7b5d8e-d81…` | `TASKSET-AR-UI-DESIGN-IMPLEMENTATION` | completed | 2026-06-11 | 2026-06-11T10:47:46+09:00 | 2026-06-11T10:59:38+09:00 | 2026-06-11T10:59:38+09:00 | Bring graph, state-machine, roadmap, planner, source, and write surfaces into the sam… |
 | `TASK-AR-233` | `d475a04e-6c5…` | `TASKSET-AR-REPO-HYGIENE` | completed | 2026-06-10 | 2026-06-10 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | Clean the current working tree through an intentional commit and push, then keep back… |
 | `TASK-AR-511` | `bf47ce08-f7a…` | `TASKSET-AR-REPO-HYGIENE` | completed | 2026-06-12T23:15:32+09:00 | 2026-06-13T12:30:36+09:00 | 2026-06-13T13:20:00+09:00 | 2026-06-13T13:20:00+09:00 | 서로 다른 OS/LLM/페인에서 작업한 파일이 줄바꿈·인코딩 차이로 가짜 diff와 경고를 만드는 것을 차단한다. 현재 `.gitattributes`가… |
+| `TASK-AR-520` | `bbb306dd-5fc…` | `TASKSET-AR-REPO-HYGIENE` | completed | 2026-06-13T02:54:38+09:00 | 2026-06-13T02:58:38+09:00 | 2026-06-13T08:10:00+09:00 | 2026-06-13T08:10:00+09:00 | taskset_work_gate judges BACKLOG-BOARD.md stale within minutes because the generator… |
 | `TASK-AR-512` | `94b7763f-436…` | `TASKSET-AR-REPO-HYGIENE` | completed | 2026-06-12T23:15:32+09:00 | 2026-06-13T02:58:37+09:00 | 2026-06-13T07:50:00+09:00 | 2026-06-13T07:50:00+09:00 | 형상관리 산출물(branch/worktree/stash/PR/issue/claim)의 "지저분함"을 사람이 인지하기 전에 주기 점검 루프가 감지·보고·정… |
+| `TASK-AR-521` | `ac308082-386…` | `TASKSET-AR-REPO-HYGIENE` | completed | 2026-06-13T02:54:38+09:00 | 2026-06-13T09:47:58+09:00 | 2026-06-13T13:20:00+09:00 | 2026-06-13T13:20:00+09:00 | Template owner_governance_gate.py is missing evidence_index_generator/context_knowled… |
+| `TASK-AR-522` | `d947e814-6af…` | `TASKSET-AR-REPO-HYGIENE` | completed | 2026-06-13T02:54:38+09:00 | 2026-06-13T10:33:54+09:00 | 2026-06-13T13:50:00+09:00 | 2026-06-13T13:50:00+09:00 | Bundle of independently-verified small fixes: (1) work.py emits verification_status p… |
 | `TASK-AR-306` | `9fc495d7-bfd…` | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | completed | 2026-06-11T17:34:00+09:00 | 2026-06-11T16:30:00+09:00 | 2026-06-11T17:34:00+09:00 | 2026-06-11T17:34:00+09:00 | Owner 7개 지시(브랜치/스태시 정리, UI 적용, 플러그인/훅 정리, 레거시 전신 프로젝트 정리, 구조 분석, 비전 분석, 기록/등록)를 단일 세션… |
 | `TASK-AR-309` | `d5458ef2-2dd…` | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | completed | 2026-06-11T17:34:00+09:00 | 2026-06-12T02:08:54+09:00 | 2026-06-12T02:08:54+09:00 | 2026-06-12T02:08:54+09:00 | 2026-06-11 "UI 미반영" 사건의 두 원인(비-editable stale 설치, 장수 구버전 서버 프로세스)이 재발하지 않도록 가드 방안을 계획… |
 | `TASK-AR-307` | `2457f407-5d4…` | `TASKSET-AR-OPS-FEEDBACK-ANALYSIS` | completed | 2026-06-11T17:34:00+09:00 | 2026-06-12T02:08:54+09:00 | 2026-06-12T02:08:54+09:00 | 2026-06-12T02:08:54+09:00 | 2026-06-11 전사 구조 분석에서 식별된 개선 항목을 Owner가 우선순위 결정할 수 있는 실행 계획으로 확정한다 (분석/계획 전용, 구현 없음). |
@@ -309,6 +294,7 @@ completed_task_set_count: 20
 | `TASK-AR-504` | `acd02367-581…` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | 2026-06-12T18:51:54+09:00 | 2026-06-12T18:51:54+09:00 | 2026-06-12T18:55:00+09:00 | 2026-06-12T18:55:00+09:00 | 병렬 세션(codex/claude)이 서로의 미머지 변경을 모른 채 세운 계획이 merge 후 조용히 무효화되는 문제를 지연평가로 해결한다: 계획의 전제… |
 | `TASK-AR-508` | `41f58968-7dc…` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | 2026-06-12T21:53:22+09:00 | 2026-06-12T21:55:08+09:00 | 2026-06-12T22:15:00+09:00 | 2026-06-12T22:15:00+09:00 | dirty intake와 session baseline의 residue 보존 규칙이 `codex/*` 브랜치에 하드코딩되어 있어 `claude/*` 브랜… |
 | `TASK-AR-503` | `4966fce3-64b…` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | 2026-06-12T18:35:45+09:00 | 2026-06-13T01:33:43+09:00 | 2026-06-13T02:50:00+09:00 | 2026-06-13T02:50:00+09:00 | 워크트리 작업은 반드시 main 체크아웃에 활성 클레임을 먼저 남기고 시작하도록 강제한다. 클레임 없는 워크트리 작업은 보드/ui-console 양쪽에서… |
+| `TASK-AR-500` | `15e90de2-ca8…` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | 2026-06-12T18:35:45+09:00 | 2026-06-12T21:27:17+09:00 | 2026-06-13T01:55:00+09:00 | 2026-06-13T02:05:00+09:00 | 충돌 발견 시점을 merge-time(사후)에서 claim-time(사전)으로 옮긴다. 새 클레임 생성 시 활성 클레임들의 선언 footprint(`ta… |
 | `TASK-AR-505` | `69f8bed3-e0d…` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | 2026-06-12T21:15:09+09:00 | 2026-06-13T01:23:31+09:00 | 2026-06-13T02:25:00+09:00 | 2026-06-13T02:25:00+09:00 | 작업 수명주기의 W5(통합 후 정리) 단계를 실행 가능하게 만든다: merge 완료 + claim released 상태의 좀비 워크트리/브랜치를 검출하고… |
 | `TASK-AR-507` | `2df22d07-cea…` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | 2026-06-12T21:24:50+09:00 | 2026-06-13T08:37:43+09:00 | 2026-06-13T10:30:00+09:00 | 2026-06-13T10:30:00+09:00 | Owner 규칙 "작업자가 스스로 검증 금지, 항상 다른 에이전트가 검증"을 실행 가능하게 강제한다: claim release/closeout 시 ver… |
 | `TASK-AR-506` | `25e129f5-2ad…` | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | completed | 2026-06-12T21:15:09+09:00 | 2026-06-13T09:53:21+09:00 | 2026-06-13T12:40:00+09:00 | 2026-06-13T12:40:00+09:00 | 이번 taskset에만 수동 적용된 지연평가 규율(T0 스냅샷/T2 착수 체크)과 W0~W6 수명주기를 **모든 작업의 기본값**으로 만든다 — Owne… |

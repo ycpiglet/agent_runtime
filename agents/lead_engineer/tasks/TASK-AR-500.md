@@ -5,9 +5,10 @@ task_uid: 15e90de2-ca81-4611-8b6d-078de0a04e18
 registered_at: 2026-06-12T18:35:45+09:00
 created_at: 2026-06-12T18:35:45+09:00
 started_at: 2026-06-12T21:27:17+09:00
+completed_at: 2026-06-13T01:55:00+09:00
 updated_at: 2026-06-13T02:05:00+09:00
 title: Claim-time footprint conflict gate (target_files intersection)
-status: in_progress
+status: completed
 priority: P1
 difficulty: M
 est_hours: 6

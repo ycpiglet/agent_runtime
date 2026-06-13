@@ -7,7 +7,7 @@ created_at: 2026-06-13T02:54:38+09:00
 updated_at: 2026-06-13T08:10:00+09:00
 started_at: 2026-06-13T02:58:38+09:00
 completed_at: 2026-06-13T08:10:00+09:00
-status: planned
+status: completed
 priority: P1
 difficulty: S
 est_hours: 3
