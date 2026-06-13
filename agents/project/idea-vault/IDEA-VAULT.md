@@ -22,5 +22,69 @@
 | IV-010 | 모바일 푸시 전용 앱 | 2026-06-11 | 웹훅→메신저 알림으로 충분 | 같은 문서 §1-D | 2026-12-01 | 메신저 알림(AR-365)의 한계 입증 | shelved |
 | IV-011 | Gather식 Webhook Objects(공간 내 알림 객체) | 2026-06-11 | 맵 뷰 자체가 미구현 | 같은 문서 §1-A | 2026-11-01 | 2D 맵(AR-364) 출시 후 | shelved |
 
-- Action Board: 재발굴 루프 규칙·주기는 TASK-AR-360에서 구현. 신규 보류 결정은 반드시 본 레지스트리에 추가.
-- Next: revisit_after 도래 항목을 retro/planning scan이 Owner 제안으로 재상정.
+- Action Board: 재발굴 루프 규칙·주기는 TASK-AR-360에서 확정 (아래 운영 규칙). 신규 보류 결정은 반드시 본 레지스트리에 추가.
+- Next: revisit_after 도래 항목을 retro/planning scan이 Owner 제안으로 재상정 (`scripts/planning_loop.py scan` → `idea-vault-revival-due` finding).
+
+## Operating Rules (TASK-AR-360 확정)
+
+레지스트리(위 표)가 SSoT다. 도구 `scripts/idea_vault.py`가 표를 읽고/갱신한다 (수동 표 편집도 허용 — 단 컬럼 8개·형식 유지).
+
+### Entry Schema (표 컬럼 = 항목 스키마)
+
+| 컬럼 | 의미 | 형식 |
+| --- | --- | --- |
+| `id` | 고유 식별자 | `IV-NNN` (3자리) |
+| `idea` | 아이디어 요약 (summary) | 자유 텍스트 |
+| `shelved_at` | 보류 일자 | `YYYY-MM-DD` |
+| `shelved_reason` | 보류 사유 (rejected_reason) | 자유 텍스트 (비어 있으면 안 됨) |
+| `origin_ref` | 결정 기록 출처 | 문서/리서치 참조 |
+| `revisit_after` | 재검토 기한 | `YYYY-MM-DD` |
+| `revival_criteria` | 부활 조건 | 자유 텍스트 (비어 있으면 안 됨) |
+| `status` | 생애주기 상태 | `shelved` \| `revived` \| `re-deferred` \| `adopted` \| `retired` |
+
+### Status 생애주기
+
+- `shelved` — 활성 보류, `revisit_after` 도래 대기.
+- `revived` — 재발굴 제안이 발행됨 (재평가/A·B 진행 중). `idea_vault.py revive <id>`가 설정.
+- `re-deferred` — 재평가 후 새 `revisit_after`로 재보류. `idea_vault.py defer <id> --until <date>`가 설정.
+- `adopted` — 정규 작업으로 승격 (결정 이력 보존; revive 불가).
+- `retired` — 영구 폐기 (결정 이력 보존; revive 불가).
+
+활성(active) 상태 = `shelved`, `re-deferred`. `due`/scan은 활성 항목 중 `revisit_after <= now`만 재상정한다.
+
+### Commands (`scripts/idea_vault.py`)
+
+- `list` — 전체 항목 출력.
+- `due [--now YYYY-MM-DD]` — `revisit_after` 도래 활성 항목 출력. 읽기 전용, **항상 exit 0**.
+- `revive <id>` — **제안 전용**. planning outbox에 B-mode owner 제안(`origin_type: idea_vault_revival`, `proposal_output: owner_decision`)을 발행하고 항목을 `revived`로 표시한다. **절대 task를 자동 생성하지 않는다.**
+- `defer <id> --until <date>` — `revisit_after`를 갱신하고 `re-deferred`로 표시.
+- `validate` — 레지스트리 스키마 검증 (id 형식·중복, status 허용값, 날짜 형식, 필수 컬럼).
+
+### 재발굴 루프 연동
+
+`scripts/planning_loop.py scan`이 `_scan_idea_vault`로 도래 항목을 `idea-vault-revival-due` finding(risk_tier `owner`, 비차단)으로 surface한다. 이 finding은 Owner 제안 경로로만 흐르며 canonical mutation을 일으키지 않는다 (scan status는 `pass` 유지 — high-risk가 아님).
+
+### 신규 보류 게이트 (체크리스트)
+
+새로 기각·보류하는 모든 아이디어는 task 종료/제안 거부 전에 본 레지스트리에 한 행을 추가해야 한다: `id`, `idea`, `shelved_at`, `shelved_reason`, `origin_ref`, `revisit_after`(기본 +3개월 권장), `revival_criteria`, `status: shelved`. 폐기 대신 보존이 RSI 원칙이다.
+
+## A/B Experiment Protocol (부활 시 검증 규약)
+
+부활 제안이 Owner 승인으로 채택될 때, 곧바로 정규 작업으로 굳히지 않고 **한 번에 한 변수**만 바꾸는 짧은 A/B 실험으로 검증한다 (Measured Improvement 원칙과 통합).
+
+1. **One variable** — 이번 부활로 바꾸는 단일 변수를 명시 (예: "회의실 사용 시 TTS on/off"). 두 개 이상 변수는 분리해 별도 실험.
+2. **Metric** — 채택/재보류를 가를 측정 지표 하나 (예: 토큰/작업, 회의 합의 도달 시간, Owner 개입 횟수). 사전에 baseline(A) 값을 기록.
+3. **Period** — 짧은 고정 기간 (기본 1주 또는 N 사이클). 기간 종료 전 결론을 내지 않는다.
+4. **Decision** — 기간 종료 시 A(현행) vs B(부활안) 지표를 비교: 개선이면 `adopted`(정규 작업 승격), 아니면 `re-deferred`(새 `revisit_after`와 함께 재보류) — 어느 쪽이든 결과는 레지스트리에 반영.
+
+부활 제안 JSON은 `ab_experiment` 블록(`protocol`, `status`, `one_variable`, `metric`, `period`, `decision`)을 운반하며, 본 절(`#ab-experiment-protocol`)을 참조한다.
+
+### 선행 사례 매핑 (Acceptance Criteria)
+
+| 패턴 | 본 레지스트리 대응 |
+| --- | --- |
+| Pivotal Tracker Icebox | `status: shelved` 항목 (활성 보류, 미일정) |
+| ADR `superseded` | `status: retired`/`adopted` (결정 이력 보존, revive 불가) |
+| Linear Archive vs Delete | 표에서 행 삭제 금지 — 항상 status 전이로 보존 |
+| Readwise resurfacing | `revisit_after` 도래 → scan이 주기 재상정 |
+| Google SRE postmortem 보존 | 신규 보류 게이트 = 결정을 잊지 않고 기록 |

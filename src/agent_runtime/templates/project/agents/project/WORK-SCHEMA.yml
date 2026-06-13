@@ -264,7 +264,7 @@ fields:
     query_use: Detect stale records and recent changes.
   origin_type:
     type: enum
-    allowed_values: [owner_request, planning_proposal, doc_intake, retro, automation_rule]
+    allowed_values: [owner_request, planning_proposal, doc_intake, idea_vault_revival, retro, automation_rule]
     required_for: [initiative, taskset, task, unit, routine, spike]
     populated_by: planner
     source: human

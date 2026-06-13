@@ -394,6 +394,49 @@ def _scan_compounds(root: Path, findings: list[dict[str, Any]]) -> None:
             )
 
 
+def _scan_idea_vault(root: Path, findings: list[dict[str, Any]], *, now: str | None) -> None:
+    """Surface Idea Vault entries whose revisit_after has arrived.
+
+    Non-blocking by design: due ideas are low-risk Owner proposals to re-evaluate,
+    never auto-created work. Imported lazily to keep planning_loop standalone.
+    """
+    try:
+        from scripts import idea_vault  # type: ignore
+    except ModuleNotFoundError:  # pragma: no cover - direct-script execution path
+        try:
+            import idea_vault  # type: ignore
+        except ModuleNotFoundError:
+            return
+    vault_path = root / idea_vault.VAULT_PATH
+    if not vault_path.exists():
+        return
+    now_date = idea_vault._now_date(now[:10] if now else None)
+    _, entries = idea_vault.load_registry(root)
+    for entry in idea_vault.due_entries(entries, now_date):
+        entry_id = entry.get("id")
+        findings.append(
+            _finding(
+                category="idea-vault-revival-due",
+                source_path=f"{idea_vault.VAULT_PATH.as_posix()}#{entry_id}",
+                confidence=0.7,
+                suggested_next_action=(
+                    "re-evaluate the shelved idea against its revival_criteria; if adopting, run a "
+                    "one-variable A/B experiment before promoting to a task (proposal-only)"
+                ),
+                evidence=[
+                    {
+                        "summary": (
+                            f"{entry_id} is due for re-evaluation as of {now_date} "
+                            f"(revisit_after {entry.get('revisit_after')})"
+                        ),
+                        "confidence": 0.7,
+                    }
+                ],
+                risk_tier="owner",
+            )
+        )
+
+
 def scan(root: Path, *, trigger: str = "manual", now: str | None = None) -> dict[str, Any]:
     findings: list[dict[str, Any]] = []
     sources = _scan_required_sources(root, findings)
@@ -402,6 +445,7 @@ def scan(root: Path, *, trigger: str = "manual", now: str | None = None) -> dict
     _scan_release(root, findings)
     _scan_eval_trace(root, findings)
     _scan_compounds(root, findings)
+    _scan_idea_vault(root, findings, now=now)
     unique_findings: dict[str, dict[str, Any]] = {}
     for finding in findings:
         unique_findings.setdefault(str(finding["id"]), finding)
@@ -432,6 +476,8 @@ def _action_type(category: str) -> str:
         return "eval_expansion"
     if category in {"retro-compound-pattern"}:
         return "retro_compound_follow_up"
+    if category in {"idea-vault-revival-due"}:
+        return "idea_vault_revival"
     return "watch_only"
 
 
@@ -443,6 +489,7 @@ def _proposal_output(action_type: str) -> str:
         "eval_expansion": "eval",
         "release_version_consistency": "release",
         "retro_compound_follow_up": "task",
+        "idea_vault_revival": "owner_decision",
         "skill_proposal": "skill",
         "watch_only": "no_action",
         "no_action": "no_action",
@@ -665,6 +712,7 @@ def _department_for_action(action_type: str) -> str:
         "eval_expansion": "evaluation-office",
         "release_version_consistency": "release-integrity",
         "retro_compound_follow_up": "rsi-lab",
+        "idea_vault_revival": "planning-office",
         "c_mode_promotion": "risk-and-safety",
     }
     return mapping.get(action_type, "planning-office")

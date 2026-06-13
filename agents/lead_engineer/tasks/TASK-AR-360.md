@@ -50,3 +50,21 @@ tags:
 ## Evidence Targets
 
 - `agents/project/idea-vault/IDEA-VAULT.md`, planning scan 연동 코드, 테스트
+
+## W4a Self-Verification (inst-ui1-ar360)
+
+- Branch `claude/task-ar-360-ui` rebased on `origin/main` (cb22565).
+- Files: `scripts/idea_vault.py` (new), `tests/test_idea_vault.py` (new),
+  `scripts/planning_loop.py` (`_scan_idea_vault` + `idea_vault_revival` action
+  mapping), `agents/project/idea-vault/IDEA-VAULT.md` (operating rules + A/B
+  protocol + precedent map), `agents/project/WORK-SCHEMA.yml` and template copy
+  (`origin_type` enum += `idea_vault_revival`).
+- Focused: `python -m pytest tests/test_idea_vault.py -q` -> 12 passed.
+- Full: `python -m pytest tests -q` -> 741 passed (0:10:04).
+- Gate: `python scripts/owner_governance_gate.py` -> exit 0, all sub-gates
+  findings=0.
+- Demo: `python scripts/idea_vault.py due --now 2027-01-01` -> 12 due seeds,
+  exit 0, ASCII-safe stdout.
+- Revive verified proposal-only: emits `origin_type: idea_vault_revival`,
+  `proposal_output: owner_decision`, `canonical_mutation_allowed: false`, no
+  task created.
