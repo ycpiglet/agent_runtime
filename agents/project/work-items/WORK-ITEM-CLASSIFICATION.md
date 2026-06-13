@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-13T19:59:17+09:00
+generated_at: 2026-06-13T21:26:38+09:00
 record_count: 235
 ---
 
@@ -192,9 +192,9 @@ record_count: 235
 | 0.19.8 | Task 0.19.8 | task | `TASK-AR-327` | `TASKSET-AR-UI-UX-V2` | completed | `agents/lead_engineer/tasks/TASK-AR-327.md` | 에이전트 간 대화를 Slack/Discord처럼 채널/스레드로 관전하고, Owner가 UI에서 meeting/seminar를 소집할 수 있게 한다. |
 | 0.19.9 | Task 0.19.9 | task | `TASK-AR-328` | `TASKSET-AR-UI-UX-V2` | completed | `agents/lead_engineer/tasks/TASK-AR-328.md` | 특정 taskset 실행을 지시했을 때 해당 taskset 완료 후 scope 밖 작업으로 이탈하지 않고 정지·보고하도록 런타임 정책으로 강제한다 (Ow… |
 | 0.20 | Taskset 0.20 | taskset | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Platform Builder |
-| 0.20.1 | Task 0.20.1 | task | `TASK-AR-329` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-329.md` | Owner가 UI에서 taskset을 직접 만들고, task를 넣고 빼고, 일괄 편집할 수 있게 한다 (Linear Projects / Notion DB… |
-| 0.20.2 | Task 0.20.2 | task | `TASK-AR-330` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-330.md` | task 계층(서브태스크)과 의존성(blocks/blocked-by)을 데이터 모델로 정식화하고 타임라인(Gantt)·의존 그래프로 시각화한다. |
-| 0.20.3 | Task 0.20.3 | task | `TASK-AR-331` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-331.md` | Notion형 커스텀 속성과 Monday/ClickUp형 "when X then Y" 자동화 규칙, Linear형 트리아지 큐를 제공한다. |
+| 0.20.1 | Task 0.20.1 | task | `TASK-AR-329` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | `agents/lead_engineer/tasks/TASK-AR-329.md` | Owner가 UI에서 taskset을 직접 만들고, task를 넣고 빼고, 일괄 편집할 수 있게 한다 (Linear Projects / Notion DB… |
+| 0.20.2 | Task 0.20.2 | task | `TASK-AR-330` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | `agents/lead_engineer/tasks/TASK-AR-330.md` | task 계층(서브태스크)과 의존성(blocks/blocked-by)을 데이터 모델로 정식화하고 타임라인(Gantt)·의존 그래프로 시각화한다. |
+| 0.20.3 | Task 0.20.3 | task | `TASK-AR-331` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | completed | `agents/lead_engineer/tasks/TASK-AR-331.md` | Notion형 커스텀 속성과 Monday/ClickUp형 "when X then Y" 자동화 규칙, Linear형 트리아지 큐를 제공한다. |
 | 0.20.4 | Task 0.20.4 | task | `TASK-AR-332` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-332.md` | 사진/문서를 task·메시지에 드래그드롭/붙여넣기로 첨부하고, 미리보기·다운로드할 수 있게 한다 (Notion/Slack/Jira 모델). |
 | 0.20.5 | Task 0.20.5 | task | `TASK-AR-333` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-333.md` | taskset/보드/이벤트를 표준 포맷으로 내보내고, 외부 목록을 task로 일괄 가져올 수 있게 한다 (Notion/Jira 모델). |
 | 0.20.6 | Task 0.20.6 | task | `TASK-AR-334` | `TASKSET-AR-UI-PLATFORM-EXTENSIONS` | planned | `agents/lead_engineer/tasks/TASK-AR-334.md` | task/taskset/메시지/이벤트/evidence/reviews 문서를 한 검색창에서 풀텍스트로 찾고 즉시 이동한다 (Notion 검색 + Slack… |

@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-13T19:59:17+09:00",
+  "generated_at": "2026-06-13T21:26:38+09:00",
   "record_count": 235,
   "finding_count": 0,
   "findings": [],
@@ -1697,7 +1697,7 @@
       "title": "Owner가 UI에서 taskset을 직접 만들고, task를 넣고 빼고, 일괄 편집할 수 있게 한다 (Linear Projects / Notion DB…",
       "path": "agents/lead_engineer/tasks/TASK-AR-329.md",
       "parent_id": "TASKSET-AR-UI-PLATFORM-EXTENSIONS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-330",
@@ -1708,7 +1708,7 @@
       "title": "task 계층(서브태스크)과 의존성(blocks/blocked-by)을 데이터 모델로 정식화하고 타임라인(Gantt)·의존 그래프로 시각화한다.",
       "path": "agents/lead_engineer/tasks/TASK-AR-330.md",
       "parent_id": "TASKSET-AR-UI-PLATFORM-EXTENSIONS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-331",
@@ -1719,7 +1719,7 @@
       "title": "Notion형 커스텀 속성과 Monday/ClickUp형 \"when X then Y\" 자동화 규칙, Linear형 트리아지 큐를 제공한다.",
       "path": "agents/lead_engineer/tasks/TASK-AR-331.md",
       "parent_id": "TASKSET-AR-UI-PLATFORM-EXTENSIONS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-332",

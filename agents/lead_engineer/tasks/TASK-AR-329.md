@@ -14,7 +14,11 @@ registered_at: 2026-06-11T18:56:35+09:00
 created_at: 2026-06-11T18:56:35+09:00
 updated_at: 2026-06-11T18:56:35+09:00
 title: Taskset 라이프사이클 UI — 생성/보관/이동/벌크/undo/템플릿
-status: planned
+status: completed
+started_at: 2026-06-13T20:08:18+09:00
+completed_at: 2026-06-13T20:55:00+09:00
+resolution: done
+verification_status: passed
 priority: P1
 difficulty: L
 est_hours: 10

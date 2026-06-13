@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-13T20:57:17+09:00
-record_count: 438
+generated_at: 2026-06-13T21:26:39+09:00
+record_count: 441
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `438` review and evidence records under `reviews/`.
+- Summary: indexed `441` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `438` files |
+| Reviews covered | pass | `441` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -471,6 +471,9 @@ record_count: 438
 | `reviews/W4B-2026-06-13-TASK-AR-326.md` | `W4B-2026-06-13-TASK-AR-326` | verification | record | n/a | W4b Independent Verification — TASK-AR-326 (Realtime Presence + Live Map) |
 | `reviews/W4B-2026-06-13-TASK-AR-327.md` | `W4B-2026-06-13-TASK-AR-327` | verification | record | n/a | W4b Independent Verification — TASK-AR-327 (Channels View + Meeting/Seminar) |
 | `reviews/W4B-2026-06-13-TASK-AR-328.md` | `W4B-2026-06-13-TASK-AR-328` | verification | record | n/a | W4b Independent Verification — TASK-AR-328 (Taskset Boundary Execution Guard) |
+| `reviews/W4B-2026-06-13-TASK-AR-329.md` | `W4B-2026-06-13-TASK-AR-329` | verification | record | n/a | W4b Independent Verification — TASK-AR-329 (Taskset Lifecycle UI) |
+| `reviews/W4B-2026-06-13-TASK-AR-330.md` | `W4B-2026-06-13-TASK-AR-330` | verification | record | n/a | W4b Independent Verification — TASK-AR-330 (Subtask/Dependency + Timeline + Graph) |
+| `reviews/W4B-2026-06-13-TASK-AR-331.md` | `W4B-2026-06-13-TASK-AR-331` | verification | record | n/a | W4b Independent Verification — TASK-AR-331 (Custom Properties + Labels + Automation + Triage) |
 | `reviews/W4B-2026-06-13-TASK-AR-362.md` | `W4B-2026-06-13-TASK-AR-362` | verification | record | n/a | W4b Independent Verification — TASK-AR-362 (Board Peek + DnD + Quick Actions) |
 
 ## Risks / Blockers
