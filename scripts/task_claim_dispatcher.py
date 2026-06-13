@@ -14,6 +14,13 @@ the claim's worker agent_instance_id, and a verification evidence ref is require
 by default (--allow-missing-evidence is a loud transitional escape). Claims that
 were already released before this gate existed are exempt; only new release
 invocations enforce it.
+
+Create runs the deferred plan revalidation check (T2, TASK-AR-506) by default:
+when the claim's task_set_id has a recorded assumption set in
+agents/project/work-items/PLAN-ASSUMPTIONS.json, drifted anchors refuse claim
+creation until a replan review re-records them (--skip-plan-check is a loud
+transitional escape). This makes the W0~W6 lifecycle the default for all work,
+not an opt-in per taskset.
 """
 
 from __future__ import annotations
@@ -28,6 +35,7 @@ from pathlib import Path
 from typing import Any
 
 import backlog_board
+import plan_assumption_gate
 from agent_instance_registry import record_claim_instance
 from footprint_conflict_gate import ACTIVE_CLAIM_STATUSES as FOOTPRINT_ACTIVE_STATUSES
 from footprint_conflict_gate import footprints_overlap
@@ -392,6 +400,84 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> None:
         print(f"display_name={claim.get('display_name')}")
 
 
+def _plan_assumption_findings(root: Path, task_set_id: str) -> list[str] | None:
+    """Return T2 drift findings for the taskset's recorded assumption set.
+
+    ``None`` means no snapshot is recorded for this taskset (T0 never ran);
+    an empty list means the snapshot exists and every anchor still holds.
+    """
+    registry = plan_assumption_gate._load_registry(root)  # noqa: SLF001
+    entry = next(
+        (
+            item
+            for item in registry.get("assumption_sets", [])
+            if isinstance(item, dict) and item.get("taskset_id") == task_set_id
+        ),
+        None,
+    )
+    if entry is None:
+        return None
+    findings: list[str] = []
+    for anchor in entry.get("anchors", []):
+        finding = plan_assumption_gate._check_anchor(root, anchor)  # noqa: SLF001
+        if finding is not None:
+            findings.append(finding)
+    return findings
+
+
+def _plan_check_refusal(root: Path, task_set_id: str, *, skip_plan_check: bool) -> bool:
+    """T2 dispatch gate: verify the taskset's recorded plan assumptions.
+
+    Returns True when claim creation must be refused. All output goes to
+    stderr so --json stdout stays machine-readable.
+    """
+    try:
+        findings = _plan_assumption_findings(root, task_set_id)
+    except (OSError, ValueError) as exc:
+        findings = [f"registry-unreadable:{plan_assumption_gate.REGISTRY_REL}:{exc}"]
+    if findings is None:
+        print(
+            f"note: no plan-assumption snapshot recorded for {task_set_id} "
+            "(T0 skipped at registration); T2 drift check has nothing to verify. "
+            "Record one with: python scripts/plan_assumption_gate.py record "
+            f"--taskset {task_set_id} --design-record <review> --anchor <path>",
+            file=sys.stderr,
+        )
+        return False
+    if not findings:
+        print(f"plan-assumption-gate: pass ({task_set_id})", file=sys.stderr)
+        return False
+    if skip_plan_check:
+        print(
+            "WARNING: --skip-plan-check used: creating claim for "
+            f"{task_set_id} DESPITE drifted plan assumptions (T2 dispatch gate bypassed):",
+            file=sys.stderr,
+        )
+        for finding in findings:
+            print(f"  - {finding}", file=sys.stderr)
+        print(
+            "This is a transitional escape; run a replan review and re-record "
+            "anchors as soon as possible.",
+            file=sys.stderr,
+        )
+        return False
+    print(
+        f"plan assumption drift detected for {task_set_id}: "
+        "claim creation refused (T2 dispatch gate)",
+        file=sys.stderr,
+    )
+    for finding in findings:
+        print(f"- {finding}", file=sys.stderr)
+    print(
+        "action=drifted plan assumptions; run a replan review for the affected "
+        "taskset, then re-record anchors (python scripts/plan_assumption_gate.py "
+        f"record --taskset {task_set_id} --design-record <review> --anchor <path>) "
+        "before dispatch. --skip-plan-check is a loud transitional escape only.",
+        file=sys.stderr,
+    )
+    return True
+
+
 def cmd_create(args: argparse.Namespace) -> int:
     root = args.root.resolve()
     errors = _validate_create_args(args)
@@ -409,6 +495,12 @@ def cmd_create(args: argparse.Namespace) -> int:
                 file=sys.stderr,
             )
             return 1
+
+    task_set_id = str(args.task_set_id or "").strip()
+    if task_set_id and _plan_check_refusal(
+        root, task_set_id, skip_plan_check=args.skip_plan_check
+    ):
+        return 1
 
     claim = _build_claim(args, records, target_files=_resolve_target_files(root, args))
     creation_errors = _claim_creation_errors(root, claim, records)
@@ -684,6 +776,15 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--log-path")
     create.add_argument("--lease-minutes", type=int, default=30)
     create.add_argument("--allow-parallel-task-set", action="store_true")
+    create.add_argument(
+        "--skip-plan-check",
+        action="store_true",
+        help=(
+            "Transitional escape: create the claim even when the taskset's "
+            "recorded plan assumptions (T0 snapshot) have drifted; prints a "
+            "loud warning instead of refusing (T2 dispatch gate bypass)"
+        ),
+    )
     create.add_argument("--json", action="store_true")
     create.set_defaults(func=cmd_create)
 

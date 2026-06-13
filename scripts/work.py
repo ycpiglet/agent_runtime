@@ -3,6 +3,13 @@
 This is the scaffolded, non-LLM path for planner-approved work intake. It
 creates stable records first; generated views such as hierarchy numbers and the
 backlog board are refreshed afterward.
+
+Lifecycle defaults (W0~W6, TASK-AR-506):
+- ``new``/``register`` automatically records the taskset's plan-assumption
+  snapshot (T0) via ``plan_assumption_gate``; ``--no-plan-snapshot`` opts out.
+  The matching T2 drift check runs in ``task_claim_dispatcher.py create``.
+- ``status`` is the W0 session-start visibility surface: active claims,
+  git worktrees, and unmerged agent-branch divergence in one read-only view.
 """
 
 from __future__ import annotations
@@ -22,7 +29,9 @@ from typing import Any
 
 import backlog_board
 import evidence_index_generator
+import inflight_overlay
 import now as now_util
+import plan_assumption_gate
 import task_identity
 import work_item_classifier
 
@@ -226,6 +235,13 @@ WORK_VIEWS_SCHEMA = "agent-runtime-work-views/v1"
 WORK_VIEWS_PATH = Path("agents/project/work-items/WORK-VIEWS.json")
 VIEW_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 MISSING_GROUP_VALUE = "(none)"
+# T0 default anchors: the registration/dispatch flow itself. If these scripts
+# change between registration (T0) and dispatch (T2), the plan was made
+# against a different flow and must be revalidated before claiming.
+PLAN_SNAPSHOT_DEFAULT_ANCHORS = (
+    "scripts/work.py",
+    "scripts/task_claim_dispatcher.py",
+)
 
 
 class WorkRegistrationError(RuntimeError):
@@ -1154,6 +1170,61 @@ def register(root: Path, input_path: Path, *, now: str | None = None) -> dict[st
         "tasks": [_rel(root, _task_path(root, str(task["display_id"]))) for task in tasks],
         "units": [_rel(root, path) for path in _unit_targets(root, tasks)],
         "reservation_group_id": group_id,
+    }
+
+
+def _is_plan_flow_script(entry: str) -> bool:
+    normalized = entry.replace("\\", "/").strip()
+    return normalized.startswith("scripts/") and normalized.endswith(".py")
+
+
+def _plan_snapshot_design_record(root: Path, payload: dict[str, Any], review_rel: str) -> str:
+    origin_ref = str(payload.get("origin_ref") or "").strip().replace("\\", "/")
+    if origin_ref and (root / origin_ref).is_file():
+        return origin_ref
+    return review_rel
+
+
+def _plan_snapshot_anchors(payload: dict[str, Any], design_record: str) -> list[str]:
+    anchors = {design_record, *PLAN_SNAPSHOT_DEFAULT_ANCHORS}
+    tasks = payload.get("tasks")
+    for task in tasks if isinstance(tasks, list) else []:
+        if not isinstance(task, dict):
+            continue
+        sources = [task.get("target_files")]
+        units = task.get("units")
+        for unit in units if isinstance(units, list) else []:
+            if isinstance(unit, dict):
+                sources.append(unit.get("target_files"))
+        for source in sources:
+            for entry in _text_lines(source):
+                if _is_plan_flow_script(entry):
+                    anchors.add(entry.replace("\\", "/").strip())
+    return sorted(anchors)
+
+
+def record_plan_snapshot(root: Path, input_path: Path, result: dict[str, Any]) -> dict[str, Any]:
+    """T0: record the plan-assumption snapshot for a freshly registered taskset.
+
+    Default anchor set: the design record (the input's ``origin_ref`` when that
+    file exists, otherwise the generated registration review) plus the
+    registration/dispatch flow scripts and every ``scripts/*.py`` the taskset's
+    tasks/units declare in ``target_files``. Deferred revalidation: drift
+    against these anchors blocks claim creation at T2
+    (``task_claim_dispatcher.py create``) until a replan review re-records.
+    """
+    payload = _read_json(input_path)
+    taskset = payload.get("taskset") if isinstance(payload.get("taskset"), dict) else {}
+    taskset_id = str(taskset.get("id") or "").strip()
+    design_record = _plan_snapshot_design_record(root, payload, str(result.get("review") or ""))
+    anchors = _plan_snapshot_anchors(payload, design_record)
+    plan_assumption_gate.cmd_record(root, taskset_id, design_record, anchors)
+    return {
+        "status": "recorded",
+        "taskset_id": taskset_id,
+        "design_record": design_record,
+        "anchors": anchors,
+        "registry": plan_assumption_gate.REGISTRY_REL,
     }
 
 
@@ -2844,6 +2915,18 @@ def cmd_new(args: argparse.Namespace) -> int:
             print(f"- {finding}", file=sys.stderr)
         return 1
     print("work-new: pass")
+    if args.no_plan_snapshot:
+        print(
+            "plan-snapshot: skipped (--no-plan-snapshot); record one before dispatch:"
+            " python scripts/plan_assumption_gate.py record --taskset <id>"
+            " --design-record <review> --anchor <path>"
+        )
+        result["plan_snapshot"] = {"status": "skipped", "reason": "--no-plan-snapshot"}
+    elif result.get("status") != "created":
+        print("plan-snapshot: skipped (records already existed; existing snapshot preserved)")
+        result["plan_snapshot"] = {"status": "skipped", "reason": "already_exists"}
+    else:
+        result["plan_snapshot"] = record_plan_snapshot(args.root, args.input, result)
     if args.json:
         print(json.dumps(result, ensure_ascii=False, indent=2))
     else:
@@ -2854,6 +2937,124 @@ def cmd_new(args: argparse.Namespace) -> int:
 
 def cmd_now(args: argparse.Namespace) -> int:
     print(now_util.value(utc=args.utc, date=args.date, epoch=args.epoch))
+    return 0
+
+
+def _ascii_status(value: Any) -> str:
+    return str(value if value is not None else "").encode("ascii", "replace").decode("ascii")
+
+
+def _git_worktrees(root: Path) -> list[dict[str, str]] | None:
+    """List git worktrees for root; None when git/worktree info is unavailable."""
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(root), "worktree", "list", "--porcelain"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except (OSError, FileNotFoundError):
+        return None
+    if proc.returncode != 0:
+        return None
+    worktrees: list[dict[str, str]] = []
+    current: dict[str, str] = {}
+    for raw in proc.stdout.splitlines():
+        line = raw.strip()
+        if not line:
+            if current:
+                worktrees.append(current)
+                current = {}
+            continue
+        if line.startswith("worktree "):
+            if current:
+                worktrees.append(current)
+            current = {"path": line[len("worktree "):], "branch": ""}
+        elif line.startswith("branch ") and current:
+            branch = line[len("branch "):]
+            if branch.startswith("refs/heads/"):
+                branch = branch[len("refs/heads/"):]
+            current["branch"] = branch
+        elif line == "detached" and current:
+            current["branch"] = "(detached)"
+    if current:
+        worktrees.append(current)
+    return worktrees
+
+
+def _active_claim_rows(root: Path) -> list[dict[str, Any]]:
+    claims_dir = root / "agents" / "runtime" / "task_claims"
+    rows: list[dict[str, Any]] = []
+    if claims_dir.is_dir():
+        for path in sorted(claims_dir.glob("*.json"), key=lambda item: item.name.lower()):
+            try:
+                payload = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if not isinstance(payload, dict):
+                continue
+            if str(payload.get("status") or "").strip().lower() not in ACTIVE_CLAIM_STATUSES:
+                continue
+            rows.append(
+                {
+                    "task_id": str(payload.get("task_id") or ""),
+                    "task_set_id": str(payload.get("task_set_id") or ""),
+                    "claim_id": str(payload.get("claim_id") or path.stem),
+                    "status": str(payload.get("status") or ""),
+                    "agent": str(payload.get("display_name") or payload.get("agent_instance_id") or ""),
+                    "worktree_path": str(payload.get("worktree_path") or ""),
+                    "path": _rel(root, path),
+                }
+            )
+    rows.sort(key=lambda row: (row["task_id"], row["claim_id"]))
+    return rows
+
+
+def status_work(root: Path) -> dict[str, Any]:
+    """W0 session-start visibility: active claims + worktrees + in-flight branches.
+
+    Read-only. This is the lifecycle entrypoint: never start on a problem
+    that already has an active claim here.
+    """
+    overlay = inflight_overlay.build_overlay(root)
+    return {
+        "status": "ok",
+        "root": str(root),
+        "active_claims": _active_claim_rows(root),
+        "worktrees": _git_worktrees(root),
+        "inflight": {
+            "summary": inflight_overlay.summary_line(overlay),
+            "counts": overlay.get("summary", {}),
+        },
+    }
+
+
+def cmd_status(args: argparse.Namespace) -> int:
+    result = status_work(args.root)
+    if args.json:
+        print(json.dumps(result, ensure_ascii=True, indent=2))
+        return 0
+    print("work-status: ok")
+    print(f"root={_ascii_status(result['root'])}")
+    claims = result["active_claims"]
+    print(f"active_claims={len(claims)}")
+    for claim in claims:
+        print(
+            f"- task={_ascii_status(claim['task_id'])}"
+            f" status={_ascii_status(claim['status'])}"
+            f" agent={_ascii_status(claim['agent'])}"
+            f" claim={_ascii_status(claim['claim_id'])}"
+            f" worktree={_ascii_status(claim['worktree_path'])}"
+        )
+    worktrees = result["worktrees"]
+    if worktrees is None:
+        print("worktrees=unavailable")
+    else:
+        print(f"worktrees={len(worktrees)}")
+        for tree in worktrees:
+            print(f"- path={_ascii_status(tree['path'])} branch={_ascii_status(tree.get('branch'))}")
+    print(_ascii_status(result["inflight"]["summary"]))
     return 0
 
 
@@ -3092,17 +3293,33 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--root", type=Path, default=ROOT)
     sub = parser.add_subparsers(dest="command", required=True)
 
+    no_snapshot_help = (
+        "Opt out of the automatic T0 plan-assumption snapshot (discouraged); "
+        "without a snapshot the T2 dispatch drift check has nothing to verify"
+    )
     new = sub.add_parser("new", help="Create work records from structured JSON input")
     new.add_argument("--input", type=Path, required=True)
     new.add_argument("--now")
+    new.add_argument("--no-plan-snapshot", action="store_true", help=no_snapshot_help)
     new.add_argument("--json", action="store_true")
     new.set_defaults(func=cmd_new)
 
     register_cmd = sub.add_parser("register", help="Alias for new")
     register_cmd.add_argument("--input", type=Path, required=True)
     register_cmd.add_argument("--now")
+    register_cmd.add_argument("--no-plan-snapshot", action="store_true", help=no_snapshot_help)
     register_cmd.add_argument("--json", action="store_true")
     register_cmd.set_defaults(func=cmd_new)
+
+    status_cmd = sub.add_parser(
+        "status",
+        help=(
+            "W0 session-start visibility: active claims, git worktrees, and "
+            "in-flight (unmerged agent branch) divergence in one read-only view"
+        ),
+    )
+    status_cmd.add_argument("--json", action="store_true")
+    status_cmd.set_defaults(func=cmd_status)
 
     now_cmd = sub.add_parser("now", help="Print the canonical project timestamp")
     now_group = now_cmd.add_mutually_exclusive_group()
