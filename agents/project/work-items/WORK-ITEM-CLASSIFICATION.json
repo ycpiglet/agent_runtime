@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-13T14:21:03+09:00",
+  "generated_at": "2026-06-13T15:18:48+09:00",
   "record_count": 233,
   "finding_count": 0,
   "findings": [],
@@ -2082,7 +2082,7 @@
       "title": "Ops Ergonomics",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-UNASSIGNED",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-523",
@@ -2093,7 +2093,7 @@
       "title": "Nothing surfaces the 500-series observability at session start. Add scripts/session_d…",
       "path": "agents/lead_engineer/tasks/TASK-AR-523.md",
       "parent_id": "TASKSET-AR-OPS-ERGONOMICS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-524",
@@ -2104,7 +2104,7 @@
       "title": "Make the new 500-series tools discoverable as trigger-based skills: wave-conductor (w…",
       "path": "agents/lead_engineer/tasks/TASK-AR-524.md",
       "parent_id": "TASKSET-AR-OPS-ERGONOMICS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-525",
@@ -2115,7 +2115,7 @@
       "title": "Register the new dashboard hook + 5 skills + the standalone tools (wave_dispatcher/me…",
       "path": "agents/lead_engineer/tasks/TASK-AR-525.md",
       "parent_id": "TASKSET-AR-OPS-ERGONOMICS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "initiative:INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",

@@ -9,7 +9,7 @@
   "callsite_id": "claude-w8-ar523",
   "pane_id": "claude-w8-ar523",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-OPS-ERGONOMICS",
   "project_id": "",
   "unit_id": "",
@@ -17,20 +17,20 @@
   "model_tier": "",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "implementing",
-  "progress_pct": 0,
+  "phase": "complete",
+  "progress_pct": 100,
   "step_index": 1,
   "step_total": 6,
   "status_text": "AR-523: session dashboard hook",
   "worktree_path": ".worktrees/TASK-AR-523",
   "branch": "claude/task-ar-523-session-dashboard",
   "claimed_at": "2026-06-13T14:21:49+09:00",
-  "last_heartbeat": "2026-06-13T14:21:49+09:00",
-  "updated_at": "2026-06-13T14:21:49+09:00",
+  "last_heartbeat": "2026-06-13T15:16:53+09:00",
+  "updated_at": "2026-06-13T15:16:53+09:00",
   "expires_at": "2026-06-13T14:51:49+09:00",
   "lease": {
     "claimed_at": "2026-06-13T14:21:49+09:00",
-    "heartbeat_at": "2026-06-13T14:21:49+09:00",
+    "heartbeat_at": "2026-06-13T15:16:53+09:00",
     "expires_at": "2026-06-13T14:51:49+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260613-142149-task-ar-523-e3be.handoff.md",
@@ -43,5 +43,9 @@
     ".codex/hooks.json",
     "src/agent_runtime/templates/project/.codex/hooks.json",
     "src/agent_runtime/templates/project/scripts/session_dashboard.py"
-  ]
+  ],
+  "released_at": "2026-06-13T15:16:53+09:00",
+  "verified_by": "inst-w4b-ar523-orchestrator",
+  "verifier_role": "reviewer",
+  "verification_evidence": "agents/runtime/task_claims/CLAIM-20260613-142149-task-ar-523-e3be.handoff.md"
 }
