@@ -131,6 +131,9 @@ HTML = """<!doctype html>
           <button class="sidebar-link" type="button" role="tab" data-view="map" data-route="agents/map" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Live Map</span>
           </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="office" data-route="agents/office" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9971;</span><span class="sidebar-label">Office Map</span>
+          </button>
         </div>
         <div class="sidebar-group" data-group="comms">
           <span class="sidebar-group-title">COMMS</span>
@@ -606,6 +609,18 @@ HTML = """<!doctype html>
             </section>
           </div>
         </div>
+        <div id="view-office" class="view">
+          <section class="office-map" aria-label="2D office map">
+            <header class="office-map-header">
+              <h2>Office Map</h2>
+              <p id="office-map-summary" class="office-map-summary" role="status">no agents</p>
+            </header>
+            <div class="office-map-stage">
+              <div id="office-map-grid" class="office-map-grid" aria-label="Company floor plan"></div>
+            </div>
+            <ul id="office-map-legend" class="office-map-legend" aria-label="Action glyph legend"></ul>
+          </section>
+        </div>
         <div id="view-statemachines" class="view">
           <section class="state-machine-viewer" aria-label="State machine viewer">
             <header class="state-machine-header">
@@ -889,6 +904,12 @@ CSS = """/*
   --heat-normal: var(--primary);
   --heat-busy: var(--warning);
   --heat-overload: var(--danger);
+  /* 2D office map (TASK-AR-364). Room surfaces reuse the panel tokens; each room
+     accent maps to an existing semantic color so no per-room raw color leaks. */
+  --office-floor: var(--surface-grad);
+  --office-room-bg: var(--panel);
+  --office-room-line: var(--line-strong);
+  --office-avatar-bg: var(--panel-strong);
 }
 [data-theme="dark"] {
   color-scheme: dark;
@@ -975,6 +996,11 @@ CSS = """/*
   --heat-normal: var(--primary-hover);
   --heat-busy: var(--warning);
   --heat-overload: var(--danger);
+  /* 2D office map (TASK-AR-364) */
+  --office-floor: var(--surface-grad);
+  --office-room-bg: var(--panel);
+  --office-room-line: var(--line-strong);
+  --office-avatar-bg: var(--panel-strong);
 }
 * { box-sizing: border-box; }
 html { background: var(--canvas); }
@@ -2058,6 +2084,129 @@ textarea:focus {
 .live-map-legend .legend-assignment { border-top-color: var(--success); }
 .live-map-legend .legend-review { border-top-color: var(--amber); }
 .live-map-legend .legend-block { border-top-color: var(--danger); }
+/* --- 2D Office Map (TASK-AR-364) --- */
+.office-map {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.office-map-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.office-map-header h2 { margin: 0; }
+.office-map-summary {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.office-map-stage {
+  border: 1px solid var(--office-room-line);
+  border-radius: 12px;
+  padding: 10px;
+  background: var(--office-floor);
+}
+.office-map-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(8, minmax(34px, 1fr));
+  gap: 6px;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+}
+.office-room {
+  position: relative;
+  border: 1px solid var(--office-room-line);
+  border-top: 3px solid var(--office-room-line);
+  border-radius: 10px;
+  background: var(--office-room-bg);
+  padding: 6px 8px;
+  overflow: hidden;
+}
+.office-room.token-violet { border-top-color: var(--violet); }
+.office-room.token-blue { border-top-color: var(--blue); }
+.office-room.token-amber { border-top-color: var(--amber); }
+.office-room.token-success { border-top-color: var(--success); }
+.office-room.token-primary { border-top-color: var(--primary); }
+.office-room-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+.office-room-count {
+  font-size: 10px;
+  color: var(--subtle);
+}
+.office-agent {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  width: 46px;
+  text-align: center;
+}
+.office-agent-glyph {
+  font-size: 14px;
+  line-height: 1;
+}
+.office-agent-sprite {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--office-avatar-bg);
+  border: 2px solid var(--office-room-line);
+}
+.office-agent.presence-working .office-agent-sprite { border-color: var(--blue); }
+.office-agent.presence-reviewing .office-agent-sprite { border-color: var(--amber); }
+.office-agent.presence-in_meeting .office-agent-sprite { border-color: var(--violet); }
+.office-agent.presence-online .office-agent-sprite { border-color: var(--success); }
+.office-agent.presence-offline .office-agent-sprite { border-color: var(--office-room-line); opacity: 0.7; }
+.office-agent-name {
+  font-size: 9px;
+  color: var(--muted);
+  max-width: 46px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.office-map-empty {
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--subtle);
+  font-size: 13px;
+}
+.office-map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 11px;
+  color: var(--muted);
+}
+.office-map-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.office-map-legend .legend-glyph { font-size: 14px; }
 .activity-feed {
   position: fixed;
   right: 18px;
@@ -7267,6 +7416,111 @@ function renderMap() {
   `).join("") : `<div class="empty">No roadmap milestones</div>`;
 }
 
+// ----- TASK-AR-364: 2D office map -----
+// Renders the company floor plan: one room per team function with cute avatar
+// sprites and an emoji action glyph above each. All emoji come from the server
+// payload (agent.glyph / action_glyphs) so this code stays ASCII-only (cp949
+// node-check guard). In-meeting agents are placed in the meeting room by the
+// Python derivation; this view just paints what it is given.
+function officeMapData() {
+  return runtimeState.office_map || {
+    world: { cols: 12, rows: 8 },
+    rooms: [],
+    agents: [],
+    action_glyphs: {},
+    action_labels: {},
+    totals: { agents: 0, actions: {} },
+  };
+}
+
+function renderOfficeMap() {
+  const grid = $("office-map-grid");
+  if (!grid) return;
+  const data = officeMapData();
+  const rooms = data.rooms || [];
+  const agents = data.agents || [];
+  const totals = data.totals || { agents: 0, actions: {} };
+
+  const actionParts = Object.keys(totals.actions || {}).sort().map((key) => `${key} ${totals.actions[key]}`);
+  setText(
+    "office-map-summary",
+    `${totals.agents || 0} agents - ${actionParts.join(" / ") || "no activity"}`
+  );
+
+  while (grid.firstChild) grid.removeChild(grid.firstChild);
+
+  if (!rooms.length) {
+    const note = document.createElement("div");
+    note.className = "office-map-empty";
+    note.textContent = "No agents to place on the map";
+    grid.appendChild(note);
+  } else {
+    const agentsByRoom = {};
+    agents.forEach((agent) => {
+      (agentsByRoom[agent.room_id] = agentsByRoom[agent.room_id] || []).push(agent);
+    });
+
+    rooms.forEach((room) => {
+      const rect = room.rect || { col: 0, row: 0, cols: 1, rows: 1 };
+      const cell = document.createElement("div");
+      cell.className = `office-room token-${room.token || "primary"}`;
+      cell.dataset.roomId = room.id;
+      cell.style.gridColumn = `${rect.col + 1} / span ${rect.cols}`;
+      cell.style.gridRow = `${rect.row + 1} / span ${rect.rows}`;
+
+      const name = document.createElement("div");
+      name.className = "office-room-name";
+      name.textContent = String(room.name || room.id);
+      cell.appendChild(name);
+
+      const count = document.createElement("div");
+      count.className = "office-room-count";
+      count.textContent = `${room.occupant_count || 0} here`;
+      cell.appendChild(count);
+
+      (agentsByRoom[room.id] || []).forEach((agent) => {
+        const pos = agent.cell || { fx: 0.5, fy: 0.5 };
+        const sprite = document.createElement("div");
+        sprite.className = `office-agent presence-${agent.presence || "offline"}`;
+        sprite.dataset.agentId = agent.id || "";
+        sprite.dataset.entityId = agent.id || "";
+        sprite.style.left = `${Math.round((pos.fx || 0.5) * 100)}%`;
+        sprite.style.top = `${Math.max(26, Math.round((pos.fy || 0.5) * 100))}%`;
+        sprite.title = `${agent.display_name || agent.role} - ${agent.action_label || agent.action || ""}`;
+
+        const glyph = document.createElement("div");
+        glyph.className = "office-agent-glyph";
+        // Emoji glyph is server-provided data (never an ASCII-breaking literal).
+        glyph.textContent = agent.glyph || "";
+        sprite.appendChild(glyph);
+
+        const avatar = document.createElement("div");
+        avatar.className = "office-agent-sprite";
+        avatar.textContent = agent.avatar || "AG";
+        sprite.appendChild(avatar);
+
+        const label = document.createElement("div");
+        label.className = "office-agent-name";
+        label.textContent = String(agent.callsign || agent.role || "");
+        sprite.appendChild(label);
+
+        cell.appendChild(sprite);
+      });
+
+      grid.appendChild(cell);
+    });
+  }
+
+  const legend = $("office-map-legend");
+  if (legend) {
+    const glyphs = data.action_glyphs || {};
+    const labels = data.action_labels || {};
+    legend.innerHTML = Object.keys(glyphs).map((action) =>
+      `<li><span class="legend-glyph">${escapeHtml(glyphs[action])}</span>${escapeHtml(labels[action] || action)}</li>`
+    ).join("");
+  }
+}
+
 // ----- TASK-AR-336: interactive state-machine viewer -----
 const SM_SIGNAL_LABELS = { pass: "Proceed (pass)", watch: "Needs attention (watch)", block: "Stop until fixed (block)" };
 
@@ -9407,6 +9661,7 @@ function renderAll() {
   renderTimeline();
   renderDependencyGraph();
   renderMap();
+  renderOfficeMap();
   renderStateMachineViewer();
   renderSources();
   renderCommands();
@@ -10397,6 +10652,8 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/graph": "graph",
         "/api/live_map": "live_map",
         "/api/live-map": "live_map",
+        "/api/office_map": "office_map",
+        "/api/office-map": "office_map",
         "/api/state-machines": "state_machines",
         "/api/roadmap": "roadmap",
         "/api/roadmap-timeline": "roadmap_timeline",

@@ -2974,3 +2974,139 @@ def test_ui_console_inbox_notification_fields_are_escaped(tmp_path):
     assert any("<script>alert(1)</script>" in body for body in bodies)
     html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
     assert "<script>alert(1)</script>" not in html
+
+
+# ----- TASK-AR-364: 2D office map view -----
+
+
+def _write_office_instance(root: Path, instance_id: str, *, role: str, team_id: str = "agent-runtime-core") -> None:
+    record = {
+        "schema": "agent-runtime-agent-instance/v1",
+        "agent_instance_id": instance_id,
+        "callsign": f"claude/{instance_id}",
+        "display_name": f"claude/{instance_id}",
+        "role": role,
+        "team_id": team_id,
+        "model": "claude-opus",
+        "spawned_at": "2026-06-14T10:00:00+09:00",
+    }
+    _write(root / "agents" / "runtime" / "instances" / f"{instance_id}.json", json.dumps(record))
+
+
+def _write_office_claim(root: Path, claim_id: str, instance_id: str, *, status: str, mode: str | None = None) -> None:
+    record = {
+        "schema": "agent-runtime-task-claim/v1",
+        "claim_id": claim_id,
+        "task_id": "TASK-AR-950",
+        "agent_instance_id": instance_id,
+        "status": status,
+        "claimed_at": "2026-06-14T10:30:00+09:00",
+        "last_heartbeat": "2026-06-14T10:40:00+09:00",
+    }
+    if mode is not None:
+        record["mode"] = mode
+    _write(root / "agents" / "runtime" / "task_claims" / f"{claim_id}.json", json.dumps(record))
+
+
+def test_ui_console_office_map_view_registered_in_agents_sidebar(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+
+    # New Office Map view lives in the AGENTS group with a data-view + data-route.
+    assert 'data-view="office"' in html
+    assert 'data-route="agents/office"' in html
+    # And a dedicated view container with the floor-plan grid + legend anchors.
+    assert 'id="view-office"' in html
+    assert 'id="office-map-grid"' in html
+    assert 'id="office-map-summary"' in html
+    assert 'id="office-map-legend"' in html
+
+
+def test_ui_console_office_map_route_serves_world_areas_and_agents(tmp_path):
+    _write_office_instance(tmp_path, "inst-le", role="lead-engineer")
+    _write_office_claim(tmp_path, "CLAIM-le", "inst-le", status="in_progress")
+
+    underscore = ui_console.build_response("/api/office_map", tmp_path)
+    hyphen = ui_console.build_response("/api/office-map", tmp_path)
+    assert underscore.status == 200 and hyphen.status == 200
+    payload = json.loads(underscore.body.decode("utf-8"))
+    assert payload["resource"] == "office_map"
+    office = payload["items"]
+    assert office["schema"] == "agent-runtime-office-map/v1"
+    # World -> areas tree (rooms per team) and a placed agent in the dev room.
+    assert office["world"]["areas"] == ["planning", "dev", "qa", "release", "meeting"]
+    placed = {agent["role"]: agent["room_id"] for agent in office["agents"]}
+    assert placed["lead-engineer"] == "dev"
+
+
+def test_ui_console_office_map_render_function_is_ascii_only_and_node_check(tmp_path):
+    # The office-map JS must be ASCII-only (cp949 node-check guard) -- emoji are
+    # served from the Python payload (agent.glyph / action_glyphs), never inlined.
+    import shutil
+    import subprocess
+
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert "function renderOfficeMap(" in js
+    assert "renderOfficeMap()" in js  # wired into renderAll
+    start = js.index("function renderOfficeMap")
+    end = js.index("function renderStateMachineViewer", start)
+    office_block = js[start:end]
+    non_ascii = [ch for ch in office_block if ord(ch) > 127]
+    assert not non_ascii, f"office-map JS must be ASCII-only, found: {non_ascii[:5]}"
+    # The glyph is rendered from server data, not a literal emoji in the JS.
+    assert "agent.glyph" in office_block
+
+    if shutil.which("node") is None:
+        import pytest
+
+        pytest.skip("node not available")
+    proc = subprocess.run(["node", "--check", "-"], input=js, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stderr
+
+
+def test_ui_console_office_map_css_uses_tokens_not_raw_color(tmp_path):
+    # (TASK-AR-364 tokenization guard) Every color the office-map CSS introduces
+    # must flow through var(--token); no raw hex/rgba outside the token blocks.
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    body_css = css.replace(_root_token_block(css), "").replace(_dark_theme_block(css), "")
+    hex_pattern = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+    rgba_pattern = re.compile(r"rgba?\(")
+    office_lines = [
+        line for line in body_css.splitlines()
+        if any(token in line for token in (".office-map", ".office-room", ".office-agent"))
+    ]
+    assert office_lines, "expected office-map CSS rules to exist"
+    for line in office_lines:
+        assert not hex_pattern.search(line), f"raw hex in office-map CSS: {line.strip()}"
+        assert not rgba_pattern.search(line), f"raw rgba in office-map CSS: {line.strip()}"
+
+    # The new office tokens are defined in BOTH theme blocks.
+    assert "--office-room-bg:" in _root_token_block(css)
+    assert "--office-room-bg:" in _dark_theme_block(css)
+    # Rooms consume semantic accent tokens (no per-room raw color).
+    assert ".office-room.token-blue { border-top-color: var(--blue); }" in css
+
+
+def test_ui_console_office_map_in_meeting_agents_render_in_meeting_room(tmp_path):
+    # TASK-AR-361 integration through the route: a meeting-mode claim relocates
+    # the agent to the meeting room and carries the meeting glyph.
+    _write_office_instance(tmp_path, "inst-le", role="lead-engineer")
+    _write_office_claim(tmp_path, "CLAIM-meet", "inst-le", status="in_progress", mode="meeting")
+
+    payload = json.loads(ui_console.build_response("/api/office_map", tmp_path).body.decode("utf-8"))
+    office = payload["items"]
+    le = next(agent for agent in office["agents"] if agent["role"] == "lead-engineer")
+    assert le["room_id"] == "meeting"
+    assert le["action"] == "meeting"
+    assert office["totals"]["in_meeting"] == 1
+
+
+def test_ui_console_office_map_graceful_when_no_agents(tmp_path):
+    # No instances -> the route still serves the static rooms with zero agents,
+    # and the shell renders the view container.
+    payload = json.loads(ui_console.build_response("/api/office_map", tmp_path).body.decode("utf-8"))
+    office = payload["items"]
+    assert office["agents"] == []
+    assert {room["id"] for room in office["rooms"]} == {"planning", "dev", "qa", "release", "meeting"}
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    assert 'id="view-office"' in html
