@@ -4,9 +4,11 @@ display_id: TASK-AR-506
 task_uid: 25e129f5-2ad1-4b21-af3f-3c5655d358be
 registered_at: 2026-06-12T21:15:09+09:00
 created_at: 2026-06-12T21:15:09+09:00
-updated_at: 2026-06-12T21:15:09+09:00
+updated_at: 2026-06-13T12:40:00+09:00
+started_at: 2026-06-13T09:53:21+09:00
+completed_at: 2026-06-13T12:40:00+09:00
 title: Lifecycle discipline by default — W0~W6 contract + auto T0/T2 wiring
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 7
@@ -85,3 +87,14 @@ tags:
 - 등록/디스패치 플로우 변경분 + 테스트
 - 계약 문서 변경분
 - closeout review record
+
+## Completion Evidence
+
+- PR #72 (9d41e03): auto T0 snapshot in work.py registration, inline T2 drift refusal in claim creation, work.py status W0 entrypoint, W0-W6 contract in AGENTS.md + template; 11 tests.
+
+## Verification Results
+
+- pytest tests/test_lifecycle_defaults.py -q -> 11 passed
+- pytest tests -q -> 696 passed
+- owner governance chain -> pass (no bypass)
+- W4b inst-w4b-ar506-verifier -> APPROVE

@@ -16,11 +16,11 @@ active_work:
       agent_instance_id: inst-w6-ar521-claude
       display_name: claude/parity-swift
       callsite_id: claude-w6-ar521
-    - claim_id: CLAIM-20260613-095321-task-ar-506-02e9
+    - claim_id: CLAIM-20260613-103354-task-ar-522-4547
       agent_role: lead-engineer
-      agent_instance_id: inst-w6-ar506-claude
-      display_name: claude/default-heron
-      callsite_id: claude-w6-ar506
+      agent_instance_id: inst-w6-ar522-claude
+      display_name: claude/polish-wren
+      callsite_id: claude-w6-ar522
   current_teams: []
 resume:
   active_task: TASK-AR-501
