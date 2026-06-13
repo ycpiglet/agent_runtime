@@ -1155,3 +1155,141 @@ def test_ui_state_roadmap_timeline_resource_shape_when_sources_missing(tmp_path)
     resource = ui_state.build_resource(tmp_path, "roadmap_timeline", now="2026-06-13T03:00:00+09:00")
     assert resource["resource"] == "roadmap_timeline"
     assert resource["items"]["schema"] == "agent-runtime-roadmap-timeline/v1"
+
+
+# --- Team / Agent RPG presence (TASK-AR-324) -------------------------------
+
+
+def _write_instance(root: Path, instance_id: str, **overrides) -> None:
+    record = {
+        "schema": "agent-runtime-agent-instance/v1",
+        "agent_instance_id": instance_id,
+        "callsign": f"claude/{instance_id}",
+        "display_name": f"claude/{instance_id}",
+        "role": "lead-engineer",
+        "team_id": "agent-runtime-core",
+        "model": "claude-opus",
+        "model_tier": "opus",
+        "provider": "anthropic",
+        "skill_versions": {"lead_engineer": "1.0.0"},
+        "task_id": "TASK-AR-900",
+        "task_set_id": "TASKSET-AR-DEMO",
+        "spawned_at": "2026-06-13T10:00:00+09:00",
+    }
+    record.update(overrides)
+    _write(root / "agents" / "runtime" / "instances" / f"{instance_id}.json", json.dumps(record))
+
+
+def _write_team_claim(root: Path, claim_id: str, instance_id: str, *, status: str, **overrides) -> None:
+    record = {
+        "schema": "agent-runtime-task-claim/v1",
+        "claim_id": claim_id,
+        "task_id": overrides.pop("task_id", "TASK-AR-901"),
+        "agent_role": "lead-engineer",
+        "team_id": "agent-runtime-core",
+        "agent_instance_id": instance_id,
+        "display_name": f"claude/{instance_id}",
+        "status": status,
+        "phase": "implement",
+        "progress_pct": 40,
+        "claimed_at": "2026-06-13T10:30:00+09:00",
+        "last_heartbeat": "2026-06-13T10:40:00+09:00",
+    }
+    record.update(overrides)
+    _write(root / "agents" / "runtime" / "task_claims" / f"{claim_id}.json", json.dumps(record))
+
+
+def _team_agent_card(state: dict, instance_id: str) -> dict:
+    for team in state["team_agents"]["teams"]:
+        for card in team["agents"]:
+            if card["id"] == instance_id:
+                return card
+    raise AssertionError(f"agent card not found: {instance_id}")
+
+
+def test_ui_state_team_agents_groups_instances_into_team_hierarchy_with_cards(tmp_path):
+    _write_instance(tmp_path, "inst-le-01", role="lead-engineer", team_id="agent-runtime-core")
+    _write_instance(tmp_path, "inst-qa-02", role="qa", team_id="agent-runtime-core")
+    _write_instance(tmp_path, "inst-mp-03", role="managing-partner", team_id="governance-loop")
+    _write_team_claim(tmp_path, "CLAIM-active", "inst-le-01", status="in_progress", task_id="TASK-AR-910")
+
+    state = ui_state.build_state(tmp_path, now="2026-06-13T11:00:00+09:00")
+    team_agents = state["team_agents"]
+
+    assert team_agents["schema"] == "agent-runtime-team-agents/v1"
+    assert team_agents["totals"] == {"teams": 2, "agents": 3, "online": 1}
+    team_ids = [team["team_id"] for team in team_agents["teams"]]
+    assert team_ids == ["agent-runtime-core", "governance-loop"]
+
+    core = next(team for team in team_agents["teams"] if team["team_id"] == "agent-runtime-core")
+    assert core["agent_count"] == 2
+    assert core["online_count"] == 1
+    assert core["role_distribution"] == {"lead-engineer": 1, "qa": 1}
+
+    card = _team_agent_card(state, "inst-le-01")
+    assert card["role"] == "lead-engineer"
+    assert card["callsign"] == "claude/inst-le-01"
+    assert card["model"] == "claude-opus"
+    assert card["skill_versions"] == {"lead_engineer": "1.0.0"}
+    assert card["presence"] == "working"
+    assert card["online"] is True
+    assert card["current_claim"]["task_id"] == "TASK-AR-910"
+    assert card["avatar"] == "LE"
+
+    offline = _team_agent_card(state, "inst-qa-02")
+    assert offline["presence"] == "offline"
+    assert offline["online"] is False
+    assert offline["current_claim"] is None
+
+
+def test_ui_state_team_agents_level_xp_derived_from_completed_claim_counts(tmp_path):
+    _write_instance(tmp_path, "inst-le-01")
+
+    baseline = _team_agent_card(
+        ui_state.build_state(tmp_path, now="2026-06-13T11:00:00+09:00"),
+        "inst-le-01",
+    )
+    # No completed work -> level 1, zero XP.
+    assert baseline["level"] == 1
+    assert baseline["xp"] == 0
+    assert baseline["lifetime"]["completed_tasks"] == 0
+
+    # Mutating a STORED field (instance progress) must not move level/XP.
+    _write_instance(tmp_path, "inst-le-01", progress_pct=99, level=42, xp=99999)
+    unchanged = _team_agent_card(
+        ui_state.build_state(tmp_path, now="2026-06-13T11:01:00+09:00"),
+        "inst-le-01",
+    )
+    assert unchanged["level"] == baseline["level"]
+    assert unchanged["xp"] == baseline["xp"]
+
+    # Adding completed claims (the work count) is what moves the XP bar.
+    _write_team_claim(tmp_path, "CLAIM-done-1", "inst-le-01", status="completed", task_id="TASK-AR-801")
+    _write_team_claim(tmp_path, "CLAIM-done-2", "inst-le-01", status="completed", task_id="TASK-AR-802")
+    grown = _team_agent_card(
+        ui_state.build_state(tmp_path, now="2026-06-13T11:02:00+09:00"),
+        "inst-le-01",
+    )
+    assert grown["lifetime"]["completed_tasks"] == 2
+    assert grown["xp"] == 200  # 2 tasks * 100 XP
+    assert grown["xp"] > baseline["xp"]
+    assert grown["level"] >= baseline["level"]
+    # Completed-unit claims add their own XP increment.
+    _write_team_claim(
+        tmp_path, "CLAIM-done-3", "inst-le-01", status="completed", task_id="TASK-AR-803", unit_id="UNIT-1"
+    )
+    with_unit = _team_agent_card(
+        ui_state.build_state(tmp_path, now="2026-06-13T11:03:00+09:00"),
+        "inst-le-01",
+    )
+    assert with_unit["lifetime"]["completed_units"] == 1
+    assert with_unit["xp"] == 320  # 3 tasks * 100 + 1 unit * 20
+
+
+def test_ui_state_team_agents_resource_payload_and_safe_degrade(tmp_path):
+    payload = ui_state.build_resource(tmp_path, "team_agents", now="2026-06-13T11:00:00+09:00")
+    assert payload["resource"] == "team_agents"
+    assert payload["items"]["schema"] == "agent-runtime-team-agents/v1"
+    # No instances present -> empty, well-formed payload (no crash).
+    assert payload["items"]["teams"] == []
+    assert payload["items"]["totals"] == {"teams": 0, "agents": 0, "online": 0}

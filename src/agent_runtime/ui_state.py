@@ -26,6 +26,7 @@ RESOURCE_NAMES = (
     "work_explorer",
     "meeting_room",
     "tasksets_board",
+    "team_agents",
     "sources",
     "errors",
     "evidence",
@@ -42,6 +43,7 @@ TASKS_GLOB = "agents/lead_engineer/tasks/TASK-*.md"
 WORK_ITEM_CLASSIFICATION_REL = "agents/project/work-items/WORK-ITEM-CLASSIFICATION.json"
 SESSION_GLOB = "agents/runtime/sessions/*.json"
 TASK_CLAIM_GLOB = "agents/runtime/task_claims/*.json"
+INSTANCE_GLOB = "agents/runtime/instances/*.json"
 EVENT_GLOB = "agents/runtime/events/*.jsonl"
 PANE_EVENT_GLOB = "agents/runtime/pane_events/*.jsonl"
 MESSAGE_GLOBS = (
@@ -2143,6 +2145,248 @@ def build_roadmap_timeline(
     }
 
 
+# --- Team / Agent RPG presence (TASK-AR-324) -------------------------------
+# Team -> Agent organisation hierarchy rendered as online-RPG-guild character
+# cards. The card "level" and "XP" are DERIVED on every build from completed
+# task/unit claim counts; they are computed-only and never read from a stored
+# field. This means flipping a claim status to "completed" moves a card's XP,
+# while editing any stored instance/claim attribute leaves the bar untouched.
+
+TEAM_AGENTS_SCHEMA = "agent-runtime-team-agents/v1"
+_TEAM_AGENTS_ACTIVITY_LIMIT = 5
+_XP_PER_COMPLETED_TASK = 100
+_XP_PER_COMPLETED_UNIT = 20
+_XP_PER_LEVEL = 100  # level n requires (n-1)^2 * _XP_PER_LEVEL total XP
+_AGENT_ONLINE_CLAIM_STATES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
+
+
+def _team_agent_level(xp: int) -> dict[str, int]:
+    """Derive an RPG level + within-level progress from a raw XP total.
+
+    Levels follow a widening quadratic curve: level L starts at
+    (L-1)^2 * _XP_PER_LEVEL XP. Everything here is a pure function of `xp`
+    so the bar only moves when the completed-work count (hence xp) moves.
+    """
+    safe_xp = max(0, int(xp))
+    level = 1
+    while (level * level) * _XP_PER_LEVEL <= safe_xp:
+        level += 1
+    floor_xp = ((level - 1) * (level - 1)) * _XP_PER_LEVEL
+    ceil_xp = (level * level) * _XP_PER_LEVEL
+    span = max(1, ceil_xp - floor_xp)
+    into_level = safe_xp - floor_xp
+    pct = max(0, min(100, round((into_level / span) * 100)))
+    return {
+        "level": level,
+        "xp": safe_xp,
+        "xp_into_level": into_level,
+        "xp_for_next": ceil_xp - safe_xp,
+        "xp_level_floor": floor_xp,
+        "xp_level_ceiling": ceil_xp,
+        "xp_pct": pct,
+    }
+
+
+def _load_instances(root: Path, now: str, warnings: list[dict[str, str]]) -> list[dict[str, Any]]:
+    """Read raw agent-instance spawn records (agents/runtime/instances/*.json)."""
+    instances: list[dict[str, Any]] = []
+    for path in sorted(root.glob(INSTANCE_GLOB)):
+        rel_path = _rel(root, path)
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            warnings.append(_warning("instance-json-parse-error", rel_path, str(exc)))
+            continue
+        except OSError as exc:
+            warnings.append(_warning("instance-read-error", rel_path, str(exc)))
+            continue
+        if not isinstance(payload, dict):
+            warnings.append(_warning("instance-invalid-record", rel_path, "instance payload is not an object"))
+            continue
+        record = dict(payload)
+        record["source_path"] = rel_path
+        record["last_updated"] = _mtime_iso(path)
+        instances.append(record)
+    return instances
+
+
+def build_team_agents(
+    root: Path,
+    instances: list[dict[str, Any]],
+    agents: list[dict[str, Any]],
+    task_claims: list[dict[str, Any]],
+    events: list[dict[str, Any]],
+    now: str,
+) -> dict[str, Any]:
+    """Team -> Agent hierarchy with per-agent RPG presence character cards.
+
+    Cards join three runtime sources by agent_instance_id: instance spawn
+    records (identity/role/model/skills), task claims (current claim +
+    completed lifetime counts), and the active agent view (live online state).
+    Level/XP are computed from completed-work counts only.
+    """
+    # Lifetime + current claim aggregation keyed by instance id.
+    completed_tasks: dict[str, set[str]] = {}
+    completed_units: dict[str, set[str]] = {}
+    current_claim_by_instance: dict[str, dict[str, Any]] = {}
+    for claim in task_claims:
+        instance_id = str(claim.get("agent_instance_id") or "").strip()
+        if not instance_id:
+            continue
+        status = str(claim.get("status") or "").strip().lower()
+        if status == "completed":
+            task_id = str(claim.get("task_id") or claim.get("claim_id") or "")
+            completed_tasks.setdefault(instance_id, set()).add(task_id)
+            unit_id = str(claim.get("unit_id") or "").strip()
+            if unit_id:
+                completed_units.setdefault(instance_id, set()).add(unit_id)
+        if status in _AGENT_ONLINE_CLAIM_STATES:
+            existing = current_claim_by_instance.get(instance_id)
+            ts = str(claim.get("last_heartbeat") or claim.get("claimed_at") or "")
+            if existing is None or ts > str(existing.get("_ts") or ""):
+                current_claim_by_instance[instance_id] = {**claim, "_ts": ts}
+
+    # Live online state from the active-agent view (task-claim derived).
+    agent_by_instance = {str(agent.get("id") or ""): agent for agent in agents}
+
+    # Most recent runtime activity per role (for recent-activity feed fallback).
+    activity_by_role: dict[str, dict[str, Any]] = {}
+    for event in events:
+        role = str(event.get("role") or event.get("actor") or "").strip()
+        if not role:
+            continue
+        ts = str(event.get("created_at") or event.get("ts") or "")
+        existing = activity_by_role.get(role)
+        if existing is None or ts > str(existing.get("ts") or ""):
+            activity_by_role[role] = {
+                "role": role,
+                "event": event.get("event") or event.get("type") or "activity",
+                "task_id": event.get("task_id") or "",
+                "ts": ts,
+            }
+
+    teams: dict[str, dict[str, Any]] = {}
+    for instance in instances:
+        instance_id = str(instance.get("agent_instance_id") or instance.get("id") or "").strip()
+        if not instance_id:
+            continue
+        role = str(instance.get("role") or "unknown").strip() or "unknown"
+        team_id = str(instance.get("team_id") or "unassigned").strip() or "unassigned"
+        callsign = str(instance.get("callsign") or instance.get("display_name") or instance_id)
+        skill_versions = instance.get("skill_versions") if isinstance(instance.get("skill_versions"), dict) else {}
+
+        done_tasks = sorted(completed_tasks.get(instance_id, set()))
+        done_units = sorted(completed_units.get(instance_id, set()))
+        xp_total = len(done_tasks) * _XP_PER_COMPLETED_TASK + len(done_units) * _XP_PER_COMPLETED_UNIT
+        rpg = _team_agent_level(xp_total)
+
+        claim = current_claim_by_instance.get(instance_id)
+        live = agent_by_instance.get(instance_id, {})
+        online = bool(live.get("online")) or claim is not None
+        if claim is not None:
+            presence = "in_meeting" if str(claim.get("mode") or "") == "meeting" else "working"
+            if str(claim.get("status") or "").lower() in {"review", "waiting_review"}:
+                presence = "reviewing"
+        elif online:
+            presence = "online"
+        else:
+            presence = "offline"
+
+        current_claim = None
+        if claim is not None:
+            current_claim = {
+                "claim_id": claim.get("claim_id"),
+                "task_id": claim.get("task_id"),
+                "task_set_id": claim.get("task_set_id"),
+                "status": claim.get("status"),
+                "phase": claim.get("phase"),
+                "progress_pct": claim.get("progress_pct"),
+                "status_text": claim.get("status_text"),
+                "worktree_path": claim.get("worktree_path"),
+                "branch": claim.get("branch"),
+            }
+
+        activity = activity_by_role.get(role)
+        recent_activity = [activity] if activity else []
+
+        avatar = "".join(part[:1] for part in role.replace("-", " ").replace("_", " ").split())[:2].upper() or "AG"
+        card = {
+            "id": instance_id,
+            "role": role,
+            "callsign": callsign,
+            "display_name": str(instance.get("display_name") or callsign),
+            "avatar": avatar,
+            "model": instance.get("model") or "",
+            "model_tier": instance.get("model_tier") or "",
+            "provider": instance.get("provider") or "",
+            "skill_versions": skill_versions,
+            "skill_count": len(skill_versions),
+            "presence": presence,
+            "online": online,
+            "current_claim": current_claim,
+            "current_task_id": (claim or {}).get("task_id") if claim else None,
+            "lifetime": {
+                "completed_tasks": len(done_tasks),
+                "completed_units": len(done_units),
+                "completed_task_ids": done_tasks,
+            },
+            "level": rpg["level"],
+            "xp": rpg["xp"],
+            "xp_into_level": rpg["xp_into_level"],
+            "xp_for_next": rpg["xp_for_next"],
+            "xp_pct": rpg["xp_pct"],
+            "recent_activity": recent_activity[:_TEAM_AGENTS_ACTIVITY_LIMIT],
+            "spawned_at": instance.get("spawned_at") or instance.get("created_at"),
+            "source_path": instance.get("source_path") or "",
+            "last_updated": instance.get("last_updated"),
+        }
+
+        team = teams.get(team_id)
+        if team is None:
+            team = teams[team_id] = {
+                "id": team_id,
+                "team_id": team_id,
+                "agents": [],
+                "roles": {},
+            }
+        team["agents"].append(card)
+        team["roles"][role] = team["roles"].get(role, 0) + 1
+
+    team_groups: list[dict[str, Any]] = []
+    for team_id in sorted(teams):
+        team = teams[team_id]
+        members = sorted(team["agents"], key=lambda card: (not card["online"], card["role"], card["id"]))
+        online_count = sum(1 for card in members if card["online"])
+        team_groups.append(
+            {
+                "id": team_id,
+                "team_id": team_id,
+                "agent_count": len(members),
+                "online_count": online_count,
+                "role_distribution": dict(sorted(team["roles"].items())),
+                "agents": members,
+            }
+        )
+
+    totals = {
+        "teams": len(team_groups),
+        "agents": sum(group["agent_count"] for group in team_groups),
+        "online": sum(group["online_count"] for group in team_groups),
+    }
+    return {
+        "schema": TEAM_AGENTS_SCHEMA,
+        "generated_at": now,
+        "source_glob": INSTANCE_GLOB,
+        "xp_model": {
+            "per_completed_task": _XP_PER_COMPLETED_TASK,
+            "per_completed_unit": _XP_PER_COMPLETED_UNIT,
+            "note": "level/xp are computed from completed claim counts only",
+        },
+        "totals": totals,
+        "teams": team_groups,
+    }
+
+
 def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     root_path = Path(root).resolve()
     generated_at = now or _now_iso()
@@ -2172,6 +2416,8 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
     meeting_room = build_meeting_room(agents, tasks, now=generated_at)
     tasksets_board = build_tasksets_board(work_explorer, tasks, events, generated_at)
     roadmap_timeline = build_roadmap_timeline(roadmap, work_explorer, root_path, generated_at, warnings)
+    instances = _load_instances(root_path, generated_at, warnings)
+    team_agents = build_team_agents(root_path, instances, agents, task_claims, events, generated_at)
     return {
         "generated_at": generated_at,
         "sources": sources,
@@ -2185,6 +2431,7 @@ def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
         "work_explorer": work_explorer,
         "meeting_room": meeting_room,
         "tasksets_board": tasksets_board,
+        "team_agents": team_agents,
         "messages": messages,
         "events": events,
         "goals": goals,
