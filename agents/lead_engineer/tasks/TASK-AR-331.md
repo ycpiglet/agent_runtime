@@ -14,7 +14,11 @@ registered_at: 2026-06-11T18:56:35+09:00
 created_at: 2026-06-11T18:56:35+09:00
 updated_at: 2026-06-11T18:56:35+09:00
 title: 커스텀 속성·라벨 + 자동화 규칙 편집기 + 트리아지 큐
-status: planned
+status: completed
+started_at: 2026-06-13T20:08:19+09:00
+completed_at: 2026-06-13T21:05:00+09:00
+resolution: done
+verification_status: passed
 priority: P2
 difficulty: L
 est_hours: 10

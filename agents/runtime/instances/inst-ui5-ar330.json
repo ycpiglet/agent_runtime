@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "inst-ui5-ar330",
+  "callsign": "claude/dep-vole",
+  "callsite_id": "claude-ui5-330",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260613-200819-task-ar-330-f2bb.json"
+  ],
+  "created_at": "2026-06-13T20:08:19+09:00",
+  "decision_cycle_id": "",
+  "display_name": "claude/dep-vole",
+  "model": "",
+  "model_tier": "",
+  "on_behalf_of": "TASK-AR-330",
+  "pane_id": "claude-ui5-330",
+  "parent_instance_id": "",
+  "project_id": "",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "lead-engineer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-13T20:08:19+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-330",
+  "task_set_id": "TASKSET-AR-UI-PLATFORM-EXTENSIONS",
+  "team_id": "agent-runtime-core",
+  "unit_id": "",
+  "unit_spec": "",
+  "updated_at": "2026-06-13T20:08:19+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-330"
+}

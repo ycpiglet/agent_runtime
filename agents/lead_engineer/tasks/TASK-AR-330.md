@@ -14,7 +14,11 @@ registered_at: 2026-06-11T18:56:35+09:00
 created_at: 2026-06-11T18:56:35+09:00
 updated_at: 2026-06-11T18:56:35+09:00
 title: 서브태스크·의존성 모델 + 타임라인/의존 그래프
-status: planned
+status: completed
+started_at: 2026-06-13T20:08:19+09:00
+completed_at: 2026-06-13T21:00:00+09:00
+resolution: done
+verification_status: passed
 priority: P1
 difficulty: L
 est_hours: 10
