@@ -2,7 +2,11 @@
 
 Human-readable task numbers such as TASK-AR-258 are useful labels, but they are
 not safe as the only identity when several panes register tasks concurrently.
-This script adds and enforces a UUIDv4 `task_uid` plus lifecycle timestamps.
+This script adds and enforces a time-sortable UUIDv7 `task_uid` (UUIDv4 legacy
+keys remain valid) plus lifecycle timestamps. UUIDv7 is collision-free AND
+time-ordered, so panes mint locally with no coordination (RFC 9562 sec 5.7);
+the reservation ledger is therefore optional -- a vanity path for contiguous
+`TASK-AR-NNN` only, not on the hot path (TASK-AR-536).
 """
 
 from __future__ import annotations
@@ -22,7 +26,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 TASKS_DIR = Path("agents/lead_engineer/tasks")
 RESERVATIONS_PATH = Path("agents/project/work-items/TASK-ID-RESERVATIONS.json")
-UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
+UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[47][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
 TASK_DISPLAY_RE = re.compile(r"^(TASK-AR-)(\d+)$")
 DONE_STATUSES = {"completed", "done", "released", "완료"}
 STARTED_STATUSES = DONE_STATUSES | {"in_progress", "active", "review", "working"}
@@ -371,6 +375,29 @@ def _reservation_findings(root: Path, now: datetime) -> list[str]:
     return findings
 
 
+def _uuid7() -> uuid.UUID:
+    """Generate a UUIDv7 (RFC 9562 sec 5.7): 48-bit big-endian Unix-ms timestamp,
+    4-bit version (7), 12-bit rand_a, 2-bit variant (0b10), 62-bit rand_b.
+
+    Time-sortable AND collision-free with zero coordination, so concurrent panes
+    mint task_uids locally without a central allocator (TASK-AR-536). The ms
+    timestamp is an opaque key component, not a human-facing timestamp, so it uses
+    the wall clock directly rather than scripts/now.py.
+    """
+    import time
+
+    unix_ms = time.time_ns() // 1_000_000
+    rand = int.from_bytes(os.urandom(10), "big")  # 80 random bits
+    rand_a = (rand >> 64) & 0x0FFF  # 12 bits
+    rand_b = rand & ((1 << 62) - 1)  # 62 bits
+    value = (unix_ms & 0xFFFFFFFFFFFF) << 80
+    value |= 0x7 << 76  # version 7
+    value |= rand_a << 64
+    value |= 0b10 << 62  # variant 10
+    value |= rand_b
+    return uuid.UUID(int=value)
+
+
 def _valid_uuid(value: str) -> bool:
     return bool(UUID_RE.match(value.strip().lower()))
 
@@ -431,7 +458,7 @@ def _backfill_updates(meta: dict[str, Any], now_text: str) -> dict[str, str]:
     if not str(meta.get("display_id") or "").strip() and task_id:
         updates["display_id"] = task_id
     if not str(meta.get("task_uid") or "").strip():
-        updates["task_uid"] = str(uuid.uuid4())
+        updates["task_uid"] = str(_uuid7())
     if not str(meta.get("registered_at") or "").strip():
         updates["registered_at"] = registered_at
     if not str(meta.get("created_at") or "").strip():
@@ -554,7 +581,7 @@ def _cmd_create_with_reservation(args: argparse.Namespace, root: Path, now_text:
         if task_path.exists():
             print(f"task file already exists: {_rel(root, task_path)}", file=sys.stderr)
             return 1
-        task_uid = uuid.uuid4()
+        task_uid = _uuid7()
         created = _create_task_file(
             root=root,
             task_id=task_id,
@@ -586,7 +613,7 @@ def cmd_create(args: argparse.Namespace) -> int:
     now_text = _now_text(args.now)
     if args.reservation_id:
         return _cmd_create_with_reservation(args, root, now_text)
-    task_uid = uuid.uuid4()
+    task_uid = _uuid7()
     timestamp = _timestamp_slug(now_text)
     task_id = args.task_id or f"TASK-AR-{timestamp}-{task_uid.hex[:8]}"
     display_id = args.display_id or task_id

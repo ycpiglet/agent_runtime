@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-14T11:13:34+09:00",
-  "record_count": 247,
+  "generated_at": "2026-06-14T16:06:00+09:00",
+  "record_count": 273,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -1686,7 +1686,7 @@
       "title": "Platform Builder",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-UNASSIGNED",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-329",
@@ -1796,7 +1796,7 @@
       "title": "중요한 변화(blocked, 승인 대기, 마감 임박, 멘션)를 인앱 알림 인박스로 모으고, 채널에 멘션·핀·리액션을 더한다 (Slack + Linear…",
       "path": "agents/lead_engineer/tasks/TASK-AR-338.md",
       "parent_id": "TASKSET-AR-UI-PLATFORM-EXTENSIONS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-339",
@@ -1807,7 +1807,7 @@
       "title": "운영 지표를 Grafana/Sentry형 대시보드로 상시 노출한다: 토큰/비용 추이, eval 점수, 게이트 pass/watch/block 보드, tas…",
       "path": "agents/lead_engineer/tasks/TASK-AR-339.md",
       "parent_id": "TASKSET-AR-UI-PLATFORM-EXTENSIONS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-340",
@@ -1818,7 +1818,7 @@
       "title": "콘솔에 생동감을 더하는 애니메이션/이펙트와 RPG형 게임화 요소를 토글 가능한 폴리시 레이어로 추가한다 (기본은 차분한 진지 모드).",
       "path": "agents/lead_engineer/tasks/TASK-AR-340.md",
       "parent_id": "TASKSET-AR-UI-PLATFORM-EXTENSIONS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-341",
@@ -1829,7 +1829,7 @@
       "title": "멀티 호스트 프로젝트(agent_runtime, autofolio 등)를 Notion 워크스페이스처럼 전환하고, 대시보드 위젯 확장 포인트와 KR/EN…",
       "path": "agents/lead_engineer/tasks/TASK-AR-341.md",
       "parent_id": "TASKSET-AR-UI-PLATFORM-EXTENSIONS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "taskset:TASKSET-AR-UI-LIVING-CONSOLE",
@@ -1840,7 +1840,7 @@
       "title": "World Builder",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-UNASSIGNED",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-360",
@@ -1884,7 +1884,7 @@
       "title": "프로젝트의 성숙도를 진화하는 캐릭터처럼 측정·표시한다: 프로젝트 Lv.N(누적 경험), 사업 단계 칭호(garage→seed→startup→scaleup…",
       "path": "agents/lead_engineer/tasks/TASK-AR-363.md",
       "parent_id": "TASKSET-AR-UI-LIVING-CONSOLE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-364",
@@ -1895,7 +1895,7 @@
       "title": "실제 회사 같은 2D 맵에 에이전트를 배치해 한눈에 조직 활동을 보여준다 (Smallville/Generative Agents 패턴 — arXiv 230…",
       "path": "agents/lead_engineer/tasks/TASK-AR-364.md",
       "parent_id": "TASKSET-AR-UI-LIVING-CONSOLE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-365",
@@ -1906,7 +1906,7 @@
       "title": "작업 이벤트(완료/차단/승인 대기)를 사용자가 쓰는 메신저로 내보낸다 — LangSmith 패턴(범용 웹훅 + 채널 레시피, 집계 윈도우 기반)을 채택.",
       "path": "agents/lead_engineer/tasks/TASK-AR-365.md",
       "parent_id": "TASKSET-AR-UI-LIVING-CONSOLE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "taskset:TASKSET-AR-PM-OPERATING-SYSTEM",
@@ -2118,10 +2118,263 @@
       "status": "completed"
     },
     {
-      "key": "taskset:TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
+      "key": "taskset:TASKSET-AR-HOST-FEEDBACK-INTAKE",
       "level": "taskset",
       "number": "0.25",
       "label": "Taskset 0.25",
+      "id": "TASKSET-AR-HOST-FEEDBACK-INTAKE",
+      "title": "Host Liaison",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-UNASSIGNED",
+      "status": "complete"
+    },
+    {
+      "key": "task:TASK-AR-526",
+      "level": "task",
+      "number": "0.25.1",
+      "label": "Task 0.25.1",
+      "id": "TASK-AR-526",
+      "title": "Treat host (autofolio) feedback issues as first-class, non-ignorable input: ingest th…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-526.md",
+      "parent_id": "TASKSET-AR-HOST-FEEDBACK-INTAKE",
+      "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-527",
+      "level": "task",
+      "number": "0.25.2",
+      "label": "Task 0.25.2",
+      "id": "TASK-AR-527",
+      "title": "Reactivate the currently-dormant council/seminar device so queued host feedback is ac…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-527.md",
+      "parent_id": "TASKSET-AR-HOST-FEEDBACK-INTAKE",
+      "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-528",
+      "level": "task",
+      "number": "0.25.3",
+      "label": "Task 0.25.3",
+      "id": "TASK-AR-528",
+      "title": "Close the loop so a deliberation outcome is written back to the originating host issu…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-528.md",
+      "parent_id": "TASKSET-AR-HOST-FEEDBACK-INTAKE",
+      "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-529",
+      "level": "task",
+      "number": "0.25.4",
+      "label": "Task 0.25.4",
+      "id": "TASK-AR-529",
+      "title": "Close the parallel-wave conflict-safety weak link: `footprint_conflict_gate --check`…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-529.md",
+      "parent_id": "TASKSET-AR-HOST-FEEDBACK-INTAKE",
+      "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-530",
+      "level": "task",
+      "number": "0.25.5",
+      "label": "Task 0.25.5",
+      "id": "TASK-AR-530",
+      "title": "Give the platform an objective, quantitative self-eval so each version can prove it i…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-530.md",
+      "parent_id": "TASKSET-AR-HOST-FEEDBACK-INTAKE",
+      "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-531",
+      "level": "task",
+      "number": "0.25.6",
+      "label": "Task 0.25.6",
+      "id": "TASK-AR-531",
+      "title": "Close the host-fit gaps that block deep adoption of agent_runtime as a reusable platf…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-531.md",
+      "parent_id": "TASKSET-AR-HOST-FEEDBACK-INTAKE",
+      "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-532",
+      "level": "task",
+      "number": "0.25.7",
+      "label": "Task 0.25.7",
+      "id": "TASK-AR-532",
+      "title": "Route the standing open bug issues through the same intake/triage pipeline (category…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-532.md",
+      "parent_id": "TASKSET-AR-HOST-FEEDBACK-INTAKE",
+      "status": "completed"
+    },
+    {
+      "key": "taskset:TASKSET-AR-WORK-STORE-RESTRUCTURE",
+      "level": "taskset",
+      "number": "0.26",
+      "label": "Taskset 0.26",
+      "id": "TASKSET-AR-WORK-STORE-RESTRUCTURE",
+      "title": "Store Architect",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-UNASSIGNED",
+      "status": "complete"
+    },
+    {
+      "key": "task:TASK-AR-533",
+      "level": "task",
+      "number": "0.26.1",
+      "label": "Task 0.26.1",
+      "id": "TASK-AR-533",
+      "title": "Turn `BACKLOG-BOARD.md` from a data dump (currently ~69% inline \"Archived Task Files\"…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-533.md",
+      "parent_id": "TASKSET-AR-WORK-STORE-RESTRUCTURE",
+      "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-534",
+      "level": "task",
+      "number": "0.26.2",
+      "label": "Task 0.26.2",
+      "id": "TASK-AR-534",
+      "title": "Treat `reviews/` (402 files, 2.4MB, pure append, never transitions state) as a logs/e…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-534.md",
+      "parent_id": "TASKSET-AR-WORK-STORE-RESTRUCTURE",
+      "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-535",
+      "level": "task",
+      "number": "0.26.3",
+      "label": "Task 0.26.3",
+      "id": "TASK-AR-535",
+      "title": "Dissolve the \"quantum jump\" (200s -> 300s -> no 400s -> 500s): gaps are inherent to a…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-535.md",
+      "parent_id": "TASKSET-AR-WORK-STORE-RESTRUCTURE",
+      "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-536",
+      "level": "task",
+      "number": "0.26.4",
+      "label": "Task 0.26.4",
+      "id": "TASK-AR-536",
+      "title": "Make the permanent key collision-free AND time-sortable so multiple agents mint IDs w…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-536.md",
+      "parent_id": "TASKSET-AR-WORK-STORE-RESTRUCTURE",
+      "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-537",
+      "level": "task",
+      "number": "0.26.5",
+      "label": "Task 0.26.5",
+      "id": "TASK-AR-537",
+      "title": "Keep the agent read surface small and fast as the store grows toward thousands of fil…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-537.md",
+      "parent_id": "TASKSET-AR-WORK-STORE-RESTRUCTURE",
+      "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-538",
+      "level": "task",
+      "number": "0.26.6",
+      "label": "Task 0.26.6",
+      "id": "TASK-AR-538",
+      "title": "Add an explicit intake state so new items wait in a triage inbox (excluded from the a…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-538.md",
+      "parent_id": "TASKSET-AR-WORK-STORE-RESTRUCTURE",
+      "status": "completed"
+    },
+    {
+      "key": "taskset:TASKSET-AR-UNIFIED-DECISION-CONSOLE",
+      "level": "taskset",
+      "number": "0.27",
+      "label": "Taskset 0.27",
+      "id": "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
+      "title": "Decision Cartographer",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-UNASSIGNED",
+      "status": "complete"
+    },
+    {
+      "key": "task:TASK-AR-539",
+      "level": "task",
+      "number": "0.27.1",
+      "label": "Task 0.27.1",
+      "id": "TASK-AR-539",
+      "title": "Make every meaningful artifact the product operates/archives a first-class, browsable…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-539.md",
+      "parent_id": "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
+      "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-540",
+      "level": "task",
+      "number": "0.27.2",
+      "label": "Task 0.27.2",
+      "id": "TASK-AR-540",
+      "title": "One fuzzy input to jump to / act on ANY entity in the catalog — the proven universal-…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-540.md",
+      "parent_id": "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
+      "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-541",
+      "level": "task",
+      "number": "0.27.3",
+      "label": "Task 0.27.3",
+      "id": "TASK-AR-541",
+      "title": "Make any entity a rich detail surface with pluggable tabs/cards (Backstage `EntityCon…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-541.md",
+      "parent_id": "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
+      "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-542",
+      "level": "task",
+      "number": "0.27.4",
+      "label": "Task 0.27.4",
+      "id": "TASK-AR-542",
+      "title": "Answer \"who/what/when/why did this change\" for any entity by unifying scattered histo…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-542.md",
+      "parent_id": "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
+      "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-543",
+      "level": "task",
+      "number": "0.27.5",
+      "label": "Task 0.27.5",
+      "id": "TASK-AR-543",
+      "title": "Give the decision-maker reusable lenses over the catalog and an exception-only attent…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-543.md",
+      "parent_id": "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
+      "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-544",
+      "level": "task",
+      "number": "0.27.6",
+      "label": "Task 0.27.6",
+      "id": "TASK-AR-544",
+      "title": "Bring SCM artifacts the Owner listed (git log, branches, PRs, issues) into the catalo…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-544.md",
+      "parent_id": "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
+      "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-545",
+      "level": "task",
+      "number": "0.27.7",
+      "label": "Task 0.27.7",
+      "id": "TASK-AR-545",
+      "title": "Make the product's governance/knowledge documents (skills, council records, seminar r…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-545.md",
+      "parent_id": "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
+      "status": "completed"
+    },
+    {
+      "key": "taskset:TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
+      "level": "taskset",
+      "number": "0.28",
+      "label": "Taskset 0.28",
       "id": "TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
       "title": "Maturity Steward",
       "path": "BACKLOG-BOARD.md",
@@ -2131,8 +2384,8 @@
     {
       "key": "task:TASK-AR-546",
       "level": "task",
-      "number": "0.25.1",
-      "label": "Task 0.25.1",
+      "number": "0.28.1",
+      "label": "Task 0.28.1",
       "id": "TASK-AR-546",
       "title": "Close the highest-impact UI testing gap: there are ~326 Python-side UI tests but **no…",
       "path": "agents/lead_engineer/tasks/TASK-AR-546.md",
@@ -2142,8 +2395,8 @@
     {
       "key": "task:TASK-AR-547",
       "level": "task",
-      "number": "0.25.2",
-      "label": "Task 0.25.2",
+      "number": "0.28.2",
+      "label": "Task 0.28.2",
       "id": "TASK-AR-547",
       "title": "The console is single-column with fixed widths and a fixed sidebar; it breaks below d…",
       "path": "agents/lead_engineer/tasks/TASK-AR-547.md",
@@ -2153,8 +2406,8 @@
     {
       "key": "task:TASK-AR-548",
       "level": "task",
-      "number": "0.25.3",
-      "label": "Task 0.25.3",
+      "number": "0.28.3",
+      "label": "Task 0.28.3",
       "id": "TASK-AR-548",
       "title": "Form errors currently surface in a single global list and a failed submit can reset t…",
       "path": "agents/lead_engineer/tasks/TASK-AR-548.md",
@@ -2164,8 +2417,8 @@
     {
       "key": "task:TASK-AR-549",
       "level": "task",
-      "number": "0.25.4",
-      "label": "Task 0.25.4",
+      "number": "0.28.4",
+      "label": "Task 0.28.4",
       "id": "TASK-AR-549",
       "title": "The console has broad ARIA usage but misses several WCAG essentials. Add skip-to-cont…",
       "path": "agents/lead_engineer/tasks/TASK-AR-549.md",
@@ -2175,8 +2428,8 @@
     {
       "key": "task:TASK-AR-550",
       "level": "task",
-      "number": "0.25.5",
-      "label": "Task 0.25.5",
+      "number": "0.28.5",
+      "label": "Task 0.28.5",
       "id": "TASK-AR-550",
       "title": "The console polls every 5-10s, adding latency and wasted bandwidth. Add Server-Sent E…",
       "path": "agents/lead_engineer/tasks/TASK-AR-550.md",
@@ -2186,8 +2439,8 @@
     {
       "key": "task:TASK-AR-551",
       "level": "task",
-      "number": "0.25.6",
-      "label": "Task 0.25.6",
+      "number": "0.28.6",
+      "label": "Task 0.28.6",
       "id": "TASK-AR-551",
       "title": "i18n covers UI chrome (ko/en) but error messages are hardcoded English and there is n…",
       "path": "agents/lead_engineer/tasks/TASK-AR-551.md",
@@ -2197,8 +2450,8 @@
     {
       "key": "task:TASK-AR-552",
       "level": "task",
-      "number": "0.25.7",
-      "label": "Task 0.25.7",
+      "number": "0.28.7",
+      "label": "Task 0.28.7",
       "id": "TASK-AR-552",
       "title": "The deadlock guardrails (claim_reaper/goal_supervisor) are unit-tested on the happy p…",
       "path": "agents/lead_engineer/tasks/TASK-AR-552.md",
@@ -2208,8 +2461,8 @@
     {
       "key": "task:TASK-AR-553",
       "level": "task",
-      "number": "0.25.8",
-      "label": "Task 0.25.8",
+      "number": "0.28.8",
+      "label": "Task 0.28.8",
       "id": "TASK-AR-553",
       "title": "The runtime captures rich local audit trails (pane_events, stop_counters, hook-logs)…",
       "path": "agents/lead_engineer/tasks/TASK-AR-553.md",
@@ -2219,8 +2472,8 @@
     {
       "key": "task:TASK-AR-554",
       "level": "task",
-      "number": "0.25.9",
-      "label": "Task 0.25.9",
+      "number": "0.28.9",
+      "label": "Task 0.28.9",
       "id": "TASK-AR-554",
       "title": "Claim reaping/recovery assumes a single checkout (single-writer). Multiple hosts or C…",
       "path": "agents/lead_engineer/tasks/TASK-AR-554.md",
@@ -2230,8 +2483,8 @@
     {
       "key": "task:TASK-AR-555",
       "level": "task",
-      "number": "0.25.10",
-      "label": "Task 0.25.10",
+      "number": "0.28.10",
+      "label": "Task 0.28.10",
       "id": "TASK-AR-555",
       "title": "Release stages are validated locally in `--check` mode only; remote tag/PR/merge/publ…",
       "path": "agents/lead_engineer/tasks/TASK-AR-555.md",
@@ -2241,8 +2494,8 @@
     {
       "key": "task:TASK-AR-556",
       "level": "task",
-      "number": "0.25.11",
-      "label": "Task 0.25.11",
+      "number": "0.28.11",
+      "label": "Task 0.28.11",
       "id": "TASK-AR-556",
       "title": "Make the canonical closure steps (compound / review / retro) **non-skippable** for su…",
       "path": "agents/lead_engineer/tasks/TASK-AR-556.md",
@@ -2721,6 +2974,39 @@
       "path": "agents/lead_engineer/tasks/TASK-AR-519.md",
       "parent_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
       "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-HOST-FEEDBACK-INTAKE",
+      "level": "initiative",
+      "number": "5",
+      "label": "Initiative 5",
+      "id": "INIT-AR-HOST-FEEDBACK-INTAKE",
+      "title": "Host Feedback Intake Initiative",
+      "path": "agents/project/initiatives/INIT-AR-HOST-FEEDBACK-INTAKE.md",
+      "parent_id": "",
+      "status": "planned"
+    },
+    {
+      "key": "initiative:INIT-AR-UNIFIED-DECISION-CONSOLE",
+      "level": "initiative",
+      "number": "6",
+      "label": "Initiative 6",
+      "id": "INIT-AR-UNIFIED-DECISION-CONSOLE",
+      "title": "Unified Decision Console Initiative",
+      "path": "agents/project/initiatives/INIT-AR-UNIFIED-DECISION-CONSOLE.md",
+      "parent_id": "",
+      "status": "planned"
+    },
+    {
+      "key": "initiative:INIT-AR-WORK-STORE-RESTRUCTURE",
+      "level": "initiative",
+      "number": "7",
+      "label": "Initiative 7",
+      "id": "INIT-AR-WORK-STORE-RESTRUCTURE",
+      "title": "Work Store Restructure Initiative",
+      "path": "agents/project/initiatives/INIT-AR-WORK-STORE-RESTRUCTURE.md",
+      "parent_id": "",
+      "status": "planned"
     }
   ]
 }

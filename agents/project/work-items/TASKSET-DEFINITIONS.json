@@ -26,6 +26,24 @@
       "order": 523
     },
     {
+      "task_set_id": "TASKSET-AR-HOST-FEEDBACK-INTAKE",
+      "display_name": "Host Liaison",
+      "summary": "Treat host (autofolio) dogfooding feedback as first-class input: intake/triage, blind-Delphi council/seminar deliberation with diversity + Owner-boundary guardrails, decision reply-back to issues, plus the feedback-derived footprint-gate, self-eval/RSI fitness, host-fit, and open-bug candidates whose adoption the first deliberation decides.",
+      "order": 524
+    },
+    {
+      "task_set_id": "TASKSET-AR-WORK-STORE-RESTRUCTURE",
+      "display_name": "Store Architect",
+      "summary": "Stop the board from dumping the archive and reviews from accumulating unbounded: board attention-lanes (Triage/Active/Rollup) + extracted archive manifest, reviews date-shard + compacted index, classifier ordinal as canonical human ID with cosmetic TASK-AR-NNN gaps, UUIDv7/ULID stable keys, a manifest-first derived read-index + repo perf config, and a triage intake status. Single store + status field + views; no lifecycle directories.",
+      "order": 525
+    },
+    {
+      "task_set_id": "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
+      "display_name": "Decision Cartographer",
+      "summary": "A decision/operations-optimized console over a typed entity catalog of every artifact (plan/review/issue/pr/git-log/branch/skill/council/seminar/work-items/waves/state/history): catalog model + manifest, universal command palette + cross-entity search, entity detail + backlinks, activity/provenance timeline + audit, faceted saved views + rollups + needs-attention inbox, live SCM surface, and governance-document surface.",
+      "order": 526
+    },
+    {
       "task_set_id": "TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
       "display_name": "Maturity Steward",
       "summary": "Close product-maturity gaps from the UI/quality assessment: end-to-end browser tests (Playwright), responsive layout, form validation + error UX, accessibility uplift, SSE real-time updates, i18n hardening, claim_reaper concurrency stress, observability export, multi-host claim safety, and owner-gated release automation.",

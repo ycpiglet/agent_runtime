@@ -24,7 +24,20 @@ dev = ["pytest"]
 where = ["src"]
 
 [tool.setuptools.package-data]
-agent_runtime = ["templates/project/**/*"]
+# TASK-AR-531 (GH #121): on older setuptools (<=62, what the host hit) the `**/*`
+# glob silently DROPS dot-prefixed paths, so a `pip install` host never received
+# the template wiring (.gitattributes / .githooks / .github / .codex). Newer
+# setuptools ships them, but the build floor does not pin a version, so enumerate
+# the dot-paths explicitly -> correct + identical across ALL setuptools versions.
+# Verified by scripts/verify_wheel_dotfiles.py (built-wheel content assertion).
+agent_runtime = [
+    "templates/project/**/*",
+    "templates/project/.gitattributes",
+    "templates/project/.githooks/**/*",
+    "templates/project/.github/**/*",
+    "templates/project/.codex/**/*",
+    "templates/project/**/.gitkeep",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

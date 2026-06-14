@@ -1,5 +1,8 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
+  - reviews/MEETING-2026-06-14-host-feedback-intake-registration.md
+  - reviews/MEETING-2026-06-14-wave-plan-host-store-console.md
+  - reviews/COUNCIL-2026-06-14-host-feedback-first-deliberation.md
   - reviews/REVIEW-2026-06-14-knowledge-stack-closeout.md
   - reviews/RETRO-2026-06-14-knowledge-stack.md
   - reviews/RETRO-2026-06-14-agent-runtime-process-integrity.md

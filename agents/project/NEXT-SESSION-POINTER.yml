@@ -1,14 +1,14 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-13T23:42:00+09:00
+updated_at: 2026-06-14T01:50:00+09:00
 current_state:
-  summary: "UI console waves 1-7 complete (21/28 UI tasks): UI-UX-V2 done (9/9); UI-PLATFORM-EXTENSIONS AR-329..337 done (9/13); UI-LIVING-CONSOLE AR-360/361/362 done (3/6). Wave-7 (AR-335 calendar/scheduled dispatch, AR-336 state-machine viewer, AR-337 team/role assignment heatmap) merged via PRs #117-#119 with W4a+W4b dual verification; claims released, worktrees/branches clean."
+  summary: "ALL 28 UI console tasks COMPLETE (28/28): UI-UX-V2 9/9, UI-PLATFORM-EXTENSIONS 13/13 (AR-329..341), UI-LIVING-CONSOLE 6/6 (AR-360..365). Delivered across waves 1-9 with W4a self-verify + W4b independent verify, serial union-merge integration, and per-wave closeout (PRs #92-#130). W4b caught + fixed real defects pre-merge (AR-327 HTTP-400, AR-329 template reader gap, AR-334 dead-code guard). Claims released, worktrees/branches clean."
   status: ready
-  task_set_status: in_progress
-  task_set_id: "TASKSET-AR-UI-PLATFORM-EXTENSIONS"
-  step_index: 4
+  task_set_status: complete
+  task_set_id: "TASKSET-AR-UI-LIVING-CONSOLE"
+  step_index: 5
   step_total: 5
-  progress_pct: 75
-  status_text: "Waves 1-7 done (21/28). Remaining UI backlog: UI-PLATFORM-EXTENSIONS 338-341 (4); UI-LIVING-CONSOLE 363/364/365 (3). Next waves dispatch from the V2 shell."
+  progress_pct: 100
+  status_text: "ALL UI work done (28/28). The V2 console shell (theme tokens, sidebar+hash routing, list toolbar, command/proposal path, gate chain) now carries all platform extensions + living-console features. Next: select a non-UI taskset from BACKLOG-BOARD.md."
 active_work:
   current_agents: []
   current_teams: []

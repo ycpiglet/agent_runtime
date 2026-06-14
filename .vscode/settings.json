@@ -1,0 +1,16 @@
+{
+  "files.watcherExclude": {
+    "**/.git/**": true,
+    "**/.venv/**": true,
+    "**/.worktrees/**": true,
+    "**/__pycache__/**": true,
+    "**/node_modules/**": true,
+    "**/.playwright-mcp/**": true,
+    "**/.remember/**": true
+  },
+  "search.exclude": {
+    "**/.worktrees": true,
+    "**/__pycache__": true,
+    "**/.venv": true
+  }
+}

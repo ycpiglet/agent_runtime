@@ -144,13 +144,22 @@ def test_backlog_board_hides_completed_tasks_and_completed_task_sets(tmp_path: P
     archived_sets = board.split("## Archived Task Sets", 1)[1]
     assert "| Quality Sentinel (`TASKSET-AR-QUALITY-LOOP`) |" in archived_sets
     assert "| `2/2` done |" in archived_sets
-    archived_set_summary = archived_sets.split("## Archived Task Files", 1)[0]
+    archived_set_summary = archived_sets.split("## Rollups", 1)[0]
     assert "TASK-AR-901" not in archived_set_summary
     assert "TASK-AR-902" not in archived_set_summary
-    archived_files = board.split("## Archived Task Files", 1)[1]
-    assert "TASK-AR-901" in archived_files
-    assert "TASK-AR-902" in archived_files
-    assert "registered_at" in archived_files
+    # TASK-AR-533: completed task files are no longer dumped inline on the board.
+    # The board carries a rollup pointer; per-file detail lives in ARCHIVE-INDEX.md.
+    assert "## Archived Task Files" not in board
+    assert "## Rollups" in board
+    rollups = board.split("## Rollups", 1)[1]
+    assert "ARCHIVE-INDEX.md" in rollups
+    assert "`2`" in rollups
+    assert "TASK-AR-901" not in board
+    assert "TASK-AR-902" not in board
+    archive_index = backlog_board.render_archive_index(tasks)
+    assert "TASK-AR-901" in archive_index
+    assert "TASK-AR-902" in archive_index
+    assert "registered_at" in archive_index
 
 
 def test_sync_taskset_registry_creates_updates_and_archives(tmp_path: Path) -> None:
@@ -255,6 +264,29 @@ def test_template_backlog_board_merges_registry_reader(tmp_path: Path) -> None:
     assert "`TASKSET-TMPL-MADE`" in board
 
 
+def test_triage_tasks_are_held_out_of_active_and_shown_in_triage(tmp_path: Path) -> None:
+    # TASK-AR-538: status:triage is an intake state -- excluded from the Active
+    # board, surfaced in a Triage inbox, and counted in the needs-attention rollup.
+    tasks_dir = tmp_path / "agents" / "lead_engineer" / "tasks"
+    _write_task(tasks_dir, "TASK-AR-901", "TASKSET-AR-QUALITY-LOOP", status="triage")
+    _write_task(tasks_dir, "TASK-AR-902", "TASKSET-AR-QUALITY-LOOP", status="in_progress")
+
+    tasks = backlog_board.load_tasks(tasks_dir)
+    board = backlog_board.render(tasks, root=tmp_path)
+
+    assert "## Triage" in board
+    triage_section = board.split("## Triage", 1)[1].split("\n## ", 1)[0]
+    assert "TASK-AR-901" in triage_section
+    # The active task set tables (above Triage) must NOT contain the triage task.
+    active_zone = board.split("## Action Board", 1)[1].split("## Triage", 1)[0]
+    assert "TASK-AR-901" not in active_zone
+    assert "TASK-AR-902" in active_zone  # in_progress task stays active
+    # Needs-attention rollup reflects the triage item.
+    rollups = board.split("## Rollups", 1)[1]
+    assert "Needs attention" in rollups
+    assert backlog_board.is_triage(tasks[0]) or backlog_board.is_triage(tasks[1])
+
+
 def test_real_backlog_tasks_are_classified_into_twenty_five_task_sets() -> None:
     tasks = backlog_board.load_tasks(ROOT / "agents" / "lead_engineer" / "tasks")
     task_set_ids = {task.task_set_id for task in tasks}
@@ -289,5 +321,8 @@ def test_real_backlog_tasks_are_classified_into_twenty_five_task_sets() -> None:
         "TASKSET-AR-AGENT-IDENTITY-CONTRACT",
         "TASKSET-AR-WORK-METADATA-ANALYTICS",
         "TASKSET-AR-OPS-ERGONOMICS",
+        "TASKSET-AR-HOST-FEEDBACK-INTAKE",
+        "TASKSET-AR-WORK-STORE-RESTRUCTURE",
+        "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
         "TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
     }

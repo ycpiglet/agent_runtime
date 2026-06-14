@@ -75,6 +75,14 @@ merge queue, then re-plan and dispatch the next wave).
   completed/released.
 - Footprint disjointness is enforced at plan time; do not hand-override a
   deferral -- fix the overlapping `target_files` instead.
+- Plan-time disjointness only checks DECLARED `target_files`, so a unit that
+  under-declares can collide undetected. After a unit completes, run the post-hoc
+  check `footprint_conflict_gate.py --postverify --task-id <T> [--base <merge-base>]`
+  to compare ACTUAL changed files (merge-base diff) vs declared; `actual ⊄ declared`
+  surfaces as a watch (add `--enforce-undeclared` to block). **Worktree backstop:**
+  because each unit runs in an isolated `.worktrees/<task_id>`, an undeclared
+  collision degrades to a *merge conflict* at integration, NOT live corruption --
+  the merge step is the second net (TASK-AR-529, GH #125).
 - `parallel` mode sets `--allow-parallel-task-set`; only use it when the units
   are genuinely independent.
 

@@ -14,7 +14,11 @@ registered_at: 2026-06-11T19:48:00+09:00
 created_at: 2026-06-11T19:48:00+09:00
 updated_at: 2026-06-11T19:48:00+09:00
 title: 2D 오피스 맵 — 회사 맵 + 에이전트 스프라이트 + 이모지 상태 글리프
-status: planned
+status: completed
+started_at: 2026-06-14T00:35:14+09:00
+completed_at: 2026-06-14T01:05:00+09:00
+resolution: done
+verification_status: passed
 priority: P3
 difficulty: L
 est_hours: 12

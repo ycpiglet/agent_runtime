@@ -21,6 +21,7 @@ from typing import Iterable
 ROOT = Path(__file__).resolve().parent.parent
 TASKS_DIR = ROOT / "agents" / "lead_engineer" / "tasks"
 DEFAULT_OUTPUT = ROOT / "BACKLOG-BOARD.md"
+ARCHIVE_INDEX_OUTPUT = ROOT / "ARCHIVE-INDEX.md"
 TASK_SET_REGISTRY = Path("agents/project/work-items/TASKSET-DEFINITIONS.json")
 TASK_SET_REGISTRY_SCHEMA = "agent-runtime-taskset-definitions/v1"
 
@@ -41,6 +42,8 @@ STATUS_WEIGHT = {
     "done": 1,
 }
 DONE_STATUSES = {"completed", "done", "released", "완료"}
+# TASK-AR-538: intake states held OUT of the active board until accepted/deferred.
+TRIAGE_STATUSES = {"triage", "intake"}
 ACTIVE_CLAIM_STATUSES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
 DEFAULT_WIP_LIMIT = 3
 DIFFICULTY_LABEL = {"S": "Low", "M": "Medium", "L": "High", "XL": "Critical", "하": "Low", "중": "Medium", "상": "High"}
@@ -590,6 +593,10 @@ def is_done(task: Task) -> bool:
     return task.status.lower() in DONE_STATUSES
 
 
+def is_triage(task: Task) -> bool:
+    return task.status.lower() in TRIAGE_STATUSES
+
+
 def value_for(task: Task) -> str:
     score = score_for(task)
     if score >= 14:
@@ -722,7 +729,8 @@ def lane_counts(tasks: Iterable[Task]) -> dict[str, int]:
 
 def render(tasks: list[Task], *, root: Path | None = None) -> str:
     today = date.today().isoformat()
-    open_tasks = [t for t in tasks if not is_done(t)]
+    open_tasks = [t for t in tasks if not is_done(t) and not is_triage(t)]
+    triage_tasks = [t for t in tasks if is_triage(t)]
     completed_tasks = [t for t in tasks if is_done(t)]
     counts = lane_counts(tasks)
     task_set_ids = task_sets_for(open_tasks, root)
@@ -847,33 +855,41 @@ def render(tasks: list[Task], *, root: Path | None = None) -> str:
                 + " |"
             )
 
-    if completed_tasks:
+    if triage_tasks:
         lines.extend([
             "",
-            "## Archived Task Files",
+            "## Triage",
             "",
-            "- Restore rule: completed tasks stay hidden from the live Action Board, but every completed task file remains visible here with identity and lifecycle metadata.",
-            "| Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |",
-            "|---|---|---|---|---|---|---|---|---|",
+            "- Intake inbox (TASK-AR-538): items awaiting an accept (-> planned/backlog) or defer (-> someday) decision. Held OUT of the Active board until accepted; host feedback enters here (TASK-AR-526).",
+            "| Task | Task Set | P | Status | Summary |",
+            "|---|---|---:|---|---|",
         ])
-        for task in sorted(completed_tasks, key=lambda task: task_set_sort_key(task, root)):
+        for task in sorted(triage_tasks, key=lambda task: task_set_sort_key(task, root)):
             lines.append(
                 "| "
                 + " | ".join(
                     [
                         f"`{task.display_id}`",
-                        f"`{shorten(task.task_uid, 13)}`" if task.task_uid else "-",
                         f"`{task.task_set_id}`",
+                        task.priority,
                         task.status,
-                        task.registered_at or "-",
-                        task.started_at or "-",
-                        task.completed_at or "-",
-                        task.updated_at or "-",
                         task.goal.replace("|", "/"),
                     ]
                 )
                 + " |"
             )
+
+    needs_attention = len(triage_tasks) + counts.get("Ask", 0)
+    lines.extend([
+        "",
+        "## Rollups",
+        "- Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).",
+        f"- Needs attention: `{needs_attention}` — triage awaiting `{len(triage_tasks)}`, owner-decision (Ask) `{counts.get('Ask', 0)}` (TASK-AR-538).",
+        f"- Triage: `{len(triage_tasks)}` awaiting accept/defer{' (see Triage above)' if triage_tasks else ''}.",
+        f"- Active: `{len(open_tasks)}` open across `{len(task_set_ids)}` task sets (see Action Board above).",
+        f"- Archived task sets: `{len(completed_task_set_ids)}` (see Archived Task Sets above).",
+        f"- Archived task files: `{len(completed_tasks)}` — see `ARCHIVE-INDEX.md`.",
+    ])
 
     lines.extend([
         "",
@@ -897,6 +913,57 @@ def render(tasks: list[Task], *, root: Path | None = None) -> str:
     return "\n".join(lines)
 
 
+def render_archive_index(tasks: list[Task], *, root: Path | None = None) -> str:
+    """Render the per-file archive detail extracted from the live board (TASK-AR-533).
+
+    The board used to inline every completed task file (~69% of its length). That
+    turned an attention surface into a data dump. The board now shows a rollup
+    count + pointer; the full identity/lifecycle detail lives here so nothing is
+    lost and completed work stays queryable.
+    """
+    today = date.today().isoformat()
+    completed_tasks = [task for task in tasks if is_done(task)]
+    lines: list[str] = [
+        "---",
+        "type: archive_index",
+        "id: ARCHIVE-INDEX-agent-runtime",
+        "audience: owner",
+        f"generated_at: {today}",
+        f"archived_count: {len(completed_tasks)}",
+        "---",
+        "",
+        "# Archived Task Files",
+        "",
+        f"- `{len(completed_tasks)}` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.",
+        "- Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.",
+        "",
+        "| Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |",
+        "|---|---|---|---|---|---|---|---|---|",
+    ]
+    if not completed_tasks:
+        lines.append("| - | - | - | - | - | - | - | - | - |")
+    for task in sorted(completed_tasks, key=lambda task: task_set_sort_key(task, root)):
+        lines.append(
+            "| "
+            + " | ".join(
+                [
+                    f"`{task.display_id}`",
+                    f"`{shorten(task.task_uid, 13)}`" if task.task_uid else "-",
+                    f"`{task.task_set_id}`",
+                    task.status,
+                    task.registered_at or "-",
+                    task.started_at or "-",
+                    task.completed_at or "-",
+                    task.updated_at or "-",
+                    task.goal.replace("|", "/"),
+                ]
+            )
+            + " |"
+        )
+    lines.append("")
+    return "\n".join(lines)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Generate Owner-facing backlog decision board")
     parser.add_argument("--tasks-dir", default=str(TASKS_DIR))
@@ -906,11 +973,14 @@ def main() -> int:
 
     tasks = load_tasks(Path(args.tasks_dir))
     text = render(tasks, root=ROOT)
+    archive_text = render_archive_index(tasks, root=ROOT)
     if args.write:
         output = Path(args.output)
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(text, encoding="utf-8")
+        ARCHIVE_INDEX_OUTPUT.write_text(archive_text, encoding="utf-8")
         print(f"wrote={output}")
+        print(f"wrote={ARCHIVE_INDEX_OUTPUT}")
         print(f"tasks={len(tasks)}")
     else:
         print(text)

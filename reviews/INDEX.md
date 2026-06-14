@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-14T15:52:17+09:00
-record_count: 453
+generated_at: 2026-06-14T16:06:03+09:00
+record_count: 481
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `453` review and evidence records under `reviews/`.
+- Summary: indexed `481` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `453` files |
+| Reviews covered | pass | `481` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -73,6 +73,7 @@ record_count: 453
 | `reviews/CORRECTION-COLLECTOR-2026-06-09-task-ar-207.json` | `CORRECTION-COLLECTOR-2026-06-09-task-ar-207` | json | record | n/a | CORRECTION-COLLECTOR-2026-06-09-task-ar-207 |
 | `reviews/CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current.json` | `CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current` | json | record | n/a | CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current |
 | `reviews/CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final.json` | `CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final` | json | record | n/a | CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final |
+| `reviews/COUNCIL-2026-06-14-host-feedback-first-deliberation.md` | `COUNCIL-2026-06-14-host-feedback-first-deliberation` | council | watch | watch | Council — Host Feedback First Deliberation (TASK-AR-527) |
 | `reviews/GOVERNANCE-OPS-REPORT-2026-06-10.md` | `GOVERNANCE-OPS-REPORT-2026-06-10` | governance_ops_report | watch | watch | Governance Operations Report |
 | `reviews/LIVE-REVIEWER-GATE-2026-06-09-task-ar-206.json` | `LIVE-REVIEWER-GATE-2026-06-09-task-ar-206` | json | record | n/a | LIVE-REVIEWER-GATE-2026-06-09-task-ar-206 |
 | `reviews/LIVE-REVIEWER-GATE-2026-06-09-task-ar-207-failure-sample.json` | `LIVE-REVIEWER-GATE-2026-06-09-task-ar-207-failure-sample` | json | record | n/a | LIVE-REVIEWER-GATE-2026-06-09-task-ar-207-failure-sample |
@@ -130,7 +131,9 @@ record_count: 453
 | `reviews/MEETING-2026-06-13-parallel-wave-replan-post-codex-merge.md` | `MEETING-2026-06-13-parallel-wave-replan-post-codex-merge` | meeting | pass | pass | Parallel Wave Replan After Codex Merge (T3) |
 | `reviews/MEETING-2026-06-14-agent-runtime-task-ar-222-migration-closeout-sync.md` | `MEETING-2026-06-14-agent-runtime-task-ar-222-migration-closeout-sync` | md | record | n/a | MEETING: TASK-AR-220/222 closeout 동기화 정합 미팅 |
 | `reviews/MEETING-2026-06-14-agent-runtime-task-ar-223-closeout-planning.md` | `MEETING-2026-06-14-agent-runtime-task-ar-223-closeout-planning` | md | record | n/a | MEETING (2026-06-14) - TASK-AR-223 closeout planning |
+| `reviews/MEETING-2026-06-14-host-feedback-intake-registration.md` | `MEETING-2026-06-14-host-feedback-intake-registration` | meeting | watch | watch | Host Feedback Intake — Deliberation Topic + Taskset Registration |
 | `reviews/MEETING-2026-06-14-product-maturity-uplift-taskset-registration.md` | `MEETING-2026-06-14-product-maturity-uplift-taskset-registration` | meeting | watch | watch | Product Maturity Uplift — Taskset Registration |
+| `reviews/MEETING-2026-06-14-wave-plan-host-store-console.md` | `MEETING-2026-06-14-wave-plan-host-store-console` | meeting | watch | watch | Wave Execution Plan — Host Feedback + Work Store + Decision Console |
 | `reviews/MEETING-2026-06-15-agent-runtime-task-ar-223-cycle-sync.md` | `MEETING-2026-06-15-agent-runtime-task-ar-223-cycle-sync` | md | record | n/a | MEETING (2026-06-15) - TASK-AR-223 closeout cycle sync |
 | `reviews/OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion.json` | `OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion` | json | record | n/a | OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion |
 | `reviews/OFFLINE-EVAL-2026-06-09-task-ar-217-rerun.json` | `OFFLINE-EVAL-2026-06-09-task-ar-217-rerun` | json | record | n/a | OFFLINE-EVAL-2026-06-09-task-ar-217-rerun |
@@ -182,6 +185,8 @@ record_count: 453
 | `reviews/RESEARCH-2026-06-13-agent-runtime-task-ar-211-official-multi-project-overlay.md` | `RESEARCH-2026-06-13-agent-runtime-task-ar-211-official-multi-project-overlay` | md | record | n/a | RESEARCH-2026-06-13-agent-runtime-task-ar-211-official-multi-project-overlay |
 | `reviews/RESEARCH-2026-06-14-agent-runtime-task-ar-222-cross-project-overlay-and-governance-research.md` | `RESEARCH-2026-06-14-agent-runtime-task-ar-222-cross-project-overlay-and-governance-research` | md | record | n/a | RESEARCH: TASK-AR-222 closeout을 위한 운영 연구 반영 |
 | `reviews/RESEARCH-2026-06-14-product-maturity-ui-assessment.md` | `RESEARCH-2026-06-14-product-maturity-ui-assessment` | research | watch | watch | Product Maturity & UI Assessment — 2026-06-14 |
+| `reviews/RESEARCH-2026-06-14-unified-decision-console.md` | `RESEARCH-2026-06-14-unified-decision-console` | research | complete | n/a | Unified Decision/Operations Console — Research Synthesis |
+| `reviews/RESEARCH-2026-06-14-work-store-architecture-and-numbering.md` | `RESEARCH-2026-06-14-work-store-architecture-and-numbering` | research | complete | n/a | Work Store Architecture, Archival, Numbering & Performance — Research Synthesis |
 | `reviews/RESEARCH-2026-06-15-agent-runtime-task-ar-223-hold-routing-and-overlay-edge-research.md` | `RESEARCH-2026-06-15-agent-runtime-task-ar-223-hold-routing-and-overlay-edge-research` | md | record | n/a | RESEARCH: TASK-AR-223 hold-routing + overlay-edge risk 반영 (2026-06-15) |
 | `reviews/RETRO-2026-06-10-agent-runtime-governance-ops.md` | `RETRO-2026-06-10-agent-runtime-governance-ops` | retro | watch | watch | RETRO-2026-06-10 agent runtime governance ops |
 | `reviews/RETRO-2026-06-14-agent-runtime-process-integrity.md` | `RETRO-2026-06-14-agent-runtime-process-integrity` | retro | watch | watch | RETRO 2026-06-14 — Process Integrity (verification / merge / compound-review-retro) |
@@ -487,6 +492,29 @@ record_count: 453
 | `reviews/W4B-2026-06-13-TASK-AR-336.md` | `W4B-2026-06-13-TASK-AR-336` | verification | record | n/a | W4b Independent Verification — TASK-AR-336 (State-Machine Viewer) |
 | `reviews/W4B-2026-06-13-TASK-AR-337.md` | `W4B-2026-06-13-TASK-AR-337` | verification | record | n/a | W4b Independent Verification — TASK-AR-337 (Team/Role Assignment + Workload Heatmap) |
 | `reviews/W4B-2026-06-13-TASK-AR-362.md` | `W4B-2026-06-13-TASK-AR-362` | verification | record | n/a | W4b Independent Verification — TASK-AR-362 (Board Peek + DnD + Quick Actions) |
+| `reviews/W4B-2026-06-14-TASK-AR-338.md` | `W4B-2026-06-14-TASK-AR-338` | verification | record | n/a | W4b Independent Verification — TASK-AR-338 (Notification center + mentions/pins/reactions + daily brief) |
+| `reviews/W4B-2026-06-14-TASK-AR-339.md` | `W4B-2026-06-14-TASK-AR-339` | verification | record | n/a | W4b Independent Verification — TASK-AR-339 (Ops dashboard — token/cost, eval, gates, burndown) |
+| `reviews/W4B-2026-06-14-TASK-AR-340.md` | `W4B-2026-06-14-TASK-AR-340` | verification | record | n/a | W4b Independent Verification — TASK-AR-340 (Microinteractions + gamification policy layer) |
+| `reviews/W4B-2026-06-14-TASK-AR-341.md` | `W4B-2026-06-14-TASK-AR-341` | verification | record | n/a | W4b Independent Verification — TASK-AR-341 (Workspace switcher + widget extension points + i18n) |
+| `reviews/W4B-2026-06-14-TASK-AR-363.md` | `W4B-2026-06-14-TASK-AR-363` | verification | record | n/a | W4b Independent Verification — TASK-AR-363 (Growth system — project Lv / business stage / XP with guardrails) |
+| `reviews/W4B-2026-06-14-TASK-AR-364.md` | `W4B-2026-06-14-TASK-AR-364` | verification | record | n/a | W4b Independent Verification — TASK-AR-364 (2D office map — agent sprites + emoji action glyphs) |
+| `reviews/W4B-2026-06-14-TASK-AR-365.md` | `W4B-2026-06-14-TASK-AR-365` | verification | record | n/a | W4b Independent Verification — TASK-AR-365 (External notification routing — webhook-first) |
+| `reviews/W4B-2026-06-14-TASK-AR-526.md` | `W4B-2026-06-14-TASK-AR-526` | verification | record | n/a | W4b Independent Verification — TASK-AR-526 (Host feedback intake + triage classifier) |
+| `reviews/W4B-2026-06-14-TASK-AR-527.md` | `W4B-2026-06-14-TASK-AR-527` | verification | record | n/a | W4b Independent Verification — TASK-AR-527 (Blind-Delphi deliberation harness + first run) |
+| `reviews/W4B-2026-06-14-TASK-AR-528.md` | `W4B-2026-06-14-TASK-AR-528` | verification | record | n/a | W4b Independent Verification — TASK-AR-528 (Host-feedback reply-back mechanism) |
+| `reviews/W4B-2026-06-14-TASK-AR-529.md` | `W4B-2026-06-14-TASK-AR-529` | verification | record | n/a | W4b Independent Verification — TASK-AR-529 (post-hoc actual-vs-declared footprint check) |
+| `reviews/W4B-2026-06-14-TASK-AR-530.md` | `W4B-2026-06-14-TASK-AR-530` | verification | record | n/a | W4b Independent Verification — TASK-AR-530 (cross-version self-eval harness, advisory gate) |
+| `reviews/W4B-2026-06-14-TASK-AR-531.md` | `W4B-2026-06-14-TASK-AR-531` | verification | record | n/a | W4b Independent Verification — TASK-AR-531 (wheel-dotfile packaging, P1 sub-gap) |
+| `reviews/W4B-2026-06-14-TASK-AR-532.md` | `W4B-2026-06-14-TASK-AR-532` | verification | record | n/a | W4b Independent Verification — TASK-AR-532 (open BUG verify-first regression guards) |
+| `reviews/W4B-2026-06-14-TASK-AR-533.md` | `W4B-2026-06-14-TASK-AR-533` | verification | record | n/a | W4b Independent Verification — TASK-AR-533 (Board attention-lanes + archive manifest extraction) |
+| `reviews/W4B-2026-06-14-TASK-AR-534.md` | `W4B-2026-06-14-TASK-AR-534` | verification | record | n/a | W4b Independent Verification — TASK-AR-534 (Reviews date-shard capability + planner) |
+| `reviews/W4B-2026-06-14-TASK-AR-535.md` | `W4B-2026-06-14-TASK-AR-535` | verification | record | n/a | W4b Independent Verification — TASK-AR-535 (Classifier ordinal as canonical human ID + numbering policy) |
+| `reviews/W4B-2026-06-14-TASK-AR-536.md` | `W4B-2026-06-14-TASK-AR-536` | verification | record | n/a | W4b Independent Verification — TASK-AR-536 (UUIDv7 stable key + reservation demotion) |
+| `reviews/W4B-2026-06-14-TASK-AR-537.md` | `W4B-2026-06-14-TASK-AR-537` | verification | record | n/a | W4b Independent Verification — TASK-AR-537 (Manifest-first read surface + perf config) |
+| `reviews/W4B-2026-06-14-TASK-AR-538.md` | `W4B-2026-06-14-TASK-AR-538` | verification | record | n/a | W4b Independent Verification — TASK-AR-538 (Triage intake status + needs-attention lane) |
+| `reviews/W4B-2026-06-14-TASK-AR-539.md` | `W4B-2026-06-14-TASK-AR-539` | verification | record | n/a | W4b Independent Verification — TASK-AR-539 (Unified artifact entity catalog) |
+| `reviews/W4B-2026-06-14-TASK-AR-540.md` | `W4B-2026-06-14-TASK-AR-540` | verification | record | n/a | W4b Independent Verification — TASK-AR-540 (command palette + cross-entity search) |
+| `reviews/W4B-2026-06-14-TASK-AR-541-545.md` | `W4B-2026-06-14-TASK-AR-541-545` | verification | record | n/a | W4b Independent Verification — Decision Console Surfaces (TASK-AR-541/542/543/544/545) |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.
