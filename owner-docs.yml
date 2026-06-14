@@ -1,5 +1,7 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
+  - reviews/RETRO-2026-06-14-agent-runtime-process-integrity.md
+  - reviews/REVIEW-2026-06-14-deadlock-eval-automation-closeout.md
   - reviews/RESEARCH-2026-06-14-product-maturity-ui-assessment.md
   - reviews/MEETING-2026-06-14-product-maturity-uplift-taskset-registration.md
   - OPS-COMMAND-REFERENCE.md
