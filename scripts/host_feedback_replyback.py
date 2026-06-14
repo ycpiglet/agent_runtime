@@ -27,6 +27,8 @@ QUEUE = ROOT / "agents" / "project" / "work-items" / "HOST-FEEDBACK-QUEUE.json"
 DRAFTS = ROOT / "agents" / "project" / "work-items" / "HOST-FEEDBACK-REPLIES.md"
 REPO = "ycpiglet/agent_runtime"
 DELIBERATION = "reviews/COUNCIL-2026-06-14-host-feedback-first-deliberation.md"
+# Hidden marker so re-running --post is idempotent (skip issues already replied).
+REPLY_MARKER = "<!-- ar528-replyback -->"
 
 
 def _issue_number(source: str) -> str | None:
@@ -62,6 +64,8 @@ def build_replies(queue: dict) -> list[dict]:
             "Guardrails: this is a recommendation + priority signal; product "
             "direction stays with the Owner, safety/order with a human (R3)."
         )
+        lines.append("")
+        lines.append(REPLY_MARKER)
         replies.append({"issue": number, "body": "\n".join(lines)})
     return replies
 
@@ -85,6 +89,22 @@ def render_drafts(replies: list[dict]) -> str:
         out.append(reply["body"])
         out.append("")
     return "\n".join(out)
+
+
+def _already_replied(issue: str) -> bool:
+    """True if an ar528 reply marker is already present on the issue (idempotency)."""
+    result = subprocess.run(
+        ["gh", "issue", "view", issue, "--repo", REPO, "--json", "comments"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        return False
+    try:
+        comments = json.loads(result.stdout).get("comments", [])
+    except json.JSONDecodeError:
+        return False
+    return any(REPLY_MARKER in str(comment.get("body") or "") for comment in comments)
 
 
 def post_reply(issue: str, body: str) -> tuple[bool, str]:
@@ -122,6 +142,9 @@ def main() -> int:
             print(f"host-feedback-replyback: refusing to post; {len(findings)} findings")
             return 1
         for reply in replies:
+            if _already_replied(reply["issue"]):
+                print(f"#{reply['issue']}: skipped (already replied; idempotent)")
+                continue
             ok, detail = post_reply(reply["issue"], reply["body"])
             print(f"#{reply['issue']}: {'posted ' + detail if ok else 'FAILED ' + detail}")
         return 0

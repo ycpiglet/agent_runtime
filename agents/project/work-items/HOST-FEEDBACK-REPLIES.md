@@ -17,6 +17,8 @@ This feedback was run through the host-feedback intake pipeline (GH #131): triag
 
 Guardrails: this is a recommendation + priority signal; product direction stays with the Owner, safety/order with a human (R3).
 
+<!-- ar528-replyback -->
+
 ## GH #20
 
 **agent_runtime — host-feedback intake decision**
@@ -27,6 +29,8 @@ This feedback was run through the host-feedback intake pipeline (GH #131): triag
   - ACCEPT (verify-first): build_sync_plan already has a TypeError path-like guard in v0.2.0; add the stale-config AttributeError guard + a regression test, then reply-back.
 
 Guardrails: this is a recommendation + priority signal; product direction stays with the Owner, safety/order with a human (R3).
+
+<!-- ar528-replyback -->
 
 ## GH #21
 
@@ -39,6 +43,8 @@ This feedback was run through the host-feedback intake pipeline (GH #131): triag
 
 Guardrails: this is a recommendation + priority signal; product direction stays with the Owner, safety/order with a human (R3).
 
+<!-- ar528-replyback -->
+
 ## GH #121
 
 **agent_runtime — host-feedback intake decision**
@@ -49,6 +55,8 @@ This feedback was run through the host-feedback intake pipeline (GH #131): triag
   - ACCEPT (split): wheel-dotfile packaging is a CONFIRMED live blocker -> P1 now (empirical: 0/4 dotfiles ship). status l10n P3 (alias-additive). read-location = doc-only. REJECT work_cli sub-gap (scripts/work.py already is the scaffolder).
 
 Guardrails: this is a recommendation + priority signal; product direction stays with the Owner, safety/order with a human (R3).
+
+<!-- ar528-replyback -->
 
 ## GH #125
 
@@ -61,6 +69,8 @@ This feedback was run through the host-feedback intake pipeline (GH #131): triag
 
 Guardrails: this is a recommendation + priority signal; product direction stays with the Owner, safety/order with a human (R3).
 
+<!-- ar528-replyback -->
+
 ## GH #128
 
 **agent_runtime — host-feedback intake decision**
@@ -72,6 +82,8 @@ This feedback was run through the host-feedback intake pipeline (GH #131): triag
 
 Guardrails: this is a recommendation + priority signal; product direction stays with the Owner, safety/order with a human (R3).
 
+<!-- ar528-replyback -->
+
 ## GH #131
 
 **agent_runtime — host-feedback intake decision**
@@ -82,3 +94,5 @@ This feedback was run through the host-feedback intake pipeline (GH #131): triag
   - ACCEPT — the intake->deliberate->reply-back pipeline itself; built via 526/527/528 (526 + this deliberation are done).
 
 Guardrails: this is a recommendation + priority signal; product direction stays with the Owner, safety/order with a human (R3).
+
+<!-- ar528-replyback -->

@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-14T12:57:01+09:00
-record_count: 472
+generated_at: 2026-06-14T13:07:40+09:00
+record_count: 473
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `472` review and evidence records under `reviews/`.
+- Summary: indexed `473` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `472` files |
+| Reviews covered | pass | `473` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -497,6 +497,7 @@ record_count: 472
 | `reviews/W4B-2026-06-14-TASK-AR-365.md` | `W4B-2026-06-14-TASK-AR-365` | verification | record | n/a | W4b Independent Verification — TASK-AR-365 (External notification routing — webhook-first) |
 | `reviews/W4B-2026-06-14-TASK-AR-526.md` | `W4B-2026-06-14-TASK-AR-526` | verification | record | n/a | W4b Independent Verification — TASK-AR-526 (Host feedback intake + triage classifier) |
 | `reviews/W4B-2026-06-14-TASK-AR-527.md` | `W4B-2026-06-14-TASK-AR-527` | verification | record | n/a | W4b Independent Verification — TASK-AR-527 (Blind-Delphi deliberation harness + first run) |
+| `reviews/W4B-2026-06-14-TASK-AR-528.md` | `W4B-2026-06-14-TASK-AR-528` | verification | record | n/a | W4b Independent Verification — TASK-AR-528 (Host-feedback reply-back mechanism) |
 | `reviews/W4B-2026-06-14-TASK-AR-529.md` | `W4B-2026-06-14-TASK-AR-529` | verification | record | n/a | W4b Independent Verification — TASK-AR-529 (post-hoc actual-vs-declared footprint check) |
 | `reviews/W4B-2026-06-14-TASK-AR-531.md` | `W4B-2026-06-14-TASK-AR-531` | verification | record | n/a | W4b Independent Verification — TASK-AR-531 (wheel-dotfile packaging, P1 sub-gap) |
 | `reviews/W4B-2026-06-14-TASK-AR-533.md` | `W4B-2026-06-14-TASK-AR-533` | verification | record | n/a | W4b Independent Verification — TASK-AR-533 (Board attention-lanes + archive manifest extraction) |
