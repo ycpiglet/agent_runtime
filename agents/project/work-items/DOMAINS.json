@@ -1,0 +1,51 @@
+{
+  "schema": "agent-runtime-domains/v1",
+  "_note": "Capability domains (대분류) that group initiatives + tasksets into stable value areas. Single source of truth — edit here to retune; knowledge_graph wires partOf edges (taskset -> initiative -> domain, or work-item -> domain directly). Optimize membership over time as the roadmap evolves.",
+  "domains": [
+    {
+      "id": "DOMAIN-WORK-MODELING",
+      "title": "Work Modeling",
+      "summary": "How work itself is represented, stored, and related — the hierarchy, the store, and its metadata.",
+      "members": [
+        "INIT-AR-WORK-STORE-RESTRUCTURE",
+        "INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
+        "INIT-AR-WORK-METADATA-ANALYTICS"
+      ]
+    },
+    {
+      "id": "DOMAIN-AGENT-ORCHESTRATION",
+      "title": "Agent Orchestration",
+      "summary": "Running and coordinating agents — identity/observability, parallel-wave execution, reliability.",
+      "members": [
+        "INIT-AR-AGENT-IDENTITY-OBSERVABILITY",
+        "INIT-AR-PARALLEL-WAVE-EXECUTION"
+      ]
+    },
+    {
+      "id": "DOMAIN-OWNER-EXPERIENCE",
+      "title": "Owner Experience",
+      "summary": "How the owner sees and steers the system — the console, feedback intake, and operational ergonomics.",
+      "members": [
+        "INIT-AR-UNIFIED-DECISION-CONSOLE",
+        "INIT-AR-HOST-FEEDBACK-INTAKE",
+        "TASKSET-AR-OPS-ERGONOMICS"
+      ]
+    },
+    {
+      "id": "DOMAIN-GOVERNANCE-QUALITY",
+      "title": "Governance & Quality",
+      "summary": "Gates, verification, and product maturity — keeping the system correct and trustworthy.",
+      "members": [
+        "TASKSET-AR-PRODUCT-MATURITY-UPLIFT"
+      ]
+    }
+  ],
+  "initiative_tasksets": {
+    "INIT-AR-WORK-STORE-RESTRUCTURE": ["TASKSET-AR-WORK-STORE-RESTRUCTURE"],
+    "INIT-AR-WORK-METADATA-ANALYTICS": ["TASKSET-AR-WORK-METADATA-ANALYTICS"],
+    "INIT-AR-AGENT-IDENTITY-OBSERVABILITY": ["TASKSET-AR-AGENT-IDENTITY-CONTRACT"],
+    "INIT-AR-PARALLEL-WAVE-EXECUTION": ["TASKSET-AR-PARALLEL-WAVE-EXECUTION"],
+    "INIT-AR-UNIFIED-DECISION-CONSOLE": ["TASKSET-AR-UNIFIED-DECISION-CONSOLE"],
+    "INIT-AR-HOST-FEEDBACK-INTAKE": ["TASKSET-AR-HOST-FEEDBACK-INTAKE"]
+  }
+}

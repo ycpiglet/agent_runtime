@@ -146,6 +146,31 @@ def test_ingest_reviews_scans_body_for_references(tmp_path):
     assert {"TASK-AR-552", "TASKSET-AR-COLLAB-CONCURRENCY", "INIT-AR-HOST-FEEDBACK-INTAKE"} <= targets
 
 
+def test_build_graph_wires_capability_domains(tmp_path):
+    wi = tmp_path / "agents" / "project" / "work-items"
+    wi.mkdir(parents=True)
+    (wi / "WORK-ITEM-CLASSIFICATION.json").write_text(json.dumps({"records": [
+        {"id": "INIT-AR-X", "level": "initiative", "title": "Init X"},
+        {"id": "TASKSET-AR-X", "level": "taskset", "title": "Set X"}]}), encoding="utf-8")
+    (wi / "DOMAINS.json").write_text(json.dumps({
+        "schema": "agent-runtime-domains/v1",
+        "domains": [{"id": "DOMAIN-X", "title": "Domain X", "summary": "s", "members": ["INIT-AR-X"]}],
+        "initiative_tasksets": {"INIT-AR-X": ["TASKSET-AR-X"], "INIT-AR-MISSING": ["TASKSET-AR-X"]},
+    }), encoding="utf-8")
+    graph = kg.build_graph(tmp_path, git_limit=0)
+    by_id = {n["id"]: n for n in graph["nodes"]}
+    assert by_id["DOMAIN-X"]["kind"] == "domain"
+    # initiative -> domain and taskset -> initiative partOf edges exist
+    assert {"type": "partOf", "target": "DOMAIN-X"} in by_id["INIT-AR-X"]["relations"]
+    assert {"type": "partOf", "target": "INIT-AR-X"} in by_id["TASKSET-AR-X"]["relations"]
+    # an edge to a non-existent parent (INIT-AR-MISSING) is skipped, not dangling
+    assert all(r["target"] != "INIT-AR-MISSING" for r in by_id["TASKSET-AR-X"]["relations"])
+
+
+def test_ingest_domains_missing_file_is_empty(tmp_path):
+    assert kg.ingest_domains(tmp_path) == []
+
+
 def test_build_graph_prunes_dangling_reference_edges(tmp_path):
     # a review body references a real task plus bogus id-shaped tokens (filename / date)
     reviews = tmp_path / "reviews"
