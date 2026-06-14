@@ -34,7 +34,7 @@ tags: [planning-record, product-maturity, ui-ux, taskset, registration, improvem
 
 ## Action
 
-전체 등록을 마치려면 아래 부킹을 적용한다. **이 레시피는 wave89 closeout(미커밋 TASK-AR-526~545)과 함께 일괄 반영**한다 — 지금 인덱스/분류기를 재생성하면 미커밋 526~545와 충돌하므로, 본 레코드에 레시피만 남기고 task 파일·루브릭·카탈로그·리뷰는 격리 커밋했다.
+전체 등록을 마치려면 아래 부킹을 적용한다. 최초 등록 시 wave89 closeout의 미커밋 작업과의 인덱스 충돌을 피하려 task 파일·루브릭·카탈로그·리뷰를 먼저 격리 커밋했고, 레지스트리/인덱스 부킹은 이후 main에서 일괄 반영했다.
 
 | # | 부킹 단계 | 파일/명령 |
 | --- | --- | --- |
@@ -50,9 +50,9 @@ TASKSET-DEFINITIONS.json 추가 항목:
 | field | value |
 | --- | --- |
 | task_set_id | TASKSET-AR-PRODUCT-MATURITY-UPLIFT |
-| display_name | Product Maturity Uplift |
+| display_name | Maturity Steward |
 | summary | 2026-06-14 성숙도/UI 평가 개선점(e2e·a11y·반응형·실시간·i18n·reaper 동시성·관측성·멀티호스트·릴리스 자동화) 후보 백로그 |
-| order | 546 |
+| order | 527 |
 
 owner-docs.yml 추가 항목:
 
@@ -63,7 +63,7 @@ owner-docs.yml 추가 항목:
 
 ## Risk
 
-- 지금 분류기/인덱스를 재생성하면 wave89 미커밋 항목(TASK-AR-526~545, 미인덱싱 리뷰)을 끌어들여 격리가 깨진다 → 부킹은 closeout과 함께.
+- 최초 등록 시 분류기/인덱스를 재생성하면 wave89의 미커밋 항목을 끌어들여 격리가 깨질 수 있어 콘텐츠를 먼저 분리 커밋했고, 레지스트리 부킹은 main에서 별도 반영했다.
 - task 파일은 legacy 프론트매터(work_schema_gate 통과 포맷)로 작성했다. v1(`schema_version`) 마이그레이션 시 일괄 변환 대상.
 - 후보 등록이 "채택"으로 오독될 위험 → 모든 task에 `status: planned` + 본 레코드의 boundary 명시.
 
