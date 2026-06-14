@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-14T16:06:03+09:00
-record_count: 481
+generated_at: 2026-06-14T18:03:39+09:00
+record_count: 482
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `481` review and evidence records under `reviews/`.
+- Summary: indexed `482` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `481` files |
+| Reviews covered | pass | `482` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -450,6 +450,7 @@ record_count: 481
 | `reviews/REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log.md` | `REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log` | md | record | n/a | REVIEW: TASK-AR-222 closeout 실행 로그 |
 | `reviews/REVIEW-2026-06-14-deadlock-eval-automation-closeout.md` | `REVIEW-2026-06-14-deadlock-eval-automation-closeout` | review | watch | watch | REVIEW 2026-06-14 — Deadlock guardrails · eval · auto-merge closeout |
 | `reviews/REVIEW-2026-06-14-knowledge-stack-closeout.md` | `REVIEW-2026-06-14-knowledge-stack-closeout` | review | watch | watch | REVIEW 2026-06-14 — Agent knowledge stack closeout (#1–#4) |
+| `reviews/REVIEW-2026-06-14-knowledge-stack-followups-closeout.md` | `REVIEW-2026-06-14-knowledge-stack-followups-closeout` | review | watch | watch | REVIEW 2026-06-14 — Knowledge-stack follow-ups closeout (A/B/C) |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario |
