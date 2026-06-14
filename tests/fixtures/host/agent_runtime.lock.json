@@ -2,7 +2,8 @@
   "installed": {
     "managed_files": {
       ".codex/hooks.json": "sha256:0dfdfadf6c2a520591d4ba7f4804937c60e59554067a9573cb25682fa05d5859",
-      ".gitattributes": "sha256:15ffd335359d2c442ed4df547a878ff3555e20383b9fa60fee5de4cdb47f9f6b",
+      ".gitattributes": "sha256:22ec718362af48d401e6717569dfcc89ec3573d553dc3f3530f4db8a1625b79b",
+      ".githooks/post-merge": "sha256:b112da8578360cd49b871f518afa9c2ffb9f266c416daa02a8a9b17a84196e39",
       ".githooks/pre-commit": "sha256:850b1f91882fd3ec4d7335cbe9d0e5678af7d111d2754a5da9134d70b2d1c65b",
       ".github/workflows/owner-doc-format.yml": "sha256:173fdbbd463b87c882a38651d6caeddf24ddfee7dbe4de7df72725da7b77537e",
       "AGENTS.md": "sha256:eb76c85b035397bfc622a15b367376257f60fe68032ed6282f68875c0146014b",
@@ -136,6 +137,7 @@
       "scripts/knowledge_graph.py": "sha256:deb21598ea468d824d9a22340a04620efbdaebc1f405a39ebdd86e0ed4cf2584",
       "scripts/knowledge_lint.py": "sha256:709fdb0b0e2487c4fbd123c7a62b0ce5bbb9173a4dea5f228acb8405da9c66b9",
       "scripts/local_schedule_daemon.py": "sha256:548b5ce03b04f44ac1fd833b6347a7850665895f299f8aceeacfa4b7cf5d4f8d",
+      "scripts/lock_merge_driver.py": "sha256:7cd74471e96a2e44e22438841156ffa783c2600d16ae024b77c3f8062bcc1769",
       "scripts/macro_detect.py": "sha256:15a7ecad24ee5e73922ba7f276d3e8439a37f6a6e2e6b95fdcfc843cababd813",
       "scripts/merge_queue.py": "sha256:fa58f4b4a7fd0a7a59a9a2e3606705a83300508d49abc16871d1b7cd4b9ea41f",
       "scripts/message_queue.py": "sha256:3c6eb116d0c6db0229daad7eda983afd2d048bc43ed15f7348ba325b9ccb4c7a",
@@ -261,8 +263,8 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.2.0",
-    "template_digest": "sha256:71ebce21b383c79d00696c8f53a11a9f2e3b31639242dae30ea2858a45fdb508",
-    "template_files": 258
+    "template_digest": "sha256:5e790e3c208c963a175cee7cc827d1b0d7413f7a53ae595f649ccc4e46a21389",
+    "template_files": 260
   },
   "project": "fixture-host",
   "schema": "agent-runtime-lock/v1",

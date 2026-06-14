@@ -1,0 +1,21 @@
+#!/bin/sh
+# Optional Git hook. Install with:
+#   python scripts/lock_merge_driver.py --install   (sets the driver + core.hooksPath)
+# or:
+#   git config core.hooksPath .githooks
+#
+# Regenerates the derived host lock(s) after a merge, when the working tree is
+# fully materialised, and stages any that changed. Paired with the keep-ours
+# merge driver (.gitattributes) this turns the lock conflict into a clean,
+# auto-resolved merge. See docs/lock-merge-driver.md.
+
+if command -v python >/dev/null 2>&1; then
+  PYTHON_BIN=python
+elif command -v python3 >/dev/null 2>&1; then
+  PYTHON_BIN=python3
+else
+  echo "post-merge: python not found on PATH" >&2
+  exit 0
+fi
+
+"$PYTHON_BIN" scripts/lock_merge_driver.py post-merge || true
