@@ -1,0 +1,55 @@
+# Auto-merge a pull request once its `test` workflow run concludes successfully.
+#
+# Verification gate = the `test` CI workflow (pytest matrix 3.10/3.11/3.12 + the
+# warning-summary / latency gates). Owner policy (2026-06-14): merge ALL green PRs
+# and delete the source branch — no manual approval step.
+#
+# To narrow this to opt-in later, gate the merge on a label (e.g. only merge when
+# the PR carries an `auto-merge` label). To strengthen "verification", add more
+# required checks to the `test` workflow (governance gate, path-triggered evals,
+# release benchmark no-regression) — the per-merge gate stays cheap + deterministic;
+# heavier benchmarks belong on the schedule/release path, not every PR.
+#
+# Safety: merges only when the PR head still equals the exact commit CI validated,
+# so a newer, untested push is never auto-merged. Runs in the base-repo context
+# (workflow_run), so the token is trusted even for fork PRs.
+name: auto-merge
+
+on:
+  workflow_run:
+    workflows: ["test"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request'
+    steps:
+      - name: Merge the CI-validated green PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          pr="$(gh pr list --repo "$REPO" --head "$HEAD_BRANCH" --state open \
+                  --json number,headRefOid --jq '.[0] // empty')"
+          if [ -z "$pr" ]; then
+            echo "No open PR for branch '$HEAD_BRANCH'; nothing to merge."
+            exit 0
+          fi
+          num="$(printf '%s' "$pr" | jq -r '.number')"
+          head_oid="$(printf '%s' "$pr" | jq -r '.headRefOid')"
+          if [ "$head_oid" != "$HEAD_SHA" ]; then
+            echo "PR #$num head ($head_oid) moved past CI-validated $HEAD_SHA; skipping."
+            exit 0
+          fi
+          echo "All checks green for PR #$num at $HEAD_SHA — auto-merging + deleting branch."
+          gh pr merge "$num" --repo "$REPO" --merge --delete-branch
