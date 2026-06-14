@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-14T10:30:36+09:00
-record_count: 466
+generated_at: 2026-06-14T11:04:36+09:00
+record_count: 467
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `466` review and evidence records under `reviews/`.
+- Summary: indexed `467` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `466` files |
+| Reviews covered | pass | `467` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -500,6 +500,7 @@ record_count: 466
 | `reviews/W4B-2026-06-14-TASK-AR-533.md` | `W4B-2026-06-14-TASK-AR-533` | verification | record | n/a | W4b Independent Verification — TASK-AR-533 (Board attention-lanes + archive manifest extraction) |
 | `reviews/W4B-2026-06-14-TASK-AR-534.md` | `W4B-2026-06-14-TASK-AR-534` | verification | record | n/a | W4b Independent Verification — TASK-AR-534 (Reviews date-shard capability + planner) |
 | `reviews/W4B-2026-06-14-TASK-AR-535.md` | `W4B-2026-06-14-TASK-AR-535` | verification | record | n/a | W4b Independent Verification — TASK-AR-535 (Classifier ordinal as canonical human ID + numbering policy) |
+| `reviews/W4B-2026-06-14-TASK-AR-536.md` | `W4B-2026-06-14-TASK-AR-536` | verification | record | n/a | W4b Independent Verification — TASK-AR-536 (UUIDv7 stable key + reservation demotion) |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.

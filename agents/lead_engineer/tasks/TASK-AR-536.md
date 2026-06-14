@@ -4,8 +4,10 @@ display_id: TASK-AR-536
 task_uid: 30f4de47-2cdd-4af4-85de-a9e9f788bfe9
 registered_at: 2026-06-14T03:22:33+09:00
 created_at: 2026-06-14T03:22:33+09:00
-updated_at: 2026-06-14T03:22:33+09:00
-status: planned
+started_at: 2026-06-14T10:40:00+09:00
+updated_at: 2026-06-14T10:50:00+09:00
+completed_at: 2026-06-14T10:50:00+09:00
+status: completed
 priority: P2
 difficulty: M
 est_hours: 5
@@ -45,3 +47,13 @@ tags:
 ## Evidence Targets
 
 - `reviews/RESEARCH-2026-06-14-work-store-architecture-and-numbering.md` (UUIDv7/ULID time-sortable, coordination-free; Snowflake/Instagram/Discord worker-id partitioning; reservation = serialization point).
+
+## Completion Evidence
+
+- `scripts/task_identity.py`: added `_uuid7()` (RFC 9562 sec 5.7 — 48-bit unix-ms + version 7 + variant 10 + 74 random bits); widened `UUID_RE` from version-4-pinned to `[47]` (v4 legacy + v7); switched all three `task_uid` mint sites (`_backfill_updates`, `_cmd_create_with_reservation`, `cmd_create`) to `_uuid7()`. The reservation `RES-...` group-id hex stays `uuid4` (not a task_uid). Docstring updated: reservation ledger is optional (vanity contiguous `TASK-AR-NNN` only), not on the hot path.
+- `tests/test_task_identity_uuid7.py`: 4 tests (version/variant, time-sortable + collision-free, legacy v4 valid, backfill mints v7). Existing `tests/test_task_identity.py` local regex widened to `[47]`.
+
+## Verification Results
+
+- W4a: new 4 tests + full task_identity suite (11) pass; `task_identity.py check --check` findings=0 on the real store (all 196 legacy v4 keys still valid); governance gate exit 0.
+- W4b (independent, verifier != worker): see `reviews/W4B-2026-06-14-TASK-AR-536.md`.

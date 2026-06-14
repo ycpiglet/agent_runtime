@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-14T10:30:34+09:00",
+  "generated_at": "2026-06-14T11:04:33+09:00",
   "record_count": 272,
   "finding_count": 0,
   "findings": [],
@@ -2258,7 +2258,7 @@
       "title": "Make the permanent key collision-free AND time-sortable so multiple agents mint IDs w…",
       "path": "agents/lead_engineer/tasks/TASK-AR-536.md",
       "parent_id": "TASKSET-AR-WORK-STORE-RESTRUCTURE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-537",
