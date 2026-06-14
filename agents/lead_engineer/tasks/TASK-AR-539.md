@@ -4,8 +4,10 @@ display_id: TASK-AR-539
 task_uid: caa68fb5-1275-4aa8-aee6-a6cafa792944
 registered_at: 2026-06-14T03:22:33+09:00
 created_at: 2026-06-14T03:22:33+09:00
-updated_at: 2026-06-14T03:22:33+09:00
-status: planned
+started_at: 2026-06-14T12:05:00+09:00
+updated_at: 2026-06-14T12:15:00+09:00
+completed_at: 2026-06-14T12:15:00+09:00
+status: completed
 priority: P1
 difficulty: L
 est_hours: 10
@@ -45,3 +47,14 @@ tags:
 ## Evidence Targets
 
 - `reviews/RESEARCH-2026-06-14-unified-decision-console.md` (Backstage kind/metadata/spec + well-known relations; Port blueprints; Glean knowledge graph; Cortex JSON-schema custom types).
+
+## Completion Evidence
+
+- `scripts/entity_catalog.py` + `tests/test_entity_catalog.py`: a Backstage-style typed entity graph. Uniform envelope `{kind, id, title, metadata, relations}`; typed directional relations (`partOf` from the classification parent graph, `addresses` from host feedback -> tasks, `references` from review filenames -> tasks). `--check`/`--write`.
+- Generated `agents/project/work-items/ENTITY-CATALOG.json`: **693 entities across 11 kinds** (task 219, taskset 32, initiative 8, unit 13, host_feedback 7, plus review/council/seminar/meeting/research/verification 414). Manifest-first (TASK-AR-537): reads the generated classification + queue + review filenames, not raw re-scan.
+- This is the foundation the console tasks (TASK-AR-540..545) read instead of re-deriving the graph.
+
+## Verification Results
+
+- W4a: 4 catalog tests pass; `--check` findings=0; `--write` emits the manifest; governance gate exit 0.
+- W4b (independent, verifier != worker): see `reviews/W4B-2026-06-14-TASK-AR-539.md`.
