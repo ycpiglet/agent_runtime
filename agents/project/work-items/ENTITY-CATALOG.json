@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-entity-catalog/v1",
   "generated_at": "2026-06-15",
-  "entity_count": 717,
+  "entity_count": 718,
   "kind_counts": {
     "council": 1,
     "host_feedback": 7,
@@ -13,7 +13,7 @@
     "task": 226,
     "taskset": 33,
     "unit": 13,
-    "verification": 41
+    "verification": 42
   },
   "entities": [
     {
@@ -3665,7 +3665,7 @@
       "title": "ORG-MODEL.yml (role/team/tier registry, aliases absorb owner drift) + scripts/org_mod…",
       "metadata": {
         "ordinal": "0.29.1",
-        "status": "in_progress",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-557.md"
       },
       "relations": [
@@ -9090,6 +9090,21 @@
         {
           "type": "references",
           "target": "TASK-AR-541"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-15-TASK-AR-557",
+      "title": "W4B-2026-06-15-TASK-AR-557",
+      "metadata": {
+        "date": "2026-06-15",
+        "path": "reviews/W4B-2026-06-15-TASK-AR-557.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-557"
         }
       ]
     }

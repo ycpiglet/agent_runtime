@@ -52,3 +52,18 @@ def test_check_enforce_blocks_on_unresolved(tmp_path):
 def test_governance_gate_invokes_org_model():
     text = (ROOT / "scripts" / "owner_governance_gate.py").read_text(encoding="utf-8")
     assert "org_model_gate.py" in text
+
+
+def test_corrupt_registry_is_watch_safe(tmp_path, monkeypatch):
+    # W4b finding #1: a watch check must never block governance, even if the
+    # registry is missing/malformed. Fail-soft: watch -> 0, enforce -> 1.
+    mod = _load()
+
+    def boom(*a, **k):
+        raise ValueError("corrupt registry")
+
+    monkeypatch.setattr(mod, "load_registry", boom)
+    f = tmp_path / "TASK-Z.md"
+    f.write_text("---\nowner: x\n---\n", encoding="utf-8")
+    assert mod.cmd_check([str(f)], enforce=False) == 0
+    assert mod.cmd_check([str(f)], enforce=True) == 1

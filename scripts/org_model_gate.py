@@ -54,7 +54,12 @@ def _front_owner(path: Path) -> str | None:
 
 
 def cmd_check(paths: list[str], *, enforce: bool) -> int:
-    reg = load_registry()
+    try:
+        reg = load_registry()
+    except Exception as exc:  # fail-soft: a watch check must never block governance
+        level = "block" if enforce else "watch"
+        print(f"org-model: {level} registry-load-error: {exc}")
+        return 1 if enforce else 0
     files: list[Path] = []
     for p in paths:
         if any(c in p for c in "*?"):

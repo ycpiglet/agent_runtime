@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-15T00:33:48+09:00
+generated_at: 2026-06-15T01:03:38+09:00
 record_count: 281
 ---
 
@@ -267,7 +267,7 @@ record_count: 281
 | 0.28.10 | Task 0.28.10 | task | `TASK-AR-555` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-555.md` | Release stages are validated locally in `--check` mode only; remote tag/PR/merge/publ… |
 | 0.28.11 | Task 0.28.11 | task | `TASK-AR-556` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-556.md` | Make the canonical closure steps (compound / review / retro) **non-skippable** for su… |
 | 0.29 | Taskset 0.29 | taskset | `TASKSET-AR-AGENT-ORG-DELEGATION` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Org Conductor |
-| 0.29.1 | Task 0.29.1 | task | `TASK-AR-557` | `TASKSET-AR-AGENT-ORG-DELEGATION` | in_progress | `agents/lead_engineer/tasks/TASK-AR-557.md` | ORG-MODEL.yml (role/team/tier registry, aliases absorb owner drift) + scripts/org_mod… |
+| 0.29.1 | Task 0.29.1 | task | `TASK-AR-557` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | `agents/lead_engineer/tasks/TASK-AR-557.md` | ORG-MODEL.yml (role/team/tier registry, aliases absorb owner drift) + scripts/org_mod… |
 | 0.29.2 | Task 0.29.2 | task | `TASK-AR-558` | `TASKSET-AR-AGENT-ORG-DELEGATION` | planned | `agents/lead_engineer/tasks/TASK-AR-558.md` | Tool for a Lead to decompose a Taskset's Tasks into worker-ready Units (unit_spec/con… |
 | 0.29.3 | Task 0.29.3 | task | `TASK-AR-559` | `TASKSET-AR-AGENT-ORG-DELEGATION` | planned | `agents/lead_engineer/tasks/TASK-AR-559.md` | scripts/dispatch_gate.py: footprint-disjoint seam check (reuse footprint_conflict_gat… |
 | 0.29.4 | Task 0.29.4 | task | `TASK-AR-560` | `TASKSET-AR-AGENT-ORG-DELEGATION` | planned | `agents/lead_engineer/tasks/TASK-AR-560.md` | Lead orchestrator: create claim+worktree+instance, spawn Worker/Reviewer sub-agents (… |
