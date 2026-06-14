@@ -42,6 +42,8 @@ STATUS_WEIGHT = {
     "done": 1,
 }
 DONE_STATUSES = {"completed", "done", "released", "완료"}
+# TASK-AR-538: intake states held OUT of the active board until accepted/deferred.
+TRIAGE_STATUSES = {"triage", "intake"}
 ACTIVE_CLAIM_STATUSES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
 DEFAULT_WIP_LIMIT = 3
 DIFFICULTY_LABEL = {"S": "Low", "M": "Medium", "L": "High", "XL": "Critical", "하": "Low", "중": "Medium", "상": "High"}
@@ -591,6 +593,10 @@ def is_done(task: Task) -> bool:
     return task.status.lower() in DONE_STATUSES
 
 
+def is_triage(task: Task) -> bool:
+    return task.status.lower() in TRIAGE_STATUSES
+
+
 def value_for(task: Task) -> str:
     score = score_for(task)
     if score >= 14:
@@ -723,7 +729,8 @@ def lane_counts(tasks: Iterable[Task]) -> dict[str, int]:
 
 def render(tasks: list[Task], *, root: Path | None = None) -> str:
     today = date.today().isoformat()
-    open_tasks = [t for t in tasks if not is_done(t)]
+    open_tasks = [t for t in tasks if not is_done(t) and not is_triage(t)]
+    triage_tasks = [t for t in tasks if is_triage(t)]
     completed_tasks = [t for t in tasks if is_done(t)]
     counts = lane_counts(tasks)
     task_set_ids = task_sets_for(open_tasks, root)
@@ -848,12 +855,37 @@ def render(tasks: list[Task], *, root: Path | None = None) -> str:
                 + " |"
             )
 
-    triage_tasks = [task for task in open_tasks if task.status == "triage"]
+    if triage_tasks:
+        lines.extend([
+            "",
+            "## Triage",
+            "",
+            "- Intake inbox (TASK-AR-538): items awaiting an accept (-> planned/backlog) or defer (-> someday) decision. Held OUT of the Active board until accepted; host feedback enters here (TASK-AR-526).",
+            "| Task | Task Set | P | Status | Summary |",
+            "|---|---|---:|---|---|",
+        ])
+        for task in sorted(triage_tasks, key=lambda task: task_set_sort_key(task, root)):
+            lines.append(
+                "| "
+                + " | ".join(
+                    [
+                        f"`{task.display_id}`",
+                        f"`{task.task_set_id}`",
+                        task.priority,
+                        task.status,
+                        task.goal.replace("|", "/"),
+                    ]
+                )
+                + " |"
+            )
+
+    needs_attention = len(triage_tasks) + counts.get("Ask", 0)
     lines.extend([
         "",
         "## Rollups",
         "- Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).",
-        f"- Triage: `{len(triage_tasks)}` awaiting accept/defer.",
+        f"- Needs attention: `{needs_attention}` — triage awaiting `{len(triage_tasks)}`, owner-decision (Ask) `{counts.get('Ask', 0)}` (TASK-AR-538).",
+        f"- Triage: `{len(triage_tasks)}` awaiting accept/defer{' (see Triage above)' if triage_tasks else ''}.",
         f"- Active: `{len(open_tasks)}` open across `{len(task_set_ids)}` task sets (see Action Board above).",
         f"- Archived task sets: `{len(completed_task_set_ids)}` (see Archived Task Sets above).",
         f"- Archived task files: `{len(completed_tasks)}` — see `ARCHIVE-INDEX.md`.",

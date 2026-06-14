@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-14T11:09:26+09:00
-record_count: 468
+generated_at: 2026-06-14T12:14:40+09:00
+record_count: 469
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `468` review and evidence records under `reviews/`.
+- Summary: indexed `469` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `468` files |
+| Reviews covered | pass | `469` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -502,6 +502,7 @@ record_count: 468
 | `reviews/W4B-2026-06-14-TASK-AR-535.md` | `W4B-2026-06-14-TASK-AR-535` | verification | record | n/a | W4b Independent Verification — TASK-AR-535 (Classifier ordinal as canonical human ID + numbering policy) |
 | `reviews/W4B-2026-06-14-TASK-AR-536.md` | `W4B-2026-06-14-TASK-AR-536` | verification | record | n/a | W4b Independent Verification — TASK-AR-536 (UUIDv7 stable key + reservation demotion) |
 | `reviews/W4B-2026-06-14-TASK-AR-537.md` | `W4B-2026-06-14-TASK-AR-537` | verification | record | n/a | W4b Independent Verification — TASK-AR-537 (Manifest-first read surface + perf config) |
+| `reviews/W4B-2026-06-14-TASK-AR-538.md` | `W4B-2026-06-14-TASK-AR-538` | verification | record | n/a | W4b Independent Verification — TASK-AR-538 (Triage intake status + needs-attention lane) |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.

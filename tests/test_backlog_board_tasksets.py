@@ -264,6 +264,29 @@ def test_template_backlog_board_merges_registry_reader(tmp_path: Path) -> None:
     assert "`TASKSET-TMPL-MADE`" in board
 
 
+def test_triage_tasks_are_held_out_of_active_and_shown_in_triage(tmp_path: Path) -> None:
+    # TASK-AR-538: status:triage is an intake state -- excluded from the Active
+    # board, surfaced in a Triage inbox, and counted in the needs-attention rollup.
+    tasks_dir = tmp_path / "agents" / "lead_engineer" / "tasks"
+    _write_task(tasks_dir, "TASK-AR-901", "TASKSET-AR-QUALITY-LOOP", status="triage")
+    _write_task(tasks_dir, "TASK-AR-902", "TASKSET-AR-QUALITY-LOOP", status="in_progress")
+
+    tasks = backlog_board.load_tasks(tasks_dir)
+    board = backlog_board.render(tasks, root=tmp_path)
+
+    assert "## Triage" in board
+    triage_section = board.split("## Triage", 1)[1].split("\n## ", 1)[0]
+    assert "TASK-AR-901" in triage_section
+    # The active task set tables (above Triage) must NOT contain the triage task.
+    active_zone = board.split("## Action Board", 1)[1].split("## Triage", 1)[0]
+    assert "TASK-AR-901" not in active_zone
+    assert "TASK-AR-902" in active_zone  # in_progress task stays active
+    # Needs-attention rollup reflects the triage item.
+    rollups = board.split("## Rollups", 1)[1]
+    assert "Needs attention" in rollups
+    assert backlog_board.is_triage(tasks[0]) or backlog_board.is_triage(tasks[1])
+
+
 def test_real_backlog_tasks_are_classified_into_twenty_five_task_sets() -> None:
     tasks = backlog_board.load_tasks(ROOT / "agents" / "lead_engineer" / "tasks")
     task_set_ids = {task.task_set_id for task in tasks}

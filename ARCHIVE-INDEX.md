@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-14
-archived_count: 189
+archived_count: 191
 ---
 
 # Archived Task Files
 
-- `189` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `191` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -200,5 +200,7 @@ archived_count: 189
 | `TASK-AR-535` | `57b5d41e-a8c…` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T09:30:00+09:00 | 2026-06-14T09:35:00+09:00 | 2026-06-14T09:35:00+09:00 | Dissolve the "quantum jump" (200s -> 300s -> no 400s -> 500s): gaps are inherent to a… |
 | `TASK-AR-533` | `4e786186-f46…` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T09:00:00+09:00 | 2026-06-14T09:20:14+09:00 | 2026-06-14T09:20:14+09:00 | Turn `BACKLOG-BOARD.md` from a data dump (currently ~69% inline "Archived Task Files"… |
 | `TASK-AR-534` | `b81f8006-1e3…` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T09:42:00+09:00 | 2026-06-14T09:50:00+09:00 | 2026-06-14T09:50:00+09:00 | Treat `reviews/` (402 files, 2.4MB, pure append, never transitions state) as a logs/e… |
+| `TASK-AR-538` | `42d85997-bac…` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T11:45:00+09:00 | 2026-06-14T12:00:00+09:00 | 2026-06-14T12:00:00+09:00 | Add an explicit intake state so new items wait in a triage inbox (excluded from the a… |
 | `TASK-AR-536` | `30f4de47-2cd…` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T10:40:00+09:00 | 2026-06-14T10:50:00+09:00 | 2026-06-14T10:50:00+09:00 | Make the permanent key collision-free AND time-sortable so multiple agents mint IDs w… |
 | `TASK-AR-537` | `85813f55-1ac…` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T10:52:00+09:00 | 2026-06-14T11:00:00+09:00 | 2026-06-14T11:00:00+09:00 | Keep the agent read surface small and fast as the store grows toward thousands of fil… |
+| `TASK-AR-539` | `caa68fb5-127…` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T12:05:00+09:00 | 2026-06-14T12:15:00+09:00 | 2026-06-14T12:15:00+09:00 | Make every meaningful artifact the product operates/archives a first-class, browsable… |

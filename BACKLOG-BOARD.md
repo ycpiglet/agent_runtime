@@ -9,21 +9,21 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-14
 task_count: 219
-open_count: 30
-completed_count: 189
-task_set_count: 6
-completed_task_set_count: 26
+open_count: 28
+completed_count: 191
+task_set_count: 5
+completed_task_set_count: 27
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `30` open or active tasks; `189` completed tasks are archived from this live board.
+- Summary: `28` open or active tasks; `191` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `27` / Ask `1` / Review `0` / Later `2` / Done `189`.
-- Task Sets: `6` active workflows; `26` completed workflows are hidden from the live action board.
+- Status: Action `25` / Ask `1` / Review `0` / Later `2` / Done `191`.
+- Task Sets: `5` active workflows; `27` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -78,26 +78,16 @@ completed_task_set_count: 26
 | `TASK-AR-532` | - | - | - | planned | Action | P2 | Medium | Medium | 5h/4000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Route the standing open bug issues through the same intake/triage pipeline (category… |
 | `TASK-AR-531` | - | - | - | planned | Action | P2 | Medium | Medium | 6h/5500tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Close the host-fit gaps that block deep adoption of agent_runtime as a reusable platf… |
 
-### Store Architect (`TASKSET-AR-WORK-STORE-RESTRUCTURE`)
-
-- Flow: Stop the board from dumping the archive and reviews from accumulating unbounded: board attention-lanes (Triage/Active/Rollup) + extracted archive manifest, reviews date-shard + compacted index, classifier ordinal as canonical human ID with cosmetic TASK-AR-NNN gaps, UUIDv7/ULID stable keys, a manifest-first derived read-index + repo perf config, and a triage intake status. Single store + status field + views; no lifecycle directories.
-- Progress: `5/6` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-538` | - | - | - | planned | Action | P2 | Medium | Low | 4h/3500tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Add an explicit intake state so new items wait in a triage inbox (excluded from the a… |
-
 ### Decision Cartographer (`TASKSET-AR-UNIFIED-DECISION-CONSOLE`)
 
 - Flow: A decision/operations-optimized console over a typed entity catalog of every artifact (plan/review/issue/pr/git-log/branch/skill/council/seminar/work-items/waves/state/history): catalog model + manifest, universal command palette + cross-entity search, entity detail + backlinks, activity/provenance timeline + audit, faceted saved views + rollups + needs-attention inbox, live SCM surface, and governance-document surface.
-- Progress: `0/7` done; `7` open or active.
+- Progress: `1/7` done; `6` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-540` | - | - | - | planned | Action | P1 | High | Medium | 7h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | One fuzzy input to jump to / act on ANY entity in the catalog — the proven universal-… |
 | `TASK-AR-541` | - | - | - | planned | Action | P1 | High | Medium | 7h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Make any entity a rich detail surface with pluggable tabs/cards (Backstage `EntityCon… |
 | `TASK-AR-543` | - | - | - | planned | Action | P1 | High | Medium | 7h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Give the decision-maker reusable lenses over the catalog and an exception-only attent… |
-| `TASK-AR-539` | - | - | - | planned | Action | P1 | High | High | 10h/9000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Make every meaningful artifact the product operates/archives a first-class, browsable… |
 | `TASK-AR-544` | - | - | - | planned | Ask | P2 | Medium | Medium | 6h/5500tok | Low | 5 | agent-runtime-core | lead-engineer | Owner/agent decision | Bring SCM artifacts the Owner listed (git log, branches, PRs, issues) into the catalo… |
 | `TASK-AR-545` | - | - | - | planned | Action | P2 | Medium | Medium | 6h/5500tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Make the product's governance/knowledge documents (skills, council records, seminar r… |
 | `TASK-AR-542` | - | - | - | planned | Action | P2 | Medium | Medium | 7h/6000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Answer "who/what/when/why did this change" for any entity by unifying scattered histo… |
@@ -151,13 +141,15 @@ completed_task_set_count: 26
 | Work Metadata Analyst (`TASKSET-AR-WORK-METADATA-ANALYTICS`) | Conversation-to-work traceability, Work Item metadata, Explorer roll-ups, query/export, agent attribution, and stale verification evidence. | `6/6` done | `6` completed task files archived |
 | Wave Conductor (`TASKSET-AR-PARALLEL-WAVE-EXECUTION`) | Claim-time footprint conflict gate, wave dispatcher with cascade/parallel modes, integrator merge queue, and claim-first enforcement. | `10/10` done | `10` completed task files archived |
 | Ops Ergonomics (`TASKSET-AR-OPS-ERGONOMICS`) | Make the 500-series infrastructure easy to operate: session-start W0 dashboard hook, trigger-based skills for wave/merge/verify/work-analytics/release, asset registry entries, and an ops command reference. | `3/3` done | `3` completed task files archived |
+| Store Architect (`TASKSET-AR-WORK-STORE-RESTRUCTURE`) | Stop the board from dumping the archive and reviews from accumulating unbounded: board attention-lanes (Triage/Active/Rollup) + extracted archive manifest, reviews date-shard + compacted index, classifier ordinal as canonical human ID with cosmetic TASK-AR-NNN gaps, UUIDv7/ULID stable keys, a manifest-first derived read-index + repo perf config, and a triage intake status. Single store + status field + views; no lifecycle directories. | `6/6` done | `6` completed task files archived |
 
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
+- Needs attention: `1` — triage awaiting `0`, owner-decision (Ask) `1` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `30` open across `6` task sets (see Action Board above).
-- Archived task sets: `26` (see Archived Task Sets above).
-- Archived task files: `189` — see `ARCHIVE-INDEX.md`.
+- Active: `28` open across `5` task sets (see Action Board above).
+- Archived task sets: `27` (see Archived Task Sets above).
+- Archived task files: `191` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

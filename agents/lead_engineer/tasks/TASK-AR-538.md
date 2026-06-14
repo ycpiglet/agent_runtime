@@ -4,8 +4,10 @@ display_id: TASK-AR-538
 task_uid: 42d85997-bac8-4afb-b10b-664356a235de
 registered_at: 2026-06-14T03:22:33+09:00
 created_at: 2026-06-14T03:22:33+09:00
-updated_at: 2026-06-14T03:22:33+09:00
-status: planned
+started_at: 2026-06-14T11:45:00+09:00
+updated_at: 2026-06-14T12:00:00+09:00
+completed_at: 2026-06-14T12:00:00+09:00
+status: completed
 priority: P2
 difficulty: S
 est_hours: 4
@@ -44,3 +46,14 @@ tags:
 ## Evidence Targets
 
 - `reviews/RESEARCH-2026-06-14-work-store-architecture-and-numbering.md` (Linear Triage excluded-from-views intake; Datadog Monitor Quality "needs attention"; GTD Next-Actions vs Someday/Maybe).
+
+## Completion Evidence
+
+- `scripts/backlog_board.py`: `TRIAGE_STATUSES = {triage, intake}` + `is_triage()`; `open_tasks` now excludes triage (held out of active lanes); a `## Triage` inbox section renders triage items with the accept(-> planned)/defer hint; a `## Rollups` `Needs attention` line counts `triage + Ask-lane`.
+- `agents/project/PROJECT-MANAGEMENT-CONTRACT.md`: documents the triage intake state + accept/defer transitions; consistent with `HOST-FEEDBACK-QUEUE.json` (triage -> accepted/deferred/rejected, TASK-AR-526). Status FIELD + view, not a directory move.
+- `tests/test_backlog_board_tasksets.py`: triage task held out of active + shown in Triage; needs-attention rollup present.
+
+## Verification Results
+
+- W4a: 9 board tests pass; board regenerates ("Needs attention" line; no empty Triage section when 0 triage); governance gate exit 0.
+- W4b (independent, verifier != worker): see `reviews/W4B-2026-06-14-TASK-AR-538.md`.

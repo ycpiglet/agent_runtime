@@ -89,6 +89,17 @@ and `--check` in governance and before handoff. `0.*` ordinals are legacy or
 unassigned work that predates `initiative_id`; add `initiative_id` when that
 work is next touched.
 
+## Triage Intake State (TASK-AR-538)
+
+`status: triage` (alias `intake`) is an intake state, NOT active work. Triage
+items are held OUT of the Active board, surfaced in a dedicated `## Triage`
+inbox on `BACKLOG-BOARD.md`, and counted in the board's `Needs attention`
+rollup. Transitions: **accept** -> `planned`/`backlog` (enters active work) or
+**defer** -> a someday parking lot. Host feedback enters via this state
+(`HOST-FEEDBACK-QUEUE.json` uses the same `triage -> accepted/deferred/rejected`
+vocabulary, TASK-AR-526). This is a status FIELD + view, not a directory move
+(single store + status + views; see the work-store restructure initiative).
+
 ## Orthogonal Axes And Non-Tree Work
 
 Milestone, horizon, team, owner, role, priority, and phase are orthogonal axes,

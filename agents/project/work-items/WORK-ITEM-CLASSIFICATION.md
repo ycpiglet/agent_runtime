@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-14T11:09:23+09:00
+generated_at: 2026-06-14T12:14:38+09:00
 record_count: 272
 ---
 
@@ -239,15 +239,15 @@ record_count: 272
 | 0.25.5 | Task 0.25.5 | task | `TASK-AR-530` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | planned | `agents/lead_engineer/tasks/TASK-AR-530.md` | Give the platform an objective, quantitative self-eval so each version can prove it i… |
 | 0.25.6 | Task 0.25.6 | task | `TASK-AR-531` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | planned | `agents/lead_engineer/tasks/TASK-AR-531.md` | Close the host-fit gaps that block deep adoption of agent_runtime as a reusable platf… |
 | 0.25.7 | Task 0.25.7 | task | `TASK-AR-532` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | planned | `agents/lead_engineer/tasks/TASK-AR-532.md` | Route the standing open bug issues through the same intake/triage pipeline (category… |
-| 0.26 | Taskset 0.26 | taskset | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Store Architect |
+| 0.26 | Taskset 0.26 | taskset | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Store Architect |
 | 0.26.1 | Task 0.26.1 | task | `TASK-AR-533` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | `agents/lead_engineer/tasks/TASK-AR-533.md` | Turn `BACKLOG-BOARD.md` from a data dump (currently ~69% inline "Archived Task Files"… |
 | 0.26.2 | Task 0.26.2 | task | `TASK-AR-534` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | `agents/lead_engineer/tasks/TASK-AR-534.md` | Treat `reviews/` (402 files, 2.4MB, pure append, never transitions state) as a logs/e… |
 | 0.26.3 | Task 0.26.3 | task | `TASK-AR-535` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | `agents/lead_engineer/tasks/TASK-AR-535.md` | Dissolve the "quantum jump" (200s -> 300s -> no 400s -> 500s): gaps are inherent to a… |
 | 0.26.4 | Task 0.26.4 | task | `TASK-AR-536` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | `agents/lead_engineer/tasks/TASK-AR-536.md` | Make the permanent key collision-free AND time-sortable so multiple agents mint IDs w… |
 | 0.26.5 | Task 0.26.5 | task | `TASK-AR-537` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | `agents/lead_engineer/tasks/TASK-AR-537.md` | Keep the agent read surface small and fast as the store grows toward thousands of fil… |
-| 0.26.6 | Task 0.26.6 | task | `TASK-AR-538` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | planned | `agents/lead_engineer/tasks/TASK-AR-538.md` | Add an explicit intake state so new items wait in a triage inbox (excluded from the a… |
+| 0.26.6 | Task 0.26.6 | task | `TASK-AR-538` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | `agents/lead_engineer/tasks/TASK-AR-538.md` | Add an explicit intake state so new items wait in a triage inbox (excluded from the a… |
 | 0.27 | Taskset 0.27 | taskset | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Decision Cartographer |
-| 0.27.1 | Task 0.27.1 | task | `TASK-AR-539` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-539.md` | Make every meaningful artifact the product operates/archives a first-class, browsable… |
+| 0.27.1 | Task 0.27.1 | task | `TASK-AR-539` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-539.md` | Make every meaningful artifact the product operates/archives a first-class, browsable… |
 | 0.27.2 | Task 0.27.2 | task | `TASK-AR-540` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-540.md` | One fuzzy input to jump to / act on ANY entity in the catalog — the proven universal-… |
 | 0.27.3 | Task 0.27.3 | task | `TASK-AR-541` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-541.md` | Make any entity a rich detail surface with pluggable tabs/cards (Backstage `EntityCon… |
 | 0.27.4 | Task 0.27.4 | task | `TASK-AR-542` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-542.md` | Answer "who/what/when/why did this change" for any entity by unifying scattered histo… |

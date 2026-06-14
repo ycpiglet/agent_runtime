@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-14T11:09:23+09:00",
+  "generated_at": "2026-06-14T12:14:38+09:00",
   "record_count": 272,
   "finding_count": 0,
   "findings": [],
@@ -2214,7 +2214,7 @@
       "title": "Store Architect",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-UNASSIGNED",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-533",
@@ -2280,7 +2280,7 @@
       "title": "Add an explicit intake state so new items wait in a triage inbox (excluded from the a…",
       "path": "agents/lead_engineer/tasks/TASK-AR-538.md",
       "parent_id": "TASKSET-AR-WORK-STORE-RESTRUCTURE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "taskset:TASKSET-AR-UNIFIED-DECISION-CONSOLE",
@@ -2302,7 +2302,7 @@
       "title": "Make every meaningful artifact the product operates/archives a first-class, browsable…",
       "path": "agents/lead_engineer/tasks/TASK-AR-539.md",
       "parent_id": "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-540",
