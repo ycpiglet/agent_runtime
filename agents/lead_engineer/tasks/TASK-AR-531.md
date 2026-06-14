@@ -4,8 +4,10 @@ display_id: TASK-AR-531
 task_uid: 270755af-d866-4b1c-9dc1-8c729f9aee7f
 registered_at: 2026-06-14T02:08:50+09:00
 created_at: 2026-06-14T02:08:50+09:00
-updated_at: 2026-06-14T02:08:50+09:00
-status: planned
+started_at: 2026-06-14T12:30:00+09:00
+updated_at: 2026-06-14T12:40:00+09:00
+completed_at: 2026-06-14T12:40:00+09:00
+status: completed
 priority: P2
 difficulty: M
 est_hours: 6
@@ -54,3 +56,14 @@ tags:
 - **#4 status localization — P3**, alias-additive (English enum stays canonical; Korean maps onto it).
 - **#2 host-context read-location — doc-only** (substrate `unmanaged_paths` from `sync.unmanaged:` already exists in config.py).
 - **#3 work_cli scaffolder — REJECTED.** `scripts/work.py` already is the scaffolder (`new`/`register` + required-field validation). Do not fund.
+
+## Completion Evidence
+
+- **#1 wheel-dotfile packaging — DELIVERED (the P1 live blocker).** `pyproject.toml [tool.setuptools.package-data]` now enumerates the dot-paths (`templates/project/.gitattributes`, `.githooks/**/*`, `.github/**/*`, `.codex/**/*`, `**/.gitkeep`) the `**/*` glob silently dropped. `scripts/verify_wheel_dotfiles.py --check` builds a wheel and asserts the dot-files ship; `tests/test_wheel_dotfiles_packaging.py` is a fast config guard.
+- Built-wheel proof: the wheel now contains `agent_runtime/templates/project/.codex/hooks.json`, `.gitattributes`, `.githooks/pre-commit`, `.github/workflows/owner-doc-format.yml` (verify-wheel-dotfiles: pass, findings=0). A `pip install` host now receives the template wiring.
+- **#4 status localization (P3), #2 read-location (doc-only): DEFERRED** per the council; **#3 work_cli: REJECTED** (scripts/work.py exists). These are recorded follow-ups, not part of this completion. TASK-AR-536's template-copy note (UUIDv7) can ride the same template/packaging follow-up.
+
+## Verification Results
+
+- W4a: built-wheel content assertion passes (4 dot-file subtrees present); config-guard test passes; governance gate exit 0.
+- W4b (independent, verifier != worker): see `reviews/W4B-2026-06-14-TASK-AR-531.md`.

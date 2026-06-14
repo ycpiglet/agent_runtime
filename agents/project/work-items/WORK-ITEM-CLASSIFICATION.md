@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-14T12:23:10+09:00
+generated_at: 2026-06-14T12:47:33+09:00
 record_count: 272
 ---
 
@@ -235,9 +235,9 @@ record_count: 272
 | 0.25.1 | Task 0.25.1 | task | `TASK-AR-526` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | completed | `agents/lead_engineer/tasks/TASK-AR-526.md` | Treat host (autofolio) feedback issues as first-class, non-ignorable input: ingest th… |
 | 0.25.2 | Task 0.25.2 | task | `TASK-AR-527` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | completed | `agents/lead_engineer/tasks/TASK-AR-527.md` | Reactivate the currently-dormant council/seminar device so queued host feedback is ac… |
 | 0.25.3 | Task 0.25.3 | task | `TASK-AR-528` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | planned | `agents/lead_engineer/tasks/TASK-AR-528.md` | Close the loop so a deliberation outcome is written back to the originating host issu… |
-| 0.25.4 | Task 0.25.4 | task | `TASK-AR-529` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | planned | `agents/lead_engineer/tasks/TASK-AR-529.md` | Close the parallel-wave conflict-safety weak link: `footprint_conflict_gate --check`… |
+| 0.25.4 | Task 0.25.4 | task | `TASK-AR-529` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | completed | `agents/lead_engineer/tasks/TASK-AR-529.md` | Close the parallel-wave conflict-safety weak link: `footprint_conflict_gate --check`… |
 | 0.25.5 | Task 0.25.5 | task | `TASK-AR-530` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | planned | `agents/lead_engineer/tasks/TASK-AR-530.md` | Give the platform an objective, quantitative self-eval so each version can prove it i… |
-| 0.25.6 | Task 0.25.6 | task | `TASK-AR-531` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | planned | `agents/lead_engineer/tasks/TASK-AR-531.md` | Close the host-fit gaps that block deep adoption of agent_runtime as a reusable platf… |
+| 0.25.6 | Task 0.25.6 | task | `TASK-AR-531` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | completed | `agents/lead_engineer/tasks/TASK-AR-531.md` | Close the host-fit gaps that block deep adoption of agent_runtime as a reusable platf… |
 | 0.25.7 | Task 0.25.7 | task | `TASK-AR-532` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | planned | `agents/lead_engineer/tasks/TASK-AR-532.md` | Route the standing open bug issues through the same intake/triage pipeline (category… |
 | 0.26 | Taskset 0.26 | taskset | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Store Architect |
 | 0.26.1 | Task 0.26.1 | task | `TASK-AR-533` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | `agents/lead_engineer/tasks/TASK-AR-533.md` | Turn `BACKLOG-BOARD.md` from a data dump (currently ~69% inline "Archived Task Files"… |

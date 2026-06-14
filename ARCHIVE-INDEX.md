@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-14
-archived_count: 191
+archived_count: 193
 ---
 
 # Archived Task Files
 
-- `191` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `193` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -196,7 +196,9 @@ archived_count: 191
 | `TASK-AR-524` | `1979924a-046…` | `TASKSET-AR-OPS-ERGONOMICS` | completed | 2026-06-13T14:18:04+09:00 | 2026-06-13T14:21:49+09:00 | 2026-06-13T15:30:00+09:00 | 2026-06-13T14:18:04+09:00 | Make the new 500-series tools discoverable as trigger-based skills: wave-conductor (w… |
 | `TASK-AR-525` | `c3880949-258…` | `TASKSET-AR-OPS-ERGONOMICS` | completed | 2026-06-13T14:18:04+09:00 | 2026-06-13T14:21:50+09:00 | 2026-06-13T15:30:00+09:00 | 2026-06-13T14:18:04+09:00 | Register the new dashboard hook + 5 skills + the standalone tools (wave_dispatcher/me… |
 | `TASK-AR-526` | `f98765de-5e1…` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | completed | 2026-06-14T02:08:50+09:00 | 2026-06-14T09:30:00+09:00 | 2026-06-14T09:38:00+09:00 | 2026-06-14T09:38:00+09:00 | Treat host (autofolio) feedback issues as first-class, non-ignorable input: ingest th… |
+| `TASK-AR-529` | `93277502-ad3…` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | completed | 2026-06-14T02:08:50+09:00 | 2026-06-14T12:45:00+09:00 | 2026-06-14T12:55:00+09:00 | 2026-06-14T12:55:00+09:00 | Close the parallel-wave conflict-safety weak link: `footprint_conflict_gate --check`… |
 | `TASK-AR-527` | `92a2232e-514…` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | completed | 2026-06-14T02:08:50+09:00 | 2026-06-14T10:00:00+09:00 | 2026-06-14T10:10:00+09:00 | 2026-06-14T10:10:00+09:00 | Reactivate the currently-dormant council/seminar device so queued host feedback is ac… |
+| `TASK-AR-531` | `270755af-d86…` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | completed | 2026-06-14T02:08:50+09:00 | 2026-06-14T12:30:00+09:00 | 2026-06-14T12:40:00+09:00 | 2026-06-14T12:40:00+09:00 | Close the host-fit gaps that block deep adoption of agent_runtime as a reusable platf… |
 | `TASK-AR-535` | `57b5d41e-a8c…` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T09:30:00+09:00 | 2026-06-14T09:35:00+09:00 | 2026-06-14T09:35:00+09:00 | Dissolve the "quantum jump" (200s -> 300s -> no 400s -> 500s): gaps are inherent to a… |
 | `TASK-AR-533` | `4e786186-f46…` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T09:00:00+09:00 | 2026-06-14T09:20:14+09:00 | 2026-06-14T09:20:14+09:00 | Turn `BACKLOG-BOARD.md` from a data dump (currently ~69% inline "Archived Task Files"… |
 | `TASK-AR-534` | `b81f8006-1e3…` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T09:42:00+09:00 | 2026-06-14T09:50:00+09:00 | 2026-06-14T09:50:00+09:00 | Treat `reviews/` (402 files, 2.4MB, pure append, never transitions state) as a logs/e… |

@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-entity-catalog/v1",
   "generated_at": "2026-06-14",
-  "entity_count": 695,
+  "entity_count": 697,
   "kind_counts": {
     "council": 1,
     "host_feedback": 7,
@@ -13,7 +13,7 @@
     "task": 219,
     "taskset": 32,
     "unit": 13,
-    "verification": 34
+    "verification": 36
   },
   "entities": [
     {
@@ -3153,7 +3153,7 @@
       "title": "Close the parallel-wave conflict-safety weak link: `footprint_conflict_gate --check`…",
       "metadata": {
         "ordinal": "0.25.4",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-529.md"
       },
       "relations": [
@@ -3185,7 +3185,7 @@
       "title": "Close the host-fit gaps that block deep adoption of agent_runtime as a reusable platf…",
       "metadata": {
         "ordinal": "0.25.6",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-531.md"
       },
       "relations": [
@@ -8681,6 +8681,36 @@
         {
           "type": "references",
           "target": "TASK-AR-527"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-14-TASK-AR-529",
+      "title": "W4B-2026-06-14-TASK-AR-529",
+      "metadata": {
+        "date": "2026-06-14",
+        "path": "reviews/W4B-2026-06-14-TASK-AR-529.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-529"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-14-TASK-AR-531",
+      "title": "W4B-2026-06-14-TASK-AR-531",
+      "metadata": {
+        "date": "2026-06-14",
+        "path": "reviews/W4B-2026-06-14-TASK-AR-531.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-531"
         }
       ]
     },
