@@ -126,6 +126,7 @@
       "scripts/inflight_overlay.py": "sha256:16be0bdf91d7549c07d14683f2688c5aa75388de3bc1254b5b06e87c3fb1f32b",
       "scripts/install_hooks.py": "sha256:8629b654c8137896578695239a06db4079f2078c172d0d2b7e3e38d3500f0fea",
       "scripts/kedb_search.py": "sha256:b2b714723f8be28fb9f09de571b2b5414ff6c0213c98d35dc9cc42e102e38b82",
+      "scripts/knowledge_graph.py": "sha256:eb0d45c7872bfb5833e0a7909b5c05fcf69bd356338294d2930d4183163d067b",
       "scripts/local_schedule_daemon.py": "sha256:548b5ce03b04f44ac1fd833b6347a7850665895f299f8aceeacfa4b7cf5d4f8d",
       "scripts/macro_detect.py": "sha256:15a7ecad24ee5e73922ba7f276d3e8439a37f6a6e2e6b95fdcfc843cababd813",
       "scripts/merge_queue.py": "sha256:fa58f4b4a7fd0a7a59a9a2e3606705a83300508d49abc16871d1b7cd4b9ea41f",
@@ -251,8 +252,8 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.2.0",
-    "template_digest": "sha256:d5aad2213044fa25e5d1a16112be22afee475409b4c24b1fc4837b94c132ab27",
-    "template_files": 248
+    "template_digest": "sha256:2e5cf5ab3780450419e96322ab028edb6a18290eb467aa2bbefb7f8fd7b20656",
+    "template_files": 249
   },
   "project": "fixture-host",
   "schema": "agent-runtime-lock/v1",
