@@ -732,6 +732,10 @@ HTML = """<!doctype html>
               <h2>Knowledge Graph</h2>
               <p id="kg-graph-summary" class="kg-graph-summary" role="status" aria-live="polite">Loading entities&hellip;</p>
             </header>
+            <div class="kg-graph-toolbar">
+              <input id="kg-search" class="kg-search" type="search" placeholder="Filter by id or title&hellip;" aria-label="Filter knowledge graph entities by id or title">
+              <div id="kg-filters" class="kg-filters" role="group" aria-label="Filter knowledge graph by kind"></div>
+            </div>
             <div class="kg-graph-stage">
               <svg id="kg-graph-svg" class="kg-graph-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Knowledge graph nodes and edges"></svg>
             </div>
@@ -4702,6 +4706,42 @@ pre {
 .dep-graph-legend .legend-cycle { background: var(--danger); }
 
 /* ===== Knowledge graph view (#5) ===== */
+.kg-graph-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+.kg-search {
+  flex: 1 1 200px;
+  min-width: 160px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 12px;
+}
+.kg-filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.kg-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+}
+.kg-filter-chip[aria-pressed="true"] { background: var(--panel-strong); color: var(--ink); }
+.kg-filter-chip[aria-pressed="false"] { opacity: 0.45; text-decoration: line-through; }
+.kg-filter-chip .kg-chip-dot {
+  display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+  border: 1px solid var(--line-strong);
+}
 .kg-graph-stage {
   position: relative;
   border: 1px solid var(--line);
@@ -9233,6 +9273,9 @@ function renderDependencyGraph() {
 let knowledgeGraphState = { nodes: [], edges: [], totals: {}, error: null };
 let knowledgeGraphFocus = null;
 let knowledgeGraphLoading = false;
+let knowledgeGraphSearch = "";
+let knowledgeGraphHiddenKinds = new Set();
+let knowledgeGraphControlsBound = false;
 
 const KG_KIND_COLORS = {
   task: "var(--primary-line)", taskset: "var(--blue)", initiative: "var(--warning-line)",
@@ -9251,8 +9294,57 @@ async function loadKnowledgeGraph() {
   } finally {
     knowledgeGraphLoading = false;
   }
-  knowledgeGraphFocus = null;
+  // Deep-link: a shared #/records/knowledge-graph?select=<id> focuses that node on load.
+  knowledgeGraphFocus = parseHash().select || null;
+  bindKnowledgeGraphControls();
   renderKnowledgeGraph();
+}
+
+function bindKnowledgeGraphControls() {
+  if (knowledgeGraphControlsBound) return;
+  const input = $("kg-search");
+  if (!input) return;
+  input.addEventListener("input", () => {
+    knowledgeGraphSearch = input.value.trim().toLowerCase();
+    renderKnowledgeGraph();
+  });
+  knowledgeGraphControlsBound = true;
+}
+
+function knowledgeGraphVisibleNodes() {
+  const query = knowledgeGraphSearch;
+  return (knowledgeGraphState.nodes || []).filter((node) =>
+    !knowledgeGraphHiddenKinds.has(node.kind)
+    && (!query
+      || String(node.id).toLowerCase().includes(query)
+      || String(node.label || "").toLowerCase().includes(query)));
+}
+
+function renderKnowledgeGraphFilters() {
+  const host = $("kg-filters");
+  if (!host) return;
+  const kinds = Array.from(new Set((knowledgeGraphState.nodes || []).map((n) => n.kind))).sort();
+  host.innerHTML = "";
+  kinds.forEach((kind) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "kg-filter-chip";
+    chip.setAttribute("aria-pressed", knowledgeGraphHiddenKinds.has(kind) ? "false" : "true");
+    chip.innerHTML = `<span class="kg-chip-dot" style="background:${KG_KIND_COLORS[kind] || "var(--panel)"}"></span>${escapeHtml(kind)}`;
+    chip.addEventListener("click", () => {
+      if (knowledgeGraphHiddenKinds.has(kind)) knowledgeGraphHiddenKinds.delete(kind);
+      else knowledgeGraphHiddenKinds.add(kind);
+      renderKnowledgeGraph();
+    });
+    host.appendChild(chip);
+  });
+}
+
+function updateKnowledgeGraphHash() {
+  if (!(window.history && history.replaceState)) return;
+  const base = "#/records/knowledge-graph";
+  const hash = knowledgeGraphFocus ? `${base}?select=${encodeURIComponent(knowledgeGraphFocus)}` : base;
+  try { history.replaceState(null, "", hash); } catch (error) { /* ignore */ }
 }
 
 function knowledgeGraphNodePositions(nodes) {
@@ -9281,25 +9373,30 @@ function knowledgeGraphNodePositions(nodes) {
 function renderKnowledgeGraph() {
   const data = knowledgeGraphState || { nodes: [], edges: [], totals: {} };
   const totals = data.totals || {};
+  renderKnowledgeGraphFilters();
+
+  const nodes = knowledgeGraphVisibleNodes();
+  const visibleIds = new Set(nodes.map((n) => n.id));
+  const edges = (data.edges || []).filter((edge) => visibleIds.has(edge.from) && visibleIds.has(edge.to));
+  const isFiltered = Boolean(knowledgeGraphSearch) || knowledgeGraphHiddenKinds.size > 0;
+
   const summary = data.error
     ? `Unavailable: ${data.error}`
-    : `${totals.shown || 0} of ${totals.nodes || 0} entities`
-      + ` · ${(data.edges || []).length} edges shown`
-      + (totals.capped ? " · showing the most-connected" : "")
+    : `${nodes.length}${isFiltered ? " shown / " + (totals.shown || (data.nodes || []).length) : ""} of ${totals.nodes || 0} entities`
+      + ` · ${edges.length} edges`
+      + (totals.capped ? " · most-connected" : "")
       + (knowledgeGraphFocus ? ` · focus: ${knowledgeGraphFocus}` : "");
   setText("kg-graph-summary", summary);
 
   const legend = $("kg-graph-legend");
   if (legend) {
-    const kinds = Array.from(new Set((data.nodes || []).map((n) => n.kind))).sort();
+    const kinds = Array.from(new Set(nodes.map((n) => n.kind))).sort();
     legend.innerHTML = kinds.map((kind) =>
       `<li><span class="legend-swatch" style="background:${KG_KIND_COLORS[kind] || "var(--panel)"}"></span>${escapeHtml(kind)}</li>`).join("");
   }
 
   const svg = $("kg-graph-svg");
   if (!svg) return;
-  const nodes = data.nodes || [];
-  const edges = data.edges || [];
   while (svg.firstChild) svg.removeChild(svg.firstChild);
   if (!nodes.length) {
     const note = document.createElementNS(SVG_NS, "text");
@@ -9307,7 +9404,7 @@ function renderKnowledgeGraph() {
     note.setAttribute("y", "300");
     note.setAttribute("class", "kg-graph-empty");
     note.setAttribute("text-anchor", "middle");
-    note.textContent = data.error ? "Knowledge graph unavailable" : "No knowledge graph data";
+    note.textContent = data.error ? "Knowledge graph unavailable" : (isFiltered ? "No entities match the filter" : "No knowledge graph data");
     svg.appendChild(note);
     return;
   }
@@ -9362,6 +9459,7 @@ function renderKnowledgeGraph() {
     }
     group.addEventListener("click", () => {
       knowledgeGraphFocus = knowledgeGraphFocus === node.id ? null : node.id;
+      updateKnowledgeGraphHash();
       renderKnowledgeGraph();
     });
     nodeLayer.appendChild(group);

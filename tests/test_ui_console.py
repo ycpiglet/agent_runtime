@@ -3428,3 +3428,18 @@ def test_ui_console_api_knowledge_graph_returns_bounded_subgraph(tmp_path):
     assert payload["totals"]["shown"] <= 50
     # each node carries a kind + degree for colouring/sizing
     assert all("kind" in n and "degree" in n for n in payload["nodes"])
+
+
+def test_ui_console_knowledge_graph_search_filter_deeplink_present(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    # search box + kind-filter container
+    assert 'id="kg-search"' in html
+    assert 'id="kg-filters"' in html
+    # filtering + deeplink behaviour
+    assert "function knowledgeGraphVisibleNodes" in js
+    assert "function renderKnowledgeGraphFilters" in js
+    assert "function updateKnowledgeGraphHash" in js
+    assert "parseHash().select" in js  # deep-link focus on load
+    assert ".kg-filter-chip" in css
