@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-entity-catalog/v1",
   "generated_at": "2026-06-14",
-  "entity_count": 700,
+  "entity_count": 702,
   "kind_counts": {
     "council": 1,
     "host_feedback": 7,
@@ -13,7 +13,7 @@
     "task": 219,
     "taskset": 32,
     "unit": 13,
-    "verification": 39
+    "verification": 41
   },
   "entities": [
     {
@@ -3329,7 +3329,7 @@
       "title": "Decision Cartographer",
       "metadata": {
         "ordinal": "0.27",
-        "status": "active",
+        "status": "complete",
         "path": "BACKLOG-BOARD.md"
       },
       "relations": [
@@ -3361,7 +3361,7 @@
       "title": "One fuzzy input to jump to / act on ANY entity in the catalog — the proven universal-…",
       "metadata": {
         "ordinal": "0.27.2",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-540.md"
       },
       "relations": [
@@ -3377,7 +3377,7 @@
       "title": "Make any entity a rich detail surface with pluggable tabs/cards (Backstage `EntityCon…",
       "metadata": {
         "ordinal": "0.27.3",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-541.md"
       },
       "relations": [
@@ -3393,7 +3393,7 @@
       "title": "Answer \"who/what/when/why did this change\" for any entity by unifying scattered histo…",
       "metadata": {
         "ordinal": "0.27.4",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-542.md"
       },
       "relations": [
@@ -3409,7 +3409,7 @@
       "title": "Give the decision-maker reusable lenses over the catalog and an exception-only attent…",
       "metadata": {
         "ordinal": "0.27.5",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-543.md"
       },
       "relations": [
@@ -3425,7 +3425,7 @@
       "title": "Bring SCM artifacts the Owner listed (git log, branches, PRs, issues) into the catalo…",
       "metadata": {
         "ordinal": "0.27.6",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-544.md"
       },
       "relations": [
@@ -3441,7 +3441,7 @@
       "title": "Make the product's governance/knowledge documents (skills, council records, seminar r…",
       "metadata": {
         "ordinal": "0.27.7",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-545.md"
       },
       "relations": [
@@ -8861,6 +8861,36 @@
         {
           "type": "references",
           "target": "TASK-AR-539"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-14-TASK-AR-540",
+      "title": "W4B-2026-06-14-TASK-AR-540",
+      "metadata": {
+        "date": "2026-06-14",
+        "path": "reviews/W4B-2026-06-14-TASK-AR-540.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-540"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-14-TASK-AR-541-545",
+      "title": "W4B-2026-06-14-TASK-AR-541-545",
+      "metadata": {
+        "date": "2026-06-14",
+        "path": "reviews/W4B-2026-06-14-TASK-AR-541-545.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-541"
         }
       ]
     }

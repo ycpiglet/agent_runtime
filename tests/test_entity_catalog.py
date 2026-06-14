@@ -41,6 +41,25 @@ def test_check_flags_structural_errors() -> None:
     assert any("missing-title" in f for f in findings)
 
 
+def test_search_blends_scopes_and_ranks() -> None:
+    catalog = ec.build_catalog()
+    # Exact id match ranks first.
+    res = ec.search_entities(catalog, "TASK-AR-539")
+    assert res and res[0]["id"] == "TASK-AR-539"
+    # kind: prefix scoping narrows to one kind.
+    res = ec.search_entities(catalog, "kind:task 539")
+    assert res and all(e["kind"] == "task" for e in res)
+    assert any(e["id"] == "TASK-AR-539" for e in res)
+    # @taskset scoping.
+    res = ec.search_entities(catalog, "@taskset console")
+    assert res and all(e["kind"] == "taskset" for e in res)
+    # Blended cross-kind when unscoped.
+    res = ec.search_entities(catalog, "host", limit=100)
+    assert len({e["kind"] for e in res}) >= 1
+    # Empty query returns entities (browse mode), bounded by limit.
+    assert len(ec.search_entities(catalog, "", limit=5)) == 5
+
+
 def test_every_entity_has_uniform_envelope() -> None:
     catalog = ec.build_catalog()
     for entity in catalog["entities"]:

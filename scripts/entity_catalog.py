@@ -154,6 +154,44 @@ def build_catalog(root: Path = ROOT) -> dict:
     }
 
 
+_SCOPE_RE = re.compile(r"^(?:kind:|@)(\w[\w-]*)\s+(.*)$", re.IGNORECASE)
+
+
+def search_entities(catalog: dict, query: str, *, kinds: list[str] | None = None, limit: int = 50) -> list[dict]:
+    """Cross-entity command-palette search (TASK-AR-540).
+
+    Supports prefix scoping like ``kind:task foo`` or ``@taskset bar`` so the
+    palette can narrow to one kind in one input (VS Code style). Ranks id matches
+    above title matches above metadata matches; blends across all kinds otherwise.
+    """
+    raw = (query or "").strip()
+    scoped_kind: str | None = None
+    match = _SCOPE_RE.match(raw)
+    if match:
+        scoped_kind, raw = match.group(1).lower(), match.group(2).strip()
+    kind_filter = {scoped_kind} if scoped_kind else ({k.lower() for k in kinds} if kinds else None)
+    needle = raw.lower()
+    ranked: list[tuple[int, str, dict]] = []
+    for entity in catalog.get("entities", []):
+        if kind_filter and str(entity.get("kind", "")).lower() not in kind_filter:
+            continue
+        eid = str(entity.get("id", ""))
+        title = str(entity.get("title", ""))
+        if not needle:
+            score = 1
+        elif needle in eid.lower():
+            score = 3
+        elif needle in title.lower():
+            score = 2
+        elif needle in json.dumps(entity.get("metadata", {}), ensure_ascii=False).lower():
+            score = 1
+        else:
+            continue
+        ranked.append((score, eid, entity))
+    ranked.sort(key=lambda row: (-row[0], row[1]))
+    return [entity for _, _, entity in ranked[:limit]]
+
+
 def check_catalog(catalog: dict) -> list[str]:
     findings: list[str] = []
     if str(catalog.get("schema") or "") != SCHEMA:

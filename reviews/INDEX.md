@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-14T13:43:04+09:00
-record_count: 475
+generated_at: 2026-06-14T14:02:27+09:00
+record_count: 477
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `475` review and evidence records under `reviews/`.
+- Summary: indexed `477` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `475` files |
+| Reviews covered | pass | `477` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -509,6 +509,8 @@ record_count: 475
 | `reviews/W4B-2026-06-14-TASK-AR-537.md` | `W4B-2026-06-14-TASK-AR-537` | verification | record | n/a | W4b Independent Verification — TASK-AR-537 (Manifest-first read surface + perf config) |
 | `reviews/W4B-2026-06-14-TASK-AR-538.md` | `W4B-2026-06-14-TASK-AR-538` | verification | record | n/a | W4b Independent Verification — TASK-AR-538 (Triage intake status + needs-attention lane) |
 | `reviews/W4B-2026-06-14-TASK-AR-539.md` | `W4B-2026-06-14-TASK-AR-539` | verification | record | n/a | W4b Independent Verification — TASK-AR-539 (Unified artifact entity catalog) |
+| `reviews/W4B-2026-06-14-TASK-AR-540.md` | `W4B-2026-06-14-TASK-AR-540` | verification | record | n/a | W4b Independent Verification — TASK-AR-540 (command palette + cross-entity search) |
+| `reviews/W4B-2026-06-14-TASK-AR-541-545.md` | `W4B-2026-06-14-TASK-AR-541-545` | verification | record | n/a | W4b Independent Verification — Decision Console Surfaces (TASK-AR-541/542/543/544/545) |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.

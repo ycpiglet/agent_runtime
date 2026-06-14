@@ -8,6 +8,7 @@ import json
 import os
 import re
 import secrets
+import subprocess
 import sys
 import threading
 import time
@@ -2759,6 +2760,203 @@ def load_inflight(
     if overlay.get("error"):
         warnings.append(_warning("inflight-overlay-unavailable", "scripts/inflight_overlay.py", str(overlay["error"])))
     return overlay
+
+
+# --- Entity catalog (TASK-AR-539/540): manifest-first read + palette search ---
+def load_catalog(root: Path) -> dict[str, Any]:
+    """Read the generated ENTITY-CATALOG.json (manifest-first; {} if absent)."""
+    path = Path(root) / "agents" / "project" / "work-items" / "ENTITY-CATALOG.json"
+    if not path.exists():
+        return {"schema": "agent-runtime-entity-catalog/v1", "entities": []}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {"schema": "agent-runtime-entity-catalog/v1", "entities": []}
+
+
+_CATALOG_SCOPE_RE = re.compile(r"^(?:kind:|@)(\w[\w-]*)\s+(.*)$", re.IGNORECASE)
+
+
+def catalog_search(root: Path, query: str, kinds: list[str] | None = None, limit: int = 50) -> list[dict[str, Any]]:
+    """Cross-entity command-palette search over the catalog (TASK-AR-540).
+
+    Reads the generated ENTITY-CATALOG.json (manifest-first) and ranks matches.
+    Supports prefix scoping like ``kind:task foo`` / ``@taskset bar``. Implemented
+    inline here (not via scripts.entity_catalog) so it works inside the server
+    process, whose sys.path is src-only.
+    """
+    catalog = load_catalog(root)
+    raw = (query or "").strip()
+    scoped: str | None = None
+    match = _CATALOG_SCOPE_RE.match(raw)
+    if match:
+        scoped, raw = match.group(1).lower(), match.group(2).strip()
+    kind_filter = {scoped} if scoped else ({k.lower() for k in kinds} if kinds else None)
+    needle = raw.lower()
+    ranked: list[tuple[int, str, dict[str, Any]]] = []
+    for entity in catalog.get("entities", []):
+        if kind_filter and str(entity.get("kind", "")).lower() not in kind_filter:
+            continue
+        eid = str(entity.get("id", ""))
+        title = str(entity.get("title", ""))
+        if not needle:
+            score = 1
+        elif needle in eid.lower():
+            score = 3
+        elif needle in title.lower():
+            score = 2
+        elif needle in json.dumps(entity.get("metadata", {}), ensure_ascii=False).lower():
+            score = 1
+        else:
+            continue
+        ranked.append((score, eid, entity))
+    ranked.sort(key=lambda row: (-row[0], row[1]))
+    return [entity for _, _, entity in ranked[:limit]]
+
+
+def catalog_entity(root: Path, entity_id: str) -> dict[str, Any] | None:
+    """Entity detail + forward relations + computed BACKLINKS (TASK-AR-541)."""
+    entities = load_catalog(root).get("entities", [])
+    by_id = {str(item.get("id")): item for item in entities}
+    entity = by_id.get(entity_id)
+    if entity is None:
+        return None
+    forward = [
+        {
+            "type": rel.get("type"),
+            "target": rel.get("target"),
+            "target_title": (by_id.get(str(rel.get("target"))) or {}).get("title"),
+            "resolved": str(rel.get("target")) in by_id,
+        }
+        for rel in entity.get("relations", [])
+    ]
+    backlinks = [
+        {"type": rel.get("type"), "source": str(other.get("id")), "source_kind": other.get("kind")}
+        for other in entities
+        for rel in other.get("relations", [])
+        if str(rel.get("target")) == entity_id
+    ]
+    return {"entity": entity, "relations": forward, "backlinks": backlinks}
+
+
+def catalog_facets(root: Path) -> dict[str, Any]:
+    """Faceted counts (kind/status) + a needs-attention rollup (TASK-AR-543)."""
+    entities = load_catalog(root).get("entities", [])
+    by_kind: dict[str, int] = {}
+    by_status: dict[str, int] = {}
+    triage: list[str] = []
+    for entity in entities:
+        kind = str(entity.get("kind", ""))
+        by_kind[kind] = by_kind.get(kind, 0) + 1
+        status = str((entity.get("metadata") or {}).get("status") or "")
+        if status:
+            by_status[status] = by_status.get(status, 0) + 1
+        if status == "triage":
+            triage.append(str(entity.get("id")))
+    return {
+        "by_kind": dict(sorted(by_kind.items())),
+        "by_status": dict(sorted(by_status.items())),
+        "needs_attention": {"triage": triage, "triage_count": len(triage)},
+        "total": len(entities),
+    }
+
+
+DOC_KINDS = ("council", "seminar", "meeting", "review", "research", "verification", "skill", "plan")
+
+
+def catalog_docs(root: Path) -> dict[str, Any]:
+    """Governance/knowledge document surface grouped by kind (TASK-AR-545)."""
+    groups: dict[str, list[dict[str, Any]]] = {}
+    for entity in load_catalog(root).get("entities", []):
+        kind = str(entity.get("kind", ""))
+        if kind not in DOC_KINDS:
+            continue
+        meta = entity.get("metadata") or {}
+        groups.setdefault(kind, []).append(
+            {
+                "id": str(entity.get("id")),
+                "title": entity.get("title"),
+                "date": meta.get("date"),
+                "path": meta.get("path"),
+                "references": [r.get("target") for r in entity.get("relations", []) if r.get("type") == "references"],
+            }
+        )
+    return {
+        "kinds": {k: sorted(v, key=lambda row: str(row.get("date") or ""), reverse=True) for k, v in sorted(groups.items())},
+        "counts": {k: len(v) for k, v in sorted(groups.items())},
+    }
+
+
+def _git_lines(root: Path, args: list[str], limit: int = 40) -> list[str]:
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), *args], capture_output=True, text=True, timeout=10
+        )
+    except (OSError, subprocess.SubprocessError):
+        return []
+    if result.returncode != 0:
+        return []
+    return [line for line in result.stdout.splitlines() if line.strip()][:limit]
+
+
+def entity_activity(root: Path, entity_id: str) -> dict[str, Any]:
+    """Typed chronological activity/provenance timeline for an entity (TASK-AR-542).
+
+    Unifies record provenance (review/verification/etc. that reference the entity,
+    from the catalog backlinks) with git commits mentioning the entity id.
+    """
+    events: list[dict[str, Any]] = []
+    catalog = load_catalog(root)
+    by_id = {str(item.get("id")): item for item in catalog.get("entities", [])}
+    for other in catalog.get("entities", []):
+        for rel in other.get("relations", []):
+            if str(rel.get("target")) == entity_id:
+                meta = other.get("metadata") or {}
+                events.append(
+                    {
+                        "type": rel.get("type"),
+                        "actor": other.get("kind"),
+                        "ref": str(other.get("id")),
+                        "date": meta.get("date"),
+                        "source": "record",
+                    }
+                )
+    for line in _git_lines(root, ["log", "--grep", entity_id, "-n", "20", "--date=short", "--pretty=%ad %h %s"]):
+        parts = line.split(" ", 2)
+        events.append(
+            {
+                "type": "committed",
+                "actor": "git",
+                "ref": parts[1] if len(parts) > 1 else "",
+                "date": parts[0] if parts else None,
+                "source": "commit",
+                "summary": parts[2] if len(parts) > 2 else line,
+            }
+        )
+    events.sort(key=lambda event: str(event.get("date") or ""), reverse=True)
+    return {"entity_id": entity_id, "events": events, "count": len(events)}
+
+
+def scm_overview(root: Path) -> dict[str, Any]:
+    """Live SCM surface: branches + recent commits from local git (TASK-AR-544)."""
+    branches = [line.strip().lstrip("* ").strip() for line in _git_lines(root, ["branch", "--all", "--no-color"], limit=80)]
+    commits: list[dict[str, Any]] = []
+    for line in _git_lines(root, ["log", "-n", "20", "--date=short", "--pretty=%ad %h %s"], limit=20):
+        parts = line.split(" ", 2)
+        commits.append(
+            {
+                "date": parts[0] if parts else None,
+                "hash": parts[1] if len(parts) > 1 else "",
+                "summary": parts[2] if len(parts) > 2 else line,
+            }
+        )
+    current = _git_lines(root, ["rev-parse", "--abbrev-ref", "HEAD"], limit=1)
+    return {
+        "current_branch": current[0] if current else None,
+        "branch_count": len(branches),
+        "branches": branches,
+        "recent_commits": commits,
+    }
 
 
 # --- Work Explorer (TASK-AR-516) -------------------------------------------

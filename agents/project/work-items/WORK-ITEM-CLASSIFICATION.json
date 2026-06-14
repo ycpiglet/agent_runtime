@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-14T13:43:03+09:00",
+  "generated_at": "2026-06-14T14:02:25+09:00",
   "record_count": 272,
   "finding_count": 0,
   "findings": [],
@@ -2291,7 +2291,7 @@
       "title": "Decision Cartographer",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-UNASSIGNED",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-539",
@@ -2313,7 +2313,7 @@
       "title": "One fuzzy input to jump to / act on ANY entity in the catalog — the proven universal-…",
       "path": "agents/lead_engineer/tasks/TASK-AR-540.md",
       "parent_id": "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-541",
@@ -2324,7 +2324,7 @@
       "title": "Make any entity a rich detail surface with pluggable tabs/cards (Backstage `EntityCon…",
       "path": "agents/lead_engineer/tasks/TASK-AR-541.md",
       "parent_id": "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-542",
@@ -2335,7 +2335,7 @@
       "title": "Answer \"who/what/when/why did this change\" for any entity by unifying scattered histo…",
       "path": "agents/lead_engineer/tasks/TASK-AR-542.md",
       "parent_id": "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-543",
@@ -2346,7 +2346,7 @@
       "title": "Give the decision-maker reusable lenses over the catalog and an exception-only attent…",
       "path": "agents/lead_engineer/tasks/TASK-AR-543.md",
       "parent_id": "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-544",
@@ -2357,7 +2357,7 @@
       "title": "Bring SCM artifacts the Owner listed (git log, branches, PRs, issues) into the catalo…",
       "path": "agents/lead_engineer/tasks/TASK-AR-544.md",
       "parent_id": "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-545",
@@ -2368,7 +2368,7 @@
       "title": "Make the product's governance/knowledge documents (skills, council records, seminar r…",
       "path": "agents/lead_engineer/tasks/TASK-AR-545.md",
       "parent_id": "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "taskset:TASKSET-AR-PRODUCT-MATURITY-UPLIFT",

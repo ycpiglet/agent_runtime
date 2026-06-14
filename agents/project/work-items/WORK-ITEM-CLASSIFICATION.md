@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-14T13:43:03+09:00
+generated_at: 2026-06-14T14:02:25+09:00
 record_count: 272
 ---
 
@@ -246,14 +246,14 @@ record_count: 272
 | 0.26.4 | Task 0.26.4 | task | `TASK-AR-536` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | `agents/lead_engineer/tasks/TASK-AR-536.md` | Make the permanent key collision-free AND time-sortable so multiple agents mint IDs w… |
 | 0.26.5 | Task 0.26.5 | task | `TASK-AR-537` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | `agents/lead_engineer/tasks/TASK-AR-537.md` | Keep the agent read surface small and fast as the store grows toward thousands of fil… |
 | 0.26.6 | Task 0.26.6 | task | `TASK-AR-538` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | `agents/lead_engineer/tasks/TASK-AR-538.md` | Add an explicit intake state so new items wait in a triage inbox (excluded from the a… |
-| 0.27 | Taskset 0.27 | taskset | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Decision Cartographer |
+| 0.27 | Taskset 0.27 | taskset | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Decision Cartographer |
 | 0.27.1 | Task 0.27.1 | task | `TASK-AR-539` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-539.md` | Make every meaningful artifact the product operates/archives a first-class, browsable… |
-| 0.27.2 | Task 0.27.2 | task | `TASK-AR-540` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-540.md` | One fuzzy input to jump to / act on ANY entity in the catalog — the proven universal-… |
-| 0.27.3 | Task 0.27.3 | task | `TASK-AR-541` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-541.md` | Make any entity a rich detail surface with pluggable tabs/cards (Backstage `EntityCon… |
-| 0.27.4 | Task 0.27.4 | task | `TASK-AR-542` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-542.md` | Answer "who/what/when/why did this change" for any entity by unifying scattered histo… |
-| 0.27.5 | Task 0.27.5 | task | `TASK-AR-543` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-543.md` | Give the decision-maker reusable lenses over the catalog and an exception-only attent… |
-| 0.27.6 | Task 0.27.6 | task | `TASK-AR-544` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-544.md` | Bring SCM artifacts the Owner listed (git log, branches, PRs, issues) into the catalo… |
-| 0.27.7 | Task 0.27.7 | task | `TASK-AR-545` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-545.md` | Make the product's governance/knowledge documents (skills, council records, seminar r… |
+| 0.27.2 | Task 0.27.2 | task | `TASK-AR-540` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-540.md` | One fuzzy input to jump to / act on ANY entity in the catalog — the proven universal-… |
+| 0.27.3 | Task 0.27.3 | task | `TASK-AR-541` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-541.md` | Make any entity a rich detail surface with pluggable tabs/cards (Backstage `EntityCon… |
+| 0.27.4 | Task 0.27.4 | task | `TASK-AR-542` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-542.md` | Answer "who/what/when/why did this change" for any entity by unifying scattered histo… |
+| 0.27.5 | Task 0.27.5 | task | `TASK-AR-543` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-543.md` | Give the decision-maker reusable lenses over the catalog and an exception-only attent… |
+| 0.27.6 | Task 0.27.6 | task | `TASK-AR-544` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-544.md` | Bring SCM artifacts the Owner listed (git log, branches, PRs, issues) into the catalo… |
+| 0.27.7 | Task 0.27.7 | task | `TASK-AR-545` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-545.md` | Make the product's governance/knowledge documents (skills, council records, seminar r… |
 | 0.28 | Taskset 0.28 | taskset | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Maturity Steward |
 | 0.28.1 | Task 0.28.1 | task | `TASK-AR-546` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-546.md` | Close the highest-impact UI testing gap: there are ~326 Python-side UI tests but **no… |
 | 0.28.2 | Task 0.28.2 | task | `TASK-AR-547` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-547.md` | The console is single-column with fixed widths and a fixed sidebar; it breaks below d… |

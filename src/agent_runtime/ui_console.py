@@ -12103,6 +12103,49 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
                 "total": len(results),
             }
         )
+    # Unified entity catalog + command-palette search (TASK-AR-539/540). Reads the
+    # generated ENTITY-CATALOG.json directly (manifest-first), NOT build_state, so
+    # the palette stays instant. `?q=` (with optional `kind:`/`@` prefix) searches;
+    # `?kind=` narrows; no query returns the full catalog + kind counts.
+    if request_path == "/api/catalog":
+        params = parse_qs(parsed_url.query)
+        query = (params.get("q", [""])[0] or "").strip()
+        kinds = [value for value in params.get("kind", []) if value]
+        if query or kinds:
+            items = ui_state.catalog_search(root_path, query, kinds=kinds or None)
+            return _json_response(
+                {"resource": "catalog_search", "query": query, "kinds": kinds, "items": items, "total": len(items)}
+            )
+        catalog = ui_state.load_catalog(root_path)
+        return _json_response(
+            {
+                "resource": "catalog",
+                "schema": catalog.get("schema"),
+                "entity_count": catalog.get("entity_count", len(catalog.get("entities", []))),
+                "kind_counts": catalog.get("kind_counts", {}),
+                "entities": catalog.get("entities", []),
+            }
+        )
+    # Entity detail + forward relations + computed backlinks (TASK-AR-541).
+    if request_path == "/api/catalog/entity":
+        entity_id = (parse_qs(parsed_url.query).get("id", [""])[0] or "").strip()
+        detail = ui_state.catalog_entity(root_path, entity_id)
+        if detail is None:
+            return _json_response({"resource": "catalog_entity", "id": entity_id, "error": "not found"}, status=404)
+        return _json_response({"resource": "catalog_entity", **detail})
+    # Faceted counts + needs-attention rollup (TASK-AR-543).
+    if request_path == "/api/catalog/facets":
+        return _json_response({"resource": "catalog_facets", **ui_state.catalog_facets(root_path)})
+    # Governance/knowledge document surface (TASK-AR-545).
+    if request_path == "/api/catalog/docs":
+        return _json_response({"resource": "catalog_docs", **ui_state.catalog_docs(root_path)})
+    # Activity/provenance timeline for an entity (TASK-AR-542).
+    if request_path == "/api/activity":
+        entity_id = (parse_qs(parsed_url.query).get("id", [""])[0] or "").strip()
+        return _json_response({"resource": "activity", **ui_state.entity_activity(root_path, entity_id)})
+    # Live SCM surface: branches + recent commits (TASK-AR-544).
+    if request_path == "/api/scm":
+        return _json_response({"resource": "scm", **ui_state.scm_overview(root_path)})
 
     api_resources = {
         "/api/tasks": "tasks",

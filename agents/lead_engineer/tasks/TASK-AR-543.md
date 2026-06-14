@@ -4,8 +4,10 @@ display_id: TASK-AR-543
 task_uid: 5f93b27d-34ce-4b82-928a-c5d6f2ba3149
 registered_at: 2026-06-14T03:22:33+09:00
 created_at: 2026-06-14T03:22:33+09:00
-updated_at: 2026-06-14T03:22:33+09:00
-status: planned
+started_at: 2026-06-14T14:25:00+09:00
+updated_at: 2026-06-14T14:40:00+09:00
+completed_at: 2026-06-14T14:40:00+09:00
+status: completed
 priority: P1
 difficulty: M
 est_hours: 7
@@ -45,3 +47,13 @@ tags:
 ## Evidence Targets
 
 - `reviews/RESEARCH-2026-06-14-unified-decision-console.md` (Linear Custom Views/swimlanes; GitHub Projects insights group-by; Jira JQL dashboards; Notion relation+rollup; Datadog needs-attention/Case Management).
+
+## Completion Evidence
+
+- `ui_state.catalog_facets()` + `/api/catalog/facets`: facet counts by kind + by status, plus a needs-attention rollup (triage). Live: 11 kinds / 700 total.
+- Manifest-first: reads the generated ENTITY-CATALOG.json (539) / local git, NOT build_state, so the surface stays fast. `tests/test_catalog_surfaces.py` covers it.
+
+## Verification Results
+
+- W4a: catalog-surface tests pass; endpoint live-verified via curl; governance gate exit 0.
+- W4b (independent, verifier != worker): see `reviews/W4B-2026-06-14-TASK-AR-541-545.md` (batch).

@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-14
-archived_count: 195
+archived_count: 201
 ---
 
 # Archived Task Files
 
-- `195` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `201` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -207,4 +207,10 @@ archived_count: 195
 | `TASK-AR-538` | `42d85997-bac…` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T11:45:00+09:00 | 2026-06-14T12:00:00+09:00 | 2026-06-14T12:00:00+09:00 | Add an explicit intake state so new items wait in a triage inbox (excluded from the a… |
 | `TASK-AR-536` | `30f4de47-2cd…` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T10:40:00+09:00 | 2026-06-14T10:50:00+09:00 | 2026-06-14T10:50:00+09:00 | Make the permanent key collision-free AND time-sortable so multiple agents mint IDs w… |
 | `TASK-AR-537` | `85813f55-1ac…` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T10:52:00+09:00 | 2026-06-14T11:00:00+09:00 | 2026-06-14T11:00:00+09:00 | Keep the agent read surface small and fast as the store grows toward thousands of fil… |
+| `TASK-AR-540` | `eb29ba54-c72…` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T14:05:00+09:00 | 2026-06-14T14:20:00+09:00 | 2026-06-14T14:20:00+09:00 | One fuzzy input to jump to / act on ANY entity in the catalog — the proven universal-… |
+| `TASK-AR-541` | `086d2ce1-9cd…` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T14:25:00+09:00 | 2026-06-14T14:40:00+09:00 | 2026-06-14T14:40:00+09:00 | Make any entity a rich detail surface with pluggable tabs/cards (Backstage `EntityCon… |
+| `TASK-AR-543` | `5f93b27d-34c…` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T14:25:00+09:00 | 2026-06-14T14:40:00+09:00 | 2026-06-14T14:40:00+09:00 | Give the decision-maker reusable lenses over the catalog and an exception-only attent… |
 | `TASK-AR-539` | `caa68fb5-127…` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T12:05:00+09:00 | 2026-06-14T12:15:00+09:00 | 2026-06-14T12:15:00+09:00 | Make every meaningful artifact the product operates/archives a first-class, browsable… |
+| `TASK-AR-544` | `0b16b05d-c8a…` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T14:25:00+09:00 | 2026-06-14T14:40:00+09:00 | 2026-06-14T14:40:00+09:00 | Bring SCM artifacts the Owner listed (git log, branches, PRs, issues) into the catalo… |
+| `TASK-AR-545` | `98d79038-827…` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T14:25:00+09:00 | 2026-06-14T14:40:00+09:00 | 2026-06-14T14:40:00+09:00 | Make the product's governance/knowledge documents (skills, council records, seminar r… |
+| `TASK-AR-542` | `2bc66839-72e…` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T14:25:00+09:00 | 2026-06-14T14:40:00+09:00 | 2026-06-14T14:40:00+09:00 | Answer "who/what/when/why did this change" for any entity by unifying scattered histo… |

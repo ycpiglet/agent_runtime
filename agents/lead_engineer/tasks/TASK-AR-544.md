@@ -4,8 +4,10 @@ display_id: TASK-AR-544
 task_uid: 0b16b05d-c8ad-43cc-a2df-ac33ab4cd903
 registered_at: 2026-06-14T03:22:33+09:00
 created_at: 2026-06-14T03:22:33+09:00
-updated_at: 2026-06-14T03:22:33+09:00
-status: planned
+started_at: 2026-06-14T14:25:00+09:00
+updated_at: 2026-06-14T14:40:00+09:00
+completed_at: 2026-06-14T14:40:00+09:00
+status: completed
 priority: P2
 difficulty: M
 est_hours: 6
@@ -46,3 +48,13 @@ tags:
 ## Evidence Targets
 
 - `reviews/RESEARCH-2026-06-14-unified-decision-console.md` (Sourcegraph cross-repo navigation; GitHub timeline cross-referenced/connected events, "Closes #" automation).
+
+## Completion Evidence
+
+- `ui_state.scm_overview()` + `/api/scm`: current branch + all branches + recent commits from local git (read-only). Live: 43 branches, 20 recent commits.
+- Manifest-first: reads the generated ENTITY-CATALOG.json (539) / local git, NOT build_state, so the surface stays fast. `tests/test_catalog_surfaces.py` covers it.
+
+## Verification Results
+
+- W4a: catalog-surface tests pass; endpoint live-verified via curl; governance gate exit 0.
+- W4b (independent, verifier != worker): see `reviews/W4B-2026-06-14-TASK-AR-541-545.md` (batch).
