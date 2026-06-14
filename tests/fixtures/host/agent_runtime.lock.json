@@ -134,7 +134,7 @@
       "scripts/kedb_search.py": "sha256:b2b714723f8be28fb9f09de571b2b5414ff6c0213c98d35dc9cc42e102e38b82",
       "scripts/knowledge_ask.py": "sha256:00197508c3dfd658a0911a552a46696f25097ea0a3188b8b5312c626dbb9f8ce",
       "scripts/knowledge_digest.py": "sha256:a1b195c2ec82a50cae0b0ba666c47c6e3c99ccadc21477ad8aa13bae7da249cc",
-      "scripts/knowledge_graph.py": "sha256:deb21598ea468d824d9a22340a04620efbdaebc1f405a39ebdd86e0ed4cf2584",
+      "scripts/knowledge_graph.py": "sha256:4c26ad85026b735aa42f4bcb7d1c34e685260d7efd64e3e76c289390f8315944",
       "scripts/knowledge_lint.py": "sha256:709fdb0b0e2487c4fbd123c7a62b0ce5bbb9173a4dea5f228acb8405da9c66b9",
       "scripts/local_schedule_daemon.py": "sha256:548b5ce03b04f44ac1fd833b6347a7850665895f299f8aceeacfa4b7cf5d4f8d",
       "scripts/lock_merge_driver.py": "sha256:7cd74471e96a2e44e22438841156ffa783c2600d16ae024b77c3f8062bcc1769",
@@ -263,7 +263,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.2.0",
-    "template_digest": "sha256:5e790e3c208c963a175cee7cc827d1b0d7413f7a53ae595f649ccc4e46a21389",
+    "template_digest": "sha256:82b18e276427a088b028edf6be7fdac5f118fdab9947395825b51650d471c919",
     "template_files": 260
   },
   "project": "fixture-host",

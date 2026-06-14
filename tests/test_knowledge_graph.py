@@ -146,6 +146,37 @@ def test_ingest_reviews_scans_body_for_references(tmp_path):
     assert {"TASK-AR-552", "TASKSET-AR-COLLAB-CONCURRENCY", "INIT-AR-HOST-FEEDBACK-INTAKE"} <= targets
 
 
+def test_build_graph_prunes_dangling_reference_edges(tmp_path):
+    # a review body references a real task plus bogus id-shaped tokens (filename / date)
+    reviews = tmp_path / "reviews"
+    reviews.mkdir()
+    (reviews / "REVIEW-2026-06-14-x.md").write_text(
+        "Closed TASK-AR-1; see TASKSET-DEFINITIONS and TASK-AR-20260611.\n", encoding="utf-8")
+    wi = tmp_path / "agents" / "project" / "work-items"
+    wi.mkdir(parents=True)
+    (wi / "WORK-ITEM-CLASSIFICATION.json").write_text(
+        json.dumps({"records": [{"id": "TASK-AR-1", "level": "task", "title": "One"}]}), encoding="utf-8")
+    graph = kg.build_graph(tmp_path, git_limit=0)
+    review = next(n for n in graph["nodes"] if n["id"] == "REVIEW-2026-06-14-x")
+    targets = {r["target"] for r in review["relations"] if r["type"] == "references"}
+    assert "TASK-AR-1" in targets  # real node kept
+    assert "TASKSET-DEFINITIONS" not in targets  # dangling reference pruned
+    assert "TASK-AR-20260611" not in targets
+
+
+def test_build_graph_keeps_dangling_structural_edges(tmp_path):
+    # a task whose partOf taskset is missing must STAY dangling (lint flags it block)
+    wi = tmp_path / "agents" / "project" / "work-items"
+    wi.mkdir(parents=True)
+    (wi / "WORK-ITEM-CLASSIFICATION.json").write_text(
+        json.dumps({"records": [
+            {"id": "TASK-AR-9", "level": "task", "title": "Nine", "parent_id": "TASKSET-GONE"}]}),
+        encoding="utf-8")
+    graph = kg.build_graph(tmp_path, git_limit=0)
+    task = next(n for n in graph["nodes"] if n["id"] == "TASK-AR-9")
+    assert {"type": "partOf", "target": "TASKSET-GONE"} in task["relations"]
+
+
 def test_reference_targets_dedupes_caps_and_excludes_self():
     body = " ".join(f"TASK-AR-{i}" for i in range(60)) + " REVIEW-SELF"
     refs = kg._reference_targets("REVIEW-SELF", body, self_id="REVIEW-SELF")
