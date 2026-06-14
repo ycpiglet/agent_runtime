@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-14
-archived_count: 201
+archived_count: 202
 ---
 
 # Archived Task Files
 
-- `201` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `202` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -199,6 +199,7 @@ archived_count: 201
 | `TASK-AR-529` | `93277502-ad3…` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | completed | 2026-06-14T02:08:50+09:00 | 2026-06-14T12:45:00+09:00 | 2026-06-14T12:55:00+09:00 | 2026-06-14T12:55:00+09:00 | Close the parallel-wave conflict-safety weak link: `footprint_conflict_gate --check`… |
 | `TASK-AR-527` | `92a2232e-514…` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | completed | 2026-06-14T02:08:50+09:00 | 2026-06-14T10:00:00+09:00 | 2026-06-14T10:10:00+09:00 | 2026-06-14T10:10:00+09:00 | Reactivate the currently-dormant council/seminar device so queued host feedback is ac… |
 | `TASK-AR-530` | `fa0dc086-45f…` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | completed | 2026-06-14T02:08:50+09:00 | 2026-06-14T13:40:00+09:00 | 2026-06-14T13:55:00+09:00 | 2026-06-14T13:55:00+09:00 | Give the platform an objective, quantitative self-eval so each version can prove it i… |
+| `TASK-AR-528` | `93e48db2-bbb…` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | completed | 2026-06-14T02:08:50+09:00 | 2026-06-14T13:10:00+09:00 | 2026-06-14T15:10:00+09:00 | 2026-06-14T15:10:00+09:00 | Close the loop so a deliberation outcome is written back to the originating host issu… |
 | `TASK-AR-532` | `cb6168bf-1b6…` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | completed | 2026-06-14T02:08:50+09:00 | 2026-06-14T13:25:00+09:00 | 2026-06-14T13:35:00+09:00 | 2026-06-14T13:35:00+09:00 | Route the standing open bug issues through the same intake/triage pipeline (category… |
 | `TASK-AR-531` | `270755af-d86…` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | completed | 2026-06-14T02:08:50+09:00 | 2026-06-14T12:30:00+09:00 | 2026-06-14T12:40:00+09:00 | 2026-06-14T12:40:00+09:00 | Close the host-fit gaps that block deep adoption of agent_runtime as a reusable platf… |
 | `TASK-AR-535` | `57b5d41e-a8c…` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T09:30:00+09:00 | 2026-06-14T09:35:00+09:00 | 2026-06-14T09:35:00+09:00 | Dissolve the "quantum jump" (200s -> 300s -> no 400s -> 500s): gaps are inherent to a… |

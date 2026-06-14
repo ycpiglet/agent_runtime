@@ -97,6 +97,8 @@ def _already_replied(issue: str) -> bool:
         ["gh", "issue", "view", issue, "--repo", REPO, "--json", "comments"],
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     if result.returncode != 0:
         return False
@@ -112,6 +114,8 @@ def post_reply(issue: str, body: str) -> tuple[bool, str]:
         ["gh", "issue", "comment", issue, "--repo", REPO, "--body", body],
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     return result.returncode == 0, (result.stdout or result.stderr).strip()
 

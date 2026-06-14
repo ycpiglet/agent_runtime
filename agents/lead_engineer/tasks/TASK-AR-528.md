@@ -5,8 +5,9 @@ task_uid: 93e48db2-bbb5-4dc7-b0f0-90ea1dbd2a63
 registered_at: 2026-06-14T02:08:50+09:00
 created_at: 2026-06-14T02:08:50+09:00
 started_at: 2026-06-14T13:10:00+09:00
-updated_at: 2026-06-14T13:20:00+09:00
-status: in_progress
+updated_at: 2026-06-14T15:10:00+09:00
+completed_at: 2026-06-14T15:10:00+09:00
+status: completed
 priority: P2
 difficulty: M
 est_hours: 4
@@ -46,7 +47,7 @@ tags:
 ## Progress / Owner-gated step
 
 - DELIVERED (local): `scripts/host_feedback_replyback.py` (`--check`/`--write-drafts`/`--post`) reads the queue verdicts and renders one traceable reply per source issue (decision + priority + rationale + deliberation-record link + guardrails). `--check` findings=0; 7 drafts in `agents/project/work-items/HOST-FEEDBACK-REPLIES.md`. Traceability is bidirectional: issue <-> queue entry <-> COUNCIL record <-> task.
-- PENDING (owner-gated): the actual `gh issue comment` POST to #121/#125/#128/#131 + #19/#20/#21 is an outbound external write and was correctly blocked by the action classifier ("proceed with 528" does not authorize posting to those external destinations). The Owner closes the loop with one command: `python scripts/host_feedback_replyback.py --post` (or add a Bash permission rule). Status stays `in_progress` until the reply is posted.
+- DONE (Owner-approved 2026-06-14): reply-back POSTED to all 7 issues — #19/#20/#21/#121/#125/#128/#131 — each carrying the decision + rationale + deliberation-record link + the idempotency marker. Re-running `--post` now skips all 7. A cp949 subprocess-decode bug (the same class as #21) was fixed mid-post (`encoding="utf-8", errors="replace"` on the gh calls); idempotency made the partial first run safe. The GH #131 intake pipeline loop is now closed end-to-end: intake (526) -> deliberate (527) -> reply-back (528).
 
 ## Verification Results
 

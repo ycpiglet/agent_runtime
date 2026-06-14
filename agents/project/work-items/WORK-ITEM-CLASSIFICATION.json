@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-14T14:02:25+09:00",
+  "generated_at": "2026-06-14T14:38:02+09:00",
   "record_count": 272,
   "finding_count": 0,
   "findings": [],
@@ -2126,7 +2126,7 @@
       "title": "Host Liaison",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-UNASSIGNED",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-526",
@@ -2159,7 +2159,7 @@
       "title": "Close the loop so a deliberation outcome is written back to the originating host issu…",
       "path": "agents/lead_engineer/tasks/TASK-AR-528.md",
       "parent_id": "TASKSET-AR-HOST-FEEDBACK-INTAKE",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-529",
