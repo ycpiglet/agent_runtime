@@ -238,3 +238,11 @@ def test_cli_build_and_query(tmp_path, capsys):
     out = json.loads(capsys.readouterr().out)
     assert any(t == "TASKSET-A" for _, t in out["neighbors"]) or \
         any(n.get("target") == "TASKSET-A" for n in out["neighbors"])
+
+
+def test_enable_utf8_stdout_is_safe_on_unreconfigurable_stream(monkeypatch):
+    import io
+    # a plain StringIO has no reconfigure(); the helper must not raise
+    monkeypatch.setattr("knowledge_graph.sys.stdout", io.StringIO())
+    monkeypatch.setattr("knowledge_graph.sys.stderr", io.StringIO())
+    kg.enable_utf8_stdout()  # no exception = pass

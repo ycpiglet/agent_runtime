@@ -63,6 +63,17 @@ REVIEW_KIND_BY_PREFIX = {
 ACTIVE_CLAIM_STATUSES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working", "active", "running"}
 
 
+def enable_utf8_stdout() -> None:
+    """Reconfigure stdout/stderr to UTF-8 so entity titles (em-dashes, Korean) and the
+    `—` in lint output don't crash on a cp949/legacy console. Best-effort no-op where
+    unsupported. Shared by the knowledge_* CLIs; call from their __main__."""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8")  # type: ignore[union-attr]
+        except (AttributeError, ValueError, OSError):
+            pass
+
+
 def _node(kind: str, eid: str, title: str = "", *, metadata: dict | None = None, relations: list | None = None) -> dict:
     return {"kind": kind, "id": eid, "title": title or eid, "metadata": metadata or {}, "relations": relations or []}
 
@@ -453,4 +464,5 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    enable_utf8_stdout()
     raise SystemExit(main())

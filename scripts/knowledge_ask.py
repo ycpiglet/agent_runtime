@@ -209,10 +209,5 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    # Graph titles carry unicode (em-dashes, Korean); avoid cp949 console crashes.
-    for _stream in (getattr(__import__("sys"), "stdout", None), getattr(__import__("sys"), "stderr", None)):
-        try:
-            _stream.reconfigure(encoding="utf-8")  # type: ignore[union-attr]
-        except Exception:
-            pass
+    kg.enable_utf8_stdout()  # graph titles carry unicode; avoid cp949 console crashes
     raise SystemExit(main())

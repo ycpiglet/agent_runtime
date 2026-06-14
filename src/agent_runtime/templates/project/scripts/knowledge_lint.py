@@ -142,4 +142,5 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    kg.enable_utf8_stdout()
     raise SystemExit(main())
