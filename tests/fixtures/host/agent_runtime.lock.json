@@ -98,7 +98,7 @@
       "scripts/check_repo_structure.py": "sha256:57914d739308ab831191c8f7dd2c66a2b73e2cd5742d604a9cbe0f03f6bb2a6f",
       "scripts/check_skill_structure.py": "sha256:b7b2626a713a0689b0b94a3875c65dcf844f4d636710305b4d3ad4e325f09aea",
       "scripts/claim_lease.py": "sha256:92cdee8010b4ddd056d07da033a7e0ad7238ab9e96f6627deca2e3ea34ea08cc",
-      "scripts/claim_reaper.py": "sha256:2672a36f763573918e54d67face35adc9368c82131a30087c46a6d968055abfc",
+      "scripts/claim_reaper.py": "sha256:8f4bd05d2dea87ebca458edaf6397d1320ae87390fec9e0384bca1860ad6084b",
       "scripts/claim_reaper_hook.py": "sha256:07591f4caaca373a26792af8234fc6436405974815a3c3801a2b43795934d0fa",
       "scripts/claude_cli_probe.py": "sha256:857eebf768b715805eff01545b5c2bbb4fa97decda597b9c2ec0ab1bd3fb891e",
       "scripts/closure_gate.py": "sha256:479806ae1be4501d503cbedb153dc71dd36b29a153da0822edc6396f7419dc2c",
@@ -174,7 +174,7 @@
       "scripts/session_start_hook.py": "sha256:a688e6e77d3bf156ddac3409082b224775732ec0d86bd581332b1274b5ef4e86",
       "scripts/state_machine_gate.py": "sha256:8bbe521adf8948a196b28ca847e3ac836b278f7ca0e62e854bfc4489e8f412ef",
       "scripts/state_sync_gate.py": "sha256:47cda9968b58b2a9908bbd59bd0af5bb3bec3b0981999c0db583ca2ff2a565bd",
-      "scripts/stop_events.py": "sha256:531e70db8f231560bcb324a44c4b14103912eb1530488963894d2f9c9f910550",
+      "scripts/stop_events.py": "sha256:b6398afd39a08671766db08f1b6793b303cea9c72bbe9510ac48ab4571d14c31",
       "scripts/stop_hook_closure_gate.py": "sha256:72a42fed1940225d71b68a9074da642093d55aaea33c19a0cde32e2f026f1983",
       "scripts/stop_hook_owner_governance.cmd": "sha256:8ac529f0eabb5bfc34425d0b8851854320a4c6a011470c57bafbbacaf5a33e80",
       "scripts/stop_hook_owner_governance.py": "sha256:d9e95d623d960ee8efce01eca574c048e8feae53dcf84afe44c4eaa2ceed1e9e",
@@ -256,7 +256,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.2.0",
-    "template_digest": "sha256:0c658ed8b0b22f1508724d3408272037004003579fd2f1ccb621187f293a78a9",
+    "template_digest": "sha256:49b35117be6db5d0145df1eef50cc5db67030d1dedcada35429099dcf53782f3",
     "template_files": 253
   },
   "project": "fixture-host",

@@ -35,6 +35,7 @@ import argparse
 import json
 import os
 import sys
+import threading
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -158,23 +159,94 @@ def classify_claim(claim: dict[str, Any], now: datetime, grace_seconds: int) -> 
 
 
 def _write_json_atomic(path: Path, payload: dict[str, Any]) -> None:
-    tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
+    tmp = path.with_name(f"{path.name}.{os.getpid()}.{threading.get_ident()}.tmp")
     tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     os.replace(tmp, path)
 
 
-def _reap(root: Path, path: Path, claim: dict[str, Any], now: datetime) -> None:
-    prior = str(claim.get("status") or "")
-    now_text = now.isoformat(timespec="seconds")
-    claim["status"] = REAPED_STATUS
-    claim["recovered_from_status"] = prior
-    claim["reaped_at"] = now_text
-    claim["reaped_by"] = "claim_reaper"
-    claim["reaped_reason"] = "lease-expired"
-    claim["updated_at"] = now_text
-    _write_json_atomic(path, claim)
+LOCK_TIMEOUT_SECONDS = 5.0
+LOCK_POLL_SECONDS = 0.01
 
-    # Audit trail is best-effort: a logging failure must never block recovery.
+
+def _acquire_lock(path: Path):
+    """Exclusive per-claim lock so concurrent reapers transition a claim once."""
+    import time
+
+    deadline = time.monotonic() + LOCK_TIMEOUT_SECONDS
+    while True:
+        try:
+            return os.open(str(path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except (FileExistsError, PermissionError):
+            # Windows can raise PermissionError while another thread/process is
+            # mid-unlink of the lock file; treat it like "held" and retry.
+            if time.monotonic() >= deadline:
+                raise TimeoutError(f"reap lock timeout: {path}")
+            import time as _t
+
+            _t.sleep(LOCK_POLL_SECONDS)
+
+
+def _release_lock(path: Path, fd: int) -> None:
+    try:
+        os.close(fd)
+    except OSError:
+        pass
+    try:
+        path.unlink()
+    except OSError:
+        pass
+
+
+def _read_one(path: Path) -> dict[str, Any] | None:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _reap(root: Path, path: Path, claim: dict[str, Any], now: datetime, grace_seconds: int) -> bool:
+    """Atomically transition a provably-dead claim to ``expired``.
+
+    Returns True iff THIS call performed the transition. A per-claim lock plus a
+    re-classification under the lock guarantee that, under concurrent reapers, a
+    claim is reaped at most once and is never reaped if a heartbeat resurrected it
+    (re-classified live) in the race window between the initial read and the lock.
+    """
+    lock = path.with_name(f"{path.name}.reap.lock")
+    fd = _acquire_lock(lock)
+    audit: dict[str, str] | None = None
+    try:
+        current = _read_one(path)
+        if current is None:
+            return False
+        decision, _reason = classify_claim(current, now, grace_seconds)
+        if decision != "dead":
+            return False  # already reaped, or resurrected by a heartbeat
+        prior = str(current.get("status") or "")
+        now_text = now.isoformat(timespec="seconds")
+        current["status"] = REAPED_STATUS
+        current["recovered_from_status"] = prior
+        current["reaped_at"] = now_text
+        current["reaped_by"] = "claim_reaper"
+        current["reaped_reason"] = "lease-expired"
+        current["updated_at"] = now_text
+        _write_json_atomic(path, current)
+        audit = {
+            "claim_id": current.get("claim_id", ""),
+            "task_id": current.get("task_id", ""),
+            "task_set_id": current.get("task_set_id", ""),
+            "worktree_path": current.get("worktree_path", ""),
+            "prior": prior,
+            "now_text": now_text,
+        }
+    finally:
+        _release_lock(lock, fd)
+
+    if audit is None:
+        return False
+    # Audit trail is best-effort and runs outside the lock: a logging failure must
+    # never block recovery, and only the winning reaper records (no double audit).
     try:
         pane_event_log.append_event(
             root,
@@ -182,15 +254,15 @@ def _reap(root: Path, path: Path, claim: dict[str, Any], now: datetime) -> None:
                 "event": "claim_reaped",
                 "actor": "claim_reaper",
                 "actor_role": "orchestrator",
-                "claim_id": claim.get("claim_id", ""),
-                "task_id": claim.get("task_id", ""),
-                "task_set_id": claim.get("task_set_id", ""),
-                "worktree_path": claim.get("worktree_path", ""),
+                "claim_id": audit["claim_id"],
+                "task_id": audit["task_id"],
+                "task_set_id": audit["task_set_id"],
+                "worktree_path": audit["worktree_path"],
                 "message": (
-                    f"Reaped dead claim (was {prior}); lease expired beyond grace. "
+                    f"Reaped dead claim (was {audit['prior']}); lease expired beyond grace. "
                     "Unit is now re-dispatchable."
                 ),
-                "ts": now_text,
+                "ts": audit["now_text"],
             },
         )
     except Exception:  # noqa: BLE001
@@ -201,11 +273,12 @@ def _reap(root: Path, path: Path, claim: dict[str, Any], now: datetime) -> None:
         reason_code="dead_claim",
         action="reaped",
         klass="recoverable",
-        claim_id=claim.get("claim_id", ""),
-        task_id=claim.get("task_id", ""),
-        message=f"was {prior}",
+        claim_id=audit["claim_id"],
+        task_id=audit["task_id"],
+        message=f"was {audit['prior']}",
         now=now,
     )
+    return True
 
 
 def _entry(path: Path, claim: dict[str, Any], reason: str) -> dict[str, Any]:
@@ -258,8 +331,12 @@ def sweep(
                 )
         else:  # dead
             if apply:
-                _reap(root, path, claim, now_dt)
-                report["reaped"].append(entry)
+                if _reap(root, path, claim, now_dt, grace):
+                    report["reaped"].append(entry)
+                else:
+                    # Another concurrent reaper won the race, or a heartbeat
+                    # resurrected the claim under the lock.
+                    report["skipped"].append({**entry, "reason": "reap-superseded"})
             else:
                 report["would_reap"].append(entry)
     return report
