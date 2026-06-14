@@ -67,7 +67,11 @@ SKIP_TOP_LEVEL_DIR_NAMES = {
     "agents",
 }
 
-_ABSOLUTE_PATH_RE = r"(?:[A-Za-z]:\\Users\\" + r"|/Us" + r"ers/|/ho" + r"me/)[^\s`\"']+"
+# Absolute local paths leak host identity. The leading lookbehind keeps genuine
+# absolute paths (start at a boundary) while rejecting UI hash-routes such as
+# `#/home/board` and relative segments like `foo/home/bar`, which are false
+# positives (a long-standing source of red CI on the UI console code).
+_ABSOLUTE_PATH_RE = r"(?<![#\w])(?:[A-Za-z]:\\Users\\" + r"|/Us" + r"ers/|/ho" + r"me/)[^\s`\"']+"
 
 CONTENT_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("absolute-local-path", re.compile(_ABSOLUTE_PATH_RE)),
