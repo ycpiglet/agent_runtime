@@ -206,6 +206,23 @@ def build_graph(root: Path, *, git_limit: int = 200) -> dict:
             continue
         seen.add(nid)
         unique.append(node)
+
+    # Prune `references` edges to non-existent targets. Body scanning (ingest_reviews)
+    # matches anything id-shaped — file names like TASKSET-DEFINITIONS, date-like
+    # TASK-AR-20260611, archived ids — which would otherwise show as dangling-edge
+    # noise in lint. Structural (partOf) and `mentions` edges keep their dangling
+    # targets so lint still flags real integrity gaps.
+    node_ids = {str(n.get("id") or "") for n in unique}
+    for node in unique:
+        relations = node.get("relations") or []
+        kept = [
+            relation for relation in relations
+            if str(relation.get("type")) != "references"
+            or str(relation.get("target") or "") in node_ids
+        ]
+        if len(kept) != len(relations):
+            node["relations"] = kept
+
     edge_count = sum(len(n.get("relations") or []) for n in unique)
     return {
         "schema": SCHEMA,
