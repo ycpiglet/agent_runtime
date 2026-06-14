@@ -32,7 +32,7 @@ STRUCTURAL_RELS = {"partOf", "dependsOn", "blocks"}
 # one is a planning defect worth flagging. Observational kinds (commit, claim,
 # review, meeting, research, call, seminar, retro, pr) are leaves by nature, so
 # their isolation is expected and must not drown the signal.
-CONNECTED_KINDS = {"task", "taskset", "initiative", "unit", "verification"}
+CONNECTED_KINDS = {"task", "taskset", "initiative", "unit", "verification", "domain"}
 
 Finding = dict[str, Any]
 
