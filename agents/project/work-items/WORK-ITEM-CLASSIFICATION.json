@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-14T09:43:06+09:00",
+  "generated_at": "2026-06-14T09:44:35+09:00",
   "record_count": 272,
   "finding_count": 0,
   "findings": [],
@@ -2137,7 +2137,7 @@
       "title": "Treat host (autofolio) feedback issues as first-class, non-ignorable input: ingest th…",
       "path": "agents/lead_engineer/tasks/TASK-AR-526.md",
       "parent_id": "TASKSET-AR-HOST-FEEDBACK-INTAKE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-527",

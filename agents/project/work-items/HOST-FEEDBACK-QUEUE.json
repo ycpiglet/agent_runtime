@@ -1,0 +1,63 @@
+{
+  "schema": "agent-runtime-host-feedback-queue/v1",
+  "categories": ["relationship", "defect", "design", "process"],
+  "statuses": ["triage", "deliberating", "accepted", "deferred", "rejected"],
+  "entries": [
+    {
+      "id": "HFQ-131",
+      "source": "ycpiglet/agent_runtime#131",
+      "category": "process",
+      "status": "triage",
+      "title": "host feedback intake -> council/seminar deliberation -> reply-back pipeline",
+      "tasks": ["TASK-AR-526", "TASK-AR-527", "TASK-AR-528"]
+    },
+    {
+      "id": "HFQ-121",
+      "source": "ycpiglet/agent_runtime#121",
+      "category": "relationship",
+      "status": "triage",
+      "title": "autofolio<->agent_runtime relationship + host-fit gaps (wheel dotfiles, read-location, work_cli, status i18n)",
+      "tasks": ["TASK-AR-531"]
+    },
+    {
+      "id": "HFQ-125",
+      "source": "ycpiglet/agent_runtime#125",
+      "category": "defect",
+      "status": "triage",
+      "title": "parallel wave: declared vs actual footprint post-verify gate missing",
+      "tasks": ["TASK-AR-529"]
+    },
+    {
+      "id": "HFQ-128",
+      "source": "ycpiglet/agent_runtime#128",
+      "category": "design",
+      "status": "triage",
+      "title": "cross-version self-eval harness + fixed/variable metrics + RSI fitness gate",
+      "tasks": ["TASK-AR-530"]
+    },
+    {
+      "id": "HFQ-021",
+      "source": "ycpiglet/agent_runtime#21",
+      "category": "defect",
+      "status": "triage",
+      "title": "BUG-002: sync --diff fails on Windows cp949 console (UnicodeEncodeError)",
+      "tasks": ["TASK-AR-532"]
+    },
+    {
+      "id": "HFQ-020",
+      "source": "ycpiglet/agent_runtime#20",
+      "category": "defect",
+      "status": "triage",
+      "title": "BUG-001: build_sync_plan accepts stale config (AttributeError)",
+      "tasks": ["TASK-AR-532"]
+    },
+    {
+      "id": "HFQ-019",
+      "source": "ycpiglet/agent_runtime#19",
+      "category": "defect",
+      "status": "triage",
+      "title": "BUG-004: project template role docs link to unshipped files",
+      "tasks": ["TASK-AR-532"]
+    }
+  ]
+}
