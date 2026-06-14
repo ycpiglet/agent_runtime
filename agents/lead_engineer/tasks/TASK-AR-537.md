@@ -4,8 +4,10 @@ display_id: TASK-AR-537
 task_uid: 85813f55-1aca-4dde-81cc-40e347376c34
 registered_at: 2026-06-14T03:22:33+09:00
 created_at: 2026-06-14T03:22:33+09:00
-updated_at: 2026-06-14T03:22:33+09:00
-status: planned
+started_at: 2026-06-14T10:52:00+09:00
+updated_at: 2026-06-14T11:00:00+09:00
+completed_at: 2026-06-14T11:00:00+09:00
+status: completed
 priority: P2
 difficulty: M
 est_hours: 6
@@ -45,3 +47,15 @@ tags:
 ## Evidence Targets
 
 - `reviews/RESEARCH-2026-06-14-work-store-architecture-and-numbering.md` (ripgrep ~75k files sub-sec; git status scales with file count, feature.manyFiles @10k+; VS Code 8,192 watchers; SQLite/FTS5 as derived cache, never SSoT).
+
+## Completion Evidence
+
+- `agents/project/READ-SURFACE-CONTRACT.md`: names the 6 canonical generated manifests agents read instead of globbing; documents the git perf config and the deferred SQLite/FTS5 design (mtime+hash rebuild, disposable cache, ~10k threshold).
+- `scripts/work_index.py` + `tests/test_work_index.py`: `--check` verifies the read-surface manifests exist (exit 1 if any missing) + reports corpus size (820 md) + FTS recommendation; 3 tests.
+- `.vscode/settings.json`: `files.watcherExclude` for `.git`/`.venv`/`.worktrees`/caches. Git perf config applied locally: `feature.manyFiles=true`, `core.untrackedCache=true`, `core.fsmonitor=true`.
+- Scope decision: corpus ~820 md (8% of 10k) → SQLite/FTS5 specified but DEFERRED (no vaporware; grep confirms no half-built DB).
+
+## Verification Results
+
+- W4a: `work_index.py --check` findings=0; 3 tests pass; governance gate exit 0.
+- W4b (independent, verifier != worker): APPROVE — `reviews/W4B-2026-06-14-TASK-AR-537.md`. All 6 criteria PASS (contract documented, check non-vacuous incl. empty-dir exit 1, deferred SQLite concrete, perf config applied, tests real, defer judged sound).

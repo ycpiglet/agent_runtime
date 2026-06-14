@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-14T11:04:33+09:00",
+  "generated_at": "2026-06-14T11:09:23+09:00",
   "record_count": 272,
   "finding_count": 0,
   "findings": [],
@@ -2269,7 +2269,7 @@
       "title": "Keep the agent read surface small and fast as the store grows toward thousands of fil…",
       "path": "agents/lead_engineer/tasks/TASK-AR-537.md",
       "parent_id": "TASKSET-AR-WORK-STORE-RESTRUCTURE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-538",

@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-14
-archived_count: 188
+archived_count: 189
 ---
 
 # Archived Task Files
 
-- `188` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `189` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -201,3 +201,4 @@ archived_count: 188
 | `TASK-AR-533` | `4e786186-f46…` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T09:00:00+09:00 | 2026-06-14T09:20:14+09:00 | 2026-06-14T09:20:14+09:00 | Turn `BACKLOG-BOARD.md` from a data dump (currently ~69% inline "Archived Task Files"… |
 | `TASK-AR-534` | `b81f8006-1e3…` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T09:42:00+09:00 | 2026-06-14T09:50:00+09:00 | 2026-06-14T09:50:00+09:00 | Treat `reviews/` (402 files, 2.4MB, pure append, never transitions state) as a logs/e… |
 | `TASK-AR-536` | `30f4de47-2cd…` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T10:40:00+09:00 | 2026-06-14T10:50:00+09:00 | 2026-06-14T10:50:00+09:00 | Make the permanent key collision-free AND time-sortable so multiple agents mint IDs w… |
+| `TASK-AR-537` | `85813f55-1ac…` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T10:52:00+09:00 | 2026-06-14T11:00:00+09:00 | 2026-06-14T11:00:00+09:00 | Keep the agent read surface small and fast as the store grows toward thousands of fil… |
