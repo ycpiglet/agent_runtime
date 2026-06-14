@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-14T13:07:40+09:00
-record_count: 473
+generated_at: 2026-06-14T13:30:08+09:00
+record_count: 474
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `473` review and evidence records under `reviews/`.
+- Summary: indexed `474` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `473` files |
+| Reviews covered | pass | `474` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -499,6 +499,7 @@ record_count: 473
 | `reviews/W4B-2026-06-14-TASK-AR-527.md` | `W4B-2026-06-14-TASK-AR-527` | verification | record | n/a | W4b Independent Verification — TASK-AR-527 (Blind-Delphi deliberation harness + first run) |
 | `reviews/W4B-2026-06-14-TASK-AR-528.md` | `W4B-2026-06-14-TASK-AR-528` | verification | record | n/a | W4b Independent Verification — TASK-AR-528 (Host-feedback reply-back mechanism) |
 | `reviews/W4B-2026-06-14-TASK-AR-529.md` | `W4B-2026-06-14-TASK-AR-529` | verification | record | n/a | W4b Independent Verification — TASK-AR-529 (post-hoc actual-vs-declared footprint check) |
+| `reviews/W4B-2026-06-14-TASK-AR-530.md` | `W4B-2026-06-14-TASK-AR-530` | verification | record | n/a | W4b Independent Verification — TASK-AR-530 (cross-version self-eval harness, advisory gate) |
 | `reviews/W4B-2026-06-14-TASK-AR-531.md` | `W4B-2026-06-14-TASK-AR-531` | verification | record | n/a | W4b Independent Verification — TASK-AR-531 (wheel-dotfile packaging, P1 sub-gap) |
 | `reviews/W4B-2026-06-14-TASK-AR-533.md` | `W4B-2026-06-14-TASK-AR-533` | verification | record | n/a | W4b Independent Verification — TASK-AR-533 (Board attention-lanes + archive manifest extraction) |
 | `reviews/W4B-2026-06-14-TASK-AR-534.md` | `W4B-2026-06-14-TASK-AR-534` | verification | record | n/a | W4b Independent Verification — TASK-AR-534 (Reviews date-shard capability + planner) |

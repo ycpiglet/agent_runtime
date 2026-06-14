@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-entity-catalog/v1",
   "generated_at": "2026-06-14",
-  "entity_count": 698,
+  "entity_count": 699,
   "kind_counts": {
     "council": 1,
     "host_feedback": 7,
@@ -13,7 +13,7 @@
     "task": 219,
     "taskset": 32,
     "unit": 13,
-    "verification": 37
+    "verification": 38
   },
   "entities": [
     {
@@ -3169,7 +3169,7 @@
       "title": "Give the platform an objective, quantitative self-eval so each version can prove it i…",
       "metadata": {
         "ordinal": "0.25.5",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-530.md"
       },
       "relations": [
@@ -3201,7 +3201,7 @@
       "title": "Route the standing open bug issues through the same intake/triage pipeline (category…",
       "metadata": {
         "ordinal": "0.25.7",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-532.md"
       },
       "relations": [
@@ -8711,6 +8711,21 @@
         {
           "type": "references",
           "target": "TASK-AR-529"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-14-TASK-AR-530",
+      "title": "W4B-2026-06-14-TASK-AR-530",
+      "metadata": {
+        "date": "2026-06-14",
+        "path": "reviews/W4B-2026-06-14-TASK-AR-530.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-530"
         }
       ]
     },

@@ -9,8 +9,8 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-14
 task_count: 219
-open_count: 26
-completed_count: 193
+open_count: 24
+completed_count: 195
 task_set_count: 5
 completed_task_set_count: 27
 ---
@@ -18,11 +18,11 @@ completed_task_set_count: 27
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `26` open or active tasks; `193` completed tasks are archived from this live board.
+- Summary: `24` open or active tasks; `195` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `23` / Ask `1` / Review `0` / Later `2` / Done `193`.
+- Status: Action `21` / Ask `1` / Review `0` / Later `2` / Done `195`.
 - Task Sets: `5` active workflows; `27` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -68,13 +68,11 @@ completed_task_set_count: 27
 ### Host Liaison (`TASKSET-AR-HOST-FEEDBACK-INTAKE`)
 
 - Flow: Treat host (autofolio) dogfooding feedback as first-class input: intake/triage, blind-Delphi council/seminar deliberation with diversity + Owner-boundary guardrails, decision reply-back to issues, plus the feedback-derived footprint-gate, self-eval/RSI fitness, host-fit, and open-bug candidates whose adoption the first deliberation decides.
-- Progress: `4/7` done; `3` open or active.
+- Progress: `6/7` done; `1` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-528` | - | - | - | in_progress | Action | P2 | Medium | Medium | 4h/3500tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Close the loop so a deliberation outcome is written back to the originating host issu… |
-| `TASK-AR-530` | - | - | - | planned | Action | P1 | High | High | 10h/9000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Give the platform an objective, quantitative self-eval so each version can prove it i… |
-| `TASK-AR-532` | - | - | - | planned | Action | P2 | Medium | Medium | 5h/4000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Route the standing open bug issues through the same intake/triage pipeline (category… |
 
 ### Decision Cartographer (`TASKSET-AR-UNIFIED-DECISION-CONSOLE`)
 
@@ -145,9 +143,9 @@ completed_task_set_count: 27
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `1` — triage awaiting `0`, owner-decision (Ask) `1` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `26` open across `5` task sets (see Action Board above).
+- Active: `24` open across `5` task sets (see Action Board above).
 - Archived task sets: `27` (see Archived Task Sets above).
-- Archived task files: `193` — see `ARCHIVE-INDEX.md`.
+- Archived task files: `195` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

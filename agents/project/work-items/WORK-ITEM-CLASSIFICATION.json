@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-14T12:56:59+09:00",
+  "generated_at": "2026-06-14T13:30:04+09:00",
   "record_count": 272,
   "finding_count": 0,
   "findings": [],
@@ -2181,7 +2181,7 @@
       "title": "Give the platform an objective, quantitative self-eval so each version can prove it i…",
       "path": "agents/lead_engineer/tasks/TASK-AR-530.md",
       "parent_id": "TASKSET-AR-HOST-FEEDBACK-INTAKE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-531",
@@ -2203,7 +2203,7 @@
       "title": "Route the standing open bug issues through the same intake/triage pipeline (category…",
       "path": "agents/lead_engineer/tasks/TASK-AR-532.md",
       "parent_id": "TASKSET-AR-HOST-FEEDBACK-INTAKE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "taskset:TASKSET-AR-WORK-STORE-RESTRUCTURE",
