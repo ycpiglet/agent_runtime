@@ -7,22 +7,22 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-14T08:35:52+09:00
-record_count: 261
+generated_at: 2026-06-14T09:21:49+09:00
+record_count: 272
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `261` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `272` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
 | Initiatives | pass | `8` records |
-| Tasksets | pass | `31` records |
-| Tasks | pass | `209` records |
+| Tasksets | pass | `32` records |
+| Tasks | pass | `219` records |
 | Units | pass | `13` records |
 | Findings | pass | `0` findings |
 
@@ -240,7 +240,7 @@ record_count: 261
 | 0.25.6 | Task 0.25.6 | task | `TASK-AR-531` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | planned | `agents/lead_engineer/tasks/TASK-AR-531.md` | Close the host-fit gaps that block deep adoption of agent_runtime as a reusable platf… |
 | 0.25.7 | Task 0.25.7 | task | `TASK-AR-532` | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | planned | `agents/lead_engineer/tasks/TASK-AR-532.md` | Route the standing open bug issues through the same intake/triage pipeline (category… |
 | 0.26 | Taskset 0.26 | taskset | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Store Architect |
-| 0.26.1 | Task 0.26.1 | task | `TASK-AR-533` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | planned | `agents/lead_engineer/tasks/TASK-AR-533.md` | Turn `BACKLOG-BOARD.md` from a data dump (currently ~69% inline "Archived Task Files"… |
+| 0.26.1 | Task 0.26.1 | task | `TASK-AR-533` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | `agents/lead_engineer/tasks/TASK-AR-533.md` | Turn `BACKLOG-BOARD.md` from a data dump (currently ~69% inline "Archived Task Files"… |
 | 0.26.2 | Task 0.26.2 | task | `TASK-AR-534` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | planned | `agents/lead_engineer/tasks/TASK-AR-534.md` | Treat `reviews/` (402 files, 2.4MB, pure append, never transitions state) as a logs/e… |
 | 0.26.3 | Task 0.26.3 | task | `TASK-AR-535` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | planned | `agents/lead_engineer/tasks/TASK-AR-535.md` | Dissolve the "quantum jump" (200s -> 300s -> no 400s -> 500s): gaps are inherent to a… |
 | 0.26.4 | Task 0.26.4 | task | `TASK-AR-536` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | planned | `agents/lead_engineer/tasks/TASK-AR-536.md` | Make the permanent key collision-free AND time-sortable so multiple agents mint IDs w… |
@@ -254,6 +254,17 @@ record_count: 261
 | 0.27.5 | Task 0.27.5 | task | `TASK-AR-543` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-543.md` | Give the decision-maker reusable lenses over the catalog and an exception-only attent… |
 | 0.27.6 | Task 0.27.6 | task | `TASK-AR-544` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-544.md` | Bring SCM artifacts the Owner listed (git log, branches, PRs, issues) into the catalo… |
 | 0.27.7 | Task 0.27.7 | task | `TASK-AR-545` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | planned | `agents/lead_engineer/tasks/TASK-AR-545.md` | Make the product's governance/knowledge documents (skills, council records, seminar r… |
+| 0.28 | Taskset 0.28 | taskset | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Maturity Steward |
+| 0.28.1 | Task 0.28.1 | task | `TASK-AR-546` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-546.md` | Close the highest-impact UI testing gap: there are ~326 Python-side UI tests but **no… |
+| 0.28.2 | Task 0.28.2 | task | `TASK-AR-547` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-547.md` | The console is single-column with fixed widths and a fixed sidebar; it breaks below d… |
+| 0.28.3 | Task 0.28.3 | task | `TASK-AR-548` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-548.md` | Form errors currently surface in a single global list and a failed submit can reset t… |
+| 0.28.4 | Task 0.28.4 | task | `TASK-AR-549` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-549.md` | The console has broad ARIA usage but misses several WCAG essentials. Add skip-to-cont… |
+| 0.28.5 | Task 0.28.5 | task | `TASK-AR-550` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-550.md` | The console polls every 5-10s, adding latency and wasted bandwidth. Add Server-Sent E… |
+| 0.28.6 | Task 0.28.6 | task | `TASK-AR-551` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-551.md` | i18n covers UI chrome (ko/en) but error messages are hardcoded English and there is n… |
+| 0.28.7 | Task 0.28.7 | task | `TASK-AR-552` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-552.md` | The deadlock guardrails (claim_reaper/goal_supervisor) are unit-tested on the happy p… |
+| 0.28.8 | Task 0.28.8 | task | `TASK-AR-553` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-553.md` | The runtime captures rich local audit trails (pane_events, stop_counters, hook-logs)… |
+| 0.28.9 | Task 0.28.9 | task | `TASK-AR-554` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-554.md` | Claim reaping/recovery assumes a single checkout (single-writer). Multiple hosts or C… |
+| 0.28.10 | Task 0.28.10 | task | `TASK-AR-555` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-555.md` | Release stages are validated locally in `--check` mode only; remote tag/PR/merge/publ… |
 | 1 | Initiative 1 | initiative | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | - | planned | `agents/project/initiatives/INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE.md` | Work Hierarchy Conflict Closure Initiative |
 | 1.1 | Taskset 1.1 | taskset | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | active | `BACKLOG-BOARD.md` | Work Taxonomist |
 | 1.1.1 | Task 1.1.1 | task | `TASK-AR-369` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-369.md` | Finish the terminology migration from ambiguous `project -> taskset -> task -> unit`… |

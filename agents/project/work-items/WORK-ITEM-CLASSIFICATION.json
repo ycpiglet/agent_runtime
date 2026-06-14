@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-14T08:35:52+09:00",
-  "record_count": 261,
+  "generated_at": "2026-06-14T09:21:49+09:00",
+  "record_count": 272,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -2225,7 +2225,7 @@
       "title": "Turn `BACKLOG-BOARD.md` from a data dump (currently ~69% inline \"Archived Task Files\"…",
       "path": "agents/lead_engineer/tasks/TASK-AR-533.md",
       "parent_id": "TASKSET-AR-WORK-STORE-RESTRUCTURE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-534",
@@ -2368,6 +2368,127 @@
       "title": "Make the product's governance/knowledge documents (skills, council records, seminar r…",
       "path": "agents/lead_engineer/tasks/TASK-AR-545.md",
       "parent_id": "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
+      "status": "planned"
+    },
+    {
+      "key": "taskset:TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
+      "level": "taskset",
+      "number": "0.28",
+      "label": "Taskset 0.28",
+      "id": "TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
+      "title": "Maturity Steward",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-UNASSIGNED",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-546",
+      "level": "task",
+      "number": "0.28.1",
+      "label": "Task 0.28.1",
+      "id": "TASK-AR-546",
+      "title": "Close the highest-impact UI testing gap: there are ~326 Python-side UI tests but **no…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-546.md",
+      "parent_id": "TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-547",
+      "level": "task",
+      "number": "0.28.2",
+      "label": "Task 0.28.2",
+      "id": "TASK-AR-547",
+      "title": "The console is single-column with fixed widths and a fixed sidebar; it breaks below d…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-547.md",
+      "parent_id": "TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-548",
+      "level": "task",
+      "number": "0.28.3",
+      "label": "Task 0.28.3",
+      "id": "TASK-AR-548",
+      "title": "Form errors currently surface in a single global list and a failed submit can reset t…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-548.md",
+      "parent_id": "TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-549",
+      "level": "task",
+      "number": "0.28.4",
+      "label": "Task 0.28.4",
+      "id": "TASK-AR-549",
+      "title": "The console has broad ARIA usage but misses several WCAG essentials. Add skip-to-cont…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-549.md",
+      "parent_id": "TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-550",
+      "level": "task",
+      "number": "0.28.5",
+      "label": "Task 0.28.5",
+      "id": "TASK-AR-550",
+      "title": "The console polls every 5-10s, adding latency and wasted bandwidth. Add Server-Sent E…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-550.md",
+      "parent_id": "TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-551",
+      "level": "task",
+      "number": "0.28.6",
+      "label": "Task 0.28.6",
+      "id": "TASK-AR-551",
+      "title": "i18n covers UI chrome (ko/en) but error messages are hardcoded English and there is n…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-551.md",
+      "parent_id": "TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-552",
+      "level": "task",
+      "number": "0.28.7",
+      "label": "Task 0.28.7",
+      "id": "TASK-AR-552",
+      "title": "The deadlock guardrails (claim_reaper/goal_supervisor) are unit-tested on the happy p…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-552.md",
+      "parent_id": "TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-553",
+      "level": "task",
+      "number": "0.28.8",
+      "label": "Task 0.28.8",
+      "id": "TASK-AR-553",
+      "title": "The runtime captures rich local audit trails (pane_events, stop_counters, hook-logs)…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-553.md",
+      "parent_id": "TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-554",
+      "level": "task",
+      "number": "0.28.9",
+      "label": "Task 0.28.9",
+      "id": "TASK-AR-554",
+      "title": "Claim reaping/recovery assumes a single checkout (single-writer). Multiple hosts or C…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-554.md",
+      "parent_id": "TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-555",
+      "level": "task",
+      "number": "0.28.10",
+      "label": "Task 0.28.10",
+      "id": "TASK-AR-555",
+      "title": "Release stages are validated locally in `--check` mode only; remote tag/PR/merge/publ…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-555.md",
+      "parent_id": "TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
       "status": "planned"
     },
     {

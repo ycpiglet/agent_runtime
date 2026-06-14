@@ -144,13 +144,22 @@ def test_backlog_board_hides_completed_tasks_and_completed_task_sets(tmp_path: P
     archived_sets = board.split("## Archived Task Sets", 1)[1]
     assert "| Quality Sentinel (`TASKSET-AR-QUALITY-LOOP`) |" in archived_sets
     assert "| `2/2` done |" in archived_sets
-    archived_set_summary = archived_sets.split("## Archived Task Files", 1)[0]
+    archived_set_summary = archived_sets.split("## Rollups", 1)[0]
     assert "TASK-AR-901" not in archived_set_summary
     assert "TASK-AR-902" not in archived_set_summary
-    archived_files = board.split("## Archived Task Files", 1)[1]
-    assert "TASK-AR-901" in archived_files
-    assert "TASK-AR-902" in archived_files
-    assert "registered_at" in archived_files
+    # TASK-AR-533: completed task files are no longer dumped inline on the board.
+    # The board carries a rollup pointer; per-file detail lives in ARCHIVE-INDEX.md.
+    assert "## Archived Task Files" not in board
+    assert "## Rollups" in board
+    rollups = board.split("## Rollups", 1)[1]
+    assert "ARCHIVE-INDEX.md" in rollups
+    assert "`2`" in rollups
+    assert "TASK-AR-901" not in board
+    assert "TASK-AR-902" not in board
+    archive_index = backlog_board.render_archive_index(tasks)
+    assert "TASK-AR-901" in archive_index
+    assert "TASK-AR-902" in archive_index
+    assert "registered_at" in archive_index
 
 
 def test_sync_taskset_registry_creates_updates_and_archives(tmp_path: Path) -> None:
@@ -292,4 +301,5 @@ def test_real_backlog_tasks_are_classified_into_twenty_five_task_sets() -> None:
         "TASKSET-AR-HOST-FEEDBACK-INTAKE",
         "TASKSET-AR-WORK-STORE-RESTRUCTURE",
         "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
+        "TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
     }

@@ -42,6 +42,12 @@
       "display_name": "Decision Cartographer",
       "summary": "A decision/operations-optimized console over a typed entity catalog of every artifact (plan/review/issue/pr/git-log/branch/skill/council/seminar/work-items/waves/state/history): catalog model + manifest, universal command palette + cross-entity search, entity detail + backlinks, activity/provenance timeline + audit, faceted saved views + rollups + needs-attention inbox, live SCM surface, and governance-document surface.",
       "order": 526
+    },
+    {
+      "task_set_id": "TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
+      "display_name": "Maturity Steward",
+      "summary": "Close product-maturity gaps from the UI/quality assessment: end-to-end browser tests (Playwright), responsive layout, form validation + error UX, accessibility uplift, SSE real-time updates, i18n hardening, claim_reaper concurrency stress, observability export, multi-host claim safety, and owner-gated release automation.",
+      "order": 527
     }
   ]
 }
