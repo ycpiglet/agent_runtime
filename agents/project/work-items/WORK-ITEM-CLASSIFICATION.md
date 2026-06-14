@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-14T09:21:49+09:00
+generated_at: 2026-06-14T09:43:06+09:00
 record_count: 272
 ---
 
@@ -242,7 +242,7 @@ record_count: 272
 | 0.26 | Taskset 0.26 | taskset | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Store Architect |
 | 0.26.1 | Task 0.26.1 | task | `TASK-AR-533` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | `agents/lead_engineer/tasks/TASK-AR-533.md` | Turn `BACKLOG-BOARD.md` from a data dump (currently ~69% inline "Archived Task Files"… |
 | 0.26.2 | Task 0.26.2 | task | `TASK-AR-534` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | planned | `agents/lead_engineer/tasks/TASK-AR-534.md` | Treat `reviews/` (402 files, 2.4MB, pure append, never transitions state) as a logs/e… |
-| 0.26.3 | Task 0.26.3 | task | `TASK-AR-535` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | planned | `agents/lead_engineer/tasks/TASK-AR-535.md` | Dissolve the "quantum jump" (200s -> 300s -> no 400s -> 500s): gaps are inherent to a… |
+| 0.26.3 | Task 0.26.3 | task | `TASK-AR-535` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | `agents/lead_engineer/tasks/TASK-AR-535.md` | Dissolve the "quantum jump" (200s -> 300s -> no 400s -> 500s): gaps are inherent to a… |
 | 0.26.4 | Task 0.26.4 | task | `TASK-AR-536` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | planned | `agents/lead_engineer/tasks/TASK-AR-536.md` | Make the permanent key collision-free AND time-sortable so multiple agents mint IDs w… |
 | 0.26.5 | Task 0.26.5 | task | `TASK-AR-537` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | planned | `agents/lead_engineer/tasks/TASK-AR-537.md` | Keep the agent read surface small and fast as the store grows toward thousands of fil… |
 | 0.26.6 | Task 0.26.6 | task | `TASK-AR-538` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | planned | `agents/lead_engineer/tasks/TASK-AR-538.md` | Add an explicit intake state so new items wait in a triage inbox (excluded from the a… |

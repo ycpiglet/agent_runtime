@@ -63,18 +63,31 @@ must not: dispatchers and readiness gates treat missing unit detail as
 
 ## Numbering And Classification
 
-Human-facing hierarchy numbers are generated, not manually reserved by
-planners. Stable file identity remains UUID/timestamp backed. The classifier
-renders:
+There are three distinct identifiers; do not conflate them (TASK-AR-535):
 
-```text
-Initiative 1 -> Taskset 1.1 -> Task 1.1.1 -> Unit 1.1.1.1
-```
+1. **Stable key (canonical identity)** — `task_uid`, a UUID (UUIDv7/ULID for new
+   records; UUIDv4 legacy keys remain valid). This is the only canonical identity;
+   it never changes and is what attribution, claims, and evidence bind to.
+2. **Human-facing number** — the generated hierarchy ordinal
+   `Initiative 1 -> Taskset 1.1 -> Task 1.1.1 -> Unit 1.1.1.1`, rendered by
+   `scripts/work_item_classifier.py`. This is the official number to cite in
+   Owner-facing discussion. It is contiguous and recomputed, so it has no gaps.
+3. **Display key** — `display_id` / `TASK-AR-NNN`, a convenience label.
 
-Use `scripts/work_item_classifier.py --write` after hierarchy metadata changes.
-Use `scripts/work_item_classifier.py --check` in governance and before
-handoff. `0.*` numbers are legacy or unassigned work that predates
-`initiative_id`; add `initiative_id` when that work is next touched.
+**`TASK-AR-NNN` gaps are cosmetic and expected.** Gaps (e.g. no 100s/400s, the
+200/300/500 blocks) are an inherent property of any central sequence — Postgres
+and MySQL document that sequences cannot be gapless; Jira keys and Stripe invoice
+numbers separate an opaque stable key from a derived display number for exactly
+this reason. **Gaps are never backfilled and carry no meaning.** New
+`TASK-AR-NNN` are allocated **contiguously from `max+1`** (no reserved blocks,
+no "quantum jumps"); reservation of a vanity `TASK-AR-NNN` is optional, not on
+the hot path (see TASK-AR-536). When a contiguous label is unavailable under
+concurrency, the `TASK-AR-<timestamp>-<hex8>` form is a first-class equivalent.
+
+Use `scripts/work_item_classifier.py --write` after hierarchy metadata changes
+and `--check` in governance and before handoff. `0.*` ordinals are legacy or
+unassigned work that predates `initiative_id`; add `initiative_id` when that
+work is next touched.
 
 ## Orthogonal Axes And Non-Tree Work
 

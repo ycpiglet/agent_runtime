@@ -4,8 +4,10 @@ display_id: TASK-AR-535
 task_uid: 57b5d41e-a8c9-46b0-9092-83a7a7fecce7
 registered_at: 2026-06-14T03:22:33+09:00
 created_at: 2026-06-14T03:22:33+09:00
-updated_at: 2026-06-14T03:22:33+09:00
-status: planned
+started_at: 2026-06-14T09:30:00+09:00
+updated_at: 2026-06-14T09:35:00+09:00
+completed_at: 2026-06-14T09:35:00+09:00
+status: completed
 priority: P1
 difficulty: M
 est_hours: 5
@@ -44,3 +46,13 @@ tags:
 ## Evidence Targets
 
 - `reviews/RESEARCH-2026-06-14-work-store-architecture-and-numbering.md` (Postgres/MySQL "sequences are not gapless"; Linear UUID+identifier; Jira mutable key; Stripe opaque id + separate invoice number).
+
+## Completion Evidence
+
+- `agents/project/PROJECT-MANAGEMENT-CONTRACT.md` `## Numbering And Classification`: now names three identifiers — stable key (`task_uid` UUID, canonical), human-facing ordinal (`N.N.N.N`, contiguous/gapless, official number), and `TASK-AR-NNN` display key (gaps cosmetic, never backfilled, allocated contiguously from max+1). Rationale cites Postgres/MySQL gapless-impossibility + Jira/Stripe key-vs-display separation; points to TASK-AR-536 for UUIDv7 + reservation demotion.
+- Backed by an existing generator: `scripts/work_item_classifier.py` computes the contiguous ordinal via positional `enumerate(start=1)` (no gaps possible).
+
+## Verification Results
+
+- W4a: `owner_doc_format_gate.py --manifest owner-docs.yml` green; governance gate exit 0.
+- W4b (independent, verifier != worker): APPROVE — `reviews/W4B-2026-06-14-TASK-AR-535.md`. All 5 criteria PASS. Note: the contract doc is not in the owner-docs manifest (left as-is; it is a contract, not a report — forcing report sections would distort it).

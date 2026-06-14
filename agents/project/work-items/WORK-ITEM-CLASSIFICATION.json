@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-14T09:21:49+09:00",
+  "generated_at": "2026-06-14T09:43:06+09:00",
   "record_count": 272,
   "finding_count": 0,
   "findings": [],
@@ -2247,7 +2247,7 @@
       "title": "Dissolve the \"quantum jump\" (200s -> 300s -> no 400s -> 500s): gaps are inherent to a…",
       "path": "agents/lead_engineer/tasks/TASK-AR-535.md",
       "parent_id": "TASKSET-AR-WORK-STORE-RESTRUCTURE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-536",

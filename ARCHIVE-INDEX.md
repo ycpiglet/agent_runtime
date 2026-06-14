@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-14
-archived_count: 183
+archived_count: 184
 ---
 
 # Archived Task Files
 
-- `183` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `184` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -195,4 +195,5 @@ archived_count: 183
 | `TASK-AR-523` | `61af969f-9b5…` | `TASKSET-AR-OPS-ERGONOMICS` | completed | 2026-06-13T14:18:04+09:00 | 2026-06-13T14:21:49+09:00 | 2026-06-13T15:30:00+09:00 | 2026-06-13T14:18:04+09:00 | Nothing surfaces the 500-series observability at session start. Add scripts/session_d… |
 | `TASK-AR-524` | `1979924a-046…` | `TASKSET-AR-OPS-ERGONOMICS` | completed | 2026-06-13T14:18:04+09:00 | 2026-06-13T14:21:49+09:00 | 2026-06-13T15:30:00+09:00 | 2026-06-13T14:18:04+09:00 | Make the new 500-series tools discoverable as trigger-based skills: wave-conductor (w… |
 | `TASK-AR-525` | `c3880949-258…` | `TASKSET-AR-OPS-ERGONOMICS` | completed | 2026-06-13T14:18:04+09:00 | 2026-06-13T14:21:50+09:00 | 2026-06-13T15:30:00+09:00 | 2026-06-13T14:18:04+09:00 | Register the new dashboard hook + 5 skills + the standalone tools (wave_dispatcher/me… |
+| `TASK-AR-535` | `57b5d41e-a8c…` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T09:30:00+09:00 | 2026-06-14T09:35:00+09:00 | 2026-06-14T09:35:00+09:00 | Dissolve the "quantum jump" (200s -> 300s -> no 400s -> 500s): gaps are inherent to a… |
 | `TASK-AR-533` | `4e786186-f46…` | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T09:00:00+09:00 | 2026-06-14T09:20:14+09:00 | 2026-06-14T09:20:14+09:00 | Turn `BACKLOG-BOARD.md` from a data dump (currently ~69% inline "Archived Task Files"… |
