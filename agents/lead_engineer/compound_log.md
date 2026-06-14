@@ -338,3 +338,40 @@
 - signal: watch
 - score: 74
 - All 6 PRs merged green via auto-merge after the re-merges; thrash recorded; remediation is RETRO forward action #1 (automation), not yet implemented.
+
+## COMPOUND-2026-06-14-004: running git inside a merge driver deadlocks (fixing the lock thrash)
+
+### Bottom Line
+- Implementing the fixture-lock automation (RETRO #1, COMPOUND-003 remediation), the obvious design — a git merge driver that *regenerates* the lock on conflict — does not work, for two independent reasons found only by end-to-end testing:
+  1. **Stale inputs**: git invokes a merge driver before it has materialised the other side's clean additions, so the working tree *and* the index are incomplete at driver time. Regenerating from them produced a lock one template short (260 vs 261).
+  2. **Deadlock**: getting the fully-merged tree from inside the driver by spawning git (`merge-tree` / `read-tree` / `checkout-index`) **deadlocks** — git holds the merge and the child git blocks (Windows + fsmonitor). A real merge hung to the 120s timeout: `failed to execute internal merge`.
+- Also learned: the modern `ort` strategy runs drivers **in-memory before `MERGE_HEAD` is written**, so the driver can't read it (a `GITHEAD_<sha>` env var is the only in-driver handle on "theirs").
+- The shipped design (PR #149) abandons regenerate-in-driver: a trivial `true` keep-ours driver suppresses the conflict (no subprocess → no deadlock) and a committed `.githooks/post-merge` regenerates the lock afterwards, when the tree is complete.
+
+### 5W1H
+| Field | Record |
+|---|---|
+| Who | Assistant implementing RETRO-2026-06-14 forward action #1. |
+| What | Three driver designs failed before the keep-ours + post-merge split worked: (a) regen from working tree → 1 file short; (b) regen from git index → still short (index not finalised at driver time); (c) merge-tree + GITHEAD to get the true merged tree → correct content BUT spawning git in the driver deadlocked the merge. |
+| When | 2026-06-14, knowledge-stack follow-up wave (A/B/C). |
+| Where | PR #149 branch; `scripts/lock_merge_driver.py`, `.gitattributes`, `.githooks/post-merge`. |
+| Why | A merge driver runs in a constrained context: inputs aren't fully merged yet, MERGE_HEAD isn't on disk (ort), and the index is locked — so neither "read the merged state" nor "ask git for it" is safe. |
+| How | Each design was proven/killed by an actual two-branch merge that adds a *different* template on each side (the real thrash shape), comparing the resulting lock to a fresh `lock --write`. Only the post-merge-hook design produced the correct 262-file lock with no markers and no hang. |
+
+### Cause
+- Primary: assuming a merge driver can see the merged result (it can't) and that spawning git from inside a merge is safe (it isn't — index-lock + fsmonitor deadlock).
+- Secondary (process): destructive test cleanup. `git reset --hard` during e2e iteration twice discarded uncommitted driver edits (had to re-apply); a background test bash hung the merge and held `index.lock` / spawned `.merge_file_*` until killed; a backgrounded console (`&` in a tool call) died between calls, so the browser polled a dead server and froze on a stale error — a confusing red herring during visual verification.
+
+### Forced Rule
+- A git merge driver must be **self-contained and non-blocking**: never spawn git from inside it, and never assume the working tree / index / MERGE_HEAD reflect the merged result. To act on merged content, suppress the conflict in the driver (`true`) and do the real work in a **post-merge hook** (or post-commit), where the tree is complete.
+- Prove merge/driver behaviour with a real merge that reproduces the actual conflict shape, end-to-end — unit tests on the resolver function alone hid both the staleness and the deadlock.
+- Test-harness hygiene: don't `git reset --hard` with uncommitted work you still need; don't run a server with a bare `&` when a later tool call must reach it (use a persistent background runner); after killing a hung git, clear `index.lock` + `.merge_file_*` before retrying.
+
+### Preventive Action (executable)
+- Shipped keep-ours + post-merge design (PR #149) verified end-to-end: real divergent-template merge → exit 0, no markers, post-merge regenerated the correct lock and staged it. 6 unit tests + the live merge.
+- Dogfooded immediately: PR #150 went DIRTY behind #149's lock change and was resolved by the same lock-regen flow (the driver now lives on main for future re-merges).
+
+### Status
+- signal: watch
+- score: 80
+- RETRO-2026-06-14 forward action #1 (fixture-lock automation) and #2 (review/meeting reference edges) are now DONE (#149, #150); #5 console graph view shipped (#151). Lock-thrash remediation moved from "recorded" to "implemented + dogfooded".
