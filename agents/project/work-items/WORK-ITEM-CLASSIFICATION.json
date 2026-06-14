@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-14T23:34:21+09:00",
-  "record_count": 273,
+  "generated_at": "2026-06-15T00:33:48+09:00",
+  "record_count": 281,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -2503,6 +2503,83 @@
       "status": "planned"
     },
     {
+      "key": "taskset:TASKSET-AR-AGENT-ORG-DELEGATION",
+      "level": "taskset",
+      "number": "0.29",
+      "label": "Taskset 0.29",
+      "id": "TASKSET-AR-AGENT-ORG-DELEGATION",
+      "title": "Org Conductor",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-UNASSIGNED",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-557",
+      "level": "task",
+      "number": "0.29.1",
+      "label": "Task 0.29.1",
+      "id": "TASK-AR-557",
+      "title": "ORG-MODEL.yml (role/team/tier registry, aliases absorb owner drift) + scripts/org_mod…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-557.md",
+      "parent_id": "TASKSET-AR-AGENT-ORG-DELEGATION",
+      "status": "in_progress"
+    },
+    {
+      "key": "task:TASK-AR-558",
+      "level": "task",
+      "number": "0.29.2",
+      "label": "Task 0.29.2",
+      "id": "TASK-AR-558",
+      "title": "Tool for a Lead to decompose a Taskset's Tasks into worker-ready Units (unit_spec/con…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-558.md",
+      "parent_id": "TASKSET-AR-AGENT-ORG-DELEGATION",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-559",
+      "level": "task",
+      "number": "0.29.3",
+      "label": "Task 0.29.3",
+      "id": "TASK-AR-559",
+      "title": "scripts/dispatch_gate.py: footprint-disjoint seam check (reuse footprint_conflict_gat…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-559.md",
+      "parent_id": "TASKSET-AR-AGENT-ORG-DELEGATION",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-560",
+      "level": "task",
+      "number": "0.29.4",
+      "label": "Task 0.29.4",
+      "id": "TASK-AR-560",
+      "title": "Lead orchestrator: create claim+worktree+instance, spawn Worker/Reviewer sub-agents (…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-560.md",
+      "parent_id": "TASKSET-AR-AGENT-ORG-DELEGATION",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-561",
+      "level": "task",
+      "number": "0.29.5",
+      "label": "Task 0.29.5",
+      "id": "TASK-AR-561",
+      "title": "Extend blind-Delphi seminar/council with substance-axis persona archetypes (risk tole…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-561.md",
+      "parent_id": "TASKSET-AR-AGENT-ORG-DELEGATION",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-562",
+      "level": "task",
+      "number": "0.29.6",
+      "label": "Task 0.29.6",
+      "id": "TASK-AR-562",
+      "title": "Read-API over real records: org tree (teams->roles->live instances), work-state count…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-562.md",
+      "parent_id": "TASKSET-AR-AGENT-ORG-DELEGATION",
+      "status": "planned"
+    },
+    {
       "key": "initiative:INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
       "level": "initiative",
       "number": "1",
@@ -3007,6 +3084,17 @@
       "path": "agents/project/initiatives/INIT-AR-WORK-STORE-RESTRUCTURE.md",
       "parent_id": "",
       "status": "planned"
+    },
+    {
+      "key": "initiative:INIT-AR-AGENT-ORG-DELEGATION",
+      "level": "initiative",
+      "number": "8",
+      "label": "Initiative 8",
+      "id": "INIT-AR-AGENT-ORG-DELEGATION",
+      "title": "INIT-AR-AGENT-ORG-DELEGATION — Agent Org & Delegation Model",
+      "path": "agents/project/initiatives/INIT-AR-AGENT-ORG-DELEGATION.md",
+      "parent_id": "",
+      "status": "active"
     }
   ]
 }

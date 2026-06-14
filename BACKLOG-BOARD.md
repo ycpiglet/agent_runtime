@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-06-14
-task_count: 220
-open_count: 18
+generated_at: 2026-06-15
+task_count: 226
+open_count: 24
 completed_count: 202
-task_set_count: 3
+task_set_count: 4
 completed_task_set_count: 29
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `18` open or active tasks; `202` completed tasks are archived from this live board.
+- Summary: `24` open or active tasks; `202` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `16` / Ask `0` / Review `0` / Later `2` / Done `202`.
-- Task Sets: `3` active workflows; `29` completed workflows are hidden from the live action board.
+- Status: Action `21` / Ask `1` / Review `0` / Later `2` / Done `202`.
+- Task Sets: `4` active workflows; `29` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -84,6 +84,20 @@ completed_task_set_count: 29
 | `TASK-AR-550` | - | - | - | planned | Later | P2 | Medium | High | 16h/12000tok | Low | 5 | agent-runtime-core | lead-engineer | Wait for dependency | The console polls every 5-10s, adding latency and wasted bandwidth. Add Server-Sent E… |
 | `TASK-AR-555` | - | - | - | planned | Action | P3 | Low | High | 12h/9000tok | Low | 4 | agent-runtime-core | lead-engineer | Execute next | Release stages are validated locally in `--check` mode only; remote tag/PR/merge/publ… |
 
+### Org Conductor (`TASKSET-AR-AGENT-ORG-DELEGATION`)
+
+- Flow: Operationalize a Director->Lead->Worker+Reviewer agent org by reconciling the template org-suite (roles.yml/orchestrator/subagent/seminar) with the repo claim/wave execution: role/team/tier registry + owner normalization, lead taskset->unit decomposition, seam-aware + risk-based dispatch gate, orchestrator with a swappable WorkerBackend (sub-agents now, headless daemon later), a blind-Delphi persona-diversity deliberation layer, and a minimal org/state read-API. Research-grounded (Karpathy autonomy, gstack, multi-agent architectures, persona diversity); seam-aware parallelism + phased autonomy; token cost binding (~15x).
+- Progress: `0/6` done; `6` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-557` | - | - | - | in_progress | Ask | P1 | High | Medium | 6h/5000tok | Low | 7 | agent-runtime-core | lead-engineer | Owner/agent decision | ORG-MODEL.yml (role/team/tier registry, aliases absorb owner drift) + scripts/org_mod… |
+| `TASK-AR-562` | - | - | - | planned | Action | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Read-API over real records: org tree (teams->roles->live instances), work-state count… |
+| `TASK-AR-558` | - | - | - | planned | Action | P1 | High | High | 8h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Tool for a Lead to decompose a Taskset's Tasks into worker-ready Units (unit_spec/con… |
+| `TASK-AR-559` | - | - | - | planned | Action | P1 | High | High | 8h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | scripts/dispatch_gate.py: footprint-disjoint seam check (reuse footprint_conflict_gat… |
+| `TASK-AR-561` | - | - | - | planned | Action | P1 | High | High | 8h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Extend blind-Delphi seminar/council with substance-axis persona archetypes (risk tole… |
+| `TASK-AR-560` | - | - | - | planned | Action | P1 | High | Critical | 12h/12000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Lead orchestrator: create claim+worktree+instance, spawn Worker/Reviewer sub-agents (… |
+
 ## Archived Task Sets
 
 - Archive rule: completed task sets stay out of the live Action Board but remain visible as workflow-level completion evidence.
@@ -121,9 +135,9 @@ completed_task_set_count: 29
 
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
-- Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
+- Needs attention: `1` — triage awaiting `0`, owner-decision (Ask) `1` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `18` open across `3` task sets (see Action Board above).
+- Active: `24` open across `4` task sets (see Action Board above).
 - Archived task sets: `29` (see Archived Task Sets above).
 - Archived task files: `202` — see `ARCHIVE-INDEX.md`.
 

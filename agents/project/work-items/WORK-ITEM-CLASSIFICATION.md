@@ -7,22 +7,22 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-14T23:34:21+09:00
-record_count: 273
+generated_at: 2026-06-15T00:33:48+09:00
+record_count: 281
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `273` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `281` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `8` records |
-| Tasksets | pass | `32` records |
-| Tasks | pass | `220` records |
+| Initiatives | pass | `9` records |
+| Tasksets | pass | `33` records |
+| Tasks | pass | `226` records |
 | Units | pass | `13` records |
 | Findings | pass | `0` findings |
 
@@ -266,6 +266,13 @@ record_count: 273
 | 0.28.9 | Task 0.28.9 | task | `TASK-AR-554` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-554.md` | Claim reaping/recovery assumes a single checkout (single-writer). Multiple hosts or C… |
 | 0.28.10 | Task 0.28.10 | task | `TASK-AR-555` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-555.md` | Release stages are validated locally in `--check` mode only; remote tag/PR/merge/publ… |
 | 0.28.11 | Task 0.28.11 | task | `TASK-AR-556` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-556.md` | Make the canonical closure steps (compound / review / retro) **non-skippable** for su… |
+| 0.29 | Taskset 0.29 | taskset | `TASKSET-AR-AGENT-ORG-DELEGATION` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Org Conductor |
+| 0.29.1 | Task 0.29.1 | task | `TASK-AR-557` | `TASKSET-AR-AGENT-ORG-DELEGATION` | in_progress | `agents/lead_engineer/tasks/TASK-AR-557.md` | ORG-MODEL.yml (role/team/tier registry, aliases absorb owner drift) + scripts/org_mod… |
+| 0.29.2 | Task 0.29.2 | task | `TASK-AR-558` | `TASKSET-AR-AGENT-ORG-DELEGATION` | planned | `agents/lead_engineer/tasks/TASK-AR-558.md` | Tool for a Lead to decompose a Taskset's Tasks into worker-ready Units (unit_spec/con… |
+| 0.29.3 | Task 0.29.3 | task | `TASK-AR-559` | `TASKSET-AR-AGENT-ORG-DELEGATION` | planned | `agents/lead_engineer/tasks/TASK-AR-559.md` | scripts/dispatch_gate.py: footprint-disjoint seam check (reuse footprint_conflict_gat… |
+| 0.29.4 | Task 0.29.4 | task | `TASK-AR-560` | `TASKSET-AR-AGENT-ORG-DELEGATION` | planned | `agents/lead_engineer/tasks/TASK-AR-560.md` | Lead orchestrator: create claim+worktree+instance, spawn Worker/Reviewer sub-agents (… |
+| 0.29.5 | Task 0.29.5 | task | `TASK-AR-561` | `TASKSET-AR-AGENT-ORG-DELEGATION` | planned | `agents/lead_engineer/tasks/TASK-AR-561.md` | Extend blind-Delphi seminar/council with substance-axis persona archetypes (risk tole… |
+| 0.29.6 | Task 0.29.6 | task | `TASK-AR-562` | `TASKSET-AR-AGENT-ORG-DELEGATION` | planned | `agents/lead_engineer/tasks/TASK-AR-562.md` | Read-API over real records: org tree (teams->roles->live instances), work-state count… |
 | 1 | Initiative 1 | initiative | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | - | planned | `agents/project/initiatives/INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE.md` | Work Hierarchy Conflict Closure Initiative |
 | 1.1 | Taskset 1.1 | taskset | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | active | `BACKLOG-BOARD.md` | Work Taxonomist |
 | 1.1.1 | Task 1.1.1 | task | `TASK-AR-369` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-369.md` | Finish the terminology migration from ambiguous `project -> taskset -> task -> unit`… |
@@ -312,6 +319,7 @@ record_count: 273
 | 5 | Initiative 5 | initiative | `INIT-AR-HOST-FEEDBACK-INTAKE` | - | planned | `agents/project/initiatives/INIT-AR-HOST-FEEDBACK-INTAKE.md` | Host Feedback Intake Initiative |
 | 6 | Initiative 6 | initiative | `INIT-AR-UNIFIED-DECISION-CONSOLE` | - | planned | `agents/project/initiatives/INIT-AR-UNIFIED-DECISION-CONSOLE.md` | Unified Decision Console Initiative |
 | 7 | Initiative 7 | initiative | `INIT-AR-WORK-STORE-RESTRUCTURE` | - | planned | `agents/project/initiatives/INIT-AR-WORK-STORE-RESTRUCTURE.md` | Work Store Restructure Initiative |
+| 8 | Initiative 8 | initiative | `INIT-AR-AGENT-ORG-DELEGATION` | - | active | `agents/project/initiatives/INIT-AR-AGENT-ORG-DELEGATION.md` | INIT-AR-AGENT-ORG-DELEGATION — Agent Org & Delegation Model |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.
