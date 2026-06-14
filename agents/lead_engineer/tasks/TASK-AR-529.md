@@ -4,8 +4,10 @@ display_id: TASK-AR-529
 task_uid: 93277502-ad30-4b2a-a897-2213fe38ffbf
 registered_at: 2026-06-14T02:08:50+09:00
 created_at: 2026-06-14T02:08:50+09:00
-updated_at: 2026-06-14T02:08:50+09:00
-status: planned
+started_at: 2026-06-14T12:45:00+09:00
+updated_at: 2026-06-14T12:55:00+09:00
+completed_at: 2026-06-14T12:55:00+09:00
+status: completed
 priority: P1
 difficulty: M
 est_hours: 5
@@ -47,6 +49,16 @@ tags:
 - `scripts/footprint_conflict_gate.py` (or merge-queue integration) + tests.
 - Wave-conductor documentation update.
 - Source: GH ycpiglet/agent_runtime#125.
+
+## Completion Evidence
+
+- `scripts/footprint_conflict_gate.py`: `--postverify --task-id T` post-hoc check — compares ACTUAL changed files (`git diff --name-only <base>...HEAD`, merge-base not worktree HEAD) to the claim's declared `target_files`; `actual ⊄ declared` is flagged (incl. claim-declares-nothing). WATCH by default; `--enforce-undeclared` makes it BLOCK. `_covered()` reuses `entries_overlap` (prefix/exact/glob). The worktree backstop is stated in the action message.
+- **Council-scoped delivery**: the read-only post-hoc check is adopted now; the undeclared watch->BLOCK flip is DEFERRED behind `--enforce-undeclared` (default off) so the existing `--check` Stop-hook path + its locked `test_undeclared_footprint_is_watch_not_fail` are unchanged. `tests/test_footprint_postverify.py`: 5 tests.
+
+## Verification Results
+
+- W4a: 19 footprint tests pass (5 new + existing); default `--check` unchanged; governance gate exit 0.
+- W4b (independent, verifier != worker): see `reviews/W4B-2026-06-14-TASK-AR-529.md`.
 
 ## Deliberation Verdict (2026-06-14)
 
