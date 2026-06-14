@@ -1,5 +1,13 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-06-15 TASKSET-AR-AGENT-ORG-DELEGATION 등록 + Unit 1 완료 (Org Conductor)
+
+- 브레인스토밍→리서치(Karpathy/gstack/페르소나 다양성)→spec→plan→등록. Director→Lead→Worker+Reviewer 조직, seam-aware 병렬+단계적 자율, 위험기반 하이브리드 디스패치, 교체가능 WorkerBackend(서브에이전트→데몬), 페르소나=blind-Delphi 심의 레이어, 토큰 비용 구속(~15×).
+- `TASKSET-AR-AGENT-ORG-DELEGATION` (order 528, 6 units): `TASK-AR-557`(역할/팀/티어 레지스트리+owner 해소 게이트 — 완료, W4b APPROVE) `TASK-AR-558`(Lead taskset→unit 분해) `TASK-AR-559`(seam+위험 디스패치 게이트) `TASK-AR-560`(오케스트레이터+WorkerBackend) `TASK-AR-561`(페르소나 심의 레이어) `TASK-AR-562`(org/state read-API).
+- Spec: `docs/superpowers/specs/2026-06-14-agent-org-delegation-model-design.md`. Research: `reviews/RESEARCH-2026-06-14-agent-org-design-references.md`. Plan(Unit1): `docs/superpowers/plans/2026-06-15-agent-org-delegation-unit1-role-registry.md`.
+- UI 재설계 + 프로덕트 구조 변경은 차기 세션 이관: `reviews/HANDOFF-2026-06-15-ui-redesign-and-product-structure.md`.
+- Branch `claude/agent-org-delegation-design` (unpushed; Owner-gated).
+
 ## 2026-06-14 Owner 구조 개편 + 통합 콘솔 등록 (TASKSET-AR-WORK-STORE-RESTRUCTURE / TASKSET-AR-UNIFIED-DECISION-CONSOLE)
 
 - Owner 질문(archive 누적·도메인/상태머신 분리·메모리/검색 성능·통합 포인터 notice·번호 quantum-jump·통합 UI)에 대한 멀티에이전트 리서치(1차 출처) + 실측 후 2개 taskset 등록. 번호는 533~545 **연속 할당**(블록 점프 없이 — 번호 정책 시연).

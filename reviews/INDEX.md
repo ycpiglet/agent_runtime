@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-15T01:03:43+09:00
-record_count: 484
+generated_at: 2026-06-15T01:10:28+09:00
+record_count: 485
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `484` review and evidence records under `reviews/`.
+- Summary: indexed `485` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `484` files |
+| Reviews covered | pass | `485` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -75,6 +75,7 @@ record_count: 484
 | `reviews/CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final.json` | `CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final` | json | record | n/a | CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final |
 | `reviews/COUNCIL-2026-06-14-host-feedback-first-deliberation.md` | `COUNCIL-2026-06-14-host-feedback-first-deliberation` | council | watch | watch | Council — Host Feedback First Deliberation (TASK-AR-527) |
 | `reviews/GOVERNANCE-OPS-REPORT-2026-06-10.md` | `GOVERNANCE-OPS-REPORT-2026-06-10` | governance_ops_report | watch | watch | Governance Operations Report |
+| `reviews/HANDOFF-2026-06-15-ui-redesign-and-product-structure.md` | `HANDOFF-2026-06-15-ui-redesign-and-product-structure` | md | record | n/a | HANDOFF — UI Redesign & Product-Structure Change (for next session) |
 | `reviews/LIVE-REVIEWER-GATE-2026-06-09-task-ar-206.json` | `LIVE-REVIEWER-GATE-2026-06-09-task-ar-206` | json | record | n/a | LIVE-REVIEWER-GATE-2026-06-09-task-ar-206 |
 | `reviews/LIVE-REVIEWER-GATE-2026-06-09-task-ar-207-failure-sample.json` | `LIVE-REVIEWER-GATE-2026-06-09-task-ar-207-failure-sample` | json | record | n/a | LIVE-REVIEWER-GATE-2026-06-09-task-ar-207-failure-sample |
 | `reviews/LIVE-REVIEWER-GATE-2026-06-10-task-ar-206-current.json` | `LIVE-REVIEWER-GATE-2026-06-10-task-ar-206-current` | json | record | n/a | LIVE-REVIEWER-GATE-2026-06-10-task-ar-206-current |
