@@ -40,6 +40,16 @@
             "timeout": 120
           }
         ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python scripts/stop_hook_closure_gate.py",
+            "timeout": 30
+          }
+        ]
       }
     ]
   }
