@@ -1,0 +1,54 @@
+from pathlib import Path
+import importlib.util
+
+ROOT = Path(__file__).resolve().parent.parent
+SPEC = ROOT / "scripts" / "org_model_gate.py"
+
+
+def _load():
+    spec = importlib.util.spec_from_file_location("org_model_gate", SPEC)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_registry_loads_and_covers_existing_owners():
+    mod = _load()
+    reg = mod.load_registry()
+    for value in ["lead_engineer", "lead-engineer", "qa", "research-agent",
+                  "managing-partner", "release-integrity"]:
+        assert mod.resolve_owner(value, reg) is not None, f"{value} unresolved"
+    ids = [r["id"] for r in reg["roles"]]
+    assert len(ids) == len(set(ids))
+    assert all("_" not in i for i in ids)
+
+
+def test_resolve_owner_aliases_and_unknown():
+    mod = _load()
+    reg = mod.load_registry()
+    assert mod.resolve_owner("lead_engineer", reg)["id"] == "lead-engineer"
+    assert mod.resolve_owner("lead-engineer", reg)["id"] == "lead-engineer"
+    assert mod.resolve_owner("ci-cd", reg)["id"] == "release-integrity"
+    assert mod.resolve_owner("totally-unknown-role", reg) is None
+
+
+def test_check_reports_unresolved_but_is_watch_level(tmp_path, capsys):
+    mod = _load()
+    f = tmp_path / "TASK-X.md"
+    f.write_text("---\nowner: nope-not-a-role\nkind: task\n---\n", encoding="utf-8")
+    rc = mod.cmd_check([str(f)], enforce=False)
+    out = capsys.readouterr().out
+    assert "nope-not-a-role" in out
+    assert rc == 0
+
+
+def test_check_enforce_blocks_on_unresolved(tmp_path):
+    mod = _load()
+    f = tmp_path / "TASK-Y.md"
+    f.write_text("---\nowner: nope\nkind: task\n---\n", encoding="utf-8")
+    assert mod.cmd_check([str(f)], enforce=True) == 1
+
+
+def test_governance_gate_invokes_org_model():
+    text = (ROOT / "scripts" / "owner_governance_gate.py").read_text(encoding="utf-8")
+    assert "org_model_gate.py" in text
