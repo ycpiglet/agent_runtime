@@ -35,6 +35,7 @@ import argparse
 import json
 import os
 import sys
+import threading
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -158,7 +159,7 @@ def classify_claim(claim: dict[str, Any], now: datetime, grace_seconds: int) -> 
 
 
 def _write_json_atomic(path: Path, payload: dict[str, Any]) -> None:
-    tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
+    tmp = path.with_name(f"{path.name}.{os.getpid()}.{threading.get_ident()}.tmp")
     tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     os.replace(tmp, path)
 
@@ -175,7 +176,9 @@ def _acquire_lock(path: Path):
     while True:
         try:
             return os.open(str(path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-        except FileExistsError:
+        except (FileExistsError, PermissionError):
+            # Windows can raise PermissionError while another thread/process is
+            # mid-unlink of the lock file; treat it like "held" and retry.
             if time.monotonic() >= deadline:
                 raise TimeoutError(f"reap lock timeout: {path}")
             import time as _t
@@ -190,7 +193,7 @@ def _release_lock(path: Path, fd: int) -> None:
         pass
     try:
         path.unlink()
-    except FileNotFoundError:
+    except OSError:
         pass
 
 
