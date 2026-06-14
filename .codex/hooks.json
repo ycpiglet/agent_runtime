@@ -51,6 +51,16 @@
             "timeout": 60
           }
         ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe scripts/stop_hook_closure_gate.py",
+            "timeout": 30
+          }
+        ]
       }
     ],
     "PostToolUse": [

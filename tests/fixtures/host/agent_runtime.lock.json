@@ -1,7 +1,7 @@
 {
   "installed": {
     "managed_files": {
-      ".codex/hooks.json": "sha256:49aa370a3c9f80f2b3844b3bea4170a2abf6f306ce3fe196a1297a37b189aad7",
+      ".codex/hooks.json": "sha256:0dfdfadf6c2a520591d4ba7f4804937c60e59554067a9573cb25682fa05d5859",
       ".gitattributes": "sha256:15ffd335359d2c442ed4df547a878ff3555e20383b9fa60fee5de4cdb47f9f6b",
       ".githooks/pre-commit": "sha256:850b1f91882fd3ec4d7335cbe9d0e5678af7d111d2754a5da9134d70b2d1c65b",
       ".github/workflows/owner-doc-format.yml": "sha256:173fdbbd463b87c882a38651d6caeddf24ddfee7dbe4de7df72725da7b77537e",
@@ -101,6 +101,7 @@
       "scripts/claim_reaper.py": "sha256:8f4bd05d2dea87ebca458edaf6397d1320ae87390fec9e0384bca1860ad6084b",
       "scripts/claim_reaper_hook.py": "sha256:07591f4caaca373a26792af8234fc6436405974815a3c3801a2b43795934d0fa",
       "scripts/claude_cli_probe.py": "sha256:857eebf768b715805eff01545b5c2bbb4fa97decda597b9c2ec0ab1bd3fb891e",
+      "scripts/closure_gate.py": "sha256:479806ae1be4501d503cbedb153dc71dd36b29a153da0822edc6396f7419dc2c",
       "scripts/codex_subagent_bridge.py": "sha256:fb4814510196d0ef763cceb1973d6d2baa73e8a767365fde88235d582789bad5",
       "scripts/collab_log.py": "sha256:594cd860b176507271e65d2d30edf003c1fce166481c392888e78bc625148083",
       "scripts/collaboration_concurrency_gate.py": "sha256:54b78b4da96f971698aa751f63ae6c26fdc07565ffe2947b63b72e6d55479ce7",
@@ -173,6 +174,7 @@
       "scripts/state_machine_gate.py": "sha256:8bbe521adf8948a196b28ca847e3ac836b278f7ca0e62e854bfc4489e8f412ef",
       "scripts/state_sync_gate.py": "sha256:47cda9968b58b2a9908bbd59bd0af5bb3bec3b0981999c0db583ca2ff2a565bd",
       "scripts/stop_events.py": "sha256:b6398afd39a08671766db08f1b6793b303cea9c72bbe9510ac48ab4571d14c31",
+      "scripts/stop_hook_closure_gate.py": "sha256:72a42fed1940225d71b68a9074da642093d55aaea33c19a0cde32e2f026f1983",
       "scripts/stop_hook_owner_governance.cmd": "sha256:8ac529f0eabb5bfc34425d0b8851854320a4c6a011470c57bafbbacaf5a33e80",
       "scripts/stop_hook_owner_governance.py": "sha256:d9e95d623d960ee8efce01eca574c048e8feae53dcf84afe44c4eaa2ceed1e9e",
       "scripts/subagent_council.py": "sha256:d86012bb61ab057f299cf994c1ff6f04d1a8e84c39d1b2e4712a94c27e62d608",
@@ -253,8 +255,8 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.2.0",
-    "template_digest": "sha256:5fbf6b7f2b2183097487a4cf1a6782e8df5e83e18c10efac7e30b78222f10699",
-    "template_files": 250
+    "template_digest": "sha256:9ebab7c01dbdbe4e3beb3a7ee15a0b3d9a3d93e97bfee95b272a85aac63e047e",
+    "template_files": 252
   },
   "project": "fixture-host",
   "schema": "agent-runtime-lock/v1",
