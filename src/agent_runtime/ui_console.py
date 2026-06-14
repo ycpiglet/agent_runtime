@@ -209,6 +209,9 @@ HTML = """<!doctype html>
           <button class="sidebar-link" type="button" role="tab" data-view="sources" data-route="records/sources" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Sources</span>
           </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="knowledge-graph" data-route="records/knowledge-graph" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9901;</span><span class="sidebar-label">Knowledge Graph</span>
+          </button>
         </div>
         <div class="sidebar-group" data-group="ops">
           <span class="sidebar-group-title" data-i18n="nav.group.ops">OPS</span>
@@ -722,6 +725,18 @@ HTML = """<!doctype html>
         </div>
         <div id="view-sources" class="view">
           <div id="sources-list" class="list-panel"></div>
+        </div>
+        <div id="view-knowledge-graph" class="view">
+          <section class="kg-graph" aria-label="Knowledge graph visualization">
+            <header class="kg-graph-header">
+              <h2>Knowledge Graph</h2>
+              <p id="kg-graph-summary" class="kg-graph-summary" role="status" aria-live="polite">Loading entities&hellip;</p>
+            </header>
+            <div class="kg-graph-stage">
+              <svg id="kg-graph-svg" class="kg-graph-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Knowledge graph nodes and edges"></svg>
+            </div>
+            <ul id="kg-graph-legend" class="kg-graph-legend" aria-label="Knowledge graph legend"></ul>
+          </section>
         </div>
         <div id="view-writes" class="view">
           <div id="command-log" class="list-panel"></div>
@@ -4685,6 +4700,41 @@ pre {
 .dep-graph-legend .legend-dependency { background: var(--blue); }
 .dep-graph-legend .legend-parent { background: var(--subtle); }
 .dep-graph-legend .legend-cycle { background: var(--danger); }
+
+/* ===== Knowledge graph view (#5) ===== */
+.kg-graph-stage {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--canvas-grad);
+  overflow: hidden;
+}
+.kg-graph-svg { display: block; width: 100%; height: 460px; }
+.kg-edge { stroke: var(--line-strong); stroke-width: 1.2; fill: none; opacity: 0.45; }
+.kg-edge.type-partOf { stroke: var(--primary-line); opacity: 0.7; }
+.kg-edge.type-dependsOn, .kg-edge.type-blocks { stroke: var(--danger); opacity: 0.7; }
+.kg-edge.type-references { stroke: var(--blue); }
+.kg-edge.type-executes { stroke: var(--subtle); stroke-dasharray: 4 3; }
+.kg-node circle { stroke: var(--line-strong); stroke-width: 1.4; fill: var(--panel-strong); cursor: pointer; }
+.kg-node.kind-task circle { fill: var(--primary-soft-strong); stroke: var(--primary-line); }
+.kg-node.kind-taskset circle { fill: var(--blue); stroke: var(--blue); }
+.kg-node.kind-initiative circle { fill: var(--warning-soft); stroke: var(--warning-line); }
+.kg-node.kind-review circle, .kg-node.kind-meeting circle, .kg-node.kind-research circle,
+.kg-node.kind-retro circle, .kg-node.kind-council circle, .kg-node.kind-seminar circle,
+.kg-node.kind-compound circle, .kg-node.kind-verification circle, .kg-node.kind-call circle { fill: var(--panel); }
+.kg-node.kind-claim circle { fill: var(--subtle); }
+.kg-node.kind-commit circle, .kg-node.kind-pr circle { fill: var(--canvas); }
+.kg-node.is-focus circle { stroke: var(--danger); stroke-width: 2.6; }
+.kg-node text { fill: var(--muted); font-size: 9px; text-anchor: middle; pointer-events: none; }
+.kg-graph-empty { fill: var(--subtle); font-size: 14px; }
+.kg-graph-legend {
+  display: flex; flex-wrap: wrap; gap: 12px; margin: 8px 0 0; padding: 0;
+  list-style: none; font-size: 11px; color: var(--muted);
+}
+.kg-graph-legend .legend-swatch {
+  display: inline-block; width: 12px; height: 12px; margin-right: 5px;
+  border-radius: 50%; vertical-align: middle; border: 1px solid var(--line-strong);
+}
 
 /* ===== State machine interactive viewer (TASK-AR-336) ===== */
 .state-machine-viewer {
@@ -9179,6 +9229,146 @@ function renderDependencyGraph() {
   svg.appendChild(nodeLayer);
 }
 
+// ----- Knowledge graph view (#5): on-demand, degree-ranked bounded subgraph -----
+let knowledgeGraphState = { nodes: [], edges: [], totals: {}, error: null };
+let knowledgeGraphFocus = null;
+let knowledgeGraphLoading = false;
+
+const KG_KIND_COLORS = {
+  task: "var(--primary-line)", taskset: "var(--blue)", initiative: "var(--warning-line)",
+  review: "var(--panel)", claim: "var(--subtle)", commit: "var(--canvas)",
+};
+
+async function loadKnowledgeGraph() {
+  if (knowledgeGraphLoading) return;
+  knowledgeGraphLoading = true;
+  setText("kg-graph-summary", "Loading entities…");
+  try {
+    const response = await fetch("/api/knowledge-graph", { cache: "no-store" });
+    knowledgeGraphState = await response.json();
+  } catch (error) {
+    knowledgeGraphState = { nodes: [], edges: [], totals: {}, error: String(error) };
+  } finally {
+    knowledgeGraphLoading = false;
+  }
+  knowledgeGraphFocus = null;
+  renderKnowledgeGraph();
+}
+
+function knowledgeGraphNodePositions(nodes) {
+  // Cluster nodes by kind around a big ring; within each cluster, a small ring.
+  // Deterministic so the layout reads the same across refreshes.
+  const positions = {};
+  const cx = 500, cy = 300;
+  const byKind = {};
+  nodes.forEach((node) => { (byKind[node.kind] || (byKind[node.kind] = [])).push(node); });
+  const kinds = Object.keys(byKind).sort();
+  kinds.forEach((kind, ki) => {
+    const cluster = byKind[kind];
+    const clusterAngle = (ki / Math.max(kinds.length, 1)) * Math.PI * 2 - Math.PI / 2;
+    const clusterX = cx + Math.cos(clusterAngle) * 300;
+    const clusterY = cy + Math.sin(clusterAngle) * 210;
+    const radius = Math.min(140, 18 + cluster.length * 7);
+    cluster.forEach((node, ni) => {
+      if (cluster.length === 1) { positions[node.id] = { x: clusterX, y: clusterY }; return; }
+      const a = (ni / cluster.length) * Math.PI * 2;
+      positions[node.id] = { x: clusterX + Math.cos(a) * radius, y: clusterY + Math.sin(a) * radius };
+    });
+  });
+  return positions;
+}
+
+function renderKnowledgeGraph() {
+  const data = knowledgeGraphState || { nodes: [], edges: [], totals: {} };
+  const totals = data.totals || {};
+  const summary = data.error
+    ? `Unavailable: ${data.error}`
+    : `${totals.shown || 0} of ${totals.nodes || 0} entities`
+      + ` · ${(data.edges || []).length} edges shown`
+      + (totals.capped ? " · showing the most-connected" : "")
+      + (knowledgeGraphFocus ? ` · focus: ${knowledgeGraphFocus}` : "");
+  setText("kg-graph-summary", summary);
+
+  const legend = $("kg-graph-legend");
+  if (legend) {
+    const kinds = Array.from(new Set((data.nodes || []).map((n) => n.kind))).sort();
+    legend.innerHTML = kinds.map((kind) =>
+      `<li><span class="legend-swatch" style="background:${KG_KIND_COLORS[kind] || "var(--panel)"}"></span>${escapeHtml(kind)}</li>`).join("");
+  }
+
+  const svg = $("kg-graph-svg");
+  if (!svg) return;
+  const nodes = data.nodes || [];
+  const edges = data.edges || [];
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  if (!nodes.length) {
+    const note = document.createElementNS(SVG_NS, "text");
+    note.setAttribute("x", "500");
+    note.setAttribute("y", "300");
+    note.setAttribute("class", "kg-graph-empty");
+    note.setAttribute("text-anchor", "middle");
+    note.textContent = data.error ? "Knowledge graph unavailable" : "No knowledge graph data";
+    svg.appendChild(note);
+    return;
+  }
+  const positions = knowledgeGraphNodePositions(nodes);
+  const focusAdjacent = new Set();
+  if (knowledgeGraphFocus) {
+    edges.forEach((edge) => {
+      if (edge.from === knowledgeGraphFocus) focusAdjacent.add(edge.to);
+      if (edge.to === knowledgeGraphFocus) focusAdjacent.add(edge.from);
+    });
+  }
+
+  const edgeLayer = document.createElementNS(SVG_NS, "g");
+  edges.forEach((edge) => {
+    const a = positions[edge.from];
+    const b = positions[edge.to];
+    if (!a || !b) return;
+    const line = document.createElementNS(SVG_NS, "line");
+    line.setAttribute("x1", a.x); line.setAttribute("y1", a.y);
+    line.setAttribute("x2", b.x); line.setAttribute("y2", b.y);
+    line.setAttribute("class", `kg-edge type-${edge.type || "relates"}`);
+    if (knowledgeGraphFocus) {
+      const touches = edge.from === knowledgeGraphFocus || edge.to === knowledgeGraphFocus;
+      line.style.opacity = touches ? "0.95" : "0.08";
+    }
+    edgeLayer.appendChild(line);
+  });
+  svg.appendChild(edgeLayer);
+
+  const nodeLayer = document.createElementNS(SVG_NS, "g");
+  nodes.forEach((node) => {
+    const pos = positions[node.id];
+    if (!pos) return;
+    const isFocus = node.id === knowledgeGraphFocus;
+    const dim = knowledgeGraphFocus && !isFocus && !focusAdjacent.has(node.id);
+    const group = document.createElementNS(SVG_NS, "g");
+    group.setAttribute("class", `kg-node kind-${node.kind || "entity"} ${isFocus ? "is-focus" : ""}`);
+    group.setAttribute("data-entity-id", node.id);
+    if (dim) group.style.opacity = "0.18";
+    const circle = document.createElementNS(SVG_NS, "circle");
+    circle.setAttribute("cx", pos.x); circle.setAttribute("cy", pos.y);
+    circle.setAttribute("r", String(Math.min(22, 6 + Math.sqrt(node.degree || 1) * 2)));
+    const title = document.createElementNS(SVG_NS, "title");
+    title.textContent = `${node.id} (${node.kind}) · ${node.degree} links\n${node.label || ""}`;
+    circle.appendChild(title);
+    group.appendChild(circle);
+    if ((node.degree || 0) >= 6 || isFocus) {
+      const label = document.createElementNS(SVG_NS, "text");
+      label.setAttribute("x", pos.x); label.setAttribute("y", pos.y - 12);
+      label.textContent = String(node.id).slice(0, 16);
+      group.appendChild(label);
+    }
+    group.addEventListener("click", () => {
+      knowledgeGraphFocus = knowledgeGraphFocus === node.id ? null : node.id;
+      renderKnowledgeGraph();
+    });
+    nodeLayer.appendChild(group);
+  });
+  svg.appendChild(nodeLayer);
+}
+
 function renderPlanning() {
   const planning = runtimeState.planning || { scan_reports: [], proposals: [], requests: [], draft_tasks: [], applied: [], summary: {} };
   const proposals = planning.proposals || [];
@@ -11132,6 +11322,7 @@ function activateView(view, { updateHash = true } = {}) {
   });
   document.querySelectorAll(".view").forEach((item) => item.classList.remove("is-active"));
   target.classList.add("is-active");
+  if (view === "knowledge-graph") loadKnowledgeGraph();
   if (updateHash) {
     const route = routeForView(view);
     if (route) {
@@ -12059,6 +12250,15 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         return _json_response(ui_state.build_state(root_path))
     if request_path == "/api/stream":
         return _sse_response(ui_state.build_state(root_path))
+    # On-demand knowledge-graph view (TASK-AR / #5): a degree-ranked bounded subgraph,
+    # built lazily off the polled state because it scans work items, reviews, and git.
+    if request_path == "/api/knowledge-graph":
+        params = parse_qs(parsed_url.query)
+        try:
+            limit = int(params.get("limit", [""])[0])
+        except (ValueError, IndexError):
+            limit = ui_state.KNOWLEDGE_GRAPH_VIEW_LIMIT
+        return _json_response(ui_state.build_knowledge_graph_view(root_path, limit=limit))
     if request_path == "/api/events":
         state = ui_state.build_state(root_path)
         filters = {key: values[0] for key, values in parse_qs(parsed_url.query).items() if values}

@@ -5250,6 +5250,87 @@ def build_dependency_graph(tasks: list[dict[str, Any]], now: str) -> dict[str, A
     }
 
 
+KNOWLEDGE_GRAPH_VIEW_SCHEMA = "agent-runtime-knowledge-graph-view/v1"
+KNOWLEDGE_GRAPH_VIEW_LIMIT = 140
+
+
+def build_knowledge_graph_view(
+    root: Path, *, limit: int = KNOWLEDGE_GRAPH_VIEW_LIMIT, now: str | None = None
+) -> dict[str, Any]:
+    """Bounded knowledge-graph view for the console: the most-connected entities
+    and the edges among them.
+
+    On-demand (not part of build_state) because building the full graph scans work
+    items, reviews, claims, and git history. Returns a degree-ranked top-N subgraph
+    so the SVG stays readable; `totals.capped` flags when the full graph is larger.
+    """
+    moment = now or datetime.now(timezone.utc).isoformat()
+    empty_totals = {"nodes": 0, "edges": 0, "shown": 0, "capped": False}
+
+    def _fail(error: str) -> dict[str, Any]:
+        return {"schema": KNOWLEDGE_GRAPH_VIEW_SCHEMA, "generated_at": moment,
+                "nodes": [], "edges": [], "totals": dict(empty_totals), "error": error}
+
+    try:
+        # The console process runs from scripts/, so the repo root (parent of
+        # scripts/) is not on sys.path by default — add it so `from scripts` resolves.
+        root_str = str(Path(root).resolve())
+        if root_str not in sys.path:
+            sys.path.insert(0, root_str)
+        from scripts import knowledge_graph as kg
+    except ImportError as exc:
+        return _fail(f"knowledge_graph unavailable: {exc}")
+    try:
+        graph = kg.build_graph(Path(root))
+    except Exception as exc:  # building scans the repo; never break the endpoint
+        return _fail(f"knowledge graph build failed: {exc}")
+
+    by_id: dict[str, dict[str, Any]] = {}
+    for node in graph.get("nodes", []) or []:
+        nid = str(node.get("id") or "").strip()
+        if nid:
+            by_id[nid] = node
+
+    degree: dict[str, int] = {}
+    adjacency: list[tuple[str, str, str]] = []
+    for nid, node in by_id.items():
+        for relation in node.get("relations") or []:
+            target = str(relation.get("target") or "").strip()
+            rel_type = str(relation.get("type") or "").strip()
+            if not target:
+                continue
+            adjacency.append((nid, rel_type, target))
+            degree[nid] = degree.get(nid, 0) + 1
+            degree[target] = degree.get(target, 0) + 1
+
+    ranked = sorted(by_id, key=lambda i: (-degree.get(i, 0), i))[: max(1, limit)]
+    kept = set(ranked)
+    nodes = [
+        {"id": i, "kind": str(by_id[i].get("kind") or "entity"),
+         "label": str(by_id[i].get("title") or i), "degree": degree.get(i, 0)}
+        for i in ranked
+    ]
+    edges: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for src, rel_type, target in adjacency:
+        if src in kept and target in kept and (src, rel_type, target) not in seen:
+            seen.add((src, rel_type, target))
+            edges.append({"from": src, "to": target, "type": rel_type or "relates"})
+
+    return {
+        "schema": KNOWLEDGE_GRAPH_VIEW_SCHEMA,
+        "generated_at": moment,
+        "nodes": nodes,
+        "edges": edges,
+        "totals": {
+            "nodes": len(by_id),
+            "edges": len(adjacency),
+            "shown": len(nodes),
+            "capped": len(by_id) > len(nodes),
+        },
+    }
+
+
 # --- Custom properties + labels + automation rules + triage (TASK-AR-331) ---
 # Notion-style custom properties, Monday/Linear-style labels, Monday/ClickUp
 # "when X then Y" automation rules, and a Linear-style triage queue. All four

@@ -3389,3 +3389,42 @@ def test_ui_console_ar341_app_js_node_check(tmp_path):
     js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
     proc = subprocess.run(["node", "--check", "-"], input=js, capture_output=True, text=True)
     assert proc.returncode == 0, proc.stderr
+
+
+def test_ui_console_knowledge_graph_view_present(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    # sidebar + panel
+    assert 'data-view="knowledge-graph"' in html
+    assert 'data-route="records/knowledge-graph"' in html
+    assert 'id="view-knowledge-graph"' in html
+    assert 'id="kg-graph-svg"' in html
+    # render + on-demand load + activation hook
+    assert "function renderKnowledgeGraph" in js
+    assert "loadKnowledgeGraph" in js
+    assert 'view === "knowledge-graph") loadKnowledgeGraph' in js
+    assert ".kg-graph-svg" in css
+
+
+def test_ui_console_api_knowledge_graph_returns_bounded_subgraph(tmp_path):
+    wi = tmp_path / "agents" / "project" / "work-items"
+    wi.mkdir(parents=True)
+    (wi / "WORK-ITEM-CLASSIFICATION.json").write_text(
+        json.dumps({"records": [
+            {"id": "TASKSET-A", "level": "taskset", "title": "Set A"},
+            {"id": "TASK-AR-1", "level": "task", "title": "One", "parent_id": "TASKSET-A"},
+            {"id": "TASK-AR-2", "level": "task", "title": "Two", "parent_id": "TASKSET-A"},
+        ]}),
+        encoding="utf-8",
+    )
+    response = ui_console.build_response("/api/knowledge-graph?limit=50", tmp_path)
+    assert response.status == 200
+    payload = json.loads(response.body.decode("utf-8"))
+    ids = {n["id"] for n in payload["nodes"]}
+    assert {"TASKSET-A", "TASK-AR-1", "TASK-AR-2"} <= ids
+    # partOf edges among the kept nodes are present
+    assert any(e["type"] == "partOf" and e["to"] == "TASKSET-A" for e in payload["edges"])
+    assert payload["totals"]["shown"] <= 50
+    # each node carries a kind + degree for colouring/sizing
+    assert all("kind" in n and "degree" in n for n in payload["nodes"])
