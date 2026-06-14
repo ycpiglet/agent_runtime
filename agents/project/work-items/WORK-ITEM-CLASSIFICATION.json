@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-14T09:44:35+09:00",
+  "generated_at": "2026-06-14T10:05:13+09:00",
   "record_count": 272,
   "finding_count": 0,
   "findings": [],
@@ -2236,7 +2236,7 @@
       "title": "Treat `reviews/` (402 files, 2.4MB, pure append, never transitions state) as a logs/e…",
       "path": "agents/lead_engineer/tasks/TASK-AR-534.md",
       "parent_id": "TASKSET-AR-WORK-STORE-RESTRUCTURE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-535",

@@ -4,8 +4,10 @@ display_id: TASK-AR-534
 task_uid: b81f8006-1e3c-4087-aece-d1bb5935e3b7
 registered_at: 2026-06-14T03:22:33+09:00
 created_at: 2026-06-14T03:22:33+09:00
-updated_at: 2026-06-14T03:22:33+09:00
-status: planned
+started_at: 2026-06-14T09:42:00+09:00
+updated_at: 2026-06-14T09:50:00+09:00
+completed_at: 2026-06-14T09:50:00+09:00
+status: completed
 priority: P1
 difficulty: M
 est_hours: 6
@@ -45,3 +47,14 @@ tags:
 ## Evidence Targets
 
 - `reviews/RESEARCH-2026-06-14-work-store-architecture-and-numbering.md` (logrotate/Athena/Postgres RANGE partitioning; git blob=hash so moving files does not shrink history; append-only + compaction).
+
+## Completion Evidence
+
+- `scripts/reviews_maintenance.py`: `--check` (growth observability: file_count/size/month-distribution + a shard-due threshold that blocks when a month exceeds MONTH_FILE_THRESHOLD) and `--plan` (read-only dry-run: YYYY-MM shard mapping + a repo-wide reference-rewrite count). `tests/test_reviews_maintenance.py`: 3 tests.
+- **Scope decision (research-backed): defer the physical move.** All 410 reviews are a single month (2026-06); sharding now yields zero query/structure benefit and `--plan` shows **1535** references would need rewriting. Research says shard before ~5-10k files; git is fine to ~10k. So this ships the capability + threshold trigger and defers the move until it is beneficial. The compact index already exists as `reviews/INDEX.md` (evidence_index_generator) — not duplicated.
+- Follow-up (deferred with the move): when sharding triggers, the index generator must learn sharded `reviews/YYYY-MM/` paths.
+
+## Verification Results
+
+- W4a: 3 tests pass; `--check` exit 0 (below threshold); `--plan` read-only (git status unchanged); governance gate exit 0.
+- W4b (independent, verifier != worker): APPROVE — `reviews/W4B-2026-06-14-TASK-AR-534.md`. All 5 criteria PASS; defer decision judged sound. W4b found the reference count under-reported (3 files only); FIXED to scan repo-wide (140 -> 1535), reinforcing the defer.

@@ -9,8 +9,8 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-14
 task_count: 219
-open_count: 34
-completed_count: 185
+open_count: 33
+completed_count: 186
 task_set_count: 6
 completed_task_set_count: 26
 ---
@@ -18,11 +18,11 @@ completed_task_set_count: 26
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `34` open or active tasks; `185` completed tasks are archived from this live board.
+- Summary: `33` open or active tasks; `186` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `31` / Ask `1` / Review `0` / Later `2` / Done `185`.
+- Status: Action `30` / Ask `1` / Review `0` / Later `2` / Done `186`.
 - Task Sets: `6` active workflows; `26` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -82,11 +82,10 @@ completed_task_set_count: 26
 ### Store Architect (`TASKSET-AR-WORK-STORE-RESTRUCTURE`)
 
 - Flow: Stop the board from dumping the archive and reviews from accumulating unbounded: board attention-lanes (Triage/Active/Rollup) + extracted archive manifest, reviews date-shard + compacted index, classifier ordinal as canonical human ID with cosmetic TASK-AR-NNN gaps, UUIDv7/ULID stable keys, a manifest-first derived read-index + repo perf config, and a triage intake status. Single store + status field + views; no lifecycle directories.
-- Progress: `2/6` done; `4` open or active.
+- Progress: `3/6` done; `3` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-534` | - | - | - | planned | Action | P1 | High | Medium | 6h/5500tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Treat `reviews/` (402 files, 2.4MB, pure append, never transitions state) as a logs/e… |
 | `TASK-AR-538` | - | - | - | planned | Action | P2 | Medium | Low | 4h/3500tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Add an explicit intake state so new items wait in a triage inbox (excluded from the a… |
 | `TASK-AR-536` | - | - | - | planned | Action | P2 | Medium | Medium | 5h/4500tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Make the permanent key collision-free AND time-sortable so multiple agents mint IDs w… |
 | `TASK-AR-537` | - | - | - | planned | Action | P2 | Medium | Medium | 6h/5500tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Keep the agent read surface small and fast as the store grows toward thousands of fil… |
@@ -159,9 +158,9 @@ completed_task_set_count: 26
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Triage: `0` awaiting accept/defer.
-- Active: `34` open across `6` task sets (see Action Board above).
+- Active: `33` open across `6` task sets (see Action Board above).
 - Archived task sets: `26` (see Archived Task Sets above).
-- Archived task files: `185` — see `ARCHIVE-INDEX.md`.
+- Archived task files: `186` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.
