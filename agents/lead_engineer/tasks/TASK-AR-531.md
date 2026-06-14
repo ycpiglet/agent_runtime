@@ -46,3 +46,11 @@ tags:
 - `MANIFEST.in` / packaging config; status alias map; scaffolder CLI; read-location convention doc.
 - Host counterpart: autofolio `docs/agent_runtime_feedback.md` (§1, §7), `docs/AGENT_RUNTIME_RELATIONSHIP.md`.
 - Source: GH ycpiglet/agent_runtime#121.
+
+## Deliberation Verdict (2026-06-14)
+
+- ACCEPT (split) — `reviews/COUNCIL-2026-06-14-host-feedback-first-deliberation.md`.
+- **#1 wheel-dotfile packaging — P1, do now.** CONFIRMED live blocker by empirical wheel build: 0 of 4 template dotfiles (`.gitattributes`, `.githooks/`, `.github/`, `.codex/`) ship (setuptools silently drops dot-prefixed paths under the `templates/project/**/*` glob; no MANIFEST.in). Fix via explicit dot-path enumeration or `MANIFEST.in` + `include-package-data`; gate on a built-wheel content assertion so a future build can't silently drop them again. Reuse AR-511, do not re-author.
+- **#4 status localization — P3**, alias-additive (English enum stays canonical; Korean maps onto it).
+- **#2 host-context read-location — doc-only** (substrate `unmanaged_paths` from `sync.unmanaged:` already exists in config.py).
+- **#3 work_cli scaffolder — REJECTED.** `scripts/work.py` already is the scaffolder (`new`/`register` + required-field validation). Do not fund.

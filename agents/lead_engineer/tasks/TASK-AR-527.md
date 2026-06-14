@@ -4,8 +4,10 @@ display_id: TASK-AR-527
 task_uid: 92a2232e-5142-4532-85ba-cefb3704f177
 registered_at: 2026-06-14T02:08:50+09:00
 created_at: 2026-06-14T02:08:50+09:00
-updated_at: 2026-06-14T02:08:50+09:00
-status: planned
+started_at: 2026-06-14T10:00:00+09:00
+updated_at: 2026-06-14T10:10:00+09:00
+completed_at: 2026-06-14T10:10:00+09:00
+status: completed
 priority: P1
 difficulty: L
 est_hours: 8
@@ -47,3 +49,15 @@ tags:
 - A council/seminar record under `reviews/` for the first deliberation cycle.
 - `agents/project/DIVERSITY-COUNCIL-PROTOCOL.md` (viewpoints + verdict contract referenced).
 - Source: GH ycpiglet/agent_runtime#131 (deliberation + guardrails).
+
+## Completion Evidence
+
+- First blind-Delphi deliberation run: 5 independent viewpoints (skeptic, pragmatist, systems-thinker, user-impact-reviewer, stabilizer) evaluated the 4 candidates without seeing each other, then synthesis. Record: `reviews/COUNCIL-2026-06-14-host-feedback-first-deliberation.md` (per DIVERSITY-COUNCIL-PROTOCOL output contract: candidate ids, viewpoints, minority concerns, per-candidate verdict + priority, guardrails, next action + owner boundary).
+- Guardrails enforced: vote = priority signal (not direction); Owner alone decides product direction; safety/order = human (R3).
+- Outcomes written back to `agents/project/work-items/HOST-FEEDBACK-QUEUE.json` (triage -> accepted with verdict + priority). The deliberation materially changed candidate scope (529 block flag-gated; 530 RSI gate advisory; 531 work_cli rejected as already-built; 532 verify-first as #21/#20 appear already fixed).
+- Repeatable: re-run the council for the next intake batch (the consumption end of the GH #131 pipeline).
+
+## Verification Results
+
+- W4a: HOST-FEEDBACK-QUEUE check passes; owner_doc_format_gate green on the council record; governance gate exit 0.
+- W4b (independent, verifier != worker): see `reviews/W4B-2026-06-14-TASK-AR-527.md` — verifies the record against the council protocol output contract, blind-Delphi divergence, explicit guardrails, queue consistency, and that the deliberation changed scope (not theater).

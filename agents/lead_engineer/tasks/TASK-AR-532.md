@@ -45,3 +45,9 @@ tags:
 - Fixes + tests in `scripts/` / `src/agent_runtime/`.
 - Reply-back on each bug issue per TASK-AR-528.
 - Source: GH ycpiglet/agent_runtime#21, #20, #19.
+
+## Deliberation Verdict (2026-06-14)
+
+- ACCEPT (verify-first), P1 — `reviews/COUNCIL-2026-06-14-host-feedback-first-deliberation.md`.
+- **#21/#20 appear ALREADY mitigated in v0.2.0** (`sync.py _print_output` uses `errors="replace"`; `cli.py` reconfigures stdout to UTF-8; `build_sync_plan` has a path-like `TypeError` guard). Do NOT blindly re-fix solved code: reproduce on a real cp949 console, confirm where it still throws (redirected/non-reconfigurable stdout, tracebacks), add a regression test, then reply-back. Add the stale-config `AttributeError` guard for #20.
+- **#19 doc-links** = same unshipped-dotfile root cause as the 531 wheel gap; fix WITH that packaging work, not separately.

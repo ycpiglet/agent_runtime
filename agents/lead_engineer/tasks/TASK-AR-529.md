@@ -47,3 +47,9 @@ tags:
 - `scripts/footprint_conflict_gate.py` (or merge-queue integration) + tests.
 - Wave-conductor documentation update.
 - Source: GH ycpiglet/agent_runtime#125.
+
+## Deliberation Verdict (2026-06-14)
+
+- ACCEPT, P1 (split) — `reviews/COUNCIL-2026-06-14-host-feedback-first-deliberation.md`.
+- Adopt the read-only post-hoc `actual ⊄ declared` check now, diffing against the wave **merge-base** (not worktree HEAD — a worktree diff is empty after commits and would no-op).
+- DEFER the undeclared `watch -> block` flip behind an `--enforce-undeclared` flag (default off): flipping it as-is breaks the locked `test_undeclared_footprint_is_watch_not_fail` and stalls the governance Stop-hook chain. Keep the worktree backstop as the documented degradation net.

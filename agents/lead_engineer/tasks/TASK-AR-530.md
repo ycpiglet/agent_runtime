@@ -49,3 +49,10 @@ tags:
 - A self-eval harness + held-out workset under `scripts/` / `tests/` / `agents/project/`.
 - `docs/AGENT_RUNTIME_EVAL_METRICS.md` (host counterpart) referenced.
 - Source: GH ycpiglet/agent_runtime#128.
+
+## Deliberation Verdict (2026-06-14)
+
+- ACCEPT (staged), P2 — `reviews/COUNCIL-2026-06-14-host-feedback-first-deliberation.md`.
+- Build the held-out fixed/variable metric HARNESS (additive, safe).
+- Keep the RSI self-mutation fitness gate ADVISORY/report-only (record N->N+1 delta, never block) until a trustworthy, variance-aware baseline exists AND R3 sign-off — it gates the safety-sensitive self-modification surface; a noisy/gameable metric (Goodhart) could rubber-stamp drift or block real gains.
+- Minority concern preserved: the systems-thinker rated this the single highest-leverage item (P0) as the RSI fitness function; honored by accepting the harness now.

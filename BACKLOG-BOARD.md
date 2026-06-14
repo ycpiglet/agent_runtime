@@ -9,8 +9,8 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-14
 task_count: 219
-open_count: 33
-completed_count: 186
+open_count: 32
+completed_count: 187
 task_set_count: 6
 completed_task_set_count: 26
 ---
@@ -18,11 +18,11 @@ completed_task_set_count: 26
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `33` open or active tasks; `186` completed tasks are archived from this live board.
+- Summary: `32` open or active tasks; `187` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `30` / Ask `1` / Review `0` / Later `2` / Done `186`.
+- Status: Action `29` / Ask `1` / Review `0` / Later `2` / Done `187`.
 - Task Sets: `6` active workflows; `26` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -68,12 +68,11 @@ completed_task_set_count: 26
 ### Host Liaison (`TASKSET-AR-HOST-FEEDBACK-INTAKE`)
 
 - Flow: Treat host (autofolio) dogfooding feedback as first-class input: intake/triage, blind-Delphi council/seminar deliberation with diversity + Owner-boundary guardrails, decision reply-back to issues, plus the feedback-derived footprint-gate, self-eval/RSI fitness, host-fit, and open-bug candidates whose adoption the first deliberation decides.
-- Progress: `1/7` done; `6` open or active.
+- Progress: `2/7` done; `5` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-529` | - | - | - | planned | Action | P1 | High | Medium | 5h/4500tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Close the parallel-wave conflict-safety weak link: `footprint_conflict_gate --check`… |
-| `TASK-AR-527` | - | - | - | planned | Action | P1 | High | High | 8h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Reactivate the currently-dormant council/seminar device so queued host feedback is ac… |
 | `TASK-AR-530` | - | - | - | planned | Action | P1 | High | High | 10h/9000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Give the platform an objective, quantitative self-eval so each version can prove it i… |
 | `TASK-AR-528` | - | - | - | planned | Action | P2 | Medium | Medium | 4h/3500tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Close the loop so a deliberation outcome is written back to the originating host issu… |
 | `TASK-AR-532` | - | - | - | planned | Action | P2 | Medium | Medium | 5h/4000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Route the standing open bug issues through the same intake/triage pipeline (category… |
@@ -158,9 +157,9 @@ completed_task_set_count: 26
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Triage: `0` awaiting accept/defer.
-- Active: `33` open across `6` task sets (see Action Board above).
+- Active: `32` open across `6` task sets (see Action Board above).
 - Archived task sets: `26` (see Archived Task Sets above).
-- Archived task files: `186` — see `ARCHIVE-INDEX.md`.
+- Archived task files: `187` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

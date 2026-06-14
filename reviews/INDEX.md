@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-14T10:05:16+09:00
-record_count: 464
+generated_at: 2026-06-14T10:30:36+09:00
+record_count: 466
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `464` review and evidence records under `reviews/`.
+- Summary: indexed `466` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `464` files |
+| Reviews covered | pass | `466` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -73,6 +73,7 @@ record_count: 464
 | `reviews/CORRECTION-COLLECTOR-2026-06-09-task-ar-207.json` | `CORRECTION-COLLECTOR-2026-06-09-task-ar-207` | json | record | n/a | CORRECTION-COLLECTOR-2026-06-09-task-ar-207 |
 | `reviews/CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current.json` | `CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current` | json | record | n/a | CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current |
 | `reviews/CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final.json` | `CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final` | json | record | n/a | CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final |
+| `reviews/COUNCIL-2026-06-14-host-feedback-first-deliberation.md` | `COUNCIL-2026-06-14-host-feedback-first-deliberation` | council | watch | watch | Council — Host Feedback First Deliberation (TASK-AR-527) |
 | `reviews/GOVERNANCE-OPS-REPORT-2026-06-10.md` | `GOVERNANCE-OPS-REPORT-2026-06-10` | governance_ops_report | watch | watch | Governance Operations Report |
 | `reviews/LIVE-REVIEWER-GATE-2026-06-09-task-ar-206.json` | `LIVE-REVIEWER-GATE-2026-06-09-task-ar-206` | json | record | n/a | LIVE-REVIEWER-GATE-2026-06-09-task-ar-206 |
 | `reviews/LIVE-REVIEWER-GATE-2026-06-09-task-ar-207-failure-sample.json` | `LIVE-REVIEWER-GATE-2026-06-09-task-ar-207-failure-sample` | json | record | n/a | LIVE-REVIEWER-GATE-2026-06-09-task-ar-207-failure-sample |
@@ -495,6 +496,7 @@ record_count: 464
 | `reviews/W4B-2026-06-14-TASK-AR-364.md` | `W4B-2026-06-14-TASK-AR-364` | verification | record | n/a | W4b Independent Verification — TASK-AR-364 (2D office map — agent sprites + emoji action glyphs) |
 | `reviews/W4B-2026-06-14-TASK-AR-365.md` | `W4B-2026-06-14-TASK-AR-365` | verification | record | n/a | W4b Independent Verification — TASK-AR-365 (External notification routing — webhook-first) |
 | `reviews/W4B-2026-06-14-TASK-AR-526.md` | `W4B-2026-06-14-TASK-AR-526` | verification | record | n/a | W4b Independent Verification — TASK-AR-526 (Host feedback intake + triage classifier) |
+| `reviews/W4B-2026-06-14-TASK-AR-527.md` | `W4B-2026-06-14-TASK-AR-527` | verification | record | n/a | W4b Independent Verification — TASK-AR-527 (Blind-Delphi deliberation harness + first run) |
 | `reviews/W4B-2026-06-14-TASK-AR-533.md` | `W4B-2026-06-14-TASK-AR-533` | verification | record | n/a | W4b Independent Verification — TASK-AR-533 (Board attention-lanes + archive manifest extraction) |
 | `reviews/W4B-2026-06-14-TASK-AR-534.md` | `W4B-2026-06-14-TASK-AR-534` | verification | record | n/a | W4b Independent Verification — TASK-AR-534 (Reviews date-shard capability + planner) |
 | `reviews/W4B-2026-06-14-TASK-AR-535.md` | `W4B-2026-06-14-TASK-AR-535` | verification | record | n/a | W4b Independent Verification — TASK-AR-535 (Classifier ordinal as canonical human ID + numbering policy) |

@@ -2,12 +2,15 @@
   "schema": "agent-runtime-host-feedback-queue/v1",
   "categories": ["relationship", "defect", "design", "process"],
   "statuses": ["triage", "deliberating", "accepted", "deferred", "rejected"],
+  "deliberation": "reviews/COUNCIL-2026-06-14-host-feedback-first-deliberation.md",
   "entries": [
     {
       "id": "HFQ-131",
       "source": "ycpiglet/agent_runtime#131",
       "category": "process",
-      "status": "triage",
+      "status": "accepted",
+      "priority": "P1",
+      "verdict": "ACCEPT — the intake->deliberate->reply-back pipeline itself; built via 526/527/528 (526 + this deliberation are done).",
       "title": "host feedback intake -> council/seminar deliberation -> reply-back pipeline",
       "tasks": ["TASK-AR-526", "TASK-AR-527", "TASK-AR-528"]
     },
@@ -15,7 +18,9 @@
       "id": "HFQ-121",
       "source": "ycpiglet/agent_runtime#121",
       "category": "relationship",
-      "status": "triage",
+      "status": "accepted",
+      "priority": "P1",
+      "verdict": "ACCEPT (split): wheel-dotfile packaging is a CONFIRMED live blocker -> P1 now (empirical: 0/4 dotfiles ship). status l10n P3 (alias-additive). read-location = doc-only. REJECT work_cli sub-gap (scripts/work.py already is the scaffolder).",
       "title": "autofolio<->agent_runtime relationship + host-fit gaps (wheel dotfiles, read-location, work_cli, status i18n)",
       "tasks": ["TASK-AR-531"]
     },
@@ -23,7 +28,9 @@
       "id": "HFQ-125",
       "source": "ycpiglet/agent_runtime#125",
       "category": "defect",
-      "status": "triage",
+      "status": "accepted",
+      "priority": "P1",
+      "verdict": "ACCEPT (split): adopt read-only post-hoc actual-vs-declared check now (diff vs wave merge-base); DEFER the undeclared watch->BLOCK flip behind an --enforce-undeclared flag (breaks a locked test + stalls the Stop-hook chain).",
       "title": "parallel wave: declared vs actual footprint post-verify gate missing",
       "tasks": ["TASK-AR-529"]
     },
@@ -31,7 +38,9 @@
       "id": "HFQ-128",
       "source": "ycpiglet/agent_runtime#128",
       "category": "design",
-      "status": "triage",
+      "status": "accepted",
+      "priority": "P2",
+      "verdict": "ACCEPT (staged): build the held-out fixed/variable metric HARNESS; keep the RSI self-mutation fitness gate ADVISORY/report-only until a trustworthy variance-aware baseline + R3 sign-off (Goodhart/over-fit risk). Minority: systems-thinker rated this the highest-leverage item (P0).",
       "title": "cross-version self-eval harness + fixed/variable metrics + RSI fitness gate",
       "tasks": ["TASK-AR-530"]
     },
@@ -39,7 +48,9 @@
       "id": "HFQ-021",
       "source": "ycpiglet/agent_runtime#21",
       "category": "defect",
-      "status": "triage",
+      "status": "accepted",
+      "priority": "P1",
+      "verdict": "ACCEPT (verify-first): appears already mitigated in v0.2.0 (sync.py _print_output errors='replace'; cli.py stdout reconfigure). Reproduce on a cp949 console, confirm where it still throws, add a regression test, reply-back. Do NOT blindly re-fix solved code.",
       "title": "BUG-002: sync --diff fails on Windows cp949 console (UnicodeEncodeError)",
       "tasks": ["TASK-AR-532"]
     },
@@ -47,7 +58,9 @@
       "id": "HFQ-020",
       "source": "ycpiglet/agent_runtime#20",
       "category": "defect",
-      "status": "triage",
+      "status": "accepted",
+      "priority": "P2",
+      "verdict": "ACCEPT (verify-first): build_sync_plan already has a TypeError path-like guard in v0.2.0; add the stale-config AttributeError guard + a regression test, then reply-back.",
       "title": "BUG-001: build_sync_plan accepts stale config (AttributeError)",
       "tasks": ["TASK-AR-532"]
     },
@@ -55,9 +68,11 @@
       "id": "HFQ-019",
       "source": "ycpiglet/agent_runtime#19",
       "category": "defect",
-      "status": "triage",
+      "status": "accepted",
+      "priority": "P3",
+      "verdict": "ACCEPT: same unshipped-dotfile root cause as the 531 wheel gap; fix WITH the wheel packaging work, not separately.",
       "title": "BUG-004: project template role docs link to unshipped files",
-      "tasks": ["TASK-AR-532"]
+      "tasks": ["TASK-AR-532", "TASK-AR-531"]
     }
   ]
 }

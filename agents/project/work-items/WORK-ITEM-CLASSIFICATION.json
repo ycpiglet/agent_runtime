@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-14T10:05:13+09:00",
+  "generated_at": "2026-06-14T10:30:34+09:00",
   "record_count": 272,
   "finding_count": 0,
   "findings": [],
@@ -2148,7 +2148,7 @@
       "title": "Reactivate the currently-dormant council/seminar device so queued host feedback is ac…",
       "path": "agents/lead_engineer/tasks/TASK-AR-527.md",
       "parent_id": "TASKSET-AR-HOST-FEEDBACK-INTAKE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-528",
