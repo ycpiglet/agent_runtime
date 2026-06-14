@@ -38,6 +38,7 @@ from typing import Any
 
 SCHEMA = "agent-runtime-knowledge-graph/v1"
 GRAPH_REL = "agents/project/work-items/KNOWLEDGE-GRAPH.json"
+DOMAINS_REL = "agents/project/work-items/DOMAINS.json"
 
 TASK_REF_RE = re.compile(r"TASK-AR-[0-9]+")
 # Work-item entity ids a narrative record may cite in its body (tasks, tasksets,
@@ -202,6 +203,53 @@ def ingest_git(root: Path, limit: int = 200) -> list[dict]:
     return nodes
 
 
+def _load_domains(root: Path) -> dict:
+    path = Path(root) / DOMAINS_REL
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def ingest_domains(root: Path) -> list[dict]:
+    """Capability domains (대분류) from DOMAINS.json as top-level nodes. The child->parent
+    partOf edges (member -> domain, taskset -> initiative) are wired in build_graph so they
+    only attach to entities that actually exist."""
+    payload = _load_domains(root)
+    nodes: list[dict] = []
+    for domain in payload.get("domains", []) or []:
+        did = str(domain.get("id") or "").strip()
+        if not did:
+            continue
+        nodes.append(_node(
+            "domain", did, str(domain.get("title") or did),
+            metadata={"summary": domain.get("summary")},
+        ))
+    return nodes
+
+
+def _domain_membership(root: Path) -> list[tuple[str, str]]:
+    """(child_id, parent_id) partOf pairs from DOMAINS.json: each domain member -> domain,
+    and each taskset -> its initiative."""
+    payload = _load_domains(root)
+    pairs: list[tuple[str, str]] = []
+    for domain in payload.get("domains", []) or []:
+        did = str(domain.get("id") or "").strip()
+        for member in domain.get("members", []) or []:
+            member = str(member or "").strip()
+            if did and member:
+                pairs.append((member, did))
+    for initiative, tasksets in (payload.get("initiative_tasksets") or {}).items():
+        for taskset in tasksets or []:
+            taskset = str(taskset or "").strip()
+            if taskset and initiative:
+                pairs.append((taskset, str(initiative).strip()))
+    return pairs
+
+
 def build_graph(root: Path, *, git_limit: int = 200) -> dict:
     root = Path(root)
     nodes: list[dict] = []
@@ -209,6 +257,7 @@ def build_graph(root: Path, *, git_limit: int = 200) -> dict:
     nodes.extend(ingest_reviews(root))
     nodes.extend(ingest_claims(root))
     nodes.extend(ingest_git(root, limit=git_limit))
+    nodes.extend(ingest_domains(root))
     seen: set[str] = set()
     unique: list[dict] = []
     for node in nodes:
@@ -233,6 +282,19 @@ def build_graph(root: Path, *, git_limit: int = 200) -> dict:
         ]
         if len(kept) != len(relations):
             node["relations"] = kept
+
+    # Wire capability-domain membership: attach a `partOf` edge from each existing child
+    # to its existing parent (member -> domain, taskset -> initiative). Skipping missing
+    # endpoints keeps the edges clean and resolves the orphan-initiative/domain lint.
+    by_id = {str(n.get("id") or ""): n for n in unique}
+    for child_id, parent_id in _domain_membership(root):
+        child = by_id.get(child_id)
+        if child is None or parent_id not in by_id:
+            continue
+        relations = child.setdefault("relations", [])
+        edge = {"type": "partOf", "target": parent_id}
+        if edge not in relations:
+            relations.append(edge)
 
     edge_count = sum(len(n.get("relations") or []) for n in unique)
     return {
