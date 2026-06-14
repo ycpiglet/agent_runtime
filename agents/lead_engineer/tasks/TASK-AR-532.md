@@ -4,8 +4,10 @@ display_id: TASK-AR-532
 task_uid: cb6168bf-1b68-40ce-82a4-4531a8433509
 registered_at: 2026-06-14T02:08:50+09:00
 created_at: 2026-06-14T02:08:50+09:00
-updated_at: 2026-06-14T02:08:50+09:00
-status: planned
+started_at: 2026-06-14T13:25:00+09:00
+updated_at: 2026-06-14T13:35:00+09:00
+completed_at: 2026-06-14T13:35:00+09:00
+status: completed
 priority: P2
 difficulty: M
 est_hours: 5

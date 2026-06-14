@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-entity-catalog/v1",
   "generated_at": "2026-06-14",
-  "entity_count": 699,
+  "entity_count": 700,
   "kind_counts": {
     "council": 1,
     "host_feedback": 7,
@@ -13,7 +13,7 @@
     "task": 219,
     "taskset": 32,
     "unit": 13,
-    "verification": 38
+    "verification": 39
   },
   "entities": [
     {
@@ -8741,6 +8741,21 @@
         {
           "type": "references",
           "target": "TASK-AR-531"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-14-TASK-AR-532",
+      "title": "W4B-2026-06-14-TASK-AR-532",
+      "metadata": {
+        "date": "2026-06-14",
+        "path": "reviews/W4B-2026-06-14-TASK-AR-532.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-532"
         }
       ]
     },

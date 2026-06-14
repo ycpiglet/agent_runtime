@@ -23,7 +23,10 @@ def test_pyproject_declares_agent_runtime_distribution_and_one_release_aliases()
     assert 'name = "agent_runtime"' in text
     assert 'agent_runtime = "agent_runtime.cli:main"' in text
     assert 'ralph = "agent_runtime.cli:main"' in text
-    assert 'agent_runtime = ["templates/project/**/*"]' in text
+    # TASK-AR-531: package-data is now a multi-line list -- the base glob is
+    # retained PLUS the dot-paths the glob alone silently drops (GH #121).
+    assert '"templates/project/**/*"' in text
+    assert '"templates/project/.githooks/**/*"' in text
 
 
 def test_legacy_module_cli_executes_for_one_release():
