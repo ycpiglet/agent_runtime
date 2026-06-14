@@ -7,14 +7,14 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-14T14:38:02+09:00
-record_count: 272
+generated_at: 2026-06-14T14:47:16+09:00
+record_count: 273
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `272` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `273` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
@@ -22,7 +22,7 @@ record_count: 272
 | --- | --- | --- |
 | Initiatives | pass | `8` records |
 | Tasksets | pass | `32` records |
-| Tasks | pass | `219` records |
+| Tasks | pass | `220` records |
 | Units | pass | `13` records |
 | Findings | pass | `0` findings |
 
@@ -265,6 +265,7 @@ record_count: 272
 | 0.28.8 | Task 0.28.8 | task | `TASK-AR-553` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-553.md` | The runtime captures rich local audit trails (pane_events, stop_counters, hook-logs)… |
 | 0.28.9 | Task 0.28.9 | task | `TASK-AR-554` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-554.md` | Claim reaping/recovery assumes a single checkout (single-writer). Multiple hosts or C… |
 | 0.28.10 | Task 0.28.10 | task | `TASK-AR-555` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-555.md` | Release stages are validated locally in `--check` mode only; remote tag/PR/merge/publ… |
+| 0.28.11 | Task 0.28.11 | task | `TASK-AR-556` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-556.md` | Make the canonical closure steps (compound / review / retro) **non-skippable** for su… |
 | 1 | Initiative 1 | initiative | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | - | planned | `agents/project/initiatives/INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE.md` | Work Hierarchy Conflict Closure Initiative |
 | 1.1 | Taskset 1.1 | taskset | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | active | `BACKLOG-BOARD.md` | Work Taxonomist |
 | 1.1.1 | Task 1.1.1 | task | `TASK-AR-369` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-369.md` | Finish the terminology migration from ambiguous `project -> taskset -> task -> unit`… |

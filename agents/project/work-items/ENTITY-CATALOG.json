@@ -1,16 +1,16 @@
 {
   "schema": "agent-runtime-entity-catalog/v1",
   "generated_at": "2026-06-14",
-  "entity_count": 702,
+  "entity_count": 705,
   "kind_counts": {
     "council": 1,
     "host_feedback": 7,
     "initiative": 8,
     "meeting": 55,
     "research": 27,
-    "review": 288,
+    "review": 290,
     "seminar": 11,
-    "task": 219,
+    "task": 220,
     "taskset": 32,
     "unit": 13,
     "verification": 41
@@ -3628,6 +3628,22 @@
       ]
     },
     {
+      "kind": "task",
+      "id": "TASK-AR-556",
+      "title": "Make the canonical closure steps (compound / review / retro) **non-skippable** for su…",
+      "metadata": {
+        "ordinal": "0.28.11",
+        "status": "planned",
+        "path": "agents/lead_engineer/tasks/TASK-AR-556.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-PRODUCT-MATURITY-UPLIFT"
+        }
+      ]
+    },
+    {
       "kind": "initiative",
       "id": "INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
       "title": "Work Hierarchy Conflict Closure Initiative",
@@ -5596,6 +5612,16 @@
       "metadata": {
         "date": "2026-06-10",
         "path": "reviews/RETRO-2026-06-10-agent-runtime-governance-ops.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "RETRO-2026-06-14-agent-runtime-process-integrity",
+      "title": "RETRO-2026-06-14-agent-runtime-process-integrity",
+      "metadata": {
+        "date": "2026-06-14",
+        "path": "reviews/RETRO-2026-06-14-agent-runtime-process-integrity.md"
       },
       "relations": []
     },
@@ -8166,6 +8192,16 @@
       "metadata": {
         "date": "2026-06-14",
         "path": "reviews/REVIEW-2026-06-14-agent-runtime-task-ar-222-closeout-log.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-14-deadlock-eval-automation-closeout",
+      "title": "REVIEW-2026-06-14-deadlock-eval-automation-closeout",
+      "metadata": {
+        "date": "2026-06-14",
+        "path": "reviews/REVIEW-2026-06-14-deadlock-eval-automation-closeout.md"
       },
       "relations": []
     },
