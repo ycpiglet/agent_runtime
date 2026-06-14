@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-13T23:47:35+09:00
-record_count: 447
+generated_at: 2026-06-14T10:12:42+09:00
+record_count: 449
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `447` review and evidence records under `reviews/`.
+- Summary: indexed `449` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `447` files |
+| Reviews covered | pass | `449` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -130,6 +130,7 @@ record_count: 447
 | `reviews/MEETING-2026-06-13-parallel-wave-replan-post-codex-merge.md` | `MEETING-2026-06-13-parallel-wave-replan-post-codex-merge` | meeting | pass | pass | Parallel Wave Replan After Codex Merge (T3) |
 | `reviews/MEETING-2026-06-14-agent-runtime-task-ar-222-migration-closeout-sync.md` | `MEETING-2026-06-14-agent-runtime-task-ar-222-migration-closeout-sync` | md | record | n/a | MEETING: TASK-AR-220/222 closeout 동기화 정합 미팅 |
 | `reviews/MEETING-2026-06-14-agent-runtime-task-ar-223-closeout-planning.md` | `MEETING-2026-06-14-agent-runtime-task-ar-223-closeout-planning` | md | record | n/a | MEETING (2026-06-14) - TASK-AR-223 closeout planning |
+| `reviews/MEETING-2026-06-14-product-maturity-uplift-taskset-registration.md` | `MEETING-2026-06-14-product-maturity-uplift-taskset-registration` | meeting | watch | watch | Product Maturity Uplift — Taskset Registration |
 | `reviews/MEETING-2026-06-15-agent-runtime-task-ar-223-cycle-sync.md` | `MEETING-2026-06-15-agent-runtime-task-ar-223-cycle-sync` | md | record | n/a | MEETING (2026-06-15) - TASK-AR-223 closeout cycle sync |
 | `reviews/OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion.json` | `OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion` | json | record | n/a | OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion |
 | `reviews/OFFLINE-EVAL-2026-06-09-task-ar-217-rerun.json` | `OFFLINE-EVAL-2026-06-09-task-ar-217-rerun` | json | record | n/a | OFFLINE-EVAL-2026-06-09-task-ar-217-rerun |
@@ -180,6 +181,7 @@ record_count: 447
 | `reviews/RESEARCH-2026-06-12-work-hierarchy-taxonomy.md` | `RESEARCH-2026-06-12-work-hierarchy-taxonomy` | research | pass | pass | Work Hierarchy Taxonomy Research |
 | `reviews/RESEARCH-2026-06-13-agent-runtime-task-ar-211-official-multi-project-overlay.md` | `RESEARCH-2026-06-13-agent-runtime-task-ar-211-official-multi-project-overlay` | md | record | n/a | RESEARCH-2026-06-13-agent-runtime-task-ar-211-official-multi-project-overlay |
 | `reviews/RESEARCH-2026-06-14-agent-runtime-task-ar-222-cross-project-overlay-and-governance-research.md` | `RESEARCH-2026-06-14-agent-runtime-task-ar-222-cross-project-overlay-and-governance-research` | md | record | n/a | RESEARCH: TASK-AR-222 closeout을 위한 운영 연구 반영 |
+| `reviews/RESEARCH-2026-06-14-product-maturity-ui-assessment.md` | `RESEARCH-2026-06-14-product-maturity-ui-assessment` | research | watch | watch | Product Maturity & UI Assessment — 2026-06-14 |
 | `reviews/RESEARCH-2026-06-15-agent-runtime-task-ar-223-hold-routing-and-overlay-edge-research.md` | `RESEARCH-2026-06-15-agent-runtime-task-ar-223-hold-routing-and-overlay-edge-research` | md | record | n/a | RESEARCH: TASK-AR-223 hold-routing + overlay-edge risk 반영 (2026-06-15) |
 | `reviews/RETRO-2026-06-10-agent-runtime-governance-ops.md` | `RETRO-2026-06-10-agent-runtime-governance-ops` | retro | watch | watch | RETRO-2026-06-10 agent runtime governance ops |
 | `reviews/REVIEW-2026-06-08-agent-runtime-after-pass-1.md` | `REVIEW-2026-06-08-agent-runtime-after-pass-1` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-after-pass-1 |

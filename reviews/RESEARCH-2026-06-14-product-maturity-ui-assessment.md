@@ -70,6 +70,6 @@ tags: [product-maturity, ui-ux, evaluation, rubric, assessment, improvement-back
 
 ## Next
 
-- 등록 부킹(`TASKSET-DEFINITIONS.json`·`BACKLOG-BOARD.md`·`owner-docs.yml`·인덱스/분류기 재생성)은 `reviews/MEETING-2026-06-14-product-maturity-uplift-taskset-registration.md`의 레시피대로 wave89 closeout과 함께 일괄 반영한다(미커밋 526~545와 인덱스 충돌 회피).
+- 등록 부킹(`TASKSET-DEFINITIONS.json`·`BACKLOG-BOARD.md`·`owner-docs.yml`·인덱스/분류기 재생성)은 `reviews/MEETING-2026-06-14-product-maturity-uplift-taskset-registration.md`의 레시피대로 main에 반영한다(wave89 미커밋 항목과의 인덱스 충돌은 분리 커밋으로 회피).
 - 첫 착수 후보는 TASK-AR-546(e2e 토대) — 이후 a11y(549)/폼 UX(548)가 빠른 사용자 체감 개선.
 - 다음 정기 재평가 시 본 루브릭 차원을 재채점하고 회귀 여부를 기록한다.

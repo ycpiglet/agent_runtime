@@ -24,6 +24,12 @@
       "display_name": "Ops Ergonomics",
       "summary": "Make the 500-series infrastructure easy to operate: session-start W0 dashboard hook, trigger-based skills for wave/merge/verify/work-analytics/release, asset registry entries, and an ops command reference.",
       "order": 523
+    },
+    {
+      "task_set_id": "TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
+      "display_name": "Maturity Steward",
+      "summary": "Close product-maturity gaps from the UI/quality assessment: end-to-end browser tests (Playwright), responsive layout, form validation + error UX, accessibility uplift, SSE real-time updates, i18n hardening, claim_reaper concurrency stress, observability export, multi-host claim safety, and owner-gated release automation.",
+      "order": 527
     }
   ]
 }
