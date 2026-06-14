@@ -1,14 +1,14 @@
 {
   "schema": "agent-runtime-entity-catalog/v1",
   "generated_at": "2026-06-14",
-  "entity_count": 707,
+  "entity_count": 709,
   "kind_counts": {
     "council": 1,
     "host_feedback": 7,
     "initiative": 8,
     "meeting": 55,
-    "research": 27,
-    "review": 292,
+    "research": 28,
+    "review": 293,
     "seminar": 11,
     "task": 220,
     "taskset": 32,
@@ -5557,6 +5557,16 @@
     },
     {
       "kind": "research",
+      "id": "RESEARCH-2026-06-14-agent-org-design-references",
+      "title": "RESEARCH-2026-06-14-agent-org-design-references",
+      "metadata": {
+        "date": "2026-06-14",
+        "path": "reviews/RESEARCH-2026-06-14-agent-org-design-references.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "research",
       "id": "RESEARCH-2026-06-14-agent-runtime-task-ar-222-cross-project-overlay-and-governance-research",
       "title": "RESEARCH-2026-06-14-agent-runtime-task-ar-222-cross-project-overlay-and-governance-research",
       "metadata": {
@@ -8222,6 +8232,16 @@
       "metadata": {
         "date": "2026-06-14",
         "path": "reviews/REVIEW-2026-06-14-knowledge-stack-closeout.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-14-knowledge-stack-followups-closeout",
+      "title": "REVIEW-2026-06-14-knowledge-stack-followups-closeout",
+      "metadata": {
+        "date": "2026-06-14",
+        "path": "reviews/REVIEW-2026-06-14-knowledge-stack-followups-closeout.md"
       },
       "relations": []
     },

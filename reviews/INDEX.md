@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-14T18:03:39+09:00
-record_count: 482
+generated_at: 2026-06-14T23:34:15+09:00
+record_count: 483
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `482` review and evidence records under `reviews/`.
+- Summary: indexed `483` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `482` files |
+| Reviews covered | pass | `483` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -183,6 +183,7 @@ record_count: 482
 | `reviews/RESEARCH-2026-06-12-agent-runtime-paperclip-and-doc-to-plan.md` | `RESEARCH-2026-06-12-agent-runtime-paperclip-and-doc-to-plan` | md | record | n/a | RESEARCH-2026-06-12 — Paperclip 분석 및 문서→플랜 파이프라인 기획 |
 | `reviews/RESEARCH-2026-06-12-work-hierarchy-taxonomy.md` | `RESEARCH-2026-06-12-work-hierarchy-taxonomy` | research | pass | pass | Work Hierarchy Taxonomy Research |
 | `reviews/RESEARCH-2026-06-13-agent-runtime-task-ar-211-official-multi-project-overlay.md` | `RESEARCH-2026-06-13-agent-runtime-task-ar-211-official-multi-project-overlay` | md | record | n/a | RESEARCH-2026-06-13-agent-runtime-task-ar-211-official-multi-project-overlay |
+| `reviews/RESEARCH-2026-06-14-agent-org-design-references.md` | `RESEARCH-2026-06-14-agent-org-design-references` | md | record | n/a | RESEARCH — Agent Org Design References (Karpathy · multi-agent architectures · persona diversity) |
 | `reviews/RESEARCH-2026-06-14-agent-runtime-task-ar-222-cross-project-overlay-and-governance-research.md` | `RESEARCH-2026-06-14-agent-runtime-task-ar-222-cross-project-overlay-and-governance-research` | md | record | n/a | RESEARCH: TASK-AR-222 closeout을 위한 운영 연구 반영 |
 | `reviews/RESEARCH-2026-06-14-product-maturity-ui-assessment.md` | `RESEARCH-2026-06-14-product-maturity-ui-assessment` | research | watch | watch | Product Maturity & UI Assessment — 2026-06-14 |
 | `reviews/RESEARCH-2026-06-14-unified-decision-console.md` | `RESEARCH-2026-06-14-unified-decision-console` | research | complete | n/a | Unified Decision/Operations Console — Research Synthesis |
