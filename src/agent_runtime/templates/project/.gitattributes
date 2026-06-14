@@ -13,6 +13,12 @@
 # .py / .md / .json / .jsonl / .yml / .toml / extensionless POSIX hooks, etc.
 * text=auto eol=lf
 
+# Derived host lock: a digest over all template files, so concurrent template
+# branches always collide on it. The keep-ours driver suppresses the conflict;
+# the post-merge hook regenerates the correct lock.
+# Register once: python scripts/lock_merge_driver.py --install
+agent_runtime.lock.json merge=arlock-keepours
+
 # --- Windows scripts that REQUIRE CRLF in the working tree to execute ---
 # Batch / command files are run by cmd.exe and must have CRLF line endings.
 # (The repo blob is still stored as LF; checkout converts to CRLF on disk.)
