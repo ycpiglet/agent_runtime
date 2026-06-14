@@ -132,6 +132,28 @@ def test_ingest_reviews(tmp_path):
     assert {"type": "references", "target": "TASK-AR-1"} in rev["relations"]
 
 
+def test_ingest_reviews_scans_body_for_references(tmp_path):
+    reviews = tmp_path / "reviews"
+    reviews.mkdir()
+    # filename has no entity id; the body cites a task, taskset, and initiative
+    (reviews / "REVIEW-2026-06-14-process-closeout.md").write_text(
+        "## Bottom Line\nClosed TASK-AR-552 under TASKSET-AR-COLLAB-CONCURRENCY for INIT-AR-HOST-FEEDBACK-INTAKE.\n",
+        encoding="utf-8",
+    )
+    nodes = kg.ingest_reviews(tmp_path)
+    rev = next(n for n in nodes if n["id"] == "REVIEW-2026-06-14-process-closeout")
+    targets = {r["target"] for r in rev["relations"] if r["type"] == "references"}
+    assert {"TASK-AR-552", "TASKSET-AR-COLLAB-CONCURRENCY", "INIT-AR-HOST-FEEDBACK-INTAKE"} <= targets
+
+
+def test_reference_targets_dedupes_caps_and_excludes_self():
+    body = " ".join(f"TASK-AR-{i}" for i in range(60)) + " REVIEW-SELF"
+    refs = kg._reference_targets("REVIEW-SELF", body, self_id="REVIEW-SELF")
+    assert "REVIEW-SELF" not in refs
+    assert len(refs) <= kg.MAX_BODY_REFS
+    assert refs == sorted(refs)
+
+
 def test_ingest_claims(tmp_path):
     cl = tmp_path / "agents" / "runtime" / "task_claims"
     cl.mkdir(parents=True)

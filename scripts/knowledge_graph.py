@@ -40,6 +40,11 @@ SCHEMA = "agent-runtime-knowledge-graph/v1"
 GRAPH_REL = "agents/project/work-items/KNOWLEDGE-GRAPH.json"
 
 TASK_REF_RE = re.compile(r"TASK-AR-[0-9]+")
+# Work-item entity ids a narrative record may cite in its body (tasks, tasksets,
+# initiatives). Used to wire review/meeting -> work-item `references` edges so
+# digest backlinks and ask grounding light up (previously bodies were not scanned).
+ENTITY_REF_RE = re.compile(r"\b(?:TASK-AR-[0-9]+|TASKSET-[A-Z0-9][A-Z0-9-]+|INIT-[A-Z0-9][A-Z0-9-]+)\b")
+MAX_BODY_REFS = 40
 PR_RE = re.compile(r"\(#(\d+)\)")
 REVIEW_DATE_RE = re.compile(r"(20\d{2}-\d{2}-\d{2})")
 REVIEW_KIND_BY_PREFIX = {
@@ -106,13 +111,28 @@ def ingest_reviews(root: Path) -> list[dict]:
         prefix = name.split("-", 1)[0].upper()
         kind = REVIEW_KIND_BY_PREFIX.get(prefix, "review")
         date_match = REVIEW_DATE_RE.search(name)
-        refs = sorted(set(TASK_REF_RE.findall(name)))
+        refs = _reference_targets(name, _read_text(path), self_id=name)
         nodes.append(_node(
             kind, name, name,
             metadata={"date": date_match.group(1) if date_match else None, "path": f"reviews/{path.name}"},
             relations=[_rel("references", ref) for ref in refs],
         ))
     return nodes
+
+
+def _read_text(path: Path) -> str:
+    try:
+        return path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ""
+
+
+def _reference_targets(name: str, body: str, *, self_id: str = "") -> list[str]:
+    """Work-item ids cited in a record's filename and body, deduped, self excluded,
+    capped at MAX_BODY_REFS for stable fan-out. Sorted for deterministic output."""
+    found = set(ENTITY_REF_RE.findall(name)) | set(ENTITY_REF_RE.findall(body))
+    found.discard(self_id)
+    return sorted(found)[:MAX_BODY_REFS]
 
 
 def ingest_claims(root: Path) -> list[dict]:
