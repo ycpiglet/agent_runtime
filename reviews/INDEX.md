@@ -7,7 +7,7 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-14T12:47:35+09:00
+generated_at: 2026-06-14T12:57:01+09:00
 record_count: 472
 ---
 

@@ -4,8 +4,9 @@ display_id: TASK-AR-528
 task_uid: 93e48db2-bbb5-4dc7-b0f0-90ea1dbd2a63
 registered_at: 2026-06-14T02:08:50+09:00
 created_at: 2026-06-14T02:08:50+09:00
-updated_at: 2026-06-14T02:08:50+09:00
-status: planned
+started_at: 2026-06-14T13:10:00+09:00
+updated_at: 2026-06-14T13:20:00+09:00
+status: in_progress
 priority: P2
 difficulty: M
 est_hours: 4
@@ -41,3 +42,13 @@ tags:
 - A reply-back on at least one seed issue (#121/#125/#128/#131) referencing the deliberation record.
 - The intake queue entry updated with the final decision.
 - Source: GH ycpiglet/agent_runtime#131 (반영·회신).
+
+## Progress / Owner-gated step
+
+- DELIVERED (local): `scripts/host_feedback_replyback.py` (`--check`/`--write-drafts`/`--post`) reads the queue verdicts and renders one traceable reply per source issue (decision + priority + rationale + deliberation-record link + guardrails). `--check` findings=0; 7 drafts in `agents/project/work-items/HOST-FEEDBACK-REPLIES.md`. Traceability is bidirectional: issue <-> queue entry <-> COUNCIL record <-> task.
+- PENDING (owner-gated): the actual `gh issue comment` POST to #121/#125/#128/#131 + #19/#20/#21 is an outbound external write and was correctly blocked by the action classifier ("proceed with 528" does not authorize posting to those external destinations). The Owner closes the loop with one command: `python scripts/host_feedback_replyback.py --post` (or add a Bash permission rule). Status stays `in_progress` until the reply is posted.
+
+## Verification Results
+
+- W4a: `--check` findings=0; drafts render accurately from the queue verdicts; governance gate exit 0.
+- W4b (independent, verifier != worker): see `reviews/W4B-2026-06-14-TASK-AR-528.md` (verifies the mechanism + draft accuracy; the post itself is owner-gated).

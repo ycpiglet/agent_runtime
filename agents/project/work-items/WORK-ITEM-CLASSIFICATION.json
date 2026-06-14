@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-14T12:47:33+09:00",
+  "generated_at": "2026-06-14T12:56:59+09:00",
   "record_count": 272,
   "finding_count": 0,
   "findings": [],
@@ -2159,7 +2159,7 @@
       "title": "Close the loop so a deliberation outcome is written back to the originating host issu…",
       "path": "agents/lead_engineer/tasks/TASK-AR-528.md",
       "parent_id": "TASKSET-AR-HOST-FEEDBACK-INTAKE",
-      "status": "planned"
+      "status": "in_progress"
     },
     {
       "key": "task:TASK-AR-529",

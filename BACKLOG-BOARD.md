@@ -72,8 +72,8 @@ completed_task_set_count: 27
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-528` | - | - | - | in_progress | Action | P2 | Medium | Medium | 4h/3500tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Close the loop so a deliberation outcome is written back to the originating host issu… |
 | `TASK-AR-530` | - | - | - | planned | Action | P1 | High | High | 10h/9000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Give the platform an objective, quantitative self-eval so each version can prove it i… |
-| `TASK-AR-528` | - | - | - | planned | Action | P2 | Medium | Medium | 4h/3500tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Close the loop so a deliberation outcome is written back to the originating host issu… |
 | `TASK-AR-532` | - | - | - | planned | Action | P2 | Medium | Medium | 5h/4000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Route the standing open bug issues through the same intake/triage pipeline (category… |
 
 ### Decision Cartographer (`TASKSET-AR-UNIFIED-DECISION-CONSOLE`)

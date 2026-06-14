@@ -3137,7 +3137,7 @@
       "title": "Close the loop so a deliberation outcome is written back to the originating host issu…",
       "metadata": {
         "ordinal": "0.25.3",
-        "status": "planned",
+        "status": "in_progress",
         "path": "agents/lead_engineer/tasks/TASK-AR-528.md"
       },
       "relations": [
