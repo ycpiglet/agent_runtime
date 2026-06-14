@@ -225,10 +225,16 @@ roles:
     output_contract:
       - "PR 생성·머지·롤백 / CI 워크플로 변경"
       - "Vercel 배포 확인 evidence (scripts/check_deployment.py)"
+      - "git 표면 단일 소유: pr/merge/branch/stash/issue 정책과 자동화(auto-merge)"
+      - "외부·비가역 액션(main 머지·push·release publish·파괴적 git)은 승인 게이팅"
     audit_gate: false
     default_subagents: [implementer, reviewer]
     notes: |
       배포·시크릿 관련 변경은 audit_gate true로 escalate.
+      직무 분리: 작업 작성자는 자기 PR을 머지하지 않는다(W4b 독립검증과 동일 원리).
+      머지 게이트 = test 워크플로(full CI) green. green 아닌 PR은 머지 금지
+      (branch protection의 required status check로 구조적 강제). 루틴 green 머지는
+      auto-merge 워크플로가 처리하고, ci-cd는 정책·자동화·예외(충돌/롤백/release/issue)를 소유.
 
   - id: uiux
     aliases: [uiux, ui, ux, frontend]
