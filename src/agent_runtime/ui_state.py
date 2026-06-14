@@ -5,9 +5,11 @@ import binascii
 import hashlib
 import importlib.util
 import json
+import os
 import re
 import secrets
 import sys
+import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -6951,7 +6953,92 @@ def build_ops_metrics(
     }
 
 
+# --- Full-state cache (console perf) ----------------------------------------
+# build_state assembles ~40 substructures and shells out to git for the inflight
+# overlay, so a cold build is multi-second on a large store. The 4s console poll
+# must not pay that every time, or the board appears empty while /api/state hangs
+# (observed: ~60s, 6.5MB per call on a 800+ record store). Cache the full state
+# per root, invalidated by a cheap mtime+count signature over the source dirs that
+# change during work, with a long TTL backstop for anything the signature misses.
+_STATE_CACHE: dict[str, tuple[float, tuple, dict[str, Any]]] = {}
+# Serialize cold builds: the frontend fires a burst of requests on load (state +
+# SSE + resources); without this each would pay the full cold build in parallel.
+_STATE_BUILD_LOCK = threading.Lock()
+_STATE_TTL_BACKSTOP = 300.0
+_STATE_SIG_DIRS = (
+    "agents/lead_engineer/tasks",
+    "agents/runtime",
+    "agents/project",
+    "reviews",
+)
+
+
+def _state_signature(root_path: Path) -> tuple:
+    """Cheap change-detector: (rel, file count, latest mtime) per source dir.
+
+    os.walk + os.stat (no pathlib object churn) so this stays ~0.3s even over the
+    whole runtime/project/reviews tree -- two orders of magnitude under a rebuild.
+    Any add/remove/edit under these dirs changes the tuple and busts the cache.
+    """
+    parts: list[tuple[str, int, float]] = []
+    for rel in _STATE_SIG_DIRS:
+        base = root_path / rel
+        if not base.exists():
+            continue
+        count = 0
+        latest = 0.0
+        for dirpath, dirnames, filenames in os.walk(base):
+            dirnames[:] = [d for d in dirnames if d not in ("__pycache__", ".git", "node_modules")]
+            for filename in filenames:
+                count += 1
+                try:
+                    mtime = os.stat(os.path.join(dirpath, filename)).st_mtime
+                except OSError:
+                    continue
+                if mtime > latest:
+                    latest = mtime
+        parts.append((rel, count, round(latest, 3)))
+    return tuple(parts)
+
+
 def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
+    """Cached front for the full console state (see ``_build_state_uncached``).
+
+    Explicit ``now`` (deterministic test / replay calls) bypasses the cache.
+    Otherwise the per-root cache returns instantly while the source signature is
+    unchanged; any edit to a task/claim/review/etc. changes the signature and
+    forces a rebuild. ``generated_at`` is re-stamped on cache hits so the console
+    still shows a live timestamp.
+    """
+    if now is not None:
+        return _build_state_uncached(root, now)
+    root_path = Path(root).resolve()
+    key = str(root_path)
+    signature = _state_signature(root_path)
+
+    def _fresh_hit() -> dict[str, Any] | None:
+        cached = _STATE_CACHE.get(key)
+        if cached is not None:
+            stamped_at, cached_sig, cached_state = cached
+            if cached_sig == signature and (time.monotonic() - stamped_at) < _STATE_TTL_BACKSTOP:
+                return {**cached_state, "generated_at": _now_iso()}
+        return None
+
+    hit = _fresh_hit()
+    if hit is not None:
+        return hit
+    # Cold build: serialize so a request burst does not rebuild in parallel; a
+    # request that waited gets the cache the winner just populated.
+    with _STATE_BUILD_LOCK:
+        hit = _fresh_hit()
+        if hit is not None:
+            return hit
+        state = _build_state_uncached(root_path, now)
+        _STATE_CACHE[key] = (time.monotonic(), signature, state)
+        return state
+
+
+def _build_state_uncached(root: Path | str, now: str | None = None) -> dict[str, Any]:
     root_path = Path(root).resolve()
     generated_at = now or _now_iso()
     warnings: list[dict[str, str]] = []

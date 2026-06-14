@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import threading
 from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -12215,6 +12216,13 @@ class _ConsoleHandler(BaseHTTPRequestHandler):
 def run_server(root: Path, *, host: str = "127.0.0.1", port: int = 8765) -> int:
     root_path = Path(root).resolve()
     handler = type("AgentRuntimeConsoleHandler", (_ConsoleHandler,), {"root": root_path})
+    # Pre-warm the state cache off-thread so the FIRST browser request hits the
+    # cache (~0.3s) instead of paying the cold build (~40s on a large store).
+    threading.Thread(
+        target=lambda: ui_state.build_state(root_path),
+        daemon=True,
+        name="console-state-warmup",
+    ).start()
     with ThreadingHTTPServer((host, port), handler) as server:
         actual_host, actual_port = server.server_address[:2]
         print(f"Agent Runtime Console: http://{actual_host}:{actual_port}/")

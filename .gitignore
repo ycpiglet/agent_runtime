@@ -27,6 +27,11 @@ __pycache__/
 
 # Local browser verification artifacts.
 /.playwright-mcp/
+/agent-runtime-console.png
+/console-loaded.png
+
+# Console auto-start background log (scripts/console_autostart.py).
+/.console-autostart.log
 
 # TASK-AR-365: external notification routing secrets (webhook URLs / bot tokens /
 # SMTP creds). NEVER commit the populated config; only the *.example template is
