@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-15T13:47:57+09:00",
-  "record_count": 281,
+  "generated_at": "2026-06-15T17:49:28+09:00",
+  "record_count": 290,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -2580,6 +2580,94 @@
       "status": "completed"
     },
     {
+      "key": "taskset:TASKSET-AR-DECISION-FIRST-CONSOLE-IA",
+      "level": "taskset",
+      "number": "0.30",
+      "label": "Taskset 0.30",
+      "id": "TASKSET-AR-DECISION-FIRST-CONSOLE-IA",
+      "title": "Decision Cockpit",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-UNASSIGNED",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-563",
+      "level": "task",
+      "number": "0.30.1",
+      "label": "Task 0.30.1",
+      "id": "TASK-AR-563",
+      "title": "scripts/attention_inbox.py: 6-group 'what needs me now' aggregation from existing wor…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-563.md",
+      "parent_id": "TASKSET-AR-DECISION-FIRST-CONSOLE-IA",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-564",
+      "level": "task",
+      "number": "0.30.2",
+      "label": "Task 0.30.2",
+      "id": "TASK-AR-564",
+      "title": "Serve the attention inbox at /api/inbox and replace the 80-screen home with the cockp…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-564.md",
+      "parent_id": "TASKSET-AR-DECISION-FIRST-CONSOLE-IA",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-565",
+      "level": "task",
+      "number": "0.30.3",
+      "label": "Task 0.30.3",
+      "id": "TASK-AR-565",
+      "title": "Group the 67 nav routes under core 7 (Home/Work/Agents/Decisions/Records/Search/More)…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-565.md",
+      "parent_id": "TASKSET-AR-DECISION-FIRST-CONSOLE-IA",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-566",
+      "level": "task",
+      "number": "0.30.4",
+      "label": "Task 0.30.4",
+      "id": "TASK-AR-566",
+      "title": "Counts/summaries on screen; detail opens in a keyboard-accessible side drawer on clic…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-566.md",
+      "parent_id": "TASKSET-AR-DECISION-FIRST-CONSOLE-IA",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-567",
+      "level": "task",
+      "number": "0.30.5",
+      "label": "Task 0.30.5",
+      "id": "TASK-AR-567",
+      "title": "Initiative->Taskset->Unit waiting/active/done board + drill-down (reuse org_read_api.…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-567.md",
+      "parent_id": "TASKSET-AR-DECISION-FIRST-CONSOLE-IA",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-568",
+      "level": "task",
+      "number": "0.30.6",
+      "label": "Task 0.30.6",
+      "id": "TASK-AR-568",
+      "title": "UI language toggle over the existing i18n layer (EN data/schema stays); localize inbo…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-568.md",
+      "parent_id": "TASKSET-AR-DECISION-FIRST-CONSOLE-IA",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-569",
+      "level": "task",
+      "number": "0.30.7",
+      "label": "Task 0.30.7",
+      "id": "TASK-AR-569",
+      "title": "E2E asserting home <= 2 screens / DOM <= ~1500 + maturity behaviors (responsive/a11y/…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-569.md",
+      "parent_id": "TASKSET-AR-DECISION-FIRST-CONSOLE-IA",
+      "status": "planned"
+    },
+    {
       "key": "initiative:INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
       "level": "initiative",
       "number": "1",
@@ -3093,6 +3181,17 @@
       "id": "INIT-AR-AGENT-ORG-DELEGATION",
       "title": "INIT-AR-AGENT-ORG-DELEGATION — Agent Org & Delegation Model",
       "path": "agents/project/initiatives/INIT-AR-AGENT-ORG-DELEGATION.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "initiative:INIT-AR-DECISION-FIRST-CONSOLE-IA",
+      "level": "initiative",
+      "number": "9",
+      "label": "Initiative 9",
+      "id": "INIT-AR-DECISION-FIRST-CONSOLE-IA",
+      "title": "INIT-AR-DECISION-FIRST-CONSOLE-IA — Decision-First Console IA",
+      "path": "agents/project/initiatives/INIT-AR-DECISION-FIRST-CONSOLE-IA.md",
       "parent_id": "",
       "status": "active"
     }

@@ -326,4 +326,5 @@ def test_real_backlog_tasks_are_classified_into_twenty_five_task_sets() -> None:
         "TASKSET-AR-UNIFIED-DECISION-CONSOLE",
         "TASKSET-AR-PRODUCT-MATURITY-UPLIFT",
         "TASKSET-AR-AGENT-ORG-DELEGATION",
+        "TASKSET-AR-DECISION-FIRST-CONSOLE-IA",
     }
