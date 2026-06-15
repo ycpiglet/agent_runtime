@@ -248,7 +248,7 @@ HTML = """<!doctype html>
     <main class="layout" id="main">
       <section class="cockpit" id="cockpit" aria-label="Attention inbox - what needs you now">
         <header class="cockpit-head">
-          <h1 class="cockpit-title">What needs you now</h1>
+          <h2 class="cockpit-title">What needs you now</h2>
           <span class="cockpit-total" id="inbox-total" aria-live="polite"></span>
         </header>
         <div class="cockpit-grid" id="inbox-groups" role="list"></div>
@@ -5856,10 +5856,10 @@ pre {
 }
 
 /* --- Decision-first cockpit: attention inbox (TASK-AR-564) ----------------- */
-/* The home hero — "what needs you now". Six derived groups (scripts/
+/* The home hero -- "what needs you now". Six derived groups (scripts/
    attention_inbox.py via /api/inbox): a count + top-3 per group; full detail
    stays behind the existing views (progressive disclosure). Colors are tokens
-   only (no raw literals — see test_ui_console_theme_key_panels_use_tokens). */
+   only (no raw literals -- see test_ui_console_theme_key_panels_use_tokens). */
 .cockpit { margin: 0 0 1.25rem; }
 .cockpit-head {
   display: flex; align-items: baseline; justify-content: space-between;

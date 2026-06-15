@@ -4,8 +4,10 @@ display_id: TASK-AR-563
 task_uid: 9ce4e1e1-af57-452e-9a27-e0d0339a765e
 registered_at: 2026-06-15T17:43:04+09:00
 created_at: 2026-06-15T17:43:04+09:00
-updated_at: 2026-06-15T17:43:04+09:00
-status: planned
+updated_at: 2026-06-15T22:50:00+09:00
+started_at: 2026-06-15T18:00:00+09:00
+completed_at: 2026-06-15T20:30:00+09:00
+status: completed
 priority: P1
 difficulty: M
 est_hours: 6

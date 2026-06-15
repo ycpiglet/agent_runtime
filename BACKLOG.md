@@ -15,6 +15,7 @@
 | 526 | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | Decision Cartographer |
 | 527 | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | Maturity Steward |
 | 528 | `TASKSET-AR-AGENT-ORG-DELEGATION` | Org Conductor |
+| 529 | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | Decision Cockpit |
 
 <!-- BACKLOG-INDEX:END -->
 

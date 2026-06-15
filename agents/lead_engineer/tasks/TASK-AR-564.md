@@ -4,8 +4,10 @@ display_id: TASK-AR-564
 task_uid: 30fd8b46-ee56-4483-a699-06d5804faf9c
 registered_at: 2026-06-15T17:43:04+09:00
 created_at: 2026-06-15T17:43:04+09:00
-updated_at: 2026-06-15T17:43:04+09:00
-status: planned
+updated_at: 2026-06-15T22:50:00+09:00
+started_at: 2026-06-15T20:30:00+09:00
+completed_at: 2026-06-15T22:50:00+09:00
+status: completed
 priority: P1
 difficulty: L
 est_hours: 8

@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-15T17:49:28+09:00
+generated_at: 2026-06-15T23:38:17+09:00
 record_count: 290
 ---
 
@@ -274,8 +274,8 @@ record_count: 290
 | 0.29.5 | Task 0.29.5 | task | `TASK-AR-561` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | `agents/lead_engineer/tasks/TASK-AR-561.md` | Extend blind-Delphi seminar/council with substance-axis persona archetypes (risk tole… |
 | 0.29.6 | Task 0.29.6 | task | `TASK-AR-562` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | `agents/lead_engineer/tasks/TASK-AR-562.md` | Read-API over real records: org tree (teams->roles->live instances), work-state count… |
 | 0.30 | Taskset 0.30 | taskset | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Decision Cockpit |
-| 0.30.1 | Task 0.30.1 | task | `TASK-AR-563` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | planned | `agents/lead_engineer/tasks/TASK-AR-563.md` | scripts/attention_inbox.py: 6-group 'what needs me now' aggregation from existing wor… |
-| 0.30.2 | Task 0.30.2 | task | `TASK-AR-564` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | planned | `agents/lead_engineer/tasks/TASK-AR-564.md` | Serve the attention inbox at /api/inbox and replace the 80-screen home with the cockp… |
+| 0.30.1 | Task 0.30.1 | task | `TASK-AR-563` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | `agents/lead_engineer/tasks/TASK-AR-563.md` | scripts/attention_inbox.py: 6-group 'what needs me now' aggregation from existing wor… |
+| 0.30.2 | Task 0.30.2 | task | `TASK-AR-564` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | `agents/lead_engineer/tasks/TASK-AR-564.md` | Serve the attention inbox at /api/inbox and replace the 80-screen home with the cockp… |
 | 0.30.3 | Task 0.30.3 | task | `TASK-AR-565` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | planned | `agents/lead_engineer/tasks/TASK-AR-565.md` | Group the 67 nav routes under core 7 (Home/Work/Agents/Decisions/Records/Search/More)… |
 | 0.30.4 | Task 0.30.4 | task | `TASK-AR-566` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | planned | `agents/lead_engineer/tasks/TASK-AR-566.md` | Counts/summaries on screen; detail opens in a keyboard-accessible side drawer on clic… |
 | 0.30.5 | Task 0.30.5 | task | `TASK-AR-567` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | planned | `agents/lead_engineer/tasks/TASK-AR-567.md` | Initiative->Taskset->Unit waiting/active/done board + drill-down (reuse org_read_api.… |
