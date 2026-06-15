@@ -99,6 +99,7 @@ class Orchestrator:
         report = {"workers": [], "reviewers": [], "held_for_owner": [],
                   "skipped_idempotent": [], "stopped_over_budget": []}
         spent = 0
+        budget_exhausted = False
         for entry in plan:
             uid = entry["unit_id"]
             meta = meta_by_id.get(uid, {})
@@ -108,8 +109,9 @@ class Orchestrator:
             if entry["mode"] == "owner-gate":                # risk gate
                 report["held_for_owner"].append({"unit_id": uid, "reasons": entry["reasons"]})
                 continue
-            est = int(meta.get("est_tokens", 0) or 0)        # token budget
-            if self.budget_total is not None and spent + est > self.budget_total:
+            est = int(meta.get("est_tokens", 0) or 0)        # token budget: stop-the-line
+            if self.budget_total is not None and (budget_exhausted or spent + est > self.budget_total):
+                budget_exhausted = True   # spec F2: once budget is consumed, remaining units wait
                 report["stopped_over_budget"].append(uid)
                 continue
             spent += est

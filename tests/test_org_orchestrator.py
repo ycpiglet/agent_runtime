@@ -48,6 +48,19 @@ def test_orchestrator_token_budget_stops_dispatch():
     assert rep["tokens_spent"] == 100
 
 
+def test_budget_is_stop_the_line_not_skip_over():
+    # W4b finding [Med]: spec F2 = once budget is consumed, remaining units WAIT.
+    mod = _load()
+    units = [
+        ("U1", {"risk_tier": "low", "target_files": ["a.py"], "est_tokens": 100}),
+        ("U2", {"risk_tier": "low", "target_files": ["b.py"], "est_tokens": 100}),  # over budget
+        ("U3", {"risk_tier": "low", "target_files": ["c.py"], "est_tokens": 10}),   # cheap, but line stopped
+    ]
+    rep = mod.Orchestrator(mod.RecordingBackend(), budget_total=150).run(units)
+    assert [w["unit_id"] for w in rep["workers"]] == ["U1"]
+    assert rep["stopped_over_budget"] == ["U2", "U3"]   # U3 not dispatched despite being cheap
+
+
 def test_backend_is_swappable_interface():
     mod = _load()
     # the orchestrator only depends on the WorkerBackend ABC, never on a concrete backend

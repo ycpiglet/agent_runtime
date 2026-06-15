@@ -60,3 +60,12 @@ def test_decompose_is_idempotent_and_records_provenance(tmp_path):
     prov = (tmp_path / "TASK-AR-902" / "DECOMPOSITION.json")
     assert prov.exists()
     assert "UNIT-TASK-AR-902-001" in prov.read_text(encoding="utf-8")
+
+
+def test_render_unit_rejects_incomplete_brief():
+    # W4b finding [Low]: incomplete brief should raise a clear error, not KeyError.
+    import pytest
+    ld = _load("lead_decompose")
+    with pytest.raises(ValueError):
+        ld.render_unit(task_id="TASK-AR-903", task_set_id="TS", n=1,
+                       brief={"context": "", "scope": "s", "handoff": "h", "stop_condition": "x"})

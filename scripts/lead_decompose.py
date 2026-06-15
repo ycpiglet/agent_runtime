@@ -43,6 +43,10 @@ def render_unit(*, task_id: str, task_set_id: str, n: int, brief: dict,
                 project_id: str = DEFAULT_PROJECT, decomposed_by: str = "lead-engineer") -> tuple[str, str]:
     """Return (unit_id, markdown) for a worker-ready unit from a brief dict."""
     unit_id = f"UNIT-{task_id}-{n:03d}"
+    _missing = [k for k in ("context", "scope", "handoff", "stop_condition")
+                if not str(brief.get(k, "")).strip()]
+    if _missing:
+        raise ValueError(f"{unit_id}: unit brief missing required fields: {_missing}")
     fm = [
         "---",
         f"unit_id: {unit_id}",
