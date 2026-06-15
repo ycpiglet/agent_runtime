@@ -4,8 +4,9 @@ display_id: TASK-AR-552
 task_uid: 7556ca8e-de5f-44fd-b9ed-42d80495c448
 registered_at: 2026-06-14T08:48:02+09:00
 created_at: 2026-06-14T08:48:02+09:00
-updated_at: 2026-06-14T08:48:02+09:00
-status: planned
+updated_at: 2026-06-15T13:45:18+09:00
+status: completed
+resolution: done
 priority: P1
 difficulty: M
 est_hours: 6
@@ -17,6 +18,12 @@ tags:
   - testing
   - deadlock
   - concurrency
+started_at: 2026-06-15T13:45:18+09:00
+completed_at: 2026-06-15T13:45:18+09:00
+verification_status: passed
+review_refs:
+  - reviews/W4B-2026-06-15-TASK-AR-546-556.md
+  - reviews/REVIEW-2026-06-15-product-maturity-uplift-closeout.md
 ---
 
 # TASK-AR-552 - claim_reaper concurrency + heartbeat stress tests

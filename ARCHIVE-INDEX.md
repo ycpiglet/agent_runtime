@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-15
-archived_count: 215
+archived_count: 226
 ---
 
 # Archived Task Files
 
-- `215` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `226` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -222,6 +222,17 @@ archived_count: 215
 | `TASK-AR-544` | `0b16b05d-c8a…` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T14:25:00+09:00 | 2026-06-14T14:40:00+09:00 | 2026-06-14T14:40:00+09:00 | Bring SCM artifacts the Owner listed (git log, branches, PRs, issues) into the catalo… |
 | `TASK-AR-545` | `98d79038-827…` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T14:25:00+09:00 | 2026-06-14T14:40:00+09:00 | 2026-06-14T14:40:00+09:00 | Make the product's governance/knowledge documents (skills, council records, seminar r… |
 | `TASK-AR-542` | `2bc66839-72e…` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T14:25:00+09:00 | 2026-06-14T14:40:00+09:00 | 2026-06-14T14:40:00+09:00 | Answer "who/what/when/why did this change" for any entity by unifying scattered histo… |
+| `TASK-AR-548` | `26100de0-a45…` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | 2026-06-14T08:48:02+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | Form errors currently surface in a single global list and a failed submit can reset t… |
+| `TASK-AR-552` | `7556ca8e-de5…` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | 2026-06-14T08:48:02+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | The deadlock guardrails (claim_reaper/goal_supervisor) are unit-tested on the happy p… |
+| `TASK-AR-556` | `94b7419c-b34…` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | 2026-06-14T11:10:46+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | Make the canonical closure steps (compound / review / retro) **non-skippable** for su… |
+| `TASK-AR-546` | `e38bdf8b-01f…` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | 2026-06-14T08:48:02+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | Close the highest-impact UI testing gap: there are ~326 Python-side UI tests but **no… |
+| `TASK-AR-549` | `acc358de-d05…` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | 2026-06-14T08:48:02+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | The console has broad ARIA usage but misses several WCAG essentials. Add skip-to-cont… |
+| `TASK-AR-551` | `7d63f433-a22…` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | 2026-06-14T08:48:02+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | i18n covers UI chrome (ko/en) but error messages are hardcoded English and there is n… |
+| `TASK-AR-553` | `c1b3f0c1-b90…` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | 2026-06-14T08:48:02+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | The runtime captures rich local audit trails (pane_events, stop_counters, hook-logs)… |
+| `TASK-AR-547` | `333e7d79-d97…` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | 2026-06-14T08:48:02+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | The console is single-column with fixed widths and a fixed sidebar; it breaks below d… |
+| `TASK-AR-554` | `62ff8a17-5e8…` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | 2026-06-14T08:48:02+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | Claim reaping/recovery assumes a single checkout (single-writer). Multiple hosts or C… |
+| `TASK-AR-550` | `1f502ba9-46e…` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | 2026-06-14T08:48:02+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | The console polls every 5-10s, adding latency and wasted bandwidth. Add Server-Sent E… |
+| `TASK-AR-555` | `64cd01b2-0e9…` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | 2026-06-14T08:48:02+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | 2026-06-15T13:45:18+09:00 | Release stages are validated locally in `--check` mode only; remote tag/PR/merge/publ… |
 | `TASK-AR-557` | `74c4128c-45e…` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | 2026-06-15T00:29:41+09:00 | 2026-06-15T00:29:41+09:00 | 2026-06-15T01:30:00+09:00 | 2026-06-15T01:30:00+09:00 | ORG-MODEL.yml (role/team/tier registry, aliases absorb owner drift) + scripts/org_mod… |
 | `TASK-AR-562` | `595f7d10-6f0…` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | 2026-06-15T00:29:41+09:00 | 2026-06-15T00:29:41+09:00 | 2026-06-15T10:04:03+09:00 | 2026-06-15T10:04:03+09:00 | Read-API over real records: org tree (teams->roles->live instances), work-state count… |
 | `TASK-AR-558` | `630087d8-3d4…` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | 2026-06-15T00:29:41+09:00 | 2026-06-15T00:29:41+09:00 | 2026-06-15T10:04:03+09:00 | 2026-06-15T10:04:03+09:00 | Tool for a Lead to decompose a Taskset's Tasks into worker-ready Units (unit_spec/con… |

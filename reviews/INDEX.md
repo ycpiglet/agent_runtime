@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-15T12:36:35+09:00
-record_count: 492
+generated_at: 2026-06-15T14:37:00+09:00
+record_count: 494
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `492` review and evidence records under `reviews/`.
+- Summary: indexed `494` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `492` files |
+| Reviews covered | pass | `494` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -455,6 +455,7 @@ record_count: 492
 | `reviews/REVIEW-2026-06-14-knowledge-stack-followups-closeout.md` | `REVIEW-2026-06-14-knowledge-stack-followups-closeout` | review | watch | watch | REVIEW 2026-06-14 — Knowledge-stack follow-ups closeout (A/B/C) |
 | `reviews/REVIEW-2026-06-15-doc-to-plan-closeout.md` | `REVIEW-2026-06-15-doc-to-plan-closeout` | md | record | n/a | REVIEW — Doc-to-Plan: Closeout (TASKSET-AR-DOC-TO-PLAN) |
 | `reviews/REVIEW-2026-06-15-paperclip-gap-adoption-decision.md` | `REVIEW-2026-06-15-paperclip-gap-adoption-decision` | md | record | n/a | REVIEW — Paperclip Gap Analysis & Adoption Decision (TASK-AR-367) |
+| `reviews/REVIEW-2026-06-15-product-maturity-uplift-closeout.md` | `REVIEW-2026-06-15-product-maturity-uplift-closeout` | md | record | n/a | REVIEW — Product Maturity Uplift: Closeout (TASKSET-AR-PRODUCT-MATURITY-UPLIFT) |
 | `reviews/REVIEW-2026-06-15-work-hierarchy-conflict-closure-closeout.md` | `REVIEW-2026-06-15-work-hierarchy-conflict-closure-closeout` | md | record | n/a | REVIEW — Work Hierarchy Conflict Closure: Closeout (TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE) |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
@@ -524,6 +525,7 @@ record_count: 492
 | `reviews/W4B-2026-06-14-TASK-AR-541-545.md` | `W4B-2026-06-14-TASK-AR-541-545` | verification | record | n/a | W4b Independent Verification — Decision Console Surfaces (TASK-AR-541/542/543/544/545) |
 | `reviews/W4B-2026-06-15-TASK-AR-366-368.md` | `W4B-2026-06-15-TASK-AR-366-368` | md | record | n/a | W4B Independent Verification — TASK-AR-366 & TASK-AR-368 |
 | `reviews/W4B-2026-06-15-TASK-AR-371-374.md` | `W4B-2026-06-15-TASK-AR-371-374` | md | record | n/a | W4B-2026-06-15-TASK-AR-371-374 |
+| `reviews/W4B-2026-06-15-TASK-AR-546-556.md` | `W4B-2026-06-15-TASK-AR-546-556` | md | record | n/a | W4B Independent Verification — TASKSET-AR-546-556 (product-maturity-uplift) |
 | `reviews/W4B-2026-06-15-TASK-AR-557.md` | `W4B-2026-06-15-TASK-AR-557` | md | record | n/a | W4B Independent Verification — TASK-AR-557 (Unit 1: Role/Team/Tier Registry) |
 | `reviews/W4B-2026-06-15-TASK-AR-558-562.md` | `W4B-2026-06-15-TASK-AR-558-562` | md | record | n/a | W4B Independent Verification — TASK-AR-558..562 (Agent Org Delegation) |
 

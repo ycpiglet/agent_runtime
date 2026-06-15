@@ -63,6 +63,7 @@ HTML = """<!doctype html>
   <link rel="stylesheet" href="/app.css">
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to main content</a>
   <div id="runtime-console-app" class="shell">
     <header class="topbar">
       <div class="brand">
@@ -244,7 +245,7 @@ HTML = """<!doctype html>
     </nav>
     <div id="sidebar-scrim" class="sidebar-scrim" hidden></div>
 
-    <main class="layout">
+    <main class="layout" id="main">
       <section class="dashboard" aria-label="Dashboard">
         <div class="metric"><span>Total Tasks</span><strong id="metric-tasks">0</strong></div>
         <div class="metric"><span>Active</span><strong id="metric-active">0</strong></div>
@@ -1011,6 +1012,19 @@ CSS = """/*
  * info/primary) keep the same semantic meaning across themes and are always
  * paired with text labels (never color-only signalling).
  */
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: -48px;
+  z-index: 1000;
+  padding: 8px 14px;
+  background: var(--primary);
+  color: var(--canvas);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: top 120ms ease;
+}
+.skip-link:focus { top: 8px; outline: 2px solid var(--canvas); }
 :root {
   color-scheme: light;
   /* Surfaces */
