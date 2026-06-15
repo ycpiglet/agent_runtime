@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-15T10:05:56+09:00",
+  "generated_at": "2026-06-15T12:36:25+09:00",
   "record_count": 281,
   "finding_count": 0,
   "findings": [],
@@ -2038,7 +2038,7 @@
       "title": "Pitch Alchemist",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-UNASSIGNED",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-366",
@@ -2049,7 +2049,7 @@
       "title": "pitch deck/기획서/아이디어 문서(PPT, PDF, Word, HTML, md)를 넣으면 시스템이 스스로 분석해 plan을 짜고 실현 가능한 ta…",
       "path": "agents/lead_engineer/tasks/TASK-AR-366.md",
       "parent_id": "TASKSET-AR-DOC-TO-PLAN",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-367",
@@ -2060,7 +2060,7 @@
       "title": "비전이 동일한 오픈소스 Paperclip(github.com/paperclipai/paperclip, MIT)의 기능 중 agent_runtime에 없는…",
       "path": "agents/lead_engineer/tasks/TASK-AR-367.md",
       "parent_id": "TASKSET-AR-DOC-TO-PLAN",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-368",
@@ -2071,7 +2071,7 @@
       "title": "예상치(est_*)만 있는 현 체계에 실측치를 더해, task/taskset을 우선순위·난이도·예상/실제 토큰·예상/실제 시간·부서 등 다요소로 정렬·필…",
       "path": "agents/lead_engineer/tasks/TASK-AR-368.md",
       "parent_id": "TASKSET-AR-DOC-TO-PLAN",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "taskset:TASKSET-AR-OPS-ERGONOMICS",
@@ -2599,7 +2599,7 @@
       "title": "Work Taxonomist",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-369",
@@ -2632,7 +2632,7 @@
       "title": "Remove `BACKLOG.md` as a top-of-file shared manual registration hotspot while preserv…",
       "path": "agents/lead_engineer/tasks/TASK-AR-371.md",
       "parent_id": "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-372",
@@ -2643,7 +2643,7 @@
       "title": "Provide one structured registration command path so planners stop hand-editing board…",
       "path": "agents/lead_engineer/tasks/TASK-AR-372.md",
       "parent_id": "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-372-001",
@@ -2753,7 +2753,7 @@
       "title": "Make it visible which planned tasks are worker-ready and which still require planner…",
       "path": "agents/lead_engineer/tasks/TASK-AR-373.md",
       "parent_id": "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-373-001",
@@ -2786,7 +2786,7 @@
       "title": "Prove that the work hierarchy and registration conflict surfaces are actually closed…",
       "path": "agents/lead_engineer/tasks/TASK-AR-374.md",
       "parent_id": "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "initiative:INIT-AR-AGENT-IDENTITY-OBSERVABILITY",

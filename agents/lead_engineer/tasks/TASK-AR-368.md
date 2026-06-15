@@ -12,9 +12,10 @@ display_id: TASK-AR-368
 task_uid: 587a4f9e-5261-4a63-b7a8-300af15910d8
 registered_at: 2026-06-12T00:09:43+09:00
 created_at: 2026-06-12T00:09:43+09:00
-updated_at: 2026-06-12T00:09:43+09:00
+updated_at: 2026-06-15T12:36:11+09:00
 title: 실측 지표 캡처 + 다요소 평가/정렬 기준 확장
-status: planned
+status: completed
+resolution: done
 priority: P1
 difficulty: M
 est_hours: 8
@@ -26,6 +27,12 @@ tags:
   - actuals
   - sorting
   - evaluation
+started_at: 2026-06-15T12:36:11+09:00
+completed_at: 2026-06-15T12:36:11+09:00
+verification_status: passed
+review_refs:
+  - reviews/W4B-2026-06-15-TASK-AR-366-368.md
+  - reviews/REVIEW-2026-06-15-doc-to-plan-closeout.md
 ---
 
 # TASK-AR-368 - 실측 지표 캡처 + 다요소 평가/정렬 기준 확장

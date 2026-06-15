@@ -14,8 +14,9 @@ registered_at: 2026-06-12T08:17:54+09:00
 created_at: 2026-06-12T08:17:54+09:00
 title: Registration CLI/API for initiative, taskset, task, and unit records
 started_at: 2026-06-12T11:58:44+09:00
-updated_at: 2026-06-12T14:32:00+09:00
-status: in_progress
+updated_at: 2026-06-15T12:01:39+09:00
+status: completed
+resolution: done
 priority: P1
 difficulty: L
 est_hours: 12
@@ -35,6 +36,11 @@ tags:
   - cli
   - registration
   - automation
+completed_at: 2026-06-15T12:01:39+09:00
+verification_status: passed
+review_refs:
+  - reviews/W4B-2026-06-15-TASK-AR-371-374.md
+  - reviews/REVIEW-2026-06-15-work-hierarchy-conflict-closure-closeout.md
 ---
 
 # TASK-AR-372 - Registration CLI/API for initiative, taskset, task, and unit records

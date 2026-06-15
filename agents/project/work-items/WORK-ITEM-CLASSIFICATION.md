@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-15T10:05:56+09:00
+generated_at: 2026-06-15T12:36:25+09:00
 record_count: 281
 ---
 
@@ -223,10 +223,10 @@ record_count: 281
 | 0.22.8 | Task 0.22.8 | task | `TASK-AR-349` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-349.md` | Mirror the PM hierarchy, unit templates, schemas, and gates into generated host proje… |
 | 0.22.9 | Task 0.22.9 | task | `TASK-AR-350` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-350.md` | Add a taskset verification wrapper and Owner-facing closeout evidence for the PM oper… |
 | 0.22.9.1 | Unit 0.22.9.1 | unit | `UNIT-TASK-AR-350-001` | `TASK-AR-350` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-350/UNIT-TASK-AR-350-001.md` | UNIT-TASK-AR-350-001 - PM OS Closeout Verification |
-| 0.23 | Taskset 0.23 | taskset | `TASKSET-AR-DOC-TO-PLAN` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Pitch Alchemist |
-| 0.23.1 | Task 0.23.1 | task | `TASK-AR-366` | `TASKSET-AR-DOC-TO-PLAN` | planned | `agents/lead_engineer/tasks/TASK-AR-366.md` | pitch deck/기획서/아이디어 문서(PPT, PDF, Word, HTML, md)를 넣으면 시스템이 스스로 분석해 plan을 짜고 실현 가능한 ta… |
-| 0.23.2 | Task 0.23.2 | task | `TASK-AR-367` | `TASKSET-AR-DOC-TO-PLAN` | planned | `agents/lead_engineer/tasks/TASK-AR-367.md` | 비전이 동일한 오픈소스 Paperclip(github.com/paperclipai/paperclip, MIT)의 기능 중 agent_runtime에 없는… |
-| 0.23.3 | Task 0.23.3 | task | `TASK-AR-368` | `TASKSET-AR-DOC-TO-PLAN` | planned | `agents/lead_engineer/tasks/TASK-AR-368.md` | 예상치(est_*)만 있는 현 체계에 실측치를 더해, task/taskset을 우선순위·난이도·예상/실제 토큰·예상/실제 시간·부서 등 다요소로 정렬·필… |
+| 0.23 | Taskset 0.23 | taskset | `TASKSET-AR-DOC-TO-PLAN` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Pitch Alchemist |
+| 0.23.1 | Task 0.23.1 | task | `TASK-AR-366` | `TASKSET-AR-DOC-TO-PLAN` | completed | `agents/lead_engineer/tasks/TASK-AR-366.md` | pitch deck/기획서/아이디어 문서(PPT, PDF, Word, HTML, md)를 넣으면 시스템이 스스로 분석해 plan을 짜고 실현 가능한 ta… |
+| 0.23.2 | Task 0.23.2 | task | `TASK-AR-367` | `TASKSET-AR-DOC-TO-PLAN` | completed | `agents/lead_engineer/tasks/TASK-AR-367.md` | 비전이 동일한 오픈소스 Paperclip(github.com/paperclipai/paperclip, MIT)의 기능 중 agent_runtime에 없는… |
+| 0.23.3 | Task 0.23.3 | task | `TASK-AR-368` | `TASKSET-AR-DOC-TO-PLAN` | completed | `agents/lead_engineer/tasks/TASK-AR-368.md` | 예상치(est_*)만 있는 현 체계에 실측치를 더해, task/taskset을 우선순위·난이도·예상/실제 토큰·예상/실제 시간·부서 등 다요소로 정렬·필… |
 | 0.24 | Taskset 0.24 | taskset | `TASKSET-AR-OPS-ERGONOMICS` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Ops Ergonomics |
 | 0.24.1 | Task 0.24.1 | task | `TASK-AR-523` | `TASKSET-AR-OPS-ERGONOMICS` | completed | `agents/lead_engineer/tasks/TASK-AR-523.md` | Nothing surfaces the 500-series observability at session start. Add scripts/session_d… |
 | 0.24.2 | Task 0.24.2 | task | `TASK-AR-524` | `TASKSET-AR-OPS-ERGONOMICS` | completed | `agents/lead_engineer/tasks/TASK-AR-524.md` | Make the new 500-series tools discoverable as trigger-based skills: wave-conductor (w… |
@@ -274,11 +274,11 @@ record_count: 281
 | 0.29.5 | Task 0.29.5 | task | `TASK-AR-561` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | `agents/lead_engineer/tasks/TASK-AR-561.md` | Extend blind-Delphi seminar/council with substance-axis persona archetypes (risk tole… |
 | 0.29.6 | Task 0.29.6 | task | `TASK-AR-562` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | `agents/lead_engineer/tasks/TASK-AR-562.md` | Read-API over real records: org tree (teams->roles->live instances), work-state count… |
 | 1 | Initiative 1 | initiative | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | - | planned | `agents/project/initiatives/INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE.md` | Work Hierarchy Conflict Closure Initiative |
-| 1.1 | Taskset 1.1 | taskset | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | active | `BACKLOG-BOARD.md` | Work Taxonomist |
+| 1.1 | Taskset 1.1 | taskset | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | complete | `BACKLOG-BOARD.md` | Work Taxonomist |
 | 1.1.1 | Task 1.1.1 | task | `TASK-AR-369` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-369.md` | Finish the terminology migration from ambiguous `project -> taskset -> task -> unit`… |
 | 1.1.2 | Task 1.1.2 | task | `TASK-AR-370` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-370.md` | Prevent concurrent panes from selecting the same human display ID before a task file… |
-| 1.1.3 | Task 1.1.3 | task | `TASK-AR-371` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-371.md` | Remove `BACKLOG.md` as a top-of-file shared manual registration hotspot while preserv… |
-| 1.1.4 | Task 1.1.4 | task | `TASK-AR-372` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | in_progress | `agents/lead_engineer/tasks/TASK-AR-372.md` | Provide one structured registration command path so planners stop hand-editing board… |
+| 1.1.3 | Task 1.1.3 | task | `TASK-AR-371` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-371.md` | Remove `BACKLOG.md` as a top-of-file shared manual registration hotspot while preserv… |
+| 1.1.4 | Task 1.1.4 | task | `TASK-AR-372` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-372.md` | Provide one structured registration command path so planners stop hand-editing board… |
 | 1.1.4.1 | Unit 1.1.4.1 | unit | `UNIT-TASK-AR-372-001` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-001.md` | UNIT-TASK-AR-372-001 - Work Schema SSoT And Gate |
 | 1.1.4.2 | Unit 1.1.4.2 | unit | `UNIT-TASK-AR-372-002` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-002.md` | UNIT-TASK-AR-372-002 - Deterministic Work Registration CLI |
 | 1.1.4.3 | Unit 1.1.4.3 | unit | `UNIT-TASK-AR-372-003` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-003.md` | UNIT-TASK-AR-372-003 - Worker-Ready Unit Generation In Work CLI |
@@ -288,10 +288,10 @@ record_count: 281
 | 1.1.4.7 | Unit 1.1.4.7 | unit | `UNIT-TASK-AR-372-007` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-007.md` | UNIT-TASK-AR-372-007 - Proposal-Only Work Criteria Command |
 | 1.1.4.8 | Unit 1.1.4.8 | unit | `UNIT-TASK-AR-372-008` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-008.md` | UNIT-TASK-AR-372-008 - Proposal-Only Work Assign Command |
 | 1.1.4.9 | Unit 1.1.4.9 | unit | `UNIT-TASK-AR-372-009` | `TASK-AR-372` | completed | `agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-009.md` | UNIT-TASK-AR-372-009 - Proposal-Only Work Split Command |
-| 1.1.5 | Task 1.1.5 | task | `TASK-AR-373` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | worker_ready | `agents/lead_engineer/tasks/TASK-AR-373.md` | Make it visible which planned tasks are worker-ready and which still require planner… |
+| 1.1.5 | Task 1.1.5 | task | `TASK-AR-373` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-373.md` | Make it visible which planned tasks are worker-ready and which still require planner… |
 | 1.1.5.1 | Unit 1.1.5.1 | unit | `UNIT-TASK-AR-373-001` | `TASK-AR-373` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-373/UNIT-TASK-AR-373-001.md` | UNIT-TASK-AR-373-001 — worker-readiness classifier report |
 | 1.1.5.2 | Unit 1.1.5.2 | unit | `UNIT-TASK-AR-373-002` | `TASK-AR-373` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-373/UNIT-TASK-AR-373-002.md` | UNIT-TASK-AR-373-002 — migration report + dispatcher readiness guard |
-| 1.1.6 | Task 1.1.6 | task | `TASK-AR-374` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | planned | `agents/lead_engineer/tasks/TASK-AR-374.md` | Prove that the work hierarchy and registration conflict surfaces are actually closed… |
+| 1.1.6 | Task 1.1.6 | task | `TASK-AR-374` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-374.md` | Prove that the work hierarchy and registration conflict surfaces are actually closed… |
 | 2 | Initiative 2 | initiative | `INIT-AR-AGENT-IDENTITY-OBSERVABILITY` | - | active | `agents/project/initiatives/INIT-AR-AGENT-IDENTITY-OBSERVABILITY.md` | Agent Identity Observability |
 | 2.1 | Taskset 2.1 | taskset | `TASKSET-AR-AGENT-IDENTITY-CONTRACT` | `INIT-AR-AGENT-IDENTITY-OBSERVABILITY` | complete | `BACKLOG-BOARD.md` | Agent Identity Contract |
 | 2.1.1 | Task 2.1.1 | task | `TASK-AR-375` | `TASKSET-AR-AGENT-IDENTITY-CONTRACT` | completed | `agents/lead_engineer/tasks/TASK-AR-375.md` | Create durable instance-level identity records and a deterministic gate that rejects… |

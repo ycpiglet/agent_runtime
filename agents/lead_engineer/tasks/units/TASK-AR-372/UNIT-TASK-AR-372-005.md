@@ -36,11 +36,12 @@ verification:
   - python scripts/work.py --help
 handoff: Report work verify syntax, evidence path behavior, and remaining work close gap.
 stop_condition: Stop after deterministic verification evidence is written; leave work close and AI planner proposal tools to separate units.
-verified_at: 2026-06-12T13:13:09+09:00
-verified_by: codex
+verified_at: 2026-06-15T11:21:19+09:00
+verified_by: work.py verify
 evidence_refs:
   - reviews/VERIFY-2026-06-12-unit-task-ar-372-005-20260612131309.json
-updated_at: 2026-06-12T13:13:09+09:00
+  - reviews/VERIFY-2026-06-15-unit-task-ar-372-005-20260615112119.json
+updated_at: 2026-06-15T11:21:19+09:00
 ---
 
 # UNIT-TASK-AR-372-005 - Deterministic Work Verify Command

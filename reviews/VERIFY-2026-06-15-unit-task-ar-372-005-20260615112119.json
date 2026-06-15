@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-15-unit-task-ar-372-005-20260615112119",
+  "work_id": "UNIT-TASK-AR-372-005",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-372/UNIT-TASK-AR-372-005.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-372",
+  "unit_id": "UNIT-TASK-AR-372-005",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-15T11:21:19+09:00",
+  "verified_by": "work.py verify",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python -m py_compile scripts\\\\work.py",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-15T11:21:19+09:00",
+      "finished_at": "2026-06-15T11:21:19+09:00",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "pytest tests/test_work_verify.py tests/test_work_registration.py tests/test_now.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-15T11:21:19+09:00",
+      "finished_at": "2026-06-15T11:21:51+09:00",
+      "stdout": ".............                                                            [100%]\n13 passed in 26.42s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/work.py --help",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-15T11:21:51+09:00",
+      "finished_at": "2026-06-15T11:21:53+09:00",
+      "stdout": "usage: work.py [-h] [--root ROOT]\n               {new,register,status,now,verify,criteria,assign,split,close,stats,view}\n               ...\n\nCreate and manage Work Items\n\npositional arguments:\n  {new,register,status,now,verify,criteria,assign,split,close,stats,view}\n    new                 Create work records from structured JSON input\n    register            Alias for new\n    status              W0 session-start visibility: active claims, git\n                        worktrees, and in-flight (unmerged agent branch)\n                        divergence in one read-only view\n    now                 Print the canonical project timestamp\n    verify              Run a work item's verification commands and write\n                        evidence\n    criteria            Evaluate criteria verifiability and write B-mode\n                        proposals for gaps\n    assign              Recommend team/owner assignment and write B-mode\n                        proposals for gaps\n    split               Propose worker-ready unit specs for a task without\n                        canonical unit files\n    close               Close a work item after passed verification evidence\n    stats               Aggregate v1 Work Item metadata without mutating files\n    view                Save, list, and run reusable work stats views\n\noptions:\n  -h, --help            show this help message and exit\n  --root ROOT\n",
+      "stderr": ""
+    }
+  ]
+}

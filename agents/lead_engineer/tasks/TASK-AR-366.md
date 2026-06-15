@@ -12,9 +12,10 @@ display_id: TASK-AR-366
 task_uid: 07e182d9-a171-409b-b978-9edd86625bb5
 registered_at: 2026-06-12T00:09:43+09:00
 created_at: 2026-06-12T00:09:43+09:00
-updated_at: 2026-06-12T00:09:43+09:00
+updated_at: 2026-06-15T12:36:11+09:00
 title: 문서→플랜 파이프라인 — pitch deck/기획서 인입 → task 자동 분해 등록
-status: planned
+status: completed
+resolution: done
 priority: P1
 difficulty: XL
 est_hours: 16
@@ -26,6 +27,12 @@ tags:
   - intake
   - planning
   - autoplan
+started_at: 2026-06-15T12:36:11+09:00
+completed_at: 2026-06-15T12:36:11+09:00
+verification_status: passed
+review_refs:
+  - reviews/W4B-2026-06-15-TASK-AR-366-368.md
+  - reviews/REVIEW-2026-06-15-doc-to-plan-closeout.md
 ---
 
 # TASK-AR-366 - 문서→플랜 파이프라인 — pitch deck/기획서 인입 → task 자동 분해 등록
