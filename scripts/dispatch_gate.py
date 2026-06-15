@@ -74,12 +74,10 @@ def plan_dispatch(units: list[tuple[str, dict]], *, max_parallel: int = 4) -> li
 
 
 def _front_meta(path: Path) -> dict:
-    import yaml
-    text = path.read_text(encoding="utf-8", errors="replace")
-    if not text.startswith("---"):
-        return {}
-    end = text.find("\n---", 3)
-    return yaml.safe_load(text[3:end]) if end != -1 else {}
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from org_model_gate import parse_frontmatter  # stdlib parser (no PyYAML)
+    return parse_frontmatter(path.read_text(encoding="utf-8", errors="replace"))
 
 
 def _units_from_dir(d: Path) -> list[tuple[str, dict]]:

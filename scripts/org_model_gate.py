@@ -7,17 +7,97 @@ Spec: docs/superpowers/specs/2026-06-14-agent-org-delegation-model-design.md (Se
 from __future__ import annotations
 import argparse
 import glob
+import re
 from pathlib import Path
-
-import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 REGISTRY = ROOT / "agents" / "project" / "ORG-MODEL.yml"
 DEFAULT_GLOB = "agents/lead_engineer/tasks/TASK-*.md"
 
 
+def _coerce(v: str):
+    v = v.strip().strip("'\"")
+    if v in ("true", "True"):
+        return True
+    if v in ("false", "False"):
+        return False
+    if re.fullmatch(r"-?\d+", v):
+        return int(v)
+    return v
+
+
+def parse_frontmatter(text: str) -> dict:
+    """Stdlib frontmatter parser (the repo + CI run PyYAML-free; gates parse by hand)."""
+    meta: dict = {}
+    if not text.startswith("---"):
+        return meta
+    current_list = None
+    for raw in text.splitlines()[1:]:
+        line = raw.rstrip()
+        if line.strip() == "---":
+            break
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        if line.startswith("  - ") and current_list:
+            meta.setdefault(current_list, []).append(_coerce(line[4:]))
+            continue
+        m = re.match(r"^([A-Za-z0-9_-]+):\s*(.*)$", line)
+        if not m:
+            continue
+        key, val = m.group(1), m.group(2).strip()
+        if val == "":
+            meta[key] = []
+            current_list = key
+        elif val.startswith("[") and val.endswith("]"):
+            meta[key] = [_coerce(x) for x in val[1:-1].split(",") if x.strip()]
+            current_list = None
+        else:
+            meta[key] = _coerce(val)
+            current_list = None
+    return meta
+
+
+def _coerce_om(v: str):
+    v = v.strip()
+    if v.startswith("[") and v.endswith("]"):
+        return [x.strip() for x in v[1:-1].split(",") if x.strip()]
+    return v.strip("'\"")
+
+
+def parse_org_model(text: str) -> dict:
+    """Stdlib parser for ORG-MODEL.yml's fixed structure (no PyYAML)."""
+    reg: dict = {"teams": [], "roles": [], "tiers": []}
+    section = None
+    cur = None
+    for raw in text.splitlines():
+        line = raw.split("#", 1)[0].rstrip()   # ORG-MODEL values contain no '#'
+        if not line.strip():
+            continue
+        if not line[0].isspace():              # top-level key
+            key, _, val = line.partition(":")
+            key, val = key.strip(), val.strip()
+            section = cur = None
+            if key in ("teams", "roles"):
+                section = key
+            elif val.startswith("[") and val.endswith("]"):
+                reg[key] = [x.strip() for x in val[1:-1].split(",") if x.strip()]
+            elif val:
+                reg[key] = val
+        elif section and line.lstrip().startswith("- "):
+            cur = {}
+            reg[section].append(cur)
+            rest = line.lstrip()[2:]
+            if ":" in rest:
+                k, _, v = rest.partition(":")
+                cur[k.strip()] = _coerce_om(v)
+        elif section and cur is not None and ":" in line:
+            k, _, v = line.strip().partition(":")
+            cur[k.strip()] = _coerce_om(v)
+    return reg
+
+
 def load_registry(path: Path = REGISTRY) -> dict:
-    return yaml.safe_load(path.read_text(encoding="utf-8"))
+    return parse_org_model(path.read_text(encoding="utf-8"))
 
 
 def _alias_map(reg: dict) -> dict[str, dict]:
@@ -45,12 +125,7 @@ def resolve_team(team_id: str | None, reg: dict) -> dict | None:
 
 
 def _front_owner(path: Path) -> str | None:
-    text = path.read_text(encoding="utf-8", errors="replace")
-    if not text.startswith("---"):
-        return None
-    end = text.find("\n---", 3)
-    fm = yaml.safe_load(text[3:end]) if end != -1 else {}
-    return (fm or {}).get("owner")
+    return parse_frontmatter(path.read_text(encoding="utf-8", errors="replace")).get("owner")
 
 
 def cmd_check(paths: list[str], *, enforce: bool) -> int:

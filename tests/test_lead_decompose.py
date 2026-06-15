@@ -2,8 +2,6 @@ import importlib.util
 import sys
 from pathlib import Path
 
-import yaml
-
 ROOT = Path(__file__).resolve().parent.parent
 # task_unit_readiness_gate imports sibling scripts by bare name (import backlog_board).
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -41,11 +39,12 @@ def test_decompose_creates_readiness_passing_units(tmp_path):
         units_root=tmp_path,
     )
     assert len(res["created"]) == 2
+    pfm = _load("org_model_gate").parse_frontmatter   # stdlib frontmatter parser (no PyYAML)
     for p in res["created"]:
         path = Path(p)
         text = path.read_text(encoding="utf-8")
-        _, fm, body = text.split("---", 2)
-        meta = yaml.safe_load(fm)
+        meta = pfm(text)
+        body = text.split("---", 2)[2]
         findings = gate.validate_unit(ROOT, path, meta, body, require_ready=True)
         assert findings == [], findings
 

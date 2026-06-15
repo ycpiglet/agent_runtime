@@ -12,11 +12,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
-import yaml
-
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from org_model_gate import parse_frontmatter, parse_org_model  # noqa: E402  (stdlib, no PyYAML)
 
 STATUS_BUCKETS = {
     "proposed": "waiting", "planned": "waiting", "worker_ready": "waiting",
@@ -27,7 +28,7 @@ STATUS_BUCKETS = {
 
 
 def load_org(root: Path = ROOT) -> dict:
-    return yaml.safe_load((root / "agents" / "project" / "ORG-MODEL.yml").read_text(encoding="utf-8"))
+    return parse_org_model((root / "agents" / "project" / "ORG-MODEL.yml").read_text(encoding="utf-8"))
 
 
 def _alias_to_role(reg: dict) -> dict[str, str]:
@@ -67,11 +68,7 @@ def org_tree(root: Path = ROOT) -> dict:
 
 
 def _front(path: Path) -> dict:
-    text = path.read_text(encoding="utf-8", errors="replace")
-    if not text.startswith("---"):
-        return {}
-    end = text.find("\n---", 3)
-    return (yaml.safe_load(text[3:end]) if end != -1 else {}) or {}
+    return parse_frontmatter(path.read_text(encoding="utf-8", errors="replace"))
 
 
 def _task_metas(root: Path) -> list[dict]:
