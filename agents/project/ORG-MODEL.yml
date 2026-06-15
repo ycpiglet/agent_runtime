@@ -1,0 +1,66 @@
+# agents/project/ORG-MODEL.yml — Role/Team/Tier registry (SSOT).
+# Director -> Lead -> Worker + Reviewer, organized into functional teams.
+# `aliases` absorb historical free-text owner values so no mass file rewrite is
+# needed; the org_model_gate resolves any alias to the canonical kebab-case id.
+# Spec: docs/superpowers/specs/2026-06-14-agent-org-delegation-model-design.md (Sec A).
+schema: agent-runtime-org-model/v1
+updated_at: 2026-06-15T00:29:41+09:00
+
+# Tiers map to the work-schema *_model_tier fields (planner/worker/reviewer).
+tiers: [director, planner, worker, reviewer]
+
+teams:
+  - id: org           # org-wide (no single discipline)
+    display_name: Org
+  - id: engineering
+    display_name: Engineering
+  - id: ui-ux
+    display_name: UI/UX
+  - id: research
+    display_name: Research
+  - id: quality
+    display_name: Quality & Eval
+  - id: risk-release
+    display_name: Risk & Release
+
+roles:
+  - id: managing-partner
+    tier: director
+    team: org
+    aliases: [mp, partner, director, ceo, managing_partner, managing-partner, planning-coordinator, planning-office, planning, diversity-council, council]
+  - id: lead-engineer
+    tier: planner
+    team: engineering
+    aliases: [lead, lead_engineer, lead-engineer, engineering, worktree-dispatcher]
+  - id: worker-engineer
+    tier: worker
+    team: engineering
+    aliases: [worker, engineer, agent-runtime, rsi-lab]
+  - id: uiux
+    tier: planner
+    team: ui-ux
+    aliases: [ui, ux, uiux, frontend, uiux-designer]
+  - id: research-agent
+    tier: planner
+    team: research
+    aliases: [research, researcher, research-agent, research_agent]
+  - id: qa
+    tier: reviewer
+    team: quality
+    aliases: [qa, quality, test, evaluation-office, evaluation_office]
+  - id: independent-auditor
+    tier: reviewer
+    team: quality
+    aliases: [audit, auditor, independent-auditor, independent_auditor]
+  - id: doc-steward
+    tier: reviewer
+    team: quality
+    aliases: [doc, steward, doc-steward, doc_steward, scribe, timeline, secretary]
+  - id: risk-controller
+    tier: reviewer
+    team: risk-release
+    aliases: [risk, risk-controller, risk_controller, risk-and-safety, risk_and_safety]
+  - id: release-integrity
+    tier: reviewer
+    team: risk-release
+    aliases: [release, release-integrity, release_integrity, ci-cd, cicd]

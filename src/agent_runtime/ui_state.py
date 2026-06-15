@@ -2890,7 +2890,8 @@ def catalog_docs(root: Path) -> dict[str, Any]:
 def _git_lines(root: Path, args: list[str], limit: int = 40) -> list[str]:
     try:
         result = subprocess.run(
-            ["git", "-C", str(root), *args], capture_output=True, text=True, timeout=10
+            ["git", "-C", str(root), *args], capture_output=True, text=True,
+            encoding="utf-8", errors="replace", timeout=10
         )
     except (OSError, subprocess.SubprocessError):
         return []

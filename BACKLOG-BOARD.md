@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-06-14
-task_count: 220
+generated_at: 2026-06-15
+task_count: 226
 open_count: 18
-completed_count: 202
+completed_count: 208
 task_set_count: 3
-completed_task_set_count: 29
+completed_task_set_count: 30
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `18` open or active tasks; `202` completed tasks are archived from this live board.
+- Summary: `18` open or active tasks; `208` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `16` / Ask `0` / Review `0` / Later `2` / Done `202`.
-- Task Sets: `3` active workflows; `29` completed workflows are hidden from the live action board.
+- Status: Action `16` / Ask `0` / Review `0` / Later `2` / Done `208`.
+- Task Sets: `3` active workflows; `30` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -118,14 +118,15 @@ completed_task_set_count: 29
 | Host Liaison (`TASKSET-AR-HOST-FEEDBACK-INTAKE`) | Treat host (autofolio) dogfooding feedback as first-class input: intake/triage, blind-Delphi council/seminar deliberation with diversity + Owner-boundary guardrails, decision reply-back to issues, plus the feedback-derived footprint-gate, self-eval/RSI fitness, host-fit, and open-bug candidates whose adoption the first deliberation decides. | `7/7` done | `7` completed task files archived |
 | Store Architect (`TASKSET-AR-WORK-STORE-RESTRUCTURE`) | Stop the board from dumping the archive and reviews from accumulating unbounded: board attention-lanes (Triage/Active/Rollup) + extracted archive manifest, reviews date-shard + compacted index, classifier ordinal as canonical human ID with cosmetic TASK-AR-NNN gaps, UUIDv7/ULID stable keys, a manifest-first derived read-index + repo perf config, and a triage intake status. Single store + status field + views; no lifecycle directories. | `6/6` done | `6` completed task files archived |
 | Decision Cartographer (`TASKSET-AR-UNIFIED-DECISION-CONSOLE`) | A decision/operations-optimized console over a typed entity catalog of every artifact (plan/review/issue/pr/git-log/branch/skill/council/seminar/work-items/waves/state/history): catalog model + manifest, universal command palette + cross-entity search, entity detail + backlinks, activity/provenance timeline + audit, faceted saved views + rollups + needs-attention inbox, live SCM surface, and governance-document surface. | `7/7` done | `7` completed task files archived |
+| Org Conductor (`TASKSET-AR-AGENT-ORG-DELEGATION`) | Operationalize a Director->Lead->Worker+Reviewer agent org by reconciling the template org-suite (roles.yml/orchestrator/subagent/seminar) with the repo claim/wave execution: role/team/tier registry + owner normalization, lead taskset->unit decomposition, seam-aware + risk-based dispatch gate, orchestrator with a swappable WorkerBackend (sub-agents now, headless daemon later), a blind-Delphi persona-diversity deliberation layer, and a minimal org/state read-API. Research-grounded (Karpathy autonomy, gstack, multi-agent architectures, persona diversity); seam-aware parallelism + phased autonomy; token cost binding (~15x). | `6/6` done | `6` completed task files archived |
 
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
 - Active: `18` open across `3` task sets (see Action Board above).
-- Archived task sets: `29` (see Archived Task Sets above).
-- Archived task files: `202` — see `ARCHIVE-INDEX.md`.
+- Archived task sets: `30` (see Archived Task Sets above).
+- Archived task files: `208` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

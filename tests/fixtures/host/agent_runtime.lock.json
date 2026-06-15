@@ -146,7 +146,7 @@
       "scripts/now.py": "sha256:6d6d6fcc9f1a4599a6735a15013fd263c887ae9910388e741134870abf446c9f",
       "scripts/orchestrator_safety_gate.py": "sha256:ff588238e9e0ab497f7a82caf52cb674c362409ca0583b33e402321efb29c7c7",
       "scripts/owner_doc_format_gate.py": "sha256:0ad323c0b4344d3071fa08f79e2f8720498b8d83e43fd03fc721dc1472b61815",
-      "scripts/owner_governance_gate.py": "sha256:1636f6739a9c6543d4faeae20d5b83ccad236b8128f87277c659c7c1b7180ddb",
+      "scripts/owner_governance_gate.py": "sha256:ba6cff4968ca4bf019ff5d5263cbcf45d16c00a6e57d45a064cd2ce2713ddead",
       "scripts/pane_event_log.py": "sha256:414fec8f0a4e3cb74a319c4e125e92af8ba406c8f8b26a99e278685ec52927a7",
       "scripts/parallel_worktree_gate.py": "sha256:06e5206a9cb7cf29199c922a1e077eee90a233379e6c7315bdd337ef1b0edcbc",
       "scripts/pipeline.py": "sha256:4abd82e5f09c9d3cc80d30542df7569bc1d7a2509303c1de704f213a49c03d97",
@@ -264,7 +264,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.2.0",
-    "template_digest": "sha256:c35cac3e65a81607ce36d812cf88422ce3a4d2448efa8893b3effc4715c6cbec",
+    "template_digest": "sha256:a7f7921f9ad84a0bdf9dfe10dc03641c73260e3117b17117c63a277765eb28a7",
     "template_files": 261
   },
   "project": "fixture-host",

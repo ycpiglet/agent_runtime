@@ -1,19 +1,19 @@
 {
   "schema": "agent-runtime-entity-catalog/v1",
-  "generated_at": "2026-06-14",
-  "entity_count": 707,
+  "generated_at": "2026-06-15",
+  "entity_count": 720,
   "kind_counts": {
     "council": 1,
     "host_feedback": 7,
-    "initiative": 8,
+    "initiative": 9,
     "meeting": 55,
-    "research": 27,
-    "review": 292,
+    "research": 28,
+    "review": 294,
     "seminar": 11,
-    "task": 220,
-    "taskset": 32,
+    "task": 226,
+    "taskset": 33,
     "unit": 13,
-    "verification": 41
+    "verification": 43
   },
   "entities": [
     {
@@ -3644,6 +3644,118 @@
       ]
     },
     {
+      "kind": "taskset",
+      "id": "TASKSET-AR-AGENT-ORG-DELEGATION",
+      "title": "Org Conductor",
+      "metadata": {
+        "ordinal": "0.29",
+        "status": "complete",
+        "path": "BACKLOG-BOARD.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "INIT-UNASSIGNED"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-557",
+      "title": "ORG-MODEL.yml (role/team/tier registry, aliases absorb owner drift) + scripts/org_mod…",
+      "metadata": {
+        "ordinal": "0.29.1",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-557.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-AGENT-ORG-DELEGATION"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-558",
+      "title": "Tool for a Lead to decompose a Taskset's Tasks into worker-ready Units (unit_spec/con…",
+      "metadata": {
+        "ordinal": "0.29.2",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-558.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-AGENT-ORG-DELEGATION"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-559",
+      "title": "scripts/dispatch_gate.py: footprint-disjoint seam check (reuse footprint_conflict_gat…",
+      "metadata": {
+        "ordinal": "0.29.3",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-559.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-AGENT-ORG-DELEGATION"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-560",
+      "title": "Lead orchestrator: create claim+worktree+instance, spawn Worker/Reviewer sub-agents (…",
+      "metadata": {
+        "ordinal": "0.29.4",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-560.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-AGENT-ORG-DELEGATION"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-561",
+      "title": "Extend blind-Delphi seminar/council with substance-axis persona archetypes (risk tole…",
+      "metadata": {
+        "ordinal": "0.29.5",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-561.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-AGENT-ORG-DELEGATION"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-562",
+      "title": "Read-API over real records: org tree (teams->roles->live instances), work-state count…",
+      "metadata": {
+        "ordinal": "0.29.6",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-562.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-AGENT-ORG-DELEGATION"
+        }
+      ]
+    },
+    {
       "kind": "initiative",
       "id": "INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
       "title": "Work Hierarchy Conflict Closure Initiative",
@@ -4345,6 +4457,17 @@
       "relations": []
     },
     {
+      "kind": "initiative",
+      "id": "INIT-AR-AGENT-ORG-DELEGATION",
+      "title": "INIT-AR-AGENT-ORG-DELEGATION — Agent Org & Delegation Model",
+      "metadata": {
+        "ordinal": "8",
+        "status": "active",
+        "path": "agents/project/initiatives/INIT-AR-AGENT-ORG-DELEGATION.md"
+      },
+      "relations": []
+    },
+    {
       "kind": "host_feedback",
       "id": "HFQ-131",
       "title": "host feedback intake -> council/seminar deliberation -> reply-back pipeline",
@@ -4772,6 +4895,16 @@
       "metadata": {
         "date": "2026-06-10",
         "path": "reviews/GOVERNANCE-OPS-REPORT-2026-06-10.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "HANDOFF-2026-06-15-ui-redesign-and-product-structure",
+      "title": "HANDOFF-2026-06-15-ui-redesign-and-product-structure",
+      "metadata": {
+        "date": "2026-06-15",
+        "path": "reviews/HANDOFF-2026-06-15-ui-redesign-and-product-structure.md"
       },
       "relations": []
     },
@@ -5552,6 +5685,16 @@
       "metadata": {
         "date": "2026-06-13",
         "path": "reviews/RESEARCH-2026-06-13-agent-runtime-task-ar-211-official-multi-project-overlay.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "research",
+      "id": "RESEARCH-2026-06-14-agent-org-design-references",
+      "title": "RESEARCH-2026-06-14-agent-org-design-references",
+      "metadata": {
+        "date": "2026-06-14",
+        "path": "reviews/RESEARCH-2026-06-14-agent-org-design-references.md"
       },
       "relations": []
     },
@@ -8226,6 +8369,16 @@
       "relations": []
     },
     {
+      "kind": "review",
+      "id": "REVIEW-2026-06-14-knowledge-stack-followups-closeout",
+      "title": "REVIEW-2026-06-14-knowledge-stack-followups-closeout",
+      "metadata": {
+        "date": "2026-06-14",
+        "path": "reviews/REVIEW-2026-06-14-knowledge-stack-followups-closeout.md"
+      },
+      "relations": []
+    },
+    {
       "kind": "seminar",
       "id": "SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract",
       "title": "SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract",
@@ -8947,6 +9100,36 @@
         {
           "type": "references",
           "target": "TASK-AR-541"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-15-TASK-AR-557",
+      "title": "W4B-2026-06-15-TASK-AR-557",
+      "metadata": {
+        "date": "2026-06-15",
+        "path": "reviews/W4B-2026-06-15-TASK-AR-557.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-557"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-15-TASK-AR-558-562",
+      "title": "W4B-2026-06-15-TASK-AR-558-562",
+      "metadata": {
+        "date": "2026-06-15",
+        "path": "reviews/W4B-2026-06-15-TASK-AR-558-562.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-558"
         }
       ]
     }
