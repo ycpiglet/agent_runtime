@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-15
-archived_count: 203
+archived_count: 208
 ---
 
 # Archived Task Files
 
-- `203` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `208` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -216,3 +216,8 @@ archived_count: 203
 | `TASK-AR-545` | `98d79038-827…` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T14:25:00+09:00 | 2026-06-14T14:40:00+09:00 | 2026-06-14T14:40:00+09:00 | Make the product's governance/knowledge documents (skills, council records, seminar r… |
 | `TASK-AR-542` | `2bc66839-72e…` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | 2026-06-14T03:22:33+09:00 | 2026-06-14T14:25:00+09:00 | 2026-06-14T14:40:00+09:00 | 2026-06-14T14:40:00+09:00 | Answer "who/what/when/why did this change" for any entity by unifying scattered histo… |
 | `TASK-AR-557` | `74c4128c-45e…` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | 2026-06-15T00:29:41+09:00 | 2026-06-15T00:29:41+09:00 | 2026-06-15T01:30:00+09:00 | 2026-06-15T01:30:00+09:00 | ORG-MODEL.yml (role/team/tier registry, aliases absorb owner drift) + scripts/org_mod… |
+| `TASK-AR-562` | `595f7d10-6f0…` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | 2026-06-15T00:29:41+09:00 | 2026-06-15T00:29:41+09:00 | 2026-06-15T10:04:03+09:00 | 2026-06-15T10:04:03+09:00 | Read-API over real records: org tree (teams->roles->live instances), work-state count… |
+| `TASK-AR-558` | `630087d8-3d4…` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | 2026-06-15T00:29:41+09:00 | 2026-06-15T00:29:41+09:00 | 2026-06-15T10:04:03+09:00 | 2026-06-15T10:04:03+09:00 | Tool for a Lead to decompose a Taskset's Tasks into worker-ready Units (unit_spec/con… |
+| `TASK-AR-559` | `f6f4ad66-c4a…` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | 2026-06-15T00:29:41+09:00 | 2026-06-15T00:29:41+09:00 | 2026-06-15T10:04:03+09:00 | 2026-06-15T10:04:03+09:00 | scripts/dispatch_gate.py: footprint-disjoint seam check (reuse footprint_conflict_gat… |
+| `TASK-AR-561` | `bb188d37-3a0…` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | 2026-06-15T00:29:41+09:00 | 2026-06-15T00:29:41+09:00 | 2026-06-15T10:04:03+09:00 | 2026-06-15T10:04:03+09:00 | Extend blind-Delphi seminar/council with substance-axis persona archetypes (risk tole… |
+| `TASK-AR-560` | `01090ddb-fc0…` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | 2026-06-15T00:29:41+09:00 | 2026-06-15T00:29:41+09:00 | 2026-06-15T10:04:03+09:00 | 2026-06-15T10:04:03+09:00 | Lead orchestrator: create claim+worktree+instance, spawn Worker/Reviewer sub-agents (… |

@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-15T01:03:38+09:00",
+  "generated_at": "2026-06-15T10:05:56+09:00",
   "record_count": 281,
   "finding_count": 0,
   "findings": [],
@@ -2511,7 +2511,7 @@
       "title": "Org Conductor",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-UNASSIGNED",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-557",
@@ -2533,7 +2533,7 @@
       "title": "Tool for a Lead to decompose a Taskset's Tasks into worker-ready Units (unit_spec/con…",
       "path": "agents/lead_engineer/tasks/TASK-AR-558.md",
       "parent_id": "TASKSET-AR-AGENT-ORG-DELEGATION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-559",
@@ -2544,7 +2544,7 @@
       "title": "scripts/dispatch_gate.py: footprint-disjoint seam check (reuse footprint_conflict_gat…",
       "path": "agents/lead_engineer/tasks/TASK-AR-559.md",
       "parent_id": "TASKSET-AR-AGENT-ORG-DELEGATION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-560",
@@ -2555,7 +2555,7 @@
       "title": "Lead orchestrator: create claim+worktree+instance, spawn Worker/Reviewer sub-agents (…",
       "path": "agents/lead_engineer/tasks/TASK-AR-560.md",
       "parent_id": "TASKSET-AR-AGENT-ORG-DELEGATION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-561",
@@ -2566,7 +2566,7 @@
       "title": "Extend blind-Delphi seminar/council with substance-axis persona archetypes (risk tole…",
       "path": "agents/lead_engineer/tasks/TASK-AR-561.md",
       "parent_id": "TASKSET-AR-AGENT-ORG-DELEGATION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-562",
@@ -2577,7 +2577,7 @@
       "title": "Read-API over real records: org tree (teams->roles->live instances), work-state count…",
       "path": "agents/lead_engineer/tasks/TASK-AR-562.md",
       "parent_id": "TASKSET-AR-AGENT-ORG-DELEGATION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "initiative:INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",

@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-15T01:10:28+09:00
-record_count: 485
+generated_at: 2026-06-15T10:06:03+09:00
+record_count: 486
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `485` review and evidence records under `reviews/`.
+- Summary: indexed `486` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `485` files |
+| Reviews covered | pass | `486` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -519,6 +519,7 @@ record_count: 485
 | `reviews/W4B-2026-06-14-TASK-AR-540.md` | `W4B-2026-06-14-TASK-AR-540` | verification | record | n/a | W4b Independent Verification — TASK-AR-540 (command palette + cross-entity search) |
 | `reviews/W4B-2026-06-14-TASK-AR-541-545.md` | `W4B-2026-06-14-TASK-AR-541-545` | verification | record | n/a | W4b Independent Verification — Decision Console Surfaces (TASK-AR-541/542/543/544/545) |
 | `reviews/W4B-2026-06-15-TASK-AR-557.md` | `W4B-2026-06-15-TASK-AR-557` | md | record | n/a | W4B Independent Verification — TASK-AR-557 (Unit 1: Role/Team/Tier Registry) |
+| `reviews/W4B-2026-06-15-TASK-AR-558-562.md` | `W4B-2026-06-15-TASK-AR-558-562` | md | record | n/a | W4B Independent Verification — TASK-AR-558..562 (Agent Org Delegation) |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.

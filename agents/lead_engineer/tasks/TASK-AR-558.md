@@ -4,8 +4,13 @@ display_id: TASK-AR-558
 task_uid: 630087d8-3d44-4db8-bc15-19f1438e203c
 registered_at: 2026-06-15T00:29:41+09:00
 created_at: 2026-06-15T00:29:41+09:00
-updated_at: 2026-06-15T00:29:41+09:00
-status: planned
+updated_at: 2026-06-15T10:04:03+09:00
+started_at: 2026-06-15T00:29:41+09:00
+completed_at: 2026-06-15T10:04:03+09:00
+status: completed
+verification_status: passed
+review_refs:
+  - reviews/W4B-2026-06-15-TASK-AR-558-562.md
 priority: P1
 difficulty: L
 est_hours: 8

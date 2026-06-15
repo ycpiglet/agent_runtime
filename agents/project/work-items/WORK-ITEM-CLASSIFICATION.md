@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-15T01:03:38+09:00
+generated_at: 2026-06-15T10:05:56+09:00
 record_count: 281
 ---
 
@@ -266,13 +266,13 @@ record_count: 281
 | 0.28.9 | Task 0.28.9 | task | `TASK-AR-554` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-554.md` | Claim reaping/recovery assumes a single checkout (single-writer). Multiple hosts or C… |
 | 0.28.10 | Task 0.28.10 | task | `TASK-AR-555` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-555.md` | Release stages are validated locally in `--check` mode only; remote tag/PR/merge/publ… |
 | 0.28.11 | Task 0.28.11 | task | `TASK-AR-556` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-556.md` | Make the canonical closure steps (compound / review / retro) **non-skippable** for su… |
-| 0.29 | Taskset 0.29 | taskset | `TASKSET-AR-AGENT-ORG-DELEGATION` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Org Conductor |
+| 0.29 | Taskset 0.29 | taskset | `TASKSET-AR-AGENT-ORG-DELEGATION` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Org Conductor |
 | 0.29.1 | Task 0.29.1 | task | `TASK-AR-557` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | `agents/lead_engineer/tasks/TASK-AR-557.md` | ORG-MODEL.yml (role/team/tier registry, aliases absorb owner drift) + scripts/org_mod… |
-| 0.29.2 | Task 0.29.2 | task | `TASK-AR-558` | `TASKSET-AR-AGENT-ORG-DELEGATION` | planned | `agents/lead_engineer/tasks/TASK-AR-558.md` | Tool for a Lead to decompose a Taskset's Tasks into worker-ready Units (unit_spec/con… |
-| 0.29.3 | Task 0.29.3 | task | `TASK-AR-559` | `TASKSET-AR-AGENT-ORG-DELEGATION` | planned | `agents/lead_engineer/tasks/TASK-AR-559.md` | scripts/dispatch_gate.py: footprint-disjoint seam check (reuse footprint_conflict_gat… |
-| 0.29.4 | Task 0.29.4 | task | `TASK-AR-560` | `TASKSET-AR-AGENT-ORG-DELEGATION` | planned | `agents/lead_engineer/tasks/TASK-AR-560.md` | Lead orchestrator: create claim+worktree+instance, spawn Worker/Reviewer sub-agents (… |
-| 0.29.5 | Task 0.29.5 | task | `TASK-AR-561` | `TASKSET-AR-AGENT-ORG-DELEGATION` | planned | `agents/lead_engineer/tasks/TASK-AR-561.md` | Extend blind-Delphi seminar/council with substance-axis persona archetypes (risk tole… |
-| 0.29.6 | Task 0.29.6 | task | `TASK-AR-562` | `TASKSET-AR-AGENT-ORG-DELEGATION` | planned | `agents/lead_engineer/tasks/TASK-AR-562.md` | Read-API over real records: org tree (teams->roles->live instances), work-state count… |
+| 0.29.2 | Task 0.29.2 | task | `TASK-AR-558` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | `agents/lead_engineer/tasks/TASK-AR-558.md` | Tool for a Lead to decompose a Taskset's Tasks into worker-ready Units (unit_spec/con… |
+| 0.29.3 | Task 0.29.3 | task | `TASK-AR-559` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | `agents/lead_engineer/tasks/TASK-AR-559.md` | scripts/dispatch_gate.py: footprint-disjoint seam check (reuse footprint_conflict_gat… |
+| 0.29.4 | Task 0.29.4 | task | `TASK-AR-560` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | `agents/lead_engineer/tasks/TASK-AR-560.md` | Lead orchestrator: create claim+worktree+instance, spawn Worker/Reviewer sub-agents (… |
+| 0.29.5 | Task 0.29.5 | task | `TASK-AR-561` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | `agents/lead_engineer/tasks/TASK-AR-561.md` | Extend blind-Delphi seminar/council with substance-axis persona archetypes (risk tole… |
+| 0.29.6 | Task 0.29.6 | task | `TASK-AR-562` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | `agents/lead_engineer/tasks/TASK-AR-562.md` | Read-API over real records: org tree (teams->roles->live instances), work-state count… |
 | 1 | Initiative 1 | initiative | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | - | planned | `agents/project/initiatives/INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE.md` | Work Hierarchy Conflict Closure Initiative |
 | 1.1 | Taskset 1.1 | taskset | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | active | `BACKLOG-BOARD.md` | Work Taxonomist |
 | 1.1.1 | Task 1.1.1 | task | `TASK-AR-369` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-369.md` | Finish the terminology migration from ambiguous `project -> taskset -> task -> unit`… |

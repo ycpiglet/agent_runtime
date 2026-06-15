@@ -4,8 +4,13 @@ display_id: TASK-AR-560
 task_uid: 01090ddb-fc0d-4a8d-b5e0-f66e5c57c501
 registered_at: 2026-06-15T00:29:41+09:00
 created_at: 2026-06-15T00:29:41+09:00
-updated_at: 2026-06-15T00:29:41+09:00
-status: planned
+updated_at: 2026-06-15T10:04:03+09:00
+started_at: 2026-06-15T00:29:41+09:00
+completed_at: 2026-06-15T10:04:03+09:00
+status: completed
+verification_status: passed
+review_refs:
+  - reviews/W4B-2026-06-15-TASK-AR-558-562.md
 priority: P1
 difficulty: XL
 est_hours: 12
