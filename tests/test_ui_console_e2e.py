@@ -85,3 +85,16 @@ def test_inbox_api_returns_groups(console_url):  # TASK-AR-564 (decision-first c
     assert "groups" in payload and "total" in payload and "counts" in payload
     assert set(payload["groups"]) >= {"approval_pending", "blocked", "stale",
                                       "gate_failures", "cost_anomalies", "runtime_anomalies"}
+
+
+def test_cockpit_home_hero_present(console_url):  # TASK-AR-564 (cockpit home view)
+    _, home = _get(console_url + "/")
+    _, js = _get(console_url + "/app.js")
+    _, css = _get(console_url + "/app.css")
+    # Hero replaces the 80-screen home as the first decision surface.
+    assert 'id="cockpit"' in home and 'id="inbox-groups"' in home
+    assert "What needs you now" in home and 'id="inbox-empty"' in home
+    # Client renders /api/inbox into the hero on load + on a refresh cadence.
+    assert "loadCockpit" in js and "renderCockpit" in js and "/api/inbox" in js
+    # Cockpit styling is present (tokenized; verified literal-free elsewhere).
+    assert ".cockpit-grid" in css and ".inbox-card" in css

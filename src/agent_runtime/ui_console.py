@@ -246,6 +246,15 @@ HTML = """<!doctype html>
     <div id="sidebar-scrim" class="sidebar-scrim" hidden></div>
 
     <main class="layout" id="main">
+      <section class="cockpit" id="cockpit" aria-label="Attention inbox - what needs you now">
+        <header class="cockpit-head">
+          <h1 class="cockpit-title">What needs you now</h1>
+          <span class="cockpit-total" id="inbox-total" aria-live="polite"></span>
+        </header>
+        <div class="cockpit-grid" id="inbox-groups" role="list"></div>
+        <p class="cockpit-empty" id="inbox-empty" hidden>&#10003; Nothing needs you right now.</p>
+      </section>
+
       <section class="dashboard" aria-label="Dashboard">
         <div class="metric"><span>Total Tasks</span><strong id="metric-tasks">0</strong></div>
         <div class="metric"><span>Active</span><strong id="metric-active">0</strong></div>
@@ -5845,6 +5854,58 @@ pre {
     animation: none !important;
   }
 }
+
+/* --- Decision-first cockpit: attention inbox (TASK-AR-564) ----------------- */
+/* The home hero — "what needs you now". Six derived groups (scripts/
+   attention_inbox.py via /api/inbox): a count + top-3 per group; full detail
+   stays behind the existing views (progressive disclosure). Colors are tokens
+   only (no raw literals — see test_ui_console_theme_key_panels_use_tokens). */
+.cockpit { margin: 0 0 1.25rem; }
+.cockpit-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 0.5rem; margin-bottom: 0.75rem;
+}
+.cockpit-title { margin: 0; font-size: 1.2rem; font-weight: 700; color: var(--ink); }
+.cockpit-total { font-size: 0.85rem; color: var(--muted); }
+.cockpit-grid {
+  display: grid; gap: 0.85rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+.cockpit-empty {
+  margin: 0; padding: 1.5rem; text-align: center; color: var(--muted);
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+}
+.inbox-card {
+  display: flex; flex-direction: column; gap: 0.5rem; padding: 0.85rem 1rem;
+  background: var(--panel); border: 1px solid var(--line);
+  border-left: 4px solid var(--line-strong); border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.inbox-card.tone-high { border-left-color: var(--danger); }
+.inbox-card.tone-mid { border-left-color: var(--warning); }
+.inbox-card.tone-low { border-left-color: var(--muted); }
+.inbox-card-head { display: flex; align-items: center; gap: 0.45rem; }
+.inbox-ico { font-size: 1.05em; line-height: 1; }
+.inbox-label { font-weight: 600; color: var(--ink); }
+.inbox-count {
+  margin-left: auto; min-width: 1.7em; padding: 0.05rem 0.45rem; text-align: center;
+  font-size: 0.8rem; font-weight: 700; color: var(--ink);
+  background: var(--panel-strong); border-radius: 999px;
+}
+.inbox-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.45rem; min-width: 0; }
+.inbox-item { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; font-size: 0.85rem; }
+.inbox-item-title {
+  font-weight: 600; color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.inbox-item-meta { display: flex; gap: 0.4rem; align-items: baseline; min-width: 0; color: var(--muted); font-size: 0.78rem; }
+.inbox-item-id { font-variant-numeric: tabular-nums; white-space: nowrap; flex: none; }
+.inbox-item-why { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.inbox-item-action { flex: none; margin-left: auto; padding-left: 0.4rem; color: var(--primary); font-weight: 600; white-space: nowrap; }
+.inbox-more { font-size: 0.8rem; color: var(--muted); }
+@media (max-width: 640px) {
+  .cockpit-grid { grid-template-columns: 1fr; }
+}
 """
 
 JS = """// --- Theme system (TASK-AR-320) -------------------------------------------
@@ -6384,6 +6445,86 @@ function renderWidgets() {
   grid.innerHTML = widgets.length
     ? widgets.map(renderWidgetCard).join("")
     : `<div class="home-widget-empty">${escapeHtml(t("widgets.empty"))}</div>`;
+}
+
+// --- Decision-first cockpit: attention inbox (TASK-AR-564) -----------------
+// Render /api/inbox (six derived groups) as the home hero - "what needs you
+// now". Counts + top-3 per group; dynamic text uses textContent (no innerHTML
+// interpolation). A derived read: non-fatal if unavailable.
+const INBOX_GROUPS = {
+  approval_pending:  { label: "Approvals", icon: "\\u270B", tone: "high" },
+  blocked:           { label: "Blocked", icon: "\\u26D4", tone: "high" },
+  runtime_anomalies: { label: "Runtime anomalies", icon: "\\u26A1", tone: "high" },
+  gate_failures:     { label: "Gate failures", icon: "\\u2717", tone: "mid" },
+  cost_anomalies:    { label: "Cost anomalies", icon: "$", tone: "mid" },
+  stale:             { label: "Stale", icon: "\\u231B", tone: "low" },
+};
+
+function inboxEl(tag, cls, text) {
+  const el = document.createElement(tag);
+  if (cls) el.className = cls;
+  if (text != null) el.textContent = text;
+  return el;
+}
+
+function renderCockpit(data) {
+  const grid = $("inbox-groups");
+  if (!grid) return;
+  const total = (data && data.total) || 0;
+  const totalEl = $("inbox-total");
+  if (totalEl) {
+    totalEl.textContent = total
+      ? `${total} item${total === 1 ? "" : "s"} need attention`
+      : "all clear";
+  }
+  const empty = $("inbox-empty");
+  if (empty) empty.hidden = total > 0;
+  grid.hidden = total === 0;
+  grid.innerHTML = "";
+  const groups = (data && data.groups) || {};
+  for (const key of Object.keys(groups)) {
+    const items = groups[key] || [];
+    if (!items.length) continue;
+    const meta = INBOX_GROUPS[key] || { label: key, icon: "\\u2022", tone: "low" };
+    const card = inboxEl("article", `inbox-card tone-${meta.tone}`);
+    card.setAttribute("role", "listitem");
+    const head = inboxEl("div", "inbox-card-head");
+    const ico = inboxEl("span", "inbox-ico", meta.icon);
+    ico.setAttribute("aria-hidden", "true");
+    head.appendChild(ico);
+    head.appendChild(inboxEl("span", "inbox-label", meta.label));
+    head.appendChild(inboxEl("span", "inbox-count", String(items.length)));
+    card.appendChild(head);
+    const list = inboxEl("ul", "inbox-items");
+    for (const it of items.slice(0, 3)) {
+      const li = inboxEl("li", "inbox-item");
+      // Row 1: human-readable title (the decision), full width, ellipsized.
+      li.appendChild(inboxEl("span", "inbox-item-title", it.title || it.id || "\\u2014"));
+      // Row 2: muted id + why-it-surfaced, with the suggested action pinned right.
+      const meta = inboxEl("div", "inbox-item-meta");
+      if (it.id) meta.appendChild(inboxEl("span", "inbox-item-id", it.id));
+      if (it.why) meta.appendChild(inboxEl("span", "inbox-item-why", it.why));
+      if (it.action) meta.appendChild(inboxEl("span", "inbox-item-action", it.action));
+      li.appendChild(meta);
+      list.appendChild(li);
+    }
+    card.appendChild(list);
+    if (items.length > 3) {
+      card.appendChild(inboxEl("div", "inbox-more", `+${items.length - 3} more`));
+    }
+    grid.appendChild(card);
+  }
+}
+
+async function loadCockpit() {
+  try {
+    const response = await fetch("/api/inbox", { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    renderCockpit(await response.json());
+  } catch (error) {
+    const totalEl = $("inbox-total");
+    if (totalEl) totalEl.textContent = "inbox unavailable";
+  }
 }
 
 async function loadState() {
@@ -12151,6 +12292,10 @@ loadI18n();
 loadState();
 connectEventStream();
 setInterval(loadState, 4000);
+// TASK-AR-564: decision-first cockpit - load the attention inbox and keep it
+// fresh (slower cadence than state; it is a derived read over work items).
+loadCockpit();
+setInterval(loadCockpit, 8000);
 """
 
 
