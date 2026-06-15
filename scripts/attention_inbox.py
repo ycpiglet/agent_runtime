@@ -1,0 +1,158 @@
+"""Attention Inbox derived read (decision-first console IA Unit 1, TASK-AR-563).
+
+Aggregate existing work-item frontmatter + runtime claims into the 6-group
+"what needs me now" inbox the cockpit (Unit 2) renders. Read-only; stdlib-only
+(repo + CI are PyYAML-free; frontmatter via org_model_gate.parse_frontmatter).
+No new storage, no gate execution, no fabricated items.
+
+Spec: docs/superpowers/specs/2026-06-15-decision-first-console-ia-design.md (§A).
+"""
+from __future__ import annotations
+
+import argparse
+import datetime as _dt
+import glob
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from org_model_gate import parse_frontmatter  # noqa: E402  (stdlib frontmatter parser)
+
+DONE = {"completed", "closed", "done"}
+ACTIVE = {"active", "in_progress"}
+GROUP_ORDER = ["approval_pending", "blocked", "gate_failures",
+               "runtime_anomalies", "cost_anomalies", "stale"]
+
+
+def _load_tasks(tasks_dir: Path) -> list[dict]:
+    return [parse_frontmatter(Path(p).read_text(encoding="utf-8", errors="replace"))
+            for p in glob.glob(str(tasks_dir / "TASK-*.md"))]
+
+
+def _item(group: str, meta: dict, why: str, action: str, *, severity: int = 1, age_days: int = 0) -> dict:
+    return {"group": group, "id": meta.get("id"),
+            "title": meta.get("title") or meta.get("id"),
+            "why": why, "age_days": age_days, "severity": severity, "action": action}
+
+
+def _num(v):
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _parse_dt(value):
+    try:
+        return _dt.datetime.fromisoformat(str(value))
+    except (TypeError, ValueError):
+        return None
+
+
+def approval_pending(tasks: list[dict]) -> list[dict]:
+    out = []
+    for m in tasks:
+        if str(m.get("approval_required", "")).lower() in ("true", "1", "yes") \
+                and str(m.get("status", "")).lower() not in DONE:
+            out.append(_item("approval_pending", m, "approval_required", "approve / gate", severity=3))
+    return out
+
+
+def blocked(tasks: list[dict]) -> list[dict]:
+    out = []
+    for m in tasks:
+        st = str(m.get("status", "")).lower()
+        if st == "blocked" or (m.get("blocked_by") and st not in DONE):
+            out.append(_item("blocked", m, f"status={st or 'blocked'}", "resolve blocker", severity=2))
+    return out
+
+
+def gate_failures(tasks: list[dict]) -> list[dict]:
+    out = []
+    for m in tasks:
+        n = _num(m.get("gate_failure_count"))
+        if n and n > 0:
+            out.append(_item("gate_failures", m, f"{int(n)} gate failures", "fix gate", severity=2))
+    return out
+
+
+def cost_anomalies(tasks: list[dict]) -> list[dict]:
+    out = []
+    for m in tasks:
+        est, act, cap = _num(m.get("est_tokens")), _num(m.get("actual_tokens")), _num(m.get("budget_cap"))
+        if act is not None and ((est is not None and act > est) or (cap is not None and act > cap)):
+            out.append(_item("cost_anomalies", m, f"actual {int(act)} > budget", "review cost", severity=2))
+    return out
+
+
+def stale(tasks: list[dict], *, now, stale_days: int = 7) -> list[dict]:
+    out = []
+    for m in tasks:
+        if str(m.get("status", "")).lower() not in ACTIVE:
+            continue
+        ts = _parse_dt(m.get("updated_at"))
+        if ts is None:
+            continue
+        age = (now - ts).days
+        if age >= stale_days:
+            out.append(_item("stale", m, f"no update {age}d", "review / refresh", severity=1, age_days=age))
+    return out
+
+
+def _claim_conflicts(root: Path):
+    try:
+        from multi_host_claim_gate import detect_conflicts, load_claims
+        return detect_conflicts(load_claims(root / "agents" / "runtime" / "task_claims"))
+    except Exception:
+        return []
+
+
+def runtime_anomalies(root: Path) -> list[dict]:
+    out = []
+    for c in _claim_conflicts(root):
+        out.append({"group": "runtime_anomalies", "id": c.get("resource"),
+                    "title": c.get("resource"),
+                    "why": "cross-host claim conflict: " + ",".join(c.get("hosts", [])),
+                    "age_days": 0, "severity": 3, "action": "resolve claim"})
+    return out
+
+
+def inbox(root: Path, *, now=None, stale_days: int = 7) -> dict:
+    now = now or _dt.datetime.now(_dt.timezone.utc).astimezone()
+    tasks_dir = root / "agents" / "lead_engineer" / "tasks"
+    tasks = _load_tasks(tasks_dir) if tasks_dir.exists() else []
+    groups = {
+        "approval_pending": approval_pending(tasks),
+        "blocked": blocked(tasks),
+        "gate_failures": gate_failures(tasks),
+        "runtime_anomalies": runtime_anomalies(root),
+        "cost_anomalies": cost_anomalies(tasks),
+        "stale": stale(tasks, now=now, stale_days=stale_days),
+    }
+    for items in groups.values():
+        items.sort(key=lambda i: i["severity"], reverse=True)
+    counts = {g: len(groups[g]) for g in GROUP_ORDER}
+    return {"groups": {g: groups[g] for g in GROUP_ORDER}, "counts": counts,
+            "total": sum(counts.values())}
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description="Attention inbox (what needs a human now).")
+    ap.add_argument("--json", action="store_true")
+    a = ap.parse_args(argv)
+    data = inbox(ROOT)
+    if a.json:
+        print(json.dumps(data, indent=2, ensure_ascii=False))
+    else:
+        print(f"attention-inbox: {data['total']} items needing attention" if data["total"]
+              else "attention-inbox: nothing needs you")
+        for g, n in data["counts"].items():
+            if n:
+                print(f"  {g}: {n}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
