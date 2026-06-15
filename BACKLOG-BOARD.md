@@ -9,21 +9,21 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-15
 task_count: 226
-open_count: 13
-completed_count: 213
-task_set_count: 2
-completed_task_set_count: 31
+open_count: 11
+completed_count: 215
+task_set_count: 1
+completed_task_set_count: 32
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `13` open or active tasks; `213` completed tasks are archived from this live board.
+- Summary: `11` open or active tasks; `215` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `11` / Ask `0` / Review `0` / Later `2` / Done `213`.
-- Task Sets: `2` active workflows; `31` completed workflows are hidden from the live action board.
+- Status: Action `10` / Ask `0` / Review `0` / Later `1` / Done `215`.
+- Task Sets: `1` active workflows; `32` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -41,16 +41,6 @@ completed_task_set_count: 31
 ## Action Board
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
-
-### Pitch Alchemist (`TASKSET-AR-DOC-TO-PLAN`)
-
-- Flow: Document-to-plan intake pipeline, Paperclip gap adoption, actuals capture, and multi-factor evaluation/sorting.
-- Progress: `1/3` done; `2` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-368` | - | - | - | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 예상치(est_*)만 있는 현 체계에 실측치를 더해, task/taskset을 우선순위·난이도·예상/실제 토큰·예상/실제 시간·부서 등 다요소로 정렬·필… |
-| `TASK-AR-366` | - | - | - | planned | Later | P1 | High | Critical | 16h/12000tok | Low | 6 | agent-runtime-core | lead-engineer | Wait for dependency | pitch deck/기획서/아이디어 문서(PPT, PDF, Word, HTML, md)를 넣으면 시스템이 스스로 분석해 plan을 짜고 실현 가능한 ta… |
 
 ### Maturity Steward (`TASKSET-AR-PRODUCT-MATURITY-UPLIFT`)
 
@@ -98,6 +88,7 @@ completed_task_set_count: 31
 | Platform Builder (`TASKSET-AR-UI-PLATFORM-EXTENSIONS`) | Taskset CRUD, dependencies/timeline, custom properties/automation, attachments, import/export, search, calendar, state-machine viewer, team workload, notifications, ops dashboard, gamification, and workspace extensibility. | `13/13` done | `13` completed task files archived |
 | World Builder (`TASKSET-AR-UI-LIVING-CONSOLE`) | Idea vault with resurfacing loop, drag-in meeting room, direct-manipulation layer, progression system with guardrails, 2D office map, and webhook-first external notifications. | `6/6` done | `6` completed task files archived |
 | Project Workbreaker (`TASKSET-AR-PM-OPERATING-SYSTEM`) | Project-to-unit hierarchy, worker-ready specs, model-tier routing, WIP controls, dispatcher scope stops, and PM verification gates. | `9/9` done | `9` completed task files archived |
+| Pitch Alchemist (`TASKSET-AR-DOC-TO-PLAN`) | Document-to-plan intake pipeline, Paperclip gap adoption, actuals capture, and multi-factor evaluation/sorting. | `3/3` done | `3` completed task files archived |
 | Work Taxonomist (`TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE`) | Initiative vocabulary, collision-free task registration, shared backlog deconfliction, and unit-readiness migration. | `6/6` done | `6` completed task files archived |
 | Agent Identity Contract (`TASKSET-AR-AGENT-IDENTITY-CONTRACT`) | Add role/instance/display identity records, spawn provenance, and attribution gates for multi-agent work. | `1/1` done | `1` completed task files archived |
 | Work Metadata Analyst (`TASKSET-AR-WORK-METADATA-ANALYTICS`) | Conversation-to-work traceability, Work Item metadata, Explorer roll-ups, query/export, agent attribution, and stale verification evidence. | `6/6` done | `6` completed task files archived |
@@ -112,9 +103,9 @@ completed_task_set_count: 31
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `13` open across `2` task sets (see Action Board above).
-- Archived task sets: `31` (see Archived Task Sets above).
-- Archived task files: `213` — see `ARCHIVE-INDEX.md`.
+- Active: `11` open across `1` task sets (see Action Board above).
+- Archived task sets: `32` (see Archived Task Sets above).
+- Archived task files: `215` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

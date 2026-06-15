@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-15T12:03:50+09:00
+generated_at: 2026-06-15T12:36:25+09:00
 record_count: 281
 ---
 
@@ -223,10 +223,10 @@ record_count: 281
 | 0.22.8 | Task 0.22.8 | task | `TASK-AR-349` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-349.md` | Mirror the PM hierarchy, unit templates, schemas, and gates into generated host proje… |
 | 0.22.9 | Task 0.22.9 | task | `TASK-AR-350` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-350.md` | Add a taskset verification wrapper and Owner-facing closeout evidence for the PM oper… |
 | 0.22.9.1 | Unit 0.22.9.1 | unit | `UNIT-TASK-AR-350-001` | `TASK-AR-350` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-350/UNIT-TASK-AR-350-001.md` | UNIT-TASK-AR-350-001 - PM OS Closeout Verification |
-| 0.23 | Taskset 0.23 | taskset | `TASKSET-AR-DOC-TO-PLAN` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Pitch Alchemist |
-| 0.23.1 | Task 0.23.1 | task | `TASK-AR-366` | `TASKSET-AR-DOC-TO-PLAN` | planned | `agents/lead_engineer/tasks/TASK-AR-366.md` | pitch deck/기획서/아이디어 문서(PPT, PDF, Word, HTML, md)를 넣으면 시스템이 스스로 분석해 plan을 짜고 실현 가능한 ta… |
+| 0.23 | Taskset 0.23 | taskset | `TASKSET-AR-DOC-TO-PLAN` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Pitch Alchemist |
+| 0.23.1 | Task 0.23.1 | task | `TASK-AR-366` | `TASKSET-AR-DOC-TO-PLAN` | completed | `agents/lead_engineer/tasks/TASK-AR-366.md` | pitch deck/기획서/아이디어 문서(PPT, PDF, Word, HTML, md)를 넣으면 시스템이 스스로 분석해 plan을 짜고 실현 가능한 ta… |
 | 0.23.2 | Task 0.23.2 | task | `TASK-AR-367` | `TASKSET-AR-DOC-TO-PLAN` | completed | `agents/lead_engineer/tasks/TASK-AR-367.md` | 비전이 동일한 오픈소스 Paperclip(github.com/paperclipai/paperclip, MIT)의 기능 중 agent_runtime에 없는… |
-| 0.23.3 | Task 0.23.3 | task | `TASK-AR-368` | `TASKSET-AR-DOC-TO-PLAN` | planned | `agents/lead_engineer/tasks/TASK-AR-368.md` | 예상치(est_*)만 있는 현 체계에 실측치를 더해, task/taskset을 우선순위·난이도·예상/실제 토큰·예상/실제 시간·부서 등 다요소로 정렬·필… |
+| 0.23.3 | Task 0.23.3 | task | `TASK-AR-368` | `TASKSET-AR-DOC-TO-PLAN` | completed | `agents/lead_engineer/tasks/TASK-AR-368.md` | 예상치(est_*)만 있는 현 체계에 실측치를 더해, task/taskset을 우선순위·난이도·예상/실제 토큰·예상/실제 시간·부서 등 다요소로 정렬·필… |
 | 0.24 | Taskset 0.24 | taskset | `TASKSET-AR-OPS-ERGONOMICS` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Ops Ergonomics |
 | 0.24.1 | Task 0.24.1 | task | `TASK-AR-523` | `TASKSET-AR-OPS-ERGONOMICS` | completed | `agents/lead_engineer/tasks/TASK-AR-523.md` | Nothing surfaces the 500-series observability at session start. Add scripts/session_d… |
 | 0.24.2 | Task 0.24.2 | task | `TASK-AR-524` | `TASKSET-AR-OPS-ERGONOMICS` | completed | `agents/lead_engineer/tasks/TASK-AR-524.md` | Make the new 500-series tools discoverable as trigger-based skills: wave-conductor (w… |

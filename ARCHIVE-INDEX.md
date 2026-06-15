@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-15
-archived_count: 213
+archived_count: 215
 ---
 
 # Archived Task Files
 
-- `213` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `215` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -174,6 +174,8 @@ archived_count: 213
 | `TASK-AR-349` | `7e8741f0-87d…` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | 2026-06-11T19:50:16+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | Mirror the PM hierarchy, unit templates, schemas, and gates into generated host proje… |
 | `TASK-AR-348` | `79254591-b67…` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | 2026-06-11T19:50:16+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | Render project/taskset/task/unit hierarchy without stuffing detailed instructions int… |
 | `TASK-AR-367` | `eeebc386-16b…` | `TASKSET-AR-DOC-TO-PLAN` | completed | 2026-06-12T00:09:43+09:00 | 2026-06-15T12:01:39+09:00 | 2026-06-15T12:01:39+09:00 | 2026-06-15T12:01:39+09:00 | 비전이 동일한 오픈소스 Paperclip(github.com/paperclipai/paperclip, MIT)의 기능 중 agent_runtime에 없는… |
+| `TASK-AR-368` | `587a4f9e-526…` | `TASKSET-AR-DOC-TO-PLAN` | completed | 2026-06-12T00:09:43+09:00 | 2026-06-15T12:36:11+09:00 | 2026-06-15T12:36:11+09:00 | 2026-06-15T12:36:11+09:00 | 예상치(est_*)만 있는 현 체계에 실측치를 더해, task/taskset을 우선순위·난이도·예상/실제 토큰·예상/실제 시간·부서 등 다요소로 정렬·필… |
+| `TASK-AR-366` | `07e182d9-a17…` | `TASKSET-AR-DOC-TO-PLAN` | completed | 2026-06-12T00:09:43+09:00 | 2026-06-15T12:36:11+09:00 | 2026-06-15T12:36:11+09:00 | 2026-06-15T12:36:11+09:00 | pitch deck/기획서/아이디어 문서(PPT, PDF, Word, HTML, md)를 넣으면 시스템이 스스로 분석해 plan을 짜고 실현 가능한 ta… |
 | `TASK-AR-369` | `9d171d09-6c3…` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | 2026-06-12T08:17:54+09:00 | 2026-06-12T08:42:59+09:00 | 2026-06-12T09:04:46+09:00 | 2026-06-12T09:04:46+09:00 | Finish the terminology migration from ambiguous `project -> taskset -> task -> unit`… |
 | `TASK-AR-370` | `5655d2cb-a03…` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | 2026-06-12T08:17:54+09:00 | 2026-06-12T09:43:38+09:00 | 2026-06-12T11:06:57+09:00 | 2026-06-12T11:06:57+09:00 | Prevent concurrent panes from selecting the same human display ID before a task file… |
 | `TASK-AR-371` | `b1f3ba90-9be…` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | 2026-06-12T08:17:54+09:00 | 2026-06-15T12:01:39+09:00 | 2026-06-15T12:01:39+09:00 | 2026-06-15T12:01:39+09:00 | Remove `BACKLOG.md` as a top-of-file shared manual registration hotspot while preserv… |

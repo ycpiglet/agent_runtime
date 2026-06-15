@@ -78,3 +78,17 @@ def test_unsupported_and_missing_binary_lib_are_graceful(tmp_path):
     if not has:
         with pytest.raises(RuntimeError):
             mod.extract_text(pdf)
+
+
+def test_main_out_writes_and_is_ascii_safe(tmp_path):
+    # W4b MEDIUM: the --out success message must be ASCII so it never crashes the
+    # success exit on a non-UTF-8 (cp949/cp1252) Windows console.
+    mod = _load()
+    src = (ROOT / "scripts" / "doc_to_plan.py").read_text(encoding="utf-8")
+    line = next(ln for ln in src.splitlines() if "proposal written to" in ln)
+    assert line.isascii(), line
+    f = tmp_path / "pitch.md"
+    f.write_text(SAMPLE, encoding="utf-8")
+    out = tmp_path / "proposal.json"
+    assert mod.main(["--input", str(f), "--out", str(out)]) == 0
+    assert out.exists()

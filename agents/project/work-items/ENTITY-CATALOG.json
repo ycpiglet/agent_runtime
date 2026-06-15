@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-entity-catalog/v1",
   "generated_at": "2026-06-15",
-  "entity_count": 724,
+  "entity_count": 725,
   "kind_counts": {
     "council": 1,
     "host_feedback": 7,
@@ -13,7 +13,7 @@
     "task": 226,
     "taskset": 33,
     "unit": 13,
-    "verification": 44
+    "verification": 45
   },
   "entities": [
     {
@@ -2961,7 +2961,7 @@
       "title": "Pitch Alchemist",
       "metadata": {
         "ordinal": "0.23",
-        "status": "active",
+        "status": "complete",
         "path": "BACKLOG-BOARD.md"
       },
       "relations": [
@@ -2977,7 +2977,7 @@
       "title": "pitch deck/기획서/아이디어 문서(PPT, PDF, Word, HTML, md)를 넣으면 시스템이 스스로 분석해 plan을 짜고 실현 가능한 ta…",
       "metadata": {
         "ordinal": "0.23.1",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-366.md"
       },
       "relations": [
@@ -3009,7 +3009,7 @@
       "title": "예상치(est_*)만 있는 현 체계에 실측치를 더해, task/taskset을 우선순위·난이도·예상/실제 토큰·예상/실제 시간·부서 등 다요소로 정렬·필…",
       "metadata": {
         "ordinal": "0.23.3",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-368.md"
       },
       "relations": [
@@ -9130,6 +9130,21 @@
         {
           "type": "references",
           "target": "TASK-AR-541"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-15-TASK-AR-366-368",
+      "title": "W4B-2026-06-15-TASK-AR-366-368",
+      "metadata": {
+        "date": "2026-06-15",
+        "path": "reviews/W4B-2026-06-15-TASK-AR-366-368.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-366"
         }
       ]
     },

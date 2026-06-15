@@ -161,7 +161,7 @@ def main(argv: list[str] | None = None) -> int:
     text = json.dumps(proposal, indent=2, ensure_ascii=False)
     if a.out:
         Path(a.out).write_text(text + "\n", encoding="utf-8")
-        print(f"doc-to-plan: proposal written to {a.out} ({len(proposal['tasks'])} tasks) — Owner approval required")
+        print(f"doc-to-plan: proposal written to {a.out} ({len(proposal['tasks'])} tasks) - Owner approval required")
     else:
         print(text)
     return 0

@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-15T12:03:55+09:00
-record_count: 491
+generated_at: 2026-06-15T12:36:35+09:00
+record_count: 492
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `491` review and evidence records under `reviews/`.
+- Summary: indexed `492` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `491` files |
+| Reviews covered | pass | `492` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -522,6 +522,7 @@ record_count: 491
 | `reviews/W4B-2026-06-14-TASK-AR-539.md` | `W4B-2026-06-14-TASK-AR-539` | verification | record | n/a | W4b Independent Verification — TASK-AR-539 (Unified artifact entity catalog) |
 | `reviews/W4B-2026-06-14-TASK-AR-540.md` | `W4B-2026-06-14-TASK-AR-540` | verification | record | n/a | W4b Independent Verification — TASK-AR-540 (command palette + cross-entity search) |
 | `reviews/W4B-2026-06-14-TASK-AR-541-545.md` | `W4B-2026-06-14-TASK-AR-541-545` | verification | record | n/a | W4b Independent Verification — Decision Console Surfaces (TASK-AR-541/542/543/544/545) |
+| `reviews/W4B-2026-06-15-TASK-AR-366-368.md` | `W4B-2026-06-15-TASK-AR-366-368` | md | record | n/a | W4B Independent Verification — TASK-AR-366 & TASK-AR-368 |
 | `reviews/W4B-2026-06-15-TASK-AR-371-374.md` | `W4B-2026-06-15-TASK-AR-371-374` | md | record | n/a | W4B-2026-06-15-TASK-AR-371-374 |
 | `reviews/W4B-2026-06-15-TASK-AR-557.md` | `W4B-2026-06-15-TASK-AR-557` | md | record | n/a | W4B Independent Verification — TASK-AR-557 (Unit 1: Role/Team/Tier Registry) |
 | `reviews/W4B-2026-06-15-TASK-AR-558-562.md` | `W4B-2026-06-15-TASK-AR-558-562` | md | record | n/a | W4B Independent Verification — TASK-AR-558..562 (Agent Org Delegation) |
