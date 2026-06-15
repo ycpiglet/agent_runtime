@@ -21,6 +21,8 @@
 | IV-009 | 에이전트 음성/TTS 발화 | 2026-06-11 | 효용 미검증, 소음 리스크 | 같은 문서 §2 | 2026-12-01 | 회의실(AR-361) 사용 패턴에서 수요 확인 | shelved |
 | IV-010 | 모바일 푸시 전용 앱 | 2026-06-11 | 웹훅→메신저 알림으로 충분 | 같은 문서 §1-D | 2026-12-01 | 메신저 알림(AR-365)의 한계 입증 | shelved |
 | IV-011 | Gather식 Webhook Objects(공간 내 알림 객체) | 2026-06-11 | 맵 뷰 자체가 미구현 | 같은 문서 §1-A | 2026-11-01 | 2D 맵(AR-364) 출시 후 | shelved |
+| IV-013 | 완전 멀티테넌시 데이터 격리 (vs 현 멀티호스트) | 2026-06-15 | 현 멀티호스트(AR-341/554) 충분; 완전 테넌트 격리는 별도 대형 보안 모델 (YAGNI) | REVIEW-2026-06-15-paperclip-gap-adoption-decision §axis3 | 2027-01-01 | 실제 멀티테넌트 요구 발생(외부/팀 공유) | shelved |
+| IV-014 | out-of-process 플러그인 워커 (vs 선언적 위젯) | 2026-06-15 | 새 비신뢰 코드 실행 경계(샌드박스·권한범위·공급망 검토 필요); 선언적 위젯(AR-341)이 더 안전 | REVIEW-2026-06-15-paperclip-gap-adoption-decision §axis4 | 2027-01-01 | 마켓플레이스 수요 + 샌드박스 설계 완성 | shelved |
 
 - Action Board: 재발굴 루프 규칙·주기는 TASK-AR-360에서 확정 (아래 운영 규칙). 신규 보류 결정은 반드시 본 레지스트리에 추가.
 - Next: revisit_after 도래 항목을 retro/planning scan이 Owner 제안으로 재상정 (`scripts/planning_loop.py scan` → `idea-vault-revival-due` finding).
