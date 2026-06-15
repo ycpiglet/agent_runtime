@@ -9,21 +9,21 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-15
 task_count: 226
-open_count: 11
-completed_count: 215
-task_set_count: 1
-completed_task_set_count: 32
+open_count: 0
+completed_count: 226
+task_set_count: 0
+completed_task_set_count: 33
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `11` open or active tasks; `215` completed tasks are archived from this live board.
+- Summary: `0` open or active tasks; `226` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `10` / Ask `0` / Review `0` / Later `1` / Done `215`.
-- Task Sets: `1` active workflows; `32` completed workflows are hidden from the live action board.
+- Status: Action `0` / Ask `0` / Review `0` / Later `0` / Done `226`.
+- Task Sets: `0` active workflows; `33` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -41,25 +41,6 @@ completed_task_set_count: 32
 ## Action Board
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
-
-### Maturity Steward (`TASKSET-AR-PRODUCT-MATURITY-UPLIFT`)
-
-- Flow: Close product-maturity gaps from the UI/quality assessment: end-to-end browser tests (Playwright), responsive layout, form validation + error UX, accessibility uplift, SSE real-time updates, i18n hardening, claim_reaper concurrency stress, observability export, multi-host claim safety, and owner-gated release automation.
-- Progress: `0/11` done; `11` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-548` | - | - | - | planned | Action | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Form errors currently surface in a single global list and a failed submit can reset t… |
-| `TASK-AR-552` | - | - | - | planned | Action | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | The deadlock guardrails (claim_reaper/goal_supervisor) are unit-tested on the happy p… |
-| `TASK-AR-556` | - | - | - | planned | Action | P1 | High | Medium | 6h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Make the canonical closure steps (compound / review / retro) **non-skippable** for su… |
-| `TASK-AR-546` | - | - | - | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Close the highest-impact UI testing gap: there are ~326 Python-side UI tests but **no… |
-| `TASK-AR-549` | - | - | - | planned | Action | P1 | High | Medium | 8h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | The console has broad ARIA usage but misses several WCAG essentials. Add skip-to-cont… |
-| `TASK-AR-551` | - | - | - | planned | Action | P2 | Medium | Medium | 6h/5000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | i18n covers UI chrome (ko/en) but error messages are hardcoded English and there is n… |
-| `TASK-AR-553` | - | - | - | planned | Action | P2 | Medium | Medium | 8h/6000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | The runtime captures rich local audit trails (pane_events, stop_counters, hook-logs)… |
-| `TASK-AR-547` | - | - | - | planned | Action | P2 | Medium | High | 12h/9000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | The console is single-column with fixed widths and a fixed sidebar; it breaks below d… |
-| `TASK-AR-554` | - | - | - | planned | Action | P2 | Medium | High | 12h/9000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Claim reaping/recovery assumes a single checkout (single-writer). Multiple hosts or C… |
-| `TASK-AR-550` | - | - | - | planned | Later | P2 | Medium | High | 16h/12000tok | Low | 5 | agent-runtime-core | lead-engineer | Wait for dependency | The console polls every 5-10s, adding latency and wasted bandwidth. Add Server-Sent E… |
-| `TASK-AR-555` | - | - | - | planned | Action | P3 | Low | High | 12h/9000tok | Low | 4 | agent-runtime-core | lead-engineer | Execute next | Release stages are validated locally in `--check` mode only; remote tag/PR/merge/publ… |
 
 ## Archived Task Sets
 
@@ -97,15 +78,16 @@ completed_task_set_count: 32
 | Host Liaison (`TASKSET-AR-HOST-FEEDBACK-INTAKE`) | Treat host (autofolio) dogfooding feedback as first-class input: intake/triage, blind-Delphi council/seminar deliberation with diversity + Owner-boundary guardrails, decision reply-back to issues, plus the feedback-derived footprint-gate, self-eval/RSI fitness, host-fit, and open-bug candidates whose adoption the first deliberation decides. | `7/7` done | `7` completed task files archived |
 | Store Architect (`TASKSET-AR-WORK-STORE-RESTRUCTURE`) | Stop the board from dumping the archive and reviews from accumulating unbounded: board attention-lanes (Triage/Active/Rollup) + extracted archive manifest, reviews date-shard + compacted index, classifier ordinal as canonical human ID with cosmetic TASK-AR-NNN gaps, UUIDv7/ULID stable keys, a manifest-first derived read-index + repo perf config, and a triage intake status. Single store + status field + views; no lifecycle directories. | `6/6` done | `6` completed task files archived |
 | Decision Cartographer (`TASKSET-AR-UNIFIED-DECISION-CONSOLE`) | A decision/operations-optimized console over a typed entity catalog of every artifact (plan/review/issue/pr/git-log/branch/skill/council/seminar/work-items/waves/state/history): catalog model + manifest, universal command palette + cross-entity search, entity detail + backlinks, activity/provenance timeline + audit, faceted saved views + rollups + needs-attention inbox, live SCM surface, and governance-document surface. | `7/7` done | `7` completed task files archived |
+| Maturity Steward (`TASKSET-AR-PRODUCT-MATURITY-UPLIFT`) | Close product-maturity gaps from the UI/quality assessment: end-to-end browser tests (Playwright), responsive layout, form validation + error UX, accessibility uplift, SSE real-time updates, i18n hardening, claim_reaper concurrency stress, observability export, multi-host claim safety, and owner-gated release automation. | `11/11` done | `11` completed task files archived |
 | Org Conductor (`TASKSET-AR-AGENT-ORG-DELEGATION`) | Operationalize a Director->Lead->Worker+Reviewer agent org by reconciling the template org-suite (roles.yml/orchestrator/subagent/seminar) with the repo claim/wave execution: role/team/tier registry + owner normalization, lead taskset->unit decomposition, seam-aware + risk-based dispatch gate, orchestrator with a swappable WorkerBackend (sub-agents now, headless daemon later), a blind-Delphi persona-diversity deliberation layer, and a minimal org/state read-API. Research-grounded (Karpathy autonomy, gstack, multi-agent architectures, persona diversity); seam-aware parallelism + phased autonomy; token cost binding (~15x). | `6/6` done | `6` completed task files archived |
 
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `11` open across `1` task sets (see Action Board above).
-- Archived task sets: `32` (see Archived Task Sets above).
-- Archived task files: `215` — see `ARCHIVE-INDEX.md`.
+- Active: `0` open across `0` task sets (see Action Board above).
+- Archived task sets: `33` (see Archived Task Sets above).
+- Archived task files: `226` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

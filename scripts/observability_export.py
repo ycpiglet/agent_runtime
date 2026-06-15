@@ -81,7 +81,7 @@ def main(argv: list[str] | None = None) -> int:
     text = (json.dumps(metrics, indent=2, ensure_ascii=False) if a.format == "json"
             else to_prometheus(metrics))
     if a.out:
-        Path(a.out).write_text(text + "\n", encoding="utf-8")
+        Path(a.out).write_text(text.rstrip("\n") + "\n", encoding="utf-8")  # exactly one trailing newline
         print(f"observability: {a.format} metrics written to {a.out}")
     else:
         print(text)

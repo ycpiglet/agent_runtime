@@ -1,14 +1,14 @@
 {
   "schema": "agent-runtime-entity-catalog/v1",
   "generated_at": "2026-06-15",
-  "entity_count": 725,
+  "entity_count": 726,
   "kind_counts": {
     "council": 1,
     "host_feedback": 7,
     "initiative": 9,
     "meeting": 55,
     "research": 28,
-    "review": 297,
+    "review": 298,
     "seminar": 11,
     "task": 226,
     "taskset": 33,
@@ -3457,7 +3457,7 @@
       "title": "Maturity Steward",
       "metadata": {
         "ordinal": "0.28",
-        "status": "active",
+        "status": "complete",
         "path": "BACKLOG-BOARD.md"
       },
       "relations": [
@@ -3473,7 +3473,7 @@
       "title": "Close the highest-impact UI testing gap: there are ~326 Python-side UI tests but **no…",
       "metadata": {
         "ordinal": "0.28.1",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-546.md"
       },
       "relations": [
@@ -3489,7 +3489,7 @@
       "title": "The console is single-column with fixed widths and a fixed sidebar; it breaks below d…",
       "metadata": {
         "ordinal": "0.28.2",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-547.md"
       },
       "relations": [
@@ -3505,7 +3505,7 @@
       "title": "Form errors currently surface in a single global list and a failed submit can reset t…",
       "metadata": {
         "ordinal": "0.28.3",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-548.md"
       },
       "relations": [
@@ -3521,7 +3521,7 @@
       "title": "The console has broad ARIA usage but misses several WCAG essentials. Add skip-to-cont…",
       "metadata": {
         "ordinal": "0.28.4",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-549.md"
       },
       "relations": [
@@ -3537,7 +3537,7 @@
       "title": "The console polls every 5-10s, adding latency and wasted bandwidth. Add Server-Sent E…",
       "metadata": {
         "ordinal": "0.28.5",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-550.md"
       },
       "relations": [
@@ -3553,7 +3553,7 @@
       "title": "i18n covers UI chrome (ko/en) but error messages are hardcoded English and there is n…",
       "metadata": {
         "ordinal": "0.28.6",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-551.md"
       },
       "relations": [
@@ -3569,7 +3569,7 @@
       "title": "The deadlock guardrails (claim_reaper/goal_supervisor) are unit-tested on the happy p…",
       "metadata": {
         "ordinal": "0.28.7",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-552.md"
       },
       "relations": [
@@ -3585,7 +3585,7 @@
       "title": "The runtime captures rich local audit trails (pane_events, stop_counters, hook-logs)…",
       "metadata": {
         "ordinal": "0.28.8",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-553.md"
       },
       "relations": [
@@ -3601,7 +3601,7 @@
       "title": "Claim reaping/recovery assumes a single checkout (single-writer). Multiple hosts or C…",
       "metadata": {
         "ordinal": "0.28.9",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-554.md"
       },
       "relations": [
@@ -3617,7 +3617,7 @@
       "title": "Release stages are validated locally in `--check` mode only; remote tag/PR/merge/publ…",
       "metadata": {
         "ordinal": "0.28.10",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-555.md"
       },
       "relations": [
@@ -3633,7 +3633,7 @@
       "title": "Make the canonical closure steps (compound / review / retro) **non-skippable** for su…",
       "metadata": {
         "ordinal": "0.28.11",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-556.md"
       },
       "relations": [
@@ -8395,6 +8395,16 @@
       "metadata": {
         "date": "2026-06-15",
         "path": "reviews/REVIEW-2026-06-15-paperclip-gap-adoption-decision.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-15-product-maturity-uplift-closeout",
+      "title": "REVIEW-2026-06-15-product-maturity-uplift-closeout",
+      "metadata": {
+        "date": "2026-06-15",
+        "path": "reviews/REVIEW-2026-06-15-product-maturity-uplift-closeout.md"
       },
       "relations": []
     },

@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-release-readiness-summary/v1",
   "evaluation_mode": "v0.1.8_readiness_aggregation",
-  "generated_at": "2026-06-09T09:59:10.161637+00:00",
+  "generated_at": "2026-06-15T04:38:23.348453+00:00",
   "target_tag": "v0.1.8",
   "status": "pass",
   "release_route": "release_evidence_ready",

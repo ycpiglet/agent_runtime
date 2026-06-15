@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-15T12:36:25+09:00
+generated_at: 2026-06-15T13:47:57+09:00
 record_count: 281
 ---
 
@@ -254,18 +254,18 @@ record_count: 281
 | 0.27.5 | Task 0.27.5 | task | `TASK-AR-543` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-543.md` | Give the decision-maker reusable lenses over the catalog and an exception-only attent… |
 | 0.27.6 | Task 0.27.6 | task | `TASK-AR-544` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-544.md` | Bring SCM artifacts the Owner listed (git log, branches, PRs, issues) into the catalo… |
 | 0.27.7 | Task 0.27.7 | task | `TASK-AR-545` | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | completed | `agents/lead_engineer/tasks/TASK-AR-545.md` | Make the product's governance/knowledge documents (skills, council records, seminar r… |
-| 0.28 | Taskset 0.28 | taskset | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | `INIT-UNASSIGNED` | active | `BACKLOG-BOARD.md` | Maturity Steward |
-| 0.28.1 | Task 0.28.1 | task | `TASK-AR-546` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-546.md` | Close the highest-impact UI testing gap: there are ~326 Python-side UI tests but **no… |
-| 0.28.2 | Task 0.28.2 | task | `TASK-AR-547` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-547.md` | The console is single-column with fixed widths and a fixed sidebar; it breaks below d… |
-| 0.28.3 | Task 0.28.3 | task | `TASK-AR-548` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-548.md` | Form errors currently surface in a single global list and a failed submit can reset t… |
-| 0.28.4 | Task 0.28.4 | task | `TASK-AR-549` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-549.md` | The console has broad ARIA usage but misses several WCAG essentials. Add skip-to-cont… |
-| 0.28.5 | Task 0.28.5 | task | `TASK-AR-550` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-550.md` | The console polls every 5-10s, adding latency and wasted bandwidth. Add Server-Sent E… |
-| 0.28.6 | Task 0.28.6 | task | `TASK-AR-551` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-551.md` | i18n covers UI chrome (ko/en) but error messages are hardcoded English and there is n… |
-| 0.28.7 | Task 0.28.7 | task | `TASK-AR-552` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-552.md` | The deadlock guardrails (claim_reaper/goal_supervisor) are unit-tested on the happy p… |
-| 0.28.8 | Task 0.28.8 | task | `TASK-AR-553` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-553.md` | The runtime captures rich local audit trails (pane_events, stop_counters, hook-logs)… |
-| 0.28.9 | Task 0.28.9 | task | `TASK-AR-554` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-554.md` | Claim reaping/recovery assumes a single checkout (single-writer). Multiple hosts or C… |
-| 0.28.10 | Task 0.28.10 | task | `TASK-AR-555` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-555.md` | Release stages are validated locally in `--check` mode only; remote tag/PR/merge/publ… |
-| 0.28.11 | Task 0.28.11 | task | `TASK-AR-556` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | planned | `agents/lead_engineer/tasks/TASK-AR-556.md` | Make the canonical closure steps (compound / review / retro) **non-skippable** for su… |
+| 0.28 | Taskset 0.28 | taskset | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Maturity Steward |
+| 0.28.1 | Task 0.28.1 | task | `TASK-AR-546` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | `agents/lead_engineer/tasks/TASK-AR-546.md` | Close the highest-impact UI testing gap: there are ~326 Python-side UI tests but **no… |
+| 0.28.2 | Task 0.28.2 | task | `TASK-AR-547` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | `agents/lead_engineer/tasks/TASK-AR-547.md` | The console is single-column with fixed widths and a fixed sidebar; it breaks below d… |
+| 0.28.3 | Task 0.28.3 | task | `TASK-AR-548` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | `agents/lead_engineer/tasks/TASK-AR-548.md` | Form errors currently surface in a single global list and a failed submit can reset t… |
+| 0.28.4 | Task 0.28.4 | task | `TASK-AR-549` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | `agents/lead_engineer/tasks/TASK-AR-549.md` | The console has broad ARIA usage but misses several WCAG essentials. Add skip-to-cont… |
+| 0.28.5 | Task 0.28.5 | task | `TASK-AR-550` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | `agents/lead_engineer/tasks/TASK-AR-550.md` | The console polls every 5-10s, adding latency and wasted bandwidth. Add Server-Sent E… |
+| 0.28.6 | Task 0.28.6 | task | `TASK-AR-551` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | `agents/lead_engineer/tasks/TASK-AR-551.md` | i18n covers UI chrome (ko/en) but error messages are hardcoded English and there is n… |
+| 0.28.7 | Task 0.28.7 | task | `TASK-AR-552` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | `agents/lead_engineer/tasks/TASK-AR-552.md` | The deadlock guardrails (claim_reaper/goal_supervisor) are unit-tested on the happy p… |
+| 0.28.8 | Task 0.28.8 | task | `TASK-AR-553` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | `agents/lead_engineer/tasks/TASK-AR-553.md` | The runtime captures rich local audit trails (pane_events, stop_counters, hook-logs)… |
+| 0.28.9 | Task 0.28.9 | task | `TASK-AR-554` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | `agents/lead_engineer/tasks/TASK-AR-554.md` | Claim reaping/recovery assumes a single checkout (single-writer). Multiple hosts or C… |
+| 0.28.10 | Task 0.28.10 | task | `TASK-AR-555` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | `agents/lead_engineer/tasks/TASK-AR-555.md` | Release stages are validated locally in `--check` mode only; remote tag/PR/merge/publ… |
+| 0.28.11 | Task 0.28.11 | task | `TASK-AR-556` | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | completed | `agents/lead_engineer/tasks/TASK-AR-556.md` | Make the canonical closure steps (compound / review / retro) **non-skippable** for su… |
 | 0.29 | Taskset 0.29 | taskset | `TASKSET-AR-AGENT-ORG-DELEGATION` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Org Conductor |
 | 0.29.1 | Task 0.29.1 | task | `TASK-AR-557` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | `agents/lead_engineer/tasks/TASK-AR-557.md` | ORG-MODEL.yml (role/team/tier registry, aliases absorb owner drift) + scripts/org_mod… |
 | 0.29.2 | Task 0.29.2 | task | `TASK-AR-558` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | `agents/lead_engineer/tasks/TASK-AR-558.md` | Tool for a Lead to decompose a Taskset's Tasks into worker-ready Units (unit_spec/con… |

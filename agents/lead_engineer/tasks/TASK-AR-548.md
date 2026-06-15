@@ -4,8 +4,9 @@ display_id: TASK-AR-548
 task_uid: 26100de0-a450-4e8f-8db2-aed073180b22
 registered_at: 2026-06-14T08:48:02+09:00
 created_at: 2026-06-14T08:48:02+09:00
-updated_at: 2026-06-14T08:48:02+09:00
-status: planned
+updated_at: 2026-06-15T13:45:18+09:00
+status: completed
+resolution: done
 priority: P1
 difficulty: M
 est_hours: 6
@@ -17,6 +18,12 @@ tags:
   - forms
   - ux
   - validation
+started_at: 2026-06-15T13:45:18+09:00
+completed_at: 2026-06-15T13:45:18+09:00
+verification_status: passed
+review_refs:
+  - reviews/W4B-2026-06-15-TASK-AR-546-556.md
+  - reviews/REVIEW-2026-06-15-product-maturity-uplift-closeout.md
 ---
 
 # TASK-AR-548 - Form validation + error UX (inline, toast, undo)
