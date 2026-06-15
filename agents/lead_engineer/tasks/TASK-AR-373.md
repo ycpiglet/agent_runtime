@@ -13,9 +13,10 @@ display_id: TASK-AR-373
 task_uid: d30bf31f-641a-4e5a-8968-51d14a267fed
 registered_at: 2026-06-12T08:17:54+09:00
 created_at: 2026-06-12T08:17:54+09:00
-updated_at: 2026-06-13T16:30:00+09:00
+updated_at: 2026-06-15T12:01:39+09:00
 title: Unit-readiness migration report for legacy planned tasks
-status: worker_ready
+status: completed
+resolution: done
 priority: P3
 difficulty: M
 est_hours: 6
@@ -34,6 +35,12 @@ tags:
   - unit-readiness
   - migration
   - planning
+started_at: 2026-06-15T12:01:39+09:00
+completed_at: 2026-06-15T12:01:39+09:00
+verification_status: passed
+review_refs:
+  - reviews/W4B-2026-06-15-TASK-AR-371-374.md
+  - reviews/REVIEW-2026-06-15-work-hierarchy-conflict-closure-closeout.md
 ---
 
 # TASK-AR-373 - Unit-readiness migration report for legacy planned tasks

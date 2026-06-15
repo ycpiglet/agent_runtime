@@ -1,19 +1,19 @@
 {
   "schema": "agent-runtime-entity-catalog/v1",
   "generated_at": "2026-06-15",
-  "entity_count": 720,
+  "entity_count": 724,
   "kind_counts": {
     "council": 1,
     "host_feedback": 7,
     "initiative": 9,
     "meeting": 55,
     "research": 28,
-    "review": 294,
+    "review": 297,
     "seminar": 11,
     "task": 226,
     "taskset": 33,
     "unit": 13,
-    "verification": 43
+    "verification": 44
   },
   "entities": [
     {
@@ -2993,7 +2993,7 @@
       "title": "비전이 동일한 오픈소스 Paperclip(github.com/paperclipai/paperclip, MIT)의 기능 중 agent_runtime에 없는…",
       "metadata": {
         "ordinal": "0.23.2",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-367.md"
       },
       "relations": [
@@ -3772,7 +3772,7 @@
       "title": "Work Taxonomist",
       "metadata": {
         "ordinal": "1.1",
-        "status": "active",
+        "status": "complete",
         "path": "BACKLOG-BOARD.md"
       },
       "relations": [
@@ -3820,7 +3820,7 @@
       "title": "Remove `BACKLOG.md` as a top-of-file shared manual registration hotspot while preserv…",
       "metadata": {
         "ordinal": "1.1.3",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-371.md"
       },
       "relations": [
@@ -3836,7 +3836,7 @@
       "title": "Provide one structured registration command path so planners stop hand-editing board…",
       "metadata": {
         "ordinal": "1.1.4",
-        "status": "in_progress",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-372.md"
       },
       "relations": [
@@ -3996,7 +3996,7 @@
       "title": "Make it visible which planned tasks are worker-ready and which still require planner…",
       "metadata": {
         "ordinal": "1.1.5",
-        "status": "worker_ready",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-373.md"
       },
       "relations": [
@@ -4044,7 +4044,7 @@
       "title": "Prove that the work hierarchy and registration conflict surfaces are actually closed…",
       "metadata": {
         "ordinal": "1.1.6",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-374.md"
       },
       "relations": [
@@ -8379,6 +8379,36 @@
       "relations": []
     },
     {
+      "kind": "review",
+      "id": "REVIEW-2026-06-15-doc-to-plan-closeout",
+      "title": "REVIEW-2026-06-15-doc-to-plan-closeout",
+      "metadata": {
+        "date": "2026-06-15",
+        "path": "reviews/REVIEW-2026-06-15-doc-to-plan-closeout.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-15-paperclip-gap-adoption-decision",
+      "title": "REVIEW-2026-06-15-paperclip-gap-adoption-decision",
+      "metadata": {
+        "date": "2026-06-15",
+        "path": "reviews/REVIEW-2026-06-15-paperclip-gap-adoption-decision.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-15-work-hierarchy-conflict-closure-closeout",
+      "title": "REVIEW-2026-06-15-work-hierarchy-conflict-closure-closeout",
+      "metadata": {
+        "date": "2026-06-15",
+        "path": "reviews/REVIEW-2026-06-15-work-hierarchy-conflict-closure-closeout.md"
+      },
+      "relations": []
+    },
+    {
       "kind": "seminar",
       "id": "SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract",
       "title": "SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract",
@@ -9100,6 +9130,21 @@
         {
           "type": "references",
           "target": "TASK-AR-541"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-15-TASK-AR-371-374",
+      "title": "W4B-2026-06-15-TASK-AR-371-374",
+      "metadata": {
+        "date": "2026-06-15",
+        "path": "reviews/W4B-2026-06-15-TASK-AR-371-374.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-371"
         }
       ]
     },

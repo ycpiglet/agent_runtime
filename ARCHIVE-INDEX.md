@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-15
-archived_count: 208
+archived_count: 213
 ---
 
 # Archived Task Files
 
-- `208` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `213` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -173,8 +173,13 @@ archived_count: 208
 | `TASK-AR-347` | `815686ed-3b2…` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | 2026-06-11T19:50:16+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | Add Kanban-style WIP controls and flow signals for tasksets, teams, and worker units. |
 | `TASK-AR-349` | `7e8741f0-87d…` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | 2026-06-11T19:50:16+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | Mirror the PM hierarchy, unit templates, schemas, and gates into generated host proje… |
 | `TASK-AR-348` | `79254591-b67…` | `TASKSET-AR-PM-OPERATING-SYSTEM` | completed | 2026-06-11T19:50:16+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | 2026-06-12T01:38:36+09:00 | Render project/taskset/task/unit hierarchy without stuffing detailed instructions int… |
+| `TASK-AR-367` | `eeebc386-16b…` | `TASKSET-AR-DOC-TO-PLAN` | completed | 2026-06-12T00:09:43+09:00 | 2026-06-15T12:01:39+09:00 | 2026-06-15T12:01:39+09:00 | 2026-06-15T12:01:39+09:00 | 비전이 동일한 오픈소스 Paperclip(github.com/paperclipai/paperclip, MIT)의 기능 중 agent_runtime에 없는… |
 | `TASK-AR-369` | `9d171d09-6c3…` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | 2026-06-12T08:17:54+09:00 | 2026-06-12T08:42:59+09:00 | 2026-06-12T09:04:46+09:00 | 2026-06-12T09:04:46+09:00 | Finish the terminology migration from ambiguous `project -> taskset -> task -> unit`… |
 | `TASK-AR-370` | `5655d2cb-a03…` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | 2026-06-12T08:17:54+09:00 | 2026-06-12T09:43:38+09:00 | 2026-06-12T11:06:57+09:00 | 2026-06-12T11:06:57+09:00 | Prevent concurrent panes from selecting the same human display ID before a task file… |
+| `TASK-AR-371` | `b1f3ba90-9be…` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | 2026-06-12T08:17:54+09:00 | 2026-06-15T12:01:39+09:00 | 2026-06-15T12:01:39+09:00 | 2026-06-15T12:01:39+09:00 | Remove `BACKLOG.md` as a top-of-file shared manual registration hotspot while preserv… |
+| `TASK-AR-372` | `42f1d67e-cc3…` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | 2026-06-12T08:17:54+09:00 | 2026-06-12T11:58:44+09:00 | 2026-06-15T12:01:39+09:00 | 2026-06-15T12:01:39+09:00 | Provide one structured registration command path so planners stop hand-editing board… |
+| `TASK-AR-373` | `d30bf31f-641…` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | 2026-06-12T08:17:54+09:00 | 2026-06-15T12:01:39+09:00 | 2026-06-15T12:01:39+09:00 | 2026-06-15T12:01:39+09:00 | Make it visible which planned tasks are worker-ready and which still require planner… |
+| `TASK-AR-374` | `e08dd19a-399…` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | 2026-06-12T08:17:54+09:00 | 2026-06-15T12:01:39+09:00 | 2026-06-15T12:01:39+09:00 | 2026-06-15T12:01:39+09:00 | Prove that the work hierarchy and registration conflict surfaces are actually closed… |
 | `TASK-AR-375` | `fe4cf218-9eb…` | `TASKSET-AR-AGENT-IDENTITY-CONTRACT` | completed | 2026-06-12T14:50:00+09:00 | 2026-06-12T15:05:12+09:00 | 2026-06-12T15:25:40+09:00 | 2026-06-12T15:25:40+09:00 | Create durable instance-level identity records and a deterministic gate that rejects… |
 | `TASK-AR-514` | `5b5f167a-3a1…` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | 2026-06-12T23:30:00+09:00 | 2026-06-13T01:33:45+09:00 | 2026-06-13T04:30:00+09:00 | 2026-06-13T04:30:00+09:00 | Owner/Claude/Codex planning discussions must map to review records, task records, boa… |
 | `TASK-AR-517` | `da2e7699-1f7…` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | 2026-06-12T23:33:00+09:00 | 2026-06-13T02:45:16+09:00 | 2026-06-13T11:50:00+09:00 | 2026-06-13T11:50:00+09:00 | Turn Work Item metadata into queryable statistics, JSON/CSV export, and reusable save… |

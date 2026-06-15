@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-15T10:05:56+09:00",
+  "generated_at": "2026-06-15T12:03:50+09:00",
   "record_count": 281,
   "finding_count": 0,
   "findings": [],
@@ -2060,7 +2060,7 @@
       "title": "비전이 동일한 오픈소스 Paperclip(github.com/paperclipai/paperclip, MIT)의 기능 중 agent_runtime에 없는…",
       "path": "agents/lead_engineer/tasks/TASK-AR-367.md",
       "parent_id": "TASKSET-AR-DOC-TO-PLAN",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-368",
@@ -2599,7 +2599,7 @@
       "title": "Work Taxonomist",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-369",
@@ -2632,7 +2632,7 @@
       "title": "Remove `BACKLOG.md` as a top-of-file shared manual registration hotspot while preserv…",
       "path": "agents/lead_engineer/tasks/TASK-AR-371.md",
       "parent_id": "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-372",
@@ -2643,7 +2643,7 @@
       "title": "Provide one structured registration command path so planners stop hand-editing board…",
       "path": "agents/lead_engineer/tasks/TASK-AR-372.md",
       "parent_id": "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-372-001",
@@ -2753,7 +2753,7 @@
       "title": "Make it visible which planned tasks are worker-ready and which still require planner…",
       "path": "agents/lead_engineer/tasks/TASK-AR-373.md",
       "parent_id": "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-373-001",
@@ -2786,7 +2786,7 @@
       "title": "Prove that the work hierarchy and registration conflict surfaces are actually closed…",
       "path": "agents/lead_engineer/tasks/TASK-AR-374.md",
       "parent_id": "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "initiative:INIT-AR-AGENT-IDENTITY-OBSERVABILITY",

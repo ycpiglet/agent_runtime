@@ -12,9 +12,10 @@ display_id: TASK-AR-371
 task_uid: b1f3ba90-9bea-4fab-b72c-a7c3388c8dd3
 registered_at: 2026-06-12T08:17:54+09:00
 created_at: 2026-06-12T08:17:54+09:00
-updated_at: 2026-06-12T08:17:54+09:00
+updated_at: 2026-06-15T12:01:39+09:00
 title: BACKLOG.md shared-write deconfliction
-status: planned
+status: completed
+resolution: done
 priority: P1
 difficulty: M
 est_hours: 8
@@ -33,6 +34,12 @@ tags:
   - backlog
   - conflict
   - docs
+started_at: 2026-06-15T12:01:39+09:00
+completed_at: 2026-06-15T12:01:39+09:00
+verification_status: passed
+review_refs:
+  - reviews/W4B-2026-06-15-TASK-AR-371-374.md
+  - reviews/REVIEW-2026-06-15-work-hierarchy-conflict-closure-closeout.md
 ---
 
 # TASK-AR-371 - BACKLOG.md shared-write deconfliction

@@ -12,9 +12,10 @@ display_id: TASK-AR-374
 task_uid: e08dd19a-3998-44ff-8b16-4a1eaa7c4ccf
 registered_at: 2026-06-12T08:17:54+09:00
 created_at: 2026-06-12T08:17:54+09:00
-updated_at: 2026-06-12T08:17:54+09:00
+updated_at: 2026-06-15T12:01:39+09:00
 title: Conflict-surface verification and closeout gate
-status: planned
+status: completed
+resolution: done
 priority: P3
 difficulty: S
 est_hours: 8
@@ -33,6 +34,12 @@ tags:
   - verification
   - closeout
   - conflict
+started_at: 2026-06-15T12:01:39+09:00
+completed_at: 2026-06-15T12:01:39+09:00
+verification_status: passed
+review_refs:
+  - reviews/W4B-2026-06-15-TASK-AR-371-374.md
+  - reviews/REVIEW-2026-06-15-work-hierarchy-conflict-closure-closeout.md
 ---
 
 # TASK-AR-374 - Conflict-surface verification and closeout gate
