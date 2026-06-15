@@ -1,5 +1,23 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+<!-- BACKLOG-INDEX:START (generated from TASKSET-DEFINITIONS.json — do not edit by hand) -->
+
+## Registered tasksets (generated)
+
+| Order | Taskset | Name |
+| --- | --- | --- |
+| 512 | `TASKSET-AR-AGENT-IDENTITY-CONTRACT` | Agent Identity Contract |
+| 513 | `TASKSET-AR-WORK-METADATA-ANALYTICS` | Work Metadata Analyst |
+| 514 | `TASKSET-AR-PARALLEL-WAVE-EXECUTION` | Wave Conductor |
+| 523 | `TASKSET-AR-OPS-ERGONOMICS` | Ops Ergonomics |
+| 524 | `TASKSET-AR-HOST-FEEDBACK-INTAKE` | Host Liaison |
+| 525 | `TASKSET-AR-WORK-STORE-RESTRUCTURE` | Store Architect |
+| 526 | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | Decision Cartographer |
+| 527 | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | Maturity Steward |
+| 528 | `TASKSET-AR-AGENT-ORG-DELEGATION` | Org Conductor |
+
+<!-- BACKLOG-INDEX:END -->
+
 ## 2026-06-15 TASKSET-AR-AGENT-ORG-DELEGATION 등록 + Unit 1 완료 (Org Conductor)
 
 - 브레인스토밍→리서치(Karpathy/gstack/페르소나 다양성)→spec→plan→등록. Director→Lead→Worker+Reviewer 조직, seam-aware 병렬+단계적 자율, 위험기반 하이브리드 디스패치, 교체가능 WorkerBackend(서브에이전트→데몬), 페르소나=blind-Delphi 심의 레이어, 토큰 비용 구속(~15×).
