@@ -1,10 +1,10 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-06-15 - TASKSET-AR-AGENT-ORG-DELEGATION active (Unit 1 done)
+## 2026-06-15 - TASKSET-AR-AGENT-ORG-DELEGATION complete (6/6)
 
-- Agent org & delegation sub-project registered (`TASKSET-AR-AGENT-ORG-DELEGATION`, Org Conductor; 6 units `TASK-AR-557..562`). Unit 1 (`TASK-AR-557`, `agents/project/ORG-MODEL.yml` role/team/tier registry + watch-level owner-resolution gate) implemented, W4b APPROVE, completed.
-- Active taskset: `TASKSET-AR-AGENT-ORG-DELEGATION` (step 1/6). Next: units `TASK-AR-558..562`, or resume UI redesign (`reviews/HANDOFF-2026-06-15-ui-redesign-and-product-structure.md`).
-- Branch `claude/agent-org-delegation-design` (unpushed; Owner-gated).
+- Agent org & delegation sub-project COMPLETE: `TASKSET-AR-AGENT-ORG-DELEGATION` (Org Conductor), 6 units `TASK-AR-557..562` implemented, W4b APPROVE (2 records), completed; full suite green.
+- Units: role/team/tier registry + owner gate (557), lead decomposition (558), seam+risk dispatch gate (559), orchestrator + swappable WorkerBackend (560), persona-diversity deliberation layer (561), org/state read-API (562).
+- Next: resume UI redesign (`reviews/HANDOFF-2026-06-15-ui-redesign-and-product-structure.md`). Branch `claude/agent-org-delegation-design` (unpushed; Owner-gated).
 
 ## 2026-06-13 - TASKSET-AR-UI-PLATFORM-EXTENSIONS wave-7 active
 

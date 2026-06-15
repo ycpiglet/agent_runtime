@@ -1,14 +1,14 @@
 schema: agent-runtime-next-session-pointer/v1
 updated_at: 2026-06-15T01:35:00+09:00
 current_state:
-  summary: "Agent-org & delegation sub-project: spec + research (Karpathy / gstack / persona-diversity) approved; registered TASKSET-AR-AGENT-ORG-DELEGATION (Org Conductor; 6 units TASK-AR-557..562); Unit 1 (TASK-AR-557, role/team/tier registry ORG-MODEL.yml + watch-level owner-resolution gate) implemented, W4b APPROVE, completed. UI/UX redesign + product-structure change DEFERRED to next session (see reviews/HANDOFF-2026-06-15-ui-redesign-and-product-structure.md)."
+  summary: "Agent-org & delegation sub-project COMPLETE: TASKSET-AR-AGENT-ORG-DELEGATION 6/6 units (TASK-AR-557..562) implemented, W4b APPROVE (2 records), completed; full suite green (1279 pass). Units: role/team/tier registry + owner gate, lead decomposition, seam+risk dispatch gate, orchestrator + swappable WorkerBackend, persona-diversity deliberation layer, org/state read-API. UI/UX redesign + product-structure change DEFERRED to next session (reviews/HANDOFF-2026-06-15-ui-redesign-and-product-structure.md)."
   status: ready
-  task_set_status: in_progress
+  task_set_status: complete
   task_set_id: "TASKSET-AR-AGENT-ORG-DELEGATION"
-  step_index: 1
+  step_index: 6
   step_total: 6
-  progress_pct: 17
-  status_text: "Unit 1/6 done (TASK-AR-557, W4b APPROVE). Next: (a) continue agent-org units TASK-AR-558..562 (each via superpowers:writing-plans), or (b) resume UI redesign sub-projects #1 decision-first IA + #3 visual identity / 2.5D characters / insight-graph. Branch: claude/agent-org-delegation-design (unpushed; Owner-gated)."
+  progress_pct: 100
+  status_text: "TASKSET-AR-AGENT-ORG-DELEGATION 6/6 done. Next: resume UI redesign sub-projects #1 decision-first IA + #3 visual identity / 2.5D characters / insight-graph (reviews/HANDOFF-2026-06-15-ui-redesign-and-product-structure.md). Branch claude/agent-org-delegation-design (unpushed; Owner-gated)."
 active_work:
   current_agents: []
   current_teams: []
