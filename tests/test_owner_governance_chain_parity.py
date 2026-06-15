@@ -40,6 +40,11 @@ DOCUMENTED_TEMPLATE_OMISSIONS: dict[str, str] = {
         "src/agent_runtime/templates/**, agents/project/overlays/**, and root eval files "
         "that generated projects do not ship"
     ),
+    "scripts/org_model_gate.py": (
+        "root-repo-specific (org-delegation Unit 1): resolves work-item owner/team against "
+        "the root agents/project/ORG-MODEL.yml; generated projects ship their own role model "
+        "(agents/roles.yml), so this watch-level gate is intentionally root-only"
+    ),
 }
 
 # Template chain entries whose script is known to be missing from the

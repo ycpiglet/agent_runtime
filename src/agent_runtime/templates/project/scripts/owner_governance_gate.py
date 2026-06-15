@@ -55,6 +55,10 @@ def main() -> int:
         # (validates TASKSET-AR-CONTEXT-KNOWLEDGE contracts against src/agent_runtime/templates/**,
         # agents/project/overlays/**, and agents/project/evals/* evidence that generated projects
         # do not ship). Mirrored in tests/test_owner_governance_chain_parity.py exceptions.
+        # intentionally omitted: scripts/org_model_gate.py -- root-repo-specific (org-delegation
+        # Unit 1): resolves work-item owner/team against the root agents/project/ORG-MODEL.yml;
+        # generated projects ship their own role model (agents/roles.yml), so this watch-level
+        # gate is intentionally root-only. Mirrored in tests/test_owner_governance_chain_parity.py.
         ["scripts/parallel_worktree_gate.py", "--check"],
         ["scripts/worktree_lifecycle_gate.py", "--check"],
         ["scripts/collaboration_concurrency_gate.py", "--check"],
