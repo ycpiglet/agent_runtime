@@ -38,3 +38,12 @@ def test_apply_block_inserts_then_replaces_preserving_narrative():
     twice = mod.apply_block(once, block2)
     assert "GEN-2" in twice and "GEN-1" not in twice
     assert "planner note" in twice and twice.count(mod.START) == 1
+
+
+def test_lone_start_marker_errors_instead_of_duplicating():
+    # W4b finding: a corrupted block (START present, END lost) must not duplicate.
+    import pytest
+    mod = _load()
+    corrupted = "# Backlog\n" + mod.START + "\nGEN-broken\n\n## Narrative\n"
+    with pytest.raises(ValueError):
+        mod.apply_block(corrupted, mod.START + "\nGEN-new\n" + mod.END)

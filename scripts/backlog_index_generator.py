@@ -37,6 +37,9 @@ def apply_block(text: str, block: str) -> str:
         pre = text[: text.index(START)]
         post = text[text.index(END) + len(END):]
         return pre + block + post
+    if START in text:   # W4b: a lone START would otherwise duplicate the block
+        raise ValueError("BACKLOG-INDEX: START marker present but END missing — "
+                         "restore the END marker or remove the block before regenerating")
     # first insertion: place the block right after the H1 title line
     lines = text.splitlines()
     out, inserted = [], False
