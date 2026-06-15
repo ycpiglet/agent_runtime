@@ -12360,6 +12360,15 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         return ConsoleResponse(200, "application/javascript; charset=utf-8", _bytes(JS))
     if request_path == "/api/state":
         return _json_response(ui_state.build_state(root_path))
+    if request_path == "/api/inbox":
+        # Decision-first cockpit data (TASK-AR-564): the 6-group attention inbox derived
+        # from existing records by scripts/attention_inbox.py (stdlib, PyYAML-free).
+        import sys as _sys
+        _scripts = str(root_path / "scripts")
+        if _scripts not in _sys.path:
+            _sys.path.insert(0, _scripts)
+        import attention_inbox
+        return _json_response(attention_inbox.inbox(root_path))
     if request_path == "/api/stream":
         return _sse_response(ui_state.build_state(root_path))
     # On-demand knowledge-graph view (TASK-AR / #5): a degree-ranked bounded subgraph,

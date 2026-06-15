@@ -76,3 +76,12 @@ def test_form_validation_and_i18n_present(console_url):  # TASK-AR-548 / 551
     _, home = _get(console_url + "/")
     assert any(k in js for k in ("aria-invalid", "required", "validat"))   # 548
     assert any(k in home or k in js for k in ("toLocaleString", "Intl.", "i18n"))  # 551
+
+
+def test_inbox_api_returns_groups(console_url):  # TASK-AR-564 (decision-first cockpit data)
+    status, body = _get(console_url + "/api/inbox")
+    assert status == 200
+    payload = json.loads(body)
+    assert "groups" in payload and "total" in payload and "counts" in payload
+    assert set(payload["groups"]) >= {"approval_pending", "blocked", "stale",
+                                      "gate_failures", "cost_anomalies", "runtime_anomalies"}
