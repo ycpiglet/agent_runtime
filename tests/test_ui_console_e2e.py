@@ -7,6 +7,7 @@ runs are captured separately via the live MCP). Validates the home page and an A
 import json
 import threading
 import urllib.request
+from html.parser import HTMLParser
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
@@ -34,6 +35,24 @@ def console_url():
 def _get(url: str, timeout: int = 45):
     with urllib.request.urlopen(url, timeout=timeout) as resp:
         return resp.status, resp.read().decode("utf-8", "replace")
+
+
+class _DomCounter(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.count = 0
+
+    def handle_starttag(self, tag, attrs):
+        self.count += 1
+
+    def handle_startendtag(self, tag, attrs):
+        self.count += 1
+
+
+def _dom_count(fragment: str) -> int:
+    parser = _DomCounter()
+    parser.feed(fragment)
+    return parser.count
 
 
 def test_console_home_serves_html(console_url):
@@ -159,3 +178,31 @@ def test_i18n_resource_localizes_cockpit_and_work_state(console_url):  # TASK-AR
     assert "localizedInboxWhy" in js
     assert "localizedInboxAction" in js
     assert "renderCockpit(cockpitData)" in js
+
+
+def test_decision_first_home_budget_and_maturity_regression(console_url):  # TASK-AR-569
+    _, home = _get(console_url + "/")
+    _, css = _get(console_url + "/app.css")
+    _, js = _get(console_url + "/app.js")
+    _, i18n_body = _get(console_url + "/api/i18n")
+    i18n = json.loads(i18n_body)["items"]
+
+    assert _dom_count(home) <= 1500
+    shell_end = home.index('<section class="work-surface">')
+    decision_shell = home[:shell_end]
+    assert _dom_count(decision_shell) <= 320
+    assert home.count('class="view is-active"') == 1
+    assert ".view {\n  display: none;" in css and ".view.is-active {\n  display: block;" in css
+
+    assert home.index('id="cockpit"') < home.index('id="work-state-hero"')
+    assert home.index('id="work-state-hero"') < home.index('class="dashboard"')
+    assert home.index('class="dashboard"') < shell_end
+
+    assert "@media" in css and "max-width" in css
+    assert 'class="skip-link"' in home and 'href="#main"' in home and 'id="main"' in home
+    assert 'role="dialog"' in home and "aria-live" in home
+    assert "EventSource" in js and "/api/stream" in js
+    assert 'id="lang-toggle"' in home and i18n["default_language"] == "ko"
+    assert {"ko", "en"}.issubset(set(i18n["languages"]))
+    assert "required" in home
+    assert any(k in js for k in ("aria-invalid", "required", "validat"))

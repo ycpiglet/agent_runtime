@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-16
-archived_count: 232
+archived_count: 233
 ---
 
 # Archived Task Files
 
-- `232` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `233` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -243,5 +243,6 @@ archived_count: 232
 | `TASK-AR-563` | `9ce4e1e1-af5…` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | 2026-06-15T17:43:04+09:00 | 2026-06-15T18:00:00+09:00 | 2026-06-15T20:30:00+09:00 | 2026-06-15T22:50:00+09:00 | scripts/attention_inbox.py: 6-group 'what needs me now' aggregation from existing wor… |
 | `TASK-AR-565` | `6b69101b-e12…` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | 2026-06-15T17:43:04+09:00 | 2026-06-16T20:50:31+09:00 | 2026-06-16T21:04:00+09:00 | 2026-06-16T21:04:00+09:00 | Group the 67 nav routes under core 7 (Home/Work/Agents/Decisions/Records/Search/More)… |
 | `TASK-AR-567` | `b924243c-6c8…` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | 2026-06-15T17:43:04+09:00 | 2026-06-16T22:31:44+09:00 | 2026-06-16T22:45:01+09:00 | 2026-06-16T22:45:01+09:00 | Initiative->Taskset->Unit waiting/active/done board + drill-down (reuse org_read_api.… |
+| `TASK-AR-569` | `4a0e922b-6b9…` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | 2026-06-15T17:43:04+09:00 | 2026-06-16T23:28:33+09:00 | 2026-06-16T23:33:38+09:00 | 2026-06-16T23:33:38+09:00 | E2E asserting home <= 2 screens / DOM <= ~1500 + maturity behaviors (responsive/a11y/… |
 | `TASK-AR-564` | `30fd8b46-ee5…` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | 2026-06-15T17:43:04+09:00 | 2026-06-15T20:30:00+09:00 | 2026-06-15T22:50:00+09:00 | 2026-06-15T22:50:00+09:00 | Serve the attention inbox at /api/inbox and replace the 80-screen home with the cockp… |
 | `TASK-AR-566` | `324b1b84-070…` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | 2026-06-15T17:43:04+09:00 | 2026-06-16T22:05:45+09:00 | 2026-06-16T22:21:17+09:00 | 2026-06-16T22:21:17+09:00 | Counts/summaries on screen; detail opens in a keyboard-accessible side drawer on clic… |
