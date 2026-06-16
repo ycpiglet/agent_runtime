@@ -1,11 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-06-16 - TASKSET-AR-DECISION-FIRST-CONSOLE-IA / TASK-AR-567 active
+## 2026-06-16 - TASKSET-AR-DECISION-FIRST-CONSOLE-IA / TASK-AR-567 complete
 
-- Active claim: `CLAIM-20260616-223144-task-ar-567-5063` (`lead_engineer@work-03`) is preserved in the root checkout for `TASK-AR-567`.
-- Current taskset: `TASKSET-AR-DECISION-FIRST-CONSOLE-IA`; current task: `TASK-AR-567`.
-- Worktree/branch: `.worktrees/TASK-AR-567` on `codex/task-ar-567-work-state-board`.
-- Status: claim created; implement the Work secondary hero with initiative/taskset/unit waiting-active-done counts and drill-down using existing work-state/org data.
+- Completed claim: `CLAIM-20260616-223144-task-ar-567-5063` (`lead_engineer@work-03`) was W4b-approved, released, merged, indexed, and cleaned.
+- Current taskset: `TASKSET-AR-DECISION-FIRST-CONSOLE-IA`; next task: `TASK-AR-568`.
+- Worktree/branch: `.worktrees/TASK-AR-567` was removed after merge; branch cleanup follows ancestor verification.
+- Status: Work secondary hero now uses `org_read_api.work_state` through `/api/work-state` with waiting/active/review/done counts and drill-down.
+- Evidence: `reviews/REVIEW-2026-06-16-task-ar-567-work-state-board.md`; `reviews/W4B-2026-06-16-TASK-AR-567.md`.
 - Completed predecessor: `TASK-AR-566` was W4b-approved, released, merged, indexed, and cleaned with `reviews/W4B-2026-06-16-TASK-AR-566.md`.
 - Completed predecessor: `TASK-AR-565` was W4b-approved, released, merged, and indexed with `reviews/W4B-2026-06-16-TASK-AR-565.md`.
 

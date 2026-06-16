@@ -31,6 +31,7 @@ RESOURCE_NAMES = (
     "multipane_assurance",
     "inflight",
     "work_explorer",
+    "work_state",
     "meeting_room",
     "channels",
     "tasksets_board",
@@ -3512,7 +3513,9 @@ def build_channels(
 
 
 TASKSETS_BOARD_SCHEMA = "agent-runtime-tasksets-board/v1"
+WORK_STATE_BOARD_SCHEMA = "agent-runtime-work-state-board/v1"
 _TASKSETS_BOARD_ACTIVITY_LIMIT = 5
+_WORK_STATE_TASK_LIMIT = 12
 _TASKSET_CHILD_STATUS_PHASES = {
     "plan": ("planned", "backlog", "todo", "proposed", "draft"),
     "work": ("in_progress", "active", "working", "claimed", "assigned", "started"),
@@ -3599,6 +3602,115 @@ def build_taskset_completion(
         or f"Taskset {completed_id} completed; stop and report.",
         "policy": "stop_and_report",
         "next_suggestion": _suggest_next_taskset(task_sets, completed_id),
+    }
+
+
+def _load_org_read_api(root: Path, warnings: list[dict[str, str]]) -> Any | None:
+    candidates = [
+        root / "scripts" / "org_read_api.py",
+        Path(__file__).resolve().parents[2] / "scripts" / "org_read_api.py",
+    ]
+    seen: set[Path] = set()
+    for path in candidates:
+        resolved = path.resolve()
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        if not resolved.is_file():
+            continue
+        try:
+            spec = importlib.util.spec_from_file_location("agent_runtime_org_read_api", resolved)
+            if spec is None or spec.loader is None:
+                raise RuntimeError("unable to load module spec")
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            return module
+        except Exception as exc:  # pragma: no cover - defensive path
+            warnings.append(_warning("work-state-read-api-error", _rel(root, resolved), str(exc)))
+            return None
+    warnings.append(_warning("work-state-read-api-missing", "scripts/org_read_api.py", "org read API not found"))
+    return None
+
+
+def build_work_state_board(
+    root: Path,
+    task_sets: list[dict[str, Any]],
+    tasks: list[dict[str, Any]],
+    now: str,
+    warnings: list[dict[str, str]],
+) -> dict[str, Any]:
+    module = _load_org_read_api(root, warnings)
+    raw: dict[str, Any] = {}
+    if module is not None and hasattr(module, "work_state"):
+        try:
+            raw = module.work_state(root)
+        except Exception as exc:  # pragma: no cover - defensive path
+            warnings.append(_warning("work-state-read-error", "scripts/org_read_api.py::work_state", str(exc)))
+            raw = {}
+
+    taskset_meta = {str(item.get("id") or ""): item for item in task_sets if item.get("id")}
+    task_meta = {str(item.get("id") or ""): item for item in tasks if item.get("id")}
+    totals = {"waiting": 0, "active": 0, "review": 0, "done": 0, "tasksets": 0, "tasks": 0}
+    cards: list[dict[str, Any]] = []
+    for taskset_id, record in sorted(raw.items()):
+        taskset_key = str(taskset_id or "").strip()
+        if not taskset_key or not isinstance(record, dict):
+            continue
+        counts = {
+            "waiting": int(record.get("waiting", 0) or 0),
+            "active": int(record.get("active", 0) or 0),
+            "review": int(record.get("review", 0) or 0),
+            "done": int(record.get("done", 0) or 0),
+        }
+        total = sum(counts.values())
+        if total == 0:
+            continue
+        for key, value in counts.items():
+            totals[key] += value
+        totals["tasksets"] += 1
+        totals["tasks"] += total
+
+        meta = taskset_meta.get(taskset_key, {})
+        raw_tasks = record.get("tasks") or []
+        task_rows: list[dict[str, Any]] = []
+        if isinstance(raw_tasks, list):
+            for raw_task in raw_tasks:
+                if not isinstance(raw_task, dict):
+                    continue
+                task_id = str(raw_task.get("id") or "").strip()
+                live = task_meta.get(task_id, {})
+                task_rows.append(
+                    {
+                        "id": task_id,
+                        "title": live.get("title") or task_id,
+                        "status": raw_task.get("status") or live.get("status") or "",
+                        "bucket": raw_task.get("bucket") or "waiting",
+                        "priority": live.get("priority") or "",
+                        "source_path": live.get("source_path") or "",
+                    }
+                )
+        task_rows.sort(key=lambda item: (str(item.get("bucket") or ""), str(item.get("id") or "")))
+        cards.append(
+            {
+                "id": taskset_key,
+                "title": meta.get("display_name") or taskset_key,
+                "initiative_id": meta.get("initiative_id") or "",
+                "primary_alias": meta.get("primary_alias") or "",
+                "counts": counts,
+                "active_total": counts["active"] + counts["review"],
+                "total": total,
+                "tasks": task_rows[:_WORK_STATE_TASK_LIMIT],
+                "task_limit": _WORK_STATE_TASK_LIMIT,
+                "hidden_tasks": max(0, len(task_rows) - _WORK_STATE_TASK_LIMIT),
+            }
+        )
+    cards.sort(key=lambda item: (-int(item["active_total"]), -int(item["counts"]["waiting"]), str(item["id"])))
+    return {
+        "schema": WORK_STATE_BOARD_SCHEMA,
+        "generated_at": now,
+        "source": "scripts/org_read_api.py::work_state",
+        "totals": totals,
+        "tasksets": cards,
     }
 
 
@@ -7350,6 +7462,7 @@ def _build_state_uncached(root: Path | str, now: str | None = None) -> dict[str,
     meeting_room = build_meeting_room(agents, tasks, now=generated_at)
     channels = build_channels(messages, tasks, task_sets, now=generated_at)
     tasksets_board = build_tasksets_board(work_explorer, tasks, events, generated_at)
+    work_state = build_work_state_board(root_path, task_sets, tasks, generated_at, warnings)
     taskset_completion = build_taskset_completion(pane_events, task_sets)
     roadmap_timeline = build_roadmap_timeline(roadmap, work_explorer, root_path, generated_at, warnings)
     instances = _load_instances(root_path, generated_at, warnings)
@@ -7430,6 +7543,7 @@ def _build_state_uncached(root: Path | str, now: str | None = None) -> dict[str,
         "meeting_room": meeting_room,
         "channels": channels,
         "tasksets_board": tasksets_board,
+        "work_state": work_state,
         "taskset_completion": taskset_completion,
         "team_agents": team_agents,
         "teams": teams,

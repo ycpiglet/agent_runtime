@@ -1,34 +1,19 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-16T22:31:44+09:00
+updated_at: 2026-06-16T22:58:30+09:00
 current_state:
-  summary: "TASK-AR-567 work-state board is claimed in .worktrees/TASK-AR-567 on codex/task-ar-567-work-state-board."
-  status: claimed
+  summary: "TASK-AR-567 work-state board is W4b-approved, released, merged, and cleaned; continue with TASK-AR-568."
+  status: ready
   task_set_status: active
   task_set_id: "TASKSET-AR-DECISION-FIRST-CONSOLE-IA"
-  step_index: 5
+  step_index: 6
   step_total: 6
-  progress_pct: 0
-  status_text: "TASK-AR-567 claimed; implement Work secondary hero with waiting/active/done counts and drill-down, then self-verify."
+  progress_pct: 100
+  status_text: "TASK-AR-567 complete; next claim should start TASK-AR-568 i18n KO/EN UI toggle."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260616-223144-task-ar-567-5063
-      agent_role: lead-engineer
-      agent_instance_id: le-20260616-task-ar-567
-      display_name: lead_engineer@work-03
-      callsite_id: terminal:wt-task-ar-567:tab-01
-      task_id: TASK-AR-567
-      task_set_id: TASKSET-AR-DECISION-FIRST-CONSOLE-IA
-      worktree_path: .worktrees/TASK-AR-567
-      branch: codex/task-ar-567-work-state-board
-      status: claimed
-      phase: claim-created
-  current_teams:
-    - team_id: ui
-      task_set_id: TASKSET-AR-DECISION-FIRST-CONSOLE-IA
-      active_claims:
-        - CLAIM-20260616-223144-task-ar-567-5063
+  current_agents: []
+  current_teams: []
 resume:
-  active_task: TASK-AR-567
+  active_task: TASK-AR-568
   active_task_set: TASKSET-AR-DECISION-FIRST-CONSOLE-IA
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
@@ -37,8 +22,7 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260616-223144-task-ar-567-5063.json
+  active_claims: []
   release_steward_completed_tasks:
     - agents/lead_engineer/tasks/TASK-AR-219.md
     - agents/lead_engineer/tasks/TASK-AR-222.md
