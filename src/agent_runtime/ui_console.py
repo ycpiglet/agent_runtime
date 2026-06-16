@@ -64,7 +64,7 @@ HTML = """<!doctype html>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
-  <div id="runtime-console-app" class="shell">
+  <div id="runtime-console-app" class="shell" data-work-surface-open="false">
     <header class="topbar">
       <div class="brand">
         <svg class="brand-mark" viewBox="0 0 48 48" role="img" aria-label="Agent Runtime">
@@ -1855,6 +1855,9 @@ textarea:focus {
   display: grid;
   gap: 12px;
   padding: 14px;
+}
+.shell[data-work-surface-open="false"] .work-surface {
+  display: none;
 }
 .create-form,
 .runtime-form,
@@ -4500,13 +4503,23 @@ pre {
     align-items: flex-start;
     flex-direction: column;
     flex-wrap: wrap;
-    padding: 16px;
+    gap: 8px;
+    padding: 10px 12px;
   }
+  .brand { gap: 8px; }
+  .brand-mark { width: 32px; height: 32px; }
+  #status-line { display: none; }
+  .topbar .topbar-search { flex: 0 0 auto; width: 100%; max-width: none; margin: 0; }
   .toolbar {
     justify-content: flex-start;
     width: 100%;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
   }
-  h1 { font-size: 24px; }
+  .toolbar > * { flex: 0 0 auto; }
+  h1 { font-size: 19px; }
   .layout {
     padding: 14px;
     margin-left: 0;
@@ -4585,6 +4598,17 @@ pre {
   .edit-row,
   .button-row {
     grid-template-columns: 1fr;
+  }
+  .dashboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .metric {
+    min-height: 64px;
+    padding: 10px;
+  }
+  .metric strong {
+    margin-top: 6px;
+    font-size: 24px;
   }
 }
 .roadmap-timeline-summary {
@@ -5998,6 +6022,9 @@ pre {
 .cockpit-grid {
   display: grid; gap: 0.85rem;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 2px;
 }
 .cockpit-empty {
   margin: 0; padding: 1.5rem; text-align: center; color: var(--muted);
@@ -6094,6 +6121,9 @@ pre {
 .work-state-board {
   display: grid; gap: 0.75rem;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 2px;
 }
 .work-state-empty {
   margin: 0; padding: 1rem; color: var(--muted); text-align: center;
@@ -6154,12 +6184,26 @@ pre {
   font-size: 0.68rem;
 }
 @media (max-width: 640px) {
+  .cockpit { margin-bottom: 0.75rem; }
+  .cockpit-grid,
+  .work-state-board {
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 2px;
+  }
+  .cockpit-grid { gap: 0.5rem; }
   .cockpit-grid { grid-template-columns: 1fr; }
+  .inbox-card { gap: 0.35rem; padding: 0.65rem 0.75rem; }
+  .inbox-card-action { min-height: 30px; padding: 0.25rem 0.55rem; }
   .inbox-detail-drawer { width: 100vw; }
+  .work-state-hero { margin-bottom: 0.75rem; padding: 0.75rem; }
+  .work-state-head { gap: 0.45rem; margin-bottom: 0.55rem; }
   .work-state-head { flex-direction: column; }
   .work-state-total { white-space: normal; }
-  .work-state-board { grid-template-columns: 1fr; }
+  .work-state-board { grid-template-columns: 1fr; gap: 0.5rem; }
+  .work-state-card { gap: 0.45rem; padding: 0.65rem; }
   .work-state-counts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .work-state-drill { display: none; }
 }
 """
 
@@ -12077,6 +12121,8 @@ function routeForView(view) {
 function activateView(view, { updateHash = true } = {}) {
   const target = $(`view-${view}`);
   if (!target) return;
+  const shell = $("runtime-console-app");
+  if (shell) shell.dataset.workSurfaceOpen = "true";
   let activeLink = null;
   navLinks().forEach((item) => {
     const isActive = item.dataset.view === view;
@@ -12139,8 +12185,10 @@ function selectEntityFromHash(select) {
 
 function applyHashRoute() {
   const { route, select } = parseHash();
+  const shell = $("runtime-console-app");
   const view = route ? viewForRoute(route) : "board";
   activateView(view || "board", { updateHash: false });
+  if (!route && shell) shell.dataset.workSurfaceOpen = "false";
   selectEntityFromHash(select);
 }
 

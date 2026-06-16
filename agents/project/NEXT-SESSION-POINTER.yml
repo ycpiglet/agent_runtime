@@ -1,35 +1,20 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-16T23:28:33+09:00
+updated_at: 2026-06-17T00:18:17+09:00
 current_state:
-  summary: "TASK-AR-569 E2E + DOM budget regression is claimed in .worktrees/TASK-AR-569 on codex/task-ar-569-e2e-dom-budget."
-  status: claimed
-  task_set_status: active
+  summary: "TASKSET-AR-DECISION-FIRST-CONSOLE-IA is complete: TASK-AR-569 W4b-approved, released, merged, indexed, and cleaned."
+  status: complete
+  task_set_status: complete
   task_set_id: "TASKSET-AR-DECISION-FIRST-CONSOLE-IA"
-  step_index: 1
+  step_index: 6
   step_total: 6
-  progress_pct: 0
-  status_text: "TASK-AR-569 claimed; add E2E/DOM budget regression preserving maturity behaviors."
+  progress_pct: 100
+  status_text: "No active claim for the decision-first console IA taskset."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260616-232833-task-ar-569-8b7b
-      agent_role: lead-engineer
-      agent_instance_id: le-20260616-task-ar-569
-      display_name: lead_engineer@work-05
-      callsite_id: terminal:wt-task-ar-569:tab-01
-      task_id: TASK-AR-569
-      task_set_id: TASKSET-AR-DECISION-FIRST-CONSOLE-IA
-      worktree_path: .worktrees/TASK-AR-569
-      branch: codex/task-ar-569-e2e-dom-budget
-      status: claimed
-      phase: claim-created
-  current_teams:
-    - team_id: ui
-      task_set_id: TASKSET-AR-DECISION-FIRST-CONSOLE-IA
-      active_claims:
-        - CLAIM-20260616-232833-task-ar-569-8b7b
+  current_agents: []
+  current_teams: []
 resume:
-  active_task: TASK-AR-569
-  active_task_set: TASKSET-AR-DECISION-FIRST-CONSOLE-IA
+  active_task: ""
+  active_task_set: ""
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -37,7 +22,16 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
+  active_claims: []
+  decision_first_console_completed_tasks:
+    - agents/lead_engineer/tasks/TASK-AR-563.md
+    - agents/lead_engineer/tasks/TASK-AR-564.md
+    - agents/lead_engineer/tasks/TASK-AR-565.md
+    - agents/lead_engineer/tasks/TASK-AR-566.md
+    - agents/lead_engineer/tasks/TASK-AR-567.md
+    - agents/lead_engineer/tasks/TASK-AR-568.md
+    - agents/lead_engineer/tasks/TASK-AR-569.md
+  decision_first_console_completed_claims:
     - agents/runtime/task_claims/CLAIM-20260616-232833-task-ar-569-8b7b.json
   release_steward_completed_tasks:
     - agents/lead_engineer/tasks/TASK-AR-219.md

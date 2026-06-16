@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-569:tab-01",
   "pane_id": "terminal:wt-task-ar-569:tab-01",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-DECISION-FIRST-CONSOLE-IA",
   "active_scope": "TASKSET-AR-DECISION-FIRST-CONSOLE-IA",
   "scope_transition_approved": false,
@@ -27,12 +27,12 @@
   "worktree_path": ".worktrees/TASK-AR-569",
   "branch": "codex/task-ar-569-e2e-dom-budget",
   "claimed_at": "2026-06-16T23:28:33+09:00",
-  "last_heartbeat": "2026-06-17T00:16:43+09:00",
-  "updated_at": "2026-06-17T00:16:43+09:00",
+  "last_heartbeat": "2026-06-17T00:18:17+09:00",
+  "updated_at": "2026-06-17T00:18:17+09:00",
   "expires_at": "2026-06-17T00:46:43+09:00",
   "lease": {
     "claimed_at": "2026-06-16T23:28:33+09:00",
-    "heartbeat_at": "2026-06-17T00:16:43+09:00",
+    "heartbeat_at": "2026-06-17T00:18:17+09:00",
     "expires_at": "2026-06-17T00:46:43+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260616-232833-task-ar-569-8b7b.handoff.md",
@@ -52,5 +52,9 @@
     "reviews/INDEX.md",
     "STATUS.md",
     "agents/project/NEXT-SESSION-POINTER.yml"
-  ]
+  ],
+  "released_at": "2026-06-17T00:18:17+09:00",
+  "verified_by": "codex-w4b-20260617-task-ar-569",
+  "verifier_role": "qa-reviewer",
+  "verification_evidence": "reviews/W4B-2026-06-17-TASK-AR-569.md"
 }

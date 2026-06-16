@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-16T23:29:27+09:00",
+  "generated_at": "2026-06-17T00:20:05+09:00",
   "record_count": 290,
   "finding_count": 0,
   "findings": [],
@@ -2588,7 +2588,7 @@
       "title": "Decision Cockpit",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-UNASSIGNED",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-563",
@@ -2665,7 +2665,7 @@
       "title": "E2E asserting home <= 2 screens / DOM <= ~1500 + maturity behaviors (responsive/a11y/…",
       "path": "agents/lead_engineer/tasks/TASK-AR-569.md",
       "parent_id": "TASKSET-AR-DECISION-FIRST-CONSOLE-IA",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "initiative:INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE",
