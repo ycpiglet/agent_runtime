@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-17T00:20:05+09:00
-record_count: 290
+generated_at: 2026-06-17T08:31:27+09:00
+record_count: 298
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `290` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `298` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `10` records |
-| Tasksets | pass | `34` records |
-| Tasks | pass | `233` records |
-| Units | pass | `13` records |
+| Initiatives | pass | `11` records |
+| Tasksets | pass | `35` records |
+| Tasks | pass | `236` records |
+| Units | pass | `16` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -329,6 +329,14 @@ record_count: 290
 | 7 | Initiative 7 | initiative | `INIT-AR-WORK-STORE-RESTRUCTURE` | - | planned | `agents/project/initiatives/INIT-AR-WORK-STORE-RESTRUCTURE.md` | Work Store Restructure Initiative |
 | 8 | Initiative 8 | initiative | `INIT-AR-AGENT-ORG-DELEGATION` | - | active | `agents/project/initiatives/INIT-AR-AGENT-ORG-DELEGATION.md` | INIT-AR-AGENT-ORG-DELEGATION — Agent Org & Delegation Model |
 | 9 | Initiative 9 | initiative | `INIT-AR-DECISION-FIRST-CONSOLE-IA` | - | active | `agents/project/initiatives/INIT-AR-DECISION-FIRST-CONSOLE-IA.md` | INIT-AR-DECISION-FIRST-CONSOLE-IA — Decision-First Console IA |
+| 10 | Initiative 10 | initiative | `INIT-AR-SELF-IMPROVEMENT-CADENCE` | - | active | `agents/project/initiatives/INIT-AR-SELF-IMPROVEMENT-CADENCE.md` | Self Improvement Cadence |
+| 10.1 | Taskset 10.1 | taskset | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | `INIT-AR-SELF-IMPROVEMENT-CADENCE` | active | `BACKLOG-BOARD.md` | Self Improvement Cadence |
+| 10.1.1 | Task 10.1.1 | task | `TASK-AR-570` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | planned | `agents/lead_engineer/tasks/TASK-AR-570.md` | Create a deterministic baseline that identifies low-frequency agent roles, low-reuse… |
+| 10.1.1.1 | Unit 10.1.1.1 | unit | `UNIT-TASK-AR-570-001` | `TASK-AR-570` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-570/UNIT-TASK-AR-570-001.md` | UNIT-TASK-AR-570-001 - Build self-improvement metrics baseline |
+| 10.1.2 | Task 10.1.2 | task | `TASK-AR-571` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | planned | `agents/lead_engineer/tasks/TASK-AR-571.md` | Use review, meeting, seminar, retro, compound, scribe, and doc-steward surfaces to re… |
+| 10.1.2.1 | Unit 10.1.2.1 | unit | `UNIT-TASK-AR-571-001` | `TASK-AR-571` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-571/UNIT-TASK-AR-571-001.md` | UNIT-TASK-AR-571-001 - Record the first self-improvement cycle |
+| 10.1.3 | Task 10.1.3 | task | `TASK-AR-572` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | planned | `agents/lead_engineer/tasks/TASK-AR-572.md` | Define measurable maturity criteria for low-frequency agent/skill self-improvement an… |
+| 10.1.3.1 | Unit 10.1.3.1 | unit | `UNIT-TASK-AR-572-001` | `TASK-AR-572` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-572/UNIT-TASK-AR-572-001.md` | UNIT-TASK-AR-572-001 - Wire maturity reporting into governance surfaces |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

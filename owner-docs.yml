@@ -1,5 +1,6 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
+  - reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-registration.md
   - reviews/REVIEW-2026-06-14-knowledge-stack-followups-closeout.md
   - reviews/MEETING-2026-06-14-host-feedback-intake-registration.md
   - reviews/MEETING-2026-06-14-wave-plan-host-store-console.md

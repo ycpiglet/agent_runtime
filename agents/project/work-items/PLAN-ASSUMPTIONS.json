@@ -67,8 +67,36 @@
       "recorded_at": "2026-06-13T13:16:22+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-registration.md",
+          "value": "a34991d7cb185f9ea8f2700ceb977b5f5c7876f1054f1cb3369f62fd8b4a3a06"
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/self_improvement_cycle.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "cb2cd245558157ff640dbf0b824694c5623e2e1ef0ccfba6e83f9a08a5522bc8"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-registration.md",
+      "recorded_at": "2026-06-17T08:31:29+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-SELF-IMPROVEMENT-CADENCE"
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-13T13:16:22+09:00"
+  "updated_at": "2026-06-17T08:31:29+09:00"
 }
