@@ -1,17 +1,32 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-16T22:58:30+09:00
+updated_at: 2026-06-16T23:01:31+09:00
 current_state:
-  summary: "TASK-AR-567 work-state board is W4b-approved, released, merged, and cleaned; continue with TASK-AR-568."
-  status: ready
+  summary: "TASK-AR-568 i18n KO/EN UI toggle is claimed in .worktrees/TASK-AR-568 on codex/task-ar-568-i18n-toggle."
+  status: claimed
   task_set_status: active
   task_set_id: "TASKSET-AR-DECISION-FIRST-CONSOLE-IA"
-  step_index: 6
+  step_index: 1
   step_total: 6
-  progress_pct: 100
-  status_text: "TASK-AR-567 complete; next claim should start TASK-AR-568 i18n KO/EN UI toggle."
+  progress_pct: 0
+  status_text: "TASK-AR-568 claimed; implement KO/EN UI language toggle and localize inbox/group labels."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260616-230131-task-ar-568-21a3
+      agent_role: lead-engineer
+      agent_instance_id: le-20260616-task-ar-568
+      display_name: lead_engineer@work-04
+      callsite_id: terminal:wt-task-ar-568:tab-01
+      task_id: TASK-AR-568
+      task_set_id: TASKSET-AR-DECISION-FIRST-CONSOLE-IA
+      worktree_path: .worktrees/TASK-AR-568
+      branch: codex/task-ar-568-i18n-toggle
+      status: claimed
+      phase: claim-created
+  current_teams:
+    - team_id: ui
+      task_set_id: TASKSET-AR-DECISION-FIRST-CONSOLE-IA
+      active_claims:
+        - CLAIM-20260616-230131-task-ar-568-21a3
 resume:
   active_task: TASK-AR-568
   active_task_set: TASKSET-AR-DECISION-FIRST-CONSOLE-IA
@@ -22,7 +37,8 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260616-230131-task-ar-568-21a3.json
   release_steward_completed_tasks:
     - agents/lead_engineer/tasks/TASK-AR-219.md
     - agents/lead_engineer/tasks/TASK-AR-222.md
