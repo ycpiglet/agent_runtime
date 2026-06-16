@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-566:tab-01",
   "pane_id": "terminal:wt-task-ar-566:tab-01",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-DECISION-FIRST-CONSOLE-IA",
   "active_scope": "TASKSET-AR-DECISION-FIRST-CONSOLE-IA",
   "scope_transition_approved": false,
@@ -19,21 +19,21 @@
   "model_tier": "worker_standard",
   "wip_slot": 1,
   "stop_condition": "",
-  "phase": "claim-created",
-  "progress_pct": 0,
-  "step_index": 1,
+  "phase": "self-verified",
+  "progress_pct": 90,
+  "step_index": 5,
   "step_total": 6,
-  "status_text": "TASK-AR-566 progressive-disclosure detail panel",
+  "status_text": "TASK-AR-566 implementation committed and W4a self-verification passed; awaiting independent W4b release.",
   "worktree_path": ".worktrees/TASK-AR-566",
   "branch": "codex/task-ar-566-progressive-disclosure",
   "claimed_at": "2026-06-16T22:05:45+09:00",
-  "last_heartbeat": "2026-06-16T22:05:45+09:00",
-  "updated_at": "2026-06-16T22:05:45+09:00",
-  "expires_at": "2026-06-16T22:35:45+09:00",
+  "last_heartbeat": "2026-06-16T22:25:32+09:00",
+  "updated_at": "2026-06-16T22:25:32+09:00",
+  "expires_at": "2026-06-16T23:00:00+09:00",
   "lease": {
     "claimed_at": "2026-06-16T22:05:45+09:00",
-    "heartbeat_at": "2026-06-16T22:05:45+09:00",
-    "expires_at": "2026-06-16T22:35:45+09:00"
+    "heartbeat_at": "2026-06-16T22:25:32+09:00",
+    "expires_at": "2026-06-16T23:00:00+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260616-220545-task-ar-566-9197.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260616-220545-task-ar-566-9197.log.md",
@@ -50,5 +50,9 @@
     "ARCHIVE-INDEX.md",
     "reviews",
     "reviews/INDEX.md"
-  ]
+  ],
+  "released_at": "2026-06-16T22:25:32+09:00",
+  "verified_by": "codex-w4b-TASK-AR-566-20260616",
+  "verifier_role": "qa-reviewer",
+  "verification_evidence": "reviews/W4B-2026-06-16-TASK-AR-566.md"
 }

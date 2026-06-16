@@ -1,11 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-06-16 - TASKSET-AR-DECISION-FIRST-CONSOLE-IA / TASK-AR-566 active
+## 2026-06-16 - TASKSET-AR-DECISION-FIRST-CONSOLE-IA / TASK-AR-566 W5 integration
 
-- Active claim: `CLAIM-20260616-220545-task-ar-566-9197` (`lead_engineer@work-02`) is preserved in the root checkout for `TASK-AR-566`.
+- Released claim: `CLAIM-20260616-220545-task-ar-566-9197` (`lead_engineer@work-02`) was W4b-approved by `codex-w4b-TASK-AR-566-20260616`.
 - Current taskset: `TASKSET-AR-DECISION-FIRST-CONSOLE-IA`; current task: `TASK-AR-566`.
 - Worktree/branch: `.worktrees/TASK-AR-566` on `codex/task-ar-566-progressive-disclosure`.
-- Status: claim created; implement progressive disclosure so cockpit counts/summaries stay on screen and detail opens in a keyboard-accessible drawer.
+- Status: implementation commit `8caa57c` passed W4a/W4b and is being merged into `claude/decision-first-console-ia`; next executable task is `TASK-AR-567`.
+- Evidence: `reviews/REVIEW-2026-06-16-task-ar-566-progressive-disclosure.md`; `reviews/W4B-2026-06-16-TASK-AR-566.md`.
 - Completed predecessor: `TASK-AR-565` was W4b-approved, released, merged, and indexed with `reviews/W4B-2026-06-16-TASK-AR-565.md`.
 
 ## 2026-06-15 - TASKSET-AR-AGENT-ORG-DELEGATION complete (6/6)
