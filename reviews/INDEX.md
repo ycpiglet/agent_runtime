@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-16T22:26:16+09:00
-record_count: 499
+generated_at: 2026-06-16T22:55:25+09:00
+record_count: 500
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `499` review and evidence records under `reviews/`.
+- Summary: indexed `500` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `499` files |
+| Reviews covered | pass | `500` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -533,6 +533,7 @@ record_count: 499
 | `reviews/W4B-2026-06-15-TASK-AR-563-564.md` | `W4B-2026-06-15-TASK-AR-563-564` | md | record | n/a | W4B Independent Verification — TASK-AR-563/564 (decision-first cockpit) |
 | `reviews/W4B-2026-06-16-TASK-AR-565.md` | `W4B-2026-06-16-TASK-AR-565` | verification | record | n/a | W4b Independent Verification - TASK-AR-565 |
 | `reviews/W4B-2026-06-16-TASK-AR-566.md` | `W4B-2026-06-16-TASK-AR-566` | md | record | n/a | W4b Independent Verification - TASK-AR-566 |
+| `reviews/W4B-2026-06-16-TASK-AR-567.md` | `W4B-2026-06-16-TASK-AR-567` | md | record | n/a | W4B Verification - TASK-AR-567 |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.
