@@ -113,3 +113,25 @@ def test_cockpit_progressive_detail_drawer_present(console_url):  # TASK-AR-566
     assert "initInboxDetailDrawer" in js
     assert ".inbox-summary-line" in css
     assert ".inbox-detail-drawer" in css
+
+
+def test_work_state_api_returns_secondary_hero_shape(console_url):  # TASK-AR-567
+    status, body = _get(console_url + "/api/work-state")
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["resource"] == "work_state"
+    assert payload["items"]["schema"] == "agent-runtime-work-state-board/v1"
+    assert "totals" in payload["items"] and "tasksets" in payload["items"]
+    assert set(payload["items"]["totals"]) >= {"waiting", "active", "review", "done", "tasksets", "tasks"}
+
+
+def test_work_state_secondary_hero_present(console_url):  # TASK-AR-567
+    _, home = _get(console_url + "/")
+    _, js = _get(console_url + "/app.js")
+    _, css = _get(console_url + "/app.css")
+
+    assert 'id="work-state-hero"' in home
+    assert 'id="work-state-board"' in home and 'id="work-state-total"' in home
+    assert "Work state" in home
+    assert "loadWorkState" in js and "renderWorkState" in js and "/api/work-state" in js
+    assert ".work-state-card" in css and ".work-state-drill" in css

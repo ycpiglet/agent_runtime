@@ -278,6 +278,18 @@ HTML = """<!doctype html>
         <div id="inbox-detail-list" class="inbox-detail-list" role="list"></div>
       </aside>
 
+      <section class="work-state-hero" id="work-state-hero" aria-labelledby="work-state-title">
+        <header class="work-state-head">
+          <div>
+            <p class="work-state-kicker">Work</p>
+            <h2 id="work-state-title">Work state</h2>
+          </div>
+          <span id="work-state-total" class="work-state-total" aria-live="polite"></span>
+        </header>
+        <div id="work-state-board" class="work-state-board" role="list"></div>
+        <p id="work-state-empty" class="work-state-empty" hidden>No active work state.</p>
+      </section>
+
       <section class="dashboard" aria-label="Dashboard">
         <div class="metric"><span>Total Tasks</span><strong id="metric-tasks">0</strong></div>
         <div class="metric"><span>Active</span><strong id="metric-active">0</strong></div>
@@ -6064,9 +6076,90 @@ pre {
   margin-top: 0.45rem; color: var(--muted); font-size: 0.78rem;
 }
 .inbox-detail-item-action { color: var(--primary); font-weight: 700; }
+.work-state-hero {
+  margin: 0 0 1.25rem; padding: 1rem;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.work-state-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 1rem; margin-bottom: 0.8rem;
+}
+.work-state-kicker {
+  margin: 0 0 0.2rem; color: var(--muted); font-size: 0.75rem;
+  font-weight: 700; text-transform: uppercase;
+}
+.work-state-head h2 { margin: 0; color: var(--ink); font-size: 1.1rem; }
+.work-state-total { color: var(--muted); font-size: 0.84rem; white-space: nowrap; }
+.work-state-board {
+  display: grid; gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.work-state-empty {
+  margin: 0; padding: 1rem; color: var(--muted); text-align: center;
+  background: var(--surface-raised); border: 1px solid var(--line); border-radius: var(--radius);
+}
+.work-state-card {
+  display: flex; flex-direction: column; gap: 0.65rem; min-width: 0;
+  padding: 0.85rem; background: var(--surface-raised);
+  border: 1px solid var(--line); border-left: 4px solid var(--primary-line);
+  border-radius: var(--radius);
+}
+.work-state-card.is-hot { border-left-color: var(--danger); }
+.work-state-card.is-waiting { border-left-color: var(--warning); }
+.work-state-path {
+  margin: 0; color: var(--muted); font-size: 0.72rem; font-weight: 700;
+  text-transform: uppercase; overflow-wrap: anywhere;
+}
+.work-state-card-title {
+  margin: 0; color: var(--ink); font-size: 0.95rem; line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.work-state-counts {
+  display: grid; gap: 0.4rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.work-state-count {
+  min-width: 0; padding: 0.45rem; background: var(--panel);
+  border: 1px solid var(--line); border-radius: var(--radius);
+}
+.work-state-count strong {
+  display: block; color: var(--ink); font-size: 1rem; line-height: 1.1;
+}
+.work-state-count span {
+  display: block; margin-top: 0.12rem; color: var(--muted); font-size: 0.7rem;
+}
+.work-state-drill {
+  border-top: 1px solid var(--line); padding-top: 0.55rem;
+}
+.work-state-drill summary {
+  cursor: pointer; color: var(--primary); font-size: 0.8rem; font-weight: 700;
+}
+.work-state-drill summary:focus-visible {
+  outline: 2px solid var(--primary); outline-offset: 2px; box-shadow: var(--focus);
+}
+.work-state-units {
+  display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.55rem;
+}
+.work-state-unit {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  min-width: 0; color: var(--ink); font-size: 0.78rem;
+}
+.work-state-unit span:first-child {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.work-state-bucket {
+  flex: 0 0 auto; padding: 0.08rem 0.4rem; color: var(--muted);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 999px;
+  font-size: 0.68rem;
+}
 @media (max-width: 640px) {
   .cockpit-grid { grid-template-columns: 1fr; }
   .inbox-detail-drawer { width: 100vw; }
+  .work-state-head { flex-direction: column; }
+  .work-state-total { white-space: normal; }
+  .work-state-board { grid-template-columns: 1fr; }
+  .work-state-counts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 """
 
@@ -6753,6 +6846,86 @@ async function loadCockpit() {
   } catch (error) {
     const totalEl = $("inbox-total");
     if (totalEl) totalEl.textContent = "inbox unavailable";
+  }
+}
+
+function workStatePayload(data) {
+  return (data && data.items) || data || { tasksets: [], totals: {} };
+}
+
+function renderWorkStateCount(label, value) {
+  const tile = inboxEl("div", "work-state-count");
+  tile.appendChild(inboxEl("strong", "", String(value || 0)));
+  tile.appendChild(inboxEl("span", "", label));
+  return tile;
+}
+
+function renderWorkStateCard(card) {
+  const counts = card.counts || {};
+  const article = inboxEl("article", "work-state-card");
+  if ((card.active_total || 0) > 0) article.classList.add("is-hot");
+  else if ((counts.waiting || 0) > 0) article.classList.add("is-waiting");
+  article.setAttribute("role", "listitem");
+  article.appendChild(inboxEl("p", "work-state-path", card.initiative_id || card.id || "taskset"));
+  article.appendChild(inboxEl("h3", "work-state-card-title", card.title || card.id || "Untitled taskset"));
+
+  const countGrid = inboxEl("div", "work-state-counts");
+  countGrid.appendChild(renderWorkStateCount("Waiting", counts.waiting));
+  countGrid.appendChild(renderWorkStateCount("Active", counts.active));
+  countGrid.appendChild(renderWorkStateCount("Review", counts.review));
+  countGrid.appendChild(renderWorkStateCount("Done", counts.done));
+  article.appendChild(countGrid);
+
+  const tasks = Array.isArray(card.tasks) ? card.tasks : [];
+  const details = inboxEl("details", "work-state-drill");
+  const summaryText = card.hidden_tasks
+    ? `${tasks.length} units shown, ${card.hidden_tasks} hidden`
+    : `${tasks.length} units`;
+  details.appendChild(inboxEl("summary", "", summaryText));
+  const list = inboxEl("div", "work-state-units");
+  list.setAttribute("role", "list");
+  for (const task of tasks) {
+    const row = inboxEl("div", "work-state-unit");
+    row.setAttribute("role", "listitem");
+    row.appendChild(inboxEl("span", "", task.id || task.title || "untitled"));
+    row.appendChild(inboxEl("span", "work-state-bucket", task.bucket || task.status || "waiting"));
+    list.appendChild(row);
+  }
+  details.appendChild(list);
+  article.appendChild(details);
+  return article;
+}
+
+function renderWorkState(data) {
+  const payload = workStatePayload(data);
+  const board = $("work-state-board");
+  if (!board) return;
+  const tasksets = Array.isArray(payload.tasksets) ? payload.tasksets : [];
+  const totals = payload.totals || {};
+  const totalEl = $("work-state-total");
+  if (totalEl) {
+    const taskCount = totals.tasks || 0;
+    totalEl.textContent = taskCount
+      ? `${totals.tasksets || tasksets.length} tasksets / ${taskCount} units`
+      : "no work state";
+  }
+  const empty = $("work-state-empty");
+  if (empty) empty.hidden = tasksets.length > 0;
+  board.hidden = tasksets.length === 0;
+  board.replaceChildren();
+  for (const card of tasksets.slice(0, 6)) {
+    board.appendChild(renderWorkStateCard(card || {}));
+  }
+}
+
+async function loadWorkState() {
+  try {
+    const response = await fetch("/api/work-state", { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    renderWorkState(await response.json());
+  } catch (error) {
+    const totalEl = $("work-state-total");
+    if (totalEl) totalEl.textContent = "work state unavailable";
   }
 }
 
@@ -12612,6 +12785,9 @@ setInterval(loadState, 4000);
 // fresh (slower cadence than state; it is a derived read over work items).
 loadCockpit();
 setInterval(loadCockpit, 8000);
+// TASK-AR-567: secondary Work hero over org_read_api.work_state.
+loadWorkState();
+setInterval(loadWorkState, 15000);
 """
 
 
@@ -12939,6 +13115,8 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         "/api/inflight": "inflight",
         "/api/work_explorer": "work_explorer",
         "/api/work-explorer": "work_explorer",
+        "/api/work_state": "work_state",
+        "/api/work-state": "work_state",
         "/api/meeting_room": "meeting_room",
         "/api/meeting-room": "meeting_room",
         "/api/tasksets_board": "tasksets_board",

@@ -532,6 +532,58 @@ def _write_work_classification(root: Path) -> None:
     )
 
 
+def _write_work_state_tasks(root: Path) -> None:
+    tasks_dir = root / "agents" / "lead_engineer" / "tasks"
+    _write(
+        tasks_dir / "TASK-AR-514.md",
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-514",
+                "status: completed",
+                "priority: P1",
+                "task_set_id: TASKSET-AR-WORK-METADATA-ANALYTICS",
+                "---",
+                "",
+                "# TASK-AR-514 - Work metadata schema",
+                "",
+            ]
+        ),
+    )
+    _write(
+        tasks_dir / "TASK-AR-516.md",
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-516",
+                "status: planned",
+                "priority: P1",
+                "task_set_id: TASKSET-AR-WORK-METADATA-ANALYTICS",
+                "---",
+                "",
+                "# TASK-AR-516 - Work Explorer tree",
+                "",
+            ]
+        ),
+    )
+    _write(
+        tasks_dir / "TASK-AR-517.md",
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-517",
+                "status: in_progress",
+                "priority: P1",
+                "task_set_id: TASKSET-AR-WORK-METADATA-ANALYTICS",
+                "---",
+                "",
+                "# TASK-AR-517 - Active work",
+                "",
+            ]
+        ),
+    )
+
+
 def test_ui_console_work_explorer_route_serves_tree_resource(tmp_path):
     _write_work_classification(tmp_path)
     _write(
@@ -572,6 +624,70 @@ def test_ui_console_work_explorer_route_serves_tree_resource(tmp_path):
     assert "reviews/VERIFY-2026-06-12-task-ar-514.json" in taskset["descendant_evidence_refs"]
     assert payload["items"]["roots"] == ["INIT-AR-WORK-METADATA-ANALYTICS"]
     assert payload["items"]["staleness_note"]
+
+
+def test_ui_console_work_state_route_serves_org_read_api_board(tmp_path):
+    _write_work_classification(tmp_path)
+    _write_work_state_tasks(tmp_path)
+
+    response = ui_console.build_response("/api/work_state", tmp_path)
+    payload = json.loads(response.body.decode("utf-8"))
+    alias = json.loads(ui_console.build_response("/api/work-state", tmp_path).body.decode("utf-8"))
+
+    assert response.status == 200
+    assert payload["resource"] == "work_state"
+    assert alias["resource"] == "work_state"
+    assert payload["items"]["schema"] == "agent-runtime-work-state-board/v1"
+    assert payload["items"]["source"] == "scripts/org_read_api.py::work_state"
+    assert payload["items"]["totals"]["waiting"] == 1
+    assert payload["items"]["totals"]["active"] == 1
+    assert payload["items"]["totals"]["done"] == 1
+
+    card = next(c for c in payload["items"]["tasksets"] if c["id"] == "TASKSET-AR-WORK-METADATA-ANALYTICS")
+    assert card["counts"] == {"waiting": 1, "active": 1, "review": 0, "done": 1}
+    assert card["active_total"] == 1
+    assert {task["id"]: task["bucket"] for task in card["tasks"]} == {
+        "TASK-AR-514": "done",
+        "TASK-AR-516": "waiting",
+        "TASK-AR-517": "active",
+    }
+
+
+def test_ui_console_work_state_secondary_hero_contract(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    for marker in [
+        'id="work-state-hero"',
+        'aria-labelledby="work-state-title"',
+        'id="work-state-total"',
+        'id="work-state-board"',
+        'id="work-state-empty"',
+        'role="list"',
+    ]:
+        assert marker in html
+
+    for marker in [
+        "function workStatePayload",
+        "function renderWorkState",
+        "function renderWorkStateCard",
+        "function loadWorkState",
+        'fetch("/api/work-state"',
+        "setInterval(loadWorkState, 15000)",
+    ]:
+        assert marker in js
+
+    for selector in [
+        ".work-state-hero",
+        ".work-state-board",
+        ".work-state-card",
+        ".work-state-counts",
+        ".work-state-drill",
+        ".work-state-unit",
+        ".work-state-bucket",
+    ]:
+        assert selector in css
 
 
 def test_ui_console_work_explorer_tab_tree_and_facet_anchors(tmp_path):
