@@ -92,9 +92,9 @@ HTML = """<!doctype html>
           </button>
           <div id="workspace-switcher-menu" class="workspace-switcher-menu" role="menu" aria-label="Registered workspaces" hidden></div>
         </div>
-        <label class="lang-toggle" title="Language / Settings">
+        <label class="lang-toggle" title="Language / Settings" data-i18n-title="common.language">
           <span id="lang-toggle-label" class="lang-toggle-label">Lang</span>
-          <select id="lang-toggle" class="lang-toggle-select" aria-label="Language">
+          <select id="lang-toggle" class="lang-toggle-select" aria-label="Language" data-i18n-aria-label="common.language">
             <option value="ko">KR</option>
             <option value="en">EN</option>
           </select>
@@ -256,23 +256,23 @@ HTML = """<!doctype html>
     <div id="sidebar-scrim" class="sidebar-scrim" hidden></div>
 
     <main class="layout" id="main">
-      <section class="cockpit" id="cockpit" aria-label="Attention inbox - what needs you now">
+      <section class="cockpit" id="cockpit" aria-label="Attention inbox - what needs you now" data-i18n-aria-label="cockpit.aria">
         <header class="cockpit-head">
-          <h2 class="cockpit-title">What needs you now</h2>
+          <h2 class="cockpit-title" data-i18n="cockpit.title">What needs you now</h2>
           <span class="cockpit-total" id="inbox-total" aria-live="polite"></span>
         </header>
         <div class="cockpit-grid" id="inbox-groups" role="list"></div>
-        <p class="cockpit-empty" id="inbox-empty" hidden>&#10003; Nothing needs you right now.</p>
+        <p class="cockpit-empty" id="inbox-empty" hidden data-i18n="cockpit.empty">Nothing needs you right now.</p>
       </section>
       <div id="inbox-detail-backdrop" class="inbox-detail-backdrop" hidden></div>
       <aside id="inbox-detail-drawer" class="inbox-detail-drawer" role="dialog" aria-modal="true"
              aria-labelledby="inbox-detail-title" hidden tabindex="-1">
         <header class="inbox-detail-head">
           <div>
-            <p class="inbox-detail-kicker">Attention detail</p>
-            <h2 id="inbox-detail-title">Inbox detail</h2>
+            <p class="inbox-detail-kicker" data-i18n="cockpit.detail.kicker">Attention detail</p>
+            <h2 id="inbox-detail-title" data-i18n="cockpit.detail.title">Inbox detail</h2>
           </div>
-          <button id="inbox-detail-close" class="inbox-detail-close" type="button" aria-label="Close attention detail">&times;</button>
+          <button id="inbox-detail-close" class="inbox-detail-close" type="button" aria-label="Close attention detail" data-i18n-aria-label="cockpit.detail.close">&times;</button>
         </header>
         <p id="inbox-detail-summary" class="inbox-detail-summary"></p>
         <div id="inbox-detail-list" class="inbox-detail-list" role="list"></div>
@@ -281,13 +281,13 @@ HTML = """<!doctype html>
       <section class="work-state-hero" id="work-state-hero" aria-labelledby="work-state-title">
         <header class="work-state-head">
           <div>
-            <p class="work-state-kicker">Work</p>
-            <h2 id="work-state-title">Work state</h2>
+            <p class="work-state-kicker" data-i18n="work_state.kicker">Work</p>
+            <h2 id="work-state-title" data-i18n="work_state.title">Work state</h2>
           </div>
           <span id="work-state-total" class="work-state-total" aria-live="polite"></span>
         </header>
         <div id="work-state-board" class="work-state-board" role="list"></div>
-        <p id="work-state-empty" class="work-state-empty" hidden>No active work state.</p>
+        <p id="work-state-empty" class="work-state-empty" hidden data-i18n="work_state.empty">No active work state.</p>
       </section>
 
       <section class="dashboard" aria-label="Dashboard">
@@ -6522,6 +6522,8 @@ const DEFAULT_LANGUAGE = "ko";
 const SUPPORTED_LANGUAGES = ["ko", "en"];
 let currentLanguage = DEFAULT_LANGUAGE;
 let i18nStrings = {};
+let cockpitData = null;
+let workStateData = null;
 
 function storedLanguage() {
   try {
@@ -6548,6 +6550,14 @@ function applyTranslations() {
     const key = node.getAttribute("data-i18n");
     if (key && i18nStrings[key]) node.textContent = t(key);
   });
+  document.querySelectorAll("[data-i18n-aria-label]").forEach((node) => {
+    const key = node.getAttribute("data-i18n-aria-label");
+    if (key && i18nStrings[key]) node.setAttribute("aria-label", t(key));
+  });
+  document.querySelectorAll("[data-i18n-title]").forEach((node) => {
+    const key = node.getAttribute("data-i18n-title");
+    if (key && i18nStrings[key]) node.setAttribute("title", t(key));
+  });
   const wsLabel = $("workspace-switcher-label");
   if (wsLabel && i18nStrings["workspace.title"]) wsLabel.textContent = t("workspace.title");
   const langLabel = $("lang-toggle-label");
@@ -6568,6 +6578,8 @@ function setLanguage(lang, persist) {
   // Re-render the surfaces that draw translated strings inline.
   renderWorkspaces();
   renderWidgets();
+  if (cockpitData) renderCockpit(cockpitData);
+  if (workStateData) renderWorkState(workStateData);
 }
 
 function initLanguage() {
@@ -6707,14 +6719,13 @@ function renderWidgets() {
 // now". Counts + top-3 per group; dynamic text uses textContent (no innerHTML
 // interpolation). A derived read: non-fatal if unavailable.
 const INBOX_GROUPS = {
-  approval_pending:  { label: "Approvals", icon: "\\u270B", tone: "high" },
-  blocked:           { label: "Blocked", icon: "\\u26D4", tone: "high" },
-  runtime_anomalies: { label: "Runtime anomalies", icon: "\\u26A1", tone: "high" },
-  gate_failures:     { label: "Gate failures", icon: "\\u2717", tone: "mid" },
-  cost_anomalies:    { label: "Cost anomalies", icon: "$", tone: "mid" },
-  stale:             { label: "Stale", icon: "\\u231B", tone: "low" },
+  approval_pending:  { labelKey: "inbox.group.approval_pending", icon: "\\u270B", tone: "high" },
+  blocked:           { labelKey: "inbox.group.blocked", icon: "\\u26D4", tone: "high" },
+  runtime_anomalies: { labelKey: "inbox.group.runtime_anomalies", icon: "\\u26A1", tone: "high" },
+  gate_failures:     { labelKey: "inbox.group.gate_failures", icon: "\\u2717", tone: "mid" },
+  cost_anomalies:    { labelKey: "inbox.group.cost_anomalies", icon: "$", tone: "mid" },
+  stale:             { labelKey: "inbox.group.stale", icon: "\\u231B", tone: "low" },
 };
-let cockpitData = null;
 let inboxDrawerPreviousFocus = null;
 
 function inboxEl(tag, cls, text) {
@@ -6725,16 +6736,57 @@ function inboxEl(tag, cls, text) {
 }
 
 function inboxGroupMeta(key) {
-  return INBOX_GROUPS[key] || { label: key, icon: "\\u2022", tone: "low" };
+  const meta = INBOX_GROUPS[key] || { labelKey: "", icon: "\\u2022", tone: "low" };
+  return {
+    label: meta.labelKey ? t(meta.labelKey) : key,
+    icon: meta.icon,
+    tone: meta.tone,
+  };
+}
+
+function localizedInboxTitle(item) {
+  return item.title || item.id || t("cockpit.item.untitled");
+}
+
+function localizedInboxAction(action) {
+  const map = {
+    "approve / gate": "inbox.action.approve_gate",
+    "resolve blocker": "inbox.action.resolve_blocker",
+    "fix gate": "inbox.action.fix_gate",
+    "review cost": "inbox.action.review_cost",
+    "review / refresh": "inbox.action.review_refresh",
+    "resolve claim": "inbox.action.resolve_claim",
+  };
+  const key = map[String(action || "")];
+  return key ? t(key) : (action || "");
+}
+
+function localizedInboxWhy(why) {
+  const raw = String(why || "");
+  if (!raw) return "";
+  if (raw === "approval_required") return t("inbox.why.approval_required");
+  let match = raw.match(/^status=(.+)$/);
+  if (match) return `${t("inbox.why.status")}=${match[1]}`;
+  match = raw.match(/^(\\d+) gate failures$/);
+  if (match) return `${match[1]} ${t("inbox.why.gate_failures")}`;
+  match = raw.match(/^actual (\\d+) > budget$/);
+  if (match) return `${t("inbox.why.actual")} ${match[1]} > ${t("inbox.why.budget")}`;
+  match = raw.match(/^no update (\\d+)d$/);
+  if (match) return `${t("inbox.why.no_update")} ${match[1]}d`;
+  const conflictPrefix = "cross-host claim conflict: ";
+  if (raw.indexOf(conflictPrefix) === 0) {
+    return `${t("inbox.why.cross_host_claim_conflict")}: ${raw.slice(conflictPrefix.length)}`;
+  }
+  return raw;
 }
 
 function inboxSummary(items) {
-  if (!items.length) return "No items in this group.";
+  if (!items.length) return t("cockpit.summary.empty");
   const first = items[0] || {};
-  const title = first.title || first.id || "Untitled item";
-  const why = first.why ? ` - ${first.why}` : "";
-  const action = first.action ? ` (${first.action})` : "";
-  const more = items.length > 1 ? `; ${items.length - 1} more` : "";
+  const title = localizedInboxTitle(first);
+  const why = first.why ? ` - ${localizedInboxWhy(first.why)}` : "";
+  const action = first.action ? ` (${localizedInboxAction(first.action)})` : "";
+  const more = items.length > 1 ? `; ${items.length - 1} ${t("cockpit.summary.more")}` : "";
   return `${title}${why}${action}${more}`;
 }
 
@@ -6746,8 +6798,8 @@ function renderCockpit(data) {
   const totalEl = $("inbox-total");
   if (totalEl) {
     totalEl.textContent = total
-      ? `${total} item${total === 1 ? "" : "s"} need attention`
-      : "all clear";
+      ? (total === 1 ? t("cockpit.total.one") : `${total} ${t("cockpit.total.many_suffix")}`)
+      : t("cockpit.total.clear");
   }
   const empty = $("inbox-empty");
   if (empty) empty.hidden = total > 0;
@@ -6768,7 +6820,7 @@ function renderCockpit(data) {
     head.appendChild(inboxEl("span", "inbox-count", String(items.length)));
     card.appendChild(head);
     card.appendChild(inboxEl("p", "inbox-summary-line", inboxSummary(items)));
-    const action = inboxEl("button", "inbox-card-action", "Open details");
+    const action = inboxEl("button", "inbox-card-action", t("cockpit.open_details"));
     action.type = "button";
     action.dataset.inboxGroup = key;
     action.setAttribute("aria-haspopup", "dialog");
@@ -6782,12 +6834,12 @@ function renderCockpit(data) {
 function renderInboxDetailItem(item) {
   const row = inboxEl("article", "inbox-detail-item");
   row.setAttribute("role", "listitem");
-  row.appendChild(inboxEl("h3", "inbox-detail-item-title", item.title || item.id || "Untitled item"));
+  row.appendChild(inboxEl("h3", "inbox-detail-item-title", localizedInboxTitle(item)));
   const meta = inboxEl("div", "inbox-detail-item-meta");
   if (item.id) meta.appendChild(inboxEl("span", "", item.id));
   if (item.age) meta.appendChild(inboxEl("span", "", item.age));
-  if (item.why) meta.appendChild(inboxEl("span", "", item.why));
-  if (item.action) meta.appendChild(inboxEl("span", "inbox-detail-item-action", item.action));
+  if (item.why) meta.appendChild(inboxEl("span", "", localizedInboxWhy(item.why)));
+  if (item.action) meta.appendChild(inboxEl("span", "inbox-detail-item-action", localizedInboxAction(item.action)));
   row.appendChild(meta);
   return row;
 }
@@ -6805,8 +6857,8 @@ function openInboxDetail(groupKey, opener) {
   inboxDrawerPreviousFocus = opener || document.activeElement;
   title.textContent = `${meta.label} (${items.length})`;
   summary.textContent = items.length
-    ? "Review the full signal list and act on the highest-severity item first."
-    : "No items in this group.";
+    ? t("cockpit.detail.summary")
+    : t("cockpit.detail.empty");
   list.innerHTML = "";
   for (const item of items) list.appendChild(renderInboxDetailItem(item || {}));
   backdrop.hidden = false;
@@ -6845,12 +6897,18 @@ async function loadCockpit() {
     renderCockpit(await response.json());
   } catch (error) {
     const totalEl = $("inbox-total");
-    if (totalEl) totalEl.textContent = "inbox unavailable";
+    if (totalEl) totalEl.textContent = t("cockpit.unavailable");
   }
 }
 
 function workStatePayload(data) {
   return (data && data.items) || data || { tasksets: [], totals: {} };
+}
+
+function localizedWorkBucket(bucket) {
+  const raw = String(bucket || "waiting");
+  const key = `work_state.bucket.${raw}`;
+  return i18nStrings[key] ? t(key) : raw;
 }
 
 function renderWorkStateCount(label, value) {
@@ -6870,17 +6928,17 @@ function renderWorkStateCard(card) {
   article.appendChild(inboxEl("h3", "work-state-card-title", card.title || card.id || "Untitled taskset"));
 
   const countGrid = inboxEl("div", "work-state-counts");
-  countGrid.appendChild(renderWorkStateCount("Waiting", counts.waiting));
-  countGrid.appendChild(renderWorkStateCount("Active", counts.active));
-  countGrid.appendChild(renderWorkStateCount("Review", counts.review));
-  countGrid.appendChild(renderWorkStateCount("Done", counts.done));
+  countGrid.appendChild(renderWorkStateCount(t("work_state.count.waiting"), counts.waiting));
+  countGrid.appendChild(renderWorkStateCount(t("work_state.count.active"), counts.active));
+  countGrid.appendChild(renderWorkStateCount(t("work_state.count.review"), counts.review));
+  countGrid.appendChild(renderWorkStateCount(t("work_state.count.done"), counts.done));
   article.appendChild(countGrid);
 
   const tasks = Array.isArray(card.tasks) ? card.tasks : [];
   const details = inboxEl("details", "work-state-drill");
   const summaryText = card.hidden_tasks
-    ? `${tasks.length} units shown, ${card.hidden_tasks} hidden`
-    : `${tasks.length} units`;
+    ? `${tasks.length} ${t("work_state.units.shown")}, ${card.hidden_tasks} ${t("work_state.units.hidden")}`
+    : `${tasks.length} ${t("work_state.units")}`;
   details.appendChild(inboxEl("summary", "", summaryText));
   const list = inboxEl("div", "work-state-units");
   list.setAttribute("role", "list");
@@ -6888,7 +6946,7 @@ function renderWorkStateCard(card) {
     const row = inboxEl("div", "work-state-unit");
     row.setAttribute("role", "listitem");
     row.appendChild(inboxEl("span", "", task.id || task.title || "untitled"));
-    row.appendChild(inboxEl("span", "work-state-bucket", task.bucket || task.status || "waiting"));
+    row.appendChild(inboxEl("span", "work-state-bucket", localizedWorkBucket(task.bucket || task.status || "waiting")));
     list.appendChild(row);
   }
   details.appendChild(list);
@@ -6897,6 +6955,7 @@ function renderWorkStateCard(card) {
 }
 
 function renderWorkState(data) {
+  workStateData = data || null;
   const payload = workStatePayload(data);
   const board = $("work-state-board");
   if (!board) return;
@@ -6906,8 +6965,8 @@ function renderWorkState(data) {
   if (totalEl) {
     const taskCount = totals.tasks || 0;
     totalEl.textContent = taskCount
-      ? `${totals.tasksets || tasksets.length} tasksets / ${taskCount} units`
-      : "no work state";
+      ? `${totals.tasksets || tasksets.length} ${t("work_state.total.tasksets")} / ${taskCount} ${t("work_state.total.units")}`
+      : t("work_state.total.none");
   }
   const empty = $("work-state-empty");
   if (empty) empty.hidden = tasksets.length > 0;
@@ -6925,7 +6984,7 @@ async function loadWorkState() {
     renderWorkState(await response.json());
   } catch (error) {
     const totalEl = $("work-state-total");
-    if (totalEl) totalEl.textContent = "work state unavailable";
+    if (totalEl) totalEl.textContent = t("work_state.unavailable");
   }
 }
 

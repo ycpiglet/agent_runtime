@@ -93,7 +93,8 @@ def test_cockpit_home_hero_present(console_url):  # TASK-AR-564 (cockpit home vi
     _, css = _get(console_url + "/app.css")
     # Hero replaces the 80-screen home as the first decision surface.
     assert 'id="cockpit"' in home and 'id="inbox-groups"' in home
-    assert "What needs you now" in home and 'id="inbox-empty"' in home
+    assert 'data-i18n="cockpit.title"' in home and 'id="inbox-empty"' in home
+    assert 'data-i18n-aria-label="cockpit.aria"' in home
     # Client renders /api/inbox into the hero on load + on a refresh cadence.
     assert "loadCockpit" in js and "renderCockpit" in js and "/api/inbox" in js
     # Cockpit styling is present (tokenized; verified literal-free elsewhere).
@@ -132,6 +133,29 @@ def test_work_state_secondary_hero_present(console_url):  # TASK-AR-567
 
     assert 'id="work-state-hero"' in home
     assert 'id="work-state-board"' in home and 'id="work-state-total"' in home
-    assert "Work state" in home
+    assert 'data-i18n="work_state.title"' in home
     assert "loadWorkState" in js and "renderWorkState" in js and "/api/work-state" in js
     assert ".work-state-card" in css and ".work-state-drill" in css
+
+
+def test_i18n_resource_localizes_cockpit_and_work_state(console_url):  # TASK-AR-568
+    status, body = _get(console_url + "/api/i18n")
+    assert status == 200
+    payload = json.loads(body)
+    strings = payload["items"]["strings"]
+
+    for key in [
+        "cockpit.title",
+        "cockpit.open_details",
+        "inbox.group.blocked",
+        "inbox.action.fix_gate",
+        "inbox.why.approval_required",
+        "work_state.title",
+    ]:
+        assert strings[key]["ko"]
+        assert strings[key]["en"]
+
+    _, js = _get(console_url + "/app.js")
+    assert "localizedInboxWhy" in js
+    assert "localizedInboxAction" in js
+    assert "renderCockpit(cockpitData)" in js

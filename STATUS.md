@@ -1,11 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-06-16 - TASKSET-AR-DECISION-FIRST-CONSOLE-IA / TASK-AR-568 active
+## 2026-06-16 - TASKSET-AR-DECISION-FIRST-CONSOLE-IA / TASK-AR-568 complete
 
-- Active claim: `CLAIM-20260616-230131-task-ar-568-21a3` (`lead_engineer@work-04`) is preserved in the root checkout for `TASK-AR-568`.
-- Current taskset: `TASKSET-AR-DECISION-FIRST-CONSOLE-IA`; current task: `TASK-AR-568`.
-- Worktree/branch: `.worktrees/TASK-AR-568` on `codex/task-ar-568-i18n-toggle`.
-- Status: claim created; implement the KO/EN UI language toggle over the existing i18n layer, keeping data/schema values in English and localizing inbox/group labels.
+- Completed claim: `CLAIM-20260616-230131-task-ar-568-21a3` (`lead_engineer@work-04`) was W4b-approved, released, merged, indexed, and cleaned.
+- Current taskset: `TASKSET-AR-DECISION-FIRST-CONSOLE-IA`; next task: `TASK-AR-569`.
+- Worktree/branch: `.worktrees/TASK-AR-568` was removed after merge; branch cleanup follows ancestor verification.
+- Status: UI language toggle now localizes cockpit, inbox group/action/why labels, and work-state hero display strings while preserving English API schema/data identifiers.
+- Evidence: `reviews/REVIEW-2026-06-16-task-ar-568-i18n-toggle.md`; `reviews/W4B-2026-06-16-TASK-AR-568.md`.
 - Completed predecessor: `TASK-AR-567` was W4b-approved, released, merged, indexed, and cleaned with `reviews/W4B-2026-06-16-TASK-AR-567.md`.
 
 ## 2026-06-16 - TASKSET-AR-DECISION-FIRST-CONSOLE-IA / TASK-AR-567 complete

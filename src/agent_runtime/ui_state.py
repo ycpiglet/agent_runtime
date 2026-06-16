@@ -2197,9 +2197,8 @@ def load_goals(root: Path, now: str) -> list[dict[str, Any]]:
 DEFAULT_LANGUAGE = "ko"
 I18N_LANGUAGES = ("ko", "en")
 
-# Key shell strings only (high-traffic nav groups, view titles, common buttons).
-# This is the *mechanism* + the high-traffic conversions; remaining strings stay
-# English literals in the DOM and can be migrated incrementally using t(key).
+# Key shell strings and decision-first hero strings. Runtime/API data identifiers
+# remain English; display labels are mapped in the browser via this table.
 I18N_STRINGS: dict[str, dict[str, str]] = {
     "nav.group.home": {"ko": "홈", "en": "Home"},
     "nav.group.work": {"ko": "작업", "en": "Work"},
@@ -2229,6 +2228,68 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     },
     "widgets.title": {"ko": "위젯", "en": "Widgets"},
     "widgets.empty": {"ko": "등록된 위젯이 없습니다", "en": "No widgets registered"},
+    "cockpit.aria": {
+        "ko": "주의 인박스 - 지금 필요한 일",
+        "en": "Attention inbox - what needs you now",
+    },
+    "cockpit.title": {"ko": "지금 필요한 일", "en": "What needs you now"},
+    "cockpit.empty": {"ko": "지금 필요한 항목이 없습니다.", "en": "Nothing needs you right now."},
+    "cockpit.total.clear": {"ko": "모두 정상", "en": "all clear"},
+    "cockpit.total.one": {"ko": "1개 항목 확인 필요", "en": "1 item needs attention"},
+    "cockpit.total.many_suffix": {"ko": "개 항목 확인 필요", "en": "items need attention"},
+    "cockpit.unavailable": {"ko": "인박스를 불러올 수 없습니다", "en": "inbox unavailable"},
+    "cockpit.open_details": {"ko": "상세 열기", "en": "Open details"},
+    "cockpit.detail.kicker": {"ko": "주의 상세", "en": "Attention detail"},
+    "cockpit.detail.title": {"ko": "인박스 상세", "en": "Inbox detail"},
+    "cockpit.detail.close": {"ko": "주의 상세 닫기", "en": "Close attention detail"},
+    "cockpit.detail.summary": {
+        "ko": "전체 신호 목록을 확인하고 심각도가 가장 높은 항목부터 처리하세요.",
+        "en": "Review the full signal list and act on the highest-severity item first.",
+    },
+    "cockpit.detail.empty": {"ko": "이 그룹에는 항목이 없습니다.", "en": "No items in this group."},
+    "cockpit.item.untitled": {"ko": "제목 없는 항목", "en": "Untitled item"},
+    "cockpit.summary.empty": {"ko": "이 그룹에는 항목이 없습니다.", "en": "No items in this group."},
+    "cockpit.summary.more": {"ko": "개 더 있음", "en": "more"},
+    "inbox.group.approval_pending": {"ko": "승인", "en": "Approvals"},
+    "inbox.group.blocked": {"ko": "차단됨", "en": "Blocked"},
+    "inbox.group.runtime_anomalies": {"ko": "런타임 이상", "en": "Runtime anomalies"},
+    "inbox.group.gate_failures": {"ko": "게이트 실패", "en": "Gate failures"},
+    "inbox.group.cost_anomalies": {"ko": "비용 이상", "en": "Cost anomalies"},
+    "inbox.group.stale": {"ko": "오래됨", "en": "Stale"},
+    "inbox.action.approve_gate": {"ko": "승인 / 게이트", "en": "approve / gate"},
+    "inbox.action.resolve_blocker": {"ko": "차단 해소", "en": "resolve blocker"},
+    "inbox.action.fix_gate": {"ko": "게이트 수정", "en": "fix gate"},
+    "inbox.action.review_cost": {"ko": "비용 검토", "en": "review cost"},
+    "inbox.action.review_refresh": {"ko": "검토 / 갱신", "en": "review / refresh"},
+    "inbox.action.resolve_claim": {"ko": "클레임 해소", "en": "resolve claim"},
+    "inbox.why.approval_required": {"ko": "승인 필요", "en": "approval_required"},
+    "inbox.why.status": {"ko": "상태", "en": "status"},
+    "inbox.why.gate_failures": {"ko": "게이트 실패", "en": "gate failures"},
+    "inbox.why.actual": {"ko": "실제", "en": "actual"},
+    "inbox.why.budget": {"ko": "예산", "en": "budget"},
+    "inbox.why.no_update": {"ko": "업데이트 없음", "en": "no update"},
+    "inbox.why.cross_host_claim_conflict": {
+        "ko": "호스트 간 클레임 충돌",
+        "en": "cross-host claim conflict",
+    },
+    "work_state.kicker": {"ko": "작업", "en": "Work"},
+    "work_state.title": {"ko": "작업 상태", "en": "Work state"},
+    "work_state.empty": {"ko": "활성 작업 상태가 없습니다.", "en": "No active work state."},
+    "work_state.unavailable": {"ko": "작업 상태를 불러올 수 없습니다", "en": "work state unavailable"},
+    "work_state.total.none": {"ko": "작업 상태 없음", "en": "no work state"},
+    "work_state.total.tasksets": {"ko": "태스크셋", "en": "tasksets"},
+    "work_state.total.units": {"ko": "유닛", "en": "units"},
+    "work_state.count.waiting": {"ko": "대기", "en": "Waiting"},
+    "work_state.count.active": {"ko": "진행", "en": "Active"},
+    "work_state.count.review": {"ko": "검토", "en": "Review"},
+    "work_state.count.done": {"ko": "완료", "en": "Done"},
+    "work_state.units": {"ko": "유닛", "en": "units"},
+    "work_state.units.shown": {"ko": "개 유닛 표시", "en": "units shown"},
+    "work_state.units.hidden": {"ko": "개 숨김", "en": "hidden"},
+    "work_state.bucket.waiting": {"ko": "대기", "en": "waiting"},
+    "work_state.bucket.active": {"ko": "진행", "en": "active"},
+    "work_state.bucket.review": {"ko": "검토", "en": "review"},
+    "work_state.bucket.done": {"ko": "완료", "en": "done"},
 }
 
 

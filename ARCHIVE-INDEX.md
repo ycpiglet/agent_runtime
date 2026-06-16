@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-16
-archived_count: 231
+archived_count: 232
 ---
 
 # Archived Task Files
 
-- `231` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `232` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -239,6 +239,7 @@ archived_count: 231
 | `TASK-AR-559` | `f6f4ad66-c4a…` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | 2026-06-15T00:29:41+09:00 | 2026-06-15T00:29:41+09:00 | 2026-06-15T10:04:03+09:00 | 2026-06-15T10:04:03+09:00 | scripts/dispatch_gate.py: footprint-disjoint seam check (reuse footprint_conflict_gat… |
 | `TASK-AR-561` | `bb188d37-3a0…` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | 2026-06-15T00:29:41+09:00 | 2026-06-15T00:29:41+09:00 | 2026-06-15T10:04:03+09:00 | 2026-06-15T10:04:03+09:00 | Extend blind-Delphi seminar/council with substance-axis persona archetypes (risk tole… |
 | `TASK-AR-560` | `01090ddb-fc0…` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | 2026-06-15T00:29:41+09:00 | 2026-06-15T00:29:41+09:00 | 2026-06-15T10:04:03+09:00 | 2026-06-15T10:04:03+09:00 | Lead orchestrator: create claim+worktree+instance, spawn Worker/Reviewer sub-agents (… |
+| `TASK-AR-568` | `b9ffa27b-90a…` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | 2026-06-15T17:43:04+09:00 | 2026-06-16T23:01:31+09:00 | 2026-06-16T23:13:09+09:00 | 2026-06-16T23:13:09+09:00 | UI language toggle over the existing i18n layer (EN data/schema stays); localize inbo… |
 | `TASK-AR-563` | `9ce4e1e1-af5…` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | 2026-06-15T17:43:04+09:00 | 2026-06-15T18:00:00+09:00 | 2026-06-15T20:30:00+09:00 | 2026-06-15T22:50:00+09:00 | scripts/attention_inbox.py: 6-group 'what needs me now' aggregation from existing wor… |
 | `TASK-AR-565` | `6b69101b-e12…` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | 2026-06-15T17:43:04+09:00 | 2026-06-16T20:50:31+09:00 | 2026-06-16T21:04:00+09:00 | 2026-06-16T21:04:00+09:00 | Group the 67 nav routes under core 7 (Home/Work/Agents/Decisions/Records/Search/More)… |
 | `TASK-AR-567` | `b924243c-6c8…` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | 2026-06-15T17:43:04+09:00 | 2026-06-16T22:31:44+09:00 | 2026-06-16T22:45:01+09:00 | 2026-06-16T22:45:01+09:00 | Initiative->Taskset->Unit waiting/active/done board + drill-down (reuse org_read_api.… |

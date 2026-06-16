@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-16T22:57:13+09:00
+generated_at: 2026-06-16T23:25:12+09:00
 record_count: 290
 ---
 
@@ -279,7 +279,7 @@ record_count: 290
 | 0.30.3 | Task 0.30.3 | task | `TASK-AR-565` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | `agents/lead_engineer/tasks/TASK-AR-565.md` | Group the 67 nav routes under core 7 (Home/Work/Agents/Decisions/Records/Search/More)… |
 | 0.30.4 | Task 0.30.4 | task | `TASK-AR-566` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | `agents/lead_engineer/tasks/TASK-AR-566.md` | Counts/summaries on screen; detail opens in a keyboard-accessible side drawer on clic… |
 | 0.30.5 | Task 0.30.5 | task | `TASK-AR-567` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | `agents/lead_engineer/tasks/TASK-AR-567.md` | Initiative->Taskset->Unit waiting/active/done board + drill-down (reuse org_read_api.… |
-| 0.30.6 | Task 0.30.6 | task | `TASK-AR-568` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | planned | `agents/lead_engineer/tasks/TASK-AR-568.md` | UI language toggle over the existing i18n layer (EN data/schema stays); localize inbo… |
+| 0.30.6 | Task 0.30.6 | task | `TASK-AR-568` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | `agents/lead_engineer/tasks/TASK-AR-568.md` | UI language toggle over the existing i18n layer (EN data/schema stays); localize inbo… |
 | 0.30.7 | Task 0.30.7 | task | `TASK-AR-569` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | planned | `agents/lead_engineer/tasks/TASK-AR-569.md` | E2E asserting home <= 2 screens / DOM <= ~1500 + maturity behaviors (responsive/a11y/… |
 | 1 | Initiative 1 | initiative | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | - | planned | `agents/project/initiatives/INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE.md` | Work Hierarchy Conflict Closure Initiative |
 | 1.1 | Taskset 1.1 | taskset | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | complete | `BACKLOG-BOARD.md` | Work Taxonomist |

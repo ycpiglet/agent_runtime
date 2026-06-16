@@ -661,9 +661,12 @@ def test_ui_console_work_state_secondary_hero_contract(tmp_path):
     for marker in [
         'id="work-state-hero"',
         'aria-labelledby="work-state-title"',
+        'data-i18n="work_state.kicker"',
+        'data-i18n="work_state.title"',
         'id="work-state-total"',
         'id="work-state-board"',
         'id="work-state-empty"',
+        'data-i18n="work_state.empty"',
         'role="list"',
     ]:
         assert marker in html
@@ -672,7 +675,10 @@ def test_ui_console_work_state_secondary_hero_contract(tmp_path):
         "function workStatePayload",
         "function renderWorkState",
         "function renderWorkStateCard",
+        "function localizedWorkBucket",
+        "let workStateData = null",
         "function loadWorkState",
+        't("work_state.count.waiting")',
         'fetch("/api/work-state"',
         "setInterval(loadWorkState, 15000)",
     ]:
@@ -1232,11 +1238,17 @@ def test_ui_console_cockpit_progressive_disclosure_drawer_contract(tmp_path):
     css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
 
     for marker in [
+        'data-i18n-aria-label="cockpit.aria"',
+        'data-i18n="cockpit.title"',
+        'data-i18n="cockpit.empty"',
         'id="inbox-detail-backdrop"',
         'id="inbox-detail-drawer"',
         'role="dialog"',
         'aria-modal="true"',
         'aria-labelledby="inbox-detail-title"',
+        'data-i18n="cockpit.detail.kicker"',
+        'data-i18n="cockpit.detail.title"',
+        'data-i18n-aria-label="cockpit.detail.close"',
         'id="inbox-detail-close"',
         'id="inbox-detail-list"',
         'role="list"',
@@ -1247,6 +1259,9 @@ def test_ui_console_cockpit_progressive_disclosure_drawer_contract(tmp_path):
         "let cockpitData = null",
         "let inboxDrawerPreviousFocus = null",
         "function inboxSummary",
+        "function localizedInboxWhy",
+        "function localizedInboxAction",
+        "function localizedInboxTitle",
         "function openInboxDetail",
         "function closeInboxDetail",
         "function initInboxDetailDrawer",
@@ -3514,7 +3529,18 @@ def test_ui_console_i18n_route_has_kr_en_for_key_strings_default_kr(tmp_path):
     assert "ko" in table["languages"] and "en" in table["languages"]
     strings = table["strings"]
     # Key shell strings carry both KR and EN.
-    for key in ("nav.group.work", "view.board.title", "button.refresh", "workspace.title"):
+    for key in (
+        "nav.group.work",
+        "view.board.title",
+        "button.refresh",
+        "workspace.title",
+        "cockpit.title",
+        "cockpit.open_details",
+        "inbox.group.approval_pending",
+        "inbox.action.approve_gate",
+        "inbox.why.approval_required",
+        "work_state.title",
+    ):
         assert key in strings, f"missing i18n key {key}"
         assert strings[key]["ko"], f"missing KR for {key}"
         assert strings[key]["en"], f"missing EN for {key}"
@@ -3531,16 +3557,67 @@ def test_ui_console_i18n_t_helper_and_language_toggle_present(tmp_path):
     # data-i18n anchors mark high-traffic strings for translation.
     assert 'data-i18n="nav.group.work"' in html
     assert 'data-i18n="button.refresh"' in html
+    assert 'data-i18n="cockpit.title"' in html
+    assert 'data-i18n-aria-label="cockpit.aria"' in html
+    assert 'data-i18n-title="common.language"' in html
     # t() lookup helper + default-KR mechanism + escape-safe application.
     assert "function t(key)" in js
     assert 'const DEFAULT_LANGUAGE = "ko";' in js
     assert "function applyTranslations" in js
+    assert "renderCockpit(cockpitData)" in js
+    assert "renderWorkState(workStateData)" in js
     # Translations are applied via textContent (never innerHTML) -> escape-safe.
     start = js.index("function applyTranslations")
     end = js.index("function setLanguage", start)
     block = js[start:end]
     assert "textContent" in block
+    assert "setAttribute" in block
     assert "innerHTML" not in block
+
+
+def test_ui_console_i18n_localizes_cockpit_inbox_contract(tmp_path):
+    payload = json.loads(ui_console.build_response("/api/i18n", tmp_path).body.decode("utf-8"))
+    strings = payload["items"]["strings"]
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+
+    for key in [
+        "inbox.group.approval_pending",
+        "inbox.group.blocked",
+        "inbox.group.runtime_anomalies",
+        "inbox.group.gate_failures",
+        "inbox.group.cost_anomalies",
+        "inbox.group.stale",
+        "inbox.action.approve_gate",
+        "inbox.action.resolve_blocker",
+        "inbox.action.fix_gate",
+        "inbox.action.review_cost",
+        "inbox.action.review_refresh",
+        "inbox.action.resolve_claim",
+        "inbox.why.status",
+        "inbox.why.gate_failures",
+        "inbox.why.cross_host_claim_conflict",
+    ]:
+        assert key in strings, key
+        assert strings[key]["ko"] and strings[key]["en"]
+
+    for marker in [
+        'data-i18n="cockpit.title"',
+        'data-i18n="cockpit.empty"',
+        'data-i18n="cockpit.detail.kicker"',
+        'data-i18n="cockpit.detail.title"',
+        'data-i18n-aria-label="cockpit.detail.close"',
+    ]:
+        assert marker in html
+
+    cockpit_start = js.index("// --- Decision-first cockpit")
+    cockpit_end = js.index("function workStatePayload", cockpit_start)
+    cockpit_block = js[cockpit_start:cockpit_end]
+    assert 'labelKey: "inbox.group.approval_pending"' in cockpit_block
+    assert "function localizedInboxWhy" in cockpit_block
+    assert "function localizedInboxAction" in cockpit_block
+    assert 't("cockpit.open_details")' in cockpit_block
+    assert "approval_required" in cockpit_block
 
 
 def test_ui_console_i18n_kr_strings_not_inlined_in_ar341_app_js(tmp_path):
