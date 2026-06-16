@@ -46,7 +46,7 @@ completed_task_set_count: 33
 
 - Flow: UI redesign #1: turn the 80-screen data-dump home into a decision-first cockpit whose hero is an Attention Inbox ('what needs me now', 6 signal groups derived from existing gates/records), prune nav 67->core 7 (+More), progressive disclosure (essentials on screen, detail on interaction), preserve the just-landed maturity behaviors (responsive/a11y/SSE/i18n/validation), and a KO/EN UI toggle. Incremental on the monolith; component/token extraction + 2.5D characters + insight graph are sub-project #3.
 - Progress: `4/7` done; `3` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-568` | - | - | - | planned | Action | P1 | High | Medium | 5h/4000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | UI language toggle over the existing i18n layer (EN data/schema stays); localize inbo… |

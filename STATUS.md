@@ -1,12 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-06-16 - TASKSET-AR-DECISION-FIRST-CONSOLE-IA / TASK-AR-566 W5 integration
+## 2026-06-16 - TASKSET-AR-DECISION-FIRST-CONSOLE-IA / TASK-AR-567 active
 
-- Released claim: `CLAIM-20260616-220545-task-ar-566-9197` (`lead_engineer@work-02`) was W4b-approved by `codex-w4b-TASK-AR-566-20260616`.
-- Current taskset: `TASKSET-AR-DECISION-FIRST-CONSOLE-IA`; current task: `TASK-AR-566`.
-- Worktree/branch: `.worktrees/TASK-AR-566` on `codex/task-ar-566-progressive-disclosure`.
-- Status: implementation commit `8caa57c` passed W4a/W4b and is being merged into `claude/decision-first-console-ia`; next executable task is `TASK-AR-567`.
-- Evidence: `reviews/REVIEW-2026-06-16-task-ar-566-progressive-disclosure.md`; `reviews/W4B-2026-06-16-TASK-AR-566.md`.
+- Active claim: `CLAIM-20260616-223144-task-ar-567-5063` (`lead_engineer@work-03`) is preserved in the root checkout for `TASK-AR-567`.
+- Current taskset: `TASKSET-AR-DECISION-FIRST-CONSOLE-IA`; current task: `TASK-AR-567`.
+- Worktree/branch: `.worktrees/TASK-AR-567` on `codex/task-ar-567-work-state-board`.
+- Status: claim created; implement the Work secondary hero with initiative/taskset/unit waiting-active-done counts and drill-down using existing work-state/org data.
+- Completed predecessor: `TASK-AR-566` was W4b-approved, released, merged, indexed, and cleaned with `reviews/W4B-2026-06-16-TASK-AR-566.md`.
 - Completed predecessor: `TASK-AR-565` was W4b-approved, released, merged, and indexed with `reviews/W4B-2026-06-16-TASK-AR-565.md`.
 
 ## 2026-06-15 - TASKSET-AR-AGENT-ORG-DELEGATION complete (6/6)
