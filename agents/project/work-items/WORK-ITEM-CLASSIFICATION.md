@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-17T08:31:27+09:00
+generated_at: 2026-06-17T08:50:36+09:00
 record_count: 298
 ---
 
@@ -331,8 +331,8 @@ record_count: 298
 | 9 | Initiative 9 | initiative | `INIT-AR-DECISION-FIRST-CONSOLE-IA` | - | active | `agents/project/initiatives/INIT-AR-DECISION-FIRST-CONSOLE-IA.md` | INIT-AR-DECISION-FIRST-CONSOLE-IA — Decision-First Console IA |
 | 10 | Initiative 10 | initiative | `INIT-AR-SELF-IMPROVEMENT-CADENCE` | - | active | `agents/project/initiatives/INIT-AR-SELF-IMPROVEMENT-CADENCE.md` | Self Improvement Cadence |
 | 10.1 | Taskset 10.1 | taskset | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | `INIT-AR-SELF-IMPROVEMENT-CADENCE` | active | `BACKLOG-BOARD.md` | Self Improvement Cadence |
-| 10.1.1 | Task 10.1.1 | task | `TASK-AR-570` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | planned | `agents/lead_engineer/tasks/TASK-AR-570.md` | Create a deterministic baseline that identifies low-frequency agent roles, low-reuse… |
-| 10.1.1.1 | Unit 10.1.1.1 | unit | `UNIT-TASK-AR-570-001` | `TASK-AR-570` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-570/UNIT-TASK-AR-570-001.md` | UNIT-TASK-AR-570-001 - Build self-improvement metrics baseline |
+| 10.1.1 | Task 10.1.1 | task | `TASK-AR-570` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | `agents/lead_engineer/tasks/TASK-AR-570.md` | Create a deterministic baseline that identifies low-frequency agent roles, low-reuse… |
+| 10.1.1.1 | Unit 10.1.1.1 | unit | `UNIT-TASK-AR-570-001` | `TASK-AR-570` | completed | `agents/lead_engineer/tasks/units/TASK-AR-570/UNIT-TASK-AR-570-001.md` | UNIT-TASK-AR-570-001 - Build self-improvement metrics baseline |
 | 10.1.2 | Task 10.1.2 | task | `TASK-AR-571` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | planned | `agents/lead_engineer/tasks/TASK-AR-571.md` | Use review, meeting, seminar, retro, compound, scribe, and doc-steward surfaces to re… |
 | 10.1.2.1 | Unit 10.1.2.1 | unit | `UNIT-TASK-AR-571-001` | `TASK-AR-571` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-571/UNIT-TASK-AR-571-001.md` | UNIT-TASK-AR-571-001 - Record the first self-improvement cycle |
 | 10.1.3 | Task 10.1.3 | task | `TASK-AR-572` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | planned | `agents/lead_engineer/tasks/TASK-AR-572.md` | Define measurable maturity criteria for low-frequency agent/skill self-improvement an… |

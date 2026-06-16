@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-17T08:31:27+09:00",
+  "generated_at": "2026-06-17T08:50:36+09:00",
   "record_count": 298,
   "finding_count": 0,
   "findings": [],
@@ -3226,7 +3226,7 @@
       "title": "Create a deterministic baseline that identifies low-frequency agent roles, low-reuse…",
       "path": "agents/lead_engineer/tasks/TASK-AR-570.md",
       "parent_id": "TASKSET-AR-SELF-IMPROVEMENT-CADENCE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-570-001",
@@ -3237,7 +3237,7 @@
       "title": "UNIT-TASK-AR-570-001 - Build self-improvement metrics baseline",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-570/UNIT-TASK-AR-570-001.md",
       "parent_id": "TASK-AR-570",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-571",

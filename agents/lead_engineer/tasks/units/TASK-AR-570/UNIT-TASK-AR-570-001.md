@@ -9,11 +9,11 @@ task_id: TASK-AR-570
 task_set_id: TASKSET-AR-SELF-IMPROVEMENT-CADENCE
 initiative_id: INIT-AR-SELF-IMPROVEMENT-CADENCE
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-06-17T08:31:23+09:00
-updated_at: 2026-06-17T08:31:23+09:00
+updated_at: 2026-06-17T08:48:56+09:00
 origin_type: owner_request
 origin_ref: owner-request:low-frequency-agent-skill-self-improvement-cycle
 created_by: codex-planner
@@ -45,6 +45,15 @@ verification:
   - python scripts/self_improvement_cycle.py assess --json
 handoff: Report baseline metrics and the exact low-frequency roles/assets that need the next cycle.
 stop_condition: Stop after the baseline command and tests pass; do not start artifact-generation work without the next unit claim.
+verified_at: 2026-06-17T08:48:42+09:00
+verified_by: le-20260617-083506-kst-3845
+evidence_refs:
+  - reviews/VERIFY-2026-06-17-unit-task-ar-570-001-20260617084842.json
+resolution: done
+completed_at: 2026-06-17T08:48:56+09:00
+closed_by: le-20260617-083506-kst-3845
+actual_hours: 1.2
+actual_tokens: 0
 ---
 
 # UNIT-TASK-AR-570-001 - Build self-improvement metrics baseline
@@ -97,3 +106,15 @@ Report baseline metrics and the exact low-frequency roles/assets that need the n
 ## Stop Boundary
 
 Stop after the baseline command and tests pass; do not start artifact-generation work without the next unit claim.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-17T08:48:56+09:00`
+- Resolution: `done`
+- Actual hours: `1.2`
+- Actual tokens: `0`
+- Closed by: `le-20260617-083506-kst-3845`
+- Evidence:
+  - `reviews/VERIFY-2026-06-17-unit-task-ar-570-001-20260617084842.json`
+<!-- work-close:end -->

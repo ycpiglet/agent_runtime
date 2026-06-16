@@ -1,0 +1,34 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-17-unit-task-ar-570-001-20260617084842",
+  "work_id": "UNIT-TASK-AR-570-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-570/UNIT-TASK-AR-570-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-570",
+  "unit_id": "UNIT-TASK-AR-570-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-17T08:48:42+09:00",
+  "verified_by": "le-20260617-083506-kst-3845",
+  "command_count": 2,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_self_improvement_cycle.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-17T08:48:42+09:00",
+      "finished_at": "2026-06-17T08:48:45+09:00",
+      "stdout": "...                                                                      [100%]\n3 passed in 0.83s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/self_improvement_cycle.py assess --json",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-17T08:48:45+09:00",
+      "finished_at": "2026-06-17T08:48:46+09:00",
+      "stdout": "ge_count\": 2\n      },\n      {\n        \"asset_id\": \"gate.release_cadence\",\n        \"kind\": \"gate\",\n        \"lifecycle\": \"keep\",\n        \"reuse\": 1,\n        \"root_cause\": \"low_reuse_evidence\",\n        \"severity\": \"watch\",\n        \"status\": \"active\",\n        \"subject\": \"asset-low-reuse:gate.release_cadence\",\n        \"usage_count\": 6\n      },\n      {\n        \"asset_id\": \"gate.conversation_work_audit\",\n        \"kind\": \"gate\",\n        \"lifecycle\": \"keep\",\n        \"reuse\": 1,\n        \"root_cause\": \"low_reuse_evidence\",\n        \"severity\": \"watch\",\n        \"status\": \"active\",\n        \"subject\": \"asset-low-reuse:gate.conversation_work_audit\",\n        \"usage_count\": 5\n      },\n      {\n        \"asset_id\": \"gate.work_schema\",\n        \"kind\": \"gate\",\n        \"lifecycle\": \"keep\",\n        \"reuse\": 1,\n        \"root_cause\": \"low_reuse_evidence\",\n        \"severity\": \"watch\",\n        \"status\": \"active\",\n        \"subject\": \"asset-low-reuse:gate.work_schema\",\n        \"usage_count\": 4\n      },\n      {\n        \"asset_id\": \"capability.wave_dispatcher\",\n        \"kind\": \"script\",\n        \"lifecycle\": \"keep\",\n        \"reuse\": 1,\n        \"root_cause\": \"low_reuse_evidence\",\n        \"severity\": \"watch\",\n        \"status\": \"active\",\n        \"subject\": \"asset-low-reuse:capability.wave_dispatcher\",\n        \"usage_count\": 4\n      },\n      {\n        \"asset_id\": \"capability.merge_queue\",\n        \"kind\": \"script\",\n        \"lifecycle\": \"keep\",\n        \"reuse\": 1,\n        \"root_cause\": \"low_reuse_evidence\",\n        \"severity\": \"watch\",\n        \"status\": \"active\",\n        \"subject\": \"asset-low-reuse:capability.merge_queue\",\n        \"usage_count\": 7\n      },\n      {\n        \"asset_id\": \"capability.inflight_overlay\",\n        \"kind\": \"script\",\n        \"lifecycle\": \"keep\",\n        \"reuse\": 1,\n        \"root_cause\": \"low_reuse_evidence\",\n        \"severity\": \"watch\",\n        \"status\": \"active\",\n        \"subject\": \"asset-low-reuse:capability.inflight_overlay\",\n        \"usage_count\": 6\n      },\n      {\n        \"asset_id\": \"capability.session_dashboard\",\n        \"kind\": \"script\",\n        \"lifecycle\": \"keep\",\n        \"reuse\": 1,\n        \"root_cause\": \"low_reuse_evidence\",\n        \"severity\": \"watch\",\n        \"status\": \"active\",\n        \"subject\": \"asset-low-reuse:capability.session_dashboard\",\n        \"usage_count\": 3\n      },\n      {\n        \"asset_id\": \"skill.wave_conductor\",\n        \"kind\": \"skill\",\n        \"lifecycle\": \"keep\",\n        \"reuse\": 1,\n        \"root_cause\": \"low_reuse_evidence\",\n        \"severity\": \"watch\",\n        \"status\": \"active\",\n        \"subject\": \"asset-low-reuse:skill.wave_conductor\",\n        \"usage_count\": 2\n      },\n      {\n        \"asset_id\": \"skill.independent_verification\",\n        \"kind\": \"skill\",\n        \"lifecycle\": \"keep\",\n        \"reuse\": 1,\n        \"root_cause\": \"low_reuse_evidence\",\n        \"severity\": \"watch\",\n        \"status\": \"active\",\n        \"subject\": \"asset-low-reuse:skill.independent_verification\",\n        \"usage_count\": 4\n      },\n      {\n        \"asset_id\": \"skill.release_conductor\",\n        \"kind\": \"skill\",\n        \"lifecycle\": \"keep\",\n        \"reuse\": 1,\n        \"root_cause\": \"low_reuse_evidence\",\n        \"severity\": \"watch\",\n        \"status\": \"active\",\n        \"subject\": \"asset-low-reuse:skill.release_conductor\",\n        \"usage_count\": 1\n      }\n    ],\n    \"assets\": 35,\n    \"block\": 0,\n    \"findings\": 0,\n    \"usage_total\": 227,\n    \"watch\": 0\n  },\n  \"schema\": \"agent-runtime-self-improvement-assessment/v1\",\n  \"score\": {\n    \"deductions\": {\n      \"advisory_due\": 3,\n      \"lifecycle_watch\": 10,\n      \"low_reuse_assets\": 20,\n      \"monitored_role_gaps\": 25,\n      \"unwaived_blocks\": 0,\n      \"waiver_debt\": 10\n    },\n    \"inputs\": {\n      \"advisory_due\": 0,\n      \"advisory_overdue\": 0,\n      \"advisory_unknown\": 1,\n      \"lifecycle_watch\": 60,\n      \"low_reuse_assets\": 17,\n      \"monitored_role_gaps\": 5,\n      \"unwaived_blocks\": 0,\n      \"waiver_debt\": 1\n    },\n    \"maturity_level\": \"immature\",\n    \"value\": 32\n  },\n  \"status\": \"watch\"\n}\n",
+      "stderr": ""
+    }
+  ]
+}
