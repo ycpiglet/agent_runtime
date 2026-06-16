@@ -264,6 +264,19 @@ HTML = """<!doctype html>
         <div class="cockpit-grid" id="inbox-groups" role="list"></div>
         <p class="cockpit-empty" id="inbox-empty" hidden>&#10003; Nothing needs you right now.</p>
       </section>
+      <div id="inbox-detail-backdrop" class="inbox-detail-backdrop" hidden></div>
+      <aside id="inbox-detail-drawer" class="inbox-detail-drawer" role="dialog" aria-modal="true"
+             aria-labelledby="inbox-detail-title" hidden tabindex="-1">
+        <header class="inbox-detail-head">
+          <div>
+            <p class="inbox-detail-kicker">Attention detail</p>
+            <h2 id="inbox-detail-title">Inbox detail</h2>
+          </div>
+          <button id="inbox-detail-close" class="inbox-detail-close" type="button" aria-label="Close attention detail">&times;</button>
+        </header>
+        <p id="inbox-detail-summary" class="inbox-detail-summary"></p>
+        <div id="inbox-detail-list" class="inbox-detail-list" role="list"></div>
+      </aside>
 
       <section class="dashboard" aria-label="Dashboard">
         <div class="metric"><span>Total Tasks</span><strong id="metric-tasks">0</strong></div>
@@ -5960,9 +5973,9 @@ pre {
 
 /* --- Decision-first cockpit: attention inbox (TASK-AR-564) ----------------- */
 /* The home hero -- "what needs you now". Six derived groups (scripts/
-   attention_inbox.py via /api/inbox): a count + top-3 per group; full detail
-   stays behind the existing views (progressive disclosure). Colors are tokens
-   only (no raw literals -- see test_ui_console_theme_key_panels_use_tokens). */
+   attention_inbox.py via /api/inbox): counts + compact summaries stay on the
+   home; full item detail opens in the focus-managed drawer (TASK-AR-566).
+   Colors are tokens only (no raw literals -- see theme token tests). */
 .cockpit { margin: 0 0 1.25rem; }
 .cockpit-head {
   display: flex; align-items: baseline; justify-content: space-between;
@@ -5995,19 +6008,65 @@ pre {
   font-size: 0.8rem; font-weight: 700; color: var(--ink);
   background: var(--panel-strong); border-radius: 999px;
 }
-.inbox-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.45rem; min-width: 0; }
-.inbox-item { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; font-size: 0.85rem; }
-.inbox-item-title {
-  font-weight: 600; color: var(--ink);
+.inbox-summary-line {
+  margin: 0; color: var(--muted); font-size: 0.86rem;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.inbox-item-meta { display: flex; gap: 0.4rem; align-items: baseline; min-width: 0; color: var(--muted); font-size: 0.78rem; }
-.inbox-item-id { font-variant-numeric: tabular-nums; white-space: nowrap; flex: none; }
-.inbox-item-why { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.inbox-item-action { flex: none; margin-left: auto; padding-left: 0.4rem; color: var(--primary); font-weight: 600; white-space: nowrap; }
-.inbox-more { font-size: 0.8rem; color: var(--muted); }
+.inbox-summary-action { color: var(--primary); font-weight: 700; }
+.inbox-card-action {
+  align-self: flex-start; min-height: 34px; border: 1px solid var(--line-strong);
+  border-radius: var(--radius); background: var(--panel-strong); color: var(--ink);
+  cursor: pointer; font-size: 0.82rem; font-weight: 700; padding: 0.35rem 0.65rem;
+}
+.inbox-card-action:hover { border-color: var(--primary-line); background: var(--primary-soft); }
+.inbox-card-action:focus-visible {
+  outline: 2px solid var(--primary); outline-offset: 2px; box-shadow: var(--focus);
+}
+.inbox-detail-backdrop {
+  position: fixed; inset: 0; z-index: 48; background: var(--scrim);
+}
+.inbox-detail-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 49;
+  width: min(460px, 100vw); padding: 1rem;
+  background: var(--panel); border-left: 1px solid var(--line);
+  box-shadow: var(--shadow); overflow-y: auto;
+}
+.inbox-detail-backdrop[hidden],
+.inbox-detail-drawer[hidden] { display: none; }
+.inbox-detail-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 1rem; margin-bottom: 0.75rem;
+}
+.inbox-detail-kicker {
+  margin: 0 0 0.2rem; color: var(--muted); font-size: 0.75rem;
+  font-weight: 700; text-transform: uppercase;
+}
+.inbox-detail-head h2 { margin: 0; font-size: 1.1rem; color: var(--ink); }
+.inbox-detail-close {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border: 1px solid var(--line-strong);
+  border-radius: var(--radius); background: var(--panel-strong); color: var(--ink);
+  cursor: pointer; font-size: 1.3rem; line-height: 1;
+}
+.inbox-detail-close:hover { border-color: var(--primary-line); background: var(--primary-soft); }
+.inbox-detail-close:focus-visible {
+  outline: 2px solid var(--primary); outline-offset: 2px; box-shadow: var(--focus);
+}
+.inbox-detail-summary { margin: 0 0 0.75rem; color: var(--muted); font-size: 0.85rem; }
+.inbox-detail-list { display: flex; flex-direction: column; gap: 0.6rem; }
+.inbox-detail-item {
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface-raised); padding: 0.7rem;
+}
+.inbox-detail-item-title { margin: 0; color: var(--ink); font-size: 0.92rem; font-weight: 700; }
+.inbox-detail-item-meta {
+  display: flex; flex-wrap: wrap; gap: 0.35rem 0.55rem;
+  margin-top: 0.45rem; color: var(--muted); font-size: 0.78rem;
+}
+.inbox-detail-item-action { color: var(--primary); font-weight: 700; }
 @media (max-width: 640px) {
   .cockpit-grid { grid-template-columns: 1fr; }
+  .inbox-detail-drawer { width: 100vw; }
 }
 """
 
@@ -6562,6 +6621,8 @@ const INBOX_GROUPS = {
   cost_anomalies:    { label: "Cost anomalies", icon: "$", tone: "mid" },
   stale:             { label: "Stale", icon: "\\u231B", tone: "low" },
 };
+let cockpitData = null;
+let inboxDrawerPreviousFocus = null;
 
 function inboxEl(tag, cls, text) {
   const el = document.createElement(tag);
@@ -6570,7 +6631,22 @@ function inboxEl(tag, cls, text) {
   return el;
 }
 
+function inboxGroupMeta(key) {
+  return INBOX_GROUPS[key] || { label: key, icon: "\\u2022", tone: "low" };
+}
+
+function inboxSummary(items) {
+  if (!items.length) return "No items in this group.";
+  const first = items[0] || {};
+  const title = first.title || first.id || "Untitled item";
+  const why = first.why ? ` - ${first.why}` : "";
+  const action = first.action ? ` (${first.action})` : "";
+  const more = items.length > 1 ? `; ${items.length - 1} more` : "";
+  return `${title}${why}${action}${more}`;
+}
+
 function renderCockpit(data) {
+  cockpitData = data || { groups: {}, total: 0 };
   const grid = $("inbox-groups");
   if (!grid) return;
   const total = (data && data.total) || 0;
@@ -6588,7 +6664,7 @@ function renderCockpit(data) {
   for (const key of Object.keys(groups)) {
     const items = groups[key] || [];
     if (!items.length) continue;
-    const meta = INBOX_GROUPS[key] || { label: key, icon: "\\u2022", tone: "low" };
+    const meta = inboxGroupMeta(key);
     const card = inboxEl("article", `inbox-card tone-${meta.tone}`);
     card.setAttribute("role", "listitem");
     const head = inboxEl("div", "inbox-card-head");
@@ -6598,25 +6674,75 @@ function renderCockpit(data) {
     head.appendChild(inboxEl("span", "inbox-label", meta.label));
     head.appendChild(inboxEl("span", "inbox-count", String(items.length)));
     card.appendChild(head);
-    const list = inboxEl("ul", "inbox-items");
-    for (const it of items.slice(0, 3)) {
-      const li = inboxEl("li", "inbox-item");
-      // Row 1: human-readable title (the decision), full width, ellipsized.
-      li.appendChild(inboxEl("span", "inbox-item-title", it.title || it.id || "\\u2014"));
-      // Row 2: muted id + why-it-surfaced, with the suggested action pinned right.
-      const meta = inboxEl("div", "inbox-item-meta");
-      if (it.id) meta.appendChild(inboxEl("span", "inbox-item-id", it.id));
-      if (it.why) meta.appendChild(inboxEl("span", "inbox-item-why", it.why));
-      if (it.action) meta.appendChild(inboxEl("span", "inbox-item-action", it.action));
-      li.appendChild(meta);
-      list.appendChild(li);
-    }
-    card.appendChild(list);
-    if (items.length > 3) {
-      card.appendChild(inboxEl("div", "inbox-more", `+${items.length - 3} more`));
-    }
+    card.appendChild(inboxEl("p", "inbox-summary-line", inboxSummary(items)));
+    const action = inboxEl("button", "inbox-card-action", "Open details");
+    action.type = "button";
+    action.dataset.inboxGroup = key;
+    action.setAttribute("aria-haspopup", "dialog");
+    action.setAttribute("aria-controls", "inbox-detail-drawer");
+    action.addEventListener("click", () => openInboxDetail(key, action));
+    card.appendChild(action);
     grid.appendChild(card);
   }
+}
+
+function renderInboxDetailItem(item) {
+  const row = inboxEl("article", "inbox-detail-item");
+  row.setAttribute("role", "listitem");
+  row.appendChild(inboxEl("h3", "inbox-detail-item-title", item.title || item.id || "Untitled item"));
+  const meta = inboxEl("div", "inbox-detail-item-meta");
+  if (item.id) meta.appendChild(inboxEl("span", "", item.id));
+  if (item.age) meta.appendChild(inboxEl("span", "", item.age));
+  if (item.why) meta.appendChild(inboxEl("span", "", item.why));
+  if (item.action) meta.appendChild(inboxEl("span", "inbox-detail-item-action", item.action));
+  row.appendChild(meta);
+  return row;
+}
+
+function openInboxDetail(groupKey, opener) {
+  const drawer = $("inbox-detail-drawer");
+  const backdrop = $("inbox-detail-backdrop");
+  const title = $("inbox-detail-title");
+  const summary = $("inbox-detail-summary");
+  const list = $("inbox-detail-list");
+  if (!drawer || !backdrop || !title || !summary || !list) return;
+  const groups = (cockpitData && cockpitData.groups) || {};
+  const items = groups[groupKey] || [];
+  const meta = inboxGroupMeta(groupKey);
+  inboxDrawerPreviousFocus = opener || document.activeElement;
+  title.textContent = `${meta.label} (${items.length})`;
+  summary.textContent = items.length
+    ? "Review the full signal list and act on the highest-severity item first."
+    : "No items in this group.";
+  list.innerHTML = "";
+  for (const item of items) list.appendChild(renderInboxDetailItem(item || {}));
+  backdrop.hidden = false;
+  drawer.hidden = false;
+  drawer.focus();
+  const close = $("inbox-detail-close");
+  if (close) close.focus();
+}
+
+function closeInboxDetail() {
+  const drawer = $("inbox-detail-drawer");
+  const backdrop = $("inbox-detail-backdrop");
+  if (drawer) drawer.hidden = true;
+  if (backdrop) backdrop.hidden = true;
+  const target = inboxDrawerPreviousFocus;
+  inboxDrawerPreviousFocus = null;
+  if (target && typeof target.focus === "function") target.focus();
+}
+
+function initInboxDetailDrawer() {
+  $("inbox-detail-close")?.addEventListener("click", closeInboxDetail);
+  $("inbox-detail-backdrop")?.addEventListener("click", closeInboxDetail);
+  document.addEventListener("keydown", (event) => {
+    const drawer = $("inbox-detail-drawer");
+    if (event.key === "Escape" && drawer && !drawer.hidden) {
+      event.preventDefault();
+      closeInboxDetail();
+    }
+  });
 }
 
 async function loadCockpit() {
@@ -7515,12 +7641,12 @@ function taskSetInstruction(taskSet, action) {
   const alias = taskSet.primary_alias || taskSet.slug_alias || taskSet.id;
   const command = taskSetCommand(taskSet, action);
   if (action === "plan") {
-    return `${alias} 계획: ${command} 실행 후 next task, worktree, claim 경계를 보고해줘.`;
+    return `${alias} \\uacc4\\ud68d: ${command} \\uc2e4\\ud589 \\ud6c4 next task, worktree, claim \\uacbd\\uacc4\\ub97c \\ubcf4\\uace0\\ud574\\uc918.`;
   }
   if (action === "start") {
-    return `${alias} 진행: ${command} 실행 후 ${taskSet.id} 범위 안에서만 진행하고 완료 시 정지/보고해줘.`;
+    return `${alias} \\uc9c4\\ud589: ${command} \\uc2e4\\ud589 \\ud6c4 ${taskSet.id} \\ubc94\\uc704 \\uc548\\uc5d0\\uc11c\\ub9cc \\uc9c4\\ud589\\ud558\\uace0 \\uc644\\ub8cc \\uc2dc \\uc815\\uc9c0/\\ubcf4\\uace0\\ud574\\uc918.`;
   }
-  return `${alias} gate 확인: ${command} 실행 후 결과를 보고해줘.`;
+  return `${alias} gate \\ud655\\uc778: ${command} \\uc2e4\\ud589 \\ud6c4 \\uacb0\\uacfc\\ub97c \\ubcf4\\uace0\\ud574\\uc918.`;
 }
 
 async function queueTaskSetCommand(taskSet, action) {
@@ -7587,7 +7713,7 @@ function populateBulkMoveOptions() {
   const select = $("taskset-bulk-move");
   if (!select) return;
   const current = select.value;
-  const options = ['<option value="">Move to taskset…</option>'].concat(
+  const options = ['<option value="">Move to taskset&hellip;</option>'].concat(
     (runtimeState.task_sets || []).map((ts) => `<option value="${escapeHtml(ts.id)}">${escapeHtml(ts.display_name || ts.id)}</option>`)
   );
   select.innerHTML = options.join("");
@@ -12477,6 +12603,7 @@ initContextualHelp();
 // TASK-AR-341: language bootstrap + i18n string load.
 initLanguage();
 loadI18n();
+initInboxDetailDrawer();
 
 loadState();
 connectEventStream();

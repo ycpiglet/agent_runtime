@@ -1110,6 +1110,52 @@ def test_ui_console_favicon_route_is_quiet_for_browser_probe(tmp_path):
     assert response.body == b""
 
 
+def test_ui_console_cockpit_progressive_disclosure_drawer_contract(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    for marker in [
+        'id="inbox-detail-backdrop"',
+        'id="inbox-detail-drawer"',
+        'role="dialog"',
+        'aria-modal="true"',
+        'aria-labelledby="inbox-detail-title"',
+        'id="inbox-detail-close"',
+        'id="inbox-detail-list"',
+        'role="list"',
+    ]:
+        assert marker in html
+
+    for marker in [
+        "let cockpitData = null",
+        "let inboxDrawerPreviousFocus = null",
+        "function inboxSummary",
+        "function openInboxDetail",
+        "function closeInboxDetail",
+        "function initInboxDetailDrawer",
+        'action.setAttribute("aria-haspopup", "dialog")',
+        'action.setAttribute("aria-controls", "inbox-detail-drawer")',
+        'action.addEventListener("click", () => openInboxDetail(key, action))',
+        'event.key === "Escape" && drawer && !drawer.hidden',
+        "inboxDrawerPreviousFocus = opener || document.activeElement",
+    ]:
+        assert marker in js
+
+    for selector in [
+        ".inbox-summary-line",
+        ".inbox-card-action",
+        ".inbox-detail-backdrop",
+        ".inbox-detail-drawer",
+        ".inbox-detail-item",
+    ]:
+        assert selector in css
+
+    assert ".inbox-items" not in css
+    assert "items.slice(0, 3)" not in js
+    assert "inbox-more" not in js
+
+
 def test_ui_console_board_card_exposes_peek_dnd_and_quick_action_anchors(tmp_path):
     html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
     js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")

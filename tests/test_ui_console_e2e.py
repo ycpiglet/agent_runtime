@@ -98,3 +98,18 @@ def test_cockpit_home_hero_present(console_url):  # TASK-AR-564 (cockpit home vi
     assert "loadCockpit" in js and "renderCockpit" in js and "/api/inbox" in js
     # Cockpit styling is present (tokenized; verified literal-free elsewhere).
     assert ".cockpit-grid" in css and ".inbox-card" in css
+
+
+def test_cockpit_progressive_detail_drawer_present(console_url):  # TASK-AR-566
+    _, home = _get(console_url + "/")
+    _, js = _get(console_url + "/app.js")
+    _, css = _get(console_url + "/app.css")
+
+    assert 'id="inbox-detail-drawer"' in home
+    assert 'role="dialog"' in home and 'aria-modal="true"' in home
+    assert 'id="inbox-detail-backdrop"' in home
+    assert 'id="inbox-detail-close"' in home
+    assert "openInboxDetail" in js and "closeInboxDetail" in js
+    assert "initInboxDetailDrawer" in js
+    assert ".inbox-summary-line" in css
+    assert ".inbox-detail-drawer" in css
