@@ -1,0 +1,29 @@
+{
+  "schema": "agent-runtime-session-baseline/v1",
+  "captured_at": "2026-06-16T13:15:13.615752+00:00",
+  "cwd": "C:\\Users\\ycpig\\agent_runtime",
+  "head": "61cfa8e",
+  "branch": "claude/decision-first-console-ia",
+  "status_fingerprint": "6bf9580ad5ef071aab055d07537b8600d44851393a28d7af97b07e7e2f328edc",
+  "stash_count": 0,
+  "worktrees": [
+    {
+      "path": "C:/Users/ycpig/agent_runtime",
+      "HEAD": "61cfa8ee283f7f852346e848c2928d542041a38d",
+      "branch": "claude/decision-first-console-ia"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-566",
+      "HEAD": "43d4d341fde5fa9bba969a2947a1f506479fc585",
+      "branch": "codex/task-ar-566-progressive-disclosure"
+    }
+  ],
+  "active_codex_branches": [
+    "claude/deadlock-guardrails",
+    "claude/decision-first-console-ia",
+    "claude/product-maturity-eval-merge",
+    "claude/wave89-closeout",
+    "codex/task-ar-552",
+    "+ codex/task-ar-566-progressive-disclosure"
+  ]
+}
