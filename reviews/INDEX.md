@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-15T23:38:26+09:00
-record_count: 495
+generated_at: 2026-06-16T21:02:24+09:00
+record_count: 496
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `495` review and evidence records under `reviews/`.
+- Summary: indexed `496` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `495` files |
+| Reviews covered | pass | `496` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -457,6 +457,7 @@ record_count: 495
 | `reviews/REVIEW-2026-06-15-paperclip-gap-adoption-decision.md` | `REVIEW-2026-06-15-paperclip-gap-adoption-decision` | md | record | n/a | REVIEW — Paperclip Gap Analysis & Adoption Decision (TASK-AR-367) |
 | `reviews/REVIEW-2026-06-15-product-maturity-uplift-closeout.md` | `REVIEW-2026-06-15-product-maturity-uplift-closeout` | md | record | n/a | REVIEW — Product Maturity Uplift: Closeout (TASKSET-AR-PRODUCT-MATURITY-UPLIFT) |
 | `reviews/REVIEW-2026-06-15-work-hierarchy-conflict-closure-closeout.md` | `REVIEW-2026-06-15-work-hierarchy-conflict-closure-closeout` | md | record | n/a | REVIEW — Work Hierarchy Conflict Closure: Closeout (TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE) |
+| `reviews/REVIEW-2026-06-16-task-ar-565-nav-prune-core7.md` | `REVIEW-2026-06-16-task-ar-565-nav-prune-core7` | review | pass | pass | REVIEW - TASK-AR-565 Nav Prune Core 7 |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario |
