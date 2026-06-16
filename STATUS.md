@@ -1,12 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-06-16 - TASKSET-AR-DECISION-FIRST-CONSOLE-IA / TASK-AR-565 W4b 대기
+## 2026-06-16 - TASKSET-AR-DECISION-FIRST-CONSOLE-IA / TASK-AR-566 active
 
-- Active claim: `CLAIM-20260616-205031-task-ar-565-e73e` (`lead_engineer@work-01`) is preserved in the root checkout for `TASK-AR-565`.
-- Current taskset: `TASKSET-AR-DECISION-FIRST-CONSOLE-IA`; current task: `TASK-AR-565`.
-- Worktree/branch: `.worktrees/TASK-AR-565` on `codex/task-ar-565-nav-prune`.
-- Status: W4a self-verification is complete; W4b independent verification and claim release are still required before merge cleanup.
-- Evidence: `reviews/REVIEW-2026-06-16-task-ar-565-nav-prune-core7.md` and `reviews/artifacts/task-ar-565-nav-core7.png`.
+- Active claim: `CLAIM-20260616-220545-task-ar-566-9197` (`lead_engineer@work-02`) is preserved in the root checkout for `TASK-AR-566`.
+- Current taskset: `TASKSET-AR-DECISION-FIRST-CONSOLE-IA`; current task: `TASK-AR-566`.
+- Worktree/branch: `.worktrees/TASK-AR-566` on `codex/task-ar-566-progressive-disclosure`.
+- Status: claim created; implement progressive disclosure so cockpit counts/summaries stay on screen and detail opens in a keyboard-accessible drawer.
+- Completed predecessor: `TASK-AR-565` was W4b-approved, released, merged, and indexed with `reviews/W4B-2026-06-16-TASK-AR-565.md`.
 
 ## 2026-06-15 - TASKSET-AR-AGENT-ORG-DELEGATION complete (6/6)
 

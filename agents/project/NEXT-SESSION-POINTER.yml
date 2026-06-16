@@ -1,17 +1,32 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-16T21:59:07+09:00
+updated_at: 2026-06-16T22:06:10+09:00
 current_state:
-  summary: "TASK-AR-565 nav prune core-7 passed W4b verification and claim release; merge cleanup is in progress before the next Decision Cockpit task."
-  status: integrating
+  summary: "TASK-AR-566 progressive-disclosure detail panel is claimed in .worktrees/TASK-AR-566 on codex/task-ar-566-progressive-disclosure."
+  status: claimed
   task_set_status: active
   task_set_id: "TASKSET-AR-DECISION-FIRST-CONSOLE-IA"
-  step_index: 6
+  step_index: 4
   step_total: 6
-  progress_pct: 100
-  status_text: "TASK-AR-565 released after W4b verification; next worker-ready task is TASK-AR-566 progressive-disclosure detail panel."
+  progress_pct: 0
+  status_text: "TASK-AR-566 claimed; implement counts/summaries with keyboard-accessible detail drawer, then self-verify."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260616-220545-task-ar-566-9197
+      agent_role: lead-engineer
+      agent_instance_id: le-20260616-task-ar-566
+      display_name: lead_engineer@work-02
+      callsite_id: terminal:wt-task-ar-566:tab-01
+      task_id: TASK-AR-566
+      task_set_id: TASKSET-AR-DECISION-FIRST-CONSOLE-IA
+      worktree_path: .worktrees/TASK-AR-566
+      branch: codex/task-ar-566-progressive-disclosure
+      status: claimed
+      phase: claim-created
+  current_teams:
+    - team_id: ui
+      task_set_id: TASKSET-AR-DECISION-FIRST-CONSOLE-IA
+      active_claims:
+        - CLAIM-20260616-220545-task-ar-566-9197
 resume:
   active_task: TASK-AR-566
   active_task_set: TASKSET-AR-DECISION-FIRST-CONSOLE-IA
@@ -22,7 +37,8 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260616-220545-task-ar-566-9197.json
   release_steward_completed_tasks:
     - agents/lead_engineer/tasks/TASK-AR-219.md
     - agents/lead_engineer/tasks/TASK-AR-222.md
