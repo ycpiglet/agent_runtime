@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-16T22:57:14+09:00
-record_count: 501
+generated_at: 2026-06-16T23:13:41+09:00
+record_count: 502
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `501` review and evidence records under `reviews/`.
+- Summary: indexed `502` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `501` files |
+| Reviews covered | pass | `502` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -460,6 +460,7 @@ record_count: 501
 | `reviews/REVIEW-2026-06-16-task-ar-565-nav-prune-core7.md` | `REVIEW-2026-06-16-task-ar-565-nav-prune-core7` | review | pass | pass | REVIEW - TASK-AR-565 Nav Prune Core 7 |
 | `reviews/REVIEW-2026-06-16-task-ar-566-progressive-disclosure.md` | `REVIEW-2026-06-16-task-ar-566-progressive-disclosure` | review | pass | pass | REVIEW - TASK-AR-566 Progressive Disclosure Detail Panel |
 | `reviews/REVIEW-2026-06-16-task-ar-567-work-state-board.md` | `REVIEW-2026-06-16-task-ar-567-work-state-board` | md | record | n/a | TASK-AR-567 W4a Review - Work State Board |
+| `reviews/REVIEW-2026-06-16-task-ar-568-i18n-toggle.md` | `REVIEW-2026-06-16-task-ar-568-i18n-toggle` | md | record | n/a | TASK-AR-568 W4a Review - i18n KO/EN UI Toggle |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario |
