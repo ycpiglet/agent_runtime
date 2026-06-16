@@ -1,5 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-16 - TASKSET-AR-DECISION-FIRST-CONSOLE-IA / TASK-AR-569 active
+
+- Active claim: `CLAIM-20260616-232833-task-ar-569-8b7b` (`lead_engineer@work-05`) is preserved in the root checkout for `TASK-AR-569`.
+- Current taskset: `TASKSET-AR-DECISION-FIRST-CONSOLE-IA`; current task: `TASK-AR-569`.
+- Worktree/branch: `.worktrees/TASK-AR-569` on `codex/task-ar-569-e2e-dom-budget`.
+- Status: claim created; implement E2E and regression guards for home <= 2 screens, DOM budget, and maturity behavior preservation.
+- Completed predecessor: `TASK-AR-568` was W4b-approved, released, merged, indexed, and cleaned with `reviews/W4B-2026-06-16-TASK-AR-568.md`.
+
 ## 2026-06-16 - TASKSET-AR-DECISION-FIRST-CONSOLE-IA / TASK-AR-568 complete
 
 - Completed claim: `CLAIM-20260616-230131-task-ar-568-21a3` (`lead_engineer@work-04`) was W4b-approved, released, merged, indexed, and cleaned.
