@@ -1,34 +1,19 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-16T21:12:55+09:00
+updated_at: 2026-06-16T21:59:07+09:00
 current_state:
-  summary: "TASK-AR-565 nav prune core-7 is W4a self-verified in .worktrees/TASK-AR-565 on codex/task-ar-565-nav-prune. W4b independent verification and claim release are still required before merge cleanup."
-  status: waiting_review
-  task_set_status: waiting_review
+  summary: "TASK-AR-565 nav prune core-7 passed W4b verification and claim release; merge cleanup is in progress before the next Decision Cockpit task."
+  status: integrating
+  task_set_status: active
   task_set_id: "TASKSET-AR-DECISION-FIRST-CONSOLE-IA"
-  step_index: 5
+  step_index: 6
   step_total: 6
-  progress_pct: 90
-  status_text: "TASK-AR-565 W4a done; W4b independent verification and release still required. Worktree .worktrees/TASK-AR-565, branch codex/task-ar-565-nav-prune."
+  progress_pct: 100
+  status_text: "TASK-AR-565 released after W4b verification; next worker-ready task is TASK-AR-566 progressive-disclosure detail panel."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260616-205031-task-ar-565-e73e
-      agent_role: lead-engineer
-      agent_instance_id: le-20260616-205031-kst-e73e
-      display_name: lead_engineer@work-01
-      callsite_id: terminal:wt-task-ar-565:tab-01
-      task_id: TASK-AR-565
-      task_set_id: TASKSET-AR-DECISION-FIRST-CONSOLE-IA
-      worktree_path: .worktrees/TASK-AR-565
-      branch: codex/task-ar-565-nav-prune
-      status: claimed
-      phase: self-verified
-  current_teams:
-    - team_id: ui
-      task_set_id: TASKSET-AR-DECISION-FIRST-CONSOLE-IA
-      active_claims:
-        - CLAIM-20260616-205031-task-ar-565-e73e
+  current_agents: []
+  current_teams: []
 resume:
-  active_task: TASK-AR-565
+  active_task: TASK-AR-566
   active_task_set: TASKSET-AR-DECISION-FIRST-CONSOLE-IA
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
@@ -37,8 +22,7 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260616-205031-task-ar-565-e73e.json
+  active_claims: []
   release_steward_completed_tasks:
     - agents/lead_engineer/tasks/TASK-AR-219.md
     - agents/lead_engineer/tasks/TASK-AR-222.md

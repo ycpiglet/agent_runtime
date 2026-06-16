@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-15T23:38:17+09:00",
+  "generated_at": "2026-06-16T21:03:39+09:00",
   "record_count": 290,
   "finding_count": 0,
   "findings": [],
@@ -2621,7 +2621,7 @@
       "title": "Group the 67 nav routes under core 7 (Home/Work/Agents/Decisions/Records/Search/More)…",
       "path": "agents/lead_engineer/tasks/TASK-AR-565.md",
       "parent_id": "TASKSET-AR-DECISION-FIRST-CONSOLE-IA",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-566",

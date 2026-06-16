@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-565:tab-01",
   "pane_id": "terminal:wt-task-ar-565:tab-01",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-DECISION-FIRST-CONSOLE-IA",
   "active_scope": "TASKSET-AR-DECISION-FIRST-CONSOLE-IA",
   "scope_transition_approved": false,
@@ -27,12 +27,12 @@
   "worktree_path": ".worktrees/TASK-AR-565",
   "branch": "codex/task-ar-565-nav-prune",
   "claimed_at": "2026-06-16T20:50:31+09:00",
-  "last_heartbeat": "2026-06-16T21:04:54+09:00",
-  "updated_at": "2026-06-16T21:04:54+09:00",
+  "last_heartbeat": "2026-06-16T21:54:58+09:00",
+  "updated_at": "2026-06-16T21:54:58+09:00",
   "expires_at": "2026-06-16T21:34:54+09:00",
   "lease": {
     "claimed_at": "2026-06-16T20:50:31+09:00",
-    "heartbeat_at": "2026-06-16T21:04:54+09:00",
+    "heartbeat_at": "2026-06-16T21:54:58+09:00",
     "expires_at": "2026-06-16T21:34:54+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260616-205031-task-ar-565-e73e.handoff.md",
@@ -52,5 +52,9 @@
     "reviews/INDEX.md",
     "reviews/REVIEW-2026-06-16-task-ar-565-nav-prune-core7.md",
     "reviews/artifacts/task-ar-565-nav-core7.png"
-  ]
+  ],
+  "released_at": "2026-06-16T21:54:58+09:00",
+  "verified_by": "qa-20260616-task-ar-565-w4b",
+  "verifier_role": "qa-reviewer",
+  "verification_evidence": "reviews/W4B-2026-06-16-TASK-AR-565.md"
 }

@@ -125,119 +125,129 @@ HTML = """<!doctype html>
         <div id="sidebar-active-empty" class="sidebar-active-empty">No active taskset</div>
       </div>
       <div class="sidebar-nav" role="tablist" aria-label="Views">
-        <div class="sidebar-group" data-group="home">
+        <div class="sidebar-core" aria-label="Core navigation">
           <button class="sidebar-link is-active" type="button" role="tab" data-view="board" data-route="home/board" aria-selected="true">
             <span class="sidebar-icon" aria-hidden="true">&#8962;</span><span class="sidebar-label">Home</span>
           </button>
-        </div>
-        <div class="sidebar-group" data-group="work">
-          <span class="sidebar-group-title" data-i18n="nav.group.work">WORK</span>
-          <button class="sidebar-link" type="button" role="tab" data-view="tasksets" data-route="work/tasksets" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9635;</span><span class="sidebar-label">Tasksets</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="tsboard" data-route="work/board" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Taskset Board</span>
-          </button>
           <button class="sidebar-link" type="button" role="tab" data-view="work" data-route="work/explorer" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9776;</span><span class="sidebar-label">Work Explorer</span>
+            <span class="sidebar-icon" aria-hidden="true">&#9776;</span><span class="sidebar-label">Work</span>
           </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="planner" data-route="work/planner" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9998;</span><span class="sidebar-label">Planner</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="triage" data-route="work/triage" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9873;</span><span class="sidebar-label">Triage</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="roadmap" data-route="work/roadmap" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9776;</span><span class="sidebar-label">Roadmap</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="timeline" data-route="work/timeline" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9776;</span><span class="sidebar-label">Timeline</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="calendar" data-route="work/calendar" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9993;</span><span class="sidebar-label">Calendar</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="deps" data-route="work/dependencies" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Dependencies</span>
-          </button>
-        </div>
-        <div class="sidebar-group" data-group="agents">
-          <span class="sidebar-group-title" data-i18n="nav.group.agents">AGENTS</span>
           <button class="sidebar-link" type="button" role="tab" data-view="team" data-route="agents/team" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9733;</span><span class="sidebar-label">Team</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="growth" data-route="agents/growth" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9650;</span><span class="sidebar-label">Growth</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="workload" data-route="agents/workload" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9638;</span><span class="sidebar-label">Workload</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="agents" data-route="agents/list" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9737;</span><span class="sidebar-label">Agents</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="map" data-route="agents/map" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Live Map</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="office" data-route="agents/office" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9971;</span><span class="sidebar-label">Office Map</span>
-          </button>
-        </div>
-        <div class="sidebar-group" data-group="comms">
-          <span class="sidebar-group-title" data-i18n="nav.group.comms">COMMS</span>
-          <button class="sidebar-link" type="button" role="tab" data-view="inbox" data-route="comms/inbox" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9993;</span><span class="sidebar-label">Inbox</span><span id="inbox-nav-badge" class="sidebar-badge" hidden>0</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="channels" data-route="comms/channels" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Channels</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="messages" data-route="comms/messages" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9993;</span><span class="sidebar-label">Messages</span>
+            <span class="sidebar-icon" aria-hidden="true">&#9733;</span><span class="sidebar-label">Agents</span>
           </button>
           <button class="sidebar-link" type="button" role="tab" data-view="meeting" data-route="comms/meetings" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9786;</span><span class="sidebar-label">Meetings</span>
+            <span class="sidebar-icon" aria-hidden="true">&#9786;</span><span class="sidebar-label">Decisions</span>
           </button>
-        </div>
-        <div class="sidebar-group" data-group="records">
-          <span class="sidebar-group-title" data-i18n="nav.group.records">RECORDS</span>
           <button class="sidebar-link" type="button" role="tab" data-view="events" data-route="records/events" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9201;</span><span class="sidebar-label">Events</span>
+            <span class="sidebar-icon" aria-hidden="true">&#9201;</span><span class="sidebar-label">Records</span>
           </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="evidence" data-route="records/evidence" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9745;</span><span class="sidebar-label">Evidence</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="statemachines" data-route="records/state-machines" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9881;</span><span class="sidebar-label">State Machines</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="sources" data-route="records/sources" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Sources</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="knowledge-graph" data-route="records/knowledge-graph" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9901;</span><span class="sidebar-label">Knowledge Graph</span>
+          <button class="sidebar-link" type="button" role="tab" data-view="search" data-route="search" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9906;</span><span class="sidebar-label">Search</span>
           </button>
         </div>
-        <div class="sidebar-group" data-group="ops">
-          <span class="sidebar-group-title" data-i18n="nav.group.ops">OPS</span>
-          <button class="sidebar-link" type="button" role="tab" data-view="dashboard" data-route="ops/dashboard" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9683;</span><span class="sidebar-label">Dashboard</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="automation" data-route="ops/automation" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9889;</span><span class="sidebar-label">Automation</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="properties" data-route="ops/properties" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9636;</span><span class="sidebar-label">Properties</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="labels" data-route="ops/labels" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9750;</span><span class="sidebar-label">Labels</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="notifications" data-route="ops/notifications" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9993;</span><span class="sidebar-label">Notifications</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="portability" data-route="ops/portability" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#8645;</span><span class="sidebar-label">Import/Export</span>
-          </button>
-          <button class="sidebar-link" type="button" role="tab" data-view="writes" data-route="ops/writes" aria-selected="false">
-            <span class="sidebar-icon" aria-hidden="true">&#9881;</span><span class="sidebar-label">Writes</span>
-          </button>
-        </div>
+        <details class="sidebar-more" data-group="more">
+          <summary class="sidebar-more-summary">
+            <span class="sidebar-icon" aria-hidden="true">&#8942;</span><span class="sidebar-label">More</span>
+          </summary>
+          <div class="sidebar-more-content">
+            <div class="sidebar-group" data-group="work">
+              <span class="sidebar-group-title" data-i18n="nav.group.work">WORK</span>
+              <button class="sidebar-link" type="button" role="tab" data-view="tasksets" data-route="work/tasksets" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9635;</span><span class="sidebar-label">Tasksets</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="tsboard" data-route="work/board" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Taskset Board</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="planner" data-route="work/planner" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9998;</span><span class="sidebar-label">Planner</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="triage" data-route="work/triage" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9873;</span><span class="sidebar-label">Triage</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="roadmap" data-route="work/roadmap" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9776;</span><span class="sidebar-label">Roadmap</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="timeline" data-route="work/timeline" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9776;</span><span class="sidebar-label">Timeline</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="calendar" data-route="work/calendar" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9993;</span><span class="sidebar-label">Calendar</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="deps" data-route="work/dependencies" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Dependencies</span>
+              </button>
+            </div>
+            <div class="sidebar-group" data-group="agents">
+              <span class="sidebar-group-title" data-i18n="nav.group.agents">AGENTS</span>
+              <button class="sidebar-link" type="button" role="tab" data-view="growth" data-route="agents/growth" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9650;</span><span class="sidebar-label">Growth</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="workload" data-route="agents/workload" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9638;</span><span class="sidebar-label">Workload</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="agents" data-route="agents/list" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9737;</span><span class="sidebar-label">Agent List</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="map" data-route="agents/map" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Live Map</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="office" data-route="agents/office" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9971;</span><span class="sidebar-label">Office Map</span>
+              </button>
+            </div>
+            <div class="sidebar-group" data-group="comms">
+              <span class="sidebar-group-title" data-i18n="nav.group.comms">COMMS</span>
+              <button class="sidebar-link" type="button" role="tab" data-view="inbox" data-route="comms/inbox" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9993;</span><span class="sidebar-label">Inbox</span><span id="inbox-nav-badge" class="sidebar-badge" hidden>0</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="channels" data-route="comms/channels" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Channels</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="messages" data-route="comms/messages" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9993;</span><span class="sidebar-label">Messages</span>
+              </button>
+            </div>
+            <div class="sidebar-group" data-group="records">
+              <span class="sidebar-group-title" data-i18n="nav.group.records">RECORDS</span>
+              <button class="sidebar-link" type="button" role="tab" data-view="evidence" data-route="records/evidence" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9745;</span><span class="sidebar-label">Evidence</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="statemachines" data-route="records/state-machines" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9881;</span><span class="sidebar-label">State Machines</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="sources" data-route="records/sources" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Sources</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="knowledge-graph" data-route="records/knowledge-graph" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9901;</span><span class="sidebar-label">Knowledge Graph</span>
+              </button>
+            </div>
+            <div class="sidebar-group" data-group="ops">
+              <span class="sidebar-group-title" data-i18n="nav.group.ops">OPS</span>
+              <button class="sidebar-link" type="button" role="tab" data-view="dashboard" data-route="ops/dashboard" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9683;</span><span class="sidebar-label">Dashboard</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="automation" data-route="ops/automation" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9889;</span><span class="sidebar-label">Automation</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="properties" data-route="ops/properties" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9636;</span><span class="sidebar-label">Properties</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="labels" data-route="ops/labels" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9750;</span><span class="sidebar-label">Labels</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="notifications" data-route="ops/notifications" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9993;</span><span class="sidebar-label">Notifications</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="portability" data-route="ops/portability" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#8645;</span><span class="sidebar-label">Import/Export</span>
+              </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="writes" data-route="ops/writes" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9881;</span><span class="sidebar-label">Writes</span>
+              </button>
+            </div>
+          </div>
+        </details>
       </div>
       <button id="sidebar-collapse" class="sidebar-collapse" type="button" aria-label="Collapse sidebar">
         <span class="sidebar-collapse-icon" aria-hidden="true">&#8676;</span><span class="sidebar-label">Collapse</span>
@@ -304,6 +314,16 @@ HTML = """<!doctype html>
           <div id="kanban" class="kanban" aria-label="Kanban"></div>
           <div id="board-peek" class="board-peek" role="tooltip" aria-hidden="true" hidden></div>
           <div id="board-dnd-status" class="board-dnd-status" role="status" aria-live="polite"></div>
+        </div>
+        <div id="view-search" class="view">
+          <section class="search-view" aria-label="Search">
+            <header class="search-view-head">
+              <h2>Search</h2>
+            </header>
+            <input id="search-view-input" class="search-view-input" type="search" autocomplete="off"
+                   placeholder="Search tasks, tasksets, messages, events" aria-label="Search entities">
+            <div id="search-view-results" class="search-view-results" role="listbox" aria-label="Search results"></div>
+          </section>
         </div>
         <div id="view-work" class="view">
           <div class="work-toolbar">
@@ -1279,6 +1299,9 @@ a:hover { text-decoration: underline; }
 .sidebar[data-collapsed="true"] .sidebar-active-empty {
   display: none;
 }
+.sidebar[data-collapsed="true"] .sidebar-more-content {
+  display: none;
+}
 .sidebar-pinned {
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -1317,6 +1340,51 @@ a:hover { text-decoration: underline; }
   flex-direction: column;
   gap: 2px;
   flex: 1 1 auto;
+}
+.sidebar-core {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 6px;
+}
+.sidebar-more {
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+}
+.sidebar-more-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  box-shadow: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  list-style: none;
+  padding: 8px 10px;
+}
+.sidebar-more-summary::-webkit-details-marker {
+  display: none;
+}
+.sidebar-more-summary:hover,
+.sidebar-more[open] > .sidebar-more-summary {
+  color: var(--ink);
+  background: var(--raise-strong);
+}
+.sidebar-more-summary:focus-visible {
+  outline: 2px solid var(--primary-hover);
+  outline-offset: 2px;
+  box-shadow: var(--focus);
+}
+.sidebar-more-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 6px;
 }
 .sidebar-group {
   display: flex;
@@ -1370,6 +1438,9 @@ a:hover { text-decoration: underline; }
   line-height: 1;
 }
 .sidebar[data-collapsed="true"] .sidebar-link {
+  justify-content: center;
+}
+.sidebar[data-collapsed="true"] .sidebar-more-summary {
   justify-content: center;
 }
 .sidebar-collapse {
@@ -4436,6 +4507,9 @@ pre {
   .sidebar[data-collapsed="true"] .sidebar-active-empty {
     display: revert;
   }
+  .sidebar[data-collapsed="true"] .sidebar-more-content {
+    display: flex;
+  }
   .sidebar.is-open {
     transform: translateX(0);
   }
@@ -5189,6 +5263,35 @@ pre {
   padding: 14px;
   color: var(--muted);
   font-size: 13px;
+}
+.search-view {
+  max-width: 760px;
+}
+.search-view-head {
+  margin-bottom: 12px;
+}
+.search-view-input {
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+  color: var(--ink);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: 14px;
+}
+.search-view-input:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+.search-view-results {
+  margin-top: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  overflow: hidden;
+}
+.search-view-results:empty {
+  display: none;
 }
 /* Quick open overlay (Ctrl+P): recent + favorites + live search. */
 .quick-open {
@@ -7052,6 +7155,9 @@ const SEARCH_FAVORITES_KEY = "ar-search-favorites";
 let searchResults = [];
 let searchActiveIndex = 0;
 let searchDebounce = null;
+let searchViewResults = [];
+let searchViewActiveIndex = 0;
+let searchViewDebounce = null;
 let quickOpenResults = [];
 let quickOpenActiveIndex = 0;
 let quickOpenDebounce = null;
@@ -7130,6 +7236,24 @@ function renderGlobalSearchResults(query) {
     .join("");
 }
 
+function renderSearchViewResults(query) {
+  const box = $("search-view-results");
+  if (!box) return;
+  if (!query) {
+    box.innerHTML = "";
+    return;
+  }
+  if (!searchViewResults.length) {
+    box.innerHTML = `<div class="search-empty">No matches for &ldquo;${escapeHtml(query)}&rdquo;</div>`;
+    return;
+  }
+  if (searchViewActiveIndex >= searchViewResults.length) searchViewActiveIndex = searchViewResults.length - 1;
+  if (searchViewActiveIndex < 0) searchViewActiveIndex = 0;
+  box.innerHTML = searchViewResults
+    .map((item, index) => searchResultRow(item, index, index === searchViewActiveIndex))
+    .join("");
+}
+
 function runGlobalSearch() {
   const input = $("global-search-input");
   const query = input ? input.value.trim() : "";
@@ -7148,6 +7272,33 @@ function runGlobalSearch() {
       searchResults = [];
       renderGlobalSearchResults(query);
     });
+}
+
+function runSearchView() {
+  const input = $("search-view-input");
+  const query = input ? input.value.trim() : "";
+  if (!query) {
+    searchViewResults = [];
+    renderSearchViewResults("");
+    return;
+  }
+  fetchSearch(query)
+    .then((payload) => {
+      searchViewResults = payload.items || [];
+      searchViewActiveIndex = 0;
+      renderSearchViewResults(query);
+    })
+    .catch(() => {
+      searchViewResults = [];
+      renderSearchViewResults(query);
+    });
+}
+
+function focusSearchView() {
+  const input = $("search-view-input") || $("global-search-input");
+  if (!input) return;
+  input.focus();
+  if (typeof input.select === "function") input.select();
 }
 
 function navigateToResult(item) {
@@ -11568,14 +11719,19 @@ function routeForView(view) {
 function activateView(view, { updateHash = true } = {}) {
   const target = $(`view-${view}`);
   if (!target) return;
+  let activeLink = null;
   navLinks().forEach((item) => {
     const isActive = item.dataset.view === view;
     item.classList.toggle("is-active", isActive);
     item.setAttribute("aria-selected", isActive ? "true" : "false");
+    if (isActive) activeLink = item;
   });
+  const activeMore = activeLink ? activeLink.closest(".sidebar-more") : null;
+  if (activeMore) activeMore.open = true;
   document.querySelectorAll(".view").forEach((item) => item.classList.remove("is-active"));
   target.classList.add("is-active");
   if (view === "knowledge-graph") loadKnowledgeGraph();
+  if (view === "search") focusSearchView();
   if (updateHash) {
     const route = routeForView(view);
     if (route) {
@@ -11790,6 +11946,23 @@ document.addEventListener("keydown", (event) => {
       return;
     }
   }
+  if (event.target === $("search-view-input")) {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      searchViewActiveIndex += 1;
+      renderSearchViewResults($("search-view-input").value.trim());
+      return;
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      searchViewActiveIndex = Math.max(0, searchViewActiveIndex - 1);
+      renderSearchViewResults($("search-view-input").value.trim());
+      return;
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      navigateToResult(searchViewResults[searchViewActiveIndex]);
+      return;
+    }
+  }
   if (paletteIsOpen()) {
     if (event.key === "Escape") {
       event.preventDefault();
@@ -11854,6 +12027,22 @@ wireListToolbars();
     });
     input.addEventListener("focus", () => {
       if (input.value.trim() && searchResults.length) renderGlobalSearchResults(input.value.trim());
+    });
+  }
+  const viewInput = $("search-view-input");
+  if (viewInput) {
+    viewInput.addEventListener("input", () => {
+      searchViewActiveIndex = 0;
+      if (searchViewDebounce) clearTimeout(searchViewDebounce);
+      searchViewDebounce = setTimeout(runSearchView, 140);
+    });
+  }
+  const viewBox = $("search-view-results");
+  if (viewBox) {
+    viewBox.addEventListener("click", (event) => {
+      const row = event.target.closest(".search-result");
+      if (!row) return;
+      navigateToResult(searchViewResults[Number(row.dataset.resultIndex) || 0]);
     });
   }
   const box = $("global-search-results");

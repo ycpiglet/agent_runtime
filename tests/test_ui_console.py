@@ -1584,24 +1584,43 @@ def test_ui_console_theme_key_panels_use_tokens_not_raw_hex(tmp_path):
 # ----- TASK-AR-321: sidebar IA + hash routing -----
 
 ALL_VIEW_IDS = [
-    "board",
-    "work",
-    "meeting",
-    "tasksets",
-    "tsboard",
-    "team",
     "agents",
-    "messages",
+    "automation",
+    "board",
+    "calendar",
+    "channels",
+    "dashboard",
+    "deps",
     "events",
     "evidence",
-    "planner",
-    "roadmap",
+    "growth",
+    "inbox",
+    "knowledge-graph",
+    "labels",
     "map",
+    "meeting",
+    "messages",
+    "notifications",
+    "office",
+    "planner",
+    "portability",
+    "properties",
+    "roadmap",
+    "search",
     "sources",
+    "statemachines",
+    "tasksets",
+    "team",
+    "timeline",
+    "triage",
+    "tsboard",
+    "work",
+    "workload",
     "writes",
 ]
 
-SIDEBAR_GROUPS = ["home", "work", "agents", "comms", "records", "ops"]
+CORE_NAV_LABELS = ["Home", "Work", "Agents", "Decisions", "Records", "Search", "More"]
+MORE_GROUPS = ["work", "agents", "comms", "records", "ops"]
 
 
 def test_ui_console_sidebar_replaces_horizontal_tabs(tmp_path):
@@ -1614,11 +1633,18 @@ def test_ui_console_sidebar_replaces_horizontal_tabs(tmp_path):
     assert 'class="tab "' not in html
     assert 'class="tab is-active"' not in html
 
-    # Grouped nav sections from plan section 2.2.
-    for group in SIDEBAR_GROUPS:
+    core = re.search(r'<div class="sidebar-core"[^>]*>(.*?)</div>\s*<details', html, re.S)
+    assert core, "core navigation wrapper missing"
+    core_labels = re.findall(r'<span class="sidebar-label">([^<]+)</span>', core.group(1))
+    assert core_labels == CORE_NAV_LABELS[:-1]
+    assert 'class="sidebar-more-summary"' in html
+    assert ">More<" in html
+    assert len(core_labels) + 1 == 7
+    # Detailed routes are retained but moved behind collapsed More.
+    assert '<details class="sidebar-more" data-group="more">' in html
+    assert '<details class="sidebar-more" data-group="more" open>' not in html
+    for group in MORE_GROUPS:
         assert f'data-group="{group}"' in html
-    for label in ["WORK", "AGENTS", "COMMS", "RECORDS", "OPS"]:
-        assert f">{label}<" in html
 
 
 def test_ui_console_sidebar_keeps_all_nine_plus_views_reachable(tmp_path):
@@ -1635,13 +1661,15 @@ def test_ui_console_sidebar_links_carry_hash_routes(tmp_path):
 
     for route in [
         "home/board",
-        "work/tasksets",
-        "work/board",
+        "work/explorer",
         "agents/team",
-        "agents/map",
-        "comms/channels",
         "comms/meetings",
         "records/events",
+        "search",
+        "work/tasksets",
+        "work/board",
+        "agents/map",
+        "comms/channels",
         "ops/writes",
     ]:
         assert f'data-route="{route}"' in html
@@ -1657,6 +1685,8 @@ def test_ui_console_hash_routing_wiring_present(tmp_path):
     assert "function activateView" in js
     assert "function viewForRoute" in js
     assert "function routeForView" in js
+    assert "focusSearchView" in js
+    assert "activeLink.closest(\".sidebar-more\")" in js
     # Pinned active-taskset progress is always rendered.
     assert "renderSidebarActiveTaskset" in js
 
