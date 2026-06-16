@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-17T00:20:06+09:00
-record_count: 505
+generated_at: 2026-06-17T00:28:39+09:00
+record_count: 506
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `505` review and evidence records under `reviews/`.
+- Summary: indexed `506` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `505` files |
+| Reviews covered | pass | `506` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -462,6 +462,7 @@ record_count: 505
 | `reviews/REVIEW-2026-06-16-task-ar-567-work-state-board.md` | `REVIEW-2026-06-16-task-ar-567-work-state-board` | md | record | n/a | TASK-AR-567 W4a Review - Work State Board |
 | `reviews/REVIEW-2026-06-16-task-ar-568-i18n-toggle.md` | `REVIEW-2026-06-16-task-ar-568-i18n-toggle` | md | record | n/a | TASK-AR-568 W4a Review - i18n KO/EN UI Toggle |
 | `reviews/REVIEW-2026-06-16-task-ar-569-e2e-dom-budget.md` | `REVIEW-2026-06-16-task-ar-569-e2e-dom-budget` | md | record | n/a | TASK-AR-569 W4a Review - E2E + DOM Budget Regression |
+| `reviews/REVIEW-2026-06-17-decision-first-console-ia-closeout.md` | `REVIEW-2026-06-17-decision-first-console-ia-closeout` | md | record | n/a | REVIEW: Decision-First Console IA Closeout |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario |
