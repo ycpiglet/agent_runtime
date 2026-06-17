@@ -9,6 +9,9 @@ __pycache__/
 # Local install/build probes
 /.tmp/
 
+# Brainstorming visual-companion mockups (local only).
+/.superpowers/
+
 # Legacy staging leftovers; canonical sync templates are package data.
 /templates/
 
