@@ -1,12 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE / TASK-AR-573 complete
+## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE / TASK-AR-574 complete
 
-- Completed task: `TASK-AR-573` created real scribe claim/log evidence, removed the obsolete `role-usage:scribe` waiver, passed W4a/W4b verification, released the claim, merged the worktree, and closed the task.
-- Current taskset: `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE`; `TASK-AR-574` is next for dormant monitored-role evidence.
-- Current metrics after TASK-AR-573: evidence maturity `immature`, score `42/100`, role gaps `5`, asset gaps `17`, waiver debt `0`, scribe `unknown`, doc-steward `ok`.
+- Completed task: `TASK-AR-574` routed the `reviewer` monitored role through real claim evidence, recorded blockers for `council`, `progress-scout`, `release-steward`, and `skeptic`, passed W4a/W4b verification, released the claim, merged the worktree, and closed the task.
+- Completed predecessor: `TASK-AR-573` created real scribe claim/log evidence and removed the obsolete `role-usage:scribe` waiver.
+- Current taskset: `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE`; `TASK-AR-575` is next for low-reuse runtime asset exercise/deprecation.
+- Current metrics after TASK-AR-574: evidence maturity `immature`, score `47/100`, role gaps `4`, asset gaps `17`, waiver debt `0`, scribe `unknown`, doc-steward `ok`.
 - Remaining target before maturity claim: score `>=65`, role gaps `<=3`, waiver debt `0`, low-reuse assets `<=8`.
-- Evidence: `reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md`; `reviews/W4B-2026-06-17-TASK-AR-573.md`; `reviews/VERIFY-2026-06-17-task-ar-573-20260617173707.json`.
+- Evidence: `reviews/REVIEW-2026-06-17-task-ar-574-monitored-role-evidence.md`; `reviews/W4B-2026-06-17-TASK-AR-574.md`; `reviews/VERIFY-2026-06-17-task-ar-574-20260617175559.json`; `reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md`.
 
 ## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-CADENCE maturity report
 

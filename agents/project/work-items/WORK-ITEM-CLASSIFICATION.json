@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-17T17:37:25+09:00",
+  "generated_at": "2026-06-17T17:56:13+09:00",
   "record_count": 308,
   "finding_count": 0,
   "findings": [],
@@ -3336,7 +3336,7 @@
       "title": "Route council, progress-scout, release-steward, reviewer, and skeptic into real revie…",
       "path": "agents/lead_engineer/tasks/TASK-AR-574.md",
       "parent_id": "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-574-001",
