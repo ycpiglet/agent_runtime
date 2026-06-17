@@ -14,6 +14,7 @@ into a form the proposal engine can use.
 | Continuity pointer gap | `continuity-pointer-gap` | `COMPOUND-2026-06-10-003` | gate | keep `NEXT-SESSION-POINTER.yml` in taskset handoffs |
 | Taskset completion inferred from claims | `taskset-completion-claim-only` | `COMPOUND-2026-06-10-004` | gate | use named taskset gate before completion claims |
 | RSI operating evidence scattered | `rsi-evidence-scattered` | `REVIEW-2026-06-11-agent-runtime-rsi-operating-system-registration` | verified | `TASKSET-AR-RSI-OPERATING-SYSTEM` closeout |
+| Low-frequency self-improvement debt | `self-improvement-low-frequency-debt` | `reviews/REVIEW-2026-06-17-self-improvement-cycle.md`, `COMPOUND-2026-06-17-001` | watch | route dormant roles and low-reuse assets into the next cycle |
 
 ## Detailed Cases
 
@@ -92,3 +93,19 @@ into a form the proposal engine can use.
 - A case touching Owner-only boundaries must stay proposal-only until the Owner decision is explicit.
 - `needs enforcement` entries must route to a task proposal or an explicit `accepted_watch` decision before closeout.
 
+### CASE-SELF-IMPROVEMENT-LOW-FREQUENCY-DEBT
+
+| Field | Value |
+| --- | --- |
+| `case_id` | `CASE-SELF-IMPROVEMENT-LOW-FREQUENCY-DEBT` |
+| `dedupe_key` | `self-improvement-low-frequency-debt` |
+| `symptom` | Low-frequency roles and runtime assets stay visible as watch debt. |
+| `trigger` | `scripts/self_improvement_cycle.py assess` reports immature/watch. |
+| `owner_boundary` | local |
+| `affected_gate` | `scripts/collaboration_governance_gate.py`, `scripts/runtime_asset_usage.py` |
+| `recurrence_count` | role gaps `6`; asset gaps `17` |
+| `source_refs` | `reviews/REVIEW-2026-06-17-self-improvement-cycle.md`, `COMPOUND-2026-06-17-001` |
+| `reproduction` | Run `python scripts/self_improvement_cycle.py assess --json`. |
+| `linked_regression_fixture` | `tests/test_self_improvement_cycle.py` |
+| `task_proposal` | `TASK-AR-571`, then `TASK-AR-572` maturity reporting |
+| `prevention_status` | watch |
