@@ -72,6 +72,12 @@
       "display_name": "Self Improvement Remediation",
       "summary": "Burn down the first-cycle maturity blockers: scribe waiver debt, dormant monitored-role evidence, low-reuse runtime assets, and a follow-up measurable report.",
       "order": 616
+    },
+    {
+      "task_set_id": "TASKSET-AR-BUSINESS-OPERATIONS-TEAMS",
+      "display_name": "Business Operations Teams",
+      "summary": "Extend the live org overlay and host scaffold with business-side teams for monetization, asset management, marketing, and compliant sales automation.",
+      "order": 617
     }
   ]
 }

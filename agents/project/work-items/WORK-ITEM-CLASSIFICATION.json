@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-17T18:47:02+09:00",
-  "record_count": 308,
+  "generated_at": "2026-06-17T22:12:03+09:00",
+  "record_count": 312,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -3391,6 +3391,50 @@
       "title": "UNIT-TASK-AR-576-001 - Measure remediation delta and update handoff surfaces",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-576/UNIT-TASK-AR-576-001.md",
       "parent_id": "TASK-AR-576",
+      "status": "worker_ready"
+    },
+    {
+      "key": "initiative:INIT-AR-BUSINESS-OPERATIONS-TEAMS",
+      "level": "initiative",
+      "number": "12",
+      "label": "Initiative 12",
+      "id": "INIT-AR-BUSINESS-OPERATIONS-TEAMS",
+      "title": "Business Operations Teams",
+      "path": "agents/project/initiatives/INIT-AR-BUSINESS-OPERATIONS-TEAMS.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-BUSINESS-OPERATIONS-TEAMS",
+      "level": "taskset",
+      "number": "12.1",
+      "label": "Taskset 12.1",
+      "id": "TASKSET-AR-BUSINESS-OPERATIONS-TEAMS",
+      "title": "Business Operations Teams",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-BUSINESS-OPERATIONS-TEAMS",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-577",
+      "level": "task",
+      "number": "12.1.1",
+      "label": "Task 12.1.1",
+      "id": "TASK-AR-577",
+      "title": "Define finance/accounting, marketing/growth, and sales/revenue teams across live proj…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-577.md",
+      "parent_id": "TASKSET-AR-BUSINESS-OPERATIONS-TEAMS",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-577-001",
+      "level": "unit",
+      "number": "12.1.1.1",
+      "label": "Unit 12.1.1.1",
+      "id": "UNIT-TASK-AR-577-001",
+      "title": "UNIT-TASK-AR-577-001 - Publish business operations org model",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-577/UNIT-TASK-AR-577-001.md",
+      "parent_id": "TASK-AR-577",
       "status": "worker_ready"
     }
   ]

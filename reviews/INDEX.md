@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-17T18:47:12+09:00
-record_count: 542
+generated_at: 2026-06-17T22:12:06+09:00
+record_count: 543
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `542` review and evidence records under `reviews/`.
+- Summary: indexed `543` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `542` files |
+| Reviews covered | pass | `543` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -471,6 +471,7 @@ record_count: 542
 | `reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md` | `REVIEW-2026-06-17-task-ar-573-scribe-evidence` | md | record | watch | TASK-AR-573 Scribe Evidence |
 | `reviews/REVIEW-2026-06-17-task-ar-574-monitored-role-evidence.md` | `REVIEW-2026-06-17-task-ar-574-monitored-role-evidence` | md | record | watch | TASK-AR-574 Monitored Role Evidence |
 | `reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md` | `REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle` | review | approved | pass | TASK-AR-575 Runtime Asset Lifecycle Review |
+| `reviews/REVIEW-2026-06-17-taskset-ar-business-operations-teams-registration.md` | `REVIEW-2026-06-17-taskset-ar-business-operations-teams-registration` | md | record | pass | Business Operations Teams Registration |
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-registration.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-registration` | md | record | pass | Self Improvement Cadence Registration |
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-cycle.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-cycle` | md | record | pass | Self Improvement Cadence T3 Replan After Cycle |
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report` | md | record | pass | Self Improvement Cadence T3 Replan After Report |

@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-17T18:47:02+09:00
-record_count: 308
+generated_at: 2026-06-17T22:12:03+09:00
+record_count: 312
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `308` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `312` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `12` records |
-| Tasksets | pass | `36` records |
-| Tasks | pass | `240` records |
-| Units | pass | `20` records |
+| Initiatives | pass | `13` records |
+| Tasksets | pass | `37` records |
+| Tasks | pass | `241` records |
+| Units | pass | `21` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -347,6 +347,10 @@ record_count: 308
 | 11.1.3.1 | Unit 11.1.3.1 | unit | `UNIT-TASK-AR-575-001` | `TASK-AR-575` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-575/UNIT-TASK-AR-575-001.md` | UNIT-TASK-AR-575-001 - Burn down runtime asset low-reuse debt |
 | 11.1.4 | Task 11.1.4 | task | `TASK-AR-576` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | completed | `agents/lead_engineer/tasks/TASK-AR-576.md` | Re-run the self-improvement report after role and asset remediation and state whether… |
 | 11.1.4.1 | Unit 11.1.4.1 | unit | `UNIT-TASK-AR-576-001` | `TASK-AR-576` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-576/UNIT-TASK-AR-576-001.md` | UNIT-TASK-AR-576-001 - Measure remediation delta and update handoff surfaces |
+| 12 | Initiative 12 | initiative | `INIT-AR-BUSINESS-OPERATIONS-TEAMS` | - | active | `agents/project/initiatives/INIT-AR-BUSINESS-OPERATIONS-TEAMS.md` | Business Operations Teams |
+| 12.1 | Taskset 12.1 | taskset | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | `INIT-AR-BUSINESS-OPERATIONS-TEAMS` | active | `BACKLOG-BOARD.md` | Business Operations Teams |
+| 12.1.1 | Task 12.1.1 | task | `TASK-AR-577` | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | planned | `agents/lead_engineer/tasks/TASK-AR-577.md` | Define finance/accounting, marketing/growth, and sales/revenue teams across live proj… |
+| 12.1.1.1 | Unit 12.1.1.1 | unit | `UNIT-TASK-AR-577-001` | `TASK-AR-577` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-577/UNIT-TASK-AR-577-001.md` | UNIT-TASK-AR-577-001 - Publish business operations org model |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

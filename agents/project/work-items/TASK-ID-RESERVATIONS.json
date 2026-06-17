@@ -265,8 +265,27 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-577",
+      "expires_at": "2026-06-18T22:10:00+09:00",
+      "fulfilled_at": "2026-06-17T22:10:00+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-577.md",
+      "fulfilled_task_id": "TASK-AR-577",
+      "fulfilled_task_uid": "2e74dfb1-12c0-4ed3-b19a-7eb716565cac",
+      "initiative_id": "INIT-AR-BUSINESS-OPERATIONS-TEAMS",
+      "kind": "task",
+      "owner_id": "codex-planner",
+      "reason": "work registration TASKSET-AR-BUSINESS-OPERATIONS-TEAMS",
+      "reservation_group_id": "RES-20260617-221000-d470ad37",
+      "reservation_id": "RES-20260617-221000-d470ad37-01",
+      "reserved_at": "2026-06-17T22:10:00+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-BUSINESS-OPERATIONS-TEAMS",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-06-17T17:15:00+09:00"
+  "updated_at": "2026-06-17T22:10:00+09:00"
 }
