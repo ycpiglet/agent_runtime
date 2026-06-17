@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-17T16:29:17+09:00
-record_count: 519
+generated_at: 2026-06-17T16:44:37+09:00
+record_count: 520
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `519` review and evidence records under `reviews/`.
+- Summary: indexed `520` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `519` files |
+| Reviews covered | pass | `520` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -163,6 +163,7 @@ record_count: 519
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current.json` | `RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0.json` | `RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0 |
 | `reviews/RELEASE-VERSION-CONSISTENCY-STEWARD.json` | `RELEASE-VERSION-CONSISTENCY-STEWARD` | json | record | n/a | RELEASE-VERSION-CONSISTENCY-STEWARD |
+| `reviews/REPORT-2026-06-17-self-improvement-maturity.md` | `REPORT-2026-06-17-self-improvement-maturity` | md | record | watch | Self Improvement Maturity Report 2026-06-17 |
 | `reviews/RESEARCH-2026-06-09-agent-runtime-official-recommendation-update.md` | `RESEARCH-2026-06-09-agent-runtime-official-recommendation-update` | md | record | n/a | RESEARCH-2026-06-09-agent-runtime-official-recommendation-update.md |
 | `reviews/RESEARCH-2026-06-09-agent-runtime-official-runtime-ops-update.md` | `RESEARCH-2026-06-09-agent-runtime-official-runtime-ops-update` | md | record | n/a | RESEARCH-2026-06-09-agent-runtime-official-runtime-ops-update |
 | `reviews/RESEARCH-2026-06-09-agent-runtime-task-ar-214-official-query-contract.md` | `RESEARCH-2026-06-09-agent-runtime-task-ar-214-official-query-contract` | md | record | n/a | RESEARCH-2026-06-09-agent-runtime-task-ar-214-official-query-contract |

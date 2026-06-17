@@ -19,6 +19,15 @@
 
 <!-- BACKLOG-INDEX:END -->
 
+## 2026-06-17 TASKSET-AR-SELF-IMPROVEMENT-CADENCE maturity report
+
+- Active taskset: `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` (Self Improvement Cadence).
+- Scope: measure low-frequency agent/skill usage, record the first review/meeting/seminar/retro/compound/casebook cycle, and publish measurable maturity thresholds.
+- Current state: `TASK-AR-570` and `TASK-AR-571` are complete; `TASK-AR-572` publishes the maturity report and keeps the persistent self-improvement goal active.
+- Metrics: evidence maturity `immature`, score `32/100`, role gaps `6`, asset gaps `17`, cycle artifacts `6/6`.
+- Next cycle: create real scribe claim/log evidence, route monitored dormant roles into review/council evidence, exercise or deprecate low-reuse runtime assets, then rerun `python scripts/self_improvement_cycle.py report --json`.
+- Evidence: `reviews/REPORT-2026-06-17-self-improvement-maturity.md`; `reviews/REVIEW-2026-06-17-self-improvement-cycle.md`; `reviews/RETRO-2026-06-17-self-improvement-cycle.md`.
+
 ## 2026-06-15 TASKSET-AR-AGENT-ORG-DELEGATION 등록 + Unit 1 완료 (Org Conductor)
 
 - 브레인스토밍→리서치(Karpathy/gstack/페르소나 다양성)→spec→plan→등록. Director→Lead→Worker+Reviewer 조직, seam-aware 병렬+단계적 자율, 위험기반 하이브리드 디스패치, 교체가능 WorkerBackend(서브에이전트→데몬), 페르소나=blind-Delphi 심의 레이어, 토큰 비용 구속(~15×).

@@ -1,5 +1,14 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-CADENCE maturity report
+
+- Current taskset: `TASKSET-AR-SELF-IMPROVEMENT-CADENCE`; `TASK-AR-570` and `TASK-AR-571` are complete, and `TASK-AR-572` reports the maturity state.
+- Current metrics: evidence maturity `immature`, score `32/100`, role gaps `6`, asset gaps `17`, scribe `unknown`, doc-steward `ok`.
+- Cycle evidence: review, meeting, seminar, retro, compound, and casebook artifacts are present (`6/6` required records).
+- Goal state: the self-improvement operating cycle is recorded, but the active thread goal remains open until role/asset evidence improves.
+- Next concrete cycle: create real scribe claim/log evidence, route monitored dormant roles into review/council evidence, exercise or deprecate low-reuse runtime assets, then rerun `python scripts/self_improvement_cycle.py report --json`.
+- Evidence: `reviews/REPORT-2026-06-17-self-improvement-maturity.md`; `reviews/REVIEW-2026-06-17-self-improvement-cycle.md`; `reviews/RETRO-2026-06-17-self-improvement-cycle.md`.
+
 ## 2026-06-17 - TASKSET-AR-DECISION-FIRST-CONSOLE-IA complete
 
 - Completed claim: `CLAIM-20260616-232833-task-ar-569-8b7b` (`lead_engineer@work-05`) was W4b-approved, released, merged, indexed, and cleaned.

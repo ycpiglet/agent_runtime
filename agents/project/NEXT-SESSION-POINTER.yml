@@ -1,14 +1,14 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-17T00:18:17+09:00
+updated_at: 2026-06-17T16:45:00+09:00
 current_state:
-  summary: "TASKSET-AR-DECISION-FIRST-CONSOLE-IA is complete: TASK-AR-569 W4b-approved, released, merged, indexed, and cleaned."
-  status: complete
-  task_set_status: complete
-  task_set_id: "TASKSET-AR-DECISION-FIRST-CONSOLE-IA"
-  step_index: 6
-  step_total: 6
+  summary: "TASKSET-AR-SELF-IMPROVEMENT-CADENCE has recorded the first product-native self-improvement cycle, but evidence maturity remains immature."
+  status: watch
+  task_set_status: reporting_complete_goal_active
+  task_set_id: "TASKSET-AR-SELF-IMPROVEMENT-CADENCE"
+  step_index: 3
+  step_total: 3
   progress_pct: 100
-  status_text: "No active claim for the decision-first console IA taskset."
+  status_text: "Cycle artifacts are present (6/6), but score remains 32/100 with role gaps 6 and asset gaps 17."
 active_work:
   current_agents: []
   current_teams: []
@@ -23,6 +23,23 @@ roles:
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
   active_claims: []
+  self_improvement_cadence:
+    taskset: TASKSET-AR-SELF-IMPROVEMENT-CADENCE
+    maturity_report: reviews/REPORT-2026-06-17-self-improvement-maturity.md
+    cycle_review: reviews/REVIEW-2026-06-17-self-improvement-cycle.md
+    cycle_retro: reviews/RETRO-2026-06-17-self-improvement-cycle.md
+    current_metrics:
+      score: 32
+      maturity: immature
+      role_gaps: 6
+      asset_gaps: 17
+      scribe: unknown
+      doc_steward: ok
+      cycle_artifacts: "6/6"
+    next_cycle:
+      - "Create real scribe claim/log evidence before removing the scribe waiver."
+      - "Route council/progress-scout/release-steward/reviewer/skeptic into review or council evidence."
+      - "Exercise, modify, or deprecate low-reuse runtime assets, then rerun self_improvement_cycle.py report."
   decision_first_console_completed_tasks:
     - agents/lead_engineer/tasks/TASK-AR-563.md
     - agents/lead_engineer/tasks/TASK-AR-564.md

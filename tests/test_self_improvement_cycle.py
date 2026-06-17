@@ -300,3 +300,82 @@ def test_cli_cycle_dry_run_json(tmp_path: Path) -> None:
     assert payload["schema"] == "agent-runtime-self-improvement-cycle/v1"
     assert payload["status"] == "planned"
     assert payload["artifacts"]
+
+
+def test_assess_next_actions_shift_after_cycle_artifacts_exist(tmp_path: Path) -> None:
+    module = load_module()
+    write_fixture(tmp_path)
+
+    module.cycle(tmp_path, now=datetime(2026, 6, 17, 8, 0, tzinfo=timezone.utc))
+    payload = module.assess(tmp_path, now=datetime(2026, 6, 17, 8, 30, tzinfo=timezone.utc))
+
+    assert payload["product_surfaces"]["current_cycle"]["recorded"] is True
+    assert not any(action.startswith("Run the cycle unit") for action in payload["next"])
+    assert payload["next"]
+
+
+def test_report_dry_run_marks_goal_active_when_evidence_is_immature(tmp_path: Path) -> None:
+    module = load_module()
+    write_fixture(tmp_path)
+    module.cycle(tmp_path, now=datetime(2026, 6, 17, 8, 0, tzinfo=timezone.utc))
+
+    payload = module.report(
+        tmp_path,
+        now=datetime(2026, 6, 17, 8, 30, tzinfo=timezone.utc),
+        dry_run=True,
+    )
+
+    assert payload["schema"] == "agent-runtime-self-improvement-report/v1"
+    assert payload["goal_state"]["complete"] is False
+    assert payload["goal_state"]["operating_state"] == "cycle_recorded_but_evidence_immature"
+    assert payload["artifact"]["status"] == "planned"
+    assert payload["artifact"]["path"] == "reviews/REPORT-2026-06-17-self-improvement-maturity.md"
+    assert "waiver_debt" in payload["goal_state"]["blocking_gates"]
+    assert not (tmp_path / "reviews/REPORT-2026-06-17-self-improvement-maturity.md").exists()
+
+
+def test_report_write_mode_records_maturity_report(tmp_path: Path) -> None:
+    module = load_module()
+    write_fixture(tmp_path)
+    module.cycle(tmp_path, now=datetime(2026, 6, 17, 8, 0, tzinfo=timezone.utc))
+
+    payload = module.report(
+        tmp_path,
+        now=datetime(2026, 6, 17, 8, 30, tzinfo=timezone.utc),
+    )
+
+    report = tmp_path / "reviews/REPORT-2026-06-17-self-improvement-maturity.md"
+    assert payload["status"] == "recorded"
+    assert report.exists()
+    text = report.read_text(encoding="utf-8")
+    assert "Persistent thread goal complete: `false`" in text
+    assert "cycle_artifacts" in text
+    assert "Maturity Gates" in text
+
+
+def test_cli_report_dry_run_json(tmp_path: Path) -> None:
+    write_fixture(tmp_path)
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--root",
+            str(tmp_path),
+            "--now",
+            "2026-06-17T08:00:00+00:00",
+            "report",
+            "--dry-run",
+            "--json",
+        ],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["schema"] == "agent-runtime-self-improvement-report/v1"
+    assert payload["goal_state"]["complete"] is False
