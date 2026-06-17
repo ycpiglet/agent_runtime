@@ -9,9 +9,9 @@ kind: task
 parent_id: TASKSET-AR-SELF-IMPROVEMENT-CADENCE
 registered_at: 2026-06-17T08:31:23+09:00
 created_at: 2026-06-17T08:31:23+09:00
-updated_at: 2026-06-17T17:01:00+09:00
+updated_at: 2026-06-17T17:09:00+09:00
 title: Publish maturity thresholds and improvement report
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 2
@@ -36,11 +36,16 @@ verification:
   - python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-SELF-IMPROVEMENT-CADENCE --check
   - python scripts/evidence_index_generator.py --check
   - python scripts/owner_governance_gate.py
-verification_status: failed
-verified_at: 2026-06-17T17:01:00+09:00
+verification_status: passed
+verified_at: 2026-06-17T17:08:00+09:00
 verified_by: le-20260617-163829-kst-61f6
 evidence_refs:
-  - reviews/VERIFY-2026-06-17-task-ar-572-20260617170100.json
+  - reviews/VERIFY-2026-06-17-task-ar-572-20260617170800.json
+resolution: done
+completed_at: 2026-06-17T17:09:00+09:00
+closed_by: le-20260617-163829-kst-61f6
+actual_hours: 1.0
+actual_tokens: 3200
 ---
 
 # TASK-AR-572 - Publish maturity thresholds and improvement report
@@ -64,3 +69,15 @@ evidence_refs:
 - `python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-SELF-IMPROVEMENT-CADENCE --check`
 - `python scripts/evidence_index_generator.py --check`
 - `python scripts/owner_governance_gate.py`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-17T17:09:00+09:00`
+- Resolution: `done`
+- Actual hours: `1.0`
+- Actual tokens: `3200`
+- Closed by: `le-20260617-163829-kst-61f6`
+- Evidence:
+  - `reviews/VERIFY-2026-06-17-task-ar-572-20260617170800.json`
+<!-- work-close:end -->

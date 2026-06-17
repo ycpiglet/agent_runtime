@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-17T16:58:55+09:00
-record_count: 523
+generated_at: 2026-06-17T17:05:15+09:00
+record_count: 525
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `523` review and evidence records under `reviews/`.
+- Summary: indexed `525` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `523` files |
+| Reviews covered | pass | `525` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -469,6 +469,7 @@ record_count: 523
 | `reviews/REVIEW-2026-06-17-self-improvement-cycle.md` | `REVIEW-2026-06-17-self-improvement-cycle` | md | record | watch | Self Improvement Cycle 2026-06-17 |
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-registration.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-registration` | md | record | pass | Self Improvement Cadence Registration |
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-cycle.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-cycle` | md | record | pass | Self Improvement Cadence T3 Replan After Cycle |
+| `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report` | md | record | pass | Self Improvement Cadence T3 Replan After Report |
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan` | md | record | pass | Self Improvement Cadence T3 Replan |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
@@ -499,6 +500,7 @@ record_count: 523
 | `reviews/VERIFY-2026-06-17-task-ar-570-20260617085000.json` | `VERIFY-2026-06-17-task-ar-570-20260617085000` | json | record | n/a | VERIFY-2026-06-17-task-ar-570-20260617085000 |
 | `reviews/VERIFY-2026-06-17-task-ar-571-20260617162554.json` | `VERIFY-2026-06-17-task-ar-571-20260617162554` | json | record | n/a | VERIFY-2026-06-17-task-ar-571-20260617162554 |
 | `reviews/VERIFY-2026-06-17-task-ar-572-20260617170100.json` | `VERIFY-2026-06-17-task-ar-572-20260617170100` | json | record | n/a | VERIFY-2026-06-17-task-ar-572-20260617170100 |
+| `reviews/VERIFY-2026-06-17-task-ar-572-20260617170800.json` | `VERIFY-2026-06-17-task-ar-572-20260617170800` | json | record | n/a | VERIFY-2026-06-17-task-ar-572-20260617170800 |
 | `reviews/VERIFY-2026-06-17-unit-task-ar-570-001-20260617084842.json` | `VERIFY-2026-06-17-unit-task-ar-570-001-20260617084842` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-570-001-20260617084842 |
 | `reviews/VERIFY-2026-06-17-unit-task-ar-571-001-20260617162341.json` | `VERIFY-2026-06-17-unit-task-ar-571-001-20260617162341` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-571-001-20260617162341 |
 | `reviews/VERIFY-2026-06-17-unit-task-ar-572-001-20260617165800.json` | `VERIFY-2026-06-17-unit-task-ar-572-001-20260617165800` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-572-001-20260617165800 |

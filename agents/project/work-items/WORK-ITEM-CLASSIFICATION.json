@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-17T16:57:07+09:00",
+  "generated_at": "2026-06-17T17:03:44+09:00",
   "record_count": 298,
   "finding_count": 0,
   "findings": [],
@@ -3215,7 +3215,7 @@
       "title": "Self Improvement Cadence",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-SELF-IMPROVEMENT-CADENCE",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-570",
@@ -3270,7 +3270,7 @@
       "title": "Define measurable maturity criteria for low-frequency agent/skill self-improvement an…",
       "path": "agents/lead_engineer/tasks/TASK-AR-572.md",
       "parent_id": "TASKSET-AR-SELF-IMPROVEMENT-CADENCE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-572-001",
