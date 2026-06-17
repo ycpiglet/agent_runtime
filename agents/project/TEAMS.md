@@ -42,6 +42,48 @@
     - agents/project/ROADMAP.md
     - agents/project/ORG.md
 
+- team_id: finance-accounting
+  purpose: 혼합 수익 모델(B2B SaaS + 콘텐츠/제휴 성장)의 가격, 청구, 비용, 자산, 라이선스, 매출 지표 관리
+  lead: finance-controller
+  roles:
+    - finance-controller
+    - accounting-operator
+    - asset-steward
+    - revenue-analyst
+  canonical_context:
+    - agents/project/PROJECT-CONTEXT.yml
+    - agents/project/VISION.md
+    - agents/project/ROADMAP.md
+    - agents/project/ORG.md
+
+- team_id: marketing-growth
+  purpose: 제품 포지셔닝, 브랜드 메시지, 콘텐츠 캘린더, SEO, 캠페인 실험, 채널별 성과 분석
+  lead: marketing-lead
+  roles:
+    - marketing-lead
+    - content-marketer
+    - growth-analyst
+    - brand-steward
+  canonical_context:
+    - agents/project/PROJECT-CONTEXT.yml
+    - agents/project/VISION.md
+    - agents/project/ROADMAP.md
+    - agents/project/LINKS.md
+
+- team_id: sales-revenue
+  purpose: ICP/리드 정의, CRM 파이프라인, 데모/제안서, 파트너십, 합법적 예약 게시와 홍보 운영
+  lead: sales-lead
+  roles:
+    - sales-lead
+    - crm-operator
+    - partnership-manager
+    - sales-ops
+  canonical_context:
+    - agents/project/PROJECT-CONTEXT.yml
+    - agents/project/VISION.md
+    - agents/project/ROADMAP.md
+    - agents/project/ORG.md
+
 - team_id: planning-office
   purpose: 사이클 종료/일정/진척도 기반 planning scan과 proposal outbox 운영
   lead: planning-coordinator

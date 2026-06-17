@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-17T22:12:03+09:00",
+  "generated_at": "2026-06-17T22:27:35+09:00",
   "record_count": 312,
   "finding_count": 0,
   "findings": [],
@@ -3413,7 +3413,7 @@
       "title": "Business Operations Teams",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-BUSINESS-OPERATIONS-TEAMS",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-577",
@@ -3424,7 +3424,7 @@
       "title": "Define finance/accounting, marketing/growth, and sales/revenue teams across live proj…",
       "path": "agents/lead_engineer/tasks/TASK-AR-577.md",
       "parent_id": "TASKSET-AR-BUSINESS-OPERATIONS-TEAMS",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-577-001",
@@ -3435,7 +3435,7 @@
       "title": "UNIT-TASK-AR-577-001 - Publish business operations org model",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-577/UNIT-TASK-AR-577-001.md",
       "parent_id": "TASK-AR-577",
-      "status": "worker_ready"
+      "status": "completed"
     }
   ]
 }

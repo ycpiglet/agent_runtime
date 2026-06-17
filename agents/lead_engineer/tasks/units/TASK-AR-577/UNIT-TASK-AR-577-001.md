@@ -9,11 +9,11 @@ task_id: TASK-AR-577
 task_set_id: TASKSET-AR-BUSINESS-OPERATIONS-TEAMS
 initiative_id: INIT-AR-BUSINESS-OPERATIONS-TEAMS
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-06-17T22:10:00+09:00
-updated_at: 2026-06-17T22:10:00+09:00
+updated_at: 2026-06-17T22:34:00+09:00
 origin_type: owner_request
 origin_ref: chat:2026-06-17-business-operations-teams
 created_by: codex-planner
@@ -51,12 +51,21 @@ acceptance:
   - Template docs provide the same business-team starter defaults.
   - Sales automation text states compliant automation only and rejects viewbots, fake traffic, unauthorized bulk posting, spam, and platform manipulation.
 verification:
-  - PYTHONPATH=src python -m pytest tests/test_org_model_gate.py tests/test_org_read_api.py tests/test_project_context_overlay.py tests/test_owner_governance_chain_parity.py -q
+  - python -m pytest tests/test_org_model_gate.py tests/test_org_read_api.py tests/test_project_context_overlay.py tests/test_owner_governance_chain_parity.py -q
   - python scripts/org_model_gate.py --check
   - python scripts/org_read_api.py --view org
   - python scripts/owner_governance_gate.py
 handoff: Report the added teams/roles, template coverage, explicit prohibited growth automation, and verification results.
 stop_condition: Stop after the business operations org model is registered, implemented, verified, and closed with W4/W5/W6 evidence.
+verified_at: 2026-06-17T22:32:00+09:00
+verified_by: lead-engineer-20260617-business-ops-577
+evidence_refs:
+  - reviews/VERIFY-2026-06-17-unit-task-ar-577-001-20260617223200.json
+resolution: done
+completed_at: 2026-06-17T22:34:00+09:00
+closed_by: lead-engineer-20260617-business-ops-577
+actual_hours: 2.2
+actual_tokens: 5400
 ---
 
 # UNIT-TASK-AR-577-001 - Publish business operations org model
@@ -111,7 +120,7 @@ Add business-side teams and focused validation only. Keep live checkout roles as
 
 ## Verification
 
-- `PYTHONPATH=src python -m pytest tests/test_org_model_gate.py tests/test_org_read_api.py tests/test_project_context_overlay.py tests/test_owner_governance_chain_parity.py -q`
+- `python -m pytest tests/test_org_model_gate.py tests/test_org_read_api.py tests/test_project_context_overlay.py tests/test_owner_governance_chain_parity.py -q`
 - `python scripts/org_model_gate.py --check`
 - `python scripts/org_read_api.py --view org`
 - `python scripts/owner_governance_gate.py`
@@ -123,3 +132,15 @@ Report the added teams/roles, template coverage, explicit prohibited growth auto
 ## Stop Boundary
 
 Stop after the business operations org model is registered, implemented, verified, and closed with W4/W5/W6 evidence.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-17T22:34:00+09:00`
+- Resolution: `done`
+- Actual hours: `2.2`
+- Actual tokens: `5400`
+- Closed by: `lead-engineer-20260617-business-ops-577`
+- Evidence:
+  - `reviews/VERIFY-2026-06-17-unit-task-ar-577-001-20260617223200.json`
+<!-- work-close:end -->

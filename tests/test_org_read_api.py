@@ -39,6 +39,14 @@ def test_org_tree_groups_live_instances_by_team_and_role(tmp_path):
     assert tree["engineering"]["lead-engineer"] == ["Eng-1"]   # alias resolved
 
 
+def test_org_tree_exposes_business_operations_teams_from_live_registry():
+    mod = _load()
+    tree = mod.org_tree(ROOT)
+    assert "finance-accounting" in tree
+    assert "marketing-growth" in tree
+    assert "sales-revenue" in tree
+
+
 def test_work_state_buckets_waiting_and_done(tmp_path):
     mod = _load()
     _fixture(tmp_path)

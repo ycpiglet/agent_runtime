@@ -9,21 +9,21 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-17
 task_count: 241
-open_count: 1
-completed_count: 240
-task_set_count: 1
-completed_task_set_count: 36
+open_count: 0
+completed_count: 241
+task_set_count: 0
+completed_task_set_count: 37
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `1` open or active tasks; `240` completed tasks are archived from this live board.
+- Summary: `0` open or active tasks; `241` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `1` / Ask `0` / Review `0` / Later `0` / Done `240`.
-- Task Sets: `1` active workflows; `36` completed workflows are hidden from the live action board.
+- Status: Action `0` / Ask `0` / Review `0` / Later `0` / Done `241`.
+- Task Sets: `0` active workflows; `37` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -41,15 +41,6 @@ completed_task_set_count: 36
 ## Action Board
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
-
-### Business Operations Teams (`TASKSET-AR-BUSINESS-OPERATIONS-TEAMS`)
-
-- Flow: Extend the live org overlay and host scaffold with business-side teams for monetization, asset management, marketing, and compliant sales automation.
-- Progress: `0/1` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-577` | INIT-AR-BUSINESS-OPERATIONS-TEAMS | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-577/UNIT-TASK-AR-577-001.md | planned | Action | P0 | Critical | Medium | 3h/4500tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Define finance/accounting, marketing/growth, and sales/revenue teams across live proj… |
 
 ## Archived Task Sets
 
@@ -92,14 +83,15 @@ completed_task_set_count: 36
 | Decision Cockpit (`TASKSET-AR-DECISION-FIRST-CONSOLE-IA`) | UI redesign #1: turn the 80-screen data-dump home into a decision-first cockpit whose hero is an Attention Inbox ('what needs me now', 6 signal groups derived from existing gates/records), prune nav 67->core 7 (+More), progressive disclosure (essentials on screen, detail on interaction), preserve the just-landed maturity behaviors (responsive/a11y/SSE/i18n/validation), and a KO/EN UI toggle. Incremental on the monolith; component/token extraction + 2.5D characters + insight graph are sub-project #3. | `7/7` done | `7` completed task files archived |
 | Self Improvement Cadence (`TASKSET-AR-SELF-IMPROVEMENT-CADENCE`) | Detect low-frequency roles and runtime assets, run review/retro/meeting/seminar/compound/doc-steward/scribe cycles from evidence, and publish measurable maturity signals. | `3/3` done | `3` completed task files archived |
 | Self Improvement Remediation (`TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE`) | Burn down the first-cycle maturity blockers: scribe waiver debt, dormant monitored-role evidence, low-reuse runtime assets, and a follow-up measurable report. | `4/4` done | `4` completed task files archived |
+| Business Operations Teams (`TASKSET-AR-BUSINESS-OPERATIONS-TEAMS`) | Extend the live org overlay and host scaffold with business-side teams for monetization, asset management, marketing, and compliant sales automation. | `1/1` done | `1` completed task files archived |
 
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `1` open across `1` task sets (see Action Board above).
-- Archived task sets: `36` (see Archived Task Sets above).
-- Archived task files: `240` — see `ARCHIVE-INDEX.md`.
+- Active: `0` open across `0` task sets (see Action Board above).
+- Archived task sets: `37` (see Archived Task Sets above).
+- Archived task files: `241` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

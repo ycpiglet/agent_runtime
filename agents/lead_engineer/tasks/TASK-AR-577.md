@@ -9,9 +9,9 @@ kind: task
 parent_id: TASKSET-AR-BUSINESS-OPERATIONS-TEAMS
 registered_at: 2026-06-17T22:10:00+09:00
 created_at: 2026-06-17T22:10:00+09:00
-updated_at: 2026-06-17T22:10:00+09:00
+updated_at: 2026-06-17T22:38:00+09:00
 title: Add business operations teams to org overlays
-status: planned
+status: completed
 priority: P0
 difficulty: M
 est_hours: 3
@@ -30,8 +30,24 @@ summary: Define finance/accounting, marketing/growth, and sales/revenue teams ac
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+started_at: 2026-06-17T22:15:13+09:00
 tags:
   - work-cli-created
+verification:
+  - python -m pytest tests/test_org_model_gate.py tests/test_org_read_api.py tests/test_project_context_overlay.py tests/test_owner_governance_chain_parity.py -q
+  - python scripts/org_model_gate.py --check
+  - python scripts/org_read_api.py --view org
+  - python scripts/owner_governance_gate.py
+verification_status: passed
+verified_at: 2026-06-17T22:36:00+09:00
+verified_by: lead-engineer-20260617-business-ops-577
+evidence_refs:
+  - reviews/VERIFY-2026-06-17-task-ar-577-20260617223600.json
+resolution: done
+completed_at: 2026-06-17T22:38:00+09:00
+closed_by: lead-engineer-20260617-business-ops-577
+actual_hours: 2.4
+actual_tokens: 6200
 ---
 
 # TASK-AR-577 - Add business operations teams to org overlays
@@ -53,7 +69,19 @@ tags:
 
 ## Verification
 
-- `PYTHONPATH=src python -m pytest tests/test_org_model_gate.py tests/test_org_read_api.py tests/test_project_context_overlay.py tests/test_owner_governance_chain_parity.py -q`
+- `python -m pytest tests/test_org_model_gate.py tests/test_org_read_api.py tests/test_project_context_overlay.py tests/test_owner_governance_chain_parity.py -q`
 - `python scripts/org_model_gate.py --check`
 - `python scripts/org_read_api.py --view org`
 - `python scripts/owner_governance_gate.py`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-17T22:38:00+09:00`
+- Resolution: `done`
+- Actual hours: `2.4`
+- Actual tokens: `6200`
+- Closed by: `lead-engineer-20260617-business-ops-577`
+- Evidence:
+  - `reviews/VERIFY-2026-06-17-task-ar-577-20260617223600.json`
+<!-- work-close:end -->
