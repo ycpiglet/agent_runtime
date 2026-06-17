@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-17T17:11:36+09:00",
+  "generated_at": "2026-06-17T17:37:25+09:00",
   "record_count": 308,
   "finding_count": 0,
   "findings": [],
@@ -3314,7 +3314,7 @@
       "title": "Create verifiable scribe claim/log evidence and only remove the scribe waiver if coll…",
       "path": "agents/lead_engineer/tasks/TASK-AR-573.md",
       "parent_id": "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-573-001",

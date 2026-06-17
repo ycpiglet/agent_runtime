@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE
 registered_at: 2026-06-17T17:15:00+09:00
 created_at: 2026-06-17T17:15:00+09:00
-updated_at: 2026-06-17T17:15:00+09:00
+started_at: 2026-06-17T17:25:00+09:00
+updated_at: 2026-06-17T17:37:24+09:00
 title: Create real scribe evidence
-status: planned
+status: completed
 priority: P0
 difficulty: M
 est_hours: 2
@@ -32,6 +33,20 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+verification:
+  - python scripts/collaboration_governance_gate.py --check
+  - python scripts/self_improvement_cycle.py assess
+  - python scripts/parallel_worktree_gate.py --check
+verification_status: passed
+verified_at: 2026-06-17T17:37:07+09:00
+verified_by: scribe-20260617-172500-kst-573
+evidence_refs:
+  - reviews/VERIFY-2026-06-17-task-ar-573-20260617173707.json
+resolution: done
+completed_at: 2026-06-17T17:37:24+09:00
+closed_by: scribe-20260617-172500-kst-573
+actual_hours: 1.2
+actual_tokens: 3500
 ---
 
 # TASK-AR-573 - Create real scribe evidence
@@ -55,3 +70,15 @@ tags:
 - `python scripts/collaboration_governance_gate.py --check`
 - `python scripts/self_improvement_cycle.py assess`
 - `python scripts/parallel_worktree_gate.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-17T17:37:24+09:00`
+- Resolution: `done`
+- Actual hours: `1.2`
+- Actual tokens: `3500`
+- Closed by: `scribe-20260617-172500-kst-573`
+- Evidence:
+  - `reviews/VERIFY-2026-06-17-task-ar-573-20260617173707.json`
+<!-- work-close:end -->

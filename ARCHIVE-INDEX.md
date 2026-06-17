@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-17
-archived_count: 236
+archived_count: 237
 ---
 
 # Archived Task Files
 
-- `236` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `237` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -249,3 +249,4 @@ archived_count: 236
 | `TASK-AR-570` | `f004f017-f9e…` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | 2026-06-17T08:31:23+09:00 | 2026-06-17T08:35:06+09:00 | 2026-06-17T08:50:16+09:00 | 2026-06-17T08:50:16+09:00 | Create a deterministic baseline that identifies low-frequency agent roles, low-reuse… |
 | `TASK-AR-571` | `610c4d58-2c0…` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | 2026-06-17T08:31:23+09:00 | 2026-06-17T09:02:21+09:00 | 2026-06-17T16:26:25+09:00 | 2026-06-17T16:26:25+09:00 | Use review, meeting, seminar, retro, compound, scribe, and doc-steward surfaces to re… |
 | `TASK-AR-572` | `d5f5d125-a5e…` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | 2026-06-17T08:31:23+09:00 | 2026-06-17T16:38:29+09:00 | 2026-06-17T17:09:00+09:00 | 2026-06-17T17:09:00+09:00 | Define measurable maturity criteria for low-frequency agent/skill self-improvement an… |
+| `TASK-AR-573` | `ee8e7259-55d…` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | completed | 2026-06-17T17:15:00+09:00 | - | 2026-06-17T17:37:24+09:00 | 2026-06-17T17:37:24+09:00 | Create verifiable scribe claim/log evidence and only remove the scribe waiver if coll… |

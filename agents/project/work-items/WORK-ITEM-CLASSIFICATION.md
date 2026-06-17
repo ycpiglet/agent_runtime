@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-17T17:11:36+09:00
+generated_at: 2026-06-17T17:37:25+09:00
 record_count: 308
 ---
 
@@ -339,7 +339,7 @@ record_count: 308
 | 10.1.3.1 | Unit 10.1.3.1 | unit | `UNIT-TASK-AR-572-001` | `TASK-AR-572` | completed | `agents/lead_engineer/tasks/units/TASK-AR-572/UNIT-TASK-AR-572-001.md` | UNIT-TASK-AR-572-001 - Wire maturity reporting into governance surfaces |
 | 11 | Initiative 11 | initiative | `INIT-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | - | active | `agents/project/initiatives/INIT-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE.md` | Self Improvement Remediation Cycle |
 | 11.1 | Taskset 11.1 | taskset | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | `INIT-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | active | `BACKLOG-BOARD.md` | Self Improvement Remediation |
-| 11.1.1 | Task 11.1.1 | task | `TASK-AR-573` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | planned | `agents/lead_engineer/tasks/TASK-AR-573.md` | Create verifiable scribe claim/log evidence and only remove the scribe waiver if coll… |
+| 11.1.1 | Task 11.1.1 | task | `TASK-AR-573` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | completed | `agents/lead_engineer/tasks/TASK-AR-573.md` | Create verifiable scribe claim/log evidence and only remove the scribe waiver if coll… |
 | 11.1.1.1 | Unit 11.1.1.1 | unit | `UNIT-TASK-AR-573-001` | `TASK-AR-573` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-573/UNIT-TASK-AR-573-001.md` | UNIT-TASK-AR-573-001 - Prove scribe usage before waiver burn-down |
 | 11.1.2 | Task 11.1.2 | task | `TASK-AR-574` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | planned | `agents/lead_engineer/tasks/TASK-AR-574.md` | Route council, progress-scout, release-steward, reviewer, and skeptic into real revie… |
 | 11.1.2.1 | Unit 11.1.2.1 | unit | `UNIT-TASK-AR-574-001` | `TASK-AR-574` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-574/UNIT-TASK-AR-574-001.md` | UNIT-TASK-AR-574-001 - Create monitored-role evidence packet |

@@ -1,19 +1,19 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-17T17:32:44+09:00
+updated_at: 2026-06-17T17:37:24+09:00
 current_state:
   summary: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE is registered to burn down the immature self-improvement metrics with real role and asset evidence."
   status: watch
-  task_set_status: w4b_approved
+  task_set_status: in_progress
   task_set_id: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
-  step_index: 1
+  step_index: 2
   step_total: 4
-  progress_pct: 50
-  status_text: "TASK-AR-573 W4b approved; claim released and ready for merge/closeout."
+  progress_pct: 25
+  status_text: "TASK-AR-573 is complete; next task is TASK-AR-574 dormant monitored-role evidence."
 active_work:
   current_agents: []
   current_teams: []
 resume:
-  active_task: "TASK-AR-573"
+  active_task: "TASK-AR-574"
   active_task_set: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
@@ -27,10 +27,16 @@ pointers:
     taskset: TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE
     released_claim: agents/runtime/task_claims/CLAIM-20260617-172500-task-ar-573-remediation-scribe.json
     w4b_evidence: reviews/W4B-2026-06-17-TASK-AR-573.md
+    completed_tasks:
+      - TASK-AR-573
+    completed_evidence:
+      - reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md
+      - reviews/W4B-2026-06-17-TASK-AR-573.md
+      - reviews/VERIFY-2026-06-17-task-ar-573-20260617173707.json
     registration_review: reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration.md
     plan: docs/superpowers/plans/2026-06-17-self-improvement-remediation-cycle.md
     registration_input: agents/project/work-items/REGISTRATION-2026-06-17-self-improvement-remediation-cycle.json
-    next_task: TASK-AR-573
+    next_task: TASK-AR-574
     tasks:
       - TASK-AR-573
       - TASK-AR-574
@@ -43,6 +49,14 @@ pointers:
       asset_gaps: 17
       waiver_debt: 1
       scribe: unknown
+    current_metrics:
+      score: 42
+      maturity: immature
+      role_gaps: 5
+      asset_gaps: 17
+      waiver_debt: 0
+      scribe: unknown
+      doc_steward: ok
     target_next:
       score: ">=65"
       role_gaps: "<=3"

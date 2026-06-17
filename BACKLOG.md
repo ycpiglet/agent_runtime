@@ -19,14 +19,14 @@
 
 <!-- BACKLOG-INDEX:END -->
 
-## 2026-06-17 TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE registration
+## 2026-06-17 TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE active
 
 - Active taskset: `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` (Self Improvement Remediation).
 - Scope: burn down the first-cycle blockers from the maturity report: scribe waiver debt, dormant monitored-role evidence, low-reuse runtime assets, and a follow-up delta report.
-- Registered tasks: `TASK-AR-573`(real scribe evidence), `TASK-AR-574`(dormant monitored-role evidence), `TASK-AR-575`(low-reuse runtime assets), `TASK-AR-576`(remediation delta report).
-- Current baseline: evidence maturity `immature`, score `32/100`, role gaps `6`, asset gaps `17`, waiver debt `1`, scribe `unknown`.
+- Progress: `TASK-AR-573` is complete; next task is `TASK-AR-574`(dormant monitored-role evidence), followed by `TASK-AR-575`(low-reuse runtime assets) and `TASK-AR-576`(remediation delta report).
+- Current metrics: evidence maturity `immature`, score `42/100`, role gaps `5`, asset gaps `17`, waiver debt `0`, scribe `unknown`, doc-steward `ok`.
 - Next target: reach measurable improvement before any maturity claim — score `>=65`, role gaps `<=3`, waiver debt `0`, low-reuse assets `<=8`.
-- Evidence: `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration.md`; `docs/superpowers/plans/2026-06-17-self-improvement-remediation-cycle.md`; `agents/project/work-items/REGISTRATION-2026-06-17-self-improvement-remediation-cycle.json`.
+- Evidence: `reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md`; `reviews/W4B-2026-06-17-TASK-AR-573.md`; `reviews/VERIFY-2026-06-17-task-ar-573-20260617173707.json`; `docs/superpowers/plans/2026-06-17-self-improvement-remediation-cycle.md`.
 
 ## 2026-06-17 TASKSET-AR-SELF-IMPROVEMENT-CADENCE maturity report
 

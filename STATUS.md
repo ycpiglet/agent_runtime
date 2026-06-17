@@ -1,12 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE registered
+## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE / TASK-AR-573 complete
 
-- Current taskset: `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE`; tasks `TASK-AR-573` through `TASK-AR-576` are registered and worker-ready.
-- Baseline carried forward: evidence maturity `immature`, score `32/100`, role gaps `6`, asset gaps `17`, waiver debt `1`, scribe `unknown`.
-- Purpose: create real scribe evidence, route dormant monitored roles into review/council evidence, exercise or retire low-reuse runtime assets, then publish a remediation delta report.
-- Goal state: persistent self-improvement goal remains open; next target is measurable improvement (`score >=65`, role gaps `<=3`, waiver debt `0`, low-reuse assets `<=8`) before any maturity claim.
-- Evidence: `reviews/REPORT-2026-06-17-self-improvement-maturity.md`; `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration.md`; `docs/superpowers/plans/2026-06-17-self-improvement-remediation-cycle.md`.
+- Completed task: `TASK-AR-573` created real scribe claim/log evidence, removed the obsolete `role-usage:scribe` waiver, passed W4a/W4b verification, released the claim, merged the worktree, and closed the task.
+- Current taskset: `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE`; `TASK-AR-574` is next for dormant monitored-role evidence.
+- Current metrics after TASK-AR-573: evidence maturity `immature`, score `42/100`, role gaps `5`, asset gaps `17`, waiver debt `0`, scribe `unknown`, doc-steward `ok`.
+- Remaining target before maturity claim: score `>=65`, role gaps `<=3`, waiver debt `0`, low-reuse assets `<=8`.
+- Evidence: `reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md`; `reviews/W4B-2026-06-17-TASK-AR-573.md`; `reviews/VERIFY-2026-06-17-task-ar-573-20260617173707.json`.
 
 ## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-CADENCE maturity report
 

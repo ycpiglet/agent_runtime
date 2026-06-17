@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-17T17:33:23+09:00
-record_count: 529
+generated_at: 2026-06-17T17:37:45+09:00
+record_count: 530
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `529` review and evidence records under `reviews/`.
+- Summary: indexed `530` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `529` files |
+| Reviews covered | pass | `530` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -503,6 +503,7 @@ record_count: 529
 | `reviews/VERIFY-2026-06-17-task-ar-571-20260617162554.json` | `VERIFY-2026-06-17-task-ar-571-20260617162554` | json | record | n/a | VERIFY-2026-06-17-task-ar-571-20260617162554 |
 | `reviews/VERIFY-2026-06-17-task-ar-572-20260617170100.json` | `VERIFY-2026-06-17-task-ar-572-20260617170100` | json | record | n/a | VERIFY-2026-06-17-task-ar-572-20260617170100 |
 | `reviews/VERIFY-2026-06-17-task-ar-572-20260617170800.json` | `VERIFY-2026-06-17-task-ar-572-20260617170800` | json | record | n/a | VERIFY-2026-06-17-task-ar-572-20260617170800 |
+| `reviews/VERIFY-2026-06-17-task-ar-573-20260617173707.json` | `VERIFY-2026-06-17-task-ar-573-20260617173707` | json | record | n/a | VERIFY-2026-06-17-task-ar-573-20260617173707 |
 | `reviews/VERIFY-2026-06-17-unit-task-ar-570-001-20260617084842.json` | `VERIFY-2026-06-17-unit-task-ar-570-001-20260617084842` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-570-001-20260617084842 |
 | `reviews/VERIFY-2026-06-17-unit-task-ar-571-001-20260617162341.json` | `VERIFY-2026-06-17-unit-task-ar-571-001-20260617162341` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-571-001-20260617162341 |
 | `reviews/VERIFY-2026-06-17-unit-task-ar-572-001-20260617165800.json` | `VERIFY-2026-06-17-unit-task-ar-572-001-20260617165800` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-572-001-20260617165800 |
