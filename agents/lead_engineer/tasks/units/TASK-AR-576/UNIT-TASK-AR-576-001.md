@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE
 initiative_id: INIT-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-06-17T17:15:00+09:00
-updated_at: 2026-06-17T17:15:00+09:00
+updated_at: 2026-06-17T18:34:59+09:00
 origin_type: owner_request
 origin_ref: reviews/REPORT-2026-06-17-self-improvement-maturity.md
 created_by: codex-planner
@@ -45,6 +45,10 @@ verification:
   - python scripts/evidence_index_generator.py --check
 handoff: State the before/after metrics and whether the persistent self-improvement goal remains open.
 stop_condition: Stop after the delta report and handoff surfaces are committed.
+verified_at: 2026-06-17T18:34:59+09:00
+verified_by: lead-engineer-20260617-remediation-delta-576
+evidence_refs:
+  - reviews/VERIFY-2026-06-17-unit-task-ar-576-001-20260617183459.json
 ---
 
 # UNIT-TASK-AR-576-001 - Measure remediation delta and update handoff surfaces

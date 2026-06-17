@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-17T18:23:18+09:00
-record_count: 538
+generated_at: 2026-06-17T18:35:17+09:00
+record_count: 540
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `538` review and evidence records under `reviews/`.
+- Summary: indexed `540` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `538` files |
+| Reviews covered | pass | `540` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -164,6 +164,7 @@ record_count: 538
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0.json` | `RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0 |
 | `reviews/RELEASE-VERSION-CONSISTENCY-STEWARD.json` | `RELEASE-VERSION-CONSISTENCY-STEWARD` | json | record | n/a | RELEASE-VERSION-CONSISTENCY-STEWARD |
 | `reviews/REPORT-2026-06-17-self-improvement-maturity.md` | `REPORT-2026-06-17-self-improvement-maturity` | md | record | watch | Self Improvement Maturity Report 2026-06-17 |
+| `reviews/REPORT-2026-06-17-self-improvement-remediation-delta.md` | `REPORT-2026-06-17-self-improvement-remediation-delta` | md | record | watch | Self Improvement Remediation Delta 2026-06-17 |
 | `reviews/RESEARCH-2026-06-09-agent-runtime-official-recommendation-update.md` | `RESEARCH-2026-06-09-agent-runtime-official-recommendation-update` | md | record | n/a | RESEARCH-2026-06-09-agent-runtime-official-recommendation-update.md |
 | `reviews/RESEARCH-2026-06-09-agent-runtime-official-runtime-ops-update.md` | `RESEARCH-2026-06-09-agent-runtime-official-runtime-ops-update` | md | record | n/a | RESEARCH-2026-06-09-agent-runtime-official-runtime-ops-update |
 | `reviews/RESEARCH-2026-06-09-agent-runtime-task-ar-214-official-query-contract.md` | `RESEARCH-2026-06-09-agent-runtime-task-ar-214-official-query-contract` | md | record | n/a | RESEARCH-2026-06-09-agent-runtime-task-ar-214-official-query-contract |
@@ -514,6 +515,7 @@ record_count: 538
 | `reviews/VERIFY-2026-06-17-unit-task-ar-573-001-20260617172602.json` | `VERIFY-2026-06-17-unit-task-ar-573-001-20260617172602` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-573-001-20260617172602 |
 | `reviews/VERIFY-2026-06-17-unit-task-ar-574-001-20260617174554.json` | `VERIFY-2026-06-17-unit-task-ar-574-001-20260617174554` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-574-001-20260617174554 |
 | `reviews/VERIFY-2026-06-17-unit-task-ar-575-001-20260617180903.json` | `VERIFY-2026-06-17-unit-task-ar-575-001-20260617180903` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-575-001-20260617180903 |
+| `reviews/VERIFY-2026-06-17-unit-task-ar-576-001-20260617183459.json` | `VERIFY-2026-06-17-unit-task-ar-576-001-20260617183459` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-576-001-20260617183459 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |

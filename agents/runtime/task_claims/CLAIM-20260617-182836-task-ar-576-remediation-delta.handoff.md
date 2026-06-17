@@ -11,8 +11,9 @@
 - model_tier: worker_standard
 - wip_slot: 1
 - stop_condition: Stop after the remediation delta report and handoff surfaces are committed.
-- phase: taskset-claimed
+- phase: self-verified
 - step: 4/4
-- progress_pct: 0
-- status_text: TASK-AR-576 claimed to publish the remediation delta report.
+- progress_pct: 90
+- status_text: TASK-AR-576 delta report passed W4a; W4b independent verification is pending.
 - status: claimed
+- w4a_evidence: reviews/VERIFY-2026-06-17-unit-task-ar-576-001-20260617183459.json

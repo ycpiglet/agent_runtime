@@ -1,5 +1,5 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-17T18:28:36+09:00
+updated_at: 2026-06-17T18:35:05+09:00
 current_state:
   summary: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE is registered to burn down the immature self-improvement metrics with real role and asset evidence."
   status: watch
@@ -7,8 +7,8 @@ current_state:
   task_set_id: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
   step_index: 4
   step_total: 4
-  progress_pct: 80
-  status_text: "TASK-AR-576 is claimed to publish the remediation delta report."
+  progress_pct: 90
+  status_text: "TASK-AR-576 delta report passed W4a; W4b independent verification is pending."
 active_work:
   current_agents:
     - claim_id: CLAIM-20260617-182836-task-ar-576-remediation-delta
@@ -56,6 +56,8 @@ pointers:
       - reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md
       - reviews/W4B-2026-06-17-TASK-AR-575.md
       - reviews/VERIFY-2026-06-17-task-ar-575-20260617182232.json
+      - reviews/REPORT-2026-06-17-self-improvement-remediation-delta.md
+      - reviews/VERIFY-2026-06-17-unit-task-ar-576-001-20260617183459.json
     registration_review: reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration.md
     plan: docs/superpowers/plans/2026-06-17-self-improvement-remediation-cycle.md
     registration_input: agents/project/work-items/REGISTRATION-2026-06-17-self-improvement-remediation-cycle.json
@@ -86,6 +88,17 @@ pointers:
       role_gaps: "<=3"
       waiver_debt: 0
       low_reuse_assets: "<=8"
+    goal_state:
+      operating_state: improving_but_active
+      complete: false
+      blocking_gates:
+        - monitored_role_gaps
+        - scribe_state
+      remaining_watches:
+        - council
+        - progress-scout
+        - skeptic
+        - capability.session_dashboard
   self_improvement_cadence:
     taskset: TASKSET-AR-SELF-IMPROVEMENT-CADENCE
     maturity_report: reviews/REPORT-2026-06-17-self-improvement-maturity.md

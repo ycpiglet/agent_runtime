@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-17-unit-task-ar-576-001-20260617183459",
+  "work_id": "UNIT-TASK-AR-576-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-576/UNIT-TASK-AR-576-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-576",
+  "unit_id": "UNIT-TASK-AR-576-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-17T18:34:59+09:00",
+  "verified_by": "lead-engineer-20260617-remediation-delta-576",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python scripts/self_improvement_cycle.py report --dry-run --json",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-17T18:35:00+09:00",
+      "finished_at": "2026-06-17T18:35:00+09:00",
+      "stdout": "{\n  \"artifact\": {\n    \"bytes\": 1600,\n    \"kind\": \"maturity_report\",\n    \"path\": \"reviews/REPORT-2026-06-17-self-improvement-maturity.md\",\n    \"status\": \"exists\"\n  },\n  \"assessment\": {\n    \"asset_gaps\": 1,\n    \"maturity_level\": \"improving\",\n    \"role_gaps\": 3,\n    \"score\": {\n      \"deductions\": {\n        \"advisory_due\": 3,\n        \"lifecycle_watch\": 10,\n        \"low_reuse_assets\": 2,\n        \"monitored_role_gaps\": 15,\n        \"unwaived_blocks\": 0,\n        \"waiver_debt\": 0\n      },\n      \"inputs\": {\n        \"advisory_due\": 0,\n        \"advisory_overdue\": 0,\n        \"advisory_unknown\": 1,\n        \"lifecycle_watch\": 64,\n        \"low_reuse_assets\": 1,\n        \"monitored_role_gaps\": 3,\n        \"unwaived_blocks\": 0,\n        \"waiver_debt\": 0\n      },\n      \"maturity_level\": \"improving\",\n      \"value\": 70\n    },\n    \"status\": \"pass\"\n  },\n  \"dry_run\": true,\n  \"generated_at\": \"2026-06-17T18:35:00+09:00\",\n  \"goal_state\": {\n    \"blocking_gates\": [\n      \"monitored_role_gaps\",\n      \"scribe_state\"\n    ],\n    \"complete\": false,\n    \"cycle_recorded\": true,\n    \"evidence_maturity\": \"improving\",\n    \"operating_state\": \"cycle_recorded_but_evidence_immature\"\n  },\n  \"maturity_gates\": [\n    {\n      \"current\": 70,\n      \"gate\": \"score_improving\",\n      \"pass\": true,\n      \"target\": \">=65\"\n    },\n    {\n      \"current\": 70,\n      \"gate\": \"score_mature\",\n      \"pass\": false,\n      \"target\": \">=90\"\n    },\n    {\n      \"current\": 0,\n      \"gate\": \"unwaived_blocks\",\n      \"pass\": true,\n      \"target\": \"0\"\n    },\n    {\n      \"current\": 0,\n      \"gate\": \"waiver_debt\",\n      \"pass\": true,\n      \"target\": \"0\"\n    },\n    {\n      \"current\": 3,\n      \"gate\": \"monitored_role_gaps\",\n      \"pass\": false,\n      \"target\": \"<=1\"\n    },\n    {\n      \"current\": 1,\n      \"gate\": \"low_reuse_assets\",\n      \"pass\": true,\n      \"target\": \"<=2\"\n    },\n    {\n      \"current\": \"unknown\",\n      \"gate\": \"scribe_state\",\n      \"pass\": false,\n      \"target\": \"ok\"\n    },\n    {\n      \"current\": \"6/6\",\n      \"gate\": \"cycle_artifacts\",\n      \"pass\": true,\n      \"target\": \"all required\"\n    }\n  ],\n  \"next_cycle_thresholds\": [\n    {\n      \"current\": 70,\n      \"metric\": \"score\",\n      \"target_mature\": 90,\n      \"target_next\": 65\n    },\n    {\n      \"current\": 3,\n      \"metric\": \"role_gaps\",\n      \"target_mature\": 1,\n      \"target_next\": 3\n    },\n    {\n      \"current\": 0,\n      \"metric\": \"waiver_debt\",\n      \"target_mature\": 0,\n      \"target_next\": 0\n    },\n    {\n      \"current\": 1,\n      \"metric\": \"asset_gaps\",\n      \"target_mature\": 5,\n      \"target_next\": 12\n    },\n    {\n      \"current\": 1,\n      \"metric\": \"low_reuse_assets\",\n      \"target_mature\": 2,\n      \"target_next\": 8\n    },\n    {\n      \"current\": \"unknown\",\n      \"metric\": \"scribe_state\",\n      \"target_mature\": \"ok\",\n      \"target_next\": \"known\"\n    }\n  ],\n  \"root\": \"C:\\\\Users\\\\ycpig\\\\agent_runtime\\\\.worktrees\\\\TASK-AR-576\",\n  \"schema\": \"agent-runtime-self-improvement-report/v1\",\n  \"status\": \"planned\",\n  \"task_id\": \"TASK-AR-572\",\n  \"unit_id\": \"UNIT-TASK-AR-572-001\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-17T18:35:00+09:00",
+      "finished_at": "2026-06-17T18:35:04+09:00",
+      "stdout": "taskset-work-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-576\nfindings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-17T18:35:04+09:00",
+      "finished_at": "2026-06-17T18:35:05+09:00",
+      "stdout": "evidence-index: pass\nfindings=0\n",
+      "stderr": ""
+    }
+  ]
+}

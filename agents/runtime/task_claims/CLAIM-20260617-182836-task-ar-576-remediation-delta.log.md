@@ -11,3 +11,5 @@
 - wip_slot: 1
 - stop_condition: Stop after the remediation delta report and handoff surfaces are committed.
 - status_text: TASK-AR-576 claimed to publish the remediation delta report.
+- 2026-06-17T18:35:00+09:00: drafted `reviews/REPORT-2026-06-17-self-improvement-remediation-delta.md`; measured state is improving `70/100`, not mature.
+- 2026-06-17T18:35:05+09:00: W4a passed with `reviews/VERIFY-2026-06-17-unit-task-ar-576-001-20260617183459.json`; W4b independent verification is pending.
