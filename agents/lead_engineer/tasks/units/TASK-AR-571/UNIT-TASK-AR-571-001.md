@@ -9,11 +9,11 @@ task_id: TASK-AR-571
 task_set_id: TASKSET-AR-SELF-IMPROVEMENT-CADENCE
 initiative_id: INIT-AR-SELF-IMPROVEMENT-CADENCE
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-06-17T08:31:23+09:00
-updated_at: 2026-06-17T08:31:23+09:00
+updated_at: 2026-06-17T16:24:06+09:00
 origin_type: owner_request
 origin_ref: owner-request:low-frequency-agent-skill-self-improvement-cycle
 created_by: codex-planner
@@ -46,6 +46,15 @@ verification:
   - python scripts/self_improvement_cycle.py cycle --dry-run --json
 handoff: Leave generated artifacts linked from the review report and include next-cycle thresholds.
 stop_condition: Stop after one cycle is recorded and verified; do not close the broader goal until repeated-cycle maturity criteria are met.
+verified_at: 2026-06-17T16:23:41+09:00
+verified_by: le-20260617-090221-kst-969f
+evidence_refs:
+  - reviews/VERIFY-2026-06-17-unit-task-ar-571-001-20260617162341.json
+resolution: done
+completed_at: 2026-06-17T16:24:06+09:00
+closed_by: le-20260617-090221-kst-969f
+actual_hours: 1.5
+actual_tokens: 0
 ---
 
 # UNIT-TASK-AR-571-001 - Record the first self-improvement cycle
@@ -99,3 +108,15 @@ Leave generated artifacts linked from the review report and include next-cycle t
 ## Stop Boundary
 
 Stop after one cycle is recorded and verified; do not close the broader goal until repeated-cycle maturity criteria are met.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-17T16:24:06+09:00`
+- Resolution: `done`
+- Actual hours: `1.5`
+- Actual tokens: `0`
+- Closed by: `le-20260617-090221-kst-969f`
+- Evidence:
+  - `reviews/VERIFY-2026-06-17-unit-task-ar-571-001-20260617162341.json`
+<!-- work-close:end -->

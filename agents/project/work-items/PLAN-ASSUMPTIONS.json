@@ -72,13 +72,13 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan.md",
-          "value": "431603674dabe7e09e372ecf5f17133bc7960455a61ea8d5442131d266d14fae"
+          "path": "reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-cycle.md",
+          "value": "8120479ad834133b71b32bc93c9202265a4810c535578ee904c0947fb256eb67"
         },
         {
           "kind": "sha256",
           "path": "scripts/self_improvement_cycle.py",
-          "value": "37035c937aac5b5b63b33009fe708c19bdbae1e9c93926f8fa6787fa2fe8dec9"
+          "value": "c34bc53f206be126d3926e68c80834f1097f300ea4de491f3d3ad54dd887861a"
         },
         {
           "kind": "sha256",
@@ -91,12 +91,12 @@
           "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan.md",
-      "recorded_at": "2026-06-17T08:59:05+09:00",
+      "design_record": "reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-cycle.md",
+      "recorded_at": "2026-06-17T16:29:16+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-SELF-IMPROVEMENT-CADENCE"
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-17T08:59:05+09:00"
+  "updated_at": "2026-06-17T16:29:16+09:00"
 }
