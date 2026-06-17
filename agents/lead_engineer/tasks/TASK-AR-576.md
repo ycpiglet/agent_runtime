@@ -9,9 +9,9 @@ kind: task
 parent_id: TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE
 registered_at: 2026-06-17T17:15:00+09:00
 created_at: 2026-06-17T17:15:00+09:00
-updated_at: 2026-06-17T17:15:00+09:00
+updated_at: 2026-06-17T18:47:01+09:00
 title: Publish remediation delta report
-status: planned
+status: completed
 priority: P1
 difficulty: S
 est_hours: 1
@@ -30,8 +30,23 @@ summary: Re-run the self-improvement report after role and asset remediation and
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+started_at: 2026-06-17T18:28:36+09:00
+verification:
+  - python scripts/self_improvement_cycle.py report --dry-run --json
+  - python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE --check
+  - python scripts/evidence_index_generator.py --check
 tags:
   - work-cli-created
+verification_status: passed
+verified_at: 2026-06-17T18:46:40+09:00
+verified_by: lead-engineer-20260617-remediation-delta-576
+evidence_refs:
+  - reviews/VERIFY-2026-06-17-task-ar-576-20260617184640.json
+resolution: done
+completed_at: 2026-06-17T18:47:01+09:00
+closed_by: lead-engineer-20260617-remediation-delta-576
+actual_hours: 1.1
+actual_tokens: 2600
 ---
 
 # TASK-AR-576 - Publish remediation delta report
@@ -55,3 +70,15 @@ tags:
 - `python scripts/self_improvement_cycle.py report --dry-run --json`
 - `python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE --check`
 - `python scripts/evidence_index_generator.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-17T18:47:01+09:00`
+- Resolution: `done`
+- Actual hours: `1.1`
+- Actual tokens: `2600`
+- Closed by: `lead-engineer-20260617-remediation-delta-576`
+- Evidence:
+  - `reviews/VERIFY-2026-06-17-task-ar-576-20260617184640.json`
+<!-- work-close:end -->

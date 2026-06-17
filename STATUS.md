@@ -1,13 +1,14 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE / TASK-AR-576 delta report
+## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE complete
 
-- Current task: `TASK-AR-576` published the remediation delta report, passed W4a self-verification, passed W4b independent verification, and is ready for merge/closeout.
+- Completed taskset: `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` is now `4/4` done and archived from the live board.
+- Completed final task: `TASK-AR-576` published the remediation delta report, passed W4a self-verification, passed W4b independent verification, merged, and closed.
 - Completed remediation tasks: `TASK-AR-573` created real scribe claim/log evidence and removed the obsolete `role-usage:scribe` waiver; `TASK-AR-574` routed the `reviewer` monitored role through real claim evidence; `TASK-AR-575` reduced low-reuse asset debt to one explicit watch.
 - Current metrics after remediation: evidence maturity `improving`, score `70/100`, role gaps `3`, asset gaps `1`, low-reuse assets `1`, waiver debt `0`, scribe `unknown`, doc-steward `ok`.
 - Delta from baseline: score `+38`, role gaps `-3`, asset gaps `-16`, low-reuse assets `-16`, waiver debt `-1`.
 - Persistent thread goal: still active. Do not claim full maturity yet; mature gates still fail on `monitored_role_gaps` and `scribe_state`.
-- Evidence: `reviews/REPORT-2026-06-17-self-improvement-remediation-delta.md`; `reviews/VERIFY-2026-06-17-unit-task-ar-576-001-20260617183459.json`; `reviews/W4B-2026-06-17-TASK-AR-576.md`; `reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md`; `reviews/W4B-2026-06-17-TASK-AR-575.md`; `reviews/VERIFY-2026-06-17-task-ar-575-20260617182232.json`; `reviews/REVIEW-2026-06-17-task-ar-574-monitored-role-evidence.md`; `reviews/W4B-2026-06-17-TASK-AR-574.md`; `reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md`.
+- Evidence: `reviews/REPORT-2026-06-17-self-improvement-remediation-delta.md`; `reviews/VERIFY-2026-06-17-task-ar-576-20260617184640.json`; `reviews/VERIFY-2026-06-17-unit-task-ar-576-001-20260617183459.json`; `reviews/W4B-2026-06-17-TASK-AR-576.md`; `reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md`; `reviews/W4B-2026-06-17-TASK-AR-575.md`; `reviews/VERIFY-2026-06-17-task-ar-575-20260617182232.json`; `reviews/REVIEW-2026-06-17-task-ar-574-monitored-role-evidence.md`; `reviews/W4B-2026-06-17-TASK-AR-574.md`; `reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md`.
 
 ## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-CADENCE maturity report
 

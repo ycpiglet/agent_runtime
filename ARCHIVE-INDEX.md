@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-17
-archived_count: 239
+archived_count: 240
 ---
 
 # Archived Task Files
 
-- `239` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `240` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -250,5 +250,6 @@ archived_count: 239
 | `TASK-AR-571` | `610c4d58-2c0…` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | 2026-06-17T08:31:23+09:00 | 2026-06-17T09:02:21+09:00 | 2026-06-17T16:26:25+09:00 | 2026-06-17T16:26:25+09:00 | Use review, meeting, seminar, retro, compound, scribe, and doc-steward surfaces to re… |
 | `TASK-AR-572` | `d5f5d125-a5e…` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | 2026-06-17T08:31:23+09:00 | 2026-06-17T16:38:29+09:00 | 2026-06-17T17:09:00+09:00 | 2026-06-17T17:09:00+09:00 | Define measurable maturity criteria for low-frequency agent/skill self-improvement an… |
 | `TASK-AR-573` | `ee8e7259-55d…` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | completed | 2026-06-17T17:15:00+09:00 | 2026-06-17T17:25:00+09:00 | 2026-06-17T17:37:24+09:00 | 2026-06-17T17:37:24+09:00 | Create verifiable scribe claim/log evidence and only remove the scribe waiver if coll… |
+| `TASK-AR-576` | `04c1bf81-a8f…` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | completed | 2026-06-17T17:15:00+09:00 | 2026-06-17T18:28:36+09:00 | 2026-06-17T18:47:01+09:00 | 2026-06-17T18:47:01+09:00 | Re-run the self-improvement report after role and asset remediation and state whether… |
 | `TASK-AR-574` | `d1df7596-272…` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | completed | 2026-06-17T17:15:00+09:00 | 2026-06-17T17:43:07+09:00 | 2026-06-17T17:56:12+09:00 | 2026-06-17T17:56:12+09:00 | Route council, progress-scout, release-steward, reviewer, and skeptic into real revie… |
 | `TASK-AR-575` | `93fe873f-43f…` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | completed | 2026-06-17T17:15:00+09:00 | 2026-06-17T18:00:00+09:00 | 2026-06-17T18:22:52+09:00 | 2026-06-17T18:22:52+09:00 | Reduce low-reuse runtime asset debt by exercising valuable assets in real workflows o… |

@@ -1,19 +1,19 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-17T18:42:15+09:00
+updated_at: 2026-06-17T18:47:01+09:00
 current_state:
-  summary: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE is registered to burn down the immature self-improvement metrics with real role and asset evidence."
+  summary: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE is complete; the persistent self-improvement goal is improving but still active."
   status: watch
-  task_set_status: in_progress
+  task_set_status: completed
   task_set_id: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
   step_index: 4
   step_total: 4
-  progress_pct: 95
-  status_text: "TASK-AR-576 passed W4b; merge and task closeout are pending."
+  progress_pct: 100
+  status_text: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE closed at improving 70/100; full maturity remains open."
 active_work:
   current_agents: []
   current_teams: []
 resume:
-  active_task: "TASK-AR-576"
+  active_task: none
   active_task_set: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
@@ -41,6 +41,7 @@ pointers:
       - TASK-AR-573
       - TASK-AR-574
       - TASK-AR-575
+      - TASK-AR-576
     completed_evidence:
       - reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md
       - reviews/W4B-2026-06-17-TASK-AR-573.md
@@ -54,10 +55,11 @@ pointers:
       - reviews/REPORT-2026-06-17-self-improvement-remediation-delta.md
       - reviews/VERIFY-2026-06-17-unit-task-ar-576-001-20260617183459.json
       - reviews/W4B-2026-06-17-TASK-AR-576.md
+      - reviews/VERIFY-2026-06-17-task-ar-576-20260617184640.json
     registration_review: reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration.md
     plan: docs/superpowers/plans/2026-06-17-self-improvement-remediation-cycle.md
     registration_input: agents/project/work-items/REGISTRATION-2026-06-17-self-improvement-remediation-cycle.json
-    next_task: TASK-AR-576
+    next_task: null
     tasks:
       - TASK-AR-573
       - TASK-AR-574
@@ -95,6 +97,10 @@ pointers:
         - progress-scout
         - skeptic
         - capability.session_dashboard
+    next_cycle_focus:
+      - "Resolve scribe_state scoring so real scribe evidence can become known/ok."
+      - "Route council, progress-scout, and skeptic through real claim evidence or an Owner-approved monitoring decision."
+      - "Give capability.session_dashboard a successful usage/performance pass or an explicit lifecycle decision."
   self_improvement_cadence:
     taskset: TASKSET-AR-SELF-IMPROVEMENT-CADENCE
     maturity_report: reviews/REPORT-2026-06-17-self-improvement-maturity.md
