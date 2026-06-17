@@ -1,0 +1,253 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "reviews/REPORT-2026-06-17-self-improvement-maturity.md",
+  "created_by": "codex-planner",
+  "now": "2026-06-17T17:15:00+09:00",
+  "initiative": {
+    "id": "INIT-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE",
+    "title": "Self Improvement Remediation Cycle",
+    "summary": "Convert the measured self-improvement debt into real role, scribe, and runtime-asset evidence so the score can improve beyond the immature baseline.",
+    "owner": "lead_engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE",
+    "display_name": "Self Improvement Remediation",
+    "summary": "Burn down the first-cycle maturity blockers: scribe waiver debt, dormant monitored-role evidence, low-reuse runtime assets, and a follow-up measurable report.",
+    "order": 616,
+    "plan_slug": "2026-06-17-self-improvement-remediation-cycle"
+  },
+  "tasks": [
+    {
+      "title": "Create real scribe evidence",
+      "goal": "Create verifiable scribe claim/log evidence and only remove the scribe waiver if collaboration governance proves the evidence is sufficient.",
+      "scope": "Use the existing claim lifecycle and waiver records. Do not delete the scribe waiver unless a real scribe-role claim/log artifact exists and collaboration_governance_gate no longer reports scribe waiver debt.",
+      "priority": "P0",
+      "difficulty": "M",
+      "est_hours": 2,
+      "est_tokens": 2500,
+      "owner": "lead_engineer",
+      "team": "agent-runtime-core",
+      "acceptance": [
+        "A real scribe-role claim/log or equivalent governed evidence exists in runtime records.",
+        "The scribe waiver is either removed with passing evidence or explicitly retained with a new blocker record.",
+        "self_improvement_cycle.py assess reports scribe_state as known or explains why it remains blocked."
+      ],
+      "verification": [
+        "python scripts/collaboration_governance_gate.py --check",
+        "python scripts/self_improvement_cycle.py assess",
+        "python scripts/parallel_worktree_gate.py --check"
+      ],
+      "units": [
+        {
+          "title": "Prove scribe usage before waiver burn-down",
+          "context": "The maturity report shows scribe_state unknown and waiver_debt 1. This unit should create real evidence rather than editing metrics directly.",
+          "inputs": [
+            "reviews/REPORT-2026-06-17-self-improvement-maturity.md",
+            "agents/project/waivers/WAIVER-2026-06-10-collaboration-runtime-promotion.json",
+            "scripts/collaboration_governance_gate.py"
+          ],
+          "target_files": [
+            "agents/runtime/task_claims",
+            "agents/project/waivers/WAIVER-2026-06-10-collaboration-runtime-promotion.json",
+            "scripts/collaboration_governance_gate.py",
+            "reviews/INDEX.md"
+          ],
+          "scope": "Create or route real scribe evidence through the existing lifecycle. Avoid synthetic evidence and do not weaken the governance gate.",
+          "steps": [
+            "Inspect how collaboration_governance_gate detects scribe waiver debt.",
+            "Route a scribe-role evidence record through the claim/log path or document a blocker if the dispatcher cannot represent the role.",
+            "Remove or update the waiver only after the gate proves the evidence is sufficient.",
+            "Index the resulting evidence."
+          ],
+          "acceptance": [
+            "The scribe debt is measurably reduced or a concrete blocker is recorded.",
+            "No waiver is removed without a passing gate or explicit review decision.",
+            "The evidence survives git clean/reset because it is committed."
+          ],
+          "verification": [
+            "python scripts/collaboration_governance_gate.py --check",
+            "python scripts/self_improvement_cycle.py assess",
+            "python scripts/evidence_index_generator.py --check"
+          ],
+          "handoff": "State whether scribe_state changed and cite the exact evidence/waiver decision.",
+          "stop_condition": "Stop after scribe evidence is real and indexed, or after a blocker review explains why the waiver cannot yet be removed."
+        }
+      ]
+    },
+    {
+      "title": "Route dormant monitored roles",
+      "goal": "Route council, progress-scout, release-steward, reviewer, and skeptic into real review or council evidence so monitored role gaps decrease.",
+      "scope": "Use product-native review/council/seminar/task-claim evidence. Do not mark roles as exercised from prose alone.",
+      "priority": "P0",
+      "difficulty": "M",
+      "est_hours": 2,
+      "est_tokens": 3000,
+      "owner": "lead_engineer",
+      "team": "agent-runtime-core",
+      "acceptance": [
+        "At least three monitored role gaps are removed or converted into explicit blockers with evidence.",
+        "A review/council record states which roles were exercised and which remain missing.",
+        "self_improvement_cycle.py assess reports role_gaps lower than 6 or explains the blocker."
+      ],
+      "verification": [
+        "python scripts/collaboration_governance_gate.py --check",
+        "python scripts/self_improvement_cycle.py assess",
+        "python scripts/evidence_index_generator.py --check"
+      ],
+      "units": [
+        {
+          "title": "Create monitored-role evidence packet",
+          "context": "The current maturity blockers include five monitored role gaps. This unit should route those roles through real governance records rather than changing thresholds.",
+          "inputs": [
+            "reviews/REPORT-2026-06-17-self-improvement-maturity.md",
+            "scripts/collaboration_governance_gate.py",
+            "agents/project/MULTIPANE-PROCESS-POLICY.yml"
+          ],
+          "target_files": [
+            "reviews",
+            "agents/runtime/task_claims",
+            "agents/project/MULTIPANE-PROCESS-POLICY.yml",
+            "reviews/INDEX.md"
+          ],
+          "scope": "Create evidence for monitored roles using existing records and gates. Do not invent live dialogue or bypass role-monitor findings.",
+          "steps": [
+            "Read the collaboration gate role-monitor logic and current policy.",
+            "Create review/council evidence that assigns or records the monitored roles honestly.",
+            "Run the gate and document remaining monitored role gaps.",
+            "Index the evidence."
+          ],
+          "acceptance": [
+            "Role evidence is traceable to claim, review, council, or policy records.",
+            "The role_gaps metric decreases or a blocker review explains why it cannot.",
+            "The next cycle report can compare before/after role_gaps."
+          ],
+          "verification": [
+            "python scripts/collaboration_governance_gate.py --check",
+            "python scripts/self_improvement_cycle.py assess",
+            "python scripts/evidence_index_generator.py --check"
+          ],
+          "handoff": "List each monitored role and its evidence path or blocker.",
+          "stop_condition": "Stop after the role gap state is measurable and indexed."
+        }
+      ]
+    },
+    {
+      "title": "Exercise or retire low-reuse runtime assets",
+      "goal": "Reduce low-reuse runtime asset debt by exercising valuable assets in real workflows or deprecating assets that should no longer be kept.",
+      "scope": "Use the runtime asset registry and usage gate. Do not game usage counts with dummy references.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 3,
+      "est_tokens": 3500,
+      "owner": "lead_engineer",
+      "team": "agent-runtime-core",
+      "acceptance": [
+        "Low-reuse asset count decreases toward the target_next threshold.",
+        "Each changed asset has keep, exercise, modify, or deprecate rationale.",
+        "runtime_asset_usage.py --check and self_improvement_cycle.py assess reflect the new state."
+      ],
+      "verification": [
+        "python scripts/runtime_asset_usage.py --check",
+        "python scripts/self_improvement_cycle.py assess",
+        "python scripts/evidence_index_generator.py --check"
+      ],
+      "units": [
+        {
+          "title": "Burn down runtime asset low-reuse debt",
+          "context": "The maturity report shows low_reuse_assets 17 against target_next 8 and mature target 2. This unit should prioritize real workflow exercise or explicit lifecycle decisions.",
+          "inputs": [
+            "reviews/REPORT-2026-06-17-self-improvement-maturity.md",
+            "agents/project/RUNTIME-ASSET-REGISTRY.json",
+            "scripts/runtime_asset_usage.py"
+          ],
+          "target_files": [
+            "agents/project/RUNTIME-ASSET-REGISTRY.json",
+            "OPS-COMMAND-REFERENCE.md",
+            "reviews",
+            "scripts/runtime_asset_usage.py",
+            "reviews/INDEX.md"
+          ],
+          "scope": "Review low-reuse assets and create real usage or lifecycle decisions. Keep unrelated registry refactors out of scope.",
+          "steps": [
+            "Run runtime_asset_usage.py and rank low-reuse assets by owner value.",
+            "For each selected asset, either exercise it in a real workflow or document a lifecycle decision.",
+            "Update registry/docs only when the decision changes the durable contract.",
+            "Re-run usage and self-improvement assessment."
+          ],
+          "acceptance": [
+            "At least five low-reuse assets have real evidence or lifecycle decisions.",
+            "The asset_gaps or low_reuse_assets metric decreases, or a blocker review explains why not.",
+            "No asset is deprecated without owner-facing rationale."
+          ],
+          "verification": [
+            "python scripts/runtime_asset_usage.py --check",
+            "python scripts/self_improvement_cycle.py assess",
+            "python scripts/evidence_index_generator.py --check"
+          ],
+          "handoff": "Report asset_gaps and low_reuse_assets before/after plus changed evidence paths.",
+          "stop_condition": "Stop after asset debt changes are measurable and indexed."
+        }
+      ]
+    },
+    {
+      "title": "Publish remediation delta report",
+      "goal": "Re-run the self-improvement report after role and asset remediation and state whether the persistent goal is mature, improving, or still active.",
+      "scope": "Report the measured delta only after the remediation tasks land. Do not claim maturity unless gates pass.",
+      "priority": "P1",
+      "difficulty": "S",
+      "est_hours": 1,
+      "est_tokens": 1500,
+      "owner": "lead_engineer",
+      "team": "agent-runtime-core",
+      "acceptance": [
+        "The report compares baseline 32/6/17 with current score, role_gaps, and asset_gaps.",
+        "The next-session pointer and status reflect the true persistent goal state.",
+        "If score remains below 65, another concrete remediation cycle is registered or explicitly queued."
+      ],
+      "verification": [
+        "python scripts/self_improvement_cycle.py report --dry-run --json",
+        "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE --check",
+        "python scripts/evidence_index_generator.py --check"
+      ],
+      "units": [
+        {
+          "title": "Measure remediation delta and update handoff surfaces",
+          "context": "The first cycle established a baseline but did not improve metrics. This unit decides whether remediation produced measurable improvement.",
+          "inputs": [
+            "reviews/REPORT-2026-06-17-self-improvement-maturity.md",
+            "scripts/self_improvement_cycle.py",
+            "STATUS.md",
+            "agents/project/NEXT-SESSION-POINTER.yml"
+          ],
+          "target_files": [
+            "scripts/self_improvement_cycle.py",
+            "STATUS.md",
+            "agents/project/NEXT-SESSION-POINTER.yml",
+            "reviews/INDEX.md"
+          ],
+          "scope": "Publish the delta and next state. Do not edit thresholds to make the result look better.",
+          "steps": [
+            "Run assessment and report commands after remediation work is merged.",
+            "Compare score, role_gaps, asset_gaps, waiver_debt, and scribe_state against the first report.",
+            "Update status and next-session pointer with true goal state.",
+            "Register or queue the next cycle if the target_next threshold is not reached."
+          ],
+          "acceptance": [
+            "A delta report exists and is indexed.",
+            "Goal state is truthful: mature, improving, or still active.",
+            "Verification commands prove report freshness."
+          ],
+          "verification": [
+            "python scripts/self_improvement_cycle.py report --dry-run --json",
+            "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE --check",
+            "python scripts/evidence_index_generator.py --check"
+          ],
+          "handoff": "State the before/after metrics and whether the persistent self-improvement goal remains open.",
+          "stop_condition": "Stop after the delta report and handoff surfaces are committed."
+        }
+      ]
+    }
+  ]
+}

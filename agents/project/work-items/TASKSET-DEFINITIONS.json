@@ -66,6 +66,12 @@
       "display_name": "Self Improvement Cadence",
       "summary": "Detect low-frequency roles and runtime assets, run review/retro/meeting/seminar/compound/doc-steward/scribe cycles from evidence, and publish measurable maturity signals.",
       "order": 615
+    },
+    {
+      "task_set_id": "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE",
+      "display_name": "Self Improvement Remediation",
+      "summary": "Burn down the first-cycle maturity blockers: scribe waiver debt, dormant monitored-role evidence, low-reuse runtime assets, and a follow-up measurable report.",
+      "order": 616
     }
   ]
 }

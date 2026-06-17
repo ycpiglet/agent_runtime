@@ -1,5 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE registered
+
+- Current taskset: `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE`; tasks `TASK-AR-573` through `TASK-AR-576` are registered and worker-ready.
+- Baseline carried forward: evidence maturity `immature`, score `32/100`, role gaps `6`, asset gaps `17`, waiver debt `1`, scribe `unknown`.
+- Purpose: create real scribe evidence, route dormant monitored roles into review/council evidence, exercise or retire low-reuse runtime assets, then publish a remediation delta report.
+- Goal state: persistent self-improvement goal remains open; next target is measurable improvement (`score >=65`, role gaps `<=3`, waiver debt `0`, low-reuse assets `<=8`) before any maturity claim.
+- Evidence: `reviews/REPORT-2026-06-17-self-improvement-maturity.md`; `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration.md`; `docs/superpowers/plans/2026-06-17-self-improvement-remediation-cycle.md`.
+
 ## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-CADENCE maturity report
 
 - Current taskset: `TASKSET-AR-SELF-IMPROVEMENT-CADENCE`; `TASK-AR-570` and `TASK-AR-571` are complete, and `TASK-AR-572` reports the maturity state.

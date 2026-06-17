@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-17
-task_count: 236
-open_count: 0
+task_count: 240
+open_count: 4
 completed_count: 236
-task_set_count: 0
+task_set_count: 1
 completed_task_set_count: 35
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `0` open or active tasks; `236` completed tasks are archived from this live board.
+- Summary: `4` open or active tasks; `236` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `0` / Ask `0` / Review `0` / Later `0` / Done `236`.
-- Task Sets: `0` active workflows; `35` completed workflows are hidden from the live action board.
+- Status: Action `4` / Ask `0` / Review `0` / Later `0` / Done `236`.
+- Task Sets: `1` active workflows; `35` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -41,6 +41,18 @@ completed_task_set_count: 35
 ## Action Board
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
+
+### Self Improvement Remediation (`TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE`)
+
+- Flow: Burn down the first-cycle maturity blockers: scribe waiver debt, dormant monitored-role evidence, low-reuse runtime assets, and a follow-up measurable report.
+- Progress: `0/4` done; `4` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-573` | INIT-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-573/UNIT-TASK-AR-573-001.md | planned | Action | P0 | Critical | Medium | 2h/2500tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Create verifiable scribe claim/log evidence and only remove the scribe waiver if coll… |
+| `TASK-AR-576` | INIT-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-576/UNIT-TASK-AR-576-001.md | planned | Action | P1 | High | Low | 1h/1500tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Re-run the self-improvement report after role and asset remediation and state whether… |
+| `TASK-AR-574` | INIT-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-574/UNIT-TASK-AR-574-001.md | planned | Action | P0 | Critical | Medium | 2h/3000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Route council, progress-scout, release-steward, reviewer, and skeptic into real revie… |
+| `TASK-AR-575` | INIT-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-575/UNIT-TASK-AR-575-001.md | planned | Action | P1 | High | Medium | 3h/3500tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Reduce low-reuse runtime asset debt by exercising valuable assets in real workflows o… |
 
 ## Archived Task Sets
 
@@ -87,7 +99,7 @@ completed_task_set_count: 35
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `0` open across `0` task sets (see Action Board above).
+- Active: `4` open across `1` task sets (see Action Board above).
 - Archived task sets: `35` (see Archived Task Sets above).
 - Archived task files: `236` — see `ARCHIVE-INDEX.md`.
 

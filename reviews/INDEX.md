@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-17T17:05:15+09:00
-record_count: 525
+generated_at: 2026-06-17T17:11:39+09:00
+record_count: 526
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `525` review and evidence records under `reviews/`.
+- Summary: indexed `526` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `525` files |
+| Reviews covered | pass | `526` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -471,6 +471,7 @@ record_count: 525
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-cycle.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-cycle` | md | record | pass | Self Improvement Cadence T3 Replan After Cycle |
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report` | md | record | pass | Self Improvement Cadence T3 Replan After Report |
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan` | md | record | pass | Self Improvement Cadence T3 Replan |
+| `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration` | md | record | pass | Self Improvement Remediation Registration |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario |

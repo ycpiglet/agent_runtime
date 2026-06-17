@@ -95,8 +95,46 @@
       "recorded_at": "2026-06-17T17:05:05+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-SELF-IMPROVEMENT-CADENCE"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "reviews/REPORT-2026-06-17-self-improvement-maturity.md",
+          "value": "bbc45f933cbf60dab3bd3702ee95c5ad9243bf0d6975106a0bc54ac9b6505ad4"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/collaboration_governance_gate.py",
+          "value": "10488ea9ea980c422bb06143d8b27323f77a6bceed487545ca635ba60d9753da"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/runtime_asset_usage.py",
+          "value": "35f2c5486a8127e942f396789b79bcc9b25398c403a1ba30883fe28330e0a621"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/self_improvement_cycle.py",
+          "value": "13d58dbc5a72c2f99c15cbf78fea785ca022c03c2f5f8eb492eee8af82b6e035"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "cb2cd245558157ff640dbf0b824694c5623e2e1ef0ccfba6e83f9a08a5522bc8"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        }
+      ],
+      "design_record": "reviews/REPORT-2026-06-17-self-improvement-maturity.md",
+      "recorded_at": "2026-06-17T17:11:39+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-17T17:05:05+09:00"
+  "updated_at": "2026-06-17T17:11:39+09:00"
 }

@@ -19,9 +19,18 @@
 
 <!-- BACKLOG-INDEX:END -->
 
+## 2026-06-17 TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE registration
+
+- Active taskset: `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` (Self Improvement Remediation).
+- Scope: burn down the first-cycle blockers from the maturity report: scribe waiver debt, dormant monitored-role evidence, low-reuse runtime assets, and a follow-up delta report.
+- Registered tasks: `TASK-AR-573`(real scribe evidence), `TASK-AR-574`(dormant monitored-role evidence), `TASK-AR-575`(low-reuse runtime assets), `TASK-AR-576`(remediation delta report).
+- Current baseline: evidence maturity `immature`, score `32/100`, role gaps `6`, asset gaps `17`, waiver debt `1`, scribe `unknown`.
+- Next target: reach measurable improvement before any maturity claim — score `>=65`, role gaps `<=3`, waiver debt `0`, low-reuse assets `<=8`.
+- Evidence: `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration.md`; `docs/superpowers/plans/2026-06-17-self-improvement-remediation-cycle.md`; `agents/project/work-items/REGISTRATION-2026-06-17-self-improvement-remediation-cycle.json`.
+
 ## 2026-06-17 TASKSET-AR-SELF-IMPROVEMENT-CADENCE maturity report
 
-- Active taskset: `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` (Self Improvement Cadence).
+- Completed taskset: `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` (Self Improvement Cadence).
 - Scope: measure low-frequency agent/skill usage, record the first review/meeting/seminar/retro/compound/casebook cycle, and publish measurable maturity thresholds.
 - Current state: `TASK-AR-570` and `TASK-AR-571` are complete; `TASK-AR-572` publishes the maturity report and keeps the persistent self-improvement goal active.
 - Metrics: evidence maturity `immature`, score `32/100`, role gaps `6`, asset gaps `17`, cycle artifacts `6/6`.
