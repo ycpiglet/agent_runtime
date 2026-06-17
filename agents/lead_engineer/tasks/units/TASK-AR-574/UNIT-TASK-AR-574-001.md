@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE
 initiative_id: INIT-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-06-17T17:15:00+09:00
-updated_at: 2026-06-17T17:15:00+09:00
+updated_at: 2026-06-17T17:45:54+09:00
 origin_type: owner_request
 origin_ref: reviews/REPORT-2026-06-17-self-improvement-maturity.md
 created_by: codex-planner
@@ -44,6 +44,10 @@ verification:
   - python scripts/evidence_index_generator.py --check
 handoff: List each monitored role and its evidence path or blocker.
 stop_condition: Stop after the role gap state is measurable and indexed.
+verified_at: 2026-06-17T17:45:54+09:00
+verified_by: reviewer-20260617-role-evidence-574
+evidence_refs:
+  - reviews/VERIFY-2026-06-17-unit-task-ar-574-001-20260617174554.json
 ---
 
 # UNIT-TASK-AR-574-001 - Create monitored-role evidence packet
