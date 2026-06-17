@@ -9,11 +9,11 @@ task_id: TASK-AR-572
 task_set_id: TASKSET-AR-SELF-IMPROVEMENT-CADENCE
 initiative_id: INIT-AR-SELF-IMPROVEMENT-CADENCE
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-06-17T08:31:23+09:00
-updated_at: 2026-06-17T08:31:23+09:00
+updated_at: 2026-06-17T16:59:00+09:00
 origin_type: owner_request
 origin_ref: owner-request:low-frequency-agent-skill-self-improvement-cycle
 created_by: codex-planner
@@ -47,6 +47,15 @@ verification:
   - python scripts/evidence_index_generator.py --check
 handoff: Final report states current maturity level, metric values, and whether the active thread goal remains open.
 stop_condition: Stop after reporting maturity state; if metrics are not mature, leave the goal active with the next concrete cycle.
+verified_at: 2026-06-17T16:58:00+09:00
+verified_by: le-20260617-163829-kst-61f6
+evidence_refs:
+  - reviews/VERIFY-2026-06-17-unit-task-ar-572-001-20260617165800.json
+resolution: done
+completed_at: 2026-06-17T16:59:00+09:00
+closed_by: le-20260617-163829-kst-61f6
+actual_hours: 0.5
+actual_tokens: 2000
 ---
 
 # UNIT-TASK-AR-572-001 - Wire maturity reporting into governance surfaces
@@ -101,3 +110,15 @@ Final report states current maturity level, metric values, and whether the activ
 ## Stop Boundary
 
 Stop after reporting maturity state; if metrics are not mature, leave the goal active with the next concrete cycle.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-17T16:59:00+09:00`
+- Resolution: `done`
+- Actual hours: `0.5`
+- Actual tokens: `2000`
+- Closed by: `le-20260617-163829-kst-61f6`
+- Evidence:
+  - `reviews/VERIFY-2026-06-17-unit-task-ar-572-001-20260617165800.json`
+<!-- work-close:end -->

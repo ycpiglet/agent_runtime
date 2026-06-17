@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-17T16:26:54+09:00
+generated_at: 2026-06-17T16:57:07+09:00
 record_count: 298
 ---
 
@@ -336,7 +336,7 @@ record_count: 298
 | 10.1.2 | Task 10.1.2 | task | `TASK-AR-571` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | `agents/lead_engineer/tasks/TASK-AR-571.md` | Use review, meeting, seminar, retro, compound, scribe, and doc-steward surfaces to re… |
 | 10.1.2.1 | Unit 10.1.2.1 | unit | `UNIT-TASK-AR-571-001` | `TASK-AR-571` | completed | `agents/lead_engineer/tasks/units/TASK-AR-571/UNIT-TASK-AR-571-001.md` | UNIT-TASK-AR-571-001 - Record the first self-improvement cycle |
 | 10.1.3 | Task 10.1.3 | task | `TASK-AR-572` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | planned | `agents/lead_engineer/tasks/TASK-AR-572.md` | Define measurable maturity criteria for low-frequency agent/skill self-improvement an… |
-| 10.1.3.1 | Unit 10.1.3.1 | unit | `UNIT-TASK-AR-572-001` | `TASK-AR-572` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-572/UNIT-TASK-AR-572-001.md` | UNIT-TASK-AR-572-001 - Wire maturity reporting into governance surfaces |
+| 10.1.3.1 | Unit 10.1.3.1 | unit | `UNIT-TASK-AR-572-001` | `TASK-AR-572` | completed | `agents/lead_engineer/tasks/units/TASK-AR-572/UNIT-TASK-AR-572-001.md` | UNIT-TASK-AR-572-001 - Wire maturity reporting into governance surfaces |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-17-unit-task-ar-572-001-20260617165800",
+  "work_id": "UNIT-TASK-AR-572-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-572/UNIT-TASK-AR-572-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-572",
+  "unit_id": "UNIT-TASK-AR-572-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-17T16:58:00+09:00",
+  "verified_by": "le-20260617-163829-kst-61f6",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_self_improvement_cycle.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-17T16:56:45+09:00",
+      "finished_at": "2026-06-17T16:56:50+09:00",
+      "stdout": "...........                                                              [100%]\n11 passed in 2.43s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-SELF-IMPROVEMENT-CADENCE --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-17T16:56:50+09:00",
+      "finished_at": "2026-06-17T16:56:51+09:00",
+      "stdout": "taskset-work-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\nfindings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-17T16:56:51+09:00",
+      "finished_at": "2026-06-17T16:56:53+09:00",
+      "stdout": "evidence-index: pass\nfindings=0\n",
+      "stderr": ""
+    }
+  ]
+}
