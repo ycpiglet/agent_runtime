@@ -182,3 +182,121 @@ def test_cli_assess_json(tmp_path: Path) -> None:
     assert payload["schema"] == "agent-runtime-self-improvement-assessment/v1"
     assert payload["collaboration"]["role_gaps"]
     assert payload["runtime_assets"]["asset_gaps"]
+
+
+def test_cycle_dry_run_plans_every_required_surface_without_writing(tmp_path: Path) -> None:
+    module = load_module()
+    write_fixture(tmp_path)
+
+    payload = module.cycle(
+        tmp_path,
+        now=datetime(2026, 6, 17, 8, 0, tzinfo=timezone.utc),
+        dry_run=True,
+    )
+
+    assert payload["schema"] == "agent-runtime-self-improvement-cycle/v1"
+    assert payload["status"] == "planned"
+    assert payload["requires_compound"] is True
+    kinds = {artifact["kind"] for artifact in payload["artifacts"]}
+    assert {"review", "meeting", "seminar", "retro", "compound", "casebook"} <= kinds
+    assert all(artifact["status"] == "planned" for artifact in payload["artifacts"])
+    assert payload["assessment"]["role_gaps"] == 2
+    assert payload["assessment"]["asset_gaps"] == 1
+    assert not (tmp_path / "reviews/REVIEW-2026-06-17-self-improvement-cycle.md").exists()
+    assert not (tmp_path / "agents/lead_engineer/compound_log.md").exists()
+
+
+def test_cycle_write_mode_records_artifacts_and_casebook(tmp_path: Path) -> None:
+    module = load_module()
+    write_fixture(tmp_path)
+
+    payload = module.cycle(
+        tmp_path,
+        now=datetime(2026, 6, 17, 8, 0, tzinfo=timezone.utc),
+        dry_run=False,
+    )
+
+    assert payload["status"] == "recorded"
+    review = tmp_path / "reviews/REVIEW-2026-06-17-self-improvement-cycle.md"
+    meeting = tmp_path / "reviews/MEETING-2026-06-17-self-improvement-cycle-sync.md"
+    seminar = tmp_path / "reviews/SEMINAR-2026-06-17-self-improvement-cadence.md"
+    retro = tmp_path / "reviews/RETRO-2026-06-17-self-improvement-cycle.md"
+    compound = tmp_path / "agents/lead_engineer/compound_log.md"
+    casebook = tmp_path / "agents/project/casebooks/failure-and-compound-casebook.md"
+    for path in [review, meeting, seminar, retro, compound, casebook]:
+        assert path.exists(), path
+
+    review_text = review.read_text(encoding="utf-8")
+    retro_text = retro.read_text(encoding="utf-8")
+    assert "Next-Cycle Thresholds" in review_text
+    assert "scribe" in review_text
+    assert "doc_steward" in review_text
+    assert "Section 5 Forward Actions" in retro_text
+    assert "role-usage:scribe" in retro_text
+    assert "COMPOUND-2026-06-17-001" in compound.read_text(encoding="utf-8")
+    assert "CASE-SELF-IMPROVEMENT-LOW-FREQUENCY-DEBT" in casebook.read_text(encoding="utf-8")
+
+    dry_run_after_write = module.cycle(
+        tmp_path,
+        now=datetime(2026, 6, 17, 8, 30, tzinfo=timezone.utc),
+        dry_run=True,
+    )
+    assert dry_run_after_write["compound_id"] == "COMPOUND-2026-06-17-001"
+    assert {artifact["status"] for artifact in dry_run_after_write["artifacts"]} == {"exists"}
+
+
+def test_cycle_skips_compound_when_assessment_is_mature(tmp_path: Path) -> None:
+    module = load_module()
+    mature_policy = policy()
+    mature_policy["minimum_claim_roles"] = {"scribe": 1}
+    mature_policy["monitored_roles"] = []
+    write_json(tmp_path / "agents/project/COLLABORATION-GOVERNANCE.json", mature_policy)
+    write_json(tmp_path / "agents/runtime/task_claims/CLAIM-scribe.json", claim("scribe", claim_id="CLAIM-scribe"))
+    good_registry = registry()
+    good_registry["assets"][0]["evidence_paths"] = ["reviews/REVIEW-fixture.md", "reviews/MEETING-fixture.md"]
+    write_json(tmp_path / "agents/project/RUNTIME-ASSET-REGISTRY.json", good_registry)
+    write(tmp_path / "skills/sleepy/SKILL.md", "# Sleepy\n")
+    write(tmp_path / "reviews/REVIEW-fixture.md", "sleepy-skill-token\n")
+    write(tmp_path / "reviews/MEETING-fixture.md", "sleepy-skill-token\n")
+    write(tmp_path / "agents/lead_engineer/STATUS.md", "## 현재 한 줄 요약\n- one\n")
+
+    payload = module.cycle(
+        tmp_path,
+        now=datetime(2026, 6, 17, 8, 0, tzinfo=timezone.utc),
+        dry_run=True,
+    )
+
+    assert payload["assessment"]["maturity_level"] == "mature"
+    assert payload["requires_compound"] is False
+    kinds = {artifact["kind"] for artifact in payload["artifacts"]}
+    assert "compound" not in kinds
+    assert "casebook" not in kinds
+
+
+def test_cli_cycle_dry_run_json(tmp_path: Path) -> None:
+    write_fixture(tmp_path)
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--root",
+            str(tmp_path),
+            "--now",
+            "2026-06-17T08:00:00+00:00",
+            "cycle",
+            "--dry-run",
+            "--json",
+        ],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["schema"] == "agent-runtime-self-improvement-cycle/v1"
+    assert payload["status"] == "planned"
+    assert payload["artifacts"]
