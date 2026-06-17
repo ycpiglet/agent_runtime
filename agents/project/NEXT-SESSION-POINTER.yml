@@ -1,5 +1,5 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-17T18:22:52+09:00
+updated_at: 2026-06-17T18:28:36+09:00
 current_state:
   summary: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE is registered to burn down the immature self-improvement metrics with real role and asset evidence."
   status: watch
@@ -7,11 +7,17 @@ current_state:
   task_set_id: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
   step_index: 4
   step_total: 4
-  progress_pct: 75
-  status_text: "TASK-AR-575 is closed; next task is TASK-AR-576 remediation delta report."
+  progress_pct: 80
+  status_text: "TASK-AR-576 is claimed to publish the remediation delta report."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260617-182836-task-ar-576-remediation-delta
+      agent_role: lead-engineer
+      agent_instance_id: lead-engineer-20260617-remediation-delta-576
+      display_name: lead-engineer@implementation-02
+      callsite_id: terminal:wt-task-ar-576:tab-01
+  current_teams:
+    - agent-runtime-core
 resume:
   active_task: "TASK-AR-576"
   active_task_set: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
@@ -22,10 +28,11 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260617-182836-task-ar-576-remediation-delta.json
   self_improvement_remediation:
     taskset: TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE
-    active_claim: null
+    active_claim: agents/runtime/task_claims/CLAIM-20260617-182836-task-ar-576-remediation-delta.json
     release_ready_claim: null
     released_claims:
       - agents/runtime/task_claims/CLAIM-20260617-172500-task-ar-573-remediation-scribe.json
