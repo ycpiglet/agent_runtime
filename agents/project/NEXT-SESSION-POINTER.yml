@@ -1,17 +1,23 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-17T17:15:00+09:00
+updated_at: 2026-06-17T17:25:00+09:00
 current_state:
   summary: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE is registered to burn down the immature self-improvement metrics with real role and asset evidence."
   status: watch
-  task_set_status: registered_ready
+  task_set_status: in_progress
   task_set_id: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
-  step_index: 0
+  step_index: 1
   step_total: 4
-  progress_pct: 0
-  status_text: "Next task is TASK-AR-573: create real scribe evidence before removing the scribe waiver."
+  progress_pct: 25
+  status_text: "Active claim CLAIM-20260617-172500-task-ar-573-remediation-scribe is proving real scribe evidence."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260617-172500-task-ar-573-remediation-scribe
+      agent_role: scribe
+      agent_instance_id: scribe-20260617-172500-kst-573
+      display_name: scribe@implementation-01
+      callsite_id: terminal:wt-task-ar-573:tab-01
+  current_teams:
+    - agent-runtime-core
 resume:
   active_task: "TASK-AR-573"
   active_task_set: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
@@ -22,9 +28,11 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260617-172500-task-ar-573-remediation-scribe.json
   self_improvement_remediation:
     taskset: TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE
+    active_claim: agents/runtime/task_claims/CLAIM-20260617-172500-task-ar-573-remediation-scribe.json
     registration_review: reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration.md
     plan: docs/superpowers/plans/2026-06-17-self-improvement-remediation-cycle.md
     registration_input: agents/project/work-items/REGISTRATION-2026-06-17-self-improvement-remediation-cycle.json

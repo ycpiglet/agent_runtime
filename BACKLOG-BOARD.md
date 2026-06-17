@@ -46,7 +46,7 @@ completed_task_set_count: 35
 
 - Flow: Burn down the first-cycle maturity blockers: scribe waiver debt, dormant monitored-role evidence, low-reuse runtime assets, and a follow-up measurable report.
 - Progress: `0/4` done; `4` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-573` | INIT-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-573/UNIT-TASK-AR-573-001.md | planned | Action | P0 | Critical | Medium | 2h/2500tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Create verifiable scribe claim/log evidence and only remove the scribe waiver if coll… |
