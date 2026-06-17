@@ -1,5 +1,5 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-17T18:00:00+09:00
+updated_at: 2026-06-17T18:15:36+09:00
 current_state:
   summary: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE is registered to burn down the immature self-improvement metrics with real role and asset evidence."
   status: watch
@@ -7,17 +7,11 @@ current_state:
   task_set_id: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
   step_index: 3
   step_total: 4
-  progress_pct: 55
-  status_text: "Active claim CLAIM-20260617-180000-task-ar-575-5b30 is exercising or retiring low-reuse runtime assets."
+  progress_pct: 70
+  status_text: "TASK-AR-575 release-steward claim passed W4b and is released; merge and task closeout are pending."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260617-180000-task-ar-575-5b30
-      agent_role: release-steward
-      agent_instance_id: release-steward-20260617-runtime-assets-575
-      display_name: release-steward@implementation-01
-      callsite_id: terminal:wt-task-ar-575:tab-01
-  current_teams:
-    - agent-runtime-core
+  current_agents: []
+  current_teams: []
 resume:
   active_task: "TASK-AR-575"
   active_task_set: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
@@ -28,18 +22,19 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260617-180000-task-ar-575-5b30.json
+  active_claims: []
   self_improvement_remediation:
     taskset: TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE
-    active_claim: agents/runtime/task_claims/CLAIM-20260617-180000-task-ar-575-5b30.json
+    active_claim: null
     release_ready_claim: null
     released_claims:
       - agents/runtime/task_claims/CLAIM-20260617-172500-task-ar-573-remediation-scribe.json
       - agents/runtime/task_claims/CLAIM-20260617-174307-task-ar-574-role-evidence.json
+      - agents/runtime/task_claims/CLAIM-20260617-180000-task-ar-575-5b30.json
     w4b_evidence:
       - reviews/W4B-2026-06-17-TASK-AR-573.md
       - reviews/W4B-2026-06-17-TASK-AR-574.md
+      - reviews/W4B-2026-06-17-TASK-AR-575.md
     completed_tasks:
       - TASK-AR-573
       - TASK-AR-574
@@ -67,10 +62,10 @@ pointers:
       waiver_debt: 1
       scribe: unknown
     current_metrics:
-      score: 52
-      maturity: immature
+      score: 70
+      maturity: improving
       role_gaps: 3
-      asset_gaps: 17
+      asset_gaps: 1
       waiver_debt: 0
       scribe: unknown
       doc_steward: ok
