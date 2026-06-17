@@ -28,6 +28,7 @@ import runtime_asset_usage  # noqa: E402
 
 SCHEMA = "agent-runtime-self-improvement-assessment/v1"
 CYCLE_SCHEMA = "agent-runtime-self-improvement-cycle/v1"
+REPORT_SCHEMA = "agent-runtime-self-improvement-report/v1"
 SCRIBE_HOT_KEEP = 10
 SCRIBE_DUE_AT = 13
 SCRIBE_OVERDUE_AT = 16
@@ -310,6 +311,7 @@ def assess(root: Path, *, now: datetime) -> dict[str, Any]:
     collab_counts = Counter(_effective_severity(finding) for finding in collab_findings)
     asset_counts = Counter(str(getattr(finding, "severity", "watch")) for finding in asset_findings)
     score = _score(collab_findings=collab_findings, role_gaps=roles, asset_gaps=assets, advisory=advisory)
+    cycle_status = _cycle_artifact_status(root, now=now, requires_compound=_debt_requires_compound_from_parts(score, roles, assets, advisory))
 
     return {
         "schema": SCHEMA,
@@ -337,8 +339,9 @@ def assess(root: Path, *, now: datetime) -> dict[str, Any]:
         "product_surfaces": {
             "artifact_counts": _review_artifact_counts(root),
             "required_cycle_surfaces": ["REVIEW", "MEETING", "SEMINAR", "RETRO", "COMPOUND"],
+            "current_cycle": cycle_status,
         },
-        "next": _next_actions(score["maturity_level"], roles, assets, advisory),
+        "next": _next_actions(score["maturity_level"], roles, assets, advisory, cycle_recorded=cycle_status["recorded"]),
     }
 
 
@@ -388,6 +391,43 @@ def _debt_requires_compound(payload: dict[str, Any]) -> bool:
         or inputs["low_reuse_assets"] >= 3
         or payload["advisory_signals"]["scribe"]["state"] in {"unknown", "due", "overdue"}
     )
+
+
+def _debt_requires_compound_from_parts(
+    score: dict[str, Any],
+    role_gaps: list[dict[str, Any]],
+    asset_gaps: list[dict[str, Any]],
+    advisory: dict[str, dict[str, Any]],
+) -> bool:
+    inputs = score["inputs"]
+    return (
+        inputs["waiver_debt"] > 0
+        or inputs["monitored_role_gaps"] >= 3
+        or inputs["low_reuse_assets"] >= 3
+        or advisory["scribe"]["state"] in {"unknown", "due", "overdue"}
+        or bool(role_gaps and asset_gaps)
+    )
+
+
+def _cycle_artifact_status(root: Path, *, now: datetime, requires_compound: bool) -> dict[str, Any]:
+    paths = _artifact_paths(_today(now))
+    required = ["review", "meeting", "seminar", "retro"]
+    if requires_compound:
+        required.extend(["compound", "casebook"])
+    artifacts: list[dict[str, Any]] = []
+    for kind, rel_path in paths.items():
+        if kind not in required:
+            continue
+        exists = (root / rel_path).exists()
+        artifacts.append({"kind": kind, "path": rel_path, "exists": exists})
+    present = sum(1 for artifact in artifacts if artifact["exists"])
+    return {
+        "date": _today(now),
+        "recorded": present == len(artifacts),
+        "present": present,
+        "required": len(artifacts),
+        "artifacts": artifacts,
+    }
 
 
 def _table(rows: list[dict[str, Any]], columns: list[str]) -> list[str]:
@@ -825,15 +865,152 @@ def cycle(root: Path, *, now: datetime, dry_run: bool = False, overwrite: bool =
     }
 
 
+def _maturity_gate_results(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    score = payload["score"]
+    inputs = score["inputs"]
+    cycle_status = payload["product_surfaces"]["current_cycle"]
+    scribe_state = payload["advisory_signals"]["scribe"]["state"]
+    return [
+        {"gate": "score_improving", "current": score["value"], "target": ">=65", "pass": score["value"] >= 65},
+        {"gate": "score_mature", "current": score["value"], "target": ">=90", "pass": score["value"] >= 90},
+        {"gate": "unwaived_blocks", "current": inputs["unwaived_blocks"], "target": "0", "pass": inputs["unwaived_blocks"] == 0},
+        {"gate": "waiver_debt", "current": inputs["waiver_debt"], "target": "0", "pass": inputs["waiver_debt"] == 0},
+        {"gate": "monitored_role_gaps", "current": inputs["monitored_role_gaps"], "target": "<=1", "pass": inputs["monitored_role_gaps"] <= 1},
+        {"gate": "low_reuse_assets", "current": inputs["low_reuse_assets"], "target": "<=2", "pass": inputs["low_reuse_assets"] <= 2},
+        {"gate": "scribe_state", "current": scribe_state, "target": "ok", "pass": scribe_state == "ok"},
+        {"gate": "cycle_artifacts", "current": f"{cycle_status['present']}/{cycle_status['required']}", "target": "all required", "pass": cycle_status["recorded"]},
+    ]
+
+
+def _goal_state(payload: dict[str, Any]) -> dict[str, Any]:
+    gates = _maturity_gate_results(payload)
+    blocking = [gate["gate"] for gate in gates if not gate["pass"] and gate["gate"] != "score_mature"]
+    mature = payload["maturity_level"] == "mature" and not blocking
+    cycle_recorded = payload["product_surfaces"]["current_cycle"]["recorded"]
+    return {
+        "complete": bool(mature),
+        "evidence_maturity": payload["maturity_level"],
+        "cycle_recorded": cycle_recorded,
+        "operating_state": "mature" if mature else ("cycle_recorded_but_evidence_immature" if cycle_recorded else "needs_cycle_record"),
+        "blocking_gates": blocking,
+    }
+
+
+def _render_report(payload: dict[str, Any], *, today: str, generated_at: str) -> str:
+    score = payload["score"]
+    cycle_status = payload["product_surfaces"]["current_cycle"]
+    goal_state = _goal_state(payload)
+    baseline_rows = [
+        {"metric": "score", "baseline": 32, "current": score["value"], "delta": score["value"] - 32},
+        {"metric": "role_gaps", "baseline": 6, "current": len(payload["collaboration"]["role_gaps"]), "delta": len(payload["collaboration"]["role_gaps"]) - 6},
+        {"metric": "asset_gaps", "baseline": 17, "current": len(payload["runtime_assets"]["asset_gaps"]), "delta": len(payload["runtime_assets"]["asset_gaps"]) - 17},
+        {"metric": "cycle_artifacts", "baseline": 0, "current": cycle_status["present"], "delta": cycle_status["present"]},
+    ]
+    lines = [
+        "---",
+        f"title: Self Improvement Maturity Report {today}",
+        f"date: {today}",
+        f"signal: {payload['status']}",
+        f"score: {score['value']}",
+        "tags: [self-improvement, maturity-report, task-ar-572]",
+        "---",
+        "",
+        f"# Self Improvement Maturity Report {today}",
+        "",
+        "## Bottom Line",
+        "",
+        f"- Evidence maturity: `{payload['maturity_level']}` at `{score['value']}/100`.",
+        f"- Cycle artifacts: `{cycle_status['present']}/{cycle_status['required']}` required records present.",
+        f"- Persistent thread goal complete: `{str(goal_state['complete']).lower()}`.",
+        "- The operating cycle is now recorded, but role/asset evidence has not yet improved enough to claim maturity.",
+        "",
+        "## Signal",
+        "",
+        "| Metric | Baseline | Current | Delta |",
+        "| --- | ---: | ---: | ---: |",
+    ]
+    for row in baseline_rows:
+        lines.append(f"| {row['metric']} | {row['baseline']} | {row['current']} | {row['delta']} |")
+    lines.extend(
+        [
+            "",
+            "## Maturity Gates",
+            "",
+            "| Gate | Current | Target | Pass |",
+            "| --- | --- | --- | --- |",
+        ]
+    )
+    for gate in _maturity_gate_results(payload):
+        lines.append(f"| {gate['gate']} | `{gate['current']}` | `{gate['target']}` | `{str(gate['pass']).lower()}` |")
+    lines.extend(
+        [
+            "",
+            "## Decision",
+            "",
+            "- Keep the active thread goal open.",
+            "- Use the recorded cycle as the repeatable cadence baseline.",
+            "- Do not remove the scribe waiver or claim monitored roles are exercised until real claim/log evidence exists.",
+            "",
+            "## Next",
+            "",
+        ]
+    )
+    for action in payload["next"]:
+        lines.append(f"- {action}")
+    lines.extend(["", f"_Generated at `{generated_at}`._", ""])
+    return "\n".join(lines)
+
+
+def report(root: Path, *, now: datetime, dry_run: bool = False, overwrite: bool = False) -> dict[str, Any]:
+    root = root.resolve()
+    payload = assess(root, now=now)
+    today = _today(now)
+    generated_at = now.isoformat(timespec="seconds")
+    rel_path = f"reviews/REPORT-{today}-self-improvement-maturity.md"
+    content = _render_report(payload, today=today, generated_at=generated_at)
+    artifact = _write_text_artifact(
+        root,
+        rel_path=rel_path,
+        content=content,
+        kind="maturity_report",
+        dry_run=dry_run,
+        overwrite=overwrite,
+    )
+    return {
+        "schema": REPORT_SCHEMA,
+        "generated_at": generated_at,
+        "root": str(root),
+        "status": "planned" if dry_run else "recorded",
+        "dry_run": dry_run,
+        "task_id": "TASK-AR-572",
+        "unit_id": "UNIT-TASK-AR-572-001",
+        "assessment": {
+            "status": payload["status"],
+            "maturity_level": payload["maturity_level"],
+            "score": payload["score"],
+            "role_gaps": len(payload["collaboration"]["role_gaps"]),
+            "asset_gaps": len(payload["runtime_assets"]["asset_gaps"]),
+        },
+        "goal_state": _goal_state(payload),
+        "maturity_gates": _maturity_gate_results(payload),
+        "next_cycle_thresholds": _thresholds(payload),
+        "artifact": artifact,
+    }
+
+
 def _next_actions(
     maturity_level: str,
     role_gaps: list[dict[str, Any]],
     asset_gaps: list[dict[str, Any]],
     advisory: dict[str, dict[str, Any]],
+    *,
+    cycle_recorded: bool = False,
 ) -> list[str]:
     actions: list[str] = []
-    if maturity_level not in {"mature", "improving"}:
+    if maturity_level not in {"mature", "improving"} and not cycle_recorded:
         actions.append("Run the cycle unit to record review/meeting/seminar/retro evidence from this baseline.")
+    elif maturity_level not in {"mature", "improving"}:
+        actions.append("Run the next remediation cycle after adding real role/asset evidence.")
     if any(gap["root_cause"] == "waiver_debt" for gap in role_gaps):
         actions.append("Create real scribe claim/log evidence before removing the scribe waiver.")
     if any(gap["subject"].startswith("role-monitor:") for gap in role_gaps):
@@ -893,6 +1070,24 @@ def render_cycle_text(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def render_report_text(payload: dict[str, Any]) -> str:
+    lines = [
+        "Self Improvement Maturity Report",
+        f"- Status: {payload['status']}",
+        f"- Evidence maturity: {payload['assessment']['maturity_level']} ({payload['assessment']['score']['value']}/100)",
+        f"- Goal complete: {payload['goal_state']['complete']}",
+        f"- Operating state: {payload['goal_state']['operating_state']}",
+        f"- Report: {payload['artifact']['status']} -> {payload['artifact']['path']}",
+        "",
+        "Blocking gates:",
+    ]
+    blockers = payload["goal_state"]["blocking_gates"]
+    lines.extend(f"- {gate}" for gate in blockers)
+    if not blockers:
+        lines.append("- none")
+    return "\n".join(lines)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Self-improvement cycle baseline")
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Repository root")
@@ -904,6 +1099,10 @@ def build_parser() -> argparse.ArgumentParser:
     cycle_parser.add_argument("--dry-run", action="store_true", help="show planned artifacts without writing")
     cycle_parser.add_argument("--overwrite", action="store_true", help="replace dated review/meeting/seminar/retro records")
     cycle_parser.add_argument("--json", action="store_true", help="emit JSON")
+    report_parser = sub.add_parser("report", help="write maturity report and active-goal state")
+    report_parser.add_argument("--dry-run", action="store_true", help="show planned report without writing")
+    report_parser.add_argument("--overwrite", action="store_true", help="replace dated maturity report")
+    report_parser.add_argument("--json", action="store_true", help="emit JSON")
     return parser
 
 
@@ -923,6 +1122,13 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
         else:
             print(render_cycle_text(payload))
+        return 0
+    if args.command == "report":
+        payload = report(args.root, now=now, dry_run=args.dry_run, overwrite=args.overwrite)
+        if args.json:
+            print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        else:
+            print(render_report_text(payload))
         return 0
     return 2
 
