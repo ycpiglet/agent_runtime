@@ -1,0 +1,23 @@
+{
+  "schema": "agent-runtime-session-baseline/v1",
+  "captured_at": "2026-06-16T23:56:36.307716+00:00",
+  "cwd": "C:\\Users\\ycpig\\agent_runtime",
+  "head": "f4e1319",
+  "branch": "claude/decision-first-console-ia",
+  "status_fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stash_count": 0,
+  "worktrees": [
+    {
+      "path": "C:/Users/ycpig/agent_runtime",
+      "HEAD": "f4e13195a1b96c32b03d6822e20b3ca7eb1e147c",
+      "branch": "claude/decision-first-console-ia"
+    }
+  ],
+  "active_codex_branches": [
+    "claude/deadlock-guardrails",
+    "claude/decision-first-console-ia",
+    "claude/product-maturity-eval-merge",
+    "claude/wave89-closeout",
+    "codex/task-ar-552"
+  ]
+}

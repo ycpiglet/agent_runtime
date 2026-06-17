@@ -72,13 +72,13 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-registration.md",
-          "value": "a34991d7cb185f9ea8f2700ceb977b5f5c7876f1054f1cb3369f62fd8b4a3a06"
+          "path": "reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan.md",
+          "value": "431603674dabe7e09e372ecf5f17133bc7960455a61ea8d5442131d266d14fae"
         },
         {
-          "kind": "absent",
+          "kind": "sha256",
           "path": "scripts/self_improvement_cycle.py",
-          "value": ""
+          "value": "37035c937aac5b5b63b33009fe708c19bdbae1e9c93926f8fa6787fa2fe8dec9"
         },
         {
           "kind": "sha256",
@@ -91,12 +91,12 @@
           "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-registration.md",
-      "recorded_at": "2026-06-17T08:31:29+09:00",
+      "design_record": "reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan.md",
+      "recorded_at": "2026-06-17T08:59:05+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-SELF-IMPROVEMENT-CADENCE"
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-17T08:31:29+09:00"
+  "updated_at": "2026-06-17T08:59:05+09:00"
 }
