@@ -23,10 +23,10 @@
 
 - Active taskset: `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` (Self Improvement Remediation).
 - Scope: burn down the first-cycle blockers from the maturity report: scribe waiver debt, dormant monitored-role evidence, low-reuse runtime assets, and a follow-up delta report.
-- Progress: `TASK-AR-573` and `TASK-AR-574` are complete; next task is `TASK-AR-575`(low-reuse runtime assets), followed by `TASK-AR-576`(remediation delta report).
-- Current metrics: evidence maturity `immature`, score `47/100`, role gaps `4`, asset gaps `17`, waiver debt `0`, scribe `unknown`, doc-steward `ok`.
-- Next target: reach measurable improvement before any maturity claim — score `>=65`, role gaps `<=3`, waiver debt `0`, low-reuse assets `<=8`.
-- Evidence: `reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md`; `reviews/W4B-2026-06-17-TASK-AR-573.md`; `reviews/REVIEW-2026-06-17-task-ar-574-monitored-role-evidence.md`; `reviews/W4B-2026-06-17-TASK-AR-574.md`; `reviews/VERIFY-2026-06-17-task-ar-574-20260617175559.json`; `docs/superpowers/plans/2026-06-17-self-improvement-remediation-cycle.md`.
+- Progress: `TASK-AR-573`, `TASK-AR-574`, and `TASK-AR-575` are complete; next task is `TASK-AR-576`(remediation delta report).
+- Current metrics: evidence maturity `improving`, score `70/100`, role gaps `3`, asset gaps `1`, low-reuse assets `1`, waiver debt `0`, scribe `unknown`, doc-steward `ok`.
+- Next target: publish the measurable remediation delta without overstating maturity; remaining watches are `council`, `progress-scout`, `skeptic`, and `capability.session_dashboard`.
+- Evidence: `reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md`; `reviews/W4B-2026-06-17-TASK-AR-573.md`; `reviews/REVIEW-2026-06-17-task-ar-574-monitored-role-evidence.md`; `reviews/W4B-2026-06-17-TASK-AR-574.md`; `reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md`; `reviews/W4B-2026-06-17-TASK-AR-575.md`; `reviews/VERIFY-2026-06-17-task-ar-575-20260617182232.json`; `docs/superpowers/plans/2026-06-17-self-improvement-remediation-cycle.md`.
 
 ## 2026-06-17 TASKSET-AR-SELF-IMPROVEMENT-CADENCE maturity report
 

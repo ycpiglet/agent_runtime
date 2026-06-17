@@ -1,13 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE / TASK-AR-574 complete
+## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE / TASK-AR-575 complete
 
-- Completed task: `TASK-AR-574` routed the `reviewer` monitored role through real claim evidence, recorded blockers for `council`, `progress-scout`, `release-steward`, and `skeptic`, passed W4a/W4b verification, released the claim, merged the worktree, and closed the task.
-- Completed predecessor: `TASK-AR-573` created real scribe claim/log evidence and removed the obsolete `role-usage:scribe` waiver.
-- Current taskset: `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE`; `TASK-AR-575` is next for low-reuse runtime asset exercise/deprecation.
-- Current metrics after TASK-AR-574: evidence maturity `immature`, score `47/100`, role gaps `4`, asset gaps `17`, waiver debt `0`, scribe `unknown`, doc-steward `ok`.
-- Remaining target before maturity claim: score `>=65`, role gaps `<=3`, waiver debt `0`, low-reuse assets `<=8`.
-- Evidence: `reviews/REVIEW-2026-06-17-task-ar-574-monitored-role-evidence.md`; `reviews/W4B-2026-06-17-TASK-AR-574.md`; `reviews/VERIFY-2026-06-17-task-ar-574-20260617175559.json`; `reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md`.
+- Completed task: `TASK-AR-575` recorded real lifecycle evidence for low-reuse runtime assets, reduced low-reuse asset debt to one explicit watch, passed W4a/W4b verification, released the claim, merged the worktree, and closed the task.
+- Completed predecessors: `TASK-AR-573` created real scribe claim/log evidence and removed the obsolete `role-usage:scribe` waiver; `TASK-AR-574` routed the `reviewer` monitored role through real claim evidence.
+- Current taskset: `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE`; `TASK-AR-576` is next for the remediation delta report.
+- Current metrics after TASK-AR-575: evidence maturity `improving`, score `70/100`, role gaps `3`, asset gaps `1`, low-reuse assets `1`, waiver debt `0`, scribe `unknown`, doc-steward `ok`.
+- Remaining before closeout: publish the delta report, preserve the explicit watches for `council`, `progress-scout`, `skeptic`, and `capability.session_dashboard`, and do not claim full maturity yet.
+- Evidence: `reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md`; `reviews/W4B-2026-06-17-TASK-AR-575.md`; `reviews/VERIFY-2026-06-17-task-ar-575-20260617182232.json`; `reviews/REVIEW-2026-06-17-task-ar-574-monitored-role-evidence.md`; `reviews/W4B-2026-06-17-TASK-AR-574.md`; `reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md`.
 
 ## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-CADENCE maturity report
 

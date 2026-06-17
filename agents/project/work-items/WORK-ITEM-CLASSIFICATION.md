@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-17T17:56:13+09:00
+generated_at: 2026-06-17T18:22:53+09:00
 record_count: 308
 ---
 
@@ -343,7 +343,7 @@ record_count: 308
 | 11.1.1.1 | Unit 11.1.1.1 | unit | `UNIT-TASK-AR-573-001` | `TASK-AR-573` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-573/UNIT-TASK-AR-573-001.md` | UNIT-TASK-AR-573-001 - Prove scribe usage before waiver burn-down |
 | 11.1.2 | Task 11.1.2 | task | `TASK-AR-574` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | completed | `agents/lead_engineer/tasks/TASK-AR-574.md` | Route council, progress-scout, release-steward, reviewer, and skeptic into real revie… |
 | 11.1.2.1 | Unit 11.1.2.1 | unit | `UNIT-TASK-AR-574-001` | `TASK-AR-574` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-574/UNIT-TASK-AR-574-001.md` | UNIT-TASK-AR-574-001 - Create monitored-role evidence packet |
-| 11.1.3 | Task 11.1.3 | task | `TASK-AR-575` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | planned | `agents/lead_engineer/tasks/TASK-AR-575.md` | Reduce low-reuse runtime asset debt by exercising valuable assets in real workflows o… |
+| 11.1.3 | Task 11.1.3 | task | `TASK-AR-575` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | completed | `agents/lead_engineer/tasks/TASK-AR-575.md` | Reduce low-reuse runtime asset debt by exercising valuable assets in real workflows o… |
 | 11.1.3.1 | Unit 11.1.3.1 | unit | `UNIT-TASK-AR-575-001` | `TASK-AR-575` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-575/UNIT-TASK-AR-575-001.md` | UNIT-TASK-AR-575-001 - Burn down runtime asset low-reuse debt |
 | 11.1.4 | Task 11.1.4 | task | `TASK-AR-576` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | planned | `agents/lead_engineer/tasks/TASK-AR-576.md` | Re-run the self-improvement report after role and asset remediation and state whether… |
 | 11.1.4.1 | Unit 11.1.4.1 | unit | `UNIT-TASK-AR-576-001` | `TASK-AR-576` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-576/UNIT-TASK-AR-576-001.md` | UNIT-TASK-AR-576-001 - Measure remediation delta and update handoff surfaces |
