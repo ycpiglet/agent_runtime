@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-573:tab-01",
   "pane_id": "terminal:wt-task-ar-573:tab-01",
   "mode": "implementation",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE",
   "active_scope": "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE",
   "scope_transition_approved": false,
@@ -27,12 +27,12 @@
   "worktree_path": ".worktrees/TASK-AR-573",
   "branch": "codex/task-ar-573-remediation-scribe",
   "claimed_at": "2026-06-17T17:25:00+09:00",
-  "last_heartbeat": "2026-06-17T17:25:00+09:00",
-  "updated_at": "2026-06-17T17:25:00+09:00",
+  "last_heartbeat": "2026-06-17T17:32:44+09:00",
+  "updated_at": "2026-06-17T17:32:44+09:00",
   "expires_at": "2026-06-17T17:55:00+09:00",
   "lease": {
     "claimed_at": "2026-06-17T17:25:00+09:00",
-    "heartbeat_at": "2026-06-17T17:25:00+09:00",
+    "heartbeat_at": "2026-06-17T17:32:44+09:00",
     "expires_at": "2026-06-17T17:55:00+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260617-172500-task-ar-573-remediation-scribe.handoff.md",
@@ -44,5 +44,9 @@
     "agents/project/waivers/WAIVER-2026-06-10-collaboration-runtime-promotion.json",
     "scripts/collaboration_governance_gate.py",
     "reviews/INDEX.md"
-  ]
+  ],
+  "released_at": "2026-06-17T17:32:44+09:00",
+  "verified_by": "Jason-019ed4b2-67de-7340-b34e-301bbb0ce2e5",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-06-17-TASK-AR-573.md"
 }
