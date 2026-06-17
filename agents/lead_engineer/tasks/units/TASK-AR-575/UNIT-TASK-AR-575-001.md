@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE
 initiative_id: INIT-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-06-17T17:15:00+09:00
-updated_at: 2026-06-17T17:15:00+09:00
+updated_at: 2026-06-17T18:09:03+09:00
 origin_type: owner_request
 origin_ref: reviews/REPORT-2026-06-17-self-improvement-maturity.md
 created_by: codex-planner
@@ -45,6 +45,10 @@ verification:
   - python scripts/evidence_index_generator.py --check
 handoff: Report asset_gaps and low_reuse_assets before/after plus changed evidence paths.
 stop_condition: Stop after asset debt changes are measurable and indexed.
+verified_at: 2026-06-17T18:09:03+09:00
+verified_by: release-steward-20260617-runtime-assets-575
+evidence_refs:
+  - reviews/VERIFY-2026-06-17-unit-task-ar-575-001-20260617180903.json
 ---
 
 # UNIT-TASK-AR-575-001 - Burn down runtime asset low-reuse debt

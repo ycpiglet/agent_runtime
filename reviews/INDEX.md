@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-17T17:56:24+09:00
-record_count: 534
+generated_at: 2026-06-17T18:09:18+09:00
+record_count: 536
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `534` review and evidence records under `reviews/`.
+- Summary: indexed `536` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `534` files |
+| Reviews covered | pass | `536` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -469,6 +469,7 @@ record_count: 534
 | `reviews/REVIEW-2026-06-17-self-improvement-cycle.md` | `REVIEW-2026-06-17-self-improvement-cycle` | md | record | watch | Self Improvement Cycle 2026-06-17 |
 | `reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md` | `REVIEW-2026-06-17-task-ar-573-scribe-evidence` | md | record | watch | TASK-AR-573 Scribe Evidence |
 | `reviews/REVIEW-2026-06-17-task-ar-574-monitored-role-evidence.md` | `REVIEW-2026-06-17-task-ar-574-monitored-role-evidence` | md | record | watch | TASK-AR-574 Monitored Role Evidence |
+| `reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md` | `REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle` | review | approved | pass | TASK-AR-575 Runtime Asset Lifecycle Review |
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-registration.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-registration` | md | record | pass | Self Improvement Cadence Registration |
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-cycle.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-cycle` | md | record | pass | Self Improvement Cadence T3 Replan After Cycle |
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report` | md | record | pass | Self Improvement Cadence T3 Replan After Report |
@@ -511,6 +512,7 @@ record_count: 534
 | `reviews/VERIFY-2026-06-17-unit-task-ar-572-001-20260617165800.json` | `VERIFY-2026-06-17-unit-task-ar-572-001-20260617165800` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-572-001-20260617165800 |
 | `reviews/VERIFY-2026-06-17-unit-task-ar-573-001-20260617172602.json` | `VERIFY-2026-06-17-unit-task-ar-573-001-20260617172602` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-573-001-20260617172602 |
 | `reviews/VERIFY-2026-06-17-unit-task-ar-574-001-20260617174554.json` | `VERIFY-2026-06-17-unit-task-ar-574-001-20260617174554` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-574-001-20260617174554 |
+| `reviews/VERIFY-2026-06-17-unit-task-ar-575-001-20260617180903.json` | `VERIFY-2026-06-17-unit-task-ar-575-001-20260617180903` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-575-001-20260617180903 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |

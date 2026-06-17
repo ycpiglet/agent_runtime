@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-17-unit-task-ar-575-001-20260617180903",
+  "work_id": "UNIT-TASK-AR-575-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-575/UNIT-TASK-AR-575-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-575",
+  "unit_id": "UNIT-TASK-AR-575-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-17T18:09:03+09:00",
+  "verified_by": "release-steward-20260617-runtime-assets-575",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python scripts/runtime_asset_usage.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-17T18:09:03+09:00",
+      "finished_at": "2026-06-17T18:09:04+09:00",
+      "stdout": "e-asset-usage: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-575\nassets=35\nusage_total=298\nblock=0\nwatch=0\nby_kind={\"gate\": 11, \"hook\": 3, \"script\": 13, \"skill\": 7, \"trigger\": 1}\nby_lifecycle={\"keep\": 34, \"observe\": 1}\n- metric gate.owner_governance kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=6 reuse=2\n- metric gate.collaboration_governance kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=12 reuse=2\n- metric gate.runtime_asset_usage kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=7 reuse=2\n- metric gate.state_sync kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=2\n- metric report.governance_ops kind=script status=active lifecycle=keep paths=1 evidence=3 usage=7 reuse=2\n- metric hook.taskset_prompt kind=hook status=active lifecycle=keep paths=2 evidence=3 usage=7 reuse=2\n- metric hook.stop_owner_governance kind=hook status=active lifecycle=keep paths=2 evidence=2 usage=10 reuse=2\n- metric trigger.planning kind=trigger status=watch lifecycle=observe paths=1 evidence=2 usage=9 reuse=2\n- metric capability.ralph_loop kind=script status=active lifecycle=keep paths=1 evidence=2 usage=2 reuse=2\n- metric capability.agent_retro kind=script status=active lifecycle=keep paths=1 evidence=2 usage=11 reuse=2\n- metric capability.retro_forward kind=script status=active lifecycle=keep paths=1 evidence=2 usage=7 reuse=2\n- metric capability.scribe_due kind=script status=active lifecycle=keep paths=1 evidence=2 usage=11 reuse=2\n- metric capability.doc_steward_due kind=script status=active lifecycle=keep paths=1 evidence=2 usage=5 reuse=2\n- metric skill.taskset_dispatch kind=skill status=active lifecycle=keep paths=1 evidence=2 usage=4 reuse=2\n- metric gate.footprint_conflict kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric gate.worktree_lifecycle kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=10 reuse=2\n- metric gate.attribution kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=7 reuse=2\n- metric gate.verification_freshness kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=6 reuse=2\n- metric gate.release_cadence kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=11 reuse=2\n- metric gate.conversation_work_audit kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric gate.work_schema kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=8 reuse=2\n- metric capability.wave_dispatcher kind=script status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric capability.merge_queue kind=script status=active lifecycle=keep paths=1 evidence=3 usage=11 reuse=2\n- metric capability.scm_steward kind=script status=active lifecycle=keep paths=1 evidence=2 usage=12 reuse=2\n- metric capability.inflight_overlay kind=script status=active lifecycle=keep paths=1 evidence=3 usage=10 reuse=2\n- metric capability.work kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.update_notify kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.session_dashboard kind=script status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=1\n- metric hook.session_dashboard kind=hook status=active lifecycle=keep paths=2 evidence=2 usage=9 reuse=2\n- metric skill.wave_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=7 reuse=2\n- metric skill.merge_integrator kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=15 reuse=2\n- metric skill.independent_verification kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=11 reuse=2\n- metric skill.work_analytics kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=14 reuse=2\n- metric skill.release_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=5 reuse=2\n- metric skill.scm_steward kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=19 reuse=2\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/self_improvement_cycle.py assess",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-17T18:09:04+09:00",
+      "finished_at": "2026-06-17T18:09:04+09:00",
+      "stdout": "Self Improvement Assessment\n- Status: pass\n- Maturity: improving (70/100)\n- Role gaps: 3\n- Asset gaps: 1\n- Scribe: unknown\n- Doc Steward: ok\n\nTop role gaps:\n- council: missing_claim_evidence (watch)\n- progress-scout: missing_claim_evidence (watch)\n- skeptic: missing_claim_evidence (watch)\n\nTop asset gaps:\n- capability.session_dashboard: low_reuse_evidence (watch)\n\nNext:\n- Route monitored dormant roles into the next review or council cycle.\n- Review low-reuse runtime assets and either exercise, modify, or deprecate them.\n- Run advisory scribe/doc-steward checks in the next cycle report.\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-17T18:09:04+09:00",
+      "finished_at": "2026-06-17T18:09:06+09:00",
+      "stdout": "evidence-index: pass\nfindings=0\n",
+      "stderr": ""
+    }
+  ]
+}
