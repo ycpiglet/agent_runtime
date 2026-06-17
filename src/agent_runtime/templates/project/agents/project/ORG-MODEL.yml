@@ -1,27 +1,18 @@
-# agents/project/ORG-MODEL.yml — Role/Team/Tier registry (SSOT).
-# Director -> Lead -> Worker + Reviewer, organized into functional teams.
-# `aliases` absorb historical free-text owner values so no mass file rewrite is
-# needed; the org_model_gate resolves any alias to the canonical kebab-case id.
-# Spec: docs/superpowers/specs/2026-06-14-agent-org-delegation-model-design.md (Sec A).
+# agents/project/ORG-MODEL.yml — Role/Team/Tier registry starter.
+# Host projects may edit this project overlay; do not fork reusable role skills
+# or scripts to express product-specific business structure.
 schema: agent-runtime-org-model/v1
-updated_at: 2026-06-17T22:20:00+09:00
+updated_at: YYYY-MM-DDTHH:MM:SS+09:00
 
-# Tiers map to the work-schema *_model_tier fields (planner/worker/reviewer).
 tiers: [director, planner, worker, reviewer]
 
 teams:
-  - id: org           # org-wide (no single discipline)
+  - id: org
     display_name: Org
-  - id: engineering
-    display_name: Engineering
-  - id: ui-ux
-    display_name: UI/UX
-  - id: research
-    display_name: Research
+  - id: product-core
+    display_name: Product Core
   - id: quality
     display_name: Quality & Eval
-  - id: risk-release
-    display_name: Risk & Release
   - id: finance-accounting
     display_name: Finance & Accounting
   - id: marketing-growth
@@ -30,46 +21,26 @@ teams:
     display_name: Sales & Revenue
 
 roles:
-  - id: managing-partner
+  - id: owner
     tier: director
     team: org
-    aliases: [mp, partner, director, ceo, managing_partner, managing-partner, planning-coordinator, planning-office, planning, diversity-council, council]
+    aliases: [owner, product-owner, product_owner]
   - id: lead-engineer
     tier: planner
-    team: engineering
-    aliases: [lead, lead_engineer, lead-engineer, engineering, worktree-dispatcher]
-  - id: worker-engineer
+    team: product-core
+    aliases: [lead, lead_engineer, lead-engineer, engineering]
+  - id: backend
     tier: worker
-    team: engineering
-    aliases: [worker, engineer, agent-runtime, rsi-lab]
+    team: product-core
+    aliases: [backend, engineer, worker]
   - id: uiux
     tier: planner
-    team: ui-ux
-    aliases: [ui, ux, uiux, frontend, uiux-designer]
-  - id: research-agent
-    tier: planner
-    team: research
-    aliases: [research, researcher, research-agent, research_agent]
+    team: product-core
+    aliases: [ui, ux, uiux, frontend]
   - id: qa
     tier: reviewer
     team: quality
-    aliases: [qa, quality, test, evaluation-office, evaluation_office]
-  - id: independent-auditor
-    tier: reviewer
-    team: quality
-    aliases: [audit, auditor, independent-auditor, independent_auditor]
-  - id: doc-steward
-    tier: reviewer
-    team: quality
-    aliases: [doc, steward, doc-steward, doc_steward, scribe, timeline, secretary]
-  - id: risk-controller
-    tier: reviewer
-    team: risk-release
-    aliases: [risk, risk-controller, risk_controller, risk-and-safety, risk_and_safety]
-  - id: release-integrity
-    tier: reviewer
-    team: risk-release
-    aliases: [release, release-integrity, release_integrity, ci-cd, cicd]
+    aliases: [qa, quality, test]
   - id: finance-controller
     tier: planner
     team: finance-accounting

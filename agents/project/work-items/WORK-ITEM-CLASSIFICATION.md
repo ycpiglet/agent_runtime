@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-17T22:12:03+09:00
+generated_at: 2026-06-17T22:27:35+09:00
 record_count: 312
 ---
 
@@ -348,9 +348,9 @@ record_count: 312
 | 11.1.4 | Task 11.1.4 | task | `TASK-AR-576` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | completed | `agents/lead_engineer/tasks/TASK-AR-576.md` | Re-run the self-improvement report after role and asset remediation and state whether… |
 | 11.1.4.1 | Unit 11.1.4.1 | unit | `UNIT-TASK-AR-576-001` | `TASK-AR-576` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-576/UNIT-TASK-AR-576-001.md` | UNIT-TASK-AR-576-001 - Measure remediation delta and update handoff surfaces |
 | 12 | Initiative 12 | initiative | `INIT-AR-BUSINESS-OPERATIONS-TEAMS` | - | active | `agents/project/initiatives/INIT-AR-BUSINESS-OPERATIONS-TEAMS.md` | Business Operations Teams |
-| 12.1 | Taskset 12.1 | taskset | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | `INIT-AR-BUSINESS-OPERATIONS-TEAMS` | active | `BACKLOG-BOARD.md` | Business Operations Teams |
-| 12.1.1 | Task 12.1.1 | task | `TASK-AR-577` | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | planned | `agents/lead_engineer/tasks/TASK-AR-577.md` | Define finance/accounting, marketing/growth, and sales/revenue teams across live proj… |
-| 12.1.1.1 | Unit 12.1.1.1 | unit | `UNIT-TASK-AR-577-001` | `TASK-AR-577` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-577/UNIT-TASK-AR-577-001.md` | UNIT-TASK-AR-577-001 - Publish business operations org model |
+| 12.1 | Taskset 12.1 | taskset | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | `INIT-AR-BUSINESS-OPERATIONS-TEAMS` | complete | `BACKLOG-BOARD.md` | Business Operations Teams |
+| 12.1.1 | Task 12.1.1 | task | `TASK-AR-577` | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | completed | `agents/lead_engineer/tasks/TASK-AR-577.md` | Define finance/accounting, marketing/growth, and sales/revenue teams across live proj… |
+| 12.1.1.1 | Unit 12.1.1.1 | unit | `UNIT-TASK-AR-577-001` | `TASK-AR-577` | completed | `agents/lead_engineer/tasks/units/TASK-AR-577/UNIT-TASK-AR-577-001.md` | UNIT-TASK-AR-577-001 - Publish business operations org model |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.
