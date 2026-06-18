@@ -1,0 +1,107 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-19-task-ar-596-closeout-20260619080337",
+  "work_id": "TASK-AR-596",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-596.md",
+  "kind": "task",
+  "task_id": "TASK-AR-596",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-19T08:03:37+09:00",
+  "verified_by": "codex-wiki-closeout-596",
+  "claim_id": "CLAIM-20260619-075804-task-ar-596-closeout",
+  "worktree_path": ".worktrees/TASK-AR-596-closeout",
+  "commit_ref": "7bc750b",
+  "command_count": 10,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_wiki_page_api.py tests/test_ui_console.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "159 passed, 1 existing DeprecationWarning for invalid escape sequence in ui_console_assets.py"
+    },
+    {
+      "command": "python -m pytest tests/test_wiki_page_api.py tests/test_wiki_search_ask_api.py tests/test_knowledge_graph.py tests/test_knowledge_digest.py tests/test_knowledge_ask.py tests/test_knowledge_lint.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "67 passed in 10.70s"
+    },
+    {
+      "command": "python -m pytest tests/test_knowledge_lint.py tests/test_knowledge_lint_gate.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "25 passed in 5.04s"
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0"
+    },
+    {
+      "command": "python scripts/knowledge_graph.py check --json --git-limit 0",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "{\"findings\": [], \"ok\": true}"
+    },
+    {
+      "command": "python scripts/knowledge_lint.py --root . --git-limit 0 check --json",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "block=0, watch=2 existing orphan-entity initiative findings"
+    },
+    {
+      "command": "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-LLM-WIKI --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "taskset-work-gate: pass; findings=0"
+    },
+    {
+      "command": "python scripts/rbac_write_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "rbac-write-gate: pass; findings=0"
+    },
+    {
+      "command": "python scripts/state_sync_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "state-sync-gate: pass; findings=0 block=0 watch=0"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "No whitespace errors; CRLF normalization warnings only."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion": "Knowledge lint understands the new wiki/corpus kinds and relationships.",
+      "status": "passed",
+      "evidence": "UNIT-TASK-AR-596-001 W4b passed earlier, focused lint tests passed, knowledge_lint reports block=0 on the current graph, and knowledge_graph check returns ok=true."
+    },
+    {
+      "criterion": "Wiki/search/ask regressions pass together.",
+      "status": "passed",
+      "evidence": "Combined wiki/search/ask/knowledge regression command passed with 67 tests; UI/wiki route regression command passed with 159 tests."
+    },
+    {
+      "criterion": "Taskset closeout updates owner-facing state without stale pointers.",
+      "status": "partial",
+      "evidence": "TASK-AR-593 was closed, released LLM-Wiki claim phases were normalized to complete, and standard taskset gate passes without findings. Final require-complete proof is deferred until the active TASK-AR-596 closeout claim is independently verified, released, and root-integrated."
+    },
+    {
+      "criterion": "W4b verifier is independent from the implementer.",
+      "status": "pending",
+      "evidence": "Independent W4b verification is the next required step for this TASK-AR-596 closeout claim."
+    }
+  ],
+  "residual": [
+    "Independent W4b verification and claim release remain required before TASK-AR-596 can be closed.",
+    "The current active TASK-AR-596 claim prevents the require-complete taskset gate from passing until W4b/release is complete.",
+    "Browser screenshot verification was not performed; deterministic UI contract tests and design-system gate passed."
+  ],
+  "next_step": "Request independent W4b verification for commit 7bc750b plus this W4a evidence, then release CLAIM-20260619-075804-task-ar-596-closeout if approved."
+}

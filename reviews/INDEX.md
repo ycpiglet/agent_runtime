@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T08:01:07+09:00
-record_count: 612
+generated_at: 2026-06-19T08:04:13+09:00
+record_count: 613
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `612` review and evidence records under `reviews/`.
+- Summary: indexed `613` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `612` files |
+| Reviews covered | pass | `613` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -566,6 +566,7 @@ record_count: 612
 | `reviews/VERIFY-2026-06-19-task-ar-584-root-integration-20260619013817.json` | `VERIFY-2026-06-19-task-ar-584-root-integration-20260619013817` | json | record | n/a | VERIFY-2026-06-19-task-ar-584-root-integration-20260619013817 |
 | `reviews/VERIFY-2026-06-19-task-ar-594-20260619031224.json` | `VERIFY-2026-06-19-task-ar-594-20260619031224` | json | record | n/a | VERIFY-2026-06-19-task-ar-594-20260619031224 |
 | `reviews/VERIFY-2026-06-19-task-ar-595-20260619073554.json` | `VERIFY-2026-06-19-task-ar-595-20260619073554` | json | record | n/a | VERIFY-2026-06-19-task-ar-595-20260619073554 |
+| `reviews/VERIFY-2026-06-19-task-ar-596-closeout-20260619080337.json` | `VERIFY-2026-06-19-task-ar-596-closeout-20260619080337` | json | record | n/a | VERIFY-2026-06-19-task-ar-596-closeout-20260619080337 |
 | `reviews/VERIFY-2026-06-19-task-ar-597-root-integration-20260619021833.json` | `VERIFY-2026-06-19-task-ar-597-root-integration-20260619021833` | json | record | n/a | VERIFY-2026-06-19-task-ar-597-root-integration-20260619021833 |
 | `reviews/VERIFY-2026-06-19-task-ar-598-20260619015334.json` | `VERIFY-2026-06-19-task-ar-598-20260619015334` | json | record | n/a | VERIFY-2026-06-19-task-ar-598-20260619015334 |
 | `reviews/VERIFY-2026-06-19-task-ar-598-root-integration-20260619021304.json` | `VERIFY-2026-06-19-task-ar-598-root-integration-20260619021304` | json | record | n/a | VERIFY-2026-06-19-task-ar-598-root-integration-20260619021304 |
