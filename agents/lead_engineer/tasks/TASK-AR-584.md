@@ -18,6 +18,7 @@ verified_at: 2026-06-19T01:27:09+09:00
 verified_by: independent-verifier-task-ar-584-20260619
 evidence_refs:
   - reviews/VERIFY-2026-06-19-task-ar-584-20260619011843.json
+  - reviews/VERIFY-2026-06-19-task-ar-584-root-integration-20260619013817.json
 w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-584.md
 priority: P2
 difficulty: L
@@ -76,4 +77,5 @@ actual_tokens: 12000
 - Closed by: `uiux-pattern-renderers-20260619-584`
 - Evidence:
   - `reviews/VERIFY-2026-06-19-task-ar-584-20260619011843.json`
+  - `reviews/VERIFY-2026-06-19-task-ar-584-root-integration-20260619013817.json`
 <!-- work-close:end -->
