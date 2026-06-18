@@ -3712,3 +3712,51 @@ def test_ui_console_knowledge_graph_search_filter_deeplink_present(tmp_path):
     assert "function updateKnowledgeGraphHash" in js
     assert "parseHash().select" in js  # deep-link focus on load
     assert ".kg-filter-chip" in css
+
+
+def test_ui_console_wiki_page_view_present_and_routed(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    assert 'data-view="wiki"' in html
+    assert 'data-route="wiki"' in html
+    assert 'id="view-wiki"' in html
+    assert 'id="wiki-page-body"' in html
+    assert 'id="wiki-minigraph-svg"' in html
+    assert "function loadWikiPage" in js
+    assert "function wikiEntityFromRoute" in js
+    assert 'route === "wiki" || String(route || "").startsWith("wiki/")' in js
+    assert 'if (view === "wiki") loadWikiPage' in js
+    assert ".wiki-page-layout" in css
+    assert ".wiki-minigraph-svg" in css
+
+
+def test_ui_console_wiki_page_js_ascii_only_and_node_check(tmp_path):
+    import shutil
+    import subprocess
+
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    start = js.index("// ----- Wiki page view")
+    end = js.index("// ----- Knowledge graph view", start)
+    block = js[start:end]
+    non_ascii = [ch for ch in block if ord(ch) > 127]
+    assert not non_ascii, f"wiki page JS must be ASCII-only, found: {non_ascii[:5]}"
+    if shutil.which("node") is None:
+        import pytest
+
+        pytest.skip("node not available")
+    proc = subprocess.run(["node", "--check", "-"], input=js, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stderr
+
+
+def test_ui_console_wiki_page_css_uses_tokens_not_raw_color(tmp_path):
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    body_css = css.replace(_root_token_block(css), "").replace(_dark_theme_block(css), "")
+    hex_pattern = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+    rgba_pattern = re.compile(r"rgba?\(")
+    lines = [line for line in body_css.splitlines() if ".wiki-" in line]
+    assert lines, "expected wiki page CSS rules"
+    for line in lines:
+        assert not hex_pattern.search(line), f"raw hex in wiki CSS: {line.strip()}"
+        assert not rgba_pattern.search(line), f"raw rgba in wiki CSS: {line.strip()}"

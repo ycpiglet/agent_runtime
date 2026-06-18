@@ -206,6 +206,9 @@ HTML = """<!doctype html>
               <button class="sidebar-link" type="button" role="tab" data-view="sources" data-route="records/sources" aria-selected="false">
                 <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Sources</span>
               </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="wiki" data-route="wiki" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9432;</span><span class="sidebar-label">Wiki</span>
+              </button>
               <button class="sidebar-link" type="button" role="tab" data-view="knowledge-graph" data-route="records/knowledge-graph" aria-selected="false">
                 <span class="sidebar-icon" aria-hidden="true">&#9901;</span><span class="sidebar-label">Knowledge Graph</span>
               </button>
@@ -768,6 +771,47 @@ HTML = """<!doctype html>
         </div>
         <div id="view-sources" class="view">
           <div id="sources-list" class="list-panel"></div>
+        </div>
+        <div id="view-wiki" class="view">
+          <section class="wiki-page" aria-label="Wiki page">
+            <header class="wiki-page-header">
+              <div>
+                <h2 id="wiki-page-title">Wiki</h2>
+                <p id="wiki-page-summary-line" class="wiki-page-summary-line" role="status" aria-live="polite">Open an entity page by id.</p>
+              </div>
+              <div class="wiki-page-toolbar">
+                <input id="wiki-entity-input" class="wiki-entity-input" type="search" placeholder="Entity id, e.g. TASK-AR-1" aria-label="Open wiki entity id">
+                <button id="wiki-open-entity" class="wiki-toolbar-button" type="button">Open</button>
+                <button id="wiki-open-graph" class="wiki-toolbar-button" type="button">Graph</button>
+              </div>
+            </header>
+            <div class="wiki-page-layout">
+              <article class="wiki-page-main" aria-label="Wiki summary">
+                <div id="wiki-page-body" class="wiki-page-body"></div>
+                <section class="wiki-page-section" aria-label="Entity relations">
+                  <h3>Relations</h3>
+                  <div id="wiki-page-relations" class="wiki-relation-list"></div>
+                </section>
+                <section class="wiki-page-section" aria-label="Entity backlinks">
+                  <h3>Backlinks</h3>
+                  <div id="wiki-page-backlinks" class="wiki-relation-list"></div>
+                </section>
+              </article>
+              <aside class="wiki-page-sidebar" aria-label="Wiki metadata and graph">
+                <section class="wiki-page-section">
+                  <h3>Metadata</h3>
+                  <div id="wiki-page-metadata" class="wiki-metadata"></div>
+                </section>
+                <section class="wiki-page-section">
+                  <h3>Mini Graph</h3>
+                  <div class="wiki-minigraph-stage">
+                    <svg id="wiki-minigraph-svg" class="wiki-minigraph-svg" viewBox="0 0 420 280" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Wiki local entity graph"></svg>
+                  </div>
+                  <ul id="wiki-minigraph-legend" class="wiki-minigraph-legend" aria-label="Wiki mini graph legend"></ul>
+                </section>
+              </aside>
+            </div>
+          </section>
         </div>
         <div id="view-knowledge-graph" class="view">
           <section class="kg-graph" aria-label="Knowledge graph visualization">
@@ -4581,11 +4625,21 @@ pre {
   .command-card-meta,
   .audit-card-meta,
   .surface-card-meta,
+  .wiki-page-layout,
+  .wiki-page-header,
+  .wiki-metadata-row,
   .taskset-actions,
   .meta-grid,
   .edit-row,
   .button-row {
     grid-template-columns: 1fr;
+  }
+  .wiki-page-header {
+    display: grid;
+  }
+  .wiki-page-toolbar,
+  .wiki-entity-input {
+    width: 100%;
   }
   .dashboard {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4838,6 +4892,170 @@ pre {
 .dep-graph-legend .legend-dependency { background: var(--blue); }
 .dep-graph-legend .legend-parent { background: var(--subtle); }
 .dep-graph-legend .legend-cycle { background: var(--danger); }
+
+/* ===== Wiki page view (LLM-Wiki Unit 3) ===== */
+.wiki-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-px-12);
+}
+.wiki-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-px-16);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: var(--space-px-12);
+}
+.wiki-page-header h2 { margin: 0; }
+.wiki-page-summary-line {
+  margin: var(--space-px-4) 0 0;
+  color: var(--muted);
+  font-size: var(--font-size-ui-12);
+}
+.wiki-page-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-px-8);
+  justify-content: flex-end;
+}
+.wiki-entity-input {
+  min-width: 220px;
+  padding: var(--space-px-6) var(--space-px-10);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--ink);
+  font-size: var(--font-size-ui-12);
+}
+.wiki-toolbar-button,
+.wiki-link {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--panel-strong);
+  color: var(--ink);
+  font-size: var(--font-size-ui-12);
+  cursor: pointer;
+}
+.wiki-toolbar-button {
+  padding: var(--space-px-6) var(--space-px-10);
+}
+.wiki-link {
+  display: block;
+  width: 100%;
+  padding: var(--space-px-8);
+  text-align: left;
+}
+.wiki-link:hover,
+.wiki-toolbar-button:hover { border-color: var(--primary-line); }
+.wiki-page-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 32%);
+  gap: var(--space-px-16);
+  align-items: start;
+}
+.wiki-page-main,
+.wiki-page-sidebar {
+  min-width: 0;
+}
+.wiki-page-section {
+  margin-top: var(--space-px-14);
+}
+.wiki-page-section h3 {
+  margin: 0 0 var(--space-px-8);
+  font-size: var(--font-size-ui-13);
+}
+.wiki-page-body {
+  color: var(--ink);
+  line-height: 1.55;
+}
+.wiki-page-body h1,
+.wiki-page-body h2,
+.wiki-page-body h3 {
+  margin: var(--space-px-12) 0 var(--space-px-6);
+}
+.wiki-page-body p,
+.wiki-page-body ul {
+  margin: 0 0 var(--space-px-8);
+}
+.wiki-page-body ul {
+  padding-left: var(--space-px-18);
+}
+.wiki-relation-list {
+  display: grid;
+  gap: var(--space-px-8);
+}
+.wiki-relation-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-px-8);
+}
+.wiki-relation-id,
+.wiki-metadata-label,
+.wiki-minigraph-legend {
+  color: var(--muted);
+  font-size: var(--font-size-ui-11);
+}
+.wiki-relation-meta {
+  margin-top: var(--space-px-3);
+  color: var(--muted);
+  font-size: var(--font-size-ui-11);
+}
+.wiki-metadata {
+  display: grid;
+  gap: var(--space-px-6);
+}
+.wiki-metadata-row {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: var(--space-px-8);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: var(--space-px-5);
+}
+.wiki-metadata-value {
+  overflow-wrap: anywhere;
+}
+.wiki-minigraph-stage {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--canvas-grad);
+  overflow: hidden;
+}
+.wiki-minigraph-svg { display: block; width: 100%; height: 280px; }
+.wiki-minigraph-edge { stroke: var(--line-strong); stroke-width: 1.2; opacity: 0.55; }
+.wiki-minigraph-edge.type-partOf { stroke: var(--primary-line); opacity: 0.8; }
+.wiki-minigraph-edge.type-references,
+.wiki-minigraph-edge.type-documents { stroke: var(--blue); }
+.wiki-minigraph-edge.type-imports,
+.wiki-minigraph-edge.type-tests,
+.wiki-minigraph-edge.type-tested_by { stroke: var(--warning-line); }
+.wiki-minigraph-node circle {
+  fill: var(--panel-strong);
+  stroke: var(--line-strong);
+  stroke-width: 1.4;
+  cursor: pointer;
+}
+.wiki-minigraph-node.kind-task circle { fill: var(--primary-soft-strong); stroke: var(--primary-line); }
+.wiki-minigraph-node.kind-taskset circle { fill: var(--blue); stroke: var(--blue); }
+.wiki-minigraph-node.kind-doc circle,
+.wiki-minigraph-node.kind-review circle { fill: var(--panel); }
+.wiki-minigraph-node.is-root circle { stroke: var(--danger); stroke-width: 2.4; }
+.wiki-minigraph-node text {
+  fill: var(--muted);
+  font-size: var(--font-size-ui-9);
+  text-anchor: middle;
+  pointer-events: none;
+}
+.wiki-minigraph-empty { fill: var(--subtle); font-size: var(--font-size-ui-13); text-anchor: middle; }
+.wiki-minigraph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-px-10);
+  margin: var(--space-px-8) 0 0;
+  padding: 0;
+  list-style: none;
+}
 
 /* ===== Knowledge graph view (#5) ===== */
 .kg-graph-toolbar {
@@ -7437,7 +7655,7 @@ function renderGroupedList(view, items, rowTemplate, emptyLabel) {
 const COMMAND_PALETTE_VIEWS = [
   "board", "work", "meeting", "tasksets", "tsboard", "team", "agents",
   "messages", "events", "evidence", "planner", "triage", "roadmap", "map", "sources",
-  "automation", "properties", "labels", "portability", "writes",
+  "wiki", "automation", "properties", "labels", "portability", "writes",
 ];
 let commandPaletteIndex = 0;
 
@@ -9912,6 +10130,231 @@ function renderDependencyGraph() {
   svg.appendChild(nodeLayer);
 }
 
+// ----- Wiki page view (LLM-Wiki Unit 3): deterministic page envelope + local graph -----
+let wikiPageState = null;
+let wikiPageId = "";
+let wikiPageLoading = false;
+
+function wikiRoute(id) {
+  return id ? `#/wiki/${encodeURIComponent(id)}` : "#/wiki";
+}
+
+function wikiEntityFromRoute(route) {
+  if (!route || route === "wiki") return "";
+  if (!route.startsWith("wiki/")) return "";
+  try {
+    return decodeURIComponent(route.slice("wiki/".length));
+  } catch (error) {
+    return route.slice("wiki/".length);
+  }
+}
+
+function openWikiPage(id) {
+  const entityId = String(id || "").trim();
+  const link = wikiRoute(entityId);
+  if (window.location.hash === link) applyHashRoute();
+  else window.location.hash = link;
+}
+
+async function loadWikiPage(id) {
+  const entityId = String(id || "").trim();
+  wikiPageId = entityId;
+  const input = $("wiki-entity-input");
+  if (input && input.value !== entityId) input.value = entityId;
+  if (!entityId) {
+    wikiPageState = null;
+    renderWikiPageIntro();
+    return;
+  }
+  if (wikiPageLoading) return;
+  wikiPageLoading = true;
+  setText("wiki-page-title", entityId);
+  setText("wiki-page-summary-line", "Loading wiki page...");
+  try {
+    const response = await fetch(`/api/wiki/page/${encodeURIComponent(entityId)}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    wikiPageState = await response.json();
+  } catch (error) {
+    wikiPageState = { id: entityId, error: String(error), relations: [], backlinks: [], minigraph: { nodes: [], edges: [] } };
+  } finally {
+    wikiPageLoading = false;
+  }
+  renderWikiPage();
+}
+
+function renderWikiPageIntro() {
+  setText("wiki-page-title", "Wiki");
+  setText("wiki-page-summary-line", "Open an entity page by id.");
+  setHtml("wiki-page-body", `<div class="empty">Enter an entity id or open a relation from the knowledge graph.</div>`);
+  setHtml("wiki-page-relations", `<div class="empty">No page selected</div>`);
+  setHtml("wiki-page-backlinks", `<div class="empty">No page selected</div>`);
+  setHtml("wiki-page-metadata", "");
+  renderWikiMiniGraph({ nodes: [], edges: [] }, "");
+}
+
+function wikiMarkdownToHtml(markdown) {
+  const lines = String(markdown || "").split(/\\r?\\n/);
+  const out = [];
+  let listOpen = false;
+  const closeList = () => {
+    if (listOpen) {
+      out.push("</ul>");
+      listOpen = false;
+    }
+  };
+  lines.forEach((line) => {
+    const text = line.trim();
+    if (!text) {
+      closeList();
+      return;
+    }
+    const heading = text.match(/^(#{1,3})\s+(.*)$/);
+    if (heading) {
+      closeList();
+      const level = Math.min(3, heading[1].length + 1);
+      out.push(`<h${level}>${escapeHtml(heading[2])}</h${level}>`);
+      return;
+    }
+    if (text.startsWith("- ")) {
+      if (!listOpen) {
+        out.push("<ul>");
+        listOpen = true;
+      }
+      out.push(`<li>${escapeHtml(text.slice(2))}</li>`);
+      return;
+    }
+    closeList();
+    out.push(`<p>${escapeHtml(text)}</p>`);
+  });
+  closeList();
+  return out.join("") || `<div class="empty">No deterministic summary available</div>`;
+}
+
+function wikiRelationItems(items, direction) {
+  const rows = items || [];
+  if (!rows.length) return `<div class="empty">No ${escapeHtml(direction)}</div>`;
+  return rows.map((item) => {
+    const targetId = item.target_id || item.source_id || item.id || "";
+    const title = item.target_title || item.source_title || item.title || targetId;
+    const kind = item.target_kind || item.source_kind || item.kind || "entity";
+    const type = item.type || "relates";
+    return `<button type="button" class="wiki-link" data-wiki-id="${escapeHtml(targetId)}">`
+      + `<span class="wiki-relation-title"><strong>${escapeHtml(title)}</strong><span class="wiki-relation-id">${escapeHtml(targetId)}</span></span>`
+      + `<span class="wiki-relation-meta">${escapeHtml(type)} - ${escapeHtml(kind)}</span>`
+      + `</button>`;
+  }).join("");
+}
+
+function wikiMetadataRows(metadata) {
+  const data = metadata || {};
+  const rows = [
+    ["Kind", wikiPageState?.kind || ""],
+    ["Status", data.status || ""],
+    ["Owner", data.owner || ""],
+    ["Updated", data.updated_at || ""],
+    ["Freshness", data.freshness || ""],
+    ["Lineage", data.lineage || ""],
+    ["Source", data.source || ""],
+  ].filter((row) => row[1]);
+  if (!rows.length) return `<div class="empty">No metadata</div>`;
+  return rows.map(([label, value]) =>
+    `<div class="wiki-metadata-row"><span class="wiki-metadata-label">${escapeHtml(label)}</span><span class="wiki-metadata-value">${escapeHtml(value)}</span></div>`
+  ).join("");
+}
+
+function renderWikiPage() {
+  const page = wikiPageState || {};
+  if (page.error) {
+    setText("wiki-page-title", page.id || "Wiki");
+    setText("wiki-page-summary-line", `Unavailable: ${page.error}`);
+    setHtml("wiki-page-body", `<div class="empty">Wiki page not found</div>`);
+    setHtml("wiki-page-relations", `<div class="empty">No relations</div>`);
+    setHtml("wiki-page-backlinks", `<div class="empty">No backlinks</div>`);
+    setHtml("wiki-page-metadata", "");
+    renderWikiMiniGraph({ nodes: [], edges: [] }, "");
+    return;
+  }
+  setText("wiki-page-title", page.title || page.id || "Wiki");
+  setText("wiki-page-summary-line", `${page.kind || "entity"} - ${page.id || ""}`);
+  setHtml("wiki-page-body", wikiMarkdownToHtml(page.summary || ""));
+  setHtml("wiki-page-relations", wikiRelationItems(page.relations || [], "relations"));
+  setHtml("wiki-page-backlinks", wikiRelationItems(page.backlinks || [], "backlinks"));
+  setHtml("wiki-page-metadata", wikiMetadataRows(page.metadata || {}));
+  renderWikiMiniGraph(page.minigraph || { nodes: [], edges: [] }, page.id || "");
+}
+
+function wikiMiniGraphPositions(nodes, rootId) {
+  const positions = {};
+  const root = nodes.find((node) => node.id === rootId) || nodes[0];
+  if (!root) return positions;
+  positions[root.id] = { x: 210, y: 140 };
+  const others = nodes.filter((node) => node.id !== root.id);
+  others.forEach((node, index) => {
+    const angle = (index / Math.max(others.length, 1)) * Math.PI * 2 - Math.PI / 2;
+    positions[node.id] = { x: 210 + Math.cos(angle) * 145, y: 140 + Math.sin(angle) * 92 };
+  });
+  return positions;
+}
+
+function renderWikiMiniGraph(graph, rootId) {
+  const svg = $("wiki-minigraph-svg");
+  const legend = $("wiki-minigraph-legend");
+  const nodes = (graph.nodes || []).slice(0, 48);
+  const ids = new Set(nodes.map((node) => node.id));
+  const edges = (graph.edges || []).filter((edge) => ids.has(edge.from) && ids.has(edge.to));
+  if (legend) {
+    const kinds = Array.from(new Set(nodes.map((node) => node.kind || "entity"))).sort();
+    legend.innerHTML = kinds.map((kind) => `<li>${escapeHtml(kind)}</li>`).join("");
+  }
+  if (!svg) return;
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  if (!nodes.length) {
+    const note = document.createElementNS(SVG_NS, "text");
+    note.setAttribute("x", "210");
+    note.setAttribute("y", "140");
+    note.setAttribute("class", "wiki-minigraph-empty");
+    note.textContent = "No local graph";
+    svg.appendChild(note);
+    return;
+  }
+  const positions = wikiMiniGraphPositions(nodes, rootId);
+  const edgeLayer = document.createElementNS(SVG_NS, "g");
+  edges.forEach((edge) => {
+    const a = positions[edge.from];
+    const b = positions[edge.to];
+    if (!a || !b) return;
+    const line = document.createElementNS(SVG_NS, "line");
+    line.setAttribute("x1", a.x); line.setAttribute("y1", a.y);
+    line.setAttribute("x2", b.x); line.setAttribute("y2", b.y);
+    line.setAttribute("class", `wiki-minigraph-edge type-${edge.type || "relates"}`);
+    edgeLayer.appendChild(line);
+  });
+  svg.appendChild(edgeLayer);
+  const nodeLayer = document.createElementNS(SVG_NS, "g");
+  nodes.forEach((node) => {
+    const pos = positions[node.id];
+    if (!pos) return;
+    const group = document.createElementNS(SVG_NS, "g");
+    group.setAttribute("class", `wiki-minigraph-node kind-${node.kind || "entity"} ${node.id === rootId ? "is-root" : ""}`);
+    group.setAttribute("data-wiki-id", node.id);
+    const circle = document.createElementNS(SVG_NS, "circle");
+    circle.setAttribute("cx", pos.x); circle.setAttribute("cy", pos.y);
+    circle.setAttribute("r", node.id === rootId ? "18" : "12");
+    const title = document.createElementNS(SVG_NS, "title");
+    title.textContent = `${node.id} (${node.kind || "entity"})`;
+    circle.appendChild(title);
+    group.appendChild(circle);
+    const label = document.createElementNS(SVG_NS, "text");
+    label.setAttribute("x", pos.x);
+    label.setAttribute("y", pos.y - 18);
+    label.textContent = String(node.id || "").slice(0, 18);
+    group.appendChild(label);
+    group.addEventListener("click", () => openWikiPage(node.id));
+    nodeLayer.appendChild(group);
+  });
+  svg.appendChild(nodeLayer);
+}
+
 // ----- Knowledge graph view (#5): on-demand, degree-ranked bounded subgraph -----
 let knowledgeGraphState = { nodes: [], edges: [], totals: {}, error: null };
 let knowledgeGraphFocus = null;
@@ -12022,6 +12465,7 @@ function navLinks() {
 }
 
 function viewForRoute(route) {
+  if (route === "wiki" || String(route || "").startsWith("wiki/")) return "wiki";
   const link = navLinks().find((item) => item.dataset.route === route);
   return link ? link.dataset.view : null;
 }
@@ -12048,6 +12492,7 @@ function activateView(view, { updateHash = true } = {}) {
   document.querySelectorAll(".view").forEach((item) => item.classList.remove("is-active"));
   target.classList.add("is-active");
   if (view === "knowledge-graph") loadKnowledgeGraph();
+  if (view === "wiki" && updateHash) loadWikiPage("");
   if (view === "search") focusSearchView();
   if (updateHash) {
     const route = routeForView(view);
@@ -12060,9 +12505,9 @@ function activateView(view, { updateHash = true } = {}) {
 }
 
 function parseHash() {
-  // Hash shape: #/<route>?select=<entityId>  (AR-321 routing + AR-334 select).
+  // Hash shape: #/<route>?select=<entityId> or #/wiki/<entityId>.
   const raw = (window.location.hash || "").replace(/^#\/?/, "");
-  if (!raw) return { route: null, select: null };
+  if (!raw) return { route: null, select: null, wikiId: null };
   const [routePart, queryPart] = raw.split("?");
   let select = null;
   if (queryPart) {
@@ -12070,7 +12515,7 @@ function parseHash() {
       select = new URLSearchParams(queryPart).get("select");
     } catch (error) { select = null; }
   }
-  return { route: viewForRoute(routePart) ? routePart : null, select };
+  return { route: viewForRoute(routePart) ? routePart : null, select, wikiId: wikiEntityFromRoute(routePart) || null };
 }
 
 function routeFromHash() {
@@ -12097,11 +12542,12 @@ function selectEntityFromHash(select) {
 }
 
 function applyHashRoute() {
-  const { route, select } = parseHash();
+  const { route, select, wikiId } = parseHash();
   const shell = $("runtime-console-app");
   const view = route ? viewForRoute(route) : "board";
   activateView(view || "board", { updateHash: false });
   if (!route && shell) shell.dataset.workSurfaceOpen = "false";
+  if (view === "wiki") loadWikiPage(wikiId || select || "");
   selectEntityFromHash(select);
 }
 
@@ -12154,6 +12600,26 @@ function renderSidebarActiveTaskset() {
 
 navLinks().forEach((link) => {
   link.addEventListener("click", () => activateView(link.dataset.view));
+});
+
+$("wiki-open-entity")?.addEventListener("click", () => {
+  const input = $("wiki-entity-input");
+  openWikiPage(input ? input.value : "");
+});
+$("wiki-entity-input")?.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    openWikiPage(event.target.value);
+  }
+});
+$("wiki-open-graph")?.addEventListener("click", () => {
+  window.location.hash = "#/records/knowledge-graph";
+});
+document.addEventListener("click", (event) => {
+  const link = event.target.closest(".wiki-link");
+  if (!link) return;
+  event.preventDefault();
+  openWikiPage(link.dataset.wikiId || "");
 });
 
 window.addEventListener("hashchange", applyHashRoute);
