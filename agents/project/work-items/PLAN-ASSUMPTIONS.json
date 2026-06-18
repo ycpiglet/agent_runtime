@@ -243,6 +243,39 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-06-18-taskset-ar-release-auto-noncritical-registration.md",
+          "value": "386fa27d870862d9141f5e936adac85d7f605c5baa486b12f984dd7309b59e6c"
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/release_auto_noncritical.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/release_execution_gate.py",
+          "value": "0147cc72eb2b77991709937a10f1e2f3de54fd336dbfab325d95ac332ec26ac1"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "cb2cd245558157ff640dbf0b824694c5623e2e1ef0ccfba6e83f9a08a5522bc8"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-06-18-taskset-ar-release-auto-noncritical-registration.md",
+      "recorded_at": "2026-06-18T22:27:24+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-RELEASE-AUTO-NONCRITICAL"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report.md",
           "value": "0258f24e5deb282038df779fb900c7dbf6d0d3333d1fdcbe966f98659f23d44a"
         },
@@ -307,5 +340,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-18T18:43:10+09:00"
+  "updated_at": "2026-06-18T22:27:24+09:00"
 }

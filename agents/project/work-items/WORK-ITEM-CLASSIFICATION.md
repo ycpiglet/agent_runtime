@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-18T18:43:08+09:00
-record_count: 336
+generated_at: 2026-06-18T22:26:52+09:00
+record_count: 344
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `336` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `344` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `19` records |
-| Tasksets | pass | `43` records |
-| Tasks | pass | `248` records |
-| Units | pass | `26` records |
+| Initiatives | pass | `20` records |
+| Tasksets | pass | `44` records |
+| Tasks | pass | `250` records |
+| Units | pass | `30` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -375,6 +375,14 @@ record_count: 336
 | 18.1 | Taskset 18.1 | taskset | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | `INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | active | `BACKLOG-BOARD.md` | Design System Debt Consolidation |
 | 18.1.1 | Task 18.1.1 | task | `TASK-AR-583` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | planned | `agents/lead_engineer/tasks/TASK-AR-583.md` | Replace the transitional --space-px-* / --radius-px-* aliases in the console asset CS… |
 | 18.1.2 | Task 18.1.2 | task | `TASK-AR-584` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | planned | `agents/lead_engineer/tasks/TASK-AR-584.md` | Move view-specific JS renderers (data-heavy SVG layouts, calendar grids, office-map p… |
+| 19 | Initiative 19 | initiative | `INIT-AR-RELEASE-AUTOMATION` | - | active | `agents/project/initiatives/INIT-AR-RELEASE-AUTOMATION.md` | Release Automation (noncritical auto-execution) |
+| 19.1 | Taskset 19.1 | taskset | `TASKSET-AR-RELEASE-AUTO-NONCRITICAL` | `INIT-AR-RELEASE-AUTOMATION` | active | `BACKLOG-BOARD.md` | Noncritical Release Auto-Execution |
+| 19.1.1 | Task 19.1.1 | task | `TASK-AR-585` | `TASKSET-AR-RELEASE-AUTO-NONCRITICAL` | planned | `agents/lead_engineer/tasks/TASK-AR-585.md` | Make scripts/release_execution_gate.py version-parametric like release_council_gate.p… |
+| 19.1.1.1 | Unit 19.1.1.1 | unit | `UNIT-TASK-AR-585-001` | `TASK-AR-585` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-585/UNIT-TASK-AR-585-001.md` | UNIT-TASK-AR-585-001 - Make execution gate target version parametric |
+| 19.1.2 | Task 19.1.2 | task | `TASK-AR-586` | `TASKSET-AR-RELEASE-AUTO-NONCRITICAL` | planned | `agents/lead_engineer/tasks/TASK-AR-586.md` | Add an automated path that, at the release cadence boundary on green main CI, execute… |
+| 19.1.2.1 | Unit 19.1.2.1 | unit | `UNIT-TASK-AR-586-001` | `TASK-AR-586` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-586/UNIT-TASK-AR-586-001.md` | UNIT-TASK-AR-586-001 - Noncritical auto-release orchestrator |
+| 19.1.2.2 | Unit 19.1.2.2 | unit | `UNIT-TASK-AR-586-002` | `TASK-AR-586` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-586/UNIT-TASK-AR-586-002.md` | UNIT-TASK-AR-586-002 - Schedule + Owner notification wiring |
+| 19.1.2.3 | Unit 19.1.2.3 | unit | `UNIT-TASK-AR-586-003` | `TASK-AR-586` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-586/UNIT-TASK-AR-586-003.md` | UNIT-TASK-AR-586-003 - Correct the release-conductor skill doc |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

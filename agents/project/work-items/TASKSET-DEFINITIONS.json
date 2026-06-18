@@ -114,6 +114,12 @@
       "display_name": "Design System Debt Consolidation",
       "summary": "Consolidate transitional spacing/radius px-alias tokens into a designed semantic scale, and promote remaining view-specific JS renderers into stable pattern modules, without re-introducing raw literals.",
       "order": 623
+    },
+    {
+      "task_set_id": "TASKSET-AR-RELEASE-AUTO-NONCRITICAL",
+      "display_name": "Noncritical Release Auto-Execution",
+      "summary": "Fix the stale release execution gate (parameterize the hardcoded v0.1.8) and wire a cadence-bound auto-release path that runs the agent-council vote, gates, tag, and push for noncritical releases on green main CI, while keeping major/breaking/critical releases Owner-gated. Correct the release-conductor skill doc to match the implemented tier rule.",
+      "order": 624
     }
   ]
 }
