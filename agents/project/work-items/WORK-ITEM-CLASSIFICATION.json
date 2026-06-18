@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T08:30:58+09:00",
+  "generated_at": "2026-06-19T08:48:14+09:00",
   "record_count": 358,
   "finding_count": 0,
   "findings": [],
@@ -3930,7 +3930,7 @@
       "title": "Create the RFC that promotes the seminar decision into an accepted design direction a…",
       "path": "agents/lead_engineer/tasks/TASK-AR-601.md",
       "parent_id": "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-602",
