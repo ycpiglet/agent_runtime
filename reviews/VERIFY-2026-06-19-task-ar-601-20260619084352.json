@@ -1,0 +1,76 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-19-task-ar-601-20260619084352",
+  "work_id": "TASK-AR-601",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-601.md",
+  "kind": "task",
+  "task_id": "TASK-AR-601",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-19T08:43:52+09:00",
+  "verified_by": "codex-independent-verifier-ui-rfc-601",
+  "claim_id": "CLAIM-20260619-083600-task-ar-601-ui-direction-rfc",
+  "worktree_path": ".worktrees/TASK-AR-601-rfc",
+  "commit_ref": "6f90d18",
+  "command_count": 5,
+  "commands": [
+    {
+      "command": "python scripts/owner_doc_format_gate.py reviews/RFC-2026-06-19-ui-ux-design-direction.md reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "RFC and proposal owner-facing records pass; findings=0."
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0."
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "evidence-index: pass; findings=0."
+    },
+    {
+      "command": "python scripts/ui_ux_cycle.py --root . propose --dry-run --json",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "dry-run proposal generation exits 0; follow-up implementation remains blocked_by_active_claim while TASK-AR-601 owns the design-system target."
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "No whitespace errors; Git warned that reviews/INDEX.md line endings will normalize from CRLF to LF."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion": "RFC states selected visual direction, target workflow, references, rejected alternatives, risks, and promotion decision.",
+      "status": "passed",
+      "evidence": "reviews/RFC-2026-06-19-ui-ux-design-direction.md accepts operator_attention_graph and records workflow, references, rejected alternatives, risks, and decision record."
+    },
+    {
+      "criterion": "RFC lists design-token, UI-component, pattern-component, and one-off boundaries before implementation.",
+      "status": "passed",
+      "evidence": "RFC Assetization Classification, Token Boundaries, Component And Pattern Boundaries, and Page Assembly Boundary sections define the allowed deltas."
+    },
+    {
+      "criterion": "DESIGN.md and DESIGN-SYSTEM.md update only accepted direction and governance deltas.",
+      "status": "passed",
+      "evidence": "docs/design/agent-runtime/DESIGN.md records the accepted direction; docs/design/agent-runtime/DESIGN-SYSTEM.md records experimental relation asset boundaries."
+    },
+    {
+      "criterion": "RFC defines beta-tester and UX-evaluator evidence for the next implementation round.",
+      "status": "passed",
+      "evidence": "RFC Beta-Tester And UX-Evaluator Evidence section requires user-like paths, recovery paths, desktop/mobile notes, accessibility review, and BTC-style defect IDs."
+    }
+  ],
+  "tooling_note": "python scripts/work.py verify agents/lead_engineer/tasks/TASK-AR-601.md --actor codex-lead-designer-ui-rfc-601 --json returned verification:no-commands because this task stores verification commands in the markdown body. This manual verification record preserves the executed commands and results.",
+  "residual": [
+    "TASK-AR-602 remains the next planned UI/UX implementation/evaluation derivation step.",
+    "No UI source mutation is authorized by TASK-AR-601."
+  ],
+  "next_step": "Release claim CLAIM-20260619-083600-task-ar-601-ui-direction-rfc with W4B evidence and close TASK-AR-601."
+}

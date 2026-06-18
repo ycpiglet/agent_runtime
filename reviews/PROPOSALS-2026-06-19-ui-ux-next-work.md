@@ -22,7 +22,7 @@ tags: [ui, ux, design-system, proposal]
 
 | Proposal | Status | Lead | Evidence |
 | --- | --- | --- | --- |
-| design_direction_rfc | seminar_selected | lead-designer | `reviews/SEMINAR-2026-06-19-ui-ux-design-direction.md` |
+| design_direction_rfc | accepted_rfc | lead-designer | `reviews/RFC-2026-06-19-ui-ux-design-direction.md` |
 | implementation_refactor | needs_task_registration | interface-designer | source/test targets listed |
 | ux_evaluation_pass | needs_implementation_target | ux-evaluator | beta/evaluator artifacts listed |
 
@@ -57,7 +57,7 @@ tags: [ui, ux, design-system, proposal]
 
 ### design_direction_rfc
 
-- Status: `seminar_selected`
+- Status: `accepted_rfc`
 - Lead role: `lead-designer`
 - Supporting roles: design-system-steward, ux-evaluator
 - Review roles: interface-designer
@@ -65,6 +65,10 @@ tags: [ui, ux, design-system, proposal]
 - Proposal artifacts: reviews/RFC-2026-06-19-ui-ux-design-direction.md, reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md
 
 Create a Design Exploration RFC when the current visual direction is too repetitive, including references, token delta, component/pattern needs, and responsive/a11y acceptance criteria.
+
+Outcome: `reviews/RFC-2026-06-19-ui-ux-design-direction.md` accepts
+`operator_attention_graph`. UI source mutation remains blocked until the next
+claimed implementation task.
 
 Acceptance criteria:
 - States the user problem, target screen, workflow, and why the existing direction is insufficient.
