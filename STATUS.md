@@ -2,8 +2,9 @@
 
 ## 현재 한 줄 요약
 
-- `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` is active; `TASK-AR-599` is claimed by `CLAIM-20260619-022506-task-ar-599-9bea` in `.worktrees/TASK-AR-599`.
-- UI refactor/design-system remediation is functionally past the assetization and debt-consolidation phases; the remaining active work is automating review outputs into proposal-only next-work intake.
+- `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` is complete: `TASK-AR-597`, `TASK-AR-598`, and `TASK-AR-599` are implemented, W4b-verified, integrated, and closed.
+- Active next work is `TASKSET-AR-LLM-WIKI` / `TASK-AR-594`: Wiki per-page mini-graph lens. Create a fresh claim before implementation.
+- UI refactor/design-system remediation is functionally past the assetization and debt-consolidation phases; the new remaining work is proposal registration from `ui_ux_cycle.py propose`, not ad hoc UI mutation.
 - `TASK-AR-583` semantic spacing/radius scale is W4b verified and integrated; `TASK-AR-584` is next.
 - `TASK-AR-593` Wiki search + ask has passed W4b, was released, merged, and its worktree/branch were cleaned.
 - LLM-Wiki registration is now integrated into the current line; the preserved branch remains an archival source only.
@@ -12,12 +13,13 @@
 - Doc Steward remains ok; keep document-health checks advisory and evidence-based.
 - Next for Design System Debt Consolidation: dispatch `TASK-AR-584` when continuing the sequence.
 
-## 2026-06-19 - TASKSET-AR-UI-UX-CYCLE-AUTOMATION / TASK-AR-599 active
+## 2026-06-19 - TASKSET-AR-UI-UX-CYCLE-AUTOMATION complete
 
-- Active claim: `CLAIM-20260619-022506-task-ar-599-9bea` (`codex-ui-ux-cycle-599`) is claimed with worktree `.worktrees/TASK-AR-599` and branch `codex/task-ar-599-ui-ux-propose`.
-- Completed in this taskset: `TASK-AR-597` added the UI/UX cycle conductor, and `TASK-AR-598` added seminar/meeting/beta artifact planning.
-- Current task: `TASK-AR-599` adds deterministic proposal generation so UI/UX cycle reports can route new design direction RFCs, implementation refactors, and UX evaluation passes into backlog-ready intake without mutating UI files or claims directly.
-- Boundary: implementation must stay proposal-only; UI source edits remain separate worker-claimed refactor tasks.
+- Completed tasks: `TASK-AR-597` added the UI/UX cycle conductor, `TASK-AR-598` added seminar/meeting/beta artifact planning, and `TASK-AR-599` added deterministic proposal generation.
+- Released claim: `CLAIM-20260619-022506-task-ar-599-9bea` passed independent W4b via `reviews/W4B-2026-06-19-TASK-AR-599.md`.
+- Integrated branch: `codex/task-ar-599-ui-ux-propose`; worktree removed after merge.
+- Output: `python scripts/ui_ux_cycle.py --root . propose --dry-run --json` now emits proposal-only `design_direction_rfc`, `implementation_refactor`, and `ux_evaluation_pass` records with role routing and target-file boundaries.
+- Boundary: proposals do not mutate UI source, claims, or task records; follow-up design or implementation still requires W0-W6 registration and a fresh claim.
 
 ## 2026-06-19 - TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION / TASK-AR-583 complete
 

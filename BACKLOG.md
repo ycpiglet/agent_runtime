@@ -29,13 +29,13 @@
 
 <!-- BACKLOG-INDEX:END -->
 
-## 2026-06-19 TASKSET-AR-UI-UX-CYCLE-AUTOMATION active
+## 2026-06-19 TASKSET-AR-UI-UX-CYCLE-AUTOMATION complete
 
-- Active taskset: `TASKSET-AR-UI-UX-CYCLE-AUTOMATION`.
-- Active task: `TASK-AR-599` - automate UI/UX cycle recommendations into proposal-only backlog intake.
-- Active claim: `CLAIM-20260619-022506-task-ar-599-9bea` in `.worktrees/TASK-AR-599` on `codex/task-ar-599-ui-ux-propose`.
-- Completed in this cycle: `TASK-AR-597` UI/UX cycle conductor, `TASK-AR-598` seminar/meeting/beta review planning.
-- Boundary: proposals may classify next work as new design direction RFC, implementation refactor, or UX evaluation pass; they must not mutate UI files, create claims, or bypass W0-W6 registration.
+- Completed taskset: `TASKSET-AR-UI-UX-CYCLE-AUTOMATION`, `3/3` done and archived from the live board.
+- Completed tasks: `TASK-AR-597` UI/UX cycle conductor, `TASK-AR-598` seminar/meeting/beta review planning, and `TASK-AR-599` proposal-only next-work intake.
+- Released claim: `CLAIM-20260619-022506-task-ar-599-9bea`; W4b evidence `reviews/W4B-2026-06-19-TASK-AR-599.md`.
+- Output: `ui_ux_cycle.py propose --dry-run --json` produces new design direction RFC, implementation refactor, and UX evaluation pass proposals with role routing and target-file boundaries.
+- Boundary: proposal records may not mutate UI files, create claims, or bypass W0-W6 registration.
 
 ## 2026-06-17 TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE complete
 

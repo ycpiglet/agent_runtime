@@ -9,21 +9,21 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-19
 task_count: 258
-open_count: 5
-completed_count: 253
-task_set_count: 2
-completed_task_set_count: 43
+open_count: 4
+completed_count: 254
+task_set_count: 1
+completed_task_set_count: 44
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `5` open or active tasks; `253` completed tasks are archived from this live board.
+- Summary: `4` open or active tasks; `254` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `4` / Ask `0` / Review `1` / Later `0` / Done `253`.
-- Task Sets: `2` active workflows; `43` completed workflows are hidden from the live action board.
+- Status: Action `3` / Ask `0` / Review `1` / Later `0` / Done `254`.
+- Task Sets: `1` active workflows; `44` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -41,15 +41,6 @@ completed_task_set_count: 43
 ## Action Board
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
-
-### UI UX Cycle Automation (`TASKSET-AR-UI-UX-CYCLE-AUTOMATION`)
-
-- Flow: Create an automated UI/UX improvement loop: assess tokens, components, typography, size, color, motion, effects, schemas, and assets; record seminar/meeting/beta-tester review needs; then propose the next concrete UI refactor tasks for execution and verification.
-- Progress: `2/3` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-599` | INIT-AR-UI-UX-CONTINUOUS-IMPROVEMENT | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | High | 6h/12000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Let completed UI/UX cycle reports propose follow-up work items for lead-designer, des… |
 
 ### LLM Wiki (`TASKSET-AR-LLM-WIKI`)
 
@@ -107,6 +98,7 @@ completed_task_set_count: 43
 | Business Operations Teams (`TASKSET-AR-BUSINESS-OPERATIONS-TEAMS`) | Extend the live org overlay and host scaffold with business-side teams for monetization, asset management, marketing, and compliant sales automation. | `1/1` done | `1` completed task files archived |
 | Design System Governance (`TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE`) | Publish a design-system operating contract, assetization classification workflow, UI/UX role split, and deterministic gate so new UI work can reuse components while still proposing new design directions. | `1/1` done | `1` completed task files archived |
 | Design System Assetization (`TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION`) | Move the first reusable UI primitives and domain patterns out of ui_console.py, add token scale assets, and tighten the design-system gate so existing baseline debt is tracked without blocking safe incremental refactors. | `1/1` done | `1` completed task files archived |
+| UI UX Cycle Automation (`TASKSET-AR-UI-UX-CYCLE-AUTOMATION`) | Create an automated UI/UX improvement loop: assess tokens, components, typography, size, color, motion, effects, schemas, and assets; record seminar/meeting/beta-tester review needs; then propose the next concrete UI refactor tasks for execution and verification. | `3/3` done | `3` completed task files archived |
 | Design System Component Patterns (`TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS`) | Add reusable Button/Card/Table/Modal-style component helpers and domain pattern helpers for TaskLane, ClaimCard, EvidencePanel, CommandBar, and StateMachinePanel, then wire representative console renderers to those helpers. | `1/1` done | `1` completed task files archived |
 | Design System Token Debt (`TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT`) | Replace console typography, spacing, and radius CSS literals with token references, remove the remaining raw color literal, and make the design-system full audit prove that literal debt is no longer hidden in the console baseline. | `1/1` done | `1` completed task files archived |
 | Design System Served Asset Split (`TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT`) | Physically separate the console's served HTML/CSS/JS string assets from the Python API/server module while preserving /, /app.css, and /app.js behavior. | `1/1` done | `1` completed task files archived |
@@ -116,9 +108,9 @@ completed_task_set_count: 43
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `5` open across `2` task sets (see Action Board above).
-- Archived task sets: `43` (see Archived Task Sets above).
-- Archived task files: `253` — see `ARCHIVE-INDEX.md`.
+- Active: `4` open across `1` task sets (see Action Board above).
+- Archived task sets: `44` (see Archived Task Sets above).
+- Archived task files: `254` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

@@ -13,6 +13,10 @@
 - stop_condition: Stop after plan-review dry-run artifact planning, tests, docs, and verification evidence are complete and ready for independent review.
 - status_text: Claimed TASK-AR-598 for UI/UX plan-review implementation.
 
+## Taskset Closeout
+
+- 2026-06-19T02:55:00+09:00: TASKSET-AR-UI-UX-CYCLE-AUTOMATION completed; claim phase normalized to `taskset-completed`.
+
 ## Events
 
 - 2026-06-19T01:53:34+09:00: self-verification passed; evidence recorded at `reviews/VERIFY-2026-06-19-task-ar-598-20260619015334.json`.

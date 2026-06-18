@@ -12,10 +12,10 @@
 - model_tier: worker_standard
 - wip_slot: 1
 - stop_condition: Stop after plan-review dry-run artifact planning, tests, docs, and verification evidence are complete and ready for independent review.
-- phase: w4b-verified-released
+- phase: taskset-completed
 - step: 5/5
 - progress_pct: 100
-- status_text: Independent W4b passed; claim released for W5 integration.
+- status_text: TASKSET-AR-UI-UX-CYCLE-AUTOMATION completed and W6 closeout is in progress.
 - status: released
 - self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-598-20260619015334.json
 - w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-598.md
@@ -35,6 +35,7 @@
 - `git diff --check` passed.
 - Independent W4b verifier `Cicero` passed the claim.
 
-## Next Step
+## Taskset Closeout
 
-W5 integration should merge `codex/task-ar-598-plan-review` into the root branch, then `TASK-AR-599` can add next-work proposal generation.
+- TASKSET-AR-UI-UX-CYCLE-AUTOMATION completed after TASK-AR-599 integration and closeout.
+- Claim phase normalized to `taskset-completed` for taskset completion gates.

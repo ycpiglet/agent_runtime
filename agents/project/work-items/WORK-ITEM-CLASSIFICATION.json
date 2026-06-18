@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T02:20:00+09:00",
+  "generated_at": "2026-06-19T02:53:21+09:00",
   "record_count": 352,
   "finding_count": 0,
   "findings": [],
@@ -3831,7 +3831,7 @@
       "title": "UI UX Cycle Automation",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-UI-UX-CONTINUOUS-IMPROVEMENT",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-597",
@@ -3875,7 +3875,7 @@
       "title": "Let completed UI/UX cycle reports propose follow-up work items for lead-designer, des…",
       "path": "agents/lead_engineer/tasks/TASK-AR-599.md",
       "parent_id": "TASKSET-AR-UI-UX-CYCLE-AUTOMATION",
-      "status": "planned"
+      "status": "completed"
     }
   ]
 }

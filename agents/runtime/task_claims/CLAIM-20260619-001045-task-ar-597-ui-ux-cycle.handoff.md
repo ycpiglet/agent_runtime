@@ -11,10 +11,10 @@
 - model_tier: worker_standard
 - wip_slot: 1
 - stop_condition: Stop after the UI/UX cycle conductor, tests, docs, and verification evidence are complete and ready for independent review.
-- phase: w4b-verified-released
+- phase: taskset-completed
 - step: 5/5
 - progress_pct: 100
-- status_text: Independent W4b passed; claim released for W5 integration.
+- status_text: TASKSET-AR-UI-UX-CYCLE-AUTOMATION completed and W6 closeout is in progress.
 - status: released
 - self_verification_evidence: reviews/VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525.json
 - w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-597.md
@@ -34,6 +34,7 @@
 - `python scripts/ui_ux_cycle.py --root . report --dry-run --json` passed and plans `reviews/REPORT-2026-06-19-ui-ux-cycle.md`.
 - Live root assessment passed with `status=ready_after_cycle_release`, `score=95`, and next refactor `TASK-AR-583`.
 
-## Next Step
+## Taskset Closeout
 
-W5 integration should merge the `TASK-AR-597` worktree changes, then `TASK-AR-583` can be claimed.
+- TASKSET-AR-UI-UX-CYCLE-AUTOMATION completed after TASK-AR-599 integration and closeout.
+- Claim phase normalized to `taskset-completed` for taskset completion gates.
