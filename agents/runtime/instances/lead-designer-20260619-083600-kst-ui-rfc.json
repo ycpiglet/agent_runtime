@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "lead-designer-20260619-083600-kst-ui-rfc",
+  "callsign": "codex-lead-designer-ui-rfc-601",
+  "callsite_id": "terminal:wt-task-ar-601:tab-01",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260619-083600-task-ar-601-ui-direction-rfc.json"
+  ],
+  "created_at": "2026-06-19T08:36:00+09:00",
+  "decision_cycle_id": "",
+  "display_name": "codex-lead-designer-ui-rfc-601",
+  "model": "",
+  "model_tier": "planner_high",
+  "on_behalf_of": "TASK-AR-601",
+  "pane_id": "terminal:wt-task-ar-601:tab-01",
+  "parent_instance_id": "",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "lead-designer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-19T08:36:00+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-601",
+  "task_set_id": "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC",
+  "team_id": "ui-ux",
+  "unit_id": "",
+  "unit_spec": "",
+  "updated_at": "2026-06-19T08:36:00+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-601-rfc"
+}

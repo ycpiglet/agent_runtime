@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-19
-archived_count: 258
+archived_count: 259
 ---
 
 # Archived Task Files
 
-- `258` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `259` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -264,6 +264,7 @@ archived_count: 258
 | `TASK-AR-582` | `15ac2d6e-173…` | `TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | completed | 2026-06-18T15:55:00+09:00 | 2026-06-18T15:16:35+09:00 | 2026-06-18T16:15:00+09:00 | 2026-06-18T16:15:00+09:00 | Resolve the diagnostic report's single-file HTML/CSS/JS string concentration by movin… |
 | `TASK-AR-583` | `c8e43f0d-2b3…` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | completed | 2026-06-18T18:43:04+09:00 | 2026-06-19T00:34:03+09:00 | 2026-06-19T00:52:00+09:00 | 2026-06-19T00:52:00+09:00 | Replace the transitional --space-px-* / --radius-px-* aliases in the console asset CS… |
 | `TASK-AR-584` | `ba370d39-693…` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | completed | 2026-06-18T18:43:04+09:00 | 2026-06-19T00:58:28+09:00 | 2026-06-19T01:36:21+09:00 | 2026-06-19T01:36:21+09:00 | Move view-specific JS renderers (data-heavy SVG layouts, calendar grids, office-map p… |
+| `TASK-AR-600` | `ea6e499e-86a…` | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | completed | 2026-06-19T08:18:00+09:00 | 2026-06-19T08:19:00+09:00 | 2026-06-19T08:30:23+09:00 | 2026-06-19T08:30:23+09:00 | Create the seminar artifact that decides what new visual direction should be explored… |
 | `TASK-AR-591` | `67b812de-9f0…` | `TASKSET-AR-LLM-WIKI` | completed | 2026-06-17T22:30:00+09:00 | 2026-06-18T00:00:00+09:00 | 2026-06-18T22:05:00+09:00 | 2026-06-18T22:05:00+09:00 | Add a deterministic wiki page envelope with summary, metadata, typed relationships, b… |
 | `TASK-AR-595` | `a605f5ee-c83…` | `TASKSET-AR-LLM-WIKI` | completed | 2026-06-17T22:30:00+09:00 | 2026-06-19T07:19:32+09:00 | 2026-06-19T07:55:00+09:00 | 2026-06-19T07:55:00+09:00 | Promote Wiki/Search as a core navigation hub adjacent to Records and add cross-links… |
 | `TASK-AR-596` | `39cb21b7-2cd…` | `TASKSET-AR-LLM-WIKI` | completed | 2026-06-17T22:30:00+09:00 | 2026-06-19T07:58:04+09:00 | 2026-06-19T08:09:00+09:00 | 2026-06-19T08:09:00+09:00 | Extend knowledge lint coverage for the expanded corpus and close `TASKSET-AR-LLM-WIKI… |
