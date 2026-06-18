@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "le-20260618-233054-kst-6287",
+  "callsign": "lead_engineer@work-01",
+  "callsite_id": "terminal:wt-task-ar-593:tab-01",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260618-233054-task-ar-593-6287.json"
+  ],
+  "created_at": "2026-06-18T23:30:54+09:00",
+  "decision_cycle_id": "",
+  "display_name": "lead_engineer@work-01",
+  "model": "",
+  "model_tier": "implementation",
+  "on_behalf_of": "TASK-AR-593",
+  "pane_id": "terminal:wt-task-ar-593:tab-01",
+  "parent_instance_id": "",
+  "project_id": "agent_runtime",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "lead-engineer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-18T23:30:54+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-593",
+  "task_set_id": "TASKSET-AR-LLM-WIKI",
+  "team_id": "agent-runtime-core",
+  "unit_id": "",
+  "unit_spec": "",
+  "updated_at": "2026-06-18T23:30:54+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-593"
+}

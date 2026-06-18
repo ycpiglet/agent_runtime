@@ -2,12 +2,23 @@
 
 ## 현재 한 줄 요약
 
+- `TASK-AR-593` Wiki search + ask is W4a self-verified on `codex/task-ar-593-wiki-search-ask` at `b6df4ce`; W4b independent verification/release is pending.
 - LLM-Wiki registration is now integrated into the current line; the preserved branch remains an archival source only.
 - Self-improvement remediation is improving but not mature: `scribe_state` is now ok, but the score is still below mature and one monitored role gap remains.
 - Scribe source is now the live status summary section so advisory health can be measured without fabricating role evidence.
 - Doc Steward remains ok; keep document-health checks advisory and evidence-based.
 - Design-system cleanup appears in the current dirty intake as separate uncommitted work and should be preserved, not folded into this role cleanup.
-- Next after role cleanup: continue `TASKSET-AR-LLM-WIKI` from the registered records, starting with `TASK-AR-593` search + ask.
+- Next for LLM-Wiki: run W4b independent verification for `CLAIM-20260618-233054-task-ar-593-6287`, then release/merge and continue with `TASK-AR-594`.
+
+## 2026-06-18 - TASKSET-AR-LLM-WIKI / TASK-AR-593 W4a ready
+
+- Active claim: `CLAIM-20260618-233054-task-ar-593-6287` is in `review` with `phase=self-verified`, `progress_pct=90`.
+- Worktree/branch: `.worktrees/TASK-AR-593` / `codex/task-ar-593-wiki-search-ask`.
+- Commit: `b6df4ce Add wiki search and ask surface`.
+- Output: `/api/wiki/search?q=`, `/api/wiki/ask?q=&llm=0|1`, shared Wiki search/ask bar, evidence answer rendering, clickable search/evidence rows.
+- W4a evidence: `reviews/VERIFY-2026-06-18-task-ar-593-20260618234500.json`; review `reviews/REVIEW-2026-06-18-wiki-search-ask.md`.
+- Verification: wiki/search/page APIs `8` tests, UI console `155` tests, knowledge regression `62` tests, `py_compile`, `git diff --check`, taskset gate, knowledge graph check, and owner-governance all passed in the worktree.
+- Boundary: not merged or completed yet; W4b independent verification and claim release are required before W5 cleanup.
 
 ## 2026-06-18 - LLM-Wiki worktree preservation active
 
