@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-600:tab-01",
   "pane_id": "terminal:wt-task-ar-600:tab-01",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC",
   "active_scope": "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC",
   "scope_transition_approved": true,
@@ -19,20 +19,20 @@
   "model_tier": "planner_high",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "claim-created",
-  "progress_pct": 0,
-  "step_index": 1,
+  "phase": "w4b-verified-released",
+  "progress_pct": 100,
+  "step_index": 5,
   "step_total": 5,
-  "status_text": "Claimed TASK-AR-600 UI direction seminar",
+  "status_text": "Released after W4b verification; seminar evidence accepted.",
   "worktree_path": ".worktrees/TASK-AR-600-seminar",
   "branch": "codex/task-ar-600-ui-direction-seminar",
   "claimed_at": "2026-06-19T08:19:00+09:00",
-  "last_heartbeat": "2026-06-19T08:19:00+09:00",
-  "updated_at": "2026-06-19T08:19:00+09:00",
+  "last_heartbeat": "2026-06-19T08:27:53+09:00",
+  "updated_at": "2026-06-19T08:27:53+09:00",
   "expires_at": "2026-06-19T09:49:00+09:00",
   "lease": {
     "claimed_at": "2026-06-19T08:19:00+09:00",
-    "heartbeat_at": "2026-06-19T08:19:00+09:00",
+    "heartbeat_at": "2026-06-19T08:27:53+09:00",
     "expires_at": "2026-06-19T09:49:00+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260619-081900-task-ar-600-ui-direction-seminar.handoff.md",
@@ -43,5 +43,9 @@
     "reviews/SEMINAR-2026-06-19-ui-ux-design-direction.md",
     "reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md",
     "reviews/INDEX.md"
-  ]
+  ],
+  "released_at": "2026-06-19T08:27:53+09:00",
+  "verified_by": "codex-independent-verifier-ui-seminar-600",
+  "verifier_role": "qa-reviewer",
+  "verification_evidence": "reviews/W4B-2026-06-19-TASK-AR-600.md"
 }

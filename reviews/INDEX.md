@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T08:24:15+09:00
-record_count: 621
+generated_at: 2026-06-19T08:30:59+09:00
+record_count: 622
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `621` review and evidence records under `reviews/`.
+- Summary: indexed `622` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `621` files |
+| Reviews covered | pass | `622` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -575,6 +575,7 @@ record_count: 621
 | `reviews/VERIFY-2026-06-19-task-ar-598-20260619015334.json` | `VERIFY-2026-06-19-task-ar-598-20260619015334` | json | record | n/a | VERIFY-2026-06-19-task-ar-598-20260619015334 |
 | `reviews/VERIFY-2026-06-19-task-ar-598-root-integration-20260619021304.json` | `VERIFY-2026-06-19-task-ar-598-root-integration-20260619021304` | json | record | n/a | VERIFY-2026-06-19-task-ar-598-root-integration-20260619021304 |
 | `reviews/VERIFY-2026-06-19-task-ar-599-20260619023818.json` | `VERIFY-2026-06-19-task-ar-599-20260619023818` | json | record | n/a | VERIFY-2026-06-19-task-ar-599-20260619023818 |
+| `reviews/VERIFY-2026-06-19-task-ar-600-20260619082941.json` | `VERIFY-2026-06-19-task-ar-600-20260619082941` | json | record | n/a | VERIFY-2026-06-19-task-ar-600-20260619082941 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500.json` | `VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525.json` | `VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323.json` | `VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323 |

@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-19T08:18:38+09:00
+generated_at: 2026-06-19T08:30:58+09:00
 record_count: 358
 ---
 
@@ -393,8 +393,8 @@ record_count: 358
 | 20.1.3 | Task 20.1.3 | task | `TASK-AR-599` | `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` | completed | `agents/lead_engineer/tasks/TASK-AR-599.md` | Let completed UI/UX cycle reports propose follow-up work items for lead-designer, des… |
 | 21 | Initiative 21 | initiative | `INIT-AR-UI-UX-DESIGN-DIRECTION-CYCLE` | - | active | `agents/project/initiatives/INIT-AR-UI-UX-DESIGN-DIRECTION-CYCLE.md` | UI UX Design Direction Cycle |
 | 21.1 | Taskset 21.1 | taskset | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | `INIT-AR-UI-UX-DESIGN-DIRECTION-CYCLE` | active | `BACKLOG-BOARD.md` | UI UX Design Direction RFC |
-| 21.1.1 | Task 21.1.1 | task | `TASK-AR-600` | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | planned | `agents/lead_engineer/tasks/TASK-AR-600.md` | Create the seminar artifact that decides what new visual direction should be explored… |
-| 21.1.1.1 | Unit 21.1.1.1 | unit | `UNIT-TASK-AR-600-001` | `TASK-AR-600` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md` | UNIT-TASK-AR-600-001 - Run lead-designer UI direction seminar |
+| 21.1.1 | Task 21.1.1 | task | `TASK-AR-600` | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | completed | `agents/lead_engineer/tasks/TASK-AR-600.md` | Create the seminar artifact that decides what new visual direction should be explored… |
+| 21.1.1.1 | Unit 21.1.1.1 | unit | `UNIT-TASK-AR-600-001` | `TASK-AR-600` | completed | `agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md` | UNIT-TASK-AR-600-001 - Run lead-designer UI direction seminar |
 | 21.1.2 | Task 21.1.2 | task | `TASK-AR-601` | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | planned | `agents/lead_engineer/tasks/TASK-AR-601.md` | Create the RFC that promotes the seminar decision into an accepted design direction a… |
 | 21.1.3 | Task 21.1.3 | task | `TASK-AR-602` | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | planned | `agents/lead_engineer/tasks/TASK-AR-602.md` | Turn the accepted design-direction RFC into the next implementation refactor and beta… |
 

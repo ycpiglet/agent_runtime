@@ -1,25 +1,20 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T08:19:00+09:00
+updated_at: 2026-06-19T08:31:00+09:00
 current_state:
-  summary: "TASK-AR-600 is claimed to run the UI/UX design-direction seminar after the LLM Wiki closeout."
-  status: in_progress
+  summary: "TASK-AR-600 is complete and released; TASK-AR-601 is the next UI/UX design-direction RFC task."
+  status: ready
   task_set_status: active
   task_set_id: "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC"
-  step_index: 1
+  step_index: 2
   step_total: 5
-  progress_pct: 0
-  status_text: "Claimed TASK-AR-600 UI direction seminar."
+  progress_pct: 33
+  status_text: "TASK-AR-600 seminar evidence accepted; claim TASK-AR-601 before RFC work."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260619-081900-task-ar-600-ui-direction-seminar
-      agent_role: lead-designer
-      agent_instance_id: lead-designer-20260619-081900-kst-ui-seminar
-      display_name: codex-lead-designer-ui-seminar-600
-      callsite_id: terminal:wt-task-ar-600:tab-01
+  current_agents: []
   current_teams:
     - ui-ux
 resume:
-  active_task: TASK-AR-600
+  active_task: TASK-AR-601
   active_task_set: TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
@@ -39,8 +34,7 @@ pointers:
     next_task: null
     self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-584-20260619011843.json
     w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-584.md
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260619-081900-task-ar-600-ui-direction-seminar.json
+  active_claims: []
   ui_ux_cycle_automation:
     taskset: TASKSET-AR-UI-UX-CYCLE-AUTOMATION
     completed_tasks:

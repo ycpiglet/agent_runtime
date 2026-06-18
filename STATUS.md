@@ -2,9 +2,9 @@
 
 ## 현재 한 줄 요약
 
-- Active line is `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC`: `TASK-AR-600` is claimed by `codex-lead-designer-ui-seminar-600` to write the UI/UX design-direction seminar.
-- The previous `TASKSET-AR-LLM-WIKI` closeout is complete: `TASK-AR-590..596` are archived `7/7`, W4b evidence is indexed, active claims are clear except the new `TASK-AR-600` seminar claim.
-- UI refactor/design-system remediation is functionally past the assetization and debt-consolidation phases; the current work is now the design-direction RFC cycle before the next UI source mutation.
+- Active line is `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC`: `TASK-AR-600` is complete and released; next claim should target `TASK-AR-601` to publish the RFC.
+- The previous `TASKSET-AR-LLM-WIKI` closeout is complete: `TASK-AR-590..596` are archived `7/7`, W4b evidence is indexed, and active claims are currently clear.
+- UI refactor/design-system remediation is functionally past the assetization and debt-consolidation phases; the current work is the design-direction RFC cycle before the next UI source mutation.
 - `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` is complete: `TASK-AR-597`, `TASK-AR-598`, and `TASK-AR-599` are implemented, W4b-verified, integrated, and closed.
 - `TASK-AR-583` semantic spacing/radius scale is W4b verified and integrated; `TASK-AR-584` is next.
 - `TASK-AR-593` Wiki search + ask has passed W4b, was released, merged, and its worktree/branch were cleaned.

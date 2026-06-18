@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T08:18:38+09:00",
+  "generated_at": "2026-06-19T08:30:58+09:00",
   "record_count": 358,
   "finding_count": 0,
   "findings": [],
@@ -3908,7 +3908,7 @@
       "title": "Create the seminar artifact that decides what new visual direction should be explored…",
       "path": "agents/lead_engineer/tasks/TASK-AR-600.md",
       "parent_id": "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-600-001",
@@ -3919,7 +3919,7 @@
       "title": "UNIT-TASK-AR-600-001 - Run lead-designer UI direction seminar",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md",
       "parent_id": "TASK-AR-600",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-601",

@@ -9,11 +9,11 @@ task_id: TASK-AR-600
 task_set_id: TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC
 initiative_id: INIT-AR-UI-UX-DESIGN-DIRECTION-CYCLE
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead-designer
 created_at: 2026-06-19T08:18:00+09:00
-updated_at: 2026-06-19T08:23:49+09:00
+updated_at: 2026-06-19T08:30:57+09:00
 origin_type: owner_request
 origin_ref: chat:2026-06-19-ui-refactor-continuous-cycle
 created_by: codex-planner
@@ -50,6 +50,11 @@ verified_by: codex-independent-verifier-ui-seminar-600
 evidence_refs:
   - reviews/VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323.json
   - reviews/VERIFY-2026-06-19-unit-task-ar-600-001-20260619082349.json
+resolution: done
+completed_at: 2026-06-19T08:30:57+09:00
+closed_by: codex-lead-designer-ui-seminar-600
+actual_hours: 1.0
+actual_tokens: 6000
 ---
 
 # UNIT-TASK-AR-600-001 - Run lead-designer UI direction seminar
@@ -103,3 +108,16 @@ Report the selected design-direction candidate, rejected alternatives, assetizat
 ## Stop Boundary
 
 Stop after seminar evidence is complete and ready for RFC registration or claim.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T08:30:57+09:00`
+- Resolution: `done`
+- Actual hours: `1.0`
+- Actual tokens: `6000`
+- Closed by: `codex-lead-designer-ui-seminar-600`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323.json`
+  - `reviews/VERIFY-2026-06-19-unit-task-ar-600-001-20260619082349.json`
+<!-- work-close:end -->
