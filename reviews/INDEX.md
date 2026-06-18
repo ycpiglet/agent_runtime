@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T08:30:59+09:00
-record_count: 622
+generated_at: 2026-06-19T08:44:44+09:00
+record_count: 625
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `622` review and evidence records under `reviews/`.
+- Summary: indexed `625` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `622` files |
+| Reviews covered | pass | `625` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -507,6 +507,7 @@ record_count: 622
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-conductor.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-conductor` | review | accepted | replan | UI/UX Cycle Automation T3 Replan After Conductor |
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-review-planning.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-review-planning` | review | accepted | replan | UI/UX Cycle Automation T3 Replan After Review Planning |
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-design-direction-rfc-registration.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-design-direction-rfc-registration` | md | record | pass | UI UX Design Direction RFC Registration |
+| `reviews/RFC-2026-06-19-ui-ux-design-direction.md` | `RFC-2026-06-19-ui-ux-design-direction` | ui-ux-design-direction-rfc | accepted | pass | UI/UX Design Direction RFC 2026-06-19 |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario |
@@ -576,6 +577,7 @@ record_count: 622
 | `reviews/VERIFY-2026-06-19-task-ar-598-root-integration-20260619021304.json` | `VERIFY-2026-06-19-task-ar-598-root-integration-20260619021304` | json | record | n/a | VERIFY-2026-06-19-task-ar-598-root-integration-20260619021304 |
 | `reviews/VERIFY-2026-06-19-task-ar-599-20260619023818.json` | `VERIFY-2026-06-19-task-ar-599-20260619023818` | json | record | n/a | VERIFY-2026-06-19-task-ar-599-20260619023818 |
 | `reviews/VERIFY-2026-06-19-task-ar-600-20260619082941.json` | `VERIFY-2026-06-19-task-ar-600-20260619082941` | json | record | n/a | VERIFY-2026-06-19-task-ar-600-20260619082941 |
+| `reviews/VERIFY-2026-06-19-task-ar-601-20260619084352.json` | `VERIFY-2026-06-19-task-ar-601-20260619084352` | json | record | n/a | VERIFY-2026-06-19-task-ar-601-20260619084352 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500.json` | `VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525.json` | `VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323.json` | `VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323 |
@@ -655,6 +657,7 @@ record_count: 622
 | `reviews/W4B-2026-06-19-TASK-AR-598.md` | `W4B-2026-06-19-TASK-AR-598` | md | record | pass | TASK-AR-598 W4b Independent Verification |
 | `reviews/W4B-2026-06-19-TASK-AR-599.md` | `W4B-2026-06-19-TASK-AR-599` | md | record | pass | TASK-AR-599 W4b Independent Verification |
 | `reviews/W4B-2026-06-19-TASK-AR-600.md` | `W4B-2026-06-19-TASK-AR-600` | w4b-independent-verification | accepted | pass | W4B Independent Verification - TASK-AR-600 |
+| `reviews/W4B-2026-06-19-TASK-AR-601.md` | `W4B-2026-06-19-TASK-AR-601` | w4b-independent-verification | accepted | pass | W4B Independent Verification - TASK-AR-601 |
 | `reviews/W4B-2026-06-19-UNIT-TASK-AR-596-001.md` | `W4B-2026-06-19-UNIT-TASK-AR-596-001` | md | accepted | pass | W4B Independent Verification - UNIT-TASK-AR-596-001 |
 
 ## Risks / Blockers

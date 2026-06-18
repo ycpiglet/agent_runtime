@@ -9,9 +9,16 @@ kind: task
 parent_id: TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC
 registered_at: 2026-06-19T08:18:00+09:00
 created_at: 2026-06-19T08:18:00+09:00
-updated_at: 2026-06-19T08:18:00+09:00
+updated_at: 2026-06-19T08:43:52+09:00
 title: Publish UI design direction RFC
 status: planned
+started_at: 2026-06-19T08:36:00+09:00
+verification_status: passed
+verified_at: 2026-06-19T08:43:52+09:00
+verified_by: codex-independent-verifier-ui-rfc-601
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-task-ar-601-20260619084352.json
+w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-601.md
 priority: P1
 difficulty: M
 est_hours: 3

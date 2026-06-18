@@ -144,6 +144,38 @@ RFC before implementation:
 Accepted RFCs update `DESIGN.md` for visual direction and this file for system
 rules. Workers then implement from the updated contract.
 
+### Accepted RFC: operator attention graph
+
+`reviews/RFC-2026-06-19-ui-ux-design-direction.md` accepts
+`operator_attention_graph` as the next design direction. It authorizes a later
+implementation task to propose relation-aware assets, but only within these
+boundaries:
+
+| Candidate asset | Class | Initial tier | Contract |
+| --- | --- | --- | --- |
+| Relation trace tokens | `design_token` | `experimental` | Use existing status and line tokens first; add new semantic relation tokens only inside the token definition layer. |
+| Relation spacing, motion, and effect tokens | `design_token` | `experimental` | Preserve semantic spacing names, reduced-motion behavior, and shallow evidence-first emphasis. |
+| `componentRelationChip` | `ui_component` | `experimental` | Label taskset, claim, evidence, wiki, graph, and command relationships with visible state text and keyboard focus. |
+| `componentEvidencePreviewRow` | `ui_component` | `experimental` | Show evidence kind, freshness, status label, and target link for pass, watch, block, missing, and stale states. |
+| `patternAttentionRelationPanel` | `pattern_component` | `experimental` | Combine current item, related artifacts, evidence preview, and command readiness without hiding the active taskset. |
+| `patternGraphContextStack` | `pattern_component` | `experimental` | Provide the narrow-viewport list equivalent for graph context, including empty, interrupted, stale, and blocked states. |
+
+The implementation may choose names that better fit `ui_design_assets.py`, but
+the responsibilities and states above must remain testable. Any one-off
+relationship copy or layout used only by the first implementation must be
+labelled `one_off_for_now` in closeout evidence and promoted before a third
+copy appears.
+
+The next source-mutating UI task must include beta-tester and UX-evaluator
+evidence for:
+
+- a user-like path from taskset attention to claim evidence, graph/wiki context,
+  and command readiness;
+- desktop and mobile viewport behavior;
+- keyboard traversal, visible focus, reduced motion, and non-color-only state;
+- recovery paths for empty graph, stale evidence, blocked command, and
+  interrupted claim.
+
 ## Role routing
 
 | Role | Responsibility |

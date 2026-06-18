@@ -89,3 +89,38 @@ The theme system from the V2 plan is implemented in `src/agent_runtime/ui_consol
 - **Toggle + auto-detection + persistence.** A header `#theme-toggle` button switches light/dark and persists the choice in `localStorage` (`agent-runtime-theme`). First load resolves: saved choice → OS `prefers-color-scheme` → light default. An inline `<head>` bootstrap applies `data-theme` before first paint (no flash); `app.js` re-applies, wires the toggle, and live-follows OS preference changes until the user makes an explicit choice.
 
 DOM ids and structure are unchanged so the sibling V2 foundation tasks (sidebar IA, list patterns) merge cleanly.
+
+## Amendment 2026-06-19 (TASK-AR-601 - operator attention graph direction)
+
+The next accepted design direction is `operator_attention_graph`, recorded in
+`reviews/RFC-2026-06-19-ui-ux-design-direction.md`.
+
+This direction keeps the light-first, dense, evidence-first operator console
+model, but adds a relationship layer for the workflow:
+
+```text
+taskset or attention item -> claim and evidence -> wiki or graph context -> command readiness
+```
+
+Future UI implementation should make tasksets, claims, evidence records, wiki
+pages, graph nodes, and safe commands feel connected without replacing the
+taskset-first mental model. Relationship visuals must clarify decision context:
+what owns the work, why it needs attention, what evidence is fresh or stale, and
+which command state is safe, blocked, or interrupted.
+
+Accepted references remain reference systems rather than copy targets:
+
+- Linear-style operator density for compact hierarchy and restrained visual
+  weight.
+- Sentry-style evidence drilldown for severity, ownership, and trace clarity.
+- Miro/FigJam-style relationship surfaces for visible context links only where
+  graph context helps an operator decide.
+
+The rejected alternatives are `visual_refresh_only` and `dashboard_kpi_layer`.
+The former does not improve decision flow; the latter risks generic SaaS
+summary metrics and hides evidence/context behind secondary views.
+
+Implementation remains blocked until a later claimed UI source task. That task
+must preserve visible labels, keyboard traversal, reduced-motion behavior,
+responsive graph-to-list fallback, and beta-tester evidence for empty, stale,
+blocked, and interrupted states.
