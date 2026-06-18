@@ -1,0 +1,61 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-19-task-ar-596-20260619080600",
+  "work_id": "TASK-AR-596",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-596.md",
+  "kind": "task",
+  "task_id": "TASK-AR-596",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-19T08:06:00+09:00",
+  "verified_by": "qa-20260619-075804-kst-closeout",
+  "command_count": 5,
+  "commands": [
+    {
+      "command": "python -m pytest tests\\test_wiki_page_api.py tests\\test_wiki_search_ask_api.py tests\\test_knowledge_graph.py tests\\test_knowledge_digest.py tests\\test_knowledge_ask.py tests\\test_knowledge_lint.py tests\\test_knowledge_lint_gate.py tests\\test_ui_console.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-19T08:04:47+09:00",
+      "finished_at": "2026-06-19T08:05:11+09:00",
+      "stdout": "........................................................................ [ 31%]\n........................................................................ [ 63%]\n........................................................................ [ 94%]\n............                                                             [100%]\n228 passed in 22.23s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts\\knowledge_lint.py --root . --git-limit 0 check --json",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-19T08:05:11+09:00",
+      "finished_at": "2026-06-19T08:05:18+09:00",
+      "stdout": "{\n  \"findings\": [\n    {\n      \"code\": \"orphan-entity\",\n      \"severity\": \"watch\",\n      \"id\": \"INIT-AR-AGENT-ORG-DELEGATION\",\n      \"detail\": \"INIT-AR-AGENT-ORG-DELEGATION (initiative) has no relations\"\n    },\n    {\n      \"code\": \"orphan-entity\",\n      \"severity\": \"watch\",\n      \"id\": \"INIT-AR-DECISION-FIRST-CONSOLE-IA\",\n      \"detail\": \"INIT-AR-DECISION-FIRST-CONSOLE-IA (initiative) has no relations\"\n    }\n  ],\n  \"summary\": {\n    \"block\": 0,\n    \"watch\": 2,\n    \"total\": 2\n  }\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts\\knowledge_graph.py check --json --git-limit 0",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-19T08:05:18+09:00",
+      "finished_at": "2026-06-19T08:05:24+09:00",
+      "stdout": "{\n  \"findings\": [],\n  \"ok\": true\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts\\taskset_work_gate.py --task-set-id TASKSET-AR-LLM-WIKI --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-19T08:05:24+09:00",
+      "finished_at": "2026-06-19T08:05:25+09:00",
+      "stdout": "taskset-work-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-596-closeout\nfindings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts\\owner_governance_gate.py",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-19T08:05:25+09:00",
+      "finished_at": "2026-06-19T08:05:46+09:00",
+      "stdout": "onversation_work_audit kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric gate.work_schema kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=8 reuse=2\n- metric capability.wave_dispatcher kind=script status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric capability.merge_queue kind=script status=active lifecycle=keep paths=1 evidence=3 usage=11 reuse=2\n- metric capability.scm_steward kind=script status=active lifecycle=keep paths=1 evidence=2 usage=12 reuse=2\n- metric capability.inflight_overlay kind=script status=active lifecycle=keep paths=1 evidence=3 usage=10 reuse=2\n- metric capability.work kind=script status=active lifecycle=keep paths=1 evidence=2 usage=7 reuse=2\n- metric capability.update_notify kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.session_dashboard kind=script status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=1\n- metric hook.session_dashboard kind=hook status=active lifecycle=keep paths=2 evidence=2 usage=9 reuse=2\n- metric skill.wave_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=7 reuse=2\n- metric skill.merge_integrator kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=15 reuse=2\n- metric skill.independent_verification kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=11 reuse=2\n- metric skill.work_analytics kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=14 reuse=2\n- metric skill.release_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=5 reuse=2\n- metric skill.scm_steward kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=19 reuse=2\nowner-governance: result: scripts/runtime_asset_usage.py --check -> 0\nowner-governance: start: scripts/state_sync_gate.py --check\nstate-sync-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-596-closeout\nfindings=0\nblock=0\nwatch=0\nowner-governance: result: scripts/state_sync_gate.py --check -> 0\nowner-governance: start: scripts/automation_rules_gate.py --check\nautomation-rules-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-596-closeout\nrules_total=0\nrules_active=0\nrules_executed=0\nrules_invalid=0\nactions=0\nfindings=0\nowner-governance: result: scripts/automation_rules_gate.py --check -> 0\nowner-governance: start: scripts/scheduled_dispatch_gate.py --check\nscheduled-dispatch-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-596-closeout\nschedules_total=0\nschedules_active=0\nschedules_invalid=0\ndue=0\ndispatches=0\nreminders=0\nfindings=0\nowner-governance: result: scripts/scheduled_dispatch_gate.py --check -> 0\nowner-governance: start: scripts/release_cadence_trigger.py --check\nrelease-cadence: watch finding=release-cadence:proposal recommended_bump=patch recommended_version=0.2.1\nrelease-cadence: baseline tag=v0.2.0 commits=344 feat=99 fix=17 days=5 (thresholds commits>=40 feat>=5 days>=14)\nrelease-cadence: trigger reasons: commits>=40 (actual 344); feat>=5 (actual 99)\nrelease-cadence: current version=0.2.0 source=pyproject.toml\nrelease-cadence: bump targets: pyproject.toml\nrelease-cadence: non-blocking watch; no version bump, tag, push, publish, or release execution\nowner-governance: result: scripts/release_cadence_trigger.py --check -> 0\nowner-governance: start: scripts/conversation_work_audit.py --check\nconversation-work-audit: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-596-closeout\nplanning_records=16\nfindings=0 block=0 watch=0\nowner-governance: result: scripts/conversation_work_audit.py --check -> 0\nowner-governance: start: scripts/knowledge_lint_gate.py --check\nknowledge-lint-gate: pass (enforced; changed=62>=10; no block findings)\nowner-governance: result: scripts/knowledge_lint_gate.py --check -> 0\nowner-governance: start: scripts/planning_loop.py gate --trigger hook --action scan\nstatus=pass\nowner-governance: result: scripts/planning_loop.py gate --trigger hook --action scan -> 0\n",
+      "stderr": ""
+    }
+  ]
+}

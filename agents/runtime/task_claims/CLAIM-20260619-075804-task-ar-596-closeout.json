@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-596:tab-01",
   "pane_id": "terminal:wt-task-ar-596:tab-01",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-LLM-WIKI",
   "active_scope": "TASKSET-AR-LLM-WIKI",
   "scope_transition_approved": true,
@@ -19,20 +19,20 @@
   "model_tier": "codex",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "claim-created",
-  "progress_pct": 0,
-  "step_index": 1,
+  "phase": "taskset-completed",
+  "progress_pct": 100,
+  "step_index": 6,
   "step_total": 6,
-  "status_text": "Claimed TASK-AR-596 LLM-Wiki closeout",
+  "status_text": "TASKSET-AR-LLM-WIKI completed; TASK-AR-596 closed and ready for W4b release.",
   "worktree_path": ".worktrees/TASK-AR-596-closeout",
   "branch": "codex/task-ar-596-closeout",
   "claimed_at": "2026-06-19T07:58:04+09:00",
-  "last_heartbeat": "2026-06-19T07:58:04+09:00",
-  "updated_at": "2026-06-19T07:58:04+09:00",
+  "last_heartbeat": "2026-06-19T08:15:00+09:00",
+  "updated_at": "2026-06-19T08:15:00+09:00",
   "expires_at": "2026-06-19T08:28:04+09:00",
   "lease": {
     "claimed_at": "2026-06-19T07:58:04+09:00",
-    "heartbeat_at": "2026-06-19T07:58:04+09:00",
+    "heartbeat_at": "2026-06-19T08:15:00+09:00",
     "expires_at": "2026-06-19T08:28:04+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260619-075804-task-ar-596-closeout.handoff.md",
@@ -47,5 +47,9 @@
     "agents/runtime/task_claims/CLAIM-20260619-025906-task-ar-594-wiki-minigraph.json",
     "agents/runtime/task_claims/CLAIM-20260619-071932-task-ar-595-wiki-nav.json",
     "reviews/INDEX.md"
-  ]
+  ],
+  "released_at": "2026-06-19T08:15:00+09:00",
+  "verified_by": "codex-w4b-20260619-task-ar-596-closeout",
+  "verifier_role": "independent-w4b",
+  "verification_evidence": "reviews/W4B-2026-06-19-TASK-AR-596.md"
 }

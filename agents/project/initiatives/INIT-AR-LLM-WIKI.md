@@ -1,10 +1,12 @@
 ---
 title: LLM-Wiki + Graph (agent + human)
-status: active
+status: completed
 owner: lead-engineer
 task_set_id: TASKSET-AR-LLM-WIKI
 created_at: 2026-06-17T22:30:00+09:00
-updated_at: 2026-06-18T23:30:00+09:00
+updated_at: 2026-06-19T08:15:00+09:00
+completed_at: 2026-06-19T08:15:00+09:00
+closed_by: codex-wiki-closeout-596
 ---
 
 # INIT-AR-LLM-WIKI - LLM-Wiki + Graph (agent + human)
@@ -33,10 +35,19 @@ bounded, while the global knowledge graph remains the secondary overview.
 | `TASK-AR-590` | completed | worker-engineer | Expand the graph corpus across docs/code/config/assets. |
 | `TASK-AR-591` | completed | worker-engineer | Add deterministic `/api/wiki/page` read envelope. |
 | `TASK-AR-592` | completed | uiux | Add console Wiki page view and local mini-graph. |
-| `TASK-AR-593` | planned | uiux | Add deterministic search + ask API/UI with LLM opt-in. |
-| `TASK-AR-594` | planned | uiux | Refine the per-page mini-graph lens and typed controls. |
-| `TASK-AR-595` | planned | uiux | Promote Wiki/Search as a core navigation hub with cross-links. |
-| `TASK-AR-596` | planned | qa | Extend lint and close the taskset with W4b evidence. |
+| `TASK-AR-593` | completed | uiux | Add deterministic search + ask API/UI with LLM opt-in. |
+| `TASK-AR-594` | completed | uiux | Refine the per-page mini-graph lens and typed controls. |
+| `TASK-AR-595` | completed | uiux | Promote Wiki/Search as a core navigation hub with cross-links. |
+| `TASK-AR-596` | completed | qa | Extend lint and close the taskset with W4b evidence. |
+
+## Closeout
+
+- Completed at: `2026-06-19T08:15:00+09:00`
+- Result: `TASKSET-AR-LLM-WIKI` closed locally; `BACKLOG-BOARD.md` archives
+  LLM Wiki as `7/7` done with `open_count: 0`.
+- Task-level verification:
+  `reviews/VERIFY-2026-06-19-task-ar-596-20260619080600.json`
+- W4b closeout evidence: `reviews/W4B-2026-06-19-TASK-AR-596.md`
 
 ## Boundary
 

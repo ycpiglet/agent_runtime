@@ -11,8 +11,12 @@
 - model_tier: codex
 - wip_slot: 0
 - stop_condition: 
-- phase: claim-created
-- step: 1/6
-- progress_pct: 0
-- status_text: Claimed TASK-AR-596 LLM-Wiki closeout
-- status: claimed
+- phase: taskset-completed
+- step: 6/6
+- progress_pct: 100
+- status_text: TASKSET-AR-LLM-WIKI completed; TASK-AR-596 closed and W4b released.
+- status: released
+- released_at: 2026-06-19T08:15:00+09:00
+- verified_by: codex-w4b-20260619-task-ar-596-closeout
+- verifier_role: independent-w4b
+- verification_evidence: reviews/W4B-2026-06-19-TASK-AR-596.md

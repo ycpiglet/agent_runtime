@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-19T08:00:51+09:00
+generated_at: 2026-06-19T08:10:26+09:00
 record_count: 352
 ---
 
@@ -351,15 +351,15 @@ record_count: 352
 | 12.1 | Taskset 12.1 | taskset | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | `INIT-AR-BUSINESS-OPERATIONS-TEAMS` | complete | `BACKLOG-BOARD.md` | Business Operations Teams |
 | 12.1.1 | Task 12.1.1 | task | `TASK-AR-577` | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | completed | `agents/lead_engineer/tasks/TASK-AR-577.md` | Define finance/accounting, marketing/growth, and sales/revenue teams across live proj… |
 | 12.1.1.1 | Unit 12.1.1.1 | unit | `UNIT-TASK-AR-577-001` | `TASK-AR-577` | completed | `agents/lead_engineer/tasks/units/TASK-AR-577/UNIT-TASK-AR-577-001.md` | UNIT-TASK-AR-577-001 - Publish business operations org model |
-| 13 | Initiative 13 | initiative | `INIT-AR-LLM-WIKI` | - | active | `agents/project/initiatives/INIT-AR-LLM-WIKI.md` | INIT-AR-LLM-WIKI - LLM-Wiki + Graph (agent + human) |
-| 13.1 | Taskset 13.1 | taskset | `TASKSET-AR-LLM-WIKI` | `INIT-AR-LLM-WIKI` | active | `BACKLOG-BOARD.md` | LLM Wiki |
+| 13 | Initiative 13 | initiative | `INIT-AR-LLM-WIKI` | - | completed | `agents/project/initiatives/INIT-AR-LLM-WIKI.md` | INIT-AR-LLM-WIKI - LLM-Wiki + Graph (agent + human) |
+| 13.1 | Taskset 13.1 | taskset | `TASKSET-AR-LLM-WIKI` | `INIT-AR-LLM-WIKI` | complete | `BACKLOG-BOARD.md` | LLM Wiki |
 | 13.1.1 | Task 13.1.1 | task | `TASK-AR-590` | `TASKSET-AR-LLM-WIKI` | completed | `agents/lead_engineer/tasks/TASK-AR-590.md` | Extend the knowledge graph corpus so LLM-Wiki pages can reason over runtime assets, h… |
 | 13.1.2 | Task 13.1.2 | task | `TASK-AR-591` | `TASKSET-AR-LLM-WIKI` | completed | `agents/lead_engineer/tasks/TASK-AR-591.md` | Add a deterministic wiki page envelope with summary, metadata, typed relationships, b… |
 | 13.1.3 | Task 13.1.3 | task | `TASK-AR-592` | `TASKSET-AR-LLM-WIKI` | completed | `agents/lead_engineer/tasks/TASK-AR-592.md` | Build the console Wiki view with entity page routing, summary, relations, backlinks,… |
 | 13.1.4 | Task 13.1.4 | task | `TASK-AR-593` | `TASKSET-AR-LLM-WIKI` | completed | `agents/lead_engineer/tasks/TASK-AR-593.md` | Add deterministic `/api/wiki/search?q=` and `/api/wiki/ask?q=&llm=0/1`, then wire a s… |
 | 13.1.5 | Task 13.1.5 | task | `TASK-AR-594` | `TASKSET-AR-LLM-WIKI` | completed | `agents/lead_engineer/tasks/TASK-AR-594.md` | Refine the per-page mini-graph into a typed, contextual insight lens with click-to-na… |
 | 13.1.6 | Task 13.1.6 | task | `TASK-AR-595` | `TASKSET-AR-LLM-WIKI` | completed | `agents/lead_engineer/tasks/TASK-AR-595.md` | Promote Wiki/Search as a core navigation hub adjacent to Records and add cross-links… |
-| 13.1.7 | Task 13.1.7 | task | `TASK-AR-596` | `TASKSET-AR-LLM-WIKI` | planned | `agents/lead_engineer/tasks/TASK-AR-596.md` | Extend knowledge lint coverage for the expanded corpus and close `TASKSET-AR-LLM-WIKI… |
+| 13.1.7 | Task 13.1.7 | task | `TASK-AR-596` | `TASKSET-AR-LLM-WIKI` | completed | `agents/lead_engineer/tasks/TASK-AR-596.md` | Extend knowledge lint coverage for the expanded corpus and close `TASKSET-AR-LLM-WIKI… |
 | 13.1.7.1 | Unit 13.1.7.1 | unit | `UNIT-TASK-AR-596-001` | `TASK-AR-596` | completed | `agents/lead_engineer/tasks/units/TASK-AR-596/UNIT-TASK-AR-596-001.md` | UNIT-TASK-AR-596-001 - Extend wiki corpus lint checks |
 | 14 | Initiative 14 | initiative | `INIT-AR-DESIGN-SYSTEM-GOVERNANCE` | - | active | `agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-GOVERNANCE.md` | Design System Governance |
 | 14.1 | Taskset 14.1 | taskset | `TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE` | `INIT-AR-DESIGN-SYSTEM-GOVERNANCE` | complete | `BACKLOG-BOARD.md` | Design System Governance |

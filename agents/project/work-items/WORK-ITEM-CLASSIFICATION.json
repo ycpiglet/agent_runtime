@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T08:00:51+09:00",
+  "generated_at": "2026-06-19T08:10:26+09:00",
   "record_count": 352,
   "finding_count": 0,
   "findings": [],
@@ -3446,7 +3446,7 @@
       "title": "INIT-AR-LLM-WIKI - LLM-Wiki + Graph (agent + human)",
       "path": "agents/project/initiatives/INIT-AR-LLM-WIKI.md",
       "parent_id": "",
-      "status": "active"
+      "status": "completed"
     },
     {
       "key": "taskset:TASKSET-AR-LLM-WIKI",
@@ -3457,7 +3457,7 @@
       "title": "LLM Wiki",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-LLM-WIKI",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-590",
@@ -3534,7 +3534,7 @@
       "title": "Extend knowledge lint coverage for the expanded corpus and close `TASKSET-AR-LLM-WIKI…",
       "path": "agents/lead_engineer/tasks/TASK-AR-596.md",
       "parent_id": "TASKSET-AR-LLM-WIKI",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-596-001",
