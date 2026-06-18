@@ -1,27 +1,48 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T00:45:00+09:00
+updated_at: 2026-06-19T00:59:00+09:00
 current_state:
-  summary: "TASK-AR-583 semantic scale is W4b verified and integrated; TASK-AR-584 is next."
+  summary: "TASK-AR-584 pattern renderer promotion is claimed in .worktrees/TASK-AR-584."
   status: active
   task_set_status: active
   task_set_id: "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION"
-  step_index: 6
-  step_total: 6
-  progress_pct: 100
-  status_text: "TASK-AR-583 completed; dispatch TASK-AR-584 when continuing design-system debt consolidation."
+  step_index: 1
+  step_total: 5
+  progress_pct: 0
+  status_text: "TASK-AR-584 claimed; worker should promote pattern renderers and write verification evidence."
 active_work:
-  current_agents: []
+  current_agents:
+    - display_name: codex-uiux-pattern-renderers-584
+      agent_role: lead-engineer
+      team_id: ui-ux
+      agent_instance_id: uiux-pattern-renderers-20260619-584
+      callsite_id: terminal:wt-task-ar-584:tab-01
+      pane_id: terminal:wt-task-ar-584:tab-01
+      task_id: TASK-AR-584
+      task_set_id: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
+      status: claimed
+      phase: claim-created
+      progress_pct: 0
+      step_index: 1
+      step_total: 5
+      status_text: Claimed TASK-AR-584 pattern renderer promotion.
+      worktree_path: .worktrees/TASK-AR-584
+      branch: codex/task-ar-584-pattern-renderers
+      claim_id: CLAIM-20260619-005828-task-ar-584-pattern-renderers
+      claim_path: agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.json
+      handoff_path: agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.handoff.md
+      last_heartbeat: 2026-06-19T00:58:28+09:00
   current_teams:
     - team_id: ui-ux
       status: active
-      phase: next-task-ready
+      phase: claim-created
       progress_pct: 0
       step_index: 1
-      step_total: 6
-      status_text: TASK-AR-584 is next after TASK-AR-583 completion
+      step_total: 5
+      status_text: TASK-AR-584 pattern renderer promotion claimed
       active_task: TASK-AR-584
       task_set_id: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
-      pane_ids: []
+      pane_ids:
+        - terminal:wt-task-ar-584:tab-01
 resume:
   active_task: "TASK-AR-584"
   active_task_set: "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION"
@@ -32,7 +53,6 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
   design_system_debt_consolidation:
     taskset: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
     released_claim: agents/runtime/task_claims/CLAIM-20260619-003400-task-ar-583-semantic-scale.json
@@ -44,11 +64,13 @@ pointers:
     next_task: TASK-AR-584
     self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-583-20260619003823.json
     w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-583.md
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.json
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
     active_claim: null
     preserved_claim: agents/runtime/task_claims/CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve.json
-    preserved_branch: claude/llm-wiki
+    preserved_branch: archive/branches/20260619/claude-llm-wiki
     preserved_branch_head: 5846e40
     worktree_path: null
     implementation_branch: codex/task-ar-593-wiki-search-ask
