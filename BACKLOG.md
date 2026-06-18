@@ -21,11 +21,13 @@
 | 617 | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | Business Operations Teams |
 | 618 | `TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE` | Design System Governance |
 | 619 | `TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION` | Design System Assetization |
+| 619 | `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` | UI UX Cycle Automation |
 | 620 | `TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS` | Design System Component Patterns |
 | 621 | `TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT` | Design System Token Debt |
 | 622 | `TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | Design System Served Asset Split |
 | 623 | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | Design System Debt Consolidation |
 | 624 | `TASKSET-AR-LLM-WIKI` | LLM Wiki |
+| 624 | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | UI UX Design Direction RFC |
 
 <!-- BACKLOG-INDEX:END -->
 
