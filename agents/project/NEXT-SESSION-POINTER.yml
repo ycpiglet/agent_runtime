@@ -1,36 +1,16 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T01:12:00+09:00
+updated_at: 2026-06-19T01:27:09+09:00
 current_state:
-  summary: "TASK-AR-584 pattern renderer promotion remains the top-level active task; TASK-AR-596 wiki lint extension is also claimed in .worktrees/TASK-AR-596."
+  summary: "TASK-AR-584 pattern renderer promotion passed W4b and was released; TASK-AR-596 wiki lint extension remains the active claimed work."
   status: active
   task_set_status: active
-  task_set_id: "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION"
+  task_set_id: "TASKSET-AR-LLM-WIKI"
   step_index: 1
   step_total: 5
   progress_pct: 0
-  status_text: "TASK-AR-584 owns UI renderer promotion; TASK-AR-596 owns non-overlapping wiki lint extension."
+  status_text: "TASK-AR-596 owns the current active work; TASK-AR-584 is released and awaiting integration cleanup."
 active_work:
   current_agents:
-    - display_name: codex-uiux-pattern-renderers-584
-      agent_role: lead-engineer
-      team_id: ui-ux
-      agent_instance_id: uiux-pattern-renderers-20260619-584
-      callsite_id: terminal:wt-task-ar-584:tab-01
-      pane_id: terminal:wt-task-ar-584:tab-01
-      task_id: TASK-AR-584
-      task_set_id: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
-      status: claimed
-      phase: claim-created
-      progress_pct: 0
-      step_index: 1
-      step_total: 5
-      status_text: Claimed TASK-AR-584 pattern renderer promotion.
-      worktree_path: .worktrees/TASK-AR-584
-      branch: codex/task-ar-584-pattern-renderers
-      claim_id: CLAIM-20260619-005828-task-ar-584-pattern-renderers
-      claim_path: agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.json
-      handoff_path: agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.handoff.md
-      last_heartbeat: 2026-06-19T00:58:28+09:00
     - display_name: codex-wiki-lint-596
       agent_role: lead-engineer
       team_id: agent-runtime-core
@@ -52,17 +32,6 @@ active_work:
       handoff_path: agents/runtime/task_claims/CLAIM-20260619-011800-task-ar-596-wiki-lint.handoff.md
       last_heartbeat: 2026-06-19T01:12:00+09:00
   current_teams:
-    - team_id: ui-ux
-      status: active
-      phase: claim-created
-      progress_pct: 0
-      step_index: 1
-      step_total: 5
-      status_text: TASK-AR-584 pattern renderer promotion claimed
-      active_task: TASK-AR-584
-      task_set_id: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
-      pane_ids:
-        - terminal:wt-task-ar-584:tab-01
     - team_id: agent-runtime-core
       status: active
       phase: claim-created
@@ -75,8 +44,8 @@ active_work:
       pane_ids:
         - terminal:wt-task-ar-596:tab-01
 resume:
-  active_task: "TASK-AR-584"
-  active_task_set: "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION"
+  active_task: "TASK-AR-596"
+  active_task_set: "TASKSET-AR-LLM-WIKI"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -86,17 +55,16 @@ roles:
 pointers:
   design_system_debt_consolidation:
     taskset: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
-    released_claim: agents/runtime/task_claims/CLAIM-20260619-003400-task-ar-583-semantic-scale.json
-    worktree_path: .worktrees/TASK-AR-583
-    implementation_branch: codex/task-ar-583-semantic-scale
-    implementation_commit: f5f0014
-    status: task_ar_583_completed_integrated
-    next_decision: dispatch_task_ar_584
+    released_claim: agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.json
+    worktree_path: .worktrees/TASK-AR-584
+    implementation_branch: codex/task-ar-584-pattern-renderers
+    implementation_commit: 3efa0f0
+    status: task_ar_584_w4b_released_pending_integration_cleanup
+    next_decision: integrate_task_ar_584_then_close_design_system_debt_consolidation
     next_task: TASK-AR-584
-    self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-583-20260619003823.json
-    w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-583.md
+    self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-584-20260619011843.json
+    w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-584.md
   active_claims:
-    - agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.json
     - agents/runtime/task_claims/CLAIM-20260619-011800-task-ar-596-wiki-lint.json
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI

@@ -12,11 +12,11 @@
 - model_tier: worker_standard
 - wip_slot: 1
 - stop_condition: Stop after SVG-layout and calendar-grid renderers are served through stable pattern APIs, focused tests pass, design-system gate passes, and verification evidence is written.
-- phase: w4a-self-verified
-- step: 4/5
-- progress_pct: 85
-- status_text: Pattern renderer promotion implemented and W4a verified; W4b independent verification pending.
-- status: claimed
+- phase: w4b-verified-released
+- step: 5/5
+- progress_pct: 100
+- status_text: TASK-AR-584 pattern renderer promotion released after independent W4b verification.
+- status: released
 
 ## W4a Self Verification
 
@@ -24,3 +24,10 @@
 - pytest: `python -m pytest tests\test_ui_console.py tests\test_ui_console_e2e.py tests\test_ui_design_assets.py -q` -> 177 passed
 - design gate: `python scripts\design_system_gate.py --check --all-ui` -> pass, findings=0
 - browser: served `app.js` contains `patternSvgGraph`, `patternCalendarGrid`, `patternSvgLayeredRadialLayout`; live map, dependency graph, and calendar rendered without console/page errors.
+
+## W4b Independent Verification
+
+- evidence: reviews/W4B-2026-06-19-TASK-AR-584.md
+- verified_by: independent-verifier-task-ar-584-20260619
+- verifier_role: independent-auditor
+- release: claim released at 2026-06-19T01:27:09+09:00

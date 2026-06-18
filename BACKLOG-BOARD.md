@@ -57,7 +57,7 @@ completed_task_set_count: 42
 
 - Flow: Consolidate transitional spacing/radius px-alias tokens into a designed semantic scale, and promote remaining view-specific JS renderers into stable pattern modules, without re-introducing raw literals.
 - Progress: `1/2` done; `1` open or active.
-- WIP: active `1/3`; oldest `0.2h`; stale `0`.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-584` | INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | High | 6h/12000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Move view-specific JS renderers (data-heavy SVG layouts, calendar grids, office-map p… |
@@ -66,7 +66,7 @@ completed_task_set_count: 42
 
 - Flow: Extend the merged knowledge stack with a human-browsable Wiki/Search surface over the expanded corpus: deterministic entity pages, search, ask, contextual mini-graphs, nav integration, and linted closeout.
 - Progress: `3/7` done; `4` open or active.
-- WIP: active `1/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.3h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-595` | INIT-AR-LLM-WIKI | - | - | planned | Action | P1 | High | Medium | 5h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Promote Wiki/Search as a core navigation hub adjacent to Records and add cross-links… |
