@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-06-18
-task_count: 255
-open_count: 6
+generated_at: 2026-06-19
+task_count: 258
+open_count: 9
 completed_count: 249
-task_set_count: 2
+task_set_count: 3
 completed_task_set_count: 42
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `6` open or active tasks; `249` completed tasks are archived from this live board.
+- Summary: `9` open or active tasks; `249` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `6` / Ask `0` / Review `0` / Later `0` / Done `249`.
-- Task Sets: `2` active workflows; `42` completed workflows are hidden from the live action board.
+- Status: Action `9` / Ask `0` / Review `0` / Later `0` / Done `249`.
+- Task Sets: `3` active workflows; `42` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -42,6 +42,17 @@ completed_task_set_count: 42
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
 
+### UI UX Cycle Automation (`TASKSET-AR-UI-UX-CYCLE-AUTOMATION`)
+
+- Flow: Create an automated UI/UX improvement loop: assess tokens, components, typography, size, color, motion, effects, schemas, and assets; record seminar/meeting/beta-tester review needs; then propose the next concrete UI refactor tasks for execution and verification.
+- Progress: `0/3` done; `3` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-597` | INIT-AR-UI-UX-CONTINUOUS-IMPROVEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-597/UNIT-TASK-AR-597-001.md | planned | Action | P1 | High | Medium | 4h/8000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Add a deterministic UI/UX cycle command that reads current design-system state, open… |
+| `TASK-AR-598` | INIT-AR-UI-UX-CONTINUOUS-IMPROVEMENT | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | Medium | 4h/8000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Make the UI/UX cycle able to record meeting/seminar/beta-tester artifact skeletons af… |
+| `TASK-AR-599` | INIT-AR-UI-UX-CONTINUOUS-IMPROVEMENT | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | High | 6h/12000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Let completed UI/UX cycle reports propose follow-up work items for lead-designer, des… |
+
 ### Design System Debt Consolidation (`TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION`)
 
 - Flow: Consolidate transitional spacing/radius px-alias tokens into a designed semantic scale, and promote remaining view-specific JS renderers into stable pattern modules, without re-introducing raw literals.
@@ -56,7 +67,7 @@ completed_task_set_count: 42
 
 - Flow: Extend the merged knowledge stack with a human-browsable Wiki/Search surface over the expanded corpus: deterministic entity pages, search, ask, contextual mini-graphs, nav integration, and linted closeout.
 - Progress: `3/7` done; `4` open or active.
-- WIP: active `1/3`; oldest `0.2h`; stale `0`.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-595` | INIT-AR-LLM-WIKI | - | - | planned | Action | P1 | High | Medium | 5h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Promote Wiki/Search as a core navigation hub adjacent to Records and add cross-links… |
@@ -116,7 +127,7 @@ completed_task_set_count: 42
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `6` open across `2` task sets (see Action Board above).
+- Active: `9` open across `3` task sets (see Action Board above).
 - Archived task sets: `42` (see Archived Task Sets above).
 - Archived task files: `249` — see `ARCHIVE-INDEX.md`.
 

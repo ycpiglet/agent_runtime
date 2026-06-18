@@ -304,8 +304,36 @@
       "recorded_at": "2026-06-17T17:11:39+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-registration.md",
+          "value": "7fbdbf69c415023cea800519a2aaaf3613d6da9bd36d1be5b0a61f6e587c29ee"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "cb2cd245558157ff640dbf0b824694c5623e2e1ef0ccfba6e83f9a08a5522bc8"
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/ui_ux_cycle.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-registration.md",
+      "recorded_at": "2026-06-19T00:09:48+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-UI-UX-CYCLE-AUTOMATION"
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-18T18:43:10+09:00"
+  "updated_at": "2026-06-19T00:09:48+09:00"
 }

@@ -1,0 +1,127 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "chat:2026-06-19-ui-refactor-continuous-cycle",
+  "created_by": "codex-planner",
+  "now": "2026-06-19T00:00:00+09:00",
+  "initiative": {
+    "id": "INIT-AR-UI-UX-CONTINUOUS-IMPROVEMENT",
+    "title": "UI UX Continuous Improvement",
+    "summary": "Turn detailed UI/UX refinement into a repeatable cycle that evaluates design-system maturity, calls seminar/meeting/beta-tester style review surfaces, proposes the next UI tasks, and feeds verified findings back into implementation.",
+    "owner": "lead_engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-UI-UX-CYCLE-AUTOMATION",
+    "display_name": "UI UX Cycle Automation",
+    "summary": "Create an automated UI/UX improvement loop: assess tokens, components, typography, size, color, motion, effects, schemas, and assets; record seminar/meeting/beta-tester review needs; then propose the next concrete UI refactor tasks for execution and verification.",
+    "order": 619,
+    "plan_slug": "2026-06-19-ui-ux-cycle-automation"
+  },
+  "tasks": [
+    {
+      "title": "Add UI/UX cycle conductor",
+      "goal": "Add a deterministic UI/UX cycle command that reads current design-system state, open UI tasks, recent meeting/seminar records, and beta-tester expectations, then emits a structured assessment and next-action plan without mutating UI source files.",
+      "scope": "Add a read-only script, focused tests, and documentation updates. Do not edit ui_console_assets.py or tests/test_ui_console.py while TASK-AR-593 owns overlapping UI footprints.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 4,
+      "est_tokens": 8000,
+      "owner": "lead_engineer",
+      "team": "ui-ux",
+      "acceptance": [
+        "scripts/ui_ux_cycle.py has assess and report modes that summarize design-system gate status, open UI task candidates, role coverage, and beta-tester review requirements.",
+        "The command identifies the next UI refactor action without touching files owned by active claims.",
+        "The generated report explicitly covers typography, size, color, motion, effects, schema, and asset dimensions as a checklist.",
+        "Focused tests prove deterministic output on fixture repos and no write side effects in assess mode."
+      ],
+      "verification": [
+        "python -m pytest tests/test_ui_ux_cycle.py -q",
+        "python scripts/ui_ux_cycle.py --root . assess --json",
+        "python scripts/ui_ux_cycle.py --root . report --dry-run --json"
+      ],
+      "units": [
+        {
+          "title": "Add UI/UX cycle conductor",
+          "context": "The Owner wants UI refactoring to continue, then repeatedly use seminar, meeting, beta tester, and related agent functions to derive the next step, implement, verify, and evaluate. Direct UI asset edits are temporarily blocked by an active overlapping TASK-AR-593 claim, so this unit builds the non-overlapping cycle conductor first.",
+          "inputs": [
+            "docs/design/agent-runtime/DESIGN-SYSTEM.md",
+            "scripts/design_system_gate.py",
+            "scripts/meeting_room.py",
+            "scripts/self_improvement_cycle.py",
+            "BACKLOG-BOARD.md",
+            "agents/project/ORG-MODEL.yml"
+          ],
+          "target_files": [
+            "scripts/ui_ux_cycle.py",
+            "tests/test_ui_ux_cycle.py",
+            "docs/design/agent-runtime/DESIGN-SYSTEM.md",
+            "agents/lead_engineer/tasks/TASK-AR-583.md",
+            "agents/lead_engineer/tasks/TASK-AR-584.md"
+          ],
+          "scope": "Create read-only assessment/report plumbing and documentation. Do not perform the semantic-token or JS-renderer refactors in this unit.",
+          "steps": [
+            "Implement a deterministic UI/UX cycle assessment that composes current design-system gate status, UI backlog candidates, recent review artifacts, and beta-tester evidence requirements.",
+            "Expose CLI subcommands for JSON assess output and dry-run report planning.",
+            "Document how the cycle selects the next UI refactor, meeting/seminar/beta-tester review, and verification handoff.",
+            "Add focused tests with fixture repos covering candidate selection, checklist dimensions, dry-run reporting, and no assess-mode writes.",
+            "Run verification commands and record handoff evidence."
+          ],
+          "acceptance": [
+            "The cycle names TASK-AR-583 as the next UI refactor when no conflicting active claim owns its target files, and marks it blocked/deferred when a conflict exists.",
+            "The cycle checklist includes typography, size, color, motion, effects, schema, assets, accessibility, responsiveness, and interaction evidence.",
+            "Report dry-run returns planned artifact paths without writing them.",
+            "The command output is stable enough for future automation to consume."
+          ],
+          "verification": [
+            "python -m pytest tests/test_ui_ux_cycle.py -q",
+            "python scripts/ui_ux_cycle.py --root . assess --json",
+            "python scripts/ui_ux_cycle.py --root . report --dry-run --json"
+          ],
+          "handoff": "Report cycle status, next UI refactor recommendation, review/beta-tester requirements, and commands used.",
+          "stop_condition": "Stop after the UI/UX cycle conductor, tests, docs, and verification evidence are complete and ready for independent review."
+        }
+      ]
+    },
+    {
+      "title": "Wire UI/UX cycle into seminar and beta-tester artifacts",
+      "goal": "Make the UI/UX cycle able to record meeting/seminar/beta-tester artifact skeletons after each implementation round, preserving exploratory verification requirements.",
+      "scope": "Extend the conductor after the read-only baseline lands. Do not fabricate live agent dialogue; create proposal/evidence shells only.",
+      "priority": "P2",
+      "difficulty": "M",
+      "est_hours": 4,
+      "est_tokens": 8000,
+      "owner": "lead_engineer",
+      "team": "ui-ux",
+      "acceptance": [
+        "The cycle can plan seminar, meeting, and beta-tester evidence artifacts for a selected UI task.",
+        "Beta-tester evidence requires exploratory user-like actions, recovery attempts, environment notes, and failure IDs.",
+        "Generated artifacts are indexed and gated."
+      ],
+      "verification": [
+        "python -m pytest tests/test_ui_ux_cycle.py tests/test_meeting_room.py -q",
+        "python scripts/ui_ux_cycle.py --root . plan-review --task-id TASK-AR-583 --dry-run --json"
+      ]
+    },
+    {
+      "title": "Automate UI/UX cycle recommendations into backlog intake",
+      "goal": "Let completed UI/UX cycle reports propose follow-up work items for lead-designer, design-system-steward, interface-designer, and ux-evaluator review without bypassing W0-W6 registration.",
+      "scope": "Produce proposal records only; actual task registration remains explicit through work.py new or an approved planner handoff.",
+      "priority": "P2",
+      "difficulty": "L",
+      "est_hours": 6,
+      "est_tokens": 12000,
+      "owner": "lead_engineer",
+      "team": "ui-ux",
+      "acceptance": [
+        "Cycle reports produce machine-readable next-work proposals with role routing and target file boundaries.",
+        "Proposals distinguish new design direction RFCs from implementation refactors and UX evaluation passes.",
+        "No proposal can mutate UI files or claims directly."
+      ],
+      "verification": [
+        "python -m pytest tests/test_ui_ux_cycle.py -q",
+        "python scripts/ui_ux_cycle.py --root . propose --dry-run --json"
+      ]
+    }
+  ]
+}

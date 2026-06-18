@@ -92,6 +92,12 @@
       "order": 619
     },
     {
+      "task_set_id": "TASKSET-AR-UI-UX-CYCLE-AUTOMATION",
+      "display_name": "UI UX Cycle Automation",
+      "summary": "Create an automated UI/UX improvement loop: assess tokens, components, typography, size, color, motion, effects, schemas, and assets; record seminar/meeting/beta-tester review needs; then propose the next concrete UI refactor tasks for execution and verification.",
+      "order": 619
+    },
+    {
       "task_set_id": "TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS",
       "display_name": "Design System Component Patterns",
       "summary": "Add reusable Button/Card/Table/Modal-style component helpers and domain pattern helpers for TaskLane, ClaimCard, EvidencePanel, CommandBar, and StateMachinePanel, then wire representative console renderers to those helpers.",

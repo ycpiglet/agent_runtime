@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-593:tab-01",
   "pane_id": "terminal:wt-task-ar-593:tab-01",
   "mode": "work",
-  "status": "review",
+  "status": "released",
   "task_set_id": "TASKSET-AR-LLM-WIKI",
   "active_scope": "TASKSET-AR-LLM-WIKI",
   "scope_transition_approved": true,
@@ -19,25 +19,25 @@
   "model_tier": "implementation",
   "wip_slot": 1,
   "stop_condition": "",
-  "phase": "self-verified",
-  "progress_pct": 90,
-  "step_index": 4,
+  "phase": "verified",
+  "progress_pct": 100,
+  "step_index": 5,
   "step_total": 7,
-  "status_text": "W4a self-verification passed for wiki search and ask API/UI; W4b independent verification pending",
+  "status_text": "W4b independent verification passed; claim released for merge",
   "worktree_path": ".worktrees/TASK-AR-593",
   "branch": "codex/task-ar-593-wiki-search-ask",
   "claimed_at": "2026-06-18T23:30:54+09:00",
-  "last_heartbeat": "2026-06-18T23:45:00+09:00",
-  "updated_at": "2026-06-18T23:45:00+09:00",
+  "last_heartbeat": "2026-06-19T00:25:00+09:00",
+  "updated_at": "2026-06-19T00:25:00+09:00",
   "expires_at": "2026-06-19T00:00:54+09:00",
   "lease": {
     "claimed_at": "2026-06-18T23:30:54+09:00",
-    "heartbeat_at": "2026-06-18T23:45:00+09:00",
+    "heartbeat_at": "2026-06-19T00:25:00+09:00",
     "expires_at": "2026-06-19T00:00:54+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260618-233054-task-ar-593-6287.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260618-233054-task-ar-593-6287.log.md",
-  "verification_evidence": "reviews/VERIFY-2026-06-18-task-ar-593-20260618234500.json",
+  "verification_evidence": "reviews/W4B-2026-06-19-TASK-AR-593.md",
   "allow_parallel_task_set": false,
   "tags": [],
   "target_files": [
@@ -47,5 +47,8 @@
     "scripts/knowledge_ask.py",
     "tests/test_wiki_search_ask_api.py",
     "tests/test_ui_console.py"
-  ]
+  ],
+  "released_at": "2026-06-19T00:25:00+09:00",
+  "verified_by": "codex-w4b-20260619-task-ar-593",
+  "verifier_role": "independent-w4b"
 }
