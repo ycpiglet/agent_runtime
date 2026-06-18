@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T01:59:33+09:00
-record_count: 600
+generated_at: 2026-06-19T02:10:38+09:00
+record_count: 601
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `600` review and evidence records under `reviews/`.
+- Summary: indexed `601` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `600` files |
+| Reviews covered | pass | `601` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -561,6 +561,7 @@ record_count: 600
 | `reviews/VERIFY-2026-06-19-task-ar-583-20260619003823.json` | `VERIFY-2026-06-19-task-ar-583-20260619003823` | json | record | n/a | VERIFY-2026-06-19-task-ar-583-20260619003823 |
 | `reviews/VERIFY-2026-06-19-task-ar-584-20260619011843.json` | `VERIFY-2026-06-19-task-ar-584-20260619011843` | json | record | n/a | VERIFY-2026-06-19-task-ar-584-20260619011843 |
 | `reviews/VERIFY-2026-06-19-task-ar-584-root-integration-20260619013817.json` | `VERIFY-2026-06-19-task-ar-584-root-integration-20260619013817` | json | record | n/a | VERIFY-2026-06-19-task-ar-584-root-integration-20260619013817 |
+| `reviews/VERIFY-2026-06-19-task-ar-598-20260619015334.json` | `VERIFY-2026-06-19-task-ar-598-20260619015334` | json | record | n/a | VERIFY-2026-06-19-task-ar-598-20260619015334 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500.json` | `VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525.json` | `VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |

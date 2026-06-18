@@ -239,3 +239,97 @@ def test_cli_assess_json(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
     payload = json.loads(result.stdout)
     assert payload["next_refactor"]["task"]["task_id"] == "TASK-AR-583"
+
+
+def test_plan_review_dry_run_plans_artifacts_without_writing(tmp_path: Path) -> None:
+    module = load_module()
+    write_fixture(tmp_path)
+    before = sorted(path.relative_to(tmp_path).as_posix() for path in tmp_path.rglob("*") if path.is_file())
+
+    payload = module.plan_review(
+        tmp_path,
+        task_id="TASK-AR-583",
+        now=datetime(2026, 6, 19, 0, 0, tzinfo=timezone.utc),
+        dry_run=True,
+    )
+
+    after = sorted(path.relative_to(tmp_path).as_posix() for path in tmp_path.rglob("*") if path.is_file())
+    assert after == before
+    assert payload["schema"] == "agent-runtime-ui-ux-review-plan/v1"
+    assert payload["status"] == "planned"
+    assert payload["task"]["task_id"] == "TASK-AR-583"
+    assert {artifact["kind"] for artifact in payload["artifacts"]} == {"seminar", "meeting", "beta_tester"}
+    assert [artifact["status"] for artifact in payload["artifacts"]] == ["planned", "planned", "planned"]
+    assert payload["index"]["status"] == "planned"
+
+
+def test_plan_review_beta_tester_requires_exploratory_evidence(tmp_path: Path) -> None:
+    module = load_module()
+    write_fixture(tmp_path)
+
+    payload = module.plan_review(
+        tmp_path,
+        task_id="TASK-AR-583",
+        now=datetime(2026, 6, 19, 0, 0, tzinfo=timezone.utc),
+        dry_run=True,
+    )
+
+    beta = next(artifact for artifact in payload["artifacts"] if artifact["kind"] == "beta_tester")
+    fields = {row["field"] for row in beta["evidence_fields"]}
+    assert {"user_like_actions", "recovery_attempts", "environment_notes", "failure_ids"} <= fields
+    assert any("clicked or typed" in requirement for requirement in beta["requirements"])
+    assert any("BTC-style" in requirement for requirement in beta["requirements"])
+
+
+def test_plan_review_write_records_artifacts_and_updates_index(tmp_path: Path) -> None:
+    module = load_module()
+    write_fixture(tmp_path)
+
+    payload = module.plan_review(
+        tmp_path,
+        task_id="TASK-AR-583",
+        now=datetime(2026, 6, 19, 0, 0, tzinfo=timezone.utc),
+        dry_run=False,
+    )
+
+    assert payload["status"] == "recorded"
+    assert payload["index"]["status"] == "pass"
+    for artifact in payload["artifacts"]:
+        assert artifact["status"] == "recorded"
+        assert (tmp_path / artifact["path"]).exists()
+    beta_text = (tmp_path / "reviews" / "BETA-TEST-2026-06-19-task-ar-583-ui-ux.md").read_text(encoding="utf-8")
+    assert "## User-Like Actions" in beta_text
+    assert "## Recovery Attempts" in beta_text
+    assert "## Failure IDs" in beta_text
+    index_text = (tmp_path / "reviews" / "INDEX.md").read_text(encoding="utf-8")
+    assert "BETA-TEST-2026-06-19-task-ar-583-ui-ux.md" in index_text
+
+
+def test_cli_plan_review_json(tmp_path: Path) -> None:
+    write_fixture(tmp_path)
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--root",
+            str(tmp_path),
+            "--now",
+            "2026-06-19T00:00:00+00:00",
+            "plan-review",
+            "--task-id",
+            "TASK-AR-583",
+            "--dry-run",
+            "--json",
+        ],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["status"] == "planned"
+    assert payload["artifacts"][0]["path"] == "reviews/SEMINAR-2026-06-19-task-ar-583-ui-ux.md"

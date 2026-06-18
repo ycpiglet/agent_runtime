@@ -25,10 +25,12 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 import backlog_board  # noqa: E402
+import meeting_room  # noqa: E402
 
 
 ASSESS_SCHEMA = "agent-runtime-ui-ux-cycle-assessment/v1"
 REPORT_SCHEMA = "agent-runtime-ui-ux-cycle-report/v1"
+REVIEW_PLAN_SCHEMA = "agent-runtime-ui-ux-review-plan/v1"
 ACTIVE_CLAIM_STATUSES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
 OPEN_TASK_STATUSES = {"planned", "worker_ready", "claimed", "in_progress", "review", "waiting_review", "working"}
 UI_ROLE_IDS = ("lead-designer", "design-system-steward", "interface-designer", "ux-evaluator")
@@ -73,6 +75,25 @@ BETA_TESTER_REQUIREMENTS = [
     "Attach or reference multi-step evidence; a single screenshot is not enough.",
 ]
 
+BETA_TESTER_EVIDENCE_FIELDS = [
+    {
+        "field": "user_like_actions",
+        "requirement": "List the exact clicks, typing, navigation, filtering, and recovery actions attempted.",
+    },
+    {
+        "field": "recovery_attempts",
+        "requirement": "Exercise empty, error, retry, undo, back/forward, and interrupted-flow states where relevant.",
+    },
+    {
+        "field": "environment_notes",
+        "requirement": "Record OS, browser, viewport, data state, local server URL, and any test account or fixture context.",
+    },
+    {
+        "field": "failure_ids",
+        "requirement": "Assign BTC-style IDs to user-visible defects and link each ID to reproduction evidence.",
+    },
+]
+
 
 def _parse_now(value: str | None) -> datetime:
     if not value:
@@ -110,6 +131,14 @@ def _read_text(path: Path) -> str:
         return path.read_text(encoding="utf-8", errors="replace")
     except OSError:
         return ""
+
+
+def _write_text(path: Path, text: str, *, overwrite: bool) -> str:
+    if path.exists() and not overwrite:
+        return "exists"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+    return "recorded"
 
 
 def _frontmatter(path: Path) -> dict[str, Any]:
@@ -194,6 +223,32 @@ def _load_tasks(root: Path) -> list[dict[str, Any]]:
             }
         )
     return tasks
+
+
+def _load_task(root: Path, task_id: str) -> dict[str, Any] | None:
+    tasks_dir = root / "agents" / "lead_engineer" / "tasks"
+    if not tasks_dir.is_dir():
+        return None
+    expected = f"{task_id}.md"
+    candidates = [tasks_dir / expected] if (tasks_dir / expected).exists() else sorted(tasks_dir.glob(f"{task_id}*.md"))
+    for path in candidates:
+        text = _read_text(path)
+        meta = _frontmatter(path)
+        resolved_id = str(meta.get("id") or meta.get("work_id") or path.stem)
+        if resolved_id != task_id:
+            continue
+        return {
+            "task_id": resolved_id,
+            "title": str(meta.get("title") or resolved_id),
+            "task_set_id": str(meta.get("task_set_id") or ""),
+            "status": str(meta.get("status") or ""),
+            "priority": str(meta.get("priority") or ""),
+            "team": str(meta.get("team") or ""),
+            "owner": str(meta.get("owner") or ""),
+            "path": _rel(root, path),
+            "target_files": _normalize_paths(meta.get("target_files")) or _infer_target_files(text),
+        }
+    return None
 
 
 def _load_active_claims(root: Path) -> list[dict[str, Any]]:
@@ -352,6 +407,205 @@ def _review_plan(next_refactor: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _artifact_status(dry_run: bool) -> str:
+    return "planned" if dry_run else "pending"
+
+
+def _review_artifacts(task: dict[str, Any], *, today: str, generated_at: str, dry_run: bool) -> list[dict[str, Any]]:
+    task_id = task["task_id"]
+    task_slug = meeting_room.slugify(f"{task_id}-ui-ux")
+    return [
+        {
+            "kind": "seminar",
+            "id": f"SEMINAR-{today}-{task_slug}",
+            "path": f"reviews/SEMINAR-{today}-{task_slug}.md",
+            "status": _artifact_status(dry_run),
+            "participants": ["lead-designer", "design-system-steward", "interface-designer", "ux-evaluator"],
+            "purpose": "derive the next UI/UX delta before another implementation round",
+            "generated_at": generated_at,
+        },
+        {
+            "kind": "meeting",
+            "id": f"MEETING-{today}-{task_slug}",
+            "path": f"reviews/MEETING-{today}-{task_slug}.md",
+            "status": _artifact_status(dry_run),
+            "participants": ["lead-engineer", "design-system-steward", "interface-designer"],
+            "purpose": "align scope, target files, verification, and handoff boundaries",
+            "generated_at": generated_at,
+        },
+        {
+            "kind": "beta_tester",
+            "id": f"BETA-TEST-{today}-{task_slug}",
+            "path": f"reviews/BETA-TEST-{today}-{task_slug}.md",
+            "status": _artifact_status(dry_run),
+            "participants": ["beta-tester", "ux-evaluator"],
+            "purpose": "capture exploratory user-like evidence after implementation",
+            "generated_at": generated_at,
+            "evidence_fields": list(BETA_TESTER_EVIDENCE_FIELDS),
+            "requirements": list(BETA_TESTER_REQUIREMENTS),
+        },
+    ]
+
+
+def _render_meeting_artifact(task: dict[str, Any], artifact: dict[str, Any], *, meeting_type: str) -> str:
+    return meeting_room.render_skeleton(
+        meeting_id=artifact["id"],
+        topic=f"{task['task_id']} {artifact['purpose']}",
+        participants=list(artifact["participants"]),
+        meeting_type=meeting_type,
+        rounds=3,
+        task_id=task["task_id"],
+        generated_at=artifact["generated_at"],
+    )
+
+
+def _render_beta_tester_artifact(task: dict[str, Any], artifact: dict[str, Any]) -> str:
+    lines = [
+        "---",
+        "type: beta-tester-review",
+        f"id: {artifact['id']}",
+        "audience: owner",
+        "status: planned",
+        "signal: planned",
+        f"task_id: {task['task_id']}",
+        f"generated_at: {artifact['generated_at']}",
+        "participants:",
+    ]
+    lines.extend(f"  - {participant}" for participant in artifact["participants"])
+    lines.append("evidence_fields:")
+    lines.extend(f"  - {field['field']}" for field in artifact["evidence_fields"])
+    lines.append("tags: [ui, ux, beta-tester, evidence-skeleton]")
+    lines.extend(
+        [
+            "---",
+            "",
+            f"# {task['task_id']} Beta Tester Evidence",
+            "",
+            "## Bottom Line",
+            "",
+            "- Summary: beta-tester evidence skeleton recorded; execution pending.",
+            "- Boundary: this file defines required exploratory evidence and does not fabricate test results.",
+            "",
+            "## Environment Notes",
+            "",
+            "- OS/browser/viewport: _pending_",
+            "- Data state/server URL/account or fixture: _pending_",
+            "",
+            "## User-Like Actions",
+            "",
+            "- _pending_",
+            "",
+            "## Recovery Attempts",
+            "",
+            "- _pending_",
+            "",
+            "## Failure IDs",
+            "",
+            "- BTC-YYYYMMDD-001: _none recorded yet_",
+            "",
+            "## Required Evidence Fields",
+            "",
+        ]
+    )
+    for field in artifact["evidence_fields"]:
+        lines.append(f"- `{field['field']}`: {field['requirement']}")
+    lines.extend(["", "## Checklist Dimensions", ""])
+    for row in _quality_checklist():
+        lines.append(f"- `{row['dimension']}`: {row['evidence_required']}")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _render_review_artifact(task: dict[str, Any], artifact: dict[str, Any]) -> str:
+    if artifact["kind"] == "seminar":
+        return _render_meeting_artifact(task, artifact, meeting_type="seminar")
+    if artifact["kind"] == "meeting":
+        return _render_meeting_artifact(task, artifact, meeting_type="meeting")
+    return _render_beta_tester_artifact(task, artifact)
+
+
+def _run_evidence_index(root: Path, *, write: bool) -> dict[str, Any]:
+    generator = root / "scripts" / "evidence_index_generator.py"
+    if not generator.exists():
+        generator = SCRIPT_DIR / "evidence_index_generator.py"
+    if not generator.exists():
+        return {
+            "status": "missing",
+            "command": "python scripts/evidence_index_generator.py --write" if write else "python scripts/evidence_index_generator.py --check",
+            "path": "reviews/INDEX.md",
+        }
+    args = [sys.executable, str(generator), "--write" if write else "--check"]
+    result = subprocess.run(
+        args,
+        cwd=root,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    return {
+        "status": "pass" if result.returncode == 0 else "fail",
+        "returncode": result.returncode,
+        "command": "python scripts/evidence_index_generator.py --write" if write else "python scripts/evidence_index_generator.py --check",
+        "path": "reviews/INDEX.md",
+    }
+
+
+def plan_review(
+    root: Path,
+    *,
+    task_id: str,
+    now: datetime,
+    dry_run: bool = False,
+    overwrite: bool = False,
+) -> dict[str, Any]:
+    root = root.resolve()
+    generated_at = now.isoformat(timespec="seconds")
+    task = _load_task(root, task_id)
+    if not task:
+        return {
+            "schema": REVIEW_PLAN_SCHEMA,
+            "generated_at": generated_at,
+            "root": str(root),
+            "status": "failed",
+            "dry_run": dry_run,
+            "task_id": task_id,
+            "errors": [f"task not found: {task_id}"],
+        }
+    artifacts = _review_artifacts(task, today=_today(now), generated_at=generated_at, dry_run=dry_run)
+    errors: list[str] = []
+    if not dry_run:
+        for artifact in artifacts:
+            target = root / artifact["path"]
+            artifact["status"] = _write_text(target, _render_review_artifact(task, artifact), overwrite=overwrite)
+            if artifact["status"] == "exists":
+                errors.append(f"artifact already exists: {artifact['path']} (pass --overwrite to replace)")
+        index = _run_evidence_index(root, write=True) if not errors else {"status": "skipped", "path": "reviews/INDEX.md"}
+    else:
+        index = {
+            "status": "planned",
+            "command": "python scripts/evidence_index_generator.py --write",
+            "path": "reviews/INDEX.md",
+        }
+    return {
+        "schema": REVIEW_PLAN_SCHEMA,
+        "generated_at": generated_at,
+        "root": str(root),
+        "status": "planned" if dry_run else ("recorded" if not errors and index.get("status") == "pass" else "failed"),
+        "dry_run": dry_run,
+        "task": task,
+        "artifacts": artifacts,
+        "index": index,
+        "gate": {
+            "status": "planned" if dry_run else index.get("status"),
+            "command": "python scripts/evidence_index_generator.py --check",
+        },
+        "errors": errors,
+    }
+
+
 def _cycle_score(design_gate: dict[str, Any], roles: dict[str, Any], next_refactor: dict[str, Any], artifacts: list[dict[str, Any]]) -> dict[str, Any]:
     score = 0
     score += 30 if design_gate.get("status") == "pass" else 0
@@ -501,6 +755,19 @@ def render_report_text(payload: dict[str, Any]) -> str:
     )
 
 
+def render_review_plan_text(payload: dict[str, Any]) -> str:
+    artifacts = ", ".join(f"{artifact['kind']}->{artifact['path']}" for artifact in payload.get("artifacts", []))
+    return "\n".join(
+        [
+            "UI/UX Review Artifact Plan",
+            f"- Status: {payload['status']}",
+            f"- Task: {(payload.get('task') or {}).get('task_id', payload.get('task_id', 'none'))}",
+            f"- Artifacts: {artifacts or 'none'}",
+            f"- Index: {(payload.get('index') or {}).get('status', 'n/a')}",
+        ]
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="UI/UX continuous improvement cycle conductor")
     parser.add_argument("--root", type=Path, default=Path.cwd())
@@ -512,6 +779,11 @@ def build_parser() -> argparse.ArgumentParser:
     report_parser.add_argument("--dry-run", action="store_true")
     report_parser.add_argument("--overwrite", action="store_true")
     report_parser.add_argument("--json", action="store_true")
+    review_parser = sub.add_parser("plan-review", help="plan seminar, meeting, and beta-tester artifacts for a UI task")
+    review_parser.add_argument("--task-id", required=True)
+    review_parser.add_argument("--dry-run", action="store_true")
+    review_parser.add_argument("--overwrite", action="store_true")
+    review_parser.add_argument("--json", action="store_true")
     return parser
 
 
@@ -532,6 +804,19 @@ def main(argv: list[str] | None = None) -> int:
         else:
             print(render_report_text(payload))
         return 0
+    if args.command == "plan-review":
+        payload = plan_review(
+            args.root,
+            task_id=args.task_id,
+            now=now,
+            dry_run=args.dry_run,
+            overwrite=args.overwrite,
+        )
+        if args.json:
+            print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        else:
+            print(render_review_plan_text(payload))
+        return 0 if payload.get("status") in {"planned", "recorded"} else 1
     return 2
 
 

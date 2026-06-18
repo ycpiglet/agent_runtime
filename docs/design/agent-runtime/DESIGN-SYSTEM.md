@@ -174,8 +174,9 @@ styling pass:
 
 1. Run `python scripts/ui_ux_cycle.py --root . assess --json`.
 2. Confirm the next refactor candidate and any active-claim footprint conflict.
-3. Run or plan the relevant seminar/meeting/beta-tester review surfaces before
-   the next implementation round.
+3. Run `python scripts/ui_ux_cycle.py --root . plan-review --task-id <TASK> --dry-run --json`
+   to plan the seminar, implementation meeting, and beta-tester evidence
+   skeletons for the selected UI task.
 4. Implement only the claimed unit.
 5. Verify with the design-system gate, focused tests, and beta-tester evidence.
 6. Feed the result back into the next `ui_ux_cycle` report.
@@ -183,6 +184,13 @@ styling pass:
 The cycle checklist must always cover typography, size/spacing, color, motion,
 effects, schema/API boundaries, assets, accessibility, responsiveness, and
 interaction recovery paths.
+
+`plan-review` is proposal/evidence plumbing. Dry-run mode must not write files.
+Write mode may create only review skeletons and refresh `reviews/INDEX.md`; it
+must not fabricate live seminar dialogue, beta-tester results, UI source edits,
+claims, or registered follow-up tasks. Beta-tester skeletons must require
+user-like actions, recovery attempts, environment notes, and BTC-style failure
+IDs before an evaluator can claim the evidence is complete.
 
 ## Gate
 
