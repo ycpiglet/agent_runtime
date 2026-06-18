@@ -814,6 +814,16 @@ HTML = """<!doctype html>
                 </section>
                 <section class="wiki-page-section">
                   <h3>Mini Graph</h3>
+                  <div class="wiki-minigraph-controls">
+                    <label>Nodes
+                      <select id="wiki-minigraph-limit" aria-label="Wiki mini graph node limit">
+                        <option value="12">12</option>
+                        <option value="24" selected>24</option>
+                        <option value="48">48</option>
+                      </select>
+                    </label>
+                    <span id="wiki-minigraph-summary" class="wiki-minigraph-summary" role="status" aria-live="polite"></span>
+                  </div>
                   <div class="wiki-minigraph-stage">
                     <svg id="wiki-minigraph-svg" class="wiki-minigraph-svg" viewBox="0 0 420 280" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Wiki local entity graph"></svg>
                   </div>
@@ -5074,6 +5084,33 @@ pre {
 .wiki-metadata-value {
   overflow-wrap: anywhere;
 }
+.wiki-minigraph-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2xl);
+  margin-bottom: var(--space-2xl);
+}
+.wiki-minigraph-controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-lg);
+  color: var(--muted);
+  font-size: var(--font-size-ui-11);
+}
+.wiki-minigraph-controls select {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  color: var(--ink);
+  font-size: var(--font-size-ui-11);
+  padding: var(--space-sm) var(--space-xl);
+}
+.wiki-minigraph-summary {
+  color: var(--muted);
+  font-size: var(--font-size-ui-11);
+}
 .wiki-minigraph-stage {
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -5083,22 +5120,41 @@ pre {
 .wiki-minigraph-svg { display: block; width: 100%; height: 280px; }
 .wiki-minigraph-edge { stroke: var(--line-strong); stroke-width: 1.2; opacity: 0.55; }
 .wiki-minigraph-edge.type-partOf { stroke: var(--primary-line); opacity: 0.8; }
+.wiki-minigraph-edge.type-parent,
+.wiki-minigraph-edge.type-child,
+.wiki-minigraph-edge.type-partof { stroke: var(--primary-line); opacity: 0.8; }
 .wiki-minigraph-edge.type-references,
 .wiki-minigraph-edge.type-documents { stroke: var(--blue); }
 .wiki-minigraph-edge.type-imports,
 .wiki-minigraph-edge.type-tests,
 .wiki-minigraph-edge.type-tested_by { stroke: var(--warning-line); }
+.wiki-minigraph-edge-label {
+  fill: var(--muted);
+  font-size: var(--font-size-ui-8);
+  text-anchor: middle;
+  pointer-events: none;
+}
+.wiki-minigraph-node {
+  cursor: pointer;
+  outline: none;
+}
 .wiki-minigraph-node circle {
   fill: var(--panel-strong);
   stroke: var(--line-strong);
   stroke-width: 1.4;
-  cursor: pointer;
 }
 .wiki-minigraph-node.kind-task circle { fill: var(--primary-soft-strong); stroke: var(--primary-line); }
 .wiki-minigraph-node.kind-taskset circle { fill: var(--blue); stroke: var(--blue); }
 .wiki-minigraph-node.kind-doc circle,
 .wiki-minigraph-node.kind-review circle { fill: var(--panel); }
+.wiki-minigraph-node.role-incoming circle { stroke: var(--success-line); }
+.wiki-minigraph-node.role-outgoing circle { stroke: var(--primary-line); }
+.wiki-minigraph-node.role-mixed circle { stroke: var(--warning-line); }
 .wiki-minigraph-node.is-root circle { stroke: var(--danger); stroke-width: 2.4; }
+.wiki-minigraph-node:focus-visible circle {
+  stroke: var(--primary-hover);
+  box-shadow: var(--focus);
+}
 .wiki-minigraph-node text {
   fill: var(--muted);
   font-size: var(--font-size-ui-9);
@@ -5109,10 +5165,15 @@ pre {
 .wiki-minigraph-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-4xl);
+  gap: var(--space-2xl);
   margin: var(--space-2xl) 0 0;
   padding: 0;
   list-style: none;
+}
+.wiki-minigraph-legend li {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: var(--space-xs) var(--space-lg);
 }
 
 /* ===== Knowledge graph view (#5) ===== */
@@ -10358,28 +10419,86 @@ function renderWikiPage() {
   renderWikiMiniGraph(page.minigraph || { nodes: [], edges: [] }, page.id || "");
 }
 
+function wikiClassToken(value) {
+  const token = String(value || "entity").replace(/[^A-Za-z0-9_-]+/g, "-");
+  return token || "entity";
+}
+
+function wikiMiniGraphLimit(graph) {
+  const control = $("wiki-minigraph-limit");
+  const requested = Number(control ? control.value : 24);
+  const serverLimit = Number((graph || {}).limit || 48);
+  const value = Number.isFinite(requested) ? requested : 24;
+  return Math.max(4, Math.min(serverLimit || 48, value));
+}
+
+function wikiMiniGraphNodes(graph, rootId) {
+  const raw = (graph.nodes || []);
+  const root = raw.find((node) => node.id === rootId) || raw[0] || null;
+  const limit = wikiMiniGraphLimit(graph);
+  const others = raw.filter((node) => !root || node.id !== root.id);
+  if (!root) return raw.slice(0, limit);
+  return [root].concat(others.slice(0, Math.max(0, limit - 1)));
+}
+
+function wikiMiniGraphSummary(graph, nodes, edges) {
+  const totalNodes = Number(graph.total_nodes || (graph.nodes || []).length || 0);
+  const shownNodes = nodes.length;
+  const totalEdges = Number(graph.total_edges || (graph.edges || []).length || 0);
+  const topTypes = (graph.relation_counts || []).slice(0, 2)
+    .map((item) => `${item.type}:${item.total}`)
+    .join(", ");
+  return `${shownNodes}/${totalNodes} nodes - ${edges.length}/${totalEdges} edges`
+    + (graph.capped ? " - capped" : "")
+    + (topTypes ? ` - ${topTypes}` : "");
+}
+
 function wikiMiniGraphPositions(nodes, rootId) {
   const positions = {};
   const root = nodes.find((node) => node.id === rootId) || nodes[0];
   if (!root) return positions;
   positions[root.id] = { x: 210, y: 140 };
   const others = nodes.filter((node) => node.id !== root.id);
-  others.forEach((node, index) => {
-    const angle = (index / Math.max(others.length, 1)) * Math.PI * 2 - Math.PI / 2;
-    positions[node.id] = { x: 210 + Math.cos(angle) * 145, y: 140 + Math.sin(angle) * 92 };
+  const groups = { incoming: [], outgoing: [], mixed: [], neighbor: [] };
+  others.forEach((node) => {
+    const role = String(node.role || "neighbor");
+    if (role === "incoming") groups.incoming.push(node);
+    else if (role === "outgoing") groups.outgoing.push(node);
+    else if (role === "mixed") groups.mixed.push(node);
+    else groups.neighbor.push(node);
   });
+  const placeColumn = (items, x) => {
+    items.forEach((node, index) => {
+      const y = items.length === 1 ? 140 : 62 + (index / Math.max(items.length - 1, 1)) * 156;
+      positions[node.id] = { x, y };
+    });
+  };
+  const placeRow = (items, y) => {
+    items.forEach((node, index) => {
+      const x = items.length === 1 ? 210 : 96 + (index / Math.max(items.length - 1, 1)) * 228;
+      positions[node.id] = { x, y };
+    });
+  };
+  placeColumn(groups.incoming, 82);
+  placeColumn(groups.outgoing, 338);
+  placeRow(groups.mixed, 46);
+  placeRow(groups.neighbor, 238);
   return positions;
 }
 
 function renderWikiMiniGraph(graph, rootId) {
+  graph = graph || { nodes: [], edges: [] };
   const svg = $("wiki-minigraph-svg");
   const legend = $("wiki-minigraph-legend");
-  const nodes = (graph.nodes || []).slice(0, 48);
+  const nodes = wikiMiniGraphNodes(graph, rootId);
   const ids = new Set(nodes.map((node) => node.id));
   const edges = (graph.edges || []).filter((edge) => ids.has(edge.from) && ids.has(edge.to));
+  setText("wiki-minigraph-summary", wikiMiniGraphSummary(graph || {}, nodes, edges));
   if (legend) {
     const kinds = Array.from(new Set(nodes.map((node) => node.kind || "entity"))).sort();
-    legend.innerHTML = kinds.map((kind) => `<li>${escapeHtml(kind)}</li>`).join("");
+    const rels = (graph.relation_counts || []).slice(0, 4)
+      .map((item) => `<li>${escapeHtml(item.type || "relates")} ${escapeHtml(item.total || 0)}</li>`);
+    legend.innerHTML = kinds.map((kind) => `<li>${escapeHtml(kind)}</li>`).concat(rels).join("");
   }
   if (!svg) return;
   while (svg.firstChild) svg.removeChild(svg.firstChild);
@@ -10401,8 +10520,20 @@ function renderWikiMiniGraph(graph, rootId) {
     const line = document.createElementNS(SVG_NS, "line");
     line.setAttribute("x1", a.x); line.setAttribute("y1", a.y);
     line.setAttribute("x2", b.x); line.setAttribute("y2", b.y);
-    line.setAttribute("class", `wiki-minigraph-edge type-${edge.type || "relates"}`);
+    line.setAttribute("class", `wiki-minigraph-edge type-${wikiClassToken(edge.type || "relates")}`);
+    line.setAttribute("data-wiki-edge-type", edge.type || "relates");
+    const title = document.createElementNS(SVG_NS, "title");
+    title.textContent = `${edge.type || "relates"}: ${edge.from} -> ${edge.to}`;
+    line.appendChild(title);
     edgeLayer.appendChild(line);
+    if (edges.length <= 18) {
+      const label = document.createElementNS(SVG_NS, "text");
+      label.setAttribute("x", (a.x + b.x) / 2);
+      label.setAttribute("y", (a.y + b.y) / 2 - 4);
+      label.setAttribute("class", "wiki-minigraph-edge-label");
+      label.textContent = String(edge.type || "relates").slice(0, 16);
+      edgeLayer.appendChild(label);
+    }
   });
   svg.appendChild(edgeLayer);
   const nodeLayer = document.createElementNS(SVG_NS, "g");
@@ -10410,13 +10541,19 @@ function renderWikiMiniGraph(graph, rootId) {
     const pos = positions[node.id];
     if (!pos) return;
     const group = document.createElementNS(SVG_NS, "g");
-    group.setAttribute("class", `wiki-minigraph-node kind-${node.kind || "entity"} ${node.id === rootId ? "is-root" : ""}`);
+    group.setAttribute("class", `wiki-minigraph-node kind-${wikiClassToken(node.kind || "entity")} role-${wikiClassToken(node.role || "neighbor")} ${node.id === rootId ? "is-root" : ""}`);
     group.setAttribute("data-wiki-id", node.id);
+    group.setAttribute("data-wiki-node-kind", node.kind || "entity");
+    group.setAttribute("data-wiki-node-role", node.role || "neighbor");
+    group.setAttribute("role", "button");
+    group.setAttribute("tabindex", "0");
+    group.setAttribute("aria-label", `Open ${node.title || node.id} (${node.kind || "entity"}, ${node.role || "neighbor"})`);
     const circle = document.createElementNS(SVG_NS, "circle");
+    const degree = Math.max(1, Number(node.degree || 1));
     circle.setAttribute("cx", pos.x); circle.setAttribute("cy", pos.y);
-    circle.setAttribute("r", node.id === rootId ? "18" : "12");
+    circle.setAttribute("r", node.id === rootId ? "20" : String(Math.min(16, 10 + Math.sqrt(degree) * 1.6)));
     const title = document.createElementNS(SVG_NS, "title");
-    title.textContent = `${node.id} (${node.kind || "entity"})`;
+    title.textContent = `${node.title || node.id}\n${node.kind || "entity"} - ${node.role || "neighbor"}\n${node.incoming_count || 0} in / ${node.outgoing_count || 0} out`;
     circle.appendChild(title);
     group.appendChild(circle);
     const label = document.createElementNS(SVG_NS, "text");
@@ -10425,6 +10562,12 @@ function renderWikiMiniGraph(graph, rootId) {
     label.textContent = String(node.id || "").slice(0, 18);
     group.appendChild(label);
     group.addEventListener("click", () => openWikiPage(node.id));
+    group.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openWikiPage(node.id);
+      }
+    });
     nodeLayer.appendChild(group);
   });
   svg.appendChild(nodeLayer);
@@ -12700,6 +12843,10 @@ $("wiki-query-input")?.addEventListener("keydown", (event) => {
 });
 $("wiki-open-graph")?.addEventListener("click", () => {
   window.location.hash = "#/records/knowledge-graph";
+});
+$("wiki-minigraph-limit")?.addEventListener("change", () => {
+  if (!wikiPageState) return;
+  renderWikiMiniGraph(wikiPageState.minigraph || { nodes: [], edges: [] }, wikiPageState.id || "");
 });
 document.addEventListener("click", (event) => {
   const link = event.target.closest(".wiki-link");
