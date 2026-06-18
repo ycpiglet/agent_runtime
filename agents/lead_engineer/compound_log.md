@@ -394,3 +394,22 @@
 
 ### Status
 - Recorded by `scripts/self_improvement_cycle.py cycle`.
+## COMPOUND-2026-06-18-001: Low-frequency role and runtime asset debt recurrence
+
+### Bottom Line
+- Self-improvement debt is recurring enough to require a searchable compound record.
+- Baseline maturity: `improving` at `73/100`.
+- Evidence review: `reviews/REVIEW-2026-06-18-self-improvement-cycle.md`.
+
+### Cause
+- Role invocation text exists, but claim evidence is missing for monitored roles.
+- Runtime assets are registered, but several have low distinct evidence reuse.
+- Scribe status is not yet reliable enough to remove the existing waiver debt.
+
+### Preventive Action
+- Keep the cycle command as the repeatable path from assessment to review/meeting/seminar/retro evidence.
+- Route scribe, reviewer, skeptic, council, progress-scout, and release-steward gaps into the next cycle.
+- Reassess before claiming maturity improvement.
+
+### Status
+- Recorded by `scripts/self_improvement_cycle.py cycle`.

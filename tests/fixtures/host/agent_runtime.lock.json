@@ -177,7 +177,7 @@
       "scripts/schedule_task.py": "sha256:900ec8181ecffc388eaea4d5ce5195618f6ea817577344034dd8454eb6aa97cb",
       "scripts/scheduled_dispatch_gate.py": "sha256:c2a41725d81303a58c3cf80c076137d1fca5414019bd45334bf7893eb88b12cf",
       "scripts/scm_steward.py": "sha256:023a3d5910957e866dc51295b7788c6105cc74cee21a98402a4260a4055961da",
-      "scripts/scribe_due.py": "sha256:a764a6b314fab1d1283126e95080c6eeb6d923862c4be67e08c41e1504dfef91",
+      "scripts/scribe_due.py": "sha256:3ba9579be478a9e0a6e0983d4847074f6a503ba64eb67d060ca56ff548c449bb",
       "scripts/secretary_digest.py": "sha256:66a5e85681877eec911fc3dca0f1b19b71004a840f87500d1c78f10cda55b004",
       "scripts/session_dashboard.py": "sha256:1ba6a9a0eb17d1d3e074a761fc197f389c6822a2d736b3549c0e9b02c219c76d",
       "scripts/session_start_hook.py": "sha256:a688e6e77d3bf156ddac3409082b224775732ec0d86bd581332b1274b5ef4e86",
@@ -266,7 +266,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.2.0",
-    "template_digest": "sha256:4f015cadaaebd9a78085bdfc4a61eac52f080e81eaafaba3c2ef5f96e3755104",
+    "template_digest": "sha256:a8f482a1cf4dbda68f72004dcb9c58fdd6309a4a99e0c830a57da805ba6381fb",
     "template_files": 263
   },
   "project": "fixture-host",

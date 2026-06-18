@@ -156,6 +156,27 @@ def test_assessment_can_be_mature_when_evidence_is_present(tmp_path: Path) -> No
     assert payload["runtime_assets"]["asset_gaps"] == []
 
 
+def test_assessment_uses_root_status_when_role_status_missing(tmp_path: Path) -> None:
+    module = load_module()
+    mature_policy = policy()
+    mature_policy["minimum_claim_roles"] = {"scribe": 1}
+    mature_policy["monitored_roles"] = []
+    write_json(tmp_path / "agents/project/COLLABORATION-GOVERNANCE.json", mature_policy)
+    write_json(tmp_path / "agents/runtime/task_claims/CLAIM-scribe.json", claim("scribe", claim_id="CLAIM-scribe"))
+    good_registry = registry()
+    good_registry["assets"][0]["evidence_paths"] = ["reviews/REVIEW-fixture.md", "reviews/MEETING-fixture.md"]
+    write_json(tmp_path / "agents/project/RUNTIME-ASSET-REGISTRY.json", good_registry)
+    write(tmp_path / "skills/sleepy/SKILL.md", "# Sleepy\n")
+    write(tmp_path / "reviews/REVIEW-fixture.md", "sleepy-skill-token\n")
+    write(tmp_path / "reviews/MEETING-fixture.md", "sleepy-skill-token\n")
+    write(tmp_path / "STATUS.md", "## 현재 한 줄 요약\n- one\n- two\n")
+
+    payload = module.assess(tmp_path, now=datetime(2026, 6, 17, 8, 0, tzinfo=timezone.utc))
+
+    assert payload["advisory_signals"]["scribe"]["state"] == "ok"
+    assert payload["advisory_signals"]["scribe"]["hot_entries"] == 2
+
+
 def test_cli_assess_json(tmp_path: Path) -> None:
     write_fixture(tmp_path)
 

@@ -1,5 +1,14 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 현재 한 줄 요약
+
+- LLM-Wiki preservation branch is deferred with owner-visible handoff; no active claim is currently open.
+- Self-improvement remediation is improving but not mature: `scribe_state`, monitored role gaps, and cycle evidence still need follow-up.
+- Scribe source is now the live status summary section so advisory health can be measured without fabricating role evidence.
+- Doc Steward remains ok; keep document-health checks advisory and evidence-based.
+- Design-system cleanup appears in the current dirty intake as separate uncommitted work and should be preserved, not folded into this role cleanup.
+- Next after role cleanup: strengthen LLM-Wiki and knowledge graph surfaces from registered records, not from chat-only notes.
+
 ## 2026-06-18 - LLM-Wiki worktree preservation active
 
 - Preservation claim: `CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve` now records `.worktrees/llm-wiki` / `claude/llm-wiki` in the primary checkout before closeout.
