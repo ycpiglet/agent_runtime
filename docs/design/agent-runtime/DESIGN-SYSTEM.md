@@ -48,7 +48,7 @@ assets live in:
 
 | Layer | Module | Contents |
 | --- | --- | --- |
-| `design_token` | `src/agent_runtime/ui_design_assets.py` | `UI_TOKEN_SCALE_CSS` for shared type, spacing, radius, and tokenized px aliases used by the legacy console CSS. |
+| `design_token` | `src/agent_runtime/ui_design_assets.py` | `UI_TOKEN_SCALE_CSS` for shared type, semantic spacing, radius, and specialized layout offsets used by the legacy console CSS. |
 | `ui_component` | `src/agent_runtime/ui_design_assets.py` | JS helpers such as `componentButton`, `componentCard`, `componentTable`, `componentModalShell`, `componentProgressBar`, `componentEmptyState`, `componentMetaGrid`, and `componentStateChip`. |
 | `pattern_component` | `src/agent_runtime/ui_design_assets.py` | Domain helpers such as `patternTaskLane`, `patternClaimCard`, `patternEvidencePanel`, `patternCommandBar`, `patternStateMachinePanelLegend`, `patternAuditMeta`, and `patternSurfaceMeta`, served into `/app.js` and reused by console renderers. |
 | `served_asset` | `src/agent_runtime/ui_console_assets.py` | The served HTML, CSS, and JavaScript asset strings, including composition with `ui_design_assets`. |
@@ -73,6 +73,13 @@ Token-literal status as of `TASK-AR-581`: the full `--all-ui` raw-literal audit
 passes for the current console baseline. Typography, spacing, radius, and the
 remaining raw stroke color are now represented through tokens rather than
 page-level CSS literals.
+
+Semantic scale status as of `TASK-AR-583`: transitional `--space-px-*` and
+`--radius-px-*` aliases have been removed from the token layer and console CSS
+consumers. Shared spacing now uses named scale tokens such as `--space-sm`,
+`--space-6xl`, `--space-viewport-gap`, and `--space-floating-offset`; radius
+uses `--radius-hairline`, `--radius-xs`, `--radius-md`, `--radius-lg`, and
+related scale names.
 
 Residual one-off boundary: data-heavy SVG layout functions, calendar grids,
 office map placement, import/export previews, specialized ops dashboard charts,
@@ -111,12 +118,11 @@ against objective, checkable criteria:
 Demotion or deprecation is allowed from any tier. Tier transitions are recorded
 in the asset module docstring and in the touching task's closeout evidence.
 
-Tokens follow the same model. The current `--space-px-*` and `--radius-px-*`
-aliases are `stable` but transitional: they tokenize the legacy literal values
-rather than a designed scale. Consolidating them into a semantic scale (for
-example `--space-1..n`) is a future `experimental` token delta that promotes
-only after the asset layer migrates to it, and it must not silently re-introduce
-raw literals.
+Tokens follow the same model. The current spacing and radius scale is `stable`
+for new console work: workers must use semantic scale tokens rather than
+pixel-named aliases or raw literals. New spacing/radius values start as
+`experimental` only when a design exploration proves the existing scale cannot
+serve the workflow, and they must not silently re-introduce raw literals.
 
 ## New design proposal path
 
