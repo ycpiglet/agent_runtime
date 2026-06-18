@@ -40,7 +40,7 @@
       "agents/project/EVAL-POLICY.example.yml": "sha256:1e6a0569306ef8857f7f24cd9914e390c36bdf4562d8d51c26c905c6af20f5f8",
       "agents/project/LINKS.md": "sha256:0a28363fa4839bfd7f2c90402b92a875af31178795630f2f3b5a487e9cbb34da",
       "agents/project/NEXT-SESSION-POINTER.yml": "sha256:f52ca90fa32fb24251b68d4919ebd14190b91aab8a710a35c13a058766cffc8a",
-      "agents/project/ORG-MODEL.yml": "sha256:4e91e1b3c13adeaec9bb8d493e6236414ddda36d92876bd2e5903666c2c3dab9",
+      "agents/project/ORG-MODEL.yml": "sha256:49f78d215da0df4020126d9d1156d636a249b4784b6ae0ef1326253a06464ca6",
       "agents/project/ORG.md": "sha256:335344669b25ca5b2d076f4bca8199e983e08c0de987d0e1a84db699122bd896",
       "agents/project/PROJECT-CONTEXT.example.yml": "sha256:30d16441ca1862a069d4d5144713249bde53bff52e54c57a948edc3f5af8846b",
       "agents/project/README.md": "sha256:91b62e1ae52a1b4cdb5a008daf6f230695f0c72772dd38acf36eb3122eacdeb5",
@@ -147,7 +147,7 @@
       "scripts/now.py": "sha256:6d6d6fcc9f1a4599a6735a15013fd263c887ae9910388e741134870abf446c9f",
       "scripts/orchestrator_safety_gate.py": "sha256:ff588238e9e0ab497f7a82caf52cb674c362409ca0583b33e402321efb29c7c7",
       "scripts/owner_doc_format_gate.py": "sha256:0ad323c0b4344d3071fa08f79e2f8720498b8d83e43fd03fc721dc1472b61815",
-      "scripts/owner_governance_gate.py": "sha256:f7d05a2e525b5f4bcb641f9a7263dd098ce119e6efac20a0bc2db3843e8f0785",
+      "scripts/owner_governance_gate.py": "sha256:3f4505fab004b92f353634fcbc02e957e18dfdbfe34fd42f4a860bbdb08979f5",
       "scripts/pane_event_log.py": "sha256:414fec8f0a4e3cb74a319c4e125e92af8ba406c8f8b26a99e278685ec52927a7",
       "scripts/parallel_worktree_gate.py": "sha256:06e5206a9cb7cf29199c922a1e077eee90a233379e6c7315bdd337ef1b0edcbc",
       "scripts/pipeline.py": "sha256:4abd82e5f09c9d3cc80d30542df7569bc1d7a2509303c1de704f213a49c03d97",
@@ -266,7 +266,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.2.0",
-    "template_digest": "sha256:7c832b0e07cdaf70a94bb33cb7e7d045e71dbe514857b5a5fc0eab426374c448",
+    "template_digest": "sha256:4f015cadaaebd9a78085bdfc4a61eac52f080e81eaafaba3c2ef5f96e3755104",
     "template_files": 263
   },
   "project": "fixture-host",
