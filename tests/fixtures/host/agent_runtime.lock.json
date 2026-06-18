@@ -136,7 +136,7 @@
       "scripts/knowledge_ask.py": "sha256:2b518d182c76f7383f050478650373d083e6f5d06b87df7ad16005a33b82959b",
       "scripts/knowledge_digest.py": "sha256:da575bb13b141b906d90be1214f98bd22ee69fe8cd191c541dcd9e99f5579aa5",
       "scripts/knowledge_graph.py": "sha256:7a53f2b9dc196765b089b2145df2ebc7c294f827d964c39ce22e703055744ad0",
-      "scripts/knowledge_lint.py": "sha256:999f0c6514f492d4bc88de538f0b5906ec03a6f1bf458b83cca90100b72f80f6",
+      "scripts/knowledge_lint.py": "sha256:2bcd8bf5510f563025d051db06e16c12f5f86bd9607bd7a38a1ac9c171963db0",
       "scripts/knowledge_lint_gate.py": "sha256:d864c5f67a5419a8c30f6e3b76e9e52c1a910e40819fc5e283b67a3cac331ed2",
       "scripts/local_schedule_daemon.py": "sha256:548b5ce03b04f44ac1fd833b6347a7850665895f299f8aceeacfa4b7cf5d4f8d",
       "scripts/lock_merge_driver.py": "sha256:7cd74471e96a2e44e22438841156ffa783c2600d16ae024b77c3f8062bcc1769",
@@ -266,7 +266,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.2.0",
-    "template_digest": "sha256:107e282189c15f7b548fe894f53f71205a7cd09a1f316639978b7074ff9f215f",
+    "template_digest": "sha256:a05be57f027af960b021bf95cdc9c2faa538d6c9ff409d2b8ac2ee44d04ced98",
     "template_files": 263
   },
   "project": "fixture-host",
