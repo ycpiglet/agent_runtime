@@ -19,21 +19,21 @@
   "model_tier": "worker_standard",
   "wip_slot": 1,
   "stop_condition": "Stop after UI/UX cycle propose mode, tests, docs, and verification evidence are complete and ready for independent review.",
-  "phase": "w2-claimed",
-  "progress_pct": 0,
-  "step_index": 1,
+  "phase": "w4a-self-verified",
+  "progress_pct": 85,
+  "step_index": 4,
   "step_total": 5,
-  "status_text": "Claimed TASK-AR-599 for UI/UX next-work proposal automation.",
+  "status_text": "TASK-AR-599 proposal intake implemented and W4a self-verified; independent W4b pending.",
   "worktree_path": ".worktrees/TASK-AR-599",
   "branch": "codex/task-ar-599-ui-ux-propose",
   "claimed_at": "2026-06-19T02:25:06+09:00",
-  "last_heartbeat": "2026-06-19T02:25:06+09:00",
-  "updated_at": "2026-06-19T02:25:06+09:00",
-  "expires_at": "2026-06-19T02:55:06+09:00",
+  "last_heartbeat": "2026-06-19T02:39:08+09:00",
+  "updated_at": "2026-06-19T02:39:08+09:00",
+  "expires_at": "2026-06-19T03:09:08+09:00",
   "lease": {
     "claimed_at": "2026-06-19T02:25:06+09:00",
-    "heartbeat_at": "2026-06-19T02:25:06+09:00",
-    "expires_at": "2026-06-19T02:55:06+09:00"
+    "heartbeat_at": "2026-06-19T02:39:08+09:00",
+    "expires_at": "2026-06-19T03:09:08+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260619-022506-task-ar-599-9bea.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260619-022506-task-ar-599-9bea.log.md",
@@ -43,5 +43,6 @@
     "scripts/ui_ux_cycle.py",
     "tests/test_ui_ux_cycle.py",
     "docs/design/agent-runtime/DESIGN-SYSTEM.md"
-  ]
+  ],
+  "self_verification_evidence": "reviews/VERIFY-2026-06-19-task-ar-599-20260619023613.json"
 }

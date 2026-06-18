@@ -1,14 +1,14 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T02:25:06+09:00
+updated_at: 2026-06-19T02:39:08+09:00
 current_state:
-  summary: "TASK-AR-599 is actively claimed for UI/UX cycle next-work proposal automation. TASK-AR-597 and TASK-AR-598 are completed, W4b-verified, and integrated."
+  summary: "TASK-AR-599 is W4a self-verified in .worktrees/TASK-AR-599 and awaits independent W4b verification/release. TASK-AR-597 and TASK-AR-598 are completed, W4b-verified, and integrated."
   status: active
   task_set_status: active
   task_set_id: "TASKSET-AR-UI-UX-CYCLE-AUTOMATION"
-  step_index: 1
+  step_index: 4
   step_total: 5
-  progress_pct: 0
-  status_text: "Active claim CLAIM-20260619-022506-task-ar-599-9bea owns TASK-AR-599 in .worktrees/TASK-AR-599."
+  progress_pct: 85
+  status_text: "Active claim CLAIM-20260619-022506-task-ar-599-9bea owns TASK-AR-599; implementation branch head dc3ff2c is W4a self-verified and needs W4b."
 active_work:
   current_agents:
     - claim_id: CLAIM-20260619-022506-task-ar-599-9bea
@@ -52,13 +52,12 @@ pointers:
     active_claim: agents/runtime/task_claims/CLAIM-20260619-022506-task-ar-599-9bea.json
     released_claim: agents/runtime/task_claims/CLAIM-20260619-014841-task-ar-598-task-ar-598-plan-review.json
     worktree_path: .worktrees/TASK-AR-599
-    implementation_branch: codex/task-ar-598-plan-review
-    implementation_commit: 81715af
-    followup_commit: f1f8a6d
-    status: task_ar_599_claimed_for_next_work_proposal_automation
-    self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-598-20260619015334.json
-    root_integration_evidence: reviews/VERIFY-2026-06-19-task-ar-598-root-integration-20260619021304.json
-    w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-598.md
+    implementation_branch: codex/task-ar-599-ui-ux-propose
+    implementation_commit: dc3ff2c
+    status: task_ar_599_w4a_self_verified_w4b_pending
+    self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-599-20260619023613.json
+    root_integration_evidence: null
+    w4b_evidence: null
     next_task: TASK-AR-599
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
