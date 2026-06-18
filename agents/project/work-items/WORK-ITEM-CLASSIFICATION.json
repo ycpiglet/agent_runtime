@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T00:50:48+09:00",
-  "record_count": 351,
+  "generated_at": "2026-06-19T01:09:44+09:00",
+  "record_count": 352,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -3535,6 +3535,17 @@
       "path": "agents/lead_engineer/tasks/TASK-AR-596.md",
       "parent_id": "TASKSET-AR-LLM-WIKI",
       "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-596-001",
+      "level": "unit",
+      "number": "13.1.7.1",
+      "label": "Unit 13.1.7.1",
+      "id": "UNIT-TASK-AR-596-001",
+      "title": "UNIT-TASK-AR-596-001 - Extend wiki corpus lint checks",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-596/UNIT-TASK-AR-596-001.md",
+      "parent_id": "TASK-AR-596",
+      "status": "worker_ready"
     },
     {
       "key": "initiative:INIT-AR-DESIGN-SYSTEM-GOVERNANCE",

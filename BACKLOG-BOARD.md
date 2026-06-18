@@ -57,7 +57,7 @@ completed_task_set_count: 42
 
 - Flow: Consolidate transitional spacing/radius px-alias tokens into a designed semantic scale, and promote remaining view-specific JS renderers into stable pattern modules, without re-introducing raw literals.
 - Progress: `1/2` done; `1` open or active.
-- WIP: active `1/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.2h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-584` | INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | High | 6h/12000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Move view-specific JS renderers (data-heavy SVG layouts, calendar grids, office-map p… |
@@ -70,7 +70,7 @@ completed_task_set_count: 42
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-595` | INIT-AR-LLM-WIKI | - | - | planned | Action | P1 | High | Medium | 5h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Promote Wiki/Search as a core navigation hub adjacent to Records and add cross-links… |
-| `TASK-AR-596` | INIT-AR-LLM-WIKI | - | - | planned | Action | P1 | High | Medium | 5h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Extend knowledge lint coverage for the expanded corpus and close `TASKSET-AR-LLM-WIKI… |
+| `TASK-AR-596` | INIT-AR-LLM-WIKI | - | agents/lead_engineer/tasks/units/TASK-AR-596/UNIT-TASK-AR-596-001.md | planned | Action | P1 | High | Medium | 5h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Extend knowledge lint coverage for the expanded corpus and close `TASKSET-AR-LLM-WIKI… |
 | `TASK-AR-594` | INIT-AR-LLM-WIKI | - | - | planned | Action | P1 | High | Medium | 6h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Refine the per-page mini-graph into a typed, contextual insight lens with click-to-na… |
 | `TASK-AR-593` | INIT-AR-LLM-WIKI | - | - | review | Review | P1 | High | High | 7h/7000tok | Low | 5 | agent-runtime-core | lead-engineer | Review evidence | Add deterministic `/api/wiki/search?q=` and `/api/wiki/ask?q=&llm=0/1`, then wire a s… |
 

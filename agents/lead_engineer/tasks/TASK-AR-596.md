@@ -13,6 +13,7 @@ est_tokens: 5000
 owner: qa
 task_set_id: TASKSET-AR-LLM-WIKI
 initiative_id: INIT-AR-LLM-WIKI
+unit_spec: agents/lead_engineer/tasks/units/TASK-AR-596/UNIT-TASK-AR-596-001.md
 tags:
   - wiki
   - knowledge
@@ -33,6 +34,11 @@ evidence.
 - Wiki/search/ask regressions pass together.
 - W4b verifier is independent from the implementer.
 - Taskset closeout updates owner-facing state without leaving stale pointers.
+
+## Units
+
+- `UNIT-TASK-AR-596-001` - Extend wiki corpus lint checks before UI-facing
+  mini-graph/nav closeout.
 
 ## Refs
 

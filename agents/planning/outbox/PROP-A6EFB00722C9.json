@@ -1,0 +1,150 @@
+{
+  "action_type": "plan_update",
+  "affected_owner_boundary": "Local task-to-unit planning metadata only after approved apply.",
+  "blast_radius": "Proposed unit specs for the target task only.",
+  "created_at": "2026-06-19T01:10:00+09:00",
+  "dedupe_key": "work-split:TASK-AR-596:a6efb00722c9061a5da23e73c36250217eac823f",
+  "department": "planning-office",
+  "draft_task_path": "agents/planning/drafts/PROP-A6EFB00722C9.md",
+  "evidence": [
+    {
+      "confidence": 0.82,
+      "severity": "watch",
+      "summary": "TASK-AR-596 has no registered unit specs; propose 4 worker-ready unit draft(s)."
+    },
+    {
+      "confidence": 0.8,
+      "severity": "watch",
+      "summary": "Internal split readiness status: watch."
+    }
+  ],
+  "evidence_hash": "a6efb00722c9061a5da23e73c36250217eac823f",
+  "expected_verification_command": "python scripts/work.py split TASK-AR-596 --json",
+  "id": "PROP-A6EFB00722C9",
+  "mode": "B",
+  "owner_boundary": "B-mode split proposal only; do not create unit files, reserve IDs, or mutate canonical work items without approved apply.",
+  "proposal_output": "plan",
+  "proposed_by": "codex",
+  "proposed_units": [
+    {
+      "acceptance": [
+        "Knowledge lint understands the new wiki/corpus kinds and relationships."
+      ],
+      "context": "Extend knowledge lint coverage for the expanded corpus and close\n`TASKSET-AR-LLM-WIKI` with full E2E, DOM budget, owner governance, and W4b\nevidence.",
+      "handoff": "Report files changed, verification results, and any follow-up split needed for TASK-AR-596.",
+      "inputs": [],
+      "proposed_unit_ref": "TASK-AR-596-PROPOSED-001",
+      "scope": "Knowledge lint understands the new wiki/corpus kinds and relationships.",
+      "steps": [
+        "Implement the bounded outcome: Knowledge lint understands the new wiki/corpus kinds and relationships.",
+        "Update the focused tests, docs, or evidence required by the touched surface.",
+        "Run the declared verification commands and record handoff notes."
+      ],
+      "stop_condition": "Stop after this proposed unit is implemented, verified, and ready for closeout.",
+      "target_files": [],
+      "title": "TASK-AR-596 - Knowledge lint understands the new wiki/corpus kinds and rela...",
+      "verification": [
+        "python scripts/work.py split TASK-AR-596 --json"
+      ]
+    },
+    {
+      "acceptance": [
+        "Wiki/search/ask regressions pass together."
+      ],
+      "context": "Extend knowledge lint coverage for the expanded corpus and close\n`TASKSET-AR-LLM-WIKI` with full E2E, DOM budget, owner governance, and W4b\nevidence.",
+      "handoff": "Report files changed, verification results, and any follow-up split needed for TASK-AR-596.",
+      "inputs": [],
+      "proposed_unit_ref": "TASK-AR-596-PROPOSED-002",
+      "scope": "Wiki/search/ask regressions pass together.",
+      "steps": [
+        "Implement the bounded outcome: Wiki/search/ask regressions pass together.",
+        "Update the focused tests, docs, or evidence required by the touched surface.",
+        "Run the declared verification commands and record handoff notes."
+      ],
+      "stop_condition": "Stop after this proposed unit is implemented, verified, and ready for closeout.",
+      "target_files": [],
+      "title": "TASK-AR-596 - Wiki/search/ask regressions pass together.",
+      "verification": [
+        "python scripts/work.py split TASK-AR-596 --json"
+      ]
+    },
+    {
+      "acceptance": [
+        "W4b verifier is independent from the implementer."
+      ],
+      "context": "Extend knowledge lint coverage for the expanded corpus and close\n`TASKSET-AR-LLM-WIKI` with full E2E, DOM budget, owner governance, and W4b\nevidence.",
+      "handoff": "Report files changed, verification results, and any follow-up split needed for TASK-AR-596.",
+      "inputs": [],
+      "proposed_unit_ref": "TASK-AR-596-PROPOSED-003",
+      "scope": "W4b verifier is independent from the implementer.",
+      "steps": [
+        "Implement the bounded outcome: W4b verifier is independent from the implementer.",
+        "Update the focused tests, docs, or evidence required by the touched surface.",
+        "Run the declared verification commands and record handoff notes."
+      ],
+      "stop_condition": "Stop after this proposed unit is implemented, verified, and ready for closeout.",
+      "target_files": [],
+      "title": "TASK-AR-596 - W4b verifier is independent from the implementer.",
+      "verification": [
+        "python scripts/work.py split TASK-AR-596 --json"
+      ]
+    },
+    {
+      "acceptance": [
+        "Taskset closeout updates owner-facing state without leaving stale pointers."
+      ],
+      "context": "Extend knowledge lint coverage for the expanded corpus and close\n`TASKSET-AR-LLM-WIKI` with full E2E, DOM budget, owner governance, and W4b\nevidence.",
+      "handoff": "Report files changed, verification results, and any follow-up split needed for TASK-AR-596.",
+      "inputs": [],
+      "proposed_unit_ref": "TASK-AR-596-PROPOSED-004",
+      "scope": "Taskset closeout updates owner-facing state without leaving stale pointers.",
+      "steps": [
+        "Implement the bounded outcome: Taskset closeout updates owner-facing state without leaving stale pointers.",
+        "Update the focused tests, docs, or evidence required by the touched surface.",
+        "Run the declared verification commands and record handoff notes."
+      ],
+      "stop_condition": "Stop after this proposed unit is implemented, verified, and ready for closeout.",
+      "target_files": [],
+      "title": "TASK-AR-596 - Taskset closeout updates owner-facing state without leaving s...",
+      "verification": [
+        "python scripts/work.py split TASK-AR-596 --json"
+      ]
+    }
+  ],
+  "readiness_findings": [
+    "TASK-AR-596-PROPOSED-001:split-readiness:missing:inputs",
+    "TASK-AR-596-PROPOSED-001:split-readiness:missing:target_files",
+    "TASK-AR-596-PROPOSED-002:split-readiness:missing:inputs",
+    "TASK-AR-596-PROPOSED-002:split-readiness:missing:target_files",
+    "TASK-AR-596-PROPOSED-003:split-readiness:missing:inputs",
+    "TASK-AR-596-PROPOSED-003:split-readiness:missing:target_files",
+    "TASK-AR-596-PROPOSED-004:split-readiness:missing:inputs",
+    "TASK-AR-596-PROPOSED-004:split-readiness:missing:target_files"
+  ],
+  "readiness_status": "watch",
+  "rejection_reason": null,
+  "reviewer_opinions": [],
+  "risk_tier": "medium",
+  "rollback_path": "agents/planning/rollback/PROP-A6EFB00722C9.json",
+  "source_refs": [
+    {
+      "kind": "work_split",
+      "path": "agents/lead_engineer/tasks/TASK-AR-596.md"
+    }
+  ],
+  "status": "proposed",
+  "suggested_next_action": "Review and approve proposed unit specs for `TASK-AR-596` before creating canonical unit files.",
+  "supersedes": [],
+  "target_files": [
+    "agents/lead_engineer/tasks/TASK-AR-596.md"
+  ],
+  "task_id": "TASK-AR-596",
+  "title": "work split: TASK-AR-596",
+  "trace_id": null,
+  "updated_at": "2026-06-19T01:10:00+09:00",
+  "verifier_list": [
+    "python scripts/work.py split TASK-AR-596 --json",
+    "python scripts/task_unit_readiness_gate.py --task-id <approved-task-id> --require-ready --check",
+    "python scripts/owner_governance_gate.py"
+  ]
+}
