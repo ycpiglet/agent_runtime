@@ -1,14 +1,14 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T01:27:09+09:00
+updated_at: 2026-06-19T01:36:21+09:00
 current_state:
-  summary: "TASK-AR-584 pattern renderer promotion passed W4b and was released; TASK-AR-596 wiki lint extension remains the active claimed work."
+  summary: "TASK-AR-584 pattern renderer promotion is integrated and closed; TASK-AR-596 wiki lint extension remains the active claimed work."
   status: active
   task_set_status: active
   task_set_id: "TASKSET-AR-LLM-WIKI"
   step_index: 1
   step_total: 5
   progress_pct: 0
-  status_text: "TASK-AR-596 owns the current active work; TASK-AR-584 is released and awaiting integration cleanup."
+  status_text: "TASK-AR-596 owns the current active work; design-system debt consolidation is closed."
 active_work:
   current_agents:
     - display_name: codex-wiki-lint-596
@@ -56,12 +56,12 @@ pointers:
   design_system_debt_consolidation:
     taskset: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
     released_claim: agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.json
-    worktree_path: .worktrees/TASK-AR-584
+    worktree_path: null
     implementation_branch: codex/task-ar-584-pattern-renderers
-    implementation_commit: 3efa0f0
-    status: task_ar_584_w4b_released_pending_integration_cleanup
-    next_decision: integrate_task_ar_584_then_close_design_system_debt_consolidation
-    next_task: TASK-AR-584
+    implementation_commit: e0fff0c
+    status: task_ar_584_completed_integrated_closed
+    next_decision: design_system_debt_consolidation_closed_continue_active_task_ar_596
+    next_task: null
     self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-584-20260619011843.json
     w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-584.md
   active_claims:

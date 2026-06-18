@@ -9,9 +9,16 @@ kind: task
 parent_id: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
 registered_at: 2026-06-18T18:43:04+09:00
 created_at: 2026-06-18T18:43:04+09:00
-updated_at: 2026-06-18T18:43:04+09:00
+updated_at: 2026-06-19T01:36:21+09:00
 title: Promote remaining view-specific JS renderers into pattern modules
-status: planned
+status: completed
+started_at: 2026-06-19T00:58:28+09:00
+verification_status: passed
+verified_at: 2026-06-19T01:27:09+09:00
+verified_by: independent-verifier-task-ar-584-20260619
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-task-ar-584-20260619011843.json
+w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-584.md
 priority: P2
 difficulty: L
 est_hours: 6
@@ -31,6 +38,11 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+resolution: done
+completed_at: 2026-06-19T01:36:21+09:00
+closed_by: uiux-pattern-renderers-20260619-584
+actual_hours: 2.5
+actual_tokens: 12000
 ---
 
 # TASK-AR-584 - Promote remaining view-specific JS renderers into pattern modules
@@ -53,3 +65,15 @@ tags:
 
 - `python -m pytest tests/test_ui_console.py tests/test_ui_console_e2e.py tests/test_ui_design_assets.py -q`
 - `python scripts/design_system_gate.py --check --all-ui`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T01:36:21+09:00`
+- Resolution: `done`
+- Actual hours: `2.5`
+- Actual tokens: `12000`
+- Closed by: `uiux-pattern-renderers-20260619-584`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-task-ar-584-20260619011843.json`
+<!-- work-close:end -->

@@ -9,21 +9,21 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-19
 task_count: 258
-open_count: 8
-completed_count: 250
-task_set_count: 3
-completed_task_set_count: 42
+open_count: 7
+completed_count: 251
+task_set_count: 2
+completed_task_set_count: 43
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `8` open or active tasks; `250` completed tasks are archived from this live board.
+- Summary: `7` open or active tasks; `251` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `7` / Ask `0` / Review `1` / Later `0` / Done `250`.
-- Task Sets: `3` active workflows; `42` completed workflows are hidden from the live action board.
+- Status: Action `6` / Ask `0` / Review `1` / Later `0` / Done `251`.
+- Task Sets: `2` active workflows; `43` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -53,20 +53,11 @@ completed_task_set_count: 42
 | `TASK-AR-598` | INIT-AR-UI-UX-CONTINUOUS-IMPROVEMENT | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | Medium | 4h/8000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Make the UI/UX cycle able to record meeting/seminar/beta-tester artifact skeletons af… |
 | `TASK-AR-599` | INIT-AR-UI-UX-CONTINUOUS-IMPROVEMENT | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | High | 6h/12000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Let completed UI/UX cycle reports propose follow-up work items for lead-designer, des… |
 
-### Design System Debt Consolidation (`TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION`)
-
-- Flow: Consolidate transitional spacing/radius px-alias tokens into a designed semantic scale, and promote remaining view-specific JS renderers into stable pattern modules, without re-introducing raw literals.
-- Progress: `1/2` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-584` | INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | High | 6h/12000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Move view-specific JS renderers (data-heavy SVG layouts, calendar grids, office-map p… |
-
 ### LLM Wiki (`TASKSET-AR-LLM-WIKI`)
 
 - Flow: Extend the merged knowledge stack with a human-browsable Wiki/Search surface over the expanded corpus: deterministic entity pages, search, ask, contextual mini-graphs, nav integration, and linted closeout.
 - Progress: `3/7` done; `4` open or active.
-- WIP: active `1/3`; oldest `0.3h`; stale `0`.
+- WIP: active `1/3`; oldest `0.4h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-595` | INIT-AR-LLM-WIKI | - | - | planned | Action | P1 | High | Medium | 5h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Promote Wiki/Search as a core navigation hub adjacent to Records and add cross-links… |
@@ -121,14 +112,15 @@ completed_task_set_count: 42
 | Design System Component Patterns (`TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS`) | Add reusable Button/Card/Table/Modal-style component helpers and domain pattern helpers for TaskLane, ClaimCard, EvidencePanel, CommandBar, and StateMachinePanel, then wire representative console renderers to those helpers. | `1/1` done | `1` completed task files archived |
 | Design System Token Debt (`TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT`) | Replace console typography, spacing, and radius CSS literals with token references, remove the remaining raw color literal, and make the design-system full audit prove that literal debt is no longer hidden in the console baseline. | `1/1` done | `1` completed task files archived |
 | Design System Served Asset Split (`TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT`) | Physically separate the console's served HTML/CSS/JS string assets from the Python API/server module while preserving /, /app.css, and /app.js behavior. | `1/1` done | `1` completed task files archived |
+| Design System Debt Consolidation (`TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION`) | Consolidate transitional spacing/radius px-alias tokens into a designed semantic scale, and promote remaining view-specific JS renderers into stable pattern modules, without re-introducing raw literals. | `2/2` done | `2` completed task files archived |
 
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `8` open across `3` task sets (see Action Board above).
-- Archived task sets: `42` (see Archived Task Sets above).
-- Archived task files: `250` — see `ARCHIVE-INDEX.md`.
+- Active: `7` open across `2` task sets (see Action Board above).
+- Archived task sets: `43` (see Archived Task Sets above).
+- Archived task files: `251` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.
