@@ -4,8 +4,9 @@ display_id: TASK-AR-593
 task_uid: 5ee2d0c0-f1fb-4f20-b7d9-c034b658712d
 registered_at: 2026-06-17T22:30:00+09:00
 created_at: 2026-06-17T22:30:00+09:00
-updated_at: 2026-06-18T23:30:00+09:00
-status: planned
+started_at: 2026-06-18T23:30:54+09:00
+updated_at: 2026-06-18T23:45:00+09:00
+status: review
 priority: P1
 difficulty: L
 est_hours: 7
@@ -34,6 +35,13 @@ missing.
 - `/api/wiki/ask` returns `{query, evidence, cited, answer, llm_used}`.
 - Wiki UI can search, open result pages, and show evidence answers.
 - Tests cover deterministic default and mocked/degraded LLM opt-in path.
+
+## Current Evidence
+
+- Claim: `CLAIM-20260618-233054-task-ar-593-6287`
+- Review: `reviews/REVIEW-2026-06-18-wiki-search-ask.md`
+- W4a self-verification: `reviews/VERIFY-2026-06-18-task-ar-593-20260618234500.json`
+- Status: W4a passed; W4b independent verification and claim release remain pending.
 
 ## Refs
 

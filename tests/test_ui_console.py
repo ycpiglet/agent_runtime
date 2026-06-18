@@ -3724,12 +3724,20 @@ def test_ui_console_wiki_page_view_present_and_routed(tmp_path):
     assert 'id="view-wiki"' in html
     assert 'id="wiki-page-body"' in html
     assert 'id="wiki-minigraph-svg"' in html
+    assert 'id="wiki-query-input"' in html
+    assert 'id="wiki-search-results"' in html
+    assert 'id="wiki-ask-answer"' in html
     assert "function loadWikiPage" in js
+    assert "function runWikiSearch" in js
+    assert "function runWikiAsk" in js
+    assert "/api/wiki/search?q=" in js
+    assert "/api/wiki/ask?q=" in js
     assert "function wikiEntityFromRoute" in js
     assert 'route === "wiki" || String(route || "").startsWith("wiki/")' in js
     assert 'if (view === "wiki") loadWikiPage' in js
     assert ".wiki-page-layout" in css
     assert ".wiki-minigraph-svg" in css
+    assert ".wiki-query-panel" in css
 
 
 def test_ui_console_wiki_page_js_ascii_only_and_node_check(tmp_path):

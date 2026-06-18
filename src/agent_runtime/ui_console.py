@@ -261,6 +261,24 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         if page is None:
             return _json_response({"resource": "wiki_page", "id": entity_id, "error": "not found"}, status=404)
         return _json_response({"resource": "wiki_page", **page})
+    if request_path == "/api/wiki/search":
+        params = parse_qs(parsed_url.query)
+        query = (params.get("q", [""])[0] or "").strip()
+        try:
+            limit = int(params.get("limit", [""])[0])
+        except (ValueError, IndexError):
+            limit = ui_state.WIKI_SEARCH_LIMIT
+        return _json_response({"resource": "wiki_search", **ui_state.build_wiki_search(root_path, query, limit=limit)})
+    if request_path == "/api/wiki/ask":
+        params = parse_qs(parsed_url.query)
+        query = (params.get("q", [""])[0] or "").strip()
+        llm_flag = (params.get("llm", ["0"])[0] or "0").strip().lower()
+        try:
+            k = int(params.get("k", [""])[0])
+        except (ValueError, IndexError):
+            k = ui_state.WIKI_ASK_EVIDENCE_LIMIT
+        ask = ui_state.build_wiki_ask(root_path, query, use_llm=llm_flag in {"1", "true", "yes", "on"}, k=k)
+        return _json_response({"resource": "wiki_ask", **ask})
     if request_path == "/api/events":
         state = ui_state.build_state(root_path)
         filters = {key: values[0] for key, values in parse_qs(parsed_url.query).items() if values}

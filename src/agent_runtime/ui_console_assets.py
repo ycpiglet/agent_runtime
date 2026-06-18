@@ -785,6 +785,16 @@ HTML = """<!doctype html>
                 <button id="wiki-open-graph" class="wiki-toolbar-button" type="button">Graph</button>
               </div>
             </header>
+            <section class="wiki-query-panel" aria-label="Wiki search and ask">
+              <div class="wiki-query-controls">
+                <input id="wiki-query-input" class="wiki-query-input" type="search" placeholder="Search or ask wiki" aria-label="Search or ask wiki">
+                <button id="wiki-search-button" class="wiki-toolbar-button" type="button">Search</button>
+                <button id="wiki-ask-button" class="wiki-toolbar-button" type="button">Ask</button>
+                <label class="wiki-llm-toggle"><input id="wiki-ask-llm" type="checkbox"> AI</label>
+              </div>
+              <div id="wiki-ask-answer" class="wiki-ask-answer" role="status" aria-live="polite"></div>
+              <div id="wiki-search-results" class="wiki-search-results" aria-label="Wiki search results"></div>
+            </section>
             <div class="wiki-page-layout">
               <article class="wiki-page-main" aria-label="Wiki summary">
                 <div id="wiki-page-body" class="wiki-page-body"></div>
@@ -4638,7 +4648,9 @@ pre {
     display: grid;
   }
   .wiki-page-toolbar,
-  .wiki-entity-input {
+  .wiki-query-controls,
+  .wiki-entity-input,
+  .wiki-query-input {
     width: 100%;
   }
   .dashboard {
@@ -4919,13 +4931,36 @@ pre {
   gap: var(--space-px-8);
   justify-content: flex-end;
 }
-.wiki-entity-input {
+.wiki-query-panel {
+  display: grid;
+  gap: var(--space-px-8);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: var(--space-px-12);
+}
+.wiki-query-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-px-8);
+  align-items: center;
+}
+.wiki-entity-input,
+.wiki-query-input {
   min-width: 220px;
   padding: var(--space-px-6) var(--space-px-10);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--panel);
   color: var(--ink);
+  font-size: var(--font-size-ui-12);
+}
+.wiki-query-input {
+  flex: 1 1 280px;
+}
+.wiki-llm-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-px-5);
+  color: var(--muted);
   font-size: var(--font-size-ui-12);
 }
 .wiki-toolbar-button,
@@ -4948,6 +4983,29 @@ pre {
 }
 .wiki-link:hover,
 .wiki-toolbar-button:hover { border-color: var(--primary-line); }
+.wiki-search-results {
+  display: grid;
+  gap: var(--space-px-8);
+}
+.wiki-search-result-score {
+  color: var(--muted);
+  font-size: var(--font-size-ui-11);
+}
+.wiki-ask-answer {
+  color: var(--ink);
+  font-size: var(--font-size-ui-12);
+  line-height: 1.45;
+}
+.wiki-ask-evidence {
+  display: grid;
+  gap: var(--space-px-6);
+  margin-top: var(--space-px-6);
+}
+.wiki-ask-citation {
+  border-left: 2px solid var(--primary-line);
+  padding-left: var(--space-px-8);
+  color: var(--muted);
+}
 .wiki-page-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(260px, 32%);
@@ -10134,6 +10192,10 @@ function renderDependencyGraph() {
 let wikiPageState = null;
 let wikiPageId = "";
 let wikiPageLoading = false;
+let wikiSearchState = { query: "", results: [] };
+let wikiAskState = { query: "", evidence: [], cited: [], answer: "", llm_used: false };
+let wikiSearchLoading = false;
+let wikiAskLoading = false;
 
 function wikiRoute(id) {
   return id ? `#/wiki/${encodeURIComponent(id)}` : "#/wiki";
@@ -10190,6 +10252,107 @@ function renderWikiPageIntro() {
   setHtml("wiki-page-backlinks", `<div class="empty">No page selected</div>`);
   setHtml("wiki-page-metadata", "");
   renderWikiMiniGraph({ nodes: [], edges: [] }, "");
+}
+
+function wikiQueryValue() {
+  const input = $("wiki-query-input");
+  return String(input ? input.value : "").trim();
+}
+
+function wikiSetQueryValue(value) {
+  const input = $("wiki-query-input");
+  if (input && input.value !== value) input.value = value;
+}
+
+function wikiSearchResultItems(results) {
+  const rows = results || [];
+  if (!rows.length) return `<div class="empty">No search results</div>`;
+  return rows.map((item) => {
+    const score = Number.isFinite(Number(item.score)) ? Number(item.score) : 0;
+    return `<button type="button" class="wiki-link" data-wiki-id="${escapeHtml(item.id || "")}">`
+      + `<span class="wiki-relation-title"><strong>${escapeHtml(item.title || item.id || "")}</strong><span class="wiki-relation-id">${escapeHtml(item.id || "")}</span></span>`
+      + `<span class="wiki-relation-meta">${escapeHtml(item.kind || "entity")} - ${escapeHtml(item.snippet || "")}</span>`
+      + `<span class="wiki-search-result-score">score ${score}</span>`
+      + `</button>`;
+  }).join("");
+}
+
+function renderWikiSearchResults() {
+  if (wikiSearchLoading) {
+    setHtml("wiki-search-results", `<div class="empty">Searching...</div>`);
+    return;
+  }
+  const query = wikiSearchState.query || "";
+  if (!query) {
+    setHtml("wiki-search-results", "");
+    return;
+  }
+  const count = (wikiSearchState.results || []).length;
+  setHtml("wiki-search-results", `<div class="wiki-relation-meta">${count} result(s) for ${escapeHtml(query)}</div>` + wikiSearchResultItems(wikiSearchState.results || []));
+}
+
+async function runWikiSearch(query) {
+  const value = String(query || wikiQueryValue()).trim();
+  wikiSetQueryValue(value);
+  if (!value || wikiSearchLoading) return;
+  wikiSearchLoading = true;
+  renderWikiSearchResults();
+  try {
+    const response = await fetch(`/api/wiki/search?q=${encodeURIComponent(value)}`, { cache: "no-store" });
+    wikiSearchState = await response.json();
+  } catch (error) {
+    wikiSearchState = { query: value, results: [], error: String(error) };
+  } finally {
+    wikiSearchLoading = false;
+  }
+  renderWikiSearchResults();
+}
+
+function wikiAskEvidenceItems(evidence) {
+  const rows = evidence || [];
+  if (!rows.length) return "";
+  return `<div class="wiki-ask-evidence">` + rows.map((item) =>
+    `<button type="button" class="wiki-link wiki-ask-citation" data-wiki-id="${escapeHtml(item.id || "")}">`
+      + `<span class="wiki-relation-title"><strong>${escapeHtml(item.title || item.id || "")}</strong><span class="wiki-relation-id">${escapeHtml(item.id || "")}</span></span>`
+      + `<span class="wiki-relation-meta">${escapeHtml(item.excerpt || "")}</span>`
+      + `</button>`
+  ).join("") + `</div>`;
+}
+
+function renderWikiAsk() {
+  if (wikiAskLoading) {
+    setHtml("wiki-ask-answer", `<div class="empty">Asking...</div>`);
+    return;
+  }
+  if (!wikiAskState.query) {
+    setHtml("wiki-ask-answer", "");
+    return;
+  }
+  const mode = wikiAskState.llm_used ? "LLM" : "Evidence";
+  const note = wikiAskState.note ? `<div class="wiki-relation-meta">${escapeHtml(wikiAskState.note)}</div>` : "";
+  setHtml("wiki-ask-answer",
+    `<strong>${escapeHtml(mode)} answer</strong><div>${escapeHtml(wikiAskState.answer || "")}</div>`
+    + note
+    + wikiAskEvidenceItems(wikiAskState.evidence || [])
+  );
+}
+
+async function runWikiAsk(query) {
+  const value = String(query || wikiQueryValue()).trim();
+  wikiSetQueryValue(value);
+  if (!value || wikiAskLoading) return;
+  const llm = $("wiki-ask-llm")?.checked ? "1" : "0";
+  wikiAskLoading = true;
+  renderWikiAsk();
+  try {
+    const response = await fetch(`/api/wiki/ask?q=${encodeURIComponent(value)}&llm=${llm}`, { cache: "no-store" });
+    wikiAskState = await response.json();
+  } catch (error) {
+    wikiAskState = { query: value, evidence: [], cited: [], answer: String(error), llm_used: false };
+  } finally {
+    wikiAskLoading = false;
+  }
+  renderWikiAsk();
 }
 
 function wikiMarkdownToHtml(markdown) {
@@ -12610,6 +12773,18 @@ $("wiki-entity-input")?.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     event.preventDefault();
     openWikiPage(event.target.value);
+  }
+});
+$("wiki-search-button")?.addEventListener("click", () => {
+  runWikiSearch();
+});
+$("wiki-ask-button")?.addEventListener("click", () => {
+  runWikiAsk();
+});
+$("wiki-query-input")?.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    runWikiSearch(event.target.value);
   }
 });
 $("wiki-open-graph")?.addEventListener("click", () => {

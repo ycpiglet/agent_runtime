@@ -1,0 +1,71 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-18-task-ar-593-20260618234500",
+  "work_id": "TASK-AR-593",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-593.md",
+  "kind": "task",
+  "task_id": "TASK-AR-593",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-18T23:45:00+09:00",
+  "verified_by": "le-20260618-233054-kst-6287",
+  "verification_phase": "W4a-self",
+  "command_count": 5,
+  "commands": [
+    {
+      "command": "python -m pytest tests\\test_wiki_search_ask_api.py tests\\test_wiki_page_api.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-18T23:38:00+09:00",
+      "finished_at": "2026-06-18T23:38:07+09:00",
+      "stdout": "8 passed, 1 warning",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest tests\\test_ui_console.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-18T23:38:00+09:00",
+      "finished_at": "2026-06-18T23:38:29+09:00",
+      "stdout": "155 passed",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest tests\\test_wiki_search_ask_api.py tests\\test_wiki_page_api.py tests\\test_knowledge_graph.py tests\\test_knowledge_digest.py tests\\test_knowledge_ask.py tests\\test_knowledge_lint.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-18T23:41:00+09:00",
+      "finished_at": "2026-06-18T23:41:08+09:00",
+      "stdout": "62 passed",
+      "stderr": ""
+    },
+    {
+      "command": "python -m py_compile src\\agent_runtime\\ui_state.py src\\agent_runtime\\ui_console.py scripts\\knowledge_ask.py scripts\\knowledge_graph.py",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-18T23:41:00+09:00",
+      "finished_at": "2026-06-18T23:41:05+09:00",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-18T23:41:00+09:00",
+      "finished_at": "2026-06-18T23:41:03+09:00",
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "acceptance": [
+    "/api/wiki/search returns ranked id/kind/title/snippet/score results",
+    "/api/wiki/ask returns query/evidence/cited/answer/llm_used results",
+    "Wiki UI can search, open result pages, and show evidence answers",
+    "Tests cover deterministic default plus mocked and degraded LLM opt-in paths"
+  ],
+  "residual": [
+    "W4b independent verification and claim release are still pending"
+  ]
+}

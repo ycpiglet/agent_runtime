@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-18T23:25:50+09:00
-record_count: 585
+generated_at: 2026-06-18T23:37:29+09:00
+record_count: 587
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `585` review and evidence records under `reviews/`.
+- Summary: indexed `587` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `585` files |
+| Reviews covered | pass | `587` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -499,6 +499,7 @@ record_count: 585
 | `reviews/REVIEW-2026-06-18-taskset-ar-design-system-token-debt-registration.md` | `REVIEW-2026-06-18-taskset-ar-design-system-token-debt-registration` | md | record | pass | Design System Token Debt Registration |
 | `reviews/REVIEW-2026-06-18-wiki-page-api-envelope.md` | `REVIEW-2026-06-18-wiki-page-api-envelope` | md | record | pass | Wiki Page API Envelope |
 | `reviews/REVIEW-2026-06-18-wiki-page-view.md` | `REVIEW-2026-06-18-wiki-page-view` | md | record | pass | Wiki Page View |
+| `reviews/REVIEW-2026-06-18-wiki-search-ask.md` | `REVIEW-2026-06-18-wiki-search-ask` | md | record | pass | Wiki Search And Ask |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario |
@@ -549,6 +550,7 @@ record_count: 585
 | `reviews/VERIFY-2026-06-18-task-ar-580-20260618150500.json` | `VERIFY-2026-06-18-task-ar-580-20260618150500` | json | record | n/a | VERIFY-2026-06-18-task-ar-580-20260618150500 |
 | `reviews/VERIFY-2026-06-18-task-ar-581-20260618154000.json` | `VERIFY-2026-06-18-task-ar-581-20260618154000` | json | record | n/a | VERIFY-2026-06-18-task-ar-581-20260618154000 |
 | `reviews/VERIFY-2026-06-18-task-ar-582-20260618161500.json` | `VERIFY-2026-06-18-task-ar-582-20260618161500` | json | record | n/a | VERIFY-2026-06-18-task-ar-582-20260618161500 |
+| `reviews/VERIFY-2026-06-18-task-ar-593-20260618234500.json` | `VERIFY-2026-06-18-task-ar-593-20260618234500` | json | record | n/a | VERIFY-2026-06-18-task-ar-593-20260618234500 |
 | `reviews/VERIFY-2026-06-18-unit-task-ar-578-001-20260618125735.json` | `VERIFY-2026-06-18-unit-task-ar-578-001-20260618125735` | json | record | n/a | VERIFY-2026-06-18-unit-task-ar-578-001-20260618125735 |
 | `reviews/VERIFY-2026-06-18-unit-task-ar-579-001-20260618143300.json` | `VERIFY-2026-06-18-unit-task-ar-579-001-20260618143300` | json | record | n/a | VERIFY-2026-06-18-unit-task-ar-579-001-20260618143300 |
 | `reviews/VERIFY-2026-06-18-unit-task-ar-580-001-20260618150000.json` | `VERIFY-2026-06-18-unit-task-ar-580-001-20260618150000` | json | record | n/a | VERIFY-2026-06-18-unit-task-ar-580-001-20260618150000 |

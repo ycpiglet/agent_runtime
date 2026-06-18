@@ -1,14 +1,14 @@
 {
   "schema": "agent-runtime-entity-catalog/v1",
   "generated_at": "2026-06-18",
-  "entity_count": 854,
+  "entity_count": 856,
   "kind_counts": {
     "council": 1,
     "host_feedback": 7,
     "initiative": 20,
     "meeting": 57,
     "research": 29,
-    "review": 336,
+    "review": 338,
     "seminar": 13,
     "task": 255,
     "taskset": 44,
@@ -5024,7 +5024,7 @@
       "title": "Add deterministic `/api/wiki/search?q=` and `/api/wiki/ask?q=&llm=0|1`, then wire a s…",
       "metadata": {
         "ordinal": "13.1.4",
-        "status": "planned",
+        "status": "review",
         "path": "agents/lead_engineer/tasks/TASK-AR-593.md"
       },
       "relations": [
@@ -9669,6 +9669,16 @@
     },
     {
       "kind": "review",
+      "id": "REVIEW-2026-06-18-llm-wiki-registration-current-line",
+      "title": "REVIEW-2026-06-18-llm-wiki-registration-current-line",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/REVIEW-2026-06-18-llm-wiki-registration-current-line.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
       "id": "REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout",
       "title": "REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout",
       "metadata": {
@@ -9794,6 +9804,16 @@
       "metadata": {
         "date": "2026-06-18",
         "path": "reviews/REVIEW-2026-06-18-wiki-page-view.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-18-wiki-search-ask",
+      "title": "REVIEW-2026-06-18-wiki-search-ask",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/REVIEW-2026-06-18-wiki-search-ask.md"
       },
       "relations": []
     },
