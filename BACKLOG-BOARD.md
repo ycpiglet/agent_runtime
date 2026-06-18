@@ -46,7 +46,7 @@ completed_task_set_count: 44
 
 - Flow: Extend the merged knowledge stack with a human-browsable Wiki/Search surface over the expanded corpus: deterministic entity pages, search, ask, contextual mini-graphs, nav integration, and linted closeout.
 - Progress: `5/7` done; `2` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-596` | INIT-AR-LLM-WIKI | - | agents/lead_engineer/tasks/units/TASK-AR-596/UNIT-TASK-AR-596-001.md | planned | Action | P1 | High | Medium | 5h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Extend knowledge lint coverage for the expanded corpus and close `TASKSET-AR-LLM-WIKI… |

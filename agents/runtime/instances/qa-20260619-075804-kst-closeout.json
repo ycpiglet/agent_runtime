@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "qa-20260619-075804-kst-closeout",
+  "callsign": "codex-wiki-closeout-596",
+  "callsite_id": "terminal:wt-task-ar-596:tab-01",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260619-075804-task-ar-596-closeout.json"
+  ],
+  "created_at": "2026-06-19T07:58:04+09:00",
+  "decision_cycle_id": "",
+  "display_name": "codex-wiki-closeout-596",
+  "model": "",
+  "model_tier": "codex",
+  "on_behalf_of": "TASK-AR-596",
+  "pane_id": "terminal:wt-task-ar-596:tab-01",
+  "parent_instance_id": "",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "qa",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-19T07:58:04+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-596",
+  "task_set_id": "TASKSET-AR-LLM-WIKI",
+  "team_id": "agent-runtime-core",
+  "unit_id": "",
+  "unit_spec": "",
+  "updated_at": "2026-06-19T07:58:04+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-596-closeout"
+}
