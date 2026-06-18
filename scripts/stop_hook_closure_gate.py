@@ -1,7 +1,7 @@
 """Stop hook: block closure when substantial work lacks compound/review/retro.
 
-Emits Stop-hook JSON only when blocking. Best-effort: any failure approves
-silently (never blocks a stop on a gate error). Honors
+Emits Stop-hook JSON for every path; non-blocking paths use the empty Codex
+Stop output object. Best-effort: any failure approves without blocking. Honors
 AGENT_RUNTIME_CLOSURE_GATE_DISABLE via closure_gate.
 """
 
@@ -24,6 +24,8 @@ def _emit_stop_payload(payload: dict[str, object]) -> None:
         if system_message:
             result["systemMessage"] = system_message
         print(json.dumps(result, ensure_ascii=False))
+        return
+    print("{}")
 
 
 def main(argv: list[str] | None = None) -> int:

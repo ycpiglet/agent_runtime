@@ -73,6 +73,8 @@ def _codex_stop_payload(payload: dict[str, str]) -> dict[str, object]:
 def _emit_stop_payload(payload: dict[str, str]) -> None:
     if payload.get("decision") == "block":
         print(json.dumps(_codex_stop_payload(payload), ensure_ascii=False))
+        return
+    print("{}")
 
 
 def main(argv: list[str] | None = None) -> int:
