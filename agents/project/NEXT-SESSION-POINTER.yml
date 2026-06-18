@@ -1,26 +1,17 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T01:52:17+09:00
+updated_at: 2026-06-19T02:03:10+09:00
 current_state:
-  summary: "TASK-AR-598 is actively claimed for UI/UX cycle plan-review implementation; TASKSET-AR-LLM-WIKI remains queued for TASK-AR-594/TASK-AR-595 and final closeout."
-  status: active
+  summary: "TASK-AR-598 is W4b released and ready for W5 integration; TASKSET-AR-LLM-WIKI remains queued for TASK-AR-594/TASK-AR-595 and final closeout."
+  status: ready
   task_set_status: active
   task_set_id: "TASKSET-AR-LLM-WIKI"
   step_index: 4
   step_total: 5
   progress_pct: 80
-  status_text: "Active claim TASK-AR-598 is running in .worktrees/TASK-AR-598; resume LLM-Wiki TASK-AR-594/TASK-AR-595 after that claim is released or paused."
+  status_text: "No active claims; integrate TASK-AR-598, then resume LLM-Wiki TASK-AR-594/TASK-AR-595."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260619-014841-task-ar-598-task-ar-598-plan-review
-      agent_role: lead-engineer
-      agent_instance_id: uiux-cycle-20260619-598
-      display_name: codex-ui-ux-cycle-598
-      callsite_id: terminal:wt-task-ar-598:tab-01
-      task_id: TASK-AR-598
-      task_set_id: TASKSET-AR-UI-UX-CYCLE-AUTOMATION
-      worktree_path: .worktrees/TASK-AR-598
-  current_teams:
-    - ui-ux
+  current_agents: []
+  current_teams: []
 resume:
   active_task: "TASK-AR-594"
   active_task_set: "TASKSET-AR-LLM-WIKI"
@@ -42,8 +33,18 @@ pointers:
     next_task: null
     self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-584-20260619011843.json
     w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-584.md
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260619-014841-task-ar-598-task-ar-598-plan-review.json
+  active_claims: []
+  ui_ux_cycle_automation:
+    taskset: TASKSET-AR-UI-UX-CYCLE-AUTOMATION
+    released_claim: agents/runtime/task_claims/CLAIM-20260619-014841-task-ar-598-task-ar-598-plan-review.json
+    worktree_path: .worktrees/TASK-AR-598
+    implementation_branch: codex/task-ar-598-plan-review
+    implementation_commit: 1816a9f
+    followup_commit: f1f8a6d
+    status: task_ar_598_w4b_released_ready_for_w5_integration
+    self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-598-20260619015334.json
+    w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-598.md
+    next_task: TASK-AR-599
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
     active_claim: null
