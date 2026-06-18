@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T00:09:47+09:00",
+  "generated_at": "2026-06-19T00:33:42+09:00",
   "record_count": 351,
   "finding_count": 0,
   "findings": [],
@@ -3501,7 +3501,7 @@
       "title": "Add deterministic `/api/wiki/search?q=` and `/api/wiki/ask?q=&llm=0|1`, then wire a s…",
       "path": "agents/lead_engineer/tasks/TASK-AR-593.md",
       "parent_id": "TASKSET-AR-LLM-WIKI",
-      "status": "planned"
+      "status": "review"
     },
     {
       "key": "task:TASK-AR-594",

@@ -22,7 +22,7 @@ completed_task_set_count: 42
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `9` / Ask `0` / Review `0` / Later `0` / Done `249`.
+- Status: Action `8` / Ask `0` / Review `1` / Later `0` / Done `249`.
 - Task Sets: `3` active workflows; `42` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -73,7 +73,7 @@ completed_task_set_count: 42
 | `TASK-AR-595` | INIT-AR-LLM-WIKI | - | - | planned | Action | P1 | High | Medium | 5h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Promote Wiki/Search as a core navigation hub adjacent to Records and add cross-links… |
 | `TASK-AR-596` | INIT-AR-LLM-WIKI | - | - | planned | Action | P1 | High | Medium | 5h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Extend knowledge lint coverage for the expanded corpus and close `TASKSET-AR-LLM-WIKI… |
 | `TASK-AR-594` | INIT-AR-LLM-WIKI | - | - | planned | Action | P1 | High | Medium | 6h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Refine the per-page mini-graph into a typed, contextual insight lens with click-to-na… |
-| `TASK-AR-593` | INIT-AR-LLM-WIKI | - | - | planned | Action | P1 | High | High | 7h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Add deterministic `/api/wiki/search?q=` and `/api/wiki/ask?q=&llm=0/1`, then wire a s… |
+| `TASK-AR-593` | INIT-AR-LLM-WIKI | - | - | review | Review | P1 | High | High | 7h/7000tok | Low | 5 | agent-runtime-core | lead-engineer | Review evidence | Add deterministic `/api/wiki/search?q=` and `/api/wiki/ask?q=&llm=0/1`, then wire a s… |
 
 ## Archived Task Sets
 

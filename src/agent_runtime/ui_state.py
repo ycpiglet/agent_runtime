@@ -5427,7 +5427,11 @@ def build_dependency_graph(tasks: list[dict[str, Any]], now: str) -> dict[str, A
 KNOWLEDGE_GRAPH_VIEW_SCHEMA = "agent-runtime-knowledge-graph-view/v1"
 KNOWLEDGE_GRAPH_VIEW_LIMIT = 140
 WIKI_PAGE_SCHEMA = "agent-runtime-wiki-page/v1"
+WIKI_SEARCH_SCHEMA = "agent-runtime-wiki-search/v1"
+WIKI_ASK_SCHEMA = "agent-runtime-wiki-ask/v1"
 WIKI_MINIGRAPH_LIMIT = 48
+WIKI_SEARCH_LIMIT = 20
+WIKI_ASK_EVIDENCE_LIMIT = 5
 
 
 def _ensure_knowledge_import_paths(root: Path) -> None:
@@ -5462,6 +5466,190 @@ def _wiki_node_summary(node: dict[str, Any], *, root_id: str | None = None) -> d
         "title": str(node.get("title") or node_id),
         "root": bool(root_id and node_id == root_id),
     }
+
+
+def _wiki_search_score(node: dict[str, Any], query: str) -> int:
+    needle = (query or "").strip().lower()
+    if not needle:
+        return 0
+    node_id = str(node.get("id") or "")
+    title = str(node.get("title") or "")
+    metadata = json.dumps(node.get("metadata") or {}, ensure_ascii=False).lower()
+    if needle in node_id.lower():
+        return 3
+    if needle in title.lower():
+        return 2
+    if needle in metadata:
+        return 1
+    return 0
+
+
+def _wiki_search_snippet(node: dict[str, Any], query: str) -> str:
+    metadata = node.get("metadata") or {}
+    parts = []
+    status = str(metadata.get("status") or "").strip()
+    owner = str(metadata.get("owner") or metadata.get("agent_role") or "").strip()
+    source = str(metadata.get("path") or "").strip()
+    if status:
+        parts.append(f"status: {status}")
+    if owner:
+        parts.append(f"owner: {owner}")
+    if source:
+        parts.append(f"source: {source}")
+    if not parts:
+        rel_count = len(node.get("relations") or [])
+        parts.append(f"{node.get('kind') or 'entity'} with {rel_count} relation(s)")
+    return "; ".join(parts)[:240]
+
+
+def _wiki_evidence_excerpt(pack: dict[str, Any]) -> str:
+    root = pack.get("root") or {}
+    metadata = root.get("metadata") or {}
+    related = [str(item.get("id") or "") for item in pack.get("neighbors", []) if item.get("id")]
+    backlinks = [str(item.get("id") or "") for item in pack.get("backlinks", []) if item.get("id")]
+    parts = [
+        str(root.get("kind") or "entity"),
+        str(root.get("title") or root.get("id") or ""),
+    ]
+    source = str(metadata.get("path") or "").strip()
+    status = str(metadata.get("status") or "").strip()
+    if status:
+        parts.append(f"status {status}")
+    if source:
+        parts.append(f"source {source}")
+    if related:
+        parts.append("related " + ", ".join(related[:4]))
+    if backlinks:
+        parts.append("backlinks " + ", ".join(backlinks[:4]))
+    return "; ".join(part for part in parts if part)[:360]
+
+
+def build_wiki_search(
+    root: Path, query: str, *, limit: int = WIKI_SEARCH_LIMIT, now: str | None = None
+) -> dict[str, Any]:
+    """Deterministic ranked wiki search over the existing knowledge graph."""
+    moment = now or datetime.now(timezone.utc).isoformat()
+    query = (query or "").strip()
+    try:
+        limit = max(1, min(int(limit), 50))
+    except (TypeError, ValueError):
+        limit = WIKI_SEARCH_LIMIT
+    if not query:
+        return {
+            "schema": WIKI_SEARCH_SCHEMA,
+            "generated_at": moment,
+            "query": query,
+            "results": [],
+        }
+    try:
+        _ensure_knowledge_import_paths(root)
+        from scripts import knowledge_graph as kg
+        graph = kg.build_graph(Path(root))
+        hits = kg.search(graph, query, limit=limit)
+    except Exception as exc:
+        return {
+            "schema": WIKI_SEARCH_SCHEMA,
+            "generated_at": moment,
+            "query": query,
+            "results": [],
+            "error": type(exc).__name__,
+        }
+    results = []
+    for node in hits:
+        node_id = str(node.get("id") or "")
+        if not node_id:
+            continue
+        results.append({
+            "id": node_id,
+            "kind": str(node.get("kind") or "entity"),
+            "title": str(node.get("title") or node_id),
+            "snippet": _wiki_search_snippet(node, query),
+            "score": _wiki_search_score(node, query),
+        })
+    return {
+        "schema": WIKI_SEARCH_SCHEMA,
+        "generated_at": moment,
+        "query": query,
+        "results": results,
+    }
+
+
+def build_wiki_ask(
+    root: Path,
+    query: str,
+    *,
+    use_llm: bool = False,
+    k: int = WIKI_ASK_EVIDENCE_LIMIT,
+    now: str | None = None,
+    synthesizer: Any | None = None,
+) -> dict[str, Any]:
+    """Evidence-first wiki ask endpoint envelope, with explicit LLM opt-in."""
+    moment = now or datetime.now(timezone.utc).isoformat()
+    query = (query or "").strip()
+    try:
+        k = max(1, min(int(k), 10))
+    except (TypeError, ValueError):
+        k = WIKI_ASK_EVIDENCE_LIMIT
+    if not query:
+        return {
+            "schema": WIKI_ASK_SCHEMA,
+            "generated_at": moment,
+            "query": query,
+            "evidence": [],
+            "cited": [],
+            "answer": "No query provided.",
+            "llm_used": False,
+        }
+    try:
+        _ensure_knowledge_import_paths(root)
+        from scripts import knowledge_ask as ka
+        from scripts import knowledge_graph as kg
+        graph = kg.build_graph(Path(root))
+        result = ka.answer(Path(root), graph, query, k=k, use_llm=use_llm, synthesizer=synthesizer)
+    except Exception as exc:
+        return {
+            "schema": WIKI_ASK_SCHEMA,
+            "generated_at": moment,
+            "query": query,
+            "evidence": [],
+            "cited": [],
+            "answer": "Wiki evidence lookup failed.",
+            "llm_used": False,
+            "error": type(exc).__name__,
+        }
+
+    evidence: list[dict[str, Any]] = []
+    for pack in result.get("context") or []:
+        root_node = pack.get("root") or {}
+        node_id = str(root_node.get("id") or "")
+        if not node_id:
+            continue
+        evidence.append({
+            "id": node_id,
+            "kind": str(root_node.get("kind") or "entity"),
+            "title": str(root_node.get("title") or node_id),
+            "excerpt": _wiki_evidence_excerpt(pack),
+        })
+    cited = [item["id"] for item in evidence]
+    llm_used = result.get("mode") == "llm" and bool(result.get("answer"))
+    if llm_used:
+        answer_text = str(result.get("answer") or "")
+    elif evidence:
+        answer_text = "Evidence-only result: " + "; ".join(f"{item['title']} [{item['id']}]" for item in evidence[:3])
+    else:
+        answer_text = "No matching evidence found."
+    payload = {
+        "schema": WIKI_ASK_SCHEMA,
+        "generated_at": moment,
+        "query": query,
+        "evidence": evidence,
+        "cited": cited,
+        "answer": answer_text,
+        "llm_used": bool(llm_used),
+    }
+    if result.get("note"):
+        payload["note"] = result.get("note")
+    return payload
 
 
 def build_wiki_page(root: Path, entity_id: str, *, now: str | None = None) -> dict[str, Any] | None:
