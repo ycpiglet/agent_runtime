@@ -213,6 +213,98 @@ def test_report_dry_run_returns_path_without_writing(tmp_path: Path) -> None:
     assert payload["status"] == "planned"
     assert payload["artifact"]["path"] == "reviews/REPORT-2026-06-19-ui-ux-cycle.md"
     assert not (tmp_path / payload["artifact"]["path"]).exists()
+    assert {proposal["proposal_kind"] for proposal in payload["assessment"]["next_work_proposals"]} == {
+        "design_direction_rfc",
+        "implementation_refactor",
+        "ux_evaluation_pass",
+    }
+
+
+def test_propose_dry_run_returns_three_proposal_kinds_without_writing(tmp_path: Path) -> None:
+    module = load_module()
+    write_fixture(tmp_path)
+    before = sorted(path.relative_to(tmp_path).as_posix() for path in tmp_path.rglob("*") if path.is_file())
+
+    payload = module.propose(
+        tmp_path,
+        now=datetime(2026, 6, 19, 0, 0, tzinfo=timezone.utc),
+        dry_run=True,
+    )
+
+    after = sorted(path.relative_to(tmp_path).as_posix() for path in tmp_path.rglob("*") if path.is_file())
+    assert after == before
+    assert payload["schema"] == "agent-runtime-ui-ux-next-work-proposals/v1"
+    assert payload["status"] == "planned"
+    assert payload["artifact"]["path"] == "reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md"
+    assert {proposal["proposal_kind"] for proposal in payload["proposals"]} == {
+        "design_direction_rfc",
+        "implementation_refactor",
+        "ux_evaluation_pass",
+    }
+    assert payload["mutation_policy"]["generator_mutation_policy"] == "proposal-only"
+
+
+def test_propose_refactor_proposal_has_role_routing_and_target_boundaries(tmp_path: Path) -> None:
+    module = load_module()
+    write_fixture(tmp_path)
+
+    payload = module.propose(
+        tmp_path,
+        now=datetime(2026, 6, 19, 0, 0, tzinfo=timezone.utc),
+        dry_run=True,
+    )
+
+    refactor = next(proposal for proposal in payload["proposals"] if proposal["proposal_kind"] == "implementation_refactor")
+    assert refactor["status"] == "ready_to_register"
+    assert refactor["role_routing"]["lead_role"] == "interface-designer"
+    assert "design-system-steward" in refactor["role_routing"]["supporting_roles"]
+    assert refactor["target_file_boundaries"]["future_target_files"] == ["src/agent_runtime/ui_console_assets.py"]
+    assert "agents/runtime/task_claims/*.json" in refactor["target_file_boundaries"]["generator_must_not_write"]
+    assert refactor["registration_boundary"]["creates_claim"] is False
+    assert refactor["registration_boundary"]["mutates_ui_files"] is False
+    assert refactor["registration_boundary"]["mutates_claims"] is False
+    assert refactor["registration_boundary"]["mutates_work_items"] is False
+
+
+def test_propose_distinguishes_new_design_and_ux_evaluation_paths(tmp_path: Path) -> None:
+    module = load_module()
+    write_fixture(tmp_path)
+
+    payload = module.propose(
+        tmp_path,
+        now=datetime(2026, 6, 19, 0, 0, tzinfo=timezone.utc),
+        dry_run=True,
+    )
+
+    design = next(proposal for proposal in payload["proposals"] if proposal["proposal_kind"] == "design_direction_rfc")
+    evaluation = next(proposal for proposal in payload["proposals"] if proposal["proposal_kind"] == "ux_evaluation_pass")
+    assert design["role_routing"]["lead_role"] == "lead-designer"
+    assert "DESIGN.md" in design["target_file_boundaries"]["future_target_files"]
+    assert evaluation["role_routing"]["lead_role"] == "ux-evaluator"
+    assert any(path.startswith("reviews/BETA-TEST-") for path in evaluation["target_file_boundaries"]["future_target_files"])
+
+
+def test_propose_write_records_only_proposal_artifact_and_index(tmp_path: Path) -> None:
+    module = load_module()
+    write_fixture(tmp_path)
+    before = sorted(path.relative_to(tmp_path).as_posix() for path in tmp_path.rglob("*") if path.is_file())
+
+    payload = module.propose(
+        tmp_path,
+        now=datetime(2026, 6, 19, 0, 0, tzinfo=timezone.utc),
+        dry_run=False,
+    )
+
+    after = sorted(path.relative_to(tmp_path).as_posix() for path in tmp_path.rglob("*") if path.is_file())
+    added = sorted(set(after) - set(before))
+    assert payload["status"] == "recorded"
+    assert added == ["reviews/INDEX.md", "reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md"]
+    assert not any(path.startswith("src/agent_runtime/") for path in added)
+    assert not any(path.startswith("agents/runtime/task_claims/") for path in added)
+    text = (tmp_path / "reviews" / "PROPOSALS-2026-06-19-ui-ux-next-work.md").read_text(encoding="utf-8")
+    assert "design_direction_rfc" in text
+    assert "implementation_refactor" in text
+    assert "ux_evaluation_pass" in text
 
 
 def test_cli_assess_json(tmp_path: Path) -> None:

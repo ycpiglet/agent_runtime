@@ -174,12 +174,17 @@ styling pass:
 
 1. Run `python scripts/ui_ux_cycle.py --root . assess --json`.
 2. Confirm the next refactor candidate and any active-claim footprint conflict.
-3. Run `python scripts/ui_ux_cycle.py --root . plan-review --task-id <TASK> --dry-run --json`
+3. Run `python scripts/ui_ux_cycle.py --root . propose --dry-run --json`
+   to generate proposal-only next-work intake. The proposals must distinguish
+   Design Exploration RFCs, implementation refactors, and UX evaluation passes,
+   and each proposal must carry role routing plus target file boundaries.
+4. Route the selected recommendation through W0-W6 registration and claim.
+5. Run `python scripts/ui_ux_cycle.py --root . plan-review --task-id <TASK> --dry-run --json`
    to plan the seminar, implementation meeting, and beta-tester evidence
    skeletons for the selected UI task.
-4. Implement only the claimed unit.
-5. Verify with the design-system gate, focused tests, and beta-tester evidence.
-6. Feed the result back into the next `ui_ux_cycle` report.
+6. Implement only the claimed unit.
+7. Verify with the design-system gate, focused tests, and beta-tester evidence.
+8. Feed the result back into the next `ui_ux_cycle` report.
 
 The cycle checklist must always cover typography, size/spacing, color, motion,
 effects, schema/API boundaries, assets, accessibility, responsiveness, and
@@ -191,6 +196,13 @@ must not fabricate live seminar dialogue, beta-tester results, UI source edits,
 claims, or registered follow-up tasks. Beta-tester skeletons must require
 user-like actions, recovery attempts, environment notes, and BTC-style failure
 IDs before an evaluator can claim the evidence is complete.
+
+`propose` is next-work intake plumbing. Dry-run mode must not write files. Write
+mode may create only `reviews/PROPOSALS-<date>-ui-ux-next-work.md` and refresh
+`reviews/INDEX.md`; it must not edit UI source files, runtime claims, or work
+item records. Proposal records are not approval to implement. A planner or owner
+must register/claim the selected follow-up through W0-W6 before any UI file
+mutation.
 
 ## Gate
 
