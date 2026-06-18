@@ -29,6 +29,14 @@
 
 <!-- BACKLOG-INDEX:END -->
 
+## 2026-06-19 TASKSET-AR-UI-UX-CYCLE-AUTOMATION active
+
+- Active taskset: `TASKSET-AR-UI-UX-CYCLE-AUTOMATION`.
+- Active task: `TASK-AR-599` - automate UI/UX cycle recommendations into proposal-only backlog intake.
+- Active claim: `CLAIM-20260619-022506-task-ar-599-9bea` in `.worktrees/TASK-AR-599` on `codex/task-ar-599-ui-ux-propose`.
+- Completed in this cycle: `TASK-AR-597` UI/UX cycle conductor, `TASK-AR-598` seminar/meeting/beta review planning.
+- Boundary: proposals may classify next work as new design direction RFC, implementation refactor, or UX evaluation pass; they must not mutate UI files, create claims, or bypass W0-W6 registration.
+
 ## 2026-06-17 TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE complete
 
 - Completed taskset: `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` (Self Improvement Remediation), `4/4` done and archived from the live board.
