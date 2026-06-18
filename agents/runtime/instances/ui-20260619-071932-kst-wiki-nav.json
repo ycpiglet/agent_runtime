@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "ui-20260619-071932-kst-wiki-nav",
+  "callsign": "codex-uiux",
+  "callsite_id": "terminal:wt-task-ar-595:tab-01",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260619-071932-task-ar-595-wiki-nav.json"
+  ],
+  "created_at": "2026-06-19T07:19:32+09:00",
+  "decision_cycle_id": "",
+  "display_name": "codex-uiux",
+  "model": "",
+  "model_tier": "codex",
+  "on_behalf_of": "TASK-AR-595",
+  "pane_id": "terminal:wt-task-ar-595:tab-01",
+  "parent_instance_id": "",
+  "project_id": "",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "uiux",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-19T07:19:32+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-595",
+  "task_set_id": "TASKSET-AR-LLM-WIKI",
+  "team_id": "agent-runtime-core",
+  "unit_id": "",
+  "unit_spec": "",
+  "updated_at": "2026-06-19T07:19:32+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-595"
+}
