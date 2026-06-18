@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "dss-20260618-155700-kst-served-asset-split",
+  "callsign": "codex-design-system-served-asset-split-582",
+  "callsite_id": "terminal:wt-task-ar-582:tab-01",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260618-151635-task-ar-582-7f78.json"
+  ],
+  "created_at": "2026-06-18T15:16:35+09:00",
+  "decision_cycle_id": "",
+  "display_name": "codex-design-system-served-asset-split-582",
+  "model": "",
+  "model_tier": "worker_standard",
+  "on_behalf_of": "UNIT-TASK-AR-582-001",
+  "pane_id": "terminal:wt-task-ar-582:tab-01",
+  "parent_instance_id": "",
+  "project_id": "",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "design-system-steward",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-18T15:16:35+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-582",
+  "task_set_id": "TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT",
+  "team_id": "ui-ux",
+  "unit_id": "UNIT-TASK-AR-582-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-582/UNIT-TASK-AR-582-001.md",
+  "updated_at": "2026-06-18T15:16:35+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-582"
+}

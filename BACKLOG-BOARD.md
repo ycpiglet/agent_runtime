@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-06-17
-task_count: 241
+generated_at: 2026-06-18
+task_count: 246
 open_count: 0
-completed_count: 241
+completed_count: 246
 task_set_count: 0
-completed_task_set_count: 37
+completed_task_set_count: 42
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `0` open or active tasks; `241` completed tasks are archived from this live board.
+- Summary: `0` open or active tasks; `246` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `0` / Ask `0` / Review `0` / Later `0` / Done `241`.
-- Task Sets: `0` active workflows; `37` completed workflows are hidden from the live action board.
+- Status: Action `0` / Ask `0` / Review `0` / Later `0` / Done `246`.
+- Task Sets: `0` active workflows; `42` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -84,14 +84,19 @@ completed_task_set_count: 37
 | Self Improvement Cadence (`TASKSET-AR-SELF-IMPROVEMENT-CADENCE`) | Detect low-frequency roles and runtime assets, run review/retro/meeting/seminar/compound/doc-steward/scribe cycles from evidence, and publish measurable maturity signals. | `3/3` done | `3` completed task files archived |
 | Self Improvement Remediation (`TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE`) | Burn down the first-cycle maturity blockers: scribe waiver debt, dormant monitored-role evidence, low-reuse runtime assets, and a follow-up measurable report. | `4/4` done | `4` completed task files archived |
 | Business Operations Teams (`TASKSET-AR-BUSINESS-OPERATIONS-TEAMS`) | Extend the live org overlay and host scaffold with business-side teams for monetization, asset management, marketing, and compliant sales automation. | `1/1` done | `1` completed task files archived |
+| Design System Governance (`TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE`) | Publish a design-system operating contract, assetization classification workflow, UI/UX role split, and deterministic gate so new UI work can reuse components while still proposing new design directions. | `1/1` done | `1` completed task files archived |
+| Design System Assetization (`TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION`) | Move the first reusable UI primitives and domain patterns out of ui_console.py, add token scale assets, and tighten the design-system gate so existing baseline debt is tracked without blocking safe incremental refactors. | `1/1` done | `1` completed task files archived |
+| Design System Component Patterns (`TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS`) | Add reusable Button/Card/Table/Modal-style component helpers and domain pattern helpers for TaskLane, ClaimCard, EvidencePanel, CommandBar, and StateMachinePanel, then wire representative console renderers to those helpers. | `1/1` done | `1` completed task files archived |
+| Design System Token Debt (`TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT`) | Replace console typography, spacing, and radius CSS literals with token references, remove the remaining raw color literal, and make the design-system full audit prove that literal debt is no longer hidden in the console baseline. | `1/1` done | `1` completed task files archived |
+| Design System Served Asset Split (`TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT`) | Physically separate the console's served HTML/CSS/JS string assets from the Python API/server module while preserving /, /app.css, and /app.js behavior. | `1/1` done | `1` completed task files archived |
 
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
 - Active: `0` open across `0` task sets (see Action Board above).
-- Archived task sets: `37` (see Archived Task Sets above).
-- Archived task files: `241` — see `ARCHIVE-INDEX.md`.
+- Archived task sets: `42` (see Archived Task Sets above).
+- Archived task files: `246` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

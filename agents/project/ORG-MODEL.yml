@@ -4,7 +4,7 @@
 # needed; the org_model_gate resolves any alias to the canonical kebab-case id.
 # Spec: docs/superpowers/specs/2026-06-14-agent-org-delegation-model-design.md (Sec A).
 schema: agent-runtime-org-model/v1
-updated_at: 2026-06-17T22:20:00+09:00
+updated_at: 2026-06-18T12:51:06+09:00
 
 # Tiers map to the work-schema *_model_tier fields (planner/worker/reviewer).
 tiers: [director, planner, worker, reviewer]
@@ -42,10 +42,22 @@ roles:
     tier: worker
     team: engineering
     aliases: [worker, engineer, agent-runtime, rsi-lab]
-  - id: uiux
+  - id: lead-designer
     tier: planner
     team: ui-ux
-    aliases: [ui, ux, uiux, frontend, uiux-designer]
+    aliases: [lead-designer, lead_designer, product-designer, visual-designer, design-lead, design-strategy]
+  - id: design-system-steward
+    tier: reviewer
+    team: ui-ux
+    aliases: [design-system, design_system, design-system-steward, design_system_steward, token-steward, component-steward, pattern-steward]
+  - id: interface-designer
+    tier: worker
+    team: ui-ux
+    aliases: [ui, ux, uiux, frontend, uiux-designer, interface-designer, interface_designer, screen-designer]
+  - id: ux-evaluator
+    tier: reviewer
+    team: ui-ux
+    aliases: [ux-evaluator, ux_evaluator, usability, accessibility, visual-qa, design-review]
   - id: research-agent
     tier: planner
     team: research

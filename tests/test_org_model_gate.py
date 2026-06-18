@@ -58,6 +58,23 @@ def test_business_operations_teams_and_aliases_resolve():
         assert mod.resolve_owner(alias, reg)["id"] == role_id
 
 
+def test_uiux_roles_are_split_but_legacy_alias_resolves():
+    mod = _load()
+    reg = mod.load_registry()
+    expected_aliases = {
+        "lead-designer": "lead-designer",
+        "visual-designer": "lead-designer",
+        "design-system": "design-system-steward",
+        "token-steward": "design-system-steward",
+        "interface-designer": "interface-designer",
+        "uiux": "interface-designer",
+        "ux-evaluator": "ux-evaluator",
+        "accessibility": "ux-evaluator",
+    }
+    for alias, role_id in expected_aliases.items():
+        assert mod.resolve_owner(alias, reg)["id"] == role_id
+
+
 def test_check_reports_unresolved_but_is_watch_level(tmp_path, capsys):
     mod = _load()
     f = tmp_path / "TASK-X.md"

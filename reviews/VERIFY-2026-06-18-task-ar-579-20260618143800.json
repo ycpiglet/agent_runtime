@@ -1,0 +1,65 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-18-task-ar-579-20260618143800",
+  "work_id": "TASK-AR-579",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-579.md",
+  "kind": "task",
+  "task_id": "TASK-AR-579",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-18T14:38:00+09:00",
+  "verified_by": "independent-auditor-design-system-579",
+  "command_count": 5,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_ui_design_assets.py tests/test_design_system_gate.py tests/test_ui_console.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "163 passed in 16.40s",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=2 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --path src/agent_runtime/ui_design_assets.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=1 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python -m py_compile src/agent_runtime/ui_console.py src/agent_runtime/ui_design_assets.py scripts/design_system_gate.py",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "taskset-work-gate: pass; findings=0",
+      "stderr": ""
+    }
+  ],
+  "source_evidence": [
+    "reviews/VERIFY-2026-06-18-unit-task-ar-579-001-20260618143300.json",
+    "reviews/W4B-2026-06-18-TASK-AR-579.md"
+  ],
+  "coverage": [
+    "asset module exists and is served through /app.css and /app.js",
+    "selected helper definitions are no longer authored inside ui_console.py",
+    "diff-aware design-system gate catches added raw literals",
+    "existing ui_console regression suite remains green"
+  ],
+  "known_external_watch": [
+    "This task does not fully componentize all task, agent, table, modal, and domain pattern renderers.",
+    "Repository-level parallel-worktree cleanup remains affected by pre-existing .worktrees/llm-wiki residue outside this task."
+  ]
+}

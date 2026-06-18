@@ -27,6 +27,131 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-assetization-registration.md",
+          "value": "3ffa3b5a633cc6246deb1d231e3aac0d95aed4f2ac0ff8d54484f626b5840a9b"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/design_system_gate.py",
+          "value": "d9c044c4e88c569f521eb92dda19f95acf2259b118f41a2cbd88a3aca7d10e94"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "cb2cd245558157ff640dbf0b824694c5623e2e1ef0ccfba6e83f9a08a5522bc8"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-assetization-registration.md",
+      "recorded_at": "2026-06-18T14:15:18+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-component-patterns-registration.md",
+          "value": "18ca923d9bb3539bf307a6b2c6c566a6fc8d21220bed94768e8c44d22a367d53"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "cb2cd245558157ff640dbf0b824694c5623e2e1ef0ccfba6e83f9a08a5522bc8"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-component-patterns-registration.md",
+      "recorded_at": "2026-06-18T14:34:45+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-governance-registration.md",
+          "value": "54189dd31d590d186bfebfa9aea94c0921b74c9c7abffad780327c24b443af7c"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/design_system_gate.py",
+          "value": "d9c044c4e88c569f521eb92dda19f95acf2259b118f41a2cbd88a3aca7d10e94"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "cb2cd245558157ff640dbf0b824694c5623e2e1ef0ccfba6e83f9a08a5522bc8"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-governance-registration.md",
+      "recorded_at": "2026-06-18T12:56:41+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-served-asset-split-registration.md",
+          "value": "cba8bc3e3b40ccd5eda5797e12791b4f191d825c282c923f913d75009f30df74"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "cb2cd245558157ff640dbf0b824694c5623e2e1ef0ccfba6e83f9a08a5522bc8"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-served-asset-split-registration.md",
+      "recorded_at": "2026-06-18T15:16:14+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-token-debt-registration.md",
+          "value": "603e913f5633b2cbe41456f962452655dc5c76670a5e2e59b088b8cedc0378af"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "cb2cd245558157ff640dbf0b824694c5623e2e1ef0ccfba6e83f9a08a5522bc8"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-token-debt-registration.md",
+      "recorded_at": "2026-06-18T15:03:46+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "scripts/taskset_dispatcher.py",
           "value": "ac78599e2197c7999eaffc406449034dab76e34f11c1dd41da4f555478499a6b"
         },
@@ -159,5 +284,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-17T22:12:06+09:00"
+  "updated_at": "2026-06-18T15:16:14+09:00"
 }

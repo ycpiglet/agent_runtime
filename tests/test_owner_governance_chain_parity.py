@@ -45,6 +45,10 @@ DOCUMENTED_TEMPLATE_OMISSIONS: dict[str, str] = {
         "the live checkout agents/project/ORG-MODEL.yml; generated projects may seed their "
         "own ORG-MODEL overlay, but this watch-level gate is intentionally root-only"
     ),
+    "scripts/design_system_gate.py": (
+        "root-repo-specific: checks Agent Runtime design-system governance artifacts and "
+        "changed UI files; generated projects choose their own UI stack and gate timing"
+    ),
 }
 
 # Template chain entries whose script is known to be missing from the
@@ -196,4 +200,19 @@ def test_template_org_model_includes_business_operations_teams() -> None:
         / "ORG-MODEL.yml"
     ).read_text(encoding="utf-8")
     for expected in ("finance-accounting", "marketing-growth", "sales-revenue"):
+        assert expected in template_org_model
+
+
+def test_template_org_model_includes_split_uiux_roles() -> None:
+    template_org_model = (
+        REPO_ROOT
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "agents"
+        / "project"
+        / "ORG-MODEL.yml"
+    ).read_text(encoding="utf-8")
+    for expected in ("lead-designer", "design-system-steward", "interface-designer", "ux-evaluator"):
         assert expected in template_org_model

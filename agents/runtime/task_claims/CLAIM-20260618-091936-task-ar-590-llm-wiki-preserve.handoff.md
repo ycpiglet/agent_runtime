@@ -4,9 +4,9 @@
 - task_id: TASK-AR-590
 - task_set_id: TASKSET-AR-LLM-WIKI
 - branch: claude/llm-wiki
-- worktree_path: .worktrees/llm-wiki
-- status: claimed
-- phase: claim-created
+- worktree_path: null
+- status: expired
+- phase: branch-preserved-worktree-removed
 - scope_transition_approved: true
 - claimed_at: 2026-06-18T09:19:36+09:00
 - agent_instance_id: worker-engineer-20260618-091936-llm-wiki
@@ -24,12 +24,19 @@ ahead worktree after stop-hook failure. It does not approve implementation,
 merge, publish, deletion, or archival side effects.
 
 Do not implement LLM-Wiki changes from the root checkout. Continue by either
-formalizing the worktree through the W2/W3 claim flow, integrating the
-registration branch, or recording an Owner decision to defer/archive it.
+integrating the preserved branch through a fresh claim, or recording an Owner
+decision to defer/archive it.
 
 ## Current Evidence
 
-- Worktree: `.worktrees/llm-wiki`
+- Worktree: removed from the primary checkout on 2026-06-18T17:48:46+09:00
 - Branch head: `5846e40 feat(work): register TASKSET-AR-LLM-WIKI (7 units, role-distributed owners)`
+- Preserved branch: `claude/llm-wiki`
 - Spec in worktree: `docs/superpowers/specs/2026-06-17-llm-wiki-design.md`
 - Unit 1 plan in worktree: `docs/superpowers/plans/2026-06-17-llm-wiki-unit1-corpus-expansion.md`
+
+## Closeout Note
+
+The `.worktrees/llm-wiki` working tree was clean and has been removed with
+`git worktree remove`. The local branch `claude/llm-wiki` remains at `5846e40`;
+no LLM-Wiki commits were merged, deleted, or rewritten.

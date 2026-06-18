@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-17T22:27:35+09:00
-record_count: 312
+generated_at: 2026-06-18T15:21:18+09:00
+record_count: 332
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `312` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `332` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `13` records |
-| Tasksets | pass | `37` records |
-| Tasks | pass | `241` records |
-| Units | pass | `21` records |
+| Initiatives | pass | `18` records |
+| Tasksets | pass | `42` records |
+| Tasks | pass | `246` records |
+| Units | pass | `26` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -351,6 +351,26 @@ record_count: 312
 | 12.1 | Taskset 12.1 | taskset | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | `INIT-AR-BUSINESS-OPERATIONS-TEAMS` | complete | `BACKLOG-BOARD.md` | Business Operations Teams |
 | 12.1.1 | Task 12.1.1 | task | `TASK-AR-577` | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | completed | `agents/lead_engineer/tasks/TASK-AR-577.md` | Define finance/accounting, marketing/growth, and sales/revenue teams across live proj… |
 | 12.1.1.1 | Unit 12.1.1.1 | unit | `UNIT-TASK-AR-577-001` | `TASK-AR-577` | completed | `agents/lead_engineer/tasks/units/TASK-AR-577/UNIT-TASK-AR-577-001.md` | UNIT-TASK-AR-577-001 - Publish business operations org model |
+| 13 | Initiative 13 | initiative | `INIT-AR-DESIGN-SYSTEM-GOVERNANCE` | - | active | `agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-GOVERNANCE.md` | Design System Governance |
+| 13.1 | Taskset 13.1 | taskset | `TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE` | `INIT-AR-DESIGN-SYSTEM-GOVERNANCE` | complete | `BACKLOG-BOARD.md` | Design System Governance |
+| 13.1.1 | Task 13.1.1 | task | `TASK-AR-578` | `TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE` | completed | `agents/lead_engineer/tasks/TASK-AR-578.md` | Create durable design-system governance for Agent Runtime UI work: a diagnostic repor… |
+| 13.1.1.1 | Unit 13.1.1.1 | unit | `UNIT-TASK-AR-578-001` | `TASK-AR-578` | completed | `agents/lead_engineer/tasks/units/TASK-AR-578/UNIT-TASK-AR-578-001.md` | UNIT-TASK-AR-578-001 - Publish design-system governance and gate |
+| 14 | Initiative 14 | initiative | `INIT-AR-DESIGN-SYSTEM-ASSETIZATION` | - | active | `agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-ASSETIZATION.md` | Design System Assetization |
+| 14.1 | Taskset 14.1 | taskset | `TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION` | `INIT-AR-DESIGN-SYSTEM-ASSETIZATION` | complete | `BACKLOG-BOARD.md` | Design System Assetization |
+| 14.1.1 | Task 14.1.1 | task | `TASK-AR-579` | `TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION` | completed | `agents/lead_engineer/tasks/TASK-AR-579.md` | Create the first executable UI asset layer for Agent Runtime: design token scale, reu… |
+| 14.1.1.1 | Unit 14.1.1.1 | unit | `UNIT-TASK-AR-579-001` | `TASK-AR-579` | completed | `agents/lead_engineer/tasks/units/TASK-AR-579/UNIT-TASK-AR-579-001.md` | UNIT-TASK-AR-579-001 - Extract token, primitive, and pattern asset bundle |
+| 15 | Initiative 15 | initiative | `INIT-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS` | - | active | `agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS.md` | Design System Component Patterns |
+| 15.1 | Taskset 15.1 | taskset | `TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS` | `INIT-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS` | complete | `BACKLOG-BOARD.md` | Design System Component Patterns |
+| 15.1.1 | Task 15.1.1 | task | `TASK-AR-580` | `TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS` | completed | `agents/lead_engineer/tasks/TASK-AR-580.md` | Extend the executable UI asset layer so the console has named component APIs and doma… |
+| 15.1.1.1 | Unit 15.1.1.1 | unit | `UNIT-TASK-AR-580-001` | `TASK-AR-580` | completed | `agents/lead_engineer/tasks/units/TASK-AR-580/UNIT-TASK-AR-580-001.md` | UNIT-TASK-AR-580-001 - Promote component and domain pattern helpers |
+| 16 | Initiative 16 | initiative | `INIT-AR-DESIGN-SYSTEM-TOKEN-DEBT` | - | active | `agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-TOKEN-DEBT.md` | Design System Token Debt Closure |
+| 16.1 | Taskset 16.1 | taskset | `TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT` | `INIT-AR-DESIGN-SYSTEM-TOKEN-DEBT` | complete | `BACKLOG-BOARD.md` | Design System Token Debt |
+| 16.1.1 | Task 16.1.1 | task | `TASK-AR-581` | `TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT` | completed | `agents/lead_engineer/tasks/TASK-AR-581.md` | Resolve the diagnostic report's token maturity gap for typography, spacing, radius, a… |
+| 16.1.1.1 | Unit 16.1.1.1 | unit | `UNIT-TASK-AR-581-001` | `TASK-AR-581` | completed | `agents/lead_engineer/tasks/units/TASK-AR-581/UNIT-TASK-AR-581-001.md` | UNIT-TASK-AR-581-001 - Tokenize console CSS literal debt |
+| 17 | Initiative 17 | initiative | `INIT-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | - | active | `agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT.md` | Design System Served Asset Split |
+| 17.1 | Taskset 17.1 | taskset | `TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | `INIT-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | complete | `BACKLOG-BOARD.md` | Design System Served Asset Split |
+| 17.1.1 | Task 17.1.1 | task | `TASK-AR-582` | `TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | completed | `agents/lead_engineer/tasks/TASK-AR-582.md` | Resolve the diagnostic report's single-file HTML/CSS/JS string concentration by movin… |
+| 17.1.1.1 | Unit 17.1.1.1 | unit | `UNIT-TASK-AR-582-001` | `TASK-AR-582` | completed | `agents/lead_engineer/tasks/units/TASK-AR-582/UNIT-TASK-AR-582-001.md` | UNIT-TASK-AR-582-001 - Move served HTML CSS JS assets out of ui_console |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

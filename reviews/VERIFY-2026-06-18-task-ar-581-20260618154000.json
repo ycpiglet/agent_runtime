@@ -1,0 +1,79 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-18-task-ar-581-20260618154000",
+  "work_id": "TASK-AR-581",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-581.md",
+  "kind": "task",
+  "task_id": "TASK-AR-581",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-18T15:40:00+09:00",
+  "verified_by": "independent-auditor-design-system-581",
+  "command_count": 7,
+  "commands": [
+    {
+      "command": "python scripts/design_system_gate.py --all-ui --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=5 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=2 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --path src/agent_runtime/ui_console.py --path src/agent_runtime/ui_design_assets.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=2 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest tests/test_ui_design_assets.py tests/test_design_system_gate.py tests/test_ui_console.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "168 passed in 21.33s",
+      "stderr": ""
+    },
+    {
+      "command": "python -m py_compile src/agent_runtime/ui_console.py src/agent_runtime/ui_design_assets.py scripts/design_system_gate.py",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "taskset-work-gate: pass; findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/work_item_classifier.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "work-item-classifier: pass; findings=0",
+      "stderr": ""
+    }
+  ],
+  "source_evidence": [
+    "reviews/VERIFY-2026-06-18-unit-task-ar-581-001-20260618153500.json",
+    "reviews/W4B-2026-06-18-TASK-AR-581.md"
+  ],
+  "coverage": [
+    "full design-system raw-literal audit passes with --all-ui",
+    "console typography, spacing, radius, and remaining stroke color literals are represented through tokens",
+    "served CSS exposes the expanded token aliases",
+    "existing UI console regression suite remains green"
+  ],
+  "known_external_watch": [
+    "Physical decomposition of ui_console.py remains separate residual debt.",
+    "Pre-existing .worktrees/llm-wiki parallel-worktree hygiene issue remains outside this task."
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-17T22:27:35+09:00",
-  "record_count": 312,
+  "generated_at": "2026-06-18T15:21:18+09:00",
+  "record_count": 332,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -3435,6 +3435,226 @@
       "title": "UNIT-TASK-AR-577-001 - Publish business operations org model",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-577/UNIT-TASK-AR-577-001.md",
       "parent_id": "TASK-AR-577",
+      "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-DESIGN-SYSTEM-GOVERNANCE",
+      "level": "initiative",
+      "number": "13",
+      "label": "Initiative 13",
+      "id": "INIT-AR-DESIGN-SYSTEM-GOVERNANCE",
+      "title": "Design System Governance",
+      "path": "agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-GOVERNANCE.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE",
+      "level": "taskset",
+      "number": "13.1",
+      "label": "Taskset 13.1",
+      "id": "TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE",
+      "title": "Design System Governance",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-DESIGN-SYSTEM-GOVERNANCE",
+      "status": "complete"
+    },
+    {
+      "key": "task:TASK-AR-578",
+      "level": "task",
+      "number": "13.1.1",
+      "label": "Task 13.1.1",
+      "id": "TASK-AR-578",
+      "title": "Create durable design-system governance for Agent Runtime UI work: a diagnostic repor…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-578.md",
+      "parent_id": "TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-578-001",
+      "level": "unit",
+      "number": "13.1.1.1",
+      "label": "Unit 13.1.1.1",
+      "id": "UNIT-TASK-AR-578-001",
+      "title": "UNIT-TASK-AR-578-001 - Publish design-system governance and gate",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-578/UNIT-TASK-AR-578-001.md",
+      "parent_id": "TASK-AR-578",
+      "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-DESIGN-SYSTEM-ASSETIZATION",
+      "level": "initiative",
+      "number": "14",
+      "label": "Initiative 14",
+      "id": "INIT-AR-DESIGN-SYSTEM-ASSETIZATION",
+      "title": "Design System Assetization",
+      "path": "agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-ASSETIZATION.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION",
+      "level": "taskset",
+      "number": "14.1",
+      "label": "Taskset 14.1",
+      "id": "TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION",
+      "title": "Design System Assetization",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-DESIGN-SYSTEM-ASSETIZATION",
+      "status": "complete"
+    },
+    {
+      "key": "task:TASK-AR-579",
+      "level": "task",
+      "number": "14.1.1",
+      "label": "Task 14.1.1",
+      "id": "TASK-AR-579",
+      "title": "Create the first executable UI asset layer for Agent Runtime: design token scale, reu…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-579.md",
+      "parent_id": "TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-579-001",
+      "level": "unit",
+      "number": "14.1.1.1",
+      "label": "Unit 14.1.1.1",
+      "id": "UNIT-TASK-AR-579-001",
+      "title": "UNIT-TASK-AR-579-001 - Extract token, primitive, and pattern asset bundle",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-579/UNIT-TASK-AR-579-001.md",
+      "parent_id": "TASK-AR-579",
+      "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS",
+      "level": "initiative",
+      "number": "15",
+      "label": "Initiative 15",
+      "id": "INIT-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS",
+      "title": "Design System Component Patterns",
+      "path": "agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS",
+      "level": "taskset",
+      "number": "15.1",
+      "label": "Taskset 15.1",
+      "id": "TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS",
+      "title": "Design System Component Patterns",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS",
+      "status": "complete"
+    },
+    {
+      "key": "task:TASK-AR-580",
+      "level": "task",
+      "number": "15.1.1",
+      "label": "Task 15.1.1",
+      "id": "TASK-AR-580",
+      "title": "Extend the executable UI asset layer so the console has named component APIs and doma…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-580.md",
+      "parent_id": "TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-580-001",
+      "level": "unit",
+      "number": "15.1.1.1",
+      "label": "Unit 15.1.1.1",
+      "id": "UNIT-TASK-AR-580-001",
+      "title": "UNIT-TASK-AR-580-001 - Promote component and domain pattern helpers",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-580/UNIT-TASK-AR-580-001.md",
+      "parent_id": "TASK-AR-580",
+      "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-DESIGN-SYSTEM-TOKEN-DEBT",
+      "level": "initiative",
+      "number": "16",
+      "label": "Initiative 16",
+      "id": "INIT-AR-DESIGN-SYSTEM-TOKEN-DEBT",
+      "title": "Design System Token Debt Closure",
+      "path": "agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-TOKEN-DEBT.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT",
+      "level": "taskset",
+      "number": "16.1",
+      "label": "Taskset 16.1",
+      "id": "TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT",
+      "title": "Design System Token Debt",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-DESIGN-SYSTEM-TOKEN-DEBT",
+      "status": "complete"
+    },
+    {
+      "key": "task:TASK-AR-581",
+      "level": "task",
+      "number": "16.1.1",
+      "label": "Task 16.1.1",
+      "id": "TASK-AR-581",
+      "title": "Resolve the diagnostic report's token maturity gap for typography, spacing, radius, a…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-581.md",
+      "parent_id": "TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-581-001",
+      "level": "unit",
+      "number": "16.1.1.1",
+      "label": "Unit 16.1.1.1",
+      "id": "UNIT-TASK-AR-581-001",
+      "title": "UNIT-TASK-AR-581-001 - Tokenize console CSS literal debt",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-581/UNIT-TASK-AR-581-001.md",
+      "parent_id": "TASK-AR-581",
+      "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT",
+      "level": "initiative",
+      "number": "17",
+      "label": "Initiative 17",
+      "id": "INIT-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT",
+      "title": "Design System Served Asset Split",
+      "path": "agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT",
+      "level": "taskset",
+      "number": "17.1",
+      "label": "Taskset 17.1",
+      "id": "TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT",
+      "title": "Design System Served Asset Split",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT",
+      "status": "complete"
+    },
+    {
+      "key": "task:TASK-AR-582",
+      "level": "task",
+      "number": "17.1.1",
+      "label": "Task 17.1.1",
+      "id": "TASK-AR-582",
+      "title": "Resolve the diagnostic report's single-file HTML/CSS/JS string concentration by movin…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-582.md",
+      "parent_id": "TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-582-001",
+      "level": "unit",
+      "number": "17.1.1.1",
+      "label": "Unit 17.1.1.1",
+      "id": "UNIT-TASK-AR-582-001",
+      "title": "UNIT-TASK-AR-582-001 - Move served HTML CSS JS assets out of ui_console",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-582/UNIT-TASK-AR-582-001.md",
+      "parent_id": "TASK-AR-582",
       "status": "completed"
     }
   ]

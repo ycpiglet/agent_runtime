@@ -1,0 +1,89 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-18-unit-task-ar-580-001-20260618150000",
+  "work_id": "UNIT-TASK-AR-580-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-580/UNIT-TASK-AR-580-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-580",
+  "unit_id": "UNIT-TASK-AR-580-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-18T15:00:00+09:00",
+  "verified_by": "codex-design-system-component-patterns-580",
+  "command_count": 6,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_ui_design_assets.py tests/test_design_system_gate.py tests/test_ui_console.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "167 passed in 16.41s",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=2 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --path src/agent_runtime/ui_design_assets.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=1 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python -m py_compile src/agent_runtime/ui_console.py src/agent_runtime/ui_design_assets.py",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "taskset-work-gate: pass; findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/work_item_classifier.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "work-item-classifier: pass; findings=0",
+      "stderr": ""
+    }
+  ],
+  "assetization_classification": [
+    {
+      "surface": "Button, Card, Table, Modal shell primitives",
+      "class": "ui_component",
+      "asset": "src/agent_runtime/ui_design_assets.py::componentButton/componentCard/componentTable/componentModalShell"
+    },
+    {
+      "surface": "Task lane and claim card",
+      "class": "pattern_component",
+      "asset": "src/agent_runtime/ui_design_assets.py::patternTaskLane/patternClaimCard"
+    },
+    {
+      "surface": "Evidence and audit panels",
+      "class": "pattern_component",
+      "asset": "src/agent_runtime/ui_design_assets.py::patternEvidencePanel/patternAuditCard"
+    },
+    {
+      "surface": "Command bar and state-machine legend",
+      "class": "pattern_component",
+      "asset": "src/agent_runtime/ui_design_assets.py::patternCommandBar/patternStateMachinePanelLegend"
+    },
+    {
+      "surface": "Remaining SVG/layout-heavy renderers",
+      "class": "one_off_for_now",
+      "asset": "src/agent_runtime/ui_console.py"
+    }
+  ],
+  "known_external_watch": [
+    "This unit promotes representative component/pattern APIs but does not fully extract every remaining ui_console.py renderer.",
+    "Main checkout still has pre-existing .worktrees/llm-wiki parallel-worktree hygiene residue outside this task."
+  ]
+}

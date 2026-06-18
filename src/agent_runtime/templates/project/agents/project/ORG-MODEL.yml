@@ -33,10 +33,22 @@ roles:
     tier: worker
     team: product-core
     aliases: [backend, engineer, worker]
-  - id: uiux
+  - id: lead-designer
     tier: planner
     team: product-core
-    aliases: [ui, ux, uiux, frontend]
+    aliases: [lead-designer, lead_designer, product-designer, visual-designer, design-lead]
+  - id: design-system-steward
+    tier: reviewer
+    team: product-core
+    aliases: [design-system, design_system, design-system-steward, token-steward, component-steward]
+  - id: interface-designer
+    tier: worker
+    team: product-core
+    aliases: [ui, ux, uiux, frontend, uiux-designer, interface-designer]
+  - id: ux-evaluator
+    tier: reviewer
+    team: quality
+    aliases: [ux-evaluator, usability, accessibility, visual-qa, design-review]
   - id: qa
     tier: reviewer
     team: quality

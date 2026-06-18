@@ -60,6 +60,10 @@ def main() -> int:
         # agents/project/ORG-MODEL.yml. Generated projects may seed their own
         # ORG-MODEL overlay, but this root watch-level gate remains root-only.
         # Mirrored in tests/test_owner_governance_chain_parity.py.
+        # intentionally omitted: scripts/design_system_gate.py -- root-repo-specific
+        # design-system maturity gate for the Agent Runtime monolith. Generated
+        # projects may adopt their own design-system gate after choosing a UI stack.
+        # Mirrored in tests/test_owner_governance_chain_parity.py.
         ["scripts/parallel_worktree_gate.py", "--check"],
         ["scripts/worktree_lifecycle_gate.py", "--check"],
         ["scripts/collaboration_concurrency_gate.py", "--check"],

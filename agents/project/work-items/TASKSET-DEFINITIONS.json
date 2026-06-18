@@ -78,6 +78,36 @@
       "display_name": "Business Operations Teams",
       "summary": "Extend the live org overlay and host scaffold with business-side teams for monetization, asset management, marketing, and compliant sales automation.",
       "order": 617
+    },
+    {
+      "task_set_id": "TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE",
+      "display_name": "Design System Governance",
+      "summary": "Publish a design-system operating contract, assetization classification workflow, UI/UX role split, and deterministic gate so new UI work can reuse components while still proposing new design directions.",
+      "order": 618
+    },
+    {
+      "task_set_id": "TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION",
+      "display_name": "Design System Assetization",
+      "summary": "Move the first reusable UI primitives and domain patterns out of ui_console.py, add token scale assets, and tighten the design-system gate so existing baseline debt is tracked without blocking safe incremental refactors.",
+      "order": 619
+    },
+    {
+      "task_set_id": "TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS",
+      "display_name": "Design System Component Patterns",
+      "summary": "Add reusable Button/Card/Table/Modal-style component helpers and domain pattern helpers for TaskLane, ClaimCard, EvidencePanel, CommandBar, and StateMachinePanel, then wire representative console renderers to those helpers.",
+      "order": 620
+    },
+    {
+      "task_set_id": "TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT",
+      "display_name": "Design System Token Debt",
+      "summary": "Replace console typography, spacing, and radius CSS literals with token references, remove the remaining raw color literal, and make the design-system full audit prove that literal debt is no longer hidden in the console baseline.",
+      "order": 621
+    },
+    {
+      "task_set_id": "TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT",
+      "display_name": "Design System Served Asset Split",
+      "summary": "Physically separate the console's served HTML/CSS/JS string assets from the Python API/server module while preserving /, /app.css, and /app.js behavior.",
+      "order": 622
     }
   ]
 }

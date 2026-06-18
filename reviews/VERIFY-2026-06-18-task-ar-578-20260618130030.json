@@ -1,0 +1,58 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-18-task-ar-578-20260618130030",
+  "work_id": "TASK-AR-578",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-578.md",
+  "kind": "task",
+  "task_id": "TASK-AR-578",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-18T13:00:30+09:00",
+  "verified_by": "independent-auditor-design-system-578",
+  "command_count": 5,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_design_system_gate.py tests/test_org_model_gate.py tests/test_org_read_api.py tests/test_owner_governance_chain_parity.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "27 passed",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=0 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/org_model_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "org-model: watch unresolved=0 checked=242",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/org_read_api.py --view org",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "org_tree rendered with ui-ux, engineering, quality, risk-release, finance-accounting, marketing-growth, and sales-revenue teams",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/owner_governance_gate.py",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "Passed in claimed worktree before main W5 cleanup; main checkout later remained blocked only by pre-existing .worktrees/llm-wiki parallel-worktree hygiene.",
+      "stderr": ""
+    }
+  ],
+  "source_evidence": [
+    "reviews/VERIFY-2026-06-18-unit-task-ar-578-001-20260618125735.json",
+    "reviews/W4B-2026-06-18-TASK-AR-578.md"
+  ],
+  "known_external_watch": [
+    "Main checkout owner_governance_gate is blocked by pre-existing .worktrees/llm-wiki parallel-worktree hygiene, outside TASK-AR-578 target files."
+  ]
+}
