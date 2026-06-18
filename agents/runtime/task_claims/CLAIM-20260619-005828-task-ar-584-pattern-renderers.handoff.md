@@ -12,8 +12,15 @@
 - model_tier: worker_standard
 - wip_slot: 1
 - stop_condition: Stop after SVG-layout and calendar-grid renderers are served through stable pattern APIs, focused tests pass, design-system gate passes, and verification evidence is written.
-- phase: claim-created
-- step: 1/5
-- progress_pct: 0
-- status_text: Claimed TASK-AR-584 pattern renderer promotion.
+- phase: w4a-self-verified
+- step: 4/5
+- progress_pct: 85
+- status_text: Pattern renderer promotion implemented and W4a verified; W4b independent verification pending.
 - status: claimed
+
+## W4a Self Verification
+
+- evidence: reviews/VERIFY-2026-06-19-task-ar-584-20260619011843.json
+- pytest: `python -m pytest tests\test_ui_console.py tests\test_ui_console_e2e.py tests\test_ui_design_assets.py -q` -> 177 passed
+- design gate: `python scripts\design_system_gate.py --check --all-ui` -> pass, findings=0
+- browser: served `app.js` contains `patternSvgGraph`, `patternCalendarGrid`, `patternSvgLayeredRadialLayout`; live map, dependency graph, and calendar rendered without console/page errors.

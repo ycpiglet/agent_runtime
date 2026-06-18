@@ -1,0 +1,78 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-19-task-ar-584-20260619011843",
+  "work_id": "TASK-AR-584",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-584.md",
+  "kind": "task",
+  "task_id": "TASK-AR-584",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-19T01:18:43+09:00",
+  "verified_by": "uiux-pattern-renderers-20260619-584",
+  "verification_phase": "W4a-self",
+  "claim_id": "CLAIM-20260619-005828-task-ar-584-pattern-renderers",
+  "command_count": 7,
+  "commands": [
+    {
+      "command": "python -m pytest tests\\test_ui_console.py tests\\test_ui_console_e2e.py tests\\test_ui_design_assets.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "177 passed in 61.35s (0:01:01)",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts\\design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python -m py_compile src\\agent_runtime\\ui_design_assets.py src\\agent_runtime\\ui_console_assets.py",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "GET http://127.0.0.1:8767/app.js",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "patternSvgGraph=True; patternCalendarGrid=True; patternSvgLayeredRadialLayout=True; length=308305",
+      "stderr": ""
+    },
+    {
+      "command": "GET http://127.0.0.1:8767/api/state",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "status=200 length=7582958",
+      "stderr": ""
+    },
+    {
+      "command": "Playwright render check against http://127.0.0.1:8767/",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "liveMapChildren=456 liveMapNodes=68 liveMapEdges=250 depGraphChildren=878 depGraphNodes=274 depGraphEdges=54 calendarCells=42 calendarWeekdays=7 calendarEvents=277 console_errors=0 page_errors=0",
+      "stderr": ""
+    }
+  ],
+  "acceptance": [
+    "patternSvgLayeredRadialLayout, patternSvgGraph, and patternCalendarGrid are classified as pattern_component assets",
+    "Live map and dependency graph SVG layout/rendering now call the shared pattern APIs",
+    "Calendar month/week grid rendering now calls the shared patternCalendarGrid API",
+    "DESIGN-SYSTEM.md documents the promoted experimental pattern APIs and residual boundary",
+    "Served app.js includes the promoted pattern APIs and browser rendering remains non-empty"
+  ],
+  "residual": [
+    "W4b independent verification and claim release are still pending",
+    "Broader renderer-level extraction remains future work outside TASK-AR-584"
+  ]
+}
