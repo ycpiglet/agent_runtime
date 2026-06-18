@@ -129,6 +129,9 @@ HTML = """<!doctype html>
           <button class="sidebar-link" type="button" role="tab" data-view="events" data-route="records/events" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9201;</span><span class="sidebar-label">Records</span>
           </button>
+          <button class="sidebar-link" type="button" role="tab" data-view="wiki" data-route="wiki" aria-selected="false">
+            <span class="sidebar-icon" aria-hidden="true">&#9432;</span><span class="sidebar-label">Wiki</span>
+          </button>
           <button class="sidebar-link" type="button" role="tab" data-view="search" data-route="search" aria-selected="false">
             <span class="sidebar-icon" aria-hidden="true">&#9906;</span><span class="sidebar-label">Search</span>
           </button>
@@ -205,9 +208,6 @@ HTML = """<!doctype html>
               </button>
               <button class="sidebar-link" type="button" role="tab" data-view="sources" data-route="records/sources" aria-selected="false">
                 <span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Sources</span>
-              </button>
-              <button class="sidebar-link" type="button" role="tab" data-view="wiki" data-route="wiki" aria-selected="false">
-                <span class="sidebar-icon" aria-hidden="true">&#9432;</span><span class="sidebar-label">Wiki</span>
               </button>
               <button class="sidebar-link" type="button" role="tab" data-view="knowledge-graph" data-route="records/knowledge-graph" aria-selected="false">
                 <span class="sidebar-icon" aria-hidden="true">&#9901;</span><span class="sidebar-label">Knowledge Graph</span>
@@ -3134,6 +3134,11 @@ textarea:focus {
   font-size: var(--font-size-ui-12);
   line-height: 1.4;
 }
+.work-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+}
 .work-detail-meta {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4991,6 +4996,16 @@ pre {
   padding: var(--space-2xl);
   text-align: left;
 }
+.wiki-deeplink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 0;
+  padding: var(--space-lg) var(--space-2xl);
+  text-align: center;
+  white-space: nowrap;
+}
 .wiki-link:hover,
 .wiki-toolbar-button:hover { border-color: var(--primary-line); }
 .wiki-search-results {
@@ -5618,6 +5633,12 @@ pre {
   font-size: var(--font-size-ui-11);
   color: var(--muted);
   margin-top: var(--space-2xs);
+}
+.search-result-wiki {
+  display: inline-flex;
+  margin-left: var(--space-lg);
+  color: var(--primary);
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
 }
 .search-result-links {
   font-size: var(--font-size-ui-11);
@@ -7897,9 +7918,18 @@ async function fetchSearch(query) {
   return response.json();
 }
 
+function resultDeepLink(item) {
+  if (!item) return "";
+  if (wikiKnownEntityId(item.id)) return wikiRoute(item.id);
+  if (item.deep_link) return item.deep_link;
+  if (item.route) return `#/${item.route}`;
+  return "";
+}
+
 function searchResultRow(item, index, active) {
   const type = escapeHtml(item.entity_type || "");
   const title = escapeHtml(item.title || item.id || "");
+  const deepLink = resultDeepLink(item);
   const metaParts = [];
   if (item.status) metaParts.push(escapeHtml(item.status));
   if (item.owner) metaParts.push(escapeHtml(item.owner));
@@ -7909,13 +7939,14 @@ function searchResultRow(item, index, active) {
     if (rel.sha) return `commit ${escapeHtml(rel.label || rel.sha)}`;
     return `doc ${escapeHtml(rel.label || rel.path || "")}`;
   });
+  const wikiRouteText = wikiKnownEntityId(item.id) ? `<span class="search-result-wiki">${escapeHtml(wikiRoute(item.id))}</span>` : "";
   const linkHtml = links.length ? `<div class="search-result-links">${links.join(" &middot; ")}</div>` : "";
   return `<button type="button" class="search-result${active ? " is-active" : ""}" role="option"`
-    + ` data-result-index="${index}" data-deep-link="${escapeHtml(item.deep_link || "")}"`
+    + ` data-result-index="${index}" data-deep-link="${escapeHtml(deepLink)}"`
     + ` data-entity-id="${escapeHtml(item.id || "")}" data-entity-type="${type}">`
     + `<div class="search-result-head"><span class="search-result-type">${type}</span>`
     + `<span class="search-result-title">${title}</span></div>`
-    + `<div class="search-result-meta">${metaParts.join(" &middot; ")}</div>${linkHtml}</button>`;
+    + `<div class="search-result-meta">${metaParts.join(" &middot; ")}${wikiRouteText}</div>${linkHtml}</button>`;
 }
 
 function renderGlobalSearchResults(query) {
@@ -8011,7 +8042,7 @@ function navigateToResult(item) {
   recordRecentEntity(item);
   closeGlobalSearch();
   closeQuickOpen();
-  const link = item.deep_link || (item.route ? `#/${item.route}` : "");
+  const link = resultDeepLink(item);
   if (link) {
     // Force hashchange even if only the select= param changed.
     if (window.location.hash === link) applyHashRoute();
@@ -8447,6 +8478,24 @@ function tasksetTaskRows(taskSet) {
   return `<div class="taskset-card-tasks" aria-label="Tasks in ${escapeHtml(taskSet.id)}">${rows}</div>`;
 }
 
+function wikiEntityAction(id, label = "Wiki") {
+  const entityId = String(id || "").trim();
+  if (!entityId) return "";
+  return `<button type="button" class="wiki-link wiki-deeplink" data-wiki-id="${escapeHtml(entityId)}" aria-label="Open ${escapeHtml(entityId)} in Wiki">${escapeHtml(label)}</button>`;
+}
+
+function wikiKnownEntityId(id) {
+  const entityId = String(id || "").trim();
+  return /^(TASK|TASKSET|INIT|UNIT|REVIEW|MEETING|SEMINAR|RETRO|REPORT|VERIFY|W4B|CLAIM)-/i.test(entityId)
+    ? entityId
+    : "";
+}
+
+function wikiKnownEntityAction(id, label = "Wiki") {
+  const entityId = wikiKnownEntityId(id);
+  return entityId ? wikiEntityAction(entityId, label) : "";
+}
+
 function taskSetCards(taskSets, options = {}) {
   const compact = Boolean(options.compact);
   return taskSets.map((taskSet) => {
@@ -8482,6 +8531,7 @@ function taskSetCards(taskSets, options = {}) {
           <button class="taskset-action" type="button" data-taskset-action="plan" data-taskset-id="${escapeHtml(taskSet.id)}">Plan</button>
           <button class="taskset-action" type="button" data-taskset-action="start" data-taskset-id="${escapeHtml(taskSet.id)}">Start</button>
           <button class="taskset-action" type="button" data-taskset-action="gate" data-taskset-id="${escapeHtml(taskSet.id)}">Gate</button>
+          ${wikiEntityAction(taskSet.id, "Wiki")}
           <button class="taskset-action" type="button" data-taskset-lifecycle="rename" data-taskset-id="${escapeHtml(taskSet.id)}" data-taskset-name="${escapeHtml(taskSet.display_name || taskSet.id)}">Rename</button>
           <button class="taskset-action" type="button" data-taskset-lifecycle="archive" data-taskset-id="${escapeHtml(taskSet.id)}">Archive</button>
         </div>`}
@@ -8629,6 +8679,7 @@ function taskCard(task) {
     quickActions: [
       { action: "claim", label: "Claim" },
       { action: "verify", label: "Verify" },
+      { action: "wiki", label: "Wiki" },
       { action: "close", label: "Close" },
     ],
   });
@@ -8730,7 +8781,9 @@ function schedulePeek(anchor) {
 async function quickAction(action, taskId) {
   const task = taskById(taskId);
   if (!task) return;
-  if (action === "claim") {
+  if (action === "wiki") {
+    openWikiPage(taskId);
+  } else if (action === "claim") {
     await sendJson(`/api/tasks/${encodeURIComponent(taskId)}`, {
       method: "PATCH",
       type: "task.update",
@@ -10848,7 +10901,7 @@ function queuePlanningDecision(type, proposalId) {
 function renderSources() {
   const rows = [...(runtimeState.sources || []), ...(runtimeState.gaps || []), ...(runtimeState.warnings || [])];
   $("sources-list").innerHTML = rows.length ? rows.map((row) => `
-    <article class="surface-card source-card ${row.fresh === false || row.kind?.includes("error") ? "warn" : "pass"}">
+    <article class="surface-card source-card ${row.fresh === false || row.kind?.includes("error") ? "warn" : "pass"}" data-entity-id="${escapeHtml(row.id || "")}">
       <div class="surface-card-header">
         <b>${escapeHtml(row.id || row.kind || "source")}</b>
         <span class="state-chip">${escapeHtml(row.freshness || row.detail || "source")}</span>
@@ -10861,6 +10914,7 @@ function renderSources() {
         <span><span class="meta-label">Risk</span><strong>${escapeHtml(row.detail || row.freshness || "known")}</strong></span>
         <span><span class="meta-label">Mutation</span><strong>${escapeHtml(row.mutation_boundary || "read-only")}</strong></span>
       `)}
+      <div class="work-detail-actions">${wikiKnownEntityAction(row.id, "Open Wiki")}</div>
     </article>
   `).join("") : `<div class="empty">No sources</div>`;
 }
@@ -11422,6 +11476,7 @@ function renderWorkNodeDetail() {
   host.innerHTML = `
     <h3>${escapeHtml(node.label || node.id)} - ${escapeHtml(node.id)}</h3>
     <p>${escapeHtml(node.title || "")}</p>
+    <div class="work-detail-actions">${wikiEntityAction(node.id, "Open Wiki")}</div>
     <div class="work-detail-meta" aria-label="Work node metadata">
       <span><span class="meta-label">Level</span><strong>${escapeHtml(node.level || "unknown")}</strong></span>
       <span><span class="meta-label">Status</span><strong>${escapeHtml(node.status || "unknown")}</strong></span>

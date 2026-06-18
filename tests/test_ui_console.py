@@ -1305,6 +1305,7 @@ def test_ui_console_board_card_exposes_peek_dnd_and_quick_action_anchors(tmp_pat
         "data-task-order",
         'data-quick-action="claim"',
         'data-quick-action="verify"',
+        '{ action: "wiki", label: "Wiki" }',
         'data-quick-action="close"',
         "buildPeekMarkup",
         "showPeek",
@@ -1360,6 +1361,7 @@ def test_ui_console_board_dnd_and_quick_actions_use_command_path_not_file_write(
     assert 'type: "task.update"' in action_block
     assert 'type: "runtime.request_review"' in action_block
     assert 'type: "task.archive"' in action_block
+    assert "openWikiPage(taskId)" in action_block
     assert "writeFile" not in action_block and "fs." not in action_block
 
 
@@ -1796,7 +1798,7 @@ ALL_VIEW_IDS = [
     "writes",
 ]
 
-CORE_NAV_LABELS = ["Home", "Work", "Agents", "Decisions", "Records", "Search", "More"]
+CORE_NAV_LABELS = ["Home", "Work", "Agents", "Decisions", "Records", "Wiki", "Search", "More"]
 MORE_GROUPS = ["work", "agents", "comms", "records", "ops"]
 
 
@@ -1816,7 +1818,9 @@ def test_ui_console_sidebar_replaces_horizontal_tabs(tmp_path):
     assert core_labels == CORE_NAV_LABELS[:-1]
     assert 'class="sidebar-more-summary"' in html
     assert ">More<" in html
-    assert len(core_labels) + 1 == 7
+    assert len(core_labels) + 1 == 8
+    assert core_labels.index("Wiki") == core_labels.index("Records") + 1
+    assert html.count('data-view="wiki"') == 1
     # Detailed routes are retained but moved behind collapsed More.
     assert '<details class="sidebar-more" data-group="more">' in html
     assert '<details class="sidebar-more" data-group="more" open>' not in html
@@ -1842,6 +1846,7 @@ def test_ui_console_sidebar_links_carry_hash_routes(tmp_path):
         "agents/team",
         "comms/meetings",
         "records/events",
+        "wiki",
         "search",
         "work/tasksets",
         "work/board",
@@ -3721,6 +3726,8 @@ def test_ui_console_wiki_page_view_present_and_routed(tmp_path):
 
     assert 'data-view="wiki"' in html
     assert 'data-route="wiki"' in html
+    core = re.search(r'<div class="sidebar-core"[^>]*>(.*?)</div>\s*<details', html, re.S)
+    assert core and 'data-view="wiki"' in core.group(1)
     assert 'id="view-wiki"' in html
     assert 'id="wiki-page-body"' in html
     assert 'id="wiki-minigraph-svg"' in html
@@ -3740,6 +3747,14 @@ def test_ui_console_wiki_page_view_present_and_routed(tmp_path):
     assert "/api/wiki/search?q=" in js
     assert "/api/wiki/ask?q=" in js
     assert "function wikiEntityFromRoute" in js
+    assert "function wikiEntityAction" in js
+    assert "function wikiKnownEntityAction" in js
+    assert 'class="wiki-link wiki-deeplink"' in js
+    assert "function resultDeepLink" in js
+    assert "if (wikiKnownEntityId(item.id)) return wikiRoute(item.id)" in js
+    assert "const link = resultDeepLink(item)" in js
+    assert "wikiKnownEntityAction(row.id" in js
+    assert "search-result-wiki" in js
     assert 'route === "wiki" || String(route || "").startsWith("wiki/")' in js
     assert 'if (view === "wiki") loadWikiPage' in js
     assert ".wiki-page-layout" in css
@@ -3748,6 +3763,9 @@ def test_ui_console_wiki_page_view_present_and_routed(tmp_path):
     assert ".wiki-minigraph-edge-label" in css
     assert ".wiki-minigraph-node.role-incoming" in css
     assert ".wiki-query-panel" in css
+    assert ".wiki-deeplink" in css
+    assert ".work-detail-actions" in css
+    assert ".search-result-wiki" in css
 
 
 def test_ui_console_wiki_page_js_ascii_only_and_node_check(tmp_path):
