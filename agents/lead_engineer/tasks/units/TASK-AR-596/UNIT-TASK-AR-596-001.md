@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-LLM-WIKI
 initiative_id: INIT-AR-LLM-WIKI
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: qa
 created_at: 2026-06-19T01:12:00+09:00
-updated_at: 2026-06-19T01:12:00+09:00
+updated_at: 2026-06-19T01:25:00+09:00
 origin_type: owner_request
 origin_ref: chat:2026-06-19-doc-scribe-wiki-graph-cleanup
 created_by: codex-planner
@@ -51,6 +51,10 @@ verification:
   - python scripts/knowledge_graph.py check --json --git-limit 0
 handoff: Report lint contract changes, regression commands, and whether TASK-AR-596 still needs later E2E/W4b/taskset closeout after TASK-AR-594 and TASK-AR-595.
 stop_condition: Stop after expanded corpus lint checks are implemented, focused tests pass, template parity is updated, and follow-up closeout status is explicit.
+verified_at: 2026-06-19T01:25:00+09:00
+verified_by: codex-wiki-lint-596
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500.json
 ---
 
 # UNIT-TASK-AR-596-001 - Extend wiki corpus lint checks
