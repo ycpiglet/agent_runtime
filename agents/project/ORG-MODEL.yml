@@ -4,7 +4,7 @@
 # needed; the org_model_gate resolves any alias to the canonical kebab-case id.
 # Spec: docs/superpowers/specs/2026-06-14-agent-org-delegation-model-design.md (Sec A).
 schema: agent-runtime-org-model/v1
-updated_at: 2026-06-15T00:29:41+09:00
+updated_at: 2026-06-18T12:51:06+09:00
 
 # Tiers map to the work-schema *_model_tier fields (planner/worker/reviewer).
 tiers: [director, planner, worker, reviewer]
@@ -22,6 +22,12 @@ teams:
     display_name: Quality & Eval
   - id: risk-release
     display_name: Risk & Release
+  - id: finance-accounting
+    display_name: Finance & Accounting
+  - id: marketing-growth
+    display_name: Marketing & Growth
+  - id: sales-revenue
+    display_name: Sales & Revenue
 
 roles:
   - id: managing-partner
@@ -36,10 +42,22 @@ roles:
     tier: worker
     team: engineering
     aliases: [worker, engineer, agent-runtime, rsi-lab]
-  - id: uiux
+  - id: lead-designer
     tier: planner
     team: ui-ux
-    aliases: [ui, ux, uiux, frontend, uiux-designer]
+    aliases: [lead-designer, lead_designer, product-designer, visual-designer, design-lead, design-strategy]
+  - id: design-system-steward
+    tier: reviewer
+    team: ui-ux
+    aliases: [design-system, design_system, design-system-steward, design_system_steward, token-steward, component-steward, pattern-steward]
+  - id: interface-designer
+    tier: worker
+    team: ui-ux
+    aliases: [ui, ux, uiux, frontend, uiux-designer, interface-designer, interface_designer, screen-designer]
+  - id: ux-evaluator
+    tier: reviewer
+    team: ui-ux
+    aliases: [ux-evaluator, ux_evaluator, usability, accessibility, visual-qa, design-review]
   - id: research-agent
     tier: planner
     team: research
@@ -64,3 +82,51 @@ roles:
     tier: reviewer
     team: risk-release
     aliases: [release, release-integrity, release_integrity, ci-cd, cicd]
+  - id: finance-controller
+    tier: planner
+    team: finance-accounting
+    aliases: [finance, finance-controller, finance_controller, monetization, pricing, fpna]
+  - id: accounting-operator
+    tier: worker
+    team: finance-accounting
+    aliases: [accounting, accountant, bookkeeper, bookkeeping, billing, invoicing]
+  - id: asset-steward
+    tier: reviewer
+    team: finance-accounting
+    aliases: [asset, assets, asset-management, asset_manager, license-manager, license_manager, vendor-steward]
+  - id: revenue-analyst
+    tier: planner
+    team: finance-accounting
+    aliases: [revenue, revenue-analyst, revenue_analyst, unit-economics, unit_economics]
+  - id: marketing-lead
+    tier: planner
+    team: marketing-growth
+    aliases: [marketing, marketing-lead, marketing_lead, growth-marketing, go-to-market, gtm]
+  - id: content-marketer
+    tier: worker
+    team: marketing-growth
+    aliases: [content, content-marketer, content_marketer, copywriter, seo]
+  - id: growth-analyst
+    tier: planner
+    team: marketing-growth
+    aliases: [growth, growth-analyst, growth_analyst, channel-analyst, campaign-analyst]
+  - id: brand-steward
+    tier: reviewer
+    team: marketing-growth
+    aliases: [brand, brand-steward, brand_steward, positioning, messaging]
+  - id: sales-lead
+    tier: planner
+    team: sales-revenue
+    aliases: [sales, sales-lead, sales_lead, bizdev, business-development]
+  - id: crm-operator
+    tier: worker
+    team: sales-revenue
+    aliases: [crm, crm-operator, crm_operator, lead-ops, lead_ops, pipeline-operator]
+  - id: partnership-manager
+    tier: planner
+    team: sales-revenue
+    aliases: [partnership, partnerships, partnership-manager, partnership_manager, partner-manager]
+  - id: sales-ops
+    tier: reviewer
+    team: sales-revenue
+    aliases: [sales-ops, sales_ops, revenue-ops, revops, deal-desk]

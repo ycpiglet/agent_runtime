@@ -31,6 +31,7 @@ RESOURCE_NAMES = (
     "multipane_assurance",
     "inflight",
     "work_explorer",
+    "work_state",
     "meeting_room",
     "channels",
     "tasksets_board",
@@ -2196,9 +2197,8 @@ def load_goals(root: Path, now: str) -> list[dict[str, Any]]:
 DEFAULT_LANGUAGE = "ko"
 I18N_LANGUAGES = ("ko", "en")
 
-# Key shell strings only (high-traffic nav groups, view titles, common buttons).
-# This is the *mechanism* + the high-traffic conversions; remaining strings stay
-# English literals in the DOM and can be migrated incrementally using t(key).
+# Key shell strings and decision-first hero strings. Runtime/API data identifiers
+# remain English; display labels are mapped in the browser via this table.
 I18N_STRINGS: dict[str, dict[str, str]] = {
     "nav.group.home": {"ko": "홈", "en": "Home"},
     "nav.group.work": {"ko": "작업", "en": "Work"},
@@ -2228,6 +2228,68 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     },
     "widgets.title": {"ko": "위젯", "en": "Widgets"},
     "widgets.empty": {"ko": "등록된 위젯이 없습니다", "en": "No widgets registered"},
+    "cockpit.aria": {
+        "ko": "주의 인박스 - 지금 필요한 일",
+        "en": "Attention inbox - what needs you now",
+    },
+    "cockpit.title": {"ko": "지금 필요한 일", "en": "What needs you now"},
+    "cockpit.empty": {"ko": "지금 필요한 항목이 없습니다.", "en": "Nothing needs you right now."},
+    "cockpit.total.clear": {"ko": "모두 정상", "en": "all clear"},
+    "cockpit.total.one": {"ko": "1개 항목 확인 필요", "en": "1 item needs attention"},
+    "cockpit.total.many_suffix": {"ko": "개 항목 확인 필요", "en": "items need attention"},
+    "cockpit.unavailable": {"ko": "인박스를 불러올 수 없습니다", "en": "inbox unavailable"},
+    "cockpit.open_details": {"ko": "상세 열기", "en": "Open details"},
+    "cockpit.detail.kicker": {"ko": "주의 상세", "en": "Attention detail"},
+    "cockpit.detail.title": {"ko": "인박스 상세", "en": "Inbox detail"},
+    "cockpit.detail.close": {"ko": "주의 상세 닫기", "en": "Close attention detail"},
+    "cockpit.detail.summary": {
+        "ko": "전체 신호 목록을 확인하고 심각도가 가장 높은 항목부터 처리하세요.",
+        "en": "Review the full signal list and act on the highest-severity item first.",
+    },
+    "cockpit.detail.empty": {"ko": "이 그룹에는 항목이 없습니다.", "en": "No items in this group."},
+    "cockpit.item.untitled": {"ko": "제목 없는 항목", "en": "Untitled item"},
+    "cockpit.summary.empty": {"ko": "이 그룹에는 항목이 없습니다.", "en": "No items in this group."},
+    "cockpit.summary.more": {"ko": "개 더 있음", "en": "more"},
+    "inbox.group.approval_pending": {"ko": "승인", "en": "Approvals"},
+    "inbox.group.blocked": {"ko": "차단됨", "en": "Blocked"},
+    "inbox.group.runtime_anomalies": {"ko": "런타임 이상", "en": "Runtime anomalies"},
+    "inbox.group.gate_failures": {"ko": "게이트 실패", "en": "Gate failures"},
+    "inbox.group.cost_anomalies": {"ko": "비용 이상", "en": "Cost anomalies"},
+    "inbox.group.stale": {"ko": "오래됨", "en": "Stale"},
+    "inbox.action.approve_gate": {"ko": "승인 / 게이트", "en": "approve / gate"},
+    "inbox.action.resolve_blocker": {"ko": "차단 해소", "en": "resolve blocker"},
+    "inbox.action.fix_gate": {"ko": "게이트 수정", "en": "fix gate"},
+    "inbox.action.review_cost": {"ko": "비용 검토", "en": "review cost"},
+    "inbox.action.review_refresh": {"ko": "검토 / 갱신", "en": "review / refresh"},
+    "inbox.action.resolve_claim": {"ko": "클레임 해소", "en": "resolve claim"},
+    "inbox.why.approval_required": {"ko": "승인 필요", "en": "approval_required"},
+    "inbox.why.status": {"ko": "상태", "en": "status"},
+    "inbox.why.gate_failures": {"ko": "게이트 실패", "en": "gate failures"},
+    "inbox.why.actual": {"ko": "실제", "en": "actual"},
+    "inbox.why.budget": {"ko": "예산", "en": "budget"},
+    "inbox.why.no_update": {"ko": "업데이트 없음", "en": "no update"},
+    "inbox.why.cross_host_claim_conflict": {
+        "ko": "호스트 간 클레임 충돌",
+        "en": "cross-host claim conflict",
+    },
+    "work_state.kicker": {"ko": "작업", "en": "Work"},
+    "work_state.title": {"ko": "작업 상태", "en": "Work state"},
+    "work_state.empty": {"ko": "활성 작업 상태가 없습니다.", "en": "No active work state."},
+    "work_state.unavailable": {"ko": "작업 상태를 불러올 수 없습니다", "en": "work state unavailable"},
+    "work_state.total.none": {"ko": "작업 상태 없음", "en": "no work state"},
+    "work_state.total.tasksets": {"ko": "태스크셋", "en": "tasksets"},
+    "work_state.total.units": {"ko": "유닛", "en": "units"},
+    "work_state.count.waiting": {"ko": "대기", "en": "Waiting"},
+    "work_state.count.active": {"ko": "진행", "en": "Active"},
+    "work_state.count.review": {"ko": "검토", "en": "Review"},
+    "work_state.count.done": {"ko": "완료", "en": "Done"},
+    "work_state.units": {"ko": "유닛", "en": "units"},
+    "work_state.units.shown": {"ko": "개 유닛 표시", "en": "units shown"},
+    "work_state.units.hidden": {"ko": "개 숨김", "en": "hidden"},
+    "work_state.bucket.waiting": {"ko": "대기", "en": "waiting"},
+    "work_state.bucket.active": {"ko": "진행", "en": "active"},
+    "work_state.bucket.review": {"ko": "검토", "en": "review"},
+    "work_state.bucket.done": {"ko": "완료", "en": "done"},
 }
 
 
@@ -3512,7 +3574,9 @@ def build_channels(
 
 
 TASKSETS_BOARD_SCHEMA = "agent-runtime-tasksets-board/v1"
+WORK_STATE_BOARD_SCHEMA = "agent-runtime-work-state-board/v1"
 _TASKSETS_BOARD_ACTIVITY_LIMIT = 5
+_WORK_STATE_TASK_LIMIT = 12
 _TASKSET_CHILD_STATUS_PHASES = {
     "plan": ("planned", "backlog", "todo", "proposed", "draft"),
     "work": ("in_progress", "active", "working", "claimed", "assigned", "started"),
@@ -3599,6 +3663,115 @@ def build_taskset_completion(
         or f"Taskset {completed_id} completed; stop and report.",
         "policy": "stop_and_report",
         "next_suggestion": _suggest_next_taskset(task_sets, completed_id),
+    }
+
+
+def _load_org_read_api(root: Path, warnings: list[dict[str, str]]) -> Any | None:
+    candidates = [
+        root / "scripts" / "org_read_api.py",
+        Path(__file__).resolve().parents[2] / "scripts" / "org_read_api.py",
+    ]
+    seen: set[Path] = set()
+    for path in candidates:
+        resolved = path.resolve()
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        if not resolved.is_file():
+            continue
+        try:
+            spec = importlib.util.spec_from_file_location("agent_runtime_org_read_api", resolved)
+            if spec is None or spec.loader is None:
+                raise RuntimeError("unable to load module spec")
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            return module
+        except Exception as exc:  # pragma: no cover - defensive path
+            warnings.append(_warning("work-state-read-api-error", _rel(root, resolved), str(exc)))
+            return None
+    warnings.append(_warning("work-state-read-api-missing", "scripts/org_read_api.py", "org read API not found"))
+    return None
+
+
+def build_work_state_board(
+    root: Path,
+    task_sets: list[dict[str, Any]],
+    tasks: list[dict[str, Any]],
+    now: str,
+    warnings: list[dict[str, str]],
+) -> dict[str, Any]:
+    module = _load_org_read_api(root, warnings)
+    raw: dict[str, Any] = {}
+    if module is not None and hasattr(module, "work_state"):
+        try:
+            raw = module.work_state(root)
+        except Exception as exc:  # pragma: no cover - defensive path
+            warnings.append(_warning("work-state-read-error", "scripts/org_read_api.py::work_state", str(exc)))
+            raw = {}
+
+    taskset_meta = {str(item.get("id") or ""): item for item in task_sets if item.get("id")}
+    task_meta = {str(item.get("id") or ""): item for item in tasks if item.get("id")}
+    totals = {"waiting": 0, "active": 0, "review": 0, "done": 0, "tasksets": 0, "tasks": 0}
+    cards: list[dict[str, Any]] = []
+    for taskset_id, record in sorted(raw.items()):
+        taskset_key = str(taskset_id or "").strip()
+        if not taskset_key or not isinstance(record, dict):
+            continue
+        counts = {
+            "waiting": int(record.get("waiting", 0) or 0),
+            "active": int(record.get("active", 0) or 0),
+            "review": int(record.get("review", 0) or 0),
+            "done": int(record.get("done", 0) or 0),
+        }
+        total = sum(counts.values())
+        if total == 0:
+            continue
+        for key, value in counts.items():
+            totals[key] += value
+        totals["tasksets"] += 1
+        totals["tasks"] += total
+
+        meta = taskset_meta.get(taskset_key, {})
+        raw_tasks = record.get("tasks") or []
+        task_rows: list[dict[str, Any]] = []
+        if isinstance(raw_tasks, list):
+            for raw_task in raw_tasks:
+                if not isinstance(raw_task, dict):
+                    continue
+                task_id = str(raw_task.get("id") or "").strip()
+                live = task_meta.get(task_id, {})
+                task_rows.append(
+                    {
+                        "id": task_id,
+                        "title": live.get("title") or task_id,
+                        "status": raw_task.get("status") or live.get("status") or "",
+                        "bucket": raw_task.get("bucket") or "waiting",
+                        "priority": live.get("priority") or "",
+                        "source_path": live.get("source_path") or "",
+                    }
+                )
+        task_rows.sort(key=lambda item: (str(item.get("bucket") or ""), str(item.get("id") or "")))
+        cards.append(
+            {
+                "id": taskset_key,
+                "title": meta.get("display_name") or taskset_key,
+                "initiative_id": meta.get("initiative_id") or "",
+                "primary_alias": meta.get("primary_alias") or "",
+                "counts": counts,
+                "active_total": counts["active"] + counts["review"],
+                "total": total,
+                "tasks": task_rows[:_WORK_STATE_TASK_LIMIT],
+                "task_limit": _WORK_STATE_TASK_LIMIT,
+                "hidden_tasks": max(0, len(task_rows) - _WORK_STATE_TASK_LIMIT),
+            }
+        )
+    cards.sort(key=lambda item: (-int(item["active_total"]), -int(item["counts"]["waiting"]), str(item["id"])))
+    return {
+        "schema": WORK_STATE_BOARD_SCHEMA,
+        "generated_at": now,
+        "source": "scripts/org_read_api.py::work_state",
+        "totals": totals,
+        "tasksets": cards,
     }
 
 
@@ -7350,6 +7523,7 @@ def _build_state_uncached(root: Path | str, now: str | None = None) -> dict[str,
     meeting_room = build_meeting_room(agents, tasks, now=generated_at)
     channels = build_channels(messages, tasks, task_sets, now=generated_at)
     tasksets_board = build_tasksets_board(work_explorer, tasks, events, generated_at)
+    work_state = build_work_state_board(root_path, task_sets, tasks, generated_at, warnings)
     taskset_completion = build_taskset_completion(pane_events, task_sets)
     roadmap_timeline = build_roadmap_timeline(roadmap, work_explorer, root_path, generated_at, warnings)
     instances = _load_instances(root_path, generated_at, warnings)
@@ -7430,6 +7604,7 @@ def _build_state_uncached(root: Path | str, now: str | None = None) -> dict[str,
         "meeting_room": meeting_room,
         "channels": channels,
         "tasksets_board": tasksets_board,
+        "work_state": work_state,
         "taskset_completion": taskset_completion,
         "team_agents": team_agents,
         "teams": teams,

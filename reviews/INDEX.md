@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-15T14:37:00+09:00
-record_count: 494
+generated_at: 2026-06-18T18:43:10+09:00
+record_count: 573
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `494` review and evidence records under `reviews/`.
+- Summary: indexed `573` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `494` files |
+| Reviews covered | pass | `573` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -74,6 +74,7 @@ record_count: 494
 | `reviews/CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current.json` | `CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current` | json | record | n/a | CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current |
 | `reviews/CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final.json` | `CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final` | json | record | n/a | CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final |
 | `reviews/COUNCIL-2026-06-14-host-feedback-first-deliberation.md` | `COUNCIL-2026-06-14-host-feedback-first-deliberation` | council | watch | watch | Council — Host Feedback First Deliberation (TASK-AR-527) |
+| `reviews/DIAGNOSTIC-2026-06-18-ui-design-system-maturity.md` | `DIAGNOSTIC-2026-06-18-ui-design-system-maturity` | md | accepted | n/a | UI Design System Maturity Diagnostic |
 | `reviews/GOVERNANCE-OPS-REPORT-2026-06-10.md` | `GOVERNANCE-OPS-REPORT-2026-06-10` | governance_ops_report | watch | watch | Governance Operations Report |
 | `reviews/HANDOFF-2026-06-15-ui-redesign-and-product-structure.md` | `HANDOFF-2026-06-15-ui-redesign-and-product-structure` | md | record | n/a | HANDOFF — UI Redesign & Product-Structure Change (for next session) |
 | `reviews/LIVE-REVIEWER-GATE-2026-06-09-task-ar-206.json` | `LIVE-REVIEWER-GATE-2026-06-09-task-ar-206` | json | record | n/a | LIVE-REVIEWER-GATE-2026-06-09-task-ar-206 |
@@ -136,6 +137,7 @@ record_count: 494
 | `reviews/MEETING-2026-06-14-product-maturity-uplift-taskset-registration.md` | `MEETING-2026-06-14-product-maturity-uplift-taskset-registration` | meeting | watch | watch | Product Maturity Uplift — Taskset Registration |
 | `reviews/MEETING-2026-06-14-wave-plan-host-store-console.md` | `MEETING-2026-06-14-wave-plan-host-store-console` | meeting | watch | watch | Wave Execution Plan — Host Feedback + Work Store + Decision Console |
 | `reviews/MEETING-2026-06-15-agent-runtime-task-ar-223-cycle-sync.md` | `MEETING-2026-06-15-agent-runtime-task-ar-223-cycle-sync` | md | record | n/a | MEETING (2026-06-15) - TASK-AR-223 closeout cycle sync |
+| `reviews/MEETING-2026-06-17-self-improvement-cycle-sync.md` | `MEETING-2026-06-17-self-improvement-cycle-sync` | meeting | planned | planned | Self Improvement Cycle Sync |
 | `reviews/OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion.json` | `OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion` | json | record | n/a | OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion |
 | `reviews/OFFLINE-EVAL-2026-06-09-task-ar-217-rerun.json` | `OFFLINE-EVAL-2026-06-09-task-ar-217-rerun` | json | record | n/a | OFFLINE-EVAL-2026-06-09-task-ar-217-rerun |
 | `reviews/OFFLINE-EVAL-2026-06-09-task-ar-217.json` | `OFFLINE-EVAL-2026-06-09-task-ar-217` | json | record | n/a | OFFLINE-EVAL-2026-06-09-task-ar-217 |
@@ -162,6 +164,8 @@ record_count: 494
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current.json` | `RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0.json` | `RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0 |
 | `reviews/RELEASE-VERSION-CONSISTENCY-STEWARD.json` | `RELEASE-VERSION-CONSISTENCY-STEWARD` | json | record | n/a | RELEASE-VERSION-CONSISTENCY-STEWARD |
+| `reviews/REPORT-2026-06-17-self-improvement-maturity.md` | `REPORT-2026-06-17-self-improvement-maturity` | md | record | watch | Self Improvement Maturity Report 2026-06-17 |
+| `reviews/REPORT-2026-06-17-self-improvement-remediation-delta.md` | `REPORT-2026-06-17-self-improvement-remediation-delta` | md | record | watch | Self Improvement Remediation Delta 2026-06-17 |
 | `reviews/RESEARCH-2026-06-09-agent-runtime-official-recommendation-update.md` | `RESEARCH-2026-06-09-agent-runtime-official-recommendation-update` | md | record | n/a | RESEARCH-2026-06-09-agent-runtime-official-recommendation-update.md |
 | `reviews/RESEARCH-2026-06-09-agent-runtime-official-runtime-ops-update.md` | `RESEARCH-2026-06-09-agent-runtime-official-runtime-ops-update` | md | record | n/a | RESEARCH-2026-06-09-agent-runtime-official-runtime-ops-update |
 | `reviews/RESEARCH-2026-06-09-agent-runtime-task-ar-214-official-query-contract.md` | `RESEARCH-2026-06-09-agent-runtime-task-ar-214-official-query-contract` | md | record | n/a | RESEARCH-2026-06-09-agent-runtime-task-ar-214-official-query-contract |
@@ -190,9 +194,11 @@ record_count: 494
 | `reviews/RESEARCH-2026-06-14-unified-decision-console.md` | `RESEARCH-2026-06-14-unified-decision-console` | research | complete | n/a | Unified Decision/Operations Console — Research Synthesis |
 | `reviews/RESEARCH-2026-06-14-work-store-architecture-and-numbering.md` | `RESEARCH-2026-06-14-work-store-architecture-and-numbering` | research | complete | n/a | Work Store Architecture, Archival, Numbering & Performance — Research Synthesis |
 | `reviews/RESEARCH-2026-06-15-agent-runtime-task-ar-223-hold-routing-and-overlay-edge-research.md` | `RESEARCH-2026-06-15-agent-runtime-task-ar-223-hold-routing-and-overlay-edge-research` | md | record | n/a | RESEARCH: TASK-AR-223 hold-routing + overlay-edge risk 반영 (2026-06-15) |
+| `reviews/RESEARCH-2026-06-18-design-system-governance-role-topology.md` | `RESEARCH-2026-06-18-design-system-governance-role-topology` | md | synthesized (partial verification) | n/a | RESEARCH — Design-System Governance & Design-Org Role Topology |
 | `reviews/RETRO-2026-06-10-agent-runtime-governance-ops.md` | `RETRO-2026-06-10-agent-runtime-governance-ops` | retro | watch | watch | RETRO-2026-06-10 agent runtime governance ops |
 | `reviews/RETRO-2026-06-14-agent-runtime-process-integrity.md` | `RETRO-2026-06-14-agent-runtime-process-integrity` | retro | watch | watch | RETRO 2026-06-14 — Process Integrity (verification / merge / compound-review-retro) |
 | `reviews/RETRO-2026-06-14-knowledge-stack.md` | `RETRO-2026-06-14-knowledge-stack` | retro | watch | watch | RETRO 2026-06-14 — Agent knowledge stack (#1–#4) |
+| `reviews/RETRO-2026-06-17-self-improvement-cycle.md` | `RETRO-2026-06-17-self-improvement-cycle` | retro | record | n/a | RETRO 2026-06-17 - Self Improvement Cycle |
 | `reviews/REVIEW-2026-06-08-agent-runtime-after-pass-1.md` | `REVIEW-2026-06-08-agent-runtime-after-pass-1` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-after-pass-1 |
 | `reviews/REVIEW-2026-06-08-agent-runtime-baseline.md` | `REVIEW-2026-06-08-agent-runtime-baseline` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-baseline |
 | `reviews/REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25.md` | `REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25 |
@@ -457,6 +463,31 @@ record_count: 494
 | `reviews/REVIEW-2026-06-15-paperclip-gap-adoption-decision.md` | `REVIEW-2026-06-15-paperclip-gap-adoption-decision` | md | record | n/a | REVIEW — Paperclip Gap Analysis & Adoption Decision (TASK-AR-367) |
 | `reviews/REVIEW-2026-06-15-product-maturity-uplift-closeout.md` | `REVIEW-2026-06-15-product-maturity-uplift-closeout` | md | record | n/a | REVIEW — Product Maturity Uplift: Closeout (TASKSET-AR-PRODUCT-MATURITY-UPLIFT) |
 | `reviews/REVIEW-2026-06-15-work-hierarchy-conflict-closure-closeout.md` | `REVIEW-2026-06-15-work-hierarchy-conflict-closure-closeout` | md | record | n/a | REVIEW — Work Hierarchy Conflict Closure: Closeout (TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE) |
+| `reviews/REVIEW-2026-06-16-task-ar-565-nav-prune-core7.md` | `REVIEW-2026-06-16-task-ar-565-nav-prune-core7` | review | pass | pass | REVIEW - TASK-AR-565 Nav Prune Core 7 |
+| `reviews/REVIEW-2026-06-16-task-ar-566-progressive-disclosure.md` | `REVIEW-2026-06-16-task-ar-566-progressive-disclosure` | review | pass | pass | REVIEW - TASK-AR-566 Progressive Disclosure Detail Panel |
+| `reviews/REVIEW-2026-06-16-task-ar-567-work-state-board.md` | `REVIEW-2026-06-16-task-ar-567-work-state-board` | md | record | n/a | TASK-AR-567 W4a Review - Work State Board |
+| `reviews/REVIEW-2026-06-16-task-ar-568-i18n-toggle.md` | `REVIEW-2026-06-16-task-ar-568-i18n-toggle` | md | record | n/a | TASK-AR-568 W4a Review - i18n KO/EN UI Toggle |
+| `reviews/REVIEW-2026-06-16-task-ar-569-e2e-dom-budget.md` | `REVIEW-2026-06-16-task-ar-569-e2e-dom-budget` | md | record | n/a | TASK-AR-569 W4a Review - E2E + DOM Budget Regression |
+| `reviews/REVIEW-2026-06-17-decision-first-console-ia-closeout.md` | `REVIEW-2026-06-17-decision-first-console-ia-closeout` | md | record | n/a | REVIEW: Decision-First Console IA Closeout |
+| `reviews/REVIEW-2026-06-17-self-improvement-cycle.md` | `REVIEW-2026-06-17-self-improvement-cycle` | md | record | watch | Self Improvement Cycle 2026-06-17 |
+| `reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md` | `REVIEW-2026-06-17-task-ar-573-scribe-evidence` | md | record | watch | TASK-AR-573 Scribe Evidence |
+| `reviews/REVIEW-2026-06-17-task-ar-574-monitored-role-evidence.md` | `REVIEW-2026-06-17-task-ar-574-monitored-role-evidence` | md | record | watch | TASK-AR-574 Monitored Role Evidence |
+| `reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md` | `REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle` | review | approved | pass | TASK-AR-575 Runtime Asset Lifecycle Review |
+| `reviews/REVIEW-2026-06-17-task-ar-577-business-operations-teams.md` | `REVIEW-2026-06-17-task-ar-577-business-operations-teams` | md | record | n/a | TASK-AR-577 W4a Review - Business Operations Teams |
+| `reviews/REVIEW-2026-06-17-taskset-ar-business-operations-teams-registration.md` | `REVIEW-2026-06-17-taskset-ar-business-operations-teams-registration` | md | record | pass | Business Operations Teams Registration |
+| `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-registration.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-registration` | md | record | pass | Self Improvement Cadence Registration |
+| `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-cycle.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-cycle` | md | record | pass | Self Improvement Cadence T3 Replan After Cycle |
+| `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report` | md | record | pass | Self Improvement Cadence T3 Replan After Report |
+| `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan` | md | record | pass | Self Improvement Cadence T3 Replan |
+| `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration` | md | record | pass | Self Improvement Remediation Registration |
+| `reviews/REVIEW-2026-06-18-llm-wiki-preservation-branch-deferred.md` | `REVIEW-2026-06-18-llm-wiki-preservation-branch-deferred` | md | accepted | n/a | LLM-Wiki Preservation Branch Deferred |
+| `reviews/REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout.md` | `REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout` | review | pass | n/a | LLM-Wiki Worktree Preservation Closeout |
+| `reviews/REVIEW-2026-06-18-taskset-ar-design-system-assetization-registration.md` | `REVIEW-2026-06-18-taskset-ar-design-system-assetization-registration` | md | record | pass | Design System Assetization Registration |
+| `reviews/REVIEW-2026-06-18-taskset-ar-design-system-component-patterns-registration.md` | `REVIEW-2026-06-18-taskset-ar-design-system-component-patterns-registration` | md | record | pass | Design System Component Patterns Registration |
+| `reviews/REVIEW-2026-06-18-taskset-ar-design-system-debt-consolidation-registration.md` | `REVIEW-2026-06-18-taskset-ar-design-system-debt-consolidation-registration` | md | record | pass | Design System Debt Consolidation Registration |
+| `reviews/REVIEW-2026-06-18-taskset-ar-design-system-governance-registration.md` | `REVIEW-2026-06-18-taskset-ar-design-system-governance-registration` | md | record | pass | Design System Governance Registration |
+| `reviews/REVIEW-2026-06-18-taskset-ar-design-system-served-asset-split-registration.md` | `REVIEW-2026-06-18-taskset-ar-design-system-served-asset-split-registration` | md | record | pass | Design System Served Asset Split Registration |
+| `reviews/REVIEW-2026-06-18-taskset-ar-design-system-token-debt-registration.md` | `REVIEW-2026-06-18-taskset-ar-design-system-token-debt-registration` | md | record | pass | Design System Token Debt Registration |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario |
@@ -469,6 +500,7 @@ record_count: 494
 | `reviews/SEMINAR-2026-06-13-agent-runtime-task-ar-211-overlay-seminar-notes.md` | `SEMINAR-2026-06-13-agent-runtime-task-ar-211-overlay-seminar-notes` | md | record | n/a | SEMINAR-2026-06-13-agent-runtime-task-ar-211-overlay-seminar-notes |
 | `reviews/SEMINAR-2026-06-14-agent-runtime-task-ar-222-closeout-sync.md` | `SEMINAR-2026-06-14-agent-runtime-task-ar-222-closeout-sync` | md | record | n/a | SEMINAR: TASK-AR-222 closeout 번들 운영 동기화 세미나 |
 | `reviews/SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync.md` | `SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync` | md | record | n/a | SEMINAR (2026-06-15) - TASK-AR-223 governance sync |
+| `reviews/SEMINAR-2026-06-17-self-improvement-cadence.md` | `SEMINAR-2026-06-17-self-improvement-cadence` | meeting | planned | planned | Self Improvement Cadence Seminar |
 | `reviews/VERIFY-2026-06-12-task-ar-375-20260612150820.json` | `VERIFY-2026-06-12-task-ar-375-20260612150820` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612150820 |
 | `reviews/VERIFY-2026-06-12-task-ar-375-20260612151830.json` | `VERIFY-2026-06-12-task-ar-375-20260612151830` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612151830 |
 | `reviews/VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030.json` | `VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030` | json | record | n/a | VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030 |
@@ -482,6 +514,34 @@ record_count: 494
 | `reviews/VERIFY-2026-06-12-unit-task-ar-375-001-20260612150512.json` | `VERIFY-2026-06-12-unit-task-ar-375-001-20260612150512` | json | record | n/a | VERIFY-2026-06-12-unit-task-ar-375-001-20260612150512 |
 | `reviews/VERIFY-2026-06-12-unit-task-ar-375-001-20260612151810.json` | `VERIFY-2026-06-12-unit-task-ar-375-001-20260612151810` | json | record | n/a | VERIFY-2026-06-12-unit-task-ar-375-001-20260612151810 |
 | `reviews/VERIFY-2026-06-15-unit-task-ar-372-005-20260615112119.json` | `VERIFY-2026-06-15-unit-task-ar-372-005-20260615112119` | json | record | n/a | VERIFY-2026-06-15-unit-task-ar-372-005-20260615112119 |
+| `reviews/VERIFY-2026-06-17-task-ar-570-20260617085000.json` | `VERIFY-2026-06-17-task-ar-570-20260617085000` | json | record | n/a | VERIFY-2026-06-17-task-ar-570-20260617085000 |
+| `reviews/VERIFY-2026-06-17-task-ar-571-20260617162554.json` | `VERIFY-2026-06-17-task-ar-571-20260617162554` | json | record | n/a | VERIFY-2026-06-17-task-ar-571-20260617162554 |
+| `reviews/VERIFY-2026-06-17-task-ar-572-20260617170100.json` | `VERIFY-2026-06-17-task-ar-572-20260617170100` | json | record | n/a | VERIFY-2026-06-17-task-ar-572-20260617170100 |
+| `reviews/VERIFY-2026-06-17-task-ar-572-20260617170800.json` | `VERIFY-2026-06-17-task-ar-572-20260617170800` | json | record | n/a | VERIFY-2026-06-17-task-ar-572-20260617170800 |
+| `reviews/VERIFY-2026-06-17-task-ar-573-20260617173707.json` | `VERIFY-2026-06-17-task-ar-573-20260617173707` | json | record | n/a | VERIFY-2026-06-17-task-ar-573-20260617173707 |
+| `reviews/VERIFY-2026-06-17-task-ar-574-20260617175559.json` | `VERIFY-2026-06-17-task-ar-574-20260617175559` | json | record | n/a | VERIFY-2026-06-17-task-ar-574-20260617175559 |
+| `reviews/VERIFY-2026-06-17-task-ar-575-20260617182232.json` | `VERIFY-2026-06-17-task-ar-575-20260617182232` | json | record | n/a | VERIFY-2026-06-17-task-ar-575-20260617182232 |
+| `reviews/VERIFY-2026-06-17-task-ar-576-20260617184640.json` | `VERIFY-2026-06-17-task-ar-576-20260617184640` | json | record | n/a | VERIFY-2026-06-17-task-ar-576-20260617184640 |
+| `reviews/VERIFY-2026-06-17-task-ar-577-20260617223600.json` | `VERIFY-2026-06-17-task-ar-577-20260617223600` | json | record | n/a | VERIFY-2026-06-17-task-ar-577-20260617223600 |
+| `reviews/VERIFY-2026-06-17-unit-task-ar-570-001-20260617084842.json` | `VERIFY-2026-06-17-unit-task-ar-570-001-20260617084842` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-570-001-20260617084842 |
+| `reviews/VERIFY-2026-06-17-unit-task-ar-571-001-20260617162341.json` | `VERIFY-2026-06-17-unit-task-ar-571-001-20260617162341` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-571-001-20260617162341 |
+| `reviews/VERIFY-2026-06-17-unit-task-ar-572-001-20260617165800.json` | `VERIFY-2026-06-17-unit-task-ar-572-001-20260617165800` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-572-001-20260617165800 |
+| `reviews/VERIFY-2026-06-17-unit-task-ar-573-001-20260617172602.json` | `VERIFY-2026-06-17-unit-task-ar-573-001-20260617172602` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-573-001-20260617172602 |
+| `reviews/VERIFY-2026-06-17-unit-task-ar-574-001-20260617174554.json` | `VERIFY-2026-06-17-unit-task-ar-574-001-20260617174554` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-574-001-20260617174554 |
+| `reviews/VERIFY-2026-06-17-unit-task-ar-575-001-20260617180903.json` | `VERIFY-2026-06-17-unit-task-ar-575-001-20260617180903` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-575-001-20260617180903 |
+| `reviews/VERIFY-2026-06-17-unit-task-ar-576-001-20260617183459.json` | `VERIFY-2026-06-17-unit-task-ar-576-001-20260617183459` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-576-001-20260617183459 |
+| `reviews/VERIFY-2026-06-17-unit-task-ar-577-001-20260617223200.json` | `VERIFY-2026-06-17-unit-task-ar-577-001-20260617223200` | json | record | n/a | VERIFY-2026-06-17-unit-task-ar-577-001-20260617223200 |
+| `reviews/VERIFY-2026-06-18-design-system-diagnostic-closure.md` | `VERIFY-2026-06-18-design-system-diagnostic-closure` | md | accepted | n/a | Design System Diagnostic Closure Audit |
+| `reviews/VERIFY-2026-06-18-task-ar-578-20260618130030.json` | `VERIFY-2026-06-18-task-ar-578-20260618130030` | json | record | n/a | VERIFY-2026-06-18-task-ar-578-20260618130030 |
+| `reviews/VERIFY-2026-06-18-task-ar-579-20260618143800.json` | `VERIFY-2026-06-18-task-ar-579-20260618143800` | json | record | n/a | VERIFY-2026-06-18-task-ar-579-20260618143800 |
+| `reviews/VERIFY-2026-06-18-task-ar-580-20260618150500.json` | `VERIFY-2026-06-18-task-ar-580-20260618150500` | json | record | n/a | VERIFY-2026-06-18-task-ar-580-20260618150500 |
+| `reviews/VERIFY-2026-06-18-task-ar-581-20260618154000.json` | `VERIFY-2026-06-18-task-ar-581-20260618154000` | json | record | n/a | VERIFY-2026-06-18-task-ar-581-20260618154000 |
+| `reviews/VERIFY-2026-06-18-task-ar-582-20260618161500.json` | `VERIFY-2026-06-18-task-ar-582-20260618161500` | json | record | n/a | VERIFY-2026-06-18-task-ar-582-20260618161500 |
+| `reviews/VERIFY-2026-06-18-unit-task-ar-578-001-20260618125735.json` | `VERIFY-2026-06-18-unit-task-ar-578-001-20260618125735` | json | record | n/a | VERIFY-2026-06-18-unit-task-ar-578-001-20260618125735 |
+| `reviews/VERIFY-2026-06-18-unit-task-ar-579-001-20260618143300.json` | `VERIFY-2026-06-18-unit-task-ar-579-001-20260618143300` | json | record | n/a | VERIFY-2026-06-18-unit-task-ar-579-001-20260618143300 |
+| `reviews/VERIFY-2026-06-18-unit-task-ar-580-001-20260618150000.json` | `VERIFY-2026-06-18-unit-task-ar-580-001-20260618150000` | json | record | n/a | VERIFY-2026-06-18-unit-task-ar-580-001-20260618150000 |
+| `reviews/VERIFY-2026-06-18-unit-task-ar-581-001-20260618153500.json` | `VERIFY-2026-06-18-unit-task-ar-581-001-20260618153500` | json | record | n/a | VERIFY-2026-06-18-unit-task-ar-581-001-20260618153500 |
+| `reviews/VERIFY-2026-06-18-unit-task-ar-582-001-20260618161000.json` | `VERIFY-2026-06-18-unit-task-ar-582-001-20260618161000` | json | record | n/a | VERIFY-2026-06-18-unit-task-ar-582-001-20260618161000 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
@@ -528,6 +588,25 @@ record_count: 494
 | `reviews/W4B-2026-06-15-TASK-AR-546-556.md` | `W4B-2026-06-15-TASK-AR-546-556` | md | record | n/a | W4B Independent Verification — TASKSET-AR-546-556 (product-maturity-uplift) |
 | `reviews/W4B-2026-06-15-TASK-AR-557.md` | `W4B-2026-06-15-TASK-AR-557` | md | record | n/a | W4B Independent Verification — TASK-AR-557 (Unit 1: Role/Team/Tier Registry) |
 | `reviews/W4B-2026-06-15-TASK-AR-558-562.md` | `W4B-2026-06-15-TASK-AR-558-562` | md | record | n/a | W4B Independent Verification — TASK-AR-558..562 (Agent Org Delegation) |
+| `reviews/W4B-2026-06-15-TASK-AR-563-564.md` | `W4B-2026-06-15-TASK-AR-563-564` | md | record | n/a | W4B Independent Verification — TASK-AR-563/564 (decision-first cockpit) |
+| `reviews/W4B-2026-06-16-TASK-AR-565.md` | `W4B-2026-06-16-TASK-AR-565` | verification | record | n/a | W4b Independent Verification - TASK-AR-565 |
+| `reviews/W4B-2026-06-16-TASK-AR-566.md` | `W4B-2026-06-16-TASK-AR-566` | md | record | n/a | W4b Independent Verification - TASK-AR-566 |
+| `reviews/W4B-2026-06-16-TASK-AR-567.md` | `W4B-2026-06-16-TASK-AR-567` | md | record | n/a | W4B Verification - TASK-AR-567 |
+| `reviews/W4B-2026-06-16-TASK-AR-568.md` | `W4B-2026-06-16-TASK-AR-568` | md | record | n/a | W4B Verification - TASK-AR-568 |
+| `reviews/W4B-2026-06-17-TASK-AR-569.md` | `W4B-2026-06-17-TASK-AR-569` | md | record | n/a | TASK-AR-569 W4b Independent Verification |
+| `reviews/W4B-2026-06-17-TASK-AR-570.md` | `W4B-2026-06-17-TASK-AR-570` | md | record | n/a | TASK-AR-570 W4b Independent Verification |
+| `reviews/W4B-2026-06-17-TASK-AR-571.md` | `W4B-2026-06-17-TASK-AR-571` | md | record | n/a | TASK-AR-571 W4b Independent Verification |
+| `reviews/W4B-2026-06-17-TASK-AR-572.md` | `W4B-2026-06-17-TASK-AR-572` | md | record | n/a | TASK-AR-572 W4b Independent Verification |
+| `reviews/W4B-2026-06-17-TASK-AR-573.md` | `W4B-2026-06-17-TASK-AR-573` | md | record | n/a | TASK-AR-573 W4b Independent Verification |
+| `reviews/W4B-2026-06-17-TASK-AR-574.md` | `W4B-2026-06-17-TASK-AR-574` | md | approved | pass | TASK-AR-574 W4b Independent Verification |
+| `reviews/W4B-2026-06-17-TASK-AR-575.md` | `W4B-2026-06-17-TASK-AR-575` | md | approved | pass | TASK-AR-575 W4b Independent Verification |
+| `reviews/W4B-2026-06-17-TASK-AR-576.md` | `W4B-2026-06-17-TASK-AR-576` | md | approved | pass | TASK-AR-576 W4b Independent Verification |
+| `reviews/W4B-2026-06-17-TASK-AR-577.md` | `W4B-2026-06-17-TASK-AR-577` | w4b-independent-verification | approved | pass | W4b Independent Verification: TASK-AR-577 |
+| `reviews/W4B-2026-06-18-TASK-AR-578.md` | `W4B-2026-06-18-TASK-AR-578` | md | passed | pass | W4b Verification - TASK-AR-578 |
+| `reviews/W4B-2026-06-18-TASK-AR-579.md` | `W4B-2026-06-18-TASK-AR-579` | md | accepted | n/a | W4B Independent Verification - TASK-AR-579 |
+| `reviews/W4B-2026-06-18-TASK-AR-580.md` | `W4B-2026-06-18-TASK-AR-580` | md | accepted | n/a | W4B Independent Verification - TASK-AR-580 |
+| `reviews/W4B-2026-06-18-TASK-AR-581.md` | `W4B-2026-06-18-TASK-AR-581` | md | accepted | n/a | W4B Independent Verification - TASK-AR-581 |
+| `reviews/W4B-2026-06-18-TASK-AR-582.md` | `W4B-2026-06-18-TASK-AR-582` | md | accepted | n/a | W4B Independent Verification - TASK-AR-582 |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.

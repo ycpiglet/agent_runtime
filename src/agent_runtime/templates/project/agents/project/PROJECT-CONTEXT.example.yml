@@ -43,6 +43,42 @@ agent_teams:
     canonical_context:
       - agents/project/ORG.md
       - agents/lead_engineer/tasks/BACKLOG.md
+  - id: finance-accounting
+    purpose: Own monetization, pricing, billing, costs, assets, licenses, vendors, and revenue metrics.
+    roles: [finance-controller, accounting-operator, asset-steward, revenue-analyst]
+    canonical_context:
+      - agents/project/VISION.md
+      - agents/project/ROADMAP.md
+      - agents/project/ORG.md
+  - id: marketing-growth
+    purpose: Own positioning, brand, content, SEO, campaigns, channel experiments, and performance analysis.
+    roles: [marketing-lead, content-marketer, growth-analyst, brand-steward]
+    canonical_context:
+      - agents/project/VISION.md
+      - agents/project/ROADMAP.md
+      - agents/project/LINKS.md
+  - id: sales-revenue
+    purpose: Own ICP, leads, CRM pipeline, demos, proposals, partnerships, and compliant promotional operations.
+    roles: [sales-lead, crm-operator, partnership-manager, sales-ops]
+    canonical_context:
+      - agents/project/VISION.md
+      - agents/project/ROADMAP.md
+      - agents/project/ORG.md
+
+growth_automation_policy:
+  allowed:
+    - owned-channel scheduled posting
+    - approved API posting
+    - consent-based CRM follow-up
+    - SEO/content analysis
+    - campaign performance reporting
+  prohibited:
+    - viewbots
+    - fake traffic or fake engagement
+    - unauthorized bulk posting
+    - spam
+    - terms-of-service evasion
+    - platform manipulation
 
 links:
   - label: Product brief

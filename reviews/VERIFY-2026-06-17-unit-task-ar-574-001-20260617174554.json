@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-17-unit-task-ar-574-001-20260617174554",
+  "work_id": "UNIT-TASK-AR-574-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-574/UNIT-TASK-AR-574-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-574",
+  "unit_id": "UNIT-TASK-AR-574-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-17T17:45:54+09:00",
+  "verified_by": "reviewer-20260617-role-evidence-574",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python scripts/collaboration_governance_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-17T17:45:55+09:00",
+      "finished_at": "2026-06-17T17:45:55+09:00",
+      "stdout": " agents/runtime/task_claims/CLAIM-20260613-224455-task-ar-336-4220.json: released claim has phase='claim-created', progress_pct=0\n- watch lifecycle:released-claim-incomplete:CLAIM-20260613-224456-task-ar-337-a262 agents/runtime/task_claims/CLAIM-20260613-224456-task-ar-337-a262.json: released claim has phase='claim-created', progress_pct=0\n- watch lifecycle:released-claim-incomplete:CLAIM-20260613-235912-task-ar-338-049b agents/runtime/task_claims/CLAIM-20260613-235912-task-ar-338-049b.json: released claim has phase='claim-created', progress_pct=0\n- watch lifecycle:released-claim-incomplete:CLAIM-20260613-235912-task-ar-339-22c2 agents/runtime/task_claims/CLAIM-20260613-235912-task-ar-339-22c2.json: released claim has phase='claim-created', progress_pct=0\n- watch lifecycle:released-claim-incomplete:CLAIM-20260613-235913-task-ar-340-d87f agents/runtime/task_claims/CLAIM-20260613-235913-task-ar-340-d87f.json: released claim has phase='claim-created', progress_pct=0\n- watch lifecycle:released-claim-incomplete:CLAIM-20260613-235913-task-ar-341-3d7f agents/runtime/task_claims/CLAIM-20260613-235913-task-ar-341-3d7f.json: released claim has phase='claim-created', progress_pct=0\n- watch lifecycle:released-claim-incomplete:CLAIM-20260614-003513-task-ar-363-a8f8 agents/runtime/task_claims/CLAIM-20260614-003513-task-ar-363-a8f8.json: released claim has phase='claim-created', progress_pct=0\n- watch lifecycle:released-claim-incomplete:CLAIM-20260614-003514-task-ar-364-c3f4 agents/runtime/task_claims/CLAIM-20260614-003514-task-ar-364-c3f4.json: released claim has phase='claim-created', progress_pct=0\n- watch lifecycle:released-claim-incomplete:CLAIM-20260614-003514-task-ar-365-0e78 agents/runtime/task_claims/CLAIM-20260614-003514-task-ar-365-0e78.json: released claim has phase='claim-created', progress_pct=0\n- watch lifecycle:released-claim-incomplete:CLAIM-20260616-205031-task-ar-565-e73e agents/runtime/task_claims/CLAIM-20260616-205031-task-ar-565-e73e.json: released claim has phase='self-verified', progress_pct=90\n- watch lifecycle:released-claim-incomplete:CLAIM-20260616-220545-task-ar-566-9197 agents/runtime/task_claims/CLAIM-20260616-220545-task-ar-566-9197.json: released claim has phase='self-verified', progress_pct=90\n- watch lifecycle:released-claim-incomplete:CLAIM-20260616-223144-task-ar-567-5063 agents/runtime/task_claims/CLAIM-20260616-223144-task-ar-567-5063.json: released claim has phase='verified', progress_pct=100\n- watch lifecycle:released-claim-incomplete:CLAIM-20260616-230131-task-ar-568-21a3 agents/runtime/task_claims/CLAIM-20260616-230131-task-ar-568-21a3.json: released claim has phase='verified', progress_pct=100\n- watch lifecycle:released-claim-incomplete:CLAIM-20260616-232833-task-ar-569-8b7b agents/runtime/task_claims/CLAIM-20260616-232833-task-ar-569-8b7b.json: released claim has phase='verified', progress_pct=100\n- watch lifecycle:released-claim-incomplete:CLAIM-20260617-083506-task-ar-570-3845 agents/runtime/task_claims/CLAIM-20260617-083506-task-ar-570-3845.json: released claim has phase='taskset-claimed', progress_pct=0\n- watch lifecycle:released-claim-incomplete:CLAIM-20260617-090221-task-ar-571-969f agents/runtime/task_claims/CLAIM-20260617-090221-task-ar-571-969f.json: released claim has phase='taskset-claimed', progress_pct=0\n- watch lifecycle:released-claim-incomplete:CLAIM-20260617-163829-task-ar-572-61f6 agents/runtime/task_claims/CLAIM-20260617-163829-task-ar-572-61f6.json: released claim has phase='taskset-claimed', progress_pct=0\n- watch lifecycle:released-claim-incomplete:CLAIM-20260617-172500-task-ar-573-remediation-scribe agents/runtime/task_claims/CLAIM-20260617-172500-task-ar-573-remediation-scribe.json: released claim has phase='taskset-claimed', progress_pct=0\n- watch lifecycle:active-worktree-missing:CLAIM-20260617-174307-task-ar-574-role-evidence agents/runtime/task_claims/CLAIM-20260617-174307-task-ar-574-role-evidence.json: active claim worktree path does not exist: .worktrees/TASK-AR-574\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/self_improvement_cycle.py assess",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-17T17:45:55+09:00",
+      "finished_at": "2026-06-17T17:45:56+09:00",
+      "stdout": "Self Improvement Assessment\n- Status: watch\n- Maturity: immature (47/100)\n- Role gaps: 4\n- Asset gaps: 17\n- Scribe: unknown\n- Doc Steward: ok\n\nTop role gaps:\n- council: missing_claim_evidence (watch)\n- progress-scout: missing_claim_evidence (watch)\n- release-steward: missing_claim_evidence (watch)\n- skeptic: missing_claim_evidence (watch)\n\nTop asset gaps:\n- gate.owner_governance: low_reuse_evidence (watch)\n- report.governance_ops: low_reuse_evidence (watch)\n- hook.taskset_prompt: low_reuse_evidence (watch)\n- gate.footprint_conflict: low_reuse_evidence (watch)\n- gate.worktree_lifecycle: low_reuse_evidence (watch)\n- gate.attribution: low_reuse_evidence (watch)\n- gate.verification_freshness: low_reuse_evidence (watch)\n- gate.release_cadence: low_reuse_evidence (watch)\n\nNext:\n- Run the next remediation cycle after adding real role/asset evidence.\n- Route monitored dormant roles into the next review or council cycle.\n- Review low-reuse runtime assets and either exercise, modify, or deprecate them.\n- Run advisory scribe/doc-steward checks in the next cycle report.\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-17T17:45:56+09:00",
+      "finished_at": "2026-06-17T17:45:58+09:00",
+      "stdout": "evidence-index: pass\nfindings=0\n",
+      "stderr": ""
+    }
+  ]
+}

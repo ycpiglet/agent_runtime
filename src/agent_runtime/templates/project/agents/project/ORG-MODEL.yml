@@ -1,0 +1,103 @@
+# agents/project/ORG-MODEL.yml — Role/Team/Tier registry starter.
+# Host projects may edit this project overlay; do not fork reusable role skills
+# or scripts to express product-specific business structure.
+schema: agent-runtime-org-model/v1
+updated_at: YYYY-MM-DDTHH:MM:SS+09:00
+
+tiers: [director, planner, worker, reviewer]
+
+teams:
+  - id: org
+    display_name: Org
+  - id: product-core
+    display_name: Product Core
+  - id: quality
+    display_name: Quality & Eval
+  - id: finance-accounting
+    display_name: Finance & Accounting
+  - id: marketing-growth
+    display_name: Marketing & Growth
+  - id: sales-revenue
+    display_name: Sales & Revenue
+
+roles:
+  - id: owner
+    tier: director
+    team: org
+    aliases: [owner, product-owner, product_owner]
+  - id: lead-engineer
+    tier: planner
+    team: product-core
+    aliases: [lead, lead_engineer, lead-engineer, engineering]
+  - id: backend
+    tier: worker
+    team: product-core
+    aliases: [backend, engineer, worker]
+  - id: lead-designer
+    tier: planner
+    team: product-core
+    aliases: [lead-designer, lead_designer, product-designer, visual-designer, design-lead]
+  - id: design-system-steward
+    tier: reviewer
+    team: product-core
+    aliases: [design-system, design_system, design-system-steward, token-steward, component-steward]
+  - id: interface-designer
+    tier: worker
+    team: product-core
+    aliases: [ui, ux, uiux, frontend, uiux-designer, interface-designer]
+  - id: ux-evaluator
+    tier: reviewer
+    team: quality
+    aliases: [ux-evaluator, usability, accessibility, visual-qa, design-review]
+  - id: qa
+    tier: reviewer
+    team: quality
+    aliases: [qa, quality, test]
+  - id: finance-controller
+    tier: planner
+    team: finance-accounting
+    aliases: [finance, finance-controller, finance_controller, monetization, pricing, fpna]
+  - id: accounting-operator
+    tier: worker
+    team: finance-accounting
+    aliases: [accounting, accountant, bookkeeper, bookkeeping, billing, invoicing]
+  - id: asset-steward
+    tier: reviewer
+    team: finance-accounting
+    aliases: [asset, assets, asset-management, asset_manager, license-manager, license_manager, vendor-steward]
+  - id: revenue-analyst
+    tier: planner
+    team: finance-accounting
+    aliases: [revenue, revenue-analyst, revenue_analyst, unit-economics, unit_economics]
+  - id: marketing-lead
+    tier: planner
+    team: marketing-growth
+    aliases: [marketing, marketing-lead, marketing_lead, growth-marketing, go-to-market, gtm]
+  - id: content-marketer
+    tier: worker
+    team: marketing-growth
+    aliases: [content, content-marketer, content_marketer, copywriter, seo]
+  - id: growth-analyst
+    tier: planner
+    team: marketing-growth
+    aliases: [growth, growth-analyst, growth_analyst, channel-analyst, campaign-analyst]
+  - id: brand-steward
+    tier: reviewer
+    team: marketing-growth
+    aliases: [brand, brand-steward, brand_steward, positioning, messaging]
+  - id: sales-lead
+    tier: planner
+    team: sales-revenue
+    aliases: [sales, sales-lead, sales_lead, bizdev, business-development]
+  - id: crm-operator
+    tier: worker
+    team: sales-revenue
+    aliases: [crm, crm-operator, crm_operator, lead-ops, lead_ops, pipeline-operator]
+  - id: partnership-manager
+    tier: planner
+    team: sales-revenue
+    aliases: [partnership, partnerships, partnership-manager, partnership_manager, partner-manager]
+  - id: sales-ops
+    tier: reviewer
+    team: sales-revenue
+    aliases: [sales-ops, sales_ops, revenue-ops, revops, deal-desk]

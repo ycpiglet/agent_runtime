@@ -1,0 +1,29 @@
+{
+  "schema": "agent-runtime-session-baseline/v1",
+  "captured_at": "2026-06-16T14:06:29.945305+00:00",
+  "cwd": "C:\\Users\\ycpig\\agent_runtime",
+  "head": "3d58f2c",
+  "branch": "claude/decision-first-console-ia",
+  "status_fingerprint": "1666caa2aff131ef4758b64d62c106293b080fff452207cfb7e1d1b13e7d092c",
+  "stash_count": 0,
+  "worktrees": [
+    {
+      "path": "C:/Users/ycpig/agent_runtime",
+      "HEAD": "3d58f2cc57ebd38def70b9c984fbb9ccf0ea750c",
+      "branch": "claude/decision-first-console-ia"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-568",
+      "HEAD": "61aa26c2032f1220c3084a7771ec2976a6d7fa0a",
+      "branch": "codex/task-ar-568-i18n-toggle"
+    }
+  ],
+  "active_codex_branches": [
+    "claude/deadlock-guardrails",
+    "claude/decision-first-console-ia",
+    "claude/product-maturity-eval-merge",
+    "claude/wave89-closeout",
+    "codex/task-ar-552",
+    "+ codex/task-ar-568-i18n-toggle"
+  ]
+}

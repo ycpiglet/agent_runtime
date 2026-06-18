@@ -1,0 +1,96 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "chat:2026-06-18-design-system-governance",
+  "created_by": "codex-planner",
+  "now": "2026-06-18T12:51:06+09:00",
+  "initiative": {
+    "id": "INIT-AR-DESIGN-SYSTEM-GOVERNANCE",
+    "title": "Design System Governance",
+    "summary": "Turn the UI design-system diagnosis and external methodology research into durable rules, gate checks, and UI/UX role routing.",
+    "owner": "lead_engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE",
+    "display_name": "Design System Governance",
+    "summary": "Publish a design-system operating contract, assetization classification workflow, UI/UX role split, and deterministic gate so new UI work can reuse components while still proposing new design directions.",
+    "order": 618,
+    "plan_slug": "2026-06-18-design-system-governance"
+  },
+  "tasks": [
+    {
+      "title": "Publish design-system governance and gate",
+      "goal": "Create durable design-system governance for Agent Runtime UI work: a diagnostic report, system contract, assetization rules, UI/UX role split, and a deterministic gate with tests.",
+      "scope": "Add documentation, role metadata, a read-only gate, and focused tests. Do not rewrite the UI console or create live per-role directories in this checkout.",
+      "priority": "P0",
+      "difficulty": "M",
+      "est_hours": 4,
+      "est_tokens": 7000,
+      "owner": "lead_engineer",
+      "team": "ui-ux",
+      "acceptance": [
+        "reviews/DIAGNOSTIC-2026-06-18-ui-design-system-maturity.md records the current maturity diagnosis, root causes, and recommended operating model.",
+        "docs/design/agent-runtime/DESIGN-SYSTEM.md defines token/component/pattern/one-off classification, new-design proposal workflow, implementation rules, and closeout evidence requirements.",
+        "ORG-MODEL live and template overlays include focused UI/UX roles for lead-designer, design-system-steward, interface-designer, and ux-evaluator while preserving legacy uiux aliases.",
+        "scripts/design_system_gate.py reports raw literal usage and required governance artifacts without mutating files, with focused tests proving pass/fail behavior."
+      ],
+      "verification": [
+        "python -m pytest tests/test_design_system_gate.py tests/test_org_model_gate.py tests/test_org_read_api.py tests/test_owner_governance_chain_parity.py -q",
+        "python scripts/design_system_gate.py --check",
+        "python scripts/org_model_gate.py --check",
+        "python scripts/org_read_api.py --view org",
+        "python scripts/owner_governance_gate.py"
+      ],
+      "units": [
+        {
+          "title": "Publish design-system governance and gate",
+          "context": "The Owner accepted the diagnosis that only color/theme is meaningfully assetized and asked for rules, gates, UIUX role refinement, and a way to propose new designs without returning to hardcoded one-off UI.",
+          "inputs": [
+            "docs/design/agent-runtime/DESIGN.md",
+            "agents/project/ORG-MODEL.yml",
+            "src/agent_runtime/templates/project/agents/project/ORG-MODEL.yml",
+            "scripts/org_model_gate.py",
+            "tests/test_org_model_gate.py",
+            "tests/test_owner_governance_chain_parity.py"
+          ],
+          "target_files": [
+            "reviews/DIAGNOSTIC-2026-06-18-ui-design-system-maturity.md",
+            "docs/design/agent-runtime/DESIGN-SYSTEM.md",
+            "agents/project/ORG-MODEL.yml",
+            "src/agent_runtime/templates/project/agents/project/ORG-MODEL.yml",
+            "scripts/design_system_gate.py",
+            "tests/test_design_system_gate.py",
+            "tests/test_org_model_gate.py",
+            "tests/test_org_read_api.py",
+            "tests/test_owner_governance_chain_parity.py"
+          ],
+          "scope": "Governance and validation only. Do not refactor src/agent_runtime/ui_console.py in this unit and do not add live agents/<role> directories.",
+          "steps": [
+            "Write the detailed diagnostic review with current maturity score, repo evidence, external methodology references, and recommended operating model.",
+            "Create DESIGN-SYSTEM.md as the rule source for token, UI component, pattern component, and one-off classification plus the new-design RFC path.",
+            "Extend live and template ORG-MODEL UI/UX roles while keeping legacy uiux owner aliases resolvable.",
+            "Add design_system_gate.py with artifact, role, and raw-literal checks suitable for watch-level governance.",
+            "Add focused tests for artifact coverage, gate behavior, raw literal detection, and role resolution.",
+            "Run the recorded verification commands and record evidence in handoff/closeout."
+          ],
+          "acceptance": [
+            "The design-system contract separates accepted visual direction from enforceable assetization rules.",
+            "New visual directions have a proposal and promotion path instead of being blocked or hardcoded directly into pages.",
+            "The role model routes design strategy, system stewardship, screen implementation, and UX evaluation separately without live directory proliferation.",
+            "The gate can fail on missing artifacts or raw literals in changed UI files and can pass the current repository baseline."
+          ],
+          "verification": [
+            "python -m pytest tests/test_design_system_gate.py tests/test_org_model_gate.py tests/test_org_read_api.py tests/test_owner_governance_chain_parity.py -q",
+            "python scripts/design_system_gate.py --check",
+            "python scripts/org_model_gate.py --check",
+            "python scripts/org_read_api.py --view org",
+            "python scripts/owner_governance_gate.py"
+          ],
+          "handoff": "Report the created governance docs, role split, gate coverage, residual limitations, and verification results.",
+          "stop_condition": "Stop after the governance docs, role metadata, gate, tests, verification evidence, and closeout records are complete."
+        }
+      ]
+    }
+  ]
+}

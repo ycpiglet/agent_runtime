@@ -42,8 +42,12 @@ DOCUMENTED_TEMPLATE_OMISSIONS: dict[str, str] = {
     ),
     "scripts/org_model_gate.py": (
         "root-repo-specific (org-delegation Unit 1): resolves work-item owner/team against "
-        "the root agents/project/ORG-MODEL.yml; generated projects ship their own role model "
-        "(agents/roles.yml), so this watch-level gate is intentionally root-only"
+        "the live checkout agents/project/ORG-MODEL.yml; generated projects may seed their "
+        "own ORG-MODEL overlay, but this watch-level gate is intentionally root-only"
+    ),
+    "scripts/design_system_gate.py": (
+        "root-repo-specific: checks Agent Runtime design-system governance artifacts and "
+        "changed UI files; generated projects choose their own UI stack and gate timing"
     ),
 }
 
@@ -182,3 +186,33 @@ def test_evidence_index_generator_template_mirror_matches_root() -> None:
     root_script = (REPO_ROOT / "scripts" / "evidence_index_generator.py").read_text(encoding="utf-8")
     template_script = (TEMPLATE_SCRIPTS_DIR / "evidence_index_generator.py").read_text(encoding="utf-8")
     assert root_script == template_script, "template evidence_index_generator.py drifted from root copy"
+
+
+def test_template_org_model_includes_business_operations_teams() -> None:
+    template_org_model = (
+        REPO_ROOT
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "agents"
+        / "project"
+        / "ORG-MODEL.yml"
+    ).read_text(encoding="utf-8")
+    for expected in ("finance-accounting", "marketing-growth", "sales-revenue"):
+        assert expected in template_org_model
+
+
+def test_template_org_model_includes_split_uiux_roles() -> None:
+    template_org_model = (
+        REPO_ROOT
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "agents"
+        / "project"
+        / "ORG-MODEL.yml"
+    ).read_text(encoding="utf-8")
+    for expected in ("lead-designer", "design-system-steward", "interface-designer", "ux-evaluator"):
+        assert expected in template_org_model

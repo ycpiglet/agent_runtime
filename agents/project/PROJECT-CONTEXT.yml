@@ -1,5 +1,5 @@
 schema: agent-runtime-project-context/v1
-updated_at: 2026-06-13T09:30:00+09:00
+updated_at: 2026-06-17T22:20:00+09:00
 
 project:
   id: agent-runtime-mvp-platform
@@ -69,6 +69,54 @@ agent_teams:
     canonical_context:
       - agents/project/VISION.md
       - agents/project/ROADMAP.md
+  - id: finance-accounting
+    purpose: 혼합 수익 모델, 가격/청구, 비용, 자산, 라이선스, 매출 지표 관리
+    roles:
+      - finance-controller
+      - accounting-operator
+      - asset-steward
+      - revenue-analyst
+    canonical_context:
+      - agents/project/VISION.md
+      - agents/project/ROADMAP.md
+      - agents/project/ORG.md
+  - id: marketing-growth
+    purpose: 포지셔닝, 콘텐츠/SEO, 캠페인 실험, 브랜드 일관성, 채널 성과 분석
+    roles:
+      - marketing-lead
+      - content-marketer
+      - growth-analyst
+      - brand-steward
+    canonical_context:
+      - agents/project/VISION.md
+      - agents/project/ROADMAP.md
+      - agents/project/LINKS.md
+  - id: sales-revenue
+    purpose: ICP/리드, CRM 파이프라인, 데모/제안, 파트너십, 합법적 홍보 운영
+    roles:
+      - sales-lead
+      - crm-operator
+      - partnership-manager
+      - sales-ops
+    canonical_context:
+      - agents/project/VISION.md
+      - agents/project/ROADMAP.md
+      - agents/project/ORG.md
+
+growth_automation_policy:
+  allowed:
+    - owned-channel scheduled posting
+    - approved API posting
+    - consent-based CRM follow-up
+    - SEO/content analysis
+    - campaign performance reporting
+  prohibited:
+    - viewbots
+    - fake traffic or fake engagement
+    - unauthorized bulk posting
+    - spam
+    - terms-of-service evasion
+    - platform manipulation
 
 links:
   - label: release gate

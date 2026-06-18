@@ -11,7 +11,7 @@
       "status": "active",
       "lifecycle": "keep",
       "paths": ["scripts/owner_governance_gate.py"],
-      "evidence_paths": [".githooks/pre-commit", ".codex/hooks.json"],
+      "evidence_paths": [".githooks/pre-commit", ".codex/hooks.json", "reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md"],
       "tokens": ["owner_governance_gate.py"],
       "min_recent_uses": 1
     },
@@ -51,7 +51,7 @@
       "status": "active",
       "lifecycle": "keep",
       "paths": ["scripts/governance_ops_report.py"],
-      "evidence_paths": ["AGENT_RUNTIME_GOVERNANCE_OPS_BRIEF.md", "reviews/GOVERNANCE-OPS-REPORT-2026-06-10.md"],
+      "evidence_paths": ["AGENT_RUNTIME_GOVERNANCE_OPS_BRIEF.md", "reviews/GOVERNANCE-OPS-REPORT-2026-06-10.md", "reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md"],
       "tokens": ["governance_ops_report.py", "GOVERNANCE-OPS-REPORT"],
       "min_recent_uses": 1
     },
@@ -61,7 +61,7 @@
       "status": "active",
       "lifecycle": "keep",
       "paths": ["scripts/taskset_prompt_hook.py", "scripts/taskset_prompt_hook.cmd"],
-      "evidence_paths": [".codex/hooks.json", "src/agent_runtime/templates/project/AGENTS.md"],
+      "evidence_paths": [".codex/hooks.json", "src/agent_runtime/templates/project/AGENTS.md", "reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md"],
       "tokens": ["taskset_prompt_hook", "UserPromptSubmit"],
       "min_recent_uses": 1
     },
@@ -151,7 +151,7 @@
       "status": "active",
       "lifecycle": "keep",
       "paths": ["scripts/footprint_conflict_gate.py"],
-      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-500.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md"],
+      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-500.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md", "reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md"],
       "tokens": ["footprint_conflict_gate.py", "gate.footprint_conflict"],
       "min_recent_uses": 1
     },
@@ -161,7 +161,7 @@
       "status": "active",
       "lifecycle": "keep",
       "paths": ["scripts/worktree_lifecycle_gate.py"],
-      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-505.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md"],
+      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-505.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md", "reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md"],
       "tokens": ["worktree_lifecycle_gate.py", "gate.worktree_lifecycle"],
       "min_recent_uses": 1
     },
@@ -171,7 +171,7 @@
       "status": "active",
       "lifecycle": "keep",
       "paths": ["scripts/attribution_gate.py"],
-      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-518.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md"],
+      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-518.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md", "reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md"],
       "tokens": ["attribution_gate.py", "gate.attribution"],
       "min_recent_uses": 1
     },
@@ -181,7 +181,7 @@
       "status": "active",
       "lifecycle": "keep",
       "paths": ["scripts/verification_freshness_gate.py"],
-      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-519.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md"],
+      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-519.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md", "reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md"],
       "tokens": ["verification_freshness_gate.py", "gate.verification_freshness"],
       "min_recent_uses": 1
     },
@@ -191,7 +191,7 @@
       "status": "active",
       "lifecycle": "keep",
       "paths": ["scripts/release_cadence_trigger.py"],
-      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-510.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md"],
+      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-510.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md", "reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md"],
       "tokens": ["release_cadence_trigger.py", "release-cadence", "gate.release_cadence"],
       "min_recent_uses": 1
     },
@@ -201,7 +201,7 @@
       "status": "active",
       "lifecycle": "keep",
       "paths": ["scripts/conversation_work_audit.py"],
-      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-514.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md"],
+      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-514.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md", "reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md"],
       "tokens": ["conversation_work_audit.py", "gate.conversation_work_audit"],
       "min_recent_uses": 1
     },
@@ -211,7 +211,7 @@
       "status": "active",
       "lifecycle": "keep",
       "paths": ["scripts/work_schema_gate.py"],
-      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-515.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md"],
+      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-515.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md", "reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md"],
       "tokens": ["work_schema_gate.py", "gate.work_schema"],
       "min_recent_uses": 1
     },
@@ -221,7 +221,7 @@
       "status": "active",
       "lifecycle": "keep",
       "paths": ["scripts/wave_dispatcher.py"],
-      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-501.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md"],
+      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-501.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md", "reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md"],
       "tokens": ["wave_dispatcher.py", "wave-conductor", "capability.wave_dispatcher"],
       "min_recent_uses": 1
     },
@@ -231,7 +231,7 @@
       "status": "active",
       "lifecycle": "keep",
       "paths": ["scripts/merge_queue.py"],
-      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-502.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md"],
+      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-502.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md", "reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md"],
       "tokens": ["merge_queue.py", "merge-integrator", "capability.merge_queue"],
       "min_recent_uses": 1
     },
@@ -251,7 +251,7 @@
       "status": "active",
       "lifecycle": "keep",
       "paths": ["scripts/inflight_overlay.py"],
-      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-513.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md"],
+      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-513.md", "reviews/REVIEW-2026-06-13-parallel-wave-500-series-final-closeout.md", "reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md"],
       "tokens": ["inflight_overlay.py", "inflight-overlay", "capability.inflight_overlay"],
       "min_recent_uses": 1
     },
@@ -301,7 +301,7 @@
       "status": "active",
       "lifecycle": "keep",
       "paths": ["skills/wave-conductor/SKILL.md", "src/agent_runtime/templates/project/skills/wave-conductor/SKILL.md"],
-      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-524.md", "scripts/wave_dispatcher.py"],
+      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-524.md", "scripts/wave_dispatcher.py", "reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md"],
       "tokens": ["wave-conductor", "wave_dispatcher", "skill.wave_conductor"],
       "min_recent_uses": 1
     },
@@ -321,7 +321,7 @@
       "status": "active",
       "lifecycle": "keep",
       "paths": ["skills/independent-verification/SKILL.md", "src/agent_runtime/templates/project/skills/independent-verification/SKILL.md"],
-      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-524.md", "scripts/verification_freshness_gate.py"],
+      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-524.md", "scripts/verification_freshness_gate.py", "reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md"],
       "tokens": ["independent-verification", "W4a", "W4b", "skill.independent_verification"],
       "min_recent_uses": 1
     },
@@ -341,7 +341,7 @@
       "status": "active",
       "lifecycle": "keep",
       "paths": ["skills/release-conductor/SKILL.md", "src/agent_runtime/templates/project/skills/release-conductor/SKILL.md"],
-      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-524.md", "scripts/release_cadence_trigger.py"],
+      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-524.md", "scripts/release_cadence_trigger.py", "reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md"],
       "tokens": ["release-conductor", "release_cadence_trigger", "skill.release_conductor"],
       "min_recent_uses": 1
     },

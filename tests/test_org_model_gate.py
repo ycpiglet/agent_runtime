@@ -16,7 +16,8 @@ def test_registry_loads_and_covers_existing_owners():
     mod = _load()
     reg = mod.load_registry()
     for value in ["lead_engineer", "lead-engineer", "qa", "research-agent",
-                  "managing-partner", "release-integrity"]:
+                  "managing-partner", "release-integrity", "finance",
+                  "accounting", "marketing", "sales"]:
         assert mod.resolve_owner(value, reg) is not None, f"{value} unresolved"
     ids = [r["id"] for r in reg["roles"]]
     assert len(ids) == len(set(ids))
@@ -30,6 +31,48 @@ def test_resolve_owner_aliases_and_unknown():
     assert mod.resolve_owner("lead-engineer", reg)["id"] == "lead-engineer"
     assert mod.resolve_owner("ci-cd", reg)["id"] == "release-integrity"
     assert mod.resolve_owner("totally-unknown-role", reg) is None
+
+
+def test_business_operations_teams_and_aliases_resolve():
+    mod = _load()
+    reg = mod.load_registry()
+    team_ids = {team["id"] for team in reg["teams"]}
+    assert {"finance-accounting", "marketing-growth", "sales-revenue"} <= team_ids
+    assert all("_" not in team_id for team_id in team_ids)
+
+    expected_aliases = {
+        "finance": "finance-controller",
+        "billing": "accounting-operator",
+        "asset-management": "asset-steward",
+        "unit-economics": "revenue-analyst",
+        "marketing": "marketing-lead",
+        "seo": "content-marketer",
+        "growth": "growth-analyst",
+        "brand": "brand-steward",
+        "sales": "sales-lead",
+        "crm": "crm-operator",
+        "partnerships": "partnership-manager",
+        "revops": "sales-ops",
+    }
+    for alias, role_id in expected_aliases.items():
+        assert mod.resolve_owner(alias, reg)["id"] == role_id
+
+
+def test_uiux_roles_are_split_but_legacy_alias_resolves():
+    mod = _load()
+    reg = mod.load_registry()
+    expected_aliases = {
+        "lead-designer": "lead-designer",
+        "visual-designer": "lead-designer",
+        "design-system": "design-system-steward",
+        "token-steward": "design-system-steward",
+        "interface-designer": "interface-designer",
+        "uiux": "interface-designer",
+        "ux-evaluator": "ux-evaluator",
+        "accessibility": "ux-evaluator",
+    }
+    for alias, role_id in expected_aliases.items():
+        assert mod.resolve_owner(alias, reg)["id"] == role_id
 
 
 def test_check_reports_unresolved_but_is_watch_level(tmp_path, capsys):

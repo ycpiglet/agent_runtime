@@ -39,6 +39,23 @@ def test_org_tree_groups_live_instances_by_team_and_role(tmp_path):
     assert tree["engineering"]["lead-engineer"] == ["Eng-1"]   # alias resolved
 
 
+def test_org_tree_exposes_business_operations_teams_from_live_registry():
+    mod = _load()
+    tree = mod.org_tree(ROOT)
+    assert "finance-accounting" in tree
+    assert "marketing-growth" in tree
+    assert "sales-revenue" in tree
+
+
+def test_org_tree_exposes_split_uiux_roles_from_live_registry():
+    mod = _load()
+    tree = mod.org_tree(ROOT)
+    assert "ui-ux" in tree
+    reg = mod.load_org(ROOT)
+    roles = {role["id"] for role in reg["roles"] if role.get("team") == "ui-ux"}
+    assert {"lead-designer", "design-system-steward", "interface-designer", "ux-evaluator"} <= roles
+
+
 def test_work_state_buckets_waiting_and_done(tmp_path):
     mod = _load()
     _fixture(tmp_path)

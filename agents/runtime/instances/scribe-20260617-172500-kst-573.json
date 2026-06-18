@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "scribe-20260617-172500-kst-573",
+  "callsign": "scribe@implementation-01",
+  "callsite_id": "terminal:wt-task-ar-573:tab-01",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260617-172500-task-ar-573-remediation-scribe.json"
+  ],
+  "created_at": "2026-06-17T17:25:00+09:00",
+  "decision_cycle_id": "",
+  "display_name": "scribe@implementation-01",
+  "model": "",
+  "model_tier": "worker_standard",
+  "on_behalf_of": "UNIT-TASK-AR-573-001",
+  "pane_id": "terminal:wt-task-ar-573:tab-01",
+  "parent_instance_id": "",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "scribe",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-17T17:25:00+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-573",
+  "task_set_id": "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE",
+  "team_id": "agent-runtime-core",
+  "unit_id": "UNIT-TASK-AR-573-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-573/UNIT-TASK-AR-573-001.md",
+  "updated_at": "2026-06-17T17:25:00+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-573"
+}

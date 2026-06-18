@@ -15,8 +15,27 @@
 | 526 | `TASKSET-AR-UNIFIED-DECISION-CONSOLE` | Decision Cartographer |
 | 527 | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | Maturity Steward |
 | 528 | `TASKSET-AR-AGENT-ORG-DELEGATION` | Org Conductor |
+| 529 | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | Decision Cockpit |
 
 <!-- BACKLOG-INDEX:END -->
+
+## 2026-06-17 TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE complete
+
+- Completed taskset: `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` (Self Improvement Remediation), `4/4` done and archived from the live board.
+- Scope: burn down the first-cycle blockers from the maturity report: scribe waiver debt, dormant monitored-role evidence, low-reuse runtime assets, and a follow-up delta report.
+- Progress: `TASK-AR-573`, `TASK-AR-574`, `TASK-AR-575`, and `TASK-AR-576` are complete.
+- Current metrics: evidence maturity `improving`, score `70/100`, role gaps `3`, asset gaps `1`, low-reuse assets `1`, waiver debt `0`, scribe `unknown`, doc-steward `ok`.
+- Persistent goal state: still active, not mature; remaining watches are `council`, `progress-scout`, `skeptic`, `scribe_state`, and `capability.session_dashboard`.
+- Evidence: `reviews/REPORT-2026-06-17-self-improvement-remediation-delta.md`; `reviews/W4B-2026-06-17-TASK-AR-576.md`; `reviews/VERIFY-2026-06-17-task-ar-576-20260617184640.json`; `reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md`; `reviews/W4B-2026-06-17-TASK-AR-573.md`; `reviews/REVIEW-2026-06-17-task-ar-574-monitored-role-evidence.md`; `reviews/W4B-2026-06-17-TASK-AR-574.md`; `reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md`; `reviews/W4B-2026-06-17-TASK-AR-575.md`; `reviews/VERIFY-2026-06-17-task-ar-575-20260617182232.json`; `docs/superpowers/plans/2026-06-17-self-improvement-remediation-cycle.md`.
+
+## 2026-06-17 TASKSET-AR-SELF-IMPROVEMENT-CADENCE maturity report
+
+- Completed taskset: `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` (Self Improvement Cadence).
+- Scope: measure low-frequency agent/skill usage, record the first review/meeting/seminar/retro/compound/casebook cycle, and publish measurable maturity thresholds.
+- Current state: `TASK-AR-570` and `TASK-AR-571` are complete; `TASK-AR-572` publishes the maturity report and keeps the persistent self-improvement goal active.
+- Metrics: evidence maturity `immature`, score `32/100`, role gaps `6`, asset gaps `17`, cycle artifacts `6/6`.
+- Next cycle: create real scribe claim/log evidence, route monitored dormant roles into review/council evidence, exercise or deprecate low-reuse runtime assets, then rerun `python scripts/self_improvement_cycle.py report --json`.
+- Evidence: `reviews/REPORT-2026-06-17-self-improvement-maturity.md`; `reviews/REVIEW-2026-06-17-self-improvement-cycle.md`; `reviews/RETRO-2026-06-17-self-improvement-cycle.md`.
 
 ## 2026-06-15 TASKSET-AR-AGENT-ORG-DELEGATION 등록 + Unit 1 완료 (Org Conductor)
 

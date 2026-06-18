@@ -1,0 +1,21 @@
+# Handoff: codex-design-system-governance
+
+- claim_id: CLAIM-20260618-125220-task-ar-578-design-system-governance
+- task_id: TASK-AR-578
+- worktree_path: .worktrees/TASK-AR-578
+- branch: codex/task-ar-578-design-system-governance
+- task_set_id: TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE
+- project_id: PROJECT-AGENT-RUNTIME
+- unit_id: UNIT-TASK-AR-578-001
+- unit_spec: agents/lead_engineer/tasks/units/TASK-AR-578/UNIT-TASK-AR-578-001.md
+- model_tier: worker_standard
+- wip_slot: 1
+- stop_condition: 
+- phase: W4b
+- step: 6/6
+- progress_pct: 100
+- status_text: Released after W4b verification
+- status: released
+- released_at: 2026-06-18T12:59:14+09:00
+- verified_by: independent-auditor-design-system-578
+- verification_evidence: reviews/W4B-2026-06-18-TASK-AR-578.md

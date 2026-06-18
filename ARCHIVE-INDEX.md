@@ -2,13 +2,13 @@
 type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
-generated_at: 2026-06-15
-archived_count: 226
+generated_at: 2026-06-18
+archived_count: 246
 ---
 
 # Archived Task Files
 
-- `226` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `246` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -239,3 +239,23 @@ archived_count: 226
 | `TASK-AR-559` | `f6f4ad66-c4a…` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | 2026-06-15T00:29:41+09:00 | 2026-06-15T00:29:41+09:00 | 2026-06-15T10:04:03+09:00 | 2026-06-15T10:04:03+09:00 | scripts/dispatch_gate.py: footprint-disjoint seam check (reuse footprint_conflict_gat… |
 | `TASK-AR-561` | `bb188d37-3a0…` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | 2026-06-15T00:29:41+09:00 | 2026-06-15T00:29:41+09:00 | 2026-06-15T10:04:03+09:00 | 2026-06-15T10:04:03+09:00 | Extend blind-Delphi seminar/council with substance-axis persona archetypes (risk tole… |
 | `TASK-AR-560` | `01090ddb-fc0…` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | 2026-06-15T00:29:41+09:00 | 2026-06-15T00:29:41+09:00 | 2026-06-15T10:04:03+09:00 | 2026-06-15T10:04:03+09:00 | Lead orchestrator: create claim+worktree+instance, spawn Worker/Reviewer sub-agents (… |
+| `TASK-AR-568` | `b9ffa27b-90a…` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | 2026-06-15T17:43:04+09:00 | 2026-06-16T23:01:31+09:00 | 2026-06-16T23:13:09+09:00 | 2026-06-16T23:13:09+09:00 | UI language toggle over the existing i18n layer (EN data/schema stays); localize inbo… |
+| `TASK-AR-563` | `9ce4e1e1-af5…` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | 2026-06-15T17:43:04+09:00 | 2026-06-15T18:00:00+09:00 | 2026-06-15T20:30:00+09:00 | 2026-06-15T22:50:00+09:00 | scripts/attention_inbox.py: 6-group 'what needs me now' aggregation from existing wor… |
+| `TASK-AR-565` | `6b69101b-e12…` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | 2026-06-15T17:43:04+09:00 | 2026-06-16T20:50:31+09:00 | 2026-06-16T21:04:00+09:00 | 2026-06-16T21:04:00+09:00 | Group the 67 nav routes under core 7 (Home/Work/Agents/Decisions/Records/Search/More)… |
+| `TASK-AR-567` | `b924243c-6c8…` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | 2026-06-15T17:43:04+09:00 | 2026-06-16T22:31:44+09:00 | 2026-06-16T22:45:01+09:00 | 2026-06-16T22:45:01+09:00 | Initiative->Taskset->Unit waiting/active/done board + drill-down (reuse org_read_api.… |
+| `TASK-AR-569` | `4a0e922b-6b9…` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | 2026-06-15T17:43:04+09:00 | 2026-06-16T23:28:33+09:00 | 2026-06-17T00:06:10+09:00 | 2026-06-17T00:06:10+09:00 | E2E asserting home <= 2 screens / DOM <= ~1500 + maturity behaviors (responsive/a11y/… |
+| `TASK-AR-564` | `30fd8b46-ee5…` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | 2026-06-15T17:43:04+09:00 | 2026-06-15T20:30:00+09:00 | 2026-06-15T22:50:00+09:00 | 2026-06-15T22:50:00+09:00 | Serve the attention inbox at /api/inbox and replace the 80-screen home with the cockp… |
+| `TASK-AR-566` | `324b1b84-070…` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | 2026-06-15T17:43:04+09:00 | 2026-06-16T22:05:45+09:00 | 2026-06-16T22:21:17+09:00 | 2026-06-16T22:21:17+09:00 | Counts/summaries on screen; detail opens in a keyboard-accessible side drawer on clic… |
+| `TASK-AR-570` | `f004f017-f9e…` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | 2026-06-17T08:31:23+09:00 | 2026-06-17T08:35:06+09:00 | 2026-06-17T08:50:16+09:00 | 2026-06-17T08:50:16+09:00 | Create a deterministic baseline that identifies low-frequency agent roles, low-reuse… |
+| `TASK-AR-571` | `610c4d58-2c0…` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | 2026-06-17T08:31:23+09:00 | 2026-06-17T09:02:21+09:00 | 2026-06-17T16:26:25+09:00 | 2026-06-17T16:26:25+09:00 | Use review, meeting, seminar, retro, compound, scribe, and doc-steward surfaces to re… |
+| `TASK-AR-572` | `d5f5d125-a5e…` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | 2026-06-17T08:31:23+09:00 | 2026-06-17T16:38:29+09:00 | 2026-06-17T17:09:00+09:00 | 2026-06-17T17:09:00+09:00 | Define measurable maturity criteria for low-frequency agent/skill self-improvement an… |
+| `TASK-AR-573` | `ee8e7259-55d…` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | completed | 2026-06-17T17:15:00+09:00 | 2026-06-17T17:25:00+09:00 | 2026-06-17T17:37:24+09:00 | 2026-06-17T17:37:24+09:00 | Create verifiable scribe claim/log evidence and only remove the scribe waiver if coll… |
+| `TASK-AR-576` | `04c1bf81-a8f…` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | completed | 2026-06-17T17:15:00+09:00 | 2026-06-17T18:28:36+09:00 | 2026-06-17T18:47:01+09:00 | 2026-06-17T18:47:01+09:00 | Re-run the self-improvement report after role and asset remediation and state whether… |
+| `TASK-AR-574` | `d1df7596-272…` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | completed | 2026-06-17T17:15:00+09:00 | 2026-06-17T17:43:07+09:00 | 2026-06-17T17:56:12+09:00 | 2026-06-17T17:56:12+09:00 | Route council, progress-scout, release-steward, reviewer, and skeptic into real revie… |
+| `TASK-AR-575` | `93fe873f-43f…` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | completed | 2026-06-17T17:15:00+09:00 | 2026-06-17T18:00:00+09:00 | 2026-06-17T18:22:52+09:00 | 2026-06-17T18:22:52+09:00 | Reduce low-reuse runtime asset debt by exercising valuable assets in real workflows o… |
+| `TASK-AR-577` | `2e74dfb1-12c…` | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | completed | 2026-06-17T22:10:00+09:00 | 2026-06-17T22:15:13+09:00 | 2026-06-17T22:38:00+09:00 | 2026-06-17T22:38:00+09:00 | Define finance/accounting, marketing/growth, and sales/revenue teams across live proj… |
+| `TASK-AR-578` | `f7cbe326-b1f…` | `TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE` | completed | 2026-06-18T12:51:06+09:00 | - | 2026-06-18T13:01:58+09:00 | 2026-06-18T13:01:58+09:00 | Create durable design-system governance for Agent Runtime UI work: a diagnostic repor… |
+| `TASK-AR-579` | `ae9daa9c-87c…` | `TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION` | completed | 2026-06-18T13:20:00+09:00 | - | 2026-06-18T14:33:00+09:00 | 2026-06-18T14:33:00+09:00 | Create the first executable UI asset layer for Agent Runtime: design token scale, reu… |
+| `TASK-AR-580` | `f906471c-6ae…` | `TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS` | completed | 2026-06-18T14:50:00+09:00 | - | 2026-06-18T15:00:00+09:00 | 2026-06-18T15:00:00+09:00 | Extend the executable UI asset layer so the console has named component APIs and doma… |
+| `TASK-AR-581` | `f446b363-e61…` | `TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT` | completed | 2026-06-18T15:20:00+09:00 | - | 2026-06-18T15:40:00+09:00 | 2026-06-18T15:40:00+09:00 | Resolve the diagnostic report's token maturity gap for typography, spacing, radius, a… |
+| `TASK-AR-582` | `15ac2d6e-173…` | `TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | completed | 2026-06-18T15:55:00+09:00 | - | 2026-06-18T16:15:00+09:00 | 2026-06-18T16:15:00+09:00 | Resolve the diagnostic report's single-file HTML/CSS/JS string concentration by movin… |

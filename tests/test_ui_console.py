@@ -532,6 +532,58 @@ def _write_work_classification(root: Path) -> None:
     )
 
 
+def _write_work_state_tasks(root: Path) -> None:
+    tasks_dir = root / "agents" / "lead_engineer" / "tasks"
+    _write(
+        tasks_dir / "TASK-AR-514.md",
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-514",
+                "status: completed",
+                "priority: P1",
+                "task_set_id: TASKSET-AR-WORK-METADATA-ANALYTICS",
+                "---",
+                "",
+                "# TASK-AR-514 - Work metadata schema",
+                "",
+            ]
+        ),
+    )
+    _write(
+        tasks_dir / "TASK-AR-516.md",
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-516",
+                "status: planned",
+                "priority: P1",
+                "task_set_id: TASKSET-AR-WORK-METADATA-ANALYTICS",
+                "---",
+                "",
+                "# TASK-AR-516 - Work Explorer tree",
+                "",
+            ]
+        ),
+    )
+    _write(
+        tasks_dir / "TASK-AR-517.md",
+        "\n".join(
+            [
+                "---",
+                "id: TASK-AR-517",
+                "status: in_progress",
+                "priority: P1",
+                "task_set_id: TASKSET-AR-WORK-METADATA-ANALYTICS",
+                "---",
+                "",
+                "# TASK-AR-517 - Active work",
+                "",
+            ]
+        ),
+    )
+
+
 def test_ui_console_work_explorer_route_serves_tree_resource(tmp_path):
     _write_work_classification(tmp_path)
     _write(
@@ -572,6 +624,76 @@ def test_ui_console_work_explorer_route_serves_tree_resource(tmp_path):
     assert "reviews/VERIFY-2026-06-12-task-ar-514.json" in taskset["descendant_evidence_refs"]
     assert payload["items"]["roots"] == ["INIT-AR-WORK-METADATA-ANALYTICS"]
     assert payload["items"]["staleness_note"]
+
+
+def test_ui_console_work_state_route_serves_org_read_api_board(tmp_path):
+    _write_work_classification(tmp_path)
+    _write_work_state_tasks(tmp_path)
+
+    response = ui_console.build_response("/api/work_state", tmp_path)
+    payload = json.loads(response.body.decode("utf-8"))
+    alias = json.loads(ui_console.build_response("/api/work-state", tmp_path).body.decode("utf-8"))
+
+    assert response.status == 200
+    assert payload["resource"] == "work_state"
+    assert alias["resource"] == "work_state"
+    assert payload["items"]["schema"] == "agent-runtime-work-state-board/v1"
+    assert payload["items"]["source"] == "scripts/org_read_api.py::work_state"
+    assert payload["items"]["totals"]["waiting"] == 1
+    assert payload["items"]["totals"]["active"] == 1
+    assert payload["items"]["totals"]["done"] == 1
+
+    card = next(c for c in payload["items"]["tasksets"] if c["id"] == "TASKSET-AR-WORK-METADATA-ANALYTICS")
+    assert card["counts"] == {"waiting": 1, "active": 1, "review": 0, "done": 1}
+    assert card["active_total"] == 1
+    assert {task["id"]: task["bucket"] for task in card["tasks"]} == {
+        "TASK-AR-514": "done",
+        "TASK-AR-516": "waiting",
+        "TASK-AR-517": "active",
+    }
+
+
+def test_ui_console_work_state_secondary_hero_contract(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    for marker in [
+        'id="work-state-hero"',
+        'aria-labelledby="work-state-title"',
+        'data-i18n="work_state.kicker"',
+        'data-i18n="work_state.title"',
+        'id="work-state-total"',
+        'id="work-state-board"',
+        'id="work-state-empty"',
+        'data-i18n="work_state.empty"',
+        'role="list"',
+    ]:
+        assert marker in html
+
+    for marker in [
+        "function workStatePayload",
+        "function renderWorkState",
+        "function renderWorkStateCard",
+        "function localizedWorkBucket",
+        "let workStateData = null",
+        "function loadWorkState",
+        't("work_state.count.waiting")',
+        'fetch("/api/work-state"',
+        "setInterval(loadWorkState, 15000)",
+    ]:
+        assert marker in js
+
+    for selector in [
+        ".work-state-hero",
+        ".work-state-board",
+        ".work-state-card",
+        ".work-state-counts",
+        ".work-state-drill",
+        ".work-state-unit",
+        ".work-state-bucket",
+    ]:
+        assert selector in css
 
 
 def test_ui_console_work_explorer_tab_tree_and_facet_anchors(tmp_path):
@@ -1110,6 +1232,61 @@ def test_ui_console_favicon_route_is_quiet_for_browser_probe(tmp_path):
     assert response.body == b""
 
 
+def test_ui_console_cockpit_progressive_disclosure_drawer_contract(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    for marker in [
+        'data-i18n-aria-label="cockpit.aria"',
+        'data-i18n="cockpit.title"',
+        'data-i18n="cockpit.empty"',
+        'id="inbox-detail-backdrop"',
+        'id="inbox-detail-drawer"',
+        'role="dialog"',
+        'aria-modal="true"',
+        'aria-labelledby="inbox-detail-title"',
+        'data-i18n="cockpit.detail.kicker"',
+        'data-i18n="cockpit.detail.title"',
+        'data-i18n-aria-label="cockpit.detail.close"',
+        'id="inbox-detail-close"',
+        'id="inbox-detail-list"',
+        'role="list"',
+    ]:
+        assert marker in html
+
+    for marker in [
+        "let cockpitData = null",
+        "let inboxDrawerPreviousFocus = null",
+        "function inboxSummary",
+        "function localizedInboxWhy",
+        "function localizedInboxAction",
+        "function localizedInboxTitle",
+        "function openInboxDetail",
+        "function closeInboxDetail",
+        "function initInboxDetailDrawer",
+        'action.setAttribute("aria-haspopup", "dialog")',
+        'action.setAttribute("aria-controls", "inbox-detail-drawer")',
+        'action.addEventListener("click", () => openInboxDetail(key, action))',
+        'event.key === "Escape" && drawer && !drawer.hidden',
+        "inboxDrawerPreviousFocus = opener || document.activeElement",
+    ]:
+        assert marker in js
+
+    for selector in [
+        ".inbox-summary-line",
+        ".inbox-card-action",
+        ".inbox-detail-backdrop",
+        ".inbox-detail-drawer",
+        ".inbox-detail-item",
+    ]:
+        assert selector in css
+
+    assert ".inbox-items" not in css
+    assert "items.slice(0, 3)" not in js
+    assert "inbox-more" not in js
+
+
 def test_ui_console_board_card_exposes_peek_dnd_and_quick_action_anchors(tmp_path):
     html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
     js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
@@ -1584,24 +1761,43 @@ def test_ui_console_theme_key_panels_use_tokens_not_raw_hex(tmp_path):
 # ----- TASK-AR-321: sidebar IA + hash routing -----
 
 ALL_VIEW_IDS = [
-    "board",
-    "work",
-    "meeting",
-    "tasksets",
-    "tsboard",
-    "team",
     "agents",
-    "messages",
+    "automation",
+    "board",
+    "calendar",
+    "channels",
+    "dashboard",
+    "deps",
     "events",
     "evidence",
-    "planner",
-    "roadmap",
+    "growth",
+    "inbox",
+    "knowledge-graph",
+    "labels",
     "map",
+    "meeting",
+    "messages",
+    "notifications",
+    "office",
+    "planner",
+    "portability",
+    "properties",
+    "roadmap",
+    "search",
     "sources",
+    "statemachines",
+    "tasksets",
+    "team",
+    "timeline",
+    "triage",
+    "tsboard",
+    "work",
+    "workload",
     "writes",
 ]
 
-SIDEBAR_GROUPS = ["home", "work", "agents", "comms", "records", "ops"]
+CORE_NAV_LABELS = ["Home", "Work", "Agents", "Decisions", "Records", "Search", "More"]
+MORE_GROUPS = ["work", "agents", "comms", "records", "ops"]
 
 
 def test_ui_console_sidebar_replaces_horizontal_tabs(tmp_path):
@@ -1614,11 +1810,18 @@ def test_ui_console_sidebar_replaces_horizontal_tabs(tmp_path):
     assert 'class="tab "' not in html
     assert 'class="tab is-active"' not in html
 
-    # Grouped nav sections from plan section 2.2.
-    for group in SIDEBAR_GROUPS:
+    core = re.search(r'<div class="sidebar-core"[^>]*>(.*?)</div>\s*<details', html, re.S)
+    assert core, "core navigation wrapper missing"
+    core_labels = re.findall(r'<span class="sidebar-label">([^<]+)</span>', core.group(1))
+    assert core_labels == CORE_NAV_LABELS[:-1]
+    assert 'class="sidebar-more-summary"' in html
+    assert ">More<" in html
+    assert len(core_labels) + 1 == 7
+    # Detailed routes are retained but moved behind collapsed More.
+    assert '<details class="sidebar-more" data-group="more">' in html
+    assert '<details class="sidebar-more" data-group="more" open>' not in html
+    for group in MORE_GROUPS:
         assert f'data-group="{group}"' in html
-    for label in ["WORK", "AGENTS", "COMMS", "RECORDS", "OPS"]:
-        assert f">{label}<" in html
 
 
 def test_ui_console_sidebar_keeps_all_nine_plus_views_reachable(tmp_path):
@@ -1635,13 +1838,15 @@ def test_ui_console_sidebar_links_carry_hash_routes(tmp_path):
 
     for route in [
         "home/board",
-        "work/tasksets",
-        "work/board",
+        "work/explorer",
         "agents/team",
-        "agents/map",
-        "comms/channels",
         "comms/meetings",
         "records/events",
+        "search",
+        "work/tasksets",
+        "work/board",
+        "agents/map",
+        "comms/channels",
         "ops/writes",
     ]:
         assert f'data-route="{route}"' in html
@@ -1657,6 +1862,8 @@ def test_ui_console_hash_routing_wiring_present(tmp_path):
     assert "function activateView" in js
     assert "function viewForRoute" in js
     assert "function routeForView" in js
+    assert "focusSearchView" in js
+    assert "activeLink.closest(\".sidebar-more\")" in js
     # Pinned active-taskset progress is always rendered.
     assert "renderSidebarActiveTaskset" in js
 
@@ -3322,7 +3529,18 @@ def test_ui_console_i18n_route_has_kr_en_for_key_strings_default_kr(tmp_path):
     assert "ko" in table["languages"] and "en" in table["languages"]
     strings = table["strings"]
     # Key shell strings carry both KR and EN.
-    for key in ("nav.group.work", "view.board.title", "button.refresh", "workspace.title"):
+    for key in (
+        "nav.group.work",
+        "view.board.title",
+        "button.refresh",
+        "workspace.title",
+        "cockpit.title",
+        "cockpit.open_details",
+        "inbox.group.approval_pending",
+        "inbox.action.approve_gate",
+        "inbox.why.approval_required",
+        "work_state.title",
+    ):
         assert key in strings, f"missing i18n key {key}"
         assert strings[key]["ko"], f"missing KR for {key}"
         assert strings[key]["en"], f"missing EN for {key}"
@@ -3339,16 +3557,67 @@ def test_ui_console_i18n_t_helper_and_language_toggle_present(tmp_path):
     # data-i18n anchors mark high-traffic strings for translation.
     assert 'data-i18n="nav.group.work"' in html
     assert 'data-i18n="button.refresh"' in html
+    assert 'data-i18n="cockpit.title"' in html
+    assert 'data-i18n-aria-label="cockpit.aria"' in html
+    assert 'data-i18n-title="common.language"' in html
     # t() lookup helper + default-KR mechanism + escape-safe application.
     assert "function t(key)" in js
     assert 'const DEFAULT_LANGUAGE = "ko";' in js
     assert "function applyTranslations" in js
+    assert "renderCockpit(cockpitData)" in js
+    assert "renderWorkState(workStateData)" in js
     # Translations are applied via textContent (never innerHTML) -> escape-safe.
     start = js.index("function applyTranslations")
     end = js.index("function setLanguage", start)
     block = js[start:end]
     assert "textContent" in block
+    assert "setAttribute" in block
     assert "innerHTML" not in block
+
+
+def test_ui_console_i18n_localizes_cockpit_inbox_contract(tmp_path):
+    payload = json.loads(ui_console.build_response("/api/i18n", tmp_path).body.decode("utf-8"))
+    strings = payload["items"]["strings"]
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+
+    for key in [
+        "inbox.group.approval_pending",
+        "inbox.group.blocked",
+        "inbox.group.runtime_anomalies",
+        "inbox.group.gate_failures",
+        "inbox.group.cost_anomalies",
+        "inbox.group.stale",
+        "inbox.action.approve_gate",
+        "inbox.action.resolve_blocker",
+        "inbox.action.fix_gate",
+        "inbox.action.review_cost",
+        "inbox.action.review_refresh",
+        "inbox.action.resolve_claim",
+        "inbox.why.status",
+        "inbox.why.gate_failures",
+        "inbox.why.cross_host_claim_conflict",
+    ]:
+        assert key in strings, key
+        assert strings[key]["ko"] and strings[key]["en"]
+
+    for marker in [
+        'data-i18n="cockpit.title"',
+        'data-i18n="cockpit.empty"',
+        'data-i18n="cockpit.detail.kicker"',
+        'data-i18n="cockpit.detail.title"',
+        'data-i18n-aria-label="cockpit.detail.close"',
+    ]:
+        assert marker in html
+
+    cockpit_start = js.index("// --- Decision-first cockpit")
+    cockpit_end = js.index("function workStatePayload", cockpit_start)
+    cockpit_block = js[cockpit_start:cockpit_end]
+    assert 'labelKey: "inbox.group.approval_pending"' in cockpit_block
+    assert "function localizedInboxWhy" in cockpit_block
+    assert "function localizedInboxAction" in cockpit_block
+    assert 't("cockpit.open_details")' in cockpit_block
+    assert "approval_required" in cockpit_block
 
 
 def test_ui_console_i18n_kr_strings_not_inlined_in_ar341_app_js(tmp_path):

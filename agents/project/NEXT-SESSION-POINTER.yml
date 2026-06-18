@@ -1,20 +1,20 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-15T01:35:00+09:00
+updated_at: 2026-06-18T17:48:46+09:00
 current_state:
-  summary: "Agent-org & delegation sub-project COMPLETE: TASKSET-AR-AGENT-ORG-DELEGATION 6/6 units (TASK-AR-557..562) implemented, W4b APPROVE (2 records), completed; full suite green (1279 pass). Units: role/team/tier registry + owner gate, lead decomposition, seam+risk dispatch gate, orchestrator + swappable WorkerBackend, persona-diversity deliberation layer, org/state read-API. UI/UX redesign + product-structure change DEFERRED to next session (reviews/HANDOFF-2026-06-15-ui-redesign-and-product-structure.md)."
-  status: ready
-  task_set_status: complete
-  task_set_id: "TASKSET-AR-AGENT-ORG-DELEGATION"
-  step_index: 6
-  step_total: 6
+  summary: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE is complete; the persistent self-improvement goal is improving but still active."
+  status: watch
+  task_set_status: completed
+  task_set_id: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
+  step_index: 4
+  step_total: 4
   progress_pct: 100
-  status_text: "TASKSET-AR-AGENT-ORG-DELEGATION 6/6 done. Next: resume UI redesign sub-projects #1 decision-first IA + #3 visual identity / 2.5D characters / insight-graph (reviews/HANDOFF-2026-06-15-ui-redesign-and-product-structure.md). Branch claude/agent-org-delegation-design (unpushed; Owner-gated)."
+  status_text: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE closed at improving 70/100; full maturity remains open."
 active_work:
   current_agents: []
   current_teams: []
 resume:
   active_task: none
-  active_task_set: TASKSET-AR-AGENT-ORG-DELEGATION
+  active_task_set: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -22,10 +22,121 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260613-224455-task-ar-335-516a.json
-    - agents/runtime/task_claims/CLAIM-20260613-224455-task-ar-336-4220.json
-    - agents/runtime/task_claims/CLAIM-20260613-224456-task-ar-337-a262.json
+  active_claims: []
+  llm_wiki_preservation:
+    taskset: TASKSET-AR-LLM-WIKI
+    active_claim: null
+    preserved_claim: agents/runtime/task_claims/CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve.json
+    preserved_branch: claude/llm-wiki
+    preserved_branch_head: 5846e40
+    worktree_path: null
+    status: deferred_branch_preserved
+    next_decision: integrate_defer_or_archive
+  self_improvement_remediation:
+    taskset: TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE
+    active_claim: null
+    release_ready_claim: null
+    released_claims:
+      - agents/runtime/task_claims/CLAIM-20260617-172500-task-ar-573-remediation-scribe.json
+      - agents/runtime/task_claims/CLAIM-20260617-174307-task-ar-574-role-evidence.json
+      - agents/runtime/task_claims/CLAIM-20260617-180000-task-ar-575-5b30.json
+      - agents/runtime/task_claims/CLAIM-20260617-182836-task-ar-576-remediation-delta.json
+    w4b_evidence:
+      - reviews/W4B-2026-06-17-TASK-AR-573.md
+      - reviews/W4B-2026-06-17-TASK-AR-574.md
+      - reviews/W4B-2026-06-17-TASK-AR-575.md
+      - reviews/W4B-2026-06-17-TASK-AR-576.md
+    completed_tasks:
+      - TASK-AR-573
+      - TASK-AR-574
+      - TASK-AR-575
+      - TASK-AR-576
+    completed_evidence:
+      - reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md
+      - reviews/W4B-2026-06-17-TASK-AR-573.md
+      - reviews/VERIFY-2026-06-17-task-ar-573-20260617173707.json
+      - reviews/REVIEW-2026-06-17-task-ar-574-monitored-role-evidence.md
+      - reviews/W4B-2026-06-17-TASK-AR-574.md
+      - reviews/VERIFY-2026-06-17-task-ar-574-20260617175559.json
+      - reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md
+      - reviews/W4B-2026-06-17-TASK-AR-575.md
+      - reviews/VERIFY-2026-06-17-task-ar-575-20260617182232.json
+      - reviews/REPORT-2026-06-17-self-improvement-remediation-delta.md
+      - reviews/VERIFY-2026-06-17-unit-task-ar-576-001-20260617183459.json
+      - reviews/W4B-2026-06-17-TASK-AR-576.md
+      - reviews/VERIFY-2026-06-17-task-ar-576-20260617184640.json
+    registration_review: reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration.md
+    plan: docs/superpowers/plans/2026-06-17-self-improvement-remediation-cycle.md
+    registration_input: agents/project/work-items/REGISTRATION-2026-06-17-self-improvement-remediation-cycle.json
+    next_task: null
+    tasks:
+      - TASK-AR-573
+      - TASK-AR-574
+      - TASK-AR-575
+      - TASK-AR-576
+    baseline_metrics:
+      score: 32
+      maturity: immature
+      role_gaps: 6
+      asset_gaps: 17
+      waiver_debt: 1
+      scribe: unknown
+    current_metrics:
+      score: 70
+      maturity: improving
+      role_gaps: 3
+      asset_gaps: 1
+      low_reuse_assets: 1
+      waiver_debt: 0
+      scribe: unknown
+      doc_steward: ok
+    target_next:
+      score: ">=65"
+      role_gaps: "<=3"
+      waiver_debt: 0
+      low_reuse_assets: "<=8"
+    goal_state:
+      operating_state: improving_but_active
+      complete: false
+      blocking_gates:
+        - monitored_role_gaps
+        - scribe_state
+      remaining_watches:
+        - council
+        - progress-scout
+        - skeptic
+        - capability.session_dashboard
+    next_cycle_focus:
+      - "Resolve scribe_state scoring so real scribe evidence can become known/ok."
+      - "Route council, progress-scout, and skeptic through real claim evidence or an Owner-approved monitoring decision."
+      - "Give capability.session_dashboard a successful usage/performance pass or an explicit lifecycle decision."
+  self_improvement_cadence:
+    taskset: TASKSET-AR-SELF-IMPROVEMENT-CADENCE
+    maturity_report: reviews/REPORT-2026-06-17-self-improvement-maturity.md
+    cycle_review: reviews/REVIEW-2026-06-17-self-improvement-cycle.md
+    cycle_retro: reviews/RETRO-2026-06-17-self-improvement-cycle.md
+    current_metrics:
+      score: 32
+      maturity: immature
+      role_gaps: 6
+      asset_gaps: 17
+      scribe: unknown
+      doc_steward: ok
+      cycle_artifacts: "6/6"
+    next_cycle:
+      - "Create real scribe claim/log evidence before removing the scribe waiver."
+      - "Route council/progress-scout/release-steward/reviewer/skeptic into review or council evidence."
+      - "Exercise, modify, or deprecate low-reuse runtime assets, then rerun self_improvement_cycle.py report."
+  decision_first_console_completed_tasks:
+    - agents/lead_engineer/tasks/TASK-AR-563.md
+    - agents/lead_engineer/tasks/TASK-AR-564.md
+    - agents/lead_engineer/tasks/TASK-AR-565.md
+    - agents/lead_engineer/tasks/TASK-AR-566.md
+    - agents/lead_engineer/tasks/TASK-AR-567.md
+    - agents/lead_engineer/tasks/TASK-AR-568.md
+    - agents/lead_engineer/tasks/TASK-AR-569.md
+  decision_first_console_completed_claims:
+    - agents/runtime/task_claims/CLAIM-20260616-232833-task-ar-569-8b7b.json
   release_steward_completed_tasks:
     - agents/lead_engineer/tasks/TASK-AR-219.md
     - agents/lead_engineer/tasks/TASK-AR-222.md

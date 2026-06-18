@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-15T13:47:57+09:00
-record_count: 281
+generated_at: 2026-06-18T18:43:08+09:00
+record_count: 336
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `281` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `336` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `9` records |
-| Tasksets | pass | `33` records |
-| Tasks | pass | `226` records |
-| Units | pass | `13` records |
+| Initiatives | pass | `19` records |
+| Tasksets | pass | `43` records |
+| Tasks | pass | `248` records |
+| Units | pass | `26` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -273,6 +273,14 @@ record_count: 281
 | 0.29.4 | Task 0.29.4 | task | `TASK-AR-560` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | `agents/lead_engineer/tasks/TASK-AR-560.md` | Lead orchestrator: create claim+worktree+instance, spawn Worker/Reviewer sub-agents (… |
 | 0.29.5 | Task 0.29.5 | task | `TASK-AR-561` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | `agents/lead_engineer/tasks/TASK-AR-561.md` | Extend blind-Delphi seminar/council with substance-axis persona archetypes (risk tole… |
 | 0.29.6 | Task 0.29.6 | task | `TASK-AR-562` | `TASKSET-AR-AGENT-ORG-DELEGATION` | completed | `agents/lead_engineer/tasks/TASK-AR-562.md` | Read-API over real records: org tree (teams->roles->live instances), work-state count… |
+| 0.30 | Taskset 0.30 | taskset | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | `INIT-UNASSIGNED` | complete | `BACKLOG-BOARD.md` | Decision Cockpit |
+| 0.30.1 | Task 0.30.1 | task | `TASK-AR-563` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | `agents/lead_engineer/tasks/TASK-AR-563.md` | scripts/attention_inbox.py: 6-group 'what needs me now' aggregation from existing wor… |
+| 0.30.2 | Task 0.30.2 | task | `TASK-AR-564` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | `agents/lead_engineer/tasks/TASK-AR-564.md` | Serve the attention inbox at /api/inbox and replace the 80-screen home with the cockp… |
+| 0.30.3 | Task 0.30.3 | task | `TASK-AR-565` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | `agents/lead_engineer/tasks/TASK-AR-565.md` | Group the 67 nav routes under core 7 (Home/Work/Agents/Decisions/Records/Search/More)… |
+| 0.30.4 | Task 0.30.4 | task | `TASK-AR-566` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | `agents/lead_engineer/tasks/TASK-AR-566.md` | Counts/summaries on screen; detail opens in a keyboard-accessible side drawer on clic… |
+| 0.30.5 | Task 0.30.5 | task | `TASK-AR-567` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | `agents/lead_engineer/tasks/TASK-AR-567.md` | Initiative->Taskset->Unit waiting/active/done board + drill-down (reuse org_read_api.… |
+| 0.30.6 | Task 0.30.6 | task | `TASK-AR-568` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | `agents/lead_engineer/tasks/TASK-AR-568.md` | UI language toggle over the existing i18n layer (EN data/schema stays); localize inbo… |
+| 0.30.7 | Task 0.30.7 | task | `TASK-AR-569` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | `agents/lead_engineer/tasks/TASK-AR-569.md` | E2E asserting home <= 2 screens / DOM <= ~1500 + maturity behaviors (responsive/a11y/… |
 | 1 | Initiative 1 | initiative | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | - | planned | `agents/project/initiatives/INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE.md` | Work Hierarchy Conflict Closure Initiative |
 | 1.1 | Taskset 1.1 | taskset | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | `INIT-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | complete | `BACKLOG-BOARD.md` | Work Taxonomist |
 | 1.1.1 | Task 1.1.1 | task | `TASK-AR-369` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | `agents/lead_engineer/tasks/TASK-AR-369.md` | Finish the terminology migration from ambiguous `project -> taskset -> task -> unit`… |
@@ -320,6 +328,53 @@ record_count: 281
 | 6 | Initiative 6 | initiative | `INIT-AR-UNIFIED-DECISION-CONSOLE` | - | planned | `agents/project/initiatives/INIT-AR-UNIFIED-DECISION-CONSOLE.md` | Unified Decision Console Initiative |
 | 7 | Initiative 7 | initiative | `INIT-AR-WORK-STORE-RESTRUCTURE` | - | planned | `agents/project/initiatives/INIT-AR-WORK-STORE-RESTRUCTURE.md` | Work Store Restructure Initiative |
 | 8 | Initiative 8 | initiative | `INIT-AR-AGENT-ORG-DELEGATION` | - | active | `agents/project/initiatives/INIT-AR-AGENT-ORG-DELEGATION.md` | INIT-AR-AGENT-ORG-DELEGATION — Agent Org & Delegation Model |
+| 9 | Initiative 9 | initiative | `INIT-AR-DECISION-FIRST-CONSOLE-IA` | - | active | `agents/project/initiatives/INIT-AR-DECISION-FIRST-CONSOLE-IA.md` | INIT-AR-DECISION-FIRST-CONSOLE-IA — Decision-First Console IA |
+| 10 | Initiative 10 | initiative | `INIT-AR-SELF-IMPROVEMENT-CADENCE` | - | active | `agents/project/initiatives/INIT-AR-SELF-IMPROVEMENT-CADENCE.md` | Self Improvement Cadence |
+| 10.1 | Taskset 10.1 | taskset | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | `INIT-AR-SELF-IMPROVEMENT-CADENCE` | complete | `BACKLOG-BOARD.md` | Self Improvement Cadence |
+| 10.1.1 | Task 10.1.1 | task | `TASK-AR-570` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | `agents/lead_engineer/tasks/TASK-AR-570.md` | Create a deterministic baseline that identifies low-frequency agent roles, low-reuse… |
+| 10.1.1.1 | Unit 10.1.1.1 | unit | `UNIT-TASK-AR-570-001` | `TASK-AR-570` | completed | `agents/lead_engineer/tasks/units/TASK-AR-570/UNIT-TASK-AR-570-001.md` | UNIT-TASK-AR-570-001 - Build self-improvement metrics baseline |
+| 10.1.2 | Task 10.1.2 | task | `TASK-AR-571` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | `agents/lead_engineer/tasks/TASK-AR-571.md` | Use review, meeting, seminar, retro, compound, scribe, and doc-steward surfaces to re… |
+| 10.1.2.1 | Unit 10.1.2.1 | unit | `UNIT-TASK-AR-571-001` | `TASK-AR-571` | completed | `agents/lead_engineer/tasks/units/TASK-AR-571/UNIT-TASK-AR-571-001.md` | UNIT-TASK-AR-571-001 - Record the first self-improvement cycle |
+| 10.1.3 | Task 10.1.3 | task | `TASK-AR-572` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | `agents/lead_engineer/tasks/TASK-AR-572.md` | Define measurable maturity criteria for low-frequency agent/skill self-improvement an… |
+| 10.1.3.1 | Unit 10.1.3.1 | unit | `UNIT-TASK-AR-572-001` | `TASK-AR-572` | completed | `agents/lead_engineer/tasks/units/TASK-AR-572/UNIT-TASK-AR-572-001.md` | UNIT-TASK-AR-572-001 - Wire maturity reporting into governance surfaces |
+| 11 | Initiative 11 | initiative | `INIT-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | - | active | `agents/project/initiatives/INIT-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE.md` | Self Improvement Remediation Cycle |
+| 11.1 | Taskset 11.1 | taskset | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | `INIT-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | complete | `BACKLOG-BOARD.md` | Self Improvement Remediation |
+| 11.1.1 | Task 11.1.1 | task | `TASK-AR-573` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | completed | `agents/lead_engineer/tasks/TASK-AR-573.md` | Create verifiable scribe claim/log evidence and only remove the scribe waiver if coll… |
+| 11.1.1.1 | Unit 11.1.1.1 | unit | `UNIT-TASK-AR-573-001` | `TASK-AR-573` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-573/UNIT-TASK-AR-573-001.md` | UNIT-TASK-AR-573-001 - Prove scribe usage before waiver burn-down |
+| 11.1.2 | Task 11.1.2 | task | `TASK-AR-574` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | completed | `agents/lead_engineer/tasks/TASK-AR-574.md` | Route council, progress-scout, release-steward, reviewer, and skeptic into real revie… |
+| 11.1.2.1 | Unit 11.1.2.1 | unit | `UNIT-TASK-AR-574-001` | `TASK-AR-574` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-574/UNIT-TASK-AR-574-001.md` | UNIT-TASK-AR-574-001 - Create monitored-role evidence packet |
+| 11.1.3 | Task 11.1.3 | task | `TASK-AR-575` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | completed | `agents/lead_engineer/tasks/TASK-AR-575.md` | Reduce low-reuse runtime asset debt by exercising valuable assets in real workflows o… |
+| 11.1.3.1 | Unit 11.1.3.1 | unit | `UNIT-TASK-AR-575-001` | `TASK-AR-575` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-575/UNIT-TASK-AR-575-001.md` | UNIT-TASK-AR-575-001 - Burn down runtime asset low-reuse debt |
+| 11.1.4 | Task 11.1.4 | task | `TASK-AR-576` | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | completed | `agents/lead_engineer/tasks/TASK-AR-576.md` | Re-run the self-improvement report after role and asset remediation and state whether… |
+| 11.1.4.1 | Unit 11.1.4.1 | unit | `UNIT-TASK-AR-576-001` | `TASK-AR-576` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-576/UNIT-TASK-AR-576-001.md` | UNIT-TASK-AR-576-001 - Measure remediation delta and update handoff surfaces |
+| 12 | Initiative 12 | initiative | `INIT-AR-BUSINESS-OPERATIONS-TEAMS` | - | active | `agents/project/initiatives/INIT-AR-BUSINESS-OPERATIONS-TEAMS.md` | Business Operations Teams |
+| 12.1 | Taskset 12.1 | taskset | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | `INIT-AR-BUSINESS-OPERATIONS-TEAMS` | complete | `BACKLOG-BOARD.md` | Business Operations Teams |
+| 12.1.1 | Task 12.1.1 | task | `TASK-AR-577` | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | completed | `agents/lead_engineer/tasks/TASK-AR-577.md` | Define finance/accounting, marketing/growth, and sales/revenue teams across live proj… |
+| 12.1.1.1 | Unit 12.1.1.1 | unit | `UNIT-TASK-AR-577-001` | `TASK-AR-577` | completed | `agents/lead_engineer/tasks/units/TASK-AR-577/UNIT-TASK-AR-577-001.md` | UNIT-TASK-AR-577-001 - Publish business operations org model |
+| 13 | Initiative 13 | initiative | `INIT-AR-DESIGN-SYSTEM-GOVERNANCE` | - | active | `agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-GOVERNANCE.md` | Design System Governance |
+| 13.1 | Taskset 13.1 | taskset | `TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE` | `INIT-AR-DESIGN-SYSTEM-GOVERNANCE` | complete | `BACKLOG-BOARD.md` | Design System Governance |
+| 13.1.1 | Task 13.1.1 | task | `TASK-AR-578` | `TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE` | completed | `agents/lead_engineer/tasks/TASK-AR-578.md` | Create durable design-system governance for Agent Runtime UI work: a diagnostic repor… |
+| 13.1.1.1 | Unit 13.1.1.1 | unit | `UNIT-TASK-AR-578-001` | `TASK-AR-578` | completed | `agents/lead_engineer/tasks/units/TASK-AR-578/UNIT-TASK-AR-578-001.md` | UNIT-TASK-AR-578-001 - Publish design-system governance and gate |
+| 14 | Initiative 14 | initiative | `INIT-AR-DESIGN-SYSTEM-ASSETIZATION` | - | active | `agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-ASSETIZATION.md` | Design System Assetization |
+| 14.1 | Taskset 14.1 | taskset | `TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION` | `INIT-AR-DESIGN-SYSTEM-ASSETIZATION` | complete | `BACKLOG-BOARD.md` | Design System Assetization |
+| 14.1.1 | Task 14.1.1 | task | `TASK-AR-579` | `TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION` | completed | `agents/lead_engineer/tasks/TASK-AR-579.md` | Create the first executable UI asset layer for Agent Runtime: design token scale, reu… |
+| 14.1.1.1 | Unit 14.1.1.1 | unit | `UNIT-TASK-AR-579-001` | `TASK-AR-579` | completed | `agents/lead_engineer/tasks/units/TASK-AR-579/UNIT-TASK-AR-579-001.md` | UNIT-TASK-AR-579-001 - Extract token, primitive, and pattern asset bundle |
+| 15 | Initiative 15 | initiative | `INIT-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS` | - | active | `agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS.md` | Design System Component Patterns |
+| 15.1 | Taskset 15.1 | taskset | `TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS` | `INIT-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS` | complete | `BACKLOG-BOARD.md` | Design System Component Patterns |
+| 15.1.1 | Task 15.1.1 | task | `TASK-AR-580` | `TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS` | completed | `agents/lead_engineer/tasks/TASK-AR-580.md` | Extend the executable UI asset layer so the console has named component APIs and doma… |
+| 15.1.1.1 | Unit 15.1.1.1 | unit | `UNIT-TASK-AR-580-001` | `TASK-AR-580` | completed | `agents/lead_engineer/tasks/units/TASK-AR-580/UNIT-TASK-AR-580-001.md` | UNIT-TASK-AR-580-001 - Promote component and domain pattern helpers |
+| 16 | Initiative 16 | initiative | `INIT-AR-DESIGN-SYSTEM-TOKEN-DEBT` | - | active | `agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-TOKEN-DEBT.md` | Design System Token Debt Closure |
+| 16.1 | Taskset 16.1 | taskset | `TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT` | `INIT-AR-DESIGN-SYSTEM-TOKEN-DEBT` | complete | `BACKLOG-BOARD.md` | Design System Token Debt |
+| 16.1.1 | Task 16.1.1 | task | `TASK-AR-581` | `TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT` | completed | `agents/lead_engineer/tasks/TASK-AR-581.md` | Resolve the diagnostic report's token maturity gap for typography, spacing, radius, a… |
+| 16.1.1.1 | Unit 16.1.1.1 | unit | `UNIT-TASK-AR-581-001` | `TASK-AR-581` | completed | `agents/lead_engineer/tasks/units/TASK-AR-581/UNIT-TASK-AR-581-001.md` | UNIT-TASK-AR-581-001 - Tokenize console CSS literal debt |
+| 17 | Initiative 17 | initiative | `INIT-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | - | active | `agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT.md` | Design System Served Asset Split |
+| 17.1 | Taskset 17.1 | taskset | `TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | `INIT-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | complete | `BACKLOG-BOARD.md` | Design System Served Asset Split |
+| 17.1.1 | Task 17.1.1 | task | `TASK-AR-582` | `TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | completed | `agents/lead_engineer/tasks/TASK-AR-582.md` | Resolve the diagnostic report's single-file HTML/CSS/JS string concentration by movin… |
+| 17.1.1.1 | Unit 17.1.1.1 | unit | `UNIT-TASK-AR-582-001` | `TASK-AR-582` | completed | `agents/lead_engineer/tasks/units/TASK-AR-582/UNIT-TASK-AR-582-001.md` | UNIT-TASK-AR-582-001 - Move served HTML CSS JS assets out of ui_console |
+| 18 | Initiative 18 | initiative | `INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | - | active | `agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION.md` | Design System Debt Consolidation |
+| 18.1 | Taskset 18.1 | taskset | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | `INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | active | `BACKLOG-BOARD.md` | Design System Debt Consolidation |
+| 18.1.1 | Task 18.1.1 | task | `TASK-AR-583` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | planned | `agents/lead_engineer/tasks/TASK-AR-583.md` | Replace the transitional --space-px-* / --radius-px-* aliases in the console asset CS… |
+| 18.1.2 | Task 18.1.2 | task | `TASK-AR-584` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | planned | `agents/lead_engineer/tasks/TASK-AR-584.md` | Move view-specific JS renderers (data-heavy SVG layouts, calendar grids, office-map p… |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

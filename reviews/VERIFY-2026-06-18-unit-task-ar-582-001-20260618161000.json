@@ -1,0 +1,95 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-18-unit-task-ar-582-001-20260618161000",
+  "work_id": "UNIT-TASK-AR-582-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-582/UNIT-TASK-AR-582-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-582",
+  "unit_id": "UNIT-TASK-AR-582-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-18T16:10:00+09:00",
+  "verified_by": "codex-design-system-served-asset-split-582",
+  "command_count": 7,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_ui_design_assets.py tests/test_design_system_gate.py tests/test_ui_console.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "169 passed in 22.11s",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --all-ui --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=3 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --path src/agent_runtime/ui_console.py --path src/agent_runtime/ui_console_assets.py --path src/agent_runtime/ui_design_assets.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=3 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python -m py_compile src/agent_runtime/ui_console.py src/agent_runtime/ui_console_assets.py src/agent_runtime/ui_design_assets.py scripts/design_system_gate.py",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "taskset-work-gate: pass; findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/work_item_classifier.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "work-item-classifier: pass; findings=0",
+      "stderr": ""
+    }
+  ],
+  "line_count_change": {
+    "src/agent_runtime/ui_console.py": {
+      "before": 13269,
+      "after": 470
+    },
+    "src/agent_runtime/ui_console_assets.py": {
+      "after": 12811
+    }
+  },
+  "assetization_classification": [
+    {
+      "surface": "Served HTML/CSS/JS asset strings",
+      "class": "pattern_component",
+      "asset": "src/agent_runtime/ui_console_assets.py"
+    },
+    {
+      "surface": "HTTP routing and API response orchestration",
+      "class": "page assembly",
+      "asset": "src/agent_runtime/ui_console.py"
+    },
+    {
+      "surface": "Remaining JS view renderers inside the served asset",
+      "class": "one_off_for_now",
+      "asset": "src/agent_runtime/ui_console_assets.py residual renderer extraction debt"
+    }
+  ],
+  "known_external_watch": [
+    "This unit moves the served asset strings; it does not split every JavaScript renderer into separate pattern modules.",
+    "Repository-level parallel-worktree cleanup remains affected by pre-existing .worktrees/llm-wiki residue outside this task."
+  ]
+}

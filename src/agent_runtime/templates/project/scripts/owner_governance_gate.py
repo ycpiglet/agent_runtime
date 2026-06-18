@@ -56,9 +56,14 @@ def main() -> int:
         # agents/project/overlays/**, and agents/project/evals/* evidence that generated projects
         # do not ship). Mirrored in tests/test_owner_governance_chain_parity.py exceptions.
         # intentionally omitted: scripts/org_model_gate.py -- root-repo-specific (org-delegation
-        # Unit 1): resolves work-item owner/team against the root agents/project/ORG-MODEL.yml;
-        # generated projects ship their own role model (agents/roles.yml), so this watch-level
-        # gate is intentionally root-only. Mirrored in tests/test_owner_governance_chain_parity.py.
+        # Unit 1): resolves work-item owner/team against the live checkout's
+        # agents/project/ORG-MODEL.yml. Generated projects may seed their own
+        # ORG-MODEL overlay, but this root watch-level gate remains root-only.
+        # Mirrored in tests/test_owner_governance_chain_parity.py.
+        # intentionally omitted: scripts/design_system_gate.py -- root-repo-specific
+        # design-system maturity gate for the Agent Runtime monolith. Generated
+        # projects may adopt their own design-system gate after choosing a UI stack.
+        # Mirrored in tests/test_owner_governance_chain_parity.py.
         ["scripts/parallel_worktree_gate.py", "--check"],
         ["scripts/worktree_lifecycle_gate.py", "--check"],
         ["scripts/collaboration_concurrency_gate.py", "--check"],

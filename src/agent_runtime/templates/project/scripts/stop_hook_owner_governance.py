@@ -1,7 +1,7 @@
 """Stop hook wrapper for the Owner governance gate.
 
-The governance gate prints human-readable logs. Stop hooks require structured
-JSON on stdout, so this wrapper captures gate output and emits a Stop decision.
+The governance gate prints human-readable logs. Stop hooks only emit structured
+JSON when they need to block; successful stops stay silent.
 """
 
 from __future__ import annotations
@@ -14,6 +14,8 @@ from datetime import datetime
 from datetime import timezone
 from pathlib import Path
 from typing import Any
+
+import stop_hook_session_scope
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -108,14 +110,22 @@ def build_payload(result: subprocess.CompletedProcess[str], *, diagnostic_path: 
     }
 
 
+def emit_stop_payload(payload: dict[str, str]) -> None:
+    if payload.get("decision") == "block":
+        print(json.dumps(payload, ensure_ascii=False))
+
+
 def main() -> int:
+    scope = stop_hook_session_scope.assess(stop_hook_session_scope.read_hook_input(), root=ROOT)
+    if scope.get("bypass"):
+        return 0
     result = _run_gate()
     payload = build_payload(result)
     diagnostic_path = write_diagnostic(result, payload)
     if diagnostic_path is not None:
         payload = build_payload(result, diagnostic_path=diagnostic_path)
         write_diagnostic(result, payload, log_dir=diagnostic_path.parent)
-    print(json.dumps(payload, ensure_ascii=False))
+    emit_stop_payload(payload)
     return 0
 
 

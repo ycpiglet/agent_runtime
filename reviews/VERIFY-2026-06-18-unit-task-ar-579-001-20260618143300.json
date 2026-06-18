@@ -1,0 +1,77 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-18-unit-task-ar-579-001-20260618143300",
+  "work_id": "UNIT-TASK-AR-579-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-579/UNIT-TASK-AR-579-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-579",
+  "unit_id": "UNIT-TASK-AR-579-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-18T14:33:00+09:00",
+  "verified_by": "codex-design-system-assetization-579",
+  "command_count": 5,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_ui_design_assets.py tests/test_design_system_gate.py tests/test_ui_console.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "163 passed in 18.78s",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=2 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --path src/agent_runtime/ui_design_assets.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=1 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python -m py_compile src/agent_runtime/ui_console.py src/agent_runtime/ui_design_assets.py scripts/design_system_gate.py",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "taskset-work-gate: pass; findings=0",
+      "stderr": ""
+    }
+  ],
+  "assetization_classification": [
+    {
+      "surface": "type/spacing/radius scale",
+      "class": "design_token",
+      "asset": "src/agent_runtime/ui_design_assets.py::UI_TOKEN_SCALE_CSS"
+    },
+    {
+      "surface": "progress, empty state, state chip, card, metadata grid helpers",
+      "class": "ui_component",
+      "asset": "src/agent_runtime/ui_design_assets.py::UI_COMPONENTS_JS"
+    },
+    {
+      "surface": "audit and surface metadata helpers",
+      "class": "pattern_component",
+      "asset": "src/agent_runtime/ui_design_assets.py::patternAuditMeta/patternSurfaceMeta"
+    },
+    {
+      "surface": "existing view-specific task/agent/map renderers",
+      "class": "one_off_for_now",
+      "asset": "src/agent_runtime/ui_console.py"
+    }
+  ],
+  "known_external_watch": [
+    "This unit starts assetization but does not fully refactor the ui_console.py monolith.",
+    "Main checkout still carries pre-existing unrelated parallel-worktree hygiene residue for .worktrees/llm-wiki."
+  ]
+}

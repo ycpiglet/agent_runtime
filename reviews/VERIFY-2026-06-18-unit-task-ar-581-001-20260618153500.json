@@ -1,0 +1,96 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-18-unit-task-ar-581-001-20260618153500",
+  "work_id": "UNIT-TASK-AR-581-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-581/UNIT-TASK-AR-581-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-581",
+  "unit_id": "UNIT-TASK-AR-581-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-18T15:35:00+09:00",
+  "verified_by": "codex-design-system-token-debt-581",
+  "command_count": 7,
+  "commands": [
+    {
+      "command": "python scripts/design_system_gate.py --all-ui --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=5 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=2 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --path src/agent_runtime/ui_console.py --path src/agent_runtime/ui_design_assets.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=2 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest tests/test_ui_design_assets.py tests/test_design_system_gate.py tests/test_ui_console.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "168 passed in 21.33s",
+      "stderr": ""
+    },
+    {
+      "command": "python -m py_compile src/agent_runtime/ui_console.py src/agent_runtime/ui_design_assets.py scripts/design_system_gate.py",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "taskset-work-gate: pass; findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/work_item_classifier.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "work-item-classifier: pass; findings=0",
+      "stderr": ""
+    }
+  ],
+  "assetization_classification": [
+    {
+      "surface": "Typography CSS literals",
+      "class": "design_token",
+      "asset": "src/agent_runtime/ui_design_assets.py::UI_TOKEN_SCALE_CSS font-size aliases"
+    },
+    {
+      "surface": "Spacing CSS literals",
+      "class": "design_token",
+      "asset": "src/agent_runtime/ui_design_assets.py::UI_TOKEN_SCALE_CSS space-px aliases"
+    },
+    {
+      "surface": "Radius CSS literals",
+      "class": "design_token",
+      "asset": "src/agent_runtime/ui_design_assets.py::UI_TOKEN_SCALE_CSS radius-px aliases"
+    },
+    {
+      "surface": "Remaining CSS raw stroke color",
+      "class": "design_token",
+      "asset": "src/agent_runtime/ui_console.py semantic token reference var(--on-accent)"
+    },
+    {
+      "surface": "JavaScript geometry and physical renderer layout",
+      "class": "one_off_for_now",
+      "asset": "src/agent_runtime/ui_console.py residual physical decomposition debt"
+    }
+  ],
+  "known_external_watch": [
+    "This unit closes CSS raw-literal debt for the design-system gate, not the physical decomposition of ui_console.py.",
+    "Repository-level parallel-worktree cleanup remains affected by pre-existing .worktrees/llm-wiki residue outside this task."
+  ]
+}

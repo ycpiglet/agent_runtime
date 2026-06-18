@@ -1,5 +1,59 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-18 - LLM-Wiki worktree preservation active
+
+- Preservation claim: `CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve` now records `.worktrees/llm-wiki` / `claude/llm-wiki` in the primary checkout before closeout.
+- Boundary: this is continuity preservation only. It does not claim LLM-Wiki implementation, merge, push, delete, or archive anything.
+- Reason: stop hooks reported owner governance failure, dirty intake preservation required, and missing closeout records because the `llm-wiki` worktree was ahead of `origin/main` without an active claim.
+- Next decision: integrate the LLM-Wiki registration branch, defer it with an Owner-visible archive/handoff, or continue it through a formal W2/W3 claim.
+- Evidence: `reviews/REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout.md`; `agents/runtime/task_claims/CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve.json`.
+
+## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE complete
+
+- Completed taskset: `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` is now `4/4` done and archived from the live board.
+- Completed final task: `TASK-AR-576` published the remediation delta report, passed W4a self-verification, passed W4b independent verification, merged, and closed.
+- Completed remediation tasks: `TASK-AR-573` created real scribe claim/log evidence and removed the obsolete `role-usage:scribe` waiver; `TASK-AR-574` routed the `reviewer` monitored role through real claim evidence; `TASK-AR-575` reduced low-reuse asset debt to one explicit watch.
+- Current metrics after remediation: evidence maturity `improving`, score `70/100`, role gaps `3`, asset gaps `1`, low-reuse assets `1`, waiver debt `0`, scribe `unknown`, doc-steward `ok`.
+- Delta from baseline: score `+38`, role gaps `-3`, asset gaps `-16`, low-reuse assets `-16`, waiver debt `-1`.
+- Persistent thread goal: still active. Do not claim full maturity yet; mature gates still fail on `monitored_role_gaps` and `scribe_state`.
+- Evidence: `reviews/REPORT-2026-06-17-self-improvement-remediation-delta.md`; `reviews/VERIFY-2026-06-17-task-ar-576-20260617184640.json`; `reviews/VERIFY-2026-06-17-unit-task-ar-576-001-20260617183459.json`; `reviews/W4B-2026-06-17-TASK-AR-576.md`; `reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md`; `reviews/W4B-2026-06-17-TASK-AR-575.md`; `reviews/VERIFY-2026-06-17-task-ar-575-20260617182232.json`; `reviews/REVIEW-2026-06-17-task-ar-574-monitored-role-evidence.md`; `reviews/W4B-2026-06-17-TASK-AR-574.md`; `reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md`.
+
+## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-CADENCE maturity report
+
+- Current taskset: `TASKSET-AR-SELF-IMPROVEMENT-CADENCE`; `TASK-AR-570` and `TASK-AR-571` are complete, and `TASK-AR-572` reports the maturity state.
+- Current metrics: evidence maturity `immature`, score `32/100`, role gaps `6`, asset gaps `17`, scribe `unknown`, doc-steward `ok`.
+- Cycle evidence: review, meeting, seminar, retro, compound, and casebook artifacts are present (`6/6` required records).
+- Goal state: the self-improvement operating cycle is recorded, but the active thread goal remains open until role/asset evidence improves.
+- Next concrete cycle: create real scribe claim/log evidence, route monitored dormant roles into review/council evidence, exercise or deprecate low-reuse runtime assets, then rerun `python scripts/self_improvement_cycle.py report --json`.
+- Evidence: `reviews/REPORT-2026-06-17-self-improvement-maturity.md`; `reviews/REVIEW-2026-06-17-self-improvement-cycle.md`; `reviews/RETRO-2026-06-17-self-improvement-cycle.md`.
+
+## 2026-06-17 - TASKSET-AR-DECISION-FIRST-CONSOLE-IA complete
+
+- Completed claim: `CLAIM-20260616-232833-task-ar-569-8b7b` (`lead_engineer@work-05`) was W4b-approved, released, merged, indexed, and cleaned.
+- Completed taskset: `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` is now `7/7` done on the backlog board.
+- Worktree/branch: `.worktrees/TASK-AR-569` was removed after merge; local branch cleanup follows ancestor verification.
+- Status: decision-first home now has server E2E DOM budget coverage plus Playwright desktop/mobile browser height coverage for `home <= 2 screens`, while preserving responsive/a11y/SSE/i18n/validation signals.
+- Evidence: `reviews/REVIEW-2026-06-16-task-ar-569-e2e-dom-budget.md`; `reviews/W4B-2026-06-17-TASK-AR-569.md`.
+
+## 2026-06-16 - TASKSET-AR-DECISION-FIRST-CONSOLE-IA / TASK-AR-568 complete
+
+- Completed claim: `CLAIM-20260616-230131-task-ar-568-21a3` (`lead_engineer@work-04`) was W4b-approved, released, merged, indexed, and cleaned.
+- Current taskset: `TASKSET-AR-DECISION-FIRST-CONSOLE-IA`; next task: `TASK-AR-569`.
+- Worktree/branch: `.worktrees/TASK-AR-568` was removed after merge; branch cleanup follows ancestor verification.
+- Status: UI language toggle now localizes cockpit, inbox group/action/why labels, and work-state hero display strings while preserving English API schema/data identifiers.
+- Evidence: `reviews/REVIEW-2026-06-16-task-ar-568-i18n-toggle.md`; `reviews/W4B-2026-06-16-TASK-AR-568.md`.
+- Completed predecessor: `TASK-AR-567` was W4b-approved, released, merged, indexed, and cleaned with `reviews/W4B-2026-06-16-TASK-AR-567.md`.
+
+## 2026-06-16 - TASKSET-AR-DECISION-FIRST-CONSOLE-IA / TASK-AR-567 complete
+
+- Completed claim: `CLAIM-20260616-223144-task-ar-567-5063` (`lead_engineer@work-03`) was W4b-approved, released, merged, indexed, and cleaned.
+- Current taskset: `TASKSET-AR-DECISION-FIRST-CONSOLE-IA`; next task: `TASK-AR-568`.
+- Worktree/branch: `.worktrees/TASK-AR-567` was removed after merge; branch cleanup follows ancestor verification.
+- Status: Work secondary hero now uses `org_read_api.work_state` through `/api/work-state` with waiting/active/review/done counts and drill-down.
+- Evidence: `reviews/REVIEW-2026-06-16-task-ar-567-work-state-board.md`; `reviews/W4B-2026-06-16-TASK-AR-567.md`.
+- Completed predecessor: `TASK-AR-566` was W4b-approved, released, merged, indexed, and cleaned with `reviews/W4B-2026-06-16-TASK-AR-566.md`.
+- Completed predecessor: `TASK-AR-565` was W4b-approved, released, merged, and indexed with `reviews/W4B-2026-06-16-TASK-AR-565.md`.
+
 ## 2026-06-15 - TASKSET-AR-AGENT-ORG-DELEGATION complete (6/6)
 
 - Agent org & delegation sub-project COMPLETE: `TASKSET-AR-AGENT-ORG-DELEGATION` (Org Conductor), 6 units `TASK-AR-557..562` implemented, W4b APPROVE (2 records), completed; full suite green.
