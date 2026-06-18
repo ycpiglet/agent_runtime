@@ -8,7 +8,7 @@ architecture: token-scale CSS plus primitive/pattern JS helpers that
 from __future__ import annotations
 
 UI_TOKEN_SCALE_CSS = """
-/* ===== Design-system token scale (TASK-AR-579) =========================== */
+/* ===== Design-system token scale (TASK-AR-579, TASK-AR-583) ============= */
 :root {
   --font-size-ui-xs: 10px;
   --font-size-ui-sm: 11px;
@@ -31,46 +31,35 @@ UI_TOKEN_SCALE_CSS = """
   --font-size-ui-26: 26px;
   --font-size-ui-28: 28px;
   --font-size-ui-30: 30px;
-  --space-0: 0px;
-  --space-1: 2px;
-  --space-2: 4px;
-  --space-3: 6px;
-  --space-4: 8px;
-  --space-5: 10px;
-  --space-6: 12px;
-  --space-7: 14px;
-  --space-8: 16px;
-  --space-px-1: 1px;
-  --space-px-2: var(--space-1);
-  --space-px-3: 3px;
-  --space-px-4: var(--space-2);
-  --space-px-5: 5px;
-  --space-px-6: var(--space-3);
-  --space-px-7: 7px;
-  --space-px-8: var(--space-4);
-  --space-px-9: 9px;
-  --space-px-10: var(--space-5);
-  --space-px-11: 11px;
-  --space-px-12: var(--space-6);
-  --space-px-14: var(--space-7);
-  --space-px-16: var(--space-8);
-  --space-px-18: 18px;
-  --space-px-20: 20px;
-  --space-px-22: 22px;
-  --space-px-24: 24px;
-  --space-px-28: 28px;
-  --space-px-40: 40px;
-  --space-px-76: 76px;
+  --space-none: 0px;
+  --space-hairline: 1px;
+  --space-2xs: 2px;
+  --space-xs: 3px;
+  --space-sm: 4px;
+  --space-md: 5px;
+  --space-lg: 6px;
+  --space-xl: 7px;
+  --space-2xl: 8px;
+  --space-3xl: 9px;
+  --space-4xl: 10px;
+  --space-5xl: 11px;
+  --space-6xl: 12px;
+  --space-7xl: 14px;
+  --space-8xl: 16px;
+  --space-9xl: 18px;
+  --space-10xl: 20px;
+  --space-11xl: 22px;
+  --space-12xl: 24px;
+  --space-13xl: 28px;
+  --space-viewport-gap: 40px;
+  --space-floating-offset: 76px;
+  --radius-hairline: 2px;
   --radius-xs: 3px;
-  --radius-sm: 6px;
-  --radius-md: var(--radius);
-  --radius-px-2: 2px;
-  --radius-px-3: var(--radius-xs);
-  --radius-px-4: 4px;
-  --radius-px-6: var(--radius-sm);
-  --radius-px-8: var(--radius-md);
-  --radius-px-10: 10px;
-  --radius-px-12: 12px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: var(--radius);
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
   --radius-pill: 999px;
 }
 """

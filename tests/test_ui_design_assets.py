@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 from agent_runtime import ui_console
 from agent_runtime import ui_console_assets
@@ -29,13 +30,24 @@ def test_ui_design_assets_classify_token_component_and_pattern_layers():
 def test_ui_design_token_scale_is_served_in_console_css(tmp_path):
     css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
 
-    assert "Design-system token scale (TASK-AR-579)" in css
+    assert "Design-system token scale (TASK-AR-579, TASK-AR-583)" in css
     assert "--font-size-ui-sm" in css
     assert "--font-size-ui-12" in css
-    assert "--space-6" in css
-    assert "--space-px-12" in css
+    assert "--space-6xl" in css
+    assert "--space-floating-offset" in css
     assert "--radius-sm" in css
-    assert "--radius-px-6" in css
+    assert "--radius-md" in css
+    assert "--space-px-" not in css
+    assert "--radius-px-" not in css
+
+
+def test_console_spacing_and_radius_vars_are_defined(tmp_path):
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    definitions = set(re.findall(r"(--(?:space|radius)-[A-Za-z0-9-]+)\s*:", css))
+    references = set(re.findall(r"var\((--(?:space|radius)-[A-Za-z0-9-]+)", css))
+
+    assert sorted(references - definitions) == []
 
 
 def test_ui_component_bundle_is_served_in_console_js(tmp_path):

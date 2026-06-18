@@ -9,9 +9,16 @@ kind: task
 parent_id: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
 registered_at: 2026-06-18T18:43:04+09:00
 created_at: 2026-06-18T18:43:04+09:00
-updated_at: 2026-06-18T18:43:04+09:00
+started_at: 2026-06-19T00:34:03+09:00
+updated_at: 2026-06-19T00:52:00+09:00
 title: Consolidate transitional px-alias tokens into a semantic scale
-status: planned
+status: completed
+verification_status: passed
+verified_at: 2026-06-19T00:38:23+09:00
+verified_by: uiux-semantic-scale-20260619-583
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-task-ar-583-20260619003823.json
+w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-583.md
 priority: P2
 difficulty: M
 est_hours: 4
@@ -31,6 +38,11 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+resolution: done
+completed_at: 2026-06-19T00:52:00+09:00
+closed_by: codex
+actual_hours: 1.5
+actual_tokens: 8000
 ---
 
 # TASK-AR-583 - Consolidate transitional px-alias tokens into a semantic scale
@@ -53,3 +65,15 @@ tags:
 
 - `python -m pytest tests/test_design_system_gate.py tests/test_ui_design_assets.py tests/test_ui_console.py -q`
 - `python scripts/design_system_gate.py --check --all-ui`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T00:52:00+09:00`
+- Resolution: `done`
+- Actual hours: `1.5`
+- Actual tokens: `8000`
+- Closed by: `codex`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-task-ar-583-20260619003823.json`
+<!-- work-close:end -->

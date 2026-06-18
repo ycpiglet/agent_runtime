@@ -1,51 +1,30 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-18T23:55:00+09:00
+updated_at: 2026-06-19T00:45:00+09:00
 current_state:
-  summary: "TASK-AR-593 Wiki search + ask is W4a self-verified on codex/task-ar-593-wiki-search-ask; W4b independent verification/release is next."
-  status: review
+  summary: "TASK-AR-583 semantic scale is W4b verified and integrated; TASK-AR-584 is next."
+  status: active
   task_set_status: active
-  task_set_id: "TASKSET-AR-LLM-WIKI"
-  step_index: 4
-  step_total: 7
-  progress_pct: 90
-  status_text: "TASK-AR-593 W4a passed; run W4b independent verification for CLAIM-20260618-233054-task-ar-593-6287 before release/merge."
+  task_set_id: "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION"
+  step_index: 6
+  step_total: 6
+  progress_pct: 100
+  status_text: "TASK-AR-583 completed; dispatch TASK-AR-584 when continuing design-system debt consolidation."
 active_work:
-  current_agents:
-    - display_name: lead_engineer@work-01
-      agent_role: lead-engineer
-      team_id: agent-runtime-core
-      agent_instance_id: le-20260618-233054-kst-6287
-      callsite_id: terminal:wt-task-ar-593:tab-01
-      pane_id: terminal:wt-task-ar-593:tab-01
-      task_id: TASK-AR-593
-      task_set_id: TASKSET-AR-LLM-WIKI
-      status: review
-      phase: self-verified
-      progress_pct: 90
-      step_index: 4
-      step_total: 7
-      status_text: W4a self-verification passed; W4b independent verification pending
-      worktree_path: .worktrees/TASK-AR-593
-      branch: codex/task-ar-593-wiki-search-ask
-      claim_id: CLAIM-20260618-233054-task-ar-593-6287
-      claim_path: agents/runtime/task_claims/CLAIM-20260618-233054-task-ar-593-6287.json
-      handoff_path: agents/runtime/task_claims/CLAIM-20260618-233054-task-ar-593-6287.handoff.md
-      last_heartbeat: 2026-06-18T23:45:00+09:00
+  current_agents: []
   current_teams:
-    - team_id: agent-runtime-core
-      status: review
-      phase: self-verified
-      progress_pct: 90
-      step_index: 4
-      step_total: 7
-      status_text: TASK-AR-593 W4a passed; W4b independent verification pending
-      active_task: TASK-AR-593
-      task_set_id: TASKSET-AR-LLM-WIKI
-      pane_ids:
-        - terminal:wt-task-ar-593:tab-01
+    - team_id: ui-ux
+      status: active
+      phase: next-task-ready
+      progress_pct: 0
+      step_index: 1
+      step_total: 6
+      status_text: TASK-AR-584 is next after TASK-AR-583 completion
+      active_task: TASK-AR-584
+      task_set_id: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
+      pane_ids: []
 resume:
-  active_task: "TASK-AR-593"
-  active_task_set: "TASKSET-AR-LLM-WIKI"
+  active_task: "TASK-AR-584"
+  active_task_set: "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -53,23 +32,34 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260618-233054-task-ar-593-6287.json
+  active_claims: []
+  design_system_debt_consolidation:
+    taskset: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
+    released_claim: agents/runtime/task_claims/CLAIM-20260619-003400-task-ar-583-semantic-scale.json
+    worktree_path: .worktrees/TASK-AR-583
+    implementation_branch: codex/task-ar-583-semantic-scale
+    implementation_commit: f5f0014
+    status: task_ar_583_completed_integrated
+    next_decision: dispatch_task_ar_584
+    next_task: TASK-AR-584
+    self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-583-20260619003823.json
+    w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-583.md
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
-    active_claim: agents/runtime/task_claims/CLAIM-20260618-233054-task-ar-593-6287.json
+    active_claim: null
     preserved_claim: agents/runtime/task_claims/CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve.json
     preserved_branch: claude/llm-wiki
     preserved_branch_head: 5846e40
-    worktree_path: .worktrees/TASK-AR-593
+    worktree_path: null
     implementation_branch: codex/task-ar-593-wiki-search-ask
     implementation_commit: b6df4ce
-    status: task_ar_593_w4a_self_verified
+    status: task_ar_593_released_and_merged
     current_line_order: 624
-    next_decision: w4b_independent_verification
-    next_task: TASK-AR-593
+    next_decision: continue_task_ar_594_or_backlog_priority
+    next_task: TASK-AR-594
     next_after_release: TASK-AR-594
     verification_evidence: reviews/VERIFY-2026-06-18-task-ar-593-20260618234500.json
+    w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-593.md
     review: reviews/REVIEW-2026-06-18-wiki-search-ask.md
   self_improvement_remediation:
     taskset: TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE

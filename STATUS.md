@@ -2,13 +2,22 @@
 
 ## 현재 한 줄 요약
 
-- `TASK-AR-593` Wiki search + ask is W4a self-verified on `codex/task-ar-593-wiki-search-ask` at `b6df4ce`; W4b independent verification/release is pending.
+- `TASK-AR-583` semantic spacing/radius scale is W4b verified and integrated; `TASK-AR-584` is next.
+- `TASK-AR-593` Wiki search + ask has passed W4b, was released, merged, and its worktree/branch were cleaned.
 - LLM-Wiki registration is now integrated into the current line; the preserved branch remains an archival source only.
 - Self-improvement remediation is improving but not mature: `scribe_state` is now ok, but the score is still below mature and one monitored role gap remains.
 - Scribe source is now the live status summary section so advisory health can be measured without fabricating role evidence.
 - Doc Steward remains ok; keep document-health checks advisory and evidence-based.
-- Design-system cleanup appears in the current dirty intake as separate uncommitted work and should be preserved, not folded into this role cleanup.
-- Next for LLM-Wiki: run W4b independent verification for `CLAIM-20260618-233054-task-ar-593-6287`, then release/merge and continue with `TASK-AR-594`.
+- Next for Design System Debt Consolidation: dispatch `TASK-AR-584` when continuing the sequence.
+
+## 2026-06-19 - TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION / TASK-AR-583 complete
+
+- Released claim: `CLAIM-20260619-003400-task-ar-583-semantic-scale` is W4b verified with `phase=w4b-verified-released`, `progress_pct=100`.
+- Worktree/branch: `.worktrees/TASK-AR-583` / `codex/task-ar-583-semantic-scale`; worktree removed after merge staging.
+- Output: semantic spacing/radius tokens replace transitional `--space-px-*` and `--radius-px-*` aliases in UI assets and design-system documentation.
+- Evidence: `reviews/VERIFY-2026-06-19-task-ar-583-20260619003823.json`; `reviews/W4B-2026-06-19-TASK-AR-583.md`.
+- Verification: design-system/UI console tests passed (`173 passed`), full design-system gate passed with no findings, alias scan found no runtime matches, and syntax checks passed.
+- Boundary: `TASK-AR-583` is complete, but `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` is not complete; continue with `TASK-AR-584`.
 
 ## 2026-06-18 - TASKSET-AR-LLM-WIKI / TASK-AR-593 W4a ready
 

@@ -1,0 +1,70 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-19-task-ar-583-20260619003823",
+  "work_id": "TASK-AR-583",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-583.md",
+  "kind": "task",
+  "task_id": "TASK-AR-583",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-19T00:38:23+09:00",
+  "verified_by": "uiux-semantic-scale-20260619-583",
+  "claim_id": "CLAIM-20260619-003400-task-ar-583-semantic-scale",
+  "worktree_path": ".worktrees/TASK-AR-583",
+  "command_count": 5,
+  "commands": [
+    {
+      "command": "rg -n -- \"--space-px|--radius-px\" src\\agent_runtime",
+      "status": "passed",
+      "returncode": 1,
+      "stdout_summary": "No matches in source; transitional spacing/radius aliases were removed from runtime source.",
+      "stderr_summary": ""
+    },
+    {
+      "command": "python -m pytest tests\\test_ui_design_assets.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "7 passed in 0.90s",
+      "stderr_summary": ""
+    },
+    {
+      "command": "python -m pytest tests\\test_design_system_gate.py tests\\test_ui_design_assets.py tests\\test_ui_console.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "173 passed in 13.25s",
+      "stderr_summary": ""
+    },
+    {
+      "command": "python scripts\\design_system_gate.py --check --all-ui --json",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "status=pass; checked_artifacts=3; checked_roles=4; scanned=6; findings=0",
+      "stderr_summary": ""
+    },
+    {
+      "command": "python -m py_compile src\\agent_runtime\\ui_design_assets.py src\\agent_runtime\\ui_console_assets.py scripts\\design_system_gate.py",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "No output; compilation succeeded.",
+      "stderr_summary": ""
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion": "ui_console_assets.py / ui_design_assets.py expose a designed semantic spacing and radius scale; transitional --space-px-* / --radius-px-* aliases are removed or re-expressed as semantic-scale references.",
+      "status": "passed",
+      "evidence": "ui_design_assets.py defines semantic spacing/radius tokens; ui_console_assets.py consumes them; source alias scan has no matches."
+    },
+    {
+      "criterion": "python scripts/design_system_gate.py --check --all-ui reports findings=0.",
+      "status": "passed",
+      "evidence": "design_system_gate returned status=pass, findings=0."
+    },
+    {
+      "criterion": "DESIGN-SYSTEM.md Executable asset layer and Maturity tiers sections reflect the promoted semantic scale.",
+      "status": "passed",
+      "evidence": "DESIGN-SYSTEM.md documents TASK-AR-583 semantic scale status and stable token rule."
+    }
+  ],
+  "next_step": "Independent W4b review can verify the worktree diff, then release CLAIM-20260619-003400-task-ar-583-semantic-scale so the cycle can advance to TASK-AR-584."
+}
