@@ -336,4 +336,5 @@ def test_real_backlog_tasks_are_classified_into_twenty_five_task_sets() -> None:
         "TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT",
         "TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT",
         "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION",
+        "TASKSET-AR-RELEASE-AUTO-NONCRITICAL",
     }

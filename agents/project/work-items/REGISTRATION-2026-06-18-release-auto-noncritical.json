@@ -1,0 +1,184 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "chat:2026-06-18-release-auto-noncritical",
+  "created_by": "lead-engineer",
+  "initiative": {
+    "id": "INIT-AR-RELEASE-AUTOMATION",
+    "title": "Release Automation (noncritical auto-execution)",
+    "summary": "Realize the intended tiered release rule: noncritical (additive/patch) releases execute via the agent release council without Owner approval, while major/breaking/critical releases stay Owner-gated. Today only the cadence proposal is automatic and the execution gate is pinned to v0.1.8, so noncritical releases pile up unreleased.",
+    "owner": "lead-engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-RELEASE-AUTO-NONCRITICAL",
+    "display_name": "Noncritical Release Auto-Execution",
+    "summary": "Fix the stale release execution gate (parameterize the hardcoded v0.1.8) and wire a cadence-bound auto-release path that runs the agent-council vote, gates, tag, and push for noncritical releases on green main CI, while keeping major/breaking/critical releases Owner-gated. Correct the release-conductor skill doc to match the implemented tier rule.",
+    "order": 624,
+    "plan_slug": "2026-06-18-release-auto-noncritical"
+  },
+  "tasks": [
+    {
+      "title": "Parameterize the release execution gate (remove hardcoded v0.1.8)",
+      "goal": "Make scripts/release_execution_gate.py version-parametric like release_council_gate.py so any target version can pass, instead of blocking every release after v0.1.8.",
+      "scope": "Replace the hardcoded target_version=='0.1.8' / target_tag=='v0.1.8' checks with parametric resolution from pyproject.toml (target_version must equal the package version; target_tag must equal 'v'+target_version). Do NOT change the approval-route logic (approved / agent_council_approved routes stay as-is). Update DEFAULT_* paths if pinned to v0.1.8 and update the gate's tests.",
+      "priority": "P1",
+      "difficulty": "S",
+      "est_hours": 2,
+      "est_tokens": 6000,
+      "owner": "lead-engineer",
+      "team": "risk-release",
+      "acceptance": [
+        "scripts/release_execution_gate.py contains no hardcoded '0.1.8' / 'v0.1.8' in its evaluation logic; target_version/target_tag are validated against the live pyproject.toml version (mirroring release_council_gate.py _pyproject_version).",
+        "The approved and agent_council_approved execution routes are unchanged in behavior.",
+        "Tests cover a parametric version (e.g. a fixture at the current pyproject version) passing and a mismatched version blocking."
+      ],
+      "verification": [
+        "python -m pytest tests/test_release_execution_gate.py -q",
+        "python scripts/owner_governance_gate.py",
+        "rg -n \"0\\.1\\.8\" scripts/release_execution_gate.py || echo no-hardcoded-version"
+      ],
+      "units": [
+        {
+          "title": "Make execution gate target version parametric",
+          "context": "release_execution_gate.py L109-112 hardcode target_version=='0.1.8' and target_tag=='v0.1.8', so it blocks any release past 0.1.8. release_council_gate.py already resolves the expected version from pyproject.toml via _pyproject_version and compares parametrically.",
+          "inputs": [
+            "scripts/release_council_gate.py (reference: _pyproject_version + resolved_expected pattern)",
+            "scripts/release_execution_gate.py",
+            "current pyproject.toml version"
+          ],
+          "target_files": [
+            "scripts/release_execution_gate.py",
+            "tests/test_release_execution_gate.py"
+          ],
+          "scope": "Only the version-equality checks and any v0.1.8-pinned DEFAULT_* paths. Leave route logic (release_route assignments) and approval-status handling untouched.",
+          "steps": [
+            "Add a pyproject version resolver (reuse or mirror release_council_gate._pyproject_version).",
+            "Replace the hardcoded target_version/target_tag equality checks with: target_version == resolved package version, target_tag == 'v'+target_version.",
+            "Re-point any DEFAULT decision/output paths that are pinned to a v0.1.8 filename to be parametric or generic.",
+            "Update tests: one fixture at the current version passes; a mismatched-version fixture blocks.",
+            "Run the gate tests and owner_governance_gate."
+          ],
+          "acceptance": [
+            "No '0.1.8' literal remains in the gate evaluation logic.",
+            "Parametric pass + mismatch-block tests both green."
+          ],
+          "verification": [
+            "python -m pytest tests/test_release_execution_gate.py -q"
+          ],
+          "handoff": "Gate is version-parametric; hand to unit 2 (auto-release path) which depends on a working execution gate.",
+          "stop_condition": "Stop if changing the version checks would require altering approval-route semantics; flag for review instead."
+        }
+      ]
+    },
+    {
+      "title": "Wire cadence-bound noncritical auto-release and correct the release-conductor doc",
+      "goal": "Add an automated path that, at the release cadence boundary on green main CI, executes a noncritical release end-to-end via the agent release council (no Owner approval), while major/breaking/critical releases stop for explicit Owner approval. Document the real tier rule.",
+      "scope": "Add an orchestration script and a scheduled workflow that gate strictly on noncritical + green CI + head-SHA pinning, run readiness summary -> agent-council decision (W4b independent) -> council gate -> execution gate -> bump/tag/push, and notify the Owner. Never auto-release when criticality is critical or any CRITICAL_FLAG (major_or_breaking_release, secret, destructive, etc.) is set. Correct skills/release-conductor/SKILL.md (and its template copy) which currently overstates that all execution is Owner-gated.",
+      "priority": "P1",
+      "difficulty": "L",
+      "est_hours": 8,
+      "est_tokens": 16000,
+      "owner": "lead-engineer",
+      "team": "risk-release",
+      "acceptance": [
+        "A noncritical release (criticality=noncritical, no CRITICAL_FLAGS, recommended bump=patch) can be executed end-to-end by the agent release council without Owner approval, producing a tag + push.",
+        "Any critical / major_or_breaking_release / secret / destructive release halts before tag/push and requires explicit Owner approval (no auto-execution).",
+        "Auto-release only fires on green main CI for the exact validated head SHA (reuse the auto-merge.yml safety pattern) and is bound to the cadence boundary (weekly cron / W6), not every merge.",
+        "The Owner is notified on every auto-release execution.",
+        "skills/release-conductor/SKILL.md and its template copy describe the real tier rule (noncritical -> agent council; critical/major-or-breaking -> Owner), replacing the 'always Owner-gated' wording."
+      ],
+      "verification": [
+        "python -m pytest tests -q -k release",
+        "python scripts/owner_governance_gate.py",
+        "python scripts/release_cadence_trigger.py --check --json"
+      ],
+      "units": [
+        {
+          "title": "Noncritical auto-release orchestrator",
+          "context": "Cadence proposal is automatic but execution must be kicked off. release_council_gate passes only for criticality=noncritical with no CRITICAL_FLAGS; release_execution_gate accepts agent_council_approved as a no-Owner execution route. Compose these into one orchestrator.",
+          "inputs": [
+            "scripts/release_cadence_trigger.py",
+            "scripts/release_readiness_summary.py",
+            "scripts/release_council_gate.py",
+            "scripts/release_execution_gate.py",
+            "skills/release-conductor/SKILL.md (the 8-step flow)"
+          ],
+          "target_files": [
+            "scripts/release_auto_noncritical.py",
+            "tests/test_release_auto_noncritical.py"
+          ],
+          "scope": "Decision + orchestration only; reuse existing readiness/council/execution scripts. Must refuse (exit non-zero, no mutation) when criticality is critical or any CRITICAL_FLAG is present, or when CI is not green.",
+          "steps": [
+            "Read the cadence proposal; proceed only if bump is patch/noncritical and no CRITICAL_FLAG applies.",
+            "Generate the readiness summary and an agent-council RELEASE-DECISION (status=agent_council_approved, approved_by=agent-release-council, W4b-independent role votes).",
+            "Run release_council_gate then release_execution_gate; abort on any block finding.",
+            "On pass: bump pyproject, tag, push; emit an Owner notification record.",
+            "Emit a clear 'owner-approval-required' result (no mutation) for critical/major-or-breaking."
+          ],
+          "acceptance": [
+            "Dry-run/test proves noncritical path reaches tag/push and critical path halts with owner-approval-required."
+          ],
+          "verification": [
+            "python -m pytest tests/test_release_auto_noncritical.py -q"
+          ],
+          "handoff": "Orchestrator ready; unit 2 wires it to the schedule.",
+          "stop_condition": "Stop and request Owner review before enabling real tag/push if external publish (PyPI/host) blast radius is unclear."
+        },
+        {
+          "title": "Schedule + Owner notification wiring",
+          "context": "test.yml already has a weekly cron (0 2 * * 1). Auto-release should run at that cadence on green main only, with head-SHA pinning like auto-merge.yml.",
+          "inputs": [
+            ".github/workflows/test.yml",
+            ".github/workflows/auto-merge.yml (safety pattern: head-SHA equality)",
+            "scripts/release_auto_noncritical.py"
+          ],
+          "target_files": [
+            ".github/workflows/release-auto.yml"
+          ],
+          "scope": "Workflow wiring + notification only. Trigger on the cadence boundary (weekly cron / W6) gated on green main CI; never on untested SHAs.",
+          "steps": [
+            "Add a scheduled workflow that runs release_auto_noncritical.py on green main.",
+            "Pin to the validated head SHA so an untested push is never released.",
+            "Send an Owner notification on execution.",
+            "Document the trigger + safety in the workflow header."
+          ],
+          "acceptance": [
+            "Workflow only fires at the cadence boundary on green main and only for noncritical bumps."
+          ],
+          "verification": [
+            "python -c \"import yaml; yaml.safe_load(open('.github/workflows/release-auto.yml'))\""
+          ],
+          "handoff": "Auto-release live for noncritical; major/breaking still Owner-gated.",
+          "stop_condition": "Do not enable scheduled tag/push without the Owner-notification path in place."
+        },
+        {
+          "title": "Correct the release-conductor skill doc",
+          "context": "skills/release-conductor/SKILL.md states 'Tag, push, and publish are Owner-gated -- never run them without explicit approval', which overstates the code: release_council_gate + release_execution_gate allow agent_council_approved execution for noncritical releases.",
+          "inputs": [
+            "skills/release-conductor/SKILL.md",
+            "src/agent_runtime/templates/project/skills/release-conductor/SKILL.md",
+            "scripts/release_council_gate.py CRITICAL_FLAGS"
+          ],
+          "target_files": [
+            "skills/release-conductor/SKILL.md",
+            "src/agent_runtime/templates/project/skills/release-conductor/SKILL.md"
+          ],
+          "scope": "Documentation only. State the tier rule: noncritical -> agent council can approve and execute without Owner; critical / major_or_breaking_release / secret / destructive -> explicit Owner approval required.",
+          "steps": [
+            "Rewrite the Owner-gated-boundaries section to describe the two tiers and the criticality/CRITICAL_FLAGS trigger.",
+            "Keep the template copy in sync; regenerate the host lock if the template changed."
+          ],
+          "acceptance": [
+            "The skill doc no longer claims all execution is Owner-gated and accurately describes the noncritical agent-council path."
+          ],
+          "verification": [
+            "python scripts/lock_merge_driver.py post-merge"
+          ],
+          "handoff": "Doc matches code; close the taskset.",
+          "stop_condition": "If the template change desyncs the host lock, regenerate it before closing."
+        }
+      ]
+    }
+  ]
+}

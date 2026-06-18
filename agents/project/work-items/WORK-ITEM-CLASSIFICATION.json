@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-18T18:43:08+09:00",
-  "record_count": 336,
+  "generated_at": "2026-06-18T22:26:52+09:00",
+  "record_count": 344,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -3700,6 +3700,94 @@
       "path": "agents/lead_engineer/tasks/TASK-AR-584.md",
       "parent_id": "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION",
       "status": "planned"
+    },
+    {
+      "key": "initiative:INIT-AR-RELEASE-AUTOMATION",
+      "level": "initiative",
+      "number": "19",
+      "label": "Initiative 19",
+      "id": "INIT-AR-RELEASE-AUTOMATION",
+      "title": "Release Automation (noncritical auto-execution)",
+      "path": "agents/project/initiatives/INIT-AR-RELEASE-AUTOMATION.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-RELEASE-AUTO-NONCRITICAL",
+      "level": "taskset",
+      "number": "19.1",
+      "label": "Taskset 19.1",
+      "id": "TASKSET-AR-RELEASE-AUTO-NONCRITICAL",
+      "title": "Noncritical Release Auto-Execution",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-RELEASE-AUTOMATION",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-585",
+      "level": "task",
+      "number": "19.1.1",
+      "label": "Task 19.1.1",
+      "id": "TASK-AR-585",
+      "title": "Make scripts/release_execution_gate.py version-parametric like release_council_gate.p…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-585.md",
+      "parent_id": "TASKSET-AR-RELEASE-AUTO-NONCRITICAL",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-585-001",
+      "level": "unit",
+      "number": "19.1.1.1",
+      "label": "Unit 19.1.1.1",
+      "id": "UNIT-TASK-AR-585-001",
+      "title": "UNIT-TASK-AR-585-001 - Make execution gate target version parametric",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-585/UNIT-TASK-AR-585-001.md",
+      "parent_id": "TASK-AR-585",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-586",
+      "level": "task",
+      "number": "19.1.2",
+      "label": "Task 19.1.2",
+      "id": "TASK-AR-586",
+      "title": "Add an automated path that, at the release cadence boundary on green main CI, execute…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-586.md",
+      "parent_id": "TASKSET-AR-RELEASE-AUTO-NONCRITICAL",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-586-001",
+      "level": "unit",
+      "number": "19.1.2.1",
+      "label": "Unit 19.1.2.1",
+      "id": "UNIT-TASK-AR-586-001",
+      "title": "UNIT-TASK-AR-586-001 - Noncritical auto-release orchestrator",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-586/UNIT-TASK-AR-586-001.md",
+      "parent_id": "TASK-AR-586",
+      "status": "worker_ready"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-586-002",
+      "level": "unit",
+      "number": "19.1.2.2",
+      "label": "Unit 19.1.2.2",
+      "id": "UNIT-TASK-AR-586-002",
+      "title": "UNIT-TASK-AR-586-002 - Schedule + Owner notification wiring",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-586/UNIT-TASK-AR-586-002.md",
+      "parent_id": "TASK-AR-586",
+      "status": "worker_ready"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-586-003",
+      "level": "unit",
+      "number": "19.1.2.3",
+      "label": "Unit 19.1.2.3",
+      "id": "UNIT-TASK-AR-586-003",
+      "title": "UNIT-TASK-AR-586-003 - Correct the release-conductor skill doc",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-586/UNIT-TASK-AR-586-003.md",
+      "parent_id": "TASK-AR-586",
+      "status": "worker_ready"
     }
   ]
 }

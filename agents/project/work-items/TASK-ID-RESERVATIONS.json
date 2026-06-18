@@ -417,8 +417,46 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-585",
+      "expires_at": "2026-06-19T22:26:32+09:00",
+      "fulfilled_at": "2026-06-18T22:26:32+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-585.md",
+      "fulfilled_task_id": "TASK-AR-585",
+      "fulfilled_task_uid": "57774268-cd3d-46ce-b280-9190ad6f808e",
+      "initiative_id": "INIT-AR-RELEASE-AUTOMATION",
+      "kind": "task",
+      "owner_id": "lead-engineer",
+      "reason": "work registration TASKSET-AR-RELEASE-AUTO-NONCRITICAL",
+      "reservation_group_id": "RES-20260618-222632-7ac40299",
+      "reservation_id": "RES-20260618-222632-7ac40299-01",
+      "reserved_at": "2026-06-18T22:26:32+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-RELEASE-AUTO-NONCRITICAL",
+      "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-586",
+      "expires_at": "2026-06-19T22:26:32+09:00",
+      "fulfilled_at": "2026-06-18T22:26:32+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-586.md",
+      "fulfilled_task_id": "TASK-AR-586",
+      "fulfilled_task_uid": "0896a0d3-a4b6-43df-97f4-400f4f7bc38e",
+      "initiative_id": "INIT-AR-RELEASE-AUTOMATION",
+      "kind": "task",
+      "owner_id": "lead-engineer",
+      "reason": "work registration TASKSET-AR-RELEASE-AUTO-NONCRITICAL",
+      "reservation_group_id": "RES-20260618-222632-7ac40299",
+      "reservation_id": "RES-20260618-222632-7ac40299-02",
+      "reserved_at": "2026-06-18T22:26:32+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-RELEASE-AUTO-NONCRITICAL",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-06-18T18:43:04+09:00"
+  "updated_at": "2026-06-18T22:26:32+09:00"
 }
