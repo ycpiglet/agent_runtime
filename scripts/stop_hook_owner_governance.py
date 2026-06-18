@@ -1,7 +1,7 @@
 """Stop hook wrapper for the Owner governance gate.
 
-The governance gate prints human-readable logs. Stop hooks emit a JSON object
-for every path; non-blocking stops use the empty Codex Stop output object.
+The governance gate prints human-readable logs. Stop hooks are block-only
+emitters: non-blocking paths stay silent, and block paths emit Stop JSON.
 """
 
 from __future__ import annotations
@@ -132,8 +132,6 @@ def _codex_stop_payload(payload: dict[str, str]) -> dict[str, object]:
 def emit_stop_payload(payload: dict[str, str]) -> None:
     if payload.get("decision") == "block":
         print(json.dumps(_codex_stop_payload(payload), ensure_ascii=False))
-        return
-    print("{}")
 
 
 def main() -> int:

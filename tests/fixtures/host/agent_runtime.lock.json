@@ -184,9 +184,9 @@
       "scripts/state_machine_gate.py": "sha256:8bbe521adf8948a196b28ca847e3ac836b278f7ca0e62e854bfc4489e8f412ef",
       "scripts/state_sync_gate.py": "sha256:47cda9968b58b2a9908bbd59bd0af5bb3bec3b0981999c0db583ca2ff2a565bd",
       "scripts/stop_events.py": "sha256:b6398afd39a08671766db08f1b6793b303cea9c72bbe9510ac48ab4571d14c31",
-      "scripts/stop_hook_closure_gate.py": "sha256:cae2e825756409c65cf33e7e7b64095614cbde856c040a70d3ba4578130926d9",
+      "scripts/stop_hook_closure_gate.py": "sha256:7b0a40ba37904ca176b603cca6fceacc27c09cdb911a042243c8f54b1626a105",
       "scripts/stop_hook_owner_governance.cmd": "sha256:8ac529f0eabb5bfc34425d0b8851854320a4c6a011470c57bafbbacaf5a33e80",
-      "scripts/stop_hook_owner_governance.py": "sha256:cf7b221071f0499e8c74327abdfbd92cd94744106ca5745301e27fe6b5531db9",
+      "scripts/stop_hook_owner_governance.py": "sha256:cee76ef0eb993cbcced320efde85be693484e5ff002c9e1a894d5f10754af7f5",
       "scripts/stop_hook_session_scope.py": "sha256:75cc7332461618d985ec716044ae993ced1d391ec87a57ef903db63a2aaf1cf5",
       "scripts/subagent_council.py": "sha256:d86012bb61ab057f299cf994c1ff6f04d1a8e84c39d1b2e4712a94c27e62d608",
       "scripts/subagent_dispatch.py": "sha256:a07ead3b8b38bb800322acbe4e24025a12f54d99ea1105b88156d5713b46380c",
@@ -266,7 +266,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.2.0",
-    "template_digest": "sha256:a05be57f027af960b021bf95cdc9c2faa538d6c9ff409d2b8ac2ee44d04ced98",
+    "template_digest": "sha256:ad277d49d73763a8f0065486d5ed0f8515c1318c4e4996c19f22f9f047ad2b69",
     "template_files": 263
   },
   "project": "fixture-host",
