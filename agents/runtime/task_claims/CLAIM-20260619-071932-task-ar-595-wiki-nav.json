@@ -19,7 +19,7 @@
   "model_tier": "codex",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "w4b-verified-released",
+  "phase": "complete",
   "progress_pct": 100,
   "step_index": 6,
   "step_total": 6,

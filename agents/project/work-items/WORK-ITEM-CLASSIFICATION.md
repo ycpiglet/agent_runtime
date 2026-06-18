@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-19T07:53:08+09:00
+generated_at: 2026-06-19T08:00:51+09:00
 record_count: 352
 ---
 
@@ -356,7 +356,7 @@ record_count: 352
 | 13.1.1 | Task 13.1.1 | task | `TASK-AR-590` | `TASKSET-AR-LLM-WIKI` | completed | `agents/lead_engineer/tasks/TASK-AR-590.md` | Extend the knowledge graph corpus so LLM-Wiki pages can reason over runtime assets, h… |
 | 13.1.2 | Task 13.1.2 | task | `TASK-AR-591` | `TASKSET-AR-LLM-WIKI` | completed | `agents/lead_engineer/tasks/TASK-AR-591.md` | Add a deterministic wiki page envelope with summary, metadata, typed relationships, b… |
 | 13.1.3 | Task 13.1.3 | task | `TASK-AR-592` | `TASKSET-AR-LLM-WIKI` | completed | `agents/lead_engineer/tasks/TASK-AR-592.md` | Build the console Wiki view with entity page routing, summary, relations, backlinks,… |
-| 13.1.4 | Task 13.1.4 | task | `TASK-AR-593` | `TASKSET-AR-LLM-WIKI` | review | `agents/lead_engineer/tasks/TASK-AR-593.md` | Add deterministic `/api/wiki/search?q=` and `/api/wiki/ask?q=&llm=0/1`, then wire a s… |
+| 13.1.4 | Task 13.1.4 | task | `TASK-AR-593` | `TASKSET-AR-LLM-WIKI` | completed | `agents/lead_engineer/tasks/TASK-AR-593.md` | Add deterministic `/api/wiki/search?q=` and `/api/wiki/ask?q=&llm=0/1`, then wire a s… |
 | 13.1.5 | Task 13.1.5 | task | `TASK-AR-594` | `TASKSET-AR-LLM-WIKI` | completed | `agents/lead_engineer/tasks/TASK-AR-594.md` | Refine the per-page mini-graph into a typed, contextual insight lens with click-to-na… |
 | 13.1.6 | Task 13.1.6 | task | `TASK-AR-595` | `TASKSET-AR-LLM-WIKI` | completed | `agents/lead_engineer/tasks/TASK-AR-595.md` | Promote Wiki/Search as a core navigation hub adjacent to Records and add cross-links… |
 | 13.1.7 | Task 13.1.7 | task | `TASK-AR-596` | `TASKSET-AR-LLM-WIKI` | planned | `agents/lead_engineer/tasks/TASK-AR-596.md` | Extend knowledge lint coverage for the expanded corpus and close `TASKSET-AR-LLM-WIKI… |
