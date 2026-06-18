@@ -1,0 +1,25 @@
+{
+  "schema": "agent-runtime-session-baseline/v1",
+  "captured_at": "2026-06-18T12:43:43.544943+00:00",
+  "cwd": "C:\\Users\\ycpig\\agent_runtime",
+  "head": "2eb0ed0",
+  "branch": "claude/decision-first-console-ia",
+  "status_fingerprint": "77948c554e38ea96495eff6d0e2a99d64c6f01e8c703970b89b43a761d4bad2f",
+  "stash_count": 0,
+  "worktrees": [
+    {
+      "path": "C:/Users/ycpig/agent_runtime",
+      "HEAD": "2eb0ed07a08b556299edd135d1fe29e2215254e7",
+      "branch": "claude/decision-first-console-ia"
+    }
+  ],
+  "active_codex_branches": [
+    "claude/deadlock-guardrails",
+    "claude/decision-first-console-ia",
+    "claude/llm-wiki",
+    "claude/product-maturity-eval-merge",
+    "claude/wave89-closeout",
+    "codex/task-ar-552",
+    "codex/task-ar-578-design-system-governance"
+  ]
+}

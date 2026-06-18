@@ -1,0 +1,38 @@
+{
+  "schema": "agent-runtime-session-baseline/v1",
+  "captured_at": "2026-06-18T15:21:42.074070+00:00",
+  "cwd": "C:\\Users\\ycpig\\agent_runtime",
+  "head": "5826746",
+  "branch": "claude/decision-first-console-ia",
+  "status_fingerprint": "587394a0c7c1b0bcf9a204407d086aecc5534c74a35c10c92feb425476d7b01d",
+  "stash_count": 0,
+  "worktrees": [
+    {
+      "path": "C:/Users/ycpig/agent_runtime",
+      "HEAD": "5826746347d5d8644ae5ffbfc2ac73d6e0fcf1a4",
+      "branch": "claude/decision-first-console-ia"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-593",
+      "HEAD": "b6df4ced9bd50e5ae49bca29c84a2d051f42ab63",
+      "branch": "codex/task-ar-593-wiki-search-ask"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-597",
+      "HEAD": "5826746347d5d8644ae5ffbfc2ac73d6e0fcf1a4",
+      "branch": "codex/task-ar-597-ui-ux-cycle"
+    }
+  ],
+  "active_codex_branches": [
+    "claude/deadlock-guardrails",
+    "claude/decision-first-console-ia",
+    "claude/llm-wiki",
+    "claude/product-maturity-eval-merge",
+    "claude/release-auto-reg",
+    "claude/wave89-closeout",
+    "codex/task-ar-552",
+    "codex/task-ar-578-design-system-governance",
+    "+ codex/task-ar-593-wiki-search-ask",
+    "+ codex/task-ar-597-ui-ux-cycle"
+  ]
+}

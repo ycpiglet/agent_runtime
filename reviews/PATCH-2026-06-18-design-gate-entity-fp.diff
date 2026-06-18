@@ -1,0 +1,462 @@
+diff --git a/scripts/design_system_gate.py b/scripts/design_system_gate.py
+new file mode 100644
+index 0000000..fc5a6d4
+--- /dev/null
++++ b/scripts/design_system_gate.py
+@@ -0,0 +1,276 @@
++"""Design-system governance gate for Agent Runtime UI work.
++
++The default check is baseline-safe: it verifies governance artifacts and scans
++added UI diff lines. Explicit ``--path`` / ``--all-ui`` checks scan whole files
++and are useful for full debt audits or focused review.
++"""
++from __future__ import annotations
++
++import argparse
++import json
++import re
++import subprocess
++import sys
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parent.parent
++REQUIRED_ARTIFACTS = [
++    Path("docs/design/agent-runtime/DESIGN.md"),
++    Path("docs/design/agent-runtime/DESIGN-SYSTEM.md"),
++    Path("reviews/DIAGNOSTIC-2026-06-18-ui-design-system-maturity.md"),
++]
++REQUIRED_ROLES = [
++    "lead-designer",
++    "design-system-steward",
++    "interface-designer",
++    "ux-evaluator",
++]
++UI_SUFFIXES = {".css", ".html", ".js", ".jsx", ".ts", ".tsx", ".py"}
++UI_PATH_HINTS = (
++    "src/agent_runtime/ui_console.py",
++    "src/agent_runtime/ui_",
++    "public/",
++    "web/",
++    "components/",
++    "src/components/",
++    "src/app/",
++)
++# ``(?<!&)`` keeps HTML numeric character entities (e.g. ``&#9881;`` gear icon,
++# ``&#9776;`` menu icon) from being misread as raw hex color literals.
++RAW_COLOR_RE = re.compile(r"(?<!&)#[0-9a-fA-F]{3,8}\b")
++RAW_SIZE_RE = re.compile(
++    r"\b(?:font-size|margin|margin-[a-z]+|padding|padding-[a-z]+|gap|row-gap|column-gap|border-radius)\s*:\s*\d+(?:\.\d+)?px\b"
++)
++
++
++class Finding:
++    def __init__(self, code: str, path: str, line: int, message: str) -> None:
++        self.code = code
++        self.path = path
++        self.line = line
++        self.message = message
++
++
++def _repo_paths_from_git(root: Path, args: list[str]) -> list[str]:
++    try:
++        result = subprocess.run(
++            ["git", *args],
++            cwd=root,
++            text=True,
++            encoding="utf-8",
++            errors="replace",
++            stdout=subprocess.PIPE,
++            stderr=subprocess.DEVNULL,
++            check=False,
++        )
++    except OSError:
++        return []
++    if result.returncode not in (0, 1):
++        return []
++    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
++
++
++def changed_paths(root: Path = ROOT) -> list[Path]:
++    names = set(_repo_paths_from_git(root, ["diff", "--name-only", "--diff-filter=ACMRTUXB", "HEAD", "--"]))
++    names.update(_repo_paths_from_git(root, ["diff", "--cached", "--name-only", "--diff-filter=ACMRTUXB", "--"]))
++    return [root / name for name in sorted(names)]
++
++
++def is_ui_path(path: Path, root: Path = ROOT) -> bool:
++    if path.suffix.lower() not in UI_SUFFIXES:
++        return False
++    try:
++        rel = path.resolve().relative_to(root.resolve()).as_posix()
++    except ValueError:
++        rel = path.as_posix()
++    return any(rel == hint or rel.startswith(hint) for hint in UI_PATH_HINTS)
++
++
++def _is_token_definition(line: str) -> bool:
++    stripped = line.strip()
++    return stripped.startswith("--") and ":" in stripped
++
++
++def scan_raw_literals(paths: list[Path], root: Path = ROOT) -> list[Finding]:
++    findings: list[Finding] = []
++    for path in paths:
++        if not path.exists() or not path.is_file():
++            continue
++        try:
++            rel = path.resolve().relative_to(root.resolve()).as_posix()
++        except ValueError:
++            rel = str(path)
++        text = path.read_text(encoding="utf-8", errors="replace")
++        for idx, line in enumerate(text.splitlines(), start=1):
++            if _is_token_definition(line):
++                continue
++            if RAW_COLOR_RE.search(line):
++                findings.append(Finding("raw-color", rel, idx, "raw color literal outside token definition"))
++            if RAW_SIZE_RE.search(line):
++                findings.append(Finding("raw-size", rel, idx, "raw px literal outside token definition"))
++    return findings
++
++
++def scan_raw_literal_lines(rows: list[tuple[str, int, str]]) -> list[Finding]:
++    findings: list[Finding] = []
++    for rel, line_no, line in rows:
++        if _is_token_definition(line):
++            continue
++        if RAW_COLOR_RE.search(line):
++            findings.append(Finding("raw-color", rel, line_no, "raw color literal outside token definition"))
++        if RAW_SIZE_RE.search(line):
++            findings.append(Finding("raw-size", rel, line_no, "raw px literal outside token definition"))
++    return findings
++
++
++def _repo_text_from_git(root: Path, args: list[str]) -> str:
++    try:
++        result = subprocess.run(
++            ["git", *args],
++            cwd=root,
++            text=True,
++            encoding="utf-8",
++            errors="replace",
++            stdout=subprocess.PIPE,
++            stderr=subprocess.DEVNULL,
++            check=False,
++        )
++    except OSError:
++        return ""
++    if result.returncode not in (0, 1):
++        return ""
++    return result.stdout
++
++
++def added_ui_lines_from_diff(diff_text: str, root: Path = ROOT) -> list[tuple[str, int, str]]:
++    rows: list[tuple[str, int, str]] = []
++    current_path = ""
++    current_ui = False
++    new_line = 0
++    for line in diff_text.splitlines():
++        if line.startswith("+++ "):
++            target = line[4:].strip()
++            current_path = target[2:] if target.startswith("b/") else target
++            current_ui = current_path != "/dev/null" and is_ui_path(root / current_path, root)
++            continue
++        if not current_ui:
++            continue
++        if line.startswith("@@ "):
++            match = re.search(r"\+(\d+)(?:,(\d+))?", line)
++            new_line = int(match.group(1)) if match else 0
++            continue
++        if line.startswith("+") and not line.startswith("+++"):
++            rows.append((current_path, new_line, line[1:]))
++            new_line += 1
++            continue
++        if line.startswith("-") and not line.startswith("---"):
++            continue
++        if new_line:
++            new_line += 1
++    return rows
++
++
++def untracked_ui_paths(root: Path = ROOT) -> list[Path]:
++    names = _repo_paths_from_git(root, ["ls-files", "--others", "--exclude-standard", "--"])
++    return [root / name for name in names if is_ui_path(root / name, root)]
++
++
++def changed_ui_addition_findings(root: Path = ROOT) -> tuple[list[Finding], int]:
++    diff_text = _repo_text_from_git(root, ["diff", "--unified=0", "--no-ext-diff", "HEAD", "--"])
++    diff_text += _repo_text_from_git(root, ["diff", "--cached", "--unified=0", "--no-ext-diff", "--"])
++    rows = added_ui_lines_from_diff(diff_text, root)
++    findings = scan_raw_literal_lines(rows)
++    untracked = untracked_ui_paths(root)
++    findings.extend(scan_raw_literals(untracked, root))
++    scanned_paths = {row[0] for row in rows}
++    scanned_paths.update(
++        path.resolve().relative_to(root.resolve()).as_posix()
++        if path.resolve().is_relative_to(root.resolve())
++        else path.as_posix()
++        for path in untracked
++    )
++    return findings, len(scanned_paths)
++
++
++def artifact_findings(root: Path = ROOT) -> list[Finding]:
++    findings: list[Finding] = []
++    for rel in REQUIRED_ARTIFACTS:
++        if not (root / rel).exists():
++            findings.append(Finding("missing-artifact", rel.as_posix(), 0, "required design-system artifact missing"))
++    return findings
++
++
++def role_findings(root: Path = ROOT) -> list[Finding]:
++    sys.path.insert(0, str(root / "scripts"))
++    from org_model_gate import load_registry, resolve_owner  # noqa: WPS433
++
++    reg = load_registry(root / "agents" / "project" / "ORG-MODEL.yml")
++    findings: list[Finding] = []
++    for role in REQUIRED_ROLES:
++        resolved = resolve_owner(role, reg)
++        if not resolved or resolved.get("id") != role:
++            findings.append(Finding("missing-role", "agents/project/ORG-MODEL.yml", 0, f"{role} role missing"))
++    legacy = resolve_owner("uiux", reg)
++    if not legacy:
++        findings.append(Finding("missing-legacy-alias", "agents/project/ORG-MODEL.yml", 0, "uiux alias no longer resolves"))
++    return findings
++
++
++def cmd_check(
++    *,
++    root: Path = ROOT,
++    paths: list[str] | None = None,
++    all_ui: bool = False,
++    json_output: bool = False,
++) -> int:
++    findings = []
++    findings.extend(artifact_findings(root))
++    findings.extend(role_findings(root))
++
++    if paths:
++        scan_paths = [Path(p) if Path(p).is_absolute() else root / p for p in paths]
++    elif all_ui:
++        scan_paths = [p for p in root.rglob("*") if is_ui_path(p, root)]
++        findings.extend(scan_raw_literals(scan_paths, root))
++    else:
++        diff_findings, scanned_count = changed_ui_addition_findings(root)
++        scan_paths = [Path(f"<diff:{scanned_count}>")] * scanned_count
++        findings.extend(diff_findings)
++
++    if paths:
++        findings.extend(scan_raw_literals(scan_paths, root))
++
++    payload = {
++        "status": "fail" if findings else "pass",
++        "checked_artifacts": len(REQUIRED_ARTIFACTS),
++        "checked_roles": len(REQUIRED_ROLES),
++        "scanned": len(scan_paths),
++        "findings": [finding.__dict__ for finding in findings],
++    }
++    if json_output:
++        print(json.dumps(payload, indent=2, ensure_ascii=False))
++    else:
++        for finding in findings:
++            loc = f"{finding.path}:{finding.line}" if finding.line else finding.path
++            print(f"design-system-gate: {finding.code}: {loc}: {finding.message}")
++        print(
++            "design-system-gate: "
++            f"{payload['status']} artifacts={payload['checked_artifacts']} "
++            f"roles={payload['checked_roles']} scanned={payload['scanned']} "
++            f"findings={len(findings)}"
++        )
++    return 1 if findings else 0
++
++
++def main(argv: list[str] | None = None) -> int:
++    parser = argparse.ArgumentParser(description="Design-system governance gate")
++    parser.add_argument("--check", action="store_true")
++    parser.add_argument("--path", action="append", default=[])
++    parser.add_argument("--all-ui", action="store_true")
++    parser.add_argument("--json", action="store_true")
++    args = parser.parse_args(argv)
++    return cmd_check(paths=args.path, all_ui=args.all_ui, json_output=args.json)
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/tests/test_design_system_gate.py b/tests/test_design_system_gate.py
+new file mode 100644
+index 0000000..fdea482
+--- /dev/null
++++ b/tests/test_design_system_gate.py
+@@ -0,0 +1,131 @@
++from pathlib import Path
++import importlib.util
++
++ROOT = Path(__file__).resolve().parent.parent
++SPEC = ROOT / "scripts" / "design_system_gate.py"
++
++
++def _load():
++    spec = importlib.util.spec_from_file_location("design_system_gate", SPEC)
++    mod = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(mod)
++    return mod
++
++
++def test_required_artifacts_exist_and_roles_resolve():
++    mod = _load()
++    findings = mod.artifact_findings(ROOT) + mod.role_findings(ROOT)
++    assert findings == []
++
++
++def test_gate_detects_raw_literals_in_explicit_path(tmp_path):
++    mod = _load()
++    ui = tmp_path / "raw.css"
++    ui.write_text(".x { color: #fff; padding: 12px; }\n", encoding="utf-8")
++    findings = mod.scan_raw_literals([ui], ROOT)
++    assert {finding.code for finding in findings} == {"raw-color", "raw-size"}
++
++
++def test_gate_allows_token_definitions_and_vars(tmp_path):
++    mod = _load()
++    ui = tmp_path / "tokens.css"
++    ui.write_text(
++        ":root {\n"
++        "  --panel: #fff;\n"
++        "  --space-3: 12px;\n"
++        "}\n"
++        ".x { color: var(--panel); padding: var(--space-3); }\n",
++        encoding="utf-8",
++    )
++    assert mod.scan_raw_literals([ui], ROOT) == []
++
++
++def test_diff_line_scan_detects_added_raw_literals():
++    mod = _load()
++    diff = "\n".join(
++        [
++            "diff --git a/src/agent_runtime/ui_console.py b/src/agent_runtime/ui_console.py",
++            "--- a/src/agent_runtime/ui_console.py",
++            "+++ b/src/agent_runtime/ui_console.py",
++            "@@ -10,0 +11,2 @@",
++            "+.x { color: #fff; padding: 12px; }",
++            "+.y { color: var(--ink); padding: var(--space-4); }",
++        ]
++    )
++
++    findings = mod.scan_raw_literal_lines(mod.added_ui_lines_from_diff(diff, ROOT))
++
++    assert {finding.code for finding in findings} == {"raw-color", "raw-size"}
++    assert {finding.line for finding in findings} == {11}
++
++
++def test_diff_line_scan_allows_added_token_definitions():
++    mod = _load()
++    diff = "\n".join(
++        [
++            "diff --git a/src/agent_runtime/ui_design_assets.py b/src/agent_runtime/ui_design_assets.py",
++            "--- a/src/agent_runtime/ui_design_assets.py",
++            "+++ b/src/agent_runtime/ui_design_assets.py",
++            "@@ -1,0 +2,3 @@",
++            "+:root {",
++            "+  --space-9: 18px;",
++            "+}",
++        ]
++    )
++
++    assert mod.scan_raw_literal_lines(mod.added_ui_lines_from_diff(diff, ROOT)) == []
++
++
++def test_gate_ignores_html_numeric_entities(tmp_path):
++    """`&#9881;`-style accessibility icon entities must not read as hex colors."""
++    mod = _load()
++    ui = tmp_path / "icons.html"
++    ui.write_text(
++        '<span class="icon" aria-hidden="true">&#9881;</span>\n'
++        '<span class="icon" aria-hidden="true">&#9776;</span>\n',
++        encoding="utf-8",
++    )
++    assert mod.scan_raw_literals([ui], ROOT) == []
++
++
++def test_gate_still_flags_real_hex_color(tmp_path):
++    mod = _load()
++    ui = tmp_path / "c.css"
++    ui.write_text(".x { color: #abc; }\n", encoding="utf-8")
++    assert {finding.code for finding in mod.scan_raw_literals([ui], ROOT)} == {"raw-color"}
++
++
++def test_diff_line_scan_ignores_added_html_entities():
++    mod = _load()
++    diff = "\n".join(
++        [
++            "diff --git a/src/agent_runtime/ui_console.py b/src/agent_runtime/ui_console.py",
++            "--- a/src/agent_runtime/ui_console.py",
++            "+++ b/src/agent_runtime/ui_console.py",
++            "@@ -10,0 +11,2 @@",
++            '+.icon::before { content: "&#9881;"; }',
++            "+.real { color: #fff; }",
++        ]
++    )
++
++    findings = mod.scan_raw_literal_lines(mod.added_ui_lines_from_diff(diff, ROOT))
++
++    assert {finding.code for finding in findings} == {"raw-color"}
++    assert {finding.line for finding in findings} == {12}
++
++
++def test_missing_artifacts_are_reported(tmp_path):
++    mod = _load()
++    (tmp_path / "agents" / "project").mkdir(parents=True)
++    findings = mod.artifact_findings(tmp_path)
++    assert {finding.code for finding in findings} == {"missing-artifact"}
++
++
++def test_default_check_passes_current_changed_baseline():
++    mod = _load()
++    assert mod.cmd_check(root=ROOT, paths=[], all_ui=False, json_output=True) == 0
++
++
++def test_all_ui_check_passes_current_tokenized_baseline():
++    mod = _load()
++    assert mod.cmd_check(root=ROOT, paths=[], all_ui=True, json_output=True) == 0
+diff --git a/docs/design/agent-runtime/DESIGN-SYSTEM.md b/docs/design/agent-runtime/DESIGN-SYSTEM.md
+index dec6eb8..9397693 100644
+--- a/docs/design/agent-runtime/DESIGN-SYSTEM.md
++++ b/docs/design/agent-runtime/DESIGN-SYSTEM.md
+@@ -86,6 +86,38 @@ while `ui_console.py` owns routing and API behavior. Remaining extraction work i
+ inside the JavaScript renderer asset itself, where view-specific renderers still
+ need promotion into pattern modules.
+ 
++## Maturity tiers
++
++Every token, UI component, and pattern component carries a maturity tier so new
++design can enter the system without destabilizing it. This is the
++consistency-vs-novelty mechanism: novelty is allowed but *labelled* and not
++load-bearing until it earns promotion (model adapted from the USWDS, GitHub
++Primer, and VA.gov component lifecycles — see
++`reviews/RESEARCH-2026-06-18-design-system-governance-role-topology.md`).
++
++| Tier | Meaning | Allowed use |
++| --- | --- | --- |
++| `experimental` | New or in-flight; API and visuals may still change. Enters via a Design Exploration RFC or a first extraction. | Behind the originating view only; never a load-bearing shared dependency. |
++| `stable` | Proven, documented, reused; breaking changes require a migration note. | Default for new screens. Workers build from stable assets only. |
++| `deprecated` | Superseded; kept only for migration. | Do not add new usages; replace on touch. |
++
++Promotion `experimental -> stable` is decided by the `design-system-steward`
++against objective, checkable criteria:
++
++1. **Adoption** — used by at least two views (the rule-of-three trigger in *Assetization classes*).
++2. **Stability** — the asset API did not change across its last use, and there is no open visual-regression issue.
++3. **Evidence** — listed in the *Executable asset layer* table and backed by `visual_verification` for desktop and mobile.
++
++Demotion or deprecation is allowed from any tier. Tier transitions are recorded
++in the asset module docstring and in the touching task's closeout evidence.
++
++Tokens follow the same model. The current `--space-px-*` and `--radius-px-*`
++aliases are `stable` but transitional: they tokenize the legacy literal values
++rather than a designed scale. Consolidating them into a semantic scale (for
++example `--space-1..n`) is a future `experimental` token delta that promotes
++only after the asset layer migrates to it, and it must not silently re-introduce
++raw literals.
++
+ ## New design proposal path
+ 
+ New visual direction is allowed, but it must enter through a Design Exploration
