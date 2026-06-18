@@ -167,7 +167,7 @@ def _write_public_source(root: Path):
     _write(root / "scripts" / "task_claim_dispatcher.py", "raise SystemExit(0)\n")
     _write(
         root / "scripts" / "stop_hook_owner_governance.py",
-        "import json\nprint(json.dumps({'decision':'approve','reason':'owner governance gate passed','systemMessage':'findings=0'}))\n",
+        "import json\nprint(json.dumps({'continue': True}))\n",
     )
     _write(
         root / "scripts" / "stop_hook_owner_governance.cmd",
@@ -196,7 +196,7 @@ def _write_public_source(root: Path):
     )
     _write(
         root / "src" / "agent_runtime" / "templates" / "project" / "scripts" / "stop_hook_owner_governance.py",
-        "import json\nprint(json.dumps({'decision':'approve','reason':'owner governance gate passed','systemMessage':'findings=0'}))\n",
+        "import json\nprint(json.dumps({'continue': True}))\n",
     )
     _write(
         root / "src" / "agent_runtime" / "templates" / "project" / "scripts" / "stop_hook_owner_governance.cmd",
@@ -2369,4 +2369,3 @@ def test_publish_github_execute_cli_passes_work_dir(tmp_path, monkeypatch):
 
     assert captured["work_dir"] == tmp_path / "source" / ".tmp" / "work"
     assert captured["execute"] is True
-

@@ -59,14 +59,27 @@ def _payload_from_result(result: subprocess.CompletedProcess[str]) -> dict[str, 
     }
 
 
-def _emit_stop_payload(payload: dict[str, str]) -> None:
+def _codex_stop_payload(payload: dict[str, str]) -> dict[str, object]:
     if payload.get("decision") == "block":
-        print(json.dumps(payload, ensure_ascii=False))
+        result: dict[str, object] = {
+            "decision": "block",
+            "reason": payload.get("reason", "dirty intake blocked stop"),
+        }
+        system_message = payload.get("systemMessage")
+        if system_message:
+            result["systemMessage"] = system_message
+        return result
+    return {"continue": True}
+
+
+def _emit_stop_payload(payload: dict[str, str]) -> None:
+    print(json.dumps(_codex_stop_payload(payload), ensure_ascii=False))
 
 
 def main(argv: list[str] | None = None) -> int:
     scope = stop_hook_session_scope.assess(stop_hook_session_scope.read_hook_input(), root=ROOT)
     if scope.get("bypass"):
+        _emit_stop_payload({"decision": "approve", "reason": str(scope.get("reason") or "scope bypass")})
         return 0
     result = _run_dirty_intake(list(argv or []))
     _emit_stop_payload(_payload_from_result(result))

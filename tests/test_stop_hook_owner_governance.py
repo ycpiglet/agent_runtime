@@ -107,4 +107,4 @@ def test_stop_hook_owner_governance_skips_question_only_session(tmp_path):
     )
 
     assert result.returncode == 0
-    assert result.stdout == ""
+    assert json.loads(result.stdout) == {"continue": True}
