@@ -107,6 +107,4 @@ def test_stop_hook_owner_governance_skips_question_only_session(tmp_path):
     )
 
     assert result.returncode == 0
-    payload = json.loads(result.stdout)
-    assert payload["decision"] == "approve"
-    assert "question-only session" in payload["reason"]
+    assert result.stdout == ""

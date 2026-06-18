@@ -59,13 +59,17 @@ def _payload_from_result(result: subprocess.CompletedProcess[str]) -> dict[str, 
     }
 
 
+def _emit_stop_payload(payload: dict[str, str]) -> None:
+    if payload.get("decision") == "block":
+        print(json.dumps(payload, ensure_ascii=False))
+
+
 def main(argv: list[str] | None = None) -> int:
     scope = stop_hook_session_scope.assess(stop_hook_session_scope.read_hook_input(), root=ROOT)
     if scope.get("bypass"):
-        print(json.dumps(stop_hook_session_scope.approval_payload("dirty intake", scope), ensure_ascii=False))
         return 0
     result = _run_dirty_intake(list(argv or []))
-    print(json.dumps(_payload_from_result(result), ensure_ascii=False))
+    _emit_stop_payload(_payload_from_result(result))
     return 0
 
 

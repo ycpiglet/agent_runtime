@@ -137,9 +137,7 @@ def test_dirty_intake_hook_skips_question_only_session(tmp_path: Path) -> None:
     )
 
     assert result.returncode == 0
-    payload = json.loads(result.stdout)
-    assert payload["decision"] == "approve"
-    assert "question-only session" in payload["reason"]
+    assert result.stdout == ""
 
 
 def test_dirty_intake_hook_keeps_block_for_mutating_session(tmp_path: Path) -> None:
@@ -190,6 +188,4 @@ def test_closure_hook_skips_question_only_session(tmp_path: Path) -> None:
     )
 
     assert result.returncode == 0
-    payload = json.loads(result.stdout)
-    assert payload["decision"] == "approve"
-    assert "question-only session" in payload["reason"]
+    assert result.stdout == ""
