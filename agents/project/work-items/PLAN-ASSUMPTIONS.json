@@ -309,8 +309,13 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-registration.md",
-          "value": "7fbdbf69c415023cea800519a2aaaf3613d6da9bd36d1be5b0a61f6e587c29ee"
+          "path": "reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-conductor.md",
+          "value": "1944ce31c6117f4e109d55e7cbdd7541ad3efe9e37153127039e6107d8b55c02"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/ui_ux_cycle.py",
+          "value": "daae5563d27640568bede15507cf3b7a6fe5747783f93c99c754f3d15a02402d"
         },
         {
           "kind": "sha256",
@@ -318,22 +323,17 @@
           "value": "cb2cd245558157ff640dbf0b824694c5623e2e1ef0ccfba6e83f9a08a5522bc8"
         },
         {
-          "kind": "absent",
-          "path": "scripts/ui_ux_cycle.py",
-          "value": ""
-        },
-        {
           "kind": "sha256",
           "path": "scripts/work.py",
           "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-registration.md",
-      "recorded_at": "2026-06-19T00:09:48+09:00",
+      "design_record": "reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-conductor.md",
+      "recorded_at": "2026-06-19T01:46:37+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-UI-UX-CYCLE-AUTOMATION"
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-19T00:09:48+09:00"
+  "updated_at": "2026-06-19T01:46:37+09:00"
 }
