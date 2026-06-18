@@ -232,7 +232,7 @@ def evaluate(changed: list[str], *, prompt: str = "", diff_lines: int = 0) -> di
     if grade in ("Critical", "High"):
         artifacts.append("협업 evidence (collab_log record 또는 subagent dispatch 이벤트)")
     if touches_frontend:
-        artifacts.append("BTC-{NNN} (Beta 라운드 — 사용자 대면 변경)")
+        artifacts.append("ROUNDS.md entry + optional BTC-{NNN} (exploratory Beta 라운드 — smoke 대체 불가)")
     artifacts.append("RETRO (cycle close — agent_retro)")
 
     return {
@@ -273,6 +273,8 @@ def _print_human(result: dict) -> None:
     if workers:
         print(f"  필수 worker role /call: {', '.join(workers)}")
         print("    → python scripts/agent_orchestrator.py call <role> \"<intent>\" --task <TASK-NNN>")
+        if "beta-tester" in workers:
+            print("    → beta-tester 산출물: ROUNDS.md clean/fail entry + BTC-NNN if failure; smoke/DOM-only evidence 불가")
     print("  필수 산출물:")
     for a in result["required_artifacts"]:
         print(f"    - {a}")

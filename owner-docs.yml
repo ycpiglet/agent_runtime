@@ -1,5 +1,6 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
+  - reviews/REVIEW-2026-06-18-beta-tester-role-strengthening.md
   - reviews/REVIEW-2026-06-17-taskset-ar-business-operations-teams-registration.md
   - reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration.md
   - reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-registration.md

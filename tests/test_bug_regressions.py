@@ -32,6 +32,13 @@ def test_template_role_docs_have_no_broken_links() -> None:
     assert missing == [], missing
 
 
+def test_beta_tester_progressive_disclosure_docs_are_shipped() -> None:
+    """Beta Tester SKILL.md must not point to unshipped exploration guidance."""
+    base = ROOT / "src" / "agent_runtime" / "templates" / "project" / "agents" / "beta_tester"
+    assert (base / "references" / "exploration.md").exists()
+    assert (base / "GOTCHAS.md").exists()
+
+
 def test_build_sync_plan_rejects_non_path_like() -> None:
     """GH #20 / BUG-001: a stale config arg must raise a CLEAR TypeError, not AttributeError."""
     from agent_runtime import sync

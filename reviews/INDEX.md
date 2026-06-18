@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-18T09:22:15+09:00
-record_count: 548
+generated_at: 2026-06-18T09:45:40+09:00
+record_count: 550
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `548` review and evidence records under `reviews/`.
+- Summary: indexed `550` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `548` files |
+| Reviews covered | pass | `550` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -74,6 +74,7 @@ record_count: 548
 | `reviews/CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current.json` | `CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current` | json | record | n/a | CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current |
 | `reviews/CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final.json` | `CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final` | json | record | n/a | CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final |
 | `reviews/COUNCIL-2026-06-14-host-feedback-first-deliberation.md` | `COUNCIL-2026-06-14-host-feedback-first-deliberation` | council | watch | watch | Council — Host Feedback First Deliberation (TASK-AR-527) |
+| `reviews/DIAGNOSTIC-2026-06-18-ui-design-system-maturity.md` | `DIAGNOSTIC-2026-06-18-ui-design-system-maturity` | md | record | n/a | DIAGNOSTIC — UI Design-System Maturity & Asset-ization Gap |
 | `reviews/GOVERNANCE-OPS-REPORT-2026-06-10.md` | `GOVERNANCE-OPS-REPORT-2026-06-10` | governance_ops_report | watch | watch | Governance Operations Report |
 | `reviews/HANDOFF-2026-06-15-ui-redesign-and-product-structure.md` | `HANDOFF-2026-06-15-ui-redesign-and-product-structure` | md | record | n/a | HANDOFF — UI Redesign & Product-Structure Change (for next session) |
 | `reviews/LIVE-REVIEWER-GATE-2026-06-09-task-ar-206.json` | `LIVE-REVIEWER-GATE-2026-06-09-task-ar-206` | json | record | n/a | LIVE-REVIEWER-GATE-2026-06-09-task-ar-206 |
@@ -478,6 +479,7 @@ record_count: 548
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report` | md | record | pass | Self Improvement Cadence T3 Replan After Report |
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan` | md | record | pass | Self Improvement Cadence T3 Replan |
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration` | md | record | pass | Self Improvement Remediation Registration |
+| `reviews/REVIEW-2026-06-18-beta-tester-role-strengthening.md` | `REVIEW-2026-06-18-beta-tester-role-strengthening` | review | pass | pass | Beta Tester Role Strengthening |
 | `reviews/REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout.md` | `REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout` | review | pass | n/a | LLM-Wiki Worktree Preservation Closeout |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
