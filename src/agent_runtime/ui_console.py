@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs
+from urllib.parse import unquote
 from urllib.parse import urlparse
 
 from . import ui_commands
@@ -251,6 +252,15 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         except (ValueError, IndexError):
             limit = ui_state.KNOWLEDGE_GRAPH_VIEW_LIMIT
         return _json_response(ui_state.build_knowledge_graph_view(root_path, limit=limit))
+    if request_path == "/api/wiki/page" or request_path.startswith("/api/wiki/page/"):
+        if request_path.startswith("/api/wiki/page/"):
+            entity_id = unquote(request_path[len("/api/wiki/page/") :]).strip()
+        else:
+            entity_id = (parse_qs(parsed_url.query).get("id", [""])[0] or "").strip()
+        page = ui_state.build_wiki_page(root_path, entity_id)
+        if page is None:
+            return _json_response({"resource": "wiki_page", "id": entity_id, "error": "not found"}, status=404)
+        return _json_response({"resource": "wiki_page", **page})
     if request_path == "/api/events":
         state = ui_state.build_state(root_path)
         filters = {key: values[0] for key, values in parse_qs(parsed_url.query).items() if values}

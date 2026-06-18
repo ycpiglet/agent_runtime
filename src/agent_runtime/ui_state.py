@@ -5426,6 +5426,132 @@ def build_dependency_graph(tasks: list[dict[str, Any]], now: str) -> dict[str, A
 
 KNOWLEDGE_GRAPH_VIEW_SCHEMA = "agent-runtime-knowledge-graph-view/v1"
 KNOWLEDGE_GRAPH_VIEW_LIMIT = 140
+WIKI_PAGE_SCHEMA = "agent-runtime-wiki-page/v1"
+WIKI_MINIGRAPH_LIMIT = 48
+
+
+def _ensure_knowledge_import_paths(root: Path) -> None:
+    root_path = Path(root).resolve()
+    repo_root = Path(__file__).resolve().parents[2]
+    for path in (root_path, root_path / "scripts", repo_root, repo_root / "scripts"):
+        text = str(path)
+        if text not in sys.path:
+            sys.path.insert(0, text)
+
+
+def _knowledge_source_metadata(root: Path, node: dict[str, Any], *, now: str) -> dict[str, Any]:
+    metadata = node.get("metadata") or {}
+    source = str(metadata.get("path") or "").strip()
+    source_path = Path(root) / source if source else Path(root)
+    updated_at = _mtime_iso(source_path) if source else None
+    return {
+        "owner": metadata.get("owner") or metadata.get("agent_role"),
+        "status": metadata.get("status"),
+        "updated_at": updated_at or metadata.get("date") or metadata.get("updated_at"),
+        "freshness": _path_freshness(source_path) if source else "unknown",
+        "lineage": metadata.get("fingerprint"),
+        "source": source or None,
+    }
+
+
+def _wiki_node_summary(node: dict[str, Any], *, root_id: str | None = None) -> dict[str, Any]:
+    node_id = str(node.get("id") or "")
+    return {
+        "id": node_id,
+        "kind": str(node.get("kind") or "entity"),
+        "title": str(node.get("title") or node_id),
+        "root": bool(root_id and node_id == root_id),
+    }
+
+
+def build_wiki_page(root: Path, entity_id: str, *, now: str | None = None) -> dict[str, Any] | None:
+    """Deterministic wiki page envelope over the knowledge graph.
+
+    The console route uses this read-only helper for a page API. It omits
+    unresolved relation endpoints so rendered links can stay dead-link free.
+    """
+    entity_id = (entity_id or "").strip()
+    if not entity_id:
+        return None
+    moment = now or datetime.now(timezone.utc).isoformat()
+    try:
+        _ensure_knowledge_import_paths(root)
+        from scripts import knowledge_digest as kd
+        from scripts import knowledge_graph as kg
+    except ImportError:
+        return None
+    try:
+        graph = kg.build_graph(Path(root))
+        idx = kg.build_index(graph)
+        digest_page = kd.build_page(idx, entity_id)
+    except Exception:
+        return None
+    if digest_page is None:
+        return None
+    node = idx.by_id.get(entity_id)
+    if node is None:
+        return None
+
+    relations: list[dict[str, Any]] = []
+    for rel_type, target in idx.forward.get(entity_id, []):
+        target_node = idx.by_id.get(target)
+        if target_node is None:
+            continue
+        relations.append({
+            "type": rel_type,
+            "target_id": target,
+            "target_title": target_node.get("title") or target,
+            "target_kind": target_node.get("kind") or "entity",
+        })
+
+    backlinks: list[dict[str, Any]] = []
+    for rel_type, source in idx.backward.get(entity_id, []):
+        source_node = idx.by_id.get(source)
+        if source_node is None:
+            continue
+        backlinks.append({
+            "type": rel_type,
+            "source_id": source,
+            "source_title": source_node.get("title") or source,
+            "source_kind": source_node.get("kind") or "entity",
+        })
+
+    local_ids = [entity_id]
+    for rel in relations:
+        if rel["target_id"] not in local_ids:
+            local_ids.append(rel["target_id"])
+    for rel in backlinks:
+        if rel["source_id"] not in local_ids:
+            local_ids.append(rel["source_id"])
+    local_ids = local_ids[:WIKI_MINIGRAPH_LIMIT]
+    kept = set(local_ids)
+    minigraph_edges: list[dict[str, str]] = []
+    for rel in relations:
+        target = str(rel["target_id"])
+        if target in kept:
+            minigraph_edges.append({"from": entity_id, "to": target, "type": str(rel["type"])})
+    for rel in backlinks:
+        source = str(rel["source_id"])
+        if source in kept:
+            minigraph_edges.append({"from": source, "to": entity_id, "type": str(rel["type"])})
+
+    metadata = _knowledge_source_metadata(Path(root), node, now=moment)
+    metadata["lineage"] = digest_page.get("fingerprint")
+    return {
+        "schema": WIKI_PAGE_SCHEMA,
+        "generated_at": moment,
+        "id": entity_id,
+        "kind": node.get("kind"),
+        "title": node.get("title") or entity_id,
+        "summary": kd.render_markdown(digest_page),
+        "metadata": metadata,
+        "relations": relations,
+        "backlinks": backlinks,
+        "minigraph": {
+            "nodes": [_wiki_node_summary(idx.by_id[i], root_id=entity_id) for i in local_ids if i in idx.by_id],
+            "edges": minigraph_edges,
+        },
+    }
 
 
 def build_knowledge_graph_view(

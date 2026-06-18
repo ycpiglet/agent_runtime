@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-18T22:49:24+09:00
-record_count: 581
+generated_at: 2026-06-18T22:54:02+09:00
+record_count: 582
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `581` review and evidence records under `reviews/`.
+- Summary: indexed `582` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `581` files |
+| Reviews covered | pass | `582` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -495,6 +495,7 @@ record_count: 581
 | `reviews/REVIEW-2026-06-18-taskset-ar-design-system-governance-registration.md` | `REVIEW-2026-06-18-taskset-ar-design-system-governance-registration` | md | record | pass | Design System Governance Registration |
 | `reviews/REVIEW-2026-06-18-taskset-ar-design-system-served-asset-split-registration.md` | `REVIEW-2026-06-18-taskset-ar-design-system-served-asset-split-registration` | md | record | pass | Design System Served Asset Split Registration |
 | `reviews/REVIEW-2026-06-18-taskset-ar-design-system-token-debt-registration.md` | `REVIEW-2026-06-18-taskset-ar-design-system-token-debt-registration` | md | record | pass | Design System Token Debt Registration |
+| `reviews/REVIEW-2026-06-18-wiki-page-api-envelope.md` | `REVIEW-2026-06-18-wiki-page-api-envelope` | md | record | pass | Wiki Page API Envelope |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario |
