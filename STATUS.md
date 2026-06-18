@@ -3,7 +3,7 @@
 ## 현재 한 줄 요약
 
 - `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` is complete: `TASK-AR-597`, `TASK-AR-598`, and `TASK-AR-599` are implemented, W4b-verified, integrated, and closed.
-- Active next work is `TASKSET-AR-LLM-WIKI` / `TASK-AR-594`: Wiki per-page mini-graph lens. Create a fresh claim before implementation.
+- Active work is `TASKSET-AR-LLM-WIKI` / `TASK-AR-594`: Wiki per-page mini-graph lens. Claim `CLAIM-20260619-025906-task-ar-594-wiki-minigraph` is active in `.worktrees/TASK-AR-594`; implementation not started.
 - UI refactor/design-system remediation is functionally past the assetization and debt-consolidation phases; the new remaining work is proposal registration from `ui_ux_cycle.py propose`, not ad hoc UI mutation.
 - `TASK-AR-583` semantic spacing/radius scale is W4b verified and integrated; `TASK-AR-584` is next.
 - `TASK-AR-593` Wiki search + ask has passed W4b, was released, merged, and its worktree/branch were cleaned.

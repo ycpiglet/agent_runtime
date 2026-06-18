@@ -1,5 +1,5 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T02:55:00+09:00
+updated_at: 2026-06-19T03:08:30+09:00
 current_state:
   summary: "TASKSET-AR-UI-UX-CYCLE-AUTOMATION is complete; resume TASKSET-AR-LLM-WIKI with TASK-AR-594 as the next active task for wiki graph strengthening."
   status: active
@@ -8,9 +8,14 @@ current_state:
   step_index: 1
   step_total: 2
   progress_pct: 50
-  status_text: "Next active work is TASK-AR-594 Wiki per-page mini-graph lens; create a fresh claim before implementation."
+  status_text: "TASK-AR-594 Wiki per-page mini-graph lens is claimed in .worktrees/TASK-AR-594; implementation not started."
 active_work:
-  current_agents: []
+  current_agents:
+    - claim_id: CLAIM-20260619-025906-task-ar-594-wiki-minigraph
+      agent_role: lead-engineer
+      agent_instance_id: uiux-wiki-20260619-594
+      display_name: codex-wiki-minigraph-594
+      callsite_id: terminal:wt-task-ar-594:tab-01
   current_teams:
     - uiux
 resume:
@@ -35,7 +40,7 @@ pointers:
     self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-584-20260619011843.json
     w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-584.md
   active_claims:
-    []
+    - agents/runtime/task_claims/CLAIM-20260619-025906-task-ar-594-wiki-minigraph.json
   ui_ux_cycle_automation:
     taskset: TASKSET-AR-UI-UX-CYCLE-AUTOMATION
     completed_tasks:
@@ -54,7 +59,7 @@ pointers:
     next_task: null
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
-    active_claim: null
+    active_claim: agents/runtime/task_claims/CLAIM-20260619-025906-task-ar-594-wiki-minigraph.json
     released_claim: agents/runtime/task_claims/CLAIM-20260619-011800-task-ar-596-wiki-lint.json
     preserved_claim: agents/runtime/task_claims/CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve.json
     preserved_branch: archive/branches/20260619/claude-llm-wiki

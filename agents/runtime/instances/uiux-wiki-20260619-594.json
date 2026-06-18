@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "uiux-wiki-20260619-594",
+  "callsign": "codex-wiki-minigraph-594",
+  "callsite_id": "terminal:wt-task-ar-594:tab-01",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260619-025906-task-ar-594-wiki-minigraph.json"
+  ],
+  "created_at": "2026-06-19T02:59:06+09:00",
+  "decision_cycle_id": "",
+  "display_name": "codex-wiki-minigraph-594",
+  "model": "",
+  "model_tier": "worker_standard",
+  "on_behalf_of": "TASK-AR-594",
+  "pane_id": "terminal:wt-task-ar-594:tab-01",
+  "parent_instance_id": "",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "lead-engineer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-19T02:59:06+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-594",
+  "task_set_id": "TASKSET-AR-LLM-WIKI",
+  "team_id": "ui-ux",
+  "unit_id": "",
+  "unit_spec": "",
+  "updated_at": "2026-06-19T02:59:06+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-594"
+}
