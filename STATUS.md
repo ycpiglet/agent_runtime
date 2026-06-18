@@ -2,8 +2,8 @@
 
 ## 현재 한 줄 요약
 
-- Active line is `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC`: `TASK-AR-600` and `TASK-AR-601` are complete and released; `TASK-AR-602` is the next planned docs-only derivation step before any UI source mutation.
-- The previous `TASKSET-AR-LLM-WIKI` closeout is complete: `TASK-AR-590..596` are archived `7/7`, W4b evidence is indexed, and active claims are currently clear.
+- Active line is `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC`: `TASK-AR-600` and `TASK-AR-601` are complete and released; `TASK-AR-602` is now claimed for docs-only implementation/evaluation derivation before any UI source mutation.
+- The previous `TASKSET-AR-LLM-WIKI` closeout is complete: `TASK-AR-590..596` are archived `7/7`, W4b evidence is indexed, and that taskset has no active claims.
 - UI refactor/design-system remediation is functionally past the assetization and debt-consolidation phases; the current work is the design-direction RFC cycle before the next UI source mutation.
 - `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` is complete: `TASK-AR-597`, `TASK-AR-598`, and `TASK-AR-599` are implemented, W4b-verified, integrated, and closed.
 - `TASK-AR-583` semantic spacing/radius scale is W4b verified and integrated; `TASK-AR-584` is next.

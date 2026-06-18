@@ -1,16 +1,21 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T08:50:33+09:00
+updated_at: 2026-06-19T08:55:00+09:00
 current_state:
-  summary: "TASK-AR-601 is closed; TASK-AR-602 is the next planned UI/UX design-direction task before any UI source mutation."
-  status: active
+  summary: "TASK-AR-602 is claimed to derive the next UI implementation and UX evaluation units before any UI source mutation."
+  status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC"
   step_index: 4
   step_total: 5
   progress_pct: 67
-  status_text: "No active claim; next step is to claim TASK-AR-602 before deriving implementation and UX evaluation units."
+  status_text: "TASK-AR-602 is active; output is planning/registration input only, with UI source mutation blocked."
 active_work:
-  current_agents: []
+  current_agents:
+    - claim_id: CLAIM-20260619-085500-task-ar-602-ui-next-units
+      agent_role: interface-designer
+      agent_instance_id: interface-designer-20260619-085500-kst-ui-next-units
+      display_name: codex-interface-designer-ui-next-units-602
+      callsite_id: terminal:wt-task-ar-602:tab-01
   current_teams:
     - ui-ux
 resume:
@@ -34,7 +39,8 @@ pointers:
     next_task: null
     self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-584-20260619011843.json
     w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-584.md
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260619-085500-task-ar-602-ui-next-units.json
   ui_ux_cycle_automation:
     taskset: TASKSET-AR-UI-UX-CYCLE-AUTOMATION
     completed_tasks:
