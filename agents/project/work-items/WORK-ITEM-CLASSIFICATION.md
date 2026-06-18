@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-19T01:38:50+09:00
+generated_at: 2026-06-19T01:42:43+09:00
 record_count: 352
 ---
 
@@ -360,7 +360,7 @@ record_count: 352
 | 13.1.5 | Task 13.1.5 | task | `TASK-AR-594` | `TASKSET-AR-LLM-WIKI` | planned | `agents/lead_engineer/tasks/TASK-AR-594.md` | Refine the per-page mini-graph into a typed, contextual insight lens with click-to-na… |
 | 13.1.6 | Task 13.1.6 | task | `TASK-AR-595` | `TASKSET-AR-LLM-WIKI` | planned | `agents/lead_engineer/tasks/TASK-AR-595.md` | Promote Wiki/Search as a core navigation hub adjacent to Records and add cross-links… |
 | 13.1.7 | Task 13.1.7 | task | `TASK-AR-596` | `TASKSET-AR-LLM-WIKI` | planned | `agents/lead_engineer/tasks/TASK-AR-596.md` | Extend knowledge lint coverage for the expanded corpus and close `TASKSET-AR-LLM-WIKI… |
-| 13.1.7.1 | Unit 13.1.7.1 | unit | `UNIT-TASK-AR-596-001` | `TASK-AR-596` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-596/UNIT-TASK-AR-596-001.md` | UNIT-TASK-AR-596-001 - Extend wiki corpus lint checks |
+| 13.1.7.1 | Unit 13.1.7.1 | unit | `UNIT-TASK-AR-596-001` | `TASK-AR-596` | completed | `agents/lead_engineer/tasks/units/TASK-AR-596/UNIT-TASK-AR-596-001.md` | UNIT-TASK-AR-596-001 - Extend wiki corpus lint checks |
 | 14 | Initiative 14 | initiative | `INIT-AR-DESIGN-SYSTEM-GOVERNANCE` | - | active | `agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-GOVERNANCE.md` | Design System Governance |
 | 14.1 | Taskset 14.1 | taskset | `TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE` | `INIT-AR-DESIGN-SYSTEM-GOVERNANCE` | complete | `BACKLOG-BOARD.md` | Design System Governance |
 | 14.1.1 | Task 14.1.1 | task | `TASK-AR-578` | `TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE` | completed | `agents/lead_engineer/tasks/TASK-AR-578.md` | Create durable design-system governance for Agent Runtime UI work: a diagnostic repor… |
