@@ -1,0 +1,116 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-19-task-ar-594-20260619031224",
+  "work_id": "TASK-AR-594",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-594.md",
+  "kind": "task",
+  "task_id": "TASK-AR-594",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-19T03:12:24+09:00",
+  "verified_by": "codex-wiki-minigraph-594",
+  "claim_id": "CLAIM-20260619-025906-task-ar-594-wiki-minigraph",
+  "worktree_path": ".worktrees/TASK-AR-594",
+  "commit_ref": "77f98af",
+  "command_count": 10,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_wiki_page_api.py tests/test_ui_console.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "159 passed, 1 warning in 19.84s",
+      "stderr_summary": ""
+    },
+    {
+      "command": "python -m py_compile src/agent_runtime/ui_state.py",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "No output; compilation succeeded.",
+      "stderr_summary": ""
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "No whitespace errors.",
+      "stderr_summary": ""
+    },
+    {
+      "command": "python -m pytest tests/test_wiki_page_api.py tests/test_wiki_search_ask_api.py tests/test_knowledge_graph.py tests/test_knowledge_digest.py tests/test_knowledge_ask.py tests/test_knowledge_lint.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "67 passed in 8.13s",
+      "stderr_summary": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0",
+      "stderr_summary": ""
+    },
+    {
+      "command": "python scripts/knowledge_graph.py check --json --git-limit 0",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "{\"findings\": [], \"ok\": true}",
+      "stderr_summary": ""
+    },
+    {
+      "command": "node -e \"try { require('playwright'); console.log('playwright:yes') } catch (e) { console.log('playwright:no') }\"",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "playwright:no",
+      "stderr_summary": ""
+    },
+    {
+      "command": "Start worktree console on :8766 and GET /api/wiki/page/TASK-AR-594",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "{\"Status\":200,\"Id\":\"TASK-AR-594\",\"Nodes\":4,\"Edges\":4,\"Summary\":\"references\",\"Capped\":false}",
+      "stderr_summary": ""
+    },
+    {
+      "command": "python scripts/rbac_write_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "rbac-write-gate: pass; findings=0",
+      "stderr_summary": ""
+    },
+    {
+      "command": "python scripts/taskset_work_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "taskset-work-gate: pass; findings=0",
+      "stderr_summary": ""
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion": "Mini-graph remains bounded and nonblank.",
+      "status": "passed",
+      "evidence": "API envelope includes limit, total_nodes, total_edges, capped, and returns 4 nodes / 4 edges for TASK-AR-594 in the worktree server route. UI also adds a 12/24/48 node limit control while keeping the server cap at WIKI_MINIGRAPH_LIMIT."
+    },
+    {
+      "criterion": "Edge/node kinds are legible through tokenized styling.",
+      "status": "passed",
+      "evidence": "Nodes now include role, degree, incoming_count, outgoing_count, and edge_types; edges include source/target title/kind. CSS adds token-only role and edge-label styling, and tests assert no raw wiki CSS colors."
+    },
+    {
+      "criterion": "Node clicks navigate to wiki pages.",
+      "status": "passed",
+      "evidence": "renderWikiMiniGraph keeps click navigation via openWikiPage(node.id) and adds keyboard Enter/Space navigation with role=button, tabindex=0, and aria-label."
+    },
+    {
+      "criterion": "Tests cover rendering invariants and CSS/JS guardrails.",
+      "status": "passed",
+      "evidence": "tests/test_wiki_page_api.py covers minigraph relation counts, root role, node roles, counts, and edge titles. tests/test_ui_console.py covers the minigraph controls, class token helper, data attributes, CSS selectors, ASCII-only JS, node --check, and token-only wiki CSS."
+    }
+  ],
+  "residual": [
+    "Independent W4b verification and claim release are still required before TASK-AR-594 can be closed.",
+    "Playwright is not installed in this environment, so W4a could not capture a browser screenshot. HTTP route verification, JS node-check, DOM contract tests, and CSS gate all passed."
+  ],
+  "next_step": "Independent W4b review should verify commit 77f98af, the evidence file, and the recorded commands, then release CLAIM-20260619-025906-task-ar-594-wiki-minigraph if approved."
+}

@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-19
-archived_count: 254
+archived_count: 255
 ---
 
 # Archived Task Files
 
-- `254` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `255` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -266,4 +266,5 @@ archived_count: 254
 | `TASK-AR-584` | `ba370d39-693…` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | completed | 2026-06-18T18:43:04+09:00 | 2026-06-19T00:58:28+09:00 | 2026-06-19T01:36:21+09:00 | 2026-06-19T01:36:21+09:00 | Move view-specific JS renderers (data-heavy SVG layouts, calendar grids, office-map p… |
 | `TASK-AR-591` | `67b812de-9f0…` | `TASKSET-AR-LLM-WIKI` | completed | 2026-06-17T22:30:00+09:00 | 2026-06-18T00:00:00+09:00 | 2026-06-18T22:05:00+09:00 | 2026-06-18T22:05:00+09:00 | Add a deterministic wiki page envelope with summary, metadata, typed relationships, b… |
 | `TASK-AR-590` | `e2ae011e-bd3…` | `TASKSET-AR-LLM-WIKI` | completed | 2026-06-17T22:30:00+09:00 | 2026-06-18T00:00:00+09:00 | 2026-06-18T21:42:00+09:00 | 2026-06-18T21:42:00+09:00 | Extend the knowledge graph corpus so LLM-Wiki pages can reason over runtime assets, h… |
+| `TASK-AR-594` | `180d4bc2-8a3…` | `TASKSET-AR-LLM-WIKI` | completed | 2026-06-17T22:30:00+09:00 | 2026-06-19T02:59:06+09:00 | 2026-06-19T03:24:00+09:00 | 2026-06-19T03:24:00+09:00 | Refine the per-page mini-graph into a typed, contextual insight lens with click-to-na… |
 | `TASK-AR-592` | `32dd58d6-22a…` | `TASKSET-AR-LLM-WIKI` | completed | 2026-06-17T22:30:00+09:00 | 2026-06-18T00:00:00+09:00 | 2026-06-18T23:00:00+09:00 | 2026-06-18T23:00:00+09:00 | Build the console Wiki view with entity page routing, summary, relations, backlinks,… |

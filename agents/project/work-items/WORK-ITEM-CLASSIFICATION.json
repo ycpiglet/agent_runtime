@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T02:53:21+09:00",
+  "generated_at": "2026-06-19T07:08:24+09:00",
   "record_count": 352,
   "finding_count": 0,
   "findings": [],
@@ -3512,7 +3512,7 @@
       "title": "Refine the per-page mini-graph into a typed, contextual insight lens with click-to-na…",
       "path": "agents/lead_engineer/tasks/TASK-AR-594.md",
       "parent_id": "TASKSET-AR-LLM-WIKI",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-595",

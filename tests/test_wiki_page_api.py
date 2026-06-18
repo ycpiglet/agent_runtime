@@ -52,6 +52,23 @@ def test_build_wiki_page_envelope_resolves_relations_backlinks_and_minigraph(tmp
     minigraph_ids = {node["id"] for node in page["minigraph"]["nodes"]}
     assert "TASK-AR-1" in minigraph_ids and "TASKSET-A" in minigraph_ids
     assert all(edge["from"] in minigraph_ids and edge["to"] in minigraph_ids for edge in page["minigraph"]["edges"])
+    assert page["minigraph"]["root_id"] == "TASK-AR-1"
+    assert page["minigraph"]["limit"] == ui_state.WIKI_MINIGRAPH_LIMIT
+    assert page["minigraph"]["total_nodes"] >= len(page["minigraph"]["nodes"])
+    assert page["minigraph"]["total_edges"] >= len(page["minigraph"]["edges"])
+    assert any(item["type"] == "partOf" and item["outgoing"] == 1 for item in page["minigraph"]["relation_counts"])
+    root_node = next(node for node in page["minigraph"]["nodes"] if node["id"] == "TASK-AR-1")
+    assert root_node["root"] is True
+    assert root_node["role"] == "root"
+    assert root_node["degree"] >= 2
+    assert root_node["incoming_count"] >= 1
+    assert root_node["outgoing_count"] >= 1
+    taskset_node = next(node for node in page["minigraph"]["nodes"] if node["id"] == "TASKSET-A")
+    assert taskset_node["role"] == "outgoing"
+    assert "partOf" in taskset_node["edge_types"]
+    edge = next(edge for edge in page["minigraph"]["edges"] if edge["type"] == "partOf")
+    assert edge["source_title"] == "One"
+    assert edge["target_title"] == "Set A"
 
 
 def test_build_wiki_page_missing_entity_returns_none(tmp_path: Path) -> None:

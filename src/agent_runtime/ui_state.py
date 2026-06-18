@@ -5458,13 +5458,25 @@ def _knowledge_source_metadata(root: Path, node: dict[str, Any], *, now: str) ->
     }
 
 
-def _wiki_node_summary(node: dict[str, Any], *, root_id: str | None = None) -> dict[str, Any]:
+def _wiki_node_summary(
+    node: dict[str, Any],
+    *,
+    root_id: str | None = None,
+    lens: dict[str, dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     node_id = str(node.get("id") or "")
+    stats = (lens or {}).get(node_id, {})
+    edge_types = sorted(str(item) for item in stats.get("edge_types", []) if str(item).strip())
     return {
         "id": node_id,
         "kind": str(node.get("kind") or "entity"),
         "title": str(node.get("title") or node_id),
         "root": bool(root_id and node_id == root_id),
+        "role": str(stats.get("role") or ("root" if root_id and node_id == root_id else "neighbor")),
+        "degree": int(stats.get("degree") or 0),
+        "incoming_count": int(stats.get("incoming_count") or 0),
+        "outgoing_count": int(stats.get("outgoing_count") or 0),
+        "edge_types": edge_types,
     }
 
 
@@ -5704,6 +5716,57 @@ def build_wiki_page(root: Path, entity_id: str, *, now: str | None = None) -> di
             "source_kind": source_node.get("kind") or "entity",
         })
 
+    lens_stats: dict[str, dict[str, Any]] = {
+        entity_id: {
+            "role": "root",
+            "degree": 0,
+            "incoming_count": 0,
+            "outgoing_count": 0,
+            "edge_types": set(),
+        }
+    }
+    relation_counts: dict[str, dict[str, int]] = {}
+
+    def _relation_count(rel_type: str, direction: str) -> None:
+        bucket = relation_counts.setdefault(rel_type, {"incoming": 0, "outgoing": 0, "total": 0})
+        bucket[direction] += 1
+        bucket["total"] += 1
+
+    def _node_lens(node_id: str) -> dict[str, Any]:
+        return lens_stats.setdefault(node_id, {
+            "role": "neighbor",
+            "degree": 0,
+            "incoming_count": 0,
+            "outgoing_count": 0,
+            "edge_types": set(),
+        })
+
+    def _add_lens_edge(other_id: str, rel_type: str, direction: str) -> None:
+        root_lens = _node_lens(entity_id)
+        other_lens = _node_lens(other_id)
+        root_lens["degree"] += 1
+        root_lens[f"{direction}_count"] += 1
+        root_lens["edge_types"].add(rel_type)
+        other_lens["degree"] += 1
+        other_lens["edge_types"].add(rel_type)
+        if direction == "outgoing":
+            other_lens["incoming_count"] += 1
+            other_role = "outgoing"
+        else:
+            other_lens["outgoing_count"] += 1
+            other_role = "incoming"
+        existing_role = str(other_lens.get("role") or "neighbor")
+        if existing_role in ("neighbor", other_role):
+            other_lens["role"] = other_role
+        elif existing_role != "root":
+            other_lens["role"] = "mixed"
+        _relation_count(rel_type, direction)
+
+    for rel in relations:
+        _add_lens_edge(str(rel["target_id"]), str(rel["type"]), "outgoing")
+    for rel in backlinks:
+        _add_lens_edge(str(rel["source_id"]), str(rel["type"]), "incoming")
+
     local_ids = [entity_id]
     for rel in relations:
         if rel["target_id"] not in local_ids:
@@ -5711,17 +5774,47 @@ def build_wiki_page(root: Path, entity_id: str, *, now: str | None = None) -> di
     for rel in backlinks:
         if rel["source_id"] not in local_ids:
             local_ids.append(rel["source_id"])
+    total_nodes = len(local_ids)
     local_ids = local_ids[:WIKI_MINIGRAPH_LIMIT]
     kept = set(local_ids)
-    minigraph_edges: list[dict[str, str]] = []
+    minigraph_edges: list[dict[str, Any]] = []
     for rel in relations:
         target = str(rel["target_id"])
         if target in kept:
-            minigraph_edges.append({"from": entity_id, "to": target, "type": str(rel["type"])})
+            minigraph_edges.append({
+                "from": entity_id,
+                "to": target,
+                "type": str(rel["type"]),
+                "source_title": node.get("title") or entity_id,
+                "source_kind": node.get("kind") or "entity",
+                "target_title": rel.get("target_title") or target,
+                "target_kind": rel.get("target_kind") or "entity",
+            })
     for rel in backlinks:
         source = str(rel["source_id"])
         if source in kept:
-            minigraph_edges.append({"from": source, "to": entity_id, "type": str(rel["type"])})
+            minigraph_edges.append({
+                "from": source,
+                "to": entity_id,
+                "type": str(rel["type"]),
+                "source_title": rel.get("source_title") or source,
+                "source_kind": rel.get("source_kind") or "entity",
+                "target_title": node.get("title") or entity_id,
+                "target_kind": node.get("kind") or "entity",
+            })
+
+    relation_summary = [
+        {
+            "type": rel_type,
+            "incoming": counts["incoming"],
+            "outgoing": counts["outgoing"],
+            "total": counts["total"],
+        }
+        for rel_type, counts in sorted(
+            relation_counts.items(),
+            key=lambda item: (-item[1]["total"], item[0]),
+        )
+    ]
 
     metadata = _knowledge_source_metadata(Path(root), node, now=moment)
     metadata["lineage"] = digest_page.get("fingerprint")
@@ -5736,7 +5829,13 @@ def build_wiki_page(root: Path, entity_id: str, *, now: str | None = None) -> di
         "relations": relations,
         "backlinks": backlinks,
         "minigraph": {
-            "nodes": [_wiki_node_summary(idx.by_id[i], root_id=entity_id) for i in local_ids if i in idx.by_id],
+            "root_id": entity_id,
+            "limit": WIKI_MINIGRAPH_LIMIT,
+            "total_nodes": total_nodes,
+            "total_edges": len(relations) + len(backlinks),
+            "capped": total_nodes > WIKI_MINIGRAPH_LIMIT,
+            "relation_counts": relation_summary,
+            "nodes": [_wiki_node_summary(idx.by_id[i], root_id=entity_id, lens=lens_stats) for i in local_ids if i in idx.by_id],
             "edges": minigraph_edges,
         },
     }

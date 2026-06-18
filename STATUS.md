@@ -3,7 +3,7 @@
 ## 현재 한 줄 요약
 
 - `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` is complete: `TASK-AR-597`, `TASK-AR-598`, and `TASK-AR-599` are implemented, W4b-verified, integrated, and closed.
-- Active work is `TASKSET-AR-LLM-WIKI` / `TASK-AR-594`: Wiki per-page mini-graph lens. Claim `CLAIM-20260619-025906-task-ar-594-wiki-minigraph` is active in `.worktrees/TASK-AR-594`; implementation not started.
+- Active line is `TASKSET-AR-LLM-WIKI`: `TASK-AR-594` is W4b verified, released, and closed; next claim should target `TASK-AR-595`.
 - UI refactor/design-system remediation is functionally past the assetization and debt-consolidation phases; the new remaining work is proposal registration from `ui_ux_cycle.py propose`, not ad hoc UI mutation.
 - `TASK-AR-583` semantic spacing/radius scale is W4b verified and integrated; `TASK-AR-584` is next.
 - `TASK-AR-593` Wiki search + ask has passed W4b, was released, merged, and its worktree/branch were cleaned.
@@ -12,6 +12,15 @@
 - Scribe source is now the live status summary section so advisory health can be measured without fabricating role evidence.
 - Doc Steward remains ok; keep document-health checks advisory and evidence-based.
 - Next for Design System Debt Consolidation: dispatch `TASK-AR-584` when continuing the sequence.
+
+## 2026-06-19 - TASKSET-AR-LLM-WIKI / TASK-AR-594 complete
+
+- Completed task: `TASK-AR-594` refined the Wiki per-page mini-graph into a bounded typed lens with role/degree metadata, edge metadata, node limit controls, and click/keyboard navigation.
+- Released claim: `CLAIM-20260619-025906-task-ar-594-wiki-minigraph` is W4b verified with `phase=w4b-verified-released`, `progress_pct=100`.
+- Worktree/branch: `.worktrees/TASK-AR-594` was removed during W5 cleanup; implementation branch `codex/task-ar-594-wiki-minigraph` was integrated from commit `2c5729f`.
+- Evidence: `reviews/VERIFY-2026-06-19-task-ar-594-20260619031224.json`; `reviews/W4B-2026-06-19-TASK-AR-594.md`.
+- Verification: Wiki page/UI console tests passed (`159 passed`), Wiki knowledge regression tests passed (`67 passed`), design-system gate passed with no findings, knowledge graph check passed, syntax check passed, and diff whitespace check passed.
+- Boundary: `TASKSET-AR-LLM-WIKI` remains active. Continue with `TASK-AR-595` before the final `TASK-AR-596` closeout.
 
 ## 2026-06-19 - TASKSET-AR-UI-UX-CYCLE-AUTOMATION complete
 
@@ -30,15 +39,15 @@
 - Verification: design-system/UI console tests passed (`173 passed`), full design-system gate passed with no findings, alias scan found no runtime matches, and syntax checks passed.
 - Boundary: `TASK-AR-583` is complete, but `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` is not complete; continue with `TASK-AR-584`.
 
-## 2026-06-18 - TASKSET-AR-LLM-WIKI / TASK-AR-593 W4a ready
+## 2026-06-18 - TASKSET-AR-LLM-WIKI / TASK-AR-593 complete
 
-- Active claim: `CLAIM-20260618-233054-task-ar-593-6287` is in `review` with `phase=self-verified`, `progress_pct=90`.
-- Worktree/branch: `.worktrees/TASK-AR-593` / `codex/task-ar-593-wiki-search-ask`.
+- Completed claim: `CLAIM-20260618-233054-task-ar-593-6287` passed W4b, was released, merged, and cleaned.
+- Worktree/branch: `.worktrees/TASK-AR-593` / `codex/task-ar-593-wiki-search-ask`; both were cleaned after integration.
 - Commit: `b6df4ce Add wiki search and ask surface`.
 - Output: `/api/wiki/search?q=`, `/api/wiki/ask?q=&llm=0|1`, shared Wiki search/ask bar, evidence answer rendering, clickable search/evidence rows.
-- W4a evidence: `reviews/VERIFY-2026-06-18-task-ar-593-20260618234500.json`; review `reviews/REVIEW-2026-06-18-wiki-search-ask.md`.
+- Evidence: `reviews/VERIFY-2026-06-18-task-ar-593-20260618234500.json`; `reviews/W4B-2026-06-19-TASK-AR-593.md`; review `reviews/REVIEW-2026-06-18-wiki-search-ask.md`.
 - Verification: wiki/search/page APIs `8` tests, UI console `155` tests, knowledge regression `62` tests, `py_compile`, `git diff --check`, taskset gate, knowledge graph check, and owner-governance all passed in the worktree.
-- Boundary: not merged or completed yet; W4b independent verification and claim release are required before W5 cleanup.
+- Boundary: complete; continue the taskset through `TASK-AR-594`, `TASK-AR-595`, and final `TASK-AR-596` closeout.
 
 ## 2026-06-18 - LLM-Wiki worktree preservation active
 

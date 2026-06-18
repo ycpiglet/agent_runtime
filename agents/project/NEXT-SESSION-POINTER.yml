@@ -1,25 +1,20 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T03:08:30+09:00
+updated_at: 2026-06-19T03:24:00+09:00
 current_state:
-  summary: "TASKSET-AR-UI-UX-CYCLE-AUTOMATION is complete; resume TASKSET-AR-LLM-WIKI with TASK-AR-594 as the next active task for wiki graph strengthening."
+  summary: "TASK-AR-594 Wiki mini-graph lens is W4b verified and released; continue TASKSET-AR-LLM-WIKI with TASK-AR-595 as the next active task."
   status: active
   task_set_status: active
   task_set_id: "TASKSET-AR-LLM-WIKI"
   step_index: 1
   step_total: 2
-  progress_pct: 50
-  status_text: "TASK-AR-594 Wiki per-page mini-graph lens is claimed in .worktrees/TASK-AR-594; implementation not started."
+  progress_pct: 65
+  status_text: "TASK-AR-594 is W4b verified and released; next claim should target TASK-AR-595 Wiki/Search navigation hub."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260619-025906-task-ar-594-wiki-minigraph
-      agent_role: lead-engineer
-      agent_instance_id: uiux-wiki-20260619-594
-      display_name: codex-wiki-minigraph-594
-      callsite_id: terminal:wt-task-ar-594:tab-01
+  current_agents: []
   current_teams:
     - uiux
 resume:
-  active_task: TASK-AR-594
+  active_task: TASK-AR-595
   active_task_set: TASKSET-AR-LLM-WIKI
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
@@ -40,7 +35,7 @@ pointers:
     self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-584-20260619011843.json
     w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-584.md
   active_claims:
-    - agents/runtime/task_claims/CLAIM-20260619-025906-task-ar-594-wiki-minigraph.json
+    []
   ui_ux_cycle_automation:
     taskset: TASKSET-AR-UI-UX-CYCLE-AUTOMATION
     completed_tasks:
@@ -59,20 +54,25 @@ pointers:
     next_task: null
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
-    active_claim: agents/runtime/task_claims/CLAIM-20260619-025906-task-ar-594-wiki-minigraph.json
-    released_claim: agents/runtime/task_claims/CLAIM-20260619-011800-task-ar-596-wiki-lint.json
+    active_claim: null
+    released_claim: agents/runtime/task_claims/CLAIM-20260619-025906-task-ar-594-wiki-minigraph.json
+    released_claims:
+      - agents/runtime/task_claims/CLAIM-20260619-011800-task-ar-596-wiki-lint.json
+      - agents/runtime/task_claims/CLAIM-20260619-025906-task-ar-594-wiki-minigraph.json
     preserved_claim: agents/runtime/task_claims/CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve.json
     preserved_branch: archive/branches/20260619/claude-llm-wiki
     preserved_branch_head: 5846e40
     worktree_path: null
-    implementation_branch: codex/task-ar-596-wiki-lint
-    implementation_commit: 121bfe6
-    status: unit_task_ar_596_001_released
+    implementation_branch: codex/task-ar-594-wiki-minigraph
+    implementation_commit: 2c5729f
+    status: task_ar_594_w4b_verified_released
     current_line_order: 624
-    next_decision: dispatch_task_ar_594_or_task_ar_595_before_full_task_ar_596_closeout
-    next_task: TASK-AR-594
-    next_after_release: TASK-AR-595
+    next_decision: dispatch_task_ar_595_before_full_task_ar_596_closeout
+    next_task: TASK-AR-595
+    next_after_release: TASK-AR-596
     verification_evidence: reviews/VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500.json
+    task_ar_594_self_verification: reviews/VERIFY-2026-06-19-task-ar-594-20260619031224.json
+    task_ar_594_w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-594.md
     w4b_evidence: reviews/W4B-2026-06-19-UNIT-TASK-AR-596-001.md
     review: reviews/REVIEW-2026-06-18-wiki-search-ask.md
   self_improvement_remediation:

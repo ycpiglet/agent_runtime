@@ -11,8 +11,13 @@
 - model_tier: worker_standard
 - wip_slot: 1
 - stop_condition: Stop after TASK-AR-594 wiki mini-graph lens implementation, tests, W4a evidence, and handoff are ready for independent W4b.
-- phase: claim-created
-- step: 1/5
-- progress_pct: 0
-- status_text: Claiming TASK-AR-594 wiki mini-graph lens; implementation not started.
-- status: claimed
+- phase: w4b-verified-released
+- step: 5/5
+- progress_pct: 100
+- status_text: TASK-AR-594 wiki mini-graph lens implemented, W4a self-verified, W4b approved, and claim released.
+- status: released
+- implementation_commit: 77f98af
+- w4a_evidence: reviews/VERIFY-2026-06-19-task-ar-594-20260619031224.json
+- w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-594.md
+- verified_by: 019edbf1-00e8-7b71-a8cc-ef4ec514359b
+- released_at: 2026-06-19T03:23:00+09:00
