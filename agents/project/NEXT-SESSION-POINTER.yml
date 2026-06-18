@@ -1,14 +1,14 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T00:59:00+09:00
+updated_at: 2026-06-19T01:12:00+09:00
 current_state:
-  summary: "TASK-AR-584 pattern renderer promotion is claimed in .worktrees/TASK-AR-584."
+  summary: "TASK-AR-584 pattern renderer promotion remains the top-level active task; TASK-AR-596 wiki lint extension is also claimed in .worktrees/TASK-AR-596."
   status: active
   task_set_status: active
   task_set_id: "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION"
   step_index: 1
   step_total: 5
   progress_pct: 0
-  status_text: "TASK-AR-584 claimed; worker should promote pattern renderers and write verification evidence."
+  status_text: "TASK-AR-584 owns UI renderer promotion; TASK-AR-596 owns non-overlapping wiki lint extension."
 active_work:
   current_agents:
     - display_name: codex-uiux-pattern-renderers-584
@@ -31,6 +31,26 @@ active_work:
       claim_path: agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.json
       handoff_path: agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.handoff.md
       last_heartbeat: 2026-06-19T00:58:28+09:00
+    - display_name: codex-wiki-lint-596
+      agent_role: lead-engineer
+      team_id: agent-runtime-core
+      agent_instance_id: wiki-lint-20260619-596
+      callsite_id: terminal:wt-task-ar-596:tab-01
+      pane_id: terminal:wt-task-ar-596:tab-01
+      task_id: TASK-AR-596
+      task_set_id: TASKSET-AR-LLM-WIKI
+      status: claimed
+      phase: claim-created
+      progress_pct: 0
+      step_index: 1
+      step_total: 5
+      status_text: Claimed TASK-AR-596 expanded corpus lint unit.
+      worktree_path: .worktrees/TASK-AR-596
+      branch: codex/task-ar-596-wiki-lint
+      claim_id: CLAIM-20260619-011800-task-ar-596-wiki-lint
+      claim_path: agents/runtime/task_claims/CLAIM-20260619-011800-task-ar-596-wiki-lint.json
+      handoff_path: agents/runtime/task_claims/CLAIM-20260619-011800-task-ar-596-wiki-lint.handoff.md
+      last_heartbeat: 2026-06-19T01:12:00+09:00
   current_teams:
     - team_id: ui-ux
       status: active
@@ -43,6 +63,17 @@ active_work:
       task_set_id: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
       pane_ids:
         - terminal:wt-task-ar-584:tab-01
+    - team_id: agent-runtime-core
+      status: active
+      phase: claim-created
+      progress_pct: 0
+      step_index: 1
+      step_total: 5
+      status_text: TASK-AR-596 wiki lint extension claimed
+      active_task: TASK-AR-596
+      task_set_id: TASKSET-AR-LLM-WIKI
+      pane_ids:
+        - terminal:wt-task-ar-596:tab-01
 resume:
   active_task: "TASK-AR-584"
   active_task_set: "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION"
@@ -66,19 +97,20 @@ pointers:
     w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-583.md
   active_claims:
     - agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.json
+    - agents/runtime/task_claims/CLAIM-20260619-011800-task-ar-596-wiki-lint.json
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
-    active_claim: null
+    active_claim: agents/runtime/task_claims/CLAIM-20260619-011800-task-ar-596-wiki-lint.json
     preserved_claim: agents/runtime/task_claims/CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve.json
     preserved_branch: archive/branches/20260619/claude-llm-wiki
     preserved_branch_head: 5846e40
-    worktree_path: null
-    implementation_branch: codex/task-ar-593-wiki-search-ask
-    implementation_commit: b6df4ce
-    status: task_ar_593_released_and_merged
+    worktree_path: .worktrees/TASK-AR-596
+    implementation_branch: codex/task-ar-596-wiki-lint
+    implementation_commit: pending
+    status: task_ar_596_lint_claimed
     current_line_order: 624
-    next_decision: continue_task_ar_594_or_backlog_priority
-    next_task: TASK-AR-594
+    next_decision: complete_task_ar_596_lint_unit_then_continue_task_ar_594_or_task_ar_595
+    next_task: TASK-AR-596
     next_after_release: TASK-AR-594
     verification_evidence: reviews/VERIFY-2026-06-18-task-ar-593-20260618234500.json
     w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-593.md
