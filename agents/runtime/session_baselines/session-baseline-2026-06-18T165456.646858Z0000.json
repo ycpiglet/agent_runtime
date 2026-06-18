@@ -1,0 +1,30 @@
+{
+  "schema": "agent-runtime-session-baseline/v1",
+  "captured_at": "2026-06-18T16:54:56.646858+00:00",
+  "cwd": "C:\\Users\\ycpig\\agent_runtime",
+  "head": "f0d883c",
+  "branch": "claude/decision-first-console-ia",
+  "status_fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stash_count": 0,
+  "worktrees": [
+    {
+      "path": "C:/Users/ycpig/agent_runtime",
+      "HEAD": "f0d883cae2b350b3f9f153178a03d20bbd0e4429",
+      "branch": "claude/decision-first-console-ia"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-598",
+      "HEAD": "1816a9ff7c21b5a3d6a4b7b89f87630297f9eeea",
+      "branch": "codex/task-ar-598-plan-review"
+    }
+  ],
+  "active_codex_branches": [
+    "claude/deadlock-guardrails",
+    "claude/decision-first-console-ia",
+    "claude/product-maturity-eval-merge",
+    "claude/release-auto-reg",
+    "claude/wave89-closeout",
+    "codex/task-ar-552",
+    "+ codex/task-ar-598-plan-review"
+  ]
+}
