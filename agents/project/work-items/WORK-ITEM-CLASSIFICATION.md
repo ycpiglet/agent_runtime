@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-19T08:10:26+09:00
-record_count: 352
+generated_at: 2026-06-19T08:18:38+09:00
+record_count: 358
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `352` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `358` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `21` records |
-| Tasksets | pass | `45` records |
-| Tasks | pass | `258` records |
-| Units | pass | `28` records |
+| Initiatives | pass | `22` records |
+| Tasksets | pass | `46` records |
+| Tasks | pass | `261` records |
+| Units | pass | `29` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -391,6 +391,12 @@ record_count: 352
 | 20.1.1.1 | Unit 20.1.1.1 | unit | `UNIT-TASK-AR-597-001` | `TASK-AR-597` | completed | `agents/lead_engineer/tasks/units/TASK-AR-597/UNIT-TASK-AR-597-001.md` | UNIT-TASK-AR-597-001 - Add UI/UX cycle conductor |
 | 20.1.2 | Task 20.1.2 | task | `TASK-AR-598` | `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` | completed | `agents/lead_engineer/tasks/TASK-AR-598.md` | Make the UI/UX cycle able to record meeting/seminar/beta-tester artifact skeletons af… |
 | 20.1.3 | Task 20.1.3 | task | `TASK-AR-599` | `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` | completed | `agents/lead_engineer/tasks/TASK-AR-599.md` | Let completed UI/UX cycle reports propose follow-up work items for lead-designer, des… |
+| 21 | Initiative 21 | initiative | `INIT-AR-UI-UX-DESIGN-DIRECTION-CYCLE` | - | active | `agents/project/initiatives/INIT-AR-UI-UX-DESIGN-DIRECTION-CYCLE.md` | UI UX Design Direction Cycle |
+| 21.1 | Taskset 21.1 | taskset | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | `INIT-AR-UI-UX-DESIGN-DIRECTION-CYCLE` | active | `BACKLOG-BOARD.md` | UI UX Design Direction RFC |
+| 21.1.1 | Task 21.1.1 | task | `TASK-AR-600` | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | planned | `agents/lead_engineer/tasks/TASK-AR-600.md` | Create the seminar artifact that decides what new visual direction should be explored… |
+| 21.1.1.1 | Unit 21.1.1.1 | unit | `UNIT-TASK-AR-600-001` | `TASK-AR-600` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md` | UNIT-TASK-AR-600-001 - Run lead-designer UI direction seminar |
+| 21.1.2 | Task 21.1.2 | task | `TASK-AR-601` | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | planned | `agents/lead_engineer/tasks/TASK-AR-601.md` | Create the RFC that promotes the seminar decision into an accepted design direction a… |
+| 21.1.3 | Task 21.1.3 | task | `TASK-AR-602` | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | planned | `agents/lead_engineer/tasks/TASK-AR-602.md` | Turn the accepted design-direction RFC into the next implementation refactor and beta… |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

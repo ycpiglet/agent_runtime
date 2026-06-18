@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T08:16:20+09:00
-record_count: 616
+generated_at: 2026-06-19T08:18:39+09:00
+record_count: 617
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `616` review and evidence records under `reviews/`.
+- Summary: indexed `617` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `616` files |
+| Reviews covered | pass | `617` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -157,7 +157,7 @@ record_count: 616
 | `reviews/OWNER-APPROVAL-GATE-2026-06-09-v0.1.8.json` | `OWNER-APPROVAL-GATE-2026-06-09-v0.1.8` | json | record | n/a | OWNER-APPROVAL-GATE-2026-06-09-v0.1.8 |
 | `reviews/PENDING-RELEASE-GUARD-2026-06-09-v0.1.8.json` | `PENDING-RELEASE-GUARD-2026-06-09-v0.1.8` | json | record | n/a | PENDING-RELEASE-GUARD-2026-06-09-v0.1.8 |
 | `reviews/PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final.json` | `PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final` | json | record | n/a | PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final |
-| `reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md` | `PROPOSALS-2026-06-19-ui-ux-next-work` | ui-ux-next-work-proposals | planned | n/a | UI/UX Next Work Proposals 2026-06-19 |
+| `reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md` | `PROPOSALS-2026-06-19-ui-ux-next-work` | ui-ux-next-work-proposals | planned | watch | UI/UX Next Work Proposals 2026-06-19 |
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8.json` | `RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8 |
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0.json` | `RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0 |
 | `reviews/RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8.json` | `RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8 |
@@ -506,6 +506,7 @@ record_count: 616
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-registration.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-registration` | md | record | pass | UI UX Cycle Automation Registration |
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-conductor.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-conductor` | review | accepted | replan | UI/UX Cycle Automation T3 Replan After Conductor |
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-review-planning.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-review-planning` | review | accepted | replan | UI/UX Cycle Automation T3 Replan After Review Planning |
+| `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-design-direction-rfc-registration.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-design-direction-rfc-registration` | md | record | pass | UI UX Design Direction RFC Registration |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario |

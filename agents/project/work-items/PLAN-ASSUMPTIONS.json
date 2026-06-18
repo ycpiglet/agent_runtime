@@ -327,8 +327,31 @@
       "recorded_at": "2026-06-19T02:23:31+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-UI-UX-CYCLE-AUTOMATION"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-design-direction-rfc-registration.md",
+          "value": "e888b7b68d22cfc6f01ff48cb0547721b4b4885b58d88652cdf5ac97ec4c917a"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "cb2cd245558157ff640dbf0b824694c5623e2e1ef0ccfba6e83f9a08a5522bc8"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-design-direction-rfc-registration.md",
+      "recorded_at": "2026-06-19T08:18:39+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC"
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-19T02:23:31+09:00"
+  "updated_at": "2026-06-19T08:18:39+09:00"
 }

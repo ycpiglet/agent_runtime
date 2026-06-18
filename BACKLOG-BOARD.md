@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-19
-task_count: 258
-open_count: 0
+task_count: 261
+open_count: 3
 completed_count: 258
-task_set_count: 0
+task_set_count: 1
 completed_task_set_count: 45
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `0` open or active tasks; `258` completed tasks are archived from this live board.
+- Summary: `3` open or active tasks; `258` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `0` / Ask `0` / Review `0` / Later `0` / Done `258`.
-- Task Sets: `0` active workflows; `45` completed workflows are hidden from the live action board.
+- Status: Action `3` / Ask `0` / Review `0` / Later `0` / Done `258`.
+- Task Sets: `1` active workflows; `45` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -41,6 +41,17 @@ completed_task_set_count: 45
 ## Action Board
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
+
+### UI UX Design Direction RFC (`TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC`)
+
+- Flow: Run the post-closeout UI/UX design-direction loop: lead-designer exploration, design-system promotion decisions, implementation refactor scope, and beta-tester evaluation criteria before mutating UI source again.
+- Progress: `0/3` done; `3` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-600` | INIT-AR-UI-UX-DESIGN-DIRECTION-CYCLE | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md | planned | Action | P1 | High | Medium | 2h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Create the seminar artifact that decides what new visual direction should be explored… |
+| `TASK-AR-601` | INIT-AR-UI-UX-DESIGN-DIRECTION-CYCLE | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | Medium | 3h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Create the RFC that promotes the seminar decision into an accepted design direction a… |
+| `TASK-AR-602` | INIT-AR-UI-UX-DESIGN-DIRECTION-CYCLE | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | Medium | 3h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Turn the accepted design-direction RFC into the next implementation refactor and beta… |
 
 ## Archived Task Sets
 
@@ -97,7 +108,7 @@ completed_task_set_count: 45
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `0` open across `0` task sets (see Action Board above).
+- Active: `3` open across `1` task sets (see Action Board above).
 - Archived task sets: `45` (see Archived Task Sets above).
 - Archived task files: `258` — see `ARCHIVE-INDEX.md`.
 

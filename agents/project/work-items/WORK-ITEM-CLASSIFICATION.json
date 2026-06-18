@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T08:10:26+09:00",
-  "record_count": 352,
+  "generated_at": "2026-06-19T08:18:38+09:00",
+  "record_count": 358,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -3876,6 +3876,72 @@
       "path": "agents/lead_engineer/tasks/TASK-AR-599.md",
       "parent_id": "TASKSET-AR-UI-UX-CYCLE-AUTOMATION",
       "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-UI-UX-DESIGN-DIRECTION-CYCLE",
+      "level": "initiative",
+      "number": "21",
+      "label": "Initiative 21",
+      "id": "INIT-AR-UI-UX-DESIGN-DIRECTION-CYCLE",
+      "title": "UI UX Design Direction Cycle",
+      "path": "agents/project/initiatives/INIT-AR-UI-UX-DESIGN-DIRECTION-CYCLE.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC",
+      "level": "taskset",
+      "number": "21.1",
+      "label": "Taskset 21.1",
+      "id": "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC",
+      "title": "UI UX Design Direction RFC",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-UI-UX-DESIGN-DIRECTION-CYCLE",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-600",
+      "level": "task",
+      "number": "21.1.1",
+      "label": "Task 21.1.1",
+      "id": "TASK-AR-600",
+      "title": "Create the seminar artifact that decides what new visual direction should be explored…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-600.md",
+      "parent_id": "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-600-001",
+      "level": "unit",
+      "number": "21.1.1.1",
+      "label": "Unit 21.1.1.1",
+      "id": "UNIT-TASK-AR-600-001",
+      "title": "UNIT-TASK-AR-600-001 - Run lead-designer UI direction seminar",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md",
+      "parent_id": "TASK-AR-600",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-601",
+      "level": "task",
+      "number": "21.1.2",
+      "label": "Task 21.1.2",
+      "id": "TASK-AR-601",
+      "title": "Create the RFC that promotes the seminar decision into an accepted design direction a…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-601.md",
+      "parent_id": "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-602",
+      "level": "task",
+      "number": "21.1.3",
+      "label": "Task 21.1.3",
+      "id": "TASK-AR-602",
+      "title": "Turn the accepted design-direction RFC into the next implementation refactor and beta…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-602.md",
+      "parent_id": "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC",
+      "status": "planned"
     }
   ]
 }
