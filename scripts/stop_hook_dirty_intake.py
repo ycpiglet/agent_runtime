@@ -60,20 +60,19 @@ def _payload_from_result(result: subprocess.CompletedProcess[str]) -> dict[str, 
 
 
 def _codex_stop_payload(payload: dict[str, str]) -> dict[str, object]:
-    if payload.get("decision") == "block":
-        result: dict[str, object] = {
-            "decision": "block",
-            "reason": payload.get("reason", "dirty intake blocked stop"),
-        }
-        system_message = payload.get("systemMessage")
-        if system_message:
-            result["systemMessage"] = system_message
-        return result
-    return {"continue": True}
+    result: dict[str, object] = {
+        "decision": "block",
+        "reason": payload.get("reason", "dirty intake blocked stop"),
+    }
+    system_message = payload.get("systemMessage")
+    if system_message:
+        result["systemMessage"] = system_message
+    return result
 
 
 def _emit_stop_payload(payload: dict[str, str]) -> None:
-    print(json.dumps(_codex_stop_payload(payload), ensure_ascii=False))
+    if payload.get("decision") == "block":
+        print(json.dumps(_codex_stop_payload(payload), ensure_ascii=False))
 
 
 def main(argv: list[str] | None = None) -> int:

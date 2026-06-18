@@ -24,8 +24,6 @@ def _emit_stop_payload(payload: dict[str, object]) -> None:
         if system_message:
             result["systemMessage"] = system_message
         print(json.dumps(result, ensure_ascii=False))
-        return
-    print(json.dumps({"continue": True}, ensure_ascii=False))
 
 
 def main(argv: list[str] | None = None) -> int:

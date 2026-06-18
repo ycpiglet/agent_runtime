@@ -132,7 +132,7 @@ def test_stop_hook_best_effort_on_error(monkeypatch, capsys):
     monkeypatch.setattr(closure_gate, "assess", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom")))
     rc = stop_hook_closure_gate.main([])
     assert rc == 0
-    assert json.loads(capsys.readouterr().out) == {"continue": True}  # never block on gate error
+    assert capsys.readouterr().out == ""  # never block on gate error
 
 
 def test_stop_hook_disabled_env_approves(tmp_path, monkeypatch, capsys):
@@ -140,4 +140,4 @@ def test_stop_hook_disabled_env_approves(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(stop_hook_closure_gate.Path, "cwd", staticmethod(lambda: tmp_path))
     rc = stop_hook_closure_gate.main([])
     assert rc == 0
-    assert json.loads(capsys.readouterr().out) == {"continue": True}
+    assert capsys.readouterr().out == ""
