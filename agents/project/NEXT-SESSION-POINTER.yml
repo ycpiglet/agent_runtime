@@ -1,14 +1,14 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T02:03:10+09:00
+updated_at: 2026-06-19T02:13:39+09:00
 current_state:
-  summary: "TASK-AR-598 is W4b released and ready for W5 integration; TASKSET-AR-LLM-WIKI remains queued for TASK-AR-594/TASK-AR-595 and final closeout."
+  summary: "TASK-AR-598 is completed, W4b-verified, and integrated; TASK-AR-599 is the next UI/UX cycle automation task. TASKSET-AR-LLM-WIKI remains queued for TASK-AR-594/TASK-AR-595 and final closeout."
   status: ready
   task_set_status: active
   task_set_id: "TASKSET-AR-LLM-WIKI"
   step_index: 4
   step_total: 5
   progress_pct: 80
-  status_text: "No active claims; integrate TASK-AR-598, then resume LLM-Wiki TASK-AR-594/TASK-AR-595."
+  status_text: "No active claims; TASK-AR-598 is complete. Resume LLM-Wiki TASK-AR-594/TASK-AR-595 or claim TASK-AR-599 for the next UI/UX automation step."
 active_work:
   current_agents: []
   current_teams: []
@@ -37,12 +37,13 @@ pointers:
   ui_ux_cycle_automation:
     taskset: TASKSET-AR-UI-UX-CYCLE-AUTOMATION
     released_claim: agents/runtime/task_claims/CLAIM-20260619-014841-task-ar-598-task-ar-598-plan-review.json
-    worktree_path: .worktrees/TASK-AR-598
+    worktree_path: null
     implementation_branch: codex/task-ar-598-plan-review
-    implementation_commit: 1816a9f
+    implementation_commit: 81715af
     followup_commit: f1f8a6d
-    status: task_ar_598_w4b_released_ready_for_w5_integration
+    status: task_ar_598_completed_integrated_closed
     self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-598-20260619015334.json
+    root_integration_evidence: reviews/VERIFY-2026-06-19-task-ar-598-root-integration-20260619021304.json
     w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-598.md
     next_task: TASK-AR-599
   llm_wiki_preservation:
