@@ -114,6 +114,12 @@
       "display_name": "Design System Debt Consolidation",
       "summary": "Consolidate transitional spacing/radius px-alias tokens into a designed semantic scale, and promote remaining view-specific JS renderers into stable pattern modules, without re-introducing raw literals.",
       "order": 623
+    },
+    {
+      "task_set_id": "TASKSET-AR-LLM-WIKI",
+      "display_name": "LLM Wiki",
+      "summary": "Extend the merged knowledge stack with a human-browsable Wiki/Search surface over the expanded corpus: deterministic entity pages, search, ask, contextual mini-graphs, nav integration, and linted closeout.",
+      "order": 624
     }
   ]
 }

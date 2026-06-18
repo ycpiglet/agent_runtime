@@ -30,8 +30,10 @@ pointers:
     preserved_branch: claude/llm-wiki
     preserved_branch_head: 5846e40
     worktree_path: null
-    status: deferred_branch_preserved
-    next_decision: integrate_defer_or_archive
+    status: registration_integrated_branch_preserved
+    current_line_order: 624
+    next_decision: continue_from_current_records
+    next_task: TASK-AR-593
   self_improvement_remediation:
     taskset: TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE
     active_claim: null

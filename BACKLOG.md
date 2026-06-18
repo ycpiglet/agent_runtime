@@ -16,6 +16,16 @@
 | 527 | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | Maturity Steward |
 | 528 | `TASKSET-AR-AGENT-ORG-DELEGATION` | Org Conductor |
 | 529 | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | Decision Cockpit |
+| 615 | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | Self Improvement Cadence |
+| 616 | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | Self Improvement Remediation |
+| 617 | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | Business Operations Teams |
+| 618 | `TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE` | Design System Governance |
+| 619 | `TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION` | Design System Assetization |
+| 620 | `TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS` | Design System Component Patterns |
+| 621 | `TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT` | Design System Token Debt |
+| 622 | `TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | Design System Served Asset Split |
+| 623 | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | Design System Debt Consolidation |
+| 624 | `TASKSET-AR-LLM-WIKI` | LLM Wiki |
 
 <!-- BACKLOG-INDEX:END -->
 

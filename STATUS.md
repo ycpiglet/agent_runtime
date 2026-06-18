@@ -2,19 +2,19 @@
 
 ## 현재 한 줄 요약
 
-- LLM-Wiki preservation branch is deferred with owner-visible handoff; no active claim is currently open.
+- LLM-Wiki registration is now integrated into the current line; the preserved branch remains an archival source only.
 - Self-improvement remediation is improving but not mature: `scribe_state` is now ok, but the score is still below mature and one monitored role gap remains.
 - Scribe source is now the live status summary section so advisory health can be measured without fabricating role evidence.
 - Doc Steward remains ok; keep document-health checks advisory and evidence-based.
 - Design-system cleanup appears in the current dirty intake as separate uncommitted work and should be preserved, not folded into this role cleanup.
-- Next after role cleanup: strengthen LLM-Wiki and knowledge graph surfaces from registered records, not from chat-only notes.
+- Next after role cleanup: continue `TASKSET-AR-LLM-WIKI` from the registered records, starting with `TASK-AR-593` search + ask.
 
 ## 2026-06-18 - LLM-Wiki worktree preservation active
 
 - Preservation claim: `CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve` now records `.worktrees/llm-wiki` / `claude/llm-wiki` in the primary checkout before closeout.
 - Boundary: this is continuity preservation only. It does not claim LLM-Wiki implementation, merge, push, delete, or archive anything.
 - Reason: stop hooks reported owner governance failure, dirty intake preservation required, and missing closeout records because the `llm-wiki` worktree was ahead of `origin/main` without an active claim.
-- Next decision: integrate the LLM-Wiki registration branch, defer it with an Owner-visible archive/handoff, or continue it through a formal W2/W3 claim.
+- Current decision: registration intent has been integrated into the current line with `TASKSET-AR-LLM-WIKI` order `624`; future implementation should continue through fresh task claims from the current records.
 - Evidence: `reviews/REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout.md`; `agents/runtime/task_claims/CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve.json`.
 
 ## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE complete

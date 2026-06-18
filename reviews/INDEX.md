@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-18T23:19:41+09:00
-record_count: 584
+generated_at: 2026-06-18T23:25:50+09:00
+record_count: 585
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `584` review and evidence records under `reviews/`.
+- Summary: indexed `585` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `584` files |
+| Reviews covered | pass | `585` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -485,6 +485,7 @@ record_count: 584
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration` | md | record | pass | Self Improvement Remediation Registration |
 | `reviews/REVIEW-2026-06-18-knowledge-graph-corpus-expansion.md` | `REVIEW-2026-06-18-knowledge-graph-corpus-expansion` | md | record | pass | Knowledge Graph Corpus Expansion |
 | `reviews/REVIEW-2026-06-18-llm-wiki-preservation-branch-deferred.md` | `REVIEW-2026-06-18-llm-wiki-preservation-branch-deferred` | md | accepted | n/a | LLM-Wiki Preservation Branch Deferred |
+| `reviews/REVIEW-2026-06-18-llm-wiki-registration-current-line.md` | `REVIEW-2026-06-18-llm-wiki-registration-current-line` | md | record | pass | LLM-Wiki Registration Current-Line Integration |
 | `reviews/REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout.md` | `REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout` | review | pass | n/a | LLM-Wiki Worktree Preservation Closeout |
 | `reviews/REVIEW-2026-06-18-monitored-role-artifact-evidence.md` | `REVIEW-2026-06-18-monitored-role-artifact-evidence` | md | record | pass | Monitored Role Artifact Evidence |
 | `reviews/REVIEW-2026-06-18-self-improvement-cycle.md` | `REVIEW-2026-06-18-self-improvement-cycle` | md | record | pass | Self Improvement Cycle 2026-06-18 |

@@ -287,7 +287,7 @@ def test_triage_tasks_are_held_out_of_active_and_shown_in_triage(tmp_path: Path)
     assert backlog_board.is_triage(tasks[0]) or backlog_board.is_triage(tasks[1])
 
 
-def test_real_backlog_tasks_are_classified_into_twenty_five_task_sets() -> None:
+def test_real_backlog_tasks_are_classified_into_registered_task_sets() -> None:
     tasks = backlog_board.load_tasks(ROOT / "agents" / "lead_engineer" / "tasks")
     task_set_ids = {task.task_set_id for task in tasks}
 
@@ -336,4 +336,5 @@ def test_real_backlog_tasks_are_classified_into_twenty_five_task_sets() -> None:
         "TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT",
         "TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT",
         "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION",
+        "TASKSET-AR-LLM-WIKI",
     }

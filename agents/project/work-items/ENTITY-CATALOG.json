@@ -1,19 +1,19 @@
 {
   "schema": "agent-runtime-entity-catalog/v1",
-  "generated_at": "2026-06-15",
-  "entity_count": 737,
+  "generated_at": "2026-06-18",
+  "entity_count": 854,
   "kind_counts": {
     "council": 1,
     "host_feedback": 7,
-    "initiative": 10,
-    "meeting": 55,
-    "research": 28,
-    "review": 298,
-    "seminar": 11,
-    "task": 233,
-    "taskset": 34,
-    "unit": 13,
-    "verification": 47
+    "initiative": 20,
+    "meeting": 57,
+    "research": 29,
+    "review": 336,
+    "seminar": 13,
+    "task": 255,
+    "taskset": 44,
+    "unit": 26,
+    "verification": 66
   },
   "entities": [
     {
@@ -3761,7 +3761,7 @@
       "title": "Decision Cockpit",
       "metadata": {
         "ordinal": "0.30",
-        "status": "active",
+        "status": "complete",
         "path": "BACKLOG-BOARD.md"
       },
       "relations": [
@@ -3809,7 +3809,7 @@
       "title": "Group the 67 nav routes under core 7 (Home/Work/Agents/Decisions/Records/Search/More)…",
       "metadata": {
         "ordinal": "0.30.3",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-565.md"
       },
       "relations": [
@@ -3825,7 +3825,7 @@
       "title": "Counts/summaries on screen; detail opens in a keyboard-accessible side drawer on clic…",
       "metadata": {
         "ordinal": "0.30.4",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-566.md"
       },
       "relations": [
@@ -3841,7 +3841,7 @@
       "title": "Initiative->Taskset->Unit waiting/active/done board + drill-down (reuse org_read_api.…",
       "metadata": {
         "ordinal": "0.30.5",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-567.md"
       },
       "relations": [
@@ -3857,7 +3857,7 @@
       "title": "UI language toggle over the existing i18n layer (EN data/schema stays); localize inbo…",
       "metadata": {
         "ordinal": "0.30.6",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-568.md"
       },
       "relations": [
@@ -3873,7 +3873,7 @@
       "title": "E2E asserting home <= 2 screens / DOM <= ~1500 + maturity behaviors (responsive/a11y/…",
       "metadata": {
         "ordinal": "0.30.7",
-        "status": "planned",
+        "status": "completed",
         "path": "agents/lead_engineer/tasks/TASK-AR-569.md"
       },
       "relations": [
@@ -4607,6 +4607,836 @@
       "relations": []
     },
     {
+      "kind": "initiative",
+      "id": "INIT-AR-SELF-IMPROVEMENT-CADENCE",
+      "title": "Self Improvement Cadence",
+      "metadata": {
+        "ordinal": "10",
+        "status": "active",
+        "path": "agents/project/initiatives/INIT-AR-SELF-IMPROVEMENT-CADENCE.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "taskset",
+      "id": "TASKSET-AR-SELF-IMPROVEMENT-CADENCE",
+      "title": "Self Improvement Cadence",
+      "metadata": {
+        "ordinal": "10.1",
+        "status": "complete",
+        "path": "BACKLOG-BOARD.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "INIT-AR-SELF-IMPROVEMENT-CADENCE"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-570",
+      "title": "Create a deterministic baseline that identifies low-frequency agent roles, low-reuse…",
+      "metadata": {
+        "ordinal": "10.1.1",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-570.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-SELF-IMPROVEMENT-CADENCE"
+        }
+      ]
+    },
+    {
+      "kind": "unit",
+      "id": "UNIT-TASK-AR-570-001",
+      "title": "UNIT-TASK-AR-570-001 - Build self-improvement metrics baseline",
+      "metadata": {
+        "ordinal": "10.1.1.1",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/units/TASK-AR-570/UNIT-TASK-AR-570-001.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASK-AR-570"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-571",
+      "title": "Use review, meeting, seminar, retro, compound, scribe, and doc-steward surfaces to re…",
+      "metadata": {
+        "ordinal": "10.1.2",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-571.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-SELF-IMPROVEMENT-CADENCE"
+        }
+      ]
+    },
+    {
+      "kind": "unit",
+      "id": "UNIT-TASK-AR-571-001",
+      "title": "UNIT-TASK-AR-571-001 - Record the first self-improvement cycle",
+      "metadata": {
+        "ordinal": "10.1.2.1",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/units/TASK-AR-571/UNIT-TASK-AR-571-001.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASK-AR-571"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-572",
+      "title": "Define measurable maturity criteria for low-frequency agent/skill self-improvement an…",
+      "metadata": {
+        "ordinal": "10.1.3",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-572.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-SELF-IMPROVEMENT-CADENCE"
+        }
+      ]
+    },
+    {
+      "kind": "unit",
+      "id": "UNIT-TASK-AR-572-001",
+      "title": "UNIT-TASK-AR-572-001 - Wire maturity reporting into governance surfaces",
+      "metadata": {
+        "ordinal": "10.1.3.1",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/units/TASK-AR-572/UNIT-TASK-AR-572-001.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASK-AR-572"
+        }
+      ]
+    },
+    {
+      "kind": "initiative",
+      "id": "INIT-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE",
+      "title": "Self Improvement Remediation Cycle",
+      "metadata": {
+        "ordinal": "11",
+        "status": "active",
+        "path": "agents/project/initiatives/INIT-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "taskset",
+      "id": "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE",
+      "title": "Self Improvement Remediation",
+      "metadata": {
+        "ordinal": "11.1",
+        "status": "complete",
+        "path": "BACKLOG-BOARD.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "INIT-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-573",
+      "title": "Create verifiable scribe claim/log evidence and only remove the scribe waiver if coll…",
+      "metadata": {
+        "ordinal": "11.1.1",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-573.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
+        }
+      ]
+    },
+    {
+      "kind": "unit",
+      "id": "UNIT-TASK-AR-573-001",
+      "title": "UNIT-TASK-AR-573-001 - Prove scribe usage before waiver burn-down",
+      "metadata": {
+        "ordinal": "11.1.1.1",
+        "status": "worker_ready",
+        "path": "agents/lead_engineer/tasks/units/TASK-AR-573/UNIT-TASK-AR-573-001.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASK-AR-573"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-574",
+      "title": "Route council, progress-scout, release-steward, reviewer, and skeptic into real revie…",
+      "metadata": {
+        "ordinal": "11.1.2",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-574.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
+        }
+      ]
+    },
+    {
+      "kind": "unit",
+      "id": "UNIT-TASK-AR-574-001",
+      "title": "UNIT-TASK-AR-574-001 - Create monitored-role evidence packet",
+      "metadata": {
+        "ordinal": "11.1.2.1",
+        "status": "worker_ready",
+        "path": "agents/lead_engineer/tasks/units/TASK-AR-574/UNIT-TASK-AR-574-001.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASK-AR-574"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-575",
+      "title": "Reduce low-reuse runtime asset debt by exercising valuable assets in real workflows o…",
+      "metadata": {
+        "ordinal": "11.1.3",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-575.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
+        }
+      ]
+    },
+    {
+      "kind": "unit",
+      "id": "UNIT-TASK-AR-575-001",
+      "title": "UNIT-TASK-AR-575-001 - Burn down runtime asset low-reuse debt",
+      "metadata": {
+        "ordinal": "11.1.3.1",
+        "status": "worker_ready",
+        "path": "agents/lead_engineer/tasks/units/TASK-AR-575/UNIT-TASK-AR-575-001.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASK-AR-575"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-576",
+      "title": "Re-run the self-improvement report after role and asset remediation and state whether…",
+      "metadata": {
+        "ordinal": "11.1.4",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-576.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
+        }
+      ]
+    },
+    {
+      "kind": "unit",
+      "id": "UNIT-TASK-AR-576-001",
+      "title": "UNIT-TASK-AR-576-001 - Measure remediation delta and update handoff surfaces",
+      "metadata": {
+        "ordinal": "11.1.4.1",
+        "status": "worker_ready",
+        "path": "agents/lead_engineer/tasks/units/TASK-AR-576/UNIT-TASK-AR-576-001.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASK-AR-576"
+        }
+      ]
+    },
+    {
+      "kind": "initiative",
+      "id": "INIT-AR-BUSINESS-OPERATIONS-TEAMS",
+      "title": "Business Operations Teams",
+      "metadata": {
+        "ordinal": "12",
+        "status": "active",
+        "path": "agents/project/initiatives/INIT-AR-BUSINESS-OPERATIONS-TEAMS.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "taskset",
+      "id": "TASKSET-AR-BUSINESS-OPERATIONS-TEAMS",
+      "title": "Business Operations Teams",
+      "metadata": {
+        "ordinal": "12.1",
+        "status": "complete",
+        "path": "BACKLOG-BOARD.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "INIT-AR-BUSINESS-OPERATIONS-TEAMS"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-577",
+      "title": "Define finance/accounting, marketing/growth, and sales/revenue teams across live proj…",
+      "metadata": {
+        "ordinal": "12.1.1",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-577.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-BUSINESS-OPERATIONS-TEAMS"
+        }
+      ]
+    },
+    {
+      "kind": "unit",
+      "id": "UNIT-TASK-AR-577-001",
+      "title": "UNIT-TASK-AR-577-001 - Publish business operations org model",
+      "metadata": {
+        "ordinal": "12.1.1.1",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/units/TASK-AR-577/UNIT-TASK-AR-577-001.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASK-AR-577"
+        }
+      ]
+    },
+    {
+      "kind": "initiative",
+      "id": "INIT-AR-LLM-WIKI",
+      "title": "INIT-AR-LLM-WIKI - LLM-Wiki + Graph (agent + human)",
+      "metadata": {
+        "ordinal": "13",
+        "status": "active",
+        "path": "agents/project/initiatives/INIT-AR-LLM-WIKI.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "taskset",
+      "id": "TASKSET-AR-LLM-WIKI",
+      "title": "LLM Wiki",
+      "metadata": {
+        "ordinal": "13.1",
+        "status": "active",
+        "path": "BACKLOG-BOARD.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "INIT-AR-LLM-WIKI"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-590",
+      "title": "Extend the knowledge graph corpus so LLM-Wiki pages can reason over runtime assets, h…",
+      "metadata": {
+        "ordinal": "13.1.1",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-590.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-LLM-WIKI"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-591",
+      "title": "Add a deterministic wiki page envelope with summary, metadata, typed relationships, b…",
+      "metadata": {
+        "ordinal": "13.1.2",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-591.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-LLM-WIKI"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-592",
+      "title": "Build the console Wiki view with entity page routing, summary, relations, backlinks,…",
+      "metadata": {
+        "ordinal": "13.1.3",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-592.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-LLM-WIKI"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-593",
+      "title": "Add deterministic `/api/wiki/search?q=` and `/api/wiki/ask?q=&llm=0|1`, then wire a s…",
+      "metadata": {
+        "ordinal": "13.1.4",
+        "status": "planned",
+        "path": "agents/lead_engineer/tasks/TASK-AR-593.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-LLM-WIKI"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-594",
+      "title": "Refine the per-page mini-graph into a typed, contextual insight lens with click-to-na…",
+      "metadata": {
+        "ordinal": "13.1.5",
+        "status": "planned",
+        "path": "agents/lead_engineer/tasks/TASK-AR-594.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-LLM-WIKI"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-595",
+      "title": "Promote Wiki/Search as a core navigation hub adjacent to Records and add cross-links…",
+      "metadata": {
+        "ordinal": "13.1.6",
+        "status": "planned",
+        "path": "agents/lead_engineer/tasks/TASK-AR-595.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-LLM-WIKI"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-596",
+      "title": "Extend knowledge lint coverage for the expanded corpus and close `TASKSET-AR-LLM-WIKI…",
+      "metadata": {
+        "ordinal": "13.1.7",
+        "status": "planned",
+        "path": "agents/lead_engineer/tasks/TASK-AR-596.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-LLM-WIKI"
+        }
+      ]
+    },
+    {
+      "kind": "initiative",
+      "id": "INIT-AR-DESIGN-SYSTEM-GOVERNANCE",
+      "title": "Design System Governance",
+      "metadata": {
+        "ordinal": "14",
+        "status": "active",
+        "path": "agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-GOVERNANCE.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "taskset",
+      "id": "TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE",
+      "title": "Design System Governance",
+      "metadata": {
+        "ordinal": "14.1",
+        "status": "complete",
+        "path": "BACKLOG-BOARD.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "INIT-AR-DESIGN-SYSTEM-GOVERNANCE"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-578",
+      "title": "Create durable design-system governance for Agent Runtime UI work: a diagnostic repor…",
+      "metadata": {
+        "ordinal": "14.1.1",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-578.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE"
+        }
+      ]
+    },
+    {
+      "kind": "unit",
+      "id": "UNIT-TASK-AR-578-001",
+      "title": "UNIT-TASK-AR-578-001 - Publish design-system governance and gate",
+      "metadata": {
+        "ordinal": "14.1.1.1",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/units/TASK-AR-578/UNIT-TASK-AR-578-001.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASK-AR-578"
+        }
+      ]
+    },
+    {
+      "kind": "initiative",
+      "id": "INIT-AR-DESIGN-SYSTEM-ASSETIZATION",
+      "title": "Design System Assetization",
+      "metadata": {
+        "ordinal": "15",
+        "status": "active",
+        "path": "agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-ASSETIZATION.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "taskset",
+      "id": "TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION",
+      "title": "Design System Assetization",
+      "metadata": {
+        "ordinal": "15.1",
+        "status": "complete",
+        "path": "BACKLOG-BOARD.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "INIT-AR-DESIGN-SYSTEM-ASSETIZATION"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-579",
+      "title": "Create the first executable UI asset layer for Agent Runtime: design token scale, reu…",
+      "metadata": {
+        "ordinal": "15.1.1",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-579.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION"
+        }
+      ]
+    },
+    {
+      "kind": "unit",
+      "id": "UNIT-TASK-AR-579-001",
+      "title": "UNIT-TASK-AR-579-001 - Extract token, primitive, and pattern asset bundle",
+      "metadata": {
+        "ordinal": "15.1.1.1",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/units/TASK-AR-579/UNIT-TASK-AR-579-001.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASK-AR-579"
+        }
+      ]
+    },
+    {
+      "kind": "initiative",
+      "id": "INIT-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS",
+      "title": "Design System Component Patterns",
+      "metadata": {
+        "ordinal": "16",
+        "status": "active",
+        "path": "agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "taskset",
+      "id": "TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS",
+      "title": "Design System Component Patterns",
+      "metadata": {
+        "ordinal": "16.1",
+        "status": "complete",
+        "path": "BACKLOG-BOARD.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "INIT-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-580",
+      "title": "Extend the executable UI asset layer so the console has named component APIs and doma…",
+      "metadata": {
+        "ordinal": "16.1.1",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-580.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS"
+        }
+      ]
+    },
+    {
+      "kind": "unit",
+      "id": "UNIT-TASK-AR-580-001",
+      "title": "UNIT-TASK-AR-580-001 - Promote component and domain pattern helpers",
+      "metadata": {
+        "ordinal": "16.1.1.1",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/units/TASK-AR-580/UNIT-TASK-AR-580-001.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASK-AR-580"
+        }
+      ]
+    },
+    {
+      "kind": "initiative",
+      "id": "INIT-AR-DESIGN-SYSTEM-TOKEN-DEBT",
+      "title": "Design System Token Debt Closure",
+      "metadata": {
+        "ordinal": "17",
+        "status": "active",
+        "path": "agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-TOKEN-DEBT.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "taskset",
+      "id": "TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT",
+      "title": "Design System Token Debt",
+      "metadata": {
+        "ordinal": "17.1",
+        "status": "complete",
+        "path": "BACKLOG-BOARD.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "INIT-AR-DESIGN-SYSTEM-TOKEN-DEBT"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-581",
+      "title": "Resolve the diagnostic report's token maturity gap for typography, spacing, radius, a…",
+      "metadata": {
+        "ordinal": "17.1.1",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-581.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT"
+        }
+      ]
+    },
+    {
+      "kind": "unit",
+      "id": "UNIT-TASK-AR-581-001",
+      "title": "UNIT-TASK-AR-581-001 - Tokenize console CSS literal debt",
+      "metadata": {
+        "ordinal": "17.1.1.1",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/units/TASK-AR-581/UNIT-TASK-AR-581-001.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASK-AR-581"
+        }
+      ]
+    },
+    {
+      "kind": "initiative",
+      "id": "INIT-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT",
+      "title": "Design System Served Asset Split",
+      "metadata": {
+        "ordinal": "18",
+        "status": "active",
+        "path": "agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "taskset",
+      "id": "TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT",
+      "title": "Design System Served Asset Split",
+      "metadata": {
+        "ordinal": "18.1",
+        "status": "complete",
+        "path": "BACKLOG-BOARD.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "INIT-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-582",
+      "title": "Resolve the diagnostic report's single-file HTML/CSS/JS string concentration by movin…",
+      "metadata": {
+        "ordinal": "18.1.1",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/TASK-AR-582.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT"
+        }
+      ]
+    },
+    {
+      "kind": "unit",
+      "id": "UNIT-TASK-AR-582-001",
+      "title": "UNIT-TASK-AR-582-001 - Move served HTML CSS JS assets out of ui_console",
+      "metadata": {
+        "ordinal": "18.1.1.1",
+        "status": "completed",
+        "path": "agents/lead_engineer/tasks/units/TASK-AR-582/UNIT-TASK-AR-582-001.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASK-AR-582"
+        }
+      ]
+    },
+    {
+      "kind": "initiative",
+      "id": "INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION",
+      "title": "Design System Debt Consolidation",
+      "metadata": {
+        "ordinal": "19",
+        "status": "active",
+        "path": "agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "taskset",
+      "id": "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION",
+      "title": "Design System Debt Consolidation",
+      "metadata": {
+        "ordinal": "19.1",
+        "status": "active",
+        "path": "BACKLOG-BOARD.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-583",
+      "title": "Replace the transitional --space-px-* / --radius-px-* aliases in the console asset CS…",
+      "metadata": {
+        "ordinal": "19.1.1",
+        "status": "planned",
+        "path": "agents/lead_engineer/tasks/TASK-AR-583.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION"
+        }
+      ]
+    },
+    {
+      "kind": "task",
+      "id": "TASK-AR-584",
+      "title": "Move view-specific JS renderers (data-heavy SVG layouts, calendar grids, office-map p…",
+      "metadata": {
+        "ordinal": "19.1.2",
+        "status": "planned",
+        "path": "agents/lead_engineer/tasks/TASK-AR-584.md"
+      },
+      "relations": [
+        {
+          "type": "partOf",
+          "target": "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION"
+        }
+      ]
+    },
+    {
       "kind": "host_feedback",
       "id": "HFQ-131",
       "title": "host feedback intake -> council/seminar deliberation -> reply-back pipeline",
@@ -5024,6 +5854,16 @@
       "metadata": {
         "date": "2026-06-14",
         "path": "reviews/COUNCIL-2026-06-14-host-feedback-first-deliberation.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "DIAGNOSTIC-2026-06-18-ui-design-system-maturity",
+      "title": "DIAGNOSTIC-2026-06-18-ui-design-system-maturity",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/DIAGNOSTIC-2026-06-18-ui-design-system-maturity.md"
       },
       "relations": []
     },
@@ -5598,12 +6438,62 @@
       "relations": []
     },
     {
+      "kind": "meeting",
+      "id": "MEETING-2026-06-17-self-improvement-cycle-sync",
+      "title": "MEETING-2026-06-17-self-improvement-cycle-sync",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/MEETING-2026-06-17-self-improvement-cycle-sync.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "meeting",
+      "id": "MEETING-2026-06-18-self-improvement-cycle-sync",
+      "title": "MEETING-2026-06-18-self-improvement-cycle-sync",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/MEETING-2026-06-18-self-improvement-cycle-sync.md"
+      },
+      "relations": []
+    },
+    {
       "kind": "review",
       "id": "OFFLINE-EVAL-2026-06-10-task-ar-205-current-log",
       "title": "OFFLINE-EVAL-2026-06-10-task-ar-205-current-log",
       "metadata": {
         "date": "2026-06-10",
         "path": "reviews/OFFLINE-EVAL-2026-06-10-task-ar-205-current-log.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REPORT-2026-06-17-self-improvement-maturity",
+      "title": "REPORT-2026-06-17-self-improvement-maturity",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/REPORT-2026-06-17-self-improvement-maturity.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REPORT-2026-06-17-self-improvement-remediation-delta",
+      "title": "REPORT-2026-06-17-self-improvement-remediation-delta",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/REPORT-2026-06-17-self-improvement-remediation-delta.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REPORT-2026-06-18-self-improvement-maturity",
+      "title": "REPORT-2026-06-18-self-improvement-maturity",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/REPORT-2026-06-18-self-improvement-maturity.md"
       },
       "relations": []
     },
@@ -5888,6 +6778,16 @@
       "relations": []
     },
     {
+      "kind": "research",
+      "id": "RESEARCH-2026-06-18-design-system-governance-role-topology",
+      "title": "RESEARCH-2026-06-18-design-system-governance-role-topology",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/RESEARCH-2026-06-18-design-system-governance-role-topology.md"
+      },
+      "relations": []
+    },
+    {
       "kind": "review",
       "id": "RETRO-2026-06-10-agent-runtime-governance-ops",
       "title": "RETRO-2026-06-10-agent-runtime-governance-ops",
@@ -5914,6 +6814,26 @@
       "metadata": {
         "date": "2026-06-14",
         "path": "reviews/RETRO-2026-06-14-knowledge-stack.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "RETRO-2026-06-17-self-improvement-cycle",
+      "title": "RETRO-2026-06-17-self-improvement-cycle",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/RETRO-2026-06-17-self-improvement-cycle.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "RETRO-2026-06-18-self-improvement-cycle",
+      "title": "RETRO-2026-06-18-self-improvement-cycle",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/RETRO-2026-06-18-self-improvement-cycle.md"
       },
       "relations": []
     },
@@ -8558,6 +9478,326 @@
       "relations": []
     },
     {
+      "kind": "review",
+      "id": "REVIEW-2026-06-16-task-ar-565-nav-prune-core7",
+      "title": "REVIEW-2026-06-16-task-ar-565-nav-prune-core7",
+      "metadata": {
+        "date": "2026-06-16",
+        "path": "reviews/REVIEW-2026-06-16-task-ar-565-nav-prune-core7.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-16-task-ar-566-progressive-disclosure",
+      "title": "REVIEW-2026-06-16-task-ar-566-progressive-disclosure",
+      "metadata": {
+        "date": "2026-06-16",
+        "path": "reviews/REVIEW-2026-06-16-task-ar-566-progressive-disclosure.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-16-task-ar-567-work-state-board",
+      "title": "REVIEW-2026-06-16-task-ar-567-work-state-board",
+      "metadata": {
+        "date": "2026-06-16",
+        "path": "reviews/REVIEW-2026-06-16-task-ar-567-work-state-board.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-16-task-ar-568-i18n-toggle",
+      "title": "REVIEW-2026-06-16-task-ar-568-i18n-toggle",
+      "metadata": {
+        "date": "2026-06-16",
+        "path": "reviews/REVIEW-2026-06-16-task-ar-568-i18n-toggle.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-16-task-ar-569-e2e-dom-budget",
+      "title": "REVIEW-2026-06-16-task-ar-569-e2e-dom-budget",
+      "metadata": {
+        "date": "2026-06-16",
+        "path": "reviews/REVIEW-2026-06-16-task-ar-569-e2e-dom-budget.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-17-decision-first-console-ia-closeout",
+      "title": "REVIEW-2026-06-17-decision-first-console-ia-closeout",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/REVIEW-2026-06-17-decision-first-console-ia-closeout.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-17-self-improvement-cycle",
+      "title": "REVIEW-2026-06-17-self-improvement-cycle",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/REVIEW-2026-06-17-self-improvement-cycle.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-17-task-ar-573-scribe-evidence",
+      "title": "REVIEW-2026-06-17-task-ar-573-scribe-evidence",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-17-task-ar-574-monitored-role-evidence",
+      "title": "REVIEW-2026-06-17-task-ar-574-monitored-role-evidence",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/REVIEW-2026-06-17-task-ar-574-monitored-role-evidence.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle",
+      "title": "REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-17-task-ar-577-business-operations-teams",
+      "title": "REVIEW-2026-06-17-task-ar-577-business-operations-teams",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/REVIEW-2026-06-17-task-ar-577-business-operations-teams.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-17-taskset-ar-business-operations-teams-registration",
+      "title": "REVIEW-2026-06-17-taskset-ar-business-operations-teams-registration",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/REVIEW-2026-06-17-taskset-ar-business-operations-teams-registration.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-registration",
+      "title": "REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-registration",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-registration.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-cycle",
+      "title": "REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-cycle",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-cycle.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report",
+      "title": "REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan",
+      "title": "REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration",
+      "title": "REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-18-knowledge-graph-corpus-expansion",
+      "title": "REVIEW-2026-06-18-knowledge-graph-corpus-expansion",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/REVIEW-2026-06-18-knowledge-graph-corpus-expansion.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-18-llm-wiki-preservation-branch-deferred",
+      "title": "REVIEW-2026-06-18-llm-wiki-preservation-branch-deferred",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/REVIEW-2026-06-18-llm-wiki-preservation-branch-deferred.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout",
+      "title": "REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-18-monitored-role-artifact-evidence",
+      "title": "REVIEW-2026-06-18-monitored-role-artifact-evidence",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/REVIEW-2026-06-18-monitored-role-artifact-evidence.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-18-self-improvement-cycle",
+      "title": "REVIEW-2026-06-18-self-improvement-cycle",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/REVIEW-2026-06-18-self-improvement-cycle.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-18-self-improvement-owner-state-alignment",
+      "title": "REVIEW-2026-06-18-self-improvement-owner-state-alignment",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/REVIEW-2026-06-18-self-improvement-owner-state-alignment.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-18-stop-hook-session-scope-quoted-payload",
+      "title": "REVIEW-2026-06-18-stop-hook-session-scope-quoted-payload",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/REVIEW-2026-06-18-stop-hook-session-scope-quoted-payload.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-18-taskset-ar-design-system-assetization-registration",
+      "title": "REVIEW-2026-06-18-taskset-ar-design-system-assetization-registration",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-assetization-registration.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-18-taskset-ar-design-system-component-patterns-registration",
+      "title": "REVIEW-2026-06-18-taskset-ar-design-system-component-patterns-registration",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-component-patterns-registration.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-18-taskset-ar-design-system-debt-consolidation-registration",
+      "title": "REVIEW-2026-06-18-taskset-ar-design-system-debt-consolidation-registration",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-debt-consolidation-registration.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-18-taskset-ar-design-system-governance-registration",
+      "title": "REVIEW-2026-06-18-taskset-ar-design-system-governance-registration",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-governance-registration.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-18-taskset-ar-design-system-served-asset-split-registration",
+      "title": "REVIEW-2026-06-18-taskset-ar-design-system-served-asset-split-registration",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-served-asset-split-registration.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-18-taskset-ar-design-system-token-debt-registration",
+      "title": "REVIEW-2026-06-18-taskset-ar-design-system-token-debt-registration",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-token-debt-registration.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-18-wiki-page-api-envelope",
+      "title": "REVIEW-2026-06-18-wiki-page-api-envelope",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/REVIEW-2026-06-18-wiki-page-api-envelope.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "review",
+      "id": "REVIEW-2026-06-18-wiki-page-view",
+      "title": "REVIEW-2026-06-18-wiki-page-view",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/REVIEW-2026-06-18-wiki-page-view.md"
+      },
+      "relations": []
+    },
+    {
       "kind": "seminar",
       "id": "SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract",
       "title": "SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract",
@@ -8664,6 +9904,36 @@
       "metadata": {
         "date": "2026-06-15",
         "path": "reviews/SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "seminar",
+      "id": "SEMINAR-2026-06-17-self-improvement-cadence",
+      "title": "SEMINAR-2026-06-17-self-improvement-cadence",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/SEMINAR-2026-06-17-self-improvement-cadence.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "seminar",
+      "id": "SEMINAR-2026-06-18-self-improvement-cadence",
+      "title": "SEMINAR-2026-06-18-self-improvement-cadence",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/SEMINAR-2026-06-18-self-improvement-cadence.md"
+      },
+      "relations": []
+    },
+    {
+      "kind": "verification",
+      "id": "VERIFY-2026-06-18-design-system-diagnostic-closure",
+      "title": "VERIFY-2026-06-18-design-system-diagnostic-closure",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/VERIFY-2026-06-18-design-system-diagnostic-closure.md"
       },
       "relations": []
     },
@@ -9369,6 +10639,276 @@
         {
           "type": "references",
           "target": "TASK-AR-563"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-16-TASK-AR-565",
+      "title": "W4B-2026-06-16-TASK-AR-565",
+      "metadata": {
+        "date": "2026-06-16",
+        "path": "reviews/W4B-2026-06-16-TASK-AR-565.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-565"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-16-TASK-AR-566",
+      "title": "W4B-2026-06-16-TASK-AR-566",
+      "metadata": {
+        "date": "2026-06-16",
+        "path": "reviews/W4B-2026-06-16-TASK-AR-566.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-566"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-16-TASK-AR-567",
+      "title": "W4B-2026-06-16-TASK-AR-567",
+      "metadata": {
+        "date": "2026-06-16",
+        "path": "reviews/W4B-2026-06-16-TASK-AR-567.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-567"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-16-TASK-AR-568",
+      "title": "W4B-2026-06-16-TASK-AR-568",
+      "metadata": {
+        "date": "2026-06-16",
+        "path": "reviews/W4B-2026-06-16-TASK-AR-568.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-568"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-17-TASK-AR-569",
+      "title": "W4B-2026-06-17-TASK-AR-569",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/W4B-2026-06-17-TASK-AR-569.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-569"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-17-TASK-AR-570",
+      "title": "W4B-2026-06-17-TASK-AR-570",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/W4B-2026-06-17-TASK-AR-570.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-570"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-17-TASK-AR-571",
+      "title": "W4B-2026-06-17-TASK-AR-571",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/W4B-2026-06-17-TASK-AR-571.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-571"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-17-TASK-AR-572",
+      "title": "W4B-2026-06-17-TASK-AR-572",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/W4B-2026-06-17-TASK-AR-572.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-572"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-17-TASK-AR-573",
+      "title": "W4B-2026-06-17-TASK-AR-573",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/W4B-2026-06-17-TASK-AR-573.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-573"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-17-TASK-AR-574",
+      "title": "W4B-2026-06-17-TASK-AR-574",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/W4B-2026-06-17-TASK-AR-574.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-574"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-17-TASK-AR-575",
+      "title": "W4B-2026-06-17-TASK-AR-575",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/W4B-2026-06-17-TASK-AR-575.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-575"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-17-TASK-AR-576",
+      "title": "W4B-2026-06-17-TASK-AR-576",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/W4B-2026-06-17-TASK-AR-576.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-576"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-17-TASK-AR-577",
+      "title": "W4B-2026-06-17-TASK-AR-577",
+      "metadata": {
+        "date": "2026-06-17",
+        "path": "reviews/W4B-2026-06-17-TASK-AR-577.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-577"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-18-TASK-AR-578",
+      "title": "W4B-2026-06-18-TASK-AR-578",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/W4B-2026-06-18-TASK-AR-578.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-578"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-18-TASK-AR-579",
+      "title": "W4B-2026-06-18-TASK-AR-579",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/W4B-2026-06-18-TASK-AR-579.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-579"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-18-TASK-AR-580",
+      "title": "W4B-2026-06-18-TASK-AR-580",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/W4B-2026-06-18-TASK-AR-580.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-580"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-18-TASK-AR-581",
+      "title": "W4B-2026-06-18-TASK-AR-581",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/W4B-2026-06-18-TASK-AR-581.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-581"
+        }
+      ]
+    },
+    {
+      "kind": "verification",
+      "id": "W4B-2026-06-18-TASK-AR-582",
+      "title": "W4B-2026-06-18-TASK-AR-582",
+      "metadata": {
+        "date": "2026-06-18",
+        "path": "reviews/W4B-2026-06-18-TASK-AR-582.md"
+      },
+      "relations": [
+        {
+          "type": "references",
+          "target": "TASK-AR-582"
         }
       ]
     }
