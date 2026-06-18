@@ -425,3 +425,35 @@ def test_cli_plan_review_json(tmp_path: Path) -> None:
     payload = json.loads(result.stdout)
     assert payload["status"] == "planned"
     assert payload["artifacts"][0]["path"] == "reviews/SEMINAR-2026-06-19-task-ar-583-ui-ux.md"
+
+
+def test_cli_propose_dry_run_json(tmp_path: Path) -> None:
+    write_fixture(tmp_path)
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--root",
+            str(tmp_path),
+            "--now",
+            "2026-06-19T00:00:00+00:00",
+            "propose",
+            "--dry-run",
+            "--json",
+        ],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["schema"] == "agent-runtime-ui-ux-next-work-proposals/v1"
+    assert [proposal["proposal_kind"] for proposal in payload["proposals"]] == [
+        "design_direction_rfc",
+        "implementation_refactor",
+        "ux_evaluation_pass",
+    ]
