@@ -1,24 +1,16 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T02:39:08+09:00
+updated_at: 2026-06-19T02:46:12+09:00
 current_state:
-  summary: "TASK-AR-599 is W4a self-verified in .worktrees/TASK-AR-599 and awaits independent W4b verification/release. TASK-AR-597 and TASK-AR-598 are completed, W4b-verified, and integrated."
+  summary: "TASK-AR-599 is W4b-verified and claim-released; .worktrees/TASK-AR-599 is ready for W5 root integration. TASK-AR-597 and TASK-AR-598 are completed, W4b-verified, and integrated."
   status: active
   task_set_status: active
   task_set_id: "TASKSET-AR-UI-UX-CYCLE-AUTOMATION"
-  step_index: 4
+  step_index: 5
   step_total: 5
-  progress_pct: 85
-  status_text: "Active claim CLAIM-20260619-022506-task-ar-599-9bea owns TASK-AR-599; branch head d5c927e is W4a self-verified and needs W4b."
+  progress_pct: 95
+  status_text: "TASK-AR-599 claim CLAIM-20260619-022506-task-ar-599-9bea is W4b-verified and released; W5 merge/closeout remains."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260619-022506-task-ar-599-9bea
-      agent_role: lead-engineer
-      agent_instance_id: uiux-cycle-20260619-599
-      display_name: codex-ui-ux-cycle-599
-      callsite_id: terminal:wt-task-ar-599:tab-01
-      task_id: TASK-AR-599
-      task_set_id: TASKSET-AR-UI-UX-CYCLE-AUTOMATION
-      worktree_path: .worktrees/TASK-AR-599
+  current_agents: []
   current_teams:
     - ui-ux
 resume:
@@ -43,21 +35,21 @@ pointers:
     self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-584-20260619011843.json
     w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-584.md
   active_claims:
-    - agents/runtime/task_claims/CLAIM-20260619-022506-task-ar-599-9bea.json
+    []
   ui_ux_cycle_automation:
     taskset: TASKSET-AR-UI-UX-CYCLE-AUTOMATION
     completed_tasks:
       - TASK-AR-597
       - TASK-AR-598
-    active_claim: agents/runtime/task_claims/CLAIM-20260619-022506-task-ar-599-9bea.json
-    released_claim: agents/runtime/task_claims/CLAIM-20260619-014841-task-ar-598-task-ar-598-plan-review.json
+    active_claim: null
+    released_claim: agents/runtime/task_claims/CLAIM-20260619-022506-task-ar-599-9bea.json
     worktree_path: .worktrees/TASK-AR-599
     implementation_branch: codex/task-ar-599-ui-ux-propose
     implementation_commit: d5c927e
-    status: task_ar_599_w4a_self_verified_w4b_pending
+    status: task_ar_599_w4b_verified_released_w5_pending
     self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-599-20260619023818.json
     root_integration_evidence: null
-    w4b_evidence: null
+    w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-599.md
     next_task: TASK-AR-599
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
