@@ -50,7 +50,7 @@ assets live in:
 | --- | --- | --- |
 | `design_token` | `src/agent_runtime/ui_design_assets.py` | `UI_TOKEN_SCALE_CSS` for shared type, semantic spacing, radius, and specialized layout offsets used by the legacy console CSS. |
 | `ui_component` | `src/agent_runtime/ui_design_assets.py` | JS helpers such as `componentButton`, `componentCard`, `componentTable`, `componentModalShell`, `componentProgressBar`, `componentEmptyState`, `componentMetaGrid`, and `componentStateChip`. |
-| `pattern_component` | `src/agent_runtime/ui_design_assets.py` | Domain helpers such as `patternTaskLane`, `patternClaimCard`, `patternEvidencePanel`, `patternCommandBar`, `patternStateMachinePanelLegend`, `patternAuditMeta`, and `patternSurfaceMeta`, served into `/app.js` and reused by console renderers. |
+| `pattern_component` | `src/agent_runtime/ui_design_assets.py` | Domain helpers such as `patternTaskLane`, `patternClaimCard`, `patternEvidencePanel`, `patternCommandBar`, `patternStateMachinePanelLegend`, `patternSvgLayeredRadialLayout`, `patternSvgGraph`, `patternCalendarGrid`, `patternAuditMeta`, and `patternSurfaceMeta`, served into `/app.js` and reused by console renderers. |
 | `served_asset` | `src/agent_runtime/ui_console_assets.py` | The served HTML, CSS, and JavaScript asset strings, including composition with `ui_design_assets`. |
 | `page assembly` | `src/agent_runtime/ui_console.py` | HTTP routing, API responses, data wiring, and serving the asset module constants. |
 
@@ -68,6 +68,8 @@ Promoted pattern usage as of `TASK-AR-580`:
 | `patternEvidencePanel` / `patternAuditCard` | Events, errors, evidence links, and replay panels. |
 | `patternCommandBar` | Write command log cards. |
 | `patternStateMachinePanelLegend` | State-machine viewer legend shell. |
+| `patternSvgLayeredRadialLayout` / `patternSvgGraph` | Live-map and dependency-graph SVG node/edge layout and paint path. |
+| `patternCalendarGrid` | Calendar month/week grid cell renderer in `renderCalendar`. |
 
 Token-literal status as of `TASK-AR-581`: the full `--all-ui` raw-literal audit
 passes for the current console baseline. Typography, spacing, radius, and the
@@ -81,11 +83,13 @@ consumers. Shared spacing now uses named scale tokens such as `--space-sm`,
 uses `--radius-hairline`, `--radius-xs`, `--radius-md`, `--radius-lg`, and
 related scale names.
 
-Residual one-off boundary: data-heavy SVG layout functions, calendar grids,
-office map placement, import/export previews, specialized ops dashboard charts,
-and JavaScript geometry constants may remain in `ui_console.py` until a later
-unit extracts them behind stable pattern APIs. These are physical decomposition
-and layout-geometry debts, not typography/spacing/radius token debts.
+Residual one-off boundary: office map placement, import/export previews,
+specialized ops dashboard charts, and remaining JavaScript geometry constants
+may remain in `ui_console.py` until a later unit extracts them behind stable
+pattern APIs. These are physical decomposition and layout-geometry debts, not
+typography/spacing/radius token debts. As of `TASK-AR-584`, the live/dependency
+SVG node/edge layout path and calendar grid cell renderer are promoted into
+experimental pattern APIs.
 
 Served asset ownership as of `TASK-AR-582`: `ui_console.py` no longer owns the
 large HTML/CSS/JS strings. `ui_console_assets.py` owns the static served assets,

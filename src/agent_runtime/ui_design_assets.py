@@ -255,6 +255,122 @@ function patternStateMachinePanelLegend() {
   ].join("");
 }
 
+function patternSvgLayeredRadialLayout(nodes, layers) {
+  const positions = {};
+  const used = new Set();
+  (layers || []).forEach((layer) => {
+    const items = (nodes || []).filter((node) => {
+      if (used.has(node.id)) return false;
+      return layer.filter ? layer.filter(node) : true;
+    });
+    items.forEach((node) => used.add(node.id));
+    if (layer.point) {
+      items.forEach((node) => {
+        positions[node.id] = { x: layer.point.x, y: layer.point.y };
+      });
+      return;
+    }
+    const center = layer.center || { x: 500, y: 300 };
+    const radiusX = layer.radiusX || layer.radius || 220;
+    const radiusY = layer.radiusY || layer.radius || 160;
+    items.forEach((node, index) => {
+      const angle = (index / Math.max(items.length, 1)) * Math.PI * 2 - Math.PI / 2;
+      positions[node.id] = {
+        x: center.x + Math.cos(angle) * radiusX,
+        y: center.y + Math.sin(angle) * radiusY,
+      };
+    });
+  });
+  return positions;
+}
+
+function patternSvgGraph(options) {
+  const graph = options || {};
+  const svg = graph.svg;
+  if (!svg) return;
+  const nodes = graph.nodes || [];
+  const edges = graph.edges || [];
+  const positions = graph.positions || {};
+  const ns = graph.namespace || "http://www.w3.org/2000/svg";
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  if (!nodes.length) {
+    const note = document.createElementNS(ns, "text");
+    note.setAttribute("x", graph.emptyX || "500");
+    note.setAttribute("y", graph.emptyY || "300");
+    note.setAttribute("class", graph.emptyClass || "svg-graph-empty");
+    note.setAttribute("text-anchor", "middle");
+    note.textContent = graph.emptyLabel || "No graph data";
+    svg.appendChild(note);
+    return;
+  }
+
+  const edgeLayer = document.createElementNS(ns, "g");
+  edges.forEach((edge) => {
+    const a = positions[edge.from];
+    const b = positions[edge.to];
+    if (!a || !b) return;
+    const line = document.createElementNS(ns, "line");
+    line.setAttribute("x1", a.x);
+    line.setAttribute("y1", a.y);
+    line.setAttribute("x2", b.x);
+    line.setAttribute("y2", b.y);
+    line.setAttribute("class", graph.edgeClassFor ? graph.edgeClassFor(edge) : (graph.edgeClass || "svg-graph-edge"));
+    const edgeAttrs = graph.edgeAttrsFor ? graph.edgeAttrsFor(edge) : {};
+    Object.entries(edgeAttrs || {}).forEach(([key, value]) => line.setAttribute(key, value));
+    edgeLayer.appendChild(line);
+  });
+  svg.appendChild(edgeLayer);
+
+  const nodeLayer = document.createElementNS(ns, "g");
+  nodes.forEach((node) => {
+    const pos = positions[node.id];
+    if (!pos) return;
+    const group = document.createElementNS(ns, "g");
+    group.setAttribute("class", graph.nodeClassFor ? graph.nodeClassFor(node) : (graph.nodeClass || "svg-graph-node"));
+    const nodeAttrs = graph.nodeAttrsFor ? graph.nodeAttrsFor(node) : {};
+    Object.entries(nodeAttrs || {}).forEach(([key, value]) => group.setAttribute(key, value));
+    const circle = document.createElementNS(ns, "circle");
+    circle.setAttribute("cx", pos.x);
+    circle.setAttribute("cy", pos.y);
+    circle.setAttribute("r", graph.nodeRadiusFor ? graph.nodeRadiusFor(node) : (graph.nodeRadius || "16"));
+    group.appendChild(circle);
+    const label = document.createElementNS(ns, "text");
+    label.setAttribute("x", pos.x);
+    label.setAttribute("y", pos.y + (graph.labelDy || 28));
+    label.textContent = graph.nodeLabelFor ? graph.nodeLabelFor(node) : String(node.id || "").slice(0, 18);
+    group.appendChild(label);
+    nodeLayer.appendChild(group);
+  });
+  svg.appendChild(nodeLayer);
+}
+
+function patternCalendarGrid(options) {
+  const calendar = options || {};
+  const weekdays = calendar.weekdays || [];
+  const days = calendar.days || [];
+  const byDate = calendar.byDate || {};
+  const dateKeyFor = calendar.dateKeyFor || (() => "");
+  const todayKey = calendar.todayKey || "";
+  const header = weekdays.map((name) => `<div class="calendar-weekday" role="columnheader">${escapeHtml(name)}</div>`).join("");
+  const cells = days.map(({ date, outside }) => {
+    const key = dateKeyFor(date);
+    const events = byDate[key] || [];
+    const isToday = key === todayKey;
+    const eventHtml = events.map((event) => {
+      const extraClass = calendar.eventClassFor ? calendar.eventClassFor(event) : "";
+      const title = calendar.eventTitleFor ? calendar.eventTitleFor(event) : (event.title || "");
+      const id = calendar.eventIdFor ? calendar.eventIdFor(event) : (event.id || "");
+      const label = calendar.eventLabelFor ? calendar.eventLabelFor(event) : title;
+      return `<span class="calendar-event ${extraClass}" title="${escapeHtml(title)}" data-entity-id="${escapeHtml(id)}">${escapeHtml(label)}</span>`;
+    }).join("");
+    return `<div class="calendar-cell ${outside ? "is-outside" : ""} ${isToday ? "is-today" : ""}" role="gridcell">
+      <span class="calendar-cell-date">${escapeHtml(date.getDate())}</span>
+      ${eventHtml}
+    </div>`;
+  }).join("");
+  return header + cells;
+}
+
 /* Backward-compatible names used by the existing console renderers. */
 function progressBar(value) {
   return componentProgressBar(value);
@@ -290,6 +406,9 @@ ASSETIZATION_CLASSES = {
     "patternEvidencePanel": "pattern_component",
     "patternCommandBar": "pattern_component",
     "patternStateMachinePanelLegend": "pattern_component",
+    "patternSvgLayeredRadialLayout": "pattern_component",
+    "patternSvgGraph": "pattern_component",
+    "patternCalendarGrid": "pattern_component",
     "patternAuditMeta": "pattern_component",
     "patternSurfaceMeta": "pattern_component",
 }

@@ -23,6 +23,9 @@ def test_ui_design_assets_classify_token_component_and_pattern_layers():
     assert classes["patternEvidencePanel"] == "pattern_component"
     assert classes["patternCommandBar"] == "pattern_component"
     assert classes["patternStateMachinePanelLegend"] == "pattern_component"
+    assert classes["patternSvgLayeredRadialLayout"] == "pattern_component"
+    assert classes["patternSvgGraph"] == "pattern_component"
+    assert classes["patternCalendarGrid"] == "pattern_component"
     assert classes["patternAuditMeta"] == "pattern_component"
     assert classes["patternSurfaceMeta"] == "pattern_component"
 
@@ -65,6 +68,9 @@ def test_ui_component_bundle_is_served_in_console_js(tmp_path):
     assert "function patternEvidencePanel" in js
     assert "function patternCommandBar" in js
     assert "function patternStateMachinePanelLegend" in js
+    assert "function patternSvgLayeredRadialLayout" in js
+    assert "function patternSvgGraph" in js
+    assert "function patternCalendarGrid" in js
     assert "function renderAuditMeta(content)" in js
     assert "function renderSurfaceMeta(content)" in js
 
@@ -107,3 +113,6 @@ def test_promoted_pattern_helpers_are_called_by_console_renderers():
     assert "patternEvidencePanel(errors" in source
     assert "host.innerHTML = patternCommandBar(rows);" in source
     assert "legend.innerHTML = patternStateMachinePanelLegend();" in source
+    assert "return patternSvgLayeredRadialLayout(nodes" in source
+    assert "patternSvgGraph({" in source
+    assert "grid.innerHTML = patternCalendarGrid({" in source

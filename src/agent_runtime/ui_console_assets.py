@@ -9446,20 +9446,10 @@ function liveMapData() {
 }
 
 function liveMapNodePositions(nodes) {
-  // Deterministic radial layout: owner at the apex, everyone else on a ring
-  // grouped by kind so the graph reads the same across refreshes.
-  const positions = {};
-  const cx = 500;
-  const cy = 300;
-  const owner = nodes.find((node) => node.kind === "owner");
-  if (owner) positions[owner.id] = { x: cx, y: 70 };
-  const ring = nodes.filter((node) => node.kind !== "owner");
-  const radius = 220;
-  ring.forEach((node, index) => {
-    const angle = (index / Math.max(ring.length, 1)) * Math.PI * 2 - Math.PI / 2;
-    positions[node.id] = { x: cx + Math.cos(angle) * radius, y: cy + 40 + Math.sin(angle) * (radius * 0.7) };
-  });
-  return positions;
+  return patternSvgLayeredRadialLayout(nodes, [
+    { filter: (node) => node.kind === "owner", point: { x: 500, y: 70 } },
+    { filter: (node) => node.kind !== "owner", center: { x: 500, y: 340 }, radiusX: 220, radiusY: 154 },
+  ]);
 }
 
 function renderLiveMap() {
@@ -9480,55 +9470,23 @@ function renderLiveMap() {
 
   const nodes = data.nodes || [];
   const edges = data.edges || [];
-  while (svg.firstChild) svg.removeChild(svg.firstChild);
-  if (!nodes.length) {
-    const note = document.createElementNS(SVG_NS, "text");
-    note.setAttribute("x", "500");
-    note.setAttribute("y", "210");
-    note.setAttribute("class", "live-map-empty");
-    note.setAttribute("text-anchor", "middle");
-    note.textContent = "No live map data";
-    svg.appendChild(note);
-    return;
-  }
   const positions = liveMapNodePositions(nodes);
-
-  const edgeLayer = document.createElementNS(SVG_NS, "g");
-  edges.forEach((edge) => {
-    const a = positions[edge.from];
-    const b = positions[edge.to];
-    if (!a || !b) return;
-    const line = document.createElementNS(SVG_NS, "line");
-    line.setAttribute("x1", a.x);
-    line.setAttribute("y1", a.y);
-    line.setAttribute("x2", b.x);
-    line.setAttribute("y2", b.y);
-    line.setAttribute("class", `live-map-edge kind-${edge.kind || "edge"}`);
-    line.setAttribute("data-edge-id", edge.id);
-    edgeLayer.appendChild(line);
+  patternSvgGraph({
+    svg,
+    nodes,
+    edges,
+    positions,
+    emptyLabel: "No live map data",
+    emptyClass: "live-map-empty",
+    emptyY: "210",
+    edgeClassFor: (edge) => `live-map-edge kind-${edge.kind || "edge"}`,
+    edgeAttrsFor: (edge) => ({ "data-edge-id": edge.id }),
+    nodeClassFor: (node) => `live-map-node kind-${node.kind || "node"} presence-${node.presence || "offline"}`,
+    nodeAttrsFor: (node) => ({ "data-node-id": node.id }),
+    nodeRadiusFor: (node) => node.kind === "owner" ? "26" : "18",
+    nodeLabelFor: (node) => String(node.label || node.id).slice(0, 18),
+    labelDy: 34,
   });
-  svg.appendChild(edgeLayer);
-
-  const nodeLayer = document.createElementNS(SVG_NS, "g");
-  nodes.forEach((node) => {
-    const pos = positions[node.id];
-    if (!pos) return;
-    const group = document.createElementNS(SVG_NS, "g");
-    group.setAttribute("class", `live-map-node kind-${node.kind || "node"} presence-${node.presence || "offline"}`);
-    group.setAttribute("data-node-id", node.id);
-    const circle = document.createElementNS(SVG_NS, "circle");
-    circle.setAttribute("cx", pos.x);
-    circle.setAttribute("cy", pos.y);
-    circle.setAttribute("r", node.kind === "owner" ? "26" : "18");
-    group.appendChild(circle);
-    const label = document.createElementNS(SVG_NS, "text");
-    label.setAttribute("x", pos.x);
-    label.setAttribute("y", pos.y + 34);
-    label.textContent = String(node.label || node.id).slice(0, 18);
-    group.appendChild(label);
-    nodeLayer.appendChild(group);
-  });
-  svg.appendChild(nodeLayer);
 }
 
 function pulseLiveElement(selector) {
@@ -10101,22 +10059,10 @@ function renderTimeline() {
 }
 
 function dependencyNodePositions(nodes) {
-  // Deterministic ring layout (mirrors the live map) so the graph reads the
-  // same across refreshes; parent nodes sit on an inner ring.
-  const positions = {};
-  const cx = 500;
-  const cy = 300;
-  const parents = nodes.filter((node) => node.kind === "parent");
-  const others = nodes.filter((node) => node.kind !== "parent");
-  parents.forEach((node, index) => {
-    const angle = (index / Math.max(parents.length, 1)) * Math.PI * 2 - Math.PI / 2;
-    positions[node.id] = { x: cx + Math.cos(angle) * 110, y: cy + Math.sin(angle) * 90 };
-  });
-  others.forEach((node, index) => {
-    const angle = (index / Math.max(others.length, 1)) * Math.PI * 2 - Math.PI / 2;
-    positions[node.id] = { x: cx + Math.cos(angle) * 230, y: cy + Math.sin(angle) * 200 };
-  });
-  return positions;
+  return patternSvgLayeredRadialLayout(nodes, [
+    { filter: (node) => node.kind === "parent", center: { x: 500, y: 300 }, radiusX: 110, radiusY: 90 },
+    { filter: (node) => node.kind !== "parent", center: { x: 500, y: 300 }, radiusX: 230, radiusY: 200 },
+  ]);
 }
 
 function renderDependencyGraph() {
@@ -10137,55 +10083,21 @@ function renderDependencyGraph() {
   if (!svg) return;
   const nodes = data.nodes || [];
   const edges = data.edges || [];
-  while (svg.firstChild) svg.removeChild(svg.firstChild);
-  if (!nodes.length) {
-    const note = document.createElementNS(SVG_NS, "text");
-    note.setAttribute("x", "500");
-    note.setAttribute("y", "300");
-    note.setAttribute("class", "dep-graph-empty");
-    note.setAttribute("text-anchor", "middle");
-    note.textContent = "No dependency data";
-    svg.appendChild(note);
-    return;
-  }
   const positions = dependencyNodePositions(nodes);
-
-  const edgeLayer = document.createElementNS(SVG_NS, "g");
-  edges.forEach((edge) => {
-    const a = positions[edge.from];
-    const b = positions[edge.to];
-    if (!a || !b) return;
-    const line = document.createElementNS(SVG_NS, "line");
-    line.setAttribute("x1", a.x);
-    line.setAttribute("y1", a.y);
-    line.setAttribute("x2", b.x);
-    line.setAttribute("y2", b.y);
-    line.setAttribute("class", `dep-edge kind-${edge.kind || "dependency"} ${edge.in_cycle ? "is-cycle" : ""}`);
-    line.setAttribute("data-edge-id", edge.id);
-    edgeLayer.appendChild(line);
+  patternSvgGraph({
+    svg,
+    nodes,
+    edges,
+    positions,
+    emptyLabel: "No dependency data",
+    emptyClass: "dep-graph-empty",
+    edgeClassFor: (edge) => `dep-edge kind-${edge.kind || "dependency"} ${edge.in_cycle ? "is-cycle" : ""}`,
+    edgeAttrsFor: (edge) => ({ "data-edge-id": edge.id }),
+    nodeClassFor: (node) => `dep-node kind-${node.kind || "task"} ${node.in_cycle ? "is-cycle" : ""}`,
+    nodeAttrsFor: (node) => ({ "data-node-id": node.id }),
+    nodeRadiusFor: (node) => node.kind === "parent" ? "20" : "14",
+    nodeLabelFor: (node) => String(node.id).slice(0, 18),
   });
-  svg.appendChild(edgeLayer);
-
-  const nodeLayer = document.createElementNS(SVG_NS, "g");
-  nodes.forEach((node) => {
-    const pos = positions[node.id];
-    if (!pos) return;
-    const group = document.createElementNS(SVG_NS, "g");
-    group.setAttribute("class", `dep-node kind-${node.kind || "task"} ${node.in_cycle ? "is-cycle" : ""}`);
-    group.setAttribute("data-node-id", node.id);
-    const circle = document.createElementNS(SVG_NS, "circle");
-    circle.setAttribute("cx", pos.x);
-    circle.setAttribute("cy", pos.y);
-    circle.setAttribute("r", node.kind === "parent" ? "20" : "14");
-    group.appendChild(circle);
-    const label = document.createElementNS(SVG_NS, "text");
-    label.setAttribute("x", pos.x);
-    label.setAttribute("y", pos.y + 28);
-    label.textContent = String(node.id).slice(0, 18);
-    group.appendChild(label);
-    nodeLayer.appendChild(group);
-  });
-  svg.appendChild(nodeLayer);
 }
 
 // ----- Wiki page view (LLM-Wiki Unit 3): deterministic page envelope + local graph -----
@@ -10987,22 +10899,21 @@ function renderCalendar() {
   }
 
   const days = calendarVisibleDays();
-  const header = CALENDAR_WEEKDAYS.map((name) => `<div class="calendar-weekday" role="columnheader">${escapeHtml(name)}</div>`).join("");
-  const cells = days.map(({ date, outside }) => {
-    const key = calendarDateKey(date);
-    const events = byDate[key] || [];
-    const isToday = key === todayKey;
-    const eventHtml = events.map((event) => {
+  grid.innerHTML = patternCalendarGrid({
+    weekdays: CALENDAR_WEEKDAYS,
+    days,
+    byDate,
+    todayKey,
+    dateKeyFor: calendarDateKey,
+    eventClassFor: (event) => {
       const overdue = event.reminder === "overdue";
       const kindClass = `calendar-event-${(event.kind || "").replace(/[^a-z]/g, "")}`;
-      return `<span class="calendar-event ${kindClass} ${overdue ? "is-overdue" : ""}" title="${escapeHtml(event.title || "")}" data-entity-id="${escapeHtml(event.id || "")}">${escapeHtml(event.title || "")}</span>`;
-    }).join("");
-    return `<div class="calendar-cell ${outside ? "is-outside" : ""} ${isToday ? "is-today" : ""}" role="gridcell">
-      <span class="calendar-cell-date">${escapeHtml(date.getDate())}</span>
-      ${eventHtml}
-    </div>`;
-  }).join("");
-  grid.innerHTML = header + cells;
+      return `${kindClass} ${overdue ? "is-overdue" : ""}`;
+    },
+    eventTitleFor: (event) => event.title || "",
+    eventIdFor: (event) => event.id || "",
+    eventLabelFor: (event) => event.title || "",
+  });
 }
 
 function renderSchedules() {
