@@ -1,0 +1,127 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "chat:2026-06-19-ui-refactor-continuous-cycle",
+  "created_by": "codex-planner",
+  "now": "2026-06-19T08:18:00+09:00",
+  "initiative": {
+    "id": "INIT-AR-UI-UX-DESIGN-DIRECTION-CYCLE",
+    "title": "UI UX Design Direction Cycle",
+    "summary": "Continue the UI/UX improvement loop after the cycle automation closeout by deriving a new design direction, promoting accepted system deltas, and preparing the next implementation and beta-tester pass.",
+    "owner": "lead_engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC",
+    "display_name": "UI UX Design Direction RFC",
+    "summary": "Run the post-closeout UI/UX design-direction loop: lead-designer exploration, design-system promotion decisions, implementation refactor scope, and beta-tester evaluation criteria before mutating UI source again.",
+    "order": 624,
+    "plan_slug": "2026-06-19-ui-ux-design-direction-rfc"
+  },
+  "tasks": [
+    {
+      "title": "Run lead-designer UI direction seminar",
+      "goal": "Create the seminar artifact that decides what new visual direction should be explored next, instead of letting implementation workers repeat the current UI language by default.",
+      "scope": "Planning and evidence only. Do not edit UI source files. The seminar must cover typography, size, color, motion, effects, schema, assets, accessibility, responsiveness, and interaction.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 2,
+      "est_tokens": 5000,
+      "owner": "lead-designer",
+      "team": "ui-ux",
+      "acceptance": [
+        "reviews/SEMINAR-2026-06-19-ui-ux-design-direction.md records lead-designer, design-system-steward, interface-designer, and ux-evaluator viewpoints.",
+        "The seminar states the user problem, target screen or workflow, and why the current visual direction is insufficient.",
+        "The seminar evaluates typography, size/spacing, color, motion, effects, schema, assets, accessibility, responsiveness, and interaction with concrete evidence requirements.",
+        "The seminar selects one RFC direction and rejects at least one alternative with rationale."
+      ],
+      "verification": [
+        "python scripts/ui_ux_cycle.py --root . assess --json",
+        "python scripts/design_system_gate.py --check --all-ui",
+        "python scripts/evidence_index_generator.py --check"
+      ],
+      "units": [
+        {
+          "title": "Run lead-designer UI direction seminar",
+          "context": "The previous design-system work made tokens, roles, gates, and UI/UX cycle proposals usable. The next cycle must create a real design-direction decision before implementation, so new UI work does not simply repeat the existing visual language.",
+          "inputs": [
+            "reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md",
+            "reviews/DIAGNOSTIC-2026-06-18-ui-design-system-maturity.md",
+            "docs/design/agent-runtime/DESIGN.md",
+            "docs/design/agent-runtime/DESIGN-SYSTEM.md",
+            "scripts/ui_ux_cycle.py"
+          ],
+          "target_files": [
+            "reviews/SEMINAR-2026-06-19-ui-ux-design-direction.md",
+            "reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md",
+            "reviews/INDEX.md"
+          ],
+          "scope": "Write the seminar decision artifact and refresh the evidence index only. Do not edit docs/design or UI source files in this unit.",
+          "steps": [
+            "Read the current UI/UX proposal and design-system diagnostic.",
+            "Record lead-designer, design-system-steward, interface-designer, and ux-evaluator positions.",
+            "Compare at least two design-direction options and choose one RFC candidate.",
+            "Map the chosen direction to token, UI component, pattern component, and one-off implications.",
+            "Refresh evidence index and run the recorded verification commands."
+          ],
+          "acceptance": [
+            "The seminar artifact is specific enough for a planner to write the RFC task without chat context.",
+            "Every UI quality dimension has evidence expectations and a likely assetization class.",
+            "The chosen direction has an explicit implementation boundary and beta-tester follow-up path."
+          ],
+          "verification": [
+            "python scripts/ui_ux_cycle.py --root . assess --json",
+            "python scripts/design_system_gate.py --check --all-ui",
+            "python scripts/evidence_index_generator.py --check"
+          ],
+          "handoff": "Report the selected design-direction candidate, rejected alternatives, assetization implications, and next RFC target files.",
+          "stop_condition": "Stop after seminar evidence is complete and ready for RFC registration or claim."
+        }
+      ]
+    },
+    {
+      "title": "Publish UI design direction RFC",
+      "goal": "Create the RFC that promotes the seminar decision into an accepted design direction and names the exact token, component, pattern, and page-assembly deltas allowed for implementation.",
+      "scope": "RFC and design-system documentation only. Do not mutate UI source files. Update DESIGN.md or DESIGN-SYSTEM.md only for accepted direction and governance deltas.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 3,
+      "est_tokens": 7000,
+      "owner": "lead-designer",
+      "team": "ui-ux",
+      "acceptance": [
+        "reviews/RFC-2026-06-19-ui-ux-design-direction.md states the selected visual direction, target workflow, references, rejected alternatives, risks, and promotion decision.",
+        "The RFC lists minimum design-token, UI-component, pattern-component, and one-off boundaries before implementation.",
+        "DESIGN.md and DESIGN-SYSTEM.md are updated only when the RFC promotes a reusable rule or asset contract.",
+        "The RFC defines beta-tester and UX-evaluator evidence for the next implementation round."
+      ],
+      "verification": [
+        "python scripts/design_system_gate.py --check --all-ui",
+        "python scripts/evidence_index_generator.py --check",
+        "python scripts/ui_ux_cycle.py --root . propose --dry-run --json"
+      ]
+    },
+    {
+      "title": "Derive next UI implementation and UX evaluation units",
+      "goal": "Turn the accepted design-direction RFC into the next implementation refactor and beta-tester evaluation records without bypassing W0-W6.",
+      "scope": "Planning and registration input only. Do not edit UI source files. The output must be specific enough for interface-designer and ux-evaluator claims.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 3,
+      "est_tokens": 7000,
+      "owner": "interface-designer",
+      "team": "ui-ux",
+      "acceptance": [
+        "A follow-up registration input names the next UI source mutation task, its target files, and its token/component/pattern/one-off classification.",
+        "A beta-tester artifact plan records clicked/typed flows, recovery attempts, viewport/data state, and BTC-style failure routing.",
+        "The next implementation task keeps page files focused on layout/data wiring and moves repeated surface area into pattern assets.",
+        "The plan preserves design-system gate and focused UI test commands for W4a/W4b."
+      ],
+      "verification": [
+        "python scripts/ui_ux_cycle.py --root . propose --dry-run --json",
+        "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC --check",
+        "python scripts/evidence_index_generator.py --check"
+      ]
+    }
+  ]
+}

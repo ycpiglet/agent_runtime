@@ -2,16 +2,53 @@
 type: ui-ux-next-work-proposals
 id: PROPOSALS-2026-06-19-ui-ux-next-work
 status: planned
+signal: watch
+score: 80
+priority: Medium
 tags: [ui, ux, design-system, proposal]
 ---
 
 # UI/UX Next Work Proposals 2026-06-19
 
-## Boundary
+## Bottom Line
 
-- Mutation policy: `proposal-only`.
-- Claim policy: must register and claim follow-up work through W0-W6 before any UI source mutation.
-- This artifact proposes work only; it does not register tasks, create claims, or mutate UI source files.
+- Summary: proposal-only UI/UX next-work options are preserved for later task
+  registration.
+- Result: no UI source mutation is authorized by this record.
+- Boundary: follow-up implementation still requires W0-W6 registration and
+  claim-first execution.
+
+## Signal
+
+| Proposal | Status | Lead | Evidence |
+| --- | --- | --- | --- |
+| design_direction_rfc | ready_to_register | lead-designer | RFC proposal path listed |
+| implementation_refactor | needs_task_registration | interface-designer | source/test targets listed |
+| ux_evaluation_pass | needs_implementation_target | ux-evaluator | beta/evaluator artifacts listed |
+
+## Action
+
+- Register a concrete follow-up task before touching UI source files.
+- Keep this record as proposal evidence only.
+- Use design-system and UX review roles before implementation begins.
+
+## Risk
+
+- Risk: treating this proposal as an active task would bypass W0-W6.
+- Risk: implementation without design direction review may repeat the current
+  visual direction.
+- Guardrail: source files remain out of scope until a claim exists.
+
+## Decision
+
+- Decision: preserve the proposals as next-work options, not as active work.
+- Decision: design exploration, implementation refactor, and UX evaluation stay
+  separate work items.
+
+## Next
+
+- Choose one proposal and register it as a canonical task if UI/UX work resumes.
+- Run focused UI tests and the design-system gate for any future implementation.
 
 ## Proposals
 
