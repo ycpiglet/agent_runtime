@@ -18,3 +18,5 @@
 - 2026-06-19T07:35:54+09:00: W4a checks passed: 159 focused wiki/UI tests, 67 wiki/knowledge tests, py_compile, diff check, design-system gate, knowledge graph check, taskset gate, evidence index, state sync, RBAC, and footprint gates.
 - 2026-06-19T07:35:54+09:00: recorded W4a evidence `reviews/VERIFY-2026-06-19-task-ar-595-20260619073554.json` with freshness metadata; evidence commit `acec583`.
 - 2026-06-19T07:39:45+09:00: claim moved to self-verified progress state pending independent W4b verification and release.
+- 2026-06-19T07:43:41+09:00: independent W4b verifier `019edce4-553e-7f81-9015-79fb336b8ceb` approved the task with no findings; evidence recorded at `reviews/W4B-2026-06-19-TASK-AR-595.md`.
+- 2026-06-19T07:43:41+09:00: claim released after W4b verification.

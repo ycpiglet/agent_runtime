@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-595:tab-01",
   "pane_id": "terminal:wt-task-ar-595:tab-01",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-LLM-WIKI",
   "active_scope": "TASKSET-AR-LLM-WIKI",
   "scope_transition_approved": true,
@@ -19,20 +19,20 @@
   "model_tier": "codex",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "self-verified",
-  "progress_pct": 90,
-  "step_index": 5,
+  "phase": "w4b-verified-released",
+  "progress_pct": 100,
+  "step_index": 6,
   "step_total": 6,
-  "status_text": "TASK-AR-595 wiki navigation integration implemented and W4a self-verified; awaiting independent W4b.",
+  "status_text": "TASK-AR-595 wiki navigation integration implemented, W4a self-verified, W4b approved, and claim released.",
   "worktree_path": ".worktrees/TASK-AR-595",
   "branch": "codex/task-ar-595-work-01",
   "claimed_at": "2026-06-19T07:19:32+09:00",
-  "last_heartbeat": "2026-06-19T07:39:45+09:00",
-  "updated_at": "2026-06-19T07:39:45+09:00",
+  "last_heartbeat": "2026-06-19T07:43:41+09:00",
+  "updated_at": "2026-06-19T07:43:41+09:00",
   "expires_at": "2026-06-19T08:09:45+09:00",
   "lease": {
     "claimed_at": "2026-06-19T07:19:32+09:00",
-    "heartbeat_at": "2026-06-19T07:39:45+09:00",
+    "heartbeat_at": "2026-06-19T07:43:41+09:00",
     "expires_at": "2026-06-19T08:09:45+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260619-071932-task-ar-595-wiki-nav.handoff.md",
@@ -44,5 +44,9 @@
     "src/agent_runtime/ui_console_assets.py",
     "tests/test_ui_console.py",
     "agents/lead_engineer/tasks/TASK-AR-595.md"
-  ]
+  ],
+  "released_at": "2026-06-19T07:43:41+09:00",
+  "verified_by": "019edce4-553e-7f81-9015-79fb336b8ceb",
+  "verifier_role": "independent-w4b-verifier",
+  "verification_evidence": "reviews/W4B-2026-06-19-TASK-AR-595.md"
 }

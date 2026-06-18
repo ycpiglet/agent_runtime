@@ -11,14 +11,17 @@
 - model_tier: codex
 - wip_slot: 0
 - stop_condition: 
-- phase: self-verified
-- step: 5/6
-- progress_pct: 90
-- status_text: TASK-AR-595 wiki navigation integration implemented and W4a self-verified; awaiting independent W4b.
-- status: claimed
+- phase: w4b-verified-released
+- step: 6/6
+- progress_pct: 100
+- status_text: TASK-AR-595 wiki navigation integration implemented, W4a self-verified, W4b approved, and claim released.
+- status: released
 - implementation_commit: 3cb20c3
 - self_verification_commit: acec583
 - self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-595-20260619073554.json
+- w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-595.md
+- verified_by: 019edce4-553e-7f81-9015-79fb336b8ceb
+- released_at: 2026-06-19T07:43:41+09:00
 
 ## Implementation Summary
 
@@ -39,7 +42,8 @@
 - `python scripts\evidence_index_generator.py --check` passed.
 - `python scripts\verification_freshness_gate.py --check` passed; the new TASK-AR-595 record is fresh, with existing legacy records remaining watch-only.
 
-## W4b Needed
+## W4b Verification
 
-- Independent verifier should review implementation commit `3cb20c3`, evidence commit `acec583`, and `reviews/VERIFY-2026-06-19-task-ar-595-20260619073554.json`.
-- Playwright is not installed in this worktree environment (`playwright:no`), so W4a did not include a browser screenshot.
+- Independent verifier `019edce4-553e-7f81-9015-79fb336b8ceb` approved the task with no findings.
+- W4b evidence: `reviews/W4B-2026-06-19-TASK-AR-595.md`.
+- Playwright is not installed in this worktree environment (`playwright:no`), so W4a/W4b did not include a browser screenshot.

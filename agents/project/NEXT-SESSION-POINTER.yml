@@ -1,21 +1,16 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T03:24:00+09:00
+updated_at: 2026-06-19T07:43:41+09:00
 current_state:
-  summary: "TASK-AR-595 Wiki/Search navigation hub is claimed for implementation after TASK-AR-594 release."
-  status: active
+  summary: "TASK-AR-595 Wiki/Search navigation hub is W4b-approved and released; root integration and cleanup are in progress before TASK-AR-596 closeout."
+  status: integration_pending
   task_set_status: active
   task_set_id: "TASKSET-AR-LLM-WIKI"
-  step_index: 1
+  step_index: 2
   step_total: 2
-  progress_pct: 65
-  status_text: "CLAIM-20260619-071932-task-ar-595-wiki-nav is active; implement Wiki/Search as a core navigation hub and cross-link entity surfaces."
+  progress_pct: 85
+  status_text: "CLAIM-20260619-071932-task-ar-595-wiki-nav is released with W4b evidence; merge the worktree, clean up, then run TASK-AR-596 full closeout."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260619-071932-task-ar-595-wiki-nav
-      agent_role: uiux
-      agent_instance_id: ui-20260619-071932-kst-wiki-nav
-      display_name: codex-uiux
-      callsite_id: terminal:wt-task-ar-595:tab-01
+  current_agents: []
   current_teams:
     - uiux
 resume:
@@ -39,8 +34,7 @@ pointers:
     next_task: null
     self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-584-20260619011843.json
     w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-584.md
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260619-071932-task-ar-595-wiki-nav.json
+  active_claims: []
   ui_ux_cycle_automation:
     taskset: TASKSET-AR-UI-UX-CYCLE-AUTOMATION
     completed_tasks:
@@ -59,25 +53,28 @@ pointers:
     next_task: null
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
-    active_claim: agents/runtime/task_claims/CLAIM-20260619-071932-task-ar-595-wiki-nav.json
-    released_claim: agents/runtime/task_claims/CLAIM-20260619-025906-task-ar-594-wiki-minigraph.json
+    active_claim: null
+    released_claim: agents/runtime/task_claims/CLAIM-20260619-071932-task-ar-595-wiki-nav.json
     released_claims:
       - agents/runtime/task_claims/CLAIM-20260619-011800-task-ar-596-wiki-lint.json
       - agents/runtime/task_claims/CLAIM-20260619-025906-task-ar-594-wiki-minigraph.json
+      - agents/runtime/task_claims/CLAIM-20260619-071932-task-ar-595-wiki-nav.json
     preserved_claim: agents/runtime/task_claims/CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve.json
     preserved_branch: archive/branches/20260619/claude-llm-wiki
     preserved_branch_head: 5846e40
     worktree_path: null
-    implementation_branch: codex/task-ar-594-wiki-minigraph
-    implementation_commit: 2c5729f
-    status: task_ar_595_claimed
+    implementation_branch: codex/task-ar-595-work-01
+    implementation_commit: acec583
+    status: task_ar_595_w4b_released_pending_root_integration
     current_line_order: 624
-    next_decision: implement_task_ar_595_before_full_task_ar_596_closeout
-    next_task: TASK-AR-595
+    next_decision: merge_task_ar_595_then_run_task_ar_596_full_closeout
+    next_task: TASK-AR-596
     next_after_release: TASK-AR-596
     verification_evidence: reviews/VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500.json
     task_ar_594_self_verification: reviews/VERIFY-2026-06-19-task-ar-594-20260619031224.json
     task_ar_594_w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-594.md
+    task_ar_595_self_verification: reviews/VERIFY-2026-06-19-task-ar-595-20260619073554.json
+    task_ar_595_w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-595.md
     w4b_evidence: reviews/W4B-2026-06-19-UNIT-TASK-AR-596-001.md
     review: reviews/REVIEW-2026-06-18-wiki-search-ask.md
   self_improvement_remediation:
