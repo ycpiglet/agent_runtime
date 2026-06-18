@@ -57,6 +57,7 @@ ACTIVE_BACKGROUND_STATUSES = {"pending", "running", "active", "in_progress", "wo
 PATCH_FILE_RE = re.compile(r"^\*\*\* (?:Add|Update|Delete) File: (.+)$", re.MULTILINE)
 PATCH_MOVE_RE = re.compile(r"^\*\*\* Move to: (.+)$", re.MULTILINE)
 PS_ASSIGN_RE = re.compile(r"(?i)(\$\w+)\s*=\s*([^;\r\n]+)")
+PS_ASSIGNMENT_START_RE = re.compile(r"(?i)\$\w+\s*=")
 SHELL_PATH_PARAM_RE = re.compile(
     r"""(?ix)
     -(?:LiteralPath|Path|FilePath|Destination|TargetPath)
@@ -188,6 +189,40 @@ def _shell_variables(command: str) -> dict[str, str]:
     return variables
 
 
+def _mask_powershell_assignment_rhs(command: str) -> str:
+    """Hide assignment values before scanning for actual command path args."""
+    chars = list(command)
+    for match in PS_ASSIGNMENT_START_RE.finditer(command):
+        index = match.end()
+        quote: str | None = None
+        while index < len(chars):
+            char = chars[index]
+            if quote:
+                chars[index] = " "
+                if quote == "'" and char == "'" and index + 1 < len(chars) and chars[index + 1] == "'":
+                    chars[index + 1] = " "
+                    index += 2
+                    continue
+                if quote == '"' and char == "`" and index + 1 < len(chars):
+                    chars[index + 1] = " "
+                    index += 2
+                    continue
+                if char == quote:
+                    quote = None
+                index += 1
+                continue
+            if char in {"'", '"'}:
+                quote = char
+                chars[index] = " "
+                index += 1
+                continue
+            if char in {";", "\r", "\n"}:
+                break
+            chars[index] = " "
+            index += 1
+    return "".join(chars)
+
+
 def _resolve_shell_path_token(token: str, variables: dict[str, str]) -> str | None:
     text = token.strip()
     if not text:
@@ -239,16 +274,17 @@ def _path_values(value: Any) -> set[str]:
 
 def _command_touched_paths(command: str) -> set[str]:
     normalized = command.replace("\\", "/")
+    scan_command = _mask_powershell_assignment_rhs(command)
     paths: set[str] = set()
     if "scripts/lock_merge_driver.py" in normalized and "post-merge" in normalized:
         paths.add("tests/fixtures/host/agent_runtime.lock.json")
     if "scripts/evidence_index_generator.py" in normalized and "--write" in normalized:
         paths.add("reviews/INDEX.md")
 
-    paths.update(_git_add_paths(command))
+    paths.update(_git_add_paths(scan_command))
     variables = _shell_variables(command)
     for pattern in (SHELL_PATH_PARAM_RE, SHELL_REDIRECT_RE):
-        for match in pattern.finditer(command):
+        for match in pattern.finditer(scan_command):
             path = _resolve_shell_path_token(match.group("token"), variables)
             if path:
                 paths.add(path)
