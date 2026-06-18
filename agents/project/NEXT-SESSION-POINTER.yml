@@ -1,14 +1,14 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-18T17:48:46+09:00
+updated_at: 2026-06-18T23:18:00+09:00
 current_state:
-  summary: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE is complete; the persistent self-improvement goal is improving but still active."
+  summary: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE is complete; the persistent self-improvement goal is improving at 83/100 but still active."
   status: watch
   task_set_status: completed
   task_set_id: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
   step_index: 4
   step_total: 4
   progress_pct: 100
-  status_text: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE closed at improving 70/100; full maturity remains open."
+  status_text: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE closed and the 2026-06-18 maturity refresh reports improving 83/100; full maturity remains open."
 active_work:
   current_agents: []
   current_teams: []
@@ -52,6 +52,7 @@ pointers:
       - TASK-AR-575
       - TASK-AR-576
     completed_evidence:
+      - reviews/REPORT-2026-06-18-self-improvement-maturity.md
       - reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md
       - reviews/W4B-2026-06-17-TASK-AR-573.md
       - reviews/VERIFY-2026-06-17-task-ar-573-20260617173707.json
@@ -82,13 +83,13 @@ pointers:
       waiver_debt: 1
       scribe: unknown
     current_metrics:
-      score: 70
+      score: 83
       maturity: improving
-      role_gaps: 3
+      role_gaps: 1
       asset_gaps: 1
       low_reuse_assets: 1
       waiver_debt: 0
-      scribe: unknown
+      scribe: ok
       doc_steward: ok
     target_next:
       score: ">=65"
@@ -99,17 +100,14 @@ pointers:
       operating_state: improving_but_active
       complete: false
       blocking_gates:
-        - monitored_role_gaps
-        - scribe_state
+        - score_mature
       remaining_watches:
-        - council
-        - progress-scout
-        - skeptic
+        - monitored_role_gap
         - capability.session_dashboard
     next_cycle_focus:
-      - "Resolve scribe_state scoring so real scribe evidence can become known/ok."
-      - "Route council, progress-scout, and skeptic through real claim evidence or an Owner-approved monitoring decision."
+      - "Route the remaining monitored role gap through real claim evidence or an Owner-approved monitoring decision."
       - "Give capability.session_dashboard a successful usage/performance pass or an explicit lifecycle decision."
+      - "Raise the self-improvement score from 83 to the mature target of 90 without fabricating role evidence."
   self_improvement_cadence:
     taskset: TASKSET-AR-SELF-IMPROVEMENT-CADENCE
     maturity_report: reviews/REPORT-2026-06-17-self-improvement-maturity.md

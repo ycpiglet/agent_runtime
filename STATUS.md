@@ -3,7 +3,7 @@
 ## 현재 한 줄 요약
 
 - LLM-Wiki preservation branch is deferred with owner-visible handoff; no active claim is currently open.
-- Self-improvement remediation is improving but not mature: `scribe_state`, monitored role gaps, and cycle evidence still need follow-up.
+- Self-improvement remediation is improving but not mature: `scribe_state` is now ok, but the score is still below mature and one monitored role gap remains.
 - Scribe source is now the live status summary section so advisory health can be measured without fabricating role evidence.
 - Doc Steward remains ok; keep document-health checks advisory and evidence-based.
 - Design-system cleanup appears in the current dirty intake as separate uncommitted work and should be preserved, not folded into this role cleanup.
@@ -21,19 +21,19 @@
 
 - Completed taskset: `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` is now `4/4` done and archived from the live board.
 - Completed final task: `TASK-AR-576` published the remediation delta report, passed W4a self-verification, passed W4b independent verification, merged, and closed.
-- Completed remediation tasks: `TASK-AR-573` created real scribe claim/log evidence and removed the obsolete `role-usage:scribe` waiver; `TASK-AR-574` routed the `reviewer` monitored role through real claim evidence; `TASK-AR-575` reduced low-reuse asset debt to one explicit watch.
-- Current metrics after remediation: evidence maturity `improving`, score `70/100`, role gaps `3`, asset gaps `1`, low-reuse assets `1`, waiver debt `0`, scribe `unknown`, doc-steward `ok`.
-- Delta from baseline: score `+38`, role gaps `-3`, asset gaps `-16`, low-reuse assets `-16`, waiver debt `-1`.
-- Persistent thread goal: still active. Do not claim full maturity yet; mature gates still fail on `monitored_role_gaps` and `scribe_state`.
-- Evidence: `reviews/REPORT-2026-06-17-self-improvement-remediation-delta.md`; `reviews/VERIFY-2026-06-17-task-ar-576-20260617184640.json`; `reviews/VERIFY-2026-06-17-unit-task-ar-576-001-20260617183459.json`; `reviews/W4B-2026-06-17-TASK-AR-576.md`; `reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md`; `reviews/W4B-2026-06-17-TASK-AR-575.md`; `reviews/VERIFY-2026-06-17-task-ar-575-20260617182232.json`; `reviews/REVIEW-2026-06-17-task-ar-574-monitored-role-evidence.md`; `reviews/W4B-2026-06-17-TASK-AR-574.md`; `reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md`.
+- Completed remediation tasks: `TASK-AR-573` created real scribe claim/log evidence and removed the obsolete `role-usage:scribe` waiver; `TASK-AR-574` routed the `reviewer` monitored role through real claim evidence; `TASK-AR-575` reduced low-reuse asset debt to one explicit watch; `TASK-AR-576` published the remediation delta.
+- Current metrics after the 2026-06-18 maturity refresh: evidence maturity `improving`, score `83/100`, role gaps `1`, asset gaps `1`, low-reuse assets `1`, waiver debt `0`, scribe `ok`, doc-steward `ok`.
+- Delta from baseline: score `+51`, role gaps `-5`, asset gaps `-16`, waiver debt `-1`.
+- Persistent thread goal: still active. Do not claim full maturity yet; the mature score gate remains below target (`83 < 90`) and one monitored role gap remains visible.
+- Evidence: `reviews/REPORT-2026-06-18-self-improvement-maturity.md`; `reviews/REPORT-2026-06-17-self-improvement-remediation-delta.md`; `reviews/VERIFY-2026-06-17-task-ar-576-20260617184640.json`; `reviews/VERIFY-2026-06-17-unit-task-ar-576-001-20260617183459.json`; `reviews/W4B-2026-06-17-TASK-AR-576.md`; `reviews/REVIEW-2026-06-17-task-ar-575-runtime-asset-lifecycle.md`; `reviews/W4B-2026-06-17-TASK-AR-575.md`; `reviews/VERIFY-2026-06-17-task-ar-575-20260617182232.json`; `reviews/REVIEW-2026-06-17-task-ar-574-monitored-role-evidence.md`; `reviews/W4B-2026-06-17-TASK-AR-574.md`; `reviews/REVIEW-2026-06-17-task-ar-573-scribe-evidence.md`.
 
 ## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-CADENCE maturity report
 
 - Current taskset: `TASKSET-AR-SELF-IMPROVEMENT-CADENCE`; `TASK-AR-570` and `TASK-AR-571` are complete, and `TASK-AR-572` reports the maturity state.
-- Current metrics: evidence maturity `immature`, score `32/100`, role gaps `6`, asset gaps `17`, scribe `unknown`, doc-steward `ok`.
+- Baseline metrics: evidence maturity `immature`, score `32/100`, role gaps `6`, asset gaps `17`, scribe `unknown`, doc-steward `ok`.
 - Cycle evidence: review, meeting, seminar, retro, compound, and casebook artifacts are present (`6/6` required records).
 - Goal state: the self-improvement operating cycle is recorded, but the active thread goal remains open until role/asset evidence improves.
-- Next concrete cycle: create real scribe claim/log evidence, route monitored dormant roles into review/council evidence, exercise or deprecate low-reuse runtime assets, then rerun `python scripts/self_improvement_cycle.py report --json`.
+- Next concrete cycle: route the remaining monitored dormant role into review/council evidence, exercise or retire the last low-reuse runtime asset, then rerun `python scripts/self_improvement_cycle.py report --json`.
 - Evidence: `reviews/REPORT-2026-06-17-self-improvement-maturity.md`; `reviews/REVIEW-2026-06-17-self-improvement-cycle.md`; `reviews/RETRO-2026-06-17-self-improvement-cycle.md`.
 
 ## 2026-06-17 - TASKSET-AR-DECISION-FIRST-CONSOLE-IA complete
