@@ -1,20 +1,29 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T02:19:59+09:00
+updated_at: 2026-06-19T02:25:06+09:00
 current_state:
-  summary: "TASK-AR-597 and TASK-AR-598 are completed, W4b-verified, and integrated; TASK-AR-599 is the remaining UI/UX cycle automation task. TASKSET-AR-LLM-WIKI remains queued for TASK-AR-594/TASK-AR-595 and final closeout."
-  status: ready
+  summary: "TASK-AR-599 is actively claimed for UI/UX cycle next-work proposal automation. TASK-AR-597 and TASK-AR-598 are completed, W4b-verified, and integrated."
+  status: active
   task_set_status: active
-  task_set_id: "TASKSET-AR-LLM-WIKI"
-  step_index: 4
+  task_set_id: "TASKSET-AR-UI-UX-CYCLE-AUTOMATION"
+  step_index: 1
   step_total: 5
-  progress_pct: 80
-  status_text: "No active claims; TASK-AR-597 and TASK-AR-598 are complete. Resume LLM-Wiki TASK-AR-594/TASK-AR-595 or claim TASK-AR-599 for the final UI/UX automation step."
+  progress_pct: 0
+  status_text: "Active claim CLAIM-20260619-022506-task-ar-599-9bea owns TASK-AR-599 in .worktrees/TASK-AR-599."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260619-022506-task-ar-599-9bea
+      agent_role: lead-engineer
+      agent_instance_id: uiux-cycle-20260619-599
+      display_name: codex-ui-ux-cycle-599
+      callsite_id: terminal:wt-task-ar-599:tab-01
+      task_id: TASK-AR-599
+      task_set_id: TASKSET-AR-UI-UX-CYCLE-AUTOMATION
+      worktree_path: .worktrees/TASK-AR-599
+  current_teams:
+    - ui-ux
 resume:
-  active_task: "TASK-AR-594"
-  active_task_set: "TASKSET-AR-LLM-WIKI"
+  active_task: "TASK-AR-599"
+  active_task_set: "TASKSET-AR-UI-UX-CYCLE-AUTOMATION"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -33,18 +42,20 @@ pointers:
     next_task: null
     self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-584-20260619011843.json
     w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-584.md
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260619-022506-task-ar-599-9bea.json
   ui_ux_cycle_automation:
     taskset: TASKSET-AR-UI-UX-CYCLE-AUTOMATION
     completed_tasks:
       - TASK-AR-597
       - TASK-AR-598
+    active_claim: agents/runtime/task_claims/CLAIM-20260619-022506-task-ar-599-9bea.json
     released_claim: agents/runtime/task_claims/CLAIM-20260619-014841-task-ar-598-task-ar-598-plan-review.json
-    worktree_path: null
+    worktree_path: .worktrees/TASK-AR-599
     implementation_branch: codex/task-ar-598-plan-review
     implementation_commit: 81715af
     followup_commit: f1f8a6d
-    status: task_ar_598_completed_integrated_closed
+    status: task_ar_599_claimed_for_next_work_proposal_automation
     self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-598-20260619015334.json
     root_integration_evidence: reviews/VERIFY-2026-06-19-task-ar-598-root-integration-20260619021304.json
     w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-598.md
