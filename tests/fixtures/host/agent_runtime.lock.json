@@ -34,7 +34,7 @@
       "agents/owner/SKILL.md": "sha256:eeeb78ac0aabcefd8ce81088a5c8c149cfae3f07fc1088befa9911e04effed8d",
       "agents/project/AGENT-KNOWLEDGE-WAREHOUSE.md": "sha256:b88ea8f5f866eb6d92de349ff8e85274a90533486a2ff61da4ffed8663519803",
       "agents/project/AUTONOMY-POLICY.example.yml": "sha256:cd2b31b0e0959158abb7716398231baa670c76f5b4539054f93465dca43e7dbc",
-      "agents/project/COLLABORATION-GOVERNANCE.json": "sha256:2880bd293fd35ed36215ee4934f41df3219f58a7c79221c39ff99925b0ed3917",
+      "agents/project/COLLABORATION-GOVERNANCE.json": "sha256:8cc44d503f39a1a7c27e6d3881b199df4e5e56d8d85e0edc56e48e4fe8179a7a",
       "agents/project/CONTEXT-SOURCES.example.yml": "sha256:04c8541e4a9da5c718c6f1403bfcd5dab1169f9bff504007348ab41b4a85cacc",
       "agents/project/DATASET-CATALOG.example.yml": "sha256:88e71db4200c796b635332de04543d8316d4082097d591c56617f85be4299056",
       "agents/project/EVAL-POLICY.example.yml": "sha256:1e6a0569306ef8857f7f24cd9914e390c36bdf4562d8d51c26c905c6af20f5f8",
@@ -111,7 +111,7 @@
       "scripts/codex_subagent_bridge.py": "sha256:fb4814510196d0ef763cceb1973d6d2baa73e8a767365fde88235d582789bad5",
       "scripts/collab_log.py": "sha256:594cd860b176507271e65d2d30edf003c1fce166481c392888e78bc625148083",
       "scripts/collaboration_concurrency_gate.py": "sha256:54b78b4da96f971698aa751f63ae6c26fdc07565ffe2947b63b72e6d55479ce7",
-      "scripts/collaboration_governance_gate.py": "sha256:e290b3f222a0a6761f8be61658facdfdffd7be920de024d7c943dff0a58636e5",
+      "scripts/collaboration_governance_gate.py": "sha256:93a11006b1efb17e5c323bebeb672bc879cc62c9e3cb348928ef9fcc2d4ee2d0",
       "scripts/compound_metrics.py": "sha256:2dfb0c74f030d1c4070abcc60fbb965ef018d997bdacecda46a13c5ffeeb9817",
       "scripts/continuity_contract_gate.py": "sha256:8625a9a9795d5c1c13ae0d8abdb93fe74a606991da1210dd47704e1ad669b725",
       "scripts/conversation_work_audit.py": "sha256:7279a081414e1aa3929929c88491289512f2b62c157038021622fb8198d1d47f",
@@ -266,7 +266,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.2.0",
-    "template_digest": "sha256:3c27f4e835e7fb410153a6448c1fd46be5186a3ce1a9baac29af91c50d71d7a6",
+    "template_digest": "sha256:7e2ecdbe220af5db324e1f4d2505250ef32c4edd98682eb399e562ce22ca885a",
     "template_files": 263
   },
   "project": "fixture-host",

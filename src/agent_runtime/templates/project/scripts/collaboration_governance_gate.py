@@ -192,7 +192,46 @@ def _review_artifact_counts(root: Path) -> Counter[str]:
     return counts
 
 
-def _check_roles(policy: dict[str, Any], claims: list[dict[str, Any]], findings: list[Finding]) -> None:
+def _configured_role_evidence_paths(root: Path, policy: dict[str, Any], role: str) -> list[str]:
+    evidence = policy.get("monitored_role_evidence")
+    if not isinstance(evidence, dict):
+        return []
+    entries = evidence.get(role)
+    if isinstance(entries, dict):
+        entries = [entries]
+    if not isinstance(entries, list):
+        return []
+
+    paths: list[str] = []
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        pattern = str(entry.get("path_glob") or "").strip()
+        if not pattern:
+            continue
+        tokens = entry.get("contains")
+        if isinstance(tokens, str):
+            required_tokens = [tokens]
+        elif isinstance(tokens, list):
+            required_tokens = [str(token) for token in tokens if str(token).strip()]
+        else:
+            required_tokens = []
+        for path in sorted(root.glob(pattern), key=lambda item: item.as_posix().lower()):
+            if not path.is_file():
+                continue
+            rel = _rel(root, path)
+            if required_tokens:
+                try:
+                    text = path.read_text(encoding="utf-8", errors="replace").lower()
+                except OSError:
+                    continue
+                if not all(token.lower() in text for token in required_tokens):
+                    continue
+            paths.append(rel)
+    return sorted(set(paths))
+
+
+def _check_roles(root: Path, policy: dict[str, Any], claims: list[dict[str, Any]], findings: list[Finding]) -> None:
     role_counts = Counter(str(claim.get("agent_role") or "").strip() for claim in claims)
     min_claims = int(policy.get("min_claims_for_role_coverage") or 0)
     if len(claims) < min_claims:
@@ -227,13 +266,13 @@ def _check_roles(policy: dict[str, Any], claims: list[dict[str, Any]], findings:
     monitored = policy.get("monitored_roles")
     if isinstance(monitored, list):
         for role in sorted(str(role) for role in monitored if str(role).strip()):
-            if role_counts.get(role, 0) == 0:
+            if role_counts.get(role, 0) == 0 and not _configured_role_evidence_paths(root, policy, role):
                 findings.append(
                     Finding(
                         "watch",
                         f"role-monitor:{role}",
                         "agents/runtime/task_claims",
-                        f"role {role} has no claim evidence in this window",
+                        f"role {role} has no claim or configured artifact evidence in this window",
                     )
                 )
 
@@ -336,7 +375,7 @@ def analyze(root: Path, now: datetime) -> list[Finding]:
         return raw_findings
     waivers = _valid_waivers(root, policy, now, raw_findings)
     claims = _read_claims(root, raw_findings)
-    _check_roles(policy, claims, raw_findings)
+    _check_roles(root, policy, claims, raw_findings)
     _check_artifacts(root, policy, raw_findings)
     _check_capabilities(root, policy, raw_findings)
     _check_lifecycle(root, policy, claims, now, raw_findings)

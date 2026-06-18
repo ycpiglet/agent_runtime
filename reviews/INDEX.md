@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-18T21:56:38+09:00
-record_count: 578
+generated_at: 2026-06-18T22:27:46+09:00
+record_count: 579
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `578` review and evidence records under `reviews/`.
+- Summary: indexed `579` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `578` files |
+| Reviews covered | pass | `579` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -485,6 +485,7 @@ record_count: 578
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration` | md | record | pass | Self Improvement Remediation Registration |
 | `reviews/REVIEW-2026-06-18-llm-wiki-preservation-branch-deferred.md` | `REVIEW-2026-06-18-llm-wiki-preservation-branch-deferred` | md | accepted | n/a | LLM-Wiki Preservation Branch Deferred |
 | `reviews/REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout.md` | `REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout` | review | pass | n/a | LLM-Wiki Worktree Preservation Closeout |
+| `reviews/REVIEW-2026-06-18-monitored-role-artifact-evidence.md` | `REVIEW-2026-06-18-monitored-role-artifact-evidence` | md | record | pass | Monitored Role Artifact Evidence |
 | `reviews/REVIEW-2026-06-18-self-improvement-cycle.md` | `REVIEW-2026-06-18-self-improvement-cycle` | md | record | pass | Self Improvement Cycle 2026-06-18 |
 | `reviews/REVIEW-2026-06-18-taskset-ar-design-system-assetization-registration.md` | `REVIEW-2026-06-18-taskset-ar-design-system-assetization-registration` | md | record | pass | Design System Assetization Registration |
 | `reviews/REVIEW-2026-06-18-taskset-ar-design-system-component-patterns-registration.md` | `REVIEW-2026-06-18-taskset-ar-design-system-component-patterns-registration` | md | record | pass | Design System Component Patterns Registration |

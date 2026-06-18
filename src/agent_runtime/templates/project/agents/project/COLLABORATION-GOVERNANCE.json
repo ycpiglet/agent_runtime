@@ -18,6 +18,20 @@
     "release-steward",
     "progress-scout"
   ],
+  "monitored_role_evidence": {
+    "council": [
+      {
+        "path_glob": "reviews/COUNCIL-*.md",
+        "contains": ["type: council", "council"]
+      }
+    ],
+    "skeptic": [
+      {
+        "path_glob": "reviews/COUNCIL-*.md",
+        "contains": ["skeptic"]
+      }
+    ]
+  },
   "required_review_artifacts": [
     "REVIEW",
     "MEETING",
