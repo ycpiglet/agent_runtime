@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T02:20:01+09:00
-record_count: 603
+generated_at: 2026-06-19T02:23:41+09:00
+record_count: 604
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `603` review and evidence records under `reviews/`.
+- Summary: indexed `604` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `603` files |
+| Reviews covered | pass | `604` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -502,6 +502,7 @@ record_count: 603
 | `reviews/REVIEW-2026-06-18-wiki-search-ask.md` | `REVIEW-2026-06-18-wiki-search-ask` | md | record | pass | Wiki Search And Ask |
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-registration.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-registration` | md | record | pass | UI UX Cycle Automation Registration |
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-conductor.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-conductor` | review | accepted | replan | UI/UX Cycle Automation T3 Replan After Conductor |
+| `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-review-planning.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-review-planning` | review | accepted | replan | UI/UX Cycle Automation T3 Replan After Review Planning |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario |
