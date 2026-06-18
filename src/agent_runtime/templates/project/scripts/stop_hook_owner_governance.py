@@ -15,6 +15,8 @@ from datetime import timezone
 from pathlib import Path
 from typing import Any
 
+import stop_hook_session_scope
+
 
 ROOT = Path(__file__).resolve().parents[1]
 MAX_MESSAGE_CHARS = 6000
@@ -109,6 +111,10 @@ def build_payload(result: subprocess.CompletedProcess[str], *, diagnostic_path: 
 
 
 def main() -> int:
+    scope = stop_hook_session_scope.assess(stop_hook_session_scope.read_hook_input(), root=ROOT)
+    if scope.get("bypass"):
+        print(json.dumps(stop_hook_session_scope.approval_payload("owner governance", scope), ensure_ascii=False))
+        return 0
     result = _run_gate()
     payload = build_payload(result)
     diagnostic_path = write_diagnostic(result, payload)

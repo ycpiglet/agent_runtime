@@ -10,9 +10,15 @@ import json
 import sys
 from pathlib import Path
 
+import stop_hook_session_scope
+
 
 def main(argv: list[str] | None = None) -> int:
     try:
+        scope = stop_hook_session_scope.assess(stop_hook_session_scope.read_hook_input(), root=Path.cwd())
+        if scope.get("bypass"):
+            print(json.dumps(stop_hook_session_scope.approval_payload("closure gate", scope), ensure_ascii=False))
+            return 0
         import closure_gate
 
         result = closure_gate.assess(Path.cwd())
