@@ -22,7 +22,7 @@ tags: [ui, ux, design-system, proposal]
 
 | Proposal | Status | Lead | Evidence |
 | --- | --- | --- | --- |
-| design_direction_rfc | ready_to_register | lead-designer | RFC proposal path listed |
+| design_direction_rfc | seminar_selected | lead-designer | `reviews/SEMINAR-2026-06-19-ui-ux-design-direction.md` |
 | implementation_refactor | needs_task_registration | interface-designer | source/test targets listed |
 | ux_evaluation_pass | needs_implementation_target | ux-evaluator | beta/evaluator artifacts listed |
 
@@ -47,14 +47,17 @@ tags: [ui, ux, design-system, proposal]
 
 ## Next
 
-- Choose one proposal and register it as a canonical task if UI/UX work resumes.
+- Use `reviews/SEMINAR-2026-06-19-ui-ux-design-direction.md` as the selected
+  seminar input for the design-direction RFC.
+- Choose the selected proposal and register the RFC task before UI/UX
+  implementation work resumes.
 - Run focused UI tests and the design-system gate for any future implementation.
 
 ## Proposals
 
 ### design_direction_rfc
 
-- Status: `ready_to_register`
+- Status: `seminar_selected`
 - Lead role: `lead-designer`
 - Supporting roles: design-system-steward, ux-evaluator
 - Review roles: interface-designer
