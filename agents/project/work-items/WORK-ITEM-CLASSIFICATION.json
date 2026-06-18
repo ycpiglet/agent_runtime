@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T02:14:04+09:00",
+  "generated_at": "2026-06-19T02:20:00+09:00",
   "record_count": 352,
   "finding_count": 0,
   "findings": [],
@@ -3842,7 +3842,7 @@
       "title": "Add a deterministic UI/UX cycle command that reads current design-system state, open…",
       "path": "agents/lead_engineer/tasks/TASK-AR-597.md",
       "parent_id": "TASKSET-AR-UI-UX-CYCLE-AUTOMATION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-597-001",
@@ -3853,7 +3853,7 @@
       "title": "UNIT-TASK-AR-597-001 - Add UI/UX cycle conductor",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-597/UNIT-TASK-AR-597-001.md",
       "parent_id": "TASK-AR-597",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-598",

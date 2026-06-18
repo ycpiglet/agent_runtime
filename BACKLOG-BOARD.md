@@ -9,8 +9,8 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-19
 task_count: 258
-open_count: 6
-completed_count: 252
+open_count: 5
+completed_count: 253
 task_set_count: 2
 completed_task_set_count: 43
 ---
@@ -18,11 +18,11 @@ completed_task_set_count: 43
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `6` open or active tasks; `252` completed tasks are archived from this live board.
+- Summary: `5` open or active tasks; `253` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `5` / Ask `0` / Review `1` / Later `0` / Done `252`.
+- Status: Action `4` / Ask `0` / Review `1` / Later `0` / Done `253`.
 - Task Sets: `2` active workflows; `43` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -45,11 +45,10 @@ completed_task_set_count: 43
 ### UI UX Cycle Automation (`TASKSET-AR-UI-UX-CYCLE-AUTOMATION`)
 
 - Flow: Create an automated UI/UX improvement loop: assess tokens, components, typography, size, color, motion, effects, schemas, and assets; record seminar/meeting/beta-tester review needs; then propose the next concrete UI refactor tasks for execution and verification.
-- Progress: `1/3` done; `2` open or active.
+- Progress: `2/3` done; `1` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-597` | INIT-AR-UI-UX-CONTINUOUS-IMPROVEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-597/UNIT-TASK-AR-597-001.md | planned | Action | P1 | High | Medium | 4h/8000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Add a deterministic UI/UX cycle command that reads current design-system state, open… |
 | `TASK-AR-599` | INIT-AR-UI-UX-CONTINUOUS-IMPROVEMENT | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | High | 6h/12000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Let completed UI/UX cycle reports propose follow-up work items for lead-designer, des… |
 
 ### LLM Wiki (`TASKSET-AR-LLM-WIKI`)
@@ -117,9 +116,9 @@ completed_task_set_count: 43
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `6` open across `2` task sets (see Action Board above).
+- Active: `5` open across `2` task sets (see Action Board above).
 - Archived task sets: `43` (see Archived Task Sets above).
-- Archived task files: `252` — see `ARCHIVE-INDEX.md`.
+- Archived task files: `253` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.
