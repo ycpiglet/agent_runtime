@@ -78,6 +78,29 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-debt-consolidation-registration.md",
+          "value": "b4c2dde92bdbe94f185d58af3bd4c8c426157bb40ab272fa1a0c32a7db08b2b2"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "cb2cd245558157ff640dbf0b824694c5623e2e1ef0ccfba6e83f9a08a5522bc8"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-debt-consolidation-registration.md",
+      "recorded_at": "2026-06-18T18:43:10+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-governance-registration.md",
           "value": "54189dd31d590d186bfebfa9aea94c0921b74c9c7abffad780327c24b443af7c"
         },
@@ -284,5 +307,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-18T15:16:14+09:00"
+  "updated_at": "2026-06-18T18:43:10+09:00"
 }

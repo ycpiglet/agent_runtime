@@ -1,5 +1,6 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
+  - reviews/REVIEW-2026-06-18-taskset-ar-design-system-debt-consolidation-registration.md
   - reviews/REVIEW-2026-06-18-taskset-ar-design-system-served-asset-split-registration.md
   - reviews/REVIEW-2026-06-18-taskset-ar-design-system-token-debt-registration.md
   - reviews/REVIEW-2026-06-18-taskset-ar-design-system-component-patterns-registration.md

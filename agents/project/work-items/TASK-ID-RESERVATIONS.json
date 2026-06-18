@@ -379,8 +379,46 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-583",
+      "expires_at": "2026-06-19T18:43:04+09:00",
+      "fulfilled_at": "2026-06-18T18:43:04+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-583.md",
+      "fulfilled_task_id": "TASK-AR-583",
+      "fulfilled_task_uid": "c8e43f0d-2b3c-4eb2-bafe-1cb67cda51b4",
+      "initiative_id": "INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION",
+      "kind": "task",
+      "owner_id": "lead-engineer",
+      "reason": "work registration TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION",
+      "reservation_group_id": "RES-20260618-184304-fbffba5c",
+      "reservation_id": "RES-20260618-184304-fbffba5c-01",
+      "reserved_at": "2026-06-18T18:43:04+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION",
+      "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-584",
+      "expires_at": "2026-06-19T18:43:04+09:00",
+      "fulfilled_at": "2026-06-18T18:43:04+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-584.md",
+      "fulfilled_task_id": "TASK-AR-584",
+      "fulfilled_task_uid": "ba370d39-6930-4201-b2f7-504b66928001",
+      "initiative_id": "INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION",
+      "kind": "task",
+      "owner_id": "lead-engineer",
+      "reason": "work registration TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION",
+      "reservation_group_id": "RES-20260618-184304-fbffba5c",
+      "reservation_id": "RES-20260618-184304-fbffba5c-02",
+      "reserved_at": "2026-06-18T18:43:04+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-06-18T15:55:00+09:00"
+  "updated_at": "2026-06-18T18:43:04+09:00"
 }

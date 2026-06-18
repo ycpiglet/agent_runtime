@@ -7,22 +7,22 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-18T15:21:18+09:00
-record_count: 332
+generated_at: 2026-06-18T18:43:08+09:00
+record_count: 336
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `332` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `336` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `18` records |
-| Tasksets | pass | `42` records |
-| Tasks | pass | `246` records |
+| Initiatives | pass | `19` records |
+| Tasksets | pass | `43` records |
+| Tasks | pass | `248` records |
 | Units | pass | `26` records |
 | Findings | pass | `0` findings |
 
@@ -371,6 +371,10 @@ record_count: 332
 | 17.1 | Taskset 17.1 | taskset | `TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | `INIT-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | complete | `BACKLOG-BOARD.md` | Design System Served Asset Split |
 | 17.1.1 | Task 17.1.1 | task | `TASK-AR-582` | `TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | completed | `agents/lead_engineer/tasks/TASK-AR-582.md` | Resolve the diagnostic report's single-file HTML/CSS/JS string concentration by movin… |
 | 17.1.1.1 | Unit 17.1.1.1 | unit | `UNIT-TASK-AR-582-001` | `TASK-AR-582` | completed | `agents/lead_engineer/tasks/units/TASK-AR-582/UNIT-TASK-AR-582-001.md` | UNIT-TASK-AR-582-001 - Move served HTML CSS JS assets out of ui_console |
+| 18 | Initiative 18 | initiative | `INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | - | active | `agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION.md` | Design System Debt Consolidation |
+| 18.1 | Taskset 18.1 | taskset | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | `INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | active | `BACKLOG-BOARD.md` | Design System Debt Consolidation |
+| 18.1.1 | Task 18.1.1 | task | `TASK-AR-583` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | planned | `agents/lead_engineer/tasks/TASK-AR-583.md` | Replace the transitional --space-px-* / --radius-px-* aliases in the console asset CS… |
+| 18.1.2 | Task 18.1.2 | task | `TASK-AR-584` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | planned | `agents/lead_engineer/tasks/TASK-AR-584.md` | Move view-specific JS renderers (data-heavy SVG layouts, calendar grids, office-map p… |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

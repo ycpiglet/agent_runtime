@@ -108,6 +108,12 @@
       "display_name": "Design System Served Asset Split",
       "summary": "Physically separate the console's served HTML/CSS/JS string assets from the Python API/server module while preserving /, /app.css, and /app.js behavior.",
       "order": 622
+    },
+    {
+      "task_set_id": "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION",
+      "display_name": "Design System Debt Consolidation",
+      "summary": "Consolidate transitional spacing/radius px-alias tokens into a designed semantic scale, and promote remaining view-specific JS renderers into stable pattern modules, without re-introducing raw literals.",
+      "order": 623
     }
   ]
 }
