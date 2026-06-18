@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "uiux-semantic-scale-20260619-583",
+  "callsign": "codex-uiux-semantic-scale-583",
+  "callsite_id": "terminal:wt-task-ar-583:tab-01",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260619-003400-task-ar-583-semantic-scale.json"
+  ],
+  "created_at": "2026-06-19T00:34:03+09:00",
+  "decision_cycle_id": "",
+  "display_name": "codex-uiux-semantic-scale-583",
+  "model": "",
+  "model_tier": "worker_standard",
+  "on_behalf_of": "TASK-AR-583",
+  "pane_id": "terminal:wt-task-ar-583:tab-01",
+  "parent_instance_id": "",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "lead-engineer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-19T00:34:03+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-583",
+  "task_set_id": "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION",
+  "team_id": "ui-ux",
+  "unit_id": "",
+  "unit_spec": "",
+  "updated_at": "2026-06-19T00:34:03+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-583"
+}
