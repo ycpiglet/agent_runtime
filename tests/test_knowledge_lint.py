@@ -91,6 +91,82 @@ def test_orphan_entity_ignores_observational_kinds():
     assert all(f["id"] != "deadbeef" for f in _by_code(findings, "orphan-entity"))
 
 
+# --- expanded wiki corpus contracts ---
+
+def test_expanded_corpus_missing_source_is_block():
+    g = _graph(extra=[
+        {"kind": "doc", "id": "doc:docs/missing.md", "title": "Missing source", "metadata": {},
+         "relations": []},
+    ])
+    findings = kl.lint_expanded_corpus(g)
+    missing = _by_code(findings, "expanded-corpus-missing-source")
+    assert missing and missing[0]["severity"] == "block"
+    assert missing[0]["id"] == "doc:docs/missing.md"
+
+
+def test_expanded_corpus_missing_required_relationship_is_block():
+    g = _graph(extra=[
+        {"kind": "module", "id": "module:scripts.worker", "title": "worker",
+         "metadata": {"path": "scripts/worker.py"}, "relations": []},
+        {"kind": "asset", "id": "asset:gate/example", "title": "gate.example",
+         "metadata": {"asset_id": "gate.example"}, "relations": []},
+    ])
+    findings = kl.lint_expanded_corpus(g)
+    missing = _by_code(findings, "expanded-corpus-missing-relation")
+    assert {f["id"] for f in missing} == {"module:scripts.worker", "asset:gate/example"}
+    assert all(f["severity"] == "block" for f in missing)
+
+
+def test_expanded_corpus_invalid_relationship_is_block():
+    g = _graph(extra=[
+        {"kind": "config", "id": "config:pyproject.toml", "title": "pyproject.toml",
+         "metadata": {"path": "pyproject.toml"},
+         "relations": [{"type": "references", "target": "TASK-AR-1"}]},
+    ])
+    findings = kl.lint_expanded_corpus(g)
+    invalid = _by_code(findings, "expanded-corpus-invalid-relation")
+    assert invalid and invalid[0]["severity"] == "block"
+    assert invalid[0]["id"] == "config:pyproject.toml"
+
+
+def test_expanded_doc_work_item_references_require_documents_pair():
+    g = _graph(extra=[
+        {"kind": "doc", "id": "doc:docs/guide.md", "title": "Guide",
+         "metadata": {"path": "docs/guide.md"},
+         "relations": [{"type": "references", "target": "TASK-AR-1"}]},
+    ])
+    findings = kl.lint_expanded_corpus(g)
+    missing = _by_code(findings, "expanded-corpus-missing-relation")
+    assert missing and "without paired documents relation" in missing[0]["detail"]
+
+
+def test_expanded_corpus_clean_nodes_have_no_findings():
+    g = _graph(extra=[
+        {"kind": "doc", "id": "doc:docs/guide.md", "title": "Guide",
+         "metadata": {"path": "docs/guide.md"},
+         "relations": [
+             {"type": "references", "target": "TASK-AR-1"},
+             {"type": "documents", "target": "TASK-AR-1"},
+             {"type": "references", "target": "doc:OPS-TEST.md"},
+         ]},
+        {"kind": "module", "id": "module:scripts.worker", "title": "worker",
+         "metadata": {"path": "scripts/worker.py"},
+         "relations": [{"type": "defined_in", "target": "file:scripts/worker.py"}]},
+        {"kind": "file", "id": "file:scripts/worker.py", "title": "scripts/worker.py",
+         "metadata": {"path": "scripts/worker.py"}, "relations": []},
+        {"kind": "config", "id": "config:pyproject.toml", "title": "pyproject.toml",
+         "metadata": {"path": "pyproject.toml"},
+         "relations": [{"type": "configures", "target": "TASK-AR-1"}]},
+        {"kind": "schema", "id": "schema:schemas/task.schema.json", "title": "schemas/task.schema.json",
+         "metadata": {"path": "schemas/task.schema.json"},
+         "relations": [{"type": "validates", "target": "TASK-AR-1"}]},
+        {"kind": "asset", "id": "asset:gate/example", "title": "gate.example",
+         "metadata": {"asset_id": "gate.example"},
+         "relations": [{"type": "used_by", "target": "REVIEW-2026-06-18-example"}]},
+    ])
+    assert kl.lint_expanded_corpus(g) == []
+
+
 # --- memory freshness ---
 
 def test_stale_memory_is_block(tmp_path):

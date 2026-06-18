@@ -26,6 +26,9 @@ tags: [knowledge-graph, lint, freshness, gate, agent-primitive]
 | `duplicate-id` | block | the same `id` appears on >1 node (build_index silently overwrites) |
 | `dangling-edge` | block if rel ∈ {partOf, dependsOn, blocks}; else watch | a forward edge whose target is not a node |
 | `orphan-entity` | watch | a node with no forward and no backward edges (isolated knowledge) |
+| `expanded-corpus-missing-source` | block | an expanded wiki corpus node lacks minimum source metadata (`metadata.path` or `metadata.asset_id`) |
+| `expanded-corpus-invalid-relation` | block | an expanded wiki corpus node uses a relation type outside its ingest adapter contract |
+| `expanded-corpus-missing-relation` | block | an expanded wiki corpus node lacks an unconditional relation such as `module -> defined_in`, asset lineage, or doc work-item `references`/`documents` pairing |
 
 `STRUCTURAL_RELS = {"partOf", "dependsOn", "blocks"}` — a broken structural edge corrupts task/taskset topology (block); a dangling `mentions`/`references` from a git commit or review is informational (watch).
 
@@ -33,6 +36,7 @@ tags: [knowledge-graph, lint, freshness, gate, agent-primitive]
 
 - `Finding` — `{"code", "severity", "id", "detail"}` dict.
 - `lint_structural(graph, idx) -> list[Finding]` — duplicate-id (from raw `graph["nodes"]`), dangling-edge, orphan-entity.
+- `lint_expanded_corpus(graph) -> list[Finding]` — validates `doc/module/file/config/schema/asset` source metadata and relation contracts without blocking standalone docs/config/schema files that do not cite another entity.
 - `lint_memory(root, idx) -> list[Finding]` — orphan-memory, stale-memory (reuses `knowledge_digest`).
 - `lint(root, graph) -> list[Finding]` — builds the index, combines both, sorted by (severity, code, id) for stable output.
 - `summarize(findings) -> {"block": n, "watch": n, "total": n}`.
@@ -54,4 +58,4 @@ Mirrored to `templates/project/scripts/` (regen fixture lock). Not auto-added to
 
 ## Test (TDD)
 
-`tests/test_knowledge_lint.py`: duplicate-id, dangling structural=block vs informational=watch, orphan-entity watch, stale-memory + orphan-memory via tmp memory dir, `lint` combine+sort, summarize counts, CLI exit codes (clean=0, block=1, --strict watch=1).
+`tests/test_knowledge_lint.py`: duplicate-id, dangling structural=block vs informational=watch, orphan-entity watch, expanded wiki corpus metadata/relation checks, stale-memory + orphan-memory via tmp memory dir, `lint` combine+sort, summarize counts, CLI exit codes (clean=0, block=1, --strict watch=1).

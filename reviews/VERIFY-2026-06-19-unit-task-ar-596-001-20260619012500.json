@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500",
+  "work_id": "UNIT-TASK-AR-596-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-596/UNIT-TASK-AR-596-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-596",
+  "unit_id": "UNIT-TASK-AR-596-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-19T01:25:00+09:00",
+  "verified_by": "codex-wiki-lint-596",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_knowledge_lint.py tests/test_knowledge_lint_gate.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-19T01:21:57+09:00",
+      "finished_at": "2026-06-19T01:21:59+09:00",
+      "stdout": ".........................                                                [100%]\n25 passed in 1.33s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/knowledge_lint.py --root . --git-limit 0 check --json",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-19T01:21:59+09:00",
+      "finished_at": "2026-06-19T01:22:04+09:00",
+      "stdout": "{\n  \"findings\": [\n    {\n      \"code\": \"orphan-entity\",\n      \"severity\": \"watch\",\n      \"id\": \"INIT-AR-AGENT-ORG-DELEGATION\",\n      \"detail\": \"INIT-AR-AGENT-ORG-DELEGATION (initiative) has no relations\"\n    },\n    {\n      \"code\": \"orphan-entity\",\n      \"severity\": \"watch\",\n      \"id\": \"INIT-AR-DECISION-FIRST-CONSOLE-IA\",\n      \"detail\": \"INIT-AR-DECISION-FIRST-CONSOLE-IA (initiative) has no relations\"\n    }\n  ],\n  \"summary\": {\n    \"block\": 0,\n    \"watch\": 2,\n    \"total\": 2\n  }\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/knowledge_graph.py check --json --git-limit 0",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-19T01:22:04+09:00",
+      "finished_at": "2026-06-19T01:22:11+09:00",
+      "stdout": "{\n  \"findings\": [],\n  \"ok\": true\n}\n",
+      "stderr": ""
+    }
+  ]
+}
