@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-18T22:42:14+09:00
-record_count: 580
+generated_at: 2026-06-18T22:49:24+09:00
+record_count: 581
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `580` review and evidence records under `reviews/`.
+- Summary: indexed `581` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `580` files |
+| Reviews covered | pass | `581` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -483,6 +483,7 @@ record_count: 580
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report` | md | record | pass | Self Improvement Cadence T3 Replan After Report |
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan` | md | record | pass | Self Improvement Cadence T3 Replan |
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration` | md | record | pass | Self Improvement Remediation Registration |
+| `reviews/REVIEW-2026-06-18-knowledge-graph-corpus-expansion.md` | `REVIEW-2026-06-18-knowledge-graph-corpus-expansion` | md | record | pass | Knowledge Graph Corpus Expansion |
 | `reviews/REVIEW-2026-06-18-llm-wiki-preservation-branch-deferred.md` | `REVIEW-2026-06-18-llm-wiki-preservation-branch-deferred` | md | accepted | n/a | LLM-Wiki Preservation Branch Deferred |
 | `reviews/REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout.md` | `REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout` | review | pass | n/a | LLM-Wiki Worktree Preservation Closeout |
 | `reviews/REVIEW-2026-06-18-monitored-role-artifact-evidence.md` | `REVIEW-2026-06-18-monitored-role-artifact-evidence` | md | record | pass | Monitored Role Artifact Evidence |

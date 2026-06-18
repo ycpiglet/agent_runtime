@@ -135,7 +135,7 @@
       "scripts/kedb_search.py": "sha256:b2b714723f8be28fb9f09de571b2b5414ff6c0213c98d35dc9cc42e102e38b82",
       "scripts/knowledge_ask.py": "sha256:2b518d182c76f7383f050478650373d083e6f5d06b87df7ad16005a33b82959b",
       "scripts/knowledge_digest.py": "sha256:da575bb13b141b906d90be1214f98bd22ee69fe8cd191c541dcd9e99f5579aa5",
-      "scripts/knowledge_graph.py": "sha256:cf1b6e8f8da3ea1e7d257235da142f09fa3a8014ca8b69a70fc0038187830c94",
+      "scripts/knowledge_graph.py": "sha256:7a53f2b9dc196765b089b2145df2ebc7c294f827d964c39ce22e703055744ad0",
       "scripts/knowledge_lint.py": "sha256:999f0c6514f492d4bc88de538f0b5906ec03a6f1bf458b83cca90100b72f80f6",
       "scripts/knowledge_lint_gate.py": "sha256:d864c5f67a5419a8c30f6e3b76e9e52c1a910e40819fc5e283b67a3cac331ed2",
       "scripts/local_schedule_daemon.py": "sha256:548b5ce03b04f44ac1fd833b6347a7850665895f299f8aceeacfa4b7cf5d4f8d",
@@ -266,7 +266,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.2.0",
-    "template_digest": "sha256:1d4a0a10a310f3abcc54818cd39a4d56f77a34685a1eaabe37f12f341394db04",
+    "template_digest": "sha256:43b45e6f6e39e4167c60aec0f839c7a46c7270d1e202cddcfc7f00bc3db42a4d",
     "template_files": 263
   },
   "project": "fixture-host",
