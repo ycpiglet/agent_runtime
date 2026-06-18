@@ -1,20 +1,20 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T07:43:41+09:00
+updated_at: 2026-06-19T07:55:00+09:00
 current_state:
-  summary: "TASK-AR-595 Wiki/Search navigation hub is W4b-approved and released; root integration and cleanup are in progress before TASK-AR-596 closeout."
-  status: integration_pending
+  summary: "TASK-AR-595 Wiki/Search navigation hub is completed, W4b-approved, merged, released, and cleaned up; resume TASK-AR-596 full LLM-Wiki closeout."
+  status: active
   task_set_status: active
   task_set_id: "TASKSET-AR-LLM-WIKI"
   step_index: 2
   step_total: 2
-  progress_pct: 85
-  status_text: "CLAIM-20260619-071932-task-ar-595-wiki-nav is released with W4b evidence; merge the worktree, clean up, then run TASK-AR-596 full closeout."
+  progress_pct: 90
+  status_text: "TASK-AR-595 is completed; TASK-AR-596 is the remaining LLM-Wiki lint/E2E/taskset closeout task."
 active_work:
   current_agents: []
   current_teams:
     - uiux
 resume:
-  active_task: TASK-AR-595
+  active_task: TASK-AR-596
   active_task_set: TASKSET-AR-LLM-WIKI
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
@@ -65,9 +65,9 @@ pointers:
     worktree_path: null
     implementation_branch: codex/task-ar-595-work-01
     implementation_commit: acec583
-    status: task_ar_595_w4b_released_pending_root_integration
+    status: task_ar_595_completed_integrated_closed
     current_line_order: 624
-    next_decision: merge_task_ar_595_then_run_task_ar_596_full_closeout
+    next_decision: claim_task_ar_596_full_closeout
     next_task: TASK-AR-596
     next_after_release: TASK-AR-596
     verification_evidence: reviews/VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500.json
