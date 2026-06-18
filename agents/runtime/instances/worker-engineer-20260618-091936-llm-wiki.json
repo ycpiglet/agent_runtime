@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "worker-engineer-20260618-091936-llm-wiki",
+  "callsign": "worker-engineer@llm-wiki-preserve",
+  "callsite_id": "terminal:wt-llm-wiki:tab-01",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve.json"
+  ],
+  "created_at": "2026-06-18T09:19:36+09:00",
+  "decision_cycle_id": "",
+  "display_name": "worker-engineer@llm-wiki-preserve",
+  "model": "",
+  "model_tier": "worker_standard",
+  "on_behalf_of": "TASK-AR-590",
+  "pane_id": "terminal:wt-llm-wiki:tab-01",
+  "parent_instance_id": "",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "worker-engineer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-18T09:19:36+09:00",
+  "spawned_by": "manual-preservation",
+  "task_id": "TASK-AR-590",
+  "task_set_id": "TASKSET-AR-LLM-WIKI",
+  "team_id": "agent-runtime-core",
+  "unit_id": "",
+  "unit_spec": "",
+  "updated_at": "2026-06-18T09:19:36+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/llm-wiki"
+}

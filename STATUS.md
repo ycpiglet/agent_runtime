@@ -1,5 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-06-18 - LLM-Wiki worktree preservation active
+
+- Preservation claim: `CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve` now records `.worktrees/llm-wiki` / `claude/llm-wiki` in the primary checkout before closeout.
+- Boundary: this is continuity preservation only. It does not claim LLM-Wiki implementation, merge, push, delete, or archive anything.
+- Reason: stop hooks reported owner governance failure, dirty intake preservation required, and missing closeout records because the `llm-wiki` worktree was ahead of `origin/main` without an active claim.
+- Next decision: integrate the LLM-Wiki registration branch, defer it with an Owner-visible archive/handoff, or continue it through a formal W2/W3 claim.
+- Evidence: `reviews/REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout.md`; `agents/runtime/task_claims/CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve.json`.
+
 ## 2026-06-17 - TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE complete
 
 - Completed taskset: `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` is now `4/4` done and archived from the live board.

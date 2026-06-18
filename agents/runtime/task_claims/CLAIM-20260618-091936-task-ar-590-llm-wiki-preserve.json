@@ -1,0 +1,50 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve",
+  "task_id": "TASK-AR-590",
+  "agent_role": "worker-engineer",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "worker-engineer-20260618-091936-llm-wiki",
+  "display_name": "worker-engineer@llm-wiki-preserve",
+  "callsite_id": "terminal:wt-llm-wiki:tab-01",
+  "pane_id": "terminal:wt-llm-wiki:tab-01",
+  "mode": "preservation",
+  "status": "claimed",
+  "task_set_id": "TASKSET-AR-LLM-WIKI",
+  "active_scope": "TASKSET-AR-LLM-WIKI",
+  "scope_transition_approved": true,
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "model_tier": "worker_standard",
+  "wip_slot": 1,
+  "stop_condition": "Stop after the LLM-Wiki worktree is either claimed through W2/W3 or integrated/deferred by Owner decision; do not implement from the root checkout.",
+  "phase": "claim-created",
+  "progress_pct": 0,
+  "step_index": 1,
+  "step_total": 7,
+  "status_text": "Preserving existing claim-less LLM-Wiki worktree before closeout; no root implementation work is claimed.",
+  "scope_transition_reason": "Stop-hook preservation of an already-existing ahead LLM-Wiki worktree; this does not approve root implementation or merge/publish side effects.",
+  "worktree_path": ".worktrees/llm-wiki",
+  "branch": "claude/llm-wiki",
+  "claimed_at": "2026-06-18T09:19:36+09:00",
+  "last_heartbeat": "2026-06-18T09:19:36+09:00",
+  "updated_at": "2026-06-18T09:19:36+09:00",
+  "expires_at": "2026-06-18T09:49:36+09:00",
+  "lease": {
+    "claimed_at": "2026-06-18T09:19:36+09:00",
+    "heartbeat_at": "2026-06-18T09:19:36+09:00",
+    "expires_at": "2026-06-18T09:49:36+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve.log.md",
+  "allow_parallel_task_set": false,
+  "tags": [
+    "preservation",
+    "llm-wiki",
+    "claim-first"
+  ],
+  "target_files": [
+    "scripts/knowledge_graph.py",
+    "src/agent_runtime/templates/project/scripts/knowledge_graph.py",
+    "tests/test_knowledge_graph_corpus.py"
+  ]
+}

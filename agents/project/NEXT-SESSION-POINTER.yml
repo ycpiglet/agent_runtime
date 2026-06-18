@@ -1,5 +1,5 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-17T18:47:01+09:00
+updated_at: 2026-06-18T09:19:36+09:00
 current_state:
   summary: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE is complete; the persistent self-improvement goal is improving but still active."
   status: watch
@@ -10,8 +10,16 @@ current_state:
   progress_pct: 100
   status_text: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE closed at improving 70/100; full maturity remains open."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve
+      agent_role: worker-engineer
+      agent_instance_id: worker-engineer-20260618-091936-llm-wiki
+      display_name: worker-engineer@llm-wiki-preserve
+      callsite_id: terminal:wt-llm-wiki:tab-01
+  current_teams:
+    - team_id: agent-runtime-core
+      task_set_id: TASKSET-AR-LLM-WIKI
+      claim_id: CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve
 resume:
   active_task: none
   active_task_set: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
@@ -22,7 +30,15 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve.json
+  llm_wiki_preservation:
+    taskset: TASKSET-AR-LLM-WIKI
+    active_claim: agents/runtime/task_claims/CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve.json
+    branch: claude/llm-wiki
+    worktree_path: .worktrees/llm-wiki
+    status: preservation_only
+    next_decision: integrate_defer_or_archive
   self_improvement_remediation:
     taskset: TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE
     active_claim: null
