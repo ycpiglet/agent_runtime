@@ -31,10 +31,25 @@ import meeting_room  # noqa: E402
 ASSESS_SCHEMA = "agent-runtime-ui-ux-cycle-assessment/v1"
 REPORT_SCHEMA = "agent-runtime-ui-ux-cycle-report/v1"
 REVIEW_PLAN_SCHEMA = "agent-runtime-ui-ux-review-plan/v1"
+PROPOSAL_SCHEMA = "agent-runtime-ui-ux-next-work-proposals/v1"
 ACTIVE_CLAIM_STATUSES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
 OPEN_TASK_STATUSES = {"planned", "worker_ready", "claimed", "in_progress", "review", "waiting_review", "working"}
 UI_ROLE_IDS = ("lead-designer", "design-system-steward", "interface-designer", "ux-evaluator")
 CYCLE_TASKSET_ID = "TASKSET-AR-UI-UX-CYCLE-AUTOMATION"
+PROPOSAL_KINDS = ("design_direction_rfc", "implementation_refactor", "ux_evaluation_pass")
+PROPOSAL_ONLY_BOUNDARY = {
+    "generator_mutation_policy": "proposal-only",
+    "may_write": ["reviews/PROPOSALS-YYYY-MM-DD-ui-ux-next-work.md", "reviews/INDEX.md"],
+    "must_not_write": [
+        "src/agent_runtime/ui_console.py",
+        "src/agent_runtime/ui_console_assets.py",
+        "src/agent_runtime/ui_design_assets.py",
+        "agents/runtime/task_claims/*.json",
+        "agents/runtime/instances/*.json",
+        "agents/lead_engineer/tasks/*.md",
+    ],
+    "claim_policy": "must register and claim follow-up work through W0-W6 before any UI source mutation",
+}
 UI_TASKSET_PRIORITY = (
     "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION",
     "TASKSET-AR-UI-DESIGN-IMPLEMENTATION",
@@ -407,6 +422,171 @@ def _review_plan(next_refactor: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _proposal_status_for_refactor(next_refactor: dict[str, Any]) -> str:
+    if next_refactor.get("status") == "ready":
+        return "ready_to_register"
+    if next_refactor.get("status") == "ready_after_cycle_release":
+        return "ready_after_cycle_release"
+    if next_refactor.get("status") == "blocked_by_active_claim":
+        return "blocked_by_active_claim"
+    return "needs_task_registration"
+
+
+def _proposal_base(
+    *,
+    today: str,
+    generated_at: str,
+    kind: str,
+    title: str,
+    status: str,
+    lead_role: str,
+    supporting_roles: list[str],
+    review_roles: list[str],
+    future_target_files: list[str],
+    proposal_artifact_files: list[str],
+    summary: str,
+    source_evidence: dict[str, Any],
+    acceptance_criteria: list[str],
+) -> dict[str, Any]:
+    return {
+        "proposal_id": f"UIUX-NEXT-{today}-{kind.replace('_', '-')}",
+        "proposal_kind": kind,
+        "title": title,
+        "status": status,
+        "generated_at": generated_at,
+        "summary": summary,
+        "role_routing": {
+            "lead_role": lead_role,
+            "supporting_roles": supporting_roles,
+            "review_roles": review_roles,
+        },
+        "target_file_boundaries": {
+            "future_target_files": future_target_files,
+            "proposal_artifact_files": proposal_artifact_files,
+            "generator_may_write": list(PROPOSAL_ONLY_BOUNDARY["may_write"]),
+            "generator_must_not_write": list(PROPOSAL_ONLY_BOUNDARY["must_not_write"]),
+        },
+        "registration_boundary": {
+            "requires_work_registration": True,
+            "requires_claim_before_mutation": True,
+            "suggested_command": "python scripts/work.py new --input <json>",
+            "claim_policy": PROPOSAL_ONLY_BOUNDARY["claim_policy"],
+            "creates_claim": False,
+            "mutates_ui_files": False,
+            "mutates_claims": False,
+            "mutates_work_items": False,
+        },
+        "source_evidence": source_evidence,
+        "acceptance_criteria": acceptance_criteria,
+    }
+
+
+def _next_work_proposals(assessment: dict[str, Any], *, today: str, generated_at: str) -> list[dict[str, Any]]:
+    next_refactor = assessment.get("next_refactor") or {}
+    task = next_refactor.get("task") or {}
+    task_id = str(task.get("task_id") or "next-ui-task")
+    task_path = str(task.get("path") or "")
+    future_targets = list(task.get("target_files") or [])
+    if not future_targets:
+        future_targets = [
+            "src/agent_runtime/ui_console_assets.py",
+            "src/agent_runtime/ui_design_assets.py",
+            "tests/test_ui_console.py",
+            "tests/test_ui_design_assets.py",
+        ]
+    proposal_artifact = f"reviews/PROPOSALS-{today}-ui-ux-next-work.md"
+    rfc_artifact = f"reviews/RFC-{today}-ui-ux-design-direction.md"
+    review_artifacts = _review_artifacts(
+        {
+            "task_id": task_id,
+            "title": str(task.get("title") or task_id),
+            "path": task_path,
+            "target_files": future_targets,
+        },
+        today=today,
+        generated_at=generated_at,
+        dry_run=True,
+    )
+    review_paths = [artifact["path"] for artifact in review_artifacts]
+    source = {
+        "assessment_schema": assessment.get("schema"),
+        "assessment_status": assessment.get("status"),
+        "readiness": assessment.get("score"),
+        "next_refactor_status": next_refactor.get("status"),
+        "next_refactor_task_id": task.get("task_id"),
+        "next_refactor_task_path": task_path,
+        "conflicts": next_refactor.get("conflicts") or [],
+    }
+    return [
+        _proposal_base(
+            today=today,
+            generated_at=generated_at,
+            kind="design_direction_rfc",
+            title="Explore a new UI direction before implementation",
+            status="ready_to_register",
+            lead_role="lead-designer",
+            supporting_roles=["design-system-steward", "ux-evaluator"],
+            review_roles=["interface-designer"],
+            future_target_files=["DESIGN.md", "docs/design/agent-runtime/DESIGN-SYSTEM.md"],
+            proposal_artifact_files=[rfc_artifact, proposal_artifact],
+            summary=(
+                "Create a Design Exploration RFC when the current visual direction is too repetitive, "
+                "including references, token delta, component/pattern needs, and responsive/a11y acceptance criteria."
+            ),
+            source_evidence=source,
+            acceptance_criteria=[
+                "States the user problem, target screen, workflow, and why the existing direction is insufficient.",
+                "Provides 2-3 references or screenshots and records accepted/rejected/promoted outcome.",
+                "Lists minimum token, UI component, and pattern component deltas before implementation.",
+            ],
+        ),
+        _proposal_base(
+            today=today,
+            generated_at=generated_at,
+            kind="implementation_refactor",
+            title=f"Refactor {task_id} through existing design-system assets",
+            status=_proposal_status_for_refactor(next_refactor),
+            lead_role="interface-designer",
+            supporting_roles=["design-system-steward"],
+            review_roles=["ux-evaluator"],
+            future_target_files=future_targets,
+            proposal_artifact_files=[proposal_artifact],
+            summary=(
+                "Register and claim the next implementation unit only after this proposal is reviewed; "
+                "page files stay focused on layout/data wiring and repeated UI moves into pattern assets."
+            ),
+            source_evidence=source,
+            acceptance_criteria=[
+                "Classifies touched UI as design_token, ui_component, pattern_component, or one_off_for_now.",
+                "Uses existing tokens/components first and records any token/component promotion explicitly.",
+                "Runs focused UI tests plus the design-system gate before W4a closeout.",
+            ],
+        ),
+        _proposal_base(
+            today=today,
+            generated_at=generated_at,
+            kind="ux_evaluation_pass",
+            title=f"Run exploratory UX evaluation for {task_id}",
+            status="ready_after_implementation" if task.get("task_id") else "needs_implementation_target",
+            lead_role="ux-evaluator",
+            supporting_roles=["beta-tester", "interface-designer"],
+            review_roles=["design-system-steward"],
+            future_target_files=review_paths,
+            proposal_artifact_files=[proposal_artifact, *review_paths],
+            summary=(
+                "Plan the post-implementation beta-tester/evaluator pass with clicked/typed actions, "
+                "edge and recovery attempts, environment notes, and BTC-style visible-defect IDs."
+            ),
+            source_evidence=source,
+            acceptance_criteria=[
+                "Records user-like actions instead of screenshot-only evidence.",
+                "Covers recovery, empty, interrupted, and responsive states where relevant.",
+                "Links every user-visible defect to a BTC-style failure ID and reproduction path.",
+            ],
+        ),
+    ]
+
+
 def _artifact_status(dry_run: bool) -> str:
     return "planned" if dry_run else "pending"
 
@@ -660,6 +840,7 @@ def assess(root: Path, *, now: datetime | None = None) -> dict[str, Any]:
 def _render_report(payload: dict[str, Any], *, today: str) -> str:
     next_refactor = payload["next_refactor"]
     task = next_refactor.get("task") or {}
+    proposals = payload.get("next_work_proposals") or []
     lines = [
         "---",
         "type: report",
@@ -688,6 +869,12 @@ def _render_report(payload: dict[str, Any], *, today: str) -> str:
     lines.append(f"- Seminar participants: {', '.join(plan['seminar']['participants'])}")
     lines.append(f"- Meeting participants: {', '.join(plan['meeting']['participants'])}")
     lines.append(f"- Beta tester participants: {', '.join(plan['beta_tester']['participants'])}")
+    lines.extend(["", "## Next Work Proposals", ""])
+    for proposal in proposals:
+        lines.append(
+            f"- `{proposal['proposal_kind']}` -> `{proposal['status']}` "
+            f"via `{proposal['role_routing']['lead_role']}`."
+        )
     lines.extend(["", "## Beta Tester Evidence Requirements", ""])
     for req in plan["beta_tester"]["requirements"]:
         lines.append(f"- {req}")
@@ -711,6 +898,7 @@ def report(root: Path, *, now: datetime, dry_run: bool = False, overwrite: bool 
     rel_path = f"reviews/REPORT-{today}-ui-ux-cycle.md"
     target = root / rel_path
     payload = assess(root, now=now)
+    payload["next_work_proposals"] = _next_work_proposals(payload, today=today, generated_at=generated_at)
     content = _render_report(payload, today=today)
     artifact_status = "planned"
     if not dry_run:
@@ -729,6 +917,100 @@ def report(root: Path, *, now: datetime, dry_run: bool = False, overwrite: bool 
         "assessment": payload,
         "artifact": {"path": rel_path, "status": artifact_status},
     }
+
+
+def _render_proposals_artifact(payload: dict[str, Any]) -> str:
+    lines = [
+        "---",
+        "type: ui-ux-next-work-proposals",
+        f"id: PROPOSALS-{payload['today']}-ui-ux-next-work",
+        "status: planned",
+        "tags: [ui, ux, design-system, proposal]",
+        "---",
+        "",
+        f"# UI/UX Next Work Proposals {payload['today']}",
+        "",
+        "## Boundary",
+        "",
+        f"- Mutation policy: `{payload['mutation_policy']['generator_mutation_policy']}`.",
+        f"- Claim policy: {payload['mutation_policy']['claim_policy']}.",
+        "- This artifact proposes work only; it does not register tasks, create claims, or mutate UI source files.",
+        "",
+        "## Proposals",
+        "",
+    ]
+    for proposal in payload["proposals"]:
+        routing = proposal["role_routing"]
+        boundaries = proposal["target_file_boundaries"]
+        lines.extend(
+            [
+                f"### {proposal['proposal_kind']}",
+                "",
+                f"- Status: `{proposal['status']}`",
+                f"- Lead role: `{routing['lead_role']}`",
+                f"- Supporting roles: {', '.join(routing['supporting_roles'])}",
+                f"- Review roles: {', '.join(routing['review_roles'])}",
+                f"- Future target files: {', '.join(boundaries['future_target_files']) or 'none'}",
+                f"- Proposal artifacts: {', '.join(boundaries['proposal_artifact_files'])}",
+                "",
+                proposal["summary"],
+                "",
+                "Acceptance criteria:",
+            ]
+        )
+        lines.extend(f"- {criterion}" for criterion in proposal["acceptance_criteria"])
+        lines.append("")
+    return "\n".join(lines)
+
+
+def propose(root: Path, *, now: datetime, dry_run: bool = False, overwrite: bool = False) -> dict[str, Any]:
+    root = root.resolve()
+    today = _today(now)
+    generated_at = now.isoformat(timespec="seconds")
+    assessment = assess(root, now=now)
+    proposals = _next_work_proposals(assessment, today=today, generated_at=generated_at)
+    rel_path = f"reviews/PROPOSALS-{today}-ui-ux-next-work.md"
+    payload: dict[str, Any] = {
+        "schema": PROPOSAL_SCHEMA,
+        "generated_at": generated_at,
+        "today": today,
+        "root": str(root),
+        "status": "planned",
+        "dry_run": dry_run,
+        "assessment": {
+            "schema": assessment.get("schema"),
+            "status": assessment.get("status"),
+            "score": assessment.get("score"),
+            "next_refactor": assessment.get("next_refactor"),
+        },
+        "mutation_policy": dict(PROPOSAL_ONLY_BOUNDARY),
+        "proposals": proposals,
+        "artifact": {"path": rel_path, "status": "planned"},
+        "index": {
+            "status": "planned" if dry_run else "pending",
+            "command": "python scripts/evidence_index_generator.py --write",
+            "path": "reviews/INDEX.md",
+        },
+        "errors": [],
+    }
+    if dry_run:
+        return payload
+
+    target = root / rel_path
+    if target.exists() and not overwrite:
+        payload["status"] = "failed"
+        payload["artifact"]["status"] = "exists"
+        payload["index"]["status"] = "skipped"
+        payload["errors"].append(f"artifact already exists: {rel_path} (pass --overwrite to replace)")
+        return payload
+
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(_render_proposals_artifact(payload), encoding="utf-8")
+    payload["artifact"]["status"] = "recorded"
+    index = _run_evidence_index(root, write=True)
+    payload["index"] = index
+    payload["status"] = "recorded" if index.get("status") == "pass" else "failed"
+    return payload
 
 
 def render_text(payload: dict[str, Any]) -> str:
@@ -768,6 +1050,19 @@ def render_review_plan_text(payload: dict[str, Any]) -> str:
     )
 
 
+def render_proposal_text(payload: dict[str, Any]) -> str:
+    proposals = ", ".join(f"{item['proposal_kind']}:{item['status']}" for item in payload.get("proposals", []))
+    return "\n".join(
+        [
+            "UI/UX Next Work Proposals",
+            f"- Status: {payload['status']}",
+            f"- Dry run: {payload['dry_run']}",
+            f"- Artifact: {payload['artifact']['status']} -> {payload['artifact']['path']}",
+            f"- Proposals: {proposals or 'none'}",
+        ]
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="UI/UX continuous improvement cycle conductor")
     parser.add_argument("--root", type=Path, default=Path.cwd())
@@ -784,6 +1079,10 @@ def build_parser() -> argparse.ArgumentParser:
     review_parser.add_argument("--dry-run", action="store_true")
     review_parser.add_argument("--overwrite", action="store_true")
     review_parser.add_argument("--json", action="store_true")
+    propose_parser = sub.add_parser("propose", help="produce proposal-only next-work recommendations")
+    propose_parser.add_argument("--dry-run", action="store_true")
+    propose_parser.add_argument("--overwrite", action="store_true")
+    propose_parser.add_argument("--json", action="store_true")
     return parser
 
 
@@ -816,6 +1115,13 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
         else:
             print(render_review_plan_text(payload))
+        return 0 if payload.get("status") in {"planned", "recorded"} else 1
+    if args.command == "propose":
+        payload = propose(args.root, now=now, dry_run=args.dry_run, overwrite=args.overwrite)
+        if args.json:
+            print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        else:
+            print(render_proposal_text(payload))
         return 0 if payload.get("status") in {"planned", "recorded"} else 1
     return 2
 
