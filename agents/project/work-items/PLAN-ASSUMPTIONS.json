@@ -175,6 +175,29 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-06-19-taskset-ar-oag-claim-aware-relation-adapter-registration.md",
+          "value": "9170bfc7ce58cf348229732f9f81eae127a38befa27f89f27884133dd66f9e4e"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "cb2cd245558157ff640dbf0b824694c5623e2e1ef0ccfba6e83f9a08a5522bc8"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-06-19-taskset-ar-oag-claim-aware-relation-adapter-registration.md",
+      "recorded_at": "2026-06-19T12:26:23+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-19-taskset-ar-operator-attention-graph-registration.md",
           "value": "58e027892367d43e24ab02b652c25875335ca0b3383faa74319b8a478b087a53"
         },
@@ -376,5 +399,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-19T09:09:45+09:00"
+  "updated_at": "2026-06-19T12:26:23+09:00"
 }

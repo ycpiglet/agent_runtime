@@ -2,9 +2,10 @@
 
 ## 현재 한 줄 요약
 
-- Active line is `TASKSET-AR-OPERATOR-ATTENTION-GRAPH`: `TASK-AR-604` beta/UX evaluation is now resumed under `CLAIM-20260619-120404-task-ar-604-task-ar-604-beta-resume` after the expired claim was reaped; evaluation work belongs in `.worktrees/TASK-AR-604-oag-beta`.
+- `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` is complete: `TASK-AR-603` implemented the first relation-aware UI slice, and `TASK-AR-604` completed beta/UX evaluation with W4b evidence.
+- Next UI refactor line is registered as `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER`: start with `TASK-AR-605` to fix the claim-aware relation adapter findings, then `TASK-AR-606` for beta/UX retest.
 - The previous `TASKSET-AR-LLM-WIKI` closeout is complete: `TASK-AR-590..596` are archived `7/7`, W4b evidence is indexed, and that taskset has no active claims.
-- UI refactor/design-system remediation is now past the first source-mutating operator-attention-graph implementation. The next UI work is user-like beta/UX evaluation of that slice, not another source mutation.
+- UI refactor/design-system remediation is now past the first source-mutating operator-attention-graph implementation and beta/UX evaluation. The next UI work is a source-mutating claim-aware relation adapter refinement.
 - `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` is complete: `TASK-AR-597`, `TASK-AR-598`, and `TASK-AR-599` are implemented, W4b-verified, integrated, and closed.
 - `TASK-AR-583` semantic spacing/radius scale is W4b verified and integrated; `TASK-AR-584` is next.
 - `TASK-AR-593` Wiki search + ask has passed W4b, was released, merged, and its worktree/branch were cleaned.
@@ -12,12 +13,26 @@
 - Self-improvement remediation is improving but not mature: `scribe_state` is now ok, but the score is still below mature and one monitored role gap remains.
 - Scribe source is now the live status summary section so advisory health can be measured without fabricating role evidence.
 - Doc Steward remains ok; keep document-health checks advisory and evidence-based.
-- Next UI refactor step: complete `TASK-AR-604` beta-tester and UX-evaluator evidence, then feed findings into the next UI/UX cycle proposal.
+- Next UI refactor step: claim `TASK-AR-605` and implement claim-aware relation state mapping for `BTC-OAG-BLOCKED-001` and `BTC-OAG-INTERRUPT-001`.
 
-## 2026-06-19 - TASKSET-AR-OPERATOR-ATTENTION-GRAPH / TASK-AR-604 active
+## 2026-06-19 - TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER registered
 
-- Active claim: `CLAIM-20260619-120404-task-ar-604-task-ar-604-beta-resume`.
+- Registered next taskset: `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER`.
+- Next task: `TASK-AR-605` / `UNIT-TASK-AR-605-001` implements claim-aware relation state mapping in the UI asset adapters and focused UI tests.
+- Follow-up task: `TASK-AR-606` / `UNIT-TASK-AR-606-001` reruns beta/UX evidence after the adapter fix.
+- Source evidence: `reviews/BETA-TEST-2026-06-19-operator-attention-graph.md`, `reviews/UX-EVAL-2026-06-19-operator-attention-graph.md`, and `reviews/W4B-2026-06-19-TASK-AR-604.md`.
+- T0 plan snapshot recorded in `agents/project/work-items/PLAN-ASSUMPTIONS.json`.
+
+## 2026-06-19 - TASKSET-AR-OPERATOR-ATTENTION-GRAPH complete
+
+- Completed taskset: `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` is `2/2` done.
+- Released claim: `CLAIM-20260619-120404-task-ar-604-task-ar-604-beta-resume` is W4b verified with evidence `reviews/W4B-2026-06-19-TASK-AR-604.md`.
 - Reaped predecessor: `CLAIM-20260619-095200-task-ar-604-operator-attention-graph-beta` expired at the lease boundary and is preserved as an expired claim record.
+- W4a evidence: `reviews/VERIFY-2026-06-19-unit-task-ar-604-001-20260619121240.json`; task-level evidence `reviews/VERIFY-2026-06-19-task-ar-604-20260619122122.json`.
+- W4b finding: the design direction is viable, but `tasksetRelationSummary` must become claim-aware before this surface is considered semantically correct.
+
+## 2026-06-19 - TASKSET-AR-OPERATOR-ATTENTION-GRAPH / TASK-AR-604 complete
+
 - Worktree/branch: `.worktrees/TASK-AR-604-oag-beta` / `codex/task-ar-604-operator-attention-graph-beta`.
 - Scope: evaluation evidence only; UI source mutation is out of scope for this task.
 - Target evidence: `reviews/BETA-TEST-2026-06-19-operator-attention-graph.md`, `reviews/UX-EVAL-2026-06-19-operator-attention-graph.md`, and `reviews/INDEX.md`.
@@ -30,7 +45,7 @@
 - Integrated branch: `codex/task-ar-603-operator-attention-graph`; implementation commit `5c121b3`, W4b record commit `a923e91`.
 - Output: `componentRelationChip`, `componentEvidencePreviewRow`, `patternAttentionRelationPanel`, and `patternGraphContextStack`; `tasksetRelationSummary` is intentionally recorded as one-off-for-now adapter debt.
 - Verification: focused UI tests passed (`162 passed`), design-system gate passed with `findings=0`, `ui_ux_cycle assess` now reports `ready/100`, evidence index passed, and whitespace checks passed.
-- Boundary: `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` remains active. Continue with `TASK-AR-604` for beta-tester and UX-evaluator evidence before closing the taskset.
+- Boundary: `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` is closed locally. Continue with `TASK-AR-605` only through a fresh claim/worktree.
 
 ## 2026-06-19 - TASKSET-AR-LLM-WIKI / TASK-AR-594 complete
 

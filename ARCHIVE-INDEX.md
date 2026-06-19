@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-19
-archived_count: 262
+archived_count: 263
 ---
 
 # Archived Task Files
 
-- `262` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `263` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -274,4 +274,5 @@ archived_count: 262
 | `TASK-AR-594` | `180d4bc2-8a3…` | `TASKSET-AR-LLM-WIKI` | completed | 2026-06-17T22:30:00+09:00 | 2026-06-19T02:59:06+09:00 | 2026-06-19T03:24:00+09:00 | 2026-06-19T03:24:00+09:00 | Refine the per-page mini-graph into a typed, contextual insight lens with click-to-na… |
 | `TASK-AR-593` | `5ee2d0c0-f1f…` | `TASKSET-AR-LLM-WIKI` | completed | 2026-06-17T22:30:00+09:00 | 2026-06-18T23:30:54+09:00 | 2026-06-19T08:02:00+09:00 | 2026-06-19T08:02:00+09:00 | Add deterministic `/api/wiki/search?q=` and `/api/wiki/ask?q=&llm=0/1`, then wire a s… |
 | `TASK-AR-592` | `32dd58d6-22a…` | `TASKSET-AR-LLM-WIKI` | completed | 2026-06-17T22:30:00+09:00 | 2026-06-18T00:00:00+09:00 | 2026-06-18T23:00:00+09:00 | 2026-06-18T23:00:00+09:00 | Build the console Wiki view with entity page routing, summary, relations, backlinks,… |
+| `TASK-AR-604` | `a60cb6b0-21a…` | `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` | completed | 2026-06-19T09:08:00+09:00 | - | 2026-06-19T12:22:50+09:00 | 2026-06-19T12:22:50+09:00 | Verify the first operator_attention_graph implementation through user-like beta actio… |
 | `TASK-AR-603` | `ff9f0a9f-e5f…` | `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` | completed | 2026-06-19T09:08:00+09:00 | 2026-06-19T09:15:00+09:00 | 2026-06-19T09:42:00+09:00 | 2026-06-19T09:42:00+09:00 | Add the first governed relation-aware UI assets and wire one taskset/claim/evidence/c… |

@@ -569,8 +569,46 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-OPERATOR-ATTENTION-GRAPH",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-605",
+      "expires_at": "2026-06-20T12:26:00+09:00",
+      "fulfilled_at": "2026-06-19T12:26:00+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-605.md",
+      "fulfilled_task_id": "TASK-AR-605",
+      "fulfilled_task_uid": "c27b747a-ef7a-47c6-b577-b3f849dc6e23",
+      "initiative_id": "INIT-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER",
+      "kind": "task",
+      "owner_id": "codex-planner",
+      "reason": "work registration TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER",
+      "reservation_group_id": "RES-20260619-122600-bbf35777",
+      "reservation_id": "RES-20260619-122600-bbf35777-01",
+      "reserved_at": "2026-06-19T12:26:00+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER",
+      "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-606",
+      "expires_at": "2026-06-20T12:26:00+09:00",
+      "fulfilled_at": "2026-06-19T12:26:00+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-606.md",
+      "fulfilled_task_id": "TASK-AR-606",
+      "fulfilled_task_uid": "744809da-dfd2-4105-ad36-98406c23a81c",
+      "initiative_id": "INIT-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER",
+      "kind": "task",
+      "owner_id": "codex-planner",
+      "reason": "work registration TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER",
+      "reservation_group_id": "RES-20260619-122600-bbf35777",
+      "reservation_id": "RES-20260619-122600-bbf35777-02",
+      "reserved_at": "2026-06-19T12:26:00+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-06-19T09:08:00+09:00"
+  "updated_at": "2026-06-19T12:26:00+09:00"
 }

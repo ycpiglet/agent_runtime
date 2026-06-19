@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-OPERATOR-ATTENTION-GRAPH
 registered_at: 2026-06-19T09:08:00+09:00
 created_at: 2026-06-19T09:08:00+09:00
-updated_at: 2026-06-19T12:21:22+09:00
+started_at: 2026-06-19T09:52:00+09:00
+updated_at: 2026-06-19T12:22:50+09:00
 title: Run operator attention graph beta and UX evaluation
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 3
@@ -41,6 +42,11 @@ verified_at: 2026-06-19T12:21:22+09:00
 verified_by: codex-ux-evaluator-oag-604-resume
 evidence_refs:
   - reviews/VERIFY-2026-06-19-task-ar-604-20260619122122.json
+resolution: done
+completed_at: 2026-06-19T12:22:50+09:00
+closed_by: codex-ux-evaluator-oag-604-resume
+actual_hours: 1.8
+actual_tokens: 12000
 ---
 
 # TASK-AR-604 - Run operator attention graph beta and UX evaluation
@@ -66,3 +72,15 @@ evidence_refs:
 - `python scripts/design_system_gate.py --check --all-ui`
 - `python scripts/evidence_index_generator.py --check`
 - `python scripts/ui_ux_cycle.py --root . assess --json`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T12:22:50+09:00`
+- Resolution: `done`
+- Actual hours: `1.8`
+- Actual tokens: `12000`
+- Closed by: `codex-ux-evaluator-oag-604-resume`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-task-ar-604-20260619122122.json`
+<!-- work-close:end -->

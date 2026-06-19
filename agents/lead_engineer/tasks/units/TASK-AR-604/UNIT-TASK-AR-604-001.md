@@ -9,11 +9,11 @@ task_id: TASK-AR-604
 task_set_id: TASKSET-AR-OPERATOR-ATTENTION-GRAPH
 initiative_id: INIT-AR-OPERATOR-ATTENTION-GRAPH
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: ux-evaluator
 created_at: 2026-06-19T09:08:00+09:00
-updated_at: 2026-06-19T12:12:40+09:00
+updated_at: 2026-06-19T12:22:48+09:00
 origin_type: owner_request
 origin_ref: chat:2026-06-19-ui-refactor-continuous-cycle
 created_by: codex-planner
@@ -50,6 +50,11 @@ verified_by: codex-ux-evaluator-oag-604-resume
 evidence_refs:
   - reviews/VERIFY-2026-06-19-unit-task-ar-604-001-20260619100700.json
   - reviews/VERIFY-2026-06-19-unit-task-ar-604-001-20260619121240.json
+resolution: done
+completed_at: 2026-06-19T12:22:48+09:00
+closed_by: codex-ux-evaluator-oag-604-resume
+actual_hours: 1.8
+actual_tokens: 12000
 ---
 
 # UNIT-TASK-AR-604-001 - Record beta-tester and UX-evaluator evidence
@@ -104,3 +109,16 @@ Report beta paths, defects, accessibility/responsive findings, and whether anoth
 ## Stop Boundary
 
 Stop after beta and UX evidence are complete and ready for independent verification.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T12:22:48+09:00`
+- Resolution: `done`
+- Actual hours: `1.8`
+- Actual tokens: `12000`
+- Closed by: `codex-ux-evaluator-oag-604-resume`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-unit-task-ar-604-001-20260619100700.json`
+  - `reviews/VERIFY-2026-06-19-unit-task-ar-604-001-20260619121240.json`
+<!-- work-close:end -->

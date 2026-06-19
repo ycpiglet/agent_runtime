@@ -138,6 +138,12 @@
       "display_name": "Operator Attention Graph",
       "summary": "First source-mutating implementation of the accepted operator_attention_graph direction: relation tokens/components/patterns, one taskset-to-evidence workflow wiring, and beta/UX evaluation evidence.",
       "order": 625
+    },
+    {
+      "task_set_id": "TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER",
+      "display_name": "Claim-Aware Relation Adapter",
+      "summary": "Promote or replace the view-local relation summary adapter so Operator Attention Graph claim path and command readiness reflect active, expired, interrupted, and guarded claim states, then rerun beta/UX evaluation.",
+      "order": 626
     }
   ]
 }

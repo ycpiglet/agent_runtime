@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-19T09:53:11+09:00
-record_count: 364
+generated_at: 2026-06-19T12:28:24+09:00
+record_count: 370
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `364` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `370` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `23` records |
-| Tasksets | pass | `47` records |
-| Tasks | pass | `263` records |
-| Units | pass | `31` records |
+| Initiatives | pass | `24` records |
+| Tasksets | pass | `48` records |
+| Tasks | pass | `265` records |
+| Units | pass | `33` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -398,11 +398,17 @@ record_count: 364
 | 21.1.2 | Task 21.1.2 | task | `TASK-AR-601` | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | completed | `agents/lead_engineer/tasks/TASK-AR-601.md` | Create the RFC that promotes the seminar decision into an accepted design direction a… |
 | 21.1.3 | Task 21.1.3 | task | `TASK-AR-602` | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | completed | `agents/lead_engineer/tasks/TASK-AR-602.md` | Turn the accepted design-direction RFC into the next implementation refactor and beta… |
 | 22 | Initiative 22 | initiative | `INIT-AR-OPERATOR-ATTENTION-GRAPH` | - | active | `agents/project/initiatives/INIT-AR-OPERATOR-ATTENTION-GRAPH.md` | Operator Attention Graph UI Implementation |
-| 22.1 | Taskset 22.1 | taskset | `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` | `INIT-AR-OPERATOR-ATTENTION-GRAPH` | active | `BACKLOG-BOARD.md` | Operator Attention Graph |
+| 22.1 | Taskset 22.1 | taskset | `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` | `INIT-AR-OPERATOR-ATTENTION-GRAPH` | complete | `BACKLOG-BOARD.md` | Operator Attention Graph |
 | 22.1.1 | Task 22.1.1 | task | `TASK-AR-603` | `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` | completed | `agents/lead_engineer/tasks/TASK-AR-603.md` | Add the first governed relation-aware UI assets and wire one taskset/claim/evidence/c… |
 | 22.1.1.1 | Unit 22.1.1.1 | unit | `UNIT-TASK-AR-603-001` | `TASK-AR-603` | completed | `agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md` | UNIT-TASK-AR-603-001 - Add relation-aware UI assets and first workflow wiring |
-| 22.1.2 | Task 22.1.2 | task | `TASK-AR-604` | `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` | planned | `agents/lead_engineer/tasks/TASK-AR-604.md` | Verify the first operator_attention_graph implementation through user-like beta actio… |
-| 22.1.2.1 | Unit 22.1.2.1 | unit | `UNIT-TASK-AR-604-001` | `TASK-AR-604` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-604/UNIT-TASK-AR-604-001.md` | UNIT-TASK-AR-604-001 - Record beta-tester and UX-evaluator evidence |
+| 22.1.2 | Task 22.1.2 | task | `TASK-AR-604` | `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` | completed | `agents/lead_engineer/tasks/TASK-AR-604.md` | Verify the first operator_attention_graph implementation through user-like beta actio… |
+| 22.1.2.1 | Unit 22.1.2.1 | unit | `UNIT-TASK-AR-604-001` | `TASK-AR-604` | completed | `agents/lead_engineer/tasks/units/TASK-AR-604/UNIT-TASK-AR-604-001.md` | UNIT-TASK-AR-604-001 - Record beta-tester and UX-evaluator evidence |
+| 23 | Initiative 23 | initiative | `INIT-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` | - | active | `agents/project/initiatives/INIT-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER.md` | Operator Attention Graph Claim-Aware Relation Adapter |
+| 23.1 | Taskset 23.1 | taskset | `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` | `INIT-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` | active | `BACKLOG-BOARD.md` | Claim-Aware Relation Adapter |
+| 23.1.1 | Task 23.1.1 | task | `TASK-AR-605` | `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` | planned | `agents/lead_engineer/tasks/TASK-AR-605.md` | Refactor the Operator Attention Graph relation pattern adapter for BTC-OAG-BLOCKED-00… |
+| 23.1.1.1 | Unit 23.1.1.1 | unit | `UNIT-TASK-AR-605-001` | `TASK-AR-605` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-605/UNIT-TASK-AR-605-001.md` | UNIT-TASK-AR-605-001 - Add claim-aware relation state mapping |
+| 23.1.2 | Task 23.1.2 | task | `TASK-AR-606` | `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` | planned | `agents/lead_engineer/tasks/TASK-AR-606.md` | Repeat beta-tester and UX-evaluator verification after the claim-aware adapter implem… |
+| 23.1.2.1 | Unit 23.1.2.1 | unit | `UNIT-TASK-AR-606-001` | `TASK-AR-606` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-606/UNIT-TASK-AR-606-001.md` | UNIT-TASK-AR-606-001 - Record claim-aware adapter beta and UX evidence |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

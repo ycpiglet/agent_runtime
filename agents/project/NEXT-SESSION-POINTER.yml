@@ -1,32 +1,22 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T12:04:04+09:00
+updated_at: 2026-06-19T12:26:00+09:00
 current_state:
-  summary: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH is active; TASK-AR-604 beta/UX evidence resumed after the expired predecessor claim was reaped."
+  summary: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH is complete; TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER is registered as the next UI/UX implementation and beta cycle."
   status: in_progress
-  task_set_status: active
-  task_set_id: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH"
-  step_index: 4
-  step_total: 5
-  progress_pct: 75
-  status_text: "Active claim CLAIM-20260619-120404-task-ar-604-task-ar-604-beta-resume owns the resumed beta/UX evidence pass in .worktrees/TASK-AR-604-oag-beta."
+  task_set_status: registered
+  task_set_id: "TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER"
+  step_index: 1
+  step_total: 2
+  progress_pct: 0
+  status_text: "No active UI claim; next claim should be TASK-AR-605 for claim-aware relation state mapping."
 active_work:
-  current_agents:
-    - claim_id: "CLAIM-20260619-120404-task-ar-604-task-ar-604-beta-resume"
-      agent_role: "ux-evaluator"
-      agent_instance_id: "ux-evaluator-20260619-resume-oag"
-      display_name: "codex-ux-evaluator-oag-604-resume"
-      callsite_id: "terminal:wt-task-ar-604:tab-02"
-      pane_id: "terminal:wt-task-ar-604:tab-02"
-      task_id: "TASK-AR-604"
-      task_set_id: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH"
-      unit_id: "UNIT-TASK-AR-604-001"
-      worktree_path: ".worktrees/TASK-AR-604-oag-beta"
+  current_agents: []
   current_teams:
     - ui-ux
 resume:
-  active_task: TASK-AR-604
-  active_task_set: TASKSET-AR-OPERATOR-ATTENTION-GRAPH
-  branch_policy: "Use dispatcher-created worktrees for new task-set work; TASK-AR-604 should gather beta/UX evidence before taskset closeout."
+  active_task: TASK-AR-605
+  active_task_set: TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER
+  branch_policy: "Create a fresh dispatcher claim and worktree for TASK-AR-605 before mutating UI source files."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -37,19 +27,46 @@ pointers:
     taskset: TASKSET-AR-OPERATOR-ATTENTION-GRAPH
     completed_tasks:
       - TASK-AR-603
-    active_claim: agents/runtime/task_claims/CLAIM-20260619-120404-task-ar-604-task-ar-604-beta-resume.json
+      - TASK-AR-604
+    active_claim: null
     expired_claim: agents/runtime/task_claims/CLAIM-20260619-095200-task-ar-604-operator-attention-graph-beta.json
-    released_claim: agents/runtime/task_claims/CLAIM-20260619-091500-task-ar-603-operator-attention-graph.json
-    worktree_path: .worktrees/TASK-AR-604-oag-beta
+    released_claims:
+      - agents/runtime/task_claims/CLAIM-20260619-091500-task-ar-603-operator-attention-graph.json
+      - agents/runtime/task_claims/CLAIM-20260619-120404-task-ar-604-task-ar-604-beta-resume.json
+    worktree_path: null
     implementation_branch: codex/task-ar-604-operator-attention-graph-beta
     implementation_commit: 5c121b3
-    integration_commit: a923e91
-    status: task_ar_604_resumed_beta_ux_evaluation
-    next_task: TASK-AR-604
-    next_decision: complete_beta_ux_evaluation_before_taskset_closeout
+    evaluation_commit: 4182788
+    w4b_commit: 357c3ea
+    status: taskset_completed_local_closeout
+    next_task: null
+    next_decision: continue_with_claim_aware_relation_adapter_taskset
     verification_evidence: reviews/VERIFY-2026-06-19-operator-attention-graph-implementation.json
     unit_verification_evidence: reviews/VERIFY-2026-06-19-unit-task-ar-603-001-20260619094000.json
-    w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-603.md
+    task_ar_604_unit_verification: reviews/VERIFY-2026-06-19-unit-task-ar-604-001-20260619121240.json
+    task_ar_604_verification: reviews/VERIFY-2026-06-19-task-ar-604-20260619122122.json
+    w4b_evidence:
+      - reviews/W4B-2026-06-19-TASK-AR-603.md
+      - reviews/W4B-2026-06-19-TASK-AR-604.md
+    findings:
+      - BTC-OAG-BLOCKED-001
+      - BTC-OAG-INTERRUPT-001
+  oag_claim_aware_relation_adapter:
+    taskset: TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER
+    active_claim: null
+    worktree_path: null
+    status: registered
+    next_task: TASK-AR-605
+    next_unit: UNIT-TASK-AR-605-001
+    follow_up_task: TASK-AR-606
+    registration_input: agents/project/work-items/REGISTRATION-2026-06-19-oag-claim-aware-relation-adapter.json
+    registration_review: reviews/REVIEW-2026-06-19-taskset-ar-oag-claim-aware-relation-adapter-registration.md
+    plan: docs/superpowers/plans/2026-06-19-oag-claim-aware-relation-adapter.md
+    source_evidence:
+      - reviews/BETA-TEST-2026-06-19-operator-attention-graph.md
+      - reviews/UX-EVAL-2026-06-19-operator-attention-graph.md
+      - reviews/W4B-2026-06-19-TASK-AR-604.md
+    next_decision: claim_task_ar_605_to_fix_claim_aware_relation_mapping
   design_system_debt_consolidation:
     taskset: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
     released_claim: agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.json

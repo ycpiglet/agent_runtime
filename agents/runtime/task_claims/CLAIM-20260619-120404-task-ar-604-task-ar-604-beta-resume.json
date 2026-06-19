@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-604:tab-02",
   "pane_id": "terminal:wt-task-ar-604:tab-02",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-OPERATOR-ATTENTION-GRAPH",
   "active_scope": "TASKSET-AR-OPERATOR-ATTENTION-GRAPH",
   "scope_transition_approved": true,
@@ -19,20 +19,20 @@
   "model_tier": "worker_standard",
   "wip_slot": 0,
   "stop_condition": "Stop after beta and UX evidence are committed and ready for independent verification.",
-  "phase": "evidence-preservation",
-  "progress_pct": 80,
-  "step_index": 4,
+  "phase": "taskset-completed",
+  "progress_pct": 100,
+  "step_index": 5,
   "step_total": 5,
-  "status_text": "Resumed TASK-AR-604 beta/UX evidence after expired claim was reaped; source mutation remains out of scope.",
+  "status_text": "TASK-AR-604 beta/UX evaluation completed, W4b approved, released, and taskset closeout reached.",
   "worktree_path": ".worktrees/TASK-AR-604-oag-beta",
   "branch": "codex/task-ar-604-operator-attention-graph-beta",
   "claimed_at": "2026-06-19T12:04:04+09:00",
-  "last_heartbeat": "2026-06-19T12:04:04+09:00",
-  "updated_at": "2026-06-19T12:04:04+09:00",
+  "last_heartbeat": "2026-06-19T12:22:35+09:00",
+  "updated_at": "2026-06-19T12:22:35+09:00",
   "expires_at": "2026-06-19T16:04:04+09:00",
   "lease": {
     "claimed_at": "2026-06-19T12:04:04+09:00",
-    "heartbeat_at": "2026-06-19T12:04:04+09:00",
+    "heartbeat_at": "2026-06-19T12:22:35+09:00",
     "expires_at": "2026-06-19T16:04:04+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260619-120404-task-ar-604-task-ar-604-beta-resume.handoff.md",
@@ -43,5 +43,9 @@
     "reviews/BETA-TEST-2026-06-19-operator-attention-graph.md",
     "reviews/UX-EVAL-2026-06-19-operator-attention-graph.md",
     "reviews/INDEX.md"
-  ]
+  ],
+  "released_at": "2026-06-19T12:22:35+09:00",
+  "verified_by": "codex-independent-w4b-verifier-2026-06-19",
+  "verifier_role": "independent-verifier",
+  "verification_evidence": "reviews/W4B-2026-06-19-TASK-AR-604.md"
 }

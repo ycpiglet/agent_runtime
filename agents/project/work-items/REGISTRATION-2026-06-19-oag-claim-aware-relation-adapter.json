@@ -1,0 +1,154 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "chat:2026-06-19-ui-refactor-continuous-cycle",
+  "created_by": "codex-planner",
+  "now": "2026-06-19T12:26:00+09:00",
+  "initiative": {
+    "id": "INIT-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER",
+    "title": "Operator Attention Graph Claim-Aware Relation Adapter",
+    "summary": "Continue the UI/UX cycle after TASK-AR-604 by fixing the verified data-semantics gap: relation summaries must consume claim state and expose claimed, guarded, interrupted, stale, and missing states accurately.",
+    "owner": "lead_engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER",
+    "display_name": "Claim-Aware Relation Adapter",
+    "summary": "Promote or replace the view-local relation summary adapter so Operator Attention Graph claim path and command readiness reflect active, expired, interrupted, and guarded claim states, then rerun beta/UX evaluation.",
+    "order": 626,
+    "plan_slug": "2026-06-19-oag-claim-aware-relation-adapter"
+  },
+  "tasks": [
+    {
+      "title": "Implement claim-aware operator relation adapter",
+      "goal": "Fix BTC-OAG-BLOCKED-001 and BTC-OAG-INTERRUPT-001 by feeding claim records into the Operator Attention Graph relation summary and adding explicit claimed, guarded, and interrupted relation states.",
+      "scope": "Source mutation is limited to the UI asset adapters and focused UI tests. Do not redesign the whole console, change routing architecture, or broaden visual styling beyond state semantics required by the findings.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 4,
+      "est_tokens": 9000,
+      "owner": "interface-designer",
+      "team": "ui-ux",
+      "acceptance": [
+        "Operator Attention Graph relation summary consumes `task_claims` or an equivalent claim-state projection when available.",
+        "Active/resumed TASK-AR-604-style claim context no longer renders as `CLAIM PATH ready to claim` or `COMMAND READINESS task.create ready`.",
+        "`tasksetChildRelationState` or its replacement exposes distinct `claimed`, `guarded`, and `interrupted` semantics instead of collapsing interrupted states to `stale`.",
+        "Claim readiness and command readiness remain visible text, not color-only state.",
+        "Touched UI is classified as design_token, ui_component, pattern_component, or one_off_for_now in verification evidence."
+      ],
+      "verification": [
+        "python -m pytest tests/test_ui_design_assets.py tests/test_ui_console.py -q",
+        "python scripts/design_system_gate.py --check --all-ui",
+        "python scripts/ui_ux_cycle.py --root . assess --json",
+        "python scripts/evidence_index_generator.py --check"
+      ],
+      "units": [
+        {
+          "title": "Add claim-aware relation state mapping",
+          "context": "TASK-AR-604 beta/UX evidence accepted the visual direction but found that `/api/state` includes resumed and expired claim records while the relation panel still reports ready-to-claim and task.create-ready. The next implementation must make the relation adapter consume that state.",
+          "inputs": [
+            "reviews/BETA-TEST-2026-06-19-operator-attention-graph.md",
+            "reviews/UX-EVAL-2026-06-19-operator-attention-graph.md",
+            "reviews/W4B-2026-06-19-TASK-AR-604.md",
+            "src/agent_runtime/ui_console_assets.py",
+            "src/agent_runtime/ui_design_assets.py",
+            "tests/test_ui_console.py",
+            "tests/test_ui_design_assets.py"
+          ],
+          "target_files": [
+            "src/agent_runtime/ui_console_assets.py",
+            "src/agent_runtime/ui_design_assets.py",
+            "tests/test_ui_console.py",
+            "tests/test_ui_design_assets.py",
+            "reviews/VERIFY-2026-06-19-oag-claim-aware-relation-adapter.json",
+            "reviews/INDEX.md"
+          ],
+          "scope": "Implement claim-aware relation state mapping and focused tests only. Do not add a new visual theme, new navigation model, or broad page refactor.",
+          "steps": [
+            "Read TASK-AR-604 beta, UX, and W4b findings.",
+            "Trace how `task_claims` reach the Taskset Board state and how `tasksetRelationSummary` currently derives claim path and command readiness.",
+            "Promote or replace the adapter so claim readiness can distinguish unclaimed, claimed, expired/reaped, guarded, interrupted, and completed states.",
+            "Keep relation state labels text-visible and tokenized through existing component/pattern helpers.",
+            "Add focused tests for active claim, expired predecessor, interrupted phase, blocked/guarded command, stale evidence, and no-claim fallback.",
+            "Run W4a verification commands and record evidence."
+          ],
+          "acceptance": [
+            "Tests prove active claim state changes relation chip and command readiness wording.",
+            "Tests prove interrupted phase no longer maps to plain stale.",
+            "Existing empty/stale/missing graph context fallbacks still pass.",
+            "No raw color, spacing, radius, shadow, or type literal is introduced outside token definitions.",
+            "The implementation keeps page code focused on data wiring and delegates repeated UI to helpers or pattern assets."
+          ],
+          "verification": [
+            "python -m pytest tests/test_ui_design_assets.py tests/test_ui_console.py -q",
+            "python scripts/design_system_gate.py --check --all-ui",
+            "python scripts/ui_ux_cycle.py --root . assess --json",
+            "python scripts/evidence_index_generator.py --check"
+          ],
+          "handoff": "Report adapter ownership, state mapping table, tests added, assetization classification, and remaining UX/beta risks.",
+          "stop_condition": "Stop after the claim-aware relation adapter passes focused tests and W4a evidence is ready for independent verification."
+        }
+      ]
+    },
+    {
+      "title": "Run claim-aware relation adapter beta and UX evaluation",
+      "goal": "Repeat beta-tester and UX-evaluator verification after the claim-aware adapter implementation, with focus on active claim, interrupted, guarded, mobile, focus, and reduced-motion behavior.",
+      "scope": "Evaluation and evidence only. Do not mutate UI source files in this task. Any remaining visual or semantic defect must be routed with BTC-style IDs.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 2,
+      "est_tokens": 5000,
+      "owner": "ux-evaluator",
+      "team": "ui-ux",
+      "acceptance": [
+        "Beta evidence includes user-like click/keyboard paths for active claim, no-claim, expired claim, interrupted claim, and blocked/guarded command states.",
+        "UX evaluation covers labels, non-color-only state, focus order, reduced motion, mobile layout, and command readiness clarity.",
+        "Every user-visible defect is assigned a BTC-style ID and reproduction path.",
+        "The evaluation states whether the next cycle should pursue another implementation refinement or a new visual direction."
+      ],
+      "verification": [
+        "python scripts/design_system_gate.py --check --all-ui",
+        "python scripts/evidence_index_generator.py --check",
+        "python scripts/ui_ux_cycle.py --root . assess --json"
+      ],
+      "units": [
+        {
+          "title": "Record claim-aware adapter beta and UX evidence",
+          "context": "This unit validates that the adapter fix resolved TASK-AR-604's routed findings and that relation state remains usable across desktop/mobile and recovery states.",
+          "inputs": [
+            "reviews/BETA-TEST-2026-06-19-operator-attention-graph.md",
+            "reviews/UX-EVAL-2026-06-19-operator-attention-graph.md",
+            "reviews/W4B-2026-06-19-TASK-AR-604.md",
+            "src/agent_runtime/ui_console_assets.py"
+          ],
+          "target_files": [
+            "reviews/BETA-TEST-2026-06-19-oag-claim-aware-relation-adapter.md",
+            "reviews/UX-EVAL-2026-06-19-oag-claim-aware-relation-adapter.md",
+            "reviews/INDEX.md"
+          ],
+          "scope": "Record exploratory evidence only. Do not patch UI source files in this unit.",
+          "steps": [
+            "Launch the local UI surface from the implementation worktree.",
+            "Execute active claim, no-claim, expired claim, interrupted claim, and guarded command paths.",
+            "Check desktop and mobile layout, focus order, non-color-only labels, and reduced-motion behavior.",
+            "Assign BTC-style IDs to remaining user-visible defects.",
+            "Refresh evidence index and run recorded verification commands."
+          ],
+          "acceptance": [
+            "Evidence lists exact actions, viewport, data state, expected result, observed result, and pass/fail status.",
+            "Recovery and edge states are attempted rather than only described.",
+            "No UI source files are changed by the evaluation unit.",
+            "The handoff recommends either another implementation refinement or a new design-direction cycle."
+          ],
+          "verification": [
+            "python scripts/design_system_gate.py --check --all-ui",
+            "python scripts/evidence_index_generator.py --check",
+            "python scripts/ui_ux_cycle.py --root . assess --json"
+          ],
+          "handoff": "Report beta paths, defects, accessibility/responsive findings, and the next UI/UX cycle decision.",
+          "stop_condition": "Stop after beta/UX evidence is complete and ready for independent verification."
+        }
+      ]
+    }
+  ]
+}
