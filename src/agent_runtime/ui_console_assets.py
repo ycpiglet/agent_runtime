@@ -11992,22 +11992,18 @@ function renderOpsResources(data) {
   const bars = rows.map((row) => {
     const est = Number(row.est_tokens) || 0;
     const actual = Number(row.actual_tokens) || 0;
-    // The est bar scales tokens against the largest taskset; the actual bar is
-    // the consumed fraction of that taskset's own estimate (capped at est).
-    const estPct = Math.max(0, Math.min(100, (est / maxEst) * 100));
-    const actualWidth = est ? Math.max(0, Math.min(estPct, (actual / est) * estPct)) : 0;
-    const over = row.over_budget ? " is-over" : "";
     const consumed = (row.consumed_pct === null || row.consumed_pct === undefined)
       ? "est-only"
-      : `${escapeHtml(row.consumed_pct)}% used`;
-    const name = escapeHtml(row.display_name || row.task_set_id || "");
-    return `<div class="opsdash-bar-row">` +
-      `<div class="opsdash-bar-label"><span>${name}</span>` +
-      `<small>${escapeHtml(opsFormatTokens(est))} est - ${consumed}</small></div>` +
-      `<div class="opsdash-bar-track" role="img" aria-label="${name}: ${escapeHtml(opsFormatTokens(est))} estimated tokens">` +
-      `<div class="opsdash-bar-est" style="width: ${estPct.toFixed(1)}%"></div>` +
-      `<div class="opsdash-bar-actual${over}" style="width: ${actualWidth.toFixed(1)}%"></div>` +
-      `</div></div>`;
+      : `${row.consumed_pct}% used`;
+    return patternOpsTokenBar({
+      name: row.display_name || row.task_set_id || "",
+      est,
+      actual,
+      maxEst,
+      overBudget: !!row.over_budget,
+      consumedLabel: consumed,
+      estLabel: opsFormatTokens(est),
+    });
   }).join("");
   host.innerHTML = totals + bars;
   const src = $("opsdash-tokens-src");
@@ -12120,15 +12116,7 @@ function renderOpsBurndown(data) {
       return;
     }
     const peak = Math.max(1, ...weeks.map((w) => Number(w.done) || 0));
-    const bars = weeks.map((w) => {
-      const h = Math.max(2, Math.round(((Number(w.done) || 0) / peak) * 70));
-      const wk = String(w.week || "").slice(5);
-      return `<div class="opsdash-vbar" title="${escapeHtml(w.week)}: ${escapeHtml(w.done)} done">` +
-        `<span class="opsdash-vbar-count">${escapeHtml(w.done)}</span>` +
-        `<span class="opsdash-vbar-fill" style="height: ${h}px"></span>` +
-        `<span class="opsdash-vbar-label">${escapeHtml(wk)}</span>` +
-        `</div>`;
-    }).join("");
+    const bars = weeks.map((w) => patternOpsVelocityBar(w, peak)).join("");
     velHost.innerHTML = `<div class="opsdash-velocity-head">Weekly velocity - ` +
       `avg ${escapeHtml(String(vel.avg_per_week || 0))}/wk, peak ${escapeHtml(String(vel.peak_week || 0))}</div>` +
       `<div class="opsdash-velocity-bars">${bars}</div>`;
@@ -13173,18 +13161,9 @@ function renderImportPreview(preview) {
   if (commitBtn) commitBtn.disabled = !(counts.new > 0);
   const items = (preview && preview.items) || [];
   if (!host) return;
-  host.innerHTML = items.length ? items.map((item) => {
-    const invalid = (item.errors || []).length > 0;
-    const badgeClass = invalid ? "is-invalid" : (item.duplicate ? "is-duplicate" : "is-new");
-    const badgeLabel = invalid ? "invalid" : (item.duplicate ? "duplicate" : "new");
-    const reasons = invalid ? (item.errors || []) : (item.duplicate_reasons || []);
-    return `<div class="portability-row">
-      <span class="portability-badge ${badgeClass}">${escapeHtml(badgeLabel)}</span>
-      <span class="portability-row-title">${escapeHtml(item.title || "(no title)")}</span>
-      ${item.id ? `<span class="portability-row-id">${escapeHtml(item.id)}</span>` : ""}
-      ${reasons.length ? `<span class="portability-row-reason">${escapeHtml(reasons.join("; "))}</span>` : ""}
-    </div>`;
-  }).join("") : `<div class="empty">No rows parsed</div>`;
+  host.innerHTML = items.length
+    ? items.map((item) => patternPortabilityPreviewRow(item)).join("")
+    : `<div class="empty">No rows parsed</div>`;
 }
 
 async function requestImportPreview() {
