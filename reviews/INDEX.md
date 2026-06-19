@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T09:41:16+09:00
-record_count: 633
+generated_at: 2026-06-19T12:12:49+09:00
+record_count: 637
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `633` review and evidence records under `reviews/`.
+- Summary: indexed `637` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `633` files |
+| Reviews covered | pass | `637` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -39,6 +39,7 @@ record_count: 633
 | `reviews/A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final.json` | `A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final` | json | record | n/a | A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final |
 | `reviews/AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8.json` | `AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8` | json | record | n/a | AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8 |
 | `reviews/BETA-PLAN-2026-06-19-operator-attention-graph.md` | `BETA-PLAN-2026-06-19-operator-attention-graph` | ui-beta-test-plan | accepted | pass | Operator Attention Graph Beta Plan |
+| `reviews/BETA-TEST-2026-06-19-operator-attention-graph.md` | `BETA-TEST-2026-06-19-operator-attention-graph` | beta-tester-review | accepted_with_findings | watch | Operator Attention Graph Beta Test |
 | `reviews/CALL-2026-06-09-agent-runtime-task-ar-204-co-location-handoff-call.md` | `CALL-2026-06-09-agent-runtime-task-ar-204-co-location-handoff-call` | md | record | n/a | CALL: TASK-AR-204 Co-Location Handoff |
 | `reviews/CALL-2026-06-09-agent-runtime-task-ar-205-offline-eval-followup-call.md` | `CALL-2026-06-09-agent-runtime-task-ar-205-offline-eval-followup-call` | md | record | n/a | CALL: TASK-AR-205 Offline Eval Follow-up |
 | `reviews/CALL-2026-06-09-agent-runtime-task-ar-206-live-reviewer-followup-call.md` | `CALL-2026-06-09-agent-runtime-task-ar-206-live-reviewer-followup-call` | md | record | n/a | CALL: TASK-AR-206 Live Reviewer Follow-up |
@@ -526,6 +527,7 @@ record_count: 633
 | `reviews/SEMINAR-2026-06-17-self-improvement-cadence.md` | `SEMINAR-2026-06-17-self-improvement-cadence` | meeting | planned | planned | Self Improvement Cadence Seminar |
 | `reviews/SEMINAR-2026-06-18-self-improvement-cadence.md` | `SEMINAR-2026-06-18-self-improvement-cadence` | meeting | planned | planned | Self Improvement Cadence Seminar |
 | `reviews/SEMINAR-2026-06-19-ui-ux-design-direction.md` | `SEMINAR-2026-06-19-ui-ux-design-direction` | ui-ux-design-direction-seminar | accepted | pass | UI/UX Design Direction Seminar 2026-06-19 |
+| `reviews/UX-EVAL-2026-06-19-operator-attention-graph.md` | `UX-EVAL-2026-06-19-operator-attention-graph` | ux-evaluation | accepted_with_findings | watch | Operator Attention Graph UX Evaluation |
 | `reviews/VERIFY-2026-06-12-task-ar-375-20260612150820.json` | `VERIFY-2026-06-12-task-ar-375-20260612150820` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612150820 |
 | `reviews/VERIFY-2026-06-12-task-ar-375-20260612151830.json` | `VERIFY-2026-06-12-task-ar-375-20260612151830` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612151830 |
 | `reviews/VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030.json` | `VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030` | json | record | n/a | VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030 |
@@ -588,6 +590,8 @@ record_count: 633
 | `reviews/VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323.json` | `VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-600-001-20260619082349.json` | `VERIFY-2026-06-19-unit-task-ar-600-001-20260619082349` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-600-001-20260619082349 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-603-001-20260619094000.json` | `VERIFY-2026-06-19-unit-task-ar-603-001-20260619094000` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-603-001-20260619094000 |
+| `reviews/VERIFY-2026-06-19-unit-task-ar-604-001-20260619100700.json` | `VERIFY-2026-06-19-unit-task-ar-604-001-20260619100700` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-604-001-20260619100700 |
+| `reviews/VERIFY-2026-06-19-unit-task-ar-604-001-20260619121240.json` | `VERIFY-2026-06-19-unit-task-ar-604-001-20260619121240` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-604-001-20260619121240 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
