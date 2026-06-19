@@ -16,11 +16,11 @@ from pathlib import Path
 from typing import Any
 
 
-DEFAULT_PLAN = Path("agents/project/release/RELEASE-EXECUTION-v0.1.8.yml")
+DEFAULT_PLAN = Path("agents/project/release/RELEASE-EXECUTION.yml")
 DEFAULT_TEMPLATE = Path("agents/project/RELEASE-GATE-TEMPLATE.yml")
 DEFAULT_PYPROJECT = Path("pyproject.toml")
 DEFAULT_INIT = Path("src/agent_runtime/__init__.py")
-DEFAULT_OUT = Path("reviews/RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8.json")
+DEFAULT_OUT = Path("reviews/RELEASE-EXECUTION-GATE.json")
 
 REQUIRED_READY_EVIDENCE = [
     "reviews/REVIEW-2026-06-09-agent-runtime-task-ar-220-migration-approval-closure.md",
@@ -69,6 +69,13 @@ def _list_after(text: str, key: str) -> list[str]:
     return values
 
 
+def _pyproject_version(pyproject: Path) -> str:
+    if not pyproject.exists():
+        return ""
+    match = re.search(r'(?m)^version\s*=\s*"([^"]+)"', pyproject.read_text(encoding="utf-8"))
+    return match.group(1) if match else ""
+
+
 def _package_versions(pyproject: Path, init: Path) -> tuple[str, str, list[str]]:
     py_text, py_findings = _read(pyproject)
     init_text, init_findings = _read(init)
@@ -99,6 +106,9 @@ def evaluate(plan_path: Path, template_path: Path, pyproject: Path, init: Path) 
     package_version, init_version, version_findings = _package_versions(pyproject, init)
     findings.extend(version_findings)
 
+    # Resolve expected version parametrically from pyproject.toml (mirrors release_council_gate)
+    resolved_expected = _pyproject_version(pyproject)
+
     if execution_status == "executed":
         if release_state not in {"ready", "release"}:
             findings.append(f"release-template:not-ready-or-release:{release_state or '<missing>'}")
@@ -106,10 +116,12 @@ def evaluate(plan_path: Path, template_path: Path, pyproject: Path, init: Path) 
         findings.append(f"release-template:not-ready:{release_state or '<missing>'}")
     if release_cause != "all_hold_routes_closed_with_evidence":
         findings.append(f"release-cause:unexpected:{release_cause or '<missing>'}")
-    if target_version != "0.1.8":
-        findings.append(f"target_version:not-0.1.8:{target_version or '<missing>'}")
-    if target_tag != "v0.1.8":
-        findings.append(f"target_tag:not-v0.1.8:{target_tag or '<missing>'}")
+    if not target_version:
+        findings.append("target_version:missing")
+    elif resolved_expected and target_version != resolved_expected:
+        findings.append(f"target_version:mismatch-pyproject:{target_version}!={resolved_expected}")
+    if target_tag != f"v{target_version}":
+        findings.append(f"target_tag:not-v-target-version:{target_tag or '<missing>'}!=v{target_version}")
     if package_version != init_version:
         findings.append("package-version:not-in-sync")
     if package_version and target_version and package_version == target_version and execution_status != "executed":
