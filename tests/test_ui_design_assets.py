@@ -65,6 +65,8 @@ def test_ui_design_token_scale_is_served_in_console_css(tmp_path):
     assert "--space-2xl" in css
     assert "--radius-sm" in css
     assert "--radius-hairline" in css
+    assert "--space-px-" not in css
+    assert "--radius-px-" not in css
 
 
 def test_ui_component_bundle_is_served_in_console_js(tmp_path):

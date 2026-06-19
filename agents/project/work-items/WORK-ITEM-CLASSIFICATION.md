@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-20T08:26:04+09:00
+generated_at: 2026-06-20T08:57:10+09:00
 record_count: 366
 ---
 
@@ -373,7 +373,7 @@ record_count: 366
 | 17.1.1.1 | Unit 17.1.1.1 | unit | `UNIT-TASK-AR-582-001` | `TASK-AR-582` | completed | `agents/lead_engineer/tasks/units/TASK-AR-582/UNIT-TASK-AR-582-001.md` | UNIT-TASK-AR-582-001 - Move served HTML CSS JS assets out of ui_console |
 | 18 | Initiative 18 | initiative | `INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | - | active | `agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION.md` | Design System Debt Consolidation |
 | 18.1 | Taskset 18.1 | taskset | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | `INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | active | `BACKLOG-BOARD.md` | Design System Debt Consolidation |
-| 18.1.1 | Task 18.1.1 | task | `TASK-AR-583` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | planned | `agents/lead_engineer/tasks/TASK-AR-583.md` | Replace the transitional --space-px-* / --radius-px-* aliases in the console asset CS… |
+| 18.1.1 | Task 18.1.1 | task | `TASK-AR-583` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | completed | `agents/lead_engineer/tasks/TASK-AR-583.md` | Replace the transitional --space-px-* / --radius-px-* aliases in the console asset CS… |
 | 18.1.2 | Task 18.1.2 | task | `TASK-AR-584` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | planned | `agents/lead_engineer/tasks/TASK-AR-584.md` | Move view-specific JS renderers (data-heavy SVG layouts, calendar grids, office-map p… |
 | 19 | Initiative 19 | initiative | `INIT-AR-RELEASE-AUTOMATION` | - | active | `agents/project/initiatives/INIT-AR-RELEASE-AUTOMATION.md` | Release Automation (noncritical auto-execution) |
 | 19.1 | Taskset 19.1 | taskset | `TASKSET-AR-RELEASE-AUTO-NONCRITICAL` | `INIT-AR-RELEASE-AUTOMATION` | active | `BACKLOG-BOARD.md` | Noncritical Release Auto-Execution |

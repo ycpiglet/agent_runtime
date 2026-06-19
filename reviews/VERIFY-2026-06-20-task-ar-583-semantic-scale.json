@@ -1,0 +1,36 @@
+{
+  "schema": "agent-runtime-verification/v1",
+  "work_id": "TASK-AR-583",
+  "task_set_id": "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION",
+  "status": "passed",
+  "verified_at": "2026-06-20T08:55:08+09:00",
+  "verified_by": "codex-design-system-steward-task-ar-583-20260620",
+  "summary": "Semantic spacing and radius scale consolidation is complete: console CSS exposes stable semantic tokens, transitional px aliases are absent from served CSS, and the design-system contract no longer describes alias tokens as current infrastructure.",
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_design_system_gate.py tests/test_ui_design_assets.py tests/test_ui_console.py -q",
+      "status": "passed",
+      "stdout": "223 passed, 1 warning in 36.60s"
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0"
+    },
+    {
+      "command": "rg -n -- \"--space-px-|--radius-px-|tokenized px aliases\" src/agent_runtime/ui_design_assets.py src/agent_runtime/ui_console_assets.py tests/test_ui_design_assets.py tests/test_ui_console.py docs/design/agent-runtime/DESIGN-SYSTEM.md",
+      "status": "passed",
+      "stdout": "Only explanatory documentation and negative test assertions mention the retired alias names; served CSS and console asset consumers do not define or consume --space-px-* / --radius-px-* aliases."
+    }
+  ],
+  "coverage": [
+    "UI_TOKEN_SCALE_CSS defines stable semantic spacing and radius scales",
+    "Served console CSS regression test asserts semantic scale tokens are present",
+    "Regression test asserts --space-px-* and --radius-px-* are absent from served CSS",
+    "DESIGN-SYSTEM.md executable asset layer describes semantic scales instead of transitional px aliases"
+  ],
+  "residual_risks": [
+    "Large view-specific JavaScript renderers remain a separate pattern extraction task under TASK-AR-584.",
+    "Some documentation still names --space-px-* and --radius-px-* when describing the historical aliases that were removed."
+  ]
+}

@@ -8,10 +8,11 @@ work_uid: c8e43f0d-2b3c-4eb2-bafe-1cb67cda51b4
 kind: task
 parent_id: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
 registered_at: 2026-06-18T18:43:04+09:00
+started_at: 2026-06-20T08:52:02+09:00
 created_at: 2026-06-18T18:43:04+09:00
-updated_at: 2026-06-18T18:43:04+09:00
+updated_at: 2026-06-20T08:55:08+09:00
 title: Consolidate transitional px-alias tokens into a semantic scale
-status: planned
+status: completed
 priority: P2
 difficulty: M
 est_hours: 4
@@ -31,6 +32,17 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+verification_status: passed
+verified_at: 2026-06-20T08:55:08+09:00
+verified_by: codex-independent-verifier-task-ar-583-20260620
+evidence_refs:
+  - reviews/VERIFY-2026-06-20-task-ar-583-semantic-scale.json
+  - reviews/W4B-2026-06-20-TASK-AR-583.md
+resolution: done
+completed_at: 2026-06-20T08:55:08+09:00
+closed_by: codex-design-system-steward-task-ar-583-20260620
+actual_hours: 1
+actual_tokens: 3500
 ---
 
 # TASK-AR-583 - Consolidate transitional px-alias tokens into a semantic scale
@@ -53,3 +65,34 @@ tags:
 
 - `python -m pytest tests/test_design_system_gate.py tests/test_ui_design_assets.py tests/test_ui_console.py -q`
 - `python scripts/design_system_gate.py --check --all-ui`
+
+## Assetization Classification
+
+| Surface | Class | Asset |
+| --- | --- | --- |
+| Stable semantic spacing scale | `design_token` | `src/agent_runtime/ui_design_assets.py::UI_TOKEN_SCALE_CSS` |
+| Stable semantic radius scale | `design_token` | `src/agent_runtime/ui_design_assets.py::UI_TOKEN_SCALE_CSS` |
+| Legacy px alias removal guard | `design_token` gate/test | `tests/test_ui_design_assets.py` |
+| Executable asset layer wording | `design_token` documentation | `docs/design/agent-runtime/DESIGN-SYSTEM.md` |
+
+## Result
+
+- Confirmed `ui_design_assets.UI_TOKEN_SCALE_CSS` exposes semantic spacing and
+  radius tokens without `--space-px-*` or `--radius-px-*` aliases.
+- Updated the design-system operating contract so the executable token layer no
+  longer describes the retired aliases as current console infrastructure.
+- Added regression coverage that asserts the served CSS contains semantic
+  spacing/radius tokens and no transitional px aliases.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-20T08:55:08+09:00`
+- Resolution: `done`
+- Actual hours: `1`
+- Actual tokens: `3500`
+- Closed by: `codex-design-system-steward-task-ar-583-20260620`
+- Evidence:
+  - `reviews/VERIFY-2026-06-20-task-ar-583-semantic-scale.json`
+  - `reviews/W4B-2026-06-20-TASK-AR-583.md`
+<!-- work-close:end -->

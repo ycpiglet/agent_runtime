@@ -9,8 +9,8 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-20
 task_count: 256
-open_count: 8
-completed_count: 248
+open_count: 7
+completed_count: 249
 task_set_count: 3
 completed_task_set_count: 43
 ---
@@ -18,11 +18,11 @@ completed_task_set_count: 43
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `8` open or active tasks; `248` completed tasks are archived from this live board.
+- Summary: `7` open or active tasks; `249` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `8` / Ask `0` / Review `0` / Later `0` / Done `248`.
+- Status: Action `7` / Ask `0` / Review `0` / Later `0` / Done `249`.
 - Task Sets: `3` active workflows; `43` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -45,11 +45,10 @@ completed_task_set_count: 43
 ### Design System Debt Consolidation (`TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION`)
 
 - Flow: Consolidate transitional spacing/radius px-alias tokens into a designed semantic scale, and promote remaining view-specific JS renderers into stable pattern modules, without re-introducing raw literals.
-- Progress: `0/2` done; `2` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- Progress: `1/2` done; `1` open or active.
+- WIP: active `1/3`; oldest `0.1h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-583` | INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | Medium | 4h/8000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Replace the transitional --space-px-* / --radius-px-* aliases in the console asset CS… |
 | `TASK-AR-584` | INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | High | 6h/12000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Move view-specific JS renderers (data-heavy SVG layouts, calendar grids, office-map p… |
 
 ### Noncritical Release Auto-Execution (`TASKSET-AR-RELEASE-AUTO-NONCRITICAL`)
@@ -127,9 +126,9 @@ completed_task_set_count: 43
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `8` open across `3` task sets (see Action Board above).
+- Active: `7` open across `3` task sets (see Action Board above).
 - Archived task sets: `43` (see Archived Task Sets above).
-- Archived task files: `248` — see `ARCHIVE-INDEX.md`.
+- Archived task files: `249` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

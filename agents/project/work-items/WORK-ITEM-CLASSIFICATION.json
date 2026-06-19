@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-20T08:26:04+09:00",
+  "generated_at": "2026-06-20T08:57:10+09:00",
   "record_count": 366,
   "finding_count": 0,
   "findings": [],
@@ -3688,7 +3688,7 @@
       "title": "Replace the transitional --space-px-* / --radius-px-* aliases in the console asset CS…",
       "path": "agents/lead_engineer/tasks/TASK-AR-583.md",
       "parent_id": "TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-584",
