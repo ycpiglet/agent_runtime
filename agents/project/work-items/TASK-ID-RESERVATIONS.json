@@ -531,8 +531,46 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-603",
+      "expires_at": "2026-06-20T09:08:00+09:00",
+      "fulfilled_at": "2026-06-19T09:08:00+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-603.md",
+      "fulfilled_task_id": "TASK-AR-603",
+      "fulfilled_task_uid": "ff9f0a9f-e5f2-4cf3-b6e8-8da4fa2830e9",
+      "initiative_id": "INIT-AR-OPERATOR-ATTENTION-GRAPH",
+      "kind": "task",
+      "owner_id": "codex-planner",
+      "reason": "work registration TASKSET-AR-OPERATOR-ATTENTION-GRAPH",
+      "reservation_group_id": "RES-20260619-090800-36377773",
+      "reservation_id": "RES-20260619-090800-36377773-01",
+      "reserved_at": "2026-06-19T09:08:00+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-OPERATOR-ATTENTION-GRAPH",
+      "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-604",
+      "expires_at": "2026-06-20T09:08:00+09:00",
+      "fulfilled_at": "2026-06-19T09:08:00+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-604.md",
+      "fulfilled_task_id": "TASK-AR-604",
+      "fulfilled_task_uid": "a60cb6b0-21a6-4f46-a0df-c1fbba8d9ba3",
+      "initiative_id": "INIT-AR-OPERATOR-ATTENTION-GRAPH",
+      "kind": "task",
+      "owner_id": "codex-planner",
+      "reason": "work registration TASKSET-AR-OPERATOR-ATTENTION-GRAPH",
+      "reservation_group_id": "RES-20260619-090800-36377773",
+      "reservation_id": "RES-20260619-090800-36377773-02",
+      "reserved_at": "2026-06-19T09:08:00+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-OPERATOR-ATTENTION-GRAPH",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-06-19T08:18:00+09:00"
+  "updated_at": "2026-06-19T09:08:00+09:00"
 }

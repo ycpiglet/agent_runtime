@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-19
-task_count: 261
-open_count: 0
+task_count: 263
+open_count: 2
 completed_count: 261
-task_set_count: 0
+task_set_count: 1
 completed_task_set_count: 46
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `0` open or active tasks; `261` completed tasks are archived from this live board.
+- Summary: `2` open or active tasks; `261` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `0` / Ask `0` / Review `0` / Later `0` / Done `261`.
-- Task Sets: `0` active workflows; `46` completed workflows are hidden from the live action board.
+- Status: Action `2` / Ask `0` / Review `0` / Later `0` / Done `261`.
+- Task Sets: `1` active workflows; `46` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -41,6 +41,16 @@ completed_task_set_count: 46
 ## Action Board
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
+
+### Operator Attention Graph (`TASKSET-AR-OPERATOR-ATTENTION-GRAPH`)
+
+- Flow: First source-mutating implementation of the accepted operator_attention_graph direction: relation tokens/components/patterns, one taskset-to-evidence workflow wiring, and beta/UX evaluation evidence.
+- Progress: `0/2` done; `2` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-604` | INIT-AR-OPERATOR-ATTENTION-GRAPH | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-604/UNIT-TASK-AR-604-001.md | planned | Action | P1 | High | Medium | 3h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Verify the first operator_attention_graph implementation through user-like beta actio… |
+| `TASK-AR-603` | INIT-AR-OPERATOR-ATTENTION-GRAPH | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md | planned | Action | P1 | High | Medium | 5h/11000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Add the first governed relation-aware UI assets and wire one taskset/claim/evidence/c… |
 
 ## Archived Task Sets
 
@@ -98,7 +108,7 @@ completed_task_set_count: 46
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `0` open across `0` task sets (see Action Board above).
+- Active: `2` open across `1` task sets (see Action Board above).
 - Archived task sets: `46` (see Archived Task Sets above).
 - Archived task files: `261` — see `ARCHIVE-INDEX.md`.
 

@@ -132,6 +132,12 @@
       "display_name": "UI UX Design Direction RFC",
       "summary": "Run the post-closeout UI/UX design-direction loop: lead-designer exploration, design-system promotion decisions, implementation refactor scope, and beta-tester evaluation criteria before mutating UI source again.",
       "order": 624
+    },
+    {
+      "task_set_id": "TASKSET-AR-OPERATOR-ATTENTION-GRAPH",
+      "display_name": "Operator Attention Graph",
+      "summary": "First source-mutating implementation of the accepted operator_attention_graph direction: relation tokens/components/patterns, one taskset-to-evidence workflow wiring, and beta/UX evaluation evidence.",
+      "order": 625
     }
   ]
 }

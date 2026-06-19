@@ -2,7 +2,7 @@
 
 ## 현재 한 줄 요약
 
-- Active line is clear: `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` is complete (`TASK-AR-600..602`), and the next UI step is to register the operator attention graph implementation taskset from `agents/project/work-items/REGISTRATION-2026-06-19-operator-attention-graph-implementation.json`.
+- Active line is `TASKSET-AR-OPERATOR-ATTENTION-GRAPH`: `TASK-AR-603` is the next source-mutating UI implementation task; claim it before editing `src/agent_runtime/ui_design_assets.py` or `src/agent_runtime/ui_console_assets.py`.
 - The previous `TASKSET-AR-LLM-WIKI` closeout is complete: `TASK-AR-590..596` are archived `7/7`, W4b evidence is indexed, and that taskset has no active claims.
 - UI refactor/design-system remediation is functionally past the assetization and debt-consolidation phases; the current work is the design-direction RFC cycle before the next UI source mutation.
 - `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` is complete: `TASK-AR-597`, `TASK-AR-598`, and `TASK-AR-599` are implemented, W4b-verified, integrated, and closed.

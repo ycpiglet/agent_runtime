@@ -1,21 +1,21 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T09:06:00+09:00
+updated_at: 2026-06-19T09:08:00+09:00
 current_state:
-  summary: "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC is complete; the operator attention graph implementation registration input is ready."
+  summary: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH is registered; TASK-AR-603 is the next UI source-mutating implementation task."
   status: ready
-  task_set_status: completed
-  task_set_id: "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC"
-  step_index: 5
+  task_set_status: active
+  task_set_id: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH"
+  step_index: 1
   step_total: 5
-  progress_pct: 100
-  status_text: "No active UI/UX design-direction claim; next step is to register the operator attention graph implementation taskset."
+  progress_pct: 20
+  status_text: "No active claim; next step is to claim TASK-AR-603 before mutating UI source files."
 active_work:
   current_agents: []
   current_teams:
     - ui-ux
 resume:
-  active_task: null
-  active_task_set: none
+  active_task: TASK-AR-603
+  active_task_set: TASKSET-AR-OPERATOR-ATTENTION-GRAPH
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."

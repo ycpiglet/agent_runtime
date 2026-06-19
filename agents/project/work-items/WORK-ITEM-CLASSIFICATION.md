@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-19T09:06:44+09:00
-record_count: 358
+generated_at: 2026-06-19T09:09:44+09:00
+record_count: 364
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `358` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `364` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `22` records |
-| Tasksets | pass | `46` records |
-| Tasks | pass | `261` records |
-| Units | pass | `29` records |
+| Initiatives | pass | `23` records |
+| Tasksets | pass | `47` records |
+| Tasks | pass | `263` records |
+| Units | pass | `31` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -397,6 +397,12 @@ record_count: 358
 | 21.1.1.1 | Unit 21.1.1.1 | unit | `UNIT-TASK-AR-600-001` | `TASK-AR-600` | completed | `agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md` | UNIT-TASK-AR-600-001 - Run lead-designer UI direction seminar |
 | 21.1.2 | Task 21.1.2 | task | `TASK-AR-601` | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | completed | `agents/lead_engineer/tasks/TASK-AR-601.md` | Create the RFC that promotes the seminar decision into an accepted design direction a… |
 | 21.1.3 | Task 21.1.3 | task | `TASK-AR-602` | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | completed | `agents/lead_engineer/tasks/TASK-AR-602.md` | Turn the accepted design-direction RFC into the next implementation refactor and beta… |
+| 22 | Initiative 22 | initiative | `INIT-AR-OPERATOR-ATTENTION-GRAPH` | - | active | `agents/project/initiatives/INIT-AR-OPERATOR-ATTENTION-GRAPH.md` | Operator Attention Graph UI Implementation |
+| 22.1 | Taskset 22.1 | taskset | `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` | `INIT-AR-OPERATOR-ATTENTION-GRAPH` | active | `BACKLOG-BOARD.md` | Operator Attention Graph |
+| 22.1.1 | Task 22.1.1 | task | `TASK-AR-603` | `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` | planned | `agents/lead_engineer/tasks/TASK-AR-603.md` | Add the first governed relation-aware UI assets and wire one taskset/claim/evidence/c… |
+| 22.1.1.1 | Unit 22.1.1.1 | unit | `UNIT-TASK-AR-603-001` | `TASK-AR-603` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md` | UNIT-TASK-AR-603-001 - Add relation-aware UI assets and first workflow wiring |
+| 22.1.2 | Task 22.1.2 | task | `TASK-AR-604` | `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` | planned | `agents/lead_engineer/tasks/TASK-AR-604.md` | Verify the first operator_attention_graph implementation through user-like beta actio… |
+| 22.1.2.1 | Unit 22.1.2.1 | unit | `UNIT-TASK-AR-604-001` | `TASK-AR-604` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-604/UNIT-TASK-AR-604-001.md` | UNIT-TASK-AR-604-001 - Record beta-tester and UX-evaluator evidence |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

@@ -1,5 +1,6 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
+  - reviews/REVIEW-2026-06-19-taskset-ar-operator-attention-graph-registration.md
   - reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-design-direction-rfc-registration.md
   - reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-registration.md
   - reviews/REVIEW-2026-06-18-taskset-ar-design-system-debt-consolidation-registration.md

@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T09:06:44+09:00",
-  "record_count": 358,
+  "generated_at": "2026-06-19T09:09:44+09:00",
+  "record_count": 364,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -3942,6 +3942,72 @@
       "path": "agents/lead_engineer/tasks/TASK-AR-602.md",
       "parent_id": "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC",
       "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-OPERATOR-ATTENTION-GRAPH",
+      "level": "initiative",
+      "number": "22",
+      "label": "Initiative 22",
+      "id": "INIT-AR-OPERATOR-ATTENTION-GRAPH",
+      "title": "Operator Attention Graph UI Implementation",
+      "path": "agents/project/initiatives/INIT-AR-OPERATOR-ATTENTION-GRAPH.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-OPERATOR-ATTENTION-GRAPH",
+      "level": "taskset",
+      "number": "22.1",
+      "label": "Taskset 22.1",
+      "id": "TASKSET-AR-OPERATOR-ATTENTION-GRAPH",
+      "title": "Operator Attention Graph",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-OPERATOR-ATTENTION-GRAPH",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-603",
+      "level": "task",
+      "number": "22.1.1",
+      "label": "Task 22.1.1",
+      "id": "TASK-AR-603",
+      "title": "Add the first governed relation-aware UI assets and wire one taskset/claim/evidence/c…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-603.md",
+      "parent_id": "TASKSET-AR-OPERATOR-ATTENTION-GRAPH",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-603-001",
+      "level": "unit",
+      "number": "22.1.1.1",
+      "label": "Unit 22.1.1.1",
+      "id": "UNIT-TASK-AR-603-001",
+      "title": "UNIT-TASK-AR-603-001 - Add relation-aware UI assets and first workflow wiring",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md",
+      "parent_id": "TASK-AR-603",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-604",
+      "level": "task",
+      "number": "22.1.2",
+      "label": "Task 22.1.2",
+      "id": "TASK-AR-604",
+      "title": "Verify the first operator_attention_graph implementation through user-like beta actio…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-604.md",
+      "parent_id": "TASKSET-AR-OPERATOR-ATTENTION-GRAPH",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-604-001",
+      "level": "unit",
+      "number": "22.1.2.1",
+      "label": "Unit 22.1.2.1",
+      "id": "UNIT-TASK-AR-604-001",
+      "title": "UNIT-TASK-AR-604-001 - Record beta-tester and UX-evaluator evidence",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-604/UNIT-TASK-AR-604-001.md",
+      "parent_id": "TASK-AR-604",
+      "status": "worker_ready"
     }
   ]
 }

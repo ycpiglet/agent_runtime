@@ -28,6 +28,7 @@
 | 623 | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | Design System Debt Consolidation |
 | 624 | `TASKSET-AR-LLM-WIKI` | LLM Wiki |
 | 624 | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | UI UX Design Direction RFC |
+| 625 | `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` | Operator Attention Graph |
 
 <!-- BACKLOG-INDEX:END -->
 
