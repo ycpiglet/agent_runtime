@@ -156,6 +156,12 @@
       "display_name": "Taskset Board IA Design Direction",
       "summary": "Resolve the post-OAG UX watch that Taskset Board discovery and whole-board focus traversal are too long now that the board contains 49 tasksets; run a lead-designer IA/design seminar, publish an RFC, then derive the next implementation and beta-evaluation taskset.",
       "order": 628
+    },
+    {
+      "task_set_id": "TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE",
+      "display_name": "Taskset Board Attention Workspace",
+      "summary": "Source-mutating implementation of the accepted Taskset Board IA RFC: attention lane derivation, taskset switcher, relation detail panel, and beta/UX evidence for desktop, mobile, keyboard, reduced-motion, and recovery states.",
+      "order": 629
     }
   ]
 }

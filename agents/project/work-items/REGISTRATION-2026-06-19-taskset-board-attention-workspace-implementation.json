@@ -48,6 +48,7 @@
         {
           "title": "Add Taskset Board attention lane schema and workspace UI",
           "context": "TASK-AR-610 accepted taskset_attention_workspace after OAG beta evidence showed 49 tasksets make whole-board scanning and focus traversal too long.",
+          "scope": "Source mutation is limited to declared UI state, UI asset, design asset, focused test, verification evidence, and review-index files. Do not change task/claim SSoT files, write APIs, dispatcher behavior, or unrelated console views.",
           "inputs": [
             "reviews/RFC-2026-06-19-taskset-board-ia-design-direction.md",
             "reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md",

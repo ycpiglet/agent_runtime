@@ -388,6 +388,29 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-06-19-taskset-ar-taskset-board-attention-workspace-registration.md",
+          "value": "04bf8e6dd3c61923e6b3bc9ca2d0a8654df8b0594e6ca67cc5c7d87eb3a60b4b"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "cb2cd245558157ff640dbf0b824694c5623e2e1ef0ccfba6e83f9a08a5522bc8"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-06-19-taskset-ar-taskset-board-attention-workspace-registration.md",
+      "recorded_at": "2026-06-19T19:43:29+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-19-taskset-ar-taskset-board-ia-design-direction-registration.md",
           "value": "66b49a2229ab9af1bdcd118448d667fb1c00c03b30be7b56378078fdbb050fdd"
         },
@@ -455,5 +478,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-19T15:35:57+09:00"
+  "updated_at": "2026-06-19T19:43:29+09:00"
 }

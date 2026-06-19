@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T19:28:25+09:00
-record_count: 674
+generated_at: 2026-06-19T19:43:29+09:00
+record_count: 675
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `674` review and evidence records under `reviews/`.
+- Summary: indexed `675` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `674` files |
+| Reviews covered | pass | `675` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -515,6 +515,7 @@ record_count: 674
 | `reviews/REVIEW-2026-06-19-taskset-ar-oag-claim-aware-relation-adapter-registration.md` | `REVIEW-2026-06-19-taskset-ar-oag-claim-aware-relation-adapter-registration` | md | record | pass | Claim-Aware Relation Adapter Registration |
 | `reviews/REVIEW-2026-06-19-taskset-ar-oag-mobile-responsive-refinement-registration.md` | `REVIEW-2026-06-19-taskset-ar-oag-mobile-responsive-refinement-registration` | md | record | pass | OAG Mobile Responsive Refinement Registration |
 | `reviews/REVIEW-2026-06-19-taskset-ar-operator-attention-graph-registration.md` | `REVIEW-2026-06-19-taskset-ar-operator-attention-graph-registration` | md | record | pass | Operator Attention Graph Registration |
+| `reviews/REVIEW-2026-06-19-taskset-ar-taskset-board-attention-workspace-registration.md` | `REVIEW-2026-06-19-taskset-ar-taskset-board-attention-workspace-registration` | md | record | pass | Taskset Board Attention Workspace Registration |
 | `reviews/REVIEW-2026-06-19-taskset-ar-taskset-board-ia-design-direction-registration.md` | `REVIEW-2026-06-19-taskset-ar-taskset-board-ia-design-direction-registration` | md | record | pass | Taskset Board IA Design Direction Registration |
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-registration.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-registration` | md | record | pass | UI UX Cycle Automation Registration |
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-conductor.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-conductor` | review | accepted | replan | UI/UX Cycle Automation T3 Replan After Conductor |

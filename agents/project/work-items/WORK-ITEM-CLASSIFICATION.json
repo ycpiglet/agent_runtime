@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T19:28:17+09:00",
-  "record_count": 382,
+  "generated_at": "2026-06-19T19:43:27+09:00",
+  "record_count": 388,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4206,6 +4206,72 @@
       "path": "agents/lead_engineer/tasks/TASK-AR-611.md",
       "parent_id": "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION",
       "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-TASKSET-BOARD-ATTENTION-WORKSPACE",
+      "level": "initiative",
+      "number": "26",
+      "label": "Initiative 26",
+      "id": "INIT-AR-TASKSET-BOARD-ATTENTION-WORKSPACE",
+      "title": "Taskset Board Attention Workspace",
+      "path": "agents/project/initiatives/INIT-AR-TASKSET-BOARD-ATTENTION-WORKSPACE.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE",
+      "level": "taskset",
+      "number": "26.1",
+      "label": "Taskset 26.1",
+      "id": "TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE",
+      "title": "Taskset Board Attention Workspace",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-TASKSET-BOARD-ATTENTION-WORKSPACE",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-612",
+      "level": "task",
+      "number": "26.1.1",
+      "label": "Task 26.1.1",
+      "id": "TASK-AR-612",
+      "title": "Convert the Taskset Board from a whole-board-first scan into an attention workspace w…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-612.md",
+      "parent_id": "TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-612-001",
+      "level": "unit",
+      "number": "26.1.1.1",
+      "label": "Unit 26.1.1.1",
+      "id": "UNIT-TASK-AR-612-001",
+      "title": "UNIT-TASK-AR-612-001 - Add Taskset Board attention lane schema and workspace UI",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-612/UNIT-TASK-AR-612-001.md",
+      "parent_id": "TASK-AR-612",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-613",
+      "level": "task",
+      "number": "26.1.2",
+      "label": "Task 26.1.2",
+      "id": "TASK-AR-613",
+      "title": "Verify the attention workspace through user-like beta actions, keyboard traversal, mo…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-613.md",
+      "parent_id": "TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-613-001",
+      "level": "unit",
+      "number": "26.1.2.1",
+      "label": "Unit 26.1.2.1",
+      "id": "UNIT-TASK-AR-613-001",
+      "title": "UNIT-TASK-AR-613-001 - Record Taskset Board attention workspace beta and UX evidence",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-613/UNIT-TASK-AR-613-001.md",
+      "parent_id": "TASK-AR-613",
+      "status": "worker_ready"
     }
   ]
 }
