@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER
 initiative_id: INIT-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: ux-evaluator
 created_at: 2026-06-19T12:26:00+09:00
-updated_at: 2026-06-19T12:26:00+09:00
+updated_at: 2026-06-19T13:42:43+09:00
 origin_type: owner_request
 origin_ref: chat:2026-06-19-ui-refactor-continuous-cycle
 created_by: codex-planner
@@ -45,6 +45,10 @@ verification:
   - python scripts/ui_ux_cycle.py --root . assess --json
 handoff: Report beta paths, defects, accessibility/responsive findings, and the next UI/UX cycle decision.
 stop_condition: Stop after beta/UX evidence is complete and ready for independent verification.
+verified_at: 2026-06-19T13:42:43+09:00
+verified_by: codex-ux-evaluator-ar-606
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-unit-task-ar-606-001-20260619134243.json
 ---
 
 # UNIT-TASK-AR-606-001 - Record claim-aware adapter beta and UX evidence
