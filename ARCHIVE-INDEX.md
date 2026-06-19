@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-19
-archived_count: 260
+archived_count: 261
 ---
 
 # Archived Task Files
 
-- `260` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `261` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -266,6 +266,7 @@ archived_count: 260
 | `TASK-AR-584` | `ba370d39-693…` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | completed | 2026-06-18T18:43:04+09:00 | 2026-06-19T00:58:28+09:00 | 2026-06-19T01:36:21+09:00 | 2026-06-19T01:36:21+09:00 | Move view-specific JS renderers (data-heavy SVG layouts, calendar grids, office-map p… |
 | `TASK-AR-600` | `ea6e499e-86a…` | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | completed | 2026-06-19T08:18:00+09:00 | 2026-06-19T08:19:00+09:00 | 2026-06-19T08:30:23+09:00 | 2026-06-19T08:30:23+09:00 | Create the seminar artifact that decides what new visual direction should be explored… |
 | `TASK-AR-601` | `2b3c140e-121…` | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | completed | 2026-06-19T08:18:00+09:00 | 2026-06-19T08:36:00+09:00 | 2026-06-19T08:48:13+09:00 | 2026-06-19T08:48:13+09:00 | Create the RFC that promotes the seminar decision into an accepted design direction a… |
+| `TASK-AR-602` | `abcc24fb-904…` | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | completed | 2026-06-19T08:18:00+09:00 | 2026-06-19T08:55:00+09:00 | 2026-06-19T09:06:00+09:00 | 2026-06-19T09:06:00+09:00 | Turn the accepted design-direction RFC into the next implementation refactor and beta… |
 | `TASK-AR-591` | `67b812de-9f0…` | `TASKSET-AR-LLM-WIKI` | completed | 2026-06-17T22:30:00+09:00 | 2026-06-18T00:00:00+09:00 | 2026-06-18T22:05:00+09:00 | 2026-06-18T22:05:00+09:00 | Add a deterministic wiki page envelope with summary, metadata, typed relationships, b… |
 | `TASK-AR-595` | `a605f5ee-c83…` | `TASKSET-AR-LLM-WIKI` | completed | 2026-06-17T22:30:00+09:00 | 2026-06-19T07:19:32+09:00 | 2026-06-19T07:55:00+09:00 | 2026-06-19T07:55:00+09:00 | Promote Wiki/Search as a core navigation hub adjacent to Records and add cross-links… |
 | `TASK-AR-596` | `39cb21b7-2cd…` | `TASKSET-AR-LLM-WIKI` | completed | 2026-06-17T22:30:00+09:00 | 2026-06-19T07:58:04+09:00 | 2026-06-19T08:09:00+09:00 | 2026-06-19T08:09:00+09:00 | Extend knowledge lint coverage for the expanded corpus and close `TASKSET-AR-LLM-WIKI… |

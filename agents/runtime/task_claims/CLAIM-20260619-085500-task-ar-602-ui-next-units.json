@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-602:tab-01",
   "pane_id": "terminal:wt-task-ar-602:tab-01",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC",
   "active_scope": "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC",
   "scope_transition_approved": true,
@@ -19,20 +19,20 @@
   "model_tier": "planner_high",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "claim-created",
-  "progress_pct": 0,
-  "step_index": 1,
+  "phase": "taskset-completed",
+  "progress_pct": 100,
+  "step_index": 5,
   "step_total": 5,
-  "status_text": "Claimed derivation of next UI implementation and UX evaluation units; no UI source mutation.",
+  "status_text": "Released and closed after W4b verification; follow-up registration input is ready.",
   "worktree_path": ".worktrees/TASK-AR-602-next-units",
   "branch": "codex/task-ar-602-ui-next-units",
   "claimed_at": "2026-06-19T08:55:00+09:00",
-  "last_heartbeat": "2026-06-19T08:55:00+09:00",
-  "updated_at": "2026-06-19T08:55:00+09:00",
+  "last_heartbeat": "2026-06-19T09:05:00+09:00",
+  "updated_at": "2026-06-19T09:05:00+09:00",
   "expires_at": "2026-06-19T09:25:00+09:00",
   "lease": {
     "claimed_at": "2026-06-19T08:55:00+09:00",
-    "heartbeat_at": "2026-06-19T08:55:00+09:00",
+    "heartbeat_at": "2026-06-19T09:05:00+09:00",
     "expires_at": "2026-06-19T09:25:00+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260619-085500-task-ar-602-ui-next-units.handoff.md",
@@ -45,5 +45,9 @@
     "reviews/BETA-PLAN-2026-06-19-operator-attention-graph.md",
     "reviews/INDEX.md",
     "reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md"
-  ]
+  ],
+  "released_at": "2026-06-19T09:05:00+09:00",
+  "verified_by": "codex-independent-w4b-verifier-2026-06-19",
+  "verifier_role": "qa-reviewer",
+  "verification_evidence": "reviews/W4B-2026-06-19-TASK-AR-602.md"
 }

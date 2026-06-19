@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T08:48:14+09:00",
+  "generated_at": "2026-06-19T09:06:44+09:00",
   "record_count": 358,
   "finding_count": 0,
   "findings": [],
@@ -3897,7 +3897,7 @@
       "title": "UI UX Design Direction RFC",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-UI-UX-DESIGN-DIRECTION-CYCLE",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-600",
@@ -3941,7 +3941,7 @@
       "title": "Turn the accepted design-direction RFC into the next implementation refactor and beta…",
       "path": "agents/lead_engineer/tasks/TASK-AR-602.md",
       "parent_id": "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC",
-      "status": "planned"
+      "status": "completed"
     }
   ]
 }

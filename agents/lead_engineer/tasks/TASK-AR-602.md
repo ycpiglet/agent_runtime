@@ -9,9 +9,9 @@ kind: task
 parent_id: TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC
 registered_at: 2026-06-19T08:18:00+09:00
 created_at: 2026-06-19T08:18:00+09:00
-updated_at: 2026-06-19T09:00:00+09:00
+updated_at: 2026-06-19T09:06:00+09:00
 title: Derive next UI implementation and UX evaluation units
-status: planned
+status: completed
 started_at: 2026-06-19T08:55:00+09:00
 verification_status: passed
 verified_at: 2026-06-19T09:00:00+09:00
@@ -37,6 +37,11 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+resolution: done
+completed_at: 2026-06-19T09:06:00+09:00
+closed_by: codex-interface-designer-ui-next-units-602
+actual_hours: 1.4
+actual_tokens: 8500
 ---
 
 # TASK-AR-602 - Derive next UI implementation and UX evaluation units
@@ -61,3 +66,15 @@ tags:
 - `python scripts/ui_ux_cycle.py --root . propose --dry-run --json`
 - `python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC --check`
 - `python scripts/evidence_index_generator.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T09:06:00+09:00`
+- Resolution: `done`
+- Actual hours: `1.4`
+- Actual tokens: `8500`
+- Closed by: `codex-interface-designer-ui-next-units-602`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-task-ar-602-20260619090000.json`
+<!-- work-close:end -->

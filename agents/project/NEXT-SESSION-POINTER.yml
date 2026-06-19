@@ -1,26 +1,21 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T08:55:00+09:00
+updated_at: 2026-06-19T09:06:00+09:00
 current_state:
-  summary: "TASK-AR-602 is claimed to derive the next UI implementation and UX evaluation units before any UI source mutation."
-  status: in_progress
-  task_set_status: active
+  summary: "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC is complete; the operator attention graph implementation registration input is ready."
+  status: ready
+  task_set_status: completed
   task_set_id: "TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC"
-  step_index: 4
+  step_index: 5
   step_total: 5
-  progress_pct: 67
-  status_text: "TASK-AR-602 is active; output is planning/registration input only, with UI source mutation blocked."
+  progress_pct: 100
+  status_text: "No active UI/UX design-direction claim; next step is to register the operator attention graph implementation taskset."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260619-085500-task-ar-602-ui-next-units
-      agent_role: interface-designer
-      agent_instance_id: interface-designer-20260619-085500-kst-ui-next-units
-      display_name: codex-interface-designer-ui-next-units-602
-      callsite_id: terminal:wt-task-ar-602:tab-01
+  current_agents: []
   current_teams:
     - ui-ux
 resume:
-  active_task: TASK-AR-602
-  active_task_set: TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC
+  active_task: null
+  active_task_set: none
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -39,8 +34,7 @@ pointers:
     next_task: null
     self_verification_evidence: reviews/VERIFY-2026-06-19-task-ar-584-20260619011843.json
     w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-584.md
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260619-085500-task-ar-602-ui-next-units.json
+  active_claims: []
   ui_ux_cycle_automation:
     taskset: TASKSET-AR-UI-UX-CYCLE-AUTOMATION
     completed_tasks:
