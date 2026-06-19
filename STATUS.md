@@ -7,7 +7,7 @@
 - `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` is complete: `TASK-AR-607` fixed `BTC-OAG-CLAIM-MOBILE-001`, and `TASK-AR-608` completed beta/UX retest with W4b evidence.
 - `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` is complete: `TASK-AR-609` completed the lead-designer seminar, `TASK-AR-610` published the accepted Taskset Board IA RFC, and `TASK-AR-611` derived the implementation plus beta-evaluation units.
 - `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` is complete: `TASK-AR-612` implemented the attention workspace and `TASK-AR-613` recorded beta/UX evidence with W4b.
-- Active UI follow-up: `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` is registered, and next source mutation is `TASK-AR-614` / `UNIT-TASK-AR-614-001` to fix active-claim lane freshness plus zero-count empty-lane copy.
+- Active UI follow-up: `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` is in beta-ready state; `TASK-AR-614` fixed active-claim lane freshness plus zero-count empty-lane copy, and next work is `TASK-AR-615` / `UNIT-TASK-AR-615-001` beta/UX verification.
 - The previous `TASKSET-AR-LLM-WIKI` closeout is complete: `TASK-AR-590..596` are archived `7/7`, W4b evidence is indexed, and that taskset has no active claims.
 - UI refactor/design-system remediation is now past design-system governance, asset extraction, UI/UX cycle automation, first source-mutating Operator Attention Graph implementation, beta/UX evaluation, and claim-aware relation adapter refinement.
 - `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` is complete: `TASK-AR-597`, `TASK-AR-598`, and `TASK-AR-599` are implemented, W4b-verified, integrated, and closed.
@@ -17,15 +17,15 @@
 - Self-improvement remediation is improving but not mature: `scribe_state` is now ok, but the score is still below mature and one monitored role gap remains.
 - Scribe source is now the live status summary section so advisory health can be measured without fabricating role evidence.
 - Doc Steward remains ok; keep document-health checks advisory and evidence-based.
-- Next UI refactor step: claim `TASK-AR-614` before source mutation, then run `TASK-AR-615` beta/UX evidence after the claim/empty-state refinement lands.
+- Next UI refactor step: claim `TASK-AR-615` and run beta-tester plus UX-evaluator evidence against the refined Taskset Board attention workspace.
 
 ## 2026-06-19 - TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT active
 
 - Registered taskset: `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT`.
-- Active task: `TASK-AR-614` patches `BTC-TSAW-CLAIM-001` and `BTC-TSAW-EMPTY-001` so live active claims appear in the Taskset Board attention lane and zero-count lanes carry clear recovery copy.
-- Next unit: `UNIT-TASK-AR-614-001`.
-- Follow-up task: `TASK-AR-615` repeats beta-tester and UX-evaluator verification after the implementation lands.
-- Boundary: no UI source mutation should start until `TASK-AR-614` is claimed in a fresh worktree.
+- Completed implementation: `TASK-AR-614` patches `BTC-TSAW-CLAIM-001` and `BTC-TSAW-EMPTY-001` so live active claims appear in the Taskset Board attention lane and zero-count lanes carry clear recovery copy.
+- Verification: `reviews/VERIFY-2026-06-19-task-ar-614-closeout.json` and `reviews/W4B-2026-06-19-TASK-AR-614.md`.
+- Active next task: `TASK-AR-615` / `UNIT-TASK-AR-615-001` repeats beta-tester and UX-evaluator verification after the implementation lands.
+- Boundary: `TASK-AR-615` is evaluation-only unless beta evidence routes a new BTC follow-up.
 
 ## 2026-06-19 - TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE complete
 

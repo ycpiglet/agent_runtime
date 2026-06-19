@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-19T21:58:17+09:00
+generated_at: 2026-06-19T22:37:52+09:00
 record_count: 394
 ---
 
@@ -429,8 +429,8 @@ record_count: 394
 | 26.1.2.1 | Unit 26.1.2.1 | unit | `UNIT-TASK-AR-613-001` | `TASK-AR-613` | completed | `agents/lead_engineer/tasks/units/TASK-AR-613/UNIT-TASK-AR-613-001.md` | UNIT-TASK-AR-613-001 - Record Taskset Board attention workspace beta and UX evidence |
 | 27 | Initiative 27 | initiative | `INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | - | active | `agents/project/initiatives/INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT.md` | Taskset Attention Workspace Claim And Empty State Refinement |
 | 27.1 | Taskset 27.1 | taskset | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | `INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | active | `BACKLOG-BOARD.md` | TSAW Claim And Empty State Refinement |
-| 27.1.1 | Task 27.1.1 | task | `TASK-AR-614` | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-614.md` | Fix BTC-TSAW-CLAIM-001 and BTC-TSAW-EMPTY-001 so active runtime claims appear in the… |
-| 27.1.1.1 | Unit 27.1.1.1 | unit | `UNIT-TASK-AR-614-001` | `TASK-AR-614` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-614/UNIT-TASK-AR-614-001.md` | UNIT-TASK-AR-614-001 - Patch attention workspace claim and empty recovery states |
+| 27.1.1 | Task 27.1.1 | task | `TASK-AR-614` | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | completed | `agents/lead_engineer/tasks/TASK-AR-614.md` | Fix BTC-TSAW-CLAIM-001 and BTC-TSAW-EMPTY-001 so active runtime claims appear in the… |
+| 27.1.1.1 | Unit 27.1.1.1 | unit | `UNIT-TASK-AR-614-001` | `TASK-AR-614` | completed | `agents/lead_engineer/tasks/units/TASK-AR-614/UNIT-TASK-AR-614-001.md` | UNIT-TASK-AR-614-001 - Patch attention workspace claim and empty recovery states |
 | 27.1.2 | Task 27.1.2 | task | `TASK-AR-615` | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-615.md` | Repeat beta-tester and UX-evaluator verification after the active-claim and empty-lan… |
 | 27.1.2.1 | Unit 27.1.2.1 | unit | `UNIT-TASK-AR-615-001` | `TASK-AR-615` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-615/UNIT-TASK-AR-615-001.md` | UNIT-TASK-AR-615-001 - Record refined attention workspace beta and UX evidence |
 

@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T22:31:35+09:00
-record_count: 688
+generated_at: 2026-06-19T22:37:53+09:00
+record_count: 689
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `688` review and evidence records under `reviews/`.
+- Summary: indexed `689` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `688` files |
+| Reviews covered | pass | `689` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -614,6 +614,7 @@ record_count: 688
 | `reviews/VERIFY-2026-06-19-task-ar-611-20260619184000.json` | `VERIFY-2026-06-19-task-ar-611-20260619184000` | json | record | n/a | VERIFY-2026-06-19-task-ar-611-20260619184000 |
 | `reviews/VERIFY-2026-06-19-task-ar-612-closeout.json` | `VERIFY-2026-06-19-task-ar-612-closeout` | json | record | n/a | VERIFY-2026-06-19-task-ar-612-closeout |
 | `reviews/VERIFY-2026-06-19-task-ar-613-closeout.json` | `VERIFY-2026-06-19-task-ar-613-closeout` | json | record | n/a | VERIFY-2026-06-19-task-ar-613-closeout |
+| `reviews/VERIFY-2026-06-19-task-ar-614-closeout.json` | `VERIFY-2026-06-19-task-ar-614-closeout` | json | record | n/a | VERIFY-2026-06-19-task-ar-614-closeout |
 | `reviews/VERIFY-2026-06-19-taskset-board-attention-workspace-implementation.json` | `VERIFY-2026-06-19-taskset-board-attention-workspace-implementation` | json | record | n/a | VERIFY-2026-06-19-taskset-board-attention-workspace-implementation |
 | `reviews/VERIFY-2026-06-19-tsaw-claim-empty-refinement.json` | `VERIFY-2026-06-19-tsaw-claim-empty-refinement` | json | record | n/a | VERIFY-2026-06-19-tsaw-claim-empty-refinement |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500.json` | `VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500 |

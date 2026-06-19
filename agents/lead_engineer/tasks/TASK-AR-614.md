@@ -9,9 +9,16 @@ kind: task
 parent_id: TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT
 registered_at: 2026-06-19T21:56:00+09:00
 created_at: 2026-06-19T21:56:00+09:00
-updated_at: 2026-06-19T21:56:00+09:00
+started_at: 2026-06-19T22:14:49+09:00
+updated_at: 2026-06-19T22:37:50+09:00
+verification_status: passed
+verified_at: 2026-06-19T22:35:29+09:00
+verified_by: independent-w4b-task-ar-614-20260619
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-task-ar-614-closeout.json
+w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-614.md
 title: Fix Taskset attention active-claim freshness and empty lane copy
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 4
@@ -32,6 +39,11 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+resolution: done
+completed_at: 2026-06-19T22:37:50+09:00
+closed_by: codex-interface-designer-ar-614
+actual_hours: 1.5
+actual_tokens: 12000
 ---
 
 # TASK-AR-614 - Fix Taskset attention active-claim freshness and empty lane copy
@@ -59,3 +71,15 @@ tags:
 - `python scripts/ui_ux_cycle.py --root . assess --json`
 - `python scripts/evidence_index_generator.py --check`
 - `git diff --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T22:37:50+09:00`
+- Resolution: `done`
+- Actual hours: `1.5`
+- Actual tokens: `12000`
+- Closed by: `codex-interface-designer-ar-614`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-task-ar-614-closeout.json`
+<!-- work-close:end -->

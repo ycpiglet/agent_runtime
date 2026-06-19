@@ -1,22 +1,22 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T21:56:00+09:00
+updated_at: 2026-06-19T22:37:50+09:00
 current_state:
-  summary: "TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE is locally complete: TASK-AR-612 implemented the attention workspace, TASK-AR-613 beta/UX verified it, and findings BTC-TSAW-CLAIM-001 / BTC-TSAW-EMPTY-001 are routed into TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT."
+  summary: "TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT is in final evaluation: TASK-AR-614 fixed active-claim lane freshness and empty-lane copy with W4b, and TASK-AR-615 is the next beta/UX verification pass."
   status: active
   task_set_status: taskset_active
   task_set_id: TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT
-  step_index: 1
+  step_index: 2
   step_total: 5
-  progress_pct: 0
-  status_text: "Claim TASK-AR-614 before source mutation. Fix active-claim lane freshness and zero-count empty-lane copy, then run TASK-AR-615 beta/UX evaluation."
+  progress_pct: 50
+  status_text: "Claim TASK-AR-615 to run beta-tester and UX-evaluator verification for the refined Taskset Board attention workspace."
 active_work:
   current_agents: []
   current_teams:
     - ui-ux
 resume:
-  active_task: TASK-AR-614
+  active_task: TASK-AR-615
   active_task_set: TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT
-  branch_policy: "No active claim remains. Claim TASK-AR-614 before source mutation; TASK-AR-615 remains evaluation-only after implementation lands."
+  branch_policy: "No active claim remains. Claim TASK-AR-615 before beta/UX evidence work; TASK-AR-614 implementation is W4b verified and closed."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -49,19 +49,24 @@ pointers:
   tsaw_claim_empty_refinement:
     taskset: TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT
     active_claim: null
-    status: registered_ready_to_claim
+    status: implementation_complete_beta_ready
     tasks:
       - TASK-AR-614
       - TASK-AR-615
-    next_task: TASK-AR-614
-    next_unit: UNIT-TASK-AR-614-001
+    completed_tasks:
+      - TASK-AR-614
+    next_task: TASK-AR-615
+    next_unit: UNIT-TASK-AR-615-001
     findings:
       - BTC-TSAW-CLAIM-001
       - BTC-TSAW-EMPTY-001
     registration_input: agents/project/work-items/REGISTRATION-2026-06-19-tsaw-active-claim-empty-lane-refinement.json
     registration_review: reviews/REVIEW-2026-06-19-taskset-ar-tsaw-claim-empty-refinement-registration.md
     plan: docs/superpowers/plans/2026-06-19-tsaw-claim-empty-refinement.md
-    next_decision: claim_task_ar_614_implementation
+    implementation_commit: a103b91
+    task_ar_614_verification: reviews/VERIFY-2026-06-19-task-ar-614-closeout.json
+    task_ar_614_w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-614.md
+    next_decision: claim_task_ar_615_beta_ux_evaluation
   operator_attention_graph:
     taskset: TASKSET-AR-OPERATOR-ATTENTION-GRAPH
     completed_tasks:

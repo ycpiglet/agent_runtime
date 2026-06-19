@@ -1,0 +1,53 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-19-task-ar-614-closeout",
+  "work_id": "TASK-AR-614",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-614.md",
+  "kind": "task",
+  "task_id": "TASK-AR-614",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-19T22:35:29+09:00",
+  "verified_by": "independent-w4b-task-ar-614-20260619",
+  "summary": "TASK-AR-614 implementation passed W4a and independent W4b. Live taskset claims are now surfaced in active_claims from task_claims[].task_set_id even when classification is stale or missing, and zero-count attention lanes use dedicated empty_label/empty_hint copy.",
+  "evidence_refs": [
+    "reviews/VERIFY-2026-06-19-tsaw-claim-empty-refinement.json",
+    "reviews/VERIFY-2026-06-19-unit-task-ar-614-001-20260619222418.json",
+    "reviews/W4B-2026-06-19-TASK-AR-614.md"
+  ],
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_ui_state.py tests/test_ui_console.py tests/test_ui_design_assets.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "evidence": "273 passed"
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "returncode": 0,
+      "evidence": "findings=0"
+    },
+    {
+      "command": "python scripts/ui_ux_cycle.py --root . assess --json",
+      "status": "passed",
+      "returncode": 0,
+      "evidence": "score=75 usable; no next refactor candidate inside implementation worktree"
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "evidence": "findings=0"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "returncode": 0,
+      "evidence": "no whitespace findings"
+    }
+  ],
+  "residual_risks": [
+    "TASK-AR-615 remains required for browser-level beta and UX verification after implementation integration."
+  ]
+}

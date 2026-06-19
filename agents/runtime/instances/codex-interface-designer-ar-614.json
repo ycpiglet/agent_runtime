@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "codex-interface-designer-ar-614",
+  "callsign": "codex-interface-designer-ar-614",
+  "callsite_id": "terminal:wt-task-ar-614:tab-01",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260619-221449-task-ar-614-task-ar-614-tsaw-claim-empty-refinement.json"
+  ],
+  "created_at": "2026-06-19T22:14:49+09:00",
+  "decision_cycle_id": "",
+  "display_name": "codex-interface-designer-ar-614",
+  "model": "",
+  "model_tier": "worker_standard",
+  "on_behalf_of": "UNIT-TASK-AR-614-001",
+  "pane_id": "terminal:wt-task-ar-614:tab-01",
+  "parent_instance_id": "",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "interface-designer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-19T22:14:49+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-614",
+  "task_set_id": "TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT",
+  "team_id": "ui-ux",
+  "unit_id": "UNIT-TASK-AR-614-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-614/UNIT-TASK-AR-614-001.md",
+  "updated_at": "2026-06-19T22:14:49+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-614-tsaw-claim-empty-refinement"
+}

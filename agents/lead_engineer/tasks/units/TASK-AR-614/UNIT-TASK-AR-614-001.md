@@ -9,11 +9,11 @@ task_id: TASK-AR-614
 task_set_id: TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT
 initiative_id: INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: interface-designer
 created_at: 2026-06-19T21:56:00+09:00
-updated_at: 2026-06-19T22:24:18+09:00
+updated_at: 2026-06-19T22:35:45+09:00
 origin_type: beta_finding
 origin_ref: reviews/BETA-TEST-2026-06-19-taskset-board-attention-workspace.md
 created_by: codex-ux-evaluator-ar-613
@@ -62,6 +62,11 @@ verified_at: 2026-06-19T22:24:18+09:00
 verified_by: work.py verify
 evidence_refs:
   - reviews/VERIFY-2026-06-19-unit-task-ar-614-001-20260619222418.json
+resolution: done
+completed_at: 2026-06-19T22:35:45+09:00
+closed_by: codex-interface-designer-ar-614
+actual_hours: 1.5
+actual_tokens: 12000
 ---
 
 # UNIT-TASK-AR-614-001 - Patch attention workspace claim and empty recovery states
@@ -129,3 +134,15 @@ Report data derivation fields changed, empty-state pattern copy, tests, verifica
 ## Stop Boundary
 
 Stop after implementation is source-mutated, tested, self-verified, and ready for independent W4b verification.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T22:35:45+09:00`
+- Resolution: `done`
+- Actual hours: `1.5`
+- Actual tokens: `12000`
+- Closed by: `codex-interface-designer-ar-614`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-unit-task-ar-614-001-20260619222418.json`
+<!-- work-close:end -->
