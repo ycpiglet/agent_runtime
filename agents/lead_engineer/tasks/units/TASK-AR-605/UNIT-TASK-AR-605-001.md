@@ -9,11 +9,11 @@ task_id: TASK-AR-605
 task_set_id: TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER
 initiative_id: INIT-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: interface-designer
 created_at: 2026-06-19T12:26:00+09:00
-updated_at: 2026-06-19T12:56:18+09:00
+updated_at: 2026-06-19T13:12:55+09:00
 origin_type: owner_request
 origin_ref: chat:2026-06-19-ui-refactor-continuous-cycle
 created_by: codex-planner
@@ -57,6 +57,11 @@ verified_at: 2026-06-19T12:56:18+09:00
 verified_by: codex-interface-designer-ar-605
 evidence_refs:
   - reviews/VERIFY-2026-06-19-unit-task-ar-605-001-20260619125618.json
+resolution: done
+completed_at: 2026-06-19T13:12:55+09:00
+closed_by: codex-interface-designer-ar-605
+actual_hours: 2.2
+actual_tokens: 15000
 ---
 
 # UNIT-TASK-AR-605-001 - Add claim-aware relation state mapping
@@ -119,3 +124,15 @@ Report adapter ownership, state mapping table, tests added, assetization classif
 ## Stop Boundary
 
 Stop after the claim-aware relation adapter passes focused tests and W4a evidence is ready for independent verification.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T13:12:55+09:00`
+- Resolution: `done`
+- Actual hours: `2.2`
+- Actual tokens: `15000`
+- Closed by: `codex-interface-designer-ar-605`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-unit-task-ar-605-001-20260619125618.json`
+<!-- work-close:end -->

@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER
 registered_at: 2026-06-19T12:26:00+09:00
 created_at: 2026-06-19T12:26:00+09:00
-updated_at: 2026-06-19T12:26:00+09:00
+started_at: 2026-06-19T12:40:31+09:00
+updated_at: 2026-06-19T13:15:22+09:00
 title: Refactor claim-aware operator relation pattern adapter
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 4
@@ -30,8 +31,23 @@ summary: Refactor the Operator Attention Graph relation pattern adapter for BTC-
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python -m pytest tests/test_ui_design_assets.py tests/test_ui_console.py -q
+  - python scripts/design_system_gate.py --check --all-ui
+  - python scripts/ui_ux_cycle.py --root . assess --json
+  - python scripts/evidence_index_generator.py --check
 tags:
   - work-cli-created
+verification_status: passed
+verified_at: 2026-06-19T13:14:45+09:00
+verified_by: codex-interface-designer-ar-605
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-task-ar-605-20260619131445.json
+resolution: done
+completed_at: 2026-06-19T13:15:22+09:00
+closed_by: codex-interface-designer-ar-605
+actual_hours: 2.2
+actual_tokens: 15000
 ---
 
 # TASK-AR-605 - Refactor claim-aware operator relation pattern adapter
@@ -58,3 +74,15 @@ tags:
 - `python scripts/design_system_gate.py --check --all-ui`
 - `python scripts/ui_ux_cycle.py --root . assess --json`
 - `python scripts/evidence_index_generator.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T13:15:22+09:00`
+- Resolution: `done`
+- Actual hours: `2.2`
+- Actual tokens: `15000`
+- Closed by: `codex-interface-designer-ar-605`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-task-ar-605-20260619131445.json`
+<!-- work-close:end -->

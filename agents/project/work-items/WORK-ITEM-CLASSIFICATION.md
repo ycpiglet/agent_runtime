@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-19T12:28:24+09:00
+generated_at: 2026-06-19T13:15:23+09:00
 record_count: 370
 ---
 
@@ -405,8 +405,8 @@ record_count: 370
 | 22.1.2.1 | Unit 22.1.2.1 | unit | `UNIT-TASK-AR-604-001` | `TASK-AR-604` | completed | `agents/lead_engineer/tasks/units/TASK-AR-604/UNIT-TASK-AR-604-001.md` | UNIT-TASK-AR-604-001 - Record beta-tester and UX-evaluator evidence |
 | 23 | Initiative 23 | initiative | `INIT-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` | - | active | `agents/project/initiatives/INIT-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER.md` | Operator Attention Graph Claim-Aware Relation Adapter |
 | 23.1 | Taskset 23.1 | taskset | `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` | `INIT-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` | active | `BACKLOG-BOARD.md` | Claim-Aware Relation Adapter |
-| 23.1.1 | Task 23.1.1 | task | `TASK-AR-605` | `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` | planned | `agents/lead_engineer/tasks/TASK-AR-605.md` | Refactor the Operator Attention Graph relation pattern adapter for BTC-OAG-BLOCKED-00… |
-| 23.1.1.1 | Unit 23.1.1.1 | unit | `UNIT-TASK-AR-605-001` | `TASK-AR-605` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-605/UNIT-TASK-AR-605-001.md` | UNIT-TASK-AR-605-001 - Add claim-aware relation state mapping |
+| 23.1.1 | Task 23.1.1 | task | `TASK-AR-605` | `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` | completed | `agents/lead_engineer/tasks/TASK-AR-605.md` | Refactor the Operator Attention Graph relation pattern adapter for BTC-OAG-BLOCKED-00… |
+| 23.1.1.1 | Unit 23.1.1.1 | unit | `UNIT-TASK-AR-605-001` | `TASK-AR-605` | completed | `agents/lead_engineer/tasks/units/TASK-AR-605/UNIT-TASK-AR-605-001.md` | UNIT-TASK-AR-605-001 - Add claim-aware relation state mapping |
 | 23.1.2 | Task 23.1.2 | task | `TASK-AR-606` | `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` | planned | `agents/lead_engineer/tasks/TASK-AR-606.md` | Repeat beta-tester and UX-evaluator verification after the claim-aware adapter implem… |
 | 23.1.2.1 | Unit 23.1.2.1 | unit | `UNIT-TASK-AR-606-001` | `TASK-AR-606` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-606/UNIT-TASK-AR-606-001.md` | UNIT-TASK-AR-606-001 - Record claim-aware adapter beta and UX evidence |
 

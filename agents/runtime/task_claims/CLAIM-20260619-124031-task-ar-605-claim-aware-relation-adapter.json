@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-605:tab-01",
   "pane_id": "terminal:wt-task-ar-605:tab-01",
   "mode": "worker",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER",
   "active_scope": "TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER",
   "scope_transition_approved": true,
@@ -27,12 +27,12 @@
   "worktree_path": ".worktrees/TASK-AR-605-claim-aware-relation-adapter",
   "branch": "codex/task-ar-605-claim-aware-relation-adapter",
   "claimed_at": "2026-06-19T12:40:31+09:00",
-  "last_heartbeat": "2026-06-19T12:40:31+09:00",
-  "updated_at": "2026-06-19T12:40:31+09:00",
+  "last_heartbeat": "2026-06-19T13:12:43+09:00",
+  "updated_at": "2026-06-19T13:12:43+09:00",
   "expires_at": "2026-06-19T13:10:31+09:00",
   "lease": {
     "claimed_at": "2026-06-19T12:40:31+09:00",
-    "heartbeat_at": "2026-06-19T12:40:31+09:00",
+    "heartbeat_at": "2026-06-19T13:12:43+09:00",
     "expires_at": "2026-06-19T13:10:31+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260619-124031-task-ar-605-claim-aware-relation-adapter.handoff.md",
@@ -46,5 +46,9 @@
     "tests/test_ui_design_assets.py",
     "reviews/VERIFY-2026-06-19-oag-claim-aware-relation-adapter.json",
     "reviews/INDEX.md"
-  ]
+  ],
+  "released_at": "2026-06-19T13:12:43+09:00",
+  "verified_by": "codex-w4b-verifier-ar-605",
+  "verifier_role": "qa-reviewer",
+  "verification_evidence": "reviews/W4B-2026-06-19-TASK-AR-605.md"
 }
