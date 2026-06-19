@@ -1925,6 +1925,64 @@ def test_ui_console_collapsed_rail_and_mobile_overlay_css(tmp_path):
     assert ".sidebar-scrim" in css
 
 
+def test_ui_console_uses_component_icons_for_primary_navigation(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+
+    assert 'class="sidebar-toggle-icon"' in html
+    assert '<span class="sidebar-icon" aria-hidden="true"><svg' in html
+    assert 'stroke="currentColor"' in html
+    assert 'width="var(--icon-size)"' in html
+    assert "lucide-static" not in html
+    assert "&#8962;" not in html
+    assert "&#9906;" not in html
+
+
+def test_ui_console_typography_and_icon_css_uses_design_tokens(tmp_path):
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    assert "font-family: var(--font-sans);" in css
+    assert "font-family: var(--font-mono);" in css
+    assert "--icon-size: 16px;" in css
+    assert ".icon," in css
+    assert "width: var(--icon-size);" in css
+    assert "height: var(--icon-size);" in css
+    assert '"IBM Plex Sans", "Segoe UI", sans-serif' not in css
+
+
+def test_ui_console_serves_self_hosted_geist_font_assets(tmp_path):
+    response = ui_console.build_response(
+        "/vendor/geist/1.7.2/fonts/geist-sans/Geist-Variable.woff2",
+        tmp_path,
+    )
+    italic_response = ui_console.build_response(
+        "/vendor/geist/1.7.2/fonts/geist-sans/Geist-Italic%5Bwght%5D.woff2",
+        tmp_path,
+    )
+
+    assert response.status == 200
+    assert response.content_type == "font/woff2"
+    assert response.body.startswith(b"wOF2")
+    assert italic_response.status == 200
+    assert italic_response.content_type == "font/woff2"
+    assert italic_response.body.startswith(b"wOF2")
+
+
+def test_ui_console_serves_vendored_lucide_icon_assets(tmp_path):
+    response = ui_console.build_response(
+        "/vendor/lucide-static/1.21.0/icons/menu.svg",
+        tmp_path,
+    )
+    blocked_response = ui_console.build_response(
+        "/vendor/lucide-static/1.21.0/icons/../LICENSE",
+        tmp_path,
+    )
+
+    assert response.status == 200
+    assert response.content_type == "image/svg+xml; charset=utf-8"
+    assert b"lucide-static v1.21.0 - ISC" in response.body
+    assert blocked_response.status == 404
+
+
 # ---- TASK-AR-322: common list pattern (sort/filter/group/search + density) ----
 
 

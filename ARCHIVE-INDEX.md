@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-20
-archived_count: 248
+archived_count: 249
 ---
 
 # Archived Task Files
 
-- `248` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `249` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -261,3 +261,4 @@ archived_count: 248
 | `TASK-AR-582` | `15ac2d6e-173…` | `TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | completed | 2026-06-18T15:55:00+09:00 | 2026-06-18T15:16:35+09:00 | 2026-06-18T16:15:00+09:00 | 2026-06-18T16:15:00+09:00 | Resolve the diagnostic report's single-file HTML/CSS/JS string concentration by movin… |
 | `TASK-AR-587` | `eea05fb1-653…` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | completed | 2026-06-20T01:04:15+09:00 | - | 2026-06-20T05:02:07+09:00 | 2026-06-20T05:02:07+09:00 | Give every agent a deterministic visual identity: a seeded SVG avatar keyed to agent… |
 | `TASK-AR-588` | `51fd1ba5-1d9…` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | completed | 2026-06-20T01:04:15+09:00 | - | 2026-06-20T04:42:00+09:00 | 2026-06-20T04:42:00+09:00 | Replace the hand-rolled graph layout with proper layout engines: Dagre (MIT, layered/… |
+| `TASK-AR-589` | `f283db13-7e6…` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | done | 2026-06-20T01:04:15+09:00 | - | 2026-06-20T05:55:00+09:00 | 2026-06-20T05:55:00+09:00 | Self-host OFL fonts (Geist + Geist Mono) as font tokens and vendor the Lucide (ISC) i… |

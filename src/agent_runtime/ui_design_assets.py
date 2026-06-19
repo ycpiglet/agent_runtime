@@ -5,6 +5,21 @@ JavaScript. This module is the first reusable asset layer inside that
 architecture: token-scale CSS plus primitive/pattern JS helpers that
 ``ui_console.py`` serves instead of redefining directly in the page bundle.
 
+Typography system (TASK-AR-589, experimental tier):
+  Geist 1.7.2 and Geist Mono 1.7.2 are vendored under
+  ``src/agent_runtime/vendor/geist/1.7.2`` with the SIL Open Font License
+  record kept beside the binaries. The console serves those ``.woff2`` files
+  from ``/vendor/geist/1.7.2/...``; no runtime font CDN is required. Consumers
+  use ``--font-sans`` and ``--font-mono`` instead of page-local font stacks.
+
+Icon system (TASK-AR-589, experimental tier):
+  ``componentIcon(name)`` returns a Lucide inline SVG subset from
+  ``src/agent_runtime/vendor/lucide-static/1.21.0/icons``. The vendored
+  package is ISC-licensed and every icon inherits ``currentColor`` while size
+  is controlled by the ``--icon-size`` design token. Name validation is strict:
+  unknown names return the safe help-circle fallback rather than interpolating
+  untrusted names into SVG markup.
+
 Avatar system (TASK-AR-587, experimental tier):
   ``patternAgentAvatar(seed)`` — a deterministic seeded SVG avatar generator
   aligned to the vendored DiceBear Identicon style. No runtime network calls;
@@ -30,14 +45,59 @@ Avatar system (TASK-AR-587, experimental tier):
 """
 from __future__ import annotations
 
+import json
 from html import escape as _html_escape
+from pathlib import Path
+
+
+_PACKAGE_ROOT = Path(__file__).resolve().parent
+GEIST_VERSION = "1.7.2"
+GEIST_LICENSE = "SIL OPEN FONT LICENSE"
+GEIST_VENDOR_PATH = "src/agent_runtime/vendor/geist/1.7.2"
+LUCIDE_STATIC_VERSION = "1.21.0"
+LUCIDE_STATIC_LICENSE = "ISC"
+LUCIDE_STATIC_VENDOR_PATH = "src/agent_runtime/vendor/lucide-static/1.21.0"
 
 UI_TOKEN_SCALE_CSS = """
+/* ===== Typography font tokens (TASK-AR-589) ============================== */
+/* Geist 1.7.2 / Geist Mono 1.7.2 are self-hosted from /vendor/geist.       */
+/* License boundary: SIL Open Font License, vendored with the font files.   */
+@font-face {
+  font-family: "Geist";
+  src: url("/vendor/geist/1.7.2/fonts/geist-sans/Geist-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist";
+  src: url("/vendor/geist/1.7.2/fonts/geist-sans/Geist-Italic%5Bwght%5D.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/vendor/geist/1.7.2/fonts/geist-mono/GeistMono-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/vendor/geist/1.7.2/fonts/geist-mono/GeistMono-Italic%5Bwght%5D.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
 /* ===== Design-system token scale (TASK-AR-579, promoted TASK-AR-583) ===== */
 /* Spacing and radius tokens are now a fully designed semantic scale.         */
 /* Transitional space-px / radius-px aliases have been removed (TASK-AR-583);*/
 /* consumers use the named semantic tokens below (stable as of TASK-AR-583). */
 :root {
+  --font-sans: "Geist", "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Geist Mono", "IBM Plex Mono", "SFMono-Regular", Consolas, ui-monospace, monospace;
+  --icon-size: 16px;
   --font-size-ui-xs: 10px;
   --font-size-ui-sm: 11px;
   --font-size-ui-md: 12px;
@@ -949,10 +1009,134 @@ def patternAgentAvatar(seed: str, *, role: str = "", size: int = 40, label: str 
     )
 
 
+_LUCIDE_ICON_NAMES = (
+    "menu",
+    "settings",
+    "home",
+    "list",
+    "search",
+    "users",
+    "clock",
+    "calendar",
+    "inbox",
+    "mail",
+    "bell",
+    "circle-check",
+    "check-circle",
+    "flag",
+    "bar-chart",
+    "zap",
+    "activity",
+    "more-horizontal",
+    "chevron-right",
+    "arrow-right",
+    "help-circle",
+    "x",
+    "plus",
+    "external-link",
+    "layout-dashboard",
+    "workflow",
+    "tags",
+    "database",
+    "network",
+    "file-check",
+    "send",
+    "message-square",
+    "calendar-days",
+    "triangle-alert",
+    "cpu",
+    "clipboard",
+)
+_LUCIDE_ICON_VENDOR_ROOT = _PACKAGE_ROOT / "vendor" / "lucide-static" / LUCIDE_STATIC_VERSION / "icons"
+_ICON_DEFAULT_PATHS = (
+    '<circle cx="12" cy="12" r="10"/>'
+    '<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>'
+    '<path d="M12 17h.01"/>'
+)
+
+
+def _extract_lucide_svg_paths(svg_text: str) -> str:
+    svg_start = svg_text.find("<svg")
+    if svg_start < 0:
+        return ""
+    open_end = svg_text.find(">", svg_start)
+    close_start = svg_text.rfind("</svg>")
+    if open_end < 0 or close_start < 0 or close_start <= open_end:
+        return ""
+    body = svg_text[open_end + 1 : close_start]
+    return "".join(line.strip() for line in body.splitlines() if line.strip())
+
+
+def _load_lucide_icon_paths() -> dict[str, str]:
+    icons: dict[str, str] = {}
+    for name in _LUCIDE_ICON_NAMES:
+        path = _LUCIDE_ICON_VENDOR_ROOT / f"{name}.svg"
+        if not path.is_file():
+            continue
+        paths = _extract_lucide_svg_paths(path.read_text(encoding="utf-8"))
+        if paths:
+            icons[name] = paths
+    return icons
+
+
+_ICON_PATHS_PY = _load_lucide_icon_paths()
+
+
+def componentIcon(name: str, *, label: str = "", class_name: str = "icon") -> str:
+    """Return a token-safe inline SVG from the vendored Lucide subset."""
+    icon_name = str(name or "").strip().lower()
+    paths = _ICON_PATHS_PY.get(icon_name, _ICON_DEFAULT_PATHS)
+    cls = _html_escape(class_name or "icon", quote=True)
+    title_el = f"<title>{_html_escape(label)}</title>" if label else ""
+    aria_hidden = "" if label else ' aria-hidden="true"'
+    aria_label = f' aria-label="{_html_escape(label, quote=True)}"' if label else ""
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"'
+        ' width="var(--icon-size)" height="var(--icon-size)" fill="none"'
+        ' stroke="currentColor" stroke-width="2" stroke-linecap="round"'
+        ' stroke-linejoin="round"'
+        f' class="{cls}"{aria_hidden}{aria_label} focusable="false">'
+        f"{title_el}"
+        f"{paths}"
+        "</svg>"
+    )
+
+
+_ICON_COMPONENT_JS = (
+    "\n/* ===== UI component: Lucide icons (TASK-AR-589) ========================== */\n"
+    "var _ICON_PATHS = "
+    + json.dumps(_ICON_PATHS_PY, ensure_ascii=True, sort_keys=True)
+    + ";\n"
+    "var _ICON_DEFAULT = "
+    + json.dumps(_ICON_DEFAULT_PATHS, ensure_ascii=True)
+    + ";\n"
+    r"""
+function componentIcon(name, options) {
+  var opts = options || {};
+  var key = String(name || "").trim().toLowerCase();
+  var label = opts.label || "";
+  var cls = opts.className || "icon";
+  var paths = Object.prototype.hasOwnProperty.call(_ICON_PATHS, key) ? _ICON_PATHS[key] : _ICON_DEFAULT;
+  var titleEl = label ? ("<title>" + escapeHtml(label) + "</title>") : "";
+  var ariaHidden = label ? "" : ' aria-hidden="true"';
+  var ariaLabel = label ? (' aria-label="' + escapeHtml(label) + '"') : "";
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"'
+    + ' width="var(--icon-size)" height="var(--icon-size)" fill="none"'
+    + ' stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'
+    + ' class="' + escapeHtml(cls) + '"' + ariaHidden + ariaLabel + ' focusable="false">'
+    + titleEl + paths + '</svg>';
+}
+"""
+)
+
+UI_COMPONENTS_JS = UI_COMPONENTS_JS + _ICON_COMPONENT_JS
+
+
 ASSETIZATION_CLASSES = {
     "UI_TOKEN_SCALE_CSS": "design_token",
     "componentButton": "ui_component",
     "componentStateChip": "ui_component",
+    "componentIcon": "ui_component",
     "componentMetaGrid": "ui_component",
     "componentCard": "ui_component",
     "componentModalShell": "ui_component",

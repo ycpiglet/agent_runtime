@@ -1,0 +1,135 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-20-task-ar-589-typography-icons",
+  "work_id": "TASK-AR-589",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-589.md",
+  "kind": "task",
+  "task_id": "TASK-AR-589",
+  "unit_ids": [
+    "UNIT-TASK-AR-589-001",
+    "UNIT-TASK-AR-589-002"
+  ],
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-20T05:51:20+09:00",
+  "verified_by": "codex-interface-designer-task-ar-589-20260620",
+  "claim_id": "CLAIM-20260620-052500-task-ar-589-typography-icons",
+  "summary": "TASK-AR-589 adds self-hosted Geist / Geist Mono font tokens and a vendored Lucide inline icon component boundary for the Agent Runtime console.",
+  "implemented": [
+    "Vendored geist 1.7.2 metadata, README, OFL license, Geist variable sans/italic woff2, and Geist Mono variable/italic woff2 under src/agent_runtime/vendor/geist/1.7.2.",
+    "Served the Geist woff2 files from ui_console.py under /vendor/geist/1.7.2/... with font/woff2 content type, including percent-decoded bracket filenames.",
+    "Added @font-face rules plus --font-sans, --font-mono, and --icon-size tokens in ui_design_assets.UI_TOKEN_SCALE_CSS.",
+    "Replaced page-local body and monospace font stacks in ui_console_assets.py with the typography tokens.",
+    "Vendored a scoped Lucide static 1.21.0 SVG subset plus package metadata and ISC license under src/agent_runtime/vendor/lucide-static/1.21.0.",
+    "Added Python and JavaScript componentIcon(name) helpers that validate names against the vendored subset, return inline SVG, inherit currentColor, and size through --icon-size.",
+    "Replaced representative topbar/sidebar HTML entity glyphs with componentIcon SVG output while leaving unclear one-off glyphs untouched."
+  ],
+  "license_and_asset_boundary": [
+    {
+      "name": "geist",
+      "version": "1.7.2",
+      "license": "SIL OPEN FONT LICENSE",
+      "artifact_reference": "src/agent_runtime/vendor/geist/1.7.2",
+      "runtime_boundary": "No runtime font CDN dependency; ui_console.py serves local woff2 files and ui_design_assets.py exposes --font-sans / --font-mono tokens."
+    },
+    {
+      "name": "lucide-static",
+      "version": "1.21.0",
+      "license": "ISC",
+      "artifact_reference": "src/agent_runtime/vendor/lucide-static/1.21.0",
+      "runtime_boundary": "No build-time icon package is required at runtime; componentIcon reads the vendored SVG subset at module import and emits token-safe inline SVG."
+    }
+  ],
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_ui_design_assets.py tests/test_ui_console.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "185 passed, 1 warning in 33.40s",
+      "stderr": "DeprecationWarning: invalid escape sequence '\\/' in ui_console_assets.py pre-existing JS string interpolation."
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "node --check %TEMP%/agent-runtime-task-ar-589-app.js",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "served_asset_probe": {
+    "url": "http://127.0.0.1:8879",
+    "html": {
+      "status": 200,
+      "contains_component_icon_svg": true,
+      "contains_runtime_lucide_cdn": false
+    },
+    "app_css": {
+      "contains_font_face": true,
+      "contains_font_sans_token": true,
+      "contains_font_mono_token": true,
+      "contains_icon_size_token": true,
+      "contains_google_font_cdn": false
+    },
+    "vendor_assets": {
+      "/vendor/geist/1.7.2/fonts/geist-sans/Geist-Variable.woff2": {
+        "served": true,
+        "content_type": "font/woff2",
+        "magic": "wOF2"
+      },
+      "/vendor/geist/1.7.2/fonts/geist-sans/Geist-Italic%5Bwght%5D.woff2": {
+        "served": true,
+        "content_type": "font/woff2",
+        "magic": "wOF2"
+      },
+      "/vendor/lucide-static/1.21.0/icons/menu.svg": {
+        "served": true,
+        "content_type": "image/svg+xml; charset=utf-8",
+        "license_marker": "lucide-static v1.21.0 - ISC"
+      }
+    }
+  },
+  "browser_verification": {
+    "tooling": "Python Playwright against local Chromium after in-app Browser reported unavailable: iab; agent-browser CLI was not available on PATH.",
+    "desktop": {
+      "viewport": "1440x1000",
+      "body_text_length": 1146,
+      "body_font": "Geist, \"IBM Plex Sans\", \"Segoe UI\", system-ui, sans-serif",
+      "font_sans_token": "\"Geist\", \"IBM Plex Sans\", \"Segoe UI\", system-ui, sans-serif",
+      "font_mono_token": "\"Geist Mono\", \"IBM Plex Mono\", \"SFMono-Regular\", Consolas, ui-monospace, monospace",
+      "icon_size_token": "16px",
+      "sidebar_svg_count": 19,
+      "sidebar_toggle_svg_count": 1,
+      "first_icon_width": "16px",
+      "first_icon_height": "16px",
+      "has_error_overlay": false,
+      "console_errors": [],
+      "screenshot": "reviews/evidence/TASK-AR-589/desktop.png"
+    },
+    "mobile": {
+      "viewport": "390x844",
+      "body_text_length": 640,
+      "body_font": "Geist, \"IBM Plex Sans\", \"Segoe UI\", system-ui, sans-serif",
+      "font_sans_token": "\"Geist\", \"IBM Plex Sans\", \"Segoe UI\", system-ui, sans-serif",
+      "font_mono_token": "\"Geist Mono\", \"IBM Plex Mono\", \"SFMono-Regular\", Consolas, ui-monospace, monospace",
+      "icon_size_token": "16px",
+      "sidebar_svg_count": 19,
+      "sidebar_toggle_svg_count": 1,
+      "first_icon_width": "16px",
+      "first_icon_height": "16px",
+      "has_error_overlay": false,
+      "console_errors": [],
+      "screenshot": "reviews/evidence/TASK-AR-589/mobile.png"
+    }
+  },
+  "known_watch": [
+    "A first-run onboarding tour can overlay the home screen during screenshots; it does not block typography or icon rendering verification.",
+    "Some lower-priority one-off sidebar glyphs remain as entities where the mapping was not yet semantically clear; componentIcon now covers the primary/topbar and representative repeated navigation glyphs."
+  ]
+}

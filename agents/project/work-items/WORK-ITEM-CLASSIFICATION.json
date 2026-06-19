@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-20T05:16:54+09:00",
+  "generated_at": "2026-06-20T05:54:28+09:00",
   "record_count": 358,
   "finding_count": 0,
   "findings": [],
@@ -3886,7 +3886,7 @@
       "title": "Self-host OFL fonts (Geist + Geist Mono) as font tokens and vendor the Lucide (ISC) i…",
       "path": "agents/lead_engineer/tasks/TASK-AR-589.md",
       "parent_id": "TASKSET-AR-VISUAL-ASSET-ADOPTION",
-      "status": "planned"
+      "status": "done"
     },
     {
       "key": "unit:UNIT-TASK-AR-589-001",
@@ -3897,7 +3897,7 @@
       "title": "UNIT-TASK-AR-589-001 - Self-host Geist + Geist Mono as font tokens",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-589/UNIT-TASK-AR-589-001.md",
       "parent_id": "TASK-AR-589",
-      "status": "worker_ready"
+      "status": "done"
     },
     {
       "key": "unit:UNIT-TASK-AR-589-002",
@@ -3908,7 +3908,7 @@
       "title": "UNIT-TASK-AR-589-002 - Vendor Lucide icon set + componentIcon helper",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-589/UNIT-TASK-AR-589-002.md",
       "parent_id": "TASK-AR-589",
-      "status": "worker_ready"
+      "status": "done"
     },
     {
       "key": "task:TASK-AR-590",

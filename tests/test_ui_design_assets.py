@@ -33,6 +33,7 @@ def test_ui_design_assets_classify_token_component_and_pattern_layers():
     assert classes["componentModalShell"] == "ui_component"
     assert classes["componentProgressBar"] == "ui_component"
     assert classes["componentEmptyState"] == "ui_component"
+    assert classes["componentIcon"] == "ui_component"
     assert classes["patternTaskLane"] == "pattern_component"
     assert classes["patternClaimCard"] == "pattern_component"
     assert classes["patternEvidencePanel"] == "pattern_component"
@@ -48,6 +49,14 @@ def test_ui_design_assets_classify_token_component_and_pattern_layers():
 def test_ui_design_token_scale_is_served_in_console_css(tmp_path):
     css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
 
+    assert "@font-face" in css
+    assert 'font-family: "Geist"' in css
+    assert 'font-family: "Geist Mono"' in css
+    assert "/vendor/geist/1.7.2/fonts/geist-sans/Geist-Variable.woff2" in css
+    assert "/vendor/geist/1.7.2/fonts/geist-mono/GeistMono-Variable.woff2" in css
+    assert "--font-sans" in css
+    assert "--font-mono" in css
+    assert "--icon-size" in css
     assert "Design-system token scale (TASK-AR-579" in css
     assert "--font-size-ui-sm" in css
     assert "--font-size-ui-12" in css
@@ -67,6 +76,8 @@ def test_ui_component_bundle_is_served_in_console_js(tmp_path):
     assert "function componentTable" in js
     assert "function componentModalShell" in js
     assert "function componentMetaGrid" in js
+    assert "function componentIcon" in js
+    assert "UI component: Lucide icons (TASK-AR-589)" in js
     assert "function progressBar(value)" in js
     assert "function patternClaimCard" in js
     assert "function patternTaskLane" in js
@@ -161,6 +172,73 @@ def test_vendored_graph_library_files_are_present_and_licensed():
     for rel_path, marker in required.items():
         body = (vendor / rel_path).read_text(encoding="utf-8")
         assert marker in body, rel_path
+
+
+# ----- TASK-AR-589: Typography + icon assets (experimental) -----
+
+def test_typography_font_tokens_are_self_hosted_without_cdn(tmp_path):
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    assert "https://fonts.googleapis.com" not in css
+    assert "fonts.gstatic.com" not in css
+    assert 'font-family: var(--font-sans);' in css
+    assert 'font-family: var(--font-mono);' in css
+    assert 'url("/vendor/geist/1.7.2/fonts/geist-sans/Geist-Variable.woff2")' in css
+    assert 'url("/vendor/geist/1.7.2/fonts/geist-mono/GeistMono-Variable.woff2")' in css
+
+
+def test_vendored_geist_font_files_are_present_and_licensed():
+    vendor = ROOT / "src" / "agent_runtime" / "vendor" / "geist" / "1.7.2"
+    license_text = (vendor / "LICENSE.txt").read_text(encoding="utf-8")
+    package_text = (vendor / "package.json").read_text(encoding="utf-8")
+
+    assert "SIL OPEN FONT LICENSE" in license_text
+    assert '"version": "1.7.2"' in package_text
+    for rel_path in [
+        "fonts/geist-sans/Geist-Variable.woff2",
+        "fonts/geist-sans/Geist-Italic[wght].woff2",
+        "fonts/geist-mono/GeistMono-Variable.woff2",
+        "fonts/geist-mono/GeistMono-Italic[wght].woff2",
+    ]:
+        body = (vendor / rel_path).read_bytes()
+        assert body.startswith(b"wOF2"), rel_path
+        assert len(body) > 40_000, rel_path
+
+
+def test_vendored_lucide_icon_files_are_present_and_licensed():
+    vendor = ROOT / "src" / "agent_runtime" / "vendor" / "lucide-static" / "1.21.0"
+    license_text = (vendor / "LICENSE").read_text(encoding="utf-8")
+    package_text = (vendor / "package.json").read_text(encoding="utf-8")
+
+    assert "ISC License" in license_text
+    assert '"version": "1.21.0"' in package_text
+    for icon_name in ["menu", "settings", "home", "search", "users", "check-circle", "bar-chart", "zap"]:
+        body = (vendor / "icons" / f"{icon_name}.svg").read_text(encoding="utf-8")
+        assert "@license lucide-static v1.21.0 - ISC" in body
+        assert 'stroke="currentColor"' in body
+
+
+def test_component_icon_returns_token_safe_inline_svg():
+    svg = ui_design_assets.componentIcon("menu", label="<Menu>")
+
+    assert svg.startswith("<svg")
+    assert 'class="icon"' in svg
+    assert 'stroke="currentColor"' in svg
+    assert 'width="var(--icon-size)"' in svg
+    assert 'height="var(--icon-size)"' in svg
+    assert "&lt;Menu&gt;" in svg
+    assert "<Menu>" not in svg
+    assert "#000" not in svg
+    assert "M4 5h16" in svg
+
+
+def test_component_icon_unknown_name_uses_safe_default():
+    svg = ui_design_assets.componentIcon('"><script>alert(1)</script>', label="Unknown")
+
+    assert "<script>" not in svg
+    assert '"><script>' not in svg
+    assert '<circle cx="12" cy="12" r="10"/>' in svg
+    assert "Unknown" in svg
 
 
 # ----- TASK-AR-587: Agent avatar (experimental) -----

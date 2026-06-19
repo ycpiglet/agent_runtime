@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs
+from urllib.parse import unquote
 from urllib.parse import urlparse
 
 from . import ui_commands
@@ -47,16 +48,43 @@ _VENDOR_ASSETS: dict[str, tuple[Path, str]] = {
         _PACKAGE_ROOT / "vendor" / "d3-force" / "3.0.0" / "d3-force.min.js",
         "application/javascript; charset=utf-8",
     ),
+    "/vendor/geist/1.7.2/fonts/geist-sans/Geist-Variable.woff2": (
+        _PACKAGE_ROOT / "vendor" / "geist" / "1.7.2" / "fonts" / "geist-sans" / "Geist-Variable.woff2",
+        "font/woff2",
+    ),
+    "/vendor/geist/1.7.2/fonts/geist-sans/Geist-Italic[wght].woff2": (
+        _PACKAGE_ROOT / "vendor" / "geist" / "1.7.2" / "fonts" / "geist-sans" / "Geist-Italic[wght].woff2",
+        "font/woff2",
+    ),
+    "/vendor/geist/1.7.2/fonts/geist-mono/GeistMono-Variable.woff2": (
+        _PACKAGE_ROOT / "vendor" / "geist" / "1.7.2" / "fonts" / "geist-mono" / "GeistMono-Variable.woff2",
+        "font/woff2",
+    ),
+    "/vendor/geist/1.7.2/fonts/geist-mono/GeistMono-Italic[wght].woff2": (
+        _PACKAGE_ROOT / "vendor" / "geist" / "1.7.2" / "fonts" / "geist-mono" / "GeistMono-Italic[wght].woff2",
+        "font/woff2",
+    ),
 }
+_LUCIDE_ICON_VENDOR_PREFIX = "/vendor/lucide-static/1.21.0/icons/"
+_LUCIDE_ICON_VENDOR_ROOT = _PACKAGE_ROOT / "vendor" / "lucide-static" / "1.21.0" / "icons"
 
 def _bytes(text: str) -> bytes:
     return text.encode("utf-8")
 
 
 def _vendor_asset_response(request_path: str) -> ConsoleResponse | None:
-    entry = _VENDOR_ASSETS.get(request_path)
+    decoded_path = unquote(request_path)
+    entry = _VENDOR_ASSETS.get(request_path) or _VENDOR_ASSETS.get(decoded_path)
     if entry is None:
-        return None
+        if not decoded_path.startswith(_LUCIDE_ICON_VENDOR_PREFIX):
+            return None
+        filename = decoded_path.removeprefix(_LUCIDE_ICON_VENDOR_PREFIX)
+        if "/" in filename or "\\" in filename or not filename.endswith(".svg"):
+            return ConsoleResponse(404, "text/plain; charset=utf-8", b"vendor asset missing\n")
+        path = _LUCIDE_ICON_VENDOR_ROOT / filename
+        if not path.is_file():
+            return ConsoleResponse(404, "text/plain; charset=utf-8", b"vendor asset missing\n")
+        return ConsoleResponse(200, "image/svg+xml; charset=utf-8", path.read_bytes())
     path, content_type = entry
     if not path.is_file():
         return ConsoleResponse(404, "text/plain; charset=utf-8", b"vendor asset missing\n")
