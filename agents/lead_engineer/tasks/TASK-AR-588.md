@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-VISUAL-ASSET-ADOPTION
 registered_at: 2026-06-20T01:04:15+09:00
 created_at: 2026-06-20T01:04:15+09:00
-updated_at: 2026-06-20T01:04:15+09:00
+updated_at: 2026-06-20T04:42:00+09:00
 title: Dependency / state-machine / live-agent graph upgrade (Dagre + d3-force)
-status: planned
+status: completed
+verification_status: passed
 priority: P1
 difficulty: L
 est_hours: 10
@@ -32,6 +33,13 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+verified_at: 2026-06-20T04:42:00+09:00
+verified_by: codex-interface-designer-task-ar-588-20260620
+evidence_refs:
+  - reviews/VERIFY-2026-06-20-task-ar-588-graph-layout.json
+resolution: done
+completed_at: 2026-06-20T04:42:00+09:00
+closed_by: codex-interface-designer-task-ar-588-20260620
 ---
 
 # TASK-AR-588 - Dependency / state-machine / live-agent graph upgrade (Dagre + d3-force)
@@ -55,3 +63,10 @@ tags:
 
 - `python -m pytest tests/test_ui_console.py tests/test_ui_console_e2e.py tests/test_design_system_gate.py -q`
 - `python scripts/design_system_gate.py --check --all-ui`
+
+## W4a Self Verification (2026-06-20T04:18:13+09:00)
+
+- Evidence: `reviews/VERIFY-2026-06-20-task-ar-588-graph-layout.json`.
+- Tests: `python -m pytest tests/test_ui_design_assets.py tests/test_ui_console.py tests/test_ui_console_e2e.py -q` -> `187 passed`.
+- Design gate: `python scripts/design_system_gate.py --check --all-ui` -> pass.
+- Browser verification: desktop and mobile dependency/state-machine/live-map views loaded locally served Dagre/d3-force assets, rendered status icons, magnitude edges, health edges, and no horizontal overflow.

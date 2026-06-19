@@ -22,6 +22,9 @@ def test_ui_design_assets_classify_token_component_and_pattern_layers():
     assert classes["patternEvidencePanel"] == "pattern_component"
     assert classes["patternCommandBar"] == "pattern_component"
     assert classes["patternStateMachinePanelLegend"] == "pattern_component"
+    assert classes["patternSvgLayeredDagreLayout"] == "pattern_component"
+    assert classes["patternSvgForceAgentLayout"] == "pattern_component"
+    assert classes["graphStatusIconText"] == "ui_component"
     assert classes["patternAuditMeta"] == "pattern_component"
     assert classes["patternSurfaceMeta"] == "pattern_component"
 
@@ -54,6 +57,9 @@ def test_ui_component_bundle_is_served_in_console_js(tmp_path):
     assert "function patternEvidencePanel" in js
     assert "function patternCommandBar" in js
     assert "function patternStateMachinePanelLegend" in js
+    assert "function patternSvgLayeredDagreLayout" in js
+    assert "function patternSvgForceAgentLayout" in js
+    assert "function graphStatusIconText" in js
     assert "function renderAuditMeta(content)" in js
     assert "function renderSurfaceMeta(content)" in js
 
@@ -96,6 +102,49 @@ def test_promoted_pattern_helpers_are_called_by_console_renderers():
     assert "patternEvidencePanel(errors" in source
     assert "host.innerHTML = patternCommandBar(rows);" in source
     assert "legend.innerHTML = patternStateMachinePanelLegend();" in source
+    assert "patternSvgLayeredDagreLayout(nodes, edges" in source
+
+
+def test_layered_graph_helper_uses_vendored_dagre_and_d3_force_boundary(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+
+    assert "/vendor/dagre/3.0.0/dagre.min.js" in html
+    assert "/vendor/d3-quadtree/3.0.1/d3-quadtree.min.js" in html
+    assert "/vendor/d3-dispatch/3.0.1/d3-dispatch.min.js" in html
+    assert "/vendor/d3-timer/3.0.1/d3-timer.min.js" in html
+    assert "/vendor/d3-force/3.0.0/d3-force.min.js" in html
+    assert html.index("/vendor/dagre/3.0.0/dagre.min.js") < html.index("/app.js")
+    assert html.index("/vendor/d3-quadtree/3.0.1/d3-quadtree.min.js") < html.index("/vendor/d3-force/3.0.0/d3-force.min.js")
+
+    assert "@dagrejs/dagre 3.0.0" in js
+    assert "function graphDagreRuntime()" in js
+    assert "runtime.layout(graph)" in js
+    assert "engine: \"@dagrejs/dagre\"" in js
+    assert "/vendor/d3-force/3.0.0/d3-force.min.js" in js
+    assert "function graphD3ForceRuntime()" in js
+    assert "runtime.forceSimulation(simNodes)" in js
+    assert "http://unpkg.com" not in js
+    assert "https://unpkg.com" not in js
+
+
+def test_vendored_graph_library_files_are_present_and_licensed():
+    vendor = ROOT / "src" / "agent_runtime" / "vendor"
+    required = {
+        "dagre/3.0.0/dagre.min.js": "var dagre=",
+        "dagre/3.0.0/LICENSE": "MIT",
+        "d3-quadtree/3.0.1/d3-quadtree.min.js": "quadtree",
+        "d3-quadtree/3.0.1/LICENSE": "Copyright",
+        "d3-dispatch/3.0.1/d3-dispatch.min.js": "dispatch",
+        "d3-dispatch/3.0.1/LICENSE": "Copyright",
+        "d3-timer/3.0.1/d3-timer.min.js": "timer",
+        "d3-timer/3.0.1/LICENSE": "Copyright",
+        "d3-force/3.0.0/d3-force.min.js": "forceSimulation",
+        "d3-force/3.0.0/LICENSE": "Copyright",
+    }
+    for rel_path, marker in required.items():
+        body = (vendor / rel_path).read_text(encoding="utf-8")
+        assert marker in body, rel_path
 
 
 # ----- TASK-AR-587: Agent avatar (experimental) -----

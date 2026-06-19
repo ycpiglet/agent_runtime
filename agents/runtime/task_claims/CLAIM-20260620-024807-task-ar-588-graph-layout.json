@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-588:tab-01",
   "pane_id": "codex-interface-designer-task-ar-588",
   "mode": "implement",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-VISUAL-ASSET-ADOPTION",
   "active_scope": "TASKSET-AR-VISUAL-ASSET-ADOPTION",
   "scope_transition_approved": false,
@@ -27,12 +27,12 @@
   "worktree_path": ".worktrees/TASK-AR-588",
   "branch": "codex/task-ar-588-graph-layout",
   "claimed_at": "2026-06-20T02:48:07+09:00",
-  "last_heartbeat": "2026-06-20T02:48:07+09:00",
-  "updated_at": "2026-06-20T02:48:07+09:00",
+  "last_heartbeat": "2026-06-20T04:27:57+09:00",
+  "updated_at": "2026-06-20T04:27:57+09:00",
   "expires_at": "2026-06-20T06:48:07+09:00",
   "lease": {
     "claimed_at": "2026-06-20T02:48:07+09:00",
-    "heartbeat_at": "2026-06-20T02:48:07+09:00",
+    "heartbeat_at": "2026-06-20T04:27:57+09:00",
     "expires_at": "2026-06-20T06:48:07+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260620-024807-task-ar-588-graph-layout.handoff.md",
@@ -43,5 +43,9 @@
     "src/agent_runtime/ui_console_assets.py",
     "src/agent_runtime/ui_design_assets.py",
     "tests/test_ui_console.py"
-  ]
+  ],
+  "released_at": "2026-06-20T04:27:57+09:00",
+  "verified_by": "codex-w4b-task-ar-588-reverify-20260620",
+  "verifier_role": "independent-w4b",
+  "verification_evidence": "reviews/W4B-2026-06-20-TASK-AR-588-REVERIFY.md"
 }

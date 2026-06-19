@@ -25,8 +25,42 @@ HTML = ui_console_assets.HTML
 CSS = ui_console_assets.CSS
 JS = ui_console_assets.JS
 
+_PACKAGE_ROOT = Path(__file__).resolve().parent
+_VENDOR_ASSETS: dict[str, tuple[Path, str]] = {
+    "/vendor/dagre/3.0.0/dagre.min.js": (
+        _PACKAGE_ROOT / "vendor" / "dagre" / "3.0.0" / "dagre.min.js",
+        "application/javascript; charset=utf-8",
+    ),
+    "/vendor/d3-quadtree/3.0.1/d3-quadtree.min.js": (
+        _PACKAGE_ROOT / "vendor" / "d3-quadtree" / "3.0.1" / "d3-quadtree.min.js",
+        "application/javascript; charset=utf-8",
+    ),
+    "/vendor/d3-dispatch/3.0.1/d3-dispatch.min.js": (
+        _PACKAGE_ROOT / "vendor" / "d3-dispatch" / "3.0.1" / "d3-dispatch.min.js",
+        "application/javascript; charset=utf-8",
+    ),
+    "/vendor/d3-timer/3.0.1/d3-timer.min.js": (
+        _PACKAGE_ROOT / "vendor" / "d3-timer" / "3.0.1" / "d3-timer.min.js",
+        "application/javascript; charset=utf-8",
+    ),
+    "/vendor/d3-force/3.0.0/d3-force.min.js": (
+        _PACKAGE_ROOT / "vendor" / "d3-force" / "3.0.0" / "d3-force.min.js",
+        "application/javascript; charset=utf-8",
+    ),
+}
+
 def _bytes(text: str) -> bytes:
     return text.encode("utf-8")
+
+
+def _vendor_asset_response(request_path: str) -> ConsoleResponse | None:
+    entry = _VENDOR_ASSETS.get(request_path)
+    if entry is None:
+        return None
+    path, content_type = entry
+    if not path.is_file():
+        return ConsoleResponse(404, "text/plain; charset=utf-8", b"vendor asset missing\n")
+    return ConsoleResponse(200, content_type, path.read_bytes())
 
 
 def _json_response(payload: object, status: int = 200) -> ConsoleResponse:
@@ -229,6 +263,9 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         return ConsoleResponse(200, "text/css; charset=utf-8", _bytes(CSS))
     if request_path == "/app.js":
         return ConsoleResponse(200, "application/javascript; charset=utf-8", _bytes(JS))
+    vendor_response = _vendor_asset_response(request_path)
+    if vendor_response is not None:
+        return vendor_response
     if request_path == "/api/state":
         return _json_response(ui_state.build_state(root_path))
     if request_path == "/api/inbox":

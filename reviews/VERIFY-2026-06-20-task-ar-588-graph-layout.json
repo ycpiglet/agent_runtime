@@ -1,0 +1,197 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-20-task-ar-588-graph-layout",
+  "work_id": "TASK-AR-588",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-588.md",
+  "kind": "task",
+  "task_id": "TASK-AR-588",
+  "unit_ids": [
+    "UNIT-TASK-AR-588-001",
+    "UNIT-TASK-AR-588-002"
+  ],
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-20T04:18:13+09:00",
+  "verified_by": "codex-interface-designer-task-ar-588-20260620",
+  "claim_id": "CLAIM-20260620-024807-task-ar-588-graph-layout",
+  "summary": "TASK-AR-588 replaces ad hoc dependency/state-machine/live-map graph positioning with locally served vendored Dagre/d3-force runtime layout engines, token-driven SVG helpers, status badges, magnitude edges, health edges, and a mobile layout overflow guard.",
+  "implemented": [
+    "Vendored @dagrejs/dagre 3.0.0 under src/agent_runtime/vendor/dagre/3.0.0 and served /vendor/dagre/3.0.0/dagre.min.js from ui_console.py.",
+    "Vendored d3-force 3.0.0 plus UMD dependencies d3-quadtree 3.0.1, d3-dispatch 3.0.1, and d3-timer 3.0.1 under src/agent_runtime/vendor and served them from ui_console.py.",
+    "Added patternSvgLayeredDagreLayout for dependency and state-machine SVG layout; it now prefers the actual window.dagre runtime and falls back only if the vendored runtime is unavailable.",
+    "Added patternSvgForceAgentLayout for live agent map SVG layout; it now prefers the actual window.d3.forceSimulation runtime and falls back only if the vendored runtime is unavailable.",
+    "Added graphStatusIconText and shared graph health/magnitude/status helpers.",
+    "Rendered dependency, state-machine, and live-map edges with magnitude and health token classes.",
+    "Rendered per-node status badges/icons so status is not color-only.",
+    "Added .layout > * min/max width guard after browser verification exposed mobile horizontal overflow from intrinsic grid widths."
+  ],
+  "license_and_asset_boundary": [
+    {
+      "name": "@dagrejs/dagre",
+      "version": "3.0.0",
+      "license": "MIT",
+      "artifact_reference": "src/agent_runtime/vendor/dagre/3.0.0/dagre.min.js",
+      "runtime_boundary": "No CDN runtime dependency; ui_console.py serves the package-local UMD file at /vendor/dagre/3.0.0/dagre.min.js before /app.js, and ui_design_assets.py calls runtime.layout(graph)."
+    },
+    {
+      "name": "d3-force",
+      "version": "3.0.0",
+      "license": "ISC",
+      "artifact_reference": "src/agent_runtime/vendor/d3-force/3.0.0/d3-force.min.js",
+      "runtime_boundary": "No CDN runtime dependency; ui_console.py serves d3-quadtree, d3-dispatch, d3-timer, and d3-force UMD files before /app.js, and ui_design_assets.py calls runtime.forceSimulation(simNodes)."
+    }
+  ],
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_ui_design_assets.py tests/test_ui_console.py tests/test_ui_console_e2e.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "187 passed in 117.89s",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/state_sync_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "state-sync-gate: pass; findings=0 block=0 watch=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-VISUAL-ASSET-ADOPTION --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "taskset-work-gate: pass; findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "evidence-index: pass; findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/work_item_classifier.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "work-item-classifier: pass; findings=0",
+      "stderr": ""
+    }
+  ],
+  "served_asset_probe": {
+    "url": "http://127.0.0.1:8878",
+    "vendor_assets": {
+      "/vendor/dagre/3.0.0/dagre.min.js": {
+        "served": true,
+        "bytes": 40949
+      },
+      "/vendor/d3-quadtree/3.0.1/d3-quadtree.min.js": {
+        "served": true,
+        "bytes": 5279
+      },
+      "/vendor/d3-dispatch/3.0.1/d3-dispatch.min.js": {
+        "served": true,
+        "bytes": 1901
+      },
+      "/vendor/d3-timer/3.0.1/d3-timer.min.js": {
+        "served": true,
+        "bytes": 1947
+      },
+      "/vendor/d3-force/3.0.0/d3-force.min.js": {
+        "served": true,
+        "bytes": 8300
+      }
+    },
+    "runtime_globals": {
+      "dagre": true,
+      "dagre_version": "3.0.0",
+      "d3_force": true,
+      "d3_dependencies": true
+    },
+    "app_js": {
+      "patternSvgLayeredDagreLayout": true,
+      "patternSvgForceAgentLayout": true,
+      "appendSvgStatusBadge": true,
+      "graphDagreRuntime": true,
+      "graphD3ForceRuntime": true
+    },
+    "app_css": {
+      "layoutOverflowGuard": true,
+      "depMagnitude": true,
+      "stateMachineHealth": true,
+      "liveMapHealth": true
+    }
+  },
+  "browser_verification": {
+    "tooling": "Python Playwright against local Chrome after in-app Browser reported unavailable: iab",
+    "desktop": {
+      "dependencies": {
+        "overflow": false,
+        "nodes": 271,
+        "edges": 57,
+        "status_icons": 271,
+        "magnitude_edges": 57,
+        "health_edges": 57,
+        "screenshot": "C:/Users/ycpig/AppData/Local/Temp/task-ar-588-vendored-desktop-dependencies.png"
+      },
+      "state_machines": {
+        "overflow": false,
+        "nodes": 3,
+        "edges": 3,
+        "status_icons": 3,
+        "magnitude_edges": 3,
+        "health_edges": 3,
+        "screenshot": "C:/Users/ycpig/AppData/Local/Temp/task-ar-588-vendored-desktop-statemachines.png"
+      },
+      "live_map": {
+        "overflow": false,
+        "nodes": 67,
+        "edges": 244,
+        "status_icons": 67,
+        "magnitude_edges": 244,
+        "health_edges": 244,
+        "screenshot": "C:/Users/ycpig/AppData/Local/Temp/task-ar-588-vendored-desktop-map.png"
+      }
+    },
+    "mobile": {
+      "dependencies": {
+        "overflow": false,
+        "client_width": 390,
+        "scroll_width": 390,
+        "nodes": 271,
+        "edges": 57,
+        "status_icons": 271,
+        "screenshot": "C:/Users/ycpig/AppData/Local/Temp/task-ar-588-vendored-mobile-dependencies.png"
+      },
+      "state_machines": {
+        "overflow": false,
+        "client_width": 390,
+        "scroll_width": 390,
+        "nodes": 3,
+        "edges": 3,
+        "status_icons": 3,
+        "screenshot": "C:/Users/ycpig/AppData/Local/Temp/task-ar-588-vendored-mobile-statemachines.png"
+      },
+      "live_map": {
+        "overflow": false,
+        "client_width": 390,
+        "scroll_width": 390,
+        "nodes": 67,
+        "edges": 244,
+        "status_icons": 67,
+        "screenshot": "C:/Users/ycpig/AppData/Local/Temp/task-ar-588-vendored-mobile-map.png"
+      }
+    },
+    "console_issues": []
+  },
+  "known_watch": [
+    "The existing /api/work-state E2E route now takes about 60.5s cold in this checkout, so tests/test_ui_console_e2e.py default HTTP timeout was raised from 45s to 90s. This is a follow-up performance candidate, not a graph-rendering failure."
+  ]
+}

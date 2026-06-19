@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-20T01:04:25+09:00",
+  "generated_at": "2026-06-20T04:20:07+09:00",
   "record_count": 358,
   "finding_count": 0,
   "findings": [],
@@ -3853,7 +3853,7 @@
       "title": "Replace the hand-rolled graph layout with proper layout engines: Dagre (MIT, layered/…",
       "path": "agents/lead_engineer/tasks/TASK-AR-588.md",
       "parent_id": "TASKSET-AR-VISUAL-ASSET-ADOPTION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-588-001",
@@ -3864,7 +3864,7 @@
       "title": "UNIT-TASK-AR-588-001 - Vendor Dagre + layered DAG renderer for dependency/state-machine",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-588/UNIT-TASK-AR-588-001.md",
       "parent_id": "TASK-AR-588",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-588-002",
@@ -3875,7 +3875,7 @@
       "title": "UNIT-TASK-AR-588-002 - Vendor d3-force + live agent map renderer",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-588/UNIT-TASK-AR-588-002.md",
       "parent_id": "TASK-AR-588",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-589",

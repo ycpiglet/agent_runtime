@@ -297,6 +297,401 @@ function patternStateMachinePanelLegend() {
   ].join("");
 }
 
+/* ===== Pattern component: Layered SVG graph layout (TASK-AR-588) ==========
+ * patternSvgLayeredDagreLayout(nodes, edges, options) uses vendored
+ * @dagrejs/dagre 3.0.0 (MIT, /vendor/dagre/3.0.0/dagre.min.js) when the
+ * browser has loaded it, then returns node coordinates plus edge routes for
+ * our own token-driven SVG renderer. The fallback path is only for missing
+ * vendor assets during local development; production console HTML loads the
+ * vendored script before /app.js.
+ * Maturity tier: experimental.
+ */
+function graphEdgeKey(edge, index) {
+  return edge && edge.id ? String(edge.id) : `${edge && edge.from ? edge.from : "from"}->${edge && edge.to ? edge.to : "to"}:${index}`;
+}
+
+function graphSignalToken(value, fallback = "neutral") {
+  const text = String(value || "").toLowerCase();
+  if (["pass", "success", "done", "completed", "released", "verified"].includes(text)) return "pass";
+  if (["block", "blocked", "danger", "failed", "error", "cycle"].includes(text)) return "block";
+  if (["watch", "warning", "warn", "missing", "stale", "pending", "in_progress"].includes(text)) return "watch";
+  if (["info", "current", "path", "parent", "dependency"].includes(text)) return "info";
+  return fallback;
+}
+
+function graphStatusIconText(signal) {
+  const token = graphSignalToken(signal);
+  if (token === "pass") return "P";
+  if (token === "watch") return "W";
+  if (token === "block") return "B";
+  if (token === "info") return "I";
+  return "N";
+}
+
+function graphNodeSignal(node, fallback = "info") {
+  if (node && node.in_cycle) return "block";
+  return graphSignalToken(
+    (node && (node.signal_token || node.signal || node.status_bucket || node.status || node.kind)) || "",
+    fallback
+  );
+}
+
+function graphEdgeHealth(edge, fallback = "neutral") {
+  if (edge && edge.in_cycle) return "block";
+  return graphSignalToken(
+    (edge && (edge.health || edge.signal || edge.status || edge.kind)) || "",
+    fallback
+  );
+}
+
+function graphEdgeMagnitudeBucket(edge) {
+  const value = Number((edge && (edge.magnitude || edge.weight || edge.count)) || 1);
+  if (value >= 5) return "high";
+  if (value >= 2) return "medium";
+  return "low";
+}
+
+function svgLayeredEdgePath(points) {
+  const route = points || [];
+  if (!route.length) return "";
+  return route.map((point, index) => `${index === 0 ? "M" : "L"} ${Math.round(point.x)} ${Math.round(point.y)}`).join(" ");
+}
+
+function graphDagreRuntime() {
+  const root = typeof globalThis !== "undefined" ? globalThis : (typeof window !== "undefined" ? window : null);
+  const runtime = root && root.dagre;
+  return runtime && runtime.graphlib && typeof runtime.layout === "function" ? runtime : null;
+}
+
+function graphScalePoint(point, transform) {
+  return {
+    x: transform.offsetX + (Number(point.x) || 0) * transform.scale,
+    y: transform.offsetY + (Number(point.y) || 0) * transform.scale,
+  };
+}
+
+function graphDagreNodeBox(node) {
+  if (node && node.kind === "parent") return { width: 70, height: 42 };
+  if (node && node.kind === "missing") return { width: 62, height: 38 };
+  if (node && node.score) return { width: 92, height: 56 };
+  return { width: 64, height: 42 };
+}
+
+function patternSvgLayeredDagreRuntimeLayout(nodes, edges, options, ids) {
+  const runtime = graphDagreRuntime();
+  if (!runtime) return null;
+  try {
+    const width = Number(options.width || 1000);
+    const height = Number(options.height || 600);
+    const marginX = Number(options.marginX || 90);
+    const marginY = Number(options.marginY || 70);
+    const rankdir = String(options.rankdir || "TB").toUpperCase();
+    const graph = new runtime.graphlib.Graph({ multigraph: true })
+      .setGraph({
+        rankdir,
+        marginx: marginX,
+        marginy: marginY,
+        nodesep: Number(options.nodesep || 56),
+        ranksep: Number(options.ranksep || 76),
+      })
+      .setDefaultEdgeLabel(() => ({ minlen: 1, weight: 1 }));
+    nodes.forEach((node) => {
+      const box = graphDagreNodeBox(node);
+      graph.setNode(String(node.id), box);
+    });
+    edges.forEach((edge, index) => {
+      const from = String(edge.from);
+      const to = String(edge.to);
+      if (!ids.has(from) || !ids.has(to)) return;
+      graph.setEdge(from, to, {
+        minlen: Number(edge.minlen || 1),
+        weight: Math.max(1, Number(edge.weight || edge.magnitude || 1)),
+      }, graphEdgeKey(edge, index));
+    });
+    runtime.layout(graph);
+    const graphBox = graph.graph() || {};
+    const layoutWidth = Math.max(Number(graphBox.width || width), 1);
+    const layoutHeight = Math.max(Number(graphBox.height || height), 1);
+    const availableWidth = Math.max(width - marginX * 2, 1);
+    const availableHeight = Math.max(height - marginY * 2, 1);
+    const scale = Math.min(availableWidth / layoutWidth, availableHeight / layoutHeight);
+    const transform = {
+      scale: Number.isFinite(scale) && scale > 0 ? scale : 1,
+      offsetX: (width - layoutWidth * (Number.isFinite(scale) && scale > 0 ? scale : 1)) / 2,
+      offsetY: (height - layoutHeight * (Number.isFinite(scale) && scale > 0 ? scale : 1)) / 2,
+    };
+    const positions = {};
+    graph.nodes().forEach((id) => {
+      positions[String(id)] = graphScalePoint(graph.node(id), transform);
+    });
+    const edgeRoutes = {};
+    edges.forEach((edge, index) => {
+      const key = graphEdgeKey(edge, index);
+      const route = graph.edge({ v: String(edge.from), w: String(edge.to), name: key });
+      if (route && Array.isArray(route.points) && route.points.length) {
+        edgeRoutes[key] = route.points.map((point) => graphScalePoint(point, transform));
+      }
+    });
+    return { positions, edgeRoutes, ranks: {}, rankdir, engine: "@dagrejs/dagre" };
+  } catch (error) {
+    return null;
+  }
+}
+
+function patternSvgLayeredDagreLayout(nodes, edges, options = {}) {
+  const list = (nodes || []).filter((node) => node && node.id);
+  const links = (edges || []).filter((edge) => edge && edge.from && edge.to);
+  const ids = new Set(list.map((node) => String(node.id)));
+  const runtimeLayout = patternSvgLayeredDagreRuntimeLayout(list, links, options, ids);
+  if (runtimeLayout) return runtimeLayout;
+  const incoming = {};
+  const outgoing = {};
+  list.forEach((node) => {
+    const id = String(node.id);
+    incoming[id] = [];
+    outgoing[id] = [];
+  });
+  links.forEach((edge, index) => {
+    const from = String(edge.from);
+    const to = String(edge.to);
+    if (!ids.has(from) || !ids.has(to)) return;
+    outgoing[from].push({ edge, to, index });
+    incoming[to].push({ edge, from, index });
+  });
+
+  const rank = {};
+  const queue = list
+    .filter((node) => !incoming[String(node.id)].length)
+    .map((node) => String(node.id))
+    .sort();
+  if (!queue.length) list.forEach((node) => queue.push(String(node.id)));
+  queue.forEach((id) => { rank[id] = 0; });
+  const seen = new Set();
+  while (queue.length) {
+    const current = queue.shift();
+    if (!current || seen.has(current)) continue;
+    seen.add(current);
+    (outgoing[current] || []).forEach((entry) => {
+      rank[entry.to] = Math.max(rank[entry.to] || 0, (rank[current] || 0) + 1);
+      if (!seen.has(entry.to)) queue.push(entry.to);
+    });
+  }
+  list.forEach((node, index) => {
+    const id = String(node.id);
+    if (rank[id] === undefined) rank[id] = index;
+  });
+
+  const layers = {};
+  list.forEach((node) => {
+    const id = String(node.id);
+    const key = String(rank[id] || 0);
+    if (!layers[key]) layers[key] = [];
+    layers[key].push(node);
+  });
+  const rankKeys = Object.keys(layers).map(Number).sort((a, b) => a - b);
+  const width = Number(options.width || 1000);
+  const height = Number(options.height || 600);
+  const marginX = Number(options.marginX || 90);
+  const marginY = Number(options.marginY || 70);
+  const rankdir = String(options.rankdir || "TB").toUpperCase();
+  const positions = {};
+  const layerCount = Math.max(rankKeys.length, 1);
+
+  rankKeys.forEach((rankKey, layerIndex) => {
+    const layer = layers[String(rankKey)].sort((a, b) => String(a.id).localeCompare(String(b.id)));
+    const spanPrimary = rankdir === "LR" ? width - marginX * 2 : height - marginY * 2;
+    const spanSecondary = rankdir === "LR" ? height - marginY * 2 : width - marginX * 2;
+    const primary = layerCount === 1 ? spanPrimary / 2 : (spanPrimary / Math.max(layerCount - 1, 1)) * layerIndex;
+    layer.forEach((node, orderIndex) => {
+      const secondary = layer.length === 1
+        ? spanSecondary / 2
+        : (spanSecondary / Math.max(layer.length - 1, 1)) * orderIndex;
+      positions[String(node.id)] = rankdir === "LR"
+        ? { x: marginX + primary, y: marginY + secondary }
+        : { x: marginX + secondary, y: marginY + primary };
+    });
+  });
+
+  const edgeRoutes = {};
+  links.forEach((edge, index) => {
+    const a = positions[String(edge.from)];
+    const b = positions[String(edge.to)];
+    if (!a || !b) return;
+    const key = graphEdgeKey(edge, index);
+    if (rankdir === "LR") {
+      const midX = (a.x + b.x) / 2;
+      edgeRoutes[key] = [{ x: a.x, y: a.y }, { x: midX, y: a.y }, { x: midX, y: b.y }, { x: b.x, y: b.y }];
+    } else {
+      const midY = (a.y + b.y) / 2;
+      edgeRoutes[key] = [{ x: a.x, y: a.y }, { x: a.x, y: midY }, { x: b.x, y: midY }, { x: b.x, y: b.y }];
+    }
+  });
+
+  return { positions, edgeRoutes, ranks: rank, rankdir };
+}
+
+/* ===== Pattern component: Force SVG graph layout (TASK-AR-588) ============
+ * patternSvgForceAgentLayout(nodes, edges, options) uses vendored d3-force
+ * 3.0.0 (ISC, /vendor/d3-force/3.0.0/d3-force.min.js) plus its d3 UMD
+ * dependencies when loaded by the console HTML. It keeps deterministic seed
+ * positions and runs a stopped simulation for a fixed tick count.
+ * Maturity tier: experimental.
+ */
+function graphD3ForceRuntime() {
+  const root = typeof globalThis !== "undefined" ? globalThis : (typeof window !== "undefined" ? window : null);
+  const runtime = root && root.d3;
+  return runtime
+    && typeof runtime.forceSimulation === "function"
+    && typeof runtime.forceLink === "function"
+    && typeof runtime.forceManyBody === "function"
+    ? runtime
+    : null;
+}
+
+function patternSvgForceD3Layout(nodes, edges, options = {}) {
+  const runtime = graphD3ForceRuntime();
+  if (!runtime) return null;
+  try {
+    const list = (nodes || []).filter((node) => node && node.id);
+    const links = (edges || []).filter((edge) => edge && edge.from && edge.to);
+    const width = Number(options.width || 1000);
+    const height = Number(options.height || 600);
+    const cx = width / 2;
+    const cy = height / 2;
+    const margin = Number(options.margin || 64);
+    const ticks = Number(options.ticks || 72);
+    const targetDistance = Number(options.linkDistance || 150);
+    const radial = liveMapSeedPositions(list, width, height);
+    const simNodes = list.map((node) => {
+      const seed = radial[String(node.id)] || { x: cx, y: cy };
+      return { ...node, id: String(node.id), x: seed.x, y: seed.y, vx: 0, vy: 0 };
+    });
+    const simLinks = links.map((edge) => ({ ...edge, source: String(edge.from), target: String(edge.to) }));
+    const simulation = runtime.forceSimulation(simNodes)
+      .stop()
+      .force("link", runtime.forceLink(simLinks).id((node) => String(node.id)).distance(targetDistance).strength(0.18))
+      .force("charge", runtime.forceManyBody().strength(-Math.max(20, Math.sqrt(Number(options.repulsion || 1800)) * 1.4)))
+      .force("collide", runtime.forceCollide().radius((node) => node.kind === "owner" ? 42 : 30).strength(0.72))
+      .force("center", runtime.forceCenter(cx, cy + 24).strength(0.18))
+      .force("x", runtime.forceX((node) => node.kind === "owner" ? cx : cx).strength((node) => node.kind === "owner" ? 0.12 : 0.018))
+      .force("y", runtime.forceY((node) => node.kind === "owner" ? margin + 24 : cy + 24).strength((node) => node.kind === "owner" ? 0.14 : 0.018))
+      .velocityDecay(Math.max(0.05, Math.min(0.95, 1 - Number(options.damping || 0.72))));
+    simulation.tick(Math.max(1, ticks));
+    simulation.stop();
+    const positions = {};
+    simNodes.forEach((node) => {
+      positions[String(node.id)] = {
+        x: Math.max(margin, Math.min(width - margin, Number(node.x) || cx)),
+        y: Math.max(margin, Math.min(height - margin, Number(node.y) || cy)),
+      };
+    });
+    return positions;
+  } catch (error) {
+    return null;
+  }
+}
+
+function patternSvgForceAgentLayout(nodes, edges, options = {}) {
+  const list = (nodes || []).filter((node) => node && node.id);
+  const links = (edges || []).filter((edge) => edge && edge.from && edge.to);
+  const d3Layout = patternSvgForceD3Layout(list, links, options);
+  if (d3Layout) return d3Layout;
+  const width = Number(options.width || 1000);
+  const height = Number(options.height || 600);
+  const cx = width / 2;
+  const cy = height / 2;
+  const margin = Number(options.margin || 64);
+  const ticks = Number(options.ticks || 72);
+  const repulsion = Number(options.repulsion || 1800);
+  const spring = Number(options.spring || 0.035);
+  const damping = Number(options.damping || 0.72);
+  const targetDistance = Number(options.linkDistance || 150);
+  const positions = {};
+  const velocity = {};
+  const radial = liveMapSeedPositions(list, width, height);
+
+  list.forEach((node) => {
+    const seed = radial[String(node.id)] || { x: cx, y: cy };
+    positions[String(node.id)] = { x: seed.x, y: seed.y };
+    velocity[String(node.id)] = { x: 0, y: 0 };
+  });
+
+  for (let tick = 0; tick < ticks; tick += 1) {
+    for (let i = 0; i < list.length; i += 1) {
+      for (let j = i + 1; j < list.length; j += 1) {
+        const aId = String(list[i].id);
+        const bId = String(list[j].id);
+        const a = positions[aId];
+        const b = positions[bId];
+        let dx = a.x - b.x;
+        let dy = a.y - b.y;
+        let distSq = dx * dx + dy * dy;
+        if (distSq < 1) {
+          dx = (i + 1) * 0.7;
+          dy = (j + 1) * 0.5;
+          distSq = dx * dx + dy * dy;
+        }
+        const force = repulsion / distSq;
+        velocity[aId].x += dx * force;
+        velocity[aId].y += dy * force;
+        velocity[bId].x -= dx * force;
+        velocity[bId].y -= dy * force;
+      }
+    }
+
+    links.forEach((edge) => {
+      const a = positions[String(edge.from)];
+      const b = positions[String(edge.to)];
+      if (!a || !b) return;
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const dist = Math.max(Math.sqrt(dx * dx + dy * dy), 1);
+      const pull = (dist - targetDistance) * spring;
+      const fx = (dx / dist) * pull;
+      const fy = (dy / dist) * pull;
+      velocity[String(edge.from)].x += fx;
+      velocity[String(edge.from)].y += fy;
+      velocity[String(edge.to)].x -= fx;
+      velocity[String(edge.to)].y -= fy;
+    });
+
+    list.forEach((node) => {
+      const id = String(node.id);
+      const pos = positions[id];
+      const vel = velocity[id];
+      const anchorStrength = node.kind === "owner" ? 0.08 : 0.015;
+      const anchor = node.kind === "owner" ? { x: cx, y: margin + 24 } : { x: cx, y: cy + 24 };
+      vel.x += (anchor.x - pos.x) * anchorStrength;
+      vel.y += (anchor.y - pos.y) * anchorStrength;
+      vel.x *= damping;
+      vel.y *= damping;
+      pos.x = Math.max(margin, Math.min(width - margin, pos.x + vel.x));
+      pos.y = Math.max(margin, Math.min(height - margin, pos.y + vel.y));
+    });
+  }
+
+  return positions;
+}
+
+function liveMapSeedPositions(nodes, width = 1000, height = 600) {
+  const positions = {};
+  const cx = width / 2;
+  const cy = height / 2;
+  const owner = nodes.find((node) => node.kind === "owner");
+  if (owner) positions[String(owner.id)] = { x: cx, y: 76 };
+  const ring = nodes.filter((node) => node.kind !== "owner").sort((a, b) => String(a.id).localeCompare(String(b.id)));
+  const radiusX = Math.min(300, width * 0.32);
+  const radiusY = Math.min(210, height * 0.30);
+  ring.forEach((node, index) => {
+    const angle = (index / Math.max(ring.length, 1)) * Math.PI * 2 - Math.PI / 2;
+    positions[String(node.id)] = {
+      x: cx + Math.cos(angle) * radiusX,
+      y: cy + 44 + Math.sin(angle) * radiusY,
+    };
+  });
+  return positions;
+}
+
 /* ===== Pattern component: Agent avatar (TASK-AR-587, experimental) ========
  * patternAgentAvatar(seed, options) - deterministic seeded SVG avatar.
  * Algorithm: self-authored geometric generator (MIT/CC0-clean, no third-party
@@ -554,6 +949,9 @@ ASSETIZATION_CLASSES = {
     "patternEvidencePanel": "pattern_component",
     "patternCommandBar": "pattern_component",
     "patternStateMachinePanelLegend": "pattern_component",
+    "patternSvgLayeredDagreLayout": "pattern_component",
+    "patternSvgForceAgentLayout": "pattern_component",
+    "graphStatusIconText": "ui_component",
     "patternAuditMeta": "pattern_component",
     "patternSurfaceMeta": "pattern_component",
     "patternAgentAvatar": "pattern_component",
