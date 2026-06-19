@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-20T00:25:52+09:00
+generated_at: 2026-06-20T00:52:04+09:00
 record_count: 400
 ---
 
@@ -437,7 +437,7 @@ record_count: 400
 | 28.1 | Taskset 28.1 | taskset | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | `INIT-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | active | `BACKLOG-BOARD.md` | Taskset Board Evidence And Performance IA |
 | 28.1.1 | Task 28.1.1 | task | `TASK-AR-616` | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | completed | `agents/lead_engineer/tasks/TASK-AR-616.md` | Create a lead-designer seminar artifact that chooses the next Taskset Board IA direct… |
 | 28.1.1.1 | Unit 28.1.1.1 | unit | `UNIT-TASK-AR-616-001` | `TASK-AR-616` | completed | `agents/lead_engineer/tasks/units/TASK-AR-616/UNIT-TASK-AR-616-001.md` | UNIT-TASK-AR-616-001 - Run evidence overload and performance IA lead-designer seminar |
-| 28.1.2 | Task 28.1.2 | task | `TASK-AR-617` | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | planned | `agents/lead_engineer/tasks/TASK-AR-617.md` | Promote the seminar decision into an accepted design-direction RFC that names the exa… |
+| 28.1.2 | Task 28.1.2 | task | `TASK-AR-617` | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | completed | `agents/lead_engineer/tasks/TASK-AR-617.md` | Promote the seminar decision into an accepted design-direction RFC that names the exa… |
 | 28.1.3 | Task 28.1.3 | task | `TASK-AR-618` | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | planned | `agents/lead_engineer/tasks/TASK-AR-618.md` | Turn the accepted evidence/performance IA RFC into a source-mutation implementation r… |
 
 ## Risks / Blockers

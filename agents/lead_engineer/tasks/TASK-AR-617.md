@@ -9,9 +9,16 @@ kind: task
 parent_id: TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA
 registered_at: 2026-06-19T23:39:00+09:00
 created_at: 2026-06-19T23:39:00+09:00
-updated_at: 2026-06-19T23:39:00+09:00
+started_at: 2026-06-20T00:34:24+09:00
+updated_at: 2026-06-20T00:49:37+09:00
+verification_status: passed
+verified_at: 2026-06-20T00:44:00+09:00
+verified_by: independent-w4b-task-ar-617-20260620
+evidence_refs:
+  - reviews/VERIFY-2026-06-20-task-ar-617-rfc.json
+w4b_evidence: reviews/W4B-2026-06-20-TASK-AR-617.md
 title: Publish Taskset Board evidence and performance IA RFC
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 3
@@ -31,6 +38,11 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+resolution: done
+completed_at: 2026-06-20T00:49:37+09:00
+closed_by: codex-lead-designer-ar-617
+actual_hours: 3
+actual_tokens: 8000
 ---
 
 # TASK-AR-617 - Publish Taskset Board evidence and performance IA RFC
@@ -56,3 +68,15 @@ tags:
 - `python scripts/design_system_gate.py --check --all-ui`
 - `python scripts/evidence_index_generator.py --check`
 - `python scripts/ui_ux_cycle.py --root . propose --dry-run --json`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-20T00:49:37+09:00`
+- Resolution: `done`
+- Actual hours: `3`
+- Actual tokens: `8000`
+- Closed by: `codex-lead-designer-ar-617`
+- Evidence:
+  - `reviews/VERIFY-2026-06-20-task-ar-617-rfc.json`
+<!-- work-close:end -->
