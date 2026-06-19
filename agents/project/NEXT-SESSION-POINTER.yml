@@ -1,27 +1,21 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T18:20:00+09:00
+updated_at: 2026-06-19T19:15:00+09:00
 current_state:
-  summary: "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION is active; TASK-AR-611 is claimed to derive implementation and beta-evaluation units."
-  status: active
-  task_set_status: taskset_active
-  task_set_id: "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION"
+  summary: "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION is complete; the next UI step is to register and claim the Taskset Board Attention Workspace implementation/beta taskset."
+  status: idle
+  task_set_status: taskset_complete
+  task_set_id: none
   step_index: 5
   step_total: 5
-  progress_pct: 85
-  status_text: "TASK-AR-611 is claimed and preparing the source-mutation implementation registration plus paired beta/UX evaluation plan before any UI source mutation."
+  progress_pct: 100
+  status_text: "TASK-AR-611 is released and closed. Use agents/project/work-items/REGISTRATION-2026-06-19-taskset-board-attention-workspace-implementation.json for the next fresh W0-W6 source-mutation and beta-evaluation cycle."
 active_work:
-  current_agents:
-    - claim_id: "CLAIM-20260619-182000-task-ar-611-task-ar-611-implementation-beta"
-      agent_role: interface-designer
-      agent_instance_id: "codex-interface-designer-task-ar-611"
-      display_name: "codex-interface-designer-task-ar-611"
-      callsite_id: "terminal:wt-task-ar-611:tab-01"
-  current_teams:
-    - ui-ux
+  current_agents: []
+  current_teams: []
 resume:
-  active_task: TASK-AR-611
-  active_task_set: TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION
-  branch_policy: "Continue in .worktrees/TASK-AR-611-taskset-board-ia-implementation-beta on codex/task-ar-611-taskset-board-ia-implementation-beta; do not mutate UI source files in this planning task."
+  active_task: none
+  active_task_set: none
+  branch_policy: "No active UI claim. Register the follow-up taskset from agents/project/work-items/REGISTRATION-2026-06-19-taskset-board-attention-workspace-implementation.json, then create a fresh claim/worktree before mutating UI source."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."

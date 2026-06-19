@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-19
-archived_count: 269
+archived_count: 270
 ---
 
 # Archived Task Files
 
-- `269` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `270` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -282,3 +282,4 @@ archived_count: 269
 | `TASK-AR-607` | `3a55de67-6cf…` | `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` | completed | 2026-06-19T14:04:00+09:00 | 2026-06-19T14:07:00+09:00 | 2026-06-19T14:43:00+09:00 | 2026-06-19T14:43:00+09:00 | Fix BTC-OAG-CLAIM-MOBILE-001 by constraining Taskset Board, relation-panel, toolbar,… |
 | `TASK-AR-609` | `c01a0cfe-be2…` | `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` | completed | 2026-06-19T15:36:00+09:00 | 2026-06-19T15:39:11+09:00 | 2026-06-19T16:01:00+09:00 | 2026-06-19T16:01:00+09:00 | Create a lead-designer seminar artifact that chooses how the next Taskset Board desig… |
 | `TASK-AR-610` | `f31057dc-15b…` | `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` | completed | 2026-06-19T15:36:00+09:00 | 2026-06-19T16:14:00+09:00 | 2026-06-19T18:08:00+09:00 | 2026-06-19T18:08:00+09:00 | Promote the seminar decision into an accepted design-direction RFC that names the exa… |
+| `TASK-AR-611` | `8c371e62-109…` | `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` | completed | 2026-06-19T15:36:00+09:00 | - | 2026-06-19T19:12:00+09:00 | 2026-06-19T19:12:00+09:00 | Turn the accepted Taskset Board IA RFC into a source-mutation implementation registra… |

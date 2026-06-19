@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T18:07:49+09:00",
+  "generated_at": "2026-06-19T19:28:17+09:00",
   "record_count": 382,
   "finding_count": 0,
   "findings": [],
@@ -4161,7 +4161,7 @@
       "title": "Taskset Board IA Design Direction",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-609",
@@ -4205,7 +4205,7 @@
       "title": "Turn the accepted Taskset Board IA RFC into a source-mutation implementation registra…",
       "path": "agents/lead_engineer/tasks/TASK-AR-611.md",
       "parent_id": "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION",
-      "status": "planned"
+      "status": "completed"
     }
   ]
 }

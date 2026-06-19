@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-611:tab-01",
   "pane_id": "terminal:wt-task-ar-611:tab-01",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION",
   "active_scope": "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION",
   "scope_transition_approved": true,
@@ -19,20 +19,20 @@
   "model_tier": "worker_standard",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "implementation-beta-planning",
-  "progress_pct": 5,
-  "step_index": 1,
+  "phase": "taskset-completed",
+  "progress_pct": 100,
+  "step_index": 5,
   "step_total": 5,
-  "status_text": "Claimed TASK-AR-611 to derive Taskset Board IA implementation and beta units.",
+  "status_text": "TASK-AR-611 derived the Taskset Board Attention Workspace implementation registration plus beta/UX evaluation plan, passed W4B verification, and was released.",
   "worktree_path": ".worktrees/TASK-AR-611-taskset-board-ia-implementation-beta",
   "branch": "codex/task-ar-611-taskset-board-ia-implementation-beta",
   "claimed_at": "2026-06-19T18:20:00+09:00",
-  "last_heartbeat": "2026-06-19T18:20:00+09:00",
-  "updated_at": "2026-06-19T18:20:00+09:00",
+  "last_heartbeat": "2026-06-19T19:10:00+09:00",
+  "updated_at": "2026-06-19T19:10:00+09:00",
   "expires_at": "2026-06-19T22:20:00+09:00",
   "lease": {
     "claimed_at": "2026-06-19T18:20:00+09:00",
-    "heartbeat_at": "2026-06-19T18:20:00+09:00",
+    "heartbeat_at": "2026-06-19T19:10:00+09:00",
     "expires_at": "2026-06-19T22:20:00+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260619-182000-task-ar-611-task-ar-611-implementation-beta.handoff.md",
@@ -45,5 +45,9 @@
     "reviews/BETA-PLAN-2026-06-19-taskset-board-attention-workspace.md",
     "reviews/INDEX.md",
     "agents/lead_engineer/tasks/TASK-AR-611.md"
-  ]
+  ],
+  "released_at": "2026-06-19T19:10:00+09:00",
+  "verified_by": "codex-w4b-verifier-ar-611",
+  "verifier_role": "independent-w4b",
+  "verification_evidence": "reviews/W4B-2026-06-19-TASK-AR-611.md"
 }

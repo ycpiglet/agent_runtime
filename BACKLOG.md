@@ -35,14 +35,14 @@
 
 <!-- BACKLOG-INDEX:END -->
 
-## 2026-06-19 TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION active
+## 2026-06-19 TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION complete
 
-- Active task set: `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` is `2/3` done.
-- Completed tasks: `TASK-AR-609` / `UNIT-TASK-AR-609-001` produced the lead-designer Taskset Board IA seminar and `TASK-AR-610` published the accepted RFC; both passed W4b.
+- Completed task set: `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` is `3/3` done.
+- Completed tasks: `TASK-AR-609` / `UNIT-TASK-AR-609-001` produced the lead-designer Taskset Board IA seminar, `TASK-AR-610` published the accepted RFC, and `TASK-AR-611` derived the follow-up implementation registration plus beta/UX evaluation plan; all passed W4b.
 - Selected direction: `taskset_attention_workspace`, with command-palette switching as a supporting component rather than the primary design.
-- Remaining task: `TASK-AR-611` derives implementation and beta-evaluation units.
-- Evidence: `reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md`, `reviews/RFC-2026-06-19-taskset-board-ia-design-direction.md`, `reviews/W4B-2026-06-19-TASK-AR-609.md`, `reviews/W4B-2026-06-19-TASK-AR-610.md`.
-- Boundary: no active UI claim remains. Do not mutate UI source files until `TASK-AR-611` creates the follow-up implementation registration and a fresh implementation claim.
+- Next taskset candidate: `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE`, seeded by `agents/project/work-items/REGISTRATION-2026-06-19-taskset-board-attention-workspace-implementation.json`.
+- Evidence: `reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md`, `reviews/RFC-2026-06-19-taskset-board-ia-design-direction.md`, `reviews/PLAN-2026-06-19-taskset-board-attention-workspace-implementation.md`, `reviews/BETA-PLAN-2026-06-19-taskset-board-attention-workspace.md`, `reviews/W4B-2026-06-19-TASK-AR-609.md`, `reviews/W4B-2026-06-19-TASK-AR-610.md`, `reviews/W4B-2026-06-19-TASK-AR-611.md`.
+- Boundary: no active UI claim remains. Do not mutate UI source files until the follow-up implementation taskset is registered and a fresh implementation claim exists.
 
 ## 2026-06-19 TASKSET-AR-UI-UX-CYCLE-AUTOMATION complete
 

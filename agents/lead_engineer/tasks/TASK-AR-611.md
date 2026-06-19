@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION
 registered_at: 2026-06-19T15:36:00+09:00
 created_at: 2026-06-19T15:36:00+09:00
-updated_at: 2026-06-19T18:40:00+09:00
+started_at: 2026-06-19T18:20:00+09:00
+updated_at: 2026-06-19T19:12:00+09:00
 title: Derive Taskset Board IA implementation and beta units
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 3
@@ -40,6 +41,11 @@ verified_at: 2026-06-19T18:40:00+09:00
 verified_by: codex-interface-designer-task-ar-611
 evidence_refs:
   - reviews/VERIFY-2026-06-19-task-ar-611-20260619184000.json
+resolution: done
+completed_at: 2026-06-19T19:12:00+09:00
+closed_by: codex-interface-designer-task-ar-611
+actual_hours: 1.0
+actual_tokens: 12000
 ---
 
 # TASK-AR-611 - Derive Taskset Board IA implementation and beta units
@@ -76,3 +82,15 @@ evidence_refs:
 - `python scripts/ui_ux_cycle.py --root . propose --dry-run --json`
 - `python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION --check`
 - `python scripts/evidence_index_generator.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T19:12:00+09:00`
+- Resolution: `done`
+- Actual hours: `1.0`
+- Actual tokens: `12000`
+- Closed by: `codex-interface-designer-task-ar-611`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-task-ar-611-20260619184000.json`
+<!-- work-close:end -->

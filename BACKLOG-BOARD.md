@@ -9,21 +9,21 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-19
 task_count: 270
-open_count: 1
-completed_count: 269
-task_set_count: 1
-completed_task_set_count: 49
+open_count: 0
+completed_count: 270
+task_set_count: 0
+completed_task_set_count: 50
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `1` open or active tasks; `269` completed tasks are archived from this live board.
+- Summary: `0` open or active tasks; `270` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `1` / Ask `0` / Review `0` / Later `0` / Done `269`.
-- Task Sets: `1` active workflows; `49` completed workflows are hidden from the live action board.
+- Status: Action `0` / Ask `0` / Review `0` / Later `0` / Done `270`.
+- Task Sets: `0` active workflows; `50` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -41,15 +41,6 @@ completed_task_set_count: 49
 ## Action Board
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
-
-### Taskset Board IA Design Direction (`TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION`)
-
-- Flow: Resolve the post-OAG UX watch that Taskset Board discovery and whole-board focus traversal are too long now that the board contains 49 tasksets; run a lead-designer IA/design seminar, publish an RFC, then derive the next implementation and beta-evaluation taskset.
-- Progress: `2/3` done; `1` open or active.
-- WIP: active `1/3`; oldest `0.1h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-611` | INIT-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | Medium | 3h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Turn the accepted Taskset Board IA RFC into a source-mutation implementation registra… |
 
 ## Archived Task Sets
 
@@ -105,14 +96,15 @@ completed_task_set_count: 49
 | Operator Attention Graph (`TASKSET-AR-OPERATOR-ATTENTION-GRAPH`) | First source-mutating implementation of the accepted operator_attention_graph direction: relation tokens/components/patterns, one taskset-to-evidence workflow wiring, and beta/UX evaluation evidence. | `2/2` done | `2` completed task files archived |
 | Claim-Aware Relation Adapter (`TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER`) | Promote or replace the view-local relation summary adapter so Operator Attention Graph claim path and command readiness reflect active, expired, interrupted, and guarded claim states, then rerun beta/UX evaluation. | `2/2` done | `2` completed task files archived |
 | OAG Mobile Responsive Refinement (`TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT`) | Remove mobile Taskset Board horizontal overflow for the Operator Attention Graph relation panel, then rerun beta/UX evaluation on desktop and 390x844 mobile. | `2/2` done | `2` completed task files archived |
+| Taskset Board IA Design Direction (`TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION`) | Resolve the post-OAG UX watch that Taskset Board discovery and whole-board focus traversal are too long now that the board contains 49 tasksets; run a lead-designer IA/design seminar, publish an RFC, then derive the next implementation and beta-evaluation taskset. | `3/3` done | `3` completed task files archived |
 
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `1` open across `1` task sets (see Action Board above).
-- Archived task sets: `49` (see Archived Task Sets above).
-- Archived task files: `269` — see `ARCHIVE-INDEX.md`.
+- Active: `0` open across `0` task sets (see Action Board above).
+- Archived task sets: `50` (see Archived Task Sets above).
+- Archived task files: `270` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.
