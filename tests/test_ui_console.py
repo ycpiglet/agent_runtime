@@ -1529,10 +1529,16 @@ def test_ui_console_team_agents_tab_panel_and_css_anchors(tmp_path):
 
 
 def test_ui_console_team_agents_card_fields_are_escaped(tmp_path):
-    # All rendered agent-card fields must flow through escapeHtml.
+    # All rendered agent-card fields must flow through escapeHtml or safe component wrappers.
+    # TASK-AR-591: card.avatar replaced by patternAgentAvatar (internally escapes the label
+    # via escapeHtml); verify that the avatar function is called and the other fields are
+    # still escaped directly.
     js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
     card_block = js.split("function agentCharacterCard", 1)[1].split("\n}", 1)[0]
-    for field in ["card.avatar", "card.callsign", "card.role", "card.model"]:
+    # Avatar is now rendered via patternAgentAvatar (escapes label internally).
+    assert "patternAgentAvatar(teamAvatarSeed" in card_block
+    # Remaining identity/meta fields must still be HTML-escaped directly.
+    for field in ["card.callsign", "card.role", "card.model"]:
         assert f"escapeHtml({field}" in card_block
 
 
