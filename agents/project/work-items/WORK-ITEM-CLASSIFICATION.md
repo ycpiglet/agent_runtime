@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-20T01:04:25+09:00
-record_count: 358
+generated_at: 2026-06-20T05:18:40+09:00
+record_count: 366
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `358` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `366` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `21` records |
-| Tasksets | pass | `45` records |
-| Tasks | pass | `254` records |
-| Units | pass | `38` records |
+| Initiatives | pass | `22` records |
+| Tasksets | pass | `46` records |
+| Tasks | pass | `256` records |
+| Units | pass | `42` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -397,6 +397,14 @@ record_count: 358
 | 20.1.4 | Task 20.1.4 | task | `TASK-AR-590` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | planned | `agents/lead_engineer/tasks/TASK-AR-590.md` | Add recolorable empty/error/loading illustrations, accessible data-viz palette tokens… |
 | 20.1.4.1 | Unit 20.1.4.1 | unit | `UNIT-TASK-AR-590-001` | `TASK-AR-590` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-590/UNIT-TASK-AR-590-001.md` | UNIT-TASK-AR-590-001 - Recolorable unDraw state illustrations |
 | 20.1.4.2 | Unit 20.1.4.2 | unit | `UNIT-TASK-AR-590-002` | `TASK-AR-590` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-590/UNIT-TASK-AR-590-002.md` | UNIT-TASK-AR-590-002 - Data-viz palette tokens + componentSparkline |
+| 21 | Initiative 21 | initiative | `INIT-AR-VISUAL-SYSTEM-INTEGRATION` | - | active | `agents/project/initiatives/INIT-AR-VISUAL-SYSTEM-INTEGRATION.md` | Visual System Integration & Verification |
+| 21.1 | Taskset 21.1 | taskset | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | `INIT-AR-VISUAL-SYSTEM-INTEGRATION` | active | `BACKLOG-BOARD.md` | Visual System Integration & Verification |
+| 21.1.1 | Task 21.1.1 | task | `TASK-AR-591` | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | planned | `agents/lead_engineer/tasks/TASK-AR-591.md` | Ensure the AR-587..590 visual components actually appear in the relevant live console… |
+| 21.1.1.1 | Unit 21.1.1.1 | unit | `UNIT-TASK-AR-591-001` | `TASK-AR-591` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-591/UNIT-TASK-AR-591-001.md` | UNIT-TASK-AR-591-001 - Audit + wire components into live views |
+| 21.1.1.2 | Unit 21.1.1.2 | unit | `UNIT-TASK-AR-591-002` | `TASK-AR-591` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-591/UNIT-TASK-AR-591-002.md` | UNIT-TASK-AR-591-002 - Boot-verify the served console |
+| 21.1.2 | Task 21.1.2 | task | `TASK-AR-592` | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | planned | `agents/lead_engineer/tasks/TASK-AR-592.md` | Ensure the new visual components meet WCAG AA (contrast, roles, labels, keyboard, red… |
+| 21.1.2.1 | Unit 21.1.2.1 | unit | `UNIT-TASK-AR-592-001` | `TASK-AR-592` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-592/UNIT-TASK-AR-592-001.md` | UNIT-TASK-AR-592-001 - A11y audit + fixes for the new components |
+| 21.1.2.2 | Unit 21.1.2.2 | unit | `UNIT-TASK-AR-592-002` | `TASK-AR-592` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-592/UNIT-TASK-AR-592-002.md` | UNIT-TASK-AR-592-002 - Responsive pass for the new visuals |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

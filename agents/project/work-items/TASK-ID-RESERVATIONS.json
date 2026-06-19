@@ -531,8 +531,46 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-VISUAL-ASSET-ADOPTION",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-591",
+      "expires_at": "2026-06-21T05:18:36+09:00",
+      "fulfilled_at": "2026-06-20T05:18:36+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-591.md",
+      "fulfilled_task_id": "TASK-AR-591",
+      "fulfilled_task_uid": "a5da8af2-1b71-4cc8-a602-05cc0b80725f",
+      "initiative_id": "INIT-AR-VISUAL-SYSTEM-INTEGRATION",
+      "kind": "task",
+      "owner_id": "lead-engineer",
+      "reason": "work registration TASKSET-AR-VISUAL-SYSTEM-INTEGRATION",
+      "reservation_group_id": "RES-20260620-051836-edde9f5a",
+      "reservation_id": "RES-20260620-051836-edde9f5a-01",
+      "reserved_at": "2026-06-20T05:18:36+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-VISUAL-SYSTEM-INTEGRATION",
+      "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-592",
+      "expires_at": "2026-06-21T05:18:36+09:00",
+      "fulfilled_at": "2026-06-20T05:18:36+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-592.md",
+      "fulfilled_task_id": "TASK-AR-592",
+      "fulfilled_task_uid": "57b81740-6ec9-4d0e-a165-c352867258f2",
+      "initiative_id": "INIT-AR-VISUAL-SYSTEM-INTEGRATION",
+      "kind": "task",
+      "owner_id": "lead-engineer",
+      "reason": "work registration TASKSET-AR-VISUAL-SYSTEM-INTEGRATION",
+      "reservation_group_id": "RES-20260620-051836-edde9f5a",
+      "reservation_id": "RES-20260620-051836-edde9f5a-02",
+      "reserved_at": "2026-06-20T05:18:36+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-VISUAL-SYSTEM-INTEGRATION",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-06-20T01:04:15+09:00"
+  "updated_at": "2026-06-20T05:18:36+09:00"
 }

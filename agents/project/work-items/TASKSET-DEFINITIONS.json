@@ -126,6 +126,12 @@
       "display_name": "Visual Asset Adoption",
       "summary": "Implement the research-backed visual upgrade: DiceBear CC0 seeded agent avatars with role accents; Dagre+d3-force graph rendering for dependency/state-machine/live-agent views; Geist OFL fonts; Lucide icons; unDraw state illustrations; Radix+Carbon data-viz palette tokens and sparklines. Permissive-only, no-build, self-hosted, token-driven, landed experimental.",
       "order": 625
+    },
+    {
+      "task_set_id": "TASKSET-AR-VISUAL-SYSTEM-INTEGRATION",
+      "display_name": "Visual System Integration & Verification",
+      "summary": "Wire the new visual components into every relevant live view, boot-verify the served console, fix integration gaps, and run a WCAG AA + responsive pass on the new visual system. Permissive, no-build, token-driven.",
+      "order": 626
     }
   ]
 }

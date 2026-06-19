@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-20T01:04:25+09:00",
-  "record_count": 358,
+  "generated_at": "2026-06-20T05:18:40+09:00",
+  "record_count": 366,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -3941,6 +3941,94 @@
       "title": "UNIT-TASK-AR-590-002 - Data-viz palette tokens + componentSparkline",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-590/UNIT-TASK-AR-590-002.md",
       "parent_id": "TASK-AR-590",
+      "status": "worker_ready"
+    },
+    {
+      "key": "initiative:INIT-AR-VISUAL-SYSTEM-INTEGRATION",
+      "level": "initiative",
+      "number": "21",
+      "label": "Initiative 21",
+      "id": "INIT-AR-VISUAL-SYSTEM-INTEGRATION",
+      "title": "Visual System Integration & Verification",
+      "path": "agents/project/initiatives/INIT-AR-VISUAL-SYSTEM-INTEGRATION.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-VISUAL-SYSTEM-INTEGRATION",
+      "level": "taskset",
+      "number": "21.1",
+      "label": "Taskset 21.1",
+      "id": "TASKSET-AR-VISUAL-SYSTEM-INTEGRATION",
+      "title": "Visual System Integration & Verification",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-VISUAL-SYSTEM-INTEGRATION",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-591",
+      "level": "task",
+      "number": "21.1.1",
+      "label": "Task 21.1.1",
+      "id": "TASK-AR-591",
+      "title": "Ensure the AR-587..590 visual components actually appear in the relevant live console…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-591.md",
+      "parent_id": "TASKSET-AR-VISUAL-SYSTEM-INTEGRATION",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-591-001",
+      "level": "unit",
+      "number": "21.1.1.1",
+      "label": "Unit 21.1.1.1",
+      "id": "UNIT-TASK-AR-591-001",
+      "title": "UNIT-TASK-AR-591-001 - Audit + wire components into live views",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-591/UNIT-TASK-AR-591-001.md",
+      "parent_id": "TASK-AR-591",
+      "status": "worker_ready"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-591-002",
+      "level": "unit",
+      "number": "21.1.1.2",
+      "label": "Unit 21.1.1.2",
+      "id": "UNIT-TASK-AR-591-002",
+      "title": "UNIT-TASK-AR-591-002 - Boot-verify the served console",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-591/UNIT-TASK-AR-591-002.md",
+      "parent_id": "TASK-AR-591",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-592",
+      "level": "task",
+      "number": "21.1.2",
+      "label": "Task 21.1.2",
+      "id": "TASK-AR-592",
+      "title": "Ensure the new visual components meet WCAG AA (contrast, roles, labels, keyboard, red…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-592.md",
+      "parent_id": "TASKSET-AR-VISUAL-SYSTEM-INTEGRATION",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-592-001",
+      "level": "unit",
+      "number": "21.1.2.1",
+      "label": "Unit 21.1.2.1",
+      "id": "UNIT-TASK-AR-592-001",
+      "title": "UNIT-TASK-AR-592-001 - A11y audit + fixes for the new components",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-592/UNIT-TASK-AR-592-001.md",
+      "parent_id": "TASK-AR-592",
+      "status": "worker_ready"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-592-002",
+      "level": "unit",
+      "number": "21.1.2.2",
+      "label": "Unit 21.1.2.2",
+      "id": "UNIT-TASK-AR-592-002",
+      "title": "UNIT-TASK-AR-592-002 - Responsive pass for the new visuals",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-592/UNIT-TASK-AR-592-002.md",
+      "parent_id": "TASK-AR-592",
       "status": "worker_ready"
     }
   ]
