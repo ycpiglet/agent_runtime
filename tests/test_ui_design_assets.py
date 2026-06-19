@@ -401,3 +401,27 @@ def test_vendored_dicebear_identicon_files_are_present_and_licensed():
     for rel_path, marker in required.items():
         body = (vendor / rel_path).read_text(encoding="utf-8")
         assert marker in body, rel_path
+
+
+def test_task_ar_592_visual_responsive_tokens_exist():
+    """New visual-system responsive constants are promoted into token assets."""
+    css = ui_design_assets.UI_TOKEN_SCALE_CSS
+    for token in (
+        "--visual-sparkline-mobile-w",
+        "--visual-graph-mobile-min-width",
+        "--visual-graph-mobile-height",
+        "--visual-state-machine-mobile-height",
+    ):
+        assert token in css
+
+
+def test_task_ar_592_sparkline_accessibility_modes():
+    """Informative sparklines get img semantics; decorative sparklines stay hidden."""
+    informative = ui_design_assets.componentSparkline([1, 3, 2], label="Load trend")
+    assert 'role="img"' in informative
+    assert 'aria-label="Load trend"' in informative
+    assert "<title>Load trend</title>" in informative
+
+    decorative = ui_design_assets.componentSparkline([1, 3, 2])
+    assert 'aria-hidden="true"' in decorative
+    assert 'role="img"' not in decorative

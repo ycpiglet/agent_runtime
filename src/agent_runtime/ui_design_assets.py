@@ -205,6 +205,11 @@ UI_TOKEN_SCALE_CSS = """
   --space-8xl: 28px;
   --space-viewport-gap: 40px;
   --space-floating-offset: 76px;
+  /* Visual-system responsive tokens (TASK-AR-592). */
+  --visual-sparkline-mobile-w: 44px;
+  --visual-graph-mobile-min-width: 480px;
+  --visual-graph-mobile-height: 320px;
+  --visual-state-machine-mobile-height: 300px;
   /* ---- Radius scale (semantic, stable) ---------------------------------- */
   --radius-hairline: 2px;
   --radius-xs: 3px;

@@ -1,0 +1,69 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-20-task-ar-592-a11y-responsive",
+  "work_id": "TASK-AR-592",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-592.md",
+  "kind": "task",
+  "task_id": "TASK-AR-592",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-20T07:40:00+09:00",
+  "verified_by": "codex-interface-designer-task-ar-592-20260620",
+  "command_count": 5,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_ui_design_assets.py tests/test_ui_console.py tests/test_design_system_gate.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "216 passed, 1 warning in 37.18s",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "evidence-index: pass; findings=0",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/owner_governance_gate.py",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "owner-governance: pass; blocking findings=0; non-blocking release/freshness watches unchanged",
+      "stderr": ""
+    },
+    {
+      "command": "Playwright browser verification on http://127.0.0.1:8881/",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "desktop dependency graph labels OK; mobile dependency graph 480x320 with --dv-sparkline-w=18px; componentSparkline present in served bundle; knowledge graph 140/140 nodes keyboard-operable with aria-pressed; no unexpected HTTP 4xx after excluding documented Geist drop-in font binaries and favicon.",
+      "stderr": ""
+    }
+  ],
+  "evidence": [
+    "reviews/evidence/TASK-AR-592/desktop-dependencies.png",
+    "reviews/evidence/TASK-AR-592/mobile-dependencies.png",
+    "reviews/evidence/TASK-AR-592/mobile-workload.png",
+    "reviews/evidence/TASK-AR-592/knowledge-graph.png"
+  ],
+  "coverage": [
+    "ARIA roles and labels for dependency, live-map, state-machine, and knowledge graph SVGs",
+    "componentSparkline informative/decorative accessibility modes",
+    "knowledge graph keyboard operation with role=button, tabindex=0, aria-pressed, Enter/Space handling",
+    "prefers-reduced-motion disables non-essential live-map transition/pulse effects",
+    "visual responsive sizing tokens and final mobile graph override after base graph CSS",
+    "mobile browser computed dependency graph size 480x320 and sparkline token width 18px"
+  ],
+  "known_external_watch": [
+    "Geist woff2 binaries are intentionally absent under the existing public-sanitization/drop-in policy; browser font 404s are expected and excluded from this task's functional verification.",
+    "The workload route had no live sparkline DOM in the current repo state, but componentSparkline is present in the served bundle and covered by unit tests."
+  ]
+}

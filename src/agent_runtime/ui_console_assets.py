@@ -4812,8 +4812,10 @@ pre {
   }
   /* Sparkline (TASK-AR-590): override sparkline width token for mobile.
    * The SVG uses var(--dv-sparkline-w) so narrowing that narrows all sparklines. */
-  --dv-sparkline-w: 44px;
-  --dv-sparkline-h: var(--space-5xl);
+  :root {
+    --dv-sparkline-w: var(--visual-sparkline-mobile-w);
+    --dv-sparkline-h: var(--space-5xl);
+  }
   .workload-sparkline {
     flex-wrap: wrap;
     gap: var(--space-sm);
@@ -4838,10 +4840,13 @@ pre {
   .dep-graph-svg,
   .kg-graph-svg,
   .live-map-graph {
-    min-width: 480px;
-    height: 320px;
+    min-width: var(--visual-graph-mobile-min-width);
+    height: var(--visual-graph-mobile-height);
   }
-  .state-machine-svg { min-width: 480px; height: 300px; }
+  .state-machine-svg {
+    min-width: var(--visual-graph-mobile-min-width);
+    height: var(--visual-state-machine-mobile-height);
+  }
   /* dep-graph legend: single column on mobile */
   .dep-graph-legend,
   .kg-graph-legend,
@@ -4878,9 +4883,11 @@ pre {
     height: var(--space-7xl);
   }
   /* Sparkline: collapse to near-invisible at very narrow; hide non-essential. */
-  --dv-sparkline-w: var(--space-5xl);
-  --dv-sparkline-h: var(--space-4xl);
-  /* State art: smaller still, readable on 320px screens. */
+  :root {
+    --dv-sparkline-w: var(--space-5xl);
+    --dv-sparkline-h: var(--space-4xl);
+  }
+  /* State art: smaller still, readable on narrow screens. */
   .empty-illustration-art {
     width: var(--space-6xl);
     height: var(--space-6xl);
@@ -6129,6 +6136,38 @@ pre {
 /* Workload agent-row sparkline slot */
 .workload-sparkline { display: flex; align-items: center; gap: var(--space-md); }
 .workload-sparkline .sparkline { flex-shrink: 0; }
+
+/* TASK-AR-592 final responsive override for visual-system components.
+ * This appears after graph/sparkline base rules so mobile values are not
+ * overwritten by later component CSS. */
+@media (max-width: 720px) {
+  :root {
+    --dv-sparkline-w: var(--visual-sparkline-mobile-w);
+    --dv-sparkline-h: var(--space-5xl);
+  }
+  .dep-graph-stage,
+  .kg-graph-stage,
+  .live-map-stage {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .dep-graph-svg,
+  .kg-graph-svg,
+  .live-map-graph {
+    min-width: var(--visual-graph-mobile-min-width);
+    height: var(--visual-graph-mobile-height);
+  }
+  .state-machine-svg {
+    min-width: var(--visual-graph-mobile-min-width);
+    height: var(--visual-state-machine-mobile-height);
+  }
+}
+@media (max-width: 480px) {
+  :root {
+    --dv-sparkline-w: var(--space-5xl);
+    --dv-sparkline-h: var(--space-4xl);
+  }
+}
 
 /* --- Experience settings control + dialog --- */
 .experience-settings-toggle {
