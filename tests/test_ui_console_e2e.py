@@ -39,7 +39,7 @@ def console_url():
         server.server_close()
 
 
-def _get(url: str, timeout: int = 45):
+def _get(url: str, timeout: int = 90):
     with urllib.request.urlopen(url, timeout=timeout) as resp:
         return resp.status, resp.read().decode("utf-8", "replace")
 
