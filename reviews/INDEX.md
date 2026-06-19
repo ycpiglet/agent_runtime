@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T15:50:26+09:00
-record_count: 663
+generated_at: 2026-06-19T15:54:31+09:00
+record_count: 664
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `663` review and evidence records under `reviews/`.
+- Summary: indexed `664` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `663` files |
+| Reviews covered | pass | `664` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -696,6 +696,7 @@ record_count: 663
 | `reviews/W4B-2026-06-19-TASK-AR-606.md` | `W4B-2026-06-19-TASK-AR-606` | w4b-independent-verification | passed | pass | W4B Independent Verification - TASK-AR-606 |
 | `reviews/W4B-2026-06-19-TASK-AR-607.md` | `W4B-2026-06-19-TASK-AR-607` | w4b-independent-verification | passed | pass | W4B Independent Verification - TASK-AR-607 |
 | `reviews/W4B-2026-06-19-TASK-AR-608.md` | `W4B-2026-06-19-TASK-AR-608` | w4b-independent-verification | passed | pass | W4B Independent Verification - TASK-AR-608 |
+| `reviews/W4B-2026-06-19-TASK-AR-609.md` | `W4B-2026-06-19-TASK-AR-609` | w4b-independent-verification | passed | pass | W4B Independent Verification - TASK-AR-609 |
 | `reviews/W4B-2026-06-19-UNIT-TASK-AR-596-001.md` | `W4B-2026-06-19-UNIT-TASK-AR-596-001` | md | accepted | pass | W4B Independent Verification - UNIT-TASK-AR-596-001 |
 
 ## Risks / Blockers
