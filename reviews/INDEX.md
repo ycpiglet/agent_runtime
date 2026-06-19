@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T08:48:16+09:00
-record_count: 625
+generated_at: 2026-06-19T08:59:56+09:00
+record_count: 629
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `625` review and evidence records under `reviews/`.
+- Summary: indexed `629` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `625` files |
+| Reviews covered | pass | `629` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -38,6 +38,7 @@ record_count: 625
 | `reviews/A2A-TRACE-GATE-2026-06-10-task-ar-208-current.json` | `A2A-TRACE-GATE-2026-06-10-task-ar-208-current` | json | record | n/a | A2A-TRACE-GATE-2026-06-10-task-ar-208-current |
 | `reviews/A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final.json` | `A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final` | json | record | n/a | A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final |
 | `reviews/AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8.json` | `AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8` | json | record | n/a | AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8 |
+| `reviews/BETA-PLAN-2026-06-19-operator-attention-graph.md` | `BETA-PLAN-2026-06-19-operator-attention-graph` | ui-beta-test-plan | accepted | pass | Operator Attention Graph Beta Plan |
 | `reviews/CALL-2026-06-09-agent-runtime-task-ar-204-co-location-handoff-call.md` | `CALL-2026-06-09-agent-runtime-task-ar-204-co-location-handoff-call` | md | record | n/a | CALL: TASK-AR-204 Co-Location Handoff |
 | `reviews/CALL-2026-06-09-agent-runtime-task-ar-205-offline-eval-followup-call.md` | `CALL-2026-06-09-agent-runtime-task-ar-205-offline-eval-followup-call` | md | record | n/a | CALL: TASK-AR-205 Offline Eval Follow-up |
 | `reviews/CALL-2026-06-09-agent-runtime-task-ar-206-live-reviewer-followup-call.md` | `CALL-2026-06-09-agent-runtime-task-ar-206-live-reviewer-followup-call` | md | record | n/a | CALL: TASK-AR-206 Live Reviewer Follow-up |
@@ -156,6 +157,7 @@ record_count: 625
 | `reviews/OVERLAY-SIMULATION-GATE-2026-06-11-context-knowledge-final.json` | `OVERLAY-SIMULATION-GATE-2026-06-11-context-knowledge-final` | json | record | n/a | OVERLAY-SIMULATION-GATE-2026-06-11-context-knowledge-final |
 | `reviews/OWNER-APPROVAL-GATE-2026-06-09-v0.1.8.json` | `OWNER-APPROVAL-GATE-2026-06-09-v0.1.8` | json | record | n/a | OWNER-APPROVAL-GATE-2026-06-09-v0.1.8 |
 | `reviews/PENDING-RELEASE-GUARD-2026-06-09-v0.1.8.json` | `PENDING-RELEASE-GUARD-2026-06-09-v0.1.8` | json | record | n/a | PENDING-RELEASE-GUARD-2026-06-09-v0.1.8 |
+| `reviews/PLAN-2026-06-19-operator-attention-graph-implementation.md` | `PLAN-2026-06-19-operator-attention-graph-implementation` | ui-implementation-plan | accepted | pass | Operator Attention Graph Implementation Plan |
 | `reviews/PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final.json` | `PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final` | json | record | n/a | PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final |
 | `reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md` | `PROPOSALS-2026-06-19-ui-ux-next-work` | ui-ux-next-work-proposals | planned | watch | UI/UX Next Work Proposals 2026-06-19 |
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8.json` | `RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8 |
@@ -578,6 +580,7 @@ record_count: 625
 | `reviews/VERIFY-2026-06-19-task-ar-599-20260619023818.json` | `VERIFY-2026-06-19-task-ar-599-20260619023818` | json | record | n/a | VERIFY-2026-06-19-task-ar-599-20260619023818 |
 | `reviews/VERIFY-2026-06-19-task-ar-600-20260619082941.json` | `VERIFY-2026-06-19-task-ar-600-20260619082941` | json | record | n/a | VERIFY-2026-06-19-task-ar-600-20260619082941 |
 | `reviews/VERIFY-2026-06-19-task-ar-601-20260619084352.json` | `VERIFY-2026-06-19-task-ar-601-20260619084352` | json | record | n/a | VERIFY-2026-06-19-task-ar-601-20260619084352 |
+| `reviews/VERIFY-2026-06-19-task-ar-602-20260619090000.json` | `VERIFY-2026-06-19-task-ar-602-20260619090000` | json | record | n/a | VERIFY-2026-06-19-task-ar-602-20260619090000 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500.json` | `VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525.json` | `VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323.json` | `VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323 |
@@ -658,6 +661,7 @@ record_count: 625
 | `reviews/W4B-2026-06-19-TASK-AR-599.md` | `W4B-2026-06-19-TASK-AR-599` | md | record | pass | TASK-AR-599 W4b Independent Verification |
 | `reviews/W4B-2026-06-19-TASK-AR-600.md` | `W4B-2026-06-19-TASK-AR-600` | w4b-independent-verification | accepted | pass | W4B Independent Verification - TASK-AR-600 |
 | `reviews/W4B-2026-06-19-TASK-AR-601.md` | `W4B-2026-06-19-TASK-AR-601` | w4b-independent-verification | accepted | pass | W4B Independent Verification - TASK-AR-601 |
+| `reviews/W4B-2026-06-19-TASK-AR-602.md` | `W4B-2026-06-19-TASK-AR-602` | w4b-independent-verification | pending | watch | W4B Independent Verification - TASK-AR-602 |
 | `reviews/W4B-2026-06-19-UNIT-TASK-AR-596-001.md` | `W4B-2026-06-19-UNIT-TASK-AR-596-001` | md | accepted | pass | W4B Independent Verification - UNIT-TASK-AR-596-001 |
 
 ## Risks / Blockers
