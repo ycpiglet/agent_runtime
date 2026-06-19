@@ -46,7 +46,7 @@ completed_task_set_count: 48
 
 - Flow: Remove mobile Taskset Board horizontal overflow for the Operator Attention Graph relation panel, then rerun beta/UX evaluation on desktop and 390x844 mobile.
 - Progress: `0/2` done; `2` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-608` | INIT-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-608/UNIT-TASK-AR-608-001.md | planned | Action | P1 | High | Medium | 2h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Repeat beta-tester and UX-evaluator verification after the responsive fix, focused on… |

@@ -1,21 +1,43 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T14:04:00+09:00
+updated_at: 2026-06-19T14:07:00+09:00
 current_state:
-  summary: "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT is registered; TASK-AR-607 is ready to claim for BTC-OAG-CLAIM-MOBILE-001."
-  status: ready_to_claim
-  task_set_status: taskset_registered
+  summary: "TASK-AR-607 is claimed for the BTC-OAG-CLAIM-MOBILE-001 mobile Taskset Board overflow fix."
+  status: in_progress
+  task_set_status: task_ar_607_claimed
   task_set_id: "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT"
-  step_index: 0
+  step_index: 1
   step_total: 6
-  progress_pct: 0
-  status_text: "TASK-AR-607 should constrain Taskset Board mobile layout, then TASK-AR-608 should rerun beta/UX evidence."
+  progress_pct: 5
+  status_text: "TASK-AR-607 claim created; implementation worktree is ready for responsive layout work."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260619-140700-task-ar-607-mobile-responsive-refinement
+      display_name: codex-interface-designer-ar-607
+      agent_role: interface-designer
+      agent_instance_id: codex-interface-designer-ar-607
+      team_id: ui-ux
+      pane_id: terminal:wt-task-ar-607:tab-01
+      callsite_id: terminal:wt-task-ar-607:tab-01
+      task_id: TASK-AR-607
+      task_set_id: TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
+      unit_id: UNIT-TASK-AR-607-001
+      status: claimed
+      phase: implementation
+      progress_pct: 5
+      step_index: 1
+      step_total: 6
+      status_text: TASK-AR-607 mobile overflow fix claimed; implementation worktree ready.
+      worktree_path: .worktrees/TASK-AR-607-oag-mobile-responsive
+      branch: codex/task-ar-607-oag-mobile-responsive
+      claim_path: agents/runtime/task_claims/CLAIM-20260619-140700-task-ar-607-mobile-responsive-refinement.json
+      handoff_path: agents/runtime/task_claims/CLAIM-20260619-140700-task-ar-607-mobile-responsive-refinement.handoff.md
+      last_heartbeat: 2026-06-19T14:07:00+09:00
+  current_teams:
+    - ui-ux
 resume:
   active_task: TASK-AR-607
   active_task_set: TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
-  branch_policy: "Create a claim and worktree for TASK-AR-607 before mutating UI source."
+  branch_policy: "Work only inside .worktrees/TASK-AR-607-oag-mobile-responsive until W4 verification and release."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -86,9 +108,9 @@ pointers:
     next_decision: register_mobile_taskset_board_overflow_refinement
   oag_mobile_responsive_refinement:
     taskset: TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
-    active_claim: null
-    worktree_path: null
-    status: registered_ready_to_claim
+    active_claim: agents/runtime/task_claims/CLAIM-20260619-140700-task-ar-607-mobile-responsive-refinement.json
+    worktree_path: .worktrees/TASK-AR-607-oag-mobile-responsive
+    status: task_ar_607_claimed
     completed_tasks: []
     next_task: TASK-AR-607
     next_unit: UNIT-TASK-AR-607-001
@@ -102,7 +124,7 @@ pointers:
       - reviews/BETA-TEST-2026-06-19-oag-claim-aware-relation-adapter.md
       - reviews/UX-EVAL-2026-06-19-oag-claim-aware-relation-adapter.md
       - reviews/W4B-2026-06-19-TASK-AR-606.md
-    next_decision: claim_task_ar_607_mobile_overflow_fix
+    next_decision: implement_task_ar_607_mobile_overflow_fix
   design_system_debt_consolidation:
     taskset: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
     released_claim: agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.json
