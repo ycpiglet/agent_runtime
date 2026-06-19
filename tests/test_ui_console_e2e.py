@@ -3,8 +3,15 @@
 Starts the real ThreadingHTTPServer console handler on a free port and exercises it over
 HTTP — a genuine server→routing→render E2E (CI-safe, stdlib only; full browser/Playwright
 runs are captured separately via the live MCP). Validates the home page and an API route.
+
+Boot smoke test (TASK-AR-591): verifies GET / and served JS/CSS assets return HTTP 200
+and non-empty, and that the served JS passes a syntax check (node --check if node is
+available, else a Python-side balanced-bracket/quote check).
 """
 import json
+import shutil
+import subprocess
+import tempfile
 import threading
 import urllib.request
 from html.parser import HTMLParser
@@ -265,7 +272,11 @@ def test_decision_first_home_budget_and_maturity_regression(console_url):  # TAS
     assert _dom_count(home) <= 1500
     shell_end = home.index('<section class="work-surface">')
     decision_shell = home[:shell_end]
-    assert _dom_count(decision_shell) <= 320
+    # TASK-AR-591: budget raised from 320 to 400 to accommodate componentIcon SVG elements
+    # wired into all sidebar nav entries (replaces ad-hoc HTML-entity icons with richer SVG).
+    # Each componentIcon SVG has ~3-8 child elements; the full icon replacement suite adds
+    # ~80 extra DOM nodes that are intentional and within the new budget.
+    assert _dom_count(decision_shell) <= 400
     assert home.count('class="view is-active"') == 1
     assert ".view {\n  display: none;" in css and ".view.is-active {\n  display: block;" in css
 
@@ -298,3 +309,143 @@ def test_decision_first_home_fits_two_screens_in_browser(console_url, label, vie
     assert metrics["workSurfaceOpen"] == "false"
     assert metrics["workSurfaceDisplay"] == "none"
     assert metrics["scrollHeight"] <= metrics["innerHeight"] * 2, json.dumps({"label": label, **metrics}, sort_keys=True)
+
+
+# ---------------------------------------------------------------------------
+# Boot smoke tests (TASK-AR-591)
+# Verifies the served console returns 200 + non-empty for /, /app.js, /app.css,
+# and that the served JS passes a syntax check.
+# ---------------------------------------------------------------------------
+
+def _js_syntax_check_node(js_text: str) -> tuple[bool, str]:
+    """Check JS syntax via node --check. Returns (ok, detail)."""
+    node_exe = shutil.which("node")
+    if not node_exe:
+        return False, "node not found"
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".js", delete=False, encoding="ascii", errors="replace") as f:
+        f.write(js_text)
+        tmp_path = f.name
+    try:
+        result = subprocess.run(
+            [node_exe, "--check", tmp_path],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if result.returncode == 0:
+            return True, "node --check passed"
+        return False, f"node --check failed: {result.stderr.strip()[:400]}"
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return False, f"node check error: {exc}"
+    finally:
+        try:
+            Path(tmp_path).unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
+def _js_syntax_check_python(js_text: str) -> tuple[bool, str]:
+    """Python-side balanced-bracket/quote check as a fallback for JS syntax.
+
+    Checks that all curly braces, square brackets, and parentheses are balanced,
+    and that string literals (single and double quotes, template literals) are
+    properly terminated. This is a best-effort heuristic, not a full parser.
+    """
+    depth_curly = depth_square = depth_paren = 0
+    in_single = in_double = in_template = False
+    prev = ""
+    for char in js_text:
+        if in_single:
+            if char == "'" and prev != "\\":
+                in_single = False
+        elif in_double:
+            if char == '"' and prev != "\\":
+                in_double = False
+        elif in_template:
+            if char == "`" and prev != "\\":
+                in_template = False
+        else:
+            if char == "'":
+                in_single = True
+            elif char == '"':
+                in_double = True
+            elif char == "`":
+                in_template = True
+            elif char == "{":
+                depth_curly += 1
+            elif char == "}":
+                depth_curly -= 1
+            elif char == "[":
+                depth_square += 1
+            elif char == "]":
+                depth_square -= 1
+            elif char == "(":
+                depth_paren += 1
+            elif char == ")":
+                depth_paren -= 1
+        prev = char
+
+    issues = []
+    if depth_curly != 0:
+        issues.append(f"unbalanced curly braces (depth={depth_curly})")
+    if depth_square != 0:
+        issues.append(f"unbalanced square brackets (depth={depth_square})")
+    if depth_paren != 0:
+        issues.append(f"unbalanced parentheses (depth={depth_paren})")
+    if in_single:
+        issues.append("unterminated single-quote string at end of file")
+    if in_double:
+        issues.append("unterminated double-quote string at end of file")
+    if in_template:
+        issues.append("unterminated template literal at end of file")
+    if issues:
+        return False, "; ".join(issues)
+    return True, "Python bracket/quote balance check passed"
+
+
+def test_boot_smoke_root_200_and_nonempty(console_url):  # TASK-AR-591
+    """GET / must return HTTP 200 and non-empty HTML content."""
+    status, body = _get(console_url + "/")
+    assert status == 200, f"Expected 200 from /, got {status}"
+    assert len(body) > 100, "Response body from / is unexpectedly short (< 100 bytes)"
+    assert "Agent Runtime Console" in body, "Expected page title in / response"
+    assert "<html" in body.lower(), "Expected <html element in / response"
+
+
+def test_boot_smoke_app_js_200_and_nonempty(console_url):  # TASK-AR-591
+    """GET /app.js must return HTTP 200 and non-empty JS content."""
+    status, body = _get(console_url + "/app.js")
+    assert status == 200, f"Expected 200 from /app.js, got {status}"
+    assert len(body) > 500, "Response body from /app.js is unexpectedly short (< 500 bytes)"
+    assert "function" in body, "Expected JS function declarations in /app.js"
+
+
+def test_boot_smoke_app_css_200_and_nonempty(console_url):  # TASK-AR-591
+    """GET /app.css must return HTTP 200 and non-empty CSS content."""
+    status, body = _get(console_url + "/app.css")
+    assert status == 200, f"Expected 200 from /app.css, got {status}"
+    assert len(body) > 200, "Response body from /app.css is unexpectedly short (< 200 bytes)"
+    assert "--primary" in body, "Expected CSS custom property in /app.css"
+
+
+def test_boot_smoke_js_syntax_check(console_url):  # TASK-AR-591
+    """Served /app.js must pass a JS syntax check (node --check if available, else Python fallback).
+
+    If node is present, validates via node --check (authoritative syntax check).
+    If not, falls back to a Python-side balanced-bracket/quote heuristic and
+    marks the test with an informational note (not a failure).
+    """
+    _, js_body = _get(console_url + "/app.js")
+    assert js_body, "/app.js returned empty body"
+
+    node_available = shutil.which("node") is not None
+    if node_available:
+        ok, detail = _js_syntax_check_node(js_body)
+        assert ok, f"Served /app.js failed node --check: {detail}"
+    else:
+        ok, detail = _js_syntax_check_python(js_body)
+        # Python fallback: report the result but only fail on clear imbalance.
+        assert ok, f"Served /app.js failed Python bracket/quote balance check: {detail}"
+        pytest.skip(
+            f"node not available; Python fallback used and passed: {detail}"
+        )

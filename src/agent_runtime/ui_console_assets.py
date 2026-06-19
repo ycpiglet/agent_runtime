@@ -800,6 +800,7 @@ HTML = """<!doctype html>
               <div id="kg-filters" class="kg-filters" role="group" aria-label="Filter knowledge graph by kind"></div>
             </div>
             <div class="kg-graph-stage">
+              <div id="kg-graph-state-host" class="kg-graph-state-host" aria-live="polite"></div>
               <svg id="kg-graph-svg" class="kg-graph-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Knowledge graph nodes and edges"></svg>
             </div>
             <ul id="kg-graph-legend" class="kg-graph-legend" aria-label="Knowledge graph legend"></ul>
@@ -1113,6 +1114,39 @@ _ENTITY_ICON_MAP = {
     '<span class="sidebar-icon" aria-hidden="true">&#9776;</span><span class="sidebar-label">Roadmap</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("chevron-right") + '</span><span class="sidebar-label">Roadmap</span>',
     # sidebar: Timeline (using arrow-right -- &#9776; overloaded)
     '<span class="sidebar-icon" aria-hidden="true">&#9776;</span><span class="sidebar-label">Timeline</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("arrow-right") + '</span><span class="sidebar-label">Timeline</span>',
+    # --- TASK-AR-591: remaining ad-hoc entity icons replaced with componentIcon ---
+    # sidebar core: Decisions (smiley -> calendar icon)
+    '<span class="sidebar-icon" aria-hidden="true">&#9786;</span><span class="sidebar-label">Decisions</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("calendar") + '</span><span class="sidebar-label">Decisions</span>',
+    # sidebar: Tasksets (grid)
+    '<span class="sidebar-icon" aria-hidden="true">&#9635;</span><span class="sidebar-label">Tasksets</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("grid") + '</span><span class="sidebar-label">Tasksets</span>',
+    # sidebar: Taskset Board (layers)
+    '<span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Taskset Board</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("layers") + '</span><span class="sidebar-label">Taskset Board</span>',
+    # sidebar: Planner (edit icon)
+    '<span class="sidebar-icon" aria-hidden="true">&#9998;</span><span class="sidebar-label">Planner</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("edit") + '</span><span class="sidebar-label">Planner</span>',
+    # sidebar: Dependencies (link icon)
+    '<span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Dependencies</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("link") + '</span><span class="sidebar-label">Dependencies</span>',
+    # sidebar: Workload (cpu icon)
+    '<span class="sidebar-icon" aria-hidden="true">&#9638;</span><span class="sidebar-label">Workload</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("cpu") + '</span><span class="sidebar-label">Workload</span>',
+    # sidebar: Agent List (users icon)
+    '<span class="sidebar-icon" aria-hidden="true">&#9737;</span><span class="sidebar-label">Agent List</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("users") + '</span><span class="sidebar-label">Agent List</span>',
+    # sidebar: Live Map (map icon)
+    '<span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Live Map</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("map") + '</span><span class="sidebar-label">Live Map</span>',
+    # sidebar: Office Map (map icon)
+    '<span class="sidebar-icon" aria-hidden="true">&#9971;</span><span class="sidebar-label">Office Map</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("map") + '</span><span class="sidebar-label">Office Map</span>',
+    # sidebar: Channels (layers icon)
+    '<span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Channels</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("layers") + '</span><span class="sidebar-label">Channels</span>',
+    # sidebar: Sources (clipboard icon)
+    '<span class="sidebar-icon" aria-hidden="true">&#9783;</span><span class="sidebar-label">Sources</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("clipboard") + '</span><span class="sidebar-label">Sources</span>',
+    # sidebar: Knowledge Graph (link icon)
+    '<span class="sidebar-icon" aria-hidden="true">&#9901;</span><span class="sidebar-label">Knowledge Graph</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("link") + '</span><span class="sidebar-label">Knowledge Graph</span>',
+    # sidebar: Properties (info icon)
+    '<span class="sidebar-icon" aria-hidden="true">&#9636;</span><span class="sidebar-label">Properties</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("info") + '</span><span class="sidebar-label">Properties</span>',
+    # sidebar: Labels (flag icon)
+    '<span class="sidebar-icon" aria-hidden="true">&#9750;</span><span class="sidebar-label">Labels</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("flag") + '</span><span class="sidebar-label">Labels</span>',
+    # sidebar: Import/Export (arrow-right icon)
+    '<span class="sidebar-collapse-icon" aria-hidden="true">&#8676;</span><span class="sidebar-label">Collapse</span>': '<span class="sidebar-collapse-icon" aria-hidden="true">' + ui_design_assets.componentIcon("chevron-right") + '</span><span class="sidebar-label">Collapse</span>',
+    # workspace switcher icon (layers)
+    '<span class="workspace-switcher-icon" aria-hidden="true">&#9783;</span>': '<span class="workspace-switcher-icon" aria-hidden="true">' + ui_design_assets.componentIcon("layers") + '</span>',
 }
 
 _html = HTML
@@ -4933,9 +4967,12 @@ pre {
   stroke-width: 1.5;
   fill: var(--panel);
 }
-.dep-node.kind-task circle { fill: var(--panel-strong); }
-.dep-node.kind-parent circle { fill: var(--primary-soft-strong); stroke: var(--primary-line); }
-.dep-node.kind-missing circle { fill: var(--warning-soft); stroke: var(--warning-line); }
+/* TASK-AR-591: --dv-cat-* palette drives dependency-graph node colors.
+ * Categorical tokens (Radix Colors MIT / Carbon Apache 2.0) ensure WCAG-adequate
+ * contrast vs --panel in both light and dark themes.                          */
+.dep-node.kind-task circle { fill: var(--dv-cat-1, var(--panel-strong)); stroke: var(--dv-cat-1, var(--primary-line)); opacity: 0.82; }
+.dep-node.kind-parent circle { fill: var(--dv-cat-2, var(--primary-soft-strong)); stroke: var(--dv-cat-2, var(--primary-line)); opacity: 0.75; }
+.dep-node.kind-missing circle { fill: var(--dv-cat-3, var(--warning-soft)); stroke: var(--dv-cat-3, var(--warning-line)); opacity: 0.75; }
 .dep-node.is-cycle circle { stroke: var(--danger); stroke-width: 2.5; }
 .dep-node text {
   fill: var(--muted);
@@ -5011,6 +5048,8 @@ pre {
   background: var(--canvas-grad);
   overflow: hidden;
 }
+/* TASK-AR-591: state host for componentEmptyState/ErrorState/LoadingState overlays. */
+.kg-graph-state-host:not(:empty) { padding: var(--space-4xl) var(--space-4xl); }
 .kg-graph-svg { display: block; width: 100%; height: 460px; }
 .kg-edge { stroke: var(--line-strong); stroke-width: 1.2; fill: none; opacity: 0.45; }
 .kg-edge.type-partOf { stroke: var(--primary-line); opacity: 0.7; }
@@ -7577,7 +7616,8 @@ function renderGroupedList(view, items, rowTemplate, emptyLabel) {
   renderListToolbar(view, items);
   const { groups, filtered } = applyListControls(view, items);
   if (!filtered.length) {
-    panel.innerHTML = `<div class="empty">${escapeHtml(emptyLabel || "No items")}</div>`;
+    // TASK-AR-591: componentEmptyState (via emptyState compat wrapper) for list surfaces.
+    panel.innerHTML = emptyState(emptyLabel || "No items");
     applyListDensity(view);
     return;
   }
@@ -9614,6 +9654,7 @@ function renderMap() {
   const graph = runtimeState.graph || { nodes: [], edges: [] };
   const machines = runtimeState.state_machines || [];
   const roadmap = runtimeState.roadmap || { milestones: [] };
+  // TASK-AR-591: componentEmptyState (via emptyState compat) for graph/state-machine surfaces.
   $("graph-list").innerHTML = graph.edges.length ? graph.edges.slice(0, 80).map((edge) => `
     <article class="surface-card map-card graph-card pass">
       <div class="surface-card-header">
@@ -9629,7 +9670,7 @@ function renderMap() {
         <span><span class="meta-label">Status</span><strong>${escapeHtml(edge.task_id || "no task")}</strong></span>
       `)}
     </article>
-  `).join("") : `<div class="empty">No graph edges</div>`;
+  `).join("") : emptyState("No graph edges", "Add dependency edges to populate this view.");
   $("state-machine-list").innerHTML = machines.length ? machines.map((machine) => `
     <article class="surface-card map-card state-machine-card pass">
       <div class="surface-card-header">
@@ -9645,7 +9686,7 @@ function renderMap() {
         <span><span class="meta-label">To</span><strong>${escapeHtml((machine.states || []).join(" -> ") || "states")}</strong></span>
       `)}
     </article>
-  `).join("") : `<div class="empty">No state machines</div>`;
+  `).join("") : emptyState("No state machines", "State machine files will appear here when added.");
   $("roadmap-list").innerHTML = (roadmap.milestones || []).length ? (roadmap.milestones || []).slice(0, 40).map((item) => `
     <article class="surface-card map-card roadmap-card ${item.done ? "pass" : "warn"}">
       <div class="surface-card-header">
@@ -10367,7 +10408,9 @@ const KG_KIND_COLORS = {
 async function loadKnowledgeGraph() {
   if (knowledgeGraphLoading) return;
   knowledgeGraphLoading = true;
-  setText("kg-graph-summary", "Loading entities…");
+  setText("kg-graph-summary", "Loading entities...");
+  // TASK-AR-591: componentLoadingState for the knowledge-graph loading surface.
+  setHtml("kg-graph-state-host", loadingState("Loading knowledge graph..."));
   try {
     const response = await fetch("/api/knowledge-graph", { cache: "no-store" });
     knowledgeGraphState = await response.json();
@@ -10481,15 +10524,30 @@ function renderKnowledgeGraph() {
   if (!svg) return;
   while (svg.firstChild) svg.removeChild(svg.firstChild);
   if (!nodes.length) {
-    const note = document.createElementNS(SVG_NS, "text");
-    note.setAttribute("x", "500");
-    note.setAttribute("y", "300");
-    note.setAttribute("class", "kg-graph-empty");
-    note.setAttribute("text-anchor", "middle");
-    note.textContent = data.error ? "Knowledge graph unavailable" : (isFiltered ? "No entities match the filter" : "No knowledge graph data");
-    svg.appendChild(note);
+    // TASK-AR-591: componentErrorState / componentEmptyState for knowledge-graph surface.
+    const stateHost = $("kg-graph-state-host");
+    if (stateHost) {
+      if (data.error) {
+        stateHost.innerHTML = errorState("Knowledge graph unavailable", data.error);
+      } else if (isFiltered) {
+        stateHost.innerHTML = emptyState("No entities match the filter", "Try clearing or adjusting the filters.");
+      } else {
+        stateHost.innerHTML = emptyState("No knowledge graph data", "Add work items to populate the graph.");
+      }
+    } else {
+      const note = document.createElementNS(SVG_NS, "text");
+      note.setAttribute("x", "500");
+      note.setAttribute("y", "300");
+      note.setAttribute("class", "kg-graph-empty");
+      note.setAttribute("text-anchor", "middle");
+      note.textContent = data.error ? "Knowledge graph unavailable" : (isFiltered ? "No entities match the filter" : "No knowledge graph data");
+      svg.appendChild(note);
+    }
     return;
   }
+  // Clear loading/error state once data is available.
+  const stateHostClear = $("kg-graph-state-host");
+  if (stateHostClear) stateHostClear.innerHTML = "";
   const positions = knowledgeGraphNodePositions(nodes);
   const focusAdjacent = new Set();
   if (knowledgeGraphFocus) {
@@ -11632,10 +11690,15 @@ function agentCharacterCard(card) {
   const currentTask = claim.task_id
     ? `<code>${escapeHtml(claim.task_id)}</code> ${escapeHtml(claim.phase || claim.status || "")}`
     : "idle - no claim";
+  // TASK-AR-591: patternAgentAvatar replaces the placeholder text avatar in the
+  // team/agents-identity surface. seed = card.id for deterministic per-agent art.
+  const teamAvatarSeed = card.id || card.role || "agent";
+  const teamAvatarLabel = card.callsign || card.display_name || card.role || "agent";
+  const teamAvatar = patternAgentAvatar(teamAvatarSeed, { role: card.role || "", size: 36, label: teamAvatarLabel });
   return `
     <article class="agent-character-card presence-${escapeHtml(presence)}" data-agent-id="${escapeHtml(card.id)}">
       <header class="agent-character-header">
-        <span class="agent-character-avatar">${escapeHtml(card.avatar || "AG")}<span class="presence-ring" title="${escapeHtml(presence)}"></span></span>
+        <span class="agent-character-avatar">${teamAvatar}<span class="presence-ring" title="${escapeHtml(presence)}"></span></span>
         <div class="agent-character-identity">
           <b>${escapeHtml(card.callsign || card.id)}</b>
           <span>${escapeHtml(card.role || "unknown")} - ${escapeHtml(presence)}</span>
