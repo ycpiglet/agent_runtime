@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-604:tab-01",
   "pane_id": "terminal:wt-task-ar-604:tab-01",
   "mode": "work",
-  "status": "claimed",
+  "status": "expired",
   "task_set_id": "TASKSET-AR-OPERATOR-ATTENTION-GRAPH",
   "active_scope": "TASKSET-AR-OPERATOR-ATTENTION-GRAPH",
   "scope_transition_approved": true,
@@ -28,7 +28,7 @@
   "branch": "codex/task-ar-604-operator-attention-graph-beta",
   "claimed_at": "2026-06-19T09:52:00+09:00",
   "last_heartbeat": "2026-06-19T09:52:00+09:00",
-  "updated_at": "2026-06-19T09:52:00+09:00",
+  "updated_at": "2026-06-19T12:01:09+09:00",
   "expires_at": "2026-06-19T10:52:00+09:00",
   "lease": {
     "claimed_at": "2026-06-19T09:52:00+09:00",
@@ -43,5 +43,9 @@
     "reviews/BETA-TEST-2026-06-19-operator-attention-graph.md",
     "reviews/UX-EVAL-2026-06-19-operator-attention-graph.md",
     "reviews/INDEX.md"
-  ]
+  ],
+  "recovered_from_status": "claimed",
+  "reaped_at": "2026-06-19T12:01:09+09:00",
+  "reaped_by": "claim_reaper",
+  "reaped_reason": "lease-expired"
 }

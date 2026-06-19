@@ -1,22 +1,22 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T09:52:00+09:00
+updated_at: 2026-06-19T12:04:04+09:00
 current_state:
-  summary: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH is active; TASK-AR-604 is claimed for beta-tester and UX-evaluator evidence after the first operator attention graph implementation."
+  summary: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH is active; TASK-AR-604 beta/UX evidence resumed after the expired predecessor claim was reaped."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH"
   step_index: 4
   step_total: 5
   progress_pct: 75
-  status_text: "Active claim CLAIM-20260619-095200-task-ar-604-operator-attention-graph-beta owns the beta/UX evidence pass in .worktrees/TASK-AR-604-oag-beta."
+  status_text: "Active claim CLAIM-20260619-120404-task-ar-604-task-ar-604-beta-resume owns the resumed beta/UX evidence pass in .worktrees/TASK-AR-604-oag-beta."
 active_work:
   current_agents:
-    - claim_id: "CLAIM-20260619-095200-task-ar-604-operator-attention-graph-beta"
+    - claim_id: "CLAIM-20260619-120404-task-ar-604-task-ar-604-beta-resume"
       agent_role: "ux-evaluator"
-      agent_instance_id: "ux-evaluator-20260619-095200-kst-oag"
-      display_name: "codex-ux-evaluator-oag-604"
-      callsite_id: "terminal:wt-task-ar-604:tab-01"
-      pane_id: "terminal:wt-task-ar-604:tab-01"
+      agent_instance_id: "ux-evaluator-20260619-resume-oag"
+      display_name: "codex-ux-evaluator-oag-604-resume"
+      callsite_id: "terminal:wt-task-ar-604:tab-02"
+      pane_id: "terminal:wt-task-ar-604:tab-02"
       task_id: "TASK-AR-604"
       task_set_id: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH"
       unit_id: "UNIT-TASK-AR-604-001"
@@ -37,13 +37,14 @@ pointers:
     taskset: TASKSET-AR-OPERATOR-ATTENTION-GRAPH
     completed_tasks:
       - TASK-AR-603
-    active_claim: agents/runtime/task_claims/CLAIM-20260619-095200-task-ar-604-operator-attention-graph-beta.json
+    active_claim: agents/runtime/task_claims/CLAIM-20260619-120404-task-ar-604-task-ar-604-beta-resume.json
+    expired_claim: agents/runtime/task_claims/CLAIM-20260619-095200-task-ar-604-operator-attention-graph-beta.json
     released_claim: agents/runtime/task_claims/CLAIM-20260619-091500-task-ar-603-operator-attention-graph.json
     worktree_path: .worktrees/TASK-AR-604-oag-beta
     implementation_branch: codex/task-ar-604-operator-attention-graph-beta
     implementation_commit: 5c121b3
     integration_commit: a923e91
-    status: task_ar_604_claimed_beta_ux_evaluation
+    status: task_ar_604_resumed_beta_ux_evaluation
     next_task: TASK-AR-604
     next_decision: complete_beta_ux_evaluation_before_taskset_closeout
     verification_evidence: reviews/VERIFY-2026-06-19-operator-attention-graph-implementation.json

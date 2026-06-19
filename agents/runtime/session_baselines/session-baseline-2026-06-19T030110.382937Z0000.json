@@ -1,0 +1,30 @@
+{
+  "schema": "agent-runtime-session-baseline/v1",
+  "captured_at": "2026-06-19T03:01:10.382937+00:00",
+  "cwd": "C:\\Users\\ycpig\\agent_runtime",
+  "head": "0c8b301",
+  "branch": "claude/decision-first-console-ia",
+  "status_fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stash_count": 0,
+  "worktrees": [
+    {
+      "path": "C:/Users/ycpig/agent_runtime",
+      "HEAD": "0c8b301c1c5964ea8bc615f7ec0666607f76ab10",
+      "branch": "claude/decision-first-console-ia"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-604-oag-beta",
+      "HEAD": "0c8b301c1c5964ea8bc615f7ec0666607f76ab10",
+      "branch": "codex/task-ar-604-operator-attention-graph-beta"
+    }
+  ],
+  "active_codex_branches": [
+    "claude/deadlock-guardrails",
+    "claude/decision-first-console-ia",
+    "claude/product-maturity-eval-merge",
+    "claude/release-auto-reg",
+    "claude/wave89-closeout",
+    "codex/task-ar-552",
+    "+ codex/task-ar-604-operator-attention-graph-beta"
+  ]
+}
