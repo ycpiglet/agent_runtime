@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-OPERATOR-ATTENTION-GRAPH
 registered_at: 2026-06-19T09:08:00+09:00
 created_at: 2026-06-19T09:08:00+09:00
-updated_at: 2026-06-19T09:08:00+09:00
+updated_at: 2026-06-19T12:21:22+09:00
 title: Run operator attention graph beta and UX evaluation
 status: planned
 priority: P1
@@ -30,8 +30,17 @@ summary: Verify the first operator_attention_graph implementation through user-l
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python scripts/design_system_gate.py --check --all-ui
+  - python scripts/evidence_index_generator.py --check
+  - python scripts/ui_ux_cycle.py --root . assess --json
 tags:
   - work-cli-created
+verification_status: passed
+verified_at: 2026-06-19T12:21:22+09:00
+verified_by: codex-ux-evaluator-oag-604-resume
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-task-ar-604-20260619122122.json
 ---
 
 # TASK-AR-604 - Run operator attention graph beta and UX evaluation

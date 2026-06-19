@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T12:12:49+09:00
-record_count: 637
+generated_at: 2026-06-19T12:21:28+09:00
+record_count: 640
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `637` review and evidence records under `reviews/`.
+- Summary: indexed `640` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `637` files |
+| Reviews covered | pass | `640` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -585,6 +585,8 @@ record_count: 637
 | `reviews/VERIFY-2026-06-19-task-ar-600-20260619082941.json` | `VERIFY-2026-06-19-task-ar-600-20260619082941` | json | record | n/a | VERIFY-2026-06-19-task-ar-600-20260619082941 |
 | `reviews/VERIFY-2026-06-19-task-ar-601-20260619084352.json` | `VERIFY-2026-06-19-task-ar-601-20260619084352` | json | record | n/a | VERIFY-2026-06-19-task-ar-601-20260619084352 |
 | `reviews/VERIFY-2026-06-19-task-ar-602-20260619090000.json` | `VERIFY-2026-06-19-task-ar-602-20260619090000` | json | record | n/a | VERIFY-2026-06-19-task-ar-602-20260619090000 |
+| `reviews/VERIFY-2026-06-19-task-ar-604-20260619122106.json` | `VERIFY-2026-06-19-task-ar-604-20260619122106` | json | record | n/a | VERIFY-2026-06-19-task-ar-604-20260619122106 |
+| `reviews/VERIFY-2026-06-19-task-ar-604-20260619122122.json` | `VERIFY-2026-06-19-task-ar-604-20260619122122` | json | record | n/a | VERIFY-2026-06-19-task-ar-604-20260619122122 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500.json` | `VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525.json` | `VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323.json` | `VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323 |
@@ -670,6 +672,7 @@ record_count: 637
 | `reviews/W4B-2026-06-19-TASK-AR-601.md` | `W4B-2026-06-19-TASK-AR-601` | w4b-independent-verification | accepted | pass | W4B Independent Verification - TASK-AR-601 |
 | `reviews/W4B-2026-06-19-TASK-AR-602.md` | `W4B-2026-06-19-TASK-AR-602` | w4b-independent-verification | accepted | pass | W4B Independent Verification - TASK-AR-602 |
 | `reviews/W4B-2026-06-19-TASK-AR-603.md` | `W4B-2026-06-19-TASK-AR-603` | w4b-independent-verification | accepted | pass | W4B Independent Verification - TASK-AR-603 |
+| `reviews/W4B-2026-06-19-TASK-AR-604.md` | `W4B-2026-06-19-TASK-AR-604` | w4b-independent-verification | passed | pass | W4B Independent Verification - TASK-AR-604 |
 | `reviews/W4B-2026-06-19-UNIT-TASK-AR-596-001.md` | `W4B-2026-06-19-UNIT-TASK-AR-596-001` | md | accepted | pass | W4B Independent Verification - UNIT-TASK-AR-596-001 |
 
 ## Risks / Blockers

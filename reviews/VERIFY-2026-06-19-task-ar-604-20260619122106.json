@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-19-task-ar-604-20260619122106",
+  "work_id": "TASK-AR-604",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-604.md",
+  "kind": "task",
+  "task_id": "TASK-AR-604",
+  "unit_id": "",
+  "status": "failed",
+  "signal": "fail",
+  "verified_at": "2026-06-19T12:21:06+09:00",
+  "verified_by": "codex-ux-evaluator-oag-604-resume",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-19T12:21:06+09:00",
+      "finished_at": "2026-06-19T12:21:07+09:00",
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "failed",
+      "returncode": 1,
+      "started_at": "2026-06-19T12:21:07+09:00",
+      "finished_at": "2026-06-19T12:21:09+09:00",
+      "stdout": "evidence-index: fail\nfindings=2\n- reviews/INDEX.md: missing-review:reviews/W4B-2026-06-19-TASK-AR-604.md\n- reviews/INDEX.md: stale-or-incomplete\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/ui_ux_cycle.py --root . assess --json",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-19T12:21:09+09:00",
+      "finished_at": "2026-06-19T12:21:10+09:00",
+      "stdout": "\"evidence_required\": \"Animation duration, easing, reduced-motion behavior, and live-state movement.\"\n    },\n    {\n      \"dimension\": \"effects\",\n      \"evidence_required\": \"Shadow, border, focus, hover, depth, loading, and transition effects.\"\n    },\n    {\n      \"dimension\": \"schema\",\n      \"evidence_required\": \"State/API schema, task metadata, route contracts, and write boundaries.\"\n    },\n    {\n      \"dimension\": \"assets\",\n      \"evidence_required\": \"Design tokens, UI components, pattern components, icons, and served assets.\"\n    },\n    {\n      \"dimension\": \"accessibility\",\n      \"evidence_required\": \"Keyboard flow, focus order, labels, landmarks, contrast, and screen-reader state.\"\n    },\n    {\n      \"dimension\": \"responsiveness\",\n      \"evidence_required\": \"Desktop/mobile layout, overflow, wrapping, stable dimensions, and viewport fit.\"\n    },\n    {\n      \"dimension\": \"interaction\",\n      \"evidence_required\": \"Core workflows, error recovery, empty states, beta-tester click/type paths, and undo/safety affordances.\"\n    }\n  ],\n  \"recent_artifacts\": [\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-UNIT-TASK-AR-596-001.md\",\n      \"title\": \"W4B-2026-06-19-UNIT-TASK-AR-596-001\"\n    },\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-TASK-AR-604.md\",\n      \"title\": \"W4B-2026-06-19-TASK-AR-604\"\n    },\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-TASK-AR-603.md\",\n      \"title\": \"W4B-2026-06-19-TASK-AR-603\"\n    },\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-TASK-AR-602.md\",\n      \"title\": \"W4B-2026-06-19-TASK-AR-602\"\n    },\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-TASK-AR-601.md\",\n      \"title\": \"W4B-2026-06-19-TASK-AR-601\"\n    },\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-TASK-AR-600.md\",\n      \"title\": \"W4B-2026-06-19-TASK-AR-600\"\n    },\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-TASK-AR-599.md\",\n      \"title\": \"W4B-2026-06-19-TASK-AR-599\"\n    },\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-TASK-AR-598.md\",\n      \"title\": \"W4B-2026-06-19-TASK-AR-598\"\n    },\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-TASK-AR-597.md\",\n      \"title\": \"W4B-2026-06-19-TASK-AR-597\"\n    },\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-TASK-AR-596.md\",\n      \"title\": \"W4B-2026-06-19-TASK-AR-596\"\n    }\n  ],\n  \"review_plan\": {\n    \"beta_tester\": {\n      \"participants\": [\n        \"beta-tester\",\n        \"ux-evaluator\"\n      ],\n      \"requirements\": [\n        \"Record what was clicked or typed, not just DOM presence.\",\n        \"Exercise edge cases and recovery attempts.\",\n        \"Capture environment, viewport, and data state.\",\n        \"Create BTC-style failure IDs for user-visible defects.\",\n        \"Attach or reference multi-step evidence; a single screenshot is not enough.\"\n      ]\n    },\n    \"meeting\": {\n      \"participants\": [\n        \"lead-engineer\",\n        \"design-system-steward\",\n        \"interface-designer\"\n      ],\n      \"purpose\": \"align implementation scope, target files, and verification commands\"\n    },\n    \"seminar\": {\n      \"participants\": [\n        \"lead-designer\",\n        \"design-system-steward\",\n        \"interface-designer\",\n        \"ux-evaluator\"\n      ],\n      \"purpose\": \"derive next UI/UX delta before implementation\"\n    },\n    \"task_id\": \"next-ui-task\"\n  },\n  \"role_coverage\": {\n    \"roles\": [\n      {\n        \"present\": true,\n        \"role\": \"lead-designer\"\n      },\n      {\n        \"present\": true,\n        \"role\": \"design-system-steward\"\n      },\n      {\n        \"present\": true,\n        \"role\": \"interface-designer\"\n      },\n      {\n        \"present\": true,\n        \"role\": \"ux-evaluator\"\n      }\n    ],\n    \"status\": \"pass\"\n  },\n  \"root\": \"C:\\\\Users\\\\ycpig\\\\agent_runtime\\\\.worktrees\\\\TASK-AR-604-oag-beta\",\n  \"schema\": \"agent-runtime-ui-ux-cycle-assessment/v1\",\n  \"score\": {\n    \"level\": \"usable\",\n    \"value\": 75\n  },\n  \"status\": \"missing\"\n}\n",
+      "stderr": ""
+    }
+  ]
+}
