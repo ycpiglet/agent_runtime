@@ -1065,6 +1065,61 @@ HTML = """<!doctype html>
 </html>
 """
 
+# Replace ad-hoc entity icons in the HTML template with componentIcon SVGs
+# (TASK-AR-589). Only the topbar/sidebar icon spans that map clearly to a
+# Lucide icon name are replaced; decorative arrows and non-icon entities are
+# left as-is.  The replacement is performed once at import time so the served
+# HTML is static after that point.
+_ENTITY_ICON_MAP = {
+    # topbar: sidebar-toggle hamburger menu button
+    ">&#9776;</button>": ">" + ui_design_assets.componentIcon("menu", label="Toggle sidebar", class_name="sidebar-toggle-icon") + "</button>",
+    # topbar: experience-settings gear icon
+    '<span class="experience-settings-icon" aria-hidden="true">&#9881;</span>': '<span class="experience-settings-icon" aria-hidden="true">' + ui_design_assets.componentIcon("settings") + "</span>",
+    # sidebar core: Home
+    '<span class="sidebar-icon" aria-hidden="true">&#8962;</span><span class="sidebar-label">Home</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("home") + '</span><span class="sidebar-label">Home</span>',
+    # sidebar core: Work (list)
+    '<span class="sidebar-icon" aria-hidden="true">&#9776;</span><span class="sidebar-label">Work</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("list") + '</span><span class="sidebar-label">Work</span>',
+    # sidebar core: Search
+    '<span class="sidebar-icon" aria-hidden="true">&#9906;</span><span class="sidebar-label">Search</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("search") + '</span><span class="sidebar-label">Search</span>',
+    # sidebar core: Agents (star)
+    '<span class="sidebar-icon" aria-hidden="true">&#9733;</span><span class="sidebar-label">Agents</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("users") + '</span><span class="sidebar-label">Agents</span>',
+    # sidebar core: Records (clock)
+    '<span class="sidebar-icon" aria-hidden="true">&#9201;</span><span class="sidebar-label">Records</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("clock") + '</span><span class="sidebar-label">Records</span>',
+    # sidebar: Calendar (mail entity -> calendar icon)
+    '<span class="sidebar-icon" aria-hidden="true">&#9993;</span><span class="sidebar-label">Calendar</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("calendar") + '</span><span class="sidebar-label">Calendar</span>',
+    # sidebar: State Machines (gear)
+    '<span class="sidebar-icon" aria-hidden="true">&#9881;</span><span class="sidebar-label">State Machines</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("settings") + '</span><span class="sidebar-label">State Machines</span>',
+    # sidebar: Writes (gear)
+    '<span class="sidebar-icon" aria-hidden="true">&#9881;</span><span class="sidebar-label">Writes</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("settings") + '</span><span class="sidebar-label">Writes</span>',
+    # sidebar: Evidence (check)
+    '<span class="sidebar-icon" aria-hidden="true">&#9745;</span><span class="sidebar-label">Evidence</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("check-circle") + '</span><span class="sidebar-label">Evidence</span>',
+    # sidebar: Flag -> flag icon (&#9873;)
+    '<span class="sidebar-icon" aria-hidden="true">&#9873;</span><span class="sidebar-label">Triage</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("flag") + '</span><span class="sidebar-label">Triage</span>',
+    # sidebar: Notifications (bell) -> inbox
+    '<span class="sidebar-icon" aria-hidden="true">&#9993;</span><span class="sidebar-label">Notifications</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("bell") + '</span><span class="sidebar-label">Notifications</span>',
+    # sidebar: Dashboard
+    '<span class="sidebar-icon" aria-hidden="true">&#9683;</span><span class="sidebar-label">Dashboard</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("bar-chart") + '</span><span class="sidebar-label">Dashboard</span>',
+    # sidebar: Automation (zap)
+    '<span class="sidebar-icon" aria-hidden="true">&#9889;</span><span class="sidebar-label">Automation</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("zap") + '</span><span class="sidebar-label">Automation</span>',
+    # sidebar: Inbox (mail)
+    '<span class="sidebar-icon" aria-hidden="true">&#9993;</span><span class="sidebar-label">Inbox</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("inbox") + '</span><span class="sidebar-label">Inbox</span>',
+    # sidebar: Messages (mail)
+    '<span class="sidebar-icon" aria-hidden="true">&#9993;</span><span class="sidebar-label">Messages</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("mail") + '</span><span class="sidebar-label">Messages</span>',
+    # sidebar: Growth (chart bar)
+    '<span class="sidebar-icon" aria-hidden="true">&#9650;</span><span class="sidebar-label">Growth</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("activity") + '</span><span class="sidebar-label">Growth</span>',
+    # sidebar: more-horizontal (vertical ellipsis)
+    '<span class="sidebar-icon" aria-hidden="true">&#8942;</span><span class="sidebar-label">More</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("more-horizontal") + '</span><span class="sidebar-label">More</span>',
+    # sidebar: Roadmap (using list icon -- &#9776; overloaded)
+    '<span class="sidebar-icon" aria-hidden="true">&#9776;</span><span class="sidebar-label">Roadmap</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("chevron-right") + '</span><span class="sidebar-label">Roadmap</span>',
+    # sidebar: Timeline (using arrow-right -- &#9776; overloaded)
+    '<span class="sidebar-icon" aria-hidden="true">&#9776;</span><span class="sidebar-label">Timeline</span>': '<span class="sidebar-icon" aria-hidden="true">' + ui_design_assets.componentIcon("arrow-right") + '</span><span class="sidebar-label">Timeline</span>',
+}
+
+_html = HTML
+for _entity, _replacement in _ENTITY_ICON_MAP.items():
+    _html = _html.replace(_entity, _replacement)
+HTML = _html
+
 
 CSS = """/*
  * Theme tokens (TASK-AR-320).
@@ -1286,7 +1341,7 @@ html { background: var(--canvas); }
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: "Geist", "IBM Plex Sans", "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   background:
     linear-gradient(var(--grid-line) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
@@ -1678,7 +1733,7 @@ button {
 .workspace-item-preview { font-size: var(--font-size-ui-11); color: var(--muted); }
 .workspace-item-cmd {
   font-size: var(--font-size-ui-11);
-  font-family: var(--mono, monospace);
+  font-family: var(--font-mono);
   background: var(--tile);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -1764,7 +1819,7 @@ button {
   padding: var(--space-xs-half) 0;
 }
 .home-widget-shortcut kbd {
-  font-family: var(--mono, monospace);
+  font-family: var(--font-mono);
   font-size: var(--font-size-ui-11);
   background: var(--raise);
   border: 1px solid var(--line-strong);
@@ -2066,7 +2121,7 @@ textarea:focus {
 }
 .board-peek code {
   color: var(--primary-hover);
-  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: var(--font-size-ui-11);
 }
 .board-peek dl {
@@ -2354,7 +2409,7 @@ textarea:focus {
 }
 .task-id {
   color: var(--primary-hover);
-  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: var(--font-size-ui-11);
 }
 .task-card-title {
@@ -3046,7 +3101,7 @@ textarea:focus {
 }
 .work-node-number {
   color: var(--primary-hover);
-  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: var(--font-size-ui-11);
   white-space: nowrap;
 }
@@ -3803,7 +3858,7 @@ pre {
   font-size: var(--font-size-ui-12);
 }
 .tsboard-child:hover { background: var(--surface-raised); }
-.tsboard-child-id { font-family: monospace; color: var(--muted); }
+.tsboard-child-id { font-family: var(--font-mono); color: var(--muted); }
 .phase-chip {
   border-radius: var(--radius-pill);
   padding: var(--space-hairline) var(--space-md-half);
@@ -4289,7 +4344,7 @@ pre {
 .calendar-schedule-panel { margin-top: var(--space-5xl); }
 .calendar-schedule-panel h3 { margin: 0 0 var(--space-sm); font-size: var(--font-size-ui-14); color: var(--ink); }
 .calendar-hint { color: var(--muted); font-size: var(--font-size-ui-12); margin: 0 0 var(--space-2xl); }
-.calendar-cron-badge { font-family: monospace; font-size: var(--font-size-ui-11); color: var(--teal); }
+.calendar-cron-badge { font-family: var(--font-mono); font-size: var(--font-size-ui-11); color: var(--teal); }
 /* ===== TASK-AR-338: notification center + daily brief ===== */
 .sidebar-badge {
   margin-left: auto;
@@ -4488,7 +4543,7 @@ pre {
   color: var(--ink);
   font: inherit;
 }
-.portability-import textarea { font-family: ui-monospace, monospace; font-size: var(--font-size-ui-12); }
+.portability-import textarea { font-family: var(--font-mono); font-size: var(--font-size-ui-12); }
 .portability-summary { color: var(--muted); font-size: var(--font-size-ui-13); margin: var(--space-2xl) 0 var(--space-lg); }
 .portability-summary strong { color: var(--ink); }
 .portability-preview { display: flex; flex-direction: column; gap: var(--space-md); }
