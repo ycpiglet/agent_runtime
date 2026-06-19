@@ -46,7 +46,7 @@ completed_task_set_count: 46
 
 - Flow: First source-mutating implementation of the accepted operator_attention_graph direction: relation tokens/components/patterns, one taskset-to-evidence workflow wiring, and beta/UX evaluation evidence.
 - Progress: `1/2` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-604` | INIT-AR-OPERATOR-ATTENTION-GRAPH | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-604/UNIT-TASK-AR-604-001.md | planned | Action | P1 | High | Medium | 3h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Verify the first operator_attention_graph implementation through user-like beta actio… |

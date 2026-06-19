@@ -2,7 +2,7 @@
 
 ## 현재 한 줄 요약
 
-- Active line is `TASKSET-AR-OPERATOR-ATTENTION-GRAPH`: `TASK-AR-603` is implemented, W4b-verified, released, merged, and closed; only `TASK-AR-604` beta/UX evaluation remains open.
+- Active line is `TASKSET-AR-OPERATOR-ATTENTION-GRAPH`: `TASK-AR-604` beta/UX evaluation is now claimed by `CLAIM-20260619-095200-task-ar-604-operator-attention-graph-beta`; evaluation work belongs in `.worktrees/TASK-AR-604-oag-beta`.
 - The previous `TASKSET-AR-LLM-WIKI` closeout is complete: `TASK-AR-590..596` are archived `7/7`, W4b evidence is indexed, and that taskset has no active claims.
 - UI refactor/design-system remediation is now past the first source-mutating operator-attention-graph implementation. The next UI work is user-like beta/UX evaluation of that slice, not another source mutation.
 - `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` is complete: `TASK-AR-597`, `TASK-AR-598`, and `TASK-AR-599` are implemented, W4b-verified, integrated, and closed.
@@ -12,7 +12,15 @@
 - Self-improvement remediation is improving but not mature: `scribe_state` is now ok, but the score is still below mature and one monitored role gap remains.
 - Scribe source is now the live status summary section so advisory health can be measured without fabricating role evidence.
 - Doc Steward remains ok; keep document-health checks advisory and evidence-based.
-- Next UI refactor step: dispatch `TASK-AR-604` to verify the relation-aware operator attention graph through beta-tester and UX-evaluator evidence.
+- Next UI refactor step: complete `TASK-AR-604` beta-tester and UX-evaluator evidence, then feed findings into the next UI/UX cycle proposal.
+
+## 2026-06-19 - TASKSET-AR-OPERATOR-ATTENTION-GRAPH / TASK-AR-604 active
+
+- Active claim: `CLAIM-20260619-095200-task-ar-604-operator-attention-graph-beta`.
+- Worktree/branch: `.worktrees/TASK-AR-604-oag-beta` / `codex/task-ar-604-operator-attention-graph-beta`.
+- Scope: evaluation evidence only; UI source mutation is out of scope for this task.
+- Target evidence: `reviews/BETA-TEST-2026-06-19-operator-attention-graph.md`, `reviews/UX-EVAL-2026-06-19-operator-attention-graph.md`, and `reviews/INDEX.md`.
+- Required coverage: clicked/keyboard paths, desktop/mobile viewport notes, empty/stale/blocked/interrupted recovery attempts, accessibility/focus/reduced-motion checks, and BTC-style defect routing.
 
 ## 2026-06-19 - TASKSET-AR-OPERATOR-ATTENTION-GRAPH / TASK-AR-603 complete
 

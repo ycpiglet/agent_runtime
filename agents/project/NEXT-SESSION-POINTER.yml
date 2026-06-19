@@ -1,16 +1,26 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T09:42:00+09:00
+updated_at: 2026-06-19T09:52:00+09:00
 current_state:
-  summary: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH is active; TASK-AR-603 is implemented, W4b-verified, released, merged, and closed. TASK-AR-604 is the remaining beta/UX evaluation step."
+  summary: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH is active; TASK-AR-604 is claimed for beta-tester and UX-evaluator evidence after the first operator attention graph implementation."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH"
   step_index: 4
   step_total: 5
-  progress_pct: 70
-  status_text: "Next dispatch is TASK-AR-604: beta-tester and UX-evaluator evidence for the relation-aware operator attention graph slice."
+  progress_pct: 75
+  status_text: "Active claim CLAIM-20260619-095200-task-ar-604-operator-attention-graph-beta owns the beta/UX evidence pass in .worktrees/TASK-AR-604-oag-beta."
 active_work:
-  current_agents: []
+  current_agents:
+    - claim_id: "CLAIM-20260619-095200-task-ar-604-operator-attention-graph-beta"
+      agent_role: "ux-evaluator"
+      agent_instance_id: "ux-evaluator-20260619-095200-kst-oag"
+      display_name: "codex-ux-evaluator-oag-604"
+      callsite_id: "terminal:wt-task-ar-604:tab-01"
+      pane_id: "terminal:wt-task-ar-604:tab-01"
+      task_id: "TASK-AR-604"
+      task_set_id: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH"
+      unit_id: "UNIT-TASK-AR-604-001"
+      worktree_path: ".worktrees/TASK-AR-604-oag-beta"
   current_teams:
     - ui-ux
 resume:
@@ -27,15 +37,15 @@ pointers:
     taskset: TASKSET-AR-OPERATOR-ATTENTION-GRAPH
     completed_tasks:
       - TASK-AR-603
-    active_claim: null
+    active_claim: agents/runtime/task_claims/CLAIM-20260619-095200-task-ar-604-operator-attention-graph-beta.json
     released_claim: agents/runtime/task_claims/CLAIM-20260619-091500-task-ar-603-operator-attention-graph.json
-    worktree_path: null
-    implementation_branch: codex/task-ar-603-operator-attention-graph
+    worktree_path: .worktrees/TASK-AR-604-oag-beta
+    implementation_branch: codex/task-ar-604-operator-attention-graph-beta
     implementation_commit: 5c121b3
     integration_commit: a923e91
-    status: task_ar_603_completed_integrated_closed
+    status: task_ar_604_claimed_beta_ux_evaluation
     next_task: TASK-AR-604
-    next_decision: run_beta_ux_evaluation_before_taskset_closeout
+    next_decision: complete_beta_ux_evaluation_before_taskset_closeout
     verification_evidence: reviews/VERIFY-2026-06-19-operator-attention-graph-implementation.json
     unit_verification_evidence: reviews/VERIFY-2026-06-19-unit-task-ar-603-001-20260619094000.json
     w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-603.md
