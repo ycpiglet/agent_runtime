@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-20
-task_count: 277
-open_count: 1
-completed_count: 276
+task_count: 279
+open_count: 2
+completed_count: 277
 task_set_count: 1
-completed_task_set_count: 52
+completed_task_set_count: 53
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `1` open or active tasks; `276` completed tasks are archived from this live board.
+- Summary: `2` open or active tasks; `277` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `1` / Ask `0` / Review `0` / Later `0` / Done `276`.
-- Task Sets: `1` active workflows; `52` completed workflows are hidden from the live action board.
+- Status: Action `2` / Ask `0` / Review `0` / Later `0` / Done `277`.
+- Task Sets: `1` active workflows; `53` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -42,14 +42,15 @@ completed_task_set_count: 52
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
 
-### Taskset Board Evidence And Performance IA (`TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA`)
+### Taskset Board Evidence Review Queue (`TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE`)
 
-- Flow: Run a seminar-led UI/UX cycle for evidence-gap overload and performance-aware Taskset Board IA, publish an RFC, then derive the next implementation plus beta-evaluation registration.
-- Progress: `2/3` done; `1` open or active.
+- Flow: Implement the accepted evidence_review_queue_with_progressive_disclosure_and_split_loading direction, then run exploratory beta/UX verification.
+- Progress: `0/2` done; `2` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-618` | INIT-AR-TASKSET-BOARD-EVIDENCE-PERF-IA | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | Medium | 3h/8000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Turn the accepted evidence/performance IA RFC into a source-mutation implementation r… |
+| `TASK-AR-620` | INIT-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-620/UNIT-TASK-AR-620-001.md | planned | Action | P1 | High | Medium | 3h/8000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Verify the implemented evidence review queue with exploratory beta-tester and UX-eval… |
+| `TASK-AR-619` | INIT-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-619/UNIT-TASK-AR-619-001.md | planned | Action | P1 | High | High | 6h/14000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Make the Taskset Board stale/missing evidence lane actionable by deriving a grouped e… |
 
 ## Archived Task Sets
 
@@ -108,14 +109,15 @@ completed_task_set_count: 52
 | Taskset Board IA Design Direction (`TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION`) | Resolve the post-OAG UX watch that Taskset Board discovery and whole-board focus traversal are too long now that the board contains 49 tasksets; run a lead-designer IA/design seminar, publish an RFC, then derive the next implementation and beta-evaluation taskset. | `3/3` done | `3` completed task files archived |
 | Taskset Board Attention Workspace (`TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE`) | Source-mutating implementation of the accepted Taskset Board IA RFC: attention lane derivation, taskset switcher, relation detail panel, and beta/UX evidence for desktop, mobile, keyboard, reduced-motion, and recovery states. | `2/2` done | `2` completed task files archived |
 | TSAW Claim And Empty State Refinement (`TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT`) | Make the Taskset Board attention workspace surface live active claims and clarify zero-count lane recovery copy, then rerun beta/UX evidence. | `2/2` done | `2` completed task files archived |
+| Taskset Board Evidence And Performance IA (`TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA`) | Run a seminar-led UI/UX cycle for evidence-gap overload and performance-aware Taskset Board IA, publish an RFC, then derive the next implementation plus beta-evaluation registration. | `3/3` done | `3` completed task files archived |
 
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `1` open across `1` task sets (see Action Board above).
-- Archived task sets: `52` (see Archived Task Sets above).
-- Archived task files: `276` — see `ARCHIVE-INDEX.md`.
+- Active: `2` open across `1` task sets (see Action Board above).
+- Archived task sets: `53` (see Archived Task Sets above).
+- Archived task files: `277` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

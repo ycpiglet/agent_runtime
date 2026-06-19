@@ -1,8 +1,11 @@
 {
   "schema": "agent-runtime-verification/v1",
   "work_id": "TASK-AR-618",
+  "id": "VERIFY-2026-06-20-task-ar-618-implementation-beta-plan",
+  "task_id": "TASK-AR-618",
   "task_set_id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA",
   "claim_id": "CLAIM-20260620-010012-task-ar-618-task-ar-618-evidence-perf-implementation-plan",
+  "status": "passed",
   "verified_at": "2026-06-20T01:06:00+09:00",
   "verified_by": "codex-interface-designer-ar-618",
   "result": "pass",
@@ -15,37 +18,37 @@
   "commands": [
     {
       "command": "python -m json.tool agents/project/work-items/REGISTRATION-2026-06-20-taskset-board-evidence-review-queue-implementation.json",
-      "result": "pass",
+      "status": "passed",
       "notes": "Registration input parses as JSON."
     },
     {
       "command": "python scripts/ui_ux_cycle.py --root . propose --dry-run --json",
-      "result": "pass",
+      "status": "passed",
       "notes": "Proposal command remained dry-run and reported planned status with no mutation errors."
     },
     {
       "command": "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA --check",
-      "result": "pass",
+      "status": "passed",
       "notes": "Taskset gate found no findings."
     },
     {
       "command": "python scripts/evidence_index_generator.py --check",
-      "result": "pass",
+      "status": "passed",
       "notes": "Evidence index is current."
     },
     {
       "command": "python scripts/design_system_gate.py --check --all-ui",
-      "result": "pass",
+      "status": "passed",
       "notes": "Design-system gate passed with artifacts=3 roles=4 scanned=6 findings=0."
     },
     {
       "command": "git diff --check",
-      "result": "pass",
+      "status": "passed",
       "notes": "No whitespace errors; CRLF warning only for generated reviews/INDEX.md."
     },
     {
       "command": "git status --short -- src tests scripts",
-      "result": "pass",
+      "status": "passed",
       "notes": "No UI source, tests, or scripts were modified in TASK-AR-618."
     }
   ],

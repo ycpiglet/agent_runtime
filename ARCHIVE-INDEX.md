@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-20
-archived_count: 276
+archived_count: 277
 ---
 
 # Archived Task Files
 
-- `276` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `277` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -289,3 +289,4 @@ archived_count: 276
 | `TASK-AR-614` | `5945f908-67e…` | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | completed | 2026-06-19T21:56:00+09:00 | 2026-06-19T22:14:49+09:00 | 2026-06-19T22:37:50+09:00 | 2026-06-19T22:37:50+09:00 | Fix BTC-TSAW-CLAIM-001 and BTC-TSAW-EMPTY-001 so active runtime claims appear in the… |
 | `TASK-AR-616` | `3ff2023d-2a5…` | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | completed | 2026-06-19T23:39:00+09:00 | 2026-06-19T23:58:57+09:00 | 2026-06-20T00:23:22+09:00 | 2026-06-20T00:23:22+09:00 | Create a lead-designer seminar artifact that chooses the next Taskset Board IA direct… |
 | `TASK-AR-617` | `c356e6f9-6b8…` | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | completed | 2026-06-19T23:39:00+09:00 | 2026-06-20T00:34:24+09:00 | 2026-06-20T00:49:37+09:00 | 2026-06-20T00:49:37+09:00 | Promote the seminar decision into an accepted design-direction RFC that names the exa… |
+| `TASK-AR-618` | `92c20643-0ae…` | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | completed | 2026-06-19T23:39:00+09:00 | 2026-06-20T01:00:12+09:00 | 2026-06-20T01:14:17+09:00 | 2026-06-20T01:14:17+09:00 | Turn the accepted evidence/performance IA RFC into a source-mutation implementation r… |
