@@ -1,22 +1,43 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T12:26:00+09:00
+updated_at: 2026-06-19T12:40:31+09:00
 current_state:
-  summary: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH is complete; TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER is registered as the next UI/UX implementation and beta cycle."
+  summary: "TASK-AR-605 is claimed for claim-aware Operator Attention Graph relation adapter implementation."
   status: in_progress
-  task_set_status: registered
+  task_set_status: claimed
   task_set_id: "TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER"
   step_index: 1
-  step_total: 2
-  progress_pct: 0
-  status_text: "No active UI claim; next claim should be TASK-AR-605 for claim-aware relation state mapping."
+  step_total: 6
+  progress_pct: 5
+  status_text: "TASK-AR-605 claim created; implementation worktree is ready for adapter changes."
 active_work:
-  current_agents: []
+  current_agents:
+    - claim_id: CLAIM-20260619-124031-task-ar-605-claim-aware-relation-adapter
+      display_name: codex-interface-designer-ar-605
+      agent_role: interface-designer
+      agent_instance_id: codex-interface-designer-ar-605
+      team_id: ui-ux
+      pane_id: terminal:wt-task-ar-605:tab-01
+      callsite_id: terminal:wt-task-ar-605:tab-01
+      task_id: TASK-AR-605
+      task_set_id: TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER
+      unit_id: UNIT-TASK-AR-605-001
+      status: claimed
+      phase: implementation
+      progress_pct: 5
+      step_index: 1
+      step_total: 6
+      status_text: Claim-aware relation adapter implementation started
+      worktree_path: .worktrees/TASK-AR-605-claim-aware-relation-adapter
+      branch: codex/task-ar-605-claim-aware-relation-adapter
+      claim_path: agents/runtime/task_claims/CLAIM-20260619-124031-task-ar-605-claim-aware-relation-adapter.json
+      handoff_path: agents/runtime/task_claims/CLAIM-20260619-124031-task-ar-605-claim-aware-relation-adapter.handoff.md
+      last_heartbeat: 2026-06-19T12:40:31+09:00
   current_teams:
     - ui-ux
 resume:
   active_task: TASK-AR-605
   active_task_set: TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER
-  branch_policy: "Create a fresh dispatcher claim and worktree for TASK-AR-605 before mutating UI source files."
+  branch_policy: "Work only inside .worktrees/TASK-AR-605-claim-aware-relation-adapter until W4 verification and release."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -53,9 +74,9 @@ pointers:
       - BTC-OAG-INTERRUPT-001
   oag_claim_aware_relation_adapter:
     taskset: TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER
-    active_claim: null
-    worktree_path: null
-    status: registered
+    active_claim: agents/runtime/task_claims/CLAIM-20260619-124031-task-ar-605-claim-aware-relation-adapter.json
+    worktree_path: .worktrees/TASK-AR-605-claim-aware-relation-adapter
+    status: task_ar_605_claimed
     next_task: TASK-AR-605
     next_unit: UNIT-TASK-AR-605-001
     follow_up_task: TASK-AR-606
