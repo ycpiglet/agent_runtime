@@ -125,8 +125,12 @@ def test_ui_console_shell_css_targets_served_dom_classes(tmp_path):
         ".list-panel",
         ".tab.is-active",
         ".view.is-active",
+        ".layout > *",
     ]:
         assert selector in css
+
+    assert "min-width: 0;" in css
+    assert "max-width: 100%;" in css
 
 
 def test_ui_console_backlog_cards_surface_status_priority_taskset_and_evidence(tmp_path):
@@ -1183,11 +1187,17 @@ def test_ui_console_live_map_view_renders_graph_presence_and_activity_feed(tmp_p
     assert "function reconcileLiveMap(" in js
     assert "function pulseLiveEdge(" in js
     assert "function pushActivityToast(" in js
+    assert "patternSvgForceAgentLayout(nodes, edges" in js
+    assert "live-map-edge kind-" in js
+    assert "live-map-node-label" in js
     assert "reconcileLiveMap(previous, runtimeState)" in js  # wired into the SSE stream
     assert "renderLiveMap()" in js  # invoked from renderMap (periodic + live refresh)
 
     # CSS styles the graph + pulse highlight + toast.
     assert ".live-map-edge" in css
+    assert ".live-map-edge.magnitude-high" in css
+    assert ".live-map-edge.health-block" in css
+    assert ".live-map-node-status-icon" in css
     assert ".is-pulsing" in css
     assert ".activity-toast" in css
 
@@ -1222,6 +1232,23 @@ def test_ui_console_unknown_path_returns_404(tmp_path):
 
     assert response.status == 404
     assert response.content_type == "text/plain; charset=utf-8"
+
+
+def test_ui_console_serves_vendored_graph_libraries(tmp_path):
+    routes = {
+        "/vendor/dagre/3.0.0/dagre.min.js": "var dagre=",
+        "/vendor/d3-quadtree/3.0.1/d3-quadtree.min.js": "quadtree",
+        "/vendor/d3-dispatch/3.0.1/d3-dispatch.min.js": "dispatch",
+        "/vendor/d3-timer/3.0.1/d3-timer.min.js": "timer",
+        "/vendor/d3-force/3.0.0/d3-force.min.js": "forceSimulation",
+    }
+
+    for route, marker in routes.items():
+        response = ui_console.build_response(route, tmp_path)
+        body = response.body.decode("utf-8")
+        assert response.status == 200
+        assert response.content_type == "application/javascript; charset=utf-8"
+        assert marker in body
 
 
 def test_ui_console_favicon_route_is_quiet_for_browser_probe(tmp_path):
@@ -1540,6 +1567,17 @@ def test_ui_console_team_agents_card_fields_are_escaped(tmp_path):
     # Remaining identity/meta fields must still be HTML-escaped directly.
     for field in ["card.callsign", "card.role", "card.model"]:
         assert f"escapeHtml({field}" in card_block
+
+
+def test_ui_console_agent_cards_use_dicebear_identicon_avatar_boundary(tmp_path):
+    """Agent cards consume the local DiceBear Identicon avatar helper."""
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert "function patternAgentAvatar" in js
+    assert "data-dicebear-style=\"identicon\"" in js
+    assert "data-dicebear-version=\"" in js
+    assert "_DICEBEAR_IDENTICON_ROWS" in js
+    assert "patternAgentAvatar(avatarSeed" in js
+    assert "api.dicebear.com" not in js
 
 
 # --- Workload heatmap + team assignment view (TASK-AR-337) ------------------
@@ -1891,6 +1929,59 @@ def test_ui_console_collapsed_rail_and_mobile_overlay_css(tmp_path):
     assert ".sidebar.is-open" in mobile_css
     assert ".sidebar-toggle" in mobile_css
     assert ".sidebar-scrim" in css
+
+
+def test_ui_console_uses_component_icons_for_primary_navigation(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+
+    assert 'class="sidebar-toggle-icon"' in html
+    assert '<span class="sidebar-icon" aria-hidden="true"><svg' in html
+    assert 'stroke="currentColor"' in html
+    assert 'width="var(--icon-size)"' in html
+    assert "lucide-static" not in html
+    assert "&#8962;" not in html
+    assert "&#9906;" not in html
+
+
+def test_ui_console_typography_and_icon_css_uses_design_tokens(tmp_path):
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    assert "font-family: var(--font-sans);" in css
+    assert "font-family: var(--font-mono);" in css
+    assert "--icon-size: 16px;" in css
+    assert ".icon," in css
+    assert "width: var(--icon-size);" in css
+    assert "height: var(--icon-size);" in css
+    assert '"IBM Plex Sans", "Segoe UI", sans-serif' not in css
+
+
+def test_ui_console_serves_self_hosted_geist_font_assets(tmp_path):
+    # Geist woff2 binaries are a documented drop-in (public-sanitization policy
+    # forbids binaries in the public core). The server must handle a request for
+    # the absent font path gracefully (e.g. 404) rather than raising/500.
+    response = ui_console.build_response(
+        "/vendor/geist/1.7.2/fonts/geist-sans/Geist-Variable.woff2",
+        tmp_path,
+    )
+    assert response.status != 500
+    if response.status == 200:
+        assert response.content_type == "font/woff2"
+
+
+def test_ui_console_serves_vendored_lucide_icon_assets(tmp_path):
+    response = ui_console.build_response(
+        "/vendor/lucide-static/1.21.0/icons/menu.svg",
+        tmp_path,
+    )
+    blocked_response = ui_console.build_response(
+        "/vendor/lucide-static/1.21.0/icons/../LICENSE",
+        tmp_path,
+    )
+
+    assert response.status == 200
+    assert response.content_type == "image/svg+xml; charset=utf-8"
+    assert b"lucide-static v1.21.0 - ISC" in response.body
+    assert blocked_response.status == 404
 
 
 # ---- TASK-AR-322: common list pattern (sort/filter/group/search + density) ----
@@ -2264,6 +2355,11 @@ def test_ui_console_timeline_and_dependency_js_render_bars_arrows_and_cycle(tmp_
     # Dependency graph reuses the SVG node/edge primitives (like the live map).
     assert "dep-edge" in js
     assert "dep-node" in js
+    assert "patternSvgLayeredDagreLayout(nodes, edges" in js
+    assert "svgLayeredEdgePath(route)" in js
+    assert "graphEdgeMagnitudeBucket(edge)" in js
+    assert "graphEdgeHealth(edge" in js
+    assert "appendSvgStatusBadge(group" in js
     # Dynamic fields are escaped.
     assert "escapeHtml(bar.id)" in js
     assert "escapeHtml(arrow.from)" in js
@@ -2287,6 +2383,9 @@ def test_ui_console_timeline_and_dependency_css_uses_tokens_not_raw_hex(tmp_path
     assert ".timeline-bar.status-completed { border-color: var(--success-line)" in css
     assert ".dep-edge.is-cycle {" in css
     assert "stroke: var(--danger);" in css
+    assert ".dep-edge.magnitude-high" in css
+    assert ".dep-edge.health-watch" in css
+    assert ".dep-node-status-icon" in css
 
 
 # ----- TASK-AR-329: taskset lifecycle UI (create/rename/archive/move/bulk/undo/templates) -----
@@ -2947,6 +3046,9 @@ def test_ui_console_state_machine_render_escapes_labels_and_renders(tmp_path):
     assert "current_state" in js
     assert "is-traversed" in js
     assert "is-current" in js
+    assert "patternSvgLayeredDagreLayout(nodes, layoutEdges" in js
+    assert "state-machine-edge magnitude-" in js
+    assert 'appendSvgStatusBadge(group, pos.x + 21' in js
 
 
 def test_ui_console_state_machine_css_uses_tokens_not_raw_color(tmp_path):
@@ -2970,6 +3072,9 @@ def test_ui_console_state_machine_css_uses_tokens_not_raw_color(tmp_path):
     assert "--sm-current:" in _dark_theme_block(css)
     assert "--sm-path:" in _root_token_block(css)
     assert "--sm-path:" in _dark_theme_block(css)
+    assert ".state-machine-edge.magnitude-high" in css
+    assert ".state-machine-edge.health-pass" in css
+    assert ".state-machine-node-status-icon" in css
 
 
 def test_ui_console_state_machine_app_js_ascii_only_and_node_check(tmp_path):

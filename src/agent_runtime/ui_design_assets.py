@@ -29,32 +29,19 @@ Avatar system (TASK-AR-587, experimental tier):
   seed indefinitely.
 
 Typography tokens (TASK-AR-589, experimental tier):
-  ``--font-sans`` and ``--font-mono`` CSS custom properties with a Geist-first
-  fallback stack. Geist and Geist Mono are licensed under the SIL Open Font
-  License 1.1 (OFL-1.1), copyright Vercel, Inc. The ``@font-face`` declarations
-  point to ``/fonts/Geist.woff2`` and ``/fonts/GeistMono.woff2`` (self-hosted,
-  no CDN). If the woff2 binaries are not present, the fallback stack
-  (Inter / system-ui / sans-serif and JetBrains Mono / ui-monospace / monospace)
-  keeps the console rendering correctly. To activate Geist, drop the OFL woff2
-  files into the fonts asset path served under ``/fonts/``.
+  Geist 1.7.2 and Geist Mono 1.7.2 are vendored under
+  ``src/agent_runtime/vendor/geist/1.7.2`` with the SIL Open Font License
+  record kept beside the binaries. The console serves those ``.woff2`` files
+  from ``/vendor/geist/1.7.2/...``; no runtime font CDN is required. Consumers
+  use ``--font-sans`` and ``--font-mono`` instead of page-local font stacks.
 
 Icon system (TASK-AR-589, experimental tier):
-  ``componentIcon(name)`` — returns an inline SVG icon that inherits
-  ``currentColor`` and is sized via the ``--icon-size`` token (default 16px).
-  The icon paths are a vendored subset of the Lucide icon set, licensed under
-  the ISC License. Lucide is a fork of Feather Icons.
-
-  ISC License for the Lucide-derived paths vendored below:
-    Copyright (c) 2022 Lucide Contributors
-    Permission to use, copy, modify, and/or distribute this software for any
-    purpose with or without fee is hereby granted, provided that the above
-    copyright notice and this permission notice appear in all copies.
-    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES.
-
-  The paths are clean 24x24 stroke paths (stroke="currentColor") conforming to
-  the Lucide 24x24 grid. Name validation is strict: unknown names return a safe
-  default (circle with question mark) — ``componentIcon`` never interpolates an
-  unescaped ``name`` into SVG output.
+  ``componentIcon(name)`` returns a Lucide inline SVG subset from
+  ``src/agent_runtime/vendor/lucide-static/1.21.0/icons``. The vendored
+  package is ISC-licensed and every icon inherits ``currentColor`` while size
+  is controlled by the ``--icon-size`` design token. Name validation is strict:
+  unknown names return the safe help-circle fallback rather than interpolating
+  untrusted names into SVG markup.
 
 Data-viz palette tokens (TASK-AR-590, experimental tier):
   Categorical 8-hue set (``--dv-cat-1`` through ``--dv-cat-8``) and a 5-step
@@ -109,39 +96,59 @@ State illustrations (TASK-AR-590, experimental tier):
 """
 from __future__ import annotations
 
+import json
 from html import escape as _html_escape
+from pathlib import Path
+
+
+_PACKAGE_ROOT = Path(__file__).resolve().parent
+GEIST_VERSION = "1.7.2"
+GEIST_LICENSE = "SIL OPEN FONT LICENSE"
+GEIST_VENDOR_PATH = "src/agent_runtime/vendor/geist/1.7.2"
+LUCIDE_STATIC_VERSION = "1.21.0"
+LUCIDE_STATIC_LICENSE = "ISC"
+LUCIDE_STATIC_VENDOR_PATH = "src/agent_runtime/vendor/lucide-static/1.21.0"
 
 UI_TOKEN_SCALE_CSS = """
 /* ===== Typography font tokens (TASK-AR-589) ============================== */
-/* Geist (OFL-1.1, Vercel Inc.) self-hosted woff2 at /fonts/Geist.woff2.    */
-/* Geist Mono (OFL-1.1, Vercel Inc.) at /fonts/GeistMono.woff2.             */
-/* If the woff2 files are absent the fallback stack keeps the UI functional. */
+/* Geist 1.7.2 / Geist Mono 1.7.2 are self-hosted from /vendor/geist.       */
+/* License boundary: SIL Open Font License, vendored with the font files.   */
 @font-face {
   font-family: "Geist";
-  src: url("/fonts/Geist.woff2") format("woff2");
+  src: url("/vendor/geist/1.7.2/fonts/geist-sans/Geist-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist";
+  src: url("/vendor/geist/1.7.2/fonts/geist-sans/Geist-Italic%5Bwght%5D.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/vendor/geist/1.7.2/fonts/geist-mono/GeistMono-Variable.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Geist Mono";
-  src: url("/fonts/GeistMono.woff2") format("woff2");
+  src: url("/vendor/geist/1.7.2/fonts/geist-mono/GeistMono-Italic%5Bwght%5D.woff2") format("woff2");
   font-weight: 100 900;
-  font-style: normal;
+  font-style: italic;
   font-display: swap;
-}
-/* ===== Icon size token (TASK-AR-589) ====================================== */
-/* --icon-size controls the width/height of componentIcon() output.           */
-:root {
-  --icon-size: 16px;
 }
 /* ===== Design-system token scale (TASK-AR-579, promoted TASK-AR-583) ===== */
 /* Spacing and radius tokens are now a fully designed semantic scale.         */
 /* Transitional space-px / radius-px aliases have been removed (TASK-AR-583);*/
 /* consumers use the named semantic tokens below (stable as of TASK-AR-583). */
 :root {
-  --font-sans: "Geist", Inter, system-ui, sans-serif;
-  --font-mono: "Geist Mono", "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: "Geist", "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Geist Mono", "IBM Plex Mono", "SFMono-Regular", Consolas, ui-monospace, monospace;
+  --icon-size: 16px;
   --font-size-ui-xs: 10px;
   --font-size-ui-sm: 11px;
   --font-size-ui-md: 12px;
@@ -460,7 +467,9 @@ function componentSparkline(data, options) {
     : "";
   var label = opts.label ? escapeHtml(String(opts.label)) : "";
   var titleEl = label ? "<title>" + label + "</title>" : "";
-  var ariaAttr = label ? ' aria-label="' + label + '"' : ' aria-hidden="true"';
+  // TASK-AR-592: informative sparklines carry role="img" + aria-label (WCAG 1.1.1);
+  // decorative sparklines use aria-hidden="true" (no role attr needed).
+  var ariaAttr = label ? ' role="img" aria-label="' + label + '"' : ' aria-hidden="true"';
   return (
     '<svg class="sparkline" viewBox="0 0 ' + w + " " + h + '"' +
     ' width="var(--dv-sparkline-w, 64px)" height="var(--dv-sparkline-h, 24px)"' +
@@ -577,13 +586,297 @@ function patternStateMachinePanelLegend() {
   ].join("");
 }
 
+/* ===== Pattern component: Layered SVG graph layout (TASK-AR-588) ==========
+ * patternSvgLayeredDagreLayout(nodes, edges, options) uses vendored
+ * @dagrejs/dagre 3.0.0 (MIT, /vendor/dagre/3.0.0/dagre.min.js) when loaded,
+ * then returns token-renderer-friendly node coordinates and edge routes.
+ * Maturity tier: experimental.
+ */
+function graphEdgeKey(edge, index) {
+  return edge && edge.id ? String(edge.id) : `${edge && edge.from ? edge.from : "from"}->${edge && edge.to ? edge.to : "to"}:${index}`;
+}
+
+function graphSignalToken(value, fallback = "neutral") {
+  const text = String(value || "").toLowerCase();
+  if (["pass", "success", "done", "completed", "released", "verified"].includes(text)) return "pass";
+  if (["block", "blocked", "danger", "failed", "error", "cycle"].includes(text)) return "block";
+  if (["watch", "warning", "warn", "missing", "stale", "pending", "in_progress"].includes(text)) return "watch";
+  if (["info", "current", "path", "parent", "dependency"].includes(text)) return "info";
+  return fallback;
+}
+
+function graphStatusIconText(signal) {
+  const token = graphSignalToken(signal);
+  if (token === "pass") return "P";
+  if (token === "watch") return "W";
+  if (token === "block") return "B";
+  if (token === "info") return "I";
+  return "N";
+}
+
+function graphNodeSignal(node, fallback = "info") {
+  if (node && node.in_cycle) return "block";
+  return graphSignalToken((node && (node.signal_token || node.signal || node.status_bucket || node.status || node.kind)) || "", fallback);
+}
+
+function graphEdgeHealth(edge, fallback = "neutral") {
+  if (edge && edge.in_cycle) return "block";
+  return graphSignalToken((edge && (edge.health || edge.signal || edge.status || edge.kind)) || "", fallback);
+}
+
+function graphEdgeMagnitudeBucket(edge) {
+  const value = Number((edge && (edge.magnitude || edge.weight || edge.count || edge.dependency_count || edge.message_count)) || 1);
+  if (value >= 5) return "high";
+  if (value >= 2) return "medium";
+  return "low";
+}
+
+function svgLayeredEdgePath(points) {
+  const route = points || [];
+  if (!route.length) return "";
+  return route.map((point, index) => `${index === 0 ? "M" : "L"} ${Math.round(point.x)} ${Math.round(point.y)}`).join(" ");
+}
+
+function graphDagreRuntime() {
+  const root = typeof globalThis !== "undefined" ? globalThis : (typeof window !== "undefined" ? window : null);
+  const runtime = root && root.dagre;
+  return runtime && runtime.graphlib && typeof runtime.layout === "function" ? runtime : null;
+}
+
+function graphScalePoint(point, transform) {
+  return {
+    x: transform.offsetX + (Number(point.x) || 0) * transform.scale,
+    y: transform.offsetY + (Number(point.y) || 0) * transform.scale,
+  };
+}
+
+function graphDagreNodeBox(node) {
+  if (node && node.kind === "parent") return { width: 70, height: 42 };
+  if (node && node.kind === "missing") return { width: 62, height: 38 };
+  if (node && node.score) return { width: 92, height: 56 };
+  return { width: 64, height: 42 };
+}
+
+function patternSvgLayeredDagreRuntimeLayout(nodes, edges, options, ids) {
+  const runtime = graphDagreRuntime();
+  if (!runtime) return null;
+  try {
+    const width = Number(options.width || 1000);
+    const height = Number(options.height || 600);
+    const marginX = Number(options.marginX || 90);
+    const marginY = Number(options.marginY || 70);
+    const rankdir = String(options.rankdir || "TB").toUpperCase();
+    const graph = new runtime.graphlib.Graph({ multigraph: true })
+      .setGraph({
+        rankdir,
+        marginx: marginX,
+        marginy: marginY,
+        nodesep: Number(options.nodesep || 56),
+        ranksep: Number(options.ranksep || 76),
+      })
+      .setDefaultEdgeLabel(() => ({ minlen: 1, weight: 1 }));
+    nodes.forEach((node) => graph.setNode(String(node.id), graphDagreNodeBox(node)));
+    edges.forEach((edge, index) => {
+      const from = String(edge.from);
+      const to = String(edge.to);
+      if (!ids.has(from) || !ids.has(to)) return;
+      graph.setEdge(from, to, {
+        minlen: Number(edge.minlen || 1),
+        weight: Math.max(1, Number(edge.weight || edge.magnitude || 1)),
+      }, graphEdgeKey(edge, index));
+    });
+    runtime.layout(graph);
+    const graphBox = graph.graph() || {};
+    const layoutWidth = Math.max(Number(graphBox.width || width), 1);
+    const layoutHeight = Math.max(Number(graphBox.height || height), 1);
+    const scale = Math.min(Math.max(width - marginX * 2, 1) / layoutWidth, Math.max(height - marginY * 2, 1) / layoutHeight);
+    const transform = {
+      scale: Number.isFinite(scale) && scale > 0 ? scale : 1,
+      offsetX: (width - layoutWidth * (Number.isFinite(scale) && scale > 0 ? scale : 1)) / 2,
+      offsetY: (height - layoutHeight * (Number.isFinite(scale) && scale > 0 ? scale : 1)) / 2,
+    };
+    const positions = {};
+    graph.nodes().forEach((id) => { positions[String(id)] = graphScalePoint(graph.node(id), transform); });
+    const edgeRoutes = {};
+    edges.forEach((edge, index) => {
+      const key = graphEdgeKey(edge, index);
+      const route = graph.edge({ v: String(edge.from), w: String(edge.to), name: key });
+      if (route && Array.isArray(route.points) && route.points.length) {
+        edgeRoutes[key] = route.points.map((point) => graphScalePoint(point, transform));
+      }
+    });
+    return { positions, edgeRoutes, ranks: {}, rankdir, engine: "@dagrejs/dagre" };
+  } catch (error) {
+    return null;
+  }
+}
+
+function patternSvgLayeredDagreLayout(nodes, edges, options = {}) {
+  const list = (nodes || []).filter((node) => node && node.id);
+  const links = (edges || []).filter((edge) => edge && edge.from && edge.to);
+  const ids = new Set(list.map((node) => String(node.id)));
+  const runtimeLayout = patternSvgLayeredDagreRuntimeLayout(list, links, options, ids);
+  if (runtimeLayout) return runtimeLayout;
+  const width = Number(options.width || 1000);
+  const height = Number(options.height || 600);
+  const marginX = Number(options.marginX || 90);
+  const marginY = Number(options.marginY || 70);
+  const rankdir = String(options.rankdir || "TB").toUpperCase();
+  const incoming = {};
+  const outgoing = {};
+  list.forEach((node) => {
+    incoming[String(node.id)] = [];
+    outgoing[String(node.id)] = [];
+  });
+  links.forEach((edge, index) => {
+    const from = String(edge.from);
+    const to = String(edge.to);
+    if (!ids.has(from) || !ids.has(to)) return;
+    outgoing[from].push({ edge, to, index });
+    incoming[to].push({ edge, from, index });
+  });
+  const rank = {};
+  const queue = list.filter((node) => !incoming[String(node.id)].length).map((node) => String(node.id)).sort();
+  if (!queue.length) list.forEach((node) => queue.push(String(node.id)));
+  queue.forEach((id) => { rank[id] = 0; });
+  const seen = new Set();
+  while (queue.length) {
+    const current = queue.shift();
+    if (!current || seen.has(current)) continue;
+    seen.add(current);
+    (outgoing[current] || []).forEach((entry) => {
+      rank[entry.to] = Math.max(rank[entry.to] || 0, (rank[current] || 0) + 1);
+      if (!seen.has(entry.to)) queue.push(entry.to);
+    });
+  }
+  list.forEach((node, index) => {
+    const id = String(node.id);
+    if (rank[id] === undefined) rank[id] = index;
+  });
+  const layers = {};
+  list.forEach((node) => {
+    const key = String(rank[String(node.id)] || 0);
+    if (!layers[key]) layers[key] = [];
+    layers[key].push(node);
+  });
+  const rankKeys = Object.keys(layers).map(Number).sort((a, b) => a - b);
+  const positions = {};
+  const spanPrimary = rankdir === "LR" ? width - marginX * 2 : height - marginY * 2;
+  const spanSecondary = rankdir === "LR" ? height - marginY * 2 : width - marginX * 2;
+  rankKeys.forEach((rankKey, layerIndex) => {
+    const layer = layers[String(rankKey)].sort((a, b) => String(a.id).localeCompare(String(b.id)));
+    const primary = rankKeys.length === 1 ? spanPrimary / 2 : (spanPrimary / Math.max(rankKeys.length - 1, 1)) * layerIndex;
+    layer.forEach((node, orderIndex) => {
+      const secondary = layer.length === 1 ? spanSecondary / 2 : (spanSecondary / Math.max(layer.length - 1, 1)) * orderIndex;
+      positions[String(node.id)] = rankdir === "LR"
+        ? { x: marginX + primary, y: marginY + secondary }
+        : { x: marginX + secondary, y: marginY + primary };
+    });
+  });
+  const edgeRoutes = {};
+  links.forEach((edge, index) => {
+    const a = positions[String(edge.from)];
+    const b = positions[String(edge.to)];
+    if (!a || !b) return;
+    const key = graphEdgeKey(edge, index);
+    if (rankdir === "LR") {
+      const midX = (a.x + b.x) / 2;
+      edgeRoutes[key] = [{ x: a.x, y: a.y }, { x: midX, y: a.y }, { x: midX, y: b.y }, { x: b.x, y: b.y }];
+    } else {
+      const midY = (a.y + b.y) / 2;
+      edgeRoutes[key] = [{ x: a.x, y: a.y }, { x: a.x, y: midY }, { x: b.x, y: midY }, { x: b.x, y: b.y }];
+    }
+  });
+  return { positions, edgeRoutes, ranks: rank, rankdir };
+}
+
+/* ===== Pattern component: Force SVG graph layout (TASK-AR-588) ============
+ * patternSvgForceAgentLayout(nodes, edges, options) uses vendored d3-force
+ * 3.0.0 (ISC, /vendor/d3-force/3.0.0/d3-force.min.js) plus its local d3 UMD
+ * dependencies when loaded, with a deterministic offline fallback.
+ * Maturity tier: experimental.
+ */
+function graphD3ForceRuntime() {
+  const root = typeof globalThis !== "undefined" ? globalThis : (typeof window !== "undefined" ? window : null);
+  const runtime = root && root.d3;
+  return runtime
+    && typeof runtime.forceSimulation === "function"
+    && typeof runtime.forceLink === "function"
+    && typeof runtime.forceManyBody === "function"
+    ? runtime
+    : null;
+}
+
+function liveMapSeedPositions(nodes, width = 1000, height = 600) {
+  const positions = {};
+  const cx = width / 2;
+  const cy = height / 2;
+  const owner = nodes.find((node) => node.kind === "owner");
+  if (owner) positions[String(owner.id)] = { x: cx, y: 76 };
+  const ring = nodes.filter((node) => node.kind !== "owner").sort((a, b) => String(a.id).localeCompare(String(b.id)));
+  const radiusX = Math.min(300, width * 0.32);
+  const radiusY = Math.min(210, height * 0.30);
+  ring.forEach((node, index) => {
+    const angle = (index / Math.max(ring.length, 1)) * Math.PI * 2 - Math.PI / 2;
+    positions[String(node.id)] = { x: cx + Math.cos(angle) * radiusX, y: cy + 44 + Math.sin(angle) * radiusY };
+  });
+  return positions;
+}
+
+function patternSvgForceD3Layout(nodes, edges, options = {}) {
+  const runtime = graphD3ForceRuntime();
+  if (!runtime) return null;
+  try {
+    const list = (nodes || []).filter((node) => node && node.id);
+    const links = (edges || []).filter((edge) => edge && edge.from && edge.to);
+    const width = Number(options.width || 1000);
+    const height = Number(options.height || 600);
+    const cx = width / 2;
+    const cy = height / 2;
+    const margin = Number(options.margin || 64);
+    const ticks = Number(options.ticks || 72);
+    const radial = liveMapSeedPositions(list, width, height);
+    const simNodes = list.map((node) => {
+      const seed = radial[String(node.id)] || { x: cx, y: cy };
+      return { ...node, id: String(node.id), x: seed.x, y: seed.y, vx: 0, vy: 0 };
+    });
+    const simLinks = links.map((edge) => ({ ...edge, source: String(edge.from), target: String(edge.to) }));
+    const simulation = runtime.forceSimulation(simNodes)
+      .stop()
+      .force("link", runtime.forceLink(simLinks).id((node) => String(node.id)).distance(Number(options.linkDistance || 150)).strength(0.18))
+      .force("charge", runtime.forceManyBody().strength(-Math.max(20, Math.sqrt(Number(options.repulsion || 1800)) * 1.4)))
+      .force("collide", runtime.forceCollide().radius((node) => node.kind === "owner" ? 42 : 30).strength(0.72))
+      .force("center", runtime.forceCenter(cx, cy + 24).strength(0.18))
+      .velocityDecay(Math.max(0.05, Math.min(0.95, 1 - Number(options.damping || 0.72))));
+    simulation.tick(Math.max(1, ticks));
+    simulation.stop();
+    const positions = {};
+    simNodes.forEach((node) => {
+      positions[String(node.id)] = {
+        x: Math.max(margin, Math.min(width - margin, Number(node.x) || cx)),
+        y: Math.max(margin, Math.min(height - margin, Number(node.y) || cy)),
+      };
+    });
+    return positions;
+  } catch (error) {
+    return null;
+  }
+}
+
+function patternSvgForceAgentLayout(nodes, edges, options = {}) {
+  const list = (nodes || []).filter((node) => node && node.id);
+  const links = (edges || []).filter((edge) => edge && edge.from && edge.to);
+  const d3Layout = patternSvgForceD3Layout(list, links, options);
+  if (d3Layout) return d3Layout;
+  return liveMapSeedPositions(list, Number(options.width || 1000), Number(options.height || 600));
+}
+
 /* ===== Pattern component: Agent avatar (TASK-AR-587, experimental) ========
  * patternAgentAvatar(seed, options) - deterministic seeded SVG avatar.
- * Algorithm: self-authored geometric generator (MIT/CC0-clean, no third-party
- * assets). A seeded xorshift32 PRNG (seed derived via FNV-1a hash of the seed
- * string) drives 5x5 symmetric geometric shapes. Per-role accent ring maps
- * ORG-MODEL roles to existing semantic tokens; WCAG AA verified in both themes.
- * No runtime call to api.dicebear.com; fully offline and deterministic.
+ * Style boundary: vendored @dicebear/identicon 9.4.2 row schema
+ * (src/agent_runtime/vendor/dicebear/identicon/9.4.2), design CC0 1.0,
+ * package code MIT. Runtime mirrors the row definitions with token palette
+ * colors. No runtime call to the DiceBear HTTP API.
  * Maturity tier: experimental.
  */
 function _avatarFnv1a(str) {
@@ -632,6 +925,10 @@ var _AVATAR_ROLE_ACCENT = {
   "sales-ops":              "var(--success)"
 };
 
+var _DICEBEAR_IDENTICON_VERSION = "9.4.2";
+var _DICEBEAR_IDENTICON_LICENSE = "CC0 1.0";
+var _DICEBEAR_IDENTICON_ROWS = ["xooox", "xxoxx", "xoxox", "oxxxo", "xxxxx", "oxoxo", "ooxoo"];
+
 function patternAgentAvatar(seed, options) {
   var opts = options || {};
   var role = opts.role || "";
@@ -639,11 +936,9 @@ function patternAgentAvatar(seed, options) {
   var label = opts.label || "";
   var hash = _avatarFnv1a(String(seed));
   var rand = _avatarXorshift(hash);
-  var cells = [];
-  for (var row = 0; row < 5; row++) {
-    for (var col = 0; col < 3; col++) {
-      cells.push(rand() > 0.42 ? 1 : 0);
-    }
+  var rows = [];
+  for (var rowIndex = 0; rowIndex < 5; rowIndex++) {
+    rows.push(_DICEBEAR_IDENTICON_ROWS[Math.floor(rand() * _DICEBEAR_IDENTICON_ROWS.length)]);
   }
   var palette = ["var(--primary)", "var(--teal)", "var(--violet)", "var(--success)", "var(--warning)"];
   var fillIdx = Math.floor(rand() * palette.length);
@@ -652,9 +947,9 @@ function patternAgentAvatar(seed, options) {
   var offset = Math.floor((size - cellSize * 5) / 2);
   var shapes = "";
   for (var r = 0; r < 5; r++) {
+    var pattern = rows[r] || "ooxoo";
     for (var c = 0; c < 5; c++) {
-      var mirrored = c < 3 ? c : 4 - c;
-      if (cells[r * 3 + mirrored]) {
+      if (pattern.charAt(c) === "x") {
         var x = offset + c * cellSize;
         var y = offset + r * cellSize;
         shapes += '<rect x="' + x + '" y="' + y + '" width="' + (cellSize - 1) + '" height="' + (cellSize - 1) + '" rx="1" fill="' + fill + '"/>';
@@ -668,7 +963,7 @@ function patternAgentAvatar(seed, options) {
   return (
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + size + ' ' + size + '"' +
     ' width="' + size + '" height="' + size + '"' +
-    ' class="agent-avatar" aria-hidden="true" focusable="false">' +
+    ' class="agent-avatar" data-dicebear-style="identicon" data-dicebear-version="' + _DICEBEAR_IDENTICON_VERSION + '" aria-hidden="true" focusable="false">' +
     labelEl +
     '<circle cx="' + (size / 2) + '" cy="' + (size / 2) + '" r="' + (size / 2) + '" fill="' + bgFill + '"/>' +
     shapes +
@@ -775,6 +1070,13 @@ function patternOpsVelocityBar(week, peak) {
 # Same seed -> byte-identical SVG between Python and JS implementations.
 # ---------------------------------------------------------------------------
 
+DICEBEAR_IDENTICON_VERSION = "9.4.2"
+DICEBEAR_IDENTICON_STYLE = "identicon"
+DICEBEAR_IDENTICON_DESIGN_LICENSE = "CC0 1.0"
+DICEBEAR_IDENTICON_CODE_LICENSE = "MIT"
+DICEBEAR_IDENTICON_VENDOR_PATH = "src/agent_runtime/vendor/dicebear/identicon/9.4.2"
+DICEBEAR_IDENTICON_ROWS = ("xooox", "xxoxx", "xoxox", "oxxxo", "xxxxx", "oxoxo", "ooxoo")
+
 _AVATAR_ROLE_ACCENT_PY: dict[str, str] = {
     "managing-partner": "var(--violet)",
     "lead-engineer": "var(--primary)",
@@ -827,9 +1129,11 @@ def patternAgentAvatar(seed: str, *, role: str = "", size: int = 40, label: str 
     """Return a deterministic seeded SVG avatar for the given agent ``seed``.
 
     Same seed always yields byte-identical SVG (experimental tier, TASK-AR-587).
-    No runtime network calls; fully self-contained. The accent ring maps the
-    ``role`` (ORG-MODEL canonical id) to an existing semantic token and is WCAG AA
-    safe in both dark and light themes.
+    No runtime network calls; fully self-contained. The avatar shape mirrors
+    the vendored DiceBear Identicon 9.4.2 row pattern schema (design CC0 1.0,
+    package code MIT) with a token-safe runtime palette. The accent ring maps
+    the ``role`` (ORG-MODEL canonical id) to an existing semantic token and is
+    WCAG AA non-text safe in both dark and light themes.
 
     Args:
         seed: Stable unique identifier (agent id). Must not change between calls.
@@ -844,9 +1148,10 @@ def patternAgentAvatar(seed: str, *, role: str = "", size: int = 40, label: str 
     h = _fnv1a32(str(seed))
     rng = _xorshift32(h)
 
-    cells = []
-    for _ in range(15):  # 5 rows x 3 cols
-        cells.append(1 if next(rng) > 0.42 else 0)
+    rows = [
+        DICEBEAR_IDENTICON_ROWS[int(next(rng) * len(DICEBEAR_IDENTICON_ROWS))]
+        for _ in range(5)
+    ]
 
     palette = ["var(--primary)", "var(--teal)", "var(--violet)", "var(--success)", "var(--warning)"]
     fill_idx = int(next(rng) * len(palette))
@@ -857,9 +1162,9 @@ def patternAgentAvatar(seed: str, *, role: str = "", size: int = 40, label: str 
 
     shapes: list[str] = []
     for r in range(5):
+        pattern = rows[r] if r < len(rows) else "ooxoo"
         for c in range(5):
-            mirrored = c if c < 3 else 4 - c
-            if cells[r * 3 + mirrored]:
+            if pattern[c] == "x":
                 x = offset + c * cell_size
                 y = offset + r * cell_size
                 shapes.append(
@@ -882,7 +1187,9 @@ def patternAgentAvatar(seed: str, *, role: str = "", size: int = 40, label: str 
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {size} {size}"'
         f' width="{size}" height="{size}"'
-        f' class="agent-avatar" aria-hidden="true" focusable="false">'
+        f' class="agent-avatar" data-dicebear-style="{DICEBEAR_IDENTICON_STYLE}"'
+        f' data-dicebear-version="{DICEBEAR_IDENTICON_VERSION}"'
+        f' aria-hidden="true" focusable="false">'
         f"{label_el}"
         f'<circle cx="{cx}" cy="{cy}" r="{size // 2}" fill="var(--panel-strong)"/>'
         f"{''.join(shapes)}"
@@ -1067,7 +1374,9 @@ def componentSparkline(
         else ""
     )
     title_el = f"<title>{_html_escape(label)}</title>" if label else ""
-    aria_attr = f' aria-label="{_html_escape(label)}"' if label else ' aria-hidden="true"'
+    # TASK-AR-592: informative sparklines carry role="img" + aria-label (WCAG 1.1.1);
+    # decorative sparklines use aria-hidden="true" (no role attr needed).
+    aria_attr = f' role="img" aria-label="{_html_escape(label)}"' if label else ' aria-hidden="true"'
 
     return (
         f'<svg class="sparkline" viewBox="0 0 {width} {height}"'
@@ -1168,6 +1477,155 @@ def componentLoadingState(title: str = "") -> str:
     )
 
 
+# ---------------------------------------------------------------------------
+# Vendored Lucide icon boundary (TASK-AR-589, merged with TASK-AR-591).
+# The earlier static dict remains as a readable fallback reference; the final
+# exported componentIcon below is backed by the vendored SVG files.
+# ---------------------------------------------------------------------------
+
+_LUCIDE_ICON_NAMES = (
+    "activity",
+    "arrow-right",
+    "bar-chart",
+    "bell",
+    "calendar-days",
+    "calendar",
+    "check-circle",
+    "check",
+    "chevron-right",
+    "circle-check",
+    "clipboard",
+    "clock",
+    "cpu",
+    "database",
+    "edit",
+    "external-link",
+    "file-check",
+    "flag",
+    "grid",
+    "help-circle",
+    "home",
+    "inbox",
+    "info",
+    "layers",
+    "layout-dashboard",
+    "link",
+    "list",
+    "mail",
+    "map",
+    "menu",
+    "message-square",
+    "minus",
+    "more-horizontal",
+    "network",
+    "plus",
+    "search",
+    "send",
+    "settings",
+    "tags",
+    "trash",
+    "triangle-alert",
+    "users",
+    "workflow",
+    "x",
+    "zap",
+)
+_LUCIDE_ICON_ALIASES = {
+    "alert-triangle": "triangle-alert",
+    "pencil": "edit",
+}
+_LUCIDE_ICON_VENDOR_ROOT = _PACKAGE_ROOT / "vendor" / "lucide-static" / LUCIDE_STATIC_VERSION / "icons"
+_ICON_DEFAULT_PATHS = (
+    '<circle cx="12" cy="12" r="10"/>'
+    '<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>'
+    '<path d="M12 17h.01"/>'
+)
+
+
+def _extract_lucide_svg_paths(svg_text: str) -> str:
+    svg_start = svg_text.find("<svg")
+    if svg_start < 0:
+        return ""
+    open_end = svg_text.find(">", svg_start)
+    close_start = svg_text.rfind("</svg>")
+    if open_end < 0 or close_start < 0 or close_start <= open_end:
+        return ""
+    body = svg_text[open_end + 1 : close_start]
+    return "".join(line.strip() for line in body.splitlines() if line.strip())
+
+
+def _load_lucide_icon_paths() -> dict[str, str]:
+    icons: dict[str, str] = {}
+    for name in _LUCIDE_ICON_NAMES:
+        path = _LUCIDE_ICON_VENDOR_ROOT / f"{name}.svg"
+        if not path.is_file():
+            continue
+        paths = _extract_lucide_svg_paths(path.read_text(encoding="utf-8"))
+        if paths:
+            icons[name] = paths
+    for alias, canonical in _LUCIDE_ICON_ALIASES.items():
+        if canonical in icons:
+            icons[alias] = icons[canonical]
+    return icons
+
+
+_ICON_PATHS_PY = _load_lucide_icon_paths()
+
+
+def componentIcon(name: str, *, label: str = "", class_name: str = "icon") -> str:
+    """Return a token-safe inline SVG from the vendored Lucide subset."""
+    icon_name = _LUCIDE_ICON_ALIASES.get(str(name or "").strip().lower(), str(name or "").strip().lower())
+    paths = _ICON_PATHS_PY.get(icon_name, _ICON_DEFAULT_PATHS)
+    cls = _html_escape(class_name or "icon", quote=True)
+    title_el = f"<title>{_html_escape(label)}</title>" if label else ""
+    aria_hidden = "" if label else ' aria-hidden="true"'
+    aria_label = f' aria-label="{_html_escape(label, quote=True)}"' if label else ""
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"'
+        ' width="var(--icon-size)" height="var(--icon-size)" fill="none"'
+        ' stroke="currentColor" stroke-width="2" stroke-linecap="round"'
+        ' stroke-linejoin="round"'
+        f' class="{cls}"{aria_hidden}{aria_label} focusable="false">'
+        f"{title_el}"
+        f"{paths}"
+        "</svg>"
+    )
+
+
+_ICON_COMPONENT_JS = (
+    "\n/* ===== UI component: Lucide icons (TASK-AR-589) ========================== */\n"
+    "var _ICON_PATHS = "
+    + json.dumps(_ICON_PATHS_PY, ensure_ascii=True, sort_keys=True)
+    + ";\n"
+    "var _ICON_ALIASES = "
+    + json.dumps(_LUCIDE_ICON_ALIASES, ensure_ascii=True, sort_keys=True)
+    + ";\n"
+    "var _ICON_DEFAULT = "
+    + json.dumps(_ICON_DEFAULT_PATHS, ensure_ascii=True)
+    + ";\n"
+    r"""
+function componentIcon(name, options) {
+  var opts = options || {};
+  var key = String(name || "").trim().toLowerCase();
+  if (Object.prototype.hasOwnProperty.call(_ICON_ALIASES, key)) key = _ICON_ALIASES[key];
+  var label = opts.label || "";
+  var cls = opts.className || "icon";
+  var paths = Object.prototype.hasOwnProperty.call(_ICON_PATHS, key) ? _ICON_PATHS[key] : _ICON_DEFAULT;
+  var titleEl = label ? ("<title>" + escapeHtml(label) + "</title>") : "";
+  var ariaHidden = label ? "" : ' aria-hidden="true"';
+  var ariaLabel = label ? (' aria-label="' + escapeHtml(label) + '"') : "";
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"'
+    + ' width="var(--icon-size)" height="var(--icon-size)" fill="none"'
+    + ' stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'
+    + ' class="' + escapeHtml(cls) + '"' + ariaHidden + ariaLabel + ' focusable="false">'
+    + titleEl + paths + '</svg>';
+}
+"""
+)
+
+UI_COMPONENTS_JS = UI_COMPONENTS_JS + _ICON_COMPONENT_JS
+
+
 ASSETIZATION_CLASSES = {
     "UI_TOKEN_SCALE_CSS": "design_token",
     "componentButton": "ui_component",
@@ -1188,6 +1646,9 @@ ASSETIZATION_CLASSES = {
     "patternEvidencePanel": "pattern_component",
     "patternCommandBar": "pattern_component",
     "patternStateMachinePanelLegend": "pattern_component",
+    "patternSvgLayeredDagreLayout": "pattern_component",
+    "patternSvgForceAgentLayout": "pattern_component",
+    "graphStatusIconText": "ui_component",
     "patternAuditMeta": "pattern_component",
     "patternSurfaceMeta": "pattern_component",
     "patternAgentAvatar": "pattern_component",
