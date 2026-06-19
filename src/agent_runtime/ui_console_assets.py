@@ -3795,6 +3795,137 @@ pre {
   gap: var(--space-2xl);
   font-size: var(--font-size-ui-13);
 }
+.attention-relation-panel {
+  display: grid;
+  gap: var(--space-3xl);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  padding: var(--space-4xl);
+}
+.attention-relation-panel:focus-visible {
+  outline: 2px solid var(--primary-hover);
+  outline-offset: 2px;
+}
+.attention-relation-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-4xl);
+}
+.attention-relation-head strong {
+  font-size: var(--font-size-ui-13);
+  overflow-wrap: anywhere;
+}
+.attention-relation-kicker {
+  color: var(--subtle);
+  font-size: var(--font-size-ui-10);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+.attention-relation-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+}
+.relation-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-lg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--tile);
+  color: var(--ink);
+  padding: var(--space-xs) var(--space-3xl);
+  font-size: var(--font-size-ui-11);
+}
+.relation-chip-label {
+  color: var(--subtle);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+.relation-chip strong {
+  color: currentColor;
+}
+.relation-active {
+  color: var(--blue);
+  border-color: var(--info-line);
+  background: var(--info-soft);
+}
+.relation-stale {
+  color: var(--amber);
+  border-color: var(--warning-line);
+  background: var(--warning-soft);
+}
+.relation-blocked {
+  color: var(--danger);
+  border-color: var(--danger-line);
+  background: var(--danger-soft);
+}
+.relation-missing {
+  color: var(--muted);
+  border-color: var(--line);
+  background: var(--inset-soft);
+}
+.attention-relation-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-3xl);
+}
+.attention-evidence-preview,
+.graph-context-stack,
+.graph-context-empty {
+  display: grid;
+  gap: var(--space-lg);
+  min-width: 0;
+}
+.evidence-preview-row,
+.graph-context-item {
+  display: grid;
+  gap: var(--space-md);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  padding: var(--space-2xl);
+  min-width: 0;
+}
+.evidence-preview-row {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+}
+.evidence-preview-state {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  padding: var(--space-2xs) var(--space-lg);
+  font-size: var(--font-size-ui-10);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.evidence-preview-copy {
+  display: grid;
+  gap: var(--space-2xs);
+  min-width: 0;
+}
+.evidence-preview-copy strong,
+.evidence-preview-copy small,
+.graph-context-item span,
+.graph-context-item small {
+  overflow-wrap: anywhere;
+}
+.evidence-preview-copy small,
+.graph-context-item small {
+  color: var(--muted);
+  font-size: var(--font-size-ui-11);
+}
+.graph-context-item {
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  align-items: start;
+}
+.graph-context-item small {
+  grid-column: 2;
+}
 .tsboard-distribution { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
 .dist-chip {
   border-radius: var(--radius-pill);
@@ -4654,6 +4785,8 @@ pre {
   .wiki-page-header,
   .wiki-metadata-row,
   .taskset-actions,
+  .attention-relation-body,
+  .graph-context-item,
   .meta-grid,
   .edit-row,
   .button-row {
@@ -11751,10 +11884,70 @@ function tasksetChildRows(card) {
   `).join("");
 }
 
+function tasksetHasBlockedChild(card) {
+  return (card.children || []).some((child) => String(child.status || "").toLowerCase().includes("blocked"));
+}
+
+function tasksetChildRelationState(child) {
+  const status = String(child.status || "").toLowerCase();
+  const phase = String(child.phase || "");
+  if (status.includes("blocked")) return "blocked";
+  if (phase === "work" || phase === "review") return "active";
+  if (phase === "done") return "default";
+  return "stale";
+}
+
+function tasksetRelationSummary(card) {
+  const children = card.children || [];
+  const progress = card.progress || { done: 0, total: 0 };
+  const recent = card.recent_activity || [];
+  const blocked = tasksetHasBlockedChild(card);
+  const activeChildren = children.filter((child) => ["work", "review"].includes(String(child.phase || "")));
+  const tasksetState = blocked ? "blocked" : (card.status_bucket === "in_progress" ? "active" : "default");
+  const claimState = blocked ? "blocked" : (activeChildren.length ? "active" : (children.length ? "stale" : "missing"));
+  const evidenceState = blocked ? "blocked" : (recent.length ? "active" : (Number(progress.done || 0) ? "stale" : "missing"));
+  const commandState = blocked ? "blocked" : (children.length ? "active" : "missing");
+  const evidenceRows = recent.length
+    ? recent.slice(0, 2).map((item) => ({
+        state: "active",
+        label: item.task_id || "Recent activity",
+        detail: `${item.event || "activity"} ${item.ts || ""}`.trim(),
+        freshness: "fresh",
+      }))
+    : [{
+        state: evidenceState,
+        label: Number(progress.done || 0) ? "Evidence freshness" : "Evidence gap",
+        detail: Number(progress.done || 0)
+          ? `${progress.done}/${progress.total || 0} tasks complete; no recent activity`
+          : "No linked activity yet",
+        freshness: evidenceState,
+      }];
+  const graphItems = children.slice(0, 4).map((child) => ({
+    state: tasksetChildRelationState(child),
+    label: child.id,
+    value: child.phase || "plan",
+    detail: child.title || child.id,
+    meta: child.owner || "unassigned",
+  }));
+  return {
+    tasksetState,
+    claimState,
+    evidenceState,
+    commandState,
+    tasksetLabel: card.status || card.status_bucket || "tracked",
+    claimLabel: activeChildren.length ? `${activeChildren.length} active` : (children.length ? "ready to claim" : "missing"),
+    evidenceLabel: recent.length ? "fresh" : evidenceState,
+    commandLabel: blocked ? "blocked" : (children.length ? "task.create ready" : "no child tasks"),
+    evidenceRows,
+    graphItems,
+  };
+}
+
 function tasksetBoardCards(cards) {
   return cards.map((card) => {
     const expanded = expandedTasksetCards.has(card.id);
     const progress = card.progress || { done: 0, total: 0 };
+    const relation = tasksetRelationSummary(card);
     return `
       <article class="tsboard-card ${escapeHtml("bucket-" + (card.status_bucket || "planned"))}" data-taskset-id="${escapeHtml(card.id)}">
         <header class="tsboard-card-header">
@@ -11769,6 +11962,21 @@ function tasksetBoardCards(cards) {
           <span><span class="meta-label">Status</span><strong>${escapeHtml(card.status || "planned")}</strong></span>
         </div>
         ${progressBar(card.progress_pct)}
+        ${patternAttentionRelationPanel({
+          tasksetId: card.id,
+          title: card.title || card.id,
+          tasksetState: relation.tasksetState,
+          tasksetLabel: relation.tasksetLabel,
+          claimState: relation.claimState,
+          claimLabel: relation.claimLabel,
+          evidenceState: relation.evidenceState,
+          evidenceLabel: relation.evidenceLabel,
+          commandState: relation.commandState,
+          commandLabel: relation.commandLabel,
+          evidenceRows: relation.evidenceRows,
+          graphItems: relation.graphItems,
+          emptyGraphLabel: "No child context",
+        })}
         <div class="tsboard-distribution">${tasksetStatusDistribution(card)}</div>
         <div class="agent-stack" aria-label="Assigned agents">${tasksetAgentStack(card)}</div>
         ${tasksetRecentActivity(card)}

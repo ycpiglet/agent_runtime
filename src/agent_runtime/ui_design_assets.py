@@ -152,6 +152,37 @@ function componentEmptyState(title, hint) {
   </div>`;
 }
 
+function normalizeRelationState(state) {
+  const allowed = new Set(["default", "active", "stale", "blocked", "missing"]);
+  const clean = String(state || "default").toLowerCase();
+  return allowed.has(clean) ? clean : "default";
+}
+
+function componentRelationChip(label, state = "default", options = {}) {
+  const chipState = normalizeRelationState(state);
+  const value = options.value || chipState;
+  const title = options.title ? ` title="${escapeHtml(options.title)}"` : "";
+  return `<span class="relation-chip relation-${escapeHtml(chipState)}"${title}>
+    <span class="relation-chip-label">${escapeHtml(label || "Relation")}</span>
+    <strong>${escapeHtml(value)}</strong>
+  </span>`;
+}
+
+function componentEvidencePreviewRow(row) {
+  const item = row || {};
+  const state = normalizeRelationState(item.state || "missing");
+  const label = item.label || "Evidence";
+  const detail = item.detail || "No evidence linked";
+  const freshness = item.freshness || state;
+  return `<div class="evidence-preview-row evidence-${escapeHtml(state)}" data-relation-state="${escapeHtml(state)}">
+    <span class="evidence-preview-state">${escapeHtml(freshness)}</span>
+    <span class="evidence-preview-copy">
+      <strong>${escapeHtml(label)}</strong>
+      <small>${escapeHtml(detail)}</small>
+    </span>
+  </div>`;
+}
+
 /* ===== Pattern component assets (TASK-AR-579) ============================ */
 function patternAuditMeta(content) {
   return `<div class="audit-card-meta" aria-label="Audit metadata">${content}</div>`;
@@ -221,6 +252,49 @@ function patternAuditCard(options) {
 
 function patternEvidencePanel(rows, emptyLabel, cardTemplate) {
   return rows.length ? rows.map((item) => cardTemplate(item)).join("") : `<div class="empty">${escapeHtml(emptyLabel || "No records")}</div>`;
+}
+
+function patternGraphContextStack(items, emptyLabel = "No graph context") {
+  const rows = items || [];
+  if (!rows.length) {
+    return `<div class="graph-context-empty">${componentRelationChip("Graph context", "missing", { value: emptyLabel })}</div>`;
+  }
+  return `<div class="graph-context-stack" aria-label="Graph context stack">${rows.map((item) => {
+    const state = normalizeRelationState(item.state || "default");
+    const meta = item.meta ? `<small>${escapeHtml(item.meta)}</small>` : "";
+    return `<div class="graph-context-item relation-${escapeHtml(state)}">
+      ${componentRelationChip(item.label || "Node", state, { value: item.value || state })}
+      <span>${escapeHtml(item.detail || "")}</span>
+      ${meta}
+    </div>`;
+  }).join("")}</div>`;
+}
+
+function patternAttentionRelationPanel(options) {
+  const panel = options || {};
+  const evidenceRows = panel.evidenceRows || [];
+  const graphItems = panel.graphItems || [];
+  const label = panel.tasksetId ? `Attention graph for ${panel.tasksetId}` : "Attention graph";
+  const chips = [
+    componentRelationChip("Taskset", panel.tasksetState || "default", { value: panel.tasksetLabel || "tracked" }),
+    componentRelationChip("Claim path", panel.claimState || "missing", { value: panel.claimLabel || "missing" }),
+    componentRelationChip("Evidence freshness", panel.evidenceState || "missing", { value: panel.evidenceLabel || "missing" }),
+    componentRelationChip("Command readiness", panel.commandState || "default", { value: panel.commandLabel || "proposal" }),
+  ].join("");
+  const evidence = evidenceRows.length
+    ? evidenceRows.map(componentEvidencePreviewRow).join("")
+    : componentEvidencePreviewRow({ state: "missing", label: "Evidence", detail: "No recent evidence or activity", freshness: "missing" });
+  return `<section class="attention-relation-panel" aria-label="${escapeHtml(label)}" tabindex="0">
+    <div class="attention-relation-head">
+      <span class="attention-relation-kicker">operator_attention_graph</span>
+      <strong>${escapeHtml(panel.title || panel.tasksetId || "Taskset relation")}</strong>
+    </div>
+    <div class="attention-relation-chips" aria-label="Relation states">${chips}</div>
+    <div class="attention-relation-body">
+      <div class="attention-evidence-preview" aria-label="Evidence preview">${evidence}</div>
+      ${patternGraphContextStack(graphItems, panel.emptyGraphLabel || "No child context")}
+    </div>
+  </section>`;
 }
 
 function patternCommandCard(row) {
@@ -400,10 +474,14 @@ ASSETIZATION_CLASSES = {
     "componentTable": "ui_component",
     "componentProgressBar": "ui_component",
     "componentEmptyState": "ui_component",
+    "componentRelationChip": "ui_component",
+    "componentEvidencePreviewRow": "ui_component",
     "patternTaskLane": "pattern_component",
     "patternClaimCard": "pattern_component",
     "patternAuditCard": "pattern_component",
     "patternEvidencePanel": "pattern_component",
+    "patternAttentionRelationPanel": "pattern_component",
+    "patternGraphContextStack": "pattern_component",
     "patternCommandBar": "pattern_component",
     "patternStateMachinePanelLegend": "pattern_component",
     "patternSvgLayeredRadialLayout": "pattern_component",

@@ -18,9 +18,13 @@ def test_ui_design_assets_classify_token_component_and_pattern_layers():
     assert classes["componentModalShell"] == "ui_component"
     assert classes["componentProgressBar"] == "ui_component"
     assert classes["componentEmptyState"] == "ui_component"
+    assert classes["componentRelationChip"] == "ui_component"
+    assert classes["componentEvidencePreviewRow"] == "ui_component"
     assert classes["patternTaskLane"] == "pattern_component"
     assert classes["patternClaimCard"] == "pattern_component"
     assert classes["patternEvidencePanel"] == "pattern_component"
+    assert classes["patternAttentionRelationPanel"] == "pattern_component"
+    assert classes["patternGraphContextStack"] == "pattern_component"
     assert classes["patternCommandBar"] == "pattern_component"
     assert classes["patternStateMachinePanelLegend"] == "pattern_component"
     assert classes["patternSvgLayeredRadialLayout"] == "pattern_component"
@@ -62,10 +66,14 @@ def test_ui_component_bundle_is_served_in_console_js(tmp_path):
     assert "function componentTable" in js
     assert "function componentModalShell" in js
     assert "function componentMetaGrid" in js
+    assert "function componentRelationChip" in js
+    assert "function componentEvidencePreviewRow" in js
     assert "function progressBar(value)" in js
     assert "function patternClaimCard" in js
     assert "function patternTaskLane" in js
     assert "function patternEvidencePanel" in js
+    assert "function patternAttentionRelationPanel" in js
+    assert "function patternGraphContextStack" in js
     assert "function patternCommandBar" in js
     assert "function patternStateMachinePanelLegend" in js
     assert "function patternSvgLayeredRadialLayout" in js
@@ -116,3 +124,4 @@ def test_promoted_pattern_helpers_are_called_by_console_renderers():
     assert "return patternSvgLayeredRadialLayout(nodes" in source
     assert "patternSvgGraph({" in source
     assert "grid.innerHTML = patternCalendarGrid({" in source
+    assert "patternAttentionRelationPanel({" in source
