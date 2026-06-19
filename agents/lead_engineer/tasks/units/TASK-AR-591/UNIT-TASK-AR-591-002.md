@@ -11,6 +11,7 @@ initiative_id: INIT-AR-VISUAL-SYSTEM-INTEGRATION
 project_id: PROJECT-AGENT-RUNTIME
 status: completed
 verification_status: passed
+resolution: done
 owner: lead-engineer
 created_at: 2026-06-20T05:18:36+09:00
 started_at: 2026-06-20T08:12:15+09:00

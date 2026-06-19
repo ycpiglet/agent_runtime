@@ -13,6 +13,7 @@ created_at: 2026-06-20T05:18:36+09:00
 updated_at: 2026-06-20T08:25:00+09:00
 title: Wire new visual components into live views + boot-verify the console
 status: completed
+resolution: done
 priority: P1
 difficulty: M
 est_hours: 5
