@@ -1,0 +1,118 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "chat:2026-06-19-autonomous-loop",
+  "created_by": "lead-engineer",
+  "initiative": {
+    "id": "INIT-AR-VISUAL-SYSTEM-INTEGRATION",
+    "title": "Visual System Integration & Verification",
+    "summary": "The visual system (avatars, layered/force graph, Geist fonts, Lucide icons, data-viz palette, sparklines, state illustrations) was built across AR-587..590. Ensure it is actually wired into all relevant live console views, boot-verify the console renders it, and run an accessibility + responsive pass.",
+    "owner": "lead-engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-VISUAL-SYSTEM-INTEGRATION",
+    "display_name": "Visual System Integration & Verification",
+    "summary": "Wire the new visual components into every relevant live view, boot-verify the served console, fix integration gaps, and run a WCAG AA + responsive pass on the new visual system. Permissive, no-build, token-driven.",
+    "order": 626,
+    "plan_slug": "2026-06-19-visual-system-integration"
+  },
+  "tasks": [
+    {
+      "title": "Wire new visual components into live views + boot-verify the console",
+      "goal": "Ensure the AR-587..590 visual components actually appear in the relevant live console views, and that the served console boots and renders them without error.",
+      "scope": "Audit the served console (ui_console_assets.py renderers) and ensure: patternAgentAvatar is used in every agent listing/identity surface; the layered/force graph rendering is used in dependency/state-machine/live-map views; componentIcon replaces remaining ad-hoc HTML-entity icons everywhere; componentSparkline is used in metric/throughput surfaces; the data-viz palette tokens drive all chart/graph colors; componentEmptyState/ErrorState/LoadingState are used for all empty/error/loading surfaces. Boot the console (python stdlib server) on a test port and verify GET / and the served JS/CSS assets return 200 and parse (node --check on the served JS), with no Python import/runtime errors. Fix any integration gaps found. Keep token-driven (no raw literals); escape all interpolated strings (Python html.escape <-> JS escapeHtml symmetric); JS ASCII-only (cp949 node --check).",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 5,
+      "est_tokens": 12000,
+      "owner": "lead-engineer",
+      "team": "ui-ux",
+      "acceptance": [
+        "The served console boots on a test port; GET / and the served JS/CSS assets return HTTP 200; the served JS passes node --check; no Python import/runtime errors.",
+        "patternAgentAvatar, the graph rendering, componentIcon, componentSparkline, data-viz palette tokens, and the empty/error/loading state components each appear in at least their primary intended live view (documented in the PR).",
+        "No remaining ad-hoc HTML-entity icons where componentIcon applies; design_system_gate --check --all-ui findings=0.",
+        "All interpolated strings escaped; new JS ASCII-only."
+      ],
+      "verification": [
+        "python -m pytest tests/test_ui_console.py tests/test_ui_console_e2e.py tests/test_ui_design_assets.py tests/test_design_system_gate.py -q",
+        "python scripts/design_system_gate.py --check --all-ui",
+        "python scripts/owner_governance_gate.py"
+      ],
+      "units": [
+        {
+          "title": "Audit + wire components into live views",
+          "context": "Components from AR-587..590 exist in ui_design_assets.py but may only be wired into one view each. Ensure broad, consistent usage across the relevant served renderers in ui_console_assets.py.",
+          "inputs": ["src/agent_runtime/ui_console_assets.py", "src/agent_runtime/ui_design_assets.py", "reviews/RESEARCH-2026-06-20-ui-ux-visual-resources.md", "docs/design/agent-runtime/DESIGN-SYSTEM.md"],
+          "target_files": ["src/agent_runtime/ui_console_assets.py", "src/agent_runtime/ui_design_assets.py"],
+          "scope": "Wiring/integration only; do not redesign components. Preserve behavior elsewhere.",
+          "steps": ["Grep the served renderers for agent listings, graph views, icon entities, metric surfaces, chart colors, and empty/error/loading; wire in the matching new component/token where missing.", "Keep escaping symmetric and tokens-only.", "Run the UI test suite + gate."],
+          "acceptance": ["Each new component/token is used in its primary live view; gate green."],
+          "verification": ["python -m pytest tests/test_ui_console.py tests/test_ui_design_assets.py -q"],
+          "handoff": "Integration wired; unit 2 boot-verifies.",
+          "stop_condition": "If wiring a component requires a behavioral redesign, leave it and note it rather than scope-creep."
+        },
+        {
+          "title": "Boot-verify the served console",
+          "context": "Unit tests cover rendering logic; this confirms the whole thing actually boots and serves.",
+          "inputs": ["src/agent_runtime/ui_console.py (server entrypoint)", "ui_console_assets.py", "ui_design_assets.py"],
+          "target_files": ["tests/test_ui_console_e2e.py"],
+          "scope": "Add/extend a boot smoke test: start the server on an ephemeral port, GET / and the served assets, assert 200 + the served JS passes a syntax check; tear down.",
+          "steps": ["Launch the stdlib server on a free port in-process or via subprocess.", "Assert GET / and asset endpoints return 200 and non-empty.", "Syntax-check the served JS (node --check or a JS parser).", "Tear down cleanly."],
+          "acceptance": ["A boot smoke test proves the console serves / and assets with 200 and valid JS."],
+          "verification": ["python -m pytest tests/test_ui_console_e2e.py -q"],
+          "handoff": "Console boot-verified.",
+          "stop_condition": "If node is unavailable for the JS check, fall back to a Python-side bracket/quote balance check and note it."
+        }
+      ]
+    },
+    {
+      "title": "Accessibility + responsive pass on the new visual system",
+      "goal": "Ensure the new visual components meet WCAG AA (contrast, roles, labels, keyboard, reduced-motion) and render responsively (desktop + mobile widths) in both themes.",
+      "scope": "Audit patternAgentAvatar, the graph, componentIcon, componentSparkline, the data-viz palette, and the state illustrations for: WCAG AA contrast in dark+light; appropriate ARIA roles/labels (graphs/sparklines as img with labels, decorative avatars aria-hidden, state components role=status/alert); keyboard operability of any interactive graph nodes; prefers-reduced-motion respected. Add responsive CSS so the new visuals degrade gracefully at mobile widths. Token-driven; escaping symmetric; ASCII JS.",
+      "priority": "P2",
+      "difficulty": "M",
+      "est_hours": 5,
+      "est_tokens": 12000,
+      "owner": "lead-engineer",
+      "team": "ui-ux",
+      "acceptance": [
+        "New visual components carry correct ARIA roles/labels (decorative SVGs aria-hidden; informative ones role=img + aria-label; state components role=status/alert).",
+        "Contrast of palette/status/graph colors meets WCAG AA in both dark and light themes.",
+        "prefers-reduced-motion disables non-essential animation; interactive graph nodes are keyboard operable.",
+        "Responsive CSS keeps the new visuals usable at mobile widths; design_system_gate --all-ui green."
+      ],
+      "verification": [
+        "python -m pytest tests/test_ui_console.py tests/test_ui_design_assets.py tests/test_design_system_gate.py -q",
+        "python scripts/design_system_gate.py --check --all-ui",
+        "python scripts/owner_governance_gate.py"
+      ],
+      "units": [
+        {
+          "title": "A11y audit + fixes for the new components",
+          "context": "The new SVG-heavy components need correct semantics; some were added quickly across AR-587..590.",
+          "inputs": ["src/agent_runtime/ui_design_assets.py", "src/agent_runtime/ui_console_assets.py", "docs/design/agent-runtime/DESIGN-SYSTEM.md (status color + label rule)"],
+          "target_files": ["src/agent_runtime/ui_design_assets.py", "src/agent_runtime/ui_console_assets.py"],
+          "scope": "ARIA roles/labels, contrast, reduced-motion, keyboard — no redesign.",
+          "steps": ["Add/confirm aria-hidden on decorative SVGs, role=img+aria-label on informative graphs/sparklines, role=status/alert on state components.", "Verify palette/status contrast WCAG AA in both themes; adjust tokens if needed.", "Ensure prefers-reduced-motion gates animation; make interactive graph nodes keyboard operable."],
+          "acceptance": ["Components carry correct semantics; contrast AA both themes."],
+          "verification": ["python -m pytest tests/test_ui_design_assets.py -q"],
+          "handoff": "A11y solid; unit 2 does responsive.",
+          "stop_condition": "Flag any contrast failure that needs a token-value change for design-system-steward review."
+        },
+        {
+          "title": "Responsive pass for the new visuals",
+          "context": "Dense console must remain usable at mobile widths with the new graph/avatars/charts.",
+          "inputs": ["src/agent_runtime/ui_console_assets.py (CSS)", "the new component CSS"],
+          "target_files": ["src/agent_runtime/ui_console_assets.py"],
+          "scope": "Responsive CSS (token-driven) for the new visuals at mobile breakpoints.",
+          "steps": ["Add/adjust responsive rules so avatars/graph/sparklines/state art degrade gracefully on narrow widths.", "Keep tokens-only, no raw literals.", "Verify the gate stays green."],
+          "acceptance": ["New visuals usable at mobile widths; gate green."],
+          "verification": ["python scripts/design_system_gate.py --check --all-ui"],
+          "handoff": "Visual system integration + a11y + responsive complete.",
+          "stop_condition": "Keep responsive changes token-driven; never inline raw breakpoint literals outside the token layer if a token exists."
+        }
+      ]
+    }
+  ]
+}

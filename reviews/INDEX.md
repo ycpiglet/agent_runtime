@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-20T01:04:33+09:00
-record_count: 576
+generated_at: 2026-06-20T05:18:42+09:00
+record_count: 577
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `576` review and evidence records under `reviews/`.
+- Summary: indexed `577` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `576` files |
+| Reviews covered | pass | `577` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -491,6 +491,7 @@ record_count: 576
 | `reviews/REVIEW-2026-06-18-taskset-ar-design-system-token-debt-registration.md` | `REVIEW-2026-06-18-taskset-ar-design-system-token-debt-registration` | md | record | pass | Design System Token Debt Registration |
 | `reviews/REVIEW-2026-06-18-taskset-ar-release-auto-noncritical-registration.md` | `REVIEW-2026-06-18-taskset-ar-release-auto-noncritical-registration` | md | record | pass | Noncritical Release Auto-Execution Registration |
 | `reviews/REVIEW-2026-06-20-taskset-ar-visual-asset-adoption-registration.md` | `REVIEW-2026-06-20-taskset-ar-visual-asset-adoption-registration` | md | record | pass | Visual Asset Adoption Registration |
+| `reviews/REVIEW-2026-06-20-taskset-ar-visual-system-integration-registration.md` | `REVIEW-2026-06-20-taskset-ar-visual-system-integration-registration` | md | record | pass | Visual System Integration & Verification Registration |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario |
