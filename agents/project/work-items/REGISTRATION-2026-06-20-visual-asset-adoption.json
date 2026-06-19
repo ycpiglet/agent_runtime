@@ -1,0 +1,209 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "chat:2026-06-20-ui-ux-visual-resources",
+  "created_by": "lead-engineer",
+  "initiative": {
+    "id": "INIT-AR-VISUAL-ASSET-ADOPTION",
+    "title": "Visual Asset Adoption (graph, avatars, fonts, icons, color)",
+    "summary": "Adopt the open/permissive, no-build visual resources curated in reviews/RESEARCH-2026-06-20-ui-ux-visual-resources.md into the operator console: deterministic agent avatars, a proper dependency/agent graph, OFL fonts, an inline-SVG icon set, recolorable state illustrations, and accessible data-viz palettes. All assets self-hosted/vendored, permissive-licensed, and landed as experimental per the design-system maturity tiers.",
+    "owner": "lead-engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-VISUAL-ASSET-ADOPTION",
+    "display_name": "Visual Asset Adoption",
+    "summary": "Implement the research-backed visual upgrade: DiceBear CC0 seeded agent avatars with role accents; Dagre+d3-force graph rendering for dependency/state-machine/live-agent views; Geist OFL fonts; Lucide icons; unDraw state illustrations; Radix+Carbon data-viz palette tokens and sparklines. Permissive-only, no-build, self-hosted, token-driven, landed experimental.",
+    "order": 625,
+    "plan_slug": "2026-06-20-visual-asset-adoption"
+  },
+  "tasks": [
+    {
+      "title": "Agent avatar identity system (DiceBear CC0 + role accent)",
+      "goal": "Give every agent a deterministic visual identity: a seeded SVG avatar keyed to agent id, plus a deterministic per-role accent, self-hosted and version-pinned.",
+      "scope": "Add a pattern_component patternAgentAvatar in ui_design_assets.py (experimental tier). Use DiceBear in seeded mode with a CC0 style (Notionists preferred; Open Peeps/Pixel Art acceptable). Do NOT depend on the live api.dicebear.com at runtime: pre-generate or vendor the style and self-host SVGs; pin the DiceBear major version. Layer a deterministic role accent (ring/background) drawn in our own SVG mapped to existing role/status tokens; verify WCAG contrast in dark and light. Record the exact CC0 style + version in the module docstring.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 5,
+      "est_tokens": 12000,
+      "owner": "lead-engineer",
+      "team": "ui-ux",
+      "acceptance": [
+        "patternAgentAvatar renders a stable SVG avatar for a given agent id (same id -> same avatar) using a CC0 DiceBear style, with no runtime call to api.dicebear.com.",
+        "A deterministic per-role accent (ring/background) maps to role/status tokens and meets WCAG AA contrast in both dark and light themes.",
+        "The chosen style, its CC0 license, and the pinned DiceBear version are recorded in the asset module; no raw color/size literals (design_system_gate --all-ui passes).",
+        "Avatar appears in at least one console view (e.g. agent cards / live agent map) with desktop+mobile visual_verification."
+      ],
+      "verification": [
+        "python -m pytest tests/test_ui_design_assets.py tests/test_design_system_gate.py -q",
+        "python scripts/design_system_gate.py --check --all-ui"
+      ],
+      "units": [
+        {
+          "title": "Vendor + self-host a CC0 DiceBear style and add patternAgentAvatar",
+          "context": "DiceBear is MIT but per-style licensed; Notionists/Open Peeps/Pixel Art are CC0. Determinism + license hold only within a major version, and the free API is rate-limited/non-commercial, so self-host.",
+          "inputs": ["reviews/RESEARCH-2026-06-20-ui-ux-visual-resources.md (Strand 2)", "src/agent_runtime/ui_design_assets.py", "docs/design/agent-runtime/DESIGN-SYSTEM.md (assetization + maturity tiers)"],
+          "target_files": ["src/agent_runtime/ui_design_assets.py", "src/agent_runtime/ui_console_assets.py", "tests/test_ui_design_assets.py"],
+          "scope": "Vendor/pre-generate a single CC0 style; add a seeded patternAgentAvatar helper returning SVG; no runtime CDN dependency.",
+          "steps": ["Pick a CC0 style (Notionists) and pin the DiceBear major version.", "Pre-generate or vendor the style so avatars resolve offline.", "Add patternAgentAvatar(seed) -> SVG string in ui_design_assets.py, classified experimental.", "Record style+license+version in the module docstring.", "Add a determinism test (same seed -> identical SVG)."],
+          "acceptance": ["Same agent id yields identical avatar SVG; no api.dicebear.com call at runtime."],
+          "verification": ["python -m pytest tests/test_ui_design_assets.py -q"],
+          "handoff": "Avatar helper ready; unit 2 adds role accent + console placement.",
+          "stop_condition": "If a CC0 style cannot be vendored offline cleanly, stop and flag rather than depending on the live API."
+        },
+        {
+          "title": "Deterministic role accent + console placement",
+          "context": "Role must read at a glance without relying on the avatar alone; accent maps to existing role/status tokens and must be WCAG-safe in both themes.",
+          "inputs": ["src/agent_runtime/ui_design_assets.py (patternAgentAvatar)", "the role/status token set", "agents/project/ORG-MODEL.yml (role list)"],
+          "target_files": ["src/agent_runtime/ui_design_assets.py", "src/agent_runtime/ui_console_assets.py"],
+          "scope": "Add a deterministic role->accent mapping drawn in our SVG and place the avatar in at least one view.",
+          "steps": ["Map each ORG-MODEL role to an accent token deterministically.", "Draw the accent ring/background in our own SVG around the avatar.", "Place patternAgentAvatar in agent cards and/or the live agent map.", "Verify WCAG AA in dark and light; capture desktop+mobile evidence."],
+          "acceptance": ["Role accent is deterministic, token-driven, WCAG AA in both themes, and visible in a console view."],
+          "verification": ["python scripts/design_system_gate.py --check --all-ui"],
+          "handoff": "Agent identity system complete.",
+          "stop_condition": "If any accent fails WCAG AA in either theme, adjust the token mapping before closing."
+        }
+      ]
+    },
+    {
+      "title": "Dependency / state-machine / live-agent graph upgrade (Dagre + d3-force)",
+      "goal": "Replace the hand-rolled graph layout with proper layout engines: Dagre (MIT, layered/Sugiyama) for dependency/org/state-machine DAGs and d3-force (ISC) for the free-form live agent map, both vendored build-less and rendered as our own SVG with Datadog/GitHub-style encodings.",
+      "scope": "Vendor Dagre and d3-force as build-less <script>/UMD assets served by ui_console_assets.py (no CDN at runtime; record licenses). Feed graph data to the layout engine, then render with the existing/extended SVG pattern helpers (patternSvgGraph / patternSvgLayeredRadialLayout). Encode edges Datadog-style (stroke-width = magnitude, stroke color = health token) and add GitHub-Actions-style per-node status icons. Land as experimental; keep token-driven (no raw literals). Do NOT adopt elkjs (EPL-2.0) or 3d-force-graph (WebGL).",
+      "priority": "P1",
+      "difficulty": "L",
+      "est_hours": 10,
+      "est_tokens": 20000,
+      "owner": "lead-engineer",
+      "team": "ui-ux",
+      "acceptance": [
+        "Dagre (MIT) and d3-force (ISC) are vendored and served locally (no runtime CDN); each library's license is recorded.",
+        "Dependency/state-machine views use a Dagre layered layout rendered as our SVG; the live agent map uses d3-force tick-rendered SVG.",
+        "Edges encode magnitude (stroke-width) and health (stroke color token); each node shows a status icon; status is never color-only.",
+        "design_system_gate --all-ui passes (token-driven, no raw literals); desktop+mobile visual_verification of at least the dependency graph and live map."
+      ],
+      "verification": [
+        "python -m pytest tests/test_ui_console.py tests/test_ui_console_e2e.py tests/test_design_system_gate.py -q",
+        "python scripts/design_system_gate.py --check --all-ui"
+      ],
+      "units": [
+        {
+          "title": "Vendor Dagre + layered DAG renderer for dependency/state-machine",
+          "context": "Dagre is layout-only (emits node {x,y} + edge point arrays) and ships an IIFE global via <script>. Render with our own SVG; avoid dagre-d3 (pulls in D3).",
+          "inputs": ["reviews/RESEARCH-2026-06-20-ui-ux-visual-resources.md (Strand 1)", "src/agent_runtime/ui_design_assets.py (patternSvgGraph)", "src/agent_runtime/ui_console_assets.py"],
+          "target_files": ["src/agent_runtime/ui_console_assets.py", "src/agent_runtime/ui_design_assets.py", "tests/test_ui_console.py"],
+          "scope": "Vendor dagre.min.js locally; add a layered-DAG render path feeding the existing SVG graph pattern; Datadog edge + GitHub status encodings.",
+          "steps": ["Vendor dagre.min.js (MIT) into served assets; record license.", "Compute a top-down/L-R layered layout; map coordinates onto our SVG nodes/edges.", "Encode edge stroke-width=magnitude, stroke color=health token; add per-node status icon (from the icon set).", "Apply to the dependency graph and state-machine views."],
+          "acceptance": ["Dependency/state-machine graph uses Dagre layout rendered as our token-driven SVG with status-bearing nodes/edges."],
+          "verification": ["python -m pytest tests/test_ui_console.py -q"],
+          "handoff": "Structured graph done; unit 2 does the force map.",
+          "stop_condition": "If Dagre cannot be vendored build-less, stop and flag (do not fall back to elkjs/EPL-2.0)."
+        },
+        {
+          "title": "Vendor d3-force + live agent map renderer",
+          "context": "d3-force is a velocity-Verlet layout that mutates node.x/.y and fires tick; we render SVG per tick. Confirm ISC license + a standalone UMD artifact.",
+          "inputs": ["src/agent_runtime/ui_design_assets.py", "src/agent_runtime/ui_console_assets.py", "the live agent map view"],
+          "target_files": ["src/agent_runtime/ui_console_assets.py", "src/agent_runtime/ui_design_assets.py"],
+          "scope": "Vendor d3-force build-less; tick-render the live agent map as our SVG with agent avatars as nodes.",
+          "steps": ["Confirm d3-force ISC license + vendor a standalone UMD build (no CDN).", "Wire tick-driven SVG rendering of the live agent map.", "Use patternAgentAvatar nodes + health-encoded edges.", "Verify interactivity (drag/zoom optional) and dark/light."],
+          "acceptance": ["Live agent map renders via d3-force as token-driven SVG with avatar nodes; license recorded."],
+          "verification": ["python scripts/design_system_gate.py --check --all-ui"],
+          "handoff": "Graph upgrade complete.",
+          "stop_condition": "If a build-less ISC d3-force artifact cannot be confirmed, flag before vendoring."
+        }
+      ]
+    },
+    {
+      "title": "Typography + icon foundation (Geist OFL fonts + Lucide icons)",
+      "goal": "Self-host OFL fonts (Geist + Geist Mono) as font tokens and vendor the Lucide (ISC) inline-SVG icon set behind a componentIcon helper.",
+      "scope": "Add self-hosted woff2 Geist + Geist Mono with @font-face wired to typography tokens (no Google/CDN at runtime; record OFL). Vendor Lucide SVGs (ISC) and add a componentIcon(name) helper returning inline SVG that inherits currentColor/tokens. Land as experimental; classify per assetization rules. Confirm OFL/ISC terms before committing the binaries.",
+      "priority": "P2",
+      "difficulty": "M",
+      "est_hours": 5,
+      "est_tokens": 10000,
+      "owner": "lead-engineer",
+      "team": "ui-ux",
+      "acceptance": [
+        "Geist + Geist Mono are self-hosted (woff2) and bound to typography tokens; no runtime font CDN; OFL recorded.",
+        "Lucide icons are vendored (ISC, recorded) and exposed via componentIcon returning inline SVG that inherits token color.",
+        "design_system_gate --all-ui passes; a representative screen shows the new fonts + icons with desktop+mobile evidence."
+      ],
+      "verification": [
+        "python -m pytest tests/test_ui_design_assets.py tests/test_design_system_gate.py -q",
+        "python scripts/design_system_gate.py --check --all-ui"
+      ],
+      "units": [
+        {
+          "title": "Self-host Geist + Geist Mono as font tokens",
+          "context": "Geist/Geist Mono are OFL 1.1, built for dev tools, matching the stated direction. Self-host variable woff2; no CDN.",
+          "inputs": ["reviews/RESEARCH-2026-06-20-ui-ux-visual-resources.md (Strand 3)", "src/agent_runtime/ui_console_assets.py (CSS/tokens)", "docs/design/agent-runtime/DESIGN.md"],
+          "target_files": ["src/agent_runtime/ui_console_assets.py", "src/agent_runtime/ui_design_assets.py"],
+          "scope": "Add @font-face for self-hosted woff2 + wire to type tokens.",
+          "steps": ["Vendor Geist + Geist Mono woff2 (confirm OFL); record license.", "Add @font-face and bind font-family tokens.", "Verify rendering + fallback stack."],
+          "acceptance": ["Console uses self-hosted Geist/Geist Mono via tokens; no font CDN; OFL recorded."],
+          "verification": ["python scripts/design_system_gate.py --check --all-ui"],
+          "handoff": "Fonts done; unit 2 adds icons.",
+          "stop_condition": "If OFL terms or a self-host artifact are unclear, flag before committing binaries."
+        },
+        {
+          "title": "Vendor Lucide icon set + componentIcon helper",
+          "context": "Lucide is ISC, clean stroke icons matching the Linear/Notion look; use as inline SVG inheriting currentColor.",
+          "inputs": ["src/agent_runtime/ui_design_assets.py", "the existing icon usages / entity glyphs"],
+          "target_files": ["src/agent_runtime/ui_design_assets.py", "src/agent_runtime/ui_console_assets.py"],
+          "scope": "Vendor the needed Lucide SVGs (ISC) + componentIcon(name) returning token-colored inline SVG.",
+          "steps": ["Vendor the icon subset actually used (ISC); record license.", "Add componentIcon(name) -> inline SVG inheriting currentColor.", "Replace ad-hoc glyphs/entities (e.g. &#9776;) with componentIcon where sensible."],
+          "acceptance": ["Icons render via componentIcon as token-colored inline SVG; Lucide ISC license recorded."],
+          "verification": ["python -m pytest tests/test_design_system_gate.py -q"],
+          "handoff": "Icon foundation done.",
+          "stop_condition": "Keep scope to vendored subset; do not pull a build-required icon package."
+        }
+      ]
+    },
+    {
+      "title": "State illustrations + data-viz palette + sparklines",
+      "goal": "Add recolorable empty/error/loading illustrations, accessible data-viz palette tokens, and inline sparklines for at-a-glance trends.",
+      "scope": "Vendor recolorable unDraw illustrations (recolor to accent token) wired into EmptyState/ErrorState/Loading patterns. Add categorical+sequential data-viz palette tokens from Radix Colors (MIT) + IBM Carbon data-viz (Apache), with dark+light + WCAG, for graph/chart use. Vendor fnando/sparkline (MIT) as componentSparkline. All permissive, self-hosted, token-driven, experimental.",
+      "priority": "P2",
+      "difficulty": "M",
+      "est_hours": 6,
+      "est_tokens": 12000,
+      "owner": "lead-engineer",
+      "team": "ui-ux",
+      "acceptance": [
+        "Empty/Error/Loading states use recolorable unDraw illustrations tinted to the accent token (license recorded).",
+        "Categorical + sequential data-viz palette tokens (Radix/Carbon) exist for both themes with WCAG-adequate contrast, consumed by the graph/charts.",
+        "componentSparkline (fnando/sparkline, MIT) renders inline SVG trends; license recorded.",
+        "design_system_gate --all-ui passes; desktop+mobile visual_verification of a state screen + a sparkline."
+      ],
+      "verification": [
+        "python -m pytest tests/test_ui_design_assets.py tests/test_design_system_gate.py -q",
+        "python scripts/design_system_gate.py --check --all-ui"
+      ],
+      "units": [
+        {
+          "title": "Recolorable unDraw state illustrations",
+          "context": "unDraw is single-accent recolorable with no attribution; tint to the console accent for instant on-brand empty/error/loading.",
+          "inputs": ["reviews/RESEARCH-2026-06-20-ui-ux-visual-resources.md (Strand 4)", "existing Empty/Error/Loading handling", "src/agent_runtime/ui_design_assets.py"],
+          "target_files": ["src/agent_runtime/ui_design_assets.py", "src/agent_runtime/ui_console_assets.py"],
+          "scope": "Vendor a few unDraw SVGs, recolor to accent token, wire into state patterns.",
+          "steps": ["Vendor relevant unDraw SVGs; record license.", "Tint via accent token (currentColor/CSS var).", "Wire into componentEmptyState + error/loading patterns."],
+          "acceptance": ["State screens show accent-tinted unDraw art; no raw color literals."],
+          "verification": ["python scripts/design_system_gate.py --check --all-ui"],
+          "handoff": "State art done; unit 2 does palette + sparkline.",
+          "stop_condition": "Confirm unDraw license terms before committing assets."
+        },
+        {
+          "title": "Data-viz palette tokens + componentSparkline",
+          "context": "Graphs need accessible categorical/sequential palettes (Radix MIT / Carbon Apache) in both themes; sparklines give at-a-glance trends via fnando/sparkline (MIT).",
+          "inputs": ["IBM Carbon data-viz palettes", "Radix Colors", "github.com/fnando/sparkline", "the token layer"],
+          "target_files": ["src/agent_runtime/ui_console_assets.py", "src/agent_runtime/ui_design_assets.py"],
+          "scope": "Add data-viz palette tokens + vendor sparkline + componentSparkline helper.",
+          "steps": ["Add categorical + sequential data-viz tokens (dark+light, WCAG) from Radix/Carbon; record licenses.", "Point the graph node/edge colors at the categorical tokens.", "Vendor fnando/sparkline (MIT); add componentSparkline(data) -> inline SVG.", "Use a sparkline in a metric view (agent load / gate pass-rate)."],
+          "acceptance": ["Graph uses token palettes; componentSparkline renders inline; licenses recorded; gate green."],
+          "verification": ["python -m pytest tests/test_design_system_gate.py -q"],
+          "handoff": "Visual-asset adoption complete.",
+          "stop_condition": "Keep palettes token-driven; never inline raw hex outside the token layer."
+        }
+      ]
+    }
+  ]
+}

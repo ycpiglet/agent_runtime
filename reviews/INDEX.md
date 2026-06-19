@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-18T22:27:23+09:00
-record_count: 574
+generated_at: 2026-06-20T01:04:33+09:00
+record_count: 576
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `574` review and evidence records under `reviews/`.
+- Summary: indexed `576` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `574` files |
+| Reviews covered | pass | `576` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -195,6 +195,7 @@ record_count: 574
 | `reviews/RESEARCH-2026-06-14-work-store-architecture-and-numbering.md` | `RESEARCH-2026-06-14-work-store-architecture-and-numbering` | research | complete | n/a | Work Store Architecture, Archival, Numbering & Performance — Research Synthesis |
 | `reviews/RESEARCH-2026-06-15-agent-runtime-task-ar-223-hold-routing-and-overlay-edge-research.md` | `RESEARCH-2026-06-15-agent-runtime-task-ar-223-hold-routing-and-overlay-edge-research` | md | record | n/a | RESEARCH: TASK-AR-223 hold-routing + overlay-edge risk 반영 (2026-06-15) |
 | `reviews/RESEARCH-2026-06-18-design-system-governance-role-topology.md` | `RESEARCH-2026-06-18-design-system-governance-role-topology` | md | synthesized (partial verification) | n/a | RESEARCH — Design-System Governance & Design-Org Role Topology |
+| `reviews/RESEARCH-2026-06-20-ui-ux-visual-resources.md` | `RESEARCH-2026-06-20-ui-ux-visual-resources` | md | synthesized (Strands 1-2 verified; 3-5 from fetched sources + established knowledge) | n/a | RESEARCH — UI/UX Visual Resources (graph · character · fonts · icons · color) |
 | `reviews/RETRO-2026-06-10-agent-runtime-governance-ops.md` | `RETRO-2026-06-10-agent-runtime-governance-ops` | retro | watch | watch | RETRO-2026-06-10 agent runtime governance ops |
 | `reviews/RETRO-2026-06-14-agent-runtime-process-integrity.md` | `RETRO-2026-06-14-agent-runtime-process-integrity` | retro | watch | watch | RETRO 2026-06-14 — Process Integrity (verification / merge / compound-review-retro) |
 | `reviews/RETRO-2026-06-14-knowledge-stack.md` | `RETRO-2026-06-14-knowledge-stack` | retro | watch | watch | RETRO 2026-06-14 — Agent knowledge stack (#1–#4) |
@@ -489,6 +490,7 @@ record_count: 574
 | `reviews/REVIEW-2026-06-18-taskset-ar-design-system-served-asset-split-registration.md` | `REVIEW-2026-06-18-taskset-ar-design-system-served-asset-split-registration` | md | record | pass | Design System Served Asset Split Registration |
 | `reviews/REVIEW-2026-06-18-taskset-ar-design-system-token-debt-registration.md` | `REVIEW-2026-06-18-taskset-ar-design-system-token-debt-registration` | md | record | pass | Design System Token Debt Registration |
 | `reviews/REVIEW-2026-06-18-taskset-ar-release-auto-noncritical-registration.md` | `REVIEW-2026-06-18-taskset-ar-release-auto-noncritical-registration` | md | record | pass | Noncritical Release Auto-Execution Registration |
+| `reviews/REVIEW-2026-06-20-taskset-ar-visual-asset-adoption-registration.md` | `REVIEW-2026-06-20-taskset-ar-visual-asset-adoption-registration` | md | record | pass | Visual Asset Adoption Registration |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario |

@@ -120,6 +120,12 @@
       "display_name": "Noncritical Release Auto-Execution",
       "summary": "Fix the stale release execution gate (parameterize the hardcoded v0.1.8) and wire a cadence-bound auto-release path that runs the agent-council vote, gates, tag, and push for noncritical releases on green main CI, while keeping major/breaking/critical releases Owner-gated. Correct the release-conductor skill doc to match the implemented tier rule.",
       "order": 624
+    },
+    {
+      "task_set_id": "TASKSET-AR-VISUAL-ASSET-ADOPTION",
+      "display_name": "Visual Asset Adoption",
+      "summary": "Implement the research-backed visual upgrade: DiceBear CC0 seeded agent avatars with role accents; Dagre+d3-force graph rendering for dependency/state-machine/live-agent views; Geist OFL fonts; Lucide icons; unDraw state illustrations; Radix+Carbon data-viz palette tokens and sparklines. Permissive-only, no-build, self-hosted, token-driven, landed experimental.",
+      "order": 625
     }
   ]
 }
