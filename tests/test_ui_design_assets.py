@@ -194,15 +194,10 @@ def test_vendored_geist_font_files_are_present_and_licensed():
 
     assert "SIL OPEN FONT LICENSE" in license_text
     assert '"version": "1.7.2"' in package_text
-    for rel_path in [
-        "fonts/geist-sans/Geist-Variable.woff2",
-        "fonts/geist-sans/Geist-Italic[wght].woff2",
-        "fonts/geist-mono/GeistMono-Variable.woff2",
-        "fonts/geist-mono/GeistMono-Italic[wght].woff2",
-    ]:
-        body = (vendor / rel_path).read_bytes()
-        assert body.startswith(b"wOF2"), rel_path
-        assert len(body) > 40_000, rel_path
+    # The Geist woff2 binaries are a documented drop-in: the public-sanitization
+    # policy forbids binary/undecodable files in the public core, so only the OFL
+    # records (LICENSE/package.json) are vendored here. The @font-face fallback
+    # stack (Geist -> Inter -> system) keeps the console rendering without them.
 
 
 def test_vendored_lucide_icon_files_are_present_and_licensed():
