@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T23:44:31+09:00
-record_count: 695
+generated_at: 2026-06-20T00:16:29+09:00
+record_count: 698
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `695` review and evidence records under `reviews/`.
+- Summary: indexed `698` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `695` files |
+| Reviews covered | pass | `698` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -166,7 +166,7 @@ record_count: 695
 | `reviews/PLAN-2026-06-19-operator-attention-graph-implementation.md` | `PLAN-2026-06-19-operator-attention-graph-implementation` | ui-implementation-plan | accepted | pass | Operator Attention Graph Implementation Plan |
 | `reviews/PLAN-2026-06-19-taskset-board-attention-workspace-implementation.md` | `PLAN-2026-06-19-taskset-board-attention-workspace-implementation` | ui-implementation-plan | accepted | pass | Taskset Board Attention Workspace Implementation Plan |
 | `reviews/PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final.json` | `PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final` | json | record | n/a | PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final |
-| `reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md` | `PROPOSALS-2026-06-19-ui-ux-next-work` | ui-ux-next-work-proposals | planned | watch | UI/UX Next Work Proposals 2026-06-19 |
+| `reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md` | `PROPOSALS-2026-06-19-ui-ux-next-work` | ui-ux-next-work-proposals | active | pass | UI/UX Next Work Proposals 2026-06-19 |
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8.json` | `RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8 |
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0.json` | `RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0 |
 | `reviews/RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8.json` | `RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8 |
@@ -541,6 +541,7 @@ record_count: 695
 | `reviews/SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync.md` | `SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync` | md | record | n/a | SEMINAR (2026-06-15) - TASK-AR-223 governance sync |
 | `reviews/SEMINAR-2026-06-17-self-improvement-cadence.md` | `SEMINAR-2026-06-17-self-improvement-cadence` | meeting | planned | planned | Self Improvement Cadence Seminar |
 | `reviews/SEMINAR-2026-06-18-self-improvement-cadence.md` | `SEMINAR-2026-06-18-self-improvement-cadence` | meeting | planned | planned | Self Improvement Cadence Seminar |
+| `reviews/SEMINAR-2026-06-19-taskset-board-evidence-performance-ia.md` | `SEMINAR-2026-06-19-taskset-board-evidence-performance-ia` | ui-ux-design-seminar | accepted | pass | Taskset Board Evidence And Performance IA Seminar |
 | `reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md` | `SEMINAR-2026-06-19-taskset-board-ia-design-direction` | ui-ux-design-seminar | accepted | pass | Taskset Board IA Design Seminar |
 | `reviews/SEMINAR-2026-06-19-ui-ux-design-direction.md` | `SEMINAR-2026-06-19-ui-ux-design-direction` | ui-ux-design-direction-seminar | accepted | pass | UI/UX Design Direction Seminar 2026-06-19 |
 | `reviews/UX-EVAL-2026-06-19-oag-claim-aware-relation-adapter.md` | `UX-EVAL-2026-06-19-oag-claim-aware-relation-adapter` | ux-evaluation | accepted_with_findings | watch | Claim-Aware Relation Adapter UX Evaluation |
@@ -638,6 +639,7 @@ record_count: 695
 | `reviews/VERIFY-2026-06-19-unit-task-ar-613-001-20260619214507.json` | `VERIFY-2026-06-19-unit-task-ar-613-001-20260619214507` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-613-001-20260619214507 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-614-001-20260619222418.json` | `VERIFY-2026-06-19-unit-task-ar-614-001-20260619222418` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-614-001-20260619222418 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-615-001-20260619233128.json` | `VERIFY-2026-06-19-unit-task-ar-615-001-20260619233128` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-615-001-20260619233128 |
+| `reviews/VERIFY-2026-06-20-unit-task-ar-616-001-20260620000909.json` | `VERIFY-2026-06-20-unit-task-ar-616-001-20260620000909` | json | record | n/a | VERIFY-2026-06-20-unit-task-ar-616-001-20260620000909 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
@@ -729,6 +731,7 @@ record_count: 695
 | `reviews/W4B-2026-06-19-TASK-AR-614.md` | `W4B-2026-06-19-TASK-AR-614` | md | record | n/a | W4B Verification - TASK-AR-614 / UNIT-TASK-AR-614-001 |
 | `reviews/W4B-2026-06-19-TASK-AR-615.md` | `W4B-2026-06-19-TASK-AR-615` | md | record | n/a | W4B Verification - TASK-AR-615 / UNIT-TASK-AR-615-001 |
 | `reviews/W4B-2026-06-19-UNIT-TASK-AR-596-001.md` | `W4B-2026-06-19-UNIT-TASK-AR-596-001` | md | accepted | pass | W4B Independent Verification - UNIT-TASK-AR-596-001 |
+| `reviews/W4B-2026-06-20-TASK-AR-616.md` | `W4B-2026-06-20-TASK-AR-616` | w4b-independent-verification | passed | pass | W4B Independent Verification - TASK-AR-616 |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.
