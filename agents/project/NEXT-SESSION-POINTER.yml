@@ -1,38 +1,44 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T09:20:00+09:00
+updated_at: 2026-06-19T09:42:00+09:00
 current_state:
-  summary: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH is active; TASK-AR-603 is claimed for the first UI source-mutating operator attention graph implementation."
+  summary: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH is active; TASK-AR-603 is implemented, W4b-verified, released, merged, and closed. TASK-AR-604 is the remaining beta/UX evaluation step."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH"
-  step_index: 2
+  step_index: 4
   step_total: 5
-  progress_pct: 30
-  status_text: "Active claim CLAIM-20260619-091500-task-ar-603-operator-attention-graph owns the next UI source mutation in .worktrees/TASK-AR-603-oag."
+  progress_pct: 70
+  status_text: "Next dispatch is TASK-AR-604: beta-tester and UX-evaluator evidence for the relation-aware operator attention graph slice."
 active_work:
-  current_agents:
-    - claim_id: "CLAIM-20260619-091500-task-ar-603-operator-attention-graph"
-      agent_role: "interface-designer"
-      agent_instance_id: "interface-designer-20260619-091500-kst-oag"
-      display_name: "codex-interface-designer-oag-603"
-      callsite_id: "terminal:wt-task-ar-603:tab-01"
-      pane_id: "terminal:wt-task-ar-603:tab-01"
-      task_id: "TASK-AR-603"
-      task_set_id: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH"
-      unit_id: "UNIT-TASK-AR-603-001"
-      worktree_path: ".worktrees/TASK-AR-603-oag"
+  current_agents: []
   current_teams:
     - ui-ux
 resume:
-  active_task: TASK-AR-603
+  active_task: TASK-AR-604
   active_task_set: TASKSET-AR-OPERATOR-ATTENTION-GRAPH
-  branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
+  branch_policy: "Use dispatcher-created worktrees for new task-set work; TASK-AR-604 should gather beta/UX evidence before taskset closeout."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
+  operator_attention_graph:
+    taskset: TASKSET-AR-OPERATOR-ATTENTION-GRAPH
+    completed_tasks:
+      - TASK-AR-603
+    active_claim: null
+    released_claim: agents/runtime/task_claims/CLAIM-20260619-091500-task-ar-603-operator-attention-graph.json
+    worktree_path: null
+    implementation_branch: codex/task-ar-603-operator-attention-graph
+    implementation_commit: 5c121b3
+    integration_commit: a923e91
+    status: task_ar_603_completed_integrated_closed
+    next_task: TASK-AR-604
+    next_decision: run_beta_ux_evaluation_before_taskset_closeout
+    verification_evidence: reviews/VERIFY-2026-06-19-operator-attention-graph-implementation.json
+    unit_verification_evidence: reviews/VERIFY-2026-06-19-unit-task-ar-603-001-20260619094000.json
+    w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-603.md
   design_system_debt_consolidation:
     taskset: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
     released_claim: agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.json

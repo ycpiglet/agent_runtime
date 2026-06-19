@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-603:tab-01",
   "pane_id": "terminal:wt-task-ar-603:tab-01",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-OPERATOR-ATTENTION-GRAPH",
   "active_scope": "TASKSET-AR-OPERATOR-ATTENTION-GRAPH",
   "scope_transition_approved": true,
@@ -19,20 +19,20 @@
   "model_tier": "worker_standard",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "claim-created",
-  "progress_pct": 0,
-  "step_index": 1,
+  "phase": "w4b-verified-released",
+  "progress_pct": 100,
+  "step_index": 5,
   "step_total": 5,
-  "status_text": "Claimed operator attention graph implementation; source mutation limited to declared UI asset/test files.",
+  "status_text": "TASK-AR-603 operator attention graph implementation completed, W4a self-verified, W4b approved, released, merged, and closed.",
   "worktree_path": ".worktrees/TASK-AR-603-oag",
   "branch": "codex/task-ar-603-operator-attention-graph",
   "claimed_at": "2026-06-19T09:15:00+09:00",
-  "last_heartbeat": "2026-06-19T09:15:00+09:00",
-  "updated_at": "2026-06-19T09:15:00+09:00",
+  "last_heartbeat": "2026-06-19T09:38:00+09:00",
+  "updated_at": "2026-06-19T09:38:00+09:00",
   "expires_at": "2026-06-19T09:45:00+09:00",
   "lease": {
     "claimed_at": "2026-06-19T09:15:00+09:00",
-    "heartbeat_at": "2026-06-19T09:15:00+09:00",
+    "heartbeat_at": "2026-06-19T09:38:00+09:00",
     "expires_at": "2026-06-19T09:45:00+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260619-091500-task-ar-603-operator-attention-graph.handoff.md",
@@ -46,5 +46,10 @@
     "tests/test_ui_console.py",
     "reviews/VERIFY-2026-06-19-operator-attention-graph-implementation.json",
     "reviews/INDEX.md"
-  ]
+  ],
+  "self_verification_evidence": "reviews/VERIFY-2026-06-19-operator-attention-graph-implementation.json",
+  "released_at": "2026-06-19T09:38:00+09:00",
+  "verified_by": "codex-independent-w4b-verifier-2026-06-19",
+  "verifier_role": "independent-verifier",
+  "verification_evidence": "reviews/W4B-2026-06-19-TASK-AR-603.md"
 }

@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-19T09:09:44+09:00
+generated_at: 2026-06-19T09:41:15+09:00
 record_count: 364
 ---
 
@@ -399,8 +399,8 @@ record_count: 364
 | 21.1.3 | Task 21.1.3 | task | `TASK-AR-602` | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | completed | `agents/lead_engineer/tasks/TASK-AR-602.md` | Turn the accepted design-direction RFC into the next implementation refactor and beta… |
 | 22 | Initiative 22 | initiative | `INIT-AR-OPERATOR-ATTENTION-GRAPH` | - | active | `agents/project/initiatives/INIT-AR-OPERATOR-ATTENTION-GRAPH.md` | Operator Attention Graph UI Implementation |
 | 22.1 | Taskset 22.1 | taskset | `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` | `INIT-AR-OPERATOR-ATTENTION-GRAPH` | active | `BACKLOG-BOARD.md` | Operator Attention Graph |
-| 22.1.1 | Task 22.1.1 | task | `TASK-AR-603` | `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` | planned | `agents/lead_engineer/tasks/TASK-AR-603.md` | Add the first governed relation-aware UI assets and wire one taskset/claim/evidence/c… |
-| 22.1.1.1 | Unit 22.1.1.1 | unit | `UNIT-TASK-AR-603-001` | `TASK-AR-603` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md` | UNIT-TASK-AR-603-001 - Add relation-aware UI assets and first workflow wiring |
+| 22.1.1 | Task 22.1.1 | task | `TASK-AR-603` | `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` | completed | `agents/lead_engineer/tasks/TASK-AR-603.md` | Add the first governed relation-aware UI assets and wire one taskset/claim/evidence/c… |
+| 22.1.1.1 | Unit 22.1.1.1 | unit | `UNIT-TASK-AR-603-001` | `TASK-AR-603` | completed | `agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md` | UNIT-TASK-AR-603-001 - Add relation-aware UI assets and first workflow wiring |
 | 22.1.2 | Task 22.1.2 | task | `TASK-AR-604` | `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` | planned | `agents/lead_engineer/tasks/TASK-AR-604.md` | Verify the first operator_attention_graph implementation through user-like beta actio… |
 | 22.1.2.1 | Unit 22.1.2.1 | unit | `UNIT-TASK-AR-604-001` | `TASK-AR-604` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-604/UNIT-TASK-AR-604-001.md` | UNIT-TASK-AR-604-001 - Record beta-tester and UX-evaluator evidence |
 

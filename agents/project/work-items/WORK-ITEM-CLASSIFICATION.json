@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T09:09:44+09:00",
+  "generated_at": "2026-06-19T09:41:15+09:00",
   "record_count": 364,
   "finding_count": 0,
   "findings": [],
@@ -3974,7 +3974,7 @@
       "title": "Add the first governed relation-aware UI assets and wire one taskset/claim/evidence/c…",
       "path": "agents/lead_engineer/tasks/TASK-AR-603.md",
       "parent_id": "TASKSET-AR-OPERATOR-ATTENTION-GRAPH",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-603-001",
@@ -3985,7 +3985,7 @@
       "title": "UNIT-TASK-AR-603-001 - Add relation-aware UI assets and first workflow wiring",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md",
       "parent_id": "TASK-AR-603",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-604",

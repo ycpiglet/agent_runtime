@@ -9,11 +9,11 @@ task_id: TASK-AR-603
 task_set_id: TASKSET-AR-OPERATOR-ATTENTION-GRAPH
 initiative_id: INIT-AR-OPERATOR-ATTENTION-GRAPH
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: completed
+verification_status: passed
 owner: interface-designer
 created_at: 2026-06-19T09:08:00+09:00
-updated_at: 2026-06-19T09:08:00+09:00
+updated_at: 2026-06-19T09:42:00+09:00
 origin_type: owner_request
 origin_ref: chat:2026-06-19-ui-refactor-continuous-cycle
 created_by: codex-planner
@@ -53,6 +53,15 @@ verification:
   - python scripts/evidence_index_generator.py --check
 handoff: Report changed helpers, assetization classification, first wired workflow, focused tests, design-system gate result, and residual one-off or extraction debt.
 stop_condition: Stop after one relation-aware workflow slice is implemented, tested, and ready for independent verification.
+verified_at: 2026-06-19T09:40:00+09:00
+verified_by: codex-interface-designer-oag-603
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-unit-task-ar-603-001-20260619094000.json
+resolution: done
+completed_at: 2026-06-19T09:42:00+09:00
+closed_by: codex-interface-designer-oag-603
+actual_hours: 1.7
+actual_tokens: 11000
 ---
 
 # UNIT-TASK-AR-603-001 - Add relation-aware UI assets and first workflow wiring
@@ -116,3 +125,15 @@ Report changed helpers, assetization classification, first wired workflow, focus
 ## Stop Boundary
 
 Stop after one relation-aware workflow slice is implemented, tested, and ready for independent verification.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T09:42:00+09:00`
+- Resolution: `done`
+- Actual hours: `1.7`
+- Actual tokens: `11000`
+- Closed by: `codex-interface-designer-oag-603`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-unit-task-ar-603-001-20260619094000.json`
+<!-- work-close:end -->

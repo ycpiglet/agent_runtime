@@ -2,9 +2,9 @@
 
 ## 현재 한 줄 요약
 
-- Active line is `TASKSET-AR-OPERATOR-ATTENTION-GRAPH`: `TASK-AR-603` is now claimed by `CLAIM-20260619-091500-task-ar-603-operator-attention-graph`; source mutation belongs in `.worktrees/TASK-AR-603-oag`.
+- Active line is `TASKSET-AR-OPERATOR-ATTENTION-GRAPH`: `TASK-AR-603` is implemented, W4b-verified, released, merged, and closed; only `TASK-AR-604` beta/UX evaluation remains open.
 - The previous `TASKSET-AR-LLM-WIKI` closeout is complete: `TASK-AR-590..596` are archived `7/7`, W4b evidence is indexed, and that taskset has no active claims.
-- UI refactor/design-system remediation is functionally past the assetization and debt-consolidation phases; the current work is the design-direction RFC cycle before the next UI source mutation.
+- UI refactor/design-system remediation is now past the first source-mutating operator-attention-graph implementation. The next UI work is user-like beta/UX evaluation of that slice, not another source mutation.
 - `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` is complete: `TASK-AR-597`, `TASK-AR-598`, and `TASK-AR-599` are implemented, W4b-verified, integrated, and closed.
 - `TASK-AR-583` semantic spacing/radius scale is W4b verified and integrated; `TASK-AR-584` is next.
 - `TASK-AR-593` Wiki search + ask has passed W4b, was released, merged, and its worktree/branch were cleaned.
@@ -12,7 +12,16 @@
 - Self-improvement remediation is improving but not mature: `scribe_state` is now ok, but the score is still below mature and one monitored role gap remains.
 - Scribe source is now the live status summary section so advisory health can be measured without fabricating role evidence.
 - Doc Steward remains ok; keep document-health checks advisory and evidence-based.
-- Next for Design System Debt Consolidation: dispatch `TASK-AR-584` when continuing the sequence.
+- Next UI refactor step: dispatch `TASK-AR-604` to verify the relation-aware operator attention graph through beta-tester and UX-evaluator evidence.
+
+## 2026-06-19 - TASKSET-AR-OPERATOR-ATTENTION-GRAPH / TASK-AR-603 complete
+
+- Completed task: `TASK-AR-603` added reusable relation UI assets and wired the first taskset-to-claim/evidence/context workflow into the console.
+- Released claim: `CLAIM-20260619-091500-task-ar-603-operator-attention-graph` is W4b verified and released with evidence `reviews/W4B-2026-06-19-TASK-AR-603.md`.
+- Integrated branch: `codex/task-ar-603-operator-attention-graph`; implementation commit `5c121b3`, W4b record commit `a923e91`.
+- Output: `componentRelationChip`, `componentEvidencePreviewRow`, `patternAttentionRelationPanel`, and `patternGraphContextStack`; `tasksetRelationSummary` is intentionally recorded as one-off-for-now adapter debt.
+- Verification: focused UI tests passed (`162 passed`), design-system gate passed with `findings=0`, `ui_ux_cycle assess` now reports `ready/100`, evidence index passed, and whitespace checks passed.
+- Boundary: `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` remains active. Continue with `TASK-AR-604` for beta-tester and UX-evaluator evidence before closing the taskset.
 
 ## 2026-06-19 - TASKSET-AR-LLM-WIKI / TASK-AR-594 complete
 
