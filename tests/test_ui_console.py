@@ -3712,3 +3712,168 @@ def test_ui_console_knowledge_graph_search_filter_deeplink_present(tmp_path):
     assert "function updateKnowledgeGraphHash" in js
     assert "parseHash().select" in js  # deep-link focus on load
     assert ".kg-filter-chip" in css
+
+
+# ----- TASK-AR-588: Layered DAG + force agent-map graph upgrade -----
+
+
+def test_ui_console_dep_graph_uses_layered_dag_positions(tmp_path):
+    """Dependency graph uses layered DAG layout (Dagre/Sugiyama-style)."""
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert "function dependencyNodePositions(" in js
+    # Must include a layered DAG layout function.
+    assert "_dagre_layered_positions(" in js or "patternSvgLayeredDagreLayout(" in js
+    # dependencyNodePositions must delegate to a layered layout.
+    start = js.index("function dependencyNodePositions(")
+    end = js.index("function renderDependencyGraph(")
+    dep_fn = js[start:end]
+    assert "_dagre_layered_positions(" in dep_fn or "patternSvgLayeredDagreLayout(" in dep_fn
+
+
+def test_ui_console_dep_graph_js_has_datadog_edge_encodings(tmp_path):
+    """Dependency graph edges use Datadog-style magnitude and health encodings."""
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    start = js.index("function renderDependencyGraph(")
+    end_marker = "function loadKnowledgeGraph("
+    end = js.index(end_marker, start)
+    dep_block = js[start:end]
+    # Magnitude drives edge width (stroke-width or CSS class).
+    assert "magnitude" in dep_block or "graphEdgeMagnitudeBucket" in dep_block
+    # Health drives edge color (stroke or CSS class).
+    assert "health" in dep_block.lower() or "graphEdgeHealth" in dep_block
+
+
+def test_ui_console_dep_graph_js_has_github_actions_status_icons(tmp_path):
+    """Dependency graph nodes have GitHub-Actions-style status icon badges."""
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert "dep-node-status-icon" in js
+    start = js.index("function renderDependencyGraph(")
+    end_marker = "function loadKnowledgeGraph("
+    end = js.index(end_marker, start)
+    dep_block = js[start:end]
+    # Status icon/glyph must be added to nodes.
+    assert "dep-node-status-icon" in dep_block or "appendSvgStatusBadge" in dep_block
+
+
+def test_ui_console_dep_graph_css_status_icon_uses_tokens(tmp_path):
+    """dep-node-status-icon CSS uses semantic tokens, no raw literals."""
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    assert ".dep-node-status-icon" in css
+    hex_pattern = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+    icon_lines = [l for l in css.splitlines() if ".dep-node-status-icon" in l]
+    for line in icon_lines:
+        assert not hex_pattern.search(line), f"raw hex in dep-node-status-icon CSS: {line}"
+
+
+def test_ui_console_state_machine_js_has_layered_dag_layout(tmp_path):
+    """State machine viewer uses layered DAG layout (Dagre/Sugiyama-style)."""
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    start = js.index("function stateMachineNodePositions(")
+    end = js.index("function renderStateMachineViewer(")
+    sm_fn = js[start:end]
+    assert "_dagre_layered_positions(" in sm_fn or "patternSvgLayeredDagreLayout(" in sm_fn
+
+
+def test_ui_console_state_machine_js_has_datadog_edge_encodings(tmp_path):
+    """State machine edges use Datadog-style magnitude and health encodings."""
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    start = js.index("function renderStateMachineViewer(")
+    end = js.index("function renderRoadmapTimeline(")
+    sm_block = js[start:end]
+    # Magnitude-based width or health-based color must be present.
+    assert "graphEdgeMagnitudeBucket" in sm_block or "magnitude" in sm_block or "stroke-width" in sm_block
+
+
+def test_ui_console_state_machine_js_has_github_actions_status_icons(tmp_path):
+    """State machine nodes have GitHub-Actions-style status icon glyphs."""
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    start = js.index("function renderStateMachineViewer(")
+    end = js.index("function renderRoadmapTimeline(")
+    sm_block = js[start:end]
+    assert "state-machine-status-icon" in sm_block or "appendSvgStatusBadge" in sm_block
+
+
+def test_ui_console_state_machine_css_status_icon_uses_tokens(tmp_path):
+    """state-machine-status-icon CSS uses semantic tokens, no raw literals."""
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    assert ".state-machine-status-icon" in css
+    hex_pattern = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+    icon_lines = [l for l in css.splitlines() if ".state-machine-status-icon" in l]
+    for line in icon_lines:
+        assert not hex_pattern.search(line), f"raw hex in state-machine-status-icon CSS: {line}"
+
+
+def test_ui_console_live_map_js_has_force_directed_layout(tmp_path):
+    """Live map uses a force-directed simulation layout (d3-force upgrade path)."""
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    start = js.index("function liveMapNodePositions(")
+    end = js.index("function renderLiveMap(")
+    lm_fn = js[start:end]
+    assert "repulsion" in lm_fn
+    assert "spring" in lm_fn
+    assert "damping" in lm_fn
+    assert "ticks" in lm_fn
+
+
+def test_ui_console_live_map_js_has_datadog_edge_encodings(tmp_path):
+    """Live map edges use Datadog-style stroke-width=magnitude, stroke=health."""
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    start = js.index("function renderLiveMap(")
+    end = js.index("function pulseLiveElement(")
+    lm_block = js[start:end]
+    assert "LIVE_MAP_HEALTH_STROKE" in lm_block
+    assert "magnitude" in lm_block
+    assert 'setAttribute("stroke-width", String(magnitude))' in lm_block
+    assert 'setAttribute("stroke", healthColor)' in lm_block
+
+
+def test_ui_console_live_map_js_has_github_actions_status_icons(tmp_path):
+    """Live map nodes have GitHub-Actions-style status icon glyphs."""
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    start = js.index("function renderLiveMap(")
+    end = js.index("function pulseLiveElement(")
+    lm_block = js[start:end]
+    assert "LIVE_MAP_STATUS_GLYPH" in lm_block
+    assert "live-map-status-icon" in lm_block
+    assert "iconBg" in lm_block
+
+
+def test_ui_console_live_map_css_status_icon_uses_tokens(tmp_path):
+    """live-map-status-icon and live-map-node-label CSS use semantic tokens."""
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    assert ".live-map-status-icon" in css
+    assert ".live-map-node-label" in css
+    hex_pattern = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+    icon_lines = [
+        l for l in css.splitlines()
+        if ".live-map-status-icon" in l or ".live-map-node-label" in l
+    ]
+    for line in icon_lines:
+        assert not hex_pattern.search(line), f"raw hex in live-map icon CSS: {line}"
+
+
+def test_ui_console_graph_upgrade_escaping_in_live_map_render(tmp_path):
+    """renderLiveMap uses escapeHtml for all interpolated edge/node values."""
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    lm_start = js.index("function renderLiveMap(")
+    lm_end = js.index("function pulseLiveElement(")
+    lm_block = js[lm_start:lm_end]
+    assert "escapeHtml(edge.from)" in lm_block
+    assert "escapeHtml(edge.to)" in lm_block
+    assert "escapeHtml(" in lm_block
+
+
+def test_ui_console_graph_upgrade_module_docstring_mentions_dagre_upgrade_path(tmp_path):
+    """Module docstring documents Dagre/d3-force as the upgrade path (TASK-AR-588)."""
+    import agent_runtime.ui_console_assets as assets_mod
+    doc = assets_mod.__doc__ or ""
+    assert "Dagre" in doc
+    assert "d3-force" in doc
+    assert "upgrade path" in doc.lower()
+
+
+def test_ui_console_no_cdnjs_or_unpkg_in_graph_code(tmp_path):
+    """Graph upgrade must not introduce any runtime CDN dependency."""
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    for cdn in ("cdnjs.cloudflare.com", "unpkg.com", "cdn.jsdelivr.net"):
+        assert cdn not in js, f"CDN URL {cdn!r} found in JS -- must not use CDN at runtime"
