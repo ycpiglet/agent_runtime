@@ -3988,3 +3988,64 @@ def test_ui_console_no_cdnjs_or_unpkg_in_graph_code(tmp_path):
     js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
     for cdn in ("cdnjs.cloudflare.com", "unpkg.com", "cdn.jsdelivr.net"):
         assert cdn not in js, f"CDN URL {cdn!r} found in JS -- must not use CDN at runtime"
+
+
+# ----- TASK-AR-592: A11y + responsive pass (visual system) -----
+
+def test_ui_console_visual_system_svg_accessibility_contract(tmp_path):
+    """Graph SVGs are labelled and state/sparkline components expose right semantics."""
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+
+    assert 'id="dep-graph-svg"' in html
+    assert 'role="img" aria-label="Task dependency graph"' in html
+    assert 'id="live-map-graph"' in html
+    assert 'role="img" aria-label="Agent network graph"' in html
+    assert 'id="state-machine-svg"' in html
+    assert 'role="img" aria-label="State machine graph"' in html
+    assert 'id="kg-graph-svg"' in html
+    assert 'role="img" aria-label="Knowledge graph nodes and edges"' in html
+
+    assert 'role="status"' in js
+    assert 'role="alert"' in js
+    assert 'aria-hidden="true" focusable="false"' in js
+    assert 'role="img" aria-label="' in js
+
+
+def test_ui_console_visual_system_keyboard_and_reduced_motion_contract(tmp_path):
+    """Interactive graph nodes are keyboard-operable and animation respects motion prefs."""
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    kg_start = js.index("function renderKnowledgeGraph(")
+    kg_end = js.index("function renderPlanning(", kg_start)
+    kg_block = js[kg_start:kg_end]
+    assert 'group.setAttribute("role", "button")' in kg_block
+    assert 'group.setAttribute("tabindex", "0")' in kg_block
+    assert 'group.setAttribute("aria-pressed"' in kg_block
+    assert 'event.key === "Enter" || event.key === " "' in kg_block
+
+    assert "@media (prefers-reduced-motion: reduce)" in css
+    assert ".live-map-node circle { transition: none; }" in css
+    assert ".live-map-edge.is-pulsing { filter: none; }" in css
+    assert "if (prefersReducedMotion()) return;" in js
+
+
+def test_ui_console_visual_system_mobile_css_consumes_tokens(tmp_path):
+    """TASK-AR-592 mobile sizing uses visual tokens rather than page-local literals."""
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    assert "--visual-sparkline-mobile-w" in css
+    assert "--visual-graph-mobile-min-width" in css
+    assert "--visual-graph-mobile-height" in css
+    assert "--visual-state-machine-mobile-height" in css
+
+    mobile_start = css.index("TASK-AR-592: responsive pass")
+    mobile_end = css.index(".roadmap-timeline-summary", mobile_start)
+    mobile_block = css[mobile_start:mobile_end]
+    assert "--dv-sparkline-w: var(--visual-sparkline-mobile-w);" in mobile_block
+    assert "min-width: var(--visual-graph-mobile-min-width);" in mobile_block
+    assert "height: var(--visual-graph-mobile-height);" in mobile_block
+    assert "height: var(--visual-state-machine-mobile-height);" in mobile_block
+    assert "44px" not in mobile_block
+    assert "320px" not in mobile_block
+    assert "300px" not in mobile_block
