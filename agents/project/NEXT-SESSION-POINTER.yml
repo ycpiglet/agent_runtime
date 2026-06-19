@@ -1,21 +1,27 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T15:22:00+09:00
+updated_at: 2026-06-19T15:39:11+09:00
 current_state:
-  summary: "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT is complete; TASK-AR-608 beta/UX evidence passed W4b and no active UI claim remains."
-  status: completed
-  task_set_status: taskset_completed_local_closeout
-  task_set_id: "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT"
-  step_index: 6
-  step_total: 6
-  progress_pct: 100
-  status_text: "OAG mobile responsive refinement is locally closed; next UI cycle should select a new design-direction or IA candidate."
+  summary: "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION is registered; TASK-AR-609 lead-designer seminar is claimed for the next UI/UX cycle."
+  status: active
+  task_set_status: taskset_active
+  task_set_id: "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION"
+  step_index: 1
+  step_total: 5
+  progress_pct: 5
+  status_text: "TASK-AR-609 is claimed to produce the Taskset Board IA design seminar before any UI source mutation."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260619-153911-task-ar-609-task-ar-609-taskset-board-ia-seminar
+      agent_role: lead-designer
+      agent_instance_id: codex-lead-designer-task-ar-609
+      display_name: codex-lead-designer-task-ar-609
+      callsite_id: terminal:wt-task-ar-609:tab-01
+  current_teams:
+    - ui-ux
 resume:
-  active_task: none
-  active_task_set: TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
-  branch_policy: "OAG mobile responsive refinement is closed locally; create a fresh claim/worktree before any next UI/UX implementation."
+  active_task: TASK-AR-609
+  active_task_set: TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION
+  branch_policy: "Continue only in .worktrees/TASK-AR-609-taskset-board-ia-seminar on codex/task-ar-609-taskset-board-ia-seminar for the claimed seminar unit."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."

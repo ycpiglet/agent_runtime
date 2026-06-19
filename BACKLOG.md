@@ -31,6 +31,7 @@
 | 625 | `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` | Operator Attention Graph |
 | 626 | `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` | Claim-Aware Relation Adapter |
 | 627 | `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` | OAG Mobile Responsive Refinement |
+| 628 | `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` | Taskset Board IA Design Direction |
 
 <!-- BACKLOG-INDEX:END -->
 

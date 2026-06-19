@@ -46,7 +46,7 @@ completed_task_set_count: 49
 
 - Flow: Resolve the post-OAG UX watch that Taskset Board discovery and whole-board focus traversal are too long now that the board contains 49 tasksets; run a lead-designer IA/design seminar, publish an RFC, then derive the next implementation and beta-evaluation taskset.
 - Progress: `0/3` done; `3` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-609` | INIT-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-609/UNIT-TASK-AR-609-001.md | planned | Action | P1 | High | Medium | 2h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Create a lead-designer seminar artifact that chooses how the next Taskset Board desig… |
