@@ -1,21 +1,43 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T14:50:00+09:00
+updated_at: 2026-06-19T14:56:00+09:00
 current_state:
-  summary: "TASK-AR-607 is W4b-verified, released, and closed; TASK-AR-608 is next for beta/UX evaluation."
+  summary: "TASK-AR-608 is claimed for evaluation-only beta/UX evidence after the TASK-AR-607 mobile fix."
   status: in_progress
-  task_set_status: task_ar_608_ready
+  task_set_status: task_ar_608_claimed
   task_set_id: "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT"
-  step_index: 4
+  step_index: 1
   step_total: 6
-  progress_pct: 50
-  status_text: "TASK-AR-607 is merged and cleaned up; TASK-AR-608 is ready for an evaluation-only claim."
+  progress_pct: 5
+  status_text: "TASK-AR-608 claim created; evaluation-only worktree is ready for beta/UX evidence."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260619-145600-task-ar-608-mobile-responsive-beta
+      display_name: codex-ux-evaluator-ar-608
+      agent_role: ux-evaluator
+      agent_instance_id: codex-ux-evaluator-ar-608
+      team_id: ui-ux
+      pane_id: terminal:wt-task-ar-608:tab-01
+      callsite_id: terminal:wt-task-ar-608:tab-01
+      task_id: TASK-AR-608
+      task_set_id: TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
+      unit_id: UNIT-TASK-AR-608-001
+      status: claimed
+      phase: evaluation
+      progress_pct: 5
+      step_index: 1
+      step_total: 5
+      status_text: TASK-AR-608 mobile responsive beta/UX evaluation claimed; evidence-only worktree ready.
+      worktree_path: .worktrees/TASK-AR-608-oag-mobile-beta
+      branch: codex/task-ar-608-oag-mobile-beta
+      claim_path: agents/runtime/task_claims/CLAIM-20260619-145600-task-ar-608-mobile-responsive-beta.json
+      handoff_path: agents/runtime/task_claims/CLAIM-20260619-145600-task-ar-608-mobile-responsive-beta.handoff.md
+      last_heartbeat: 2026-06-19T14:56:00+09:00
+  current_teams:
+    - ui-ux
 resume:
   active_task: TASK-AR-608
   active_task_set: TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
-  branch_policy: "Claim TASK-AR-608 in a fresh worktree for evaluation-only beta/UX evidence; do not mutate UI source in that task."
+  branch_policy: "Work only inside .worktrees/TASK-AR-608-oag-mobile-beta until W4 verification and release; do not mutate UI source in this task."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -86,11 +108,11 @@ pointers:
     next_decision: register_mobile_taskset_board_overflow_refinement
   oag_mobile_responsive_refinement:
     taskset: TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
-    active_claim: null
+    active_claim: agents/runtime/task_claims/CLAIM-20260619-145600-task-ar-608-mobile-responsive-beta.json
     released_claims:
       - agents/runtime/task_claims/CLAIM-20260619-140700-task-ar-607-mobile-responsive-refinement.json
-    worktree_path: null
-    status: task_ar_607_merged_cleaned_task_ar_608_ready
+    worktree_path: .worktrees/TASK-AR-608-oag-mobile-beta
+    status: task_ar_608_claimed
     completed_tasks:
       - TASK-AR-607
     next_task: TASK-AR-608
@@ -110,7 +132,8 @@ pointers:
     task_ar_607_verification: reviews/VERIFY-2026-06-19-oag-mobile-responsive-refinement.json
     task_ar_607_unit_verification: reviews/VERIFY-2026-06-19-unit-task-ar-607-001-20260619143121.json
     task_ar_607_w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-607.md
-    next_decision: claim_task_ar_608_beta_ux_evaluation
+    task_ar_608_claim: agents/runtime/task_claims/CLAIM-20260619-145600-task-ar-608-mobile-responsive-beta.json
+    next_decision: complete_task_ar_608_beta_ux_evaluation
   design_system_debt_consolidation:
     taskset: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
     released_claim: agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.json

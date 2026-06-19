@@ -4,8 +4,8 @@
 
 - `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` is complete: `TASK-AR-603` implemented the first relation-aware UI slice, and `TASK-AR-604` completed beta/UX evaluation with W4b evidence.
 - `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` is complete: `TASK-AR-605` fixed claim-aware relation semantics, and `TASK-AR-606` completed beta/UX retest with W4b evidence.
-- `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` is `1/2` done: `TASK-AR-607` fixed `BTC-OAG-CLAIM-MOBILE-001`, and `TASK-AR-608` will rerun beta/UX evaluation.
-- Active UI claim: none after `TASK-AR-607` W4b release; next claim is `TASK-AR-608`.
+- `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` is `1/2` done: `TASK-AR-607` fixed `BTC-OAG-CLAIM-MOBILE-001`, and `TASK-AR-608` is claimed for beta/UX evaluation.
+- Active UI claim: `CLAIM-20260619-145600-task-ar-608-mobile-responsive-beta` owns evaluation-only `TASK-AR-608`.
 - The previous `TASKSET-AR-LLM-WIKI` closeout is complete: `TASK-AR-590..596` are archived `7/7`, W4b evidence is indexed, and that taskset has no active claims.
 - UI refactor/design-system remediation is now past design-system governance, asset extraction, UI/UX cycle automation, first source-mutating Operator Attention Graph implementation, beta/UX evaluation, and claim-aware relation adapter refinement.
 - `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` is complete: `TASK-AR-597`, `TASK-AR-598`, and `TASK-AR-599` are implemented, W4b-verified, integrated, and closed.
@@ -15,7 +15,14 @@
 - Self-improvement remediation is improving but not mature: `scribe_state` is now ok, but the score is still below mature and one monitored role gap remains.
 - Scribe source is now the live status summary section so advisory health can be measured without fabricating role evidence.
 - Doc Steward remains ok; keep document-health checks advisory and evidence-based.
-- Next UI refactor step: claim `TASK-AR-608` for desktop and `390x844` beta/UX evaluation.
+- Next UI refactor step: complete `TASK-AR-608` desktop and `390x844` beta/UX evidence without mutating UI source.
+
+## 2026-06-19 - TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT / TASK-AR-608 claimed
+
+- Active claim: `CLAIM-20260619-145600-task-ar-608-mobile-responsive-beta`.
+- Worktree/branch: `.worktrees/TASK-AR-608-oag-mobile-beta` / `codex/task-ar-608-oag-mobile-beta`.
+- Scope: evaluation evidence only; UI source mutation is out of scope.
+- Verification target: design-system gate, evidence index, UI/UX cycle assessment, and beta/UX evidence with measured desktop/mobile paths.
 
 ## 2026-06-19 - TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT / TASK-AR-607 complete
 
