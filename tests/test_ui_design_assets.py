@@ -29,13 +29,14 @@ def test_ui_design_assets_classify_token_component_and_pattern_layers():
 def test_ui_design_token_scale_is_served_in_console_css(tmp_path):
     css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
 
-    assert "Design-system token scale (TASK-AR-579)" in css
+    assert "Design-system token scale (TASK-AR-579" in css
     assert "--font-size-ui-sm" in css
     assert "--font-size-ui-12" in css
     assert "--space-6" in css
-    assert "--space-px-12" in css
+    # Semantic scale tokens (TASK-AR-583): px-aliases replaced by named tokens
+    assert "--space-2xl" in css
     assert "--radius-sm" in css
-    assert "--radius-px-6" in css
+    assert "--radius-hairline" in css
 
 
 def test_ui_component_bundle_is_served_in_console_js(tmp_path):

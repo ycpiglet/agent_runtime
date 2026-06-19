@@ -74,6 +74,19 @@ passes for the current console baseline. Typography, spacing, radius, and the
 remaining raw stroke color are now represented through tokens rather than
 page-level CSS literals.
 
+Semantic scale status as of `TASK-AR-583`: the transitional `--space-px-*` and
+`--radius-px-*` aliases have been removed and replaced by a fully designed
+semantic scale (stable tier) defined in `ui_design_assets.UI_TOKEN_SCALE_CSS`.
+The spacing scale provides named steps (`--space-hairline`, `--space-xs`,
+`--space-sm`, `--space-md`, `--space-lg`, `--space-xl`, `--space-2xl` …
+`--space-8xl`, `--space-viewport-gap`, `--space-floating-offset`) plus
+sub-step half-values for tight UI density. The radius scale provides
+`--radius-hairline`, `--radius-xs`, `--radius-sm-half`, `--radius-sm`,
+`--radius-md`, `--radius-lg`, `--radius-xl`, and `--radius-pill`. All
+consumers in `ui_console_assets.py` use these semantic names; no raw px
+literals were re-introduced and `design_system_gate --all-ui` reports
+findings=0.
+
 Residual one-off boundary: data-heavy SVG layout functions, calendar grids,
 office map placement, import/export previews, specialized ops dashboard charts,
 and JavaScript geometry constants may remain in `ui_console.py` until a later
@@ -111,12 +124,14 @@ against objective, checkable criteria:
 Demotion or deprecation is allowed from any tier. Tier transitions are recorded
 in the asset module docstring and in the touching task's closeout evidence.
 
-Tokens follow the same model. The current `--space-px-*` and `--radius-px-*`
-aliases are `stable` but transitional: they tokenize the legacy literal values
-rather than a designed scale. Consolidating them into a semantic scale (for
-example `--space-1..n`) is a future `experimental` token delta that promotes
-only after the asset layer migrates to it, and it must not silently re-introduce
-raw literals.
+Tokens follow the same model. The `--space-px-*` and `--radius-px-*`
+transitional aliases have been replaced by a designed semantic scale
+(`TASK-AR-583`, `stable`): named steps such as `--space-xs`, `--space-sm`,
+`--space-md`, `--space-lg`, `--space-xl`, `--space-2xl` … `--space-8xl`,
+`--space-viewport-gap`, `--space-floating-offset`; and `--radius-hairline`,
+`--radius-xs`, `--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-xl`,
+`--radius-pill`. Workers add new raw literals only in the token-definition
+layer; new consumers must reference these names.
 
 ## New design proposal path
 
