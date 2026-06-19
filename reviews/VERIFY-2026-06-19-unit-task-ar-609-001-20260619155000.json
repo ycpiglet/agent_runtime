@@ -1,0 +1,65 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-19-unit-task-ar-609-001-20260619155000",
+  "work_id": "UNIT-TASK-AR-609-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-609/UNIT-TASK-AR-609-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-609",
+  "unit_id": "UNIT-TASK-AR-609-001",
+  "task_set_id": "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION",
+  "claim_id": "CLAIM-20260619-153911-task-ar-609-task-ar-609-taskset-board-ia-seminar",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-19T15:50:00+09:00",
+  "verified_by": "codex-lead-designer-task-ar-609",
+  "command_count": 4,
+  "commands": [
+    {
+      "command": "python scripts/ui_ux_cycle.py --root . assess --json",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "status=ready; score=100; active_claims=1; next_refactor.task_id=TASK-AR-610; design_system_gate.status=pass"
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0\n"
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout": "evidence-index: pass\nfindings=0\n"
+    },
+    {
+      "command": "python scripts/owner_doc_format_gate.py reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "seminar and proposal documents passed owner-doc format gate; findings=0"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion": "The seminar is specific enough for a planner to write the RFC task without chat context.",
+      "status": "passed",
+      "evidence": "reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md selects taskset_attention_workspace and names TASK-AR-610 as next RFC."
+    },
+    {
+      "criterion": "Every UI quality dimension has concrete evidence expectations and an assetization class.",
+      "status": "passed",
+      "evidence": "Seminar includes Quality Requirements For RFC and Assetization Classification tables."
+    },
+    {
+      "criterion": "The chosen direction has explicit implementation boundaries, schema expectations, and a beta-tester follow-up path.",
+      "status": "passed",
+      "evidence": "Seminar includes Implementation Boundary and Beta And UX Evidence Path sections."
+    },
+    {
+      "criterion": "No source UI files are changed by this unit.",
+      "status": "passed",
+      "evidence": "Diff is limited to reviews/INDEX.md, reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md, reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md, and this verification record."
+    }
+  ],
+  "handoff": "Selected taskset_attention_workspace as the next Taskset Board IA RFC candidate. The next unit is TASK-AR-610: publish reviews/RFC-2026-06-19-taskset-board-ia-design-direction.md before any UI source mutation."
+}

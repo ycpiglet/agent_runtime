@@ -25,6 +25,7 @@ tags: [ui, ux, design-system, proposal]
 | design_direction_rfc | accepted_rfc | lead-designer | `reviews/RFC-2026-06-19-ui-ux-design-direction.md` |
 | implementation_refactor | registration_input_ready | interface-designer | `agents/project/work-items/REGISTRATION-2026-06-19-operator-attention-graph-implementation.json` |
 | ux_evaluation_pass | beta_plan_ready | ux-evaluator | `reviews/BETA-PLAN-2026-06-19-operator-attention-graph.md` |
+| taskset_board_ia_rfc | seminar_accepted | lead-designer | `reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md` |
 
 ## Action
 
@@ -49,6 +50,8 @@ tags: [ui, ux, design-system, proposal]
 
 - Use `reviews/SEMINAR-2026-06-19-ui-ux-design-direction.md` as the selected
   seminar input for the design-direction RFC.
+- Use `reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md` as the
+  selected seminar input for the next Taskset Board IA RFC.
 - Choose the selected proposal and register the RFC task before UI/UX
   implementation work resumes.
 - Run focused UI tests and the design-system gate for any future implementation.
@@ -114,3 +117,29 @@ Acceptance criteria:
 - Records user-like actions instead of screenshot-only evidence.
 - Covers recovery, empty, interrupted, and responsive states where relevant.
 - Links every user-visible defect to a BTC-style failure ID and reproduction path.
+
+### taskset_board_ia_rfc
+
+- Status: `seminar_accepted`
+- Lead role: `lead-designer`
+- Supporting roles: design-system-steward, interface-designer, ux-evaluator
+- Review roles: beta-tester
+- Future target files: reviews/RFC-2026-06-19-taskset-board-ia-design-direction.md, docs/design/agent-runtime/DESIGN.md, docs/design/agent-runtime/DESIGN-SYSTEM.md
+- Proposal artifacts: reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md, reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md
+
+Publish a Design Exploration RFC for `taskset_attention_workspace`: an
+attention-lane Taskset Board IA with a supporting taskset switcher and relation
+detail panel. The user problem is the post-OAG board scale watch: `49` tasksets
+make target discovery and whole-board focus traversal long.
+
+Outcome: `TASK-AR-609` accepted `taskset_attention_workspace` as the RFC
+candidate. UI source mutation remains blocked until the RFC is accepted and a
+follow-up implementation taskset is registered and claimed.
+
+Acceptance criteria:
+- Defines the attention-lane workspace, switcher, relation detail, schema
+  inputs, and beta/UX evidence paths.
+- Classifies candidate deltas as design_token, ui_component,
+  pattern_component, or one_off_for_now before implementation.
+- Rejects pure visual refresh, pure drill-down, and pure command-palette
+  alternatives as insufficient for board-scale scanning.

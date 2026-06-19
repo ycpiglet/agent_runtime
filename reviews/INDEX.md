@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T15:35:57+09:00
-record_count: 661
+generated_at: 2026-06-19T15:50:26+09:00
+record_count: 663
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `661` review and evidence records under `reviews/`.
+- Summary: indexed `663` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `661` files |
+| Reviews covered | pass | `663` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -533,6 +533,7 @@ record_count: 661
 | `reviews/SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync.md` | `SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync` | md | record | n/a | SEMINAR (2026-06-15) - TASK-AR-223 governance sync |
 | `reviews/SEMINAR-2026-06-17-self-improvement-cadence.md` | `SEMINAR-2026-06-17-self-improvement-cadence` | meeting | planned | planned | Self Improvement Cadence Seminar |
 | `reviews/SEMINAR-2026-06-18-self-improvement-cadence.md` | `SEMINAR-2026-06-18-self-improvement-cadence` | meeting | planned | planned | Self Improvement Cadence Seminar |
+| `reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md` | `SEMINAR-2026-06-19-taskset-board-ia-design-direction` | ui-ux-design-seminar | accepted | pass | Taskset Board IA Design Seminar |
 | `reviews/SEMINAR-2026-06-19-ui-ux-design-direction.md` | `SEMINAR-2026-06-19-ui-ux-design-direction` | ui-ux-design-direction-seminar | accepted | pass | UI/UX Design Direction Seminar 2026-06-19 |
 | `reviews/UX-EVAL-2026-06-19-oag-claim-aware-relation-adapter.md` | `UX-EVAL-2026-06-19-oag-claim-aware-relation-adapter` | ux-evaluation | accepted_with_findings | watch | Claim-Aware Relation Adapter UX Evaluation |
 | `reviews/UX-EVAL-2026-06-19-oag-mobile-responsive-refinement.md` | `UX-EVAL-2026-06-19-oag-mobile-responsive-refinement` | ux-evaluation | accepted | pass | OAG Mobile Responsive Refinement UX Evaluation |
@@ -611,6 +612,7 @@ record_count: 661
 | `reviews/VERIFY-2026-06-19-unit-task-ar-606-001-20260619134243.json` | `VERIFY-2026-06-19-unit-task-ar-606-001-20260619134243` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-606-001-20260619134243 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-607-001-20260619143121.json` | `VERIFY-2026-06-19-unit-task-ar-607-001-20260619143121` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-607-001-20260619143121 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-608-001-20260619151300.json` | `VERIFY-2026-06-19-unit-task-ar-608-001-20260619151300` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-608-001-20260619151300 |
+| `reviews/VERIFY-2026-06-19-unit-task-ar-609-001-20260619155000.json` | `VERIFY-2026-06-19-unit-task-ar-609-001-20260619155000` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-609-001-20260619155000 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
