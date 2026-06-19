@@ -6,7 +6,7 @@
 - `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` is complete: `TASK-AR-605` fixed claim-aware relation semantics, and `TASK-AR-606` completed beta/UX retest with W4b evidence.
 - `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` is complete: `TASK-AR-607` fixed `BTC-OAG-CLAIM-MOBILE-001`, and `TASK-AR-608` completed beta/UX retest with W4b evidence.
 - `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` is complete: `TASK-AR-609` completed the lead-designer seminar, `TASK-AR-610` published the accepted Taskset Board IA RFC, and `TASK-AR-611` derived the implementation plus beta-evaluation units.
-- Active UI claim: none. The next UI taskset candidate is `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE`, seeded by `agents/project/work-items/REGISTRATION-2026-06-19-taskset-board-attention-workspace-implementation.json`.
+- Active UI claim: `TASK-AR-612` / `CLAIM-20260619-195000-task-ar-612-taskset-board-attention-workspace` is implementing the Taskset Board attention workspace in `.worktrees/TASK-AR-612-taskset-board-attention-workspace`.
 - The previous `TASKSET-AR-LLM-WIKI` closeout is complete: `TASK-AR-590..596` are archived `7/7`, W4b evidence is indexed, and that taskset has no active claims.
 - UI refactor/design-system remediation is now past design-system governance, asset extraction, UI/UX cycle automation, first source-mutating Operator Attention Graph implementation, beta/UX evaluation, and claim-aware relation adapter refinement.
 - `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` is complete: `TASK-AR-597`, `TASK-AR-598`, and `TASK-AR-599` are implemented, W4b-verified, integrated, and closed.
@@ -16,7 +16,16 @@
 - Self-improvement remediation is improving but not mature: `scribe_state` is now ok, but the score is still below mature and one monitored role gap remains.
 - Scribe source is now the live status summary section so advisory health can be measured without fabricating role evidence.
 - Doc Steward remains ok; keep document-health checks advisory and evidence-based.
-- Next UI refactor step: register and claim the Taskset Board Attention Workspace implementation/beta taskset from `agents/project/work-items/REGISTRATION-2026-06-19-taskset-board-attention-workspace-implementation.json`; do not edit UI source before that fresh W0-W6 claim exists.
+- Next UI refactor step: continue `TASK-AR-612` in the claimed worktree, then run `TASK-AR-613` beta/UX evidence after source mutation is W4b-ready.
+
+## 2026-06-19 - TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE active
+
+- Registered taskset: `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE`.
+- Active task: `TASK-AR-612` implements the Taskset Board attention workspace source mutation.
+- Active claim: `CLAIM-20260619-195000-task-ar-612-taskset-board-attention-workspace`.
+- Worktree/branch: `.worktrees/TASK-AR-612-taskset-board-attention-workspace` / `codex/task-ar-612-taskset-board-attention-workspace`.
+- Boundary: source mutation stays inside `src/agent_runtime/ui_state.py`, `src/agent_runtime/ui_console_assets.py`, `src/agent_runtime/ui_design_assets.py`, focused tests, verification evidence, and `reviews/INDEX.md`.
+- Follow-up task: `TASK-AR-613` records beta-tester and UX-evaluator evidence after implementation verification.
 
 ## 2026-06-19 - TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION complete
 

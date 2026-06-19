@@ -1,21 +1,27 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T19:15:00+09:00
+updated_at: 2026-06-19T19:50:00+09:00
 current_state:
-  summary: "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION is complete; the next UI step is to register and claim the Taskset Board Attention Workspace implementation/beta taskset."
-  status: idle
-  task_set_status: taskset_complete
-  task_set_id: none
-  step_index: 5
+  summary: "TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE is active; TASK-AR-612 is claimed to implement the Taskset Board attention workspace UI assets."
+  status: active
+  task_set_status: taskset_active
+  task_set_id: TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE
+  step_index: 1
   step_total: 5
-  progress_pct: 100
-  status_text: "TASK-AR-611 is released and closed. Use agents/project/work-items/REGISTRATION-2026-06-19-taskset-board-attention-workspace-implementation.json for the next fresh W0-W6 source-mutation and beta-evaluation cycle."
+  progress_pct: 5
+  status_text: "TASK-AR-612 is claimed in .worktrees/TASK-AR-612-taskset-board-attention-workspace to source-mutate the attention workspace UI, then TASK-AR-613 will run beta/UX evidence."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260619-195000-task-ar-612-taskset-board-attention-workspace
+      agent_role: interface-designer
+      agent_instance_id: codex-interface-designer-task-ar-612
+      display_name: codex-interface-designer-task-ar-612
+      callsite_id: terminal:wt-task-ar-612:tab-01
+  current_teams:
+    - ui-ux
 resume:
-  active_task: none
-  active_task_set: none
-  branch_policy: "No active UI claim. Register the follow-up taskset from agents/project/work-items/REGISTRATION-2026-06-19-taskset-board-attention-workspace-implementation.json, then create a fresh claim/worktree before mutating UI source."
+  active_task: TASK-AR-612
+  active_task_set: TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE
+  branch_policy: "Continue in .worktrees/TASK-AR-612-taskset-board-attention-workspace on codex/task-ar-612-taskset-board-attention-workspace; keep source mutation within the claimed UI state/assets/tests/evidence files."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."

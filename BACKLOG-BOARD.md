@@ -46,7 +46,7 @@ completed_task_set_count: 50
 
 - Flow: Source-mutating implementation of the accepted Taskset Board IA RFC: attention lane derivation, taskset switcher, relation detail panel, and beta/UX evidence for desktop, mobile, keyboard, reduced-motion, and recovery states.
 - Progress: `0/2` done; `2` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-613` | INIT-AR-TASKSET-BOARD-ATTENTION-WORKSPACE | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-613/UNIT-TASK-AR-613-001.md | planned | Action | P1 | High | Medium | 4h/9000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Verify the attention workspace through user-like beta actions, keyboard traversal, mo… |
