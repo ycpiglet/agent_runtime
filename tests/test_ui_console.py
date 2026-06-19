@@ -532,6 +532,34 @@ def _write_work_classification(root: Path) -> None:
     )
 
 
+def _write_taskset_claim(
+    root: Path,
+    claim_id: str,
+    task_id: str,
+    *,
+    status: str,
+    phase: str = "implementation",
+    task_set_id: str = "TASKSET-AR-WORK-METADATA-ANALYTICS",
+    display_name: str = "interface-designer@ui-01",
+) -> None:
+    record = {
+        "schema": "agent-runtime-task-claim/v1",
+        "claim_id": claim_id,
+        "task_id": task_id,
+        "task_set_id": task_set_id,
+        "agent_role": "interface-designer",
+        "team_id": "ui-ux",
+        "agent_instance_id": display_name,
+        "display_name": display_name,
+        "status": status,
+        "phase": phase,
+        "claimed_at": "2026-06-19T10:00:00+09:00",
+        "last_heartbeat": "2026-06-19T10:05:00+09:00",
+        "status_text": f"{status} {phase}",
+    }
+    _write(root / "agents" / "runtime" / "task_claims" / f"{claim_id}.json", json.dumps(record))
+
+
 def _write_work_state_tasks(root: Path) -> None:
     tasks_dir = root / "agents" / "lead_engineer" / "tasks"
     _write(
@@ -778,6 +806,52 @@ def test_ui_console_tasksets_board_route_serves_grouped_cards(tmp_path):
     assert {child["id"] for child in card["children"]} == {"TASK-AR-514", "TASK-AR-516"}
 
 
+def test_ui_console_tasksets_board_claim_summary_marks_active_claim(tmp_path):
+    _write_work_classification(tmp_path)
+    _write_taskset_claim(tmp_path, "CLAIM-active", "TASK-AR-516", status="claimed")
+
+    payload = json.loads(ui_console.build_response("/api/tasksets_board", tmp_path).body.decode("utf-8"))
+    card = next(c for c in payload["items"]["cards"] if c["id"] == "TASKSET-AR-WORK-METADATA-ANALYTICS")
+    child = next(c for c in card["children"] if c["id"] == "TASK-AR-516")
+
+    assert card["claim_summary"]["state"] == "claimed"
+    assert card["claim_summary"]["label"] == "claimed by interface-designer@ui-01"
+    assert card["claim_summary"]["command_state"] == "guarded"
+    assert card["claim_summary"]["command_label"] == "claim guard active"
+    assert child["relation_state"] == "claimed"
+    assert child["claim_summary"]["state"] == "claimed"
+
+
+def test_ui_console_tasksets_board_claim_summary_marks_expired_guard(tmp_path):
+    _write_work_classification(tmp_path)
+    _write_taskset_claim(tmp_path, "CLAIM-expired", "TASK-AR-516", status="expired", phase="reaped")
+
+    payload = json.loads(ui_console.build_response("/api/tasksets_board", tmp_path).body.decode("utf-8"))
+    card = next(c for c in payload["items"]["cards"] if c["id"] == "TASKSET-AR-WORK-METADATA-ANALYTICS")
+    child = next(c for c in card["children"] if c["id"] == "TASK-AR-516")
+
+    assert card["claim_summary"]["state"] == "guarded"
+    assert card["claim_summary"]["label"] == "1 guarded"
+    assert card["claim_summary"]["command_label"] == "claim guard review"
+    assert child["relation_state"] == "guarded"
+
+
+def test_ui_console_tasksets_board_claim_summary_marks_interrupted_claim(tmp_path):
+    _write_work_classification(tmp_path)
+    _write_taskset_claim(tmp_path, "CLAIM-interrupted", "TASK-AR-516", status="claimed", phase="interrupted")
+
+    payload = json.loads(ui_console.build_response("/api/tasksets_board", tmp_path).body.decode("utf-8"))
+    card = next(c for c in payload["items"]["cards"] if c["id"] == "TASKSET-AR-WORK-METADATA-ANALYTICS")
+    child = next(c for c in card["children"] if c["id"] == "TASK-AR-516")
+
+    assert card["claim_summary"]["state"] == "interrupted"
+    assert card["claim_summary"]["label"] == "1 interrupted"
+    assert card["claim_summary"]["command_state"] == "guarded"
+    assert card["claim_summary"]["command_label"] == "interruption recovery"
+    assert child["relation_state"] == "interrupted"
+    assert child["relation_state"] != "stale"
+
+
 def test_ui_console_tasksets_board_tab_panel_and_css_anchors(tmp_path):
     html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
     js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
@@ -805,11 +879,14 @@ def test_ui_console_tasksets_board_tab_panel_and_css_anchors(tmp_path):
         "tasksetSwimlaneMode",
         "queueTasksetAddTask",
         "tasksetRelationSummary",
+        "claim_summary",
+        "relation_state",
         "patternAttentionRelationPanel",
         "operator_attention_graph",
         "Evidence freshness",
         "Command readiness",
         "task.create ready",
+        "command_label",
         "tasksets_board",
         "data-tsboard-toggle",
         "data-tsboard-add",
@@ -827,8 +904,11 @@ def test_ui_console_tasksets_board_tab_panel_and_css_anchors(tmp_path):
         ".attention-relation-panel",
         ".relation-chip",
         ".relation-active",
+        ".relation-claimed",
         ".relation-stale",
+        ".relation-guarded",
         ".relation-blocked",
+        ".relation-interrupted",
         ".relation-missing",
         ".evidence-preview-row",
         ".graph-context-stack",

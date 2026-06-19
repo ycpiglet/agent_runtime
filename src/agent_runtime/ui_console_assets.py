@@ -3854,12 +3854,27 @@ pre {
   border-color: var(--info-line);
   background: var(--info-soft);
 }
+.relation-claimed {
+  color: var(--blue);
+  border-color: var(--info-line);
+  background: var(--info-soft);
+}
 .relation-stale {
   color: var(--amber);
   border-color: var(--warning-line);
   background: var(--warning-soft);
 }
+.relation-guarded {
+  color: var(--amber);
+  border-color: var(--warning-line);
+  background: var(--warning-soft);
+}
 .relation-blocked {
+  color: var(--danger);
+  border-color: var(--danger-line);
+  background: var(--danger-soft);
+}
+.relation-interrupted {
   color: var(--danger);
   border-color: var(--danger-line);
   background: var(--danger-soft);
@@ -11890,7 +11905,11 @@ function tasksetHasBlockedChild(card) {
 
 function tasksetChildRelationState(child) {
   const status = String(child.status || "").toLowerCase();
-  const phase = String(child.phase || "");
+  const phase = String(child.phase || "").toLowerCase();
+  const claimState = normalizeRelationState(child.relation_state || (child.claim_summary || {}).state || "default");
+  if (["claimed", "guarded", "interrupted"].includes(claimState)) return claimState;
+  if (status.includes("interrupted") || phase.includes("interrupted")) return "interrupted";
+  if (status.includes("guard") || phase.includes("guard")) return "guarded";
   if (status.includes("blocked")) return "blocked";
   if (phase === "work" || phase === "review") return "active";
   if (phase === "done") return "default";
@@ -11901,12 +11920,15 @@ function tasksetRelationSummary(card) {
   const children = card.children || [];
   const progress = card.progress || { done: 0, total: 0 };
   const recent = card.recent_activity || [];
+  const claimSummary = card.claim_summary || {};
+  const claimSummaryState = normalizeRelationState(claimSummary.state || "default");
+  const hasClaimContext = Boolean(Number(claimSummary.count || 0) || claimSummary.latest_claim_id || claimSummary.label);
   const blocked = tasksetHasBlockedChild(card);
   const activeChildren = children.filter((child) => ["work", "review"].includes(String(child.phase || "")));
   const tasksetState = blocked ? "blocked" : (card.status_bucket === "in_progress" ? "active" : "default");
-  const claimState = blocked ? "blocked" : (activeChildren.length ? "active" : (children.length ? "stale" : "missing"));
+  const claimState = blocked ? "blocked" : (hasClaimContext && claimSummaryState !== "default" ? claimSummaryState : (activeChildren.length ? "active" : (children.length ? "stale" : "missing")));
   const evidenceState = blocked ? "blocked" : (recent.length ? "active" : (Number(progress.done || 0) ? "stale" : "missing"));
-  const commandState = blocked ? "blocked" : (children.length ? "active" : "missing");
+  const commandState = blocked ? "blocked" : (hasClaimContext && claimSummary.command_state ? normalizeRelationState(claimSummary.command_state) : (children.length ? "active" : "missing"));
   const evidenceRows = recent.length
     ? recent.slice(0, 2).map((item) => ({
         state: "active",
@@ -11935,9 +11957,9 @@ function tasksetRelationSummary(card) {
     evidenceState,
     commandState,
     tasksetLabel: card.status || card.status_bucket || "tracked",
-    claimLabel: activeChildren.length ? `${activeChildren.length} active` : (children.length ? "ready to claim" : "missing"),
+    claimLabel: hasClaimContext && claimSummary.label ? claimSummary.label : (activeChildren.length ? `${activeChildren.length} active` : (children.length ? "ready to claim" : "missing")),
     evidenceLabel: recent.length ? "fresh" : evidenceState,
-    commandLabel: blocked ? "blocked" : (children.length ? "task.create ready" : "no child tasks"),
+    commandLabel: blocked ? "blocked" : (hasClaimContext && claimSummary.command_label ? claimSummary.command_label : (children.length ? "task.create ready" : "no child tasks")),
     evidenceRows,
     graphItems,
   };

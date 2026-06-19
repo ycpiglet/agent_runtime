@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER
 initiative_id: INIT-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: interface-designer
 created_at: 2026-06-19T12:26:00+09:00
-updated_at: 2026-06-19T12:26:00+09:00
+updated_at: 2026-06-19T12:56:18+09:00
 origin_type: owner_request
 origin_ref: chat:2026-06-19-ui-refactor-continuous-cycle
 created_by: codex-planner
@@ -53,6 +53,10 @@ verification:
   - python scripts/evidence_index_generator.py --check
 handoff: Report adapter ownership, state mapping table, tests added, assetization classification, and remaining UX/beta risks.
 stop_condition: Stop after the claim-aware relation adapter passes focused tests and W4a evidence is ready for independent verification.
+verified_at: 2026-06-19T12:56:18+09:00
+verified_by: codex-interface-designer-ar-605
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-unit-task-ar-605-001-20260619125618.json
 ---
 
 # UNIT-TASK-AR-605-001 - Add claim-aware relation state mapping

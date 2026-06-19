@@ -3775,10 +3775,117 @@ def build_work_state_board(
     }
 
 
+_TASKSET_CLAIM_ACTIVE_STATUSES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
+_TASKSET_CLAIM_DONE_STATUSES = {"released", "completed", "closed", "done", "verified"}
+_TASKSET_CLAIM_GUARDED_STATUSES = {"blocked", "expired", "reaped", "cancelled", "stale"}
+
+
+def _claim_relation_kind(claim: dict[str, Any]) -> str:
+    status = str(claim.get("status") or "").strip().lower().replace("-", "_")
+    phase = str(claim.get("phase") or "").strip().lower().replace("-", "_")
+    status_text = str(claim.get("status_text") or "").strip().lower()
+    combined = f"{status} {phase} {status_text}"
+    if "interrupt" in combined:
+        return "interrupted"
+    if "guard" in combined or "block" in combined:
+        return "guarded"
+    if status in _TASKSET_CLAIM_GUARDED_STATUSES:
+        return "guarded"
+    if status in _TASKSET_CLAIM_ACTIVE_STATUSES:
+        return "claimed"
+    if status in _TASKSET_CLAIM_DONE_STATUSES:
+        return "completed"
+    return "unknown"
+
+
+def _claim_actor_label(claim: dict[str, Any]) -> str:
+    for key in ("display_name", "agent_instance_id", "agent_role", "claim_id"):
+        value = str(claim.get(key) or "").strip()
+        if value:
+            return value
+    return "claim"
+
+
+def _claim_sort_key(claim: dict[str, Any]) -> str:
+    return str(
+        claim.get("last_heartbeat")
+        or claim.get("updated_at")
+        or claim.get("claimed_at")
+        or claim.get("source", {}).get("mtime")
+        or ""
+    )
+
+
+def _claim_relation_summary(claims: list[dict[str, Any]]) -> dict[str, Any]:
+    counts = {"claimed": 0, "guarded": 0, "interrupted": 0, "completed": 0, "unknown": 0}
+    latest_by_kind: dict[str, dict[str, Any]] = {}
+    for claim in claims:
+        kind = _claim_relation_kind(claim)
+        counts[kind] = counts.get(kind, 0) + 1
+        existing = latest_by_kind.get(kind)
+        if existing is None or _claim_sort_key(claim) >= _claim_sort_key(existing):
+            latest_by_kind[kind] = claim
+
+    if counts["interrupted"]:
+        state = "interrupted"
+        latest = latest_by_kind["interrupted"]
+        label = f"{counts['interrupted']} interrupted"
+        command_state = "guarded"
+        command_label = "interruption recovery"
+    elif counts["guarded"]:
+        state = "guarded"
+        latest = latest_by_kind["guarded"]
+        label = f"{counts['guarded']} guarded"
+        command_state = "guarded"
+        command_label = "claim guard review"
+    elif counts["claimed"]:
+        state = "claimed"
+        latest = latest_by_kind["claimed"]
+        label = f"claimed by {_claim_actor_label(latest)}"
+        command_state = "guarded"
+        command_label = "claim guard active"
+    elif counts["completed"]:
+        state = "default"
+        latest = latest_by_kind["completed"]
+        label = "released"
+        command_state = "default"
+        command_label = "proposal ready"
+    else:
+        state = "default"
+        latest = {}
+        label = ""
+        command_state = "default"
+        command_label = ""
+
+    return {
+        "count": len(claims),
+        "counts": counts,
+        "state": state,
+        "label": label,
+        "command_state": command_state,
+        "command_label": command_label,
+        "latest_claim_id": latest.get("claim_id", ""),
+        "latest_actor": _claim_actor_label(latest) if latest else "",
+    }
+
+
+def _unique_claims(claims: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    by_id: dict[str, dict[str, Any]] = {}
+    anonymous: list[dict[str, Any]] = []
+    for claim in claims:
+        claim_id = str(claim.get("claim_id") or claim.get("id") or "").strip()
+        if claim_id:
+            by_id[claim_id] = claim
+        else:
+            anonymous.append(claim)
+    return [*by_id.values(), *anonymous]
+
+
 def build_tasksets_board(
     work_explorer: dict[str, Any],
     tasks: list[dict[str, Any]],
     events: list[dict[str, Any]],
+    task_claims: list[dict[str, Any]],
     now: str,
 ) -> dict[str, Any]:
     """Taskset-grouped board derived from the classification hierarchy.
@@ -3789,6 +3896,15 @@ def build_tasksets_board(
     """
     nodes = {node["id"]: node for node in work_explorer.get("nodes", [])}
     task_by_id = {str(task.get("id")): task for task in tasks if task.get("id")}
+    claims_by_task: dict[str, list[dict[str, Any]]] = {}
+    claims_by_taskset: dict[str, list[dict[str, Any]]] = {}
+    for claim in task_claims:
+        task_id = str(claim.get("task_id") or "").strip()
+        taskset_id = str(claim.get("task_set_id") or claim.get("taskset_id") or "").strip()
+        if task_id:
+            claims_by_task.setdefault(task_id, []).append(claim)
+        if taskset_id:
+            claims_by_taskset.setdefault(taskset_id, []).append(claim)
 
     # Most recent runtime activity per task id (events are append-only logs).
     activity_by_task: dict[str, dict[str, Any]] = {}
@@ -3815,6 +3931,7 @@ def build_tasksets_board(
         status_distribution: dict[str, int] = {}
         assigned_agents: list[str] = []
         recent: list[dict[str, Any]] = []
+        taskset_claims = list(claims_by_taskset.get(taskset_id, []))
         for child_id in node.get("children", []):
             child = nodes.get(child_id)
             if child is None:
@@ -3836,6 +3953,13 @@ def build_tasksets_board(
             activity = activity_by_task.get(child_id)
             if activity:
                 recent.append(activity)
+            child_claims = claims_by_task.get(child_id, [])
+            child_claim_summary = _claim_relation_summary(child_claims)
+            child_relation_state = (
+                child_claim_summary["state"]
+                if child_claim_summary["state"] != "default"
+                else ""
+            )
             children.append(
                 {
                     "id": child_id,
@@ -3846,13 +3970,17 @@ def build_tasksets_board(
                     "owner": str(owner),
                     "priority": str(priority),
                     "progress_pct": child_pct,
+                    "claim_summary": child_claim_summary,
+                    "relation_state": child_relation_state,
                     "last_updated": last_updated,
                     "source_path": child.get("path") or live.get("source_path") or "",
                 }
             )
+            taskset_claims.extend(child_claims)
 
         rollup = node.get("rollup") or {"total": 0, "completed": 0, "in_progress": 0, "planned": 0, "pct": None}
         recent.sort(key=lambda item: str(item.get("ts") or ""), reverse=True)
+        claim_summary = _claim_relation_summary(_unique_claims(taskset_claims))
         cards.append(
             {
                 "id": taskset_id,
@@ -3863,6 +3991,7 @@ def build_tasksets_board(
                 "progress_pct": rollup.get("pct"),
                 "progress": {"done": rollup.get("completed", 0), "total": rollup.get("total", 0)},
                 "status_distribution": status_distribution,
+                "claim_summary": claim_summary,
                 "assigned_agents": sorted(set(assigned_agents)),
                 "recent_activity": recent[:_TASKSETS_BOARD_ACTIVITY_LIMIT],
                 "source_path": node.get("path") or "",
@@ -7935,7 +8064,7 @@ def _build_state_uncached(root: Path | str, now: str | None = None) -> dict[str,
     work_explorer = load_work_explorer(root_path, generated_at, warnings)
     meeting_room = build_meeting_room(agents, tasks, now=generated_at)
     channels = build_channels(messages, tasks, task_sets, now=generated_at)
-    tasksets_board = build_tasksets_board(work_explorer, tasks, events, generated_at)
+    tasksets_board = build_tasksets_board(work_explorer, tasks, events, task_claims, generated_at)
     work_state = build_work_state_board(root_path, task_sets, tasks, generated_at, warnings)
     taskset_completion = build_taskset_completion(pane_events, task_sets)
     roadmap_timeline = build_roadmap_timeline(roadmap, work_explorer, root_path, generated_at, warnings)

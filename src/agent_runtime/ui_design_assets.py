@@ -153,7 +153,7 @@ function componentEmptyState(title, hint) {
 }
 
 function normalizeRelationState(state) {
-  const allowed = new Set(["default", "active", "stale", "blocked", "missing"]);
+  const allowed = new Set(["default", "active", "stale", "blocked", "missing", "claimed", "guarded", "interrupted"]);
   const clean = String(state || "default").toLowerCase();
   return allowed.has(clean) ? clean : "default";
 }

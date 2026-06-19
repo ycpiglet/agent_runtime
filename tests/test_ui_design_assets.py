@@ -83,6 +83,16 @@ def test_ui_component_bundle_is_served_in_console_js(tmp_path):
     assert "function renderSurfaceMeta(content)" in js
 
 
+def test_relation_state_assets_include_claim_aware_states(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    for state in ['"claimed"', '"guarded"', '"interrupted"']:
+        assert state in js
+    for selector in [".relation-claimed", ".relation-guarded", ".relation-interrupted"]:
+        assert selector in css
+
+
 def test_selected_helpers_are_not_redefined_inside_ui_console_source():
     source = (ROOT / "src" / "agent_runtime" / "ui_console.py").read_text(encoding="utf-8")
     asset_source = (ROOT / "src" / "agent_runtime" / "ui_console_assets.py").read_text(encoding="utf-8")

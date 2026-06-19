@@ -1,0 +1,52 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-19-unit-task-ar-605-001-20260619125618",
+  "work_id": "UNIT-TASK-AR-605-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-605/UNIT-TASK-AR-605-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-605",
+  "unit_id": "UNIT-TASK-AR-605-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-19T12:56:18+09:00",
+  "verified_by": "codex-interface-designer-ar-605",
+  "command_count": 4,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_ui_design_assets.py tests/test_ui_console.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-19T12:56:18+09:00",
+      "finished_at": "2026-06-19T12:56:39+09:00",
+      "stdout": "........................................................................ [ 43%]\n........................................................................ [ 86%]\n......................                                                   [100%]\n166 passed in 19.42s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-19T12:56:39+09:00",
+      "finished_at": "2026-06-19T12:56:40+09:00",
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/ui_ux_cycle.py --root . assess --json",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-19T12:56:40+09:00",
+      "finished_at": "2026-06-19T12:56:41+09:00",
+      "stdout": " \"Animation duration, easing, reduced-motion behavior, and live-state movement.\"\n    },\n    {\n      \"dimension\": \"effects\",\n      \"evidence_required\": \"Shadow, border, focus, hover, depth, loading, and transition effects.\"\n    },\n    {\n      \"dimension\": \"schema\",\n      \"evidence_required\": \"State/API schema, task metadata, route contracts, and write boundaries.\"\n    },\n    {\n      \"dimension\": \"assets\",\n      \"evidence_required\": \"Design tokens, UI components, pattern components, icons, and served assets.\"\n    },\n    {\n      \"dimension\": \"accessibility\",\n      \"evidence_required\": \"Keyboard flow, focus order, labels, landmarks, contrast, and screen-reader state.\"\n    },\n    {\n      \"dimension\": \"responsiveness\",\n      \"evidence_required\": \"Desktop/mobile layout, overflow, wrapping, stable dimensions, and viewport fit.\"\n    },\n    {\n      \"dimension\": \"interaction\",\n      \"evidence_required\": \"Core workflows, error recovery, empty states, beta-tester click/type paths, and undo/safety affordances.\"\n    }\n  ],\n  \"recent_artifacts\": [\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-UNIT-TASK-AR-596-001.md\",\n      \"title\": \"W4B-2026-06-19-UNIT-TASK-AR-596-001\"\n    },\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-TASK-AR-604.md\",\n      \"title\": \"W4B-2026-06-19-TASK-AR-604\"\n    },\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-TASK-AR-603.md\",\n      \"title\": \"W4B-2026-06-19-TASK-AR-603\"\n    },\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-TASK-AR-602.md\",\n      \"title\": \"W4B-2026-06-19-TASK-AR-602\"\n    },\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-TASK-AR-601.md\",\n      \"title\": \"W4B-2026-06-19-TASK-AR-601\"\n    },\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-TASK-AR-600.md\",\n      \"title\": \"W4B-2026-06-19-TASK-AR-600\"\n    },\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-TASK-AR-599.md\",\n      \"title\": \"W4B-2026-06-19-TASK-AR-599\"\n    },\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-TASK-AR-598.md\",\n      \"title\": \"W4B-2026-06-19-TASK-AR-598\"\n    },\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-TASK-AR-597.md\",\n      \"title\": \"W4B-2026-06-19-TASK-AR-597\"\n    },\n    {\n      \"kind\": \"w4b\",\n      \"path\": \"reviews/W4B-2026-06-19-TASK-AR-596.md\",\n      \"title\": \"W4B-2026-06-19-TASK-AR-596\"\n    }\n  ],\n  \"review_plan\": {\n    \"beta_tester\": {\n      \"participants\": [\n        \"beta-tester\",\n        \"ux-evaluator\"\n      ],\n      \"requirements\": [\n        \"Record what was clicked or typed, not just DOM presence.\",\n        \"Exercise edge cases and recovery attempts.\",\n        \"Capture environment, viewport, and data state.\",\n        \"Create BTC-style failure IDs for user-visible defects.\",\n        \"Attach or reference multi-step evidence; a single screenshot is not enough.\"\n      ]\n    },\n    \"meeting\": {\n      \"participants\": [\n        \"lead-engineer\",\n        \"design-system-steward\",\n        \"interface-designer\"\n      ],\n      \"purpose\": \"align implementation scope, target files, and verification commands\"\n    },\n    \"seminar\": {\n      \"participants\": [\n        \"lead-designer\",\n        \"design-system-steward\",\n        \"interface-designer\",\n        \"ux-evaluator\"\n      ],\n      \"purpose\": \"derive next UI/UX delta before implementation\"\n    },\n    \"task_id\": \"TASK-AR-605\"\n  },\n  \"role_coverage\": {\n    \"roles\": [\n      {\n        \"present\": true,\n        \"role\": \"lead-designer\"\n      },\n      {\n        \"present\": true,\n        \"role\": \"design-system-steward\"\n      },\n      {\n        \"present\": true,\n        \"role\": \"interface-designer\"\n      },\n      {\n        \"present\": true,\n        \"role\": \"ux-evaluator\"\n      }\n    ],\n    \"status\": \"pass\"\n  },\n  \"root\": \"C:\\\\Users\\\\ycpig\\\\agent_runtime\\\\.worktrees\\\\TASK-AR-605-claim-aware-relation-adapter\",\n  \"schema\": \"agent-runtime-ui-ux-cycle-assessment/v1\",\n  \"score\": {\n    \"level\": \"blocked\",\n    \"value\": 85\n  },\n  \"status\": \"blocked\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-19T12:56:41+09:00",
+      "finished_at": "2026-06-19T12:56:42+09:00",
+      "stdout": "evidence-index: pass\nfindings=0\n",
+      "stderr": ""
+    }
+  ]
+}
