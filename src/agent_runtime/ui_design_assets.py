@@ -701,6 +701,71 @@ function renderAuditMeta(content) {
 function renderSurfaceMeta(content) {
   return patternSurfaceMeta(content);
 }
+
+/* ===== Pattern component: portability preview row (TASK-AR-584) ===========
+ * patternPortabilityPreviewRow(item) renders one import/export row as an
+ * advisory badge + title + optional id + optional reason list. All user data
+ * is HTML-escaped. Maturity tier: experimental.
+ */
+function patternPortabilityPreviewRow(item) {
+  const invalid = (item.errors || []).length > 0;
+  const badgeClass = invalid ? "is-invalid" : (item.duplicate ? "is-duplicate" : "is-new");
+  const badgeLabel = invalid ? "invalid" : (item.duplicate ? "duplicate" : "new");
+  const reasons = invalid ? (item.errors || []) : (item.duplicate_reasons || []);
+  const idEl = item.id ? `<span class="portability-row-id">${escapeHtml(item.id)}</span>` : "";
+  const reasonEl = reasons.length ? `<span class="portability-row-reason">${escapeHtml(reasons.join("; "))}</span>` : "";
+  return `<div class="portability-row">
+    <span class="portability-badge ${badgeClass}">${escapeHtml(badgeLabel)}</span>
+    <span class="portability-row-title">${escapeHtml(item.title || "(no title)")}</span>
+    ${idEl}
+    ${reasonEl}
+  </div>`;
+}
+
+/* ===== Pattern component: ops token/cost bar pair (TASK-AR-584) ===========
+ * patternOpsTokenBar(options) renders an est-vs-actual dual-bar row used in
+ * the ops-dashboard token-cost panel. options: { name, est, actual, maxEst,
+ * overBudget, consumedLabel }. Width is computed from maxEst; all strings are
+ * HTML-escaped. Returns a "opsdash-bar-row" div string. Maturity: experimental.
+ */
+function patternOpsTokenBar(options) {
+  const opts = options || {};
+  const name = escapeHtml(opts.name || "");
+  const est = Number(opts.est) || 0;
+  const actual = Number(opts.actual) || 0;
+  const maxEst = Math.max(1, Number(opts.maxEst) || 1);
+  const estPct = Math.max(0, Math.min(100, (est / maxEst) * 100));
+  const actualWidth = est ? Math.max(0, Math.min(estPct, (actual / est) * estPct)) : 0;
+  const over = opts.overBudget ? " is-over" : "";
+  const consumed = escapeHtml(opts.consumedLabel || "est-only");
+  return `<div class="opsdash-bar-row">` +
+    `<div class="opsdash-bar-label"><span>${name}</span>` +
+    `<small>${escapeHtml(opts.estLabel || "")} est - ${consumed}</small></div>` +
+    `<div class="opsdash-bar-track" role="img" aria-label="${name}: ${escapeHtml(opts.estLabel || "")} estimated tokens">` +
+    `<div class="opsdash-bar-est" style="width: ${estPct.toFixed(1)}%"></div>` +
+    `<div class="opsdash-bar-actual${over}" style="width: ${actualWidth.toFixed(1)}%"></div>` +
+    `</div></div>`;
+}
+
+/* ===== Pattern component: ops velocity bar (TASK-AR-584) ==================
+ * patternOpsVelocityBar(week, peak) renders a single vertical bar for the
+ * weekly velocity chart in the ops-dashboard burndown panel. week: { week,
+ * done }. peak: integer maximum across all weeks (determines bar height).
+ * All strings are HTML-escaped. Returns a "opsdash-vbar" div string.
+ * Maturity tier: experimental.
+ */
+function patternOpsVelocityBar(week, peak) {
+  const safeWeek = week || {};
+  const done = Number(safeWeek.done) || 0;
+  const safePeak = Math.max(1, Number(peak) || 1);
+  const h = Math.max(2, Math.round((done / safePeak) * 70));
+  const wk = String(safeWeek.week || "").slice(5);
+  return `<div class="opsdash-vbar" title="${escapeHtml(safeWeek.week)}: ${escapeHtml(done)} done">` +
+    `<span class="opsdash-vbar-count">${escapeHtml(done)}</span>` +
+    `<span class="opsdash-vbar-fill" style="height: ${h}px"></span>` +
+    `<span class="opsdash-vbar-label">${escapeHtml(wk)}</span>` +
+    `</div>`;
+}
 """
 
 
@@ -1126,4 +1191,7 @@ ASSETIZATION_CLASSES = {
     "patternAuditMeta": "pattern_component",
     "patternSurfaceMeta": "pattern_component",
     "patternAgentAvatar": "pattern_component",
+    "patternPortabilityPreviewRow": "pattern_component",
+    "patternOpsTokenBar": "pattern_component",
+    "patternOpsVelocityBar": "pattern_component",
 }

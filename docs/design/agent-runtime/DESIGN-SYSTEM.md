@@ -87,11 +87,21 @@ consumers in `ui_console_assets.py` use these semantic names; no raw px
 literals were re-introduced and `design_system_gate --all-ui` reports
 findings=0.
 
-Residual one-off boundary: data-heavy SVG layout functions, calendar grids,
-office map placement, import/export previews, specialized ops dashboard charts,
-and JavaScript geometry constants may remain in `ui_console.py` until a later
-unit extracts them behind stable pattern APIs. These are physical decomposition
-and layout-geometry debts, not typography/spacing/radius token debts.
+Promoted pattern usage as of `TASK-AR-584`:
+
+| Pattern API | Current console usage |
+| --- | --- |
+| `patternPortabilityPreviewRow` | Per-row advisory HTML in `renderImportPreview` (import/export view). |
+| `patternOpsTokenBar` | Est-vs-actual dual-bar HTML in `renderOpsResources` (ops dashboard tokens panel). |
+| `patternOpsVelocityBar` | Weekly velocity bar HTML in `renderOpsBurndown` (ops dashboard burndown panel). |
+
+Residual one-off boundary: data-heavy SVG layout functions (live-map force
+simulation, dependency-graph layout), calendar grid cell building, and office
+map DOM placement remain in `ui_console_assets.py` as one-off renderers.
+Office-map placement manipulates the DOM directly (not a pure HTML-string
+renderer) and is genuinely view-specific; calendar cells are tightly coupled
+to the `calendarMode` state machine. These are layout-geometry debts to
+address in a later extraction unit when reuse across views is confirmed.
 
 Served asset ownership as of `TASK-AR-582`: `ui_console.py` no longer owns the
 large HTML/CSS/JS strings. `ui_console_assets.py` owns the static served assets,
