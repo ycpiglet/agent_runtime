@@ -4812,7 +4812,7 @@ pre {
   }
   /* Sparkline (TASK-AR-590): override sparkline width token for mobile.
    * The SVG uses var(--dv-sparkline-w) so narrowing that narrows all sparklines. */
-  --dv-sparkline-w: 44px;
+  --dv-sparkline-w: var(--visual-sparkline-mobile-w);
   --dv-sparkline-h: var(--space-5xl);
   .workload-sparkline {
     flex-wrap: wrap;
@@ -4838,10 +4838,10 @@ pre {
   .dep-graph-svg,
   .kg-graph-svg,
   .live-map-graph {
-    min-width: 480px;
-    height: 320px;
+    min-width: var(--visual-graph-mobile-min-width);
+    height: var(--visual-graph-mobile-height);
   }
-  .state-machine-svg { min-width: 480px; height: 300px; }
+  .state-machine-svg { min-width: var(--visual-graph-mobile-min-width); height: var(--visual-state-machine-mobile-height); }
   /* dep-graph legend: single column on mobile */
   .dep-graph-legend,
   .kg-graph-legend,
@@ -4880,7 +4880,7 @@ pre {
   /* Sparkline: collapse to near-invisible at very narrow; hide non-essential. */
   --dv-sparkline-w: var(--space-5xl);
   --dv-sparkline-h: var(--space-4xl);
-  /* State art: smaller still, readable on 320px screens. */
+  /* State art: smaller still, readable on narrow screens. */
   .empty-illustration-art {
     width: var(--space-6xl);
     height: var(--space-6xl);

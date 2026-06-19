@@ -401,3 +401,78 @@ def test_vendored_dicebear_identicon_files_are_present_and_licensed():
     for rel_path, marker in required.items():
         body = (vendor / rel_path).read_text(encoding="utf-8")
         assert marker in body, rel_path
+
+
+# ----- TASK-AR-592: A11y + responsive pass -----
+
+def test_task_ar_592_visual_responsive_tokens_exist():
+    """New visual-system responsive constants are promoted into token assets."""
+    css = ui_design_assets.UI_TOKEN_SCALE_CSS
+    for token in (
+        "--visual-sparkline-mobile-w",
+        "--visual-graph-mobile-min-width",
+        "--visual-graph-mobile-height",
+        "--visual-state-machine-mobile-height",
+    ):
+        assert token in css
+
+
+def test_task_ar_592_sparkline_accessibility_modes():
+    """Informative sparklines get img semantics; decorative sparklines stay hidden."""
+    informative = ui_design_assets.componentSparkline([1, 3, 2], label="Load trend")
+    assert 'role="img"' in informative
+    assert 'aria-label="Load trend"' in informative
+    assert "<title>Load trend</title>" in informative
+
+    decorative = ui_design_assets.componentSparkline([1, 3, 2])
+    assert 'aria-hidden="true"' in decorative
+    assert 'role="img"' not in decorative
+
+
+def test_task_ar_592_empty_state_has_role_status():
+    """componentEmptyState must carry role=status for screen-reader announcement."""
+    html = ui_design_assets.componentEmptyState("Nothing here", "Try later")
+    assert 'role="status"' in html
+    assert 'aria-hidden="true"' in html   # decorative SVG inside
+
+
+def test_task_ar_592_error_state_has_role_alert():
+    """componentErrorState must carry role=alert for assertive announcement."""
+    html = ui_design_assets.componentErrorState("Error", "Retry")
+    assert 'role="alert"' in html
+    assert 'aria-hidden="true"' in html   # decorative SVG inside
+
+
+def test_task_ar_592_loading_state_has_role_status_and_live():
+    """componentLoadingState must carry role=status and aria-live=polite."""
+    html = ui_design_assets.componentLoadingState("Loading...")
+    assert 'role="status"' in html
+    assert 'aria-live="polite"' in html
+    assert 'aria-hidden="true"' in html   # decorative spinner SVG inside
+
+
+def test_task_ar_592_avatar_is_decorative_by_default():
+    """patternAgentAvatar is aria-hidden when used as a decorative glyph (no explicit label)."""
+    svg = ui_design_assets.patternAgentAvatar("agent-01", role="lead-engineer")
+    assert 'aria-hidden="true"' in svg
+
+
+def test_task_ar_592_avatar_label_uses_title_element():
+    """patternAgentAvatar with a label inserts <title> for screen readers."""
+    svg = ui_design_assets.patternAgentAvatar("agent-02", label="Lead Engineer bot")
+    assert "<title>Lead Engineer bot</title>" in svg
+
+
+def test_task_ar_592_icon_decorative_has_aria_hidden():
+    """componentIcon without a label is aria-hidden (decorative)."""
+    svg = ui_design_assets.componentIcon("menu")
+    assert 'aria-hidden="true"' in svg
+    assert 'role=' not in svg
+
+
+def test_task_ar_592_icon_informative_has_role_and_label():
+    """componentIcon with a label carries aria-label and no aria-hidden."""
+    svg = ui_design_assets.componentIcon("settings", label="Open settings")
+    assert 'aria-label="Open settings"' in svg
+    assert 'aria-hidden' not in svg
+    assert "<title>Open settings</title>" in svg
