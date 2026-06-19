@@ -4,8 +4,8 @@
 
 - `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` is complete: `TASK-AR-603` implemented the first relation-aware UI slice, and `TASK-AR-604` completed beta/UX evaluation with W4b evidence.
 - `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` is complete: `TASK-AR-605` fixed claim-aware relation semantics, and `TASK-AR-606` completed beta/UX retest with W4b evidence.
-- `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` is `1/2` done: `TASK-AR-607` fixed `BTC-OAG-CLAIM-MOBILE-001`, and `TASK-AR-608` is claimed for beta/UX evaluation.
-- Active UI claim: `CLAIM-20260619-145600-task-ar-608-mobile-responsive-beta` owns evaluation-only `TASK-AR-608`.
+- `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` is complete: `TASK-AR-607` fixed `BTC-OAG-CLAIM-MOBILE-001`, and `TASK-AR-608` completed beta/UX retest with W4b evidence.
+- Active UI claim: none for the OAG mobile responsive refinement cycle.
 - The previous `TASKSET-AR-LLM-WIKI` closeout is complete: `TASK-AR-590..596` are archived `7/7`, W4b evidence is indexed, and that taskset has no active claims.
 - UI refactor/design-system remediation is now past design-system governance, asset extraction, UI/UX cycle automation, first source-mutating Operator Attention Graph implementation, beta/UX evaluation, and claim-aware relation adapter refinement.
 - `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` is complete: `TASK-AR-597`, `TASK-AR-598`, and `TASK-AR-599` are implemented, W4b-verified, integrated, and closed.
@@ -15,14 +15,16 @@
 - Self-improvement remediation is improving but not mature: `scribe_state` is now ok, but the score is still below mature and one monitored role gap remains.
 - Scribe source is now the live status summary section so advisory health can be measured without fabricating role evidence.
 - Doc Steward remains ok; keep document-health checks advisory and evidence-based.
-- Next UI refactor step: complete `TASK-AR-608` desktop and `390x844` beta/UX evidence without mutating UI source.
+- Next UI refactor step: register or select a new UI/UX design-direction or IA candidate; `ui_ux_cycle assess` now reports no open refactor candidate after the mobile overflow closeout.
 
-## 2026-06-19 - TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT / TASK-AR-608 claimed
+## 2026-06-19 - TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT complete
 
-- Active claim: `CLAIM-20260619-145600-task-ar-608-mobile-responsive-beta`.
-- Worktree/branch: `.worktrees/TASK-AR-608-oag-mobile-beta` / `codex/task-ar-608-oag-mobile-beta`.
-- Scope: evaluation evidence only; UI source mutation is out of scope.
-- Verification target: design-system gate, evidence index, UI/UX cycle assessment, and beta/UX evidence with measured desktop/mobile paths.
+- Completed taskset: `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` is `2/2` done.
+- Completed evaluation task: `TASK-AR-608` / `UNIT-TASK-AR-608-001` recorded desktop and `390x844` mobile beta/UX evidence after the responsive fix.
+- Released claim: `CLAIM-20260619-145600-task-ar-608-mobile-responsive-beta` is W4b verified with `reviews/W4B-2026-06-19-TASK-AR-608.md`.
+- Result: `BTC-OAG-CLAIM-MOBILE-001` is closed; mobile document/body width measured `390px` against a `390px` viewport, and target relation labels remained visible.
+- Evidence: beta review `reviews/BETA-TEST-2026-06-19-oag-mobile-responsive-refinement.md`; UX evaluation `reviews/UX-EVAL-2026-06-19-oag-mobile-responsive-refinement.md`; task verification `reviews/VERIFY-2026-06-19-oag-mobile-responsive-beta-ux.json`.
+- Boundary: no UI source mutation occurred in `TASK-AR-608`; the next useful UI cycle is a design-direction or IA proposal, not another mobile-overflow refinement.
 
 ## 2026-06-19 - TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT / TASK-AR-607 complete
 
@@ -30,7 +32,7 @@
 - Worktree/branch: `.worktrees/TASK-AR-607-oag-mobile-responsive` / `codex/task-ar-607-oag-mobile-responsive`.
 - Result: `TASK-AR-607` and `UNIT-TASK-AR-607-001` are completed; W4b passed in `reviews/W4B-2026-06-19-TASK-AR-607.md`.
 - Verification: `182 passed`, browser-level `390x844` overflow assertion passed, design-system gate passed with `findings=0`, evidence index passed, and verification freshness gate had `block=0`.
-- Boundary: `TASK-AR-608` remains open for beta-tester and UX-evaluator evidence; no new source mutation is required for that task.
+- Boundary: follow-up beta/UX evidence is complete in `TASK-AR-608`; no new source mutation is required for this taskset.
 
 ## 2026-06-19 - TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT registered
 

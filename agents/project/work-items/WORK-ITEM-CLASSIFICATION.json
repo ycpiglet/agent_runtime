@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T14:56:42+09:00",
+  "generated_at": "2026-06-19T15:21:09+09:00",
   "record_count": 376,
   "finding_count": 0,
   "findings": [],
@@ -4095,7 +4095,7 @@
       "title": "OAG Mobile Responsive Refinement",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-607",
@@ -4128,7 +4128,7 @@
       "title": "Repeat beta-tester and UX-evaluator verification after the responsive fix, focused on…",
       "path": "agents/lead_engineer/tasks/TASK-AR-608.md",
       "parent_id": "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-608-001",
@@ -4139,7 +4139,7 @@
       "title": "UNIT-TASK-AR-608-001 - Record mobile overflow beta and UX evidence",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-608/UNIT-TASK-AR-608-001.md",
       "parent_id": "TASK-AR-608",
-      "status": "worker_ready"
+      "status": "completed"
     }
   ]
 }

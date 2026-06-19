@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-19T14:56:42+09:00
+generated_at: 2026-06-19T15:21:09+09:00
 record_count: 376
 ---
 
@@ -410,11 +410,11 @@ record_count: 376
 | 23.1.2 | Task 23.1.2 | task | `TASK-AR-606` | `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` | completed | `agents/lead_engineer/tasks/TASK-AR-606.md` | Repeat beta-tester and UX-evaluator verification after the claim-aware adapter implem… |
 | 23.1.2.1 | Unit 23.1.2.1 | unit | `UNIT-TASK-AR-606-001` | `TASK-AR-606` | completed | `agents/lead_engineer/tasks/units/TASK-AR-606/UNIT-TASK-AR-606-001.md` | UNIT-TASK-AR-606-001 - Record claim-aware adapter beta and UX evidence |
 | 24 | Initiative 24 | initiative | `INIT-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` | - | active | `agents/project/initiatives/INIT-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT.md` | Operator Attention Graph Mobile Responsive Refinement |
-| 24.1 | Taskset 24.1 | taskset | `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` | `INIT-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` | active | `BACKLOG-BOARD.md` | OAG Mobile Responsive Refinement |
+| 24.1 | Taskset 24.1 | taskset | `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` | `INIT-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` | complete | `BACKLOG-BOARD.md` | OAG Mobile Responsive Refinement |
 | 24.1.1 | Task 24.1.1 | task | `TASK-AR-607` | `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` | completed | `agents/lead_engineer/tasks/TASK-AR-607.md` | Fix BTC-OAG-CLAIM-MOBILE-001 by constraining Taskset Board, relation-panel, toolbar,… |
 | 24.1.1.1 | Unit 24.1.1.1 | unit | `UNIT-TASK-AR-607-001` | `TASK-AR-607` | completed | `agents/lead_engineer/tasks/units/TASK-AR-607/UNIT-TASK-AR-607-001.md` | UNIT-TASK-AR-607-001 - Constrain Taskset Board mobile layout |
-| 24.1.2 | Task 24.1.2 | task | `TASK-AR-608` | `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-608.md` | Repeat beta-tester and UX-evaluator verification after the responsive fix, focused on… |
-| 24.1.2.1 | Unit 24.1.2.1 | unit | `UNIT-TASK-AR-608-001` | `TASK-AR-608` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-608/UNIT-TASK-AR-608-001.md` | UNIT-TASK-AR-608-001 - Record mobile overflow beta and UX evidence |
+| 24.1.2 | Task 24.1.2 | task | `TASK-AR-608` | `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` | completed | `agents/lead_engineer/tasks/TASK-AR-608.md` | Repeat beta-tester and UX-evaluator verification after the responsive fix, focused on… |
+| 24.1.2.1 | Unit 24.1.2.1 | unit | `UNIT-TASK-AR-608-001` | `TASK-AR-608` | completed | `agents/lead_engineer/tasks/units/TASK-AR-608/UNIT-TASK-AR-608-001.md` | UNIT-TASK-AR-608-001 - Record mobile overflow beta and UX evidence |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

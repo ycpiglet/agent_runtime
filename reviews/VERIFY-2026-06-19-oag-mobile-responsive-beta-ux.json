@@ -1,0 +1,98 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-19-oag-mobile-responsive-beta-ux",
+  "work_id": "TASK-AR-608",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-608.md",
+  "kind": "task",
+  "task_id": "TASK-AR-608",
+  "unit_id": "UNIT-TASK-AR-608-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-19T15:19:00+09:00",
+  "verified_by": "codex-w4b-verifier-ar-608",
+  "claim_id": "CLAIM-20260619-145600-task-ar-608-mobile-responsive-beta",
+  "worktree_path": ".worktrees/TASK-AR-608-oag-mobile-beta",
+  "commit_ref": "76bdcbb",
+  "command_count": 4,
+  "commands": [
+    {
+      "command": "git diff --check HEAD^ HEAD",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "No whitespace findings in the W4b verification diff."
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0."
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "evidence-index: pass findings=0."
+    },
+    {
+      "command": "python scripts/ui_ux_cycle.py --root . assess --json",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "assessment returned score=75 usable; status=missing because no next UI refactor candidate is currently selected."
+    }
+  ],
+  "evidence": [
+    "reviews/BETA-TEST-2026-06-19-oag-mobile-responsive-refinement.md",
+    "reviews/UX-EVAL-2026-06-19-oag-mobile-responsive-refinement.md",
+    "reviews/VERIFY-2026-06-19-unit-task-ar-608-001-20260619151300.json",
+    "reviews/W4B-2026-06-19-TASK-AR-608.md"
+  ],
+  "browser_probe": {
+    "desktop_path": "Open / -> Skip if visible -> loadState() -> More -> Taskset Board",
+    "mobile_path": "Open / -> Skip if visible -> hamburger -> More -> Taskset Board",
+    "mobile_viewport": "390x844",
+    "inner_width": 390,
+    "document_scroll_width": 390,
+    "body_scroll_width": 390,
+    "overflow_x": false,
+    "relation_panel_labels": [
+      "Taskset active",
+      "Claim path claimed by codex-ux-evaluator-ar-608",
+      "Evidence freshness stale",
+      "Command readiness claim guard active",
+      "TASK-AR-607 done",
+      "TASK-AR-608 plan"
+    ]
+  },
+  "acceptance": [
+    {
+      "criterion": "Beta evidence includes exact desktop and mobile click paths to Taskset Board.",
+      "status": "passed",
+      "evidence": "BETA evidence records desktop and mobile user-like actions through Taskset Board."
+    },
+    {
+      "criterion": "Mobile evidence records document width, viewport width, overflow status, and visible relation-state labels.",
+      "status": "passed",
+      "evidence": "Mobile 390x844 probe measured document and body widths at 390px with overflow=false and target relation labels visible."
+    },
+    {
+      "criterion": "UX evaluation covers requested dimensions.",
+      "status": "passed",
+      "evidence": "UX evidence covers typography wrapping, spacing density, touch target layout, color/non-color cues, reduced motion, focus order, schema preservation, and assetization class."
+    },
+    {
+      "criterion": "Every remaining user-visible defect receives BTC-style routing.",
+      "status": "passed",
+      "evidence": "No remaining user-visible defect was reproduced; BTC-OAG-CLAIM-MOBILE-001 is recorded as closed."
+    },
+    {
+      "criterion": "Evaluation states next-cycle recommendation.",
+      "status": "passed",
+      "evidence": "Beta and UX evidence recommend a new design-direction or IA cycle rather than another mobile-overflow refinement."
+    }
+  ],
+  "residual": [
+    "Taskset Board depth and focus traversal remain a next-cycle IA/design-direction watch.",
+    "ui_ux_cycle assess reports next_refactor.status=missing because no next UI refactor candidate is currently open."
+  ],
+  "next_step": "Close TASK-AR-608, merge the branch, and register or select the next UI/UX design-direction candidate."
+}

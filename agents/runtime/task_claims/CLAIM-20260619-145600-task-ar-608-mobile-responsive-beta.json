@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-608:tab-01",
   "pane_id": "terminal:wt-task-ar-608:tab-01",
   "mode": "worker",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
   "active_scope": "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
   "scope_transition_approved": true,
@@ -19,20 +19,20 @@
   "model_tier": "worker_standard",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "evaluation",
-  "progress_pct": 5,
-  "step_index": 1,
+  "phase": "taskset-completed",
+  "progress_pct": 100,
+  "step_index": 5,
   "step_total": 5,
-  "status_text": "TASK-AR-608 mobile responsive beta/UX evaluation claimed; evidence-only worktree ready.",
+  "status_text": "TASK-AR-608 mobile responsive beta/UX evaluation passed W4a/W4b and claim is released.",
   "worktree_path": ".worktrees/TASK-AR-608-oag-mobile-beta",
   "branch": "codex/task-ar-608-oag-mobile-beta",
   "claimed_at": "2026-06-19T14:56:00+09:00",
-  "last_heartbeat": "2026-06-19T14:56:00+09:00",
-  "updated_at": "2026-06-19T14:56:00+09:00",
+  "last_heartbeat": "2026-06-19T15:18:00+09:00",
+  "updated_at": "2026-06-19T15:18:00+09:00",
   "expires_at": "2026-06-19T16:56:00+09:00",
   "lease": {
     "claimed_at": "2026-06-19T14:56:00+09:00",
-    "heartbeat_at": "2026-06-19T14:56:00+09:00",
+    "heartbeat_at": "2026-06-19T15:18:00+09:00",
     "expires_at": "2026-06-19T16:56:00+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260619-145600-task-ar-608-mobile-responsive-beta.handoff.md",
@@ -43,5 +43,9 @@
     "reviews/BETA-TEST-2026-06-19-oag-mobile-responsive-refinement.md",
     "reviews/UX-EVAL-2026-06-19-oag-mobile-responsive-refinement.md",
     "reviews/INDEX.md"
-  ]
+  ],
+  "released_at": "2026-06-19T15:18:00+09:00",
+  "verified_by": "codex-w4b-verifier-ar-608",
+  "verifier_role": "qa-reviewer",
+  "verification_evidence": "reviews/W4B-2026-06-19-TASK-AR-608.md"
 }

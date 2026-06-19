@@ -9,11 +9,11 @@ task_id: TASK-AR-608
 task_set_id: TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
 initiative_id: INIT-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: ux-evaluator
 created_at: 2026-06-19T14:04:00+09:00
-updated_at: 2026-06-19T15:13:00+09:00
+updated_at: 2026-06-19T15:20:00+09:00
 origin_type: owner_request
 origin_ref: chat:2026-06-19-ui-refactor-continuous-cycle
 created_by: codex-planner
@@ -49,6 +49,11 @@ verified_at: 2026-06-19T15:13:00+09:00
 verified_by: codex-ux-evaluator-ar-608
 evidence_refs:
   - reviews/VERIFY-2026-06-19-unit-task-ar-608-001-20260619151300.json
+resolution: done
+completed_at: 2026-06-19T15:20:00+09:00
+closed_by: codex-ux-evaluator-ar-608
+actual_hours: 0.8
+actual_tokens: 6000
 ---
 
 # UNIT-TASK-AR-608-001 - Record mobile overflow beta and UX evidence
@@ -103,3 +108,15 @@ Report beta paths, mobile width measurements, accessibility/responsive findings,
 ## Stop Boundary
 
 Stop after beta/UX evidence is complete and ready for independent verification.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T15:20:00+09:00`
+- Resolution: `done`
+- Actual hours: `0.8`
+- Actual tokens: `6000`
+- Closed by: `codex-ux-evaluator-ar-608`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-unit-task-ar-608-001-20260619151300.json`
+<!-- work-close:end -->

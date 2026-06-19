@@ -1,43 +1,21 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T14:56:00+09:00
+updated_at: 2026-06-19T15:22:00+09:00
 current_state:
-  summary: "TASK-AR-608 is claimed for evaluation-only beta/UX evidence after the TASK-AR-607 mobile fix."
-  status: in_progress
-  task_set_status: task_ar_608_claimed
+  summary: "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT is complete; TASK-AR-608 beta/UX evidence passed W4b and no active UI claim remains."
+  status: completed
+  task_set_status: taskset_completed_local_closeout
   task_set_id: "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT"
-  step_index: 1
+  step_index: 6
   step_total: 6
-  progress_pct: 5
-  status_text: "TASK-AR-608 claim created; evaluation-only worktree is ready for beta/UX evidence."
+  progress_pct: 100
+  status_text: "OAG mobile responsive refinement is locally closed; next UI cycle should select a new design-direction or IA candidate."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260619-145600-task-ar-608-mobile-responsive-beta
-      display_name: codex-ux-evaluator-ar-608
-      agent_role: ux-evaluator
-      agent_instance_id: codex-ux-evaluator-ar-608
-      team_id: ui-ux
-      pane_id: terminal:wt-task-ar-608:tab-01
-      callsite_id: terminal:wt-task-ar-608:tab-01
-      task_id: TASK-AR-608
-      task_set_id: TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
-      unit_id: UNIT-TASK-AR-608-001
-      status: claimed
-      phase: evaluation
-      progress_pct: 5
-      step_index: 1
-      step_total: 5
-      status_text: TASK-AR-608 mobile responsive beta/UX evaluation claimed; evidence-only worktree ready.
-      worktree_path: .worktrees/TASK-AR-608-oag-mobile-beta
-      branch: codex/task-ar-608-oag-mobile-beta
-      claim_path: agents/runtime/task_claims/CLAIM-20260619-145600-task-ar-608-mobile-responsive-beta.json
-      handoff_path: agents/runtime/task_claims/CLAIM-20260619-145600-task-ar-608-mobile-responsive-beta.handoff.md
-      last_heartbeat: 2026-06-19T14:56:00+09:00
-  current_teams:
-    - ui-ux
+  current_agents: []
+  current_teams: []
 resume:
-  active_task: TASK-AR-608
+  active_task: none
   active_task_set: TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
-  branch_policy: "Work only inside .worktrees/TASK-AR-608-oag-mobile-beta until W4 verification and release; do not mutate UI source in this task."
+  branch_policy: "OAG mobile responsive refinement is closed locally; create a fresh claim/worktree before any next UI/UX implementation."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -108,17 +86,19 @@ pointers:
     next_decision: register_mobile_taskset_board_overflow_refinement
   oag_mobile_responsive_refinement:
     taskset: TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
-    active_claim: agents/runtime/task_claims/CLAIM-20260619-145600-task-ar-608-mobile-responsive-beta.json
+    active_claim: null
     released_claims:
       - agents/runtime/task_claims/CLAIM-20260619-140700-task-ar-607-mobile-responsive-refinement.json
-    worktree_path: .worktrees/TASK-AR-608-oag-mobile-beta
-    status: task_ar_608_claimed
+      - agents/runtime/task_claims/CLAIM-20260619-145600-task-ar-608-mobile-responsive-beta.json
+    worktree_path: null
+    status: taskset_completed_local_closeout
     completed_tasks:
       - TASK-AR-607
-    next_task: TASK-AR-608
-    next_unit: UNIT-TASK-AR-608-001
-    follow_up_task: TASK-AR-608
-    follow_up_unit: UNIT-TASK-AR-608-001
+      - TASK-AR-608
+    next_task: null
+    next_unit: null
+    follow_up_task: null
+    follow_up_unit: null
     finding: BTC-OAG-CLAIM-MOBILE-001
     registration_input: agents/project/work-items/REGISTRATION-2026-06-19-oag-mobile-responsive-refinement.json
     registration_review: reviews/REVIEW-2026-06-19-taskset-ar-oag-mobile-responsive-refinement-registration.md
@@ -133,7 +113,12 @@ pointers:
     task_ar_607_unit_verification: reviews/VERIFY-2026-06-19-unit-task-ar-607-001-20260619143121.json
     task_ar_607_w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-607.md
     task_ar_608_claim: agents/runtime/task_claims/CLAIM-20260619-145600-task-ar-608-mobile-responsive-beta.json
-    next_decision: complete_task_ar_608_beta_ux_evaluation
+    task_ar_608_beta_evidence: reviews/BETA-TEST-2026-06-19-oag-mobile-responsive-refinement.md
+    task_ar_608_ux_evidence: reviews/UX-EVAL-2026-06-19-oag-mobile-responsive-refinement.md
+    task_ar_608_verification: reviews/VERIFY-2026-06-19-oag-mobile-responsive-beta-ux.json
+    task_ar_608_unit_verification: reviews/VERIFY-2026-06-19-unit-task-ar-608-001-20260619151300.json
+    task_ar_608_w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-608.md
+    next_decision: select_new_ui_ux_design_direction_or_ia_candidate
   design_system_debt_consolidation:
     taskset: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
     released_claim: agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.json
