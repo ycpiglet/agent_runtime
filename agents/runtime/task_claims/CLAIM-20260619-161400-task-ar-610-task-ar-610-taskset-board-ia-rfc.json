@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-610:tab-01",
   "pane_id": "terminal:wt-task-ar-610:tab-01",
   "mode": "work",
-  "status": "claimed",
+  "status": "expired",
   "task_set_id": "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION",
   "active_scope": "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION",
   "scope_transition_approved": true,
@@ -28,7 +28,7 @@
   "branch": "codex/task-ar-610-taskset-board-ia-rfc",
   "claimed_at": "2026-06-19T16:14:00+09:00",
   "last_heartbeat": "2026-06-19T16:14:00+09:00",
-  "updated_at": "2026-06-19T16:14:00+09:00",
+  "updated_at": "2026-06-19T17:46:09+09:00",
   "expires_at": "2026-06-19T16:59:00+09:00",
   "lease": {
     "claimed_at": "2026-06-19T16:14:00+09:00",
@@ -44,5 +44,9 @@
     "docs/design/agent-runtime/DESIGN.md",
     "docs/design/agent-runtime/DESIGN-SYSTEM.md",
     "reviews/INDEX.md"
-  ]
+  ],
+  "recovered_from_status": "claimed",
+  "reaped_at": "2026-06-19T17:46:09+09:00",
+  "reaped_by": "claim_reaper",
+  "reaped_reason": "lease-expired"
 }
