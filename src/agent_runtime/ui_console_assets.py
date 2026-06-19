@@ -2408,6 +2408,13 @@ textarea:focus {
 .task-card-taskset strong {
   color: var(--primary-hover);
 }
+/* Agent avatar (TASK-AR-587, experimental) */
+.agent-avatar {
+  display: block;
+  flex-shrink: 0;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
 .agent-card-header,
 .taskset-card-header,
 .command-card-header,
@@ -8651,9 +8658,12 @@ function agentProgressLabel(agent) {
 }
 
 function agentCardTemplate(agent) {
+  const avatarSeed = agent.id || agent.role || "agent";
+  const avatarLabel = agent.display_name || agent.role || "agent";
   return `
     <article class="agent-card ${agent.online ? "ok" : "warn"}">
       <div class="agent-card-header">
+        ${patternAgentAvatar(avatarSeed, { role: agent.role || "", size: 40, label: avatarLabel })}
         <b>${escapeHtml(agent.display_name || agent.role || "agent")}</b>
         <span class="state-chip">${escapeHtml(agent.status || "offline")}</span>
       </div>

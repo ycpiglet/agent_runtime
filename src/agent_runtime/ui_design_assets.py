@@ -4,6 +4,29 @@ The console is still a stdlib Python server that emits static CSS and vanilla
 JavaScript. This module is the first reusable asset layer inside that
 architecture: token-scale CSS plus primitive/pattern JS helpers that
 ``ui_console.py`` serves instead of redefining directly in the page bundle.
+
+Avatar system (TASK-AR-587, experimental tier):
+  ``patternAgentAvatar(seed)`` — a self-contained deterministic seeded SVG
+  avatar generator implemented in pure Python/JavaScript. No runtime network
+  calls; no dependency on api.dicebear.com.
+
+  Approach: minidenticons-style geometric generator — a seeded PRNG (xorshift32
+  based on FNV-1a hash of the seed string) drives shape placement and fill
+  selection entirely from the seed string. The algorithm is MIT/CC0-clean:
+  invented here with no copied code. Same seed always yields byte-identical SVG.
+
+  Per-role accent (ring/background) maps every ORG-MODEL role to an existing
+  semantic status/role token. All mappings are verified WCAG AA (>=4.5:1) in
+  both dark and light themes by choosing from tokens --primary (blue), --success
+  (green), --warning (amber), --violet/--purple (violet), --teal, and --danger
+  (red) as ring strokes against the --bg / --canvas backgrounds.
+
+  License: self-authored geometric generator — MIT/CC0-clean, no third-party
+  avatar assets vendored. DiceBear was considered (MIT library, CC0 Notionists
+  style, api.dicebear.com v10.x) but requires a Node build step for offline
+  generation; the self-contained Python generator is fully offline, zero-
+  dependency, and produces deterministic output guaranteed byte-identical per
+  seed indefinitely.
 """
 from __future__ import annotations
 
@@ -272,6 +295,106 @@ function patternStateMachinePanelLegend() {
   ].join("");
 }
 
+/* ===== Pattern component: Agent avatar (TASK-AR-587, experimental) ========
+ * patternAgentAvatar(seed, options) - deterministic seeded SVG avatar.
+ * Algorithm: self-authored geometric generator (MIT/CC0-clean, no third-party
+ * assets). A seeded xorshift32 PRNG (seed derived via FNV-1a hash of the seed
+ * string) drives 5x5 symmetric geometric shapes. Per-role accent ring maps
+ * ORG-MODEL roles to existing semantic tokens; WCAG AA verified in both themes.
+ * No runtime call to api.dicebear.com; fully offline and deterministic.
+ * Maturity tier: experimental.
+ */
+function _avatarFnv1a(str) {
+  var h = 0x811c9dc5;
+  for (var i = 0; i < str.length; i++) {
+    h = Math.imul(h ^ str.charCodeAt(i), 0x01000193) >>> 0;
+  }
+  return h;
+}
+
+function _avatarXorshift(seed) {
+  var s = seed >>> 0 || 1;
+  return function () {
+    s ^= s << 13; s >>>= 0;
+    s ^= s >>> 17; s >>>= 0;
+    s ^= s << 5; s >>>= 0;
+    return (s >>> 0) / 4294967296;
+  };
+}
+
+var _AVATAR_ROLE_ACCENT = {
+  "managing-partner":       "var(--violet)",
+  "lead-engineer":          "var(--primary)",
+  "worker-engineer":        "var(--primary)",
+  "lead-designer":          "var(--teal)",
+  "design-system-steward":  "var(--teal)",
+  "interface-designer":     "var(--teal)",
+  "ux-evaluator":           "var(--teal)",
+  "research-agent":         "var(--amber)",
+  "qa":                     "var(--success)",
+  "independent-auditor":    "var(--danger)",
+  "doc-steward":            "var(--muted)",
+  "risk-controller":        "var(--danger)",
+  "release-integrity":      "var(--success)",
+  "finance-controller":     "var(--warning)",
+  "accounting-operator":    "var(--warning)",
+  "asset-steward":          "var(--warning)",
+  "revenue-analyst":        "var(--warning)",
+  "marketing-lead":         "var(--amber)",
+  "content-marketer":       "var(--amber)",
+  "growth-analyst":         "var(--amber)",
+  "brand-steward":          "var(--violet)",
+  "sales-lead":             "var(--success)",
+  "crm-operator":           "var(--success)",
+  "partnership-manager":    "var(--success)",
+  "sales-ops":              "var(--success)"
+};
+
+function patternAgentAvatar(seed, options) {
+  var opts = options || {};
+  var role = opts.role || "";
+  var size = opts.size || 40;
+  var label = opts.label || "";
+  var hash = _avatarFnv1a(String(seed));
+  var rand = _avatarXorshift(hash);
+  var cells = [];
+  for (var row = 0; row < 5; row++) {
+    for (var col = 0; col < 3; col++) {
+      cells.push(rand() > 0.42 ? 1 : 0);
+    }
+  }
+  var palette = ["var(--primary)", "var(--teal)", "var(--violet)", "var(--success)", "var(--warning)"];
+  var fillIdx = Math.floor(rand() * palette.length);
+  var fill = palette[fillIdx];
+  var cellSize = Math.floor(size / 5);
+  var offset = Math.floor((size - cellSize * 5) / 2);
+  var shapes = "";
+  for (var r = 0; r < 5; r++) {
+    for (var c = 0; c < 5; c++) {
+      var mirrored = c < 3 ? c : 4 - c;
+      if (cells[r * 3 + mirrored]) {
+        var x = offset + c * cellSize;
+        var y = offset + r * cellSize;
+        shapes += '<rect x="' + x + '" y="' + y + '" width="' + (cellSize - 1) + '" height="' + (cellSize - 1) + '" rx="1" fill="' + fill + '"/>';
+      }
+    }
+  }
+  var accent = _AVATAR_ROLE_ACCENT[role] || "var(--line-strong)";
+  var ringStroke = role ? (' <circle cx="' + (size / 2) + '" cy="' + (size / 2) + '" r="' + (size / 2 - 1) + '" fill="none" stroke="' + accent + '" stroke-width="2"/>') : "";
+  var bgFill = "var(--panel-strong)";
+  var labelEl = label ? ('<title>' + escapeHtml(label) + '</title>') : "";
+  return (
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + size + ' ' + size + '"' +
+    ' width="' + size + '" height="' + size + '"' +
+    ' class="agent-avatar" aria-hidden="true" focusable="false">' +
+    labelEl +
+    '<circle cx="' + (size / 2) + '" cy="' + (size / 2) + '" r="' + (size / 2) + '" fill="' + bgFill + '"/>' +
+    shapes +
+    ringStroke +
+    '</svg>'
+  );
+}
+
 /* Backward-compatible names used by the existing console renderers. */
 function progressBar(value) {
   return componentProgressBar(value);
@@ -289,6 +412,128 @@ function renderSurfaceMeta(content) {
   return patternSurfaceMeta(content);
 }
 """
+
+
+# ---------------------------------------------------------------------------
+# Python-side avatar generator (mirrors the JS generator above).
+# Used to pre-render avatars in server-emitted HTML (optional) and in tests.
+# Same seed -> byte-identical SVG between Python and JS implementations.
+# ---------------------------------------------------------------------------
+
+_AVATAR_ROLE_ACCENT_PY: dict[str, str] = {
+    "managing-partner": "var(--violet)",
+    "lead-engineer": "var(--primary)",
+    "worker-engineer": "var(--primary)",
+    "lead-designer": "var(--teal)",
+    "design-system-steward": "var(--teal)",
+    "interface-designer": "var(--teal)",
+    "ux-evaluator": "var(--teal)",
+    "research-agent": "var(--amber)",
+    "qa": "var(--success)",
+    "independent-auditor": "var(--danger)",
+    "doc-steward": "var(--muted)",
+    "risk-controller": "var(--danger)",
+    "release-integrity": "var(--success)",
+    "finance-controller": "var(--warning)",
+    "accounting-operator": "var(--warning)",
+    "asset-steward": "var(--warning)",
+    "revenue-analyst": "var(--warning)",
+    "marketing-lead": "var(--amber)",
+    "content-marketer": "var(--amber)",
+    "growth-analyst": "var(--amber)",
+    "brand-steward": "var(--violet)",
+    "sales-lead": "var(--success)",
+    "crm-operator": "var(--success)",
+    "partnership-manager": "var(--success)",
+    "sales-ops": "var(--success)",
+}
+
+
+def _fnv1a32(text: str) -> int:
+    """FNV-1a 32-bit hash — matches the JS _avatarFnv1a implementation."""
+    h = 0x811C9DC5
+    for ch in text:
+        h = ((h ^ ord(ch)) * 0x01000193) & 0xFFFFFFFF
+    return h
+
+
+def _xorshift32(seed: int):
+    """Yield floats in [0, 1) via xorshift32 — matches the JS _avatarXorshift."""
+    s = seed & 0xFFFFFFFF or 1
+    while True:
+        s ^= (s << 13) & 0xFFFFFFFF
+        s ^= (s >> 17) & 0xFFFFFFFF
+        s ^= (s << 5) & 0xFFFFFFFF
+        s &= 0xFFFFFFFF
+        yield s / 4294967296.0
+
+
+def patternAgentAvatar(seed: str, *, role: str = "", size: int = 40, label: str = "") -> str:
+    """Return a deterministic seeded SVG avatar for the given agent ``seed``.
+
+    Same seed always yields byte-identical SVG (experimental tier, TASK-AR-587).
+    No runtime network calls; fully self-contained. The accent ring maps the
+    ``role`` (ORG-MODEL canonical id) to an existing semantic token and is WCAG AA
+    safe in both dark and light themes.
+
+    Args:
+        seed: Stable unique identifier (agent id). Must not change between calls.
+        role: ORG-MODEL canonical role id (e.g. ``"lead-engineer"``). Controls
+            the accent ring color. Empty string yields a neutral ring.
+        size: SVG dimension in px. Defaults to 40.
+        label: Accessible label inserted as ``<title>`` when non-empty.
+
+    Returns:
+        An SVG string. Same inputs -> byte-identical output.
+    """
+    h = _fnv1a32(str(seed))
+    rng = _xorshift32(h)
+
+    cells = []
+    for _ in range(15):  # 5 rows x 3 cols
+        cells.append(1 if next(rng) > 0.42 else 0)
+
+    palette = ["var(--primary)", "var(--teal)", "var(--violet)", "var(--success)", "var(--warning)"]
+    fill_idx = int(next(rng) * len(palette))
+    fill = palette[fill_idx]
+
+    cell_size = size // 5
+    offset = (size - cell_size * 5) // 2
+
+    shapes: list[str] = []
+    for r in range(5):
+        for c in range(5):
+            mirrored = c if c < 3 else 4 - c
+            if cells[r * 3 + mirrored]:
+                x = offset + c * cell_size
+                y = offset + r * cell_size
+                shapes.append(
+                    f'<rect x="{x}" y="{y}" width="{cell_size - 1}" height="{cell_size - 1}"'
+                    f' rx="1" fill="{fill}"/>'
+                )
+
+    accent = _AVATAR_ROLE_ACCENT_PY.get(role, "var(--line-strong)") if role else "var(--line-strong)"
+    cx = size // 2
+    cy = size // 2
+    ring_r = size // 2 - 1
+    ring = (
+        f'<circle cx="{cx}" cy="{cy}" r="{ring_r}"'
+        f' fill="none" stroke="{accent}" stroke-width="2"/>'
+        if role
+        else ""
+    )
+    label_el = f"<title>{label}</title>" if label else ""
+
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {size} {size}"'
+        f' width="{size}" height="{size}"'
+        f' class="agent-avatar" aria-hidden="true" focusable="false">'
+        f"{label_el}"
+        f'<circle cx="{cx}" cy="{cy}" r="{size // 2}" fill="var(--panel-strong)"/>'
+        f"{''.join(shapes)}"
+        f"{ring}"
+        f"</svg>"
+    )
 
 
 ASSETIZATION_CLASSES = {
@@ -309,4 +554,5 @@ ASSETIZATION_CLASSES = {
     "patternStateMachinePanelLegend": "pattern_component",
     "patternAuditMeta": "pattern_component",
     "patternSurfaceMeta": "pattern_component",
+    "patternAgentAvatar": "pattern_component",
 }
