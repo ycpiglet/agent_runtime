@@ -5844,6 +5844,18 @@ pre {
   color: var(--muted);
 }
 /* Eval trend: inline SVG line + axis labels, stroke via token. */
+.opsdash-sparkline-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  color: var(--muted);
+  font-size: var(--font-size-ui-12);
+}
+.opsdash-sparkline-strip .sparkline {
+  flex-shrink: 0;
+}
 .opsdash-chart {
   width: 100%;
   height: auto;
@@ -12232,7 +12244,14 @@ function renderOpsEvalTrend(data) {
     return `<circle class="opsdash-dot${cls}" cx="${xFor(i).toFixed(1)}" cy="${yFor(p.score).toFixed(1)}" r="3">` +
       `<title>${label}</title></circle>`;
   }).join("");
+  const spark = componentSparkline(points.map((p) => Number(p.score)), {
+    label: `Eval score sparkline, ${escapeHtml(String(trend.count || n))} runs`,
+  });
   host.innerHTML =
+    `<div class="opsdash-sparkline-strip">` +
+    `<span>${escapeHtml(String(points[0].score))} -> ${escapeHtml(String(points[points.length - 1].score))}</span>` +
+    spark +
+    `</div>` +
     `<svg class="opsdash-chart" viewBox="0 0 ${W} ${H}" role="img" ` +
     `aria-label="Eval score trend, ${escapeHtml(String(trend.count || n))} runs">` +
     gridY +

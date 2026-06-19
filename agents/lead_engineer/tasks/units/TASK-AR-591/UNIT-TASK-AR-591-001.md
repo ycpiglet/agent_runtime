@@ -9,11 +9,19 @@ task_id: TASK-AR-591
 task_set_id: TASKSET-AR-VISUAL-SYSTEM-INTEGRATION
 initiative_id: INIT-AR-VISUAL-SYSTEM-INTEGRATION
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-06-20T05:18:36+09:00
-updated_at: 2026-06-20T05:18:36+09:00
+started_at: 2026-06-20T08:12:15+09:00
+updated_at: 2026-06-20T08:25:00+09:00
+completed_at: 2026-06-20T08:25:00+09:00
+verified_at: 2026-06-20T08:25:00+09:00
+verified_by: codex-independent-verifier-task-ar-591-20260620
+evidence_refs:
+  - reviews/VERIFY-2026-06-20-task-ar-591-live-wiring.json
+  - reviews/W4B-2026-06-20-TASK-AR-591.md
+  - reviews/evidence/TASK-AR-591/ops-dashboard-sparkline.png
 origin_type: owner_request
 origin_ref: chat:2026-06-19-autonomous-loop
 created_by: lead-engineer
@@ -84,3 +92,11 @@ Integration wired; unit 2 boot-verifies.
 ## Stop Boundary
 
 If wiring a component requires a behavioral redesign, leave it and note it rather than scope-creep.
+
+## Result
+
+- Audited live visual component usage and preserved existing avatar, icon, graph,
+  palette, and state component wiring.
+- Added `componentSparkline` to the live Ops Dashboard eval metric surface so the
+  reusable sparkline component appears in an actual metric route, not only in the
+  bundle or a conditional workload row.

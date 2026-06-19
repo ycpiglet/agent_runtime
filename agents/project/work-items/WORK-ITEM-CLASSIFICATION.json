@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-20T07:47:11+09:00",
+  "generated_at": "2026-06-20T08:26:04+09:00",
   "record_count": 366,
   "finding_count": 0,
   "findings": [],
@@ -3963,7 +3963,7 @@
       "title": "Visual System Integration & Verification",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-VISUAL-SYSTEM-INTEGRATION",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-591",
@@ -3974,7 +3974,7 @@
       "title": "Ensure the AR-587..590 visual components actually appear in the relevant live console…",
       "path": "agents/lead_engineer/tasks/TASK-AR-591.md",
       "parent_id": "TASKSET-AR-VISUAL-SYSTEM-INTEGRATION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-591-001",
@@ -3985,7 +3985,7 @@
       "title": "UNIT-TASK-AR-591-001 - Audit + wire components into live views",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-591/UNIT-TASK-AR-591-001.md",
       "parent_id": "TASK-AR-591",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-591-002",
@@ -3996,7 +3996,7 @@
       "title": "UNIT-TASK-AR-591-002 - Boot-verify the served console",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-591/UNIT-TASK-AR-591-002.md",
       "parent_id": "TASK-AR-591",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-592",

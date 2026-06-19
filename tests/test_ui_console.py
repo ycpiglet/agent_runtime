@@ -3129,6 +3129,8 @@ def test_ui_console_ops_dashboard_render_wired(tmp_path):
     assert "function renderOpsDashboard" in js
     assert "renderOpsDashboard();" in js  # called from renderAll
     assert "runtimeState && runtimeState.ops_metrics" in js
+    assert "componentSparkline(points.map((p) => Number(p.score))" in js
+    assert "opsdash-sparkline-strip" in js
 
 
 def test_ui_console_ops_dashboard_css_uses_tokens_not_raw_color(tmp_path):
@@ -3151,6 +3153,7 @@ def test_ui_console_ops_dashboard_css_uses_tokens_not_raw_color(tmp_path):
     # Chart lines/dots stroke/fill via tokens.
     assert "stroke: var(--primary)" in css
     assert "fill: var(--primary)" in css
+    assert ".opsdash-sparkline-strip" in css
 
 
 def test_ui_console_ops_dashboard_charts_tokenized_no_raw_color_in_js(tmp_path):
