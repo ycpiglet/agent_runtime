@@ -1,0 +1,169 @@
+{
+  "schema": "agent-runtime-verification/v1",
+  "id": "VERIFY-2026-06-19-taskset-board-attention-workspace-implementation",
+  "generated_at": "2026-06-19T20:20:40+09:00",
+  "task_id": "TASK-AR-612",
+  "unit_id": "UNIT-TASK-AR-612-001",
+  "task_set_id": "TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE",
+  "claim_id": "CLAIM-20260619-195000-task-ar-612-taskset-board-attention-workspace",
+  "actor": "codex-interface-designer-task-ar-612",
+  "status": "pass",
+  "summary": "Implemented the Taskset Board attention workspace as a read-only schema addition plus reusable UI/design assets. The first Taskset Board viewport now renders an attention workspace before the full all-tasksets fallback.",
+  "source_changes": [
+    {
+      "path": "src/agent_runtime/ui_state.py",
+      "change": "Adds taskset_attention_workspace/v1 with derived attention lanes for active claims, guarded recovery, evidence gaps, recent changes, and ready next actions."
+    },
+    {
+      "path": "src/agent_runtime/ui_design_assets.py",
+      "change": "Promotes componentTasksetQuickSwitcher and componentAttentionLaneFilter as ui_component assets and patternTasksetAttentionLane as a pattern_component asset."
+    },
+    {
+      "path": "src/agent_runtime/ui_console_assets.py",
+      "change": "Renders the attention workspace, quick switcher, lane filter, selected relation detail, and all-tasksets fallback on the Taskset Board."
+    },
+    {
+      "path": "tests/test_ui_state.py",
+      "change": "Covers attention_workspace schema, lane ids, selected taskset, derived fields, active claim membership, and evidence gap reasons."
+    },
+    {
+      "path": "tests/test_ui_console.py",
+      "change": "Covers new DOM hosts, JS render helpers, lane controls, asset calls, CSS selectors, and mobile wrapping anchors."
+    },
+    {
+      "path": "tests/test_ui_design_assets.py",
+      "change": "Covers the new component and pattern asset classifications and confirms the console renderer calls them."
+    }
+  ],
+  "lane_derivation_fields": [
+    "claim_summary.state",
+    "claim_summary.label",
+    "claim_summary.command_state",
+    "claim_summary.command_label",
+    "recent_activity",
+    "children[].phase",
+    "children[].relation_state",
+    "progress.done",
+    "progress.total",
+    "status_bucket",
+    "assigned_agents"
+  ],
+  "assetization": {
+    "design_tokens": {
+      "status": "reused_existing",
+      "notes": "No new token definitions were required; CSS uses existing semantic color, spacing, radius, and type tokens."
+    },
+    "ui_components": [
+      "componentTasksetQuickSwitcher",
+      "componentAttentionLaneFilter",
+      "componentRelationChip",
+      "componentEvidencePreviewRow"
+    ],
+    "pattern_components": [
+      "patternTasksetAttentionLane",
+      "patternAttentionRelationPanel"
+    ],
+    "one_off_for_now": [
+      "Taskset Board fallback header copy remains local to the Taskset Board view because it appears once and does not yet justify a promoted asset."
+    ]
+  },
+  "acceptance": [
+    {
+      "criterion": "Attention lanes are visible before the all-tasksets fallback.",
+      "status": "pass",
+      "evidence": "HTML adds #tsboard-workspace before #tsboard-cards; Playwright metrics found workspace=true, laneFilters=6, laneCards=14, fallback=true."
+    },
+    {
+      "criterion": "Lane membership is derived from named schema fields and includes visible reason labels.",
+      "status": "pass",
+      "evidence": "ui_state attention_workspace lists derived_from fields and lane items include reason and reason_fields; tests assert active claim and evidence gap reasons."
+    },
+    {
+      "criterion": "Keyboard-first quick switcher supports known-target retrieval and selected/empty states.",
+      "status": "pass",
+      "evidence": "componentTasksetQuickSwitcher renders a search combobox, result count, selected chip, listbox results, empty state; Playwright typed TASK-AR-612 and selected the matching taskset with Enter."
+    },
+    {
+      "criterion": "Relation detail preserves operator_attention_graph semantics.",
+      "status": "pass",
+      "evidence": "tasksetSelectedDetail composes patternAttentionRelationPanel with taskset, claim, evidence, graph, and command state labels."
+    },
+    {
+      "criterion": "Repeated surfaces are assetized or explicitly classified.",
+      "status": "pass",
+      "evidence": "ASSETIZATION_CLASSES now classifies quick switcher and lane filter as ui_component and taskset attention lane as pattern_component."
+    },
+    {
+      "criterion": "API remains read-only and task.create proposal behavior is preserved.",
+      "status": "pass",
+      "evidence": "No ui_console.py route/write changes; existing tests for task.create proposal-only add-task path pass."
+    },
+    {
+      "criterion": "Mobile 390x844 avoids document-level horizontal overflow.",
+      "status": "pass",
+      "evidence": "Playwright metrics at 390x844 reported docScrollWidth=390 and bodyScrollWidth=390."
+    }
+  ],
+  "verification_commands": [
+    {
+      "command": "python -m pytest tests/test_ui_design_assets.py tests/test_ui_console.py tests/test_ui_state.py -q",
+      "status": "pass",
+      "details": "270 passed, 1 warning in 69.70s"
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "pass",
+      "details": "artifacts=3 roles=4 scanned=6 findings=0"
+    },
+    {
+      "command": "python scripts/ui_ux_cycle.py --root . assess --json",
+      "status": "pass_with_note",
+      "details": "returncode=0, score=75 usable, design_system_gate=pass; payload status=missing because next_refactor is intentionally absent until TASK-AR-613 beta/UX evaluation produces the next candidate."
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "pass",
+      "details": "evidence-index: pass findings=0"
+    },
+    {
+      "command": "git diff --check",
+      "status": "pass",
+      "details": "no whitespace findings"
+    }
+  ],
+  "browser_checks": [
+    {
+      "command": "python -m pytest tests/test_ui_console_e2e.py::test_taskset_board_mobile_path_has_no_document_overflow -q",
+      "status": "pass",
+      "details": "1 passed in 105.83s"
+    },
+    {
+      "url": "http://127.0.0.1:8767/api/tasksets_board",
+      "status": "pass",
+      "details": "Returned taskset_attention_workspace/v1 with selected_taskset_id TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE and live lane counts active_claims=1 guarded_recovery=5 evidence_gaps=51 recently_changed=0 ready_next=0."
+    },
+    {
+      "viewport": "1440x900",
+      "status": "pass",
+      "details": "activeView=true workspaceDisplay=grid switcher=true laneFilters=6 laneCards=14 fallback=true docScrollWidth=1440 bodyScrollWidth=1440."
+    },
+    {
+      "viewport": "390x844",
+      "status": "pass",
+      "details": "activeView=true workspaceDisplay=grid switcher=true laneFilters=6 laneCards=14 fallback=true docScrollWidth=390 bodyScrollWidth=390."
+    }
+  ],
+  "additional_observations": [
+    {
+      "scope": "outside_recorded_verification",
+      "status": "watch",
+      "details": "A full tests/test_ui_console_e2e.py run produced 15 passed and 1 timeout in test_work_state_api_returns_secondary_hero_shape on /api/work-state. The Taskset Board-specific E2E path passed separately and this timeout is not caused by the changed files."
+    },
+    {
+      "scope": "browser_plugin",
+      "status": "watch",
+      "details": "The in-app browser API was unavailable in this session as browser 'iab', so browser verification used the repository Playwright path instead."
+    }
+  ],
+  "handoff": "Ready for independent W4b verification. Next work item should be TASK-AR-613 beta/UX evaluation, which must turn visible defects or next design deltas into follow-up registered tasks instead of unclaimed source fixes."
+}

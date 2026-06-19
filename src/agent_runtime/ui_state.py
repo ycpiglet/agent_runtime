@@ -3881,6 +3881,177 @@ def _unique_claims(claims: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [*by_id.values(), *anonymous]
 
 
+TASKSET_ATTENTION_LANES = (
+    {
+        "id": "active_claims",
+        "label": "Active claims",
+        "state": "claimed",
+        "reason": "Claim path currently owns work.",
+    },
+    {
+        "id": "guarded_recovery",
+        "label": "Guarded or interrupted",
+        "state": "guarded",
+        "reason": "Claim guard or interrupted recovery needs review.",
+    },
+    {
+        "id": "evidence_gaps",
+        "label": "Stale or missing evidence",
+        "state": "stale",
+        "reason": "Taskset has no recent activity evidence in the board feed.",
+    },
+    {
+        "id": "recently_changed",
+        "label": "Recently changed",
+        "state": "active",
+        "reason": "Recent runtime activity is available for inspection.",
+    },
+    {
+        "id": "ready_next",
+        "label": "Ready next action",
+        "state": "default",
+        "reason": "Open taskset has no active claim guard.",
+    },
+)
+
+
+def _attention_relation_state(card: dict[str, Any]) -> str:
+    claim_summary = card.get("claim_summary") or {}
+    claim_state = str(claim_summary.get("state") or "default").strip().lower()
+    child_states = {
+        str(child.get("relation_state") or (child.get("claim_summary") or {}).get("state") or "").strip().lower()
+        for child in card.get("children", [])
+    }
+    if "interrupted" in child_states or claim_state == "interrupted":
+        return "interrupted"
+    if "guarded" in child_states or claim_state == "guarded":
+        return "guarded"
+    if "blocked" in child_states or claim_state == "blocked":
+        return "blocked"
+    if "claimed" in child_states or claim_state == "claimed":
+        return "claimed"
+    if claim_state == "active":
+        return "active"
+    return "default"
+
+
+def _attention_card_item(card: dict[str, Any], lane: dict[str, str], reason: str, fields: list[str]) -> dict[str, Any]:
+    claim_summary = card.get("claim_summary") or {}
+    progress = card.get("progress") or {}
+    relation_state = _attention_relation_state(card)
+    return {
+        "taskset_id": card.get("id") or "",
+        "title": card.get("title") or card.get("id") or "",
+        "state": relation_state if relation_state != "default" else lane["state"],
+        "reason": reason or lane["reason"],
+        "reason_fields": fields,
+        "claim_label": claim_summary.get("label") or "",
+        "command_label": claim_summary.get("command_label") or "",
+        "progress_label": f"{progress.get('done', 0)}/{progress.get('total', 0)}",
+        "status": card.get("status") or card.get("status_bucket") or "",
+    }
+
+
+def _taskset_attention_workspace(cards: list[dict[str, Any]]) -> dict[str, Any]:
+    lanes: list[dict[str, Any]] = []
+    for lane in TASKSET_ATTENTION_LANES:
+        lane_items: list[dict[str, Any]] = []
+        for card in cards:
+            claim_summary = card.get("claim_summary") or {}
+            claim_state = _attention_relation_state(card)
+            progress = card.get("progress") or {}
+            recent = card.get("recent_activity") or []
+            children = card.get("children") or []
+            open_children = [
+                child
+                for child in children
+                if str(child.get("status_bucket") or "").strip().lower() != "completed"
+                and str(child.get("phase") or "").strip().lower() != "done"
+            ]
+
+            if lane["id"] == "active_claims" and claim_state in {"claimed", "active"}:
+                lane_items.append(
+                    _attention_card_item(
+                        card,
+                        lane,
+                        str(claim_summary.get("label") or "Active claim path"),
+                        ["claim_summary.state", "claim_summary.label", "children[].claim_summary"],
+                    )
+                )
+            elif lane["id"] == "guarded_recovery" and claim_state in {"guarded", "interrupted", "blocked"}:
+                lane_items.append(
+                    _attention_card_item(
+                        card,
+                        lane,
+                        str(claim_summary.get("command_label") or claim_summary.get("label") or lane["reason"]),
+                        ["claim_summary.state", "claim_summary.command_label", "children[].relation_state"],
+                    )
+                )
+            elif lane["id"] == "evidence_gaps" and children and not recent:
+                done = int(progress.get("done") or 0)
+                total = int(progress.get("total") or 0)
+                state = "missing" if done == 0 else "stale"
+                lane_items.append(
+                    _attention_card_item(
+                        card,
+                        {**lane, "state": state},
+                        f"No recent activity evidence; progress {done}/{total}",
+                        ["recent_activity", "progress.done", "progress.total"],
+                    )
+                )
+            elif lane["id"] == "recently_changed" and recent:
+                latest = recent[0]
+                lane_items.append(
+                    _attention_card_item(
+                        card,
+                        lane,
+                        f"{latest.get('task_id') or card.get('id')} {latest.get('event') or 'activity'}",
+                        ["recent_activity[].task_id", "recent_activity[].event", "recent_activity[].ts"],
+                    )
+                )
+            elif lane["id"] == "ready_next" and open_children and claim_state == "default":
+                lane_items.append(
+                    _attention_card_item(
+                        card,
+                        lane,
+                        f"{len(open_children)} open child tasks; claim path open",
+                        ["children[].phase", "children[].status_bucket", "claim_summary.state"],
+                    )
+                )
+
+        lanes.append(
+            {
+                **lane,
+                "count": len(lane_items),
+                "items": lane_items[:8],
+            }
+        )
+
+    selected = ""
+    for lane in lanes:
+        if lane["items"]:
+            selected = str(lane["items"][0]["taskset_id"])
+            break
+    return {
+        "version": "taskset_attention_workspace/v1",
+        "selected_taskset_id": selected or (cards[0]["id"] if cards else ""),
+        "derived_from": [
+            "claim_summary.state",
+            "claim_summary.label",
+            "claim_summary.command_state",
+            "claim_summary.command_label",
+            "recent_activity",
+            "children[].phase",
+            "children[].relation_state",
+            "progress.done",
+            "progress.total",
+            "status_bucket",
+            "assigned_agents",
+        ],
+        "lanes": lanes,
+    }
+
+
 def build_tasksets_board(
     work_explorer: dict[str, Any],
     tasks: list[dict[str, Any]],
@@ -4015,6 +4186,7 @@ def build_tasksets_board(
         "freshness": work_explorer.get("freshness", "missing"),
         "create_command": "task.create",
         "totals": totals,
+        "attention_workspace": _taskset_attention_workspace(cards),
         "cards": cards,
     }
 

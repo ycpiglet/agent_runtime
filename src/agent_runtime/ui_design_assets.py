@@ -297,6 +297,75 @@ function patternAttentionRelationPanel(options) {
   </section>`;
 }
 
+function componentTasksetQuickSwitcher(options = {}) {
+  const value = options.value || "";
+  const resultCount = Number(options.resultCount || 0);
+  const selected = options.selectedLabel || "No taskset selected";
+  const results = options.resultsMarkup || "";
+  return `<section class="tsboard-switcher" aria-label="Taskset quick switcher">
+    <label class="tsboard-switcher-label" for="tsboard-switcher">Quick switcher</label>
+    <div class="tsboard-switcher-control">
+      <input id="tsboard-switcher" class="tsboard-switcher-input" type="search" autocomplete="off"
+             role="combobox" aria-expanded="${resultCount ? "true" : "false"}"
+             aria-controls="tsboard-switcher-results"
+             value="${escapeHtml(value)}"
+             placeholder="taskset id, title, task id, owner">
+      <span class="tsboard-switcher-count" aria-live="polite">${escapeHtml(resultCount)} matches</span>
+    </div>
+    <div class="tsboard-switcher-selected">${componentRelationChip("Selected", "active", { value: selected })}</div>
+    <div id="tsboard-switcher-results" class="tsboard-switcher-results" role="listbox" aria-label="Taskset switcher results">
+      ${results || `<div class="empty">No matching tasksets</div>`}
+    </div>
+  </section>`;
+}
+
+function componentAttentionLaneFilter(lanes, activeLane = "all") {
+  const rows = [{ id: "all", label: "All lanes", count: (lanes || []).reduce((sum, lane) => sum + Number(lane.count || 0), 0) }, ...(lanes || [])];
+  return `<div class="tsboard-lane-filter" role="tablist" aria-label="Attention lane filter">
+    ${rows.map((lane) => {
+      const selected = (lane.id || "all") === activeLane;
+      return `<button type="button" class="tsboard-lane-filter-button${selected ? " is-active" : ""}"
+              role="tab" aria-selected="${selected}" data-tsboard-lane="${escapeHtml(lane.id || "all")}">
+        <span>${escapeHtml(lane.label || lane.id || "Lane")}</span>
+        <strong>${escapeHtml(lane.count || 0)}</strong>
+      </button>`;
+    }).join("")}
+  </div>`;
+}
+
+function patternTasksetAttentionLane(lane) {
+  const items = (lane && lane.items) || [];
+  const state = normalizeRelationState((lane && lane.state) || "default");
+  const body = items.length
+    ? items.map((item) => {
+        const itemState = normalizeRelationState(item.state || state);
+        return `<button type="button" class="tsboard-attention-card relation-${escapeHtml(itemState)}"
+                data-tsboard-select="${escapeHtml(item.taskset_id || "")}">
+          <span class="tsboard-attention-card-head">
+            <strong>${escapeHtml(item.taskset_id || "")}</strong>
+            ${componentRelationChip("Why", itemState, { value: item.reason || "attention" })}
+          </span>
+          <span class="tsboard-attention-title">${escapeHtml(item.title || item.taskset_id || "")}</span>
+          <span class="tsboard-attention-reason">${escapeHtml(item.reason || "")}</span>
+          <span class="tsboard-attention-meta">
+            <span>${escapeHtml(item.progress_label || "")}</span>
+            <span>${escapeHtml(item.claim_label || item.command_label || item.status || "")}</span>
+          </span>
+        </button>`;
+      }).join("")
+    : `<div class="tsboard-attention-empty">${componentRelationChip(lane.label || "Lane", "missing", { value: "empty" })}<span>${escapeHtml((lane && lane.reason) || "No matching tasksets")}</span></div>`;
+  return `<section class="tsboard-attention-lane relation-${escapeHtml(state)}" data-lane="${escapeHtml((lane && lane.id) || "")}">
+    <header class="tsboard-attention-lane-header">
+      <div>
+        <span class="tsboard-attention-kicker">attention lane</span>
+        <strong>${escapeHtml((lane && lane.label) || "Attention")}</strong>
+      </div>
+      ${componentRelationChip("Count", state, { value: String((lane && lane.count) || 0) })}
+    </header>
+    <div class="tsboard-attention-lane-body">${body}</div>
+  </section>`;
+}
+
 function patternCommandCard(row) {
   return componentCard({
     className: `command-card ${commandRiskClass(row)}`,
@@ -476,12 +545,15 @@ ASSETIZATION_CLASSES = {
     "componentEmptyState": "ui_component",
     "componentRelationChip": "ui_component",
     "componentEvidencePreviewRow": "ui_component",
+    "componentTasksetQuickSwitcher": "ui_component",
+    "componentAttentionLaneFilter": "ui_component",
     "patternTaskLane": "pattern_component",
     "patternClaimCard": "pattern_component",
     "patternAuditCard": "pattern_component",
     "patternEvidencePanel": "pattern_component",
     "patternAttentionRelationPanel": "pattern_component",
     "patternGraphContextStack": "pattern_component",
+    "patternTasksetAttentionLane": "pattern_component",
     "patternCommandBar": "pattern_component",
     "patternStateMachinePanelLegend": "pattern_component",
     "patternSvgLayeredRadialLayout": "pattern_component",

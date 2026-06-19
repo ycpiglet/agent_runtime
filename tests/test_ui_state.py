@@ -1169,6 +1169,54 @@ def test_ui_state_tasksets_board_groups_tasks_with_computed_progress(tmp_path):
     assert payload["items"]["totals"]["tasksets"] >= 1
 
 
+def test_ui_state_tasksets_board_exposes_attention_workspace(tmp_path):
+    _write_work_classification(tmp_path, _work_explorer_records())
+    _write(
+        tmp_path / "agents" / "runtime" / "task_claims" / "CLAIM-attention.json",
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-attention",
+                "task_id": "TASK-AR-516",
+                "task_set_id": "TASKSET-AR-WORK-METADATA-ANALYTICS",
+                "agent_role": "interface-designer",
+                "agent_instance_id": "interface-designer@ui-01",
+                "status": "claimed",
+                "phase": "implement",
+                "claimed_at": "2026-06-13T02:58:00+09:00",
+                "last_heartbeat": "2026-06-13T02:59:00+09:00",
+            }
+        ),
+    )
+
+    state = ui_state.build_state(tmp_path, now="2026-06-13T03:00:00+09:00")
+    workspace = state["tasksets_board"]["attention_workspace"]
+
+    assert workspace["version"] == "taskset_attention_workspace/v1"
+    assert workspace["selected_taskset_id"] == "TASKSET-AR-WORK-METADATA-ANALYTICS"
+    assert "claim_summary.command_label" in workspace["derived_from"]
+    assert "children[].relation_state" in workspace["derived_from"]
+
+    lanes = {lane["id"]: lane for lane in workspace["lanes"]}
+    assert set(lanes) == {
+        "active_claims",
+        "guarded_recovery",
+        "evidence_gaps",
+        "recently_changed",
+        "ready_next",
+    }
+    active = lanes["active_claims"]["items"][0]
+    assert active["taskset_id"] == "TASKSET-AR-WORK-METADATA-ANALYTICS"
+    assert active["state"] == "claimed"
+    assert active["claim_label"] == "claimed by interface-designer@ui-01"
+    assert active["progress_label"] == "1/3"
+    assert "claim_summary.state" in active["reason_fields"]
+
+    gap = lanes["evidence_gaps"]["items"][0]
+    assert gap["taskset_id"] == "TASKSET-AR-WORK-METADATA-ANALYTICS"
+    assert gap["reason"].startswith("No recent activity evidence")
+
+
 def test_ui_state_tasksets_board_progress_changes_only_from_child_state(tmp_path):
     records = _work_explorer_records()
     _write_work_classification(tmp_path, records)

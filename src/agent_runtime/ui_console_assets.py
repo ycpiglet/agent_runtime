@@ -461,6 +461,14 @@ HTML = """<!doctype html>
             <button id="tsboard-collapse-all" type="button">Collapse all</button>
           </div>
           <p id="tsboard-staleness" class="tsboard-staleness"></p>
+          <section id="tsboard-workspace" class="tsboard-workspace" aria-label="Taskset attention workspace"></section>
+          <header class="tsboard-fallback-head">
+            <div>
+              <span class="tsboard-attention-kicker">all tasksets fallback</span>
+              <strong>Full board</strong>
+            </div>
+            <span class="tsboard-fallback-meta">Search, expand, or switch to swimlanes</span>
+          </header>
           <div id="tsboard-cards" class="tsboard-cards" aria-label="Taskset board"></div>
           <div id="tsboard-swimlanes" class="tsboard-swimlanes" aria-label="Taskset swimlanes" hidden></div>
         </div>
@@ -3756,6 +3764,175 @@ pre {
   font-size: var(--font-size-ui-12);
   margin-bottom: var(--space-6xl);
 }
+.tsboard-workspace {
+  display: grid;
+  gap: var(--space-7xl);
+  margin-bottom: var(--space-8xl);
+}
+.tsboard-workspace-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-7xl);
+  align-items: start;
+}
+.tsboard-switcher,
+.tsboard-selected-detail,
+.tsboard-attention-lane {
+  display: grid;
+  gap: var(--space-4xl);
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  padding: var(--space-7xl);
+}
+.tsboard-switcher-label,
+.tsboard-attention-kicker {
+  color: var(--subtle);
+  font-size: var(--font-size-ui-10);
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+.tsboard-switcher-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-3xl);
+  align-items: center;
+}
+.tsboard-switcher-count,
+.tsboard-fallback-meta {
+  color: var(--muted);
+  font-size: var(--font-size-ui-12);
+}
+.tsboard-switcher-selected {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+}
+.tsboard-switcher-results {
+  display: grid;
+  gap: var(--space-lg);
+}
+.tsboard-switcher-result,
+.tsboard-attention-card {
+  display: grid;
+  gap: var(--space-md);
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--tile);
+  color: var(--ink);
+  padding: var(--space-3xl);
+  cursor: pointer;
+}
+.tsboard-switcher-result:hover,
+.tsboard-switcher-result:focus-visible,
+.tsboard-attention-card:hover,
+.tsboard-attention-card:focus-visible {
+  border-color: var(--primary-hover);
+  outline: none;
+}
+.tsboard-switcher-result.is-selected {
+  border-color: var(--info-line);
+  background: var(--info-soft);
+}
+.tsboard-switcher-result span,
+.tsboard-switcher-result small,
+.tsboard-attention-card span,
+.tsboard-selected-head span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.tsboard-switcher-result span {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+}
+.tsboard-switcher-result small,
+.tsboard-attention-meta,
+.tsboard-attention-reason,
+.tsboard-selected-head span,
+.tsboard-attention-empty span {
+  color: var(--muted);
+  font-size: var(--font-size-ui-12);
+}
+.tsboard-selected-head,
+.tsboard-attention-lane-header,
+.tsboard-fallback-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4xl);
+}
+.tsboard-selected-head > div,
+.tsboard-fallback-head > div {
+  display: grid;
+  gap: var(--space-2xs);
+  min-width: 0;
+}
+.tsboard-lane-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+}
+.tsboard-lane-filter-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-lg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface-raised);
+  color: var(--ink);
+  padding: var(--space-sm) var(--space-3xl);
+  cursor: pointer;
+}
+.tsboard-lane-filter-button.is-active {
+  border-color: var(--info-line);
+  background: var(--info-soft);
+}
+.tsboard-attention-lanes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: var(--space-7xl);
+}
+.tsboard-attention-lane-header > div {
+  display: grid;
+  gap: var(--space-2xs);
+  min-width: 0;
+}
+.tsboard-attention-lane-body {
+  display: grid;
+  gap: var(--space-lg);
+}
+.tsboard-attention-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-lg);
+}
+.tsboard-attention-title {
+  font-weight: 700;
+}
+.tsboard-attention-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+}
+.tsboard-attention-empty {
+  display: grid;
+  gap: var(--space-lg);
+  min-width: 0;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-md);
+  background: var(--inset-soft);
+  padding: var(--space-3xl);
+}
+.tsboard-fallback-head {
+  margin-bottom: var(--space-4xl);
+}
 .tsboard-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -4781,6 +4958,9 @@ pre {
   .work-toolbar,
   .work-grid,
   .tsboard-toolbar,
+  .tsboard-workspace-top,
+  .tsboard-switcher-control,
+  .tsboard-attention-lanes,
   .tsboard-cards,
   .tsboard-card-meta,
   .tsboard-swimlane-cols,
@@ -4814,6 +4994,16 @@ pre {
   .tsboard-card-header,
   .tsboard-card-meta,
   .tsboard-add-row,
+  .tsboard-switcher,
+  .tsboard-selected-detail,
+  .tsboard-selected-head,
+  .tsboard-lane-filter,
+  .tsboard-lane-filter-button,
+  .tsboard-attention-lane,
+  .tsboard-attention-lane-header,
+  .tsboard-attention-card,
+  .tsboard-attention-card-head,
+  .tsboard-fallback-head,
   .tsboard-children,
   .tsboard-child,
   .tsboard-swimlane,
@@ -4834,6 +5024,10 @@ pre {
     max-width: 100%;
   }
   .tsboard-card-header,
+  .tsboard-selected-head,
+  .tsboard-attention-lane-header,
+  .tsboard-attention-card-head,
+  .tsboard-fallback-head,
   .attention-relation-head,
   .tsboard-swimlane-header {
     flex-direction: column;
@@ -4844,11 +5038,18 @@ pre {
   }
   .tsboard-add-title,
   .tsboard-add-task,
+  .tsboard-switcher-result,
+  .tsboard-lane-filter-button,
+  .tsboard-attention-card,
   .tsboard-toggle {
     width: 100%;
   }
   .tsboard-child > *,
   .tsboard-swim-card > *,
+  .tsboard-switcher > *,
+  .tsboard-selected-detail > *,
+  .tsboard-attention-lane > *,
+  .tsboard-attention-card > *,
   .relation-chip > *,
   .graph-context-item > *,
   .evidence-preview-row > * {
@@ -7085,6 +7286,8 @@ let meetingParticipants = [];
 let meetingKeyboardHeld = null;
 let expandedTasksetCards = new Set();
 let tasksetSwimlaneMode = false;
+let selectedTasksetId = null;
+let activeTasksetAttentionLane = "all";
 // TASK-AR-336: interactive state-machine viewer selection (machine + task).
 let selectedStateMachineId = null;
 let selectedStateMachineTaskId = null;
@@ -11923,6 +12126,153 @@ function filteredTasksetCards() {
   return cards.filter((card) => tasksetCardSearchText(card).includes(query));
 }
 
+function tasksetAttentionWorkspaceData() {
+  const board = tasksetsBoardData();
+  return board.attention_workspace || { lanes: [], selected_taskset_id: "", derived_from: [] };
+}
+
+function tasksetCardById(cards, tasksetId) {
+  return (cards || []).find((card) => card.id === tasksetId) || null;
+}
+
+function tasksetSwitcherMatches(cards, query) {
+  const clean = String(query || "").trim().toLowerCase();
+  const pool = cards || [];
+  if (!clean) return pool.slice(0, 6);
+  return pool.filter((card) => tasksetCardSearchText(card).includes(clean)).slice(0, 8);
+}
+
+function ensureSelectedTaskset(cards) {
+  const workspace = tasksetAttentionWorkspaceData();
+  if (selectedTasksetId && tasksetCardById(cards, selectedTasksetId)) return selectedTasksetId;
+  selectedTasksetId = workspace.selected_taskset_id || ((cards[0] || {}).id || "");
+  return selectedTasksetId;
+}
+
+function tasksetSwitcherResults(cards, query) {
+  const matches = tasksetSwitcherMatches(cards, query);
+  return {
+    matches,
+    markup: matches.map((card) => {
+      const progress = card.progress || {};
+      const selected = card.id === selectedTasksetId;
+      return `<button type="button" class="tsboard-switcher-result${selected ? " is-selected" : ""}"
+              role="option" aria-selected="${selected}" data-tsboard-select="${escapeHtml(card.id)}">
+        <span><strong>${escapeHtml(card.id)}</strong>${escapeHtml(card.title || "")}</span>
+        <small>${escapeHtml(progress.done ?? 0)}/${escapeHtml(progress.total ?? 0)} - ${escapeHtml((card.assigned_agents || []).join(", ") || "unassigned")}</small>
+      </button>`;
+    }).join(""),
+  };
+}
+
+function tasksetSelectedDetail(card) {
+  if (!card) {
+    return `<section class="tsboard-selected-detail">${componentEmptyState("No taskset selected", "Use the quick switcher or an attention lane card.")}</section>`;
+  }
+  const relation = tasksetRelationSummary(card);
+  const progress = card.progress || {};
+  return `<section class="tsboard-selected-detail" aria-label="Selected taskset relation detail">
+    <header class="tsboard-selected-head">
+      <div>
+        <span class="tsboard-attention-kicker">selected taskset</span>
+        <strong>${escapeHtml(card.id)}</strong>
+        <span>${escapeHtml(card.title || card.id)}</span>
+      </div>
+      ${componentRelationChip("Progress", relation.tasksetState, { value: `${progress.done ?? 0}/${progress.total ?? 0}` })}
+    </header>
+    ${patternAttentionRelationPanel({
+      tasksetId: card.id,
+      title: card.title || card.id,
+      tasksetState: relation.tasksetState,
+      tasksetLabel: relation.tasksetLabel,
+      claimState: relation.claimState,
+      claimLabel: relation.claimLabel,
+      evidenceState: relation.evidenceState,
+      evidenceLabel: relation.evidenceLabel,
+      commandState: relation.commandState,
+      commandLabel: relation.commandLabel,
+      evidenceRows: relation.evidenceRows,
+      graphItems: relation.graphItems,
+      emptyGraphLabel: "No child context",
+    })}
+  </section>`;
+}
+
+function renderTasksetAttentionWorkspace(cards) {
+  const host = $("tsboard-workspace");
+  if (!host) return;
+  const queryInput = $("tsboard-switcher");
+  const query = queryInput ? queryInput.value : "";
+  const hadSwitcherFocus = document.activeElement && document.activeElement.id === "tsboard-switcher";
+  ensureSelectedTaskset(cards);
+  const workspace = tasksetAttentionWorkspaceData();
+  const laneRows = workspace.lanes || [];
+  const visibleLanes = activeTasksetAttentionLane === "all"
+    ? laneRows
+    : laneRows.filter((lane) => lane.id === activeTasksetAttentionLane);
+  const switcher = tasksetSwitcherResults(cards, query);
+  const selected = tasksetCardById(cards, selectedTasksetId);
+  host.innerHTML = `
+    <div class="tsboard-workspace-top">
+      ${componentTasksetQuickSwitcher({
+        value: query,
+        resultCount: switcher.matches.length,
+        selectedLabel: selected ? selected.id : "No taskset selected",
+        resultsMarkup: switcher.markup,
+      })}
+      ${tasksetSelectedDetail(selected)}
+    </div>
+    ${componentAttentionLaneFilter(laneRows, activeTasksetAttentionLane)}
+    <div class="tsboard-attention-lanes">
+      ${visibleLanes.length ? visibleLanes.map(patternTasksetAttentionLane).join("") : `<div class="empty">No attention lanes</div>`}
+    </div>
+  `;
+  wireTasksetAttentionWorkspace(host, switcher.matches);
+  if (hadSwitcherFocus) {
+    const nextInput = $("tsboard-switcher");
+    if (nextInput) {
+      nextInput.focus();
+      nextInput.setSelectionRange(query.length, query.length);
+    }
+  }
+}
+
+function wireTasksetAttentionWorkspace(host, matches) {
+  host.querySelectorAll("[data-tsboard-select]").forEach((button) => {
+    button.addEventListener("click", () => {
+      selectedTasksetId = button.dataset.tsboardSelect;
+      renderTasksetBoard();
+    });
+  });
+  host.querySelectorAll("[data-tsboard-lane]").forEach((button) => {
+    button.addEventListener("click", () => {
+      activeTasksetAttentionLane = button.dataset.tsboardLane || "all";
+      renderTasksetBoard();
+    });
+  });
+  const switcher = host.querySelector("#tsboard-switcher");
+  if (switcher) {
+    switcher.addEventListener("input", renderTasksetBoard);
+    switcher.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && matches.length) {
+        selectedTasksetId = matches[0].id;
+        renderTasksetBoard();
+      }
+      if (event.key === "ArrowDown") {
+        const first = host.querySelector(".tsboard-switcher-result");
+        if (first) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+      if (event.key === "Escape") {
+        switcher.value = "";
+        renderTasksetBoard();
+      }
+    });
+  }
+}
+
 function tasksetPhaseChip(child) {
   const phase = String(child.phase || "plan");
   return `<span class="phase-chip phase-${escapeHtml(phase)}">${escapeHtml(phase)}</span>`;
@@ -12152,6 +12502,8 @@ function renderTasksetBoard() {
   const swimHost = $("tsboard-swimlanes");
   if (!cardsHost || !swimHost) return;
   setText("tsboard-staleness", tasksetsBoardData().staleness_note || "");
+  const allCards = tasksetsBoardData().cards || [];
+  renderTasksetAttentionWorkspace(allCards);
   const cards = filteredTasksetCards();
   if (tasksetSwimlaneMode) {
     cardsHost.hidden = true;
