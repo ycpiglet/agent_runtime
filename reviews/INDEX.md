@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-20T00:51:21+09:00
-record_count: 703
+generated_at: 2026-06-20T01:10:25+09:00
+record_count: 707
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `703` review and evidence records under `reviews/`.
+- Summary: indexed `707` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `703` files |
+| Reviews covered | pass | `707` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -40,6 +40,7 @@ record_count: 703
 | `reviews/AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8.json` | `AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8` | json | record | n/a | AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8 |
 | `reviews/BETA-PLAN-2026-06-19-operator-attention-graph.md` | `BETA-PLAN-2026-06-19-operator-attention-graph` | ui-beta-test-plan | accepted | pass | Operator Attention Graph Beta Plan |
 | `reviews/BETA-PLAN-2026-06-19-taskset-board-attention-workspace.md` | `BETA-PLAN-2026-06-19-taskset-board-attention-workspace` | ui-beta-test-plan | accepted | pass | Taskset Board Attention Workspace Beta Plan |
+| `reviews/BETA-PLAN-2026-06-20-taskset-board-evidence-review-queue.md` | `BETA-PLAN-2026-06-20-taskset-board-evidence-review-queue` | ui-beta-test-plan | accepted | pass | Taskset Board Evidence Review Queue Beta Plan |
 | `reviews/BETA-TEST-2026-06-19-oag-claim-aware-relation-adapter.md` | `BETA-TEST-2026-06-19-oag-claim-aware-relation-adapter` | beta-tester-review | accepted_with_findings | watch | Claim-Aware Relation Adapter Beta Test |
 | `reviews/BETA-TEST-2026-06-19-oag-mobile-responsive-refinement.md` | `BETA-TEST-2026-06-19-oag-mobile-responsive-refinement` | beta-tester-review | accepted | pass | OAG Mobile Responsive Refinement Beta Test |
 | `reviews/BETA-TEST-2026-06-19-operator-attention-graph.md` | `BETA-TEST-2026-06-19-operator-attention-graph` | beta-tester-review | accepted_with_findings | watch | Operator Attention Graph Beta Test |
@@ -165,6 +166,7 @@ record_count: 703
 | `reviews/PENDING-RELEASE-GUARD-2026-06-09-v0.1.8.json` | `PENDING-RELEASE-GUARD-2026-06-09-v0.1.8` | json | record | n/a | PENDING-RELEASE-GUARD-2026-06-09-v0.1.8 |
 | `reviews/PLAN-2026-06-19-operator-attention-graph-implementation.md` | `PLAN-2026-06-19-operator-attention-graph-implementation` | ui-implementation-plan | accepted | pass | Operator Attention Graph Implementation Plan |
 | `reviews/PLAN-2026-06-19-taskset-board-attention-workspace-implementation.md` | `PLAN-2026-06-19-taskset-board-attention-workspace-implementation` | ui-implementation-plan | accepted | pass | Taskset Board Attention Workspace Implementation Plan |
+| `reviews/PLAN-2026-06-20-taskset-board-evidence-review-queue-implementation.md` | `PLAN-2026-06-20-taskset-board-evidence-review-queue-implementation` | ui-implementation-plan | accepted | pass | Taskset Board Evidence Review Queue Implementation Plan |
 | `reviews/PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final.json` | `PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final` | json | record | n/a | PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final |
 | `reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md` | `PROPOSALS-2026-06-19-ui-ux-next-work` | ui-ux-next-work-proposals | active | pass | UI/UX Next Work Proposals 2026-06-19 |
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8.json` | `RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8 |
@@ -643,6 +645,7 @@ record_count: 703
 | `reviews/VERIFY-2026-06-19-unit-task-ar-615-001-20260619233128.json` | `VERIFY-2026-06-19-unit-task-ar-615-001-20260619233128` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-615-001-20260619233128 |
 | `reviews/VERIFY-2026-06-20-task-ar-616-closeout.json` | `VERIFY-2026-06-20-task-ar-616-closeout` | json | record | n/a | VERIFY-2026-06-20-task-ar-616-closeout |
 | `reviews/VERIFY-2026-06-20-task-ar-617-rfc.json` | `VERIFY-2026-06-20-task-ar-617-rfc` | json | record | n/a | VERIFY-2026-06-20-task-ar-617-rfc |
+| `reviews/VERIFY-2026-06-20-task-ar-618-implementation-beta-plan.json` | `VERIFY-2026-06-20-task-ar-618-implementation-beta-plan` | json | record | n/a | VERIFY-2026-06-20-task-ar-618-implementation-beta-plan |
 | `reviews/VERIFY-2026-06-20-unit-task-ar-616-001-20260620000909.json` | `VERIFY-2026-06-20-unit-task-ar-616-001-20260620000909` | json | record | n/a | VERIFY-2026-06-20-unit-task-ar-616-001-20260620000909 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
@@ -737,6 +740,7 @@ record_count: 703
 | `reviews/W4B-2026-06-19-UNIT-TASK-AR-596-001.md` | `W4B-2026-06-19-UNIT-TASK-AR-596-001` | md | accepted | pass | W4B Independent Verification - UNIT-TASK-AR-596-001 |
 | `reviews/W4B-2026-06-20-TASK-AR-616.md` | `W4B-2026-06-20-TASK-AR-616` | w4b-independent-verification | passed | pass | W4B Independent Verification - TASK-AR-616 |
 | `reviews/W4B-2026-06-20-TASK-AR-617.md` | `W4B-2026-06-20-TASK-AR-617` | w4b-independent-verification | passed | pass | W4B Independent Verification - TASK-AR-617 |
+| `reviews/W4B-2026-06-20-TASK-AR-618.md` | `W4B-2026-06-20-TASK-AR-618` | w4b-verification | pass | pass | W4B - TASK-AR-618 |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.

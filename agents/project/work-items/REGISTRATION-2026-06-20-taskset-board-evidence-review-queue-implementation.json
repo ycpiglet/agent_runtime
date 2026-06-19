@@ -1,0 +1,250 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "ui_ux_rfc",
+  "origin_ref": "reviews/RFC-2026-06-19-taskset-board-evidence-performance-ia.md",
+  "created_by": "codex-interface-designer-ar-618",
+  "now": "2026-06-20T01:08:00+09:00",
+  "initiative": {
+    "id": "INIT-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE",
+    "title": "Taskset Board Evidence Review Queue",
+    "summary": "Continue the UI/UX cycle by turning evidence_gap overload and slow detail loading into a grouped evidence review queue with progressive disclosure, split loading states, and beta/UX evidence.",
+    "owner": "lead_engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE",
+    "display_name": "Taskset Board Evidence Review Queue",
+    "summary": "Implement the accepted evidence_review_queue_with_progressive_disclosure_and_split_loading direction, then run exploratory beta/UX verification.",
+    "order": 640,
+    "plan_slug": "2026-06-20-taskset-board-evidence-review-queue"
+  },
+  "tasks": [
+    {
+      "title": "Implement Taskset Board evidence review queue and split loading states",
+      "goal": "Make the Taskset Board stale/missing evidence lane actionable by deriving a grouped evidence review queue, visible caps, hidden counts, ordering reasons, latency labels, and selected evidence detail while preserving the accepted attention workspace.",
+      "scope": "Source mutation is limited to read-only Taskset Board state derivation, UI asset helpers, Taskset Board client rendering, and focused tests. Do not change task/claim persistence, write command execution, dispatcher release semantics, or unrelated console views.",
+      "priority": "P1",
+      "difficulty": "L",
+      "est_hours": 6,
+      "est_tokens": 14000,
+      "owner": "interface-designer",
+      "team": "ui-ux",
+      "acceptance": [
+        "`/api/tasksets_board` exposes `attention_workspace.evidence_review_queue` with `version`, `summary_loaded_at`, `detail_loading_state`, `groups`, selected group, visible count, hidden count, and ordering reason fields.",
+        "Evidence groups classify stale, missing, unverified, blocked, and deferrable items without relying on color alone.",
+        "Queue rows preserve taskset id/title, owner/team, progress, evidence freshness, evidence age, severity, claim state, claim phase, command readiness, and reason text.",
+        "The rendered Taskset Board shows group filters, cap disclosure, queue rows, latency badge, selected detail, empty states, and retry/defer affordances using escaped text.",
+        "Repeated UI is promoted into asset helpers rather than page-local string duplication; any temporary orientation copy is labelled one_off_for_now in the verification evidence.",
+        "Desktop and 390x844 CSS anchors keep summary, queue, detail, and inactive containment stable without document-level horizontal overflow.",
+        "Focused tests cover state schema, grouping/capping, escaped render helpers, keyboard/focus anchors, reduced-motion-safe labels, and design-system class anchors."
+      ],
+      "verification": [
+        "python -m pytest tests/test_ui_state.py tests/test_ui_console.py tests/test_ui_design_assets.py -q",
+        "python scripts/design_system_gate.py --check --all-ui",
+        "python scripts/ui_ux_cycle.py --root . assess --json",
+        "python scripts/evidence_index_generator.py --check",
+        "git diff --check"
+      ],
+      "units": [
+        {
+          "title": "Derive evidence review queue schema from Taskset Board state",
+          "context": "TASK-AR-617 accepted the evidence review queue direction because evidence_gaps=49 made the stale/missing lane too flat and API latency made detail loading ambiguous. The first implementation must add a read-only summary/detail schema before rendering new UI.",
+          "inputs": [
+            "reviews/RFC-2026-06-19-taskset-board-evidence-performance-ia.md",
+            "src/agent_runtime/ui_state.py",
+            "tests/test_ui_state.py"
+          ],
+          "target_files": [
+            "src/agent_runtime/ui_state.py",
+            "tests/test_ui_state.py",
+            "reviews/VERIFY-2026-06-20-taskset-board-evidence-review-queue-implementation.json",
+            "reviews/INDEX.md"
+          ],
+          "schema_contract": {
+            "path": "tasksets_board.items.attention_workspace.evidence_review_queue",
+            "version": "taskset_evidence_review_queue/v1",
+            "required_fields": [
+              "version",
+              "summary_loaded_at",
+              "detail_loading_state",
+              "selected_group_id",
+              "selected_taskset_id",
+              "groups[].id",
+              "groups[].label",
+              "groups[].count",
+              "groups[].visible_count",
+              "groups[].hidden_count",
+              "groups[].ordering_reason",
+              "groups[].freshness",
+              "groups[].severity",
+              "groups[].items[].taskset_id",
+              "groups[].items[].title",
+              "groups[].items[].owner",
+              "groups[].items[].team",
+              "groups[].items[].progress_label",
+              "groups[].items[].evidence_freshness",
+              "groups[].items[].evidence_age_label",
+              "groups[].items[].evidence_severity",
+              "groups[].items[].active_claim",
+              "groups[].items[].claim_phase",
+              "groups[].items[].command_readiness",
+              "groups[].items[].reason",
+              "groups[].items[].detail_loading_state"
+            ]
+          },
+          "scope": "Add only read-only derived fields under the existing Taskset Board payload. Do not write tasks, claims, boards, indexes, or registries from the UI state path.",
+          "steps": [
+            "Read the current `TASKSET_ATTENTION_LANES`, `_taskset_attention_workspace`, and `build_tasksets_board` implementation.",
+            "Derive freshness and severity from current card fields: recent activity, child phases, progress, claim summary, command readiness, status bucket, and staleness note.",
+            "Create capped groups with visible count, hidden count, ordering reason, and selected defaults.",
+            "Expose summary/detail loading labels as data even before a true async API split exists.",
+            "Add focused tests for stale/missing grouping, hidden count, ordering reason, claim/command fields, and safe empty states."
+          ],
+          "acceptance": [
+            "A focused state test proves at least two evidence groups can be generated from fixture tasksets.",
+            "A focused state test proves a group with more than the visible cap reports hidden_count and keeps the highest-severity items visible.",
+            "A focused state test proves summary/detail loading labels are present and textual.",
+            "No source path outside `ui_state.py` and focused tests changes in this unit."
+          ],
+          "verification": [
+            "python -m pytest tests/test_ui_state.py -q",
+            "python scripts/evidence_index_generator.py --check",
+            "git diff --check"
+          ],
+          "handoff": "Report schema fields, grouping rules, cap value, derived freshness/severity rules, and any unresolved true-async split risk.",
+          "stop_condition": "Stop after the read-only schema is implemented, tested, and ready for UI asset rendering."
+        },
+        {
+          "title": "Render evidence queue assets and split-loading UI states",
+          "context": "After the read-only schema exists, the Taskset Board needs reusable components and patterns for group filters, cap disclosure, queue rows, latency badges, selected detail, retry/defer controls, and inactive containment.",
+          "inputs": [
+            "reviews/RFC-2026-06-19-taskset-board-evidence-performance-ia.md",
+            "src/agent_runtime/ui_design_assets.py",
+            "src/agent_runtime/ui_console_assets.py",
+            "tests/test_ui_design_assets.py",
+            "tests/test_ui_console.py"
+          ],
+          "target_files": [
+            "src/agent_runtime/ui_design_assets.py",
+            "src/agent_runtime/ui_console_assets.py",
+            "tests/test_ui_design_assets.py",
+            "tests/test_ui_console.py",
+            "reviews/VERIFY-2026-06-20-taskset-board-evidence-review-queue-implementation.json",
+            "reviews/INDEX.md"
+          ],
+          "assetization": {
+            "design_token": [
+              "evidence freshness aliases mapped to existing semantic status colors first",
+              "evidence severity/order aliases for urgent, blocked, stale, deferrable, and recently changed",
+              "queue density roles for group filters, rows, hidden-count disclosure, and detail states",
+              "loading and latency aliases for summary-ready, detail-loading, timeout-watch, retryable, and stale-summary"
+            ],
+            "ui_component": [
+              "componentEvidenceGroupFilter",
+              "componentLaneCapDisclosure",
+              "componentLatencyBudgetBadge",
+              "componentEvidenceQueueRow"
+            ],
+            "pattern_component": [
+              "patternEvidenceReviewQueue",
+              "patternSplitBoardLoadingShell",
+              "patternInactiveViewContainmentShell"
+            ],
+            "one_off_for_now": [
+              "first-cycle orientation copy explaining why stale evidence is now grouped"
+            ]
+          },
+          "scope": "Render only the accepted evidence review queue inside Taskset Board. Keep page/server assembly focused on layout and data wiring. Do not redesign unrelated views or introduce decorative effects.",
+          "steps": [
+            "Add reusable JS helpers in `ui_design_assets.py` for filter, cap, badge, row, and pattern rendering with `escapeHtml` on every dynamic field.",
+            "Add CSS classes for stable desktop/mobile dimensions, focus, hover, selected, loading, retryable, and reduced-motion-safe states.",
+            "Wire `ui_console_assets.py` to render the evidence review queue from `attention_workspace.evidence_review_queue` without duplicating row markup.",
+            "Add tests for helper names, CSS anchors, escaping, focusable controls, reduced-motion labels, mobile stacking, and active/inactive containment.",
+            "Record W4a verification evidence."
+          ],
+          "acceptance": [
+            "The Taskset Board first viewport can show evidence group counts and hidden counts before full detail is inspected.",
+            "Every dynamic field in queue rendering is escaped.",
+            "Retry/defer controls are labelled, keyboard reachable, and proposal-only unless a later claimed task registers command behavior.",
+            "Reduced-motion mode keeps all meaning in text labels and focus state.",
+            "No card or button text overflows its fixed-format control at desktop or 390x844 according to tests and beta plan requirements."
+          ],
+          "verification": [
+            "python -m pytest tests/test_ui_design_assets.py tests/test_ui_console.py tests/test_ui_state.py -q",
+            "python scripts/design_system_gate.py --check --all-ui",
+            "python scripts/ui_ux_cycle.py --root . assess --json",
+            "python scripts/evidence_index_generator.py --check",
+            "git diff --check"
+          ],
+          "handoff": "Report rendered components, CSS anchors, accessibility states, token/component/pattern/one-off classification, tests, and beta risks.",
+          "stop_condition": "Stop after source mutation is tested, self-verified, and ready for independent W4b verification."
+        }
+      ]
+    },
+    {
+      "title": "Run Taskset Board evidence review queue beta and UX evaluation",
+      "goal": "Verify the implemented evidence review queue with exploratory beta-tester and UX-evaluator evidence covering unknown triage, known retrieval, capped drill-in, slow detail, timeout/retry, keyboard, mobile, reduced motion, and defect routing.",
+      "scope": "Evaluation and evidence only. Do not mutate UI source files in this task. Any remaining visual, interaction, accessibility, performance, schema, or assetization defect must be routed with BTC-style IDs.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 3,
+      "est_tokens": 8000,
+      "owner": "ux-evaluator",
+      "team": "ui-ux",
+      "acceptance": [
+        "Beta evidence records exact clicked, typed, and keyboard paths for unknown evidence triage and known taskset retrieval.",
+        "Evidence covers desktop and 390x844 mobile viewports with environment, data state, expected result, observed result, and pass/fail status.",
+        "UX evaluation reviews typography, density, color/non-color cues, motion, effects, schema labels, assets, accessibility, responsiveness, and interaction recovery.",
+        "Slow detail and timeout/retry states are exercised or explicitly simulated with documented limits.",
+        "Every visible failure receives a BTC-TSERQ defect id and assetization class."
+      ],
+      "verification": [
+        "python scripts/design_system_gate.py --check --all-ui",
+        "python scripts/evidence_index_generator.py --check",
+        "python scripts/ui_ux_cycle.py --root . assess --json"
+      ],
+      "units": [
+        {
+          "title": "Record evidence review queue beta and UX evidence",
+          "context": "This unit runs after the source-mutating implementation lands and checks that the accepted evidence/performance IA works as a user-like operator workflow.",
+          "inputs": [
+            "reviews/BETA-PLAN-2026-06-20-taskset-board-evidence-review-queue.md",
+            "reviews/RFC-2026-06-19-taskset-board-evidence-performance-ia.md",
+            "src/agent_runtime/ui_state.py",
+            "src/agent_runtime/ui_design_assets.py",
+            "src/agent_runtime/ui_console_assets.py"
+          ],
+          "target_files": [
+            "reviews/BETA-TEST-2026-06-20-taskset-board-evidence-review-queue.md",
+            "reviews/UX-EVAL-2026-06-20-taskset-board-evidence-review-queue.md",
+            "reviews/VERIFY-2026-06-20-taskset-board-evidence-review-queue-beta.json",
+            "reviews/INDEX.md"
+          ],
+          "scope": "Record exploratory evidence only. Do not patch UI source files in this unit.",
+          "steps": [
+            "Launch or inspect the local UI surface after implementation.",
+            "Run unknown evidence triage from Taskset Board first viewport to selected queue detail.",
+            "Run known-target retrieval by taskset id/title and confirm queue/detail state remains coherent.",
+            "Open a capped group and record visible count, hidden count, ordering reason, and selected item state.",
+            "Exercise slow detail, stale summary, retryable, defer, empty group, blocked command, interrupted claim, expired claim, and no active claim paths where data exists; otherwise document the fixture/simulation gap.",
+            "Repeat primary flows at desktop and 390x844, then record keyboard and reduced-motion notes.",
+            "Route failures with BTC-TSERQ IDs and assetization class."
+          ],
+          "acceptance": [
+            "Evidence lists exact actions, viewport, data state, expected result, observed result, pass/fail, and follow-up owner.",
+            "Accessibility review covers keyboard order, focus visibility, labels, count announcements, reduced motion, and non-color-only state.",
+            "Responsiveness review distinguishes active Taskset Board viewport fit from inactive DOM scan noise.",
+            "The handoff recommends closure, another implementation refinement, or a new lead-designer seminar."
+          ],
+          "verification": [
+            "python scripts/design_system_gate.py --check --all-ui",
+            "python scripts/evidence_index_generator.py --check",
+            "python scripts/ui_ux_cycle.py --root . assess --json"
+          ],
+          "handoff": "Report beta paths, UX findings, BTC defects, closed risks, residual risks, and the next UI/UX cycle decision.",
+          "stop_condition": "Stop after beta/UX evidence is complete and ready for independent W4b verification."
+        }
+      ]
+    }
+  ]
+}

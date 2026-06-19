@@ -1,0 +1,86 @@
+{
+  "schema": "agent-runtime-verification/v1",
+  "work_id": "TASK-AR-618",
+  "task_set_id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA",
+  "claim_id": "CLAIM-20260620-010012-task-ar-618-task-ar-618-evidence-perf-implementation-plan",
+  "verified_at": "2026-06-20T01:06:00+09:00",
+  "verified_by": "codex-interface-designer-ar-618",
+  "result": "pass",
+  "summary": "TASK-AR-618 produced a source-mutation registration input, implementation plan, and beta/UX evaluation plan for the accepted evidence_review_queue_with_progressive_disclosure_and_split_loading direction without mutating UI source files.",
+  "artifacts": [
+    "agents/project/work-items/REGISTRATION-2026-06-20-taskset-board-evidence-review-queue-implementation.json",
+    "reviews/PLAN-2026-06-20-taskset-board-evidence-review-queue-implementation.md",
+    "reviews/BETA-PLAN-2026-06-20-taskset-board-evidence-review-queue.md"
+  ],
+  "commands": [
+    {
+      "command": "python -m json.tool agents/project/work-items/REGISTRATION-2026-06-20-taskset-board-evidence-review-queue-implementation.json",
+      "result": "pass",
+      "notes": "Registration input parses as JSON."
+    },
+    {
+      "command": "python scripts/ui_ux_cycle.py --root . propose --dry-run --json",
+      "result": "pass",
+      "notes": "Proposal command remained dry-run and reported planned status with no mutation errors."
+    },
+    {
+      "command": "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA --check",
+      "result": "pass",
+      "notes": "Taskset gate found no findings."
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "result": "pass",
+      "notes": "Evidence index is current."
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "result": "pass",
+      "notes": "Design-system gate passed with artifacts=3 roles=4 scanned=6 findings=0."
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass",
+      "notes": "No whitespace errors; CRLF warning only for generated reviews/INDEX.md."
+    },
+    {
+      "command": "git status --short -- src tests scripts",
+      "result": "pass",
+      "notes": "No UI source, tests, or scripts were modified in TASK-AR-618."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion": "A follow-up registration input names the next UI source mutation task, target files, target API/schema contracts, and token/component/pattern/one-off classification.",
+      "status": "pass",
+      "evidence": "agents/project/work-items/REGISTRATION-2026-06-20-taskset-board-evidence-review-queue-implementation.json"
+    },
+    {
+      "criterion": "A beta-tester artifact plan records clicked/typed flows, recovery attempts, viewport/data state, keyboard traversal, reduced-motion behavior, API latency observation, and BTC-style failure routing.",
+      "status": "pass",
+      "evidence": "reviews/BETA-PLAN-2026-06-20-taskset-board-evidence-review-queue.md"
+    },
+    {
+      "criterion": "The next implementation task keeps page files focused on layout and data wiring while repeated surface area is moved into pattern assets.",
+      "status": "pass",
+      "evidence": "reviews/PLAN-2026-06-20-taskset-board-evidence-review-queue-implementation.md"
+    },
+    {
+      "criterion": "The plan preserves design-system gate, focused UI tests, evidence index, and independent W4b verification commands.",
+      "status": "pass",
+      "evidence": "registration input and implementation plan verification sections"
+    }
+  ],
+  "source_mutation_boundary": {
+    "src_changed": false,
+    "tests_changed": false,
+    "scripts_changed": false,
+    "notes": "TASK-AR-618 is planning/registration input only. UI source mutation is deferred to the follow-up registered taskset."
+  },
+  "next": {
+    "registration_input": "agents/project/work-items/REGISTRATION-2026-06-20-taskset-board-evidence-review-queue-implementation.json",
+    "next_taskset": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE",
+    "first_source_mutating_task": "Implement Taskset Board evidence review queue and split loading states",
+    "evaluation_task": "Run Taskset Board evidence review queue beta and UX evaluation"
+  }
+}
