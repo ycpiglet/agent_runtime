@@ -155,3 +155,34 @@ Implementation remains blocked until a later claimed UI source task. That task
 must name the lane schema or read-only adapter inputs before rendering lane
 membership, preserve OAG relation detail semantics, and provide desktop/mobile,
 keyboard, reduced-motion, recovery, and beta-tester evidence.
+
+## Amendment 2026-06-20 (TASK-AR-617 - evidence/performance IA)
+
+The next accepted Taskset Board evidence/performance direction is
+`evidence_review_queue_with_progressive_disclosure_and_split_loading`, recorded
+in `reviews/RFC-2026-06-19-taskset-board-evidence-performance-ia.md`.
+
+This direction extends `taskset_attention_workspace`. The board still opens as
+an attention workspace, but evidence overload is shaped into a review queue
+rather than a flat stale-evidence lane:
+
+```text
+Taskset Board -> lane summary -> evidence gap group -> capped review queue -> taskset/evidence detail -> action, defer, retry, or route as BTC
+```
+
+The first useful screen must separate summary from detail: grouped counts,
+visible/hidden lane-cap disclosure, summary age, and ordering reasons should be
+usable before slow secondary evidence detail finishes loading. Loading,
+timeout, stale-summary, and retryable states must be textual and keyboard
+reachable; they cannot appear as blank panels or decorative spinners.
+
+The design rejects pure stale-evidence grouping, pure lane caps, pure
+performance split, pure visual refresh, and generic dashboard KPI layers as
+insufficient alone. The accepted design combines semantic evidence grouping,
+progressive disclosure, and performance-aware loading.
+
+Implementation remains blocked until a later claimed UI source task. That task
+must name the summary/detail schema or adapter inputs before rendering queue
+membership, preserve taskset ownership semantics, and provide beta-tester and
+UX evidence for desktop, `390x844` mobile, keyboard traversal, reduced motion,
+latency recovery, inactive-view containment, and BTC-style defect routing.

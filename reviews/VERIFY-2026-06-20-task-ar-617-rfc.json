@@ -1,0 +1,41 @@
+{
+  "schema": "agent-runtime-verification/v1",
+  "id": "VERIFY-2026-06-20-task-ar-617-rfc",
+  "work_id": "TASK-AR-617",
+  "task_id": "TASK-AR-617",
+  "task_set_id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA",
+  "status": "passed",
+  "verified_at": "2026-06-20T00:44:00+09:00",
+  "verified_by": "codex-lead-designer-ar-617",
+  "summary": "TASK-AR-617 published the Taskset Board evidence/performance IA RFC and promoted accepted design-system documentation without UI source mutation.",
+  "evidence_refs": [
+    "reviews/RFC-2026-06-19-taskset-board-evidence-performance-ia.md",
+    "docs/design/agent-runtime/DESIGN.md",
+    "docs/design/agent-runtime/DESIGN-SYSTEM.md"
+  ],
+  "commands": [
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "notes": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0"
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "passed",
+      "notes": "evidence-index: pass findings=0"
+    },
+    {
+      "command": "python scripts/ui_ux_cycle.py --root . propose --dry-run --json",
+      "status": "passed",
+      "notes": "dry-run proposal generated without mutation; next_refactor still points to TASK-AR-617 until task closeout"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "notes": "exit 0; CRLF-to-LF warning only for reviews/INDEX.md"
+    }
+  ],
+  "selected_direction": "evidence_review_queue_with_progressive_disclosure_and_split_loading",
+  "source_boundary": "No src/agent_runtime UI source, tests, or API files changed in this RFC task.",
+  "next_step": "TASK-AR-618 derives the source-mutating implementation units and paired beta/UX plan."
+}

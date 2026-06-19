@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-20T00:28:08+09:00
-record_count: 700
+generated_at: 2026-06-20T00:43:07+09:00
+record_count: 703
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `700` review and evidence records under `reviews/`.
+- Summary: indexed `703` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `700` files |
+| Reviews covered | pass | `703` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -526,6 +526,7 @@ record_count: 700
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-conductor.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-conductor` | review | accepted | replan | UI/UX Cycle Automation T3 Replan After Conductor |
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-review-planning.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-review-planning` | review | accepted | replan | UI/UX Cycle Automation T3 Replan After Review Planning |
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-design-direction-rfc-registration.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-design-direction-rfc-registration` | md | record | pass | UI UX Design Direction RFC Registration |
+| `reviews/RFC-2026-06-19-taskset-board-evidence-performance-ia.md` | `RFC-2026-06-19-taskset-board-evidence-performance-ia` | ui-ux-design-rfc | accepted | pass | Taskset Board Evidence And Performance IA RFC |
 | `reviews/RFC-2026-06-19-taskset-board-ia-design-direction.md` | `RFC-2026-06-19-taskset-board-ia-design-direction` | ui-ux-design-rfc | accepted | pass | Taskset Board IA Design Direction RFC |
 | `reviews/RFC-2026-06-19-ui-ux-design-direction.md` | `RFC-2026-06-19-ui-ux-design-direction` | ui-ux-design-direction-rfc | accepted | pass | UI/UX Design Direction RFC 2026-06-19 |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
@@ -641,6 +642,7 @@ record_count: 700
 | `reviews/VERIFY-2026-06-19-unit-task-ar-614-001-20260619222418.json` | `VERIFY-2026-06-19-unit-task-ar-614-001-20260619222418` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-614-001-20260619222418 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-615-001-20260619233128.json` | `VERIFY-2026-06-19-unit-task-ar-615-001-20260619233128` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-615-001-20260619233128 |
 | `reviews/VERIFY-2026-06-20-task-ar-616-closeout.json` | `VERIFY-2026-06-20-task-ar-616-closeout` | json | record | n/a | VERIFY-2026-06-20-task-ar-616-closeout |
+| `reviews/VERIFY-2026-06-20-task-ar-617-rfc.json` | `VERIFY-2026-06-20-task-ar-617-rfc` | json | record | n/a | VERIFY-2026-06-20-task-ar-617-rfc |
 | `reviews/VERIFY-2026-06-20-unit-task-ar-616-001-20260620000909.json` | `VERIFY-2026-06-20-unit-task-ar-616-001-20260620000909` | json | record | n/a | VERIFY-2026-06-20-unit-task-ar-616-001-20260620000909 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
@@ -734,6 +736,7 @@ record_count: 700
 | `reviews/W4B-2026-06-19-TASK-AR-615.md` | `W4B-2026-06-19-TASK-AR-615` | md | record | n/a | W4B Verification - TASK-AR-615 / UNIT-TASK-AR-615-001 |
 | `reviews/W4B-2026-06-19-UNIT-TASK-AR-596-001.md` | `W4B-2026-06-19-UNIT-TASK-AR-596-001` | md | accepted | pass | W4B Independent Verification - UNIT-TASK-AR-596-001 |
 | `reviews/W4B-2026-06-20-TASK-AR-616.md` | `W4B-2026-06-20-TASK-AR-616` | w4b-independent-verification | passed | pass | W4B Independent Verification - TASK-AR-616 |
+| `reviews/W4B-2026-06-20-TASK-AR-617.md` | `W4B-2026-06-20-TASK-AR-617` | w4b-independent-verification | passed | pass | W4B Independent Verification - TASK-AR-617 |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.

@@ -209,6 +209,47 @@ fit, reduced motion, empty lane, stale evidence, blocked command, interrupted
 claim, expired claim, and no active claim states. User-visible failures use
 BTC-style IDs with reproduction paths.
 
+### Accepted RFC: taskset evidence review queue and split loading
+
+`reviews/RFC-2026-06-19-taskset-board-evidence-performance-ia.md` accepts
+`evidence_review_queue_with_progressive_disclosure_and_split_loading` as the
+Taskset Board evidence/performance IA direction. It extends
+`taskset_attention_workspace` by changing the stale-evidence lane from a flat
+list into grouped review queues with visible lane caps, hidden counts,
+summary-first loading, and retryable detail states.
+
+The first implementation must start every candidate as `experimental` unless it
+reuses an existing stable token or helper unchanged:
+
+| Candidate asset | Class | Initial tier | Contract |
+| --- | --- | --- | --- |
+| Evidence freshness aliases | `design_token` | `experimental` | Named aliases for fresh, aging, stale, missing, unknown, unverified, and retryable evidence; visible labels are required. |
+| Evidence severity/order aliases | `design_token` | `experimental` | Semantic ordering roles such as urgent, blocked, stale, deferrable, and recently changed, mapped to existing status tokens first. |
+| Lane cap and queue density roles | `design_token` | `experimental` | Compact spacing/type roles for group headers, queue rows, hidden-count disclosure, and detail-loading states. |
+| Loading and latency state tokens | `design_token` | `experimental` | Summary-ready, detail-loading, timeout-watch, retryable, and stale-summary states. |
+| Evidence group filter | `ui_component` | `experimental` | Filter control for freshness, severity, owner/team, and command readiness with visible count and focus state. |
+| Lane cap disclosure control | `ui_component` | `experimental` | Shows visible count, hidden count, ordering reason, and drill-in affordance. |
+| Latency budget badge | `ui_component` | `experimental` | Displays summary age, detail-loading, timeout-watch, and retryable states in text. |
+| Evidence queue row | `ui_component` | `experimental` | Compact row with taskset id, evidence freshness, owner/team, command readiness, and selected/focus states. |
+| Evidence review queue | `pattern_component` | `experimental` | Domain pattern combining grouped evidence gaps, capped rows, selected detail, defer/action/retry states, and keyboard traversal. |
+| Split board loading skeleton | `pattern_component` | `experimental` | Summary-first loading pattern that keeps lanes usable while detail loads or fails recoverably. |
+| Inactive view containment shell | `pattern_component` | `experimental` | Ensures inactive views cannot create user-visible horizontal overflow or ambiguous beta evidence. |
+| First-run migration copy | `one_off_for_now` | temporary | Allowed only to orient users during the first beta cycle; remove or promote before a third use. |
+
+The implementation registration must name its schema or adapter inputs before
+editing UI assets: taskset id/title/status, evidence freshness, evidence age,
+evidence severity, owner/team/role, active claim, claim phase, command
+readiness, visible count, hidden count, summary age, and detail loading state.
+If the current Taskset Board API cannot supply those values cheaply, a
+summary-first read-only adapter must be introduced before UI rendering changes.
+
+Beta-tester and UX-evaluator evidence must cover unknown evidence triage,
+known-target search, capped group drill-in, slow detail loading, timeout/retry,
+keyboard traversal, desktop and `390x844` mobile fit, reduced motion, inactive
+view containment, stale evidence, blocked command, interrupted claim, expired
+claim, and no active claim states. User-visible failures use BTC-style IDs with
+reproduction paths.
+
 ## Role routing
 
 | Role | Responsibility |
