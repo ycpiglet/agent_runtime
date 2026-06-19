@@ -1563,6 +1563,17 @@ def test_ui_console_team_agents_card_fields_are_escaped(tmp_path):
         assert f"escapeHtml({field}" in card_block
 
 
+def test_ui_console_agent_cards_use_dicebear_identicon_avatar_boundary(tmp_path):
+    """Agent cards consume the local DiceBear Identicon avatar helper."""
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert "function patternAgentAvatar" in js
+    assert "data-dicebear-style=\"identicon\"" in js
+    assert "data-dicebear-version=\"" in js
+    assert "_DICEBEAR_IDENTICON_ROWS" in js
+    assert "patternAgentAvatar(avatarSeed" in js
+    assert "api.dicebear.com" not in js
+
+
 # --- Workload heatmap + team assignment view (TASK-AR-337) ------------------
 
 

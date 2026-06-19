@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-20
-archived_count: 247
+archived_count: 248
 ---
 
 # Archived Task Files
 
-- `247` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `248` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -259,4 +259,5 @@ archived_count: 247
 | `TASK-AR-580` | `f906471c-6ae…` | `TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS` | completed | 2026-06-18T14:50:00+09:00 | 2026-06-18T14:36:09+09:00 | 2026-06-18T15:00:00+09:00 | 2026-06-18T15:00:00+09:00 | Extend the executable UI asset layer so the console has named component APIs and doma… |
 | `TASK-AR-581` | `f446b363-e61…` | `TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT` | completed | 2026-06-18T15:20:00+09:00 | 2026-06-18T15:04:39+09:00 | 2026-06-18T15:40:00+09:00 | 2026-06-18T15:40:00+09:00 | Resolve the diagnostic report's token maturity gap for typography, spacing, radius, a… |
 | `TASK-AR-582` | `15ac2d6e-173…` | `TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | completed | 2026-06-18T15:55:00+09:00 | 2026-06-18T15:16:35+09:00 | 2026-06-18T16:15:00+09:00 | 2026-06-18T16:15:00+09:00 | Resolve the diagnostic report's single-file HTML/CSS/JS string concentration by movin… |
+| `TASK-AR-587` | `eea05fb1-653…` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | completed | 2026-06-20T01:04:15+09:00 | - | 2026-06-20T05:02:07+09:00 | 2026-06-20T05:02:07+09:00 | Give every agent a deterministic visual identity: a seeded SVG avatar keyed to agent… |
 | `TASK-AR-588` | `51fd1ba5-1d9…` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | completed | 2026-06-20T01:04:15+09:00 | - | 2026-06-20T04:42:00+09:00 | 2026-06-20T04:42:00+09:00 | Replace the hand-rolled graph layout with proper layout engines: Dagre (MIT, layered/… |

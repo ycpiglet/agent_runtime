@@ -6,27 +6,27 @@ architecture: token-scale CSS plus primitive/pattern JS helpers that
 ``ui_console.py`` serves instead of redefining directly in the page bundle.
 
 Avatar system (TASK-AR-587, experimental tier):
-  ``patternAgentAvatar(seed)`` — a self-contained deterministic seeded SVG
-  avatar generator implemented in pure Python/JavaScript. No runtime network
-  calls; no dependency on api.dicebear.com.
+  ``patternAgentAvatar(seed)`` — a deterministic seeded SVG avatar generator
+  aligned to the vendored DiceBear Identicon style. No runtime network calls;
+  no dependency on api.dicebear.com.
 
-  Approach: minidenticons-style geometric generator — a seeded PRNG (xorshift32
-  based on FNV-1a hash of the seed string) drives shape placement and fill
-  selection entirely from the seed string. The algorithm is MIT/CC0-clean:
-  invented here with no copied code. Same seed always yields byte-identical SVG.
+  Approach: the DiceBear Identicon style package is vendored at
+  ``src/agent_runtime/vendor/dicebear/identicon/9.4.2``. Its design license is
+  CC0 1.0 and its package code is MIT. Runtime rendering mirrors the vendored
+  row pattern schema in token-safe Python/JavaScript instead of importing ESM or
+  using the original hex palette. Same seed always yields byte-identical SVG.
 
   Per-role accent (ring/background) maps every ORG-MODEL role to an existing
-  semantic status/role token. All mappings are verified WCAG AA (>=4.5:1) in
-  both dark and light themes by choosing from tokens --primary (blue), --success
+  semantic status/role token. All mappings are verified WCAG AA non-text
+  contrast (>=3:1) in both dark and light themes by choosing from tokens
+  --primary (blue), --success
   (green), --warning (amber), --violet/--purple (violet), --teal, and --danger
   (red) as ring strokes against the --bg / --canvas backgrounds.
 
-  License: self-authored geometric generator — MIT/CC0-clean, no third-party
-  avatar assets vendored. DiceBear was considered (MIT library, CC0 Notionists
-  style, api.dicebear.com v10.x) but requires a Node build step for offline
-  generation; the self-contained Python generator is fully offline, zero-
-  dependency, and produces deterministic output guaranteed byte-identical per
-  seed indefinitely.
+  License boundary: @dicebear/identicon 9.4.2, design CC0 1.0, code MIT. The
+  vendored package records the original DiceBear style metadata and license.
+  The console helper uses our token palette and role accent ring so the design
+  system gate remains token-driven.
 """
 from __future__ import annotations
 
@@ -694,11 +694,13 @@ function liveMapSeedPositions(nodes, width = 1000, height = 600) {
 
 /* ===== Pattern component: Agent avatar (TASK-AR-587, experimental) ========
  * patternAgentAvatar(seed, options) - deterministic seeded SVG avatar.
- * Algorithm: self-authored geometric generator (MIT/CC0-clean, no third-party
- * assets). A seeded xorshift32 PRNG (seed derived via FNV-1a hash of the seed
- * string) drives 5x5 symmetric geometric shapes. Per-role accent ring maps
- * ORG-MODEL roles to existing semantic tokens; WCAG AA verified in both themes.
- * No runtime call to api.dicebear.com; fully offline and deterministic.
+ * Style boundary: vendored @dicebear/identicon 9.4.2 row schema
+ * (src/agent_runtime/vendor/dicebear/identicon/9.4.2), design CC0 1.0,
+ * package code MIT. Runtime mirrors the Identicon row definitions with our
+ * token palette instead of the original hex palette, so it stays build-less and
+ * design-system-safe. Per-role accent ring maps ORG-MODEL roles to existing
+ * semantic tokens with WCAG AA non-text contrast. No runtime call to the
+ * DiceBear HTTP API.
  * Maturity tier: experimental.
  */
 function _avatarFnv1a(str) {
@@ -747,6 +749,10 @@ var _AVATAR_ROLE_ACCENT = {
   "sales-ops":              "var(--success)"
 };
 
+var _DICEBEAR_IDENTICON_VERSION = "9.4.2";
+var _DICEBEAR_IDENTICON_LICENSE = "CC0 1.0";
+var _DICEBEAR_IDENTICON_ROWS = ["xooox", "xxoxx", "xoxox", "oxxxo", "xxxxx", "oxoxo", "ooxoo"];
+
 function patternAgentAvatar(seed, options) {
   var opts = options || {};
   var role = opts.role || "";
@@ -754,11 +760,9 @@ function patternAgentAvatar(seed, options) {
   var label = opts.label || "";
   var hash = _avatarFnv1a(String(seed));
   var rand = _avatarXorshift(hash);
-  var cells = [];
-  for (var row = 0; row < 5; row++) {
-    for (var col = 0; col < 3; col++) {
-      cells.push(rand() > 0.42 ? 1 : 0);
-    }
+  var rows = [];
+  for (var rowIndex = 0; rowIndex < 5; rowIndex++) {
+    rows.push(_DICEBEAR_IDENTICON_ROWS[Math.floor(rand() * _DICEBEAR_IDENTICON_ROWS.length)]);
   }
   var palette = ["var(--primary)", "var(--teal)", "var(--violet)", "var(--success)", "var(--warning)"];
   var fillIdx = Math.floor(rand() * palette.length);
@@ -767,9 +771,9 @@ function patternAgentAvatar(seed, options) {
   var offset = Math.floor((size - cellSize * 5) / 2);
   var shapes = "";
   for (var r = 0; r < 5; r++) {
+    var pattern = rows[r] || "ooxoo";
     for (var c = 0; c < 5; c++) {
-      var mirrored = c < 3 ? c : 4 - c;
-      if (cells[r * 3 + mirrored]) {
+      if (pattern.charAt(c) === "x") {
         var x = offset + c * cellSize;
         var y = offset + r * cellSize;
         shapes += '<rect x="' + x + '" y="' + y + '" width="' + (cellSize - 1) + '" height="' + (cellSize - 1) + '" rx="1" fill="' + fill + '"/>';
@@ -783,7 +787,7 @@ function patternAgentAvatar(seed, options) {
   return (
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + size + ' ' + size + '"' +
     ' width="' + size + '" height="' + size + '"' +
-    ' class="agent-avatar" aria-hidden="true" focusable="false">' +
+    ' class="agent-avatar" data-dicebear-style="identicon" data-dicebear-version="' + _DICEBEAR_IDENTICON_VERSION + '" aria-hidden="true" focusable="false">' +
     labelEl +
     '<circle cx="' + (size / 2) + '" cy="' + (size / 2) + '" r="' + (size / 2) + '" fill="' + bgFill + '"/>' +
     shapes +
@@ -816,6 +820,13 @@ function renderSurfaceMeta(content) {
 # Used to pre-render avatars in server-emitted HTML (optional) and in tests.
 # Same seed -> byte-identical SVG between Python and JS implementations.
 # ---------------------------------------------------------------------------
+
+DICEBEAR_IDENTICON_VERSION = "9.4.2"
+DICEBEAR_IDENTICON_STYLE = "identicon"
+DICEBEAR_IDENTICON_DESIGN_LICENSE = "CC0 1.0"
+DICEBEAR_IDENTICON_CODE_LICENSE = "MIT"
+DICEBEAR_IDENTICON_VENDOR_PATH = "src/agent_runtime/vendor/dicebear/identicon/9.4.2"
+DICEBEAR_IDENTICON_ROWS = ("xooox", "xxoxx", "xoxox", "oxxxo", "xxxxx", "oxoxo", "ooxoo")
 
 _AVATAR_ROLE_ACCENT_PY: dict[str, str] = {
     "managing-partner": "var(--violet)",
@@ -869,9 +880,11 @@ def patternAgentAvatar(seed: str, *, role: str = "", size: int = 40, label: str 
     """Return a deterministic seeded SVG avatar for the given agent ``seed``.
 
     Same seed always yields byte-identical SVG (experimental tier, TASK-AR-587).
-    No runtime network calls; fully self-contained. The accent ring maps the
-    ``role`` (ORG-MODEL canonical id) to an existing semantic token and is WCAG AA
-    safe in both dark and light themes.
+    No runtime network calls; fully self-contained. The avatar shape mirrors
+    the vendored DiceBear Identicon 9.4.2 row pattern schema (design CC0 1.0,
+    package code MIT) with a token-safe runtime palette. The accent ring maps
+    the ``role`` (ORG-MODEL canonical id) to an existing semantic token and is
+    WCAG AA non-text safe in both dark and light themes.
 
     Args:
         seed: Stable unique identifier (agent id). Must not change between calls.
@@ -886,9 +899,10 @@ def patternAgentAvatar(seed: str, *, role: str = "", size: int = 40, label: str 
     h = _fnv1a32(str(seed))
     rng = _xorshift32(h)
 
-    cells = []
-    for _ in range(15):  # 5 rows x 3 cols
-        cells.append(1 if next(rng) > 0.42 else 0)
+    rows = [
+        DICEBEAR_IDENTICON_ROWS[int(next(rng) * len(DICEBEAR_IDENTICON_ROWS))]
+        for _ in range(5)
+    ]
 
     palette = ["var(--primary)", "var(--teal)", "var(--violet)", "var(--success)", "var(--warning)"]
     fill_idx = int(next(rng) * len(palette))
@@ -899,9 +913,9 @@ def patternAgentAvatar(seed: str, *, role: str = "", size: int = 40, label: str 
 
     shapes: list[str] = []
     for r in range(5):
+        pattern = rows[r] if r < len(rows) else "ooxoo"
         for c in range(5):
-            mirrored = c if c < 3 else 4 - c
-            if cells[r * 3 + mirrored]:
+            if pattern[c] == "x":
                 x = offset + c * cell_size
                 y = offset + r * cell_size
                 shapes.append(
@@ -924,7 +938,9 @@ def patternAgentAvatar(seed: str, *, role: str = "", size: int = 40, label: str 
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {size} {size}"'
         f' width="{size}" height="{size}"'
-        f' class="agent-avatar" aria-hidden="true" focusable="false">'
+        f' class="agent-avatar" data-dicebear-style="{DICEBEAR_IDENTICON_STYLE}"'
+        f' data-dicebear-version="{DICEBEAR_IDENTICON_VERSION}"'
+        f' aria-hidden="true" focusable="false">'
         f"{label_el}"
         f'<circle cx="{cx}" cy="{cy}" r="{size // 2}" fill="var(--panel-strong)"/>'
         f"{''.join(shapes)}"

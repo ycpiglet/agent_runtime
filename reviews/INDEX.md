@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-20T04:27:36+09:00
-record_count: 580
+generated_at: 2026-06-20T05:14:22+09:00
+record_count: 582
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `580` review and evidence records under `reviews/`.
+- Summary: indexed `582` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `580` files |
+| Reviews covered | pass | `582` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -546,6 +546,7 @@ record_count: 580
 | `reviews/VERIFY-2026-06-18-unit-task-ar-580-001-20260618150000.json` | `VERIFY-2026-06-18-unit-task-ar-580-001-20260618150000` | json | record | n/a | VERIFY-2026-06-18-unit-task-ar-580-001-20260618150000 |
 | `reviews/VERIFY-2026-06-18-unit-task-ar-581-001-20260618153500.json` | `VERIFY-2026-06-18-unit-task-ar-581-001-20260618153500` | json | record | n/a | VERIFY-2026-06-18-unit-task-ar-581-001-20260618153500 |
 | `reviews/VERIFY-2026-06-18-unit-task-ar-582-001-20260618161000.json` | `VERIFY-2026-06-18-unit-task-ar-582-001-20260618161000` | json | record | n/a | VERIFY-2026-06-18-unit-task-ar-582-001-20260618161000 |
+| `reviews/VERIFY-2026-06-20-task-ar-587-avatar-identity.json` | `VERIFY-2026-06-20-task-ar-587-avatar-identity` | json | record | n/a | VERIFY-2026-06-20-task-ar-587-avatar-identity |
 | `reviews/VERIFY-2026-06-20-task-ar-588-graph-layout.json` | `VERIFY-2026-06-20-task-ar-588-graph-layout` | json | record | n/a | VERIFY-2026-06-20-task-ar-588-graph-layout |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
@@ -612,6 +613,7 @@ record_count: 580
 | `reviews/W4B-2026-06-18-TASK-AR-580.md` | `W4B-2026-06-18-TASK-AR-580` | md | accepted | n/a | W4B Independent Verification - TASK-AR-580 |
 | `reviews/W4B-2026-06-18-TASK-AR-581.md` | `W4B-2026-06-18-TASK-AR-581` | md | accepted | n/a | W4B Independent Verification - TASK-AR-581 |
 | `reviews/W4B-2026-06-18-TASK-AR-582.md` | `W4B-2026-06-18-TASK-AR-582` | md | accepted | n/a | W4B Independent Verification - TASK-AR-582 |
+| `reviews/W4B-2026-06-20-TASK-AR-587.md` | `W4B-2026-06-20-TASK-AR-587` | md | record | n/a | W4b Verification - TASK-AR-587 |
 | `reviews/W4B-2026-06-20-TASK-AR-588-REVERIFY.md` | `W4B-2026-06-20-TASK-AR-588-REVERIFY` | md | passed | pass | TASK-AR-588 W4b Independent Reverification |
 | `reviews/W4B-2026-06-20-TASK-AR-588.md` | `W4B-2026-06-20-TASK-AR-588` | md | failed | block | TASK-AR-588 W4b Independent Verification |
 

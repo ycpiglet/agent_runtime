@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-20T04:32:09+09:00
+generated_at: 2026-06-20T05:16:54+09:00
 record_count: 358
 ---
 
@@ -385,9 +385,9 @@ record_count: 358
 | 19.1.2.3 | Unit 19.1.2.3 | unit | `UNIT-TASK-AR-586-003` | `TASK-AR-586` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-586/UNIT-TASK-AR-586-003.md` | UNIT-TASK-AR-586-003 - Correct the release-conductor skill doc |
 | 20 | Initiative 20 | initiative | `INIT-AR-VISUAL-ASSET-ADOPTION` | - | active | `agents/project/initiatives/INIT-AR-VISUAL-ASSET-ADOPTION.md` | Visual Asset Adoption (graph, avatars, fonts, icons, color) |
 | 20.1 | Taskset 20.1 | taskset | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | `INIT-AR-VISUAL-ASSET-ADOPTION` | active | `BACKLOG-BOARD.md` | Visual Asset Adoption |
-| 20.1.1 | Task 20.1.1 | task | `TASK-AR-587` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | planned | `agents/lead_engineer/tasks/TASK-AR-587.md` | Give every agent a deterministic visual identity: a seeded SVG avatar keyed to agent… |
-| 20.1.1.1 | Unit 20.1.1.1 | unit | `UNIT-TASK-AR-587-001` | `TASK-AR-587` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-587/UNIT-TASK-AR-587-001.md` | UNIT-TASK-AR-587-001 - Vendor + self-host a CC0 DiceBear style and add patternAgentAvatar |
-| 20.1.1.2 | Unit 20.1.1.2 | unit | `UNIT-TASK-AR-587-002` | `TASK-AR-587` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-587/UNIT-TASK-AR-587-002.md` | UNIT-TASK-AR-587-002 - Deterministic role accent + console placement |
+| 20.1.1 | Task 20.1.1 | task | `TASK-AR-587` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | completed | `agents/lead_engineer/tasks/TASK-AR-587.md` | Give every agent a deterministic visual identity: a seeded SVG avatar keyed to agent… |
+| 20.1.1.1 | Unit 20.1.1.1 | unit | `UNIT-TASK-AR-587-001` | `TASK-AR-587` | completed | `agents/lead_engineer/tasks/units/TASK-AR-587/UNIT-TASK-AR-587-001.md` | UNIT-TASK-AR-587-001 - Vendor + self-host a CC0 DiceBear style and add patternAgentAvatar |
+| 20.1.1.2 | Unit 20.1.1.2 | unit | `UNIT-TASK-AR-587-002` | `TASK-AR-587` | completed | `agents/lead_engineer/tasks/units/TASK-AR-587/UNIT-TASK-AR-587-002.md` | UNIT-TASK-AR-587-002 - Deterministic role accent + console placement |
 | 20.1.2 | Task 20.1.2 | task | `TASK-AR-588` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | completed | `agents/lead_engineer/tasks/TASK-AR-588.md` | Replace the hand-rolled graph layout with proper layout engines: Dagre (MIT, layered/… |
 | 20.1.2.1 | Unit 20.1.2.1 | unit | `UNIT-TASK-AR-588-001` | `TASK-AR-588` | completed | `agents/lead_engineer/tasks/units/TASK-AR-588/UNIT-TASK-AR-588-001.md` | UNIT-TASK-AR-588-001 - Vendor Dagre + layered DAG renderer for dependency/state-machine |
 | 20.1.2.2 | Unit 20.1.2.2 | unit | `UNIT-TASK-AR-588-002` | `TASK-AR-588` | completed | `agents/lead_engineer/tasks/units/TASK-AR-588/UNIT-TASK-AR-588-002.md` | UNIT-TASK-AR-588-002 - Vendor d3-force + live agent map renderer |
