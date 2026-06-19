@@ -130,6 +130,48 @@ def _browser_home_metrics(console_url: str, viewport: dict[str, int]) -> dict:
             browser.close()
 
 
+def _browser_taskset_board_metrics(console_url: str, viewport: dict[str, int]) -> dict:
+    playwright_sync = pytest.importorskip(
+        "playwright.sync_api",
+        reason="TASK-AR-607 Taskset Board mobile overflow regression requires Playwright",
+    )
+    with playwright_sync.sync_playwright() as playwright:
+        try:
+            browser = playwright.chromium.launch(headless=True)
+        except Exception as exc:  # pragma: no cover - environment failure path
+            pytest.fail(f"Playwright Chromium is required for TASK-AR-607: {exc}")
+        try:
+            page = browser.new_page(viewport=viewport)
+            page.goto(console_url + "/", wait_until="load")
+            if page.locator('button:has-text("Skip")').count():
+                page.locator('button:has-text("Skip")').first.click()
+            page.evaluate("loadState()")
+            page.locator(".sidebar-toggle").first.click()
+            page.locator(".sidebar-more-summary").first.click()
+            page.locator('button[data-view="tsboard"]').first.click()
+            page.wait_for_selector("#view-tsboard.view.is-active")
+            page.wait_for_function('document.querySelectorAll(".attention-relation-panel").length > 0')
+            page.wait_for_timeout(250)
+            return page.evaluate(
+                """() => {
+                    const panel = Array.from(document.querySelectorAll(".attention-relation-panel"))
+                      .find((node) => node.textContent.includes("TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT"))
+                      || document.querySelector(".attention-relation-panel");
+                    return {
+                      innerWidth: window.innerWidth,
+                      docScrollWidth: document.documentElement.scrollWidth,
+                      bodyScrollWidth: document.body.scrollWidth,
+                      activeView: Array.from(document.querySelectorAll(".view.is-active")).map((view) => view.id),
+                      panelText: panel ? panel.textContent.replace(/\\s+/g, " ").trim() : "",
+                      relationChipCount: document.querySelectorAll(".attention-relation-panel .relation-chip").length,
+                      toolbarOverflowMode: getComputedStyle(document.querySelector(".toolbar")).overflowX,
+                    };
+                }"""
+            )
+        finally:
+            browser.close()
+
+
 def test_console_home_serves_html(console_url):
     status, body = _get(console_url + "/")
     assert status == 200
@@ -298,3 +340,14 @@ def test_decision_first_home_fits_two_screens_in_browser(console_url, label, vie
     assert metrics["workSurfaceOpen"] == "false"
     assert metrics["workSurfaceDisplay"] == "none"
     assert metrics["scrollHeight"] <= metrics["innerHeight"] * 2, json.dumps({"label": label, **metrics}, sort_keys=True)
+
+
+def test_taskset_board_mobile_path_has_no_document_overflow(console_url):  # TASK-AR-607
+    metrics = _browser_taskset_board_metrics(console_url, {"width": 390, "height": 844})
+
+    assert metrics["activeView"] == ["view-tsboard"]
+    assert metrics["docScrollWidth"] <= metrics["innerWidth"], json.dumps(metrics, sort_keys=True)
+    assert metrics["bodyScrollWidth"] <= metrics["innerWidth"], json.dumps(metrics, sort_keys=True)
+    assert metrics["relationChipCount"] > 0
+    assert "Command readiness" in metrics["panelText"]
+    assert "Claim path" in metrics["panelText"]

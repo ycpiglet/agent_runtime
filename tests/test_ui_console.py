@@ -920,6 +920,17 @@ def test_ui_console_tasksets_board_tab_panel_and_css_anchors(tmp_path):
 
     mobile_css = css.split("@media (max-width: 760px)", 1)[1]
     assert ".tsboard-cards" in mobile_css
+    for marker in [
+        ".tsboard-card-meta",
+        ".tsboard-child",
+        ".attention-relation-head",
+        ".relation-chip",
+        ".graph-context-item small",
+        "grid-column: auto",
+        "min-width: 0",
+        "max-width: 100%",
+    ]:
+        assert marker in mobile_css
 
 
 def test_ui_console_tasksets_board_add_task_uses_command_path_not_file_write(tmp_path):

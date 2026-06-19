@@ -1,0 +1,143 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-19-oag-mobile-responsive-refinement",
+  "work_id": "TASK-AR-607",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-607.md",
+  "kind": "task",
+  "task_id": "TASK-AR-607",
+  "unit_id": "UNIT-TASK-AR-607-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-19T14:27:00+09:00",
+  "verified_by": "codex-interface-designer-ar-607",
+  "claim_id": "CLAIM-20260619-140700-task-ar-607-mobile-responsive-refinement",
+  "worktree_path": ".worktrees/TASK-AR-607-oag-mobile-responsive",
+  "commit_ref": "HEAD",
+  "freshness": {
+    "commit_ref": "HEAD",
+    "source_paths": [
+      {
+        "path": "src/agent_runtime/ui_console_assets.py",
+        "sha256": "0ecae386c93d9af3aa45514b6f748b92edcffb9ac2a816be5caa506521dd6623"
+      },
+      {
+        "path": "tests/test_ui_console.py",
+        "sha256": "d24c053b4742f087a67574dcda758a56e260eea649d45b557a176651c79aae4a"
+      },
+      {
+        "path": "tests/test_ui_console_e2e.py",
+        "sha256": "9d9a79fd69a548be98747c6bcb75516c96a709ff60a2aecaf8859d7d03e00578"
+      },
+      {
+        "path": "agents/lead_engineer/tasks/TASK-AR-607.md",
+        "sha256": "5e879a453a55fe33774e048e70d8b86710ddc966823f85a65d8cc2099ad9d752"
+      },
+      {
+        "path": "agents/lead_engineer/tasks/units/TASK-AR-607/UNIT-TASK-AR-607-001.md",
+        "sha256": "7e0aabd4b8397eebd3bbb511579207b5e5bab6697020da3fed44004affc0c1fb"
+      }
+    ]
+  },
+  "command_count": 5,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_ui_console.py tests/test_ui_console_e2e.py tests/test_ui_design_assets.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "182 passed in 81.86s. The local HTTP test server emitted a non-failing ConnectionAbortedError after the browser closed a request.",
+      "stderr_summary": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0.",
+      "stderr_summary": ""
+    },
+    {
+      "command": "python scripts/ui_ux_cycle.py --root . assess --json",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "assessment returned score=75 usable and status=missing because no open UI refactor candidate is selected while TASK-AR-607 and TASK-AR-608 remain explicit open UI tasks.",
+      "stderr_summary": ""
+    },
+    {
+      "command": "python -m pytest tests/test_ui_console.py::test_ui_console_tasksets_board_tab_panel_and_css_anchors tests/test_ui_console_e2e.py::test_taskset_board_mobile_path_has_no_document_overflow -q",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "2 passed in 68.46s.",
+      "stderr_summary": ""
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "No whitespace errors.",
+      "stderr_summary": ""
+    }
+  ],
+  "browser_probe": {
+    "viewport": "390x844",
+    "path": "Skip -> mobile sidebar toggle -> More -> Taskset Board",
+    "active_view": "view-tsboard",
+    "inner_width": 390,
+    "document_scroll_width": 390,
+    "body_scroll_width": 390,
+    "overflow_x": false,
+    "relation_panel_labels": [
+      "Command readiness",
+      "Claim path"
+    ]
+  },
+  "assetization": [
+    {
+      "item": "Taskset Board mobile responsive constraints",
+      "classification": "pattern_component",
+      "evidence": "The fix constrains reusable taskset board, relation panel, child row, evidence/context, and swimlane pattern surfaces under existing responsive breakpoints."
+    },
+    {
+      "item": "CSS token usage",
+      "classification": "design_token_reuse",
+      "evidence": "No new raw color, spacing, radius, shadow, or typography literals were introduced; design_system_gate --all-ui passed with findings=0."
+    },
+    {
+      "item": "Taskset relation semantics",
+      "classification": "one_off_for_now",
+      "evidence": "No data schema or claim-state adapter changes were made; TASK-AR-605/TASK-AR-606 semantics remain unchanged."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion": "Taskset Board fits a 390px viewport after opening More -> Taskset Board.",
+      "status": "passed",
+      "evidence": "Browser-level E2E assertion reports documentElement.scrollWidth <= window.innerWidth and body.scrollWidth <= window.innerWidth at 390x844."
+    },
+    {
+      "criterion": "Relation panel preserves claim-aware labels.",
+      "status": "passed",
+      "evidence": "The E2E test requires visible Command readiness and Claim path text plus relation chips."
+    },
+    {
+      "criterion": "Responsive constraints use existing tokens and pattern/component selectors.",
+      "status": "passed",
+      "evidence": "The implementation changes only responsive CSS in ui_console_assets.py and the design-system gate reports findings=0."
+    },
+    {
+      "criterion": "Toolbar, add-task row, relation chips, evidence/context body, child rows, and swimlanes wrap or stack predictably on mobile.",
+      "status": "passed",
+      "evidence": "CSS contract tests assert mobile selectors for tsboard-card-meta, tsboard-child, attention-relation-head, relation-chip, graph-context-item small, min-width: 0, max-width: 100%, and grid-column: auto."
+    },
+    {
+      "criterion": "Focused tests cover the CSS/mobile contract and relation-state contract.",
+      "status": "passed",
+      "evidence": "Focused tests passed and the full UI console/E2E/design asset suite passed with 182 tests."
+    }
+  ],
+  "residual": [
+    "TASK-AR-608 remains open for beta-tester and UX-evaluator evaluation after this responsive fix.",
+    "ui_ux_cycle assess returns exit code 0 with score=75 and status=missing because no separate open refactor candidate is currently selected; this is a cycle-planning watch, not a TASK-AR-607 failure.",
+    "Toolbar-style inner scroll areas remain bounded and do not produce document-level horizontal overflow."
+  ],
+  "next_step": "Commit TASK-AR-607, then request independent W4b verification before release and merge.",
+  "unit_verification_evidence": "reviews/VERIFY-2026-06-19-unit-task-ar-607-001-20260619143121.json"
+}

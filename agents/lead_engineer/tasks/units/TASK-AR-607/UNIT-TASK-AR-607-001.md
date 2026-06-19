@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
 initiative_id: INIT-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: interface-designer
 created_at: 2026-06-19T14:04:00+09:00
-updated_at: 2026-06-19T14:04:00+09:00
+updated_at: 2026-06-19T14:31:21+09:00
 origin_type: owner_request
 origin_ref: chat:2026-06-19-ui-refactor-continuous-cycle
 created_by: codex-planner
@@ -54,6 +54,10 @@ verification:
   - python scripts/evidence_index_generator.py --check
 handoff: Report selectors changed, responsive constraints added, assetization classification, desktop/mobile test results, and any remaining UX risks.
 stop_condition: Stop after the mobile overflow fix passes focused tests and W4a evidence is ready for independent verification.
+verified_at: 2026-06-19T14:31:21+09:00
+verified_by: codex-interface-designer-ar-607
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-unit-task-ar-607-001-20260619143121.json
 ---
 
 # UNIT-TASK-AR-607-001 - Constrain Taskset Board mobile layout

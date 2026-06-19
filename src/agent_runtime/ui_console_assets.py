@@ -4782,7 +4782,9 @@ pre {
   .work-grid,
   .tsboard-toolbar,
   .tsboard-cards,
+  .tsboard-card-meta,
   .tsboard-swimlane-cols,
+  .tsboard-child,
   .team-toolbar,
   .team-cards,
   .growth-hero,
@@ -4806,6 +4808,58 @@ pre {
   .edit-row,
   .button-row {
     grid-template-columns: 1fr;
+  }
+  .tsboard-toolbar,
+  .tsboard-card,
+  .tsboard-card-header,
+  .tsboard-card-meta,
+  .tsboard-add-row,
+  .tsboard-children,
+  .tsboard-child,
+  .tsboard-swimlane,
+  .tsboard-swimlane-header,
+  .tsboard-swim-col,
+  .tsboard-swim-card,
+  .attention-relation-panel,
+  .attention-relation-head,
+  .attention-relation-body,
+  .attention-relation-chips,
+  .relation-chip,
+  .attention-evidence-preview,
+  .graph-context-stack,
+  .graph-context-empty,
+  .evidence-preview-row,
+  .graph-context-item {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .tsboard-card-header,
+  .attention-relation-head,
+  .tsboard-swimlane-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .tsboard-add-row {
+    flex-direction: column;
+  }
+  .tsboard-add-title,
+  .tsboard-add-task,
+  .tsboard-toggle {
+    width: 100%;
+  }
+  .tsboard-child > *,
+  .tsboard-swim-card > *,
+  .relation-chip > *,
+  .graph-context-item > *,
+  .evidence-preview-row > * {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .relation-chip {
+    white-space: normal;
+  }
+  .graph-context-item small {
+    grid-column: auto;
   }
   .wiki-page-header {
     display: grid;
@@ -6679,6 +6733,20 @@ pre {
 }
 @media (max-width: 640px) {
   .cockpit { margin-bottom: 0.75rem; }
+  .layout,
+  .cockpit,
+  .cockpit-head,
+  .cockpit-grid,
+  .work-state-hero,
+  .work-state-head,
+  .work-state-board,
+  .work-state-card,
+  .work-surface,
+  .detail-panel,
+  .dashboard {
+    min-width: 0;
+    max-width: 100%;
+  }
   .cockpit-grid,
   .work-state-board {
     max-height: 320px;
