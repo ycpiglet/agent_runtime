@@ -4804,6 +4804,13 @@ pre {
 }
 .dep-edge.kind-parent { stroke: var(--subtle); stroke-dasharray: 4 3; }
 .dep-edge.kind-dependency { stroke: var(--blue); }
+.dep-edge.magnitude-low { stroke-width: 1.5; }
+.dep-edge.magnitude-medium { stroke-width: 2.25; }
+.dep-edge.magnitude-high { stroke-width: 3; }
+.dep-edge.health-pass { stroke: var(--success-line); }
+.dep-edge.health-watch { stroke: var(--warning-line); opacity: 0.85; }
+.dep-edge.health-block { stroke: var(--danger); opacity: 1; }
+.dep-edge.health-info { stroke: var(--primary-line); }
 .dep-edge.is-cycle {
   stroke: var(--danger);
   stroke-width: 3;
@@ -4822,6 +4829,23 @@ pre {
   fill: var(--muted);
   font-size: var(--font-size-ui-10);
   text-anchor: middle;
+}
+.dep-node-status-badge {
+  fill: var(--canvas);
+  stroke: var(--line-strong);
+  stroke-width: 1.2;
+}
+.dep-node-status-badge.signal-pass { stroke: var(--success-line); }
+.dep-node-status-badge.signal-watch { stroke: var(--warning-line); }
+.dep-node-status-badge.signal-block { stroke: var(--danger); }
+.dep-node-status-badge.signal-info { stroke: var(--primary-line); }
+.dep-node-status-icon {
+  fill: var(--ink);
+  font-size: var(--font-size-ui-8);
+  font-weight: 800;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
 }
 .dep-graph-empty { fill: var(--subtle); font-size: var(--font-size-ui-14); }
 .dep-graph-legend {
@@ -4976,6 +5000,13 @@ pre {
   fill: none;
   opacity: 0.6;
 }
+.state-machine-edge.magnitude-low { stroke-width: 1.5; }
+.state-machine-edge.magnitude-medium { stroke-width: 2.25; }
+.state-machine-edge.magnitude-high { stroke-width: 3; }
+.state-machine-edge.health-pass { stroke: var(--success-line); opacity: 0.9; }
+.state-machine-edge.health-watch { stroke: var(--warning-line); opacity: 0.8; }
+.state-machine-edge.health-block { stroke: var(--danger); opacity: 1; }
+.state-machine-edge.health-info { stroke: var(--primary-line); opacity: 0.8; }
 .state-machine-edge.is-wildcard { stroke-dasharray: 5 4; opacity: 0.4; }
 .state-machine-edge.is-traversed {
   stroke: var(--sm-path);
@@ -5007,6 +5038,23 @@ pre {
   text-anchor: middle;
 }
 .state-machine-node-score { fill: var(--muted); font-size: var(--font-size-ui-8); text-anchor: middle; }
+.state-machine-node-status-badge {
+  fill: var(--canvas);
+  stroke: var(--line-strong);
+  stroke-width: 1.2;
+}
+.state-machine-node-status-badge.signal-pass { stroke: var(--success-line); }
+.state-machine-node-status-badge.signal-watch { stroke: var(--warning-line); }
+.state-machine-node-status-badge.signal-block { stroke: var(--danger); }
+.state-machine-node-status-badge.signal-info { stroke: var(--primary-line); }
+.state-machine-node-status-icon {
+  fill: var(--ink);
+  font-size: var(--font-size-ui-8);
+  font-weight: 800;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
 .state-machine-empty { fill: var(--subtle); font-size: var(--font-size-ui-14); }
 .state-machine-legend {
   display: flex;
@@ -9175,6 +9223,22 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 const LIVE_MAP_KIND_LABELS = { message: "Message", assignment: "Assignment", review: "Review", block: "Block" };
 let livePulseTimers = {};
 
+function appendSvgStatusBadge(group, x, y, signal, classPrefix) {
+  const token = graphSignalToken(signal);
+  const badge = document.createElementNS(SVG_NS, "circle");
+  badge.setAttribute("cx", x);
+  badge.setAttribute("cy", y);
+  badge.setAttribute("r", "8");
+  badge.setAttribute("class", `${classPrefix}-status-badge signal-${token}`);
+  group.appendChild(badge);
+  const icon = document.createElementNS(SVG_NS, "text");
+  icon.setAttribute("x", x);
+  icon.setAttribute("y", y + 1);
+  icon.setAttribute("class", `${classPrefix}-status-icon signal-${token}`);
+  icon.textContent = graphStatusIconText(token);
+  group.appendChild(icon);
+}
+
 function liveMapData() {
   return runtimeState.live_map || { nodes: [], edges: [], presence: { counts: {}, online: 0, agents: [] }, totals: {} };
 }
@@ -9513,28 +9577,14 @@ function viewTaskInStateMachine(taskId) {
   renderStateMachineViewer();
 }
 
-function stateMachineNodePositions(nodes) {
-  // Deterministic horizontal lifecycle layout: states are laid out left to
-  // right in declaration order and wrapped onto rows so larger machines stay
-  // readable. Same input always yields the same coordinates.
-  const positions = {};
-  const perRow = Math.min(4, Math.max(1, nodes.length));
-  const marginX = 140;
-  const marginY = 110;
-  const spanX = nodes.length > 1 ? (1000 - marginX * 2) / Math.max(1, perRow - 1) : 0;
-  const rows = Math.ceil(nodes.length / perRow) || 1;
-  const spanY = rows > 1 ? (600 - marginY * 2) / (rows - 1) : 0;
-  nodes.forEach((node, index) => {
-    const row = Math.floor(index / perRow);
-    let col = index % perRow;
-    // Serpentine rows so consecutive states stay adjacent across wraps.
-    if (row % 2 === 1) col = perRow - 1 - col;
-    positions[node.id] = {
-      x: perRow === 1 ? 500 : marginX + col * spanX,
-      y: rows === 1 ? 300 : marginY + row * spanY,
-    };
-  });
-  return positions;
+function stateMachineNodePositions(nodes, edges = []) {
+  return patternSvgLayeredDagreLayout(nodes, edges, {
+    rankdir: "LR",
+    width: 1000,
+    height: 600,
+    marginX: 130,
+    marginY: 100,
+  }).positions;
 }
 
 function renderStateMachineViewer() {
@@ -9615,29 +9665,39 @@ function renderStateMachineViewer() {
     return;
   }
 
-  const positions = stateMachineNodePositions(nodes);
-
-  const edgeLayer = document.createElementNS(SVG_NS, "g");
-  edges.forEach((edge) => {
-    // A wildcard edge (from "*") is drawn from the current/last-traversed state
-    // (if known) or its declared target's incoming hub, falling back skipped.
+  const layoutEdges = edges.map((edge) => {
     let fromId = edge.from;
     if (edge.wildcard) {
       const hub = currentState && currentState !== edge.to ? currentState : (edge.wildcard_sources || [])[0];
       fromId = hub || edge.from;
     }
-    const a = positions[fromId];
-    const b = positions[edge.to];
+    return { ...edge, from: fromId };
+  });
+  const layout = patternSvgLayeredDagreLayout(nodes, layoutEdges, {
+    rankdir: "LR",
+    width: 1000,
+    height: 600,
+    marginX: 130,
+    marginY: 100,
+  });
+  const positions = layout.positions;
+
+  const edgeLayer = document.createElementNS(SVG_NS, "g");
+  layoutEdges.forEach((layoutEdge, index) => {
+    const edge = edges[index] || layoutEdge;
+    const a = positions[layoutEdge.from];
+    const b = positions[layoutEdge.to];
     if (!a || !b) return;
     const traversed = traversedEdgeIds.has(edge.id);
-    const line = document.createElementNS(SVG_NS, "line");
-    line.setAttribute("x1", a.x);
-    line.setAttribute("y1", a.y);
-    line.setAttribute("x2", b.x);
-    line.setAttribute("y2", b.y);
-    line.setAttribute("class", `state-machine-edge ${edge.wildcard ? "is-wildcard" : ""} ${traversed ? "is-traversed" : ""}`);
-    line.setAttribute("data-edge-id", edge.id);
-    edgeLayer.appendChild(line);
+    const route = layout.edgeRoutes[graphEdgeKey(layoutEdge, index)] || [{ x: a.x, y: a.y }, { x: b.x, y: b.y }];
+    const path = document.createElementNS(SVG_NS, "path");
+    path.setAttribute("d", svgLayeredEdgePath(route));
+    path.setAttribute(
+      "class",
+      `state-machine-edge magnitude-${graphEdgeMagnitudeBucket(edge)} health-${graphEdgeHealth(edge, traversed ? "pass" : "watch")} ${edge.wildcard ? "is-wildcard" : ""} ${traversed ? "is-traversed" : ""}`
+    );
+    path.setAttribute("data-edge-id", edge.id);
+    edgeLayer.appendChild(path);
     if (edge.trigger) {
       const label = document.createElementNS(SVG_NS, "text");
       label.setAttribute("x", (a.x + b.x) / 2);
@@ -9666,6 +9726,7 @@ function renderStateMachineViewer() {
     circle.setAttribute("cy", pos.y);
     circle.setAttribute("r", "26");
     group.appendChild(circle);
+    appendSvgStatusBadge(group, pos.x + 21, pos.y - 21, isCurrent ? "info" : graphNodeSignal(node, "watch"), "state-machine-node");
     const label = document.createElementNS(SVG_NS, "text");
     label.setAttribute("x", pos.x);
     label.setAttribute("y", pos.y + 2);
@@ -9834,23 +9895,14 @@ function renderTimeline() {
   grid.innerHTML = laneHtml + arrowBlock;
 }
 
-function dependencyNodePositions(nodes) {
-  // Deterministic ring layout (mirrors the live map) so the graph reads the
-  // same across refreshes; parent nodes sit on an inner ring.
-  const positions = {};
-  const cx = 500;
-  const cy = 300;
-  const parents = nodes.filter((node) => node.kind === "parent");
-  const others = nodes.filter((node) => node.kind !== "parent");
-  parents.forEach((node, index) => {
-    const angle = (index / Math.max(parents.length, 1)) * Math.PI * 2 - Math.PI / 2;
-    positions[node.id] = { x: cx + Math.cos(angle) * 110, y: cy + Math.sin(angle) * 90 };
-  });
-  others.forEach((node, index) => {
-    const angle = (index / Math.max(others.length, 1)) * Math.PI * 2 - Math.PI / 2;
-    positions[node.id] = { x: cx + Math.cos(angle) * 230, y: cy + Math.sin(angle) * 200 };
-  });
-  return positions;
+function dependencyNodePositions(nodes, edges = []) {
+  return patternSvgLayeredDagreLayout(nodes, edges, {
+    rankdir: "TB",
+    width: 1000,
+    height: 600,
+    marginX: 100,
+    marginY: 75,
+  }).positions;
 }
 
 function renderDependencyGraph() {
@@ -9882,21 +9934,29 @@ function renderDependencyGraph() {
     svg.appendChild(note);
     return;
   }
-  const positions = dependencyNodePositions(nodes);
+  const layout = patternSvgLayeredDagreLayout(nodes, edges, {
+    rankdir: "TB",
+    width: 1000,
+    height: 600,
+    marginX: 100,
+    marginY: 75,
+  });
+  const positions = layout.positions;
 
   const edgeLayer = document.createElementNS(SVG_NS, "g");
-  edges.forEach((edge) => {
+  edges.forEach((edge, index) => {
     const a = positions[edge.from];
     const b = positions[edge.to];
     if (!a || !b) return;
-    const line = document.createElementNS(SVG_NS, "line");
-    line.setAttribute("x1", a.x);
-    line.setAttribute("y1", a.y);
-    line.setAttribute("x2", b.x);
-    line.setAttribute("y2", b.y);
-    line.setAttribute("class", `dep-edge kind-${edge.kind || "dependency"} ${edge.in_cycle ? "is-cycle" : ""}`);
-    line.setAttribute("data-edge-id", edge.id);
-    edgeLayer.appendChild(line);
+    const route = layout.edgeRoutes[graphEdgeKey(edge, index)] || [{ x: a.x, y: a.y }, { x: b.x, y: b.y }];
+    const path = document.createElementNS(SVG_NS, "path");
+    path.setAttribute("d", svgLayeredEdgePath(route));
+    path.setAttribute(
+      "class",
+      `dep-edge kind-${edge.kind || "dependency"} magnitude-${graphEdgeMagnitudeBucket(edge)} health-${graphEdgeHealth(edge, edge.kind === "dependency" ? "watch" : "info")} ${edge.in_cycle ? "is-cycle" : ""}`
+    );
+    path.setAttribute("data-edge-id", edge.id);
+    edgeLayer.appendChild(path);
   });
   svg.appendChild(edgeLayer);
 
@@ -9912,6 +9972,7 @@ function renderDependencyGraph() {
     circle.setAttribute("cy", pos.y);
     circle.setAttribute("r", node.kind === "parent" ? "20" : "14");
     group.appendChild(circle);
+    appendSvgStatusBadge(group, pos.x + (node.kind === "parent" ? 16 : 12), pos.y - (node.kind === "parent" ? 16 : 12), graphNodeSignal(node, node.kind === "parent" ? "info" : "watch"), "dep-node");
     const label = document.createElementNS(SVG_NS, "text");
     label.setAttribute("x", pos.x);
     label.setAttribute("y", pos.y + 28);

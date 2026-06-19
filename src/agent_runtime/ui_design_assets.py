@@ -297,6 +297,159 @@ function patternStateMachinePanelLegend() {
   ].join("");
 }
 
+/* ===== Pattern component: Layered SVG graph layout (TASK-AR-588) ==========
+ * patternSvgLayeredDagreLayout(nodes, edges, options) - local, build-less
+ * Dagre-style layered graph adapter. It follows the Dagre/Sugiyama contract:
+ * rank nodes by dependency depth, order each layer deterministically, then
+ * return node coordinates plus orthogonal edge routes for our own SVG renderer.
+ *
+ * Upstream target for future full replacement: @dagrejs/dagre 3.0.0, MIT,
+ * package artifact dist/dagre.min.js. Current console architecture serves a
+ * single /app.js bundle, so this adapter keeps the layout engine self-hosted
+ * and route-free while preserving the same data seam: nodes in, edge points out.
+ * Maturity tier: experimental.
+ */
+function graphEdgeKey(edge, index) {
+  return edge && edge.id ? String(edge.id) : `${edge && edge.from ? edge.from : "from"}->${edge && edge.to ? edge.to : "to"}:${index}`;
+}
+
+function graphSignalToken(value, fallback = "neutral") {
+  const text = String(value || "").toLowerCase();
+  if (["pass", "success", "done", "completed", "released", "verified"].includes(text)) return "pass";
+  if (["block", "blocked", "danger", "failed", "error", "cycle"].includes(text)) return "block";
+  if (["watch", "warning", "warn", "missing", "stale", "pending", "in_progress"].includes(text)) return "watch";
+  if (["info", "current", "path", "parent", "dependency"].includes(text)) return "info";
+  return fallback;
+}
+
+function graphStatusIconText(signal) {
+  const token = graphSignalToken(signal);
+  if (token === "pass") return "P";
+  if (token === "watch") return "W";
+  if (token === "block") return "B";
+  if (token === "info") return "I";
+  return "N";
+}
+
+function graphNodeSignal(node, fallback = "info") {
+  if (node && node.in_cycle) return "block";
+  return graphSignalToken(
+    (node && (node.signal_token || node.signal || node.status_bucket || node.status || node.kind)) || "",
+    fallback
+  );
+}
+
+function graphEdgeHealth(edge, fallback = "neutral") {
+  if (edge && edge.in_cycle) return "block";
+  return graphSignalToken(
+    (edge && (edge.health || edge.signal || edge.status || edge.kind)) || "",
+    fallback
+  );
+}
+
+function graphEdgeMagnitudeBucket(edge) {
+  const value = Number((edge && (edge.magnitude || edge.weight || edge.count)) || 1);
+  if (value >= 5) return "high";
+  if (value >= 2) return "medium";
+  return "low";
+}
+
+function svgLayeredEdgePath(points) {
+  const route = points || [];
+  if (!route.length) return "";
+  return route.map((point, index) => `${index === 0 ? "M" : "L"} ${Math.round(point.x)} ${Math.round(point.y)}`).join(" ");
+}
+
+function patternSvgLayeredDagreLayout(nodes, edges, options = {}) {
+  const list = (nodes || []).filter((node) => node && node.id);
+  const links = (edges || []).filter((edge) => edge && edge.from && edge.to);
+  const ids = new Set(list.map((node) => String(node.id)));
+  const incoming = {};
+  const outgoing = {};
+  list.forEach((node) => {
+    const id = String(node.id);
+    incoming[id] = [];
+    outgoing[id] = [];
+  });
+  links.forEach((edge, index) => {
+    const from = String(edge.from);
+    const to = String(edge.to);
+    if (!ids.has(from) || !ids.has(to)) return;
+    outgoing[from].push({ edge, to, index });
+    incoming[to].push({ edge, from, index });
+  });
+
+  const rank = {};
+  const queue = list
+    .filter((node) => !incoming[String(node.id)].length)
+    .map((node) => String(node.id))
+    .sort();
+  if (!queue.length) list.forEach((node) => queue.push(String(node.id)));
+  queue.forEach((id) => { rank[id] = 0; });
+  const seen = new Set();
+  while (queue.length) {
+    const current = queue.shift();
+    if (!current || seen.has(current)) continue;
+    seen.add(current);
+    (outgoing[current] || []).forEach((entry) => {
+      rank[entry.to] = Math.max(rank[entry.to] || 0, (rank[current] || 0) + 1);
+      if (!seen.has(entry.to)) queue.push(entry.to);
+    });
+  }
+  list.forEach((node, index) => {
+    const id = String(node.id);
+    if (rank[id] === undefined) rank[id] = index;
+  });
+
+  const layers = {};
+  list.forEach((node) => {
+    const id = String(node.id);
+    const key = String(rank[id] || 0);
+    if (!layers[key]) layers[key] = [];
+    layers[key].push(node);
+  });
+  const rankKeys = Object.keys(layers).map(Number).sort((a, b) => a - b);
+  const width = Number(options.width || 1000);
+  const height = Number(options.height || 600);
+  const marginX = Number(options.marginX || 90);
+  const marginY = Number(options.marginY || 70);
+  const rankdir = String(options.rankdir || "TB").toUpperCase();
+  const positions = {};
+  const layerCount = Math.max(rankKeys.length, 1);
+
+  rankKeys.forEach((rankKey, layerIndex) => {
+    const layer = layers[String(rankKey)].sort((a, b) => String(a.id).localeCompare(String(b.id)));
+    const spanPrimary = rankdir === "LR" ? width - marginX * 2 : height - marginY * 2;
+    const spanSecondary = rankdir === "LR" ? height - marginY * 2 : width - marginX * 2;
+    const primary = layerCount === 1 ? spanPrimary / 2 : (spanPrimary / Math.max(layerCount - 1, 1)) * layerIndex;
+    layer.forEach((node, orderIndex) => {
+      const secondary = layer.length === 1
+        ? spanSecondary / 2
+        : (spanSecondary / Math.max(layer.length - 1, 1)) * orderIndex;
+      positions[String(node.id)] = rankdir === "LR"
+        ? { x: marginX + primary, y: marginY + secondary }
+        : { x: marginX + secondary, y: marginY + primary };
+    });
+  });
+
+  const edgeRoutes = {};
+  links.forEach((edge, index) => {
+    const a = positions[String(edge.from)];
+    const b = positions[String(edge.to)];
+    if (!a || !b) return;
+    const key = graphEdgeKey(edge, index);
+    if (rankdir === "LR") {
+      const midX = (a.x + b.x) / 2;
+      edgeRoutes[key] = [{ x: a.x, y: a.y }, { x: midX, y: a.y }, { x: midX, y: b.y }, { x: b.x, y: b.y }];
+    } else {
+      const midY = (a.y + b.y) / 2;
+      edgeRoutes[key] = [{ x: a.x, y: a.y }, { x: a.x, y: midY }, { x: b.x, y: midY }, { x: b.x, y: b.y }];
+    }
+  });
+
+  return { positions, edgeRoutes, ranks: rank, rankdir };
+}
+
 /* ===== Pattern component: Agent avatar (TASK-AR-587, experimental) ========
  * patternAgentAvatar(seed, options) - deterministic seeded SVG avatar.
  * Algorithm: self-authored geometric generator (MIT/CC0-clean, no third-party
@@ -554,6 +707,8 @@ ASSETIZATION_CLASSES = {
     "patternEvidencePanel": "pattern_component",
     "patternCommandBar": "pattern_component",
     "patternStateMachinePanelLegend": "pattern_component",
+    "patternSvgLayeredDagreLayout": "pattern_component",
+    "graphStatusIconText": "ui_component",
     "patternAuditMeta": "pattern_component",
     "patternSurfaceMeta": "pattern_component",
     "patternAgentAvatar": "pattern_component",
