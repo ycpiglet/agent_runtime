@@ -822,6 +822,28 @@ def test_ui_console_tasksets_board_claim_summary_marks_active_claim(tmp_path):
     assert child["claim_summary"]["state"] == "claimed"
 
 
+def test_ui_console_tasksets_board_attention_lane_includes_claim_only_taskset(tmp_path):
+    _write_work_classification(tmp_path)
+    _write_taskset_claim(
+        tmp_path,
+        "CLAIM-claim-only",
+        "TASK-AR-999",
+        status="claimed",
+        task_set_id="TASKSET-AR-CLAIM-ONLY",
+        display_name="interface-designer@ui-claim",
+    )
+
+    payload = json.loads(ui_console.build_response("/api/tasksets_board", tmp_path).body.decode("utf-8"))
+    board = payload["items"]
+    lanes = {lane["id"]: lane for lane in board["attention_workspace"]["lanes"]}
+    claim_only = next(c for c in board["cards"] if c["id"] == "TASKSET-AR-CLAIM-ONLY")
+
+    assert claim_only["status"] == "claim-only"
+    assert board["attention_workspace"]["selected_taskset_id"] == "TASKSET-AR-CLAIM-ONLY"
+    assert lanes["active_claims"]["items"][0]["taskset_id"] == "TASKSET-AR-CLAIM-ONLY"
+    assert lanes["active_claims"]["items"][0]["reason"] == "claimed by interface-designer@ui-claim"
+
+
 def test_ui_console_tasksets_board_claim_summary_marks_expired_guard(tmp_path):
     _write_work_classification(tmp_path)
     _write_taskset_claim(tmp_path, "CLAIM-expired", "TASK-AR-516", status="expired", phase="reaped")
@@ -892,6 +914,8 @@ def test_ui_console_tasksets_board_tab_panel_and_css_anchors(tmp_path):
         "claim_summary",
         "attention_workspace",
         "relation_state",
+        "empty_label",
+        "tsboard-attention-empty-copy",
         "patternAttentionRelationPanel",
         "operator_attention_graph",
         "Evidence freshness",
@@ -919,6 +943,7 @@ def test_ui_console_tasksets_board_tab_panel_and_css_anchors(tmp_path):
         ".tsboard-attention-lane",
         ".tsboard-attention-card",
         ".tsboard-attention-title",
+        ".tsboard-attention-empty-copy",
         ".tsboard-fallback-head",
         ".tsboard-cards",
         ".tsboard-card",

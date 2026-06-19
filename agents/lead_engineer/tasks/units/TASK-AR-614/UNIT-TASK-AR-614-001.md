@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT
 initiative_id: INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: interface-designer
 created_at: 2026-06-19T21:56:00+09:00
-updated_at: 2026-06-19T21:56:00+09:00
+updated_at: 2026-06-19T22:24:18+09:00
 origin_type: beta_finding
 origin_ref: reviews/BETA-TEST-2026-06-19-taskset-board-attention-workspace.md
 created_by: codex-ux-evaluator-ar-613
@@ -58,6 +58,10 @@ verification:
   - git diff --check
 handoff: Report data derivation fields changed, empty-state pattern copy, tests, verification evidence, and any remaining UX risks.
 stop_condition: Stop after implementation is source-mutated, tested, self-verified, and ready for independent W4b verification.
+verified_at: 2026-06-19T22:24:18+09:00
+verified_by: work.py verify
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-unit-task-ar-614-001-20260619222418.json
 ---
 
 # UNIT-TASK-AR-614-001 - Patch attention workspace claim and empty recovery states

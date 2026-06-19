@@ -336,6 +336,8 @@ function componentAttentionLaneFilter(lanes, activeLane = "all") {
 function patternTasksetAttentionLane(lane) {
   const items = (lane && lane.items) || [];
   const state = normalizeRelationState((lane && lane.state) || "default");
+  const emptyLabel = (lane && lane.empty_label) || `No ${((lane && lane.label) || "attention").toLowerCase()} items are currently surfaced.`;
+  const emptyHint = (lane && lane.empty_hint) || (lane && lane.reason) || "This lane will update when matching tasksets appear.";
   const body = items.length
     ? items.map((item) => {
         const itemState = normalizeRelationState(item.state || state);
@@ -353,7 +355,7 @@ function patternTasksetAttentionLane(lane) {
           </span>
         </button>`;
       }).join("")
-    : `<div class="tsboard-attention-empty">${componentRelationChip(lane.label || "Lane", "missing", { value: "empty" })}<span>${escapeHtml((lane && lane.reason) || "No matching tasksets")}</span></div>`;
+    : `<div class="tsboard-attention-empty">${componentRelationChip(lane.label || "Lane", "missing", { value: "empty" })}<strong class="tsboard-attention-empty-copy">${escapeHtml(emptyLabel)}</strong><span class="tsboard-attention-empty-hint">${escapeHtml(emptyHint)}</span></div>`;
   return `<section class="tsboard-attention-lane relation-${escapeHtml(state)}" data-lane="${escapeHtml((lane && lane.id) || "")}">
     <header class="tsboard-attention-lane-header">
       <div>

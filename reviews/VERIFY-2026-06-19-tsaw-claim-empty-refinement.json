@@ -1,0 +1,48 @@
+{
+  "schema": "agent-runtime-work-verification-summary/v1",
+  "id": "VERIFY-2026-06-19-tsaw-claim-empty-refinement",
+  "work_id": "UNIT-TASK-AR-614-001",
+  "task_id": "TASK-AR-614",
+  "task_set_id": "TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-19T22:25:14+09:00",
+  "verified_by": "codex-interface-designer-ar-614",
+  "detailed_evidence": "reviews/VERIFY-2026-06-19-unit-task-ar-614-001-20260619222418.json",
+  "summary": "Active taskset claims are surfaced from live task claim records even when the work classification card is stale or absent, and zero-count attention lanes now use dedicated empty copy instead of repeating the non-empty lane reason.",
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_ui_state.py tests/test_ui_console.py tests/test_ui_design_assets.py -q",
+      "status": "passed",
+      "evidence": "273 passed"
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "evidence": "findings=0"
+    },
+    {
+      "command": "python scripts/ui_ux_cycle.py --root . assess --json",
+      "status": "passed",
+      "evidence": "exit=0; score=75 usable; next_refactor reports missing because no new open refactor candidate is registered inside this implementation worktree"
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "passed",
+      "evidence": "findings=0"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "evidence": "no whitespace findings"
+    },
+    {
+      "command": "python scripts/work.py verify UNIT-TASK-AR-614-001",
+      "status": "passed",
+      "evidence": "reviews/VERIFY-2026-06-19-unit-task-ar-614-001-20260619222418.json"
+    }
+  ],
+  "residual_risks": [
+    "TASK-AR-615 remains required for beta-tester and UX-evaluator browser evidence after this implementation lands."
+  ]
+}
