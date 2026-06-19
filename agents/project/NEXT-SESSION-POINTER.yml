@@ -1,5 +1,5 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T14:43:00+09:00
+updated_at: 2026-06-19T14:50:00+09:00
 current_state:
   summary: "TASK-AR-607 is W4b-verified, released, and closed; TASK-AR-608 is next for beta/UX evaluation."
   status: in_progress
@@ -8,14 +8,14 @@ current_state:
   step_index: 4
   step_total: 6
   progress_pct: 50
-  status_text: "TASK-AR-607 passed W4a/W4b and is closed; merge/cleanup is next before TASK-AR-608 claim."
+  status_text: "TASK-AR-607 is merged and cleaned up; TASK-AR-608 is ready for an evaluation-only claim."
 active_work:
   current_agents: []
   current_teams: []
 resume:
   active_task: TASK-AR-608
   active_task_set: TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
-  branch_policy: "After TASK-AR-607 merge/cleanup, claim TASK-AR-608 in a fresh worktree for evaluation-only beta/UX evidence."
+  branch_policy: "Claim TASK-AR-608 in a fresh worktree for evaluation-only beta/UX evidence; do not mutate UI source in that task."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -89,8 +89,8 @@ pointers:
     active_claim: null
     released_claims:
       - agents/runtime/task_claims/CLAIM-20260619-140700-task-ar-607-mobile-responsive-refinement.json
-    worktree_path: .worktrees/TASK-AR-607-oag-mobile-responsive
-    status: task_ar_607_released_pending_merge_cleanup
+    worktree_path: null
+    status: task_ar_607_merged_cleaned_task_ar_608_ready
     completed_tasks:
       - TASK-AR-607
     next_task: TASK-AR-608
@@ -110,7 +110,7 @@ pointers:
     task_ar_607_verification: reviews/VERIFY-2026-06-19-oag-mobile-responsive-refinement.json
     task_ar_607_unit_verification: reviews/VERIFY-2026-06-19-unit-task-ar-607-001-20260619143121.json
     task_ar_607_w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-607.md
-    next_decision: merge_task_ar_607_then_claim_task_ar_608_beta_ux_evaluation
+    next_decision: claim_task_ar_608_beta_ux_evaluation
   design_system_debt_consolidation:
     taskset: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
     released_claim: agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.json

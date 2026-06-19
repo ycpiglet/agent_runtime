@@ -15,7 +15,7 @@
 - Self-improvement remediation is improving but not mature: `scribe_state` is now ok, but the score is still below mature and one monitored role gap remains.
 - Scribe source is now the live status summary section so advisory health can be measured without fabricating role evidence.
 - Doc Steward remains ok; keep document-health checks advisory and evidence-based.
-- Next UI refactor step: merge/cleanup `TASK-AR-607`, then claim `TASK-AR-608` for desktop and `390x844` beta/UX evaluation.
+- Next UI refactor step: claim `TASK-AR-608` for desktop and `390x844` beta/UX evaluation.
 
 ## 2026-06-19 - TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT / TASK-AR-607 complete
 
