@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA
 initiative_id: INIT-AR-TASKSET-BOARD-EVIDENCE-PERF-IA
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead-designer
 created_at: 2026-06-19T23:39:00+09:00
-updated_at: 2026-06-19T23:39:00+09:00
+updated_at: 2026-06-20T00:09:09+09:00
 origin_type: beta_followup
 origin_ref: reviews/UX-EVAL-2026-06-19-tsaw-claim-empty-refinement.md
 created_by: codex-ux-evaluator-ar-615
@@ -48,6 +48,10 @@ verification:
   - python scripts/evidence_index_generator.py --check
 handoff: Report the selected Taskset Board evidence/performance IA direction, rejected alternatives, assetization implications, RFC target files, and next beta/UX evidence path.
 stop_condition: Stop after seminar evidence is complete and ready for independent verification or RFC claim.
+verified_at: 2026-06-20T00:09:09+09:00
+verified_by: codex-lead-designer-ar-616
+evidence_refs:
+  - reviews/VERIFY-2026-06-20-unit-task-ar-616-001-20260620000909.json
 ---
 
 # UNIT-TASK-AR-616-001 - Run evidence overload and performance IA lead-designer seminar

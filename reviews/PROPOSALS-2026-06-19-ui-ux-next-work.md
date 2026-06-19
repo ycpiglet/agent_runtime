@@ -1,9 +1,9 @@
 ---
 type: ui-ux-next-work-proposals
 id: PROPOSALS-2026-06-19-ui-ux-next-work
-status: planned
-signal: watch
-score: 80
+status: active
+signal: pass
+score: 84
 priority: Medium
 tags: [ui, ux, design-system, proposal]
 ---
@@ -26,6 +26,7 @@ tags: [ui, ux, design-system, proposal]
 | implementation_refactor | registration_input_ready | interface-designer | `agents/project/work-items/REGISTRATION-2026-06-19-operator-attention-graph-implementation.json` |
 | ux_evaluation_pass | beta_plan_ready | ux-evaluator | `reviews/BETA-PLAN-2026-06-19-operator-attention-graph.md` |
 | taskset_board_ia_rfc | seminar_accepted | lead-designer | `reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md` |
+| taskset_board_evidence_perf_ia | seminar_accepted | lead-designer | `reviews/SEMINAR-2026-06-19-taskset-board-evidence-performance-ia.md` |
 
 ## Action
 
@@ -52,6 +53,8 @@ tags: [ui, ux, design-system, proposal]
   seminar input for the design-direction RFC.
 - Use `reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md` as the
   selected seminar input for the next Taskset Board IA RFC.
+- Use `reviews/SEMINAR-2026-06-19-taskset-board-evidence-performance-ia.md` as
+  the selected seminar input for the Taskset Board evidence/performance IA RFC.
 - Choose the selected proposal and register the RFC task before UI/UX
   implementation work resumes.
 - Run focused UI tests and the design-system gate for any future implementation.
@@ -143,3 +146,21 @@ Acceptance criteria:
   pattern_component, or one_off_for_now before implementation.
 - Rejects pure visual refresh, pure drill-down, and pure command-palette
   alternatives as insufficient for board-scale scanning.
+
+### taskset_board_evidence_perf_ia
+
+- Status: `seminar_accepted`
+- Lead role: `lead-designer`
+- Supporting roles: design-system-steward, interface-designer, ux-evaluator, beta-tester
+- Review roles: independent W4b verifier
+- Future target files: reviews/RFC-2026-06-19-taskset-board-evidence-performance-ia.md, docs/design/agent-runtime/DESIGN.md, docs/design/agent-runtime/DESIGN-SYSTEM.md
+- Proposal artifacts: reviews/SEMINAR-2026-06-19-taskset-board-evidence-performance-ia.md, reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md
+
+Publish an RFC for `evidence_review_queue_with_progressive_disclosure_and_split_loading`: a Taskset Board IA that turns `evidence_gaps=49` into grouped review queues, discloses lane caps and hidden counts, and splits first-screen board summary from slow secondary evidence detail.
+
+Outcome: `TASK-AR-616` accepts the combined RFC candidate. UI source mutation remains blocked until `TASK-AR-617` publishes the RFC and `TASK-AR-618` derives implementation plus beta/UX units.
+
+Acceptance criteria:
+- Defines evidence freshness grouping, lane cap disclosure, and summary-first loading as one coherent design direction.
+- Classifies expected deltas as design_token, ui_component, pattern_component, or one_off_for_now before implementation.
+- Names beta evidence for desktop, mobile, keyboard, reduced motion, latency, empty group, timeout/retry, inactive-view containment, and blocked/claimed recovery states.
