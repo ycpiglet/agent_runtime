@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-20T00:52:04+09:00",
-  "record_count": 400,
+  "generated_at": "2026-06-20T01:19:36+09:00",
+  "record_count": 407,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4359,7 +4359,7 @@
       "title": "Taskset Board Evidence And Performance IA",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-TASKSET-BOARD-EVIDENCE-PERF-IA",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-616",
@@ -4403,7 +4403,84 @@
       "title": "Turn the accepted evidence/performance IA RFC into a source-mutation implementation r…",
       "path": "agents/lead_engineer/tasks/TASK-AR-618.md",
       "parent_id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA",
+      "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE",
+      "level": "initiative",
+      "number": "29",
+      "label": "Initiative 29",
+      "id": "INIT-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE",
+      "title": "Taskset Board Evidence Review Queue",
+      "path": "agents/project/initiatives/INIT-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE",
+      "level": "taskset",
+      "number": "29.1",
+      "label": "Taskset 29.1",
+      "id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE",
+      "title": "Taskset Board Evidence Review Queue",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-619",
+      "level": "task",
+      "number": "29.1.1",
+      "label": "Task 29.1.1",
+      "id": "TASK-AR-619",
+      "title": "Make the Taskset Board stale/missing evidence lane actionable by deriving a grouped e…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-619.md",
+      "parent_id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE",
       "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-619-001",
+      "level": "unit",
+      "number": "29.1.1.1",
+      "label": "Unit 29.1.1.1",
+      "id": "UNIT-TASK-AR-619-001",
+      "title": "UNIT-TASK-AR-619-001 - Derive evidence review queue schema from Taskset Board state",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-619/UNIT-TASK-AR-619-001.md",
+      "parent_id": "TASK-AR-619",
+      "status": "worker_ready"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-619-002",
+      "level": "unit",
+      "number": "29.1.1.2",
+      "label": "Unit 29.1.1.2",
+      "id": "UNIT-TASK-AR-619-002",
+      "title": "UNIT-TASK-AR-619-002 - Render evidence queue assets and split-loading UI states",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-619/UNIT-TASK-AR-619-002.md",
+      "parent_id": "TASK-AR-619",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-620",
+      "level": "task",
+      "number": "29.1.2",
+      "label": "Task 29.1.2",
+      "id": "TASK-AR-620",
+      "title": "Verify the implemented evidence review queue with exploratory beta-tester and UX-eval…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-620.md",
+      "parent_id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-620-001",
+      "level": "unit",
+      "number": "29.1.2.1",
+      "label": "Unit 29.1.2.1",
+      "id": "UNIT-TASK-AR-620-001",
+      "title": "UNIT-TASK-AR-620-001 - Record evidence review queue beta and UX evidence",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-620/UNIT-TASK-AR-620-001.md",
+      "parent_id": "TASK-AR-620",
+      "status": "worker_ready"
     }
   ]
 }

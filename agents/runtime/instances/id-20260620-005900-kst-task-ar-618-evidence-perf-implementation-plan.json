@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "id-20260620-005900-kst-task-ar-618-evidence-perf-implementation-plan",
+  "callsign": "interface_designer@work-01",
+  "callsite_id": "terminal:wt-task-ar-618:tab-01",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260620-010012-task-ar-618-task-ar-618-evidence-perf-implementation-plan.json"
+  ],
+  "created_at": "2026-06-20T01:00:12+09:00",
+  "decision_cycle_id": "",
+  "display_name": "interface_designer@work-01",
+  "model": "",
+  "model_tier": "worker_standard",
+  "on_behalf_of": "TASK-AR-618",
+  "pane_id": "terminal:wt-task-ar-618:tab-01",
+  "parent_instance_id": "",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "interface-designer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-20T01:00:12+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-618",
+  "task_set_id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA",
+  "team_id": "ui-ux",
+  "unit_id": "",
+  "unit_spec": "",
+  "updated_at": "2026-06-20T01:00:12+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-618"
+}

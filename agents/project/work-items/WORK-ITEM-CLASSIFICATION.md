@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-20T00:52:04+09:00
-record_count: 400
+generated_at: 2026-06-20T01:19:36+09:00
+record_count: 407
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `400` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `407` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `29` records |
-| Tasksets | pass | `53` records |
-| Tasks | pass | `277` records |
-| Units | pass | `41` records |
+| Initiatives | pass | `30` records |
+| Tasksets | pass | `54` records |
+| Tasks | pass | `279` records |
+| Units | pass | `44` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -434,11 +434,18 @@ record_count: 400
 | 27.1.2 | Task 27.1.2 | task | `TASK-AR-615` | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | completed | `agents/lead_engineer/tasks/TASK-AR-615.md` | Repeat beta-tester and UX-evaluator verification after the active-claim and empty-lan… |
 | 27.1.2.1 | Unit 27.1.2.1 | unit | `UNIT-TASK-AR-615-001` | `TASK-AR-615` | completed | `agents/lead_engineer/tasks/units/TASK-AR-615/UNIT-TASK-AR-615-001.md` | UNIT-TASK-AR-615-001 - Record refined attention workspace beta and UX evidence |
 | 28 | Initiative 28 | initiative | `INIT-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | - | active | `agents/project/initiatives/INIT-AR-TASKSET-BOARD-EVIDENCE-PERF-IA.md` | Taskset Board Evidence And Performance IA |
-| 28.1 | Taskset 28.1 | taskset | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | `INIT-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | active | `BACKLOG-BOARD.md` | Taskset Board Evidence And Performance IA |
+| 28.1 | Taskset 28.1 | taskset | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | `INIT-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | complete | `BACKLOG-BOARD.md` | Taskset Board Evidence And Performance IA |
 | 28.1.1 | Task 28.1.1 | task | `TASK-AR-616` | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | completed | `agents/lead_engineer/tasks/TASK-AR-616.md` | Create a lead-designer seminar artifact that chooses the next Taskset Board IA direct… |
 | 28.1.1.1 | Unit 28.1.1.1 | unit | `UNIT-TASK-AR-616-001` | `TASK-AR-616` | completed | `agents/lead_engineer/tasks/units/TASK-AR-616/UNIT-TASK-AR-616-001.md` | UNIT-TASK-AR-616-001 - Run evidence overload and performance IA lead-designer seminar |
 | 28.1.2 | Task 28.1.2 | task | `TASK-AR-617` | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | completed | `agents/lead_engineer/tasks/TASK-AR-617.md` | Promote the seminar decision into an accepted design-direction RFC that names the exa… |
-| 28.1.3 | Task 28.1.3 | task | `TASK-AR-618` | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | planned | `agents/lead_engineer/tasks/TASK-AR-618.md` | Turn the accepted evidence/performance IA RFC into a source-mutation implementation r… |
+| 28.1.3 | Task 28.1.3 | task | `TASK-AR-618` | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | completed | `agents/lead_engineer/tasks/TASK-AR-618.md` | Turn the accepted evidence/performance IA RFC into a source-mutation implementation r… |
+| 29 | Initiative 29 | initiative | `INIT-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE` | - | active | `agents/project/initiatives/INIT-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE.md` | Taskset Board Evidence Review Queue |
+| 29.1 | Taskset 29.1 | taskset | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE` | `INIT-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE` | active | `BACKLOG-BOARD.md` | Taskset Board Evidence Review Queue |
+| 29.1.1 | Task 29.1.1 | task | `TASK-AR-619` | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE` | planned | `agents/lead_engineer/tasks/TASK-AR-619.md` | Make the Taskset Board stale/missing evidence lane actionable by deriving a grouped e… |
+| 29.1.1.1 | Unit 29.1.1.1 | unit | `UNIT-TASK-AR-619-001` | `TASK-AR-619` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-619/UNIT-TASK-AR-619-001.md` | UNIT-TASK-AR-619-001 - Derive evidence review queue schema from Taskset Board state |
+| 29.1.1.2 | Unit 29.1.1.2 | unit | `UNIT-TASK-AR-619-002` | `TASK-AR-619` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-619/UNIT-TASK-AR-619-002.md` | UNIT-TASK-AR-619-002 - Render evidence queue assets and split-loading UI states |
+| 29.1.2 | Task 29.1.2 | task | `TASK-AR-620` | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE` | planned | `agents/lead_engineer/tasks/TASK-AR-620.md` | Verify the implemented evidence review queue with exploratory beta-tester and UX-eval… |
+| 29.1.2.1 | Unit 29.1.2.1 | unit | `UNIT-TASK-AR-620-001` | `TASK-AR-620` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-620/UNIT-TASK-AR-620-001.md` | UNIT-TASK-AR-620-001 - Record evidence review queue beta and UX evidence |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

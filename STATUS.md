@@ -8,7 +8,8 @@
 - `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` is complete: `TASK-AR-609` completed the lead-designer seminar, `TASK-AR-610` published the accepted Taskset Board IA RFC, and `TASK-AR-611` derived the implementation plus beta-evaluation units.
 - `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` is complete: `TASK-AR-612` implemented the attention workspace and `TASK-AR-613` recorded beta/UX evidence with W4b.
 - `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` is complete: `TASK-AR-614` fixed active-claim lane freshness plus zero-count empty-lane copy, and `TASK-AR-615` closed the beta/UX retest with W4b evidence.
-- Active UI follow-up: `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` is in progress at `2/3` tasks complete. `TASK-AR-616` closed the lead-designer seminar, `TASK-AR-617` published the accepted evidence/performance IA RFC, and next work is `TASK-AR-618` to derive the implementation plus beta/UX plan before source mutation.
+- `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` is complete: `TASK-AR-616` closed the lead-designer seminar, `TASK-AR-617` published the accepted evidence/performance IA RFC, and `TASK-AR-618` derived the follow-up implementation registration plus beta/UX plan.
+- Active UI follow-up: `TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE` is registered at `0/2` tasks complete. Next work is `TASK-AR-619` to implement the grouped evidence review queue and split loading states.
 - The previous `TASKSET-AR-LLM-WIKI` closeout is complete: `TASK-AR-590..596` are archived `7/7`, W4b evidence is indexed, and that taskset has no active claims.
 - UI refactor/design-system remediation is now past design-system governance, asset extraction, UI/UX cycle automation, first source-mutating Operator Attention Graph implementation, beta/UX evaluation, and claim-aware relation adapter refinement.
 - `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` is complete: `TASK-AR-597`, `TASK-AR-598`, and `TASK-AR-599` are implemented, W4b-verified, integrated, and closed.
@@ -18,7 +19,29 @@
 - Self-improvement remediation is improving but not mature: `scribe_state` is now ok, but the score is still below mature and one monitored role gap remains.
 - Scribe source is now the live status summary section so advisory health can be measured without fabricating role evidence.
 - Doc Steward remains ok; keep document-health checks advisory and evidence-based.
-- Next UI refactor step: claim `TASK-AR-618` and derive the source-mutation implementation registration plus paired beta/UX plan for `evidence_review_queue_with_progressive_disclosure_and_split_loading`.
+- Next UI refactor step: claim `TASK-AR-619` and implement `attention_workspace.evidence_review_queue` plus UI asset helpers, focused tests, and W4a/W4b evidence.
+
+## 2026-06-20 - TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE registered
+
+- Registered taskset: `TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE`.
+- Purpose: implement the accepted `evidence_review_queue_with_progressive_disclosure_and_split_loading` direction as real Taskset Board UI/source behavior.
+- Tasks: `TASK-AR-619` implements the evidence review queue and split-loading states; `TASK-AR-620` runs exploratory beta/UX verification.
+- Registration input: `agents/project/work-items/REGISTRATION-2026-06-20-taskset-board-evidence-review-queue-implementation.json`.
+- Registration review: `reviews/REVIEW-2026-06-20-taskset-ar-taskset-board-evidence-review-queue-registration.md`.
+- Plan: `docs/superpowers/plans/2026-06-20-taskset-board-evidence-review-queue.md`.
+- T0 plan snapshot recorded for `TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE`.
+- Boundary: `TASK-AR-619` must be claimed in a fresh worktree before UI source mutation.
+
+## 2026-06-20 - TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA / TASK-AR-618 complete
+
+- Completed task: `TASK-AR-618` derived the source-mutation implementation registration input and paired beta/UX evaluation plan for the accepted evidence/performance IA direction.
+- Progress: `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` is now `3/3` tasks complete.
+- Follow-up registration input: `agents/project/work-items/REGISTRATION-2026-06-20-taskset-board-evidence-review-queue-implementation.json`.
+- Implementation plan: `reviews/PLAN-2026-06-20-taskset-board-evidence-review-queue-implementation.md`.
+- Beta/UX plan: `reviews/BETA-PLAN-2026-06-20-taskset-board-evidence-review-queue.md`.
+- Verification: task verification `reviews/VERIFY-2026-06-20-task-ar-618-implementation-beta-plan.json`; W4b evidence `reviews/W4B-2026-06-20-TASK-AR-618.md`.
+- Released claim: `agents/runtime/task_claims/CLAIM-20260620-010012-task-ar-618-task-ar-618-evidence-perf-implementation-plan.json`.
+- Boundary: no UI source files changed in this task. Actual UI/API behavior changes now move to the follow-up `TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE` registration and claim.
 
 ## 2026-06-20 - TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA / TASK-AR-617 complete
 

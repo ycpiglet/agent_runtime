@@ -434,6 +434,29 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/RFC-2026-06-19-taskset-board-evidence-performance-ia.md",
+          "value": "9ff9affaafd48d3668121160b208e8e41062b697377cf9d7ce43338740fe09c1"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "cb2cd245558157ff640dbf0b824694c5623e2e1ef0ccfba6e83f9a08a5522bc8"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        }
+      ],
+      "design_record": "reviews/RFC-2026-06-19-taskset-board-evidence-performance-ia.md",
+      "recorded_at": "2026-06-20T01:17:37+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-19-taskset-ar-taskset-board-ia-design-direction-registration.md",
           "value": "66b49a2229ab9af1bdcd118448d667fb1c00c03b30be7b56378078fdbb050fdd"
         },
@@ -524,5 +547,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-19T23:42:34+09:00"
+  "updated_at": "2026-06-20T01:17:37+09:00"
 }

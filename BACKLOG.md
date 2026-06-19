@@ -35,6 +35,7 @@
 | 629 | `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | Taskset Board Attention Workspace |
 | 630 | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | TSAW Claim And Empty State Refinement |
 | 631 | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | Taskset Board Evidence And Performance IA |
+| 640 | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE` | Taskset Board Evidence Review Queue |
 
 <!-- BACKLOG-INDEX:END -->
 

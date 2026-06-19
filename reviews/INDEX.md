@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-20T01:10:25+09:00
-record_count: 707
+generated_at: 2026-06-20T01:19:02+09:00
+record_count: 708
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `707` review and evidence records under `reviews/`.
+- Summary: indexed `708` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `707` files |
+| Reviews covered | pass | `708` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -528,6 +528,7 @@ record_count: 707
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-conductor.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-conductor` | review | accepted | replan | UI/UX Cycle Automation T3 Replan After Conductor |
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-review-planning.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-review-planning` | review | accepted | replan | UI/UX Cycle Automation T3 Replan After Review Planning |
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-design-direction-rfc-registration.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-design-direction-rfc-registration` | md | record | pass | UI UX Design Direction RFC Registration |
+| `reviews/REVIEW-2026-06-20-taskset-ar-taskset-board-evidence-review-queue-registration.md` | `REVIEW-2026-06-20-taskset-ar-taskset-board-evidence-review-queue-registration` | md | record | pass | Taskset Board Evidence Review Queue Registration |
 | `reviews/RFC-2026-06-19-taskset-board-evidence-performance-ia.md` | `RFC-2026-06-19-taskset-board-evidence-performance-ia` | ui-ux-design-rfc | accepted | pass | Taskset Board Evidence And Performance IA RFC |
 | `reviews/RFC-2026-06-19-taskset-board-ia-design-direction.md` | `RFC-2026-06-19-taskset-board-ia-design-direction` | ui-ux-design-rfc | accepted | pass | Taskset Board IA Design Direction RFC |
 | `reviews/RFC-2026-06-19-ui-ux-design-direction.md` | `RFC-2026-06-19-ui-ux-design-direction` | ui-ux-design-direction-rfc | accepted | pass | UI/UX Design Direction RFC 2026-06-19 |

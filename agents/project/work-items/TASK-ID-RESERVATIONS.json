@@ -835,8 +835,46 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-619",
+      "expires_at": "2026-06-21T01:08:00+09:00",
+      "fulfilled_at": "2026-06-20T01:08:00+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-619.md",
+      "fulfilled_task_id": "TASK-AR-619",
+      "fulfilled_task_uid": "d4edfeb6-39a0-41de-b64b-6e952ca374ae",
+      "initiative_id": "INIT-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE",
+      "kind": "task",
+      "owner_id": "codex-interface-designer-ar-618",
+      "reason": "work registration TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE",
+      "reservation_group_id": "RES-20260620-010800-10191c6d",
+      "reservation_id": "RES-20260620-010800-10191c6d-01",
+      "reserved_at": "2026-06-20T01:08:00+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE",
+      "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-620",
+      "expires_at": "2026-06-21T01:08:00+09:00",
+      "fulfilled_at": "2026-06-20T01:08:00+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-620.md",
+      "fulfilled_task_id": "TASK-AR-620",
+      "fulfilled_task_uid": "dee5279f-7a24-487e-b3fe-45e071a3c222",
+      "initiative_id": "INIT-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE",
+      "kind": "task",
+      "owner_id": "codex-interface-designer-ar-618",
+      "reason": "work registration TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE",
+      "reservation_group_id": "RES-20260620-010800-10191c6d",
+      "reservation_id": "RES-20260620-010800-10191c6d-02",
+      "reserved_at": "2026-06-20T01:08:00+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-REVIEW-QUEUE",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-06-19T23:39:00+09:00"
+  "updated_at": "2026-06-20T01:08:00+09:00"
 }
