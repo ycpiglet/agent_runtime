@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T12:28:26+09:00
-record_count: 641
+generated_at: 2026-06-19T12:39:19+09:00
+record_count: 642
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `641` review and evidence records under `reviews/`.
+- Summary: indexed `642` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `641` files |
+| Reviews covered | pass | `642` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -169,6 +169,7 @@ record_count: 641
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current.json` | `RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0.json` | `RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0 |
 | `reviews/RELEASE-VERSION-CONSISTENCY-STEWARD.json` | `RELEASE-VERSION-CONSISTENCY-STEWARD` | json | record | n/a | RELEASE-VERSION-CONSISTENCY-STEWARD |
+| `reviews/REPLAN-2026-06-19-taskset-ar-oag-claim-aware-relation-adapter-t2-drift.md` | `REPLAN-2026-06-19-taskset-ar-oag-claim-aware-relation-adapter-t2-drift` | md | record | pass | OAG Claim-Aware Relation Adapter T2 Replan |
 | `reviews/REPORT-2026-06-17-self-improvement-maturity.md` | `REPORT-2026-06-17-self-improvement-maturity` | md | record | watch | Self Improvement Maturity Report 2026-06-17 |
 | `reviews/REPORT-2026-06-17-self-improvement-remediation-delta.md` | `REPORT-2026-06-17-self-improvement-remediation-delta` | md | record | watch | Self Improvement Remediation Delta 2026-06-17 |
 | `reviews/REPORT-2026-06-18-self-improvement-maturity.md` | `REPORT-2026-06-18-self-improvement-maturity` | md | record | pass | Self Improvement Maturity Report 2026-06-18 |

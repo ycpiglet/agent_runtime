@@ -175,8 +175,13 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REPLAN-2026-06-19-taskset-ar-oag-claim-aware-relation-adapter-t2-drift.md",
+          "value": "d94332a26bcc3f66a8a4ef27d20e09b9b2ec1066fc44e85441fbfa20482bcb3d"
+        },
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-19-taskset-ar-oag-claim-aware-relation-adapter-registration.md",
-          "value": "9170bfc7ce58cf348229732f9f81eae127a38befa27f89f27884133dd66f9e4e"
+          "value": "e540c10ec04b8efe35b3c3a88e15aac80f8c8d8e4003d0ff0f35c4d963747645"
         },
         {
           "kind": "sha256",
@@ -186,11 +191,16 @@
         {
           "kind": "sha256",
           "path": "scripts/work.py",
-          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/design_system_gate.py",
+          "value": "b42b37d6c6b00796c4aa5f6675b37071814809d8056de199c0b48b7f393341e9"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-06-19-taskset-ar-oag-claim-aware-relation-adapter-registration.md",
-      "recorded_at": "2026-06-19T12:26:23+09:00",
+      "design_record": "reviews/REPLAN-2026-06-19-taskset-ar-oag-claim-aware-relation-adapter-t2-drift.md",
+      "recorded_at": "2026-06-19T12:38:28+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER"
     },
@@ -399,5 +409,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-19T12:26:23+09:00"
+  "updated_at": "2026-06-19T12:38:28+09:00"
 }
