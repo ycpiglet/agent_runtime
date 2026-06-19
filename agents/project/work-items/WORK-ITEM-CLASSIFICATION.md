@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-19T19:43:27+09:00
+generated_at: 2026-06-19T20:41:48+09:00
 record_count: 388
 ---
 
@@ -423,8 +423,8 @@ record_count: 388
 | 25.1.3 | Task 25.1.3 | task | `TASK-AR-611` | `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` | completed | `agents/lead_engineer/tasks/TASK-AR-611.md` | Turn the accepted Taskset Board IA RFC into a source-mutation implementation registra… |
 | 26 | Initiative 26 | initiative | `INIT-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | - | active | `agents/project/initiatives/INIT-AR-TASKSET-BOARD-ATTENTION-WORKSPACE.md` | Taskset Board Attention Workspace |
 | 26.1 | Taskset 26.1 | taskset | `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | `INIT-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | active | `BACKLOG-BOARD.md` | Taskset Board Attention Workspace |
-| 26.1.1 | Task 26.1.1 | task | `TASK-AR-612` | `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | planned | `agents/lead_engineer/tasks/TASK-AR-612.md` | Convert the Taskset Board from a whole-board-first scan into an attention workspace w… |
-| 26.1.1.1 | Unit 26.1.1.1 | unit | `UNIT-TASK-AR-612-001` | `TASK-AR-612` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-612/UNIT-TASK-AR-612-001.md` | UNIT-TASK-AR-612-001 - Add Taskset Board attention lane schema and workspace UI |
+| 26.1.1 | Task 26.1.1 | task | `TASK-AR-612` | `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | completed | `agents/lead_engineer/tasks/TASK-AR-612.md` | Convert the Taskset Board from a whole-board-first scan into an attention workspace w… |
+| 26.1.1.1 | Unit 26.1.1.1 | unit | `UNIT-TASK-AR-612-001` | `TASK-AR-612` | completed | `agents/lead_engineer/tasks/units/TASK-AR-612/UNIT-TASK-AR-612-001.md` | UNIT-TASK-AR-612-001 - Add Taskset Board attention lane schema and workspace UI |
 | 26.1.2 | Task 26.1.2 | task | `TASK-AR-613` | `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | planned | `agents/lead_engineer/tasks/TASK-AR-613.md` | Verify the attention workspace through user-like beta actions, keyboard traversal, mo… |
 | 26.1.2.1 | Unit 26.1.2.1 | unit | `UNIT-TASK-AR-613-001` | `TASK-AR-613` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-613/UNIT-TASK-AR-613-001.md` | UNIT-TASK-AR-613-001 - Record Taskset Board attention workspace beta and UX evidence |
 

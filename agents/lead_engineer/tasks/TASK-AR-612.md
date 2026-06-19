@@ -9,9 +9,15 @@ kind: task
 parent_id: TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE
 registered_at: 2026-06-19T18:35:00+09:00
 created_at: 2026-06-19T18:35:00+09:00
-updated_at: 2026-06-19T18:35:00+09:00
+started_at: 2026-06-19T19:50:00+09:00
+updated_at: 2026-06-19T20:41:47+09:00
+verification_status: passed
+verified_at: 2026-06-19T21:10:00+09:00
+verified_by: codex-independent-w4b-verifier
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-task-ar-612-closeout.json
 title: Implement Taskset Board attention workspace assets
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 6
@@ -32,6 +38,11 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+resolution: done
+completed_at: 2026-06-19T20:41:47+09:00
+closed_by: codex-interface-designer-task-ar-612
+actual_hours: 2.6
+actual_tokens: 56000
 ---
 
 # TASK-AR-612 - Implement Taskset Board attention workspace assets
@@ -60,3 +71,15 @@ tags:
 - `python scripts/ui_ux_cycle.py --root . assess --json`
 - `python scripts/evidence_index_generator.py --check`
 - `git diff --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T20:41:47+09:00`
+- Resolution: `done`
+- Actual hours: `2.6`
+- Actual tokens: `56000`
+- Closed by: `codex-interface-designer-task-ar-612`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-task-ar-612-closeout.json`
+<!-- work-close:end -->

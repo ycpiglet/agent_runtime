@@ -9,11 +9,11 @@ task_id: TASK-AR-612
 task_set_id: TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE
 initiative_id: INIT-AR-TASKSET-BOARD-ATTENTION-WORKSPACE
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: interface-designer
 created_at: 2026-06-19T18:35:00+09:00
-updated_at: 2026-06-19T20:24:24+09:00
+updated_at: 2026-06-19T20:39:21+09:00
 origin_type: owner_request
 origin_ref: chat:2026-06-19-ui-refactor-continuous-cycle
 created_by: codex-interface-designer-task-ar-611
@@ -64,6 +64,11 @@ verified_at: 2026-06-19T20:24:24+09:00
 verified_by: codex-interface-designer-task-ar-612
 evidence_refs:
   - reviews/VERIFY-2026-06-19-unit-task-ar-612-001-20260619202424.json
+resolution: done
+completed_at: 2026-06-19T20:39:21+09:00
+closed_by: codex-interface-designer-task-ar-612
+actual_hours: 2.4
+actual_tokens: 52000
 ---
 
 # UNIT-TASK-AR-612-001 - Add Taskset Board attention lane schema and workspace UI
@@ -134,3 +139,15 @@ Report changed helpers, lane derivation fields, assetization classification, foc
 ## Stop Boundary
 
 Stop after the attention workspace implementation is source-mutated, tested, self-verified, and ready for independent W4b verification.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T20:39:21+09:00`
+- Resolution: `done`
+- Actual hours: `2.4`
+- Actual tokens: `52000`
+- Closed by: `codex-interface-designer-task-ar-612`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-unit-task-ar-612-001-20260619202424.json`
+<!-- work-close:end -->

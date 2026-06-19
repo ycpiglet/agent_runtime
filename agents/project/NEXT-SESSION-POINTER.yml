@@ -1,27 +1,22 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T19:50:00+09:00
+updated_at: 2026-06-19T20:43:00+09:00
 current_state:
-  summary: "TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE is active; TASK-AR-612 is claimed to implement the Taskset Board attention workspace UI assets."
+  summary: "TASK-AR-612 is implemented, W4b-verified, released, merged, and closed. TASK-AR-613 is the next planned beta/UX evaluation for the Taskset Board attention workspace."
   status: active
   task_set_status: taskset_active
   task_set_id: TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE
-  step_index: 1
+  step_index: 4
   step_total: 5
-  progress_pct: 5
-  status_text: "TASK-AR-612 is claimed in .worktrees/TASK-AR-612-taskset-board-attention-workspace to source-mutate the attention workspace UI, then TASK-AR-613 will run beta/UX evidence."
+  progress_pct: 50
+  status_text: "No active claim remains for TASK-AR-612. Claim TASK-AR-613 before running beta/UX evidence and deriving the next UI/UX delta."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260619-195000-task-ar-612-taskset-board-attention-workspace
-      agent_role: interface-designer
-      agent_instance_id: codex-interface-designer-task-ar-612
-      display_name: codex-interface-designer-task-ar-612
-      callsite_id: terminal:wt-task-ar-612:tab-01
+  current_agents: []
   current_teams:
     - ui-ux
 resume:
-  active_task: TASK-AR-612
+  active_task: TASK-AR-613
   active_task_set: TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE
-  branch_policy: "Continue in .worktrees/TASK-AR-612-taskset-board-attention-workspace on codex/task-ar-612-taskset-board-attention-workspace; keep source mutation within the claimed UI state/assets/tests/evidence files."
+  branch_policy: "No active claim remains. Claim TASK-AR-613 before beta/UX evaluation; do not mutate UI source from the evaluation task except through a new follow-up implementation claim."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."

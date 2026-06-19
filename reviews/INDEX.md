@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T20:34:16+09:00
-record_count: 678
+generated_at: 2026-06-19T20:41:50+09:00
+record_count: 679
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `678` review and evidence records under `reviews/`.
+- Summary: indexed `679` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `678` files |
+| Reviews covered | pass | `679` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -609,6 +609,7 @@ record_count: 678
 | `reviews/VERIFY-2026-06-19-task-ar-610-20260619174130.json` | `VERIFY-2026-06-19-task-ar-610-20260619174130` | json | record | n/a | VERIFY-2026-06-19-task-ar-610-20260619174130 |
 | `reviews/VERIFY-2026-06-19-task-ar-610-20260619180000.json` | `VERIFY-2026-06-19-task-ar-610-20260619180000` | json | record | n/a | VERIFY-2026-06-19-task-ar-610-20260619180000 |
 | `reviews/VERIFY-2026-06-19-task-ar-611-20260619184000.json` | `VERIFY-2026-06-19-task-ar-611-20260619184000` | json | record | n/a | VERIFY-2026-06-19-task-ar-611-20260619184000 |
+| `reviews/VERIFY-2026-06-19-task-ar-612-closeout.json` | `VERIFY-2026-06-19-task-ar-612-closeout` | json | record | n/a | VERIFY-2026-06-19-task-ar-612-closeout |
 | `reviews/VERIFY-2026-06-19-taskset-board-attention-workspace-implementation.json` | `VERIFY-2026-06-19-taskset-board-attention-workspace-implementation` | json | record | n/a | VERIFY-2026-06-19-taskset-board-attention-workspace-implementation |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500.json` | `VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525.json` | `VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525 |

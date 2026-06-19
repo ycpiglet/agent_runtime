@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-19-task-ar-612-closeout",
+  "work_id": "TASK-AR-612",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-612.md",
+  "kind": "task",
+  "task_id": "TASK-AR-612",
+  "unit_id": "UNIT-TASK-AR-612-001",
+  "task_set_id": "TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-19T21:10:00+09:00",
+  "verified_by": "codex-independent-w4b-verifier",
+  "summary": "Task-level closeout evidence for TASK-AR-612. The implementation evidence, unit W4a verification, and independent W4b review all passed.",
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_ui_design_assets.py tests/test_ui_console.py tests/test_ui_state.py -q",
+      "status": "passed",
+      "details": "270 passed"
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "details": "artifacts=3 roles=4 scanned=6 findings=0"
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "passed",
+      "details": "findings=0"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "details": "no blocking whitespace findings"
+    }
+  ],
+  "supporting_evidence": [
+    "reviews/VERIFY-2026-06-19-taskset-board-attention-workspace-implementation.json",
+    "reviews/VERIFY-2026-06-19-unit-task-ar-612-001-20260619202424.json",
+    "reviews/W4B-2026-06-19-TASK-AR-612.md"
+  ],
+  "verdict": "Release and closeout recommended."
+}

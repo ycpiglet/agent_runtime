@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-612:tab-01",
   "pane_id": "terminal:wt-task-ar-612:tab-01",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE",
   "active_scope": "TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE",
   "scope_transition_approved": true,
@@ -27,12 +27,12 @@
   "worktree_path": ".worktrees/TASK-AR-612-taskset-board-attention-workspace",
   "branch": "codex/task-ar-612-taskset-board-attention-workspace",
   "claimed_at": "2026-06-19T19:50:00+09:00",
-  "last_heartbeat": "2026-06-19T19:50:00+09:00",
-  "updated_at": "2026-06-19T19:50:00+09:00",
+  "last_heartbeat": "2026-06-19T20:38:32+09:00",
+  "updated_at": "2026-06-19T20:38:32+09:00",
   "expires_at": "2026-06-19T23:50:00+09:00",
   "lease": {
     "claimed_at": "2026-06-19T19:50:00+09:00",
-    "heartbeat_at": "2026-06-19T19:50:00+09:00",
+    "heartbeat_at": "2026-06-19T20:38:32+09:00",
     "expires_at": "2026-06-19T23:50:00+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260619-195000-task-ar-612-taskset-board-attention-workspace.handoff.md",
@@ -48,5 +48,9 @@
     "tests/test_ui_design_assets.py",
     "reviews/VERIFY-2026-06-19-taskset-board-attention-workspace-implementation.json",
     "reviews/INDEX.md"
-  ]
+  ],
+  "released_at": "2026-06-19T20:38:32+09:00",
+  "verified_by": "codex-independent-w4b-verifier",
+  "verifier_role": "independent-verifier",
+  "verification_evidence": "reviews/W4B-2026-06-19-TASK-AR-612.md"
 }
