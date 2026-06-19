@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T23:32:06+09:00
-record_count: 693
+generated_at: 2026-06-19T23:44:31+09:00
+record_count: 695
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `693` review and evidence records under `reviews/`.
+- Summary: indexed `695` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `693` files |
+| Reviews covered | pass | `695` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -518,6 +518,7 @@ record_count: 693
 | `reviews/REVIEW-2026-06-19-taskset-ar-oag-mobile-responsive-refinement-registration.md` | `REVIEW-2026-06-19-taskset-ar-oag-mobile-responsive-refinement-registration` | md | record | pass | OAG Mobile Responsive Refinement Registration |
 | `reviews/REVIEW-2026-06-19-taskset-ar-operator-attention-graph-registration.md` | `REVIEW-2026-06-19-taskset-ar-operator-attention-graph-registration` | md | record | pass | Operator Attention Graph Registration |
 | `reviews/REVIEW-2026-06-19-taskset-ar-taskset-board-attention-workspace-registration.md` | `REVIEW-2026-06-19-taskset-ar-taskset-board-attention-workspace-registration` | md | record | pass | Taskset Board Attention Workspace Registration |
+| `reviews/REVIEW-2026-06-19-taskset-ar-taskset-board-evidence-perf-ia-registration.md` | `REVIEW-2026-06-19-taskset-ar-taskset-board-evidence-perf-ia-registration` | md | record | pass | Taskset Board Evidence And Performance IA Registration |
 | `reviews/REVIEW-2026-06-19-taskset-ar-taskset-board-ia-design-direction-registration.md` | `REVIEW-2026-06-19-taskset-ar-taskset-board-ia-design-direction-registration` | md | record | pass | Taskset Board IA Design Direction Registration |
 | `reviews/REVIEW-2026-06-19-taskset-ar-tsaw-claim-empty-refinement-registration.md` | `REVIEW-2026-06-19-taskset-ar-tsaw-claim-empty-refinement-registration` | md | record | pass | TSAW Claim And Empty State Refinement Registration |
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-registration.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-registration` | md | record | pass | UI UX Cycle Automation Registration |
@@ -617,6 +618,7 @@ record_count: 693
 | `reviews/VERIFY-2026-06-19-task-ar-612-closeout.json` | `VERIFY-2026-06-19-task-ar-612-closeout` | json | record | n/a | VERIFY-2026-06-19-task-ar-612-closeout |
 | `reviews/VERIFY-2026-06-19-task-ar-613-closeout.json` | `VERIFY-2026-06-19-task-ar-613-closeout` | json | record | n/a | VERIFY-2026-06-19-task-ar-613-closeout |
 | `reviews/VERIFY-2026-06-19-task-ar-614-closeout.json` | `VERIFY-2026-06-19-task-ar-614-closeout` | json | record | n/a | VERIFY-2026-06-19-task-ar-614-closeout |
+| `reviews/VERIFY-2026-06-19-task-ar-615-closeout.json` | `VERIFY-2026-06-19-task-ar-615-closeout` | json | record | n/a | VERIFY-2026-06-19-task-ar-615-closeout |
 | `reviews/VERIFY-2026-06-19-taskset-board-attention-workspace-implementation.json` | `VERIFY-2026-06-19-taskset-board-attention-workspace-implementation` | json | record | n/a | VERIFY-2026-06-19-taskset-board-attention-workspace-implementation |
 | `reviews/VERIFY-2026-06-19-tsaw-claim-empty-refinement.json` | `VERIFY-2026-06-19-tsaw-claim-empty-refinement` | json | record | n/a | VERIFY-2026-06-19-tsaw-claim-empty-refinement |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500.json` | `VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500 |

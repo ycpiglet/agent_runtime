@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-19T22:37:52+09:00
-record_count: 394
+generated_at: 2026-06-19T23:44:56+09:00
+record_count: 400
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `394` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `400` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `28` records |
-| Tasksets | pass | `52` records |
-| Tasks | pass | `274` records |
-| Units | pass | `40` records |
+| Initiatives | pass | `29` records |
+| Tasksets | pass | `53` records |
+| Tasks | pass | `277` records |
+| Units | pass | `41` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -428,11 +428,17 @@ record_count: 394
 | 26.1.2 | Task 26.1.2 | task | `TASK-AR-613` | `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | completed | `agents/lead_engineer/tasks/TASK-AR-613.md` | Verify the attention workspace through user-like beta actions, keyboard traversal, mo… |
 | 26.1.2.1 | Unit 26.1.2.1 | unit | `UNIT-TASK-AR-613-001` | `TASK-AR-613` | completed | `agents/lead_engineer/tasks/units/TASK-AR-613/UNIT-TASK-AR-613-001.md` | UNIT-TASK-AR-613-001 - Record Taskset Board attention workspace beta and UX evidence |
 | 27 | Initiative 27 | initiative | `INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | - | active | `agents/project/initiatives/INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT.md` | Taskset Attention Workspace Claim And Empty State Refinement |
-| 27.1 | Taskset 27.1 | taskset | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | `INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | active | `BACKLOG-BOARD.md` | TSAW Claim And Empty State Refinement |
+| 27.1 | Taskset 27.1 | taskset | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | `INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | complete | `BACKLOG-BOARD.md` | TSAW Claim And Empty State Refinement |
 | 27.1.1 | Task 27.1.1 | task | `TASK-AR-614` | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | completed | `agents/lead_engineer/tasks/TASK-AR-614.md` | Fix BTC-TSAW-CLAIM-001 and BTC-TSAW-EMPTY-001 so active runtime claims appear in the… |
 | 27.1.1.1 | Unit 27.1.1.1 | unit | `UNIT-TASK-AR-614-001` | `TASK-AR-614` | completed | `agents/lead_engineer/tasks/units/TASK-AR-614/UNIT-TASK-AR-614-001.md` | UNIT-TASK-AR-614-001 - Patch attention workspace claim and empty recovery states |
-| 27.1.2 | Task 27.1.2 | task | `TASK-AR-615` | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-615.md` | Repeat beta-tester and UX-evaluator verification after the active-claim and empty-lan… |
-| 27.1.2.1 | Unit 27.1.2.1 | unit | `UNIT-TASK-AR-615-001` | `TASK-AR-615` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-615/UNIT-TASK-AR-615-001.md` | UNIT-TASK-AR-615-001 - Record refined attention workspace beta and UX evidence |
+| 27.1.2 | Task 27.1.2 | task | `TASK-AR-615` | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | completed | `agents/lead_engineer/tasks/TASK-AR-615.md` | Repeat beta-tester and UX-evaluator verification after the active-claim and empty-lan… |
+| 27.1.2.1 | Unit 27.1.2.1 | unit | `UNIT-TASK-AR-615-001` | `TASK-AR-615` | completed | `agents/lead_engineer/tasks/units/TASK-AR-615/UNIT-TASK-AR-615-001.md` | UNIT-TASK-AR-615-001 - Record refined attention workspace beta and UX evidence |
+| 28 | Initiative 28 | initiative | `INIT-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | - | active | `agents/project/initiatives/INIT-AR-TASKSET-BOARD-EVIDENCE-PERF-IA.md` | Taskset Board Evidence And Performance IA |
+| 28.1 | Taskset 28.1 | taskset | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | `INIT-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | active | `BACKLOG-BOARD.md` | Taskset Board Evidence And Performance IA |
+| 28.1.1 | Task 28.1.1 | task | `TASK-AR-616` | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | planned | `agents/lead_engineer/tasks/TASK-AR-616.md` | Create a lead-designer seminar artifact that chooses the next Taskset Board IA direct… |
+| 28.1.1.1 | Unit 28.1.1.1 | unit | `UNIT-TASK-AR-616-001` | `TASK-AR-616` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-616/UNIT-TASK-AR-616-001.md` | UNIT-TASK-AR-616-001 - Run evidence overload and performance IA lead-designer seminar |
+| 28.1.2 | Task 28.1.2 | task | `TASK-AR-617` | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | planned | `agents/lead_engineer/tasks/TASK-AR-617.md` | Promote the seminar decision into an accepted design-direction RFC that names the exa… |
+| 28.1.3 | Task 28.1.3 | task | `TASK-AR-618` | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | planned | `agents/lead_engineer/tasks/TASK-AR-618.md` | Turn the accepted evidence/performance IA RFC into a source-mutation implementation r… |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

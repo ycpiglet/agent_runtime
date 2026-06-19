@@ -1,0 +1,55 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-19-task-ar-615-closeout",
+  "work_id": "TASK-AR-615",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-615.md",
+  "kind": "task",
+  "task_id": "TASK-AR-615",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-19T23:35:36+09:00",
+  "verified_by": "independent-w4b-task-ar-615-20260619",
+  "summary": "TASK-AR-615 beta and UX evaluation passed W4a and independent W4b. BTC-TSAW-CLAIM-001 and BTC-TSAW-EMPTY-001 are closed: live claimed work now appears in the active_claims lane, and zero-count lanes use dedicated empty-state recovery copy. The next UI/UX cycle should start a lead-designer seminar for evidence-gap overload and performance-aware Taskset Board IA.",
+  "evidence_refs": [
+    "reviews/BETA-TEST-2026-06-19-tsaw-claim-empty-refinement.md",
+    "reviews/UX-EVAL-2026-06-19-tsaw-claim-empty-refinement.md",
+    "reviews/VERIFY-2026-06-19-unit-task-ar-615-001-20260619233128.json",
+    "reviews/W4B-2026-06-19-TASK-AR-615.md"
+  ],
+  "commands": [
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "returncode": 0,
+      "evidence": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0"
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "evidence": "evidence-index: pass; findings=0"
+    },
+    {
+      "command": "python scripts/ui_ux_cycle.py --root . assess --json",
+      "status": "passed",
+      "returncode": 0,
+      "evidence": "score=75 usable; status=missing only because no next source-mutating refactor candidate is registered after this evidence-only task"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "returncode": 0,
+      "evidence": "no whitespace findings; CRLF warnings only"
+    },
+    {
+      "command": "live /api/tasksets_board cross-check",
+      "status": "passed",
+      "returncode": 0,
+      "evidence": "active_claims=1, selected_taskset_id=TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT, active_reason=claimed by ux_evaluator@work-01"
+    }
+  ],
+  "residual_risks": [
+    "The focused refinement is complete, but the next source-mutating UI refactor candidate is not yet registered.",
+    "The next recommended cycle is a lead-designer seminar on evidence-gap overload, state-build latency, and performance-aware Taskset Board IA."
+  ]
+}

@@ -9,9 +9,16 @@ kind: task
 parent_id: TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT
 registered_at: 2026-06-19T21:56:00+09:00
 created_at: 2026-06-19T21:56:00+09:00
-updated_at: 2026-06-19T21:56:00+09:00
+started_at: 2026-06-19T22:58:13+09:00
+updated_at: 2026-06-19T23:38:01+09:00
+verification_status: passed
+verified_at: 2026-06-19T23:35:36+09:00
+verified_by: independent-w4b-task-ar-615-20260619
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-task-ar-615-closeout.json
+w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-615.md
 title: Rerun Taskset attention workspace beta after claim and empty-state refinement
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 2
@@ -32,6 +39,11 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+resolution: done
+completed_at: 2026-06-19T23:38:01+09:00
+closed_by: codex-ux-evaluator-ar-615
+actual_hours: 2
+actual_tokens: 8000
 ---
 
 # TASK-AR-615 - Rerun Taskset attention workspace beta after claim and empty-state refinement
@@ -57,3 +69,15 @@ tags:
 - `python scripts/design_system_gate.py --check --all-ui`
 - `python scripts/evidence_index_generator.py --check`
 - `python scripts/ui_ux_cycle.py --root . assess --json`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T23:38:01+09:00`
+- Resolution: `done`
+- Actual hours: `2`
+- Actual tokens: `8000`
+- Closed by: `codex-ux-evaluator-ar-615`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-task-ar-615-closeout.json`
+<!-- work-close:end -->

@@ -411,6 +411,29 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/UX-EVAL-2026-06-19-tsaw-claim-empty-refinement.md",
+          "value": "69049e50b69874074fad78ef8c89b635e9af80444cca08cc30a88acfabf9c492"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "cb2cd245558157ff640dbf0b824694c5623e2e1ef0ccfba6e83f9a08a5522bc8"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        }
+      ],
+      "design_record": "reviews/UX-EVAL-2026-06-19-tsaw-claim-empty-refinement.md",
+      "recorded_at": "2026-06-19T23:42:34+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-19-taskset-ar-taskset-board-ia-design-direction-registration.md",
           "value": "66b49a2229ab9af1bdcd118448d667fb1c00c03b30be7b56378078fdbb050fdd"
         },
@@ -501,5 +524,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-19T21:58:02+09:00"
+  "updated_at": "2026-06-19T23:42:34+09:00"
 }

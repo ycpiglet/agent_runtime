@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T22:37:52+09:00",
-  "record_count": 394,
+  "generated_at": "2026-06-19T23:44:56+09:00",
+  "record_count": 400,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4293,7 +4293,7 @@
       "title": "TSAW Claim And Empty State Refinement",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-614",
@@ -4326,7 +4326,7 @@
       "title": "Repeat beta-tester and UX-evaluator verification after the active-claim and empty-lan…",
       "path": "agents/lead_engineer/tasks/TASK-AR-615.md",
       "parent_id": "TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-615-001",
@@ -4337,7 +4337,73 @@
       "title": "UNIT-TASK-AR-615-001 - Record refined attention workspace beta and UX evidence",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-615/UNIT-TASK-AR-615-001.md",
       "parent_id": "TASK-AR-615",
+      "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-TASKSET-BOARD-EVIDENCE-PERF-IA",
+      "level": "initiative",
+      "number": "28",
+      "label": "Initiative 28",
+      "id": "INIT-AR-TASKSET-BOARD-EVIDENCE-PERF-IA",
+      "title": "Taskset Board Evidence And Performance IA",
+      "path": "agents/project/initiatives/INIT-AR-TASKSET-BOARD-EVIDENCE-PERF-IA.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA",
+      "level": "taskset",
+      "number": "28.1",
+      "label": "Taskset 28.1",
+      "id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA",
+      "title": "Taskset Board Evidence And Performance IA",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-TASKSET-BOARD-EVIDENCE-PERF-IA",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-616",
+      "level": "task",
+      "number": "28.1.1",
+      "label": "Task 28.1.1",
+      "id": "TASK-AR-616",
+      "title": "Create a lead-designer seminar artifact that chooses the next Taskset Board IA direct…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-616.md",
+      "parent_id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-616-001",
+      "level": "unit",
+      "number": "28.1.1.1",
+      "label": "Unit 28.1.1.1",
+      "id": "UNIT-TASK-AR-616-001",
+      "title": "UNIT-TASK-AR-616-001 - Run evidence overload and performance IA lead-designer seminar",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-616/UNIT-TASK-AR-616-001.md",
+      "parent_id": "TASK-AR-616",
       "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-617",
+      "level": "task",
+      "number": "28.1.2",
+      "label": "Task 28.1.2",
+      "id": "TASK-AR-617",
+      "title": "Promote the seminar decision into an accepted design-direction RFC that names the exa…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-617.md",
+      "parent_id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA",
+      "status": "planned"
+    },
+    {
+      "key": "task:TASK-AR-618",
+      "level": "task",
+      "number": "28.1.3",
+      "label": "Task 28.1.3",
+      "id": "TASK-AR-618",
+      "title": "Turn the accepted evidence/performance IA RFC into a source-mutation implementation r…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-618.md",
+      "parent_id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA",
+      "status": "planned"
     }
   ]
 }

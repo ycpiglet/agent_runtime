@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-19
-archived_count: 270
+archived_count: 274
 ---
 
 # Archived Task Files
 
-- `270` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `274` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -283,3 +283,7 @@ archived_count: 270
 | `TASK-AR-609` | `c01a0cfe-be2…` | `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` | completed | 2026-06-19T15:36:00+09:00 | 2026-06-19T15:39:11+09:00 | 2026-06-19T16:01:00+09:00 | 2026-06-19T16:01:00+09:00 | Create a lead-designer seminar artifact that chooses how the next Taskset Board desig… |
 | `TASK-AR-610` | `f31057dc-15b…` | `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` | completed | 2026-06-19T15:36:00+09:00 | 2026-06-19T16:14:00+09:00 | 2026-06-19T18:08:00+09:00 | 2026-06-19T18:08:00+09:00 | Promote the seminar decision into an accepted design-direction RFC that names the exa… |
 | `TASK-AR-611` | `8c371e62-109…` | `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` | completed | 2026-06-19T15:36:00+09:00 | 2026-06-19T18:20:00+09:00 | 2026-06-19T19:12:00+09:00 | 2026-06-19T19:12:00+09:00 | Turn the accepted Taskset Board IA RFC into a source-mutation implementation registra… |
+| `TASK-AR-613` | `6bcce750-b52…` | `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | completed | 2026-06-19T18:35:00+09:00 | 2026-06-19T20:56:29+09:00 | 2026-06-19T21:55:26+09:00 | 2026-06-19T21:55:26+09:00 | Verify the attention workspace through user-like beta actions, keyboard traversal, mo… |
+| `TASK-AR-612` | `65d7c6c6-69b…` | `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | completed | 2026-06-19T18:35:00+09:00 | 2026-06-19T19:50:00+09:00 | 2026-06-19T20:41:47+09:00 | 2026-06-19T20:41:47+09:00 | Convert the Taskset Board from a whole-board-first scan into an attention workspace w… |
+| `TASK-AR-615` | `9974caed-8ab…` | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | completed | 2026-06-19T21:56:00+09:00 | 2026-06-19T22:58:13+09:00 | 2026-06-19T23:38:01+09:00 | 2026-06-19T23:38:01+09:00 | Repeat beta-tester and UX-evaluator verification after the active-claim and empty-lan… |
+| `TASK-AR-614` | `5945f908-67e…` | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | completed | 2026-06-19T21:56:00+09:00 | 2026-06-19T22:14:49+09:00 | 2026-06-19T22:37:50+09:00 | 2026-06-19T22:37:50+09:00 | Fix BTC-TSAW-CLAIM-001 and BTC-TSAW-EMPTY-001 so active runtime claims appear in the… |

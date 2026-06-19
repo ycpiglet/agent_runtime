@@ -168,6 +168,12 @@
       "display_name": "TSAW Claim And Empty State Refinement",
       "summary": "Make the Taskset Board attention workspace surface live active claims and clarify zero-count lane recovery copy, then rerun beta/UX evidence.",
       "order": 630
+    },
+    {
+      "task_set_id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA",
+      "display_name": "Taskset Board Evidence And Performance IA",
+      "summary": "Run a seminar-led UI/UX cycle for evidence-gap overload and performance-aware Taskset Board IA, publish an RFC, then derive the next implementation plus beta-evaluation registration.",
+      "order": 631
     }
   ]
 }
