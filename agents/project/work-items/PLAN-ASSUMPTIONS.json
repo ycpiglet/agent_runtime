@@ -388,6 +388,29 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-06-19-taskset-ar-taskset-board-ia-design-direction-registration.md",
+          "value": "66b49a2229ab9af1bdcd118448d667fb1c00c03b30be7b56378078fdbb050fdd"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "cb2cd245558157ff640dbf0b824694c5623e2e1ef0ccfba6e83f9a08a5522bc8"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-06-19-taskset-ar-taskset-board-ia-design-direction-registration.md",
+      "recorded_at": "2026-06-19T15:35:57+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "scripts/ui_ux_cycle.py",
           "value": "acd9439bdb575c46979b05c6ac029f1b248c80f83c839d5b54f72a382b2206c2"
         },
@@ -432,5 +455,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-19T14:05:27+09:00"
+  "updated_at": "2026-06-19T15:35:57+09:00"
 }

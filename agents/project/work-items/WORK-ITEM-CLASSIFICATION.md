@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-19T15:21:09+09:00
-record_count: 376
+generated_at: 2026-06-19T15:35:56+09:00
+record_count: 382
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `376` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `382` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `25` records |
-| Tasksets | pass | `49` records |
-| Tasks | pass | `267` records |
-| Units | pass | `35` records |
+| Initiatives | pass | `26` records |
+| Tasksets | pass | `50` records |
+| Tasks | pass | `270` records |
+| Units | pass | `36` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -415,6 +415,12 @@ record_count: 376
 | 24.1.1.1 | Unit 24.1.1.1 | unit | `UNIT-TASK-AR-607-001` | `TASK-AR-607` | completed | `agents/lead_engineer/tasks/units/TASK-AR-607/UNIT-TASK-AR-607-001.md` | UNIT-TASK-AR-607-001 - Constrain Taskset Board mobile layout |
 | 24.1.2 | Task 24.1.2 | task | `TASK-AR-608` | `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` | completed | `agents/lead_engineer/tasks/TASK-AR-608.md` | Repeat beta-tester and UX-evaluator verification after the responsive fix, focused on… |
 | 24.1.2.1 | Unit 24.1.2.1 | unit | `UNIT-TASK-AR-608-001` | `TASK-AR-608` | completed | `agents/lead_engineer/tasks/units/TASK-AR-608/UNIT-TASK-AR-608-001.md` | UNIT-TASK-AR-608-001 - Record mobile overflow beta and UX evidence |
+| 25 | Initiative 25 | initiative | `INIT-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` | - | active | `agents/project/initiatives/INIT-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION.md` | Taskset Board IA Design Direction |
+| 25.1 | Taskset 25.1 | taskset | `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` | `INIT-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` | active | `BACKLOG-BOARD.md` | Taskset Board IA Design Direction |
+| 25.1.1 | Task 25.1.1 | task | `TASK-AR-609` | `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` | planned | `agents/lead_engineer/tasks/TASK-AR-609.md` | Create a lead-designer seminar artifact that chooses how the next Taskset Board desig… |
+| 25.1.1.1 | Unit 25.1.1.1 | unit | `UNIT-TASK-AR-609-001` | `TASK-AR-609` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-609/UNIT-TASK-AR-609-001.md` | UNIT-TASK-AR-609-001 - Run Taskset Board IA lead-designer seminar |
+| 25.1.2 | Task 25.1.2 | task | `TASK-AR-610` | `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` | planned | `agents/lead_engineer/tasks/TASK-AR-610.md` | Promote the seminar decision into an accepted design-direction RFC that names the exa… |
+| 25.1.3 | Task 25.1.3 | task | `TASK-AR-611` | `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` | planned | `agents/lead_engineer/tasks/TASK-AR-611.md` | Turn the accepted Taskset Board IA RFC into a source-mutation implementation registra… |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

@@ -1,0 +1,134 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "chat:2026-06-19-ui-refactor-continuous-cycle",
+  "created_by": "codex-planner",
+  "now": "2026-06-19T15:36:00+09:00",
+  "initiative": {
+    "id": "INIT-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION",
+    "title": "Taskset Board IA Design Direction",
+    "summary": "Continue the UI/UX improvement loop by using lead-designer, design-system-steward, interface-designer, and ux-evaluator roles to choose the next Taskset Board information architecture and interaction direction before implementation workers mutate UI source.",
+    "owner": "lead_engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION",
+    "display_name": "Taskset Board IA Design Direction",
+    "summary": "Resolve the post-OAG UX watch that Taskset Board discovery and whole-board focus traversal are too long now that the board contains 49 tasksets; run a lead-designer IA/design seminar, publish an RFC, then derive the next implementation and beta-evaluation taskset.",
+    "order": 628,
+    "plan_slug": "2026-06-19-taskset-board-ia-design-direction"
+  },
+  "tasks": [
+    {
+      "title": "Run Taskset Board IA design seminar",
+      "goal": "Create a lead-designer seminar artifact that chooses how the next Taskset Board design cycle should reduce long target discovery and focus traversal without repeating the current card/list-heavy visual language by default.",
+      "scope": "Planning and evidence only. Do not edit UI source files. The seminar must cover typography, size and spacing, color and non-color cues, motion, effects, schema, assets, accessibility, responsiveness, and interaction recovery.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 2,
+      "est_tokens": 6000,
+      "owner": "lead-designer",
+      "team": "ui-ux",
+      "acceptance": [
+        "reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md records lead-designer, design-system-steward, interface-designer, and ux-evaluator viewpoints.",
+        "The seminar uses the latest OAG mobile beta/W4B evidence and the 49-taskset board watch as the user problem, not a generic visual-refresh request.",
+        "The seminar compares at least three direction options and selects one RFC candidate with rejected alternatives and rationale.",
+        "The selected candidate states token, UI component, pattern component, and one-off implications before any implementation task is created.",
+        "The seminar defines evidence requirements for font scale, density, color, animation, focus/effects, schema contracts, assets, accessibility, responsive behavior, and beta-tester interaction paths."
+      ],
+      "verification": [
+        "python scripts/ui_ux_cycle.py --root . assess --json",
+        "python scripts/design_system_gate.py --check --all-ui",
+        "python scripts/evidence_index_generator.py --check"
+      ],
+      "units": [
+        {
+          "title": "Run Taskset Board IA lead-designer seminar",
+          "context": "TASK-AR-608 closed the mobile overflow refinement, but its independent verification recorded a next-cycle watch: Taskset Board currently contains 49 tasksets, so target discovery and whole-board focus traversal are long. The next UI/UX loop should select a stronger information architecture and visual direction before mutating UI source.",
+          "inputs": [
+            "reviews/W4B-2026-06-19-TASK-AR-608.md",
+            "reviews/BETA-TEST-2026-06-19-oag-mobile-responsive-refinement.md",
+            "reviews/UX-EVAL-2026-06-19-oag-mobile-responsive-refinement.md",
+            "reviews/RFC-2026-06-19-ui-ux-design-direction.md",
+            "docs/design/agent-runtime/DESIGN.md",
+            "docs/design/agent-runtime/DESIGN-SYSTEM.md",
+            "scripts/ui_ux_cycle.py"
+          ],
+          "target_files": [
+            "reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md",
+            "reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md",
+            "reviews/INDEX.md"
+          ],
+          "scope": "Write the seminar decision artifact and refresh the evidence index only. Do not patch docs/design or UI source files in this unit.",
+          "steps": [
+            "Read the OAG mobile beta, UX, and W4B evidence that routed the Taskset Board IA watch.",
+            "Record positions from lead-designer, design-system-steward, interface-designer, and ux-evaluator.",
+            "Compare at least three directions: progressive drill-down, command-palette/taskset switcher, and attention-lane workspace.",
+            "Choose one RFC candidate and explicitly reject the weaker alternatives.",
+            "Classify expected reusable surfaces as design_token, ui_component, pattern_component, or one_off_for_now.",
+            "Define beta-tester evidence paths and gate commands for the RFC and next implementation taskset.",
+            "Refresh evidence index and run the recorded verification commands."
+          ],
+          "acceptance": [
+            "The seminar is specific enough for a planner to write the RFC task without chat context.",
+            "Every UI quality dimension has concrete evidence expectations and an assetization class.",
+            "The chosen direction has explicit implementation boundaries, schema expectations, and a beta-tester follow-up path.",
+            "No source UI files are changed by this unit."
+          ],
+          "verification": [
+            "python scripts/ui_ux_cycle.py --root . assess --json",
+            "python scripts/design_system_gate.py --check --all-ui",
+            "python scripts/evidence_index_generator.py --check"
+          ],
+          "handoff": "Report the selected Taskset Board IA direction, rejected alternatives, assetization implications, RFC target files, and next beta/UX evidence path.",
+          "stop_condition": "Stop after seminar evidence is complete and ready for independent verification or RFC claim."
+        }
+      ]
+    },
+    {
+      "title": "Publish Taskset Board IA design RFC",
+      "goal": "Promote the seminar decision into an accepted design-direction RFC that names the exact IA, visual, token, component, pattern, schema, and beta-evidence boundaries allowed for the next implementation round.",
+      "scope": "RFC and accepted design-system documentation only. Do not edit UI source files. Update DESIGN.md or DESIGN-SYSTEM.md only for promoted reusable rules or asset contracts.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 3,
+      "est_tokens": 7000,
+      "owner": "lead-designer",
+      "team": "ui-ux",
+      "acceptance": [
+        "reviews/RFC-2026-06-19-taskset-board-ia-design-direction.md states the selected IA/visual direction, target workflow, references, rejected alternatives, risks, and promotion decision.",
+        "The RFC defines typography, density, color/non-color state, motion, effects/focus, schema, assets, accessibility, responsiveness, and interaction requirements for the next implementation.",
+        "The RFC lists minimum design-token, UI-component, pattern-component, and one-off boundaries before implementation.",
+        "DESIGN.md and DESIGN-SYSTEM.md are updated only when the RFC promotes a reusable rule or asset contract.",
+        "The RFC defines beta-tester and UX-evaluator evidence for the next implementation round."
+      ],
+      "verification": [
+        "python scripts/design_system_gate.py --check --all-ui",
+        "python scripts/evidence_index_generator.py --check",
+        "python scripts/ui_ux_cycle.py --root . propose --dry-run --json"
+      ]
+    },
+    {
+      "title": "Derive Taskset Board IA implementation and beta units",
+      "goal": "Turn the accepted Taskset Board IA RFC into a source-mutation implementation registration input and a paired beta/UX evaluation plan without bypassing W0-W6.",
+      "scope": "Planning and registration input only. Do not edit UI source files. The output must be specific enough for interface-designer and ux-evaluator claims.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 3,
+      "est_tokens": 7000,
+      "owner": "interface-designer",
+      "team": "ui-ux",
+      "acceptance": [
+        "A follow-up registration input names the next UI source mutation task, target files, target API/schema contracts, and token/component/pattern/one-off classification.",
+        "A beta-tester artifact plan records clicked/typed flows, recovery attempts, viewport/data state, keyboard traversal, reduced-motion behavior, and BTC-style failure routing.",
+        "The next implementation task keeps page files focused on layout and data wiring while repeated surface area is moved into pattern assets.",
+        "The plan preserves design-system gate, focused UI tests, evidence index, and independent W4b verification commands."
+      ],
+      "verification": [
+        "python scripts/ui_ux_cycle.py --root . propose --dry-run --json",
+        "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION --check",
+        "python scripts/evidence_index_generator.py --check"
+      ]
+    }
+  ]
+}

@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-19
-task_count: 267
-open_count: 0
+task_count: 270
+open_count: 3
 completed_count: 267
-task_set_count: 0
+task_set_count: 1
 completed_task_set_count: 49
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `0` open or active tasks; `267` completed tasks are archived from this live board.
+- Summary: `3` open or active tasks; `267` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `0` / Ask `0` / Review `0` / Later `0` / Done `267`.
-- Task Sets: `0` active workflows; `49` completed workflows are hidden from the live action board.
+- Status: Action `3` / Ask `0` / Review `0` / Later `0` / Done `267`.
+- Task Sets: `1` active workflows; `49` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -41,6 +41,17 @@ completed_task_set_count: 49
 ## Action Board
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
+
+### Taskset Board IA Design Direction (`TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION`)
+
+- Flow: Resolve the post-OAG UX watch that Taskset Board discovery and whole-board focus traversal are too long now that the board contains 49 tasksets; run a lead-designer IA/design seminar, publish an RFC, then derive the next implementation and beta-evaluation taskset.
+- Progress: `0/3` done; `3` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-609` | INIT-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-609/UNIT-TASK-AR-609-001.md | planned | Action | P1 | High | Medium | 2h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Create a lead-designer seminar artifact that chooses how the next Taskset Board desig… |
+| `TASK-AR-610` | INIT-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | Medium | 3h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Promote the seminar decision into an accepted design-direction RFC that names the exa… |
+| `TASK-AR-611` | INIT-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | Medium | 3h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Turn the accepted Taskset Board IA RFC into a source-mutation implementation registra… |
 
 ## Archived Task Sets
 
@@ -101,7 +112,7 @@ completed_task_set_count: 49
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `0` open across `0` task sets (see Action Board above).
+- Active: `3` open across `1` task sets (see Action Board above).
 - Archived task sets: `49` (see Archived Task Sets above).
 - Archived task files: `267` — see `ARCHIVE-INDEX.md`.
 

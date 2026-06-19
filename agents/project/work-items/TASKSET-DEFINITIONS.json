@@ -150,6 +150,12 @@
       "display_name": "OAG Mobile Responsive Refinement",
       "summary": "Remove mobile Taskset Board horizontal overflow for the Operator Attention Graph relation panel, then rerun beta/UX evaluation on desktop and 390x844 mobile.",
       "order": 627
+    },
+    {
+      "task_set_id": "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION",
+      "display_name": "Taskset Board IA Design Direction",
+      "summary": "Resolve the post-OAG UX watch that Taskset Board discovery and whole-board focus traversal are too long now that the board contains 49 tasksets; run a lead-designer IA/design seminar, publish an RFC, then derive the next implementation and beta-evaluation taskset.",
+      "order": 628
     }
   ]
 }
