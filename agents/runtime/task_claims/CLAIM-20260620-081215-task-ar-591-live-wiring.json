@@ -1,0 +1,48 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260620-081215-task-ar-591-live-wiring",
+  "task_id": "TASK-AR-591",
+  "agent_role": "interface-designer",
+  "team_id": "ui-ux",
+  "agent_instance_id": "codex-interface-designer-task-ar-591-20260620",
+  "display_name": "Codex Interface Designer TASK-AR-591",
+  "callsite_id": "terminal:wt-task-ar-591:tab-01",
+  "pane_id": "terminal:wt-task-ar-591:tab-01",
+  "mode": "work",
+  "status": "claimed",
+  "task_set_id": "TASKSET-AR-VISUAL-SYSTEM-INTEGRATION",
+  "active_scope": "TASKSET-AR-VISUAL-SYSTEM-INTEGRATION",
+  "scope_transition_approved": false,
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "unit_id": "UNIT-TASK-AR-591-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-591/UNIT-TASK-AR-591-001.md",
+  "model_tier": "worker_standard",
+  "wip_slot": 0,
+  "stop_condition": "",
+  "phase": "claimed",
+  "progress_pct": 10,
+  "step_index": 1,
+  "step_total": 5,
+  "status_text": "Claiming TASK-AR-591 live visual component wiring",
+  "worktree_path": "C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-591",
+  "branch": "codex/task-ar-591-live-wiring",
+  "claimed_at": "2026-06-20T08:12:15+09:00",
+  "last_heartbeat": "2026-06-20T08:12:15+09:00",
+  "updated_at": "2026-06-20T08:12:15+09:00",
+  "expires_at": "2026-06-20T10:12:15+09:00",
+  "lease": {
+    "claimed_at": "2026-06-20T08:12:15+09:00",
+    "heartbeat_at": "2026-06-20T08:12:15+09:00",
+    "expires_at": "2026-06-20T10:12:15+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260620-081215-task-ar-591-live-wiring.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260620-081215-task-ar-591-live-wiring.log.md",
+  "allow_parallel_task_set": false,
+  "tags": [
+    "ui"
+  ],
+  "target_files": [
+    "src/agent_runtime/ui_console_assets.py",
+    "src/agent_runtime/ui_design_assets.py"
+  ]
+}

@@ -366,7 +366,7 @@
         {
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-20-taskset-ar-visual-system-integration-registration.md",
-          "value": "e898b56ce58e9249bad860f3fd3765ad043b366a2c0bb53d83d274a663485d65"
+          "value": "0ff3100dcd2d2ad2c68742064a549d3aeba13b3863545f19f7bd7e67a797811b"
         },
         {
           "kind": "sha256",
@@ -376,15 +376,15 @@
         {
           "kind": "sha256",
           "path": "scripts/work.py",
-          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-06-20-taskset-ar-visual-system-integration-registration.md",
-      "recorded_at": "2026-06-20T05:18:42+09:00",
+      "design_record": "reviews/REPLAN-2026-06-20-taskset-ar-visual-system-integration-task-ar-591-t3.md",
+      "recorded_at": "2026-06-20T08:11:18+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-VISUAL-SYSTEM-INTEGRATION"
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-20T05:18:42+09:00"
+  "updated_at": "2026-06-20T08:11:18+09:00"
 }
