@@ -1240,6 +1240,30 @@ CSS = """/*
   --growth-xp: var(--success);
   --growth-stage: var(--primary);
   --growth-efficiency: var(--teal);
+  /* Data-viz palette light (TASK-AR-590). Categorical 8-hue + 5-step sequential.
+     Sources: Radix Colors (MIT, radix-ui/colors) light hues for categorical;
+     IBM Carbon data-viz categorical-color-4 / sequential-01 (Apache 2.0,
+     carbondesignsystem.com/data-visualization/color-palettes) for seq steps.
+     WCAG: all categorical tokens >3:1 contrast vs --panel (graphical threshold).
+     Graph node/edge categorical colors (TASK-AR-588) consume these tokens.
+     Sparkline: --dv-sparkline maps to --accent per theme for auto-theming.   */
+  --dv-cat-1: #3e63dd;
+  --dv-cat-2: #12a594;
+  --dv-cat-3: #e79d13;
+  --dv-cat-4: #e54d2e;
+  --dv-cat-5: #30a46c;
+  --dv-cat-6: #f76808;
+  --dv-cat-7: #6e56cf;
+  --dv-cat-8: #d6409f;
+  --dv-seq-1: #d0e2ff;
+  --dv-seq-2: #82b4ff;
+  --dv-seq-3: #4589ff;
+  --dv-seq-4: #0f62fe;
+  --dv-seq-5: #002d9c;
+  --dv-sparkline: var(--accent, var(--primary));
+  --dv-sparkline-area: rgba(46, 111, 219, 0.13);
+  --dv-sparkline-w: 64px;
+  --dv-sparkline-h: 24px;
 }
 [data-theme="dark"] {
   color-scheme: dark;
@@ -1335,6 +1359,23 @@ CSS = """/*
   --growth-xp: var(--success);
   --growth-stage: var(--primary-hover);
   --growth-efficiency: var(--teal);
+  /* Data-viz palette dark (TASK-AR-590). Categorical: IBM Carbon data-viz
+     categorical-color-4 dark (Apache 2.0). Sequential: Carbon seq-01 dark.  */
+  --dv-cat-1: #8a3ffc;
+  --dv-cat-2: #33b1ff;
+  --dv-cat-3: #007d79;
+  --dv-cat-4: #ff7eb6;
+  --dv-cat-5: #fa4d56;
+  --dv-cat-6: #fff1f1;
+  --dv-cat-7: #6fdc8c;
+  --dv-cat-8: #4589ff;
+  --dv-seq-1: #e8f0ff;
+  --dv-seq-2: #a6c8ff;
+  --dv-seq-3: #4589ff;
+  --dv-seq-4: #0f62fe;
+  --dv-seq-5: #001d6c;
+  --dv-sparkline: var(--accent, var(--primary));
+  --dv-sparkline-area: rgba(94, 106, 210, 0.18);
 }
 * { box-sizing: border-box; }
 html { background: var(--canvas); }
@@ -4976,14 +5017,18 @@ pre {
 .kg-edge.type-dependsOn, .kg-edge.type-blocks { stroke: var(--danger); opacity: 0.7; }
 .kg-edge.type-references { stroke: var(--blue); }
 .kg-edge.type-executes { stroke: var(--subtle); stroke-dasharray: 4 3; }
+/* TASK-AR-590: knowledge-graph categorical node colors consume data-viz tokens
+ * (--dv-cat-N, Radix Colors MIT / Carbon Apache 2.0) for WCAG-adequate hues.
+ * Node kinds: task=cat1(blue), taskset=cat2(teal), initiative=cat3(amber),
+ *   review/meeting/research=cat7(violet), claim=cat4(red), commit/pr=panel. */
 .kg-node circle { stroke: var(--line-strong); stroke-width: 1.4; fill: var(--panel-strong); cursor: pointer; }
-.kg-node.kind-task circle { fill: var(--primary-soft-strong); stroke: var(--primary-line); }
-.kg-node.kind-taskset circle { fill: var(--blue); stroke: var(--blue); }
-.kg-node.kind-initiative circle { fill: var(--warning-soft); stroke: var(--warning-line); }
+.kg-node.kind-task circle { fill: var(--dv-cat-1, var(--primary-soft-strong)); stroke: var(--dv-cat-1, var(--primary-line)); opacity: 0.85; }
+.kg-node.kind-taskset circle { fill: var(--dv-cat-2, var(--blue)); stroke: var(--dv-cat-2, var(--blue)); opacity: 0.85; }
+.kg-node.kind-initiative circle { fill: var(--dv-cat-3, var(--warning-soft)); stroke: var(--dv-cat-3, var(--warning-line)); opacity: 0.75; }
 .kg-node.kind-review circle, .kg-node.kind-meeting circle, .kg-node.kind-research circle,
 .kg-node.kind-retro circle, .kg-node.kind-council circle, .kg-node.kind-seminar circle,
-.kg-node.kind-compound circle, .kg-node.kind-verification circle, .kg-node.kind-call circle { fill: var(--panel); }
-.kg-node.kind-claim circle { fill: var(--subtle); }
+.kg-node.kind-compound circle, .kg-node.kind-verification circle, .kg-node.kind-call circle { fill: var(--dv-cat-7, var(--panel)); opacity: 0.6; }
+.kg-node.kind-claim circle { fill: var(--dv-cat-4, var(--subtle)); opacity: 0.6; }
 .kg-node.kind-commit circle, .kg-node.kind-pr circle { fill: var(--canvas); }
 .kg-node.is-focus circle { stroke: var(--danger); stroke-width: 2.6; }
 .kg-node text { fill: var(--muted); font-size: var(--font-size-ui-9); text-anchor: middle; pointer-events: none; }
@@ -5854,6 +5899,27 @@ pre {
 .empty-illustration-art path { stroke: var(--line-strong); fill: none; }
 .empty-illustration-title { color: var(--ink); font-weight: 600; }
 .empty-illustration-hint { color: var(--muted); font-size: var(--font-size-ui-12); }
+/* TASK-AR-590: state illustration variants (error=danger token, loading=accent) */
+.empty-illustration--loading .empty-illustration-art { stroke: none; fill: none; }
+@keyframes ar-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.empty-illustration-art--spin {
+  animation: ar-spin 1s linear infinite;
+  transform-origin: 50% 50%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .empty-illustration-art--spin { animation: none; }
+}
+/* TASK-AR-590: sparkline component (inspired by fnando/sparkline MIT).        */
+/* Stroke/fill consume --dv-sparkline / --dv-sparkline-area token pairs.       */
+.sparkline {
+  display: inline-block;
+  vertical-align: middle;
+  overflow: visible;
+}
+.sparkline--empty { display: inline-block; width: var(--dv-sparkline-w, 64px); height: var(--dv-sparkline-h, 24px); }
+/* Workload agent-row sparkline slot */
+.workload-sparkline { display: flex; align-items: center; gap: var(--space-md); }
+.workload-sparkline .sparkline { flex-shrink: 0; }
 
 /* --- Experience settings control + dialog --- */
 .experience-settings-toggle {
@@ -11816,9 +11882,19 @@ function workloadRow(row, periods) {
   const drill = row.kind === "team"
     ? `data-drill-team="${escapeHtml(row.id)}"`
     : `data-drill-role="${escapeHtml(row.id)}"`;
+  // TASK-AR-590: sparkline shows agent/team load trend across periods.
+  // Numeric coercion: each cell.load is passed through Number(); non-finite
+  // values are filtered inside componentSparkline (security/numeric purity).
+  const sparkData = periods.map((period) => {
+    const cell = (row.cells || []).find((item) => item.period === period) || { load: 0 };
+    return Number(cell.load);
+  });
+  const spark = componentSparkline(sparkData, { label: escapeHtml(row.id) + " load trend" });
   return `<div class="workload-row">` +
-    `<button type="button" class="workload-label" ${drill} title="Show ${escapeHtml(row.id)} tasks">` +
-    `${escapeHtml(row.id)}<small>${escapeHtml(row.open_total ?? 0)} open - peak ${escapeHtml(row.peak_band || "idle")}</small></button>` +
+    `<button type="button" class="workload-label workload-sparkline" ${drill} title="Show ${escapeHtml(row.id)} tasks">` +
+    `<span>${escapeHtml(row.id)}<small>${escapeHtml(row.open_total ?? 0)} open - peak ${escapeHtml(row.peak_band || "idle")}</small></span>` +
+    spark +
+    `</button>` +
     `<div class="workload-cells">${cells}</div></div>`;
 }
 

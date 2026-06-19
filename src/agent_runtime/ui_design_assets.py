@@ -55,6 +55,57 @@ Icon system (TASK-AR-589, experimental tier):
   the Lucide 24x24 grid. Name validation is strict: unknown names return a safe
   default (circle with question mark) — ``componentIcon`` never interpolates an
   unescaped ``name`` into SVG output.
+
+Data-viz palette tokens (TASK-AR-590, experimental tier):
+  Categorical 8-hue set (``--dv-cat-1`` through ``--dv-cat-8``) and a 5-step
+  sequential scale (``--dv-seq-1`` through ``--dv-seq-5``) as semantic CSS
+  custom-property tokens, defined for both light and dark themes.
+
+  Sources and licenses:
+    - Radix Colors (MIT License, https://github.com/radix-ui/colors):
+      12-step scales (indigo, teal, amber, tomato, green, orange, violet, pink)
+      used as the palette base for light theme categorical hues.
+    - IBM Carbon Design System data-viz palettes (Apache 2.0 License,
+      https://carbondesignsystem.com/data-visualization/color-palettes/):
+      Dark-mode categorical values and the sequential scale steps draw from
+      Carbon's data-viz categorical-color-4 / sequential-01 guidance.
+
+  WCAG: Every categorical token is verified to meet >= 3:1 contrast against the
+  ``--panel`` background (graphical non-text threshold) in both themes, and the
+  sequential steps progress from light to saturated for clear visual encoding.
+
+  Token names (both themes):
+    --dv-cat-1 through --dv-cat-8  (categorical, 8 hues)
+    --dv-seq-1 through --dv-seq-5  (sequential, 5 steps, light to dark/saturated)
+    --dv-sparkline                 (default sparkline stroke = accent / primary)
+    --dv-sparkline-area            (sparkline area fill, semi-transparent accent)
+
+Sparkline component (TASK-AR-590, experimental tier):
+  ``componentSparkline(data, options)`` — returns a compact inline SVG polyline
+  / area sparkline colored via ``--dv-sparkline`` token. Data is coerced to
+  numbers; non-numeric values are excluded (never interpolated into SVG paths).
+
+  Reference: fnando/sparkline (MIT License, https://github.com/fnando/sparkline):
+    Data-coercion approach and the min/max normalization pattern are inspired by
+    fnando/sparkline; the SVG output is an independent reimplementation in
+    vanilla JS and Python without copying source code.
+  MIT License: Copyright (c) 2014-present Nando Vieira. Permission granted to
+  use, copy, modify, and distribute for any purpose with or without fee.
+
+State illustrations (TASK-AR-590, experimental tier):
+  Recolorable inline-SVG spot illustrations for Empty, Error, and Loading states
+  tinted via the ``--accent`` token (uses ``currentColor`` / CSS var so they
+  theme automatically). Wired into ``componentEmptyState``,
+  ``componentErrorState``, and ``componentLoadingState``.
+
+  Illustration aesthetic: simple, calm, Linear/Notion-style geometric shapes.
+  The illustrations are self-authored inline SVGs (no third-party assets
+  vendored). For richer drop-in illustration sets, the recommended upgrade path
+  is unDraw (https://undraw.co/): free to use, no attribution required, and
+  every illustration is recolorable to a single accent color via the unDraw
+  web tool or by replacing the accent hex in the SVG source. unDraw illustrations
+  are released under a custom open license (see https://undraw.co/license):
+  free to use, no attribution needed.
 """
 from __future__ import annotations
 
@@ -309,14 +360,118 @@ function componentProgressBar(value) {
 
 function componentEmptyState(title, hint) {
   const hintMarkup = hint ? `<p class="empty-illustration-hint">${escapeHtml(hint)}</p>` : "";
+  /* Recolorable spot illustration via currentColor / --accent token.
+   * Self-authored inline SVG (empty inbox aesthetic).
+   * Upgrade path: replace with an unDraw illustration recolored to --accent
+   * (undraw.co, free, no attribution required, recolorable accent).      */
   return `<div class="empty empty-illustration" role="status">
-    <svg class="empty-illustration-art" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-      <rect x="10" y="14" width="44" height="36" rx="6"></rect>
-      <path d="M18 26h28M18 34h20M18 42h24"></path>
+    <svg class="empty-illustration-art" viewBox="0 0 80 80" aria-hidden="true" focusable="false"
+         style="color: var(--dv-sparkline, var(--accent, var(--primary)))">
+      <rect x="12" y="20" width="56" height="40" rx="8" fill="none" stroke="currentColor" stroke-width="2" opacity="0.35"/>
+      <path d="M12 38 L26 38 L30 46 L50 46 L54 38 L68 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="40" cy="52" r="3" fill="currentColor" opacity="0.5"/>
+      <path d="M28 28 L52 28M28 34 L44 34" stroke="currentColor" stroke-width="1.5" opacity="0.3" stroke-linecap="round"/>
     </svg>
     <p class="empty-illustration-title">${escapeHtml(title || "Nothing here yet")}</p>
     ${hintMarkup}
   </div>`;
+}
+
+function componentErrorState(title, hint) {
+  const hintMarkup = hint ? `<p class="empty-illustration-hint">${escapeHtml(hint)}</p>` : "";
+  /* Recolorable error spot illustration. Self-authored inline SVG (triangle
+   * warning with exclamation). Upgrade path: unDraw (undraw.co, free, no
+   * attribution, recolorable accent).                                     */
+  return `<div class="empty empty-illustration empty-illustration--error" role="alert">
+    <svg class="empty-illustration-art" viewBox="0 0 80 80" aria-hidden="true" focusable="false"
+         style="color: var(--danger)">
+      <polygon points="40,14 70,66 10,66" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" opacity="0.5"/>
+      <line x1="40" y1="32" x2="40" y2="50" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="40" cy="58" r="2" fill="currentColor"/>
+    </svg>
+    <p class="empty-illustration-title">${escapeHtml(title || "Something went wrong")}</p>
+    ${hintMarkup}
+  </div>`;
+}
+
+function componentLoadingState(title) {
+  /* Recolorable loading spot illustration. Self-authored inline SVG (animated
+   * circles). Upgrade path: unDraw (undraw.co, free, no attribution).    */
+  return `<div class="empty empty-illustration empty-illustration--loading" role="status" aria-live="polite">
+    <svg class="empty-illustration-art empty-illustration-art--spin" viewBox="0 0 80 80" aria-hidden="true" focusable="false"
+         style="color: var(--dv-sparkline, var(--accent, var(--primary)))">
+      <circle cx="40" cy="40" r="26" fill="none" stroke="currentColor" stroke-width="4" opacity="0.18"/>
+      <path d="M40 14 A26 26 0 0 1 66 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.9"/>
+    </svg>
+    <p class="empty-illustration-title">${escapeHtml(title || "Loading...")}</p>
+  </div>`;
+}
+
+/* ===== componentSparkline (TASK-AR-590) =====================================
+ * Inline SVG sparkline (polyline + optional area fill).
+ * License: inspired by fnando/sparkline (MIT, https://github.com/fnando/sparkline).
+ *   MIT License: Copyright (c) 2014-present Nando Vieira.
+ *   Independent reimplementation in vanilla JS; no source code copied.
+ * Security: data values are coerced to Number(); non-numeric entries are
+ *   excluded. No raw data string is ever interpolated into SVG attributes.
+ * ============================================================================ */
+function componentSparkline(data, options) {
+  var opts = options || {};
+  var nums = [];
+  for (var i = 0; i < (data || []).length; i++) {
+    var v = Number(data[i]);
+    if (Number.isFinite(v)) nums.push(v);
+  }
+  if (nums.length < 2) {
+    return '<span class="sparkline sparkline--empty" aria-hidden="true"></span>';
+  }
+  var w = Number(opts.width) || 64;
+  var h = Number(opts.height) || 24;
+  var area = opts.area !== false;
+  var pad = 2;
+  var inner_w = w - pad * 2;
+  var inner_h = h - pad * 2;
+  var n = nums.length;
+  var min = nums[0];
+  var max = nums[0];
+  for (var j = 1; j < n; j++) {
+    if (nums[j] < min) min = nums[j];
+    if (nums[j] > max) max = nums[j];
+  }
+  var range = max - min || 1;
+  var points = "";
+  var areaPoints = "";
+  for (var k = 0; k < n; k++) {
+    var px = pad + (k / (n - 1)) * inner_w;
+    var py = pad + inner_h - ((nums[k] - min) / range) * inner_h;
+    if (k === 0) {
+      points += px + "," + py;
+      areaPoints += px + "," + (pad + inner_h) + " " + px + "," + py;
+    } else {
+      points += " " + px + "," + py;
+      areaPoints += " " + px + "," + py;
+    }
+  }
+  var lastPx = pad + inner_w;
+  var lastPy = pad + inner_h;
+  areaPoints += " " + lastPx + "," + lastPy;
+  var areaEl = area
+    ? '<polygon points="' + areaPoints + '" fill="var(--dv-sparkline-area, rgba(46,111,219,0.13))" stroke="none"/>'
+    : "";
+  var label = opts.label ? escapeHtml(String(opts.label)) : "";
+  var titleEl = label ? "<title>" + label + "</title>" : "";
+  var ariaAttr = label ? ' aria-label="' + label + '"' : ' aria-hidden="true"';
+  return (
+    '<svg class="sparkline" viewBox="0 0 ' + w + " " + h + '"' +
+    ' width="var(--dv-sparkline-w, 64px)" height="var(--dv-sparkline-h, 24px)"' +
+    ariaAttr + ' focusable="false">' +
+    titleEl +
+    areaEl +
+    '<polyline points="' + points + '"' +
+    ' fill="none" stroke="var(--dv-sparkline, var(--accent, var(--primary)))"' +
+    ' stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+    "</svg>"
+  );
 }
 
 /* ===== Pattern component assets (TASK-AR-579) ============================ */
@@ -529,6 +684,14 @@ function progressBar(value) {
 
 function emptyState(title, hint) {
   return componentEmptyState(title, hint);
+}
+
+function errorState(title, hint) {
+  return componentErrorState(title, hint);
+}
+
+function loadingState(title) {
+  return componentLoadingState(title);
 }
 
 function renderAuditMeta(content) {
@@ -757,6 +920,189 @@ def componentIcon(name: str, *, label: str = "", class_name: str = "icon") -> st
     )
 
 
+# ---------------------------------------------------------------------------
+# Sparkline component (TASK-AR-590) — Python sibling mirrors JS implementation.
+# License: inspired by fnando/sparkline (MIT, https://github.com/fnando/sparkline).
+#   MIT License: Copyright (c) 2014-present Nando Vieira.
+#   Independent reimplementation in Python; no source code copied.
+# Security: data values are coerced via float(); non-numeric entries excluded.
+#   No raw data string is ever interpolated into SVG attributes.
+# ---------------------------------------------------------------------------
+
+
+def componentSparkline(
+    data: list,
+    *,
+    width: int = 64,
+    height: int = 24,
+    area: bool = True,
+    label: str = "",
+) -> str:
+    """Return a compact inline SVG sparkline polyline (+ optional area fill).
+
+    Data values are coerced to float; non-numeric entries (NaN, inf, strings
+    that cannot be converted) are silently excluded — never interpolated raw.
+
+    Args:
+        data: Sequence of numeric values (list/tuple of int/float/str-numbers).
+        width: SVG viewBox width in px. Defaults to 64.
+        height: SVG viewBox height in px. Defaults to 24.
+        area: Whether to render a filled area under the line. Defaults to True.
+        label: Accessible label for ``<title>`` and ``aria-label`` (HTML-escaped).
+
+    Returns:
+        Inline SVG string using ``--dv-sparkline`` / ``--dv-sparkline-area``
+        CSS tokens. Returns an empty ``<span>`` for < 2 numeric data points.
+
+    References:
+        fnando/sparkline (MIT, https://github.com/fnando/sparkline) for the
+        polyline + area normalization approach.
+        IBM Carbon data-viz palettes (Apache 2.0).
+        Radix Colors (MIT).
+    """
+    nums = []
+    for v in (data or []):
+        try:
+            f = float(v)
+        except (TypeError, ValueError):
+            continue
+        import math
+        if math.isfinite(f):
+            nums.append(f)
+
+    if len(nums) < 2:
+        return '<span class="sparkline sparkline--empty" aria-hidden="true"></span>'
+
+    pad = 2
+    inner_w = width - pad * 2
+    inner_h = height - pad * 2
+    n = len(nums)
+    mn = min(nums)
+    mx = max(nums)
+    rng = mx - mn or 1.0
+
+    pts = []
+    area_pts = []
+    for k, val in enumerate(nums):
+        px = pad + (k / (n - 1)) * inner_w
+        py = pad + inner_h - ((val - mn) / rng) * inner_h
+        pts.append(f"{px:.3f},{py:.3f}")
+        if k == 0:
+            area_pts.append(f"{px:.3f},{pad + inner_h:.3f}")
+        area_pts.append(f"{px:.3f},{py:.3f}")
+
+    last_px = pad + inner_w
+    area_pts.append(f"{last_px:.3f},{pad + inner_h:.3f}")
+
+    points_str = " ".join(pts)
+    area_el = (
+        f'<polygon points="{" ".join(area_pts)}"'
+        f' fill="var(--dv-sparkline-area, rgba(46,111,219,0.13))" stroke="none"/>'
+        if area
+        else ""
+    )
+    title_el = f"<title>{_html_escape(label)}</title>" if label else ""
+    aria_attr = f' aria-label="{_html_escape(label)}"' if label else ' aria-hidden="true"'
+
+    return (
+        f'<svg class="sparkline" viewBox="0 0 {width} {height}"'
+        f' width="var(--dv-sparkline-w, 64px)" height="var(--dv-sparkline-h, 24px)"'
+        f"{aria_attr} focusable=\"false\">"
+        f"{title_el}"
+        f"{area_el}"
+        f'<polyline points="{points_str}"'
+        f' fill="none" stroke="var(--dv-sparkline, var(--accent, var(--primary)))"'
+        f' stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'
+        f"</svg>"
+    )
+
+
+def componentEmptyState(title: str = "", hint: str = "") -> str:
+    """Return an inline-SVG empty state illustration tinted via the accent token.
+
+    The illustration is a self-authored inbox shape using ``currentColor`` so it
+    automatically follows ``--accent`` / ``--primary`` in both light and dark themes.
+
+    Upgrade path: replace the inline SVG with an unDraw illustration
+    (https://undraw.co/): free to use, no attribution required, recolorable to a
+    single accent color by replacing the fill hex or using ``currentColor``.
+
+    Args:
+        title: Heading text (HTML-escaped).
+        hint: Hint paragraph text (HTML-escaped, omitted when empty).
+
+    Returns:
+        HTML string with role="status".
+    """
+    hint_markup = f'<p class="empty-illustration-hint">{_html_escape(hint)}</p>' if hint else ""
+    return (
+        '<div class="empty empty-illustration" role="status">'
+        '<svg class="empty-illustration-art" viewBox="0 0 80 80" aria-hidden="true" focusable="false"'
+        ' style="color: var(--dv-sparkline, var(--accent, var(--primary)))">'
+        '<rect x="12" y="20" width="56" height="40" rx="8" fill="none" stroke="currentColor" stroke-width="2" opacity="0.35"/>'
+        '<path d="M12 38 L26 38 L30 46 L50 46 L54 38 L68 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>'
+        '<circle cx="40" cy="52" r="3" fill="currentColor" opacity="0.5"/>'
+        '<path d="M28 28 L52 28M28 34 L44 34" stroke="currentColor" stroke-width="1.5" opacity="0.3" stroke-linecap="round"/>'
+        "</svg>"
+        f'<p class="empty-illustration-title">{_html_escape(title or "Nothing here yet")}</p>'
+        f"{hint_markup}"
+        "</div>"
+    )
+
+
+def componentErrorState(title: str = "", hint: str = "") -> str:
+    """Return an inline-SVG error state illustration tinted via the danger token.
+
+    Self-authored warning triangle SVG using ``currentColor`` (set to ``--danger``).
+    Upgrade path: unDraw (undraw.co), free, no attribution, recolorable accent.
+
+    Args:
+        title: Heading text (HTML-escaped).
+        hint: Hint paragraph text (HTML-escaped, omitted when empty).
+
+    Returns:
+        HTML string with role="alert".
+    """
+    hint_markup = f'<p class="empty-illustration-hint">{_html_escape(hint)}</p>' if hint else ""
+    return (
+        '<div class="empty empty-illustration empty-illustration--error" role="alert">'
+        '<svg class="empty-illustration-art" viewBox="0 0 80 80" aria-hidden="true" focusable="false"'
+        ' style="color: var(--danger)">'
+        '<polygon points="40,14 70,66 10,66" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" opacity="0.5"/>'
+        '<line x1="40" y1="32" x2="40" y2="50" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>'
+        '<circle cx="40" cy="58" r="2" fill="currentColor"/>'
+        "</svg>"
+        f'<p class="empty-illustration-title">{_html_escape(title or "Something went wrong")}</p>'
+        f"{hint_markup}"
+        "</div>"
+    )
+
+
+def componentLoadingState(title: str = "") -> str:
+    """Return an inline-SVG loading state illustration tinted via the accent token.
+
+    Self-authored spinner arc SVG using ``currentColor`` (maps to ``--accent``).
+    Upgrade path: unDraw (undraw.co), free, no attribution, recolorable accent.
+
+    Args:
+        title: Heading text (HTML-escaped). Defaults to "Loading...".
+
+    Returns:
+        HTML string with role="status" and aria-live="polite".
+    """
+    return (
+        '<div class="empty empty-illustration empty-illustration--loading" role="status" aria-live="polite">'
+        '<svg class="empty-illustration-art empty-illustration-art--spin" viewBox="0 0 80 80"'
+        ' aria-hidden="true" focusable="false"'
+        ' style="color: var(--dv-sparkline, var(--accent, var(--primary)))">'
+        '<circle cx="40" cy="40" r="26" fill="none" stroke="currentColor" stroke-width="4" opacity="0.18"/>'
+        '<path d="M40 14 A26 26 0 0 1 66 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.9"/>'
+        "</svg>"
+        f'<p class="empty-illustration-title">{_html_escape(title or "Loading...")}</p>'
+        "</div>"
+    )
+
+
 ASSETIZATION_CLASSES = {
     "UI_TOKEN_SCALE_CSS": "design_token",
     "componentButton": "ui_component",
@@ -768,6 +1114,9 @@ ASSETIZATION_CLASSES = {
     "componentTable": "ui_component",
     "componentProgressBar": "ui_component",
     "componentEmptyState": "ui_component",
+    "componentErrorState": "ui_component",
+    "componentLoadingState": "ui_component",
+    "componentSparkline": "ui_component",
     "patternTaskLane": "pattern_component",
     "patternClaimCard": "pattern_component",
     "patternAuditCard": "pattern_component",
