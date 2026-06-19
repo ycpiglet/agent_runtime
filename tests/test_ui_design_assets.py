@@ -121,6 +121,13 @@ def test_pattern_agent_avatar_different_seeds_differ():
     assert svg_a != svg_b, "Different seeds should produce different avatars"
 
 
+def test_pattern_agent_avatar_label_is_html_escaped():
+    """A label is escaped into <title> (no XSS); Python must match the JS escapeHtml sibling."""
+    svg = ui_design_assets.patternAgentAvatar("a1", role="qa", label="<script>alert(1)</script>")
+    assert "<script>alert" not in svg, "label must be HTML-escaped in <title> (XSS sink)"
+    assert "&lt;script&gt;" in svg
+
+
 def test_pattern_agent_avatar_returns_svg_string():
     """Output must be an SVG element string."""
     svg = ui_design_assets.patternAgentAvatar("test-agent-id")

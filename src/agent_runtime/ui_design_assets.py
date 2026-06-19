@@ -30,6 +30,8 @@ Avatar system (TASK-AR-587, experimental tier):
 """
 from __future__ import annotations
 
+from html import escape as _html_escape
+
 UI_TOKEN_SCALE_CSS = """
 /* ===== Design-system token scale (TASK-AR-579, promoted TASK-AR-583) ===== */
 /* Spacing and radius tokens are now a fully designed semantic scale.         */
@@ -522,7 +524,7 @@ def patternAgentAvatar(seed: str, *, role: str = "", size: int = 40, label: str 
         if role
         else ""
     )
-    label_el = f"<title>{label}</title>" if label else ""
+    label_el = f"<title>{_html_escape(label)}</title>" if label else ""
 
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {size} {size}"'
