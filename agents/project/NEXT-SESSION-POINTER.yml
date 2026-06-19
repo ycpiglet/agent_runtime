@@ -1,21 +1,43 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T13:15:22+09:00
+updated_at: 2026-06-19T13:26:00+09:00
 current_state:
-  summary: "TASK-AR-605 is released, verified, and closed for the claim-aware Operator Attention Graph relation adapter. TASK-AR-606 is the next beta/UX retest."
-  status: ready_for_next_claim
-  task_set_status: task_ar_605_completed_task_ar_606_ready
+  summary: "TASK-AR-606 is claimed for claim-aware Operator Attention Graph beta/UX retest."
+  status: in_progress
+  task_set_status: task_ar_606_claimed
   task_set_id: "TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER"
-  step_index: 5
+  step_index: 1
   step_total: 6
-  progress_pct: 80
-  status_text: "TASK-AR-605 fixed claim-aware relation state mapping and passed task-level verification; claim TASK-AR-606 next for beta/UX evidence."
+  progress_pct: 5
+  status_text: "TASK-AR-606 claim created; beta/UX evaluation worktree is ready for evidence recording."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260619-132600-task-ar-606-claim-aware-relation-beta
+      display_name: codex-ux-evaluator-ar-606
+      agent_role: ux-evaluator
+      agent_instance_id: codex-ux-evaluator-ar-606
+      team_id: ui-ux
+      pane_id: terminal:wt-task-ar-606:tab-01
+      callsite_id: terminal:wt-task-ar-606:tab-01
+      task_id: TASK-AR-606
+      task_set_id: TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER
+      unit_id: UNIT-TASK-AR-606-001
+      status: claimed
+      phase: evaluation
+      progress_pct: 5
+      step_index: 1
+      step_total: 6
+      status_text: Claim-aware relation adapter beta/UX evaluation started
+      worktree_path: .worktrees/TASK-AR-606-claim-aware-relation-beta
+      branch: codex/task-ar-606-claim-aware-relation-beta
+      claim_path: agents/runtime/task_claims/CLAIM-20260619-132600-task-ar-606-claim-aware-relation-beta.json
+      handoff_path: agents/runtime/task_claims/CLAIM-20260619-132600-task-ar-606-claim-aware-relation-beta.handoff.md
+      last_heartbeat: 2026-06-19T13:26:00+09:00
+  current_teams:
+    - ui-ux
 resume:
   active_task: TASK-AR-606
   active_task_set: TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER
-  branch_policy: "Create a fresh claim/worktree for TASK-AR-606 before beta/UX evidence work."
+  branch_policy: "Work only inside .worktrees/TASK-AR-606-claim-aware-relation-beta until W4 verification and release."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -52,10 +74,10 @@ pointers:
       - BTC-OAG-INTERRUPT-001
   oag_claim_aware_relation_adapter:
     taskset: TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER
-    active_claim: null
+    active_claim: agents/runtime/task_claims/CLAIM-20260619-132600-task-ar-606-claim-aware-relation-beta.json
     released_claim: agents/runtime/task_claims/CLAIM-20260619-124031-task-ar-605-claim-aware-relation-adapter.json
-    worktree_path: null
-    status: task_ar_605_completed_task_ar_606_ready
+    worktree_path: .worktrees/TASK-AR-606-claim-aware-relation-beta
+    status: task_ar_606_claimed
     completed_tasks:
       - TASK-AR-605
     next_task: TASK-AR-606
@@ -73,7 +95,7 @@ pointers:
     task_ar_605_unit_verification: reviews/VERIFY-2026-06-19-unit-task-ar-605-001-20260619125618.json
     task_ar_605_verification: reviews/VERIFY-2026-06-19-task-ar-605-20260619131445.json
     task_ar_605_w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-605.md
-    next_decision: claim_task_ar_606_for_beta_ux_retest
+    next_decision: complete_task_ar_606_beta_ux_retest
   design_system_debt_consolidation:
     taskset: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
     released_claim: agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.json

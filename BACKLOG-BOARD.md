@@ -46,7 +46,7 @@ completed_task_set_count: 47
 
 - Flow: Promote or replace the view-local relation summary adapter so Operator Attention Graph claim path and command readiness reflect active, expired, interrupted, and guarded claim states, then rerun beta/UX evaluation.
 - Progress: `1/2` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-606` | INIT-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-606/UNIT-TASK-AR-606-001.md | planned | Action | P1 | High | Medium | 2h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Repeat beta-tester and UX-evaluator verification after the claim-aware adapter implem… |
