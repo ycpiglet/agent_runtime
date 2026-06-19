@@ -36,10 +36,11 @@
 
 ## 2026-06-19 TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT Registration
 
-- New active task set: `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT`.
+- Active task set: `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` is `1/2` done.
 - Purpose: close `BTC-OAG-CLAIM-MOBILE-001`, where the Taskset Board measured `641px` document width against a `390px` mobile viewport after opening the claim-aware relation panel.
-- Registered planned tasks: `TASK-AR-607` implements the responsive Taskset Board / relation-panel layout fix; `TASK-AR-608` reruns beta-tester and UX-evaluator evidence on desktop and `390x844` mobile.
-- Boundary: implementation starts only after a `TASK-AR-607` claim and worktree are created.
+- Completed task: `TASK-AR-607` implemented the responsive Taskset Board / relation-panel layout fix and passed W4b.
+- Remaining task: `TASK-AR-608` reruns beta-tester and UX-evaluator evidence on desktop and `390x844` mobile.
+- Boundary: `TASK-AR-608` is evaluation-only; any remaining user-visible defect must be routed with a BTC-style ID.
 
 ## 2026-06-19 TASKSET-AR-UI-UX-CYCLE-AUTOMATION complete
 

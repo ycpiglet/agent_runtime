@@ -9,9 +9,11 @@ kind: task
 parent_id: TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
 registered_at: 2026-06-19T14:04:00+09:00
 created_at: 2026-06-19T14:04:00+09:00
-updated_at: 2026-06-19T14:04:00+09:00
+started_at: 2026-06-19T14:07:00+09:00
+updated_at: 2026-06-19T14:43:00+09:00
 title: Fix Taskset Board mobile overflow
-status: planned
+status: completed
+verification_status: passed
 priority: P1
 difficulty: M
 est_hours: 3
@@ -32,6 +34,15 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+verified_at: 2026-06-19T14:42:00+09:00
+verified_by: codex-w4b-verifier-ar-607
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-oag-mobile-responsive-refinement.json
+resolution: done
+completed_at: 2026-06-19T14:43:00+09:00
+closed_by: codex-interface-designer-ar-607
+actual_hours: 0.9
+actual_tokens: 12000
 ---
 
 # TASK-AR-607 - Fix Taskset Board mobile overflow
@@ -58,3 +69,15 @@ tags:
 - `python scripts/design_system_gate.py --check --all-ui`
 - `python scripts/ui_ux_cycle.py --root . assess --json`
 - `python scripts/evidence_index_generator.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T14:43:00+09:00`
+- Resolution: `done`
+- Actual hours: `0.9`
+- Actual tokens: `12000`
+- Closed by: `codex-interface-designer-ar-607`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-oag-mobile-responsive-refinement.json`
+<!-- work-close:end -->

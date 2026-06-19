@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T14:09:54+09:00",
+  "generated_at": "2026-06-19T14:44:55+09:00",
   "record_count": 376,
   "finding_count": 0,
   "findings": [],
@@ -4106,7 +4106,7 @@
       "title": "Fix BTC-OAG-CLAIM-MOBILE-001 by constraining Taskset Board, relation-panel, toolbar,…",
       "path": "agents/lead_engineer/tasks/TASK-AR-607.md",
       "parent_id": "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-607-001",
@@ -4117,7 +4117,7 @@
       "title": "UNIT-TASK-AR-607-001 - Constrain Taskset Board mobile layout",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-607/UNIT-TASK-AR-607-001.md",
       "parent_id": "TASK-AR-607",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-608",

@@ -1,43 +1,21 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T14:07:00+09:00
+updated_at: 2026-06-19T14:43:00+09:00
 current_state:
-  summary: "TASK-AR-607 is claimed for the BTC-OAG-CLAIM-MOBILE-001 mobile Taskset Board overflow fix."
+  summary: "TASK-AR-607 is W4b-verified, released, and closed; TASK-AR-608 is next for beta/UX evaluation."
   status: in_progress
-  task_set_status: task_ar_607_claimed
+  task_set_status: task_ar_608_ready
   task_set_id: "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT"
-  step_index: 1
+  step_index: 4
   step_total: 6
-  progress_pct: 5
-  status_text: "TASK-AR-607 claim created; implementation worktree is ready for responsive layout work."
+  progress_pct: 50
+  status_text: "TASK-AR-607 passed W4a/W4b and is closed; merge/cleanup is next before TASK-AR-608 claim."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260619-140700-task-ar-607-mobile-responsive-refinement
-      display_name: codex-interface-designer-ar-607
-      agent_role: interface-designer
-      agent_instance_id: codex-interface-designer-ar-607
-      team_id: ui-ux
-      pane_id: terminal:wt-task-ar-607:tab-01
-      callsite_id: terminal:wt-task-ar-607:tab-01
-      task_id: TASK-AR-607
-      task_set_id: TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
-      unit_id: UNIT-TASK-AR-607-001
-      status: claimed
-      phase: implementation
-      progress_pct: 5
-      step_index: 1
-      step_total: 6
-      status_text: TASK-AR-607 mobile overflow fix claimed; implementation worktree ready.
-      worktree_path: .worktrees/TASK-AR-607-oag-mobile-responsive
-      branch: codex/task-ar-607-oag-mobile-responsive
-      claim_path: agents/runtime/task_claims/CLAIM-20260619-140700-task-ar-607-mobile-responsive-refinement.json
-      handoff_path: agents/runtime/task_claims/CLAIM-20260619-140700-task-ar-607-mobile-responsive-refinement.handoff.md
-      last_heartbeat: 2026-06-19T14:07:00+09:00
-  current_teams:
-    - ui-ux
+  current_agents: []
+  current_teams: []
 resume:
-  active_task: TASK-AR-607
+  active_task: TASK-AR-608
   active_task_set: TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
-  branch_policy: "Work only inside .worktrees/TASK-AR-607-oag-mobile-responsive until W4 verification and release."
+  branch_policy: "After TASK-AR-607 merge/cleanup, claim TASK-AR-608 in a fresh worktree for evaluation-only beta/UX evidence."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -108,12 +86,15 @@ pointers:
     next_decision: register_mobile_taskset_board_overflow_refinement
   oag_mobile_responsive_refinement:
     taskset: TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
-    active_claim: agents/runtime/task_claims/CLAIM-20260619-140700-task-ar-607-mobile-responsive-refinement.json
+    active_claim: null
+    released_claims:
+      - agents/runtime/task_claims/CLAIM-20260619-140700-task-ar-607-mobile-responsive-refinement.json
     worktree_path: .worktrees/TASK-AR-607-oag-mobile-responsive
-    status: task_ar_607_claimed
-    completed_tasks: []
-    next_task: TASK-AR-607
-    next_unit: UNIT-TASK-AR-607-001
+    status: task_ar_607_released_pending_merge_cleanup
+    completed_tasks:
+      - TASK-AR-607
+    next_task: TASK-AR-608
+    next_unit: UNIT-TASK-AR-608-001
     follow_up_task: TASK-AR-608
     follow_up_unit: UNIT-TASK-AR-608-001
     finding: BTC-OAG-CLAIM-MOBILE-001
@@ -124,7 +105,12 @@ pointers:
       - reviews/BETA-TEST-2026-06-19-oag-claim-aware-relation-adapter.md
       - reviews/UX-EVAL-2026-06-19-oag-claim-aware-relation-adapter.md
       - reviews/W4B-2026-06-19-TASK-AR-606.md
-    next_decision: implement_task_ar_607_mobile_overflow_fix
+    implementation_commit: e968ffc
+    w4b_commit: e117042
+    task_ar_607_verification: reviews/VERIFY-2026-06-19-oag-mobile-responsive-refinement.json
+    task_ar_607_unit_verification: reviews/VERIFY-2026-06-19-unit-task-ar-607-001-20260619143121.json
+    task_ar_607_w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-607.md
+    next_decision: merge_task_ar_607_then_claim_task_ar_608_beta_ux_evaluation
   design_system_debt_consolidation:
     taskset: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
     released_claim: agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.json
