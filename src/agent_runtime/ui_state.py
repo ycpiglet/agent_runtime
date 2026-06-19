@@ -3887,30 +3887,40 @@ TASKSET_ATTENTION_LANES = (
         "label": "Active claims",
         "state": "claimed",
         "reason": "Claim path currently owns work.",
+        "empty_label": "No active taskset claims are currently surfaced.",
+        "empty_hint": "Fresh task claims from agents/runtime/task_claims will appear here even when the work index is stale.",
     },
     {
         "id": "guarded_recovery",
         "label": "Guarded or interrupted",
         "state": "guarded",
         "reason": "Claim guard or interrupted recovery needs review.",
+        "empty_label": "No guarded or interrupted claims need review.",
+        "empty_hint": "Expired, blocked, or interrupted claim records will appear here.",
     },
     {
         "id": "evidence_gaps",
         "label": "Stale or missing evidence",
         "state": "stale",
         "reason": "Taskset has no recent activity evidence in the board feed.",
+        "empty_label": "No taskset evidence gaps are currently surfaced.",
+        "empty_hint": "Tasksets with children but no recent board activity will appear here.",
     },
     {
         "id": "recently_changed",
         "label": "Recently changed",
         "state": "active",
         "reason": "Recent runtime activity is available for inspection.",
+        "empty_label": "No recent taskset changes are currently surfaced.",
+        "empty_hint": "Runtime activity events will appear here when available.",
     },
     {
         "id": "ready_next",
         "label": "Ready next action",
         "state": "default",
         "reason": "Open taskset has no active claim guard.",
+        "empty_label": "No unclaimed ready-next tasksets are currently surfaced.",
+        "empty_hint": "Open child tasks without active claim guards will appear here.",
     },
 )
 
@@ -4040,6 +4050,7 @@ def _taskset_attention_workspace(cards: list[dict[str, Any]]) -> dict[str, Any]:
             "claim_summary.label",
             "claim_summary.command_state",
             "claim_summary.command_label",
+            "task_claims[].task_set_id",
             "recent_activity",
             "children[].phase",
             "children[].relation_state",
@@ -4170,7 +4181,44 @@ def build_tasksets_board(
             }
         )
 
-    cards.sort(key=lambda card: (_work_number_sort_key(nodes[card["id"]].get("number")), card["id"]))
+    card_ids = {str(card.get("id") or "") for card in cards}
+    for taskset_id, claims in sorted(claims_by_taskset.items()):
+        if not taskset_id or taskset_id in card_ids:
+            continue
+        claim_summary = _claim_relation_summary(_unique_claims(claims))
+        if claim_summary["state"] == "default":
+            continue
+        cards.append(
+            {
+                "id": taskset_id,
+                "title": taskset_id,
+                "status": "claim-only",
+                "status_bucket": "claim_only",
+                "initiative_id": "",
+                "progress_pct": None,
+                "progress": {"done": 0, "total": 0},
+                "status_distribution": {},
+                "claim_summary": claim_summary,
+                "assigned_agents": sorted(
+                    {
+                        _claim_actor_label(claim)
+                        for claim in claims
+                        if _claim_actor_label(claim)
+                    }
+                ),
+                "recent_activity": [],
+                "source_path": "agents/runtime/task_claims",
+                "staleness_note": "Live claim has no matching taskset card in WORK-ITEM-CLASSIFICATION.json.",
+                "children": [],
+            }
+        )
+
+    cards.sort(
+        key=lambda card: (
+            _work_number_sort_key((nodes.get(str(card.get("id") or "")) or {}).get("number") or "999999"),
+            str(card.get("id") or ""),
+        )
+    )
     totals = {
         "tasksets": len(cards),
         "tasks": sum(card["progress"]["total"] for card in cards),

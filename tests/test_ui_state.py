@@ -1217,6 +1217,45 @@ def test_ui_state_tasksets_board_exposes_attention_workspace(tmp_path):
     assert gap["reason"].startswith("No recent activity evidence")
 
 
+def test_ui_state_tasksets_board_surfaces_claim_only_taskset_attention(tmp_path):
+    _write_work_classification(tmp_path, _work_explorer_records())
+    _write(
+        tmp_path / "agents" / "runtime" / "task_claims" / "CLAIM-claim-only.json",
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-claim-only",
+                "task_id": "TASK-AR-999",
+                "task_set_id": "TASKSET-AR-CLAIM-ONLY",
+                "agent_role": "interface-designer",
+                "agent_instance_id": "interface-designer@ui-claim",
+                "status": "claimed",
+                "phase": "implementation",
+                "claimed_at": "2026-06-13T02:58:00+09:00",
+                "last_heartbeat": "2026-06-13T02:59:00+09:00",
+            }
+        ),
+    )
+
+    state = ui_state.build_state(tmp_path, now="2026-06-13T03:00:00+09:00")
+    board = state["tasksets_board"]
+    workspace = board["attention_workspace"]
+    lanes = {lane["id"]: lane for lane in workspace["lanes"]}
+    claim_only = next(card for card in board["cards"] if card["id"] == "TASKSET-AR-CLAIM-ONLY")
+
+    assert claim_only["status"] == "claim-only"
+    assert claim_only["source_path"] == "agents/runtime/task_claims"
+    assert claim_only["claim_summary"]["state"] == "claimed"
+    assert workspace["selected_taskset_id"] == "TASKSET-AR-CLAIM-ONLY"
+    assert "task_claims[].task_set_id" in workspace["derived_from"]
+
+    active = lanes["active_claims"]
+    assert active["empty_label"] == "No active taskset claims are currently surfaced."
+    assert active["empty_label"] != active["reason"]
+    assert active["items"][0]["taskset_id"] == "TASKSET-AR-CLAIM-ONLY"
+    assert active["items"][0]["reason"] == "claimed by interface-designer@ui-claim"
+
+
 def test_ui_state_tasksets_board_progress_changes_only_from_child_state(tmp_path):
     records = _work_explorer_records()
     _write_work_classification(tmp_path, records)

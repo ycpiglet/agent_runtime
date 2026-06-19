@@ -99,6 +99,18 @@ def test_relation_state_assets_include_claim_aware_states(tmp_path):
         assert selector in css
 
 
+def test_taskset_attention_lane_empty_copy_uses_dedicated_fields(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+
+    assert "lane.empty_label" in js
+    assert "lane.empty_hint" in js
+    assert "tsboard-attention-empty-copy" in js
+    assert "tsboard-attention-empty-hint" in js
+    assert "This lane will update when matching tasksets appear." in js
+    assert ".tsboard-attention-empty-copy" in css
+
+
 def test_selected_helpers_are_not_redefined_inside_ui_console_source():
     source = (ROOT / "src" / "agent_runtime" / "ui_console.py").read_text(encoding="utf-8")
     asset_source = (ROOT / "src" / "agent_runtime" / "ui_console_assets.py").read_text(encoding="utf-8")

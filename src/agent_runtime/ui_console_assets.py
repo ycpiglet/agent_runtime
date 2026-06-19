@@ -3930,6 +3930,10 @@ pre {
   background: var(--inset-soft);
   padding: var(--space-3xl);
 }
+.tsboard-attention-empty-copy {
+  color: var(--ink);
+  font-size: var(--font-size-ui-13);
+}
 .tsboard-fallback-head {
   margin-bottom: var(--space-4xl);
 }
