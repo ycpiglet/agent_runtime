@@ -9,11 +9,11 @@ task_id: TASK-AR-589
 task_set_id: TASKSET-AR-VISUAL-ASSET-ADOPTION
 initiative_id: INIT-AR-VISUAL-ASSET-ADOPTION
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: done
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-06-20T01:04:15+09:00
-updated_at: 2026-06-20T01:04:15+09:00
+updated_at: 2026-06-20T05:55:00+09:00
 origin_type: owner_request
 origin_ref: chat:2026-06-20-ui-ux-visual-resources
 created_by: lead-engineer
@@ -38,6 +38,8 @@ verification:
   - python scripts/design_system_gate.py --check --all-ui
 handoff: Fonts done; unit 2 adds icons.
 stop_condition: If OFL terms or a self-host artifact are unclear, flag before committing binaries.
+completed_at: 2026-06-20T05:55:00+09:00
+verification_evidence: reviews/W4B-2026-06-20-TASK-AR-589.md
 ---
 
 # UNIT-TASK-AR-589-001 - Self-host Geist + Geist Mono as font tokens

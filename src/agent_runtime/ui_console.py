@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs
+from urllib.parse import unquote
 from urllib.parse import urlparse
 
 from . import ui_commands
@@ -25,8 +26,69 @@ HTML = ui_console_assets.HTML
 CSS = ui_console_assets.CSS
 JS = ui_console_assets.JS
 
+_PACKAGE_ROOT = Path(__file__).resolve().parent
+_VENDOR_ASSETS: dict[str, tuple[Path, str]] = {
+    "/vendor/dagre/3.0.0/dagre.min.js": (
+        _PACKAGE_ROOT / "vendor" / "dagre" / "3.0.0" / "dagre.min.js",
+        "application/javascript; charset=utf-8",
+    ),
+    "/vendor/d3-quadtree/3.0.1/d3-quadtree.min.js": (
+        _PACKAGE_ROOT / "vendor" / "d3-quadtree" / "3.0.1" / "d3-quadtree.min.js",
+        "application/javascript; charset=utf-8",
+    ),
+    "/vendor/d3-dispatch/3.0.1/d3-dispatch.min.js": (
+        _PACKAGE_ROOT / "vendor" / "d3-dispatch" / "3.0.1" / "d3-dispatch.min.js",
+        "application/javascript; charset=utf-8",
+    ),
+    "/vendor/d3-timer/3.0.1/d3-timer.min.js": (
+        _PACKAGE_ROOT / "vendor" / "d3-timer" / "3.0.1" / "d3-timer.min.js",
+        "application/javascript; charset=utf-8",
+    ),
+    "/vendor/d3-force/3.0.0/d3-force.min.js": (
+        _PACKAGE_ROOT / "vendor" / "d3-force" / "3.0.0" / "d3-force.min.js",
+        "application/javascript; charset=utf-8",
+    ),
+    "/vendor/geist/1.7.2/fonts/geist-sans/Geist-Variable.woff2": (
+        _PACKAGE_ROOT / "vendor" / "geist" / "1.7.2" / "fonts" / "geist-sans" / "Geist-Variable.woff2",
+        "font/woff2",
+    ),
+    "/vendor/geist/1.7.2/fonts/geist-sans/Geist-Italic[wght].woff2": (
+        _PACKAGE_ROOT / "vendor" / "geist" / "1.7.2" / "fonts" / "geist-sans" / "Geist-Italic[wght].woff2",
+        "font/woff2",
+    ),
+    "/vendor/geist/1.7.2/fonts/geist-mono/GeistMono-Variable.woff2": (
+        _PACKAGE_ROOT / "vendor" / "geist" / "1.7.2" / "fonts" / "geist-mono" / "GeistMono-Variable.woff2",
+        "font/woff2",
+    ),
+    "/vendor/geist/1.7.2/fonts/geist-mono/GeistMono-Italic[wght].woff2": (
+        _PACKAGE_ROOT / "vendor" / "geist" / "1.7.2" / "fonts" / "geist-mono" / "GeistMono-Italic[wght].woff2",
+        "font/woff2",
+    ),
+}
+_LUCIDE_ICON_VENDOR_PREFIX = "/vendor/lucide-static/1.21.0/icons/"
+_LUCIDE_ICON_VENDOR_ROOT = _PACKAGE_ROOT / "vendor" / "lucide-static" / "1.21.0" / "icons"
+
 def _bytes(text: str) -> bytes:
     return text.encode("utf-8")
+
+
+def _vendor_asset_response(request_path: str) -> ConsoleResponse | None:
+    decoded_path = unquote(request_path)
+    entry = _VENDOR_ASSETS.get(request_path) or _VENDOR_ASSETS.get(decoded_path)
+    if entry is None:
+        if not decoded_path.startswith(_LUCIDE_ICON_VENDOR_PREFIX):
+            return None
+        filename = decoded_path.removeprefix(_LUCIDE_ICON_VENDOR_PREFIX)
+        if "/" in filename or "\\" in filename or not filename.endswith(".svg"):
+            return ConsoleResponse(404, "text/plain; charset=utf-8", b"vendor asset missing\n")
+        path = _LUCIDE_ICON_VENDOR_ROOT / filename
+        if not path.is_file():
+            return ConsoleResponse(404, "text/plain; charset=utf-8", b"vendor asset missing\n")
+        return ConsoleResponse(200, "image/svg+xml; charset=utf-8", path.read_bytes())
+    path, content_type = entry
+    if not path.is_file():
+        return ConsoleResponse(404, "text/plain; charset=utf-8", b"vendor asset missing\n")
+    return ConsoleResponse(200, content_type, path.read_bytes())
 
 
 def _json_response(payload: object, status: int = 200) -> ConsoleResponse:
@@ -229,6 +291,9 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
         return ConsoleResponse(200, "text/css; charset=utf-8", _bytes(CSS))
     if request_path == "/app.js":
         return ConsoleResponse(200, "application/javascript; charset=utf-8", _bytes(JS))
+    vendor_response = _vendor_asset_response(request_path)
+    if vendor_response is not None:
+        return vendor_response
     if request_path == "/api/state":
         return _json_response(ui_state.build_state(root_path))
     if request_path == "/api/inbox":

@@ -9,8 +9,8 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-20
 task_count: 256
-open_count: 10
-completed_count: 246
+open_count: 7
+completed_count: 249
 task_set_count: 4
 completed_task_set_count: 42
 ---
@@ -18,11 +18,11 @@ completed_task_set_count: 42
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `10` open or active tasks; `246` completed tasks are archived from this live board.
+- Summary: `7` open or active tasks; `249` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `10` / Ask `0` / Review `0` / Later `0` / Done `246`.
+- Status: Action `7` / Ask `0` / Review `0` / Later `0` / Done `249`.
 - Task Sets: `4` active workflows; `42` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -65,13 +65,10 @@ completed_task_set_count: 42
 ### Visual Asset Adoption (`TASKSET-AR-VISUAL-ASSET-ADOPTION`)
 
 - Flow: Implement the research-backed visual upgrade: DiceBear CC0 seeded agent avatars with role accents; Dagre+d3-force graph rendering for dependency/state-machine/live-agent views; Geist OFL fonts; Lucide icons; unDraw state illustrations; Radix+Carbon data-viz palette tokens and sparklines. Permissive-only, no-build, self-hosted, token-driven, landed experimental.
-- Progress: `0/4` done; `4` open or active.
+- Progress: `3/4` done; `1` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-587` | INIT-AR-VISUAL-ASSET-ADOPTION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-587/UNIT-TASK-AR-587-001.md | planned | Action | P1 | High | Medium | 5h/12000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Give every agent a deterministic visual identity: a seeded SVG avatar keyed to agent… |
-| `TASK-AR-588` | INIT-AR-VISUAL-ASSET-ADOPTION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-588/UNIT-TASK-AR-588-001.md | planned | Action | P1 | High | High | 10h/20000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Replace the hand-rolled graph layout with proper layout engines: Dagre (MIT, layered/… |
-| `TASK-AR-589` | INIT-AR-VISUAL-ASSET-ADOPTION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-589/UNIT-TASK-AR-589-001.md | planned | Action | P2 | Medium | Medium | 5h/10000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Self-host OFL fonts (Geist + Geist Mono) as font tokens and vendor the Lucide (ISC) i… |
 | `TASK-AR-590` | INIT-AR-VISUAL-ASSET-ADOPTION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-590/UNIT-TASK-AR-590-001.md | planned | Action | P2 | Medium | Medium | 6h/12000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Add recolorable empty/error/loading illustrations, accessible data-viz palette tokens… |
 
 ### Visual System Integration & Verification (`TASKSET-AR-VISUAL-SYSTEM-INTEGRATION`)
@@ -136,9 +133,9 @@ completed_task_set_count: 42
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `10` open across `4` task sets (see Action Board above).
+- Active: `7` open across `4` task sets (see Action Board above).
 - Archived task sets: `42` (see Archived Task Sets above).
-- Archived task files: `246` — see `ARCHIVE-INDEX.md`.
+- Archived task files: `249` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

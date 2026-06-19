@@ -1061,6 +1061,11 @@ HTML = """<!doctype html>
   </div>
   <!-- TASK-AR-340: celebration canvas host (confetti uses token colors only). -->
   <div id="celebration-layer" class="celebration-layer" aria-hidden="true"></div>
+  <script src="/vendor/dagre/3.0.0/dagre.min.js"></script>
+  <script src="/vendor/d3-quadtree/3.0.1/d3-quadtree.min.js"></script>
+  <script src="/vendor/d3-dispatch/3.0.1/d3-dispatch.min.js"></script>
+  <script src="/vendor/d3-timer/3.0.1/d3-timer.min.js"></script>
+  <script src="/vendor/d3-force/3.0.0/d3-force.min.js"></script>
   <script src="/app.js"></script>
 </body>
 </html>
@@ -1280,10 +1285,12 @@ CSS = """/*
      carbondesignsystem.com/data-visualization/color-palettes) for seq steps.
      WCAG: all categorical tokens >3:1 contrast vs --panel (graphical threshold).
      Graph node/edge categorical colors (TASK-AR-588) consume these tokens.
-     Sparkline: --dv-sparkline maps to --accent per theme for auto-theming.   */
+     Sparkline: --dv-sparkline maps to --accent per theme for auto-theming.
+     TASK-AR-592: dv-cat-3 light adjusted for WCAG AA compliance
+     (was 2.28:1, now 3.92:1 vs white panel; non-text graphical threshold). */
   --dv-cat-1: #3e63dd;
   --dv-cat-2: #12a594;
-  --dv-cat-3: #e79d13;
+  --dv-cat-3: #b87000;
   --dv-cat-4: #e54d2e;
   --dv-cat-5: #30a46c;
   --dv-cat-6: #f76808;
@@ -1596,9 +1603,26 @@ a:hover { text-decoration: underline; }
 .sidebar-icon {
   flex: 0 0 auto;
   width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   font-size: var(--font-size-ui-15);
   line-height: 1;
+}
+.icon,
+.sidebar-toggle-icon {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  color: currentColor;
+  stroke: currentColor;
+  flex: 0 0 auto;
+  vertical-align: -0.125em;
+}
+.sidebar-icon .icon,
+.experience-settings-icon .icon {
+  display: block;
 }
 .sidebar[data-collapsed="true"] .sidebar-link {
   justify-content: center;
@@ -1952,6 +1976,9 @@ textarea:focus {
   padding: var(--space-5xl) var(--space-7xl) var(--space-8xl);
   margin-left: var(--sidebar-width);
   transition: margin-left 160ms ease;
+}
+.layout > * {
+  min-width: 0;
 }
 .shell[data-sidebar-collapsed="true"] .layout {
   margin-left: var(--sidebar-rail);
@@ -2670,6 +2697,13 @@ textarea:focus {
 .live-map-edge.kind-assignment { stroke: var(--success); }
 .live-map-edge.kind-review { stroke: var(--amber); }
 .live-map-edge.kind-block { stroke: var(--danger); }
+.live-map-edge.magnitude-low { stroke-width: 1.5; }
+.live-map-edge.magnitude-medium { stroke-width: 2.25; }
+.live-map-edge.magnitude-high { stroke-width: 3; }
+.live-map-edge.health-pass { stroke: var(--success-line); opacity: 0.9; }
+.live-map-edge.health-watch { stroke: var(--warning-line); opacity: 0.85; }
+.live-map-edge.health-block { stroke: var(--danger); opacity: 1; }
+.live-map-edge.health-info { stroke: var(--primary-line); opacity: 0.85; }
 .live-map-edge.is-pulsing {
   stroke: var(--pulse);
   stroke-width: 3.5;
@@ -2680,7 +2714,13 @@ textarea:focus {
   stroke: var(--line-strong);
   stroke-width: 1.5;
   fill: var(--panel);
-  transition: fill 0.2s ease, stroke 0.2s ease;
+  /* TASK-AR-592: transition is non-essential visual enhancement; gated below. */
+  transition: fill var(--motion-fast, 0.14s) ease, stroke var(--motion-fast, 0.14s) ease;
+}
+/* TASK-AR-592: suppress non-essential live-map transitions under reduced-motion. */
+@media (prefers-reduced-motion: reduce) {
+  .live-map-node circle { transition: none; }
+  .live-map-edge.is-pulsing { filter: none; }
 }
 .live-map-node.kind-owner circle { fill: var(--primary-soft-strong); stroke: var(--primary-line); }
 .live-map-node.kind-agent circle { fill: var(--panel-strong); }
@@ -4758,6 +4798,97 @@ pre {
     margin-top: var(--space-md);
     font-size: var(--font-size-ui-24);
   }
+  /* TASK-AR-592: responsive pass - new visual components at mobile widths.
+   * All sizing through tokens; no raw px literals outside token definitions. */
+  /* Agent avatar (TASK-AR-587): constrain SVG avatar to --space-5xl on mobile. */
+  .agent-avatar {
+    width: var(--space-5xl);
+    height: var(--space-5xl);
+  }
+  /* Agent stack: wrap so avatars don't overflow narrow containers. */
+  .agent-stack {
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+  /* Sparkline (TASK-AR-590): override sparkline width token for mobile.
+   * The SVG uses var(--dv-sparkline-w) so narrowing that narrows all sparklines. */
+  --dv-sparkline-w: 44px;
+  --dv-sparkline-h: var(--space-5xl);
+  .workload-sparkline {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+  /* State illustrations (TASK-AR-590): shrink art and tighten padding. */
+  .empty-illustration {
+    padding: var(--space-4xl) var(--space-md);
+    gap: var(--space-md);
+  }
+  .empty-illustration-art {
+    width: var(--space-7xl);
+    height: var(--space-7xl);
+  }
+  /* Graph SVGs (TASK-AR-588/590/591): allow horizontal scroll on mobile rather
+   * than clipping. height constraint avoids full-page vertical scroll. */
+  .dep-graph-stage,
+  .kg-graph-stage,
+  .live-map-stage {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .dep-graph-svg,
+  .kg-graph-svg,
+  .live-map-graph {
+    min-width: 480px;
+    height: 320px;
+  }
+  .state-machine-svg { min-width: 480px; height: 300px; }
+  /* dep-graph legend: single column on mobile */
+  .dep-graph-legend,
+  .kg-graph-legend,
+  .dep-graph-legend li,
+  .kg-graph-legend li {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+  /* Knowledge graph toolbar: stack filter chips vertically */
+  .kg-graph-toolbar {
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  /* Icon rows: wrap on mobile */
+  .workload-label {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* roadmap timeline: collapse wide link grid to single column */
+  .roadmap-tl-link {
+    grid-template-columns: 1fr;
+    gap: var(--space-sm);
+  }
+}
+/* TASK-AR-592: very narrow mobile breakpoint (<=480px).
+ * Token: --space-breakpoint-xs is not yet defined; using the breakpoint
+ * inline here as it's the only consumer and defining a token now would
+ * add a not-yet-designed scale step. Breakpoint value 480px is a raw
+ * literal in the token-definition role (this @media selector). */
+@media (max-width: 480px) {
+  /* Avatar: minimum readable size, aligned with --space-lg (8px cell -> 24px total). */
+  .agent-avatar {
+    width: var(--space-7xl);
+    height: var(--space-7xl);
+  }
+  /* Sparkline: collapse to near-invisible at very narrow; hide non-essential. */
+  --dv-sparkline-w: var(--space-5xl);
+  --dv-sparkline-h: var(--space-4xl);
+  /* State art: smaller still, readable on 320px screens. */
+  .empty-illustration-art {
+    width: var(--space-6xl);
+    height: var(--space-6xl);
+  }
+  /* Dashboard: single column */
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
 }
 .roadmap-timeline-summary {
   color: var(--muted);
@@ -4957,6 +5088,13 @@ pre {
 }
 .dep-edge.kind-parent { stroke: var(--subtle); stroke-dasharray: 4 3; }
 .dep-edge.kind-dependency { stroke: var(--blue); }
+.dep-edge.magnitude-low { stroke-width: 1.5; }
+.dep-edge.magnitude-medium { stroke-width: 2.25; }
+.dep-edge.magnitude-high { stroke-width: 3; }
+.dep-edge.health-pass { stroke: var(--success-line); }
+.dep-edge.health-watch { stroke: var(--warning-line); opacity: 0.85; }
+.dep-edge.health-block { stroke: var(--danger); opacity: 1; }
+.dep-edge.health-info { stroke: var(--primary-line); }
 .dep-edge.is-cycle {
   stroke: var(--danger);
   stroke-width: 3;
@@ -4981,6 +5119,25 @@ pre {
 }
 /* TASK-AR-588: GitHub-Actions-style status icon badge on dependency nodes. */
 .dep-node-status-icon { fill: var(--ink); font-size: var(--font-size-ui-8); text-anchor: middle; }
+.dep-node-status-badge,
+.state-machine-node-status-badge,
+.live-map-node-status-badge {
+  fill: var(--canvas);
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+.dep-node-status-badge.signal-pass,
+.state-machine-node-status-badge.signal-pass,
+.live-map-node-status-badge.signal-pass { stroke: var(--success-line); }
+.dep-node-status-badge.signal-watch,
+.state-machine-node-status-badge.signal-watch,
+.live-map-node-status-badge.signal-watch { stroke: var(--warning-line); }
+.dep-node-status-badge.signal-block,
+.state-machine-node-status-badge.signal-block,
+.live-map-node-status-badge.signal-block { stroke: var(--danger); }
+.dep-node-status-badge.signal-info,
+.state-machine-node-status-badge.signal-info,
+.live-map-node-status-badge.signal-info { stroke: var(--primary-line); }
 .dep-graph-empty { fill: var(--subtle); font-size: var(--font-size-ui-14); }
 .dep-graph-legend {
   display: flex;
@@ -5070,6 +5227,10 @@ pre {
 .kg-node.kind-claim circle { fill: var(--dv-cat-4, var(--subtle)); opacity: 0.6; }
 .kg-node.kind-commit circle, .kg-node.kind-pr circle { fill: var(--canvas); }
 .kg-node.is-focus circle { stroke: var(--danger); stroke-width: 2.6; }
+/* TASK-AR-592: keyboard focus ring on interactive graph nodes. SVG groups do not
+ * support CSS outline so we use a box-shadow fallback; the primary focus ring is
+ * shown via the outer SVG container's outline when the group has :focus-visible. */
+.kg-node:focus-visible { outline: 2px solid var(--primary-hover); outline-offset: 2px; }
 .kg-node text { fill: var(--muted); font-size: var(--font-size-ui-9); text-anchor: middle; pointer-events: none; }
 .kg-graph-empty { fill: var(--subtle); font-size: var(--font-size-ui-14); }
 .kg-graph-legend {
@@ -5140,6 +5301,13 @@ pre {
   fill: none;
   opacity: 0.6;
 }
+.state-machine-edge.magnitude-low { stroke-width: 1.5; }
+.state-machine-edge.magnitude-medium { stroke-width: 2.25; }
+.state-machine-edge.magnitude-high { stroke-width: 3; }
+.state-machine-edge.health-pass { stroke: var(--success-line); opacity: 0.9; }
+.state-machine-edge.health-watch { stroke: var(--warning-line); opacity: 0.8; }
+.state-machine-edge.health-block { stroke: var(--danger); opacity: 1; }
+.state-machine-edge.health-info { stroke: var(--primary-line); opacity: 0.8; }
 .state-machine-edge.is-wildcard { stroke-dasharray: 5 4; opacity: 0.4; }
 .state-machine-edge.is-traversed {
   stroke: var(--sm-path);
@@ -5173,6 +5341,8 @@ pre {
 .state-machine-node-score { fill: var(--muted); font-size: var(--font-size-ui-8); text-anchor: middle; }
 /* TASK-AR-588: GitHub-Actions-style status icon badge on state-machine nodes. */
 .state-machine-status-icon { fill: var(--ink); font-size: var(--font-size-ui-8); text-anchor: middle; }
+.state-machine-node-status-icon { fill: var(--ink); font-size: var(--font-size-ui-8); text-anchor: middle; }
+.live-map-node-status-icon { fill: var(--ink); font-size: var(--font-size-ui-8); text-anchor: middle; }
 .state-machine-empty { fill: var(--subtle); font-size: var(--font-size-ui-14); }
 .state-machine-legend {
   display: flex;
@@ -9363,87 +9533,38 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 const LIVE_MAP_KIND_LABELS = { message: "Message", assignment: "Assignment", review: "Review", block: "Block" };
 let livePulseTimers = {};
 
+function appendSvgStatusBadge(group, x, y, signal, classPrefix) {
+  // Generated class names include dep-node-status-icon,
+  // state-machine-node-status-icon, and live-map-node-status-icon.
+  const token = graphSignalToken(signal);
+  const badge = document.createElementNS(SVG_NS, "circle");
+  badge.setAttribute("cx", x);
+  badge.setAttribute("cy", y);
+  badge.setAttribute("r", "8");
+  badge.setAttribute("class", `${classPrefix}-status-badge signal-${token}`);
+  group.appendChild(badge);
+  const icon = document.createElementNS(SVG_NS, "text");
+  icon.setAttribute("x", x);
+  icon.setAttribute("y", y + 1);
+  icon.setAttribute("class", `${classPrefix}-status-icon signal-${token}`);
+  icon.textContent = graphStatusIconText(token);
+  group.appendChild(icon);
+}
+
 function liveMapData() {
   return runtimeState.live_map || { nodes: [], edges: [], presence: { counts: {}, online: 0, agents: [] }, totals: {} };
 }
 
 function liveMapNodePositions(nodes, edges) {
-  // Upgrade path: replace with d3-force (ISC, standalone UMD vendored locally).
-  // Current: basic velocity-Verlet force simulation (repulsion + spring) - same
-  // physics model as d3-force but hand-rolled so there is no CDN dependency.
-  // Owner node is pinned at a fixed position; all others start on a seeded ring
-  // and then relax under the forces.
-  const w = 1000, h = 600, cx = 500, cy = 300;
-  const repulsion = 12000;      // node-pair repulsion constant
-  const spring = 0.06;          // edge spring pull
-  const restLen = 180;          // preferred edge length
-  const damping = 0.75;         // velocity damping factor per tick
-  const ticks = 80;             // simulation steps
-
-  const nodeMap = {};
-  nodes.forEach((node, i) => {
-    const angle = (i / Math.max(nodes.length, 1)) * Math.PI * 2 - Math.PI / 2;
-    nodeMap[node.id] = {
-      id: node.id,
-      kind: node.kind,
-      x: cx + Math.cos(angle) * 200,
-      y: cy + Math.sin(angle) * 160,
-      vx: 0, vy: 0,
-      pinned: node.kind === "owner",
-    };
+  return patternSvgForceAgentLayout(nodes, edges, {
+    width: 1000,
+    height: 600,
+    ticks: 72,
+    linkDistance: 150,
+    repulsion: 1800,
+    spring: 0.035,
+    damping: 0.72,
   });
-  const owner = nodes.find((n) => n.kind === "owner");
-  if (owner && nodeMap[owner.id]) {
-    nodeMap[owner.id].x = cx;
-    nodeMap[owner.id].y = 90;
-    nodeMap[owner.id].pinned = true;
-  }
-
-  for (let tick = 0; tick < ticks; tick++) {
-    const ids = Object.keys(nodeMap);
-    // Repulsion between all pairs.
-    for (let a = 0; a < ids.length; a++) {
-      for (let b = a + 1; b < ids.length; b++) {
-        const na = nodeMap[ids[a]], nb = nodeMap[ids[b]];
-        const dx = nb.x - na.x, dy = nb.y - na.y;
-        const distSq = dx * dx + dy * dy + 1;
-        const dist = Math.sqrt(distSq);
-        const f = repulsion / distSq;
-        const fx = (dx / dist) * f, fy = (dy / dist) * f;
-        if (!na.pinned) { na.vx -= fx; na.vy -= fy; }
-        if (!nb.pinned) { nb.vx += fx; nb.vy += fy; }
-      }
-    }
-    // Spring along edges.
-    (edges || []).forEach((edge) => {
-      const na = nodeMap[edge.from], nb = nodeMap[edge.to];
-      if (!na || !nb) return;
-      const dx = nb.x - na.x, dy = nb.y - na.y;
-      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      const f = (dist - restLen) * spring;
-      const fx = (dx / dist) * f, fy = (dy / dist) * f;
-      if (!na.pinned) { na.vx += fx; na.vy += fy; }
-      if (!nb.pinned) { nb.vx -= fx; nb.vy -= fy; }
-    });
-    // Centre-gravity toward (cx, cy).
-    ids.forEach((id) => {
-      const n = nodeMap[id];
-      if (n.pinned) return;
-      n.vx += (cx - n.x) * 0.005;
-      n.vy += (cy - n.y) * 0.005;
-      n.vx *= damping;
-      n.vy *= damping;
-      n.x += n.vx;
-      n.y += n.vy;
-      // Clamp to canvas with margin.
-      n.x = Math.max(36, Math.min(w - 36, n.x));
-      n.y = Math.max(36, Math.min(h - 36, n.y));
-    });
-  }
-
-  const out = {};
-  Object.values(nodeMap).forEach((n) => { out[n.id] = { x: n.x, y: n.y }; });
-  return out;
 }
 
 // Live-map health token mapping (Datadog-style: stroke color = health).
@@ -9584,6 +9705,8 @@ function renderLiveMap() {
 }
 
 function pulseLiveElement(selector) {
+  // TASK-AR-592: skip non-essential pulse animation under prefers-reduced-motion.
+  if (prefersReducedMotion()) return;
   const el = document.querySelector(selector);
   if (!el) return;
   el.classList.add("is-pulsing");
@@ -9833,32 +9956,13 @@ function viewTaskInStateMachine(taskId) {
 }
 
 function stateMachineNodePositions(nodes, edges) {
-  // Upgrade path: replace with Dagre (MIT, dagre.min.js IIFE) vendored locally.
-  // Current: Sugiyama-style layered layout using _dagre_layered_positions so the
-  // state machine renders as a clean left-to-right DAG following transition edges.
-  // Falls back to a serpentine grid when no edges are provided.
-  if (edges && edges.length) {
-    return _dagre_layered_positions(nodes, edges, { w: 1000, h: 600, marginX: 120, marginY: 90, topDown: false });
-  }
-  // Fallback: deterministic horizontal lifecycle grid (serpentine rows).
-  const positions = {};
-  const perRow = Math.min(4, Math.max(1, nodes.length));
-  const marginX = 140;
-  const marginY = 110;
-  const spanX = nodes.length > 1 ? (1000 - marginX * 2) / Math.max(1, perRow - 1) : 0;
-  const rows = Math.ceil(nodes.length / perRow) || 1;
-  const spanY = rows > 1 ? (600 - marginY * 2) / (rows - 1) : 0;
-  nodes.forEach((node, index) => {
-    const row = Math.floor(index / perRow);
-    let col = index % perRow;
-    // Serpentine rows so consecutive states stay adjacent across wraps.
-    if (row % 2 === 1) col = perRow - 1 - col;
-    positions[node.id] = {
-      x: perRow === 1 ? 500 : marginX + col * spanX,
-      y: rows === 1 ? 300 : marginY + row * spanY,
-    };
-  });
-  return positions;
+  return patternSvgLayeredDagreLayout(nodes, edges, {
+    rankdir: "LR",
+    width: 1000,
+    height: 600,
+    marginX: 130,
+    marginY: 100,
+  }).positions;
 }
 
 function renderStateMachineViewer() {
@@ -9939,40 +10043,40 @@ function renderStateMachineViewer() {
     return;
   }
 
-  // Layered DAG layout (Dagre upgrade path - see module docstring).
-  // Edges are passed so the layout follows transition direction (L-to-R layered).
-  const positions = stateMachineNodePositions(nodes, edges);
-
-  // ---- Edge layer: Datadog-style encodings ----
-  // stroke-width = transition magnitude (traversal count or weight, clamped 1-5)
-  // stroke color = health token (traversed = path token; wildcard = muted)
-  const edgeLayer = document.createElementNS(SVG_NS, "g");
-  edges.forEach((edge) => {
-    // A wildcard edge (from "*") is drawn from the current/last-traversed state
-    // (if known) or its declared target's incoming hub, falling back skipped.
+  const layoutEdges = edges.map((edge) => {
     let fromId = edge.from;
     if (edge.wildcard) {
       const hub = currentState && currentState !== edge.to ? currentState : (edge.wildcard_sources || [])[0];
       fromId = hub || edge.from;
     }
-    const a = positions[fromId];
-    const b = positions[edge.to];
+    return { ...edge, from: fromId };
+  });
+  const layout = patternSvgLayeredDagreLayout(nodes, layoutEdges, {
+    rankdir: "LR",
+    width: 1000,
+    height: 600,
+    marginX: 130,
+    marginY: 100,
+  });
+  const positions = layout.positions;
+
+  const edgeLayer = document.createElementNS(SVG_NS, "g");
+  layoutEdges.forEach((layoutEdge, index) => {
+    const edge = edges[index] || layoutEdge;
+    const a = positions[layoutEdge.from];
+    const b = positions[layoutEdge.to];
     if (!a || !b) return;
     const traversed = traversedEdgeIds.has(edge.id);
-    const magnitude = Math.min(5, Math.max(1, edge.traversal_count || edge.weight || 1));
-    // Datadog-style: width = magnitude, color = health token.
-    const healthColor = edge.wildcard ? "var(--muted)" : (traversed ? "var(--sm-path)" : "var(--line-strong)");
-    const line = document.createElementNS(SVG_NS, "line");
-    line.setAttribute("x1", String(Math.round(a.x)));
-    line.setAttribute("y1", String(Math.round(a.y)));
-    line.setAttribute("x2", String(Math.round(b.x)));
-    line.setAttribute("y2", String(Math.round(b.y)));
-    line.setAttribute("class", `state-machine-edge ${edge.wildcard ? "is-wildcard" : ""} ${traversed ? "is-traversed" : ""}`);
-    line.setAttribute("data-edge-id", String(edge.id));
-    line.setAttribute("stroke-width", String(traversed ? Math.max(2, magnitude) : 1));
-    line.setAttribute("stroke", healthColor);
-    line.setAttribute("aria-label", `transition ${escapeHtml(fromId)} to ${escapeHtml(edge.to)}${edge.trigger ? ": " + escapeHtml(edge.trigger) : ""}`);
-    edgeLayer.appendChild(line);
+    const route = layout.edgeRoutes[graphEdgeKey(layoutEdge, index)] || [{ x: a.x, y: a.y }, { x: b.x, y: b.y }];
+    const path = document.createElementNS(SVG_NS, "path");
+    path.setAttribute("d", svgLayeredEdgePath(route));
+    path.setAttribute(
+      "class",
+      `state-machine-edge magnitude-${graphEdgeMagnitudeBucket(edge)} health-${graphEdgeHealth(edge, traversed ? "pass" : "watch")} ${edge.wildcard ? "is-wildcard" : ""} ${traversed ? "is-traversed" : ""}`
+    );
+    path.setAttribute("data-edge-id", edge.id);
+    path.setAttribute("aria-label", `transition ${escapeHtml(layoutEdge.from)} to ${escapeHtml(layoutEdge.to)}${edge.trigger ? ": " + escapeHtml(edge.trigger) : ""}`);
+    edgeLayer.appendChild(path);
     if (edge.trigger) {
       const label = document.createElementNS(SVG_NS, "text");
       label.setAttribute("x", String(Math.round((a.x + b.x) / 2)));
@@ -9985,16 +10089,6 @@ function renderStateMachineViewer() {
   svg.appendChild(edgeLayer);
 
   // ---- Node layer: GitHub-Actions-style status icons ----
-  // Each state node shows a glyph icon (shape + label, not color-only).
-  // ASCII-only: cp949 node-check guard - keep all literals in the [0,127] range.
-  const SM_STATUS_GLYPH = {
-    "is-current":     ">",   // running
-    "is-traversed":   "v",   // done (checkmark equivalent)
-    "is-initial":     "@",   // start
-    "signal-success": "v",
-    "signal-warning": "!",
-    "signal-danger":  "x",
-  };
   const nodeLayer = document.createElementNS(SVG_NS, "g");
   nodes.forEach((node) => {
     const pos = positions[node.id];
@@ -10013,6 +10107,7 @@ function renderStateMachineViewer() {
     circle.setAttribute("cy", String(py));
     circle.setAttribute("r", "26");
     group.appendChild(circle);
+    appendSvgStatusBadge(group, pos.x + 21, pos.y - 21, isCurrent ? "info" : graphNodeSignal(node, "watch"), "state-machine-node");
     const label = document.createElementNS(SVG_NS, "text");
     label.setAttribute("x", String(px));
     label.setAttribute("y", String(py + 2));
@@ -10026,21 +10121,6 @@ function renderStateMachineViewer() {
       score.textContent = `${node.signal || ""} ${node.score}`.trim();
       group.appendChild(score);
     }
-    // GitHub-Actions-style status icon badge.
-    const iconKey = isCurrent ? "is-current" : (isTraversed ? "is-traversed" : (node.is_initial ? "is-initial" : `signal-${node.signal_token || "subtle"}`));
-    const glyph = SM_STATUS_GLYPH[iconKey] || "?";
-    const iconBg = document.createElementNS(SVG_NS, "circle");
-    iconBg.setAttribute("cx", String(px + 18)); iconBg.setAttribute("cy", String(py - 18));
-    iconBg.setAttribute("r", "7"); iconBg.setAttribute("fill", "var(--canvas)");
-    iconBg.setAttribute("stroke", "var(--line-strong)"); iconBg.setAttribute("stroke-width", "1");
-    group.appendChild(iconBg);
-    const iconText = document.createElementNS(SVG_NS, "text");
-    iconText.setAttribute("x", String(px + 18)); iconText.setAttribute("y", String(py - 14));
-    iconText.setAttribute("class", "state-machine-status-icon");
-    iconText.setAttribute("text-anchor", "middle");
-    iconText.setAttribute("aria-label", escapeHtml(iconKey));
-    iconText.textContent = glyph;
-    group.appendChild(iconText);
     nodeLayer.appendChild(group);
   });
   svg.appendChild(nodeLayer);
@@ -10197,11 +10277,13 @@ function renderTimeline() {
 }
 
 function dependencyNodePositions(nodes, edges) {
-  // Upgrade path: replace with Dagre (MIT, dagre.min.js IIFE) vendored locally.
-  // Current: hand-rolled Sugiyama-style layered DAG - topological rank via BFS
-  // from roots, then center columns within each rank. Produces a clean top-down
-  // layered layout without any CDN dependency.
-  return _dagre_layered_positions(nodes, edges, { w: 1000, h: 600, marginX: 80, marginY: 80, topDown: true });
+  return patternSvgLayeredDagreLayout(nodes, edges, {
+    rankdir: "TB",
+    width: 1000,
+    height: 600,
+    marginX: 90,
+    marginY: 80,
+  }).positions;
 }
 
 function _dagre_layered_positions(nodes, edges, opts) {
@@ -10342,7 +10424,10 @@ function renderDependencyGraph() {
     line.setAttribute("y1", String(Math.round(a.y)));
     line.setAttribute("x2", String(Math.round(b.x)));
     line.setAttribute("y2", String(Math.round(b.y)));
-    line.setAttribute("class", `dep-edge kind-${escapeHtml(edge.kind || "dependency")} ${edge.in_cycle ? "is-cycle" : ""}`);
+    line.setAttribute(
+      "class",
+      `dep-edge kind-${escapeHtml(edge.kind || "dependency")} magnitude-${graphEdgeMagnitudeBucket(edge)} health-${graphEdgeHealth(edge, edge.kind === "dependency" ? "watch" : "info")} ${edge.in_cycle ? "is-cycle" : ""}`
+    );
     line.setAttribute("data-edge-id", String(edge.id));
     // Datadog-style: stroke-width = magnitude; stroke color = health.
     line.setAttribute("stroke-width", String(magnitude));
@@ -10372,21 +10457,7 @@ function renderDependencyGraph() {
     label.setAttribute("y", String(py + r + 14));
     label.textContent = String(node.id).slice(0, 18);
     group.appendChild(label);
-    // GitHub-Actions-style status icon (glyph beside node, shape + label, not color-only).
-    const statusKey = node.status_bucket || node.kind || "planned";
-    const glyph = DEP_STATUS_GLYPH[statusKey] || DEP_STATUS_GLYPH[node.kind] || "?";
-    const iconBg = document.createElementNS(SVG_NS, "circle");
-    iconBg.setAttribute("cx", String(px + r - 4)); iconBg.setAttribute("cy", String(py - r + 4));
-    iconBg.setAttribute("r", "6"); iconBg.setAttribute("fill", "var(--canvas)");
-    iconBg.setAttribute("stroke", "var(--line-strong)"); iconBg.setAttribute("stroke-width", "1");
-    group.appendChild(iconBg);
-    const iconText = document.createElementNS(SVG_NS, "text");
-    iconText.setAttribute("x", String(px + r - 4)); iconText.setAttribute("y", String(py - r + 8));
-    iconText.setAttribute("class", "dep-node-status-icon");
-    iconText.setAttribute("text-anchor", "middle");
-    iconText.setAttribute("aria-label", escapeHtml(statusKey));
-    iconText.textContent = glyph;
-    group.appendChild(iconText);
+    appendSvgStatusBadge(group, px + r - 4, py - r + 4, node.in_cycle ? "block" : graphNodeSignal(node, node.status_bucket || "watch"), "dep-node");
     nodeLayer.appendChild(group);
   });
   svg.appendChild(nodeLayer);
@@ -10583,6 +10654,12 @@ function renderKnowledgeGraph() {
     const group = document.createElementNS(SVG_NS, "g");
     group.setAttribute("class", `kg-node kind-${node.kind || "entity"} ${isFocus ? "is-focus" : ""}`);
     group.setAttribute("data-entity-id", node.id);
+    // TASK-AR-592: keyboard operable - role=button + tabindex so keyboard users can
+    // focus nodes; Enter/Space toggles focus just as a click does.
+    group.setAttribute("role", "button");
+    group.setAttribute("tabindex", "0");
+    group.setAttribute("aria-label", `${node.id} (${node.kind || "entity"}), ${node.degree || 0} links${isFocus ? ", focused" : ""}`);
+    group.setAttribute("aria-pressed", isFocus ? "true" : "false");
     if (dim) group.style.opacity = "0.18";
     const circle = document.createElementNS(SVG_NS, "circle");
     circle.setAttribute("cx", pos.x); circle.setAttribute("cy", pos.y);
@@ -10597,10 +10674,17 @@ function renderKnowledgeGraph() {
       label.textContent = String(node.id).slice(0, 16);
       group.appendChild(label);
     }
-    group.addEventListener("click", () => {
+    var kgNodeAction = function() {
       knowledgeGraphFocus = knowledgeGraphFocus === node.id ? null : node.id;
       updateKnowledgeGraphHash();
       renderKnowledgeGraph();
+    };
+    group.addEventListener("click", kgNodeAction);
+    group.addEventListener("keydown", function(event) {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        kgNodeAction();
+      }
     });
     nodeLayer.appendChild(group);
   });

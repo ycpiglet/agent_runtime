@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-20T05:18:40+09:00",
+  "generated_at": "2026-06-20T06:03:26+09:00",
   "record_count": 366,
   "finding_count": 0,
   "findings": [],
@@ -3820,7 +3820,7 @@
       "title": "Give every agent a deterministic visual identity: a seeded SVG avatar keyed to agent…",
       "path": "agents/lead_engineer/tasks/TASK-AR-587.md",
       "parent_id": "TASKSET-AR-VISUAL-ASSET-ADOPTION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-587-001",
@@ -3831,7 +3831,7 @@
       "title": "UNIT-TASK-AR-587-001 - Vendor + self-host a CC0 DiceBear style and add patternAgentAvatar",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-587/UNIT-TASK-AR-587-001.md",
       "parent_id": "TASK-AR-587",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-587-002",
@@ -3842,7 +3842,7 @@
       "title": "UNIT-TASK-AR-587-002 - Deterministic role accent + console placement",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-587/UNIT-TASK-AR-587-002.md",
       "parent_id": "TASK-AR-587",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-588",
@@ -3853,7 +3853,7 @@
       "title": "Replace the hand-rolled graph layout with proper layout engines: Dagre (MIT, layered/…",
       "path": "agents/lead_engineer/tasks/TASK-AR-588.md",
       "parent_id": "TASKSET-AR-VISUAL-ASSET-ADOPTION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-588-001",
@@ -3864,7 +3864,7 @@
       "title": "UNIT-TASK-AR-588-001 - Vendor Dagre + layered DAG renderer for dependency/state-machine",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-588/UNIT-TASK-AR-588-001.md",
       "parent_id": "TASK-AR-588",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-588-002",
@@ -3875,7 +3875,7 @@
       "title": "UNIT-TASK-AR-588-002 - Vendor d3-force + live agent map renderer",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-588/UNIT-TASK-AR-588-002.md",
       "parent_id": "TASK-AR-588",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-589",
@@ -3886,7 +3886,7 @@
       "title": "Self-host OFL fonts (Geist + Geist Mono) as font tokens and vendor the Lucide (ISC) i…",
       "path": "agents/lead_engineer/tasks/TASK-AR-589.md",
       "parent_id": "TASKSET-AR-VISUAL-ASSET-ADOPTION",
-      "status": "planned"
+      "status": "done"
     },
     {
       "key": "unit:UNIT-TASK-AR-589-001",
@@ -3897,7 +3897,7 @@
       "title": "UNIT-TASK-AR-589-001 - Self-host Geist + Geist Mono as font tokens",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-589/UNIT-TASK-AR-589-001.md",
       "parent_id": "TASK-AR-589",
-      "status": "worker_ready"
+      "status": "done"
     },
     {
       "key": "unit:UNIT-TASK-AR-589-002",
@@ -3908,7 +3908,7 @@
       "title": "UNIT-TASK-AR-589-002 - Vendor Lucide icon set + componentIcon helper",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-589/UNIT-TASK-AR-589-002.md",
       "parent_id": "TASK-AR-589",
-      "status": "worker_ready"
+      "status": "done"
     },
     {
       "key": "task:TASK-AR-590",

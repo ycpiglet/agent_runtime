@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-VISUAL-ASSET-ADOPTION
 registered_at: 2026-06-20T01:04:15+09:00
 created_at: 2026-06-20T01:04:15+09:00
-updated_at: 2026-06-20T01:04:15+09:00
+updated_at: 2026-06-20T05:02:07+09:00
 title: Agent avatar identity system (DiceBear CC0 + role accent)
-status: planned
+status: completed
+verification_status: passed
 priority: P1
 difficulty: M
 est_hours: 5
@@ -32,6 +33,13 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+verified_at: 2026-06-20T05:02:07+09:00
+verified_by: codex-interface-designer-task-ar-587-20260620
+evidence_refs:
+  - reviews/VERIFY-2026-06-20-task-ar-587-avatar-identity.json
+resolution: done
+completed_at: 2026-06-20T05:02:07+09:00
+closed_by: codex-interface-designer-task-ar-587-20260620
 ---
 
 # TASK-AR-587 - Agent avatar identity system (DiceBear CC0 + role accent)
@@ -55,3 +63,13 @@ tags:
 
 - `python -m pytest tests/test_ui_design_assets.py tests/test_design_system_gate.py -q`
 - `python scripts/design_system_gate.py --check --all-ui`
+
+## W4a Self Verification (2026-06-20T05:02:07+09:00)
+
+- Evidence: `reviews/VERIFY-2026-06-20-task-ar-587-avatar-identity.json`.
+- Vendored `@dicebear/identicon@9.4.2` package metadata, row schema/components, and license under `src/agent_runtime/vendor/dicebear/identicon/9.4.2`.
+- `patternAgentAvatar` now exposes `data-dicebear-style="identicon"` and `data-dicebear-version="9.4.2"`, uses the vendored row schema boundary, avoids `api.dicebear.com`, and keeps output token-driven.
+- Role accent rings remain deterministic and are covered by non-text contrast tests for light/dark surfaces.
+- Tests: `python -m pytest tests/test_ui_design_assets.py tests/test_ui_console.py tests/test_ui_console_e2e.py -q` -> `191 passed`.
+- Design gate: `python scripts/design_system_gate.py --check --all-ui` -> pass.
+- Browser verification: desktop and mobile `#/agents/list` rendered DiceBear Identicon avatar SVGs with no horizontal overflow and no console issues.
