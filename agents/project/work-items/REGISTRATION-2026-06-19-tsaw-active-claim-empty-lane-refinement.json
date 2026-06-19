@@ -1,0 +1,164 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "beta_finding",
+  "origin_ref": "reviews/BETA-TEST-2026-06-19-taskset-board-attention-workspace.md",
+  "created_by": "codex-ux-evaluator-ar-613",
+  "now": "2026-06-19T21:56:00+09:00",
+  "initiative": {
+    "id": "INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT",
+    "title": "Taskset Attention Workspace Claim And Empty State Refinement",
+    "summary": "Continue the UI/UX cycle after TASK-AR-613 by fixing BTC-TSAW-CLAIM-001 and BTC-TSAW-EMPTY-001 before starting another design-direction seminar.",
+    "owner": "lead_engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT",
+    "display_name": "TSAW Claim And Empty State Refinement",
+    "summary": "Make the Taskset Board attention workspace surface live active claims and clarify zero-count lane recovery copy, then rerun beta/UX evidence.",
+    "order": 630,
+    "plan_slug": "2026-06-19-tsaw-claim-empty-refinement"
+  },
+  "tasks": [
+    {
+      "title": "Fix Taskset attention active-claim freshness and empty lane copy",
+      "goal": "Fix BTC-TSAW-CLAIM-001 and BTC-TSAW-EMPTY-001 so active runtime claims appear in the active_claims lane and zero-count lanes communicate recovery without contradictory copy.",
+      "scope": "Source mutation is limited to Taskset Board state derivation, attention lane pattern assets, and focused tests. Do not change task claim persistence, dispatcher release semantics, write APIs, or unrelated console views.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 4,
+      "est_tokens": 9000,
+      "owner": "interface-designer",
+      "team": "ui-ux",
+      "acceptance": [
+        "When task_claims contains a claimed task for a taskset, `attention_workspace.lanes.active_claims` includes that taskset with a visible active-claim reason.",
+        "The selected taskset fallback prefers an active-claim taskset when one exists; otherwise it may fall back to ready/guarded/stale candidates.",
+        "Zero-count attention lanes render empty-state copy that says no matching tasksets exist while preserving the lane purpose separately.",
+        "State meaning remains textual and non-color-only for active, guarded, stale, empty, and ready-next lanes.",
+        "Focused tests cover active claim derivation, empty lane copy, switcher/selected state preservation, and mobile CSS anchors."
+      ],
+      "verification": [
+        "python -m pytest tests/test_ui_state.py tests/test_ui_console.py tests/test_ui_design_assets.py -q",
+        "python scripts/design_system_gate.py --check --all-ui",
+        "python scripts/ui_ux_cycle.py --root . assess --json",
+        "python scripts/evidence_index_generator.py --check",
+        "git diff --check"
+      ],
+      "units": [
+        {
+          "title": "Patch attention workspace claim and empty recovery states",
+          "context": "TASK-AR-613 beta evidence routed BTC-TSAW-CLAIM-001 because live `work.py status` showed an active TASK-AR-613 claim while root `/api/tasksets_board` returned `active_claims=0`. It also routed BTC-TSAW-EMPTY-001 because zero-count lane empty cards reused non-empty reason copy.",
+          "inputs": [
+            "reviews/BETA-TEST-2026-06-19-taskset-board-attention-workspace.md",
+            "reviews/UX-EVAL-2026-06-19-taskset-board-attention-workspace.md",
+            "reviews/W4B-2026-06-19-TASK-AR-613.md",
+            "src/agent_runtime/ui_state.py",
+            "src/agent_runtime/ui_design_assets.py",
+            "src/agent_runtime/ui_console_assets.py",
+            "tests/test_ui_state.py",
+            "tests/test_ui_console.py",
+            "tests/test_ui_design_assets.py"
+          ],
+          "target_files": [
+            "src/agent_runtime/ui_state.py",
+            "src/agent_runtime/ui_design_assets.py",
+            "src/agent_runtime/ui_console_assets.py",
+            "tests/test_ui_state.py",
+            "tests/test_ui_console.py",
+            "tests/test_ui_design_assets.py",
+            "reviews/VERIFY-2026-06-19-tsaw-claim-empty-refinement.json",
+            "reviews/INDEX.md"
+          ],
+          "scope": "Implement only active-claim lane freshness and empty-lane copy refinement. Do not introduce a new visual direction or change claim lifecycle semantics.",
+          "steps": [
+            "Read TASK-AR-613 beta/UX findings and current Taskset Board attention workspace derivation.",
+            "Trace how task claims are passed into `build_tasksets_board` and why active claims do not affect lane membership.",
+            "Adjust state derivation so active claim membership is derived from current claim data rather than stale classification alone.",
+            "Update the lane pattern/component empty state so zero-count lanes distinguish purpose from current absence.",
+            "Add focused unit/UI asset tests for active claim lane membership and empty copy.",
+            "Run W4a verification commands and record evidence."
+          ],
+          "acceptance": [
+            "A focused test proves a claimed taskset appears in `active_claims` with a visible reason.",
+            "A focused UI/component test proves zero-count lane copy is not contradictory.",
+            "The change uses existing design tokens and component/pattern helpers.",
+            "No task or claim files are written by the UI state/API path.",
+            "The all-tasksets fallback and task.create proposal-only path remain unchanged."
+          ],
+          "verification": [
+            "python -m pytest tests/test_ui_state.py tests/test_ui_console.py tests/test_ui_design_assets.py -q",
+            "python scripts/design_system_gate.py --check --all-ui",
+            "python scripts/ui_ux_cycle.py --root . assess --json",
+            "python scripts/evidence_index_generator.py --check",
+            "git diff --check"
+          ],
+          "handoff": "Report data derivation fields changed, empty-state pattern copy, tests, verification evidence, and any remaining UX risks.",
+          "stop_condition": "Stop after implementation is source-mutated, tested, self-verified, and ready for independent W4b verification."
+        }
+      ]
+    },
+    {
+      "title": "Rerun Taskset attention workspace beta after claim and empty-state refinement",
+      "goal": "Repeat beta-tester and UX-evaluator verification after the active-claim and empty-lane refinement, focused on live claim discovery, zero-count recovery, keyboard flow, mobile fit, and reduced motion.",
+      "scope": "Evaluation and evidence only. Do not mutate UI source files in this task. Any remaining visual or interaction defect must be routed with BTC-style IDs.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 2,
+      "est_tokens": 6000,
+      "owner": "ux-evaluator",
+      "team": "ui-ux",
+      "acceptance": [
+        "Beta evidence shows an active claim state appearing in the attention workspace when a claimed task exists.",
+        "Empty lane evidence confirms zero-count lanes communicate absence and recovery clearly.",
+        "Desktop and mobile evidence records exact click/type/keyboard paths and viewport widths.",
+        "Reduced-motion and non-color-only state cues are reviewed again.",
+        "The evaluation decides whether to close the refinement or start a new lead-designer seminar."
+      ],
+      "verification": [
+        "python scripts/design_system_gate.py --check --all-ui",
+        "python scripts/evidence_index_generator.py --check",
+        "python scripts/ui_ux_cycle.py --root . assess --json"
+      ],
+      "units": [
+        {
+          "title": "Record refined attention workspace beta and UX evidence",
+          "context": "This unit verifies that BTC-TSAW-CLAIM-001 and BTC-TSAW-EMPTY-001 are closed after the implementation refinement.",
+          "inputs": [
+            "reviews/BETA-TEST-2026-06-19-taskset-board-attention-workspace.md",
+            "reviews/UX-EVAL-2026-06-19-taskset-board-attention-workspace.md",
+            "reviews/W4B-2026-06-19-TASK-AR-613.md",
+            "src/agent_runtime/ui_state.py",
+            "src/agent_runtime/ui_design_assets.py",
+            "src/agent_runtime/ui_console_assets.py"
+          ],
+          "target_files": [
+            "reviews/BETA-TEST-2026-06-19-tsaw-claim-empty-refinement.md",
+            "reviews/UX-EVAL-2026-06-19-tsaw-claim-empty-refinement.md",
+            "reviews/INDEX.md"
+          ],
+          "scope": "Record exploratory evidence only. Do not patch UI source files in this unit.",
+          "steps": [
+            "Launch or inspect the local UI surface after implementation.",
+            "Create or use a current active claim data state and confirm the active lane surfaces it.",
+            "Click zero-count lanes and verify empty-state recovery copy.",
+            "Repeat known-target switcher, keyboard traversal, fallback search, mobile width, and reduced-motion checks.",
+            "Assign BTC-style IDs to any remaining user-visible defects.",
+            "Refresh evidence index and run recorded verification commands."
+          ],
+          "acceptance": [
+            "Evidence lists exact actions, viewport, data state, expected result, observed result, and pass/fail status.",
+            "Active claim and empty-lane findings are explicitly closed or rerouted.",
+            "No UI source files are changed by the evaluation unit.",
+            "The handoff recommends either a new design seminar or another implementation refinement."
+          ],
+          "verification": [
+            "python scripts/design_system_gate.py --check --all-ui",
+            "python scripts/evidence_index_generator.py --check",
+            "python scripts/ui_ux_cycle.py --root . assess --json"
+          ],
+          "handoff": "Report beta paths, fixed findings, accessibility/responsive findings, defects, and the next UI/UX cycle decision.",
+          "stop_condition": "Stop after beta/UX evidence is complete and ready for independent verification."
+        }
+      ]
+    }
+  ]
+}

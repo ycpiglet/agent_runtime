@@ -434,6 +434,29 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/BETA-TEST-2026-06-19-taskset-board-attention-workspace.md",
+          "value": "894cc4130e3651f30c01c9aa8ce32f2263c3b1f822e68e7d89b7f2bcf32b2f0c"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "cb2cd245558157ff640dbf0b824694c5623e2e1ef0ccfba6e83f9a08a5522bc8"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        }
+      ],
+      "design_record": "reviews/BETA-TEST-2026-06-19-taskset-board-attention-workspace.md",
+      "recorded_at": "2026-06-19T21:58:02+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "scripts/ui_ux_cycle.py",
           "value": "acd9439bdb575c46979b05c6ac029f1b248c80f83c839d5b54f72a382b2206c2"
         },
@@ -478,5 +501,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-19T19:43:29+09:00"
+  "updated_at": "2026-06-19T21:58:02+09:00"
 }

@@ -1,0 +1,56 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-19-task-ar-613-closeout",
+  "work_id": "TASK-AR-613",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-613.md",
+  "kind": "task",
+  "task_id": "TASK-AR-613",
+  "unit_id": "UNIT-TASK-AR-613-001",
+  "task_set_id": "TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-19T21:49:12+09:00",
+  "verified_by": "codex-independent-w4b-verifier",
+  "summary": "Task-level closeout evidence for TASK-AR-613. The beta evidence, UX evaluation, unit W4a verification, and independent W4b review all passed for the evidence-only evaluation unit.",
+  "commands": [
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "details": "artifacts=3 roles=4 scanned=6 findings=0"
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "passed",
+      "details": "findings=0"
+    },
+    {
+      "command": "python scripts/ui_ux_cycle.py --root . assess --json",
+      "status": "passed",
+      "details": "returncode=0; score=75 usable; next_refactor missing because follow-up implementation is not registered yet"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "details": "no blocking whitespace findings; CRLF normalization warnings only"
+    }
+  ],
+  "supporting_evidence": [
+    "reviews/BETA-TEST-2026-06-19-taskset-board-attention-workspace.md",
+    "reviews/UX-EVAL-2026-06-19-taskset-board-attention-workspace.md",
+    "reviews/VERIFY-2026-06-19-unit-task-ar-613-001-20260619214507.json",
+    "reviews/W4B-2026-06-19-TASK-AR-613.md"
+  ],
+  "routed_findings": [
+    {
+      "id": "BTC-TSAW-CLAIM-001",
+      "assetization_class": "schema / pattern_component",
+      "summary": "Live active claims are not surfaced in the active_claims attention lane."
+    },
+    {
+      "id": "BTC-TSAW-EMPTY-001",
+      "assetization_class": "pattern_component",
+      "summary": "Zero-count attention lanes reuse non-empty reason copy."
+    }
+  ],
+  "verdict": "Release and closeout recommended with routed follow-up implementation findings."
+}

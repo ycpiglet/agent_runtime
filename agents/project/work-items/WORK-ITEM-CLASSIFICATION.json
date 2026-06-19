@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T20:41:48+09:00",
-  "record_count": 388,
+  "generated_at": "2026-06-19T21:58:17+09:00",
+  "record_count": 394,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4227,7 +4227,7 @@
       "title": "Taskset Board Attention Workspace",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-TASKSET-BOARD-ATTENTION-WORKSPACE",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-612",
@@ -4260,7 +4260,7 @@
       "title": "Verify the attention workspace through user-like beta actions, keyboard traversal, mo…",
       "path": "agents/lead_engineer/tasks/TASK-AR-613.md",
       "parent_id": "TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-613-001",
@@ -4271,6 +4271,72 @@
       "title": "UNIT-TASK-AR-613-001 - Record Taskset Board attention workspace beta and UX evidence",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-613/UNIT-TASK-AR-613-001.md",
       "parent_id": "TASK-AR-613",
+      "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT",
+      "level": "initiative",
+      "number": "27",
+      "label": "Initiative 27",
+      "id": "INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT",
+      "title": "Taskset Attention Workspace Claim And Empty State Refinement",
+      "path": "agents/project/initiatives/INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT",
+      "level": "taskset",
+      "number": "27.1",
+      "label": "Taskset 27.1",
+      "id": "TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT",
+      "title": "TSAW Claim And Empty State Refinement",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-614",
+      "level": "task",
+      "number": "27.1.1",
+      "label": "Task 27.1.1",
+      "id": "TASK-AR-614",
+      "title": "Fix BTC-TSAW-CLAIM-001 and BTC-TSAW-EMPTY-001 so active runtime claims appear in the…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-614.md",
+      "parent_id": "TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-614-001",
+      "level": "unit",
+      "number": "27.1.1.1",
+      "label": "Unit 27.1.1.1",
+      "id": "UNIT-TASK-AR-614-001",
+      "title": "UNIT-TASK-AR-614-001 - Patch attention workspace claim and empty recovery states",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-614/UNIT-TASK-AR-614-001.md",
+      "parent_id": "TASK-AR-614",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-615",
+      "level": "task",
+      "number": "27.1.2",
+      "label": "Task 27.1.2",
+      "id": "TASK-AR-615",
+      "title": "Repeat beta-tester and UX-evaluator verification after the active-claim and empty-lan…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-615.md",
+      "parent_id": "TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-615-001",
+      "level": "unit",
+      "number": "27.1.2.1",
+      "label": "Unit 27.1.2.1",
+      "id": "UNIT-TASK-AR-615-001",
+      "title": "UNIT-TASK-AR-615-001 - Record refined attention workspace beta and UX evidence",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-615/UNIT-TASK-AR-615-001.md",
+      "parent_id": "TASK-AR-615",
       "status": "worker_ready"
     }
   ]

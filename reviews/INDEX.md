@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T21:51:02+09:00
-record_count: 683
+generated_at: 2026-06-19T21:58:18+09:00
+record_count: 685
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `683` review and evidence records under `reviews/`.
+- Summary: indexed `685` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `683` files |
+| Reviews covered | pass | `685` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -518,6 +518,7 @@ record_count: 683
 | `reviews/REVIEW-2026-06-19-taskset-ar-operator-attention-graph-registration.md` | `REVIEW-2026-06-19-taskset-ar-operator-attention-graph-registration` | md | record | pass | Operator Attention Graph Registration |
 | `reviews/REVIEW-2026-06-19-taskset-ar-taskset-board-attention-workspace-registration.md` | `REVIEW-2026-06-19-taskset-ar-taskset-board-attention-workspace-registration` | md | record | pass | Taskset Board Attention Workspace Registration |
 | `reviews/REVIEW-2026-06-19-taskset-ar-taskset-board-ia-design-direction-registration.md` | `REVIEW-2026-06-19-taskset-ar-taskset-board-ia-design-direction-registration` | md | record | pass | Taskset Board IA Design Direction Registration |
+| `reviews/REVIEW-2026-06-19-taskset-ar-tsaw-claim-empty-refinement-registration.md` | `REVIEW-2026-06-19-taskset-ar-tsaw-claim-empty-refinement-registration` | md | record | pass | TSAW Claim And Empty State Refinement Registration |
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-registration.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-registration` | md | record | pass | UI UX Cycle Automation Registration |
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-conductor.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-conductor` | review | accepted | replan | UI/UX Cycle Automation T3 Replan After Conductor |
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-review-planning.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-review-planning` | review | accepted | replan | UI/UX Cycle Automation T3 Replan After Review Planning |
@@ -612,6 +613,7 @@ record_count: 683
 | `reviews/VERIFY-2026-06-19-task-ar-610-20260619180000.json` | `VERIFY-2026-06-19-task-ar-610-20260619180000` | json | record | n/a | VERIFY-2026-06-19-task-ar-610-20260619180000 |
 | `reviews/VERIFY-2026-06-19-task-ar-611-20260619184000.json` | `VERIFY-2026-06-19-task-ar-611-20260619184000` | json | record | n/a | VERIFY-2026-06-19-task-ar-611-20260619184000 |
 | `reviews/VERIFY-2026-06-19-task-ar-612-closeout.json` | `VERIFY-2026-06-19-task-ar-612-closeout` | json | record | n/a | VERIFY-2026-06-19-task-ar-612-closeout |
+| `reviews/VERIFY-2026-06-19-task-ar-613-closeout.json` | `VERIFY-2026-06-19-task-ar-613-closeout` | json | record | n/a | VERIFY-2026-06-19-task-ar-613-closeout |
 | `reviews/VERIFY-2026-06-19-taskset-board-attention-workspace-implementation.json` | `VERIFY-2026-06-19-taskset-board-attention-workspace-implementation` | json | record | n/a | VERIFY-2026-06-19-taskset-board-attention-workspace-implementation |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500.json` | `VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525.json` | `VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525 |

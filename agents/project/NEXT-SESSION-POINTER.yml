@@ -1,28 +1,67 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T20:43:00+09:00
+updated_at: 2026-06-19T21:56:00+09:00
 current_state:
-  summary: "TASK-AR-612 is implemented, W4b-verified, released, merged, and closed. TASK-AR-613 is the next planned beta/UX evaluation for the Taskset Board attention workspace."
+  summary: "TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE is locally complete: TASK-AR-612 implemented the attention workspace, TASK-AR-613 beta/UX verified it, and findings BTC-TSAW-CLAIM-001 / BTC-TSAW-EMPTY-001 are routed into TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT."
   status: active
   task_set_status: taskset_active
-  task_set_id: TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE
-  step_index: 4
+  task_set_id: TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT
+  step_index: 1
   step_total: 5
-  progress_pct: 50
-  status_text: "No active claim remains for TASK-AR-612. Claim TASK-AR-613 before running beta/UX evidence and deriving the next UI/UX delta."
+  progress_pct: 0
+  status_text: "Claim TASK-AR-614 before source mutation. Fix active-claim lane freshness and zero-count empty-lane copy, then run TASK-AR-615 beta/UX evaluation."
 active_work:
   current_agents: []
   current_teams:
     - ui-ux
 resume:
-  active_task: TASK-AR-613
-  active_task_set: TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE
-  branch_policy: "No active claim remains. Claim TASK-AR-613 before beta/UX evaluation; do not mutate UI source from the evaluation task except through a new follow-up implementation claim."
+  active_task: TASK-AR-614
+  active_task_set: TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT
+  branch_policy: "No active claim remains. Claim TASK-AR-614 before source mutation; TASK-AR-615 remains evaluation-only after implementation lands."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
+  taskset_board_attention_workspace:
+    taskset: TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE
+    active_claim: null
+    released_claims:
+      - agents/runtime/task_claims/CLAIM-20260619-195000-task-ar-612-taskset-board-attention-workspace.json
+      - agents/runtime/task_claims/CLAIM-20260619-205629-task-ar-613-task-ar-613-taskset-board-attention-beta.json
+    worktree_path: null
+    status: taskset_completed_local_closeout
+    completed_tasks:
+      - TASK-AR-612
+      - TASK-AR-613
+    next_task: null
+    next_unit: null
+    implementation_commit: 333e0f5
+    evaluation_commit: 8c8e945
+    task_ar_612_w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-612.md
+    task_ar_613_beta_evidence: reviews/BETA-TEST-2026-06-19-taskset-board-attention-workspace.md
+    task_ar_613_ux_evidence: reviews/UX-EVAL-2026-06-19-taskset-board-attention-workspace.md
+    task_ar_613_w4b_evidence: reviews/W4B-2026-06-19-TASK-AR-613.md
+    findings:
+      - BTC-TSAW-CLAIM-001
+      - BTC-TSAW-EMPTY-001
+    next_decision: continue_with_tsaw_claim_empty_refinement_taskset
+  tsaw_claim_empty_refinement:
+    taskset: TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT
+    active_claim: null
+    status: registered_ready_to_claim
+    tasks:
+      - TASK-AR-614
+      - TASK-AR-615
+    next_task: TASK-AR-614
+    next_unit: UNIT-TASK-AR-614-001
+    findings:
+      - BTC-TSAW-CLAIM-001
+      - BTC-TSAW-EMPTY-001
+    registration_input: agents/project/work-items/REGISTRATION-2026-06-19-tsaw-active-claim-empty-lane-refinement.json
+    registration_review: reviews/REVIEW-2026-06-19-taskset-ar-tsaw-claim-empty-refinement-registration.md
+    plan: docs/superpowers/plans/2026-06-19-tsaw-claim-empty-refinement.md
+    next_decision: claim_task_ar_614_implementation
   operator_attention_graph:
     taskset: TASKSET-AR-OPERATOR-ATTENTION-GRAPH
     completed_tasks:

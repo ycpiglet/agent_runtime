@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-19T20:41:48+09:00
-record_count: 388
+generated_at: 2026-06-19T21:58:17+09:00
+record_count: 394
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `388` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `394` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `27` records |
-| Tasksets | pass | `51` records |
-| Tasks | pass | `272` records |
-| Units | pass | `38` records |
+| Initiatives | pass | `28` records |
+| Tasksets | pass | `52` records |
+| Tasks | pass | `274` records |
+| Units | pass | `40` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -422,11 +422,17 @@ record_count: 388
 | 25.1.2 | Task 25.1.2 | task | `TASK-AR-610` | `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` | completed | `agents/lead_engineer/tasks/TASK-AR-610.md` | Promote the seminar decision into an accepted design-direction RFC that names the exa… |
 | 25.1.3 | Task 25.1.3 | task | `TASK-AR-611` | `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` | completed | `agents/lead_engineer/tasks/TASK-AR-611.md` | Turn the accepted Taskset Board IA RFC into a source-mutation implementation registra… |
 | 26 | Initiative 26 | initiative | `INIT-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | - | active | `agents/project/initiatives/INIT-AR-TASKSET-BOARD-ATTENTION-WORKSPACE.md` | Taskset Board Attention Workspace |
-| 26.1 | Taskset 26.1 | taskset | `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | `INIT-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | active | `BACKLOG-BOARD.md` | Taskset Board Attention Workspace |
+| 26.1 | Taskset 26.1 | taskset | `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | `INIT-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | complete | `BACKLOG-BOARD.md` | Taskset Board Attention Workspace |
 | 26.1.1 | Task 26.1.1 | task | `TASK-AR-612` | `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | completed | `agents/lead_engineer/tasks/TASK-AR-612.md` | Convert the Taskset Board from a whole-board-first scan into an attention workspace w… |
 | 26.1.1.1 | Unit 26.1.1.1 | unit | `UNIT-TASK-AR-612-001` | `TASK-AR-612` | completed | `agents/lead_engineer/tasks/units/TASK-AR-612/UNIT-TASK-AR-612-001.md` | UNIT-TASK-AR-612-001 - Add Taskset Board attention lane schema and workspace UI |
-| 26.1.2 | Task 26.1.2 | task | `TASK-AR-613` | `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | planned | `agents/lead_engineer/tasks/TASK-AR-613.md` | Verify the attention workspace through user-like beta actions, keyboard traversal, mo… |
-| 26.1.2.1 | Unit 26.1.2.1 | unit | `UNIT-TASK-AR-613-001` | `TASK-AR-613` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-613/UNIT-TASK-AR-613-001.md` | UNIT-TASK-AR-613-001 - Record Taskset Board attention workspace beta and UX evidence |
+| 26.1.2 | Task 26.1.2 | task | `TASK-AR-613` | `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | completed | `agents/lead_engineer/tasks/TASK-AR-613.md` | Verify the attention workspace through user-like beta actions, keyboard traversal, mo… |
+| 26.1.2.1 | Unit 26.1.2.1 | unit | `UNIT-TASK-AR-613-001` | `TASK-AR-613` | completed | `agents/lead_engineer/tasks/units/TASK-AR-613/UNIT-TASK-AR-613-001.md` | UNIT-TASK-AR-613-001 - Record Taskset Board attention workspace beta and UX evidence |
+| 27 | Initiative 27 | initiative | `INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | - | active | `agents/project/initiatives/INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT.md` | Taskset Attention Workspace Claim And Empty State Refinement |
+| 27.1 | Taskset 27.1 | taskset | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | `INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | active | `BACKLOG-BOARD.md` | TSAW Claim And Empty State Refinement |
+| 27.1.1 | Task 27.1.1 | task | `TASK-AR-614` | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-614.md` | Fix BTC-TSAW-CLAIM-001 and BTC-TSAW-EMPTY-001 so active runtime claims appear in the… |
+| 27.1.1.1 | Unit 27.1.1.1 | unit | `UNIT-TASK-AR-614-001` | `TASK-AR-614` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-614/UNIT-TASK-AR-614-001.md` | UNIT-TASK-AR-614-001 - Patch attention workspace claim and empty recovery states |
+| 27.1.2 | Task 27.1.2 | task | `TASK-AR-615` | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-615.md` | Repeat beta-tester and UX-evaluator verification after the active-claim and empty-lan… |
+| 27.1.2.1 | Unit 27.1.2.1 | unit | `UNIT-TASK-AR-615-001` | `TASK-AR-615` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-615/UNIT-TASK-AR-615-001.md` | UNIT-TASK-AR-615-001 - Record refined attention workspace beta and UX evidence |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

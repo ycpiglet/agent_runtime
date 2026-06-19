@@ -32,6 +32,8 @@
 | 626 | `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` | Claim-Aware Relation Adapter |
 | 627 | `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` | OAG Mobile Responsive Refinement |
 | 628 | `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` | Taskset Board IA Design Direction |
+| 629 | `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | Taskset Board Attention Workspace |
+| 630 | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | TSAW Claim And Empty State Refinement |
 
 <!-- BACKLOG-INDEX:END -->
 

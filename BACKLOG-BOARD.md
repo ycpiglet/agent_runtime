@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-19
-task_count: 272
-open_count: 1
-completed_count: 271
+task_count: 274
+open_count: 2
+completed_count: 272
 task_set_count: 1
-completed_task_set_count: 50
+completed_task_set_count: 51
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `1` open or active tasks; `271` completed tasks are archived from this live board.
+- Summary: `2` open or active tasks; `272` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `1` / Ask `0` / Review `0` / Later `0` / Done `271`.
-- Task Sets: `1` active workflows; `50` completed workflows are hidden from the live action board.
+- Status: Action `2` / Ask `0` / Review `0` / Later `0` / Done `272`.
+- Task Sets: `1` active workflows; `51` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -42,14 +42,15 @@ completed_task_set_count: 50
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
 
-### Taskset Board Attention Workspace (`TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE`)
+### TSAW Claim And Empty State Refinement (`TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT`)
 
-- Flow: Source-mutating implementation of the accepted Taskset Board IA RFC: attention lane derivation, taskset switcher, relation detail panel, and beta/UX evidence for desktop, mobile, keyboard, reduced-motion, and recovery states.
-- Progress: `1/2` done; `1` open or active.
+- Flow: Make the Taskset Board attention workspace surface live active claims and clarify zero-count lane recovery copy, then rerun beta/UX evidence.
+- Progress: `0/2` done; `2` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-613` | INIT-AR-TASKSET-BOARD-ATTENTION-WORKSPACE | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-613/UNIT-TASK-AR-613-001.md | planned | Action | P1 | High | Medium | 4h/9000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Verify the attention workspace through user-like beta actions, keyboard traversal, mo… |
+| `TASK-AR-615` | INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-615/UNIT-TASK-AR-615-001.md | planned | Action | P1 | High | Medium | 2h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Repeat beta-tester and UX-evaluator verification after the active-claim and empty-lan… |
+| `TASK-AR-614` | INIT-AR-TSAW-CLAIM-EMPTY-REFINEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-614/UNIT-TASK-AR-614-001.md | planned | Action | P1 | High | Medium | 4h/9000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Fix BTC-TSAW-CLAIM-001 and BTC-TSAW-EMPTY-001 so active runtime claims appear in the… |
 
 ## Archived Task Sets
 
@@ -106,14 +107,15 @@ completed_task_set_count: 50
 | Claim-Aware Relation Adapter (`TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER`) | Promote or replace the view-local relation summary adapter so Operator Attention Graph claim path and command readiness reflect active, expired, interrupted, and guarded claim states, then rerun beta/UX evaluation. | `2/2` done | `2` completed task files archived |
 | OAG Mobile Responsive Refinement (`TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT`) | Remove mobile Taskset Board horizontal overflow for the Operator Attention Graph relation panel, then rerun beta/UX evaluation on desktop and 390x844 mobile. | `2/2` done | `2` completed task files archived |
 | Taskset Board IA Design Direction (`TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION`) | Resolve the post-OAG UX watch that Taskset Board discovery and whole-board focus traversal are too long now that the board contains 49 tasksets; run a lead-designer IA/design seminar, publish an RFC, then derive the next implementation and beta-evaluation taskset. | `3/3` done | `3` completed task files archived |
+| Taskset Board Attention Workspace (`TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE`) | Source-mutating implementation of the accepted Taskset Board IA RFC: attention lane derivation, taskset switcher, relation detail panel, and beta/UX evidence for desktop, mobile, keyboard, reduced-motion, and recovery states. | `2/2` done | `2` completed task files archived |
 
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `1` open across `1` task sets (see Action Board above).
-- Archived task sets: `50` (see Archived Task Sets above).
-- Archived task files: `271` — see `ARCHIVE-INDEX.md`.
+- Active: `2` open across `1` task sets (see Action Board above).
+- Archived task sets: `51` (see Archived Task Sets above).
+- Archived task files: `272` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

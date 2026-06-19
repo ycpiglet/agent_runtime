@@ -162,6 +162,12 @@
       "display_name": "Taskset Board Attention Workspace",
       "summary": "Source-mutating implementation of the accepted Taskset Board IA RFC: attention lane derivation, taskset switcher, relation detail panel, and beta/UX evidence for desktop, mobile, keyboard, reduced-motion, and recovery states.",
       "order": 629
+    },
+    {
+      "task_set_id": "TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT",
+      "display_name": "TSAW Claim And Empty State Refinement",
+      "summary": "Make the Taskset Board attention workspace surface live active claims and clarify zero-count lane recovery copy, then rerun beta/UX evidence.",
+      "order": 630
     }
   ]
 }
