@@ -176,6 +176,39 @@ evidence for:
 - recovery paths for empty graph, stale evidence, blocked command, and
   interrupted claim.
 
+### Accepted RFC: taskset attention workspace
+
+`reviews/RFC-2026-06-19-taskset-board-ia-design-direction.md` accepts
+`taskset_attention_workspace` as the Taskset Board IA direction. It extends the
+accepted `operator_attention_graph` direction by changing the board entry point
+from a long generated list into attention lanes with a supporting taskset
+switcher and relation detail panel.
+
+The first implementation must start every candidate as `experimental` unless it
+reuses an existing stable token or helper unchanged:
+
+| Candidate asset | Class | Initial tier | Contract |
+| --- | --- | --- | --- |
+| Attention state labels | `design_token` | `experimental` | Reuse pass/warn/block/info/active tokens first; add only named attention aliases inside the token layer when current semantics cannot distinguish active, stale, blocked, recently changed, and ready states. |
+| Lane density roles | `design_token` | `experimental` | Use the current type, spacing, and radius scale first; add compact lane roles only when beta evidence proves readability, truncation, or target-size gaps. |
+| Taskset quick switcher | `ui_component` | `experimental` | Keyboard-first typeahead with selected state, empty state, result count, and jump target. |
+| Attention lane filter | `ui_component` | `experimental` | Compact segmented or tab-like control with count, label, focus state, and non-color cue. |
+| Taskset attention lane | `pattern_component` | `experimental` | Domain lane combining taskset identity, claim state, evidence freshness, command readiness, and membership reason. |
+| Taskset relation detail panel | `pattern_component` | `experimental` | Reuse OAG relation summary and evidence preview responsibilities without duplicating relation chip/card markup. |
+| First migration helper copy | `one_off_for_now` | temporary | Allowed only for the first beta cycle; remove or promote before a third use. |
+
+The implementation registration must name its schema or adapter inputs before
+editing UI assets: taskset identity/status, active claim, claim phase, progress,
+evidence freshness, recent change timestamp, command readiness, and child task
+counts. If the current Taskset Board API cannot supply those values, a
+read-only adapter must be introduced before lane membership is rendered.
+
+Beta-tester and UX-evaluator evidence must cover unknown-target discovery,
+known-target switcher search, keyboard traversal, desktop and `390x844` mobile
+fit, reduced motion, empty lane, stale evidence, blocked command, interrupted
+claim, expired claim, and no active claim states. User-visible failures use
+BTC-style IDs with reproduction paths.
+
 ## Role routing
 
 | Role | Responsibility |

@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-19-task-ar-610-20260619174130",
+  "work_id": "TASK-AR-610",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-610.md",
+  "kind": "task",
+  "task_id": "TASK-AR-610",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-19T17:41:30+09:00",
+  "verified_by": "codex-lead-designer-task-ar-610",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-19T17:41:33+09:00",
+      "finished_at": "2026-06-19T17:41:34+09:00",
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-19T17:41:34+09:00",
+      "finished_at": "2026-06-19T17:41:35+09:00",
+      "stdout": "evidence-index: pass\nfindings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/ui_ux_cycle.py --root . propose --dry-run --json",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-19T17:41:35+09:00",
+      "finished_at": "2026-06-19T17:41:37+09:00",
+      "stdout": "ime/ui_console.py\",\n          \"src/agent_runtime/ui_console_assets.py\",\n          \"src/agent_runtime/ui_design_assets.py\",\n          \"agents/runtime/task_claims/*.json\",\n          \"agents/runtime/instances/*.json\",\n          \"agents/lead_engineer/tasks/*.md\"\n        ],\n        \"proposal_artifact_files\": [\n          \"reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md\"\n        ]\n      },\n      \"title\": \"Refactor TASK-AR-610 through existing design-system assets\"\n    },\n    {\n      \"acceptance_criteria\": [\n        \"Records user-like actions instead of screenshot-only evidence.\",\n        \"Covers recovery, empty, interrupted, and responsive states where relevant.\",\n        \"Links every user-visible defect to a BTC-style failure ID and reproduction path.\"\n      ],\n      \"generated_at\": \"2026-06-19T17:41:36+09:00\",\n      \"proposal_id\": \"UIUX-NEXT-2026-06-19-ux-evaluation-pass\",\n      \"proposal_kind\": \"ux_evaluation_pass\",\n      \"registration_boundary\": {\n        \"claim_policy\": \"must register and claim follow-up work through W0-W6 before any UI source mutation\",\n        \"creates_claim\": false,\n        \"mutates_claims\": false,\n        \"mutates_ui_files\": false,\n        \"mutates_work_items\": false,\n        \"requires_claim_before_mutation\": true,\n        \"requires_work_registration\": true,\n        \"suggested_command\": \"python scripts/work.py new --input <json>\"\n      },\n      \"role_routing\": {\n        \"lead_role\": \"ux-evaluator\",\n        \"review_roles\": [\n          \"design-system-steward\"\n        ],\n        \"supporting_roles\": [\n          \"beta-tester\",\n          \"interface-designer\"\n        ]\n      },\n      \"source_evidence\": {\n        \"assessment_schema\": \"agent-runtime-ui-ux-cycle-assessment/v1\",\n        \"assessment_status\": \"blocked\",\n        \"conflicts\": [\n          {\n            \"claim_id\": \"CLAIM-20260619-161400-task-ar-610-task-ar-610-taskset-board-ia-rfc\",\n            \"cycle_claim\": false,\n            \"overlap\": [\n              \"docs/design/agent-runtime/DESIGN-SYSTEM.md\"\n            ],\n            \"status\": \"claimed\",\n            \"task_id\": \"TASK-AR-610\",\n            \"task_set_id\": \"TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION\"\n          }\n        ],\n        \"next_refactor_status\": \"blocked_by_active_claim\",\n        \"next_refactor_task_id\": \"TASK-AR-610\",\n        \"next_refactor_task_path\": \"agents/lead_engineer/tasks/TASK-AR-610.md\",\n        \"readiness\": {\n          \"level\": \"blocked\",\n          \"value\": 85\n        }\n      },\n      \"status\": \"ready_after_implementation\",\n      \"summary\": \"Plan the post-implementation beta-tester/evaluator pass with clicked/typed actions, edge and recovery attempts, environment notes, and BTC-style visible-defect IDs.\",\n      \"target_file_boundaries\": {\n        \"future_target_files\": [\n          \"reviews/SEMINAR-2026-06-19-task-ar-610-ui-ux.md\",\n          \"reviews/MEETING-2026-06-19-task-ar-610-ui-ux.md\",\n          \"reviews/BETA-TEST-2026-06-19-task-ar-610-ui-ux.md\"\n        ],\n        \"generator_may_write\": [\n          \"reviews/PROPOSALS-YYYY-MM-DD-ui-ux-next-work.md\",\n          \"reviews/INDEX.md\"\n        ],\n        \"generator_must_not_write\": [\n          \"src/agent_runtime/ui_console.py\",\n          \"src/agent_runtime/ui_console_assets.py\",\n          \"src/agent_runtime/ui_design_assets.py\",\n          \"agents/runtime/task_claims/*.json\",\n          \"agents/runtime/instances/*.json\",\n          \"agents/lead_engineer/tasks/*.md\"\n        ],\n        \"proposal_artifact_files\": [\n          \"reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md\",\n          \"reviews/SEMINAR-2026-06-19-task-ar-610-ui-ux.md\",\n          \"reviews/MEETING-2026-06-19-task-ar-610-ui-ux.md\",\n          \"reviews/BETA-TEST-2026-06-19-task-ar-610-ui-ux.md\"\n        ]\n      },\n      \"title\": \"Run exploratory UX evaluation for TASK-AR-610\"\n    }\n  ],\n  \"root\": \"C:\\\\Users\\\\ycpig\\\\agent_runtime\\\\.worktrees\\\\TASK-AR-610-taskset-board-ia-rfc\",\n  \"schema\": \"agent-runtime-ui-ux-next-work-proposals/v1\",\n  \"status\": \"planned\",\n  \"today\": \"2026-06-19\"\n}\n",
+      "stderr": ""
+    }
+  ]
+}

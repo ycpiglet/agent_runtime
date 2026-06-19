@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T16:03:00+09:00
-record_count: 666
+generated_at: 2026-06-19T17:41:39+09:00
+record_count: 668
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `666` review and evidence records under `reviews/`.
+- Summary: indexed `668` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `666` files |
+| Reviews covered | pass | `668` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -518,6 +518,7 @@ record_count: 666
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-conductor.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-conductor` | review | accepted | replan | UI/UX Cycle Automation T3 Replan After Conductor |
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-review-planning.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-t3-replan-after-review-planning` | review | accepted | replan | UI/UX Cycle Automation T3 Replan After Review Planning |
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-design-direction-rfc-registration.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-design-direction-rfc-registration` | md | record | pass | UI UX Design Direction RFC Registration |
+| `reviews/RFC-2026-06-19-taskset-board-ia-design-direction.md` | `RFC-2026-06-19-taskset-board-ia-design-direction` | ui-ux-design-rfc | accepted | pass | Taskset Board IA Design Direction RFC |
 | `reviews/RFC-2026-06-19-ui-ux-design-direction.md` | `RFC-2026-06-19-ui-ux-design-direction` | ui-ux-design-direction-rfc | accepted | pass | UI/UX Design Direction RFC 2026-06-19 |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
@@ -602,6 +603,7 @@ record_count: 666
 | `reviews/VERIFY-2026-06-19-task-ar-605-20260619131445.json` | `VERIFY-2026-06-19-task-ar-605-20260619131445` | json | record | n/a | VERIFY-2026-06-19-task-ar-605-20260619131445 |
 | `reviews/VERIFY-2026-06-19-task-ar-606-20260619135251.json` | `VERIFY-2026-06-19-task-ar-606-20260619135251` | json | record | n/a | VERIFY-2026-06-19-task-ar-606-20260619135251 |
 | `reviews/VERIFY-2026-06-19-task-ar-609-20260619160030.json` | `VERIFY-2026-06-19-task-ar-609-20260619160030` | json | record | n/a | VERIFY-2026-06-19-task-ar-609-20260619160030 |
+| `reviews/VERIFY-2026-06-19-task-ar-610-20260619174130.json` | `VERIFY-2026-06-19-task-ar-610-20260619174130` | json | record | n/a | VERIFY-2026-06-19-task-ar-610-20260619174130 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500.json` | `VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525.json` | `VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323.json` | `VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323 |

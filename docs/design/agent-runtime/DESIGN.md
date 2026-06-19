@@ -124,3 +124,34 @@ Implementation remains blocked until a later claimed UI source task. That task
 must preserve visible labels, keyboard traversal, reduced-motion behavior,
 responsive graph-to-list fallback, and beta-tester evidence for empty, stale,
 blocked, and interrupted states.
+
+## Amendment 2026-06-19 (TASK-AR-610 - Taskset Board attention workspace)
+
+The next accepted Taskset Board IA direction is
+`taskset_attention_workspace`, recorded in
+`reviews/RFC-2026-06-19-taskset-board-ia-design-direction.md`.
+
+This direction extends `operator_attention_graph` without replacing it. The
+Taskset Board should open as an attention workspace instead of one long board:
+
+```text
+Taskset Board -> attention lane -> taskset summary -> relation detail -> evidence and command readiness
+```
+
+The first viewport prioritizes active claims, decision-needed work, stale or
+blocked evidence/commands, recently changed tasksets, and ready next-action
+candidates. The full taskset list remains available as a searchable fallback.
+Lane membership must be explainable through visible labels such as `active
+claim`, `stale evidence`, `blocked command`, `recently changed`, or `ready next
+action`; color alone is never sufficient.
+
+The supporting taskset switcher is a component, not the primary design. It
+serves known-target retrieval while the attention lanes solve unknown-target
+discovery. Pure visual refresh, pure drill-down, pure command palette, and
+generic dashboard KPI layers are rejected as insufficient for the current
+board-scale problem.
+
+Implementation remains blocked until a later claimed UI source task. That task
+must name the lane schema or read-only adapter inputs before rendering lane
+membership, preserve OAG relation detail semantics, and provide desktop/mobile,
+keyboard, reduced-motion, recovery, and beta-tester evidence.

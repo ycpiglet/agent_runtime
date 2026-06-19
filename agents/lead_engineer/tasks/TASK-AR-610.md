@@ -9,7 +9,8 @@ kind: task
 parent_id: TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION
 registered_at: 2026-06-19T15:36:00+09:00
 created_at: 2026-06-19T15:36:00+09:00
-updated_at: 2026-06-19T15:36:00+09:00
+started_at: 2026-06-19T16:14:00+09:00
+updated_at: 2026-06-19T17:41:30+09:00
 title: Publish Taskset Board IA design RFC
 status: planned
 priority: P1
@@ -29,8 +30,17 @@ summary: Promote the seminar decision into an accepted design-direction RFC that
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python scripts/design_system_gate.py --check --all-ui
+  - python scripts/evidence_index_generator.py --check
+  - python scripts/ui_ux_cycle.py --root . propose --dry-run --json
 tags:
   - work-cli-created
+verification_status: passed
+verified_at: 2026-06-19T17:41:30+09:00
+verified_by: codex-lead-designer-task-ar-610
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-task-ar-610-20260619174130.json
 ---
 
 # TASK-AR-610 - Publish Taskset Board IA design RFC
