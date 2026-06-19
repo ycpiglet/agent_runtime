@@ -1,0 +1,52 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260620-071338-task-ar-592-8ef3",
+  "task_id": "TASK-AR-592",
+  "agent_role": "interface-designer",
+  "team_id": "ui-ux",
+  "agent_instance_id": "codex-interface-designer-task-ar-592-20260620",
+  "display_name": "Codex Interface Designer TASK-AR-592",
+  "callsite_id": "terminal:wt-task-ar-592:tab-01",
+  "pane_id": "terminal:wt-task-ar-592:tab-01",
+  "mode": "work",
+  "status": "released",
+  "task_set_id": "TASKSET-AR-VISUAL-SYSTEM-INTEGRATION",
+  "active_scope": "TASKSET-AR-VISUAL-SYSTEM-INTEGRATION",
+  "scope_transition_approved": false,
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "unit_id": "UNIT-TASK-AR-592-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-592/UNIT-TASK-AR-592-001.md",
+  "model_tier": "worker_standard",
+  "wip_slot": 0,
+  "stop_condition": "",
+  "phase": "implement",
+  "progress_pct": 20,
+  "step_index": 1,
+  "step_total": 5,
+  "status_text": "Claiming TASK-AR-592 accessibility and responsive pass",
+  "worktree_path": "C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-592",
+  "branch": "codex/task-ar-592-a11y-responsive",
+  "claimed_at": "2026-06-20T07:13:38+09:00",
+  "last_heartbeat": "2026-06-20T07:55:26+09:00",
+  "updated_at": "2026-06-20T07:55:26+09:00",
+  "expires_at": "2026-06-20T07:43:38+09:00",
+  "lease": {
+    "claimed_at": "2026-06-20T07:13:38+09:00",
+    "heartbeat_at": "2026-06-20T07:55:26+09:00",
+    "expires_at": "2026-06-20T07:43:38+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260620-071338-task-ar-592-8ef3.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260620-071338-task-ar-592-8ef3.log.md",
+  "allow_parallel_task_set": false,
+  "tags": [
+    "ui"
+  ],
+  "target_files": [
+    "src/agent_runtime/ui_design_assets.py",
+    "src/agent_runtime/ui_console_assets.py"
+  ],
+  "released_at": "2026-06-20T07:55:26+09:00",
+  "verified_by": "codex-independent-verifier-task-ar-592-20260620",
+  "verifier_role": "qa-reviewer",
+  "verification_evidence": "reviews/W4B-2026-06-20-TASK-AR-592.md"
+}

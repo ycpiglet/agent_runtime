@@ -3990,7 +3990,8 @@ def test_ui_console_no_cdnjs_or_unpkg_in_graph_code(tmp_path):
         assert cdn not in js, f"CDN URL {cdn!r} found in JS -- must not use CDN at runtime"
 
 
-# ----- TASK-AR-592: A11y + responsive pass (visual system) -----
+# ----- TASK-AR-592: accessibility + responsive pass on new visual system -----
+
 
 def test_ui_console_visual_system_svg_accessibility_contract(tmp_path):
     """Graph SVGs are labelled and state/sparkline components expose right semantics."""
@@ -4042,10 +4043,16 @@ def test_ui_console_visual_system_mobile_css_consumes_tokens(tmp_path):
     mobile_start = css.index("TASK-AR-592: responsive pass")
     mobile_end = css.index(".roadmap-timeline-summary", mobile_start)
     mobile_block = css[mobile_start:mobile_end]
+    assert ":root {" in mobile_block
     assert "--dv-sparkline-w: var(--visual-sparkline-mobile-w);" in mobile_block
+    assert "--dv-sparkline-w: var(--space-5xl);" in mobile_block
     assert "min-width: var(--visual-graph-mobile-min-width);" in mobile_block
     assert "height: var(--visual-graph-mobile-height);" in mobile_block
     assert "height: var(--visual-state-machine-mobile-height);" in mobile_block
     assert "44px" not in mobile_block
     assert "320px" not in mobile_block
     assert "300px" not in mobile_block
+
+    graph_base = css.index(".dep-graph-svg {", css.index("Subtask + dependency model"))
+    final_override = css.index("TASK-AR-592 final responsive override")
+    assert final_override > graph_base

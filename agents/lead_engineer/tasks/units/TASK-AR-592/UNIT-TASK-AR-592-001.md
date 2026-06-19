@@ -9,11 +9,11 @@ task_id: TASK-AR-592
 task_set_id: TASKSET-AR-VISUAL-SYSTEM-INTEGRATION
 initiative_id: INIT-AR-VISUAL-SYSTEM-INTEGRATION
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-06-20T05:18:36+09:00
-updated_at: 2026-06-20T05:18:36+09:00
+updated_at: 2026-06-20T07:40:00+09:00
 origin_type: owner_request
 origin_ref: chat:2026-06-19-autonomous-loop
 created_by: lead-engineer
@@ -38,6 +38,13 @@ verification:
   - python -m pytest tests/test_ui_design_assets.py -q
 handoff: A11y solid; unit 2 does responsive.
 stop_condition: Flag any contrast failure that needs a token-value change for design-system-steward review.
+verified_at: 2026-06-20T07:40:00+09:00
+verified_by: codex-independent-verifier-task-ar-592-20260620
+evidence_refs:
+  - reviews/VERIFY-2026-06-20-task-ar-592-a11y-responsive.json
+  - reviews/W4B-2026-06-20-TASK-AR-592.md
+resolution: done
+completed_at: 2026-06-20T07:40:00+09:00
 ---
 
 # UNIT-TASK-AR-592-001 - A11y audit + fixes for the new components
@@ -78,6 +85,12 @@ ARIA roles/labels, contrast, reduced-motion, keyboard — no redesign.
 ## Handoff
 
 A11y solid; unit 2 does responsive.
+
+## Result
+
+Completed. The visual components now have targeted tests for SVG labels,
+state-component roles, sparkline accessibility modes, reduced-motion behavior,
+and keyboard-operable knowledge-graph nodes.
 
 ## Stop Boundary
 

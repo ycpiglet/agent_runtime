@@ -205,6 +205,11 @@ UI_TOKEN_SCALE_CSS = """
   --space-8xl: 28px;
   --space-viewport-gap: 40px;
   --space-floating-offset: 76px;
+  /* Visual-system responsive tokens (TASK-AR-592). */
+  --visual-sparkline-mobile-w: 44px;
+  --visual-graph-mobile-min-width: 480px;
+  --visual-graph-mobile-height: 320px;
+  --visual-state-machine-mobile-height: 300px;
   /* ---- Radius scale (semantic, stable) ---------------------------------- */
   --radius-hairline: 2px;
   --radius-xs: 3px;
@@ -214,13 +219,6 @@ UI_TOKEN_SCALE_CSS = """
   --radius-lg: 10px;
   --radius-xl: 12px;
   --radius-pill: 999px;
-  /* ---- Visual-system responsive tokens (TASK-AR-592, stable) ------------ */
-  /* Consumed by the @media (max-width: 760px) block in ui_console_assets.   */
-  /* Token-driven sizing keeps the mobile breakpoint free of raw px literals. */
-  --visual-sparkline-mobile-w: 44px;
-  --visual-graph-mobile-min-width: 480px;
-  --visual-graph-mobile-height: 320px;
-  --visual-state-machine-mobile-height: 300px;
 }
 """
 
