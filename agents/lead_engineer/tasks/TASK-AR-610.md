@@ -10,7 +10,7 @@ parent_id: TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION
 registered_at: 2026-06-19T15:36:00+09:00
 created_at: 2026-06-19T15:36:00+09:00
 started_at: 2026-06-19T16:14:00+09:00
-updated_at: 2026-06-19T17:41:30+09:00
+updated_at: 2026-06-19T18:00:00+09:00
 title: Publish Taskset Board IA design RFC
 status: planned
 priority: P1
@@ -37,10 +37,11 @@ verification:
 tags:
   - work-cli-created
 verification_status: passed
-verified_at: 2026-06-19T17:41:30+09:00
-verified_by: codex-lead-designer-task-ar-610
+verified_at: 2026-06-19T18:00:00+09:00
+verified_by: codex-lead-designer-task-ar-610-resume
 evidence_refs:
   - reviews/VERIFY-2026-06-19-task-ar-610-20260619174130.json
+  - reviews/VERIFY-2026-06-19-task-ar-610-20260619180000.json
 ---
 
 # TASK-AR-610 - Publish Taskset Board IA design RFC

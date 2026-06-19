@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T17:41:39+09:00
-record_count: 668
+generated_at: 2026-06-19T17:59:24+09:00
+record_count: 669
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `668` review and evidence records under `reviews/`.
+- Summary: indexed `669` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `668` files |
+| Reviews covered | pass | `669` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -604,6 +604,7 @@ record_count: 668
 | `reviews/VERIFY-2026-06-19-task-ar-606-20260619135251.json` | `VERIFY-2026-06-19-task-ar-606-20260619135251` | json | record | n/a | VERIFY-2026-06-19-task-ar-606-20260619135251 |
 | `reviews/VERIFY-2026-06-19-task-ar-609-20260619160030.json` | `VERIFY-2026-06-19-task-ar-609-20260619160030` | json | record | n/a | VERIFY-2026-06-19-task-ar-609-20260619160030 |
 | `reviews/VERIFY-2026-06-19-task-ar-610-20260619174130.json` | `VERIFY-2026-06-19-task-ar-610-20260619174130` | json | record | n/a | VERIFY-2026-06-19-task-ar-610-20260619174130 |
+| `reviews/VERIFY-2026-06-19-task-ar-610-20260619180000.json` | `VERIFY-2026-06-19-task-ar-610-20260619180000` | json | record | n/a | VERIFY-2026-06-19-task-ar-610-20260619180000 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500.json` | `VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525.json` | `VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323.json` | `VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323 |
