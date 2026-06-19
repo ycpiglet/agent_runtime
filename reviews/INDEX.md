@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-20T00:16:29+09:00
-record_count: 698
+generated_at: 2026-06-20T00:28:08+09:00
+record_count: 700
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `698` review and evidence records under `reviews/`.
+- Summary: indexed `700` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `698` files |
+| Reviews covered | pass | `700` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -209,6 +209,7 @@ record_count: 698
 | `reviews/RESEARCH-2026-06-14-work-store-architecture-and-numbering.md` | `RESEARCH-2026-06-14-work-store-architecture-and-numbering` | research | complete | n/a | Work Store Architecture, Archival, Numbering & Performance — Research Synthesis |
 | `reviews/RESEARCH-2026-06-15-agent-runtime-task-ar-223-hold-routing-and-overlay-edge-research.md` | `RESEARCH-2026-06-15-agent-runtime-task-ar-223-hold-routing-and-overlay-edge-research` | md | record | n/a | RESEARCH: TASK-AR-223 hold-routing + overlay-edge risk 반영 (2026-06-15) |
 | `reviews/RESEARCH-2026-06-18-design-system-governance-role-topology.md` | `RESEARCH-2026-06-18-design-system-governance-role-topology` | md | synthesized (partial verification) | n/a | RESEARCH — Design-System Governance & Design-Org Role Topology |
+| `reviews/RESEARCH-2026-06-20-ui-ux-visual-resources.md` | `RESEARCH-2026-06-20-ui-ux-visual-resources` | md | synthesized (Strands 1-2 verified; 3-5 from fetched sources + established knowledge) | n/a | RESEARCH — UI/UX Visual Resources (graph · character · fonts · icons · color) |
 | `reviews/RETRO-2026-06-10-agent-runtime-governance-ops.md` | `RETRO-2026-06-10-agent-runtime-governance-ops` | retro | watch | watch | RETRO-2026-06-10 agent runtime governance ops |
 | `reviews/RETRO-2026-06-14-agent-runtime-process-integrity.md` | `RETRO-2026-06-14-agent-runtime-process-integrity` | retro | watch | watch | RETRO 2026-06-14 — Process Integrity (verification / merge / compound-review-retro) |
 | `reviews/RETRO-2026-06-14-knowledge-stack.md` | `RETRO-2026-06-14-knowledge-stack` | retro | watch | watch | RETRO 2026-06-14 — Agent knowledge stack (#1–#4) |
@@ -639,6 +640,7 @@ record_count: 698
 | `reviews/VERIFY-2026-06-19-unit-task-ar-613-001-20260619214507.json` | `VERIFY-2026-06-19-unit-task-ar-613-001-20260619214507` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-613-001-20260619214507 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-614-001-20260619222418.json` | `VERIFY-2026-06-19-unit-task-ar-614-001-20260619222418` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-614-001-20260619222418 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-615-001-20260619233128.json` | `VERIFY-2026-06-19-unit-task-ar-615-001-20260619233128` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-615-001-20260619233128 |
+| `reviews/VERIFY-2026-06-20-task-ar-616-closeout.json` | `VERIFY-2026-06-20-task-ar-616-closeout` | json | record | n/a | VERIFY-2026-06-20-task-ar-616-closeout |
 | `reviews/VERIFY-2026-06-20-unit-task-ar-616-001-20260620000909.json` | `VERIFY-2026-06-20-unit-task-ar-616-001-20260620000909` | json | record | n/a | VERIFY-2026-06-20-unit-task-ar-616-001-20260620000909 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |

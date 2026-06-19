@@ -9,11 +9,11 @@ task_id: TASK-AR-616
 task_set_id: TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA
 initiative_id: INIT-AR-TASKSET-BOARD-EVIDENCE-PERF-IA
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead-designer
 created_at: 2026-06-19T23:39:00+09:00
-updated_at: 2026-06-20T00:09:09+09:00
+updated_at: 2026-06-20T00:22:09+09:00
 origin_type: beta_followup
 origin_ref: reviews/UX-EVAL-2026-06-19-tsaw-claim-empty-refinement.md
 created_by: codex-ux-evaluator-ar-615
@@ -52,6 +52,11 @@ verified_at: 2026-06-20T00:09:09+09:00
 verified_by: codex-lead-designer-ar-616
 evidence_refs:
   - reviews/VERIFY-2026-06-20-unit-task-ar-616-001-20260620000909.json
+resolution: done
+completed_at: 2026-06-20T00:22:09+09:00
+closed_by: codex-lead-designer-ar-616
+actual_hours: 2
+actual_tokens: 7000
 ---
 
 # UNIT-TASK-AR-616-001 - Run evidence overload and performance IA lead-designer seminar
@@ -110,3 +115,15 @@ Report the selected Taskset Board evidence/performance IA direction, rejected al
 ## Stop Boundary
 
 Stop after seminar evidence is complete and ready for independent verification or RFC claim.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-20T00:22:09+09:00`
+- Resolution: `done`
+- Actual hours: `2`
+- Actual tokens: `7000`
+- Closed by: `codex-lead-designer-ar-616`
+- Evidence:
+  - `reviews/VERIFY-2026-06-20-unit-task-ar-616-001-20260620000909.json`
+<!-- work-close:end -->

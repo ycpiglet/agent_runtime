@@ -8,7 +8,7 @@
 - `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` is complete: `TASK-AR-609` completed the lead-designer seminar, `TASK-AR-610` published the accepted Taskset Board IA RFC, and `TASK-AR-611` derived the implementation plus beta-evaluation units.
 - `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` is complete: `TASK-AR-612` implemented the attention workspace and `TASK-AR-613` recorded beta/UX evidence with W4b.
 - `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` is complete: `TASK-AR-614` fixed active-claim lane freshness plus zero-count empty-lane copy, and `TASK-AR-615` closed the beta/UX retest with W4b evidence.
-- Active UI follow-up: `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` is registered; next work is `TASK-AR-616` / `UNIT-TASK-AR-616-001` lead-designer seminar for evidence-gap overload, state-build latency, and performance-aware Taskset Board IA.
+- Active UI follow-up: `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` is in progress at `1/3` tasks complete. `TASK-AR-616` closed the lead-designer seminar; next work is `TASK-AR-617` to publish the evidence/performance IA RFC before source mutation.
 - The previous `TASKSET-AR-LLM-WIKI` closeout is complete: `TASK-AR-590..596` are archived `7/7`, W4b evidence is indexed, and that taskset has no active claims.
 - UI refactor/design-system remediation is now past design-system governance, asset extraction, UI/UX cycle automation, first source-mutating Operator Attention Graph implementation, beta/UX evaluation, and claim-aware relation adapter refinement.
 - `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` is complete: `TASK-AR-597`, `TASK-AR-598`, and `TASK-AR-599` are implemented, W4b-verified, integrated, and closed.
@@ -18,13 +18,23 @@
 - Self-improvement remediation is improving but not mature: `scribe_state` is now ok, but the score is still below mature and one monitored role gap remains.
 - Scribe source is now the live status summary section so advisory health can be measured without fabricating role evidence.
 - Doc Steward remains ok; keep document-health checks advisory and evidence-based.
-- Next UI refactor step: claim `TASK-AR-616` and run the evidence/performance IA lead-designer seminar before the next source-mutating UI implementation taskset.
+- Next UI refactor step: claim `TASK-AR-617` and publish the Taskset Board evidence/performance IA RFC for `evidence_review_queue_with_progressive_disclosure_and_split_loading`.
+
+## 2026-06-20 - TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA / TASK-AR-616 complete
+
+- Completed task: `TASK-AR-616` / `UNIT-TASK-AR-616-001` ran the lead-designer seminar for Taskset Board evidence overload, state-build latency, inactive-view scan noise, and performance-aware IA.
+- Selected direction: `evidence_review_queue_with_progressive_disclosure_and_split_loading`.
+- Rejected as insufficient alone: pure stale-evidence grouping, pure lane-cap/progressive drill-in, pure performance-split loading, and pure visual refresh.
+- Evidence: seminar `reviews/SEMINAR-2026-06-19-taskset-board-evidence-performance-ia.md`; task verification `reviews/VERIFY-2026-06-20-task-ar-616-closeout.json`; W4b evidence `reviews/W4B-2026-06-20-TASK-AR-616.md`.
+- Released claim: `agents/runtime/task_claims/CLAIM-20260619-235857-task-ar-616-task-ar-616-evidence-perf-ia-seminar.json`.
+- Boundary: no UI source files changed in this task. Actual UI/API behavior changes wait for `TASK-AR-617` RFC and `TASK-AR-618` implementation-unit derivation.
+- Next task: `TASK-AR-617` publishes `reviews/RFC-2026-06-19-taskset-board-evidence-performance-ia.md`.
 
 ## 2026-06-19 - TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA registered
 
 - Registered taskset: `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA`.
 - Purpose: continue the automatic UI/UX loop after TASK-AR-615 by using lead-designer, design-system-steward, interface-designer, ux-evaluator, and beta-tester roles to choose the next Taskset Board direction before source mutation.
-- First task: `TASK-AR-616` / `UNIT-TASK-AR-616-001` runs the seminar focused on `evidence_gaps=49`, state-build latency, inactive-view layout containment, typography/density, motion, effects, schema, assets, accessibility, responsiveness, and beta paths.
+- First task: `TASK-AR-616` / `UNIT-TASK-AR-616-001` completed the seminar focused on `evidence_gaps=49`, state-build latency, inactive-view layout containment, typography/density, motion, effects, schema, assets, accessibility, responsiveness, and beta paths.
 - Follow-up tasks: `TASK-AR-617` publishes the RFC; `TASK-AR-618` derives the next implementation and beta registration.
 - Boundary: do not mutate UI source files until the seminar and RFC derive a registered implementation taskset.
 

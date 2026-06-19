@@ -1,0 +1,48 @@
+{
+  "schema": "agent-runtime-verification/v1",
+  "id": "VERIFY-2026-06-20-task-ar-616-closeout",
+  "work_id": "TASK-AR-616",
+  "task_id": "TASK-AR-616",
+  "unit_id": "UNIT-TASK-AR-616-001",
+  "task_set_id": "TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA",
+  "status": "passed",
+  "verified_at": "2026-06-20T00:23:00+09:00",
+  "verified_by": "codex-lead-designer-ar-616",
+  "independent_verifier": "independent-w4b-task-ar-616-20260620",
+  "summary": "TASK-AR-616 produced the evidence/performance IA seminar, refreshed proposals and the evidence index, passed W4a commands, and passed independent W4B verification.",
+  "evidence_refs": [
+    "reviews/SEMINAR-2026-06-19-taskset-board-evidence-performance-ia.md",
+    "reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md",
+    "reviews/VERIFY-2026-06-20-unit-task-ar-616-001-20260620000909.json",
+    "reviews/W4B-2026-06-20-TASK-AR-616.md"
+  ],
+  "commands": [
+    {
+      "command": "python scripts/ui_ux_cycle.py --root . assess --json",
+      "status": "passed",
+      "notes": "status=ready, score=100, role_coverage=pass"
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "notes": "artifacts=3 roles=4 scanned=6 findings=0"
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "passed",
+      "notes": "findings=0"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "notes": "exit 0; CRLF-to-LF warnings only"
+    },
+    {
+      "command": "git status --short -- src/agent_runtime",
+      "status": "passed",
+      "notes": "no UI source files changed"
+    }
+  ],
+  "selected_direction": "evidence_review_queue_with_progressive_disclosure_and_split_loading",
+  "next_step": "TASK-AR-617 publishes the Taskset Board evidence/performance IA RFC before any source-mutating implementation task."
+}

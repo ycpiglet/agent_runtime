@@ -2,13 +2,13 @@
 type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
-generated_at: 2026-06-19
-archived_count: 274
+generated_at: 2026-06-20
+archived_count: 275
 ---
 
 # Archived Task Files
 
-- `274` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `275` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -287,3 +287,4 @@ archived_count: 274
 | `TASK-AR-612` | `65d7c6c6-69b…` | `TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE` | completed | 2026-06-19T18:35:00+09:00 | 2026-06-19T19:50:00+09:00 | 2026-06-19T20:41:47+09:00 | 2026-06-19T20:41:47+09:00 | Convert the Taskset Board from a whole-board-first scan into an attention workspace w… |
 | `TASK-AR-615` | `9974caed-8ab…` | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | completed | 2026-06-19T21:56:00+09:00 | 2026-06-19T22:58:13+09:00 | 2026-06-19T23:38:01+09:00 | 2026-06-19T23:38:01+09:00 | Repeat beta-tester and UX-evaluator verification after the active-claim and empty-lan… |
 | `TASK-AR-614` | `5945f908-67e…` | `TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT` | completed | 2026-06-19T21:56:00+09:00 | 2026-06-19T22:14:49+09:00 | 2026-06-19T22:37:50+09:00 | 2026-06-19T22:37:50+09:00 | Fix BTC-TSAW-CLAIM-001 and BTC-TSAW-EMPTY-001 so active runtime claims appear in the… |
+| `TASK-AR-616` | `3ff2023d-2a5…` | `TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA` | completed | 2026-06-19T23:39:00+09:00 | 2026-06-19T23:58:57+09:00 | 2026-06-20T00:23:22+09:00 | 2026-06-20T00:23:22+09:00 | Create a lead-designer seminar artifact that chooses the next Taskset Board IA direct… |

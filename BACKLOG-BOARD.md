@@ -7,10 +7,10 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-06-19
+generated_at: 2026-06-20
 task_count: 277
-open_count: 3
-completed_count: 274
+open_count: 2
+completed_count: 275
 task_set_count: 1
 completed_task_set_count: 52
 ---
@@ -18,11 +18,11 @@ completed_task_set_count: 52
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `3` open or active tasks; `274` completed tasks are archived from this live board.
+- Summary: `2` open or active tasks; `275` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `3` / Ask `0` / Review `0` / Later `0` / Done `274`.
+- Status: Action `2` / Ask `0` / Review `0` / Later `0` / Done `275`.
 - Task Sets: `1` active workflows; `52` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -45,11 +45,10 @@ completed_task_set_count: 52
 ### Taskset Board Evidence And Performance IA (`TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA`)
 
 - Flow: Run a seminar-led UI/UX cycle for evidence-gap overload and performance-aware Taskset Board IA, publish an RFC, then derive the next implementation plus beta-evaluation registration.
-- Progress: `0/3` done; `3` open or active.
+- Progress: `1/3` done; `2` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-616` | INIT-AR-TASKSET-BOARD-EVIDENCE-PERF-IA | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-616/UNIT-TASK-AR-616-001.md | planned | Action | P1 | High | Medium | 2h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Create a lead-designer seminar artifact that chooses the next Taskset Board IA direct… |
 | `TASK-AR-617` | INIT-AR-TASKSET-BOARD-EVIDENCE-PERF-IA | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | Medium | 3h/8000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Promote the seminar decision into an accepted design-direction RFC that names the exa… |
 | `TASK-AR-618` | INIT-AR-TASKSET-BOARD-EVIDENCE-PERF-IA | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | Medium | 3h/8000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Turn the accepted evidence/performance IA RFC into a source-mutation implementation r… |
 
@@ -115,9 +114,9 @@ completed_task_set_count: 52
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `3` open across `1` task sets (see Action Board above).
+- Active: `2` open across `1` task sets (see Action Board above).
 - Archived task sets: `52` (see Archived Task Sets above).
-- Archived task files: `274` — see `ARCHIVE-INDEX.md`.
+- Archived task files: `275` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

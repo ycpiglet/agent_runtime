@@ -1,22 +1,22 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T23:39:00+09:00
+updated_at: 2026-06-20T00:24:00+09:00
 current_state:
-  summary: "TASKSET-AR-TSAW-CLAIM-EMPTY-REFINEMENT is complete with TASK-AR-615 W4b evidence; next UI cycle is TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA, starting with TASK-AR-616 lead-designer seminar."
+  summary: "TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA is in progress: TASK-AR-616 completed the lead-designer evidence/performance IA seminar; next UI cycle step is TASK-AR-617 RFC."
   status: active
   task_set_status: taskset_active
   task_set_id: TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA
-  step_index: 1
+  step_index: 2
   step_total: 3
-  progress_pct: 0
-  status_text: "Claim TASK-AR-616 to run the evidence/performance IA lead-designer seminar before the next source-mutating UI implementation taskset."
+  progress_pct: 33
+  status_text: "Claim TASK-AR-617 to publish the evidence/performance IA RFC before the next source-mutating UI implementation taskset."
 active_work:
   current_agents: []
   current_teams:
     - ui-ux
 resume:
-  active_task: TASK-AR-616
+  active_task: TASK-AR-617
   active_task_set: TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA
-  branch_policy: "No active claim remains. Claim TASK-AR-616 before seminar evidence work; do not mutate UI source until the seminar/RFC derives a registered implementation taskset."
+  branch_policy: "No active claim remains. Claim TASK-AR-617 before RFC evidence work; do not mutate UI source until the RFC and TASK-AR-618 derive a registered implementation taskset."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -75,22 +75,30 @@ pointers:
   taskset_board_evidence_perf_ia:
     taskset: TASKSET-AR-TASKSET-BOARD-EVIDENCE-PERF-IA
     active_claim: null
-    status: taskset_registered_worker_ready
+    released_claims:
+      - agents/runtime/task_claims/CLAIM-20260619-235857-task-ar-616-task-ar-616-evidence-perf-ia-seminar.json
+    status: taskset_active_after_seminar
     tasks:
       - TASK-AR-616
       - TASK-AR-617
       - TASK-AR-618
-    completed_tasks: []
-    next_task: TASK-AR-616
-    next_unit: UNIT-TASK-AR-616-001
+    completed_tasks:
+      - TASK-AR-616
+    next_task: TASK-AR-617
+    next_unit: null
     registration_input: agents/project/work-items/REGISTRATION-2026-06-19-taskset-board-evidence-performance-ia.json
     registration_review: reviews/REVIEW-2026-06-19-taskset-ar-taskset-board-evidence-perf-ia-registration.md
     plan: docs/superpowers/plans/2026-06-19-taskset-board-evidence-performance-ia.md
+    task_ar_616_seminar: reviews/SEMINAR-2026-06-19-taskset-board-evidence-performance-ia.md
+    task_ar_616_unit_verification: reviews/VERIFY-2026-06-20-unit-task-ar-616-001-20260620000909.json
+    task_ar_616_verification: reviews/VERIFY-2026-06-20-task-ar-616-closeout.json
+    task_ar_616_w4b_evidence: reviews/W4B-2026-06-20-TASK-AR-616.md
+    selected_direction: evidence_review_queue_with_progressive_disclosure_and_split_loading
     source_evidence:
       - reviews/BETA-TEST-2026-06-19-tsaw-claim-empty-refinement.md
       - reviews/UX-EVAL-2026-06-19-tsaw-claim-empty-refinement.md
       - reviews/W4B-2026-06-19-TASK-AR-615.md
-    next_decision: claim_task_ar_616_lead_designer_seminar
+    next_decision: claim_task_ar_617_rfc
   operator_attention_graph:
     taskset: TASKSET-AR-OPERATOR-ATTENTION-GRAPH
     completed_tasks:
