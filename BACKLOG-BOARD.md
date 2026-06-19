@@ -9,21 +9,21 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-19
 task_count: 265
-open_count: 1
-completed_count: 264
-task_set_count: 1
-completed_task_set_count: 47
+open_count: 0
+completed_count: 265
+task_set_count: 0
+completed_task_set_count: 48
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `1` open or active tasks; `264` completed tasks are archived from this live board.
+- Summary: `0` open or active tasks; `265` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `1` / Ask `0` / Review `0` / Later `0` / Done `264`.
-- Task Sets: `1` active workflows; `47` completed workflows are hidden from the live action board.
+- Status: Action `0` / Ask `0` / Review `0` / Later `0` / Done `265`.
+- Task Sets: `0` active workflows; `48` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -41,15 +41,6 @@ completed_task_set_count: 47
 ## Action Board
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
-
-### Claim-Aware Relation Adapter (`TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER`)
-
-- Flow: Promote or replace the view-local relation summary adapter so Operator Attention Graph claim path and command readiness reflect active, expired, interrupted, and guarded claim states, then rerun beta/UX evaluation.
-- Progress: `1/2` done; `1` open or active.
-- WIP: active `1/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-606` | INIT-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-606/UNIT-TASK-AR-606-001.md | planned | Action | P1 | High | Medium | 2h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Repeat beta-tester and UX-evaluator verification after the claim-aware adapter implem… |
 
 ## Archived Task Sets
 
@@ -103,14 +94,15 @@ completed_task_set_count: 47
 | LLM Wiki (`TASKSET-AR-LLM-WIKI`) | Extend the merged knowledge stack with a human-browsable Wiki/Search surface over the expanded corpus: deterministic entity pages, search, ask, contextual mini-graphs, nav integration, and linted closeout. | `7/7` done | `7` completed task files archived |
 | UI UX Design Direction RFC (`TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC`) | Run the post-closeout UI/UX design-direction loop: lead-designer exploration, design-system promotion decisions, implementation refactor scope, and beta-tester evaluation criteria before mutating UI source again. | `3/3` done | `3` completed task files archived |
 | Operator Attention Graph (`TASKSET-AR-OPERATOR-ATTENTION-GRAPH`) | First source-mutating implementation of the accepted operator_attention_graph direction: relation tokens/components/patterns, one taskset-to-evidence workflow wiring, and beta/UX evaluation evidence. | `2/2` done | `2` completed task files archived |
+| Claim-Aware Relation Adapter (`TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER`) | Promote or replace the view-local relation summary adapter so Operator Attention Graph claim path and command readiness reflect active, expired, interrupted, and guarded claim states, then rerun beta/UX evaluation. | `2/2` done | `2` completed task files archived |
 
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `1` open across `1` task sets (see Action Board above).
-- Archived task sets: `47` (see Archived Task Sets above).
-- Archived task files: `264` — see `ARCHIVE-INDEX.md`.
+- Active: `0` open across `0` task sets (see Action Board above).
+- Archived task sets: `48` (see Archived Task Sets above).
+- Archived task files: `265` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

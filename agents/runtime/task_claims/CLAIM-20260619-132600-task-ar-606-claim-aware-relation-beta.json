@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-606:tab-01",
   "pane_id": "terminal:wt-task-ar-606:tab-01",
   "mode": "worker",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER",
   "active_scope": "TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER",
   "scope_transition_approved": true,
@@ -19,20 +19,20 @@
   "model_tier": "worker_standard",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "evaluation",
-  "progress_pct": 5,
-  "step_index": 1,
+  "phase": "taskset-completed",
+  "progress_pct": 100,
+  "step_index": 6,
   "step_total": 6,
-  "status_text": "Claim-aware relation adapter beta/UX evaluation started",
+  "status_text": "TASK-AR-606 W4b verified, released, and closed; next UI cycle should fix BTC-OAG-CLAIM-MOBILE-001.",
   "worktree_path": ".worktrees/TASK-AR-606-claim-aware-relation-beta",
   "branch": "codex/task-ar-606-claim-aware-relation-beta",
   "claimed_at": "2026-06-19T13:26:00+09:00",
-  "last_heartbeat": "2026-06-19T13:26:00+09:00",
-  "updated_at": "2026-06-19T13:26:00+09:00",
+  "last_heartbeat": "2026-06-19T13:55:48+09:00",
+  "updated_at": "2026-06-19T13:55:48+09:00",
   "expires_at": "2026-06-19T14:56:00+09:00",
   "lease": {
     "claimed_at": "2026-06-19T13:26:00+09:00",
-    "heartbeat_at": "2026-06-19T13:26:00+09:00",
+    "heartbeat_at": "2026-06-19T13:55:48+09:00",
     "expires_at": "2026-06-19T14:56:00+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260619-132600-task-ar-606-claim-aware-relation-beta.handoff.md",
@@ -43,5 +43,9 @@
     "reviews/BETA-TEST-2026-06-19-oag-claim-aware-relation-adapter.md",
     "reviews/UX-EVAL-2026-06-19-oag-claim-aware-relation-adapter.md",
     "reviews/INDEX.md"
-  ]
+  ],
+  "released_at": "2026-06-19T13:52:14+09:00",
+  "verified_by": "codex-w4b-verifier-ar-606",
+  "verifier_role": "qa-reviewer",
+  "verification_evidence": "reviews/W4B-2026-06-19-TASK-AR-606.md"
 }

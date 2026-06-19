@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T13:50:01+09:00
-record_count: 649
+generated_at: 2026-06-19T13:59:05+09:00
+record_count: 651
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `649` review and evidence records under `reviews/`.
+- Summary: indexed `651` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `649` files |
+| Reviews covered | pass | `651` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -508,6 +508,7 @@ record_count: 649
 | `reviews/REVIEW-2026-06-18-wiki-page-view.md` | `REVIEW-2026-06-18-wiki-page-view` | md | record | pass | Wiki Page View |
 | `reviews/REVIEW-2026-06-18-wiki-search-ask.md` | `REVIEW-2026-06-18-wiki-search-ask` | md | record | pass | Wiki Search And Ask |
 | `reviews/REVIEW-2026-06-19-stop-hook-silent-success-regression.md` | `REVIEW-2026-06-19-stop-hook-silent-success-regression` | md | record | pass | Stop Hook Silent Success Regression |
+| `reviews/REVIEW-2026-06-19-taskset-ar-oag-claim-aware-relation-adapter-closeout.md` | `REVIEW-2026-06-19-taskset-ar-oag-claim-aware-relation-adapter-closeout` | closeout-review | pass | pass | Claim-Aware Relation Adapter Closeout |
 | `reviews/REVIEW-2026-06-19-taskset-ar-oag-claim-aware-relation-adapter-registration.md` | `REVIEW-2026-06-19-taskset-ar-oag-claim-aware-relation-adapter-registration` | md | record | pass | Claim-Aware Relation Adapter Registration |
 | `reviews/REVIEW-2026-06-19-taskset-ar-operator-attention-graph-registration.md` | `REVIEW-2026-06-19-taskset-ar-operator-attention-graph-registration` | md | record | pass | Operator Attention Graph Registration |
 | `reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-registration.md` | `REVIEW-2026-06-19-taskset-ar-ui-ux-cycle-automation-registration` | md | record | pass | UI UX Cycle Automation Registration |
@@ -592,6 +593,7 @@ record_count: 649
 | `reviews/VERIFY-2026-06-19-task-ar-604-20260619122106.json` | `VERIFY-2026-06-19-task-ar-604-20260619122106` | json | record | n/a | VERIFY-2026-06-19-task-ar-604-20260619122106 |
 | `reviews/VERIFY-2026-06-19-task-ar-604-20260619122122.json` | `VERIFY-2026-06-19-task-ar-604-20260619122122` | json | record | n/a | VERIFY-2026-06-19-task-ar-604-20260619122122 |
 | `reviews/VERIFY-2026-06-19-task-ar-605-20260619131445.json` | `VERIFY-2026-06-19-task-ar-605-20260619131445` | json | record | n/a | VERIFY-2026-06-19-task-ar-605-20260619131445 |
+| `reviews/VERIFY-2026-06-19-task-ar-606-20260619135251.json` | `VERIFY-2026-06-19-task-ar-606-20260619135251` | json | record | n/a | VERIFY-2026-06-19-task-ar-606-20260619135251 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500.json` | `VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525.json` | `VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323.json` | `VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323 |

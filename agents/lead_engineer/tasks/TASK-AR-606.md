@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER
 registered_at: 2026-06-19T12:26:00+09:00
 created_at: 2026-06-19T12:26:00+09:00
-updated_at: 2026-06-19T12:26:00+09:00
+started_at: 2026-06-19T13:26:00+09:00
+updated_at: 2026-06-19T13:55:48+09:00
 title: Run claim-aware relation adapter beta and UX evaluation
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 2
@@ -30,8 +31,22 @@ summary: Repeat beta-tester and UX-evaluator verification after the claim-aware 
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python scripts/design_system_gate.py --check --all-ui
+  - python scripts/evidence_index_generator.py --check
+  - python scripts/ui_ux_cycle.py --root . assess --json
 tags:
   - work-cli-created
+verification_status: passed
+verified_at: 2026-06-19T13:52:51+09:00
+verified_by: codex-ux-evaluator-ar-606
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-task-ar-606-20260619135251.json
+resolution: done
+completed_at: 2026-06-19T13:55:48+09:00
+closed_by: codex-ux-evaluator-ar-606
+actual_hours: 1.4
+actual_tokens: 9000
 ---
 
 # TASK-AR-606 - Run claim-aware relation adapter beta and UX evaluation
@@ -56,3 +71,15 @@ tags:
 - `python scripts/design_system_gate.py --check --all-ui`
 - `python scripts/evidence_index_generator.py --check`
 - `python scripts/ui_ux_cycle.py --root . assess --json`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T13:55:48+09:00`
+- Resolution: `done`
+- Actual hours: `1.4`
+- Actual tokens: `9000`
+- Closed by: `codex-ux-evaluator-ar-606`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-task-ar-606-20260619135251.json`
+<!-- work-close:end -->

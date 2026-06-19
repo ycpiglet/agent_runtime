@@ -3,9 +3,9 @@
 ## 현재 한 줄 요약
 
 - `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` is complete: `TASK-AR-603` implemented the first relation-aware UI slice, and `TASK-AR-604` completed beta/UX evaluation with W4b evidence.
-- `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` is `1/2` complete: `TASK-AR-605` fixed the claim-aware relation adapter findings, and `TASK-AR-606` is next for beta/UX retest.
+- `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` is complete: `TASK-AR-605` fixed claim-aware relation semantics, and `TASK-AR-606` completed beta/UX retest with W4b evidence.
 - The previous `TASKSET-AR-LLM-WIKI` closeout is complete: `TASK-AR-590..596` are archived `7/7`, W4b evidence is indexed, and that taskset has no active claims.
-- UI refactor/design-system remediation is now past the first source-mutating operator-attention-graph implementation, beta/UX evaluation, and claim-aware relation adapter refinement.
+- UI refactor/design-system remediation is now past design-system governance, asset extraction, UI/UX cycle automation, first source-mutating Operator Attention Graph implementation, beta/UX evaluation, and claim-aware relation adapter refinement.
 - `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` is complete: `TASK-AR-597`, `TASK-AR-598`, and `TASK-AR-599` are implemented, W4b-verified, integrated, and closed.
 - `TASK-AR-583` semantic spacing/radius scale is W4b verified and integrated; `TASK-AR-584` is next.
 - `TASK-AR-593` Wiki search + ask has passed W4b, was released, merged, and its worktree/branch were cleaned.
@@ -13,7 +13,17 @@
 - Self-improvement remediation is improving but not mature: `scribe_state` is now ok, but the score is still below mature and one monitored role gap remains.
 - Scribe source is now the live status summary section so advisory health can be measured without fabricating role evidence.
 - Doc Steward remains ok; keep document-health checks advisory and evidence-based.
-- Next UI refactor step: claim `TASK-AR-606` and rerun beta/UX evidence against the claim-aware relation adapter.
+- Next UI refactor step: register a focused implementation unit for `BTC-OAG-CLAIM-MOBILE-001` to remove mobile Taskset Board horizontal overflow.
+
+## 2026-06-19 - TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER complete
+
+- Completed taskset: `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` is `2/2` done.
+- Completed task: `TASK-AR-606` / `UNIT-TASK-AR-606-001` recorded beta-tester and UX-evaluator evidence for the claim-aware relation adapter.
+- Released claim: `CLAIM-20260619-132600-task-ar-606-claim-aware-relation-beta` is W4b verified with evidence `reviews/W4B-2026-06-19-TASK-AR-606.md`.
+- Result: semantic claim states are accepted. Active, guarded, interrupted, and no-claim paths now show explicit relation and command-readiness labels.
+- Remaining finding: `BTC-OAG-CLAIM-MOBILE-001` at `390x844`; Taskset Board width was `641px` against a `390px` viewport.
+- Evidence: beta review `reviews/BETA-TEST-2026-06-19-oag-claim-aware-relation-adapter.md`; UX evaluation `reviews/UX-EVAL-2026-06-19-oag-claim-aware-relation-adapter.md`; task verification `reviews/VERIFY-2026-06-19-task-ar-606-20260619135251.json`.
+- Boundary: no active UI claim remains after this closeout. Continue with a new W0-W6 cycle for mobile responsive polish.
 
 ## 2026-06-19 - TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER / TASK-AR-605 complete
 

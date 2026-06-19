@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T13:15:23+09:00",
+  "generated_at": "2026-06-19T13:57:22+09:00",
   "record_count": 370,
   "finding_count": 0,
   "findings": [],
@@ -4029,7 +4029,7 @@
       "title": "Claim-Aware Relation Adapter",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-605",
@@ -4062,7 +4062,7 @@
       "title": "Repeat beta-tester and UX-evaluator verification after the claim-aware adapter implem…",
       "path": "agents/lead_engineer/tasks/TASK-AR-606.md",
       "parent_id": "TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-606-001",
@@ -4073,7 +4073,7 @@
       "title": "UNIT-TASK-AR-606-001 - Record claim-aware adapter beta and UX evidence",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-606/UNIT-TASK-AR-606-001.md",
       "parent_id": "TASK-AR-606",
-      "status": "worker_ready"
+      "status": "completed"
     }
   ]
 }
