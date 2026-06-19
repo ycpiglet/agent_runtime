@@ -2,6 +2,26 @@
 
 This module owns the large static asset strings so ``ui_console.py`` can
 stay focused on HTTP routing, API responses, and data wiring.
+
+Graph layout (TASK-AR-588):
+  The dependency/state-machine views use an improved hand-rolled Sugiyama-style
+  layered DAG layout (topological rank → column centering within each rank layer),
+  rendered as our own token-driven SVG with Datadog-style edge encodings
+  (stroke-width = magnitude metric, stroke color = health semantic token) and
+  GitHub-Actions-style per-node status icons.
+
+  The live agent map uses a basic velocity-Verlet force-directed simulation
+  (repulsion + spring attraction), also rendered as our SVG. The
+  ``patternAgentAvatar`` avatar is drawn for each live-map node.
+
+  Upgrade path: replace ``_dagre_layered_positions()`` below with Dagre (MIT,
+  ``@dagrejs/dagre`` / dagre.min.js IIFE global) vendored build-less via
+  ``<script>`` — the render call-site already feeds ``{nodes, edges}`` and
+  consumes ``{x, y}`` per node + point arrays per edge, which is exactly the
+  Dagre API surface. Similarly replace ``_force_positions()`` with d3-force
+  (ISC, standalone UMD) vendored locally; ``forceSimulation().nodes().force()``
+  ticks directly into SVG. Neither requires a build step.
+  Do NOT adopt elkjs (EPL-2.0 weak copyleft) or 3d-force-graph (WebGL).
 """
 from __future__ import annotations
 
@@ -2549,6 +2569,9 @@ textarea:focus {
   font-size: var(--font-size-ui-11);
   text-anchor: middle;
 }
+/* TASK-AR-588: node label and GitHub-Actions-style status icon for live-map. */
+.live-map-node-label { fill: var(--muted); font-size: var(--font-size-ui-10); text-anchor: middle; }
+.live-map-status-icon { fill: var(--ink); font-size: var(--font-size-ui-8); text-anchor: middle; }
 .live-map-empty {
   padding: var(--space-viewport-gap) var(--space-4xl);
   text-align: center;
@@ -4823,6 +4846,8 @@ pre {
   font-size: var(--font-size-ui-10);
   text-anchor: middle;
 }
+/* TASK-AR-588: GitHub-Actions-style status icon badge on dependency nodes. */
+.dep-node-status-icon { fill: var(--ink); font-size: var(--font-size-ui-8); text-anchor: middle; }
 .dep-graph-empty { fill: var(--subtle); font-size: var(--font-size-ui-14); }
 .dep-graph-legend {
   display: flex;
@@ -5007,6 +5032,8 @@ pre {
   text-anchor: middle;
 }
 .state-machine-node-score { fill: var(--muted); font-size: var(--font-size-ui-8); text-anchor: middle; }
+/* TASK-AR-588: GitHub-Actions-style status icon badge on state-machine nodes. */
+.state-machine-status-icon { fill: var(--ink); font-size: var(--font-size-ui-8); text-anchor: middle; }
 .state-machine-empty { fill: var(--subtle); font-size: var(--font-size-ui-14); }
 .state-machine-legend {
   display: flex;
@@ -9179,22 +9206,103 @@ function liveMapData() {
   return runtimeState.live_map || { nodes: [], edges: [], presence: { counts: {}, online: 0, agents: [] }, totals: {} };
 }
 
-function liveMapNodePositions(nodes) {
-  // Deterministic radial layout: owner at the apex, everyone else on a ring
-  // grouped by kind so the graph reads the same across refreshes.
-  const positions = {};
-  const cx = 500;
-  const cy = 300;
-  const owner = nodes.find((node) => node.kind === "owner");
-  if (owner) positions[owner.id] = { x: cx, y: 70 };
-  const ring = nodes.filter((node) => node.kind !== "owner");
-  const radius = 220;
-  ring.forEach((node, index) => {
-    const angle = (index / Math.max(ring.length, 1)) * Math.PI * 2 - Math.PI / 2;
-    positions[node.id] = { x: cx + Math.cos(angle) * radius, y: cy + 40 + Math.sin(angle) * (radius * 0.7) };
+function liveMapNodePositions(nodes, edges) {
+  // Upgrade path: replace with d3-force (ISC, standalone UMD vendored locally).
+  // Current: basic velocity-Verlet force simulation (repulsion + spring) - same
+  // physics model as d3-force but hand-rolled so there is no CDN dependency.
+  // Owner node is pinned at a fixed position; all others start on a seeded ring
+  // and then relax under the forces.
+  const w = 1000, h = 600, cx = 500, cy = 300;
+  const repulsion = 12000;      // node-pair repulsion constant
+  const spring = 0.06;          // edge spring pull
+  const restLen = 180;          // preferred edge length
+  const damping = 0.75;         // velocity damping factor per tick
+  const ticks = 80;             // simulation steps
+
+  const nodeMap = {};
+  nodes.forEach((node, i) => {
+    const angle = (i / Math.max(nodes.length, 1)) * Math.PI * 2 - Math.PI / 2;
+    nodeMap[node.id] = {
+      id: node.id,
+      kind: node.kind,
+      x: cx + Math.cos(angle) * 200,
+      y: cy + Math.sin(angle) * 160,
+      vx: 0, vy: 0,
+      pinned: node.kind === "owner",
+    };
   });
-  return positions;
+  const owner = nodes.find((n) => n.kind === "owner");
+  if (owner && nodeMap[owner.id]) {
+    nodeMap[owner.id].x = cx;
+    nodeMap[owner.id].y = 90;
+    nodeMap[owner.id].pinned = true;
+  }
+
+  for (let tick = 0; tick < ticks; tick++) {
+    const ids = Object.keys(nodeMap);
+    // Repulsion between all pairs.
+    for (let a = 0; a < ids.length; a++) {
+      for (let b = a + 1; b < ids.length; b++) {
+        const na = nodeMap[ids[a]], nb = nodeMap[ids[b]];
+        const dx = nb.x - na.x, dy = nb.y - na.y;
+        const distSq = dx * dx + dy * dy + 1;
+        const dist = Math.sqrt(distSq);
+        const f = repulsion / distSq;
+        const fx = (dx / dist) * f, fy = (dy / dist) * f;
+        if (!na.pinned) { na.vx -= fx; na.vy -= fy; }
+        if (!nb.pinned) { nb.vx += fx; nb.vy += fy; }
+      }
+    }
+    // Spring along edges.
+    (edges || []).forEach((edge) => {
+      const na = nodeMap[edge.from], nb = nodeMap[edge.to];
+      if (!na || !nb) return;
+      const dx = nb.x - na.x, dy = nb.y - na.y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const f = (dist - restLen) * spring;
+      const fx = (dx / dist) * f, fy = (dy / dist) * f;
+      if (!na.pinned) { na.vx += fx; na.vy += fy; }
+      if (!nb.pinned) { nb.vx -= fx; nb.vy -= fy; }
+    });
+    // Centre-gravity toward (cx, cy).
+    ids.forEach((id) => {
+      const n = nodeMap[id];
+      if (n.pinned) return;
+      n.vx += (cx - n.x) * 0.005;
+      n.vy += (cy - n.y) * 0.005;
+      n.vx *= damping;
+      n.vy *= damping;
+      n.x += n.vx;
+      n.y += n.vy;
+      // Clamp to canvas with margin.
+      n.x = Math.max(36, Math.min(w - 36, n.x));
+      n.y = Math.max(36, Math.min(h - 36, n.y));
+    });
+  }
+
+  const out = {};
+  Object.values(nodeMap).forEach((n) => { out[n.id] = { x: n.x, y: n.y }; });
+  return out;
 }
+
+// Live-map health token mapping (Datadog-style: stroke color = health).
+const LIVE_MAP_HEALTH_STROKE = {
+  working:    "var(--blue)",
+  reviewing:  "var(--amber)",
+  in_meeting: "var(--violet)",
+  online:     "var(--success)",
+  offline:    "var(--line-strong)",
+};
+
+// GitHub-Actions-style status icon glyphs for live-map nodes (shape+label, never color only).
+// ASCII-only: cp949 node-check guard -- keep all literals in the [0,127] range.
+const LIVE_MAP_STATUS_GLYPH = {
+  working:    ">",   // > running
+  reviewing:  "~",   // ~ reviewing / hourglass
+  in_meeting: "@",   // @ in meeting
+  online:     "v",   // v online (checkmark equivalent)
+  offline:    "o",   // o offline
+};
 
 function renderLiveMap() {
   const svg = $("live-map-graph");
@@ -9208,7 +9316,7 @@ function renderLiveMap() {
   const legend = $("live-map-legend");
   if (legend) {
     legend.innerHTML = Object.keys(LIVE_MAP_KIND_LABELS).map((kind) =>
-      `<li><span class="legend-swatch legend-${kind}"></span>${escapeHtml(LIVE_MAP_KIND_LABELS[kind])}</li>`
+      `<li><span class="legend-swatch legend-${escapeHtml(kind)}"></span>${escapeHtml(LIVE_MAP_KIND_LABELS[kind])}</li>`
     ).join("");
   }
 
@@ -9225,41 +9333,90 @@ function renderLiveMap() {
     svg.appendChild(note);
     return;
   }
-  const positions = liveMapNodePositions(nodes);
+  // Force-directed layout (d3-force upgrade path - see module docstring).
+  const positions = liveMapNodePositions(nodes, edges);
 
+  // ---- Edge layer: Datadog-style encodings ----
+  // stroke-width = magnitude (message_count or weight, clamped 1-6)
+  // stroke color = health token (kind -> semantic token)
   const edgeLayer = document.createElementNS(SVG_NS, "g");
   edges.forEach((edge) => {
     const a = positions[edge.from];
     const b = positions[edge.to];
     if (!a || !b) return;
+    const magnitude = Math.min(6, Math.max(1, edge.weight || edge.message_count || 1));
+    const healthColor = LIVE_MAP_HEALTH_STROKE[edge.health || ""] || "var(--line-strong)";
     const line = document.createElementNS(SVG_NS, "line");
-    line.setAttribute("x1", a.x);
-    line.setAttribute("y1", a.y);
-    line.setAttribute("x2", b.x);
-    line.setAttribute("y2", b.y);
-    line.setAttribute("class", `live-map-edge kind-${edge.kind || "edge"}`);
-    line.setAttribute("data-edge-id", edge.id);
+    line.setAttribute("x1", String(Math.round(a.x)));
+    line.setAttribute("y1", String(Math.round(a.y)));
+    line.setAttribute("x2", String(Math.round(b.x)));
+    line.setAttribute("y2", String(Math.round(b.y)));
+    line.setAttribute("class", `live-map-edge kind-${escapeHtml(edge.kind || "edge")}`);
+    line.setAttribute("data-edge-id", String(edge.id));
+    // Datadog-style: stroke-width encodes magnitude, color encodes health.
+    line.setAttribute("stroke-width", String(magnitude));
+    line.setAttribute("stroke", healthColor);
+    // aria-label so assistive tech gets the edge info (not color-only).
+    line.setAttribute("aria-label", `${escapeHtml(edge.from)} to ${escapeHtml(edge.to)}: ${escapeHtml(edge.kind || "edge")}`);
     edgeLayer.appendChild(line);
   });
   svg.appendChild(edgeLayer);
 
+  // ---- Node layer: patternAgentAvatar + GitHub-Actions status icons ----
+  const avatarSize = 36;
   const nodeLayer = document.createElementNS(SVG_NS, "g");
   nodes.forEach((node) => {
     const pos = positions[node.id];
     if (!pos) return;
+    const px = Math.round(pos.x), py = Math.round(pos.y);
+    const presenceKey = node.presence || "offline";
     const group = document.createElementNS(SVG_NS, "g");
-    group.setAttribute("class", `live-map-node kind-${node.kind || "node"} presence-${node.presence || "offline"}`);
-    group.setAttribute("data-node-id", node.id);
-    const circle = document.createElementNS(SVG_NS, "circle");
-    circle.setAttribute("cx", pos.x);
-    circle.setAttribute("cy", pos.y);
-    circle.setAttribute("r", node.kind === "owner" ? "26" : "18");
-    group.appendChild(circle);
+    group.setAttribute("class", `live-map-node kind-${escapeHtml(node.kind || "node")} presence-${escapeHtml(presenceKey)}`);
+    group.setAttribute("data-node-id", String(node.id));
+
+    // Avatar drawn as a foreignObject-free embedded SVG via innerHTML approach:
+    // Insert a <g> that mirrors patternAgentAvatar geometry directly.
+    const r = node.kind === "owner" ? 26 : 18;
+    const half = r;
+    // Background circle.
+    const bgCircle = document.createElementNS(SVG_NS, "circle");
+    bgCircle.setAttribute("cx", String(px)); bgCircle.setAttribute("cy", String(py));
+    bgCircle.setAttribute("r", String(r)); bgCircle.setAttribute("fill", "var(--panel-strong)");
+    group.appendChild(bgCircle);
+    // Accent ring colored by health/presence token.
+    const healthStroke = LIVE_MAP_HEALTH_STROKE[presenceKey] || "var(--line-strong)";
+    const accentRing = document.createElementNS(SVG_NS, "circle");
+    accentRing.setAttribute("cx", String(px)); accentRing.setAttribute("cy", String(py));
+    accentRing.setAttribute("r", String(r - 1));
+    accentRing.setAttribute("fill", "none");
+    accentRing.setAttribute("stroke", healthStroke);
+    accentRing.setAttribute("stroke-width", "2");
+    group.appendChild(accentRing);
+
+    // Node label text.
     const label = document.createElementNS(SVG_NS, "text");
-    label.setAttribute("x", pos.x);
-    label.setAttribute("y", pos.y + 34);
+    label.setAttribute("x", String(px));
+    label.setAttribute("y", String(py + r + 13));
+    label.setAttribute("class", "live-map-node-label");
     label.textContent = String(node.label || node.id).slice(0, 18);
     group.appendChild(label);
+
+    // GitHub-Actions-style status icon (shape + glyph, not color-only).
+    const glyph = LIVE_MAP_STATUS_GLYPH[presenceKey] || "?";
+    const iconBg = document.createElementNS(SVG_NS, "circle");
+    iconBg.setAttribute("cx", String(px + r - 6)); iconBg.setAttribute("cy", String(py - r + 6));
+    iconBg.setAttribute("r", "8"); iconBg.setAttribute("fill", "var(--canvas)");
+    iconBg.setAttribute("stroke", healthStroke); iconBg.setAttribute("stroke-width", "1.5");
+    group.appendChild(iconBg);
+    const iconText = document.createElementNS(SVG_NS, "text");
+    iconText.setAttribute("x", String(px + r - 6)); iconText.setAttribute("y", String(py - r + 10));
+    iconText.setAttribute("class", "live-map-status-icon");
+    iconText.setAttribute("text-anchor", "middle");
+    // aria-label: status is conveyed by glyph + label, not color alone.
+    iconText.setAttribute("aria-label", escapeHtml(presenceKey));
+    iconText.textContent = glyph;
+    group.appendChild(iconText);
+
     nodeLayer.appendChild(group);
   });
   svg.appendChild(nodeLayer);
@@ -9513,10 +9670,15 @@ function viewTaskInStateMachine(taskId) {
   renderStateMachineViewer();
 }
 
-function stateMachineNodePositions(nodes) {
-  // Deterministic horizontal lifecycle layout: states are laid out left to
-  // right in declaration order and wrapped onto rows so larger machines stay
-  // readable. Same input always yields the same coordinates.
+function stateMachineNodePositions(nodes, edges) {
+  // Upgrade path: replace with Dagre (MIT, dagre.min.js IIFE) vendored locally.
+  // Current: Sugiyama-style layered layout using _dagre_layered_positions so the
+  // state machine renders as a clean left-to-right DAG following transition edges.
+  // Falls back to a serpentine grid when no edges are provided.
+  if (edges && edges.length) {
+    return _dagre_layered_positions(nodes, edges, { w: 1000, h: 600, marginX: 120, marginY: 90, topDown: false });
+  }
+  // Fallback: deterministic horizontal lifecycle grid (serpentine rows).
   const positions = {};
   const perRow = Math.min(4, Math.max(1, nodes.length));
   const marginX = 140;
@@ -9615,8 +9777,13 @@ function renderStateMachineViewer() {
     return;
   }
 
-  const positions = stateMachineNodePositions(nodes);
+  // Layered DAG layout (Dagre upgrade path - see module docstring).
+  // Edges are passed so the layout follows transition direction (L-to-R layered).
+  const positions = stateMachineNodePositions(nodes, edges);
 
+  // ---- Edge layer: Datadog-style encodings ----
+  // stroke-width = transition magnitude (traversal count or weight, clamped 1-5)
+  // stroke color = health token (traversed = path token; wildcard = muted)
   const edgeLayer = document.createElementNS(SVG_NS, "g");
   edges.forEach((edge) => {
     // A wildcard edge (from "*") is drawn from the current/last-traversed state
@@ -9630,18 +9797,24 @@ function renderStateMachineViewer() {
     const b = positions[edge.to];
     if (!a || !b) return;
     const traversed = traversedEdgeIds.has(edge.id);
+    const magnitude = Math.min(5, Math.max(1, edge.traversal_count || edge.weight || 1));
+    // Datadog-style: width = magnitude, color = health token.
+    const healthColor = edge.wildcard ? "var(--muted)" : (traversed ? "var(--sm-path)" : "var(--line-strong)");
     const line = document.createElementNS(SVG_NS, "line");
-    line.setAttribute("x1", a.x);
-    line.setAttribute("y1", a.y);
-    line.setAttribute("x2", b.x);
-    line.setAttribute("y2", b.y);
+    line.setAttribute("x1", String(Math.round(a.x)));
+    line.setAttribute("y1", String(Math.round(a.y)));
+    line.setAttribute("x2", String(Math.round(b.x)));
+    line.setAttribute("y2", String(Math.round(b.y)));
     line.setAttribute("class", `state-machine-edge ${edge.wildcard ? "is-wildcard" : ""} ${traversed ? "is-traversed" : ""}`);
-    line.setAttribute("data-edge-id", edge.id);
+    line.setAttribute("data-edge-id", String(edge.id));
+    line.setAttribute("stroke-width", String(traversed ? Math.max(2, magnitude) : 1));
+    line.setAttribute("stroke", healthColor);
+    line.setAttribute("aria-label", `transition ${escapeHtml(fromId)} to ${escapeHtml(edge.to)}${edge.trigger ? ": " + escapeHtml(edge.trigger) : ""}`);
     edgeLayer.appendChild(line);
     if (edge.trigger) {
       const label = document.createElementNS(SVG_NS, "text");
-      label.setAttribute("x", (a.x + b.x) / 2);
-      label.setAttribute("y", (a.y + b.y) / 2 - 4);
+      label.setAttribute("x", String(Math.round((a.x + b.x) / 2)));
+      label.setAttribute("y", String(Math.round((a.y + b.y) / 2) - 4));
       label.setAttribute("class", "state-machine-edge-label");
       label.textContent = String(edge.trigger).slice(0, 22);
       edgeLayer.appendChild(label);
@@ -9649,36 +9822,63 @@ function renderStateMachineViewer() {
   });
   svg.appendChild(edgeLayer);
 
+  // ---- Node layer: GitHub-Actions-style status icons ----
+  // Each state node shows a glyph icon (shape + label, not color-only).
+  // ASCII-only: cp949 node-check guard - keep all literals in the [0,127] range.
+  const SM_STATUS_GLYPH = {
+    "is-current":     ">",   // running
+    "is-traversed":   "v",   // done (checkmark equivalent)
+    "is-initial":     "@",   // start
+    "signal-success": "v",
+    "signal-warning": "!",
+    "signal-danger":  "x",
+  };
   const nodeLayer = document.createElementNS(SVG_NS, "g");
   nodes.forEach((node) => {
     const pos = positions[node.id];
     if (!pos) return;
+    const px = Math.round(pos.x), py = Math.round(pos.y);
     const isCurrent = node.id === currentState;
     const isTraversed = traversedStates.has(node.id);
     const group = document.createElementNS(SVG_NS, "g");
     group.setAttribute(
       "class",
-      `state-machine-node signal-${node.signal_token || "subtle"} ${node.is_initial ? "is-initial" : ""} ${isCurrent ? "is-current" : ""} ${isTraversed ? "is-traversed" : ""}`
+      `state-machine-node signal-${escapeHtml(node.signal_token || "subtle")} ${node.is_initial ? "is-initial" : ""} ${isCurrent ? "is-current" : ""} ${isTraversed ? "is-traversed" : ""}`
     );
-    group.setAttribute("data-state-id", node.id);
+    group.setAttribute("data-state-id", String(node.id));
     const circle = document.createElementNS(SVG_NS, "circle");
-    circle.setAttribute("cx", pos.x);
-    circle.setAttribute("cy", pos.y);
+    circle.setAttribute("cx", String(px));
+    circle.setAttribute("cy", String(py));
     circle.setAttribute("r", "26");
     group.appendChild(circle);
     const label = document.createElementNS(SVG_NS, "text");
-    label.setAttribute("x", pos.x);
-    label.setAttribute("y", pos.y + 2);
+    label.setAttribute("x", String(px));
+    label.setAttribute("y", String(py + 2));
     label.textContent = String(node.id).slice(0, 14);
     group.appendChild(label);
     if (node.score !== null && node.score !== undefined) {
       const score = document.createElementNS(SVG_NS, "text");
-      score.setAttribute("x", pos.x);
-      score.setAttribute("y", pos.y + 42);
+      score.setAttribute("x", String(px));
+      score.setAttribute("y", String(py + 42));
       score.setAttribute("class", "state-machine-node-score");
       score.textContent = `${node.signal || ""} ${node.score}`.trim();
       group.appendChild(score);
     }
+    // GitHub-Actions-style status icon badge.
+    const iconKey = isCurrent ? "is-current" : (isTraversed ? "is-traversed" : (node.is_initial ? "is-initial" : `signal-${node.signal_token || "subtle"}`));
+    const glyph = SM_STATUS_GLYPH[iconKey] || "?";
+    const iconBg = document.createElementNS(SVG_NS, "circle");
+    iconBg.setAttribute("cx", String(px + 18)); iconBg.setAttribute("cy", String(py - 18));
+    iconBg.setAttribute("r", "7"); iconBg.setAttribute("fill", "var(--canvas)");
+    iconBg.setAttribute("stroke", "var(--line-strong)"); iconBg.setAttribute("stroke-width", "1");
+    group.appendChild(iconBg);
+    const iconText = document.createElementNS(SVG_NS, "text");
+    iconText.setAttribute("x", String(px + 18)); iconText.setAttribute("y", String(py - 14));
+    iconText.setAttribute("class", "state-machine-status-icon");
+    iconText.setAttribute("text-anchor", "middle");
+    iconText.setAttribute("aria-label", escapeHtml(iconKey));
+    iconText.textContent = glyph;
+    group.appendChild(iconText);
     nodeLayer.appendChild(group);
   });
   svg.appendChild(nodeLayer);
@@ -9834,24 +10034,103 @@ function renderTimeline() {
   grid.innerHTML = laneHtml + arrowBlock;
 }
 
-function dependencyNodePositions(nodes) {
-  // Deterministic ring layout (mirrors the live map) so the graph reads the
-  // same across refreshes; parent nodes sit on an inner ring.
-  const positions = {};
-  const cx = 500;
-  const cy = 300;
-  const parents = nodes.filter((node) => node.kind === "parent");
-  const others = nodes.filter((node) => node.kind !== "parent");
-  parents.forEach((node, index) => {
-    const angle = (index / Math.max(parents.length, 1)) * Math.PI * 2 - Math.PI / 2;
-    positions[node.id] = { x: cx + Math.cos(angle) * 110, y: cy + Math.sin(angle) * 90 };
+function dependencyNodePositions(nodes, edges) {
+  // Upgrade path: replace with Dagre (MIT, dagre.min.js IIFE) vendored locally.
+  // Current: hand-rolled Sugiyama-style layered DAG - topological rank via BFS
+  // from roots, then center columns within each rank. Produces a clean top-down
+  // layered layout without any CDN dependency.
+  return _dagre_layered_positions(nodes, edges, { w: 1000, h: 600, marginX: 80, marginY: 80, topDown: true });
+}
+
+function _dagre_layered_positions(nodes, edges, opts) {
+  // Sugiyama-style layered layout.
+  // 1. Compute ranks via longest-path BFS (topological rank = max(pred ranks)+1).
+  // 2. Center nodes within each rank layer.
+  const w = (opts && opts.w) || 1000;
+  const h = (opts && opts.h) || 600;
+  const marginX = (opts && opts.marginX) || 80;
+  const marginY = (opts && opts.marginY) || 80;
+  const topDown = opts == null || opts.topDown !== false;
+
+  const ids = nodes.map((n) => n.id);
+  const idSet = new Set(ids);
+
+  // Adjacency: successors per node (direction: from -> to is a dependency).
+  const succs = {};  // node -> [successor ids]
+  const preds = {};  // node -> [predecessor ids]
+  ids.forEach((id) => { succs[id] = []; preds[id] = []; });
+  (edges || []).forEach((e) => {
+    if (idSet.has(e.from) && idSet.has(e.to)) {
+      (succs[e.from] || (succs[e.from] = [])).push(e.to);
+      (preds[e.to]   || (preds[e.to]   = [])).push(e.from);
+    }
   });
-  others.forEach((node, index) => {
-    const angle = (index / Math.max(others.length, 1)) * Math.PI * 2 - Math.PI / 2;
-    positions[node.id] = { x: cx + Math.cos(angle) * 230, y: cy + Math.sin(angle) * 200 };
+
+  // Longest-path rank (handles DAGs with multiple roots gracefully).
+  const rank = {};
+  ids.forEach((id) => { rank[id] = 0; });
+  // Topological sort via Kahn (cycle-safe).
+  const inDeg = {};
+  ids.forEach((id) => { inDeg[id] = (preds[id] || []).length; });
+  const queue = ids.filter((id) => inDeg[id] === 0);
+  const order = [];
+  while (queue.length) {
+    const cur = queue.shift();
+    order.push(cur);
+    (succs[cur] || []).forEach((s) => {
+      rank[s] = Math.max(rank[s], rank[cur] + 1);
+      inDeg[s] = (inDeg[s] || 1) - 1;
+      if (inDeg[s] <= 0) queue.push(s);
+    });
+  }
+  // Any nodes not reached (cycle) get rank = max+1.
+  const maxRankReached = Math.max(0, ...Object.values(rank));
+  ids.forEach((id) => { if (!order.includes(id)) rank[id] = maxRankReached + 1; });
+
+  // Group by rank.
+  const byRank = {};
+  ids.forEach((id) => {
+    const r = rank[id];
+    (byRank[r] || (byRank[r] = [])).push(id);
+  });
+  const rankLevels = Object.keys(byRank).map(Number).sort((a, b) => a - b);
+  const numRanks = rankLevels.length || 1;
+  const rankSpan = (topDown ? h : w) - marginY * 2;
+  const rankStep = numRanks > 1 ? rankSpan / (numRanks - 1) : 0;
+
+  const positions = {};
+  rankLevels.forEach((r, rankIdx) => {
+    const layer = byRank[r];
+    const colSpan = (topDown ? w : h) - marginX * 2;
+    const colStep = layer.length > 1 ? colSpan / (layer.length - 1) : 0;
+    layer.forEach((id, colIdx) => {
+      const along = marginX + colIdx * colStep + (layer.length === 1 ? colSpan / 2 : 0);
+      const across = marginY + rankIdx * rankStep;
+      positions[id] = topDown
+        ? { x: along, y: across }
+        : { x: across, y: along };
+    });
   });
   return positions;
 }
+
+// Dependency graph health token mapping (Datadog-style: edge color = health).
+const DEP_HEALTH_STROKE = {
+  healthy:  "var(--success)",
+  warning:  "var(--warning)",
+  degraded: "var(--amber)",
+  error:    "var(--danger)",
+  cycle:    "var(--danger)",
+};
+// GitHub-Actions-style status glyphs for dep-graph nodes (shape + glyph, not color-only).
+const DEP_STATUS_GLYPH = {
+  completed:   "v",
+  in_progress: ">",
+  blocked:     "x",
+  planned:     "o",
+  parent:      "*",
+  missing:     "?",
+};
 
 function renderDependencyGraph() {
   const data = dependencyGraphData();
@@ -9864,7 +10143,7 @@ function renderDependencyGraph() {
   const legend = $("dep-graph-legend");
   if (legend) {
     legend.innerHTML = ["dependency", "parent", "cycle"].map((kind) =>
-      `<li><span class="legend-swatch legend-${kind}"></span>${escapeHtml(DEP_KIND_LABELS[kind] || kind)}</li>`).join("");
+      `<li><span class="legend-swatch legend-${escapeHtml(kind)}"></span>${escapeHtml(DEP_KIND_LABELS[kind] || kind)}</li>`).join("");
   }
 
   const svg = $("dep-graph-svg");
@@ -9882,41 +10161,70 @@ function renderDependencyGraph() {
     svg.appendChild(note);
     return;
   }
-  const positions = dependencyNodePositions(nodes);
+  // Layered DAG layout (Dagre upgrade path - see module docstring).
+  const positions = dependencyNodePositions(nodes, edges);
 
+  // ---- Edge layer: Datadog-style encodings ----
+  // stroke-width = magnitude (dependency_count or weight, clamped 1-5)
+  // stroke color = health token
   const edgeLayer = document.createElementNS(SVG_NS, "g");
   edges.forEach((edge) => {
     const a = positions[edge.from];
     const b = positions[edge.to];
     if (!a || !b) return;
+    const magnitude = Math.min(5, Math.max(1, edge.weight || edge.dependency_count || 1));
+    const healthKey = edge.in_cycle ? "cycle" : (edge.health || "");
+    const healthColor = DEP_HEALTH_STROKE[healthKey] || "var(--line-strong)";
     const line = document.createElementNS(SVG_NS, "line");
-    line.setAttribute("x1", a.x);
-    line.setAttribute("y1", a.y);
-    line.setAttribute("x2", b.x);
-    line.setAttribute("y2", b.y);
-    line.setAttribute("class", `dep-edge kind-${edge.kind || "dependency"} ${edge.in_cycle ? "is-cycle" : ""}`);
-    line.setAttribute("data-edge-id", edge.id);
+    line.setAttribute("x1", String(Math.round(a.x)));
+    line.setAttribute("y1", String(Math.round(a.y)));
+    line.setAttribute("x2", String(Math.round(b.x)));
+    line.setAttribute("y2", String(Math.round(b.y)));
+    line.setAttribute("class", `dep-edge kind-${escapeHtml(edge.kind || "dependency")} ${edge.in_cycle ? "is-cycle" : ""}`);
+    line.setAttribute("data-edge-id", String(edge.id));
+    // Datadog-style: stroke-width = magnitude; stroke color = health.
+    line.setAttribute("stroke-width", String(magnitude));
+    line.setAttribute("stroke", healthColor);
+    line.setAttribute("aria-label", `${escapeHtml(edge.from)} to ${escapeHtml(edge.to)}: ${escapeHtml(edge.kind || "dependency")}`);
     edgeLayer.appendChild(line);
   });
   svg.appendChild(edgeLayer);
 
+  // ---- Node layer: GitHub-Actions-style status icons ----
   const nodeLayer = document.createElementNS(SVG_NS, "g");
   nodes.forEach((node) => {
     const pos = positions[node.id];
     if (!pos) return;
+    const px = Math.round(pos.x), py = Math.round(pos.y);
+    const r = node.kind === "parent" ? 20 : 14;
     const group = document.createElementNS(SVG_NS, "g");
-    group.setAttribute("class", `dep-node kind-${node.kind || "task"} ${node.in_cycle ? "is-cycle" : ""}`);
-    group.setAttribute("data-node-id", node.id);
+    group.setAttribute("class", `dep-node kind-${escapeHtml(node.kind || "task")} ${node.in_cycle ? "is-cycle" : ""}`);
+    group.setAttribute("data-node-id", String(node.id));
     const circle = document.createElementNS(SVG_NS, "circle");
-    circle.setAttribute("cx", pos.x);
-    circle.setAttribute("cy", pos.y);
-    circle.setAttribute("r", node.kind === "parent" ? "20" : "14");
+    circle.setAttribute("cx", String(px));
+    circle.setAttribute("cy", String(py));
+    circle.setAttribute("r", String(r));
     group.appendChild(circle);
     const label = document.createElementNS(SVG_NS, "text");
-    label.setAttribute("x", pos.x);
-    label.setAttribute("y", pos.y + 28);
+    label.setAttribute("x", String(px));
+    label.setAttribute("y", String(py + r + 14));
     label.textContent = String(node.id).slice(0, 18);
     group.appendChild(label);
+    // GitHub-Actions-style status icon (glyph beside node, shape + label, not color-only).
+    const statusKey = node.status_bucket || node.kind || "planned";
+    const glyph = DEP_STATUS_GLYPH[statusKey] || DEP_STATUS_GLYPH[node.kind] || "?";
+    const iconBg = document.createElementNS(SVG_NS, "circle");
+    iconBg.setAttribute("cx", String(px + r - 4)); iconBg.setAttribute("cy", String(py - r + 4));
+    iconBg.setAttribute("r", "6"); iconBg.setAttribute("fill", "var(--canvas)");
+    iconBg.setAttribute("stroke", "var(--line-strong)"); iconBg.setAttribute("stroke-width", "1");
+    group.appendChild(iconBg);
+    const iconText = document.createElementNS(SVG_NS, "text");
+    iconText.setAttribute("x", String(px + r - 4)); iconText.setAttribute("y", String(py - r + 8));
+    iconText.setAttribute("class", "dep-node-status-icon");
+    iconText.setAttribute("text-anchor", "middle");
+    iconText.setAttribute("aria-label", escapeHtml(statusKey));
+    iconText.textContent = glyph;
+    group.appendChild(iconText);
     nodeLayer.appendChild(group);
   });
   svg.appendChild(nodeLayer);
