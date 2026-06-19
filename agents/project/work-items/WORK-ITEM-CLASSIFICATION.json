@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T15:35:56+09:00",
+  "generated_at": "2026-06-19T16:03:08+09:00",
   "record_count": 382,
   "finding_count": 0,
   "findings": [],
@@ -4172,7 +4172,7 @@
       "title": "Create a lead-designer seminar artifact that chooses how the next Taskset Board desig…",
       "path": "agents/lead_engineer/tasks/TASK-AR-609.md",
       "parent_id": "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-609-001",
@@ -4183,7 +4183,7 @@
       "title": "UNIT-TASK-AR-609-001 - Run Taskset Board IA lead-designer seminar",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-609/UNIT-TASK-AR-609-001.md",
       "parent_id": "TASK-AR-609",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-610",

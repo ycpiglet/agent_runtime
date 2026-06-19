@@ -9,11 +9,11 @@ task_id: TASK-AR-609
 task_set_id: TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION
 initiative_id: INIT-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead-designer
 created_at: 2026-06-19T15:36:00+09:00
-updated_at: 2026-06-19T15:36:00+09:00
+updated_at: 2026-06-19T16:00:00+09:00
 origin_type: owner_request
 origin_ref: chat:2026-06-19-ui-refactor-continuous-cycle
 created_by: codex-planner
@@ -48,6 +48,15 @@ verification:
   - python scripts/evidence_index_generator.py --check
 handoff: Report the selected Taskset Board IA direction, rejected alternatives, assetization implications, RFC target files, and next beta/UX evidence path.
 stop_condition: Stop after seminar evidence is complete and ready for independent verification or RFC claim.
+verified_at: 2026-06-19T15:58:30+09:00
+verified_by: codex-lead-designer-task-ar-609
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-unit-task-ar-609-001-20260619155830.json
+resolution: done
+completed_at: 2026-06-19T16:00:00+09:00
+closed_by: codex-lead-designer-task-ar-609
+actual_hours: 0.8
+actual_tokens: 6000
 ---
 
 # UNIT-TASK-AR-609-001 - Run Taskset Board IA lead-designer seminar
@@ -106,3 +115,15 @@ Report the selected Taskset Board IA direction, rejected alternatives, assetizat
 ## Stop Boundary
 
 Stop after seminar evidence is complete and ready for independent verification or RFC claim.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T16:00:00+09:00`
+- Resolution: `done`
+- Actual hours: `0.8`
+- Actual tokens: `6000`
+- Closed by: `codex-lead-designer-task-ar-609`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-unit-task-ar-609-001-20260619155830.json`
+<!-- work-close:end -->

@@ -35,13 +35,14 @@
 
 <!-- BACKLOG-INDEX:END -->
 
-## 2026-06-19 TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT Registration
+## 2026-06-19 TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION active
 
-- Active task set: `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` is `1/2` done.
-- Purpose: close `BTC-OAG-CLAIM-MOBILE-001`, where the Taskset Board measured `641px` document width against a `390px` mobile viewport after opening the claim-aware relation panel.
-- Completed task: `TASK-AR-607` implemented the responsive Taskset Board / relation-panel layout fix and passed W4b.
-- Remaining task: `TASK-AR-608` reruns beta-tester and UX-evaluator evidence on desktop and `390x844` mobile.
-- Boundary: `TASK-AR-608` is evaluation-only; any remaining user-visible defect must be routed with a BTC-style ID.
+- Active task set: `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` is `1/3` done.
+- Completed task: `TASK-AR-609` / `UNIT-TASK-AR-609-001` produced the lead-designer Taskset Board IA seminar and passed W4b.
+- Selected direction: `taskset_attention_workspace`, with command-palette switching as a supporting component rather than the primary design.
+- Remaining tasks: `TASK-AR-610` publishes the RFC; `TASK-AR-611` derives implementation and beta-evaluation units.
+- Evidence: `reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md`, `reviews/W4B-2026-06-19-TASK-AR-609.md`, `reviews/VERIFY-2026-06-19-task-ar-609-20260619160030.json`.
+- Boundary: no active UI claim remains. Do not mutate UI source files until `TASK-AR-610` and the follow-up implementation registration are complete.
 
 ## 2026-06-19 TASKSET-AR-UI-UX-CYCLE-AUTOMATION complete
 

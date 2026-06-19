@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-609:tab-01",
   "pane_id": "terminal:wt-task-ar-609:tab-01",
   "mode": "worker",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION",
   "active_scope": "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION",
   "scope_transition_approved": true,
@@ -19,20 +19,20 @@
   "model_tier": "worker_standard",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "seminar",
-  "progress_pct": 5,
-  "step_index": 1,
+  "phase": "w4b-verified-released",
+  "progress_pct": 100,
+  "step_index": 5,
   "step_total": 5,
-  "status_text": "Claimed Taskset Board IA seminar before editing evidence.",
+  "status_text": "Taskset Board IA seminar completed, W4b verified, released, and ready for TASK-AR-610 RFC follow-up.",
   "worktree_path": ".worktrees/TASK-AR-609-taskset-board-ia-seminar",
   "branch": "codex/task-ar-609-taskset-board-ia-seminar",
   "claimed_at": "2026-06-19T15:39:11+09:00",
-  "last_heartbeat": "2026-06-19T15:39:11+09:00",
-  "updated_at": "2026-06-19T15:39:11+09:00",
+  "last_heartbeat": "2026-06-19T15:57:35+09:00",
+  "updated_at": "2026-06-19T16:01:00+09:00",
   "expires_at": "2026-06-19T16:09:11+09:00",
   "lease": {
     "claimed_at": "2026-06-19T15:39:11+09:00",
-    "heartbeat_at": "2026-06-19T15:39:11+09:00",
+    "heartbeat_at": "2026-06-19T15:57:35+09:00",
     "expires_at": "2026-06-19T16:09:11+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260619-153911-task-ar-609-task-ar-609-taskset-board-ia-seminar.handoff.md",
@@ -43,5 +43,9 @@
     "reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md",
     "reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md",
     "reviews/INDEX.md"
-  ]
+  ],
+  "released_at": "2026-06-19T15:57:35+09:00",
+  "verified_by": "codex-w4b-verifier-ar-609",
+  "verifier_role": "qa-reviewer",
+  "verification_evidence": "reviews/W4B-2026-06-19-TASK-AR-609.md"
 }

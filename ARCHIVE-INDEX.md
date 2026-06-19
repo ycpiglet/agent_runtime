@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-06-19
-archived_count: 267
+archived_count: 268
 ---
 
 # Archived Task Files
 
-- `267` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `268` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -280,3 +280,4 @@ archived_count: 267
 | `TASK-AR-605` | `c27b747a-ef7…` | `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` | completed | 2026-06-19T12:26:00+09:00 | 2026-06-19T12:40:31+09:00 | 2026-06-19T13:15:22+09:00 | 2026-06-19T13:15:22+09:00 | Refactor the Operator Attention Graph relation pattern adapter for BTC-OAG-BLOCKED-00… |
 | `TASK-AR-608` | `206783d4-1dc…` | `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` | completed | 2026-06-19T14:04:00+09:00 | 2026-06-19T14:56:00+09:00 | 2026-06-19T15:21:00+09:00 | 2026-06-19T15:21:00+09:00 | Repeat beta-tester and UX-evaluator verification after the responsive fix, focused on… |
 | `TASK-AR-607` | `3a55de67-6cf…` | `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` | completed | 2026-06-19T14:04:00+09:00 | 2026-06-19T14:07:00+09:00 | 2026-06-19T14:43:00+09:00 | 2026-06-19T14:43:00+09:00 | Fix BTC-OAG-CLAIM-MOBILE-001 by constraining Taskset Board, relation-panel, toolbar,… |
+| `TASK-AR-609` | `c01a0cfe-be2…` | `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` | completed | 2026-06-19T15:36:00+09:00 | - | 2026-06-19T16:01:00+09:00 | 2026-06-19T16:01:00+09:00 | Create a lead-designer seminar artifact that chooses how the next Taskset Board desig… |

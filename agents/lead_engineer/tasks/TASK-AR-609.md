@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION
 registered_at: 2026-06-19T15:36:00+09:00
 created_at: 2026-06-19T15:36:00+09:00
-updated_at: 2026-06-19T15:36:00+09:00
+started_at: 2026-06-19T15:39:11+09:00
+updated_at: 2026-06-19T16:01:00+09:00
 title: Run Taskset Board IA design seminar
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 2
@@ -30,8 +31,22 @@ summary: Create a lead-designer seminar artifact that chooses how the next Tasks
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python scripts/ui_ux_cycle.py --root . assess --json
+  - python scripts/design_system_gate.py --check --all-ui
+  - python scripts/evidence_index_generator.py --check
 tags:
   - work-cli-created
+verification_status: passed
+verified_at: 2026-06-19T16:00:30+09:00
+verified_by: codex-lead-designer-task-ar-609
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-task-ar-609-20260619160030.json
+resolution: done
+completed_at: 2026-06-19T16:01:00+09:00
+closed_by: codex-lead-designer-task-ar-609
+actual_hours: 1.0
+actual_tokens: 7000
 ---
 
 # TASK-AR-609 - Run Taskset Board IA design seminar
@@ -57,3 +72,15 @@ tags:
 - `python scripts/ui_ux_cycle.py --root . assess --json`
 - `python scripts/design_system_gate.py --check --all-ui`
 - `python scripts/evidence_index_generator.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T16:01:00+09:00`
+- Resolution: `done`
+- Actual hours: `1.0`
+- Actual tokens: `7000`
+- Closed by: `codex-lead-designer-task-ar-609`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-task-ar-609-20260619160030.json`
+<!-- work-close:end -->
