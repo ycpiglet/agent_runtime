@@ -37,12 +37,12 @@
 
 ## 2026-06-19 TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION active
 
-- Active task set: `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` is `1/3` done.
-- Completed task: `TASK-AR-609` / `UNIT-TASK-AR-609-001` produced the lead-designer Taskset Board IA seminar and passed W4b.
+- Active task set: `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` is `2/3` done.
+- Completed tasks: `TASK-AR-609` / `UNIT-TASK-AR-609-001` produced the lead-designer Taskset Board IA seminar and `TASK-AR-610` published the accepted RFC; both passed W4b.
 - Selected direction: `taskset_attention_workspace`, with command-palette switching as a supporting component rather than the primary design.
-- Remaining tasks: `TASK-AR-610` publishes the RFC; `TASK-AR-611` derives implementation and beta-evaluation units.
-- Evidence: `reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md`, `reviews/W4B-2026-06-19-TASK-AR-609.md`, `reviews/VERIFY-2026-06-19-task-ar-609-20260619160030.json`.
-- Boundary: no active UI claim remains. Do not mutate UI source files until `TASK-AR-610` and the follow-up implementation registration are complete.
+- Remaining task: `TASK-AR-611` derives implementation and beta-evaluation units.
+- Evidence: `reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md`, `reviews/RFC-2026-06-19-taskset-board-ia-design-direction.md`, `reviews/W4B-2026-06-19-TASK-AR-609.md`, `reviews/W4B-2026-06-19-TASK-AR-610.md`.
+- Boundary: no active UI claim remains. Do not mutate UI source files until `TASK-AR-611` creates the follow-up implementation registration and a fresh implementation claim.
 
 ## 2026-06-19 TASKSET-AR-UI-UX-CYCLE-AUTOMATION complete
 

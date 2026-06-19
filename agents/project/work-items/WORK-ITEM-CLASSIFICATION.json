@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T16:03:08+09:00",
+  "generated_at": "2026-06-19T18:07:49+09:00",
   "record_count": 382,
   "finding_count": 0,
   "findings": [],
@@ -4194,7 +4194,7 @@
       "title": "Promote the seminar decision into an accepted design-direction RFC that names the exa…",
       "path": "agents/lead_engineer/tasks/TASK-AR-610.md",
       "parent_id": "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-611",

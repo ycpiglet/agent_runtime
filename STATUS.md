@@ -5,8 +5,8 @@
 - `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` is complete: `TASK-AR-603` implemented the first relation-aware UI slice, and `TASK-AR-604` completed beta/UX evaluation with W4b evidence.
 - `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` is complete: `TASK-AR-605` fixed claim-aware relation semantics, and `TASK-AR-606` completed beta/UX retest with W4b evidence.
 - `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` is complete: `TASK-AR-607` fixed `BTC-OAG-CLAIM-MOBILE-001`, and `TASK-AR-608` completed beta/UX retest with W4b evidence.
-- `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` is active: `TASK-AR-609` completed the lead-designer Taskset Board IA seminar; `TASK-AR-610` is claimed for the accepted RFC.
-- Active UI claim: `CLAIM-20260619-161400-task-ar-610-task-ar-610-taskset-board-ia-rfc` on `.worktrees/TASK-AR-610-taskset-board-ia-rfc`.
+- `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION` is active: `TASK-AR-609` completed the lead-designer seminar and `TASK-AR-610` published the accepted Taskset Board IA RFC.
+- Active UI claim: none. The next UI task is `TASK-AR-611`, which derives the implementation and beta-evaluation units before any source mutation.
 - The previous `TASKSET-AR-LLM-WIKI` closeout is complete: `TASK-AR-590..596` are archived `7/7`, W4b evidence is indexed, and that taskset has no active claims.
 - UI refactor/design-system remediation is now past design-system governance, asset extraction, UI/UX cycle automation, first source-mutating Operator Attention Graph implementation, beta/UX evaluation, and claim-aware relation adapter refinement.
 - `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` is complete: `TASK-AR-597`, `TASK-AR-598`, and `TASK-AR-599` are implemented, W4b-verified, integrated, and closed.
@@ -16,19 +16,19 @@
 - Self-improvement remediation is improving but not mature: `scribe_state` is now ok, but the score is still below mature and one monitored role gap remains.
 - Scribe source is now the live status summary section so advisory health can be measured without fabricating role evidence.
 - Doc Steward remains ok; keep document-health checks advisory and evidence-based.
-- Next UI refactor step: complete `reviews/RFC-2026-06-19-taskset-board-ia-design-direction.md` in the claimed `TASK-AR-610` worktree, then derive the implementation/beta plan in `TASK-AR-611` before any next UI source mutation.
+- Next UI refactor step: run `TASK-AR-611` to derive the source-mutation implementation registration and paired beta/UX evaluation units from `reviews/RFC-2026-06-19-taskset-board-ia-design-direction.md`.
 
 ## 2026-06-19 - TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION active
 
 - Registered taskset: `TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION`.
-- Progress: `1/3` tasks complete. `TASK-AR-609` / `UNIT-TASK-AR-609-001` completed the lead-designer seminar for Taskset Board information architecture and visual direction.
+- Progress: `2/3` tasks complete. `TASK-AR-609` / `UNIT-TASK-AR-609-001` completed the lead-designer seminar, and `TASK-AR-610` published the accepted Taskset Board IA RFC.
 - Released claim: `CLAIM-20260619-153911-task-ar-609-task-ar-609-taskset-board-ia-seminar`; W4b evidence `reviews/W4B-2026-06-19-TASK-AR-609.md`.
 - Result: the selected next direction is `taskset_attention_workspace`; command-palette switching remains a supporting component, not the primary design.
-- Evidence: seminar `reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md`; task verification `reviews/VERIFY-2026-06-19-task-ar-609-20260619160030.json`; unit verification `reviews/VERIFY-2026-06-19-unit-task-ar-609-001-20260619155830.json`.
-- Active task: `TASK-AR-610` publishes the RFC in `.worktrees/TASK-AR-610-taskset-board-ia-rfc`.
-- Active claim: `CLAIM-20260619-161400-task-ar-610-task-ar-610-taskset-board-ia-rfc`.
-- Next task after RFC: `TASK-AR-611` derives the implementation and beta-evaluation units.
-- Boundary: do not mutate UI source files until the RFC and follow-up implementation registration are complete.
+- Evidence: seminar `reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md`; RFC `reviews/RFC-2026-06-19-taskset-board-ia-design-direction.md`; W4b evidence `reviews/W4B-2026-06-19-TASK-AR-610.md`; task verification `reviews/VERIFY-2026-06-19-task-ar-610-20260619180000.json`.
+- Active task: none claimed.
+- Released claim: `CLAIM-20260619-175000-task-ar-610-task-ar-610-rfc-resume`.
+- Next task: `TASK-AR-611` derives the implementation and beta-evaluation units.
+- Boundary: do not mutate UI source files until `TASK-AR-611` creates the follow-up implementation registration and a fresh claim/worktree exists for that source-mutation task.
 
 ## 2026-06-19 - TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT complete
 

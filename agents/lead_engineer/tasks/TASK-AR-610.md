@@ -10,9 +10,9 @@ parent_id: TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION
 registered_at: 2026-06-19T15:36:00+09:00
 created_at: 2026-06-19T15:36:00+09:00
 started_at: 2026-06-19T16:14:00+09:00
-updated_at: 2026-06-19T18:00:00+09:00
+updated_at: 2026-06-19T18:08:00+09:00
 title: Publish Taskset Board IA design RFC
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 3
@@ -42,6 +42,11 @@ verified_by: codex-lead-designer-task-ar-610-resume
 evidence_refs:
   - reviews/VERIFY-2026-06-19-task-ar-610-20260619174130.json
   - reviews/VERIFY-2026-06-19-task-ar-610-20260619180000.json
+resolution: done
+completed_at: 2026-06-19T18:08:00+09:00
+closed_by: codex-lead-designer-task-ar-610-resume
+actual_hours: 1.4
+actual_tokens: 9000
 ---
 
 # TASK-AR-610 - Publish Taskset Board IA design RFC
@@ -67,3 +72,16 @@ evidence_refs:
 - `python scripts/design_system_gate.py --check --all-ui`
 - `python scripts/evidence_index_generator.py --check`
 - `python scripts/ui_ux_cycle.py --root . propose --dry-run --json`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-19T18:08:00+09:00`
+- Resolution: `done`
+- Actual hours: `1.4`
+- Actual tokens: `9000`
+- Closed by: `codex-lead-designer-task-ar-610-resume`
+- Evidence:
+  - `reviews/VERIFY-2026-06-19-task-ar-610-20260619174130.json`
+  - `reviews/VERIFY-2026-06-19-task-ar-610-20260619180000.json`
+<!-- work-close:end -->

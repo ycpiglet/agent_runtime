@@ -1,27 +1,21 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T17:50:00+09:00
+updated_at: 2026-06-19T18:08:00+09:00
 current_state:
-  summary: "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION is active; TASK-AR-610 was reclaimed after the expired RFC claim and is continuing in the existing worktree."
+  summary: "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION is active; TASK-AR-610 is W4b-verified and closed, and TASK-AR-611 is next."
   status: active
   task_set_status: taskset_active
   task_set_id: "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION"
-  step_index: 3
+  step_index: 4
   step_total: 5
-  progress_pct: 70
-  status_text: "TASK-AR-610 resume claim is active for W4 closeout of the Taskset Board IA design RFC; no UI source mutation is authorized in this task."
+  progress_pct: 80
+  status_text: "TASK-AR-611 should derive implementation and beta-evaluation units from the accepted Taskset Board IA RFC before any UI source mutation."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260619-175000-task-ar-610-task-ar-610-rfc-resume
-      agent_role: lead-designer
-      agent_instance_id: codex-lead-designer-task-ar-610-resume
-      display_name: codex-lead-designer-task-ar-610-resume
-      callsite_id: terminal:wt-task-ar-610-resume:tab-01
-  current_teams:
-    - ui-ux
+  current_agents: []
+  current_teams: []
 resume:
-  active_task: TASK-AR-610
+  active_task: TASK-AR-611
   active_task_set: TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION
-  branch_policy: "Continue only in .worktrees/TASK-AR-610-taskset-board-ia-rfc on codex/task-ar-610-taskset-board-ia-rfc for the claimed RFC task."
+  branch_policy: "Create a fresh claim/worktree for TASK-AR-611 before editing planning or registration artifacts."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
