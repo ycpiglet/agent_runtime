@@ -8,7 +8,10 @@ architecture: token-scale CSS plus primitive/pattern JS helpers that
 from __future__ import annotations
 
 UI_TOKEN_SCALE_CSS = """
-/* ===== Design-system token scale (TASK-AR-579) =========================== */
+/* ===== Design-system token scale (TASK-AR-579, promoted TASK-AR-583) ===== */
+/* Spacing and radius tokens are now a fully designed semantic scale.         */
+/* Transitional space-px / radius-px aliases have been removed (TASK-AR-583);*/
+/* consumers use the named semantic tokens below (stable as of TASK-AR-583). */
 :root {
   --font-size-ui-xs: 10px;
   --font-size-ui-sm: 11px;
@@ -31,6 +34,8 @@ UI_TOKEN_SCALE_CSS = """
   --font-size-ui-26: 26px;
   --font-size-ui-28: 28px;
   --font-size-ui-30: 30px;
+  /* ---- Spacing scale (semantic, stable) --------------------------------- */
+  /* Base numeric steps — even multiples of 2px forming the backbone.       */
   --space-0: 0px;
   --space-1: 2px;
   --space-2: 4px;
@@ -40,37 +45,38 @@ UI_TOKEN_SCALE_CSS = """
   --space-6: 12px;
   --space-7: 14px;
   --space-8: 16px;
-  --space-px-1: 1px;
-  --space-px-2: var(--space-1);
-  --space-px-3: 3px;
-  --space-px-4: var(--space-2);
-  --space-px-5: 5px;
-  --space-px-6: var(--space-3);
-  --space-px-7: 7px;
-  --space-px-8: var(--space-4);
-  --space-px-9: 9px;
-  --space-px-10: var(--space-5);
-  --space-px-11: 11px;
-  --space-px-12: var(--space-6);
-  --space-px-14: var(--space-7);
-  --space-px-16: var(--space-8);
-  --space-px-18: 18px;
-  --space-px-20: 20px;
-  --space-px-22: 22px;
-  --space-px-24: 24px;
-  --space-px-28: 28px;
-  --space-px-40: 40px;
-  --space-px-76: 76px;
+  /* Sub-step hairline and half-step values for tight UI density.           */
+  --space-hairline: 1px;
+  --space-xs-half: 3px;
+  --space-sm-half: 5px;
+  --space-md-half: 7px;
+  --space-lg-half: 9px;
+  --space-xl-half: 11px;
+  /* Named semantic aliases for the base scale steps.                       */
+  --space-xs: var(--space-1);
+  --space-sm: var(--space-2);
+  --space-md: var(--space-3);
+  --space-lg: var(--space-4);
+  --space-xl: var(--space-5);
+  --space-2xl: var(--space-6);
+  --space-3xl: var(--space-7);
+  --space-4xl: var(--space-8);
+  /* Extended scale for larger layout spacings.                             */
+  --space-5xl: 18px;
+  --space-6xl: 20px;
+  --space-6-5xl: 22px;
+  --space-7xl: 24px;
+  --space-8xl: 28px;
+  --space-viewport-gap: 40px;
+  --space-floating-offset: 76px;
+  /* ---- Radius scale (semantic, stable) ---------------------------------- */
+  --radius-hairline: 2px;
   --radius-xs: 3px;
+  --radius-sm-half: 4px;
   --radius-sm: 6px;
   --radius-md: var(--radius);
-  --radius-px-2: 2px;
-  --radius-px-3: var(--radius-xs);
-  --radius-px-4: 4px;
-  --radius-px-6: var(--radius-sm);
-  --radius-px-8: var(--radius-md);
-  --radius-px-10: 10px;
-  --radius-px-12: 12px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
   --radius-pill: 999px;
 }
 """
