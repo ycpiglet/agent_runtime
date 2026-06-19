@@ -17,10 +17,13 @@ template_path: src/agent_runtime/templates/project/skills/release-conductor/SKIL
 
 # Release Conductor
 
-Detect-and-propose is automated; execution stays council/Owner-gated. The
+Detect-and-propose is automated; execution is tiered by criticality. The
 cadence trigger watches accumulated change since the last tag and proposes a
-bump; the actual tag/push happens only after the readiness summary, council
-vote, execution gates, and explicit Owner approval.
+bump. For a **noncritical** release (no CRITICAL_FLAGS) the **agent release
+council** can approve AND execute the tag/push without Owner approval, after the
+readiness summary, council vote, and execution gates pass. A **critical /
+major_or_breaking / secret / destructive** release halts and requires **explicit
+Owner approval** before any tag/push.
 
 ## When To Use
 
@@ -51,7 +54,7 @@ patch) and target files. It NEVER bumps, tags, pushes, publishes, or releases.
   branches). v0.2.0 = after the codex work-schema / registration CLI /
   identity merge lands (host contract change) and a T1/T2 replan.
 
-## Release Flow (execution = council + Owner gated)
+## Release Flow (execution tier depends on criticality)
 
 1. `python -m pytest tests -q` + `python scripts/owner_governance_gate.py` exit 0.
 2. Bump `pyproject.toml`; confirm version refs with
@@ -63,7 +66,12 @@ patch) and target files. It NEVER bumps, tags, pushes, publishes, or releases.
 5. `release_council_gate.py` -> `release_execution_gate` -> `pending_release_guard` pass.
 6. `agent_runtime release-preflight` -> `publish-check` -> `publish-bundle` ->
    `publish-tag-smoke`.
-7. Tag + push: ONLY after explicit Owner approval.
+7. Tag + push: **noncritical** (criticality=noncritical, no CRITICAL_FLAGS) ->
+   the agent release council approves and executes (no Owner); **critical /
+   major_or_breaking / secret / destructive** -> ONLY after explicit Owner
+   approval. The cadence-bound `scripts/release_auto_noncritical.py` automates
+   the noncritical tier end-to-end on green main; it halts the critical tier
+   with `owner-approval-required` and mutates nothing.
 8. autofolio: bump `agent_runtime.yml` ref -> `update-plan` -> `update` -> `doctor`.
 
 ## Host Update Notify (downstream, non-blocking)
@@ -78,11 +86,29 @@ compares the latest upstream release tag against the pinned ref and prints a
 hint. Same pattern as release execution: detect automatically, apply
 (`update-plan` / `update --apply`) by Owner decision.
 
-## Owner-Gated Boundaries
+## Release Tier Rule (who can execute)
 
-- Tag, push, and publish are Owner-gated -- never run them without explicit
-  approval in the current session.
-- Council votes are required and must respect W4b independence.
+Execution authority depends on criticality, mirroring the code in
+`release_council_gate.py` / `release_execution_gate.py`:
+
+- **Noncritical -> agent release council (no Owner).** When criticality is
+  `noncritical` and NO CRITICAL_FLAG is set, the agent release council can
+  approve and execute the tag/push without Owner approval. `release_council_gate`
+  passes only for `criticality: noncritical` with empty `critical_flags`, and
+  `release_execution_gate` accepts `owner_approval_status: agent_council_approved`
+  as a valid no-Owner execution route. `scripts/release_auto_noncritical.py`
+  drives this tier automatically on green main.
+- **Critical / major / secret / destructive -> explicit Owner approval.** If
+  criticality is `critical`, or ANY CRITICAL_FLAG is set
+  (`major_or_breaking_release`, `secret_or_credential_change`,
+  `production_data_write`, `billing_or_legal_impact`,
+  `failed_or_missing_critical_gate`, `destructive_or_irreversible_operation`,
+  `untrusted_external_publication_target`), tag/push/publish are Owner-gated --
+  never run them without explicit Owner approval. The orchestrator halts this
+  tier with `owner-approval-required` and mutates nothing.
+- Council votes are always required and must respect W4b independence
+  (qa / independent-auditor / doc-steward votes come from an instance other than
+  the worker).
 - The cadence trigger and update-notify only detect and propose; they mutate
   nothing.
 

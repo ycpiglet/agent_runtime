@@ -257,7 +257,7 @@
       "scripts/worktree_lifecycle_gate.py": "sha256:a86313971b469113582b7e06064bd528867270ea741a66b46396059277e09143",
       "skills/independent-verification/SKILL.md": "sha256:13bc34701cd087a3cf04d852d00d9a3ca7ed057c2e8cd1d40df46769b07327b0",
       "skills/merge-integrator/SKILL.md": "sha256:37d4425836b34090a1b654147dcc1d829e1ac827b0815e6644c98d77cc81698c",
-      "skills/release-conductor/SKILL.md": "sha256:3c475ab514cfe3895fa46966ebf24cdc43a6333de55f0ed6be63adc5d9b17529",
+      "skills/release-conductor/SKILL.md": "sha256:85bead6cd21dd5ebd1f104c68e73777e3abeb67a6fb25938b3793d88ba0b3629",
       "skills/scm-steward/SKILL.md": "sha256:eac36caaabb483fa72d04106311dd956d36c4f654116fd7cb800db33e9586c1c",
       "skills/session-closeout/SKILL.md": "sha256:547d28dca609519a3940d453eb11b563f53ffe8308e6bb4881bcbead93fa0570",
       "skills/taskset-dispatch/SKILL.md": "sha256:5322aca4780a9e79eb876ef431ce951db6b6ce7a013c07a741929c3a18325b2a",
@@ -266,7 +266,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.2.0",
-    "template_digest": "sha256:4f015cadaaebd9a78085bdfc4a61eac52f080e81eaafaba3c2ef5f96e3755104",
+    "template_digest": "sha256:2a9370757e8ce0bce7b2e36e2ffa61c81fddb50cd4c11541e46b093278ce7dcf",
     "template_files": 263
   },
   "project": "fixture-host",

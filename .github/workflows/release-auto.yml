@@ -1,0 +1,169 @@
+# Cadence-bound noncritical auto-release for agent_runtime (TASK-AR-586).
+#
+# Trigger: the release cadence boundary -- a weekly cron (Mon 02:00 UTC, the same
+# `0 2 * * 1` cadence as test.yml's scheduled run, i.e. the W6 closeout wave). It can
+# also be dispatched manually for a dry-run preview. It does NOT fire on every merge.
+#
+# What it does: runs scripts/release_auto_noncritical.py, which proceeds to execute a
+# release WITHOUT Owner approval ONLY when the agent release council can: the cadence
+# proposal has fired, the recommended bump is patch/noncritical, there are NO
+# CRITICAL_FLAGS, and main CI is green for the exact validated head SHA. Any critical /
+# major_or_breaking / secret / destructive release halts with owner-approval-required
+# and mutates nothing.
+#
+# Safety (auto-merge.yml pattern -- only act on the exact validated head SHA):
+#   1. We resolve the latest `test` workflow run on main and require conclusion == success.
+#   2. We pin to that run's head SHA and require it to still equal the current main HEAD,
+#      so an untested newer push is NEVER released (the orchestrator re-checks this via
+#      --validated-sha as defense-in-depth).
+#   3. The orchestrator only executes for the noncritical tier; everything else stops for
+#      the Owner.
+#   4. The Owner is notified on every execution (an OWNER-NOTIFICATION record is produced
+#      and surfaced in the job summary / uploaded as an artifact).
+#
+# By default this workflow runs in --execute mode on the validated green SHA. To keep it
+# preview-only while observing it in production, set the `dry_run` dispatch input to
+# 'true' (or change the default below) -- dry-run plans the tag/push and notifies the
+# Owner but performs no real git tag/push.
+name: release-auto
+
+on:
+  schedule:
+    # Weekly cadence boundary: Monday 02:00 UTC (mirrors test.yml's scheduled cron / W6).
+    - cron: "0 2 * * 1"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Plan + notify only; perform no real git tag/push"
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: release-auto
+  cancel-in-progress: false
+
+jobs:
+  noncritical-auto-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main at full history (tags + cadence range)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Resolve the CI-validated green head SHA on main
+        id: validated
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # Latest `test` workflow run on main; require it concluded successfully.
+          run_json="$(gh run list --repo "$REPO" --workflow test.yml --branch main \
+                        --status completed --limit 1 \
+                        --json headSha,conclusion,databaseId --jq '.[0] // empty')"
+          if [ -z "$run_json" ]; then
+            echo "No completed test run on main; refusing to auto-release." >&2
+            echo "ci_status=unknown" >> "$GITHUB_OUTPUT"
+            echo "validated_sha=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          conclusion="$(printf '%s' "$run_json" | jq -r '.conclusion')"
+          validated_sha="$(printf '%s' "$run_json" | jq -r '.headSha')"
+          main_head="$(git rev-parse HEAD)"
+          echo "Latest test run on main: sha=$validated_sha conclusion=$conclusion (HEAD=$main_head)"
+          if [ "$conclusion" != "success" ]; then
+            echo "ci_status=$conclusion" >> "$GITHUB_OUTPUT"
+            echo "validated_sha=$validated_sha" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Safety: only act on the exact validated head SHA (auto-merge.yml pattern).
+          if [ "$validated_sha" != "$main_head" ]; then
+            echo "main HEAD ($main_head) moved past the CI-validated $validated_sha; skipping."
+            echo "ci_status=moved" >> "$GITHUB_OUTPUT"
+            echo "validated_sha=$validated_sha" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "ci_status=green" >> "$GITHUB_OUTPUT"
+          echo "validated_sha=$validated_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Run noncritical auto-release orchestrator (green main, SHA-pinned)
+        id: orchestrate
+        env:
+          PYTHONPATH: src
+          CI_STATUS: ${{ steps.validated.outputs.ci_status }}
+          VALIDATED_SHA: ${{ steps.validated.outputs.validated_sha }}
+          # Default to a real execute on the validated SHA; dispatch can force dry-run.
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+        run: |
+          set -euo pipefail
+          if [ "$CI_STATUS" != "green" ] || [ -z "$VALIDATED_SHA" ]; then
+            echo "main CI is not green for a validated head SHA (ci_status=$CI_STATUS); not releasing."
+            exit 0
+          fi
+          args=(scripts/release_auto_noncritical.py
+                --ci-status "$CI_STATUS"
+                --validated-sha "$VALIDATED_SHA"
+                --out-dir .tmp/release-auto
+                --json)
+          if [ "$DRY_RUN" = "true" ]; then
+            args+=(--dry-run)
+          else
+            args+=(--execute)
+          fi
+          set +e
+          python "${args[@]}" | tee .tmp/release-auto-result.json
+          rc=${PIPESTATUS[0]}
+          set -e
+          echo "orchestrator exit code: $rc"
+          # Exit 2 = owner-approval-required (critical/major): not a CI failure, it is the
+          # designed halt. Surface it but do not fail the workflow. Any other non-zero
+          # (3 CI-not-green, 4 gate-blocked) is also a clean stop with no mutation.
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+
+      - name: Notify the Owner of the auto-release outcome
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          {
+            echo "### Noncritical auto-release (TASK-AR-586)"
+            echo ""
+            if [ -f .tmp/release-auto-result.json ]; then
+              result="$(jq -r '.result // "unknown"' .tmp/release-auto-result.json 2>/dev/null || echo unknown)"
+              target="$(jq -r '.target_tag // "n/a"' .tmp/release-auto-result.json 2>/dev/null || echo n/a)"
+              dry="$(jq -r '.dry_run' .tmp/release-auto-result.json 2>/dev/null || echo unknown)"
+              echo "- result: \`$result\`"
+              echo "- target: \`$target\`"
+              echo "- dry_run: \`$dry\`"
+              if [ "$result" = "owner-approval-required" ]; then
+                echo ""
+                echo "**OWNER ACTION REQUIRED** -- a critical / major-or-breaking release was"
+                echo "detected. The agent council does NOT auto-execute this tier. Review and"
+                echo "approve explicitly before any tag/push."
+              fi
+            else
+              echo "- result: orchestrator produced no result file (no release attempted)."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Owner-notification + decision records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-auto-records-${{ github.run_id }}
+          path: |
+            .tmp/release-auto/**
+            .tmp/release-auto-result.json
+          if-no-files-found: ignore
