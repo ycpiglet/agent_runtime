@@ -1,0 +1,157 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "chat:2026-06-19-ui-refactor-continuous-cycle",
+  "created_by": "codex-planner",
+  "now": "2026-06-19T14:04:00+09:00",
+  "initiative": {
+    "id": "INIT-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
+    "title": "Operator Attention Graph Mobile Responsive Refinement",
+    "summary": "Continue the UI/UX cycle after TASK-AR-606 by fixing BTC-OAG-CLAIM-MOBILE-001: Taskset Board must fit a 390px mobile viewport while preserving claim-aware relation semantics.",
+    "owner": "lead_engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
+    "display_name": "OAG Mobile Responsive Refinement",
+    "summary": "Remove mobile Taskset Board horizontal overflow for the Operator Attention Graph relation panel, then rerun beta/UX evaluation on desktop and 390x844 mobile.",
+    "order": 627,
+    "plan_slug": "2026-06-19-oag-mobile-responsive-refinement"
+  },
+  "tasks": [
+    {
+      "title": "Fix Taskset Board mobile overflow",
+      "goal": "Fix BTC-OAG-CLAIM-MOBILE-001 by constraining Taskset Board, relation-panel, toolbar, and child-row layout so the board fits a 390px mobile viewport without losing claim-aware labels.",
+      "scope": "Source mutation is limited to responsive CSS/layout helpers and focused tests. Do not change claim semantics, command-routing behavior, navigation IA, or introduce a new visual direction.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 3,
+      "est_tokens": 8000,
+      "owner": "interface-designer",
+      "team": "ui-ux",
+      "acceptance": [
+        "Taskset Board fits a 390px viewport after opening `More -> Taskset Board`; no document-level horizontal overflow remains.",
+        "Relation panel preserves explicit `claimed`, `guarded`, `interrupted`, and no-claim labels from TASK-AR-605/TASK-AR-606.",
+        "Responsive constraints use existing design tokens and pattern/component classes, not page-local hardcoded styling.",
+        "Toolbar, add-task row, relation chips, evidence/context body, child rows, and swimlanes wrap or stack predictably on mobile.",
+        "Focused tests cover the CSS/mobile contract and the claim-aware state contract."
+      ],
+      "verification": [
+        "python -m pytest tests/test_ui_console.py tests/test_ui_console_e2e.py tests/test_ui_design_assets.py -q",
+        "python scripts/design_system_gate.py --check --all-ui",
+        "python scripts/ui_ux_cycle.py --root . assess --json",
+        "python scripts/evidence_index_generator.py --check"
+      ],
+      "units": [
+        {
+          "title": "Constrain Taskset Board mobile layout",
+          "context": "TASK-AR-606 accepted the claim-aware relation adapter but routed BTC-OAG-CLAIM-MOBILE-001: at a 390x844 viewport, Taskset Board document width was 641px. The likely source is fixed min-width/grid behavior in the Taskset Board toolbar, cards, relation body, child rows, or swimlane columns.",
+          "inputs": [
+            "reviews/BETA-TEST-2026-06-19-oag-claim-aware-relation-adapter.md",
+            "reviews/UX-EVAL-2026-06-19-oag-claim-aware-relation-adapter.md",
+            "reviews/W4B-2026-06-19-TASK-AR-606.md",
+            "src/agent_runtime/ui_console_assets.py",
+            "src/agent_runtime/ui_design_assets.py",
+            "tests/test_ui_console.py",
+            "tests/test_ui_console_e2e.py",
+            "tests/test_ui_design_assets.py"
+          ],
+          "target_files": [
+            "src/agent_runtime/ui_console_assets.py",
+            "tests/test_ui_console.py",
+            "tests/test_ui_console_e2e.py",
+            "tests/test_ui_design_assets.py",
+            "reviews/VERIFY-2026-06-19-oag-mobile-responsive-refinement.json",
+            "reviews/INDEX.md"
+          ],
+          "scope": "Implement only responsive layout constraints for Taskset Board and relation-panel surfaces. Do not alter taskset data schema, claim adapter state mapping, or broad console theming.",
+          "steps": [
+            "Read TASK-AR-606 beta, UX, and W4b findings.",
+            "Trace CSS selectors that can widen Taskset Board at 390px: toolbar, card grid minmax, relation body, child rows, add-task row, chips, and swimlanes.",
+            "Add mobile constraints under the existing responsive breakpoint using design tokens and stable pattern selectors.",
+            "Keep text visible through wrapping or stacking rather than clipping important state labels.",
+            "Add focused CSS contract tests and update any existing mobile E2E overflow assertion for Taskset Board.",
+            "Run W4a verification commands and record evidence."
+          ],
+          "acceptance": [
+            "A browser-level test proves `documentElement.scrollWidth <= window.innerWidth` for Taskset Board at `390x844`.",
+            "Tests still prove claim-aware relation chips and command readiness labels exist.",
+            "No raw color, spacing, radius, shadow, or type literal is introduced outside token definitions.",
+            "The fix is classified as pattern_component responsive refinement with no new design direction.",
+            "The desktop Taskset Board layout remains usable and relation panel content remains visible."
+          ],
+          "verification": [
+            "python -m pytest tests/test_ui_console.py tests/test_ui_console_e2e.py tests/test_ui_design_assets.py -q",
+            "python scripts/design_system_gate.py --check --all-ui",
+            "python scripts/ui_ux_cycle.py --root . assess --json",
+            "python scripts/evidence_index_generator.py --check"
+          ],
+          "handoff": "Report selectors changed, responsive constraints added, assetization classification, desktop/mobile test results, and any remaining UX risks.",
+          "stop_condition": "Stop after the mobile overflow fix passes focused tests and W4a evidence is ready for independent verification."
+        }
+      ]
+    },
+    {
+      "title": "Rerun mobile overflow beta and UX evaluation",
+      "goal": "Repeat beta-tester and UX-evaluator verification after the responsive fix, focused on desktop regression, 390x844 mobile viewport fit, focus, reduced motion, and preserved claim semantics.",
+      "scope": "Evaluation and evidence only. Do not mutate UI source files in this task. Any remaining visual or interaction defect must be routed with BTC-style IDs.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 2,
+      "est_tokens": 5000,
+      "owner": "ux-evaluator",
+      "team": "ui-ux",
+      "acceptance": [
+        "Beta evidence includes exact desktop and mobile click paths to Taskset Board.",
+        "Mobile evidence records document width, viewport width, overflow status, and visible relation-state labels.",
+        "UX evaluation covers typography wrapping, spacing density, touch target layout, color/non-color cues, reduced motion, focus order, schema preservation, and assetization class.",
+        "Every remaining user-visible defect receives a BTC-style ID and reproduction path.",
+        "The evaluation states whether the next cycle should pursue another refinement or a new design-direction seminar."
+      ],
+      "verification": [
+        "python scripts/design_system_gate.py --check --all-ui",
+        "python scripts/evidence_index_generator.py --check",
+        "python scripts/ui_ux_cycle.py --root . assess --json"
+      ],
+      "units": [
+        {
+          "title": "Record mobile overflow beta and UX evidence",
+          "context": "This unit validates that the responsive implementation closed BTC-OAG-CLAIM-MOBILE-001 without regressing claim-aware relation semantics or desktop Taskset Board usability.",
+          "inputs": [
+            "reviews/BETA-TEST-2026-06-19-oag-claim-aware-relation-adapter.md",
+            "reviews/UX-EVAL-2026-06-19-oag-claim-aware-relation-adapter.md",
+            "reviews/W4B-2026-06-19-TASK-AR-606.md",
+            "src/agent_runtime/ui_console_assets.py"
+          ],
+          "target_files": [
+            "reviews/BETA-TEST-2026-06-19-oag-mobile-responsive-refinement.md",
+            "reviews/UX-EVAL-2026-06-19-oag-mobile-responsive-refinement.md",
+            "reviews/INDEX.md"
+          ],
+          "scope": "Record exploratory evidence only. Do not patch UI source files in this unit.",
+          "steps": [
+            "Launch the local UI surface from the implementation worktree.",
+            "Execute desktop and mobile Taskset Board navigation paths.",
+            "Measure document width versus viewport width at `390x844` after the target panel is visible.",
+            "Check focus order, reduced-motion behavior, state labels, and touch-friendly wrapping.",
+            "Assign BTC-style IDs to any remaining user-visible defects.",
+            "Refresh evidence index and run recorded verification commands."
+          ],
+          "acceptance": [
+            "Evidence lists exact actions, viewport, data state, expected result, observed result, and pass/fail status.",
+            "Mobile overflow closure is proven with measured widths, not inferred from screenshots.",
+            "No UI source files are changed by the evaluation unit.",
+            "The handoff recommends either another implementation refinement or a new design-direction cycle."
+          ],
+          "verification": [
+            "python scripts/design_system_gate.py --check --all-ui",
+            "python scripts/evidence_index_generator.py --check",
+            "python scripts/ui_ux_cycle.py --root . assess --json"
+          ],
+          "handoff": "Report beta paths, mobile width measurements, accessibility/responsive findings, defects, and the next UI/UX cycle decision.",
+          "stop_condition": "Stop after beta/UX evidence is complete and ready for independent verification."
+        }
+      ]
+    }
+  ]
+}

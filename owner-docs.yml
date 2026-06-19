@@ -1,5 +1,6 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
+  - reviews/REVIEW-2026-06-19-taskset-ar-oag-mobile-responsive-refinement-registration.md
   - reviews/REVIEW-2026-06-19-taskset-ar-oag-claim-aware-relation-adapter-registration.md
   - reviews/REVIEW-2026-06-19-taskset-ar-operator-attention-graph-registration.md
   - reviews/REVIEW-2026-06-19-taskset-ar-ui-ux-design-direction-rfc-registration.md

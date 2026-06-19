@@ -144,6 +144,12 @@
       "display_name": "Claim-Aware Relation Adapter",
       "summary": "Promote or replace the view-local relation summary adapter so Operator Attention Graph claim path and command readiness reflect active, expired, interrupted, and guarded claim states, then rerun beta/UX evaluation.",
       "order": 626
+    },
+    {
+      "task_set_id": "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
+      "display_name": "OAG Mobile Responsive Refinement",
+      "summary": "Remove mobile Taskset Board horizontal overflow for the Operator Attention Graph relation panel, then rerun beta/UX evaluation on desktop and 390x844 mobile.",
+      "order": 627
     }
   ]
 }

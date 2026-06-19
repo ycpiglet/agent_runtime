@@ -4,6 +4,7 @@
 
 - `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` is complete: `TASK-AR-603` implemented the first relation-aware UI slice, and `TASK-AR-604` completed beta/UX evaluation with W4b evidence.
 - `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` is complete: `TASK-AR-605` fixed claim-aware relation semantics, and `TASK-AR-606` completed beta/UX retest with W4b evidence.
+- `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` is registered: `TASK-AR-607` will fix `BTC-OAG-CLAIM-MOBILE-001`, and `TASK-AR-608` will rerun beta/UX evaluation.
 - The previous `TASKSET-AR-LLM-WIKI` closeout is complete: `TASK-AR-590..596` are archived `7/7`, W4b evidence is indexed, and that taskset has no active claims.
 - UI refactor/design-system remediation is now past design-system governance, asset extraction, UI/UX cycle automation, first source-mutating Operator Attention Graph implementation, beta/UX evaluation, and claim-aware relation adapter refinement.
 - `TASKSET-AR-UI-UX-CYCLE-AUTOMATION` is complete: `TASK-AR-597`, `TASK-AR-598`, and `TASK-AR-599` are implemented, W4b-verified, integrated, and closed.
@@ -13,7 +14,16 @@
 - Self-improvement remediation is improving but not mature: `scribe_state` is now ok, but the score is still below mature and one monitored role gap remains.
 - Scribe source is now the live status summary section so advisory health can be measured without fabricating role evidence.
 - Doc Steward remains ok; keep document-health checks advisory and evidence-based.
-- Next UI refactor step: register a focused implementation unit for `BTC-OAG-CLAIM-MOBILE-001` to remove mobile Taskset Board horizontal overflow.
+- Next UI refactor step: claim `TASK-AR-607` and constrain Taskset Board mobile layout without changing claim-aware relation semantics.
+
+## 2026-06-19 - TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT registered
+
+- Registered taskset: `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT`.
+- First task: `TASK-AR-607` / `UNIT-TASK-AR-607-001` fixes `BTC-OAG-CLAIM-MOBILE-001` by constraining Taskset Board, relation-panel, toolbar, child-row, and swimlane layout at `390x844`.
+- Follow-up task: `TASK-AR-608` / `UNIT-TASK-AR-608-001` reruns beta-tester and UX-evaluator evidence after the responsive fix.
+- Source evidence: `reviews/BETA-TEST-2026-06-19-oag-claim-aware-relation-adapter.md`, `reviews/UX-EVAL-2026-06-19-oag-claim-aware-relation-adapter.md`, and `reviews/W4B-2026-06-19-TASK-AR-606.md`.
+- T0 plan snapshot recorded in `agents/project/work-items/PLAN-ASSUMPTIONS.json`.
+- Boundary: do not mutate UI source until `TASK-AR-607` is claimed in a fresh worktree.
 
 ## 2026-06-19 - TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER complete
 

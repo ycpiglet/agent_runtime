@@ -30,8 +30,16 @@
 | 624 | `TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC` | UI UX Design Direction RFC |
 | 625 | `TASKSET-AR-OPERATOR-ATTENTION-GRAPH` | Operator Attention Graph |
 | 626 | `TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER` | Claim-Aware Relation Adapter |
+| 627 | `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT` | OAG Mobile Responsive Refinement |
 
 <!-- BACKLOG-INDEX:END -->
+
+## 2026-06-19 TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT Registration
+
+- New active task set: `TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT`.
+- Purpose: close `BTC-OAG-CLAIM-MOBILE-001`, where the Taskset Board measured `641px` document width against a `390px` mobile viewport after opening the claim-aware relation panel.
+- Registered planned tasks: `TASK-AR-607` implements the responsive Taskset Board / relation-panel layout fix; `TASK-AR-608` reruns beta-tester and UX-evaluator evidence on desktop and `390x844` mobile.
+- Boundary: implementation starts only after a `TASK-AR-607` claim and worktree are created.
 
 ## 2026-06-19 TASKSET-AR-UI-UX-CYCLE-AUTOMATION complete
 

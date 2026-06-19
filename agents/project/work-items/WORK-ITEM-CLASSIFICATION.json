@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-19T13:57:22+09:00",
-  "record_count": 370,
+  "generated_at": "2026-06-19T14:05:25+09:00",
+  "record_count": 376,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4074,6 +4074,72 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-606/UNIT-TASK-AR-606-001.md",
       "parent_id": "TASK-AR-606",
       "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
+      "level": "initiative",
+      "number": "24",
+      "label": "Initiative 24",
+      "id": "INIT-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
+      "title": "Operator Attention Graph Mobile Responsive Refinement",
+      "path": "agents/project/initiatives/INIT-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
+      "level": "taskset",
+      "number": "24.1",
+      "label": "Taskset 24.1",
+      "id": "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
+      "title": "OAG Mobile Responsive Refinement",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-607",
+      "level": "task",
+      "number": "24.1.1",
+      "label": "Task 24.1.1",
+      "id": "TASK-AR-607",
+      "title": "Fix BTC-OAG-CLAIM-MOBILE-001 by constraining Taskset Board, relation-panel, toolbar,…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-607.md",
+      "parent_id": "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-607-001",
+      "level": "unit",
+      "number": "24.1.1.1",
+      "label": "Unit 24.1.1.1",
+      "id": "UNIT-TASK-AR-607-001",
+      "title": "UNIT-TASK-AR-607-001 - Constrain Taskset Board mobile layout",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-607/UNIT-TASK-AR-607-001.md",
+      "parent_id": "TASK-AR-607",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-608",
+      "level": "task",
+      "number": "24.1.2",
+      "label": "Task 24.1.2",
+      "id": "TASK-AR-608",
+      "title": "Repeat beta-tester and UX-evaluator verification after the responsive fix, focused on…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-608.md",
+      "parent_id": "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-608-001",
+      "level": "unit",
+      "number": "24.1.2.1",
+      "label": "Unit 24.1.2.1",
+      "id": "UNIT-TASK-AR-608-001",
+      "title": "UNIT-TASK-AR-608-001 - Record mobile overflow beta and UX evidence",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-608/UNIT-TASK-AR-608-001.md",
+      "parent_id": "TASK-AR-608",
+      "status": "worker_ready"
     }
   ]
 }

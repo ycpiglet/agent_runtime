@@ -607,8 +607,46 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-607",
+      "expires_at": "2026-06-20T14:04:00+09:00",
+      "fulfilled_at": "2026-06-19T14:04:00+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-607.md",
+      "fulfilled_task_id": "TASK-AR-607",
+      "fulfilled_task_uid": "3a55de67-6cf7-4690-9c0d-e32ae27dafa0",
+      "initiative_id": "INIT-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
+      "kind": "task",
+      "owner_id": "codex-planner",
+      "reason": "work registration TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
+      "reservation_group_id": "RES-20260619-140400-41cd76a8",
+      "reservation_id": "RES-20260619-140400-41cd76a8-01",
+      "reserved_at": "2026-06-19T14:04:00+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
+      "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-608",
+      "expires_at": "2026-06-20T14:04:00+09:00",
+      "fulfilled_at": "2026-06-19T14:04:00+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-608.md",
+      "fulfilled_task_id": "TASK-AR-608",
+      "fulfilled_task_uid": "206783d4-1dc5-49f7-bf9b-634aed3d264a",
+      "initiative_id": "INIT-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
+      "kind": "task",
+      "owner_id": "codex-planner",
+      "reason": "work registration TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
+      "reservation_group_id": "RES-20260619-140400-41cd76a8",
+      "reservation_id": "RES-20260619-140400-41cd76a8-02",
+      "reserved_at": "2026-06-19T14:04:00+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-06-19T12:26:00+09:00"
+  "updated_at": "2026-06-19T14:04:00+09:00"
 }

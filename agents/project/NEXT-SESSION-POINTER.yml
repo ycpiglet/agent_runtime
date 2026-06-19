@@ -1,21 +1,21 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T13:55:48+09:00
+updated_at: 2026-06-19T14:04:00+09:00
 current_state:
-  summary: "TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER is complete; next UI cycle should register the BTC-OAG-CLAIM-MOBILE-001 responsive refinement."
-  status: ready_for_next_registration
-  task_set_status: taskset_completed_local_closeout
-  task_set_id: "TASKSET-AR-OAG-CLAIM-AWARE-RELATION-ADAPTER"
-  step_index: 6
+  summary: "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT is registered; TASK-AR-607 is ready to claim for BTC-OAG-CLAIM-MOBILE-001."
+  status: ready_to_claim
+  task_set_status: taskset_registered
+  task_set_id: "TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT"
+  step_index: 0
   step_total: 6
-  progress_pct: 100
-  status_text: "TASK-AR-606 beta/UX evidence passed W4b, the claim is released, and the remaining UI work is mobile Taskset Board overflow."
+  progress_pct: 0
+  status_text: "TASK-AR-607 should constrain Taskset Board mobile layout, then TASK-AR-608 should rerun beta/UX evidence."
 active_work:
   current_agents: []
   current_teams: []
 resume:
-  active_task: none
-  active_task_set: none
-  branch_policy: "No active UI claim. Start the next UI cycle with W0, then register/claim the BTC-OAG-CLAIM-MOBILE-001 responsive refinement."
+  active_task: TASK-AR-607
+  active_task_set: TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
+  branch_policy: "Create a claim and worktree for TASK-AR-607 before mutating UI source."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -84,6 +84,25 @@ pointers:
     findings:
       - BTC-OAG-CLAIM-MOBILE-001
     next_decision: register_mobile_taskset_board_overflow_refinement
+  oag_mobile_responsive_refinement:
+    taskset: TASKSET-AR-OAG-MOBILE-RESPONSIVE-REFINEMENT
+    active_claim: null
+    worktree_path: null
+    status: registered_ready_to_claim
+    completed_tasks: []
+    next_task: TASK-AR-607
+    next_unit: UNIT-TASK-AR-607-001
+    follow_up_task: TASK-AR-608
+    follow_up_unit: UNIT-TASK-AR-608-001
+    finding: BTC-OAG-CLAIM-MOBILE-001
+    registration_input: agents/project/work-items/REGISTRATION-2026-06-19-oag-mobile-responsive-refinement.json
+    registration_review: reviews/REVIEW-2026-06-19-taskset-ar-oag-mobile-responsive-refinement-registration.md
+    plan: docs/superpowers/plans/2026-06-19-oag-mobile-responsive-refinement.md
+    source_evidence:
+      - reviews/BETA-TEST-2026-06-19-oag-claim-aware-relation-adapter.md
+      - reviews/UX-EVAL-2026-06-19-oag-claim-aware-relation-adapter.md
+      - reviews/W4B-2026-06-19-TASK-AR-606.md
+    next_decision: claim_task_ar_607_mobile_overflow_fix
   design_system_debt_consolidation:
     taskset: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
     released_claim: agents/runtime/task_claims/CLAIM-20260619-005828-task-ar-584-pattern-renderers.json
