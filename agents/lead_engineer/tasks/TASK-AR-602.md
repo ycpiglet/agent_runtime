@@ -9,9 +9,15 @@ kind: task
 parent_id: TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC
 registered_at: 2026-06-19T08:18:00+09:00
 created_at: 2026-06-19T08:18:00+09:00
-updated_at: 2026-06-19T08:18:00+09:00
+updated_at: 2026-06-19T09:00:00+09:00
 title: Derive next UI implementation and UX evaluation units
 status: planned
+started_at: 2026-06-19T08:55:00+09:00
+verification_status: passed
+verified_at: 2026-06-19T09:00:00+09:00
+verified_by: codex-interface-designer-ui-next-units-602
+evidence_refs:
+  - reviews/VERIFY-2026-06-19-task-ar-602-20260619090000.json
 priority: P1
 difficulty: M
 est_hours: 3

@@ -23,8 +23,8 @@ tags: [ui, ux, design-system, proposal]
 | Proposal | Status | Lead | Evidence |
 | --- | --- | --- | --- |
 | design_direction_rfc | accepted_rfc | lead-designer | `reviews/RFC-2026-06-19-ui-ux-design-direction.md` |
-| implementation_refactor | needs_task_registration | interface-designer | source/test targets listed |
-| ux_evaluation_pass | needs_implementation_target | ux-evaluator | beta/evaluator artifacts listed |
+| implementation_refactor | registration_input_ready | interface-designer | `agents/project/work-items/REGISTRATION-2026-06-19-operator-attention-graph-implementation.json` |
+| ux_evaluation_pass | beta_plan_ready | ux-evaluator | `reviews/BETA-PLAN-2026-06-19-operator-attention-graph.md` |
 
 ## Action
 
@@ -77,7 +77,7 @@ Acceptance criteria:
 
 ### implementation_refactor
 
-- Status: `needs_task_registration`
+- Status: `registration_input_ready`
 - Lead role: `interface-designer`
 - Supporting roles: design-system-steward
 - Review roles: ux-evaluator
@@ -86,6 +86,10 @@ Acceptance criteria:
 
 Register and claim the next implementation unit only after this proposal is reviewed; page files stay focused on layout/data wiring and repeated UI moves into pattern assets.
 
+Outcome: `TASK-AR-602` produced
+`agents/project/work-items/REGISTRATION-2026-06-19-operator-attention-graph-implementation.json`
+and `reviews/PLAN-2026-06-19-operator-attention-graph-implementation.md`.
+
 Acceptance criteria:
 - Classifies touched UI as design_token, ui_component, pattern_component, or one_off_for_now.
 - Uses existing tokens/components first and records any token/component promotion explicitly.
@@ -93,7 +97,7 @@ Acceptance criteria:
 
 ### ux_evaluation_pass
 
-- Status: `needs_implementation_target`
+- Status: `beta_plan_ready`
 - Lead role: `ux-evaluator`
 - Supporting roles: beta-tester, interface-designer
 - Review roles: design-system-steward
@@ -101,6 +105,10 @@ Acceptance criteria:
 - Proposal artifacts: reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md, reviews/SEMINAR-2026-06-19-next-ui-task-ui-ux.md, reviews/MEETING-2026-06-19-next-ui-task-ui-ux.md, reviews/BETA-TEST-2026-06-19-next-ui-task-ui-ux.md
 
 Plan the post-implementation beta-tester/evaluator pass with clicked/typed actions, edge and recovery attempts, environment notes, and BTC-style visible-defect IDs.
+
+Outcome: `TASK-AR-602` produced
+`reviews/BETA-PLAN-2026-06-19-operator-attention-graph.md` for the post-
+implementation beta/UX evaluation task.
 
 Acceptance criteria:
 - Records user-like actions instead of screenshot-only evidence.

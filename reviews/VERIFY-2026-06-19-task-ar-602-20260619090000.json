@@ -1,0 +1,87 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-19-task-ar-602-20260619090000",
+  "work_id": "TASK-AR-602",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-602.md",
+  "kind": "task",
+  "task_id": "TASK-AR-602",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-19T09:00:00+09:00",
+  "verified_by": "codex-interface-designer-ui-next-units-602",
+  "claim_id": "CLAIM-20260619-085500-task-ar-602-ui-next-units",
+  "worktree_path": ".worktrees/TASK-AR-602-next-units",
+  "commit_ref": "d13b93d",
+  "command_count": 7,
+  "commands": [
+    {
+      "command": "python scripts/ui_ux_cycle.py --root . propose --dry-run --json",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "dry-run proposal generation exits 0; assessment status=ready; next_refactor task=TASK-AR-602."
+    },
+    {
+      "command": "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-UI-UX-DESIGN-DIRECTION-RFC --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "taskset-work-gate: pass; findings=0."
+    },
+    {
+      "command": "python scripts/evidence_index_generator.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "evidence-index: pass; findings=0."
+    },
+    {
+      "command": "python -m json.tool agents/project/work-items/REGISTRATION-2026-06-19-operator-attention-graph-implementation.json",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "Registration input parses as valid JSON."
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0."
+    },
+    {
+      "command": "python scripts/owner_doc_format_gate.py reviews/PLAN-2026-06-19-operator-attention-graph-implementation.md reviews/BETA-PLAN-2026-06-19-operator-attention-graph.md reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "implementation plan, beta plan, and proposal records pass; findings=0."
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "returncode": 0,
+      "stdout_summary": "No whitespace errors; Git warned that reviews/INDEX.md line endings will normalize from CRLF to LF."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion": "A follow-up registration input names the next UI source mutation task, its target files, and its token/component/pattern/one-off classification.",
+      "status": "passed",
+      "evidence": "agents/project/work-items/REGISTRATION-2026-06-19-operator-attention-graph-implementation.json defines the implementation task, target files, units, and assetization requirements."
+    },
+    {
+      "criterion": "A beta-tester artifact plan records clicked/typed flows, recovery attempts, viewport/data state, and BTC-style failure routing.",
+      "status": "passed",
+      "evidence": "reviews/BETA-PLAN-2026-06-19-operator-attention-graph.md defines action paths, recovery matrix, viewport requirements, and BTC-OAG failure ID rules."
+    },
+    {
+      "criterion": "The next implementation task keeps page files focused on layout/data wiring and moves repeated surface area into pattern assets.",
+      "status": "passed",
+      "evidence": "reviews/PLAN-2026-06-19-operator-attention-graph-implementation.md and the registration unit scope require reusable helpers and restrict page/server changes."
+    },
+    {
+      "criterion": "The plan preserves design-system gate and focused UI test commands for W4a/W4b.",
+      "status": "passed",
+      "evidence": "Registration input and implementation plan list focused pytest commands, design_system_gate, ui_ux_cycle assess, and evidence index checks."
+    }
+  ],
+  "residual": [
+    "The follow-up operator attention graph implementation taskset is not registered yet.",
+    "No UI source mutation is authorized by TASK-AR-602 itself."
+  ],
+  "next_step": "Run independent W4b verification, release TASK-AR-602, then register the follow-up operator attention graph implementation taskset."
+}

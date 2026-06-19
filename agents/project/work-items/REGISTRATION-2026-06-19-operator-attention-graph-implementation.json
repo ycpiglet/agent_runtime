@@ -1,0 +1,157 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "chat:2026-06-19-ui-refactor-continuous-cycle",
+  "created_by": "codex-planner",
+  "now": "2026-06-19T09:05:00+09:00",
+  "initiative": {
+    "id": "INIT-AR-OPERATOR-ATTENTION-GRAPH",
+    "title": "Operator Attention Graph UI Implementation",
+    "summary": "Implement the accepted operator_attention_graph direction through governed experimental relation assets, then run beta-tester and UX-evaluator evidence before the next UI/UX cycle proposal.",
+    "owner": "lead_engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-OPERATOR-ATTENTION-GRAPH",
+    "display_name": "Operator Attention Graph",
+    "summary": "First source-mutating implementation of the accepted operator_attention_graph direction: relation tokens/components/patterns, one taskset-to-evidence workflow wiring, and beta/UX evaluation evidence.",
+    "order": 625,
+    "plan_slug": "2026-06-19-operator-attention-graph"
+  },
+  "tasks": [
+    {
+      "title": "Implement operator attention graph relation assets",
+      "goal": "Add the first governed relation-aware UI assets and wire one taskset/claim/evidence/context/command-readiness workflow without bypassing the design-system contract.",
+      "scope": "Source mutation is allowed only inside the declared UI asset and focused test files. Page assembly remains data wiring and composition; repeated relation chips, evidence previews, and relation panels must live in reusable asset helpers.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 5,
+      "est_tokens": 11000,
+      "owner": "interface-designer",
+      "team": "ui-ux",
+      "acceptance": [
+        "Touched UI is classified as design_token, ui_component, pattern_component, or one_off_for_now in closeout evidence.",
+        "Existing tokens are reused first; any new relation token is added only in the token definition layer and labelled experimental.",
+        "Reusable relation chip, evidence preview, attention relation panel, and graph context stack responsibilities are implemented or explicitly deferred with rationale.",
+        "The first workflow connects a taskset or attention item to claim/evidence context and command readiness without hiding the active taskset.",
+        "Page/server files remain focused on layout composition and data wiring; view-local duplicate relation markup is not added."
+      ],
+      "verification": [
+        "python -m pytest tests/test_ui_design_assets.py tests/test_ui_console.py -q",
+        "python scripts/design_system_gate.py --check --all-ui",
+        "python scripts/ui_ux_cycle.py --root . assess --json",
+        "python scripts/evidence_index_generator.py --check"
+      ],
+      "units": [
+        {
+          "title": "Add relation-aware UI assets and first workflow wiring",
+          "context": "TASK-AR-601 accepted operator_attention_graph. The implementation must create a relationship-aware path from taskset attention to claim evidence, wiki/graph context, and safe command readiness while preserving the existing light-first operator console.",
+          "inputs": [
+            "reviews/RFC-2026-06-19-ui-ux-design-direction.md",
+            "docs/design/agent-runtime/DESIGN.md",
+            "docs/design/agent-runtime/DESIGN-SYSTEM.md",
+            "src/agent_runtime/ui_design_assets.py",
+            "src/agent_runtime/ui_console_assets.py",
+            "tests/test_ui_design_assets.py",
+            "tests/test_ui_console.py"
+          ],
+          "target_files": [
+            "src/agent_runtime/ui_design_assets.py",
+            "src/agent_runtime/ui_console_assets.py",
+            "tests/test_ui_design_assets.py",
+            "tests/test_ui_console.py",
+            "reviews/VERIFY-2026-06-19-operator-attention-graph-implementation.json",
+            "reviews/INDEX.md"
+          ],
+          "scope": "Implement relation assets and one workflow slice only. Do not add unrelated console redesign, new routing architecture, or broad visual refresh.",
+          "steps": [
+            "Read the RFC assetization table and existing ui_design_assets helpers.",
+            "Add or reuse semantic tokens for relation traces, relation spacing, focus, and reduced-motion behavior.",
+            "Add reusable helpers for relation chips and evidence preview rows, using local naming conventions if different from the RFC candidate names.",
+            "Add a domain pattern for the attention relation panel and narrow-viewport graph context stack.",
+            "Wire one existing console renderer to the new pattern without moving unrelated views.",
+            "Add focused tests for asset output, required states, non-color-only labels, and existing console API behavior.",
+            "Run W4a verification commands and record evidence."
+          ],
+          "acceptance": [
+            "New relation UI states include default, active, stale, blocked, missing, and keyboard-focus paths where applicable.",
+            "The implementation contains visible text labels for relation state and evidence freshness.",
+            "Reduced-motion behavior is represented by tokens or CSS media handling where motion is introduced.",
+            "No raw color, spacing, radius, shadow, or type literal is introduced outside token definitions.",
+            "The workflow remains usable when graph context is empty or evidence is stale."
+          ],
+          "verification": [
+            "python -m pytest tests/test_ui_design_assets.py tests/test_ui_console.py -q",
+            "python scripts/design_system_gate.py --check --all-ui",
+            "python scripts/ui_ux_cycle.py --root . assess --json",
+            "python scripts/evidence_index_generator.py --check"
+          ],
+          "handoff": "Report changed helpers, assetization classification, first wired workflow, focused tests, design-system gate result, and residual one-off or extraction debt.",
+          "stop_condition": "Stop after one relation-aware workflow slice is implemented, tested, and ready for independent verification."
+        }
+      ]
+    },
+    {
+      "title": "Run operator attention graph beta and UX evaluation",
+      "goal": "Verify the first operator_attention_graph implementation through user-like beta actions, recovery attempts, responsive checks, accessibility review, and BTC-style defect routing.",
+      "scope": "Evaluation and evidence only. Do not mutate UI source files in this task. File implementation defects as beta evidence or follow-up work, not direct fixes.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 3,
+      "est_tokens": 7000,
+      "owner": "ux-evaluator",
+      "team": "ui-ux",
+      "acceptance": [
+        "Beta-tester evidence records clicked or keyboard-driven paths from taskset attention to claim evidence, graph/wiki context, and command readiness.",
+        "Recovery attempts cover empty graph, stale evidence, blocked command, and interrupted claim states.",
+        "Desktop and mobile viewport notes include environment, exact actions, and observed result.",
+        "Every visible defect is assigned a BTC-style failure ID with reproduction path.",
+        "UX evaluation covers labels, focus order, reduced motion, non-color-only state, and responsive graph-to-list fallback."
+      ],
+      "verification": [
+        "python scripts/design_system_gate.py --check --all-ui",
+        "python scripts/evidence_index_generator.py --check",
+        "python scripts/ui_ux_cycle.py --root . assess --json"
+      ],
+      "units": [
+        {
+          "title": "Record beta-tester and UX-evaluator evidence",
+          "context": "The Owner asked for UI/UX cycles that use beta-tester and evaluator evidence rather than screenshot-only claims. This unit verifies the first operator_attention_graph implementation after it lands.",
+          "inputs": [
+            "reviews/RFC-2026-06-19-ui-ux-design-direction.md",
+            "reviews/BETA-PLAN-2026-06-19-operator-attention-graph.md",
+            "src/agent_runtime/ui_console_assets.py",
+            "src/agent_runtime/ui_design_assets.py"
+          ],
+          "target_files": [
+            "reviews/BETA-TEST-2026-06-19-operator-attention-graph.md",
+            "reviews/UX-EVAL-2026-06-19-operator-attention-graph.md",
+            "reviews/INDEX.md"
+          ],
+          "scope": "Record exploratory evidence only. Do not patch UI source files in this unit.",
+          "steps": [
+            "Launch or inspect the local UI surface required by the implementation task.",
+            "Execute desktop and mobile user-like paths using click or keyboard actions.",
+            "Exercise empty graph, stale evidence, blocked command, and interrupted claim recovery states.",
+            "Record accessibility observations for labels, focus order, reduced motion, and non-color-only state.",
+            "Assign BTC-style IDs to every visible defect and link reproduction paths.",
+            "Refresh evidence index and run recorded verification commands."
+          ],
+          "acceptance": [
+            "Evidence lists exact actions, viewport, environment, expected result, observed result, and pass/fail status.",
+            "Recovery and edge states are attempted, not merely listed.",
+            "No UI source files are changed by the evaluation unit.",
+            "Any defect becomes a BTC-style follow-up candidate rather than an untracked note."
+          ],
+          "verification": [
+            "python scripts/design_system_gate.py --check --all-ui",
+            "python scripts/evidence_index_generator.py --check",
+            "python scripts/ui_ux_cycle.py --root . assess --json"
+          ],
+          "handoff": "Report beta paths, defects, accessibility/responsive findings, and whether another UI/UX cycle should propose a new design direction or implementation refinement.",
+          "stop_condition": "Stop after beta and UX evidence are complete and ready for independent verification."
+        }
+      ]
+    }
+  ]
+}
