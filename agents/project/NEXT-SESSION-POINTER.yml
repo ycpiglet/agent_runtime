@@ -1,22 +1,27 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T16:01:00+09:00
+updated_at: 2026-06-19T16:14:00+09:00
 current_state:
-  summary: "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION is active; TASK-AR-609 completed the Taskset Board IA seminar and TASK-AR-610 is next for the RFC."
+  summary: "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION is active; TASK-AR-610 is claimed to publish the Taskset Board IA RFC."
   status: active
   task_set_status: taskset_active
   task_set_id: "TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION"
   step_index: 2
   step_total: 5
-  progress_pct: 33
-  status_text: "TASK-AR-609 is complete with W4b evidence; TASK-AR-610 should publish the Taskset Board IA design RFC before any UI source mutation."
+  progress_pct: 40
+  status_text: "TASK-AR-610 is claimed for the Taskset Board IA design RFC; no UI source mutation is authorized in this task."
 active_work:
-  current_agents: []
+  current_agents:
+    - claim_id: CLAIM-20260619-161400-task-ar-610-task-ar-610-taskset-board-ia-rfc
+      agent_role: lead-designer
+      agent_instance_id: codex-lead-designer-task-ar-610
+      display_name: codex-lead-designer-task-ar-610
+      callsite_id: terminal:wt-task-ar-610:tab-01
   current_teams:
     - ui-ux
 resume:
   active_task: TASK-AR-610
   active_task_set: TASKSET-AR-TASKSET-BOARD-IA-DESIGN-DIRECTION
-  branch_policy: "Create a fresh W2 claim/worktree for TASK-AR-610 before editing RFC or design-system documentation."
+  branch_policy: "Continue only in .worktrees/TASK-AR-610-taskset-board-ia-rfc on codex/task-ar-610-taskset-board-ia-rfc for the claimed RFC task."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
