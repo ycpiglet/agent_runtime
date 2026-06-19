@@ -1,16 +1,26 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-19T09:08:00+09:00
+updated_at: 2026-06-19T09:20:00+09:00
 current_state:
-  summary: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH is registered; TASK-AR-603 is the next UI source-mutating implementation task."
-  status: ready
+  summary: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH is active; TASK-AR-603 is claimed for the first UI source-mutating operator attention graph implementation."
+  status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH"
-  step_index: 1
+  step_index: 2
   step_total: 5
-  progress_pct: 20
-  status_text: "No active claim; next step is to claim TASK-AR-603 before mutating UI source files."
+  progress_pct: 30
+  status_text: "Active claim CLAIM-20260619-091500-task-ar-603-operator-attention-graph owns the next UI source mutation in .worktrees/TASK-AR-603-oag."
 active_work:
-  current_agents: []
+  current_agents:
+    - claim_id: "CLAIM-20260619-091500-task-ar-603-operator-attention-graph"
+      agent_role: "interface-designer"
+      agent_instance_id: "interface-designer-20260619-091500-kst-oag"
+      display_name: "codex-interface-designer-oag-603"
+      callsite_id: "terminal:wt-task-ar-603:tab-01"
+      pane_id: "terminal:wt-task-ar-603:tab-01"
+      task_id: "TASK-AR-603"
+      task_set_id: "TASKSET-AR-OPERATOR-ATTENTION-GRAPH"
+      unit_id: "UNIT-TASK-AR-603-001"
+      worktree_path: ".worktrees/TASK-AR-603-oag"
   current_teams:
     - ui-ux
 resume:
