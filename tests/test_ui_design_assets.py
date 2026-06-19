@@ -96,3 +96,88 @@ def test_promoted_pattern_helpers_are_called_by_console_renderers():
     assert "patternEvidencePanel(errors" in source
     assert "host.innerHTML = patternCommandBar(rows);" in source
     assert "legend.innerHTML = patternStateMachinePanelLegend();" in source
+
+
+# ----- TASK-AR-587: Agent avatar (experimental) -----
+
+def test_pattern_agent_avatar_is_classified_as_pattern_component():
+    """patternAgentAvatar must be registered in ASSETIZATION_CLASSES."""
+    classes = ui_design_assets.ASSETIZATION_CLASSES
+    assert classes["patternAgentAvatar"] == "pattern_component"
+
+
+def test_pattern_agent_avatar_determinism():
+    """Same seed must always yield byte-identical SVG output (TASK-AR-587)."""
+    seed = "same-seed"
+    result_a = ui_design_assets.patternAgentAvatar(seed)
+    result_b = ui_design_assets.patternAgentAvatar(seed)
+    assert result_a == result_b, "patternAgentAvatar is not deterministic for the same seed"
+
+
+def test_pattern_agent_avatar_different_seeds_differ():
+    """Different seeds must produce different SVGs (basic uniqueness check)."""
+    svg_a = ui_design_assets.patternAgentAvatar("seed-alpha")
+    svg_b = ui_design_assets.patternAgentAvatar("seed-beta")
+    assert svg_a != svg_b, "Different seeds should produce different avatars"
+
+
+def test_pattern_agent_avatar_returns_svg_string():
+    """Output must be an SVG element string."""
+    svg = ui_design_assets.patternAgentAvatar("test-agent-id")
+    assert svg.strip().startswith("<svg"), "Avatar output must start with <svg"
+    assert "class=\"agent-avatar\"" in svg
+    assert "xmlns=\"http://www.w3.org/2000/svg\"" in svg
+
+
+def test_pattern_agent_avatar_no_raw_color_literals():
+    """Avatar SVG must reference only semantic tokens, no raw hex colors."""
+    import re
+    svg = ui_design_assets.patternAgentAvatar("test-agent-id", role="lead-engineer")
+    raw_color = re.compile(r'(?<!&)#[0-9a-fA-F]{3,8}\b')
+    assert not raw_color.search(svg), "Avatar SVG must not contain raw color literals"
+
+
+def test_pattern_agent_avatar_role_accent():
+    """Role parameter must produce an accent ring using a semantic token."""
+    svg_with_role = ui_design_assets.patternAgentAvatar("agent-x", role="lead-engineer")
+    svg_no_role = ui_design_assets.patternAgentAvatar("agent-x", role="")
+    # With role: accent ring rendered with stroke
+    assert 'stroke="var(--primary)"' in svg_with_role
+    # Without role: neutral line-strong ring (or no ring for empty role)
+    assert 'stroke="var(--primary)"' not in svg_no_role
+
+
+def test_pattern_agent_avatar_all_known_roles_resolve():
+    """All ORG-MODEL canonical role ids must resolve to a known accent token."""
+    from agent_runtime.ui_design_assets import _AVATAR_ROLE_ACCENT_PY, patternAgentAvatar
+    known_roles = list(_AVATAR_ROLE_ACCENT_PY.keys())
+    for role in known_roles:
+        svg = patternAgentAvatar(f"agent-{role}", role=role)
+        assert "stroke=" in svg, f"Role {role!r} should produce an accent ring"
+
+
+def test_no_runtime_dicebear_api_dependency():
+    """api.dicebear.com must not appear in any runtime code path."""
+    ui_design_src = (ROOT / "src" / "agent_runtime" / "ui_design_assets.py").read_text(encoding="utf-8")
+    ui_console_src = (ROOT / "src" / "agent_runtime" / "ui_console_assets.py").read_text(encoding="utf-8")
+    ui_console_py = (ROOT / "src" / "agent_runtime" / "ui_console.py").read_text(encoding="utf-8")
+    # api.dicebear.com may appear in comments/docstrings but not in callable code paths
+    # We check that it never appears as a fetch/URL string in the JavaScript or Python code
+    import re
+    url_pattern = re.compile(r"""["']https?://api\.dicebear\.com""")
+    assert not url_pattern.search(ui_design_src), "api.dicebear.com must not appear as a runtime URL in ui_design_assets.py"
+    assert not url_pattern.search(ui_console_src), "api.dicebear.com must not appear as a runtime URL in ui_console_assets.py"
+    assert not url_pattern.search(ui_console_py), "api.dicebear.com must not appear as a runtime URL in ui_console.py"
+
+
+def test_pattern_agent_avatar_in_console_js(tmp_path):
+    """patternAgentAvatar JS function must be served in the console JS bundle."""
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert "function patternAgentAvatar" in js, "patternAgentAvatar must be present in app.js"
+    assert "patternAgentAvatar(avatarSeed" in js, "patternAgentAvatar must be called in agentCardTemplate"
+
+
+def test_pattern_agent_avatar_label():
+    """Label parameter must insert a <title> element in the SVG."""
+    svg = ui_design_assets.patternAgentAvatar("agent-id", label="My Agent")
+    assert "<title>My Agent</title>" in svg
