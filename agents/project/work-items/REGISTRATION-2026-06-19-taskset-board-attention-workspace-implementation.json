@@ -1,0 +1,225 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "chat:2026-06-19-ui-refactor-continuous-cycle",
+  "created_by": "codex-interface-designer-task-ar-611",
+  "now": "2026-06-19T18:35:00+09:00",
+  "initiative": {
+    "id": "INIT-AR-TASKSET-BOARD-ATTENTION-WORKSPACE",
+    "title": "Taskset Board Attention Workspace",
+    "summary": "Implement the accepted taskset_attention_workspace direction so the Taskset Board opens with explainable attention lanes, a keyboard-first switcher, and a relation detail path before the full 49-taskset fallback list.",
+    "owner": "lead_engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-TASKSET-BOARD-ATTENTION-WORKSPACE",
+    "display_name": "Taskset Board Attention Workspace",
+    "summary": "Source-mutating implementation of the accepted Taskset Board IA RFC: attention lane derivation, taskset switcher, relation detail panel, and beta/UX evidence for desktop, mobile, keyboard, reduced-motion, and recovery states.",
+    "order": 629,
+    "plan_slug": "2026-06-19-taskset-board-attention-workspace"
+  },
+  "tasks": [
+    {
+      "title": "Implement Taskset Board attention workspace assets",
+      "goal": "Convert the Taskset Board from a whole-board-first scan into an attention workspace with explainable lanes, taskset switcher, and relation detail while preserving the full searchable board fallback.",
+      "scope": "Source mutation is allowed only inside the declared UI state, UI asset, design asset, and focused test files. Do not change task/claim SSoT files, write APIs, dispatcher behavior, or unrelated console views.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 6,
+      "est_tokens": 13000,
+      "owner": "interface-designer",
+      "team": "ui-ux",
+      "acceptance": [
+        "The Taskset Board first viewport exposes attention lanes for active claims, guarded or interrupted work, stale or missing evidence, recently changed tasksets, and ready next-action candidates before the all-tasksets fallback.",
+        "Lane membership is derived from named schema fields and each card shows a visible reason label; state is never color-only.",
+        "A keyboard-first taskset switcher supports known-target retrieval by id, title, alias, task id, and owner, with empty state and selected state.",
+        "A relation detail panel preserves the existing operator_attention_graph semantics: taskset state, claim path, evidence freshness, graph or child context, and command readiness.",
+        "Repeated lane, switcher, relation detail, state chip, and evidence preview surfaces are implemented as design assets or explicitly classified as one_off_for_now in closeout evidence.",
+        "The existing Taskset Board API remains read-only and page/server files stay focused on data wiring and composition."
+      ],
+      "verification": [
+        "python -m pytest tests/test_ui_design_assets.py tests/test_ui_console.py tests/test_ui_state.py -q",
+        "python scripts/design_system_gate.py --check --all-ui",
+        "python scripts/ui_ux_cycle.py --root . assess --json",
+        "python scripts/evidence_index_generator.py --check",
+        "git diff --check"
+      ],
+      "units": [
+        {
+          "title": "Add Taskset Board attention lane schema and workspace UI",
+          "context": "TASK-AR-610 accepted taskset_attention_workspace after OAG beta evidence showed 49 tasksets make whole-board scanning and focus traversal too long.",
+          "inputs": [
+            "reviews/RFC-2026-06-19-taskset-board-ia-design-direction.md",
+            "reviews/SEMINAR-2026-06-19-taskset-board-ia-design-direction.md",
+            "docs/design/agent-runtime/DESIGN.md",
+            "docs/design/agent-runtime/DESIGN-SYSTEM.md",
+            "src/agent_runtime/ui_state.py",
+            "src/agent_runtime/ui_console_assets.py",
+            "src/agent_runtime/ui_design_assets.py",
+            "tests/test_ui_state.py",
+            "tests/test_ui_console.py",
+            "tests/test_ui_design_assets.py"
+          ],
+          "target_files": [
+            "src/agent_runtime/ui_state.py",
+            "src/agent_runtime/ui_console_assets.py",
+            "src/agent_runtime/ui_design_assets.py",
+            "tests/test_ui_state.py",
+            "tests/test_ui_console.py",
+            "tests/test_ui_design_assets.py",
+            "reviews/VERIFY-2026-06-19-taskset-board-attention-workspace-implementation.json",
+            "reviews/INDEX.md"
+          ],
+          "schema_contract": [
+            "taskset_id",
+            "title",
+            "status",
+            "status_bucket",
+            "claim_summary.state",
+            "claim_summary.label",
+            "claim_summary.command_state",
+            "claim_summary.command_label",
+            "recent_activity",
+            "children[].phase",
+            "children[].claim_summary",
+            "children[].relation_state",
+            "progress.done",
+            "progress.total",
+            "progress_pct",
+            "assigned_agents"
+          ],
+          "assetization": [
+            {
+              "surface": "attention state aliases",
+              "class": "design_token",
+              "tier": "experimental",
+              "rule": "Reuse existing pass/warn/block/info/active semantic tokens first; add aliases only in token definitions if lane states cannot be distinguished."
+            },
+            {
+              "surface": "taskset quick switcher",
+              "class": "ui_component",
+              "tier": "experimental",
+              "rule": "Keyboard-first typeahead with result count, selected state, empty state, and jump target."
+            },
+            {
+              "surface": "attention lane filter",
+              "class": "ui_component",
+              "tier": "experimental",
+              "rule": "Segmented or tab-like control with count, focus state, and non-color cue."
+            },
+            {
+              "surface": "taskset attention lane",
+              "class": "pattern_component",
+              "tier": "experimental",
+              "rule": "Domain lane combining taskset identity, claim state, evidence freshness, command readiness, and membership reason."
+            },
+            {
+              "surface": "taskset relation detail panel",
+              "class": "pattern_component",
+              "tier": "experimental",
+              "rule": "Extend or reuse patternAttentionRelationPanel and evidence preview responsibilities without duplicating relation chip/card markup."
+            },
+            {
+              "surface": "first migration helper copy",
+              "class": "one_off_for_now",
+              "tier": "temporary",
+              "rule": "Allowed only for the first beta cycle; promote or remove before a third use."
+            }
+          ],
+          "steps": [
+            "Read the RFC assetization table and current tasksets_board API tests.",
+            "Derive attention lane data in ui_state.py from the named schema fields without writing task or claim records.",
+            "Add reusable ui_design_assets helpers for quick switcher, lane filter, attention lane, or relation detail only where current helpers cannot cover the surface.",
+            "Wire ui_console_assets.py so the first Taskset Board viewport renders attention lanes, switcher, and relation detail before the full all-tasksets fallback.",
+            "Preserve expanded/collapsed full board behavior and command proposal path for adding tasks.",
+            "Add focused state and UI tests for lane reasons, switcher empty and selected states, keyboard/focus anchors, mobile CSS anchors, and existing claim-summary behavior.",
+            "Run W4a verification commands and record evidence."
+          ],
+          "acceptance": [
+            "Active, guarded, interrupted, stale or missing evidence, recently changed, ready next action, empty lane, and no active claim paths are visibly labelled.",
+            "Keyboard traversal reaches lane controls, switcher, active card, relation detail, and all-tasksets fallback without tabbing through every taskset first.",
+            "At 390x844, lanes, switcher, and detail stack without document-level horizontal overflow.",
+            "Reduced-motion mode removes movement-dependent meaning if transitions are introduced.",
+            "No raw color, spacing, radius, shadow, or type literals are introduced outside token definitions.",
+            "The implementation preserves existing /api/tasksets_board aliases and task.create proposal-only behavior."
+          ],
+          "verification": [
+            "python -m pytest tests/test_ui_design_assets.py tests/test_ui_console.py tests/test_ui_state.py -q",
+            "python scripts/design_system_gate.py --check --all-ui",
+            "python scripts/ui_ux_cycle.py --root . assess --json",
+            "python scripts/evidence_index_generator.py --check",
+            "git diff --check"
+          ],
+          "handoff": "Report changed helpers, lane derivation fields, assetization classification, focused tests, beta evidence dependency, and any remaining one-off or schema gaps.",
+          "stop_condition": "Stop after the attention workspace implementation is source-mutated, tested, self-verified, and ready for independent W4b verification."
+        }
+      ]
+    },
+    {
+      "title": "Run Taskset Board attention workspace beta and UX evaluation",
+      "goal": "Verify the attention workspace through user-like beta actions, keyboard traversal, mobile and desktop viewport checks, reduced-motion review, recovery states, and BTC-style defect routing.",
+      "scope": "Evaluation and evidence only. Do not mutate UI source files in this task. Implementation defects become BTC-style follow-up candidates or a new claimed implementation task.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 4,
+      "est_tokens": 9000,
+      "owner": "ux-evaluator",
+      "team": "ui-ux",
+      "acceptance": [
+        "Beta evidence records exact clicked or typed actions for unknown-target discovery, known-target retrieval, relation detail inspection, and all-tasksets fallback.",
+        "Keyboard traversal is exercised from route entry through lane controls, switcher, card selection, relation detail, and fallback list.",
+        "Recovery attempts cover empty lane, stale evidence, blocked command, interrupted claim, expired claim, and no active claim states.",
+        "Desktop and mobile viewport notes include environment, viewport, data state, expected result, observed result, and pass/fail status.",
+        "Reduced-motion behavior and non-color-only state cues are reviewed.",
+        "Every visible defect gets a BTC-TSAW failure id with reproduction path and assetization class."
+      ],
+      "verification": [
+        "python scripts/design_system_gate.py --check --all-ui",
+        "python scripts/evidence_index_generator.py --check",
+        "python scripts/ui_ux_cycle.py --root . assess --json"
+      ],
+      "units": [
+        {
+          "title": "Record Taskset Board attention workspace beta and UX evidence",
+          "context": "The Owner asked for UI/UX improvement loops that include beta-tester and evaluator evidence rather than screenshot-only completion claims.",
+          "inputs": [
+            "reviews/RFC-2026-06-19-taskset-board-ia-design-direction.md",
+            "reviews/BETA-PLAN-2026-06-19-taskset-board-attention-workspace.md",
+            "src/agent_runtime/ui_console_assets.py",
+            "src/agent_runtime/ui_design_assets.py",
+            "src/agent_runtime/ui_state.py"
+          ],
+          "target_files": [
+            "reviews/BETA-TEST-2026-06-19-taskset-board-attention-workspace.md",
+            "reviews/UX-EVAL-2026-06-19-taskset-board-attention-workspace.md",
+            "reviews/INDEX.md"
+          ],
+          "scope": "Record exploratory evidence only. Do not patch UI source files in this unit.",
+          "steps": [
+            "Launch or inspect the local UI surface for the implemented Taskset Board route.",
+            "Execute unknown-target discovery from the first viewport and record the selected lane reason.",
+            "Type a known taskset id or title fragment into the switcher and jump to the matching detail.",
+            "Traverse by keyboard through lane controls, switcher, selected card, relation detail, and all-tasksets fallback.",
+            "Repeat the main path at desktop and 390x844 mobile viewport.",
+            "Exercise empty lane, stale evidence, blocked command, interrupted claim, expired claim, and no active claim recovery states.",
+            "Review reduced-motion and non-color-only state cues.",
+            "Assign BTC-TSAW ids to every visible defect and refresh evidence index."
+          ],
+          "acceptance": [
+            "Evidence lists exact action path, viewport, data state, expected result, observed result, pass/fail status, and screenshot or trace reference when available.",
+            "Recovery and edge states are attempted, not merely listed.",
+            "No UI source files are changed by the evaluation unit.",
+            "Every actionable defect has an owner and assetization class."
+          ],
+          "verification": [
+            "python scripts/design_system_gate.py --check --all-ui",
+            "python scripts/evidence_index_generator.py --check",
+            "python scripts/ui_ux_cycle.py --root . assess --json"
+          ],
+          "handoff": "Report beta paths, defects, accessibility and responsive findings, BTC-TSAW ids, and whether the next UI/UX cycle needs design exploration or implementation refinement.",
+          "stop_condition": "Stop after beta and UX evidence are complete and ready for independent W4b verification."
+        }
+      ]
+    }
+  ]
+}

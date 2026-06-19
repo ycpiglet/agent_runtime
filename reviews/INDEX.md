@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-19T18:07:49+09:00
-record_count: 670
+generated_at: 2026-06-19T18:36:50+09:00
+record_count: 673
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `670` review and evidence records under `reviews/`.
+- Summary: indexed `673` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `670` files |
+| Reviews covered | pass | `673` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -39,6 +39,7 @@ record_count: 670
 | `reviews/A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final.json` | `A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final` | json | record | n/a | A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final |
 | `reviews/AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8.json` | `AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8` | json | record | n/a | AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8 |
 | `reviews/BETA-PLAN-2026-06-19-operator-attention-graph.md` | `BETA-PLAN-2026-06-19-operator-attention-graph` | ui-beta-test-plan | accepted | pass | Operator Attention Graph Beta Plan |
+| `reviews/BETA-PLAN-2026-06-19-taskset-board-attention-workspace.md` | `BETA-PLAN-2026-06-19-taskset-board-attention-workspace` | ui-beta-test-plan | accepted | pass | Taskset Board Attention Workspace Beta Plan |
 | `reviews/BETA-TEST-2026-06-19-oag-claim-aware-relation-adapter.md` | `BETA-TEST-2026-06-19-oag-claim-aware-relation-adapter` | beta-tester-review | accepted_with_findings | watch | Claim-Aware Relation Adapter Beta Test |
 | `reviews/BETA-TEST-2026-06-19-oag-mobile-responsive-refinement.md` | `BETA-TEST-2026-06-19-oag-mobile-responsive-refinement` | beta-tester-review | accepted | pass | OAG Mobile Responsive Refinement Beta Test |
 | `reviews/BETA-TEST-2026-06-19-operator-attention-graph.md` | `BETA-TEST-2026-06-19-operator-attention-graph` | beta-tester-review | accepted_with_findings | watch | Operator Attention Graph Beta Test |
@@ -161,6 +162,7 @@ record_count: 670
 | `reviews/OWNER-APPROVAL-GATE-2026-06-09-v0.1.8.json` | `OWNER-APPROVAL-GATE-2026-06-09-v0.1.8` | json | record | n/a | OWNER-APPROVAL-GATE-2026-06-09-v0.1.8 |
 | `reviews/PENDING-RELEASE-GUARD-2026-06-09-v0.1.8.json` | `PENDING-RELEASE-GUARD-2026-06-09-v0.1.8` | json | record | n/a | PENDING-RELEASE-GUARD-2026-06-09-v0.1.8 |
 | `reviews/PLAN-2026-06-19-operator-attention-graph-implementation.md` | `PLAN-2026-06-19-operator-attention-graph-implementation` | ui-implementation-plan | accepted | pass | Operator Attention Graph Implementation Plan |
+| `reviews/PLAN-2026-06-19-taskset-board-attention-workspace-implementation.md` | `PLAN-2026-06-19-taskset-board-attention-workspace-implementation` | ui-implementation-plan | accepted | pass | Taskset Board Attention Workspace Implementation Plan |
 | `reviews/PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final.json` | `PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final` | json | record | n/a | PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final |
 | `reviews/PROPOSALS-2026-06-19-ui-ux-next-work.md` | `PROPOSALS-2026-06-19-ui-ux-next-work` | ui-ux-next-work-proposals | planned | watch | UI/UX Next Work Proposals 2026-06-19 |
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8.json` | `RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8 |
@@ -605,6 +607,7 @@ record_count: 670
 | `reviews/VERIFY-2026-06-19-task-ar-609-20260619160030.json` | `VERIFY-2026-06-19-task-ar-609-20260619160030` | json | record | n/a | VERIFY-2026-06-19-task-ar-609-20260619160030 |
 | `reviews/VERIFY-2026-06-19-task-ar-610-20260619174130.json` | `VERIFY-2026-06-19-task-ar-610-20260619174130` | json | record | n/a | VERIFY-2026-06-19-task-ar-610-20260619174130 |
 | `reviews/VERIFY-2026-06-19-task-ar-610-20260619180000.json` | `VERIFY-2026-06-19-task-ar-610-20260619180000` | json | record | n/a | VERIFY-2026-06-19-task-ar-610-20260619180000 |
+| `reviews/VERIFY-2026-06-19-task-ar-611-20260619184000.json` | `VERIFY-2026-06-19-task-ar-611-20260619184000` | json | record | n/a | VERIFY-2026-06-19-task-ar-611-20260619184000 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500.json` | `VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-596-001-20260619012500 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525.json` | `VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-597-001-20260619002525 |
 | `reviews/VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323.json` | `VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323` | json | record | n/a | VERIFY-2026-06-19-unit-task-ar-600-001-20260619082323 |
