@@ -1066,6 +1066,50 @@ function patternOpsVelocityBar(week, peak) {
     `<span class="opsdash-vbar-label">${escapeHtml(wk)}</span>` +
     `</div>`;
 }
+
+/* ===== Pattern component: calendar grid (TASK-AR-584) =====================
+ * patternCalendarGrid(days, byDate, options) renders the weekday headers and
+ * date cells for the work calendar. The caller still owns anchor/mode state
+ * and date-range selection; this helper owns reusable grid markup. options:
+ * { weekdays, todayKey, dateKey }. All event fields are HTML-escaped.
+ * Maturity tier: experimental with a stable API surface.
+ */
+function patternCalendarGrid(days, byDate, options = {}) {
+  const opts = options || {};
+  const weekdays = Array.isArray(opts.weekdays) && opts.weekdays.length
+    ? opts.weekdays
+    : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const dateKey = typeof opts.dateKey === "function"
+    ? opts.dateKey
+    : function (date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      };
+  const todayKey = String(opts.todayKey || "");
+  const eventsByDate = byDate || {};
+  const header = weekdays
+    .map((name) => `<div class="calendar-weekday" role="columnheader">${escapeHtml(name)}</div>`)
+    .join("");
+  const cells = (days || []).map((entry) => {
+    const date = entry && entry.date instanceof Date ? entry.date : new Date((entry && entry.date) || Date.now());
+    const key = dateKey(date);
+    const events = eventsByDate[key] || [];
+    const outside = Boolean(entry && entry.outside);
+    const isToday = key === todayKey;
+    const eventHtml = events.map((event) => {
+      const overdue = event.reminder === "overdue";
+      const kindClass = `calendar-event-${String(event.kind || "").replace(/[^a-z]/g, "")}`;
+      return `<span class="calendar-event ${kindClass} ${overdue ? "is-overdue" : ""}" title="${escapeHtml(event.title || "")}" data-entity-id="${escapeHtml(event.id || "")}">${escapeHtml(event.title || "")}</span>`;
+    }).join("");
+    return `<div class="calendar-cell ${outside ? "is-outside" : ""} ${isToday ? "is-today" : ""}" role="gridcell">
+      <span class="calendar-cell-date">${escapeHtml(date.getDate())}</span>
+      ${eventHtml}
+    </div>`;
+  }).join("");
+  return header + cells;
+}
 """
 
 
@@ -1660,4 +1704,5 @@ ASSETIZATION_CLASSES = {
     "patternPortabilityPreviewRow": "pattern_component",
     "patternOpsTokenBar": "pattern_component",
     "patternOpsVelocityBar": "pattern_component",
+    "patternCalendarGrid": "pattern_component",
 }

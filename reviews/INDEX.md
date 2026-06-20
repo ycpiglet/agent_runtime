@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-20T08:57:12+09:00
-record_count: 585
+generated_at: 2026-06-20T09:12:46+09:00
+record_count: 587
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `585` review and evidence records under `reviews/`.
+- Summary: indexed `587` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `585` files |
+| Reviews covered | pass | `587` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -549,6 +549,7 @@ record_count: 585
 | `reviews/VERIFY-2026-06-18-unit-task-ar-581-001-20260618153500.json` | `VERIFY-2026-06-18-unit-task-ar-581-001-20260618153500` | json | record | n/a | VERIFY-2026-06-18-unit-task-ar-581-001-20260618153500 |
 | `reviews/VERIFY-2026-06-18-unit-task-ar-582-001-20260618161000.json` | `VERIFY-2026-06-18-unit-task-ar-582-001-20260618161000` | json | record | n/a | VERIFY-2026-06-18-unit-task-ar-582-001-20260618161000 |
 | `reviews/VERIFY-2026-06-20-task-ar-583-semantic-scale.json` | `VERIFY-2026-06-20-task-ar-583-semantic-scale` | json | record | n/a | VERIFY-2026-06-20-task-ar-583-semantic-scale |
+| `reviews/VERIFY-2026-06-20-task-ar-584-pattern-renderers.json` | `VERIFY-2026-06-20-task-ar-584-pattern-renderers` | json | record | n/a | VERIFY-2026-06-20-task-ar-584-pattern-renderers |
 | `reviews/VERIFY-2026-06-20-task-ar-591-live-wiring.json` | `VERIFY-2026-06-20-task-ar-591-live-wiring` | json | record | n/a | VERIFY-2026-06-20-task-ar-591-live-wiring |
 | `reviews/VERIFY-2026-06-20-task-ar-592-a11y-responsive.json` | `VERIFY-2026-06-20-task-ar-592-a11y-responsive` | json | record | n/a | VERIFY-2026-06-20-task-ar-592-a11y-responsive |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
@@ -617,6 +618,7 @@ record_count: 585
 | `reviews/W4B-2026-06-18-TASK-AR-581.md` | `W4B-2026-06-18-TASK-AR-581` | md | accepted | n/a | W4B Independent Verification - TASK-AR-581 |
 | `reviews/W4B-2026-06-18-TASK-AR-582.md` | `W4B-2026-06-18-TASK-AR-582` | md | accepted | n/a | W4B Independent Verification - TASK-AR-582 |
 | `reviews/W4B-2026-06-20-TASK-AR-583.md` | `W4B-2026-06-20-TASK-AR-583` | md | accepted | n/a | W4B Independent Verification - TASK-AR-583 |
+| `reviews/W4B-2026-06-20-TASK-AR-584.md` | `W4B-2026-06-20-TASK-AR-584` | md | accepted | n/a | W4B Independent Verification - TASK-AR-584 |
 | `reviews/W4B-2026-06-20-TASK-AR-591.md` | `W4B-2026-06-20-TASK-AR-591` | md | accepted | n/a | W4B Independent Verification - TASK-AR-591 |
 | `reviews/W4B-2026-06-20-TASK-AR-592.md` | `W4B-2026-06-20-TASK-AR-592` | md | accepted | n/a | W4B Independent Verification - TASK-AR-592 |
 

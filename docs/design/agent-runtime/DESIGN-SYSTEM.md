@@ -91,17 +91,21 @@ Promoted pattern usage as of `TASK-AR-584`:
 
 | Pattern API | Current console usage |
 | --- | --- |
+| `patternSvgLayeredDagreLayout` | Dependency graph, state-machine graph, and knowledge graph layout coordinates/edge routes. |
+| `patternSvgForceAgentLayout` | Live agent map force-layout coordinates. |
+| `patternCalendarGrid` | Weekday headers and date/event cell HTML in `renderCalendar` (work calendar view). |
 | `patternPortabilityPreviewRow` | Per-row advisory HTML in `renderImportPreview` (import/export view). |
 | `patternOpsTokenBar` | Est-vs-actual dual-bar HTML in `renderOpsResources` (ops dashboard tokens panel). |
 | `patternOpsVelocityBar` | Weekly velocity bar HTML in `renderOpsBurndown` (ops dashboard burndown panel). |
 
-Residual one-off boundary: data-heavy SVG layout functions (live-map force
-simulation, dependency-graph layout), calendar grid cell building, and office
-map DOM placement remain in `ui_console_assets.py` as one-off renderers.
-Office-map placement manipulates the DOM directly (not a pure HTML-string
-renderer) and is genuinely view-specific; calendar cells are tightly coupled
-to the `calendarMode` state machine. These are layout-geometry debts to
-address in a later extraction unit when reuse across views is confirmed.
+Residual one-off boundary: data-heavy SVG node/edge drawing, calendar
+anchor/mode state, schedule cards, and office-map DOM placement remain in
+`ui_console_assets.py` as one-off renderers. Office-map placement manipulates
+the DOM directly (not a pure HTML-string renderer) and is genuinely
+view-specific; calendar state controls remain coupled to the `calendarMode`
+state machine while reusable grid markup is now in `patternCalendarGrid`.
+These are layout-geometry debts to address in a later extraction unit when
+reuse across views is confirmed.
 
 Served asset ownership as of `TASK-AR-582`: `ui_console.py` no longer owns the
 large HTML/CSS/JS strings. `ui_console_assets.py` owns the static served assets,

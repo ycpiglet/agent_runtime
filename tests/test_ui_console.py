@@ -3266,6 +3266,17 @@ def test_ui_console_ops_dashboard_escapes_rendered_fields(tmp_path):
     assert "escapeHtml(gate.status)" in block
 
 
+def test_ui_console_calendar_grid_uses_pattern_component(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    start = js.index("function renderCalendar")
+    block = js[start:js.index("function renderSchedules", start)]
+
+    assert "function patternCalendarGrid" in js
+    assert "patternCalendarGrid(days, byDate" in block
+    assert "CALENDAR_WEEKDAYS.map" not in block
+    assert "calendar-cell ${outside" not in block
+
+
 def test_ui_console_inbox_notification_fields_are_escaped(tmp_path):
     # A blocked task with markup in its reason flows into a notification body;
     # the rendered shell must not inline that markup unescaped.

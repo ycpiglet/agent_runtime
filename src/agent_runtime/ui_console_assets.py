@@ -11013,22 +11013,11 @@ function renderCalendar() {
   }
 
   const days = calendarVisibleDays();
-  const header = CALENDAR_WEEKDAYS.map((name) => `<div class="calendar-weekday" role="columnheader">${escapeHtml(name)}</div>`).join("");
-  const cells = days.map(({ date, outside }) => {
-    const key = calendarDateKey(date);
-    const events = byDate[key] || [];
-    const isToday = key === todayKey;
-    const eventHtml = events.map((event) => {
-      const overdue = event.reminder === "overdue";
-      const kindClass = `calendar-event-${(event.kind || "").replace(/[^a-z]/g, "")}`;
-      return `<span class="calendar-event ${kindClass} ${overdue ? "is-overdue" : ""}" title="${escapeHtml(event.title || "")}" data-entity-id="${escapeHtml(event.id || "")}">${escapeHtml(event.title || "")}</span>`;
-    }).join("");
-    return `<div class="calendar-cell ${outside ? "is-outside" : ""} ${isToday ? "is-today" : ""}" role="gridcell">
-      <span class="calendar-cell-date">${escapeHtml(date.getDate())}</span>
-      ${eventHtml}
-    </div>`;
-  }).join("");
-  grid.innerHTML = header + cells;
+  grid.innerHTML = patternCalendarGrid(days, byDate, {
+    weekdays: CALENDAR_WEEKDAYS,
+    todayKey,
+    dateKey: calendarDateKey,
+  });
 }
 
 function renderSchedules() {
