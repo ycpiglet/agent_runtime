@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-20T09:29:08+09:00
-record_count: 587
+generated_at: 2026-06-20T09:33:39+09:00
+record_count: 588
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `587` review and evidence records under `reviews/`.
+- Summary: indexed `588` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `587` files |
+| Reviews covered | pass | `588` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -138,6 +138,7 @@ record_count: 587
 | `reviews/MEETING-2026-06-14-wave-plan-host-store-console.md` | `MEETING-2026-06-14-wave-plan-host-store-console` | meeting | watch | watch | Wave Execution Plan — Host Feedback + Work Store + Decision Console |
 | `reviews/MEETING-2026-06-15-agent-runtime-task-ar-223-cycle-sync.md` | `MEETING-2026-06-15-agent-runtime-task-ar-223-cycle-sync` | md | record | n/a | MEETING (2026-06-15) - TASK-AR-223 closeout cycle sync |
 | `reviews/MEETING-2026-06-17-self-improvement-cycle-sync.md` | `MEETING-2026-06-17-self-improvement-cycle-sync` | meeting | planned | planned | Self Improvement Cycle Sync |
+| `reviews/MEETING-2026-06-20-ui-refactor-cycle-2-seminar-beta.md` | `MEETING-2026-06-20-ui-refactor-cycle-2-seminar-beta` | md | record | pass | UI Refactor Cycle 2 Seminar and Beta Review |
 | `reviews/MEETING-2026-06-20-ui-refactor-cycle-seminar-beta.md` | `MEETING-2026-06-20-ui-refactor-cycle-seminar-beta` | md | record | pass | UI Refactor Cycle Seminar and Beta Review |
 | `reviews/OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion.json` | `OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion` | json | record | n/a | OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion |
 | `reviews/OFFLINE-EVAL-2026-06-09-task-ar-217-rerun.json` | `OFFLINE-EVAL-2026-06-09-task-ar-217-rerun` | json | record | n/a | OFFLINE-EVAL-2026-06-09-task-ar-217-rerun |
