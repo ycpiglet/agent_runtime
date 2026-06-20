@@ -21,6 +21,26 @@
       "command": "python -m py_compile src/agent_runtime/ui_design_assets.py src/agent_runtime/ui_console_assets.py",
       "status": "passed",
       "stdout": ""
+    },
+    {
+      "command": "Python Playwright browser verification against http://127.0.0.1:8884/#/work/calendar",
+      "status": "passed",
+      "stdout": "hash=#/work/calendar; active view=view-calendar; selectedLink=true; patternCalendarGrid=function; cells=42; visibleCells=42; headers=7; events=275; period=June 2026"
+    }
+  ],
+  "browser_evidence": [
+    {
+      "path": "reviews/evidence/TASK-AR-584/calendar-grid-pattern.png",
+      "viewport": "1366x820",
+      "route": "#/work/calendar",
+      "assertions": [
+        "calendar route active",
+        "work/calendar sidebar link selected",
+        "patternCalendarGrid is present in the served app.js runtime",
+        "42 calendar cells rendered and visible",
+        "7 weekday headers rendered",
+        "calendar period shows June 2026"
+      ]
     }
   ],
   "coverage": [

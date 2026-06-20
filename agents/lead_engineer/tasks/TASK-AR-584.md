@@ -38,6 +38,7 @@ verified_by: codex-independent-verifier-task-ar-584-20260620
 evidence_refs:
   - reviews/VERIFY-2026-06-20-task-ar-584-pattern-renderers.json
   - reviews/W4B-2026-06-20-TASK-AR-584.md
+  - reviews/evidence/TASK-AR-584/calendar-grid-pattern.png
 resolution: done
 completed_at: 2026-06-20T09:11:47+09:00
 closed_by: codex-interface-designer-task-ar-584-20260620
@@ -97,4 +98,5 @@ actual_tokens: 6500
 - Evidence:
   - `reviews/VERIFY-2026-06-20-task-ar-584-pattern-renderers.json`
   - `reviews/W4B-2026-06-20-TASK-AR-584.md`
+  - `reviews/evidence/TASK-AR-584/calendar-grid-pattern.png`
 <!-- work-close:end -->
