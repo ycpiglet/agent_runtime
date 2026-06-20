@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-20T10:27:04+09:00
-record_count: 591
+generated_at: 2026-06-20T10:31:59+09:00
+record_count: 592
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `591` review and evidence records under `reviews/`.
+- Summary: indexed `592` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `591` files |
+| Reviews covered | pass | `592` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -139,6 +139,7 @@ record_count: 591
 | `reviews/MEETING-2026-06-15-agent-runtime-task-ar-223-cycle-sync.md` | `MEETING-2026-06-15-agent-runtime-task-ar-223-cycle-sync` | md | record | n/a | MEETING (2026-06-15) - TASK-AR-223 closeout cycle sync |
 | `reviews/MEETING-2026-06-17-self-improvement-cycle-sync.md` | `MEETING-2026-06-17-self-improvement-cycle-sync` | meeting | planned | planned | Self Improvement Cycle Sync |
 | `reviews/MEETING-2026-06-20-ui-refactor-cycle-2-seminar-beta.md` | `MEETING-2026-06-20-ui-refactor-cycle-2-seminar-beta` | md | record | pass | UI Refactor Cycle 2 Seminar and Beta Review |
+| `reviews/MEETING-2026-06-20-ui-refactor-cycle-3-seminar-beta.md` | `MEETING-2026-06-20-ui-refactor-cycle-3-seminar-beta` | md | record | pass | UI Refactor Cycle 3 Seminar and Beta Checkpoint |
 | `reviews/MEETING-2026-06-20-ui-refactor-cycle-seminar-beta.md` | `MEETING-2026-06-20-ui-refactor-cycle-seminar-beta` | md | record | pass | UI Refactor Cycle Seminar and Beta Review |
 | `reviews/OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion.json` | `OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion` | json | record | n/a | OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion |
 | `reviews/OFFLINE-EVAL-2026-06-09-task-ar-217-rerun.json` | `OFFLINE-EVAL-2026-06-09-task-ar-217-rerun` | json | record | n/a | OFFLINE-EVAL-2026-06-09-task-ar-217-rerun |
