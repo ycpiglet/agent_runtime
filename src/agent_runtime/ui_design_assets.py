@@ -10,23 +10,20 @@ Avatar system (TASK-AR-587, experimental tier):
   avatar generator implemented in pure Python/JavaScript. No runtime network
   calls; no dependency on api.dicebear.com.
 
-  Approach: minidenticons-style geometric generator — a seeded PRNG (xorshift32
-  based on FNV-1a hash of the seed string) drives shape placement and fill
-  selection entirely from the seed string. The algorithm is MIT/CC0-clean:
-  invented here with no copied code. Same seed always yields byte-identical SVG.
+  Style boundary: DiceBear Identicon 9.4.2 is pinned under
+  ``src/agent_runtime/vendor/dicebear/identicon/9.4.2``. Its design license is
+  CC0 1.0 and its package/code license is MIT. The console does not import the
+  package or call the public API at runtime; it uses a build-less local
+  renderer that follows the Identicon 5x5 geometric grammar with a seeded PRNG
+  (xorshift32 based on FNV-1a hash of the seed string). Same seed always yields
+  byte-identical SVG.
 
   Per-role accent (ring/background) maps every ORG-MODEL role to an existing
-  semantic status/role token. All mappings are verified WCAG AA (>=4.5:1) in
-  both dark and light themes by choosing from tokens --primary (blue), --success
-  (green), --warning (amber), --violet/--purple (violet), --teal, and --danger
-  (red) as ring strokes against the --bg / --canvas backgrounds.
-
-  License: self-authored geometric generator — MIT/CC0-clean, no third-party
-  avatar assets vendored. DiceBear was considered (MIT library, CC0 Notionists
-  style, api.dicebear.com v10.x) but requires a Node build step for offline
-  generation; the self-contained Python generator is fully offline, zero-
-  dependency, and produces deterministic output guaranteed byte-identical per
-  seed indefinitely.
+  semantic status/role token. All mappings are verified to meet the WCAG
+  graphical non-text contrast threshold in both dark and light themes by
+  choosing from tokens --primary (blue), --success (green), --warning (amber),
+  --violet/--purple (violet), --teal, and --danger (red) as ring strokes
+  against the --bg / --canvas backgrounds.
 
 Typography tokens (TASK-AR-589, experimental tier):
   Geist 1.7.2 and Geist Mono 1.7.2 are vendored under

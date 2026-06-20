@@ -98,6 +98,12 @@ Promoted pattern usage as of `TASK-AR-584`:
 | `patternOpsTokenBar` | Est-vs-actual dual-bar HTML in `renderOpsResources` (ops dashboard tokens panel). |
 | `patternOpsVelocityBar` | Weekly velocity bar HTML in `renderOpsBurndown` (ops dashboard burndown panel). |
 
+Promoted pattern usage as of `TASK-AR-587`:
+
+| Pattern API | Current console usage |
+| --- | --- |
+| `patternAgentAvatar` | Deterministic self-hosted DiceBear Identicon SVG avatar with token-driven role accent in agent cards and team identity surfaces. |
+
 Residual one-off boundary: data-heavy SVG node/edge drawing, calendar
 anchor/mode state, schedule cards, and office-map DOM placement remain in
 `ui_console_assets.py` as one-off renderers. Office-map placement manipulates

@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-20T09:33:39+09:00
-record_count: 588
+generated_at: 2026-06-20T10:16:51+09:00
+record_count: 591
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `588` review and evidence records under `reviews/`.
+- Summary: indexed `591` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `588` files |
+| Reviews covered | pass | `591` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -166,6 +166,7 @@ record_count: 588
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current.json` | `RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0.json` | `RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0 |
 | `reviews/RELEASE-VERSION-CONSISTENCY-STEWARD.json` | `RELEASE-VERSION-CONSISTENCY-STEWARD` | json | record | n/a | RELEASE-VERSION-CONSISTENCY-STEWARD |
+| `reviews/REPLAN-2026-06-20-taskset-ar-visual-asset-adoption-task-ar-587-t3.md` | `REPLAN-2026-06-20-taskset-ar-visual-asset-adoption-task-ar-587-t3` | md | record | pass | Visual Asset Adoption T3 Replan for TASK-AR-587 |
 | `reviews/REPLAN-2026-06-20-taskset-ar-visual-system-integration-task-ar-591-t3.md` | `REPLAN-2026-06-20-taskset-ar-visual-system-integration-task-ar-591-t3` | md | record | pass | Visual System Integration T3 Replan for TASK-AR-591 |
 | `reviews/REPORT-2026-06-17-self-improvement-maturity.md` | `REPORT-2026-06-17-self-improvement-maturity` | md | record | watch | Self Improvement Maturity Report 2026-06-17 |
 | `reviews/REPORT-2026-06-17-self-improvement-remediation-delta.md` | `REPORT-2026-06-17-self-improvement-remediation-delta` | md | record | watch | Self Improvement Remediation Delta 2026-06-17 |
@@ -551,6 +552,7 @@ record_count: 588
 | `reviews/VERIFY-2026-06-18-unit-task-ar-582-001-20260618161000.json` | `VERIFY-2026-06-18-unit-task-ar-582-001-20260618161000` | json | record | n/a | VERIFY-2026-06-18-unit-task-ar-582-001-20260618161000 |
 | `reviews/VERIFY-2026-06-20-task-ar-583-semantic-scale.json` | `VERIFY-2026-06-20-task-ar-583-semantic-scale` | json | record | n/a | VERIFY-2026-06-20-task-ar-583-semantic-scale |
 | `reviews/VERIFY-2026-06-20-task-ar-584-pattern-renderers.json` | `VERIFY-2026-06-20-task-ar-584-pattern-renderers` | json | record | n/a | VERIFY-2026-06-20-task-ar-584-pattern-renderers |
+| `reviews/VERIFY-2026-06-20-task-ar-587-avatar-identity.json` | `VERIFY-2026-06-20-task-ar-587-avatar-identity` | json | record | n/a | VERIFY-2026-06-20-task-ar-587-avatar-identity |
 | `reviews/VERIFY-2026-06-20-task-ar-591-live-wiring.json` | `VERIFY-2026-06-20-task-ar-591-live-wiring` | json | record | n/a | VERIFY-2026-06-20-task-ar-591-live-wiring |
 | `reviews/VERIFY-2026-06-20-task-ar-592-a11y-responsive.json` | `VERIFY-2026-06-20-task-ar-592-a11y-responsive` | json | record | n/a | VERIFY-2026-06-20-task-ar-592-a11y-responsive |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
@@ -620,6 +622,7 @@ record_count: 588
 | `reviews/W4B-2026-06-18-TASK-AR-582.md` | `W4B-2026-06-18-TASK-AR-582` | md | accepted | n/a | W4B Independent Verification - TASK-AR-582 |
 | `reviews/W4B-2026-06-20-TASK-AR-583.md` | `W4B-2026-06-20-TASK-AR-583` | md | accepted | n/a | W4B Independent Verification - TASK-AR-583 |
 | `reviews/W4B-2026-06-20-TASK-AR-584.md` | `W4B-2026-06-20-TASK-AR-584` | md | accepted | n/a | W4B Independent Verification - TASK-AR-584 |
+| `reviews/W4B-2026-06-20-TASK-AR-587.md` | `W4B-2026-06-20-TASK-AR-587` | md | accepted | n/a | W4B Independent Verification - TASK-AR-587 |
 | `reviews/W4B-2026-06-20-TASK-AR-591.md` | `W4B-2026-06-20-TASK-AR-591` | md | accepted | n/a | W4B Independent Verification - TASK-AR-591 |
 | `reviews/W4B-2026-06-20-TASK-AR-592.md` | `W4B-2026-06-20-TASK-AR-592` | md | accepted | n/a | W4B Independent Verification - TASK-AR-592 |
 

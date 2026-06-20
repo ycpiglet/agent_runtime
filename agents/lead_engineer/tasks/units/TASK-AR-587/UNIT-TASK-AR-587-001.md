@@ -9,11 +9,15 @@ task_id: TASK-AR-587
 task_set_id: TASKSET-AR-VISUAL-ASSET-ADOPTION
 initiative_id: INIT-AR-VISUAL-ASSET-ADOPTION
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: completed
+verification_status: passed
+verified_at: 2026-06-20T10:11:00+09:00
+verified_by: codex-independent-verifier-task-ar-587-20260620
+evidence_refs:
+  - reviews/VERIFY-2026-06-20-task-ar-587-avatar-identity.json
 owner: lead-engineer
 created_at: 2026-06-20T01:04:15+09:00
-updated_at: 2026-06-20T01:04:15+09:00
+updated_at: 2026-06-20T10:11:00+09:00
 origin_type: owner_request
 origin_ref: chat:2026-06-20-ui-ux-visual-resources
 created_by: lead-engineer
@@ -39,6 +43,11 @@ verification:
   - python -m pytest tests/test_ui_design_assets.py -q
 handoff: Avatar helper ready; unit 2 adds role accent + console placement.
 stop_condition: If a CC0 style cannot be vendored offline cleanly, stop and flag rather than depending on the live API.
+resolution: done
+completed_at: 2026-06-20T10:11:00+09:00
+closed_by: codex-interface-designer-task-ar-587-20260620
+actual_hours: 1
+actual_tokens: 2500
 ---
 
 # UNIT-TASK-AR-587-001 - Vendor + self-host a CC0 DiceBear style and add patternAgentAvatar
@@ -86,3 +95,15 @@ Avatar helper ready; unit 2 adds role accent + console placement.
 ## Stop Boundary
 
 If a CC0 style cannot be vendored offline cleanly, stop and flag rather than depending on the live API.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-20T10:11:00+09:00`
+- Resolution: `done`
+- Actual hours: `1`
+- Actual tokens: `2500`
+- Closed by: `codex-interface-designer-task-ar-587-20260620`
+- Evidence:
+  - `reviews/VERIFY-2026-06-20-task-ar-587-avatar-identity.json`
+<!-- work-close:end -->

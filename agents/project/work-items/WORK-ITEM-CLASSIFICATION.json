@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-20T09:12:45+09:00",
+  "generated_at": "2026-06-20T10:16:49+09:00",
   "record_count": 366,
   "finding_count": 0,
   "findings": [],
@@ -3820,7 +3820,7 @@
       "title": "Give every agent a deterministic visual identity: a seeded SVG avatar keyed to agent…",
       "path": "agents/lead_engineer/tasks/TASK-AR-587.md",
       "parent_id": "TASKSET-AR-VISUAL-ASSET-ADOPTION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-587-001",
@@ -3831,7 +3831,7 @@
       "title": "UNIT-TASK-AR-587-001 - Vendor + self-host a CC0 DiceBear style and add patternAgentAvatar",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-587/UNIT-TASK-AR-587-001.md",
       "parent_id": "TASK-AR-587",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-587-002",
@@ -3842,7 +3842,7 @@
       "title": "UNIT-TASK-AR-587-002 - Deterministic role accent + console placement",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-587/UNIT-TASK-AR-587-002.md",
       "parent_id": "TASK-AR-587",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-588",
