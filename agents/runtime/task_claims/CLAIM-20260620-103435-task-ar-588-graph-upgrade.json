@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-588:tab-01",
   "pane_id": "terminal:wt-task-ar-588:tab-01",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-VISUAL-ASSET-ADOPTION",
   "active_scope": "TASKSET-AR-VISUAL-ASSET-ADOPTION",
   "scope_transition_approved": false,
@@ -27,12 +27,12 @@
   "worktree_path": "C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-588",
   "branch": "codex/task-ar-588-graph-upgrade",
   "claimed_at": "2026-06-20T10:34:35+09:00",
-  "last_heartbeat": "2026-06-20T10:34:35+09:00",
-  "updated_at": "2026-06-20T10:34:35+09:00",
+  "last_heartbeat": "2026-06-20T11:54:37+09:00",
+  "updated_at": "2026-06-20T11:54:37+09:00",
   "expires_at": "2026-06-20T11:04:35+09:00",
   "lease": {
     "claimed_at": "2026-06-20T10:34:35+09:00",
-    "heartbeat_at": "2026-06-20T10:34:35+09:00",
+    "heartbeat_at": "2026-06-20T11:54:37+09:00",
     "expires_at": "2026-06-20T11:04:35+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260620-103435-task-ar-588-graph-upgrade.handoff.md",
@@ -52,5 +52,9 @@
     "agents/lead_engineer/tasks/units/TASK-AR-588/UNIT-TASK-AR-588-002.md",
     "reviews/VERIFY-2026-06-20-task-ar-588-graph-upgrade.json",
     "reviews/W4B-2026-06-20-TASK-AR-588.md"
-  ]
+  ],
+  "released_at": "2026-06-20T11:54:37+09:00",
+  "verified_by": "codex-independent-verifier-task-ar-588-20260620",
+  "verifier_role": "qa-reviewer",
+  "verification_evidence": "reviews/W4B-2026-06-20-TASK-AR-588.md"
 }
