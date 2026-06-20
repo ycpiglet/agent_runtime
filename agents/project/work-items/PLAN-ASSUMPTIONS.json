@@ -343,7 +343,7 @@
         {
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-20-taskset-ar-visual-asset-adoption-registration.md",
-          "value": "304e45467d5ec352a3c0ed9ed9ec313d6caea6f639a64d04c27a95b674e30948"
+          "value": "c93551e9f2b50b26f56a7a2d3c61c4a7fdf598f5ad5b09a7db589d7c7371e4b1"
         },
         {
           "kind": "sha256",
@@ -353,11 +353,11 @@
         {
           "kind": "sha256",
           "path": "scripts/work.py",
-          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-06-20-taskset-ar-visual-asset-adoption-registration.md",
-      "recorded_at": "2026-06-20T01:04:33+09:00",
+      "design_record": "reviews/REPLAN-2026-06-20-taskset-ar-visual-asset-adoption-task-ar-587-t3.md",
+      "recorded_at": "2026-06-20T09:48:23+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-VISUAL-ASSET-ADOPTION"
     },
@@ -386,5 +386,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-20T08:11:18+09:00"
+  "updated_at": "2026-06-20T09:48:23+09:00"
 }
