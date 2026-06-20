@@ -56,7 +56,7 @@ completed_task_set_count: 44
 
 - Flow: Implement the research-backed visual upgrade: DiceBear CC0 seeded agent avatars with role accents; Dagre+d3-force graph rendering for dependency/state-machine/live-agent views; Geist OFL fonts; Lucide icons; unDraw state illustrations; Radix+Carbon data-viz palette tokens and sparklines. Permissive-only, no-build, self-hosted, token-driven, landed experimental.
 - Progress: `2/4` done; `2` open or active.
-- WIP: active `1/3`; oldest `1.3h`; stale `0`.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-589` | INIT-AR-VISUAL-ASSET-ADOPTION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-589/UNIT-TASK-AR-589-001.md | planned | Action | P2 | Medium | Medium | 5h/10000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Self-host OFL fonts (Geist + Geist Mono) as font tokens and vendor the Lucide (ISC) i… |

@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-20T11:51:59+09:00
-record_count: 596
+generated_at: 2026-06-20T11:58:15+09:00
+record_count: 597
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `596` review and evidence records under `reviews/`.
+- Summary: indexed `597` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `596` files |
+| Reviews covered | pass | `597` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -140,6 +140,7 @@ record_count: 596
 | `reviews/MEETING-2026-06-17-self-improvement-cycle-sync.md` | `MEETING-2026-06-17-self-improvement-cycle-sync` | meeting | planned | planned | Self Improvement Cycle Sync |
 | `reviews/MEETING-2026-06-20-ui-refactor-cycle-2-seminar-beta.md` | `MEETING-2026-06-20-ui-refactor-cycle-2-seminar-beta` | md | record | pass | UI Refactor Cycle 2 Seminar and Beta Review |
 | `reviews/MEETING-2026-06-20-ui-refactor-cycle-3-seminar-beta.md` | `MEETING-2026-06-20-ui-refactor-cycle-3-seminar-beta` | md | record | pass | UI Refactor Cycle 3 Seminar and Beta Checkpoint |
+| `reviews/MEETING-2026-06-20-ui-refactor-cycle-4-seminar-beta.md` | `MEETING-2026-06-20-ui-refactor-cycle-4-seminar-beta` | md | record | pass | UI Refactor Cycle 4 Seminar and Beta Checkpoint |
 | `reviews/MEETING-2026-06-20-ui-refactor-cycle-seminar-beta.md` | `MEETING-2026-06-20-ui-refactor-cycle-seminar-beta` | md | record | pass | UI Refactor Cycle Seminar and Beta Review |
 | `reviews/OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion.json` | `OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion` | json | record | n/a | OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion |
 | `reviews/OFFLINE-EVAL-2026-06-09-task-ar-217-rerun.json` | `OFFLINE-EVAL-2026-06-09-task-ar-217-rerun` | json | record | n/a | OFFLINE-EVAL-2026-06-09-task-ar-217-rerun |
