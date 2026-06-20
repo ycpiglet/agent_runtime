@@ -4,23 +4,17 @@ This module owns the large static asset strings so ``ui_console.py`` can
 stay focused on HTTP routing, API responses, and data wiring.
 
 Graph layout (TASK-AR-588):
-  The dependency/state-machine views use an improved hand-rolled Sugiyama-style
-  layered DAG layout (topological rank → column centering within each rank layer),
-  rendered as our own token-driven SVG with Datadog-style edge encodings
+  Dependency, state-machine, and knowledge graph views use
+  ``patternSvgLayeredDagreLayout`` backed by the locally vendored
+  ``@dagrejs/dagre`` 3.0.0 UMD script when available, then render our own
+  token-driven SVG. Edges carry Datadog-style encodings
   (stroke-width = magnitude metric, stroke color = health semantic token) and
-  GitHub-Actions-style per-node status icons.
+  nodes carry GitHub-Actions-style status icons.
 
-  The live agent map uses a basic velocity-Verlet force-directed simulation
-  (repulsion + spring attraction), also rendered as our SVG. The
-  ``patternAgentAvatar`` avatar is drawn for each live-map node.
+  The live agent map uses ``patternSvgForceAgentLayout`` backed by locally
+  vendored d3-force 3.0.0 plus local d3 dependencies when available. Nodes are
+  rendered as embedded ``patternAgentAvatar`` SVGs with status badges.
 
-  Upgrade path: replace ``_dagre_layered_positions()`` below with Dagre (MIT,
-  ``@dagrejs/dagre`` / dagre.min.js IIFE global) vendored build-less via
-  ``<script>`` — the render call-site already feeds ``{nodes, edges}`` and
-  consumes ``{x, y}`` per node + point arrays per edge, which is exactly the
-  Dagre API surface. Similarly replace ``_force_positions()`` with d3-force
-  (ISC, standalone UMD) vendored locally; ``forceSimulation().nodes().force()``
-  ticks directly into SVG. Neither requires a build step.
   Do NOT adopt elkjs (EPL-2.0 weak copyleft) or 3d-force-graph (WebGL).
 """
 from __future__ import annotations
@@ -6173,6 +6167,9 @@ pre {
     min-width: var(--visual-graph-mobile-min-width);
     height: var(--visual-state-machine-mobile-height);
   }
+  .dep-graph-svg {
+    min-width: 100%;
+  }
 }
 @media (max-width: 480px) {
   :root {
@@ -9618,6 +9615,29 @@ function liveMapNodePositions(nodes, edges) {
   });
 }
 
+function appendLiveMapAvatar(group, node, px, py, size) {
+  const avatarSeed = String(node.id || node.role || node.label || "live-map-node");
+  const role = String(node.role || node.agent_role || (node.kind === "agent" ? node.id : node.kind) || "");
+  const label = String(node.label || node.id || "agent");
+  const template = document.createElement("template");
+  template.innerHTML = patternAgentAvatar(avatarSeed, { role, size, label });
+  const avatar = template.content.querySelector("svg");
+  if (!avatar) return false;
+  avatar.classList.add("live-map-avatar");
+  avatar.querySelectorAll("[fill], [stroke]").forEach((part) => {
+    const fill = part.getAttribute("fill");
+    const stroke = part.getAttribute("stroke");
+    if (fill !== null) part.style.fill = fill;
+    if (stroke !== null) part.style.stroke = stroke;
+  });
+  avatar.setAttribute("x", String(px - size / 2));
+  avatar.setAttribute("y", String(py - size / 2));
+  avatar.setAttribute("width", String(size));
+  avatar.setAttribute("height", String(size));
+  group.appendChild(document.importNode(avatar, true));
+  return true;
+}
+
 // Live-map health token mapping (Datadog-style: stroke color = health).
 const LIVE_MAP_HEALTH_STROKE = {
   working:    "var(--blue)",
@@ -9666,7 +9686,7 @@ function renderLiveMap() {
     svg.appendChild(note);
     return;
   }
-  // Force-directed layout (d3-force upgrade path - see module docstring).
+  // Force-directed layout using the d3-force-backed pattern helper when loaded.
   const positions = liveMapNodePositions(nodes, edges);
 
   // ---- Edge layer: Datadog-style encodings ----
@@ -9696,7 +9716,6 @@ function renderLiveMap() {
   svg.appendChild(edgeLayer);
 
   // ---- Node layer: patternAgentAvatar + GitHub-Actions status icons ----
-  const avatarSize = 36;
   const nodeLayer = document.createElementNS(SVG_NS, "g");
   nodes.forEach((node) => {
     const pos = positions[node.id];
@@ -9707,15 +9726,9 @@ function renderLiveMap() {
     group.setAttribute("class", `live-map-node kind-${escapeHtml(node.kind || "node")} presence-${escapeHtml(presenceKey)}`);
     group.setAttribute("data-node-id", String(node.id));
 
-    // Avatar drawn as a foreignObject-free embedded SVG via innerHTML approach:
-    // Insert a <g> that mirrors patternAgentAvatar geometry directly.
     const r = node.kind === "owner" ? 26 : 18;
-    const half = r;
-    // Background circle.
-    const bgCircle = document.createElementNS(SVG_NS, "circle");
-    bgCircle.setAttribute("cx", String(px)); bgCircle.setAttribute("cy", String(py));
-    bgCircle.setAttribute("r", String(r)); bgCircle.setAttribute("fill", "var(--panel-strong)");
-    group.appendChild(bgCircle);
+    const avatarSize = r * 2;
+    appendLiveMapAvatar(group, node, px, py, avatarSize);
     // Accent ring colored by health/presence token.
     const healthStroke = LIVE_MAP_HEALTH_STROKE[presenceKey] || "var(--line-strong)";
     const accentRing = document.createElementNS(SVG_NS, "circle");
@@ -10268,6 +10281,51 @@ function dependencyGraphData() {
   return runtimeState.dependency_graph || { nodes: [], edges: [], cycles: [], has_cycle: false, totals: {} };
 }
 
+function dependencyGraphFocusTasksetId() {
+  const taskSets = (runtimeState && runtimeState.task_sets) || [];
+  const active = taskSets.find((taskSet) => taskSet.active || taskSet.status === "active")
+    || taskSets.find((taskSet) => taskSet.id === ((runtimeState && runtimeState.active_taskset_id) || ""));
+  return active ? String(active.id || "") : "";
+}
+
+function dependencyGraphVisibleData(data) {
+  const nodes = data.nodes || [];
+  const edges = data.edges || [];
+  const focusTasksetId = dependencyGraphFocusTasksetId();
+  if (focusTasksetId) {
+    const focusedIds = new Set([focusTasksetId]);
+    nodes.forEach((node) => {
+      if (String(node.task_set_id || "") === focusTasksetId) focusedIds.add(String(node.id));
+    });
+    const focusedNodes = nodes.filter((node) => focusedIds.has(String(node.id)));
+    const focusedEdges = edges.filter((edge) => focusedIds.has(String(edge.from)) && focusedIds.has(String(edge.to)));
+    if (focusedNodes.length > 1) {
+      return {
+        nodes: focusedNodes,
+        edges: focusedEdges,
+        capped: focusedNodes.length < nodes.length,
+        reason: "active",
+      };
+    }
+  }
+  const linked = new Set();
+  edges.forEach((edge) => {
+    if (edge.from) linked.add(String(edge.from));
+    if (edge.to) linked.add(String(edge.to));
+  });
+  (data.cycles || []).forEach((cycle) => (cycle || []).forEach((node) => linked.add(String(node))));
+  if (!linked.size) return { nodes, edges, capped: false };
+  const visibleNodes = nodes.filter((node) => linked.has(String(node.id)));
+  const visibleIds = new Set(visibleNodes.map((node) => String(node.id)));
+  const visibleEdges = edges.filter((edge) => visibleIds.has(String(edge.from)) && visibleIds.has(String(edge.to)));
+  return {
+    nodes: visibleNodes,
+    edges: visibleEdges,
+    capped: visibleNodes.length < nodes.length,
+    reason: "linked",
+  };
+}
+
 function renderCycleWarning(id, cycles) {
   const host = $(id);
   if (!host) return;
@@ -10337,78 +10395,6 @@ function dependencyNodePositions(nodes, edges) {
   }).positions;
 }
 
-function _dagre_layered_positions(nodes, edges, opts) {
-  // Sugiyama-style layered layout.
-  // 1. Compute ranks via longest-path BFS (topological rank = max(pred ranks)+1).
-  // 2. Center nodes within each rank layer.
-  const w = (opts && opts.w) || 1000;
-  const h = (opts && opts.h) || 600;
-  const marginX = (opts && opts.marginX) || 80;
-  const marginY = (opts && opts.marginY) || 80;
-  const topDown = opts == null || opts.topDown !== false;
-
-  const ids = nodes.map((n) => n.id);
-  const idSet = new Set(ids);
-
-  // Adjacency: successors per node (direction: from -> to is a dependency).
-  const succs = {};  // node -> [successor ids]
-  const preds = {};  // node -> [predecessor ids]
-  ids.forEach((id) => { succs[id] = []; preds[id] = []; });
-  (edges || []).forEach((e) => {
-    if (idSet.has(e.from) && idSet.has(e.to)) {
-      (succs[e.from] || (succs[e.from] = [])).push(e.to);
-      (preds[e.to]   || (preds[e.to]   = [])).push(e.from);
-    }
-  });
-
-  // Longest-path rank (handles DAGs with multiple roots gracefully).
-  const rank = {};
-  ids.forEach((id) => { rank[id] = 0; });
-  // Topological sort via Kahn (cycle-safe).
-  const inDeg = {};
-  ids.forEach((id) => { inDeg[id] = (preds[id] || []).length; });
-  const queue = ids.filter((id) => inDeg[id] === 0);
-  const order = [];
-  while (queue.length) {
-    const cur = queue.shift();
-    order.push(cur);
-    (succs[cur] || []).forEach((s) => {
-      rank[s] = Math.max(rank[s], rank[cur] + 1);
-      inDeg[s] = (inDeg[s] || 1) - 1;
-      if (inDeg[s] <= 0) queue.push(s);
-    });
-  }
-  // Any nodes not reached (cycle) get rank = max+1.
-  const maxRankReached = Math.max(0, ...Object.values(rank));
-  ids.forEach((id) => { if (!order.includes(id)) rank[id] = maxRankReached + 1; });
-
-  // Group by rank.
-  const byRank = {};
-  ids.forEach((id) => {
-    const r = rank[id];
-    (byRank[r] || (byRank[r] = [])).push(id);
-  });
-  const rankLevels = Object.keys(byRank).map(Number).sort((a, b) => a - b);
-  const numRanks = rankLevels.length || 1;
-  const rankSpan = (topDown ? h : w) - marginY * 2;
-  const rankStep = numRanks > 1 ? rankSpan / (numRanks - 1) : 0;
-
-  const positions = {};
-  rankLevels.forEach((r, rankIdx) => {
-    const layer = byRank[r];
-    const colSpan = (topDown ? w : h) - marginX * 2;
-    const colStep = layer.length > 1 ? colSpan / (layer.length - 1) : 0;
-    layer.forEach((id, colIdx) => {
-      const along = marginX + colIdx * colStep + (layer.length === 1 ? colSpan / 2 : 0);
-      const across = marginY + rankIdx * rankStep;
-      positions[id] = topDown
-        ? { x: along, y: across }
-        : { x: across, y: along };
-    });
-  });
-  return positions;
-}
-
 // Dependency graph health token mapping (Datadog-style: edge color = health).
 const DEP_HEALTH_STROKE = {
   healthy:  "var(--success)",
@@ -10430,8 +10416,10 @@ const DEP_STATUS_GLYPH = {
 function renderDependencyGraph() {
   const data = dependencyGraphData();
   const totals = data.totals || {};
+  const visible = dependencyGraphVisibleData(data);
   setText("dep-graph-summary",
     `${totals.nodes || 0} nodes - ${totals.dependency_edges || 0} deps - ${totals.parent_edges || 0} subtasks`
+    + (visible.capped ? ` - showing ${visible.nodes.length} ${visible.reason || "linked"}` : "")
     + (data.has_cycle ? ` - ${(data.cycles || []).length} cycle(s)` : ""));
   renderCycleWarning("dep-cycle-warning", data.cycles);
 
@@ -10443,8 +10431,8 @@ function renderDependencyGraph() {
 
   const svg = $("dep-graph-svg");
   if (!svg) return;
-  const nodes = data.nodes || [];
-  const edges = data.edges || [];
+  const nodes = visible.nodes || [];
+  const edges = visible.edges || [];
   while (svg.firstChild) svg.removeChild(svg.firstChild);
   if (!nodes.length) {
     const note = document.createElementNS(SVG_NS, "text");
@@ -10456,7 +10444,7 @@ function renderDependencyGraph() {
     svg.appendChild(note);
     return;
   }
-  // Layered DAG layout (Dagre upgrade path - see module docstring).
+  // Layered DAG layout using the Dagre-backed pattern helper when loaded.
   const positions = dependencyNodePositions(nodes, edges);
 
   // ---- Edge layer: Datadog-style encodings ----

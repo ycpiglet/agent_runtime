@@ -2355,6 +2355,10 @@ def test_ui_console_timeline_and_dependency_js_render_bars_arrows_and_cycle(tmp_
     # Dependency graph reuses the SVG node/edge primitives (like the live map).
     assert "dep-edge" in js
     assert "dep-node" in js
+    assert "function dependencyGraphFocusTasksetId(" in js
+    assert "function dependencyGraphVisibleData(" in js
+    assert 'reason: "active"' in js
+    assert "showing ${visible.nodes.length} ${visible.reason" in js
     assert "patternSvgLayeredDagreLayout(nodes, edges" in js
     assert "svgLayeredEdgePath(route)" in js
     assert "graphEdgeMagnitudeBucket(edge)" in js
@@ -3843,16 +3847,15 @@ def test_ui_console_knowledge_graph_search_filter_deeplink_present(tmp_path):
 
 
 def test_ui_console_dep_graph_uses_layered_dag_positions(tmp_path):
-    """Dependency graph uses layered DAG layout (Dagre/Sugiyama-style)."""
+    """Dependency graph uses the vendored Dagre-backed pattern layout."""
     js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
     assert "function dependencyNodePositions(" in js
-    # Must include a layered DAG layout function.
-    assert "_dagre_layered_positions(" in js or "patternSvgLayeredDagreLayout(" in js
-    # dependencyNodePositions must delegate to a layered layout.
+    assert "_dagre_layered_positions(" not in js
+    assert "patternSvgLayeredDagreLayout(" in js
     start = js.index("function dependencyNodePositions(")
     end = js.index("function renderDependencyGraph(")
     dep_fn = js[start:end]
-    assert "_dagre_layered_positions(" in dep_fn or "patternSvgLayeredDagreLayout(" in dep_fn
+    assert "patternSvgLayeredDagreLayout(nodes, edges" in dep_fn
 
 
 def test_ui_console_dep_graph_js_has_datadog_edge_encodings(tmp_path):
@@ -3891,12 +3894,12 @@ def test_ui_console_dep_graph_css_status_icon_uses_tokens(tmp_path):
 
 
 def test_ui_console_state_machine_js_has_layered_dag_layout(tmp_path):
-    """State machine viewer uses layered DAG layout (Dagre/Sugiyama-style)."""
+    """State machine viewer uses the vendored Dagre-backed pattern layout."""
     js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
     start = js.index("function stateMachineNodePositions(")
     end = js.index("function renderStateMachineViewer(")
     sm_fn = js[start:end]
-    assert "_dagre_layered_positions(" in sm_fn or "patternSvgLayeredDagreLayout(" in sm_fn
+    assert "patternSvgLayeredDagreLayout(nodes, edges" in sm_fn
 
 
 def test_ui_console_state_machine_js_has_datadog_edge_encodings(tmp_path):
@@ -3929,7 +3932,7 @@ def test_ui_console_state_machine_css_status_icon_uses_tokens(tmp_path):
 
 
 def test_ui_console_live_map_js_has_force_directed_layout(tmp_path):
-    """Live map uses a force-directed simulation layout (d3-force upgrade path)."""
+    """Live map uses the d3-force-backed pattern layout path."""
     js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
     start = js.index("function liveMapNodePositions(")
     end = js.index("function renderLiveMap(")
@@ -3963,6 +3966,18 @@ def test_ui_console_live_map_js_has_github_actions_status_icons(tmp_path):
     assert "iconBg" in lm_block
 
 
+def test_ui_console_live_map_nodes_use_pattern_agent_avatar(tmp_path):
+    """Live map nodes embed the promoted avatar pattern instead of plain circles."""
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert "function appendLiveMapAvatar(" in js
+    assert "patternAgentAvatar(avatarSeed" in js
+    start = js.index("function renderLiveMap(")
+    end = js.index("function pulseLiveElement(")
+    lm_block = js[start:end]
+    assert "appendLiveMapAvatar(group, node, px, py, avatarSize)" in lm_block
+    assert "live-map-avatar" in js
+
+
 def test_ui_console_live_map_css_status_icon_uses_tokens(tmp_path):
     """live-map-status-icon and live-map-node-label CSS use semantic tokens."""
     css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
@@ -3988,13 +4003,14 @@ def test_ui_console_graph_upgrade_escaping_in_live_map_render(tmp_path):
     assert "escapeHtml(" in lm_block
 
 
-def test_ui_console_graph_upgrade_module_docstring_mentions_dagre_upgrade_path(tmp_path):
-    """Module docstring documents Dagre/d3-force as the upgrade path (TASK-AR-588)."""
+def test_ui_console_graph_upgrade_module_docstring_mentions_vendored_runtime_contract(tmp_path):
+    """Module docstring documents the active Dagre/d3-force runtime contract."""
     import agent_runtime.ui_console_assets as assets_mod
     doc = assets_mod.__doc__ or ""
     assert "Dagre" in doc
     assert "d3-force" in doc
-    assert "upgrade path" in doc.lower()
+    assert "locally vendored" in doc
+    assert "patternAgentAvatar" in doc
 
 
 def test_ui_console_no_cdnjs_or_unpkg_in_graph_code(tmp_path):

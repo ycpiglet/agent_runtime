@@ -104,6 +104,27 @@ Promoted pattern usage as of `TASK-AR-587`:
 | --- | --- |
 | `patternAgentAvatar` | Deterministic self-hosted DiceBear Identicon SVG avatar with token-driven role accent in agent cards and team identity surfaces. |
 
+Promoted pattern usage as of `TASK-AR-588`:
+
+| Pattern API | Current console usage |
+| --- | --- |
+| `patternSvgLayeredDagreLayout` | Dependency graph, state-machine graph, and knowledge graph use local `@dagrejs/dagre` 3.0.0 when loaded, then render token-driven SVG nodes, routed edges, and status icons. |
+| `patternSvgForceAgentLayout` | Live agent map uses local d3-force 3.0.0 plus local d3 dependencies when loaded, then renders token-driven SVG edges and `patternAgentAvatar` nodes. |
+| `graphStatusIconText` / `graphEdgeHealth` / `graphEdgeMagnitudeBucket` | Graph status is encoded as glyph/text plus semantic health and magnitude classes, never color-only. |
+
+Dependency graph display rule: keep the full graph counts in the summary, but
+render the active taskset subgraph by default when an active taskset exists.
+This prevents large historical task inventories from collapsing into an
+unreadable Dagre layer while preserving the route as a graph surface.
+
+AR-588 vendor boundary:
+
+| Asset | License | Runtime rule |
+| --- | --- | --- |
+| `src/agent_runtime/vendor/dagre/3.0.0/dagre.min.js` | MIT | Served locally through `/vendor/dagre/3.0.0/dagre.min.js`; no CDN. |
+| `src/agent_runtime/vendor/d3-force/3.0.0/d3-force.min.js` | ISC | Served locally through `/vendor/d3-force/3.0.0/d3-force.min.js`; no CDN. |
+| `src/agent_runtime/vendor/d3-{quadtree,dispatch,timer}/...` | ISC | Served locally before d3-force; required by the vendored UMD graph layout runtime. |
+
 Residual one-off boundary: data-heavy SVG node/edge drawing, calendar
 anchor/mode state, schedule cards, and office-map DOM placement remain in
 `ui_console_assets.py` as one-off renderers. Office-map placement manipulates

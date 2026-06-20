@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-20T10:27:04+09:00
+generated_at: 2026-06-20T11:50:52+09:00
 record_count: 366
 ---
 
@@ -388,9 +388,9 @@ record_count: 366
 | 20.1.1 | Task 20.1.1 | task | `TASK-AR-587` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | completed | `agents/lead_engineer/tasks/TASK-AR-587.md` | Give every agent a deterministic visual identity: a seeded SVG avatar keyed to agent… |
 | 20.1.1.1 | Unit 20.1.1.1 | unit | `UNIT-TASK-AR-587-001` | `TASK-AR-587` | completed | `agents/lead_engineer/tasks/units/TASK-AR-587/UNIT-TASK-AR-587-001.md` | UNIT-TASK-AR-587-001 - Vendor + self-host a CC0 DiceBear style and add patternAgentAvatar |
 | 20.1.1.2 | Unit 20.1.1.2 | unit | `UNIT-TASK-AR-587-002` | `TASK-AR-587` | completed | `agents/lead_engineer/tasks/units/TASK-AR-587/UNIT-TASK-AR-587-002.md` | UNIT-TASK-AR-587-002 - Deterministic role accent + console placement |
-| 20.1.2 | Task 20.1.2 | task | `TASK-AR-588` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | planned | `agents/lead_engineer/tasks/TASK-AR-588.md` | Replace the hand-rolled graph layout with proper layout engines: Dagre (MIT, layered/… |
-| 20.1.2.1 | Unit 20.1.2.1 | unit | `UNIT-TASK-AR-588-001` | `TASK-AR-588` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-588/UNIT-TASK-AR-588-001.md` | UNIT-TASK-AR-588-001 - Vendor Dagre + layered DAG renderer for dependency/state-machine |
-| 20.1.2.2 | Unit 20.1.2.2 | unit | `UNIT-TASK-AR-588-002` | `TASK-AR-588` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-588/UNIT-TASK-AR-588-002.md` | UNIT-TASK-AR-588-002 - Vendor d3-force + live agent map renderer |
+| 20.1.2 | Task 20.1.2 | task | `TASK-AR-588` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | completed | `agents/lead_engineer/tasks/TASK-AR-588.md` | Replace the hand-rolled graph layout with proper layout engines: Dagre (MIT, layered/… |
+| 20.1.2.1 | Unit 20.1.2.1 | unit | `UNIT-TASK-AR-588-001` | `TASK-AR-588` | completed | `agents/lead_engineer/tasks/units/TASK-AR-588/UNIT-TASK-AR-588-001.md` | UNIT-TASK-AR-588-001 - Vendor Dagre + layered DAG renderer for dependency/state-machine |
+| 20.1.2.2 | Unit 20.1.2.2 | unit | `UNIT-TASK-AR-588-002` | `TASK-AR-588` | completed | `agents/lead_engineer/tasks/units/TASK-AR-588/UNIT-TASK-AR-588-002.md` | UNIT-TASK-AR-588-002 - Vendor d3-force + live agent map renderer |
 | 20.1.3 | Task 20.1.3 | task | `TASK-AR-589` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | planned | `agents/lead_engineer/tasks/TASK-AR-589.md` | Self-host OFL fonts (Geist + Geist Mono) as font tokens and vendor the Lucide (ISC) i… |
 | 20.1.3.1 | Unit 20.1.3.1 | unit | `UNIT-TASK-AR-589-001` | `TASK-AR-589` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-589/UNIT-TASK-AR-589-001.md` | UNIT-TASK-AR-589-001 - Self-host Geist + Geist Mono as font tokens |
 | 20.1.3.2 | Unit 20.1.3.2 | unit | `UNIT-TASK-AR-589-002` | `TASK-AR-589` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-589/UNIT-TASK-AR-589-002.md` | UNIT-TASK-AR-589-002 - Vendor Lucide icon set + componentIcon helper |

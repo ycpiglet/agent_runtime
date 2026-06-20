@@ -1,0 +1,34 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-20-task-ar-588-20260620114515",
+  "work_id": "TASK-AR-588",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-588.md",
+  "kind": "task",
+  "task_id": "TASK-AR-588",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-20T11:45:15+09:00",
+  "verified_by": "codex-interface-designer-task-ar-588-20260620",
+  "command_count": 2,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_ui_console.py tests/test_ui_console_e2e.py tests/test_design_system_gate.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-20T11:45:15+09:00",
+      "finished_at": "2026-06-20T11:47:24+09:00",
+      "stdout": "........................................................................ [ 34%]\n........................................................................ [ 69%]\n................................................................         [100%]\n208 passed in 126.06s (0:02:06)\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-20T11:47:24+09:00",
+      "finished_at": "2026-06-20T11:47:27+09:00",
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0\n",
+      "stderr": ""
+    }
+  ]
+}

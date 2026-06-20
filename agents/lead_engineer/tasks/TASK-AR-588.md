@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-VISUAL-ASSET-ADOPTION
 registered_at: 2026-06-20T01:04:15+09:00
 created_at: 2026-06-20T01:04:15+09:00
-updated_at: 2026-06-20T01:04:15+09:00
+updated_at: 2026-06-20T11:50:50+09:00
 title: Dependency / state-machine / live-agent graph upgrade (Dagre + d3-force)
-status: planned
+status: completed
+started_at: 2026-06-20T10:34:35+09:00
 priority: P1
 difficulty: L
 est_hours: 10
@@ -32,6 +33,24 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+verification:
+  - python -m pytest tests/test_ui_console.py tests/test_ui_console_e2e.py tests/test_design_system_gate.py -q
+  - python scripts/design_system_gate.py --check --all-ui
+verification_status: passed
+verified_at: 2026-06-20T11:45:15+09:00
+verified_by: codex-interface-designer-task-ar-588-20260620
+evidence_refs:
+  - reviews/VERIFY-2026-06-20-task-ar-588-20260620114515.json
+  - reviews/W4B-2026-06-20-TASK-AR-588.md
+  - reviews/evidence/TASK-AR-588/dependency-desktop.png
+  - reviews/evidence/TASK-AR-588/dependency-mobile.png
+  - reviews/evidence/TASK-AR-588/live-map-desktop.png
+  - reviews/evidence/TASK-AR-588/live-map-mobile.png
+resolution: done
+completed_at: 2026-06-20T11:50:50+09:00
+closed_by: codex-interface-designer-task-ar-588-20260620
+actual_hours: 8.0
+actual_tokens: 26000
 ---
 
 # TASK-AR-588 - Dependency / state-machine / live-agent graph upgrade (Dagre + d3-force)
@@ -55,3 +74,20 @@ tags:
 
 - `python -m pytest tests/test_ui_console.py tests/test_ui_console_e2e.py tests/test_design_system_gate.py -q`
 - `python scripts/design_system_gate.py --check --all-ui`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-20T11:50:50+09:00`
+- Resolution: `done`
+- Actual hours: `8.0`
+- Actual tokens: `26000`
+- Closed by: `codex-interface-designer-task-ar-588-20260620`
+- Evidence:
+  - `reviews/VERIFY-2026-06-20-task-ar-588-20260620114515.json`
+  - `reviews/W4B-2026-06-20-TASK-AR-588.md`
+  - `reviews/evidence/TASK-AR-588/dependency-desktop.png`
+  - `reviews/evidence/TASK-AR-588/dependency-mobile.png`
+  - `reviews/evidence/TASK-AR-588/live-map-desktop.png`
+  - `reviews/evidence/TASK-AR-588/live-map-mobile.png`
+<!-- work-close:end -->
