@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-21
-task_count: 257
-open_count: 4
-completed_count: 253
-task_set_count: 2
-completed_task_set_count: 45
+task_count: 261
+open_count: 5
+completed_count: 256
+task_set_count: 3
+completed_task_set_count: 48
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `4` open or active tasks; `253` completed tasks are archived from this live board.
+- Summary: `5` open or active tasks; `256` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `4` / Ask `0` / Review `0` / Later `0` / Done `253`.
-- Task Sets: `2` active workflows; `45` completed workflows are hidden from the live action board.
+- Status: Action `5` / Ask `0` / Review `0` / Later `0` / Done `256`.
+- Task Sets: `3` active workflows; `48` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -61,6 +61,15 @@ completed_task_set_count: 45
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-589` | INIT-AR-VISUAL-ASSET-ADOPTION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-589/UNIT-TASK-AR-589-001.md | planned | Action | P2 | Medium | Medium | 5h/10000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Self-host OFL fonts (Geist + Geist Mono) as font tokens and vendor the Lucide (ISC) i… |
 | `TASK-AR-590` | INIT-AR-VISUAL-ASSET-ADOPTION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-590/UNIT-TASK-AR-590-001.md | planned | Action | P2 | Medium | Medium | 6h/12000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Add recolorable empty/error/loading illustrations, accessible data-viz palette tokens… |
+
+### Business Lanes Sales Revenue Implementation (`TASKSET-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION`)
+
+- Flow: Publish draft ICP/qualify/deal-readiness packet and explicit escalation guards from the sales-revenue lane contract.
+- Progress: `0/1` done; `1` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-597` | INIT-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-597/UNIT-TASK-AR-597-001.md | planned | Action | P1 | High | Medium | 4h/6500tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Draft a sales revenue packet that makes qualification, proposal, and partnership hand… |
 
 ## Archived Task Sets
 
@@ -112,14 +121,17 @@ completed_task_set_count: 45
 | Design System Served Asset Split (`TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT`) | Physically separate the console's served HTML/CSS/JS string assets from the Python API/server module while preserving /, /app.css, and /app.js behavior. | `1/1` done | `1` completed task files archived |
 | Design System Debt Consolidation (`TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION`) | Consolidate transitional spacing/radius px-alias tokens into a designed semantic scale, and promote remaining view-specific JS renderers into stable pattern modules, without re-introducing raw literals. | `2/2` done | `2` completed task files archived |
 | Visual System Integration & Verification (`TASKSET-AR-VISUAL-SYSTEM-INTEGRATION`) | Wire the new visual components into every relevant live view, boot-verify the served console, fix integration gaps, and run a WCAG AA + responsive pass on the new visual system. Permissive, no-build, token-driven. | `2/2` done | `2` completed task files archived |
+| Business Lanes Playbooks (`TASKSET-AR-BUSINESS-LANE-PLAYBOOKS`) | Create lane-specific operating packets that convert the business operating system into directly executable finance, marketing, sales, operations, support, planning, and strategy workflows. | `1/1` done | `1` completed task files archived |
+| Business Lanes Finance Implementation (`TASKSET-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION`) | Build finance/accounting execution packets (pricing-policy assumption, cost evidence, and decision boundaries) from the playbook contract. | `1/1` done | `1` completed task files archived |
+| Business Lanes Marketing Growth Implementation (`TASKSET-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION`) | Publish a draft campaign-readiness packet and decision triggers from the marketing-growth lane contract. | `1/1` done | `1` completed task files archived |
 
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `4` open across `2` task sets (see Action Board above).
-- Archived task sets: `45` (see Archived Task Sets above).
-- Archived task files: `253` — see `ARCHIVE-INDEX.md`.
+- Active: `5` open across `3` task sets (see Action Board above).
+- Archived task sets: `48` (see Archived Task Sets above).
+- Archived task files: `256` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

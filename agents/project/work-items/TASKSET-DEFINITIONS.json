@@ -138,6 +138,30 @@
       "display_name": "Visual System Integration & Verification",
       "summary": "Wire the new visual components into every relevant live view, boot-verify the served console, fix integration gaps, and run a WCAG AA + responsive pass on the new visual system. Permissive, no-build, token-driven.",
       "order": 626
+    },
+    {
+      "task_set_id": "TASKSET-AR-BUSINESS-LANE-PLAYBOOKS",
+      "display_name": "Business Lanes Playbooks",
+      "summary": "Create lane-specific operating packets that convert the business operating system into directly executable finance, marketing, sales, operations, support, planning, and strategy workflows.",
+      "order": 630
+    },
+    {
+      "task_set_id": "TASKSET-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION",
+      "display_name": "Business Lanes Finance Implementation",
+      "summary": "Build finance/accounting execution packets (pricing-policy assumption, cost evidence, and decision boundaries) from the playbook contract.",
+      "order": 631
+    },
+    {
+      "task_set_id": "TASKSET-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION",
+      "display_name": "Business Lanes Marketing Growth Implementation",
+      "summary": "Publish a draft campaign-readiness packet and decision triggers from the marketing-growth lane contract.",
+      "order": 632
+    },
+    {
+      "task_set_id": "TASKSET-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION",
+      "display_name": "Business Lanes Sales Revenue Implementation",
+      "summary": "Publish draft ICP/qualify/deal-readiness packet and explicit escalation guards from the sales-revenue lane contract.",
+      "order": 633
     }
   ]
 }

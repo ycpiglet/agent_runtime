@@ -1,5 +1,9 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
+  - reviews/REVIEW-2026-06-21-taskset-ar-business-lanes-sales-revenue-implementation-registration.md
+  - reviews/REVIEW-2026-06-21-taskset-ar-business-lanes-marketing-growth-implementation-registration.md
+  - reviews/REVIEW-2026-06-21-taskset-ar-business-lanes-finance-implementation-registration.md
+  - reviews/REVIEW-2026-06-21-taskset-ar-business-lane-playbooks-registration.md
   - reviews/REVIEW-2026-06-21-taskset-ar-business-operating-system-registration.md
   - reviews/REVIEW-2026-06-20-taskset-ar-visual-system-integration-registration.md
   - reviews/REVIEW-2026-06-20-taskset-ar-visual-asset-adoption-registration.md

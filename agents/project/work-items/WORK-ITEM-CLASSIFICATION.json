@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-21T17:13:42+09:00",
-  "record_count": 370,
+  "generated_at": "2026-06-21T18:53:31+09:00",
+  "record_count": 386,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4074,6 +4074,182 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-593/UNIT-TASK-AR-593-001.md",
       "parent_id": "TASK-AR-593",
       "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-BUSINESS-LANES",
+      "level": "initiative",
+      "number": "23",
+      "label": "Initiative 23",
+      "id": "INIT-AR-BUSINESS-LANES",
+      "title": "Business Lanes Playbooks",
+      "path": "agents/project/initiatives/INIT-AR-BUSINESS-LANES.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-BUSINESS-LANE-PLAYBOOKS",
+      "level": "taskset",
+      "number": "23.1",
+      "label": "Taskset 23.1",
+      "id": "TASKSET-AR-BUSINESS-LANE-PLAYBOOKS",
+      "title": "Business Lanes Playbooks",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-BUSINESS-LANES",
+      "status": "complete"
+    },
+    {
+      "key": "task:TASK-AR-594",
+      "level": "task",
+      "number": "23.1.1",
+      "label": "Task 23.1.1",
+      "id": "TASK-AR-594",
+      "title": "Provide concrete per-lane operating templates that define required inputs, outputs, s…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-594.md",
+      "parent_id": "TASKSET-AR-BUSINESS-LANE-PLAYBOOKS",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-594-001",
+      "level": "unit",
+      "number": "23.1.1.1",
+      "label": "Unit 23.1.1.1",
+      "id": "UNIT-TASK-AR-594-001",
+      "title": "UNIT-TASK-AR-594-001 - Draft and mirror business lane playbook packet",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-594/UNIT-TASK-AR-594-001.md",
+      "parent_id": "TASK-AR-594",
+      "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION",
+      "level": "initiative",
+      "number": "24",
+      "label": "Initiative 24",
+      "id": "INIT-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION",
+      "title": "Business Lanes Finance Implementation",
+      "path": "agents/project/initiatives/INIT-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION",
+      "level": "taskset",
+      "number": "24.1",
+      "label": "Taskset 24.1",
+      "id": "TASKSET-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION",
+      "title": "Business Lanes Finance Implementation",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION",
+      "status": "complete"
+    },
+    {
+      "key": "task:TASK-AR-595",
+      "level": "task",
+      "number": "24.1.1",
+      "label": "Task 24.1.1",
+      "id": "TASK-AR-595",
+      "title": "Produce draft finance-accounting evidence packets and boundary controls that the fina…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-595.md",
+      "parent_id": "TASKSET-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-595-001",
+      "level": "unit",
+      "number": "24.1.1.1",
+      "label": "Unit 24.1.1.1",
+      "id": "UNIT-TASK-AR-595-001",
+      "title": "UNIT-TASK-AR-595-001 - Draft finance policy evidence packet",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-595/UNIT-TASK-AR-595-001.md",
+      "parent_id": "TASK-AR-595",
+      "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION",
+      "level": "initiative",
+      "number": "25",
+      "label": "Initiative 25",
+      "id": "INIT-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION",
+      "title": "Business Lanes Marketing Growth Implementation",
+      "path": "agents/project/initiatives/INIT-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION",
+      "level": "taskset",
+      "number": "25.1",
+      "label": "Taskset 25.1",
+      "id": "TASKSET-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION",
+      "title": "Business Lanes Marketing Growth Implementation",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION",
+      "status": "complete"
+    },
+    {
+      "key": "task:TASK-AR-596",
+      "level": "task",
+      "number": "25.1.1",
+      "label": "Task 25.1.1",
+      "id": "TASK-AR-596",
+      "title": "Prepare a reusable marketing campaign-readiness packet (constraints, claims, channels…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-596.md",
+      "parent_id": "TASKSET-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-596-001",
+      "level": "unit",
+      "number": "25.1.1.1",
+      "label": "Unit 25.1.1.1",
+      "id": "UNIT-TASK-AR-596-001",
+      "title": "UNIT-TASK-AR-596-001 - Draft marketing growth campaign-readiness packet",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-596/UNIT-TASK-AR-596-001.md",
+      "parent_id": "TASK-AR-596",
+      "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION",
+      "level": "initiative",
+      "number": "26",
+      "label": "Initiative 26",
+      "id": "INIT-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION",
+      "title": "Business Lanes Sales Revenue Implementation",
+      "path": "agents/project/initiatives/INIT-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION",
+      "level": "taskset",
+      "number": "26.1",
+      "label": "Taskset 26.1",
+      "id": "TASKSET-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION",
+      "title": "Business Lanes Sales Revenue Implementation",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-597",
+      "level": "task",
+      "number": "26.1.1",
+      "label": "Task 26.1.1",
+      "id": "TASK-AR-597",
+      "title": "Draft a sales revenue packet that makes qualification, proposal, and partnership hand…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-597.md",
+      "parent_id": "TASKSET-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-597-001",
+      "level": "unit",
+      "number": "26.1.1.1",
+      "label": "Unit 26.1.1.1",
+      "id": "UNIT-TASK-AR-597-001",
+      "title": "UNIT-TASK-AR-597-001 - Draft sales revenue readiness packet",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-597/UNIT-TASK-AR-597-001.md",
+      "parent_id": "TASK-AR-597",
+      "status": "worker_ready"
     }
   ]
 }

@@ -4,6 +4,98 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-06-21-taskset-ar-business-lane-playbooks-registration.md",
+          "value": "c8214a648600c5bcae67a8714d192de2ed37c741f4caeb15f1e7b35f609981be"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "cb2cd245558157ff640dbf0b824694c5623e2e1ef0ccfba6e83f9a08a5522bc8"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-06-21-taskset-ar-business-lane-playbooks-registration.md",
+      "recorded_at": "2026-06-21T17:47:20+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-BUSINESS-LANE-PLAYBOOKS"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-06-21-taskset-ar-business-lanes-finance-implementation-registration.md",
+          "value": "2c780a355d742727ebe8ff4af7d89dc2b0cdf3e54f839ab9fe3a8ffa78cfe7d9"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "c5e5e2f4b6ffb3c1b3b54dbd0e4e9e57ee840cc320eb628ce941bc4dab92ff5c"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-06-21-taskset-ar-business-lanes-finance-implementation-registration.md",
+      "recorded_at": "2026-06-21T18:31:29+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-06-21-taskset-ar-business-lanes-marketing-growth-implementation-registration.md",
+          "value": "afa988c9300b1379d7ba441af2fab83850ef4831cb7120e744cf416f30eecc59"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "c5e5e2f4b6ffb3c1b3b54dbd0e4e9e57ee840cc320eb628ce941bc4dab92ff5c"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-06-21-taskset-ar-business-lanes-marketing-growth-implementation-registration.md",
+      "recorded_at": "2026-06-21T18:46:05+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-06-21-taskset-ar-business-lanes-sales-revenue-implementation-registration.md",
+          "value": "b43ca8cc1971639464f748377943d6279bf4ac18b55c9d1ff0a5ad8aeace087b"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "c5e5e2f4b6ffb3c1b3b54dbd0e4e9e57ee840cc320eb628ce941bc4dab92ff5c"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "d396110d97545a81b53d0cc18de2f62bdf0be1e5e82d88138edbebb72c1a36f0"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-06-21-taskset-ar-business-lanes-sales-revenue-implementation-registration.md",
+      "recorded_at": "2026-06-21T18:53:33+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-21-taskset-ar-business-operating-system-registration.md",
           "value": "06808c7062a62c8bf1bbf3fe24feeca00cd1bf8e1b3a77b463022ff268d8cd75"
         },
@@ -409,5 +501,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-21T16:43:42+09:00"
+  "updated_at": "2026-06-21T18:53:33+09:00"
 }

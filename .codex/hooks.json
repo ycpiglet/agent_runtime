@@ -18,6 +18,11 @@
             "type": "command",
             "command": "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe scripts/claim_reaper_hook.py --root .",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe scripts/interrupted_run_detector.py --root .",
+            "timeout": 15
           }
         ]
       }

@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-21T17:13:42+09:00
-record_count: 370
+generated_at: 2026-06-21T18:53:31+09:00
+record_count: 386
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `370` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `386` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `23` records |
-| Tasksets | pass | `47` records |
-| Tasks | pass | `257` records |
-| Units | pass | `43` records |
+| Initiatives | pass | `27` records |
+| Tasksets | pass | `51` records |
+| Tasks | pass | `261` records |
+| Units | pass | `47` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -409,6 +409,22 @@ record_count: 370
 | 22.1 | Taskset 22.1 | taskset | `TASKSET-AR-BUSINESS-OPERATING-SYSTEM` | `INIT-AR-BUSINESS-OPERATING-SYSTEM` | complete | `BACKLOG-BOARD.md` | Business Operating System |
 | 22.1.1 | Task 22.1.1 | task | `TASK-AR-593` | `TASKSET-AR-BUSINESS-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-593.md` | Define operations/support and planning/strategy teams alongside finance, marketing, a… |
 | 22.1.1.1 | Unit 22.1.1.1 | unit | `UNIT-TASK-AR-593-001` | `TASK-AR-593` | completed | `agents/lead_engineer/tasks/units/TASK-AR-593/UNIT-TASK-AR-593-001.md` | UNIT-TASK-AR-593-001 - Publish business operating lanes and cycle packet |
+| 23 | Initiative 23 | initiative | `INIT-AR-BUSINESS-LANES` | - | active | `agents/project/initiatives/INIT-AR-BUSINESS-LANES.md` | Business Lanes Playbooks |
+| 23.1 | Taskset 23.1 | taskset | `TASKSET-AR-BUSINESS-LANE-PLAYBOOKS` | `INIT-AR-BUSINESS-LANES` | complete | `BACKLOG-BOARD.md` | Business Lanes Playbooks |
+| 23.1.1 | Task 23.1.1 | task | `TASK-AR-594` | `TASKSET-AR-BUSINESS-LANE-PLAYBOOKS` | completed | `agents/lead_engineer/tasks/TASK-AR-594.md` | Provide concrete per-lane operating templates that define required inputs, outputs, s… |
+| 23.1.1.1 | Unit 23.1.1.1 | unit | `UNIT-TASK-AR-594-001` | `TASK-AR-594` | completed | `agents/lead_engineer/tasks/units/TASK-AR-594/UNIT-TASK-AR-594-001.md` | UNIT-TASK-AR-594-001 - Draft and mirror business lane playbook packet |
+| 24 | Initiative 24 | initiative | `INIT-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION` | - | active | `agents/project/initiatives/INIT-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION.md` | Business Lanes Finance Implementation |
+| 24.1 | Taskset 24.1 | taskset | `TASKSET-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION` | `INIT-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION` | complete | `BACKLOG-BOARD.md` | Business Lanes Finance Implementation |
+| 24.1.1 | Task 24.1.1 | task | `TASK-AR-595` | `TASKSET-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION` | completed | `agents/lead_engineer/tasks/TASK-AR-595.md` | Produce draft finance-accounting evidence packets and boundary controls that the fina… |
+| 24.1.1.1 | Unit 24.1.1.1 | unit | `UNIT-TASK-AR-595-001` | `TASK-AR-595` | completed | `agents/lead_engineer/tasks/units/TASK-AR-595/UNIT-TASK-AR-595-001.md` | UNIT-TASK-AR-595-001 - Draft finance policy evidence packet |
+| 25 | Initiative 25 | initiative | `INIT-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION` | - | active | `agents/project/initiatives/INIT-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION.md` | Business Lanes Marketing Growth Implementation |
+| 25.1 | Taskset 25.1 | taskset | `TASKSET-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION` | `INIT-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION` | complete | `BACKLOG-BOARD.md` | Business Lanes Marketing Growth Implementation |
+| 25.1.1 | Task 25.1.1 | task | `TASK-AR-596` | `TASKSET-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION` | completed | `agents/lead_engineer/tasks/TASK-AR-596.md` | Prepare a reusable marketing campaign-readiness packet (constraints, claims, channels… |
+| 25.1.1.1 | Unit 25.1.1.1 | unit | `UNIT-TASK-AR-596-001` | `TASK-AR-596` | completed | `agents/lead_engineer/tasks/units/TASK-AR-596/UNIT-TASK-AR-596-001.md` | UNIT-TASK-AR-596-001 - Draft marketing growth campaign-readiness packet |
+| 26 | Initiative 26 | initiative | `INIT-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION` | - | active | `agents/project/initiatives/INIT-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION.md` | Business Lanes Sales Revenue Implementation |
+| 26.1 | Taskset 26.1 | taskset | `TASKSET-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION` | `INIT-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION` | active | `BACKLOG-BOARD.md` | Business Lanes Sales Revenue Implementation |
+| 26.1.1 | Task 26.1.1 | task | `TASK-AR-597` | `TASKSET-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION` | planned | `agents/lead_engineer/tasks/TASK-AR-597.md` | Draft a sales revenue packet that makes qualification, proposal, and partnership hand… |
+| 26.1.1.1 | Unit 26.1.1.1 | unit | `UNIT-TASK-AR-597-001` | `TASK-AR-597` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-597/UNIT-TASK-AR-597-001.md` | UNIT-TASK-AR-597-001 - Draft sales revenue readiness packet |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.
