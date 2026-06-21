@@ -1,0 +1,28 @@
+schema: agent-runtime-owner-approval/v1
+target_version: 0.3.0
+target_tag: v0.3.0
+status: owner_approved
+owner: owner
+decision_date: 2026-06-21
+approved_by: owner
+approval_basis: >
+  User directive (2026-06-21): chose "0.3.0 (minor)" for the release and "재설계 +
+  발행 한 번에" / "A로 #183 머지 지켜보고 v0.3.0까지 마무리해줘" — explicit authorization to
+  cut v0.3.0 once the metric-based release redesign (PR #183) merged. The cadence
+  trigger recommends minor 0.3.0 (114 feat since v0.2.0, 0 breaking); minor stays the
+  Owner-approval tier, satisfied here by this directive.
+approval_scope:
+  - version bump from 0.2.0 to 0.3.0 (pyproject.toml + src/agent_runtime/__init__.py)
+  - git tag v0.3.0 + GitHub push at the CI-validated green main SHA
+  - autofolio ref bump to v0.3.0 via host update-notify -> update-plan -> update -> doctor
+required_owner_decision:
+  - approve_release_execution
+  - hold_at_ready
+  - reject_release_execution
+owner_decision: approve_release_execution
+notes: >
+  Minor release: 337 commits / 114 feat accumulated since v0.2.0 with no breaking
+  changes. The redesigned release-auto pipeline (PR #183) emits an
+  owner-approval-required notification for the minor tier rather than auto-executing it;
+  this record is that approval. The tag is cut at a CI-validated green main commit so
+  autofolio (downstream host) sees the new tag and is prompted to update.
