@@ -25,11 +25,11 @@
       "agents/lead_engineer/REPORTING-FORMAT.md": "sha256:692fc10d65ed5f2ebb3cc0547a5eb5872c273eb6c4c4a2d6ca2be4d94ef47359",
       "agents/lead_engineer/SKILL.md": "sha256:b1b82e260dab0f5c616f1fd3ffb1f9e4ac58a80fdb2c2cebd3d6835476c50a63",
       "agents/lead_engineer/TOKEN-BUDGET.md": "sha256:437a3e676948572f37737e71db55edd29c62f8fea916feb864954349cccc402a",
-      "agents/lead_engineer/retros/README.md": "sha256:258d631565097a5a882ca6649dd024b1bb175e460059c5a564cea53c0a36f15b",
-      "agents/lead_engineer/retros/TEMPLATE.md": "sha256:479669a43afa4f13ab4188b28e47752663c80e84408852a0802c216e668bd1e3",
+      "agents/lead_engineer/retros/README.md": "sha256:79b92a7fad17b189a06fdbbacc477a9cb625867cd99efe46d052b17f5d541d17",
+      "agents/lead_engineer/retros/TEMPLATE.md": "sha256:f9ec2818ae01850fe9244b778bf3b2a910e32a04267f5b333a02af0c478bcd5f",
       "agents/lead_engineer/tasks/units/README.md": "sha256:e44234861bf6ee25ebe5a31685a816e053559fd1ac27ed1aea95382b4156dc77",
       "agents/lead_engineer/tasks/units/examples/UNIT-EXAMPLE-001.md": "sha256:6c86c93fb4168053843b67269d6ea9744b8f11119e82a575cead5657341ea37c",
-      "agents/managing_partner/INDEPENDENCE-RUBRIC.md": "sha256:18b4cc575ac4c0adfb485054bf488811a2130fcde39e71dc9f2477fe00060d32",
+      "agents/managing_partner/INDEPENDENCE-RUBRIC.md": "sha256:a5193b7a437858df70501a2eec90d58813341d6923fcf190cfee0a14473cb2bd",
       "agents/managing_partner/SKILL.md": "sha256:0d54db960eeb111e2b863007e897f5f1ae96db32b4611ee14a832159c5f79e12",
       "agents/owner/SKILL.md": "sha256:eeeb78ac0aabcefd8ce81088a5c8c149cfae3f07fc1088befa9911e04effed8d",
       "agents/project/AGENT-KNOWLEDGE-WAREHOUSE.md": "sha256:b88ea8f5f866eb6d92de349ff8e85274a90533486a2ff61da4ffed8663519803",
@@ -269,7 +269,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.3.1",
-    "template_digest": "sha256:8a7738bcb9b5cbfc50944a50add3d63f29389161d5d20aaccf308f0ba29c76dc",
+    "template_digest": "sha256:8373d85f2d71bf4251e8b45a87cbc0098486bb86d74aa9a79983c1604605449f",
     "template_files": 266
   },
   "project": "fixture-host",
