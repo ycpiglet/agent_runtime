@@ -1,0 +1,34 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-21-task-ar-595-20260621183606",
+  "work_id": "TASK-AR-595",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-595.md",
+  "kind": "task",
+  "task_id": "TASK-AR-595",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-21T18:36:06+09:00",
+  "verified_by": "work.py verify",
+  "command_count": 2,
+  "commands": [
+    {
+      "command": "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-21T18:36:06+09:00",
+      "finished_at": "2026-06-21T18:36:07+09:00",
+      "stdout": "taskset-work-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\nfindings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/task_identity.py check --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-21T18:36:07+09:00",
+      "finished_at": "2026-06-21T18:36:08+09:00",
+      "stdout": "task-identity: pass\nroot=C:\\Users\\ycpig\\agent_runtime\nfindings=0\n",
+      "stderr": ""
+    }
+  ]
+}

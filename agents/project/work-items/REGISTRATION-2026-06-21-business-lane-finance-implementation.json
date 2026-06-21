@@ -1,0 +1,75 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "chat:2026-06-21-business-lane-playbooks",
+  "created_by": "codex-planner",
+  "now": "2026-06-21T18:30:00+09:00",
+  "initiative": {
+    "id": "INIT-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION",
+    "title": "Business Lanes Finance Implementation",
+    "summary": "Prepare finance implementation planning outputs from the lane playbook with explicit pricing, cost, and external-effect boundaries.",
+    "owner": "lead_engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION",
+    "display_name": "Business Lanes Finance Implementation",
+    "summary": "Build finance/accounting execution packets (pricing-policy assumption, cost evidence, and decision boundaries) from the playbook contract.",
+    "order": 631,
+    "plan_slug": "2026-06-21-business-lane-finance-implementation"
+  },
+  "tasks": [
+    {
+      "title": "Create finance policy evidence packet for execution planning",
+      "goal": "Produce draft finance-accounting evidence packets and boundary controls that the finance lane can use to progress to implementation with owner-approved scope.",
+      "scope": "Draft finance policy evidence files only; no pricing/cost stateful writes or external accounting system mutations.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 4,
+      "est_tokens": 6500,
+      "owner": "lead_engineer",
+      "team": "planning-office",
+      "acceptance": [
+        "A finance policy evidence packet and decision trigger list exists.",
+        "Revenue, margin, and cost assumption fields are explicit and labeled draft/verified status.",
+        "External-effect safeguards and approval boundaries are preserved.",
+        "Task/unit evidence and closeout are ready for W4 closure."
+      ],
+      "verification": [
+        "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION --check",
+        "python scripts/task_identity.py check --check"
+      ],
+      "units": [
+        {
+          "title": "Draft finance policy evidence packet",
+          "context": "This unit creates draft finance-accounting evidence artifacts from the lane playbook: pricing assumptions, cost evidence draft, and decision trigger matrix.",
+          "inputs": [
+            "agents/project/WORK-LANE-PLAYBOOKS.md",
+            "agents/project/BUSINESS-OPERATING-SYSTEM.md"
+          ],
+          "target_files": [
+            "agents/project/WORK-LANE-PLAYBOOKS.md"
+          ],
+          "scope": "Docs only: finance evidence packet draft and boundary controls.",
+          "steps": [
+            "Draft the finance policy evidence artifacts in `agents/project/WORK-LANE-PLAYBOOKS.md` under a finance lane subsection.",
+            "Add explicit draft/verified fields for pricing assumption, margin guardrails, and cost capture scope.",
+            "List required owner approvals and external-effect boundaries for pricing/cost changes.",
+            "Add taskset closeout evidence commands and generate verification records."
+          ],
+          "acceptance": [
+            "Finance lane draft packet is present and explicitly marked draft-only.",
+            "Boundary constraints and approval triggers are explicit.",
+            "Task and unit evidence requirements are measurable via executable commands."
+          ],
+          "verification": [
+            "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION --check",
+            "python scripts/task_identity.py check --check"
+          ],
+          "stop_condition": "Stop after finance evidence packet draft and closeout evidence links are ready for owner review.",
+          "handoff": "Report finance draft packet location, approval triggers, and verified evidence."
+        }
+      ]
+    }
+  ]
+}

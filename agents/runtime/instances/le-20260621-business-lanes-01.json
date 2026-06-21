@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "le-20260621-business-lanes-01",
+  "callsign": "lead_engineer@business-lane-01",
+  "callsite_id": "terminal:business-lane-playbooks:tab-01",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260621-174539-task-ar-594-88a8.json"
+  ],
+  "created_at": "2026-06-21T17:45:39+09:00",
+  "decision_cycle_id": "",
+  "display_name": "lead_engineer@business-lane-01",
+  "model": "",
+  "model_tier": "",
+  "on_behalf_of": "UNIT-TASK-AR-594-001",
+  "pane_id": "terminal:business-lane-playbooks:tab-01",
+  "parent_instance_id": "",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "lead-engineer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-06-21T17:45:39+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-594",
+  "task_set_id": "TASKSET-AR-BUSINESS-LANE-PLAYBOOKS",
+  "team_id": "planning-office",
+  "unit_id": "UNIT-TASK-AR-594-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-594/UNIT-TASK-AR-594-001.md",
+  "updated_at": "2026-06-21T17:45:39+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-594"
+}

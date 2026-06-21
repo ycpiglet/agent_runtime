@@ -1,0 +1,90 @@
+{
+  "schema": "agent-runtime-session-baseline/v1",
+  "captured_at": "2026-06-19T22:09:09.827890+00:00",
+  "cwd": "C:\\Users\\ycpig\\agent_runtime",
+  "head": "54b3e8e",
+  "branch": "claude/impl-task-ar-592-redo",
+  "status_fingerprint": "953a44e7c4f18b7d3cc01b46fed6557e48d0a5531c5902005da164ce80127ddb",
+  "stash_count": 5,
+  "worktrees": [
+    {
+      "path": "C:/Users/ycpig/agent_runtime",
+      "HEAD": "54b3e8e2113b267efca13c843f655116a78941c0",
+      "branch": "claude/impl-task-ar-592-redo"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.claude/worktrees/agent-a0b8217030c1e17ff",
+      "HEAD": "ee7e7d080cca7f003599c37e3e6bd0bfe7873267",
+      "branch": "claude/impl-task-ar-589"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.claude/worktrees/agent-a11c69856fc183cc5",
+      "HEAD": "b23bfe4ba2966d3fb39e17466aa956296c4b9e27",
+      "branch": "worktree-agent-a11c69856fc183cc5"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.claude/worktrees/agent-a204968e6f73721d5",
+      "HEAD": "3832e0ce51e1dbc409ea15cb6788d99fdd7ecec6",
+      "branch": "claude/impl-task-ar-585"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.claude/worktrees/agent-a248724d1c0f9fdca",
+      "HEAD": "f901a1eda5fcf3ff89541197b39ec60becdebb87",
+      "branch": "claude/impl-task-ar-591"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.claude/worktrees/agent-a316c41c9a52358a2",
+      "HEAD": "8076231c67b304b74bb7146cade11381d098baa0",
+      "branch": "claude/impl-task-ar-583"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.claude/worktrees/agent-a41eaa0427acedb27",
+      "HEAD": "6cca4b60f062c88941934c8796fd1723028a0da6",
+      "branch": "claude/impl-task-ar-586"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.claude/worktrees/agent-a5f27e1b925377ffc",
+      "HEAD": "6898fe0125ec591e51e7df673fa533c732d6a499",
+      "branch": "claude/impl-task-ar-590"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.claude/worktrees/agent-aa872949c401d838f",
+      "HEAD": "49db45e2c4bac25a651832ee953c0dc4ff8511fb",
+      "branch": "claude/impl-task-ar-584"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.claude/worktrees/agent-aad02e4e134bb1e76",
+      "HEAD": "e65b61116500aec020cd422626850deaecc2a532",
+      "branch": "worktree-agent-aad02e4e134bb1e76"
+    },
+    {
+      "path": "C:/Users/ycpig/agent_runtime/.claude/worktrees/agent-ae5f0c9f79cfdda86",
+      "HEAD": "54b3e8e2113b267efca13c843f655116a78941c0",
+      "branch": "worktree-agent-ae5f0c9f79cfdda86",
+      "locked": "claude agent agent-ae5f0c9f79cfdda86 (pid 12952 start 639173705813219110)"
+    }
+  ],
+  "active_codex_branches": [
+    "claude/adopt-vendored",
+    "claude/deadlock-guardrails",
+    "claude/decision-first-console-ia",
+    "claude/fix-avatar-xss",
+    "+ claude/impl-task-ar-583",
+    "+ claude/impl-task-ar-584",
+    "+ claude/impl-task-ar-585",
+    "+ claude/impl-task-ar-586",
+    "claude/impl-task-ar-587",
+    "claude/impl-task-ar-588",
+    "+ claude/impl-task-ar-589",
+    "+ claude/impl-task-ar-590",
+    "+ claude/impl-task-ar-591",
+    "claude/impl-task-ar-592",
+    "claude/impl-task-ar-592-redo",
+    "claude/product-maturity-eval-merge",
+    "claude/release-auto-reg",
+    "claude/visual-asset-adoption",
+    "claude/vsi-register",
+    "claude/wave89-closeout",
+    "codex/task-ar-552"
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "chat:2026-06-21-business-lane-playbooks",
+  "created_by": "codex-planner",
+  "now": "2026-06-21T19:00:00+09:00",
+  "initiative": {
+    "id": "INIT-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION",
+    "title": "Business Lanes Marketing Growth Implementation",
+    "summary": "Turn the marketing-growth playbook into an execution-ready draft packet with campaign analysis boundaries, channel constraints, and owner handoff gates.",
+    "owner": "lead_engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION",
+    "display_name": "Business Lanes Marketing Growth Implementation",
+    "summary": "Publish a draft campaign-readiness packet and decision triggers from the marketing-growth lane contract.",
+    "order": 632,
+    "plan_slug": "2026-06-21-business-lane-marketing-growth-implementation"
+  },
+  "tasks": [
+    {
+      "title": "Create marketing campaign-readiness evidence packet for owner review",
+      "goal": "Prepare a reusable marketing campaign-readiness packet (constraints, claims, channels, and evidence expectations) that can be promoted to implementation only after owner approval.",
+      "scope": "Draft marketing execution packets only; no channel actions, message dispatch, or ad platform mutations.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 4,
+      "est_tokens": 6500,
+      "owner": "lead_engineer",
+      "team": "planning-office",
+      "acceptance": [
+        "Marketing lane draft packet exists with required outputs and in-scope/out-of-scope boundaries.",
+        "Channel actions are explicitly marked as draft/owner-gated and do not require direct agent-side execution.",
+        "Decision trigger and external-effect safeguards are explicit.",
+        "Task and unit evidence commands are reproducible."
+      ],
+      "verification": [
+        "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION --check",
+        "python scripts/task_identity.py check --check"
+      ],
+      "units": [
+        {
+          "title": "Draft marketing growth campaign-readiness packet",
+          "context": "This unit publishes a markdown packet in WORK-LANE-PLAYBOOKS that standardizes campaign-readiness structure and marketing decision gates.",
+          "inputs": [
+            "agents/project/WORK-LANE-PLAYBOOKS.md",
+            "agents/project/BUSINESS-OPERATING-SYSTEM.md"
+          ],
+          "target_files": [
+            "agents/project/WORK-LANE-PLAYBOOKS.md"
+          ],
+          "scope": "Docs only: marketing campaign-readiness packet draft and approval boundaries.",
+          "steps": [
+            "Draft a marketing evidence packet section under Marketing-Growth with packet schema and draft-only fields.",
+            "Add explicit constraints for channel activity, messaging hygiene, and approval owner.",
+            "Define decision triggers for campaign execution and external partner/channel escalation.",
+            "Record W4 verification commands and evidence references."
+          ],
+          "acceptance": [
+            "Marketing growth packet is present and explicitly marked draft-only.",
+            "Scope-out boundaries include external campaign execution restrictions.",
+            "Task and unit evidence commands are deterministic and measurable."
+          ],
+          "verification": [
+            "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION --check",
+            "python scripts/task_identity.py check --check"
+          ],
+          "stop_condition": "Stop after marketing packet draft and closeout evidence links are ready for owner review.",
+          "handoff": "Report marketing readiness draft packet location, approval triggers, and verified evidence."
+        }
+      ]
+    }
+  ]
+}

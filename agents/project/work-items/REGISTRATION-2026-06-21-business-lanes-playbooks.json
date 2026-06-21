@@ -1,0 +1,84 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "chat:2026-06-21-business-lane-playbooks",
+  "created_by": "codex-planner",
+  "now": "2026-06-21T17:45:39+09:00",
+  "initiative": {
+    "id": "INIT-AR-BUSINESS-LANES",
+    "title": "Business Lanes Playbooks",
+    "summary": "Create concrete operating playbooks for finance-accounting, marketing-growth, sales-revenue, operations-support, and planning-strategy lanes so each lane can start execution immediately after registration.",
+    "owner": "lead_engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-BUSINESS-LANE-PLAYBOOKS",
+    "display_name": "Business Lanes Playbooks",
+    "summary": "Create lane-specific operating packets that convert the business operating system into directly executable finance, marketing, sales, operations, support, planning, and strategy workflows.",
+    "order": 630,
+    "plan_slug": "2026-06-21-business-lanes-playbooks"
+  },
+  "tasks": [
+    {
+      "title": "Publish lane playbooks for durable business execution",
+      "goal": "Provide concrete per-lane operating templates that define required inputs, outputs, safety boundaries, and evidence artifacts before any direct team work starts.",
+      "scope": "Publish detailed lane playbooks under agents/project and template overlays. Do not add external side-effect integrations or external-system writes.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 3,
+      "est_tokens": 5000,
+      "owner": "lead_engineer",
+      "team": "planning-office",
+      "acceptance": [
+        "A per-lane playbook for finance-accounting, marketing-growth, sales-revenue, operations-support, and planning-strategy exists and is linked from the business operating system packet.",
+        "Each lane playbook has explicit scope-in/out, required inputs, required artifacts, and next-taskset candidates.",
+        "Safety boundaries and external-effect approvals remain explicit and are not relaxed for any lane.",
+        "Source-of-truth links in live overlays and template mirrors stay aligned for the new packet location."
+      ],
+      "verification": [
+        "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-BUSINESS-LANE-PLAYBOOKS --check",
+        "python scripts/task_identity.py check --check"
+      ],
+      "units": [
+        {
+          "title": "Draft and mirror business lane playbook packet",
+          "context": "The objective is to move from team registration to repeatable, execution-ready lane playbooks. This unit creates the packet, lane-specific operating docs, and review-compatibility links used by planning/strategy, ops/support, finance, marketing, and sales teams.",
+          "inputs": [
+            "agents/project/BUSINESS-OPERATING-SYSTEM.md",
+            "agents/project/WORK-LANE-PLAYBOOKS.md",
+            "src/agent_runtime/templates/project/agents/project/BUSINESS-OPERATING-SYSTEM.md",
+            "src/agent_runtime/templates/project/agents/project/WORK-LANE-PLAYBOOKS.md",
+            "agents/project/ORG.md",
+            "agents/project/TEAMS.md",
+            "agents/project/PROJECT-CONTEXT.yml"
+          ],
+          "target_files": [
+            "agents/project/BUSINESS-OPERATING-SYSTEM.md",
+            "agents/project/WORK-LANE-PLAYBOOKS.md",
+            "src/agent_runtime/templates/project/agents/project/BUSINESS-OPERATING-SYSTEM.md",
+            "src/agent_runtime/templates/project/agents/project/WORK-LANE-PLAYBOOKS.md"
+          ],
+          "scope": "Docs only: operational playbook content and template mirrors. No external system writes.",
+          "steps": [
+            "Add `agents/project/WORK-LANE-PLAYBOOKS.md` with concrete operating templates for finance-accounting, marketing-growth, sales-revenue, operations-support, and planning-strategy.",
+            "Add lane execution contracts: inputs, outputs, cadence, artifact set, and decision triggers.",
+            "Update BUSINESS-OPERATING-SYSTEM.md and template mirror to link the new lane playbook packet.",
+            "Update target files to keep lane packet as SSoT evidence before release and closeout evidence collection.",
+            "Run taskset_work_gate and task_identity as verification evidence."
+          ],
+          "acceptance": [
+            "work lane playbook includes 5 business lanes with explicit roles, outputs, and safety constraints.",
+            "BUSINESS-OPERATING-SYSTEM.md (live and template) links the new lane packet.",
+            "taskset evidence path remains valid after verification and release records are written."
+          ],
+          "stop_condition": "Stop when lane playbooks and mirror packet are complete, cycle-artifact links are present, and no safety boundary is broadened.",
+          "verification": [
+            "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-BUSINESS-LANE-PLAYBOOKS --check",
+            "python scripts/task_identity.py check --check"
+          ],
+          "handoff": "Provide links to lane playbook packet, boundary controls, and verification evidence for this unit."
+        }
+      ]
+    }
+  ]
+}

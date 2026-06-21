@@ -1,0 +1,34 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-21-task-ar-594-20260621182006",
+  "work_id": "TASK-AR-594",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-594.md",
+  "kind": "task",
+  "task_id": "TASK-AR-594",
+  "unit_id": "",
+  "status": "failed",
+  "signal": "fail",
+  "verified_at": "2026-06-21T18:20:06+09:00",
+  "verified_by": "independent-verifier-biz",
+  "command_count": 2,
+  "commands": [
+    {
+      "command": "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-BUSINESS-LANE-PLAYBOOKS --check",
+      "status": "failed",
+      "returncode": 1,
+      "started_at": "2026-06-21T18:20:06+09:00",
+      "finished_at": "2026-06-21T18:20:10+09:00",
+      "stdout": "taskset-work-gate: fail\nroot=C:\\Users\\ycpig\\agent_runtime\nfindings=1\n- BACKLOG-BOARD.md: stale:content-mismatch: run python scripts/backlog_board.py --write\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/task_identity.py check --check",
+      "status": "failed",
+      "returncode": 1,
+      "started_at": "2026-06-21T18:20:10+09:00",
+      "finished_at": "2026-06-21T18:20:12+09:00",
+      "stdout": "task-identity: fail\nroot=C:\\Users\\ycpig\\agent_runtime\nfindings=1\n- agents/lead_engineer/tasks/TASK-AR-594.md: task-identity:missing-started-at:TASK-AR-594\n",
+      "stderr": ""
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "schema": "agent-runtime-session-baseline/v1",
+  "captured_at": "2026-06-19T23:05:44.022380+00:00",
+  "cwd": "C:\\Users\\ycpig\\agent_runtime",
+  "head": "08e1dd5",
+  "branch": "claude/impl-task-ar-592-redo",
+  "status_fingerprint": "c448766ec030359aef9f7a45f92fff2c8cd3d7cbec3188f02244cd142df9b40c",
+  "stash_count": 5,
+  "worktrees": [
+    {
+      "path": "C:/Users/ycpig/agent_runtime",
+      "HEAD": "08e1dd58a5c6100cf22d5fbaa0a88c87e538b8d2",
+      "branch": "claude/impl-task-ar-592-redo"
+    }
+  ],
+  "active_codex_branches": [
+    "claude/adopt-vendored",
+    "claude/deadlock-guardrails",
+    "claude/decision-first-console-ia",
+    "claude/fix-avatar-xss",
+    "claude/impl-task-ar-583",
+    "claude/impl-task-ar-584",
+    "claude/impl-task-ar-585",
+    "claude/impl-task-ar-586",
+    "claude/impl-task-ar-587",
+    "claude/impl-task-ar-588",
+    "claude/impl-task-ar-589",
+    "claude/impl-task-ar-590",
+    "claude/impl-task-ar-591",
+    "claude/impl-task-ar-592",
+    "claude/impl-task-ar-592-redo",
+    "claude/product-maturity-eval-merge",
+    "claude/release-auto-reg",
+    "claude/visual-asset-adoption",
+    "claude/vsi-register",
+    "claude/wave89-closeout",
+    "codex/task-ar-552",
+    "codex/task-ar-592-a11y-responsive"
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "chat:2026-06-21-business-lane-playbooks",
+  "created_by": "codex-planner",
+  "now": "2026-06-21T19:25:00+09:00",
+  "initiative": {
+    "id": "INIT-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION",
+    "title": "Business Lanes Sales Revenue Implementation",
+    "summary": "Create a sales-revenue execution-ready draft packet with ICP, qualification, and partnership handoff boundaries.",
+    "owner": "lead_engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION",
+    "display_name": "Business Lanes Sales Revenue Implementation",
+    "summary": "Publish draft ICP/qualify/deal-readiness packet and explicit escalation guards from the sales-revenue lane contract.",
+    "order": 633,
+    "plan_slug": "2026-06-21-business-lane-sales-revenue-implementation"
+  },
+  "tasks": [
+    {
+      "title": "Create sales revenue readiness packet for owner review",
+      "goal": "Draft a sales revenue packet that makes qualification, proposal, and partnership handoff evidence explicit before any outbound contact or contract action.",
+      "scope": "Draft sales operations packets only; no CRM writes, no lead messages, and no contract commitment.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 4,
+      "est_tokens": 6500,
+      "owner": "lead_engineer",
+      "team": "planning-office",
+      "acceptance": [
+        "Sales lane packet exists and documents in/out and ownership clearly.",
+        "ICP/qualification and handoff outputs are draft-only and ready for implementation split.",
+        "External-effect safeguards and escalation triggers are explicit.",
+        "Task and unit verification commands are reproducible."
+      ],
+      "verification": [
+        "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION --check",
+        "python scripts/task_identity.py check --check"
+      ],
+      "units": [
+        {
+          "title": "Draft sales revenue readiness packet",
+          "context": "This unit publishes a standardized sales-readiness packet under Sales-Revenue in WORK-LANE-PLAYBOOKS.",
+          "inputs": [
+            "agents/project/WORK-LANE-PLAYBOOKS.md",
+            "agents/project/BUSINESS-OPERATING-SYSTEM.md"
+          ],
+          "target_files": [
+            "agents/project/WORK-LANE-PLAYBOOKS.md"
+          ],
+          "scope": "Docs only: sales readiness draft packet and approval boundaries.",
+          "steps": [
+            "Draft sales readiness packet with scope/out of scope and draft-only ownership.",
+            "Add ICP and qualification schema plus lead-handoff checklist fields.",
+            "Define decision trigger for outbound/proposal/partnership escalation."
+          ],
+          "acceptance": [
+            "Sales lane packet is present and explicitly marked draft-only.",
+            "Scope-out includes no CRM/proposal commitment actions.",
+            "Task and unit evidence commands are deterministic and measurable."
+          ],
+          "verification": [
+            "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION --check",
+            "python scripts/task_identity.py check --check"
+          ],
+          "stop_condition": "Stop after sales packet draft and closeout evidence links are ready for owner review.",
+          "handoff": "Report sales packet location, ownership, and verified evidence."
+        }
+      ]
+    }
+  ]
+}
