@@ -60,8 +60,21 @@ def main() -> int:
         default=[],
         help="State-machine or schema path to validate",
     )
+    parser.add_argument(
+        "--optional-path",
+        action="append",
+        type=Path,
+        default=[],
+        help=(
+            "Path to validate only if it exists; a missing optional path is skipped, "
+            "not a finding. Lets one chain reference paths that exist in the Agent "
+            "Runtime source repo but not in generated consumer projects."
+        ),
+    )
     args = parser.parse_args()
-    paths = args.path or [Path("agents/project/STATE-MACHINES.yml")]
+    required = args.path or [Path("agents/project/STATE-MACHINES.yml")]
+    optional = [path for path in args.optional_path if path.exists()]
+    paths = [*required, *optional]
     total = 0
     for path in paths:
         findings = check_path(path)

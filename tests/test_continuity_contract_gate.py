@@ -81,3 +81,26 @@ def test_owner_governance_runs_continuity_contract_gate():
 
     assert "continuity_contract_gate.py" in root_gate
     assert "continuity_contract_gate.py" in template_gate
+
+
+def test_continuity_gate_accepts_root_protocol_docs_without_template_tree(tmp_path: Path):
+    # Generated consumer-project layout: protocol docs live at the project ROOT and
+    # the src/agent_runtime/templates/** tree is absent. The gate must not report
+    # protocol-doc-missing in that case (issue #185).
+    _write(tmp_path / "README.md", "# X\n## 한국어\n## English\nAGENTS.md CLAUDE.md NEXT-SESSION-POINTER.yml agents/project/\n")
+    _write(tmp_path / "AGENTS.md", "## Protocol\nNEXT-SESSION-POINTER.yml active_work\n")
+    _write(tmp_path / "CLAUDE.md", "## Protocol\n")
+
+    result = _run_gate(tmp_path)
+
+    assert "continuity:protocol-doc-missing" not in result.stdout
+
+
+def test_continuity_gate_flags_protocol_docs_missing_from_all_locations(tmp_path: Path):
+    # No protocol docs at root OR template path -> the check must still fire.
+    _write(tmp_path / "README.md", "# X\n")
+
+    result = _run_gate(tmp_path)
+
+    assert result.returncode == 1
+    assert "continuity:protocol-doc-missing" in result.stdout
