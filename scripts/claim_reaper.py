@@ -35,7 +35,6 @@ import argparse
 import json
 import os
 import sys
-import threading
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -158,10 +157,15 @@ def classify_claim(claim: dict[str, Any], now: datetime, grace_seconds: int) -> 
     return "dead", "lease-expired"
 
 
+try:  # bare import when run as a script (scripts/ on sys.path); package path under pytest
+    import atomic_io
+except ModuleNotFoundError:  # pragma: no cover
+    from scripts import atomic_io
+
+
 def _write_json_atomic(path: Path, payload: dict[str, Any]) -> None:
-    tmp = path.with_name(f"{path.name}.{os.getpid()}.{threading.get_ident()}.tmp")
-    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    os.replace(tmp, path)
+    # Shared durable primitive: temp -> fsync -> atomic rename (preserves unsorted keys).
+    atomic_io.write_json_atomic(path, payload)
 
 
 LOCK_TIMEOUT_SECONDS = 5.0
