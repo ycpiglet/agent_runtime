@@ -82,11 +82,15 @@ def _read_json(path: Path) -> dict[str, Any] | None:
     return value if isinstance(value, dict) else None
 
 
+try:  # bare import when run as a script (scripts/ on sys.path); package path under pytest
+    import atomic_io
+except ModuleNotFoundError:  # pragma: no cover
+    from scripts import atomic_io
+
+
 def _write_json_atomic(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
-    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    os.replace(tmp, path)
+    # Shared durable primitive: temp -> fsync -> atomic rename (TASK crash-recovery).
+    atomic_io.write_json_atomic(path, payload, sort_keys=True)
 
 
 def _is_expired(lease: dict[str, Any], now: datetime) -> bool:

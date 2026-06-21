@@ -9,6 +9,11 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
+try:  # bare import when run as a script (scripts/ on sys.path); package path under pytest
+    import atomic_io
+except ModuleNotFoundError:  # pragma: no cover
+    from scripts import atomic_io
+
 
 SCHEMA = "agent-runtime-session-baseline/v1"
 
@@ -86,7 +91,9 @@ def write_baseline(root: Path, output_dir: Path) -> Path:
     data = capture(root)
     stamp = str(data["captured_at"]).replace(":", "").replace("+", "Z")
     path = output_dir / f"session-baseline-{stamp}.json"
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    # Atomic + fsync'd: a hard power loss mid-write can no longer leave a corrupt
+    # half-written baseline (the file the next session reads to learn prior state).
+    atomic_io.write_json_atomic(path, data)
     return path
 
 
