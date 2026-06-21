@@ -31,6 +31,11 @@ MUTATION_BOUNDARY = "no version bump, tag, push, publish, or release execution"
 
 SEMVER_RE = re.compile(r"^v?(\d+)\.(\d+)\.(\d+)")
 CONVENTIONAL_RE = re.compile(r"^(?P<type>[a-z]+)(?:\([^)]*\))?!?:")
+# Breaking-change markers (criticality signal -> major bump): a conventional
+# subject with a '!' before the colon, or a "BREAKING CHANGE:" / "BREAKING-CHANGE:"
+# footer line anywhere in the commit message body.
+BREAKING_SUBJECT_RE = re.compile(r"^[a-z]+(?:\([^)]*\))?!:")
+BREAKING_FOOTER_RE = re.compile(r"(?m)^BREAKING[ -]CHANGE:")
 
 
 def _ascii(text: str) -> str:
@@ -95,6 +100,20 @@ def _conventional_counts(subjects: list[str]) -> dict[str, int]:
     return counts
 
 
+def _breaking_changes(root: Path, tag: str) -> int:
+    """Count commits marking a breaking change (subject '!:' or BREAKING CHANGE footer)."""
+    out = _git(root, "log", "--format=%s%n%b%x00", f"{tag}..HEAD") or ""
+    count = 0
+    for record in out.split("\x00"):
+        record = record.strip()
+        if not record:
+            continue
+        subject = record.splitlines()[0].strip()
+        if BREAKING_SUBJECT_RE.match(subject) or BREAKING_FOOTER_RE.search(record):
+            count += 1
+    return count
+
+
 def _bump_reasons(root: Path, tag: str) -> list[str]:
     """Minor heuristic: template deletions/renames or any schemas/** change."""
     reasons: list[str] = []
@@ -128,6 +147,8 @@ def _bump_version(version: str | None, bump: str) -> str | None:
     if not match:
         return None
     major, minor, patch = (int(part) for part in match.groups())
+    if bump == "major":
+        return f"{major + 1}.0.0"
     if bump == "minor":
         return f"{major}.{minor + 1}.0"
     return f"{major}.{minor}.{patch + 1}"
@@ -197,11 +218,13 @@ def build_report(
     commits = _commit_count(root, tag)
     counts = _conventional_counts(subjects)
     days = _days_since_tag(root, tag, now_ts=now_ts)
+    breaking = _breaking_changes(root, tag)
     metrics = {
         "commits": commits,
         "feat": counts["feat"],
         "fix": counts["fix"],
         "days_since_tag": days,
+        "breaking": breaking,
     }
 
     trigger_reasons: list[str] = []
@@ -215,7 +238,14 @@ def build_report(
     triggered = bool(trigger_reasons)
 
     bump_reasons = _bump_reasons(root, tag)
-    recommended_bump = "minor" if bump_reasons else "patch"
+    # Semver from change semantics (criticality-aware): breaking -> major,
+    # any feature (or a template/schema minor reason) -> minor, else patch.
+    if breaking:
+        recommended_bump = "major"
+    elif counts["feat"] > 0 or bump_reasons:
+        recommended_bump = "minor"
+    else:
+        recommended_bump = "patch"
     current_version = _package_version(root)
     recommended_version = _bump_version(current_version, recommended_bump)
 
@@ -271,7 +301,7 @@ def _print_report(report: dict[str, Any], *, verbose: bool) -> None:
         _ascii(
             f"release-cadence: baseline tag={report['baseline_tag']}"
             f" commits={metrics['commits']} feat={metrics['feat']}"
-            f" fix={metrics['fix']} days={metrics['days_since_tag']}"
+            f" fix={metrics['fix']} breaking={metrics['breaking']} days={metrics['days_since_tag']}"
             f" (thresholds {threshold_text})"
         )
     )
