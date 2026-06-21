@@ -268,7 +268,7 @@
       "skills/work-analytics/SKILL.md": "sha256:bd63dbfaa4edba888c0683e41cae5b72fcddc7d3618197c0d23f5e41bb7d156a",
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
-    "package_version": "0.3.0",
+    "package_version": "0.3.1",
     "template_digest": "sha256:8a7738bcb9b5cbfc50944a50add3d63f29389161d5d20aaccf308f0ba29c76dc",
     "template_files": 266
   },
@@ -276,7 +276,7 @@
   "schema": "agent-runtime-lock/v1",
   "upstream": {
     "package": "agent_runtime",
-    "ref": "v0.3.0",
+    "ref": "v0.3.1",
     "remote_url": "https://github.com/ycpiglet/agent_runtime.git"
   }
 }
