@@ -7,7 +7,7 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-21T17:07:45+09:00
+generated_at: 2026-06-21T17:13:42+09:00
 record_count: 606
 ---
 
@@ -566,7 +566,7 @@ record_count: 606
 | `reviews/VERIFY-2026-06-20-task-ar-592-a11y-responsive.json` | `VERIFY-2026-06-20-task-ar-592-a11y-responsive` | json | record | n/a | VERIFY-2026-06-20-task-ar-592-a11y-responsive |
 | `reviews/VERIFY-2026-06-20-unit-task-ar-588-001-20260620114055.json` | `VERIFY-2026-06-20-unit-task-ar-588-001-20260620114055` | json | record | n/a | VERIFY-2026-06-20-unit-task-ar-588-001-20260620114055 |
 | `reviews/VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421.json` | `VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421` | json | record | n/a | VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421 |
-| `reviews/VERIFY-2026-06-21-task-ar-593-20260621171800.json` | `VERIFY-2026-06-21-task-ar-593-20260621171800` | json | record | n/a | VERIFY-2026-06-21-task-ar-593-20260621171800 |
+| `reviews/VERIFY-2026-06-21-task-ar-593-20260621171220.json` | `VERIFY-2026-06-21-task-ar-593-20260621171220` | json | record | n/a | VERIFY-2026-06-21-task-ar-593-20260621171220 |
 | `reviews/VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000.json` | `VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000` | json | record | n/a | VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |

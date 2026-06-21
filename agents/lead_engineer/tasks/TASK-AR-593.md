@@ -10,7 +10,7 @@ parent_id: TASKSET-AR-BUSINESS-OPERATING-SYSTEM
 registered_at: 2026-06-21T16:20:00+09:00
 created_at: 2026-06-21T16:20:00+09:00
 started_at: 2026-06-21T16:48:41+09:00
-updated_at: 2026-06-21T17:20:00+09:00
+updated_at: 2026-06-21T17:12:45+09:00
 title: Publish business operating lanes and cycle packet
 status: completed
 priority: P0
@@ -39,12 +39,12 @@ verification:
   - python scripts/org_read_api.py --view org
   - python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-BUSINESS-OPERATING-SYSTEM --check
 verification_status: passed
-verified_at: 2026-06-21T17:18:00+09:00
+verified_at: 2026-06-21T17:12:20+09:00
 verified_by: lead-engineer-20260621-business-os
 evidence_refs:
-  - reviews/VERIFY-2026-06-21-task-ar-593-20260621171800.json
+  - reviews/VERIFY-2026-06-21-task-ar-593-20260621171220.json
 resolution: done
-completed_at: 2026-06-21T17:20:00+09:00
+completed_at: 2026-06-21T17:12:45+09:00
 closed_by: lead-engineer-20260621-business-os
 actual_hours: 1.6
 actual_tokens: 6900
@@ -77,11 +77,12 @@ actual_tokens: 6900
 <!-- work-close:start -->
 ## Closeout
 
-- Completed at: `2026-06-21T17:20:00+09:00`
+- Completed at: `2026-06-21T17:12:45+09:00`
 - Resolution: `done`
 - Actual hours: `1.6`
 - Actual tokens: `6900`
 - Closed by: `lead-engineer-20260621-business-os`
 - Evidence:
   - `reviews/VERIFY-2026-06-21-task-ar-593-20260621171800.json`
+  - `reviews/VERIFY-2026-06-21-task-ar-593-20260621171220.json`
 <!-- work-close:end -->
