@@ -9,21 +9,21 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-21
 task_count: 257
-open_count: 5
-completed_count: 252
-task_set_count: 3
-completed_task_set_count: 44
+open_count: 4
+completed_count: 253
+task_set_count: 2
+completed_task_set_count: 45
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `5` open or active tasks; `252` completed tasks are archived from this live board.
+- Summary: `4` open or active tasks; `253` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `5` / Ask `0` / Review `0` / Later `0` / Done `252`.
-- Task Sets: `3` active workflows; `44` completed workflows are hidden from the live action board.
+- Status: Action `4` / Ask `0` / Review `0` / Later `0` / Done `253`.
+- Task Sets: `2` active workflows; `45` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -41,15 +41,6 @@ completed_task_set_count: 44
 ## Action Board
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
-
-### Business Operating System (`TASKSET-AR-BUSINESS-OPERATING-SYSTEM`)
-
-- Flow: Extend business operations beyond team registration by adding operations/support and planning/strategy lanes plus a reusable operating packet for cross-agent business cycles.
-- Progress: `0/1` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-593` | INIT-AR-BUSINESS-OPERATING-SYSTEM | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-593/UNIT-TASK-AR-593-001.md | planned | Action | P0 | Critical | Medium | 4h/7500tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Define operations/support and planning/strategy teams alongside finance, marketing, a… |
 
 ### Noncritical Release Auto-Execution (`TASKSET-AR-RELEASE-AUTO-NONCRITICAL`)
 
@@ -116,6 +107,7 @@ completed_task_set_count: 44
 | Design System Governance (`TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE`) | Publish a design-system operating contract, assetization classification workflow, UI/UX role split, and deterministic gate so new UI work can reuse components while still proposing new design directions. | `1/1` done | `1` completed task files archived |
 | Design System Assetization (`TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION`) | Move the first reusable UI primitives and domain patterns out of ui_console.py, add token scale assets, and tighten the design-system gate so existing baseline debt is tracked without blocking safe incremental refactors. | `1/1` done | `1` completed task files archived |
 | Design System Component Patterns (`TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS`) | Add reusable Button/Card/Table/Modal-style component helpers and domain pattern helpers for TaskLane, ClaimCard, EvidencePanel, CommandBar, and StateMachinePanel, then wire representative console renderers to those helpers. | `1/1` done | `1` completed task files archived |
+| Business Operating System (`TASKSET-AR-BUSINESS-OPERATING-SYSTEM`) | Extend business operations beyond team registration by adding operations/support and planning/strategy lanes plus a reusable operating packet for cross-agent business cycles. | `1/1` done | `1` completed task files archived |
 | Design System Token Debt (`TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT`) | Replace console typography, spacing, and radius CSS literals with token references, remove the remaining raw color literal, and make the design-system full audit prove that literal debt is no longer hidden in the console baseline. | `1/1` done | `1` completed task files archived |
 | Design System Served Asset Split (`TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT`) | Physically separate the console's served HTML/CSS/JS string assets from the Python API/server module while preserving /, /app.css, and /app.js behavior. | `1/1` done | `1` completed task files archived |
 | Design System Debt Consolidation (`TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION`) | Consolidate transitional spacing/radius px-alias tokens into a designed semantic scale, and promote remaining view-specific JS renderers into stable pattern modules, without re-introducing raw literals. | `2/2` done | `2` completed task files archived |
@@ -125,9 +117,9 @@ completed_task_set_count: 44
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `5` open across `3` task sets (see Action Board above).
-- Archived task sets: `44` (see Archived Task Sets above).
-- Archived task files: `252` — see `ARCHIVE-INDEX.md`.
+- Active: `4` open across `2` task sets (see Action Board above).
+- Archived task sets: `45` (see Archived Task Sets above).
+- Archived task files: `253` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

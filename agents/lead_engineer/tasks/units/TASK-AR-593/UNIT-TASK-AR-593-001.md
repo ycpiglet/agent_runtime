@@ -9,11 +9,11 @@ task_id: TASK-AR-593
 task_set_id: TASKSET-AR-BUSINESS-OPERATING-SYSTEM
 initiative_id: INIT-AR-BUSINESS-OPERATING-SYSTEM
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-06-21T16:20:00+09:00
-updated_at: 2026-06-21T16:20:00+09:00
+updated_at: 2026-06-21T17:15:00+09:00
 origin_type: owner_request
 origin_ref: chat:2026-06-21-business-operating-system-continuation
 created_by: codex-planner
@@ -67,6 +67,15 @@ verification:
   - python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-BUSINESS-OPERATING-SYSTEM --check
 handoff: Report the new operations/support and planning/strategy lanes, business cycle packet, collaboration evidence artifacts, safety boundaries, and verification results.
 stop_condition: Stop after the operating lanes, packet docs, template parity, focused tests, collaboration records, and verification evidence are complete.
+verified_at: 2026-06-21T17:10:00+09:00
+verified_by: lead-engineer-20260621-business-os
+evidence_refs:
+  - reviews/VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000.json
+resolution: done
+completed_at: 2026-06-21T17:15:00+09:00
+closed_by: lead-engineer-20260621-business-os
+actual_hours: 1.4
+actual_tokens: 6100
 ---
 
 # UNIT-TASK-AR-593-001 - Publish business operating lanes and cycle packet
@@ -143,3 +152,15 @@ Report the new operations/support and planning/strategy lanes, business cycle pa
 ## Stop Boundary
 
 Stop after the operating lanes, packet docs, template parity, focused tests, collaboration records, and verification evidence are complete.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-21T17:15:00+09:00`
+- Resolution: `done`
+- Actual hours: `1.4`
+- Actual tokens: `6100`
+- Closed by: `lead-engineer-20260621-business-os`
+- Evidence:
+  - `reviews/VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000.json`
+<!-- work-close:end -->

@@ -84,6 +84,34 @@
     - agents/project/ROADMAP.md
     - agents/project/ORG.md
 
+- team_id: operations-support
+  purpose: 운영 런북, 고객/사용자 지원 패킷, 이슈 분류, SLA/응답 품질, 내부 프로세스 개선
+  lead: operations-lead
+  roles:
+    - operations-lead
+    - support-operator
+    - customer-success-steward
+    - process-steward
+  canonical_context:
+    - agents/project/BUSINESS-OPERATING-SYSTEM.md
+    - agents/project/PROJECT-CONTEXT.yml
+    - agents/project/ORG.md
+    - agents/project/ROADMAP.md
+
+- team_id: planning-strategy
+  purpose: 사업 전략, 우선순위, 실행 단위 분해, 요구사항 분석, 포트폴리오/로드맵 정합성
+  lead: strategy-lead
+  roles:
+    - strategy-lead
+    - planning-architect
+    - business-analyst
+    - portfolio-steward
+  canonical_context:
+    - agents/project/BUSINESS-OPERATING-SYSTEM.md
+    - docs/superpowers/plans/
+    - agents/project/work-items/WORK-ITEM-CLASSIFICATION.md
+    - reviews/
+
 - team_id: planning-office
   purpose: 사이클 종료/일정/진척도 기반 planning scan과 proposal outbox 운영
   lead: planning-coordinator

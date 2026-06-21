@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-21T16:43:11+09:00
+generated_at: 2026-06-21T17:06:17+09:00
 record_count: 370
 ---
 
@@ -406,9 +406,9 @@ record_count: 370
 | 21.1.2.1 | Unit 21.1.2.1 | unit | `UNIT-TASK-AR-592-001` | `TASK-AR-592` | completed | `agents/lead_engineer/tasks/units/TASK-AR-592/UNIT-TASK-AR-592-001.md` | UNIT-TASK-AR-592-001 - A11y audit + fixes for the new components |
 | 21.1.2.2 | Unit 21.1.2.2 | unit | `UNIT-TASK-AR-592-002` | `TASK-AR-592` | completed | `agents/lead_engineer/tasks/units/TASK-AR-592/UNIT-TASK-AR-592-002.md` | UNIT-TASK-AR-592-002 - Responsive pass for the new visuals |
 | 22 | Initiative 22 | initiative | `INIT-AR-BUSINESS-OPERATING-SYSTEM` | - | active | `agents/project/initiatives/INIT-AR-BUSINESS-OPERATING-SYSTEM.md` | Business Operating System |
-| 22.1 | Taskset 22.1 | taskset | `TASKSET-AR-BUSINESS-OPERATING-SYSTEM` | `INIT-AR-BUSINESS-OPERATING-SYSTEM` | active | `BACKLOG-BOARD.md` | Business Operating System |
-| 22.1.1 | Task 22.1.1 | task | `TASK-AR-593` | `TASKSET-AR-BUSINESS-OPERATING-SYSTEM` | planned | `agents/lead_engineer/tasks/TASK-AR-593.md` | Define operations/support and planning/strategy teams alongside finance, marketing, a… |
-| 22.1.1.1 | Unit 22.1.1.1 | unit | `UNIT-TASK-AR-593-001` | `TASK-AR-593` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-593/UNIT-TASK-AR-593-001.md` | UNIT-TASK-AR-593-001 - Publish business operating lanes and cycle packet |
+| 22.1 | Taskset 22.1 | taskset | `TASKSET-AR-BUSINESS-OPERATING-SYSTEM` | `INIT-AR-BUSINESS-OPERATING-SYSTEM` | complete | `BACKLOG-BOARD.md` | Business Operating System |
+| 22.1.1 | Task 22.1.1 | task | `TASK-AR-593` | `TASKSET-AR-BUSINESS-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-593.md` | Define operations/support and planning/strategy teams alongside finance, marketing, a… |
+| 22.1.1.1 | Unit 22.1.1.1 | unit | `UNIT-TASK-AR-593-001` | `TASK-AR-593` | completed | `agents/lead_engineer/tasks/units/TASK-AR-593/UNIT-TASK-AR-593-001.md` | UNIT-TASK-AR-593-001 - Publish business operating lanes and cycle packet |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.
