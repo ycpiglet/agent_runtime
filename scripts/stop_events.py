@@ -23,9 +23,7 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
-import threading
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -102,14 +100,15 @@ def counters_path(root: Path) -> Path:
     return Path(root) / COUNTERS_REL
 
 
+try:  # bare import when run as a script (scripts/ on sys.path); package path under pytest
+    import atomic_io
+except ModuleNotFoundError:  # pragma: no cover
+    from scripts import atomic_io
+
+
 def _write_json_atomic(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(f"{path.name}.{os.getpid()}.{threading.get_ident()}.tmp")
-    tmp.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    os.replace(tmp, path)
+    # Shared durable primitive: temp -> fsync -> atomic rename (TASK crash-recovery).
+    atomic_io.write_json_atomic(path, payload, sort_keys=True)
 
 
 def _empty_counters() -> dict[str, Any]:

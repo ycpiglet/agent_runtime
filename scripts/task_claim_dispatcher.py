@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 import uuid
@@ -34,12 +35,21 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+import atomic_io
 import backlog_board
+import claim_guard
 import plan_assumption_gate
 from agent_instance_registry import record_claim_instance
 from footprint_conflict_gate import ACTIVE_CLAIM_STATUSES as FOOTPRINT_ACTIVE_STATUSES
 from footprint_conflict_gate import footprints_overlap
 from pane_event_log import append_event
+
+
+def _claim_autocommit_enabled() -> bool:
+    # Default ON; opt out with AGENT_RUNTIME_CLAIM_AUTOCOMMIT=0 (e.g. bespoke flows).
+    return os.environ.get("AGENT_RUNTIME_CLAIM_AUTOCOMMIT", "1").strip().lower() not in {
+        "0", "false", "no", "off",
+    }
 
 
 SCHEMA = "agent-runtime-task-claim/v1"
@@ -572,7 +582,7 @@ def cmd_create(args: argparse.Namespace) -> int:
         ),
     )
 
-    claim_path.write_text(json.dumps(claim, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    atomic_io.write_json_atomic(claim_path, claim)
     record_claim_instance(root, claim, claim_path=claim_path)
     append_event(
         root,
@@ -591,6 +601,23 @@ def cmd_create(args: argparse.Namespace) -> int:
             "ts": claim["claimed_at"],
         },
     )
+    # Crash-safety guard: commit the claim immediately so a sibling session's
+    # `git reset --hard` / `git clean -fd` cannot erase an untracked claim
+    # (incident 2026-06-12). Best-effort — never fails claim creation.
+    if _claim_autocommit_enabled():
+        guard = claim_guard.commit_claim_artifacts(
+            root,
+            claim_path,
+            extra_paths=[root / str(claim["handoff_path"]), root / str(claim["log_path"])],
+            claim_id=str(claim["claim_id"]),
+        )
+        if not guard.get("ok") and guard.get("reason") != "not-a-git-repo":
+            print(
+                f"warning: claim {claim['claim_id']} was not committed "
+                f"({guard.get('reason')}); an untracked claim can be lost by a "
+                "concurrent 'git reset --hard'/'git clean -fd'",
+                file=sys.stderr,
+            )
     _emit({"status": "created", "path": _rel(root, claim_path), "claim": claim}, as_json=args.json)
     return 0
 
