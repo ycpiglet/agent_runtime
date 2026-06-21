@@ -17,6 +17,11 @@
             "type": "command",
             "command": "python scripts/claim_reaper_hook.py --root .",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "python scripts/interrupted_run_detector.py --root .",
+            "timeout": 15
           }
         ]
       }

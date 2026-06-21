@@ -37,6 +37,11 @@ import time
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 
+try:  # bare import when run as a script (scripts/ on sys.path); package path under pytest
+    import atomic_io
+except ModuleNotFoundError:  # pragma: no cover
+    from scripts import atomic_io
+
 if sys.platform == "win32":
     try:
         sys.stdout.reconfigure(encoding="utf-8")
@@ -253,11 +258,9 @@ def write_heartbeat(cfg: LoopConfig, iteration: int, status: str,
         "pid": _safe_pid(),
     }
     try:
-        cfg.heartbeat_file.parent.mkdir(parents=True, exist_ok=True)
-        cfg.heartbeat_file.write_text(
-            json.dumps(record, ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
+        # Atomic + fsync'd so a crash mid-write can't leave a corrupt heartbeat
+        # (the file an external supervisor / detector reads to spot a dead loop).
+        atomic_io.write_json_atomic(cfg.heartbeat_file, record)
     except OSError:
         pass
 
