@@ -1,7 +1,7 @@
 schema: agent-runtime-release-gate-template/v1
 updated_at: 2026-06-13T00:00:00+09:00
 linked_task: TASK-AR-210
-version: v0.2.0
+version: v0.3.0
 decision_windows:
   - date: 2026-07-02
     label: first_decision
