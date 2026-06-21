@@ -1,22 +1,43 @@
+# RETRO Template
+
 ---
 type: retro
-id: RETRO-<YYYY-MM-DD>-<slug>
-work_ref: <TASK-... or unit id>
+role: ROLE
+cycle: CYCLE-NNN
+recorded_at: YYYY-MM-DDTHH:MM:SS+09:00
+status: draft
 ---
 
-# Retro — <short title>
+# RETRO ROLE CYCLE-NNN
 
-## What we set out to do
-- <goal / expected outcome>
+## §1 Planned vs Actual
 
-## What actually happened
-- <result, including surprises>
+| Planned | Actual | Evidence |
+|---------|--------|----------|
+| - | - | - |
 
-## What worked
-- <keep doing this>
+## §2 Root Cause
 
-## What didn't
-- <stop / change this>
+- What worked:
+- What failed:
+- Why:
 
-## Change next time
-- <one concrete, verifiable change> (owner: <role>)
+## §3 Health Check
+
+| Area | Score | Evidence |
+|------|-------|----------|
+| Role clarity | 0/10 | - |
+| Evidence quality | 0/10 | - |
+| Handoff quality | 0/10 | - |
+
+## §4 Feedforward
+
+- Keep:
+- Change:
+- Stop:
+
+## §5 Forward Actions
+
+| Kind | Proposal | Owner | Trigger |
+|------|----------|-------|---------|
+| TASK 후보 | TASK-NNN | Lead Engineer | next cycle |

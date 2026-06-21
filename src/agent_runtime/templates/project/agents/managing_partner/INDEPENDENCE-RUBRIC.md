@@ -1,16 +1,21 @@
-# Independence Rubric
+# Managing Partner Independence Rubric
 
-How the managing partner / independent auditor judges whether a review was
-genuinely independent (not a rubber stamp). Score each dimension; a low score on
-any single dimension warrants a re-review.
+Use this rubric when the Managing Partner records an independence or direction
+review. Score each axis from 0 to 10 and include one evidence line per score.
 
-| Dimension | What independence looks like | Red flag |
-| --- | --- | --- |
-| Separation | The reviewer is not the author of the work under review. | Author verifies own work. |
-| Evidence | The verdict cites concrete evidence (tests run, files read, output). | "Looks fine" with no evidence. |
-| Adversarial stance | The reviewer actively tried to refute the claim. | Only confirms the happy path. |
-| Scope honesty | Deferred/untested parts are named, not hidden. | Silent gaps presented as done. |
-| Owner boundary | Product-direction and safety calls are escalated, not decided. | Reviewer sets product direction. |
+| Axis | 0-3 Red | 4-6 Yellow | 7-8 Green | 9-10 Excellent |
+|------|---------|------------|-----------|----------------|
+| Role definition | Role is unclear or overlaps owner duties | Boundaries exist but are vague | Boundaries are usable | Boundaries are explicit and enforced |
+| Actual separation | Same actor approves own work without note | Separation is ad hoc | Separation is recorded | Separation is independently evidenced |
+| Evidence | Mostly assertions | Some links, incomplete coverage | Direct evidence for key claims | Complete source-to-claim trace |
+| Cost visibility | No cost or effort signal | Rough estimate only | Estimate and actuals tracked | Variance is analyzed and fed forward |
+| Automation | Manual memory only | Some scripts exist | Gates/scripts are used | Gates prevent common drift automatically |
+| Feedback loop | No retro or follow-up | Follow-up exists but weak | Retro feeds next cycle | Retro actions are tracked to closure |
+| Dissent structure | No contrary view | Informal objections | Alternatives recorded | Dissent is decision-ready with tradeoffs |
 
-Verdicts: `pass` / `watch` / `block`. A `block` on any safety/order dimension is
-always a human (R3) decision.
+## Overall Rating
+
+- Red: average 0-3. New High/Critical work should pause for governance repair.
+- Yellow: average 4-6. Proceed with explicit risks and owner visibility.
+- Green: average 7-8. Normal operation.
+- Excellent: average 9-10. Strong separation and evidence discipline.
