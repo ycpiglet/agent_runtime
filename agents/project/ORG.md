@@ -66,6 +66,16 @@
   - crm-operator
   - partnership-manager
   - sales-ops
+- operations_support:
+  - operations-lead
+  - support-operator
+  - customer-success-steward
+  - process-steward
+- planning_strategy:
+  - strategy-lead
+  - planning-architect
+  - business-analyst
+  - portfolio-steward
 
 ## Authority and Access
 
@@ -138,6 +148,30 @@
 - role: sales-ops
   level: internal
   boundary: 영업 프로세스, CRM hygiene, 리포트, handoff 품질 점검; 매출 지표 조작 금지
+- role: operations-lead
+  level: internal
+  boundary: 운영 런북, 지원 라우팅, cycle cadence, handoff 품질 관리; 외부 시스템 쓰기 작업은 승인 전 금지
+- role: support-operator
+  level: confidential
+  boundary: 사용자/고객 이슈 정리, 지원 답변 초안, 재현 절차 기록; 고객에게 직접 발송하거나 support desk를 변경하지 않음
+- role: customer-success-steward
+  level: confidential
+  boundary: 온보딩/활성화/유지 리스크 분석, 성공 기준 정리; 고객 약속·상업 조건 변경 금지
+- role: process-steward
+  level: internal
+  boundary: 반복 업무 절차, 운영 체크리스트, closeout 품질 개선; canonical workflow 변경은 review 기록 필요
+- role: strategy-lead
+  level: confidential
+  boundary: 사업 전략, 포지셔닝 방향, 투자 우선순위 제안; 최종 방향 전환은 Owner 승인 필요
+- role: planning-architect
+  level: internal
+  boundary: initiative->taskset->task->unit 분해, worker-ready 기준, 다음 taskset 제안; claim 없는 구현 지시 금지
+- role: business-analyst
+  level: internal
+  boundary: 요구사항, KPI, 경쟁/고객 인사이트 정리; 출처와 가정을 evidence에 남김
+- role: portfolio-steward
+  level: internal
+  boundary: 로드맵/포트폴리오 우선순위와 중복 taskset 조정; 임의 reprioritization 금지
 
 ## Growth Automation Boundary
 
@@ -145,8 +179,14 @@
 - prohibited: viewbot, 가짜 조회수/트래픽/참여, 무단 대량 게시, 스팸, 약관 위반 자동화, 플랫폼 조작, 출처 없는 리드 수집
 - escalation: 자동화가 외부 계정에 쓰기 작업을 하거나 고객/리드에게 직접 발송되면 Owner 승인과 risk-and-safety 검토가 필요하다.
 
+## Business Operating Cycle Boundary
+
+- required_artifacts: review, seminar, scribe, doc-steward review, compound, retro, W4 verification evidence
+- cycle_rule: 사업 운영 사이클은 `agents/project/BUSINESS-OPERATING-SYSTEM.md`의 packet을 먼저 읽고, 새 작업은 `work.py new`로 등록한 뒤 claim/worktree 안에서만 실행한다.
+- external_effects: 회계 시스템, CRM, support desk, 이메일/메신저, 결제, 계약, 외부 게시 계정 쓰기 작업은 Owner 승인과 risk-and-safety 검토 전 금지한다.
+
 ## Escalation Policy
 
-- escalation_condition: 오버레이 누락, 규칙 충돌, 오답률 90% 미달, 정의 미확정, RSI 예산 초과, C-mode 자동 적용 요청, release/version mutation 요청, duplicate task claim, worker in main checkout, 외부 계정 쓰기 작업, 결제/계약 mutation, 플랫폼 조작 또는 스팸성 성장 자동화 요청
+- escalation_condition: 오버레이 누락, 규칙 충돌, 오답률 90% 미달, 정의 미확정, RSI 예산 초과, C-mode 자동 적용 요청, release/version mutation 요청, duplicate task claim, worker in main checkout, 고객 직접 연락, support desk mutation, 외부 계정 쓰기 작업, 결제/계약 mutation, 플랫폼 조작 또는 스팸성 성장 자동화 요청
 - response_deadline: 1 business day
 - emergency_owner: owner

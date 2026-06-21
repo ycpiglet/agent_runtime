@@ -19,6 +19,10 @@ teams:
     display_name: Marketing & Growth
   - id: sales-revenue
     display_name: Sales & Revenue
+  - id: operations-support
+    display_name: Operations & Support
+  - id: planning-strategy
+    display_name: Planning & Strategy
 
 roles:
   - id: owner
@@ -101,3 +105,35 @@ roles:
     tier: reviewer
     team: sales-revenue
     aliases: [sales-ops, sales_ops, revenue-ops, revops, deal-desk]
+  - id: operations-lead
+    tier: planner
+    team: operations-support
+    aliases: [operations, ops, operations-lead, operations_lead, ops-lead, operating-lead]
+  - id: support-operator
+    tier: worker
+    team: operations-support
+    aliases: [support, support-operator, support_operator, helpdesk, customer-support, customer_support]
+  - id: customer-success-steward
+    tier: reviewer
+    team: operations-support
+    aliases: [customer-success, customer_success, customer-success-steward, onboarding-support, success]
+  - id: process-steward
+    tier: reviewer
+    team: operations-support
+    aliases: [process, process-steward, process_steward, runbook, ops-governance]
+  - id: strategy-lead
+    tier: planner
+    team: planning-strategy
+    aliases: [strategy, strategy-lead, strategy_lead, strategic-planning, business-strategy]
+  - id: planning-architect
+    tier: planner
+    team: planning-strategy
+    aliases: [planning-architect, planning_architect, business-planning, task-architect, task_architect]
+  - id: business-analyst
+    tier: worker
+    team: planning-strategy
+    aliases: [business-analysis, business_analyst, business-analyst, requirements, requirements-analyst]
+  - id: portfolio-steward
+    tier: reviewer
+    team: planning-strategy
+    aliases: [portfolio, portfolio-steward, portfolio_steward, prioritization, roadmap-steward]

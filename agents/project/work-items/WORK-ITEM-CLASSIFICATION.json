@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-21T16:43:11+09:00",
+  "generated_at": "2026-06-21T17:06:17+09:00",
   "record_count": 370,
   "finding_count": 0,
   "findings": [],
@@ -4051,7 +4051,7 @@
       "title": "Business Operating System",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-BUSINESS-OPERATING-SYSTEM",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-593",
@@ -4062,7 +4062,7 @@
       "title": "Define operations/support and planning/strategy teams alongside finance, marketing, a…",
       "path": "agents/lead_engineer/tasks/TASK-AR-593.md",
       "parent_id": "TASKSET-AR-BUSINESS-OPERATING-SYSTEM",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-593-001",
@@ -4073,7 +4073,7 @@
       "title": "UNIT-TASK-AR-593-001 - Publish business operating lanes and cycle packet",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-593/UNIT-TASK-AR-593-001.md",
       "parent_id": "TASK-AR-593",
-      "status": "worker_ready"
+      "status": "completed"
     }
   ]
 }
