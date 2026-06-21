@@ -12,9 +12,14 @@ ROOT_DOCS = (
     "README.md",
 )
 
+# Each entry lists candidate locations for one logical protocol doc, in priority
+# order: the consumer-project root first, then the Agent Runtime source-repo
+# template path. A doc counts as present if it exists in ANY candidate location,
+# so the gate passes both in the source repo (template paths exist) and in a
+# generated consumer project (root docs exist, the template tree is absent).
 PROTOCOL_DOCS = (
-    "src/agent_runtime/templates/project/AGENTS.md",
-    "src/agent_runtime/templates/project/CLAUDE.md",
+    ("AGENTS.md", "src/agent_runtime/templates/project/AGENTS.md"),
+    ("CLAUDE.md", "src/agent_runtime/templates/project/CLAUDE.md"),
 )
 
 POINTER_PATHS = (
@@ -134,12 +139,18 @@ def _check_pointer(root: Path, findings: list[ContinuityFinding]) -> None:
 
 def _check_protocol_docs(root: Path, findings: list[ContinuityFinding]) -> None:
     docs: list[tuple[str, str]] = []
-    for rel in PROTOCOL_DOCS:
-        text = _read(root / rel)
-        if not text:
-            findings.append(ContinuityFinding(rel, "continuity:protocol-doc-missing", "protocol doc is required"))
+    for candidates in PROTOCOL_DOCS:
+        present = [(rel, _read(root / rel)) for rel in candidates if (root / rel).exists()]
+        if not any(text for _, text in present):
+            findings.append(
+                ContinuityFinding(
+                    candidates[0],
+                    "continuity:protocol-doc-missing",
+                    f"protocol doc is required in one of: {', '.join(candidates)}",
+                )
+            )
             continue
-        docs.append((rel, text))
+        docs.extend((rel, text) for rel, text in present if text)
 
     combined = "\n".join(text for _, text in docs)
     if not combined:
