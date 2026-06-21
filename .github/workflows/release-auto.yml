@@ -1,35 +1,35 @@
-# Cadence-bound noncritical auto-release for agent_runtime (TASK-AR-586).
+# Metric-bound noncritical auto-release for agent_runtime (TASK-AR-586, redesign).
 #
-# Trigger: the release cadence boundary -- a weekly cron (Mon 02:00 UTC, the same
-# `0 2 * * 1` cadence as test.yml's scheduled run, i.e. the W6 closeout wave). It can
-# also be dispatched manually for a dry-run preview. It does NOT fire on every merge.
+# Trigger: fires right after the `test` workflow completes successfully on main
+# (workflow_run) -- i.e. as soon as a CI-validated green main SHA exists, driven by
+# accumulated change rather than a weekly clock. A weekly cron (Mon 02:00 UTC) is kept
+# as a fallback heartbeat, and it can be dispatched manually for a dry-run preview.
 #
 # What it does: runs scripts/release_auto_noncritical.py, which proceeds to execute a
 # release WITHOUT Owner approval ONLY when the agent release council can: the cadence
 # proposal has fired, the recommended bump is patch/noncritical, there are NO
-# CRITICAL_FLAGS, and main CI is green for the exact validated head SHA. Any critical /
+# CRITICAL_FLAGS, and the SHA it acts on is the CI-validated green one. Any minor /
 # major_or_breaking / secret / destructive release halts with owner-approval-required
-# and mutates nothing.
+# and mutates nothing (the Owner is notified to approve).
 #
-# Safety (auto-merge.yml pattern -- only act on the exact validated head SHA):
-#   1. We resolve the latest `test` workflow run on main and require conclusion == success.
-#   2. We pin to that run's head SHA and require it to still equal the current main HEAD,
-#      so an untested newer push is NEVER released (the orchestrator re-checks this via
-#      --validated-sha as defense-in-depth).
-#   3. The orchestrator only executes for the noncritical tier; everything else stops for
-#      the Owner.
-#   4. The Owner is notified on every execution (an OWNER-NOTIFICATION record is produced
-#      and surfaced in the job summary / uploaded as an artifact).
+# SHA safety (relaxed from "== current main HEAD" to "the CI-validated green SHA"):
+#   - On workflow_run we release github.event.workflow_run.head_sha, the exact SHA the
+#     just-completed green `test` run validated. We CHECK OUT that SHA, so the tag is cut
+#     at validated code even if main has merged further since (a tag is a fixed pointer).
+#   - On schedule/dispatch we resolve the latest completed `test` run on main and act on
+#     its head SHA. The orchestrator re-checks (head_sha == --validated-sha) as
+#     defense-in-depth; because we check out the validated SHA, that holds.
 #
-# By default this workflow runs in --execute mode on the validated green SHA. To keep it
-# preview-only while observing it in production, set the `dry_run` dispatch input to
-# 'true' (or change the default below) -- dry-run plans the tag/push and notifies the
-# Owner but performs no real git tag/push.
+# By default this runs in --execute mode on the validated green SHA. Manual dispatch can
+# force a dry-run via the `dry_run` input (plan + notify, no real git tag/push).
 name: release-auto
 
 on:
+  workflow_run:
+    workflows: ["test"]
+    types: [completed]
   schedule:
-    # Weekly cadence boundary: Monday 02:00 UTC (mirrors test.yml's scheduled cron / W6).
+    # Fallback cadence heartbeat: Monday 02:00 UTC. The primary trigger is workflow_run.
     - cron: "0 2 * * 1"
   workflow_dispatch:
     inputs:
@@ -49,29 +49,32 @@ concurrency:
 
 jobs:
   noncritical-auto-release:
+    # On workflow_run, only proceed for a SUCCESSFUL `test` run on main; schedule and
+    # manual dispatch always enter and let the resolve step validate.
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main at full history (tags + cadence range)
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Resolve the CI-validated green head SHA on main
+      - name: Resolve the CI-validated green SHA to release
         id: validated
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
+          EVENT_NAME: ${{ github.event_name }}
+          WF_RUN_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           set -euo pipefail
-          # Latest `test` workflow run on main; require it concluded successfully.
+          if [ "$EVENT_NAME" = "workflow_run" ]; then
+            # The job `if` already required a successful `test` run on main; release that
+            # exact CI-validated SHA.
+            echo "Releasing CI-validated workflow_run SHA: $WF_RUN_SHA"
+            echo "ci_status=green" >> "$GITHUB_OUTPUT"
+            echo "validated_sha=$WF_RUN_SHA" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # schedule / workflow_dispatch: resolve the latest completed `test` run on main.
           run_json="$(gh run list --repo "$REPO" --workflow test.yml --branch main \
                         --status completed --limit 1 \
-                        --json headSha,conclusion,databaseId --jq '.[0] // empty')"
+                        --json headSha,conclusion --jq '.[0] // empty')"
           if [ -z "$run_json" ]; then
             echo "No completed test run on main; refusing to auto-release." >&2
             echo "ci_status=unknown" >> "$GITHUB_OUTPUT"
@@ -80,25 +83,29 @@ jobs:
           fi
           conclusion="$(printf '%s' "$run_json" | jq -r '.conclusion')"
           validated_sha="$(printf '%s' "$run_json" | jq -r '.headSha')"
-          main_head="$(git rev-parse HEAD)"
-          echo "Latest test run on main: sha=$validated_sha conclusion=$conclusion (HEAD=$main_head)"
-          if [ "$conclusion" != "success" ]; then
+          echo "Latest completed test run on main: sha=$validated_sha conclusion=$conclusion"
+          if [ "$conclusion" = "success" ]; then
+            echo "ci_status=green" >> "$GITHUB_OUTPUT"
+          else
             echo "ci_status=$conclusion" >> "$GITHUB_OUTPUT"
-            echo "validated_sha=$validated_sha" >> "$GITHUB_OUTPUT"
-            exit 0
           fi
-          # Safety: only act on the exact validated head SHA (auto-merge.yml pattern).
-          if [ "$validated_sha" != "$main_head" ]; then
-            echo "main HEAD ($main_head) moved past the CI-validated $validated_sha; skipping."
-            echo "ci_status=moved" >> "$GITHUB_OUTPUT"
-            echo "validated_sha=$validated_sha" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          echo "ci_status=green" >> "$GITHUB_OUTPUT"
           echo "validated_sha=$validated_sha" >> "$GITHUB_OUTPUT"
 
-      - name: Run noncritical auto-release orchestrator (green main, SHA-pinned)
+      - name: Checkout the validated SHA at full history (tags + cadence range)
+        if: steps.validated.outputs.ci_status == 'green' && steps.validated.outputs.validated_sha != ''
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.validated.outputs.validated_sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        if: steps.validated.outputs.ci_status == 'green' && steps.validated.outputs.validated_sha != ''
+        with:
+          python-version: "3.12"
+
+      - name: Run noncritical auto-release orchestrator (validated green SHA)
         id: orchestrate
+        if: steps.validated.outputs.ci_status == 'green' && steps.validated.outputs.validated_sha != ''
         env:
           PYTHONPATH: src
           CI_STATUS: ${{ steps.validated.outputs.ci_status }}
@@ -108,7 +115,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ "$CI_STATUS" != "green" ] || [ -z "$VALIDATED_SHA" ]; then
-            echo "main CI is not green for a validated head SHA (ci_status=$CI_STATUS); not releasing."
+            echo "main CI is not green for a validated SHA (ci_status=$CI_STATUS); not releasing."
             exit 0
           fi
           args=(scripts/release_auto_noncritical.py
@@ -126,8 +133,8 @@ jobs:
           rc=${PIPESTATUS[0]}
           set -e
           echo "orchestrator exit code: $rc"
-          # Exit 2 = owner-approval-required (critical/major): not a CI failure, it is the
-          # designed halt. Surface it but do not fail the workflow. Any other non-zero
+          # Exit 2 = owner-approval-required (minor/major/critical): not a CI failure, it is
+          # the designed halt. Surface it but do not fail the workflow. Any other non-zero
           # (3 CI-not-green, 4 gate-blocked) is also a clean stop with no mutation.
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
 
@@ -149,7 +156,7 @@ jobs:
               echo "- dry_run: \`$dry\`"
               if [ "$result" = "owner-approval-required" ]; then
                 echo ""
-                echo "**OWNER ACTION REQUIRED** -- a critical / major-or-breaking release was"
+                echo "**OWNER ACTION REQUIRED** -- a minor / major-or-breaking release was"
                 echo "detected. The agent council does NOT auto-execute this tier. Review and"
                 echo "approve explicitly before any tag/push."
               fi

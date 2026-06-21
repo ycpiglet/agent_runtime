@@ -173,6 +173,65 @@ def test_template_deletion_recommends_minor(tmp_path: Path) -> None:
     assert "template-deleted-or-renamed:" in result.stdout
 
 
+def test_feat_commits_recommend_minor(tmp_path: Path) -> None:
+    repo = _init_repo(tmp_path)
+    _git(repo, "tag", "v0.1.0")
+    for index in range(5):
+        _commit(repo, f"feat(core): feature {index}")
+
+    result = _run_trigger(repo)
+
+    assert result.returncode == 0
+    assert "recommended_bump=minor" in result.stdout
+    assert "recommended_version=0.2.0" in result.stdout
+
+
+def test_breaking_change_bang_recommends_major(tmp_path: Path) -> None:
+    repo = _init_repo(tmp_path)
+    _git(repo, "tag", "v0.1.0")
+    _commit(repo, "feat(core)!: drop legacy api")
+
+    result = _run_trigger(repo, "--commits-threshold", "1")
+
+    assert result.returncode == 0
+    assert "recommended_bump=major" in result.stdout
+    assert "recommended_version=1.0.0" in result.stdout
+
+
+def test_breaking_change_footer_recommends_major(tmp_path: Path) -> None:
+    repo = _init_repo(tmp_path)
+    _git(repo, "tag", "v0.1.0")
+    _git(
+        repo,
+        "commit",
+        "--allow-empty",
+        "-q",
+        "-m",
+        "feat(core): rework pipeline",
+        "-m",
+        "BREAKING CHANGE: removes the old trigger contract",
+    )
+
+    result = _run_trigger(repo, "--commits-threshold", "1")
+
+    assert result.returncode == 0
+    assert "recommended_bump=major" in result.stdout
+    assert "recommended_version=1.0.0" in result.stdout
+
+
+def test_fix_only_stays_patch(tmp_path: Path) -> None:
+    repo = _init_repo(tmp_path)
+    _git(repo, "tag", "v0.1.0")
+    for index in range(3):
+        _commit(repo, f"fix: bug {index}")
+
+    result = _run_trigger(repo, "--commits-threshold", "1")
+
+    assert result.returncode == 0
+    assert "recommended_bump=patch" in result.stdout
+    assert "recommended_version=0.1.1" in result.stdout
+
+
 def test_no_tags_is_graceful_and_silent(tmp_path: Path) -> None:
     repo = _init_repo(tmp_path)
     _commit(repo, "feat: work without any tag")

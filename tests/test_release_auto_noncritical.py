@@ -280,3 +280,15 @@ def test_orchestrator_default_is_dry_run() -> None:
 
     sig = inspect.signature(orch.orchestrate)
     assert sig.parameters["execute"].default is False
+
+
+def test_release_auto_workflow_fires_on_test_completion_and_releases_validated_sha() -> None:
+    workflow = (REPO_ROOT / ".github" / "workflows" / "release-auto.yml").read_text(encoding="utf-8")
+    # Metric-bound: fires right after a `test` run completes (not weekly-cron-only).
+    assert "workflow_run:" in workflow
+    assert 'workflows: ["test"]' in workflow
+    # Releases the CI-validated green SHA by checking it out, instead of requiring
+    # it to still equal a fast-moving main HEAD (the old perpetual-skip cause).
+    assert "github.event.workflow_run.head_sha" in workflow
+    assert "ref: ${{ steps.validated.outputs.validated_sha }}" in workflow
+    assert "moved past the CI-validated" not in workflow
