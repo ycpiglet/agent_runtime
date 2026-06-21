@@ -7,7 +7,7 @@ from pathlib import Path
 from scripts import release_execution_gate as gate
 
 
-CURRENT_VERSION = "0.3.0"  # matches pyproject.toml version
+CURRENT_VERSION = "0.3.1"  # matches pyproject.toml version
 
 
 def _write(path: Path, text: str) -> None:

@@ -35,7 +35,7 @@ from agent_runtime.sync import _template_files
 from agent_runtime.sync import build_sync_plan
 from agent_runtime.sync import run_sync
 
-CURRENT_RELEASE_VERSION = "0.3.0"
+CURRENT_RELEASE_VERSION = "0.3.1"
 CURRENT_RELEASE_TAG = f"v{CURRENT_RELEASE_VERSION}"
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 
