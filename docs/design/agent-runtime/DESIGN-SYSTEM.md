@@ -48,7 +48,7 @@ assets live in:
 
 | Layer | Module | Contents |
 | --- | --- | --- |
-| `design_token` | `src/agent_runtime/ui_design_assets.py` | `UI_TOKEN_SCALE_CSS` for shared type, spacing, radius, and tokenized px aliases used by the legacy console CSS. |
+| `design_token` | `src/agent_runtime/ui_design_assets.py` | `UI_TOKEN_SCALE_CSS` for shared type plus the stable semantic spacing and radius scales used by the console CSS. |
 | `ui_component` | `src/agent_runtime/ui_design_assets.py` | JS helpers such as `componentButton`, `componentCard`, `componentTable`, `componentModalShell`, `componentProgressBar`, `componentEmptyState`, `componentMetaGrid`, and `componentStateChip`. |
 | `pattern_component` | `src/agent_runtime/ui_design_assets.py` | Domain helpers such as `patternTaskLane`, `patternClaimCard`, `patternEvidencePanel`, `patternCommandBar`, `patternStateMachinePanelLegend`, `patternAuditMeta`, and `patternSurfaceMeta`, served into `/app.js` and reused by console renderers. |
 | `served_asset` | `src/agent_runtime/ui_console_assets.py` | The served HTML, CSS, and JavaScript asset strings, including composition with `ui_design_assets`. |
@@ -91,17 +91,48 @@ Promoted pattern usage as of `TASK-AR-584`:
 
 | Pattern API | Current console usage |
 | --- | --- |
+| `patternSvgLayeredDagreLayout` | Dependency graph, state-machine graph, and knowledge graph layout coordinates/edge routes. |
+| `patternSvgForceAgentLayout` | Live agent map force-layout coordinates. |
+| `patternCalendarGrid` | Weekday headers and date/event cell HTML in `renderCalendar` (work calendar view). |
 | `patternPortabilityPreviewRow` | Per-row advisory HTML in `renderImportPreview` (import/export view). |
 | `patternOpsTokenBar` | Est-vs-actual dual-bar HTML in `renderOpsResources` (ops dashboard tokens panel). |
 | `patternOpsVelocityBar` | Weekly velocity bar HTML in `renderOpsBurndown` (ops dashboard burndown panel). |
 
-Residual one-off boundary: data-heavy SVG layout functions (live-map force
-simulation, dependency-graph layout), calendar grid cell building, and office
-map DOM placement remain in `ui_console_assets.py` as one-off renderers.
-Office-map placement manipulates the DOM directly (not a pure HTML-string
-renderer) and is genuinely view-specific; calendar cells are tightly coupled
-to the `calendarMode` state machine. These are layout-geometry debts to
-address in a later extraction unit when reuse across views is confirmed.
+Promoted pattern usage as of `TASK-AR-587`:
+
+| Pattern API | Current console usage |
+| --- | --- |
+| `patternAgentAvatar` | Deterministic self-hosted DiceBear Identicon SVG avatar with token-driven role accent in agent cards and team identity surfaces. |
+
+Promoted pattern usage as of `TASK-AR-588`:
+
+| Pattern API | Current console usage |
+| --- | --- |
+| `patternSvgLayeredDagreLayout` | Dependency graph, state-machine graph, and knowledge graph use local `@dagrejs/dagre` 3.0.0 when loaded, then render token-driven SVG nodes, routed edges, and status icons. |
+| `patternSvgForceAgentLayout` | Live agent map uses local d3-force 3.0.0 plus local d3 dependencies when loaded, then renders token-driven SVG edges and `patternAgentAvatar` nodes. |
+| `graphStatusIconText` / `graphEdgeHealth` / `graphEdgeMagnitudeBucket` | Graph status is encoded as glyph/text plus semantic health and magnitude classes, never color-only. |
+
+Dependency graph display rule: keep the full graph counts in the summary, but
+render the active taskset subgraph by default when an active taskset exists.
+This prevents large historical task inventories from collapsing into an
+unreadable Dagre layer while preserving the route as a graph surface.
+
+AR-588 vendor boundary:
+
+| Asset | License | Runtime rule |
+| --- | --- | --- |
+| `src/agent_runtime/vendor/dagre/3.0.0/dagre.min.js` | MIT | Served locally through `/vendor/dagre/3.0.0/dagre.min.js`; no CDN. |
+| `src/agent_runtime/vendor/d3-force/3.0.0/d3-force.min.js` | ISC | Served locally through `/vendor/d3-force/3.0.0/d3-force.min.js`; no CDN. |
+| `src/agent_runtime/vendor/d3-{quadtree,dispatch,timer}/...` | ISC | Served locally before d3-force; required by the vendored UMD graph layout runtime. |
+
+Residual one-off boundary: data-heavy SVG node/edge drawing, calendar
+anchor/mode state, schedule cards, and office-map DOM placement remain in
+`ui_console_assets.py` as one-off renderers. Office-map placement manipulates
+the DOM directly (not a pure HTML-string renderer) and is genuinely
+view-specific; calendar state controls remain coupled to the `calendarMode`
+state machine while reusable grid markup is now in `patternCalendarGrid`.
+These are layout-geometry debts to address in a later extraction unit when
+reuse across views is confirmed.
 
 Served asset ownership as of `TASK-AR-582`: `ui_console.py` no longer owns the
 large HTML/CSS/JS strings. `ui_console_assets.py` owns the static served assets,

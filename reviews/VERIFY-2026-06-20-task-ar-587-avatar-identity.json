@@ -1,0 +1,99 @@
+{
+  "schema": "agent-runtime-verification/v1",
+  "task_id": "TASK-AR-587",
+  "task_set_id": "TASKSET-AR-VISUAL-ASSET-ADOPTION",
+  "verified_at": "2026-06-20T10:11:00+09:00",
+  "verified_by": "codex-interface-designer-task-ar-587-20260620",
+  "claim_id": "CLAIM-20260620-094946-task-ar-587-avatar-identity",
+  "status": "passed",
+  "summary": "TASK-AR-587 avatar identity requirements are satisfied: patternAgentAvatar is deterministic, self-hosted, DiceBear Identicon 9.4.2 metadata is pinned locally, no runtime api.dicebear.com dependency exists, role accent mappings are token-driven and covered by contrast tests, and the avatar renders in the live agent list at desktop and mobile widths.",
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_ui_design_assets.py tests/test_design_system_gate.py -q",
+      "result": "passed",
+      "output_summary": "48 passed in 4.78s"
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "result": "passed",
+      "output_summary": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0"
+    },
+    {
+      "command": "python -m py_compile src/agent_runtime/ui_design_assets.py src/agent_runtime/ui_console_assets.py",
+      "result": "passed",
+      "output_summary": "no compile errors"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion": "patternAgentAvatar renders a stable SVG avatar for a given agent id using a CC0 DiceBear style with no runtime call to api.dicebear.com.",
+      "status": "passed",
+      "evidence": [
+        "tests/test_ui_design_assets.py::test_pattern_agent_avatar_determinism",
+        "tests/test_ui_design_assets.py::test_pattern_agent_avatar_uses_vendored_dicebear_identicon_boundary",
+        "tests/test_ui_design_assets.py::test_pattern_agent_avatar_has_no_runtime_dicebear_api_dependency",
+        "src/agent_runtime/vendor/dicebear/identicon/9.4.2/LICENSE",
+        "src/agent_runtime/vendor/dicebear/identicon/9.4.2/package.json"
+      ]
+    },
+    {
+      "criterion": "Role accent maps to existing tokens and meets contrast requirements in dark and light themes.",
+      "status": "passed",
+      "evidence": [
+        "tests/test_ui_design_assets.py::test_pattern_agent_avatar_role_accent",
+        "tests/test_ui_design_assets.py::test_pattern_agent_avatar_all_known_roles_resolve",
+        "tests/test_ui_design_assets.py::test_pattern_agent_avatar_role_accents_meet_non_text_contrast"
+      ]
+    },
+    {
+      "criterion": "Style, license, and pinned DiceBear version are recorded in the asset module; no raw literals are introduced.",
+      "status": "passed",
+      "evidence": [
+        "src/agent_runtime/ui_design_assets.py module docstring",
+        "tests/test_ui_design_assets.py::test_design_system_contract_lists_agent_avatar_pattern",
+        "python scripts/design_system_gate.py --check --all-ui"
+      ]
+    },
+    {
+      "criterion": "Avatar appears in at least one console view with desktop and mobile visual verification.",
+      "status": "passed",
+      "evidence": [
+        "reviews/evidence/TASK-AR-587/avatar-identity-desktop.png",
+        "reviews/evidence/TASK-AR-587/avatar-identity-mobile.png"
+      ]
+    }
+  ],
+  "browser_verification": {
+    "in_app_browser": "unavailable: iab",
+    "fallback": "python playwright",
+    "server": "http://127.0.0.1:8885/",
+    "route": "#/agents/list",
+    "desktop": {
+      "viewport": "1440x1000",
+      "active_views": [
+        "view-agents"
+      ],
+      "cards": 1,
+      "avatars": 1,
+      "identicons": 1,
+      "first_avatar_size": "26x26",
+      "screenshot": "reviews/evidence/TASK-AR-587/avatar-identity-desktop.png"
+    },
+    "mobile": {
+      "viewport": "390x900",
+      "active_views": [
+        "view-agents"
+      ],
+      "cards": 1,
+      "avatars": 1,
+      "identicons": 1,
+      "first_avatar_size": "24x24",
+      "screenshot": "reviews/evidence/TASK-AR-587/avatar-identity-mobile.png"
+    },
+    "console_issues": "none besides favicon 404"
+  },
+  "notes": [
+    "The task requested a CC0 DiceBear style. The implementation uses vendored DiceBear Identicon 9.4.2 metadata and license files, with a build-less local renderer so the served console remains offline and deterministic.",
+    "The design-system operating contract now lists patternAgentAvatar as promoted TASK-AR-587 pattern usage."
+  ]
+}

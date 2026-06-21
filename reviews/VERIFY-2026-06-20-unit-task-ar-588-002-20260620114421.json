@@ -1,0 +1,25 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421",
+  "work_id": "UNIT-TASK-AR-588-002",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-588/UNIT-TASK-AR-588-002.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-588",
+  "unit_id": "UNIT-TASK-AR-588-002",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-20T11:44:21+09:00",
+  "verified_by": "codex-interface-designer-task-ar-588-20260620",
+  "command_count": 1,
+  "commands": [
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-20T11:44:21+09:00",
+      "finished_at": "2026-06-20T11:44:24+09:00",
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0\n",
+      "stderr": ""
+    }
+  ]
+}

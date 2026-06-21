@@ -1,0 +1,56 @@
+{
+  "schema": "agent-runtime-verification/v1",
+  "work_id": "TASK-AR-591",
+  "task_set_id": "TASKSET-AR-VISUAL-SYSTEM-INTEGRATION",
+  "status": "passed",
+  "verified_at": "2026-06-20T08:25:00+09:00",
+  "verified_by": "codex-independent-verifier-task-ar-591-20260620",
+  "summary": "Live visual component wiring was verified and the Ops Dashboard eval metric surface now renders componentSparkline in the actual route DOM.",
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_ui_console.py tests/test_ui_design_assets.py tests/test_ui_console_e2e.py -q",
+      "status": "passed",
+      "stdout": "231 passed in 109.83s"
+    },
+    {
+      "command": "python scripts/design_system_gate.py --check --all-ui",
+      "status": "passed",
+      "stdout": "design-system-gate: pass artifacts=3 roles=4 scanned=6 findings=0"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "stdout": ""
+    },
+    {
+      "command": "Playwright browser verification against http://127.0.0.1:8883/#/ops/dashboard",
+      "status": "passed",
+      "stdout": "evalSparkline=true role=img label='Eval score sparkline, 6 runs'; evalChart=true; sparklineCount=2"
+    }
+  ],
+  "browser_evidence": [
+    {
+      "path": "reviews/evidence/TASK-AR-591/ops-dashboard-sparkline.png",
+      "viewport": "1366x820",
+      "route": "#/ops/dashboard",
+      "assertions": [
+        "dashboard route active",
+        "ops eval sparkline present",
+        "sparkline role is img",
+        "sparkline aria-label describes the eval trend",
+        "detailed ops chart remains present"
+      ]
+    }
+  ],
+  "coverage": [
+    "patternAgentAvatar served and used by live-map/team identity surfaces",
+    "componentIcon replaces sidebar and entity glyph HTML entities",
+    "componentSparkline appears in Ops Dashboard eval metrics and workload rows",
+    "data-viz palette tokens drive dependency and knowledge graph node colors",
+    "componentEmptyState/ErrorState/LoadingState wrappers cover graph and knowledge graph states",
+    "served console boot smoke covers /, /app.js, /app.css and JS syntax"
+  ],
+  "residual_risks": [
+    "Further visual refinement remains in later UI refactor cycles: TASK-AR-583 and TASK-AR-584 still address token alias debt and renderer extraction."
+  ]
+}

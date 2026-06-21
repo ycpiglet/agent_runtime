@@ -41,6 +41,8 @@ def test_ui_design_assets_classify_token_component_and_pattern_layers():
     assert classes["patternStateMachinePanelLegend"] == "pattern_component"
     assert classes["patternSvgLayeredDagreLayout"] == "pattern_component"
     assert classes["patternSvgForceAgentLayout"] == "pattern_component"
+    assert classes["patternAgentAvatar"] == "pattern_component"
+    assert classes["patternCalendarGrid"] == "pattern_component"
     assert classes["graphStatusIconText"] == "ui_component"
     assert classes["patternAuditMeta"] == "pattern_component"
     assert classes["patternSurfaceMeta"] == "pattern_component"
@@ -65,6 +67,8 @@ def test_ui_design_token_scale_is_served_in_console_css(tmp_path):
     assert "--space-2xl" in css
     assert "--radius-sm" in css
     assert "--radius-hairline" in css
+    assert "--space-px-" not in css
+    assert "--radius-px-" not in css
 
 
 def test_ui_component_bundle_is_served_in_console_js(tmp_path):
@@ -86,9 +90,20 @@ def test_ui_component_bundle_is_served_in_console_js(tmp_path):
     assert "function patternStateMachinePanelLegend" in js
     assert "function patternSvgLayeredDagreLayout" in js
     assert "function patternSvgForceAgentLayout" in js
+    assert "function patternAgentAvatar" in js
+    assert "function patternCalendarGrid" in js
     assert "function graphStatusIconText" in js
     assert "function renderAuditMeta(content)" in js
     assert "function renderSurfaceMeta(content)" in js
+
+
+def test_design_system_contract_lists_agent_avatar_pattern():
+    docs = (ROOT / "docs" / "design" / "agent-runtime" / "DESIGN-SYSTEM.md").read_text(encoding="utf-8")
+
+    assert "Promoted pattern usage as of `TASK-AR-587`" in docs
+    assert "`patternAgentAvatar`" in docs
+    assert "DiceBear Identicon" in docs
+    assert "token-driven role accent" in docs
 
 
 def test_selected_helpers_are_not_redefined_inside_ui_console_source():

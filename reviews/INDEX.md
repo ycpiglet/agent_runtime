@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-20T05:18:42+09:00
-record_count: 577
+generated_at: 2026-06-20T11:58:15+09:00
+record_count: 597
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `577` review and evidence records under `reviews/`.
+- Summary: indexed `597` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `577` files |
+| Reviews covered | pass | `597` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -138,6 +138,10 @@ record_count: 577
 | `reviews/MEETING-2026-06-14-wave-plan-host-store-console.md` | `MEETING-2026-06-14-wave-plan-host-store-console` | meeting | watch | watch | Wave Execution Plan — Host Feedback + Work Store + Decision Console |
 | `reviews/MEETING-2026-06-15-agent-runtime-task-ar-223-cycle-sync.md` | `MEETING-2026-06-15-agent-runtime-task-ar-223-cycle-sync` | md | record | n/a | MEETING (2026-06-15) - TASK-AR-223 closeout cycle sync |
 | `reviews/MEETING-2026-06-17-self-improvement-cycle-sync.md` | `MEETING-2026-06-17-self-improvement-cycle-sync` | meeting | planned | planned | Self Improvement Cycle Sync |
+| `reviews/MEETING-2026-06-20-ui-refactor-cycle-2-seminar-beta.md` | `MEETING-2026-06-20-ui-refactor-cycle-2-seminar-beta` | md | record | pass | UI Refactor Cycle 2 Seminar and Beta Review |
+| `reviews/MEETING-2026-06-20-ui-refactor-cycle-3-seminar-beta.md` | `MEETING-2026-06-20-ui-refactor-cycle-3-seminar-beta` | md | record | pass | UI Refactor Cycle 3 Seminar and Beta Checkpoint |
+| `reviews/MEETING-2026-06-20-ui-refactor-cycle-4-seminar-beta.md` | `MEETING-2026-06-20-ui-refactor-cycle-4-seminar-beta` | md | record | pass | UI Refactor Cycle 4 Seminar and Beta Checkpoint |
+| `reviews/MEETING-2026-06-20-ui-refactor-cycle-seminar-beta.md` | `MEETING-2026-06-20-ui-refactor-cycle-seminar-beta` | md | record | pass | UI Refactor Cycle Seminar and Beta Review |
 | `reviews/OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion.json` | `OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion` | json | record | n/a | OFFLINE-EVAL-2026-06-09-task-ar-217-after-goldset-expansion |
 | `reviews/OFFLINE-EVAL-2026-06-09-task-ar-217-rerun.json` | `OFFLINE-EVAL-2026-06-09-task-ar-217-rerun` | json | record | n/a | OFFLINE-EVAL-2026-06-09-task-ar-217-rerun |
 | `reviews/OFFLINE-EVAL-2026-06-09-task-ar-217.json` | `OFFLINE-EVAL-2026-06-09-task-ar-217` | json | record | n/a | OFFLINE-EVAL-2026-06-09-task-ar-217 |
@@ -164,6 +168,8 @@ record_count: 577
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current.json` | `RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0.json` | `RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0 |
 | `reviews/RELEASE-VERSION-CONSISTENCY-STEWARD.json` | `RELEASE-VERSION-CONSISTENCY-STEWARD` | json | record | n/a | RELEASE-VERSION-CONSISTENCY-STEWARD |
+| `reviews/REPLAN-2026-06-20-taskset-ar-visual-asset-adoption-task-ar-587-t3.md` | `REPLAN-2026-06-20-taskset-ar-visual-asset-adoption-task-ar-587-t3` | md | record | pass | Visual Asset Adoption T3 Replan for TASK-AR-587 |
+| `reviews/REPLAN-2026-06-20-taskset-ar-visual-system-integration-task-ar-591-t3.md` | `REPLAN-2026-06-20-taskset-ar-visual-system-integration-task-ar-591-t3` | md | record | pass | Visual System Integration T3 Replan for TASK-AR-591 |
 | `reviews/REPORT-2026-06-17-self-improvement-maturity.md` | `REPORT-2026-06-17-self-improvement-maturity` | md | record | watch | Self Improvement Maturity Report 2026-06-17 |
 | `reviews/REPORT-2026-06-17-self-improvement-remediation-delta.md` | `REPORT-2026-06-17-self-improvement-remediation-delta` | md | record | watch | Self Improvement Remediation Delta 2026-06-17 |
 | `reviews/RESEARCH-2026-06-09-agent-runtime-official-recommendation-update.md` | `RESEARCH-2026-06-09-agent-runtime-official-recommendation-update` | md | record | n/a | RESEARCH-2026-06-09-agent-runtime-official-recommendation-update.md |
@@ -546,6 +552,14 @@ record_count: 577
 | `reviews/VERIFY-2026-06-18-unit-task-ar-580-001-20260618150000.json` | `VERIFY-2026-06-18-unit-task-ar-580-001-20260618150000` | json | record | n/a | VERIFY-2026-06-18-unit-task-ar-580-001-20260618150000 |
 | `reviews/VERIFY-2026-06-18-unit-task-ar-581-001-20260618153500.json` | `VERIFY-2026-06-18-unit-task-ar-581-001-20260618153500` | json | record | n/a | VERIFY-2026-06-18-unit-task-ar-581-001-20260618153500 |
 | `reviews/VERIFY-2026-06-18-unit-task-ar-582-001-20260618161000.json` | `VERIFY-2026-06-18-unit-task-ar-582-001-20260618161000` | json | record | n/a | VERIFY-2026-06-18-unit-task-ar-582-001-20260618161000 |
+| `reviews/VERIFY-2026-06-20-task-ar-583-semantic-scale.json` | `VERIFY-2026-06-20-task-ar-583-semantic-scale` | json | record | n/a | VERIFY-2026-06-20-task-ar-583-semantic-scale |
+| `reviews/VERIFY-2026-06-20-task-ar-584-pattern-renderers.json` | `VERIFY-2026-06-20-task-ar-584-pattern-renderers` | json | record | n/a | VERIFY-2026-06-20-task-ar-584-pattern-renderers |
+| `reviews/VERIFY-2026-06-20-task-ar-587-avatar-identity.json` | `VERIFY-2026-06-20-task-ar-587-avatar-identity` | json | record | n/a | VERIFY-2026-06-20-task-ar-587-avatar-identity |
+| `reviews/VERIFY-2026-06-20-task-ar-588-20260620114515.json` | `VERIFY-2026-06-20-task-ar-588-20260620114515` | json | record | n/a | VERIFY-2026-06-20-task-ar-588-20260620114515 |
+| `reviews/VERIFY-2026-06-20-task-ar-591-live-wiring.json` | `VERIFY-2026-06-20-task-ar-591-live-wiring` | json | record | n/a | VERIFY-2026-06-20-task-ar-591-live-wiring |
+| `reviews/VERIFY-2026-06-20-task-ar-592-a11y-responsive.json` | `VERIFY-2026-06-20-task-ar-592-a11y-responsive` | json | record | n/a | VERIFY-2026-06-20-task-ar-592-a11y-responsive |
+| `reviews/VERIFY-2026-06-20-unit-task-ar-588-001-20260620114055.json` | `VERIFY-2026-06-20-unit-task-ar-588-001-20260620114055` | json | record | n/a | VERIFY-2026-06-20-unit-task-ar-588-001-20260620114055 |
+| `reviews/VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421.json` | `VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421` | json | record | n/a | VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
@@ -611,6 +625,12 @@ record_count: 577
 | `reviews/W4B-2026-06-18-TASK-AR-580.md` | `W4B-2026-06-18-TASK-AR-580` | md | accepted | n/a | W4B Independent Verification - TASK-AR-580 |
 | `reviews/W4B-2026-06-18-TASK-AR-581.md` | `W4B-2026-06-18-TASK-AR-581` | md | accepted | n/a | W4B Independent Verification - TASK-AR-581 |
 | `reviews/W4B-2026-06-18-TASK-AR-582.md` | `W4B-2026-06-18-TASK-AR-582` | md | accepted | n/a | W4B Independent Verification - TASK-AR-582 |
+| `reviews/W4B-2026-06-20-TASK-AR-583.md` | `W4B-2026-06-20-TASK-AR-583` | md | accepted | n/a | W4B Independent Verification - TASK-AR-583 |
+| `reviews/W4B-2026-06-20-TASK-AR-584.md` | `W4B-2026-06-20-TASK-AR-584` | md | accepted | n/a | W4B Independent Verification - TASK-AR-584 |
+| `reviews/W4B-2026-06-20-TASK-AR-587.md` | `W4B-2026-06-20-TASK-AR-587` | md | accepted | n/a | W4B Independent Verification - TASK-AR-587 |
+| `reviews/W4B-2026-06-20-TASK-AR-588.md` | `W4B-2026-06-20-TASK-AR-588` | md | accepted | pass | W4B Independent Verification - TASK-AR-588 |
+| `reviews/W4B-2026-06-20-TASK-AR-591.md` | `W4B-2026-06-20-TASK-AR-591` | md | accepted | n/a | W4B Independent Verification - TASK-AR-591 |
+| `reviews/W4B-2026-06-20-TASK-AR-592.md` | `W4B-2026-06-20-TASK-AR-592` | md | accepted | n/a | W4B Independent Verification - TASK-AR-592 |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.

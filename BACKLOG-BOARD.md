@@ -9,21 +9,21 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-06-20
 task_count: 256
-open_count: 10
-completed_count: 246
-task_set_count: 4
-completed_task_set_count: 42
+open_count: 4
+completed_count: 252
+task_set_count: 2
+completed_task_set_count: 44
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `10` open or active tasks; `246` completed tasks are archived from this live board.
+- Summary: `4` open or active tasks; `252` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `10` / Ask `0` / Review `0` / Later `0` / Done `246`.
-- Task Sets: `4` active workflows; `42` completed workflows are hidden from the live action board.
+- Status: Action `4` / Ask `0` / Review `0` / Later `0` / Done `252`.
+- Task Sets: `2` active workflows; `44` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -42,16 +42,6 @@ completed_task_set_count: 42
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
 
-### Design System Debt Consolidation (`TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION`)
-
-- Flow: Consolidate transitional spacing/radius px-alias tokens into a designed semantic scale, and promote remaining view-specific JS renderers into stable pattern modules, without re-introducing raw literals.
-- Progress: `0/2` done; `2` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-583` | INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | Medium | 4h/8000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Replace the transitional --space-px-* / --radius-px-* aliases in the console asset CS… |
-| `TASK-AR-584` | INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | High | 6h/12000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Move view-specific JS renderers (data-heavy SVG layouts, calendar grids, office-map p… |
-
 ### Noncritical Release Auto-Execution (`TASKSET-AR-RELEASE-AUTO-NONCRITICAL`)
 
 - Flow: Fix the stale release execution gate (parameterize the hardcoded v0.1.8) and wire a cadence-bound auto-release path that runs the agent-council vote, gates, tag, and push for noncritical releases on green main CI, while keeping major/breaking/critical releases Owner-gated. Correct the release-conductor skill doc to match the implemented tier rule.
@@ -65,24 +55,12 @@ completed_task_set_count: 42
 ### Visual Asset Adoption (`TASKSET-AR-VISUAL-ASSET-ADOPTION`)
 
 - Flow: Implement the research-backed visual upgrade: DiceBear CC0 seeded agent avatars with role accents; Dagre+d3-force graph rendering for dependency/state-machine/live-agent views; Geist OFL fonts; Lucide icons; unDraw state illustrations; Radix+Carbon data-viz palette tokens and sparklines. Permissive-only, no-build, self-hosted, token-driven, landed experimental.
-- Progress: `0/4` done; `4` open or active.
+- Progress: `2/4` done; `2` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-587` | INIT-AR-VISUAL-ASSET-ADOPTION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-587/UNIT-TASK-AR-587-001.md | planned | Action | P1 | High | Medium | 5h/12000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Give every agent a deterministic visual identity: a seeded SVG avatar keyed to agent… |
-| `TASK-AR-588` | INIT-AR-VISUAL-ASSET-ADOPTION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-588/UNIT-TASK-AR-588-001.md | planned | Action | P1 | High | High | 10h/20000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Replace the hand-rolled graph layout with proper layout engines: Dagre (MIT, layered/… |
 | `TASK-AR-589` | INIT-AR-VISUAL-ASSET-ADOPTION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-589/UNIT-TASK-AR-589-001.md | planned | Action | P2 | Medium | Medium | 5h/10000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Self-host OFL fonts (Geist + Geist Mono) as font tokens and vendor the Lucide (ISC) i… |
 | `TASK-AR-590` | INIT-AR-VISUAL-ASSET-ADOPTION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-590/UNIT-TASK-AR-590-001.md | planned | Action | P2 | Medium | Medium | 6h/12000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Add recolorable empty/error/loading illustrations, accessible data-viz palette tokens… |
-
-### Visual System Integration & Verification (`TASKSET-AR-VISUAL-SYSTEM-INTEGRATION`)
-
-- Flow: Wire the new visual components into every relevant live view, boot-verify the served console, fix integration gaps, and run a WCAG AA + responsive pass on the new visual system. Permissive, no-build, token-driven.
-- Progress: `0/2` done; `2` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-591` | INIT-AR-VISUAL-SYSTEM-INTEGRATION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-591/UNIT-TASK-AR-591-001.md | planned | Action | P1 | High | Medium | 5h/12000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Ensure the AR-587..590 visual components actually appear in the relevant live console… |
-| `TASK-AR-592` | INIT-AR-VISUAL-SYSTEM-INTEGRATION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-592/UNIT-TASK-AR-592-001.md | planned | Action | P2 | Medium | Medium | 5h/12000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Ensure the new visual components meet WCAG AA (contrast, roles, labels, keyboard, red… |
 
 ## Archived Task Sets
 
@@ -131,14 +109,16 @@ completed_task_set_count: 42
 | Design System Component Patterns (`TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS`) | Add reusable Button/Card/Table/Modal-style component helpers and domain pattern helpers for TaskLane, ClaimCard, EvidencePanel, CommandBar, and StateMachinePanel, then wire representative console renderers to those helpers. | `1/1` done | `1` completed task files archived |
 | Design System Token Debt (`TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT`) | Replace console typography, spacing, and radius CSS literals with token references, remove the remaining raw color literal, and make the design-system full audit prove that literal debt is no longer hidden in the console baseline. | `1/1` done | `1` completed task files archived |
 | Design System Served Asset Split (`TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT`) | Physically separate the console's served HTML/CSS/JS string assets from the Python API/server module while preserving /, /app.css, and /app.js behavior. | `1/1` done | `1` completed task files archived |
+| Design System Debt Consolidation (`TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION`) | Consolidate transitional spacing/radius px-alias tokens into a designed semantic scale, and promote remaining view-specific JS renderers into stable pattern modules, without re-introducing raw literals. | `2/2` done | `2` completed task files archived |
+| Visual System Integration & Verification (`TASKSET-AR-VISUAL-SYSTEM-INTEGRATION`) | Wire the new visual components into every relevant live view, boot-verify the served console, fix integration gaps, and run a WCAG AA + responsive pass on the new visual system. Permissive, no-build, token-driven. | `2/2` done | `2` completed task files archived |
 
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `10` open across `4` task sets (see Action Board above).
-- Archived task sets: `42` (see Archived Task Sets above).
-- Archived task files: `246` — see `ARCHIVE-INDEX.md`.
+- Active: `4` open across `2` task sets (see Action Board above).
+- Archived task sets: `44` (see Archived Task Sets above).
+- Archived task files: `252` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

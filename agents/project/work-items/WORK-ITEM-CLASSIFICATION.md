@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-20T05:18:40+09:00
+generated_at: 2026-06-20T11:50:52+09:00
 record_count: 366
 ---
 
@@ -372,9 +372,9 @@ record_count: 366
 | 17.1.1 | Task 17.1.1 | task | `TASK-AR-582` | `TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | completed | `agents/lead_engineer/tasks/TASK-AR-582.md` | Resolve the diagnostic report's single-file HTML/CSS/JS string concentration by movin… |
 | 17.1.1.1 | Unit 17.1.1.1 | unit | `UNIT-TASK-AR-582-001` | `TASK-AR-582` | completed | `agents/lead_engineer/tasks/units/TASK-AR-582/UNIT-TASK-AR-582-001.md` | UNIT-TASK-AR-582-001 - Move served HTML CSS JS assets out of ui_console |
 | 18 | Initiative 18 | initiative | `INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | - | active | `agents/project/initiatives/INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION.md` | Design System Debt Consolidation |
-| 18.1 | Taskset 18.1 | taskset | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | `INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | active | `BACKLOG-BOARD.md` | Design System Debt Consolidation |
-| 18.1.1 | Task 18.1.1 | task | `TASK-AR-583` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | planned | `agents/lead_engineer/tasks/TASK-AR-583.md` | Replace the transitional --space-px-* / --radius-px-* aliases in the console asset CS… |
-| 18.1.2 | Task 18.1.2 | task | `TASK-AR-584` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | planned | `agents/lead_engineer/tasks/TASK-AR-584.md` | Move view-specific JS renderers (data-heavy SVG layouts, calendar grids, office-map p… |
+| 18.1 | Taskset 18.1 | taskset | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | `INIT-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | complete | `BACKLOG-BOARD.md` | Design System Debt Consolidation |
+| 18.1.1 | Task 18.1.1 | task | `TASK-AR-583` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | completed | `agents/lead_engineer/tasks/TASK-AR-583.md` | Replace the transitional --space-px-* / --radius-px-* aliases in the console asset CS… |
+| 18.1.2 | Task 18.1.2 | task | `TASK-AR-584` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | completed | `agents/lead_engineer/tasks/TASK-AR-584.md` | Move view-specific JS renderers (data-heavy SVG layouts, calendar grids, office-map p… |
 | 19 | Initiative 19 | initiative | `INIT-AR-RELEASE-AUTOMATION` | - | active | `agents/project/initiatives/INIT-AR-RELEASE-AUTOMATION.md` | Release Automation (noncritical auto-execution) |
 | 19.1 | Taskset 19.1 | taskset | `TASKSET-AR-RELEASE-AUTO-NONCRITICAL` | `INIT-AR-RELEASE-AUTOMATION` | active | `BACKLOG-BOARD.md` | Noncritical Release Auto-Execution |
 | 19.1.1 | Task 19.1.1 | task | `TASK-AR-585` | `TASKSET-AR-RELEASE-AUTO-NONCRITICAL` | planned | `agents/lead_engineer/tasks/TASK-AR-585.md` | Make scripts/release_execution_gate.py version-parametric like release_council_gate.p… |
@@ -385,12 +385,12 @@ record_count: 366
 | 19.1.2.3 | Unit 19.1.2.3 | unit | `UNIT-TASK-AR-586-003` | `TASK-AR-586` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-586/UNIT-TASK-AR-586-003.md` | UNIT-TASK-AR-586-003 - Correct the release-conductor skill doc |
 | 20 | Initiative 20 | initiative | `INIT-AR-VISUAL-ASSET-ADOPTION` | - | active | `agents/project/initiatives/INIT-AR-VISUAL-ASSET-ADOPTION.md` | Visual Asset Adoption (graph, avatars, fonts, icons, color) |
 | 20.1 | Taskset 20.1 | taskset | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | `INIT-AR-VISUAL-ASSET-ADOPTION` | active | `BACKLOG-BOARD.md` | Visual Asset Adoption |
-| 20.1.1 | Task 20.1.1 | task | `TASK-AR-587` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | planned | `agents/lead_engineer/tasks/TASK-AR-587.md` | Give every agent a deterministic visual identity: a seeded SVG avatar keyed to agent… |
-| 20.1.1.1 | Unit 20.1.1.1 | unit | `UNIT-TASK-AR-587-001` | `TASK-AR-587` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-587/UNIT-TASK-AR-587-001.md` | UNIT-TASK-AR-587-001 - Vendor + self-host a CC0 DiceBear style and add patternAgentAvatar |
-| 20.1.1.2 | Unit 20.1.1.2 | unit | `UNIT-TASK-AR-587-002` | `TASK-AR-587` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-587/UNIT-TASK-AR-587-002.md` | UNIT-TASK-AR-587-002 - Deterministic role accent + console placement |
-| 20.1.2 | Task 20.1.2 | task | `TASK-AR-588` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | planned | `agents/lead_engineer/tasks/TASK-AR-588.md` | Replace the hand-rolled graph layout with proper layout engines: Dagre (MIT, layered/… |
-| 20.1.2.1 | Unit 20.1.2.1 | unit | `UNIT-TASK-AR-588-001` | `TASK-AR-588` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-588/UNIT-TASK-AR-588-001.md` | UNIT-TASK-AR-588-001 - Vendor Dagre + layered DAG renderer for dependency/state-machine |
-| 20.1.2.2 | Unit 20.1.2.2 | unit | `UNIT-TASK-AR-588-002` | `TASK-AR-588` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-588/UNIT-TASK-AR-588-002.md` | UNIT-TASK-AR-588-002 - Vendor d3-force + live agent map renderer |
+| 20.1.1 | Task 20.1.1 | task | `TASK-AR-587` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | completed | `agents/lead_engineer/tasks/TASK-AR-587.md` | Give every agent a deterministic visual identity: a seeded SVG avatar keyed to agent… |
+| 20.1.1.1 | Unit 20.1.1.1 | unit | `UNIT-TASK-AR-587-001` | `TASK-AR-587` | completed | `agents/lead_engineer/tasks/units/TASK-AR-587/UNIT-TASK-AR-587-001.md` | UNIT-TASK-AR-587-001 - Vendor + self-host a CC0 DiceBear style and add patternAgentAvatar |
+| 20.1.1.2 | Unit 20.1.1.2 | unit | `UNIT-TASK-AR-587-002` | `TASK-AR-587` | completed | `agents/lead_engineer/tasks/units/TASK-AR-587/UNIT-TASK-AR-587-002.md` | UNIT-TASK-AR-587-002 - Deterministic role accent + console placement |
+| 20.1.2 | Task 20.1.2 | task | `TASK-AR-588` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | completed | `agents/lead_engineer/tasks/TASK-AR-588.md` | Replace the hand-rolled graph layout with proper layout engines: Dagre (MIT, layered/… |
+| 20.1.2.1 | Unit 20.1.2.1 | unit | `UNIT-TASK-AR-588-001` | `TASK-AR-588` | completed | `agents/lead_engineer/tasks/units/TASK-AR-588/UNIT-TASK-AR-588-001.md` | UNIT-TASK-AR-588-001 - Vendor Dagre + layered DAG renderer for dependency/state-machine |
+| 20.1.2.2 | Unit 20.1.2.2 | unit | `UNIT-TASK-AR-588-002` | `TASK-AR-588` | completed | `agents/lead_engineer/tasks/units/TASK-AR-588/UNIT-TASK-AR-588-002.md` | UNIT-TASK-AR-588-002 - Vendor d3-force + live agent map renderer |
 | 20.1.3 | Task 20.1.3 | task | `TASK-AR-589` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | planned | `agents/lead_engineer/tasks/TASK-AR-589.md` | Self-host OFL fonts (Geist + Geist Mono) as font tokens and vendor the Lucide (ISC) i… |
 | 20.1.3.1 | Unit 20.1.3.1 | unit | `UNIT-TASK-AR-589-001` | `TASK-AR-589` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-589/UNIT-TASK-AR-589-001.md` | UNIT-TASK-AR-589-001 - Self-host Geist + Geist Mono as font tokens |
 | 20.1.3.2 | Unit 20.1.3.2 | unit | `UNIT-TASK-AR-589-002` | `TASK-AR-589` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-589/UNIT-TASK-AR-589-002.md` | UNIT-TASK-AR-589-002 - Vendor Lucide icon set + componentIcon helper |
@@ -398,13 +398,13 @@ record_count: 366
 | 20.1.4.1 | Unit 20.1.4.1 | unit | `UNIT-TASK-AR-590-001` | `TASK-AR-590` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-590/UNIT-TASK-AR-590-001.md` | UNIT-TASK-AR-590-001 - Recolorable unDraw state illustrations |
 | 20.1.4.2 | Unit 20.1.4.2 | unit | `UNIT-TASK-AR-590-002` | `TASK-AR-590` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-590/UNIT-TASK-AR-590-002.md` | UNIT-TASK-AR-590-002 - Data-viz palette tokens + componentSparkline |
 | 21 | Initiative 21 | initiative | `INIT-AR-VISUAL-SYSTEM-INTEGRATION` | - | active | `agents/project/initiatives/INIT-AR-VISUAL-SYSTEM-INTEGRATION.md` | Visual System Integration & Verification |
-| 21.1 | Taskset 21.1 | taskset | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | `INIT-AR-VISUAL-SYSTEM-INTEGRATION` | active | `BACKLOG-BOARD.md` | Visual System Integration & Verification |
-| 21.1.1 | Task 21.1.1 | task | `TASK-AR-591` | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | planned | `agents/lead_engineer/tasks/TASK-AR-591.md` | Ensure the AR-587..590 visual components actually appear in the relevant live console… |
-| 21.1.1.1 | Unit 21.1.1.1 | unit | `UNIT-TASK-AR-591-001` | `TASK-AR-591` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-591/UNIT-TASK-AR-591-001.md` | UNIT-TASK-AR-591-001 - Audit + wire components into live views |
-| 21.1.1.2 | Unit 21.1.1.2 | unit | `UNIT-TASK-AR-591-002` | `TASK-AR-591` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-591/UNIT-TASK-AR-591-002.md` | UNIT-TASK-AR-591-002 - Boot-verify the served console |
-| 21.1.2 | Task 21.1.2 | task | `TASK-AR-592` | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | planned | `agents/lead_engineer/tasks/TASK-AR-592.md` | Ensure the new visual components meet WCAG AA (contrast, roles, labels, keyboard, red… |
-| 21.1.2.1 | Unit 21.1.2.1 | unit | `UNIT-TASK-AR-592-001` | `TASK-AR-592` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-592/UNIT-TASK-AR-592-001.md` | UNIT-TASK-AR-592-001 - A11y audit + fixes for the new components |
-| 21.1.2.2 | Unit 21.1.2.2 | unit | `UNIT-TASK-AR-592-002` | `TASK-AR-592` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-592/UNIT-TASK-AR-592-002.md` | UNIT-TASK-AR-592-002 - Responsive pass for the new visuals |
+| 21.1 | Taskset 21.1 | taskset | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | `INIT-AR-VISUAL-SYSTEM-INTEGRATION` | complete | `BACKLOG-BOARD.md` | Visual System Integration & Verification |
+| 21.1.1 | Task 21.1.1 | task | `TASK-AR-591` | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | completed | `agents/lead_engineer/tasks/TASK-AR-591.md` | Ensure the AR-587..590 visual components actually appear in the relevant live console… |
+| 21.1.1.1 | Unit 21.1.1.1 | unit | `UNIT-TASK-AR-591-001` | `TASK-AR-591` | completed | `agents/lead_engineer/tasks/units/TASK-AR-591/UNIT-TASK-AR-591-001.md` | UNIT-TASK-AR-591-001 - Audit + wire components into live views |
+| 21.1.1.2 | Unit 21.1.1.2 | unit | `UNIT-TASK-AR-591-002` | `TASK-AR-591` | completed | `agents/lead_engineer/tasks/units/TASK-AR-591/UNIT-TASK-AR-591-002.md` | UNIT-TASK-AR-591-002 - Boot-verify the served console |
+| 21.1.2 | Task 21.1.2 | task | `TASK-AR-592` | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | completed | `agents/lead_engineer/tasks/TASK-AR-592.md` | Ensure the new visual components meet WCAG AA (contrast, roles, labels, keyboard, red… |
+| 21.1.2.1 | Unit 21.1.2.1 | unit | `UNIT-TASK-AR-592-001` | `TASK-AR-592` | completed | `agents/lead_engineer/tasks/units/TASK-AR-592/UNIT-TASK-AR-592-001.md` | UNIT-TASK-AR-592-001 - A11y audit + fixes for the new components |
+| 21.1.2.2 | Unit 21.1.2.2 | unit | `UNIT-TASK-AR-592-002` | `TASK-AR-592` | completed | `agents/lead_engineer/tasks/units/TASK-AR-592/UNIT-TASK-AR-592-002.md` | UNIT-TASK-AR-592-002 - Responsive pass for the new visuals |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

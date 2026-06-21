@@ -9,11 +9,11 @@ task_id: TASK-AR-588
 task_set_id: TASKSET-AR-VISUAL-ASSET-ADOPTION
 initiative_id: INIT-AR-VISUAL-ASSET-ADOPTION
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-06-20T01:04:15+09:00
-updated_at: 2026-06-20T01:04:15+09:00
+updated_at: 2026-06-20T11:49:51+09:00
 origin_type: owner_request
 origin_ref: chat:2026-06-20-ui-ux-visual-resources
 created_by: lead-engineer
@@ -38,6 +38,15 @@ verification:
   - python scripts/design_system_gate.py --check --all-ui
 handoff: Graph upgrade complete.
 stop_condition: If a build-less ISC d3-force artifact cannot be confirmed, flag before vendoring.
+verified_at: 2026-06-20T11:44:21+09:00
+verified_by: codex-interface-designer-task-ar-588-20260620
+evidence_refs:
+  - reviews/VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421.json
+resolution: done
+completed_at: 2026-06-20T11:49:51+09:00
+closed_by: codex-interface-designer-task-ar-588-20260620
+actual_hours: 3.0
+actual_tokens: 9000
 ---
 
 # UNIT-TASK-AR-588-002 - Vendor d3-force + live agent map renderer
@@ -83,3 +92,15 @@ Graph upgrade complete.
 ## Stop Boundary
 
 If a build-less ISC d3-force artifact cannot be confirmed, flag before vendoring.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-20T11:49:51+09:00`
+- Resolution: `done`
+- Actual hours: `3.0`
+- Actual tokens: `9000`
+- Closed by: `codex-interface-designer-task-ar-588-20260620`
+- Evidence:
+  - `reviews/VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421.json`
+<!-- work-close:end -->

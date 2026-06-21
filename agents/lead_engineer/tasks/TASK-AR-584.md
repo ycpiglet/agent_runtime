@@ -8,10 +8,11 @@ work_uid: ba370d39-6930-4201-b2f7-504b66928001
 kind: task
 parent_id: TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION
 registered_at: 2026-06-18T18:43:04+09:00
+started_at: 2026-06-20T09:03:36+09:00
 created_at: 2026-06-18T18:43:04+09:00
-updated_at: 2026-06-18T18:43:04+09:00
+updated_at: 2026-06-20T09:11:47+09:00
 title: Promote remaining view-specific JS renderers into pattern modules
-status: planned
+status: completed
 priority: P2
 difficulty: L
 est_hours: 6
@@ -31,6 +32,18 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+verification_status: passed
+verified_at: 2026-06-20T09:11:47+09:00
+verified_by: codex-independent-verifier-task-ar-584-20260620
+evidence_refs:
+  - reviews/VERIFY-2026-06-20-task-ar-584-pattern-renderers.json
+  - reviews/W4B-2026-06-20-TASK-AR-584.md
+  - reviews/evidence/TASK-AR-584/calendar-grid-pattern.png
+resolution: done
+completed_at: 2026-06-20T09:11:47+09:00
+closed_by: codex-interface-designer-task-ar-584-20260620
+actual_hours: 2
+actual_tokens: 6500
 ---
 
 # TASK-AR-584 - Promote remaining view-specific JS renderers into pattern modules
@@ -53,3 +66,37 @@ tags:
 
 - `python -m pytest tests/test_ui_console.py tests/test_ui_console_e2e.py tests/test_ui_design_assets.py -q`
 - `python scripts/design_system_gate.py --check --all-ui`
+
+## Assetization Classification
+
+| Surface | Class | Asset |
+| --- | --- | --- |
+| SVG graph layout coordinates/routes | `pattern_component` | `patternSvgLayeredDagreLayout`, `patternSvgForceAgentLayout` |
+| Calendar weekday/date/event grid markup | `pattern_component` | `patternCalendarGrid` |
+| Calendar mode, anchor state, and schedule cards | `one_off_for_now` | retained in `ui_console_assets.py` because they are view-state-specific |
+| Office map DOM placement | `one_off_for_now` | retained in `ui_console_assets.py` because it directly manipulates the map DOM |
+
+## Result
+
+- Added `patternCalendarGrid` to the executable asset layer and assetization
+  registry.
+- Updated `renderCalendar` so the page renderer owns only state/data wiring and
+  delegates reusable weekday/date/event cell markup to `patternCalendarGrid`.
+- Confirmed the existing SVG layout helpers are registered and consumed by live
+  map, dependency graph, state-machine graph, and knowledge graph renderers.
+- Updated the design-system contract so TASK-AR-584 promoted pattern usage and
+  residual one-off boundaries match the actual implementation.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-06-20T09:11:47+09:00`
+- Resolution: `done`
+- Actual hours: `2`
+- Actual tokens: `6500`
+- Closed by: `codex-interface-designer-task-ar-584-20260620`
+- Evidence:
+  - `reviews/VERIFY-2026-06-20-task-ar-584-pattern-renderers.json`
+  - `reviews/W4B-2026-06-20-TASK-AR-584.md`
+  - `reviews/evidence/TASK-AR-584/calendar-grid-pattern.png`
+<!-- work-close:end -->
