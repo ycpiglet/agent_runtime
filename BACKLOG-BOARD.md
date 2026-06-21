@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-06-20
-task_count: 256
-open_count: 4
+generated_at: 2026-06-21
+task_count: 257
+open_count: 5
 completed_count: 252
-task_set_count: 2
+task_set_count: 3
 completed_task_set_count: 44
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `4` open or active tasks; `252` completed tasks are archived from this live board.
+- Summary: `5` open or active tasks; `252` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `4` / Ask `0` / Review `0` / Later `0` / Done `252`.
-- Task Sets: `2` active workflows; `44` completed workflows are hidden from the live action board.
+- Status: Action `5` / Ask `0` / Review `0` / Later `0` / Done `252`.
+- Task Sets: `3` active workflows; `44` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -41,6 +41,15 @@ completed_task_set_count: 44
 ## Action Board
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
+
+### Business Operating System (`TASKSET-AR-BUSINESS-OPERATING-SYSTEM`)
+
+- Flow: Extend business operations beyond team registration by adding operations/support and planning/strategy lanes plus a reusable operating packet for cross-agent business cycles.
+- Progress: `0/1` done; `1` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-593` | INIT-AR-BUSINESS-OPERATING-SYSTEM | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-593/UNIT-TASK-AR-593-001.md | planned | Action | P0 | Critical | Medium | 4h/7500tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Define operations/support and planning/strategy teams alongside finance, marketing, a… |
 
 ### Noncritical Release Auto-Execution (`TASKSET-AR-RELEASE-AUTO-NONCRITICAL`)
 
@@ -116,7 +125,7 @@ completed_task_set_count: 44
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `4` open across `2` task sets (see Action Board above).
+- Active: `5` open across `3` task sets (see Action Board above).
 - Archived task sets: `44` (see Archived Task Sets above).
 - Archived task files: `252` — see `ARCHIVE-INDEX.md`.
 
