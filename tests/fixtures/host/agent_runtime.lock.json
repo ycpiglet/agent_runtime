@@ -121,7 +121,7 @@
       "scripts/deadlock_watchdog.py": "sha256:93b317f0ac03a0c337cc36141b37589b0b090e2f9d91fc9d3558221595eac1d5",
       "scripts/dependency_cycle_gate.py": "sha256:227dde735d63e7d70fa6a41705044f6b58dae123a2596359ad1fab0c8a7ebd79",
       "scripts/doc_health_report.py": "sha256:fd35feb3ad0da78a76dfef1e13abee732638deb660e47552fdd2b9315a0988ed",
-      "scripts/doc_steward_due.py": "sha256:cd8bfaf2a421d129ced0f63341d82318223d123ee3514458cf73d55882f676e8",
+      "scripts/doc_steward_due.py": "sha256:b6baf42c215f80c84493fa7372c4529a6c46e206c09fe60fae93540791b7e6b8",
       "scripts/env_check.py": "sha256:4e556e559a149f63c62af4cd983817243f58938f2c64a5ce03d1196b3fcd0085",
       "scripts/eval_harness.py": "sha256:af1cd6bc9bedfc3b120792b5f8d70cb564f664f902a23181af3aeb53f2ccb68f",
       "scripts/evidence_index_generator.py": "sha256:9b418f03cafcdf27f6e974f6d432b7ed71ce8c0c6440f9e6a3de6304562b7fbf",
@@ -269,7 +269,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.3.1",
-    "template_digest": "sha256:7fdd1b944eac6bdc9ed55d3f409682d677ea1bd6a4ca5ad6a858c64006053f30",
+    "template_digest": "sha256:12abd5e54a957c77d6861d0affaeac699eb8c705794d0d6bd00993b786355a48",
     "template_files": 266
   },
   "project": "fixture-host",
