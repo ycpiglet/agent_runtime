@@ -69,7 +69,7 @@ def build_parser() -> argparse.ArgumentParser:
     tag_smoke_parser.add_argument("--source", type=publish_tag_smoke.Path, default=publish_tag_smoke.Path.cwd(), help="Package source root")
     tag_smoke_parser.add_argument("--repo-dir", type=publish_tag_smoke.Path, required=True, help="Temporary git repo directory")
     tag_smoke_parser.add_argument("--install-dir", type=publish_tag_smoke.Path, required=True, help="Temporary pip target directory")
-    tag_smoke_parser.add_argument("--tag", default="v0.4.0", help="Local tag to create and install from")
+    tag_smoke_parser.add_argument("--tag", default="v0.5.0", help="Local tag to create and install from")
     tag_smoke_mode = tag_smoke_parser.add_mutually_exclusive_group(required=True)
     tag_smoke_mode.add_argument("--check", action="store_true", help="Report smoke plan without writing")
     tag_smoke_mode.add_argument("--apply", action="store_true", help="Create local tag and install from it")
@@ -79,7 +79,7 @@ def build_parser() -> argparse.ArgumentParser:
     github_plan_parser.add_argument("--remote-url", required=True, help="GitHub remote URL to publish to")
     github_plan_parser.add_argument("--install-dir", type=publish_github_plan.Path, required=True, help="Temporary install verification target")
     github_plan_parser.add_argument("--work-dir", type=publish_github_plan.Path, help="Temporary git worktree target")
-    github_plan_parser.add_argument("--tag", default="v0.4.0", help="Release tag to push and verify")
+    github_plan_parser.add_argument("--tag", default="v0.5.0", help="Release tag to push and verify")
     github_plan_parser.add_argument("--branch", default="main", help="Branch to push")
     github_plan_parser.add_argument("--check", action="store_true", help="Report plan and fail if readiness findings exist")
 
@@ -99,7 +99,7 @@ def build_parser() -> argparse.ArgumentParser:
     github_execute_parser.add_argument("--remote-url", required=True, help="GitHub remote URL to publish to")
     github_execute_parser.add_argument("--install-dir", type=publish_github_execute.Path, required=True, help="Temporary install verification target")
     github_execute_parser.add_argument("--work-dir", type=publish_github_execute.Path, help="Temporary git worktree target")
-    github_execute_parser.add_argument("--tag", default="v0.4.0", help="Release tag to push and verify")
+    github_execute_parser.add_argument("--tag", default="v0.5.0", help="Release tag to push and verify")
     github_execute_parser.add_argument("--branch", default="main", help="Branch to push")
     github_execute_parser.add_argument("--execute", action="store_true", help="Actually run public GitHub create/push/tag/install commands")
 
@@ -156,7 +156,7 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optional strict-ref configuration for warning-summary-gate preflight checks",
     )
-    preflight_parser.add_argument("--tag", default="v0.4.0", help="Release tag")
+    preflight_parser.add_argument("--tag", default="v0.5.0", help="Release tag")
     preflight_parser.add_argument("--bundle-dir", type=release_preflight.Path, default=release_preflight.Path(".tmp/public-source"), help="Temporary publish bundle dir")
     preflight_parser.add_argument("--tag-repo-dir", type=release_preflight.Path, default=release_preflight.Path(".tmp/tag-repo"), help="Temporary local tag repo dir")
     preflight_parser.add_argument("--tag-install-dir", type=release_preflight.Path, default=release_preflight.Path(".tmp/tag-install"), help="Temporary local tag install dir")
