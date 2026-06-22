@@ -22,6 +22,8 @@ into a form the proposal engine can use.
 | Non-hermetic test mutates tracked files | `nonhermetic-test-tracked-mutation` | `COMPOUND-2026-06-22-001` | proposal | hermetic board/archive tests; explicit pathspec (not `git add -A`) on release commits |
 | CI flaky temp-git gate tests | `ci-flaky-temp-git` | `COMPOUND-2026-06-22-001` | watch | harden git subprocess or re-run; accepted watch |
 | Consumer-project path assumption | `consumer-project-path-assumption` | issue #185, PR #187 | gate+fixture | gates resolve root-OR-template; v0.3.1 shipped |
+| Work concentrates on lead-engineer | `role-concentration` | `REVIEW-2026-06-22-system-health-rsi-diagnosis`, self_improvement_cycle assess | tooling+proposal | `role_concentration_gate` flags it (advisory); dispatch rebalance to dormant review/skeptic/scout roles is an Owner-tier proposal |
+| Lessons reviewed but rarely compounded | `compound-under-cadence` | `REVIEW-2026-06-22-system-health-rsi-diagnosis` | tooling+proposal | `compound_cadence_gate` flags review≫compound; make compound a per-N-reviews cadence obligation (proposal) |
 
 ## Detailed Cases
 
@@ -235,3 +237,37 @@ into a form the proposal engine can use.
 | `linked_regression_fixture` | `tests/test_continuity_contract_gate.py`, `tests/test_state_machine_gate.py` |
 | `task_proposal` | shipped (PR #187): protocol docs resolve root-OR-template; `state_machine_gate --optional-path`; consumers skip absent `src/**` paths |
 | `prevention_status` | gate |
+
+### CASE-ROLE-CONCENTRATION
+
+| Field | Value |
+| --- | --- |
+| `case_id` | `CASE-ROLE-CONCENTRATION` |
+| `dedupe_key` | `role-concentration` |
+| `symptom` | One role (lead-engineer) holds 85/112 task claims (76%); review/verify/scout roles (council, skeptic, progress-scout = 0; reviewer/scribe/release-steward = 1; independent-auditor = 2) are dormant. Costs −15 maturity (monitored_role_gaps). |
+| `trigger` | Autonomous dispatch (wave_dispatcher / task_claim_dispatcher / org_orchestrator) defaults work to the lead-engineer worker; ORG-MODEL defines review/skeptic/scout roles but nothing routes work to them — they are monitored, never dispatched. |
+| `owner_boundary` | local (advisory) / dispatch-architecture (proposal) |
+| `affected_gate` | `scripts/role_concentration_gate.py` (new, advisory), `scripts/self_improvement_cycle.py assess` (collaboration) |
+| `recurrence_count` | structural (every window until dispatch rebalances) |
+| `source_refs` | `REVIEW-2026-06-22-system-health-rsi-diagnosis.md`, self_improvement_cycle assess |
+| `reproduction` | `python scripts/role_concentration_gate.py --check` (after it ships) → watch when a role share > threshold. |
+| `linked_regression_fixture` | `tests/test_role_concentration_gate.py` |
+| `task_proposal` | (1) shipped: advisory `role_concentration_gate`; (2) PROPOSAL (Owner-tier, touches dispatch): route a fraction of work to skeptic/independent-auditor (high-risk merges), progress-scout (per wave), council (W6). |
+| `prevention_status` | tooling+proposal |
+
+### CASE-COMPOUND-UNDER-CADENCE
+
+| Field | Value |
+| --- | --- |
+| `case_id` | `CASE-COMPOUND-UNDER-CADENCE` |
+| `dedupe_key` | `compound-under-cadence` |
+| `symptom` | Reviews are over-produced and lessons under-compounded: this month ~294 REVIEW vs 1 COMPOUND vs 4 RETRO. The failure→regression loop runs only when a human triggers it. |
+| `trigger` | Review is a cheap auto-emitted artifact (W4b votes per task); compounding needs the deliberate failure-to-regression step, and no cadence signal forces it. |
+| `owner_boundary` | local (advisory) / process (proposal) |
+| `affected_gate` | `scripts/compound_cadence_gate.py` (new, advisory) |
+| `recurrence_count` | structural |
+| `source_refs` | `REVIEW-2026-06-22-system-health-rsi-diagnosis.md` |
+| `reproduction` | `python scripts/compound_cadence_gate.py --check` → watch when REVIEW:COMPOUND ratio exceeds the threshold. |
+| `linked_regression_fixture` | `tests/test_compound_cadence_gate.py` |
+| `task_proposal` | (1) shipped: advisory `compound_cadence_gate`; (2) PROPOSAL: make "compound >= 1 lesson per N reviews" a cycle obligation (W6 / session-closeout). |
+| `prevention_status` | tooling+proposal |
