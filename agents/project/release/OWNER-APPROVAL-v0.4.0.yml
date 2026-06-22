@@ -1,0 +1,32 @@
+schema: agent-runtime-owner-approval/v1
+target_version: 0.4.0
+target_tag: v0.4.0
+status: owner_approved
+owner: owner
+decision_date: 2026-06-22
+approved_by: owner
+approval_basis: >
+  User directive (2026-06-22): "autofolio 쪽 시임 해제까지 이어서 진행해줘" — to drop
+  autofolio's doc_steward_due seam, the upstream generalization must ship in a tag
+  autofolio can pin. Cadence recommends minor 0.4.0 (5 feat / 0 breaking since
+  v0.3.1); minor is the Owner-approval tier, satisfied by this directive.
+approval_scope:
+  - version bump from 0.3.1 to 0.4.0 (release_version_cascade --write: 12 refs + host lock)
+  - git tag v0.4.0 + GitHub push at the CI-validated green main SHA
+  - autofolio ref bump to v0.4.0 + drop doc_steward_due from unmanaged + update
+release_contents:
+  - feat(eval): cross-version self-eval metrics harness (#128 partial) [PR #193]
+  - feat(scripts): upstream doc_steward_due from autofolio + cycle_status guard [PR #194]
+  - feat(guards): template-lock drift catcher + safe destructive-ref wrapper [PR #192]
+  - feat(release): release-version-cascade check/bump tool [PR #191]
+  - docs(compound): v0.3.x release/concurrency casebook + reviews [PR #190]
+required_owner_decision:
+  - approve_release_execution
+  - hold_at_ready
+  - reject_release_execution
+owner_decision: approve_release_execution
+notes: >
+  Minor release: additive tooling + a consumer-gate generalization (doc_steward_due)
+  with no breaking changes. Bumped atomically via the new release_version_cascade tool
+  (the prevention shipped in v0.3.x-cycle compound). After tagging, autofolio drops its
+  doc_steward_due seam and re-syncs at v0.4.0 (same loop as #185 -> v0.3.1).
