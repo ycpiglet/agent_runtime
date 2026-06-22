@@ -208,6 +208,217 @@ def test_output_is_ascii_only(tmp_path: Path) -> None:
     json_result.stdout.encode("ascii")
 
 
+# --- WORK-SCHEMA-derived metrics (issue #128 deferred-metric wiring) ---------
+
+
+def _ts(day: int, hour: int = 12) -> str:
+    """ISO timestamp inside the June-2026 window used by the fixtures."""
+    return f"2026-06-{day:02d}T{hour:02d}:00:00+09:00"
+
+
+def _git_date(day: int, hour: int = 0) -> dict[str, str]:
+    stamp = f"2026-06-{day:02d}T{hour:02d}:00:00 +0000"
+    return {"GIT_AUTHOR_DATE": stamp, "GIT_COMMITTER_DATE": stamp}
+
+
+def _write_task(
+    repo: Path,
+    task_id: str,
+    *,
+    completed_at: str | None,
+    started_at: str | None = None,
+    actual_hours: float | None = None,
+    actual_tokens: int | None = None,
+    reopened_count: int | None = None,
+    status: str = "completed",
+) -> None:
+    lines = [
+        "---",
+        "schema_version: agent-runtime-work-item/v1",
+        f"id: {task_id}",
+        "kind: task",
+        f"status: {status}",
+    ]
+    if started_at is not None:
+        lines.append(f"started_at: {started_at}")
+    if completed_at is not None:
+        lines.append(f"completed_at: {completed_at}")
+    if actual_hours is not None:
+        lines.append(f"actual_hours: {actual_hours}")
+    if actual_tokens is not None:
+        lines.append(f"actual_tokens: {actual_tokens}")
+    if reopened_count is not None:
+        lines.append(f"reopened_count: {reopened_count}")
+    lines += ["---", "", f"# {task_id}", ""]
+    dest = repo / "agents" / "lead_engineer" / "tasks"
+    dest.mkdir(parents=True, exist_ok=True)
+    (dest / f"{task_id}.md").write_text("\n".join(lines), encoding="utf-8")
+
+
+def _write_verify(
+    repo: Path,
+    name: str,
+    *,
+    task_id: str,
+    signal: str,
+    verified_at: str,
+    kind: str = "task",
+) -> None:
+    dest = repo / "reviews"
+    dest.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "schema": "agent-runtime-work-verification/v1",
+        "id": name,
+        "work_id": task_id,
+        "task_id": task_id,
+        "kind": kind,
+        "status": "failed" if signal == "fail" else "passed",
+        "signal": signal,
+        "verified_at": verified_at,
+    }
+    (dest / f"{name}.json").write_text(json.dumps(payload), encoding="utf-8")
+
+
+def _build_work_schema_repo(tmp_path: Path) -> Path:
+    """Two-tag repo whose window (v0.1.0..v0.2.0) brackets WORK-SCHEMA records."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git(repo, "init", "-q", "-b", "main")
+    _git(repo, "config", "user.email", "test@example.com")
+    _git(repo, "config", "user.name", "Test")
+    _git(repo, "config", "commit.gpgsign", "false")
+    (repo / "pyproject.toml").write_text(
+        '[project]\nname = "demo"\nversion = "0.1.0"\n', encoding="utf-8"
+    )
+    _git(repo, "add", "-A")
+    _commit(repo, "chore: init", env=_git_date(1))
+    _git(repo, "tag", "v0.1.0")  # window opens day 1
+
+    # Records that fall INSIDE the window (days 5-20).
+    _write_task(
+        repo, "TASK-AR-IN1",
+        started_at=_ts(5, 9), completed_at=_ts(5, 12),
+        actual_hours=2.0, actual_tokens=4000, reopened_count=1,
+    )
+    _write_task(
+        repo, "TASK-AR-IN2",
+        started_at=_ts(10, 8), completed_at=_ts(10, 12),
+        actual_hours=4.0, actual_tokens=6000,
+    )
+    # VERIFY: two PASS rounds for IN1 (1 re-verification), one FAIL for IN2.
+    _write_verify(repo, "VERIFY-in1-a", task_id="TASK-AR-IN1", signal="pass", verified_at=_ts(5, 10))
+    _write_verify(repo, "VERIFY-in1-b", task_id="TASK-AR-IN1", signal="pass", verified_at=_ts(5, 11))
+    _write_verify(repo, "VERIFY-in2-a", task_id="TASK-AR-IN2", signal="fail", verified_at=_ts(10, 9))
+
+    # A record OUTSIDE the window (after v0.2.0): must be excluded.
+    _write_task(
+        repo, "TASK-AR-OUT",
+        started_at=_ts(28, 8), completed_at=_ts(28, 12),
+        actual_hours=99.0, actual_tokens=99000,
+    )
+    _write_verify(repo, "VERIFY-out", task_id="TASK-AR-OUT", signal="fail", verified_at=_ts(28, 9))
+
+    _git(repo, "add", "-A")
+    _commit(repo, "feat: in-window work", env=_git_date(20))
+    _git(repo, "tag", "v0.2.0")  # window closes day 20 (excludes day-28 records)
+    return repo
+
+
+def test_gate_failure_count_from_verify_records(tmp_path: Path) -> None:
+    repo = _build_work_schema_repo(tmp_path)
+
+    report = _run_json(repo, "--from", "v0.1.0", "--to", "v0.2.0")
+    metric = report["fixed_metrics"]["gate_failure_count"]
+
+    assert metric["status"] == "collected"
+    # Only the in-window FAIL VERIFY counts; the day-28 one is excluded.
+    assert metric["value"] == 1
+
+
+def test_reverification_count_from_verify_records(tmp_path: Path) -> None:
+    repo = _build_work_schema_repo(tmp_path)
+
+    report = _run_json(repo, "--from", "v0.1.0", "--to", "v0.2.0")
+    metric = report["fixed_metrics"]["reverification_count"]
+
+    assert metric["status"] == "collected"
+    # IN1 verified twice => 1 re-verification round; IN2 once => 0.
+    assert metric["value"] == 1
+
+
+def test_reopened_count_from_task_frontmatter(tmp_path: Path) -> None:
+    repo = _build_work_schema_repo(tmp_path)
+
+    report = _run_json(repo, "--from", "v0.1.0", "--to", "v0.2.0")
+    metric = report["fixed_metrics"]["reopened_count"]
+
+    assert metric["status"] == "collected"
+    # IN1 has reopened_count: 1; IN2 has none; OUT excluded.
+    assert metric["value"] == 1
+
+
+def test_actual_tokens_and_hours_from_frontmatter(tmp_path: Path) -> None:
+    repo = _build_work_schema_repo(tmp_path)
+
+    report = _run_json(repo, "--from", "v0.1.0", "--to", "v0.2.0")
+    metrics = report["fixed_metrics"]
+
+    # In-window totals: tokens 4000+6000=10000; hours 2.0+4.0=6.0; 2 tasks.
+    assert metrics["actual_tokens_total"]["status"] == "collected"
+    assert metrics["actual_tokens_total"]["value"] == 10000
+    assert metrics["actual_hours_total"]["value"] == 6.0
+    assert metrics["measured_task_count"]["value"] == 2
+    # Per-task means.
+    assert abs(metrics["tokens_per_task"]["value"] - 5000.0) < 1e-9
+    assert metrics["tokens_per_task"]["status"] == "collected"
+
+
+def test_wall_clock_per_task_from_timestamps(tmp_path: Path) -> None:
+    repo = _build_work_schema_repo(tmp_path)
+
+    report = _run_json(repo, "--from", "v0.1.0", "--to", "v0.2.0")
+    metrics = report["fixed_metrics"]
+
+    # IN1: 9->12 = 3h; IN2: 8->12 = 4h; mean 3.5h over 2 tasks.
+    assert metrics["wall_clock_hours_total"]["status"] == "collected"
+    assert abs(metrics["wall_clock_hours_total"]["value"] - 7.0) < 1e-9
+    assert abs(metrics["wall_clock_per_task"]["value"] - 3.5) < 1e-9
+
+
+def test_since_until_aliases_for_from_to(tmp_path: Path) -> None:
+    repo = _build_two_tag_repo(tmp_path)
+
+    report = _run_json(repo, "--since", "v0.1.0", "--until", "v0.2.0")
+
+    assert report["from_ref"] == "v0.1.0"
+    assert report["to_ref"] == "v0.2.0"
+    assert report["fixed_metrics"]["feat_count"]["value"] == 2
+
+
+def test_owner_interventions_stays_not_collected(tmp_path: Path) -> None:
+    repo = _build_work_schema_repo(tmp_path)
+
+    report = _run_json(repo, "--from", "v0.1.0", "--to", "v0.2.0")
+    metric = report["fixed_metrics"]["owner_interventions"]
+
+    assert metric["status"] == "not_collected"
+    assert metric["value"] is None
+
+
+def test_work_schema_metrics_absent_when_no_records(tmp_path: Path) -> None:
+    """A plain git repo (no WORK-SCHEMA records) still works and reports zero/empty."""
+    repo = _build_two_tag_repo(tmp_path)
+
+    report = _run_json(repo, "--from", "v0.1.0", "--to", "v0.2.0")
+    metrics = report["fixed_metrics"]
+
+    # No task/VERIFY records => collected with zero counts (honest empty window),
+    # not a crash and not a fabricated value.
+    assert metrics["gate_failure_count"]["value"] == 0
+    assert metrics["measured_task_count"]["value"] == 0
+    assert metrics["tokens_per_task"]["value"] is None
+
+
 def test_reuses_release_cadence_helpers() -> None:
     """The tool must reuse helpers from release_cadence_trigger, not fork them."""
     source = SCRIPT.read_text(encoding="utf-8")
