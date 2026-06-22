@@ -292,3 +292,16 @@ def test_release_auto_workflow_fires_on_test_completion_and_releases_validated_s
     assert "github.event.workflow_run.head_sha" in workflow
     assert "ref: ${{ steps.validated.outputs.validated_sha }}" in workflow
     assert "moved past the CI-validated" not in workflow
+
+
+def test_release_auto_surfaces_owner_approval_via_github_issue() -> None:
+    # A non-patch (minor/major) release halts for Owner approval (NONCRITICAL_BUMPS =
+    # {"patch"}). That halt must reach the Owner PROACTIVELY -- a GitHub issue -- not
+    # just sit in the Actions run summary nobody watches. Regression guard for the
+    # silent-owner-notification gap.
+    workflow = (REPO_ROOT / ".github" / "workflows" / "release-auto.yml").read_text(encoding="utf-8")
+    assert "issues: write" in workflow  # GITHUB_TOKEN may open/close issues
+    assert "owner-approval-required" in workflow
+    assert "gh issue create" in workflow  # open when approval is needed
+    assert "gh issue close" in workflow  # close once a release executes
+    assert "[release-auto] Release pending Owner approval" in workflow  # single dedup'd issue
