@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -20,6 +21,17 @@ TEMPLATE_SCRIPT = (
 TASKSET = "TASKSET-AR-WAVE-TEST"
 
 
+def _routing_off_env() -> dict[str, str]:
+    """Pin the dormant-role routing flags OFF so these baseline tests assert the
+    unchanged dispatch behavior deterministically, regardless of an ambient flag
+    in the developer's shell (the live flags are exercised in
+    tests/test_role_routing_wiring.py)."""
+    env = dict(os.environ)
+    for flag in ("AR_ROLE_ROUTING", "AR_SCOUT_COUNCIL", "AR_BETA_ACTIVATION"):
+        env.pop(flag, None)
+    return env
+
+
 def _run(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(SCRIPT), "--root", str(root), *args],
@@ -29,6 +41,7 @@ def _run(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
         text=True,
         encoding="utf-8",
         errors="replace",
+        env=_routing_off_env(),
     )
 
 

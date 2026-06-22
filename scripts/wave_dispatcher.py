@@ -38,6 +38,15 @@ import model_routing
 from footprint_conflict_gate import footprints_overlap
 from task_unit_readiness_gate import depends_on_refs, load_unit_specs
 
+try:
+    # Dormant-role routing (TASK-AR-592): source-repo-only module. Consumers
+    # that vendor this dispatcher via the template do NOT ship role_routing, so
+    # the import is guarded — when absent, the per-wave scout/council hooks are
+    # simply unavailable (no behavior change, no breakage).
+    import role_routing
+except ImportError:  # pragma: no cover - consumer parity guard
+    role_routing = None  # type: ignore[assignment]
+
 
 DONE_UNIT_STATUSES = {"completed", "done"}
 DONE_CLAIM_STATUSES = {"completed", "done", "released"}
@@ -732,6 +741,32 @@ def cmd_dispatch(args: argparse.Namespace) -> int:
                 "target_files": node.target_files,
             }
         )
+
+    # Dormant-role routing seam (TASK-AR-592): when AR_SCOUT_COUNCIL is ON,
+    # dispatch a per-wave progress-scout sweep (and, at the W6 boundary, a
+    # council deliberation) as ADDITIVE overlay claims. These run alongside the
+    # worker claims this batch just issued and never remove or mutate them.
+    # Flag-OFF (default), an absent module, and any routing fault are no-ops:
+    # a routing failure must NEVER break the wave dispatch.
+    if role_routing is not None:
+        try:
+            # Prefer an explicit taskset id; for a --unit selection fall back to
+            # the issued units' own task_set_id, then the selection label, so the
+            # overlay claim id is stable and attributable.
+            task_set_id = (
+                label.split(":", 1)[1]
+                if label.startswith("taskset:")
+                else (next((n.task_set_id for n in wave_nodes if n.task_set_id), "") or label)
+            )
+            role_routing.dispatch_wave_hooks(
+                root,
+                task_set_id=task_set_id,
+                wave_no=wave_no,
+                is_w6=(wave_no == 6),
+                now=args.now,
+            )
+        except Exception:  # noqa: BLE001 - routing is best-effort overlay only
+            pass
 
     _print_dispatch_summary(root, label, wave_no, len(plan.waves), issued, skipped, args, guidance)
     return 0

@@ -1,0 +1,359 @@
+"""End-to-end TDD for wiring scripts/role_routing.py into the live dispatchers.
+
+role_routing.py is a standalone, flag-gated module: nothing in the live dispatch
+loop called it, so its three behaviors (additive review pass, per-wave scout +
+W6 council, beta activation) were inert even with the flags ON. These tests pin
+the WIRING at the dispatcher seams:
+
+  * task_claim_dispatcher.cmd_release -> route_review_pass (event=closeout)
+  * wave_dispatcher.cmd_dispatch      -> dispatch_wave_hooks (wave_no, is_w6)
+
+SAFETY CONTRACT (the load-bearing assertions):
+  * flag OFF -> the dispatcher behaves EXACTLY as before; NO overlay claim is
+    written and the primary (worker / lead-engineer) claim is unchanged.
+  * flag ON  -> the seam creates the expected ADDITIVE overlay claim WITHOUT
+    removing or mutating the primary claim.
+
+Each dispatcher is invoked as a subprocess (the real CLI path), with the flag
+injected via the child env, so the wiring is exercised exactly as it runs live.
+All state is synthetic under tmp_path.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+CLAIM_DISPATCHER = REPO_ROOT / "scripts" / "task_claim_dispatcher.py"
+WAVE_DISPATCHER = REPO_ROOT / "scripts" / "wave_dispatcher.py"
+ROLE_ROUTING_FLAG = "AR_ROLE_ROUTING"
+SCOUT_COUNCIL_FLAG = "AR_SCOUT_COUNCIL"
+TASKSET = "TASKSET-AR-WIRE-TEST"
+
+
+# ---------------------------------------------------------------------------
+# Subprocess helpers (mirror the existing dispatcher test harnesses, but allow
+# the role-routing flags to be set/cleared per call via the child env).
+# ---------------------------------------------------------------------------
+
+
+def _env(**overrides: str) -> dict[str, str]:
+    env = dict(os.environ)
+    env.setdefault("PYTHONIOENCODING", "utf-8")
+    # Default OFF unless a test sets them, so an enabled flag in the developer's
+    # shell cannot leak into the flag-OFF inertness assertions.
+    env.pop(ROLE_ROUTING_FLAG, None)
+    env.pop(SCOUT_COUNCIL_FLAG, None)
+    env.pop("AR_BETA_ACTIVATION", None)
+    env.update(overrides)
+    return env
+
+
+def _run_claim(root: Path, *args: str, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(CLAIM_DISPATCHER), "--root", str(root), *args],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        env=env or _env(),
+    )
+
+
+def _run_wave(root: Path, *args: str, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(WAVE_DISPATCHER), "--root", str(root), *args],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        env=env or _env(),
+    )
+
+
+def _git(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["git", "-C", str(root), *args],
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+
+def _init_git_repo(root: Path) -> None:
+    assert _git(root, "init", "-q").returncode == 0
+    assert _git(root, "config", "user.email", "wire-test@example.com").returncode == 0
+    assert _git(root, "config", "user.name", "Wire Test").returncode == 0
+    (root / "README.md").write_text("role routing wiring fixture\n", encoding="utf-8")
+    assert _git(root, "add", "-A").returncode == 0
+    assert _git(root, "commit", "-q", "-m", "init").returncode == 0
+
+
+def _claims(root: Path) -> list[dict]:
+    base = root / "agents" / "runtime" / "task_claims"
+    if not base.is_dir():
+        return []
+    return [json.loads(p.read_text(encoding="utf-8")) for p in sorted(base.glob("*.json"))]
+
+
+def _events(root: Path) -> list[dict]:
+    log = root / "agents" / "runtime" / "pane_events" / "pane-events.jsonl"
+    if not log.exists():
+        return []
+    return [json.loads(line) for line in log.read_text(encoding="utf-8").splitlines() if line.strip()]
+
+
+# ---------------------------------------------------------------------------
+# Claim-release fixtures (mirror tests/test_task_claim_dispatcher.py helpers).
+# ---------------------------------------------------------------------------
+
+
+def _write_worktree(root: Path, task_id: str) -> None:
+    worktree = root / ".worktrees" / task_id
+    worktree.mkdir(parents=True, exist_ok=True)
+    (worktree / ".git").write_text("gitdir: ../../.git/worktrees/test\n", encoding="utf-8")
+
+
+def _create_release_candidate(root: Path, *, task_id: str = "TASK-AR-507", suffix: str = "rr1") -> dict:
+    _write_worktree(root, task_id)
+    created = _run_claim(
+        root,
+        "create",
+        "--task-id",
+        task_id,
+        "--task-set-id",
+        TASKSET,
+        "--agent-role",
+        "lead-engineer",
+        "--mode",
+        "implement",
+        "--now",
+        "2026-06-22T09:00:00+09:00",
+        "--suffix",
+        suffix,
+        "--json",
+    )
+    assert created.returncode == 0, created.stderr or created.stdout
+    return json.loads(created.stdout)
+
+
+def _write_evidence(root: Path, rel: str = "agents/runtime/task_claims/evidence/W4B-VERIFICATION.md") -> str:
+    evidence = root / rel
+    evidence.parent.mkdir(parents=True, exist_ok=True)
+    evidence.write_text("# W4b verification\n\n- result: pass\n", encoding="utf-8")
+    return rel
+
+
+def _release(root: Path, claim: dict, *, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
+    evidence_rel = _write_evidence(root)
+    return _run_claim(
+        root,
+        "release",
+        "--claim-id",
+        claim["claim_id"],
+        "--verified-by",
+        "qa-20260622-101500-kst-w4b1",
+        "--verifier-role",
+        "qa-reviewer",
+        "--verification-evidence",
+        evidence_rel,
+        "--now",
+        "2026-06-22T10:15:00+09:00",
+        "--json",
+        env=env,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Seam 1: claim release -> route_review_pass (event=closeout)
+# ---------------------------------------------------------------------------
+
+
+def test_release_with_role_routing_off_creates_no_overlay_claim(tmp_path: Path) -> None:
+    payload = _create_release_candidate(tmp_path)
+    claim = payload["claim"]
+
+    released = _release(tmp_path, claim, env=_env())  # flag OFF
+
+    assert released.returncode == 0, released.stderr or released.stdout
+    claims = _claims(tmp_path)
+    # Exactly the one primary claim exists; it is released. No REVIEW overlay.
+    assert [c["claim_id"] for c in claims] == [claim["claim_id"]]
+    assert claims[0]["status"] == "released"
+    assert claims[0]["agent_role"] == "lead-engineer"
+    assert not any(str(c["claim_id"]).startswith("CLAIM-REVIEW-") for c in claims)
+    assert not any(e.get("event") == "review_pass_dispatched" for e in _events(tmp_path))
+
+
+def test_release_with_role_routing_on_creates_additive_review_overlay(tmp_path: Path) -> None:
+    payload = _create_release_candidate(tmp_path)
+    claim = payload["claim"]
+
+    released = _release(tmp_path, claim, env=_env(**{ROLE_ROUTING_FLAG: "1"}))  # flag ON
+
+    assert released.returncode == 0, released.stderr or released.stdout
+    claims = _claims(tmp_path)
+    by_id = {c["claim_id"]: c for c in claims}
+
+    # Primary claim still present, released, and NOT mutated into a review role.
+    assert claim["claim_id"] in by_id
+    primary = by_id[claim["claim_id"]]
+    assert primary["status"] == "released"
+    assert primary["agent_role"] == "lead-engineer"
+    assert primary["task_id"] == claim["task_id"]
+
+    # An ADDITIVE review overlay claim now exists with a DISTINCT task id.
+    overlays = [c for c in claims if c.get("overlay") and str(c["claim_id"]).startswith("CLAIM-REVIEW-")]
+    assert overlays, f"expected a review overlay, got {[c['claim_id'] for c in claims]}"
+    overlay = overlays[0]
+    assert overlay["task_id"] != claim["task_id"], "review claim must be additive (distinct task id)"
+    assert overlay["agent_role"] in {"skeptic", "independent-auditor"}
+    assert overlay.get("parent_task_id") == claim["task_id"]
+    # closeout is the wired event (release == task closeout).
+    assert "review-trigger:closeout" in (overlay.get("tags") or [])
+    assert any(e.get("event") == "review_pass_dispatched" for e in _events(tmp_path))
+
+
+def test_release_routing_failure_never_breaks_release(tmp_path: Path) -> None:
+    """A routing fault must not fail the release (mirrors a2a_claim_emitter robustness)."""
+    payload = _create_release_candidate(tmp_path)
+    claim = payload["claim"]
+    # Make the overlay write path collide: pre-create the deterministic review
+    # claim_id as a DIRECTORY so atomic write would raise; release must still 0.
+    review_id = f"CLAIM-REVIEW-{claim['task_id']}-independent-auditor-closeout".replace(" ", "")
+    # role_routing slugs the task id; reproduce its _slug to land the collision.
+    slug = "".join(c if c.isalnum() else "-" for c in claim["task_id"]).strip("-")
+    collide = tmp_path / "agents" / "runtime" / "task_claims" / f"CLAIM-REVIEW-{slug}-independent-auditor-closeout.json"
+    collide.parent.mkdir(parents=True, exist_ok=True)
+    collide.mkdir()  # a directory where a file is expected -> write fault
+
+    released = _release(tmp_path, claim, env=_env(**{ROLE_ROUTING_FLAG: "1"}))
+
+    assert released.returncode == 0, released.stderr or released.stdout
+    saved = json.loads((tmp_path / payload["path"]).read_text(encoding="utf-8"))
+    assert saved["status"] == "released"
+
+
+# ---------------------------------------------------------------------------
+# Seam 2: wave dispatch -> dispatch_wave_hooks (progress-scout per wave)
+# ---------------------------------------------------------------------------
+
+
+def _write_task(root: Path, task_id: str, *, status: str = "planned") -> None:
+    tasks_dir = root / "agents" / "lead_engineer" / "tasks"
+    tasks_dir.mkdir(parents=True, exist_ok=True)
+    (tasks_dir / f"{task_id}.md").write_text(
+        f"""---
+id: {task_id}
+status: {status}
+priority: P1
+difficulty: M
+est_hours: 2
+est_tokens: 200
+task_set_id: {TASKSET}
+tags: []
+---
+
+## Goal
+- Wiring fixture task.
+""",
+        encoding="utf-8",
+    )
+
+
+def _write_unit(root: Path, task_id: str, index: int, *, target_files: list[str], status: str = "worker_ready") -> str:
+    unit_id = f"UNIT-{task_id}-{index:03d}"
+    path = root / "agents" / "lead_engineer" / "tasks" / "units" / task_id / f"{unit_id}.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    targets = "\n".join(f"  - {entry}" for entry in target_files)
+    path.write_text(
+        f"""---
+unit_id: {unit_id}
+task_id: {task_id}
+task_set_id: {TASKSET}
+project_id: PROJECT-AGENT-RUNTIME-PM-OS
+status: {status}
+horizon: unit
+model_tier: worker_standard
+context: "Wiring fixture unit."
+inputs:
+  - agents/lead_engineer/tasks/{task_id}.md
+target_files:
+{targets}
+scope: "Only this fixture unit."
+acceptance:
+  - "It passes."
+verification:
+  - "python -m pytest -q"
+handoff: "Report the result."
+stop_condition: "stop_after:{unit_id}:no_adjacent_taskset"
+---
+
+# {unit_id}
+""",
+        encoding="utf-8",
+    )
+    return unit_id
+
+
+def test_wave_dispatch_with_scout_council_off_creates_no_overlay_claim(tmp_path: Path) -> None:
+    _init_git_repo(tmp_path)
+    _write_task(tmp_path, "TASK-AR-901")
+    u1 = _write_unit(tmp_path, "TASK-AR-901", 1, target_files=["scripts/a.py"])
+
+    result = _run_wave(
+        tmp_path, "--taskset", TASKSET, "--dispatch", "--mode", "cascade",
+        "--now", "2026-06-22T10:00:00+09:00", "--suffix", "wv1", "--json",
+        env=_env(),  # flag OFF
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    issued = json.loads(result.stdout)["issued"]
+    assert [e["unit_id"] for e in issued] == [u1]
+    claims = _claims(tmp_path)
+    # Only the worker claim — no scout/council overlay.
+    assert not any(c.get("overlay") for c in claims)
+    assert not any(str(c["claim_id"]).startswith("CLAIM-SCOUT-") for c in claims)
+    assert not any(e.get("event") == "progress_scout_sweep" for e in _events(tmp_path))
+
+
+def test_wave_dispatch_with_scout_council_on_creates_scout_overlay(tmp_path: Path) -> None:
+    _init_git_repo(tmp_path)
+    _write_task(tmp_path, "TASK-AR-901")
+    u1 = _write_unit(tmp_path, "TASK-AR-901", 1, target_files=["scripts/a.py"])
+
+    result = _run_wave(
+        tmp_path, "--taskset", TASKSET, "--dispatch", "--mode", "cascade",
+        "--now", "2026-06-22T10:00:00+09:00", "--suffix", "wv1", "--json",
+        env=_env(**{SCOUT_COUNCIL_FLAG: "1"}),  # flag ON
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["wave"] == 1
+    assert [e["unit_id"] for e in payload["issued"]] == [u1]
+
+    claims = _claims(tmp_path)
+    # Worker claim is present and unchanged in role.
+    worker = [c for c in claims if c.get("unit_id") == u1]
+    assert worker and worker[0]["agent_role"] == "lead-engineer"
+    # An additive progress-scout overlay for THIS wave now exists.
+    scouts = [c for c in claims if c.get("overlay") and c["agent_role"] == "progress-scout"]
+    assert scouts, f"expected a scout overlay, got {[c['claim_id'] for c in claims]}"
+    assert scouts[0]["claim_id"].endswith("-W1")
+    # wave 1 is not W6, so NO council overlay.
+    assert not any(c["agent_role"] == "council" for c in claims)
+    events = {e.get("event") for e in _events(tmp_path)}
+    assert "progress_scout_sweep" in events
+    assert "council_deliberation" not in events
