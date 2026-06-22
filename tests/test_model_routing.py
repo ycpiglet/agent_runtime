@@ -50,3 +50,26 @@ def test_pm_worker_escalates_to_planner_for_high_risk_trigger():
 def test_provider_env_accepts_pm_tier(monkeypatch):
     monkeypatch.setenv("CLAUDE_AGENT_OPUS_MODEL", "claude-opus-test")
     assert mr.provider_env("claude-agent", "planner_high") == {"CLAUDE_AGENT_MODEL": "claude-opus-test"}
+
+
+def test_provider_env_claude_agent_latest_defaults(monkeypatch):
+    monkeypatch.delenv("CLAUDE_AGENT_OPUS_MODEL", raising=False)
+    monkeypatch.delenv("CLAUDE_AGENT_SONNET_MODEL", raising=False)
+    assert mr.provider_env("claude-agent", "opus") == {"CLAUDE_AGENT_MODEL": "claude-opus-4-8"}
+    assert mr.provider_env("claude-agent", "sonnet") == {"CLAUDE_AGENT_MODEL": "claude-sonnet-4-6"}
+
+
+def test_provider_env_routes_codex_providers(monkeypatch):
+    monkeypatch.delenv("CODEX_AGENT_SONNET_MODEL", raising=False)
+    assert mr.provider_env("codex-agent", "sonnet") == {"CODEX_PROVIDER_MODEL": "gpt-5.2-codex"}
+    assert mr.provider_env("codex", "sonnet") == {"CODEX_PROVIDER_MODEL": "gpt-5.2-codex"}
+
+
+def test_provider_env_codex_env_override(monkeypatch):
+    monkeypatch.setenv("CODEX_AGENT_SONNET_MODEL", "gpt-custom-codex")
+    assert mr.provider_env("codex-agent", "sonnet") == {"CODEX_PROVIDER_MODEL": "gpt-custom-codex"}
+
+
+def test_provider_env_unknown_provider_and_bare_claude():
+    assert mr.provider_env("dummy", "sonnet") == {}
+    assert mr.provider_env("claude", "sonnet") == {}

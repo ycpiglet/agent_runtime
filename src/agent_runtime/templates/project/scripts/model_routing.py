@@ -20,8 +20,26 @@ TIER_ORDER = {"haiku": 1, "sonnet": 2, "opus": 3}
 
 CLAUDE_AGENT_MODEL_ENV = {
     "haiku": ("CLAUDE_AGENT_HAIKU_MODEL", "claude-haiku-4-5"),
-    "sonnet": ("CLAUDE_AGENT_SONNET_MODEL", "claude-sonnet-4-5"),
-    "opus": ("CLAUDE_AGENT_OPUS_MODEL", "claude-opus-4-7"),
+    "sonnet": ("CLAUDE_AGENT_SONNET_MODEL", "claude-sonnet-4-6"),
+    "opus": ("CLAUDE_AGENT_OPUS_MODEL", "claude-opus-4-8"),
+}
+
+# Codex (OpenAI Responses) routing. gpt-5.2-codex is the only codex model defined
+# in this repo, so every tier defaults to it; the env-override names let the Owner
+# pin tier-specific codex models later without code changes. This plumbing lets
+# difficulty->model routing reach the codex/codex-agent providers (was a no-op).
+CODEX_AGENT_MODEL_ENV = {
+    "haiku": ("CODEX_AGENT_HAIKU_MODEL", "gpt-5.2-codex"),
+    "sonnet": ("CODEX_AGENT_SONNET_MODEL", "gpt-5.2-codex"),
+    "opus": ("CODEX_AGENT_OPUS_MODEL", "gpt-5.2-codex"),
+}
+
+# provider name -> (provider env var carrying the resolved model, tier->model map).
+# Any provider absent from this table (incl. bare "claude") gets no routed model.
+PROVIDER_MODEL_ENV = {
+    "claude-agent": ("CLAUDE_AGENT_MODEL", CLAUDE_AGENT_MODEL_ENV),
+    "codex-agent": ("CODEX_PROVIDER_MODEL", CODEX_AGENT_MODEL_ENV),
+    "codex": ("CODEX_PROVIDER_MODEL", CODEX_AGENT_MODEL_ENV),
 }
 
 PM_TIER_TO_PROVIDER_TIER = {
@@ -241,19 +259,28 @@ def resolve_work_item_tier(
 
 
 def provider_env(provider_name: str, tier_or_model: str) -> dict[str, str]:
-    """Return environment variables needed for a provider to use a routed tier."""
-    if provider_name != "claude-agent":
+    """Return environment variables needed for a provider to use a routed tier.
+
+    Each routed provider (claude-agent, codex, codex-agent) carries its resolved
+    model in a single env var (PROVIDER_MODEL_ENV). Resolution order per provider:
+    tier name in its tier_map -> env-overridable model; else PM tier mapped to a
+    tier -> tier_map model; else a raw model passthrough; else {}. Providers not
+    in the table (incl. bare "claude") get no routed model.
+    """
+    mapping = PROVIDER_MODEL_ENV.get(provider_name)
+    if mapping is None:
         return {}
+    env_var_name, tier_map = mapping
     value = str(tier_or_model or "").strip()
     lower = value.lower()
-    if lower in CLAUDE_AGENT_MODEL_ENV:
-        env_name, default_model = CLAUDE_AGENT_MODEL_ENV[lower]
-        return {"CLAUDE_AGENT_MODEL": os.environ.get(env_name, default_model)}
+    if lower in tier_map:
+        env_name, default_model = tier_map[lower]
+        return {env_var_name: os.environ.get(env_name, default_model)}
     if lower in PM_TIER_TO_PROVIDER_TIER:
-        env_name, default_model = CLAUDE_AGENT_MODEL_ENV[PM_TIER_TO_PROVIDER_TIER[lower]]
-        return {"CLAUDE_AGENT_MODEL": os.environ.get(env_name, default_model)}
+        env_name, default_model = tier_map[PM_TIER_TO_PROVIDER_TIER[lower]]
+        return {env_var_name: os.environ.get(env_name, default_model)}
     if value:
-        return {"CLAUDE_AGENT_MODEL": value}
+        return {env_var_name: value}
     return {}
 
 
