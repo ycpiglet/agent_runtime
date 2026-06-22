@@ -42,6 +42,7 @@ on:
 permissions:
   contents: write
   actions: read
+  issues: write
 
 concurrency:
   group: release-auto
@@ -164,6 +165,56 @@ jobs:
               echo "- result: orchestrator produced no result file (no release attempted)."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open/update the Owner-approval issue (proactive notification)
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          VALIDATED_SHA: ${{ steps.validated.outputs.validated_sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          # The STEP_SUMMARY above is only visible to someone browsing this run. A non-patch
+          # release that halts for Owner approval must reach the Owner proactively, so open
+          # (or update) a single GitHub issue; close it once a release actually executes.
+          if [ ! -f .tmp/release-auto-result.json ]; then
+            echo "no orchestrator result file; nothing to surface"; exit 0
+          fi
+          result="$(jq -r '.result // "unknown"' .tmp/release-auto-result.json)"
+          target="$(jq -r '.target_tag // "n/a"' .tmp/release-auto-result.json)"
+          dry="$(jq -r '.dry_run' .tmp/release-auto-result.json)"
+          reason="$(jq -r '.reason // ""' .tmp/release-auto-result.json)"
+          sha="$(jq -r '.head_sha // ""' .tmp/release-auto-result.json)"
+          [ -n "$sha" ] || sha="$VALIDATED_SHA"
+          bump="$(jq -r '(.blocking_flags // []) | map(select(startswith("recommended_bump:")))[0] // "" | sub("recommended_bump:";"")' .tmp/release-auto-result.json)"
+          [ -n "$bump" ] || bump="minor"
+          title="[release-auto] Release pending Owner approval"
+          existing="$(gh issue list --repo "$REPO" --state open --search "in:title \"$title\"" --json number --jq '.[0].number // empty' 2>/dev/null || echo "")"
+          if [ "$result" = "owner-approval-required" ]; then
+            {
+              echo "An accumulated **$target** (\`$bump\`) release reached the cadence threshold but is **not auto-published** — the agent council only auto-executes \`patch\`/noncritical tiers, so a non-patch release needs your explicit approval."
+              echo ""
+              echo "- recommended: \`$target\` (\`$bump\`)"
+              echo "- validated green SHA: \`$sha\`"
+              echo "- reason: $reason"
+              echo "- workflow run: $RUN_URL"
+              echo ""
+              echo "**To approve & publish:** cut the release (\`scripts/release_version_cascade.py --write <version>\` -> PR -> merge -> annotated tag + GitHub release), or comment your go-ahead. This issue auto-closes once a release executes."
+            } > /tmp/release-issue-body.md
+            if [ -n "$existing" ]; then
+              gh issue edit "$existing" --repo "$REPO" --body-file /tmp/release-issue-body.md
+              gh issue comment "$existing" --repo "$REPO" --body "Still pending: \`$target\` (\`$bump\`) at \`$sha\` (run $RUN_URL)."
+              echo "updated pending-approval issue #$existing"
+            else
+              gh issue create --repo "$REPO" --title "$title" --body-file /tmp/release-issue-body.md
+              echo "opened pending-approval issue"
+            fi
+          elif [ "$result" = "executed" ] && [ "$dry" = "false" ] && [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$REPO" --body "Released \`$target\` (run $RUN_URL) -- closing."
+            gh issue close "$existing" --repo "$REPO"
+            echo "closed pending-approval issue #$existing after release"
+          fi
 
       - name: Upload Owner-notification + decision records
         if: always()
