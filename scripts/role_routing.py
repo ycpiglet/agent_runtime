@@ -82,6 +82,23 @@ def beta_activation_enabled() -> bool:
     return _truthy(os.environ.get(BETA_ACTIVATION_FLAG), False)
 
 
+ROUTING_CONFIG = "agents/project/role-routing.json"
+
+
+def _config_enabled(root: Path, key: str) -> bool | None:
+    """Config-driven gate: read ``agents/project/role-routing.json`` and return
+    the bool for ``key``. Returns None (file missing / bad JSON / key absent /
+    non-bool) so the caller falls back to the env flag. This lets the autonomous
+    dispatch loop activate routing from committed config without depending on the
+    process env reaching it (the env path stays as an override/fallback)."""
+    try:
+        data = json.loads((root / ROUTING_CONFIG).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    value = data.get(key) if isinstance(data, dict) else None
+    return value if isinstance(value, bool) else None
+
+
 # ---------------------------------------------------------------------------
 # Shared helpers
 # ---------------------------------------------------------------------------
@@ -196,7 +213,10 @@ def route_review_pass(
     worker's claim — the lead keeps working while the reviewer runs in parallel.
     """
     root = root.resolve()
-    if not role_routing_enabled():
+    enabled = _config_enabled(root, "role_routing")
+    if enabled is None:
+        enabled = role_routing_enabled()
+    if not enabled:
         return {"enabled": False, "created": []}
 
     now = _now_iso(now)
@@ -239,7 +259,10 @@ def dispatch_wave_hooks(
     (``is_w6=True``) is a council deliberation additionally dispatched.
     """
     root = root.resolve()
-    if not scout_council_enabled():
+    enabled = _config_enabled(root, "scout_council")
+    if enabled is None:
+        enabled = scout_council_enabled()
+    if not enabled:
         return {"enabled": False, "created": []}
 
     now = _now_iso(now)
@@ -307,7 +330,10 @@ def maybe_activate_beta(
     """
     root = root.resolve()
     due = str(due_state or "").strip().lower() in {"due", "overdue"}
-    if not beta_activation_enabled():
+    enabled = _config_enabled(root, "beta_activation")
+    if enabled is None:
+        enabled = beta_activation_enabled()
+    if not enabled:
         return {"enabled": False, "due": due, "created": []}
     if not due:
         return {"enabled": True, "due": False, "created": []}
