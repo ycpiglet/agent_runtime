@@ -24,6 +24,9 @@ into a form the proposal engine can use.
 | Consumer-project path assumption | `consumer-project-path-assumption` | issue #185, PR #187 | gate+fixture | gates resolve root-OR-template; v0.3.1 shipped |
 | Work concentrates on lead-engineer | `role-concentration` | `REVIEW-2026-06-22-system-health-rsi-diagnosis`, self_improvement_cycle assess | tooling+proposal | `role_concentration_gate` flags it (advisory); dispatch rebalance to dormant review/skeptic/scout roles is an Owner-tier proposal |
 | Lessons reviewed but rarely compounded | `compound-under-cadence` | `REVIEW-2026-06-22-system-health-rsi-diagnosis` | tooling+proposal | `compound_cadence_gate` flags review≫compound; make compound a per-N-reviews cadence obligation (proposal) |
+| A2A built but not wired into live dispatch | `a2a-dormant-not-wired` | `REVIEW-2026-06-22-subsystem-verification-audit` | proposal | router complete + tested, 0 runtime traffic; wire emit_message into claim/handoff/decision (TASK-AR-518 intent) |
+| Asset-prune loop detect-only | `asset-prune-detect-only` | `REVIEW-2026-06-22-subsystem-verification-audit` | tooling | `asset_lifecycle.py` (shipped) closes detect→action via reversible keep→observe; deprecate/remove Owner-gated |
+| beta_tester role dormant | `beta-tester-dormant` | `REVIEW-2026-06-22-subsystem-verification-audit` | proposal | advisory beta_tester_due only; activate scheduled exploration rounds → BTC-* → QA bugs |
 
 ## Detailed Cases
 
@@ -271,3 +274,37 @@ into a form the proposal engine can use.
 | `linked_regression_fixture` | `tests/test_compound_cadence_gate.py` |
 | `task_proposal` | (1) shipped: advisory `compound_cadence_gate`; (2) PROPOSAL: make "compound >= 1 lesson per N reviews" a cycle obligation (W6 / session-closeout). |
 | `prevention_status` | tooling+proposal |
+
+### CASE-A2A-DORMANT-NOT-WIRED
+
+| Field | Value |
+| --- | --- |
+| `case_id` | `CASE-A2A-DORMANT-NOT-WIRED` |
+| `dedupe_key` | `a2a-dormant-not-wired` |
+| `symptom` | A2A messaging (router + lifecycle/trace gates) is complete and tested (4/4) but has ZERO runtime traffic: `agents/runtime/a2a/messages.jsonl` doesn't exist, only a static 2026-06-09 baseline; gates pass vacuously. Cross-team and same-role-multi-instance comms therefore never happen at runtime. |
+| `trigger` | A2A landed as PoC-complete (TASK-AR-311); the dispatcher/orchestrator were never wired to `emit_message()` on real work. |
+| `owner_boundary` | dispatch-architecture (proposal) |
+| `affected_gate` | `scripts/a2a_message_router.py`, `a2a_lifecycle_gate.py`, `a2a_trace_gate.py` |
+| `recurrence_count` | 1 (structural) |
+| `source_refs` | `REVIEW-2026-06-22-subsystem-verification-audit.md`, TASK-AR-311, TASK-AR-518 |
+| `reproduction` | `ls agents/runtime/a2a/` → no live messages.jsonl; grep for `emit_message(` callers → only tests. |
+| `linked_regression_fixture` | `tests/test_a2a_message_router.py` (PoC), `test_a2a_*` gates |
+| `task_proposal` | PROPOSAL (Owner-tier): wire `emit_message` into claim/handoff/decision in the dispatch path (TASK-AR-518 intent); this also activates cross-team + same-role-instance comms. |
+| `prevention_status` | proposal |
+
+### CASE-BETA-TESTER-DORMANT
+
+| Field | Value |
+| --- | --- |
+| `case_id` | `CASE-BETA-TESTER-DORMANT` |
+| `dedupe_key` | `beta-tester-dormant` |
+| `symptom` | The beta_tester role has a spec + advisory `beta_tester_due.py` but is never activated — no automated exploration rounds, no BTC-* test-case artifacts. Edge/concurrency tests are strong; exploratory beta testing is absent. |
+| `trigger` | beta_tester_due only emits a cadence signal (exit 0); nothing dispatches a beta exploration round. |
+| `owner_boundary` | dispatch-architecture (proposal) |
+| `affected_gate` | `scripts/beta_tester_due.py`, `agents/beta_tester/` |
+| `recurrence_count` | 1 (structural) |
+| `source_refs` | `REVIEW-2026-06-22-subsystem-verification-audit.md` |
+| `reproduction` | `python scripts/beta_tester_due.py` → due/overdue signal; no BTC-* artifacts produced. |
+| `linked_regression_fixture` | n/a |
+| `task_proposal` | PROPOSAL: schedule beta exploration rounds (BTC-* → QA bug intake), same as routing other dormant roles into the loop. |
+| `prevention_status` | proposal |
