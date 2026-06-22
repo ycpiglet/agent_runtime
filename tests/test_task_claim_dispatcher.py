@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -13,6 +14,17 @@ CONCURRENCY_GATE = REPO_ROOT / "scripts" / "collaboration_concurrency_gate.py"
 IDENTITY_GATE = REPO_ROOT / "scripts" / "agent_identity_gate.py"
 
 
+def _routing_off_env() -> dict[str, str]:
+    """Pin the dormant-role routing flags OFF so these baseline claim-lifecycle
+    tests assert the unchanged behavior deterministically, regardless of an
+    ambient flag in the developer's shell (the live review-routing seam is
+    exercised in tests/test_role_routing_wiring.py)."""
+    env = dict(os.environ)
+    for flag in ("AR_ROLE_ROUTING", "AR_SCOUT_COUNCIL", "AR_BETA_ACTIVATION"):
+        env.pop(flag, None)
+    return env
+
+
 def _run_dispatcher(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(SCRIPT), "--root", str(root), *args],
@@ -22,6 +34,7 @@ def _run_dispatcher(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
         text=True,
         encoding="utf-8",
         errors="replace",
+        env=_routing_off_env(),
     )
 
 

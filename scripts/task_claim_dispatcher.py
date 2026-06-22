@@ -40,6 +40,7 @@ import atomic_io
 import backlog_board
 import claim_guard
 import plan_assumption_gate
+import role_routing
 from agent_instance_registry import record_claim_instance
 from footprint_conflict_gate import ACTIVE_CLAIM_STATUSES as FOOTPRINT_ACTIVE_STATUSES
 from footprint_conflict_gate import footprints_overlap
@@ -777,6 +778,23 @@ def cmd_release(args: argparse.Namespace) -> int:
         verifier_role=verifier_role,
         verification_evidence=evidence_ref,
     )
+    # Dormant-role routing seam (TASK-AR-592): a claim release is a task
+    # closeout, a high-risk event the audit flagged as never exercising the
+    # review roles. When AR_ROLE_ROUTING is ON, dispatch an ADDITIVE reviewer
+    # pass against a DISTINCT synthetic task id; it runs in parallel and never
+    # removes or mutates this lead-engineer claim. Flag-OFF (default) and any
+    # routing fault are no-ops — a routing failure must NEVER break the release
+    # (mirrors the a2a_claim_emitter robustness above).
+    try:
+        role_routing.route_review_pass(
+            root,
+            task_id=str(claim.get("task_id") or ""),
+            task_set_id=str(claim.get("task_set_id") or ""),
+            event="closeout",
+            now=now_text,
+        )
+    except Exception:  # noqa: BLE001 - routing is best-effort overlay only
+        pass
     if str(claim.get("phase") or "").strip().lower() == "taskset-completed":
         # Taskset boundary reached: emit a completion signal so the runtime
         # (boundary guard + UI banner) can enforce STOP-and-report rather than
