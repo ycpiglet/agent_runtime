@@ -57,6 +57,7 @@ BINARY_SUFFIXES = {
 SKIP_DIR_NAMES = {
     ".git",
     ".pytest_cache",
+    ".hypothesis",
     ".tmp",
     "reviews",
     "__pycache__",
