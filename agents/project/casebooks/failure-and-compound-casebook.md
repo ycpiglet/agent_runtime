@@ -16,7 +16,7 @@ into a form the proposal engine can use.
 | RSI operating evidence scattered | `rsi-evidence-scattered` | `REVIEW-2026-06-11-agent-runtime-rsi-operating-system-registration` | verified | `TASKSET-AR-RSI-OPERATING-SYSTEM` closeout |
 | Low-frequency self-improvement debt | `self-improvement-low-frequency-debt` | `reviews/REVIEW-2026-06-17-self-improvement-cycle.md`, `COMPOUND-2026-06-17-001` | watch | route dormant roles and low-reuse assets into the next cycle |
 | Release perpetual-skip (no tag despite backlog) | `release-perpetual-skip` | `COMPOUND-2026-06-22-001`, PR #183 | gate+fixture | metric (`workflow_run`) trigger + green-SHA checkout shipped; keep workflow-wiring test |
-| Release version-cascade incomplete | `release-version-cascade` | `COMPOUND-2026-06-22-001`, PR #184 | proposal | bump ALL current-public-tag refs atomically; inventory/preflight tests catch misses |
+| Release version-cascade incomplete | `release-version-cascade` | `COMPOUND-2026-06-22-001`, PR #184 | tooling | `scripts/release_version_cascade.py --check/--write` (shipped) bumps+verifies all 12 current-tag refs in one pass |
 | Template change leaves stale host lock | `template-stale-host-lock` | `COMPOUND-2026-06-22-001`, PR #183 | gate | `test_lock_merge_driver` catches; proposal: pre-commit auto-regen |
 | Shared-checkout ref race (concurrent agents) | `shared-checkout-ref-race` | `COMPOUND-2026-06-22-001` | proposal | verify live tip before destructive ref ops; no cleanup during concurrency |
 | Non-hermetic test mutates tracked files | `nonhermetic-test-tracked-mutation` | `COMPOUND-2026-06-22-001` | proposal | hermetic board/archive tests; explicit pathspec (not `git add -A`) on release commits |
@@ -147,9 +147,9 @@ into a form the proposal engine can use.
 | `recurrence_count` | 2 (v0.3.0 cut + every future cut) |
 | `source_refs` | `COMPOUND-2026-06-22-001`, PR #184, `[[agent-runtime-release-cadence-direction]]` (cascade file list) |
 | `reproduction` | Bump only pyproject + run `pytest tests/test_inventory_sync_sanitize.py` → version/tag-mismatch failures. |
-| `linked_regression_fixture` | existing inventory + execution-gate + preflight tests (already enforce consistency) |
-| `task_proposal` | propose a single `release-version-cascade` bump helper/gate that updates+verifies all current-tag refs in one pass (CLI `--tag` defaults ×5 files, `test.yml` ×3, `RELEASE-GATE-TEMPLATE.yml`, host fixture `ref` + regen lock, test constants ×2) |
-| `prevention_status` | proposal |
+| `linked_regression_fixture` | `tests/test_release_version_cascade.py` (new) + existing inventory/execution-gate/preflight tests |
+| `task_proposal` | SHIPPED: `scripts/release_version_cascade.py` — `--check` (one-pass consistency across all 12 refs) + `--write <ver>` (atomic bump + best-effort host-lock regen) + `--json`. Source-repo release tool, intentionally NOT in `owner_governance_gate` (consumer projects lack these refs → would reintroduce `consumer-project-path-assumption`). |
+| `prevention_status` | tooling |
 
 ### CASE-TEMPLATE-STALE-HOST-LOCK
 
