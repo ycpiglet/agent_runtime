@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-20T11:58:15+09:00
-record_count: 597
+generated_at: 2026-06-22T11:06:38+09:00
+record_count: 600
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `597` review and evidence records under `reviews/`.
+- Summary: indexed `600` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `597` files |
+| Reviews covered | pass | `600` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -69,6 +69,7 @@ record_count: 597
 | `reviews/CO-LOCATION-GATE-2026-06-09-task-ar-204.json` | `CO-LOCATION-GATE-2026-06-09-task-ar-204` | json | record | n/a | CO-LOCATION-GATE-2026-06-09-task-ar-204 |
 | `reviews/CO-LOCATION-GATE-2026-06-10-task-ar-223-root-current.json` | `CO-LOCATION-GATE-2026-06-10-task-ar-223-root-current` | json | record | n/a | CO-LOCATION-GATE-2026-06-10-task-ar-223-root-current |
 | `reviews/CO-LOCATION-GATE-2026-06-11-task-ar-310.json` | `CO-LOCATION-GATE-2026-06-11-task-ar-310` | json | record | n/a | CO-LOCATION-GATE-2026-06-11-task-ar-310 |
+| `reviews/COMPOUND-2026-06-22-release-ops-and-concurrency.md` | `COMPOUND-2026-06-22-release-ops-and-concurrency` | compound | recorded | pass | Release-ops + shared-checkout concurrency compound |
 | `reviews/CONTEXT-KNOWLEDGE-GATE-2026-06-11-final.json` | `CONTEXT-KNOWLEDGE-GATE-2026-06-11-final` | json | record | n/a | CONTEXT-KNOWLEDGE-GATE-2026-06-11-final |
 | `reviews/CORRECTION-COLLECTOR-2026-06-09-task-ar-207.json` | `CORRECTION-COLLECTOR-2026-06-09-task-ar-207` | json | record | n/a | CORRECTION-COLLECTOR-2026-06-09-task-ar-207 |
 | `reviews/CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current.json` | `CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current` | json | record | n/a | CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current |
@@ -498,6 +499,8 @@ record_count: 597
 | `reviews/REVIEW-2026-06-18-taskset-ar-release-auto-noncritical-registration.md` | `REVIEW-2026-06-18-taskset-ar-release-auto-noncritical-registration` | md | record | pass | Noncritical Release Auto-Execution Registration |
 | `reviews/REVIEW-2026-06-20-taskset-ar-visual-asset-adoption-registration.md` | `REVIEW-2026-06-20-taskset-ar-visual-asset-adoption-registration` | md | record | pass | Visual Asset Adoption Registration |
 | `reviews/REVIEW-2026-06-20-taskset-ar-visual-system-integration-registration.md` | `REVIEW-2026-06-20-taskset-ar-visual-system-integration-registration` | md | record | pass | Visual System Integration & Verification Registration |
+| `reviews/REVIEW-2026-06-22-agent-skill-track-consolidation.md` | `REVIEW-2026-06-22-agent-skill-track-consolidation` | review | assessed | pass | Agent/skill track consolidation — what to take to main |
+| `reviews/REVIEW-2026-06-22-autofolio-upstream-candidates.md` | `REVIEW-2026-06-22-autofolio-upstream-candidates` | review | assessed | pass | autofolio → agent_runtime upstream-candidate assessment |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario |
