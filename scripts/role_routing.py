@@ -37,6 +37,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+from collections.abc import Sequence
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -61,6 +62,19 @@ SKEPTIC_ROLE = "skeptic"
 SCOUT_ROLE = "progress-scout"
 COUNCIL_ROLE = "council"
 BETA_ROLE = "beta-tester"
+
+# Merge-risk escalation signals: when a closeout/merge carries any of these
+# (model_routing.ESCALATION_TRIGGERS members), route an ADDITIVE skeptic
+# adversarial pass on top of the default auditor pass. This deliberately
+# EXCLUDES bare "ambiguity": ambiguity is scope-clarity (resolve before work),
+# not merge danger, so it does not warrant a skeptic on closeout. Tunable set.
+HIGH_RISK_TRIGGERS = {
+    "high_risk",
+    "security",
+    "external_effect",
+    "cross_cutting",
+    "repeated_failure",
+}
 
 
 def _truthy(value: str | None, default: bool) -> bool:
@@ -202,6 +216,7 @@ def route_review_pass(
     task_set_id: str = "",
     event: str = "merge",
     review_role: str = DEFAULT_REVIEW_ROLE,
+    triggers: Sequence[str] | None = None,
     now: str | None = None,
 ) -> dict[str, Any]:
     """On a high-risk event (merge/closeout) create an ADDITIVE review claim.
@@ -211,6 +226,14 @@ def route_review_pass(
     review pass is dispatched for ``review_role`` against a DISTINCT, additive
     task id (``REVIEW-<task>-<role>``) so it never collides with or removes the
     worker's claim — the lead keeps working while the reviewer runs in parallel.
+
+    HIGH-RISK escalation: when ``triggers`` intersects ``HIGH_RISK_TRIGGERS`` the
+    routine ADDITIONALLY dispatches an adversarial ``skeptic`` pass on top of the
+    default auditor pass. This is purely additive — the auditor pass is created
+    exactly as before, so non-high-risk closeouts (no triggers, or only
+    scope-clarity "ambiguity") and existing callers that omit ``triggers`` are
+    unchanged. If ``review_role`` is already the skeptic, the lead pass already
+    covers it and no second skeptic overlay is created.
     """
     root = root.resolve()
     enabled = _config_enabled(root, "role_routing")
@@ -220,6 +243,8 @@ def route_review_pass(
         return {"enabled": False, "created": []}
 
     now = _now_iso(now)
+    created: list[dict[str, Any]] = []
+
     review_task = f"REVIEW-{task_id}-{_slug(review_role)}"
     claim_id = f"CLAIM-REVIEW-{_slug(task_id)}-{_slug(review_role)}-{_slug(event)}"
     claim = _write_overlay_claim(
@@ -236,7 +261,38 @@ def route_review_pass(
         parent_task_set_id=task_set_id,
         event_name="review_pass_dispatched",
     )
-    return {"enabled": True, "created": [claim] if claim else []}
+    if claim:
+        created.append(claim)
+
+    # High-risk escalation: an ADDITIVE adversarial skeptic pass. Skip when the
+    # lead pass is already a skeptic (don't double-create).
+    matched = sorted(set(triggers or ()) & HIGH_RISK_TRIGGERS)
+    if matched and review_role != SKEPTIC_ROLE:
+        skeptic_task = f"REVIEW-{task_id}-{_slug(SKEPTIC_ROLE)}"
+        skeptic_claim_id = (
+            f"CLAIM-REVIEW-{_slug(task_id)}-{_slug(SKEPTIC_ROLE)}-{_slug(event)}"
+        )
+        skeptic = _write_overlay_claim(
+            root,
+            claim_id=skeptic_claim_id,
+            task_id=skeptic_task,
+            agent_role=SKEPTIC_ROLE,
+            mode="review",
+            status_text=(
+                f"Additive {SKEPTIC_ROLE} adversarial review pass for {task_id} "
+                f"({event}; high-risk: {', '.join(matched)})"
+            ),
+            now=now,
+            task_set_id=task_set_id,
+            tags=["review", "additive", "high-risk", f"review-trigger:{event}", *matched],
+            parent_task_id=task_id,
+            parent_task_set_id=task_set_id,
+            event_name="review_pass_dispatched",
+        )
+        if skeptic:
+            created.append(skeptic)
+
+    return {"enabled": True, "created": created}
 
 
 # ---------------------------------------------------------------------------
@@ -396,7 +452,8 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> None:
 def cmd_review(args: argparse.Namespace) -> int:
     payload = route_review_pass(
         args.root, task_id=args.task_id, task_set_id=args.task_set_id,
-        event=args.event, review_role=args.review_role, now=args.now,
+        event=args.event, review_role=args.review_role,
+        triggers=args.trigger, now=args.now,
     )
     _emit(payload, as_json=args.json)
     return 0
@@ -435,6 +492,15 @@ def build_parser() -> argparse.ArgumentParser:
     review.add_argument("--task-set-id", default="")
     review.add_argument("--event", default="merge")
     review.add_argument("--review-role", default=DEFAULT_REVIEW_ROLE)
+    review.add_argument(
+        "--trigger",
+        action="append",
+        default=[],
+        help=(
+            "Escalation trigger carried by the closeout (repeatable). When any "
+            "intersects HIGH_RISK_TRIGGERS, an additive skeptic pass is dispatched."
+        ),
+    )
     review.add_argument("--now")
     review.add_argument("--json", action="store_true")
     review.set_defaults(func=cmd_review)

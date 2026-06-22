@@ -39,6 +39,7 @@ import a2a_claim_emitter
 import atomic_io
 import backlog_board
 import claim_guard
+import model_routing
 import plan_assumption_gate
 import role_routing
 from agent_instance_registry import record_claim_instance
@@ -379,6 +380,7 @@ def _build_claim(
         "log_path": log_path,
         "allow_parallel_task_set": bool(args.allow_parallel_task_set),
         "tags": list(args.tag or ()),
+        "escalation_triggers": list(args.escalation_trigger or ()),
         "target_files": list(target_files),
     }
 
@@ -782,15 +784,21 @@ def cmd_release(args: argparse.Namespace) -> int:
     # closeout, a high-risk event the audit flagged as never exercising the
     # review roles. When AR_ROLE_ROUTING is ON, dispatch an ADDITIVE reviewer
     # pass against a DISTINCT synthetic task id; it runs in parallel and never
-    # removes or mutates this lead-engineer claim. Flag-OFF (default) and any
-    # routing fault are no-ops — a routing failure must NEVER break the release
-    # (mirrors the a2a_claim_emitter robustness above).
+    # removes or mutates this lead-engineer claim. A HIGH-RISK claim (one
+    # carrying escalation_triggers or a risk tag matching an ESCALATION_TRIGGER)
+    # ALSO auto-dispatches an adversarial skeptic pass. Flag-OFF (default) and
+    # any routing fault are no-ops — a routing failure must NEVER break the
+    # release (mirrors the a2a_claim_emitter robustness above).
     try:
+        triggers = list(claim.get("escalation_triggers") or []) + [
+            t for t in (claim.get("tags") or []) if t in model_routing.ESCALATION_TRIGGERS
+        ]
         role_routing.route_review_pass(
             root,
             task_id=str(claim.get("task_id") or ""),
             task_set_id=str(claim.get("task_set_id") or ""),
             event="closeout",
+            triggers=triggers,
             now=now_text,
         )
     except Exception:  # noqa: BLE001 - routing is best-effort overlay only
@@ -872,6 +880,16 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--step-total", type=int, default=6)
     create.add_argument("--status-text", default="Claim created")
     create.add_argument("--tag", action="append", default=[])
+    create.add_argument(
+        "--escalation-trigger",
+        action="append",
+        default=[],
+        help=(
+            "High-risk escalation signal carried on the claim (repeatable), e.g. "
+            "high_risk / security / external_effect / cross_cutting / "
+            "repeated_failure. Read at closeout to route an adversarial review."
+        ),
+    )
     create.add_argument("--now")
     create.add_argument("--suffix")
     create.add_argument("--display-name")
