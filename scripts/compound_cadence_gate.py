@@ -173,6 +173,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--check", action="store_true", help="Run check (always exits 0)")
     parser.add_argument(
+        "--obligation",
+        action="store_true",
+        help="Soft obligation: exit 1 when a compound is overdue (--check stays exit 0)",
+    )
+    parser.add_argument(
         "--ratio",
         type=int,
         default=DEFAULT_RATIO,
@@ -202,6 +207,10 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(report, ensure_ascii=True, indent=2))
     else:
         print(render(root, findings, ratio=args.ratio))
+    # --obligation escalates the advisory to a soft non-zero when a compound is
+    # overdue; --check (and bare invocation) always exit 0 (watch-only).
+    if args.obligation and findings:
+        return 1
     return 0
 
 

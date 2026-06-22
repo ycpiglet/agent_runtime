@@ -45,3 +45,4 @@ __pycache__/
 /agents/project/notifications.local.json
 /.codex/notifications.local.json
 notifications.local.json
+.hypothesis/

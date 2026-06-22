@@ -144,7 +144,7 @@ jobs:
           STRICT_REFS: ${{ steps.resolve_warning_summary_strict_refs.outputs.strict_refs }}
           REQUIRE_SEND_TARGETS: ${{ steps.resolve_warning_summary_strict_refs.outputs.require_send_targets }}
       - name: Install test dependencies
-        run: python -m pip install --upgrade pip pytest
+        run: python -m pip install --upgrade pip pytest hypothesis
       - name: Check Owner governance gates
         run: python scripts/owner_governance_gate.py
       - name: Run package tests

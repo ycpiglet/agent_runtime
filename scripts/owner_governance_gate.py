@@ -76,6 +76,16 @@ def main() -> int:
         rc = run(check)
         if rc:
             failed = rc
+    # Advisory (non-blocking): compound-cadence obligation. Source-repo only --
+    # consumer projects lack this script, so guard on existence and skip silently
+    # (never affects this gate's exit code).
+    if (ROOT / "scripts" / "compound_cadence_gate.py").exists():
+        if run(["scripts/compound_cadence_gate.py", "--obligation"]):
+            print(
+                "owner-governance: advisory: compound obligation due "
+                "(review:compound ratio high) -- not blocking",
+                flush=True,
+            )
     return failed
 
 
