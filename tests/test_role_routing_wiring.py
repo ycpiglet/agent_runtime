@@ -350,6 +350,89 @@ def test_non_high_risk_release_is_auditor_only(tmp_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Seam 1c: cmd_create AUTO-INHERITS a unit's escalation_triggers from the
+# --unit-spec it is already handed, so a HIGH-RISK unit drives the skeptic pass
+# at release with NO manual --escalation-trigger flag. The whole point of the
+# link: high-risk work carries its risk signal automatically.
+# ---------------------------------------------------------------------------
+
+
+def _write_unit_spec(root: Path, *, name: str, escalation_triggers: list[str]) -> Path:
+    """Write a unit definition .md whose frontmatter carries escalation_triggers."""
+    path = root / "agents" / "lead_engineer" / "tasks" / "units" / name
+    path.parent.mkdir(parents=True, exist_ok=True)
+    triggers = "[" + ", ".join(escalation_triggers) + "]"
+    path.write_text(
+        f"""---
+unit_id: {name.removesuffix(".md")}
+task_id: TASK-AR-INH
+task_set_id: {TASKSET}
+status: worker_ready
+horizon: unit
+target_files:
+  - scripts/inh.py
+escalation_triggers: {triggers}
+---
+
+# {name}
+""",
+        encoding="utf-8",
+    )
+    return path
+
+
+def _create_via_unit_spec(root: Path, *, task_id: str, unit: Path, suffix: str) -> dict:
+    _write_worktree(root, task_id)
+    created = _run_claim(
+        root,
+        "create",
+        "--task-id", task_id,
+        "--task-set-id", TASKSET,
+        "--agent-role", "lead-engineer",
+        "--mode", "implement",
+        "--unit-spec", str(unit),
+        "--now", "2026-06-22T09:00:00+09:00",
+        "--suffix", suffix,
+        "--json",
+    )
+    assert created.returncode == 0, created.stderr or created.stdout
+    return json.loads(created.stdout)
+
+
+def test_high_risk_unit_spec_release_dispatches_auditor_and_skeptic(tmp_path: Path) -> None:
+    """END-TO-END: a high-risk --unit-spec, NO manual trigger -> auditor + skeptic."""
+    unit = _write_unit_spec(tmp_path, name="UNIT-HR.md", escalation_triggers=["high_risk"])
+    payload = _create_via_unit_spec(tmp_path, task_id="TASK-AR-INH", unit=unit, suffix="inh1")
+    claim = payload["claim"]
+    # The create seam auto-inherited the unit's trigger onto the claim.
+    assert "high_risk" in claim["escalation_triggers"], claim["escalation_triggers"]
+
+    released = _release(tmp_path, claim, env=_env(**{ROLE_ROUTING_FLAG: "1"}))
+
+    assert released.returncode == 0, released.stderr or released.stdout
+    overlays = [c for c in _claims(tmp_path) if c.get("overlay") and str(c["claim_id"]).startswith("CLAIM-REVIEW-")]
+    roles = {c["agent_role"] for c in overlays}
+    assert {"independent-auditor", "skeptic"} <= roles, roles
+
+
+def test_ambiguity_only_unit_spec_release_is_auditor_only(tmp_path: Path) -> None:
+    """A unit whose only trigger is ``ambiguity`` (NOT high-risk) -> auditor only."""
+    unit = _write_unit_spec(tmp_path, name="UNIT-AMB.md", escalation_triggers=["ambiguity"])
+    payload = _create_via_unit_spec(tmp_path, task_id="TASK-AR-AMB", unit=unit, suffix="amb1")
+    claim = payload["claim"]
+    # The trigger is inherited verbatim (no pre-filter); release intersects it.
+    assert claim["escalation_triggers"] == ["ambiguity"], claim["escalation_triggers"]
+
+    released = _release(tmp_path, claim, env=_env(**{ROLE_ROUTING_FLAG: "1"}))
+
+    assert released.returncode == 0, released.stderr or released.stdout
+    overlays = [c for c in _claims(tmp_path) if c.get("overlay") and str(c["claim_id"]).startswith("CLAIM-REVIEW-")]
+    roles = {c["agent_role"] for c in overlays}
+    assert roles == {"independent-auditor"}, f"ambiguity-only must stay auditor-only, got {roles}"
+    assert not any(c["agent_role"] == "skeptic" for c in _claims(tmp_path))
+
+
+# ---------------------------------------------------------------------------
 # Seam 2: wave dispatch -> dispatch_wave_hooks (progress-scout per wave)
 # ---------------------------------------------------------------------------
 

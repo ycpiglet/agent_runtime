@@ -230,11 +230,53 @@ def _unit_spec_target_files(root: Path, unit_spec: str) -> list[str]:
     return []
 
 
+def _unit_spec_escalation_triggers(root: Path, unit_spec: str) -> list[str]:
+    """Read a unit definition's frontmatter ``escalation_triggers``.
+
+    Mirrors :func:`_unit_spec_target_files`: resolves ``unit_spec`` relative to
+    ``root``, parses the frontmatter, and normalizes ``escalation_triggers`` to
+    a list of non-empty stripped strings (accepting either a YAML list or a
+    comma-separated string). Tolerant of a missing file/field/parse error -> [].
+    """
+    spec_value = str(unit_spec or "").strip()
+    if not spec_value:
+        return []
+    spec_path = Path(spec_value)
+    if not spec_path.is_absolute():
+        spec_path = root / spec_path
+    if not spec_path.is_file():
+        return []
+    try:
+        text = spec_path.read_text(encoding="utf-8")
+    except OSError:
+        return []
+    meta, _ = backlog_board.parse_frontmatter(text)
+    value = meta.get("escalation_triggers")
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    if isinstance(value, str) and value.strip():
+        return [part.strip() for part in value.split(",") if part.strip()]
+    return []
+
+
 def _resolve_target_files(root: Path, args: argparse.Namespace) -> list[str]:
     declared = [str(entry).strip() for entry in (args.target_file or []) if str(entry).strip()]
     if declared:
         return declared
     return _unit_spec_target_files(root, args.unit_spec)
+
+
+def _resolve_escalation_triggers(root: Path, args: argparse.Namespace) -> list[str]:
+    """Union of explicit ``--escalation-trigger`` args and the unit's inherited
+    frontmatter triggers, deduped while preserving order (explicit-first).
+
+    Explicit-first means an operator override is preserved ahead of inherited
+    signals. The unit's triggers are stored verbatim (no pre-filter): the
+    release seam intersects them with ``HIGH_RISK_TRIGGERS`` downstream.
+    """
+    explicit = [str(t).strip() for t in (args.escalation_trigger or ()) if str(t).strip()]
+    inherited = _unit_spec_escalation_triggers(root, args.unit_spec)
+    return list(dict.fromkeys(explicit + inherited))
 
 
 def _is_footprint_active(payload: dict[str, Any]) -> bool:
@@ -317,6 +359,7 @@ def _build_claim(
     records: list[tuple[Path, dict[str, Any]]],
     *,
     target_files: list[str],
+    escalation_triggers: list[str],
 ) -> dict[str, Any]:
     now = _parse_now(args.now)
     expires_at = now + timedelta(minutes=args.lease_minutes)
@@ -380,7 +423,7 @@ def _build_claim(
         "log_path": log_path,
         "allow_parallel_task_set": bool(args.allow_parallel_task_set),
         "tags": list(args.tag or ()),
-        "escalation_triggers": list(args.escalation_trigger or ()),
+        "escalation_triggers": list(escalation_triggers),
         "target_files": list(target_files),
     }
 
@@ -518,7 +561,12 @@ def cmd_create(args: argparse.Namespace) -> int:
     ):
         return 1
 
-    claim = _build_claim(args, records, target_files=_resolve_target_files(root, args))
+    claim = _build_claim(
+        args,
+        records,
+        target_files=_resolve_target_files(root, args),
+        escalation_triggers=_resolve_escalation_triggers(root, args),
+    )
     creation_errors = _claim_creation_errors(root, claim, records)
     if creation_errors:
         for error in creation_errors:
