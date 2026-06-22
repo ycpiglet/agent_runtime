@@ -35,6 +35,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+import a2a_claim_emitter
 import atomic_io
 import backlog_board
 import claim_guard
@@ -601,6 +602,11 @@ def cmd_create(args: argparse.Namespace) -> int:
             "ts": claim["claimed_at"],
         },
     )
+    # Live A2A traffic: a real claim create opens the request->review->decision->
+    # correction lifecycle on the runtime message stream. Additive observability
+    # only — it RECORDS, it never changes who gets the claim, and a failure here
+    # must never break claim creation (the emitter swallows its own errors).
+    a2a_claim_emitter.emit_claim_request(claim, root=root)
     # Crash-safety guard: commit the claim immediately so a sibling session's
     # `git reset --hard` / `git clean -fd` cannot erase an untracked claim
     # (incident 2026-06-12). Best-effort — never fails claim creation.
@@ -758,6 +764,18 @@ def cmd_release(args: argparse.Namespace) -> int:
             "message": f"Released after cross-verification by {verified_by} ({verifier_role})",
             "ts": now_text,
         },
+    )
+    # Live A2A traffic: release closes the lifecycle the create-time `request`
+    # opened, emitting review -> decision -> correction so the runtime message
+    # stream carries a full, reconstructable request->review->decision->correction
+    # chain per claim (what a2a_trace_gate validates). Additive observability only;
+    # best-effort — the emitter swallows its own errors so release never breaks.
+    a2a_claim_emitter.emit_claim_release_chain(
+        claim,
+        root=root,
+        verified_by=verified_by,
+        verifier_role=verifier_role,
+        verification_evidence=evidence_ref,
     )
     if str(claim.get("phase") or "").strip().lower() == "taskset-completed":
         # Taskset boundary reached: emit a completion signal so the runtime
