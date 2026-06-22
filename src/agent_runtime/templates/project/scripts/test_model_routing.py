@@ -78,5 +78,39 @@ def test_provider_env_resolves_claude_agent_tier(monkeypatch):
     assert env == {"CLAUDE_AGENT_MODEL": "claude-sonnet-test"}
 
 
+def test_provider_env_claude_agent_default_models(monkeypatch):
+    monkeypatch.delenv("CLAUDE_AGENT_OPUS_MODEL", raising=False)
+    monkeypatch.delenv("CLAUDE_AGENT_SONNET_MODEL", raising=False)
+    monkeypatch.delenv("CLAUDE_AGENT_HAIKU_MODEL", raising=False)
+    assert mr.provider_env("claude-agent", "opus") == {"CLAUDE_AGENT_MODEL": "claude-opus-4-8"}
+    assert mr.provider_env("claude-agent", "sonnet") == {"CLAUDE_AGENT_MODEL": "claude-sonnet-4-6"}
+    assert mr.provider_env("claude-agent", "haiku") == {"CLAUDE_AGENT_MODEL": "claude-haiku-4-5"}
+
+
+def test_provider_env_routes_codex_agent_default(monkeypatch):
+    monkeypatch.delenv("CODEX_AGENT_SONNET_MODEL", raising=False)
+    assert mr.provider_env("codex-agent", "sonnet") == {"CODEX_PROVIDER_MODEL": "gpt-5.2-codex"}
+
+
+def test_provider_env_routes_codex_default(monkeypatch):
+    monkeypatch.delenv("CODEX_AGENT_SONNET_MODEL", raising=False)
+    assert mr.provider_env("codex", "sonnet") == {"CODEX_PROVIDER_MODEL": "gpt-5.2-codex"}
+
+
+def test_provider_env_codex_agent_respects_env_override(monkeypatch):
+    monkeypatch.setenv("CODEX_AGENT_SONNET_MODEL", "gpt-custom-codex")
+    assert mr.provider_env("codex-agent", "sonnet") == {"CODEX_PROVIDER_MODEL": "gpt-custom-codex"}
+
+
+def test_provider_env_codex_accepts_pm_tier(monkeypatch):
+    monkeypatch.setenv("CODEX_AGENT_OPUS_MODEL", "gpt-codex-opus")
+    assert mr.provider_env("codex-agent", "planner_high") == {"CODEX_PROVIDER_MODEL": "gpt-codex-opus"}
+
+
+def test_provider_env_codex_passthrough_raw_model():
+    assert mr.provider_env("codex-agent", "gpt-raw") == {"CODEX_PROVIDER_MODEL": "gpt-raw"}
+
+
 def test_provider_env_ignores_non_claude_agent():
     assert mr.provider_env("dummy", "haiku") == {}
+    assert mr.provider_env("claude", "sonnet") == {}

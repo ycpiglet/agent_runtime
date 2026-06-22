@@ -312,7 +312,7 @@ def _apply_routing_to_provider(provider: Provider, provider_name: str, decision:
         return
     for name, value in model_routing.provider_env(provider_name, decision["selected_tier"]).items():
         os.environ[name] = value
-        if name == "CLAUDE_AGENT_MODEL" and hasattr(provider, "model"):
+        if name in ("CLAUDE_AGENT_MODEL", "CODEX_PROVIDER_MODEL") and hasattr(provider, "model"):
             setattr(provider, "model", value)
 
 
