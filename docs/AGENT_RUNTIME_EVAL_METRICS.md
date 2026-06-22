@@ -40,18 +40,22 @@ across versions is the spine of "is the platform actually getting better".
 |--------|------------|--------|---------------|
 | `first_pass_rate` | Share of tasks that pass ALL gates (pytest, doc/quality gates, review) on the first attempt | Per-task CI + review logs | Proxy only (see below) |
 | `rework_count` | Rework rounds (corrective follow-ups) per window | WORK-SCHEMA measurement / git proxy | Proxy (git) |
-| `gate_failure_count` | Gate failures per task | WORK-SCHEMA / CI | Not from git alone |
-| `reopened_count` | Times a task was reopened after closure | WORK-SCHEMA closure | Not from git alone |
-| `wall_clock_per_task` | Real time from task start to merge | Timestamps | Not from git alone |
-| `tokens_per_task` | Tokens consumed per task | Session/workflow usage | **NOT COLLECTED** (no instrumentation) |
+| `gate_failure_count` | Gate/verification failures per window | WORK-SCHEMA verification (`reviews/VERIFY-*.json`) | **Yes** (real source) |
+| `reopened_count` | Times a task was reopened after closure | WORK-SCHEMA closure (`reopened_count` frontmatter) | **Yes** (real source) |
+| `wall_clock_per_task` | Real time from task start to completion (`lead_time`) | WORK-SCHEMA `started_at`/`completed_at` | **Yes** (real source) |
+| `tokens_per_task` | Tokens consumed per task | WORK-SCHEMA `actual_tokens` (closure) | **Yes** (real source) |
 | `merge_conflict_count` | Merge conflicts during integration | git | Yes (merge-commit proxy) |
-| `owner_interventions` | Owner decisions/corrections per task | Manual count | Not from git alone |
+| `owner_interventions` | Owner decisions/corrections per task | Manual count | **NOT COLLECTED** (no source) |
 
 ### What `scripts/self_eval_metrics.py` computes today
 
-The tool extracts the **git-derivable subset** for a version window (a commit
-range, default: latest tag .. HEAD), emitting `--json` with each metric tagged
-`collected` or `not_collected`. It never invents or estimates a value.
+The tool extracts two families for a version window (a commit range, default:
+latest tag .. HEAD): the **git-derivable** metrics, and the **WORK-SCHEMA
+record** metrics read from the repo's task/verification artifacts filtered to the
+*same* window by record timestamp. Every metric is tagged `collected` or
+`not_collected`; it never invents or estimates a value.
+
+**Git-derived** (from the commit range `A..B`):
 
 | JSON field | Maps to | How |
 |------------|---------|-----|
@@ -62,14 +66,31 @@ range, default: latest tag .. HEAD), emitting `--json` with each metric tagged
 | `rework_ratio` | rework intensity | `rework_count / commit_count` (lower is better) |
 | `first_pass_rate_proxy` | `first_pass_rate` | `1 - rework_ratio` (PROXY) |
 | `days_since_from_tag` | window calendar span | timestamp of the base ref |
-| `tokens_per_task` | `tokens_per_task` | **`not_collected`** -- no instrumentation yet |
 
-> **Honest framing.** `first_pass_rate_proxy` and `rework_count` here are *git
-> subject proxies*, not the precise WORK-SCHEMA measurements. The exact oracle is
-> per-task CI status (FAILURE/SUCCESS on first attempt) plus the WORK-SCHEMA
-> measurement/closure groups (`rework`, `gate_failure`, `reopened`, `actual_*`).
-> Fields that require instrumentation the platform does not yet have are emitted
-> as `status: not_collected` with `value: null`. We do not fake them.
+**WORK-SCHEMA-derived** (records whose timestamp falls in the window, where the
+window bounds are the committer timestamps of the from/to refs):
+
+| JSON field | Maps to | How |
+|------------|---------|-----|
+| `gate_failure_count` | `gate_failure_count` | `reviews/VERIFY-*.json` with `signal=fail`/`status=failed` and in-window `verified_at` |
+| `reverification_count` | `rework`/`reopened` proxy | re-verification rounds (VERIFY attempts > 1 per work item) |
+| `reopened_count` | `reopened_count` | WORK-SCHEMA closure `reopened_count` summed over in-window tasks |
+| `measured_task_count` | denominator | tasks with `actual_hours`/`actual_tokens` populated |
+| `actual_tokens_total` / `tokens_per_task` | `tokens_per_task` | WORK-SCHEMA measurement `actual_tokens` (sum, and per-task mean) |
+| `actual_hours_total` / `hours_per_task` | effort | WORK-SCHEMA measurement `actual_hours` (sum, and per-task mean) |
+| `wall_clock_hours_total` / `wall_clock_per_task` | `wall_clock_per_task` | `lead_time = completed_at - started_at` (sum, and per-task mean) |
+| `owner_interventions` | `owner_interventions` | **`not_collected`** -- no source in repo records |
+
+> **Honest framing.** `first_pass_rate_proxy` and `rework_count` are still *git
+> subject proxies*, not the precise WORK-SCHEMA measurements; `reverification_count`
+> is likewise a *proxy* for rework/reopen rounds derived from repeat verification
+> attempts. The remaining WORK-SCHEMA fields (`gate_failure_count`,
+> `reopened_count`, `actual_*`, `wall_clock_*`) read the **real** closure /
+> measurement / verification source. Per-task means are emitted only when at
+> least one in-window task actually carries the field -- otherwise the field is
+> `not_collected` with `value: null` (never a fabricated zero-denominator value).
+> `owner_interventions` has no source anywhere in the repo records and stays
+> `not_collected`. We do not fake them.
 
 ---
 
@@ -127,6 +148,7 @@ guarantee of direction.
 PYTHONPATH=src python scripts/self_eval_metrics.py
 
 # Explicit version window, JSON for archiving / cross-version diffing:
+# (--since/--until are aliases for --from/--to)
 PYTHONPATH=src python scripts/self_eval_metrics.py --from v0.1.0 --to v0.2.0 --json
 
 # Watch-only (always exits 0; never mutates state):
@@ -142,16 +164,28 @@ no hardcoded consumer paths), and reuses the git helpers from
 
 ## 6. What still needs instrumentation (deferred)
 
-Section 1 lists eight fixed metrics; only the git-derivable subset is automated
-today. To complete the harness:
+Section 1 lists eight fixed metrics. The git-derivable subset plus the
+WORK-SCHEMA closure/measurement/verification fields that have a real repo source
+are now automated. Newly wired from existing data (agent_runtime#128):
 
-1. **`tokens_per_task`** -- session/workflow token accounting (none exists yet).
+- **`gate_failure_count`** -- from `reviews/VERIFY-*.json` (`signal=fail`).
+- **`reopened_count`** -- from WORK-SCHEMA closure `reopened_count` frontmatter.
+- **`tokens_per_task` / `actual_*` / `wall_clock_per_task`** -- from WORK-SCHEMA
+  measurement (`actual_tokens`/`actual_hours`) and `lead_time`
+  (`completed_at - started_at`).
+- **`reverification_count`** -- repeat-verification rounds as a rework/reopen
+  *proxy*.
+
+Still genuinely unsourced (remain `not_collected`):
+
+1. **`owner_interventions`** -- no per-task owner-decision capture exists in any
+   repo record.
 2. **Per-task CI oracle** -- first-attempt FAILURE/SUCCESS per task to replace
-   the `first_pass_rate` *proxy* with the true rate.
-3. **WORK-SCHEMA wiring** -- read `gate_failure`, `reopened`, `actual_*` from the
-   measurement/closure groups instead of git subject heuristics.
-4. **`wall_clock_per_task` / `owner_interventions`** -- timestamp and
-   intervention capture.
+   the `first_pass_rate` *proxy* with the true rate. (`gate_failure_count` and
+   `reverification_count` now give a real-but-coarse signal in the meantime.)
+3. **Live token metering** -- `tokens_per_task` reads the WORK-SCHEMA
+   `actual_tokens` *closure* value (often `0`/unset on older tasks), not live
+   session/workflow token accounting.
 
 Until then those fields are reported as `not_collected`. Honest absence beats a
 fabricated number.
