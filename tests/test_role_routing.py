@@ -190,6 +190,137 @@ def test_review_routing_on_is_idempotent(tmp_path, monkeypatch):
 
 
 # ---------------------------------------------------------------------------
+# 1b. HIGH-RISK skeptic escalation (additive on top of the auditor pass).
+#
+# On a high-risk closeout/merge (the claim carries an escalation_trigger in
+# HIGH_RISK_TRIGGERS) the auditor pass is created as always AND an ADDITIVE
+# skeptic adversarial pass is ALSO dispatched. Non-high-risk closeouts (no
+# triggers, or only scope-clarity "ambiguity") stay auditor-only — fully
+# back-compatible with callers that never pass triggers.
+# ---------------------------------------------------------------------------
+
+
+def test_high_risk_triggers_constant_excludes_bare_ambiguity():
+    mod = _load()
+    assert mod.HIGH_RISK_TRIGGERS == {
+        "high_risk", "security", "external_effect", "cross_cutting", "repeated_failure",
+    }
+    # ambiguity is scope-clarity, not merge danger: deliberately NOT a skeptic trigger.
+    assert "ambiguity" not in mod.HIGH_RISK_TRIGGERS
+
+
+def test_high_risk_trigger_adds_skeptic_overlay_alongside_auditor(tmp_path, monkeypatch):
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    _seed_lead_claim(tmp_path)
+
+    result = mod.route_review_pass(
+        tmp_path, task_id="TASK-AR-900", task_set_id="TASKSET-AR-900",
+        event="closeout", triggers=["high_risk"], now="2026-06-22T10:00:00+09:00",
+    )
+
+    assert result["enabled"] is True
+    roles = {c["agent_role"] for c in result["created"]}
+    # BOTH the default auditor pass and the additive skeptic pass are created.
+    assert "independent-auditor" in roles
+    assert "skeptic" in roles
+    assert len(result["created"]) == 2
+
+    claims = _load_claims(tmp_path)
+    skeptics = [c for c in claims if c["agent_role"] == "skeptic"]
+    assert skeptics, "expected a skeptic overlay claim on a high-risk closeout"
+    sk = skeptics[0]
+    assert sk["mode"] == "review"
+    assert sk.get("overlay") is True
+    tags = sk.get("tags") or []
+    assert "high-risk" in tags
+    assert "high_risk" in tags, "the matched trigger should be tagged"
+    # distinct deterministic claim id, distinct from the auditor pass.
+    assert sk["claim_id"] == "CLAIM-REVIEW-TASK-AR-900-skeptic-closeout"
+    auditors = [c for c in claims if c["agent_role"] == "independent-auditor"]
+    assert auditors and auditors[0]["claim_id"] != sk["claim_id"]
+
+
+def test_non_high_risk_trigger_is_auditor_only(tmp_path, monkeypatch):
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    _seed_lead_claim(tmp_path)
+
+    result = mod.route_review_pass(
+        tmp_path, task_id="TASK-AR-900", task_set_id="TASKSET-AR-900",
+        event="closeout", triggers=["ambiguity"], now="2026-06-22T10:00:00+09:00",
+    )
+
+    roles = {c["agent_role"] for c in result["created"]}
+    assert roles == {"independent-auditor"}, "ambiguity is not a merge-danger trigger"
+    assert not [c for c in _load_claims(tmp_path) if c["agent_role"] == "skeptic"]
+
+
+@pytest.mark.parametrize("triggers", [None, []])
+def test_no_triggers_is_back_compatible_auditor_only(tmp_path, monkeypatch, triggers):
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    _seed_lead_claim(tmp_path)
+
+    result = mod.route_review_pass(
+        tmp_path, task_id="TASK-AR-900", task_set_id="TASKSET-AR-900",
+        event="closeout", triggers=triggers, now="2026-06-22T10:00:00+09:00",
+    )
+
+    roles = {c["agent_role"] for c in result["created"]}
+    assert roles == {"independent-auditor"}
+    assert not [c for c in _load_claims(tmp_path) if c["agent_role"] == "skeptic"]
+
+
+def test_review_role_already_skeptic_does_not_double_create(tmp_path, monkeypatch):
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    _seed_lead_claim(tmp_path)
+
+    result = mod.route_review_pass(
+        tmp_path, task_id="TASK-AR-900", task_set_id="TASKSET-AR-900",
+        event="closeout", review_role="skeptic", triggers=["security"],
+        now="2026-06-22T10:00:00+09:00",
+    )
+
+    skeptics = [c for c in _load_claims(tmp_path) if c["agent_role"] == "skeptic"]
+    assert len(skeptics) == 1, "a skeptic lead pass must not be doubled by the escalation"
+    assert len(result["created"]) == 1
+
+
+def test_high_risk_skeptic_overlay_is_idempotent(tmp_path, monkeypatch):
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    _seed_lead_claim(tmp_path)
+    first = mod.route_review_pass(
+        tmp_path, task_id="TASK-AR-900", task_set_id="TASKSET-AR-900",
+        event="closeout", triggers=["high_risk"], now="2026-06-22T10:00:00+09:00",
+    )
+    second = mod.route_review_pass(
+        tmp_path, task_id="TASK-AR-900", task_set_id="TASKSET-AR-900",
+        event="closeout", triggers=["high_risk"], now="2026-06-22T10:00:00+09:00",
+    )
+    assert {c["agent_role"] for c in first["created"]} == {"independent-auditor", "skeptic"}
+    assert second["created"] == [], "re-dispatch must not duplicate auditor or skeptic"
+
+
+def test_high_risk_off_creates_nothing(tmp_path, monkeypatch):
+    monkeypatch.delenv("AR_ROLE_ROUTING", raising=False)
+    mod = _load()
+    _seed_lead_claim(tmp_path)
+    before = _load_claims(tmp_path)
+
+    result = mod.route_review_pass(
+        tmp_path, task_id="TASK-AR-900", task_set_id="TASKSET-AR-900",
+        event="closeout", triggers=["high_risk"], now="2026-06-22T10:00:00+09:00",
+    )
+
+    assert result["enabled"] is False
+    assert result["created"] == []
+    assert _load_claims(tmp_path) == before
+
+
+# ---------------------------------------------------------------------------
 # 2. progress-scout per wave + council at W6.
 # ---------------------------------------------------------------------------
 

@@ -246,6 +246,110 @@ def test_release_routing_failure_never_breaks_release(tmp_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Seam 1b: high-risk closeout -> auditor + skeptic. cmd_create must carry the
+# escalation signal (--escalation-trigger) onto the claim, and cmd_release must
+# derive triggers from that claim so a HIGH-RISK claim auto-dispatches a skeptic
+# adversarial pass on top of the default auditor pass.
+# ---------------------------------------------------------------------------
+
+
+def _create_high_risk_candidate(
+    root: Path, *, task_id: str = "TASK-AR-592", suffix: str = "hr1", trigger: str = "high_risk",
+) -> dict:
+    _write_worktree(root, task_id)
+    created = _run_claim(
+        root,
+        "create",
+        "--task-id", task_id,
+        "--task-set-id", TASKSET,
+        "--agent-role", "lead-engineer",
+        "--mode", "implement",
+        "--escalation-trigger", trigger,
+        "--now", "2026-06-22T09:00:00+09:00",
+        "--suffix", suffix,
+        "--json",
+    )
+    assert created.returncode == 0, created.stderr or created.stdout
+    return json.loads(created.stdout)
+
+
+def test_cmd_create_stores_escalation_trigger_on_claim(tmp_path: Path) -> None:
+    payload = _create_high_risk_candidate(tmp_path)
+    claim = payload["claim"]
+    assert claim.get("escalation_triggers") == ["high_risk"], (
+        "the create seam must carry the escalation signal that release reads"
+    )
+
+
+def test_high_risk_release_dispatches_auditor_and_skeptic(tmp_path: Path) -> None:
+    payload = _create_high_risk_candidate(tmp_path)
+    claim = payload["claim"]
+
+    released = _release(tmp_path, claim, env=_env(**{ROLE_ROUTING_FLAG: "1"}))  # flag ON
+
+    assert released.returncode == 0, released.stderr or released.stdout
+    claims = _claims(tmp_path)
+    by_id = {c["claim_id"]: c for c in claims}
+
+    # Lead claim untouched: released, still lead-engineer, same task id.
+    assert claim["claim_id"] in by_id
+    primary = by_id[claim["claim_id"]]
+    assert primary["status"] == "released"
+    assert primary["agent_role"] == "lead-engineer"
+    assert primary["task_id"] == claim["task_id"]
+
+    overlays = [c for c in claims if c.get("overlay") and str(c["claim_id"]).startswith("CLAIM-REVIEW-")]
+    overlay_roles = {c["agent_role"] for c in overlays}
+    # BOTH review overlays: the default auditor AND the high-risk skeptic.
+    assert "independent-auditor" in overlay_roles
+    assert "skeptic" in overlay_roles, f"high-risk release must dispatch a skeptic, got {overlay_roles}"
+    skeptic = next(c for c in overlays if c["agent_role"] == "skeptic")
+    assert skeptic["mode"] == "review"
+    assert "high-risk" in (skeptic.get("tags") or [])
+    assert "high_risk" in (skeptic.get("tags") or [])
+
+
+def test_high_risk_release_via_tag_also_dispatches_skeptic(tmp_path: Path) -> None:
+    """A risk *tag* matching an ESCALATION_TRIGGER also drives the skeptic pass."""
+    _write_worktree(tmp_path, "TASK-AR-593")
+    created = _run_claim(
+        tmp_path,
+        "create",
+        "--task-id", "TASK-AR-593",
+        "--task-set-id", TASKSET,
+        "--agent-role", "lead-engineer",
+        "--mode", "implement",
+        "--tag", "security",
+        "--now", "2026-06-22T09:00:00+09:00",
+        "--suffix", "hr2",
+        "--json",
+    )
+    assert created.returncode == 0, created.stderr or created.stdout
+    claim = json.loads(created.stdout)["claim"]
+
+    released = _release(tmp_path, claim, env=_env(**{ROLE_ROUTING_FLAG: "1"}))
+
+    assert released.returncode == 0, released.stderr or released.stdout
+    overlays = [c for c in _claims(tmp_path) if c.get("overlay") and str(c["claim_id"]).startswith("CLAIM-REVIEW-")]
+    roles = {c["agent_role"] for c in overlays}
+    assert {"independent-auditor", "skeptic"} <= roles, roles
+
+
+def test_non_high_risk_release_is_auditor_only(tmp_path: Path) -> None:
+    """A plain claim (no escalation triggers/risk tags) gets only the auditor pass."""
+    payload = _create_release_candidate(tmp_path)
+    claim = payload["claim"]
+
+    released = _release(tmp_path, claim, env=_env(**{ROLE_ROUTING_FLAG: "1"}))
+
+    assert released.returncode == 0, released.stderr or released.stdout
+    overlays = [c for c in _claims(tmp_path) if c.get("overlay") and str(c["claim_id"]).startswith("CLAIM-REVIEW-")]
+    roles = {c["agent_role"] for c in overlays}
+    assert roles == {"independent-auditor"}, f"non-high-risk closeout must stay auditor-only, got {roles}"
+    assert not any(c["agent_role"] == "skeptic" for c in _claims(tmp_path))
+
+
+# ---------------------------------------------------------------------------
 # Seam 2: wave dispatch -> dispatch_wave_hooks (progress-scout per wave)
 # ---------------------------------------------------------------------------
 
