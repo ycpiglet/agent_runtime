@@ -98,6 +98,12 @@
       "order": 620
     },
     {
+      "task_set_id": "TASKSET-AR-BUSINESS-OPERATING-SYSTEM",
+      "display_name": "Business Operating System",
+      "summary": "Extend business operations beyond team registration by adding operations/support and planning/strategy lanes plus a reusable operating packet for cross-agent business cycles.",
+      "order": 621
+    },
+    {
       "task_set_id": "TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT",
       "display_name": "Design System Token Debt",
       "summary": "Replace console typography, spacing, and radius CSS literals with token references, remove the remaining raw color literal, and make the design-system full audit prove that literal debt is no longer hidden in the console baseline.",

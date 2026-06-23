@@ -199,7 +199,13 @@ def test_template_org_model_includes_business_operations_teams() -> None:
         / "project"
         / "ORG-MODEL.yml"
     ).read_text(encoding="utf-8")
-    for expected in ("finance-accounting", "marketing-growth", "sales-revenue"):
+    for expected in (
+        "finance-accounting",
+        "marketing-growth",
+        "sales-revenue",
+        "operations-support",
+        "planning-strategy",
+    ):
         assert expected in template_org_model
 
 
@@ -216,3 +222,25 @@ def test_template_org_model_includes_split_uiux_roles() -> None:
     ).read_text(encoding="utf-8")
     for expected in ("lead-designer", "design-system-steward", "interface-designer", "ux-evaluator"):
         assert expected in template_org_model
+
+
+def test_template_business_operating_packet_ships() -> None:
+    packet = (
+        REPO_ROOT
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "agents"
+        / "project"
+        / "BUSINESS-OPERATING-SYSTEM.md"
+    ).read_text(encoding="utf-8")
+    for expected in (
+        "operations-support",
+        "planning-strategy",
+        "seminar",
+        "doc-steward review",
+        "Owner approval and risk review",
+        "unsupported automation outside the active task unit",
+    ):
+        assert expected in packet

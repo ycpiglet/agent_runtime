@@ -1,0 +1,52 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000",
+  "work_id": "UNIT-TASK-AR-593-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-593/UNIT-TASK-AR-593-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-593",
+  "unit_id": "UNIT-TASK-AR-593-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-06-21T17:10:00+09:00",
+  "verified_by": "lead-engineer-20260621-business-os",
+  "command_count": 4,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_org_model_gate.py tests/test_org_read_api.py tests/test_project_context_overlay.py tests/test_owner_governance_chain_parity.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-21T16:57:25+09:00",
+      "finished_at": "2026-06-21T16:57:42+09:00",
+      "stdout": "..........................                                               [100%]\n26 passed in 5.59s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/org_model_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-21T16:57:42+09:00",
+      "finished_at": "2026-06-21T16:57:43+09:00",
+      "stdout": "org-model: watch unresolved=0 checked=257\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/org_read_api.py --view org",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-21T16:57:43+09:00",
+      "finished_at": "2026-06-21T16:57:44+09:00",
+      "stdout": "{\n  \"org_tree\": {\n    \"org\": {},\n    \"engineering\": {\n      \"lead-engineer\": [\n        \"codex-design-system-governance\",\n        \"claude/board-finch\",\n        \"claude/vault-heron\",\n        \"claude/meet-crane\",\n        \"claude/team-owl\",\n        \"claude/road-ibis\",\n        \"claude/peek-lark\",\n        \"claude/theme-fox\",\n        \"claude/nav-heron\",\n        \"claude/list-wren\",\n        \"claude/live-otter\",\n        \"claude/chan-finch\",\n        \"claude/guard-stag\",\n        \"claude/cycle-hawk\",\n        \"claude/dep-vole\",\n        \"claude/rule-myna\",\n        \"claude/clip-seal\",\n        \"claude/port-crab\",\n        \"claude/find-lynx\",\n        \"claude/cal-puma\",\n        \"claude/fsm-newt\",\n        \"claude/load-bison\",\n        \"claude/inbox-otter\",\n        \"claude/ops-falcon\",\n        \"claude/spark-koi\",\n        \"claude/multi-yak\",\n        \"claude/grow-stag\",\n        \"claude/map-quokka\",\n        \"claude/hook-raven\",\n        \"claude/wiring-otter\",\n        \"claude/lifecycle-heron\",\n        \"claude/notify-petrel\",\n        \"claude/overlay-lynx\",\n        \"claude/claimfirst-ibis\",\n        \"claude/cadence-crane\",\n        \"claude/audit-magpie\",\n        \"claude/schema-finch\",\n        \"claude/wave-condor\",\n        \"claude/stats-shrike\",\n        \"claude/attrib-osprey\",\n        \"claude/fresh-tern\",\n        \"claude/queue-pelican\",\n        \"claude/steward-kestrel\",\n        \"claude/explorer-egret\",\n        \"claude/fresh-plover\",\n        \"claude/verify-falcon\",\n        \"claude/default-heron\",\n        \"claude/parity-swift\",\n        \"claude/polish-wren\",\n        \"claude/eol-raven\",\n        \"claude/dash-owl\",\n        \"claude/skill-wren\",\n        \"claude/registry-jay\",\n        \"lead_engineer@work-01\",\n        \"lead_engineer@work-02\",\n        \"lead_engineer@work-03\",\n        \"lead_engineer@work-04\",\n        \"lead_engineer@work-05\",\n        \"lead_engineer@implementation-01\",\n        \"lead_engineer@implementation-01\",\n        \"lead_engineer@implementation-01\",\n        \"lead_engineer@wave-01\",\n        \"lead-engineer@implementation-02\"\n      ],\n      \"worker-engineer\": [\n        \"worker-engineer@llm-wiki-preserve\"\n      ]\n    },\n    \"ui-ux\": {\n      \"design-system-steward\": [\n        \"codex-design-system-steward-task-ar-583\",\n        \"codex-design-system-assetization-579\",\n        \"codex-design-system-component-patterns-580\",\n        \"codex-design-system-token-debt-581\",\n        \"codex-design-system-served-asset-split-582\"\n      ],\n      \"interface-designer\": [\n        \"codex-interface-designer-task-ar-584\",\n        \"codex-interface-designer-task-ar-587\",\n        \"codex-interface-designer-task-ar-588\",\n        \"Codex Interface Designer TASK-AR-591\",\n        \"Codex Interface Designer TASK-AR-592\"\n      ]\n    },\n    \"research\": {},\n    \"quality\": {\n      \"doc-steward\": [\n        \"scribe@implementation-01\"\n      ]\n    },\n    \"risk-release\": {},\n    \"finance-accounting\": {},\n    \"marketing-growth\": {},\n    \"sales-revenue\": {},\n    \"operations-support\": {},\n    \"planning-strategy\": {}\n  }\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-BUSINESS-OPERATING-SYSTEM --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-06-21T16:57:44+09:00",
+      "finished_at": "2026-06-21T16:57:46+09:00",
+      "stdout": "taskset-work-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-593\nfindings=0\n",
+      "stderr": ""
+    }
+  ]
+}

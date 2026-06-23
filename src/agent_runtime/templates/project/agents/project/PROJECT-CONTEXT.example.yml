@@ -64,6 +64,20 @@ agent_teams:
       - agents/project/VISION.md
       - agents/project/ROADMAP.md
       - agents/project/ORG.md
+  - id: operations-support
+    purpose: Own operating runbooks, customer/support packets, issue triage, response quality, and process improvement.
+    roles: [operations-lead, support-operator, customer-success-steward, process-steward]
+    canonical_context:
+      - agents/project/BUSINESS-OPERATING-SYSTEM.md
+      - agents/project/ORG.md
+      - agents/project/ROADMAP.md
+  - id: planning-strategy
+    purpose: Own business strategy, prioritization, decomposition, requirements analysis, and roadmap coherence.
+    roles: [strategy-lead, planning-architect, business-analyst, portfolio-steward]
+    canonical_context:
+      - agents/project/BUSINESS-OPERATING-SYSTEM.md
+      - docs/superpowers/plans/
+      - agents/project/work-items/WORK-ITEM-CLASSIFICATION.md
 
 growth_automation_policy:
   allowed:
@@ -79,6 +93,18 @@ growth_automation_policy:
     - spam
     - terms-of-service evasion
     - platform manipulation
+
+business_operating_cycle_policy:
+  required_artifacts: [review, seminar, scribe, doc-steward review, compound, retro, W4 verification evidence]
+  next_taskset_rule: New business work must be registered through `python scripts/work.py new --input <json>` before implementation.
+  execution_boundary: Implementation must happen inside a claimed worktree; adjacent problems go to intake registration.
+  prohibited_without_owner_approval:
+    - external accounting-system writes
+    - CRM mutation or outbound sales contact
+    - support desk mutation or direct customer support send
+    - payment or contract mutation
+    - scraping, spam, or platform manipulation
+    - unsupported automation outside the recorded task unit
 
 links:
   - label: Product brief

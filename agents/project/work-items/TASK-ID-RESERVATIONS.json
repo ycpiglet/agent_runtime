@@ -569,8 +569,27 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-VISUAL-SYSTEM-INTEGRATION",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-593",
+      "expires_at": "2026-06-22T16:20:00+09:00",
+      "fulfilled_at": "2026-06-21T16:20:00+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-593.md",
+      "fulfilled_task_id": "TASK-AR-593",
+      "fulfilled_task_uid": "1607a42c-76da-4330-a9c6-8ac1309d9d77",
+      "initiative_id": "INIT-AR-BUSINESS-OPERATING-SYSTEM",
+      "kind": "task",
+      "owner_id": "codex-planner",
+      "reason": "work registration TASKSET-AR-BUSINESS-OPERATING-SYSTEM",
+      "reservation_group_id": "RES-20260621-162000-781cd9ca",
+      "reservation_id": "RES-20260621-162000-781cd9ca-01",
+      "reserved_at": "2026-06-21T16:20:00+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-BUSINESS-OPERATING-SYSTEM",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-06-20T05:18:36+09:00"
+  "updated_at": "2026-06-21T16:20:00+09:00"
 }
