@@ -258,7 +258,7 @@ HTML = """<!doctype html>
     <div id="sidebar-scrim" class="sidebar-scrim" hidden></div>
 
     <main class="layout" id="main">
-      <section class="cockpit" id="cockpit" aria-label="Attention inbox - what needs you now" data-i18n-aria-label="cockpit.aria">
+      <section class="cockpit" id="cockpit" data-home-default="cockpit" aria-label="Attention inbox - what needs you now" data-i18n-aria-label="cockpit.aria">
         <header class="cockpit-head">
           <h2 class="cockpit-title" data-i18n="cockpit.title">What needs you now</h2>
           <span class="cockpit-total" id="inbox-total" aria-live="polite"></span>
@@ -330,12 +330,12 @@ HTML = """<!doctype html>
           <button type="submit">Send</button>
         </form>
         <div id="view-board" class="view is-active">
-          <section id="home-widgets" class="home-widgets" aria-label="Dashboard widgets">
-            <header class="home-widgets-header">
+          <details id="home-widgets" class="home-widgets" aria-label="Dashboard widgets">
+            <summary class="home-widgets-header">
               <h2 id="home-widgets-title" class="home-widgets-title" data-i18n="widgets.title">Widgets</h2>
-            </header>
+            </summary>
             <div id="home-widgets-grid" class="home-widgets-grid"></div>
-          </section>
+          </details>
           <p class="board-hint">Hover or focus a card for a peek. Drag a card between lanes to reorder, or focus it and press Ctrl+D to lift, arrows to move, Space to drop, Esc to cancel. Quick actions: Claim / Verify / Close.</p>
           <div id="board-team-filter" class="board-team-filter" role="status" hidden></div>
           <div id="kanban" class="kanban" aria-label="Kanban"></div>
@@ -1860,7 +1860,25 @@ button {
   color: var(--ink);
 }
 .home-widgets { margin-bottom: var(--space-4xl); }
-.home-widgets-header { margin-bottom: var(--space-lg); }
+/* Decision-first IA P1: widgets are opt-in (collapsed) so the cockpit stays the
+   hero. The header is the <summary> click target. */
+.home-widgets-header {
+  margin-bottom: var(--space-lg);
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.home-widgets-header::-webkit-details-marker { display: none; }
+.home-widgets-header::before {
+  content: "\\25B8";
+  color: var(--muted);
+  font-size: var(--font-size-ui-13);
+  transition: transform 0.15s ease;
+}
+.home-widgets[open] > .home-widgets-header { margin-bottom: var(--space-lg); }
+.home-widgets[open] > .home-widgets-header::before { transform: rotate(90deg); }
 .home-widgets-title {
   font-size: var(--font-size-ui-13);
   font-weight: 700;
@@ -7174,7 +7192,26 @@ const INBOX_GROUPS = {
   gate_failures:     { labelKey: "inbox.group.gate_failures", icon: "\\u2717", tone: "mid" },
   cost_anomalies:    { labelKey: "inbox.group.cost_anomalies", icon: "$", tone: "mid" },
   stale:             { labelKey: "inbox.group.stale", icon: "\\u231B", tone: "low" },
+  unowned:           { labelKey: "inbox.group.unowned", icon: "\\u25CB", tone: "low" },
 };
+// Decision-first IA P1 (RFC-2026-06-23): the cockpit renders inbox group cards in
+// the Owner-chosen urgency order gate > blocked > stale > risk > unowned. Each
+// derived group maps onto a tier; cards sort by (tier, then group definition).
+const INBOX_TIER_ORDER = ["gate", "blocked", "stale", "risk", "unowned"];
+const INBOX_GROUP_TIER = {
+  approval_pending: "gate",
+  gate_failures: "gate",
+  blocked: "blocked",
+  stale: "stale",
+  runtime_anomalies: "risk",
+  cost_anomalies: "risk",
+  unowned: "unowned",
+};
+function inboxGroupRank(key) {
+  const tier = INBOX_GROUP_TIER[key];
+  const idx = INBOX_TIER_ORDER.indexOf(tier);
+  return idx < 0 ? INBOX_TIER_ORDER.length : idx;
+}
 let inboxDrawerPreviousFocus = null;
 
 function inboxEl(tag, cls, text) {
@@ -7205,6 +7242,7 @@ function localizedInboxAction(action) {
     "review cost": "inbox.action.review_cost",
     "review / refresh": "inbox.action.review_refresh",
     "resolve claim": "inbox.action.resolve_claim",
+    "assign owner": "inbox.action.assign_owner",
   };
   const key = map[String(action || "")];
   return key ? t(key) : (action || "");
@@ -7222,6 +7260,7 @@ function localizedInboxWhy(why) {
   if (match) return `${t("inbox.why.actual")} ${match[1]} > ${t("inbox.why.budget")}`;
   match = raw.match(/^no update (\\d+)d$/);
   if (match) return `${t("inbox.why.no_update")} ${match[1]}d`;
+  if (raw === "ready, no owner") return t("inbox.why.ready_no_owner");
   const conflictPrefix = "cross-host claim conflict: ";
   if (raw.indexOf(conflictPrefix) === 0) {
     return `${t("inbox.why.cross_host_claim_conflict")}: ${raw.slice(conflictPrefix.length)}`;
@@ -7255,7 +7294,12 @@ function renderCockpit(data) {
   grid.hidden = total === 0;
   grid.innerHTML = "";
   const groups = (data && data.groups) || {};
-  for (const key of Object.keys(groups)) {
+  // Order group cards by the Owner-chosen urgency tier (gate > blocked > stale >
+  // risk > unowned); ties fall back to the server's group order.
+  const orderedKeys = Object.keys(groups).sort(
+    (a, b) => inboxGroupRank(a) - inboxGroupRank(b)
+  );
+  for (const key of orderedKeys) {
     const items = groups[key] || [];
     if (!items.length) continue;
     const meta = inboxGroupMeta(key);

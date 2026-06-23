@@ -22,8 +22,24 @@ from org_model_gate import parse_frontmatter  # noqa: E402  (stdlib frontmatter 
 
 DONE = {"completed", "closed", "done"}
 ACTIVE = {"active", "in_progress"}
+# Unowned work is "ready but no one has it": planned/ready, not done, no owner/claim.
+READY = {"planned", "ready", "todo", "open", "backlog"}
 GROUP_ORDER = ["approval_pending", "blocked", "gate_failures",
-               "runtime_anomalies", "cost_anomalies", "stale"]
+               "runtime_anomalies", "cost_anomalies", "stale", "unowned"]
+
+# Decision-first console IA P1 (RFC-2026-06-23): the Owner-chosen urgency order
+# for the cockpit's typed attention inbox. Each derived group maps onto one of
+# these five tiers; the cockpit ranks items by (tier, severity).
+RANK_TIERS = ["gate", "blocked", "stale", "risk", "unowned"]
+GROUP_TIER = {
+    "approval_pending": "gate",   # owner gate awaiting approval
+    "gate_failures": "gate",      # failed gate
+    "blocked": "blocked",         # blocked chain
+    "stale": "stale",             # stale claim / no update
+    "runtime_anomalies": "risk",  # cross-host claim conflict
+    "cost_anomalies": "risk",     # budget breach (at-risk)
+    "unowned": "unowned",         # ready work, no owner
+}
 
 
 def _load_tasks(tasks_dir: Path) -> list[dict]:
@@ -101,6 +117,20 @@ def stale(tasks: list[dict], *, now, stale_days: int = 7) -> list[dict]:
     return out
 
 
+def unowned(tasks: list[dict]) -> list[dict]:
+    """Ready/planned work that nobody owns yet (RFC 'unowned' attention tier)."""
+    out = []
+    for m in tasks:
+        st = str(m.get("status", "")).lower()
+        if st in DONE or st not in READY:
+            continue
+        owner = str(m.get("owner", "")).strip().lower()
+        if owner and owner not in ("none", "unassigned", "tbd"):
+            continue
+        out.append(_item("unowned", m, "ready, no owner", "assign owner", severity=1))
+    return out
+
+
 def _claim_conflicts(root: Path):
     try:
         from multi_host_claim_gate import detect_conflicts, load_claims
@@ -130,12 +160,42 @@ def inbox(root: Path, *, now=None, stale_days: int = 7) -> dict:
         "runtime_anomalies": runtime_anomalies(root),
         "cost_anomalies": cost_anomalies(tasks),
         "stale": stale(tasks, now=now, stale_days=stale_days),
+        "unowned": unowned(tasks),
     }
     for items in groups.values():
         items.sort(key=lambda i: i["severity"], reverse=True)
     counts = {g: len(groups[g]) for g in GROUP_ORDER}
     return {"groups": {g: groups[g] for g in GROUP_ORDER}, "counts": counts,
-            "total": sum(counts.values())}
+            "total": sum(counts.values()),
+            "rank_order": list(RANK_TIERS), "ranked": _ranked(groups)}
+
+
+def _ranked(groups: dict[str, list[dict]]) -> list[dict]:
+    """Flatten the typed groups into the Owner-chosen urgency order.
+
+    Items are ordered by tier (gate > blocked > stale > risk > unowned), then by
+    severity (desc) within a tier. Each item gets a ``rank`` tier tag so the
+    cockpit can render the ranked inbox without re-deriving the order.
+    """
+    flat: list[dict] = []
+    seen: set = set()
+    for tier_index, tier in enumerate(RANK_TIERS):
+        tier_items = []
+        for group, items in groups.items():
+            if GROUP_TIER.get(group) != tier:
+                continue
+            for item in items:
+                # An item surfaced by a higher tier is not re-listed in a lower
+                # one (e.g. a gate-pending task is not also reported as unowned).
+                key = item.get("id")
+                if key is not None and key in seen:
+                    continue
+                if key is not None:
+                    seen.add(key)
+                tier_items.append({**item, "rank": tier, "rank_index": tier_index})
+        tier_items.sort(key=lambda i: i["severity"], reverse=True)
+        flat.extend(tier_items)
+    return flat
 
 
 def main(argv: list[str] | None = None) -> int:
