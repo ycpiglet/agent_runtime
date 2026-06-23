@@ -9926,69 +9926,9 @@ function renderOfficeMap() {
     `${totals.agents || 0} agents - ${actionParts.join(" / ") || "no activity"}`
   );
 
-  while (grid.firstChild) grid.removeChild(grid.firstChild);
-
-  if (!rooms.length) {
-    const note = document.createElement("div");
-    note.className = "office-map-empty";
-    note.textContent = "No agents to place on the map";
-    grid.appendChild(note);
-  } else {
-    const agentsByRoom = {};
-    agents.forEach((agent) => {
-      (agentsByRoom[agent.room_id] = agentsByRoom[agent.room_id] || []).push(agent);
-    });
-
-    rooms.forEach((room) => {
-      const rect = room.rect || { col: 0, row: 0, cols: 1, rows: 1 };
-      const cell = document.createElement("div");
-      cell.className = `office-room token-${room.token || "primary"}`;
-      cell.dataset.roomId = room.id;
-      cell.style.gridColumn = `${rect.col + 1} / span ${rect.cols}`;
-      cell.style.gridRow = `${rect.row + 1} / span ${rect.rows}`;
-
-      const name = document.createElement("div");
-      name.className = "office-room-name";
-      name.textContent = String(room.name || room.id);
-      cell.appendChild(name);
-
-      const count = document.createElement("div");
-      count.className = "office-room-count";
-      count.textContent = `${room.occupant_count || 0} here`;
-      cell.appendChild(count);
-
-      (agentsByRoom[room.id] || []).forEach((agent) => {
-        const pos = agent.cell || { fx: 0.5, fy: 0.5 };
-        const sprite = document.createElement("div");
-        sprite.className = `office-agent presence-${agent.presence || "offline"}`;
-        sprite.dataset.agentId = agent.id || "";
-        sprite.dataset.entityId = agent.id || "";
-        sprite.style.left = `${Math.round((pos.fx || 0.5) * 100)}%`;
-        sprite.style.top = `${Math.max(26, Math.round((pos.fy || 0.5) * 100))}%`;
-        sprite.title = `${agent.display_name || agent.role} - ${agent.action_label || agent.action || ""}`;
-
-        const glyph = document.createElement("div");
-        glyph.className = "office-agent-glyph";
-        // Emoji glyph is server-provided data (never an ASCII-breaking literal).
-        glyph.textContent = agent.glyph || "";
-        sprite.appendChild(glyph);
-
-        const avatar = document.createElement("div");
-        avatar.className = "office-agent-sprite";
-        avatar.textContent = agent.avatar || "AG";
-        sprite.appendChild(avatar);
-
-        const label = document.createElement("div");
-        label.className = "office-agent-name";
-        label.textContent = String(agent.callsign || agent.role || "");
-        sprite.appendChild(label);
-
-        cell.appendChild(sprite);
-      });
-
-      grid.appendChild(cell);
-    });
-  }
+  // DOM positioning (room cells + agent sprites) is owned by the reusable
+  // pattern helper (TASK-AR-592); this view owns summary + legend rendering.
+  patternOfficeMapPlacement(grid, rooms, agents);
 
   const legend = $("office-map-legend");
   if (legend) {
@@ -10934,34 +10874,15 @@ function calendarShift(days, months) {
   renderCalendar();
 }
 
+// Calendar anchor/mode -> visible day matrix + period label. The reusable
+// orchestration lives in patternCalendarState (TASK-AR-592); this view owns the
+// mutable anchor/mode module state and re-render side effects.
 function calendarVisibleDays() {
-  const anchor = calendarAnchorDate();
-  const days = [];
-  if (calendarMode === "week") {
-    const start = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() - anchor.getDay());
-    for (let i = 0; i < 7; i += 1) {
-      const date = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
-      days.push({ date, outside: false });
-    }
-    return days;
-  }
-  const first = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
-  const gridStart = new Date(first.getFullYear(), first.getMonth(), 1 - first.getDay());
-  for (let i = 0; i < 42; i += 1) {
-    const date = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + i);
-    days.push({ date, outside: date.getMonth() !== anchor.getMonth() });
-  }
-  return days;
+  return patternCalendarState(calendarAnchorDate(), calendarMode, { months: CALENDAR_MONTHS }).days;
 }
 
 function calendarPeriodLabel() {
-  const anchor = calendarAnchorDate();
-  if (calendarMode === "week") {
-    const start = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() - anchor.getDay());
-    const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
-    return `${calendarDateKey(start)} - ${calendarDateKey(end)}`;
-  }
-  return `${CALENDAR_MONTHS[anchor.getMonth()]} ${anchor.getFullYear()}`;
+  return patternCalendarState(calendarAnchorDate(), calendarMode, { months: CALENDAR_MONTHS }).periodLabel;
 }
 
 function renderCalendar() {

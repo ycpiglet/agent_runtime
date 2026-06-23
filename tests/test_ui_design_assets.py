@@ -43,6 +43,8 @@ def test_ui_design_assets_classify_token_component_and_pattern_layers():
     assert classes["patternSvgForceAgentLayout"] == "pattern_component"
     assert classes["patternAgentAvatar"] == "pattern_component"
     assert classes["patternCalendarGrid"] == "pattern_component"
+    assert classes["patternCalendarState"] == "pattern_component"
+    assert classes["patternOfficeMapPlacement"] == "pattern_component"
     assert classes["graphStatusIconText"] == "ui_component"
     assert classes["patternAuditMeta"] == "pattern_component"
     assert classes["patternSurfaceMeta"] == "pattern_component"
@@ -92,6 +94,8 @@ def test_ui_component_bundle_is_served_in_console_js(tmp_path):
     assert "function patternSvgForceAgentLayout" in js
     assert "function patternAgentAvatar" in js
     assert "function patternCalendarGrid" in js
+    assert "function patternCalendarState" in js
+    assert "function patternOfficeMapPlacement" in js
     assert "function graphStatusIconText" in js
     assert "function renderAuditMeta(content)" in js
     assert "function renderSurfaceMeta(content)" in js

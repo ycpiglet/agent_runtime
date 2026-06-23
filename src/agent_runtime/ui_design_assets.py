@@ -1040,6 +1040,138 @@ function patternCalendarGrid(days, byDate, options = {}) {
   }).join("");
   return header + cells;
 }
+
+/* ===== Pattern component: calendar state orchestration (TASK-AR-592) =======
+ * patternCalendarState(anchor, mode, options) is the reusable, side-effect-free
+ * core of the work-calendar's anchor/mode state handling (the grid itself is
+ * patternCalendarGrid, AR-584). Given an anchor Date and a view mode
+ * ("week" | "month") it returns { days, periodLabel }: `days` is the visible
+ * day matrix ([{ date, outside }], 7 for week / 42 for month) and `periodLabel`
+ * is the human header. The caller still owns the mutable module state (the
+ * anchor + mode + re-render); this helper only computes from them. options:
+ * { months } overrides the month-name table (default English long names).
+ * Maturity tier: experimental with a stable API surface.
+ */
+function patternCalendarState(anchor, mode, options = {}) {
+  const opts = options || {};
+  const base = anchor instanceof Date ? anchor : new Date((anchor === undefined || anchor === null) ? Date.now() : anchor);
+  const months = Array.isArray(opts.months) && opts.months.length === 12
+    ? opts.months
+    : ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const dateKey = function (date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+  const days = [];
+  let periodLabel;
+  if (mode === "week") {
+    const start = new Date(base.getFullYear(), base.getMonth(), base.getDate() - base.getDay());
+    for (let i = 0; i < 7; i += 1) {
+      const date = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+      days.push({ date, outside: false });
+    }
+    const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
+    periodLabel = `${dateKey(start)} - ${dateKey(end)}`;
+  } else {
+    const first = new Date(base.getFullYear(), base.getMonth(), 1);
+    const gridStart = new Date(first.getFullYear(), first.getMonth(), 1 - first.getDay());
+    for (let i = 0; i < 42; i += 1) {
+      const date = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + i);
+      days.push({ date, outside: date.getMonth() !== base.getMonth() });
+    }
+    periodLabel = `${months[base.getMonth()]} ${base.getFullYear()}`;
+  }
+  return { days, periodLabel };
+}
+
+/* ===== Pattern component: office-map DOM placement (TASK-AR-364/592) ========
+ * patternOfficeMapPlacement(grid, rooms, agents, options) owns the one-off DOM
+ * positioning for the 2D office map: it clears `grid`, then for each room
+ * creates a CSS-grid-positioned room cell (gridColumn/gridRow span from
+ * room.rect) and places each occupant agent sprite at its fractional cell
+ * coordinate. All emoji/text come from the server payload (caller stays
+ * ASCII-only). options: { document, emptyLabel } -- `document` defaults to the
+ * ambient global so the helper is testable with a DOM stub. NOTE: the office
+ * map is slated for a visual-identity redesign (RFC-2026-06-23), so this seam
+ * is deliberately a thin, behavior-preserving extraction.
+ * Maturity tier: experimental.
+ */
+function patternOfficeMapPlacement(grid, rooms, agents, options = {}) {
+  if (!grid) return;
+  const opts = options || {};
+  const doc = opts.document || (typeof document !== "undefined" ? document : null);
+  if (!doc) return;
+  const roomList = rooms || [];
+  const agentList = agents || [];
+  const emptyLabel = opts.emptyLabel || "No agents to place on the map";
+
+  while (grid.firstChild) grid.removeChild(grid.firstChild);
+
+  if (!roomList.length) {
+    const note = doc.createElement("div");
+    note.className = "office-map-empty";
+    note.textContent = emptyLabel;
+    grid.appendChild(note);
+    return;
+  }
+
+  const agentsByRoom = {};
+  agentList.forEach((agent) => {
+    (agentsByRoom[agent.room_id] = agentsByRoom[agent.room_id] || []).push(agent);
+  });
+
+  roomList.forEach((room) => {
+    const rect = room.rect || { col: 0, row: 0, cols: 1, rows: 1 };
+    const cell = doc.createElement("div");
+    cell.className = `office-room token-${room.token || "primary"}`;
+    cell.dataset.roomId = room.id;
+    cell.style.gridColumn = `${rect.col + 1} / span ${rect.cols}`;
+    cell.style.gridRow = `${rect.row + 1} / span ${rect.rows}`;
+
+    const name = doc.createElement("div");
+    name.className = "office-room-name";
+    name.textContent = String(room.name || room.id);
+    cell.appendChild(name);
+
+    const count = doc.createElement("div");
+    count.className = "office-room-count";
+    count.textContent = `${room.occupant_count || 0} here`;
+    cell.appendChild(count);
+
+    (agentsByRoom[room.id] || []).forEach((agent) => {
+      const pos = agent.cell || { fx: 0.5, fy: 0.5 };
+      const sprite = doc.createElement("div");
+      sprite.className = `office-agent presence-${agent.presence || "offline"}`;
+      sprite.dataset.agentId = agent.id || "";
+      sprite.dataset.entityId = agent.id || "";
+      sprite.style.left = `${Math.round((pos.fx || 0.5) * 100)}%`;
+      sprite.style.top = `${Math.max(26, Math.round((pos.fy || 0.5) * 100))}%`;
+      sprite.title = `${agent.display_name || agent.role} - ${agent.action_label || agent.action || ""}`;
+
+      const glyph = doc.createElement("div");
+      glyph.className = "office-agent-glyph";
+      // Emoji glyph is server-provided data (never an ASCII-breaking literal).
+      glyph.textContent = agent.glyph || "";
+      sprite.appendChild(glyph);
+
+      const avatar = doc.createElement("div");
+      avatar.className = "office-agent-sprite";
+      avatar.textContent = agent.avatar || "AG";
+      sprite.appendChild(avatar);
+
+      const label = doc.createElement("div");
+      label.className = "office-agent-name";
+      label.textContent = String(agent.callsign || agent.role || "");
+      sprite.appendChild(label);
+
+      cell.appendChild(sprite);
+    });
+
+    grid.appendChild(cell);
+  });
+}
 """
 
 
@@ -1635,4 +1767,6 @@ ASSETIZATION_CLASSES = {
     "patternOpsTokenBar": "pattern_component",
     "patternOpsVelocityBar": "pattern_component",
     "patternCalendarGrid": "pattern_component",
+    "patternCalendarState": "pattern_component",
+    "patternOfficeMapPlacement": "pattern_component",
 }
