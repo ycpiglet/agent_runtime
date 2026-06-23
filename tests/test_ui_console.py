@@ -3289,6 +3289,218 @@ def test_ui_console_calendar_grid_uses_pattern_component(tmp_path):
     assert "calendar-cell ${outside" not in block
 
 
+# --- Renderer extraction debt (TASK-AR-592): characterization tests ----------
+# These run the served JS in node and assert byte-identical rendered output, so
+# the office-map DOM placement + calendar state orchestration extractions are
+# proven behavior-preserving (the golden values below are the CURRENT behavior).
+
+def _extract_js_function(js: str, name: str) -> str:
+    """Return the full source of a top-level ``function name(...) {...}`` block.
+
+    Brace-matches the body (skipping any ``= {}`` default-parameter braces) so a
+    single named helper can be lifted out of the 500K served bundle and executed
+    standalone in node — i.e. proof the pattern helper is reusable in isolation.
+    """
+    match = re.search(r"function " + re.escape(name) + r"\s*\(", js)
+    assert match, f"function {name} not found in served bundle"
+    paren_depth = 0
+    cursor = match.end() - 1
+    while cursor < len(js):
+        if js[cursor] == "(":
+            paren_depth += 1
+        elif js[cursor] == ")":
+            paren_depth -= 1
+            if paren_depth == 0:
+                break
+        cursor += 1
+    body = js.index("{", cursor)
+    depth = 0
+    pos = body
+    while pos < len(js):
+        char = js[pos]
+        if char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return js[match.start():pos + 1]
+        pos += 1
+    raise AssertionError(f"unbalanced braces extracting {name}")
+
+
+def _run_node(tmp_path, script: str) -> str:
+    import shutil
+    import subprocess
+
+    if shutil.which("node") is None:
+        import pytest
+
+        pytest.skip("node not available")
+    script_path = tmp_path / "char_runner.mjs"
+    script_path.write_text(script, encoding="utf-8")
+    proc = subprocess.run(
+        ["node", str(script_path)],
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 0, proc.stderr
+    return proc.stdout
+
+
+# Golden output of the CURRENT calendar state orchestration (anchor 2026-06-15).
+# month: 42 cells, first cell 2026-05-31 (Sunday before June 1 Mon, outside),
+# last cell 2026-07-11, label "June 2026";
+# week: 7 cells, first 2026-06-14 (Sun), label "2026-06-14 - 2026-06-20".
+# Dates are formatted with LOCAL getters (the app's calendarDateKey scheme) so
+# the golden is timezone-independent across machines.
+_CALENDAR_STATE_GOLDEN = (
+    '{"month":{"n":42,"first":"2026-05-31","firstOutside":true,'
+    '"last":"2026-07-11","label":"June 2026"},'
+    '"week":{"n":7,"first":"2026-06-14","label":"2026-06-14 - 2026-06-20"}}'
+)
+
+# Local-date formatter mirroring the app's calendarDateKey (TZ-independent).
+_LOCAL_DATE_KEY_JS = """
+const key = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+"""
+
+
+def test_ui_console_calendar_state_orchestration_is_byte_identical(tmp_path):
+    # Characterization: run patternCalendarState in node and assert the visible
+    # day matrix + period label match the captured CURRENT behavior exactly.
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    helper = _extract_js_function(js, "patternCalendarState")
+    script = helper + _LOCAL_DATE_KEY_JS + """
+const anchor = new Date(2026, 5, 15);
+const m = patternCalendarState(anchor, "month");
+const w = patternCalendarState(anchor, "week");
+process.stdout.write(JSON.stringify({
+  month: { n: m.days.length, first: key(m.days[0].date), firstOutside: m.days[0].outside, last: key(m.days[41].date), label: m.periodLabel },
+  week: { n: w.days.length, first: key(w.days[0].date), label: w.periodLabel },
+}));
+"""
+    assert _run_node(tmp_path, script) == _CALENDAR_STATE_GOLDEN
+
+
+def test_ui_console_calendar_state_helper_is_reusable_standalone(tmp_path):
+    # The pattern helper is callable on its own with sample input and supports an
+    # injected month-name table (reuse seam), without any module state.
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    helper = _extract_js_function(js, "patternCalendarState")
+    script = helper + """
+const out = patternCalendarState(new Date(2026, 0, 5), "month", { months: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"] });
+process.stdout.write(JSON.stringify({ n: out.days.length, label: out.periodLabel }));
+"""
+    assert _run_node(tmp_path, script) == '{"n":42,"label":"Jan 2026"}'
+
+
+def test_ui_console_calendar_view_uses_state_pattern_helper(tmp_path):
+    # The calendar view delegates state orchestration to the pattern helper and
+    # no longer inlines the week/month day-matrix math.
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert "function patternCalendarState" in js
+    start = js.index("function calendarVisibleDays")
+    block = js[start:js.index("function renderCalendar", start)]
+    assert "patternCalendarState(" in block
+    # The 42-cell month grid loop is now owned by the helper, not the view.
+    assert "i < 42" not in block
+
+
+# Golden output of the CURRENT office-map DOM placement, serialized from a DOM
+# stub: one room cell with grid placement + one agent sprite (fractional cell).
+_OFFICE_MAP_GOLDEN = (
+    "<div class=\"office-room token-blue\" data-roomId=\"dev\" "
+    "style=\"grid-column:3 / span 4;grid-row:2 / span 3\">"
+    "<div class=\"office-room-name\">Engineering</div>"
+    "<div class=\"office-room-count\">1 here</div>"
+    "<div class=\"office-agent presence-online\" data-agentId=\"a1\" data-entityId=\"a1\" "
+    "style=\"left:60%;top:40%\" title=\"Ada - reviewing\">"
+    "<div class=\"office-agent-glyph\">G</div>"
+    "<div class=\"office-agent-sprite\">AD</div>"
+    "<div class=\"office-agent-name\">ada</div>"
+    "</div></div>"
+)
+
+# An empty-room render produces just the empty-state note.
+_OFFICE_MAP_EMPTY_GOLDEN = "<div class=\"office-map-empty\">No agents to place on the map</div>"
+
+_OFFICE_DOM_STUB = """
+function makeDoc() {
+  function el(tag) {
+    return {
+      tagName: tag, className: "", textContent: "", title: "",
+      dataset: {}, style: {}, children: [],
+      appendChild(child) { this.children.push(child); return child; },
+    };
+  }
+  return { createElement: el };
+}
+function serialize(node) {
+  const attrs = [];
+  if (node.className) attrs.push(`class="${node.className}"`);
+  for (const key of Object.keys(node.dataset)) attrs.push(`data-${key}="${node.dataset[key]}"`);
+  const styleKeys = Object.keys(node.style);
+  if (styleKeys.length) attrs.push(`style="${styleKeys.map((k) => `${cssName(k)}:${node.style[k]}`).join(";")}"`);
+  if (node.title) attrs.push(`title="${node.title}"`);
+  const open = `<${node.tagName}${attrs.length ? " " + attrs.join(" ") : ""}>`;
+  const inner = node.children.length ? node.children.map(serialize).join("") : node.textContent;
+  return `${open}${inner}</${node.tagName}>`;
+}
+function cssName(k) { return k.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase()); }
+function makeGrid() {
+  return {
+    children: [], firstChild: null,
+    appendChild(child) { this.children.push(child); this.firstChild = this.children[0]; return child; },
+    removeChild(child) { this.children = this.children.filter((c) => c !== child); this.firstChild = this.children[0] || null; },
+  };
+}
+"""
+
+
+def test_ui_console_office_map_placement_is_byte_identical(tmp_path):
+    # Characterization: run patternOfficeMapPlacement against a DOM stub and
+    # assert the serialized cell/sprite tree matches CURRENT behavior exactly.
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    helper = _extract_js_function(js, "patternOfficeMapPlacement")
+    script = helper + _OFFICE_DOM_STUB + """
+const grid = makeGrid();
+const rooms = [{ id: "dev", name: "Engineering", token: "blue", occupant_count: 1, rect: { col: 2, row: 1, cols: 4, rows: 3 } }];
+const agents = [{ id: "a1", room_id: "dev", presence: "online", display_name: "Ada", action_label: "reviewing", glyph: "G", avatar: "AD", callsign: "ada", cell: { fx: 0.6, fy: 0.4 } }];
+patternOfficeMapPlacement(grid, rooms, agents, { document: makeDoc() });
+process.stdout.write(grid.children.map(serialize).join(""));
+"""
+    assert _run_node(tmp_path, script) == _OFFICE_MAP_GOLDEN
+
+
+def test_ui_console_office_map_placement_empty_is_reusable_standalone(tmp_path):
+    # The placement helper is callable standalone with an injected document and
+    # renders the empty-state note when given no rooms (reuse seam).
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    helper = _extract_js_function(js, "patternOfficeMapPlacement")
+    script = helper + _OFFICE_DOM_STUB + """
+const grid = makeGrid();
+patternOfficeMapPlacement(grid, [], [], { document: makeDoc() });
+process.stdout.write(grid.children.map(serialize).join(""));
+"""
+    assert _run_node(tmp_path, script) == _OFFICE_MAP_EMPTY_GOLDEN
+
+
+def test_ui_console_office_map_view_uses_placement_pattern_helper(tmp_path):
+    # renderOfficeMap delegates DOM positioning to the pattern helper and no
+    # longer inlines the per-room cell construction.
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert "function patternOfficeMapPlacement" in js
+    start = js.index("function renderOfficeMap")
+    block = js[start:js.index("function renderStateMachineViewer", start)]
+    assert "patternOfficeMapPlacement(" in block
+    # The room-cell construction now lives in the helper, not the view.
+    assert "cell.style.gridColumn" not in block
+    assert "office-agent-sprite" not in block
+    # The view still owns summary + legend rendering.
+    assert "office-map-summary" in block
+    assert "office-map-legend" in block
+
+
 def test_ui_console_inbox_notification_fields_are_escaped(tmp_path):
     # A blocked task with markup in its reason flows into a notification body;
     # the rendered shell must not inline that markup unescaped.
@@ -3396,8 +3608,17 @@ def test_ui_console_office_map_render_function_is_ascii_only_and_node_check(tmp_
     office_block = js[start:end]
     non_ascii = [ch for ch in office_block if ord(ch) > 127]
     assert not non_ascii, f"office-map JS must be ASCII-only, found: {non_ascii[:5]}"
-    # The glyph is rendered from server data, not a literal emoji in the JS.
-    assert "agent.glyph" in office_block
+    # DOM placement (incl. the server-data glyph) was extracted to the reusable
+    # pattern helper (TASK-AR-592); that block must stay ASCII-only too and is
+    # where the server-provided glyph is now rendered (never a literal emoji).
+    placement_start = js.index("function patternOfficeMapPlacement")
+    placement_end = js.index("\n}\n", placement_start) + 2
+    placement_block = js[placement_start:placement_end]
+    placement_non_ascii = [ch for ch in placement_block if ord(ch) > 127]
+    assert not placement_non_ascii, (
+        f"office-map placement JS must be ASCII-only, found: {placement_non_ascii[:5]}"
+    )
+    assert "agent.glyph" in placement_block
 
     if shutil.which("node") is None:
         import pytest

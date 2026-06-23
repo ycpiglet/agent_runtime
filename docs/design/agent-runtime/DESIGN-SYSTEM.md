@@ -112,6 +112,19 @@ Promoted pattern usage as of `TASK-AR-588`:
 | `patternSvgForceAgentLayout` | Live agent map uses local d3-force 3.0.0 plus local d3 dependencies when loaded, then renders token-driven SVG edges and `patternAgentAvatar` nodes. |
 | `graphStatusIconText` / `graphEdgeHealth` / `graphEdgeMagnitudeBucket` | Graph status is encoded as glyph/text plus semantic health and magnitude classes, never color-only. |
 
+Promoted pattern usage as of `TASK-AR-592`:
+
+| Pattern API | Current console usage |
+| --- | --- |
+| `patternCalendarState` | Anchor/mode -> visible day matrix + period label for the work calendar; `calendarVisibleDays`/`calendarPeriodLabel` delegate to it (the view keeps the mutable anchor/mode state). |
+| `patternOfficeMapPlacement` | Office-map DOM placement: clears the grid then creates CSS-grid-positioned room cells and fractional-coordinate agent sprites in `renderOfficeMap` (which keeps summary + legend rendering). |
+
+`TASK-AR-592` pays down the residual calendar-state and office-map DOM-placement
+debts noted below; behavior is byte-identical (node-executed characterization
+tests assert the rendered day matrix / serialized DOM tree are unchanged). The
+office-map seam is deliberately a thin, behavior-preserving extraction because a
+visual-identity redesign (`RFC-2026-06-23`) is expected to revisit that view.
+
 Dependency graph display rule: keep the full graph counts in the summary, but
 render the active taskset subgraph by default when an active taskset exists.
 This prevents large historical task inventories from collapsing into an
@@ -125,14 +138,14 @@ AR-588 vendor boundary:
 | `src/agent_runtime/vendor/d3-force/3.0.0/d3-force.min.js` | ISC | Served locally through `/vendor/d3-force/3.0.0/d3-force.min.js`; no CDN. |
 | `src/agent_runtime/vendor/d3-{quadtree,dispatch,timer}/...` | ISC | Served locally before d3-force; required by the vendored UMD graph layout runtime. |
 
-Residual one-off boundary: data-heavy SVG node/edge drawing, calendar
-anchor/mode state, schedule cards, and office-map DOM placement remain in
-`ui_console_assets.py` as one-off renderers. Office-map placement manipulates
-the DOM directly (not a pure HTML-string renderer) and is genuinely
-view-specific; calendar state controls remain coupled to the `calendarMode`
-state machine while reusable grid markup is now in `patternCalendarGrid`.
-These are layout-geometry debts to address in a later extraction unit when
-reuse across views is confirmed.
+Residual one-off boundary: data-heavy SVG node/edge drawing and schedule cards
+remain in `ui_console_assets.py` as one-off renderers. Calendar anchor/mode
+state and office-map DOM placement were promoted to reusable pattern helpers
+(`patternCalendarState`, `patternOfficeMapPlacement`) in `TASK-AR-592`; the views
+still own their mutable view state and the calendar grid markup stays in
+`patternCalendarGrid`. The remaining residual renderers are layout-geometry
+debts to address in a later extraction unit when reuse across views is
+confirmed.
 
 Served asset ownership as of `TASK-AR-582`: `ui_console.py` no longer owns the
 large HTML/CSS/JS strings. `ui_console_assets.py` owns the static served assets,
