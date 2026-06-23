@@ -129,3 +129,57 @@ def test_default_check_passes_current_changed_baseline():
 def test_all_ui_check_passes_current_tokenized_baseline():
     mod = _load()
     assert mod.cmd_check(root=ROOT, paths=[], all_ui=True, json_output=True) == 0
+
+
+def test_ci_workflow_runs_design_system_gate_and_fails_on_findings():
+    """CI must invoke the design-system gate so UI changes can't regress tokens.
+
+    Mirrors the workflow-content assertion style in
+    tests/test_inventory_sync_sanitize.py. The gate exits nonzero on findings,
+    so a plain ``run:`` of it fails the build.
+    """
+    workflow = (ROOT / ".github" / "workflows" / "test.yml").read_text(encoding="utf-8")
+
+    assert "python scripts/design_system_gate.py --all-ui" in workflow
+    # The gate runs unconditionally on every event (it is fast); it must not be
+    # gated behind a publish-only or push-only `if:` condition.
+    step = _extract_workflow_step(workflow, "Check design-system gate (UI tokens/assetization)")
+    assert "python scripts/design_system_gate.py --all-ui" in step
+    assert "if:" not in step
+    # Additive only: it must not collide with the publish-gate `--tag` steps.
+    assert "--tag" not in step
+
+
+def test_rfc_template_and_lane_documented():
+    """The 'new design direction' RFC lane is real: template file + lane docs."""
+    template = ROOT / "docs" / "design" / "agent-runtime" / "RFC-TEMPLATE.md"
+    assert template.exists()
+    template_text = template.read_text(encoding="utf-8")
+    for section in ("## Problem", "## Proposed direction", "## Scope", "## Risks", "## Decision"):
+        assert section in template_text
+
+    design_system = (
+        ROOT / "docs" / "design" / "agent-runtime" / "DESIGN-SYSTEM.md"
+    ).read_text(encoding="utf-8")
+    assert "RFC-TEMPLATE.md" in design_system
+    assert "RFC lane" in design_system
+
+
+def _extract_workflow_step(workflow_text: str, step_name: str) -> str:
+    lines = workflow_text.splitlines()
+    start_prefix = f"      - name: {step_name}"
+    next_prefix = "      - name: "
+    for i, line in enumerate(lines):
+        if line.startswith(start_prefix):
+            start = i
+            break
+    else:
+        raise AssertionError(f"workflow step not found: {step_name}")
+
+    end = len(lines)
+    for i in range(start + 1, len(lines)):
+        if lines[i].startswith(next_prefix):
+            end = i
+            break
+
+    return "\n".join(lines[start:end])
