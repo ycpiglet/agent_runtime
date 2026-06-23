@@ -9,9 +9,9 @@ kind: task
 parent_id: TASKSET-AR-VISUAL-ASSET-ADOPTION
 registered_at: 2026-06-20T01:04:15+09:00
 created_at: 2026-06-20T01:04:15+09:00
-updated_at: 2026-06-20T01:04:15+09:00
+updated_at: 2026-06-23T00:00:00+09:00
 title: Typography + icon foundation (Geist OFL fonts + Lucide icons)
-status: planned
+status: done
 priority: P2
 difficulty: M
 est_hours: 5
