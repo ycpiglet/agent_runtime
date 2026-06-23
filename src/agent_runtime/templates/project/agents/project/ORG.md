@@ -35,6 +35,16 @@
   - crm-operator
   - partnership-manager
   - sales-ops
+- operations_support:
+  - operations-lead
+  - support-operator
+  - customer-success-steward
+  - process-steward
+- planning_strategy:
+  - strategy-lead
+  - planning-architect
+  - business-analyst
+  - portfolio-steward
 
 ## Authority and Access
 
@@ -81,6 +91,30 @@
   - role: sales-ops
     level: internal
     boundary: Sales process, CRM hygiene, reporting, and handoff quality; no revenue metric manipulation.
+  - role: operations-lead
+    level: internal
+    boundary: Operating runbooks, support routing, cycle cadence, and handoff quality; no external-system writes without approval.
+  - role: support-operator
+    level: confidential
+    boundary: User/customer issue triage, support-response drafts, and repro notes; no direct customer send or support-desk mutation.
+  - role: customer-success-steward
+    level: confidential
+    boundary: Onboarding, activation, retention-risk analysis, and success criteria; no commercial commitments.
+  - role: process-steward
+    level: internal
+    boundary: Recurring process checklists and closeout quality; canonical workflow changes require review records.
+  - role: strategy-lead
+    level: confidential
+    boundary: Business strategy, positioning direction, and investment priority proposals; Owner approves final strategic pivots.
+  - role: planning-architect
+    level: internal
+    boundary: Initiative/taskset/task/unit decomposition and worker-ready criteria; no implementation without claim/worktree.
+  - role: business-analyst
+    level: internal
+    boundary: Requirements, KPI, market/customer insight synthesis with explicit source and assumption notes.
+  - role: portfolio-steward
+    level: internal
+    boundary: Roadmap/portfolio priority and duplicate taskset coordination; no unapproved reprioritization.
 
 ## Growth Automation Boundary
 
@@ -88,8 +122,14 @@
 - prohibited: viewbots, fake traffic, fake engagement, unauthorized bulk posting, spam, terms-of-service evasion, platform manipulation, unsourced lead scraping
 - escalation: Any automation that writes to an external account or contacts customers/leads requires Owner approval and risk review.
 
+## Business Operating Cycle Boundary
+
+- required_artifacts: review, seminar, scribe, doc-steward review, compound, retro, W4 verification evidence
+- cycle_rule: Read `agents/project/BUSINESS-OPERATING-SYSTEM.md` first, register new work through `work.py new`, then execute only inside a claimed worktree.
+- external_effects: Accounting systems, CRM, support desks, email/messaging, payments, contracts, and external posting accounts are read-only or draft-only until Owner approval and risk review.
+
 ## Escalation Policy
 
-- escalation_condition: missing overlay, rule conflict, unresolved authority, external account write, contract/payment mutation, platform manipulation request, or spam-like growth automation request
+- escalation_condition: missing overlay, rule conflict, unresolved authority, direct customer contact, support desk mutation, external account write, contract/payment mutation, platform manipulation request, or spam-like growth automation request
 - response_deadline: 1 business day
 - emergency_owner: owner

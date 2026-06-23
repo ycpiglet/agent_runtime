@@ -17,7 +17,8 @@ def test_registry_loads_and_covers_existing_owners():
     reg = mod.load_registry()
     for value in ["lead_engineer", "lead-engineer", "qa", "research-agent",
                   "managing-partner", "release-integrity", "finance",
-                  "accounting", "marketing", "sales"]:
+                  "accounting", "marketing", "sales", "operations",
+                  "support", "strategy", "business-planning"]:
         assert mod.resolve_owner(value, reg) is not None, f"{value} unresolved"
     ids = [r["id"] for r in reg["roles"]]
     assert len(ids) == len(set(ids))
@@ -37,7 +38,13 @@ def test_business_operations_teams_and_aliases_resolve():
     mod = _load()
     reg = mod.load_registry()
     team_ids = {team["id"] for team in reg["teams"]}
-    assert {"finance-accounting", "marketing-growth", "sales-revenue"} <= team_ids
+    assert {
+        "finance-accounting",
+        "marketing-growth",
+        "sales-revenue",
+        "operations-support",
+        "planning-strategy",
+    } <= team_ids
     assert all("_" not in team_id for team_id in team_ids)
 
     expected_aliases = {
@@ -53,6 +60,14 @@ def test_business_operations_teams_and_aliases_resolve():
         "crm": "crm-operator",
         "partnerships": "partnership-manager",
         "revops": "sales-ops",
+        "operations": "operations-lead",
+        "helpdesk": "support-operator",
+        "customer-success": "customer-success-steward",
+        "runbook": "process-steward",
+        "strategy": "strategy-lead",
+        "business-planning": "planning-architect",
+        "requirements": "business-analyst",
+        "portfolio": "portfolio-steward",
     }
     for alias, role_id in expected_aliases.items():
         assert mod.resolve_owner(alias, reg)["id"] == role_id

@@ -45,6 +45,8 @@ def test_org_tree_exposes_business_operations_teams_from_live_registry():
     assert "finance-accounting" in tree
     assert "marketing-growth" in tree
     assert "sales-revenue" in tree
+    assert "operations-support" in tree
+    assert "planning-strategy" in tree
 
 
 def test_org_tree_exposes_split_uiux_roles_from_live_registry():

@@ -2,13 +2,13 @@
 type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
-generated_at: 2026-06-20
-archived_count: 252
+generated_at: 2026-06-21
+archived_count: 253
 ---
 
 # Archived Task Files
 
-- `252` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `253` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -257,6 +257,7 @@ archived_count: 252
 | `TASK-AR-578` | `f7cbe326-b1f…` | `TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE` | completed | 2026-06-18T12:51:06+09:00 | 2026-06-18T12:52:20+09:00 | 2026-06-18T13:01:58+09:00 | 2026-06-18T13:01:58+09:00 | Create durable design-system governance for Agent Runtime UI work: a diagnostic repor… |
 | `TASK-AR-579` | `ae9daa9c-87c…` | `TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION` | completed | 2026-06-18T13:20:00+09:00 | 2026-06-18T14:15:52+09:00 | 2026-06-18T14:33:00+09:00 | 2026-06-18T14:33:00+09:00 | Create the first executable UI asset layer for Agent Runtime: design token scale, reu… |
 | `TASK-AR-580` | `f906471c-6ae…` | `TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS` | completed | 2026-06-18T14:50:00+09:00 | 2026-06-18T14:36:09+09:00 | 2026-06-18T15:00:00+09:00 | 2026-06-18T15:00:00+09:00 | Extend the executable UI asset layer so the console has named component APIs and doma… |
+| `TASK-AR-593` | `1607a42c-76d…` | `TASKSET-AR-BUSINESS-OPERATING-SYSTEM` | completed | 2026-06-21T16:20:00+09:00 | 2026-06-21T16:48:41+09:00 | 2026-06-21T17:12:45+09:00 | 2026-06-21T17:12:45+09:00 | Define operations/support and planning/strategy teams alongside finance, marketing, a… |
 | `TASK-AR-581` | `f446b363-e61…` | `TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT` | completed | 2026-06-18T15:20:00+09:00 | 2026-06-18T15:04:39+09:00 | 2026-06-18T15:40:00+09:00 | 2026-06-18T15:40:00+09:00 | Resolve the diagnostic report's token maturity gap for typography, spacing, radius, a… |
 | `TASK-AR-582` | `15ac2d6e-173…` | `TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | completed | 2026-06-18T15:55:00+09:00 | 2026-06-18T15:16:35+09:00 | 2026-06-18T16:15:00+09:00 | 2026-06-18T16:15:00+09:00 | Resolve the diagnostic report's single-file HTML/CSS/JS string concentration by movin… |
 | `TASK-AR-583` | `c8e43f0d-2b3…` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | completed | 2026-06-18T18:43:04+09:00 | 2026-06-20T08:52:02+09:00 | 2026-06-20T08:55:08+09:00 | 2026-06-20T08:55:08+09:00 | Replace the transitional --space-px-* / --radius-px-* aliases in the console asset CS… |

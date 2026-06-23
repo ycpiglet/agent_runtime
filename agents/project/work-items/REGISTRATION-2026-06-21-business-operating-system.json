@@ -1,0 +1,107 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "chat:2026-06-21-business-operating-system-continuation",
+  "created_by": "codex-planner",
+  "now": "2026-06-21T16:20:00+09:00",
+  "initiative": {
+    "id": "INIT-AR-BUSINESS-OPERATING-SYSTEM",
+    "title": "Business Operating System",
+    "summary": "Turn finance, marketing, sales, operations, support, planning, and strategy into durable agent-runtime operating lanes with safe handoff packets and verification rules.",
+    "owner": "lead_engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-BUSINESS-OPERATING-SYSTEM",
+    "display_name": "Business Operating System",
+    "summary": "Extend business operations beyond team registration by adding operations/support and planning/strategy lanes plus a reusable operating packet for cross-agent business cycles.",
+    "order": 621,
+    "plan_slug": "2026-06-21-business-operating-system"
+  },
+  "tasks": [
+    {
+      "title": "Publish business operating lanes and cycle packet",
+      "goal": "Define operations/support and planning/strategy teams alongside finance, marketing, and sales; publish the reusable business operating packet that tells agents how to run review, seminar, scribe, doc-steward, compound, and retro cycles without unsafe external effects.",
+      "scope": "Update org overlays, host templates, documentation, and focused tests. Do not create live per-role directories, write to external CRM/accounting/support systems, or contact customers/leads.",
+      "priority": "P0",
+      "difficulty": "M",
+      "est_hours": 4,
+      "est_tokens": 7500,
+      "owner": "lead_engineer",
+      "team": "planning-office",
+      "acceptance": [
+        "Live and template ORG-MODEL registries expose operations-support and planning-strategy teams with canonical roles and practical aliases.",
+        "Live and template TEAMS/ORG/PROJECT-CONTEXT overlays route finance, marketing, sales, operations, support, planning, and strategy work to explicit owners and escalation boundaries.",
+        "agents/project/BUSINESS-OPERATING-SYSTEM.md defines a reusable cycle packet covering review, seminar, scribe, doc-steward, compound, retro, evidence, and next-taskset creation.",
+        "Focused tests prove org resolution, org-read exposure, template parity, and packet safety boundaries."
+      ],
+      "verification": [
+        "python -m pytest tests/test_org_model_gate.py tests/test_org_read_api.py tests/test_project_context_overlay.py tests/test_owner_governance_chain_parity.py -q",
+        "python scripts/org_model_gate.py --check",
+        "python scripts/org_read_api.py --view org",
+        "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-BUSINESS-OPERATING-SYSTEM --check"
+      ],
+      "units": [
+        {
+          "title": "Publish business operating lanes and cycle packet",
+          "context": "The Owner wants the accounting, marketing, sales, operations, support, planning, and strategy parts to keep moving in repeated cycles while using product features such as review, compound, retro, scribe, doc-steward, and seminar artifacts. The next smallest step is to make those lanes executable as org metadata and a reusable cycle packet before creating downstream implementation tasksets.",
+          "inputs": [
+            "agents/project/ORG-MODEL.yml",
+            "agents/project/TEAMS.md",
+            "agents/project/ORG.md",
+            "agents/project/PROJECT-CONTEXT.yml",
+            "src/agent_runtime/templates/project/agents/project/ORG-MODEL.yml",
+            "src/agent_runtime/templates/project/agents/project/ORG.md",
+            "src/agent_runtime/templates/project/agents/project/TEAMS.md",
+            "src/agent_runtime/templates/project/agents/project/PROJECT-CONTEXT.example.yml",
+            "docs/superpowers/plans/2026-06-17-business-operations-teams.md",
+            "reviews/W4B-2026-06-17-TASK-AR-577.md"
+          ],
+          "target_files": [
+            "agents/project/ORG-MODEL.yml",
+            "agents/project/TEAMS.md",
+            "agents/project/ORG.md",
+            "agents/project/PROJECT-CONTEXT.yml",
+            "agents/project/BUSINESS-OPERATING-SYSTEM.md",
+            "src/agent_runtime/templates/project/agents/project/ORG-MODEL.yml",
+            "src/agent_runtime/templates/project/agents/project/ORG.md",
+            "src/agent_runtime/templates/project/agents/project/TEAMS.md",
+            "src/agent_runtime/templates/project/agents/project/PROJECT-CONTEXT.example.yml",
+            "src/agent_runtime/templates/project/agents/project/BUSINESS-OPERATING-SYSTEM.md",
+            "tests/test_org_model_gate.py",
+            "tests/test_org_read_api.py",
+            "tests/test_project_context_overlay.py",
+            "tests/test_owner_governance_chain_parity.py",
+            "reviews/SEMINAR-2026-06-21-business-operating-system.md",
+            "reviews/SCRIBE-2026-06-21-business-operating-system.md",
+            "reviews/COMPOUND-2026-06-21-business-operating-system.md",
+            "reviews/RETRO-2026-06-21-business-operating-system.md"
+          ],
+          "scope": "Documentation, org metadata, template parity, and tests only. External accounting, CRM, support desk, social posting, email, payment, or customer-contact mutations are out of scope.",
+          "steps": [
+            "Add operations-support and planning-strategy teams to live and template ORG-MODEL registries.",
+            "Add canonical roles and aliases for operations, support, planning, strategy, customer success, and business analysis responsibilities.",
+            "Update TEAMS, ORG, and PROJECT-CONTEXT overlays with role boundaries and escalation rules for the expanded business operating lanes.",
+            "Publish BUSINESS-OPERATING-SYSTEM.md as the cycle packet SSoT and mirror it into the host template.",
+            "Record seminar, scribe, compound, and retro artifacts for this cycle.",
+            "Extend focused tests and run the recorded verification commands."
+          ],
+          "acceptance": [
+            "The new roles resolve through org_model_gate without underscore canonical ids.",
+            "org_read_api.org_tree contains operations-support and planning-strategy team keys even with no live instances.",
+            "The business operating packet requires review/seminar/scribe/doc-steward/compound/retro evidence before a business cycle claims completion.",
+            "Safety boundaries prohibit external-system writes, customer contact, scraping, spam, payment mutation, and unsupported automation without Owner approval."
+          ],
+          "verification": [
+            "python -m pytest tests/test_org_model_gate.py tests/test_org_read_api.py tests/test_project_context_overlay.py tests/test_owner_governance_chain_parity.py -q",
+            "python scripts/org_model_gate.py --check",
+            "python scripts/org_read_api.py --view org",
+            "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-BUSINESS-OPERATING-SYSTEM --check"
+          ],
+          "handoff": "Report the new operations/support and planning/strategy lanes, business cycle packet, collaboration evidence artifacts, safety boundaries, and verification results.",
+          "stop_condition": "Stop after the operating lanes, packet docs, template parity, focused tests, collaboration records, and verification evidence are complete."
+        }
+      ]
+    }
+  ]
+}

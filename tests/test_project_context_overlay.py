@@ -66,3 +66,26 @@ def test_project_context_overlay_uses_example_until_host_context_exists(tmp_path
         "agents/project/README.md",
         "agents/project/PROJECT-CONTEXT.example.yml",
     ]
+
+
+def test_business_operating_packet_defines_cycle_safety_boundary():
+    packet = (PACKAGE_ROOT / "agents" / "project" / "BUSINESS-OPERATING-SYSTEM.md").read_text(encoding="utf-8")
+    for expected in (
+        "finance-accounting",
+        "marketing-growth",
+        "sales-revenue",
+        "operations-support",
+        "planning-strategy",
+        "review",
+        "seminar",
+        "scribe",
+        "doc-steward review",
+        "compound",
+        "retro",
+        "W4 evidence",
+        "Owner approval and risk review",
+        "customer",
+        "payment",
+        "unsupported automation",
+    ):
+        assert expected in packet

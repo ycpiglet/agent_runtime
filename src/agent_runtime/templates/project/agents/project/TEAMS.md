@@ -69,6 +69,34 @@
     - agents/project/ROADMAP.md
     - agents/project/ORG.md
 
+- team_id: operations-support
+  purpose: Own operating runbooks, customer/support packets, issue triage, response quality, and internal process improvement.
+  lead: operations-lead
+  roles:
+    - operations-lead
+    - support-operator
+    - customer-success-steward
+    - process-steward
+  canonical_context:
+    - agents/project/BUSINESS-OPERATING-SYSTEM.md
+    - agents/project/PROJECT-CONTEXT.yml
+    - agents/project/ORG.md
+    - agents/project/ROADMAP.md
+
+- team_id: planning-strategy
+  purpose: Own business strategy, prioritization, task decomposition, requirements analysis, and roadmap/portfolio coherence.
+  lead: strategy-lead
+  roles:
+    - strategy-lead
+    - planning-architect
+    - business-analyst
+    - portfolio-steward
+  canonical_context:
+    - agents/project/BUSINESS-OPERATING-SYSTEM.md
+    - docs/superpowers/plans/
+    - agents/project/work-items/WORK-ITEM-CLASSIFICATION.md
+    - reviews/
+
 ## Growth Automation Boundary
 
 - Allowed: owned-channel scheduled posts, approved API posting, consent-based CRM follow-up, SEO/content analysis, and campaign performance reporting.
