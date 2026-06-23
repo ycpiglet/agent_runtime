@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-23T16:01:42+09:00",
-  "record_count": 366,
+  "generated_at": "2026-06-23T16:38:21+09:00",
+  "record_count": 370,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4029,6 +4029,50 @@
       "title": "UNIT-TASK-AR-592-002 - Responsive pass for the new visuals",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-592/UNIT-TASK-AR-592-002.md",
       "parent_id": "TASK-AR-592",
+      "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-BUSINESS-OPERATING-SYSTEM",
+      "level": "initiative",
+      "number": "22",
+      "label": "Initiative 22",
+      "id": "INIT-AR-BUSINESS-OPERATING-SYSTEM",
+      "title": "Business Operating System",
+      "path": "agents/project/initiatives/INIT-AR-BUSINESS-OPERATING-SYSTEM.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-BUSINESS-OPERATING-SYSTEM",
+      "level": "taskset",
+      "number": "22.1",
+      "label": "Taskset 22.1",
+      "id": "TASKSET-AR-BUSINESS-OPERATING-SYSTEM",
+      "title": "Business Operating System",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-BUSINESS-OPERATING-SYSTEM",
+      "status": "complete"
+    },
+    {
+      "key": "task:TASK-AR-593",
+      "level": "task",
+      "number": "22.1.1",
+      "label": "Task 22.1.1",
+      "id": "TASK-AR-593",
+      "title": "Define operations/support and planning/strategy teams alongside finance, marketing, a…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-593.md",
+      "parent_id": "TASKSET-AR-BUSINESS-OPERATING-SYSTEM",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-593-001",
+      "level": "unit",
+      "number": "22.1.1.1",
+      "label": "Unit 22.1.1.1",
+      "id": "UNIT-TASK-AR-593-001",
+      "title": "UNIT-TASK-AR-593-001 - Publish business operating lanes and cycle packet",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-593/UNIT-TASK-AR-593-001.md",
+      "parent_id": "TASK-AR-593",
       "status": "completed"
     }
   ]

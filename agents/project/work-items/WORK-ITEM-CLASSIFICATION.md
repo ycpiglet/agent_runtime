@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-23T16:01:42+09:00
-record_count: 366
+generated_at: 2026-06-23T16:38:21+09:00
+record_count: 370
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `366` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `370` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `22` records |
-| Tasksets | pass | `46` records |
-| Tasks | pass | `256` records |
-| Units | pass | `42` records |
+| Initiatives | pass | `23` records |
+| Tasksets | pass | `47` records |
+| Tasks | pass | `257` records |
+| Units | pass | `43` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -405,6 +405,10 @@ record_count: 366
 | 21.1.2 | Task 21.1.2 | task | `TASK-AR-592` | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | completed | `agents/lead_engineer/tasks/TASK-AR-592.md` | Ensure the new visual components meet WCAG AA (contrast, roles, labels, keyboard, red… |
 | 21.1.2.1 | Unit 21.1.2.1 | unit | `UNIT-TASK-AR-592-001` | `TASK-AR-592` | completed | `agents/lead_engineer/tasks/units/TASK-AR-592/UNIT-TASK-AR-592-001.md` | UNIT-TASK-AR-592-001 - A11y audit + fixes for the new components |
 | 21.1.2.2 | Unit 21.1.2.2 | unit | `UNIT-TASK-AR-592-002` | `TASK-AR-592` | completed | `agents/lead_engineer/tasks/units/TASK-AR-592/UNIT-TASK-AR-592-002.md` | UNIT-TASK-AR-592-002 - Responsive pass for the new visuals |
+| 22 | Initiative 22 | initiative | `INIT-AR-BUSINESS-OPERATING-SYSTEM` | - | active | `agents/project/initiatives/INIT-AR-BUSINESS-OPERATING-SYSTEM.md` | Business Operating System |
+| 22.1 | Taskset 22.1 | taskset | `TASKSET-AR-BUSINESS-OPERATING-SYSTEM` | `INIT-AR-BUSINESS-OPERATING-SYSTEM` | complete | `BACKLOG-BOARD.md` | Business Operating System |
+| 22.1.1 | Task 22.1.1 | task | `TASK-AR-593` | `TASKSET-AR-BUSINESS-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-593.md` | Define operations/support and planning/strategy teams alongside finance, marketing, a… |
+| 22.1.1.1 | Unit 22.1.1.1 | unit | `UNIT-TASK-AR-593-001` | `TASK-AR-593` | completed | `agents/lead_engineer/tasks/units/TASK-AR-593/UNIT-TASK-AR-593-001.md` | UNIT-TASK-AR-593-001 - Publish business operating lanes and cycle packet |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

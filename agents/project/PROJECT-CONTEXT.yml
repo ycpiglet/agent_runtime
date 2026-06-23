@@ -1,5 +1,5 @@
 schema: agent-runtime-project-context/v1
-updated_at: 2026-06-17T22:20:00+09:00
+updated_at: 2026-06-21T16:55:00+09:00
 
 project:
   id: agent-runtime-mvp-platform
@@ -102,6 +102,28 @@ agent_teams:
       - agents/project/VISION.md
       - agents/project/ROADMAP.md
       - agents/project/ORG.md
+  - id: operations-support
+    purpose: 운영 런북, 고객/사용자 지원 패킷, 이슈 분류, SLA/응답 품질, 내부 프로세스 개선
+    roles:
+      - operations-lead
+      - support-operator
+      - customer-success-steward
+      - process-steward
+    canonical_context:
+      - agents/project/BUSINESS-OPERATING-SYSTEM.md
+      - agents/project/ORG.md
+      - agents/project/ROADMAP.md
+  - id: planning-strategy
+    purpose: 사업 전략, 우선순위, 실행 단위 분해, 요구사항 분석, 포트폴리오/로드맵 정합성
+    roles:
+      - strategy-lead
+      - planning-architect
+      - business-analyst
+      - portfolio-steward
+    canonical_context:
+      - agents/project/BUSINESS-OPERATING-SYSTEM.md
+      - docs/superpowers/plans/
+      - agents/project/work-items/WORK-ITEM-CLASSIFICATION.md
 
 growth_automation_policy:
   allowed:
@@ -117,6 +139,25 @@ growth_automation_policy:
     - spam
     - terms-of-service evasion
     - platform manipulation
+
+business_operating_cycle_policy:
+  required_artifacts:
+    - review
+    - seminar
+    - scribe
+    - doc-steward review
+    - compound
+    - retro
+    - W4 verification evidence
+  next_taskset_rule: New business work must be registered through `python scripts/work.py new --input <json>` before implementation.
+  execution_boundary: Implementation must happen inside a claimed worktree; adjacent problems go to intake registration.
+  prohibited_without_owner_approval:
+    - external accounting-system writes
+    - CRM mutation or outbound sales contact
+    - support desk mutation or direct customer support send
+    - payment or contract mutation
+    - scraping, spam, or platform manipulation
+    - unsupported automation outside the recorded task unit
 
 links:
   - label: release gate
