@@ -2290,6 +2290,60 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     "work_state.bucket.active": {"ko": "진행", "en": "active"},
     "work_state.bucket.review": {"ko": "검토", "en": "review"},
     "work_state.bucket.done": {"ko": "완료", "en": "done"},
+    # ----- RFC-2026-06-23 i18n P1: error / toast / empty-state copy ---------
+    # Operator-facing error/status, toast, and empty-state copy that previously
+    # lived as inline English in the renderer (RESEARCH-2026-06-14 i18n 3/5).
+    # The dynamic data (ids, counts, messages) stays EN-canonical and is
+    # concatenated by the JS at the render site; only the human prose is keyed.
+    # error / status copy
+    "error.state_load_failed": {"ko": "상태 불러오기 실패", "en": "State load failed"},
+    "error.knowledge_graph_unavailable": {
+        "ko": "지식 그래프를 불러올 수 없습니다",
+        "en": "Knowledge graph unavailable",
+    },
+    "status.generated_prefix": {"ko": "생성됨", "en": "Generated"},
+    "status.tasks_suffix": {"ko": "개 작업", "en": "tasks"},
+    # toast copy
+    "toast.undo": {"ko": "실행 취소", "en": "Undo"},
+    "toast.taskset_action_prefix": {"ko": "태스크셋", "en": "taskset"},
+    "toast.taskset_created": {"ko": "태스크셋 생성됨", "en": "taskset created"},
+    "toast.template_instantiated": {"ko": "템플릿 적용됨", "en": "template instantiated"},
+    "toast.tasks_moved_suffix": {"ko": "개 작업 이동됨", "en": "task(s) moved"},
+    "toast.tasks_edited_suffix": {"ko": "개 작업 편집됨", "en": "task(s) edited"},
+    "toast.undo_applied": {"ko": "실행 취소 적용됨", "en": "undo applied"},
+    "toast.tasks_restored_suffix": {"ko": "개 작업 복원됨", "en": "task(s) restored"},
+    "toast.presence": {"ko": "재실", "en": "Presence"},
+    # empty-state copy
+    "empty.no_items": {"ko": "항목이 없습니다", "en": "No items"},
+    "empty.no_active_sessions": {"ko": "활성 세션이 없습니다", "en": "No active sessions"},
+    "empty.no_messages": {"ko": "메시지가 없습니다", "en": "No messages"},
+    "empty.no_events": {"ko": "이벤트가 없습니다", "en": "No events"},
+    "empty.no_graph_edges": {"ko": "그래프 엣지가 없습니다", "en": "No graph edges"},
+    "empty.no_graph_edges_hint": {
+        "ko": "이 보기를 채우려면 의존성 엣지를 추가하세요.",
+        "en": "Add dependency edges to populate this view.",
+    },
+    "empty.no_state_machines": {"ko": "상태 머신이 없습니다", "en": "No state machines"},
+    "empty.no_state_machines_hint": {
+        "ko": "상태 머신 파일을 추가하면 여기에 표시됩니다.",
+        "en": "State machine files will appear here when added.",
+    },
+    "empty.no_entities_match_filter": {
+        "ko": "필터와 일치하는 엔터티가 없습니다",
+        "en": "No entities match the filter",
+    },
+    "empty.no_entities_match_filter_hint": {
+        "ko": "필터를 지우거나 조정해 보세요.",
+        "en": "Try clearing or adjusting the filters.",
+    },
+    "empty.no_knowledge_graph_data": {
+        "ko": "지식 그래프 데이터가 없습니다",
+        "en": "No knowledge graph data",
+    },
+    "empty.no_knowledge_graph_data_hint": {
+        "ko": "작업 항목을 추가하면 그래프가 채워집니다.",
+        "en": "Add work items to populate the graph.",
+    },
 }
 
 

@@ -7447,7 +7447,7 @@ async function loadState() {
     setText("poll-state", "polling");
   } catch (error) {
     setText("poll-state", "error");
-    $("status-line").textContent = `State load failed: ${error.message}`;
+    $("status-line").textContent = t("error.state_load_failed") + ": " + error.message;
   }
 }
 
@@ -7838,7 +7838,7 @@ function renderGroupedList(view, items, rowTemplate, emptyLabel) {
   const { groups, filtered } = applyListControls(view, items);
   if (!filtered.length) {
     // TASK-AR-591: componentEmptyState (via emptyState compat wrapper) for list surfaces.
-    panel.innerHTML = emptyState(emptyLabel || "No items");
+    panel.innerHTML = emptyState(emptyLabel || t("empty.no_items"));
     applyListDensity(view);
     return;
   }
@@ -8249,7 +8249,7 @@ function renderDashboard() {
   setText("metric-active", counts.active);
   setText("metric-blocked", counts.blocked);
   setText("metric-warnings", (runtimeState.warnings || []).length + (runtimeState.gaps || []).length);
-  $("status-line").textContent = `Generated ${runtimeState.generated_at} - ${tasks.length} tasks`;
+  $("status-line").textContent = t("status.generated_prefix") + " " + runtimeState.generated_at + " - " + tasks.length + " " + t("status.tasks_suffix");
 }
 
 function renderTaskSets() {
@@ -8388,14 +8388,14 @@ async function submitTasksetLifecycle(action, taskSetId, currentName) {
     payload.display_name = name;
   }
   const result = await sendJson("/api/commands", { type, payload: { type, target: taskSetId, payload } });
-  pushActivityToast("assignment", `taskset ${action}`, `${taskSetId} (${(result && result.status) || "queued"})`);
+  pushActivityToast("assignment", t("toast.taskset_action_prefix") + " " + action, `${taskSetId} (${(result && result.status) || "queued"})`);
 }
 
 async function submitTasksetCreate(displayName, summary) {
   const payload = { actor: "owner", display_name: displayName };
   if (summary) payload.summary = summary;
   const result = await sendJson("/api/commands", { type: "taskset.create", payload: { type: "taskset.create", payload } });
-  pushActivityToast("assignment", "taskset created", `${displayName} (${(result && result.status) || "queued"})`);
+  pushActivityToast("assignment", t("toast.taskset_created"), `${displayName} (${(result && result.status) || "queued"})`);
   return result;
 }
 
@@ -8405,7 +8405,7 @@ async function instantiateTasksetTemplate(templateKey) {
     payload: { type: "taskset.template", payload: { actor: "owner", template: templateKey } }
   });
   const created = (result && result.result) || {};
-  pushActivityToast("assignment", "template instantiated", `${templateKey}: ${created.task_count || 0} tasks`);
+  pushActivityToast("assignment", t("toast.template_instantiated"), `${templateKey}: ${created.task_count || 0} tasks`);
   return result;
 }
 
@@ -8421,7 +8421,7 @@ async function applyBulkEdit() {
     for (const id of ids) {
       await sendJson("/api/commands", { type: "task.move", payload: { type: "task.move", target: id, payload: { task_set_id: moveTo } } });
     }
-    pushUndoToast(`${ids.length} task(s) moved`, null);
+    pushUndoToast(ids.length + " " + t("toast.tasks_moved_suffix"), null);
     clearBulkSelection();
     return;
   }
@@ -8437,7 +8437,7 @@ async function applyBulkEdit() {
     payload: { type: "task.bulk_edit", payload: Object.assign({ task_ids: ids }, fields) }
   });
   const undo = result && result.result && result.result.undo;
-  pushUndoToast(`${ids.length} task(s) edited`, undo);
+  pushUndoToast(ids.length + " " + t("toast.tasks_edited_suffix"), undo);
   clearBulkSelection();
 }
 
@@ -8452,7 +8452,7 @@ function pushUndoToast(message, undo) {
   if (undo && Array.isArray(undo.items) && undo.items.length) {
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = "Undo";
+    button.textContent = t("toast.undo");
     button.addEventListener("click", async () => {
       await runUndo(undo);
       dismissToast(toast);
@@ -8492,7 +8492,7 @@ async function runUndo(undo) {
       payload: { type: "task.bulk_edit", payload: Object.assign({ task_ids: group.ids }, fields) }
     });
   }
-  pushActivityToast("review", "undo applied", `${(undo.items || []).length} task(s) restored`);
+  pushActivityToast("review", t("toast.undo_applied"), (undo.items || []).length + " " + t("toast.tasks_restored_suffix"));
 }
 
 function renderTasksetTemplates() {
@@ -9095,7 +9095,7 @@ function renderAgents() {
   renderMultipaneAssurance();
   renderTaskSets();
   const agents = runtimeState.agents || [];
-  renderGroupedList("agents", agents, agentCardTemplate, "No active sessions");
+  renderGroupedList("agents", agents, agentCardTemplate, t("empty.no_active_sessions"));
 }
 
 function messageRowTemplate(message) {
@@ -9111,7 +9111,7 @@ function messageRowTemplate(message) {
 
 function renderMessages() {
   const messages = runtimeState.messages || [];
-  renderGroupedList("messages", messages, messageRowTemplate, "No messages");
+  renderGroupedList("messages", messages, messageRowTemplate, t("empty.no_messages"));
 }
 
 // ----- Channels view (TASK-AR-327) -----
@@ -9511,7 +9511,7 @@ function eventCardTemplate(event) {
 function renderEvents() {
   // Legacy filter-row narrows first, then the shared list toolbar applies filter/sort/group/density.
   const events = filterEvents(runtimeState.events || []).slice(-80).reverse();
-  renderGroupedList("events", events, eventCardTemplate, "No events");
+  renderGroupedList("events", events, eventCardTemplate, t("empty.no_events"));
 }
 
 function renderEvidence() {
@@ -9834,7 +9834,7 @@ function reconcileLiveMap(previous, next) {
   Object.keys(after).forEach((role) => {
     if (before[role] !== undefined && before[role] !== after[role]) {
       pulseLiveNode(role);
-      pushActivityToast("review", "Presence", `${role}: ${before[role]} -> ${after[role]}`);
+      pushActivityToast("review", t("toast.presence"), `${role}: ${before[role]} -> ${after[role]}`);
     }
   });
 }
@@ -9860,7 +9860,7 @@ function renderMap() {
         <span><span class="meta-label">Status</span><strong>${escapeHtml(edge.task_id || "no task")}</strong></span>
       `)}
     </article>
-  `).join("") : emptyState("No graph edges", "Add dependency edges to populate this view.");
+  `).join("") : emptyState(t("empty.no_graph_edges"), t("empty.no_graph_edges_hint"));
   $("state-machine-list").innerHTML = machines.length ? machines.map((machine) => `
     <article class="surface-card map-card state-machine-card pass">
       <div class="surface-card-header">
@@ -9876,7 +9876,7 @@ function renderMap() {
         <span><span class="meta-label">To</span><strong>${escapeHtml((machine.states || []).join(" -> ") || "states")}</strong></span>
       `)}
     </article>
-  `).join("") : emptyState("No state machines", "State machine files will appear here when added.");
+  `).join("") : emptyState(t("empty.no_state_machines"), t("empty.no_state_machines_hint"));
   $("roadmap-list").innerHTML = (roadmap.milestones || []).length ? (roadmap.milestones || []).slice(0, 40).map((item) => `
     <article class="surface-card map-card roadmap-card ${item.done ? "pass" : "warn"}">
       <div class="surface-card-header">
@@ -10581,11 +10581,11 @@ function renderKnowledgeGraph() {
     const stateHost = $("kg-graph-state-host");
     if (stateHost) {
       if (data.error) {
-        stateHost.innerHTML = errorState("Knowledge graph unavailable", data.error);
+        stateHost.innerHTML = errorState(t("error.knowledge_graph_unavailable"), data.error);
       } else if (isFiltered) {
-        stateHost.innerHTML = emptyState("No entities match the filter", "Try clearing or adjusting the filters.");
+        stateHost.innerHTML = emptyState(t("empty.no_entities_match_filter"), t("empty.no_entities_match_filter_hint"));
       } else {
-        stateHost.innerHTML = emptyState("No knowledge graph data", "Add work items to populate the graph.");
+        stateHost.innerHTML = emptyState(t("empty.no_knowledge_graph_data"), t("empty.no_knowledge_graph_data_hint"));
       }
     } else {
       const note = document.createElementNS(SVG_NS, "text");

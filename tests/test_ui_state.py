@@ -3074,6 +3074,32 @@ def test_build_i18n_has_kr_en_for_key_strings_and_default_kr():
         assert table["strings"][key]["en"]
 
 
+def test_i18n_table_covers_error_toast_empty_state_copy():
+    """RFC-2026-06-23 P1: error/toast/empty-state copy is keyed in EN + KO.
+
+    These previously lived as inline English literals in the renderer; the
+    i18n_literal_gate keeps the render sinks routed through this table.
+    """
+    table = ui_state.build_i18n(now="2026-06-14T00:00:00+09:00")["strings"]
+    # Representative load-bearing copy from each targeted category.
+    for key in (
+        "error.state_load_failed",
+        "error.knowledge_graph_unavailable",
+        "toast.undo",
+        "toast.tasks_edited_suffix",
+        "empty.no_items",
+        "empty.no_active_sessions",
+        "empty.no_graph_edges",
+    ):
+        assert key in table, f"missing keyed copy: {key}"
+        assert table[key]["ko"], f"{key} missing ko"
+        assert table[key]["en"], f"{key} missing en"
+    # The whole targeted family must carry both locales (no half-keyed entry).
+    for key, values in table.items():
+        if key.split(".", 1)[0] in {"error", "toast", "empty", "status", "loading"}:
+            assert values.get("ko") and values.get("en"), f"{key} not fully localized"
+
+
 def test_lookup_i18n_resolves_with_kr_default_and_fallbacks():
     # Server-side mirror of the JS t() helper.
     assert ui_state.lookup_i18n("button.refresh", "en") == "Refresh"
