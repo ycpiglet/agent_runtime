@@ -500,3 +500,179 @@ def test_task_ar_592_icon_informative_has_role_and_label():
     assert 'aria-label="Open settings"' in svg
     assert 'aria-hidden' not in svg
     assert "<title>Open settings</title>" in svg
+
+
+# ----- TASK-AR-590: data-viz palette + sparklines + state illustrations -----
+
+import re
+
+
+_THEME_BLOCK_RE = re.compile(r"(:root\b[^{]*\{[^}]*\}|\.theme-dark\b[^{]*\{[^}]*\})", re.DOTALL)
+
+
+def _theme_blocks():
+    """Return {'light': css_block, 'dark': css_block} for the console theme roots.
+
+    The light theme lives on ``:root`` and the dark theme on a ``.theme-dark``
+    (or equivalent) selector inside the served CSS.
+    """
+    css = ui_console.build_response("/app.css", Path(".")).body.decode("utf-8")
+    blocks = {}
+    # CSS rule bodies have no nested braces, so a body is everything up to the
+    # next '}'. Capture the selector preceding each '{ ... }' block and keep the
+    # ones that define the data-viz tokens: ':root' is the light theme root and
+    # an attribute selector containing 'dark' (e.g. [data-theme="dark"]) is dark.
+    for match in re.finditer(r"([^{}]+)\{([^{}]*)\}", css):
+        selector, body = match.group(1).strip(), match.group(2)
+        if "--dv-cat-1" not in body:
+            continue
+        selector_tail = selector.splitlines()[-1].strip() if selector else ""
+        if selector_tail == ":root":
+            blocks["light"] = body
+        elif "dark" in selector_tail:
+            blocks["dark"] = body
+    return blocks
+
+
+def _token_value(block: str, token: str) -> str:
+    match = re.search(rf"{re.escape(token)}\s*:\s*([^;]+);", block)
+    assert match is not None, f"{token} not defined"
+    return match.group(1).strip()
+
+
+def test_task_ar_590_dataviz_palette_tokens_present_in_both_themes():
+    """Categorical (8) + sequential (5) data-viz tokens exist for light and dark."""
+    blocks = _theme_blocks()
+    assert "light" in blocks, "light theme data-viz tokens missing"
+    assert "dark" in blocks, "dark theme data-viz tokens missing"
+    for theme, block in blocks.items():
+        for i in range(1, 9):
+            assert f"--dv-cat-{i}" in block, f"{theme}: --dv-cat-{i} missing"
+        for i in range(1, 6):
+            assert f"--dv-seq-{i}" in block, f"{theme}: --dv-seq-{i} missing"
+        assert "--dv-sparkline" in block, f"{theme}: --dv-sparkline missing"
+
+
+def test_task_ar_590_categorical_tokens_are_concrete_hex():
+    """Categorical tokens resolve to literal hex (so contrast can be verified)."""
+    blocks = _theme_blocks()
+    for theme, block in blocks.items():
+        for i in range(1, 9):
+            value = _token_value(block, f"--dv-cat-{i}")
+            assert re.fullmatch(r"#[0-9a-fA-F]{6}", value), (
+                f"{theme}: --dv-cat-{i}={value!r} is not a 6-digit hex"
+            )
+
+
+def test_task_ar_590_categorical_tokens_meet_wcag_non_text_contrast():
+    """Each categorical hue meets the WCAG 1.4.11 >=3:1 graphical threshold vs panel."""
+    panels = {"light": "#f7f7f5", "dark": "#0f1011"}
+    blocks = _theme_blocks()
+    for theme, block in blocks.items():
+        panel = panels[theme]
+        for i in range(1, 9):
+            value = _token_value(block, f"--dv-cat-{i}")
+            ratio = _contrast_ratio(value, panel)
+            assert ratio >= 3.0, (
+                f"{theme}: --dv-cat-{i}={value} contrast {ratio:.2f}:1 vs panel "
+                f"{panel} below WCAG non-text 3:1"
+            )
+
+
+def test_task_ar_590_sequential_scale_is_monotonic_progression():
+    """Sequential steps progress monotonically in luminance (clear visual order)."""
+    blocks = _theme_blocks()
+    for theme, block in blocks.items():
+        lums = [
+            _relative_luminance(_token_value(block, f"--dv-seq-{i}"))
+            for i in range(1, 6)
+        ]
+        # Strictly ordered (light->dark or dark->light); no two adjacent equal.
+        ascending = all(a < b for a, b in zip(lums, lums[1:]))
+        descending = all(a > b for a, b in zip(lums, lums[1:]))
+        assert ascending or descending, f"{theme}: sequential scale not monotonic: {lums}"
+
+
+def test_task_ar_590_graph_consumes_categorical_tokens():
+    """Dependency/knowledge graph node styling consumes the categorical tokens."""
+    css = ui_console.build_response("/app.css", Path(".")).body.decode("utf-8")
+    assert "var(--dv-cat-1" in css, "graph nodes do not consume --dv-cat-1"
+
+
+def test_task_ar_590_sparkline_renders_polyline_and_uses_token():
+    """componentSparkline emits an SVG polyline whose stroke is the dv-sparkline token."""
+    svg = ui_design_assets.componentSparkline([1, 5, 2, 8, 3])
+    assert svg.startswith("<svg")
+    assert "<polyline" in svg
+    assert "var(--dv-sparkline" in svg
+    # No raw color literal in the rendered output.
+    assert not re.search(r"#[0-9a-fA-F]{3,6}", svg), "sparkline leaked a raw hex literal"
+
+
+def test_task_ar_590_sparkline_excludes_non_numeric_values():
+    """Non-numeric / non-finite data is excluded, never interpolated into the path."""
+    svg = ui_design_assets.componentSparkline([1, "x", 2, None, 3, float("inf")])
+    # 3 valid numeric points -> 3 coordinate pairs in the polyline.
+    points = re.search(r'<polyline points="([^"]+)"', svg)
+    assert points is not None
+    assert len(points.group(1).split()) == 3
+    assert "x" not in points.group(1)
+    assert "inf" not in svg.lower()
+
+
+def test_task_ar_590_sparkline_empty_for_too_few_points():
+    """Fewer than two numeric points yields a safe empty span, not a broken SVG."""
+    assert "sparkline--empty" in ui_design_assets.componentSparkline([])
+    assert "sparkline--empty" in ui_design_assets.componentSparkline([7])
+    assert "sparkline--empty" in ui_design_assets.componentSparkline(["only-text"])
+
+
+def test_task_ar_590_sparkline_coordinates_within_viewbox():
+    """Generated coordinates stay inside the SVG viewBox bounds."""
+    width, height = 64, 24
+    svg = ui_design_assets.componentSparkline([0, 100, 50, 75], width=width, height=height)
+    coords = re.search(r'<polyline points="([^"]+)"', svg).group(1)
+    for pair in coords.split():
+        x, y = (float(v) for v in pair.split(","))
+        assert 0 <= x <= width
+        assert 0 <= y <= height
+
+
+def _no_raw_color_literal(markup: str) -> bool:
+    """True when markup carries no raw hex/rgb color literal (token-only tinting)."""
+    if re.search(r"#[0-9a-fA-F]{3,6}\b", markup):
+        return False
+    if re.search(r"\brgba?\(", markup):
+        return False
+    return True
+
+
+def test_task_ar_590_empty_state_illustration_is_accent_tinted_no_raw_color():
+    """Empty-state illustration tints via the accent token with no raw color literal."""
+    html = ui_design_assets.componentEmptyState("Nothing here", "Add something")
+    assert "<svg" in html
+    assert "var(--accent" in html or "var(--dv-sparkline" in html
+    assert "currentColor" in html
+    assert _no_raw_color_literal(html), html
+
+
+def test_task_ar_590_error_state_illustration_uses_danger_token_no_raw_color():
+    """Error-state illustration tints via the danger token with no raw color literal."""
+    html = ui_design_assets.componentErrorState("Boom", "Retry")
+    assert "<svg" in html
+    assert "var(--danger" in html
+    assert _no_raw_color_literal(html), html
+
+
+def test_task_ar_590_loading_state_illustration_is_accent_tinted_no_raw_color():
+    """Loading-state illustration tints via the accent token with no raw color literal."""
+    html = ui_design_assets.componentLoadingState("Loading...")
+    assert "<svg" in html
+    assert "var(--accent" in html or "var(--dv-sparkline" in html
+    assert "currentColor" in html
+    assert _no_raw_color_literal(html), html
+
+
+def test_task_ar_590_sparkline_classified_as_ui_component():
+    """The sparkline component is registered in the assetization classes."""
+    assert ui_design_assets.ASSETIZATION_CLASSES["componentSparkline"] == "ui_component"

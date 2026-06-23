@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-23T16:38:21+09:00",
+  "generated_at": "2026-06-23T17:24:28+09:00",
   "record_count": 370,
   "finding_count": 0,
   "findings": [],
@@ -3809,7 +3809,7 @@
       "title": "Visual Asset Adoption",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-VISUAL-ASSET-ADOPTION",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-587",
@@ -3919,7 +3919,7 @@
       "title": "Add recolorable empty/error/loading illustrations, accessible data-viz palette tokens…",
       "path": "agents/lead_engineer/tasks/TASK-AR-590.md",
       "parent_id": "TASKSET-AR-VISUAL-ASSET-ADOPTION",
-      "status": "planned"
+      "status": "done"
     },
     {
       "key": "unit:UNIT-TASK-AR-590-001",
