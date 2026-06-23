@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-23T14:50:10+09:00
-record_count: 611
+generated_at: 2026-06-23T15:13:25+09:00
+record_count: 614
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `611` review and evidence records under `reviews/`.
+- Summary: indexed `614` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `611` files |
+| Reviews covered | pass | `614` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -507,6 +507,9 @@ record_count: 611
 | `reviews/REVIEW-2026-06-22-autofolio-upstream-candidates.md` | `REVIEW-2026-06-22-autofolio-upstream-candidates` | review | assessed | pass | autofolio → agent_runtime upstream-candidate assessment |
 | `reviews/REVIEW-2026-06-22-subsystem-verification-audit.md` | `REVIEW-2026-06-22-subsystem-verification-audit` | review | assessed | watch | Subsystem verification audit (2026-06-22) |
 | `reviews/REVIEW-2026-06-22-system-health-rsi-diagnosis.md` | `REVIEW-2026-06-22-system-health-rsi-diagnosis` | review | assessed | watch | System-health / RSI diagnosis (2026-06-22) |
+| `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
+| `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
+| `reviews/RFC-2026-06-23-visual-identity-and-agent-characters.md` | `RFC-2026-06-23-visual-identity-and-agent-characters` | rfc | proposal | decide | RFC — Visual Identity & Agent Characters |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SCRIBE-2026-06-21-business-operating-system.md` | `SCRIBE-2026-06-21-business-operating-system` | scribe | recorded | pass | Business Operating System Scribe Log |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
