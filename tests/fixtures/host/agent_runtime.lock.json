@@ -51,6 +51,7 @@
       "agents/project/SKILL-GOVERNANCE.md": "sha256:29ba10607a25f7db5d4f9e8d990a06547c864fbfb9d6e2dcc6e41a659591faeb",
       "agents/project/STATE-MACHINES.yml": "sha256:fa5e02b56f3f9e0b1070a76a7e21820b926aff6d5cca366272a30a571aa8edf3",
       "agents/project/TEAMS.md": "sha256:516867f53afb41180ee844c051f7f496108439761327b10924a19c758ecc46e2",
+      "agents/project/WORK-LANE-PLAYBOOKS.md": "sha256:2af0a42d8512f0839cb3c1aecd7e576a7a4153ca161fcbecc77a2e679a37614a",
       "agents/project/WORK-SCHEMA.yml": "sha256:6bdcd80300e9975dfc14683b8fee8ceb163a2cacfa21996e7a98a44977f4ebf7",
       "agents/project/teams/.gitkeep": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
       "agents/qa/SKILL.md": "sha256:4bb9495507a0ef045f59bfe5f200d7072792b06e1a74264b1465ad6e0698d6e0",
@@ -270,8 +271,8 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.5.0",
-    "template_digest": "sha256:40f901aa7e767e92a2b490736ede270c64ee4a191c8dec41d77ca74885ef6870",
-    "template_files": 267
+    "template_digest": "sha256:8b8f7df12ba054253cf5987ac59c0341e7d2732c80307af91674f4c533eaaf61",
+    "template_files": 268
   },
   "project": "fixture-host",
   "schema": "agent-runtime-lock/v1",

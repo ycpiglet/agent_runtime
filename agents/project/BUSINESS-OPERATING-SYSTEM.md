@@ -7,6 +7,9 @@ covers finance/accounting, marketing/growth, sales/revenue,
 operations/support, and planning/strategy work without letting agents skip the
 normal work lifecycle or mutate external systems.
 
+See `agents/project/WORK-LANE-PLAYBOOKS.md` for the per-lane operating
+procedure (intake → draft → review → evidence) that applies this contract.
+
 ## Lanes
 
 | Lane | Lead role | Worker roles | Reviewer roles | Owns |
