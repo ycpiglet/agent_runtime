@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-23T16:38:21+09:00
+generated_at: 2026-06-23T17:24:28+09:00
 record_count: 370
 ---
 
@@ -384,7 +384,7 @@ record_count: 370
 | 19.1.2.2 | Unit 19.1.2.2 | unit | `UNIT-TASK-AR-586-002` | `TASK-AR-586` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-586/UNIT-TASK-AR-586-002.md` | UNIT-TASK-AR-586-002 - Schedule + Owner notification wiring |
 | 19.1.2.3 | Unit 19.1.2.3 | unit | `UNIT-TASK-AR-586-003` | `TASK-AR-586` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-586/UNIT-TASK-AR-586-003.md` | UNIT-TASK-AR-586-003 - Correct the release-conductor skill doc |
 | 20 | Initiative 20 | initiative | `INIT-AR-VISUAL-ASSET-ADOPTION` | - | active | `agents/project/initiatives/INIT-AR-VISUAL-ASSET-ADOPTION.md` | Visual Asset Adoption (graph, avatars, fonts, icons, color) |
-| 20.1 | Taskset 20.1 | taskset | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | `INIT-AR-VISUAL-ASSET-ADOPTION` | active | `BACKLOG-BOARD.md` | Visual Asset Adoption |
+| 20.1 | Taskset 20.1 | taskset | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | `INIT-AR-VISUAL-ASSET-ADOPTION` | complete | `BACKLOG-BOARD.md` | Visual Asset Adoption |
 | 20.1.1 | Task 20.1.1 | task | `TASK-AR-587` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | completed | `agents/lead_engineer/tasks/TASK-AR-587.md` | Give every agent a deterministic visual identity: a seeded SVG avatar keyed to agent… |
 | 20.1.1.1 | Unit 20.1.1.1 | unit | `UNIT-TASK-AR-587-001` | `TASK-AR-587` | completed | `agents/lead_engineer/tasks/units/TASK-AR-587/UNIT-TASK-AR-587-001.md` | UNIT-TASK-AR-587-001 - Vendor + self-host a CC0 DiceBear style and add patternAgentAvatar |
 | 20.1.1.2 | Unit 20.1.1.2 | unit | `UNIT-TASK-AR-587-002` | `TASK-AR-587` | completed | `agents/lead_engineer/tasks/units/TASK-AR-587/UNIT-TASK-AR-587-002.md` | UNIT-TASK-AR-587-002 - Deterministic role accent + console placement |
@@ -394,7 +394,7 @@ record_count: 370
 | 20.1.3 | Task 20.1.3 | task | `TASK-AR-589` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | done | `agents/lead_engineer/tasks/TASK-AR-589.md` | Self-host OFL fonts (Geist + Geist Mono) as font tokens and vendor the Lucide (ISC) i… |
 | 20.1.3.1 | Unit 20.1.3.1 | unit | `UNIT-TASK-AR-589-001` | `TASK-AR-589` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-589/UNIT-TASK-AR-589-001.md` | UNIT-TASK-AR-589-001 - Self-host Geist + Geist Mono as font tokens |
 | 20.1.3.2 | Unit 20.1.3.2 | unit | `UNIT-TASK-AR-589-002` | `TASK-AR-589` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-589/UNIT-TASK-AR-589-002.md` | UNIT-TASK-AR-589-002 - Vendor Lucide icon set + componentIcon helper |
-| 20.1.4 | Task 20.1.4 | task | `TASK-AR-590` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | planned | `agents/lead_engineer/tasks/TASK-AR-590.md` | Add recolorable empty/error/loading illustrations, accessible data-viz palette tokens… |
+| 20.1.4 | Task 20.1.4 | task | `TASK-AR-590` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | done | `agents/lead_engineer/tasks/TASK-AR-590.md` | Add recolorable empty/error/loading illustrations, accessible data-viz palette tokens… |
 | 20.1.4.1 | Unit 20.1.4.1 | unit | `UNIT-TASK-AR-590-001` | `TASK-AR-590` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-590/UNIT-TASK-AR-590-001.md` | UNIT-TASK-AR-590-001 - Recolorable unDraw state illustrations |
 | 20.1.4.2 | Unit 20.1.4.2 | unit | `UNIT-TASK-AR-590-002` | `TASK-AR-590` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-590/UNIT-TASK-AR-590-002.md` | UNIT-TASK-AR-590-002 - Data-viz palette tokens + componentSparkline |
 | 21 | Initiative 21 | initiative | `INIT-AR-VISUAL-SYSTEM-INTEGRATION` | - | active | `agents/project/initiatives/INIT-AR-VISUAL-SYSTEM-INTEGRATION.md` | Visual System Integration & Verification |

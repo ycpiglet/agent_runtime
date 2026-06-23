@@ -1281,13 +1281,16 @@ CSS = """/*
      Graph node/edge categorical colors (TASK-AR-588) consume these tokens.
      Sparkline: --dv-sparkline maps to --accent per theme for auto-theming.
      TASK-AR-592: dv-cat-3 light adjusted for WCAG AA compliance
-     (was 2.28:1, now 3.92:1 vs white panel; non-text graphical threshold). */
+     (was 2.28:1, now 3.66:1 vs white panel; non-text graphical threshold).
+     TASK-AR-590 (redo): dv-cat-2/5/6 light darkened to clear the WCAG 1.4.11
+     non-text 3:1 threshold vs the light --panel (were 2.86/2.94/2.82:1; now
+     3.49/4.40/4.20:1) so every categorical hue is verifiably >=3:1. */
   --dv-cat-1: #3e63dd;
-  --dv-cat-2: #12a594;
+  --dv-cat-2: #0d9488;
   --dv-cat-3: #b87000;
   --dv-cat-4: #e54d2e;
-  --dv-cat-5: #30a46c;
-  --dv-cat-6: #f76808;
+  --dv-cat-5: #218358;
+  --dv-cat-6: #cc4e00;
   --dv-cat-7: #6e56cf;
   --dv-cat-8: #d6409f;
   --dv-seq-1: #d0e2ff;
