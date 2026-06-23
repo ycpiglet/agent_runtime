@@ -2256,7 +2256,9 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     "inbox.group.gate_failures": {"ko": "게이트 실패", "en": "Gate failures"},
     "inbox.group.cost_anomalies": {"ko": "비용 이상", "en": "Cost anomalies"},
     "inbox.group.stale": {"ko": "오래됨", "en": "Stale"},
+    "inbox.group.unowned": {"ko": "담당 없음", "en": "Unowned"},
     "inbox.action.approve_gate": {"ko": "승인 / 게이트", "en": "approve / gate"},
+    "inbox.action.assign_owner": {"ko": "담당 지정", "en": "assign owner"},
     "inbox.action.resolve_blocker": {"ko": "차단 해소", "en": "resolve blocker"},
     "inbox.action.fix_gate": {"ko": "게이트 수정", "en": "fix gate"},
     "inbox.action.review_cost": {"ko": "비용 검토", "en": "review cost"},
@@ -2268,6 +2270,7 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     "inbox.why.actual": {"ko": "실제", "en": "actual"},
     "inbox.why.budget": {"ko": "예산", "en": "budget"},
     "inbox.why.no_update": {"ko": "업데이트 없음", "en": "no update"},
+    "inbox.why.ready_no_owner": {"ko": "준비됨, 담당 없음", "en": "ready, no owner"},
     "inbox.why.cross_host_claim_conflict": {
         "ko": "호스트 간 클레임 충돌",
         "en": "cross-host claim conflict",
