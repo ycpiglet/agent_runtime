@@ -209,10 +209,19 @@ def test_vendored_geist_font_files_are_present_and_licensed():
 
     assert "SIL OPEN FONT LICENSE" in license_text
     assert '"version": "1.7.2"' in package_text
-    # The Geist woff2 binaries are a documented drop-in: the public-sanitization
-    # policy forbids binary/undecodable files in the public core, so only the OFL
-    # records (LICENSE/package.json) are vendored here. The @font-face fallback
-    # stack (Geist -> Inter -> system) keeps the console rendering without them.
+
+    # TASK-AR-589: the self-hosted Geist woff2 binaries must be vendored on disk
+    # (this is what fixes the AR-588 404). Each referenced font file exists and
+    # carries the WOFF2 "wOF2" signature.
+    font_files = [
+        vendor / "fonts" / "geist-sans" / "Geist-Variable.woff2",
+        vendor / "fonts" / "geist-sans" / "Geist-Italic[wght].woff2",
+        vendor / "fonts" / "geist-mono" / "GeistMono-Variable.woff2",
+        vendor / "fonts" / "geist-mono" / "GeistMono-Italic[wght].woff2",
+    ]
+    for font_file in font_files:
+        assert font_file.is_file(), f"missing vendored font binary: {font_file}"
+        assert font_file.read_bytes()[:4] == b"wOF2", f"not a woff2 binary: {font_file}"
 
 
 def test_vendored_lucide_icon_files_are_present_and_licensed():

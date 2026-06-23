@@ -7,10 +7,10 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-06-21
+generated_at: 2026-06-23
 task_count: 257
-open_count: 4
-completed_count: 253
+open_count: 3
+completed_count: 254
 task_set_count: 2
 completed_task_set_count: 45
 ---
@@ -18,11 +18,11 @@ completed_task_set_count: 45
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `4` open or active tasks; `253` completed tasks are archived from this live board.
+- Summary: `3` open or active tasks; `254` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `4` / Ask `0` / Review `0` / Later `0` / Done `253`.
+- Status: Action `3` / Ask `0` / Review `0` / Later `0` / Done `254`.
 - Task Sets: `2` active workflows; `45` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -55,11 +55,10 @@ completed_task_set_count: 45
 ### Visual Asset Adoption (`TASKSET-AR-VISUAL-ASSET-ADOPTION`)
 
 - Flow: Implement the research-backed visual upgrade: DiceBear CC0 seeded agent avatars with role accents; Dagre+d3-force graph rendering for dependency/state-machine/live-agent views; Geist OFL fonts; Lucide icons; unDraw state illustrations; Radix+Carbon data-viz palette tokens and sparklines. Permissive-only, no-build, self-hosted, token-driven, landed experimental.
-- Progress: `2/4` done; `2` open or active.
+- Progress: `3/4` done; `1` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-589` | INIT-AR-VISUAL-ASSET-ADOPTION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-589/UNIT-TASK-AR-589-001.md | planned | Action | P2 | Medium | Medium | 5h/10000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Self-host OFL fonts (Geist + Geist Mono) as font tokens and vendor the Lucide (ISC) i… |
 | `TASK-AR-590` | INIT-AR-VISUAL-ASSET-ADOPTION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-590/UNIT-TASK-AR-590-001.md | planned | Action | P2 | Medium | Medium | 6h/12000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Add recolorable empty/error/loading illustrations, accessible data-viz palette tokens… |
 
 ## Archived Task Sets
@@ -117,9 +116,9 @@ completed_task_set_count: 45
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `4` open across `2` task sets (see Action Board above).
+- Active: `3` open across `2` task sets (see Action Board above).
 - Archived task sets: `45` (see Archived Task Sets above).
-- Archived task files: `253` — see `ARCHIVE-INDEX.md`.
+- Archived task files: `254` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

@@ -1956,16 +1956,24 @@ def test_ui_console_typography_and_icon_css_uses_design_tokens(tmp_path):
 
 
 def test_ui_console_serves_self_hosted_geist_font_assets(tmp_path):
-    # Geist woff2 binaries are a documented drop-in (public-sanitization policy
-    # forbids binaries in the public core). The server must handle a request for
-    # the absent font path gracefully (e.g. 404) rather than raising/500.
-    response = ui_console.build_response(
+    # TASK-AR-589: the Geist woff2 binaries are vendored and self-hosted. Every
+    # /vendor/geist path referenced by the @font-face CSS must resolve with a
+    # 200 + font/woff2 response (no CDN, and never the AR-588 404 watch item).
+    font_paths = [
         "/vendor/geist/1.7.2/fonts/geist-sans/Geist-Variable.woff2",
-        tmp_path,
-    )
-    assert response.status != 500
-    if response.status == 200:
-        assert response.content_type == "font/woff2"
+        "/vendor/geist/1.7.2/fonts/geist-sans/Geist-Italic[wght].woff2",
+        "/vendor/geist/1.7.2/fonts/geist-mono/GeistMono-Variable.woff2",
+        "/vendor/geist/1.7.2/fonts/geist-mono/GeistMono-Italic[wght].woff2",
+        # URL-encoded bracket forms as emitted in the @font-face src url().
+        "/vendor/geist/1.7.2/fonts/geist-sans/Geist-Italic%5Bwght%5D.woff2",
+        "/vendor/geist/1.7.2/fonts/geist-mono/GeistMono-Italic%5Bwght%5D.woff2",
+    ]
+    for path in font_paths:
+        response = ui_console.build_response(path, tmp_path)
+        assert response.status == 200, f"{path} should resolve (no 404): {response.status}"
+        assert response.content_type == "font/woff2", path
+        # Valid WOFF2 binaries start with the "wOF2" signature.
+        assert response.body[:4] == b"wOF2", f"{path} is not a valid woff2 binary"
 
 
 def test_ui_console_serves_vendored_lucide_icon_assets(tmp_path):

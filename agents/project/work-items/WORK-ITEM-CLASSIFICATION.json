@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-21T17:13:42+09:00",
+  "generated_at": "2026-06-23T16:38:21+09:00",
   "record_count": 370,
   "finding_count": 0,
   "findings": [],
@@ -3886,7 +3886,7 @@
       "title": "Self-host OFL fonts (Geist + Geist Mono) as font tokens and vendor the Lucide (ISC) i…",
       "path": "agents/lead_engineer/tasks/TASK-AR-589.md",
       "parent_id": "TASKSET-AR-VISUAL-ASSET-ADOPTION",
-      "status": "planned"
+      "status": "done"
     },
     {
       "key": "unit:UNIT-TASK-AR-589-001",

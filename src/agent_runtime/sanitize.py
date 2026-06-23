@@ -51,6 +51,8 @@ BINARY_SUFFIXES = {
     ".pdf",
     ".png",
     ".webp",
+    ".woff",
+    ".woff2",
     ".zip",
 }
 

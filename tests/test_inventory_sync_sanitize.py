@@ -1146,6 +1146,21 @@ def test_sanitize_blocks_forbidden_public_content(tmp_path):
     assert ("README.md", "absolute-local-path") in kinds
 
 
+def test_sanitize_allows_vendored_woff2_font_binaries(tmp_path):
+    # TASK-AR-589: self-hosted Geist woff2 binaries are a legitimate vendored
+    # asset (like .png/.ico). They must not be flagged "binary-or-undecodable",
+    # otherwise the sanitize gate forces the 404 workaround instead of fonts.
+    woff2 = tmp_path / "src" / "agent_runtime" / "vendor" / "geist" / "1.7.2" / "fonts" / "geist-sans" / "Geist-Variable.woff2"
+    woff2.parent.mkdir(parents=True, exist_ok=True)
+    woff2.write_bytes(b"wOF2" + b"\x00\x01\x02\x03not utf-8 decodable \xff\xfe")
+
+    findings = analyze_sanitize(tmp_path)
+    kinds = {(finding.path, finding.kind) for finding in findings}
+
+    rel = woff2.relative_to(tmp_path).as_posix()
+    assert (rel, "binary-or-undecodable") not in kinds
+
+
 def test_sanitize_blocks_forward_slash_windows_absolute_paths(tmp_path):
     local_path = "C:" + "/Us" + "ers/someone/private"
     _write(tmp_path / "README.md", f"Local path: {local_path}\n")

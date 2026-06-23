@@ -2,13 +2,13 @@
 type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
-generated_at: 2026-06-21
-archived_count: 253
+generated_at: 2026-06-23
+archived_count: 254
 ---
 
 # Archived Task Files
 
-- `253` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `254` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -264,5 +264,6 @@ archived_count: 253
 | `TASK-AR-584` | `ba370d39-693…` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | completed | 2026-06-18T18:43:04+09:00 | 2026-06-20T09:03:36+09:00 | 2026-06-20T09:11:47+09:00 | 2026-06-20T09:11:47+09:00 | Move view-specific JS renderers (data-heavy SVG layouts, calendar grids, office-map p… |
 | `TASK-AR-587` | `eea05fb1-653…` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | completed | 2026-06-20T01:04:15+09:00 | 2026-06-20T09:49:46+09:00 | 2026-06-20T10:11:00+09:00 | 2026-06-20T10:11:00+09:00 | Give every agent a deterministic visual identity: a seeded SVG avatar keyed to agent… |
 | `TASK-AR-588` | `51fd1ba5-1d9…` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | completed | 2026-06-20T01:04:15+09:00 | 2026-06-20T10:34:35+09:00 | 2026-06-20T11:50:50+09:00 | 2026-06-20T11:50:50+09:00 | Replace the hand-rolled graph layout with proper layout engines: Dagre (MIT, layered/… |
+| `TASK-AR-589` | `f283db13-7e6…` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | done | 2026-06-20T01:04:15+09:00 | 2026-06-23T00:00:00+09:00 | 2026-06-23T00:00:00+09:00 | 2026-06-23T00:00:00+09:00 | Self-host OFL fonts (Geist + Geist Mono) as font tokens and vendor the Lucide (ISC) i… |
 | `TASK-AR-591` | `a5da8af2-1b7…` | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | completed | 2026-06-20T05:18:36+09:00 | 2026-06-20T08:12:15+09:00 | 2026-06-20T08:25:00+09:00 | 2026-06-20T08:25:00+09:00 | Ensure the AR-587..590 visual components actually appear in the relevant live console… |
 | `TASK-AR-592` | `57b81740-6ec…` | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | completed | 2026-06-20T05:18:36+09:00 | 2026-06-20T07:13:38+09:00 | 2026-06-20T07:40:00+09:00 | 2026-06-20T07:40:00+09:00 | Ensure the new visual components meet WCAG AA (contrast, roles, labels, keyboard, red… |
