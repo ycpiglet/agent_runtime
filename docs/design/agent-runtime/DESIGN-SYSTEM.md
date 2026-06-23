@@ -190,6 +190,27 @@ RFC before implementation:
 Accepted RFCs update `DESIGN.md` for visual direction and this file for system
 rules. Workers then implement from the updated contract.
 
+### New design direction RFC lane
+
+This lane is the concrete, file-backed version of the path above. It exists so
+new visual language enters deliberately instead of leaking into page code.
+
+- **Reuse by default.** Build from existing `design_token`s, `ui_component`s,
+  and `pattern_component`s. Most UI work needs no RFC.
+- **File an RFC first for any visual-language change.** Before changing the
+  visual direction, adding new token semantics, or introducing new component or
+  pattern *visuals*, copy `docs/design/agent-runtime/RFC-TEMPLATE.md` to a new
+  RFC document and complete its sections: **Problem -> Proposed direction ->
+  Scope -> Risks -> Decision**. Do not invent new visual language directly in
+  page or asset code.
+- **Tier on entry.** New tokens/components/patterns from an accepted RFC enter
+  as `experimental` (behind the originating view, never load-bearing) and earn
+  `stable` only through the maturity-tier criteria above.
+- **Decision routing.** `lead-designer` owns the direction decision;
+  `design-system-steward` owns token and component/pattern promotion. Record the
+  outcome in the RFC `status` field and update `DESIGN.md` and this file when
+  accepted.
+
 ## Role routing
 
 | Role | Responsibility |
