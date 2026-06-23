@@ -149,6 +149,8 @@ jobs:
         run: python scripts/owner_governance_gate.py
       - name: Check design-system gate (UI tokens/assetization)
         run: python scripts/design_system_gate.py --all-ui
+      - name: Check console nav budget (<=7 core nav, RFC decision-first IA P2)
+        run: PYTHONPATH=src python scripts/nav_budget_gate.py
       - name: Run package tests
         run: PYTHONPATH=src python -m pytest tests -q
       - name: Run latency policy gate (warning-only) for queue metrics

@@ -1896,6 +1896,99 @@ def test_ui_console_sidebar_links_carry_hash_routes(tmp_path):
         assert f'data-route="{route}"' in html
 
 
+# --- Decision-first console IA: P1 cockpit-as-default + P2 nav budget --------
+# RFC reviews/RFC-2026-06-23-decision-first-console-IA.md (greenlit P1+P2).
+
+
+def test_ui_console_home_defaults_to_cockpit(tmp_path):
+    """P1: the home route opens on the decision cockpit, not the widget board.
+
+    The cockpit ("what needs you now") is the load-bearing first screen, so it is
+    rendered ahead of the work-surface views and explicitly flagged as the home
+    default; widgets collapse to opt-in so they do not bury the decision surface.
+    """
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+
+    # The cockpit hero is present and flagged as the default home surface.
+    assert 'data-home-default="cockpit"' in html
+    cockpit_at = html.index('id="cockpit"')
+    work_surface_at = html.index('class="work-surface"')
+    # The cockpit is rendered ahead of (above) the work-surface views.
+    assert cockpit_at < work_surface_at
+
+    # Default view is still the home board (no dead route), but the home widgets
+    # collapse to opt-in (a <details>, not an always-open <section>) so the
+    # cockpit is the hero rather than one widget among many.
+    home_widgets = re.search(r'<details id="home-widgets"[^>]*>', html)
+    assert home_widgets, "home widgets must be a collapsible opt-in disclosure"
+    assert "open" not in home_widgets.group(0), "home widgets must be collapsed by default"
+
+
+def test_ui_console_default_route_lands_on_cockpit_home(tmp_path):
+    """P1: with no hash the bootstrap lands on the cockpit-led home view."""
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+
+    # The default (no-hash) route resolves to the home board view, and the
+    # cockpit is loaded on boot so the decision surface is populated immediately.
+    assert 'viewForRoute(route) : "board"' in js or 'view || "board"' in js
+    assert "loadCockpit()" in js
+    # The home core link is the active landing tab.
+    assert 'data-view="board" data-route="home/board" aria-selected="true"' in html
+
+
+def test_ui_console_cockpit_renders_ranked_tier_order(tmp_path):
+    """P1: the cockpit wires the ranked attention inbox -- group cards render in
+    the Owner-chosen urgency tier order gate > blocked > stale > risk > unowned."""
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+
+    assert 'const INBOX_TIER_ORDER = ["gate", "blocked", "stale", "risk", "unowned"]' in js
+    assert "function inboxGroupRank" in js
+    # The cockpit sorts group cards by tier rank before rendering.
+    assert "Object.keys(groups).sort(" in js
+    assert "inboxGroupRank(a) - inboxGroupRank(b)" in js
+    # The new unowned tier is wired into the group catalog + localization.
+    assert 'unowned:           { labelKey: "inbox.group.unowned"' in js
+    assert '"assign owner": "inbox.action.assign_owner"' in js
+
+
+def test_ui_console_core_nav_within_budget(tmp_path):
+    """P2: core nav is frozen to a budget of <=7 top-level items.
+
+    Adding an 8th core link must require demoting another to More -- the budget
+    is enforced, not a snapshot.
+    """
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    core = re.search(r'<div class="sidebar-core"[^>]*>(.*?)</div>\s*<details', html, re.S)
+    assert core, "core navigation wrapper missing"
+    core_links = re.findall(r'<button class="sidebar-link[^"]*"[^>]*data-view="[^"]+"', core.group(1))
+    # core links + the single grouped "More" disclosure.
+    top_level = len(core_links) + 1
+    assert top_level <= 7, f"core nav budget exceeded: {top_level} > 7"
+
+
+def test_nav_budget_gate_passes_on_current_console(tmp_path):
+    """P2: the standalone nav-budget gate (CI check) passes at the current count
+    and fails the build if core nav ever regrows past the budget."""
+    import importlib.util
+
+    root = Path(__file__).resolve().parent.parent
+    spec = importlib.util.spec_from_file_location(
+        "nav_budget_gate", root / "scripts" / "nav_budget_gate.py"
+    )
+    gate = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gate)
+
+    assert gate.NAV_BUDGET == 7
+    result = gate.check()
+    assert result["status"] == "pass", result
+    assert result["top_level"] <= gate.NAV_BUDGET
+    # An over-budget nav is rejected.
+    over = gate.evaluate(top_level=8)
+    assert over["status"] == "fail"
+    assert gate.main([]) == 0
+
+
 def test_ui_console_hash_routing_wiring_present(tmp_path):
     js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
 
