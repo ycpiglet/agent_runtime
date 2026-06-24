@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-23T20:40:39+09:00
-record_count: 615
+generated_at: 2026-06-24T15:13:02+09:00
+record_count: 616
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `615` review and evidence records under `reviews/`.
+- Summary: indexed `616` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `615` files |
+| Reviews covered | pass | `616` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -38,6 +38,7 @@ record_count: 615
 | `reviews/A2A-TRACE-GATE-2026-06-10-task-ar-208-current.json` | `A2A-TRACE-GATE-2026-06-10-task-ar-208-current` | json | record | n/a | A2A-TRACE-GATE-2026-06-10-task-ar-208-current |
 | `reviews/A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final.json` | `A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final` | json | record | n/a | A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final |
 | `reviews/AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8.json` | `AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8` | json | record | n/a | AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8 |
+| `reviews/BETA-EXPLORATION-2026-06-24.md` | `BETA-EXPLORATION-2026-06-24` | beta-exploration-bug-catalog | complete | pass | UI Console Beta Exploration — Bug Catalog (2026-06-24) |
 | `reviews/CALL-2026-06-09-agent-runtime-task-ar-204-co-location-handoff-call.md` | `CALL-2026-06-09-agent-runtime-task-ar-204-co-location-handoff-call` | md | record | n/a | CALL: TASK-AR-204 Co-Location Handoff |
 | `reviews/CALL-2026-06-09-agent-runtime-task-ar-205-offline-eval-followup-call.md` | `CALL-2026-06-09-agent-runtime-task-ar-205-offline-eval-followup-call` | md | record | n/a | CALL: TASK-AR-205 Offline Eval Follow-up |
 | `reviews/CALL-2026-06-09-agent-runtime-task-ar-206-live-reviewer-followup-call.md` | `CALL-2026-06-09-agent-runtime-task-ar-206-live-reviewer-followup-call` | md | record | n/a | CALL: TASK-AR-206 Live Reviewer Follow-up |
