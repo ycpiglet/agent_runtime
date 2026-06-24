@@ -1050,7 +1050,10 @@ def test_ui_console_stream_and_replay_snapshot_routes(tmp_path):
 
     assert stream.status == 200
     assert stream.content_type == "text/event-stream; charset=utf-8"
-    assert stream.body.startswith(b"event: state\n")
+    # B-03: the frame leads with a long `retry:` directive (throttles EventSource
+    # reconnects) followed by the state event.
+    assert stream.body.startswith(b"retry: ")
+    assert b"event: state\n" in stream.body
     assert payload["resource"] == "replay_snapshot"
     assert payload["task_ids"] == ["TASK-UI-231"]
 
@@ -4408,3 +4411,109 @@ def test_ui_console_visual_system_mobile_css_consumes_tokens(tmp_path):
     graph_base = css.index(".dep-graph-svg {", css.index("Subtask + dependency model"))
     final_override = css.index("TASK-AR-592 final responsive override")
     assert final_override > graph_base
+
+
+# ---------------------------------------------------------------------------
+# Beta-exploration triage fixes (B-02, B-03, B-04). See
+# reviews/BETA-EXPLORATION-2026-06-24.md for the original repros.
+# ---------------------------------------------------------------------------
+
+
+def test_ui_console_inbox_degrades_gracefully_when_helper_absent(tmp_path, monkeypatch):
+    """B-02: /api/inbox must not 500 when scripts/attention_inbox.py is missing.
+
+    Repro: serve from a root whose scripts/ lacks attention_inbox.py. Before the
+    fix the route did sys.path.insert + ``import attention_inbox`` with no guard,
+    raising ModuleNotFoundError -> 500 / connection reset, breaking the cockpit
+    default home. Expected: a 200 with a valid, empty-but-shaped inbox payload and
+    a degraded flag, so renderCockpit() still shows the empty state.
+    """
+    import builtins
+    import sys as _sys
+
+    # Simulate the helper being genuinely unavailable, deterministically (a leaked
+    # scripts/ on sys.path from another test must not let the real module satisfy
+    # the import). Drop any cached module AND make a fresh import raise, exactly as
+    # a missing/renamed scripts/attention_inbox.py would.
+    monkeypatch.delitem(_sys.modules, "attention_inbox", raising=False)
+    _real_import = builtins.__import__
+
+    def _blocked_import(name, *args, **kwargs):
+        if name == "attention_inbox":
+            raise ModuleNotFoundError("No module named 'attention_inbox'")
+        return _real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", _blocked_import)
+
+    response = ui_console.build_response("/api/inbox", tmp_path)
+    payload = json.loads(response.body.decode("utf-8"))
+
+    assert response.status == 200
+    assert response.content_type == "application/json; charset=utf-8"
+    # Valid empty-but-shaped inbox: groups present (each an empty list), zeroed
+    # counts, total 0, and an explicit degraded flag the UI can surface.
+    assert payload["total"] == 0
+    assert isinstance(payload["groups"], dict)
+    assert all(payload["groups"][group] == [] for group in payload["groups"])
+    assert all(value == 0 for value in payload["counts"].values())
+    assert payload.get("degraded") is True
+
+
+def test_ui_console_stream_advises_long_retry_interval_to_avoid_storm(tmp_path):
+    """B-03: the single-shot SSE frame must carry a long ``retry:`` directive so a
+    browser EventSource does not reconnect-storm (default ~3s) and re-load the
+    heavy /api/state on every reconnect."""
+    response = ui_console.build_response("/api/stream", tmp_path)
+    body = response.body.decode("utf-8")
+
+    assert response.status == 200
+    assert response.content_type == "text/event-stream; charset=utf-8"
+    assert body.startswith("retry: ")
+    # Retry interval is well above the EventSource default (~3s); a minute+ keeps
+    # the reconnect cadence at/under the interval poll instead of storming.
+    first_line = body.splitlines()[0]
+    retry_ms = int(first_line.split(":", 1)[1].strip())
+    assert retry_ms >= 60000
+    # The state frame is still delivered.
+    assert "event: state\n" in body
+
+
+def test_ui_console_stream_client_dedupes_reconnect_state_reload(tmp_path):
+    """B-03 (client side): connectEventStream must not blindly re-render/re-fetch
+    on every reconnect. The reconnect path is debounced/deduped and a sane retry
+    is configured so a reconnect doesn't trigger a redundant heavy state load on
+    top of the interval poll."""
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    start = js.index("function connectEventStream(")
+    block = js[start:js.index("async function sendJson(", start)]
+    # A reconnect must not re-arm a second EventSource nor stack duplicate loads.
+    assert "eventStream.close" in block or "eventStreamReconnectGuard" in js or "lastStreamPayload" in js
+    # The client must dedupe identical successive snapshots so a reconnect that
+    # re-delivers the same state does NOT re-render / cascade additional loads.
+    assert "lastStreamPayload" in js
+
+
+def test_ui_console_handler_guard_returns_500_and_logs_traceback(tmp_path, monkeypatch, capsys):
+    """B-04: any unexpected handler exception must yield a clean 500 (never a
+    connection reset) AND log the full traceback to stderr (not silently
+    swallowed)."""
+    def _boom(*_args, **_kwargs):
+        raise RuntimeError("synthetic handler explosion")
+
+    # /api/state goes straight through ui_state.build_state; make it explode.
+    monkeypatch.setattr(ui_console.ui_state, "build_state", _boom)
+
+    response = ui_console.build_response("/api/state", tmp_path)
+    payload = json.loads(response.body.decode("utf-8"))
+
+    assert response.status == 500
+    assert response.content_type == "application/json; charset=utf-8"
+    assert payload["status"] == "error"
+    # Generic body: it must not leak the internal exception text to the client.
+    assert "synthetic handler explosion" not in response.body.decode("utf-8")
+
+    # The full traceback is logged to stderr so the failure is observable.
+    err = capsys.readouterr().err
+    assert "Traceback (most recent call last)" in err
+    assert "synthetic handler explosion" in err
+    assert "RuntimeError" in err
