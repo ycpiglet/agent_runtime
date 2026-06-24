@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-24T15:13:02+09:00
-record_count: 616
+generated_at: 2026-06-24T15:19:04+09:00
+record_count: 617
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `616` review and evidence records under `reviews/`.
+- Summary: indexed `617` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `616` files |
+| Reviews covered | pass | `617` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -206,6 +206,7 @@ record_count: 616
 | `reviews/RESEARCH-2026-06-15-agent-runtime-task-ar-223-hold-routing-and-overlay-edge-research.md` | `RESEARCH-2026-06-15-agent-runtime-task-ar-223-hold-routing-and-overlay-edge-research` | md | record | n/a | RESEARCH: TASK-AR-223 hold-routing + overlay-edge risk 반영 (2026-06-15) |
 | `reviews/RESEARCH-2026-06-18-design-system-governance-role-topology.md` | `RESEARCH-2026-06-18-design-system-governance-role-topology` | md | synthesized (partial verification) | n/a | RESEARCH — Design-System Governance & Design-Org Role Topology |
 | `reviews/RESEARCH-2026-06-20-ui-ux-visual-resources.md` | `RESEARCH-2026-06-20-ui-ux-visual-resources` | md | synthesized (Strands 1-2 verified; 3-5 from fetched sources + established knowledge) | n/a | RESEARCH — UI/UX Visual Resources (graph · character · fonts · icons · color) |
+| `reviews/RESEARCH-2026-06-24-oss-sprite-generators.md` | `RESEARCH-2026-06-24-oss-sprite-generators` | md | synthesized (license + animation facts fetched from primary sources this run; integration sketch is design, not yet spiked) | n/a | RESEARCH — OSS Sprite Generators for Cute, Role-Distinct, Animated Office-Map Characters |
 | `reviews/RETRO-2026-06-10-agent-runtime-governance-ops.md` | `RETRO-2026-06-10-agent-runtime-governance-ops` | retro | watch | watch | RETRO-2026-06-10 agent runtime governance ops |
 | `reviews/RETRO-2026-06-14-agent-runtime-process-integrity.md` | `RETRO-2026-06-14-agent-runtime-process-integrity` | retro | watch | watch | RETRO 2026-06-14 — Process Integrity (verification / merge / compound-review-retro) |
 | `reviews/RETRO-2026-06-14-knowledge-stack.md` | `RETRO-2026-06-14-knowledge-stack` | retro | watch | watch | RETRO 2026-06-14 — Agent knowledge stack (#1–#4) |
