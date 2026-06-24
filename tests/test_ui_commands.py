@@ -90,6 +90,32 @@ def test_submit_create_task_writes_task_and_accepted_command(tmp_path):
     assert [task["id"] for task in state["tasks"]] == ["TASK-UI-100"]
 
 
+def test_submit_create_task_rejects_overlong_title_without_crashing(tmp_path):
+    """A very long title must fail validation, not raise an OS error.
+
+    Regression for the beta-exploration finding: ``_create_task`` built the task
+    filename from ``_slug(title)`` with no length bound, so a multi-thousand-char
+    title produced a path over the OS limit and ``path.write_text`` raised an
+    uncaught ``OSError``/``FileNotFoundError``. That exception propagated out of
+    ``submit_command`` into the HTTP handler and reset the connection (no response
+    body). The command path must instead return a clean ``failed`` result.
+    """
+    _write_backlog_board_script(tmp_path)
+
+    result = ui_commands.submit_command(
+        tmp_path,
+        {"type": "task.create", "payload": {"title": "A" * 5000}},
+        now=NOW,
+        command_id="COMMAND-20260610-123000-overlong",
+    )
+
+    assert result["status"] == "failed"
+    assert any("title" in err.lower() for err in result.get("errors", []))
+    # Nothing should have been written to the tasks dir.
+    tasks_dir = tmp_path / "agents" / "lead_engineer" / "tasks"
+    assert not list(tasks_dir.glob("TASK-*.md")) if tasks_dir.exists() else True
+
+
 def test_submit_update_task_validates_and_preserves_source_truth(tmp_path):
     _write_backlog_board_script(tmp_path)
     _task(tmp_path, "TASK-UI-101")

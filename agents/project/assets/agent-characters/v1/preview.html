@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Agent Characters — Draft v1 Preview (Office Map)</title>
+<!--
+  STANDALONE preview for Owner review (RFC-2026-06-23 P1 spike, experimental tier).
+  - No build step, no runtime deps, no network. Open directly in a browser.
+  - Sprites are the original .svg files in this directory (token-driven; the
+    house palette is mirrored below so they render in-console colors here too).
+  - Demonstrates the hover -> info tooltip (role / status / current task), the
+    RPG-style metadata delivery the Owner asked for.
+  - NOT wired into the live console (ui_console_assets.py) yet — that comes
+    after the Owner picks a direction.
+-->
+<style>
+  /* House palette mirror (light) — from ui_console_assets.py :root.
+     The SVGs carry their own hex fallbacks; defining the vars here makes the
+     preview match how they'd look composed with the console CSS. */
+  :root {
+    color-scheme: light;
+    --canvas:#ffffff; --paper:#ffffff; --panel:#f7f7f5; --panel-strong:#f1f1ef;
+    --surface-raised:#ffffff; --ink:#37352f; --muted:#787774; --subtle:#9b9a97;
+    --on-accent:#ffffff; --line:#e9e9e7; --line-strong:#d3d1cb;
+    --primary:#2e6fdb; --success:#0f7b55; --warning:#cb7509; --danger:#e03e3e;
+    --teal:#0f7b55; --amber:#cb7509; --violet:#6a48c9; --info:#2e6fdb;
+    --primary-soft:rgba(46,111,219,0.10); --success-soft:rgba(15,123,85,0.12);
+    --warning-soft:rgba(203,117,9,0.14); --danger-soft:rgba(224,62,62,0.12);
+    --teal-soft:rgba(15,123,85,0.12); --violet-soft:rgba(106,72,201,0.14);
+    --raise-strong:rgba(55,53,47,0.05);
+    --office-room-bg:var(--panel); --office-room-line:var(--line-strong);
+    --radius:8px; --shadow:0 1px 2px rgba(15,15,15,0.06),0 8px 24px rgba(15,15,15,0.06);
+    --shadow-pop:0 10px 30px rgba(15,15,15,0.16);
+  }
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --canvas:#010102; --paper:#010102; --panel:#0f1011; --panel-strong:#15171a;
+    --surface-raised:#1b1d22; --ink:#f7f8f8; --muted:#a2a8b3; --subtle:#62666d;
+    --on-accent:#ffffff; --line:#23252a; --line-strong:#343844;
+    --primary:#5e6ad2; --success:#27a644; --warning:#d99a2b; --danger:#f04438;
+    --teal:#31d0aa; --amber:#d99a2b; --violet:#5e6ad2; --info:#57a0ff;
+    --primary-soft:rgba(94,106,210,0.12); --success-soft:rgba(39,166,68,0.18);
+    --warning-soft:rgba(217,154,43,0.18); --danger-soft:rgba(240,68,56,0.10);
+    --teal-soft:rgba(49,208,170,0.10); --violet-soft:rgba(94,106,210,0.18);
+    --raise-strong:rgba(255,255,255,0.032);
+    --shadow:0 18px 50px rgba(0,0,0,0.34); --shadow-pop:0 10px 30px rgba(0,0,0,0.5);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin:0; background:var(--canvas); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;
+  }
+  header {
+    padding:20px 24px; border-bottom:1px solid var(--line);
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    position:sticky; top:0; background:var(--canvas); z-index:5;
+  }
+  header h1 { font-size:18px; margin:0; }
+  header p { margin:2px 0 0; color:var(--muted); font-size:13px; }
+  .theme-toggle {
+    border:1px solid var(--line-strong); background:var(--panel);
+    color:var(--ink); border-radius:var(--radius); padding:8px 12px;
+    cursor:pointer; font-size:13px;
+  }
+  main { padding:24px; max-width:1180px; margin:0 auto; }
+  h2 { font-size:15px; margin:32px 0 4px; }
+  .sub { color:var(--muted); font-size:13px; margin:0 0 16px; }
+
+  /* ---- Office map ---- */
+  .office {
+    display:grid; grid-template-columns:repeat(4,1fr); gap:14px;
+    background:linear-gradient(180deg,var(--panel),var(--panel));
+    border:1px solid var(--line); border-radius:12px; padding:16px;
+  }
+  .room {
+    background:var(--office-room-bg); border:1px solid var(--office-room-line);
+    border-radius:10px; padding:10px 10px 14px; min-height:150px;
+    position:relative;
+  }
+  .room-name { font-size:12px; font-weight:600; color:var(--ink); }
+  .room-count { font-size:11px; color:var(--muted); margin-bottom:8px; }
+  .agents { display:flex; flex-wrap:wrap; gap:10px; }
+
+  .agent {
+    position:relative; width:64px; display:flex; flex-direction:column;
+    align-items:center; cursor:pointer; outline:none;
+    border-radius:8px; padding:4px 2px;
+  }
+  .agent:hover, .agent:focus-visible { background:var(--raise-strong); }
+  .agent .sprite-wrap {
+    width:56px; height:56px; display:flex; align-items:center; justify-content:center;
+    position:relative;
+  }
+  .agent img { width:56px; height:56px; image-rendering:pixelated; }
+  /* gentle idle bob — slow, calm (not a toy). respects reduced motion. */
+  @keyframes idle-bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-2px)} }
+  .agent img { animation:idle-bob 2.8s ease-in-out infinite; }
+  .agent:nth-child(2n) img { animation-delay:.6s; }
+  .agent:nth-child(3n) img { animation-delay:1.2s; }
+  @media (prefers-reduced-motion: reduce) { .agent img { animation:none; } }
+
+  .agent .callsign { font-size:10px; color:var(--muted); margin-top:2px; text-align:center;
+    max-width:62px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* status badge — glyph + shape, never color-only (AR-588 rule) */
+  .status-badge {
+    position:absolute; right:2px; bottom:2px; width:18px; height:18px;
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:11px; line-height:1; border:2px solid var(--paper);
+    background:var(--muted); color:#fff; font-weight:700;
+  }
+  .st-working  { background:var(--success); }
+  .st-reviewing{ background:var(--primary); }
+  .st-waiting  { background:var(--warning); }
+  .st-blocked  { background:var(--danger); }
+  .st-offline  { background:var(--muted); }
+
+  /* ---- RPG-style hover tooltip ---- */
+  .tooltip {
+    position:fixed; z-index:50; pointer-events:none; opacity:0;
+    transform:translateY(4px); transition:opacity .12s ease, transform .12s ease;
+    width:248px; background:var(--surface-raised); color:var(--ink);
+    border:1px solid var(--line-strong); border-radius:10px;
+    box-shadow:var(--shadow-pop); padding:0; overflow:hidden;
+  }
+  .tooltip.show { opacity:1; transform:translateY(0); }
+  .tt-head { display:flex; align-items:center; gap:10px; padding:10px 12px;
+    border-bottom:1px solid var(--line); }
+  .tt-head img { width:40px; height:40px; image-rendering:pixelated; }
+  .tt-id { font-size:13px; font-weight:700; }
+  .tt-role { font-size:11px; color:var(--muted); }
+  .tt-body { padding:10px 12px; font-size:12px; }
+  .tt-row { display:flex; gap:8px; margin-bottom:6px; }
+  .tt-row:last-child { margin-bottom:0; }
+  .tt-key { color:var(--muted); width:58px; flex:none; }
+  .tt-val { color:var(--ink); }
+  .tt-chip { display:inline-flex; align-items:center; gap:5px; font-weight:600;
+    padding:1px 8px; border-radius:999px; font-size:11px; }
+  .chip-working  { background:var(--success-soft); color:var(--success); }
+  .chip-reviewing{ background:var(--primary-soft); color:var(--primary); }
+  .chip-waiting  { background:var(--warning-soft); color:var(--warning); }
+  .chip-blocked  { background:var(--danger-soft);  color:var(--danger); }
+  .chip-offline  { background:var(--raise-strong); color:var(--muted); }
+
+  /* ---- Variants ---- */
+  .variants { display:flex; gap:24px; flex-wrap:wrap; }
+  .variant-card {
+    border:1px solid var(--line); border-radius:12px; padding:18px;
+    background:var(--panel); width:230px; text-align:center;
+  }
+  .variant-card img { width:96px; height:96px; image-rendering:pixelated; }
+  .variant-card h3 { font-size:13px; margin:10px 0 4px; }
+  .variant-card p { font-size:12px; color:var(--muted); margin:0; }
+  .rec { display:inline-block; margin-top:8px; font-size:11px; font-weight:700;
+    color:var(--success); background:var(--success-soft); padding:2px 8px; border-radius:999px; }
+
+  /* ---- Full role gallery ---- */
+  .gallery { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; }
+  .g-card { border:1px solid var(--line); border-radius:10px; padding:12px;
+    background:var(--panel); text-align:center; }
+  .g-card img { width:64px; height:64px; image-rendering:pixelated; }
+  .g-card .g-name { font-size:12px; font-weight:600; margin-top:6px; }
+  .g-card .g-prop { font-size:11px; color:var(--muted); margin-top:2px; }
+  footer { padding:24px; color:var(--subtle); font-size:12px; text-align:center;
+    border-top:1px solid var(--line); margin-top:32px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Agent Characters — Draft v1 <span style="color:var(--muted);font-weight:400">(show-and-iterate)</span></h1>
+    <p>Cute pixel-art office sprites · hover any agent for the RPG-style info tooltip · original art, token-driven, zero deps</p>
+  </div>
+  <button class="theme-toggle" id="themeBtn" type="button">Toggle dark</button>
+</header>
+
+<main>
+  <h2>1 · Sample Office Map (hover or focus an agent)</h2>
+  <p class="sub">Rooms are grouped by team. Each sprite shows a role via its prop/accessory + accent color; status is a glyph badge (never color-only). Hover or keyboard-focus to see role + status + current task.</p>
+  <div class="office" id="office"></div>
+
+  <h2>2 · Style variants (sample role: Lead Engineer)</h2>
+  <p class="sub">Same role, three treatments, so the Owner can choose a direction.</p>
+  <div class="variants" id="variants"></div>
+
+  <h2>3 · Full role gallery</h2>
+  <p class="sub">One original sprite per role. Prop + palette + silhouette make each role distinct.</p>
+  <div class="gallery" id="gallery"></div>
+</main>
+
+<div class="tooltip" id="tooltip" role="status" aria-live="polite"></div>
+
+<footer>
+  Draft v1 · RFC-2026-06-23 (experimental tier) · original SVG pixel art · not wired into the live console.
+</footer>
+
+<script>
+// ---- Status model (mirrors office-map: presence + action_label) ----
+const STATUS = {
+  working:   { glyph:"●", label:"Working" },      // ●
+  reviewing: { glyph:"◉", label:"Reviewing" },    // ◉
+  waiting:   { glyph:"∥", label:"Waiting" },      // ‖
+  blocked:   { glyph:"!", label:"Blocked" },      // !
+  offline:   { glyph:"·", label:"Offline" },      // ·
+};
+
+// ---- Role registry: id, display, prop, file ----
+// (mirrors generate_sprites.py ROLES; svg files live next to this html)
+const ROLES = [
+  ["managing-partner","Managing Partner","crown + gavel (director)"],
+  ["lead-engineer","Lead Engineer","hard-hat + wrench"],
+  ["worker-engineer","Worker Engineer","helmet + bolt"],
+  ["lead-designer","Lead Designer","beret + paintbrush"],
+  ["design-system-steward","Design System Steward","beret + ruler/grid"],
+  ["interface-designer","Interface Designer","beret + paintbrush"],
+  ["ux-evaluator","UX Evaluator","magnifier + check"],
+  ["research-agent","Research Agent","binoculars + flag"],
+  ["qa","QA","clipboard + green check"],
+  ["independent-auditor","Independent Auditor","monocle + clipboard"],
+  ["doc-steward","Doc Steward","book + quill"],
+  ["risk-controller","Risk Controller","shield"],
+  ["release-integrity","Release Integrity","rocket (CI/CD)"],
+  ["finance-controller","Finance Controller","coin + ledger"],
+  ["accounting-operator","Accounting Operator","coin + ledger"],
+  ["asset-steward","Asset Steward","coin (assets)"],
+  ["revenue-analyst","Revenue Analyst","coin (economics)"],
+  ["marketing-lead","Marketing Lead","megaphone"],
+  ["content-marketer","Content Marketer","megaphone"],
+  ["growth-analyst","Growth Analyst","megaphone"],
+  ["brand-steward","Brand Steward","megaphone"],
+  ["sales-lead","Sales Lead","deal tag"],
+  ["crm-operator","CRM Operator","deal tag"],
+  ["partnership-manager","Partnership Manager","deal tag"],
+  ["sales-ops","Sales Ops","deal tag"],
+  ["operations-lead","Operations Lead","headset"],
+  ["support-operator","Support Operator","headset"],
+  ["customer-success-steward","Customer Success","headset"],
+  ["process-steward","Process Steward","headset"],
+  ["strategy-lead","Strategy Lead","compass + map"],
+  ["planning-architect","Planning Architect","compass + map"],
+  ["business-analyst","Business Analyst","compass"],
+  ["portfolio-steward","Portfolio Steward","compass"],
+  ["council","Diversity Council","crown + group"],
+];
+const DISPLAY = Object.fromEntries(ROLES.map(r => [r[0], r[1]]));
+const PROP = Object.fromEntries(ROLES.map(r => [r[0], r[2]]));
+
+// ---- Sample office occupancy (demo data; mirrors the office-map payload shape:
+//      role / presence (status) / action_label (current task) / callsign / room) ----
+const ROOMS = [
+  { id:"eng", name:"Engineering", agents:[
+    { id:"LE-01", role:"lead-engineer", callsign:"Lead", status:"reviewing", task:"TASK-AR-592 plan review" },
+    { id:"WE-04", role:"worker-engineer", callsign:"Eng-4", status:"working", task:"office-map seam extraction" },
+    { id:"WE-07", role:"worker-engineer", callsign:"Eng-7", status:"blocked", task:"waiting on CI green" },
+  ]},
+  { id:"uiux", name:"UI / UX", agents:[
+    { id:"LD-01", role:"lead-designer", callsign:"Design", status:"working", task:"agent-character RFC P1" },
+    { id:"IF-02", role:"interface-designer", callsign:"UI-2", status:"working", task:"office-map sprite spike" },
+    { id:"UX-01", role:"ux-evaluator", callsign:"UX", status:"reviewing", task:"a11y contrast check" },
+    { id:"DS-01", role:"design-system-steward", callsign:"Tokens", status:"waiting", task:"token promotion review" },
+  ]},
+  { id:"quality", name:"Quality & Eval", agents:[
+    { id:"QA-01", role:"qa", callsign:"QA", status:"working", task:"E2E regression suite" },
+    { id:"AU-01", role:"independent-auditor", callsign:"Audit", status:"reviewing", task:"evidence sufficiency" },
+    { id:"DOC-01", role:"doc-steward", callsign:"Docs", status:"working", task:"doc health report" },
+  ]},
+  { id:"risk", name:"Risk & Release", agents:[
+    { id:"RC-01", role:"risk-controller", callsign:"Risk", status:"waiting", task:"safety gate review" },
+    { id:"RI-01", role:"release-integrity", callsign:"Release", status:"working", task:"auto-merge queue" },
+  ]},
+  { id:"org", name:"Org / Direction", agents:[
+    { id:"MP-01", role:"managing-partner", callsign:"Partner", status:"reviewing", task:"cost & scope decision" },
+    { id:"CN-01", role:"council", callsign:"Council", status:"waiting", task:"multi-perspective convene" },
+  ]},
+  { id:"research", name:"Research", agents:[
+    { id:"RS-01", role:"research-agent", callsign:"Scout", status:"working", task:"sprite UX references" },
+  ]},
+  { id:"planning", name:"Planning & Strategy", agents:[
+    { id:"ST-01", role:"strategy-lead", callsign:"Strategy", status:"working", task:"roadmap framing" },
+    { id:"PA-01", role:"planning-architect", callsign:"Plan", status:"waiting", task:"taskset design" },
+  ]},
+  { id:"growth", name:"Marketing & Growth", agents:[
+    { id:"MK-01", role:"marketing-lead", callsign:"Mktg", status:"offline", task:"(no active task)" },
+    { id:"BR-01", role:"brand-steward", callsign:"Brand", status:"waiting", task:"positioning note" },
+  ]},
+];
+
+function svgFor(role){ return role + ".svg"; }
+
+// ---- Render office map ----
+const office = document.getElementById("office");
+ROOMS.forEach(room => {
+  const cell = document.createElement("div");
+  cell.className = "room";
+  cell.innerHTML = `<div class="room-name">${room.name}</div>
+    <div class="room-count">${room.agents.length} here</div>`;
+  const wrap = document.createElement("div");
+  wrap.className = "agents";
+  room.agents.forEach(a => wrap.appendChild(makeAgent(a)));
+  cell.appendChild(wrap);
+  office.appendChild(cell);
+});
+
+function makeAgent(a){
+  const st = STATUS[a.status] || STATUS.offline;
+  const el = document.createElement("div");
+  el.className = "agent";
+  el.tabIndex = 0;
+  el.setAttribute("role","button");
+  el.setAttribute("aria-label",
+    `${a.id}, ${DISPLAY[a.role]}, ${st.label}, ${a.task}`);
+  el.innerHTML = `
+    <div class="sprite-wrap">
+      <img src="${svgFor(a.role)}" alt="${DISPLAY[a.role]} sprite" />
+      <div class="status-badge st-${a.status}" title="${st.label}">${st.glyph}</div>
+    </div>
+    <div class="callsign">${a.callsign}</div>`;
+  el.addEventListener("mouseenter", e => showTip(a, el));
+  el.addEventListener("mousemove", e => positionTip(e.clientX, e.clientY));
+  el.addEventListener("mouseleave", hideTip);
+  el.addEventListener("focus", () => { const r=el.getBoundingClientRect();
+    showTip(a, el); positionTip(r.right, r.top + r.height); });
+  el.addEventListener("blur", hideTip);
+  return el;
+}
+
+// ---- Tooltip ----
+const tip = document.getElementById("tooltip");
+function showTip(a, el){
+  const st = STATUS[a.status] || STATUS.offline;
+  tip.innerHTML = `
+    <div class="tt-head">
+      <img src="${svgFor(a.role)}" alt="" />
+      <div>
+        <div class="tt-id">${a.id}</div>
+        <div class="tt-role">${DISPLAY[a.role]}</div>
+      </div>
+    </div>
+    <div class="tt-body">
+      <div class="tt-row"><span class="tt-key">Status</span>
+        <span class="tt-val"><span class="tt-chip chip-${a.status}">${st.glyph} ${st.label}</span></span></div>
+      <div class="tt-row"><span class="tt-key">Task</span>
+        <span class="tt-val">${a.task}</span></div>
+      <div class="tt-row"><span class="tt-key">Prop</span>
+        <span class="tt-val">${PROP[a.role]}</span></div>
+    </div>`;
+  tip.classList.add("show");
+}
+function positionTip(x, y){
+  const pad = 14, w = 248;
+  let left = x + pad, top = y + pad;
+  if (left + w > window.innerWidth) left = x - w - pad;
+  if (top + tip.offsetHeight > window.innerHeight) top = y - tip.offsetHeight - pad;
+  tip.style.left = Math.max(8,left) + "px";
+  tip.style.top = Math.max(8,top) + "px";
+}
+function hideTip(){ tip.classList.remove("show"); }
+
+// ---- Variants ----
+const VARIANTS = [
+  ["_variant-A-chibi-lead-engineer.svg","Variant A — Standard chibi",
+    "Default look. Balanced head/body, clear prop. Reads at office-map size.", true],
+  ["_variant-B-bighead-lead-engineer.svg","Variant B — Bighead",
+    "Extra-cute 2-head proportion. Maximally 아기자기; prop slightly smaller.", false],
+  ["_variant-C-softline-lead-engineer.svg","Variant C — Soft pastel outline",
+    "Gentle 여성향 palette, soft outline instead of hard ink. Calmest.", false],
+];
+const variantsEl = document.getElementById("variants");
+VARIANTS.forEach(([file,title,desc,rec]) => {
+  const c = document.createElement("div");
+  c.className = "variant-card";
+  c.innerHTML = `<img src="${file}" alt="${title}" />
+    <h3>${title}</h3><p>${desc}</p>
+    ${rec ? '<span class="rec">★ recommended</span>' : ''}`;
+  variantsEl.appendChild(c);
+});
+
+// ---- Full gallery ----
+const gallery = document.getElementById("gallery");
+ROLES.forEach(([id, name, prop]) => {
+  const c = document.createElement("div");
+  c.className = "g-card";
+  c.innerHTML = `<img src="${id}.svg" alt="${name} sprite" />
+    <div class="g-name">${name}</div>
+    <div class="g-prop">${prop}</div>`;
+  gallery.appendChild(c);
+});
+
+// ---- Theme toggle ----
+const btn = document.getElementById("themeBtn");
+btn.addEventListener("click", () => {
+  const root = document.documentElement;
+  const dark = root.getAttribute("data-theme") === "dark";
+  root.setAttribute("data-theme", dark ? "light" : "dark");
+  btn.textContent = dark ? "Toggle dark" : "Toggle light";
+});
+</script>
+</body>
+</html>

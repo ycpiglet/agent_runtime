@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import sys
 import threading
+import traceback
 from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -99,9 +101,63 @@ def _json_response(payload: object, status: int = 200) -> ConsoleResponse:
     )
 
 
+# B-03: the SSE endpoint is single-shot (one frame then close). A browser
+# EventSource treats every close as an error and auto-reconnects at its default
+# (~3s), which would re-fetch the heavy /api/state on every reconnect on top of
+# the interval poll. Advertising a long client retry interval throttles that
+# reconnect cadence to at/under the interval poll so it can't storm.
+_SSE_RETRY_MS = 60000
+
+
 def _sse_response(payload: object) -> ConsoleResponse:
-    body = "event: state\n" + "data: " + json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n\n"
+    body = (
+        f"retry: {_SSE_RETRY_MS}\n"
+        + "event: state\n"
+        + "data: " + json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+        + "\n\n"
+    )
     return ConsoleResponse(200, "text/event-stream; charset=utf-8", _bytes(body))
+
+
+# The 6 attention-inbox groups (kept in sync with scripts/attention_inbox.py's
+# GROUP_ORDER) so the degraded fallback returns the same shape the cockpit expects.
+_INBOX_GROUP_ORDER = (
+    "approval_pending",
+    "blocked",
+    "gate_failures",
+    "runtime_anomalies",
+    "cost_anomalies",
+    "stale",
+)
+
+
+def _degraded_inbox_payload() -> dict[str, object]:
+    """A valid, empty-but-shaped inbox payload used when the inbox helper/data is
+    unavailable, so the cockpit default home renders an empty state instead of a
+    500. ``degraded`` lets the UI distinguish "nothing to do" from "couldn't load"."""
+    return {
+        "groups": {group: [] for group in _INBOX_GROUP_ORDER},
+        "counts": {group: 0 for group in _INBOX_GROUP_ORDER},
+        "total": 0,
+        "degraded": True,
+    }
+
+
+def _inbox_response(root_path: Path) -> ConsoleResponse:
+    """B-02: serve the attention inbox, degrading gracefully when the derived-read
+    helper (scripts/attention_inbox.py) is missing or unloadable. The cockpit is
+    the default home, so a missing/renamed script must NOT 500 the first screen —
+    it returns a valid empty/degraded payload (200) instead."""
+    scripts = str(root_path / "scripts")
+    if scripts not in sys.path:
+        sys.path.insert(0, scripts)
+    try:
+        import attention_inbox  # noqa: PLC0415 - lazy, optional sibling script
+        return _json_response(attention_inbox.inbox(root_path))
+    except Exception:  # noqa: BLE001 - any failure degrades to an empty inbox
+        # Log the cause to stderr (don't silently swallow) but keep the home alive.
+        traceback.print_exc()
+        return _json_response(_degraded_inbox_payload())
 
 
 def _decode_json_body(body: bytes | None) -> tuple[dict[str, object], list[str]]:
@@ -246,6 +302,22 @@ def _import_commit_response(root_path: Path, payload: dict[str, object]) -> Cons
 
 
 def build_response(path: str, root: Path | str, *, method: str = "GET", body: bytes | None = None) -> ConsoleResponse:
+    """B-04: top-level guard around request dispatch. Any unexpected handler
+    exception returns a clean 500 with a generic body (no internal detail leaked)
+    and logs the full traceback to stderr — hardening WITHOUT masking, so one bad
+    input can never silently reset the connection or dump a traceback to the
+    client. Root-cause input validation (e.g. B-01) remains the first line of
+    defense; this is defense-in-depth."""
+    try:
+        return _dispatch_response(path, root, method=method, body=body)
+    except Exception:  # noqa: BLE001 - last-resort guard for ANY handler failure
+        traceback.print_exc()
+        return _json_response(
+            {"status": "error", "error": "internal server error"}, status=500
+        )
+
+
+def _dispatch_response(path: str, root: Path | str, *, method: str = "GET", body: bytes | None = None) -> ConsoleResponse:
     root_path = Path(root)
     parsed_url = urlparse(path)
     request_path = parsed_url.path
@@ -299,12 +371,7 @@ def build_response(path: str, root: Path | str, *, method: str = "GET", body: by
     if request_path == "/api/inbox":
         # Decision-first cockpit data (TASK-AR-564): the 6-group attention inbox derived
         # from existing records by scripts/attention_inbox.py (stdlib, PyYAML-free).
-        import sys as _sys
-        _scripts = str(root_path / "scripts")
-        if _scripts not in _sys.path:
-            _sys.path.insert(0, _scripts)
-        import attention_inbox
-        return _json_response(attention_inbox.inbox(root_path))
+        return _inbox_response(root_path)
     if request_path == "/api/stream":
         return _sse_response(ui_state.build_state(root_path))
     # On-demand knowledge-graph view (TASK-AR / #5): a degree-ranked bounded subgraph,
