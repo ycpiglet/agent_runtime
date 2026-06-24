@@ -6936,6 +6936,11 @@ let runtimeState = null;
 let selectedTaskId = null;
 let pendingWrites = [];
 let eventStream = null;
+// B-03: dedupe successive SSE snapshots. The /api/stream endpoint is single-shot,
+// so EventSource reconnects and may re-deliver the SAME state; if it is identical
+// we skip the (heavy) re-render + downstream reconciliation so a reconnect can't
+// pile redundant work on top of the interval poll.
+let lastStreamPayload = null;
 let selectedWorkNodeId = null;
 let collapsedWorkNodes = new Set();
 let workFacetSelections = {};
@@ -7499,6 +7504,16 @@ function connectEventStream() {
   if (!window.EventSource || eventStream) return;
   eventStream = new EventSource("/api/stream");
   eventStream.addEventListener("state", (event) => {
+    // B-03: dedupe identical snapshots. /api/stream is single-shot, so a
+    // reconnect re-delivers a frame; if it matches the last one we skip the
+    // expensive re-render + live-map reconciliation entirely so reconnects can't
+    // storm the heavy state path on top of setInterval(loadState). The server
+    // also advertises a long `retry:` so the reconnect cadence stays sane.
+    if (event.data === lastStreamPayload) {
+      setText("poll-state", "live");
+      return;
+    }
+    lastStreamPayload = event.data;
     const previous = runtimeState;
     runtimeState = JSON.parse(event.data);
     renderAll();
