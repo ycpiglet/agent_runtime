@@ -195,6 +195,13 @@ MEETING_TYPES = ("meeting", "seminar", "review")
 MEETING_MIN_PARTICIPANTS = 2
 MEETING_DEFAULT_ROUNDS = 3
 MEETING_MAX_ROUNDS = 20
+# Upper bound on a task title. The created task filename is
+# ``TASK-UI-<14 digits>-<slug-of-title>.md``; without a bound a multi-thousand
+# character title produces a path over the OS limit and ``write_text`` raises an
+# uncaught OSError that resets the HTTP connection (beta-exploration finding).
+# 200 chars keeps the slug well within every common path limit (Windows MAX_PATH
+# is 260 incl. the absolute prefix) while staying generous for real titles.
+TASK_TITLE_MAX_LENGTH = 200
 TASK_BOARD_SYNC_COMMANDS = {"task.create", "task.update", "task.reorder", "task.archive", "task.move", "task.bulk_edit"}
 COMMAND_TYPES = (
     TASK_COMMAND_TYPES
@@ -555,6 +562,8 @@ def _create_task(root: Path, payload: dict[str, Any], now: str) -> dict[str, Any
     title = str(payload.get("title") or "").strip()
     if not title:
         errors.append("title is required")
+    elif len(title) > TASK_TITLE_MAX_LENGTH:
+        errors.append(f"title is too long: {len(title)} chars (max {TASK_TITLE_MAX_LENGTH})")
     if _task_path(root, task_id):
         errors.append(f"task already exists: {task_id}")
     if errors:
