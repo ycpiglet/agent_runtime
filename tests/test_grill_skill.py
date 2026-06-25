@@ -66,3 +66,20 @@ def test_skill_includes_artifact_templates():
     assert "BLUEPRINT.md" in text and "VISION-DIRECTION.md" in text
     assert "Revenue hypothesis" in text  # blueprint field
     assert "Methodology" in text  # vision-direction section
+
+
+def test_grill_v2_deepening():
+    text = SKILL.read_text(encoding="utf-8")
+    assert "version: 1.1.0" in text
+    # Phase A — adaptive follow-ups + domain frame
+    assert "Adaptive follow-ups" in text
+    assert "Domain frame" in text
+    # Phase B — rich canvas
+    assert "Unit economics" in text
+    assert "Assumptions register" in text
+    assert "Risk register" in text
+    # Phase C — scored decision matrix + recommendation
+    assert "Direction options (scored)" in text
+    assert "Recommended" in text
+    for criterion in ["Impact", "Ease", "Safety", "Fit", "Speed"]:
+        assert criterion in text, f"missing scoring criterion: {criterion}"
