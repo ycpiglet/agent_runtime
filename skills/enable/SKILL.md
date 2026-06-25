@@ -1,6 +1,6 @@
 ---
 name: enable
-version: 1.0.0
+version: 1.1.0
 description: Use when the Owner wants the enablement pack for a program they planned with /grill — reads a blueprint and drafts ENABLEMENT.md mapping the methodology to concrete agent_runtime assets (skills/scripts/docs) with references and next actions. Planning-strategy lane, slice D.
 triggers:
   - enable
@@ -44,7 +44,9 @@ first to create one).
 
 Before mapping, read the live asset surfaces so recommendations never go stale, and
 recommend ONLY assets found there:
-- `skills/` — available skills.
+- `skills/` — available skills. For an exact, machine-readable list (name +
+  description + triggers), run `python scripts/enablement_index.py --json` and map
+  from that, so recommendations are precise and never stale.
 - key `scripts/` — for example `scripts/work.py` (register work) and
   `scripts/taskset_dispatcher.py` (plan/start tasksets).
 - `agents/project/WORK-LANE-PLAYBOOKS.md` and
