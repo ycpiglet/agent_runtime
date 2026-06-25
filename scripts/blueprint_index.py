@@ -14,8 +14,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
+
+if sys.platform == "win32":  # let any non-ASCII print on a Windows console
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:  # noqa: BLE001
+        pass
 
 SCHEMA = "agent-runtime-blueprint-index/v1"
 BLUEPRINTS_REL = Path("agents/project/blueprints")
@@ -70,7 +77,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(index, ensure_ascii=False, indent=2))
     else:
         if not index["blueprints"]:
-            print("no blueprints yet — run /grill to create one")
+            print("no blueprints yet - run /grill to create one")
         for bp in index["blueprints"]:
             have = "".join(k[0].upper() if v else "-" for k, v in bp["artifacts"].items())
             print(f"{bp['slug']:30} [{have}]  next: {bp['next_step']}")
