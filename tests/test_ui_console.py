@@ -3502,20 +3502,44 @@ def test_ui_console_calendar_view_uses_state_pattern_helper(tmp_path):
     assert "i < 42" not in block
 
 
-# Golden output of the CURRENT office-map DOM placement, serialized from a DOM
-# stub: one room cell with grid placement + one agent sprite (fractional cell).
-_OFFICE_MAP_GOLDEN = (
+# Golden head of the office-map DOM placement (room cell + agent wrapper). The
+# chibi sprite SVG body is long + deterministic, so it is asserted separately by
+# structure (see test below) rather than inlined as a 9KB byte literal.
+_OFFICE_MAP_GOLDEN_HEAD = (
     "<div class=\"office-room token-blue\" data-roomId=\"dev\" "
     "style=\"grid-column:3 / span 4;grid-row:2 / span 3\">"
     "<div class=\"office-room-name\">Engineering</div>"
     "<div class=\"office-room-count\">1 here</div>"
     "<div class=\"office-agent presence-online\" data-agentId=\"a1\" data-entityId=\"a1\" "
-    "style=\"left:60%;top:40%\" title=\"Ada - reviewing\">"
-    "<div class=\"office-agent-glyph\">G</div>"
-    "<div class=\"office-agent-sprite\">AD</div>"
+    "style=\"left:60%;top:40%\" role=\"img\" aria-label=\"Ada . reviewing . TASK-AR-1\" "
+    "title=\"Ada . reviewing . TASK-AR-1\">"
+    "<div class=\"office-agent-glyph\" aria-hidden=\"true\">G</div>"
+    "<div class=\"office-agent-sprite\" aria-hidden=\"true\">"
+)
+# Tail after the inline sprite SVG: status word badge + callsign name label.
+_OFFICE_MAP_GOLDEN_TAIL = (
+    "</div>"
+    "<div class=\"office-agent-status\">reviewing</div>"
     "<div class=\"office-agent-name\">ada</div>"
     "</div></div>"
 )
+
+# escapeHtml shim so a lifted-out helper that calls it runs standalone in node
+# (in the full bundle escapeHtml is a top-level const; AR-587 patternAgentAvatar
+# relies on the same scoping).
+_ESCAPE_HTML_SHIM = (
+    "const escapeHtml=(s)=>String(s==null?\"\":s)"
+    ".replace(/[&<>\"']/g,c=>({\"&\":\"&amp;\",\"<\":\"&lt;\",\">\":\"&gt;\","
+    "'\\\"':\"&quot;\",\"'\":\"&#39;\"}[c]));\n"
+)
+
+
+def _chibi_deps(js: str) -> str:
+    """Lift the chibi sprite data block + helpers out of the bundle for node."""
+    data_start = js.index("var _CHIBI_BASE")
+    data_end = js.index("function _chibiFill")
+    data = js[data_start:data_end]
+    return _ESCAPE_HTML_SHIM + data + _extract_js_function(js, "_chibiFill") + _extract_js_function(js, "patternChibiSprite")
 
 # An empty-room render produces just the empty-state note.
 _OFFICE_MAP_EMPTY_GOLDEN = "<div class=\"office-map-empty\">No agents to place on the map</div>"
@@ -3524,9 +3548,10 @@ _OFFICE_DOM_STUB = """
 function makeDoc() {
   function el(tag) {
     return {
-      tagName: tag, className: "", textContent: "", title: "",
-      dataset: {}, style: {}, children: [],
+      tagName: tag, className: "", textContent: "", title: "", innerHTML: "",
+      dataset: {}, style: {}, children: [], attrs: {},
       appendChild(child) { this.children.push(child); return child; },
+      setAttribute(k, v) { this.attrs[k] = v; },
     };
   }
   return { createElement: el };
@@ -3537,9 +3562,10 @@ function serialize(node) {
   for (const key of Object.keys(node.dataset)) attrs.push(`data-${key}="${node.dataset[key]}"`);
   const styleKeys = Object.keys(node.style);
   if (styleKeys.length) attrs.push(`style="${styleKeys.map((k) => `${cssName(k)}:${node.style[k]}`).join(";")}"`);
+  for (const key of Object.keys(node.attrs || {})) attrs.push(`${key}="${node.attrs[key]}"`);
   if (node.title) attrs.push(`title="${node.title}"`);
   const open = `<${node.tagName}${attrs.length ? " " + attrs.join(" ") : ""}>`;
-  const inner = node.children.length ? node.children.map(serialize).join("") : node.textContent;
+  const inner = node.children.length ? node.children.map(serialize).join("") : (node.innerHTML || node.textContent);
   return `${open}${inner}</${node.tagName}>`;
 }
 function cssName(k) { return k.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase()); }
@@ -3556,16 +3582,30 @@ function makeGrid() {
 def test_ui_console_office_map_placement_is_byte_identical(tmp_path):
     # Characterization: run patternOfficeMapPlacement against a DOM stub and
     # assert the serialized cell/sprite tree matches CURRENT behavior exactly.
+    # The chibi sprite slot now carries an inline SVG (TASK-AR-592 v2); the head
+    # + tail of the tree are byte-checked and the sprite body verified to be the
+    # role's chibi SVG.
     js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
     helper = _extract_js_function(js, "patternOfficeMapPlacement")
-    script = helper + _OFFICE_DOM_STUB + """
+    script = _chibi_deps(js) + helper + _OFFICE_DOM_STUB + """
 const grid = makeGrid();
 const rooms = [{ id: "dev", name: "Engineering", token: "blue", occupant_count: 1, rect: { col: 2, row: 1, cols: 4, rows: 3 } }];
-const agents = [{ id: "a1", room_id: "dev", presence: "online", display_name: "Ada", action_label: "reviewing", glyph: "G", avatar: "AD", callsign: "ada", cell: { fx: 0.6, fy: 0.4 } }];
+const agents = [{ id: "a1", room_id: "dev", role: "lead-engineer", presence: "online", display_name: "Ada", action_label: "reviewing", current_task_id: "TASK-AR-1", glyph: "G", avatar: "AD", callsign: "ada", cell: { fx: 0.6, fy: 0.4 } }];
 patternOfficeMapPlacement(grid, rooms, agents, { document: makeDoc() });
 process.stdout.write(grid.children.map(serialize).join(""));
 """
-    assert _run_node(tmp_path, script) == _OFFICE_MAP_GOLDEN
+    out = _run_node(tmp_path, script)
+    assert out.startswith(_OFFICE_MAP_GOLDEN_HEAD), out[:400]
+    assert out.endswith(_OFFICE_MAP_GOLDEN_TAIL), out[-400:]
+    # The sprite slot holds the lead-engineer chibi: an inline pixel SVG with the
+    # role accent + the hard-hat prop color, and no raw hex (token-driven).
+    sprite = out[len(_OFFICE_MAP_GOLDEN_HEAD):-len(_OFFICE_MAP_GOLDEN_TAIL)]
+    assert sprite.startswith("<svg")
+    assert 'class="agent-character chibi-sprite"' in sprite
+    assert "var(--primary)" in sprite  # lead-engineer accent
+    assert "var(--office-skin)" in sprite  # filled face (Owner: no empty center)
+    assert "var(--warning)" in sprite  # hard-hat prop
+    assert not re.search(r"#[0-9a-fA-F]{3,8}", sprite)  # token-driven, no raw hex
 
 
 def test_ui_console_office_map_placement_empty_is_reusable_standalone(tmp_path):
@@ -3573,12 +3613,75 @@ def test_ui_console_office_map_placement_empty_is_reusable_standalone(tmp_path):
     # renders the empty-state note when given no rooms (reuse seam).
     js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
     helper = _extract_js_function(js, "patternOfficeMapPlacement")
-    script = helper + _OFFICE_DOM_STUB + """
+    script = _chibi_deps(js) + helper + _OFFICE_DOM_STUB + """
 const grid = makeGrid();
 patternOfficeMapPlacement(grid, [], [], { document: makeDoc() });
 process.stdout.write(grid.children.map(serialize).join(""));
 """
     assert _run_node(tmp_path, script) == _OFFICE_MAP_EMPTY_GOLDEN
+
+
+def test_ui_console_office_map_sprite_is_chibi_and_tooltip_is_rich(tmp_path):
+    # The agent slot renders the chibi pixel SVG (not the 2-letter text avatar),
+    # and the hover tooltip is the richer "who . status . task" form, mirrored
+    # into aria-label (a11y, not color-only).
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    helper = _extract_js_function(js, "patternOfficeMapPlacement")
+    script = _chibi_deps(js) + helper + _OFFICE_DOM_STUB + """
+const grid = makeGrid();
+const rooms = [{ id: "dev", name: "Engineering", token: "blue", occupant_count: 1, rect: { col: 0, row: 0, cols: 2, rows: 2 } }];
+const agents = [{ id: "a1", room_id: "dev", role: "qa", presence: "working", display_name: "Quinn", action_label: "verifying", current_task_id: "TASK-AR-9", glyph: "G", avatar: "QU", callsign: "quinn", cell: { fx: 0.5, fy: 0.5 } }];
+patternOfficeMapPlacement(grid, rooms, agents, { document: makeDoc() });
+process.stdout.write(grid.children.map(serialize).join(""));
+"""
+    out = _run_node(tmp_path, script)
+    # Chibi sprite present (inline SVG), not the old text avatar.
+    assert "chibi-sprite" in out
+    assert "<svg" in out
+    assert "var(--success)" in out  # qa accent
+    # Rich tooltip with role . status . task -- in BOTH title and aria-label.
+    assert 'title="Quinn . verifying . TASK-AR-9"' in out
+    assert 'aria-label="Quinn . verifying . TASK-AR-9"' in out
+    # Status conveyed as a word badge, not color-only.
+    assert '<div class="office-agent-status">verifying</div>' in out
+    # The wrapper is an accessible image group.
+    assert 'role="img"' in out
+
+
+def test_ui_console_office_map_tooltip_omits_task_when_absent(tmp_path):
+    # No current task -> tooltip is just "who . status" (no trailing separator).
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    helper = _extract_js_function(js, "patternOfficeMapPlacement")
+    script = _chibi_deps(js) + helper + _OFFICE_DOM_STUB + """
+const grid = makeGrid();
+const rooms = [{ id: "dev", name: "E", token: "blue", occupant_count: 1, rect: { col: 0, row: 0, cols: 2, rows: 2 } }];
+const agents = [{ id: "a1", room_id: "dev", role: "qa", presence: "online", display_name: "Quinn", action_label: "idle", glyph: "G", avatar: "QU", callsign: "quinn", cell: { fx: 0.5, fy: 0.5 } }];
+patternOfficeMapPlacement(grid, rooms, agents, { document: makeDoc() });
+process.stdout.write(grid.children.map(serialize).join(""));
+"""
+    out = _run_node(tmp_path, script)
+    assert 'title="Quinn . idle"' in out
+    assert "TASK-" not in out
+
+
+def test_ui_console_office_map_idle_animation_respects_reduced_motion(tmp_path):
+    # An idle bob animation exists for the sprite AND is disabled under
+    # prefers-reduced-motion (accessibility / vestibular safety).
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    assert "@keyframes office-idle-bob" in css
+    assert "animation: office-idle-bob" in css
+    # At least one prefers-reduced-motion media query must turn the sprite
+    # animation off (there may be others for the live-map; scan all of them).
+    blocks = re.findall(
+        r"@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{(.*?)\}\s*\}",
+        css,
+        re.S,
+    )
+    assert blocks, "expected a prefers-reduced-motion media query"
+    sprite_off = [
+        b for b in blocks if ".office-agent-sprite" in b and "animation: none" in b
+    ]
+    assert sprite_off, "office-agent-sprite animation not disabled under reduced motion"
 
 
 def test_ui_console_office_map_view_uses_placement_pattern_helper(tmp_path):

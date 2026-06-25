@@ -1086,6 +1086,264 @@ function patternCalendarState(anchor, mode, options = {}) {
   return { days, periodLabel };
 }
 
+/* ===== Pattern component: chibi office sprite (TASK-AR-592 v2) ==============
+ * patternChibiSprite(role, options) returns an inline pixel-art SVG of a cute
+ * chibi agent character for the Office Map. It is the JS twin of the
+ * deterministic Python generator at
+ * agents/project/assets/agent-characters/v2/generate_sprites.py -- the BASE +
+ * prop grids and role->accent map are identical, so the served sprite matches
+ * the on-disk catalog SVG cell-for-cell (verified by tests).
+ *
+ * Design: ORIGINAL pixel art (no third-party IP). Owner feedback drove a v2
+ * with a FILLED, colourful center -- warm skin fills the whole face, a hair cap
+ * crowns it, cheeks + eye-shine keep it cute, and a solid accent torso with a
+ * collar/button detail fills the chest. Role is conveyed by accent color + a
+ * readable prop, never hue alone (a glyph/label badge carries status). Every
+ * fill is a house CSS var (no raw hex) so the design-system gate stays green
+ * and dark-theme tokens cascade. ASCII-only output (cp949 node-check guard).
+ * Maturity tier: experimental.
+ */
+var _CHIBI_BASE = [
+  "................",
+  ".....KKKKKK.....",
+  "....KJJJJJJK....",
+  "...KJJJJJJJJK...",
+  "...KJHHHHHHJK...",
+  "...KHHHHHHHHK...",
+  "...KHFHHHHFHK...",
+  "...KHFWHHWFHK...",
+  "...KHBHHHHBHK...",
+  "...KHHHBBHHHK...",
+  "...KhHHHHHHhK...",
+  "....KHHHHHHK....",
+  "....KaAAAAaK....",
+  "...KAAWAAWAAK...",
+  "...KAAAAAAAAK...",
+  "....KK....KK...."
+];
+
+/* Per-role prop overlays (cute, readable accessory in the side gutters). */
+var _CHIBI_PROPS = {
+  hardhat: [
+    "................", ".....MMMMMM.....", "....MMMMMMMM....", "...M........M...",
+    "................", "................", "................", "................",
+    "................", "................", "................", ".............MM.",
+    ".............MM.", "............MM..", "................", "................"
+  ],
+  worker: [
+    "................", ".....MMMMMM.....", "....MMMMMMMM....", "................",
+    "................", "................", "................", "................",
+    "................", "................", "................", ".............M..",
+    "............MMM.", ".............M..", "................", "................"
+  ],
+  crown: [
+    "....M.M.M.M.....", "....MMMMMMM.....", "................", "................",
+    "................", "................", "................", "................",
+    "................", "................", "................", ".............KK.",
+    ".............MM.", "............MM..", "................", "................"
+  ],
+  beret: [
+    "................", "....aaaaaA.....", "...aaaaaaaa....", "................",
+    "................", "................", "................", "................",
+    "................", "................", "................", ".............MK.",
+    ".............MK.", "............RR..", "................", "................"
+  ],
+  ruler: [
+    "................", "....aaaaaa.....", "...aaaaaaaa....", "................",
+    "................", "................", "................", "................",
+    "................", "................", "............MMMM", "............M.M.",
+    "................", "................", "................", "................"
+  ],
+  magnifier: [
+    "................", "................", "................", "................",
+    "................", "................", "................", "................",
+    "................", "............KKK.", "...........KaaK.", "...........KaaK.",
+    "............KKK.", ".............KK.", "................", "................"
+  ],
+  qa: [
+    "................", "................", "................", "................",
+    "................", "................", "................", "................",
+    "............KKKK", "............KGGK", "............KGGK", "............KKKK",
+    "................", "................", "................", "................"
+  ],
+  monocle: [
+    "................", "................", "................", "................",
+    "................", "................", "................", "...........KK...",
+    "...........KK...", "............KKKK", "............KRRK", "............KRRK",
+    "............KKKK", "................", "................", "................"
+  ],
+  shield: [
+    "................", "................", "................", "................",
+    "................", "................", "................", "................",
+    "............RRR.", "............RRR.", "............RRR.", ".............R..",
+    "................", "................", "................", "................"
+  ],
+  rocket: [
+    "................", "................", "................", "................",
+    "................", "................", "................", "............G...",
+    "...........GGG..", "...........GGG..", "...........G.G..", "...........M.M..",
+    "................", "................", "................", "................"
+  ],
+  book: [
+    "................", "................", "................", "................",
+    "................", "................", "................", "................",
+    "............KKKK", "............KWWK", "............KWWK", "............KKKK",
+    ".............K..", "................", "................", "................"
+  ],
+  binoculars: [
+    "................", "................", "................", "................",
+    "...KK....KK.....", "...KaK..KaK.....", "...KK....KK.....", "................",
+    "................", "................", "............MM..", "............M.A.",
+    "............MAA.", "............M...", "................", "................"
+  ],
+  coin: [
+    "................", "................", "................", "................",
+    "................", "................", "................", "................",
+    "............MM..", "...........MaaM.", "...........MaAM.", "............MM..",
+    "................", "................", "................", "................"
+  ],
+  megaphone: [
+    "................", "................", "................", "................",
+    "................", "................", "................", "................",
+    "............A...", "...........AKK..", "..........AaaKK.", "..........AaaKK.",
+    "...........AKK..", "............A...", "................", "................"
+  ],
+  tag: [
+    "................", "................", "................", "................",
+    "................", "................", "................", "................",
+    "............GG..", "...........GAAG.", "...........GAAG.", "............GG..",
+    ".............G..", "................", "................", "................"
+  ],
+  headset: [
+    "................", "....aKKKKKKa....", "...aK......Ka...", "...K........K...",
+    "................", "................", "................", "................",
+    "................", "................", "............KK..", "............KaK.",
+    "................", "................", "................", "................"
+  ],
+  compass: [
+    "................", "................", "................", "................",
+    "................", "................", "................", "................",
+    "............KKKK", "............KaAK", "............KAaK", "............KKKK",
+    "................", "................", "................", "................"
+  ],
+  council: [
+    "....M.M.M.M.....", "....MMMMMMM.....", "................", "................",
+    "................", "................", "................", "................",
+    "................", "............A.A.", "...........A.A.A", "............A.A.",
+    "................", "................", "................", "................"
+  ]
+};
+
+/* role -> { accent token key, prop key }. Mirrors the Python ROLES registry. */
+var _CHIBI_ROLE = {
+  "managing-partner":        { accent: "violet",  prop: "crown" },
+  "lead-engineer":           { accent: "primary", prop: "hardhat" },
+  "worker-engineer":         { accent: "primary", prop: "worker" },
+  "lead-designer":           { accent: "teal",    prop: "beret" },
+  "design-system-steward":   { accent: "teal",    prop: "ruler" },
+  "interface-designer":      { accent: "teal",    prop: "beret" },
+  "ux-evaluator":            { accent: "teal",    prop: "magnifier" },
+  "research-agent":          { accent: "amber",   prop: "binoculars" },
+  "qa":                      { accent: "success", prop: "qa" },
+  "independent-auditor":     { accent: "danger",  prop: "monocle" },
+  "doc-steward":             { accent: "muted",   prop: "book" },
+  "risk-controller":         { accent: "danger",  prop: "shield" },
+  "release-integrity":       { accent: "success", prop: "rocket" },
+  "finance-controller":      { accent: "warning", prop: "coin" },
+  "accounting-operator":     { accent: "warning", prop: "coin" },
+  "asset-steward":           { accent: "warning", prop: "coin" },
+  "revenue-analyst":         { accent: "warning", prop: "coin" },
+  "marketing-lead":          { accent: "amber",   prop: "megaphone" },
+  "content-marketer":        { accent: "amber",   prop: "megaphone" },
+  "growth-analyst":          { accent: "amber",   prop: "megaphone" },
+  "brand-steward":           { accent: "violet",  prop: "megaphone" },
+  "sales-lead":              { accent: "success", prop: "tag" },
+  "crm-operator":            { accent: "success", prop: "tag" },
+  "partnership-manager":     { accent: "success", prop: "tag" },
+  "sales-ops":               { accent: "success", prop: "tag" },
+  "operations-lead":         { accent: "primary", prop: "headset" },
+  "support-operator":        { accent: "primary", prop: "headset" },
+  "customer-success-steward":{ accent: "teal",    prop: "headset" },
+  "process-steward":         { accent: "muted",   prop: "headset" },
+  "strategy-lead":           { accent: "violet",  prop: "compass" },
+  "planning-architect":      { accent: "violet",  prop: "compass" },
+  "business-analyst":        { accent: "primary", prop: "compass" },
+  "portfolio-steward":       { accent: "violet",  prop: "compass" },
+  "council":                 { accent: "violet",  prop: "council" }
+};
+
+/* accent key -> [solid token, soft token]. Mirrors the Python ACCENTS map. */
+var _CHIBI_ACCENT_TOKENS = {
+  primary: ["var(--primary)", "var(--primary-soft)"],
+  violet:  ["var(--violet)",  "var(--violet-soft)"],
+  teal:    ["var(--teal)",    "var(--teal-soft)"],
+  success: ["var(--success)", "var(--success-soft)"],
+  danger:  ["var(--danger)",  "var(--danger-soft)"],
+  warning: ["var(--warning)", "var(--warning-soft)"],
+  amber:   ["var(--amber)",   "var(--warning-soft)"],
+  muted:   ["var(--muted)",   "var(--raise-strong)"]
+};
+
+/* Static (accent-independent) art key -> CSS var fill. */
+var _CHIBI_STATIC_FILL = {
+  K: "var(--ink)",
+  H: "var(--office-skin)",
+  h: "var(--office-skin-shade)",
+  J: "var(--office-hair)",
+  W: "var(--paper)",
+  F: "var(--ink)",
+  B: "var(--danger)",
+  M: "var(--warning)",
+  G: "var(--success)",
+  R: "var(--danger)"
+};
+
+function _chibiFill(ch, accentKey) {
+  var tokens = _CHIBI_ACCENT_TOKENS[accentKey] || _CHIBI_ACCENT_TOKENS.primary;
+  if (ch === "A") return tokens[0];
+  if (ch === "a") return tokens[1];
+  return _CHIBI_STATIC_FILL[ch] || "var(--ink)";
+}
+
+function patternChibiSprite(role, options) {
+  var opts = options || {};
+  var size = opts.size || 26;
+  var label = opts.label || "";
+  var spec = _CHIBI_ROLE[role] || { accent: "primary", prop: "" };
+  var prop = _CHIBI_PROPS[spec.prop];
+  // Compose base + prop overlay (capital/prop cell wins over base).
+  var grid = [];
+  for (var r = 0; r < _CHIBI_BASE.length; r++) {
+    var baseRow = _CHIBI_BASE[r];
+    var propRow = prop ? prop[r] : null;
+    var row = "";
+    for (var c = 0; c < baseRow.length; c++) {
+      var pch = propRow ? propRow.charAt(c) : ".";
+      row += (pch !== ".") ? pch : baseRow.charAt(c);
+    }
+    grid.push(row);
+  }
+  var px = 8; // 16 art cells * 8 = 128 viewBox units (scaled to `size`).
+  var view = 128;
+  var rects = "";
+  for (var gr = 0; gr < grid.length; gr++) {
+    var line = grid[gr];
+    for (var gc = 0; gc < line.length; gc++) {
+      var ch = line.charAt(gc);
+      if (ch === ".") continue;
+      rects += '<rect x="' + (gc * px) + '" y="' + (gr * px) +
+        '" width="' + px + '" height="' + px + '" fill="' + _chibiFill(ch, spec.accent) + '"/>';
+    }
+  }
+  var titleEl = label ? ("<title>" + escapeHtml(label) + "</title>") : "";
+  return (
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + view + ' ' + view + '"' +
+    ' width="' + size + '" height="' + size + '" class="agent-character chibi-sprite"' +
+    ' shape-rendering="crispEdges" role="img" aria-hidden="true" focusable="false">' +
+    titleEl + rects + '</svg>'
+  );
+}
+
 /* ===== Pattern component: office-map DOM placement (TASK-AR-364/592) ========
  * patternOfficeMapPlacement(grid, rooms, agents, options) owns the one-off DOM
  * positioning for the 2D office map: it clears `grid`, then for each room
@@ -1148,18 +1406,47 @@ function patternOfficeMapPlacement(grid, rooms, agents, options = {}) {
       sprite.dataset.entityId = agent.id || "";
       sprite.style.left = `${Math.round((pos.fx || 0.5) * 100)}%`;
       sprite.style.top = `${Math.max(26, Math.round((pos.fy || 0.5) * 100))}%`;
-      sprite.title = `${agent.display_name || agent.role} - ${agent.action_label || agent.action || ""}`;
+      // Richer hover tooltip: role . status . current task. Server-provided
+      // copy only (display_name/action_label come from the i18n-aware payload),
+      // so this stays ASCII-only in the bundle. The native title doubles as the
+      // accessible fallback.
+      const who = agent.display_name || agent.role || "";
+      const status = agent.action_label || agent.action || "";
+      const taskBit = agent.current_task_id ? ` . ${agent.current_task_id}` : "";
+      const tip = `${who} . ${status}${taskBit}`;
+      sprite.title = tip;
+      // Group ARIA label so a screen reader reads one coherent agent summary
+      // rather than three disconnected nodes (a11y: not color-only).
+      sprite.setAttribute("role", "img");
+      sprite.setAttribute("aria-label", tip);
 
       const glyph = doc.createElement("div");
       glyph.className = "office-agent-glyph";
       // Emoji glyph is server-provided data (never an ASCII-breaking literal).
       glyph.textContent = agent.glyph || "";
+      glyph.setAttribute("aria-hidden", "true");
       sprite.appendChild(glyph);
 
+      // Chibi pixel sprite (TASK-AR-592 v2): colourful, role-distinct character.
+      // Falls back to the server-provided 2-letter avatar text if the role has
+      // no sprite mapping, so the slot is never empty.
       const avatar = doc.createElement("div");
       avatar.className = "office-agent-sprite";
-      avatar.textContent = agent.avatar || "AG";
+      const svg = patternChibiSprite(agent.role || "", { size: 30, label: who });
+      if (svg) {
+        avatar.innerHTML = svg;
+      } else {
+        avatar.textContent = agent.avatar || "AG";
+      }
+      avatar.setAttribute("aria-hidden", "true");
       sprite.appendChild(avatar);
+
+      // Status badge = glyph + word label (NOT color-only). The presence ring
+      // (CSS) is a secondary cue; the text label is the primary, accessible one.
+      const badge = doc.createElement("div");
+      badge.className = "office-agent-status";
+      badge.textContent = status;
+      sprite.appendChild(badge);
 
       const label = doc.createElement("div");
       label.className = "office-agent-name";
