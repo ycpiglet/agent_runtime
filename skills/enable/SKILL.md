@@ -60,6 +60,8 @@ each methodology step/lane in `VISION-DIRECTION.md`, recommend the concrete asse
 to use, the reference to read, and the next action. Finish by pointing the Owner at
 the Getting-started sequence. Do NOT run any recommended command.
 
+**Next:** suggest `/scaffold <slug>` to draft starter asset files for the program.
+
 ### ENABLEMENT.md template
 
 ```

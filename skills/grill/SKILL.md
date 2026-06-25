@@ -89,6 +89,8 @@ Write `VISION-DIRECTION.md` using the template below:
 Finish by pointing the Owner to the relevant lane playbooks and the suggested first
 taskset.
 
+**Next:** suggest `/enable <slug>` to build the enablement pack from this blueprint.
+
 ## Templates
 
 ### INTAKE.md
