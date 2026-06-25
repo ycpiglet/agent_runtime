@@ -49,6 +49,8 @@ from the blueprint (headings filled from context; unknown specifics `OWNER-DECID
 Finish by telling the Owner these are drafts to adapt and — when ready — to promote
 into the real `skills/` / `docs/` themselves. This skill never promotes them.
 
+**Status:** run `python scripts/blueprint_index.py` to see all blueprints and each one's next step.
+
 ## Templates
 
 ### README.md
