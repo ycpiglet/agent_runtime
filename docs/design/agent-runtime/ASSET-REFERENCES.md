@@ -41,11 +41,25 @@ generator, and design decision at any time without re-running the research.
 | **PerfectPixel (WellDoneCode)** | Chrome extension: design-mockup overlay for pixel-perfect QA | https://www.welldonecode.com/perfectpixel/ | Free proprietary extension | **QA tool, NOT an asset source** - verify implemented Office Map matches the design mockup | Clarified 2026-06-24 |
 | **awesome-cc0** | Curated CC0 asset index | https://github.com/madjin/awesome-cc0 | (Index) | Finding more CC0 sources | - |
 
+## Chosen + shipped (2026-06-25)
+
+Owner approved **Path A (CC0 / original-generated chibi)**, tone **chibi**,
+placement **Office Map**, standard tier. v2 sprites are now **live** in the
+console Office Map. v2 honoured the Owner note on v1 ("more colour, fill the
+empty centre") with a warm skin-filled face, hair cap, and a solid colour torso.
+All art is **original** (repo license); no external/CC0 asset is bundled, so no
+new attribution entry is required.
+
 ## In-repo references
 
 These live on `origin/main`; paths verified to exist (2026-06-24).
 
-- **Draft sprites + interactive preview:**
+- **Shipped sprites (v2, live on Office Map):**
+  `agents/project/assets/agent-characters/v2/`
+  - 34 role SVGs (colourful, filled-centre chibi), `preview.html`, `README.md`,
+    `generate_sprites.py` (deterministic; JS twin = `patternChibiSprite` in
+    `src/agent_runtime/ui_design_assets.py`, parity-tested).
+- **Draft sprites + interactive preview (v1, PRESERVED):**
   `agents/project/assets/agent-characters/v1/`
   - 34 role SVGs, 3 chibi / bighead / softline variant SVGs
     (`_variant-A-chibi-lead-engineer.svg`, `_variant-B-bighead-lead-engineer.svg`,

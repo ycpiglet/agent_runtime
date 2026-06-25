@@ -1268,6 +1268,12 @@ CSS = """/*
   --office-room-bg: var(--panel);
   --office-room-line: var(--line-strong);
   --office-avatar-bg: var(--panel-strong);
+  /* Chibi office sprites (TASK-AR-592 v2). Warm skin + hair tones fill the
+     character center (Owner: v1 felt empty); they are intentional art colors,
+     not reused semantic tokens, and only appear inside the pixel sprite. */
+  --office-skin: #f6caa6;
+  --office-skin-shade: #e0a878;
+  --office-hair: #5b4636;
   /* Growth system (TASK-AR-363). XP/level surfaces reuse existing semantic
      tokens; --growth-xp drives the level bar, --growth-stage the stage chip. */
   --growth-xp: var(--success);
@@ -1393,6 +1399,10 @@ CSS = """/*
   --office-room-bg: var(--panel);
   --office-room-line: var(--line-strong);
   --office-avatar-bg: var(--panel-strong);
+  /* Chibi office sprites (TASK-AR-592 v2): slightly deeper skin/hair for dark theme. */
+  --office-skin: #e7b489;
+  --office-skin-shade: #c9925f;
+  --office-hair: #4a3a2c;
   /* Growth system (TASK-AR-363) */
   --growth-xp: var(--success);
   --growth-stage: var(--primary-hover);
@@ -2859,8 +2869,8 @@ textarea:focus {
   line-height: 1;
 }
 .office-agent-sprite {
-  width: 26px;
-  height: 26px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -2870,12 +2880,46 @@ textarea:focus {
   color: var(--ink);
   background: var(--office-avatar-bg);
   border: 2px solid var(--office-room-line);
+  /* Chibi sprite idle bob (TASK-AR-592 v2): a gentle, self-hosted CSS-only
+     animation. Disabled under prefers-reduced-motion (see media query below). */
+  animation: office-idle-bob 3.2s ease-in-out infinite;
 }
+.office-agent-sprite .chibi-sprite {
+  width: 30px;
+  height: 30px;
+  display: block;
+  image-rendering: pixelated;
+}
+/* Presence ring is a SECONDARY cue; the word badge below is the primary,
+   non-color-only status signal (a11y / AR-588). */
 .office-agent.presence-working .office-agent-sprite { border-color: var(--blue); }
 .office-agent.presence-reviewing .office-agent-sprite { border-color: var(--amber); }
 .office-agent.presence-in_meeting .office-agent-sprite { border-color: var(--violet); }
 .office-agent.presence-online .office-agent-sprite { border-color: var(--success); }
-.office-agent.presence-offline .office-agent-sprite { border-color: var(--office-room-line); opacity: 0.7; }
+.office-agent.presence-offline .office-agent-sprite { border-color: var(--office-room-line); opacity: 0.7; animation: none; }
+/* Stagger the idle bob by presence so a roomful of agents doesn't bob in
+   lockstep (subtle liveliness, still calm). */
+.office-agent.presence-working .office-agent-sprite { animation-delay: 0s; }
+.office-agent.presence-reviewing .office-agent-sprite { animation-delay: 0.5s; }
+.office-agent.presence-in_meeting .office-agent-sprite { animation-delay: 1s; }
+.office-agent.presence-online .office-agent-sprite { animation-delay: 1.5s; }
+@keyframes office-idle-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .office-agent-sprite { animation: none; }
+}
+.office-agent-status {
+  font-size: var(--font-size-ui-9);
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  max-width: 46px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .office-agent-name {
   font-size: var(--font-size-ui-9);
   color: var(--muted);

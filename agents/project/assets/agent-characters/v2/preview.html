@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Agent Characters -- v2 Preview (Office Map)</title>
+<!-- STANDALONE preview (no build, no network). Open directly. Sprites are
+     the original .svg files in this directory; the house palette is mirrored
+     below so they render in in-console colors. -->
+<style>
+  :root {
+    color-scheme: light;
+    --canvas:#ffffff; --paper:#ffffff; --panel:#f7f7f5; --panel-strong:#f1f1ef;
+    --ink:#37352f; --muted:#787774; --subtle:#9b9a97; --line:#e9e9e7;
+    --line-strong:#d3d1cb; --primary:#2e6fdb; --success:#0f7b55;
+    --warning:#cb7509; --danger:#e03e3e; --teal:#0f7b55; --amber:#cb7509;
+    --violet:#6a48c9; --primary-soft:#dde8f9; --success-soft:#d6ece4;
+    --warning-soft:#f4e3cc; --danger-soft:#f8dcdc; --teal-soft:#d6ece4;
+    --violet-soft:#e6def5; --raise-strong:#ededeb;
+    --office-room-bg:var(--panel); --office-room-line:var(--line-strong);
+    --office-skin:#f6caa6; --office-skin-shade:#e0a878; --office-hair:#5b4636;
+  }
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --canvas:#010102; --paper:#010102; --panel:#0f1011; --panel-strong:#15171a;
+    --ink:#f7f8f8; --muted:#a2a8b3; --subtle:#62666d; --line:#23252a;
+    --line-strong:#343844; --primary:#5e6ad2; --success:#27a644;
+    --warning:#d99a2b; --danger:#f04438; --teal:#31d0aa; --amber:#d99a2b;
+    --violet:#5e6ad2; --primary-soft:#1f2433; --success-soft:#163322;
+    --warning-soft:#3a2c12; --danger-soft:#3a1614; --teal-soft:#10332b;
+    --violet-soft:#1f2433; --raise-strong:#1a1c20;
+    --office-skin:#e7b489; --office-skin-shade:#c9925f; --office-hair:#4a3a2c;
+  }
+  *{box-sizing:border-box;} body{margin:0;background:var(--canvas);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.5;}
+  header{padding:20px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  header h1{font-size:18px;margin:0;} header p{margin:4px 0 0;color:var(--muted);font-size:13px;}
+  button{font:inherit;padding:6px 12px;border:1px solid var(--line-strong);border-radius:8px;background:var(--panel);color:var(--ink);cursor:pointer;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;padding:24px;}
+  .card{margin:0;display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-top:3px solid var(--line-strong);border-radius:12px;background:var(--office-room-bg);}
+  .card.token-violet{border-top-color:var(--violet);} .card.token-primary{border-top-color:var(--primary);}
+  .card.token-teal{border-top-color:var(--teal);} .card.token-success{border-top-color:var(--success);}
+  .card.token-warning{border-top-color:var(--warning);} .card.token-amber{border-top-color:var(--amber);}
+  .card.token-danger{border-top-color:var(--danger);} .card.token-muted{border-top-color:var(--muted);}
+  .card:hover,.card:focus{outline:2px solid var(--primary);outline-offset:2px;}
+  .sprite{flex:0 0 auto;width:56px;height:56px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--panel-strong);border:2px solid var(--line-strong);}
+  .sprite img{image-rendering:pixelated;width:48px;height:48px;}
+  figcaption{display:flex;flex-direction:column;min-width:0;} figcaption b{font-size:13px;}
+  .prop{font-size:11px;color:var(--muted);} .status{font-size:11px;color:var(--success);font-weight:600;}
+</style>
+</head>
+<body>
+<header><div><h1>Agent Characters -- v2 (chibi, filled + colourful)</h1><p>Original pixel art. Hover/focus a card for the role . status . task tooltip.</p></div><button onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">Toggle theme</button></header>
+<main class="grid">
+<figure class="card token-violet" tabindex="0" title="Managing Partner . online . TASK-AR-592"><div class="sprite"><img src="managing-partner.svg" alt="Managing Partner chibi sprite" width="56" height="56"></div><figcaption><b>Managing Partner</b><span class="prop">crown + gavel (director / final call)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-primary" tabindex="0" title="Lead Engineer . online . TASK-AR-592"><div class="sprite"><img src="lead-engineer.svg" alt="Lead Engineer chibi sprite" width="56" height="56"></div><figcaption><b>Lead Engineer</b><span class="prop">hard-hat + wrench (builds &amp; plans)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-primary" tabindex="0" title="Worker Engineer . online . TASK-AR-592"><div class="sprite"><img src="worker-engineer.svg" alt="Worker Engineer chibi sprite" width="56" height="56"></div><figcaption><b>Worker Engineer</b><span class="prop">helmet + bolt (implements)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-teal" tabindex="0" title="Lead Designer . online . TASK-AR-592"><div class="sprite"><img src="lead-designer.svg" alt="Lead Designer chibi sprite" width="56" height="56"></div><figcaption><b>Lead Designer</b><span class="prop">beret + paintbrush (design direction)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-teal" tabindex="0" title="Design System Steward . online . TASK-AR-592"><div class="sprite"><img src="design-system-steward.svg" alt="Design System Steward chibi sprite" width="56" height="56"></div><figcaption><b>Design System Steward</b><span class="prop">beret + ruler/grid (tokens &amp; patterns)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-teal" tabindex="0" title="Interface Designer . online . TASK-AR-592"><div class="sprite"><img src="interface-designer.svg" alt="Interface Designer chibi sprite" width="56" height="56"></div><figcaption><b>Interface Designer</b><span class="prop">beret + paintbrush (screens)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-teal" tabindex="0" title="UX Evaluator . online . TASK-AR-592"><div class="sprite"><img src="ux-evaluator.svg" alt="UX Evaluator chibi sprite" width="56" height="56"></div><figcaption><b>UX Evaluator</b><span class="prop">magnifier + check (usability)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-amber" tabindex="0" title="Research Agent . online . TASK-AR-592"><div class="sprite"><img src="research-agent.svg" alt="Research Agent chibi sprite" width="56" height="56"></div><figcaption><b>Research Agent</b><span class="prop">binoculars + flag (scout / evidence)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-success" tabindex="0" title="QA . online . TASK-AR-592"><div class="sprite"><img src="qa.svg" alt="QA chibi sprite" width="56" height="56"></div><figcaption><b>QA</b><span class="prop">clipboard + green check (verifies)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-danger" tabindex="0" title="Independent Auditor . online . TASK-AR-592"><div class="sprite"><img src="independent-auditor.svg" alt="Independent Auditor chibi sprite" width="56" height="56"></div><figcaption><b>Independent Auditor</b><span class="prop">monocle + clipboard (evidence audit)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-muted" tabindex="0" title="Doc Steward . online . TASK-AR-592"><div class="sprite"><img src="doc-steward.svg" alt="Doc Steward chibi sprite" width="56" height="56"></div><figcaption><b>Doc Steward</b><span class="prop">book + quill (doc integrity)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-danger" tabindex="0" title="Risk Controller . online . TASK-AR-592"><div class="sprite"><img src="risk-controller.svg" alt="Risk Controller chibi sprite" width="56" height="56"></div><figcaption><b>Risk Controller</b><span class="prop">shield (risk &amp; safety)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-success" tabindex="0" title="Release Integrity . online . TASK-AR-592"><div class="sprite"><img src="release-integrity.svg" alt="Release Integrity chibi sprite" width="56" height="56"></div><figcaption><b>Release Integrity</b><span class="prop">rocket (CI/CD &amp; release)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-warning" tabindex="0" title="Finance Controller . online . TASK-AR-592"><div class="sprite"><img src="finance-controller.svg" alt="Finance Controller chibi sprite" width="56" height="56"></div><figcaption><b>Finance Controller</b><span class="prop">coin + ledger (finance)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-warning" tabindex="0" title="Accounting Operator . online . TASK-AR-592"><div class="sprite"><img src="accounting-operator.svg" alt="Accounting Operator chibi sprite" width="56" height="56"></div><figcaption><b>Accounting Operator</b><span class="prop">coin + ledger (bookkeeping)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-warning" tabindex="0" title="Asset Steward . online . TASK-AR-592"><div class="sprite"><img src="asset-steward.svg" alt="Asset Steward chibi sprite" width="56" height="56"></div><figcaption><b>Asset Steward</b><span class="prop">coin (assets &amp; licenses)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-warning" tabindex="0" title="Revenue Analyst . online . TASK-AR-592"><div class="sprite"><img src="revenue-analyst.svg" alt="Revenue Analyst chibi sprite" width="56" height="56"></div><figcaption><b>Revenue Analyst</b><span class="prop">coin (unit economics)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-amber" tabindex="0" title="Marketing Lead . online . TASK-AR-592"><div class="sprite"><img src="marketing-lead.svg" alt="Marketing Lead chibi sprite" width="56" height="56"></div><figcaption><b>Marketing Lead</b><span class="prop">megaphone (go-to-market)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-amber" tabindex="0" title="Content Marketer . online . TASK-AR-592"><div class="sprite"><img src="content-marketer.svg" alt="Content Marketer chibi sprite" width="56" height="56"></div><figcaption><b>Content Marketer</b><span class="prop">megaphone (content / SEO)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-amber" tabindex="0" title="Growth Analyst . online . TASK-AR-592"><div class="sprite"><img src="growth-analyst.svg" alt="Growth Analyst chibi sprite" width="56" height="56"></div><figcaption><b>Growth Analyst</b><span class="prop">megaphone (channels)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-violet" tabindex="0" title="Brand Steward . online . TASK-AR-592"><div class="sprite"><img src="brand-steward.svg" alt="Brand Steward chibi sprite" width="56" height="56"></div><figcaption><b>Brand Steward</b><span class="prop">megaphone (positioning)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-success" tabindex="0" title="Sales Lead . online . TASK-AR-592"><div class="sprite"><img src="sales-lead.svg" alt="Sales Lead chibi sprite" width="56" height="56"></div><figcaption><b>Sales Lead</b><span class="prop">deal tag (bizdev)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-success" tabindex="0" title="CRM Operator . online . TASK-AR-592"><div class="sprite"><img src="crm-operator.svg" alt="CRM Operator chibi sprite" width="56" height="56"></div><figcaption><b>CRM Operator</b><span class="prop">deal tag (pipeline)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-success" tabindex="0" title="Partnership Manager . online . TASK-AR-592"><div class="sprite"><img src="partnership-manager.svg" alt="Partnership Manager chibi sprite" width="56" height="56"></div><figcaption><b>Partnership Manager</b><span class="prop">deal tag (partnerships)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-success" tabindex="0" title="Sales Ops . online . TASK-AR-592"><div class="sprite"><img src="sales-ops.svg" alt="Sales Ops chibi sprite" width="56" height="56"></div><figcaption><b>Sales Ops</b><span class="prop">deal tag (deal desk)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-primary" tabindex="0" title="Operations Lead . online . TASK-AR-592"><div class="sprite"><img src="operations-lead.svg" alt="Operations Lead chibi sprite" width="56" height="56"></div><figcaption><b>Operations Lead</b><span class="prop">headset (operations)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-primary" tabindex="0" title="Support Operator . online . TASK-AR-592"><div class="sprite"><img src="support-operator.svg" alt="Support Operator chibi sprite" width="56" height="56"></div><figcaption><b>Support Operator</b><span class="prop">headset (helpdesk)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-teal" tabindex="0" title="Customer Success . online . TASK-AR-592"><div class="sprite"><img src="customer-success-steward.svg" alt="Customer Success chibi sprite" width="56" height="56"></div><figcaption><b>Customer Success</b><span class="prop">headset (onboarding)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-muted" tabindex="0" title="Process Steward . online . TASK-AR-592"><div class="sprite"><img src="process-steward.svg" alt="Process Steward chibi sprite" width="56" height="56"></div><figcaption><b>Process Steward</b><span class="prop">headset (runbooks)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-violet" tabindex="0" title="Strategy Lead . online . TASK-AR-592"><div class="sprite"><img src="strategy-lead.svg" alt="Strategy Lead chibi sprite" width="56" height="56"></div><figcaption><b>Strategy Lead</b><span class="prop">compass + map (strategy)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-violet" tabindex="0" title="Planning Architect . online . TASK-AR-592"><div class="sprite"><img src="planning-architect.svg" alt="Planning Architect chibi sprite" width="56" height="56"></div><figcaption><b>Planning Architect</b><span class="prop">compass + map (task design)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-primary" tabindex="0" title="Business Analyst . online . TASK-AR-592"><div class="sprite"><img src="business-analyst.svg" alt="Business Analyst chibi sprite" width="56" height="56"></div><figcaption><b>Business Analyst</b><span class="prop">compass (requirements)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-violet" tabindex="0" title="Portfolio Steward . online . TASK-AR-592"><div class="sprite"><img src="portfolio-steward.svg" alt="Portfolio Steward chibi sprite" width="56" height="56"></div><figcaption><b>Portfolio Steward</b><span class="prop">compass (roadmap)</span><span class="status">online</span></figcaption></figure>
+<figure class="card token-violet" tabindex="0" title="Diversity Council . online . TASK-AR-592"><div class="sprite"><img src="council.svg" alt="Diversity Council chibi sprite" width="56" height="56"></div><figcaption><b>Diversity Council</b><span class="prop">crown + group (multi-perspective)</span><span class="status">online</span></figcaption></figure>
+</main>
+</body>
+</html>
