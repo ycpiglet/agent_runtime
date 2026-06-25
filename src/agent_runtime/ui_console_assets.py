@@ -2884,7 +2884,8 @@ textarea:focus {
      animation. Disabled under prefers-reduced-motion (see media query below). */
   animation: office-idle-bob 3.2s ease-in-out infinite;
 }
-.office-agent-sprite .chibi-sprite {
+.office-agent-sprite .chibi-sprite,
+.office-agent-sprite .v3-sprite {
   width: 30px;
   height: 30px;
   display: block;
