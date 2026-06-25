@@ -3119,3 +3119,184 @@ def test_build_state_wires_workspaces_widgets_i18n(tmp_path):
     for resource in ("workspaces", "widgets", "i18n"):
         payload = ui_state.build_resource(tmp_path, resource, now="2026-06-14T00:00:00+09:00")
         assert payload["resource"] == resource
+
+
+# --- Org Chart view (console org-chart, ORG-MODEL.yml) ----------------------
+# A copy of the real ORG-MODEL structure (director top, 11 teams, all roles)
+# written into the tmp root so the org chart is testable in isolation. The
+# build also runs against the *real* repo model below for the full acceptance
+# (director -> 11 teams -> every role).
+_ORG_MODEL_FIXTURE = "\n".join(
+    [
+        "schema: agent-runtime-org-model/v1",
+        "tiers: [director, planner, worker, reviewer]",
+        "teams:",
+        "  - id: org",
+        "    display_name: Org",
+        "  - id: engineering",
+        "    display_name: Engineering",
+        "  - id: ui-ux",
+        "    display_name: UI/UX",
+        "roles:",
+        "  - id: managing-partner",
+        "    tier: director",
+        "    team: org",
+        "  - id: lead-engineer",
+        "    tier: planner",
+        "    team: engineering",
+        "  - id: worker-engineer",
+        "    tier: worker",
+        "    team: engineering",
+        "  - id: lead-designer",
+        "    tier: planner",
+        "    team: ui-ux",
+        "  - id: design-system-steward",
+        "    tier: reviewer",
+        "    team: ui-ux",
+        "  - id: interface-designer",
+        "    tier: worker",
+        "    team: ui-ux",
+        "",
+    ]
+)
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _write_org_model(root: Path, text: str = _ORG_MODEL_FIXTURE) -> None:
+    _write(root / "agents" / "project" / "ORG-MODEL.yml", text)
+
+
+def test_build_org_chart_director_top_teams_and_role_tier_ordering(tmp_path):
+    _write_org_model(tmp_path)
+    chart = ui_state.build_org_chart(tmp_path)
+
+    # Schema + a single director root (managing-partner).
+    assert chart["schema"] == ui_state.ORG_CHART_SCHEMA
+    root = chart["root"]
+    assert root["id"] == "managing-partner"
+    assert root["tier"] == "director"
+    assert root["team"] == "org"
+    assert root["category"] == "director"
+
+    # Children of the root are ALL declared teams (including the director's own
+    # org-wide team, which carries no non-director roles).
+    teams = root["children"]
+    team_ids = [team["id"] for team in teams]
+    assert team_ids == ["org", "engineering", "ui-ux"]
+    for team in teams:
+        assert team["kind"] == "team"
+        assert team["display_name"]
+        assert team["category"] == "team"
+    # The org-wide team has no non-director roles (the director is the root).
+    org_team = next(t for t in teams if t["id"] == "org")
+    assert org_team["children"] == []
+
+    # Each team's role children are sorted planner -> reviewer -> worker.
+    eng = next(t for t in teams if t["id"] == "engineering")
+    assert [r["id"] for r in eng["children"]] == ["lead-engineer", "worker-engineer"]
+    uiux = next(t for t in teams if t["id"] == "ui-ux")
+    assert [r["id"] for r in uiux["children"]] == [
+        "lead-designer",
+        "design-system-steward",
+        "interface-designer",
+    ]
+    # Role nodes carry the contract fields the renderer needs.
+    lead = uiux["children"][0]
+    assert lead["kind"] == "role"
+    assert lead["tier"] == "planner"
+    assert lead["team"] == "ui-ux"
+    assert lead["display_name"]
+    assert lead["category"] in ui_state.ORG_CHART_CATEGORIES
+
+
+def test_build_org_chart_edges_and_totals_form_a_tree(tmp_path):
+    _write_org_model(tmp_path)
+    chart = ui_state.build_org_chart(tmp_path)
+    nodes = {node["id"]: node for node in chart["nodes"]}
+    # Director + 3 teams (org, engineering, ui-ux) + 5 roles = 9 nodes; a tree so
+    # edges = nodes - 1 (the empty org team still gets its director->team edge).
+    assert chart["totals"]["roles"] == 5
+    assert chart["totals"]["teams"] == 3
+    assert chart["totals"]["nodes"] == len(chart["nodes"]) == 9
+    assert chart["totals"]["edges"] == len(chart["edges"]) == 8
+    # Every edge connects existing nodes; the director has no parent.
+    for edge in chart["edges"]:
+        assert edge["from"] in nodes
+        assert edge["to"] in nodes
+    parents = {edge["to"] for edge in chart["edges"]}
+    assert "managing-partner" not in parents
+
+
+def test_build_org_chart_real_repo_model_has_director_11_teams_all_roles():
+    chart = ui_state.build_org_chart(REPO_ROOT)
+    assert chart["root"]["id"] == "managing-partner"
+    # All 11 declared teams hang under the director (acceptance: director -> 11
+    # teams). The org-wide team is present too but carries no non-director roles.
+    team_ids = [team["id"] for team in chart["root"]["children"]]
+    assert len(team_ids) == 11
+    assert "engineering" in team_ids and "planning-strategy" in team_ids
+    assert "org" in team_ids
+    org_team = next(t for t in chart["root"]["children"] if t["id"] == "org")
+    assert org_team["children"] == []
+    # Every non-director role in ORG-MODEL is mapped under exactly one team.
+    reg = ui_state._load_org_registry(REPO_ROOT)
+    expected_roles = {r["id"] for r in reg["roles"] if r["tier"] != "director"}
+    mapped_roles = {
+        role["id"] for team in chart["root"]["children"] for role in team["children"]
+    }
+    assert mapped_roles == expected_roles
+
+
+def test_build_org_chart_renders_with_zero_live_agents(tmp_path):
+    _write_org_model(tmp_path)
+    # No instances / claims at all -> live counts default to 0, presence offline.
+    chart = ui_state.build_org_chart(tmp_path)
+    for team in chart["root"]["children"]:
+        for role in team["children"]:
+            assert role["live_agent_count"] == 0
+            assert role["online_count"] == 0
+            assert role["presence"] == "offline"
+
+
+def test_build_org_chart_joins_live_runtime_counts(tmp_path):
+    _write_org_model(tmp_path)
+    team_agents = {
+        "teams": [
+            {
+                "id": "engineering",
+                "agents": [
+                    {"id": "i1", "role": "lead-engineer", "online": True},
+                    {"id": "i2", "role": "worker-engineer", "online": False},
+                ],
+            }
+        ]
+    }
+    chart = ui_state.build_org_chart(tmp_path, team_agents)
+    eng = next(t for t in chart["root"]["children"] if t["id"] == "engineering")
+    lead = next(r for r in eng["children"] if r["id"] == "lead-engineer")
+    assert lead["live_agent_count"] == 1
+    assert lead["online_count"] == 1
+    assert lead["presence"] == "online"
+    assert eng["live_agent_count"] == 2
+    assert eng["online_count"] == 1
+
+
+def test_build_org_chart_missing_model_degrades_to_empty_tree(tmp_path):
+    # No ORG-MODEL.yml present -> well-formed empty chart, never a crash.
+    chart = ui_state.build_org_chart(tmp_path)
+    assert chart["schema"] == ui_state.ORG_CHART_SCHEMA
+    assert chart["root"] is None
+    assert chart["nodes"] == []
+    assert chart["edges"] == []
+    assert chart["totals"]["teams"] == 0
+
+
+def test_build_state_exposes_org_chart_resource(tmp_path):
+    _write_org_model(tmp_path)
+    state = ui_state.build_state(tmp_path, now="2026-06-21T00:00:00+09:00")
+    assert "org_chart" in state
+    assert state["org_chart"]["schema"] == ui_state.ORG_CHART_SCHEMA
+    assert state["org_chart"]["root"]["id"] == "managing-partner"
+    payload = ui_state.build_resource(tmp_path, "org_chart", now="2026-06-21T00:00:00+09:00")
+    assert payload["resource"] == "org_chart"

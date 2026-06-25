@@ -196,6 +196,9 @@ HTML = """<!doctype html>
               <button class="sidebar-link" type="button" role="tab" data-view="office" data-route="agents/office" aria-selected="false">
                 <span class="sidebar-icon" aria-hidden="true">&#9971;</span><span class="sidebar-label">Office Map</span>
               </button>
+              <button class="sidebar-link" type="button" role="tab" data-view="org" data-route="agents/org" aria-selected="false">
+                <span class="sidebar-icon" aria-hidden="true">&#9776;</span><span class="sidebar-label" data-i18n="nav.org">Org Chart</span>
+              </button>
             </div>
             <div class="sidebar-group" data-group="comms">
               <span class="sidebar-group-title" data-i18n="nav.group.comms">COMMS</span>
@@ -755,6 +758,18 @@ HTML = """<!doctype html>
               <div id="office-map-grid" class="office-map-grid" aria-label="Company floor plan"></div>
             </div>
             <ul id="office-map-legend" class="office-map-legend" aria-label="Action glyph legend"></ul>
+          </section>
+        </div>
+        <div id="view-org" class="view">
+          <section class="org-chart" aria-label="Agent organization chart">
+            <header class="org-chart-header">
+              <h2 data-i18n="org.title">Org Chart</h2>
+              <p id="org-chart-summary" class="org-chart-summary" role="status"></p>
+            </header>
+            <div class="org-chart-stage">
+              <svg id="org-chart-svg" class="org-chart-svg" viewBox="0 0 1200 720" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Agent organization chart: director to teams to roles"></svg>
+            </div>
+            <ul id="org-chart-legend" class="org-chart-legend" aria-label="Org chart tier and team legend"></ul>
           </section>
         </div>
         <div id="view-statemachines" class="view">
@@ -5227,6 +5242,95 @@ pre {
 .dep-graph-legend .legend-dependency { background: var(--blue); }
 .dep-graph-legend .legend-parent { background: var(--subtle); }
 .dep-graph-legend .legend-cycle { background: var(--danger); }
+
+/* ===== Org chart view (console org-chart): director -> teams -> roles ===== */
+.org-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
+  padding: var(--space-3xl);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-grad);
+}
+.org-chart-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2xl);
+}
+.org-chart-header h2 { margin: 0; }
+.org-chart-summary {
+  margin: 0;
+  font-size: var(--font-size-ui-12);
+  color: var(--muted);
+}
+.org-chart-stage {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--canvas-grad);
+  overflow: auto;
+}
+.org-chart-svg {
+  display: block;
+  width: 100%;
+  height: 560px;
+}
+.org-chart-empty { fill: var(--subtle); font-size: var(--font-size-ui-14); }
+.org-chart-edge {
+  stroke: var(--line-strong);
+  stroke-width: 1.5;
+  fill: none;
+  opacity: 0.7;
+}
+.org-chart-card {
+  stroke-width: 1.5;
+  opacity: 0.95;
+}
+.org-chart-node.kind-role,
+.org-chart-node.kind-team { cursor: pointer; }
+.org-chart-node.is-animated { transition: opacity var(--motion-fast) ease; }
+.org-chart-node:focus-visible { outline: 2px solid var(--primary-hover); outline-offset: 2px; }
+.org-chart-node:hover .org-chart-card { opacity: 1; stroke-width: 2; }
+.org-chart-role-name {
+  fill: var(--ink);
+  font-size: var(--font-size-ui-12);
+  font-weight: 600;
+}
+.org-chart-tier-badge {
+  fill: var(--muted);
+  font-size: var(--font-size-ui-10);
+}
+.org-chart-group-name {
+  fill: var(--ink);
+  font-size: var(--font-size-ui-13);
+  font-weight: 700;
+}
+.org-chart-group-name.kind-director { font-size: var(--font-size-ui-14); }
+.org-chart-group-sub {
+  fill: var(--muted);
+  font-size: var(--font-size-ui-10);
+}
+.org-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xl);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--font-size-ui-11);
+  color: var(--muted);
+}
+.org-chart-legend .legend-glyph {
+  display: inline-block;
+  margin-right: var(--space-sm-half);
+  font-weight: 700;
+  color: var(--ink);
+}
+@media (prefers-reduced-motion: reduce) {
+  .org-chart-node.is-animated { transition: none; }
+}
 
 /* ===== Knowledge graph view (#5) ===== */
 .kg-graph-toolbar {
@@ -10044,6 +10148,213 @@ function renderOfficeMap() {
   }
 }
 
+// ----- Org Chart view (console org-chart): director -> teams -> roles --------
+// Renders the static ORG-MODEL hierarchy top-down with the vendored Dagre
+// layout (same helper the dependency graph uses). Role nodes carry the v3
+// category sprite (patternOfficeSprite) + a tier badge (glyph + word, not color
+// alone) + a team color token. Clicking a team or role node drills the Board to
+// that team/role via the shared wireTeamDrilldown mechanism (AR-337), so the
+// org chart, heatmap and board all agree. Renders with zero live agents.
+function orgChartData() {
+  return runtimeState.org_chart || { root: null, nodes: [], edges: [], totals: {} };
+}
+
+// Tier badge glyph fallback (server also ships tier_badge per node). Shape +
+// word, never color alone (a11y: status not by hue).
+const ORG_TIER_GLYPH = { director: "*", planner: "^", reviewer: "?", worker: "+", team: "#" };
+
+// Embed a v3 category sprite as a child <svg> of the node group (mirrors the
+// live-map avatar embed). Inline fills are promoted to style so dark-theme
+// tokens cascade. Falls back to a token-colored disc if the sprite is empty.
+function appendOrgSprite(group, node, px, py, size) {
+  const role = String(node.id || node.role || "");
+  const label = String(node.display_name || node.id || "role");
+  let svg = null;
+  if (typeof patternOfficeSprite === "function") {
+    const template = document.createElement("template");
+    template.innerHTML = patternOfficeSprite(role, { assetVersion: "v3", size, label });
+    svg = template.content.querySelector("svg");
+  }
+  if (!svg) {
+    const disc = document.createElementNS(SVG_NS, "circle");
+    disc.setAttribute("cx", String(px)); disc.setAttribute("cy", String(py));
+    disc.setAttribute("r", String(size / 2));
+    disc.setAttribute("fill", `var(--${node.color_token || "muted"})`);
+    group.appendChild(disc);
+    return;
+  }
+  svg.querySelectorAll("[fill], [stroke]").forEach((part) => {
+    const fill = part.getAttribute("fill");
+    const stroke = part.getAttribute("stroke");
+    if (fill !== null) part.style.fill = fill;
+    if (stroke !== null) part.style.stroke = stroke;
+  });
+  svg.setAttribute("x", String(px - size / 2));
+  svg.setAttribute("y", String(py - size / 2));
+  svg.setAttribute("width", String(size));
+  svg.setAttribute("height", String(size));
+  group.appendChild(document.importNode(svg, true));
+}
+
+function orgChartNodePositions(nodes, edges) {
+  return patternSvgLayeredDagreLayout(nodes, edges, {
+    rankdir: "TB",
+    width: 1200,
+    height: 720,
+    marginX: 80,
+    marginY: 70,
+  }).positions;
+}
+
+function renderOrgChart() {
+  const svg = $("org-chart-svg");
+  if (!svg) return;
+  const data = orgChartData();
+  const totals = data.totals || {};
+  setText(
+    "org-chart-summary",
+    `${totals.teams || 0} teams - ${totals.roles || 0} roles`
+    + (totals.nodes ? ` - ${totals.nodes} nodes` : "")
+  );
+
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+  const nodes = data.nodes || [];
+  const edges = data.edges || [];
+  if (!nodes.length || !data.root) {
+    const note = document.createElementNS(SVG_NS, "text");
+    note.setAttribute("x", "600"); note.setAttribute("y", "360");
+    note.setAttribute("class", "org-chart-empty");
+    note.setAttribute("text-anchor", "middle");
+    note.textContent = "No org model";
+    svg.appendChild(note);
+    return;
+  }
+
+  const positions = orgChartNodePositions(nodes, edges);
+
+  // ---- Edge layer: director -> team -> role connectors ----
+  const edgeLayer = document.createElementNS(SVG_NS, "g");
+  edges.forEach((edge) => {
+    const a = positions[edge.from];
+    const b = positions[edge.to];
+    if (!a || !b) return;
+    const midY = (a.y + b.y) / 2;
+    const path = document.createElementNS(SVG_NS, "path");
+    path.setAttribute("d", `M ${a.x} ${a.y} L ${a.x} ${midY} L ${b.x} ${midY} L ${b.x} ${b.y}`);
+    path.setAttribute("class", "org-chart-edge");
+    path.setAttribute("fill", "none");
+    edgeLayer.appendChild(path);
+  });
+  svg.appendChild(edgeLayer);
+
+  // ---- Node layer ----
+  const reduced = prefersReducedMotion();
+  const nodeLayer = document.createElementNS(SVG_NS, "g");
+  nodes.forEach((node) => {
+    const pos = positions[node.id];
+    if (!pos) return;
+    const px = Math.round(pos.x), py = Math.round(pos.y);
+    const kind = String(node.kind || "node");
+    const token = node.color_token || "muted";
+    const group = document.createElementNS(SVG_NS, "g");
+    group.setAttribute("class", `org-chart-node kind-${escapeHtml(kind)}${reduced ? "" : " is-animated"}`);
+    group.setAttribute("data-node-id", String(node.id));
+    group.setAttribute("data-entity-id", String(node.id));
+    // Drill-down wiring (AR-337): role -> team+role, team -> team. Director is
+    // org-wide (no filter). The shared wireTeamDrilldown reads these.
+    if (kind === "role") {
+      group.setAttribute("data-drill-team", String(node.team || ""));
+      group.setAttribute("data-drill-role", String(node.id));
+    } else if (kind === "team") {
+      group.setAttribute("data-drill-team", String(node.id));
+    }
+    const tierBadge = node.tier_badge || {};
+    const tierWord = String(tierBadge.label || node.tier || kind);
+    const a11y = `${node.display_name || node.id} - ${tierWord}`
+      + (node.team ? ` - ${node.team}` : "")
+      + (node.online_count ? ` - ${node.online_count} online` : "");
+    group.setAttribute("role", (kind === "director") ? "img" : "button");
+    group.setAttribute("tabindex", (kind === "director") ? "-1" : "0");
+    group.setAttribute("aria-label", escapeHtml(a11y));
+
+    const isRole = kind === "role";
+    const w = isRole ? 168 : 200;
+    const h = isRole ? 58 : 46;
+    const rect = document.createElementNS(SVG_NS, "rect");
+    rect.setAttribute("x", String(px - w / 2)); rect.setAttribute("y", String(py - h / 2));
+    rect.setAttribute("width", String(w)); rect.setAttribute("height", String(h));
+    rect.setAttribute("rx", "8");
+    rect.setAttribute("class", "org-chart-card");
+    rect.setAttribute("stroke", `var(--${token})`);
+    // Team color token as a soft fill band (token-driven; no raw color).
+    rect.setAttribute("fill", `var(--${token}-soft, var(--panel-strong))`);
+    group.appendChild(rect);
+
+    if (isRole) {
+      // v3 category sprite on the left of the card.
+      appendOrgSprite(group, node, px - w / 2 + 22, py, 34);
+      // Role name.
+      const name = document.createElementNS(SVG_NS, "text");
+      name.setAttribute("x", String(px - w / 2 + 46)); name.setAttribute("y", String(py - 4));
+      name.setAttribute("class", "org-chart-role-name");
+      name.textContent = String(node.display_name || node.id).slice(0, 22);
+      group.appendChild(name);
+      // Tier badge: glyph + word (shape + text, not color-only).
+      const badge = document.createElementNS(SVG_NS, "text");
+      badge.setAttribute("x", String(px - w / 2 + 46)); badge.setAttribute("y", String(py + 13));
+      badge.setAttribute("class", "org-chart-tier-badge");
+      const glyph = String(tierBadge.glyph || ORG_TIER_GLYPH[node.tier] || "-");
+      const liveStr = node.online_count ? ` - ${node.online_count} on` : "";
+      badge.textContent = `${glyph} ${tierWord}${liveStr}`;
+      group.appendChild(badge);
+    } else {
+      // Director / team group node: centered name + role count.
+      const name = document.createElementNS(SVG_NS, "text");
+      name.setAttribute("x", String(px)); name.setAttribute("y", String(py - 2));
+      name.setAttribute("class", `org-chart-group-name kind-${escapeHtml(kind)}`);
+      name.setAttribute("text-anchor", "middle");
+      const glyph = String((node.tier_badge || {}).glyph || ORG_TIER_GLYPH[kind] || "");
+      name.textContent = `${glyph ? glyph + " " : ""}${String(node.display_name || node.id).slice(0, 24)}`;
+      group.appendChild(name);
+      const sub = document.createElementNS(SVG_NS, "text");
+      sub.setAttribute("x", String(px)); sub.setAttribute("y", String(py + 13));
+      sub.setAttribute("class", "org-chart-group-sub");
+      sub.setAttribute("text-anchor", "middle");
+      sub.textContent = (kind === "team")
+        ? `${node.role_count || 0} roles${node.online_count ? ` - ${node.online_count} online` : ""}`
+        : "Director";
+      group.appendChild(sub);
+    }
+    nodeLayer.appendChild(group);
+  });
+  svg.appendChild(nodeLayer);
+
+  // Keyboard activation for the drillable nodes (mirrors the click handler).
+  nodeLayer.querySelectorAll("[data-drill-team], [data-drill-role]").forEach((el) => {
+    el.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      }
+    });
+  });
+  // Reuse the shared drill-down wiring (AR-337) so board/heatmap/org agree.
+  wireTeamDrilldown(svg);
+
+  // Legend: tier badges + team color meaning.
+  const legend = $("org-chart-legend");
+  if (legend) {
+    const badges = data.tier_badges || {};
+    const order = ["director", "planner", "reviewer", "worker"];
+    legend.innerHTML = order
+      .filter((tier) => badges[tier])
+      .map((tier) =>
+        `<li><span class="legend-glyph">${escapeHtml(badges[tier].glyph)}</span>${escapeHtml(badges[tier].label)}</li>`
+      ).join("");
+  }
+}
+
 // ----- TASK-AR-336: interactive state-machine viewer -----
 const SM_SIGNAL_LABELS = { pass: "Proceed (pass)", watch: "Needs attention (watch)", block: "Stop until fixed (block)" };
 
@@ -12647,6 +12958,7 @@ function renderAll() {
   renderDependencyGraph();
   renderMap();
   renderOfficeMap();
+  renderOrgChart();
   renderStateMachineViewer();
   renderSources();
   renderCommands();

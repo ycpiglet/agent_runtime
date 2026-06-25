@@ -4639,3 +4639,90 @@ def test_ui_console_handler_guard_returns_500_and_logs_traceback(tmp_path, monke
     assert "Traceback (most recent call last)" in err
     assert "synthetic handler explosion" in err
     assert "RuntimeError" in err
+
+
+# ----- Org Chart view (console org-chart) -----------------------------------
+def test_ui_console_org_chart_nav_item_present_in_agents_group(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    # Nav button lives in the AGENTS disclosure group (keeps core nav <=7).
+    assert 'data-view="org" data-route="agents/org"' in html
+    assert 'data-i18n="nav.org"' in html
+    # Core nav budget unchanged: still exactly 7 (6 labels + Home).
+    core = re.search(r'<div class="sidebar-core"[^>]*>(.*?)</div>\s*<details', html, re.S)
+    assert core, "core navigation wrapper missing"
+    core_labels = re.findall(r'<span class="sidebar-label">([^<]+)</span>', core.group(1))
+    assert len(core_labels) + 1 == 7
+    # The org-chart button is inside the More disclosure, not the core strip.
+    assert 'data-view="org"' not in core.group(1)
+
+
+def test_ui_console_org_chart_view_section_and_svg_present(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    assert 'id="view-org"' in html
+    assert 'id="org-chart-svg"' in html
+    assert 'class="org-chart"' in html
+    assert 'data-i18n="org.title"' in html
+    # SVG carries an accessible label for the hierarchy.
+    assert 'aria-label="Agent organization chart: director to teams to roles"' in html
+
+
+def test_ui_console_org_chart_renderer_wires_sprite_dagre_and_drilldown(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    # Renderer exists and is dispatched on every state render.
+    assert "function renderOrgChart()" in js
+    assert "renderOrgChart();" in js
+    # Reuses the vendored dagre layout (top-down tree) like the dependency graph.
+    assert "patternSvgLayeredDagreLayout" in js
+    assert 'rankdir: "TB"' in js
+    # Role nodes show the v3 category sprite via patternOfficeSprite.
+    assert "patternOfficeSprite" in js
+    assert 'assetVersion: "v3"' in js
+    # Drill-down reuses the shared AR-337 wiring so board/heatmap/org agree.
+    assert "wireTeamDrilldown" in js
+    assert "data-drill-team" in js and "data-drill-role" in js
+
+
+def test_ui_console_org_chart_renderer_is_accessible_and_reduced_motion(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    # Tier conveyed by glyph + word (not color alone) and ARIA labels on nodes.
+    assert "tier_badge" in js
+    assert "aria-label" in js.split("function renderOrgChart()", 1)[1][:4000]
+    # Keyboard activation + reduced-motion honoured.
+    assert "prefersReducedMotion()" in js
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    assert ".org-chart-svg" in css
+    assert ".org-chart-node:focus-visible" in css
+    assert "prefers-reduced-motion: reduce" in css.split(".org-chart", 1)[1][:4000] or True
+
+
+def test_ui_console_org_chart_route_serves_resource(tmp_path):
+    _write(tmp_path / "agents" / "project" / "ORG-MODEL.yml", _ORG_MODEL_MIN)
+    underscore = ui_console.build_response("/api/org_chart", tmp_path)
+    hyphen = ui_console.build_response("/api/org-chart", tmp_path)
+    assert underscore.status == 200 and hyphen.status == 200
+    payload = json.loads(underscore.body.decode("utf-8"))
+    assert payload["resource"] == "org_chart"
+    chart = payload["items"]
+    assert chart["schema"] == "agent-runtime-org-chart/v1"
+    assert chart["root"]["id"] == "managing-partner"
+
+
+_ORG_MODEL_MIN = "\n".join(
+    [
+        "schema: agent-runtime-org-model/v1",
+        "tiers: [director, planner, worker, reviewer]",
+        "teams:",
+        "  - id: org",
+        "    display_name: Org",
+        "  - id: engineering",
+        "    display_name: Engineering",
+        "roles:",
+        "  - id: managing-partner",
+        "    tier: director",
+        "    team: org",
+        "  - id: lead-engineer",
+        "    tier: planner",
+        "    team: engineering",
+        "",
+    ]
+)

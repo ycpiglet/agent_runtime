@@ -48,6 +48,7 @@ RESOURCE_NAMES = (
     "graph",
     "live_map",
     "office_map",
+    "org_chart",
     "dependency_graph",
     "timeline",
     "state_machines",
@@ -2206,6 +2207,12 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     "nav.group.comms": {"ko": "소통", "en": "Comms"},
     "nav.group.records": {"ko": "기록", "en": "Records"},
     "nav.group.ops": {"ko": "운영", "en": "Ops"},
+    "nav.org": {"ko": "조직도", "en": "Org Chart"},
+    "org.title": {"ko": "조직도", "en": "Org Chart"},
+    "org.tier.director": {"ko": "디렉터", "en": "Director"},
+    "org.tier.planner": {"ko": "리드", "en": "Lead"},
+    "org.tier.reviewer": {"ko": "리뷰어", "en": "Reviewer"},
+    "org.tier.worker": {"ko": "워커", "en": "Worker"},
     "view.board.title": {"ko": "홈 대시보드", "en": "Home Dashboard"},
     "view.tasksets.title": {"ko": "태스크셋", "en": "Tasksets"},
     "view.work.title": {"ko": "작업 탐색기", "en": "Work Explorer"},
@@ -4772,6 +4779,304 @@ def build_office_map(
             "rooms": len(rooms_out),
             "actions": dict(sorted(action_counts.items())),
             "in_meeting": sum(1 for a in agents_out if a["action"] == "meeting"),
+        },
+    }
+
+
+# --- Org Chart view (console org-chart) -------------------------------------
+# A visual organization chart of the agent org, derived purely from the static
+# ORG-MODEL.yml SSOT (schema agent-runtime-org-model/v1). There is no explicit
+# reports_to in the model; the hierarchy is implied:
+#     managing-partner (director, team=org)              <- single root
+#       -> each functional TEAM (the director's own "org" team is the root,
+#          never a child team)
+#            -> the team's roles, ordered planner (team lead) -> reviewer
+#               -> worker
+# The chart renders even with zero live agents (it is from the static model);
+# live agent/claim counts + presence are an OPTIONAL join from team_agents and
+# default to 0/offline when the runtime is empty. Pure-derive; mutates nothing.
+ORG_CHART_SCHEMA = "agent-runtime-org-chart/v1"
+ORG_CHART_MODEL_REL = "agents/project/ORG-MODEL.yml"
+# Tier render order within a team: planner (lead) first, then reviewers, then
+# workers. Lower number = higher in the team column. Director never appears as a
+# team child (it is the root). Unknown tiers sort last, stably.
+ORG_CHART_TIER_ORDER = {"director": 0, "planner": 1, "reviewer": 2, "worker": 3}
+# Human-facing tier badge: glyph (shape, not color-only) + word. Mirrored in JS.
+ORG_CHART_TIER_BADGES = {
+    "director": {"glyph": "*", "label": "Director"},
+    "planner": {"glyph": "^", "label": "Lead"},
+    "reviewer": {"glyph": "?", "label": "Reviewer"},
+    "worker": {"glyph": "+", "label": "Worker"},
+}
+# role -> v3 sprite CATEGORY. Server mirror of the JS _V3_ROLE_CATEGORY map in
+# ui_design_assets.py (and the Python generator at
+# agents/project/assets/agent-characters/v3/generate_sprites.py). Kept here so a
+# node carries its category for the renderer + sprite selection. Unknown roles
+# default to "engineering" (matching v3CategoryForRole / category_for_role).
+ORG_CHART_ROLE_CATEGORY = {
+    "lead-engineer": "engineering",
+    "worker-engineer": "engineering",
+    "lead-designer": "design",
+    "design-system-steward": "design",
+    "interface-designer": "design",
+    "ux-evaluator": "design",
+    "qa": "quality-audit",
+    "independent-auditor": "quality-audit",
+    "risk-controller": "quality-audit",
+    "release-integrity": "quality-audit",
+    "research-agent": "research",
+    "progress-scout": "research",
+    "business-analyst": "research",
+    "growth-analyst": "research",
+    "managing-partner": "leadership",
+    "council": "leadership",
+    "finance-controller": "finance-ops",
+    "accounting-operator": "finance-ops",
+    "asset-steward": "finance-ops",
+    "revenue-analyst": "finance-ops",
+    "sales-ops": "finance-ops",
+    "marketing-lead": "marketing-sales",
+    "content-marketer": "marketing-sales",
+    "brand-steward": "marketing-sales",
+    "sales-lead": "marketing-sales",
+    "crm-operator": "marketing-sales",
+    "partnership-manager": "marketing-sales",
+    "doc-steward": "docs",
+    "operations-lead": "finance-ops",
+    "support-operator": "finance-ops",
+    "customer-success-steward": "marketing-sales",
+    "process-steward": "docs",
+    "strategy-lead": "leadership",
+    "planning-architect": "leadership",
+    "portfolio-steward": "leadership",
+}
+# All category tokens a node may carry: the 8 v3 sprite categories plus the two
+# structural node categories ("team" group node, "director" root node).
+ORG_CHART_CATEGORIES = (
+    "engineering",
+    "design",
+    "quality-audit",
+    "research",
+    "leadership",
+    "finance-ops",
+    "marketing-sales",
+    "docs",
+    "team",
+    "director",
+)
+# category -> existing semantic color token (defined in BOTH console theme
+# blocks; consumed as var(--<token>) so no raw colors leak). Mirrors the v3
+# CATEGORIES accent keys; team/director reuse the leadership/violet family.
+ORG_CHART_CATEGORY_TOKEN = {
+    "engineering": "primary",
+    "design": "teal",
+    "quality-audit": "danger",
+    "research": "amber",
+    "leadership": "violet",
+    "finance-ops": "warning",
+    "marketing-sales": "success",
+    "docs": "muted",
+    "team": "violet",
+    "director": "violet",
+}
+
+
+def _org_role_category(role_id: str) -> str:
+    return ORG_CHART_ROLE_CATEGORY.get(str(role_id or "").strip().lower(), "engineering")
+
+
+def _org_display_name(token: str) -> str:
+    """Humanize a kebab/snake role/team id (lead-engineer -> Lead Engineer)."""
+    words = re.split(r"[-_\s]+", str(token or "").strip())
+    return " ".join(part[:1].upper() + part[1:] for part in words if part) or str(token or "")
+
+
+def _load_org_registry(root: Path | str) -> dict[str, Any]:
+    """Load + parse ``ORG-MODEL.yml`` under ``root`` via the existing PyYAML-free
+    org-model reader (scripts.org_model_gate.parse_org_model). Reuses the gate's
+    stdlib parser; never adds PyYAML. Missing/unreadable model degrades to an
+    empty, well-formed registry so the org chart never crashes the state build.
+    """
+    path = Path(root).resolve() / ORG_CHART_MODEL_REL
+    empty = {"schema": "", "tiers": [], "teams": [], "roles": []}
+    if not path.exists():
+        return empty
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return empty
+    try:
+        # Add THIS package's repo root (the one shipping scripts/) to sys.path so
+        # the import resolves regardless of the scanned ``root`` (which in tests
+        # is a synthetic tmp dir with no scripts/). Then reuse the gate parser.
+        pkg_repo_root = str(Path(__file__).resolve().parent.parent.parent)
+        if pkg_repo_root not in sys.path:
+            sys.path.insert(0, pkg_repo_root)
+        from scripts import org_model_gate
+        reg = org_model_gate.parse_org_model(text)
+    except Exception:
+        return empty
+    reg.setdefault("teams", [])
+    reg.setdefault("roles", [])
+    reg.setdefault("tiers", [])
+    return reg
+
+
+def _org_live_index(team_agents: dict[str, Any] | None) -> dict[str, dict[str, int]]:
+    """Per-role live counts from the team_agents presence cards (optional join).
+
+    Returns ``{role: {"agents": n, "online": m}}``. Empty when there is no
+    runtime; the org chart still renders the full static model with zeroes.
+    """
+    index: dict[str, dict[str, int]] = {}
+    if not isinstance(team_agents, dict):
+        return index
+    for group in team_agents.get("teams", []) or []:
+        for card in group.get("agents", []) or []:
+            role = _normalize_role(card.get("role"))
+            if not role:
+                continue
+            entry = index.setdefault(role, {"agents": 0, "online": 0})
+            entry["agents"] += 1
+            if card.get("online"):
+                entry["online"] += 1
+    return index
+
+
+def build_org_chart(
+    root: Path | str,
+    team_agents: dict[str, Any] | None = None,
+    now: str | None = None,
+) -> dict[str, Any]:
+    """Visual org chart: director -> teams -> roles, from the static ORG-MODEL.
+
+    Pure-derive. The single root is the ``director`` role (managing-partner,
+    team=org); its children are the functional teams (the director's own ``org``
+    team is the root, NOT a child); each team's children are its roles ordered
+    planner (lead) -> reviewer -> worker. Every node carries
+    ``{id, display_name, tier, team, category}`` and a flat node/edge list so the
+    same dagre layout the dependency graph uses can lay it out as a tree. Live
+    agent/claim counts + presence are joined from ``team_agents`` when present
+    and default to 0/offline (renders with zero live agents).
+    """
+    generated_at = now or _now_iso()
+    reg = _load_org_registry(root)
+    live = _org_live_index(team_agents)
+
+    teams_meta: dict[str, dict[str, Any]] = {}
+    for team in reg.get("teams", []) or []:
+        team_id = str(team.get("id") or "").strip()
+        if team_id:
+            teams_meta[team_id] = {
+                "id": team_id,
+                "display_name": str(team.get("display_name") or _org_display_name(team_id)),
+            }
+
+    roles = [dict(role) for role in (reg.get("roles", []) or []) if str(role.get("id") or "").strip()]
+    director = next((r for r in roles if str(r.get("tier") or "").strip().lower() == "director"), None)
+
+    nodes: list[dict[str, Any]] = []
+    edges: list[dict[str, Any]] = []
+
+    def _role_node(role: dict[str, Any], kind: str) -> dict[str, Any]:
+        role_id = str(role.get("id") or "").strip()
+        tier = str(role.get("tier") or "").strip().lower()
+        team_id = str(role.get("team") or "").strip()
+        category = "director" if kind == "director" else _org_role_category(role_id)
+        live_entry = live.get(_normalize_role(role_id), {"agents": 0, "online": 0})
+        online_count = int(live_entry.get("online", 0))
+        agent_count = int(live_entry.get("agents", 0))
+        presence = "online" if online_count else "offline"
+        badge = ORG_CHART_TIER_BADGES.get(tier, {"glyph": "-", "label": tier or "role"})
+        return {
+            "id": role_id,
+            "kind": kind,
+            "display_name": _org_display_name(role_id),
+            "tier": tier,
+            "tier_badge": dict(badge),
+            "team": team_id,
+            "category": category,
+            "color_token": ORG_CHART_CATEGORY_TOKEN.get(category, "muted"),
+            "live_agent_count": agent_count,
+            "online_count": online_count,
+            "presence": presence,
+        }
+
+    root_node: dict[str, Any] | None = None
+    if director is not None:
+        root_node = _role_node(director, "director")
+        nodes.append(root_node)
+        # Roles grouped by team, EXCLUDING the director itself (it is the root and
+        # also a member of its org-wide team; we never list it under a team).
+        by_team: dict[str, list[dict[str, Any]]] = {}
+        for role in roles:
+            if role is director:
+                continue
+            team_id = str(role.get("team") or "").strip()
+            if not team_id:
+                continue
+            by_team.setdefault(team_id, []).append(role)
+
+        # Every DECLARED team is a child of the director (acceptance: director ->
+        # all teams). The director's own org-wide team appears too, carrying its
+        # non-director roles (none today -> an org-wide group node). Declaration
+        # order is preserved; teams that appear only via roles are appended.
+        ordered_team_ids = [tid for tid in teams_meta]
+        ordered_team_ids += [tid for tid in by_team if tid not in teams_meta]
+
+        team_children: list[dict[str, Any]] = []
+        for team_id in ordered_team_ids:
+            meta = teams_meta.get(team_id, {"id": team_id, "display_name": _org_display_name(team_id)})
+            team_roles = sorted(
+                by_team.get(team_id, []),
+                key=lambda r: (
+                    ORG_CHART_TIER_ORDER.get(str(r.get("tier") or "").strip().lower(), 99),
+                    str(r.get("id") or ""),
+                ),
+            )
+            role_children = [_role_node(role, "role") for role in team_roles]
+            team_agent_count = sum(child["live_agent_count"] for child in role_children)
+            team_online_count = sum(child["online_count"] for child in role_children)
+            team_node = {
+                "id": team_id,
+                "kind": "team",
+                "display_name": str(meta["display_name"]),
+                "tier": "team",
+                "team": team_id,
+                "category": "team",
+                "color_token": ORG_CHART_CATEGORY_TOKEN["team"],
+                "role_count": len(role_children),
+                "live_agent_count": team_agent_count,
+                "online_count": team_online_count,
+                "presence": "online" if team_online_count else "offline",
+                "children": role_children,
+            }
+            nodes.append(team_node)
+            edges.append({"id": f"org:{root_node['id']}->{team_id}", "from": root_node["id"], "to": team_id})
+            for child in role_children:
+                nodes.append(child)
+                edges.append({"id": f"org:{team_id}->{child['id']}", "from": team_id, "to": child["id"]})
+            # Hierarchy view keeps a nested copy; flat lists feed the dagre layout.
+            team_children.append({k: v for k, v in team_node.items()})
+        root_node = {**root_node, "children": team_children}
+
+    role_count = sum(1 for node in nodes if node.get("kind") == "role")
+    team_count = sum(1 for node in nodes if node.get("kind") == "team")
+    return {
+        "schema": ORG_CHART_SCHEMA,
+        "generated_at": generated_at,
+        "source_path": ORG_CHART_MODEL_REL,
+        "root": root_node,
+        "nodes": nodes,
+        "edges": edges,
+        "tier_order": dict(ORG_CHART_TIER_ORDER),
+        "tier_badges": {tier: dict(badge) for tier, badge in ORG_CHART_TIER_BADGES.items()},
+        "category_tokens": dict(ORG_CHART_CATEGORY_TOKEN),
+        "totals": {
+            "nodes": len(nodes),
+            "edges": len(edges),
+            "teams": team_count,
+            "roles": role_count,
         },
     }
 
@@ -7598,6 +7903,10 @@ def _build_state_uncached(root: Path | str, now: str | None = None) -> dict[str,
     # derived from the team_agents presence cards (+ events for the recording
     # action). In-meeting agents are relocated to the meeting room.
     office_map = build_office_map(team_agents, events, generated_at)
+    # Org chart (console org-chart): director -> 11 teams -> roles from the static
+    # ORG-MODEL SSOT. Live counts are an optional join from team_agents; the chart
+    # renders fully even with zero live agents.
+    org_chart = build_org_chart(root_path, team_agents, generated_at)
     dependency_graph = build_dependency_graph(tasks, generated_at)
     timeline = build_timeline(tasks, generated_at)
     # Custom properties / labels / automation rules / triage (TASK-AR-331).
@@ -7677,6 +7986,7 @@ def _build_state_uncached(root: Path | str, now: str | None = None) -> dict[str,
         "graph": graph,
         "live_map": live_map,
         "office_map": office_map,
+        "org_chart": org_chart,
         "dependency_graph": dependency_graph,
         "timeline": timeline,
         "state_machines": state_machines,

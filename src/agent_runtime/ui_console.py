@@ -504,6 +504,8 @@ def _dispatch_response(path: str, root: Path | str, *, method: str = "GET", body
         "/api/live-map": "live_map",
         "/api/office_map": "office_map",
         "/api/office-map": "office_map",
+        "/api/org_chart": "org_chart",
+        "/api/org-chart": "org_chart",
         "/api/state-machines": "state_machines",
         "/api/roadmap": "roadmap",
         "/api/roadmap-timeline": "roadmap_timeline",
