@@ -47,14 +47,52 @@ Owner approved **Path A (CC0 / original-generated chibi)**, tone **chibi**,
 placement **Office Map**, standard tier. v2 sprites are now **live** in the
 console Office Map. v2 honoured the Owner note on v1 ("more colour, fill the
 empty centre") with a warm skin-filled face, hair cap, and a solid colour torso.
-All art is **original** (repo license); no external/CC0 asset is bundled, so no
-new attribution entry is required.
+All v2 art is **original** (repo license); no external/CC0 asset is bundled, so no
+new attribution entry was required for v2.
+
+## v3 sprite system on a CC0 base (2026-06-25, TASK-AR-592 v3)
+
+Owner picked a **real CC0 base** from the sprite-quality spike: the
+**GrafxKid "RPG character"** pixel sprite (`char4_rpg-assets.png` in
+`_compare-cc0/`).
+
+- **Base asset:** GrafxKid "RPG character sprites".
+- **Source page:** https://opengameart.org/content/rpg-character-sprites
+- **Direct file:** https://opengameart.org/sites/default/files/RPG_assets.png
+- **License:** **CC0 1.0 (Public Domain)** -- **attribution NOT required.** Author:
+  **GrafxKid** (credited voluntarily; not legally required).
+- **Vendored at:** `agents/project/assets/agent-characters/v3/base/`
+  (`grafxkid-rpg-character_CC0.png` + `_frame.png`), provenance recorded in
+  `agents/project/assets/agent-characters/v3/base/SOURCES.md` and the spike ledger
+  `agents/project/assets/agent-characters/_compare-cc0/SOURCES.md`.
+
+**v3 design:** the 34 ORG-MODEL roles are grouped into **8 CATEGORIES**; a category
+is distinguished by an **accessory overlay (hat/item) + a category token color**
+(NOT 34 distinct bodies). The shipped art is rendered as **token-driven pixel SVG**
+(deterministic generator + JS twin `patternV3Sprite`), so the served console stays
+self-hosted and hex-free -- the CC0 PNG is the *reference base*, not a bundled
+raster in the bundle. v3 is **additive**: `patternOfficeSprite()` prefers v3 and
+falls back to the v2 chibi twin; **v1 + v2 are preserved**.
+
+Categories -> token color -> accessory: Engineering/blue/hard-hat,
+Design/teal/beret+brush, Quality-Audit/red/magnifier, Research/amber/binoculars,
+Leadership/violet/crown, Finance-Ops/yellow/coin, Marketing-Sales/green/megaphone,
+Docs/gray/book.
 
 ## In-repo references
 
 These live on `origin/main`; paths verified to exist (2026-06-24).
 
-- **Shipped sprites (v2, live on Office Map):**
+- **v3 category sprites (CC0-GrafxKid base, live on Office Map, additive):**
+  `agents/project/assets/agent-characters/v3/`
+  - `base/` -- vendored CC0 GrafxKid "RPG character" PNG + `SOURCES.md`.
+  - 8 category SVGs (`engineering.svg` ... `docs.svg`), `generate_sprites.py`
+    (deterministic; role->category map; JS twin = `patternV3Sprite` /
+    `patternOfficeSprite` in `src/agent_runtime/ui_design_assets.py`,
+    parity-tested by `tests/test_v3_sprites.py`).
+  - Demo: `agents/project/ui/spike/office-map-demo-v3.html`
+    (generator `gen_office_demo_v3.py`).
+- **Shipped sprites (v2, PRESERVED as v3 fallback):**
   `agents/project/assets/agent-characters/v2/`
   - 34 role SVGs (colourful, filled-centre chibi), `preview.html`, `README.md`,
     `generate_sprites.py` (deterministic; JS twin = `patternChibiSprite` in

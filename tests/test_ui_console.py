@@ -3541,6 +3541,25 @@ def _chibi_deps(js: str) -> str:
     data = js[data_start:data_end]
     return _ESCAPE_HTML_SHIM + data + _extract_js_function(js, "_chibiFill") + _extract_js_function(js, "patternChibiSprite")
 
+
+def _office_sprite_deps(js: str) -> str:
+    """Lift the FULL office-sprite stack (v3 + v2 chibi + selector) for node.
+
+    patternOfficeMapPlacement now calls patternOfficeSprite (TASK-AR-592 v3,
+    additive with a v2 fallback), so a standalone node harness needs the v3
+    data block, the v2 chibi deps, the version const, and the selector.
+    """
+    v3_data = js[js.index("var _V3_BASE"):js.index("function _v3Fill")]
+    return (
+        _chibi_deps(js)
+        + v3_data
+        + _extract_js_function(js, "_v3Fill")
+        + _extract_js_function(js, "v3CategoryForRole")
+        + _extract_js_function(js, "patternV3Sprite")
+        + 'var OFFICE_SPRITE_ASSET_VERSION = "v3";\n'
+        + _extract_js_function(js, "patternOfficeSprite")
+    )
+
 # An empty-room render produces just the empty-state note.
 _OFFICE_MAP_EMPTY_GOLDEN = "<div class=\"office-map-empty\">No agents to place on the map</div>"
 
@@ -3582,12 +3601,12 @@ function makeGrid() {
 def test_ui_console_office_map_placement_is_byte_identical(tmp_path):
     # Characterization: run patternOfficeMapPlacement against a DOM stub and
     # assert the serialized cell/sprite tree matches CURRENT behavior exactly.
-    # The chibi sprite slot now carries an inline SVG (TASK-AR-592 v2); the head
-    # + tail of the tree are byte-checked and the sprite body verified to be the
-    # role's chibi SVG.
+    # The sprite slot now carries an inline SVG; default render is the v3
+    # category sprite (TASK-AR-592 v3, additive). The head + tail of the tree
+    # are byte-checked and the sprite body verified to be the role's v3 SVG.
     js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
     helper = _extract_js_function(js, "patternOfficeMapPlacement")
-    script = _chibi_deps(js) + helper + _OFFICE_DOM_STUB + """
+    script = _office_sprite_deps(js) + helper + _OFFICE_DOM_STUB + """
 const grid = makeGrid();
 const rooms = [{ id: "dev", name: "Engineering", token: "blue", occupant_count: 1, rect: { col: 2, row: 1, cols: 4, rows: 3 } }];
 const agents = [{ id: "a1", room_id: "dev", role: "lead-engineer", presence: "online", display_name: "Ada", action_label: "reviewing", current_task_id: "TASK-AR-1", glyph: "G", avatar: "AD", callsign: "ada", cell: { fx: 0.6, fy: 0.4 } }];
@@ -3597,14 +3616,14 @@ process.stdout.write(grid.children.map(serialize).join(""));
     out = _run_node(tmp_path, script)
     assert out.startswith(_OFFICE_MAP_GOLDEN_HEAD), out[:400]
     assert out.endswith(_OFFICE_MAP_GOLDEN_TAIL), out[-400:]
-    # The sprite slot holds the lead-engineer chibi: an inline pixel SVG with the
-    # role accent + the hard-hat prop color, and no raw hex (token-driven).
+    # The sprite slot holds the lead-engineer v3 sprite (Engineering category):
+    # an inline pixel SVG with the category accent + filled face + the accent
+    # hard-hat, and no raw hex (token-driven).
     sprite = out[len(_OFFICE_MAP_GOLDEN_HEAD):-len(_OFFICE_MAP_GOLDEN_TAIL)]
     assert sprite.startswith("<svg")
-    assert 'class="agent-character chibi-sprite"' in sprite
-    assert "var(--primary)" in sprite  # lead-engineer accent
+    assert 'class="agent-character v3-sprite"' in sprite
+    assert "var(--primary)" in sprite  # Engineering category accent (blue)
     assert "var(--office-skin)" in sprite  # filled face (Owner: no empty center)
-    assert "var(--warning)" in sprite  # hard-hat prop
     assert not re.search(r"#[0-9a-fA-F]{3,8}", sprite)  # token-driven, no raw hex
 
 
@@ -3622,12 +3641,12 @@ process.stdout.write(grid.children.map(serialize).join(""));
 
 
 def test_ui_console_office_map_sprite_is_chibi_and_tooltip_is_rich(tmp_path):
-    # The agent slot renders the chibi pixel SVG (not the 2-letter text avatar),
-    # and the hover tooltip is the richer "who . status . task" form, mirrored
-    # into aria-label (a11y, not color-only).
+    # The agent slot renders the v3 category pixel SVG (not the 2-letter text
+    # avatar), and the hover tooltip is the richer "who . status . task" form,
+    # mirrored into aria-label (a11y, not color-only).
     js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
     helper = _extract_js_function(js, "patternOfficeMapPlacement")
-    script = _chibi_deps(js) + helper + _OFFICE_DOM_STUB + """
+    script = _office_sprite_deps(js) + helper + _OFFICE_DOM_STUB + """
 const grid = makeGrid();
 const rooms = [{ id: "dev", name: "Engineering", token: "blue", occupant_count: 1, rect: { col: 0, row: 0, cols: 2, rows: 2 } }];
 const agents = [{ id: "a1", room_id: "dev", role: "qa", presence: "working", display_name: "Quinn", action_label: "verifying", current_task_id: "TASK-AR-9", glyph: "G", avatar: "QU", callsign: "quinn", cell: { fx: 0.5, fy: 0.5 } }];
@@ -3635,10 +3654,10 @@ patternOfficeMapPlacement(grid, rooms, agents, { document: makeDoc() });
 process.stdout.write(grid.children.map(serialize).join(""));
 """
     out = _run_node(tmp_path, script)
-    # Chibi sprite present (inline SVG), not the old text avatar.
-    assert "chibi-sprite" in out
+    # v3 sprite present (inline SVG), not the old text avatar.
+    assert "v3-sprite" in out
     assert "<svg" in out
-    assert "var(--success)" in out  # qa accent
+    assert "var(--danger)" in out  # qa -> Quality/Audit category accent (red)
     # Rich tooltip with role . status . task -- in BOTH title and aria-label.
     assert 'title="Quinn . verifying . TASK-AR-9"' in out
     assert 'aria-label="Quinn . verifying . TASK-AR-9"' in out
@@ -3652,7 +3671,7 @@ def test_ui_console_office_map_tooltip_omits_task_when_absent(tmp_path):
     # No current task -> tooltip is just "who . status" (no trailing separator).
     js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
     helper = _extract_js_function(js, "patternOfficeMapPlacement")
-    script = _chibi_deps(js) + helper + _OFFICE_DOM_STUB + """
+    script = _office_sprite_deps(js) + helper + _OFFICE_DOM_STUB + """
 const grid = makeGrid();
 const rooms = [{ id: "dev", name: "E", token: "blue", occupant_count: 1, rect: { col: 0, row: 0, cols: 2, rows: 2 } }];
 const agents = [{ id: "a1", room_id: "dev", role: "qa", presence: "online", display_name: "Quinn", action_label: "idle", glyph: "G", avatar: "QU", callsign: "quinn", cell: { fx: 0.5, fy: 0.5 } }];

@@ -1344,6 +1344,233 @@ function patternChibiSprite(role, options) {
   );
 }
 
+/* ===== Pattern component: v3 category office sprite (TASK-AR-592 v3) ========
+ * patternV3Sprite(role, options) returns an inline pixel-art SVG of a cute
+ * agent character for the Office Map, built on the GrafxKid "RPG character"
+ * CC0 base (OpenGameArt CC0 -- attribution NOT required; provenance in
+ * agents/project/assets/agent-characters/v3/base/SOURCES.md). It is the JS twin
+ * of the deterministic Python generator at
+ * agents/project/assets/agent-characters/v3/generate_sprites.py -- the BASE +
+ * accessory grids and role->category map are identical, so the served sprite
+ * matches the on-disk catalog SVG cell-for-cell (verified by tests).
+ *
+ * Design: the 34 ORG-MODEL roles are grouped into 8 CATEGORIES; a category is
+ * distinguished by an accessory overlay (hat/item) + a category token color
+ * (NOT 34 distinct bodies). Role is conveyed by item + color, never hue alone
+ * (a glyph/word badge carries status). Every fill is a house CSS var (no raw
+ * hex) so the design-system gate stays green and dark-theme tokens cascade.
+ * Each rect carries an inline fill= (not a shared CSS class) so multiple
+ * sprites on one page never collide. ASCII-only output (cp949 node guard).
+ * v3 is ADDITIVE: patternOfficeSprite() prefers v3 and falls back to the v2
+ * chibi twin, which itself falls back to a base sprite -- the slot is never
+ * empty and v1/v2 are preserved. Maturity tier: standard.
+ */
+var _V3_BASE = [
+  ".....KKKKKK.....",
+  "....KJJJJJJK....",
+  "...KJJJJJJJJK...",
+  "...KJHHHHHHJK...",
+  "...KHHHHHHHHK...",
+  "...KHFHHHHFHK...",
+  "...KHWFHHFWHK...",
+  "...KHHHHHHHHK...",
+  "...KhBHFFHBhK...",
+  "....KHHHHHHK....",
+  "....KaHHHHaK....",
+  "...KaAAAAAAaK...",
+  "...KAAAWWAAAK...",
+  "...KAAAWWAAAK...",
+  "...KhAAAAAAhK...",
+  "....KK..KK....."
+];
+
+/* Per-CATEGORY accessory overlay (hat/item). Capital/prop cell wins over base. */
+var _V3_ACCESSORIES = {
+  hardhat: [
+    ".....AAAAAA.....", "....AAAAAAAA....", "...AAAAAAAAAA...", "..KAAAAAAAAAAK..",
+    "...K........K...", "................", "................", "................",
+    "................", "................", "................", "................",
+    "................", "................", "................", "................"
+  ],
+  beret: [
+    "....AAA.........", "...AAAAAA.W.....", "..AAAAAAAAWK....", "...aaaaaa..K....",
+    "...........K....", "................", "................", "................",
+    "................", "................", "................", "................",
+    "................", "................", "................", "................"
+  ],
+  magnifier: [
+    "................", "................", "..........KKK...", ".........KaaaK..",
+    ".........KaWaK..", ".........KaaaK..", "..........KKK...", "...........KK...",
+    "............KK..", "................", "................", "................",
+    "................", "................", "................", "................"
+  ],
+  binoculars: [
+    "................", "................", "................", "................",
+    "................", "..KAAK..KAAK....", "..KAWK..KAWK....", "..KAAK..KAAK....",
+    "...KK....KK.....", "................", "................", "................",
+    "................", "................", "................", "................"
+  ],
+  crown: [
+    "...A.A.A.A.A....", "...AAAAAAAAA....", "...AWAKAWAKA....", "...KKKKKKKKK....",
+    "................", "................", "................", "................",
+    "................", "................", "................", "................",
+    "................", "................", "................", "................"
+  ],
+  coin: [
+    "................", "................", "..........KKK...", ".........KAAAK..",
+    ".........KAWAK..", ".........KWAWK..", ".........KAWAK..", ".........KAAAK..",
+    "..........KKK...", "................", "................", "................",
+    "................", "................", "................", "................"
+  ],
+  megaphone: [
+    "................", "................", "................", "...........KAK..",
+    "..........KAAKW.", ".........KAAaKW.", ".........KAAaKW.", "..........KAAKW.",
+    "...........KAK..", "................", "................", "................",
+    "................", "................", "................", "................"
+  ],
+  book: [
+    "................", "................", "................", ".........KKKKKK.",
+    ".........KWWAWWK", ".........KWWAWWK", ".........KWWAWWK", ".........KWWAWWK",
+    ".........KKKKKK.", "................", "................", "................",
+    "................", "................", "................", "................"
+  ]
+};
+
+/* category id -> { accent token key, accessory key }. Mirrors Python CATEGORIES. */
+var _V3_CATEGORY = {
+  "engineering":     { accent: "primary", acc: "hardhat" },
+  "design":          { accent: "teal",    acc: "beret" },
+  "quality-audit":   { accent: "danger",  acc: "magnifier" },
+  "research":        { accent: "amber",   acc: "binoculars" },
+  "leadership":      { accent: "violet",  acc: "crown" },
+  "finance-ops":     { accent: "warning", acc: "coin" },
+  "marketing-sales": { accent: "success", acc: "megaphone" },
+  "docs":            { accent: "muted",   acc: "book" }
+};
+
+/* role -> category. Every canonical ORG-MODEL role (34) + Owner aliases. */
+var _V3_ROLE_CATEGORY = {
+  "lead-engineer": "engineering",
+  "worker-engineer": "engineering",
+  "lead-designer": "design",
+  "design-system-steward": "design",
+  "interface-designer": "design",
+  "ux-evaluator": "design",
+  "qa": "quality-audit",
+  "independent-auditor": "quality-audit",
+  "risk-controller": "quality-audit",
+  "release-integrity": "quality-audit",
+  "research-agent": "research",
+  "progress-scout": "research",
+  "business-analyst": "research",
+  "growth-analyst": "research",
+  "managing-partner": "leadership",
+  "council": "leadership",
+  "finance-controller": "finance-ops",
+  "accounting-operator": "finance-ops",
+  "asset-steward": "finance-ops",
+  "revenue-analyst": "finance-ops",
+  "sales-ops": "finance-ops",
+  "marketing-lead": "marketing-sales",
+  "content-marketer": "marketing-sales",
+  "brand-steward": "marketing-sales",
+  "sales-lead": "marketing-sales",
+  "crm-operator": "marketing-sales",
+  "partnership-manager": "marketing-sales",
+  "doc-steward": "docs",
+  "operations-lead": "finance-ops",
+  "support-operator": "finance-ops",
+  "customer-success-steward": "marketing-sales",
+  "process-steward": "docs",
+  "strategy-lead": "leadership",
+  "planning-architect": "leadership",
+  "portfolio-steward": "leadership"
+};
+
+/* accent key -> [solid token, soft token]. Bare var() (no hex; gate-safe). */
+var _V3_ACCENT_TOKENS = {
+  primary: ["var(--primary)", "var(--primary-soft)"],
+  teal:    ["var(--teal)",    "var(--teal-soft)"],
+  danger:  ["var(--danger)",  "var(--danger-soft)"],
+  amber:   ["var(--amber)",   "var(--warning-soft)"],
+  violet:  ["var(--violet)",  "var(--violet-soft)"],
+  warning: ["var(--warning)", "var(--warning-soft)"],
+  success: ["var(--success)", "var(--success-soft)"],
+  muted:   ["var(--muted)",   "var(--raise-strong)"]
+};
+
+/* Static (accent-independent) art key -> CSS var fill. */
+var _V3_STATIC_FILL = {
+  K: "var(--ink)",
+  H: "var(--office-skin)",
+  h: "var(--office-skin-shade)",
+  J: "var(--office-hair)",
+  W: "var(--paper)",
+  F: "var(--ink)",
+  B: "var(--danger)"
+};
+
+function _v3Fill(ch, accentKey) {
+  var tokens = _V3_ACCENT_TOKENS[accentKey] || _V3_ACCENT_TOKENS.primary;
+  if (ch === "A") return tokens[0];
+  if (ch === "a") return tokens[1];
+  return _V3_STATIC_FILL[ch] || "var(--ink)";
+}
+
+function v3CategoryForRole(role) {
+  return _V3_ROLE_CATEGORY[role] || "engineering";
+}
+
+function patternV3Sprite(role, options) {
+  var opts = options || {};
+  var size = opts.size || 30;
+  var label = opts.label || "";
+  var catId = v3CategoryForRole(role);
+  var cat = _V3_CATEGORY[catId] || _V3_CATEGORY.engineering;
+  var accessory = _V3_ACCESSORIES[cat.acc];
+  var px = 8;
+  var view = 128;
+  var rects = "";
+  for (var r = 0; r < _V3_BASE.length; r++) {
+    var baseRow = _V3_BASE[r];
+    var accRow = accessory ? accessory[r] : null;
+    for (var c = 0; c < baseRow.length; c++) {
+      var ach = accRow ? accRow.charAt(c) : ".";
+      var ch = (ach !== ".") ? ach : baseRow.charAt(c);
+      if (ch === ".") continue;
+      rects += '<rect x="' + (c * px) + '" y="' + (r * px) +
+        '" width="' + px + '" height="' + px + '" fill="' + _v3Fill(ch, cat.accent) + '"/>';
+    }
+  }
+  var titleEl = label ? ("<title>" + escapeHtml(label) + "</title>") : "";
+  return (
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + view + ' ' + view + '"' +
+    ' width="' + size + '" height="' + size + '" class="agent-character v3-sprite"' +
+    ' shape-rendering="crispEdges" role="img" aria-hidden="true" focusable="false">' +
+    titleEl + rects + '</svg>'
+  );
+}
+
+/* Additive sprite selector: prefer v3, gracefully fall back to the v2 chibi
+ * twin (which itself falls back to a base sprite). assetVersion lets a caller
+ * pin a version; default "v3". v1/v2 are preserved as fallbacks, never deleted.
+ */
+var OFFICE_SPRITE_ASSET_VERSION = "v3";
+
+function patternOfficeSprite(role, options) {
+  var opts = options || {};
+  var version = opts.assetVersion || OFFICE_SPRITE_ASSET_VERSION;
+  if (version === "v3" && typeof patternV3Sprite === "function") {
+    var svg = patternV3Sprite(role, opts);
+    if (svg) return svg;
+  }
+  // Fallback path: v2 chibi twin (additive; v2 preserved).
+  if (typeof patternChibiSprite === "function") {
+    return patternChibiSprite(role, opts);
+  }
+  return "";
+}
+
 /* ===== Pattern component: office-map DOM placement (TASK-AR-364/592) ========
  * patternOfficeMapPlacement(grid, rooms, agents, options) owns the one-off DOM
  * positioning for the 2D office map: it clears `grid`, then for each room
@@ -1427,12 +1654,18 @@ function patternOfficeMapPlacement(grid, rooms, agents, options = {}) {
       glyph.setAttribute("aria-hidden", "true");
       sprite.appendChild(glyph);
 
-      // Chibi pixel sprite (TASK-AR-592 v2): colourful, role-distinct character.
-      // Falls back to the server-provided 2-letter avatar text if the role has
-      // no sprite mapping, so the slot is never empty.
+      // Office sprite (TASK-AR-592 v3): GrafxKid-CC0-based category character,
+      // colourful + role-readable via accessory + token color. ADDITIVE: prefers
+      // v3, gracefully falls back to the v2 chibi twin if a v3 asset is missing
+      // (assetVersion can pin a version). Falls back further to the
+      // server-provided 2-letter avatar text so the slot is never empty.
       const avatar = doc.createElement("div");
       avatar.className = "office-agent-sprite";
-      const svg = patternChibiSprite(agent.role || "", { size: 30, label: who });
+      const svg = patternOfficeSprite(agent.role || "", {
+        size: 30,
+        label: who,
+        assetVersion: opts.spriteVersion || OFFICE_SPRITE_ASSET_VERSION,
+      });
       if (svg) {
         avatar.innerHTML = svg;
       } else {
