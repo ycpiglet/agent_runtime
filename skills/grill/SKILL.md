@@ -1,6 +1,6 @@
 ---
 name: grill
-version: 1.0.0
+version: 1.1.0
 description: Use when the Owner wants to turn a program/asset they are building with agent_runtime into a tailored plan — an intensive discovery interview ("grill") that drafts a blueprint and a fit vision/direction/methodology. Planning-strategy lane entry point.
 triggers:
   - grill
@@ -53,19 +53,34 @@ answer to `INTAKE.md` as you go. If the Owner declines or does not know, write
    what timeframe?
 6. **Monetization hypothesis** — How could this make money? (your hypothesis)
 
+### Adaptive follow-ups
+After an answer, ask a focused follow-up only when it materially sharpens the
+blueprint (e.g. a vague customer → "who feels this most acutely first?"). Stop once
+the answer is concrete; do not interrogate.
+
+### Domain frame
+Pick the closest domain and ask its 1–2 extra questions; record under the matching
+INTAKE field and mark unknowns `OWNER-DECIDES`:
+- **SaaS/tool** — pricing model (seat/usage/flat?), activation moment, churn risk.
+- **Content/media** — distribution channel, cadence, what compounds over time.
+- **Marketplace/network** — which side is harder to get, cold-start plan.
+- **Services/agency** — delivery capacity, repeatability, productization path.
+
 When the frame is covered, write `INTAKE.md` using the template below.
 
 ## Phase B — Blueprint
 
 Synthesize the intake into `BLUEPRINT.md` using the template below. Fill each field
-from the grill; mark gaps `OWNER-DECIDES`. Do not fabricate.
+from the grill; mark gaps `OWNER-DECIDES`. Do not fabricate. Include the
+unit-economics hypothesis, the assumptions register, and the risk register.
 
 ## Phase C — Vision · Direction · Methodology
 
 Write `VISION-DIRECTION.md` using the template below:
 - **Vision** — one paragraph derived from the blueprint; confirm it with the Owner.
-- **Direction** — 3–5 roadmap themes / next bets, presented as options for the
-  Owner to choose.
+- **Direction** — present 3–5 options scored on a decision matrix
+  (Impact / Ease / Safety / Fit / Speed, each 1–5, higher is better), with a
+  **recommended** option + rationale for the Owner to confirm.
 - **Methodology** — map the work to lanes/cycles: reference
   `agents/project/WORK-LANE-PLAYBOOKS.md` for the per-lane procedure and
   `agents/project/BUSINESS-OPERATING-SYSTEM.md` for the cycle contract. Suggest a
@@ -105,6 +120,22 @@ taskset.
 | Cost notes | ... |
 | Key risks | ... |
 | Open questions | OWNER-DECIDES: ... |
+
+## Unit economics (hypothesis — OWNER-DECIDES the numbers)
+- Price / unit: ...
+- CAC (cost to acquire): ...
+- LTV (lifetime value): ...
+- Gross margin: ...
+
+## Assumptions register
+| Assumption | Confidence (lo/med/hi) | How to validate |
+| --- | --- | --- |
+| ... | ... | ... |
+
+## Risk register
+| Risk | Likelihood | Impact | Mitigation |
+| --- | --- | --- | --- |
+| ... | ... | ... | ... |
 ```
 
 ### VISION-DIRECTION.md
@@ -115,10 +146,14 @@ taskset.
 ## Vision
 <one paragraph>
 
-## Direction (options — Owner picks)
-1. ...
-2. ...
-3. ...
+## Direction options (scored)
+| Option | Impact | Ease | Safety | Fit | Speed | Total |
+| --- | --- | --- | --- | --- | --- | --- |
+| A: ... | 1-5 | 1-5 | 1-5 | 1-5 | 1-5 | sum |
+| B: ... | | | | | | |
+| C: ... | | | | | | |
+
+**Recommended:** <option> — <rationale> (Owner confirms).
 
 ## Methodology (lanes & cycles)
 - Lane: <lane> — <what to draft> (see agents/project/WORK-LANE-PLAYBOOKS.md)
