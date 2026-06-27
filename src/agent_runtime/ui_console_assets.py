@@ -776,7 +776,8 @@ HTML = """<!doctype html>
               <p id="org-chart-summary" class="org-chart-summary" role="status"></p>
             </header>
             <div class="org-chart-stage">
-              <svg id="org-chart-svg" class="org-chart-svg" viewBox="0 0 1200 720" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Agent organization chart: director to teams to roles"></svg>
+              <svg id="org-chart-svg" class="org-chart-svg" viewBox="0 0 1200 720" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Agent organization chart: director to teams to roles" hidden></svg>
+              <div id="org-chart-canvas" class="org-chart-canvas" role="group" aria-label="Organization: director, teams, and roles"></div>
             </div>
             <ul id="org-chart-legend" class="org-chart-legend" aria-label="Org chart tier and team legend"></ul>
           </section>
@@ -5313,14 +5314,61 @@ pre {
   background: var(--canvas-grad);
   overflow: auto;
 }
-/* SPEC: the org chart sizes to its real extent (set inline by renderOrgChart) and
-   the stage scrolls horizontally, so cards stay full-size instead of overlapping. */
-.org-chart-stage { overflow-x: auto; overflow-y: auto; max-height: 640px; }
+.org-chart-stage { overflow: visible; }
 .org-chart-svg {
   display: block;
   width: 100%;
   height: 560px;
 }
+/* SPEC-org-chart-cards: glanceable, spacious team-card grid (wraps to fit width). */
+.org-chart-canvas { display: flex; flex-direction: column; gap: var(--space-2xl); padding: var(--space-md) 0; }
+.org-director-card {
+  align-self: center; display: inline-flex; align-items: center; gap: var(--space-sm);
+  padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md);
+  border: 1px solid var(--violet-line, var(--line-strong)); background: var(--violet-soft, var(--panel-strong));
+  color: var(--ink); font-size: var(--font-size-ui-15); font-weight: 700;
+}
+.org-director-glyph { color: var(--violet, var(--primary)); }
+.org-director-tier { color: var(--muted); font-size: var(--font-size-ui-12); font-weight: 600; }
+.org-teams-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-xl); align-items: start;
+}
+.org-team-card {
+  display: flex; flex-direction: column; gap: var(--space-md);
+  border: 1px solid var(--line); border-top: 3px solid var(--line-strong);
+  border-radius: var(--radius-md); background: var(--surface-raised);
+  padding: var(--space-lg); cursor: pointer;
+}
+.org-team-card:hover { border-color: var(--primary-line); }
+.org-team-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.org-team-card.tone-primary { border-top-color: var(--primary); }
+.org-team-card.tone-violet { border-top-color: var(--violet, var(--primary)); }
+.org-team-card.tone-success { border-top-color: var(--success); }
+.org-team-card.tone-danger { border-top-color: var(--danger); }
+.org-team-card.tone-warning { border-top-color: var(--warning); }
+.org-team-card.tone-teal { border-top-color: var(--teal, var(--primary)); }
+.org-team-card.tone-amber { border-top-color: var(--amber, var(--warning)); }
+.org-team-card.tone-muted { border-top-color: var(--muted); }
+.org-team-card-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-sm); }
+.org-team-card-name { color: var(--ink); font-size: var(--font-size-ui-14); font-weight: 700; }
+.org-team-card-meta { color: var(--muted); font-size: var(--font-size-ui-11); }
+.org-team-card-load { color: var(--muted); font-size: var(--font-size-ui-11); font-weight: 600; }
+.org-team-card-load.load-band-busy { color: var(--warning); }
+.org-team-card-load.load-band-overload { color: var(--danger); }
+.org-team-card-load.has-blocked { color: var(--danger); }
+.org-team-roles { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-sm); }
+.org-role-chip {
+  display: flex; align-items: center; gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); background: var(--panel); cursor: pointer;
+  font-size: var(--font-size-ui-12);
+}
+.org-role-chip:hover { border-color: var(--primary-line); background: var(--primary-soft); }
+.org-role-chip:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.org-role-glyph { color: var(--muted); font-weight: 700; }
+.org-role-name { color: var(--ink); flex: 1 1 auto; }
+.org-role-tier { color: var(--muted); font-size: var(--font-size-ui-10); }
 .org-chart-empty { fill: var(--subtle); font-size: var(--font-size-ui-14); }
 .org-chart-edge {
   stroke: var(--line-strong);
@@ -10652,6 +10700,59 @@ function orgChartNodePositions(nodes, edges) {
   }).positions;
 }
 
+// SPEC-org-chart-cards: build the glanceable team-card grid. Director banner on top;
+// each team is a card with its roles grouped beneath it; the grid wraps to fit the
+// viewport (so the whole org reads at a glance) with generous spacing. All text is
+// escapeHtml'd; drill-down via data-drill-* (wired by wireTeamDrilldown).
+function renderOrgChartCards(canvas, data) {
+  const nodes = data.nodes || [];
+  const director = nodes.filter((n) => n.kind === "director")[0];
+  const teams = nodes.filter((n) => n.kind === "team" && (n.role_count || 0) > 0);
+  const rolesByTeam = {};
+  nodes.filter((n) => n.kind === "role").forEach((r) => {
+    const key = String(r.team || "");
+    (rolesByTeam[key] = rolesByTeam[key] || []).push(r);
+  });
+  const dirToken = (director && director.color_token) || "violet";
+  const dirBadge = (director && director.tier_badge) || {};
+  const dirName = director ? (director.display_name || director.id) : "Director";
+  const teamCards = teams.map((team) => {
+    const token = team.color_token || "muted";
+    const roles = (rolesByTeam[String(team.id)] || []).slice()
+      .sort((a, b) => String(a.display_name || a.id).localeCompare(String(b.display_name || b.id)));
+    const active = Number(team.active_count || 0);
+    const blocked = Number(team.blocked_count || 0);
+    const band = String(team.load_band || "idle");
+    const loadStr = `${active} ${t("org.load.active")}` + (blocked ? ` \\u00b7 ${blocked} ${t("org.load.blocked")}` : "");
+    const roleRows = roles.map((r) => {
+      const g = (r.tier_badge && r.tier_badge.glyph) || "-";
+      const tier = (r.tier_badge && r.tier_badge.label) || r.tier || "";
+      return `<li class="org-role-chip" role="button" tabindex="0"`
+        + ` data-drill-team="${escapeHtml(r.team || team.id)}" data-drill-role="${escapeHtml(r.id)}"`
+        + ` aria-label="${escapeHtml(String(r.display_name || r.id) + " - " + String(tier))}"`
+        + ` title="${escapeHtml(String(r.display_name || r.id))}">`
+        + `<span class="org-role-glyph" aria-hidden="true">${escapeHtml(g)}</span>`
+        + `<span class="org-role-name">${escapeHtml(String(r.display_name || r.id))}</span>`
+        + `<span class="org-role-tier">${escapeHtml(String(tier))}</span></li>`;
+    }).join("");
+    return `<article class="org-team-card tone-${escapeHtml(token)}" role="button" tabindex="0"`
+      + ` aria-label="${escapeHtml(String(team.display_name || team.id) + " - " + String((team.role_count || roles.length)) + " roles")}"`
+      + ` data-drill-team="${escapeHtml(team.id)}">`
+      + `<header class="org-team-card-head">`
+      + `<span class="org-team-card-name">${escapeHtml(String(team.display_name || team.id))}</span>`
+      + `<span class="org-team-card-meta">${escapeHtml(String((team.role_count || roles.length) + " roles"))}</span>`
+      + `</header>`
+      + `<div class="org-team-card-load load-band-${escapeHtml(band)}${blocked ? " has-blocked" : ""}">${escapeHtml(loadStr)}</div>`
+      + `<ul class="org-team-roles">${roleRows}</ul></article>`;
+  }).join("");
+  canvas.innerHTML =
+    `<div class="org-director-card tone-${escapeHtml(dirToken)}">`
+    + `<span class="org-director-glyph" aria-hidden="true">${escapeHtml(String(dirBadge.glyph || "*"))}</span>`
+    + `<span class="org-director-name">${escapeHtml(String(dirName))}</span>`
+    + `<span class="org-director-tier">${escapeHtml(String(dirBadge.label || "Director"))}</span></div>`
+    + `<div class="org-teams-grid">${teamCards}</div>`;
+}
+
 function renderOrgChart() {
   const svg = $("org-chart-svg");
   if (!svg) return;
@@ -10676,6 +10777,23 @@ function renderOrgChart() {
     note.setAttribute("text-anchor", "middle");
     note.textContent = "No org model";
     svg.appendChild(note);
+    return;
+  }
+
+  // SPEC-org-chart-cards: a glanceable, spacious team-card grid (roles grouped under
+  // their team) that wraps to fit the viewport -- replaces the wide flat SVG tree
+  // that crushed 32 roles into one row. The SVG path below is kept as a fallback.
+  const canvas = $("org-chart-canvas");
+  if (canvas) {
+    svg.setAttribute("hidden", "hidden");
+    renderOrgChartCards(canvas, data);
+    wireTeamDrilldown(canvas);
+    const legendEl = $("org-chart-legend");
+    if (legendEl) {
+      const tb = data.tier_badges || {};
+      legendEl.innerHTML = ["director", "planner", "reviewer", "worker"].filter((tr) => tb[tr])
+        .map((tr) => `<li><span class="legend-glyph">${escapeHtml(tb[tr].glyph)}</span>${escapeHtml(tb[tr].label)}</li>`).join("");
+    }
     return;
   }
 

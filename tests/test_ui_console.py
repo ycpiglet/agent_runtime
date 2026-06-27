@@ -5083,15 +5083,17 @@ def test_ui_console_org_chart_renderer_wires_sprite_dagre_and_drilldown(tmp_path
 
 def test_ui_console_org_chart_renderer_is_accessible_and_reduced_motion(tmp_path):
     js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
-    # Tier conveyed by glyph + word (not color alone) and ARIA labels on nodes.
+    # Card renderer: tier conveyed by glyph + word (not color alone); cards/roles are
+    # keyboard-focusable buttons with ARIA labels.
     assert "tier_badge" in js
-    assert "aria-label" in js.split("function renderOrgChart()", 1)[1][:4000]
-    # Keyboard activation + reduced-motion honoured.
+    cards = js.split("function renderOrgChartCards(", 1)[1][:4000]
+    assert "aria-label" in cards
+    assert 'role="button"' in cards and 'tabindex="0"' in cards
+    # SVG fallback still honours reduced motion.
     assert "prefersReducedMotion()" in js
     css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
-    assert ".org-chart-svg" in css
-    assert ".org-chart-node:focus-visible" in css
-    assert "prefers-reduced-motion: reduce" in css.split(".org-chart", 1)[1][:4000] or True
+    assert ".org-team-card" in css
+    assert ".org-role-chip:focus-visible" in css
 
 
 def test_ui_console_org_chart_route_serves_resource(tmp_path):
