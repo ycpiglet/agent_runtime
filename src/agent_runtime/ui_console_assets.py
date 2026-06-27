@@ -7304,6 +7304,15 @@ function applyTranslations() {
   if (langLabel && i18nStrings["common.language"]) langLabel.textContent = t("common.language");
   const widgetsTitle = $("home-widgets-title");
   if (widgetsTitle && i18nStrings["widgets.title"]) widgetsTitle.textContent = t("widgets.title");
+  // Nav tab labels by data-view (the core tabs carry no data-i18n attr). Owner:
+  // tab names were stuck in English under KR. Only set when a translation exists.
+  document.querySelectorAll(".sidebar-link[data-view]").forEach((link) => {
+    const key = "nav." + link.getAttribute("data-view");
+    const label = link.querySelector(".sidebar-label");
+    if (label && i18nStrings[key]) label.textContent = t(key);
+  });
+  const moreLabel = document.querySelector(".sidebar-more-summary .sidebar-label");
+  if (moreLabel && i18nStrings["nav.more"]) moreLabel.textContent = t("nav.more");
 }
 
 function setLanguage(lang, persist) {

@@ -1449,6 +1449,17 @@ def test_live_map_draws_active_agents_only(tmp_path):
     assert "alice" not in agent_nodes
 
 
+def test_nav_tab_labels_localized(tmp_path):
+    # Owner: tab names stuck in English under KR. Core tabs lacked data-i18n; now
+    # localized by data-view, and every nav key carries a distinct Korean label.
+    js = ui_console.build_response("/app.js", tmp_path)
+    assert b".sidebar-link[data-view]" in js.body
+    for key in ("nav.board", "nav.work", "nav.team", "nav.meeting", "nav.events",
+                "nav.search", "nav.office", "nav.map", "nav.dashboard", "nav.more"):
+        entry = ui_state.I18N_STRINGS[key]
+        assert entry["ko"] and entry["ko"] != entry["en"]
+
+
 def test_ui_console_graph_state_and_roadmap_routes(tmp_path):
     _write_task(tmp_path, "TASK-UI-232")
     _write(
