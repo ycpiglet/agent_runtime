@@ -1206,6 +1206,10 @@ def build_live_map(
                 continue
             presence = str(card.get("presence") or "offline")
             presence_counts[presence] = presence_counts.get(presence, 0) + 1
+            # Active-only nodes: count everyone for the roll-up, but only DRAW agents
+            # who are present/working now (no historical-instance clutter).
+            if not _agent_is_active(card):
+                continue
             presence_agents.append(
                 {
                     "id": card.get("id"),
@@ -1231,6 +1235,8 @@ def build_live_map(
         agent_id = str(agent.get("role") or agent.get("id") or "").strip()
         if not agent_id:
             continue
+        if not bool(agent.get("online")):
+            continue  # active-only: don't draw offline session agents
         node = add_node(agent_id, "agent", agent.get("display_name") or agent_id)
         if node is not None and "presence" not in nodes[node]:
             nodes[node]["presence"] = "online" if agent.get("online") else "offline"
@@ -4811,6 +4817,20 @@ def _office_action_for_card(card: dict[str, Any], activity: dict[str, Any] | Non
     return "idle"
 
 
+_ACTIVE_PRESENCE = {"online", "working", "reviewing", "in_meeting", "busy", "active"}
+
+
+def _agent_is_active(card: dict[str, Any]) -> bool:
+    """Maps show an agent only when it is actually present/working NOW — online, in
+    an active presence state, or holding a current task. Keeps the office/live maps
+    to live agents instead of every historical spawned instance (SPEC: active-only)."""
+    if bool(card.get("online")):
+        return True
+    if str(card.get("presence") or "").strip().lower() in _ACTIVE_PRESENCE:
+        return True
+    return bool(str(card.get("current_task_id") or "").strip())
+
+
 def build_office_map(
     team_agents: dict[str, Any],
     events: list[dict[str, Any]],
@@ -4847,6 +4867,10 @@ def build_office_map(
         for card in team.get("agents", []) or []:
             role = str(card.get("role") or "").strip()
             if not role:
+                continue
+            # Active-only: skip historical/offline instances so the rooms show who is
+            # actually here now, not every agent ever spawned (Owner: dev room had 65).
+            if not _agent_is_active(card):
                 continue
             activity = activity_by_role.get(_normalize_role(role))
             action = _office_action_for_card(card, activity)

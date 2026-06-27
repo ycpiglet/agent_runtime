@@ -1418,6 +1418,37 @@ def test_ui_console_board_taskview_assets(tmp_path):
     assert b".lane-more" in css.body
 
 
+def test_agent_is_active_helper(tmp_path):
+    assert ui_state._agent_is_active({"online": True}) is True
+    assert ui_state._agent_is_active({"presence": "working"}) is True
+    assert ui_state._agent_is_active({"current_task_id": "TASK-1"}) is True
+    assert ui_state._agent_is_active({"presence": "offline", "online": False}) is False
+
+
+def test_office_map_shows_active_agents_only(tmp_path):
+    # Owner: office map dev room showed 65 offline historical instances. Maps must
+    # show only agents present/working NOW.
+    team_agents = {"teams": [{"team_id": "eng", "agents": [
+        {"id": "inst-1", "role": "engineer", "presence": "offline", "online": False},
+        {"id": "inst-2", "role": "engineer", "presence": "working", "online": False},
+        {"id": "inst-3", "role": "qa", "presence": "offline", "online": True},
+    ]}]}
+    om = ui_state.build_office_map(team_agents, [], "2026-06-27T00:00:00+09:00")
+    ids = {a["id"] for a in om["agents"]}
+    assert ids == {"inst-2", "inst-3"}
+
+
+def test_live_map_draws_active_agents_only(tmp_path):
+    team_agents = {"teams": [{"team_id": "eng", "agents": [
+        {"id": "i1", "role": "alice", "presence": "offline", "online": False},
+        {"id": "i2", "role": "bob", "presence": "working", "online": False},
+    ]}]}
+    lm = ui_state.build_live_map([], [], [], team_agents, "2026-06-27T00:00:00+09:00")
+    agent_nodes = {n["id"] for n in lm["nodes"] if n.get("kind") == "agent"}
+    assert "bob" in agent_nodes
+    assert "alice" not in agent_nodes
+
+
 def test_ui_console_graph_state_and_roadmap_routes(tmp_path):
     _write_task(tmp_path, "TASK-UI-232")
     _write(
