@@ -2441,6 +2441,7 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     "inbox.decide.recorded_hold": {"ko": "보류로 기록됐어요", "en": "Put on hold · recorded"},
     "inbox.decide.failed": {"ko": "전달하지 못했어요 — 다시 시도", "en": "Couldn't record — try again"},
     "inbox.decide.tally": {"ko": "이번 세션 결정", "en": "decisions this session"},
+    "inbox.decide.undo": {"ko": "되돌리기", "en": "Undo"},
     # ----- SPEC-health-snapshot-v1: insight-first work-status health strip --------
     "health.verdict.healthy": {"ko": "전반적으로 양호", "en": "Overall healthy"},
     "health.verdict.watch": {"ko": "주의 필요", "en": "Needs attention"},

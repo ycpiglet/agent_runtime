@@ -1460,6 +1460,24 @@ def test_nav_tab_labels_localized(tmp_path):
         assert entry["ko"] and entry["ko"] != entry["en"]
 
 
+def test_ui_console_decision_undo_removes_latest(tmp_path):
+    # Owner: an accidental decision must be reversible. Undo removes the latest
+    # decision proposal for the item and leaves an audit marker.
+    def post(body):
+        return ui_console.build_response(
+            "/api/commands", tmp_path, method="POST", body=json.dumps(body).encode("utf-8"))
+
+    post({"type": "decision.acknowledge", "target": "TASK-AR-900", "payload": {"actor": "owner"}})
+    dec_dir = tmp_path / ".ui_outbox" / "decisions"
+    assert len(list(dec_dir.glob("DECISION-*.json"))) == 1
+
+    r = post({"type": "decision.undo", "target": "TASK-AR-900", "payload": {"actor": "owner"}})
+    assert r.status == 202
+    assert json.loads(r.body.decode("utf-8"))["status"] == "queued"
+    assert len(list(dec_dir.glob("DECISION-*.json"))) == 0          # original removed
+    assert len(list(dec_dir.glob("DECISIONUNDO-*.json"))) == 1      # audit marker kept
+
+
 def test_ui_console_graph_state_and_roadmap_routes(tmp_path):
     _write_task(tmp_path, "TASK-UI-232")
     _write(

@@ -6787,6 +6787,12 @@ pre {
   margin: 0.5rem 0 0; color: var(--success); font-size: 0.82rem; font-weight: 700;
   animation: inboxDecideIn 160ms ease-out;
 }
+.inbox-decide-undo {
+  margin: 0.3rem 0 0; padding: 0; border: none; background: none;
+  color: var(--primary); font-size: 0.78rem; font-weight: 600;
+  text-decoration: underline; cursor: pointer;
+}
+.inbox-decide-undo:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   .inbox-decide-recorded { animation: none; }
   .inbox-decide-btn { transition: none; }
@@ -7644,7 +7650,34 @@ function queueDecision(commandType, item, reason) {
   });
 }
 
-function markDecisionRecorded(row, commandType, routed) {
+function restoreDecideBar(item, row) {
+  // Undo (Owner: accidental clicks must be reversible): drop the recorded state and
+  // bring the respond bar back so the item looks untouched.
+  row.classList.remove("is-decided");
+  const rec = row.querySelector(".inbox-decide-recorded");
+  if (rec) rec.remove();
+  const undo = row.querySelector(".inbox-decide-undo");
+  if (undo) undo.remove();
+  if (!row.querySelector(".inbox-decide")) row.appendChild(buildDecideBar(item, row));
+}
+
+async function undoDecision(item, row) {
+  try {
+    const result = await sendJson("/api/commands", {
+      type: "decision.undo",
+      payload: { type: "decision.undo", target: item.id, payload: { actor: "owner" } },
+    });
+    if (result && result.status === "failed") throw new Error("undo rejected");
+    restoreDecideBar(item, row);
+    if (decisionSessionCount > 0) decisionSessionCount -= 1;
+    const summary = $("inbox-detail-summary");
+    if (summary) summary.textContent = `${t("inbox.decide.tally")}: ${decisionSessionCount}`;
+  } catch (err) {
+    /* leave the recorded state + undo link so the operator can retry */
+  }
+}
+
+function markDecisionRecorded(item, row, commandType, routed) {
   row.classList.add("is-decided");
   const bar = row.querySelector(".inbox-decide");
   if (bar) bar.remove();
@@ -7654,6 +7687,12 @@ function markDecisionRecorded(row, commandType, routed) {
     // reached a real task's agent inbox (server-confirmed agent_routed).
     if (commandType === "decision.comment" && routed) copyKey = "inbox.decide.recorded_comment_routed";
     row.appendChild(inboxEl("p", "inbox-decide-recorded", "\\u2713 " + t(copyKey)));
+  }
+  if (!row.querySelector(".inbox-decide-undo")) {
+    const undoBtn = inboxEl("button", "inbox-decide-undo", t("inbox.decide.undo"));
+    undoBtn.type = "button";
+    undoBtn.addEventListener("click", () => undoDecision(item, row));
+    row.appendChild(undoBtn);
   }
   // The activated control was just removed with the bar; keep keyboard focus on
   // the row (now showing the confirmation) instead of dropping it to <body>.
@@ -7669,7 +7708,7 @@ async function submitDecision(commandType, item, row, reason, errorEl) {
     const result = await queueDecision(commandType, item, reason);
     if (result && result.status === "failed") throw new Error("decision rejected");
     const routed = !!(result && result.result && result.result.agent_routed);
-    markDecisionRecorded(row, commandType, routed);
+    markDecisionRecorded(item, row, commandType, routed);
   } catch (err) {
     if (errorEl) {
       errorEl.textContent = t("inbox.decide.failed");

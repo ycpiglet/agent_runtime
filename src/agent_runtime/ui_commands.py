@@ -208,7 +208,7 @@ TASK_BOARD_SYNC_COMMANDS = {"task.create", "task.update", "task.reorder", "task.
 # seen / I approve this"), comment (an opinion/question), and hold ("pause this").
 # All three only RECORD a decision under .ui_outbox/decisions/; a runtime executor
 # (v2) consumes them. They never mutate a canonical task from the UI.
-DECISION_COMMAND_TYPES = ("decision.acknowledge", "decision.comment", "decision.hold")
+DECISION_COMMAND_TYPES = ("decision.acknowledge", "decision.comment", "decision.hold", "decision.undo")
 COMMAND_TYPES = (
     TASK_COMMAND_TYPES
     + TASKSET_COMMAND_TYPES
@@ -1155,6 +1155,49 @@ def _decision_command(
     }
 
 
+def _decision_undo_command(root: Path, target: str | None, payload: dict[str, Any], now: str, command_id: str) -> dict[str, Any]:
+    """Undo the most recent operator decision on an inbox item (Owner: an accidental
+    click must be reversible). Removes the latest decision proposal for the target
+    and writes an audit marker. Proposal-only; never touches a canonical task. A
+    comment already relayed to an agent inbox cannot be unsent — only the record is
+    removed (honest limitation)."""
+    item_id = str(target or payload.get("target") or payload.get("id") or "").strip()
+    if not item_id:
+        return {"errors": ["target (inbox item id) is required"]}
+    decisions_dir = root / ".ui_outbox" / "decisions"
+    matches: list[tuple[str, Path]] = []
+    if decisions_dir.is_dir():
+        for p in sorted(decisions_dir.glob("DECISION-*.json")):
+            try:
+                rec = json.loads(p.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if rec.get("target") == item_id and rec.get("action") in set(_DECISION_ACTIONS.values()):
+                matches.append((str(rec.get("created_at") or ""), p))
+    removed: list[str] = []
+    if matches:
+        matches.sort()
+        latest = matches[-1][1]
+        removed.append(_rel(root, latest))
+        try:
+            latest.unlink()
+        except OSError:
+            pass
+    undo = {
+        "id": command_id.replace("COMMAND-", "DECISIONUNDO-"),
+        "type": "decision.undo",
+        "target": item_id,
+        "removed": removed,
+        "created_at": now,
+        "decided_by": str(payload.get("actor") or "owner"),
+        "canonical_mutation_allowed": False,
+    }
+    path = decisions_dir / f"{undo['id']}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(undo, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {"status": "queued", "result": {"removed": removed, "changed": [_rel(root, path)], "canonical_mutation_allowed": False}}
+
+
 def _normalize_participants(value: Any) -> list[str]:
     """Dedupe (case-insensitive, first wins) and drop blanks, preserving order."""
     if isinstance(value, str):
@@ -2057,6 +2100,8 @@ def submit_command(
         outcome = _planning_decision_command(root_path, command_type, payload, created_at, cid)
     elif command_type in MEETING_COMMAND_TYPES:
         outcome = _meeting_command(root_path, command_type, target_str, payload, created_at, cid)
+    elif command_type == "decision.undo":
+        outcome = _decision_undo_command(root_path, target_str, payload, created_at, cid)
     elif command_type in DECISION_COMMAND_TYPES:
         outcome = _decision_command(root_path, command_type, target_str, payload, created_at, cid)
     elif command_type in PROPERTY_COMMAND_TYPES:
