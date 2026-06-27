@@ -945,6 +945,7 @@ HTML = """<!doctype html>
               <h2>Ops Dashboard</h2>
               <p id="opsdash-summary" class="opsdash-summary" role="status"></p>
             </header>
+            <div id="health-snapshot" class="health-snapshot" role="status" hidden></div>
             <div class="opsdash-grid">
               <article class="opsdash-card" aria-label="Token and cost trend">
                 <header class="opsdash-card-head">
@@ -5910,6 +5911,36 @@ pre {
   color: var(--muted);
   font-size: var(--font-size-ui-13);
 }
+/* SPEC-health-snapshot-v1: insight-first health strip (tokens only). */
+.health-snapshot {
+  margin: 0 0 var(--space-2xl);
+  display: flex; flex-direction: column; gap: var(--space-lg);
+}
+.health-verdict {
+  display: inline-flex; align-items: center; gap: var(--space-sm);
+  font-size: var(--font-size-ui-15); color: var(--ink);
+}
+.health-verdict-dot {
+  width: var(--space-md); height: var(--space-md);
+  border-radius: var(--radius-pill); background: var(--muted);
+}
+.health-verdict.tone-success .health-verdict-dot { background: var(--success); }
+.health-verdict.tone-warning .health-verdict-dot { background: var(--warning); }
+.health-verdict.tone-danger .health-verdict-dot { background: var(--danger); }
+.health-tiles {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-md);
+}
+.health-tile {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-md);
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--surface-raised); padding: var(--space-md) var(--space-lg);
+}
+.health-tile.tone-success { background: var(--success-soft); border-color: var(--success-line); }
+.health-tile.tone-warning { background: var(--warning-soft); border-color: var(--warning-line); }
+.health-tile.tone-danger { background: var(--danger-soft); border-color: var(--danger-line); }
+.health-tile-text { font-size: var(--font-size-ui-13); color: var(--ink); }
+.health-tile-spark { flex: 0 0 auto; }
 .opsdash-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -12836,6 +12867,68 @@ function renderOpsBurndown(data) {
   }
 }
 
+// SPEC-health-snapshot-v1: insight-first "is it healthy now?" strip. Verdict shows
+// color AND a text label (never color-only). A sparkline appears ONLY for signals
+// with a real series (throughput, quality); risk/budget are current-state only.
+function healthVerdictMeta(verdict) {
+  const map = {
+    healthy: { tone: "success", key: "health.verdict.healthy" },
+    watch: { tone: "warning", key: "health.verdict.watch" },
+    at_risk: { tone: "danger", key: "health.verdict.at_risk" },
+  };
+  return map[verdict] || map.healthy;
+}
+
+function healthSignalText(sig) {
+  if (sig.key === "throughput") {
+    if (sig.value == null) return t("health.throughput") + ": " + t("health.no_data");
+    let s = t("health.throughput") + ": " + sig.value + " " + t("health.per_week");
+    if (sig.direction) {
+      const arrow = sig.direction === "up" ? "\\u2191" : (sig.direction === "down" ? "\\u2193" : "\\u2192");
+      s += " " + arrow + " (" + t("health.prev_week") + " " + sig.prev + ")";
+    }
+    return s;
+  }
+  if (sig.key === "quality") {
+    if (sig.value == null) return t("health.quality") + ": " + t("health.no_data");
+    let s = t("health.quality") + ": " + sig.value;
+    if (typeof sig.avg === "number") s += " (" + t("health.avg") + " " + sig.avg + ")";
+    return s;
+  }
+  if (sig.key === "risk") {
+    if (!sig.blocking && !sig.overloaded) return t("health.risk_clear");
+    return t("health.risk") + ": " + t("health.blocked") + " " + sig.blocking +
+      " \\u00b7 " + t("health.overloaded") + " " + sig.overloaded;
+  }
+  if (sig.key === "budget") {
+    return sig.over_budget ? (t("health.budget_over") + " " + sig.over_budget) : t("health.budget_ok");
+  }
+  return "";
+}
+
+function renderHealthSnapshot(data) {
+  const host = $("health-snapshot");
+  if (!host) return;
+  const snap = data && data.health_snapshot;
+  if (!snap) { host.hidden = true; host.innerHTML = ""; return; }
+  host.hidden = false;
+  const v = healthVerdictMeta(snap.verdict);
+  const tiles = (snap.signals || []).map((sig) => {
+    const spark = (sig.series && sig.series.length >= 2)
+      ? componentSparkline(sig.series, { label: t("health." + sig.key) })
+      : "";
+    return `<div class="health-tile tone-${escapeHtml(sig.tone || "info")}">` +
+      `<span class="health-tile-text">${escapeHtml(healthSignalText(sig))}</span>` +
+      (spark ? `<span class="health-tile-spark" aria-hidden="true">${spark}</span>` : "") +
+      `</div>`;
+  }).join("");
+  host.innerHTML =
+    `<div class="health-verdict tone-${escapeHtml(v.tone)}">` +
+    `<span class="health-verdict-dot" aria-hidden="true"></span>` +
+    `<strong>${escapeHtml(t(v.key))}</strong></div>` +
+    `<div class="health-tiles">${tiles}</div>`;
+}
+
 function renderOpsDashboard() {
   if (!$("opsdash-tokens")) return;
   const data = opsMetricsData();
@@ -12846,6 +12939,7 @@ function renderOpsDashboard() {
     `${res.task_count || 0} tasks tracked - ${opsFormatTokens(res.est_tokens)} est tokens - ` +
     `${(board.counts && board.counts.block) || 0} blocking gates - ` +
     `eval ${trend.available ? trend.latest_score : "n/a"}`);
+  renderHealthSnapshot(data);
   renderOpsResources(data);
   renderOpsEvalTrend(data);
   renderOpsGateBoard(data);

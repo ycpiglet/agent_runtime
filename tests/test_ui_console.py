@@ -1247,6 +1247,69 @@ def test_ui_console_decision_inbox_assets_expose_respond_bar(tmp_path):
     assert b"inbox-decide" in css.body
 
 
+def _health_ops(*, blocking=0, over_budget=False, latest=0.82, avg=0.79):
+    return {
+        "velocity": {"weeks": [{"week": "2026-W23", "done": 5}, {"week": "2026-W24", "done": 8}],
+                     "avg_per_week": 6.5, "available": True},
+        "eval_trend": {"available": True, "latest_score": latest, "avg_score": avg,
+                       "points": [{"score": 0.77}, {"score": 0.79}, {"score": latest}]},
+        "gates": {"blocking": blocking},
+        "resources": {"tasksets": [{"over_budget": over_budget}]},
+    }
+
+
+def test_health_snapshot_verdict_at_risk_with_blocking_gate(tmp_path):
+    # SPEC-health-snapshot-v1: a blocking gate (or overload) makes the verdict at_risk.
+    snap = ui_state._derive_health_snapshot(_health_ops(blocking=2), {"totals": {"overloaded": 0}})
+    assert snap["verdict"] == "at_risk"
+    risk = next(s for s in snap["signals"] if s["key"] == "risk")
+    assert risk["blocking"] == 2
+    assert risk["tone"] == "danger"
+
+
+def test_health_snapshot_verdict_healthy_when_clean(tmp_path):
+    snap = ui_state._derive_health_snapshot(_health_ops(), {"totals": {"overloaded": 0}})
+    assert snap["verdict"] == "healthy"
+    throughput = next(s for s in snap["signals"] if s["key"] == "throughput")
+    quality = next(s for s in snap["signals"] if s["key"] == "quality")
+    # Real series get a sparkline source.
+    assert throughput["series"] == [5, 8]
+    assert quality["series"] == [0.77, 0.79, 0.82]
+
+
+def test_health_snapshot_verdict_watch_over_budget(tmp_path):
+    # Third verdict state: over-budget (no blockers) => watch, not at_risk/healthy.
+    snap = ui_state._derive_health_snapshot(
+        _health_ops(blocking=0, over_budget=True), {"totals": {"overloaded": 0}}
+    )
+    assert snap["verdict"] == "watch"
+    budget = next(s for s in snap["signals"] if s["key"] == "budget")
+    assert budget["over_budget"] == 1
+    assert "series" not in budget
+
+
+def test_health_snapshot_no_fabricated_trend_on_point_in_time(tmp_path):
+    # Honesty: risk/budget are point-in-time only and must NEVER carry a trend series.
+    snap = ui_state._derive_health_snapshot(
+        _health_ops(blocking=1, over_budget=True), {"totals": {"overloaded": 3}}
+    )
+    risk = next(s for s in snap["signals"] if s["key"] == "risk")
+    budget = next(s for s in snap["signals"] if s["key"] == "budget")
+    assert "series" not in risk
+    assert "series" not in budget
+    assert risk["overloaded"] == 3
+    assert budget["over_budget"] == 1
+
+
+def test_ui_console_health_snapshot_assets_rendered(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path)
+    css = ui_console.build_response("/app.css", tmp_path)
+    assert js.status == 200
+    assert b"renderHealthSnapshot" in js.body
+    assert b"health.verdict" in js.body
+    assert b"health-snapshot" in css.body
+
+
 def test_ui_console_graph_state_and_roadmap_routes(tmp_path):
     _write_task(tmp_path, "TASK-UI-232")
     _write(

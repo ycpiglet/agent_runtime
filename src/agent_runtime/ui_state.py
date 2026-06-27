@@ -2334,6 +2334,22 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     "inbox.decide.recorded_hold": {"ko": "보류로 기록됐어요", "en": "Put on hold · recorded"},
     "inbox.decide.failed": {"ko": "전달하지 못했어요 — 다시 시도", "en": "Couldn't record — try again"},
     "inbox.decide.tally": {"ko": "이번 세션 결정", "en": "decisions this session"},
+    # ----- SPEC-health-snapshot-v1: insight-first work-status health strip --------
+    "health.verdict.healthy": {"ko": "전반적으로 양호", "en": "Overall healthy"},
+    "health.verdict.watch": {"ko": "주의 필요", "en": "Needs attention"},
+    "health.verdict.at_risk": {"ko": "위험 — 바로 확인", "en": "At risk — act now"},
+    "health.throughput": {"ko": "처리량", "en": "Throughput"},
+    "health.quality": {"ko": "품질 점수", "en": "Quality score"},
+    "health.risk": {"ko": "위험", "en": "Risk"},
+    "health.risk_clear": {"ko": "막힌 것 없음 — 순항 중", "en": "Nothing blocked — running clear"},
+    "health.budget_over": {"ko": "예산 초과 태스크셋", "en": "Over-budget tasksets:"},
+    "health.budget_ok": {"ko": "예산 내", "en": "Within budget"},
+    "health.per_week": {"ko": "건/주", "en": "/wk"},
+    "health.prev_week": {"ko": "지난주", "en": "prev wk"},
+    "health.avg": {"ko": "평균", "en": "avg"},
+    "health.blocked": {"ko": "막힘", "en": "blocked"},
+    "health.overloaded": {"ko": "과부하", "en": "overloaded"},
+    "health.no_data": {"ko": "데이터 부족", "en": "not enough data"},
     "work_state.kicker": {"ko": "작업", "en": "Work"},
     "work_state.title": {"ko": "작업 상태", "en": "Work state"},
     "work_state.empty": {"ko": "활성 작업 상태가 없습니다.", "en": "No active work state."},
@@ -7653,6 +7669,88 @@ def _invert_ts(value: Any) -> str:
     return "".join(chr(0x10FFFF - ord(c)) if ord(c) < 0x10FFFF else c for c in text) if text else "~"
 
 
+# SPEC-health-snapshot-v1: a comment-watch delta. Quality only counts as a "watch"
+# signal when the latest eval score drops at least this far below the running avg.
+HEALTH_QUALITY_WATCH_DELTA = 0.05
+
+
+def _health_direction(curr: float, prev: float | None) -> str:
+    if prev is None:
+        return "flat"
+    if curr > prev:
+        return "up"
+    if curr < prev:
+        return "down"
+    return "flat"
+
+
+def _derive_health_snapshot(ops_metrics: dict[str, Any], workload: dict[str, Any] | None) -> dict[str, Any]:
+    """Insight-first "is the company healthy now?" snapshot (SPEC-health-snapshot-v1).
+
+    HONESTY RULE: a trend ``series`` (sparkline source) is attached ONLY to signals
+    backed by a real time-series — throughput (``velocity.weeks``) and quality
+    (``eval_trend.points``). Risk (blocking gates + overloaded agents) and budget
+    (over-budget tasksets) are point-in-time only and carry counts, never a series,
+    so the UI can never imply a trend the data cannot support.
+    """
+    velocity = ops_metrics.get("velocity") or {}
+    eval_trend = ops_metrics.get("eval_trend") or {}
+    gates = ops_metrics.get("gates") or {}
+    resources = ops_metrics.get("resources") or {}
+    totals = (workload or {}).get("totals") or {}
+    signals: list[dict[str, Any]] = []
+
+    # Throughput — real series (velocity.weeks[].done).
+    weeks = [w for w in (velocity.get("weeks") or []) if isinstance(w, dict)]
+    if len(weeks) >= 2:
+        curr = int(weeks[-1].get("done") or 0)
+        prev = int(weeks[-2].get("done") or 0)
+        signals.append({"key": "throughput", "tone": "info", "value": curr, "prev": prev,
+                        "direction": _health_direction(curr, prev),
+                        "series": [int(w.get("done") or 0) for w in weeks]})
+    elif weeks:
+        signals.append({"key": "throughput", "tone": "info", "value": int(weeks[-1].get("done") or 0)})
+    else:
+        signals.append({"key": "throughput", "tone": "info", "value": None})
+
+    # Quality — real series (eval_trend.points[].score).
+    latest = eval_trend.get("latest_score")
+    avg = eval_trend.get("avg_score")
+    scores = [p.get("score") for p in (eval_trend.get("points") or [])
+              if isinstance(p, dict) and isinstance(p.get("score"), (int, float))]
+    if eval_trend.get("available") and isinstance(latest, (int, float)):
+        watch = (len(scores) >= 2 and isinstance(avg, (int, float))
+                 and latest < avg - HEALTH_QUALITY_WATCH_DELTA)
+        sig = {"key": "quality", "tone": "warning" if watch else "success",
+               "value": latest, "avg": avg}
+        if len(scores) >= 2:
+            sig["series"] = scores
+        signals.append(sig)
+    else:
+        signals.append({"key": "quality", "tone": "info", "value": None})
+
+    # Risk — point-in-time (blocking gates + overloaded agents). No series.
+    blocking = int(gates.get("blocking") or 0)
+    overloaded = int(totals.get("overloaded") or 0)
+    signals.append({"key": "risk", "tone": "danger" if (blocking or overloaded) else "success",
+                    "blocking": blocking, "overloaded": overloaded})
+
+    # Budget — point-in-time (over-budget tasksets). No series.
+    over_budget = sum(1 for t in (resources.get("tasksets") or [])
+                      if isinstance(t, dict) and t.get("over_budget"))
+    signals.append({"key": "budget", "tone": "warning" if over_budget else "success",
+                    "over_budget": over_budget})
+
+    quality_watch = any(s["key"] == "quality" and s["tone"] == "warning" for s in signals)
+    if blocking or overloaded:
+        verdict = "at_risk"
+    elif over_budget or quality_watch:
+        verdict = "watch"
+    else:
+        verdict = "healthy"
+    return {"verdict": verdict, "signals": signals}
+
+
 def build_ops_metrics(
     tasks: list[dict[str, Any]],
     task_sets: list[dict[str, Any]],
@@ -7976,6 +8074,10 @@ def _build_state_uncached(root: Path | str, now: str | None = None) -> dict[str,
     # Ops dashboard (TASK-AR-339): token/cost, eval trend, gate board, burndown.
     # Pure read-only derivation over tasks + task_sets + eval/gate evidence files.
     ops_metrics = build_ops_metrics(tasks, task_sets, root_path, generated_at)
+    # SPEC-health-snapshot-v1: insight-first "is it healthy now?" snapshot. Computed
+    # HERE (not inside build_ops_metrics) so both ops_metrics and the workload heatmap
+    # (overloaded count) are in scope; injected into the ops_metrics payload.
+    ops_metrics["health_snapshot"] = _derive_health_snapshot(ops_metrics, workload)
     # Notification center + @mentions + daily brief (TASK-AR-338). The inbox
     # consumes the calendar's due-soon/overdue reminders plus blocked/approval/
     # mention/error events; the daily brief summarizes today's work. Notification
