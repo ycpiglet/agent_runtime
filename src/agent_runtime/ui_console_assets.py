@@ -6673,6 +6673,48 @@ pre {
   margin-top: 0.45rem; color: var(--muted); font-size: 0.78rem;
 }
 .inbox-detail-item-action { color: var(--primary); font-weight: 700; }
+/* SPEC-decision-inbox-v1: plain-language lead + proposal-only respond bar. */
+.inbox-detail-item-lead { margin: 0.35rem 0 0; color: var(--ink); font-size: 0.85rem; line-height: 1.45; }
+.inbox-detail-item.is-decided { border-color: var(--success-line); background: var(--success-soft); }
+.inbox-decide { margin-top: 0.6rem; padding-top: 0.55rem; border-top: 1px solid var(--line); }
+.inbox-decide-prompt {
+  display: block; margin-bottom: 0.4rem; color: var(--muted);
+  font-size: 0.75rem; font-weight: 700;
+}
+.inbox-decide-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.inbox-decide-btn {
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--panel-strong); color: var(--ink);
+  padding: 0.32rem 0.7rem; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+.inbox-decide-btn:hover { border-color: var(--primary-line); background: var(--primary-soft); }
+.inbox-decide-btn:focus-visible {
+  outline: 2px solid var(--primary); outline-offset: 2px; box-shadow: var(--focus);
+}
+.inbox-decide-btn.is-primary { border-color: var(--primary); background: var(--primary); color: var(--on-accent); }
+.inbox-decide-btn.is-ghost { background: transparent; }
+.inbox-decide-reason { margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.inbox-decide-reason-input {
+  width: 100%; resize: vertical; box-sizing: border-box;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--surface-raised); color: var(--ink);
+  padding: 0.45rem 0.55rem; font: inherit; font-size: 0.82rem;
+}
+.inbox-decide-reason-input:focus-visible {
+  outline: 2px solid var(--primary); outline-offset: 1px; box-shadow: var(--focus);
+}
+.inbox-decide-reason-actions { display: flex; gap: 0.4rem; }
+.inbox-decide-error { margin: 0.35rem 0 0; color: var(--danger); font-size: 0.78rem; }
+.inbox-decide-recorded {
+  margin: 0.5rem 0 0; color: var(--success); font-size: 0.82rem; font-weight: 700;
+  animation: inboxDecideIn 160ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .inbox-decide-recorded { animation: none; }
+  .inbox-decide-btn { transition: none; }
+}
+@keyframes inboxDecideIn { from { opacity: 0; } to { opacity: 1; } }
 .work-state-hero {
   margin: 0 0 1.25rem; padding: 1rem;
   background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
@@ -7478,16 +7520,162 @@ function renderCockpit(data) {
   }
 }
 
+// SPEC-decision-inbox-v1: how many decisions the operator has recorded this
+// session. Surfaced in the drawer summary so the operate-cycle is visible.
+let decisionSessionCount = 0;
+
+// Plain-language, jargon-free sentence explaining WHY this item needs the
+// operator (keyed off the inbox group); falls back to the machine "why" so a
+// readable line always renders. Understand-first, before any action.
+function inboxPlainSentence(item) {
+  const meaningKey = "inbox.mean." + String(item.group || "");
+  if (i18nStrings && i18nStrings[meaningKey]) return t(meaningKey);
+  const why = item.why ? localizedInboxWhy(item.why) : "";
+  return why || localizedInboxTitle(item);
+}
+
+const DECISION_RECORDED_COPY = {
+  "decision.acknowledge": "inbox.decide.recorded_ack",
+  "decision.comment": "inbox.decide.recorded_comment",
+  "decision.hold": "inbox.decide.recorded_hold",
+};
+
+// Proposal-only: records an operator decision under .ui_outbox/decisions/. NEVER
+// mutates a canonical task from the UI (a runtime executor consumes it later).
+function queueDecision(commandType, item, reason) {
+  return sendJson("/api/commands", {
+    type: commandType,
+    payload: {
+      type: commandType,
+      target: item.id,
+      payload: {
+        actor: "owner",
+        group: item.group || "",
+        title: item.title || "",
+        reason: reason || "",
+      },
+    },
+  });
+}
+
+function markDecisionRecorded(row, commandType) {
+  row.classList.add("is-decided");
+  const bar = row.querySelector(".inbox-decide");
+  if (bar) bar.remove();
+  if (!row.querySelector(".inbox-decide-recorded")) {
+    const copyKey = DECISION_RECORDED_COPY[commandType] || "inbox.decide.recorded_ack";
+    row.appendChild(inboxEl("p", "inbox-decide-recorded", "\\u2713 " + t(copyKey)));
+  }
+  // The activated control was just removed with the bar; keep keyboard focus on
+  // the row (now showing the confirmation) instead of dropping it to <body>.
+  row.setAttribute("tabindex", "-1");
+  row.focus();
+  decisionSessionCount += 1;
+  const summary = $("inbox-detail-summary");
+  if (summary) summary.textContent = `${t("inbox.decide.tally")}: ${decisionSessionCount}`;
+}
+
+async function submitDecision(commandType, item, row, reason, errorEl) {
+  try {
+    const result = await queueDecision(commandType, item, reason);
+    if (result && result.status === "failed") throw new Error("decision rejected");
+    markDecisionRecorded(row, commandType);
+  } catch (err) {
+    if (errorEl) {
+      errorEl.textContent = t("inbox.decide.failed");
+      errorEl.hidden = false;
+    }
+  }
+}
+
+// The respond bar: acknowledge submits immediately; comment/hold reveal a reason
+// field (required) before sending. Real <button>/<textarea> for keyboard a11y.
+function buildDecideBar(item, row) {
+  const bar = inboxEl("div", "inbox-decide");
+  bar.appendChild(inboxEl("span", "inbox-decide-prompt", t("inbox.decide.prompt")));
+  const actions = inboxEl("div", "inbox-decide-actions");
+  const errorEl = inboxEl("p", "inbox-decide-error");
+  errorEl.hidden = true;
+  errorEl.setAttribute("role", "alert");
+
+  const reasonWrap = inboxEl("div", "inbox-decide-reason");
+  reasonWrap.hidden = true;
+  const textarea = document.createElement("textarea");
+  textarea.className = "inbox-decide-reason-input";
+  textarea.rows = 2;
+  textarea.placeholder = t("inbox.decide.reason_placeholder");
+  textarea.setAttribute("aria-label", t("inbox.decide.reason_placeholder"));
+  const reasonActions = inboxEl("div", "inbox-decide-reason-actions");
+  const sendBtn = inboxEl("button", "inbox-decide-btn is-primary", t("inbox.decide.submit"));
+  sendBtn.type = "button";
+  const cancelBtn = inboxEl("button", "inbox-decide-btn is-ghost", t("inbox.decide.cancel"));
+  cancelBtn.type = "button";
+  reasonActions.appendChild(sendBtn);
+  reasonActions.appendChild(cancelBtn);
+  reasonWrap.appendChild(textarea);
+  reasonWrap.appendChild(reasonActions);
+
+  let pendingType = null;
+  let pendingOpener = null;
+  function openReason(commandType, openerBtn) {
+    pendingType = commandType;
+    pendingOpener = openerBtn || null;
+    reasonWrap.hidden = false;
+    errorEl.hidden = true;
+    textarea.focus();
+  }
+  cancelBtn.addEventListener("click", () => {
+    reasonWrap.hidden = true;
+    pendingType = null;
+    // Cancel hides its own button; return focus to the trigger, not <body>.
+    const opener = pendingOpener;
+    pendingOpener = null;
+    if (opener && typeof opener.focus === "function") opener.focus();
+  });
+  sendBtn.addEventListener("click", () => {
+    const reason = textarea.value.trim();
+    if (!reason) {
+      errorEl.textContent = t("inbox.decide.reason_required");
+      errorEl.hidden = false;
+      textarea.focus();
+      return;
+    }
+    submitDecision(pendingType || "decision.comment", item, row, reason, errorEl);
+  });
+
+  const ackBtn = inboxEl("button", "inbox-decide-btn", t("inbox.decide.acknowledge"));
+  ackBtn.type = "button";
+  ackBtn.addEventListener("click", () => submitDecision("decision.acknowledge", item, row, "", errorEl));
+  const commentBtn = inboxEl("button", "inbox-decide-btn", t("inbox.decide.comment"));
+  commentBtn.type = "button";
+  commentBtn.addEventListener("click", () => openReason("decision.comment", commentBtn));
+  const holdBtn = inboxEl("button", "inbox-decide-btn", t("inbox.decide.hold"));
+  holdBtn.type = "button";
+  holdBtn.addEventListener("click", () => openReason("decision.hold", holdBtn));
+  actions.appendChild(ackBtn);
+  actions.appendChild(commentBtn);
+  actions.appendChild(holdBtn);
+
+  bar.appendChild(actions);
+  bar.appendChild(reasonWrap);
+  bar.appendChild(errorEl);
+  return bar;
+}
+
 function renderInboxDetailItem(item) {
   const row = inboxEl("article", "inbox-detail-item");
   row.setAttribute("role", "listitem");
   row.appendChild(inboxEl("h3", "inbox-detail-item-title", localizedInboxTitle(item)));
+  // Understand-first: the plain-language sentence leads; machine detail is muted.
+  row.appendChild(inboxEl("p", "inbox-detail-item-lead", inboxPlainSentence(item)));
   const meta = inboxEl("div", "inbox-detail-item-meta");
   if (item.id) meta.appendChild(inboxEl("span", "", item.id));
   if (item.age) meta.appendChild(inboxEl("span", "", item.age));
   if (item.why) meta.appendChild(inboxEl("span", "", localizedInboxWhy(item.why)));
   if (item.action) meta.appendChild(inboxEl("span", "inbox-detail-item-action", localizedInboxAction(item.action)));
   row.appendChild(meta);
+  // Respond bar only for items with a stable id we can address in the proposal.
+  if (item.id) row.appendChild(buildDecideBar(item, row));
   return row;
 }
 

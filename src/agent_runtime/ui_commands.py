@@ -203,6 +203,12 @@ MEETING_MAX_ROUNDS = 20
 # is 260 incl. the absolute prefix) while staying generous for real titles.
 TASK_TITLE_MAX_LENGTH = 200
 TASK_BOARD_SYNC_COMMANDS = {"task.create", "task.update", "task.reorder", "task.archive", "task.move", "task.bulk_edit"}
+# SPEC-decision-inbox-v1: the cockpit attention inbox lets the operator respond to
+# an item with a light, reversible, proposal-only decision. acknowledge ("I have
+# seen / I approve this"), comment (an opinion/question), and hold ("pause this").
+# All three only RECORD a decision under .ui_outbox/decisions/; a runtime executor
+# (v2) consumes them. They never mutate a canonical task from the UI.
+DECISION_COMMAND_TYPES = ("decision.acknowledge", "decision.comment", "decision.hold")
 COMMAND_TYPES = (
     TASK_COMMAND_TYPES
     + TASKSET_COMMAND_TYPES
@@ -217,6 +223,7 @@ COMMAND_TYPES = (
     + MESSAGE_COMMAND_TYPES
     + NOTIFICATION_COMMAND_TYPES
     + SUBSCRIPTION_COMMAND_TYPES
+    + DECISION_COMMAND_TYPES
 )
 # TASK-AR-335: a schedule fires either once at a fixed time (``reserve``) or on a
 # recurring cron-like cadence (``repeat``). The cron expression is a 5-field
@@ -1054,6 +1061,69 @@ def _planning_decision_command(root: Path, command_type: str, payload: dict[str,
         "result": {
             "changed": [_rel(root, path)],
             "planning_support": "decision_audit_record",
+            "canonical_mutation_allowed": False,
+            "next": decision["next"],
+        },
+    }
+
+
+_DECISION_ACTIONS = {
+    "decision.acknowledge": "acknowledged",
+    "decision.comment": "commented",
+    "decision.hold": "held",
+}
+
+
+def _decision_command(
+    root: Path,
+    command_type: str,
+    target: str | None,
+    payload: dict[str, Any],
+    now: str,
+    command_id: str,
+) -> dict[str, Any]:
+    """Record a proposal-only operator decision on an attention-inbox item.
+
+    SPEC-decision-inbox-v1. The console NEVER mutates a canonical task here; it
+    writes one auditable decision record under ``.ui_outbox/decisions/`` (the same
+    proposal convention as meetings/tasksets). A runtime executor consumes it
+    later. ``acknowledge`` needs no reason; ``comment`` and ``hold`` require one.
+    """
+    errors = _payload_errors(payload)
+    item_id = str(target or payload.get("target") or payload.get("id") or "").strip()
+    if not item_id:
+        errors.append("target (inbox item id) is required")
+    reason = str(payload.get("reason") or payload.get("note") or "").strip()
+    if command_type in {"decision.comment", "decision.hold"} and not reason:
+        errors.append("reason is required")
+    if payload.get("apply") is True or payload.get("mutate") is True:
+        errors.append("decision commands cannot apply canonical mutations")
+    if errors:
+        return {"errors": errors}
+
+    decision = {
+        "id": command_id.replace("COMMAND-", "DECISION-"),
+        "type": command_type,
+        "target": item_id,
+        "group": (str(payload.get("group") or "").strip() or None),
+        "title": (str(payload.get("title") or "").strip() or None),
+        "action": _DECISION_ACTIONS[command_type],
+        "status": "queued",
+        "created_at": now,
+        "decided_by": str(payload.get("actor") or "owner"),
+        "reason": reason or None,
+        "canonical_mutation_allowed": False,
+        "mutation_boundary": "proposal_only",
+        "next": "runtime executor must consume this decision before any canonical mutation",
+    }
+    path = root / ".ui_outbox" / "decisions" / f"{decision['id']}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(decision, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {
+        "status": "queued",
+        "result": {
+            "changed": [_rel(root, path)],
+            "decision": decision["action"],
             "canonical_mutation_allowed": False,
             "next": decision["next"],
         },
@@ -1962,6 +2032,8 @@ def submit_command(
         outcome = _planning_decision_command(root_path, command_type, payload, created_at, cid)
     elif command_type in MEETING_COMMAND_TYPES:
         outcome = _meeting_command(root_path, command_type, target_str, payload, created_at, cid)
+    elif command_type in DECISION_COMMAND_TYPES:
+        outcome = _decision_command(root_path, command_type, target_str, payload, created_at, cid)
     elif command_type in PROPERTY_COMMAND_TYPES:
         outcome = _property_command(root_path, command_type, target_str, payload, created_at, cid)
     elif command_type in LABEL_COMMAND_TYPES:

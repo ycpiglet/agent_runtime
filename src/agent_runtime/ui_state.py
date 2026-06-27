@@ -2282,6 +2282,54 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
         "ko": "호스트 간 클레임 충돌",
         "en": "cross-host claim conflict",
     },
+    # ----- SPEC-decision-inbox-v1: plain-language meaning + respond bar ----------
+    # A one-sentence, jargon-free explanation of WHY each attention item needs the
+    # operator, keyed off the inbox group. Read first; the machine "why" chips stay
+    # below as muted detail. (Council legibility-first verdict.)
+    "inbox.mean.approval_pending": {
+        "ko": "이 일은 당신의 승인을 기다리고 있어요.",
+        "en": "This is waiting for your approval.",
+    },
+    "inbox.mean.blocked": {
+        "ko": "이 일이 막혀서 앞으로 나아가지 못하고 있어요.",
+        "en": "This is blocked and can't move forward.",
+    },
+    "inbox.mean.gate_failures": {
+        "ko": "자동 점검(게이트)에 실패해서 확인이 필요해요.",
+        "en": "An automatic check (gate) failed and needs a look.",
+    },
+    "inbox.mean.runtime_anomalies": {
+        "ko": "실행 중 충돌이 감지돼서 정리가 필요해요.",
+        "en": "A runtime conflict was detected and needs resolving.",
+    },
+    "inbox.mean.cost_anomalies": {
+        "ko": "예상보다 비용이 더 들어서 검토가 필요해요.",
+        "en": "This ran over its budget and needs review.",
+    },
+    "inbox.mean.stale": {
+        "ko": "한동안 진행이 없어서 다시 살펴봐야 해요.",
+        "en": "This hasn't moved in a while and needs a check-in.",
+    },
+    "inbox.mean.unowned": {
+        "ko": "준비됐는데 맡은 사람이 없어요.",
+        "en": "This is ready but nobody owns it yet.",
+    },
+    "inbox.decide.prompt": {"ko": "어떻게 할까요?", "en": "What would you like to do?"},
+    "inbox.decide.acknowledge": {"ko": "확인", "en": "Acknowledge"},
+    "inbox.decide.comment": {"ko": "의견", "en": "Comment"},
+    "inbox.decide.hold": {"ko": "보류", "en": "Hold"},
+    "inbox.decide.reason_placeholder": {
+        "ko": "이유나 의견을 적어주세요 (의견·보류는 필수)",
+        "en": "Add a reason or comment (required for comment/hold)",
+    },
+    "inbox.decide.submit": {"ko": "전달", "en": "Send"},
+    "inbox.decide.cancel": {"ko": "취소", "en": "Cancel"},
+    "inbox.decide.reason_required": {"ko": "이유를 입력해 주세요.", "en": "Please add a reason first."},
+    "inbox.decide.recorded_ack": {"ko": "확인함 · 팀에 기록됨", "en": "Acknowledged · recorded for the team"},
+    "inbox.decide.recorded_comment": {"ko": "의견이 기록됐어요", "en": "Your comment was recorded"},
+    "inbox.decide.recorded_hold": {"ko": "보류로 기록됐어요", "en": "Put on hold · recorded"},
+    "inbox.decide.failed": {"ko": "전달하지 못했어요 — 다시 시도", "en": "Couldn't record — try again"},
+    "inbox.decide.tally": {"ko": "이번 세션 결정", "en": "decisions this session"},
     "work_state.kicker": {"ko": "작업", "en": "Work"},
     "work_state.title": {"ko": "작업 상태", "en": "Work state"},
     "work_state.empty": {"ko": "활성 작업 상태가 없습니다.", "en": "No active work state."},

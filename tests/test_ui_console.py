@@ -1085,6 +1085,114 @@ def test_ui_console_planner_decision_routes_write_audit_record_without_apply(tmp
     assert decision["canonical_mutation_allowed"] is False
 
 
+def test_ui_console_decision_acknowledge_writes_proposal_only(tmp_path):
+    # Decision Inbox v1 (SPEC-decision-inbox-v1): acknowledging an attention-inbox
+    # item records a proposal-only decision under .ui_outbox/decisions/ and never
+    # mutates a canonical task. No reason is required for an acknowledgement.
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {
+                "type": "decision.acknowledge",
+                "target": "TASK-AR-900",
+                "payload": {
+                    "actor": "owner",
+                    "group": "approval_pending",
+                    "title": "Approve the release gate",
+                },
+            }
+        ).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+    proposals = list((tmp_path / ".ui_outbox" / "decisions").glob("DECISION-*.json"))
+
+    assert response.status == 202
+    assert payload["status"] == "queued"
+    assert len(proposals) == 1
+    decision = json.loads(proposals[0].read_text(encoding="utf-8"))
+    assert decision["target"] == "TASK-AR-900"
+    assert decision["action"] == "acknowledged"
+    assert decision["canonical_mutation_allowed"] is False
+
+
+def test_ui_console_decision_hold_requires_reason(tmp_path):
+    # A hold is a judgement; the operator must say why. Missing reason => rejected,
+    # and NO proposal file is written.
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {"type": "decision.hold", "target": "TASK-AR-900", "payload": {"actor": "owner"}}
+        ).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+
+    assert response.status == 400
+    assert payload["status"] == "failed"
+    assert not list((tmp_path / ".ui_outbox" / "decisions").glob("DECISION-*.json"))
+
+
+def test_ui_console_decision_requires_target(tmp_path):
+    # No inbox item id => rejected, and no proposal file is written (spec §Testing).
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {"type": "decision.acknowledge", "payload": {"actor": "owner"}}
+        ).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+
+    assert response.status == 400
+    assert payload["status"] == "failed"
+    assert not list((tmp_path / ".ui_outbox" / "decisions").glob("DECISION-*.json"))
+
+
+def test_ui_console_decision_comment_records_reason_and_target(tmp_path):
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {
+                "type": "decision.comment",
+                "target": "TASK-AR-900",
+                "payload": {"actor": "owner", "reason": "Why is this blocked?", "group": "blocked"},
+            }
+        ).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+    proposals = list((tmp_path / ".ui_outbox" / "decisions").glob("DECISION-*.json"))
+
+    assert response.status == 202
+    assert payload["status"] == "queued"
+    assert len(proposals) == 1
+    decision = json.loads(proposals[0].read_text(encoding="utf-8"))
+    assert decision["target"] == "TASK-AR-900"
+    assert decision["action"] == "commented"
+    assert decision["reason"] == "Why is this blocked?"
+    assert decision["group"] == "blocked"
+
+
+def test_ui_console_decision_inbox_assets_expose_respond_bar(tmp_path):
+    # SPEC-decision-inbox-v1 front-end: the served app.js exposes the proposal-only
+    # respond bar (acknowledge/comment/hold) and its plain-language i18n keys; the
+    # respond bar is token-styled via a CSS class hook (no raw literals).
+    js = ui_console.build_response("/app.js", tmp_path)
+    css = ui_console.build_response("/app.css", tmp_path)
+    assert js.status == 200
+    assert b"queueDecision" in js.body
+    assert b"decision.acknowledge" in js.body
+    assert b"decision.comment" in js.body
+    assert b"decision.hold" in js.body
+    assert b"inbox.decide.acknowledge" in js.body
+    assert b"inbox-decide" in css.body
+
+
 def test_ui_console_graph_state_and_roadmap_routes(tmp_path):
     _write_task(tmp_path, "TASK-UI-232")
     _write(
