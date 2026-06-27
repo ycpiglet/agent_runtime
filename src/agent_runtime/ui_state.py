@@ -2422,6 +2422,17 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     # ----- SPEC-relationship-edge-labels-v1: live-map edge labels --------------
     "livemap.blocked": {"ko": "막힘", "en": "blocked"},
     "livemap.review": {"ko": "검토 중", "en": "in review"},
+    # ----- SPEC-board-taskview-v1: board controls + lane caps -------------------
+    "board.more": {"ko": "더 보기", "en": "Show more"},
+    "board.collapse": {"ko": "접기", "en": "Collapse"},
+    "board.no_matches": {"ko": "검색 결과 없음", "en": "No matches"},
+    "board.no_tasks": {"ko": "없음", "en": "None"},
+    "board.filter_placeholder": {"ko": "작업 검색…", "en": "Filter tasks…"},
+    "board.sort_priority": {"ko": "우선순위순", "en": "Priority"},
+    "board.sort_updated": {"ko": "최근 업데이트순", "en": "Recently updated"},
+    "board.sort_title": {"ko": "제목순", "en": "Title"},
+    "board.density_compact": {"ko": "컴팩트하게", "en": "Compact"},
+    "board.density_comfortable": {"ko": "편안하게", "en": "Comfortable"},
     "work_state.kicker": {"ko": "작업", "en": "Work"},
     "work_state.title": {"ko": "작업 상태", "en": "Work state"},
     "work_state.empty": {"ko": "활성 작업 상태가 없습니다.", "en": "No active work state."},

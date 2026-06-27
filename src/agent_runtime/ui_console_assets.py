@@ -341,6 +341,15 @@ HTML = """<!doctype html>
           </details>
           <p class="board-hint">Hover or focus a card for a peek. Drag a card between lanes to reorder, or focus it and press Ctrl+D to lift, arrows to move, Space to drop, Esc to cancel. Quick actions: Claim / Verify / Close.</p>
           <div id="board-team-filter" class="board-team-filter" role="status" hidden></div>
+          <div id="board-controls" class="board-controls">
+            <input id="board-filter" class="board-filter" type="search" autocomplete="off" aria-label="Filter tasks">
+            <select id="board-sort" class="board-sort" aria-label="Sort tasks">
+              <option value="priority"></option>
+              <option value="updated"></option>
+              <option value="title"></option>
+            </select>
+            <button id="board-density" type="button" class="board-density" aria-pressed="false"></button>
+          </div>
           <div id="kanban" class="kanban" aria-label="Kanban"></div>
           <div id="board-peek" class="board-peek" role="tooltip" aria-hidden="true" hidden></div>
           <div id="board-dnd-status" class="board-dnd-status" role="status" aria-live="polite"></div>
@@ -2122,6 +2131,32 @@ textarea:focus {
 .view.is-active {
   display: block;
 }
+/* SPEC-board-taskview-v1: board controls bar + lane "more" + density (tokens only). */
+.board-controls {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+.board-filter {
+  flex: 1 1 200px; min-width: 160px;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--surface-raised); color: var(--ink);
+  padding: var(--space-sm) var(--space-md); font: inherit; font-size: var(--font-size-ui-13);
+}
+.board-filter:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; box-shadow: var(--focus); }
+.board-sort, .board-density {
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--panel-strong); color: var(--ink);
+  padding: var(--space-sm) var(--space-md); font: inherit; font-size: var(--font-size-ui-13); cursor: pointer;
+}
+.board-density[aria-pressed="true"] { border-color: var(--primary); background: var(--primary-soft); }
+.lane-more {
+  display: block; width: 100%; margin-top: var(--space-sm);
+  border: 1px dashed var(--line-strong); border-radius: var(--radius-sm);
+  background: transparent; color: var(--muted);
+  padding: var(--space-sm); font: inherit; font-size: var(--font-size-ui-12); cursor: pointer;
+}
+.lane-more:hover { border-color: var(--primary-line); color: var(--primary); background: var(--primary-soft); }
+.kanban.density-compact .lane { gap: var(--space-xs); }
 .kanban {
   display: grid;
   grid-template-columns: repeat(3, minmax(220px, 1fr));
@@ -9489,17 +9524,104 @@ function renderBoardTeamFilterBanner() {
   if (clear) clear.addEventListener("click", () => setBoardTeamFilter(null));
 }
 
+// SPEC-board-taskview-v1: don't dump all tasks. Done collapses to a few recents,
+// every lane caps with "more", and a controls bar adds text filter / sort / density
+// (mailbox-like). Pure helpers below are node-verified via the /app.js slice.
+let boardSort = "priority";
+let boardDensity = "comfortable";
+let boardQuery = "";
+const boardExpandedLanes = {};
+// BOARD_PURE_START
+const BOARD_LANE_CAP = 8;
+const BOARD_DONE_CAP = 5;
+const BOARD_PRIORITY_ORDER = { P0: 0, P1: 1, P2: 2, P3: 3 };
+
+function boardFilterTasks(tasks, query) {
+  const q = String(query || "").trim().toLowerCase();
+  if (!q) return tasks.slice();
+  return tasks.filter(function (t) {
+    const hay = ((t.id || "") + " " + (t.title || "") + " " + (t.owner_agent || "") + " " + (t.task_set_id || "")).toLowerCase();
+    return hay.indexOf(q) !== -1;
+  });
+}
+
+function boardSortTasks(tasks, key) {
+  const arr = tasks.slice();
+  if (key === "updated") {
+    arr.sort(function (a, b) { return String(b.updated_at || "").localeCompare(String(a.updated_at || "")); });
+  } else if (key === "title") {
+    arr.sort(function (a, b) { return String(a.title || a.id || "").localeCompare(String(b.title || b.id || "")); });
+  } else {
+    arr.sort(function (a, b) {
+      const pa = (BOARD_PRIORITY_ORDER[a.priority] !== undefined) ? BOARD_PRIORITY_ORDER[a.priority] : 9;
+      const pb = (BOARD_PRIORITY_ORDER[b.priority] !== undefined) ? BOARD_PRIORITY_ORDER[b.priority] : 9;
+      return pa - pb;
+    });
+  }
+  return arr;
+}
+
+function boardLaneCap(lane) {
+  return lane === "Done" ? BOARD_DONE_CAP : BOARD_LANE_CAP;
+}
+// BOARD_PURE_END
+
+function refreshBoardControlLabels() {
+  const q = $("board-filter");
+  if (q) q.placeholder = t("board.filter_placeholder");
+  const s = $("board-sort");
+  if (s) {
+    const sortKeys = { priority: "board.sort_priority", updated: "board.sort_updated", title: "board.sort_title" };
+    Array.from(s.options).forEach((o) => { o.textContent = t(sortKeys[o.value] || "board.sort_priority"); });
+  }
+  const d = $("board-density");
+  if (d) d.textContent = boardDensity === "compact" ? t("board.density_comfortable") : t("board.density_compact");
+}
+
+function initBoardControls() {
+  const q = $("board-filter");
+  if (q) q.addEventListener("input", () => { boardQuery = q.value; renderKanban(); });
+  const s = $("board-sort");
+  if (s) s.addEventListener("change", () => { boardSort = s.value; renderKanban(); });
+  const d = $("board-density");
+  if (d) d.addEventListener("click", () => {
+    boardDensity = boardDensity === "compact" ? "comfortable" : "compact";
+    d.setAttribute("aria-pressed", boardDensity === "compact" ? "true" : "false");
+    renderKanban();
+  });
+  refreshBoardControlLabels();
+}
+
 function renderKanban() {
-  const tasks = (runtimeState.tasks || []).filter(taskMatchesTeamFilter);
+  let tasks = (runtimeState.tasks || []).filter(taskMatchesTeamFilter);
+  tasks = boardSortTasks(boardFilterTasks(tasks, boardQuery), boardSort);
   renderBoardTeamFilterBanner();
   if (boardLifted && !taskById(boardLifted.id)) clearLift();
-  $("kanban").innerHTML = lanes.map((lane) => {
+  const kb = $("kanban");
+  refreshBoardControlLabels();
+  kb.classList.toggle("density-compact", boardDensity === "compact");
+  kb.innerHTML = lanes.map((lane) => {
     const laneTasks = tasks.filter((task) => task.lane === lane);
-    const body = laneTasks.length ? laneTasks.map(taskCard).join("") : `<div class="empty">No ${escapeHtml(lane)} tasks</div>`;
+    const cap = boardLaneCap(lane);
+    const expanded = !!boardExpandedLanes[lane];
+    const shown = expanded ? laneTasks : laneTasks.slice(0, cap);
+    let body = shown.length
+      ? shown.map(taskCard).join("")
+      : `<div class="empty">${boardQuery ? t("board.no_matches") : t("board.no_tasks")}</div>`;
+    const hidden = laneTasks.length - shown.length;
+    if (hidden > 0) {
+      body += `<button type="button" class="lane-more" data-lane="${escapeHtml(lane)}">${t("board.more")} (${hidden})</button>`;
+    } else if (expanded && laneTasks.length > cap) {
+      body += `<button type="button" class="lane-more" data-lane="${escapeHtml(lane)}">${t("board.collapse")}</button>`;
+    }
     return patternTaskLane({ name: lane, className: laneClassName(lane), count: laneTasks.length, body });
   }).join("");
-  document.querySelectorAll("#kanban .task-card").forEach(wireBoardCard);
-  document.querySelectorAll("#kanban .lane").forEach(wireLaneDropTarget);
+  kb.querySelectorAll(".task-card").forEach(wireBoardCard);
+  kb.querySelectorAll(".lane").forEach(wireLaneDropTarget);
+  kb.querySelectorAll(".lane-more").forEach((btn) => btn.addEventListener("click", () => {
+    boardExpandedLanes[btn.dataset.lane] = !boardExpandedLanes[btn.dataset.lane];
+    renderKanban();
+  }));
   renderLift();
 }
 
@@ -14095,6 +14217,7 @@ initContextualHelp();
 initLanguage();
 loadI18n();
 initInboxDetailDrawer();
+initBoardControls();
 
 loadState();
 connectEventStream();

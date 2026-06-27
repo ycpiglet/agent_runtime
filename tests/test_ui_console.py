@@ -1403,6 +1403,21 @@ def test_ui_console_live_map_edge_labels_assets(tmp_path):
     assert b"live-map-edge-label" in css.body
 
 
+def test_ui_console_board_taskview_assets(tmp_path):
+    # SPEC-board-taskview-v1: board ships pure helpers, lane-cap, controls + i18n.
+    js = ui_console.build_response("/app.js", tmp_path)
+    css = ui_console.build_response("/app.css", tmp_path)
+    html = ui_console.build_response("/", tmp_path)
+    assert js.status == 200
+    for token in (b"boardFilterTasks", b"boardSortTasks", b"boardLaneCap",
+                  b"BOARD_PURE_START", b"board.more", b"board.filter_placeholder"):
+        assert token in js.body, token
+    assert b'id="board-controls"' in html.body
+    assert b'id="board-sort"' in html.body
+    assert b".board-controls" in css.body
+    assert b".lane-more" in css.body
+
+
 def test_ui_console_graph_state_and_roadmap_routes(tmp_path):
     _write_task(tmp_path, "TASK-UI-232")
     _write(
