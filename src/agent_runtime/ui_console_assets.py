@@ -2738,6 +2738,11 @@ textarea:focus {
 .live-map-edge.kind-assignment { stroke: var(--success); }
 .live-map-edge.kind-review { stroke: var(--amber); }
 .live-map-edge.kind-block { stroke: var(--danger); }
+/* SPEC-relationship-edge-labels-v1: mid-edge "why" labels for block/review. */
+.live-map-edge-label { fill: var(--ink); font-size: var(--font-size-ui-10); font-weight: 600; pointer-events: none; }
+.live-map-edge-label.kind-block { fill: var(--danger); }
+.live-map-edge-label.kind-review { fill: var(--warning); }
+.live-map-edge-label-bg { fill: var(--canvas); opacity: 0.85; }
 .live-map-edge.magnitude-low { stroke-width: 1.5; }
 .live-map-edge.magnitude-medium { stroke-width: 2.25; }
 .live-map-edge.magnitude-high { stroke-width: 3; }
@@ -10152,6 +10157,37 @@ function renderLiveMap() {
     // aria-label so assistive tech gets the edge info (not color-only).
     line.setAttribute("aria-label", `${escapeHtml(edge.from)} to ${escapeHtml(edge.to)}: ${escapeHtml(edge.kind || "edge")}`);
     edgeLayer.appendChild(line);
+    // SPEC-relationship-edge-labels-v1: label block/review edges so a non-expert
+    // reads WHY (the blocked reason) instead of a silent red line. Assignment and
+    // message edges stay unlabeled (too dense). textContent => no XSS from reason.
+    let edgeLabel = "";
+    if (edge.kind === "block") {
+      edgeLabel = t("livemap.blocked") + (edge.reason_label ? ": " + String(edge.reason_label) : "");
+    } else if (edge.kind === "review") {
+      edgeLabel = t("livemap.review");
+    }
+    if (edgeLabel) {
+      const text = edgeLabel.slice(0, 28);
+      const mx = Math.round((a.x + b.x) / 2);
+      const my = Math.round((a.y + b.y) / 2);
+      const wEst = Math.round(6.2 * text.length + 8);
+      const bg = document.createElementNS(SVG_NS, "rect");
+      bg.setAttribute("x", String(mx - wEst / 2)); bg.setAttribute("y", String(my - 9));
+      bg.setAttribute("width", String(wEst)); bg.setAttribute("height", "16");
+      bg.setAttribute("rx", "3");
+      bg.setAttribute("class", "live-map-edge-label-bg");
+      bg.setAttribute("aria-hidden", "true");
+      edgeLayer.appendChild(bg);
+      const lbl = document.createElementNS(SVG_NS, "text");
+      lbl.setAttribute("x", String(mx)); lbl.setAttribute("y", String(my + 3));
+      lbl.setAttribute("text-anchor", "middle");
+      lbl.setAttribute("class", `live-map-edge-label kind-${escapeHtml(edge.kind)}`);
+      // The edge line already carries the aria-label; this visible label is
+      // decorative for AT to avoid a double announce.
+      lbl.setAttribute("aria-hidden", "true");
+      lbl.textContent = text;
+      edgeLayer.appendChild(lbl);
+    }
   });
   svg.appendChild(edgeLayer);
 

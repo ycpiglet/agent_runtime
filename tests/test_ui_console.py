@@ -1374,6 +1374,35 @@ def test_ui_console_org_chart_load_assets(tmp_path):
     assert b"org-team-load" in css.body
 
 
+def test_live_map_block_edge_carries_reason_label(tmp_path):
+    # SPEC-relationship-edge-labels-v1: a blocked task's edge carries the human
+    # reason so the live map can say WHY, not just draw a silent red line.
+    tasks = [{"id": "TASK-X", "status": "blocked", "owner_agent": "alice",
+              "task_set_id": "TS1", "blocked_reason": "waiting for API schema"}]
+    lm = ui_state.build_live_map(tasks, [], [], {"teams": []}, "2026-06-27T00:00:00+09:00")
+    block = next(e for e in lm["edges"] if e.get("kind") == "block")
+    assert block["reason_label"] == "waiting for API schema"
+    assert block["from"] == "alice"
+
+
+def test_live_map_block_edge_no_reason_label(tmp_path):
+    # A blocked task with no reason: the edge still forms, carries no reason_label,
+    # and the front-end falls back to the generic label (no crash, no fabrication).
+    tasks = [{"id": "TASK-Y", "status": "blocked", "owner_agent": "bob", "task_set_id": "TS1"}]
+    lm = ui_state.build_live_map(tasks, [], [], {"teams": []}, "2026-06-27T00:00:00+09:00")
+    block = next(e for e in lm["edges"] if e.get("kind") == "block")
+    assert block.get("reason_label") is None
+
+
+def test_ui_console_live_map_edge_labels_assets(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path)
+    css = ui_console.build_response("/app.css", tmp_path)
+    assert js.status == 200
+    assert b"live-map-edge-label" in js.body
+    assert b"livemap.blocked" in js.body
+    assert b"live-map-edge-label" in css.body
+
+
 def test_ui_console_graph_state_and_roadmap_routes(tmp_path):
     _write_task(tmp_path, "TASK-UI-232")
     _write(

@@ -1276,6 +1276,8 @@ def build_live_map(
                     task_id=task_id,
                     status=status,
                     blocked_reason=task.get("blocked_reason"),
+                    # SPEC-relationship-edge-labels-v1: human "why" for the edge label.
+                    reason_label=task.get("blocked_reason"),
                 )
 
     # Message edges (actor -> recipient) from the message inbox/archive.
@@ -2417,6 +2419,9 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     # ----- SPEC-org-chart-load-v1: per-team load labels on the org chart ---------
     "org.load.active": {"ko": "진행", "en": "active"},
     "org.load.blocked": {"ko": "막힘", "en": "blocked"},
+    # ----- SPEC-relationship-edge-labels-v1: live-map edge labels --------------
+    "livemap.blocked": {"ko": "막힘", "en": "blocked"},
+    "livemap.review": {"ko": "검토 중", "en": "in review"},
     "work_state.kicker": {"ko": "작업", "en": "Work"},
     "work_state.title": {"ko": "작업 상태", "en": "Work state"},
     "work_state.empty": {"ko": "활성 작업 상태가 없습니다.", "en": "No active work state."},
