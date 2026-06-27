@@ -1248,9 +1248,13 @@ def build_live_map(
         status = str(task.get("status") or "").lower()
         owner = str(task.get("owner_agent") or "").strip()
         taskset_id = str(task.get("task_set_id") or "").strip()
-        taskset_node = add_node(taskset_id, "taskset") if taskset_id else None
+        # Active-only: only work that is actually moving (in progress / blocked / in
+        # review) appears, so the map is the live web of work — not every taskset ever
+        # (Owner: maps were over-crowded with inactive items).
+        active_work = _status_bucket(task) in {"in_progress", "blocked", "review"}
+        taskset_node = add_node(taskset_id, "taskset") if (taskset_id and active_work) else None
 
-        if owner:
+        if owner and active_work:
             add_node(owner, "agent")
             if taskset_node:
                 add_edge(
@@ -1303,6 +1307,17 @@ def build_live_map(
             status=message.get("status"),
             source_path=message.get("source_path"),
         )
+
+    # Prune orphans: drop edges whose endpoints were filtered out, then drop nodes
+    # left without any edge (keep the owner apex). Keeps the map to the live web of
+    # work instead of floating leftovers.
+    valid_ids = set(nodes.keys())
+    edges = [e for e in edges if e.get("from") in valid_ids and e.get("to") in valid_ids]
+    referenced = {LIVE_MAP_OWNER_ID}
+    for edge in edges:
+        referenced.add(edge["from"])
+        referenced.add(edge["to"])
+    nodes = {nid: node for nid, node in nodes.items() if nid in referenced}
 
     edge_kind_counts: dict[str, int] = {}
     for edge in edges:

@@ -1438,15 +1438,21 @@ def test_office_map_shows_active_agents_only(tmp_path):
     assert ids == {"inst-2", "inst-3"}
 
 
-def test_live_map_draws_active_agents_only(tmp_path):
+def test_live_map_draws_active_work_only(tmp_path):
+    # Live map = the live web of work: an active task's owner + taskset show; a done
+    # task and an offline agent are pruned (no floating inactive nodes).
+    tasks = [
+        {"id": "T1", "status": "in_progress", "owner_agent": "bob", "task_set_id": "TS1"},
+        {"id": "T2", "status": "completed", "owner_agent": "alice", "task_set_id": "TS2"},
+    ]
     team_agents = {"teams": [{"team_id": "eng", "agents": [
-        {"id": "i1", "role": "alice", "presence": "offline", "online": False},
-        {"id": "i2", "role": "bob", "presence": "working", "online": False},
+        {"id": "i-bob", "role": "bob", "presence": "working", "online": False, "current_task_id": "T1"},
+        {"id": "i-alice", "role": "alice", "presence": "offline", "online": False},
     ]}]}
-    lm = ui_state.build_live_map([], [], [], team_agents, "2026-06-27T00:00:00+09:00")
-    agent_nodes = {n["id"] for n in lm["nodes"] if n.get("kind") == "agent"}
-    assert "bob" in agent_nodes
-    assert "alice" not in agent_nodes
+    lm = ui_state.build_live_map(tasks, [], [], team_agents, "2026-06-27T00:00:00+09:00")
+    node_ids = {n["id"] for n in lm["nodes"]}
+    assert "bob" in node_ids and "TS1" in node_ids
+    assert "alice" not in node_ids and "TS2" not in node_ids
 
 
 def test_nav_tab_labels_localized(tmp_path):
