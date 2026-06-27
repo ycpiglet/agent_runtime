@@ -7,6 +7,9 @@ marketing, sales, operations, support, planning, or strategy work across
 multiple cycles. The packet keeps business work useful while preserving the
 claim/worktree lifecycle and preventing unapproved external effects.
 
+Lane-specific operating packets are in:
+`agents/project/WORK-LANE-PLAYBOOKS.md`.
+
 ## Lanes
 
 | Lane | Lead role | Worker roles | Reviewer roles | Owns |

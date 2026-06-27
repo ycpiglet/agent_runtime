@@ -2,13 +2,13 @@
 type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
-generated_at: 2026-06-21
-archived_count: 253
+generated_at: 2026-06-27
+archived_count: 256
 ---
 
 # Archived Task Files
 
-- `253` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `256` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -266,3 +266,6 @@ archived_count: 253
 | `TASK-AR-588` | `51fd1ba5-1d9…` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | completed | 2026-06-20T01:04:15+09:00 | 2026-06-20T10:34:35+09:00 | 2026-06-20T11:50:50+09:00 | 2026-06-20T11:50:50+09:00 | Replace the hand-rolled graph layout with proper layout engines: Dagre (MIT, layered/… |
 | `TASK-AR-591` | `a5da8af2-1b7…` | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | completed | 2026-06-20T05:18:36+09:00 | 2026-06-20T08:12:15+09:00 | 2026-06-20T08:25:00+09:00 | 2026-06-20T08:25:00+09:00 | Ensure the AR-587..590 visual components actually appear in the relevant live console… |
 | `TASK-AR-592` | `57b81740-6ec…` | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | completed | 2026-06-20T05:18:36+09:00 | 2026-06-20T07:13:38+09:00 | 2026-06-20T07:40:00+09:00 | 2026-06-20T07:40:00+09:00 | Ensure the new visual components meet WCAG AA (contrast, roles, labels, keyboard, red… |
+| `TASK-AR-594` | `6e7c6c37-d32…` | `TASKSET-AR-BUSINESS-LANE-PLAYBOOKS` | completed | 2026-06-21T17:45:39+09:00 | 2026-06-21T17:45:39+09:00 | 2026-06-21T18:15:00+09:00 | 2026-06-21T18:15:00+09:00 | Produce a concrete business lane playbook package with required inputs, outputs, and… |
+| `TASK-AR-595` | `30a642de-d20…` | `TASKSET-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION` | completed | 2026-06-21T18:30:00+09:00 | 2026-06-21T18:30:00+09:00 | 2026-06-21T19:00:00+09:00 | 2026-06-21T19:00:00+09:00 | Produce a finance evidence packet with constraints and control checks so the finance… |
+| `TASK-AR-596` | `46edc6d6-3cf…` | `TASKSET-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION` | completed | 2026-06-21T19:00:00+09:00 | 2026-06-21T19:00:00+09:00 | 2026-06-21T19:25:00+09:00 | 2026-06-21T19:25:00+09:00 | Prepare a reusable marketing campaign-readiness packet that defines channels, constra… |

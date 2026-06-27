@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-06-21T17:13:42+09:00
-record_count: 606
+generated_at: 2026-06-21T18:53:33+09:00
+record_count: 647
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `606` review and evidence records under `reviews/`.
+- Summary: indexed `647` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `606` files |
+| Reviews covered | pass | `647` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -69,6 +69,9 @@ record_count: 606
 | `reviews/CO-LOCATION-GATE-2026-06-09-task-ar-204.json` | `CO-LOCATION-GATE-2026-06-09-task-ar-204` | json | record | n/a | CO-LOCATION-GATE-2026-06-09-task-ar-204 |
 | `reviews/CO-LOCATION-GATE-2026-06-10-task-ar-223-root-current.json` | `CO-LOCATION-GATE-2026-06-10-task-ar-223-root-current` | json | record | n/a | CO-LOCATION-GATE-2026-06-10-task-ar-223-root-current |
 | `reviews/CO-LOCATION-GATE-2026-06-11-task-ar-310.json` | `CO-LOCATION-GATE-2026-06-11-task-ar-310` | json | record | n/a | CO-LOCATION-GATE-2026-06-11-task-ar-310 |
+| `reviews/COMPOUND-2026-06-21-business-lane-finance-implementation.md` | `COMPOUND-2026-06-21-business-lane-finance-implementation` | compound | recorded | pass | Business Lane Finance Implementation Compound |
+| `reviews/COMPOUND-2026-06-21-business-lane-marketing-growth-implementation.md` | `COMPOUND-2026-06-21-business-lane-marketing-growth-implementation` | compound | recorded | pass | Business Lane Marketing Growth Implementation Compound |
+| `reviews/COMPOUND-2026-06-21-business-lane-playbooks.md` | `COMPOUND-2026-06-21-business-lane-playbooks` | compound | recorded | pass | Business Lane Playbooks Compound |
 | `reviews/COMPOUND-2026-06-21-business-operating-system.md` | `COMPOUND-2026-06-21-business-operating-system` | compound | recorded | pass | Business Operating System Compound Note |
 | `reviews/CONTEXT-KNOWLEDGE-GATE-2026-06-11-final.json` | `CONTEXT-KNOWLEDGE-GATE-2026-06-11-final` | json | record | n/a | CONTEXT-KNOWLEDGE-GATE-2026-06-11-final |
 | `reviews/CORRECTION-COLLECTOR-2026-06-09-task-ar-207.json` | `CORRECTION-COLLECTOR-2026-06-09-task-ar-207` | json | record | n/a | CORRECTION-COLLECTOR-2026-06-09-task-ar-207 |
@@ -76,6 +79,9 @@ record_count: 606
 | `reviews/CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final.json` | `CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final` | json | record | n/a | CORRECTION-COLLECTOR-2026-06-10-taskset-quality-loop-final |
 | `reviews/COUNCIL-2026-06-14-host-feedback-first-deliberation.md` | `COUNCIL-2026-06-14-host-feedback-first-deliberation` | council | watch | watch | Council — Host Feedback First Deliberation (TASK-AR-527) |
 | `reviews/DIAGNOSTIC-2026-06-18-ui-design-system-maturity.md` | `DIAGNOSTIC-2026-06-18-ui-design-system-maturity` | md | accepted | n/a | UI Design System Maturity Diagnostic |
+| `reviews/DOC-STEWARD-2026-06-21-business-lane-finance-implementation.md` | `DOC-STEWARD-2026-06-21-business-lane-finance-implementation` | doc-steward-review | recorded | pass | Business Lane Finance Implementation Doc Steward Review |
+| `reviews/DOC-STEWARD-2026-06-21-business-lane-marketing-growth-implementation.md` | `DOC-STEWARD-2026-06-21-business-lane-marketing-growth-implementation` | doc-steward-review | recorded | pass | Business Lane Marketing Growth Implementation Doc Steward Review |
+| `reviews/DOC-STEWARD-2026-06-21-business-lane-playbooks.md` | `DOC-STEWARD-2026-06-21-business-lane-playbooks` | doc-steward-review | recorded | pass | Business Lane Playbooks Doc Steward Review |
 | `reviews/DOC-STEWARD-2026-06-21-business-operating-system.md` | `DOC-STEWARD-2026-06-21-business-operating-system` | doc-steward-review | recorded | pass | Business Operating System Doc Steward Review |
 | `reviews/GOVERNANCE-OPS-REPORT-2026-06-10.md` | `GOVERNANCE-OPS-REPORT-2026-06-10` | governance_ops_report | watch | watch | Governance Operations Report |
 | `reviews/HANDOFF-2026-06-15-ui-redesign-and-product-structure.md` | `HANDOFF-2026-06-15-ui-redesign-and-product-structure` | md | record | n/a | HANDOFF — UI Redesign & Product-Structure Change (for next session) |
@@ -208,6 +214,9 @@ record_count: 606
 | `reviews/RETRO-2026-06-14-agent-runtime-process-integrity.md` | `RETRO-2026-06-14-agent-runtime-process-integrity` | retro | watch | watch | RETRO 2026-06-14 — Process Integrity (verification / merge / compound-review-retro) |
 | `reviews/RETRO-2026-06-14-knowledge-stack.md` | `RETRO-2026-06-14-knowledge-stack` | retro | watch | watch | RETRO 2026-06-14 — Agent knowledge stack (#1–#4) |
 | `reviews/RETRO-2026-06-17-self-improvement-cycle.md` | `RETRO-2026-06-17-self-improvement-cycle` | retro | record | n/a | RETRO 2026-06-17 - Self Improvement Cycle |
+| `reviews/RETRO-2026-06-21-business-lane-finance-implementation.md` | `RETRO-2026-06-21-business-lane-finance-implementation` | retro | recorded | pass | Business Lane Finance Implementation Retro |
+| `reviews/RETRO-2026-06-21-business-lane-marketing-growth-implementation.md` | `RETRO-2026-06-21-business-lane-marketing-growth-implementation` | retro | recorded | pass | Business Lane Marketing Growth Implementation Retro |
+| `reviews/RETRO-2026-06-21-business-lane-playbooks.md` | `RETRO-2026-06-21-business-lane-playbooks` | retro | recorded | pass | Business Lane Playbooks Retro |
 | `reviews/RETRO-2026-06-21-business-operating-system.md` | `RETRO-2026-06-21-business-operating-system` | retro | recorded | pass | Business Operating System Retro |
 | `reviews/REVIEW-2026-06-08-agent-runtime-after-pass-1.md` | `REVIEW-2026-06-08-agent-runtime-after-pass-1` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-after-pass-1 |
 | `reviews/REVIEW-2026-06-08-agent-runtime-baseline.md` | `REVIEW-2026-06-08-agent-runtime-baseline` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-baseline |
@@ -501,8 +510,18 @@ record_count: 606
 | `reviews/REVIEW-2026-06-18-taskset-ar-release-auto-noncritical-registration.md` | `REVIEW-2026-06-18-taskset-ar-release-auto-noncritical-registration` | md | record | pass | Noncritical Release Auto-Execution Registration |
 | `reviews/REVIEW-2026-06-20-taskset-ar-visual-asset-adoption-registration.md` | `REVIEW-2026-06-20-taskset-ar-visual-asset-adoption-registration` | md | record | pass | Visual Asset Adoption Registration |
 | `reviews/REVIEW-2026-06-20-taskset-ar-visual-system-integration-registration.md` | `REVIEW-2026-06-20-taskset-ar-visual-system-integration-registration` | md | record | pass | Visual System Integration & Verification Registration |
+| `reviews/REVIEW-2026-06-21-task-ar-594-business-lane-playbooks.md` | `REVIEW-2026-06-21-task-ar-594-business-lane-playbooks` | review | record | pass | Business Lane Playbooks Review |
+| `reviews/REVIEW-2026-06-21-task-ar-595-business-lane-finance-implementation.md` | `REVIEW-2026-06-21-task-ar-595-business-lane-finance-implementation` | review | record | pass | Business Lane Finance Implementation Review |
+| `reviews/REVIEW-2026-06-21-task-ar-596-business-lane-marketing-growth-implementation.md` | `REVIEW-2026-06-21-task-ar-596-business-lane-marketing-growth-implementation` | review | record | pass | Business Lane Marketing Growth Implementation Review |
+| `reviews/REVIEW-2026-06-21-taskset-ar-business-lane-playbooks-registration.md` | `REVIEW-2026-06-21-taskset-ar-business-lane-playbooks-registration` | md | record | pass | Business Lanes Playbooks Registration |
+| `reviews/REVIEW-2026-06-21-taskset-ar-business-lanes-finance-implementation-registration.md` | `REVIEW-2026-06-21-taskset-ar-business-lanes-finance-implementation-registration` | md | record | pass | Business Lanes Finance Implementation Registration |
+| `reviews/REVIEW-2026-06-21-taskset-ar-business-lanes-marketing-growth-implementation-registration.md` | `REVIEW-2026-06-21-taskset-ar-business-lanes-marketing-growth-implementation-registration` | md | record | pass | Business Lanes Marketing Growth Implementation Registration |
+| `reviews/REVIEW-2026-06-21-taskset-ar-business-lanes-sales-revenue-implementation-registration.md` | `REVIEW-2026-06-21-taskset-ar-business-lanes-sales-revenue-implementation-registration` | md | record | pass | Business Lanes Sales Revenue Implementation Registration |
 | `reviews/REVIEW-2026-06-21-taskset-ar-business-operating-system-registration.md` | `REVIEW-2026-06-21-taskset-ar-business-operating-system-registration` | md | record | pass | Business Operating System Registration |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
+| `reviews/SCRIBE-2026-06-21-business-lane-finance-implementation.md` | `SCRIBE-2026-06-21-business-lane-finance-implementation` | md | recorded | pass | Scribe: Business Lane Finance Implementation |
+| `reviews/SCRIBE-2026-06-21-business-lane-marketing-growth-implementation.md` | `SCRIBE-2026-06-21-business-lane-marketing-growth-implementation` | md | recorded | pass | Scribe: Business Lane Marketing Growth Implementation |
+| `reviews/SCRIBE-2026-06-21-business-lane-playbooks.md` | `SCRIBE-2026-06-21-business-lane-playbooks` | md | recorded | pass | Scribe: Business Lane Playbooks |
 | `reviews/SCRIBE-2026-06-21-business-operating-system.md` | `SCRIBE-2026-06-21-business-operating-system` | scribe | recorded | pass | Business Operating System Scribe Log |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario |
@@ -516,6 +535,9 @@ record_count: 606
 | `reviews/SEMINAR-2026-06-14-agent-runtime-task-ar-222-closeout-sync.md` | `SEMINAR-2026-06-14-agent-runtime-task-ar-222-closeout-sync` | md | record | n/a | SEMINAR: TASK-AR-222 closeout 번들 운영 동기화 세미나 |
 | `reviews/SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync.md` | `SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync` | md | record | n/a | SEMINAR (2026-06-15) - TASK-AR-223 governance sync |
 | `reviews/SEMINAR-2026-06-17-self-improvement-cadence.md` | `SEMINAR-2026-06-17-self-improvement-cadence` | meeting | planned | planned | Self Improvement Cadence Seminar |
+| `reviews/SEMINAR-2026-06-21-business-lane-finance-implementation.md` | `SEMINAR-2026-06-21-business-lane-finance-implementation` | seminar | recorded | pass | Business Lane Finance Implementation Seminar |
+| `reviews/SEMINAR-2026-06-21-business-lane-marketing-growth-implementation.md` | `SEMINAR-2026-06-21-business-lane-marketing-growth-implementation` | seminar | recorded | pass | Business Lane Marketing Growth Implementation Seminar |
+| `reviews/SEMINAR-2026-06-21-business-lane-playbooks.md` | `SEMINAR-2026-06-21-business-lane-playbooks` | seminar | recorded | pass | Business Lane Playbooks Seminar |
 | `reviews/SEMINAR-2026-06-21-business-operating-system.md` | `SEMINAR-2026-06-21-business-operating-system` | seminar | recorded | pass | Business Operating System Seminar |
 | `reviews/VERIFY-2026-06-12-task-ar-375-20260612150820.json` | `VERIFY-2026-06-12-task-ar-375-20260612150820` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612150820 |
 | `reviews/VERIFY-2026-06-12-task-ar-375-20260612151830.json` | `VERIFY-2026-06-12-task-ar-375-20260612151830` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612151830 |
@@ -566,8 +588,27 @@ record_count: 606
 | `reviews/VERIFY-2026-06-20-task-ar-592-a11y-responsive.json` | `VERIFY-2026-06-20-task-ar-592-a11y-responsive` | json | record | n/a | VERIFY-2026-06-20-task-ar-592-a11y-responsive |
 | `reviews/VERIFY-2026-06-20-unit-task-ar-588-001-20260620114055.json` | `VERIFY-2026-06-20-unit-task-ar-588-001-20260620114055` | json | record | n/a | VERIFY-2026-06-20-unit-task-ar-588-001-20260620114055 |
 | `reviews/VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421.json` | `VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421` | json | record | n/a | VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421 |
+| `reviews/VERIFY-2026-06-21-backlog-board-rewrite-20260621193500.json` | `VERIFY-2026-06-21-backlog-board-rewrite-20260621193500` | json | record | n/a | VERIFY-2026-06-21-backlog-board-rewrite-20260621193500 |
 | `reviews/VERIFY-2026-06-21-task-ar-593-20260621171220.json` | `VERIFY-2026-06-21-task-ar-593-20260621171220` | json | record | n/a | VERIFY-2026-06-21-task-ar-593-20260621171220 |
+| `reviews/VERIFY-2026-06-21-task-ar-594-20260621182006.json` | `VERIFY-2026-06-21-task-ar-594-20260621182006` | json | record | n/a | VERIFY-2026-06-21-task-ar-594-20260621182006 |
+| `reviews/VERIFY-2026-06-21-task-ar-594-20260621182053.json` | `VERIFY-2026-06-21-task-ar-594-20260621182053` | json | record | n/a | VERIFY-2026-06-21-task-ar-594-20260621182053 |
+| `reviews/VERIFY-2026-06-21-task-ar-595-20260621183606.json` | `VERIFY-2026-06-21-task-ar-595-20260621183606` | json | record | n/a | VERIFY-2026-06-21-task-ar-595-20260621183606 |
+| `reviews/VERIFY-2026-06-21-task-ar-595-20260621183801.json` | `VERIFY-2026-06-21-task-ar-595-20260621183801` | json | record | n/a | VERIFY-2026-06-21-task-ar-595-20260621183801 |
+| `reviews/VERIFY-2026-06-21-task-ar-595-20260621183823.json` | `VERIFY-2026-06-21-task-ar-595-20260621183823` | json | record | n/a | VERIFY-2026-06-21-task-ar-595-20260621183823 |
+| `reviews/VERIFY-2026-06-21-task-ar-595-20260621184042.json` | `VERIFY-2026-06-21-task-ar-595-20260621184042` | json | record | n/a | VERIFY-2026-06-21-task-ar-595-20260621184042 |
+| `reviews/VERIFY-2026-06-21-task-ar-595-20260621184422.json` | `VERIFY-2026-06-21-task-ar-595-20260621184422` | json | record | n/a | VERIFY-2026-06-21-task-ar-595-20260621184422 |
+| `reviews/VERIFY-2026-06-21-task-ar-596-20260621184921.json` | `VERIFY-2026-06-21-task-ar-596-20260621184921` | json | record | n/a | VERIFY-2026-06-21-task-ar-596-20260621184921 |
+| `reviews/VERIFY-2026-06-21-taskset-594-task-identity-20260621193500.json` | `VERIFY-2026-06-21-taskset-594-task-identity-20260621193500` | json | record | n/a | VERIFY-2026-06-21-taskset-594-task-identity-20260621193500 |
+| `reviews/VERIFY-2026-06-21-taskset-594-taskset-work-gate-20260621193500.json` | `VERIFY-2026-06-21-taskset-594-taskset-work-gate-20260621193500` | json | record | n/a | VERIFY-2026-06-21-taskset-594-taskset-work-gate-20260621193500 |
 | `reviews/VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000.json` | `VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000` | json | record | n/a | VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000 |
+| `reviews/VERIFY-2026-06-21-unit-task-ar-594-001-20260621180825.json` | `VERIFY-2026-06-21-unit-task-ar-594-001-20260621180825` | json | record | n/a | VERIFY-2026-06-21-unit-task-ar-594-001-20260621180825 |
+| `reviews/VERIFY-2026-06-21-unit-task-ar-594-001-20260621182006.json` | `VERIFY-2026-06-21-unit-task-ar-594-001-20260621182006` | json | record | n/a | VERIFY-2026-06-21-unit-task-ar-594-001-20260621182006 |
+| `reviews/VERIFY-2026-06-21-unit-task-ar-594-001-20260621182053.json` | `VERIFY-2026-06-21-unit-task-ar-594-001-20260621182053` | json | record | n/a | VERIFY-2026-06-21-unit-task-ar-594-001-20260621182053 |
+| `reviews/VERIFY-2026-06-21-unit-task-ar-595-001-20260621183536.json` | `VERIFY-2026-06-21-unit-task-ar-595-001-20260621183536` | json | record | n/a | VERIFY-2026-06-21-unit-task-ar-595-001-20260621183536 |
+| `reviews/VERIFY-2026-06-21-unit-task-ar-595-001-20260621183800.json` | `VERIFY-2026-06-21-unit-task-ar-595-001-20260621183800` | json | record | n/a | VERIFY-2026-06-21-unit-task-ar-595-001-20260621183800 |
+| `reviews/VERIFY-2026-06-21-unit-task-ar-595-001-20260621184040.json` | `VERIFY-2026-06-21-unit-task-ar-595-001-20260621184040` | json | record | n/a | VERIFY-2026-06-21-unit-task-ar-595-001-20260621184040 |
+| `reviews/VERIFY-2026-06-21-unit-task-ar-595-001-20260621184422.json` | `VERIFY-2026-06-21-unit-task-ar-595-001-20260621184422` | json | record | n/a | VERIFY-2026-06-21-unit-task-ar-595-001-20260621184422 |
+| `reviews/VERIFY-2026-06-21-unit-task-ar-596-001-20260621185033.json` | `VERIFY-2026-06-21-unit-task-ar-596-001-20260621185033` | json | record | n/a | VERIFY-2026-06-21-unit-task-ar-596-001-20260621185033 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |

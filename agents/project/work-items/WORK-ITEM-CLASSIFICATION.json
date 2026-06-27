@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-21T17:13:42+09:00",
-  "record_count": 370,
+  "generated_at": "2026-06-27T20:22:30+09:00",
+  "record_count": 382,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4074,6 +4074,138 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-593/UNIT-TASK-AR-593-001.md",
       "parent_id": "TASK-AR-593",
       "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-BUSINESS-LANES",
+      "level": "initiative",
+      "number": "23",
+      "label": "Initiative 23",
+      "id": "INIT-AR-BUSINESS-LANES",
+      "title": "INIT-AR-BUSINESS-LANES",
+      "path": "-",
+      "parent_id": "",
+      "status": "referenced"
+    },
+    {
+      "key": "taskset:TASKSET-AR-BUSINESS-LANE-PLAYBOOKS",
+      "level": "taskset",
+      "number": "23.1",
+      "label": "Taskset 23.1",
+      "id": "TASKSET-AR-BUSINESS-LANE-PLAYBOOKS",
+      "title": "Business Lanes Playbooks",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-BUSINESS-LANES",
+      "status": "complete"
+    },
+    {
+      "key": "task:TASK-AR-594",
+      "level": "task",
+      "number": "23.1.1",
+      "label": "Task 23.1.1",
+      "id": "TASK-AR-594",
+      "title": "Produce a concrete business lane playbook package with required inputs, outputs, and…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-594.md",
+      "parent_id": "TASKSET-AR-BUSINESS-LANE-PLAYBOOKS",
+      "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION",
+      "level": "initiative",
+      "number": "24",
+      "label": "Initiative 24",
+      "id": "INIT-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION",
+      "title": "INIT-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION",
+      "path": "-",
+      "parent_id": "",
+      "status": "referenced"
+    },
+    {
+      "key": "taskset:TASKSET-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION",
+      "level": "taskset",
+      "number": "24.1",
+      "label": "Taskset 24.1",
+      "id": "TASKSET-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION",
+      "title": "Business Lanes Finance Implementation",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION",
+      "status": "complete"
+    },
+    {
+      "key": "task:TASK-AR-595",
+      "level": "task",
+      "number": "24.1.1",
+      "label": "Task 24.1.1",
+      "id": "TASK-AR-595",
+      "title": "Produce a finance evidence packet with constraints and control checks so the finance…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-595.md",
+      "parent_id": "TASKSET-AR-BUSINESS-LANES-FINANCE-IMPLEMENTATION",
+      "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION",
+      "level": "initiative",
+      "number": "25",
+      "label": "Initiative 25",
+      "id": "INIT-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION",
+      "title": "INIT-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION",
+      "path": "-",
+      "parent_id": "",
+      "status": "referenced"
+    },
+    {
+      "key": "taskset:TASKSET-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION",
+      "level": "taskset",
+      "number": "25.1",
+      "label": "Taskset 25.1",
+      "id": "TASKSET-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION",
+      "title": "Business Lanes Marketing Growth Implementation",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION",
+      "status": "complete"
+    },
+    {
+      "key": "task:TASK-AR-596",
+      "level": "task",
+      "number": "25.1.1",
+      "label": "Task 25.1.1",
+      "id": "TASK-AR-596",
+      "title": "Prepare a reusable marketing campaign-readiness packet that defines channels, constra…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-596.md",
+      "parent_id": "TASKSET-AR-BUSINESS-LANES-MARKETING-GROWTH-IMPLEMENTATION",
+      "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION",
+      "level": "initiative",
+      "number": "26",
+      "label": "Initiative 26",
+      "id": "INIT-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION",
+      "title": "INIT-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION",
+      "path": "-",
+      "parent_id": "",
+      "status": "referenced"
+    },
+    {
+      "key": "taskset:TASKSET-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION",
+      "level": "taskset",
+      "number": "26.1",
+      "label": "Taskset 26.1",
+      "id": "TASKSET-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION",
+      "title": "Business Lanes Sales Revenue Implementation",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-597",
+      "level": "task",
+      "number": "26.1.1",
+      "label": "Task 26.1.1",
+      "id": "TASK-AR-597",
+      "title": "Produce a sales-revenue readiness packet for qualification, proposal sequencing, and…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-597.md",
+      "parent_id": "TASKSET-AR-BUSINESS-LANES-SALES-REVENUE-IMPLEMENTATION",
+      "status": "planned"
     }
   ]
 }
