@@ -1310,6 +1310,70 @@ def test_ui_console_health_snapshot_assets_rendered(tmp_path):
     assert b"health-snapshot" in css.body
 
 
+def _org_task(team, status):
+    return {"assigned_team": team, "status": status}
+
+
+def test_org_load_band_thresholds(tmp_path):
+    # SPEC-org-chart-load-v1: dedicated bands for point-in-time team totals (NOT the
+    # monthly-cell workload thresholds, which would mis-band a count of 4 as overload).
+    assert ui_state._org_load_band(0) == "idle"
+    assert ui_state._org_load_band(3) == "normal"
+    assert ui_state._org_load_band(6) == "busy"
+    assert ui_state._org_load_band(12) == "overload"
+    # Boundaries (guard off-by-one in the thresholds).
+    assert ui_state._org_load_band(4) == "normal"
+    assert ui_state._org_load_band(5) == "busy"
+    assert ui_state._org_load_band(8) == "busy"
+    assert ui_state._org_load_band(9) == "overload"
+
+
+def test_org_team_load_counts_active_and_blocked(tmp_path):
+    tasks = [
+        _org_task("eng", "in_progress"), _org_task("eng", "planned"), _org_task("eng", "blocked"),
+        _org_task("qa", "completed"), _org_task("qa", "blocked"),
+        _org_task("", "in_progress"),  # no team -> ignored
+    ]
+    load = ui_state._org_team_load(tasks)
+    assert load["eng"]["active"] == 2  # in_progress + planned (open, not blocked)
+    assert load["eng"]["blocked"] == 1
+    assert load["qa"]["active"] == 0  # completed is done -> skipped
+    assert load["qa"]["blocked"] == 1
+    assert "" not in load
+
+
+def test_stamp_org_load_joins_onto_team_nodes_and_summary(tmp_path):
+    org = {"nodes": [{"id": "eng", "kind": "team"}, {"id": "qa", "kind": "team"},
+                     {"id": "alice", "kind": "role"}]}
+    ui_state._stamp_org_load(org, {"eng": {"active": 6, "blocked": 1}, "qa": {"active": 0, "blocked": 0}})
+    eng = next(n for n in org["nodes"] if n["id"] == "eng")
+    role = next(n for n in org["nodes"] if n["id"] == "alice")
+    assert eng["active_count"] == 6 and eng["blocked_count"] == 1
+    assert eng["load_band"] == "busy"
+    assert "active_count" not in role  # roles untouched
+    assert org["load_summary"] == {"teams": 2, "active": 6, "blocked": 1}
+
+
+def test_stamp_org_load_summary_counts_unmatched_teams(tmp_path):
+    # A task on a team with no org node (drift / unassigned) still counts in the
+    # summary total so the headline never silently undercounts open work; the node
+    # itself shows only its own counts.
+    org = {"nodes": [{"id": "eng", "kind": "team"}]}
+    ui_state._stamp_org_load(org, {"eng": {"active": 2, "blocked": 0}, "ghost": {"active": 3, "blocked": 1}})
+    assert org["load_summary"] == {"teams": 1, "active": 5, "blocked": 1}
+    eng = next(n for n in org["nodes"] if n["id"] == "eng")
+    assert eng["active_count"] == 2
+
+
+def test_ui_console_org_chart_load_assets(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path)
+    css = ui_console.build_response("/app.css", tmp_path)
+    assert js.status == 200
+    assert b"org-team-load" in js.body
+    assert b"org.load" in js.body
+    assert b"org-team-load" in css.body
+
+
 def test_ui_console_graph_state_and_roadmap_routes(tmp_path):
     _write_task(tmp_path, "TASK-UI-232")
     _write(

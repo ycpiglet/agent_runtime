@@ -1977,6 +1977,70 @@ def _task_is_open(task: dict[str, Any]) -> bool:
     return _status_bucket(task) != "done"
 
 
+# SPEC-org-chart-load-v1: per-team load bands for a POINT-IN-TIME total of open
+# tasks. Deliberately NOT the _WORKLOAD_* thresholds (those band a monthly-cell
+# load, so a total of 4 would mis-read as "overload"). Calibrated to realistic
+# per-team open-task totals.
+_ORG_LOAD_NORMAL_MAX = 4
+_ORG_LOAD_BUSY_MAX = 8
+
+
+def _org_load_band(count: int) -> str:
+    if count <= 0:
+        return "idle"
+    if count <= _ORG_LOAD_NORMAL_MAX:
+        return "normal"
+    if count <= _ORG_LOAD_BUSY_MAX:
+        return "busy"
+    return "overload"
+
+
+def _org_team_load(tasks: list[dict[str, Any]]) -> dict[str, dict[str, int]]:
+    """Aggregate open tasks per assigned team: {team: {active, blocked}}.
+
+    `active` = open, non-blocked workload; `blocked` = blocked bucket. Done tasks
+    are skipped. Grouped by `task["assigned_team"]` (set by enrich_tasks_with_assignment),
+    which shares the org TEAM-node id space (the Workload heatmap joins on it too).
+    """
+    out: dict[str, dict[str, int]] = {}
+    for task in tasks:
+        team = str(task.get("assigned_team") or "").strip()
+        if not team:
+            continue
+        bucket = _status_bucket(task)
+        if bucket == "done":
+            continue
+        rec = out.setdefault(team, {"active": 0, "blocked": 0})
+        if bucket == "blocked":
+            rec["blocked"] += 1
+        else:
+            rec["active"] += 1
+    return out
+
+
+def _stamp_org_load(org_chart: dict[str, Any], team_load: dict[str, dict[str, int]]) -> dict[str, Any]:
+    """Stamp active/blocked counts + a load band onto each TEAM node, and add a
+    plain-language `load_summary`. Role/director nodes are left untouched."""
+    team_count = 0
+    for node in org_chart.get("nodes") or []:
+        if node.get("kind") != "team":
+            continue
+        team_count += 1
+        rec = team_load.get(node.get("id")) or {}
+        active = int(rec.get("active") or 0)
+        blocked = int(rec.get("blocked") or 0)
+        node["active_count"] = active
+        node["blocked_count"] = blocked
+        node["load_band"] = _org_load_band(active)
+    # The summary totals come from ALL of team_load (not only matched nodes), so
+    # open work on a team with no org node (drifted id / "unassigned") still shows
+    # in the headline rather than silently undercounting.
+    total_active = sum(int(r.get("active") or 0) for r in team_load.values())
+    total_blocked = sum(int(r.get("blocked") or 0) for r in team_load.values())
+    org_chart["load_summary"] = {"teams": team_count, "active": total_active, "blocked": total_blocked}
+    return org_chart
+
+
 def _task_set_status(group: dict[str, Any]) -> str:
     if int(group.get("active", 0) or 0) > 0:
         return "active"
@@ -2350,6 +2414,9 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     "health.blocked": {"ko": "막힘", "en": "blocked"},
     "health.overloaded": {"ko": "과부하", "en": "overloaded"},
     "health.no_data": {"ko": "데이터 부족", "en": "not enough data"},
+    # ----- SPEC-org-chart-load-v1: per-team load labels on the org chart ---------
+    "org.load.active": {"ko": "진행", "en": "active"},
+    "org.load.blocked": {"ko": "막힘", "en": "blocked"},
     "work_state.kicker": {"ko": "작업", "en": "Work"},
     "work_state.title": {"ko": "작업 상태", "en": "Work state"},
     "work_state.empty": {"ko": "활성 작업 상태가 없습니다.", "en": "No active work state."},
@@ -8057,6 +8124,10 @@ def _build_state_uncached(root: Path | str, now: str | None = None) -> dict[str,
     # ORG-MODEL SSOT. Live counts are an optional join from team_agents; the chart
     # renders fully even with zero live agents.
     org_chart = build_org_chart(root_path, team_agents, generated_at)
+    # SPEC-org-chart-load-v1: join per-team open-task load onto the org tree so a
+    # non-expert can see who is busy / blocked at a glance. Additive; tasks are
+    # already enriched with assigned_team above.
+    _stamp_org_load(org_chart, _org_team_load(tasks))
     dependency_graph = build_dependency_graph(tasks, generated_at)
     timeline = build_timeline(tasks, generated_at)
     # Custom properties / labels / automation rules / triage (TASK-AR-331).

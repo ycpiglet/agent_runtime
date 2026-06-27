@@ -5313,6 +5313,12 @@ pre {
   fill: var(--muted);
   font-size: var(--font-size-ui-10);
 }
+/* SPEC-org-chart-load-v1: per-team load line (color band + always a text label). */
+.org-team-load { fill: var(--muted); font-size: var(--font-size-ui-10); font-weight: 600; }
+.org-team-load.load-band-normal { fill: var(--success); }
+.org-team-load.load-band-busy { fill: var(--warning); }
+.org-team-load.load-band-overload { fill: var(--danger); }
+.org-team-load.has-blocked { fill: var(--danger); }
 .org-chart-legend {
   display: flex;
   flex-wrap: wrap;
@@ -10434,10 +10440,12 @@ function renderOrgChart() {
   if (!svg) return;
   const data = orgChartData();
   const totals = data.totals || {};
+  const load = data.load_summary || {};
   setText(
     "org-chart-summary",
     `${totals.teams || 0} teams - ${totals.roles || 0} roles`
     + (totals.nodes ? ` - ${totals.nodes} nodes` : "")
+    + `  \\u00b7  ${load.active || 0} ${t("org.load.active")} \\u00b7 ${load.blocked || 0} ${t("org.load.blocked")}`
   );
 
   while (svg.firstChild) svg.removeChild(svg.firstChild);
@@ -10502,8 +10510,10 @@ function renderOrgChart() {
     group.setAttribute("aria-label", escapeHtml(a11y));
 
     const isRole = kind === "role";
+    const isTeam = kind === "team";
     const w = isRole ? 168 : 200;
-    const h = isRole ? 58 : 46;
+    // Team cards are taller to fit a third "load" line (SPEC-org-chart-load-v1).
+    const h = isRole ? 58 : (isTeam ? 64 : 46);
     const rect = document.createElementNS(SVG_NS, "rect");
     rect.setAttribute("x", String(px - w / 2)); rect.setAttribute("y", String(py - h / 2));
     rect.setAttribute("width", String(w)); rect.setAttribute("height", String(h));
@@ -10532,22 +10542,38 @@ function renderOrgChart() {
       badge.textContent = `${glyph} ${tierWord}${liveStr}`;
       group.appendChild(badge);
     } else {
-      // Director / team group node: centered name + role count.
+      // Director / team group node: centered name + role count (+ load for teams).
+      const nameY = isTeam ? py - 14 : py - 2;
+      const subY = isTeam ? py - 1 : py + 13;
       const name = document.createElementNS(SVG_NS, "text");
-      name.setAttribute("x", String(px)); name.setAttribute("y", String(py - 2));
+      name.setAttribute("x", String(px)); name.setAttribute("y", String(nameY));
       name.setAttribute("class", `org-chart-group-name kind-${escapeHtml(kind)}`);
       name.setAttribute("text-anchor", "middle");
       const glyph = String((node.tier_badge || {}).glyph || ORG_TIER_GLYPH[kind] || "");
       name.textContent = `${glyph ? glyph + " " : ""}${String(node.display_name || node.id).slice(0, 24)}`;
       group.appendChild(name);
       const sub = document.createElementNS(SVG_NS, "text");
-      sub.setAttribute("x", String(px)); sub.setAttribute("y", String(py + 13));
+      sub.setAttribute("x", String(px)); sub.setAttribute("y", String(subY));
       sub.setAttribute("class", "org-chart-group-sub");
       sub.setAttribute("text-anchor", "middle");
-      sub.textContent = (kind === "team")
+      sub.textContent = isTeam
         ? `${node.role_count || 0} roles${node.online_count ? ` - ${node.online_count} online` : ""}`
         : "Director";
       group.appendChild(sub);
+      if (isTeam) {
+        // Load line: open-task workload band (color) + blocked count, always with
+        // a text label (never color-only). Lets a non-expert see who's busy/blocked.
+        const active = Number(node.active_count || 0);
+        const blocked = Number(node.blocked_count || 0);
+        const band = String(node.load_band || "idle");
+        const load = document.createElementNS(SVG_NS, "text");
+        load.setAttribute("x", String(px)); load.setAttribute("y", String(py + 17));
+        load.setAttribute("text-anchor", "middle");
+        load.setAttribute("class", `org-team-load load-band-${escapeHtml(band)}${blocked ? " has-blocked" : ""}`);
+        load.textContent = `${active} ${t("org.load.active")}`
+          + (blocked ? `  \\u00b7  ${blocked} ${t("org.load.blocked")}` : "");
+        group.appendChild(load);
+      }
     }
     nodeLayer.appendChild(group);
   });
