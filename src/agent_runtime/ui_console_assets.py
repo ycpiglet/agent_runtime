@@ -5313,6 +5313,9 @@ pre {
   background: var(--canvas-grad);
   overflow: auto;
 }
+/* SPEC: the org chart sizes to its real extent (set inline by renderOrgChart) and
+   the stage scrolls horizontally, so cards stay full-size instead of overlapping. */
+.org-chart-stage { overflow-x: auto; overflow-y: auto; max-height: 640px; }
 .org-chart-svg {
   display: block;
   width: 100%;
@@ -10632,9 +10635,17 @@ function appendOrgSprite(group, node, px, py, size) {
 }
 
 function orgChartNodePositions(nodes, edges) {
+  // Owner: the chart was mangled -- 32 role cards crushed into a fixed 1200px width.
+  // Size the layout to the widest rank (~190px per card) so cards never overlap;
+  // renderOrgChart then sizes the SVG to the real extent and the stage scrolls.
+  const list = nodes || [];
+  const roleCount = list.filter((n) => n.kind === "role").length;
+  const teamCount = list.filter((n) => n.kind === "team").length;
+  const widest = Math.max(roleCount, teamCount, 1);
+  const width = Math.max(1200, widest * 190 + 160);
   return patternSvgLayeredDagreLayout(nodes, edges, {
     rankdir: "TB",
-    width: 1200,
+    width,
     height: 720,
     marginX: 80,
     marginY: 70,
@@ -10669,6 +10680,19 @@ function renderOrgChart() {
   }
 
   const positions = orgChartNodePositions(nodes, edges);
+
+  // Size the SVG to the real layout extent so cards render full-size (no squish);
+  // the stage scrolls horizontally for large orgs. viewBox == element size = 1:1.
+  let maxX = 1200, maxY = 560;
+  Object.keys(positions).forEach((id) => {
+    const p = positions[id];
+    if (p) { maxX = Math.max(maxX, p.x); maxY = Math.max(maxY, p.y); }
+  });
+  const W = Math.round(maxX + 140);
+  const H = Math.round(maxY + 90);
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.style.width = W + "px";
+  svg.style.height = H + "px";
 
   // ---- Edge layer: director -> team -> role connectors ----
   const edgeLayer = document.createElementNS(SVG_NS, "g");
