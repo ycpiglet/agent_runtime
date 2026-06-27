@@ -7558,12 +7558,15 @@ function queueDecision(commandType, item, reason) {
   });
 }
 
-function markDecisionRecorded(row, commandType) {
+function markDecisionRecorded(row, commandType, routed) {
   row.classList.add("is-decided");
   const bar = row.querySelector(".inbox-decide");
   if (bar) bar.remove();
   if (!row.querySelector(".inbox-decide-recorded")) {
-    const copyKey = DECISION_RECORDED_COPY[commandType] || "inbox.decide.recorded_ack";
+    let copyKey = DECISION_RECORDED_COPY[commandType] || "inbox.decide.recorded_ack";
+    // Honest copy: only claim "delivered to the agent" when the comment actually
+    // reached a real task's agent inbox (server-confirmed agent_routed).
+    if (commandType === "decision.comment" && routed) copyKey = "inbox.decide.recorded_comment_routed";
     row.appendChild(inboxEl("p", "inbox-decide-recorded", "\\u2713 " + t(copyKey)));
   }
   // The activated control was just removed with the bar; keep keyboard focus on
@@ -7579,7 +7582,8 @@ async function submitDecision(commandType, item, row, reason, errorEl) {
   try {
     const result = await queueDecision(commandType, item, reason);
     if (result && result.status === "failed") throw new Error("decision rejected");
-    markDecisionRecorded(row, commandType);
+    const routed = !!(result && result.result && result.result.agent_routed);
+    markDecisionRecorded(row, commandType, routed);
   } catch (err) {
     if (errorEl) {
       errorEl.textContent = t("inbox.decide.failed");

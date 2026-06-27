@@ -2327,6 +2327,10 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     "inbox.decide.reason_required": {"ko": "이유를 입력해 주세요.", "en": "Please add a reason first."},
     "inbox.decide.recorded_ack": {"ko": "확인함 · 팀에 기록됨", "en": "Acknowledged · recorded for the team"},
     "inbox.decide.recorded_comment": {"ko": "의견이 기록됐어요", "en": "Your comment was recorded"},
+    "inbox.decide.recorded_comment_routed": {
+        "ko": "의견이 담당 에이전트에게 전달됐어요",
+        "en": "Your comment was delivered to the agent",
+    },
     "inbox.decide.recorded_hold": {"ko": "보류로 기록됐어요", "en": "Put on hold · recorded"},
     "inbox.decide.failed": {"ko": "전달하지 못했어요 — 다시 시도", "en": "Couldn't record — try again"},
     "inbox.decide.tally": {"ko": "이번 세션 결정", "en": "decisions this session"},

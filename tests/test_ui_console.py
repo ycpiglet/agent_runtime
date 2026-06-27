@@ -1178,6 +1178,60 @@ def test_ui_console_decision_comment_records_reason_and_target(tmp_path):
     assert decision["group"] == "blocked"
 
 
+def test_ui_console_decision_comment_on_task_relays_to_agent_inbox(tmp_path):
+    # Decision Inbox v2: a comment on a real task is recorded AND relayed to the
+    # agent message inbox (a real consumer), so the operator actually exchanges
+    # opinions with the agents working it — not just an audit record.
+    _write_task(tmp_path, "TASK-AR-901")
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {
+                "type": "decision.comment",
+                "target": "TASK-AR-901",
+                "payload": {"actor": "owner", "reason": "Can we ship this today?", "group": "approval_pending"},
+            }
+        ).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+    proposals = list((tmp_path / ".ui_outbox" / "decisions").glob("DECISION-*.json"))
+    messages = list((tmp_path / "agents" / "messages" / "inbox").glob("*.md"))
+
+    assert response.status == 202
+    assert payload["status"] == "queued"
+    assert payload["result"]["agent_routed"] is True
+    assert len(proposals) == 1
+    assert len(messages) == 1
+    assert "Can we ship this today?" in messages[0].read_text(encoding="utf-8")
+
+
+def test_ui_console_decision_comment_on_nontask_records_proposal_only(tmp_path):
+    # A non-task inbox item (e.g. a runtime claim conflict) has no task to reach;
+    # it must still record the proposal but NOT fabricate an agent message.
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {
+                "type": "decision.comment",
+                "target": "claim-conflict-resource-x",
+                "payload": {"actor": "owner", "reason": "who owns this?", "group": "runtime_anomalies"},
+            }
+        ).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+    proposals = list((tmp_path / ".ui_outbox" / "decisions").glob("DECISION-*.json"))
+    inbox = tmp_path / "agents" / "messages" / "inbox"
+
+    assert response.status == 202
+    assert payload["result"]["agent_routed"] is False
+    assert len(proposals) == 1
+    assert not (inbox.exists() and list(inbox.glob("*.md")))
+
+
 def test_ui_console_decision_inbox_assets_expose_respond_bar(tmp_path):
     # SPEC-decision-inbox-v1 front-end: the served app.js exposes the proposal-only
     # respond bar (acknowledge/comment/hold) and its plain-language i18n keys; the

@@ -1119,11 +1119,36 @@ def _decision_command(
     path = root / ".ui_outbox" / "decisions" / f"{decision['id']}.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(decision, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    changed = [_rel(root, path)]
+    # v2: a comment on a REAL task is also relayed to the agent message inbox (the
+    # same channel task.comment uses), so the operator genuinely reaches the agents
+    # working it instead of only leaving an audit record. Non-task items (e.g. claim
+    # conflicts) get the record above only. This writes an agent message, never a
+    # task mutation, so the proposal-only / canonical_mutation_allowed:false contract
+    # still holds.
+    agent_routed = False
+    if command_type == "decision.comment" and reason and _task_path(root, item_id) is not None:
+        relay = _comment_task(
+            root,
+            item_id,
+            {"comment": reason, "to": payload.get("to") or "lead-engineer", "actor": payload.get("actor")},
+            now,
+        )
+        if "changed" in relay:
+            changed.extend(relay["changed"])
+            agent_routed = True
+        # else: the task vanished between the _task_path check and the relay (rare
+        # race). The decision proposal above is already durable; we degrade to
+        # record-only and the UI honestly shows "recorded" (not "delivered"),
+        # agent_routed staying False. Errors are intentionally not fatal here.
+
     return {
         "status": "queued",
         "result": {
-            "changed": [_rel(root, path)],
+            "changed": changed,
             "decision": decision["action"],
+            "agent_routed": agent_routed,
             "canonical_mutation_allowed": False,
             "next": decision["next"],
         },
