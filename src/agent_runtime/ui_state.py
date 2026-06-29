@@ -2331,6 +2331,8 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     "nav.portability": {"ko": "가져오기·내보내기", "en": "Import/Export"},
     "nav.writes": {"ko": "쓰기 기록", "en": "Writes"},
     "org.title": {"ko": "조직도", "en": "Org Chart"},
+    "org.owner_label": {"ko": "오너 (나)", "en": "Owner (You)"},
+    "org.owner_sub": {"ko": "에이전트 조직 지휘", "en": "Directs the agent org"},
     "org.tier.director": {"ko": "디렉터", "en": "Director"},
     "org.tier.planner": {"ko": "리드", "en": "Lead"},
     "org.tier.reviewer": {"ko": "리뷰어", "en": "Reviewer"},

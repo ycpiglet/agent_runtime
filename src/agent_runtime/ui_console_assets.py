@@ -5321,7 +5321,16 @@ pre {
   height: 560px;
 }
 /* SPEC-org-chart-cards: glanceable, spacious team-card grid (wraps to fit width). */
-.org-chart-canvas { display: flex; flex-direction: column; gap: var(--space-2xl); padding: var(--space-md) 0; }
+.org-chart-canvas { display: flex; flex-direction: column; align-items: center; gap: var(--space-sm); padding: var(--space-md) 0; }
+.org-owner-card {
+  display: inline-flex; align-items: center; gap: var(--space-sm);
+  padding: var(--space-md) var(--space-xl); border-radius: var(--radius-pill);
+  border: 1px solid var(--primary); background: var(--primary); color: var(--on-accent);
+  font-size: var(--font-size-ui-15); font-weight: 700;
+}
+.org-owner-glyph { font-size: var(--font-size-ui-16); }
+.org-owner-sub { font-weight: 600; font-size: var(--font-size-ui-12); opacity: 0.85; }
+.org-hierarchy-link { width: 0; height: var(--space-lg); border-left: 2px solid var(--line-strong); }
 .org-director-card {
   align-self: center; display: inline-flex; align-items: center; gap: var(--space-sm);
   padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md);
@@ -5331,6 +5340,7 @@ pre {
 .org-director-glyph { color: var(--violet, var(--primary)); }
 .org-director-tier { color: var(--muted); font-size: var(--font-size-ui-12); font-weight: 600; }
 .org-teams-grid {
+  width: 100%; margin-top: var(--space-md);
   display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: var(--space-xl); align-items: start;
 }
@@ -10745,11 +10755,19 @@ function renderOrgChartCards(canvas, data) {
       + `<div class="org-team-card-load load-band-${escapeHtml(band)}${blocked ? " has-blocked" : ""}">${escapeHtml(loadStr)}</div>`
       + `<ul class="org-team-roles">${roleRows}</ul></article>`;
   }).join("");
+  // The human Owner is the apex who directs the agent org -> shown above the
+  // director (Owner -> Managing Partner -> teams -> roles).
   canvas.innerHTML =
-    `<div class="org-director-card tone-${escapeHtml(dirToken)}">`
+    `<div class="org-owner-card">`
+    + `<span class="org-owner-glyph" aria-hidden="true">\\u2605</span>`
+    + `<span class="org-owner-name">${escapeHtml(t("org.owner_label"))}</span>`
+    + `<span class="org-owner-sub">${escapeHtml(t("org.owner_sub"))}</span></div>`
+    + `<div class="org-hierarchy-link" aria-hidden="true"></div>`
+    + `<div class="org-director-card tone-${escapeHtml(dirToken)}">`
     + `<span class="org-director-glyph" aria-hidden="true">${escapeHtml(String(dirBadge.glyph || "*"))}</span>`
     + `<span class="org-director-name">${escapeHtml(String(dirName))}</span>`
     + `<span class="org-director-tier">${escapeHtml(String(dirBadge.label || "Director"))}</span></div>`
+    + `<div class="org-hierarchy-link" aria-hidden="true"></div>`
     + `<div class="org-teams-grid">${teamCards}</div>`;
 }
 
