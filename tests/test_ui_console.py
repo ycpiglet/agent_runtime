@@ -5096,6 +5096,22 @@ def test_ui_console_org_chart_renderer_is_accessible_and_reduced_motion(tmp_path
     assert ".org-role-chip:focus-visible" in css
 
 
+def test_ui_console_org_role_detail(tmp_path):
+    # Owner: clicking an agent shows its role/team/responsibilities/skills.
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    assert "function openRoleDetail(" in js
+    assert 'id="org-role-detail"' in html
+    assert ".org-role-detail" in css
+    # Descriptions derived from tier + team, fully localized (ko + en present).
+    for key in ("org.resp.planner", "org.resp.reviewer", "org.resp.worker", "org.resp.director",
+                "org.skill.engineering", "org.skill.quality",
+                "org.detail.responsibilities", "org.detail.skills"):
+        entry = ui_state.I18N_STRINGS[key]
+        assert entry["ko"] and entry["en"]
+
+
 def test_ui_console_org_chart_route_serves_resource(tmp_path):
     _write(tmp_path / "agents" / "project" / "ORG-MODEL.yml", _ORG_MODEL_MIN)
     underscore = ui_console.build_response("/api/org_chart", tmp_path)

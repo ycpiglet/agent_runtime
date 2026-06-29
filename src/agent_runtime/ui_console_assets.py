@@ -780,6 +780,13 @@ HTML = """<!doctype html>
               <div id="org-chart-canvas" class="org-chart-canvas" role="group" aria-label="Organization: director, teams, and roles"></div>
             </div>
             <ul id="org-chart-legend" class="org-chart-legend" aria-label="Org chart tier and team legend"></ul>
+            <div id="org-role-backdrop" class="org-role-backdrop" hidden></div>
+            <aside id="org-role-detail" class="org-role-detail" role="dialog" aria-modal="true" aria-labelledby="org-role-name" hidden>
+              <button id="org-role-close" class="org-role-close" type="button" aria-label="Close">&times;</button>
+              <p class="org-role-kicker" data-i18n="org.detail.kicker">Agent</p>
+              <h3 id="org-role-name" class="org-role-name-h"></h3>
+              <div id="org-role-body" class="org-role-body"></div>
+            </aside>
           </section>
         </div>
         <div id="view-statemachines" class="view">
@@ -5379,6 +5386,40 @@ pre {
 .org-role-glyph { color: var(--muted); font-weight: 700; }
 .org-role-name { color: var(--ink); flex: 1 1 auto; }
 .org-role-tier { color: var(--muted); font-size: var(--font-size-ui-10); }
+/* SPEC-org-role-detail: click-a-role description drawer. */
+.org-role-backdrop { position: fixed; inset: 0; z-index: 48; background: var(--scrim); }
+.org-role-detail {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 49; width: 380px; max-width: 92vw;
+  background: var(--panel); border-left: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-pop, var(--shadow)); padding: var(--space-2xl);
+  overflow-y: auto; display: flex; flex-direction: column; gap: var(--space-md);
+}
+.org-role-backdrop[hidden], .org-role-detail[hidden] { display: none; }
+.org-role-close {
+  position: absolute; top: var(--space-md); right: var(--space-md); width: 32px; height: 32px;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--panel-strong); color: var(--ink); cursor: pointer; font-size: var(--font-size-ui-16); line-height: 1;
+}
+.org-role-close:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; box-shadow: var(--focus); }
+.org-role-kicker { margin: 0; color: var(--muted); font-size: var(--font-size-ui-11); font-weight: 700; text-transform: uppercase; }
+.org-role-name-h { margin: 0; color: var(--ink); font-size: var(--font-size-ui-18); }
+.org-role-meta { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+.org-role-tag {
+  font-size: var(--font-size-ui-12); color: var(--ink);
+  background: var(--surface-raised); border: 1px solid var(--line); border-radius: var(--radius-pill);
+  padding: var(--space-xs) var(--space-md);
+}
+.org-role-tag-k { color: var(--muted); }
+.org-role-sec { display: flex; flex-direction: column; gap: var(--space-xs); margin-top: var(--space-sm); }
+.org-role-sec h4 { margin: 0; color: var(--muted); font-size: var(--font-size-ui-11); font-weight: 700; text-transform: uppercase; }
+.org-role-sec p { margin: 0; color: var(--ink); font-size: var(--font-size-ui-13); line-height: 1.5; }
+.org-role-drill {
+  margin-top: var(--space-lg); align-self: flex-start;
+  border: 1px solid var(--primary); border-radius: var(--radius-sm);
+  background: var(--primary); color: var(--on-accent);
+  padding: var(--space-sm) var(--space-lg); font: inherit; font-size: var(--font-size-ui-13); font-weight: 600; cursor: pointer;
+}
+.org-role-drill:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; box-shadow: var(--focus); }
 .org-chart-empty { fill: var(--subtle); font-size: var(--font-size-ui-14); }
 .org-chart-edge {
   stroke: var(--line-strong);
@@ -10738,9 +10779,9 @@ function renderOrgChartCards(canvas, data) {
       const g = (r.tier_badge && r.tier_badge.glyph) || "-";
       const tier = (r.tier_badge && r.tier_badge.label) || r.tier || "";
       return `<li class="org-role-chip" role="button" tabindex="0"`
-        + ` data-drill-team="${escapeHtml(r.team || team.id)}" data-drill-role="${escapeHtml(r.id)}"`
+        + ` data-role-id="${escapeHtml(r.id)}"`
         + ` aria-label="${escapeHtml(String(r.display_name || r.id) + " - " + String(tier))}"`
-        + ` title="${escapeHtml(String(r.display_name || r.id))}">`
+        + ` title="${escapeHtml(String(r.display_name || r.id))} - ${escapeHtml(String(tier))}">`
         + `<span class="org-role-glyph" aria-hidden="true">${escapeHtml(g)}</span>`
         + `<span class="org-role-name">${escapeHtml(String(r.display_name || r.id))}</span>`
         + `<span class="org-role-tier">${escapeHtml(String(tier))}</span></li>`;
@@ -10769,6 +10810,68 @@ function renderOrgChartCards(canvas, data) {
     + `<span class="org-director-tier">${escapeHtml(String(dirBadge.label || "Director"))}</span></div>`
     + `<div class="org-hierarchy-link" aria-hidden="true"></div>`
     + `<div class="org-teams-grid">${teamCards}</div>`;
+}
+
+// SPEC-org-role-detail: clicking a role opens a panel describing that agent --
+// tier + team + responsibilities (from tier) + skills/focus (from team) + a button
+// to view its tasks. Descriptions are derived from the real delegation model.
+let orgRoleDetailPrevFocus = null;
+
+function openRoleDetail(roleId) {
+  const panel = $("org-role-detail");
+  if (!panel) return;
+  const data = orgChartData();
+  const nodes = (data && data.nodes) || [];
+  const node = nodes.filter((n) => n.kind === "role" && String(n.id) === String(roleId))[0];
+  if (!node) return;
+  const team = nodes.filter((n) => n.kind === "team" && String(n.id) === String(node.team))[0];
+  const teamName = (team && (team.display_name || team.id)) || node.team || "-";
+  const tierBadge = node.tier_badge || {};
+  const tierLabel = (tierBadge.glyph ? tierBadge.glyph + " " : "") + String(tierBadge.label || node.tier || "");
+  const respKey = "org.resp." + String(node.tier || "");
+  const skillKey = "org.skill." + String(node.team || "");
+  const respText = i18nStrings[respKey] ? t(respKey) : "";
+  const skillText = i18nStrings[skillKey] ? t(skillKey) : "";
+  setText("org-role-name", String(node.display_name || node.id));
+  const body = $("org-role-body");
+  body.innerHTML =
+    `<div class="org-role-meta">`
+    + `<span class="org-role-tag"><span class="org-role-tag-k">${escapeHtml(t("org.detail.tier"))}</span> ${escapeHtml(tierLabel)}</span>`
+    + `<span class="org-role-tag"><span class="org-role-tag-k">${escapeHtml(t("org.detail.team"))}</span> ${escapeHtml(String(teamName))}</span>`
+    + `</div>`
+    + (respText ? `<section class="org-role-sec"><h4>${escapeHtml(t("org.detail.responsibilities"))}</h4><p>${escapeHtml(respText)}</p></section>` : "")
+    + (skillText ? `<section class="org-role-sec"><h4>${escapeHtml(t("org.detail.skills"))}</h4><p>${escapeHtml(skillText)}</p></section>` : "")
+    + `<button type="button" class="org-role-drill" data-drill-team="${escapeHtml(node.team || "")}" data-drill-role="${escapeHtml(node.id)}">${escapeHtml(t("org.detail.viewtasks"))}</button>`;
+  wireTeamDrilldown(body);
+  const drill = body.querySelector(".org-role-drill");
+  if (drill) drill.addEventListener("click", closeRoleDetail);
+  orgRoleDetailPrevFocus = document.activeElement;
+  const backdrop = $("org-role-backdrop");
+  if (backdrop) backdrop.hidden = false;
+  panel.hidden = false;
+  const close = $("org-role-close");
+  if (close) close.focus();
+}
+
+function closeRoleDetail() {
+  const panel = $("org-role-detail");
+  const backdrop = $("org-role-backdrop");
+  if (panel) panel.hidden = true;
+  if (backdrop) backdrop.hidden = true;
+  const prev = orgRoleDetailPrevFocus;
+  orgRoleDetailPrevFocus = null;
+  if (prev && typeof prev.focus === "function") prev.focus();
+}
+
+function initOrgRoleDetail() {
+  const close = $("org-role-close");
+  if (close) close.addEventListener("click", closeRoleDetail);
+  const backdrop = $("org-role-backdrop");
+  if (backdrop) backdrop.addEventListener("click", closeRoleDetail);
+  document.addEventListener("keydown", (event) => {
+    const panel = $("org-role-detail");
+    if (event.key === "Escape" && panel && !panel.hidden) { event.preventDefault(); closeRoleDetail(); }
+  });
 }
 
 function renderOrgChart() {
@@ -10806,6 +10909,14 @@ function renderOrgChart() {
     svg.setAttribute("hidden", "hidden");
     renderOrgChartCards(canvas, data);
     wireTeamDrilldown(canvas);
+    // Clicking a role opens its detail panel (description), not a board drill.
+    canvas.querySelectorAll(".org-role-chip").forEach((chip) => {
+      const open = () => openRoleDetail(chip.getAttribute("data-role-id"));
+      chip.addEventListener("click", open);
+      chip.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(); }
+      });
+    });
     const legendEl = $("org-chart-legend");
     if (legendEl) {
       const tb = data.tier_badges || {};
@@ -14426,6 +14537,7 @@ initLanguage();
 loadI18n();
 initInboxDetailDrawer();
 initBoardControls();
+initOrgRoleDetail();
 
 loadState();
 connectEventStream();
