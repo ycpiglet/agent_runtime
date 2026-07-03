@@ -18,8 +18,8 @@ def _brief(i):
     return {
         "title": f"Sample unit {i}",
         "context": f"context for unit {i}",
-        "inputs": ["scripts/x.py"],
-        "target_files": ["scripts/x.py"],
+        "inputs": ["scripts/lead_decompose.py"],
+        "target_files": ["scripts/lead_decompose.py"],
         "scope": f"scope for unit {i}",
         "steps": ["do a", "do b"],
         "acceptance": ["it works"],

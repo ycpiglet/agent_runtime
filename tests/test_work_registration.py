@@ -251,6 +251,14 @@ def test_work_new_creates_worker_ready_unit_specs_from_task_input(tmp_path: Path
     ):
         assert heading in body
 
+    # The gate now verifies declared target_files/inputs paths exist (GH #125);
+    # materialize the fixture's declared paths in the tmp root.
+    for rel in ("scripts/work.py", "tests/test_work_registration.py", "registration.json"):
+        declared = tmp_path / rel
+        declared.parent.mkdir(parents=True, exist_ok=True)
+        if not declared.exists():
+            declared.write_text("fixture\n", encoding="utf-8")
+
     gate = _run_unit_gate(
         tmp_path,
         "--task-id",
