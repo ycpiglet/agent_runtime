@@ -25,6 +25,9 @@
       "agents/lead_engineer/REPORTING-FORMAT.md": "sha256:692fc10d65ed5f2ebb3cc0547a5eb5872c273eb6c4c4a2d6ca2be4d94ef47359",
       "agents/lead_engineer/SKILL.md": "sha256:b1b82e260dab0f5c616f1fd3ffb1f9e4ac58a80fdb2c2cebd3d6835476c50a63",
       "agents/lead_engineer/TOKEN-BUDGET.md": "sha256:437a3e676948572f37737e71db55edd29c62f8fea916feb864954349cccc402a",
+      "agents/lead_engineer/compound_log.md": "sha256:5117b6d3918ad9c5b2df02318ea771bd937c411038f793b688fb3fb5674a73ec",
+      "agents/lead_engineer/reports/INDEX.md": "sha256:9637327e19b230f73996310eda7b245220b68c65a4b59df6da203a2b58437701",
+      "agents/lead_engineer/reports/README.md": "sha256:9d2cf6241d274ddbf51385d8ec9377b771a51fa84a2dfe29068eb04af8b018ac",
       "agents/lead_engineer/retros/README.md": "sha256:79b92a7fad17b189a06fdbbacc477a9cb625867cd99efe46d052b17f5d541d17",
       "agents/lead_engineer/retros/TEMPLATE.md": "sha256:f9ec2818ae01850fe9244b778bf3b2a910e32a04267f5b333a02af0c478bcd5f",
       "agents/lead_engineer/tasks/units/README.md": "sha256:e44234861bf6ee25ebe5a31685a816e053559fd1ac27ed1aea95382b4156dc77",
@@ -271,8 +274,8 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.5.0",
-    "template_digest": "sha256:c3171b2c573b8d1bace9add48809ed868eb22dac295366788f3fe535bb83253d",
-    "template_files": 268
+    "template_digest": "sha256:09d6c305b27758ff225bbf16b7707c6945d0660c5203b660e9bd966c49907e0c",
+    "template_files": 271
   },
   "project": "fixture-host",
   "schema": "agent-runtime-lock/v1",
