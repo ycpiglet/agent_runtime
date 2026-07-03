@@ -129,11 +129,21 @@ jobs:
           else
             args+=(--execute)
           fi
+          # .tmp/ is gitignored, so it does not exist in a fresh CI checkout. Without it,
+          # `tee` fails to create the result file, PIPESTATUS[0] masks that failure, and
+          # both notify steps silently skip ("no orchestrator result file") — the Owner
+          # never learns a release is pending approval (observed: v0.6.0 pending since
+          # 2026-06-29, run 28353042537, zero notification issues ever created).
+          mkdir -p .tmp
           set +e
           python "${args[@]}" | tee .tmp/release-auto-result.json
           rc=${PIPESTATUS[0]}
           set -e
           echo "orchestrator exit code: $rc"
+          if [ ! -s .tmp/release-auto-result.json ]; then
+            echo "::error::orchestrator result file was not written; Owner notification would be silently skipped"
+            exit 1
+          fi
           # Exit 2 = owner-approval-required (minor/major/critical): not a CI failure, it is
           # the designed halt. Surface it but do not fail the workflow. Any other non-zero
           # (3 CI-not-green, 4 gate-blocked) is also a clean stop with no mutation.
