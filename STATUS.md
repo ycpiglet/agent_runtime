@@ -1,5 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-04 - 자율 루프 sweep: 침묵 결함 3건 수정 + open-state 정리 + v0.6.0 승인 대기
+
+- Release-auto Owner 알림 무발화 수정: `.tmp/` 부재로 tee가 결과 파일 생성에 실패해 알림 step이 조용히 skip되던 결함을 PR #240으로 수정하고, main test 수동 디스패치로 release-auto가 이슈 #241에 코멘트하는 것까지 E2E 실증했다.
+- Main CI 미체인 수정: GITHUB_TOKEN 머지는 push 워크플로를 트리거하지 않아(재귀 방지) 2026-06-14 이후 main test가 주간 cron뿐이었고 지표 기반 릴리스 발화가 주간으로 퇴화해 있었다. auto-merge에 workflow_dispatch 체인을 추가(PR #245)했고, 첫 실전에서 403(actions 권한 부재)을 산출물 확인으로 적발해 PR #247로 권한을 보강했다.
+- Open-state sweep: 이슈 8건(#19/#20/#21/#125/#131/#162/#211/#237)을 main 대비 실측 검증 후 증거와 함께 종료했고, TASK-AR-585/586은 verified-complete closeout으로 보드를 open 0으로 만들었으며(#211 consumer-breaking 템플릿 불일치, #125 경로 실재 게이트, #19 잔여 링크 타깃은 신규 수정), 아카이브 스태시에만 있던 베타테스터 역할 강화는 PR #242로 복구했다.
+- Pending Owner decision: v0.6.0(minor, feat 16/커밋 72)이 2026-06-29부터 승인 대기 중 — 이슈 #241에서 승인 시 `release_version_cascade.py --write 0.6.0` 경로로 발행한다.
+- Evidence: `reviews/COMPOUND-2026-07-04-silent-wiring-and-stale-state.md`; PR #238~#247; `agents/project/casebooks/failure-and-compound-casebook.md`의 `silent-cross-step-wiring`/`stale-open-state-debt` 행.
+
 ## 2026-06-18 - LLM-Wiki worktree preservation active
 
 - Preservation claim: `CLAIM-20260618-091936-task-ar-590-llm-wiki-preserve` now records `.worktrees/llm-wiki` / `claude/llm-wiki` in the primary checkout before closeout.
