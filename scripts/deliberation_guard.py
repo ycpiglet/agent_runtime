@@ -30,18 +30,68 @@ import time
 from pathlib import Path
 from typing import Any
 
-import yaml
-
 DEFAULT_POLICY = Path("agents/project/DELIBERATION-GUARDRAILS.yml")
+
+
+def _parse_scalar(value: str) -> Any:
+    text = value.strip().strip('"').strip("'")
+    if text.lower() in {"true", "false"}:
+        return text.lower() == "true"
+    try:
+        return int(text)
+    except ValueError:
+        try:
+            return float(text)
+        except ValueError:
+            return text
+
+
+def _parse_policy_text(text: str) -> dict[str, Any]:
+    """Minimal parser for the guardrails file (repo scripts avoid PyYAML).
+
+    Supports exactly the shapes this policy uses: top-level scalars, one
+    level of nested mappings, and nested string lists ("  - item").
+    """
+    data: dict[str, Any] = {}
+    section: dict[str, Any] | None = None
+    list_key: str | None = None
+    for raw in text.splitlines():
+        line = raw.split("#", 1)[0].rstrip()
+        if not line.strip():
+            continue
+        indent = len(line) - len(line.lstrip())
+        stripped = line.strip()
+        if stripped.startswith("- ") and section is not None and list_key is not None:
+            section.setdefault(list_key, []).append(_parse_scalar(stripped[2:]))
+            continue
+        if ":" not in stripped:
+            continue
+        key, _, value = stripped.partition(":")
+        key = key.strip()
+        value = value.strip()
+        if indent == 0:
+            if value:
+                data[key] = _parse_scalar(value)
+                section, list_key = None, None
+            else:
+                data[key] = {}
+                section, list_key = data[key], None
+        elif section is not None:
+            if value:
+                section[key] = _parse_scalar(value)
+                list_key = None
+            else:
+                list_key = key
+    return data
 
 
 def load_policy(root: Path) -> dict[str, Any] | None:
     path = root / DEFAULT_POLICY
     try:
-        payload = yaml.safe_load(path.read_text(encoding="utf-8"))
-    except (OSError, yaml.YAMLError):
+        payload = _parse_policy_text(path.read_text(encoding="utf-8"))
+    except OSError:
         return None
-    return payload if isinstance(payload, dict) else None
+    return payload if payload else None
 
 
 def _ledger_path(root: Path, policy: dict[str, Any]) -> Path:
