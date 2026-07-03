@@ -23,6 +23,10 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  # Required by the post-merge `gh workflow run test.yml` dispatch; without it
+  # the dispatch fails 403 (Resource not accessible by integration) and main
+  # stays unvalidated until the weekly cron.
+  actions: write
 
 jobs:
   auto-merge:
