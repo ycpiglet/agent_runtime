@@ -33,6 +33,9 @@ ALLOWED_LOCAL_CONFIG_PATHS = {
 ALLOWED_PROJECT_TEMPLATE_HOST_PATHS = {
     "agents/lead_engineer/tasks/units/README.md",
     "agents/lead_engineer/tasks/units/examples/UNIT-EXAMPLE-001.md",
+    # Structural schema docs only — actual BRIEF/PLAN records stay forbidden.
+    "agents/lead_engineer/reports/README.md",
+    "agents/lead_engineer/reports/INDEX.md",
 }
 
 FORBIDDEN_PATH_NAMES = {

@@ -2,13 +2,13 @@
 type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
-generated_at: 2026-06-23
-archived_count: 255
+generated_at: 2026-07-04
+archived_count: 257
 ---
 
 # Archived Task Files
 
-- `255` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `257` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -262,6 +262,8 @@ archived_count: 255
 | `TASK-AR-582` | `15ac2d6e-173…` | `TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT` | completed | 2026-06-18T15:55:00+09:00 | 2026-06-18T15:16:35+09:00 | 2026-06-18T16:15:00+09:00 | 2026-06-18T16:15:00+09:00 | Resolve the diagnostic report's single-file HTML/CSS/JS string concentration by movin… |
 | `TASK-AR-583` | `c8e43f0d-2b3…` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | completed | 2026-06-18T18:43:04+09:00 | 2026-06-20T08:52:02+09:00 | 2026-06-20T08:55:08+09:00 | 2026-06-20T08:55:08+09:00 | Replace the transitional --space-px-* / --radius-px-* aliases in the console asset CS… |
 | `TASK-AR-584` | `ba370d39-693…` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | completed | 2026-06-18T18:43:04+09:00 | 2026-06-20T09:03:36+09:00 | 2026-06-20T09:11:47+09:00 | 2026-06-20T09:11:47+09:00 | Move view-specific JS renderers (data-heavy SVG layouts, calendar grids, office-map p… |
+| `TASK-AR-585` | `57774268-cd3…` | `TASKSET-AR-RELEASE-AUTO-NONCRITICAL` | done | 2026-06-18T22:26:32+09:00 | 2026-07-04T02:00:00+09:00 | 2026-07-04T02:37:53+09:00 | 2026-07-04T02:37:53+09:00 | Make scripts/release_execution_gate.py version-parametric like release_council_gate.p… |
+| `TASK-AR-586` | `0896a0d3-a4b…` | `TASKSET-AR-RELEASE-AUTO-NONCRITICAL` | done | 2026-06-18T22:26:32+09:00 | 2026-07-04T02:00:00+09:00 | 2026-07-04T02:37:53+09:00 | 2026-07-04T02:37:53+09:00 | Add an automated path that, at the release cadence boundary on green main CI, execute… |
 | `TASK-AR-587` | `eea05fb1-653…` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | completed | 2026-06-20T01:04:15+09:00 | 2026-06-20T09:49:46+09:00 | 2026-06-20T10:11:00+09:00 | 2026-06-20T10:11:00+09:00 | Give every agent a deterministic visual identity: a seeded SVG avatar keyed to agent… |
 | `TASK-AR-588` | `51fd1ba5-1d9…` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | completed | 2026-06-20T01:04:15+09:00 | 2026-06-20T10:34:35+09:00 | 2026-06-20T11:50:50+09:00 | 2026-06-20T11:50:50+09:00 | Replace the hand-rolled graph layout with proper layout engines: Dagre (MIT, layered/… |
 | `TASK-AR-589` | `f283db13-7e6…` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | done | 2026-06-20T01:04:15+09:00 | 2026-06-23T00:00:00+09:00 | 2026-06-23T00:00:00+09:00 | 2026-06-23T00:00:00+09:00 | Self-host OFL fonts (Geist + Geist Mono) as font tokens and vendor the Lucide (ISC) i… |

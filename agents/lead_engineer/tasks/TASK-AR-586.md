@@ -9,9 +9,13 @@ kind: task
 parent_id: TASKSET-AR-RELEASE-AUTO-NONCRITICAL
 registered_at: 2026-06-18T22:26:32+09:00
 created_at: 2026-06-18T22:26:32+09:00
-updated_at: 2026-06-18T22:26:32+09:00
+updated_at: 2026-07-04T02:37:53+09:00
+started_at: 2026-07-04T02:00:00+09:00
+completed_at: 2026-07-04T02:37:53+09:00
+verification_status: passed
+resolution: done
 title: Wire cadence-bound noncritical auto-release and correct the release-conductor doc
-status: planned
+status: done
 priority: P1
 difficulty: L
 est_hours: 8
@@ -57,3 +61,23 @@ tags:
 - `python -m pytest tests -q -k release`
 - `python scripts/owner_governance_gate.py`
 - `python scripts/release_cadence_trigger.py --check --json`
+
+## Closeout (2026-07-04)
+
+- Finding: the scoped work already landed on main via the release-automation
+  redesign lane (PR #183: workflow_run trigger on green main test runs,
+  green-SHA checkout, feat->minor / breaking->major semver, criticality
+  tiering; PR #210: dedup owner-approval GitHub-issue notification). This
+  closeout verifies acceptance rather than re-implementing.
+- Verified: `scripts/release_auto_noncritical.py` + `.github/workflows/release-auto.yml`
+  execute the noncritical tier end-to-end (readiness -> council -> gates ->
+  tag/push) and halt critical / major_or_breaking / secret / destructive with
+  `owner-approval-required` plus an Owner-visible dedup issue (issues: write).
+- Verified: `python -m pytest tests -q -k release` -> `120 passed`.
+- Verified: `python scripts/release_cadence_trigger.py --check --json` ->
+  `triggered=true` (commits>=40 actual 72, feat>=5 actual 16) — trigger lane live.
+- Verified: `skills/release-conductor/SKILL.md` and the template copy document
+  the real tier rule (noncritical -> agent council executes; critical/major ->
+  explicit Owner approval), not 'always Owner-gated'.
+- Boundary: tier boundary itself is v0.3.0-era Owner policy — patch-level
+  noncritical releases auto-execute; minor/major stop for Owner approval.

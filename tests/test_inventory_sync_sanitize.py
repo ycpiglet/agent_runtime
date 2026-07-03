@@ -2385,3 +2385,24 @@ def test_publish_github_execute_cli_passes_work_dir(tmp_path, monkeypatch):
     assert captured["work_dir"] == tmp_path / "source" / ".tmp" / "work"
     assert captured["execute"] is True
 
+
+
+def test_sanitize_allows_reports_schema_docs_but_blocks_report_records(tmp_path):
+    # BUG-004 (#19): REPORTING-FORMAT.md links reports/README.md + reports/INDEX.md,
+    # so those structural schema docs ship in the template. Actual BRIEF/PLAN
+    # records under reports/ remain host-local and forbidden.
+    source = tmp_path / "source"
+    _write_public_source(source)
+    reports_dir = (
+        source / "src" / "agent_runtime" / "templates" / "project" / "agents" / "lead_engineer" / "reports"
+    )
+    _write(reports_dir / "README.md", "# Reports Archive\n")
+    _write(reports_dir / "INDEX.md", "# Reports Index\n")
+    _write(reports_dir / "BRIEF-2026-07-04-001.md", "# host-local record\n")
+
+    sanitize_findings = {(finding.path, finding.kind) for finding in analyze_sanitize(source)}
+
+    prefix = "src/agent_runtime/templates/project/agents/lead_engineer/reports"
+    assert (f"{prefix}/README.md", "forbidden-template-path") not in sanitize_findings
+    assert (f"{prefix}/INDEX.md", "forbidden-template-path") not in sanitize_findings
+    assert (f"{prefix}/BRIEF-2026-07-04-001.md", "forbidden-template-path") in sanitize_findings

@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-23T17:24:28+09:00
+generated_at: 2026-07-04T03:16:33+09:00
 record_count: 370
 ---
 
@@ -376,10 +376,10 @@ record_count: 370
 | 18.1.1 | Task 18.1.1 | task | `TASK-AR-583` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | completed | `agents/lead_engineer/tasks/TASK-AR-583.md` | Replace the transitional --space-px-* / --radius-px-* aliases in the console asset CS… |
 | 18.1.2 | Task 18.1.2 | task | `TASK-AR-584` | `TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION` | completed | `agents/lead_engineer/tasks/TASK-AR-584.md` | Move view-specific JS renderers (data-heavy SVG layouts, calendar grids, office-map p… |
 | 19 | Initiative 19 | initiative | `INIT-AR-RELEASE-AUTOMATION` | - | active | `agents/project/initiatives/INIT-AR-RELEASE-AUTOMATION.md` | Release Automation (noncritical auto-execution) |
-| 19.1 | Taskset 19.1 | taskset | `TASKSET-AR-RELEASE-AUTO-NONCRITICAL` | `INIT-AR-RELEASE-AUTOMATION` | active | `BACKLOG-BOARD.md` | Noncritical Release Auto-Execution |
-| 19.1.1 | Task 19.1.1 | task | `TASK-AR-585` | `TASKSET-AR-RELEASE-AUTO-NONCRITICAL` | planned | `agents/lead_engineer/tasks/TASK-AR-585.md` | Make scripts/release_execution_gate.py version-parametric like release_council_gate.p… |
+| 19.1 | Taskset 19.1 | taskset | `TASKSET-AR-RELEASE-AUTO-NONCRITICAL` | `INIT-AR-RELEASE-AUTOMATION` | complete | `BACKLOG-BOARD.md` | Noncritical Release Auto-Execution |
+| 19.1.1 | Task 19.1.1 | task | `TASK-AR-585` | `TASKSET-AR-RELEASE-AUTO-NONCRITICAL` | done | `agents/lead_engineer/tasks/TASK-AR-585.md` | Make scripts/release_execution_gate.py version-parametric like release_council_gate.p… |
 | 19.1.1.1 | Unit 19.1.1.1 | unit | `UNIT-TASK-AR-585-001` | `TASK-AR-585` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-585/UNIT-TASK-AR-585-001.md` | UNIT-TASK-AR-585-001 - Make execution gate target version parametric |
-| 19.1.2 | Task 19.1.2 | task | `TASK-AR-586` | `TASKSET-AR-RELEASE-AUTO-NONCRITICAL` | planned | `agents/lead_engineer/tasks/TASK-AR-586.md` | Add an automated path that, at the release cadence boundary on green main CI, execute… |
+| 19.1.2 | Task 19.1.2 | task | `TASK-AR-586` | `TASKSET-AR-RELEASE-AUTO-NONCRITICAL` | done | `agents/lead_engineer/tasks/TASK-AR-586.md` | Add an automated path that, at the release cadence boundary on green main CI, execute… |
 | 19.1.2.1 | Unit 19.1.2.1 | unit | `UNIT-TASK-AR-586-001` | `TASK-AR-586` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-586/UNIT-TASK-AR-586-001.md` | UNIT-TASK-AR-586-001 - Noncritical auto-release orchestrator |
 | 19.1.2.2 | Unit 19.1.2.2 | unit | `UNIT-TASK-AR-586-002` | `TASK-AR-586` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-586/UNIT-TASK-AR-586-002.md` | UNIT-TASK-AR-586-002 - Schedule + Owner notification wiring |
 | 19.1.2.3 | Unit 19.1.2.3 | unit | `UNIT-TASK-AR-586-003` | `TASK-AR-586` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-586/UNIT-TASK-AR-586-003.md` | UNIT-TASK-AR-586-003 - Correct the release-conductor skill doc |
