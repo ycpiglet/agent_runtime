@@ -305,3 +305,19 @@ def test_release_auto_surfaces_owner_approval_via_github_issue() -> None:
     assert "gh issue create" in workflow  # open when approval is needed
     assert "gh issue close" in workflow  # close once a release executes
     assert "[release-auto] Release pending Owner approval" in workflow  # single dedup'd issue
+
+
+def test_release_auto_workflow_persists_the_orchestrator_result_file() -> None:
+    # The notify + Owner-approval-issue steps read .tmp/release-auto-result.json. But
+    # .tmp/ is gitignored and absent in a fresh CI checkout, so `tee` used to fail to
+    # create the file while PIPESTATUS[0] masked the failure — every notification step
+    # then skipped with "no orchestrator result file" and the Owner was never told a
+    # release was pending (v0.6.0 sat unnoticed from 2026-06-29, run 28353042537).
+    workflow = (REPO_ROOT / ".github" / "workflows" / "release-auto.yml").read_text(encoding="utf-8")
+    mkdir_pos = workflow.find("mkdir -p .tmp")
+    tee_pos = workflow.find("tee .tmp/release-auto-result.json")
+    assert mkdir_pos != -1, "workflow must create .tmp before tee-ing the result file"
+    assert tee_pos != -1
+    assert mkdir_pos < tee_pos
+    # And a missing result file must fail loudly instead of silently skipping notify.
+    assert "result file was not written" in workflow
