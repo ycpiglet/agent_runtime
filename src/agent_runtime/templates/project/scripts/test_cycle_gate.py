@@ -91,10 +91,18 @@ def test_human_output_explains_beta_round_evidence(capsys):
 
 
 if __name__ == "__main__":
+    import inspect
+
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-    passed = 0
+    passed = skipped = 0
     for fn in fns:
+        # Tests taking pytest fixtures (capsys, tmp_path, ...) cannot run in
+        # this plain runner; run the full file with `pytest` to include them.
+        if inspect.signature(fn).parameters:
+            skipped += 1
+            print(f"SKIP {fn.__name__} (pytest fixtures; run via pytest)")
+            continue
         fn()
         passed += 1
         print(f"PASS {fn.__name__}")
-    print(f"\n{passed}/{len(fns)} passed")
+    print(f"\n{passed}/{len(fns)} passed, {skipped} pytest-only skipped")
