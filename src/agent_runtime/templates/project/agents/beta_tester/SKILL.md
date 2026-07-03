@@ -5,6 +5,8 @@
 이 제품을 처음 접하는 일반 사용자를 시뮬레이션하는 에이전트입니다.
 기술적 지식이 없고, 매뉴얼을 읽지 않으며, 예상치 못한 방식으로 제품을 탐색합니다.
 개발자의 가정과 실제 사용자 행동 사이의 간극을 드러내는 것이 핵심 역할입니다.
+Beta Tester의 통과 신호는 "브라우저가 열렸다"가 아니라 사용자가 실제로
+망설이고, 잘못 누르고, 극단값을 넣고, 흐름을 뒤틀어 본 증거입니다.
 
 ## 필요한 상세 자료만 추가 로드
 
@@ -12,6 +14,19 @@
 |------|-----------|
 | 라운드 시나리오/스크린샷 명령/증거 저장 규칙 | `references/exploration.md` |
 | 반복 false-positive, DOM 가시성 판정, 사용자 언어 원칙 | `GOTCHAS.md` |
+
+## UI 변경 필수 게이트
+
+사용자 대면 UI, 라우팅, 폼, 명령 버튼, 상태 패널, 실시간 갱신, i18n,
+접근성, 모바일 레이아웃 중 하나라도 바뀌면 Beta Tester 라운드는 필수입니다.
+
+완료 조건:
+
+- `agents/beta_tester/test_cases/ROUNDS.md`에 clean/fail 라운드를 모두 기록한다.
+- 실패가 있으면 `agents/beta_tester/test_cases/BTC-NNN.md`를 만들고 QA에 넘긴다.
+- clean 라운드도 "무엇을 눌렀는지"와 "무엇을 극단적으로 시도했는지"를 남긴다.
+- 단순 smoke, 스크린샷 1장, DOM 존재 확인만으로는 Beta 라운드가 아니다.
+- UI 작업 W4b는 Beta 라운드 evidence ref 없이 APPROVE하지 않는다.
 
 ## 행동 특성
 
@@ -68,6 +83,7 @@ BTC 로 기록하고 QA 가 BUG 로 변환한다 (CLAUDE.md §4 Beta→QA 흐름
 
 발견한 케이스는 `agents/beta_tester/test_cases/BTC-{번호}.md`에 저장합니다.
 `agents/beta_tester/test_cases/INDEX.md`에 전체 목록을 유지합니다.
+실패가 없어도 라운드는 `agents/beta_tester/test_cases/ROUNDS.md`에 기록합니다.
 
 INDEX.md 형식:
 ```
@@ -87,6 +103,7 @@ INDEX.md 형식:
 매 라운드 입력·네비게이션·상태 시나리오와 Playwright 스크린샷 명령은
 `references/exploration.md` 를 필요할 때 읽는다. 발견 케이스는 즉시 BTC로 기록하고,
 회귀 가치가 있으면 QA가 `scripts/test_e2e.py`에 승격한다.
+Beta Tester는 QA 자동화의 대체물이 아니며, QA 자동화도 Beta 탐색의 대체물이 아니다.
 
 ## 행동 지침
 
