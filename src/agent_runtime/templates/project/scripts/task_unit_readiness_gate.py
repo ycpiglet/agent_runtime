@@ -41,6 +41,60 @@ REQUIRED_SECTIONS = {
     "handoff": "Handoff",
     "stop_boundary": "Stop Boundary",
 }
+# target_files/inputs entries must point at real paths: target_files feeds
+# file-level collision detection, so a typo'd path silently disables the very
+# conflict safety it exists for (GH #125 — two host units declared nonexistent
+# test files and every gate passed). Files a unit will CREATE are declared with
+# an explicit `new:` prefix. Glob or non-path-like entries (URLs, chat refs,
+# prose) are skipped, and completed units are exempt so historical archives do
+# not fail on since-deleted paths.
+PATH_EXEMPT_PREFIX = "new:"
+PATH_CHECK_EXEMPT_STATUSES = {"completed", "done"}
+_PATH_LIKE_RE = re.compile(r"^[A-Za-z0-9_.\-/\\]+$")
+# Scheme-less web references such as `github.com/fnando/sparkline` look
+# path-like; treat a leading domain segment as a non-repo reference.
+_DOMAIN_LIKE_RE = re.compile(r"^[\w-]+(\.[\w-]+)+/")
+
+
+def _path_entries(value: object) -> list[str]:
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    text = str(value or "").strip()
+    return [text] if text else []
+
+
+def _parent_task_status(root: Path, meta: dict[str, Any]) -> str:
+    task_id = str(meta.get("task_id") or "").strip()
+    if not task_id:
+        return ""
+    task_path = root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    if not task_path.is_file():
+        return ""
+    try:
+        task_meta, _ = backlog_board.parse_frontmatter(task_path.read_text(encoding="utf-8"))
+    except OSError:
+        return ""
+    return str(task_meta.get("status") or "").strip().lower()
+
+
+def _path_existence_findings(root: Path, rel: str, meta: dict[str, Any]) -> list[str]:
+    findings: list[str] = []
+    status = str(meta.get("status") or "").strip().lower()
+    if status in PATH_CHECK_EXEMPT_STATUSES:
+        return findings
+    # Historical units of finished tasks reference paths that legitimately no
+    # longer exist (e.g. a task whose scope was deleting a waiver file).
+    if _parent_task_status(root, meta) in PATH_CHECK_EXEMPT_STATUSES:
+        return findings
+    for field in ("target_files", "inputs"):
+        for entry in _path_entries(meta.get(field)):
+            if entry.startswith(PATH_EXEMPT_PREFIX):
+                continue
+            if "*" in entry or not _PATH_LIKE_RE.match(entry) or _DOMAIN_LIKE_RE.match(entry):
+                continue
+            if not (root / entry).exists():
+                findings.append(f"{rel}: unit:{field.replace('_', '-')}-not-found:{entry}")
+    return findings
 
 
 def _rel(root: Path, path: Path) -> str:
@@ -129,6 +183,8 @@ def validate_unit(root: Path, path: Path, meta: dict[str, Any], body: str, *, re
     unit_task = str(meta.get("task_id") or "").strip()
     if unit_task and f"/{unit_task}/" not in rel:
         findings.append(f"{rel}: unit:path-task-mismatch:{unit_task}")
+
+    findings.extend(_path_existence_findings(root, rel, meta))
     return findings
 
 
