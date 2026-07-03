@@ -62,7 +62,52 @@ def archive_stash_refs(root: Path) -> list[str]:
         out = _run_git(root, "for-each-ref", "--format=%(refname)", ARCHIVE_STASH_PREFIX)
     except RuntimeError:
         return []
-    return [line.removeprefix("refs/remotes/origin/") for line in out.splitlines() if line.strip()]
+    # Keep the resolvable short form (origin/...) so rev-list can use the names.
+    return [line.removeprefix("refs/remotes/") for line in out.splitlines() if line.strip()]
+
+
+def dangling_lane_findings(root: Path, ref: str, stashes: list[str], threshold: int) -> list[dict[str, Any]]:
+    """Stash refs whose PARENT chain carries a whole unmerged lane.
+
+    A dirty-work stash records its base commit as first parent. When that
+    base is itself not on the mainline, everything below it is reachable
+    ONLY through the stash ref — deleting the stash would garbage an entire
+    lane. Found in the wild on 2026-07-04: 160 unmerged commits (11 taskset
+    registrations, TASK-AR-618..620) hung off one stash parent (issue #250).
+    """
+    findings: list[dict[str, Any]] = []
+    for stash in stashes:
+        try:
+            # "Dangling" means the stash ref is the ONLY tether: commits
+            # reachable neither from the mainline ref nor from any pinned
+            # archive/branches/* preservation ref count toward the lane.
+            count = int(
+                _run_git(
+                    root,
+                    "rev-list",
+                    "--count",
+                    f"{stash}^1",
+                    "--not",
+                    ref,
+                    "--glob=refs/remotes/origin/archive/branches/*",
+                ).strip()
+            )
+        except (RuntimeError, ValueError):
+            continue  # plain snapshot commit without a stash parent chain
+        if count >= threshold:
+            findings.append(
+                {
+                    "kind": "dangling-lane",
+                    "stash": stash,
+                    "unmerged_commit_count": count,
+                    "detail": (
+                        f"stash parent chain carries {count} commits absent from {ref}; the lane "
+                        "is preserved only by this stash ref — pin it under archive/branches/ "
+                        "and route an integrate/defer/archive decision to the Owner"
+                    ),
+                }
+            )
+    return findings
 
 
 def load_open_issues(issues_file: Path | None) -> list[dict[str, Any]] | None:
@@ -83,7 +128,7 @@ def load_open_issues(issues_file: Path | None) -> list[dict[str, Any]] | None:
     return [dict(item) for item in json.loads(result.stdout or "[]")]
 
 
-def sweep(root: Path, ref: str, issues_file: Path | None = None) -> dict[str, Any]:
+def sweep(root: Path, ref: str, issues_file: Path | None = None, dangling_threshold: int = 5) -> dict[str, Any]:
     closed_in_history = closed_issue_numbers_in_history(root, ref)
     open_issues = load_open_issues(issues_file)
     findings: list[dict[str, Any]] = []
@@ -106,12 +151,19 @@ def sweep(root: Path, ref: str, issues_file: Path | None = None) -> dict[str, An
                     }
                 )
     stashes = archive_stash_refs(root)
+    findings.sort(key=lambda item: item["number"])
+    findings.extend(
+        sorted(
+            dangling_lane_findings(root, ref, stashes, dangling_threshold),
+            key=lambda item: -item["unmerged_commit_count"],
+        )
+    )
     return {
         "schema": "agent-runtime-open-state-sweep/v1",
         "ref": ref,
         "issues_source": issues_source,
         "closing_keyword_issue_count": len(closed_in_history),
-        "findings": sorted(findings, key=lambda item: item["number"]),
+        "findings": findings,
         "archive_stash_refs": stashes,
         "archive_stash_count": len(stashes),
     }
@@ -124,6 +176,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--issues-file", type=Path, default=None, help="JSON [{number,title}] instead of gh")
     parser.add_argument("--json", action="store_true", dest="as_json")
     parser.add_argument("--check", action="store_true", help="exit 1 when findings exist")
+    parser.add_argument(
+        "--dangling-threshold",
+        type=int,
+        default=5,
+        help="report a stash as a dangling lane when its parent chain has at least this many unmerged commits (default 5)",
+    )
     args = parser.parse_args(argv)
 
     root = args.root.resolve()
@@ -132,7 +190,7 @@ def main(argv: list[str] | None = None) -> int:
         _run_git(root, "rev-parse", "--verify", "--quiet", ref)
     except RuntimeError:
         ref = "HEAD"
-    report = sweep(root, ref, issues_file=args.issues_file)
+    report = sweep(root, ref, issues_file=args.issues_file, dangling_threshold=args.dangling_threshold)
 
     if args.as_json:
         print(json.dumps(report, ensure_ascii=True, indent=2, sort_keys=True))
@@ -140,7 +198,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"open-state-sweep: ref={report['ref']} issues_source={report['issues_source']}")
         print(f"findings={len(report['findings'])}")
         for finding in report["findings"]:
-            print(f"- {finding['kind']}: #{finding['number']} {finding['title']}")
+            if finding["kind"] == "stale-open-issue":
+                print(f"- {finding['kind']}: #{finding['number']} {finding['title']}")
+            else:
+                print(f"- {finding['kind']}: {finding['stash']} unmerged_commits={finding['unmerged_commit_count']}")
         print(f"archive_stash_refs={report['archive_stash_count']}")
     if report["issues_source"] == "unavailable":
         print("note: open-issue source unavailable (no gh, no --issues-file); issue sweep skipped", file=sys.stderr)
