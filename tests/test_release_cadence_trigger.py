@@ -285,3 +285,29 @@ def test_owner_governance_chain_wires_release_cadence_trigger() -> None:
 
 def test_template_script_copy_matches_root_script() -> None:
     assert TEMPLATE_SCRIPT.read_text(encoding="utf-8") == SCRIPT.read_text(encoding="utf-8")
+
+
+def test_swallowed_error_is_visible_on_stdout(tmp_path: Path, monkeypatch) -> None:
+    # The watch-only blanket handler converts any build_report exception into
+    # exit 0 under --check. That used to leave stdout completely EMPTY, which
+    # read as a silent skip and made CI flakes undiagnosable (2026-07-03 CI:
+    # 'finding=... in ""'). The error must be mirrored to stdout.
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("release_cadence_trigger_under_test", SCRIPT)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    def _boom(*args, **kwargs):
+        raise RuntimeError("transient runner failure")
+
+    monkeypatch.setattr(module, "build_report", _boom)
+    import io
+    from contextlib import redirect_stdout
+
+    buffer = io.StringIO()
+    with redirect_stdout(buffer):
+        rc = module.main(["--root", str(tmp_path), "--check"])
+
+    assert rc == 0
+    assert "release-cadence: error RuntimeError" in buffer.getvalue()
