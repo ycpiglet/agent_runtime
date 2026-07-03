@@ -321,3 +321,18 @@ def test_release_auto_workflow_persists_the_orchestrator_result_file() -> None:
     assert mkdir_pos < tee_pos
     # And a missing result file must fail loudly instead of silently skipping notify.
     assert "result file was not written" in workflow
+
+
+def test_auto_merge_dispatches_main_ci_after_merging() -> None:
+    # Pushes made with GITHUB_TOKEN do not trigger `on: push` workflows
+    # (recursion prevention), so auto-merged commits never ran test.yml on
+    # main: post-merge integration CI was weekly-cron only and the
+    # metric-bound release-auto trigger (PR #183) silently degenerated back
+    # to weekly. auto-merge must chain main CI via workflow_dispatch — the
+    # documented exception to that prevention.
+    workflow = (REPO_ROOT / ".github" / "workflows" / "auto-merge.yml").read_text(encoding="utf-8")
+    merge_pos = workflow.find("gh pr merge")
+    dispatch_pos = workflow.find("gh workflow run test.yml")
+    assert dispatch_pos != -1, "auto-merge must dispatch main CI after merging"
+    assert merge_pos != -1 and merge_pos < dispatch_pos
+    assert "--ref main" in workflow
