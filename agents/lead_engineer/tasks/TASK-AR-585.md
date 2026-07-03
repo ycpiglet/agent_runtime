@@ -13,6 +13,7 @@ updated_at: 2026-07-04T02:37:53+09:00
 started_at: 2026-07-04T02:00:00+09:00
 completed_at: 2026-07-04T02:37:53+09:00
 verification_status: passed
+resolution: done
 title: Parameterize the release execution gate (remove hardcoded v0.1.8)
 status: done
 priority: P1
