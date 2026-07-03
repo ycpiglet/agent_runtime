@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-04T02:59:21+09:00
-record_count: 618
+generated_at: 2026-07-04T03:34:56+09:00
+record_count: 619
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `618` review and evidence records under `reviews/`.
+- Summary: indexed `619` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `618` files |
+| Reviews covered | pass | `619` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -72,6 +72,7 @@ record_count: 618
 | `reviews/CO-LOCATION-GATE-2026-06-11-task-ar-310.json` | `CO-LOCATION-GATE-2026-06-11-task-ar-310` | json | record | n/a | CO-LOCATION-GATE-2026-06-11-task-ar-310 |
 | `reviews/COMPOUND-2026-06-21-business-operating-system.md` | `COMPOUND-2026-06-21-business-operating-system` | compound | recorded | pass | Business Operating System Compound Note |
 | `reviews/COMPOUND-2026-06-22-release-ops-and-concurrency.md` | `COMPOUND-2026-06-22-release-ops-and-concurrency` | compound | recorded | pass | Release-ops + shared-checkout concurrency compound |
+| `reviews/COMPOUND-2026-07-04-silent-wiring-and-stale-state.md` | `COMPOUND-2026-07-04-silent-wiring-and-stale-state` | compound | recorded | pass | Silent cross-step wiring failures + stale open-state compound |
 | `reviews/CONTEXT-KNOWLEDGE-GATE-2026-06-11-final.json` | `CONTEXT-KNOWLEDGE-GATE-2026-06-11-final` | json | record | n/a | CONTEXT-KNOWLEDGE-GATE-2026-06-11-final |
 | `reviews/CORRECTION-COLLECTOR-2026-06-09-task-ar-207.json` | `CORRECTION-COLLECTOR-2026-06-09-task-ar-207` | json | record | n/a | CORRECTION-COLLECTOR-2026-06-09-task-ar-207 |
 | `reviews/CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current.json` | `CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current` | json | record | n/a | CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current |
