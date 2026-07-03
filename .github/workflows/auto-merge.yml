@@ -53,3 +53,20 @@ jobs:
           fi
           echo "All checks green for PR #$num at $HEAD_SHA — auto-merging + deleting branch."
           gh pr merge "$num" --repo "$REPO" --merge --delete-branch
+
+      - name: Dispatch main CI on the merged result
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # Pushes made with GITHUB_TOKEN do not trigger `on: push` workflows
+          # (GitHub recursion prevention), so auto-merged commits never ran the
+          # `test` workflow on main — post-merge integration CI was silently
+          # absent since 2026-06-14 (main-branch test runs were weekly-cron
+          # only) and the metric-bound release-auto workflow_run trigger
+          # (PR #183) degenerated back to weekly. workflow_dispatch is the
+          # documented exception to that prevention, so chain main CI
+          # explicitly. test.yml's own completion then drives release-auto.
+          gh workflow run test.yml --repo "$REPO" --ref main \
+            || echo "::warning::failed to dispatch main CI; main stays unvalidated until the weekly cron"
