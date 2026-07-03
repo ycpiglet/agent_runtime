@@ -44,9 +44,25 @@ tags: []
     )
 
 
-def _write_unit(root: Path, task_id: str, *, missing_section: str = "") -> None:
+def _write_unit(
+    root: Path,
+    task_id: str,
+    *,
+    missing_section: str = "",
+    target_file: str = "scripts/example.py",
+    input_file: str = "input.md",
+    create_paths: bool = True,
+) -> None:
     path = root / "agents" / "lead_engineer" / "tasks" / "units" / task_id / f"UNIT-{task_id}-001.md"
     path.parent.mkdir(parents=True, exist_ok=True)
+    if create_paths:
+        for rel in (target_file, input_file):
+            if rel.startswith("new:") or "*" in rel or "://" in rel:
+                continue
+            target = root / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if not target.exists():
+                target.write_text("fixture\n", encoding="utf-8")
     sections = {
         "Context": "This unit exists for a gate test.",
         "Inputs": "- input.md",
@@ -73,9 +89,9 @@ model_tier: worker_standard
 escalation_triggers: [ambiguity]
 context: "Gate test context."
 inputs:
-  - input.md
+  - {input_file}
 target_files:
-  - scripts/example.py
+  - {target_file}
 scope: "Only this test unit."
 acceptance:
   - "It passes."
@@ -133,3 +149,58 @@ def test_gate_blocks_active_worker_claim_without_unit(tmp_path: Path) -> None:
 
     assert result.returncode == 1
     assert "unit:active-worker-missing-unit-spec" in result.stdout
+
+
+def test_gate_blocks_nonexistent_declared_target_file(tmp_path: Path) -> None:
+    # GH #125: target_files feeds collision detection, so a typo'd/nonexistent
+    # declared path must fail readiness instead of silently passing.
+    _write_task(tmp_path, "TASK-AR-344")
+    _write_unit(tmp_path, "TASK-AR-344", target_file="tests/unit/test_compliance_gate.py", create_paths=False)
+    (tmp_path / "input.md").write_text("fixture\n", encoding="utf-8")
+
+    result = _run(tmp_path, "--task-id", "TASK-AR-344", "--check")
+
+    assert result.returncode == 1
+    assert "unit:target-files-not-found:tests/unit/test_compliance_gate.py" in result.stdout
+
+
+def test_gate_blocks_nonexistent_declared_input(tmp_path: Path) -> None:
+    _write_task(tmp_path, "TASK-AR-344")
+    _write_unit(tmp_path, "TASK-AR-344", input_file="docs/missing-brief.md", create_paths=False)
+    (tmp_path / "scripts").mkdir()
+    (tmp_path / "scripts" / "example.py").write_text("fixture\n", encoding="utf-8")
+
+    result = _run(tmp_path, "--task-id", "TASK-AR-344", "--check")
+
+    assert result.returncode == 1
+    assert "unit:inputs-not-found:docs/missing-brief.md" in result.stdout
+
+
+def test_gate_allows_to_be_created_target_with_new_prefix(tmp_path: Path) -> None:
+    _write_task(tmp_path, "TASK-AR-344")
+    _write_unit(tmp_path, "TASK-AR-344", target_file="new:reviews/REPORT-TO-CREATE.md")
+
+    result = _run(tmp_path, "--task-id", "TASK-AR-344", "--check")
+
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_gate_exempts_completed_parent_task_from_path_existence(tmp_path: Path) -> None:
+    # Historical units of finished tasks may reference since-deleted paths
+    # (e.g. a task whose scope WAS deleting a waiver file).
+    _write_task(tmp_path, "TASK-AR-344", status="completed")
+    _write_unit(tmp_path, "TASK-AR-344", target_file="agents/project/waivers/DELETED.json", create_paths=False)
+    (tmp_path / "input.md").write_text("fixture\n", encoding="utf-8")
+
+    result = _run(tmp_path, "--task-id", "TASK-AR-344", "--check")
+
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_gate_skips_glob_and_domain_like_entries(tmp_path: Path) -> None:
+    _write_task(tmp_path, "TASK-AR-344")
+    _write_unit(tmp_path, "TASK-AR-344", target_file="src/**/*.py", input_file="github.com/fnando/sparkline", create_paths=False)
+
+    result = _run(tmp_path, "--task-id", "TASK-AR-344", "--check")
+
+    assert result.returncode == 0, result.stdout + result.stderr

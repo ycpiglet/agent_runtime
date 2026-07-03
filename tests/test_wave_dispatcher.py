@@ -99,6 +99,13 @@ def _write_unit(
     unit_id = f"UNIT-{task_id}-{index:03d}"
     path = root / "agents" / "lead_engineer" / "tasks" / "units" / task_id / f"{unit_id}.md"
     path.parent.mkdir(parents=True, exist_ok=True)
+    for entry in target_files:
+        if entry.startswith("new:") or "*" in entry:
+            continue
+        declared = root / entry
+        declared.parent.mkdir(parents=True, exist_ok=True)
+        if not declared.exists():
+            declared.write_text("fixture\n", encoding="utf-8")
     targets = "\n".join(f"  - {entry}" for entry in target_files)
     depends_block = ""
     if depends_on:
