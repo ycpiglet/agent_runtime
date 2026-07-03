@@ -107,3 +107,83 @@ def test_watch_only_default_exits_zero_even_with_findings(tmp_path: Path) -> Non
     result = _run(tmp_path, "--issues-file", str(issues))
 
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+def _seed_dangling_stash(root: Path, lane_commits: int) -> None:
+    # main line
+    _seed_repo(root, ["feat: mainline base"])
+    _git(root, "branch", "-M", "main")
+    # divergent lane
+    _git(root, "checkout", "-q", "-b", "lane")
+    for index in range(lane_commits):
+        marker = root / f"lane-{index}.txt"
+        marker.write_text(f"lane {index}\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", f"lane commit {index}")
+    # stash-shaped merge commit whose first parent is the lane tip
+    lane_tip = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "HEAD"],
+        check=True, capture_output=True, text=True, encoding="utf-8",
+    ).stdout.strip()
+    (root / "wip.txt").write_text("wip\n", encoding="utf-8")
+    _git(root, "add", "-A")
+    _git(root, "commit", "-q", "-m", "archive late dirty work")
+    stash_commit = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "HEAD"],
+        check=True, capture_output=True, text=True, encoding="utf-8",
+    ).stdout.strip()
+    _git(root, "update-ref", "refs/remotes/origin/archive/stashes/20260704/test-lane", stash_commit)
+    _git(root, "checkout", "-q", "main")
+    assert lane_tip  # first parent of the stash-shaped commit is the lane
+
+
+def test_reports_dangling_lane_hanging_off_stash_parent(tmp_path: Path) -> None:
+    # Issue #250: 160 unmerged commits were reachable only through one
+    # stash ref's parent chain; the sweep must surface such lanes.
+    _seed_dangling_stash(tmp_path, lane_commits=6)
+
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT), "--root", str(tmp_path), "--ref", "main",
+         "--issues-file", str(_issues_file(tmp_path, [])), "--json"],
+        check=False, capture_output=True, text=True, encoding="utf-8", errors="replace",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    report = json.loads(result.stdout)
+    lanes = [f for f in report["findings"] if f["kind"] == "dangling-lane"]
+    assert len(lanes) == 1
+    assert lanes[0]["unmerged_commit_count"] >= 6
+    assert "archive/stashes/20260704/test-lane" in lanes[0]["stash"]
+
+
+def test_small_stash_delta_is_not_a_dangling_lane(tmp_path: Path) -> None:
+    _seed_dangling_stash(tmp_path, lane_commits=2)
+
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT), "--root", str(tmp_path), "--ref", "main",
+         "--issues-file", str(_issues_file(tmp_path, [])), "--json"],
+        check=False, capture_output=True, text=True, encoding="utf-8", errors="replace",
+    )
+
+    report = json.loads(result.stdout)
+    assert [f for f in report["findings"] if f["kind"] == "dangling-lane"] == []
+
+
+def test_lane_pinned_under_archive_branches_is_not_dangling(tmp_path: Path) -> None:
+    # A lane already preserved by an archive/branches/* ref is tethered; the
+    # stash is no longer its only anchor, so it must not be reported.
+    _seed_dangling_stash(tmp_path, lane_commits=6)
+    stash_parent = subprocess.run(
+        ["git", "-C", str(tmp_path), "rev-parse", "refs/remotes/origin/archive/stashes/20260704/test-lane^1"],
+        check=True, capture_output=True, text=True, encoding="utf-8",
+    ).stdout.strip()
+    _git(tmp_path, "update-ref", "refs/remotes/origin/archive/branches/20260704/pinned-lane", stash_parent)
+
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT), "--root", str(tmp_path), "--ref", "main",
+         "--issues-file", str(_issues_file(tmp_path, [])), "--json"],
+        check=False, capture_output=True, text=True, encoding="utf-8", errors="replace",
+    )
+
+    report = json.loads(result.stdout)
+    assert [f for f in report["findings"] if f["kind"] == "dangling-lane"] == []
