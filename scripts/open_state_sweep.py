@@ -1,0 +1,151 @@
+"""Report open state that has drifted from merged reality (watch-only).
+
+COMPOUND-2026-07-04 (`stale-open-state-debt`): under high merge velocity,
+open GitHub issues drift from what main has already delivered — closing
+keywords in auto-merged commits do not reliably auto-close issues, so
+verified-done work sits open while the board loses trust as an attention
+surface. The 2026-07-04 manual sweep closed 8 such issues by hand; this
+tool makes that sweep repeatable.
+
+What it checks:
+1. Closing keywords (``fixes/closes/resolves #N``) in the merged history of
+   ``--ref`` vs the currently OPEN issues -> ``stale-open-issue`` findings
+   (the merged history claims the issue is done, but it is still open).
+2. Untriaged dirty-work archive refs (``archive/stashes/*``) -> reported as
+   a count so preserved-but-unlanded work stays visible (#162 was recovered
+   from exactly such a stash three weeks after archiving).
+
+Boundary: report tool only — NOT wired into the owner governance chain.
+``--check`` exits 1 on findings for opt-in CI use; the default exit is 0.
+Open issues come from ``gh`` when available or ``--issues-file`` (JSON list
+of ``{number, title}``) for offline/deterministic use.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any
+
+CLOSING_RE = re.compile(
+    r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s*:?\s+#(\d+)", re.IGNORECASE
+)
+ARCHIVE_STASH_PREFIX = "refs/remotes/origin/archive/stashes/"
+
+
+def _run_git(root: Path, *args: str) -> str:
+    result = subprocess.run(
+        ["git", "-C", str(root), *args],
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"git {' '.join(args)} failed: {result.stderr.strip()}")
+    return result.stdout
+
+
+def closed_issue_numbers_in_history(root: Path, ref: str) -> set[int]:
+    """Issue numbers referenced by closing keywords in the merged history of ref."""
+    log = _run_git(root, "log", ref, "--format=%s%n%b")
+    return {int(match.group(1)) for match in CLOSING_RE.finditer(log)}
+
+
+def archive_stash_refs(root: Path) -> list[str]:
+    try:
+        out = _run_git(root, "for-each-ref", "--format=%(refname)", ARCHIVE_STASH_PREFIX)
+    except RuntimeError:
+        return []
+    return [line.removeprefix("refs/remotes/origin/") for line in out.splitlines() if line.strip()]
+
+
+def load_open_issues(issues_file: Path | None) -> list[dict[str, Any]] | None:
+    """Open issues from --issues-file, else from gh; None when unavailable."""
+    if issues_file is not None:
+        payload = json.loads(issues_file.read_text(encoding="utf-8"))
+        return [dict(item) for item in payload]
+    result = subprocess.run(
+        ["gh", "issue", "list", "--state", "open", "--limit", "200", "--json", "number,title"],
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if result.returncode != 0:
+        return None
+    return [dict(item) for item in json.loads(result.stdout or "[]")]
+
+
+def sweep(root: Path, ref: str, issues_file: Path | None = None) -> dict[str, Any]:
+    closed_in_history = closed_issue_numbers_in_history(root, ref)
+    open_issues = load_open_issues(issues_file)
+    findings: list[dict[str, Any]] = []
+    issues_source = "unavailable"
+    if open_issues is not None:
+        issues_source = "issues-file" if issues_file is not None else "gh"
+        for issue in open_issues:
+            number = int(issue.get("number", 0))
+            if number in closed_in_history:
+                findings.append(
+                    {
+                        "kind": "stale-open-issue",
+                        "number": number,
+                        "title": str(issue.get("title", "")),
+                        "detail": (
+                            f"merged history of {ref} contains a closing keyword for #{number} "
+                            "but the issue is still open; verify against main and close with "
+                            "evidence or reopen the work"
+                        ),
+                    }
+                )
+    stashes = archive_stash_refs(root)
+    return {
+        "schema": "agent-runtime-open-state-sweep/v1",
+        "ref": ref,
+        "issues_source": issues_source,
+        "closing_keyword_issue_count": len(closed_in_history),
+        "findings": sorted(findings, key=lambda item: item["number"]),
+        "archive_stash_refs": stashes,
+        "archive_stash_count": len(stashes),
+    }
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Report open state that drifted from merged reality")
+    parser.add_argument("--root", type=Path, default=Path.cwd())
+    parser.add_argument("--ref", default="origin/main", help="merged-history ref (default origin/main; falls back to HEAD)")
+    parser.add_argument("--issues-file", type=Path, default=None, help="JSON [{number,title}] instead of gh")
+    parser.add_argument("--json", action="store_true", dest="as_json")
+    parser.add_argument("--check", action="store_true", help="exit 1 when findings exist")
+    args = parser.parse_args(argv)
+
+    root = args.root.resolve()
+    ref = args.ref
+    try:
+        _run_git(root, "rev-parse", "--verify", "--quiet", ref)
+    except RuntimeError:
+        ref = "HEAD"
+    report = sweep(root, ref, issues_file=args.issues_file)
+
+    if args.as_json:
+        print(json.dumps(report, ensure_ascii=True, indent=2, sort_keys=True))
+    else:
+        print(f"open-state-sweep: ref={report['ref']} issues_source={report['issues_source']}")
+        print(f"findings={len(report['findings'])}")
+        for finding in report["findings"]:
+            print(f"- {finding['kind']}: #{finding['number']} {finding['title']}")
+        print(f"archive_stash_refs={report['archive_stash_count']}")
+    if report["issues_source"] == "unavailable":
+        print("note: open-issue source unavailable (no gh, no --issues-file); issue sweep skipped", file=sys.stderr)
+    return 1 if args.check and report["findings"] else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
