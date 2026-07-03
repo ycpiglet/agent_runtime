@@ -336,3 +336,11 @@ def test_auto_merge_dispatches_main_ci_after_merging() -> None:
     assert dispatch_pos != -1, "auto-merge must dispatch main CI after merging"
     assert merge_pos != -1 and merge_pos < dispatch_pos
     assert "--ref main" in workflow
+
+
+def test_auto_merge_has_actions_write_for_main_ci_dispatch() -> None:
+    # gh workflow run needs `actions: write`; without it the dispatch fails
+    # 403 behind the non-fatal guard and main silently stays unvalidated
+    # (observed on the first post-merge dispatch attempt, 2026-07-03).
+    workflow = (REPO_ROOT / ".github" / "workflows" / "auto-merge.yml").read_text(encoding="utf-8")
+    assert "actions: write" in workflow
