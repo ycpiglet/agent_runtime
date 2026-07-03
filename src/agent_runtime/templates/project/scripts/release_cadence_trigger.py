@@ -43,21 +43,28 @@ def _ascii(text: str) -> str:
 
 
 def _git(root: Path, *args: str) -> str | None:
-    try:
-        result = subprocess.run(
-            ["git", *args],
-            cwd=root,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            check=False,
-        )
-    except OSError:
-        return None
-    if result.returncode != 0:
-        return None
-    return result.stdout
+    # Read-only, idempotent git queries. Under loaded CI runners the spawn
+    # itself can fail transiently, so retry OSError briefly; a non-zero exit
+    # is a deterministic git answer (e.g. no tag yet) and is not retried.
+    for attempt in range(3):
+        if attempt:
+            time.sleep(0.2 * attempt)
+        try:
+            result = subprocess.run(
+                ["git", *args],
+                cwd=root,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                check=False,
+            )
+        except OSError:
+            continue
+        if result.returncode != 0:
+            return None
+        return result.stdout
+    return None
 
 
 def _latest_tag(root: Path) -> str | None:
@@ -337,7 +344,12 @@ def main(argv: list[str] | None = None) -> int:
             days_threshold=args.days_threshold,
         )
     except Exception as exc:  # noqa: BLE001 - watch-only trigger must not block sessions
-        print(_ascii(f"release-cadence: error {type(exc).__name__}: {exc}"), file=sys.stderr)
+        # Also mirror the error to stdout: a swallowed exception used to leave
+        # stdout completely empty under --check (exit 0), which read as a
+        # silent skip and made CI flakes undiagnosable.
+        message = _ascii(f"release-cadence: error {type(exc).__name__}: {exc}")
+        print(message)
+        print(message, file=sys.stderr)
         return 0 if args.check else 1
 
     if args.json:
