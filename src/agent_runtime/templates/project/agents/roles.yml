@@ -280,16 +280,20 @@ roles:
     required_inputs:
       - AGENTS.md
       - agents/beta_tester/SKILL.md
+      - agents/beta_tester/references/exploration.md
+      - agents/beta_tester/GOTCHAS.md
       - agents/beta_tester/test_cases/INDEX.md
       - public/app.html
     forbidden_inputs:
       - "기술 디테일·구현 추론 (사용자 관점 보존)"
     output_contract:
-      - "BTC-NNN.md (사용자 관점 탐색 결과)"
-      - "재현 단계 + 환경 + 기대 vs 실제"
+      - "ROUNDS.md clean/fail 라운드 evidence (UI 변경 시 필수)"
+      - "BTC-NNN.md (실패 발견 시 사용자 관점 탐색 결과)"
+      - "재현 단계 + 환경 + 기대 vs 실제 + 스크린샷/브라우저 증거"
     audit_gate: false
     notes: |
       Beta Tester는 기술 원인 분석을 하지 않는다. QA가 BUG로 변환.
+      단순 smoke, DOM 존재 확인, 스크린샷 1장은 Beta 라운드로 인정하지 않는다.
 
   - id: owner
     aliases: [owner, user]
