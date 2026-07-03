@@ -19,7 +19,8 @@ def test_frontend_is_high_and_requires_beta():
     assert r["touches_frontend"] is True
     assert "beta-tester" in r["required_worker_roles"]
     assert "beta" not in r["required_subagents"]
-    assert any("BTC" in a for a in r["required_artifacts"])
+    assert any("ROUNDS.md" in a for a in r["required_artifacts"])
+    assert any("smoke" in a for a in r["required_artifacts"])
 
 
 def test_gate_or_hook_change_is_high_with_skeptic():
@@ -79,6 +80,14 @@ def test_human_output_recommends_auto_model_routing(capsys):
     out = capsys.readouterr().out
     assert "--model auto" in out
     assert "--grade High" in out
+
+
+def test_human_output_explains_beta_round_evidence(capsys):
+    r = cg.evaluate(["public/app.js"])
+    cg._print_human(r)
+    out = capsys.readouterr().out
+    assert "ROUNDS.md clean/fail entry" in out
+    assert "smoke/DOM-only evidence" in out
 
 
 if __name__ == "__main__":
