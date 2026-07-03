@@ -43,6 +43,7 @@
       "agents/project/COLLABORATION-GOVERNANCE.json": "sha256:2880bd293fd35ed36215ee4934f41df3219f58a7c79221c39ff99925b0ed3917",
       "agents/project/CONTEXT-SOURCES.example.yml": "sha256:04c8541e4a9da5c718c6f1403bfcd5dab1169f9bff504007348ab41b4a85cacc",
       "agents/project/DATASET-CATALOG.example.yml": "sha256:88e71db4200c796b635332de04543d8316d4082097d591c56617f85be4299056",
+      "agents/project/DELIBERATION-GUARDRAILS.yml": "sha256:257b52b4571a5c1a1209bc4bae31f04d15966d5b3795597d5f8bdd024ae77d49",
       "agents/project/EVAL-POLICY.example.yml": "sha256:1e6a0569306ef8857f7f24cd9914e390c36bdf4562d8d51c26c905c6af20f5f8",
       "agents/project/LINKS.md": "sha256:0a28363fa4839bfd7f2c90402b92a875af31178795630f2f3b5a487e9cbb34da",
       "agents/project/NEXT-SESSION-POINTER.yml": "sha256:f52ca90fa32fb24251b68d4919ebd14190b91aab8a710a35c13a058766cffc8a",
@@ -126,6 +127,7 @@
       "scripts/conversation_work_audit.py": "sha256:7279a081414e1aa3929929c88491289512f2b62c157038021622fb8198d1d47f",
       "scripts/cycle_gate.py": "sha256:8316cdeeef228f0078427d5c275060c5a79a23835bb6f31906e970ccbdf1e617",
       "scripts/deadlock_watchdog.py": "sha256:93b317f0ac03a0c337cc36141b37589b0b090e2f9d91fc9d3558221595eac1d5",
+      "scripts/deliberation_guard.py": "sha256:84b3fe4a0a776c207f319536ce6390cd355adca0169090450b3cb6cc130dc7b2",
       "scripts/dependency_cycle_gate.py": "sha256:227dde735d63e7d70fa6a41705044f6b58dae123a2596359ad1fab0c8a7ebd79",
       "scripts/doc_health_report.py": "sha256:fd35feb3ad0da78a76dfef1e13abee732638deb660e47552fdd2b9315a0988ed",
       "scripts/doc_steward_due.py": "sha256:b6baf42c215f80c84493fa7372c4529a6c46e206c09fe60fae93540791b7e6b8",
@@ -276,8 +278,8 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.5.0",
-    "template_digest": "sha256:cf172db572e698c127b59b901957cfe289b5b5fa29d97bd01f6021a8b891f894",
-    "template_files": 273
+    "template_digest": "sha256:6cce36b548955440e67276e409a7ac2cc7a9a75b3990acfb64bd4ef5f24eb1d0",
+    "template_files": 275
   },
   "project": "fixture-host",
   "schema": "agent-runtime-lock/v1",
