@@ -376,6 +376,10 @@ class Task:
         return str(self.meta.get("project_id") or "-").strip() or "-"
 
     @property
+    def initiative_id(self) -> str:
+        return str(self.meta.get("initiative_id") or "-").strip() or "-"
+
+    @property
     def unit_spec(self) -> str:
         return str(self.meta.get("unit_spec") or "").strip()
 
