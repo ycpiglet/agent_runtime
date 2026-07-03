@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-23T17:24:28+09:00",
+  "generated_at": "2026-07-04T02:39:47+09:00",
   "record_count": 370,
   "finding_count": 0,
   "findings": [],
@@ -3721,7 +3721,7 @@
       "title": "Noncritical Release Auto-Execution",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-RELEASE-AUTOMATION",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-585",
@@ -3732,7 +3732,7 @@
       "title": "Make scripts/release_execution_gate.py version-parametric like release_council_gate.p…",
       "path": "agents/lead_engineer/tasks/TASK-AR-585.md",
       "parent_id": "TASKSET-AR-RELEASE-AUTO-NONCRITICAL",
-      "status": "planned"
+      "status": "done"
     },
     {
       "key": "unit:UNIT-TASK-AR-585-001",
@@ -3754,7 +3754,7 @@
       "title": "Add an automated path that, at the release cadence boundary on green main CI, execute…",
       "path": "agents/lead_engineer/tasks/TASK-AR-586.md",
       "parent_id": "TASKSET-AR-RELEASE-AUTO-NONCRITICAL",
-      "status": "planned"
+      "status": "done"
     },
     {
       "key": "unit:UNIT-TASK-AR-586-001",

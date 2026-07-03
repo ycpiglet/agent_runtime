@@ -9,9 +9,12 @@ kind: task
 parent_id: TASKSET-AR-RELEASE-AUTO-NONCRITICAL
 registered_at: 2026-06-18T22:26:32+09:00
 created_at: 2026-06-18T22:26:32+09:00
-updated_at: 2026-06-18T22:26:32+09:00
+updated_at: 2026-07-04T02:37:53+09:00
+started_at: 2026-07-04T02:00:00+09:00
+completed_at: 2026-07-04T02:37:53+09:00
+verification_status: passed
 title: Parameterize the release execution gate (remove hardcoded v0.1.8)
-status: planned
+status: done
 priority: P1
 difficulty: S
 est_hours: 2
@@ -55,3 +58,16 @@ tags:
 - `python -m pytest tests/test_release_execution_gate.py -q`
 - `python scripts/owner_governance_gate.py`
 - `rg -n "0\.1\.8" scripts/release_execution_gate.py || echo no-hardcoded-version`
+
+## Closeout (2026-07-04)
+
+- Finding: the scoped work already landed on main via the release-automation
+  redesign lane (PR #183 era); this closeout verifies acceptance rather than
+  re-implementing.
+- Verified: `rg "0\.1\.8" scripts/release_execution_gate.py` -> no hardcoded
+  version; the gate resolves the live version via `_pyproject_version`
+  (scripts/release_execution_gate.py) mirroring release_council_gate.py.
+- Verified: `python -m pytest tests/test_release_execution_gate.py -q` -> `8 passed`
+  (includes parametric current-version pass and mismatch block coverage via
+  `CURRENT_VERSION`).
+- Approval-route logic (approved / agent_council_approved) unchanged.
