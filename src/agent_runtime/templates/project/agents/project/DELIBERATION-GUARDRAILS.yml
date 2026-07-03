@@ -1,0 +1,30 @@
+# Deliberation guardrails (GH #132 precondition 2+3, upstream share).
+#
+# Any scheduler/daemon that invokes the deliberation devices (persona_council,
+# agent_seminar) MUST pass scripts/deliberation_guard.py first. These caps
+# exist BEFORE any always-on mode is built, so the off-switch precedes the
+# engine. Values are Owner-tunable; the guard fails closed on a missing or
+# unreadable file.
+schema: agent-runtime-deliberation-guardrails/v1
+kill_switch_env: AGENT_RUNTIME_DELIBERATION_DISABLE
+limits:
+  # Never run deliberations closer together than this (minutes).
+  min_interval_minutes: 30
+  # Hard daily ceiling on guarded runs, across all schedulers.
+  max_runs_per_day: 8
+  # Per-run shape caps; a run declaring more is refused up front.
+  max_personas_per_run: 7
+  max_est_tokens_per_run: 60000
+output_contract:
+  # Deliberation output is advisory only: records/proposals, never mutations.
+  # The guard rejects any declared output whose mutation field is not "none"
+  # and any record carrying side-effect fields.
+  mutation: none
+  forbidden_fields:
+    - apply
+    - execute
+    - push
+    - tag
+    - order
+    - trade
+run_ledger: agents/runtime/deliberation-runs.jsonl
