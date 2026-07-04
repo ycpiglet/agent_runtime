@@ -311,3 +311,109 @@ def test_swallowed_error_is_visible_on_stdout(tmp_path: Path, monkeypatch) -> No
 
     assert rc == 0
     assert "release-cadence: error RuntimeError" in buffer.getvalue()
+
+
+# --------------------------------------------------------------------------- #
+# Git query failures must be an ERROR, never a quiet "not-triggered" pass.
+# (2026-07-03 main CI flake: a transient git spawn failure inside the trigger
+# collapsed commits to 0, release-auto reported 'not-triggered' with exit 0,
+# and a whole release cycle would have been silently skipped in production.)
+# --------------------------------------------------------------------------- #
+def _load_module():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("release_cadence_trigger_query_errors", SCRIPT)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_spawn_failure_reports_git_query_error(tmp_path: Path, monkeypatch) -> None:
+    module = _load_module()
+    monkeypatch.setattr(module.time, "sleep", lambda _s: None)
+
+    def _boom(*args, **kwargs):
+        raise OSError("spawn failed")
+
+    monkeypatch.setattr(module.subprocess, "run", _boom)
+    report = module.build_report(tmp_path)
+
+    assert report["status"] == "error"
+    assert report["triggered"] is False
+    assert report["reason"] == "git-query-error"
+    assert report["git_query_errors"]
+    assert "describe" in report["git_query_errors"][0]["command"]
+    assert "OSError" in report["git_query_errors"][0]["error"]
+
+
+def test_signal_killed_git_is_retried_then_recorded(tmp_path: Path, monkeypatch) -> None:
+    module = _load_module()
+    monkeypatch.setattr(module.time, "sleep", lambda _s: None)
+    calls: list[list[str]] = []
+
+    def _killed(cmd, **kwargs):
+        calls.append(list(cmd))
+        return subprocess.CompletedProcess(cmd, returncode=-9, stdout="", stderr="")
+
+    monkeypatch.setattr(module.subprocess, "run", _killed)
+    module._QUERY_ERRORS.clear()
+    out = module._git(tmp_path, "describe", "--tags")
+
+    assert out is None
+    # A signal death is transient, not a deterministic git answer: retried.
+    assert len(calls) == 3
+    assert module._QUERY_ERRORS
+    assert "signal 9" in module._QUERY_ERRORS[0]["error"]
+
+
+def test_transient_spawn_failure_recovers_without_error(tmp_path: Path, monkeypatch) -> None:
+    repo = _init_repo(tmp_path)
+    _git(repo, "tag", "v0.1.0")
+    for index in range(41):
+        _commit(repo, f"chore: tick {index}")
+
+    module = _load_module()
+    monkeypatch.setattr(module.time, "sleep", lambda _s: None)
+    real_run = subprocess.run
+    state = {"raised": False}
+
+    def _flaky_once(cmd, **kwargs):
+        if not state["raised"]:
+            state["raised"] = True
+            raise OSError("transient spawn failure")
+        return real_run(cmd, **kwargs)
+
+    monkeypatch.setattr(module.subprocess, "run", _flaky_once)
+    report = module.build_report(repo)
+
+    assert report["triggered"] is True
+    assert report["status"] == "watch"
+    assert "git_query_errors" not in report
+
+
+def test_no_baseline_tag_is_still_a_quiet_pass(tmp_path: Path) -> None:
+    repo = _init_repo(tmp_path)  # commits but no tag: deterministic non-zero from describe
+    module = _load_module()
+    report = module.build_report(repo)
+
+    assert report["status"] == "pass"
+    assert report["reason"] == "no-baseline-tag"
+    assert "git_query_errors" not in report
+
+
+def test_git_query_error_prints_loud_without_verbose(capsys) -> None:
+    module = _load_module()
+    report = {
+        "thresholds": {"commits": 40, "feat": 5, "days": 14},
+        "triggered": False,
+        "status": "error",
+        "reason": "git-query-error",
+        "git_query_errors": [
+            {"command": "git rev-list --count v0.1.0..HEAD", "error": "OSError: spawn failed"}
+        ],
+    }
+    module._print_report(report, verbose=False)
+    out = capsys.readouterr().out
+
+    assert "release-cadence: ERROR git-query-error" in out
+    assert "git rev-list" in out

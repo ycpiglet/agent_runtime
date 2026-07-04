@@ -344,3 +344,38 @@ def test_auto_merge_has_actions_write_for_main_ci_dispatch() -> None:
     # (observed on the first post-merge dispatch attempt, 2026-07-03).
     workflow = (REPO_ROOT / ".github" / "workflows" / "auto-merge.yml").read_text(encoding="utf-8")
     assert "actions: write" in workflow
+
+
+# --------------------------------------------------------------------------- #
+# Trigger evaluation failure: loud, never a quiet "not-triggered" exit 0.
+# --------------------------------------------------------------------------- #
+def test_trigger_git_query_error_halts_loud(tmp_path: Path, monkeypatch) -> None:
+    repo = _make_repo(tmp_path)
+
+    def _error_report(root, now_ts=None):
+        return {
+            "triggered": False,
+            "status": "error",
+            "reason": "git-query-error",
+            "git_query_errors": [
+                {"command": "git describe --tags --abbrev=0", "error": "OSError: spawn failed"}
+            ],
+        }
+
+    monkeypatch.setattr(orch.cadence, "build_report", _error_report)
+    result = _run(repo, ci_status="green", criticality="noncritical")
+
+    assert result["result"] == orch.RESULT_TRIGGER_ERROR
+    assert result["mutated"] is False
+    assert result["git_query_errors"]
+    # Exit-code contract: an unevaluated trigger is NOT "nothing to do".
+    assert orch._EXIT_CODES[orch.RESULT_TRIGGER_ERROR] != 0
+
+
+def test_genuinely_quiet_repo_is_still_not_triggered(tmp_path: Path) -> None:
+    repo = _make_repo(tmp_path, triggered=False)
+    result = _run(repo, ci_status="green", criticality="noncritical")
+
+    assert result["result"] == orch.RESULT_NOT_TRIGGERED
+    assert "git_query_errors" not in result
+    assert orch._EXIT_CODES[orch.RESULT_NOT_TRIGGERED] == 0

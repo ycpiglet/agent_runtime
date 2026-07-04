@@ -58,6 +58,7 @@ NONCRITICAL_BUMPS = {"patch"}
 RESULT_EXECUTED = "executed"  # noncritical: gates passed + (dry-run or real) release done
 RESULT_OWNER_REQUIRED = "owner-approval-required"  # critical/major/flagged: halted, no mutation
 RESULT_NOT_TRIGGERED = "not-triggered"  # cadence has not proposed a release
+RESULT_TRIGGER_ERROR = "trigger-error"  # cadence could not be evaluated (git query failures)
 RESULT_NOT_GREEN = "ci-not-green"  # main CI not green / SHA mismatch
 RESULT_BLOCKED = "blocked"  # a gate blocked the noncritical decision
 
@@ -331,6 +332,14 @@ def orchestrate(
         "baseline_tag": report.get("baseline_tag"),
     }
     if not report.get("triggered"):
+        if report.get("reason") == "git-query-error":
+            # The trigger never got answers out of git; "not-triggered" would
+            # silently skip a release cycle. Fail loud so the run shows red
+            # and the next scheduled run retries.
+            base["result"] = RESULT_TRIGGER_ERROR
+            base["reason"] = "cadence trigger could not be evaluated (git query errors)"
+            base["git_query_errors"] = report.get("git_query_errors", [])
+            return base
         base["result"] = RESULT_NOT_TRIGGERED
         base["reason"] = "cadence proposal has not fired; nothing to release"
         return base
@@ -525,6 +534,7 @@ _EXIT_CODES = {
     RESULT_OWNER_REQUIRED: 2,  # halted for Owner: distinct, non-zero
     RESULT_NOT_GREEN: 3,
     RESULT_BLOCKED: 4,
+    RESULT_TRIGGER_ERROR: 5,  # could not evaluate the trigger: loud, retry next run
 }
 
 
@@ -545,6 +555,9 @@ def _print_human(result: dict[str, Any]) -> None:
             print(_ascii(f"release-auto: owner notified -> {notif['out']}"))
     elif result.get("reason"):
         print(_ascii(f"release-auto: {result['reason']}"))
+    if status == RESULT_TRIGGER_ERROR:
+        for err in result.get("git_query_errors", []):
+            print(_ascii(f"release-auto:   git-query-error: {err.get('command')}: {err.get('error')}"))
     for finding in result.get("findings", []):
         print(_ascii(f"release-auto:   finding: {finding}"))
 

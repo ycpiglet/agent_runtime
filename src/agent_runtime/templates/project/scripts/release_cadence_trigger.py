@@ -42,10 +42,19 @@ def _ascii(text: str) -> str:
     return text.encode("ascii", "backslashreplace").decode("ascii")
 
 
+# Spawn-level git failures recorded by _git() for the current build_report()
+# pass. A query that exhausts its retries is an evaluation failure, not a git
+# answer: callers must be able to tell "no data" apart from "could not ask".
+# Module-level because this is a single-threaded CLI/import-time helper.
+_QUERY_ERRORS: list[dict[str, str]] = []
+
+
 def _git(root: Path, *args: str) -> str | None:
     # Read-only, idempotent git queries. Under loaded CI runners the spawn
-    # itself can fail transiently, so retry OSError briefly; a non-zero exit
+    # itself can fail transiently (OSError) or git can be killed by a signal
+    # (negative returncode); both are retried briefly. A normal non-zero exit
     # is a deterministic git answer (e.g. no tag yet) and is not retried.
+    last_error = ""
     for attempt in range(3):
         if attempt:
             time.sleep(0.2 * attempt)
@@ -59,11 +68,16 @@ def _git(root: Path, *args: str) -> str | None:
                 errors="replace",
                 check=False,
             )
-        except OSError:
+        except OSError as exc:
+            last_error = f"{type(exc).__name__}: {exc}"
+            continue
+        if result.returncode < 0:
+            last_error = f"killed by signal {-result.returncode}"
             continue
         if result.returncode != 0:
             return None
         return result.stdout
+    _QUERY_ERRORS.append({"command": "git " + " ".join(args), "error": last_error})
     return None
 
 
@@ -207,8 +221,24 @@ def build_report(
         "mutation_boundary": MUTATION_BOUNDARY,
     }
 
+    _QUERY_ERRORS.clear()
     tag = _latest_tag(root)
     if tag is None:
+        if _QUERY_ERRORS:
+            # "describe" never got a git answer: this is an evaluation failure,
+            # not a repo without tags. Refuse to report a quiet pass.
+            base.update(
+                {
+                    "status": "error",
+                    "triggered": False,
+                    "finding": None,
+                    "reason": "git-query-error",
+                    "baseline_tag": None,
+                    "metrics": None,
+                    "git_query_errors": list(_QUERY_ERRORS),
+                }
+            )
+            return base
         base.update(
             {
                 "status": "pass",
@@ -271,6 +301,14 @@ def build_report(
             "bump_targets": _bump_targets(root),
         }
     )
+    if _QUERY_ERRORS:
+        base["git_query_errors"] = list(_QUERY_ERRORS)
+        if not triggered:
+            # Metrics were computed on top of failed git queries (e.g. rev-list
+            # never answered, so commits collapsed to 0). "pass" would be a
+            # silent skip; surface it as an evaluation error instead.
+            base["status"] = "error"
+            base["reason"] = "git-query-error"
     return base
 
 
@@ -280,6 +318,13 @@ def _print_report(report: dict[str, Any], *, verbose: bool) -> None:
         f"commits>={thresholds['commits']} feat>={thresholds['feat']} days>={thresholds['days']}"
     )
     if not report["triggered"]:
+        if report.get("reason") == "git-query-error":
+            # Always loud, verbose or not: an unevaluated trigger must never
+            # read like a quiet below-thresholds pass.
+            print(_ascii("release-cadence: ERROR git-query-error (trigger could not be evaluated)"))
+            for err in report.get("git_query_errors", []):
+                print(_ascii(f"release-cadence:   {err['command']}: {err['error']}"))
+            return
         if not verbose:
             return
         if report.get("reason") == "no-baseline-tag":
