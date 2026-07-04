@@ -65,9 +65,27 @@ this note records the generalized lessons and prevention routes.
   unlanded content — is cheap (this one closed 7 issues/tasks and recovered
   one real feature) and keeps the board a trustworthy attention surface.
 
+## Addendum (same day, later cycle): query failure read as "no data"
+
+3. **A transient git failure silently skipped a release cycle.** The
+   cadence trigger's `_git` helper folded *"the spawn failed after
+   retries"* and *"git answered non-zero"* into the same `None`. A loaded
+   runner killed one spawn, `rev-list` returned no answer, commits
+   collapsed to 0, and `release_auto_noncritical` reported `not-triggered`
+   with exit 0 — indistinguishable from a genuinely quiet repo. Surfaced
+   only as an assertion flake on main CI (run 28680340240,
+   `test_major_or_breaking_flag_halts`), with zero diagnostics. **Root
+   cause: a fail-open default in a decision path — "could not ask" must
+   never be classified as "no data."** Fix: PR #254 (query-error ledger in
+   the trigger, `git-query-error` report status, `RESULT_TRIGGER_ERROR`
+   exit 5, signal-death retried) + PR #255 (workflow fails the run red on
+   rc=5; notify steps still run via `if: always()`).
+   (`silent-query-error-as-no-data`)
+
 ## Feed-forward
 
-- Casebook rows added: `silent-cross-step-wiring`, `stale-open-state-debt`.
+- Casebook rows added: `silent-cross-step-wiring`, `stale-open-state-debt`,
+  `silent-query-error-as-no-data`.
 - Proposal (not implemented): a scheduled "open-state sweep" checklist or
   gate that lists open issues/board tasks whose referenced acceptance
   criteria already hold on main.
