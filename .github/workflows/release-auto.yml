@@ -145,9 +145,16 @@ jobs:
             exit 1
           fi
           # Exit 2 = owner-approval-required (minor/major/critical): not a CI failure, it is
-          # the designed halt. Surface it but do not fail the workflow. Any other non-zero
-          # (3 CI-not-green, 4 gate-blocked) is also a clean stop with no mutation.
+          # the designed halt. Surface it but do not fail the workflow. Exit 3 (CI-not-green)
+          # and 4 (gate-blocked) are also clean stops with no mutation. Exit 5 means the
+          # cadence trigger could not be evaluated at all (git query failures): the cycle was
+          # NOT assessed, so fail the step to make the run red — the notify steps below are
+          # if: always() and still run. Next scheduled run retries.
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          if [ "$rc" = "5" ]; then
+            echo "::error::cadence trigger evaluation failed (git query errors); release cycle was not assessed"
+            exit 5
+          fi
 
       - name: Notify the Owner of the auto-release outcome
         if: always()

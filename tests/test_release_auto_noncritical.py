@@ -379,3 +379,13 @@ def test_genuinely_quiet_repo_is_still_not_triggered(tmp_path: Path) -> None:
     assert result["result"] == orch.RESULT_NOT_TRIGGERED
     assert "git_query_errors" not in result
     assert orch._EXIT_CODES[orch.RESULT_NOT_TRIGGERED] == 0
+
+
+def test_release_auto_workflow_fails_red_on_trigger_error() -> None:
+    # Exit 5 (trigger-error) means the cadence trigger never got answers out of
+    # git: the cycle was NOT assessed. The workflow must fail the step (red run)
+    # instead of folding it into the "clean stop" non-zero family, or a git
+    # spawn failure silently skips a release cycle with a green run.
+    workflow = (REPO_ROOT / ".github" / "workflows" / "release-auto.yml").read_text(encoding="utf-8")
+    assert '"$rc" = "5"' in workflow
+    assert "release cycle was not assessed" in workflow
