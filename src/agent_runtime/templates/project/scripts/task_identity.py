@@ -20,7 +20,11 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 TASKS_DIR = Path("agents/lead_engineer/tasks")
 UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
-DONE_STATUSES = {"completed", "done", "released", "완료"}
+try:
+    import status_alias
+except ImportError:  # imported as scripts.<name> (namespace package)
+    from scripts import status_alias
+DONE_STATUSES = status_alias.DONE_STATUSES
 STARTED_STATUSES = DONE_STATUSES | {"in_progress", "active", "review", "working"}
 LIFECYCLE_FIELDS = ("display_id", "task_uid", "registered_at", "created_at", "started_at", "updated_at", "completed_at")
 

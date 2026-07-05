@@ -23,6 +23,7 @@ from typing import Any
 
 import backlog_board
 import model_routing
+import status_alias
 
 
 ACTIVE_STATUSES = {
@@ -62,7 +63,9 @@ def _letter_alias(index: int) -> str:
 
 
 def _normalize_status(value: str) -> str:
-    return str(value or "").strip().lower()
+    # Alias-aware (issue #121 item 4): localized statuses like "완료" fold to
+    # their canonical enum value before any transition/done comparison.
+    return status_alias.normalize_status(value)
 
 
 def _rel(root: Path, path: Path) -> str:

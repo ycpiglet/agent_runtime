@@ -38,7 +38,11 @@ STATUS_WEIGHT = {
     "completed": 1,
     "done": 1,
 }
-DONE_STATUSES = {"completed", "done", "released", "완료"}
+try:
+    import status_alias
+except ImportError:  # imported as scripts.<name> (namespace package)
+    from scripts import status_alias
+DONE_STATUSES = status_alias.DONE_STATUSES
 ACTIVE_CLAIM_STATUSES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
 DEFAULT_WIP_LIMIT = 3
 DIFFICULTY_LABEL = {"S": "Low", "M": "Medium", "L": "High", "XL": "Critical", "하": "Low", "중": "Medium", "상": "High"}
