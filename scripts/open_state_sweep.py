@@ -14,6 +14,9 @@ What it checks:
 2. Untriaged dirty-work archive refs (``archive/stashes/*``) -> reported as
    a count so preserved-but-unlanded work stays visible (#162 was recovered
    from exactly such a stash three weeks after archiving).
+3. Non-archive remote branches fully contained in ``--ref`` (ahead=0) and
+   idle past an age floor -> ``merged-remote-branch`` findings (merge debris
+   that the auto-delete flow missed; six 3-week-old ones found 2026-07-05).
 
 Boundary: report tool only — NOT wired into the owner governance chain.
 ``--check`` exits 1 on findings for opt-in CI use; the default exit is 0.
@@ -28,6 +31,7 @@ import json
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -110,6 +114,60 @@ def dangling_lane_findings(root: Path, ref: str, stashes: list[str], threshold: 
     return findings
 
 
+REMOTE_BRANCH_PREFIX = "refs/remotes/origin/"
+BRANCH_EXCLUDE = ("origin/HEAD", "origin/main")
+DEFAULT_MERGED_BRANCH_AGE_DAYS = 7
+
+
+def merged_branch_findings(
+    root: Path, ref: str, *, age_days: int, now_ts: float | None = None
+) -> list[dict[str, Any]]:
+    """Non-archive remote branches fully contained in ref (ahead=0): merge debris.
+
+    The auto-delete flow only removes the branch a PR merged from; lanes merged
+    by other means survive indefinitely (2026-07-05 sweep: six branches, all
+    fully merged for three weeks). The age floor keeps just-cut zero-ahead
+    branches (work that has not started yet) out of the findings.
+    """
+    try:
+        out = _run_git(
+            root, "for-each-ref", "--format=%(refname:short) %(committerdate:unix)", REMOTE_BRANCH_PREFIX
+        )
+    except RuntimeError:
+        return []
+    now = now_ts if now_ts is not None else time.time()
+    findings: list[dict[str, Any]] = []
+    for line in out.splitlines():
+        if not line.strip():
+            continue
+        name, _, stamp = line.rpartition(" ")
+        if name in BRANCH_EXCLUDE or name.startswith("origin/archive/"):
+            continue
+        try:
+            age = (now - int(stamp)) / 86400.0
+        except ValueError:
+            continue
+        if age < age_days:
+            continue
+        try:
+            ahead = int(_run_git(root, "rev-list", "--count", f"{ref}..{name}").strip())
+        except (RuntimeError, ValueError):
+            continue
+        if ahead == 0:
+            findings.append(
+                {
+                    "kind": "merged-remote-branch",
+                    "branch": name,
+                    "age_days": round(age, 1),
+                    "detail": (
+                        f"fully contained in {ref} (ahead=0) and idle for {round(age)}d; "
+                        "safe to delete the remote branch"
+                    ),
+                }
+            )
+    return findings
+
+
 def load_open_issues(issues_file: Path | None) -> list[dict[str, Any]] | None:
     """Open issues from --issues-file, else from gh; None when unavailable."""
     if issues_file is not None:
@@ -128,7 +186,14 @@ def load_open_issues(issues_file: Path | None) -> list[dict[str, Any]] | None:
     return [dict(item) for item in json.loads(result.stdout or "[]")]
 
 
-def sweep(root: Path, ref: str, issues_file: Path | None = None, dangling_threshold: int = 5) -> dict[str, Any]:
+def sweep(
+    root: Path,
+    ref: str,
+    issues_file: Path | None = None,
+    dangling_threshold: int = 5,
+    merged_branch_age_days: int = DEFAULT_MERGED_BRANCH_AGE_DAYS,
+    now_ts: float | None = None,
+) -> dict[str, Any]:
     closed_in_history = closed_issue_numbers_in_history(root, ref)
     open_issues = load_open_issues(issues_file)
     findings: list[dict[str, Any]] = []
@@ -158,6 +223,12 @@ def sweep(root: Path, ref: str, issues_file: Path | None = None, dangling_thresh
             key=lambda item: -item["unmerged_commit_count"],
         )
     )
+    findings.extend(
+        sorted(
+            merged_branch_findings(root, ref, age_days=merged_branch_age_days, now_ts=now_ts),
+            key=lambda item: -item["age_days"],
+        )
+    )
     return {
         "schema": "agent-runtime-open-state-sweep/v1",
         "ref": ref,
@@ -182,6 +253,12 @@ def main(argv: list[str] | None = None) -> int:
         default=5,
         help="report a stash as a dangling lane when its parent chain has at least this many unmerged commits (default 5)",
     )
+    parser.add_argument(
+        "--merged-branch-age-days",
+        type=int,
+        default=DEFAULT_MERGED_BRANCH_AGE_DAYS,
+        help="report a fully-merged (ahead=0) non-archive remote branch only when idle at least this many days (default 7)",
+    )
     args = parser.parse_args(argv)
 
     root = args.root.resolve()
@@ -190,7 +267,13 @@ def main(argv: list[str] | None = None) -> int:
         _run_git(root, "rev-parse", "--verify", "--quiet", ref)
     except RuntimeError:
         ref = "HEAD"
-    report = sweep(root, ref, issues_file=args.issues_file, dangling_threshold=args.dangling_threshold)
+    report = sweep(
+        root,
+        ref,
+        issues_file=args.issues_file,
+        dangling_threshold=args.dangling_threshold,
+        merged_branch_age_days=args.merged_branch_age_days,
+    )
 
     if args.as_json:
         print(json.dumps(report, ensure_ascii=True, indent=2, sort_keys=True))
@@ -200,6 +283,8 @@ def main(argv: list[str] | None = None) -> int:
         for finding in report["findings"]:
             if finding["kind"] == "stale-open-issue":
                 print(f"- {finding['kind']}: #{finding['number']} {finding['title']}")
+            elif finding["kind"] == "merged-remote-branch":
+                print(f"- {finding['kind']}: {finding['branch']} age_days={finding['age_days']}")
             else:
                 print(f"- {finding['kind']}: {finding['stash']} unmerged_commits={finding['unmerged_commit_count']}")
         print(f"archive_stash_refs={report['archive_stash_count']}")
