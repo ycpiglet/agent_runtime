@@ -1,0 +1,107 @@
+# Weekly open-state sweep (watch-only) — COMPOUND-2026-07-04 `stale-open-state-debt`.
+#
+# Under high merge velocity, open issues / archive stashes / remote branches drift
+# from merged reality within weeks. The manual 2026-07-04 sweep closed 8 stale
+# issues and recovered one unlanded feature; scripts/open_state_sweep.py made that
+# repeatable, and this workflow makes it periodic. Watch-only: it mutates nothing —
+# findings surface as a single dedup'd GitHub issue (the proven release-auto
+# proactive-notification pattern), which auto-closes when a later sweep is clean.
+name: open-state-sweep
+
+on:
+  schedule:
+    - cron: "30 3 * * 1" # Mondays 03:30 UTC, after the weekly main test cron (02:00)
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch all remote refs (archive stashes + branches)
+        run: git fetch origin '+refs/heads/*:refs/remotes/origin/*'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run the sweep
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # .tmp/ is gitignored and absent in a fresh checkout; without mkdir the
+          # tee below cannot create the result file and the notify step would
+          # silently skip (casebook: silent-cross-step-wiring, PR #240).
+          mkdir -p .tmp
+          set +e
+          python scripts/open_state_sweep.py --root . --ref origin/main --json | tee .tmp/open-state-sweep.json
+          rc=${PIPESTATUS[0]}
+          set -e
+          echo "sweep exit code: $rc"
+          if [ ! -s .tmp/open-state-sweep.json ]; then
+            echo "::error::sweep result file was not written; findings would be silently dropped"
+            exit 1
+          fi
+          if [ "$rc" != "0" ]; then
+            echo "::error::open_state_sweep.py failed (rc=$rc)"
+            exit "$rc"
+          fi
+
+      - name: Open/update or close the findings issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          if [ ! -f .tmp/open-state-sweep.json ]; then
+            echo "no sweep result file; nothing to surface"; exit 0
+          fi
+          count="$(jq '.findings | length' .tmp/open-state-sweep.json)"
+          title="[open-state-sweep] Open state drifted from merged reality"
+          existing="$(gh issue list --repo "$REPO" --state open --search "in:title \"$title\"" --json number --jq '.[0].number // empty' 2>/dev/null || echo "")"
+          if [ "$count" -gt 0 ]; then
+            {
+              echo "The weekly open-state sweep found **$count** finding(s) that need triage — verify each against main, then close with evidence, recover unlanded work, or delete debris."
+              echo ""
+              echo '```json'
+              jq '.findings' .tmp/open-state-sweep.json
+              echo '```'
+              echo ""
+              echo "- archive stash refs: $(jq '.archive_stash_count' .tmp/open-state-sweep.json)"
+              echo "- workflow run: $RUN_URL"
+              echo ""
+              echo "This issue is updated by every sweep and auto-closes once a sweep comes back clean."
+            } > /tmp/sweep-issue-body.md
+            if [ -n "$existing" ]; then
+              gh issue edit "$existing" --repo "$REPO" --body-file /tmp/sweep-issue-body.md
+              gh issue comment "$existing" --repo "$REPO" --body "Still drifting: $count finding(s) (run $RUN_URL)."
+              echo "updated findings issue #$existing"
+            else
+              gh issue create --repo "$REPO" --title "$title" --body-file /tmp/sweep-issue-body.md
+              echo "opened findings issue"
+            fi
+          elif [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$REPO" --body "Sweep is clean again (run $RUN_URL) -- closing."
+            gh issue close "$existing" --repo "$REPO"
+            echo "closed findings issue #$existing"
+          else
+            echo "sweep clean; no issue to manage"
+          fi
+
+      - name: Upload sweep result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-state-sweep-result
+          path: .tmp/open-state-sweep.json
+          if-no-files-found: warn

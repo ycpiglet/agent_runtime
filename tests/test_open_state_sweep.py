@@ -243,3 +243,28 @@ def test_archive_branches_are_excluded_from_merged_branch_findings(tmp_path: Pat
     assert result.returncode == 0
     report = json.loads(result.stdout)
     assert all(f["kind"] != "merged-remote-branch" for f in report["findings"])
+
+
+# --------------------------------------------------------------------------- #
+# Scheduled workflow wiring: weekly sweep surfaces findings as a dedup'd issue.
+# --------------------------------------------------------------------------- #
+def test_sweep_workflow_wiring() -> None:
+    workflow = (REPO_ROOT / ".github" / "workflows" / "open-state-sweep.yml").read_text(encoding="utf-8")
+    # Periodic + manual trigger; may open/close the findings issue.
+    assert "schedule:" in workflow
+    assert "workflow_dispatch:" in workflow
+    assert "issues: write" in workflow
+    # Findings reach the Owner proactively via a single dedup'd issue that
+    # auto-closes when a sweep is clean (release-auto notification pattern).
+    assert "gh issue create" in workflow
+    assert "gh issue close" in workflow
+    assert "[open-state-sweep] Open state drifted from merged reality" in workflow
+    # Cross-step file contract pinned (casebook: silent-cross-step-wiring):
+    # .tmp exists before tee, and a missing result file fails loudly.
+    mkdir_pos = workflow.find("mkdir -p .tmp")
+    tee_pos = workflow.find("tee .tmp/open-state-sweep.json")
+    assert mkdir_pos != -1 and tee_pos != -1 and mkdir_pos < tee_pos
+    assert "result file was not written" in workflow
+    # Archive stash/branch refs live under refs/heads on origin; the sweep needs
+    # the full remote refspec, not just the checked-out ref.
+    assert "+refs/heads/*:refs/remotes/origin/*" in workflow
