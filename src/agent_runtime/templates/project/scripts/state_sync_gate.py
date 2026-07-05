@@ -14,7 +14,11 @@ TASKS_DIR = Path("agents/lead_engineer/tasks")
 BOARD = Path("BACKLOG-BOARD.md")
 BACKLOG = Path("BACKLOG.md")
 STATUS = Path("STATUS.md")
-DONE_STATUSES = {"completed", "done", "released", "완료"}
+try:
+    import status_alias
+except ImportError:  # imported as scripts.<name> (namespace package)
+    from scripts import status_alias
+DONE_STATUSES = status_alias.DONE_STATUSES
 
 
 @dataclass(frozen=True)

@@ -41,7 +41,11 @@ STATUS_WEIGHT = {
     "completed": 1,
     "done": 1,
 }
-DONE_STATUSES = {"completed", "done", "released", "완료"}
+try:
+    import status_alias
+except ImportError:  # imported as scripts.<name> (namespace package)
+    from scripts import status_alias
+DONE_STATUSES = status_alias.DONE_STATUSES
 # TASK-AR-538: intake states held OUT of the active board until accepted/deferred.
 TRIAGE_STATUSES = {"triage", "intake"}
 ACTIVE_CLAIM_STATUSES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}

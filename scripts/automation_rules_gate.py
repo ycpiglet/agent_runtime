@@ -43,8 +43,12 @@ EVENT_LOG = "agents/runtime/events/automation_rules.jsonl"
 
 VALID_TRIGGERS = ("status_change", "due_passed", "blocked_too_long")
 VALID_ACTIONS = ("board_regen", "escalation_message", "label_apply")
-DONE_STATUSES = {"completed", "done", "released", "완료"}
-BLOCKED_STATUSES = {"blocked", "hold", "보류"}
+try:
+    import status_alias
+except ImportError:  # imported as scripts.<name> (namespace package)
+    from scripts import status_alias
+DONE_STATUSES = status_alias.DONE_STATUSES
+BLOCKED_STATUSES = status_alias.BLOCKED_STATUSES
 DEFAULT_BLOCKED_DAYS = 3
 
 
