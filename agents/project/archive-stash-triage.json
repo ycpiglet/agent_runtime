@@ -1,0 +1,76 @@
+{
+  "schema": "agent-runtime-archive-stash-triage/v1",
+  "description": "Verdicts for archive/stashes/* refs. open_state_sweep.py reports any stash ref missing from this ledger as an untriaged-stash finding; without this file it only counts stashes (opt-in enforcement). Verdicts: recovered (content re-landed on main), superseded (content already on main by other means), noise (runtime records / board churn with no unlanded work), pinned-pending-owner (lane pinned under archive/branches/, Owner decision open).",
+  "triaged": {
+    "archive/stashes/20260612/backlog-board-task-ar-370-pane-events-session-ba": {
+      "verdict": "noise",
+      "note": "BACKLOG-BOARD + TASK-AR-370 record + pane-events snapshot; task long closed on main",
+      "triaged_at": "2026-07-05"
+    },
+    "archive/stashes/20260612/pane-events-session-baseline-2026-06-12t025510.9": {
+      "verdict": "noise",
+      "note": "pane-events.jsonl only (runtime session record)",
+      "triaged_at": "2026-07-05"
+    },
+    "archive/stashes/20260612/record": {
+      "verdict": "noise",
+      "note": "empty diff vs parent (marker-only stash)",
+      "triaged_at": "2026-07-05"
+    },
+    "archive/stashes/20260618/beta-tester-role-strengthening": {
+      "verdict": "recovered",
+      "note": "beta-tester SKILL strengthening recovered to main via PR #242 (issue #162)",
+      "triaged_at": "2026-07-05"
+    },
+    "archive/stashes/20260621/hooks-archive-index-backlog-board-business-opera": {
+      "verdict": "noise",
+      "note": "board/hooks/archive-index churn; content verified landed or superseded in 2026-07-04 sweep",
+      "triaged_at": "2026-07-05"
+    },
+    "archive/stashes/20260627/archive-index-backlog-board-business-operating-s": {
+      "verdict": "superseded",
+      "note": "BUSINESS-OPERATING-SYSTEM docs landed via the #212-family merges; board files churn",
+      "triaged_at": "2026-07-05"
+    },
+    "archive/stashes/20260627/on-claude-crash-recovery-0": {
+      "verdict": "noise",
+      "note": "same dirty-state family as 20260621/hooks-archive-index (board/records)",
+      "triaged_at": "2026-07-05"
+    },
+    "archive/stashes/20260627/on-claude-impl-task-ar-5-1": {
+      "verdict": "noise",
+      "note": "pane-events.jsonl only",
+      "triaged_at": "2026-07-05"
+    },
+    "archive/stashes/20260627/on-claude-impl-task-ar-5-3": {
+      "verdict": "noise",
+      "note": "pane-events.jsonl only",
+      "triaged_at": "2026-07-05"
+    },
+    "archive/stashes/20260627/on-claude-impl-task-ar-5-4": {
+      "verdict": "superseded",
+      "note": "TASK-AR-588 UI console/design assets; verified already on main, lane pinned at archive/branches/20260704/visual-asset-588-superseded-lane",
+      "triaged_at": "2026-07-05"
+    },
+    "archive/stashes/20260627/pane-events-claim-20260621-183224-task-ar-595-5e": {
+      "verdict": "superseded",
+      "note": "claim records persisted on main (commits d7985c65/aaea556a family)",
+      "triaged_at": "2026-07-05"
+    },
+    "archive/stashes/20260627/pane-events-claim-20260621-184650-task-ar-596-7e5a-2": {
+      "verdict": "superseded",
+      "note": "claim records persisted on main (commits d7985c65/aaea556a family)",
+      "triaged_at": "2026-07-05"
+    },
+    "archive/stashes/20260627/wip-on-claude-decision-f-5": {
+      "verdict": "pinned-pending-owner",
+      "note": "160-commit decision-first v2 lane; pinned at archive/branches/20260704/decision-first-v2-lane, Owner decision issue #250",
+      "triaged_at": "2026-07-05"
+    },
+    "archive/stashes/20260627/wip-on-claude-impl-task-2": {
+      "verdict": "noise",
+      "note": "pane-events.jsonl only",
+      "triaged_at": "2026-07-05"
+    }
+  }
+}

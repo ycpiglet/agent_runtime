@@ -268,3 +268,81 @@ def test_sweep_workflow_wiring() -> None:
     # Archive stash/branch refs live under refs/heads on origin; the sweep needs
     # the full remote refspec, not just the checked-out ref.
     assert "+refs/heads/*:refs/remotes/origin/*" in workflow
+
+
+# --------------------------------------------------------------------------- #
+# untriaged-stash: stash refs must carry a verdict once the ledger exists.
+# --------------------------------------------------------------------------- #
+def _write_ledger(root: Path, triaged: dict) -> None:
+    ledger = root / "agents" / "project" / "archive-stash-triage.json"
+    ledger.parent.mkdir(parents=True, exist_ok=True)
+    ledger.write_text(
+        json.dumps({"schema": "agent-runtime-archive-stash-triage/v1", "triaged": triaged}),
+        encoding="utf-8",
+    )
+
+
+def test_stash_without_ledger_stays_count_only(tmp_path: Path) -> None:
+    _seed_repo(tmp_path, ["feat: base"])
+    _git(tmp_path, "update-ref", "refs/remotes/origin/archive/stashes/20260705/x", "HEAD")
+
+    result = _run(tmp_path, "--json")
+
+    report = json.loads(result.stdout)
+    assert report["stash_triage_ledger"] is False
+    assert report["untriaged_stash_count"] is None
+    assert all(f["kind"] != "untriaged-stash" for f in report["findings"])
+
+
+def test_untriaged_stash_is_reported_when_ledger_exists(tmp_path: Path) -> None:
+    _seed_repo(tmp_path, ["feat: base"])
+    _git(tmp_path, "update-ref", "refs/remotes/origin/archive/stashes/20260705/new-lane", "HEAD")
+    _write_ledger(tmp_path, {})
+
+    result = _run(tmp_path, "--json")
+
+    report = json.loads(result.stdout)
+    assert report["stash_triage_ledger"] is True
+    assert report["untriaged_stash_count"] == 1
+    kinds = [(f["kind"], f.get("stash")) for f in report["findings"]]
+    assert ("untriaged-stash", "origin/archive/stashes/20260705/new-lane") in kinds
+
+
+def test_triaged_stash_is_quiet(tmp_path: Path) -> None:
+    _seed_repo(tmp_path, ["feat: base"])
+    _git(tmp_path, "update-ref", "refs/remotes/origin/archive/stashes/20260705/known", "HEAD")
+    _write_ledger(
+        tmp_path,
+        {"archive/stashes/20260705/known": {"verdict": "noise", "triaged_at": "2026-07-05"}},
+    )
+
+    result = _run(tmp_path, "--json")
+
+    report = json.loads(result.stdout)
+    assert report["untriaged_stash_count"] == 0
+    assert all(f["kind"] != "untriaged-stash" for f in report["findings"])
+
+
+def test_malformed_ledger_fails_loud(tmp_path: Path) -> None:
+    # A broken triage source must not read as "everything triaged"
+    # (casebook: silent-query-error-as-no-data).
+    _seed_repo(tmp_path, ["feat: base"])
+    ledger = tmp_path / "agents" / "project" / "archive-stash-triage.json"
+    ledger.parent.mkdir(parents=True, exist_ok=True)
+    ledger.write_text('{"triaged": "not-an-object"}', encoding="utf-8")
+
+    result = _run(tmp_path, "--json")
+
+    assert result.returncode != 0
+    assert "triaged" in (result.stderr + result.stdout)
+
+
+def test_live_ledger_covers_all_current_stashes() -> None:
+    # The committed ledger must stay in sync with reality: every stash ref on
+    # origin has a verdict (new stashes surface as findings until triaged).
+    ledger = json.loads(
+        (REPO_ROOT / "agents" / "project" / "archive-stash-triage.json").read_text(encoding="utf-8")
+    )
+    assert isinstance(ledger["triaged"], dict)
+    for entry in ledger["triaged"].values():
+        assert entry["verdict"] in {"recovered", "superseded", "noise", "pinned-pending-owner"}
