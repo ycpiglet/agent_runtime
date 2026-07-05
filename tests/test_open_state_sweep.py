@@ -187,3 +187,59 @@ def test_lane_pinned_under_archive_branches_is_not_dangling(tmp_path: Path) -> N
 
     report = json.loads(result.stdout)
     assert [f for f in report["findings"] if f["kind"] == "dangling-lane"] == []
+
+
+# --------------------------------------------------------------------------- #
+# merged-remote-branch: fully-merged (ahead=0) non-archive branches are debris.
+# --------------------------------------------------------------------------- #
+def test_reports_merged_remote_branch_past_age_floor(tmp_path: Path) -> None:
+    _seed_repo(tmp_path, ["feat: base", "chore: tip"])
+    _git(tmp_path, "update-ref", "refs/remotes/origin/old-lane", "HEAD~1")
+
+    result = _run(tmp_path, "--merged-branch-age-days", "0", "--json")
+
+    assert result.returncode == 0
+    report = json.loads(result.stdout)
+    kinds = [(f["kind"], f.get("branch")) for f in report["findings"]]
+    assert ("merged-remote-branch", "origin/old-lane") in kinds
+
+
+def test_fresh_zero_ahead_branch_is_below_age_floor(tmp_path: Path) -> None:
+    # A branch just cut from the tip (work not started) must not be flagged
+    # under the default 7-day age floor: its committerdate is "now".
+    _seed_repo(tmp_path, ["feat: base"])
+    _git(tmp_path, "update-ref", "refs/remotes/origin/just-cut", "HEAD")
+
+    result = _run(tmp_path, "--json")
+
+    assert result.returncode == 0
+    report = json.loads(result.stdout)
+    assert all(f["kind"] != "merged-remote-branch" for f in report["findings"])
+
+
+def test_unmerged_branch_is_not_reported(tmp_path: Path) -> None:
+    _seed_repo(tmp_path, ["feat: base"])
+    _git(tmp_path, "branch", "-M", "main")
+    _git(tmp_path, "checkout", "-q", "-b", "lane")
+    (tmp_path / "lane.txt").write_text("lane\n", encoding="utf-8")
+    _git(tmp_path, "add", "-A")
+    _git(tmp_path, "commit", "-q", "-m", "feat: lane work")
+    _git(tmp_path, "update-ref", "refs/remotes/origin/live-lane", "HEAD")
+    _git(tmp_path, "checkout", "-q", "main")
+
+    result = _run(tmp_path, "--merged-branch-age-days", "0", "--json")
+
+    assert result.returncode == 0
+    report = json.loads(result.stdout)
+    assert all(f["kind"] != "merged-remote-branch" for f in report["findings"])
+
+
+def test_archive_branches_are_excluded_from_merged_branch_findings(tmp_path: Path) -> None:
+    _seed_repo(tmp_path, ["feat: base"])
+    _git(tmp_path, "update-ref", "refs/remotes/origin/archive/branches/20260704/pinned", "HEAD")
+
+    result = _run(tmp_path, "--merged-branch-age-days", "0", "--json")
+
+    assert result.returncode == 0
+    report = json.loads(result.stdout)
+    assert all(f["kind"] != "merged-remote-branch" for f in report["findings"])
