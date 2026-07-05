@@ -2724,11 +2724,19 @@ def test_ui_state_office_map_action_glyph_table_covers_required_actions(tmp_path
 
 def test_ui_state_office_map_places_agents_by_role_room(tmp_path):
     # Each role lands in its functional room; coordinates are normalized cells.
+    # Active-only spec (Owner: dev room showed 65 offline historical instances):
+    # the office map places only agents that are present/working NOW, so every
+    # placed role here holds an active claim, and an instance without one is
+    # pruned (see test_office_map_shows_active_agents_only).
     _write_instance(tmp_path, "inst-le", role="lead-engineer", team_id="agent-runtime-core")
     _write_instance(tmp_path, "inst-qa", role="qa", team_id="agent-runtime-core")
     _write_instance(tmp_path, "inst-pl", role="planning-coordinator", team_id="planning-office")
     _write_instance(tmp_path, "inst-ver", role="version-steward", team_id="release-integrity")
+    _write_instance(tmp_path, "inst-gone", role="doc-steward", team_id="agent-runtime-core")
     _write_team_claim(tmp_path, "CLAIM-le", "inst-le", status="in_progress", task_id="TASK-AR-910")
+    _write_team_claim(tmp_path, "CLAIM-qa", "inst-qa", status="in_progress", task_id="TASK-AR-911")
+    _write_team_claim(tmp_path, "CLAIM-pl", "inst-pl", status="in_progress", task_id="TASK-AR-912")
+    _write_team_claim(tmp_path, "CLAIM-ver", "inst-ver", status="in_progress", task_id="TASK-AR-913")
 
     state = ui_state.build_state(tmp_path, now="2026-06-14T11:00:00+09:00")
     office = state["office_map"]
@@ -2743,9 +2751,8 @@ def test_ui_state_office_map_places_agents_by_role_room(tmp_path):
     le = by_role["lead-engineer"]
     assert le["action"] == "working"
     assert le["glyph"] == "\U0001F4BB"
-    # Offline agent (no claim) reads as idle.
-    assert by_role["qa"]["action"] == "idle"
-    assert by_role["qa"]["glyph"] == "\U0001F4A4"
+    # An instance with no claim is not placed at all (active-only pruning).
+    assert "doc-steward" not in by_role
 
     # Every placed agent carries a normalized in-room cell.
     for agent in office["agents"]:
