@@ -25,8 +25,21 @@ def test_host_roots_includes_fixture():
 
 
 def test_regenerate_noop_when_current():
-    # the committed fixture lock already matches the template tree
-    assert lmd.regenerate(FIXTURE_HOST) is False
+    # The committed fixture lock must already match the template tree. Assert by
+    # comparing content READ-ONLY instead of calling regenerate(FIXTURE_HOST):
+    # regenerate() rewrites the tracked fixture when stale, so the old form
+    # silently mutated the checkout exactly when it failed — which then made the
+    # local repro look "already current" and hid the diagnosis
+    # (casebook: nonhermetic-test-tracked-mutation; observed 2026-07-04 on PR #254).
+    # Staleness recovery itself is covered hermetically by
+    # test_regenerate_restores_stale_lock on a tmp copy.
+    from agent_runtime import lock
+
+    plan = lock.build_lock_plan(FIXTURE_HOST)
+    expected = json.dumps(plan.record, indent=2, sort_keys=True) + "\n"
+    actual = FIXTURE_LOCK.read_text(encoding="utf-8")
+    # Regen with: python scripts/lock_merge_driver.py pre-commit (templates staged)
+    assert actual == expected
 
 
 def test_regenerate_restores_stale_lock(tmp_path):
