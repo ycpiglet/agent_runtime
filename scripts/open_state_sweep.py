@@ -17,6 +17,11 @@ What it checks:
 3. Non-archive remote branches fully contained in ``--ref`` (ahead=0) and
    idle past an age floor -> ``merged-remote-branch`` findings (merge debris
    that the auto-delete flow missed; six 3-week-old ones found 2026-07-05).
+4. Archive stash refs missing from the committed triage ledger
+   (``agents/project/archive-stash-triage.json``) -> ``untriaged-stash``
+   findings. Opt-in: without the ledger the sweep only counts stashes, so
+   template hosts stay quiet; with it, only NEW stashes surface instead of
+   a forever-stable total count nobody re-reads.
 
 Boundary: report tool only — NOT wired into the owner governance chain.
 ``--check`` exits 1 on findings for opt-in CI use; the default exit is 0.
@@ -39,6 +44,7 @@ CLOSING_RE = re.compile(
     r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s*:?\s+#(\d+)", re.IGNORECASE
 )
 ARCHIVE_STASH_PREFIX = "refs/remotes/origin/archive/stashes/"
+STASH_TRIAGE_LEDGER = Path("agents") / "project" / "archive-stash-triage.json"
 
 
 def _run_git(root: Path, *args: str) -> str:
@@ -168,6 +174,39 @@ def merged_branch_findings(
     return findings
 
 
+def untriaged_stash_findings(root: Path, stashes: list[str]) -> list[dict[str, Any]] | None:
+    """Stash refs missing from the committed triage ledger; None when no ledger.
+
+    The ledger is opt-in: without it the sweep keeps its original count-only
+    behavior (template hosts stay quiet). A malformed ledger raises — a broken
+    triage source must not silently degrade into "everything looks triaged"
+    (casebook: silent-query-error-as-no-data).
+    """
+    ledger_path = root / STASH_TRIAGE_LEDGER
+    if not ledger_path.exists():
+        return None
+    payload = json.loads(ledger_path.read_text(encoding="utf-8"))
+    triaged = payload.get("triaged")
+    if not isinstance(triaged, dict):
+        raise ValueError(f"{ledger_path}: expected a 'triaged' object")
+    findings: list[dict[str, Any]] = []
+    for stash in stashes:
+        key = stash.removeprefix("origin/")
+        if key not in triaged:
+            findings.append(
+                {
+                    "kind": "untriaged-stash",
+                    "stash": stash,
+                    "detail": (
+                        "archive stash has no verdict in agents/project/archive-stash-triage.json; "
+                        "inspect it (recovered / superseded / noise / pinned-pending-owner) and "
+                        "record the verdict so preserved-but-unlanded work cannot hide"
+                    ),
+                }
+            )
+    return findings
+
+
 def load_open_issues(issues_file: Path | None) -> list[dict[str, Any]] | None:
     """Open issues from --issues-file, else from gh; None when unavailable."""
     if issues_file is not None:
@@ -229,6 +268,9 @@ def sweep(
             key=lambda item: -item["age_days"],
         )
     )
+    untriaged = untriaged_stash_findings(root, stashes)
+    if untriaged is not None:
+        findings.extend(sorted(untriaged, key=lambda item: item["stash"]))
     return {
         "schema": "agent-runtime-open-state-sweep/v1",
         "ref": ref,
@@ -237,6 +279,8 @@ def sweep(
         "findings": findings,
         "archive_stash_refs": stashes,
         "archive_stash_count": len(stashes),
+        "stash_triage_ledger": untriaged is not None,
+        "untriaged_stash_count": len(untriaged) if untriaged is not None else None,
     }
 
 
@@ -285,6 +329,8 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"- {finding['kind']}: #{finding['number']} {finding['title']}")
             elif finding["kind"] == "merged-remote-branch":
                 print(f"- {finding['kind']}: {finding['branch']} age_days={finding['age_days']}")
+            elif finding["kind"] == "untriaged-stash":
+                print(f"- {finding['kind']}: {finding['stash']}")
             else:
                 print(f"- {finding['kind']}: {finding['stash']} unmerged_commits={finding['unmerged_commit_count']}")
         print(f"archive_stash_refs={report['archive_stash_count']}")
