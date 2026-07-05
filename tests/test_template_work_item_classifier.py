@@ -26,7 +26,9 @@ def _write(path: Path, text: str) -> None:
 def _seed_consumer_repo(root: Path) -> None:
     scripts = root / "scripts"
     scripts.mkdir(parents=True)
-    for name in ("backlog_board.py", "work_item_classifier.py"):
+    # status_alias.py rides along: backlog_board consumes the shared status
+    # vocabulary (#121 item 4), and a consumer syncs the whole scripts/ dir.
+    for name in ("backlog_board.py", "work_item_classifier.py", "status_alias.py"):
         shutil.copy(TEMPLATE_SCRIPTS / name, scripts / name)
     _write(
         root / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md",
