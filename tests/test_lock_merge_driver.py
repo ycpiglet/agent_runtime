@@ -65,3 +65,37 @@ def test_committed_post_merge_hook_invokes_driver():
 def test_gitattributes_declares_driver():
     attrs = (ROOT / ".gitattributes").read_text(encoding="utf-8")
     assert "agent_runtime.lock.json merge=arlock-keepours" in attrs
+
+
+def test_pre_commit_noop_without_staged_templates(monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        lmd, "_git",
+        lambda *a, **k: subprocess.CompletedProcess(a, 0, stdout="README.md\nscripts/foo.py\n", stderr=""),
+    )
+    monkeypatch.setattr(lmd, "post_merge", lambda: calls.append(1) or 0)
+    assert lmd.pre_commit() == 0
+    assert calls == []  # ordinary commits stay fast: no regen
+
+
+def test_pre_commit_regenerates_when_template_staged(monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        lmd, "_git",
+        lambda *a, **k: subprocess.CompletedProcess(
+            a, 0, stdout="src/agent_runtime/templates/project/scripts/x.py\n", stderr=""
+        ),
+    )
+    monkeypatch.setattr(lmd, "post_merge", lambda: calls.append(1) or 0)
+    assert lmd.pre_commit() == 0
+    assert calls == [1]
+
+
+def test_committed_pre_commit_hooks_invoke_driver():
+    # Both the repo hook and the shipped template hook must wire the staged-template
+    # lock regen, or a template commit goes stale until CI (template-stale-host-lock).
+    for hook in (
+        ROOT / ".githooks" / "pre-commit",
+        ROOT / "src" / "agent_runtime" / "templates" / "project" / ".githooks" / "pre-commit",
+    ):
+        assert "lock_merge_driver.py pre-commit" in hook.read_text(encoding="utf-8"), hook
