@@ -1085,6 +1085,405 @@ def test_ui_console_planner_decision_routes_write_audit_record_without_apply(tmp
     assert decision["canonical_mutation_allowed"] is False
 
 
+def test_ui_console_decision_acknowledge_writes_proposal_only(tmp_path):
+    # Decision Inbox v1 (SPEC-decision-inbox-v1): acknowledging an attention-inbox
+    # item records a proposal-only decision under .ui_outbox/decisions/ and never
+    # mutates a canonical task. No reason is required for an acknowledgement.
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {
+                "type": "decision.acknowledge",
+                "target": "TASK-AR-900",
+                "payload": {
+                    "actor": "owner",
+                    "group": "approval_pending",
+                    "title": "Approve the release gate",
+                },
+            }
+        ).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+    proposals = list((tmp_path / ".ui_outbox" / "decisions").glob("DECISION-*.json"))
+
+    assert response.status == 202
+    assert payload["status"] == "queued"
+    assert len(proposals) == 1
+    decision = json.loads(proposals[0].read_text(encoding="utf-8"))
+    assert decision["target"] == "TASK-AR-900"
+    assert decision["action"] == "acknowledged"
+    assert decision["canonical_mutation_allowed"] is False
+
+
+def test_ui_console_decision_hold_requires_reason(tmp_path):
+    # A hold is a judgement; the operator must say why. Missing reason => rejected,
+    # and NO proposal file is written.
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {"type": "decision.hold", "target": "TASK-AR-900", "payload": {"actor": "owner"}}
+        ).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+
+    assert response.status == 400
+    assert payload["status"] == "failed"
+    assert not list((tmp_path / ".ui_outbox" / "decisions").glob("DECISION-*.json"))
+
+
+def test_ui_console_decision_requires_target(tmp_path):
+    # No inbox item id => rejected, and no proposal file is written (spec §Testing).
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {"type": "decision.acknowledge", "payload": {"actor": "owner"}}
+        ).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+
+    assert response.status == 400
+    assert payload["status"] == "failed"
+    assert not list((tmp_path / ".ui_outbox" / "decisions").glob("DECISION-*.json"))
+
+
+def test_ui_console_decision_comment_records_reason_and_target(tmp_path):
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {
+                "type": "decision.comment",
+                "target": "TASK-AR-900",
+                "payload": {"actor": "owner", "reason": "Why is this blocked?", "group": "blocked"},
+            }
+        ).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+    proposals = list((tmp_path / ".ui_outbox" / "decisions").glob("DECISION-*.json"))
+
+    assert response.status == 202
+    assert payload["status"] == "queued"
+    assert len(proposals) == 1
+    decision = json.loads(proposals[0].read_text(encoding="utf-8"))
+    assert decision["target"] == "TASK-AR-900"
+    assert decision["action"] == "commented"
+    assert decision["reason"] == "Why is this blocked?"
+    assert decision["group"] == "blocked"
+
+
+def test_ui_console_decision_comment_on_task_relays_to_agent_inbox(tmp_path):
+    # Decision Inbox v2: a comment on a real task is recorded AND relayed to the
+    # agent message inbox (a real consumer), so the operator actually exchanges
+    # opinions with the agents working it — not just an audit record.
+    _write_task(tmp_path, "TASK-AR-901")
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {
+                "type": "decision.comment",
+                "target": "TASK-AR-901",
+                "payload": {"actor": "owner", "reason": "Can we ship this today?", "group": "approval_pending"},
+            }
+        ).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+    proposals = list((tmp_path / ".ui_outbox" / "decisions").glob("DECISION-*.json"))
+    messages = list((tmp_path / "agents" / "messages" / "inbox").glob("*.md"))
+
+    assert response.status == 202
+    assert payload["status"] == "queued"
+    assert payload["result"]["agent_routed"] is True
+    assert len(proposals) == 1
+    assert len(messages) == 1
+    assert "Can we ship this today?" in messages[0].read_text(encoding="utf-8")
+
+
+def test_ui_console_decision_comment_on_nontask_records_proposal_only(tmp_path):
+    # A non-task inbox item (e.g. a runtime claim conflict) has no task to reach;
+    # it must still record the proposal but NOT fabricate an agent message.
+    response = ui_console.build_response(
+        "/api/commands",
+        tmp_path,
+        method="POST",
+        body=json.dumps(
+            {
+                "type": "decision.comment",
+                "target": "claim-conflict-resource-x",
+                "payload": {"actor": "owner", "reason": "who owns this?", "group": "runtime_anomalies"},
+            }
+        ).encode("utf-8"),
+    )
+    payload = json.loads(response.body.decode("utf-8"))
+    proposals = list((tmp_path / ".ui_outbox" / "decisions").glob("DECISION-*.json"))
+    inbox = tmp_path / "agents" / "messages" / "inbox"
+
+    assert response.status == 202
+    assert payload["result"]["agent_routed"] is False
+    assert len(proposals) == 1
+    assert not (inbox.exists() and list(inbox.glob("*.md")))
+
+
+def test_ui_console_decision_inbox_assets_expose_respond_bar(tmp_path):
+    # SPEC-decision-inbox-v1 front-end: the served app.js exposes the proposal-only
+    # respond bar (acknowledge/comment/hold) and its plain-language i18n keys; the
+    # respond bar is token-styled via a CSS class hook (no raw literals).
+    js = ui_console.build_response("/app.js", tmp_path)
+    css = ui_console.build_response("/app.css", tmp_path)
+    assert js.status == 200
+    assert b"queueDecision" in js.body
+    assert b"decision.acknowledge" in js.body
+    assert b"decision.comment" in js.body
+    assert b"decision.hold" in js.body
+    assert b"inbox.decide.acknowledge" in js.body
+    assert b"inbox-decide" in css.body
+
+
+def _health_ops(*, blocking=0, over_budget=False, latest=0.82, avg=0.79):
+    return {
+        "velocity": {"weeks": [{"week": "2026-W23", "done": 5}, {"week": "2026-W24", "done": 8}],
+                     "avg_per_week": 6.5, "available": True},
+        "eval_trend": {"available": True, "latest_score": latest, "avg_score": avg,
+                       "points": [{"score": 0.77}, {"score": 0.79}, {"score": latest}]},
+        "gates": {"blocking": blocking},
+        "resources": {"tasksets": [{"over_budget": over_budget}]},
+    }
+
+
+def test_health_snapshot_verdict_at_risk_with_blocking_gate(tmp_path):
+    # SPEC-health-snapshot-v1: a blocking gate (or overload) makes the verdict at_risk.
+    snap = ui_state._derive_health_snapshot(_health_ops(blocking=2), {"totals": {"overloaded": 0}})
+    assert snap["verdict"] == "at_risk"
+    risk = next(s for s in snap["signals"] if s["key"] == "risk")
+    assert risk["blocking"] == 2
+    assert risk["tone"] == "danger"
+
+
+def test_health_snapshot_verdict_healthy_when_clean(tmp_path):
+    snap = ui_state._derive_health_snapshot(_health_ops(), {"totals": {"overloaded": 0}})
+    assert snap["verdict"] == "healthy"
+    throughput = next(s for s in snap["signals"] if s["key"] == "throughput")
+    quality = next(s for s in snap["signals"] if s["key"] == "quality")
+    # Real series get a sparkline source.
+    assert throughput["series"] == [5, 8]
+    assert quality["series"] == [0.77, 0.79, 0.82]
+
+
+def test_health_snapshot_verdict_watch_over_budget(tmp_path):
+    # Third verdict state: over-budget (no blockers) => watch, not at_risk/healthy.
+    snap = ui_state._derive_health_snapshot(
+        _health_ops(blocking=0, over_budget=True), {"totals": {"overloaded": 0}}
+    )
+    assert snap["verdict"] == "watch"
+    budget = next(s for s in snap["signals"] if s["key"] == "budget")
+    assert budget["over_budget"] == 1
+    assert "series" not in budget
+
+
+def test_health_snapshot_no_fabricated_trend_on_point_in_time(tmp_path):
+    # Honesty: risk/budget are point-in-time only and must NEVER carry a trend series.
+    snap = ui_state._derive_health_snapshot(
+        _health_ops(blocking=1, over_budget=True), {"totals": {"overloaded": 3}}
+    )
+    risk = next(s for s in snap["signals"] if s["key"] == "risk")
+    budget = next(s for s in snap["signals"] if s["key"] == "budget")
+    assert "series" not in risk
+    assert "series" not in budget
+    assert risk["overloaded"] == 3
+    assert budget["over_budget"] == 1
+
+
+def test_ui_console_health_snapshot_assets_rendered(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path)
+    css = ui_console.build_response("/app.css", tmp_path)
+    assert js.status == 200
+    assert b"renderHealthSnapshot" in js.body
+    assert b"health.verdict" in js.body
+    assert b"health-snapshot" in css.body
+
+
+def _org_task(team, status):
+    return {"assigned_team": team, "status": status}
+
+
+def test_org_load_band_thresholds(tmp_path):
+    # SPEC-org-chart-load-v1: dedicated bands for point-in-time team totals (NOT the
+    # monthly-cell workload thresholds, which would mis-band a count of 4 as overload).
+    assert ui_state._org_load_band(0) == "idle"
+    assert ui_state._org_load_band(3) == "normal"
+    assert ui_state._org_load_band(6) == "busy"
+    assert ui_state._org_load_band(12) == "overload"
+    # Boundaries (guard off-by-one in the thresholds).
+    assert ui_state._org_load_band(4) == "normal"
+    assert ui_state._org_load_band(5) == "busy"
+    assert ui_state._org_load_band(8) == "busy"
+    assert ui_state._org_load_band(9) == "overload"
+
+
+def test_org_team_load_counts_active_and_blocked(tmp_path):
+    tasks = [
+        _org_task("eng", "in_progress"), _org_task("eng", "planned"), _org_task("eng", "blocked"),
+        _org_task("qa", "completed"), _org_task("qa", "blocked"),
+        _org_task("", "in_progress"),  # no team -> ignored
+    ]
+    load = ui_state._org_team_load(tasks)
+    assert load["eng"]["active"] == 2  # in_progress + planned (open, not blocked)
+    assert load["eng"]["blocked"] == 1
+    assert load["qa"]["active"] == 0  # completed is done -> skipped
+    assert load["qa"]["blocked"] == 1
+    assert "" not in load
+
+
+def test_stamp_org_load_joins_onto_team_nodes_and_summary(tmp_path):
+    org = {"nodes": [{"id": "eng", "kind": "team"}, {"id": "qa", "kind": "team"},
+                     {"id": "alice", "kind": "role"}]}
+    ui_state._stamp_org_load(org, {"eng": {"active": 6, "blocked": 1}, "qa": {"active": 0, "blocked": 0}})
+    eng = next(n for n in org["nodes"] if n["id"] == "eng")
+    role = next(n for n in org["nodes"] if n["id"] == "alice")
+    assert eng["active_count"] == 6 and eng["blocked_count"] == 1
+    assert eng["load_band"] == "busy"
+    assert "active_count" not in role  # roles untouched
+    assert org["load_summary"] == {"teams": 2, "active": 6, "blocked": 1}
+
+
+def test_stamp_org_load_summary_counts_unmatched_teams(tmp_path):
+    # A task on a team with no org node (drift / unassigned) still counts in the
+    # summary total so the headline never silently undercounts open work; the node
+    # itself shows only its own counts.
+    org = {"nodes": [{"id": "eng", "kind": "team"}]}
+    ui_state._stamp_org_load(org, {"eng": {"active": 2, "blocked": 0}, "ghost": {"active": 3, "blocked": 1}})
+    assert org["load_summary"] == {"teams": 1, "active": 5, "blocked": 1}
+    eng = next(n for n in org["nodes"] if n["id"] == "eng")
+    assert eng["active_count"] == 2
+
+
+def test_ui_console_org_chart_load_assets(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path)
+    css = ui_console.build_response("/app.css", tmp_path)
+    assert js.status == 200
+    assert b"org-team-load" in js.body
+    assert b"org.load" in js.body
+    assert b"org-team-load" in css.body
+
+
+def test_live_map_block_edge_carries_reason_label(tmp_path):
+    # SPEC-relationship-edge-labels-v1: a blocked task's edge carries the human
+    # reason so the live map can say WHY, not just draw a silent red line.
+    tasks = [{"id": "TASK-X", "status": "blocked", "owner_agent": "alice",
+              "task_set_id": "TS1", "blocked_reason": "waiting for API schema"}]
+    lm = ui_state.build_live_map(tasks, [], [], {"teams": []}, "2026-06-27T00:00:00+09:00")
+    block = next(e for e in lm["edges"] if e.get("kind") == "block")
+    assert block["reason_label"] == "waiting for API schema"
+    assert block["from"] == "alice"
+
+
+def test_live_map_block_edge_no_reason_label(tmp_path):
+    # A blocked task with no reason: the edge still forms, carries no reason_label,
+    # and the front-end falls back to the generic label (no crash, no fabrication).
+    tasks = [{"id": "TASK-Y", "status": "blocked", "owner_agent": "bob", "task_set_id": "TS1"}]
+    lm = ui_state.build_live_map(tasks, [], [], {"teams": []}, "2026-06-27T00:00:00+09:00")
+    block = next(e for e in lm["edges"] if e.get("kind") == "block")
+    assert block.get("reason_label") is None
+
+
+def test_ui_console_live_map_edge_labels_assets(tmp_path):
+    js = ui_console.build_response("/app.js", tmp_path)
+    css = ui_console.build_response("/app.css", tmp_path)
+    assert js.status == 200
+    assert b"live-map-edge-label" in js.body
+    assert b"livemap.blocked" in js.body
+    assert b"live-map-edge-label" in css.body
+
+
+def test_ui_console_board_taskview_assets(tmp_path):
+    # SPEC-board-taskview-v1: board ships pure helpers, lane-cap, controls + i18n.
+    js = ui_console.build_response("/app.js", tmp_path)
+    css = ui_console.build_response("/app.css", tmp_path)
+    html = ui_console.build_response("/", tmp_path)
+    assert js.status == 200
+    for token in (b"boardFilterTasks", b"boardSortTasks", b"boardLaneCap",
+                  b"BOARD_PURE_START", b"board.more", b"board.filter_placeholder"):
+        assert token in js.body, token
+    assert b'id="board-controls"' in html.body
+    assert b'id="board-sort"' in html.body
+    assert b".board-controls" in css.body
+    assert b".lane-more" in css.body
+
+
+def test_agent_is_active_helper(tmp_path):
+    assert ui_state._agent_is_active({"online": True}) is True
+    assert ui_state._agent_is_active({"presence": "working"}) is True
+    assert ui_state._agent_is_active({"current_task_id": "TASK-1"}) is True
+    assert ui_state._agent_is_active({"presence": "offline", "online": False}) is False
+
+
+def test_office_map_shows_active_agents_only(tmp_path):
+    # Owner: office map dev room showed 65 offline historical instances. Maps must
+    # show only agents present/working NOW.
+    team_agents = {"teams": [{"team_id": "eng", "agents": [
+        {"id": "inst-1", "role": "engineer", "presence": "offline", "online": False},
+        {"id": "inst-2", "role": "engineer", "presence": "working", "online": False},
+        {"id": "inst-3", "role": "qa", "presence": "offline", "online": True},
+    ]}]}
+    om = ui_state.build_office_map(team_agents, [], "2026-06-27T00:00:00+09:00")
+    ids = {a["id"] for a in om["agents"]}
+    assert ids == {"inst-2", "inst-3"}
+
+
+def test_live_map_draws_active_work_only(tmp_path):
+    # Live map = the live web of work: an active task's owner + taskset show; a done
+    # task and an offline agent are pruned (no floating inactive nodes).
+    tasks = [
+        {"id": "T1", "status": "in_progress", "owner_agent": "bob", "task_set_id": "TS1"},
+        {"id": "T2", "status": "completed", "owner_agent": "alice", "task_set_id": "TS2"},
+    ]
+    team_agents = {"teams": [{"team_id": "eng", "agents": [
+        {"id": "i-bob", "role": "bob", "presence": "working", "online": False, "current_task_id": "T1"},
+        {"id": "i-alice", "role": "alice", "presence": "offline", "online": False},
+    ]}]}
+    lm = ui_state.build_live_map(tasks, [], [], team_agents, "2026-06-27T00:00:00+09:00")
+    node_ids = {n["id"] for n in lm["nodes"]}
+    assert "bob" in node_ids and "TS1" in node_ids
+    assert "alice" not in node_ids and "TS2" not in node_ids
+
+
+def test_nav_tab_labels_localized(tmp_path):
+    # Owner: tab names stuck in English under KR. Core tabs lacked data-i18n; now
+    # localized by data-view, and every nav key carries a distinct Korean label.
+    js = ui_console.build_response("/app.js", tmp_path)
+    assert b".sidebar-link[data-view]" in js.body
+    for key in ("nav.board", "nav.work", "nav.team", "nav.meeting", "nav.events",
+                "nav.search", "nav.office", "nav.map", "nav.dashboard", "nav.more"):
+        entry = ui_state.I18N_STRINGS[key]
+        assert entry["ko"] and entry["ko"] != entry["en"]
+
+
+def test_ui_console_decision_undo_removes_latest(tmp_path):
+    # Owner: an accidental decision must be reversible. Undo removes the latest
+    # decision proposal for the item and leaves an audit marker.
+    def post(body):
+        return ui_console.build_response(
+            "/api/commands", tmp_path, method="POST", body=json.dumps(body).encode("utf-8"))
+
+    post({"type": "decision.acknowledge", "target": "TASK-AR-900", "payload": {"actor": "owner"}})
+    dec_dir = tmp_path / ".ui_outbox" / "decisions"
+    assert len(list(dec_dir.glob("DECISION-*.json"))) == 1
+
+    r = post({"type": "decision.undo", "target": "TASK-AR-900", "payload": {"actor": "owner"}})
+    assert r.status == 202
+    assert json.loads(r.body.decode("utf-8"))["status"] == "queued"
+    assert len(list(dec_dir.glob("DECISION-*.json"))) == 0          # original removed
+    assert len(list(dec_dir.glob("DECISIONUNDO-*.json"))) == 1      # audit marker kept
+
+
 def test_ui_console_graph_state_and_roadmap_routes(tmp_path):
     _write_task(tmp_path, "TASK-UI-232")
     _write(
@@ -4684,15 +5083,33 @@ def test_ui_console_org_chart_renderer_wires_sprite_dagre_and_drilldown(tmp_path
 
 def test_ui_console_org_chart_renderer_is_accessible_and_reduced_motion(tmp_path):
     js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
-    # Tier conveyed by glyph + word (not color alone) and ARIA labels on nodes.
+    # Card renderer: tier conveyed by glyph + word (not color alone); cards/roles are
+    # keyboard-focusable buttons with ARIA labels.
     assert "tier_badge" in js
-    assert "aria-label" in js.split("function renderOrgChart()", 1)[1][:4000]
-    # Keyboard activation + reduced-motion honoured.
+    cards = js.split("function renderOrgChartCards(", 1)[1][:4000]
+    assert "aria-label" in cards
+    assert 'role="button"' in cards and 'tabindex="0"' in cards
+    # SVG fallback still honours reduced motion.
     assert "prefersReducedMotion()" in js
     css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
-    assert ".org-chart-svg" in css
-    assert ".org-chart-node:focus-visible" in css
-    assert "prefers-reduced-motion: reduce" in css.split(".org-chart", 1)[1][:4000] or True
+    assert ".org-team-card" in css
+    assert ".org-role-chip:focus-visible" in css
+
+
+def test_ui_console_org_role_detail(tmp_path):
+    # Owner: clicking an agent shows its role/team/responsibilities/skills.
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    assert "function openRoleDetail(" in js
+    assert 'id="org-role-detail"' in html
+    assert ".org-role-detail" in css
+    # Descriptions derived from tier + team, fully localized (ko + en present).
+    for key in ("org.resp.planner", "org.resp.reviewer", "org.resp.worker", "org.resp.director",
+                "org.skill.engineering", "org.skill.quality",
+                "org.detail.responsibilities", "org.detail.skills"):
+        entry = ui_state.I18N_STRINGS[key]
+        assert entry["ko"] and entry["en"]
 
 
 def test_ui_console_org_chart_route_serves_resource(tmp_path):

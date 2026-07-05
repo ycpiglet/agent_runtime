@@ -341,6 +341,15 @@ HTML = """<!doctype html>
           </details>
           <p class="board-hint">Hover or focus a card for a peek. Drag a card between lanes to reorder, or focus it and press Ctrl+D to lift, arrows to move, Space to drop, Esc to cancel. Quick actions: Claim / Verify / Close.</p>
           <div id="board-team-filter" class="board-team-filter" role="status" hidden></div>
+          <div id="board-controls" class="board-controls">
+            <input id="board-filter" class="board-filter" type="search" autocomplete="off" aria-label="Filter tasks">
+            <select id="board-sort" class="board-sort" aria-label="Sort tasks">
+              <option value="priority"></option>
+              <option value="updated"></option>
+              <option value="title"></option>
+            </select>
+            <button id="board-density" type="button" class="board-density" aria-pressed="false"></button>
+          </div>
           <div id="kanban" class="kanban" aria-label="Kanban"></div>
           <div id="board-peek" class="board-peek" role="tooltip" aria-hidden="true" hidden></div>
           <div id="board-dnd-status" class="board-dnd-status" role="status" aria-live="polite"></div>
@@ -767,9 +776,17 @@ HTML = """<!doctype html>
               <p id="org-chart-summary" class="org-chart-summary" role="status"></p>
             </header>
             <div class="org-chart-stage">
-              <svg id="org-chart-svg" class="org-chart-svg" viewBox="0 0 1200 720" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Agent organization chart: director to teams to roles"></svg>
+              <svg id="org-chart-svg" class="org-chart-svg" viewBox="0 0 1200 720" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Agent organization chart: director to teams to roles" hidden></svg>
+              <div id="org-chart-canvas" class="org-chart-canvas" role="group" aria-label="Organization: director, teams, and roles"></div>
             </div>
             <ul id="org-chart-legend" class="org-chart-legend" aria-label="Org chart tier and team legend"></ul>
+            <div id="org-role-backdrop" class="org-role-backdrop" hidden></div>
+            <aside id="org-role-detail" class="org-role-detail" role="dialog" aria-modal="true" aria-labelledby="org-role-name" hidden>
+              <button id="org-role-close" class="org-role-close" type="button" aria-label="Close">&times;</button>
+              <p class="org-role-kicker" data-i18n="org.detail.kicker">Agent</p>
+              <h3 id="org-role-name" class="org-role-name-h"></h3>
+              <div id="org-role-body" class="org-role-body"></div>
+            </aside>
           </section>
         </div>
         <div id="view-statemachines" class="view">
@@ -945,6 +962,7 @@ HTML = """<!doctype html>
               <h2>Ops Dashboard</h2>
               <p id="opsdash-summary" class="opsdash-summary" role="status"></p>
             </header>
+            <div id="health-snapshot" class="health-snapshot" role="status" hidden></div>
             <div class="opsdash-grid">
               <article class="opsdash-card" aria-label="Token and cost trend">
                 <header class="opsdash-card-head">
@@ -2121,6 +2139,32 @@ textarea:focus {
 .view.is-active {
   display: block;
 }
+/* SPEC-board-taskview-v1: board controls bar + lane "more" + density (tokens only). */
+.board-controls {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+.board-filter {
+  flex: 1 1 200px; min-width: 160px;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--surface-raised); color: var(--ink);
+  padding: var(--space-sm) var(--space-md); font: inherit; font-size: var(--font-size-ui-13);
+}
+.board-filter:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; box-shadow: var(--focus); }
+.board-sort, .board-density {
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--panel-strong); color: var(--ink);
+  padding: var(--space-sm) var(--space-md); font: inherit; font-size: var(--font-size-ui-13); cursor: pointer;
+}
+.board-density[aria-pressed="true"] { border-color: var(--primary); background: var(--primary-soft); }
+.lane-more {
+  display: block; width: 100%; margin-top: var(--space-sm);
+  border: 1px dashed var(--line-strong); border-radius: var(--radius-sm);
+  background: transparent; color: var(--muted);
+  padding: var(--space-sm); font: inherit; font-size: var(--font-size-ui-12); cursor: pointer;
+}
+.lane-more:hover { border-color: var(--primary-line); color: var(--primary); background: var(--primary-soft); }
+.kanban.density-compact .lane { gap: var(--space-xs); }
 .kanban {
   display: grid;
   grid-template-columns: repeat(3, minmax(220px, 1fr));
@@ -2737,6 +2781,11 @@ textarea:focus {
 .live-map-edge.kind-assignment { stroke: var(--success); }
 .live-map-edge.kind-review { stroke: var(--amber); }
 .live-map-edge.kind-block { stroke: var(--danger); }
+/* SPEC-relationship-edge-labels-v1: mid-edge "why" labels for block/review. */
+.live-map-edge-label { fill: var(--ink); font-size: var(--font-size-ui-10); font-weight: 600; pointer-events: none; }
+.live-map-edge-label.kind-block { fill: var(--danger); }
+.live-map-edge-label.kind-review { fill: var(--warning); }
+.live-map-edge-label-bg { fill: var(--canvas); opacity: 0.85; }
 .live-map-edge.magnitude-low { stroke-width: 1.5; }
 .live-map-edge.magnitude-medium { stroke-width: 2.25; }
 .live-map-edge.magnitude-high { stroke-width: 3; }
@@ -5272,11 +5321,105 @@ pre {
   background: var(--canvas-grad);
   overflow: auto;
 }
+.org-chart-stage { overflow: visible; }
 .org-chart-svg {
   display: block;
   width: 100%;
   height: 560px;
 }
+/* SPEC-org-chart-cards: glanceable, spacious team-card grid (wraps to fit width). */
+.org-chart-canvas { display: flex; flex-direction: column; align-items: center; gap: var(--space-sm); padding: var(--space-md) 0; }
+.org-owner-card {
+  display: inline-flex; align-items: center; gap: var(--space-sm);
+  padding: var(--space-md) var(--space-xl); border-radius: var(--radius-pill);
+  border: 1px solid var(--primary); background: var(--primary); color: var(--on-accent);
+  font-size: var(--font-size-ui-15); font-weight: 700;
+}
+.org-owner-glyph { font-size: var(--font-size-ui-16); }
+.org-owner-sub { font-weight: 600; font-size: var(--font-size-ui-12); opacity: 0.85; }
+.org-hierarchy-link { width: 0; height: var(--space-lg); border-left: 2px solid var(--line-strong); }
+.org-director-card {
+  align-self: center; display: inline-flex; align-items: center; gap: var(--space-sm);
+  padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md);
+  border: 1px solid var(--violet-line, var(--line-strong)); background: var(--violet-soft, var(--panel-strong));
+  color: var(--ink); font-size: var(--font-size-ui-15); font-weight: 700;
+}
+.org-director-glyph { color: var(--violet, var(--primary)); }
+.org-director-tier { color: var(--muted); font-size: var(--font-size-ui-12); font-weight: 600; }
+.org-teams-grid {
+  width: 100%; margin-top: var(--space-md);
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-xl); align-items: start;
+}
+.org-team-card {
+  display: flex; flex-direction: column; gap: var(--space-md);
+  border: 1px solid var(--line); border-top: 3px solid var(--line-strong);
+  border-radius: var(--radius-md); background: var(--surface-raised);
+  padding: var(--space-lg); cursor: pointer;
+}
+.org-team-card:hover { border-color: var(--primary-line); }
+.org-team-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.org-team-card.tone-primary { border-top-color: var(--primary); }
+.org-team-card.tone-violet { border-top-color: var(--violet, var(--primary)); }
+.org-team-card.tone-success { border-top-color: var(--success); }
+.org-team-card.tone-danger { border-top-color: var(--danger); }
+.org-team-card.tone-warning { border-top-color: var(--warning); }
+.org-team-card.tone-teal { border-top-color: var(--teal, var(--primary)); }
+.org-team-card.tone-amber { border-top-color: var(--amber, var(--warning)); }
+.org-team-card.tone-muted { border-top-color: var(--muted); }
+.org-team-card-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-sm); }
+.org-team-card-name { color: var(--ink); font-size: var(--font-size-ui-14); font-weight: 700; }
+.org-team-card-meta { color: var(--muted); font-size: var(--font-size-ui-11); }
+.org-team-card-load { color: var(--muted); font-size: var(--font-size-ui-11); font-weight: 600; }
+.org-team-card-load.load-band-busy { color: var(--warning); }
+.org-team-card-load.load-band-overload { color: var(--danger); }
+.org-team-card-load.has-blocked { color: var(--danger); }
+.org-team-roles { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-sm); }
+.org-role-chip {
+  display: flex; align-items: center; gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); background: var(--panel); cursor: pointer;
+  font-size: var(--font-size-ui-12);
+}
+.org-role-chip:hover { border-color: var(--primary-line); background: var(--primary-soft); }
+.org-role-chip:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.org-role-glyph { color: var(--muted); font-weight: 700; }
+.org-role-name { color: var(--ink); flex: 1 1 auto; }
+.org-role-tier { color: var(--muted); font-size: var(--font-size-ui-10); }
+/* SPEC-org-role-detail: click-a-role description drawer. */
+.org-role-backdrop { position: fixed; inset: 0; z-index: 48; background: var(--scrim); }
+.org-role-detail {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 49; width: 380px; max-width: 92vw;
+  background: var(--panel); border-left: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-pop, var(--shadow)); padding: var(--space-2xl);
+  overflow-y: auto; display: flex; flex-direction: column; gap: var(--space-md);
+}
+.org-role-backdrop[hidden], .org-role-detail[hidden] { display: none; }
+.org-role-close {
+  position: absolute; top: var(--space-md); right: var(--space-md); width: 32px; height: 32px;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--panel-strong); color: var(--ink); cursor: pointer; font-size: var(--font-size-ui-16); line-height: 1;
+}
+.org-role-close:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; box-shadow: var(--focus); }
+.org-role-kicker { margin: 0; color: var(--muted); font-size: var(--font-size-ui-11); font-weight: 700; text-transform: uppercase; }
+.org-role-name-h { margin: 0; color: var(--ink); font-size: var(--font-size-ui-18); }
+.org-role-meta { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+.org-role-tag {
+  font-size: var(--font-size-ui-12); color: var(--ink);
+  background: var(--surface-raised); border: 1px solid var(--line); border-radius: var(--radius-pill);
+  padding: var(--space-xs) var(--space-md);
+}
+.org-role-tag-k { color: var(--muted); }
+.org-role-sec { display: flex; flex-direction: column; gap: var(--space-xs); margin-top: var(--space-sm); }
+.org-role-sec h4 { margin: 0; color: var(--muted); font-size: var(--font-size-ui-11); font-weight: 700; text-transform: uppercase; }
+.org-role-sec p { margin: 0; color: var(--ink); font-size: var(--font-size-ui-13); line-height: 1.5; }
+.org-role-drill {
+  margin-top: var(--space-lg); align-self: flex-start;
+  border: 1px solid var(--primary); border-radius: var(--radius-sm);
+  background: var(--primary); color: var(--on-accent);
+  padding: var(--space-sm) var(--space-lg); font: inherit; font-size: var(--font-size-ui-13); font-weight: 600; cursor: pointer;
+}
+.org-role-drill:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; box-shadow: var(--focus); }
 .org-chart-empty { fill: var(--subtle); font-size: var(--font-size-ui-14); }
 .org-chart-edge {
   stroke: var(--line-strong);
@@ -5312,6 +5455,12 @@ pre {
   fill: var(--muted);
   font-size: var(--font-size-ui-10);
 }
+/* SPEC-org-chart-load-v1: per-team load line (color band + always a text label). */
+.org-team-load { fill: var(--muted); font-size: var(--font-size-ui-10); font-weight: 600; }
+.org-team-load.load-band-normal { fill: var(--success); }
+.org-team-load.load-band-busy { fill: var(--warning); }
+.org-team-load.load-band-overload { fill: var(--danger); }
+.org-team-load.has-blocked { fill: var(--danger); }
 .org-chart-legend {
   display: flex;
   flex-wrap: wrap;
@@ -5910,6 +6059,36 @@ pre {
   color: var(--muted);
   font-size: var(--font-size-ui-13);
 }
+/* SPEC-health-snapshot-v1: insight-first health strip (tokens only). */
+.health-snapshot {
+  margin: 0 0 var(--space-2xl);
+  display: flex; flex-direction: column; gap: var(--space-lg);
+}
+.health-verdict {
+  display: inline-flex; align-items: center; gap: var(--space-sm);
+  font-size: var(--font-size-ui-15); color: var(--ink);
+}
+.health-verdict-dot {
+  width: var(--space-md); height: var(--space-md);
+  border-radius: var(--radius-pill); background: var(--muted);
+}
+.health-verdict.tone-success .health-verdict-dot { background: var(--success); }
+.health-verdict.tone-warning .health-verdict-dot { background: var(--warning); }
+.health-verdict.tone-danger .health-verdict-dot { background: var(--danger); }
+.health-tiles {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-md);
+}
+.health-tile {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-md);
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--surface-raised); padding: var(--space-md) var(--space-lg);
+}
+.health-tile.tone-success { background: var(--success-soft); border-color: var(--success-line); }
+.health-tile.tone-warning { background: var(--warning-soft); border-color: var(--warning-line); }
+.health-tile.tone-danger { background: var(--danger-soft); border-color: var(--danger-line); }
+.health-tile-text { font-size: var(--font-size-ui-13); color: var(--ink); }
+.health-tile-spark { flex: 0 0 auto; }
 .opsdash-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -6673,6 +6852,54 @@ pre {
   margin-top: 0.45rem; color: var(--muted); font-size: 0.78rem;
 }
 .inbox-detail-item-action { color: var(--primary); font-weight: 700; }
+/* SPEC-decision-inbox-v1: plain-language lead + proposal-only respond bar. */
+.inbox-detail-item-lead { margin: 0.35rem 0 0; color: var(--ink); font-size: 0.85rem; line-height: 1.45; }
+.inbox-detail-item.is-decided { border-color: var(--success-line); background: var(--success-soft); }
+.inbox-decide { margin-top: 0.6rem; padding-top: 0.55rem; border-top: 1px solid var(--line); }
+.inbox-decide-prompt {
+  display: block; margin-bottom: 0.4rem; color: var(--muted);
+  font-size: 0.75rem; font-weight: 700;
+}
+.inbox-decide-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.inbox-decide-btn {
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--panel-strong); color: var(--ink);
+  padding: 0.32rem 0.7rem; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+.inbox-decide-btn:hover { border-color: var(--primary-line); background: var(--primary-soft); }
+.inbox-decide-btn:focus-visible {
+  outline: 2px solid var(--primary); outline-offset: 2px; box-shadow: var(--focus);
+}
+.inbox-decide-btn.is-primary { border-color: var(--primary); background: var(--primary); color: var(--on-accent); }
+.inbox-decide-btn.is-ghost { background: transparent; }
+.inbox-decide-reason { margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.inbox-decide-reason-input {
+  width: 100%; resize: vertical; box-sizing: border-box;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--surface-raised); color: var(--ink);
+  padding: 0.45rem 0.55rem; font: inherit; font-size: 0.82rem;
+}
+.inbox-decide-reason-input:focus-visible {
+  outline: 2px solid var(--primary); outline-offset: 1px; box-shadow: var(--focus);
+}
+.inbox-decide-reason-actions { display: flex; gap: 0.4rem; }
+.inbox-decide-error { margin: 0.35rem 0 0; color: var(--danger); font-size: 0.78rem; }
+.inbox-decide-recorded {
+  margin: 0.5rem 0 0; color: var(--success); font-size: 0.82rem; font-weight: 700;
+  animation: inboxDecideIn 160ms ease-out;
+}
+.inbox-decide-undo {
+  margin: 0.3rem 0 0; padding: 0; border: none; background: none;
+  color: var(--primary); font-size: 0.78rem; font-weight: 600;
+  text-decoration: underline; cursor: pointer;
+}
+.inbox-decide-undo:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .inbox-decide-recorded { animation: none; }
+  .inbox-decide-btn { transition: none; }
+}
+@keyframes inboxDecideIn { from { opacity: 0; } to { opacity: 1; } }
 .work-state-hero {
   margin: 0 0 1.25rem; padding: 1rem;
   background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
@@ -7185,6 +7412,15 @@ function applyTranslations() {
   if (langLabel && i18nStrings["common.language"]) langLabel.textContent = t("common.language");
   const widgetsTitle = $("home-widgets-title");
   if (widgetsTitle && i18nStrings["widgets.title"]) widgetsTitle.textContent = t("widgets.title");
+  // Nav tab labels by data-view (the core tabs carry no data-i18n attr). Owner:
+  // tab names were stuck in English under KR. Only set when a translation exists.
+  document.querySelectorAll(".sidebar-link[data-view]").forEach((link) => {
+    const key = "nav." + link.getAttribute("data-view");
+    const label = link.querySelector(".sidebar-label");
+    if (label && i18nStrings[key]) label.textContent = t(key);
+  });
+  const moreLabel = document.querySelector(".sidebar-more-summary .sidebar-label");
+  if (moreLabel && i18nStrings["nav.more"]) moreLabel.textContent = t("nav.more");
 }
 
 function setLanguage(lang, persist) {
@@ -7478,16 +7714,199 @@ function renderCockpit(data) {
   }
 }
 
+// SPEC-decision-inbox-v1: how many decisions the operator has recorded this
+// session. Surfaced in the drawer summary so the operate-cycle is visible.
+let decisionSessionCount = 0;
+
+// Plain-language, jargon-free sentence explaining WHY this item needs the
+// operator (keyed off the inbox group); falls back to the machine "why" so a
+// readable line always renders. Understand-first, before any action.
+function inboxPlainSentence(item) {
+  const meaningKey = "inbox.mean." + String(item.group || "");
+  if (i18nStrings && i18nStrings[meaningKey]) return t(meaningKey);
+  const why = item.why ? localizedInboxWhy(item.why) : "";
+  return why || localizedInboxTitle(item);
+}
+
+const DECISION_RECORDED_COPY = {
+  "decision.acknowledge": "inbox.decide.recorded_ack",
+  "decision.comment": "inbox.decide.recorded_comment",
+  "decision.hold": "inbox.decide.recorded_hold",
+};
+
+// Proposal-only: records an operator decision under .ui_outbox/decisions/. NEVER
+// mutates a canonical task from the UI (a runtime executor consumes it later).
+function queueDecision(commandType, item, reason) {
+  return sendJson("/api/commands", {
+    type: commandType,
+    payload: {
+      type: commandType,
+      target: item.id,
+      payload: {
+        actor: "owner",
+        group: item.group || "",
+        title: item.title || "",
+        reason: reason || "",
+      },
+    },
+  });
+}
+
+function restoreDecideBar(item, row) {
+  // Undo (Owner: accidental clicks must be reversible): drop the recorded state and
+  // bring the respond bar back so the item looks untouched.
+  row.classList.remove("is-decided");
+  const rec = row.querySelector(".inbox-decide-recorded");
+  if (rec) rec.remove();
+  const undo = row.querySelector(".inbox-decide-undo");
+  if (undo) undo.remove();
+  if (!row.querySelector(".inbox-decide")) row.appendChild(buildDecideBar(item, row));
+}
+
+async function undoDecision(item, row) {
+  try {
+    const result = await sendJson("/api/commands", {
+      type: "decision.undo",
+      payload: { type: "decision.undo", target: item.id, payload: { actor: "owner" } },
+    });
+    if (result && result.status === "failed") throw new Error("undo rejected");
+    restoreDecideBar(item, row);
+    if (decisionSessionCount > 0) decisionSessionCount -= 1;
+    const summary = $("inbox-detail-summary");
+    if (summary) summary.textContent = `${t("inbox.decide.tally")}: ${decisionSessionCount}`;
+  } catch (err) {
+    /* leave the recorded state + undo link so the operator can retry */
+  }
+}
+
+function markDecisionRecorded(item, row, commandType, routed) {
+  row.classList.add("is-decided");
+  const bar = row.querySelector(".inbox-decide");
+  if (bar) bar.remove();
+  if (!row.querySelector(".inbox-decide-recorded")) {
+    let copyKey = DECISION_RECORDED_COPY[commandType] || "inbox.decide.recorded_ack";
+    // Honest copy: only claim "delivered to the agent" when the comment actually
+    // reached a real task's agent inbox (server-confirmed agent_routed).
+    if (commandType === "decision.comment" && routed) copyKey = "inbox.decide.recorded_comment_routed";
+    row.appendChild(inboxEl("p", "inbox-decide-recorded", "\\u2713 " + t(copyKey)));
+  }
+  if (!row.querySelector(".inbox-decide-undo")) {
+    const undoBtn = inboxEl("button", "inbox-decide-undo", t("inbox.decide.undo"));
+    undoBtn.type = "button";
+    undoBtn.addEventListener("click", () => undoDecision(item, row));
+    row.appendChild(undoBtn);
+  }
+  // The activated control was just removed with the bar; keep keyboard focus on
+  // the row (now showing the confirmation) instead of dropping it to <body>.
+  row.setAttribute("tabindex", "-1");
+  row.focus();
+  decisionSessionCount += 1;
+  const summary = $("inbox-detail-summary");
+  if (summary) summary.textContent = `${t("inbox.decide.tally")}: ${decisionSessionCount}`;
+}
+
+async function submitDecision(commandType, item, row, reason, errorEl) {
+  try {
+    const result = await queueDecision(commandType, item, reason);
+    if (result && result.status === "failed") throw new Error("decision rejected");
+    const routed = !!(result && result.result && result.result.agent_routed);
+    markDecisionRecorded(item, row, commandType, routed);
+  } catch (err) {
+    if (errorEl) {
+      errorEl.textContent = t("inbox.decide.failed");
+      errorEl.hidden = false;
+    }
+  }
+}
+
+// The respond bar: acknowledge submits immediately; comment/hold reveal a reason
+// field (required) before sending. Real <button>/<textarea> for keyboard a11y.
+function buildDecideBar(item, row) {
+  const bar = inboxEl("div", "inbox-decide");
+  bar.appendChild(inboxEl("span", "inbox-decide-prompt", t("inbox.decide.prompt")));
+  const actions = inboxEl("div", "inbox-decide-actions");
+  const errorEl = inboxEl("p", "inbox-decide-error");
+  errorEl.hidden = true;
+  errorEl.setAttribute("role", "alert");
+
+  const reasonWrap = inboxEl("div", "inbox-decide-reason");
+  reasonWrap.hidden = true;
+  const textarea = document.createElement("textarea");
+  textarea.className = "inbox-decide-reason-input";
+  textarea.rows = 2;
+  textarea.placeholder = t("inbox.decide.reason_placeholder");
+  textarea.setAttribute("aria-label", t("inbox.decide.reason_placeholder"));
+  const reasonActions = inboxEl("div", "inbox-decide-reason-actions");
+  const sendBtn = inboxEl("button", "inbox-decide-btn is-primary", t("inbox.decide.submit"));
+  sendBtn.type = "button";
+  const cancelBtn = inboxEl("button", "inbox-decide-btn is-ghost", t("inbox.decide.cancel"));
+  cancelBtn.type = "button";
+  reasonActions.appendChild(sendBtn);
+  reasonActions.appendChild(cancelBtn);
+  reasonWrap.appendChild(textarea);
+  reasonWrap.appendChild(reasonActions);
+
+  let pendingType = null;
+  let pendingOpener = null;
+  function openReason(commandType, openerBtn) {
+    pendingType = commandType;
+    pendingOpener = openerBtn || null;
+    reasonWrap.hidden = false;
+    errorEl.hidden = true;
+    textarea.focus();
+  }
+  cancelBtn.addEventListener("click", () => {
+    reasonWrap.hidden = true;
+    pendingType = null;
+    // Cancel hides its own button; return focus to the trigger, not <body>.
+    const opener = pendingOpener;
+    pendingOpener = null;
+    if (opener && typeof opener.focus === "function") opener.focus();
+  });
+  sendBtn.addEventListener("click", () => {
+    const reason = textarea.value.trim();
+    if (!reason) {
+      errorEl.textContent = t("inbox.decide.reason_required");
+      errorEl.hidden = false;
+      textarea.focus();
+      return;
+    }
+    submitDecision(pendingType || "decision.comment", item, row, reason, errorEl);
+  });
+
+  const ackBtn = inboxEl("button", "inbox-decide-btn", t("inbox.decide.acknowledge"));
+  ackBtn.type = "button";
+  ackBtn.addEventListener("click", () => submitDecision("decision.acknowledge", item, row, "", errorEl));
+  const commentBtn = inboxEl("button", "inbox-decide-btn", t("inbox.decide.comment"));
+  commentBtn.type = "button";
+  commentBtn.addEventListener("click", () => openReason("decision.comment", commentBtn));
+  const holdBtn = inboxEl("button", "inbox-decide-btn", t("inbox.decide.hold"));
+  holdBtn.type = "button";
+  holdBtn.addEventListener("click", () => openReason("decision.hold", holdBtn));
+  actions.appendChild(ackBtn);
+  actions.appendChild(commentBtn);
+  actions.appendChild(holdBtn);
+
+  bar.appendChild(actions);
+  bar.appendChild(reasonWrap);
+  bar.appendChild(errorEl);
+  return bar;
+}
+
 function renderInboxDetailItem(item) {
   const row = inboxEl("article", "inbox-detail-item");
   row.setAttribute("role", "listitem");
   row.appendChild(inboxEl("h3", "inbox-detail-item-title", localizedInboxTitle(item)));
+  // Understand-first: the plain-language sentence leads; machine detail is muted.
+  row.appendChild(inboxEl("p", "inbox-detail-item-lead", inboxPlainSentence(item)));
   const meta = inboxEl("div", "inbox-detail-item-meta");
   if (item.id) meta.appendChild(inboxEl("span", "", item.id));
   if (item.age) meta.appendChild(inboxEl("span", "", item.age));
   if (item.why) meta.appendChild(inboxEl("span", "", localizedInboxWhy(item.why)));
   if (item.action) meta.appendChild(inboxEl("span", "inbox-detail-item-action", localizedInboxAction(item.action)));
   row.appendChild(meta);
+  // Respond bar only for items with a stable id we can address in the proposal.
+  if (item.id) row.appendChild(buildDecideBar(item, row));
   return row;
 }
 
@@ -9255,17 +9674,104 @@ function renderBoardTeamFilterBanner() {
   if (clear) clear.addEventListener("click", () => setBoardTeamFilter(null));
 }
 
+// SPEC-board-taskview-v1: don't dump all tasks. Done collapses to a few recents,
+// every lane caps with "more", and a controls bar adds text filter / sort / density
+// (mailbox-like). Pure helpers below are node-verified via the /app.js slice.
+let boardSort = "priority";
+let boardDensity = "comfortable";
+let boardQuery = "";
+const boardExpandedLanes = {};
+// BOARD_PURE_START
+const BOARD_LANE_CAP = 8;
+const BOARD_DONE_CAP = 5;
+const BOARD_PRIORITY_ORDER = { P0: 0, P1: 1, P2: 2, P3: 3 };
+
+function boardFilterTasks(tasks, query) {
+  const q = String(query || "").trim().toLowerCase();
+  if (!q) return tasks.slice();
+  return tasks.filter(function (t) {
+    const hay = ((t.id || "") + " " + (t.title || "") + " " + (t.owner_agent || "") + " " + (t.task_set_id || "")).toLowerCase();
+    return hay.indexOf(q) !== -1;
+  });
+}
+
+function boardSortTasks(tasks, key) {
+  const arr = tasks.slice();
+  if (key === "updated") {
+    arr.sort(function (a, b) { return String(b.updated_at || "").localeCompare(String(a.updated_at || "")); });
+  } else if (key === "title") {
+    arr.sort(function (a, b) { return String(a.title || a.id || "").localeCompare(String(b.title || b.id || "")); });
+  } else {
+    arr.sort(function (a, b) {
+      const pa = (BOARD_PRIORITY_ORDER[a.priority] !== undefined) ? BOARD_PRIORITY_ORDER[a.priority] : 9;
+      const pb = (BOARD_PRIORITY_ORDER[b.priority] !== undefined) ? BOARD_PRIORITY_ORDER[b.priority] : 9;
+      return pa - pb;
+    });
+  }
+  return arr;
+}
+
+function boardLaneCap(lane) {
+  return lane === "Done" ? BOARD_DONE_CAP : BOARD_LANE_CAP;
+}
+// BOARD_PURE_END
+
+function refreshBoardControlLabels() {
+  const q = $("board-filter");
+  if (q) q.placeholder = t("board.filter_placeholder");
+  const s = $("board-sort");
+  if (s) {
+    const sortKeys = { priority: "board.sort_priority", updated: "board.sort_updated", title: "board.sort_title" };
+    Array.from(s.options).forEach((o) => { o.textContent = t(sortKeys[o.value] || "board.sort_priority"); });
+  }
+  const d = $("board-density");
+  if (d) d.textContent = boardDensity === "compact" ? t("board.density_comfortable") : t("board.density_compact");
+}
+
+function initBoardControls() {
+  const q = $("board-filter");
+  if (q) q.addEventListener("input", () => { boardQuery = q.value; renderKanban(); });
+  const s = $("board-sort");
+  if (s) s.addEventListener("change", () => { boardSort = s.value; renderKanban(); });
+  const d = $("board-density");
+  if (d) d.addEventListener("click", () => {
+    boardDensity = boardDensity === "compact" ? "comfortable" : "compact";
+    d.setAttribute("aria-pressed", boardDensity === "compact" ? "true" : "false");
+    renderKanban();
+  });
+  refreshBoardControlLabels();
+}
+
 function renderKanban() {
-  const tasks = (runtimeState.tasks || []).filter(taskMatchesTeamFilter);
+  let tasks = (runtimeState.tasks || []).filter(taskMatchesTeamFilter);
+  tasks = boardSortTasks(boardFilterTasks(tasks, boardQuery), boardSort);
   renderBoardTeamFilterBanner();
   if (boardLifted && !taskById(boardLifted.id)) clearLift();
-  $("kanban").innerHTML = lanes.map((lane) => {
+  const kb = $("kanban");
+  refreshBoardControlLabels();
+  kb.classList.toggle("density-compact", boardDensity === "compact");
+  kb.innerHTML = lanes.map((lane) => {
     const laneTasks = tasks.filter((task) => task.lane === lane);
-    const body = laneTasks.length ? laneTasks.map(taskCard).join("") : `<div class="empty">No ${escapeHtml(lane)} tasks</div>`;
+    const cap = boardLaneCap(lane);
+    const expanded = !!boardExpandedLanes[lane];
+    const shown = expanded ? laneTasks : laneTasks.slice(0, cap);
+    let body = shown.length
+      ? shown.map(taskCard).join("")
+      : `<div class="empty">${boardQuery ? t("board.no_matches") : t("board.no_tasks")}</div>`;
+    const hidden = laneTasks.length - shown.length;
+    if (hidden > 0) {
+      body += `<button type="button" class="lane-more" data-lane="${escapeHtml(lane)}">${t("board.more")} (${hidden})</button>`;
+    } else if (expanded && laneTasks.length > cap) {
+      body += `<button type="button" class="lane-more" data-lane="${escapeHtml(lane)}">${t("board.collapse")}</button>`;
+    }
     return patternTaskLane({ name: lane, className: laneClassName(lane), count: laneTasks.length, body });
   }).join("");
-  document.querySelectorAll("#kanban .task-card").forEach(wireBoardCard);
-  document.querySelectorAll("#kanban .lane").forEach(wireLaneDropTarget);
+  kb.querySelectorAll(".task-card").forEach(wireBoardCard);
+  kb.querySelectorAll(".lane").forEach(wireLaneDropTarget);
+  kb.querySelectorAll(".lane-more").forEach((btn) => btn.addEventListener("click", () => {
+    boardExpandedLanes[btn.dataset.lane] = !boardExpandedLanes[btn.dataset.lane];
+    renderKanban();
+  }));
   renderLift();
 }
 
@@ -9923,6 +10429,37 @@ function renderLiveMap() {
     // aria-label so assistive tech gets the edge info (not color-only).
     line.setAttribute("aria-label", `${escapeHtml(edge.from)} to ${escapeHtml(edge.to)}: ${escapeHtml(edge.kind || "edge")}`);
     edgeLayer.appendChild(line);
+    // SPEC-relationship-edge-labels-v1: label block/review edges so a non-expert
+    // reads WHY (the blocked reason) instead of a silent red line. Assignment and
+    // message edges stay unlabeled (too dense). textContent => no XSS from reason.
+    let edgeLabel = "";
+    if (edge.kind === "block") {
+      edgeLabel = t("livemap.blocked") + (edge.reason_label ? ": " + String(edge.reason_label) : "");
+    } else if (edge.kind === "review") {
+      edgeLabel = t("livemap.review");
+    }
+    if (edgeLabel) {
+      const text = edgeLabel.slice(0, 28);
+      const mx = Math.round((a.x + b.x) / 2);
+      const my = Math.round((a.y + b.y) / 2);
+      const wEst = Math.round(6.2 * text.length + 8);
+      const bg = document.createElementNS(SVG_NS, "rect");
+      bg.setAttribute("x", String(mx - wEst / 2)); bg.setAttribute("y", String(my - 9));
+      bg.setAttribute("width", String(wEst)); bg.setAttribute("height", "16");
+      bg.setAttribute("rx", "3");
+      bg.setAttribute("class", "live-map-edge-label-bg");
+      bg.setAttribute("aria-hidden", "true");
+      edgeLayer.appendChild(bg);
+      const lbl = document.createElementNS(SVG_NS, "text");
+      lbl.setAttribute("x", String(mx)); lbl.setAttribute("y", String(my + 3));
+      lbl.setAttribute("text-anchor", "middle");
+      lbl.setAttribute("class", `live-map-edge-label kind-${escapeHtml(edge.kind)}`);
+      // The edge line already carries the aria-label; this visible label is
+      // decorative for AT to avoid a double announce.
+      lbl.setAttribute("aria-hidden", "true");
+      lbl.textContent = text;
+      edgeLayer.appendChild(lbl);
+    }
   });
   svg.appendChild(edgeLayer);
 
@@ -10197,13 +10734,144 @@ function appendOrgSprite(group, node, px, py, size) {
 }
 
 function orgChartNodePositions(nodes, edges) {
+  // Owner: the chart was mangled -- 32 role cards crushed into a fixed 1200px width.
+  // Size the layout to the widest rank (~190px per card) so cards never overlap;
+  // renderOrgChart then sizes the SVG to the real extent and the stage scrolls.
+  const list = nodes || [];
+  const roleCount = list.filter((n) => n.kind === "role").length;
+  const teamCount = list.filter((n) => n.kind === "team").length;
+  const widest = Math.max(roleCount, teamCount, 1);
+  const width = Math.max(1200, widest * 190 + 160);
   return patternSvgLayeredDagreLayout(nodes, edges, {
     rankdir: "TB",
-    width: 1200,
+    width,
     height: 720,
     marginX: 80,
     marginY: 70,
   }).positions;
+}
+
+// SPEC-org-chart-cards: build the glanceable team-card grid. Director banner on top;
+// each team is a card with its roles grouped beneath it; the grid wraps to fit the
+// viewport (so the whole org reads at a glance) with generous spacing. All text is
+// escapeHtml'd; drill-down via data-drill-* (wired by wireTeamDrilldown).
+function renderOrgChartCards(canvas, data) {
+  const nodes = data.nodes || [];
+  const director = nodes.filter((n) => n.kind === "director")[0];
+  const teams = nodes.filter((n) => n.kind === "team" && (n.role_count || 0) > 0);
+  const rolesByTeam = {};
+  nodes.filter((n) => n.kind === "role").forEach((r) => {
+    const key = String(r.team || "");
+    (rolesByTeam[key] = rolesByTeam[key] || []).push(r);
+  });
+  const dirToken = (director && director.color_token) || "violet";
+  const dirBadge = (director && director.tier_badge) || {};
+  const dirName = director ? (director.display_name || director.id) : "Director";
+  const teamCards = teams.map((team) => {
+    const token = team.color_token || "muted";
+    const roles = (rolesByTeam[String(team.id)] || []).slice()
+      .sort((a, b) => String(a.display_name || a.id).localeCompare(String(b.display_name || b.id)));
+    const active = Number(team.active_count || 0);
+    const blocked = Number(team.blocked_count || 0);
+    const band = String(team.load_band || "idle");
+    const loadStr = `${active} ${t("org.load.active")}` + (blocked ? ` \\u00b7 ${blocked} ${t("org.load.blocked")}` : "");
+    const roleRows = roles.map((r) => {
+      const g = (r.tier_badge && r.tier_badge.glyph) || "-";
+      const tier = (r.tier_badge && r.tier_badge.label) || r.tier || "";
+      return `<li class="org-role-chip" role="button" tabindex="0"`
+        + ` data-role-id="${escapeHtml(r.id)}"`
+        + ` aria-label="${escapeHtml(String(r.display_name || r.id) + " - " + String(tier))}"`
+        + ` title="${escapeHtml(String(r.display_name || r.id))} - ${escapeHtml(String(tier))}">`
+        + `<span class="org-role-glyph" aria-hidden="true">${escapeHtml(g)}</span>`
+        + `<span class="org-role-name">${escapeHtml(String(r.display_name || r.id))}</span>`
+        + `<span class="org-role-tier">${escapeHtml(String(tier))}</span></li>`;
+    }).join("");
+    return `<article class="org-team-card tone-${escapeHtml(token)}" role="button" tabindex="0"`
+      + ` aria-label="${escapeHtml(String(team.display_name || team.id) + " - " + String((team.role_count || roles.length)) + " roles")}"`
+      + ` data-drill-team="${escapeHtml(team.id)}">`
+      + `<header class="org-team-card-head">`
+      + `<span class="org-team-card-name">${escapeHtml(String(team.display_name || team.id))}</span>`
+      + `<span class="org-team-card-meta">${escapeHtml(String((team.role_count || roles.length) + " roles"))}</span>`
+      + `</header>`
+      + `<div class="org-team-card-load load-band-${escapeHtml(band)}${blocked ? " has-blocked" : ""}">${escapeHtml(loadStr)}</div>`
+      + `<ul class="org-team-roles">${roleRows}</ul></article>`;
+  }).join("");
+  // The human Owner is the apex who directs the agent org -> shown above the
+  // director (Owner -> Managing Partner -> teams -> roles).
+  canvas.innerHTML =
+    `<div class="org-owner-card">`
+    + `<span class="org-owner-glyph" aria-hidden="true">\\u2605</span>`
+    + `<span class="org-owner-name">${escapeHtml(t("org.owner_label"))}</span>`
+    + `<span class="org-owner-sub">${escapeHtml(t("org.owner_sub"))}</span></div>`
+    + `<div class="org-hierarchy-link" aria-hidden="true"></div>`
+    + `<div class="org-director-card tone-${escapeHtml(dirToken)}">`
+    + `<span class="org-director-glyph" aria-hidden="true">${escapeHtml(String(dirBadge.glyph || "*"))}</span>`
+    + `<span class="org-director-name">${escapeHtml(String(dirName))}</span>`
+    + `<span class="org-director-tier">${escapeHtml(String(dirBadge.label || "Director"))}</span></div>`
+    + `<div class="org-hierarchy-link" aria-hidden="true"></div>`
+    + `<div class="org-teams-grid">${teamCards}</div>`;
+}
+
+// SPEC-org-role-detail: clicking a role opens a panel describing that agent --
+// tier + team + responsibilities (from tier) + skills/focus (from team) + a button
+// to view its tasks. Descriptions are derived from the real delegation model.
+let orgRoleDetailPrevFocus = null;
+
+function openRoleDetail(roleId) {
+  const panel = $("org-role-detail");
+  if (!panel) return;
+  const data = orgChartData();
+  const nodes = (data && data.nodes) || [];
+  const node = nodes.filter((n) => n.kind === "role" && String(n.id) === String(roleId))[0];
+  if (!node) return;
+  const team = nodes.filter((n) => n.kind === "team" && String(n.id) === String(node.team))[0];
+  const teamName = (team && (team.display_name || team.id)) || node.team || "-";
+  const tierBadge = node.tier_badge || {};
+  const tierLabel = (tierBadge.glyph ? tierBadge.glyph + " " : "") + String(tierBadge.label || node.tier || "");
+  const respKey = "org.resp." + String(node.tier || "");
+  const skillKey = "org.skill." + String(node.team || "");
+  const respText = i18nStrings[respKey] ? t(respKey) : "";
+  const skillText = i18nStrings[skillKey] ? t(skillKey) : "";
+  setText("org-role-name", String(node.display_name || node.id));
+  const body = $("org-role-body");
+  body.innerHTML =
+    `<div class="org-role-meta">`
+    + `<span class="org-role-tag"><span class="org-role-tag-k">${escapeHtml(t("org.detail.tier"))}</span> ${escapeHtml(tierLabel)}</span>`
+    + `<span class="org-role-tag"><span class="org-role-tag-k">${escapeHtml(t("org.detail.team"))}</span> ${escapeHtml(String(teamName))}</span>`
+    + `</div>`
+    + (respText ? `<section class="org-role-sec"><h4>${escapeHtml(t("org.detail.responsibilities"))}</h4><p>${escapeHtml(respText)}</p></section>` : "")
+    + (skillText ? `<section class="org-role-sec"><h4>${escapeHtml(t("org.detail.skills"))}</h4><p>${escapeHtml(skillText)}</p></section>` : "")
+    + `<button type="button" class="org-role-drill" data-drill-team="${escapeHtml(node.team || "")}" data-drill-role="${escapeHtml(node.id)}">${escapeHtml(t("org.detail.viewtasks"))}</button>`;
+  wireTeamDrilldown(body);
+  const drill = body.querySelector(".org-role-drill");
+  if (drill) drill.addEventListener("click", closeRoleDetail);
+  orgRoleDetailPrevFocus = document.activeElement;
+  const backdrop = $("org-role-backdrop");
+  if (backdrop) backdrop.hidden = false;
+  panel.hidden = false;
+  const close = $("org-role-close");
+  if (close) close.focus();
+}
+
+function closeRoleDetail() {
+  const panel = $("org-role-detail");
+  const backdrop = $("org-role-backdrop");
+  if (panel) panel.hidden = true;
+  if (backdrop) backdrop.hidden = true;
+  const prev = orgRoleDetailPrevFocus;
+  orgRoleDetailPrevFocus = null;
+  if (prev && typeof prev.focus === "function") prev.focus();
+}
+
+function initOrgRoleDetail() {
+  const close = $("org-role-close");
+  if (close) close.addEventListener("click", closeRoleDetail);
+  const backdrop = $("org-role-backdrop");
+  if (backdrop) backdrop.addEventListener("click", closeRoleDetail);
+  document.addEventListener("keydown", (event) => {
+    const panel = $("org-role-detail");
+    if (event.key === "Escape" && panel && !panel.hidden) { event.preventDefault(); closeRoleDetail(); }
+  });
 }
 
 function renderOrgChart() {
@@ -10211,10 +10879,12 @@ function renderOrgChart() {
   if (!svg) return;
   const data = orgChartData();
   const totals = data.totals || {};
+  const load = data.load_summary || {};
   setText(
     "org-chart-summary",
     `${totals.teams || 0} teams - ${totals.roles || 0} roles`
     + (totals.nodes ? ` - ${totals.nodes} nodes` : "")
+    + `  \\u00b7  ${load.active || 0} ${t("org.load.active")} \\u00b7 ${load.blocked || 0} ${t("org.load.blocked")}`
   );
 
   while (svg.firstChild) svg.removeChild(svg.firstChild);
@@ -10231,7 +10901,45 @@ function renderOrgChart() {
     return;
   }
 
+  // SPEC-org-chart-cards: a glanceable, spacious team-card grid (roles grouped under
+  // their team) that wraps to fit the viewport -- replaces the wide flat SVG tree
+  // that crushed 32 roles into one row. The SVG path below is kept as a fallback.
+  const canvas = $("org-chart-canvas");
+  if (canvas) {
+    svg.setAttribute("hidden", "hidden");
+    renderOrgChartCards(canvas, data);
+    wireTeamDrilldown(canvas);
+    // Clicking a role opens its detail panel (description), not a board drill.
+    canvas.querySelectorAll(".org-role-chip").forEach((chip) => {
+      const open = () => openRoleDetail(chip.getAttribute("data-role-id"));
+      chip.addEventListener("click", open);
+      chip.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(); }
+      });
+    });
+    const legendEl = $("org-chart-legend");
+    if (legendEl) {
+      const tb = data.tier_badges || {};
+      legendEl.innerHTML = ["director", "planner", "reviewer", "worker"].filter((tr) => tb[tr])
+        .map((tr) => `<li><span class="legend-glyph">${escapeHtml(tb[tr].glyph)}</span>${escapeHtml(tb[tr].label)}</li>`).join("");
+    }
+    return;
+  }
+
   const positions = orgChartNodePositions(nodes, edges);
+
+  // Size the SVG to the real layout extent so cards render full-size (no squish);
+  // the stage scrolls horizontally for large orgs. viewBox == element size = 1:1.
+  let maxX = 1200, maxY = 560;
+  Object.keys(positions).forEach((id) => {
+    const p = positions[id];
+    if (p) { maxX = Math.max(maxX, p.x); maxY = Math.max(maxY, p.y); }
+  });
+  const W = Math.round(maxX + 140);
+  const H = Math.round(maxY + 90);
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.style.width = W + "px";
+  svg.style.height = H + "px";
 
   // ---- Edge layer: director -> team -> role connectors ----
   const edgeLayer = document.createElementNS(SVG_NS, "g");
@@ -10279,8 +10987,10 @@ function renderOrgChart() {
     group.setAttribute("aria-label", escapeHtml(a11y));
 
     const isRole = kind === "role";
+    const isTeam = kind === "team";
     const w = isRole ? 168 : 200;
-    const h = isRole ? 58 : 46;
+    // Team cards are taller to fit a third "load" line (SPEC-org-chart-load-v1).
+    const h = isRole ? 58 : (isTeam ? 64 : 46);
     const rect = document.createElementNS(SVG_NS, "rect");
     rect.setAttribute("x", String(px - w / 2)); rect.setAttribute("y", String(py - h / 2));
     rect.setAttribute("width", String(w)); rect.setAttribute("height", String(h));
@@ -10309,22 +11019,38 @@ function renderOrgChart() {
       badge.textContent = `${glyph} ${tierWord}${liveStr}`;
       group.appendChild(badge);
     } else {
-      // Director / team group node: centered name + role count.
+      // Director / team group node: centered name + role count (+ load for teams).
+      const nameY = isTeam ? py - 14 : py - 2;
+      const subY = isTeam ? py - 1 : py + 13;
       const name = document.createElementNS(SVG_NS, "text");
-      name.setAttribute("x", String(px)); name.setAttribute("y", String(py - 2));
+      name.setAttribute("x", String(px)); name.setAttribute("y", String(nameY));
       name.setAttribute("class", `org-chart-group-name kind-${escapeHtml(kind)}`);
       name.setAttribute("text-anchor", "middle");
       const glyph = String((node.tier_badge || {}).glyph || ORG_TIER_GLYPH[kind] || "");
       name.textContent = `${glyph ? glyph + " " : ""}${String(node.display_name || node.id).slice(0, 24)}`;
       group.appendChild(name);
       const sub = document.createElementNS(SVG_NS, "text");
-      sub.setAttribute("x", String(px)); sub.setAttribute("y", String(py + 13));
+      sub.setAttribute("x", String(px)); sub.setAttribute("y", String(subY));
       sub.setAttribute("class", "org-chart-group-sub");
       sub.setAttribute("text-anchor", "middle");
-      sub.textContent = (kind === "team")
+      sub.textContent = isTeam
         ? `${node.role_count || 0} roles${node.online_count ? ` - ${node.online_count} online` : ""}`
         : "Director";
       group.appendChild(sub);
+      if (isTeam) {
+        // Load line: open-task workload band (color) + blocked count, always with
+        // a text label (never color-only). Lets a non-expert see who's busy/blocked.
+        const active = Number(node.active_count || 0);
+        const blocked = Number(node.blocked_count || 0);
+        const band = String(node.load_band || "idle");
+        const load = document.createElementNS(SVG_NS, "text");
+        load.setAttribute("x", String(px)); load.setAttribute("y", String(py + 17));
+        load.setAttribute("text-anchor", "middle");
+        load.setAttribute("class", `org-team-load load-band-${escapeHtml(band)}${blocked ? " has-blocked" : ""}`);
+        load.textContent = `${active} ${t("org.load.active")}`
+          + (blocked ? `  \\u00b7  ${blocked} ${t("org.load.blocked")}` : "");
+        group.appendChild(load);
+      }
     }
     nodeLayer.appendChild(group);
   });
@@ -12644,6 +13370,68 @@ function renderOpsBurndown(data) {
   }
 }
 
+// SPEC-health-snapshot-v1: insight-first "is it healthy now?" strip. Verdict shows
+// color AND a text label (never color-only). A sparkline appears ONLY for signals
+// with a real series (throughput, quality); risk/budget are current-state only.
+function healthVerdictMeta(verdict) {
+  const map = {
+    healthy: { tone: "success", key: "health.verdict.healthy" },
+    watch: { tone: "warning", key: "health.verdict.watch" },
+    at_risk: { tone: "danger", key: "health.verdict.at_risk" },
+  };
+  return map[verdict] || map.healthy;
+}
+
+function healthSignalText(sig) {
+  if (sig.key === "throughput") {
+    if (sig.value == null) return t("health.throughput") + ": " + t("health.no_data");
+    let s = t("health.throughput") + ": " + sig.value + " " + t("health.per_week");
+    if (sig.direction) {
+      const arrow = sig.direction === "up" ? "\\u2191" : (sig.direction === "down" ? "\\u2193" : "\\u2192");
+      s += " " + arrow + " (" + t("health.prev_week") + " " + sig.prev + ")";
+    }
+    return s;
+  }
+  if (sig.key === "quality") {
+    if (sig.value == null) return t("health.quality") + ": " + t("health.no_data");
+    let s = t("health.quality") + ": " + sig.value;
+    if (typeof sig.avg === "number") s += " (" + t("health.avg") + " " + sig.avg + ")";
+    return s;
+  }
+  if (sig.key === "risk") {
+    if (!sig.blocking && !sig.overloaded) return t("health.risk_clear");
+    return t("health.risk") + ": " + t("health.blocked") + " " + sig.blocking +
+      " \\u00b7 " + t("health.overloaded") + " " + sig.overloaded;
+  }
+  if (sig.key === "budget") {
+    return sig.over_budget ? (t("health.budget_over") + " " + sig.over_budget) : t("health.budget_ok");
+  }
+  return "";
+}
+
+function renderHealthSnapshot(data) {
+  const host = $("health-snapshot");
+  if (!host) return;
+  const snap = data && data.health_snapshot;
+  if (!snap) { host.hidden = true; host.innerHTML = ""; return; }
+  host.hidden = false;
+  const v = healthVerdictMeta(snap.verdict);
+  const tiles = (snap.signals || []).map((sig) => {
+    const spark = (sig.series && sig.series.length >= 2)
+      ? componentSparkline(sig.series, { label: t("health." + sig.key) })
+      : "";
+    return `<div class="health-tile tone-${escapeHtml(sig.tone || "info")}">` +
+      `<span class="health-tile-text">${escapeHtml(healthSignalText(sig))}</span>` +
+      (spark ? `<span class="health-tile-spark" aria-hidden="true">${spark}</span>` : "") +
+      `</div>`;
+  }).join("");
+  host.innerHTML =
+    `<div class="health-verdict tone-${escapeHtml(v.tone)}">` +
+    `<span class="health-verdict-dot" aria-hidden="true"></span>` +
+    `<strong>${escapeHtml(t(v.key))}</strong></div>` +
+    `<div class="health-tiles">${tiles}</div>`;
+}
+
 function renderOpsDashboard() {
   if (!$("opsdash-tokens")) return;
   const data = opsMetricsData();
@@ -12654,6 +13442,7 @@ function renderOpsDashboard() {
     `${res.task_count || 0} tasks tracked - ${opsFormatTokens(res.est_tokens)} est tokens - ` +
     `${(board.counts && board.counts.block) || 0} blocking gates - ` +
     `eval ${trend.available ? trend.latest_score : "n/a"}`);
+  renderHealthSnapshot(data);
   renderOpsResources(data);
   renderOpsEvalTrend(data);
   renderOpsGateBoard(data);
@@ -13747,6 +14536,8 @@ initContextualHelp();
 initLanguage();
 loadI18n();
 initInboxDetailDrawer();
+initBoardControls();
+initOrgRoleDetail();
 
 loadState();
 connectEventStream();

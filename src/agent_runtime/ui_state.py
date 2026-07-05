@@ -1206,6 +1206,10 @@ def build_live_map(
                 continue
             presence = str(card.get("presence") or "offline")
             presence_counts[presence] = presence_counts.get(presence, 0) + 1
+            # Active-only nodes: count everyone for the roll-up, but only DRAW agents
+            # who are present/working now (no historical-instance clutter).
+            if not _agent_is_active(card):
+                continue
             presence_agents.append(
                 {
                     "id": card.get("id"),
@@ -1231,6 +1235,8 @@ def build_live_map(
         agent_id = str(agent.get("role") or agent.get("id") or "").strip()
         if not agent_id:
             continue
+        if not bool(agent.get("online")):
+            continue  # active-only: don't draw offline session agents
         node = add_node(agent_id, "agent", agent.get("display_name") or agent_id)
         if node is not None and "presence" not in nodes[node]:
             nodes[node]["presence"] = "online" if agent.get("online") else "offline"
@@ -1242,9 +1248,13 @@ def build_live_map(
         status = str(task.get("status") or "").lower()
         owner = str(task.get("owner_agent") or "").strip()
         taskset_id = str(task.get("task_set_id") or "").strip()
-        taskset_node = add_node(taskset_id, "taskset") if taskset_id else None
+        # Active-only: only work that is actually moving (in progress / blocked / in
+        # review) appears, so the map is the live web of work — not every taskset ever
+        # (Owner: maps were over-crowded with inactive items).
+        active_work = _status_bucket(task) in {"in_progress", "blocked", "review"}
+        taskset_node = add_node(taskset_id, "taskset") if (taskset_id and active_work) else None
 
-        if owner:
+        if owner and active_work:
             add_node(owner, "agent")
             if taskset_node:
                 add_edge(
@@ -1276,6 +1286,8 @@ def build_live_map(
                     task_id=task_id,
                     status=status,
                     blocked_reason=task.get("blocked_reason"),
+                    # SPEC-relationship-edge-labels-v1: human "why" for the edge label.
+                    reason_label=task.get("blocked_reason"),
                 )
 
     # Message edges (actor -> recipient) from the message inbox/archive.
@@ -1295,6 +1307,17 @@ def build_live_map(
             status=message.get("status"),
             source_path=message.get("source_path"),
         )
+
+    # Prune orphans: drop edges whose endpoints were filtered out, then drop nodes
+    # left without any edge (keep the owner apex). Keeps the map to the live web of
+    # work instead of floating leftovers.
+    valid_ids = set(nodes.keys())
+    edges = [e for e in edges if e.get("from") in valid_ids and e.get("to") in valid_ids]
+    referenced = {LIVE_MAP_OWNER_ID}
+    for edge in edges:
+        referenced.add(edge["from"])
+        referenced.add(edge["to"])
+    nodes = {nid: node for nid, node in nodes.items() if nid in referenced}
 
     edge_kind_counts: dict[str, int] = {}
     for edge in edges:
@@ -1977,6 +2000,70 @@ def _task_is_open(task: dict[str, Any]) -> bool:
     return _status_bucket(task) != "done"
 
 
+# SPEC-org-chart-load-v1: per-team load bands for a POINT-IN-TIME total of open
+# tasks. Deliberately NOT the _WORKLOAD_* thresholds (those band a monthly-cell
+# load, so a total of 4 would mis-read as "overload"). Calibrated to realistic
+# per-team open-task totals.
+_ORG_LOAD_NORMAL_MAX = 4
+_ORG_LOAD_BUSY_MAX = 8
+
+
+def _org_load_band(count: int) -> str:
+    if count <= 0:
+        return "idle"
+    if count <= _ORG_LOAD_NORMAL_MAX:
+        return "normal"
+    if count <= _ORG_LOAD_BUSY_MAX:
+        return "busy"
+    return "overload"
+
+
+def _org_team_load(tasks: list[dict[str, Any]]) -> dict[str, dict[str, int]]:
+    """Aggregate open tasks per assigned team: {team: {active, blocked}}.
+
+    `active` = open, non-blocked workload; `blocked` = blocked bucket. Done tasks
+    are skipped. Grouped by `task["assigned_team"]` (set by enrich_tasks_with_assignment),
+    which shares the org TEAM-node id space (the Workload heatmap joins on it too).
+    """
+    out: dict[str, dict[str, int]] = {}
+    for task in tasks:
+        team = str(task.get("assigned_team") or "").strip()
+        if not team:
+            continue
+        bucket = _status_bucket(task)
+        if bucket == "done":
+            continue
+        rec = out.setdefault(team, {"active": 0, "blocked": 0})
+        if bucket == "blocked":
+            rec["blocked"] += 1
+        else:
+            rec["active"] += 1
+    return out
+
+
+def _stamp_org_load(org_chart: dict[str, Any], team_load: dict[str, dict[str, int]]) -> dict[str, Any]:
+    """Stamp active/blocked counts + a load band onto each TEAM node, and add a
+    plain-language `load_summary`. Role/director nodes are left untouched."""
+    team_count = 0
+    for node in org_chart.get("nodes") or []:
+        if node.get("kind") != "team":
+            continue
+        team_count += 1
+        rec = team_load.get(node.get("id")) or {}
+        active = int(rec.get("active") or 0)
+        blocked = int(rec.get("blocked") or 0)
+        node["active_count"] = active
+        node["blocked_count"] = blocked
+        node["load_band"] = _org_load_band(active)
+    # The summary totals come from ALL of team_load (not only matched nodes), so
+    # open work on a team with no org node (drifted id / "unassigned") still shows
+    # in the headline rather than silently undercounting.
+    total_active = sum(int(r.get("active") or 0) for r in team_load.values())
+    total_blocked = sum(int(r.get("blocked") or 0) for r in team_load.values())
+    org_chart["load_summary"] = {"teams": team_count, "active": total_active, "blocked": total_blocked}
+    return org_chart
+
+
 def _task_set_status(group: dict[str, Any]) -> str:
     if int(group.get("active", 0) or 0) > 0:
         return "active"
@@ -2208,7 +2295,69 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     "nav.group.records": {"ko": "기록", "en": "Records"},
     "nav.group.ops": {"ko": "운영", "en": "Ops"},
     "nav.org": {"ko": "조직도", "en": "Org Chart"},
+    # SPEC-nav-i18n: tab labels keyed by data-view (core tabs lacked data-i18n).
+    "nav.board": {"ko": "홈", "en": "Home"},
+    "nav.work": {"ko": "작업", "en": "Work"},
+    "nav.team": {"ko": "에이전트", "en": "Agents"},
+    "nav.meeting": {"ko": "의사결정", "en": "Decisions"},
+    "nav.events": {"ko": "기록", "en": "Records"},
+    "nav.search": {"ko": "검색", "en": "Search"},
+    "nav.more": {"ko": "더보기", "en": "More"},
+    "nav.tasksets": {"ko": "태스크셋", "en": "Tasksets"},
+    "nav.tsboard": {"ko": "태스크셋 보드", "en": "Taskset Board"},
+    "nav.planner": {"ko": "플래너", "en": "Planner"},
+    "nav.triage": {"ko": "분류", "en": "Triage"},
+    "nav.roadmap": {"ko": "로드맵", "en": "Roadmap"},
+    "nav.timeline": {"ko": "타임라인", "en": "Timeline"},
+    "nav.calendar": {"ko": "캘린더", "en": "Calendar"},
+    "nav.deps": {"ko": "의존성", "en": "Dependencies"},
+    "nav.growth": {"ko": "성장", "en": "Growth"},
+    "nav.workload": {"ko": "업무량", "en": "Workload"},
+    "nav.agents": {"ko": "에이전트 목록", "en": "Agent List"},
+    "nav.map": {"ko": "실시간 맵", "en": "Live Map"},
+    "nav.office": {"ko": "오피스 맵", "en": "Office Map"},
+    "nav.inbox": {"ko": "받은함", "en": "Inbox"},
+    "nav.channels": {"ko": "채널", "en": "Channels"},
+    "nav.messages": {"ko": "메시지", "en": "Messages"},
+    "nav.evidence": {"ko": "증거", "en": "Evidence"},
+    "nav.statemachines": {"ko": "상태 머신", "en": "State Machines"},
+    "nav.sources": {"ko": "출처", "en": "Sources"},
+    "nav.knowledge-graph": {"ko": "지식 그래프", "en": "Knowledge Graph"},
+    "nav.dashboard": {"ko": "대시보드", "en": "Dashboard"},
+    "nav.automation": {"ko": "자동화", "en": "Automation"},
+    "nav.properties": {"ko": "속성", "en": "Properties"},
+    "nav.labels": {"ko": "라벨", "en": "Labels"},
+    "nav.notifications": {"ko": "알림", "en": "Notifications"},
+    "nav.portability": {"ko": "가져오기·내보내기", "en": "Import/Export"},
+    "nav.writes": {"ko": "쓰기 기록", "en": "Writes"},
     "org.title": {"ko": "조직도", "en": "Org Chart"},
+    "org.owner_label": {"ko": "오너 (나)", "en": "Owner (You)"},
+    "org.owner_sub": {"ko": "에이전트 조직 지휘", "en": "Directs the agent org"},
+    # SPEC-org-role-detail: click a role to see what that agent does. Responsibilities
+    # are derived from the tier and skills from the team (the real delegation model),
+    # so every role gets an accurate description without a 34-entry hand registry.
+    "org.detail.kicker": {"ko": "에이전트", "en": "Agent"},
+    "org.detail.team": {"ko": "소속 팀", "en": "Team"},
+    "org.detail.tier": {"ko": "역할 등급", "en": "Tier"},
+    "org.detail.responsibilities": {"ko": "책임", "en": "Responsibilities"},
+    "org.detail.skills": {"ko": "스킬 · 전문 분야", "en": "Skills & focus"},
+    "org.detail.viewtasks": {"ko": "이 역할의 작업 보기", "en": "View this role's tasks"},
+    "org.detail.close": {"ko": "닫기", "en": "Close"},
+    "org.resp.director": {"ko": "전사 방향과 우선순위를 정하고, 팀 간 작업을 조정하며, 오너의 의사결정을 보조합니다.", "en": "Sets direction and priorities, coordinates across teams, and supports the Owner's decisions."},
+    "org.resp.planner": {"ko": "팀의 일을 태스크셋·유닛으로 분해하고 워커에게 배분하며, 게이트 통과와 통합을 책임집니다.", "en": "Breaks the team's work into tasksets/units, dispatches to workers, and owns gate-passing and integration."},
+    "org.resp.worker": {"ko": "배정된 작업 단위를 실행하고 증거를 남기며, 완료 후 검토를 요청합니다.", "en": "Executes assigned units, produces evidence, and requests review on completion."},
+    "org.resp.reviewer": {"ko": "산출물과 게이트를 검토해 통과/주의/차단을 판정하고 필요한 수정을 요청합니다.", "en": "Reviews outputs and gates, ruling pass/watch/block, and requests changes."},
+    "org.skill.org": {"ko": "전사 총괄 · 조정 · 거버넌스", "en": "Org-wide oversight, coordination, governance"},
+    "org.skill.engineering": {"ko": "코드 구현 · 테스트 · 리팩터링 · 런타임", "en": "Code, tests, refactoring, runtime"},
+    "org.skill.ui-ux": {"ko": "UI 설계 · 디자인 시스템 · 접근성 · 시각 검증", "en": "UI design, design system, accessibility, visual QA"},
+    "org.skill.research": {"ko": "조사 · 레퍼런스 분석 · 근거 정리", "en": "Research, reference analysis, evidence"},
+    "org.skill.quality": {"ko": "품질 평가 · 게이트 판정 · 문서 검토 · 감사", "en": "Quality eval, gate rulings, doc review, audit"},
+    "org.skill.risk-release": {"ko": "릴리스 무결성 · 리스크 통제", "en": "Release integrity, risk control"},
+    "org.skill.finance-accounting": {"ko": "비용 · 회계 · 자산 · 수익 분석", "en": "Cost, accounting, assets, revenue analysis"},
+    "org.skill.marketing-growth": {"ko": "마케팅 · 성장 · 캠페인", "en": "Marketing, growth, campaigns"},
+    "org.skill.sales-revenue": {"ko": "세일즈 · 수익 · 파트너십", "en": "Sales, revenue, partnerships"},
+    "org.skill.operations-support": {"ko": "운영 · 지원 · 프로세스", "en": "Operations, support, process"},
+    "org.skill.planning-strategy": {"ko": "기획 · 전략 · 우선순위", "en": "Planning, strategy, prioritization"},
     "org.tier.director": {"ko": "디렉터", "en": "Director"},
     "org.tier.planner": {"ko": "리드", "en": "Lead"},
     "org.tier.reviewer": {"ko": "리뷰어", "en": "Reviewer"},
@@ -2282,6 +2431,92 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
         "ko": "호스트 간 클레임 충돌",
         "en": "cross-host claim conflict",
     },
+    # ----- SPEC-decision-inbox-v1: plain-language meaning + respond bar ----------
+    # A one-sentence, jargon-free explanation of WHY each attention item needs the
+    # operator, keyed off the inbox group. Read first; the machine "why" chips stay
+    # below as muted detail. (Council legibility-first verdict.)
+    "inbox.mean.approval_pending": {
+        "ko": "이 일은 당신의 승인을 기다리고 있어요.",
+        "en": "This is waiting for your approval.",
+    },
+    "inbox.mean.blocked": {
+        "ko": "이 일이 막혀서 앞으로 나아가지 못하고 있어요.",
+        "en": "This is blocked and can't move forward.",
+    },
+    "inbox.mean.gate_failures": {
+        "ko": "자동 점검(게이트)에 실패해서 확인이 필요해요.",
+        "en": "An automatic check (gate) failed and needs a look.",
+    },
+    "inbox.mean.runtime_anomalies": {
+        "ko": "실행 중 충돌이 감지돼서 정리가 필요해요.",
+        "en": "A runtime conflict was detected and needs resolving.",
+    },
+    "inbox.mean.cost_anomalies": {
+        "ko": "예상보다 비용이 더 들어서 검토가 필요해요.",
+        "en": "This ran over its budget and needs review.",
+    },
+    "inbox.mean.stale": {
+        "ko": "한동안 진행이 없어서 다시 살펴봐야 해요.",
+        "en": "This hasn't moved in a while and needs a check-in.",
+    },
+    "inbox.mean.unowned": {
+        "ko": "준비됐는데 맡은 사람이 없어요.",
+        "en": "This is ready but nobody owns it yet.",
+    },
+    "inbox.decide.prompt": {"ko": "어떻게 할까요?", "en": "What would you like to do?"},
+    "inbox.decide.acknowledge": {"ko": "확인", "en": "Acknowledge"},
+    "inbox.decide.comment": {"ko": "의견", "en": "Comment"},
+    "inbox.decide.hold": {"ko": "보류", "en": "Hold"},
+    "inbox.decide.reason_placeholder": {
+        "ko": "이유나 의견을 적어주세요 (의견·보류는 필수)",
+        "en": "Add a reason or comment (required for comment/hold)",
+    },
+    "inbox.decide.submit": {"ko": "전달", "en": "Send"},
+    "inbox.decide.cancel": {"ko": "취소", "en": "Cancel"},
+    "inbox.decide.reason_required": {"ko": "이유를 입력해 주세요.", "en": "Please add a reason first."},
+    "inbox.decide.recorded_ack": {"ko": "확인함 · 팀에 기록됨", "en": "Acknowledged · recorded for the team"},
+    "inbox.decide.recorded_comment": {"ko": "의견이 기록됐어요", "en": "Your comment was recorded"},
+    "inbox.decide.recorded_comment_routed": {
+        "ko": "의견이 담당 에이전트에게 전달됐어요",
+        "en": "Your comment was delivered to the agent",
+    },
+    "inbox.decide.recorded_hold": {"ko": "보류로 기록됐어요", "en": "Put on hold · recorded"},
+    "inbox.decide.failed": {"ko": "전달하지 못했어요 — 다시 시도", "en": "Couldn't record — try again"},
+    "inbox.decide.tally": {"ko": "이번 세션 결정", "en": "decisions this session"},
+    "inbox.decide.undo": {"ko": "되돌리기", "en": "Undo"},
+    # ----- SPEC-health-snapshot-v1: insight-first work-status health strip --------
+    "health.verdict.healthy": {"ko": "전반적으로 양호", "en": "Overall healthy"},
+    "health.verdict.watch": {"ko": "주의 필요", "en": "Needs attention"},
+    "health.verdict.at_risk": {"ko": "위험 — 바로 확인", "en": "At risk — act now"},
+    "health.throughput": {"ko": "처리량", "en": "Throughput"},
+    "health.quality": {"ko": "품질 점수", "en": "Quality score"},
+    "health.risk": {"ko": "위험", "en": "Risk"},
+    "health.risk_clear": {"ko": "막힌 것 없음 — 순항 중", "en": "Nothing blocked — running clear"},
+    "health.budget_over": {"ko": "예산 초과 태스크셋", "en": "Over-budget tasksets:"},
+    "health.budget_ok": {"ko": "예산 내", "en": "Within budget"},
+    "health.per_week": {"ko": "건/주", "en": "/wk"},
+    "health.prev_week": {"ko": "지난주", "en": "prev wk"},
+    "health.avg": {"ko": "평균", "en": "avg"},
+    "health.blocked": {"ko": "막힘", "en": "blocked"},
+    "health.overloaded": {"ko": "과부하", "en": "overloaded"},
+    "health.no_data": {"ko": "데이터 부족", "en": "not enough data"},
+    # ----- SPEC-org-chart-load-v1: per-team load labels on the org chart ---------
+    "org.load.active": {"ko": "진행", "en": "active"},
+    "org.load.blocked": {"ko": "막힘", "en": "blocked"},
+    # ----- SPEC-relationship-edge-labels-v1: live-map edge labels --------------
+    "livemap.blocked": {"ko": "막힘", "en": "blocked"},
+    "livemap.review": {"ko": "검토 중", "en": "in review"},
+    # ----- SPEC-board-taskview-v1: board controls + lane caps -------------------
+    "board.more": {"ko": "더 보기", "en": "Show more"},
+    "board.collapse": {"ko": "접기", "en": "Collapse"},
+    "board.no_matches": {"ko": "검색 결과 없음", "en": "No matches"},
+    "board.no_tasks": {"ko": "없음", "en": "None"},
+    "board.filter_placeholder": {"ko": "작업 검색…", "en": "Filter tasks…"},
+    "board.sort_priority": {"ko": "우선순위순", "en": "Priority"},
+    "board.sort_updated": {"ko": "최근 업데이트순", "en": "Recently updated"},
+    "board.sort_title": {"ko": "제목순", "en": "Title"},
+    "board.density_compact": {"ko": "컴팩트하게", "en": "Compact"},
+    "board.density_comfortable": {"ko": "편안하게", "en": "Comfortable"},
     "work_state.kicker": {"ko": "작업", "en": "Work"},
     "work_state.title": {"ko": "작업 상태", "en": "Work state"},
     "work_state.empty": {"ko": "활성 작업 상태가 없습니다.", "en": "No active work state."},
@@ -4660,6 +4895,20 @@ def _office_action_for_card(card: dict[str, Any], activity: dict[str, Any] | Non
     return "idle"
 
 
+_ACTIVE_PRESENCE = {"online", "working", "reviewing", "in_meeting", "busy", "active"}
+
+
+def _agent_is_active(card: dict[str, Any]) -> bool:
+    """Maps show an agent only when it is actually present/working NOW — online, in
+    an active presence state, or holding a current task. Keeps the office/live maps
+    to live agents instead of every historical spawned instance (SPEC: active-only)."""
+    if bool(card.get("online")):
+        return True
+    if str(card.get("presence") or "").strip().lower() in _ACTIVE_PRESENCE:
+        return True
+    return bool(str(card.get("current_task_id") or "").strip())
+
+
 def build_office_map(
     team_agents: dict[str, Any],
     events: list[dict[str, Any]],
@@ -4696,6 +4945,10 @@ def build_office_map(
         for card in team.get("agents", []) or []:
             role = str(card.get("role") or "").strip()
             if not role:
+                continue
+            # Active-only: skip historical/offline instances so the rooms show who is
+            # actually here now, not every agent ever spawned (Owner: dev room had 65).
+            if not _agent_is_active(card):
                 continue
             activity = activity_by_role.get(_normalize_role(role))
             action = _office_action_for_card(card, activity)
@@ -7601,6 +7854,88 @@ def _invert_ts(value: Any) -> str:
     return "".join(chr(0x10FFFF - ord(c)) if ord(c) < 0x10FFFF else c for c in text) if text else "~"
 
 
+# SPEC-health-snapshot-v1: a comment-watch delta. Quality only counts as a "watch"
+# signal when the latest eval score drops at least this far below the running avg.
+HEALTH_QUALITY_WATCH_DELTA = 0.05
+
+
+def _health_direction(curr: float, prev: float | None) -> str:
+    if prev is None:
+        return "flat"
+    if curr > prev:
+        return "up"
+    if curr < prev:
+        return "down"
+    return "flat"
+
+
+def _derive_health_snapshot(ops_metrics: dict[str, Any], workload: dict[str, Any] | None) -> dict[str, Any]:
+    """Insight-first "is the company healthy now?" snapshot (SPEC-health-snapshot-v1).
+
+    HONESTY RULE: a trend ``series`` (sparkline source) is attached ONLY to signals
+    backed by a real time-series — throughput (``velocity.weeks``) and quality
+    (``eval_trend.points``). Risk (blocking gates + overloaded agents) and budget
+    (over-budget tasksets) are point-in-time only and carry counts, never a series,
+    so the UI can never imply a trend the data cannot support.
+    """
+    velocity = ops_metrics.get("velocity") or {}
+    eval_trend = ops_metrics.get("eval_trend") or {}
+    gates = ops_metrics.get("gates") or {}
+    resources = ops_metrics.get("resources") or {}
+    totals = (workload or {}).get("totals") or {}
+    signals: list[dict[str, Any]] = []
+
+    # Throughput — real series (velocity.weeks[].done).
+    weeks = [w for w in (velocity.get("weeks") or []) if isinstance(w, dict)]
+    if len(weeks) >= 2:
+        curr = int(weeks[-1].get("done") or 0)
+        prev = int(weeks[-2].get("done") or 0)
+        signals.append({"key": "throughput", "tone": "info", "value": curr, "prev": prev,
+                        "direction": _health_direction(curr, prev),
+                        "series": [int(w.get("done") or 0) for w in weeks]})
+    elif weeks:
+        signals.append({"key": "throughput", "tone": "info", "value": int(weeks[-1].get("done") or 0)})
+    else:
+        signals.append({"key": "throughput", "tone": "info", "value": None})
+
+    # Quality — real series (eval_trend.points[].score).
+    latest = eval_trend.get("latest_score")
+    avg = eval_trend.get("avg_score")
+    scores = [p.get("score") for p in (eval_trend.get("points") or [])
+              if isinstance(p, dict) and isinstance(p.get("score"), (int, float))]
+    if eval_trend.get("available") and isinstance(latest, (int, float)):
+        watch = (len(scores) >= 2 and isinstance(avg, (int, float))
+                 and latest < avg - HEALTH_QUALITY_WATCH_DELTA)
+        sig = {"key": "quality", "tone": "warning" if watch else "success",
+               "value": latest, "avg": avg}
+        if len(scores) >= 2:
+            sig["series"] = scores
+        signals.append(sig)
+    else:
+        signals.append({"key": "quality", "tone": "info", "value": None})
+
+    # Risk — point-in-time (blocking gates + overloaded agents). No series.
+    blocking = int(gates.get("blocking") or 0)
+    overloaded = int(totals.get("overloaded") or 0)
+    signals.append({"key": "risk", "tone": "danger" if (blocking or overloaded) else "success",
+                    "blocking": blocking, "overloaded": overloaded})
+
+    # Budget — point-in-time (over-budget tasksets). No series.
+    over_budget = sum(1 for t in (resources.get("tasksets") or [])
+                      if isinstance(t, dict) and t.get("over_budget"))
+    signals.append({"key": "budget", "tone": "warning" if over_budget else "success",
+                    "over_budget": over_budget})
+
+    quality_watch = any(s["key"] == "quality" and s["tone"] == "warning" for s in signals)
+    if blocking or overloaded:
+        verdict = "at_risk"
+    elif over_budget or quality_watch:
+        verdict = "watch"
+    else:
+        verdict = "healthy"
+    return {"verdict": verdict, "signals": signals}
+
+
 def build_ops_metrics(
     tasks: list[dict[str, Any]],
     task_sets: list[dict[str, Any]],
@@ -7907,6 +8242,10 @@ def _build_state_uncached(root: Path | str, now: str | None = None) -> dict[str,
     # ORG-MODEL SSOT. Live counts are an optional join from team_agents; the chart
     # renders fully even with zero live agents.
     org_chart = build_org_chart(root_path, team_agents, generated_at)
+    # SPEC-org-chart-load-v1: join per-team open-task load onto the org tree so a
+    # non-expert can see who is busy / blocked at a glance. Additive; tasks are
+    # already enriched with assigned_team above.
+    _stamp_org_load(org_chart, _org_team_load(tasks))
     dependency_graph = build_dependency_graph(tasks, generated_at)
     timeline = build_timeline(tasks, generated_at)
     # Custom properties / labels / automation rules / triage (TASK-AR-331).
@@ -7924,6 +8263,10 @@ def _build_state_uncached(root: Path | str, now: str | None = None) -> dict[str,
     # Ops dashboard (TASK-AR-339): token/cost, eval trend, gate board, burndown.
     # Pure read-only derivation over tasks + task_sets + eval/gate evidence files.
     ops_metrics = build_ops_metrics(tasks, task_sets, root_path, generated_at)
+    # SPEC-health-snapshot-v1: insight-first "is it healthy now?" snapshot. Computed
+    # HERE (not inside build_ops_metrics) so both ops_metrics and the workload heatmap
+    # (overloaded count) are in scope; injected into the ops_metrics payload.
+    ops_metrics["health_snapshot"] = _derive_health_snapshot(ops_metrics, workload)
     # Notification center + @mentions + daily brief (TASK-AR-338). The inbox
     # consumes the calendar's due-soon/overdue reminders plus blocked/approval/
     # mention/error events; the daily brief summarizes today's work. Notification
