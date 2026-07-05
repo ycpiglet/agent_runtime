@@ -15,3 +15,7 @@ else
 fi
 
 "$PYTHON_BIN" scripts/precommit_check.py || exit 1
+
+# Template files staged -> regenerate + stage the derived host lock(s) now,
+# instead of failing the lock-freshness test one CI round-trip later.
+"$PYTHON_BIN" scripts/lock_merge_driver.py pre-commit || exit 1

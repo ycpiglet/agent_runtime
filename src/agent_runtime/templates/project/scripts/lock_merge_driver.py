@@ -67,6 +67,25 @@ def regenerate(host_root: Path) -> bool:
     return True
 
 
+TEMPLATE_PREFIX = "src/agent_runtime/templates/"
+
+
+def pre_commit() -> int:
+    """Regenerate + stage host locks, but only when a template file is staged.
+
+    The host lock digests the template tree, so any template commit that does
+    not regenerate it fails test_regenerate_noop_when_current one CI round-trip
+    later (casebook: template-stale-host-lock). Gating on staged template paths
+    keeps ordinary commits fast. Best-effort by design: with partial staging
+    the regen reads the working tree, and CI remains the authority.
+    """
+    out = _git("diff", "--cached", "--name-only")
+    staged = [line.strip() for line in out.stdout.splitlines() if line.strip()]
+    if not any(path.startswith(TEMPLATE_PREFIX) for path in staged):
+        return 0
+    return post_merge()
+
+
 def post_merge() -> int:
     """Regenerate every host lock and stage the ones that changed. Runs after the merge
     has completed, so the working tree is fully materialised and `git add` is safe."""
@@ -105,12 +124,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--install", action="store_true", help="register the merge driver + post-merge hook")
     sub = parser.add_subparsers(dest="command")
     sub.add_parser("post-merge", help="(run by the hook) regenerate + stage host locks")
+    sub.add_parser("pre-commit", help="(run by the hook) regenerate + stage host locks when templates are staged")
 
     args = parser.parse_args(argv)
     if args.install:
         return install()
     if args.command == "post-merge":
         return post_merge()
+    if args.command == "pre-commit":
+        return pre_commit()
     parser.error("nothing to do: pass --install or `post-merge`")
     return 2
 

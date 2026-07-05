@@ -4,7 +4,7 @@
       ".codex/hooks.json": "sha256:90f632efc1634338bc23d1bdab4619a51386b46cc664d698b332777d3454ead8",
       ".gitattributes": "sha256:22ec718362af48d401e6717569dfcc89ec3573d553dc3f3530f4db8a1625b79b",
       ".githooks/post-merge": "sha256:b112da8578360cd49b871f518afa9c2ffb9f266c416daa02a8a9b17a84196e39",
-      ".githooks/pre-commit": "sha256:850b1f91882fd3ec4d7335cbe9d0e5678af7d111d2754a5da9134d70b2d1c65b",
+      ".githooks/pre-commit": "sha256:9b5b120d9b18f39977021db0b543953267cbfcd60f817cf92edd93812d560457",
       ".github/workflows/owner-doc-format.yml": "sha256:173fdbbd463b87c882a38651d6caeddf24ddfee7dbe4de7df72725da7b77537e",
       "AGENTS.md": "sha256:eb76c85b035397bfc622a15b367376257f60fe68032ed6282f68875c0146014b",
       "AGENT_RUNTIME.md": "sha256:e1fea0c100683f01b39d9038f970ffd17b6ccb2885f02251731e4aafb9e6fe78",
@@ -151,7 +151,7 @@
       "scripts/knowledge_lint.py": "sha256:999f0c6514f492d4bc88de538f0b5906ec03a6f1bf458b83cca90100b72f80f6",
       "scripts/knowledge_lint_gate.py": "sha256:d864c5f67a5419a8c30f6e3b76e9e52c1a910e40819fc5e283b67a3cac331ed2",
       "scripts/local_schedule_daemon.py": "sha256:548b5ce03b04f44ac1fd833b6347a7850665895f299f8aceeacfa4b7cf5d4f8d",
-      "scripts/lock_merge_driver.py": "sha256:7cd74471e96a2e44e22438841156ffa783c2600d16ae024b77c3f8062bcc1769",
+      "scripts/lock_merge_driver.py": "sha256:cc465e57aa92c89c1cdd694a5046349b2dd36c790f50036bfe2de12968879765",
       "scripts/macro_detect.py": "sha256:15a7ecad24ee5e73922ba7f276d3e8439a37f6a6e2e6b95fdcfc843cababd813",
       "scripts/merge_queue.py": "sha256:fa58f4b4a7fd0a7a59a9a2e3606705a83300508d49abc16871d1b7cd4b9ea41f",
       "scripts/message_queue.py": "sha256:3c6eb116d0c6db0229daad7eda983afd2d048bc43ed15f7348ba325b9ccb4c7a",
@@ -278,7 +278,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.5.0",
-    "template_digest": "sha256:92a91b3ca19f0d7fdcb1c92c67982b44bad356d0ee7b4d7d2b7f35117518984d",
+    "template_digest": "sha256:5bbfe49c2233e92ecf57a3c056828ad8c032a008ea7bfec63fbd9f9a440840d8",
     "template_files": 275
   },
   "project": "fixture-host",
