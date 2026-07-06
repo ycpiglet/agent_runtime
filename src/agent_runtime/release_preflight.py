@@ -439,7 +439,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--warning-summary-gate-strict-refs",
         help="Optional strict-ref configuration for warning-summary-gate checks",
     )
-    parser.add_argument("--tag", default="v0.5.0", help="Release tag")
+    parser.add_argument("--tag", default="v0.6.0", help="Release tag")
     parser.add_argument("--bundle-dir", type=Path, default=Path(".tmp/public-source"), help="Temporary publish bundle dir")
     parser.add_argument("--tag-repo-dir", type=Path, default=Path(".tmp/tag-repo"), help="Temporary local tag repo dir")
     parser.add_argument("--tag-install-dir", type=Path, default=Path(".tmp/tag-install"), help="Temporary local tag install dir")
