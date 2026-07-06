@@ -30,7 +30,7 @@ ROOT = Path(__file__).resolve().parent.parent
 HOOKS_DIR = ".githooks"
 
 
-def _run(*args: str) -> tuple[int, str]:
+def _run(*args: str, timeout: int = 30) -> tuple[int, str]:
     try:
         proc = subprocess.run(
             args,
@@ -39,7 +39,7 @@ def _run(*args: str) -> tuple[int, str]:
             text=True,
             encoding="utf-8",
             errors="replace",
-            timeout=30,
+            timeout=timeout,
         )
     except (OSError, subprocess.TimeoutExpired) as exc:
         return 1, f"{exc.__class__.__name__}"
@@ -53,19 +53,30 @@ def check_python() -> str:
     )
 
 
-def check_editable_install() -> str:
+def _editable_import_target() -> tuple[bool, str]:
     code = (
         "import agent_runtime, pathlib;"
         "print(pathlib.Path(agent_runtime.__file__).resolve())"
     )
     rc, out = _run(sys.executable, "-c", code)
     if rc != 0:
-        return "FIX  editable install: agent_runtime not importable -> run: pip install -e ."
-    src = (ROOT / "src").resolve()
-    if out.startswith(str(src)):
-        return f"ok   editable install: {out}"
+        return False, "not importable"
+    return out.startswith(str((ROOT / "src").resolve())), out
+
+
+def check_editable_install(apply: bool) -> str:
+    ok, target = _editable_import_target()
+    if ok:
+        return f"ok   editable install: {target}"
+    if apply:
+        print("bootstrap: running pip install -e . (first run can take a minute)...")
+        rc, _ = _run(sys.executable, "-m", "pip", "install", "-e", ".", timeout=600)
+        if rc == 0:
+            ok, target = _editable_import_target()
+            if ok:
+                return f"ok   editable install: installed -> {target}"
     return (
-        f"FIX  editable install: imports {out} (not this checkout)"
+        f"FIX  editable install: {target} (not this checkout)"
         " -> run: pip install -e ."
     )
 
@@ -117,7 +128,9 @@ def check_gh_cli() -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Check/fix the local dev wiring (always exits 0)")
     parser.add_argument("--check", action="store_true", help="report only (default)")
-    parser.add_argument("--apply", action="store_true", help="fix hooksPath if wrong")
+    parser.add_argument(
+        "--apply", action="store_true", help="fix what is safe: editable install + hooksPath"
+    )
     parser.add_argument(
         "--ssh-push", action="store_true", help="with --apply: also switch origin push URL to SSH"
     )
@@ -125,7 +138,7 @@ def main(argv: list[str] | None = None) -> int:
 
     lines = [
         check_python(),
-        check_editable_install(),
+        check_editable_install(apply=args.apply),
         check_hooks_path(apply=args.apply),
         check_push_transport(ssh_push=args.apply and args.ssh_push),
         check_gh_cli(),
@@ -134,7 +147,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"bootstrap: {line}")
     pending = sum(1 for line in lines if line.startswith("FIX"))
     if pending:
-        print(f"bootstrap: {pending} item(s) need fixing (see FIX lines; --apply fixes hooksPath)")
+        print(
+            f"bootstrap: {pending} item(s) need fixing"
+            " (see FIX lines; --apply fixes editable install + hooksPath)"
+        )
     else:
         print("bootstrap: environment ready")
     return 0  # watch-only: never blocks
