@@ -56,6 +56,20 @@ MUTATING_COMMAND_RE = re.compile(
 ACTIVE_BACKGROUND_STATUSES = {"pending", "running", "active", "in_progress", "working"}
 PATCH_FILE_RE = re.compile(r"^\*\*\* (?:Add|Update|Delete) File: (.+)$", re.MULTILINE)
 PATCH_MOVE_RE = re.compile(r"^\*\*\* Move to: (.+)$", re.MULTILINE)
+PS_ASSIGN_RE = re.compile(r"(?i)(\$\w+)\s*=\s*([^;\r\n]+)")
+PS_ASSIGNMENT_START_RE = re.compile(r"(?i)\$\w+\s*=")
+SHELL_PATH_PARAM_RE = re.compile(
+    r"""(?ix)
+    -(?:LiteralPath|Path|FilePath|Destination|TargetPath)
+    \s+
+    (?P<token>"[^"]+"|'[^']+'|[^\s;|&]+)
+    """
+)
+SHELL_REDIRECT_RE = re.compile(r"""(?<![<>])>{1,2}\s*(?P<token>"[^"]+"|'[^']+'|[^\s;|&]+)""")
+SHELL_TOKEN_RE = re.compile(r'''"[^"]+"|'[^']+'|[^\s;|&]+''')
+GIT_ADD_RE = re.compile(r"(?i)\bgit\s+(?:-[^\s]+\s+)*add\s+(?P<args>[^;&|]+)")
+TEMP_PATH_MARKERS = ("$env:TEMP", "$env:TMP", "%TEMP%", "%TMP%")
+EXTERNAL_TEMP_PATH = "__external__/temp"
 LOG_PREFIXES = ("agents/runtime/hook-logs/", "agents/runtime/session_baselines/")
 
 
@@ -154,6 +168,88 @@ def _normalize_repo_path(value: str) -> str:
     return text.rstrip("/")
 
 
+def _contains_temp_marker(value: str) -> bool:
+    upper = value.upper()
+    return any(marker.upper() in upper for marker in TEMP_PATH_MARKERS)
+
+
+def _shell_variables(command: str) -> dict[str, str]:
+    variables: dict[str, str] = {}
+    for match in PS_ASSIGN_RE.finditer(command):
+        name = match.group(1).strip()
+        expression = match.group(2).strip()
+        if _contains_temp_marker(expression):
+            variables[name.lower()] = EXTERNAL_TEMP_PATH
+            continue
+        token_match = SHELL_TOKEN_RE.search(expression)
+        if token_match:
+            token = token_match.group(0)
+            if not token.lower().startswith("join-path"):
+                variables[name.lower()] = _normalize_repo_path(token)
+    return variables
+
+
+def _mask_powershell_assignment_rhs(command: str) -> str:
+    """Hide assignment values before scanning for actual command path args."""
+    chars = list(command)
+    for match in PS_ASSIGNMENT_START_RE.finditer(command):
+        index = match.end()
+        quote: str | None = None
+        while index < len(chars):
+            char = chars[index]
+            if quote:
+                chars[index] = " "
+                if quote == "'" and char == "'" and index + 1 < len(chars) and chars[index + 1] == "'":
+                    chars[index + 1] = " "
+                    index += 2
+                    continue
+                if quote == '"' and char == "`" and index + 1 < len(chars):
+                    chars[index + 1] = " "
+                    index += 2
+                    continue
+                if char == quote:
+                    quote = None
+                index += 1
+                continue
+            if char in {"'", '"'}:
+                quote = char
+                chars[index] = " "
+                index += 1
+                continue
+            if char in {";", "\r", "\n"}:
+                break
+            chars[index] = " "
+            index += 1
+    return "".join(chars)
+
+
+def _resolve_shell_path_token(token: str, variables: dict[str, str]) -> str | None:
+    text = token.strip()
+    if not text:
+        return None
+    variable_value = variables.get(text.lower())
+    if variable_value:
+        return variable_value
+    if _contains_temp_marker(text):
+        return EXTERNAL_TEMP_PATH
+    if text.startswith("$"):
+        return None
+    return _normalize_repo_path(text)
+
+
+def _git_add_paths(command: str) -> set[str]:
+    paths: set[str] = set()
+    for match in GIT_ADD_RE.finditer(command):
+        for token in SHELL_TOKEN_RE.findall(match.group("args")):
+            text = token.strip().strip('"').strip("'")
+            if not text or text == "--" or text.startswith("-"):
+                continue
+            if text in {".", "./"}:
+                return set()
+            paths.add(_normalize_repo_path(text))
+    return paths
+
+
 def _path_values(value: Any) -> set[str]:
     value = _maybe_json(value)
     paths: set[str] = set()
@@ -178,11 +274,21 @@ def _path_values(value: Any) -> set[str]:
 
 def _command_touched_paths(command: str) -> set[str]:
     normalized = command.replace("\\", "/")
+    scan_command = _mask_powershell_assignment_rhs(command)
+    paths: set[str] = set()
     if "scripts/lock_merge_driver.py" in normalized and "post-merge" in normalized:
-        return {"tests/fixtures/host/agent_runtime.lock.json"}
+        paths.add("tests/fixtures/host/agent_runtime.lock.json")
     if "scripts/evidence_index_generator.py" in normalized and "--write" in normalized:
-        return {"reviews/INDEX.md"}
-    return set()
+        paths.add("reviews/INDEX.md")
+
+    paths.update(_git_add_paths(scan_command))
+    variables = _shell_variables(command)
+    for pattern in (SHELL_PATH_PARAM_RE, SHELL_REDIRECT_RE):
+        for match in pattern.finditer(scan_command):
+            path = _resolve_shell_path_token(match.group("token"), variables)
+            if path:
+                paths.add(path)
+    return paths
 
 
 def tool_event_touched_paths(name: str, tool_input: Any = None) -> set[str]:

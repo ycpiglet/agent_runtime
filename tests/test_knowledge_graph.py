@@ -146,6 +146,106 @@ def test_ingest_reviews_scans_body_for_references(tmp_path):
     assert {"TASK-AR-552", "TASKSET-AR-COLLAB-CONCURRENCY", "INIT-AR-HOST-FEEDBACK-INTAKE"} <= targets
 
 
+def test_ingest_docs_adds_doc_nodes_and_work_item_edges(tmp_path):
+    wi = tmp_path / "agents" / "project" / "work-items"
+    wi.mkdir(parents=True)
+    (wi / "WORK-ITEM-CLASSIFICATION.json").write_text(
+        json.dumps({"records": [{"id": "TASK-AR-1", "level": "task", "title": "One"}]}),
+        encoding="utf-8",
+    )
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    (docs / "guide.md").write_text("# Guide\nDocuments TASK-AR-1 and links [[Ops]].\n", encoding="utf-8")
+    (tmp_path / "OPS-TEST.md").write_text("# Ops\n", encoding="utf-8")
+
+    graph = kg.build_graph(tmp_path, git_limit=0)
+    by_id = {n["id"]: n for n in graph["nodes"]}
+    guide = by_id["doc:docs/guide.md"]
+
+    assert guide["kind"] == "doc"
+    assert guide["title"] == "Guide"
+    assert {"type": "references", "target": "TASK-AR-1"} in guide["relations"]
+    assert {"type": "documents", "target": "TASK-AR-1"} in guide["relations"]
+    assert {"type": "references", "target": "doc:OPS-TEST.md"} in guide["relations"]
+
+
+def test_ingest_code_modules_adds_import_file_and_test_edges(tmp_path):
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    (scripts / "a.py").write_text("import b\n", encoding="utf-8")
+    (scripts / "b.py").write_text("VALUE = 1\n", encoding="utf-8")
+    tests = tmp_path / "tests"
+    tests.mkdir()
+    (tests / "test_a.py").write_text("import a\n", encoding="utf-8")
+
+    graph = kg.build_graph(tmp_path, git_limit=0)
+    by_id = {n["id"]: n for n in graph["nodes"]}
+    module_a = by_id["module:scripts.a"]
+    test_a = by_id["module:tests.test_a"]
+
+    assert by_id["file:scripts/a.py"]["kind"] == "file"
+    assert {"type": "defined_in", "target": "file:scripts/a.py"} in module_a["relations"]
+    assert {"type": "imports", "target": "module:scripts.b"} in module_a["relations"]
+    assert {"type": "tests", "target": "module:scripts.a"} in test_a["relations"]
+    assert {"type": "tested_by", "target": "module:tests.test_a"} in module_a["relations"]
+
+
+def test_ingest_configs_and_schemas_adds_validation_edges(tmp_path):
+    wi = tmp_path / "agents" / "project" / "work-items"
+    wi.mkdir(parents=True)
+    (wi / "WORK-ITEM-CLASSIFICATION.json").write_text(
+        json.dumps({"records": [{"id": "TASK-AR-1", "level": "task", "title": "One"}]}),
+        encoding="utf-8",
+    )
+    (tmp_path / "pyproject.toml").write_text("# configures TASK-AR-1\n", encoding="utf-8")
+    schemas = tmp_path / "schemas"
+    schemas.mkdir()
+    (schemas / "task.schema.json").write_text('{"description":"validates TASK-AR-1"}', encoding="utf-8")
+
+    graph = kg.build_graph(tmp_path, git_limit=0)
+    by_id = {n["id"]: n for n in graph["nodes"]}
+
+    assert by_id["config:pyproject.toml"]["kind"] == "config"
+    assert {"type": "configures", "target": "TASK-AR-1"} in by_id["config:pyproject.toml"]["relations"]
+    assert by_id["schema:schemas/task.schema.json"]["kind"] == "schema"
+    assert {"type": "validates", "target": "TASK-AR-1"} in by_id["schema:schemas/task.schema.json"]["relations"]
+
+
+def test_ingest_assets_links_registry_to_files_and_evidence(tmp_path):
+    registry_dir = tmp_path / "agents" / "project"
+    registry_dir.mkdir(parents=True)
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    (scripts / "example_gate.py").write_text("print('example_gate')\n", encoding="utf-8")
+    reviews = tmp_path / "reviews"
+    reviews.mkdir()
+    (reviews / "REVIEW-2026-06-18-example.md").write_text("example_gate evidence\n", encoding="utf-8")
+    (registry_dir / "RUNTIME-ASSET-REGISTRY.json").write_text(
+        json.dumps({
+            "schema": "agent-runtime-asset-registry/v1",
+            "assets": [{
+                "id": "gate.example",
+                "kind": "gate",
+                "status": "active",
+                "lifecycle": "keep",
+                "paths": ["scripts/example_gate.py"],
+                "evidence_paths": ["reviews/REVIEW-2026-06-18-example.md"],
+                "tokens": ["example_gate"],
+            }],
+        }),
+        encoding="utf-8",
+    )
+
+    graph = kg.build_graph(tmp_path, git_limit=0)
+    by_id = {n["id"]: n for n in graph["nodes"]}
+    asset = by_id["asset:gate/example"]
+
+    assert asset["kind"] == "asset"
+    assert asset["metadata"]["asset_id"] == "gate.example"
+    assert {"type": "defined_in", "target": "file:scripts/example_gate.py"} in asset["relations"]
+    assert {"type": "used_by", "target": "REVIEW-2026-06-18-example"} in asset["relations"]
+
+
 def test_build_graph_wires_capability_domains(tmp_path):
     wi = tmp_path / "agents" / "project" / "work-items"
     wi.mkdir(parents=True)
@@ -200,6 +300,38 @@ def test_build_graph_keeps_dangling_structural_edges(tmp_path):
     graph = kg.build_graph(tmp_path, git_limit=0)
     task = next(n for n in graph["nodes"] if n["id"] == "TASK-AR-9")
     assert {"type": "partOf", "target": "TASKSET-GONE"} in task["relations"]
+
+
+def test_build_graph_prunes_inactive_claim_executes_missing_task(tmp_path):
+    cl = tmp_path / "agents" / "runtime" / "task_claims"
+    cl.mkdir(parents=True)
+    (cl / "CLAIM-x.json").write_text(json.dumps({
+        "claim_id": "CLAIM-x",
+        "task_id": "TASK-AR-590",
+        "status": "expired",
+    }), encoding="utf-8")
+
+    graph = kg.build_graph(tmp_path, git_limit=0)
+    claim = next(n for n in graph["nodes"] if n["id"] == "CLAIM-x")
+
+    assert {"type": "executes", "target": "TASK-AR-590"} not in claim["relations"]
+    assert kg.check_graph(graph) == []
+
+
+def test_build_graph_keeps_active_claim_executes_missing_task(tmp_path):
+    cl = tmp_path / "agents" / "runtime" / "task_claims"
+    cl.mkdir(parents=True)
+    (cl / "CLAIM-x.json").write_text(json.dumps({
+        "claim_id": "CLAIM-x",
+        "task_id": "TASK-AR-590",
+        "status": "assigned",
+    }), encoding="utf-8")
+
+    graph = kg.build_graph(tmp_path, git_limit=0)
+    claim = next(n for n in graph["nodes"] if n["id"] == "CLAIM-x")
+
+    assert {"type": "executes", "target": "TASK-AR-590"} in claim["relations"]
+    assert any("TASK-AR-590" in finding for finding in kg.check_graph(graph))
 
 
 def test_reference_targets_dedupes_caps_and_excludes_self():

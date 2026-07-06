@@ -34,6 +34,8 @@ def _write_json(path: Path, payload: dict) -> None:
 def _policy(
     *,
     minimum_roles: dict[str, int] | None = None,
+    monitored_roles: list[str] | None = None,
+    monitored_role_evidence: dict | None = None,
     artifacts: list[str] | None = None,
     capabilities: dict[str, list[str]] | None = None,
 ) -> dict:
@@ -42,7 +44,8 @@ def _policy(
         "version": 1,
         "min_claims_for_role_coverage": 1,
         "minimum_claim_roles": minimum_roles if minimum_roles is not None else {},
-        "monitored_roles": [],
+        "monitored_roles": monitored_roles if monitored_roles is not None else [],
+        "monitored_role_evidence": monitored_role_evidence if monitored_role_evidence is not None else {},
         "required_review_artifacts": artifacts if artifacts is not None else [],
         "required_root_capabilities": capabilities if capabilities is not None else {},
         "lifecycle_thresholds": {
@@ -189,6 +192,53 @@ def test_collaboration_governance_gate_reports_lifecycle_watch_without_blocking(
     assert "lifecycle:active-worktree-missing:CLAIM-active" in result.stdout
     assert "lifecycle:released-claim-incomplete:CLAIM-released" in result.stdout
     assert "watch=3" in result.stdout
+
+
+def test_monitored_role_accepts_configured_artifact_evidence(tmp_path: Path) -> None:
+    _write_json(
+        tmp_path / "agents" / "project" / "COLLABORATION-GOVERNANCE.json",
+        _policy(
+            monitored_roles=["council", "skeptic", "progress-scout"],
+            monitored_role_evidence={
+                "council": [{"path_glob": "reviews/COUNCIL-*.md", "contains": ["type: council", "council"]}],
+                "skeptic": [{"path_glob": "reviews/COUNCIL-*.md", "contains": ["skeptic"]}],
+            },
+        ),
+    )
+    _write_json(tmp_path / "agents" / "runtime" / "task_claims" / "CLAIM-1.json", _claim("qa"))
+    (tmp_path / ".worktrees" / "TASK-1").mkdir(parents=True)
+    _write(
+        tmp_path / "reviews" / "COUNCIL-2026-06-18-example.md",
+        "---\ntype: council\n---\n# Council\n\n| role | verdict |\n| --- | --- |\n| skeptic | hold |\n",
+    )
+
+    result = _run_gate(tmp_path)
+
+    assert result.returncode == 0
+    assert "role-monitor:council" not in result.stdout
+    assert "role-monitor:skeptic" not in result.stdout
+    assert "role-monitor:progress-scout" in result.stdout
+    assert "watch=1" in result.stdout
+
+
+def test_monitored_role_artifact_must_match_required_tokens(tmp_path: Path) -> None:
+    _write_json(
+        tmp_path / "agents" / "project" / "COLLABORATION-GOVERNANCE.json",
+        _policy(
+            monitored_roles=["skeptic"],
+            monitored_role_evidence={
+                "skeptic": [{"path_glob": "reviews/COUNCIL-*.md", "contains": ["skeptic"]}],
+            },
+        ),
+    )
+    _write_json(tmp_path / "agents" / "runtime" / "task_claims" / "CLAIM-1.json", _claim("qa"))
+    _write(tmp_path / "reviews" / "COUNCIL-2026-06-18-example.md", "---\ntype: council\n---\n# Council\n")
+
+    result = _run_gate(tmp_path)
+
+    assert result.returncode == 0
+    assert "role-monitor:skeptic" in result.stdout
+    assert "no claim or configured artifact evidence" in result.stdout
 
 
 def test_owner_governance_runs_collaboration_governance_gate() -> None:
