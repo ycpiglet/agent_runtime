@@ -22,7 +22,11 @@ try:  # Windows 콘솔(cp949)에서도 UTF-8 출력 (em-dash/화살표 등)
 except Exception:
     pass
 
-STATUS = Path(__file__).resolve().parent.parent / "agents" / "lead_engineer" / "STATUS.md"
+ROOT = Path(__file__).resolve().parent.parent
+STATUS_CANDIDATES = [
+    ROOT / "agents" / "lead_engineer" / "STATUS.md",
+    ROOT / "STATUS.md",
+]
 HOT_KEEP = 10
 DUE_AT = 13
 OVERDUE_AT = 16  # > 15
@@ -49,12 +53,21 @@ def classify(n: int) -> str:
     return "ok"
 
 
+def status_path() -> Path | None:
+    for path in STATUS_CANDIDATES:
+        if path.is_file():
+            return path
+    return None
+
+
 def main() -> int:
     quiet = "--quiet" in sys.argv
-    if not STATUS.exists():
-        print(f"scribe_due: STATUS 없음 — {STATUS}")
+    status = status_path()
+    if status is None:
+        candidates = ", ".join(str(path) for path in STATUS_CANDIDATES)
+        print(f"scribe_due: STATUS 없음 — checked {candidates}")
         return 0
-    n = count_hot_entries(STATUS.read_text(encoding="utf-8"))
+    n = count_hot_entries(status.read_text(encoding="utf-8"))
     state = classify(n)
     msg = {
         "ok": f"ok — 핫 항목 {n}개 (<= 12), 압축 불요",

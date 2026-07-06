@@ -99,6 +99,90 @@ def test_mutating_session_skips_unrelated_dirty_paths(tmp_path: Path) -> None:
     assert result["reason"] == "dirty-state-unrelated-to-session"
 
 
+def test_temp_file_shell_write_skips_unrelated_repo_dirty_paths(tmp_path: Path) -> None:
+    subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
+    (tmp_path / "reviews").mkdir()
+    (tmp_path / "reviews" / "other.md").write_text("other pane\n", encoding="utf-8")
+    transcript = _transcript(
+        tmp_path,
+        {
+            "tool_name": "functions.shell_command",
+            "tool_input": {
+                "command": (
+                    "$tmp=Join-Path $env:TEMP 'agent-runtime-question-only-transcript.jsonl'; "
+                    "Set-Content -LiteralPath $tmp -Value '{\"type\":\"message\"}' -Encoding UTF8"
+                )
+            },
+        },
+    )
+
+    result = scope.assess({"transcript_path": str(transcript)}, root=tmp_path)
+
+    assert result["bypass"] is True
+    assert result["reason"] == "dirty-state-unrelated-to-session"
+
+
+def test_shell_command_string_payload_does_not_claim_embedded_repo_path(tmp_path: Path) -> None:
+    subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
+    (tmp_path / "ARCHIVE-INDEX.md").write_text("other pane\n", encoding="utf-8")
+    command = (
+        "$line = '{\"tool_name\":\"functions.shell_command\","
+        "\"tool_input\":{\"command\":\"Set-Content -Path ARCHIVE-INDEX.md -Value test\"}}'; "
+        "$tmp=Join-Path $env:TEMP 'agent-runtime-stop-hook-repro.jsonl'; "
+        "Set-Content -LiteralPath $tmp -Value $line -Encoding UTF8"
+    )
+    transcript = _transcript(
+        tmp_path,
+        {"tool_name": "functions.shell_command", "tool_input": {"command": command}},
+    )
+
+    result = scope.assess({"transcript_path": str(transcript)}, root=tmp_path)
+
+    assert result["bypass"] is True
+    assert result["reason"] == "dirty-state-unrelated-to-session"
+
+
+def test_shell_write_to_dirty_repo_path_enforces_closeout(tmp_path: Path) -> None:
+    subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
+    (tmp_path / "scripts").mkdir()
+    (tmp_path / "scripts" / "current.py").write_text("dirty\n", encoding="utf-8")
+    transcript = _transcript(
+        tmp_path,
+        {
+            "tool_name": "functions.shell_command",
+            "tool_input": {
+                "command": "$target='scripts/current.py'; Set-Content -LiteralPath $target -Value 'dirty'"
+            },
+        },
+    )
+
+    result = scope.assess({"transcript_path": str(transcript)}, root=tmp_path)
+
+    assert result["bypass"] is False
+    assert result["reason"] == "session-has-mutating-activity"
+
+
+def test_git_add_paths_skip_unrelated_repo_dirty_after_commit(tmp_path: Path) -> None:
+    subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
+    (tmp_path / "reviews").mkdir()
+    (tmp_path / "reviews" / "other.md").write_text("other pane\n", encoding="utf-8")
+    transcript = _transcript(
+        tmp_path,
+        {
+            "tool_name": "functions.shell_command",
+            "tool_input": {
+                "command": "git add scripts/stop_hook_session_scope.py tests/test_stop_hook_session_scope.py"
+            },
+        },
+        {"tool_name": "functions.shell_command", "tool_input": {"command": "git commit -m hook-scope"}},
+    )
+
+    result = scope.assess({"transcript_path": str(transcript)}, root=tmp_path)
+
+    assert result["bypass"] is True
+    assert result["reason"] == "dirty-state-unrelated-to-session"
+
+
 def test_mutating_session_enforces_overlapping_dirty_paths(tmp_path: Path) -> None:
     subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
     (tmp_path / "scripts").mkdir()

@@ -1,5 +1,6 @@
 """Tests for closure_gate — require compound/review/retro for substantial work."""
 
+import json
 import subprocess
 import sys
 from datetime import datetime, timezone, timedelta
