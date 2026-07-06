@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 import time
@@ -149,6 +150,21 @@ def _display_path(path: Path) -> str:
 
 def session_path(agent_id: str) -> Path:
     return SESSIONS_DIR / f"{agent_id}.json"
+
+
+def write_session_json(path: Path, payload: dict) -> None:
+    """Crash-safe session write: temp-then-``os.replace`` (issue #274).
+
+    A direct ``write_text`` interrupted by power loss leaves a half-written,
+    unparseable JSON that crashes the next session's orchestrator/claim-reaper.
+    ``os.replace`` is atomic on the same filesystem, so readers only ever see
+    the old or the new record (pattern proven in message_queue and on the
+    autofolio host, forced-shutdown scenario included).
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + f".tmp.{uuid.uuid4().hex[:8]}")
+    tmp.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    os.replace(tmp, path)
 
 
 def read_sessions() -> list[dict]:
@@ -544,10 +560,7 @@ def cmd_spawn(args: argparse.Namespace) -> Outcome:
     summary = f"spawn role={role} task={task} agent_id={agent_id} dry_run={args.dry_run}"
     if not args.dry_run:
         ensure_dirs()
-        session_path(agent_id).write_text(
-            json.dumps(record, indent=2, ensure_ascii=False) + "\n",
-            encoding="utf-8",
-        )
+        write_session_json(session_path(agent_id), record)
     return Outcome(0, summary, payload)
 
 
@@ -577,8 +590,7 @@ def cmd_kill(args: argparse.Namespace) -> Outcome:
     payload = {"dry_run": args.dry_run, "session": record}
     summary = f"kill agent_id={agent_id} dry_run={args.dry_run}"
     if not args.dry_run:
-        p.write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n",
-                     encoding="utf-8")
+        write_session_json(p, record)
     return Outcome(0, summary, payload)
 
 
@@ -885,8 +897,7 @@ def cmd_leave_for_work(args: argparse.Namespace) -> Outcome:
                 p = session_path(s["agent_id"])
                 s["status"] = "stopping"
                 s["stopped_at"] = ts
-                p.write_text(json.dumps(s, indent=2, ensure_ascii=False) + "\n",
-                             encoding="utf-8")
+                write_session_json(p, s)
     return Outcome(0, summary, payload)
 
 
