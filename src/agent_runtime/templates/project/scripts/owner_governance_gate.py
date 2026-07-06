@@ -10,9 +10,36 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
+# Consumer-host guard (issue #273; host-proven in autofolio PR #148): a generated
+# project ships this gate without the source repo's full surface, so checks whose
+# substrate is absent in this checkout are skipped LOUDLY (never silently) and
+# return 0. In the source repo every path below exists, so nothing is ever
+# skipped there — source-repo behavior is unchanged by construction.
+SOURCE_TEMPLATE_ROOT = ROOT / "src" / "agent_runtime" / "templates" / "project"
+ROOT_STATE_SURFACES = ("BACKLOG-BOARD.md", "BACKLOG.md", "STATUS.md")
+SOURCE_ONLY_CHECKS = {"scripts/collaboration_governance_gate.py", "scripts/runtime_asset_usage.py"}
+ROOT_STATE_CHECKS = {"scripts/state_sync_gate.py", "scripts/taskset_work_gate.py"}
+
+
+def skip_reason(args: list[str]) -> str:
+    """Why this check cannot run in this checkout ('' when it can)."""
+    script = args[0]
+    if not (ROOT / script).exists():
+        return f"script missing: {script}"
+    if script in SOURCE_ONLY_CHECKS and not SOURCE_TEMPLATE_ROOT.exists():
+        return f"host checkout skip: {SOURCE_TEMPLATE_ROOT.relative_to(ROOT).as_posix()} is absent"
+    if script in ROOT_STATE_CHECKS and not all((ROOT / p).exists() for p in ROOT_STATE_SURFACES):
+        missing = ", ".join(p for p in ROOT_STATE_SURFACES if not (ROOT / p).exists())
+        return f"host checkout skip: root state surfaces absent ({missing})"
+    return ""
+
 
 def run(args: list[str]) -> int:
     label = " ".join(args)
+    reason = skip_reason(args)
+    if reason:
+        print(f"owner-governance: skip: {label} ({reason})", flush=True)
+        return 0
     print(f"owner-governance: start: {label}", flush=True)
     rc = subprocess.call([sys.executable, *args], cwd=ROOT)
     print(f"owner-governance: result: {label} -> {rc}", flush=True)
