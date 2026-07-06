@@ -35,3 +35,12 @@ def test_output_is_ascii_only() -> None:
     # Onboarding runs on fresh consoles (cp949 on Windows); keep output ASCII.
     result = _run("--check")
     result.stdout.encode("ascii")
+
+
+def test_one_shot_wrappers_delegate_to_bootstrap() -> None:
+    # setup.ps1 / setup.sh are the clone-and-run entry points; both must exist
+    # and delegate to the bootstrap script with --apply.
+    for name in ("setup.ps1", "setup.sh"):
+        wrapper = (REPO_ROOT / name).read_text(encoding="utf-8")
+        assert "scripts/bootstrap_dev_env.py" in wrapper, name
+        assert "--apply" in wrapper, name

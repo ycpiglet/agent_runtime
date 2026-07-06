@@ -3,15 +3,18 @@
 > 이 저장소의 작업 환경을 새 머신(또는 클라우드)에서 재현하는 정본 가이드.
 > 행동 계약은 `AGENTS.md`, 현황은 `STATUS.md`, Claude Code 요약은 `CLAUDE.md` 참조.
 
-## Bottom Line — 3커맨드 셋업
+## Bottom Line — clone 후 원커맨드 셋업
 
 ```sh
 git clone https://github.com/ycpiglet/agent_runtime.git && cd agent_runtime
-pip install -e .
-python scripts/bootstrap_dev_env.py --apply   # 배선 점검 + hooksPath 자동 수리
+./setup.sh          # macOS/Linux
+.\setup.ps1         # Windows (차단 시: powershell -ExecutionPolicy Bypass -File setup.ps1)
 ```
 
-이후 `gh auth login`(최초 1회)과 SSH 키 등록만 하면 이 PC와 동일하게 작업할 수 있다.
+setup 스크립트가 editable 설치 → hooksPath 배선 → push URL SSH 전환 →
+gh 미인증 시 `gh auth login`까지 한 번에 처리한다. SSH 키 등록만 별도로 하면
+이 PC와 동일하게 작업할 수 있다. (내부적으로
+`python scripts/bootstrap_dev_env.py --apply --ssh-push`를 실행 — 수동 경로도 동일)
 
 ## 1. 사전 요구사항
 
@@ -22,16 +25,19 @@ python scripts/bootstrap_dev_env.py --apply   # 배선 점검 + hooksPath 자동
 | GitHub CLI (`gh`) | 이슈/PR/릴리스 자동화 | `gh auth login` 필요 |
 | SSH 키 (GitHub 등록) | push 전송 | 아래 §3 — 릴리스 작업에 사실상 필수 |
 
-## 2. 셋업 절차 (왜 각 단계가 필요한가)
+## 2. setup이 하는 일 (왜 각 단계가 필요한가)
 
 1. **`pip install -e .` (editable 설치)** — src 레이아웃 패키지라 editable이 아니면
    site-packages의 옛 빌드가 import되어 "코드 고쳤는데 반영 안 됨" 사고가 난다
-   (2026-06-11 실사례).
+   (2026-06-11 실사례). bootstrap `--apply`가 미설치/오설치를 감지하면 직접 실행한다.
 2. **`git config core.hooksPath .githooks`** — 게이트 체인·evidence INDEX·호스트 락
    재생성이 pre-commit 훅으로 돈다. 미설정 시 로컬 커밋이 게이트를 전부 건너뛰고
    **CI에서만 터진다** (2026-07-06 실사례: PR #267/#268 각 1회 red).
-3. **`python scripts/bootstrap_dev_env.py --apply`** — 위 두 가지 + push 전송 +
-   gh 인증을 한 번에 점검한다. `--apply --ssh-push`를 주면 push URL도 SSH로 전환.
+3. **push URL SSH 전환 + gh 인증** — §3 근거. setup 래퍼는 gh가 미인증이면
+   `gh auth login`을 바로 띄운다.
+
+수동/부분 실행이 필요하면 `python scripts/bootstrap_dev_env.py --check`(점검만) /
+`--apply`(editable+hooksPath 수리) / `--apply --ssh-push`(push URL까지)를 쓴다.
 
 ## 3. GitHub 인증 — push는 SSH를 권장
 

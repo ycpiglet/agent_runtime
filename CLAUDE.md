@@ -8,8 +8,9 @@
 ## 환경 배선 (새 머신이면 가장 먼저)
 
 ```sh
-pip install -e .                                # src 레이아웃 — editable 필수
-python scripts/bootstrap_dev_env.py --apply     # hooksPath 등 일괄 점검/수리
+./setup.sh    # macOS/Linux — Windows는 .\setup.ps1
+# = python scripts/bootstrap_dev_env.py --apply --ssh-push (+ gh 로그인 유도)
+#   editable 설치·hooksPath·SSH push까지 원커맨드로 세팅
 ```
 
 - `core.hooksPath`가 `.githooks`가 아니면 게이트/락 재생성이 로컬에서 안 돌고
