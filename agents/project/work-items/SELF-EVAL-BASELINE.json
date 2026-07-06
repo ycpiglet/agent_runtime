@@ -1,12 +1,12 @@
 {
   "schema": "agent-runtime-self-eval/v1",
-  "version": "v0.2.0",
+  "version": "v0.6.0",
   "fixed": {
-    "completed_tasks": 194,
-    "open_tasks": 25,
-    "verification_coverage_pct": 18.6,
-    "est_tokens_total": 814600,
-    "est_hours_total": 1546.0,
+    "completed_tasks": 257,
+    "open_tasks": 0,
+    "verification_coverage_pct": 28.0,
+    "est_tokens_total": 1121100,
+    "est_hours_total": 1758.0,
     "first_try_test_pass_rate": null,
     "gate_failure_count": null,
     "rework_count": null,
@@ -15,8 +15,9 @@
     "owner_intervention_count": null
   },
   "variable": {
-    "w4b_records": 37,
+    "w4b_records": 72,
     "council_deliberations": 1
   },
+  "hosts": [],
   "note": "Advisory only. null fixed metrics await WORK-SCHEMA actuals capture."
 }

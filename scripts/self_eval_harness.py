@@ -14,6 +14,13 @@ N->N+1 delta, NEVER blocks) until a trustworthy baseline + R3 sign-off exist.
 Where a fixed metric has no captured substrate yet (WORK-SCHEMA actuals such as
 rework_count / first_try_test_pass), it is reported as `null` and excluded from
 the fitness delta -- the schema is the spine, the captured values are the muscle.
+
+Host real-usage pipeline (GH #128 request 4): hosts (e.g. autofolio) supply
+per-cycle metric snapshots as ``agent-runtime-host-eval/v1`` JSON files under
+``agents/host/eval/`` (the host-owned namespace from
+docs/host-context-read-location.md). The harness ingests them additively into
+the snapshot's ``hosts`` section; absence of the directory is not an error, and
+unreadable/foreign files are listed loudly as skipped, never dropped silently.
 """
 
 from __future__ import annotations
@@ -29,6 +36,7 @@ TASKS = ROOT / "agents" / "lead_engineer" / "tasks"
 REVIEWS = ROOT / "reviews"
 BASELINE = ROOT / "agents" / "project" / "work-items" / "SELF-EVAL-BASELINE.json"
 SCHEMA = "agent-runtime-self-eval/v1"
+HOST_SCHEMA = "agent-runtime-host-eval/v1"
 
 # Fixed (held-out) metrics: meaningful regardless of version. Some are computed
 # now; the rest are declared so the held-out spine is stable and a later
@@ -67,6 +75,30 @@ def _frontmatter(text: str) -> dict[str, str]:
             key, _, value = line.partition(":")
             meta[key.strip()] = value.strip()
     return meta
+
+
+def load_host_snapshots(root: Path = ROOT) -> tuple[list[dict], list[str]]:
+    """Read host-supplied eval snapshots from agents/host/eval/ (absence is fine)."""
+    hosts: list[dict] = []
+    skipped: list[str] = []
+    host_dir = root / "agents" / "host" / "eval"
+    if not host_dir.is_dir():
+        return hosts, skipped
+    for path in sorted(host_dir.rglob("*.json")):
+        rel = path.relative_to(root).as_posix()
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            skipped.append(f"{rel}: unreadable ({exc.__class__.__name__})")
+            continue
+        if not isinstance(data, dict) or data.get("schema") != HOST_SCHEMA:
+            skipped.append(f"{rel}: schema is not {HOST_SCHEMA}")
+            continue
+        if not data.get("host") or not data.get("cycle"):
+            skipped.append(f"{rel}: missing required host/cycle fields")
+            continue
+        hosts.append(data)
+    return hosts, skipped
 
 
 def compute_snapshot(version: str, root: Path = ROOT) -> dict:
@@ -118,7 +150,8 @@ def compute_snapshot(version: str, root: Path = ROOT) -> dict:
         fixed["rework_count"] = captured["rework_count"]
         fixed["reopened_count"] = captured["reopened_count"]
 
-    return {
+    hosts, host_skipped = load_host_snapshots(root)
+    snapshot = {
         "schema": SCHEMA,
         "version": version,
         "fixed": fixed,
@@ -127,8 +160,12 @@ def compute_snapshot(version: str, root: Path = ROOT) -> dict:
             "w4b_records": len(list(reviews_dir.glob("W4B-*.md"))),
             "council_deliberations": len(list(reviews_dir.glob("COUNCIL-*.md"))),
         },
+        "hosts": hosts,
         "note": "Advisory only. null fixed metrics await WORK-SCHEMA actuals capture.",
     }
+    if host_skipped:
+        snapshot["host_skipped"] = host_skipped
+    return snapshot
 
 
 def advisory_gate(current: dict, baseline: dict | None) -> list[str]:
@@ -150,6 +187,14 @@ def advisory_gate(current: dict, baseline: dict | None) -> list[str]:
             improved = (delta > 0) == HIGHER_IS_BETTER.get(name, True)
             verdict = "improved" if improved else "REGRESSED"
         lines.append(f"  {name}: {b} -> {c} ({'+' if delta > 0 else ''}{delta}) {verdict}")
+    for host in current.get("hosts", []):
+        supplied = len(host.get("fixed") or {}) + len(host.get("variable") or {})
+        lines.append(
+            f"  host[{host.get('host')}] cycle {host.get('cycle')}:"
+            f" {supplied} real-usage metrics supplied"
+        )
+    for reason in current.get("host_skipped", []):
+        lines.append(f"  host-eval SKIPPED {reason}")
     return lines
 
 
