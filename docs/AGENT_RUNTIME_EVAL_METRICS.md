@@ -162,6 +162,41 @@ no hardcoded consumer paths), and reuses the git helpers from
 
 ---
 
+## 5b. Host real-usage pipeline (`agent-runtime-host-eval/v1`)
+
+Request 4 of agent_runtime#128: real-usage hosts (e.g. autofolio) supply
+per-cycle metric snapshots so platform eval runs on real workload data, not
+only on the platform's own records.
+
+- **Drop location:** `agents/host/eval/*.json` — inside the host-owned
+  namespace from `docs/host-context-read-location.md`, so templates never ship
+  or overwrite it and absence is never an error. In the platform repo this is
+  where host-relayed snapshots get committed (the same intake path as
+  `HOST-FEEDBACK-QUEUE`); a host repo that copies the harness reads its own
+  `agents/host/eval/` the same way.
+- **File schema (one JSON per cycle):**
+
+  ```json
+  {
+    "schema": "agent-runtime-host-eval/v1",
+    "host": "autofolio",
+    "cycle": "2026-07-pilot-wave-1",
+    "fixed": {"gate_failure_count": 2, "rework_count": 1},
+    "variable": {"wave_concurrency": 3, "footprint_violations": 0}
+  }
+  ```
+
+  `schema`, `host`, and `cycle` are required. `fixed` uses the section-1
+  vocabulary (subset OK); `variable` carries the host's per-version capability
+  metrics (section-2 semantics, host-defined keys).
+- **Ingestion:** `scripts/self_eval_harness.py` loads every matching file into
+  the snapshot's `hosts` list (`--report`, `--write`, `--gate` all see them);
+  the advisory gate prints one line per host cycle. Unreadable or
+  foreign-schema files are listed loudly under `host_skipped` — never dropped
+  silently.
+
+---
+
 ## 6. What still needs instrumentation (deferred)
 
 Section 1 lists eight fixed metrics. The git-derivable subset plus the

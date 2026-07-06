@@ -41,6 +41,9 @@ files nothing reads.
 - **Framework (future):** components that want host context (planning loop,
   deliberation, dashboards) read this path. The file is optional; absence
   means "no host context provided" and MUST NOT be an error.
+- **Wired today:** `scripts/self_eval_harness.py` reads host-supplied eval
+  snapshots from `agents/host/eval/*.json`
+  (`agent-runtime-host-eval/v1`; see `docs/AGENT_RUNTIME_EVAL_METRICS.md` §5b).
 
 ## Overriding managed files is a different problem
 

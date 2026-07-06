@@ -39,3 +39,57 @@ def test_null_metrics_excluded_from_delta() -> None:
     lines = se.advisory_gate(cur, base)
     assert not any("rework_count" in line for line in lines)
     assert any("completed_tasks" in line for line in lines)
+
+
+def _host_root(tmp_path):
+    # Minimal repo layout for compute_snapshot/load_host_snapshots against a tmp root.
+    (tmp_path / "agents" / "lead_engineer" / "tasks").mkdir(parents=True)
+    (tmp_path / "reviews").mkdir()
+    return tmp_path
+
+
+def test_host_eval_absence_is_not_an_error(tmp_path) -> None:
+    root = _host_root(tmp_path)
+    snap = se.compute_snapshot("test", root=root)
+    assert snap["hosts"] == []
+    assert "host_skipped" not in snap
+
+
+def test_host_eval_snapshot_ingested_and_reported(tmp_path) -> None:
+    root = _host_root(tmp_path)
+    host_dir = root / "agents" / "host" / "eval"
+    host_dir.mkdir(parents=True)
+    payload = {
+        "schema": se.HOST_SCHEMA,
+        "host": "autofolio",
+        "cycle": "2026-07-pilot-wave-1",
+        "fixed": {"gate_failure_count": 2, "rework_count": 1},
+        "variable": {"wave_concurrency": 3, "footprint_violations": 0},
+    }
+    (host_dir / "autofolio-2026-07.json").write_text(
+        __import__("json").dumps(payload), encoding="utf-8"
+    )
+    snap = se.compute_snapshot("test", root=root)
+    assert snap["hosts"] == [payload]
+    lines = "\n".join(se.advisory_gate(snap, {"version": "v1", "fixed": {}}))
+    assert "host[autofolio] cycle 2026-07-pilot-wave-1: 4 real-usage metrics supplied" in lines
+
+
+def test_host_eval_foreign_or_incomplete_files_are_listed_not_dropped(tmp_path) -> None:
+    root = _host_root(tmp_path)
+    host_dir = root / "agents" / "host" / "eval"
+    host_dir.mkdir(parents=True)
+    (host_dir / "broken.json").write_text("{not json", encoding="utf-8")
+    (host_dir / "foreign.json").write_text('{"schema": "other/v1"}', encoding="utf-8")
+    (host_dir / "incomplete.json").write_text(
+        '{"schema": "%s", "host": "autofolio"}' % se.HOST_SCHEMA, encoding="utf-8"
+    )
+    snap = se.compute_snapshot("test", root=root)
+    assert snap["hosts"] == []
+    skipped = "\n".join(snap["host_skipped"])
+    assert "broken.json: unreadable" in skipped
+    assert "foreign.json: schema is not" in skipped
+    assert "incomplete.json: missing required host/cycle" in skipped
+    # The advisory gate surfaces the skips loudly.
+    lines = "\n".join(se.advisory_gate(snap, {"version": "v1", "fixed": {}}))
+    assert "host-eval SKIPPED" in lines
