@@ -14,8 +14,10 @@ spine, variable = limbs).
 This is a watch-only signal, not a gate:
 - ``--check`` always exits 0 and never mutates state.
 - Metrics with no source in the repo are emitted honestly as
-  ``status: not_collected`` with ``value: null`` (e.g. ``owner_interventions``),
-  never faked or estimated.
+  ``status: not_collected`` with ``value: null`` (e.g. live token metering),
+  never faked or estimated. ``owner_interventions`` is synthesized from the
+  decision records that DO exist (owner_request tasks + OWNER-APPROVAL
+  records); the GitHub-comment axis stays uncollected.
 
 Boundaries (deliberate):
 - Source-repo tool only. NOT wired into ``owner_governance_gate.py`` and never
@@ -113,6 +115,7 @@ def _not_collected(reason: str) -> dict[str, Any]:
 
 TASKS_GLOB = "agents/lead_engineer/tasks/*.md"
 VERIFY_GLOB = "reviews/VERIFY-*.json"
+OWNER_APPROVAL_GLOB = "reviews/OWNER-APPROVAL-*.json"
 
 _FM_RE = re.compile(r"^---\s*$(.*?)^---\s*$", re.DOTALL | re.MULTILINE)
 # Flat "key: value" frontmatter lines (the closure/measurement fields we need
@@ -258,6 +261,43 @@ def _collect_tasks(root: Path, lo: datetime | None, hi: datetime | None) -> dict
     }
 
 
+def _collect_owner_interventions(
+    root: Path, lo: datetime | None, hi: datetime | None
+) -> dict[str, int]:
+    """Owner interventions synthesized from existing decision records (GH #128).
+
+    Two axes, no invented sources:
+    - directive: tasks with ``origin_type: owner_request`` whose ``registered_at``
+      falls in the window (the Owner steering work into existence);
+    - approval: ``reviews/OWNER-APPROVAL-*.json`` records whose ``generated_at``
+      (fallback ``decision_date``) falls in the window (the Owner deciding).
+    The GitHub-comment axis (Owner decisions left on issues/PRs) has no repo
+    record and stays uncollected.
+    """
+    directive = 0
+    for path in sorted(root.glob(TASKS_GLOB)):
+        try:
+            fm = _parse_frontmatter(path.read_text(encoding="utf-8"))
+        except OSError:
+            continue
+        if fm.get("origin_type") != "owner_request":
+            continue
+        if _in_window(_parse_iso(fm.get("registered_at", "")), lo, hi):
+            directive += 1
+    approvals = 0
+    for path in sorted(root.glob(OWNER_APPROVAL_GLOB)):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(data, dict):
+            continue
+        ts = _parse_iso(str(data.get("generated_at") or data.get("decision_date") or ""))
+        if _in_window(ts, lo, hi):
+            approvals += 1
+    return {"directive": directive, "approvals": approvals}
+
+
 def _work_schema_metrics(
     root: Path, lo: datetime | None, hi: datetime | None
 ) -> dict[str, dict[str, Any]]:
@@ -332,9 +372,15 @@ def _work_schema_metrics(
             "no in-window tasks carry both started_at and completed_at"
         )
 
-    # Genuinely unsourced: nothing in the repo records owner decisions per task.
-    metrics["owner_interventions"] = _not_collected(
-        "no owner-intervention instrumentation in repo records (agent_runtime#128 follow-up)"
+    # Synthesized from existing decision records (directive + approval axes);
+    # the GitHub-comment axis has no repo record and stays uncollected.
+    interventions = _collect_owner_interventions(root, lo, hi)
+    metrics["owner_interventions"] = _fixed(
+        interventions["directive"] + interventions["approvals"],
+        f"{TASKS_GLOB} origin_type=owner_request (in-window registered_at)"
+        f" + {OWNER_APPROVAL_GLOB} (in-window generated_at)",
+        f"directive={interventions['directive']} approval={interventions['approvals']};"
+        " gh-comment decisions not collected (no repo record)",
     )
     return metrics
 
