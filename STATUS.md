@@ -1,5 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-06 (2차) - 이슈 전량 정리: #128/#132/#250 종료 — 열린 이슈 0 도달
+
+- Owner 지시("#128 정리 후 132, 250 정리")로 잔여 이슈 3건을 전부 종료했다. **열린 이슈 0 + 백로그 보드 open 0.**
+- **#128 close-out(PR #270)**: 게시된 설계대로 `owner_interventions`를 기존 결정 레코드 합성으로 수집(directive: owner_request 등록 / approval: OWNER-APPROVAL-*.json; gh-comment 축만 not_collected 잔존). 하네스에 `est_*_per_completed_task` 지표를 추가하고 누적 총량은 context-only로 판정에서 제외해 v0.2.0→v0.6.0 델타의 REGRESSED 오탐 2건을 해소. #128에 게시됐던 autofolio 파일럿 실데이터(N=20 tasks, first_pass 0.95)를 `agents/host/eval/` 첫 파일로 백필해 호스트 파이프라인 E2E를 실증했다. 4개 요청 전부 v1 이행으로 종료.
+- **#132 종료**: 선행조건 5개 중 upstream 몫 전부 출하 확인(가드+proposal-only 계약 PR #253, 수렴 하네스 #128 계열, 가시성 레코드). **아무것도 활성화 안 됨** — 데몬 기본 OFF 유지, 24/7 전환은 호스트 단계 계획+Owner go 신호로 별도 사안.
+- **#250 종료**: 옵션 A(지식스택, PR #267) 이행 완료 + UI 레인은 현 decision-inbox IA 유지로 아카이브 확정. `archive/branches/20260704/decision-first-v2-lane` 영구 핀 + sweep dangling-lane 추적으로 유실 없음. 부활 경로(별도 taskset 재이식) 명시.
+- Evidence: PR #270; 이슈 #128/#132/#250 close 코멘트; `python scripts/self_eval_harness.py --gate` 출력의 'host[autofolio] … 7 real-usage metrics supplied'.
+
 ## 2026-07-06 - Owner 결정 배치 이행: v0.6.0 발행 + #250 옵션 A 통합 + #128 호스트 파이프라인
 
 - Owner 지시("#132 제외하고 전부 진행", 2026-07-06)로 대기 중이던 결정 4건을 일괄 이행했다.
