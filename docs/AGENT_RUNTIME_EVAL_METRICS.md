@@ -45,7 +45,7 @@ across versions is the spine of "is the platform actually getting better".
 | `wall_clock_per_task` | Real time from task start to completion (`lead_time`) | WORK-SCHEMA `started_at`/`completed_at` | **Yes** (real source) |
 | `tokens_per_task` | Tokens consumed per task | WORK-SCHEMA `actual_tokens` (closure) | **Yes** (real source) |
 | `merge_conflict_count` | Merge conflicts during integration | git | Yes (merge-commit proxy) |
-| `owner_interventions` | Owner decisions/corrections per task | Manual count | **NOT COLLECTED** (no source) |
+| `owner_interventions` | Owner decisions/corrections per task | owner_request tasks + OWNER-APPROVAL records (synthesis) | **Yes** (directive+approval axes; gh-comment axis not collected) |
 
 ### What `scripts/self_eval_metrics.py` computes today
 
@@ -79,7 +79,7 @@ window bounds are the committer timestamps of the from/to refs):
 | `actual_tokens_total` / `tokens_per_task` | `tokens_per_task` | WORK-SCHEMA measurement `actual_tokens` (sum, and per-task mean) |
 | `actual_hours_total` / `hours_per_task` | effort | WORK-SCHEMA measurement `actual_hours` (sum, and per-task mean) |
 | `wall_clock_hours_total` / `wall_clock_per_task` | `wall_clock_per_task` | `lead_time = completed_at - started_at` (sum, and per-task mean) |
-| `owner_interventions` | `owner_interventions` | **`not_collected`** -- no source in repo records |
+| `owner_interventions` | `owner_interventions` | synthesized: `origin_type: owner_request` tasks (in-window `registered_at`) + `reviews/OWNER-APPROVAL-*.json` (in-window `generated_at`); gh-comment axis stays `not_collected` |
 
 > **Honest framing.** `first_pass_rate_proxy` and `rework_count` are still *git
 > subject proxies*, not the precise WORK-SCHEMA measurements; `reverification_count`
@@ -89,8 +89,9 @@ window bounds are the committer timestamps of the from/to refs):
 > measurement / verification source. Per-task means are emitted only when at
 > least one in-window task actually carries the field -- otherwise the field is
 > `not_collected` with `value: null` (never a fabricated zero-denominator value).
-> `owner_interventions` has no source anywhere in the repo records and stays
-> `not_collected`. We do not fake them.
+> `owner_interventions` is a *synthesis* of the decision records that do exist
+> (directive: `owner_request` tasks; approval: `OWNER-APPROVAL-*.json`) -- the
+> gh-comment axis has no repo record and is excluded rather than guessed.
 
 ---
 
@@ -211,10 +212,15 @@ are now automated. Newly wired from existing data (agent_runtime#128):
 - **`reverification_count`** -- repeat-verification rounds as a rework/reopen
   *proxy*.
 
+Newly wired (2026-07-06, GH #128 close-out): **`owner_interventions`** is now
+synthesized from `origin_type: owner_request` tasks + `OWNER-APPROVAL-*.json`
+records (directive + approval axes). Only the gh-comment axis (Owner decisions
+left on issues/PRs) remains unsourced.
+
 Still genuinely unsourced (remain `not_collected`):
 
-1. **`owner_interventions`** -- no per-task owner-decision capture exists in any
-   repo record.
+1. **Owner gh-comment decisions** -- no repo record; would need an issue/PR
+   decision-capture convention.
 2. **Per-task CI oracle** -- first-attempt FAILURE/SUCCESS per task to replace
    the `first_pass_rate` *proxy* with the true rate. (`gate_failure_count` and
    `reverification_count` now give a real-but-coarse signal in the meantime.)

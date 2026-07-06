@@ -395,14 +395,57 @@ def test_since_until_aliases_for_from_to(tmp_path: Path) -> None:
     assert report["fixed_metrics"]["feat_count"]["value"] == 2
 
 
-def test_owner_interventions_stays_not_collected(tmp_path: Path) -> None:
+def test_owner_interventions_synthesized_from_decision_records(tmp_path: Path) -> None:
+    """Directive (owner_request tasks) + approval (OWNER-APPROVAL records), window-filtered."""
+    repo = _build_work_schema_repo(tmp_path)
+
+    tasks = repo / "agents" / "lead_engineer" / "tasks"
+    (tasks / "TASK-AR-OWNER1.md").write_text(
+        "\n".join(
+            [
+                "---",
+                "schema_version: agent-runtime-work-item/v1",
+                "id: TASK-AR-OWNER1",
+                "kind: task",
+                "status: completed",
+                "origin_type: owner_request",
+                f"registered_at: {_ts(6, 9)}",
+                f"completed_at: {_ts(6, 12)}",
+                "---",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    reviews = repo / "reviews"
+    (reviews / "OWNER-APPROVAL-GATE-in.json").write_text(
+        json.dumps({"schema": "agent-runtime-owner-approval-gate/v1", "generated_at": _ts(7, 10)}),
+        encoding="utf-8",
+    )
+    # Out-of-window approval (day 28, after the v0.2.0 tag) must be excluded.
+    (reviews / "OWNER-APPROVAL-GATE-out.json").write_text(
+        json.dumps({"schema": "agent-runtime-owner-approval-gate/v1", "generated_at": _ts(28, 10)}),
+        encoding="utf-8",
+    )
+
+    report = _run_json(repo, "--from", "v0.1.0", "--to", "v0.2.0")
+    metric = report["fixed_metrics"]["owner_interventions"]
+
+    assert metric["status"] == "collected"
+    assert metric["value"] == 2
+    assert "directive=1" in metric["note"]
+    assert "approval=1" in metric["note"]
+
+
+def test_owner_interventions_zero_when_no_decision_records(tmp_path: Path) -> None:
+    """No owner_request tasks / approval records => honest zero, still collected."""
     repo = _build_work_schema_repo(tmp_path)
 
     report = _run_json(repo, "--from", "v0.1.0", "--to", "v0.2.0")
     metric = report["fixed_metrics"]["owner_interventions"]
 
-    assert metric["status"] == "not_collected"
-    assert metric["value"] is None
+    assert metric["status"] == "collected"
+    assert metric["value"] == 0
 
 
 def test_work_schema_metrics_absent_when_no_records(tmp_path: Path) -> None:

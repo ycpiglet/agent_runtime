@@ -47,21 +47,28 @@ FIXED_METRICS = (
     "verification_coverage_pct",
     "est_tokens_total",
     "est_hours_total",
+    "est_tokens_per_completed_task",
+    "est_hours_per_completed_task",
+    "owner_intervention_count",
     # Declared, awaiting WORK-SCHEMA actuals capture (reported null until then):
     "first_try_test_pass_rate",
     "gate_failure_count",
     "rework_count",
     "reopened_count",
     "merge_conflict_count",
-    "owner_intervention_count",
 )
 # "higher is better" direction per computed metric (for the advisory verdict).
+# None = context-only: cumulative repo totals grow monotonically with work done,
+# so a bigger number is not a regression -- report the delta, never judge it.
 HIGHER_IS_BETTER = {
     "completed_tasks": True,
     "verification_coverage_pct": True,
     "open_tasks": False,
-    "est_tokens_total": False,
-    "est_hours_total": False,
+    "est_tokens_total": None,
+    "est_hours_total": None,
+    "owner_intervention_count": None,
+    "est_tokens_per_completed_task": False,
+    "est_hours_per_completed_task": False,
 }
 
 
@@ -108,11 +115,14 @@ def compute_snapshot(version: str, root: Path = ROOT) -> dict:
     open_count = 0
     est_tokens = 0
     est_hours = 0.0
+    owner_requests = 0
     captured: dict[str, int] = {"gate_failure_count": 0, "rework_count": 0, "reopened_count": 0}
     have_actuals = False
     for path in tasks_dir.glob("TASK-*.md"):
         meta = _frontmatter(path.read_text(encoding="utf-8", errors="replace"))
         status = meta.get("status", "").lower()
+        if meta.get("origin_type") == "owner_request":
+            owner_requests += 1
         try:
             est_tokens += int(meta.get("est_tokens", "0") or 0)
             est_hours += float(meta.get("est_hours", "0") or 0)
@@ -145,6 +155,13 @@ def compute_snapshot(version: str, root: Path = ROOT) -> dict:
     fixed["verification_coverage_pct"] = coverage
     fixed["est_tokens_total"] = est_tokens
     fixed["est_hours_total"] = round(est_hours, 1)
+    if completed:
+        fixed["est_tokens_per_completed_task"] = round(est_tokens / len(completed), 1)
+        fixed["est_hours_per_completed_task"] = round(est_hours / len(completed), 2)
+    # Owner interventions: directive (owner_request tasks) + approval records.
+    fixed["owner_intervention_count"] = owner_requests + len(
+        list(reviews_dir.glob("OWNER-APPROVAL-*.json"))
+    )
     if have_actuals:
         fixed["gate_failure_count"] = captured["gate_failure_count"]
         fixed["rework_count"] = captured["rework_count"]
@@ -181,10 +198,13 @@ def advisory_gate(current: dict, baseline: dict | None) -> list[str]:
         if c is None or b is None:
             continue
         delta = round(c - b, 1)
-        if delta == 0:
+        direction = HIGHER_IS_BETTER.get(name, True)
+        if direction is None:
+            verdict = "context-only (cumulative, not judged)"
+        elif delta == 0:
             verdict = "flat"
         else:
-            improved = (delta > 0) == HIGHER_IS_BETTER.get(name, True)
+            improved = (delta > 0) == direction
             verdict = "improved" if improved else "REGRESSED"
         lines.append(f"  {name}: {b} -> {c} ({'+' if delta > 0 else ''}{delta}) {verdict}")
     for host in current.get("hosts", []):
