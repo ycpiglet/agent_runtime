@@ -34,6 +34,32 @@ STRUCTURAL_RELS = {"partOf", "dependsOn", "blocks"}
 # their isolation is expected and must not drown the signal.
 CONNECTED_KINDS = {"task", "taskset", "initiative", "unit", "verification", "domain"}
 
+# Expanded LLM-Wiki corpus nodes are derived from concrete repo artifacts. Lint
+# keeps the contract deliberately small: every node must identify its source,
+# relation types must match the ingest adapter, and only unconditional adapter
+# relations are mandatory. This avoids blocking standalone docs/config/schema
+# files that simply do not cite another entity yet.
+EXPANDED_SOURCE_FIELDS = {
+    "doc": ("path",),
+    "module": ("path",),
+    "file": ("path",),
+    "config": ("path",),
+    "schema": ("path",),
+    "asset": ("asset_id",),
+}
+EXPANDED_ALLOWED_RELS = {
+    "doc": {"references", "documents"},
+    "module": {"defined_in", "imports", "tests", "tested_by"},
+    "file": set(),
+    "config": {"configures"},
+    "schema": {"validates"},
+    "asset": {"defined_in", "used_by", "enforces"},
+}
+EXPANDED_REQUIRED_ANY_RELS = {
+    "module": {"defined_in"},
+    "asset": {"defined_in", "used_by", "enforces"},
+}
+
 Finding = dict[str, Any]
 
 
@@ -62,6 +88,85 @@ def lint_structural(graph: dict, idx: kg.GraphIndex) -> list[Finding]:
             continue
         if not idx.forward.get(nid) and not idx.backward.get(nid):
             findings.append(_finding("orphan-entity", "watch", nid, f"{nid} ({node.get('kind')}) has no relations"))
+
+    findings.extend(lint_expanded_corpus(graph))
+    return findings
+
+
+def _relation_types(node: dict) -> set[str]:
+    return {str(relation.get("type") or "") for relation in node.get("relations") or [] if relation.get("type")}
+
+
+def _relation_targets(node: dict, rel_type: str) -> set[str]:
+    return {
+        str(relation.get("target") or "")
+        for relation in node.get("relations") or []
+        if relation.get("type") == rel_type and relation.get("target")
+    }
+
+
+def _is_work_entity_id(value: str) -> bool:
+    return value.startswith("TASK-AR-") or value.startswith("TASKSET-") or value.startswith("INIT-")
+
+
+def lint_expanded_corpus(graph: dict) -> list[Finding]:
+    findings: list[Finding] = []
+    for node in graph.get("nodes", []) or []:
+        kind = str(node.get("kind") or "")
+        if kind not in EXPANDED_SOURCE_FIELDS:
+            continue
+
+        metadata = node.get("metadata") if isinstance(node.get("metadata"), dict) else {}
+        eid = str(node.get("id") or "")
+        for field in EXPANDED_SOURCE_FIELDS[kind]:
+            if not str(metadata.get(field) or "").strip():
+                findings.append(_finding(
+                    "expanded-corpus-missing-source",
+                    "block",
+                    eid,
+                    f"{eid} ({kind}) is missing metadata.{field}",
+                ))
+
+        allowed = EXPANDED_ALLOWED_RELS[kind]
+        for relation in node.get("relations") or []:
+            rel_type = str(relation.get("type") or "")
+            if rel_type not in allowed:
+                findings.append(_finding(
+                    "expanded-corpus-invalid-relation",
+                    "block",
+                    eid,
+                    f"{eid} ({kind}) has unsupported relation type {rel_type or 'missing'}",
+                ))
+
+        relation_types = _relation_types(node)
+        required_any = EXPANDED_REQUIRED_ANY_RELS.get(kind)
+        if required_any and not (relation_types & required_any):
+            findings.append(_finding(
+                "expanded-corpus-missing-relation",
+                "block",
+                eid,
+                f"{eid} ({kind}) requires one of {','.join(sorted(required_any))}",
+            ))
+
+        if kind == "doc":
+            references = _relation_targets(node, "references")
+            documents = _relation_targets(node, "documents")
+            missing_documents = sorted(target for target in references if _is_work_entity_id(target) and target not in documents)
+            missing_references = sorted(target for target in documents if target not in references)
+            for target in missing_documents:
+                findings.append(_finding(
+                    "expanded-corpus-missing-relation",
+                    "block",
+                    eid,
+                    f"{eid} (doc) references {target} without paired documents relation",
+                ))
+            for target in missing_references:
+                findings.append(_finding(
+                    "expanded-corpus-missing-relation",
+                    "block",
+                    eid,
+                    f"{eid} (doc) documents {target} without paired references relation",
+                ))
 
     return findings
 

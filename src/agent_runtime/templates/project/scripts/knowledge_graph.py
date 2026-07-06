@@ -26,6 +26,7 @@ CLI:
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import re
 import subprocess
@@ -45,7 +46,9 @@ TASK_REF_RE = re.compile(r"TASK-AR-[0-9]+")
 # initiatives). Used to wire review/meeting -> work-item `references` edges so
 # digest backlinks and ask grounding light up (previously bodies were not scanned).
 ENTITY_REF_RE = re.compile(r"\b(?:TASK-AR-[0-9]+|TASKSET-[A-Z0-9][A-Z0-9-]+|INIT-[A-Z0-9][A-Z0-9-]+)\b")
+WIKI_LINK_RE = re.compile(r"\[\[([^\]\n]+)\]\]")
 MAX_BODY_REFS = 40
+MAX_TEXT_SCAN_CHARS = 200_000
 PR_RE = re.compile(r"\(#(\d+)\)")
 REVIEW_DATE_RE = re.compile(r"(20\d{2}-\d{2}-\d{2})")
 REVIEW_KIND_BY_PREFIX = {
@@ -62,6 +65,18 @@ REVIEW_KIND_BY_PREFIX = {
     "CALL": "call",
 }
 ACTIVE_CLAIM_STATUSES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working", "active", "running"}
+SOFT_REL_TYPES = {
+    "references",
+    "documents",
+    "imports",
+    "tests",
+    "tested_by",
+    "defined_in",
+    "configures",
+    "validates",
+    "enforces",
+    "used_by",
+}
 
 
 def enable_utf8_stdout() -> None:
@@ -81,6 +96,30 @@ def _node(kind: str, eid: str, title: str = "", *, metadata: dict | None = None,
 
 def _rel(rel_type: str, target: str) -> dict:
     return {"type": rel_type, "target": target}
+
+
+def _dedupe_relations(relations: list[dict]) -> list[dict]:
+    seen: set[tuple[str, str]] = set()
+    unique: list[dict] = []
+    for relation in relations:
+        rel_type = str(relation.get("type") or "")
+        target = str(relation.get("target") or "")
+        if not rel_type or not target or (rel_type, target) in seen:
+            continue
+        seen.add((rel_type, target))
+        unique.append({"type": rel_type, "target": target})
+    return unique
+
+
+def _repo_rel(root: Path, path: Path) -> str:
+    try:
+        return path.resolve().relative_to(root.resolve()).as_posix()
+    except ValueError:
+        return path.as_posix().replace("\\", "/")
+
+
+def _read_scan_text(path: Path) -> str:
+    return _read_text(path)[:MAX_TEXT_SCAN_CHARS]
 
 
 # --------------------------------------------------------------------------- ingest
@@ -145,6 +184,305 @@ def _reference_targets(name: str, body: str, *, self_id: str = "") -> list[str]:
     found = set(ENTITY_REF_RE.findall(name)) | set(ENTITY_REF_RE.findall(body))
     found.discard(self_id)
     return sorted(found)[:MAX_BODY_REFS]
+
+
+def _markdown_title(text: str, fallback: str) -> str:
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("#"):
+            title = stripped.lstrip("#").strip()
+            if title:
+                return title
+    return fallback
+
+
+def _is_doc_rel(rel: str) -> bool:
+    path = Path(rel)
+    name = path.name
+    if rel.startswith("docs/") and name.lower().endswith(".md"):
+        return True
+    if "/" in rel:
+        return False
+    upper = name.upper()
+    return (
+        upper.startswith("README")
+        or upper == "AGENTS.MD"
+        or upper.startswith("OPS-") and upper.endswith(".MD")
+        or upper.startswith("AGENT_") and upper.endswith(".MD")
+        or upper.endswith("_BRIEF.MD")
+    )
+
+
+def _doc_id(rel: str) -> str:
+    return f"doc:{rel}"
+
+
+def _iter_doc_paths(root: Path) -> list[Path]:
+    paths: set[Path] = set()
+    docs_dir = root / "docs"
+    if docs_dir.is_dir():
+        paths.update(path for path in docs_dir.rglob("*.md") if path.is_file())
+    for pattern in ("README*", "*_BRIEF.md", "OPS-*.md", "AGENT_*.md", "AGENTS.md"):
+        paths.update(path for path in root.glob(pattern) if path.is_file())
+    return sorted(paths, key=lambda path: _repo_rel(root, path))
+
+
+def ingest_docs(root: Path) -> list[dict]:
+    records: list[tuple[Path, str, str, str]] = []
+    aliases: dict[str, str] = {}
+    for path in _iter_doc_paths(root):
+        rel = _repo_rel(root, path)
+        text = _read_scan_text(path)
+        title = _markdown_title(text, rel)
+        eid = _doc_id(rel)
+        records.append((path, rel, text, title))
+        for alias in {rel, rel.removesuffix(".md"), Path(rel).stem, title}:
+            normalized = alias.strip().lower()
+            if normalized:
+                aliases.setdefault(normalized, eid)
+
+    nodes: list[dict] = []
+    for _path, rel, text, title in records:
+        eid = _doc_id(rel)
+        relations: list[dict] = []
+        for ref in _reference_targets(rel, text, self_id=eid):
+            relations.append(_rel("references", ref))
+            relations.append(_rel("documents", ref))
+        for match in WIKI_LINK_RE.finditer(text):
+            label = match.group(1).split("|", 1)[0].strip()
+            target = aliases.get(label.lower()) or aliases.get(label.removesuffix(".md").lower())
+            if target and target != eid:
+                relations.append(_rel("references", target))
+        nodes.append(_node("doc", eid, title, metadata={"path": rel}, relations=_dedupe_relations(relations)))
+    return nodes
+
+
+def _python_source_paths(root: Path) -> list[Path]:
+    paths: set[Path] = set()
+    for rel_base in ("scripts", "src/agent_runtime", "tests"):
+        base = root / rel_base
+        if base.is_dir():
+            paths.update(path for path in base.rglob("*.py") if path.is_file())
+    return sorted(paths, key=lambda path: _repo_rel(root, path))
+
+
+def _module_name_for_rel(rel: str) -> str:
+    dotted = rel.removesuffix(".py").replace("/", ".")
+    if dotted.endswith(".__init__"):
+        dotted = dotted[: -len(".__init__")]
+    return dotted
+
+
+def _module_id_for_rel(rel: str) -> str:
+    return f"module:{_module_name_for_rel(rel)}"
+
+
+def _file_id(rel: str) -> str:
+    return f"file:{rel}"
+
+
+def _module_aliases(rel: str) -> set[str]:
+    dotted = _module_name_for_rel(rel)
+    aliases = {dotted}
+    if dotted.startswith("scripts."):
+        aliases.add(dotted.split(".", 1)[1])
+    if dotted.startswith("src.agent_runtime."):
+        aliases.add("agent_runtime." + dotted.removeprefix("src.agent_runtime."))
+    elif dotted == "src.agent_runtime":
+        aliases.add("agent_runtime")
+    return {alias for alias in aliases if alias}
+
+
+def _import_targets(path: Path, alias_map: dict[str, str]) -> list[str]:
+    try:
+        tree = ast.parse(_read_text(path))
+    except SyntaxError:
+        return []
+    targets: set[str] = set()
+    for node in ast.walk(tree):
+        candidates: list[str] = []
+        if isinstance(node, ast.Import):
+            candidates.extend(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.level == 0:
+            module = node.module or ""
+            if module:
+                candidates.append(module)
+                for alias in node.names:
+                    if alias.name != "*":
+                        candidates.append(f"{module}.{alias.name}")
+        for candidate in candidates:
+            target = alias_map.get(candidate)
+            if target:
+                targets.add(target)
+    return sorted(targets)
+
+
+def ingest_code_modules(root: Path) -> list[dict]:
+    records: list[tuple[Path, str, str, str]] = []
+    alias_map: dict[str, str] = {}
+    by_stem: dict[str, list[str]] = {}
+    for path in _python_source_paths(root):
+        rel = _repo_rel(root, path)
+        module_id = _module_id_for_rel(rel)
+        file_id = _file_id(rel)
+        records.append((path, rel, module_id, file_id))
+        for alias in _module_aliases(rel):
+            alias_map.setdefault(alias, module_id)
+        by_stem.setdefault(path.stem, []).append(module_id)
+
+    modules: dict[str, dict] = {}
+    files: dict[str, dict] = {}
+    for path, rel, module_id, file_id in records:
+        files[file_id] = _node("file", file_id, rel, metadata={"path": rel})
+        imports = [_rel("imports", target) for target in _import_targets(path, alias_map) if target != module_id]
+        modules[module_id] = _node(
+            "module",
+            module_id,
+            _module_name_for_rel(rel),
+            metadata={"path": rel},
+            relations=_dedupe_relations([_rel("defined_in", file_id), *imports]),
+        )
+
+    for _path, rel, module_id, _file_id_value in records:
+        if not rel.startswith("tests/test_"):
+            continue
+        target_stem = Path(rel).stem.removeprefix("test_")
+        for target in sorted(set(by_stem.get(target_stem, []))):
+            if target == module_id:
+                continue
+            modules[module_id]["relations"].append(_rel("tests", target))
+            modules[target]["relations"].append(_rel("tested_by", module_id))
+
+    return [*files.values(), *modules.values()]
+
+
+def _config_schema_kind(rel: str) -> str:
+    name = Path(rel).name.lower()
+    if rel.startswith("schemas/") or name.endswith(".schema.json"):
+        return "schema"
+    return "config"
+
+
+def _config_schema_id(rel: str) -> str:
+    kind = _config_schema_kind(rel)
+    return f"{kind}:{rel}"
+
+
+def _iter_config_schema_paths(root: Path) -> list[Path]:
+    paths: set[Path] = set()
+    for pattern in ("*.yml", "*.yaml", "*.toml"):
+        paths.update(path for path in root.glob(pattern) if path.is_file())
+    hooks = root / ".codex" / "hooks.json"
+    if hooks.is_file():
+        paths.add(hooks)
+    for base_rel in ("schemas", "src/agent_runtime/templates"):
+        base = root / base_rel
+        if base.is_dir():
+            paths.update(
+                path for path in base.rglob("*")
+                if path.is_file() and path.suffix.lower() in {".json", ".yml", ".yaml", ".toml"}
+            )
+    return sorted(paths, key=lambda path: _repo_rel(root, path))
+
+
+def ingest_configs_and_schemas(root: Path) -> list[dict]:
+    nodes: list[dict] = []
+    for path in _iter_config_schema_paths(root):
+        rel = _repo_rel(root, path)
+        kind = _config_schema_kind(rel)
+        edge_type = "validates" if kind == "schema" else "configures"
+        refs = _reference_targets(rel, _read_scan_text(path), self_id="")
+        nodes.append(_node(
+            kind,
+            _config_schema_id(rel),
+            rel,
+            metadata={"path": rel},
+            relations=_dedupe_relations([_rel(edge_type, ref) for ref in refs]),
+        ))
+    return nodes
+
+
+def _node_id_for_rel_path(rel: str) -> str | None:
+    rel = rel.replace("\\", "/")
+    if rel.endswith(".py") and (rel.startswith("scripts/") or rel.startswith("src/agent_runtime/") or rel.startswith("tests/")):
+        return _file_id(rel)
+    if _is_doc_rel(rel):
+        return _doc_id(rel)
+    if rel.startswith("reviews/") and rel.endswith(".md"):
+        return Path(rel).stem
+    if (
+        rel.startswith("schemas/")
+        or rel.startswith("src/agent_runtime/templates/")
+        or Path(rel).suffix.lower() in {".yml", ".yaml", ".toml"}
+        or rel == ".codex/hooks.json"
+    ):
+        return _config_schema_id(rel)
+    return None
+
+
+def _asset_node_id(kind: str, asset_id: str) -> str:
+    clean = asset_id.strip().replace("\\", "/").replace(":", "_")
+    prefix = f"{kind}."
+    if clean.startswith(prefix):
+        clean = clean[len(prefix):]
+    clean = clean.replace(".", "/")
+    return f"asset:{kind}/{clean}"
+
+
+def ingest_assets(root: Path) -> list[dict]:
+    try:
+        import runtime_asset_usage
+    except ImportError:
+        return []
+
+    registry_path = root / runtime_asset_usage.REGISTRY_PATH
+    try:
+        registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    if not isinstance(registry, dict):
+        return []
+    findings, metrics = runtime_asset_usage.analyze(root)
+    _ = findings
+    by_id = {metric.asset_id: metric for metric in metrics}
+    nodes: list[dict] = []
+    for asset in registry.get("assets", []) or []:
+        if not isinstance(asset, dict):
+            continue
+        asset_id = str(asset.get("id") or "").strip()
+        kind = str(asset.get("kind") or "asset").strip() or "asset"
+        if not asset_id:
+            continue
+        metric = by_id.get(asset_id)
+        metadata = {
+            "asset_id": asset_id,
+            "status": asset.get("status"),
+            "lifecycle": asset.get("lifecycle"),
+        }
+        if metric:
+            metadata.update({
+                "path_count": metric.path_count,
+                "evidence_count": metric.evidence_count,
+                "usage_count": metric.usage_count,
+                "reuse": metric.distinct_evidence_hits,
+            })
+        relations: list[dict] = []
+        for raw_path in asset.get("paths", []) or []:
+            target = _node_id_for_rel_path(str(raw_path))
+            if target:
+                relations.append(_rel("defined_in", target))
+        for raw_path in asset.get("evidence_paths", []) or []:
+            target = _node_id_for_rel_path(str(raw_path))
+            if target:
+                relations.append(_rel("used_by", target))
+        nodes.append(_node(
+            "asset",
+            _asset_node_id(kind, asset_id),
+            asset_id,
+            metadata=metadata,
+            relations=_dedupe_relations(relations),
+        ))
+    return nodes
 
 
 def ingest_claims(root: Path) -> list[dict]:
@@ -258,6 +596,10 @@ def build_graph(root: Path, *, git_limit: int = 200) -> dict:
     nodes.extend(ingest_claims(root))
     nodes.extend(ingest_git(root, limit=git_limit))
     nodes.extend(ingest_domains(root))
+    nodes.extend(ingest_docs(root))
+    nodes.extend(ingest_code_modules(root))
+    nodes.extend(ingest_configs_and_schemas(root))
+    nodes.extend(ingest_assets(root))
     seen: set[str] = set()
     unique: list[dict] = []
     for node in nodes:
@@ -267,19 +609,29 @@ def build_graph(root: Path, *, git_limit: int = 200) -> dict:
         seen.add(nid)
         unique.append(node)
 
-    # Prune `references` edges to non-existent targets. Body scanning (ingest_reviews)
-    # matches anything id-shaped — file names like TASKSET-DEFINITIONS, date-like
-    # TASK-AR-20260611, archived ids — which would otherwise show as dangling-edge
-    # noise in lint. Structural (partOf) and `mentions` edges keep their dangling
-    # targets so lint still flags real integrity gaps.
+    # Prune soft derived edges to non-existent targets. Body/code/config scanning
+    # intentionally matches broadly; missing endpoints should not drown real graph
+    # integrity gaps. Structural edges (partOf) and active claim executes edges keep
+    # dangling targets so lint still flags actionable broken state.
     node_ids = {str(n.get("id") or "") for n in unique}
     for node in unique:
         relations = node.get("relations") or []
-        kept = [
-            relation for relation in relations
-            if str(relation.get("type")) != "references"
-            or str(relation.get("target") or "") in node_ids
-        ]
+        kept = []
+        for relation in relations:
+            rel_type = str(relation.get("type") or "")
+            target = str(relation.get("target") or "")
+            if not target or target in node_ids:
+                kept.append(relation)
+                continue
+            if rel_type in SOFT_REL_TYPES:
+                continue
+            if (
+                rel_type == "executes"
+                and str(node.get("kind") or "") == "claim"
+                and not bool((node.get("metadata") or {}).get("active"))
+            ):
+                continue
+            kept.append(relation)
         if len(kept) != len(relations):
             node["relations"] = kept
 
