@@ -1,7 +1,7 @@
 {
   "installed": {
     "managed_files": {
-      ".codex/hooks.json": "sha256:90f632efc1634338bc23d1bdab4619a51386b46cc664d698b332777d3454ead8",
+      ".codex/hooks.json": "sha256:0ce8889258365b8dc239053c0a02f932369c0a865a02880e8881cee65ce72080",
       ".gitattributes": "sha256:22ec718362af48d401e6717569dfcc89ec3573d553dc3f3530f4db8a1625b79b",
       ".githooks/post-merge": "sha256:b112da8578360cd49b871f518afa9c2ffb9f266c416daa02a8a9b17a84196e39",
       ".githooks/pre-commit": "sha256:9b5b120d9b18f39977021db0b543953267cbfcd60f817cf92edd93812d560457",
@@ -192,6 +192,7 @@
       "scripts/scribe_due.py": "sha256:3ba9579be478a9e0a6e0983d4847074f6a503ba64eb67d060ca56ff548c449bb",
       "scripts/secretary_digest.py": "sha256:66a5e85681877eec911fc3dca0f1b19b71004a840f87500d1c78f10cda55b004",
       "scripts/session_dashboard.py": "sha256:1ba6a9a0eb17d1d3e074a761fc197f389c6822a2d736b3549c0e9b02c219c76d",
+      "scripts/session_resume_check.py": "sha256:0dcc415cd8f8b60dc5d242ed118a06e3070fbd08a9b6f46c2237921e815318eb",
       "scripts/session_start_hook.py": "sha256:a688e6e77d3bf156ddac3409082b224775732ec0d86bd581332b1274b5ef4e86",
       "scripts/state_machine_gate.py": "sha256:b1ce42970658b1d7eed94b0285a47fca74e2566ff9094b71ed99a5ad10206e7f",
       "scripts/state_sync_gate.py": "sha256:414748a65191d7ff3924e6f4a786c2f8b7b926f4d675b193d4f1463e90476c2a",
@@ -279,8 +280,8 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.6.0",
-    "template_digest": "sha256:03bdbc1918b348e7180131358fa793aa33fcfd70210c42d83c3dbb1d5d905938",
-    "template_files": 276
+    "template_digest": "sha256:ee601b99ef12541612734b6aefc078367cf56fb1c0811eceb66cee843989b635",
+    "template_files": 277
   },
   "project": "fixture-host",
   "schema": "agent-runtime-lock/v1",
