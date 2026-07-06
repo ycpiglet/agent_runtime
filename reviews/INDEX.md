@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-04T03:34:56+09:00
-record_count: 619
+generated_at: 2026-07-06T12:32:39+09:00
+record_count: 620
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `619` review and evidence records under `reviews/`.
+- Summary: indexed `620` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `619` files |
+| Reviews covered | pass | `620` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -495,6 +495,7 @@ record_count: 619
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan` | md | record | pass | Self Improvement Cadence T3 Replan |
 | `reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration.md` | `REVIEW-2026-06-17-taskset-ar-self-improvement-remediation-cycle-registration` | md | record | pass | Self Improvement Remediation Registration |
 | `reviews/REVIEW-2026-06-18-beta-tester-role-strengthening.md` | `REVIEW-2026-06-18-beta-tester-role-strengthening` | review | pass | pass | Beta Tester Role Strengthening |
+| `reviews/REVIEW-2026-06-18-knowledge-graph-corpus-expansion.md` | `REVIEW-2026-06-18-knowledge-graph-corpus-expansion` | md | record | pass | Knowledge Graph Corpus Expansion |
 | `reviews/REVIEW-2026-06-18-llm-wiki-preservation-branch-deferred.md` | `REVIEW-2026-06-18-llm-wiki-preservation-branch-deferred` | md | accepted | n/a | LLM-Wiki Preservation Branch Deferred |
 | `reviews/REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout.md` | `REVIEW-2026-06-18-llm-wiki-worktree-preservation-closeout` | review | pass | n/a | LLM-Wiki Worktree Preservation Closeout |
 | `reviews/REVIEW-2026-06-18-taskset-ar-design-system-assetization-registration.md` | `REVIEW-2026-06-18-taskset-ar-design-system-assetization-registration` | md | record | pass | Design System Assetization Registration |
