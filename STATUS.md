@@ -1,5 +1,15 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-06 - Owner 결정 배치 이행: v0.6.0 발행 + #250 옵션 A 통합 + #128 호스트 파이프라인
+
+- Owner 지시("#132 제외하고 전부 진행", 2026-07-06)로 대기 중이던 결정 4건을 일괄 이행했다.
+- **v0.6.0 발행(#241 종료)**: `release_version_cascade.py --write 0.6.0` → PR #266 → annotated tag + GitHub release. v0.5.0 이후 51 PR/149커밋 범위. 발행 실무에서 HTTPS 토큰의 workflow 스코프 부재(→ origin push URL SSH 전환)와 로컬 core.hooksPath 미배선(빈 .git/hooks → `.githooks` 복구)을 발견·해소했다.
+- **#121 종료**: council-ACCEPT 잔여 2건(P3 status l10n PR #261, read-location PR #262)까지 전 항목 소진 확인 후 관계 정립 확정과 함께 close. 후속은 #128로 승계.
+- **#250 옵션 A 실행(PR #267)**: decision-first v2 레인(160커밋)에서 충돌-제로 지식스택만 선별 통합 — knowledge_graph(+372)/knowledge_lint(+105)/stop-hook 4종/collab_gate + 레인 테스트 5파일(+344) + 템플릿 미러 5종. 기록성 ~330파일과 UI 레인은 아카이브 보존 유지. **잔여 Owner 결정**: UI 레인(Taskset Board attention workspace) vs 현 decision-inbox IA 방향 — 결정 대기로 이슈 열어둠.
+- **#128 착수(PR #268)**: 호스트 실사용 eval 파이프라인 배선(`agents/host/eval/*.json`, `agent-runtime-host-eval/v1`, loud-skip 계약) + held-out 베이스라인 v0.2.0→v0.6.0 현행화. advisory 델타와 v0.5.0..v0.6.0 윈도우 실측은 `reviews/REPORT-2026-07-06-self-eval-v0.6.0-baseline-refresh.md`. fitness gate는 advisory 유지(차단 전환은 R3 사인오프 사안).
+- CI 회귀 교훈 2건: 신규 reviews/ 문서는 evidence INDEX 등재(`evidence_index_generator.py --write`), 템플릿 미러 변경은 호스트 락 재생성(`regen_host_lock_if_needed.py --write`)이 필수 — 로컬 훅 비활성 상태에서 커밋하면 CI에서만 적발된다.
+- Evidence: PR #266/#267/#268; 이슈 #241/#121 close 코멘트, #250/#128 진행 코멘트; https://github.com/ycpiglet/agent_runtime/releases/tag/v0.6.0
+
 ## 2026-07-04 - 자율 루프 sweep: 침묵 결함 3건 수정 + open-state 정리 + v0.6.0 승인 대기
 
 - Release-auto Owner 알림 무발화 수정: `.tmp/` 부재로 tee가 결과 파일 생성에 실패해 알림 step이 조용히 skip되던 결함을 PR #240으로 수정하고, main test 수동 디스패치로 release-auto가 이슈 #241에 코멘트하는 것까지 E2E 실증했다.
