@@ -34,7 +34,7 @@ PIPELINES: dict[str, list[Stage]] = {
 
 DEFAULT_LOOP_CAP = 2
 
-_VERDICT_RE = re.compile(r"(?im)^\\s*VERDICT:\\s*([A-Za-z][\\w-]*)\\s*$")
+_VERDICT_RE = re.compile(r"(?im)^\s*VERDICT:\s*([A-Za-z][\w-]*)\s*$")
 
 
 def parse_verdict(reply_text: str) -> str | None:
