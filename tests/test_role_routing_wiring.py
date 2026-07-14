@@ -438,6 +438,19 @@ def test_ambiguity_only_unit_spec_release_is_auditor_only(tmp_path: Path) -> Non
 
 
 def _write_task(root: Path, task_id: str, *, status: str = "planned") -> None:
+    taskset_path = root / "agents" / "project" / "initiatives" / f"{TASKSET}.md"
+    taskset_path.parent.mkdir(parents=True, exist_ok=True)
+    taskset_path.write_text(
+        f"""---
+schema_version: agent-runtime-work-item/v1
+work_id: {TASKSET}
+kind: taskset
+title: Role Routing Wiring Fixture
+summary: Synthetic canonical taskset for wave role-routing tests.
+---
+""",
+        encoding="utf-8",
+    )
     tasks_dir = root / "agents" / "lead_engineer" / "tasks"
     tasks_dir.mkdir(parents=True, exist_ok=True)
     (tasks_dir / f"{task_id}.md").write_text(
