@@ -40,6 +40,11 @@ DONE_STATUSES = {
     "done",
 }
 
+CANONICAL_TASKSET_SCHEMA = "agent-runtime-work-item/v1"
+STRUCTURED_WORKTREE_FIELDS = ("repository_path", "worktree_path", "branch", "base_ref")
+PROTECTED_BRANCHES = {"develop", "development", "main", "master", "production", "release"}
+SAFE_GIT_REF = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]*$")
+
 
 def _slug(value: str) -> str:
     text = re.sub(r"[^A-Za-z0-9]+", "-", value.strip().lower())
@@ -48,7 +53,7 @@ def _slug(value: str) -> str:
 
 
 def _taskset_slug(task_set_id: str) -> str:
-    return _slug(re.sub(r"^TASKSET-AR-", "", task_set_id, flags=re.IGNORECASE))
+    return _slug(re.sub(r"^TASKSET-(?:AR-)?", "", task_set_id, flags=re.IGNORECASE))
 
 
 def _letter_alias(index: int) -> str:
@@ -75,7 +80,69 @@ def _rel(root: Path, path: Path) -> str:
         return path.as_posix()
 
 
-def _taskset_aliases() -> dict[str, backlog_board.TaskSetInfo]:
+def _canonical_tasksets(root: Path) -> list[backlog_board.TaskSetInfo]:
+    tasksets_dir = root / "agents" / "project" / "initiatives"
+    if not tasksets_dir.is_dir():
+        return []
+
+    tasksets: list[backlog_board.TaskSetInfo] = []
+    paths = sorted(tasksets_dir.glob("TASKSET-*.md"), key=lambda item: item.name.lower())
+    for index, path in enumerate(paths, start=1):
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError as exc:
+            raise SystemExit(f"invalid canonical task set record: {_rel(root, path)}: {exc}") from exc
+        meta, _ = backlog_board.parse_frontmatter(text)
+        schema_version = str(meta.get("schema_version") or "").strip()
+        kind = str(meta.get("kind") or "").strip()
+        work_id = str(meta.get("work_id") or "").strip()
+        errors: list[str] = []
+        if schema_version != CANONICAL_TASKSET_SCHEMA:
+            errors.append(
+                f"schema_version must be {CANONICAL_TASKSET_SCHEMA!r}, got {schema_version!r}"
+            )
+        if kind != "taskset":
+            errors.append(f"kind must be 'taskset', got {kind!r}")
+        if not re.fullmatch(r"TASKSET-[A-Z0-9][A-Z0-9-]*", work_id):
+            errors.append(f"work_id must be an uppercase TASKSET-* id, got {work_id!r}")
+        if path.stem != work_id:
+            errors.append(f"filename {path.stem!r} must match work_id {work_id!r}")
+        if errors:
+            raise SystemExit(
+                f"invalid canonical task set record: {_rel(root, path)}: " + "; ".join(errors)
+            )
+
+        display_name = str(meta.get("title") or work_id).strip() or work_id
+        summary = str(meta.get("summary") or "").strip()
+        tasksets.append(
+            backlog_board.TaskSetInfo(
+                task_set_id=work_id,
+                display_name=display_name,
+                summary=summary,
+                order=1000 + index,
+            )
+        )
+    return tasksets
+
+
+def _register_alias(
+    aliases: dict[str, backlog_board.TaskSetInfo],
+    value: str,
+    info: backlog_board.TaskSetInfo,
+) -> None:
+    alias = value.strip().lower()
+    if not alias:
+        return
+    existing = aliases.get(alias)
+    if existing is not None and existing.task_set_id != info.task_set_id:
+        raise SystemExit(
+            "duplicate task set alias: "
+            f"{alias} ({existing.task_set_id}, {info.task_set_id})"
+        )
+    aliases[alias] = info
+
+
+def _taskset_aliases(root: Path | None = None) -> dict[str, backlog_board.TaskSetInfo]:
     aliases: dict[str, backlog_board.TaskSetInfo] = {}
     for index, info in enumerate(backlog_board.TASK_SET_DEFINITIONS, start=1):
         letter = _letter_alias(index)
@@ -93,14 +160,33 @@ def _taskset_aliases() -> dict[str, backlog_board.TaskSetInfo]:
             _slug(info.task_set_id.replace("TASKSET-AR-", "")),
         }
         for value in values:
-            aliases[value.lower()] = info
+            _register_alias(aliases, value, info)
+
+    if root is not None:
+        for info in _canonical_tasksets(root.resolve()):
+            existing = next(
+                (
+                    static
+                    for static in backlog_board.TASK_SET_DEFINITIONS
+                    if static.task_set_id == info.task_set_id
+                ),
+                None,
+            )
+            resolved_info = existing or info
+            values = {
+                info.task_set_id,
+                _taskset_slug(info.task_set_id),
+                _slug(info.display_name),
+            }
+            for value in values:
+                _register_alias(aliases, value, resolved_info)
     return aliases
 
 
-def _resolve_taskset(value: str) -> backlog_board.TaskSetInfo:
+def _resolve_taskset(value: str, root: Path | None = None) -> backlog_board.TaskSetInfo:
     normalized = value.strip().lower()
     normalized = re.sub(r"^taskset[-_: ]*", "", normalized)
-    aliases = _taskset_aliases()
+    aliases = _taskset_aliases(root)
     if value.strip().lower() in aliases:
         return aliases[value.strip().lower()]
     if normalized in aliases:
@@ -240,22 +326,106 @@ def _set_task_status(task_path: Path, next_status: str) -> bool:
 
 
 def _sync_backlog_board(root: Path) -> bool:
-    result = subprocess.run(
-        [sys.executable, str(Path(__file__).resolve().with_name("backlog_board.py")), "--write"],
-        cwd=root,
-        check=False,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-    )
-    if result.returncode != 0:
-        if result.stderr:
-            print(result.stderr, file=sys.stderr, end="")
-        if result.stdout:
-            print(result.stdout, file=sys.stderr, end="")
+    try:
+        tasks = backlog_board.load_tasks(root / "agents" / "lead_engineer" / "tasks")
+        rendered = backlog_board.render(tasks, root=root)
+        (root / "BACKLOG-BOARD.md").write_text(rendered, encoding="utf-8")
+    except (OSError, ValueError) as exc:
+        print(f"failed to rewrite BACKLOG-BOARD.md: {exc}", file=sys.stderr)
         return False
     return True
+
+
+def _unsafe_git_ref(value: str) -> bool:
+    return (
+        not SAFE_GIT_REF.fullmatch(value)
+        or ".." in value
+        or "//" in value
+        or "@{" in value
+        or value.endswith(("/", ".", ".lock"))
+        or value.startswith(("/", "."))
+    )
+
+
+def _worktree_tuple(
+    root: Path,
+    unit_meta: dict[str, Any],
+    *,
+    default_worktree: str,
+    default_branch: str,
+) -> dict[str, Any]:
+    values = {
+        field: str(unit_meta.get(field) or "").strip()
+        for field in STRUCTURED_WORKTREE_FIELDS
+    }
+    declared = [field for field, value in values.items() if value]
+    if not declared:
+        return {
+            "repository_path": str(root),
+            "worktree_path": default_worktree,
+            "branch": default_branch,
+            "base_ref": "",
+            "worktree_command": [
+                "git",
+                "worktree",
+                "add",
+                "-b",
+                default_branch,
+                default_worktree,
+            ],
+        }
+
+    missing = [field for field in STRUCTURED_WORKTREE_FIELDS if not values[field]]
+    if missing:
+        raise SystemExit(
+            "structured worktree metadata must define all fields; missing: "
+            + ", ".join(missing)
+        )
+
+    repository = Path(values["repository_path"])
+    if not repository.is_absolute():
+        raise SystemExit("repository_path must be absolute for structured worktree metadata")
+    worktree = Path(values["worktree_path"])
+    if not worktree.is_absolute():
+        raise SystemExit("worktree_path must be absolute for structured worktree metadata")
+
+    repository = repository.resolve()
+    worktree = worktree.resolve()
+    worktrees_dir = (repository / ".worktrees").resolve()
+    if worktree == worktrees_dir or not worktree.is_relative_to(worktrees_dir):
+        raise SystemExit(f"worktree_path must be under {worktrees_dir}")
+
+    branch = values["branch"]
+    if _unsafe_git_ref(branch):
+        raise SystemExit(f"unsafe branch: {branch}")
+    protected_name = branch.removeprefix("refs/heads/").lower()
+    if protected_name in PROTECTED_BRANCHES:
+        raise SystemExit(f"protected branch is not allowed for a task worktree: {branch}")
+
+    base_ref = values["base_ref"]
+    if _unsafe_git_ref(base_ref):
+        raise SystemExit(f"unsafe base_ref: {base_ref}")
+
+    return {
+        "repository_path": str(repository),
+        "worktree_path": str(worktree),
+        "branch": branch,
+        "base_ref": base_ref,
+        "worktree_command": [
+            "git",
+            "worktree",
+            "add",
+            "-b",
+            branch,
+            str(worktree),
+            base_ref,
+        ],
+    }
+
+
+def _repository_path(root: Path, payload: dict[str, Any]) -> Path:
+    value = str(payload.get("repository_path") or "").strip()
+    return Path(value).resolve() if value else root.resolve()
 
 
 def _worktree_preflight_error(root: Path, payload: dict[str, Any]) -> str | None:
@@ -264,7 +434,7 @@ def _worktree_preflight_error(root: Path, payload: dict[str, Any]) -> str | None
         return "task worktree is not ready: missing worktree_path"
     worktree = Path(worktree_value)
     if not worktree.is_absolute():
-        worktree = root / worktree
+        worktree = _repository_path(root, payload) / worktree
     if not worktree.is_dir():
         return f"task worktree is not ready: {worktree_value} does not exist"
     if not (worktree / ".git").exists():
@@ -277,15 +447,19 @@ def _ensure_worktree(root: Path, payload: dict[str, Any]) -> bool:
         return True
     worktree_command = list(payload["worktree_command"])
     worktree_command[0] = os.environ.get("AGENT_RUNTIME_GIT") or worktree_command[0]
-    result = subprocess.run(
-        worktree_command,
-        cwd=root,
-        check=False,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-    )
+    try:
+        result = subprocess.run(
+            worktree_command,
+            cwd=_repository_path(root, payload),
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError as exc:
+        print(f"failed to run worktree command: {exc}", file=sys.stderr)
+        return False
     if result.returncode != 0:
         if result.stderr:
             print(result.stderr, file=sys.stderr, end="")
@@ -301,13 +475,13 @@ def _ensure_worktree(root: Path, payload: dict[str, Any]) -> bool:
 
 def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
     root = args.root.resolve()
-    info = _resolve_taskset(args.taskset)
+    info = _resolve_taskset(args.taskset, root)
     tasks = _tasks_for(root, info.task_set_id)
     task = _next_task(tasks)
     task_set_slug = _taskset_slug(info.task_set_id)
     task_slug = _slug(task.task_id)
-    worktree_path = f".worktrees/{task.task_id}"
-    branch = f"codex/{task_slug}-{task_set_slug}"
+    default_worktree = f".worktrees/{task.task_id}"
+    default_branch = f"codex/{task_slug}-{task_set_slug}"
     step_index = tasks.index(task) + 1
     step_total = len(tasks)
     unit = _ready_unit_for_task(root, task.task_id)
@@ -320,9 +494,14 @@ def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
     wip_slot = len(active_claims) + 1
     stop_condition = str(unit_meta.get("stop_condition") or task.meta.get("stop_condition") or _stop_condition_for(task, unit_id)).strip()
     status_text = f"Starting {info.display_name}: {task.task_id}"
-    mode = args.mode or task_set_slug
     agent_role = args.agent_role or backlog_board.agent_for(task)
     team_id = args.team_id or backlog_board.team_for(task)
+    worktree = _worktree_tuple(
+        root,
+        unit_meta,
+        default_worktree=default_worktree,
+        default_branch=default_branch,
+    )
 
     claim_command = [
         sys.executable or "python",
@@ -353,7 +532,7 @@ def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
         "--team-id",
         team_id,
         "--mode",
-        mode,
+        "orchestrator",
         "--phase",
         "taskset-claimed",
         "--progress-pct",
@@ -365,16 +544,17 @@ def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
         "--status-text",
         status_text,
         "--worktree-path",
-        worktree_path,
+        str(worktree["worktree_path"]),
         "--branch",
-        branch,
+        str(worktree["branch"]),
     ]
     if args.now:
         claim_command.extend(["--now", args.now])
     if args.suffix:
         claim_command.extend(["--suffix", args.suffix])
-    if args.json:
-        claim_command.append("--json")
+    # The outer command can emit text or JSON, but claim verification always
+    # consumes the task_claim_dispatcher's machine-readable response.
+    claim_command.append("--json")
 
     return {
         "task_set_id": info.task_set_id,
@@ -384,7 +564,7 @@ def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
         "step_index": step_index,
         "step_total": step_total,
         "next_task_status": task.status,
-        "next_task_path": str((root / "agents" / "lead_engineer" / "tasks" / f"{task.task_id}.md")),
+        "next_task_path": str(task.path.resolve()),
         "project_id": project_id,
         "unit_id": unit_id,
         "unit_spec_path": _rel(root, unit_path) if unit_path else str(task.meta.get("unit_spec") or ""),
@@ -393,16 +573,11 @@ def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
         "wip_slot": wip_slot,
         "stop_condition": stop_condition,
         "status_text": status_text,
-        "worktree_path": worktree_path,
-        "branch": branch,
-        "worktree_command": [
-            "git",
-            "worktree",
-            "add",
-            "-b",
-            branch,
-            worktree_path,
-        ],
+        "repository_path": worktree["repository_path"],
+        "worktree_path": worktree["worktree_path"],
+        "branch": worktree["branch"],
+        "base_ref": worktree["base_ref"],
+        "worktree_command": worktree["worktree_command"],
         "claim_command": claim_command,
         "wave_plan_command": [
             sys.executable or "python",
@@ -439,6 +614,64 @@ def cmd_plan(args: argparse.Namespace) -> int:
     payload = _plan_payload(args)
     _emit(payload, as_json=args.json)
     return 0
+
+
+def _persisted_claim(
+    root: Path,
+    payload: dict[str, Any],
+    stdout: str,
+) -> tuple[dict[str, Any] | None, Path | None, str | None]:
+    try:
+        envelope = json.loads(stdout)
+    except json.JSONDecodeError as exc:
+        return None, None, f"claim dispatcher returned invalid JSON: {exc}"
+    if not isinstance(envelope, dict):
+        return None, None, "claim dispatcher returned a non-object JSON payload"
+    if str(envelope.get("status") or "") != "created":
+        return None, None, "claim dispatcher did not report status=created"
+
+    declared = envelope.get("claim")
+    if not isinstance(declared, dict):
+        return None, None, "claim dispatcher response is missing the claim object"
+    path_value = str(envelope.get("path") or "").strip()
+    if not path_value:
+        return None, None, "claim dispatcher response is missing the persisted claim path"
+    claim_path = Path(path_value)
+    if not claim_path.is_absolute():
+        claim_path = root / claim_path
+    claim_path = claim_path.resolve()
+    claim_dir = (root / "agents" / "runtime" / "task_claims").resolve()
+    if claim_path == claim_dir or not claim_path.is_relative_to(claim_dir):
+        return None, claim_path, f"persisted claim path is outside {claim_dir}: {claim_path}"
+    if not claim_path.is_file():
+        return None, claim_path, f"persisted claim is missing: {claim_path}"
+
+    persisted = _read_claim(claim_path)
+    if persisted is None:
+        return None, claim_path, f"persisted claim is unreadable: {claim_path}"
+    expected = {
+        "claim_id": str(declared.get("claim_id") or ""),
+        "task_id": str(payload.get("next_task_id") or ""),
+        "task_set_id": str(payload.get("task_set_id") or ""),
+        "worktree_path": str(payload.get("worktree_path") or ""),
+        "branch": str(payload.get("branch") or ""),
+        "mode": "orchestrator",
+    }
+    for field, expected_value in expected.items():
+        if not expected_value:
+            return None, claim_path, f"claim verification expected field is empty: {field}"
+        declared_value = str(declared.get(field) or "")
+        persisted_value = str(persisted.get(field) or "")
+        if declared_value != expected_value or persisted_value != expected_value:
+            return (
+                None,
+                claim_path,
+                f"persisted claim field mismatch: {field} "
+                f"expected={expected_value!r} response={declared_value!r} persisted={persisted_value!r}",
+            )
+    if str(persisted.get("status") or "").strip().lower() not in ACTIVE_STATUSES:
+        return None, claim_path, "persisted reservation claim is not active"
+    return envelope, claim_path, None
 
 
 def cmd_start(args: argparse.Namespace) -> int:
@@ -481,10 +714,6 @@ def cmd_start(args: argparse.Namespace) -> int:
                 print(gate.stderr, file=sys.stderr, end="")
             return gate.returncode
 
-    if not _ensure_worktree(root, payload):
-        print("worktree_command=" + " ".join(payload["worktree_command"]), file=sys.stderr)
-        return 1
-
     result = subprocess.run(
         payload["claim_command"],
         cwd=root,
@@ -501,6 +730,24 @@ def cmd_start(args: argparse.Namespace) -> int:
             print(result.stdout, file=sys.stderr, end="")
         return result.returncode
 
+    claim_payload, claim_path, claim_error = _persisted_claim(root, payload, result.stdout)
+    if claim_error:
+        print(claim_error, file=sys.stderr)
+        return 1
+    assert claim_payload is not None
+    assert claim_path is not None
+    payload["claim"] = claim_payload
+
+    if not _ensure_worktree(root, payload):
+        print("worktree_command=" + " ".join(payload["worktree_command"]), file=sys.stderr)
+        claim_id = str(claim_payload.get("claim", {}).get("claim_id") or "unknown")
+        print(
+            "reservation claim remains active for retry or independent release: "
+            f"{claim_id} ({_rel(root, claim_path)})",
+            file=sys.stderr,
+        )
+        return 1
+
     task_path = Path(payload["next_task_path"])
     target_status = _target_status_for_work_start(payload["next_task_status"])
     status_updated = False
@@ -511,12 +758,6 @@ def cmd_start(args: argparse.Namespace) -> int:
         print("failed to rewrite BACKLOG-BOARD.md after task start", file=sys.stderr)
         return 1
 
-    claim_payload: dict[str, Any]
-    try:
-        claim_payload = json.loads(result.stdout)
-    except json.JSONDecodeError:
-        claim_payload = {"raw": result.stdout.strip()}
-    payload["claim"] = claim_payload
     payload["task_status_updated"] = status_updated
     payload["task_status"] = target_status
     _emit(payload, as_json=args.json)
