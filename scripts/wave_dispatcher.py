@@ -25,7 +25,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
 import subprocess
 import sys
@@ -35,6 +34,7 @@ from typing import Any
 
 import backlog_board
 import model_routing
+import taskset_dispatcher
 from footprint_conflict_gate import footprints_overlap
 from task_unit_readiness_gate import depends_on_refs, load_unit_specs
 
@@ -147,13 +147,8 @@ def _all_units(root: Path) -> list[UnitNode]:
     return [UnitNode(path=path, meta=meta) for path, meta, _body in load_unit_specs(root)]
 
 
-def _resolve_taskset_id(value: str) -> str:
-    text = value.strip()
-    if text.upper().startswith("TASKSET-"):
-        return text
-    import taskset_dispatcher
-
-    return taskset_dispatcher._resolve_taskset(text).task_set_id
+def _resolve_taskset_id(root: Path, value: str) -> str:
+    return taskset_dispatcher._resolve_taskset(value, root).task_set_id
 
 
 def _load_unit_from_path(root: Path, value: str) -> UnitNode:
@@ -171,7 +166,7 @@ def select_units(root: Path, *, taskset: str = "", units: list[str] | None = Non
     repo_units = _all_units(root)
     selected: list[UnitNode] = []
     if taskset:
-        task_set_id = _resolve_taskset_id(taskset)
+        task_set_id = _resolve_taskset_id(root, taskset)
         tasks = backlog_board.load_tasks(root / "agents" / "lead_engineer" / "tasks")
         task_ids = {task.task_id for task in tasks if task.task_set_id == task_set_id}
         selected = [
@@ -394,24 +389,13 @@ def cmd_plan(args: argparse.Namespace) -> int:
     root = args.root.resolve()
     nodes, label = select_units(root, taskset=args.taskset, units=args.unit)
     plan = compute_waves(root, nodes)
+    planned_units = {node.unit_id: _plan_unit_payload(root, node) for node in plan.nodes}
     if args.json:
         payload = {
             "command": "plan",
             "selection": label,
             "units": len(plan.nodes),
-            "waves": [
-                [
-                    {
-                        "unit_id": node.unit_id,
-                        "task_id": node.task_id,
-                        "status": node.status,
-                        "target_files": node.target_files,
-                        "depends_on": node.depends_on,
-                    }
-                    for node in wave
-                ]
-                for wave in plan.waves
-            ],
+            "waves": [[planned_units[node.unit_id] for node in wave] for wave in plan.waves],
             "deferrals": plan.deferrals,
             "external_deps": [
                 {"unit_id": unit_id, "ref": ref} for unit_id, ref in plan.external_deps
@@ -499,26 +483,28 @@ def cmd_status(args: argparse.Namespace) -> int:
     return 0
 
 
-def _ensure_worktree(root: Path, worktree_path: str, branch: str) -> str | None:
-    worktree = root / worktree_path
-    if worktree.is_dir() and (worktree / ".git").exists():
-        return None
-    git = os.environ.get("AGENT_RUNTIME_GIT") or "git"
-    result = subprocess.run(
-        [git, "worktree", "add", "-b", branch, worktree_path],
-        cwd=root,
-        check=False,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
+def _worktree_payload(root: Path, node: UnitNode) -> dict[str, Any]:
+    return taskset_dispatcher._worktree_tuple(
+        root,
+        node.meta,
+        default_worktree=f".worktrees/{node.task_id}",
+        default_branch=f"codex/{_slug(node.unit_id)}-wave",
     )
-    if result.returncode != 0:
-        detail = (result.stderr or result.stdout).strip()
-        return f"git worktree add failed for {worktree_path}: {detail}"
-    if not (worktree / ".git").exists():
-        return f"worktree is not ready after add: {worktree_path}"
-    return None
+
+
+def _plan_unit_payload(root: Path, node: UnitNode) -> dict[str, Any]:
+    worktree = _worktree_payload(root, node)
+    return {
+        "unit_id": node.unit_id,
+        "task_id": node.task_id,
+        "status": node.status,
+        "target_files": node.target_files,
+        "depends_on": node.depends_on,
+        "repository_path": worktree["repository_path"],
+        "worktree_path": worktree["worktree_path"],
+        "branch": worktree["branch"],
+        "base_ref": worktree["base_ref"],
+    }
 
 
 def _claim_command(
@@ -570,7 +556,9 @@ def _claim_command(
         "--team-id",
         team_id,
         "--mode",
-        "wave",
+        "orchestrator",
+        "--active-scope",
+        node.task_set_id,
         "--phase",
         "wave-claimed",
         "--status-text",
@@ -579,7 +567,6 @@ def _claim_command(
         worktree_path,
         "--branch",
         branch,
-        "--json",
     ]
     for entry in node.target_files:
         command.extend(["--target-file", entry])
@@ -589,7 +576,114 @@ def _claim_command(
         command.extend(["--now", args.now])
     if suffix:
         command.extend(["--suffix", suffix])
+    command.append("--json")
     return command
+
+
+def _dispatch_payload(
+    root: Path,
+    node: UnitNode,
+    *,
+    wave_no: int,
+    args: argparse.Namespace,
+    allow_parallel_task_set: bool,
+    suffix: str | None,
+) -> dict[str, Any]:
+    identity = {
+        "task_id": node.task_id,
+        "task_set_id": node.task_set_id,
+        "unit_id": node.unit_id,
+        "project_id": node.project_id,
+    }
+    missing = [field for field, value in identity.items() if not value]
+    if missing:
+        raise WaveError(
+            f"unit dispatch identity is incomplete for {_rel(root, node.path)}; missing: "
+            + ", ".join(missing)
+        )
+    worktree = _worktree_payload(root, node)
+    payload: dict[str, Any] = {
+        **identity,
+        "next_task_id": node.task_id,
+        "repository_path": worktree["repository_path"],
+        "worktree_path": worktree["worktree_path"],
+        "branch": worktree["branch"],
+        "base_ref": worktree["base_ref"],
+        "worktree_command": worktree["worktree_command"],
+    }
+    payload["claim_command"] = _claim_command(
+        root,
+        node,
+        wave_no=wave_no,
+        worktree_path=str(payload["worktree_path"]),
+        branch=str(payload["branch"]),
+        args=args,
+        allow_parallel_task_set=allow_parallel_task_set,
+        suffix=suffix,
+    )
+    return payload
+
+
+def _persisted_wave_claim(
+    root: Path,
+    payload: dict[str, Any],
+    stdout: str,
+) -> tuple[dict[str, Any] | None, Path | None, str | None]:
+    envelope, claim_path, error = taskset_dispatcher._persisted_claim(root, payload, stdout)
+    if error:
+        return None, claim_path, error
+    assert envelope is not None
+    assert claim_path is not None
+    declared = envelope["claim"]
+    persisted = taskset_dispatcher._read_claim(claim_path)
+    if persisted is None:
+        return None, claim_path, f"persisted claim is unreadable: {claim_path}"
+
+    claim_id = str(declared.get("claim_id") or "")
+    expected_path = (
+        root / "agents" / "runtime" / "task_claims" / f"{claim_id}.json"
+    ).resolve()
+    if not claim_id or claim_path != expected_path:
+        return (
+            None,
+            claim_path,
+            "persisted claim field mismatch: path "
+            f"expected={expected_path} response={claim_path}",
+        )
+
+    expected = {
+        "task_id": str(payload["task_id"]),
+        "task_set_id": str(payload["task_set_id"]),
+        "unit_id": str(payload["unit_id"]),
+        "project_id": str(payload["project_id"]),
+        "worktree_path": str(payload["worktree_path"]),
+        "branch": str(payload["branch"]),
+        "mode": "orchestrator",
+    }
+    for field, expected_value in expected.items():
+        declared_value = str(declared.get(field) or "")
+        persisted_value = str(persisted.get(field) or "")
+        if declared_value != expected_value or persisted_value != expected_value:
+            return (
+                None,
+                claim_path,
+                f"persisted claim field mismatch: {field} "
+                f"expected={expected_value!r} response={declared_value!r} "
+                f"persisted={persisted_value!r}",
+            )
+
+    declared_status = str(declared.get("status") or "").strip().lower()
+    persisted_status = str(persisted.get("status") or "").strip().lower()
+    if declared_status != persisted_status:
+        return (
+            None,
+            claim_path,
+            "persisted claim field mismatch: status "
+            f"response={declared_status!r} persisted={persisted_status!r}",
+        )
+    if persisted_status not in ACTIVE_CLAIM_STATUSES:
+        return None, claim_path, "persisted reservation claim is not active"
+    return declared, claim_path, None
 
 
 def cmd_dispatch(args: argparse.Namespace) -> int:
@@ -688,56 +782,85 @@ def cmd_dispatch(args: argparse.Namespace) -> int:
             print(f"skipped: {note}")
         return 0
 
-    issued: list[dict[str, Any]] = []
+    prepared: list[tuple[UnitNode, dict[str, Any]]] = []
     for index, node in enumerate(candidates, start=1):
         # A shared --suffix would collide on agent_instance_id within one
         # batch (same role + same --now); disambiguate per unit.
         suffix = args.suffix
         if suffix and len(candidates) > 1:
             suffix = f"{suffix}{index}"
-        worktree_path = f".worktrees/{node.task_id}"
-        branch = f"codex/{_slug(node.unit_id)}-wave"
-        error = _ensure_worktree(root, worktree_path, branch)
-        if error:
-            print(error, file=sys.stderr)
-            _print_dispatch_summary(root, label, wave_no, len(plan.waves), issued, skipped, args, guidance)
-            return 1
-        result = subprocess.run(
-            _claim_command(
-                root,
+        prepared.append(
+            (
                 node,
-                wave_no=wave_no,
-                worktree_path=worktree_path,
-                branch=branch,
-                args=args,
-                allow_parallel_task_set=parallel,
-                suffix=suffix,
-            ),
-            cwd=root,
-            check=False,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
+                _dispatch_payload(
+                    root,
+                    node,
+                    wave_no=wave_no,
+                    args=args,
+                    allow_parallel_task_set=parallel,
+                    suffix=suffix,
+                ),
+            )
         )
+
+    issued: list[dict[str, Any]] = []
+    for node, payload in prepared:
+        try:
+            result = subprocess.run(
+                payload["claim_command"],
+                cwd=root,
+                check=False,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+            )
+        except OSError as exc:
+            print(f"failed to run claim command: {exc}", file=sys.stderr)
+            _print_dispatch_summary(
+                root, label, wave_no, len(plan.waves), issued, skipped, args, guidance
+            )
+            return 1
         if result.returncode != 0:
             if result.stderr:
                 print(result.stderr, file=sys.stderr, end="")
             if result.stdout:
                 print(result.stdout, file=sys.stderr, end="")
             _print_dispatch_summary(root, label, wave_no, len(plan.waves), issued, skipped, args, guidance)
+            return result.returncode
+
+        claim, claim_path, claim_error = _persisted_wave_claim(root, payload, result.stdout)
+        if claim_error:
+            print(claim_error, file=sys.stderr)
+            _print_dispatch_summary(
+                root, label, wave_no, len(plan.waves), issued, skipped, args, guidance
+            )
             return 1
-        try:
-            claim = json.loads(result.stdout)["claim"]
-        except (json.JSONDecodeError, KeyError, TypeError):
-            claim = {"raw": result.stdout.strip()}
+        assert claim is not None
+        assert claim_path is not None
+
+        if not taskset_dispatcher._ensure_worktree(root, payload):
+            print("worktree_command=" + " ".join(payload["worktree_command"]), file=sys.stderr)
+            claim_id = str(claim.get("claim_id") or "unknown")
+            print(
+                "reservation claim remains active for retry or independent release: "
+                f"{claim_id} ({_rel(root, claim_path)})",
+                file=sys.stderr,
+            )
+            _print_dispatch_summary(
+                root, label, wave_no, len(plan.waves), issued, skipped, args, guidance
+            )
+            return 1
+
         issued.append(
             {
                 "unit_id": node.unit_id,
                 "task_id": node.task_id,
                 "claim_id": claim.get("claim_id", ""),
-                "worktree_path": worktree_path,
-                "branch": branch,
+                "repository_path": payload["repository_path"],
+                "worktree_path": payload["worktree_path"],
+                "branch": payload["branch"],
+                "base_ref": payload["base_ref"],
                 "target_files": node.target_files,
             }
         )
