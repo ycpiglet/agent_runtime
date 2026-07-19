@@ -721,8 +721,27 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-601",
+      "expires_at": "2026-07-20T11:03:47+09:00",
+      "fulfilled_at": "2026-07-19T11:03:47+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-601.md",
+      "fulfilled_task_id": "TASK-AR-601",
+      "fulfilled_task_uid": "8cc19b2e-59ac-4f1f-8743-07dd789328d0",
+      "initiative_id": "INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
+      "kind": "task",
+      "owner_id": "codex-root-planner",
+      "reason": "work registration TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
+      "reservation_group_id": "RES-20260719-110347-339abb00",
+      "reservation_id": "RES-20260719-110347-339abb00-01",
+      "reserved_at": "2026-07-19T11:03:47+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-07-19T10:28:06+09:00"
+  "updated_at": "2026-07-19T11:03:47+09:00"
 }

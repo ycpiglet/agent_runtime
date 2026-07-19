@@ -337,6 +337,34 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration.md",
+          "value": "7cb62533106dca09cae1f3350168882b199d9b21e48d06d69f74419b6c340fad"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/role_routing.py",
+          "value": "f9270a522e9988a0c70b0e92790b9f55d1de7dd53d7ef67df5ccafa748fc2f88"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "35e9b6132cdeee9adbd5ad833598bb55237e98ce07fee4ad5d927c4ed4c4d9c0"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration.md",
+      "recorded_at": "2026-07-19T11:05:35+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report.md",
           "value": "0258f24e5deb282038df779fb900c7dbf6d0d3333d1fdcbe966f98659f23d44a"
         },
@@ -447,5 +475,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-19T10:57:44+09:00"
+  "updated_at": "2026-07-19T11:05:35+09:00"
 }

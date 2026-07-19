@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-19T10:30:43+09:00",
-  "record_count": 386,
+  "generated_at": "2026-07-19T11:03:48+09:00",
+  "record_count": 390,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4249,6 +4249,50 @@
       "title": "UNIT-TASK-AR-600-001 - Close state and publish v0.7.0",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md",
       "parent_id": "TASK-AR-600",
+      "status": "worker_ready"
+    },
+    {
+      "key": "initiative:INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
+      "level": "initiative",
+      "number": "24",
+      "label": "Initiative 24",
+      "id": "INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
+      "title": "Role Routing Closeout Reliability",
+      "path": "agents/project/initiatives/INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
+      "level": "taskset",
+      "number": "24.1",
+      "label": "Taskset 24.1",
+      "id": "TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
+      "title": "Role Routing Closeout Reliability",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-601",
+      "level": "task",
+      "number": "24.1.1",
+      "label": "Task 24.1.1",
+      "id": "TASK-AR-601",
+      "title": "Ensure role_routing overlay claims carry required lifecycle artifacts and releasing a…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-601.md",
+      "parent_id": "TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-601-001",
+      "level": "unit",
+      "number": "24.1.1.1",
+      "label": "Unit 24.1.1.1",
+      "id": "UNIT-TASK-AR-601-001",
+      "title": "UNIT-TASK-AR-601-001 - Repair overlay lifecycle artifacts and recursion guard",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-601/UNIT-TASK-AR-601-001.md",
+      "parent_id": "TASK-AR-601",
       "status": "worker_ready"
     }
   ]

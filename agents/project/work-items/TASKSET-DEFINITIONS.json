@@ -8,6 +8,12 @@
       "order": 10
     },
     {
+      "task_set_id": "TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
+      "display_name": "Role Routing Closeout Reliability",
+      "summary": "Repair the overlay claim lifecycle gap discovered while closing TASK-AR-594.",
+      "order": 11
+    },
+    {
       "task_set_id": "TASKSET-AR-AGENT-IDENTITY-CONTRACT",
       "display_name": "Agent Identity Contract",
       "summary": "Add role/instance/display identity records, spawn provenance, and attribution gates for multi-agent work.",

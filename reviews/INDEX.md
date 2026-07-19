@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-19T10:56:15+09:00
-record_count: 629
+generated_at: 2026-07-19T11:03:53+09:00
+record_count: 631
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `629` review and evidence records under `reviews/`.
+- Summary: indexed `631` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `629` files |
+| Reviews covered | pass | `631` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -514,6 +514,7 @@ record_count: 629
 | `reviews/REVIEW-2026-06-22-subsystem-verification-audit.md` | `REVIEW-2026-06-22-subsystem-verification-audit` | review | assessed | watch | Subsystem verification audit (2026-06-22) |
 | `reviews/REVIEW-2026-06-22-system-health-rsi-diagnosis.md` | `REVIEW-2026-06-22-system-health-rsi-diagnosis` | review | assessed | watch | System-health / RSI diagnosis (2026-06-22) |
 | `reviews/REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration.md` | `REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration` | md | record | pass | Upstream Intake Closer Registration |
+| `reviews/REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration.md` | `REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration` | md | record | pass | Role Routing Closeout Reliability Registration |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
@@ -662,6 +663,7 @@ record_count: 629
 | `reviews/W4B-2026-06-21-TASK-AR-593.md` | `W4B-2026-06-21-TASK-AR-593` | w4b-independent-verification | approved | pass | W4b Independent Verification: TASK-AR-593 |
 | `reviews/W4B-2026-07-19-TASK-AR-594-RECHECK.md` | `W4B-2026-07-19-TASK-AR-594-RECHECK` | w4b-independent-verification | approved | pass | W4b Independent Verification Recheck: TASK-AR-594 |
 | `reviews/W4B-2026-07-19-TASK-AR-594.md` | `W4B-2026-07-19-TASK-AR-594` | w4b-independent-verification | conditional_reject | fail | W4b Independent Verification: TASK-AR-594 |
+| `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 
 ## Risks / Blockers
