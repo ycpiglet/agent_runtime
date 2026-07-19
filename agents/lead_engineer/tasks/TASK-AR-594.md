@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 registered_at: 2026-07-19T10:28:06+09:00
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T10:28:06+09:00
+updated_at: 2026-07-19T10:54:44+09:00
 title: Honor canonical taskset task order
 status: planned
 priority: P0
@@ -24,7 +24,7 @@ task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 unit_spec: agents/lead_engineer/tasks/units/TASK-AR-594/UNIT-TASK-AR-594-001.md
 reservation_id: RES-20260719-102806-bbbc9438-01
 origin_type: owner_request
-origin_ref: chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277
+origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
 summary: Preserve task order declared by canonical taskset records throughout plan and dispatch.
 planner_model_tier: planner_high
@@ -35,6 +35,11 @@ tags:
 verification:
   - python -m pytest tests/test_taskset_dispatcher.py tests/test_role_routing_wiring.py -q
   - python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT --check
+verification_status: passed
+verified_at: 2026-07-19T10:54:44+09:00
+verified_by: codex-root-task-ar-594
+evidence_refs:
+  - reviews/VERIFY-2026-07-19-task-ar-594-20260719105444.json
 ---
 
 # TASK-AR-594 - Honor canonical taskset task order

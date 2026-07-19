@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-19T10:51:36+09:00
-record_count: 626
+generated_at: 2026-07-19T10:56:15+09:00
+record_count: 629
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `626` review and evidence records under `reviews/`.
+- Summary: indexed `629` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `626` files |
+| Reviews covered | pass | `629` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -518,6 +518,8 @@ record_count: 626
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
 | `reviews/RFC-2026-06-23-visual-identity-and-agent-characters.md` | `RFC-2026-06-23-visual-identity-and-agent-characters` | rfc | proposal | decide | RFC — Visual Identity & Agent Characters |
+| `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-594-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-594-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-594 Independent Auditor Role Review |
+| `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-594-SKEPTIC.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-594-SKEPTIC` | role-review | record | n/a | TASK-AR-594 Skeptic Role Review |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SCRIBE-2026-06-21-business-operating-system.md` | `SCRIBE-2026-06-21-business-operating-system` | scribe | recorded | pass | Business Operating System Scribe Log |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
@@ -584,6 +586,7 @@ record_count: 626
 | `reviews/VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421.json` | `VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421` | json | record | n/a | VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421 |
 | `reviews/VERIFY-2026-06-21-task-ar-593-20260621171220.json` | `VERIFY-2026-06-21-task-ar-593-20260621171220` | json | record | n/a | VERIFY-2026-06-21-task-ar-593-20260621171220 |
 | `reviews/VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000.json` | `VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000` | json | record | n/a | VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000 |
+| `reviews/VERIFY-2026-07-19-task-ar-594-20260719105444.json` | `VERIFY-2026-07-19-task-ar-594-20260719105444` | json | record | n/a | VERIFY-2026-07-19-task-ar-594-20260719105444 |
 | `reviews/VERIFY-2026-07-19-unit-task-ar-594-001-20260719103702.json` | `VERIFY-2026-07-19-unit-task-ar-594-001-20260719103702` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-594-001-20260719103702 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
