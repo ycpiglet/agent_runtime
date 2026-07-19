@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 registered_at: 2026-07-19T10:28:06+09:00
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T10:28:06+09:00
+updated_at: 2026-07-19T12:21:24+09:00
 title: Preserve Git stderr in release-auto test failures
 status: planned
 priority: P2
@@ -24,7 +24,7 @@ task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 unit_spec: agents/lead_engineer/tasks/units/TASK-AR-597/UNIT-TASK-AR-597-001.md
 reservation_id: RES-20260719-102806-bbbc9438-04
 origin_type: owner_request
-origin_ref: chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277
+origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
 summary: Make the release-auto test helper raise a diagnostic error that retains the failing command and Git output.
 planner_model_tier: planner_high
@@ -34,6 +34,11 @@ tags:
   - work-cli-created
 verification:
   - python -m pytest tests/test_release_auto_noncritical.py -q
+verification_status: passed
+verified_at: 2026-07-19T12:21:24+09:00
+verified_by: codex-root-task-ar-597
+evidence_refs:
+  - reviews/VERIFY-2026-07-19-task-ar-597-20260719122124.json
 ---
 
 # TASK-AR-597 - Preserve Git stderr in release-auto test failures
