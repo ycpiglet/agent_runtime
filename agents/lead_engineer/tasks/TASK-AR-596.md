@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 registered_at: 2026-07-19T10:28:06+09:00
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T12:03:59+09:00
+started_at: 2026-07-19T11:55:48+09:00
+updated_at: 2026-07-19T12:07:13+09:00
 title: Resolve slugged canonical task files in conversation audit
-status: planned
+status: completed
 priority: P1
 difficulty: S
 est_hours: 2
@@ -40,6 +41,15 @@ verified_at: 2026-07-19T12:03:59+09:00
 verified_by: codex-root-task-ar-596
 evidence_refs:
   - reviews/VERIFY-2026-07-19-task-ar-596-20260719120359.json
+review_evidence_refs:
+  - reviews/W4B-2026-07-19-TASK-AR-596.md
+  - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-596-INDEPENDENT-AUDITOR.md
+implementation_commit: 1abfe76
+resolution: done
+completed_at: 2026-07-19T12:07:13+09:00
+closed_by: codex-root-task-ar-596
+actual_hours: 0.2
+actual_tokens: 5000
 ---
 
 # TASK-AR-596 - Resolve slugged canonical task files in conversation audit
@@ -62,3 +72,15 @@ evidence_refs:
 
 - `python -m pytest tests/test_conversation_work_audit.py -q`
 - `python scripts/conversation_work_audit.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-19T12:07:13+09:00`
+- Resolution: `done`
+- Actual hours: `0.2`
+- Actual tokens: `5000`
+- Closed by: `codex-root-task-ar-596`
+- Evidence:
+  - `reviews/VERIFY-2026-07-19-task-ar-596-20260719120359.json`
+<!-- work-close:end -->

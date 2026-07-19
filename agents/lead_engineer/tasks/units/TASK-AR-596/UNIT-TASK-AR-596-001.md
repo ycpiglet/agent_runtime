@@ -9,11 +9,12 @@ task_id: TASK-AR-596
 task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 initiative_id: INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T11:59:06+09:00
+started_at: 2026-07-19T11:55:48+09:00
+updated_at: 2026-07-19T12:07:12+09:00
 origin_type: owner_request
 origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
@@ -47,6 +48,15 @@ verified_at: 2026-07-19T11:59:06+09:00
 verified_by: codex-root-task-ar-596
 evidence_refs:
   - reviews/VERIFY-2026-07-19-unit-task-ar-596-001-20260719115906.json
+review_evidence_refs:
+  - reviews/W4B-2026-07-19-TASK-AR-596.md
+  - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-596-INDEPENDENT-AUDITOR.md
+implementation_commit: 1abfe76
+resolution: done
+completed_at: 2026-07-19T12:07:12+09:00
+closed_by: codex-root-task-ar-596
+actual_hours: 0.15
+actual_tokens: 3500
 ---
 
 # UNIT-TASK-AR-596-001 - Implement task-ID-aware pointer resolution
@@ -96,3 +106,15 @@ Report resolver semantics, collision coverage, and audit output.
 ## Stop Boundary
 
 Stop if multiple canonical files claim the same task ID; surface the ambiguity rather than choosing one silently.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-19T12:07:12+09:00`
+- Resolution: `done`
+- Actual hours: `0.15`
+- Actual tokens: `3500`
+- Closed by: `codex-root-task-ar-596`
+- Evidence:
+  - `reviews/VERIFY-2026-07-19-unit-task-ar-596-001-20260719115906.json`
+<!-- work-close:end -->
