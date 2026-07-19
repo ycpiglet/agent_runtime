@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-19T10:28:08+09:00
-record_count: 623
+generated_at: 2026-07-19T10:48:49+09:00
+record_count: 624
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `623` review and evidence records under `reviews/`.
+- Summary: indexed `624` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `623` files |
+| Reviews covered | pass | `624` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -656,6 +656,7 @@ record_count: 623
 | `reviews/W4B-2026-06-20-TASK-AR-591.md` | `W4B-2026-06-20-TASK-AR-591` | md | accepted | n/a | W4B Independent Verification - TASK-AR-591 |
 | `reviews/W4B-2026-06-20-TASK-AR-592.md` | `W4B-2026-06-20-TASK-AR-592` | md | accepted | n/a | W4B Independent Verification - TASK-AR-592 |
 | `reviews/W4B-2026-06-21-TASK-AR-593.md` | `W4B-2026-06-21-TASK-AR-593` | w4b-independent-verification | approved | pass | W4b Independent Verification: TASK-AR-593 |
+| `reviews/W4B-2026-07-19-TASK-AR-594.md` | `W4B-2026-07-19-TASK-AR-594` | w4b-independent-verification | conditional_reject | fail | W4b Independent Verification: TASK-AR-594 |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 
 ## Risks / Blockers
