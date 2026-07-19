@@ -22,6 +22,11 @@
             "type": "command",
             "command": "python scripts/interrupted_run_detector.py --root .",
             "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "python scripts/session_resume_check.py --root .",
+            "timeout": 30
           }
         ]
       }
