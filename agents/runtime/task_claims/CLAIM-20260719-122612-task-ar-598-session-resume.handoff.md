@@ -11,8 +11,15 @@
 - model_tier: worker_standard
 - wip_slot: 1
 - stop_condition: Stop if the PR contains host-specific or destructive recovery behavior
-- phase: implementation
-- step: 1/7
-- progress_pct: 0
-- status_text: Integrate crash-safe session resume audit
+- phase: verified
+- step: 7/7
+- progress_pct: 100
+- status_text: Hardened implementation passed W4a and independent W4b
 - status: claimed
+
+## Verification
+
+- W4a: `reviews/VERIFY-2026-07-19-unit-task-ar-598-001-20260719124202.json`
+- W4b: `reviews/W4B-2026-07-19-TASK-AR-598-REWORK.md`
+- implementation_commits: `3066f3c`, `d020ee6`, `da1a180`
+- pre-hardening W4b `reviews/W4B-2026-07-19-TASK-AR-598.md` is superseded.
