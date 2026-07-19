@@ -9,7 +9,7 @@
   "callsite_id": "codex-root-20260719",
   "pane_id": "root",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
   "active_scope": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
   "scope_transition_approved": true,
@@ -27,12 +27,12 @@
   "worktree_path": ".worktrees/TASK-AR-597",
   "branch": "codex/task-ar-597-git-stderr",
   "claimed_at": "2026-07-19T12:08:44+09:00",
-  "last_heartbeat": "2026-07-19T12:20:20+09:00",
-  "updated_at": "2026-07-19T12:20:20+09:00",
+  "last_heartbeat": "2026-07-19T12:20:58+09:00",
+  "updated_at": "2026-07-19T12:20:58+09:00",
   "expires_at": "2026-07-19T13:38:44+09:00",
   "lease": {
     "claimed_at": "2026-07-19T12:08:44+09:00",
-    "heartbeat_at": "2026-07-19T12:08:44+09:00",
+    "heartbeat_at": "2026-07-19T12:20:58+09:00",
     "expires_at": "2026-07-19T13:38:44+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260719-120844-task-ar-597-git-stderr.handoff.md",
@@ -47,5 +47,9 @@
   ],
   "target_files": [
     "tests/test_release_auto_noncritical.py"
-  ]
+  ],
+  "released_at": "2026-07-19T12:20:58+09:00",
+  "verified_by": "codex-independent-verifier-task-ar-597-20260719",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-19-TASK-AR-597.md"
 }
