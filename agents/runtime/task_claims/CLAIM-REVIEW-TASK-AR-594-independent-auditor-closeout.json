@@ -9,11 +9,11 @@
   "agent_instance_id": "independent-auditor-CLAIM-REVIEW-TASK-AR-594-independent-auditor-closeout",
   "display_name": "independent-auditor@review",
   "mode": "review",
-  "status": "claimed",
+  "status": "released",
   "status_text": "Additive independent-auditor review pass for TASK-AR-594 (closeout)",
   "claimed_at": "2026-07-19T10:50:24+09:00",
-  "last_heartbeat": "2026-07-19T10:50:24+09:00",
-  "updated_at": "2026-07-19T10:50:24+09:00",
+  "last_heartbeat": "2026-07-19T10:56:50+09:00",
+  "updated_at": "2026-07-19T10:56:50+09:00",
   "tags": [
     "review",
     "additive",
@@ -21,5 +21,11 @@
   ],
   "overlay": true,
   "parent_task_id": "TASK-AR-594",
-  "parent_task_set_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT"
+  "parent_task_set_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
+  "handoff_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-594-independent-auditor-closeout.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-594-independent-auditor-closeout.log.md",
+  "released_at": "2026-07-19T10:56:50+09:00",
+  "verified_by": "codex-root-role-review-coordinator-594",
+  "verifier_role": "lead-engineer",
+  "verification_evidence": "reviews/ROLE-REVIEW-2026-07-19-TASK-AR-594-INDEPENDENT-AUDITOR.md"
 }
