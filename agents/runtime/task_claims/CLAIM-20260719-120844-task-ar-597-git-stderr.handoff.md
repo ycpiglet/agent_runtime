@@ -11,8 +11,14 @@
 - model_tier: worker_standard
 - wip_slot: 1
 - stop_condition: Stop if diagnostics could expose credentials
-- phase: implementation
-- step: 1/7
-- progress_pct: 0
-- status_text: Preserve Git stderr in release-auto test failures
+- phase: verified
+- step: 7/7
+- progress_pct: 100
+- status_text: W4a and independent W4b verification passed
 - status: claimed
+
+## Verification
+
+- W4a: `reviews/VERIFY-2026-07-19-unit-task-ar-597-001-20260719121242.json`
+- W4b: `reviews/W4B-2026-07-19-TASK-AR-597.md`
+- implementation_commit: `434eda4`
