@@ -8,6 +8,7 @@ throwaway temp git repo, so the host repository is never touched.
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -20,21 +21,75 @@ from scripts import release_execution_gate as execution_gate
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "release_auto_noncritical.py"
 
+_URL_USERINFO_RE = re.compile(r"(?i)([a-z][a-z0-9+.-]*://)[^/@\s]+@")
+_SENSITIVE_ASSIGNMENT_RE = re.compile(
+    r"(?i)\b(password|passwd|token|access[_-]?token|secret|authorization)"
+    r"\s*[:=]\s*[^\r\n]*"
+)
+
+
+def _sanitize_git_diagnostic(value: str) -> str:
+    value = _URL_USERINFO_RE.sub(r"\1[REDACTED]@", value)
+    return _SENSITIVE_ASSIGNMENT_RE.sub(r"\1=[REDACTED]", value)
+
 
 def _git(repo: Path, *args: str, env: dict[str, str] | None = None) -> None:
     merged = dict(os.environ)
     if env:
         merged.update(env)
-    subprocess.run(
-        ["git", *args],
+    command = ["git", *args]
+    result = subprocess.run(
+        command,
         cwd=repo,
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
         encoding="utf-8",
         errors="replace",
         env=merged,
     )
+    if result.returncode != 0:
+        rendered_command = subprocess.list2cmdline(
+            [_sanitize_git_diagnostic(part) for part in command]
+        )
+        stdout = _sanitize_git_diagnostic(result.stdout or "<empty>")
+        stderr = _sanitize_git_diagnostic(result.stderr or "<empty>")
+        raise AssertionError(
+            "git helper failed\n"
+            f"command: {rendered_command}\n"
+            f"return code: {result.returncode}\n"
+            f"stdout:\n{stdout}\n"
+            f"stderr:\n{stderr}"
+        )
+
+
+def test_git_failure_reports_sanitized_command_and_output(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    command_url = "https://user:top-secret@example.invalid/repo.git"
+    failure = subprocess.CompletedProcess(
+        args=["git", "fetch", command_url],
+        returncode=128,
+        stdout="fetch started\n",
+        stderr=(
+            f"fatal: unable to access '{command_url}'\n"
+            "debug: authorization: Bearer secondary-secret\n"
+        ),
+    )
+    monkeypatch.setattr(subprocess, "run", lambda *args, **kwargs: failure)
+
+    with pytest.raises(AssertionError) as caught:
+        _git(tmp_path, "fetch", command_url)
+
+    message = str(caught.value)
+    expected_command = "command: git fetch https://[REDACTED]@example.invalid/repo.git"
+    assert expected_command in message
+    assert "return code: 128" in message
+    assert "stdout:\nfetch started" in message
+    assert "stderr:\nfatal: unable to access" in message
+    assert "top-secret" not in message
+    assert "secondary-secret" not in message
+    assert "authorization=[REDACTED]" in message
 
 
 def _commit(repo: Path, subject: str, *, env: dict[str, str] | None = None) -> None:

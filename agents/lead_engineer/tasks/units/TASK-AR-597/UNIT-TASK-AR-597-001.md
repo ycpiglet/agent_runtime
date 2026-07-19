@@ -10,12 +10,12 @@ task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 initiative_id: INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T10:28:06+09:00
+updated_at: 2026-07-19T12:12:42+09:00
 origin_type: owner_request
-origin_ref: chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277
+origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
 summary: Add diagnostic Git helper failures
 horizon: unit
@@ -23,7 +23,7 @@ model_tier: worker_standard
 escalation_triggers:
   - ambiguity
   - data_integrity
-context: GitHub #285 records an exit-128 git commit failure whose stderr was captured but omitted from pytest's CalledProcessError display.
+context: GitHub
 inputs:
   - https://github.com/ycpiglet/agent_runtime/issues/285
   - tests/test_release_auto_noncritical.py
@@ -37,6 +37,10 @@ verification:
   - python -m pytest tests/test_release_auto_noncritical.py -q
 handoff: Report a sample sanitized failure message and test output.
 stop_condition: Stop if exposing stderr could leak credentials; sanitize sensitive command arguments before including them.
+verified_at: 2026-07-19T12:12:42+09:00
+verified_by: codex-root-task-ar-597
+evidence_refs:
+  - reviews/VERIFY-2026-07-19-unit-task-ar-597-001-20260719121242.json
 ---
 
 # UNIT-TASK-AR-597-001 - Add diagnostic Git helper failures
