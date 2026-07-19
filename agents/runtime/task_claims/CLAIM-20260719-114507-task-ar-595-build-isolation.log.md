@@ -11,3 +11,8 @@
 - wip_slot: 1
 - stop_condition: Stop if isolated build breaks documented offline pinned-source install
 - status_text: Remove updater no-build-isolation override
+
+## Iteration
+
+- Removed `--no-build-isolation` from rendered and executable updater commands.
+- W4a passed 100 tests; independent W4b approved command parity and retained safeguards.

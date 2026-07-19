@@ -11,8 +11,15 @@
 - model_tier: worker_standard
 - wip_slot: 1
 - stop_condition: Stop if isolated build breaks documented offline pinned-source install
-- phase: implementation
-- step: 1/7
-- progress_pct: 0
-- status_text: Remove updater no-build-isolation override
+- phase: verified
+- step: 7/7
+- progress_pct: 100
+- status_text: W4b approved updater build isolation repair
 - status: claimed
+
+## Result
+
+- Implementation: `61c64cb`
+- W4a: `reviews/VERIFY-2026-07-19-unit-task-ar-595-001-20260719114606.json`
+- W4b: `reviews/W4B-2026-07-19-TASK-AR-595.md`
+- Focused tests: `100 passed`.
