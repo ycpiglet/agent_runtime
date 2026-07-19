@@ -7,10 +7,12 @@ the check must NEVER break a session start — always exit 0 without --strict.
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import subprocess
 import sys
 from pathlib import Path
+from types import ModuleType
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = (
@@ -27,6 +29,14 @@ def _run(root: Path, *extra: str) -> subprocess.CompletedProcess[str]:
         encoding="utf-8",
         errors="replace",
     )
+
+
+def _load_script_module() -> ModuleType:
+    spec = importlib.util.spec_from_file_location("session_resume_check_under_test", SCRIPT)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def test_empty_root_exits_zero_with_resume_block(tmp_path: Path) -> None:
@@ -63,6 +73,50 @@ def test_malformed_inputs_never_break_session_start(tmp_path: Path) -> None:
     result = _run(tmp_path)
     assert result.returncode == 0
     assert "stale claim file: CLAIM-broken.claim" in result.stdout
+
+
+def test_default_audit_does_not_write_runtime_state(tmp_path: Path) -> None:
+    marker = tmp_path / "keep.txt"
+    marker.write_text("unchanged\n", encoding="utf-8")
+
+    result = _run(tmp_path)
+
+    assert result.returncode == 0
+    assert list(tmp_path.rglob("*")) == [marker]
+    assert marker.read_text(encoding="utf-8") == "unchanged\n"
+
+
+def test_mutating_recovery_interfaces_are_not_exposed(tmp_path: Path) -> None:
+    fix = _run(tmp_path, "--fix")
+    checkpoint = _run(tmp_path, "checkpoint", "--task", "TASK-1", "--step", "x")
+
+    assert fix.returncode == 2
+    assert "unrecognized arguments: --fix" in fix.stderr
+    assert checkpoint.returncode == 2
+    assert not (tmp_path / "agents").exists()
+
+
+def test_unexpected_failure_preserves_json_and_strict_contract(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    module = _load_script_module()
+
+    def fail_build(*args, **kwargs):
+        raise RuntimeError("synthetic failure")
+
+    monkeypatch.setattr(module, "build_report", fail_build)
+
+    default_code = module.main(["--root", str(tmp_path), "--json"])
+    default_payload = json.loads(capsys.readouterr().out)
+    strict_code = module.main(["--root", str(tmp_path), "--json", "--strict"])
+    strict_payload = json.loads(capsys.readouterr().out)
+
+    assert default_code == 0
+    assert strict_code == 1
+    assert default_payload["clean"] is False
+    assert strict_payload["clean"] is False
+    assert "synthetic failure" in default_payload["warnings"][0]
+    assert "synthetic failure" in strict_payload["warnings"][0]
 
 
 def test_json_mode_emits_parseable_report(tmp_path: Path) -> None:

@@ -20,12 +20,11 @@ It reports:
 Safety contract
 ----------------
 This is a resume-check, so it must NEVER crash a session start. The CLI ALWAYS
-exits 0 unless ``--strict`` is passed. The main body is wrapped so any
-unexpected exception prints a single ``WARN`` line and still exits 0.
+exits 0 unless ``--strict`` is passed. The main body reports unexpected
+exceptions safely as text or valid JSON; strict mode alone returns nonzero.
 
-The only mutating action is ``--fix``, which calls
-``message_queue.recover_stale_claim`` on inbox messages whose claim is stale,
-resetting them back to ``open``. Nothing else writes anything.
+The CLI is report-only: it never repairs, deletes, or writes runtime state.
+Recovery remains an explicit operator action after reviewing the report.
 
 The core scanners are PURE: they take explicit directory paths and a ``now``
 epoch so unit tests can use temp dirs and never touch the real repo.
@@ -36,23 +35,21 @@ from __future__ import annotations
 import argparse
 import datetime as _dt
 import json
-import re as _re
 import sys
 from pathlib import Path
-
-# Windows cp949/legacy consoles cannot encode em-dashes (—) in status text and
-# the report would degrade to a single WARN line; force UTF-8 so a SessionStart
-# hook always gets the full RESUME HERE block (same guard as
-# run_daily_summary.py). Must never crash the resume check itself.
-try:
-    sys.stdout.reconfigure(encoding="utf-8")
-    sys.stderr.reconfigure(encoding="utf-8")
-except Exception:
-    pass
 
 # Reuse the vendored message_queue helpers (same scripts/ dir).
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import message_queue as mq  # noqa: E402
+
+
+def _configure_stdio() -> None:
+    """Keep the SessionStart report readable on Windows legacy consoles."""
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
 
 # --- datetime parsing helper ---
@@ -324,42 +321,7 @@ def check_ralph_consistency(ralph_path: Path, pointer: dict, now: float) -> dict
     return result
 
 
-# --- sub-step checkpoints (per-task append-only progress log) ---
-
-def _checkpoint_file(checkpoints_dir: Path, task: str) -> Path:
-    """Return the per-task checkpoint JSONL path with a sanitized filename.
-
-    Keeps only ``[A-Za-z0-9._-]``; any run of other characters collapses to a
-    single ``_``; leading/trailing ``_`` are stripped. An empty result falls
-    back to ``task`` so we never produce a hidden or empty filename.
-    """
-    safe = _re.sub(r"[^A-Za-z0-9._-]+", "_", str(task)).strip("_")
-    if not safe:
-        safe = "task"
-    return checkpoints_dir / f"{safe}.jsonl"
-
-
-def append_checkpoint(checkpoints_dir: Path, *, task: str, step: str,
-                      status: str = "started", next_action: str = "",
-                      agent: str = "", now_iso: str) -> Path:
-    """Append ONE checkpoint JSON line for ``task`` and return the file path.
-
-    This is the only new mutating action; it must only run from the
-    ``checkpoint`` subcommand and never from the audit path.
-    """
-    checkpoints_dir.mkdir(parents=True, exist_ok=True)
-    path = _checkpoint_file(checkpoints_dir, task)
-    record = {
-        "ts": now_iso,
-        "task": task,
-        "step": step,
-        "status": status,
-        "next": next_action,
-        "agent": agent,
-    }
-    with path.open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps(record, ensure_ascii=False) + "\n")
-    return path
+# --- passive sub-step checkpoint visibility ---
 
 
 _CLOSED_STATUSES = {"done", "complete", "completed", "closed"}
@@ -550,26 +512,13 @@ def render_report(report: dict) -> str:
 # --- CLI ---
 
 def main(argv: list[str] | None = None) -> int:
-    # Shared parent parser so BOTH the audit path and the checkpoint subcommand
-    # accept --root identically.
-    root_parent = argparse.ArgumentParser(add_help=False)
-    # default=SUPPRESS so the checkpoint subparser does NOT clobber a --root
-    # given before the subcommand (argparse would otherwise re-apply the
-    # subparser's default and silently discard `--root X checkpoint ...`).
-    # Both `--root X checkpoint ...` and `checkpoint --root X ...` now work.
-    root_parent.add_argument("--root", default=argparse.SUPPRESS,
-                             help="repo root (default: message_queue.REPO_ROOT)")
-
     parser = argparse.ArgumentParser(
-        parents=[root_parent],
         description="Crash-recovery + session-resume auditor (report-only, "
                     "non-blocking; always exits 0 unless --strict).")
-    # Audit-only flags live on the top-level parser.
+    parser.add_argument("--root", default=str(mq.REPO_ROOT),
+                        help="repo root (default: message_queue.REPO_ROOT)")
     parser.add_argument("--json", action="store_true",
                         help="print the report dict as JSON instead of text")
-    parser.add_argument("--fix", action="store_true",
-                        help="recover stale claims for claimed-stale messages "
-                             "(the ONLY mutating action)")
     parser.add_argument("--max-session-age-hours", type=float, default=6.0,
                         help="candidate-abandoned session age threshold (hours)")
     parser.add_argument("--pointer-max-age-hours", type=float, default=24.0,
@@ -578,40 +527,10 @@ def main(argv: list[str] | None = None) -> int:
                         help="exit 1 if any warnings (default always exits 0 so "
                              "it never blocks a SessionStart hook)")
 
-    # Optional subcommand. When omitted, behave EXACTLY as the audit CLI.
-    sub = parser.add_subparsers(dest="command", required=False)
-    cp = sub.add_parser(
-        "checkpoint", parents=[root_parent],
-        help="record a sub-step progress checkpoint for a long task "
-             "(append-only; never runs the audit)")
-    cp.add_argument("--task", required=True, help="task id (e.g. TASK-123)")
-    cp.add_argument("--step", required=True,
-                    help="what sub-step was just done/started")
-    cp.add_argument("--status", choices=["started", "done", "blocked"],
-                    default="started", help="checkpoint status")
-    cp.add_argument("--next", default="", help="the next action to take")
-    cp.add_argument("--agent", default="", help="agent/role recording this")
-
     args = parser.parse_args(argv)
 
     try:
-        root = Path(getattr(args, "root", None) or str(mq.REPO_ROOT)).resolve()
-
-        if getattr(args, "command", None) == "checkpoint":
-            checkpoints_dir = root / "agents" / "runtime" / "checkpoints"
-            path = append_checkpoint(
-                checkpoints_dir,
-                task=args.task,
-                step=args.step,
-                status=args.status,
-                next_action=args.next,
-                agent=args.agent,
-                now_iso=_local_iso(),
-            )
-            print(f"checkpoint recorded: {path} (step='{args.step}', "
-                  f"status={args.status})")
-            return 0
-
+        root = Path(args.root).resolve()
         now_iso = _local_iso()
         now_epoch = mq._now_epoch()
         report = build_report(
@@ -622,15 +541,6 @@ def main(argv: list[str] | None = None) -> int:
             pointer_max_age_hours=args.pointer_max_age_hours,
         )
 
-        if args.fix:
-            if root != mq.REPO_ROOT.resolve():
-                print(
-                    "WARNING: --fix only operates on the real repo root "
-                    f"({mq.REPO_ROOT.resolve()}); skipping fix because --root "
-                    f"points elsewhere ({root}).")
-            else:
-                _apply_fix(root, report)
-
         if args.json:
             print(json.dumps(report, ensure_ascii=False, indent=2))
         else:
@@ -640,25 +550,16 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         return 0
     except Exception as exc:  # never crash a session start
-        print(f"WARN: session_resume_check failed safely: {exc}")
-        return 0
-
-
-def _apply_fix(root: Path, report: dict) -> None:
-    inbox_dir = root / "agents" / "messages" / "inbox"
-    entries = report.get("crash_scan", {}).get("claimed_stale_messages", [])
-    for entry in entries:
-        msg_path = inbox_dir / entry["file"]
-        try:
-            changed = mq.recover_stale_claim(msg_path)
-        except Exception as exc:
-            print(f"  fix: {entry['file']} could not be recovered: {exc}")
-            continue
-        if changed:
-            print(f"  fix: reset {entry['message_id']} -> open")
+        warning = f"session_resume_check failed safely: {exc}"
+        if args.json:
+            print(
+                json.dumps(
+                    {"warnings": [warning], "clean": False}, ensure_ascii=False
+                )
+            )
         else:
-            print(f"  fix: {entry['message_id']} unchanged "
-                  f"({entry['reason']}; recovery declined)")
+            print(f"WARN: {warning}")
+        return 1 if args.strict else 0
 
 
 def _local_iso() -> str:
@@ -670,4 +571,5 @@ def _local_iso() -> str:
 
 
 if __name__ == "__main__":
+    _configure_stdio()
     raise SystemExit(main())
