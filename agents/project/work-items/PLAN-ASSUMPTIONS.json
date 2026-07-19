@@ -219,7 +219,7 @@
         {
           "kind": "sha256",
           "path": "scripts/taskset_dispatcher.py",
-          "value": "46b9cc22af53789ef810477a0148b7b15fda39ccbf8dfae09c908f1372c2ec63"
+          "value": "1470c5b4cd8effb30e6fcf92819509ec7248ed70a3ddfbef82402af0c3453adf"
         },
         {
           "kind": "sha256",
@@ -228,7 +228,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration.md",
-      "recorded_at": "2026-07-19T10:28:47+09:00",
+      "recorded_at": "2026-07-19T10:57:44+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT"
     },
@@ -447,5 +447,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-19T10:28:47+09:00"
+  "updated_at": "2026-07-19T10:57:44+09:00"
 }
