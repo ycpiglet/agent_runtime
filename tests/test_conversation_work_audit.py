@@ -148,6 +148,68 @@ def test_taskset_missing_from_board_and_pointer_drift_are_watch(tmp_path: Path) 
     assert conversation_work_audit.main(["--root", str(root), "--check"]) == 0
 
 
+def _write_active_pointer(root: Path, task_id: str, task_file: str) -> None:
+    _write(
+        root / "agents" / "project" / "NEXT-SESSION-POINTER.yml",
+        POINTER_TEMPLATE.format(task_id=task_id, taskset_id="TASKSET-AR-FIXTURE").replace(
+            f"agents/lead_engineer/tasks/{task_id}.md", task_file
+        ),
+    )
+
+
+def test_pointer_resolves_slugged_canonical_task_filename(tmp_path: Path) -> None:
+    root = _fixture_repo(tmp_path, "## Notes\n\nNo follow-up.\n")
+    slugged = "agents/lead_engineer/tasks/TASK-231-taskset-dispatcher-selection-order.md"
+    _write(
+        root / slugged,
+        "---\nwork_id: TASK-231\nid: TASK-231\nkind: task\nstatus: planned\n---\n",
+    )
+    _write_active_pointer(root, "TASK-231", slugged)
+
+    _, findings = conversation_work_audit.analyze(root)
+
+    assert not any(f.kind in {"pointer-task-missing", "pointer-task-ambiguous"} for f in findings)
+
+
+def test_pointer_resolves_task_by_frontmatter_id_without_filename_prefix(tmp_path: Path) -> None:
+    root = _fixture_repo(tmp_path, "## Notes\n\nNo follow-up.\n")
+    canonical = "agents/lead_engineer/tasks/descriptive-canonical-task.md"
+    _write(root / canonical, "---\nwork_id: TASK-231\nkind: task\nstatus: planned\n---\n")
+    _write_active_pointer(root, "TASK-231", canonical)
+
+    _, findings = conversation_work_audit.analyze(root)
+
+    assert not any(f.kind in {"pointer-task-missing", "pointer-task-ambiguous"} for f in findings)
+
+
+def test_pointer_does_not_match_longer_task_id_prefix(tmp_path: Path) -> None:
+    root = _fixture_repo(tmp_path, "## Notes\n\nNo follow-up.\n")
+    longer = "agents/lead_engineer/tasks/TASK-2310.md"
+    _write(root / longer, "---\nwork_id: TASK-2310\nkind: task\nstatus: planned\n---\n")
+    _write_active_pointer(root, "TASK-231", longer)
+
+    _, findings = conversation_work_audit.analyze(root)
+
+    assert any(f.kind == "pointer-task-missing" for f in findings)
+
+
+def test_pointer_reports_ambiguous_canonical_task_records(tmp_path: Path) -> None:
+    root = _fixture_repo(tmp_path, "## Notes\n\nNo follow-up.\n")
+    first = "agents/lead_engineer/tasks/TASK-231-first.md"
+    second = "agents/lead_engineer/tasks/TASK-231-second.md"
+    _write(root / first, "---\nwork_id: TASK-231\nkind: task\nstatus: planned\n---\n")
+    _write(root / second, "---\nwork_id: TASK-231\nkind: task\nstatus: planned\n---\n")
+    _write_active_pointer(root, "TASK-231", first)
+
+    _, findings = conversation_work_audit.analyze(root)
+
+    ambiguous = [f for f in findings if f.kind == "pointer-task-ambiguous"]
+    assert len(ambiguous) == 1
+    assert first in ambiguous[0].detail
+    assert second in ambiguous[0].detail
+    assert not any(f.kind == "pointer-task-missing" for f in findings)
+
+
 def test_non_planning_reviews_are_ignored(tmp_path: Path) -> None:
     root = _fixture_repo(tmp_path, "## Notes\n\nNothing actionable.\n")
     _write(

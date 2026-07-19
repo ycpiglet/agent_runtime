@@ -10,12 +10,12 @@ task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 initiative_id: INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T10:28:06+09:00
+updated_at: 2026-07-19T11:59:06+09:00
 origin_type: owner_request
-origin_ref: chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277
+origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
 summary: Implement task-ID-aware pointer resolution
 horizon: unit
@@ -23,7 +23,7 @@ model_tier: worker_standard
 escalation_triggers:
   - ambiguity
   - data_integrity
-context: GitHub #290 reports pointer-task-missing when active_task is TASK-231 and the canonical file is TASK-231-taskset-dispatcher-selection-order.md.
+context: GitHub
 inputs:
   - https://github.com/ycpiglet/agent_runtime/issues/290
   - scripts/conversation_work_audit.py
@@ -43,6 +43,10 @@ verification:
   - python scripts/conversation_work_audit.py --check
 handoff: Report resolver semantics, collision coverage, and audit output.
 stop_condition: Stop if multiple canonical files claim the same task ID; surface the ambiguity rather than choosing one silently.
+verified_at: 2026-07-19T11:59:06+09:00
+verified_by: codex-root-task-ar-596
+evidence_refs:
+  - reviews/VERIFY-2026-07-19-unit-task-ar-596-001-20260719115906.json
 ---
 
 # UNIT-TASK-AR-596-001 - Implement task-ID-aware pointer resolution

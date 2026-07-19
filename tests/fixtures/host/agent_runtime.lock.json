@@ -124,7 +124,7 @@
       "scripts/collaboration_governance_gate.py": "sha256:e290b3f222a0a6761f8be61658facdfdffd7be920de024d7c943dff0a58636e5",
       "scripts/compound_metrics.py": "sha256:2dfb0c74f030d1c4070abcc60fbb965ef018d997bdacecda46a13c5ffeeb9817",
       "scripts/continuity_contract_gate.py": "sha256:51e96499cab2ade5e2ecfcaa2e2b8ce041b05df1464635fa6ca62c87e894febc",
-      "scripts/conversation_work_audit.py": "sha256:7279a081414e1aa3929929c88491289512f2b62c157038021622fb8198d1d47f",
+      "scripts/conversation_work_audit.py": "sha256:57ee40b838e45a36f7ee5caa53a1850aae78c3d8ab1e196f3b09f0fbedfac4fc",
       "scripts/cycle_gate.py": "sha256:8316cdeeef228f0078427d5c275060c5a79a23835bb6f31906e970ccbdf1e617",
       "scripts/deadlock_watchdog.py": "sha256:93b317f0ac03a0c337cc36141b37589b0b090e2f9d91fc9d3558221595eac1d5",
       "scripts/deliberation_guard.py": "sha256:28a1cead74225ed11d09579709f95b2bd14de1c37fe9917200976596168408e7",
@@ -279,7 +279,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.6.0",
-    "template_digest": "sha256:b9fd4d6d77dbf65d54e8e88bc28f2237928e2266c0b48ff112fc5b8c0a1429fc",
+    "template_digest": "sha256:dffeafb58f9d2be9d45292e729663a6978f0951b82c81d257b3d9f8c4d34f283",
     "template_files": 276
   },
   "project": "fixture-host",
