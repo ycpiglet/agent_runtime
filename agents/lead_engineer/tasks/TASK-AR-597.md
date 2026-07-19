@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 registered_at: 2026-07-19T10:28:06+09:00
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T12:21:24+09:00
+started_at: 2026-07-19T12:08:44+09:00
+updated_at: 2026-07-19T12:25:31+09:00
 title: Preserve Git stderr in release-auto test failures
-status: planned
+status: completed
 priority: P2
 difficulty: S
 est_hours: 1
@@ -39,6 +40,15 @@ verified_at: 2026-07-19T12:21:24+09:00
 verified_by: codex-root-task-ar-597
 evidence_refs:
   - reviews/VERIFY-2026-07-19-task-ar-597-20260719122124.json
+review_evidence_refs:
+  - reviews/W4B-2026-07-19-TASK-AR-597.md
+  - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-597-INDEPENDENT-AUDITOR.md
+implementation_commit: 2afa258
+resolution: done
+completed_at: 2026-07-19T12:25:31+09:00
+closed_by: codex-root-task-ar-597
+actual_hours: 0.35
+actual_tokens: 5000
 ---
 
 # TASK-AR-597 - Preserve Git stderr in release-auto test failures
@@ -60,3 +70,15 @@ evidence_refs:
 ## Verification
 
 - `python -m pytest tests/test_release_auto_noncritical.py -q`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-19T12:25:31+09:00`
+- Resolution: `done`
+- Actual hours: `0.35`
+- Actual tokens: `5000`
+- Closed by: `codex-root-task-ar-597`
+- Evidence:
+  - `reviews/VERIFY-2026-07-19-task-ar-597-20260719122124.json`
+<!-- work-close:end -->

@@ -9,11 +9,12 @@ task_id: TASK-AR-597
 task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 initiative_id: INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T12:12:42+09:00
+started_at: 2026-07-19T12:08:44+09:00
+updated_at: 2026-07-19T12:25:29+09:00
 origin_type: owner_request
 origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
@@ -41,6 +42,15 @@ verified_at: 2026-07-19T12:12:42+09:00
 verified_by: codex-root-task-ar-597
 evidence_refs:
   - reviews/VERIFY-2026-07-19-unit-task-ar-597-001-20260719121242.json
+review_evidence_refs:
+  - reviews/W4B-2026-07-19-TASK-AR-597.md
+  - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-597-INDEPENDENT-AUDITOR.md
+implementation_commit: 2afa258
+resolution: done
+completed_at: 2026-07-19T12:25:29+09:00
+closed_by: codex-root-task-ar-597
+actual_hours: 0.3
+actual_tokens: 3500
 ---
 
 # UNIT-TASK-AR-597-001 - Add diagnostic Git helper failures
@@ -84,3 +94,15 @@ Report a sample sanitized failure message and test output.
 ## Stop Boundary
 
 Stop if exposing stderr could leak credentials; sanitize sensitive command arguments before including them.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-19T12:25:29+09:00`
+- Resolution: `done`
+- Actual hours: `0.3`
+- Actual tokens: `3500`
+- Closed by: `codex-root-task-ar-597`
+- Evidence:
+  - `reviews/VERIFY-2026-07-19-unit-task-ar-597-001-20260719121242.json`
+<!-- work-close:end -->
