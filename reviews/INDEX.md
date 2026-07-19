@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-19T11:08:29+09:00
-record_count: 635
+generated_at: 2026-07-19T11:11:58+09:00
+record_count: 636
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `635` review and evidence records under `reviews/`.
+- Summary: indexed `636` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `635` files |
+| Reviews covered | pass | `636` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -592,6 +592,7 @@ record_count: 635
 | `reviews/VERIFY-2026-07-19-task-ar-594-20260719110741.json` | `VERIFY-2026-07-19-task-ar-594-20260719110741` | json | record | n/a | VERIFY-2026-07-19-task-ar-594-20260719110741 |
 | `reviews/VERIFY-2026-07-19-unit-task-ar-594-001-20260719103702.json` | `VERIFY-2026-07-19-unit-task-ar-594-001-20260719103702` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-594-001-20260719103702 |
 | `reviews/VERIFY-2026-07-19-unit-task-ar-594-001-20260719110031.json` | `VERIFY-2026-07-19-unit-task-ar-594-001-20260719110031` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-594-001-20260719110031 |
+| `reviews/VERIFY-2026-07-19-unit-task-ar-601-001-20260719111136.json` | `VERIFY-2026-07-19-unit-task-ar-601-001-20260719111136` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-601-001-20260719111136 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |

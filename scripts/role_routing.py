@@ -132,6 +132,14 @@ def _claim_path(root: Path, claim_id: str) -> Path:
     return _claim_dir(root) / f"{claim_id}.json"
 
 
+def _artifact_path(root: Path, claim_id: str, suffix: str) -> Path:
+    return _claim_dir(root) / f"{claim_id}.{suffix}.md"
+
+
+def _rel(root: Path, path: Path) -> str:
+    return path.resolve().relative_to(root.resolve()).as_posix()
+
+
 def _write_overlay_claim(
     root: Path,
     *,
@@ -158,6 +166,8 @@ def _write_overlay_claim(
     path = _claim_path(root, claim_id)
     if path.exists():
         return None
+    handoff_path = _artifact_path(root, claim_id, "handoff")
+    log_path = _artifact_path(root, claim_id, "log")
     claim: dict[str, Any] = {
         "schema": SCHEMA,
         "claim_id": claim_id,
@@ -178,8 +188,32 @@ def _write_overlay_claim(
         "overlay": True,            # additive orchestration overlay marker
         "parent_task_id": parent_task_id,
         "parent_task_set_id": parent_task_set_id,
+        "handoff_path": _rel(root, handoff_path),
+        "log_path": _rel(root, log_path),
     }
     path.parent.mkdir(parents=True, exist_ok=True)
+    atomic_io.write_text_atomic(
+        handoff_path,
+        (
+            f"# Handoff: {claim_id}\n\n"
+            f"- task_id: {task_id}\n"
+            f"- parent_task_id: {parent_task_id or '-'}\n"
+            f"- agent_role: {agent_role}\n"
+            f"- mode: {mode}\n"
+            f"- status: claimed\n"
+            f"- status_text: {status_text}\n"
+        ),
+    )
+    atomic_io.write_text_atomic(
+        log_path,
+        (
+            f"# Claim Log: {claim_id}\n\n"
+            f"- claimed_at: {now}\n"
+            f"- task_id: {task_id}\n"
+            f"- agent_instance_id: {claim['agent_instance_id']}\n"
+            f"- status_text: {status_text}\n"
+        ),
+    )
     atomic_io.write_json_atomic(path, claim)
     if event_name:
         append_event(

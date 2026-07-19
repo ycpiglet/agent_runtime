@@ -841,14 +841,15 @@ def cmd_release(args: argparse.Namespace) -> int:
         triggers = list(claim.get("escalation_triggers") or []) + [
             t for t in (claim.get("tags") or []) if t in model_routing.ESCALATION_TRIGGERS
         ]
-        role_routing.route_review_pass(
-            root,
-            task_id=str(claim.get("task_id") or ""),
-            task_set_id=str(claim.get("task_set_id") or ""),
-            event="closeout",
-            triggers=triggers,
-            now=now_text,
-        )
+        if claim.get("overlay") is not True:
+            role_routing.route_review_pass(
+                root,
+                task_id=str(claim.get("task_id") or ""),
+                task_set_id=str(claim.get("task_set_id") or ""),
+                event="closeout",
+                triggers=triggers,
+                now=now_text,
+            )
     except Exception:  # noqa: BLE001 - routing is best-effort overlay only
         pass
     if str(claim.get("phase") or "").strip().lower() == "taskset-completed":

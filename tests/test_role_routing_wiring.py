@@ -220,9 +220,29 @@ def test_release_with_role_routing_on_creates_additive_review_overlay(tmp_path: 
     assert overlay["task_id"] != claim["task_id"], "review claim must be additive (distinct task id)"
     assert overlay["agent_role"] in {"skeptic", "independent-auditor"}
     assert overlay.get("parent_task_id") == claim["task_id"]
+    assert (tmp_path / overlay["handoff_path"]).is_file()
+    assert (tmp_path / overlay["log_path"]).is_file()
     # closeout is the wired event (release == task closeout).
     assert "review-trigger:closeout" in (overlay.get("tags") or [])
     assert any(e.get("event") == "review_pass_dispatched" for e in _events(tmp_path))
+
+
+def test_releasing_overlay_does_not_route_nested_review_claim(tmp_path: Path) -> None:
+    payload = _create_release_candidate(tmp_path)
+    primary = payload["claim"]
+    env = _env(**{ROLE_ROUTING_FLAG: "1"})
+    released = _release(tmp_path, primary, env=env)
+    assert released.returncode == 0, released.stderr or released.stdout
+    overlay = next(claim for claim in _claims(tmp_path) if claim.get("overlay") is True)
+
+    overlay_released = _release(tmp_path, overlay, env=env)
+
+    assert overlay_released.returncode == 0, overlay_released.stderr or overlay_released.stdout
+    claims = _claims(tmp_path)
+    assert len(claims) == 2
+    saved_overlay = next(claim for claim in claims if claim["claim_id"] == overlay["claim_id"])
+    assert saved_overlay["status"] == "released"
+    assert not any("REVIEW-REVIEW" in claim["claim_id"] for claim in claims)
 
 
 def test_release_routing_failure_never_breaks_release(tmp_path: Path) -> None:

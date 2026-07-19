@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY
 initiative_id: INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-19T11:03:47+09:00
-updated_at: 2026-07-19T11:03:47+09:00
+updated_at: 2026-07-19T11:11:36+09:00
 origin_type: runtime_discovery
 origin_ref: TASK-AR-594 closeout overlay release failure
 created_by: codex-root-planner
@@ -46,6 +46,10 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Report the original failure, lifecycle artifact paths, recursion guard behavior, and focused test output.
 stop_condition: Stop if overlay claims require a separate lifecycle schema or if suppressing recursive routing would skip ordinary worker closeout reviews.
+verified_at: 2026-07-19T11:11:36+09:00
+verified_by: codex-root-task-ar-601
+evidence_refs:
+  - reviews/VERIFY-2026-07-19-unit-task-ar-601-001-20260719111136.json
 ---
 
 # UNIT-TASK-AR-601-001 - Repair overlay lifecycle artifacts and recursion guard

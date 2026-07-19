@@ -169,6 +169,10 @@ def test_review_routing_on_creates_additive_claim_without_touching_lead(tmp_path
     rc = review[0]
     assert rc["task_id"] != lead["task_id"], "review claim must be a distinct, additive task id"
     assert rc.get("mode") == "review" or "review" in (rc.get("tags") or [])
+    assert (tmp_path / rc["handoff_path"]).is_file()
+    assert (tmp_path / rc["log_path"]).is_file()
+    assert rc["claim_id"] in (tmp_path / rc["handoff_path"]).read_text(encoding="utf-8")
+    assert rc["claim_id"] in (tmp_path / rc["log_path"]).read_text(encoding="utf-8")
     # an event is logged so the live loop / UI can see the parallel pass
     assert any(e.get("event") == "review_pass_dispatched" for e in _events(tmp_path))
 
