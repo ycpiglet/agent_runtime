@@ -35,12 +35,15 @@ from __future__ import annotations
 import argparse
 import datetime as _dt
 import json
+import re
 import sys
 from pathlib import Path
 
 # Reuse the vendored message_queue helpers (same scripts/ dir).
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import message_queue as mq  # noqa: E402
+
+_SAFE_MESSAGE_ID_RE = re.compile(r"MSG-[A-Za-z0-9._-]+\Z")
 
 
 def _configure_stdio() -> None:
@@ -126,6 +129,13 @@ def scan_claimed_stale_messages(inbox_dir: Path, claims_dir: Path,
         if not meta or meta.get("status") != "claimed":
             continue
         message_id = mq._msg_id_from_path(path, meta)
+        if not _SAFE_MESSAGE_ID_RE.fullmatch(message_id):
+            out.append({
+                "file": path.name,
+                "message_id": message_id,
+                "reason": "invalid-message-id",
+            })
+            continue
         # Derive claim file: prefer mq._claim_path on the message id, but it is
         # rooted at the real CLAIMS_DIR; for arbitrary claims_dir (tests) fall
         # back to matching by stem within claims_dir.

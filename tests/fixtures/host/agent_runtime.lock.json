@@ -192,7 +192,7 @@
       "scripts/scribe_due.py": "sha256:3ba9579be478a9e0a6e0983d4847074f6a503ba64eb67d060ca56ff548c449bb",
       "scripts/secretary_digest.py": "sha256:66a5e85681877eec911fc3dca0f1b19b71004a840f87500d1c78f10cda55b004",
       "scripts/session_dashboard.py": "sha256:1ba6a9a0eb17d1d3e074a761fc197f389c6822a2d736b3549c0e9b02c219c76d",
-      "scripts/session_resume_check.py": "sha256:192ffeeafd039248c4334c4774bf3dd1eabd9f6eda93a578c221c29bd1b9e585",
+      "scripts/session_resume_check.py": "sha256:5a21ce70f57d8987c63699acfa03e88c9b14a24c8483027a025bb86fb43a4c88",
       "scripts/session_start_hook.py": "sha256:a688e6e77d3bf156ddac3409082b224775732ec0d86bd581332b1274b5ef4e86",
       "scripts/state_machine_gate.py": "sha256:b1ce42970658b1d7eed94b0285a47fca74e2566ff9094b71ed99a5ad10206e7f",
       "scripts/state_sync_gate.py": "sha256:414748a65191d7ff3924e6f4a786c2f8b7b926f4d675b193d4f1463e90476c2a",
@@ -280,7 +280,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.6.0",
-    "template_digest": "sha256:ea9c95676b91bd9b4e26136c2025d64fe35ebc4302bd923783f5967cd6063a95",
+    "template_digest": "sha256:a49657ea5b026cdb5dda80e773f4e2ad8c6a852a325dea5b10a748b0e22ab730",
     "template_files": 277
   },
   "project": "fixture-host",

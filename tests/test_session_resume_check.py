@@ -119,6 +119,42 @@ def test_unexpected_failure_preserves_json_and_strict_contract(
     assert "synthetic failure" in strict_payload["warnings"][0]
 
 
+def test_claim_scan_rejects_path_traversal_message_id(
+    tmp_path: Path, monkeypatch
+) -> None:
+    module = _load_script_module()
+    inbox = tmp_path / "agents" / "messages" / "inbox"
+    claims = tmp_path / "agents" / "runtime" / "claims"
+    victim = tmp_path / "agents" / "outside" / "VICTIM.claim"
+    inbox.mkdir(parents=True)
+    claims.mkdir(parents=True)
+    victim.parent.mkdir(parents=True)
+    victim.write_text('{"expires_at": 0, "secret": "do-not-read"}\n', encoding="utf-8")
+    (inbox / "MSG-malicious.md").write_text(
+        "---\n"
+        "id: MSG-x/../../../outside/VICTIM\n"
+        "status: claimed\n"
+        "---\n",
+        encoding="utf-8",
+    )
+
+    def forbid_claim_read(path: Path):
+        raise AssertionError(f"unsafe claim read: {path}")
+
+    monkeypatch.setattr(module.mq, "_read_claim", forbid_claim_read)
+
+    findings = module.scan_claimed_stale_messages(inbox, claims, now=1.0)
+
+    assert findings == [
+        {
+            "file": "MSG-malicious.md",
+            "message_id": "MSG-x/../../../outside/VICTIM",
+            "reason": "invalid-message-id",
+        }
+    ]
+    assert "do-not-read" in victim.read_text(encoding="utf-8")
+
+
 def test_json_mode_emits_parseable_report(tmp_path: Path) -> None:
     result = _run(tmp_path, "--json")
     assert result.returncode == 0
