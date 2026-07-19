@@ -144,6 +144,53 @@ def test_review_routing_off_is_inert(tmp_path, monkeypatch):
     assert after == before
 
 
+@pytest.mark.parametrize(
+    ("config_value", "env_value", "expected"),
+    [(True, "0", False), (False, "1", True)],
+)
+def test_explicit_environment_value_overrides_committed_config(
+    tmp_path, monkeypatch, config_value, env_value, expected
+):
+    config = tmp_path / "agents" / "project" / "role-routing.json"
+    config.parent.mkdir(parents=True, exist_ok=True)
+    config.write_text(json.dumps({"role_routing": config_value}), encoding="utf-8")
+    monkeypatch.setenv("AR_ROLE_ROUTING", env_value)
+    mod = _load()
+
+    result = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:00:00+09:00",
+    )
+
+    assert result["enabled"] is expected
+    assert bool(result["created"]) is expected
+
+
+def test_json_publish_failure_rolls_back_overlay_artifacts(tmp_path, monkeypatch):
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+
+    def fail_json(*_args, **_kwargs):
+        raise OSError("injected claim JSON failure")
+
+    monkeypatch.setattr(mod.atomic_io, "write_json_atomic", fail_json)
+
+    with pytest.raises(OSError, match="injected claim JSON failure"):
+        mod.route_review_pass(
+            tmp_path,
+            task_id="TASK-AR-900",
+            task_set_id="TASKSET-AR-900",
+            event="closeout",
+            now="2026-06-22T10:00:00+09:00",
+        )
+
+    claim_dir = _claims_dir(tmp_path)
+    assert not list(claim_dir.glob("CLAIM-REVIEW-TASK-AR-900-*"))
+
+
 def test_review_routing_on_creates_additive_claim_without_touching_lead(tmp_path, monkeypatch):
     monkeypatch.setenv("AR_ROLE_ROUTING", "1")
     mod = _load()

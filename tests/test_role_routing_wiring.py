@@ -27,6 +27,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CLAIM_DISPATCHER = REPO_ROOT / "scripts" / "task_claim_dispatcher.py"
@@ -227,13 +229,19 @@ def test_release_with_role_routing_on_creates_additive_review_overlay(tmp_path: 
     assert any(e.get("event") == "review_pass_dispatched" for e in _events(tmp_path))
 
 
-def test_releasing_overlay_does_not_route_nested_review_claim(tmp_path: Path) -> None:
+@pytest.mark.parametrize("overlay_marker", [True, "true", 1, "1"])
+def test_releasing_overlay_does_not_route_nested_review_claim(
+    tmp_path: Path, overlay_marker: object
+) -> None:
     payload = _create_release_candidate(tmp_path)
     primary = payload["claim"]
     env = _env(**{ROLE_ROUTING_FLAG: "1"})
     released = _release(tmp_path, primary, env=env)
     assert released.returncode == 0, released.stderr or released.stdout
     overlay = next(claim for claim in _claims(tmp_path) if claim.get("overlay") is True)
+    overlay["overlay"] = overlay_marker
+    overlay_path = tmp_path / "agents" / "runtime" / "task_claims" / f"{overlay['claim_id']}.json"
+    overlay_path.write_text(json.dumps(overlay, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     overlay_released = _release(tmp_path, overlay, env=env)
 
@@ -249,20 +257,22 @@ def test_release_routing_failure_never_breaks_release(tmp_path: Path) -> None:
     """A routing fault must not fail the release (mirrors a2a_claim_emitter robustness)."""
     payload = _create_release_candidate(tmp_path)
     claim = payload["claim"]
-    # Make the overlay write path collide: pre-create the deterministic review
-    # claim_id as a DIRECTORY so atomic write would raise; release must still 0.
-    review_id = f"CLAIM-REVIEW-{claim['task_id']}-independent-auditor-closeout".replace(" ", "")
-    # role_routing slugs the task id; reproduce its _slug to land the collision.
+    # Make the first artifact publish fail after the JSON existence check by
+    # placing a directory at the deterministic handoff path. Release must stay 0.
     slug = "".join(c if c.isalnum() else "-" for c in claim["task_id"]).strip("-")
-    collide = tmp_path / "agents" / "runtime" / "task_claims" / f"CLAIM-REVIEW-{slug}-independent-auditor-closeout.json"
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    overlay_id = f"CLAIM-REVIEW-{slug}-independent-auditor-closeout"
+    collide = claim_dir / f"{overlay_id}.handoff.md"
     collide.parent.mkdir(parents=True, exist_ok=True)
-    collide.mkdir()  # a directory where a file is expected -> write fault
+    collide.mkdir()
 
     released = _release(tmp_path, claim, env=_env(**{ROLE_ROUTING_FLAG: "1"}))
 
     assert released.returncode == 0, released.stderr or released.stdout
     saved = json.loads((tmp_path / payload["path"]).read_text(encoding="utf-8"))
     assert saved["status"] == "released"
+    assert not (claim_dir / f"{overlay_id}.json").exists()
+    assert not (claim_dir / f"{overlay_id}.log.md").exists()
 
 
 # ---------------------------------------------------------------------------
