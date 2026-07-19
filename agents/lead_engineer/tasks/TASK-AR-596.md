@@ -32,6 +32,9 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+verification:
+  - python -m pytest tests/test_conversation_work_audit.py -q
+  - python scripts/conversation_work_audit.py --check
 ---
 
 # TASK-AR-596 - Resolve slugged canonical task files in conversation audit

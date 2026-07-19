@@ -32,6 +32,8 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+verification:
+  - python -m pytest tests/test_inventory_sync_sanitize.py -q
 ---
 
 # TASK-AR-595 - Enforce isolated build prerequisites in host updater

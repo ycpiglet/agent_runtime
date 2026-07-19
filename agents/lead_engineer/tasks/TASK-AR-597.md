@@ -32,6 +32,8 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+verification:
+  - python -m pytest tests/test_release_auto_noncritical.py -q
 ---
 
 # TASK-AR-597 - Preserve Git stderr in release-auto test failures

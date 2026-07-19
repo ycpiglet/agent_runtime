@@ -32,6 +32,9 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+verification:
+  - python -m pytest tests/test_taskset_dispatcher.py tests/test_role_routing_wiring.py -q
+  - python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT --check
 ---
 
 # TASK-AR-594 - Honor canonical taskset task order

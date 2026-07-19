@@ -32,6 +32,11 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+verification:
+  - python scripts/release_version_cascade.py --check
+  - python scripts/owner_governance_gate.py
+  - python -m pytest -q
+  - python scripts/work.py status
 ---
 
 # TASK-AR-600 - Synchronize state and release v0.7.0

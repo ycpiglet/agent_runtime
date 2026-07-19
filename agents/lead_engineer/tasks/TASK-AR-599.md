@@ -32,6 +32,10 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+verification:
+  - python -m pytest tests/test_allimbot.py tests/test_update_notify.py tests/test_orchestrator_atomic_writes.py tests/test_owner_governance_chain_parity.py -q
+  - python scripts/owner_governance_gate.py
+  - python scripts/regen_host_lock_if_needed.py --check
 ---
 
 # TASK-AR-599 - Adopt never-blocking allimbot notifications

@@ -32,6 +32,9 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+verification:
+  - python -m pytest tests/test_session_resume_check.py tests/test_orchestrator_atomic_writes.py -q
+  - python scripts/regen_host_lock_if_needed.py --check
 ---
 
 # TASK-AR-598 - Integrate crash-safe session resume audit
