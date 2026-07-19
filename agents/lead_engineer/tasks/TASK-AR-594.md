@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 registered_at: 2026-07-19T10:28:06+09:00
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T10:54:44+09:00
+started_at: 2026-07-19T10:32:13+09:00
+updated_at: 2026-07-19T11:08:22+09:00
 title: Honor canonical taskset task order
-status: planned
+status: completed
 priority: P0
 difficulty: M
 est_hours: 4
@@ -36,10 +37,21 @@ verification:
   - python -m pytest tests/test_taskset_dispatcher.py tests/test_role_routing_wiring.py -q
   - python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT --check
 verification_status: passed
-verified_at: 2026-07-19T10:54:44+09:00
-verified_by: codex-root-task-ar-594
+verified_at: 2026-07-19T11:07:41+09:00
+verified_by: codex-root-task-ar-594-rework
 evidence_refs:
   - reviews/VERIFY-2026-07-19-task-ar-594-20260719105444.json
+  - reviews/VERIFY-2026-07-19-task-ar-594-20260719110741.json
+failed_evidence_refs:
+  - reviews/VERIFY-2026-07-19-task-ar-594-20260719110720.json
+review_evidence_refs:
+  - reviews/W4B-2026-07-19-TASK-AR-594-REWORK.md
+  - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-594-SKEPTIC.md
+resolution: done
+completed_at: 2026-07-19T11:08:22+09:00
+closed_by: codex-root-task-ar-594-rework
+actual_hours: 1.5
+actual_tokens: 18000
 ---
 
 # TASK-AR-594 - Honor canonical taskset task order
@@ -62,3 +74,16 @@ evidence_refs:
 
 - `python -m pytest tests/test_taskset_dispatcher.py tests/test_role_routing_wiring.py -q`
 - `python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-19T11:08:22+09:00`
+- Resolution: `done`
+- Actual hours: `1.5`
+- Actual tokens: `18000`
+- Closed by: `codex-root-task-ar-594-rework`
+- Evidence:
+  - `reviews/VERIFY-2026-07-19-task-ar-594-20260719105444.json`
+  - `reviews/VERIFY-2026-07-19-task-ar-594-20260719110741.json`
+<!-- work-close:end -->

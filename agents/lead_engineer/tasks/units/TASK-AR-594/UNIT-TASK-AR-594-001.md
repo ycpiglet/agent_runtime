@@ -9,11 +9,11 @@ task_id: TASK-AR-594
 task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 initiative_id: INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T11:00:31+09:00
+updated_at: 2026-07-19T11:08:20+09:00
 origin_type: owner_request
 origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
@@ -49,6 +49,11 @@ verified_by: codex-root-task-ar-594-rework
 evidence_refs:
   - reviews/VERIFY-2026-07-19-unit-task-ar-594-001-20260719103702.json
   - reviews/VERIFY-2026-07-19-unit-task-ar-594-001-20260719110031.json
+resolution: done
+completed_at: 2026-07-19T11:08:20+09:00
+closed_by: codex-root-task-ar-594-rework
+actual_hours: 1.5
+actual_tokens: 18000
 ---
 
 # UNIT-TASK-AR-594-001 - Implement canonical task order selection
@@ -98,3 +103,16 @@ Provide changed-file summary, before/after selection evidence, focused test outp
 ## Stop Boundary
 
 Stop if canonical order cannot be derived without changing the taskset record contract; escalate with the conflicting record examples.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-19T11:08:20+09:00`
+- Resolution: `done`
+- Actual hours: `1.5`
+- Actual tokens: `18000`
+- Closed by: `codex-root-task-ar-594-rework`
+- Evidence:
+  - `reviews/VERIFY-2026-07-19-unit-task-ar-594-001-20260719103702.json`
+  - `reviews/VERIFY-2026-07-19-unit-task-ar-594-001-20260719110031.json`
+<!-- work-close:end -->
