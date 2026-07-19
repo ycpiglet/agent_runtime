@@ -10,12 +10,12 @@ task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 initiative_id: INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T10:28:06+09:00
+updated_at: 2026-07-19T12:28:43+09:00
 origin_type: owner_request
-origin_ref: chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277
+origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
 summary: Rebase and verify session resume recovery
 horizon: unit
@@ -23,7 +23,7 @@ model_tier: worker_standard
 escalation_triggers:
   - cross_cutting
   - data_integrity
-context: PR #277 contains a host-proven 673-line session resume auditor but is DIRTY against current main; issue #274 part 1 atomic writes already landed via PR #276.
+context: PR
 inputs:
   - https://github.com/ycpiglet/agent_runtime/issues/274
   - https://github.com/ycpiglet/agent_runtime/pull/277
@@ -43,6 +43,10 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Report PR conflict resolution, hook order, malformed-state tests, and the remote issue/PR outcome.
 stop_condition: Stop if the PR contains host-specific behavior or destructive recovery; retain report-only behavior and document the incompatible portion.
+verified_at: 2026-07-19T12:28:43+09:00
+verified_by: codex-root-task-ar-598
+evidence_refs:
+  - reviews/VERIFY-2026-07-19-unit-task-ar-598-001-20260719122843.json
 ---
 
 # UNIT-TASK-AR-598-001 - Rebase and verify session resume recovery
