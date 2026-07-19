@@ -1,0 +1,27 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-REVIEW-TASK-AR-595-independent-auditor-closeout",
+  "task_id": "REVIEW-TASK-AR-595-independent-auditor",
+  "task_set_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
+  "active_scope": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
+  "agent_role": "independent-auditor",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "independent-auditor-CLAIM-REVIEW-TASK-AR-595-independent-auditor-closeout",
+  "display_name": "independent-auditor@review",
+  "mode": "review",
+  "status": "claimed",
+  "status_text": "Additive independent-auditor review pass for TASK-AR-595 (closeout)",
+  "claimed_at": "2026-07-19T11:51:01+09:00",
+  "last_heartbeat": "2026-07-19T11:51:01+09:00",
+  "updated_at": "2026-07-19T11:51:01+09:00",
+  "tags": [
+    "review",
+    "additive",
+    "review-trigger:closeout"
+  ],
+  "overlay": true,
+  "parent_task_id": "TASK-AR-595",
+  "parent_task_set_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
+  "handoff_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-595-independent-auditor-closeout.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-595-independent-auditor-closeout.log.md"
+}

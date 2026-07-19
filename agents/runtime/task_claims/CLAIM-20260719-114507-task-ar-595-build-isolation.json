@@ -9,7 +9,7 @@
   "callsite_id": "codex-root-20260719",
   "pane_id": "root",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
   "active_scope": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
   "scope_transition_approved": true,
@@ -27,12 +27,12 @@
   "worktree_path": ".worktrees/TASK-AR-595",
   "branch": "codex/task-ar-595-updater-build-isolation",
   "claimed_at": "2026-07-19T11:45:07+09:00",
-  "last_heartbeat": "2026-07-19T11:50:31+09:00",
-  "updated_at": "2026-07-19T11:50:31+09:00",
+  "last_heartbeat": "2026-07-19T11:51:01+09:00",
+  "updated_at": "2026-07-19T11:51:01+09:00",
   "expires_at": "2026-07-19T13:15:07+09:00",
   "lease": {
     "claimed_at": "2026-07-19T11:45:07+09:00",
-    "heartbeat_at": "2026-07-19T11:50:31+09:00",
+    "heartbeat_at": "2026-07-19T11:51:01+09:00",
     "expires_at": "2026-07-19T13:15:07+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260719-114507-task-ar-595-build-isolation.handoff.md",
@@ -48,5 +48,9 @@
   "target_files": [
     "src/agent_runtime/host_update.py",
     "tests/test_inventory_sync_sanitize.py"
-  ]
+  ],
+  "released_at": "2026-07-19T11:51:01+09:00",
+  "verified_by": "codex-independent-verifier-task-ar-595-20260719",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-19-TASK-AR-595.md"
 }
