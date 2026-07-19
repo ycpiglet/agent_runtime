@@ -4,6 +4,29 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-19-auto-merge-execution-readback.md",
+          "value": "15e8a149d2102fc6aa7ec8421e47f6779d8bcb517c78a84efd110f1a7d30b3b6"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "35e9b6132cdeee9adbd5ad833598bb55237e98ce07fee4ad5d927c4ed4c4d9c0"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-19-auto-merge-execution-readback.md",
+      "recorded_at": "2026-07-19T10:36:52+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-AUTO-MERGE-INTEGRITY"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-21-taskset-ar-business-operating-system-registration.md",
           "value": "06808c7062a62c8bf1bbf3fe24feeca00cd1bf8e1b3a77b463022ff268d8cd75"
         },
@@ -409,5 +432,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-21T16:43:42+09:00"
+  "updated_at": "2026-07-19T10:36:52+09:00"
 }
