@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-19T11:43:52+09:00
+generated_at: 2026-07-19T11:54:41+09:00
 record_count: 390
 ---
 
@@ -413,8 +413,8 @@ record_count: 390
 | 23.1 | Taskset 23.1 | taskset | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | `INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | active | `BACKLOG-BOARD.md` | Upstream Intake Closer |
 | 23.1.1 | Task 23.1.1 | task | `TASK-AR-594` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | `agents/lead_engineer/tasks/TASK-AR-594.md` | Resolve GitHub #289 so taskset dispatch selects explicit canonical task order before… |
 | 23.1.1.1 | Unit 23.1.1.1 | unit | `UNIT-TASK-AR-594-001` | `TASK-AR-594` | completed | `agents/lead_engineer/tasks/units/TASK-AR-594/UNIT-TASK-AR-594-001.md` | UNIT-TASK-AR-594-001 - Implement canonical task order selection |
-| 23.1.2 | Task 23.1.2 | task | `TASK-AR-595` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | planned | `agents/lead_engineer/tasks/TASK-AR-595.md` | Resolve GitHub #287 so host updates honor pyproject build-system requirements instead… |
-| 23.1.2.1 | Unit 23.1.2.1 | unit | `UNIT-TASK-AR-595-001` | `TASK-AR-595` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-595/UNIT-TASK-AR-595-001.md` | UNIT-TASK-AR-595-001 - Repair updater build isolation |
+| 23.1.2 | Task 23.1.2 | task | `TASK-AR-595` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | `agents/lead_engineer/tasks/TASK-AR-595.md` | Resolve GitHub #287 so host updates honor pyproject build-system requirements instead… |
+| 23.1.2.1 | Unit 23.1.2.1 | unit | `UNIT-TASK-AR-595-001` | `TASK-AR-595` | completed | `agents/lead_engineer/tasks/units/TASK-AR-595/UNIT-TASK-AR-595-001.md` | UNIT-TASK-AR-595-001 - Repair updater build isolation |
 | 23.1.3 | Task 23.1.3 | task | `TASK-AR-596` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | planned | `agents/lead_engineer/tasks/TASK-AR-596.md` | Resolve GitHub #290 so active pointers find canonical TASK files with descriptive slu… |
 | 23.1.3.1 | Unit 23.1.3.1 | unit | `UNIT-TASK-AR-596-001` | `TASK-AR-596` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-596/UNIT-TASK-AR-596-001.md` | UNIT-TASK-AR-596-001 - Implement task-ID-aware pointer resolution |
 | 23.1.4 | Task 23.1.4 | task | `TASK-AR-597` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | planned | `agents/lead_engineer/tasks/TASK-AR-597.md` | Resolve GitHub #285 so transient Git setup failures include actionable stdout/stderr… |

@@ -9,11 +9,11 @@ task_id: TASK-AR-595
 task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 initiative_id: INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T11:46:06+09:00
+updated_at: 2026-07-19T11:54:39+09:00
 origin_type: owner_request
 origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
@@ -43,6 +43,11 @@ verified_at: 2026-07-19T11:46:06+09:00
 verified_by: codex-root-task-ar-595
 evidence_refs:
   - reviews/VERIFY-2026-07-19-unit-task-ar-595-001-20260719114606.json
+resolution: done
+completed_at: 2026-07-19T11:54:39+09:00
+closed_by: codex-root-task-ar-595
+actual_hours: 0.5
+actual_tokens: 5000
 ---
 
 # UNIT-TASK-AR-595-001 - Repair updater build isolation
@@ -88,3 +93,15 @@ Report the exact command delta and focused test result.
 ## Stop Boundary
 
 Stop if removing the override makes offline or pinned-source installation impossible under the documented updater contract; capture the failing command and environment.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-19T11:54:39+09:00`
+- Resolution: `done`
+- Actual hours: `0.5`
+- Actual tokens: `5000`
+- Closed by: `codex-root-task-ar-595`
+- Evidence:
+  - `reviews/VERIFY-2026-07-19-unit-task-ar-595-001-20260719114606.json`
+<!-- work-close:end -->

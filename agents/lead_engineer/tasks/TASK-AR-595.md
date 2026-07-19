@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 registered_at: 2026-07-19T10:28:06+09:00
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T10:28:06+09:00
+started_at: 2026-07-19T11:45:07+09:00
+updated_at: 2026-07-19T11:54:41+09:00
 title: Enforce isolated build prerequisites in host updater
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 3
@@ -24,7 +25,7 @@ task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 unit_spec: agents/lead_engineer/tasks/units/TASK-AR-595/UNIT-TASK-AR-595-001.md
 reservation_id: RES-20260719-102806-bbbc9438-02
 origin_type: owner_request
-origin_ref: chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277
+origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
 summary: Remove the updater path that bypasses declared isolated build requirements and prove the generated/executed commands are safe.
 planner_model_tier: planner_high
@@ -34,6 +35,19 @@ tags:
   - work-cli-created
 verification:
   - python -m pytest tests/test_inventory_sync_sanitize.py -q
+verification_status: passed
+verified_at: 2026-07-19T11:51:27+09:00
+verified_by: codex-root-task-ar-595
+evidence_refs:
+  - reviews/VERIFY-2026-07-19-task-ar-595-20260719115127.json
+review_evidence_refs:
+  - reviews/W4B-2026-07-19-TASK-AR-595.md
+  - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-595-INDEPENDENT-AUDITOR.md
+resolution: done
+completed_at: 2026-07-19T11:54:41+09:00
+closed_by: codex-root-task-ar-595
+actual_hours: 0.5
+actual_tokens: 5000
 ---
 
 # TASK-AR-595 - Enforce isolated build prerequisites in host updater
@@ -55,3 +69,15 @@ verification:
 ## Verification
 
 - `python -m pytest tests/test_inventory_sync_sanitize.py -q`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-19T11:54:41+09:00`
+- Resolution: `done`
+- Actual hours: `0.5`
+- Actual tokens: `5000`
+- Closed by: `codex-root-task-ar-595`
+- Evidence:
+  - `reviews/VERIFY-2026-07-19-task-ar-595-20260719115127.json`
+<!-- work-close:end -->
