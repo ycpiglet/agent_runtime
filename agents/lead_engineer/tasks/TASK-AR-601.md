@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY
 registered_at: 2026-07-19T11:03:47+09:00
 created_at: 2026-07-19T11:03:47+09:00
-updated_at: 2026-07-19T11:03:47+09:00
+updated_at: 2026-07-19T11:23:03+09:00
 title: Make routed review overlays cleanly releasable
 status: planned
 priority: P0
@@ -35,6 +35,11 @@ tags:
 verification:
   - python -m pytest tests/test_role_routing.py tests/test_role_routing_wiring.py tests/test_task_claim_dispatcher.py -q
   - python scripts/regen_host_lock_if_needed.py --check
+verification_status: passed
+verified_at: 2026-07-19T11:23:03+09:00
+verified_by: codex-root-task-ar-601
+evidence_refs:
+  - reviews/VERIFY-2026-07-19-task-ar-601-20260719112303.json
 ---
 
 # TASK-AR-601 - Make routed review overlays cleanly releasable

@@ -1,0 +1,34 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-19-task-ar-601-20260719112303",
+  "work_id": "TASK-AR-601",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-601.md",
+  "kind": "task",
+  "task_id": "TASK-AR-601",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-19T11:23:03+09:00",
+  "verified_by": "codex-root-task-ar-601",
+  "command_count": 2,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_role_routing.py tests/test_role_routing_wiring.py tests/test_task_claim_dispatcher.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-19T11:23:03+09:00",
+      "finished_at": "2026-07-19T11:23:28+09:00",
+      "stdout": "...................................................................      [100%]\n67 passed in 23.48s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/regen_host_lock_if_needed.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-19T11:23:28+09:00",
+      "finished_at": "2026-07-19T11:23:28+09:00",
+      "stdout": "OK: C:\\Users\\ycpig\\agent_runtime\\tests\\fixtures\\host\\agent_runtime.lock.json is up to date.\n",
+      "stderr": ""
+    }
+  ]
+}
