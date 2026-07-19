@@ -11,3 +11,10 @@
 - wip_slot: 1
 - stop_condition: Stop if overlay lifecycle requires a distinct schema
 - status_text: Repair overlay lifecycle artifacts and recursion guard
+
+## Iteration
+
+- W4a passed 67 focused tests.
+- Initial W4b rejected an erroneous host-template scope assumption.
+- T3 replan narrowed the unit to the observed live-checkout routing seam.
+- Revalidated W4a and independent W4b approved the live seam.

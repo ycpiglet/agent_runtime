@@ -11,8 +11,16 @@
 - model_tier: worker_standard
 - wip_slot: 1
 - stop_condition: Stop if overlay lifecycle requires a distinct schema
-- phase: implementation
-- step: 1/7
-- progress_pct: 0
-- status_text: Repair overlay lifecycle artifacts and recursion guard
+- phase: verified
+- step: 7/7
+- progress_pct: 100
+- status_text: T3 W4b approved for live role-routing seam
 - status: claimed
+
+## Result
+
+- Implementation commit after rebase: `43a6b9f`
+- W4a: `reviews/VERIFY-2026-07-19-unit-task-ar-601-001-20260719111759.json`
+- W4b: `reviews/W4B-2026-07-19-TASK-AR-601-RECHECK.md`
+- Focused tests: `67 passed`; acceptance subset: `6 passed`.
+- Host template remained unchanged and its lock is current per the recorded T3 boundary.
