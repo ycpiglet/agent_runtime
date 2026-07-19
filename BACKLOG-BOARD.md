@@ -46,7 +46,7 @@ completed_task_set_count: 47
 
 - Flow: Fix the four open host-reported defects, integrate crash recovery and allimbot notifications, synchronize project state, then cut and verify v0.7.0.
 - Progress: `0/7` done; `7` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-594` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-594/UNIT-TASK-AR-594-001.md | planned | Action | P0 | Critical | Medium | 4h/9000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #289 so taskset dispatch selects explicit canonical task order before… |
