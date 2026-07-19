@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-04T03:16:33+09:00
-record_count: 370
+generated_at: 2026-07-19T10:30:43+09:00
+record_count: 386
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `370` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `386` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `23` records |
-| Tasksets | pass | `47` records |
-| Tasks | pass | `257` records |
-| Units | pass | `43` records |
+| Initiatives | pass | `24` records |
+| Tasksets | pass | `48` records |
+| Tasks | pass | `264` records |
+| Units | pass | `50` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -409,6 +409,22 @@ record_count: 370
 | 22.1 | Taskset 22.1 | taskset | `TASKSET-AR-BUSINESS-OPERATING-SYSTEM` | `INIT-AR-BUSINESS-OPERATING-SYSTEM` | complete | `BACKLOG-BOARD.md` | Business Operating System |
 | 22.1.1 | Task 22.1.1 | task | `TASK-AR-593` | `TASKSET-AR-BUSINESS-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-593.md` | Define operations/support and planning/strategy teams alongside finance, marketing, a… |
 | 22.1.1.1 | Unit 22.1.1.1 | unit | `UNIT-TASK-AR-593-001` | `TASK-AR-593` | completed | `agents/lead_engineer/tasks/units/TASK-AR-593/UNIT-TASK-AR-593-001.md` | UNIT-TASK-AR-593-001 - Publish business operating lanes and cycle packet |
+| 23 | Initiative 23 | initiative | `INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | - | active | `agents/project/initiatives/INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT.md` | July Upstream Intake Closeout |
+| 23.1 | Taskset 23.1 | taskset | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | `INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | active | `BACKLOG-BOARD.md` | Upstream Intake Closer |
+| 23.1.1 | Task 23.1.1 | task | `TASK-AR-594` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | planned | `agents/lead_engineer/tasks/TASK-AR-594.md` | Resolve GitHub #289 so taskset dispatch selects explicit canonical task order before… |
+| 23.1.1.1 | Unit 23.1.1.1 | unit | `UNIT-TASK-AR-594-001` | `TASK-AR-594` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-594/UNIT-TASK-AR-594-001.md` | UNIT-TASK-AR-594-001 - Implement canonical task order selection |
+| 23.1.2 | Task 23.1.2 | task | `TASK-AR-595` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | planned | `agents/lead_engineer/tasks/TASK-AR-595.md` | Resolve GitHub #287 so host updates honor pyproject build-system requirements instead… |
+| 23.1.2.1 | Unit 23.1.2.1 | unit | `UNIT-TASK-AR-595-001` | `TASK-AR-595` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-595/UNIT-TASK-AR-595-001.md` | UNIT-TASK-AR-595-001 - Repair updater build isolation |
+| 23.1.3 | Task 23.1.3 | task | `TASK-AR-596` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | planned | `agents/lead_engineer/tasks/TASK-AR-596.md` | Resolve GitHub #290 so active pointers find canonical TASK files with descriptive slu… |
+| 23.1.3.1 | Unit 23.1.3.1 | unit | `UNIT-TASK-AR-596-001` | `TASK-AR-596` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-596/UNIT-TASK-AR-596-001.md` | UNIT-TASK-AR-596-001 - Implement task-ID-aware pointer resolution |
+| 23.1.4 | Task 23.1.4 | task | `TASK-AR-597` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | planned | `agents/lead_engineer/tasks/TASK-AR-597.md` | Resolve GitHub #285 so transient Git setup failures include actionable stdout/stderr… |
+| 23.1.4.1 | Unit 23.1.4.1 | unit | `UNIT-TASK-AR-597-001` | `TASK-AR-597` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-597/UNIT-TASK-AR-597-001.md` | UNIT-TASK-AR-597-001 - Add diagnostic Git helper failures |
+| 23.1.5 | Task 23.1.5 | task | `TASK-AR-598` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | planned | `agents/lead_engineer/tasks/TASK-AR-598.md` | Resolve GitHub #274 and supersede or merge PR #277 by shipping the host-proven sessio… |
+| 23.1.5.1 | Unit 23.1.5.1 | unit | `UNIT-TASK-AR-598-001` | `TASK-AR-598` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-598/UNIT-TASK-AR-598-001.md` | UNIT-TASK-AR-598-001 - Rebase and verify session resume recovery |
+| 23.1.6 | Task 23.1.6 | task | `TASK-AR-599` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | planned | `agents/lead_engineer/tasks/TASK-AR-599.md` | Resolve GitHub #279 by shipping an optional, zero-dependency notification client and… |
+| 23.1.6.1 | Unit 23.1.6.1 | unit | `UNIT-TASK-AR-599-001` | `TASK-AR-599` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-599/UNIT-TASK-AR-599-001.md` | UNIT-TASK-AR-599-001 - Wire optional allimbot notifications end to end |
+| 23.1.7 | Task 23.1.7 | task | `TASK-AR-600` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | planned | `agents/lead_engineer/tasks/TASK-AR-600.md` | Resolve GitHub #280 after every intake unit is merged by refreshing current-state rec… |
+| 23.1.7.1 | Unit 23.1.7.1 | unit | `UNIT-TASK-AR-600-001` | `TASK-AR-600` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md` | UNIT-TASK-AR-600-001 - Close state and publish v0.7.0 |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

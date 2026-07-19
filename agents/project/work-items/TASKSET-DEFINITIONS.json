@@ -2,6 +2,12 @@
   "schema": "agent-runtime-taskset-definitions/v1",
   "tasksets": [
     {
+      "task_set_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
+      "display_name": "Upstream Intake Closer",
+      "summary": "Fix the four open host-reported defects, integrate crash recovery and allimbot notifications, synchronize project state, then cut and verify v0.7.0.",
+      "order": 10
+    },
+    {
       "task_set_id": "TASKSET-AR-AGENT-IDENTITY-CONTRACT",
       "display_name": "Agent Identity Contract",
       "summary": "Add role/instance/display identity records, spawn provenance, and attribution gates for multi-agent work.",

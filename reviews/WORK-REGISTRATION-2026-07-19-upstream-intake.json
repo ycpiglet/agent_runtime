@@ -1,0 +1,449 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "origin_type": "owner_request",
+  "origin_ref": "chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277",
+  "created_by": "codex-root-planner",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "initiative": {
+    "id": "INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
+    "title": "July Upstream Intake Closeout",
+    "summary": "Convert every open downstream report, proposal, stale pull request, and pending release decision into verified implementation work and close the intake through a refreshed v0.7.0 release.",
+    "owner": "lead-engineer",
+    "status": "active"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
+    "display_name": "Upstream Intake Closer",
+    "summary": "Fix the four open host-reported defects, integrate crash recovery and allimbot notifications, synchronize project state, then cut and verify v0.7.0.",
+    "owner": "lead-engineer",
+    "status": "active",
+    "order": 10,
+    "planner_model_tier": "planner_high",
+    "worker_model_tier": "worker_standard",
+    "reviewer_model_tier": "reviewer_standard"
+  },
+  "tasks": [
+    {
+      "title": "Honor canonical taskset task order",
+      "goal": "Resolve GitHub #289 so taskset dispatch selects explicit canonical task order before score-based fallback ordering.",
+      "summary": "Preserve task order declared by canonical taskset records throughout plan and dispatch.",
+      "scope": "Update taskset parsing/selection and focused tests in both the live script and host template mirror; do not change unrelated wave scheduling policy.",
+      "priority": "P0",
+      "difficulty": "M",
+      "est_hours": 4,
+      "est_tokens": 9000,
+      "owner": "lead-engineer",
+      "team": "agent-runtime-core",
+      "origin_ref": "github:#289",
+      "acceptance": [
+        "An explicit ordered task list TASK-219 -> TASK-220 -> TASK-217 is returned in that order even when score ordering differs.",
+        "Tasksets without an explicit order retain deterministic existing fallback behavior.",
+        "Live and template taskset_dispatcher implementations remain byte-equivalent where required."
+      ],
+      "verification": [
+        "python -m pytest tests/test_taskset_dispatcher.py tests/test_role_routing_wiring.py -q",
+        "python scripts/taskset_work_gate.py --task-set-id TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT --check"
+      ],
+      "units": [
+        {
+          "title": "Implement canonical task order selection",
+          "context": "Autofolio reproduced GitHub #289 on agent_runtime v0.6.0: canonical taskset prose orders TASK-219, TASK-220, TASK-217, but _tasks_for discards that order and picks TASK-217 by score.",
+          "inputs": [
+            "https://github.com/ycpiglet/agent_runtime/issues/289",
+            "scripts/taskset_dispatcher.py",
+            "tests/test_taskset_dispatcher.py"
+          ],
+          "target_files": [
+            "scripts/taskset_dispatcher.py",
+            "src/agent_runtime/templates/project/scripts/taskset_dispatcher.py",
+            "tests/test_taskset_dispatcher.py",
+            "tests/test_role_routing_wiring.py",
+            "tests/fixtures/host/agent_runtime.lock.json"
+          ],
+          "scope": "Parse an authoritative ordered task list from the canonical taskset record, use it before fallback score ordering, mirror the implementation, and add regression coverage.",
+          "steps": [
+            "Add a deterministic canonical-order parser with unambiguous task ID matching.",
+            "Thread canonical order into task selection without changing fallback semantics.",
+            "Add reproduction and fallback regression tests, then refresh the host fixture lock if needed."
+          ],
+          "acceptance": [
+            "The reported three-task reproduction selects TASK-219 first and preserves the full declared order.",
+            "Missing, duplicated, or unrelated task IDs cannot silently reorder valid tasks.",
+            "Focused dispatcher tests pass."
+          ],
+          "verification": [
+            "python -m pytest tests/test_taskset_dispatcher.py tests/test_role_routing_wiring.py -q"
+          ],
+          "handoff": "Provide changed-file summary, before/after selection evidence, focused test output, and any fallback compatibility note.",
+          "stop_condition": "Stop if canonical order cannot be derived without changing the taskset record contract; escalate with the conflicting record examples.",
+          "escalation_triggers": ["high_risk", "cross_cutting", "data_integrity"]
+        }
+      ]
+    },
+    {
+      "title": "Enforce isolated build prerequisites in host updater",
+      "goal": "Resolve GitHub #287 so host updates honor pyproject build-system requirements instead of building with an incompatible ambient setuptools.",
+      "summary": "Remove the updater path that bypasses declared isolated build requirements and prove the generated/executed commands are safe.",
+      "scope": "Change host update planning/execution and its tests; do not broaden the change to unrelated publish smoke paths without evidence.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 3,
+      "est_tokens": 6500,
+      "owner": "lead-engineer",
+      "team": "release-integrity",
+      "origin_ref": "github:#287",
+      "acceptance": [
+        "Host updater no longer forces --no-build-isolation for an sdist/VCS install that declares setuptools>=68.",
+        "Plan rendering and executable steps use the same build-isolation policy.",
+        "Existing update trust, install-directory, sentinel, and sync checks still pass."
+      ],
+      "verification": [
+        "python -m pytest tests/test_inventory_sync_sanitize.py -q"
+      ],
+      "units": [
+        {
+          "title": "Repair updater build isolation",
+          "context": "GitHub #287 reports Ubuntu system setuptools 59.6 producing UNKNOWN-0.0.0 because host_update explicitly passes --no-build-isolation even though pyproject requires setuptools>=68.",
+          "inputs": [
+            "https://github.com/ycpiglet/agent_runtime/issues/287",
+            "src/agent_runtime/host_update.py",
+            "pyproject.toml"
+          ],
+          "target_files": [
+            "src/agent_runtime/host_update.py",
+            "tests/test_inventory_sync_sanitize.py"
+          ],
+          "scope": "Use pip's isolated build environment for updater installs, align rendered commands and execution steps, and pin the contract in focused tests.",
+          "steps": [
+            "Remove the updater-only no-build-isolation override from plan and execution construction.",
+            "Add assertions that declared build requirements are not bypassed.",
+            "Run the complete host update test module."
+          ],
+          "acceptance": [
+            "Neither generated updater commands nor install-upstream args contain --no-build-isolation.",
+            "All host update tests pass without weakening existing checks."
+          ],
+          "verification": [
+            "python -m pytest tests/test_inventory_sync_sanitize.py -q"
+          ],
+          "handoff": "Report the exact command delta and focused test result.",
+          "stop_condition": "Stop if removing the override makes offline or pinned-source installation impossible under the documented updater contract; capture the failing command and environment."
+        }
+      ]
+    },
+    {
+      "title": "Resolve slugged canonical task files in conversation audit",
+      "goal": "Resolve GitHub #290 so active pointers find canonical TASK files with descriptive slug suffixes.",
+      "summary": "Replace exact short-filename assumptions with ID-aware task record resolution.",
+      "scope": "Update live/template conversation audit and focused tests; preserve warning behavior for genuinely missing or ambiguous records.",
+      "priority": "P1",
+      "difficulty": "S",
+      "est_hours": 2,
+      "est_tokens": 4500,
+      "owner": "lead-engineer",
+      "team": "agent-runtime-core",
+      "origin_ref": "github:#290",
+      "acceptance": [
+        "A pointer to TASK-231 resolves TASK-231-taskset-dispatcher-selection-order.md.",
+        "TASK-231 does not accidentally resolve TASK-2310 or an unrelated malformed record.",
+        "Missing and ambiguous records remain visible as findings."
+      ],
+      "verification": [
+        "python -m pytest tests/test_conversation_work_audit.py -q",
+        "python scripts/conversation_work_audit.py --check"
+      ],
+      "units": [
+        {
+          "title": "Implement task-ID-aware pointer resolution",
+          "context": "GitHub #290 reports pointer-task-missing when active_task is TASK-231 and the canonical file is TASK-231-taskset-dispatcher-selection-order.md.",
+          "inputs": [
+            "https://github.com/ycpiglet/agent_runtime/issues/290",
+            "scripts/conversation_work_audit.py",
+            "tests/test_conversation_work_audit.py"
+          ],
+          "target_files": [
+            "scripts/conversation_work_audit.py",
+            "src/agent_runtime/templates/project/scripts/conversation_work_audit.py",
+            "tests/test_conversation_work_audit.py",
+            "tests/fixtures/host/agent_runtime.lock.json"
+          ],
+          "scope": "Resolve exact and slugged task filenames by canonical frontmatter ID or boundary-safe filename prefix, mirror the implementation, and test false-positive boundaries.",
+          "steps": [
+            "Introduce a boundary-safe resolver for task IDs.",
+            "Use it from _audit_pointer while preserving current finding severity.",
+            "Add slugged, collision, missing, and template-parity tests."
+          ],
+          "acceptance": [
+            "Slugged canonical task files satisfy pointer audit.",
+            "Prefix collisions do not satisfy pointer audit.",
+            "Focused tests and the live audit pass."
+          ],
+          "verification": [
+            "python -m pytest tests/test_conversation_work_audit.py -q",
+            "python scripts/conversation_work_audit.py --check"
+          ],
+          "handoff": "Report resolver semantics, collision coverage, and audit output.",
+          "stop_condition": "Stop if multiple canonical files claim the same task ID; surface the ambiguity rather than choosing one silently."
+        }
+      ]
+    },
+    {
+      "title": "Preserve Git stderr in release-auto test failures",
+      "goal": "Resolve GitHub #285 so transient Git setup failures include actionable stdout/stderr in pytest output.",
+      "summary": "Make the release-auto test helper raise a diagnostic error that retains the failing command and Git output.",
+      "scope": "Change the test helper and add regression coverage; do not alter production release behavior.",
+      "priority": "P2",
+      "difficulty": "S",
+      "est_hours": 1,
+      "est_tokens": 2500,
+      "owner": "lead-engineer",
+      "team": "evaluation-office",
+      "origin_ref": "github:#285",
+      "acceptance": [
+        "A failing helper reports the Git command, return code, stdout, and stderr.",
+        "Successful helper calls retain existing behavior.",
+        "Release-auto noncritical tests pass."
+      ],
+      "verification": [
+        "python -m pytest tests/test_release_auto_noncritical.py -q"
+      ],
+      "units": [
+        {
+          "title": "Add diagnostic Git helper failures",
+          "context": "GitHub #285 records an exit-128 git commit failure whose stderr was captured but omitted from pytest's CalledProcessError display.",
+          "inputs": [
+            "https://github.com/ycpiglet/agent_runtime/issues/285",
+            "tests/test_release_auto_noncritical.py"
+          ],
+          "target_files": [
+            "tests/test_release_auto_noncritical.py"
+          ],
+          "scope": "Refactor the local _git test helper to retain diagnostics and add a direct failure-message test.",
+          "steps": [
+            "Capture the completed process without immediately discarding output.",
+            "Raise a deterministic assertion containing command, code, stdout, and stderr on failure.",
+            "Add a unit test for the diagnostic contract and run the module."
+          ],
+          "acceptance": [
+            "The reproduced failing command emits its stderr in the assertion text.",
+            "The complete release-auto test module passes."
+          ],
+          "verification": [
+            "python -m pytest tests/test_release_auto_noncritical.py -q"
+          ],
+          "handoff": "Report a sample sanitized failure message and test output.",
+          "stop_condition": "Stop if exposing stderr could leak credentials; sanitize sensitive command arguments before including them."
+        }
+      ]
+    },
+    {
+      "title": "Integrate crash-safe session resume audit",
+      "goal": "Resolve GitHub #274 and supersede or merge PR #277 by shipping the host-proven session_resume_check in the current template.",
+      "summary": "Rebase the stale PR's report-only crash recovery auditor onto current main, preserve SessionStart order, and verify malformed state never blocks startup.",
+      "scope": "Integrate PR #277 content, resolve current-main conflicts, and refresh tests/fixture lock; atomic session writes already landed in PR #276 and must remain intact.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 3,
+      "est_tokens": 7000,
+      "owner": "lead-engineer",
+      "team": "agent-runtime-core",
+      "origin_ref": "github:#274; pr:#277",
+      "acceptance": [
+        "The template ships session_resume_check.py and invokes it after interrupted_run_detector during SessionStart.",
+        "Empty roots and malformed pointer/claim JSON remain non-blocking by default.",
+        "PR #277 is merged or explicitly superseded by the integrated change and #274 is closed."
+      ],
+      "verification": [
+        "python -m pytest tests/test_session_resume_check.py tests/test_orchestrator_atomic_writes.py -q",
+        "python scripts/regen_host_lock_if_needed.py --check"
+      ],
+      "units": [
+        {
+          "title": "Rebase and verify session resume recovery",
+          "context": "PR #277 contains a host-proven 673-line session resume auditor but is DIRTY against current main; issue #274 part 1 atomic writes already landed via PR #276.",
+          "inputs": [
+            "https://github.com/ycpiglet/agent_runtime/issues/274",
+            "https://github.com/ycpiglet/agent_runtime/pull/277",
+            "src/agent_runtime/templates/project/.codex/hooks.json"
+          ],
+          "target_files": [
+            "src/agent_runtime/templates/project/.codex/hooks.json",
+            "new:src/agent_runtime/templates/project/scripts/session_resume_check.py",
+            "new:tests/test_session_resume_check.py",
+            "tests/fixtures/host/agent_runtime.lock.json"
+          ],
+          "scope": "Integrate the PR implementation on current main, resolve only relevant conflicts, keep report-only defaults, and prove hook order and malformed-state safety.",
+          "steps": [
+            "Fetch PR #277 and compare its files with current main.",
+            "Apply the session auditor and hook wiring while preserving newer hook changes.",
+            "Run focused tests and host fixture lock validation, then reconcile the remote PR/issue."
+          ],
+          "acceptance": [
+            "SessionStart prints resumable state when present and never fails startup by default.",
+            "Hook ordering is update notify -> dashboard -> reaper -> interrupted detector -> resume check.",
+            "Focused crash recovery tests pass."
+          ],
+          "verification": [
+            "python -m pytest tests/test_session_resume_check.py tests/test_orchestrator_atomic_writes.py -q",
+            "python scripts/regen_host_lock_if_needed.py --check"
+          ],
+          "handoff": "Report PR conflict resolution, hook order, malformed-state tests, and the remote issue/PR outcome.",
+          "stop_condition": "Stop if the PR contains host-specific behavior or destructive recovery; retain report-only behavior and document the incompatible portion.",
+          "escalation_triggers": ["cross_cutting", "data_integrity"]
+        }
+      ]
+    },
+    {
+      "title": "Adopt never-blocking allimbot notifications",
+      "goal": "Resolve GitHub #279 by shipping an optional, zero-dependency notification client and wiring the four proposed intervention points without making notification availability a runtime dependency.",
+      "summary": "Add local dashboard/ntfy notification support for task completion, governance blockage, session end, update notices, and CI failure with blank-by-default configuration.",
+      "scope": "Vendor the official allimbot client contract, provide package/template surfaces, optional hooks and CI wiring, documentation, and tests; never embed tokens or require a configured provider.",
+      "priority": "P1",
+      "difficulty": "L",
+      "est_hours": 7,
+      "est_tokens": 15000,
+      "owner": "lead-engineer",
+      "team": "agent-runtime-core",
+      "origin_ref": "github:#279; github:ycpiglet/allimbot",
+      "acceptance": [
+        "Unset notification configuration is a silent no-op everywhere.",
+        "Every network error is bounded by a three-second timeout and cannot fail task completion, governance, SessionStart/Stop, update-notify, or CI.",
+        "Task completion, governance blockage, session end, update notice, and CI failure have tested optional notification paths.",
+        "No real secret or endpoint token is committed."
+      ],
+      "verification": [
+        "python -m pytest tests/test_allimbot.py tests/test_update_notify.py tests/test_orchestrator_atomic_writes.py tests/test_owner_governance_chain_parity.py -q",
+        "python scripts/owner_governance_gate.py",
+        "python scripts/regen_host_lock_if_needed.py --check"
+      ],
+      "units": [
+        {
+          "title": "Wire optional allimbot notifications end to end",
+          "context": "GitHub #279 proposes the host-proven ycpiglet/allimbot standard-library client with local /trigger and ntfy fallback, never-block semantics, and four primary runtime/CI integration points.",
+          "inputs": [
+            "https://github.com/ycpiglet/allimbot/blob/main/clients/allimbot.py",
+            "https://github.com/ycpiglet/allimbot/blob/main/docs/INTEGRATION.md",
+            "https://github.com/ycpiglet/agent_runtime/issues/279"
+          ],
+          "target_files": [
+            "new:src/agent_runtime/allimbot.py",
+            "src/agent_runtime/update_notify.py",
+            "new:src/agent_runtime/templates/project/scripts/allimbot.py",
+            "new:src/agent_runtime/templates/project/scripts/allimbot_stop_hook.cmd",
+            "src/agent_runtime/templates/project/scripts/agent_orchestrator.py",
+            "src/agent_runtime/templates/project/scripts/owner_governance_gate.py",
+            "src/agent_runtime/templates/project/.codex/hooks.json",
+            "new:src/agent_runtime/templates/project/.env.example",
+            "scripts/owner_governance_gate.py",
+            ".github/workflows/test.yml",
+            "new:docs/ALLIMBOT-INTEGRATION.md",
+            "new:tests/test_allimbot.py",
+            "tests/test_update_notify.py",
+            "tests/test_orchestrator_atomic_writes.py",
+            "tests/test_owner_governance_chain_parity.py",
+            "tests/fixtures/host/agent_runtime.lock.json"
+          ],
+          "scope": "Implement the optional client, connect task completion/governance block/session stop/update notice/CI failure, document blank configuration, and test silent no-op, timeout/error swallowing, payloads, hook wiring, and secret hygiene.",
+          "steps": [
+            "Vendor and adapt the official allimbot client into package and host-template surfaces with a three-second default timeout.",
+            "Add never-block calls at task completion, governance failure, update notice, and session Stop; add optional CI failure delivery.",
+            "Document environment variables with blank examples, add focused tests, refresh the host lock, and run secret/gate checks."
+          ],
+          "acceptance": [
+            "No configuration produces no network request and no output/error from runtime paths.",
+            "Configured local dashboard is attempted before ntfy and all exceptions are swallowed.",
+            "All requested lifecycle points have deterministic tests or workflow assertions.",
+            "Secret scanning and host fixture lock checks pass."
+          ],
+          "verification": [
+            "python -m pytest tests/test_allimbot.py tests/test_update_notify.py tests/test_orchestrator_atomic_writes.py tests/test_owner_governance_chain_parity.py -q",
+            "python scripts/owner_governance_gate.py",
+            "python scripts/regen_host_lock_if_needed.py --check"
+          ],
+          "handoff": "Report each wired event, no-op/error behavior, configuration documentation, tests, and secret-gate output.",
+          "stop_condition": "Stop before sending a real notification or committing any secret; verify only with mocks or local test servers.",
+          "escalation_triggers": ["external_effect", "security", "cross_cutting"]
+        }
+      ]
+    },
+    {
+      "title": "Synchronize state and release v0.7.0",
+      "goal": "Resolve GitHub #280 after every intake unit is merged by refreshing current-state records, bumping the complete version cascade, and publishing an annotated v0.7.0 release from verified main.",
+      "summary": "Close the taskset through full governance, current-head release preflight, version cascade, tag, GitHub release, issue reconciliation, and W5/W6 cleanup.",
+      "scope": "Run only after predecessor units are complete; update generated project state and the declared version cascade, then publish the Owner-approved v0.7.0 release.",
+      "priority": "P0",
+      "difficulty": "L",
+      "est_hours": 5,
+      "est_tokens": 12000,
+      "owner": "lead-engineer",
+      "team": "release-integrity",
+      "origin_ref": "github:#280; chat:2026-07-19-all-open-intake",
+      "acceptance": [
+        "Internal backlog/status and GitHub issue/PR state agree on remaining work before release.",
+        "All focused tests, owner governance, release cascade, and release preflight pass on current main.",
+        "v0.7.0 is committed, merged, tagged with an annotated tag, pushed, and published as a GitHub release.",
+        "GitHub #280 and all completed intake issues are closed with evidence; no claims, worktrees, or divergent branches remain."
+      ],
+      "verification": [
+        "python scripts/release_version_cascade.py --check",
+        "python scripts/owner_governance_gate.py",
+        "python -m pytest -q",
+        "python scripts/work.py status"
+      ],
+      "units": [
+        {
+          "title": "Close state and publish v0.7.0",
+          "context": "GitHub #280 approved v0.7.0 from an older SHA; current main has additional fixes, so the candidate must be rebuilt and verified only after every open intake item is integrated.",
+          "inputs": [
+            "https://github.com/ycpiglet/agent_runtime/issues/280",
+            "scripts/release_version_cascade.py",
+            "agents/project/RELEASE-GATE-TEMPLATE.yml",
+            "STATUS.md",
+            "BACKLOG-BOARD.md"
+          ],
+          "target_files": [
+            "pyproject.toml",
+            "src/agent_runtime/__init__.py",
+            "src/agent_runtime/cli.py",
+            "src/agent_runtime/publish_tag_smoke.py",
+            "src/agent_runtime/publish_github_plan.py",
+            "src/agent_runtime/publish_github_execute.py",
+            "src/agent_runtime/release_preflight.py",
+            ".github/workflows/test.yml",
+            "agents/project/RELEASE-GATE-TEMPLATE.yml",
+            "tests/fixtures/host/agent_runtime.yml",
+            "tests/fixtures/host/agent_runtime.lock.json",
+            "tests/test_inventory_sync_sanitize.py",
+            "tests/test_release_execution_gate.py",
+            "BACKLOG-BOARD.md",
+            "ARCHIVE-INDEX.md",
+            "STATUS.md",
+            "reviews/INDEX.md"
+          ],
+          "scope": "Reconcile state, bump the deterministic cascade to 0.7.0, run full validation and release preflight, integrate through the repository release workflow, publish the annotated tag/release, close issues, and remove transient claims/worktrees/branches.",
+          "steps": [
+            "Confirm all predecessor tasks are independently verified, merged, and reflected in GitHub state.",
+            "Regenerate backlog/evidence/state surfaces and run the full governance/test suite.",
+            "Bump the release cascade to 0.7.0, verify the current-head candidate, commit/merge, create and push the annotated tag, publish the GitHub release, and close remaining intake records.",
+            "Run W5/W6 status checks and publish final closeout/retro evidence."
+          ],
+          "acceptance": [
+            "Version 0.7.0 is consistent across every CASCADE path and the host fixture lock.",
+            "The release tag points to the verified release commit and the GitHub release is visible.",
+            "GitHub open intake is reconciled and W0 reports no residual worktree/claim divergence."
+          ],
+          "verification": [
+            "python scripts/release_version_cascade.py --check",
+            "python scripts/owner_governance_gate.py",
+            "python -m pytest -q",
+            "python scripts/work.py status",
+            "git tag -v v0.7.0"
+          ],
+          "handoff": "Provide release URL, tag/commit SHA, full gate/test results, closed issue list, current W0 status, and rollback notes.",
+          "stop_condition": "Stop before release if any required test/gate is red, current main differs from the verified release commit, or a secret/credential boundary is unclear.",
+          "escalation_triggers": ["external_effect", "high_risk", "cross_cutting", "release"]
+        }
+      ]
+    }
+  ]
+}

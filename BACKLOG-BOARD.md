@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-04
-task_count: 257
-open_count: 0
+generated_at: 2026-07-19
+task_count: 264
+open_count: 7
 completed_count: 257
-task_set_count: 0
+task_set_count: 1
 completed_task_set_count: 47
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `0` open or active tasks; `257` completed tasks are archived from this live board.
+- Summary: `7` open or active tasks; `257` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `0` / Ask `0` / Review `0` / Later `0` / Done `257`.
-- Task Sets: `0` active workflows; `47` completed workflows are hidden from the live action board.
+- Status: Action `7` / Ask `0` / Review `0` / Later `0` / Done `257`.
+- Task Sets: `1` active workflows; `47` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -41,6 +41,21 @@ completed_task_set_count: 47
 ## Action Board
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
+
+### Upstream Intake Closer (`TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT`)
+
+- Flow: Fix the four open host-reported defects, integrate crash recovery and allimbot notifications, synchronize project state, then cut and verify v0.7.0.
+- Progress: `0/7` done; `7` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-594` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-594/UNIT-TASK-AR-594-001.md | planned | Action | P0 | Critical | Medium | 4h/9000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #289 so taskset dispatch selects explicit canonical task order before… |
+| `TASK-AR-600` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md | planned | Action | P0 | Critical | High | 5h/12000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #280 after every intake unit is merged by refreshing current-state rec… |
+| `TASK-AR-597` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-597/UNIT-TASK-AR-597-001.md | planned | Action | P2 | Medium | Low | 1h/2500tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #285 so transient Git setup failures include actionable stdout/stderr… |
+| `TASK-AR-596` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-596/UNIT-TASK-AR-596-001.md | planned | Action | P1 | High | Low | 2h/4500tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #290 so active pointers find canonical TASK files with descriptive slu… |
+| `TASK-AR-595` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-595/UNIT-TASK-AR-595-001.md | planned | Action | P1 | High | Medium | 3h/6500tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #287 so host updates honor pyproject build-system requirements instead… |
+| `TASK-AR-598` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-598/UNIT-TASK-AR-598-001.md | planned | Action | P1 | High | Medium | 3h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #274 and supersede or merge PR #277 by shipping the host-proven sessio… |
+| `TASK-AR-599` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-599/UNIT-TASK-AR-599-001.md | planned | Action | P1 | High | High | 7h/15000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #279 by shipping an optional, zero-dependency notification client and… |
 
 ## Archived Task Sets
 
@@ -99,7 +114,7 @@ completed_task_set_count: 47
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `0` open across `0` task sets (see Action Board above).
+- Active: `7` open across `1` task sets (see Action Board above).
 - Archived task sets: `47` (see Archived Task Sets above).
 - Archived task files: `257` — see `ARCHIVE-INDEX.md`.
 

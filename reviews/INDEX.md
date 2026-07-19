@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-06T12:41:32+09:00
-record_count: 621
+generated_at: 2026-07-19T10:28:08+09:00
+record_count: 623
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `621` review and evidence records under `reviews/`.
+- Summary: indexed `623` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `621` files |
+| Reviews covered | pass | `623` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -513,6 +513,7 @@ record_count: 621
 | `reviews/REVIEW-2026-06-22-autofolio-upstream-candidates.md` | `REVIEW-2026-06-22-autofolio-upstream-candidates` | review | assessed | pass | autofolio → agent_runtime upstream-candidate assessment |
 | `reviews/REVIEW-2026-06-22-subsystem-verification-audit.md` | `REVIEW-2026-06-22-subsystem-verification-audit` | review | assessed | watch | Subsystem verification audit (2026-06-22) |
 | `reviews/REVIEW-2026-06-22-system-health-rsi-diagnosis.md` | `REVIEW-2026-06-22-system-health-rsi-diagnosis` | review | assessed | watch | System-health / RSI diagnosis (2026-06-22) |
+| `reviews/REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration.md` | `REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration` | md | record | pass | Upstream Intake Closer Registration |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
@@ -655,6 +656,7 @@ record_count: 621
 | `reviews/W4B-2026-06-20-TASK-AR-591.md` | `W4B-2026-06-20-TASK-AR-591` | md | accepted | n/a | W4B Independent Verification - TASK-AR-591 |
 | `reviews/W4B-2026-06-20-TASK-AR-592.md` | `W4B-2026-06-20-TASK-AR-592` | md | accepted | n/a | W4B Independent Verification - TASK-AR-592 |
 | `reviews/W4B-2026-06-21-TASK-AR-593.md` | `W4B-2026-06-21-TASK-AR-593` | w4b-independent-verification | approved | pass | W4b Independent Verification: TASK-AR-593 |
+| `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.

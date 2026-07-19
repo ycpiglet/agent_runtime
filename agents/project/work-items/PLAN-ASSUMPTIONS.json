@@ -198,6 +198,44 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration.md",
+          "value": "c7308dd74bc09ac4cb86480b87347ffc58a37dec42eca04bbdd57c21f0bd080e"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/conversation_work_audit.py",
+          "value": "7279a081414e1aa3929929c88491289512f2b62c157038021622fb8198d1d47f"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/owner_governance_gate.py",
+          "value": "5f88423f4dba20d026726b934ee2de6153cf762f9dc7623f8ed6e1efeaa8d38b"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "35e9b6132cdeee9adbd5ad833598bb55237e98ce07fee4ad5d927c4ed4c4d9c0"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/taskset_dispatcher.py",
+          "value": "46b9cc22af53789ef810477a0148b7b15fda39ccbf8dfae09c908f1372c2ec63"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration.md",
+      "recorded_at": "2026-07-19T10:28:47+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "scripts/taskset_dispatcher.py",
           "value": "ac78599e2197c7999eaffc406449034dab76e34f11c1dd41da4f555478499a6b"
         },
@@ -409,5 +447,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-06-21T16:43:42+09:00"
+  "updated_at": "2026-07-19T10:28:47+09:00"
 }
