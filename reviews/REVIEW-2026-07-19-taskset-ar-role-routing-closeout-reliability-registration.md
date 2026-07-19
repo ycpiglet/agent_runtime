@@ -34,6 +34,17 @@ hook again. Overlay artifacts will be created atomically with deterministic
 paths, and release-time review routing will be skipped only when
 `claim.overlay` is true.
 
+### T3 Replan — Host-template boundary
+
+The first W4b correctly rejected commit `08783fb` because the generated unit
+listed `src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py`
+even though that template does not ship `role_routing.py`, a release routing
+seam, or the committed live-checkout activation config. The observed failure
+and its configuration are confined to the live repository runtime. Shipping
+role routing to generated hosts would be a separate product-surface decision,
+not a closeout repair. The unit is therefore re-anchored to the live seam;
+the host lock remains a non-drift check and must stay unchanged.
+
 ## Action Board
 
 | Task | Title | Status |

@@ -32,7 +32,6 @@ inputs:
 target_files:
   - scripts/role_routing.py
   - scripts/task_claim_dispatcher.py
-  - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
   - tests/test_role_routing.py
   - tests/test_role_routing_wiring.py
   - tests/test_task_claim_dispatcher.py
@@ -66,7 +65,6 @@ TASK-AR-594 release generated two overlay claims without handoff/log pointers, s
 
 - scripts/role_routing.py
 - scripts/task_claim_dispatcher.py
-- src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
 - tests/test_role_routing.py
 - tests/test_role_routing_wiring.py
 - tests/test_task_claim_dispatcher.py
@@ -80,7 +78,7 @@ Create atomic handoff/log records together with each overlay claim and skip role
 
 1. Add deterministic overlay handoff/log paths and atomic initial records.
 2. Guard release-time routing for overlay claims while preserving ordinary release behavior.
-3. Add end-to-end regression tests and refresh the host lock.
+3. Add end-to-end regression tests and confirm the untouched host-template lock remains current.
 
 ## Acceptance Criteria
 

@@ -45,7 +45,7 @@ verification:
 
 ## Scope
 
-- Change role-routing claim creation, live/template release wiring, and focused tests; preserve flag gating and additive review behavior.
+- Change the live-checkout role-routing claim creation/release seam and focused tests; preserve flag gating and additive review behavior. Host-template routing is out of scope because the generated host scaffold does not ship `role_routing.py` or enable this live-only seam.
 
 ## Acceptance Criteria
 

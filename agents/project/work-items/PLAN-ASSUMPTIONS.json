@@ -338,7 +338,7 @@
         {
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration.md",
-          "value": "7cb62533106dca09cae1f3350168882b199d9b21e48d06d69f74419b6c340fad"
+          "value": "900f05fd15fb06c7e5d249dbaa2a0b15aa472d71ba149c8e993641e628cd0606"
         },
         {
           "kind": "sha256",
@@ -357,7 +357,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration.md",
-      "recorded_at": "2026-07-19T11:05:35+09:00",
+      "recorded_at": "2026-07-19T11:17:34+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY"
     },
@@ -475,5 +475,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-19T11:05:35+09:00"
+  "updated_at": "2026-07-19T11:17:34+09:00"
 }

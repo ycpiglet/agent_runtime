@@ -27,7 +27,7 @@
       "title": "Make routed review overlays cleanly releasable",
       "goal": "Ensure role_routing overlay claims carry required lifecycle artifacts and releasing an overlay cannot recursively route another overlay.",
       "summary": "Add handoff/log artifacts at overlay creation and a recursion guard at release.",
-      "scope": "Change role-routing claim creation, live/template release wiring, and focused tests; preserve flag gating and additive review behavior.",
+      "scope": "Change the live-checkout role-routing claim creation/release seam and focused tests; preserve flag gating and additive review behavior. Host-template routing is out of scope because the generated host scaffold does not ship role_routing.py or enable this live-only seam.",
       "priority": "P0",
       "difficulty": "S",
       "est_hours": 2,
@@ -57,7 +57,6 @@
           "target_files": [
             "scripts/role_routing.py",
             "scripts/task_claim_dispatcher.py",
-            "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
             "tests/test_role_routing.py",
             "tests/test_role_routing_wiring.py",
             "tests/test_task_claim_dispatcher.py",
@@ -67,7 +66,7 @@
           "steps": [
             "Add deterministic overlay handoff/log paths and atomic initial records.",
             "Guard release-time routing for overlay claims while preserving ordinary release behavior.",
-            "Add end-to-end regression tests and refresh the host lock."
+            "Add end-to-end regression tests and confirm the untouched host-template lock remains current."
           ],
           "acceptance": [
             "Generated overlay lifecycle pointers resolve to files.",
