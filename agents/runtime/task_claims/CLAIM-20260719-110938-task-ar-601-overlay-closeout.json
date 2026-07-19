@@ -9,7 +9,7 @@
   "callsite_id": "codex-root-20260719",
   "pane_id": "root",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
   "active_scope": "TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
   "scope_transition_approved": true,
@@ -27,12 +27,12 @@
   "worktree_path": ".worktrees/TASK-AR-601",
   "branch": "codex/task-ar-601-overlay-closeout",
   "claimed_at": "2026-07-19T11:09:38+09:00",
-  "last_heartbeat": "2026-07-19T11:21:47+09:00",
-  "updated_at": "2026-07-19T11:21:47+09:00",
+  "last_heartbeat": "2026-07-19T11:22:13+09:00",
+  "updated_at": "2026-07-19T11:22:13+09:00",
   "expires_at": "2026-07-19T12:39:38+09:00",
   "lease": {
     "claimed_at": "2026-07-19T11:09:38+09:00",
-    "heartbeat_at": "2026-07-19T11:21:47+09:00",
+    "heartbeat_at": "2026-07-19T11:22:13+09:00",
     "expires_at": "2026-07-19T12:39:38+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260719-110938-task-ar-601-overlay-closeout.handoff.md",
@@ -53,5 +53,9 @@
     "tests/test_role_routing_wiring.py",
     "tests/test_task_claim_dispatcher.py",
     "tests/fixtures/host/agent_runtime.lock.json"
-  ]
+  ],
+  "released_at": "2026-07-19T11:22:13+09:00",
+  "verified_by": "codex-independent-verifier-task-ar-601-recheck-20260719",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-19-TASK-AR-601-RECHECK.md"
 }
