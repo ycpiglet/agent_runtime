@@ -1,0 +1,52 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260719-114507-task-ar-595-build-isolation",
+  "task_id": "TASK-AR-595",
+  "agent_role": "lead-engineer",
+  "team_id": "release-integrity",
+  "agent_instance_id": "codex-root-task-ar-595",
+  "display_name": "codex/task-ar-595",
+  "callsite_id": "codex-root-20260719",
+  "pane_id": "root",
+  "mode": "orchestrator",
+  "status": "claimed",
+  "task_set_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
+  "active_scope": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
+  "scope_transition_approved": true,
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "unit_id": "UNIT-TASK-AR-595-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-595/UNIT-TASK-AR-595-001.md",
+  "model_tier": "worker_standard",
+  "wip_slot": 1,
+  "stop_condition": "Stop if isolated build breaks documented offline pinned-source install",
+  "phase": "implementation",
+  "progress_pct": 0,
+  "step_index": 1,
+  "step_total": 7,
+  "status_text": "Remove updater no-build-isolation override",
+  "worktree_path": ".worktrees/TASK-AR-595",
+  "branch": "codex/task-ar-595-updater-build-isolation",
+  "claimed_at": "2026-07-19T11:45:07+09:00",
+  "last_heartbeat": "2026-07-19T11:45:07+09:00",
+  "updated_at": "2026-07-19T11:45:07+09:00",
+  "expires_at": "2026-07-19T13:15:07+09:00",
+  "lease": {
+    "claimed_at": "2026-07-19T11:45:07+09:00",
+    "heartbeat_at": "2026-07-19T11:45:07+09:00",
+    "expires_at": "2026-07-19T13:15:07+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260719-114507-task-ar-595-build-isolation.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260719-114507-task-ar-595-build-isolation.log.md",
+  "allow_parallel_task_set": false,
+  "tags": [
+    "github-287"
+  ],
+  "escalation_triggers": [
+    "ambiguity",
+    "data_integrity"
+  ],
+  "target_files": [
+    "src/agent_runtime/host_update.py",
+    "tests/test_inventory_sync_sanitize.py"
+  ]
+}
