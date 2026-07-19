@@ -46,7 +46,7 @@ completed_task_set_count: 48
 
 - Flow: Fix the four open host-reported defects, integrate crash recovery and allimbot notifications, synchronize project state, then cut and verify v0.7.0.
 - Progress: `4/7` done; `3` open or active.
-- WIP: active `1/3`; oldest `0.0h`; stale `0`.
+- WIP: active `2/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-600` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md | planned | Action | P0 | Critical | High | 5h/12000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #280 after every intake unit is merged by refreshing current-state rec… |

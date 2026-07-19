@@ -9,7 +9,7 @@
   "callsite_id": "codex-root-20260719",
   "pane_id": "root",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
   "active_scope": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
   "scope_transition_approved": true,
@@ -27,12 +27,12 @@
   "worktree_path": ".worktrees/TASK-AR-598",
   "branch": "codex/task-ar-598-session-resume",
   "claimed_at": "2026-07-19T12:26:12+09:00",
-  "last_heartbeat": "2026-07-19T12:49:00+09:00",
-  "updated_at": "2026-07-19T12:49:00+09:00",
+  "last_heartbeat": "2026-07-19T12:48:57+09:00",
+  "updated_at": "2026-07-19T12:48:57+09:00",
   "expires_at": "2026-07-19T14:26:12+09:00",
   "lease": {
     "claimed_at": "2026-07-19T12:26:12+09:00",
-    "heartbeat_at": "2026-07-19T12:26:12+09:00",
+    "heartbeat_at": "2026-07-19T12:48:57+09:00",
     "expires_at": "2026-07-19T14:26:12+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260719-122612-task-ar-598-session-resume.handoff.md",
@@ -51,5 +51,9 @@
     "src/agent_runtime/templates/project/scripts/session_resume_check.py",
     "tests/test_session_resume_check.py",
     "tests/fixtures/host/agent_runtime.lock.json"
-  ]
+  ],
+  "released_at": "2026-07-19T12:48:57+09:00",
+  "verified_by": "codex-independent-verifier-task-ar-598-rework-20260719",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-19-TASK-AR-598-REWORK.md"
 }
