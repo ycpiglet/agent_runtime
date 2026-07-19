@@ -9,21 +9,21 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-07-19
 task_count: 265
-open_count: 7
-completed_count: 258
-task_set_count: 2
-completed_task_set_count: 47
+open_count: 6
+completed_count: 259
+task_set_count: 1
+completed_task_set_count: 48
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `7` open or active tasks; `258` completed tasks are archived from this live board.
+- Summary: `6` open or active tasks; `259` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `7` / Ask `0` / Review `0` / Later `0` / Done `258`.
-- Task Sets: `2` active workflows; `47` completed workflows are hidden from the live action board.
+- Status: Action `6` / Ask `0` / Review `0` / Later `0` / Done `259`.
+- Task Sets: `1` active workflows; `48` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -56,21 +56,13 @@ completed_task_set_count: 47
 | `TASK-AR-598` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-598/UNIT-TASK-AR-598-001.md | planned | Action | P1 | High | Medium | 3h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #274 and supersede or merge PR #277 by shipping the host-proven sessio… |
 | `TASK-AR-599` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-599/UNIT-TASK-AR-599-001.md | planned | Action | P1 | High | High | 7h/15000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #279 by shipping an optional, zero-dependency notification client and… |
 
-### Role Routing Closeout Reliability (`TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY`)
-
-- Flow: Repair the overlay claim lifecycle gap discovered while closing TASK-AR-594.
-- Progress: `0/1` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-601` | INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-601/UNIT-TASK-AR-601-001.md | planned | Action | P0 | Critical | Low | 2h/5000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Ensure role_routing overlay claims carry required lifecycle artifacts and releasing a… |
-
 ## Archived Task Sets
 
 - Archive rule: completed task sets stay out of the live Action Board but remain visible as workflow-level completion evidence.
 | Task Set | Flow | Progress | Evidence |
 |---|---|---:|---|
 | Context Cartographer (`TASKSET-AR-CONTEXT-KNOWLEDGE`) | Project context, source routing, and reusable knowledge structure. | `7/7` done | `7` completed task files archived |
+| Role Routing Closeout Reliability (`TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY`) | Repair the overlay claim lifecycle gap discovered while closing TASK-AR-594. | `1/1` done | `1` completed task files archived |
 | Quality Sentinel (`TASKSET-AR-QUALITY-LOOP`) | Offline evals, live review, correction loops, and traceable validation. | `7/7` done | `7` completed task files archived |
 | Migration Archivist (`TASKSET-AR-MIGRATION-PARITY`) | Legacy-source parity, migration evidence, and skill/hook/script provenance. | `6/6` done | `6` completed task files archived |
 | Release Steward (`TASKSET-AR-RELEASE-STEWARD`) | Version decisions, release closeout, and consistency checks. | `9/9` done | `9` completed task files archived |
@@ -122,9 +114,9 @@ completed_task_set_count: 47
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `7` open across `2` task sets (see Action Board above).
-- Archived task sets: `47` (see Archived Task Sets above).
-- Archived task files: `258` — see `ARCHIVE-INDEX.md`.
+- Active: `6` open across `1` task sets (see Action Board above).
+- Archived task sets: `48` (see Archived Task Sets above).
+- Archived task files: `259` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

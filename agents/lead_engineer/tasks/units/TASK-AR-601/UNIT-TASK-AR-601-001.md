@@ -9,11 +9,11 @@ task_id: TASK-AR-601
 task_set_id: TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY
 initiative_id: INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-19T11:03:47+09:00
-updated_at: 2026-07-19T11:32:47+09:00
+updated_at: 2026-07-19T11:43:50+09:00
 origin_type: runtime_discovery
 origin_ref: TASK-AR-594 closeout overlay release failure
 created_by: codex-root-planner
@@ -52,6 +52,11 @@ evidence_refs:
   - reviews/VERIFY-2026-07-19-unit-task-ar-601-001-20260719111136.json
   - reviews/VERIFY-2026-07-19-unit-task-ar-601-001-20260719111759.json
   - reviews/VERIFY-2026-07-19-unit-task-ar-601-001-20260719113247.json
+resolution: done
+completed_at: 2026-07-19T11:43:50+09:00
+closed_by: codex-root-task-ar-601
+actual_hours: 1.5
+actual_tokens: 16000
 ---
 
 # UNIT-TASK-AR-601-001 - Repair overlay lifecycle artifacts and recursion guard
@@ -104,3 +109,17 @@ Report the original failure, lifecycle artifact paths, recursion guard behavior,
 ## Stop Boundary
 
 Stop if overlay claims require a separate lifecycle schema or if suppressing recursive routing would skip ordinary worker closeout reviews.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-19T11:43:50+09:00`
+- Resolution: `done`
+- Actual hours: `1.5`
+- Actual tokens: `16000`
+- Closed by: `codex-root-task-ar-601`
+- Evidence:
+  - `reviews/VERIFY-2026-07-19-unit-task-ar-601-001-20260719111136.json`
+  - `reviews/VERIFY-2026-07-19-unit-task-ar-601-001-20260719111759.json`
+  - `reviews/VERIFY-2026-07-19-unit-task-ar-601-001-20260719113247.json`
+<!-- work-close:end -->

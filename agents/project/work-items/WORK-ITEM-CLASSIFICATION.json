@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-19T11:08:22+09:00",
+  "generated_at": "2026-07-19T11:43:52+09:00",
   "record_count": 390,
   "finding_count": 0,
   "findings": [],
@@ -4271,7 +4271,7 @@
       "title": "Role Routing Closeout Reliability",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-601",
@@ -4282,7 +4282,7 @@
       "title": "Ensure role_routing overlay claims carry required lifecycle artifacts and releasing a…",
       "path": "agents/lead_engineer/tasks/TASK-AR-601.md",
       "parent_id": "TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-601-001",
@@ -4293,7 +4293,7 @@
       "title": "UNIT-TASK-AR-601-001 - Repair overlay lifecycle artifacts and recursion guard",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-601/UNIT-TASK-AR-601-001.md",
       "parent_id": "TASK-AR-601",
-      "status": "worker_ready"
+      "status": "completed"
     }
   ]
 }
