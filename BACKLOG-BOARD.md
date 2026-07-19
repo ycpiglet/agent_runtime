@@ -60,7 +60,7 @@ completed_task_set_count: 47
 
 - Flow: Repair the overlay claim lifecycle gap discovered while closing TASK-AR-594.
 - Progress: `0/1` done; `1` open or active.
-- WIP: active `2/3`; oldest `0.0h`; stale `0`.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-601` | INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-601/UNIT-TASK-AR-601-001.md | planned | Action | P0 | Critical | Low | 2h/5000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Ensure role_routing overlay claims carry required lifecycle artifacts and releasing a… |

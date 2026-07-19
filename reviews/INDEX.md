@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-19T11:39:35+09:00
-record_count: 644
+generated_at: 2026-07-19T11:42:50+09:00
+record_count: 645
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `644` review and evidence records under `reviews/`.
+- Summary: indexed `645` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `644` files |
+| Reviews covered | pass | `645` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -522,6 +522,7 @@ record_count: 644
 | `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-594-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-594-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-594 Independent Auditor Role Review |
 | `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-594-SKEPTIC.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-594-SKEPTIC` | role-review | record | n/a | TASK-AR-594 Skeptic Role Review |
 | `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-601-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-601-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-601 Independent Auditor Role Review |
+| `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC-RECHECK.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC-RECHECK` | role-review | record | n/a | TASK-AR-601 Skeptic Hardening Recheck |
 | `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC` | role-review | record | n/a | TASK-AR-601 Skeptic Role Review |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SCRIBE-2026-06-21-business-operating-system.md` | `SCRIBE-2026-06-21-business-operating-system` | scribe | recorded | pass | Business Operating System Scribe Log |
