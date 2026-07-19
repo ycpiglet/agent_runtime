@@ -9,7 +9,7 @@
   "callsite_id": "codex-root-20260719",
   "pane_id": "root",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
   "active_scope": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
   "scope_transition_approved": true,
@@ -27,12 +27,12 @@
   "worktree_path": ".worktrees/TASK-AR-594",
   "branch": "codex/task-ar-594-canonical-order",
   "claimed_at": "2026-07-19T10:32:13+09:00",
-  "last_heartbeat": "2026-07-19T10:49:00+09:00",
-  "updated_at": "2026-07-19T10:49:00+09:00",
+  "last_heartbeat": "2026-07-19T10:50:24+09:00",
+  "updated_at": "2026-07-19T10:50:24+09:00",
   "expires_at": "2026-07-19T11:02:13+09:00",
   "lease": {
     "claimed_at": "2026-07-19T10:32:13+09:00",
-    "heartbeat_at": "2026-07-19T10:49:00+09:00",
+    "heartbeat_at": "2026-07-19T10:50:24+09:00",
     "expires_at": "2026-07-19T11:02:13+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260719-103213-task-ar-594-2652.handoff.md",
@@ -52,5 +52,9 @@
     "tests/test_taskset_dispatcher.py",
     "tests/test_role_routing_wiring.py",
     "tests/fixtures/host/agent_runtime.lock.json"
-  ]
+  ],
+  "released_at": "2026-07-19T10:50:24+09:00",
+  "verified_by": "codex-independent-verifier-task-ar-594-20260719",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-19-TASK-AR-594-RECHECK.md"
 }
