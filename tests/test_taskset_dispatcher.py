@@ -57,10 +57,22 @@ def _write_taskset(
     schema_version: str = "agent-runtime-work-item/v1",
     kind: str = "taskset",
     title: str = "Runtime Liaison",
+    task_order: tuple[str, ...] = (),
 ) -> None:
     tasksets_dir = root / "agents" / "project" / "initiatives"
     tasksets_dir.mkdir(parents=True, exist_ok=True)
     target = tasksets_dir / f"{filename or task_set_id}.md"
+    task_section = ""
+    if task_order:
+        rows = "\n".join(f"| `{task_id}` | Planned work |" for task_id in task_order)
+        task_section = f"""
+
+## Tasks
+
+| Task | Title |
+| --- | --- |
+{rows}
+"""
     target.write_text(
         f"""---
 schema_version: {schema_version}
@@ -69,6 +81,7 @@ kind: {kind}
 title: {title}
 summary: Test dynamic task set.
 ---
+{task_section}
 """,
         encoding="utf-8",
     )
@@ -122,6 +135,76 @@ def test_plan_resolves_canonical_dynamic_taskset_without_static_alias(tmp_path: 
     by_slug = _run(tmp_path, "plan", "agent-runtime-downstream-intake", "--json")
     assert by_slug.returncode == 0, by_slug.stderr or by_slug.stdout
     assert json.loads(by_slug.stdout)["task_set_id"] == task_set_id
+
+
+def test_plan_honors_canonical_task_order_before_score_sort(tmp_path: Path) -> None:
+    task_set_id = "TASKSET-TASK216-KPI-PROFILE-CONDITIONS"
+    _write_taskset(
+        tmp_path,
+        task_set_id,
+        task_order=("TASK-219", "TASK-220", "TASK-217"),
+    )
+    _write_task(tmp_path, "TASK-217", task_set_id, priority="P0")
+    _write_task(tmp_path, "TASK-219", task_set_id, priority="P2")
+    _write_task(tmp_path, "TASK-220", task_set_id, priority="P1")
+
+    result = _run(tmp_path, "plan", task_set_id, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["next_task_id"] == "TASK-219"
+    assert [task.task_id for task in dispatcher._tasks_for(tmp_path, task_set_id)] == [  # noqa: SLF001
+        "TASK-219",
+        "TASK-220",
+        "TASK-217",
+    ]
+
+
+def test_canonical_order_deduplicates_and_ignores_unrelated_ids(tmp_path: Path) -> None:
+    task_set_id = "TASKSET-DYNAMIC-ORDER"
+    _write_taskset(
+        tmp_path,
+        task_set_id,
+        task_order=("TASK-999", "TASK-219", "TASK-219", "TASK-888", "TASK-220"),
+    )
+    _write_task(tmp_path, "TASK-217", task_set_id, priority="P0")
+    _write_task(tmp_path, "TASK-219", task_set_id, priority="P2")
+    _write_task(tmp_path, "TASK-220", task_set_id, priority="P1")
+    _write_task(tmp_path, "TASK-999", "TASKSET-OTHER", priority="P0")
+
+    tasks = dispatcher._tasks_for(tmp_path, task_set_id)  # noqa: SLF001
+
+    assert [task.task_id for task in tasks] == ["TASK-219", "TASK-220", "TASK-217"]
+
+
+def test_canonical_order_skips_completed_task_without_reordering_remainder(tmp_path: Path) -> None:
+    task_set_id = "TASKSET-DYNAMIC-ORDER"
+    _write_taskset(tmp_path, task_set_id, task_order=("TASK-219", "TASK-220", "TASK-217"))
+    _write_task(tmp_path, "TASK-217", task_set_id, priority="P0")
+    _write_task(tmp_path, "TASK-219", task_set_id, status="completed", priority="P2")
+    _write_task(tmp_path, "TASK-220", task_set_id, priority="P1")
+
+    result = _run(tmp_path, "plan", task_set_id, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["next_task_id"] == "TASK-220"
+
+
+def test_task_ids_outside_tasks_section_do_not_override_score_fallback(tmp_path: Path) -> None:
+    task_set_id = "TASKSET-DYNAMIC-NO-ORDER"
+    _write_taskset(tmp_path, task_set_id)
+    record = tmp_path / "agents" / "project" / "initiatives" / f"{task_set_id}.md"
+    record.write_text(
+        record.read_text(encoding="utf-8") + "\n## Risks\n\nTASK-219 must wait for TASK-217.\n",
+        encoding="utf-8",
+    )
+    _write_task(tmp_path, "TASK-217", task_set_id, priority="P0")
+    _write_task(tmp_path, "TASK-219", task_set_id, priority="P2")
+
+    result = _run(tmp_path, "plan", task_set_id, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["next_task_id"] == "TASK-217"
 
 
 @pytest.mark.parametrize(
@@ -276,6 +359,13 @@ def test_plan_rejects_unsafe_structured_worktree_tuple(
     metadata: dict[str, str],
     message: str,
 ) -> None:
+    # Keep the fixture absolute on both POSIX and Windows. ``/tmp/...`` is a
+    # relative drive-root path to pathlib.WindowsPath, which otherwise makes
+    # every case fail at the first repository_path check.
+    metadata = {
+        key: str(tmp_path / Path(value).relative_to("/tmp")) if value.startswith("/tmp/") else value
+        for key, value in metadata.items()
+    }
     task_set_id = "TASKSET-DYNAMIC-UNSAFE"
     task_id = "TASK-904"
     _write_taskset(tmp_path, task_set_id)

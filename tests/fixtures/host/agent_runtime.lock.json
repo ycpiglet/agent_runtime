@@ -211,7 +211,7 @@
       "scripts/task_mcp.py": "sha256:b257379d6269dd70d85df7eb5523c6de83f11d197d25ca96f69e69a2af7b5018",
       "scripts/task_unit_readiness_gate.py": "sha256:7eac1361a3c65b6e7bbcec1ae21fcebab7952486179b7619c08ec37a4eba6632",
       "scripts/taskset_boundary_gate.py": "sha256:0cc438aeec1f24540ddc6838837d24cf1c4444799781ee6ca8f175be392a86f0",
-      "scripts/taskset_dispatcher.py": "sha256:46b9cc22af53789ef810477a0148b7b15fda39ccbf8dfae09c908f1372c2ec63",
+      "scripts/taskset_dispatcher.py": "sha256:1470c5b4cd8effb30e6fcf92819509ec7248ed70a3ddfbef82402af0c3453adf",
       "scripts/taskset_prompt_hook.cmd": "sha256:f6914c735d43c8ab967158fa84439753a6dd555c2df2c4192c0213c08b72b81e",
       "scripts/taskset_prompt_hook.py": "sha256:13eef2aa9d927be6ac52456266ef3f40b76442b5dad3a5bcaeb46e0f69e08e70",
       "scripts/taskset_work_gate.py": "sha256:fe840225c2fe9e6a11769d370f3f9920f532bd95fcc20a59a75449ff226652e6",
@@ -279,7 +279,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.6.0",
-    "template_digest": "sha256:fb103b292db6a6034c99880a6a579e7168ff48bdde4b6b7f087dc0ea01088972",
+    "template_digest": "sha256:f1743a7cb097e6be214f8b11b9d7c875fb5247266c9bf7f526d7fefa250cabbe",
     "template_files": 276
   },
   "project": "fixture-host",

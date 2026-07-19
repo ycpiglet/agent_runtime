@@ -44,6 +44,7 @@ CANONICAL_TASKSET_SCHEMA = "agent-runtime-work-item/v1"
 STRUCTURED_WORKTREE_FIELDS = ("repository_path", "worktree_path", "branch", "base_ref")
 PROTECTED_BRANCHES = {"develop", "development", "main", "master", "production", "release"}
 SAFE_GIT_REF = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]*$")
+TASK_ID_TOKEN = re.compile(r"(?<![A-Z0-9-])(TASK(?:-AR)?-\d+)(?![A-Z0-9-])")
 
 
 def _slug(value: str) -> str:
@@ -78,6 +79,53 @@ def _rel(root: Path, path: Path) -> str:
         return path.resolve().relative_to(root.resolve()).as_posix()
     except ValueError:
         return path.as_posix()
+
+
+def _ordered_task_ids(body: str) -> list[str]:
+    """Return task IDs in the canonical record's explicit Tasks section.
+
+    Taskset prose can mention task IDs in background, risks, or verification.
+    Only an explicit task-order section is authoritative. Duplicate IDs are
+    folded at their first occurrence so they cannot perturb later valid tasks.
+    """
+    section: list[str] = []
+    in_tasks = False
+    for line in body.splitlines():
+        heading = re.match(r"^#{2,}\s+(.+?)\s*$", line)
+        if heading:
+            title = re.sub(r"\s+", " ", heading.group(1).strip()).lower()
+            if in_tasks:
+                break
+            in_tasks = title in {"tasks", "task order", "ordered tasks", "execution order"}
+            continue
+        if in_tasks:
+            section.append(line)
+
+    ordered: list[str] = []
+    seen: set[str] = set()
+    for match in TASK_ID_TOKEN.finditer("\n".join(section)):
+        task_id = match.group(1)
+        if task_id not in seen:
+            seen.add(task_id)
+            ordered.append(task_id)
+    return ordered
+
+
+def _canonical_task_order(root: Path, task_set_id: str) -> list[str]:
+    """Read the explicit task order for one canonical taskset, if present."""
+    if not re.fullmatch(r"TASKSET-[A-Z0-9][A-Z0-9-]*", task_set_id):
+        return []
+    path = root / "agents" / "project" / "initiatives" / f"{task_set_id}.md"
+    if not path.is_file():
+        return []
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise SystemExit(f"invalid canonical task set record: {_rel(root, path)}: {exc}") from exc
+    meta, body = backlog_board.parse_frontmatter(text)
+    if str(meta.get("work_id") or "").strip() != task_set_id:
+        return []
+    return _ordered_task_ids(body)
 
 
 def _canonical_tasksets(root: Path) -> list[backlog_board.TaskSetInfo]:
@@ -196,7 +244,18 @@ def _resolve_taskset(value: str, root: Path | None = None) -> backlog_board.Task
 
 def _tasks_for(root: Path, task_set_id: str) -> list[backlog_board.Task]:
     tasks = backlog_board.load_tasks(root / "agents" / "lead_engineer" / "tasks")
-    return sorted([task for task in tasks if task.task_set_id == task_set_id], key=backlog_board.task_set_sort_key)
+    fallback = sorted(
+        [task for task in tasks if task.task_set_id == task_set_id],
+        key=backlog_board.task_set_sort_key,
+    )
+    canonical_order = _canonical_task_order(root, task_set_id)
+    if not canonical_order:
+        return fallback
+
+    by_id = {task.task_id: task for task in fallback}
+    ordered = [by_id[task_id] for task_id in canonical_order if task_id in by_id]
+    selected = {task.task_id for task in ordered}
+    return [*ordered, *(task for task in fallback if task.task_id not in selected)]
 
 
 def _next_task(tasks: list[backlog_board.Task]) -> backlog_board.Task:

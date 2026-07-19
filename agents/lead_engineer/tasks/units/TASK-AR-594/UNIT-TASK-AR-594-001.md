@@ -10,12 +10,12 @@ task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 initiative_id: INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T10:28:06+09:00
+updated_at: 2026-07-19T10:37:02+09:00
 origin_type: owner_request
-origin_ref: chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277
+origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
 summary: Implement canonical task order selection
 horizon: unit
@@ -24,7 +24,7 @@ escalation_triggers:
   - high_risk
   - cross_cutting
   - data_integrity
-context: Autofolio reproduced GitHub #289 on agent_runtime v0.6.0: canonical taskset prose orders TASK-219, TASK-220, TASK-217, but _tasks_for discards that order and picks TASK-217 by score.
+context: Autofolio reproduced GitHub
 inputs:
   - https://github.com/ycpiglet/agent_runtime/issues/289
   - scripts/taskset_dispatcher.py
@@ -44,6 +44,10 @@ verification:
   - python -m pytest tests/test_taskset_dispatcher.py tests/test_role_routing_wiring.py -q
 handoff: Provide changed-file summary, before/after selection evidence, focused test output, and any fallback compatibility note.
 stop_condition: Stop if canonical order cannot be derived without changing the taskset record contract; escalate with the conflicting record examples.
+verified_at: 2026-07-19T10:37:02+09:00
+verified_by: codex-root-task-ar-594
+evidence_refs:
+  - reviews/VERIFY-2026-07-19-unit-task-ar-594-001-20260719103702.json
 ---
 
 # UNIT-TASK-AR-594-001 - Implement canonical task order selection
