@@ -63,14 +63,15 @@ def _write_taskset(
     tasksets_dir.mkdir(parents=True, exist_ok=True)
     target = tasksets_dir / f"{filename or task_set_id}.md"
     task_section = ""
+    task_frontmatter = ""
     if task_order:
-        rows = "\n".join(f"| `{task_id}` | Planned work |" for task_id in task_order)
+        task_frontmatter = "tasks:\n" + "\n".join(f"  - {task_id}" for task_id in task_order)
+        rows = "\n".join(f"  - {task_id}" for task_id in task_order)
         task_section = f"""
 
-## Tasks
+## 포함 태스크
 
-| Task | Title |
-| --- | --- |
+tasks:
 {rows}
 """
     target.write_text(
@@ -80,6 +81,7 @@ work_id: {task_set_id}
 kind: {kind}
 title: {title}
 summary: Test dynamic task set.
+{task_frontmatter}
 ---
 {task_section}
 """,
@@ -205,6 +207,48 @@ def test_task_ids_outside_tasks_section_do_not_override_score_fallback(tmp_path:
 
     assert result.returncode == 0, result.stderr or result.stdout
     assert json.loads(result.stdout)["next_task_id"] == "TASK-217"
+
+
+def test_localized_body_order_is_used_when_frontmatter_tasks_are_absent(tmp_path: Path) -> None:
+    task_set_id = "TASKSET-DYNAMIC-BODY-ORDER"
+    _write_taskset(tmp_path, task_set_id)
+    record = tmp_path / "agents" / "project" / "initiatives" / f"{task_set_id}.md"
+    record.write_text(
+        record.read_text(encoding="utf-8")
+        + "\n## 포함 태스크\n\ntasks:\n  - TASK-219\n  - TASK-220\n  - TASK-217\n",
+        encoding="utf-8",
+    )
+    _write_task(tmp_path, "TASK-217", task_set_id, priority="P0")
+    _write_task(tmp_path, "TASK-219", task_set_id, priority="P2")
+    _write_task(tmp_path, "TASK-220", task_set_id, priority="P1")
+
+    assert [task.task_id for task in dispatcher._tasks_for(tmp_path, task_set_id)] == [  # noqa: SLF001
+        "TASK-219",
+        "TASK-220",
+        "TASK-217",
+    ]
+
+
+def test_frontmatter_tasks_take_precedence_over_conflicting_body_order(tmp_path: Path) -> None:
+    task_set_id = "TASKSET-DYNAMIC-FRONTMATTER-ORDER"
+    _write_taskset(tmp_path, task_set_id, task_order=("TASK-219", "TASK-220", "TASK-217"))
+    record = tmp_path / "agents" / "project" / "initiatives" / f"{task_set_id}.md"
+    record.write_text(
+        record.read_text(encoding="utf-8").replace(
+            "## 포함 태스크\n\ntasks:\n  - TASK-219\n  - TASK-220\n  - TASK-217",
+            "## 포함 태스크\n\ntasks:\n  - TASK-217\n  - TASK-220\n  - TASK-219",
+        ),
+        encoding="utf-8",
+    )
+    _write_task(tmp_path, "TASK-217", task_set_id, priority="P0")
+    _write_task(tmp_path, "TASK-219", task_set_id, priority="P2")
+    _write_task(tmp_path, "TASK-220", task_set_id, priority="P1")
+
+    assert [task.task_id for task in dispatcher._tasks_for(tmp_path, task_set_id)] == [  # noqa: SLF001
+        "TASK-219",
+        "TASK-220",
+        "TASK-217",
+    ]
 
 
 @pytest.mark.parametrize(

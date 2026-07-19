@@ -45,6 +45,7 @@ STRUCTURED_WORKTREE_FIELDS = ("repository_path", "worktree_path", "branch", "bas
 PROTECTED_BRANCHES = {"develop", "development", "main", "master", "production", "release"}
 SAFE_GIT_REF = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]*$")
 TASK_ID_TOKEN = re.compile(r"(?<![A-Z0-9-])(TASK(?:-AR)?-\d+)(?![A-Z0-9-])")
+TASK_ID_VALUE = re.compile(r"TASK(?:-AR)?-\d+")
 
 
 def _slug(value: str) -> str:
@@ -96,7 +97,14 @@ def _ordered_task_ids(body: str) -> list[str]:
             title = re.sub(r"\s+", " ", heading.group(1).strip()).lower()
             if in_tasks:
                 break
-            in_tasks = title in {"tasks", "task order", "ordered tasks", "execution order"}
+            in_tasks = title in {
+                "tasks",
+                "task order",
+                "ordered tasks",
+                "execution order",
+                "included tasks",
+                "포함 태스크",
+            }
             continue
         if in_tasks:
             section.append(line)
@@ -108,6 +116,23 @@ def _ordered_task_ids(body: str) -> list[str]:
         if task_id not in seen:
             seen.add(task_id)
             ordered.append(task_id)
+    return ordered
+
+
+def _frontmatter_task_ids(value: Any) -> list[str]:
+    """Return a defensive, first-occurrence order from a ``tasks`` array."""
+    if not isinstance(value, list):
+        return []
+    ordered: list[str] = []
+    seen: set[str] = set()
+    for item in value:
+        if not isinstance(item, str):
+            continue
+        task_id = item.strip()
+        if not TASK_ID_VALUE.fullmatch(task_id) or task_id in seen:
+            continue
+        seen.add(task_id)
+        ordered.append(task_id)
     return ordered
 
 
@@ -125,7 +150,8 @@ def _canonical_task_order(root: Path, task_set_id: str) -> list[str]:
     meta, body = backlog_board.parse_frontmatter(text)
     if str(meta.get("work_id") or "").strip() != task_set_id:
         return []
-    return _ordered_task_ids(body)
+    frontmatter_order = _frontmatter_task_ids(meta.get("tasks"))
+    return frontmatter_order or _ordered_task_ids(body)
 
 
 def _canonical_tasksets(root: Path) -> list[backlog_board.TaskSetInfo]:

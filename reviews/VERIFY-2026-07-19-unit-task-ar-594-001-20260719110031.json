@@ -1,0 +1,25 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-19-unit-task-ar-594-001-20260719110031",
+  "work_id": "UNIT-TASK-AR-594-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-594/UNIT-TASK-AR-594-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-594",
+  "unit_id": "UNIT-TASK-AR-594-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-19T11:00:31+09:00",
+  "verified_by": "codex-root-task-ar-594-rework",
+  "command_count": 1,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_taskset_dispatcher.py tests/test_role_routing_wiring.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-19T11:00:31+09:00",
+      "finished_at": "2026-07-19T11:00:47+09:00",
+      "stdout": ".......................................................                  [100%]\n55 passed in 15.51s\n",
+      "stderr": ""
+    }
+  ]
+}
