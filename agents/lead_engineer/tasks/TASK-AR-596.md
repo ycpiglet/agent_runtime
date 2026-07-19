@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 registered_at: 2026-07-19T10:28:06+09:00
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T10:28:06+09:00
+updated_at: 2026-07-19T12:03:59+09:00
 title: Resolve slugged canonical task files in conversation audit
 status: planned
 priority: P1
@@ -24,7 +24,7 @@ task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 unit_spec: agents/lead_engineer/tasks/units/TASK-AR-596/UNIT-TASK-AR-596-001.md
 reservation_id: RES-20260719-102806-bbbc9438-03
 origin_type: owner_request
-origin_ref: chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277
+origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
 summary: Replace exact short-filename assumptions with ID-aware task record resolution.
 planner_model_tier: planner_high
@@ -35,6 +35,11 @@ tags:
 verification:
   - python -m pytest tests/test_conversation_work_audit.py -q
   - python scripts/conversation_work_audit.py --check
+verification_status: passed
+verified_at: 2026-07-19T12:03:59+09:00
+verified_by: codex-root-task-ar-596
+evidence_refs:
+  - reviews/VERIFY-2026-07-19-task-ar-596-20260719120359.json
 ---
 
 # TASK-AR-596 - Resolve slugged canonical task files in conversation audit
