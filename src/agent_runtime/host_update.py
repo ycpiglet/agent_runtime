@@ -218,7 +218,7 @@ def build_update_plan(root: Path, install_dir: Path) -> HostUpdatePlan:
 
     install_spec = _install_spec(config.upstream_remote_url, config.upstream_ref) if not findings else ""
     commands = (
-        f"python -m pip install --target {resolved_install} {install_spec} --upgrade --no-deps --no-build-isolation --no-cache-dir",
+        f"python -m pip install --target {resolved_install} {install_spec} --upgrade --no-deps --no-cache-dir",
         (
             "python -c \"import sys; "
             f"sys.path.insert(0, {_python_literal(resolved_install)}); "
@@ -254,7 +254,6 @@ def build_update_execution(root: Path, install_dir: Path, *, mode: str) -> HostU
                     plan.install_spec,
                     "--upgrade",
                     "--no-deps",
-                    "--no-build-isolation",
                     "--no-cache-dir",
                 ),
             )

@@ -340,6 +340,7 @@ def test_update_plan_uses_host_upstream_for_install_and_sync_commands(tmp_path):
     assert plan.findings == ()
     assert plan.install_spec == "git+https://github.com/example/agent_runtime.git@v0.1.0"
     assert "python -m pip install --target" in command_text
+    assert "--no-build-isolation" not in command_text
     assert str(install_dir.resolve()) in command_text
     assert "sys.path.insert(0," in command_text
     assert "from agent_runtime.cli import main" in command_text
@@ -404,6 +405,7 @@ def test_update_execution_check_runs_install_and_installed_sync_check(tmp_path):
 
     assert [step.name for step in execution.steps] == ["install-upstream", "verify-templates", "sync-check"]
     assert "git+https://github.com/example/agent_runtime.git@v0.1.0" in execution.steps[0].args
+    assert "--no-build-isolation" not in execution.steps[0].args
     assert "sync" in execution.steps[2].args[-1]
     assert "--check" in execution.steps[2].args[-1]
 
