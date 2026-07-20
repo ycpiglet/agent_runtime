@@ -1,14 +1,14 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-18T17:48:46+09:00
+updated_at: 2026-07-20T13:18:00+09:00
 current_state:
-  summary: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE is complete; the persistent self-improvement goal is improving but still active."
-  status: watch
-  task_set_status: completed
-  task_set_id: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
-  step_index: 4
-  step_total: 4
-  progress_pct: 100
-  status_text: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE closed at improving 70/100; full maturity remains open."
+  summary: "TASK-AR-601 is repairing cross-platform Codex/Git hook execution and checkout hygiene."
+  status: active
+  task_set_status: active
+  task_set_id: "TASKSET-AR-HOOK-PORTABILITY-CLEANUP"
+  step_index: 1
+  step_total: 1
+  progress_pct: 75
+  status_text: "TASK-AR-601 implementation complete; W4 verification and cleanup are in progress."
 active_work:
   current_agents:
     - claim_id: CLAIM-20260720-125746-task-ar-601-hookfix
@@ -40,8 +40,8 @@ active_work:
       status_text: "TASK-AR-601 hook portability cleanup"
       active_task: TASK-AR-601
 resume:
-  active_task: none
-  active_task_set: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
+  active_task: TASK-AR-601
+  active_task_set: "TASKSET-AR-HOOK-PORTABILITY-CLEANUP"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -49,7 +49,8 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260720-125746-task-ar-601-hookfix.json
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
     active_claim: null

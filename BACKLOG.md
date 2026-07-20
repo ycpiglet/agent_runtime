@@ -16,6 +16,8 @@
 | 527 | `TASKSET-AR-PRODUCT-MATURITY-UPLIFT` | Maturity Steward |
 | 528 | `TASKSET-AR-AGENT-ORG-DELEGATION` | Org Conductor |
 | 529 | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | Decision Cockpit |
+| 600 | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | Merge Truth Keeper |
+| 601 | `TASKSET-AR-HOOK-PORTABILITY-CLEANUP` | Hook Portability Maintainer |
 | 615 | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | Self Improvement Cadence |
 | 616 | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | Self Improvement Remediation |
 | 617 | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | Business Operations Teams |
