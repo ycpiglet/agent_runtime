@@ -504,6 +504,7 @@ def _plan_unit_payload(root: Path, node: UnitNode) -> dict[str, Any]:
         "worktree_path": worktree["worktree_path"],
         "branch": worktree["branch"],
         "base_ref": worktree["base_ref"],
+        "adopt_existing_branch": worktree["adopt_existing_branch"],
     }
 
 
@@ -609,6 +610,7 @@ def _dispatch_payload(
         "worktree_path": worktree["worktree_path"],
         "branch": worktree["branch"],
         "base_ref": worktree["base_ref"],
+        "adopt_existing_branch": worktree["adopt_existing_branch"],
         "worktree_command": worktree["worktree_command"],
     }
     payload["claim_command"] = _claim_command(

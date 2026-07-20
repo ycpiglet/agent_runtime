@@ -24,6 +24,7 @@ from typing import Any
 import backlog_board
 import model_routing
 import status_alias
+from task_unit_readiness_gate import depends_on_refs, load_unit_specs
 
 
 ACTIVE_STATUSES = {
@@ -80,12 +81,14 @@ def _rel(root: Path, path: Path) -> str:
         return path.as_posix()
 
 
-def _canonical_tasksets(root: Path) -> list[backlog_board.TaskSetInfo]:
+def _canonical_taskset_records(
+    root: Path,
+) -> list[tuple[backlog_board.TaskSetInfo, tuple[str, ...] | None]]:
     tasksets_dir = root / "agents" / "project" / "initiatives"
     if not tasksets_dir.is_dir():
         return []
 
-    tasksets: list[backlog_board.TaskSetInfo] = []
+    tasksets: list[tuple[backlog_board.TaskSetInfo, tuple[str, ...] | None]] = []
     paths = sorted(tasksets_dir.glob("TASKSET-*.md"), key=lambda item: item.name.lower())
     for index, path in enumerate(paths, start=1):
         try:
@@ -107,6 +110,29 @@ def _canonical_tasksets(root: Path) -> list[backlog_board.TaskSetInfo]:
             errors.append(f"work_id must be an uppercase TASKSET-* id, got {work_id!r}")
         if path.stem != work_id:
             errors.append(f"filename {path.stem!r} must match work_id {work_id!r}")
+
+        ordered_tasks: tuple[str, ...] | None = None
+        if "tasks" in meta:
+            raw_tasks = meta.get("tasks")
+            if not isinstance(raw_tasks, list):
+                errors.append("tasks must be a YAML list when declared")
+            else:
+                values = [str(value).strip() for value in raw_tasks]
+                invalid = [
+                    value
+                    for value in values
+                    if not re.fullmatch(r"TASK-[A-Z0-9][A-Z0-9-]*", value)
+                ]
+                duplicates = sorted({value for value in values if values.count(value) > 1})
+                if invalid:
+                    errors.append(
+                        "tasks contains invalid task ids: "
+                        + ", ".join(repr(value) for value in invalid)
+                    )
+                if duplicates:
+                    errors.append("tasks contains duplicate task ids: " + ", ".join(duplicates))
+                if not invalid and not duplicates:
+                    ordered_tasks = tuple(values)
         if errors:
             raise SystemExit(
                 f"invalid canonical task set record: {_rel(root, path)}: " + "; ".join(errors)
@@ -115,14 +141,28 @@ def _canonical_tasksets(root: Path) -> list[backlog_board.TaskSetInfo]:
         display_name = str(meta.get("title") or work_id).strip() or work_id
         summary = str(meta.get("summary") or "").strip()
         tasksets.append(
-            backlog_board.TaskSetInfo(
-                task_set_id=work_id,
-                display_name=display_name,
-                summary=summary,
-                order=1000 + index,
+            (
+                backlog_board.TaskSetInfo(
+                    task_set_id=work_id,
+                    display_name=display_name,
+                    summary=summary,
+                    order=1000 + index,
+                ),
+                ordered_tasks,
             )
         )
     return tasksets
+
+
+def _canonical_tasksets(root: Path) -> list[backlog_board.TaskSetInfo]:
+    return [info for info, _ordered_tasks in _canonical_taskset_records(root)]
+
+
+def _canonical_task_order(root: Path, task_set_id: str) -> tuple[str, ...] | None:
+    for info, ordered_tasks in _canonical_taskset_records(root):
+        if info.task_set_id == task_set_id:
+            return ordered_tasks
+    return None
 
 
 def _register_alias(
@@ -196,14 +236,81 @@ def _resolve_taskset(value: str, root: Path | None = None) -> backlog_board.Task
 
 def _tasks_for(root: Path, task_set_id: str) -> list[backlog_board.Task]:
     tasks = backlog_board.load_tasks(root / "agents" / "lead_engineer" / "tasks")
-    return sorted([task for task in tasks if task.task_set_id == task_set_id], key=backlog_board.task_set_sort_key)
+    members = [task for task in tasks if task.task_set_id == task_set_id]
+    ordered_ids = _canonical_task_order(root, task_set_id)
+    if ordered_ids is None:
+        return sorted(members, key=backlog_board.task_set_sort_key)
+
+    by_id: dict[str, backlog_board.Task] = {}
+    duplicate_records: set[str] = set()
+    for task in tasks:
+        if task.task_id in by_id:
+            duplicate_records.add(task.task_id)
+        by_id[task.task_id] = task
+    if duplicate_records:
+        raise SystemExit(
+            "canonical task set membership is ambiguous; duplicate task records: "
+            + ", ".join(sorted(duplicate_records))
+        )
+
+    unknown = [task_id for task_id in ordered_ids if task_id not in by_id]
+    wrong_membership = [
+        task_id
+        for task_id in ordered_ids
+        if task_id in by_id and by_id[task_id].task_set_id != task_set_id
+    ]
+    declared = set(ordered_ids)
+    omitted = sorted(task.task_id for task in members if task.task_id not in declared)
+    errors: list[str] = []
+    if unknown:
+        errors.append("unknown task ids: " + ", ".join(unknown))
+    if wrong_membership:
+        errors.append("wrong task_set_id membership: " + ", ".join(wrong_membership))
+    if omitted:
+        errors.append("taskset members omitted from tasks: " + ", ".join(omitted))
+    if errors:
+        raise SystemExit(
+            f"invalid canonical task set membership for {task_set_id}: " + "; ".join(errors)
+        )
+    return [by_id[task_id] for task_id in ordered_ids]
 
 
-def _next_task(tasks: list[backlog_board.Task]) -> backlog_board.Task:
+def _task_dependencies(task: backlog_board.Task) -> list[str]:
+    value = task.meta.get("depends_on")
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    text = str(value or "").strip()
+    return [text] if text else []
+
+
+def _next_task(
+    tasks: list[backlog_board.Task],
+    *,
+    root: Path | None = None,
+) -> backlog_board.Task:
     for task in tasks:
         if _normalize_status(task.status) in DONE_STATUSES:
             continue
         if backlog_board.lane_for(task) != "Done":
+            dependencies = _task_dependencies(task)
+            if dependencies:
+                candidates = tasks
+                if root is not None:
+                    candidates = backlog_board.load_tasks(
+                        root / "agents" / "lead_engineer" / "tasks"
+                    )
+                by_id = {candidate.task_id: candidate for candidate in candidates}
+                incomplete = [
+                    dependency
+                    for dependency in dependencies
+                    if dependency not in by_id
+                    or _normalize_status(by_id[dependency].status) not in DONE_STATUSES
+                ]
+                if incomplete:
+                    raise SystemExit(
+                        f"next task {task.task_id} has incomplete dependencies; "
+                        "refusing to skip ahead: " + ", ".join(incomplete)
+                    )
             return task
     raise SystemExit("task set has no open tasks")
 
@@ -224,12 +331,58 @@ def _ready_unit_for_task(root: Path, task_id: str) -> tuple[Path, dict[str, Any]
     units = _unit_specs_for_task(root, task_id)
     if not units:
         return None
-    ready = [
+    open_units = [
         unit
         for unit in units
+        if _normalize_status(str(unit[1].get("status") or "")) not in DONE_STATUSES
+    ]
+    if not open_units:
+        raise SystemExit(f"task {task_id} has unit specs but no open unit")
+    ready = [
+        unit
+        for unit in open_units
         if str(unit[1].get("status") or "").strip() in {"worker_ready", "ready", "in_progress"}
     ]
-    return (ready or units)[0]
+    return (ready or open_units)[0]
+
+
+def _require_unit_dependencies(
+    root: Path,
+    unit_meta: dict[str, Any],
+    tasks_by_id: dict[str, backlog_board.Task],
+) -> None:
+    unit_id = str(unit_meta.get("unit_id") or "").strip()
+    dependencies = depends_on_refs(unit_meta)
+    if not dependencies:
+        return
+
+    units_by_id: dict[str, dict[str, Any]] = {}
+    for _path, meta, _body in load_unit_specs(root):
+        candidate_id = str(meta.get("unit_id") or "").strip()
+        if not candidate_id:
+            continue
+        if candidate_id in units_by_id:
+            raise SystemExit(f"duplicate unit registry id: {candidate_id}")
+        units_by_id[candidate_id] = meta
+
+    for dependency_id in dependencies:
+        if dependency_id == unit_id:
+            raise SystemExit(f"unit {unit_id} depends on itself: {dependency_id}")
+        dependency_unit = units_by_id.get(dependency_id)
+        if dependency_unit is not None:
+            status = str(dependency_unit.get("status") or "")
+        else:
+            dependency_task = tasks_by_id.get(dependency_id)
+            if dependency_task is None:
+                raise SystemExit(
+                    f"unit {unit_id} depends on unknown work item {dependency_id}"
+                )
+            status = dependency_task.status
+        if _normalize_status(status) not in DONE_STATUSES:
+            raise SystemExit(
+                f"unit {unit_id} dependency {dependency_id} is not complete "
+                f"(status={status})"
+            )
 
 
 def _project_id_for(task: backlog_board.Task, unit_meta: dict[str, Any] | None = None) -> str:
@@ -347,6 +500,103 @@ def _unsafe_git_ref(value: str) -> bool:
     )
 
 
+def _unsafe_local_branch_name(value: str) -> bool:
+    """Mirror Git's local-branch constraints without running Git before a claim."""
+    components = value.split("/")
+    return (
+        _unsafe_git_ref(value)
+        or value == "HEAD"
+        or value.startswith("-")
+        or any(component.startswith(".") for component in components)
+        or any(component.endswith(".lock") for component in components)
+    )
+
+
+def _boolean_metadata(unit_meta: dict[str, Any], field: str) -> bool:
+    value = unit_meta.get(field, False)
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str) and value.strip().lower() in {"true", "false"}:
+        return value.strip().lower() == "true"
+    raise SystemExit(f"{field} must be a boolean")
+
+
+def _local_branch_exists(repository: Path, branch: str) -> bool:
+    local_name = branch.removeprefix("refs/heads/")
+    git = os.environ.get("AGENT_RUNTIME_GIT") or "git"
+    try:
+        result = subprocess.run(
+            [git, "show-ref", "--verify", "--quiet", f"refs/heads/{local_name}"],
+            cwd=repository,
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError as exc:
+        raise SystemExit(f"failed to inspect adopted branch: {exc}") from exc
+    if result.returncode == 0:
+        return True
+    if result.returncode == 1:
+        return False
+    detail = (result.stderr or result.stdout or "git show-ref failed").strip()
+    raise SystemExit(f"failed to inspect adopted branch in {repository}: {detail}")
+
+
+def _adoption_base_error(
+    repository: Path,
+    base_ref: str,
+    candidate_ref: str | None,
+) -> str | None:
+    """Validate the declared adoption base and an optional existing branch tip."""
+    git = os.environ.get("AGENT_RUNTIME_GIT") or "git"
+    try:
+        base_result = subprocess.run(
+            [git, "rev-parse", "--verify", "--quiet", f"{base_ref}^{{commit}}"],
+            cwd=repository,
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError as exc:
+        return f"failed to inspect declared adoption base_ref {base_ref}: {exc}"
+    if base_result.returncode != 0:
+        detail = (base_result.stderr or base_result.stdout).strip()
+        suffix = f": {detail}" if detail else ""
+        return f"declared adoption base_ref is missing or not a commit: {base_ref}{suffix}"
+    if candidate_ref is None:
+        return None
+
+    try:
+        ancestry_result = subprocess.run(
+            [git, "merge-base", "--is-ancestor", base_ref, candidate_ref],
+            cwd=repository,
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError as exc:
+        return f"failed to inspect adopted branch base_ref ancestry: {exc}"
+    if ancestry_result.returncode == 0:
+        return None
+    if ancestry_result.returncode == 1:
+        return (
+            "adopted branch is behind or diverged from declared base_ref: "
+            f"candidate={candidate_ref}, base_ref={base_ref}"
+        )
+    detail = (
+        ancestry_result.stderr
+        or ancestry_result.stdout
+        or "git merge-base failed"
+    ).strip()
+    return f"failed to resolve adopted branch base_ref {base_ref}: {detail}"
+
+
 def _worktree_tuple(
     root: Path,
     unit_meta: dict[str, Any],
@@ -354,17 +604,23 @@ def _worktree_tuple(
     default_worktree: str,
     default_branch: str,
 ) -> dict[str, Any]:
+    adopt_existing_branch = _boolean_metadata(unit_meta, "adopt_existing_branch")
     values = {
         field: str(unit_meta.get(field) or "").strip()
         for field in STRUCTURED_WORKTREE_FIELDS
     }
     declared = [field for field, value in values.items() if value]
     if not declared:
+        if adopt_existing_branch:
+            raise SystemExit(
+                "adopt_existing_branch requires a complete structured worktree tuple"
+            )
         return {
             "repository_path": str(root),
             "worktree_path": default_worktree,
             "branch": default_branch,
             "base_ref": "",
+            "adopt_existing_branch": False,
             "worktree_command": [
                 "git",
                 "worktree",
@@ -398,7 +654,10 @@ def _worktree_tuple(
     branch = values["branch"]
     if _unsafe_git_ref(branch):
         raise SystemExit(f"unsafe branch: {branch}")
-    protected_name = branch.removeprefix("refs/heads/").lower()
+    local_name = branch.removeprefix("refs/heads/")
+    if _unsafe_local_branch_name(local_name):
+        raise SystemExit(f"invalid local branch name: {local_name}")
+    protected_name = local_name.lower()
     if protected_name in PROTECTED_BRANCHES:
         raise SystemExit(f"protected branch is not allowed for a task worktree: {branch}")
 
@@ -406,20 +665,32 @@ def _worktree_tuple(
     if _unsafe_git_ref(base_ref):
         raise SystemExit(f"unsafe base_ref: {base_ref}")
 
+    local_branch_exists = adopt_existing_branch and _local_branch_exists(repository, branch)
+    if adopt_existing_branch:
+        candidate_ref = f"refs/heads/{local_name}" if local_branch_exists else None
+        adoption_error = _adoption_base_error(repository, base_ref, candidate_ref)
+        if adoption_error:
+            raise SystemExit(adoption_error)
+    if local_branch_exists:
+        worktree_command = ["git", "worktree", "add", str(worktree), local_name]
+    else:
+        worktree_command = [
+            "git",
+            "worktree",
+            "add",
+            "-b",
+            local_name,
+            str(worktree),
+            base_ref,
+        ]
+
     return {
         "repository_path": str(repository),
         "worktree_path": str(worktree),
         "branch": branch,
         "base_ref": base_ref,
-        "worktree_command": [
-            "git",
-            "worktree",
-            "add",
-            "-b",
-            branch,
-            str(worktree),
-            base_ref,
-        ],
+        "adopt_existing_branch": adopt_existing_branch,
+        "worktree_command": worktree_command,
     }
 
 
@@ -439,12 +710,72 @@ def _worktree_preflight_error(root: Path, payload: dict[str, Any]) -> str | None
         return f"task worktree is not ready: {worktree_value} does not exist"
     if not (worktree / ".git").exists():
         return f"task worktree is not ready: {worktree_value} is not a git worktree"
+    if payload.get("adopt_existing_branch"):
+        git = os.environ.get("AGENT_RUNTIME_GIT") or "git"
+
+        def inspect(path: Path, *arguments: str) -> tuple[str | None, str | None]:
+            try:
+                result = subprocess.run(
+                    [git, *arguments],
+                    cwd=path,
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                )
+            except OSError as exc:
+                return None, str(exc)
+            if result.returncode != 0:
+                return None, (result.stderr or result.stdout or "git inspection failed").strip()
+            return result.stdout.strip(), None
+
+        actual_branch, branch_error = inspect(worktree, "branch", "--show-current")
+        if branch_error:
+            return f"task worktree identity inspection failed: {branch_error}"
+        expected_branch = str(payload.get("branch") or "").removeprefix("refs/heads/")
+        if actual_branch != expected_branch:
+            return (
+                "task worktree branch mismatch: "
+                f"expected {expected_branch}, actual {actual_branch or '(detached)'}"
+            )
+
+        repository = _repository_path(root, payload)
+        expected_common, repository_error = inspect(repository, "rev-parse", "--git-common-dir")
+        actual_common, worktree_error = inspect(worktree, "rev-parse", "--git-common-dir")
+        if repository_error or worktree_error:
+            return (
+                "task worktree repository identity inspection failed: "
+                + (repository_error or worktree_error or "unknown error")
+            )
+        assert expected_common is not None
+        assert actual_common is not None
+
+        def common_dir(base: Path, value: str) -> Path:
+            path = Path(value)
+            return path.resolve() if path.is_absolute() else (base / path).resolve()
+
+        if common_dir(repository, expected_common) != common_dir(worktree, actual_common):
+            return "task worktree repository mismatch for adopted branch"
+
+        base_ref = str(payload.get("base_ref") or "").strip()
+        adoption_error = _adoption_base_error(worktree, base_ref, "HEAD")
+        if adoption_error:
+            return adoption_error
     return None
 
 
 def _ensure_worktree(root: Path, payload: dict[str, Any]) -> bool:
-    if not _worktree_preflight_error(root, payload):
+    worktree_error = _worktree_preflight_error(root, payload)
+    if not worktree_error:
         return True
+    worktree_value = str(payload.get("worktree_path") or "").strip()
+    worktree_path = Path(worktree_value)
+    if not worktree_path.is_absolute():
+        worktree_path = _repository_path(root, payload) / worktree_path
+    if worktree_path.exists():
+        print(worktree_error, file=sys.stderr)
+        return False
     worktree_command = list(payload["worktree_command"])
     worktree_command[0] = os.environ.get("AGENT_RUNTIME_GIT") or worktree_command[0]
     try:
@@ -477,7 +808,7 @@ def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
     root = args.root.resolve()
     info = _resolve_taskset(args.taskset, root)
     tasks = _tasks_for(root, info.task_set_id)
-    task = _next_task(tasks)
+    task = _next_task(tasks, root=root)
     task_set_slug = _taskset_slug(info.task_set_id)
     task_slug = _slug(task.task_id)
     default_worktree = f".worktrees/{task.task_id}"
@@ -487,6 +818,16 @@ def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
     unit = _ready_unit_for_task(root, task.task_id)
     unit_path = unit[0] if unit else None
     unit_meta = unit[1] if unit else {}
+    if unit:
+        all_tasks = backlog_board.load_tasks(
+            root / "agents" / "lead_engineer" / "tasks"
+        )
+        tasks_by_id: dict[str, backlog_board.Task] = {}
+        for candidate in all_tasks:
+            if candidate.task_id in tasks_by_id:
+                raise SystemExit(f"duplicate task registry id: {candidate.task_id}")
+            tasks_by_id[candidate.task_id] = candidate
+        _require_unit_dependencies(root, unit_meta, tasks_by_id)
     unit_id = str(unit_meta.get("unit_id") or task.meta.get("unit_id") or "").strip()
     project_id = _project_id_for(task, unit_meta)
     routing_decision = model_routing.resolve_work_item_tier(task.meta, unit_meta)
@@ -577,6 +918,7 @@ def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
         "worktree_path": worktree["worktree_path"],
         "branch": worktree["branch"],
         "base_ref": worktree["base_ref"],
+        "adopt_existing_branch": worktree["adopt_existing_branch"],
         "worktree_command": worktree["worktree_command"],
         "claim_command": claim_command,
         "wave_plan_command": [

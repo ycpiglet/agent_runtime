@@ -783,6 +783,14 @@ fields:
     consumed_by: [taskset_work_gate, dispatcher, board]
     query_use: Group tasks and units under their taskset for dispatch and closeout.
     mutable: planner_only
+  tasks:
+    type: list
+    required_for: []
+    populated_by: planner
+    source: human
+    consumed_by: [dispatcher, taskset_work_gate]
+    query_use: Preserve the approved taskset membership and execution order.
+    mutable: planner_only
   task_id:
     type: string
     required_for: []

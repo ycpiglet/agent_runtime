@@ -4,6 +4,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from scripts import work_schema_gate as schema_gate
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "work_schema_gate.py"
@@ -28,6 +30,32 @@ def _write(path: Path, text: str) -> None:
 
 def _schema_path() -> Path:
     return REPO_ROOT / "agents" / "project" / "WORK-SCHEMA.yml"
+
+
+def _template_schema_path() -> Path:
+    return (
+        REPO_ROOT
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "agents"
+        / "project"
+        / "WORK-SCHEMA.yml"
+    )
+
+
+def _catalog_field(path: Path, field: str) -> dict[str, str | list[str]]:
+    text = path.read_text(encoding="utf-8")
+    fields = schema_gate._named_blocks(schema_gate._mapping_block(text, "fields"))  # noqa: SLF001
+    metadata: dict[str, str | list[str]] = {}
+    for line in fields[field].splitlines():
+        stripped = line.strip()
+        if not stripped or ":" not in stripped:
+            continue
+        key, value = stripped.split(":", 1)
+        metadata[key] = schema_gate._clean_scalar(value)  # noqa: SLF001
+    return metadata
 
 
 def _minimal_task_frontmatter(*, extra: str = "", omit: str = "", **overrides: str) -> str:
@@ -325,6 +353,24 @@ def test_template_schema_mirror_passes_gate() -> None:
 
     assert result.returncode == 0, result.stdout + result.stderr
     assert "work-schema-gate: pass" in result.stdout
+
+
+def test_taskset_tasks_catalog_semantics_match_root_and_template() -> None:
+    expected = {
+        "type": "list",
+        "required_for": [],
+        "populated_by": "planner",
+        "source": "human",
+        "consumed_by": ["dispatcher", "taskset_work_gate"],
+        "query_use": "Preserve the approved taskset membership and execution order.",
+    }
+    root = _catalog_field(_schema_path(), "tasks")
+    template = _catalog_field(_template_schema_path(), "tasks")
+
+    assert {key: root[key] for key in expected} == expected
+    assert {key: template[key] for key in expected} == expected
+    assert root["mutable"] == "planner_only"
+    assert "mutable" not in template
 
 
 def test_template_gate_mirror_matches_root_gate() -> None:
