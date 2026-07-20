@@ -30,6 +30,11 @@ summary: Fix Linux hook failures and restore a clean, synchronized checkout.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python -m pytest tests/test_update_notify.py tests/test_stop_hook_owner_governance.py tests/test_session_dashboard.py tests/test_lock_merge_driver.py tests/test_bootstrap_dev_env.py -q
+  - python scripts/lock_merge_driver.py pre-commit
+  - python scripts/owner_governance_gate.py --allow-empty-owner-docs
+evidence_refs: []
 tags:
   - work-cli-created
 ---
@@ -53,7 +58,7 @@ tags:
 
 ## Verification
 
-- `python -m pytest tests/test_stop_hook_owner_governance.py tests/test_session_dashboard.py tests/test_lock_merge_driver.py tests/test_bootstrap_dev_env.py -q`
+- `python -m pytest tests/test_update_notify.py tests/test_stop_hook_owner_governance.py tests/test_session_dashboard.py tests/test_lock_merge_driver.py tests/test_bootstrap_dev_env.py -q`
 - `python scripts/lock_merge_driver.py pre-commit`
 - `python scripts/owner_governance_gate.py --allow-empty-owner-docs`
 - `python scripts/work.py status`
