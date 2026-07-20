@@ -1,13 +1,14 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-07-20 - TASK-AR-601 hook portability cleanup active
+## 2026-07-20 - TASK-AR-601 hook portability cleanup verified
 
 - Root cause: the live Codex hook manifest used Windows-only absolute Python paths and `.cmd` commands, while root Git hooks were non-executable and `core.hooksPath` was unset.
 - Registered work: `TASKSET-AR-HOOK-PORTABILITY-CLEANUP` / `TASK-AR-601` / `UNIT-TASK-AR-601-001` with T0/T2 plan checks passing.
-- Current implementation: portable Python hook commands, executable Git hook modes, refreshed host lock, and focused regression coverage (`37 passed`).
+- Current implementation: portable Python hook commands, executable Git hook modes, refreshed host lock, and expanded focused regression coverage (`56 passed`).
 - Runtime synchronization: the Owner-approved scope transition is recorded, the progress-scout overlay is released, and active-agent/pointer/board surfaces now identify TASK-AR-601.
-- Next: W4a evidence, independent W4b verification, serial integration, claim release, and worktree/branch cleanup.
-- Evidence: `reviews/REVIEW-2026-07-20-hook-portability-and-worktree-cleanup.md`; `agents/runtime/task_claims/CLAIM-20260720-125746-task-ar-601-hookfix.json`.
+- Verification: W4a passed, the first W4b correctly rejected a stale update-notify test/document contract, and the corrected branch then passed independent W4b.
+- Claim: `CLAIM-20260720-125746-task-ar-601-hookfix` is released; serial integration and worktree/branch cleanup remain.
+- Evidence: `reviews/REVIEW-2026-07-20-hook-portability-and-worktree-cleanup.md`; `reviews/VERIFY-2026-07-20-unit-task-ar-601-001-20260720131534.json`; `reviews/W4B-2026-07-20-TASK-AR-601.md`.
 
 ## 2026-07-06 (2차) - 이슈 전량 정리: #128/#132/#250 종료 — 열린 이슈 0 도달
 

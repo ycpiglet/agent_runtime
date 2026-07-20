@@ -53,6 +53,10 @@ platform wrappers, not in the shared manifest.
   wrapper. The correction updates those contracts to the portable module
   command and adds them to the unit's explicit target-file scope before W4 is
   rerun.
+- The second independent W4b pass accepted commit `96e799d`: the expanded
+  focused suite reported `56 passed`, the actual pre-commit hook exited 0,
+  bootstrap was ready, and all 16 manifest commands were portable. Evidence:
+  `reviews/W4B-2026-07-20-TASK-AR-601.md`.
 
 - RED proof: four failures covering absolute Windows paths, `.cmd` use, dirty
   intake wiring, and non-executable root Git hooks.

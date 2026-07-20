@@ -11,8 +11,17 @@
 - model_tier: planner_high
 - wip_slot: 0
 - stop_condition: Stop on destructive reset, force-push, unrelated GitHub issue remediation, workflow/secret changes, or any conflict with user-authored uncommitted content.
-- phase: wave-claimed
-- step: 1/6
-- progress_pct: 0
-- status_text: Wave 1 dispatch: UNIT-TASK-AR-601-001
-- status: claimed
+- phase: verified
+- step: 6/6
+- progress_pct: 100
+- status_text: W4a passed and independent W4b accepted; ready for release and integration
+- status: ready_for_release
+- w4a_evidence: reviews/VERIFY-2026-07-20-unit-task-ar-601-001-20260720131534.json
+- w4b_evidence: reviews/W4B-2026-07-20-TASK-AR-601.md
+
+## Result
+
+- Replaced machine-specific Windows Python paths and shared `.cmd` dependencies with portable Python commands.
+- Recorded root Git hooks as executable and configured `core.hooksPath=.githooks`.
+- Extended hook/bootstrap regression coverage passed with `56 passed`.
+- Independent verifier `independent-verifier-20260720-hookfix` accepted the corrected branch after rejecting the first incomplete pass.
