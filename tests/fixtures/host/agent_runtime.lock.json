@@ -6,9 +6,9 @@
       ".githooks/post-merge": "sha256:b112da8578360cd49b871f518afa9c2ffb9f266c416daa02a8a9b17a84196e39",
       ".githooks/pre-commit": "sha256:9b5b120d9b18f39977021db0b543953267cbfcd60f817cf92edd93812d560457",
       ".github/workflows/owner-doc-format.yml": "sha256:173fdbbd463b87c882a38651d6caeddf24ddfee7dbe4de7df72725da7b77537e",
-      "AGENTS.md": "sha256:eb76c85b035397bfc622a15b367376257f60fe68032ed6282f68875c0146014b",
+      "AGENTS.md": "sha256:f62a51c86efcc3f582aab0c11c378dc64376fae1890d7dac7590fc2de47456be",
       "AGENT_RUNTIME.md": "sha256:e1fea0c100683f01b39d9038f970ffd17b6ccb2885f02251731e4aafb9e6fe78",
-      "CLAUDE.md": "sha256:2ee98f198d4a5dc878da096a2b827a818a027fad31d1b2583f94079a116b39e2",
+      "CLAUDE.md": "sha256:89a2ae200b768171372e4f66640e61b2b28cb3807e7a266564f226871afb0895",
       "CURSOR.md": "sha256:c2f7a525713eb281435cf7907da6d2c89ed42e8ea9f1569f3146834035e2f9ca",
       "GEMINI.md": "sha256:777c43463d7fd1532cec26cb169ed04dca3e2df3336428e5919fbd836cc8786f",
       "agents/SKILL-STRUCTURE.md": "sha256:4747052912525e6643b36f50f96d506b0fa66a5e6f7539560f53b4de9ad38d64",
@@ -281,7 +281,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.6.0",
-    "template_digest": "sha256:e303f422739535ebb7a45eece111977cee23ed361148cebb951a4043a7f57a17",
+    "template_digest": "sha256:980e61dc165866a235b50fab3a2fdce9f233ec90f0443f9169f85a52b596429b",
     "template_files": 278
   },
   "project": "fixture-host",

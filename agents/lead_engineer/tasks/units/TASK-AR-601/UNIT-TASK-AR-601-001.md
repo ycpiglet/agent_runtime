@@ -38,8 +38,11 @@ target_files:
   - .githooks/post-merge
   - tests/test_stop_hook_owner_governance.py
   - tests/test_session_dashboard.py
+  - tests/test_update_notify.py
   - tests/test_lock_merge_driver.py
   - tests/fixtures/host/agent_runtime.lock.json
+  - src/agent_runtime/templates/project/CLAUDE.md
+  - src/agent_runtime/templates/project/AGENTS.md
   - reviews/REVIEW-2026-07-20-hook-portability-and-worktree-cleanup.md
 scope: Use portable Python hook commands, preserve existing hook semantics/timeouts, record executable Git hook modes, install the documented local configuration, and remove only lifecycle artifacts created by this task.
 acceptance:
@@ -83,8 +86,11 @@ The Linux checkout uses a tracked .codex/hooks.json with Windows absolute Python
 - .githooks/post-merge
 - tests/test_stop_hook_owner_governance.py
 - tests/test_session_dashboard.py
+- tests/test_update_notify.py
 - tests/test_lock_merge_driver.py
 - tests/fixtures/host/agent_runtime.lock.json
+- src/agent_runtime/templates/project/CLAUDE.md
+- src/agent_runtime/templates/project/AGENTS.md
 - reviews/REVIEW-2026-07-20-hook-portability-and-worktree-cleanup.md
 
 ## Scope
@@ -97,6 +103,7 @@ Use portable Python hook commands, preserve existing hook semantics/timeouts, re
 2. Update live and host-template hook manifests and Git hook modes.
 3. Apply bootstrap configuration and run focused verification.
 4. Write self-verification and obtain independent W4b verification before merge and cleanup.
+5. Reconcile the dedicated update-notify contract and template documentation if independent verification finds stale Windows-only expectations.
 
 ## Acceptance Criteria
 

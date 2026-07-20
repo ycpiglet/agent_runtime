@@ -48,6 +48,12 @@ platform wrappers, not in the shared manifest.
 
 ## Verification
 
+- The first independent W4b pass rejected the change because the dedicated
+  update-notify test and two host-template documents still named the Windows
+  wrapper. The correction updates those contracts to the portable module
+  command and adds them to the unit's explicit target-file scope before W4 is
+  rerun.
+
 - RED proof: four failures covering absolute Windows paths, `.cmd` use, dirty
   intake wiring, and non-executable root Git hooks.
 - GREEN proof: `python -m pytest tests/test_stop_hook_owner_governance.py tests/test_session_dashboard.py tests/test_lock_merge_driver.py tests/test_bootstrap_dev_env.py -q`

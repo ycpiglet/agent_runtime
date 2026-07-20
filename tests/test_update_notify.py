@@ -308,12 +308,12 @@ def test_parse_ls_remote_tags_orders_numerically():
     assert update_notify.parse_ls_remote_tags(output) == ["v0.2.1", "v0.9.0", "v0.10.0"]
 
 
-def test_template_wires_session_start_update_notify_hook():
+def test_template_wires_portable_session_start_update_notify_hook():
     template_root = Path(__file__).resolve().parents[1] / "src" / "agent_runtime" / "templates" / "project"
     hooks = json.loads((template_root / ".codex" / "hooks.json").read_text(encoding="utf-8"))
     session_start = hooks["hooks"]["SessionStart"]
     commands = [hook["command"] for group in session_start for hook in group["hooks"]]
-    assert "scripts\\update_notify_hook.cmd" in commands
+    assert "python -m agent_runtime.cli update-notify" in commands
     wrapper = template_root / "scripts" / "update_notify_hook.cmd"
     assert wrapper.exists()
     text = wrapper.read_text(encoding="utf-8")
