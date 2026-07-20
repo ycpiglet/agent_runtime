@@ -1,0 +1,26 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-SCOUT-TASKSET-AR-HOOK-PORTABILITY-CLEANUP-W1",
+  "task_id": "SCOUT-TASKSET-AR-HOOK-PORTABILITY-CLEANUP-W1",
+  "task_set_id": "TASKSET-AR-HOOK-PORTABILITY-CLEANUP",
+  "active_scope": "TASKSET-AR-HOOK-PORTABILITY-CLEANUP",
+  "scope_transition_approved": true,
+  "agent_role": "progress-scout",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "progress-scout-CLAIM-SCOUT-TASKSET-AR-HOOK-PORTABILITY-CLEANUP-W1",
+  "display_name": "progress-scout@scout-sweep",
+  "mode": "scout-sweep",
+  "status": "claimed",
+  "status_text": "Progress-scout sweep for TASKSET-AR-HOOK-PORTABILITY-CLEANUP wave 1",
+  "claimed_at": "2026-07-20T12:57:46+09:00",
+  "last_heartbeat": "2026-07-20T12:57:46+09:00",
+  "updated_at": "2026-07-20T12:57:46+09:00",
+  "tags": [
+    "scout",
+    "sweep",
+    "wave:1"
+  ],
+  "overlay": true,
+  "parent_task_id": "",
+  "parent_task_set_id": "TASKSET-AR-HOOK-PORTABILITY-CLEANUP"
+}

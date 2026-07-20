@@ -55,7 +55,7 @@ completed_task_set_count: 47
 
 - Flow: Repair cross-platform hook commands, activate Git hook wiring, and verify a clean worktree lifecycle.
 - Progress: `0/1` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `2/3`; oldest `0.1h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-601` | INIT-AR-HOOK-PORTABILITY-CLEANUP | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-601/UNIT-TASK-AR-601-001.md | planned | Action | P1 | High | Medium | 2h/4000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Replace platform-specific hook commands, enforce executable Git hook metadata, instal… |

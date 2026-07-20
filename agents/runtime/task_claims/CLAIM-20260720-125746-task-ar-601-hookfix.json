@@ -12,7 +12,7 @@
   "status": "claimed",
   "task_set_id": "TASKSET-AR-HOOK-PORTABILITY-CLEANUP",
   "active_scope": "TASKSET-AR-HOOK-PORTABILITY-CLEANUP",
-  "scope_transition_approved": false,
+  "scope_transition_approved": true,
   "project_id": "PROJECT-AGENT-RUNTIME",
   "unit_id": "UNIT-TASK-AR-601-001",
   "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-601/UNIT-TASK-AR-601-001.md",
