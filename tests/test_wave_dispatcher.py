@@ -552,10 +552,10 @@ def _host_write_unit(
     targets: list[str] | None = None,
     depends: list[str] | None = None,
     status: str = "worker_ready",
-    metadata: dict[str, str] | None = None,
+    metadata: dict[str, object] | None = None,
 ) -> str:
     unit = f"UNIT-{task}-{index:03d}"
-    fields: dict[str, str | list[str]] = {
+    fields: dict[str, object] = {
         "unit_id": unit,
         "task_id": task,
         "task_set_id": taskset,
@@ -601,6 +601,7 @@ def _host_init_repo(root: Path) -> None:
     assert git("config", "user.name", "Wave Test") == 0
     (root / "README.md").write_text("fixture\n", encoding="utf-8")
     assert git("add", "-A") == git("commit", "-q", "-m", "init") == 0
+    assert git("update-ref", "refs/remotes/origin/main", "HEAD") == 0
 
 
 def test_plan_resolves_canonical_id_and_slug_to_same_validated_units(tmp_path: Path) -> None:
@@ -647,7 +648,7 @@ def test_plan_rejects_duplicate_canonical_aliases(tmp_path: Path) -> None:
     assert "duplicate task set alias" in result.stderr
 
 
-def _host_external(root: Path) -> tuple[dict[str, str], Path, Path]:
+def _host_external(root: Path) -> tuple[dict[str, object], Path, Path]:
     repo = (root / "external").resolve()
     repo.mkdir()
     worktree = repo / ".worktrees/TASK-901"
@@ -670,6 +671,31 @@ def test_plan_uses_complete_structured_external_tuple(tmp_path: Path) -> None:
     assert (unit["repository_path"], unit["worktree_path"], unit["branch"], unit["base_ref"]) == (
         str(repo), str(worktree), "fix/task-901", "origin/main"
     )
+    assert unit["adopt_existing_branch"] is False
+
+
+def test_plan_and_dispatch_payload_preserve_adopt_existing_branch(tmp_path: Path) -> None:
+    metadata, repo, _worktree = _host_external(tmp_path)
+    _host_init_repo(repo)
+    metadata["adopt_existing_branch"] = True
+    _host_write_taskset(tmp_path)
+    _host_write_task(tmp_path, "TASK-901")
+    _host_write_unit(tmp_path, "TASK-901", metadata=metadata)
+
+    result = _host_run(tmp_path, "--taskset", HOST_TASKSET, "--plan", "--json")
+
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout)["waves"][0][0]["adopt_existing_branch"] is True
+    node = _host_node(tmp_path, metadata=metadata)
+    payload = host_dispatcher._dispatch_payload(  # noqa: SLF001
+        tmp_path,
+        node,
+        wave_no=1,
+        args=_host_args(tmp_path),
+        allow_parallel_task_set=False,
+        suffix=None,
+    )
+    assert payload["adopt_existing_branch"] is True
 
 
 @pytest.mark.parametrize("missing", ["repository_path", "worktree_path", "branch", "base_ref"])
@@ -699,6 +725,12 @@ def test_plan_rejects_partial_structured_tuple(tmp_path: Path, missing: str) -> 
 def test_plan_rejects_unsafe_structured_tuple(
     tmp_path: Path, metadata: dict[str, str], message: str
 ) -> None:
+    repository = str((tmp_path / "repository").resolve())
+    outside = str((tmp_path / "outside").resolve())
+    metadata = {
+        key: value.replace("/tmp/repo", repository).replace("/tmp/out", outside)
+        for key, value in metadata.items()
+    }
     _host_write_taskset(tmp_path)
     _host_write_task(tmp_path, "TASK-901")
     _host_write_unit(tmp_path, "TASK-901", metadata=metadata)
@@ -771,7 +803,11 @@ def _host_args(root: Path, mode: str = "cascade") -> argparse.Namespace:
     )
 
 
-def _host_node(root: Path, task: str = "TASK-901", metadata: dict[str, str] | None = None) -> host_dispatcher.UnitNode:
+def _host_node(
+    root: Path,
+    task: str = "TASK-901",
+    metadata: dict[str, object] | None = None,
+) -> host_dispatcher.UnitNode:
     unit = f"UNIT-{task}-001"
     meta: dict[str, object] = {
         "unit_id": unit, "task_id": task, "task_set_id": HOST_TASKSET,
