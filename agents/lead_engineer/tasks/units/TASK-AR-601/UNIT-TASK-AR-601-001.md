@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-HOOK-PORTABILITY-CLEANUP
 initiative_id: INIT-AR-HOOK-PORTABILITY-CLEANUP
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-20T12:56:05+09:00
-updated_at: 2026-07-20T12:56:05+09:00
+updated_at: 2026-07-20T13:09:38+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-20-hook-portability-and-worktree-cleanup.md
 created_by: codex-root
@@ -54,6 +54,10 @@ verification:
   - python scripts/owner_governance_gate.py --allow-empty-owner-docs
 handoff: Report the task and unit IDs, exact hook root cause, changed manifests/modes, test results, independent verifier evidence, final branch status, and any unrelated deferred findings.
 stop_condition: Stop on destructive reset, force-push, unrelated GitHub issue remediation, workflow/secret changes, or any conflict with user-authored uncommitted content.
+verified_at: 2026-07-20T13:09:38+09:00
+verified_by: le-20260720-125746-kst-hookfix
+evidence_refs:
+  - reviews/VERIFY-2026-07-20-unit-task-ar-601-001-20260720130938.json
 ---
 
 # UNIT-TASK-AR-601-001 - Make hook execution portable and close the worktree lifecycle
