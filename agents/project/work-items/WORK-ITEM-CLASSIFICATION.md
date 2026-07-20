@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-19T10:36:48+09:00
-record_count: 374
+generated_at: 2026-07-20T12:56:06+09:00
+record_count: 378
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `374` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `378` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `24` records |
-| Tasksets | pass | `48` records |
-| Tasks | pass | `258` records |
-| Units | pass | `44` records |
+| Initiatives | pass | `25` records |
+| Tasksets | pass | `49` records |
+| Tasks | pass | `259` records |
+| Units | pass | `45` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -413,6 +413,10 @@ record_count: 374
 | 23.1 | Taskset 23.1 | taskset | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | `INIT-AR-AUTO-MERGE-INTEGRITY` | active | `BACKLOG-BOARD.md` | Merge Truth Keeper |
 | 23.1.1 | Task 23.1.1 | task | `TASK-AR-600` | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-600.md` | Make auto_merge execute fail closed when GitHub rejects a merge and preserve success… |
 | 23.1.1.1 | Unit 23.1.1.1 | unit | `UNIT-TASK-AR-600-001` | `TASK-AR-600` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md` | UNIT-TASK-AR-600-001 - Patch auto-merge execution read-back |
+| 24 | Initiative 24 | initiative | `INIT-AR-HOOK-PORTABILITY-CLEANUP` | - | active | `agents/project/initiatives/INIT-AR-HOOK-PORTABILITY-CLEANUP.md` | Hook portability and checkout hygiene |
+| 24.1 | Taskset 24.1 | taskset | `TASKSET-AR-HOOK-PORTABILITY-CLEANUP` | `INIT-AR-HOOK-PORTABILITY-CLEANUP` | active | `BACKLOG-BOARD.md` | Hook Portability Maintainer |
+| 24.1.1 | Task 24.1.1 | task | `TASK-AR-601` | `TASKSET-AR-HOOK-PORTABILITY-CLEANUP` | planned | `agents/lead_engineer/tasks/TASK-AR-601.md` | Replace platform-specific hook commands, enforce executable Git hook metadata, instal… |
+| 24.1.1.1 | Unit 24.1.1.1 | unit | `UNIT-TASK-AR-601-001` | `TASK-AR-601` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-601/UNIT-TASK-AR-601-001.md` | UNIT-TASK-AR-601-001 - Make hook execution portable and close the worktree lifecycle |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

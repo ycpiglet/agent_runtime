@@ -607,8 +607,27 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-AUTO-MERGE-INTEGRITY",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-601",
+      "expires_at": "2026-07-21T12:56:05+09:00",
+      "fulfilled_at": "2026-07-20T12:56:05+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-601.md",
+      "fulfilled_task_id": "TASK-AR-601",
+      "fulfilled_task_uid": "2aa3617a-9d42-4e59-86eb-767dafda2627",
+      "initiative_id": "INIT-AR-HOOK-PORTABILITY-CLEANUP",
+      "kind": "task",
+      "owner_id": "codex-root",
+      "reason": "work registration TASKSET-AR-HOOK-PORTABILITY-CLEANUP",
+      "reservation_group_id": "RES-20260720-125605-3b7049d9",
+      "reservation_id": "RES-20260720-125605-3b7049d9-01",
+      "reserved_at": "2026-07-20T12:56:05+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-HOOK-PORTABILITY-CLEANUP",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-07-19T10:34:25+09:00"
+  "updated_at": "2026-07-20T12:56:05+09:00"
 }

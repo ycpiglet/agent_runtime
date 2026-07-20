@@ -221,6 +221,29 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-20-taskset-ar-hook-portability-cleanup-registration.md",
+          "value": "ab981ad343e2f0b1f38fd07e68d27e17aed7b7cb839bcc4d9a80d94520bb39b7"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "35e9b6132cdeee9adbd5ad833598bb55237e98ce07fee4ad5d927c4ed4c4d9c0"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-20-taskset-ar-hook-portability-cleanup-registration.md",
+      "recorded_at": "2026-07-20T12:56:06+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-HOOK-PORTABILITY-CLEANUP"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "scripts/taskset_dispatcher.py",
           "value": "ac78599e2197c7999eaffc406449034dab76e34f11c1dd41da4f555478499a6b"
         },
@@ -432,5 +455,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-19T10:36:52+09:00"
+  "updated_at": "2026-07-20T12:56:06+09:00"
 }

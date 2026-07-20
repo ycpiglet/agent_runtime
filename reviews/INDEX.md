@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-19T10:36:52+09:00
-record_count: 623
+generated_at: 2026-07-20T12:56:06+09:00
+record_count: 624
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `623` review and evidence records under `reviews/`.
+- Summary: indexed `624` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `623` files |
+| Reviews covered | pass | `624` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -515,6 +515,7 @@ record_count: 623
 | `reviews/REVIEW-2026-06-22-system-health-rsi-diagnosis.md` | `REVIEW-2026-06-22-system-health-rsi-diagnosis` | review | assessed | watch | System-health / RSI diagnosis (2026-06-22) |
 | `reviews/REVIEW-2026-07-19-auto-merge-execution-readback.md` | `REVIEW-2026-07-19-AUTO-MERGE-READBACK` | review | approved | n/a | Auto-merge execution read-back design |
 | `reviews/REVIEW-2026-07-19-taskset-ar-auto-merge-integrity-registration.md` | `REVIEW-2026-07-19-taskset-ar-auto-merge-integrity-registration` | md | record | pass | Merge Truth Keeper Registration |
+| `reviews/REVIEW-2026-07-20-taskset-ar-hook-portability-cleanup-registration.md` | `REVIEW-2026-07-20-taskset-ar-hook-portability-cleanup-registration` | md | record | pass | Hook Portability Maintainer Registration |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
