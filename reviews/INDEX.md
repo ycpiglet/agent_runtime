@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-20T12:56:06+09:00
-record_count: 624
+generated_at: 2026-07-20T13:18:44+09:00
+record_count: 628
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `624` review and evidence records under `reviews/`.
+- Summary: indexed `628` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `624` files |
+| Reviews covered | pass | `628` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -515,6 +515,7 @@ record_count: 624
 | `reviews/REVIEW-2026-06-22-system-health-rsi-diagnosis.md` | `REVIEW-2026-06-22-system-health-rsi-diagnosis` | review | assessed | watch | System-health / RSI diagnosis (2026-06-22) |
 | `reviews/REVIEW-2026-07-19-auto-merge-execution-readback.md` | `REVIEW-2026-07-19-AUTO-MERGE-READBACK` | review | approved | n/a | Auto-merge execution read-back design |
 | `reviews/REVIEW-2026-07-19-taskset-ar-auto-merge-integrity-registration.md` | `REVIEW-2026-07-19-taskset-ar-auto-merge-integrity-registration` | md | record | pass | Merge Truth Keeper Registration |
+| `reviews/REVIEW-2026-07-20-hook-portability-and-worktree-cleanup.md` | `REVIEW-2026-07-20-hook-portability-and-worktree-cleanup` | md | record | pass | Hook Portability and Worktree Cleanup |
 | `reviews/REVIEW-2026-07-20-taskset-ar-hook-portability-cleanup-registration.md` | `REVIEW-2026-07-20-taskset-ar-hook-portability-cleanup-registration` | md | record | pass | Hook Portability Maintainer Registration |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
@@ -586,6 +587,8 @@ record_count: 624
 | `reviews/VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421.json` | `VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421` | json | record | n/a | VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421 |
 | `reviews/VERIFY-2026-06-21-task-ar-593-20260621171220.json` | `VERIFY-2026-06-21-task-ar-593-20260621171220` | json | record | n/a | VERIFY-2026-06-21-task-ar-593-20260621171220 |
 | `reviews/VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000.json` | `VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000` | json | record | n/a | VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000 |
+| `reviews/VERIFY-2026-07-20-unit-task-ar-601-001-20260720130938.json` | `VERIFY-2026-07-20-unit-task-ar-601-001-20260720130938` | json | record | n/a | VERIFY-2026-07-20-unit-task-ar-601-001-20260720130938 |
+| `reviews/VERIFY-2026-07-20-unit-task-ar-601-001-20260720131534.json` | `VERIFY-2026-07-20-unit-task-ar-601-001-20260720131534` | json | record | n/a | VERIFY-2026-07-20-unit-task-ar-601-001-20260720131534 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
@@ -658,6 +661,7 @@ record_count: 624
 | `reviews/W4B-2026-06-20-TASK-AR-591.md` | `W4B-2026-06-20-TASK-AR-591` | md | accepted | n/a | W4B Independent Verification - TASK-AR-591 |
 | `reviews/W4B-2026-06-20-TASK-AR-592.md` | `W4B-2026-06-20-TASK-AR-592` | md | accepted | n/a | W4B Independent Verification - TASK-AR-592 |
 | `reviews/W4B-2026-06-21-TASK-AR-593.md` | `W4B-2026-06-21-TASK-AR-593` | w4b-independent-verification | approved | pass | W4b Independent Verification: TASK-AR-593 |
+| `reviews/W4B-2026-07-20-TASK-AR-601.md` | `W4B-2026-07-20-TASK-AR-601` | md | accepted | pass | W4B Independent Verification - TASK-AR-601 |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.

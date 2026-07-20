@@ -8,6 +8,7 @@ clean output; hook wiring present in both .codex/hooks.json copies.
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -254,6 +255,17 @@ def _session_start_commands(hooks_path: Path) -> list[str]:
     return [hook["command"] for hook in _session_start_hooks(hooks_path)]
 
 
+def _all_hook_commands(hooks_path: Path) -> list[str]:
+    data = json.loads(hooks_path.read_text(encoding="utf-8"))
+    return [
+        hook["command"]
+        for entries in data["hooks"].values()
+        for entry in entries
+        for hook in entry.get("hooks", [])
+        if isinstance(hook, dict) and "command" in hook
+    ]
+
+
 # Worst case the script body waits on two serial network ops, each internally
 # bounded at 10s (update_notify ls-remote + scm_steward subprocess). The outer
 # hook timeout must exceed their sum plus startup, or the runner preempts the
@@ -279,6 +291,21 @@ def test_template_hooks_json_wires_dashboard() -> None:
     )
     commands = _session_start_commands(template_hooks)
     assert any("session_dashboard.py" in cmd for cmd in commands)
+
+
+@pytest.mark.parametrize(
+    "hooks_path",
+    [
+        REPO_ROOT / ".codex" / "hooks.json",
+        REPO_ROOT / "src" / "agent_runtime" / "templates" / "project" / ".codex" / "hooks.json",
+    ],
+)
+def test_codex_hook_commands_are_cross_platform(hooks_path: Path) -> None:
+    commands = _all_hook_commands(hooks_path)
+    assert commands
+    assert all("Python310" not in command for command in commands)
+    assert all(re.search(r"(?:^|\s)[A-Za-z]:[\\/]", command) is None for command in commands)
+    assert all(".cmd" not in command.lower() for command in commands)
 
 
 @pytest.mark.parametrize(

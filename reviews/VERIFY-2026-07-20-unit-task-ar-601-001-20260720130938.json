@@ -1,0 +1,52 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-20-unit-task-ar-601-001-20260720130938",
+  "work_id": "UNIT-TASK-AR-601-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-601/UNIT-TASK-AR-601-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-601",
+  "unit_id": "UNIT-TASK-AR-601-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-20T13:09:38+09:00",
+  "verified_by": "le-20260720-125746-kst-hookfix",
+  "command_count": 4,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_stop_hook_owner_governance.py tests/test_session_dashboard.py tests/test_lock_merge_driver.py tests/test_bootstrap_dev_env.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-20T13:09:38+09:00",
+      "finished_at": "2026-07-20T13:09:41+09:00",
+      "stdout": ".....................................                                    [100%]\n37 passed in 2.88s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/lock_merge_driver.py pre-commit",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-20T13:09:41+09:00",
+      "finished_at": "2026-07-20T13:09:41+09:00",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/bootstrap_dev_env.py",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-20T13:09:41+09:00",
+      "finished_at": "2026-07-20T13:09:42+09:00",
+      "stdout": "bootstrap: ok   python: 3.10.12\nbootstrap: ok   editable install: /home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-601/src/agent_runtime/__init__.py\nbootstrap: ok   hooksPath: .githooks\nbootstrap: WARN push transport: https://github.com/ycpiglet/agent_runtime.git (HTTPS OAuth tokens usually lack the 'workflow' scope; pushes touching .github/workflows/** are rejected) -> run: git remote set-url --push origin git@github.com:ycpiglet/agent_runtime.git\nbootstrap: ok   gh: installed and authenticated\nbootstrap: environment ready\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/owner_governance_gate.py --allow-empty-owner-docs",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-20T13:09:42+09:00",
+      "finished_at": "2026-07-20T13:09:45+09:00",
+      "stdout": "0 reuse=2\n- metric capability.work kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.update_notify kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.session_dashboard kind=script status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=1\n- metric hook.session_dashboard kind=hook status=active lifecycle=keep paths=2 evidence=2 usage=9 reuse=2\n- metric skill.wave_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=7 reuse=2\n- metric skill.merge_integrator kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=15 reuse=2\n- metric skill.independent_verification kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=11 reuse=2\n- metric skill.work_analytics kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=14 reuse=2\n- metric skill.release_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=5 reuse=2\n- metric skill.scm_steward kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=19 reuse=2\nowner-governance: result: scripts/runtime_asset_usage.py --check -> 0\nowner-governance: start: scripts/state_sync_gate.py --check\nstate-sync-gate: pass\nroot=/home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-601\nfindings=0\nblock=0\nwatch=0\nowner-governance: result: scripts/state_sync_gate.py --check -> 0\nowner-governance: start: scripts/automation_rules_gate.py --check\nautomation-rules-gate: pass\nroot=/home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-601\nrules_total=0\nrules_active=0\nrules_executed=0\nrules_invalid=0\nactions=0\nfindings=0\nowner-governance: result: scripts/automation_rules_gate.py --check -> 0\nowner-governance: start: scripts/scheduled_dispatch_gate.py --check\nscheduled-dispatch-gate: pass\nroot=/home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-601\nschedules_total=0\nschedules_active=0\nschedules_invalid=0\ndue=0\ndispatches=0\nreminders=0\nfindings=0\nowner-governance: result: scripts/scheduled_dispatch_gate.py --check -> 0\nowner-governance: start: scripts/release_cadence_trigger.py --check\nrelease-cadence: watch finding=release-cadence:proposal recommended_bump=minor recommended_version=0.7.0\nrelease-cadence: baseline tag=v0.6.0 commits=48 feat=5 fix=7 breaking=0 days=14 (thresholds commits>=40 feat>=5 days>=14)\nrelease-cadence: trigger reasons: commits>=40 (actual 48); feat>=5 (actual 5); days>=14 (actual 14)\nrelease-cadence: current version=0.6.0 source=pyproject.toml\nrelease-cadence: bump targets: pyproject.toml\nrelease-cadence: non-blocking watch; no version bump, tag, push, publish, or release execution\nowner-governance: result: scripts/release_cadence_trigger.py --check -> 0\nowner-governance: start: scripts/conversation_work_audit.py --check\nconversation-work-audit: pass\nroot=/home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-601\nplanning_records=14\nfindings=0 block=0 watch=0\nowner-governance: result: scripts/conversation_work_audit.py --check -> 0\nowner-governance: start: scripts/knowledge_lint_gate.py --check\nknowledge-lint-gate: pass (enforced; changed=11>=10; no block findings)\nowner-governance: result: scripts/knowledge_lint_gate.py --check -> 0\nowner-governance: start: scripts/planning_loop.py gate --trigger hook --action scan\nstatus=pass\nowner-governance: result: scripts/planning_loop.py gate --trigger hook --action scan -> 0\nowner-governance: start: scripts/compound_cadence_gate.py --obligation\ncompound-cadence-gate: watch\nroot=/home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-601\nreviews=303\ncompounds=3\nretros=5\ncompound_retro_total=8\nratio=37.9\nthreshold=20\nwatch=1\n- watch [compound-cadence]: 303 REVIEW-* vs 8 COMPOUND-*/RETRO-* (ratio 37.9, threshold 20); consider compounding lessons into COMPOUND-* or RETRO-* documents\nowner-governance: result: scripts/compound_cadence_gate.py --obligation -> 1\nowner-governance: advisory: compound obligation due (review:compound ratio high) -- not blocking\n",
+      "stderr": ""
+    }
+  ]
+}

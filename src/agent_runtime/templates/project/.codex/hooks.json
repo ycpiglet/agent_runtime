@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "scripts\\update_notify_hook.cmd",
+            "command": "python -m agent_runtime.cli update-notify",
             "timeout": 30
           },
           {
@@ -31,7 +31,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "scripts\\taskset_prompt_hook.cmd"
+            "command": "python scripts/taskset_prompt_hook.py"
           }
         ]
       }
@@ -41,7 +41,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "scripts\\stop_hook_owner_governance.cmd",
+            "command": "python scripts/stop_hook_owner_governance.py",
             "timeout": 120
           }
         ]

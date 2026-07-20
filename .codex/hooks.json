@@ -6,22 +6,22 @@
         "hooks": [
           {
             "type": "command",
-            "command": "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe scripts/session_baseline.py --root . --json",
+            "command": "python scripts/session_baseline.py --root . --json",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe scripts/session_dashboard.py --root .",
+            "command": "python scripts/session_dashboard.py --root .",
             "timeout": 35
           },
           {
             "type": "command",
-            "command": "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe scripts/claim_reaper_hook.py --root .",
+            "command": "python scripts/claim_reaper_hook.py --root .",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe scripts/interrupted_run_detector.py --root .",
+            "command": "python scripts/interrupted_run_detector.py --root .",
             "timeout": 15
           }
         ]
@@ -32,7 +32,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "scripts\\taskset_prompt_hook.cmd"
+            "command": "python scripts/taskset_prompt_hook.py"
           }
         ]
       }
@@ -42,7 +42,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "scripts\\stop_hook_owner_governance.cmd",
+            "command": "python scripts/stop_hook_owner_governance.py",
             "timeout": 120
           }
         ]
@@ -52,7 +52,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "scripts\\stop_hook_dirty_intake.cmd",
+            "command": "python scripts/stop_hook_dirty_intake.py",
             "timeout": 60
           }
         ]
@@ -62,7 +62,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe scripts/stop_hook_closure_gate.py",
+            "command": "python scripts/stop_hook_closure_gate.py",
             "timeout": 30
           }
         ]
@@ -74,7 +74,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe scripts/owner_doc_format_gate.py --manifest owner-docs.yml",
+            "command": "python scripts/owner_doc_format_gate.py --manifest owner-docs.yml",
             "timeout": 20
           }
         ]

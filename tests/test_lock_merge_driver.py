@@ -6,6 +6,7 @@ and a post-merge hook regenerates the authoritative lock. RETRO-2026-06-14 actio
 """
 
 import json
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -112,3 +113,13 @@ def test_committed_pre_commit_hooks_invoke_driver():
         ROOT / "src" / "agent_runtime" / "templates" / "project" / ".githooks" / "pre-commit",
     ):
         assert "lock_merge_driver.py pre-commit" in hook.read_text(encoding="utf-8"), hook
+
+
+def test_committed_git_hooks_are_executable():
+    for hook in (
+        ROOT / ".githooks" / "pre-commit",
+        ROOT / ".githooks" / "post-merge",
+        ROOT / "src" / "agent_runtime" / "templates" / "project" / ".githooks" / "pre-commit",
+        ROOT / "src" / "agent_runtime" / "templates" / "project" / ".githooks" / "post-merge",
+    ):
+        assert hook.stat().st_mode & stat.S_IXUSR, f"Git hook is not executable: {hook}"

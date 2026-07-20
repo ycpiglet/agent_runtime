@@ -1,0 +1,31 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-REVIEW-TASK-AR-601-independent-auditor-closeout",
+  "task_id": "REVIEW-TASK-AR-601-independent-auditor",
+  "task_set_id": "TASKSET-AR-HOOK-PORTABILITY-CLEANUP",
+  "active_scope": "TASKSET-AR-HOOK-PORTABILITY-CLEANUP",
+  "agent_role": "independent-auditor",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "independent-auditor-CLAIM-REVIEW-TASK-AR-601-independent-auditor-closeout",
+  "display_name": "independent-auditor@review",
+  "mode": "review",
+  "status": "released",
+  "status_text": "Independent W4b review accepted TASK-AR-601 closeout",
+  "claimed_at": "2026-07-20T13:18:45+09:00",
+  "last_heartbeat": "2026-07-20T13:18:45+09:00",
+  "updated_at": "2026-07-20T13:18:45+09:00",
+  "released_at": "2026-07-20T13:18:45+09:00",
+  "phase": "verified",
+  "progress_pct": 100,
+  "verified_by": "independent-verifier-20260720-hookfix",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-20-TASK-AR-601.md",
+  "tags": [
+    "review",
+    "additive",
+    "review-trigger:closeout"
+  ],
+  "overlay": true,
+  "parent_task_id": "TASK-AR-601",
+  "parent_task_set_id": "TASKSET-AR-HOOK-PORTABILITY-CLEANUP"
+}
