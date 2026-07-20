@@ -1,7 +1,7 @@
 {
   "installed": {
     "managed_files": {
-      ".codex/hooks.json": "sha256:90f632efc1634338bc23d1bdab4619a51386b46cc664d698b332777d3454ead8",
+      ".codex/hooks.json": "sha256:b582c1c2a24e3f680d9b016114532e215bc7ff58655bd09a3452a9c71cf8ed72",
       ".gitattributes": "sha256:22ec718362af48d401e6717569dfcc89ec3573d553dc3f3530f4db8a1625b79b",
       ".githooks/post-merge": "sha256:b112da8578360cd49b871f518afa9c2ffb9f266c416daa02a8a9b17a84196e39",
       ".githooks/pre-commit": "sha256:9b5b120d9b18f39977021db0b543953267cbfcd60f817cf92edd93812d560457",
@@ -281,7 +281,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.6.0",
-    "template_digest": "sha256:e8921ec3da860a78de9e8c709d367c504db6e70fcac37da5d6c2b449ba649cd2",
+    "template_digest": "sha256:e303f422739535ebb7a45eece111977cee23ed361148cebb951a4043a7f57a17",
     "template_files": 278
   },
   "project": "fixture-host",

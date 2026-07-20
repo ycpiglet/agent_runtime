@@ -51,7 +51,7 @@ def test_codex_hooks_include_session_closeout_guards():
     ]
 
     assert "scripts/session_baseline.py" in text
-    assert "scripts\\stop_hook_dirty_intake.cmd" in commands
+    assert "python scripts/stop_hook_dirty_intake.py" in commands
     assert "scripts/dirty_intake.py" not in text
     assert "scripts/owner_doc_format_gate.py" in text
 
