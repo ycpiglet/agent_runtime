@@ -10,8 +10,35 @@ current_state:
   progress_pct: 100
   status_text: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE closed at improving 70/100; full maturity remains open."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260720-125746-task-ar-601-hookfix
+      display_name: lead_engineer@orchestrator-01
+      agent_role: lead-engineer
+      agent_instance_id: le-20260720-125746-kst-hookfix
+      callsite_id: terminal:wt-task-ar-601:tab-01
+      team_id: agent-runtime-core
+      pane_id: terminal:wt-task-ar-601:tab-01
+      task_id: TASK-AR-601
+      status: claimed
+      phase: wave-claimed
+      progress_pct: 0
+      step_index: 1
+      step_total: 6
+      status_text: "Wave 1 dispatch: UNIT-TASK-AR-601-001"
+      worktree_path: .worktrees/TASK-AR-601
+      branch: codex/unit-task-ar-601-001-wave
+      claim_path: agents/runtime/task_claims/CLAIM-20260720-125746-task-ar-601-hookfix.json
+      handoff_path: agents/runtime/task_claims/CLAIM-20260720-125746-task-ar-601-hookfix.handoff.md
+      last_heartbeat: 2026-07-20T12:57:46+09:00
+  current_teams:
+    - team_id: agent-runtime-core
+      status: active
+      phase: implementation
+      progress_pct: 0
+      step_index: 1
+      step_total: 6
+      status_text: "TASK-AR-601 hook portability cleanup"
+      active_task: TASK-AR-601
 resume:
   active_task: none
   active_task_set: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
