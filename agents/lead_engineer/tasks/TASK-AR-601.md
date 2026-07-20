@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-HOOK-PORTABILITY-CLEANUP
 registered_at: 2026-07-20T12:56:05+09:00
 created_at: 2026-07-20T12:56:05+09:00
-updated_at: 2026-07-20T12:56:05+09:00
+started_at: 2026-07-20T12:57:46+09:00
+updated_at: 2026-07-20T13:24:41+09:00
 title: Repair portable hooks and clean the checkout
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 2
@@ -34,9 +35,18 @@ verification:
   - python -m pytest tests/test_update_notify.py tests/test_stop_hook_owner_governance.py tests/test_session_dashboard.py tests/test_lock_merge_driver.py tests/test_bootstrap_dev_env.py -q
   - python scripts/lock_merge_driver.py pre-commit
   - python scripts/owner_governance_gate.py --allow-empty-owner-docs
-evidence_refs: []
+evidence_refs:
+  - reviews/VERIFY-2026-07-20-task-ar-601-20260720132429.json
 tags:
   - work-cli-created
+verification_status: passed
+verified_at: 2026-07-20T13:24:29+09:00
+verified_by: codex-root
+resolution: done
+completed_at: 2026-07-20T13:24:41+09:00
+closed_by: codex-root
+actual_hours: 0.7
+actual_tokens: 11000
 ---
 
 # TASK-AR-601 - Repair portable hooks and clean the checkout
@@ -63,3 +73,15 @@ tags:
 - `python scripts/owner_governance_gate.py --allow-empty-owner-docs`
 - `python scripts/work.py status`
 - `git status --short --branch`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-20T13:24:41+09:00`
+- Resolution: `done`
+- Actual hours: `0.7`
+- Actual tokens: `11000`
+- Closed by: `codex-root`
+- Evidence:
+  - `reviews/VERIFY-2026-07-20-task-ar-601-20260720132429.json`
+<!-- work-close:end -->

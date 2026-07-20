@@ -9,11 +9,11 @@ task_id: TASK-AR-601
 task_set_id: TASKSET-AR-HOOK-PORTABILITY-CLEANUP
 initiative_id: INIT-AR-HOOK-PORTABILITY-CLEANUP
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-20T12:56:05+09:00
-updated_at: 2026-07-20T13:15:34+09:00
+updated_at: 2026-07-20T13:24:29+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-20-hook-portability-and-worktree-cleanup.md
 created_by: codex-root
@@ -62,6 +62,11 @@ verified_by: le-20260720-125746-kst-hookfix
 evidence_refs:
   - reviews/VERIFY-2026-07-20-unit-task-ar-601-001-20260720130938.json
   - reviews/VERIFY-2026-07-20-unit-task-ar-601-001-20260720131534.json
+resolution: done
+completed_at: 2026-07-20T13:24:29+09:00
+closed_by: codex-root
+actual_hours: 0.6
+actual_tokens: 9000
 ---
 
 # UNIT-TASK-AR-601-001 - Make hook execution portable and close the worktree lifecycle
@@ -127,3 +132,16 @@ Report the task and unit IDs, exact hook root cause, changed manifests/modes, te
 ## Stop Boundary
 
 Stop on destructive reset, force-push, unrelated GitHub issue remediation, workflow/secret changes, or any conflict with user-authored uncommitted content.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-20T13:24:29+09:00`
+- Resolution: `done`
+- Actual hours: `0.6`
+- Actual tokens: `9000`
+- Closed by: `codex-root`
+- Evidence:
+  - `reviews/VERIFY-2026-07-20-unit-task-ar-601-001-20260720130938.json`
+  - `reviews/VERIFY-2026-07-20-unit-task-ar-601-001-20260720131534.json`
+<!-- work-close:end -->

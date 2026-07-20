@@ -1,27 +1,19 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-20T13:18:45+09:00
+updated_at: 2026-07-20T13:24:53+09:00
 current_state:
-  summary: "TASK-AR-601 is repairing cross-platform Codex/Git hook execution and checkout hygiene."
-  status: active
-  task_set_status: active
+  summary: "TASKSET-AR-HOOK-PORTABILITY-CLEANUP is complete; hooks are portable and only the main worktree remains."
+  status: completed
+  task_set_status: completed
   task_set_id: "TASKSET-AR-HOOK-PORTABILITY-CLEANUP"
   step_index: 1
   step_total: 1
-  progress_pct: 90
-  status_text: "TASK-AR-601 W4a/W4b passed and the worker claim is released; serial integration and cleanup are in progress."
+  progress_pct: 100
+  status_text: "TASK-AR-601 passed W4a/W4b, merged through the serial queue, and completed worktree/branch cleanup."
 active_work:
   current_agents: []
-  current_teams:
-    - team_id: agent-runtime-core
-      status: active
-      phase: integration
-      progress_pct: 90
-      step_index: 5
-      step_total: 6
-      status_text: "TASK-AR-601 serial integration and lifecycle cleanup"
-      active_task: TASK-AR-601
+  current_teams: []
 resume:
-  active_task: TASK-AR-601
+  active_task: none
   active_task_set: "TASKSET-AR-HOOK-PORTABILITY-CLEANUP"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:

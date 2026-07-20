@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-20T13:18:44+09:00
-record_count: 628
+generated_at: 2026-07-20T13:25:51+09:00
+record_count: 630
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `628` review and evidence records under `reviews/`.
+- Summary: indexed `630` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `628` files |
+| Reviews covered | pass | `630` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -214,6 +214,7 @@ record_count: 628
 | `reviews/RETRO-2026-06-14-knowledge-stack.md` | `RETRO-2026-06-14-knowledge-stack` | retro | watch | watch | RETRO 2026-06-14 — Agent knowledge stack (#1–#4) |
 | `reviews/RETRO-2026-06-17-self-improvement-cycle.md` | `RETRO-2026-06-17-self-improvement-cycle` | retro | record | n/a | RETRO 2026-06-17 - Self Improvement Cycle |
 | `reviews/RETRO-2026-06-21-business-operating-system.md` | `RETRO-2026-06-21-business-operating-system` | retro | recorded | pass | Business Operating System Retro |
+| `reviews/RETRO-2026-07-20-hook-portability-cleanup.md` | `RETRO-2026-07-20-hook-portability-cleanup` | retro | recorded | pass | Hook Portability and Worktree Cleanup Retro |
 | `reviews/REVIEW-2026-06-08-agent-runtime-after-pass-1.md` | `REVIEW-2026-06-08-agent-runtime-after-pass-1` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-after-pass-1 |
 | `reviews/REVIEW-2026-06-08-agent-runtime-baseline.md` | `REVIEW-2026-06-08-agent-runtime-baseline` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-baseline |
 | `reviews/REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25.md` | `REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25 |
@@ -587,6 +588,7 @@ record_count: 628
 | `reviews/VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421.json` | `VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421` | json | record | n/a | VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421 |
 | `reviews/VERIFY-2026-06-21-task-ar-593-20260621171220.json` | `VERIFY-2026-06-21-task-ar-593-20260621171220` | json | record | n/a | VERIFY-2026-06-21-task-ar-593-20260621171220 |
 | `reviews/VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000.json` | `VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000` | json | record | n/a | VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000 |
+| `reviews/VERIFY-2026-07-20-task-ar-601-20260720132429.json` | `VERIFY-2026-07-20-task-ar-601-20260720132429` | json | record | n/a | VERIFY-2026-07-20-task-ar-601-20260720132429 |
 | `reviews/VERIFY-2026-07-20-unit-task-ar-601-001-20260720130938.json` | `VERIFY-2026-07-20-unit-task-ar-601-001-20260720130938` | json | record | n/a | VERIFY-2026-07-20-unit-task-ar-601-001-20260720130938 |
 | `reviews/VERIFY-2026-07-20-unit-task-ar-601-001-20260720131534.json` | `VERIFY-2026-07-20-unit-task-ar-601-001-20260720131534` | json | record | n/a | VERIFY-2026-07-20-unit-task-ar-601-001-20260720131534 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
