@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-04T03:16:33+09:00
-record_count: 370
+generated_at: 2026-07-19T10:36:48+09:00
+record_count: 374
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `370` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `374` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `23` records |
-| Tasksets | pass | `47` records |
-| Tasks | pass | `257` records |
-| Units | pass | `43` records |
+| Initiatives | pass | `24` records |
+| Tasksets | pass | `48` records |
+| Tasks | pass | `258` records |
+| Units | pass | `44` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -409,6 +409,10 @@ record_count: 370
 | 22.1 | Taskset 22.1 | taskset | `TASKSET-AR-BUSINESS-OPERATING-SYSTEM` | `INIT-AR-BUSINESS-OPERATING-SYSTEM` | complete | `BACKLOG-BOARD.md` | Business Operating System |
 | 22.1.1 | Task 22.1.1 | task | `TASK-AR-593` | `TASKSET-AR-BUSINESS-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-593.md` | Define operations/support and planning/strategy teams alongside finance, marketing, a… |
 | 22.1.1.1 | Unit 22.1.1.1 | unit | `UNIT-TASK-AR-593-001` | `TASK-AR-593` | completed | `agents/lead_engineer/tasks/units/TASK-AR-593/UNIT-TASK-AR-593-001.md` | UNIT-TASK-AR-593-001 - Publish business operating lanes and cycle packet |
+| 23 | Initiative 23 | initiative | `INIT-AR-AUTO-MERGE-INTEGRITY` | - | active | `agents/project/initiatives/INIT-AR-AUTO-MERGE-INTEGRITY.md` | Auto-merge execution integrity |
+| 23.1 | Taskset 23.1 | taskset | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | `INIT-AR-AUTO-MERGE-INTEGRITY` | active | `BACKLOG-BOARD.md` | Merge Truth Keeper |
+| 23.1.1 | Task 23.1.1 | task | `TASK-AR-600` | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-600.md` | Make auto_merge execute fail closed when GitHub rejects a merge and preserve success… |
+| 23.1.1.1 | Unit 23.1.1.1 | unit | `UNIT-TASK-AR-600-001` | `TASK-AR-600` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md` | UNIT-TASK-AR-600-001 - Patch auto-merge execution read-back |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

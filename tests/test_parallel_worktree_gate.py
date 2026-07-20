@@ -5,6 +5,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
+from scripts.parallel_worktree_gate import ClaimRecord, _continuity_findings
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "parallel_worktree_gate.py"
@@ -56,6 +60,76 @@ def _write_claim(root: Path, name: str, **overrides: object) -> Path:
     path = claim_dir / f"{name}.json"
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return path
+
+
+def _active_claim(root: Path) -> ClaimRecord:
+    return ClaimRecord(path=root / "claim.json", payload={"status": "claimed"})
+
+
+def _write_status(root: Path, relative_path: str, text: str) -> Path:
+    path = root / relative_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+    return path
+
+
+@pytest.mark.parametrize(
+    "marker",
+    ["Handoff Checklist", "Next Steps", "다음 세션", "다음 단계", "인수인계"],
+)
+@pytest.mark.parametrize(
+    "relative_path",
+    ["STATUS.md", "agents/lead_engineer/STATUS.md"],
+)
+def test_continuity_accepts_status_candidate_resume_markers(
+    tmp_path: Path, relative_path: str, marker: str
+):
+    _write_status(
+        tmp_path,
+        relative_path,
+        f"# STATUS\n\n## {marker}\n",
+    )
+
+    assert _continuity_findings(tmp_path, [_active_claim(tmp_path)]) == []
+
+
+def test_continuity_prefers_root_status_over_valid_host_fallback(tmp_path: Path):
+    _write_status(tmp_path, "STATUS.md", "# STATUS\n\n## Current Work\n")
+    _write_status(
+        tmp_path,
+        "agents/lead_engineer/STATUS.md",
+        "# STATUS\n\n## 다음 세션\n",
+    )
+
+    findings = _continuity_findings(tmp_path, [_active_claim(tmp_path)])
+
+    assert len(findings) == 1
+    assert findings[0].startswith("STATUS.md: continuity:status-handoff-missing:")
+    assert "agents/lead_engineer/STATUS.md" not in findings[0]
+
+
+def test_continuity_missing_status_lists_both_candidate_paths(tmp_path: Path):
+    findings = _continuity_findings(tmp_path, [_active_claim(tmp_path)])
+
+    assert len(findings) == 1
+    assert "continuity:status-missing" in findings[0]
+    assert "STATUS.md" in findings[0]
+    assert "agents/lead_engineer/STATUS.md" in findings[0]
+
+
+def test_continuity_missing_marker_names_selected_host_path(tmp_path: Path):
+    _write_status(
+        tmp_path,
+        "agents/lead_engineer/STATUS.md",
+        "# STATUS\n\n## Current Work\n",
+    )
+
+    findings = _continuity_findings(tmp_path, [_active_claim(tmp_path)])
+
+    assert len(findings) == 1
+    assert findings[0].startswith(
+        "agents/lead_engineer/STATUS.md: continuity:status-handoff-missing:"
+    )
 
 
 def test_gate_passes_when_no_parallel_task_claims_exist(tmp_path: Path):

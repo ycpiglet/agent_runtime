@@ -71,6 +71,17 @@ WORKER_BRANCH_RE = re.compile(r"^(?:codex|claude)/", re.IGNORECASE)
 TASK_ID_RE = re.compile(r"(TASK-[A-Z]+-\d+)", re.IGNORECASE)
 SPIKE_MARKER_NAMES = ("SPIKE", "SPIKE.md")
 AHEAD_BASE_REFS = ("origin/main", "origin/master", "main", "master")
+STATUS_CANDIDATES = (
+    Path("STATUS.md"),
+    Path("agents/lead_engineer/STATUS.md"),
+)
+HANDOFF_MARKERS = (
+    "Handoff Checklist",
+    "Next Steps",
+    "다음 세션",
+    "다음 단계",
+    "인수인계",
+)
 CLAIM_LOSS_INCIDENT = (
     "untracked claims are erased by a concurrent session's reset+clean "
     "(2026-06-12 incident: CLAIM-...-task-ar-500-25db lost, recreated as -66ed)"
@@ -360,16 +371,25 @@ def _validate_claims(root: Path, records: Iterable[ClaimRecord], primary_root: P
 def _continuity_findings(root: Path, active_claims: Iterable[ClaimRecord]) -> list[str]:
     findings: list[str] = []
     active = list(active_claims)
-    if not active and not (root / "STATUS.md").exists():
+    status = next(
+        (root / relative for relative in STATUS_CANDIDATES if (root / relative).is_file()),
+        None,
+    )
+    if not active and status is None:
         return findings
-    status = root / "STATUS.md"
-    if not status.exists():
-        findings.append("STATUS.md: continuity:status-missing: STATUS.md must exist for session resume")
+    if status is None:
+        candidates = ", ".join(path.as_posix() for path in STATUS_CANDIDATES)
+        findings.append(
+            f"{candidates}: continuity:status-missing: one status candidate must exist for session resume"
+        )
     else:
         text = status.read_text(encoding="utf-8")
-        if "Handoff Checklist" not in text and "Next Steps" not in text:
+        if not any(marker in text for marker in HANDOFF_MARKERS):
+            relative = _rel(root, status)
+            markers = ", ".join(HANDOFF_MARKERS)
             findings.append(
-                "STATUS.md: continuity:status-handoff-missing: STATUS.md must include Handoff Checklist or Next Steps"
+                f"{relative}: continuity:status-handoff-missing: "
+                f"status must include one resume marker: {markers}"
             )
 
     for record in active:

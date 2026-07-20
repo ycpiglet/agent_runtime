@@ -62,6 +62,12 @@
       "order": 529
     },
     {
+      "task_set_id": "TASKSET-AR-AUTO-MERGE-INTEGRITY",
+      "display_name": "Merge Truth Keeper",
+      "summary": "Close downstream BUG-014 with deterministic remote read-back.",
+      "order": 600
+    },
+    {
       "task_set_id": "TASKSET-AR-SELF-IMPROVEMENT-CADENCE",
       "display_name": "Self Improvement Cadence",
       "summary": "Detect low-frequency roles and runtime assets, run review/retro/meeting/seminar/compound/doc-steward/scribe cycles from evidence, and publish measurable maturity signals.",
