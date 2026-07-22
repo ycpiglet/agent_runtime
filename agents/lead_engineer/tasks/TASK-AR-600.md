@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-AUTO-MERGE-INTEGRITY
 registered_at: 2026-07-19T10:34:25+09:00
 created_at: 2026-07-19T10:34:25+09:00
-updated_at: 2026-07-22T18:05:29+09:00
+updated_at: 2026-07-22T18:10:37+09:00
 title: Confirm remote merge state before success
 status: planned
 priority: P1
@@ -36,13 +36,14 @@ verification:
 verification_status: passed
 tags:
   - work-cli-created
-verified_at: 2026-07-22T18:05:29+09:00
-verified_by: codex-root-task-ar-600-rework
+verified_at: 2026-07-22T18:10:37+09:00
+verified_by: codex-root-task-ar-600-rework2
 evidence_refs:
   - reviews/VERIFY-2026-07-22-task-ar-600-20260722175324.json
   - reviews/VERIFY-2026-07-22-task-ar-600-20260722175452.json
   - reviews/VERIFY-2026-07-22-task-ar-600-20260722175618.json
   - reviews/VERIFY-2026-07-22-task-ar-600-20260722180529.json
+  - reviews/VERIFY-2026-07-22-task-ar-600-20260722181037.json
 ---
 
 # TASK-AR-600 - Confirm remote merge state before success
