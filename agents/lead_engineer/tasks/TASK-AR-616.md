@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW
 registered_at: 2026-07-23T05:01:18+09:00
 created_at: 2026-07-23T05:01:18+09:00
-updated_at: 2026-07-23T05:14:06+09:00
+updated_at: 2026-07-23T05:29:52+09:00
 started_at: 2026-07-23T05:14:06+09:00
 title: Extend the exact fixture HEAD recovery window
 status: in_progress
@@ -41,6 +41,11 @@ tags:
   - release-auto
   - test-fixture
   - repeated-failure
+verification_status: passed
+verified_at: 2026-07-23T05:29:52+09:00
+verified_by: codex-root-task-ar-616
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-task-ar-616-20260723052952.json
 ---
 
 # TASK-AR-616 - Extend the exact fixture HEAD recovery window
