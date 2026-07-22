@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 initiative_id: INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T17:45:00+09:00
+updated_at: 2026-07-22T21:23:49+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
 created_by: codex-root-planner
@@ -23,7 +23,7 @@ model_tier: worker_standard
 escalation_triggers:
   - data_integrity
   - ambiguity
-context: GitHub #293 shows taskset start writes in_progress into a canonical record that uses localized workflow values. The dispatcher may normalize for comparisons but must preserve the canonical persistence vocabulary.
+context: GitHub
 inputs:
   - reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
   - scripts/taskset_dispatcher.py
@@ -39,8 +39,12 @@ acceptance:
 verification:
   - python -m pytest tests/test_taskset_dispatcher.py -q
   - python scripts/regen_host_lock_if_needed.py --check
-handoff: Report before/after frontmatter, normalized payload behavior, focused tests, and issue #293 evidence.
+handoff: Report before/after frontmatter, normalized payload behavior, focused tests, and issue
 stop_condition: Stop before changing unrelated status consumers or schema vocabulary.
+verified_at: 2026-07-22T21:23:49+09:00
+verified_by: codex-root-task-ar-604
+evidence_refs:
+  - reviews/VERIFY-2026-07-22-unit-task-ar-604-001-20260722212349.json
 ---
 
 # UNIT-TASK-AR-604-001 - Separate task status normalization from persistence

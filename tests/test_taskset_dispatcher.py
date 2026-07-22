@@ -1321,6 +1321,47 @@ def test_start_accepts_preexisting_worktree_after_persisting_claim(
     assert calls == ["claim"]
 
 
+@pytest.mark.parametrize(
+    ("current_status", "persisted_status"),
+    [
+        ("대기", "진행 중"),
+        ("planned", "in_progress"),
+    ],
+)
+def test_start_persists_status_in_the_task_record_vocabulary(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    current_status: str,
+    persisted_status: str,
+) -> None:
+    payload = _prepare_start(monkeypatch, tmp_path)
+    payload["next_task_status"] = current_status
+    _write_task(
+        tmp_path,
+        "TASK-905",
+        "TASKSET-DYNAMIC-START",
+        status=current_status,
+    )
+    worktree = Path(str(payload["worktree_path"]))
+    worktree.mkdir(parents=True)
+    (worktree / ".git").write_text("gitdir: existing\n", encoding="utf-8")
+
+    def fake_run(command: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
+        if command[0] == "claim":
+            return _claim_result(tmp_path, persist=True)
+        raise AssertionError("git must not run for a pre-existing valid worktree")
+
+    monkeypatch.setattr(dispatcher.subprocess, "run", fake_run)
+
+    assert dispatcher.cmd_start(_start_args(tmp_path)) == 0
+    task_text = Path(str(payload["next_task_path"])).read_text(encoding="utf-8")
+    assert f"status: {persisted_status}\n" in task_text
+    emitted = json.loads(capsys.readouterr().out)
+    assert emitted["task_status"] == "in_progress"
+    assert emitted["task_status_updated"] is True
+
+
 def test_plan_keeps_machine_readable_claim_response_for_non_json_outer_cli(tmp_path: Path) -> None:
     _write_task(tmp_path, "TASK-AR-901", "TASKSET-AR-QUALITY-LOOP")
     args = argparse.Namespace(
