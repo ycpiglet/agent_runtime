@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 initiative_id: INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-23T07:17:12+09:00
+updated_at: 2026-07-23T07:23:26+09:00
 started_at: 2026-07-23T07:17:12+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
@@ -45,6 +45,10 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Report mixed-fixture counts, duplicate oracle, generated view impact, and GitHub issue 300 evidence.
 stop_condition: Stop before moving canonical records or changing hierarchy semantics beyond the kind filter.
+verified_at: 2026-07-23T07:23:26+09:00
+verified_by: codex-root-task-ar-609
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-unit-task-ar-609-001-20260723072326.json
 ---
 
 # UNIT-TASK-AR-609-001 - Filter classifier initiative collection by record kind

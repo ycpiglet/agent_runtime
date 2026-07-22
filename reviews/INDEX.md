@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T07:08:37+09:00
-record_count: 793
+generated_at: 2026-07-23T07:23:33+09:00
+record_count: 796
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `793` review and evidence records under `reviews/`.
+- Summary: indexed `796` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `793` files |
+| Reviews covered | pass | `796` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -543,6 +543,7 @@ record_count: 793
 | `reviews/REVIEW-2026-07-23-self-eval-query-integrity-plan.md` | `REVIEW-2026-07-23-self-eval-query-integrity-plan` | md | record | needs-fix | Self-Eval Query Integrity Recovery Plan |
 | `reviews/REVIEW-2026-07-23-task-ar-607-dispatch-t3-replan.md` | `REVIEW-2026-07-23-task-ar-607-dispatch-t3-replan` | md | record | pass | TASK-AR-607 Dispatch T3 Replan |
 | `reviews/REVIEW-2026-07-23-task-ar-608-dispatch-t3-replan.md` | `REVIEW-2026-07-23-task-ar-608-dispatch-t3-replan` | md | record | pass | TASK-AR-608 Dispatch T3 Replan |
+| `reviews/REVIEW-2026-07-23-task-ar-609-dispatch-t3-replan.md` | `REVIEW-2026-07-23-task-ar-609-dispatch-t3-replan` | md | record | pass | TASK-AR-609 Dispatch T3 Replan |
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-auto-fixture-head-recovery-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-auto-fixture-head-recovery-registration` | md | record | pass | Release-Auto Fixture HEAD Recovery Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-auto-fixture-recovery-window-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-auto-fixture-recovery-window-registration` | md | record | pass | Release-Auto Fixture Recovery Window Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-cadence-query-recovery-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-cadence-query-recovery-registration` | md | record | pass | Release Cadence Query Recovery Registration |
@@ -706,6 +707,7 @@ record_count: 793
 | `reviews/VERIFY-2026-07-23-task-ar-608-20260723063647.json` | `VERIFY-2026-07-23-task-ar-608-20260723063647` | json | record | n/a | VERIFY-2026-07-23-task-ar-608-20260723063647 |
 | `reviews/VERIFY-2026-07-23-task-ar-608-20260723064403.json` | `VERIFY-2026-07-23-task-ar-608-20260723064403` | json | record | n/a | VERIFY-2026-07-23-task-ar-608-20260723064403 |
 | `reviews/VERIFY-2026-07-23-task-ar-608-20260723064958.json` | `VERIFY-2026-07-23-task-ar-608-20260723064958` | json | record | n/a | VERIFY-2026-07-23-task-ar-608-20260723064958 |
+| `reviews/VERIFY-2026-07-23-task-ar-609-20260723072306.json` | `VERIFY-2026-07-23-task-ar-609-20260723072306` | json | record | n/a | VERIFY-2026-07-23-task-ar-609-20260723072306 |
 | `reviews/VERIFY-2026-07-23-task-ar-613-20260723014533.json` | `VERIFY-2026-07-23-task-ar-613-20260723014533` | json | record | n/a | VERIFY-2026-07-23-task-ar-613-20260723014533 |
 | `reviews/VERIFY-2026-07-23-task-ar-613-20260723022608.json` | `VERIFY-2026-07-23-task-ar-613-20260723022608` | json | record | n/a | VERIFY-2026-07-23-task-ar-613-20260723022608 |
 | `reviews/VERIFY-2026-07-23-task-ar-614-20260723043608.json` | `VERIFY-2026-07-23-task-ar-614-20260723043608` | json | record | n/a | VERIFY-2026-07-23-task-ar-614-20260723043608 |
@@ -715,6 +717,7 @@ record_count: 793
 | `reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723063712.json` | `VERIFY-2026-07-23-unit-task-ar-608-001-20260723063712` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-608-001-20260723063712 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723064414.json` | `VERIFY-2026-07-23-unit-task-ar-608-001-20260723064414` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-608-001-20260723064414 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723065008.json` | `VERIFY-2026-07-23-unit-task-ar-608-001-20260723065008` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-608-001-20260723065008 |
+| `reviews/VERIFY-2026-07-23-unit-task-ar-609-001-20260723072326.json` | `VERIFY-2026-07-23-unit-task-ar-609-001-20260723072326` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-609-001-20260723072326 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-613-001-20260723015000.json` | `VERIFY-2026-07-23-unit-task-ar-613-001-20260723015000` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-613-001-20260723015000 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-613-001-20260723023209.json` | `VERIFY-2026-07-23-unit-task-ar-613-001-20260723023209` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-613-001-20260723023209 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-614-001-20260723043928.json` | `VERIFY-2026-07-23-unit-task-ar-614-001-20260723043928` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-614-001-20260723043928 |
