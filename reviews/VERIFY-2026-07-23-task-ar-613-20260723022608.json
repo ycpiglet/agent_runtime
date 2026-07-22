@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-23-task-ar-613-20260723022608",
+  "work_id": "TASK-AR-613",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-613.md",
+  "kind": "task",
+  "task_id": "TASK-AR-613",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-23T02:26:08+09:00",
+  "verified_by": "codex-root-task-ar-613",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_release_cadence_trigger.py tests/test_release_auto_noncritical.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T02:26:08+09:00",
+      "finished_at": "2026-07-23T02:32:02+09:00",
+      "stdout": "........................................................................ [ 96%]\n...                                                                      [100%]\n75 passed in 351.99s (0:05:51)\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/regen_host_lock_if_needed.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T02:32:02+09:00",
+      "finished_at": "2026-07-23T02:32:03+09:00",
+      "stdout": "OK: C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-613\\tests\\fixtures\\host\\agent_runtime.lock.json is up to date.\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/taskset_work_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T02:32:03+09:00",
+      "finished_at": "2026-07-23T02:32:03+09:00",
+      "stdout": "taskset-work-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-613\nfindings=0\n",
+      "stderr": ""
+    }
+  ]
+}

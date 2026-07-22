@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY
 registered_at: 2026-07-23T01:16:34+09:00
 created_at: 2026-07-23T01:16:34+09:00
-updated_at: 2026-07-23T01:45:33+09:00
+updated_at: 2026-07-23T02:26:08+09:00
 started_at: 2026-07-23T01:25:41+09:00
 title: Recover transient non-zero cadence queries without false not-triggered
 status: planned
@@ -41,10 +41,11 @@ tags:
   - release-cadence
   - release-auto
 verification_status: passed
-verified_at: 2026-07-23T01:45:33+09:00
+verified_at: 2026-07-23T02:26:08+09:00
 verified_by: codex-root-task-ar-613
 evidence_refs:
   - reviews/VERIFY-2026-07-23-task-ar-613-20260723014533.json
+  - reviews/VERIFY-2026-07-23-task-ar-613-20260723022608.json
 ---
 
 # TASK-AR-613 - Recover transient non-zero cadence queries without false not-triggered
