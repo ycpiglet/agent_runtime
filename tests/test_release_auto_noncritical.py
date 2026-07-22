@@ -7,13 +7,13 @@ throwaway temp git repo, so the host repository is never touched.
 
 from __future__ import annotations
 
+import importlib.util
 import os
 import re
 import subprocess
 import sys
 import time
 import types
-import importlib.util
 from pathlib import Path
 
 import pytest

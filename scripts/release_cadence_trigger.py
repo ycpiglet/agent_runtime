@@ -36,6 +36,11 @@ CONVENTIONAL_RE = re.compile(r"^(?P<type>[a-z]+)(?:\([^)]*\))?!?:")
 # footer line anywhere in the commit message body.
 BREAKING_SUBJECT_RE = re.compile(r"^[a-z]+(?:\([^)]*\))?!:")
 BREAKING_FOOTER_RE = re.compile(r"(?m)^BREAKING[ -]CHANGE:")
+_URL_USERINFO_RE = re.compile(r"(?i)([a-z][a-z0-9+.-]*://)[^/@\s]+@")
+_SENSITIVE_ASSIGNMENT_RE = re.compile(
+    r"(?i)\b(password|passwd|token|access[_-]?token|secret|authorization)"
+    r"\s*[:=]\s*[^\s]+"
+)
 
 
 def _ascii(text: str) -> str:
@@ -46,15 +51,39 @@ def _ascii(text: str) -> str:
 # pass. A query that exhausts its retries is an evaluation failure, not a git
 # answer: callers must be able to tell "no data" apart from "could not ask".
 # Module-level because this is a single-threaded CLI/import-time helper.
-_QUERY_ERRORS: list[dict[str, str]] = []
+_QUERY_ERRORS: list[dict[str, Any]] = []
+
+
+def _expected_no_tag_result(args: tuple[str, ...], result: Any) -> bool:
+    """Return true only for git-describe's deterministic no-tag response."""
+    if args != ("describe", "--tags", "--abbrev=0"):
+        return False
+    diagnostic = f"{result.stderr or ''}\n{result.stdout or ''}".lower()
+    return any(
+        marker in diagnostic
+        for marker in (
+            "no names found",
+            "no tags can describe",
+            "no annotated tags can describe",
+        )
+    )
+
+
+def _sanitize_git_diagnostic(value: str) -> str:
+    value = _URL_USERINFO_RE.sub(r"\1[REDACTED]@", value)
+    value = _SENSITIVE_ASSIGNMENT_RE.sub(r"\1=[REDACTED]", value)
+    return " | ".join(value.strip().splitlines())[:500] or "no diagnostic output"
 
 
 def _git(root: Path, *args: str) -> str | None:
     # Read-only, idempotent git queries. Under loaded CI runners the spawn
     # itself can fail transiently (OSError) or git can be killed by a signal
-    # (negative returncode); both are retried briefly. A normal non-zero exit
-    # is a deterministic git answer (e.g. no tag yet) and is not retried.
+    # (negative returncode); both are retried briefly. Positive non-zero exits
+    # are also retried unless git-describe explicitly reports the deterministic
+    # no-tag condition. Treating every non-zero as an empty answer can silently
+    # collapse a transient runner failure into "not-triggered".
     last_error = ""
+    last_returncode: int | None = None
     for attempt in range(3):
         if attempt:
             time.sleep(0.2 * attempt)
@@ -72,12 +101,24 @@ def _git(root: Path, *args: str) -> str | None:
             last_error = f"{type(exc).__name__}: {exc}"
             continue
         if result.returncode < 0:
+            last_returncode = result.returncode
             last_error = f"killed by signal {-result.returncode}"
             continue
         if result.returncode != 0:
-            return None
+            if _expected_no_tag_result(tuple(args), result):
+                return None
+            last_returncode = result.returncode
+            diagnostic = _sanitize_git_diagnostic(result.stderr or result.stdout or "")
+            last_error = f"exit {result.returncode}: {diagnostic}"
+            continue
         return result.stdout
-    _QUERY_ERRORS.append({"command": "git " + " ".join(args), "error": last_error})
+    _QUERY_ERRORS.append(
+        {
+            "command": "git " + " ".join(args),
+            "error": last_error,
+            "returncode": last_returncode,
+        }
+    )
     return None
 
 

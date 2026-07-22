@@ -454,7 +454,10 @@ def test_exhausted_unexpected_nonzero_git_failure_is_error(tmp_path: Path, monke
             cmd,
             returncode=128,
             stdout="",
-            stderr="fatal: transient runner resource failure",
+            stderr=(
+                "fatal: transient runner resource failure "
+                "token=top-secret https://runner:password@example.invalid/repo.git"
+            ),
         )
 
     monkeypatch.setattr(module.subprocess, "run", _nonzero)
@@ -468,6 +471,9 @@ def test_exhausted_unexpected_nonzero_git_failure_is_error(tmp_path: Path, monke
     error = report["git_query_errors"][0]
     assert error["returncode"] == 128
     assert "transient runner resource failure" in error["error"]
+    assert "top-secret" not in error["error"]
+    assert "password" not in error["error"]
+    assert "[REDACTED]" in error["error"]
 
 
 def test_no_baseline_tag_is_still_a_quiet_pass(tmp_path: Path) -> None:
@@ -475,6 +481,28 @@ def test_no_baseline_tag_is_still_a_quiet_pass(tmp_path: Path) -> None:
     module = _load_module()
     report = module.build_report(repo)
 
+    assert report["status"] == "pass"
+    assert report["reason"] == "no-baseline-tag"
+    assert "git_query_errors" not in report
+
+
+def test_expected_no_tag_result_is_not_retried(tmp_path: Path, monkeypatch) -> None:
+    module = _load_module()
+    calls: list[list[str]] = []
+
+    def _no_tags(cmd, **kwargs):
+        calls.append(list(cmd))
+        return subprocess.CompletedProcess(
+            cmd,
+            returncode=128,
+            stdout="",
+            stderr="fatal: No names found, cannot describe anything.",
+        )
+
+    monkeypatch.setattr(module.subprocess, "run", _no_tags)
+    report = module.build_report(tmp_path)
+
+    assert len(calls) == 1
     assert report["status"] == "pass"
     assert report["reason"] == "no-baseline-tag"
     assert "git_query_errors" not in report
