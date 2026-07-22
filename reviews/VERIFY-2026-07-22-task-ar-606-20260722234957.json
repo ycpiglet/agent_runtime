@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-22-task-ar-606-20260722234957",
+  "work_id": "TASK-AR-606",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-606.md",
+  "kind": "task",
+  "task_id": "TASK-AR-606",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-22T23:49:57+09:00",
+  "verified_by": "codex-root-task-ar-606",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_lock_merge_driver.py tests/test_bootstrap_dev_env.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-22T23:49:57+09:00",
+      "finished_at": "2026-07-22T23:50:03+09:00",
+      "stdout": "....s.......s.............                                               [100%]\n24 passed, 2 skipped in 4.63s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/regen_host_lock_if_needed.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-22T23:50:03+09:00",
+      "finished_at": "2026-07-22T23:50:03+09:00",
+      "stdout": "OK: C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-606\\tests\\fixtures\\host\\agent_runtime.lock.json is up to date.\n",
+      "stderr": ""
+    },
+    {
+      "command": "git ls-files -s .githooks/pre-commit src/agent_runtime/templates/project/.githooks/pre-commit",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-22T23:50:03+09:00",
+      "finished_at": "2026-07-22T23:50:03+09:00",
+      "stdout": "100755 c07feb35ee84258ef6ecfee7575b1f697f932e7d 0\t.githooks/pre-commit\n100755 acfc236075ab53871326e76b93a683a72cb15161 0\tsrc/agent_runtime/templates/project/.githooks/pre-commit\n",
+      "stderr": ""
+    }
+  ]
+}

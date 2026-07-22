@@ -6,9 +6,14 @@ and a post-merge hook regenerates the authoritative lock. RETRO-2026-06-14 actio
 """
 
 import json
+import inspect
+import os
+import stat
 import subprocess
 import sys
 from pathlib import Path
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -59,14 +64,159 @@ def test_regenerate_restores_stale_lock(tmp_path):
 
 def test_install_sets_driver_and_hookspath(tmp_path):
     subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
-    assert lmd.install(tmp_path) == 0
-    assert lmd.install(tmp_path) == 0  # idempotent
+    assert lmd.install(tmp_path, posix=False) == 0
+    assert lmd.install(tmp_path, posix=False) == 0  # idempotent
 
     def _cfg(key):
         return subprocess.run(["git", "config", "--get", key], cwd=tmp_path, capture_output=True, text=True).stdout.strip()
 
     assert _cfg(f"merge.{lmd.DRIVER_NAME}.driver") == "true"
     assert _cfg("core.hooksPath") == ".githooks"
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX execute bits are not represented by Windows chmod")
+def test_install_repairs_pre_commit_executable_mode(tmp_path):
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    hook = tmp_path / ".githooks" / "pre-commit"
+    hook.parent.mkdir()
+    hook.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    hook.chmod(0o644)
+
+    assert lmd.install(tmp_path, posix=True) == 0
+    assert stat.S_IMODE(hook.stat().st_mode) == 0o755
+
+    subprocess.run(
+        ["git", "config", "user.email", "hook-test@example.invalid"],
+        cwd=tmp_path,
+        check=True,
+    )
+    subprocess.run(["git", "config", "user.name", "Hook Test"], cwd=tmp_path, check=True)
+    marker = tmp_path / "hook-ran"
+    hook.write_text(f"#!/bin/sh\nprintf ran > '{marker.as_posix()}'\n", encoding="utf-8")
+    hook.chmod(0o644)
+    assert lmd.install(tmp_path, posix=True) == 0
+    assert stat.S_IMODE(hook.stat().st_mode) == 0o755
+    subprocess.run(["git", "commit", "--allow-empty", "-m", "hook probe"], cwd=tmp_path, check=True)
+    assert marker.read_text(encoding="utf-8") == "ran"
+
+
+def test_install_rejects_missing_posix_hook_before_configuring(tmp_path):
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+
+    assert lmd.install(tmp_path, posix=True) == 1
+    configured = subprocess.run(
+        ["git", "config", "--get", "core.hooksPath"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert configured.returncode != 0
+
+
+def test_install_rejects_non_regular_posix_hook_before_configuring(tmp_path):
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    (tmp_path / ".githooks" / "pre-commit").mkdir(parents=True)
+
+    assert lmd.install(tmp_path, posix=True) == 1
+    configured = subprocess.run(
+        ["git", "config", "--get", "core.hooksPath"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert configured.returncode != 0
+
+
+def test_executable_repair_is_noop_on_non_posix(tmp_path):
+    hook = tmp_path / ".githooks" / "pre-commit"
+    hook.parent.mkdir()
+    hook.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    before = hook.stat().st_mode
+
+    assert lmd.repair_pre_commit_executable(tmp_path, posix=False) is False
+    assert hook.stat().st_mode == before
+
+
+def test_executable_repair_refuses_non_regular_hook(tmp_path):
+    hook = tmp_path / ".githooks" / "pre-commit"
+    hook.mkdir(parents=True)
+
+    assert lmd.repair_pre_commit_executable(tmp_path, posix=True) is False
+    assert lmd.is_pre_commit_executable(tmp_path, posix=True) is False
+
+
+def test_executable_repair_refuses_linked_hooks_directory(tmp_path):
+    repo = tmp_path / "repo"
+    outside = tmp_path / "outside"
+    repo.mkdir()
+    outside.mkdir()
+    hook = outside / "pre-commit"
+    hook.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    before = hook.stat().st_mode
+    linked = repo / ".githooks"
+    if os.name == "nt":
+        subprocess.run(
+            ["cmd", "/c", "mklink", "/J", str(linked), str(outside)],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    else:
+        linked.symlink_to(outside, target_is_directory=True)
+
+    assert lmd.repair_pre_commit_executable(repo, posix=True) is False
+    assert lmd.is_pre_commit_executable(repo, posix=True) is False
+    assert hook.stat().st_mode == before
+
+
+def test_executable_repair_refuses_multi_link_hook(tmp_path):
+    repo = tmp_path / "repo"
+    hooks = repo / ".githooks"
+    hooks.mkdir(parents=True)
+    outside = tmp_path / "outside-hook"
+    outside.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    hook = hooks / "pre-commit"
+    os.link(outside, hook)
+    before = outside.stat().st_mode
+    assert hook.stat().st_nlink > 1
+
+    assert lmd.repair_pre_commit_executable(repo, posix=True) is False
+    assert lmd.is_pre_commit_executable(repo, posix=True) is False
+    assert outside.stat().st_mode == before
+
+
+def test_posix_hook_open_requests_nonblocking_mode():
+    source = inspect.getsource(lmd._open_pre_commit_fd)
+    assert "O_NONBLOCK" in source
+
+
+@pytest.mark.skipif(
+    os.name == "nt" or not hasattr(os, "mkfifo"),
+    reason="requires a POSIX FIFO",
+)
+def test_executable_repair_rejects_fifo_without_blocking(tmp_path):
+    repo = tmp_path / "repo"
+    hooks = repo / ".githooks"
+    hooks.mkdir(parents=True)
+    os.mkfifo(hooks / "pre-commit")
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(ROOT / "scripts") + os.pathsep + env.get("PYTHONPATH", "")
+    code = (
+        "from pathlib import Path; import lock_merge_driver as lmd; "
+        f"print(lmd.repair_pre_commit_executable(Path({str(repo)!r}), posix=True))"
+    )
+
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        cwd=ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=2,
+        check=True,
+    )
+
+    assert result.stdout.strip() == "False"
 
 
 def test_committed_post_merge_hook_invokes_driver():
@@ -112,3 +262,19 @@ def test_committed_pre_commit_hooks_invoke_driver():
         ROOT / "src" / "agent_runtime" / "templates" / "project" / ".githooks" / "pre-commit",
     ):
         assert "lock_merge_driver.py pre-commit" in hook.read_text(encoding="utf-8"), hook
+
+
+def test_committed_pre_commit_hooks_are_tracked_executable():
+    paths = (
+        ".githooks/pre-commit",
+        "src/agent_runtime/templates/project/.githooks/pre-commit",
+    )
+    result = subprocess.run(
+        ["git", "ls-files", "-s", *paths],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    modes = {line.split(maxsplit=1)[0] for line in result.stdout.splitlines()}
+    assert modes == {"100755"}
