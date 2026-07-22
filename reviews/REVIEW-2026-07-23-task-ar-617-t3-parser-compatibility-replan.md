@@ -42,9 +42,9 @@ loss occurs during `_frontmatter` re-emission rather than fixture setup.
 ## Required Compatibility Surface
 
 - `scripts/work.py` emits unsafe strings as deterministic JSON double-quoted
-  scalars with Unicode preserved.
-- `scripts/backlog_board.py::parse_scalar` decodes only valid JSON
-  double-quoted strings and otherwise retains current compatibility behavior.
+  scalars carrying a reserved work-scalar marker, with Unicode preserved.
+- `scripts/backlog_board.py::parse_scalar` decodes only valid marker-bearing
+  JSON strings and otherwise retains current compatibility behavior.
 - `parse_header_block` uses the same scalar decoder for block-list items so
   scalar and list values have one round-trip contract.
 - The generated-host parser mirror remains byte-identical and the host lock is
