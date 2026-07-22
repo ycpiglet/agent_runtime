@@ -17,7 +17,7 @@ updated_at: 2026-07-22T18:26:18+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-pr-303-ci-baseline-schema-recovery.md
 created_by: codex-root-planner
-summary: Fold the legacy failure link into canonical evidence refs
+summary: Normalize legacy closeout evidence metadata
 horizon: unit
 model_tier: worker_standard
 escalation_triggers:
@@ -29,19 +29,29 @@ inputs:
   - agents/lead_engineer/tasks/TASK-AR-594.md
 target_files:
   - agents/lead_engineer/tasks/TASK-AR-594.md
-scope: Normalize only the legacy evidence-reference field. Do not modify TASK-AR-594 implementation, verification payloads, or the global schema.
+  - agents/lead_engineer/tasks/TASK-AR-595.md
+  - agents/lead_engineer/tasks/TASK-AR-596.md
+  - agents/lead_engineer/tasks/TASK-AR-597.md
+  - agents/lead_engineer/tasks/TASK-AR-598.md
+  - agents/lead_engineer/tasks/TASK-AR-601.md
+  - agents/lead_engineer/tasks/units/TASK-AR-596/UNIT-TASK-AR-596-001.md
+  - agents/lead_engineer/tasks/units/TASK-AR-597/UNIT-TASK-AR-597-001.md
+  - agents/lead_engineer/tasks/units/TASK-AR-598/UNIT-TASK-AR-598-001.md
+scope: Normalize only legacy closeout evidence metadata in the declared records. Do not modify implementation, verification payloads, referenced evidence, or the global schema.
 acceptance:
   - The canonical record links all three TASK-AR-594 verification evidence files.
-  - No unknown frontmatter field remains.
+  - All review evidence paths and closeout commit/status values remain discoverable.
+  - No unknown frontmatter field remains in the declared records.
   - The CI failure is locally unreproducible after the change.
 verification:
   - python scripts/taskset_work_gate.py --check
+  - python scripts/rbac_write_gate.py --check
   - python scripts/owner_governance_gate.py --allow-empty-owner-docs
 handoff: Report the original CI finding, preserved failed evidence path, local gate results, and PR rerun outcome.
 stop_condition: Stop before changing the global work-item schema or deleting any verification evidence.
 ---
 
-# UNIT-TASK-AR-610-001 - Fold the legacy failure link into canonical evidence refs
+# UNIT-TASK-AR-610-001 - Normalize legacy closeout evidence metadata
 
 ## Context
 
@@ -55,26 +65,36 @@ PR #303 CI reproduced the same unknown-field failure on Python 3.10, 3.11, and 3
 ## Target Files
 
 - agents/lead_engineer/tasks/TASK-AR-594.md
+- agents/lead_engineer/tasks/TASK-AR-595.md
+- agents/lead_engineer/tasks/TASK-AR-596.md
+- agents/lead_engineer/tasks/TASK-AR-597.md
+- agents/lead_engineer/tasks/TASK-AR-598.md
+- agents/lead_engineer/tasks/TASK-AR-601.md
+- agents/lead_engineer/tasks/units/TASK-AR-596/UNIT-TASK-AR-596-001.md
+- agents/lead_engineer/tasks/units/TASK-AR-597/UNIT-TASK-AR-597-001.md
+- agents/lead_engineer/tasks/units/TASK-AR-598/UNIT-TASK-AR-598-001.md
 
 ## Scope
 
-Normalize only the legacy evidence-reference field. Do not modify TASK-AR-594 implementation, verification payloads, or the global schema.
+Normalize only legacy closeout evidence metadata in the declared records. Do not modify implementation, verification payloads, referenced evidence, or the global schema.
 
 ## Steps
 
 1. Confirm the unknown-field failure against the PR head.
-2. Move the failed verification path into canonical evidence_refs without deleting the evidence file.
-3. Run taskset work and Owner governance gates.
+2. Move review evidence into canonical evidence_refs and preserve commit/status values in Markdown.
+3. Run taskset work, RBAC write, and Owner governance gates.
 
 ## Acceptance Criteria
 
 - The canonical record links all three TASK-AR-594 verification evidence files.
-- No unknown frontmatter field remains.
+- All review evidence paths and closeout commit/status values remain discoverable.
+- No unknown frontmatter field remains in the declared records.
 - The CI failure is locally unreproducible after the change.
 
 ## Verification
 
 - `python scripts/taskset_work_gate.py --check`
+- `python scripts/rbac_write_gate.py --check`
 - `python scripts/owner_governance_gate.py --allow-empty-owner-docs`
 
 ## Handoff
