@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 registered_at: 2026-07-22T17:45:00+09:00
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-23T07:23:06+09:00
+updated_at: 2026-07-23T07:31:37+09:00
 started_at: 2026-07-23T07:17:12+09:00
 title: Classify initiative records by canonical kind
 status: in_progress
@@ -39,10 +39,11 @@ tags:
   - classifier
   - work-store
 verification_status: passed
-verified_at: 2026-07-23T07:23:06+09:00
+verified_at: 2026-07-23T07:31:37+09:00
 verified_by: codex-root-task-ar-609
 evidence_refs:
   - reviews/VERIFY-2026-07-23-task-ar-609-20260723072306.json
+  - reviews/VERIFY-2026-07-23-task-ar-609-20260723073137.json
 ---
 
 # TASK-AR-609 - Classify initiative records by canonical kind
