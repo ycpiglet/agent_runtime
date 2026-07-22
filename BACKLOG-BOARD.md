@@ -88,7 +88,7 @@ completed_task_set_count: 48
 
 - Flow: Update the canonical real-backlog taskset expectation for all newly registered tasksets and prove the full package suite remains green.
 - Progress: `0/1` done; `1` open or active.
-- WIP: active `1/3`; oldest `0.0h`; stale `0`.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-611` | INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-611/UNIT-TASK-AR-611-001.md | planned | Action | P0 | Critical | XS | 0.5h/2500tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Make the real-backlog classification test recognize every taskset registered by the J… |
