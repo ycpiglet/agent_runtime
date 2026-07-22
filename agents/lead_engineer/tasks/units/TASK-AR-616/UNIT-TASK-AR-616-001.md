@@ -9,11 +9,12 @@ task_id: TASK-AR-616
 task_set_id: TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW
 initiative_id: INIT-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: in_progress
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-23T05:01:18+09:00
-updated_at: 2026-07-23T05:01:18+09:00
+updated_at: 2026-07-23T05:36:47+09:00
+started_at: 2026-07-23T05:14:06+09:00
 origin_type: ci_failure
 origin_ref: reviews/REVIEW-2026-07-23-release-auto-fixture-recovery-window-plan.md
 created_by: codex-root-planner
@@ -46,6 +47,10 @@ verification:
   - python scripts/taskset_work_gate.py --check
 handoff: Report the CI recurrence, failure-first fourth-attempt case, capped delay schedule, exact-classifier parity, real-commit delta, full regressions, and independent W4b.
 stop_condition: Stop before broadening the retry classifier, retrying ambiguous mutations, changing product Git operations, or weakening CI/release gates.
+verified_at: 2026-07-23T05:36:47+09:00
+verified_by: codex-root-task-ar-616
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-unit-task-ar-616-001-20260723053647.json
 ---
 
 # UNIT-TASK-AR-616-001 - Harden the bounded fixture commit recovery window

@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-23T05:04:00+09:00
+generated_at: 2026-07-23T06:10:41+09:00
 record_count: 438
 ---
 
@@ -475,8 +475,8 @@ record_count: 438
 | 32.1.1.1 | Unit 32.1.1.1 | unit | `UNIT-TASK-AR-615-001` | `TASK-AR-615` | completed | `agents/lead_engineer/tasks/units/TASK-AR-615/UNIT-TASK-AR-615-001.md` | UNIT-TASK-AR-615-001 - Bound retry for transient release-auto fixture commits |
 | 33 | Initiative 33 | initiative | `INIT-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW` | - | active | `agents/project/initiatives/INIT-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW.md` | Release-Auto Fixture Recovery Window |
 | 33.1 | Taskset 33.1 | taskset | `TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW` | `INIT-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW` | active | `BACKLOG-BOARD.md` | Release-Auto Fixture Recovery Window |
-| 33.1.1 | Task 33.1.1 | task | `TASK-AR-616` | `TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW` | planned | `agents/lead_engineer/tasks/TASK-AR-616.md` | Resolve the reopened GitHub issue 320 by recovering when three consecutive recognized… |
-| 33.1.1.1 | Unit 33.1.1.1 | unit | `UNIT-TASK-AR-616-001` | `TASK-AR-616` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-616/UNIT-TASK-AR-616-001.md` | UNIT-TASK-AR-616-001 - Harden the bounded fixture commit recovery window |
+| 33.1.1 | Task 33.1.1 | task | `TASK-AR-616` | `TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW` | in_progress | `agents/lead_engineer/tasks/TASK-AR-616.md` | Resolve the reopened GitHub issue 320 by recovering when three consecutive recognized… |
+| 33.1.1.1 | Unit 33.1.1.1 | unit | `UNIT-TASK-AR-616-001` | `TASK-AR-616` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-616/UNIT-TASK-AR-616-001.md` | UNIT-TASK-AR-616-001 - Harden the bounded fixture commit recovery window |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

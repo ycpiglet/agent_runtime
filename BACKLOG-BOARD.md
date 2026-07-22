@@ -74,10 +74,10 @@ completed_task_set_count: 54
 
 - Flow: Extend the bounded wait for an already-recognized fixture-only Git transient without broadening mutation retries.
 - Progress: `0/1` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-616` | INIT-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-616/UNIT-TASK-AR-616-001.md | planned | Action | P0 | Critical | Low | 1h/5000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Resolve the reopened GitHub issue 320 by recovering when three consecutive recognized… |
+| `TASK-AR-616` | INIT-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-616/UNIT-TASK-AR-616-001.md | in_progress | Action | P0 | Critical | Low | 1h/5000tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Resolve the reopened GitHub issue 320 by recovering when three consecutive recognized… |
 
 ## Archived Task Sets
 
