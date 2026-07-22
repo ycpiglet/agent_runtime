@@ -1,0 +1,34 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-22-unit-task-ar-603-001-20260722202039",
+  "work_id": "UNIT-TASK-AR-603-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-603",
+  "unit_id": "UNIT-TASK-AR-603-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-22T20:20:39+09:00",
+  "verified_by": "codex-root-task-ar-603",
+  "command_count": 2,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_task_identity.py tests/test_taskset_dispatcher.py tests/test_conversation_work_audit.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-22T20:20:39+09:00",
+      "finished_at": "2026-07-22T20:21:10+09:00",
+      "stdout": "........................................................................ [ 73%]\n..........................                                               [100%]\n98 passed in 30.64s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/regen_host_lock_if_needed.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-22T20:21:10+09:00",
+      "finished_at": "2026-07-22T20:21:11+09:00",
+      "stdout": "OK: C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-603\\tests\\fixtures\\host\\agent_runtime.lock.json is up to date.\n",
+      "stderr": ""
+    }
+  ]
+}
