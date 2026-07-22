@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from scripts import backlog_board
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "work.py"
@@ -313,3 +315,36 @@ def test_work_new_blocks_missing_unit_required_fields_without_partial_files(tmp_
     assert result.returncode == 1
     assert "input:tasks[1].units[1]:missing:context" in result.stderr
     assert not (tmp_path / "agents").exists()
+
+
+def test_work_new_round_trips_hash_and_quote_bearing_frontmatter_values(tmp_path: Path) -> None:
+    payload = _payload(include_units=True)
+    task_summary = 'Preserve issue #167 with both \'single\' and "double" quotes.'
+    unit_context = 'Keep issue #168 with both \'single\' and "double" quotes.'
+    acceptance = [
+        "Preserve PR #167 and Owner's note.",
+        'Preserve PR #168 and the "reviewed" label.',
+    ]
+    payload["tasks"][0]["summary"] = task_summary  # type: ignore[index]
+    payload["tasks"][0]["units"][0]["context"] = unit_context  # type: ignore[index]
+    payload["tasks"][0]["units"][0]["acceptance"] = acceptance  # type: ignore[index]
+    input_path = _write_input(tmp_path, payload)
+
+    result = _run(tmp_path, input_path)
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    task_path = tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md"
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-901"
+        / "UNIT-TASK-AR-901-001.md"
+    )
+    task_meta, _ = backlog_board.parse_frontmatter(task_path.read_text(encoding="utf-8"))
+    unit_meta, _ = backlog_board.parse_frontmatter(unit_path.read_text(encoding="utf-8"))
+    assert task_meta["summary"] == task_summary
+    assert unit_meta["context"] == unit_context
+    assert unit_meta["acceptance"] == acceptance
