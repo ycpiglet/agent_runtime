@@ -23,6 +23,7 @@ TASKS_DIR = ROOT / "agents" / "lead_engineer" / "tasks"
 DEFAULT_OUTPUT = ROOT / "BACKLOG-BOARD.md"
 ARCHIVE_INDEX_OUTPUT = ROOT / "ARCHIVE-INDEX.md"
 TASK_SET_REGISTRY = Path("agents/project/work-items/TASKSET-DEFINITIONS.json")
+ENCODED_WORK_SCALAR_PREFIX = "\x1eagent-runtime-work-scalar-v1:"
 TASK_SET_REGISTRY_SCHEMA = "agent-runtime-taskset-definitions/v1"
 
 DISPLAY_REPLACEMENTS = {
@@ -498,10 +499,25 @@ def strip_comment(line: str) -> str:
     return line
 
 
+def decode_encoded_work_scalar(value: str) -> str | None:
+    if len(value) < 2 or value[0] != '"' or value[-1] != '"':
+        return None
+    try:
+        decoded = json.loads(value)
+    except (json.JSONDecodeError, TypeError):
+        return None
+    if not isinstance(decoded, str) or not decoded.startswith(ENCODED_WORK_SCALAR_PREFIX):
+        return None
+    return decoded[len(ENCODED_WORK_SCALAR_PREFIX) :]
+
+
 def parse_scalar(value: str) -> object:
     value = value.strip()
     if not value:
         return ""
+    decoded = decode_encoded_work_scalar(value)
+    if decoded is not None:
+        return decoded
     if value.startswith("[") and value.endswith("]"):
         inner = value[1:-1].strip()
         if not inner:
@@ -552,7 +568,10 @@ def parse_header_block(header_lines: list[str]) -> dict[str, object]:
         if not line.strip():
             continue
         if line.startswith("  - ") and current_list:
-            item = line[4:].strip().strip("'\"")
+            raw_item = line[4:].strip()
+            item = decode_encoded_work_scalar(raw_item)
+            if item is None:
+                item = raw_item.strip("'\"")
             value = meta.setdefault(current_list, [])
             if isinstance(value, list):
                 value.append(item)

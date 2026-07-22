@@ -250,9 +250,10 @@ def test_work_close_preserves_quoted_hash_metadata(tmp_path: Path) -> None:
     unit_path = _write_unit(tmp_path)
     _write_passed_evidence(tmp_path)
     expected = 'Close issue #167 with both \'single\' and "double" quotes.'
+    encoded = json.dumps(backlog_board.ENCODED_WORK_SCALAR_PREFIX + expected)
     text = unit_path.read_text(encoding="utf-8").replace(
         'context: "Close a verified unit."',
-        'context: "Close issue #167 with both \'single\' and \\"double\\" quotes."',
+        f"context: {encoded}",
     )
     unit_path.write_text(text, encoding="utf-8")
 

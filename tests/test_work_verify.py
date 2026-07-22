@@ -181,6 +181,8 @@ def test_work_verify_returns_failure_and_records_failed_evidence(tmp_path: Path)
     payload = json.loads(result.stdout[result.stdout.index("{") :])
     evidence_payload = json.loads((tmp_path / payload["evidence"]).read_text(encoding="utf-8"))
     assert evidence_payload["status"] == "failed"
+    assert evidence_payload["commands"][0]["returncode"] == 7
+    assert _frontmatter(unit_path)["verification_status"] == "failed"
 
 
 def test_work_verify_preserves_quoted_hash_scalar_and_list_values(tmp_path: Path) -> None:
@@ -215,8 +217,6 @@ def test_work_verify_preserves_quoted_hash_scalar_and_list_values(tmp_path: Path
     after, _ = backlog_board.parse_frontmatter(unit_path.read_text(encoding="utf-8"))
     assert after["context"] == expected
     assert after["acceptance"] == [expected]
-    assert evidence_payload["commands"][0]["returncode"] == 7
-    assert _frontmatter(unit_path)["verification_status"] == "failed"
 
 
 def test_work_verify_blocks_unit_without_commands(tmp_path: Path) -> None:

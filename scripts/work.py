@@ -375,17 +375,36 @@ def _has_text_value(value: Any) -> bool:
     return bool(_text_lines(value))
 
 
+def _frontmatter_scalar(value: Any) -> str:
+    text = str(value)
+    unsafe = (
+        "#" in text
+        or "\r" in text
+        or "\n" in text
+        or text != text.strip()
+        or (text.startswith("[") and text.endswith("]"))
+        or text.startswith(("'", '"'))
+        or text.endswith(("'", '"'))
+    )
+    if not unsafe:
+        return text
+    return json.dumps(
+        backlog_board.ENCODED_WORK_SCALAR_PREFIX + text,
+        ensure_ascii=False,
+    )
+
+
 def _frontmatter(meta: dict[str, Any]) -> str:
     lines = ["---"]
     for key, value in meta.items():
         if isinstance(value, list):
             lines.append(f"{key}:")
             for item in value:
-                lines.append(f"  - {item}")
+                lines.append(f"  - {_frontmatter_scalar(item)}")
         elif isinstance(value, bool):
             lines.append(f"{key}: {'true' if value else 'false'}")
         elif value is not None and str(value) != "":
-            lines.append(f"{key}: {value}")
+            lines.append(f"{key}: {_frontmatter_scalar(value)}")
     lines.append("---")
     return "\n".join(lines)
 

@@ -325,9 +325,11 @@ def test_work_new_round_trips_hash_and_quote_bearing_frontmatter_values(tmp_path
         "Preserve PR #167 and Owner's note.",
         'Preserve PR #168 and the "reviewed" label.',
     ]
+    bracketed_summary = "[planned, done]"
     payload["tasks"][0]["summary"] = task_summary  # type: ignore[index]
     payload["tasks"][0]["units"][0]["context"] = unit_context  # type: ignore[index]
     payload["tasks"][0]["units"][0]["acceptance"] = acceptance  # type: ignore[index]
+    payload["tasks"][1]["summary"] = bracketed_summary  # type: ignore[index]
     input_path = _write_input(tmp_path, payload)
 
     result = _run(tmp_path, input_path)
@@ -345,6 +347,12 @@ def test_work_new_round_trips_hash_and_quote_bearing_frontmatter_values(tmp_path
     )
     task_meta, _ = backlog_board.parse_frontmatter(task_path.read_text(encoding="utf-8"))
     unit_meta, _ = backlog_board.parse_frontmatter(unit_path.read_text(encoding="utf-8"))
+    second_meta, _ = backlog_board.parse_frontmatter(
+        (tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-902.md").read_text(
+            encoding="utf-8"
+        )
+    )
     assert task_meta["summary"] == task_summary
     assert unit_meta["context"] == unit_context
     assert unit_meta["acceptance"] == acceptance
+    assert second_meta["summary"] == bracketed_summary
