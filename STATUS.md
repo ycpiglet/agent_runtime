@@ -1,5 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-22 - PR #303 merged; release-impact remediation resumes at TASK-AR-603
+
+- Completed: PR #303 merged at `cc5a832956bcb50c5bcd62c34f3641a9f6d002e0`, post-merge `main` CI run `29913917494` passed on Python 3.10/3.11/3.12, and GitHub #291 is closed.
+- W6 closeout: TASK-AR-600, TASK-AR-610, and TASK-AR-611 plus their units are completed; the merged task worktree and local branch were removed after ancestry and cleanliness checks.
+- Active taskset: `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION`; next worker-ready item is `TASK-AR-603` for GitHub #299.
+- Remaining sequence: TASK-AR-603 through TASK-AR-609, then release-only TASK-AR-602 for v0.7.0.
+
 ## 2026-07-22 - TASK-AR-611 active; PR #303 package-test recovery
 
 - Active: claim `CLAIM-20260722-184910-task-ar-611-c34b` runs `TASK-AR-611` in `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY`.

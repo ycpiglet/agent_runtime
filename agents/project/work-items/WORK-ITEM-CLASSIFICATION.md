@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-22T18:48:39+09:00
+generated_at: 2026-07-22T20:03:08+09:00
 record_count: 418
 ---
 
@@ -426,9 +426,9 @@ record_count: 418
 | 23.1.7 | Task 23.1.7 | task | `TASK-AR-602` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | planned | `agents/lead_engineer/tasks/TASK-AR-602.md` | Resolve GitHub #280 after every intake unit is merged by refreshing current-state rec… |
 | 23.1.7.1 | Unit 23.1.7.1 | unit | `UNIT-TASK-AR-602-001` | `TASK-AR-602` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md` | UNIT-TASK-AR-602-001 - Close state and publish v0.7.0 |
 | 24 | Initiative 24 | initiative | `INIT-AR-AUTO-MERGE-INTEGRITY` | - | active | `agents/project/initiatives/INIT-AR-AUTO-MERGE-INTEGRITY.md` | Auto-merge execution integrity |
-| 24.1 | Taskset 24.1 | taskset | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | `INIT-AR-AUTO-MERGE-INTEGRITY` | active | `BACKLOG-BOARD.md` | Merge Truth Keeper |
-| 24.1.1 | Task 24.1.1 | task | `TASK-AR-600` | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-600.md` | Make auto_merge execute fail closed when GitHub rejects a merge and preserve success… |
-| 24.1.1.1 | Unit 24.1.1.1 | unit | `UNIT-TASK-AR-600-001` | `TASK-AR-600` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md` | UNIT-TASK-AR-600-001 - Patch auto-merge execution read-back |
+| 24.1 | Taskset 24.1 | taskset | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | `INIT-AR-AUTO-MERGE-INTEGRITY` | complete | `BACKLOG-BOARD.md` | Merge Truth Keeper |
+| 24.1.1 | Task 24.1.1 | task | `TASK-AR-600` | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | completed | `agents/lead_engineer/tasks/TASK-AR-600.md` | Make auto_merge execute fail closed when GitHub rejects a merge and preserve success… |
+| 24.1.1.1 | Unit 24.1.1.1 | unit | `UNIT-TASK-AR-600-001` | `TASK-AR-600` | completed | `agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md` | UNIT-TASK-AR-600-001 - Patch auto-merge execution read-back |
 | 25 | Initiative 25 | initiative | `INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | - | active | `agents/project/initiatives/INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY.md` | Role Routing Closeout Reliability |
 | 25.1 | Taskset 25.1 | taskset | `TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | `INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | complete | `BACKLOG-BOARD.md` | Role Routing Closeout Reliability |
 | 25.1.1 | Task 25.1.1 | task | `TASK-AR-601` | `TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | completed | `agents/lead_engineer/tasks/TASK-AR-601.md` | Ensure role_routing overlay claims carry required lifecycle artifacts and releasing a… |
@@ -450,13 +450,13 @@ record_count: 418
 | 26.1.7 | Task 26.1.7 | task | `TASK-AR-609` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-609.md` | Close GitHub #300 by preventing taskset records from being duplicated into the initia… |
 | 26.1.7.1 | Unit 26.1.7.1 | unit | `UNIT-TASK-AR-609-001` | `TASK-AR-609` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-609/UNIT-TASK-AR-609-001.md` | UNIT-TASK-AR-609-001 - Filter classifier initiative collection by record kind |
 | 27 | Initiative 27 | initiative | `INIT-AR-PR303-CI-SCHEMA-RECOVERY` | - | active | `agents/project/initiatives/INIT-AR-PR303-CI-SCHEMA-RECOVERY.md` | PR 303 CI Schema Recovery |
-| 27.1 | Taskset 27.1 | taskset | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | `INIT-AR-PR303-CI-SCHEMA-RECOVERY` | active | `BACKLOG-BOARD.md` | CI Schema Recovery |
-| 27.1.1 | Task 27.1.1 | task | `TASK-AR-610` | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | planned | `agents/lead_engineer/tasks/TASK-AR-610.md` | Make the existing TASK-AR-594 record satisfy the canonical work-item schema while pre… |
-| 27.1.1.1 | Unit 27.1.1.1 | unit | `UNIT-TASK-AR-610-001` | `TASK-AR-610` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-610/UNIT-TASK-AR-610-001.md` | UNIT-TASK-AR-610-001 - Normalize legacy closeout evidence metadata |
+| 27.1 | Taskset 27.1 | taskset | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | `INIT-AR-PR303-CI-SCHEMA-RECOVERY` | complete | `BACKLOG-BOARD.md` | CI Schema Recovery |
+| 27.1.1 | Task 27.1.1 | task | `TASK-AR-610` | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | completed | `agents/lead_engineer/tasks/TASK-AR-610.md` | Make the existing TASK-AR-594 record satisfy the canonical work-item schema while pre… |
+| 27.1.1.1 | Unit 27.1.1.1 | unit | `UNIT-TASK-AR-610-001` | `TASK-AR-610` | completed | `agents/lead_engineer/tasks/units/TASK-AR-610/UNIT-TASK-AR-610-001.md` | UNIT-TASK-AR-610-001 - Normalize legacy closeout evidence metadata |
 | 28 | Initiative 28 | initiative | `INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY` | - | active | `agents/project/initiatives/INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY.md` | Backlog Taskset Test Recovery |
-| 28.1 | Taskset 28.1 | taskset | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | `INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY` | active | `BACKLOG-BOARD.md` | Backlog Taskset Test Recovery |
-| 28.1.1 | Task 28.1.1 | task | `TASK-AR-611` | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | planned | `agents/lead_engineer/tasks/TASK-AR-611.md` | Make the real-backlog classification test recognize every taskset registered by the J… |
-| 28.1.1.1 | Unit 28.1.1.1 | unit | `UNIT-TASK-AR-611-001` | `TASK-AR-611` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-611/UNIT-TASK-AR-611-001.md` | UNIT-TASK-AR-611-001 - Add newly registered tasksets to the exact-set regression test |
+| 28.1 | Taskset 28.1 | taskset | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | `INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY` | complete | `BACKLOG-BOARD.md` | Backlog Taskset Test Recovery |
+| 28.1.1 | Task 28.1.1 | task | `TASK-AR-611` | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | completed | `agents/lead_engineer/tasks/TASK-AR-611.md` | Make the real-backlog classification test recognize every taskset registered by the J… |
+| 28.1.1.1 | Unit 28.1.1.1 | unit | `UNIT-TASK-AR-611-001` | `TASK-AR-611` | completed | `agents/lead_engineer/tasks/units/TASK-AR-611/UNIT-TASK-AR-611-001.md` | UNIT-TASK-AR-611-001 - Add newly registered tasksets to the exact-set regression test |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

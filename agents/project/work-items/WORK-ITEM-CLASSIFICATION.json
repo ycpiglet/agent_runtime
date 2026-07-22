@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-22T18:48:39+09:00",
+  "generated_at": "2026-07-22T20:03:08+09:00",
   "record_count": 418,
   "finding_count": 0,
   "findings": [],
@@ -4271,7 +4271,7 @@
       "title": "Merge Truth Keeper",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-AUTO-MERGE-INTEGRITY",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-600",
@@ -4282,7 +4282,7 @@
       "title": "Make auto_merge execute fail closed when GitHub rejects a merge and preserve success…",
       "path": "agents/lead_engineer/tasks/TASK-AR-600.md",
       "parent_id": "TASKSET-AR-AUTO-MERGE-INTEGRITY",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-600-001",
@@ -4293,7 +4293,7 @@
       "title": "UNIT-TASK-AR-600-001 - Patch auto-merge execution read-back",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md",
       "parent_id": "TASK-AR-600",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "initiative:INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
@@ -4535,7 +4535,7 @@
       "title": "CI Schema Recovery",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-PR303-CI-SCHEMA-RECOVERY",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-610",
@@ -4546,7 +4546,7 @@
       "title": "Make the existing TASK-AR-594 record satisfy the canonical work-item schema while pre…",
       "path": "agents/lead_engineer/tasks/TASK-AR-610.md",
       "parent_id": "TASKSET-AR-PR303-CI-SCHEMA-RECOVERY",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-610-001",
@@ -4557,7 +4557,7 @@
       "title": "UNIT-TASK-AR-610-001 - Normalize legacy closeout evidence metadata",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-610/UNIT-TASK-AR-610-001.md",
       "parent_id": "TASK-AR-610",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "initiative:INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY",
@@ -4579,7 +4579,7 @@
       "title": "Backlog Taskset Test Recovery",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-611",
@@ -4590,7 +4590,7 @@
       "title": "Make the real-backlog classification test recognize every taskset registered by the J…",
       "path": "agents/lead_engineer/tasks/TASK-AR-611.md",
       "parent_id": "TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-611-001",
@@ -4601,7 +4601,7 @@
       "title": "UNIT-TASK-AR-611-001 - Add newly registered tasksets to the exact-set regression test",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-611/UNIT-TASK-AR-611-001.md",
       "parent_id": "TASK-AR-611",
-      "status": "worker_ready"
+      "status": "completed"
     }
   ]
 }

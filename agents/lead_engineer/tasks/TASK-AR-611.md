@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY
 registered_at: 2026-07-22T18:48:38+09:00
 created_at: 2026-07-22T18:48:38+09:00
-updated_at: 2026-07-22T19:33:55+09:00
+updated_at: 2026-07-22T20:03:05+09:00
 title: Synchronize the real-backlog taskset expectation
-status: planned
+status: completed
+started_at: 2026-07-22T18:49:10+09:00
 priority: P0
 difficulty: XS
 est_hours: 0.5
@@ -42,6 +43,11 @@ verified_at: 2026-07-22T19:33:55+09:00
 verified_by: codex-root-task-ar-611
 evidence_refs:
   - reviews/VERIFY-2026-07-22-task-ar-611-20260722193355.json
+resolution: done
+completed_at: 2026-07-22T20:03:05+09:00
+closed_by: codex-root
+actual_hours: 1.1
+actual_tokens: 15000
 ---
 
 # TASK-AR-611 - Synchronize the real-backlog taskset expectation
@@ -66,3 +72,15 @@ evidence_refs:
 - `python -m pytest tests -q`
 - `python scripts/taskset_work_gate.py --check`
 - `python scripts/rbac_write_gate.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-22T20:03:05+09:00`
+- Resolution: `done`
+- Actual hours: `1.1`
+- Actual tokens: `15000`
+- Closed by: `codex-root`
+- Evidence:
+  - `reviews/VERIFY-2026-07-22-task-ar-611-20260722193355.json`
+<!-- work-close:end -->

@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-PR303-CI-SCHEMA-RECOVERY
 registered_at: 2026-07-22T18:26:18+09:00
 created_at: 2026-07-22T18:26:18+09:00
-updated_at: 2026-07-22T18:36:40+09:00
+updated_at: 2026-07-22T20:03:03+09:00
 title: Normalize legacy closeout evidence metadata
-status: planned
+status: completed
+started_at: 2026-07-22T18:27:20+09:00
 priority: P0
 difficulty: S
 est_hours: 0.5
@@ -42,6 +43,11 @@ verified_at: 2026-07-22T18:36:40+09:00
 verified_by: codex-root-task-ar-610
 evidence_refs:
   - reviews/VERIFY-2026-07-22-task-ar-610-20260722183640.json
+resolution: done
+completed_at: 2026-07-22T20:03:03+09:00
+closed_by: codex-root
+actual_hours: 0.25
+actual_tokens: 5000
 ---
 
 # TASK-AR-610 - Normalize legacy failed verification evidence references
@@ -66,3 +72,15 @@ evidence_refs:
 - `python scripts/taskset_work_gate.py --check`
 - `python scripts/rbac_write_gate.py --check`
 - `python scripts/owner_governance_gate.py --allow-empty-owner-docs`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-22T20:03:03+09:00`
+- Resolution: `done`
+- Actual hours: `0.25`
+- Actual tokens: `5000`
+- Closed by: `codex-root`
+- Evidence:
+  - `reviews/VERIFY-2026-07-22-task-ar-610-20260722183640.json`
+<!-- work-close:end -->

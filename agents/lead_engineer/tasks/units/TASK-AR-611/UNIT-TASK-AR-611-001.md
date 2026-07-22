@@ -9,11 +9,11 @@ task_id: TASK-AR-611
 task_set_id: TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY
 initiative_id: INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T18:48:38+09:00
-updated_at: 2026-07-22T19:20:21+09:00
+updated_at: 2026-07-22T20:03:04+09:00
 origin_type: downstream_bug
 origin_ref: github-actions:run-29909181630
 created_by: codex-root-planner
@@ -43,6 +43,11 @@ verified_at: 2026-07-22T19:20:21+09:00
 verified_by: codex-root-task-ar-611
 evidence_refs:
   - reviews/VERIFY-2026-07-22-unit-task-ar-611-001-20260722192021.json
+resolution: done
+completed_at: 2026-07-22T20:03:04+09:00
+closed_by: codex-root
+actual_hours: 1.0
+actual_tokens: 14000
 ---
 
 # UNIT-TASK-AR-611-001 - Add newly registered tasksets to the exact-set regression test
@@ -89,3 +94,15 @@ Provide focused/full pytest counts, exact verified HEAD, and independent W4b evi
 ## Stop Boundary
 
 Stop if the actual taskset registry contains any additional unplanned ID or if fixing the failure requires production classifier changes.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-22T20:03:04+09:00`
+- Resolution: `done`
+- Actual hours: `1.0`
+- Actual tokens: `14000`
+- Closed by: `codex-root`
+- Evidence:
+  - `reviews/VERIFY-2026-07-22-unit-task-ar-611-001-20260722192021.json`
+<!-- work-close:end -->
