@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-22T17:45:29+09:00",
-  "record_count": 410,
+  "generated_at": "2026-07-22T18:26:58+09:00",
+  "record_count": 414,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4513,6 +4513,50 @@
       "title": "UNIT-TASK-AR-609-001 - Filter classifier initiative collection by record kind",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-609/UNIT-TASK-AR-609-001.md",
       "parent_id": "TASK-AR-609",
+      "status": "worker_ready"
+    },
+    {
+      "key": "initiative:INIT-AR-PR303-CI-SCHEMA-RECOVERY",
+      "level": "initiative",
+      "number": "27",
+      "label": "Initiative 27",
+      "id": "INIT-AR-PR303-CI-SCHEMA-RECOVERY",
+      "title": "PR 303 CI Schema Recovery",
+      "path": "agents/project/initiatives/INIT-AR-PR303-CI-SCHEMA-RECOVERY.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-PR303-CI-SCHEMA-RECOVERY",
+      "level": "taskset",
+      "number": "27.1",
+      "label": "Taskset 27.1",
+      "id": "TASKSET-AR-PR303-CI-SCHEMA-RECOVERY",
+      "title": "CI Schema Recovery",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-PR303-CI-SCHEMA-RECOVERY",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-610",
+      "level": "task",
+      "number": "27.1.1",
+      "label": "Task 27.1.1",
+      "id": "TASK-AR-610",
+      "title": "Make the existing TASK-AR-594 record satisfy the canonical work-item schema while pre…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-610.md",
+      "parent_id": "TASKSET-AR-PR303-CI-SCHEMA-RECOVERY",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-610-001",
+      "level": "unit",
+      "number": "27.1.1.1",
+      "label": "Unit 27.1.1.1",
+      "id": "UNIT-TASK-AR-610-001",
+      "title": "UNIT-TASK-AR-610-001 - Fold the legacy failure link into canonical evidence refs",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-610/UNIT-TASK-AR-610-001.md",
+      "parent_id": "TASK-AR-610",
       "status": "worker_ready"
     }
   ]
