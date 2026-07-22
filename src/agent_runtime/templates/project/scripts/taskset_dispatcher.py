@@ -24,6 +24,10 @@ from typing import Any
 import backlog_board
 import model_routing
 import status_alias
+try:
+    from task_id_contract import TASK_ID_TOKEN_RE, TASK_ID_VALUE_RE
+except ImportError:  # imported as scripts.<name> (namespace package)
+    from scripts.task_id_contract import TASK_ID_TOKEN_RE, TASK_ID_VALUE_RE
 from task_unit_readiness_gate import depends_on_refs, load_unit_specs
 
 
@@ -45,8 +49,8 @@ CANONICAL_TASKSET_SCHEMA = "agent-runtime-work-item/v1"
 STRUCTURED_WORKTREE_FIELDS = ("repository_path", "worktree_path", "branch", "base_ref")
 PROTECTED_BRANCHES = {"develop", "development", "main", "master", "production", "release"}
 SAFE_GIT_REF = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]*$")
-TASK_ID_TOKEN = re.compile(r"(?<![A-Z0-9-])(TASK(?:-AR)?-\d+)(?![A-Z0-9-])")
-TASK_ID_VALUE = re.compile(r"TASK(?:-AR)?-\d+")
+TASK_ID_TOKEN = TASK_ID_TOKEN_RE
+TASK_ID_VALUE = TASK_ID_VALUE_RE
 
 
 def _slug(value: str) -> str:
@@ -171,7 +175,7 @@ def _canonical_taskset_records(
                 invalid = [
                     value
                     for value in values
-                    if not re.fullmatch(r"TASK-[A-Z0-9][A-Z0-9-]*", value)
+                    if not TASK_ID_VALUE.fullmatch(value)
                 ]
                 duplicates = sorted({value for value in values if values.count(value) > 1})
                 if invalid:

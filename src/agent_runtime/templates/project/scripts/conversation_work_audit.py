@@ -29,6 +29,11 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+try:
+    from task_id_contract import TASK_ID_TOKEN_RE
+except ImportError:  # imported as scripts.<name> (namespace package)
+    from scripts.task_id_contract import TASK_ID_TOKEN_RE
+
 TASKS_DIR = "agents/lead_engineer/tasks"
 BOARD_PATH = "BACKLOG-BOARD.md"
 POINTER_PATH = "agents/project/NEXT-SESSION-POINTER.yml"
@@ -42,7 +47,7 @@ PROPOSED_FOLLOW_UP = re.compile(r"proposed follow-up", re.IGNORECASE)
 ANY_HEADING = re.compile(r"^#{1,6}\s")
 FOLLOW_UP_STATUS_CELLS = {"next", "action", "planned", "follow-up", "todo", "open"}
 
-TASK_ID_RE = re.compile(r"TASK-AR-\d{8}-\d{6}-[0-9a-f]{8}|TASK-AR-\d+")
+TASK_ID_RE = TASK_ID_TOKEN_RE
 TASKSET_ID_RE = re.compile(r"TASKSET-AR-[A-Z0-9]+(?:-[A-Z0-9]+)*")
 INIT_ID_RE = re.compile(r"INIT-AR-[A-Z0-9]+(?:-[A-Z0-9]+)*")
 POINTER_TASK_FILE_RE = re.compile(r"agents/lead_engineer/tasks/[A-Za-z0-9._-]+\.md")
