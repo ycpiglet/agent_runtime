@@ -11,7 +11,12 @@ current_state:
   progress_pct: 57
   status_text: "TASK-AR-607 is the next planned unit after TASK-AR-606 W6 closeout."
 active_work:
-  current_agents: []
+  current_agents:
+    - claim_id: CLAIM-20260723-001848-task-ar-607-1bfd
+      agent_role: lead-engineer
+      agent_instance_id: codex-root-task-ar-607
+      display_name: lead_engineer@orchestrator-01
+      callsite_id: codex-root-20260723
   current_teams: []
 resume:
   active_task: TASK-AR-607

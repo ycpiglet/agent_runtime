@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 
@@ -321,11 +322,32 @@ def test_swallowed_error_is_visible_on_stdout(tmp_path: Path, monkeypatch) -> No
 # --------------------------------------------------------------------------- #
 def _load_module():
     import importlib.util
+    import types
 
     spec = importlib.util.spec_from_file_location("release_cadence_trigger_query_errors", SCRIPT)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
+    # The imported module initially holds process-global mutable modules. Give
+    # query-error tests private facades so monkeypatching retry seams cannot
+    # leak into unrelated tests or background activity in collection order.
+    module.subprocess = types.SimpleNamespace(run=subprocess.run)
+    module.time = types.SimpleNamespace(sleep=time.sleep, time=time.time)
     return module
+
+
+def test_loaded_module_subprocess_patch_is_process_local(monkeypatch) -> None:
+    module = _load_module()
+    parent_run = subprocess.run
+    parent_sleep = time.sleep
+
+    def _sentinel(*args, **kwargs):
+        raise AssertionError("test-only subprocess sentinel")
+
+    monkeypatch.setattr(module.subprocess, "run", _sentinel)
+    monkeypatch.setattr(module.time, "sleep", _sentinel)
+
+    assert subprocess.run is parent_run
+    assert time.sleep is parent_sleep
 
 
 def test_spawn_failure_reports_git_query_error(tmp_path: Path, monkeypatch) -> None:
