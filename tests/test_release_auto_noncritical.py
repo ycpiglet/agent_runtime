@@ -11,6 +11,9 @@ import os
 import re
 import subprocess
 import sys
+import time
+import types
+import importlib.util
 from pathlib import Path
 
 import pytest
@@ -20,6 +23,7 @@ from scripts import release_execution_gate as execution_gate
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "release_auto_noncritical.py"
+CADENCE_SCRIPT = REPO_ROOT / "scripts" / "release_cadence_trigger.py"
 
 _URL_USERINFO_RE = re.compile(r"(?i)([a-z][a-z0-9+.-]*://)[^/@\s]+@")
 _SENSITIVE_ASSIGNMENT_RE = re.compile(
@@ -425,6 +429,36 @@ def test_trigger_git_query_error_halts_loud(tmp_path: Path, monkeypatch) -> None
     assert result["git_query_errors"]
     # Exit-code contract: an unevaluated trigger is NOT "nothing to do".
     assert orch._EXIT_CODES[orch.RESULT_TRIGGER_ERROR] != 0
+
+
+def test_unexpected_nonzero_cadence_query_halts_release_auto_loud(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _make_repo(tmp_path)
+    spec = importlib.util.spec_from_file_location(
+        "release_cadence_trigger_release_auto_nonzero", CADENCE_SCRIPT
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    module.subprocess = types.SimpleNamespace(run=subprocess.run)
+    module.time = types.SimpleNamespace(sleep=time.sleep, time=time.time)
+    monkeypatch.setattr(module.time, "sleep", lambda _s: None)
+
+    def _nonzero(cmd, **kwargs):
+        return subprocess.CompletedProcess(
+            cmd,
+            returncode=128,
+            stdout="",
+            stderr="fatal: transient runner resource failure",
+        )
+
+    monkeypatch.setattr(module.subprocess, "run", _nonzero)
+    monkeypatch.setattr(orch, "cadence", module)
+    result = _run(repo, ci_status="green", criticality="noncritical")
+
+    assert result["result"] == orch.RESULT_TRIGGER_ERROR
+    assert result["mutated"] is False
+    assert result["git_query_errors"]
 
 
 def test_genuinely_quiet_repo_is_still_not_triggered(tmp_path: Path) -> None:

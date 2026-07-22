@@ -413,6 +413,63 @@ def test_transient_spawn_failure_recovers_without_error(tmp_path: Path, monkeypa
     assert "git_query_errors" not in report
 
 
+def test_transient_nonzero_git_failure_recovers_without_error(tmp_path: Path, monkeypatch) -> None:
+    repo = _init_repo(tmp_path)
+    _git(repo, "tag", "v0.1.0")
+    for index in range(41):
+        _commit(repo, f"chore: tick {index}")
+
+    module = _load_module()
+    monkeypatch.setattr(module.time, "sleep", lambda _s: None)
+    real_run = subprocess.run
+    state = {"failed": False}
+
+    def _nonzero_once(cmd, **kwargs):
+        if not state["failed"]:
+            state["failed"] = True
+            return subprocess.CompletedProcess(
+                cmd,
+                returncode=128,
+                stdout="",
+                stderr="fatal: transient runner resource failure",
+            )
+        return real_run(cmd, **kwargs)
+
+    monkeypatch.setattr(module.subprocess, "run", _nonzero_once)
+    report = module.build_report(repo)
+
+    assert report["triggered"] is True
+    assert report["status"] == "watch"
+    assert "git_query_errors" not in report
+
+
+def test_exhausted_unexpected_nonzero_git_failure_is_error(tmp_path: Path, monkeypatch) -> None:
+    module = _load_module()
+    monkeypatch.setattr(module.time, "sleep", lambda _s: None)
+    calls: list[list[str]] = []
+
+    def _nonzero(cmd, **kwargs):
+        calls.append(list(cmd))
+        return subprocess.CompletedProcess(
+            cmd,
+            returncode=128,
+            stdout="",
+            stderr="fatal: transient runner resource failure",
+        )
+
+    monkeypatch.setattr(module.subprocess, "run", _nonzero)
+    report = module.build_report(tmp_path)
+
+    assert len(calls) == 3
+    assert report["status"] == "error"
+    assert report["triggered"] is False
+    assert report["reason"] == "git-query-error"
+    assert report["git_query_errors"]
+    error = report["git_query_errors"][0]
+    assert error["returncode"] == 128
+    assert "transient runner resource failure" in error["error"]
+
+
 def test_no_baseline_tag_is_still_a_quiet_pass(tmp_path: Path) -> None:
     repo = _init_repo(tmp_path)  # commits but no tag: deterministic non-zero from describe
     module = _load_module()
