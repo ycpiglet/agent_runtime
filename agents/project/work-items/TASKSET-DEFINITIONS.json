@@ -80,6 +80,12 @@
       "order": 600
     },
     {
+      "task_set_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
+      "display_name": "Release Impact Remediator",
+      "summary": "Repair canonical identity, task start state, host dashboard dependencies, hook activation, CI isolation, frontmatter parsing, and classifier semantics.",
+      "order": 601
+    },
+    {
       "task_set_id": "TASKSET-AR-SELF-IMPROVEMENT-CADENCE",
       "display_name": "Self Improvement Cadence",
       "summary": "Detect low-frequency roles and runtime assets, run review/retro/meeting/seminar/compound/doc-steward/scribe cycles from evidence, and publish measurable maturity signals.",

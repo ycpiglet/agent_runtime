@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-07-22
-task_count: 266
-open_count: 2
+task_count: 273
+open_count: 9
 completed_count: 264
-task_set_count: 2
+task_set_count: 3
 completed_task_set_count: 48
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `2` open or active tasks; `264` completed tasks are archived from this live board.
+- Summary: `9` open or active tasks; `264` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `2` / Ask `0` / Review `0` / Later `0` / Done `264`.
-- Task Sets: `2` active workflows; `48` completed workflows are hidden from the live action board.
+- Status: Action `9` / Ask `0` / Review `0` / Later `0` / Done `264`.
+- Task Sets: `3` active workflows; `48` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -59,6 +59,21 @@ completed_task_set_count: 48
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-600` | INIT-AR-AUTO-MERGE-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md | planned | Action | P1 | High | Medium | 1h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make auto_merge execute fail closed when GitHub rejects a merge and preserve success… |
+
+### Release Impact Remediator (`TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION`)
+
+- Flow: Repair canonical identity, task start state, host dashboard dependencies, hook activation, CI isolation, frontmatter parsing, and classifier semantics.
+- Progress: `0/7` done; `7` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-603` | INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md | planned | Action | P0 | Critical | High | 4h/18000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Close GitHub #299 by defining one case-compatible canonical task-ID contract used by… |
+| `TASK-AR-604` | INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-604/UNIT-TASK-AR-604-001.md | planned | Action | P1 | High | Medium | 2h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Close GitHub #293 by separating normalized comparison aliases from the canonical stat… |
+| `TASK-AR-606` | INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-606/UNIT-TASK-AR-606-001.md | planned | Action | P1 | High | Medium | 2h/8000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Close GitHub #295 by preserving executable hook activation in source and repairing it… |
+| `TASK-AR-607` | INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-607/UNIT-TASK-AR-607-001.md | planned | Action | P1 | High | Medium | 2h/8000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Close GitHub #297 by isolating release-cadence transient-spawn recovery state so the… |
+| `TASK-AR-608` | INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-608/UNIT-TASK-AR-608-001.md | planned | Action | P1 | High | Medium | 2h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Close GitHub #298 by making comment stripping quote-aware while preserving existing u… |
+| `TASK-AR-609` | INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-609/UNIT-TASK-AR-609-001.md | planned | Action | P1 | High | Medium | 2h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Close GitHub #300 by preventing taskset records from being duplicated into the initia… |
+| `TASK-AR-605` | INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-605/UNIT-TASK-AR-605-001.md | planned | Action | P1 | High | Medium | 3h/10000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Close GitHub #294 by making the template W0 dashboard work when repository-only scrip… |
 
 ## Archived Task Sets
 
@@ -118,7 +133,7 @@ completed_task_set_count: 48
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `2` open across `2` task sets (see Action Board above).
+- Active: `9` open across `3` task sets (see Action Board above).
 - Archived task sets: `48` (see Archived Task Sets above).
 - Archived task files: `264` — see `ARCHIVE-INDEX.md`.
 

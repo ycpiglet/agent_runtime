@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-22T17:31:49+09:00",
-  "record_count": 394,
+  "generated_at": "2026-07-22T17:45:29+09:00",
+  "record_count": 410,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4338,6 +4338,182 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-601/UNIT-TASK-AR-601-001.md",
       "parent_id": "TASK-AR-601",
       "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION",
+      "level": "initiative",
+      "number": "26",
+      "label": "Initiative 26",
+      "id": "INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION",
+      "title": "July Release Impact Remediation",
+      "path": "agents/project/initiatives/INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
+      "level": "taskset",
+      "number": "26.1",
+      "label": "Taskset 26.1",
+      "id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
+      "title": "Release Impact Remediator",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-603",
+      "level": "task",
+      "number": "26.1.1",
+      "label": "Task 26.1.1",
+      "id": "TASK-AR-603",
+      "title": "Close GitHub #299 by defining one case-compatible canonical task-ID contract used by…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-603.md",
+      "parent_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-603-001",
+      "level": "unit",
+      "number": "26.1.1.1",
+      "label": "Unit 26.1.1.1",
+      "id": "UNIT-TASK-AR-603-001",
+      "title": "UNIT-TASK-AR-603-001 - Adopt a shared canonical task-ID contract",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md",
+      "parent_id": "TASK-AR-603",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-604",
+      "level": "task",
+      "number": "26.1.2",
+      "label": "Task 26.1.2",
+      "id": "TASK-AR-604",
+      "title": "Close GitHub #293 by separating normalized comparison aliases from the canonical stat…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-604.md",
+      "parent_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-604-001",
+      "level": "unit",
+      "number": "26.1.2.1",
+      "label": "Unit 26.1.2.1",
+      "id": "UNIT-TASK-AR-604-001",
+      "title": "UNIT-TASK-AR-604-001 - Separate task status normalization from persistence",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-604/UNIT-TASK-AR-604-001.md",
+      "parent_id": "TASK-AR-604",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-605",
+      "level": "task",
+      "number": "26.1.3",
+      "label": "Task 26.1.3",
+      "id": "TASK-AR-605",
+      "title": "Close GitHub #294 by making the template W0 dashboard work when repository-only scrip…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-605.md",
+      "parent_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-605-001",
+      "level": "unit",
+      "number": "26.1.3.1",
+      "label": "Unit 26.1.3.1",
+      "id": "UNIT-TASK-AR-605-001",
+      "title": "UNIT-TASK-AR-605-001 - Add a clean-template W0 fallback",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-605/UNIT-TASK-AR-605-001.md",
+      "parent_id": "TASK-AR-605",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-606",
+      "level": "task",
+      "number": "26.1.4",
+      "label": "Task 26.1.4",
+      "id": "TASK-AR-606",
+      "title": "Close GitHub #295 by preserving executable hook activation in source and repairing it…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-606.md",
+      "parent_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-606-001",
+      "level": "unit",
+      "number": "26.1.4.1",
+      "label": "Unit 26.1.4.1",
+      "id": "UNIT-TASK-AR-606-001",
+      "title": "UNIT-TASK-AR-606-001 - Make hook activation executable and idempotent",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-606/UNIT-TASK-AR-606-001.md",
+      "parent_id": "TASK-AR-606",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-607",
+      "level": "task",
+      "number": "26.1.5",
+      "label": "Task 26.1.5",
+      "id": "TASK-AR-607",
+      "title": "Close GitHub #297 by isolating release-cadence transient-spawn recovery state so the…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-607.md",
+      "parent_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-607-001",
+      "level": "unit",
+      "number": "26.1.5.1",
+      "label": "Unit 26.1.5.1",
+      "id": "UNIT-TASK-AR-607-001",
+      "title": "UNIT-TASK-AR-607-001 - Isolate transient-spawn recovery state",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-607/UNIT-TASK-AR-607-001.md",
+      "parent_id": "TASK-AR-607",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-608",
+      "level": "task",
+      "number": "26.1.6",
+      "label": "Task 26.1.6",
+      "id": "TASK-AR-608",
+      "title": "Close GitHub #298 by making comment stripping quote-aware while preserving existing u…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-608.md",
+      "parent_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-608-001",
+      "level": "unit",
+      "number": "26.1.6.1",
+      "label": "Unit 26.1.6.1",
+      "id": "UNIT-TASK-AR-608-001",
+      "title": "UNIT-TASK-AR-608-001 - Make frontmatter comment scanning quote-aware",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-608/UNIT-TASK-AR-608-001.md",
+      "parent_id": "TASK-AR-608",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-609",
+      "level": "task",
+      "number": "26.1.7",
+      "label": "Task 26.1.7",
+      "id": "TASK-AR-609",
+      "title": "Close GitHub #300 by preventing taskset records from being duplicated into the initia…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-609.md",
+      "parent_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-609-001",
+      "level": "unit",
+      "number": "26.1.7.1",
+      "label": "Unit 26.1.7.1",
+      "id": "UNIT-TASK-AR-609-001",
+      "title": "UNIT-TASK-AR-609-001 - Filter classifier initiative collection by record kind",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-609/UNIT-TASK-AR-609-001.md",
+      "parent_id": "TASK-AR-609",
+      "status": "worker_ready"
     }
   ]
 }
