@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-TERMINAL-STATUS-START-GUARD
 registered_at: 2026-07-22T21:43:00+09:00
 created_at: 2026-07-22T21:43:00+09:00
-updated_at: 2026-07-22T21:43:00+09:00
+updated_at: 2026-07-23T08:02:09+09:00
+started_at: 2026-07-23T08:02:09+09:00
 title: Block taskset restart of closed and released records
-status: planned
+status: in_progress
 priority: P1
 difficulty: S
 est_hours: 1.0

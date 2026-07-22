@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-23T07:52:07+09:00
+generated_at: 2026-07-23T08:03:08+09:00
 record_count: 438
 ---
 
@@ -459,8 +459,8 @@ record_count: 438
 | 28.1.1.1 | Unit 28.1.1.1 | unit | `UNIT-TASK-AR-611-001` | `TASK-AR-611` | completed | `agents/lead_engineer/tasks/units/TASK-AR-611/UNIT-TASK-AR-611-001.md` | UNIT-TASK-AR-611-001 - Add newly registered tasksets to the exact-set regression test |
 | 29 | Initiative 29 | initiative | `INIT-AR-TERMINAL-STATUS-START-GUARD` | - | active | `agents/project/initiatives/INIT-AR-TERMINAL-STATUS-START-GUARD.md` | Terminal Status Start Guard |
 | 29.1 | Taskset 29.1 | taskset | `TASKSET-AR-TERMINAL-STATUS-START-GUARD` | `INIT-AR-TERMINAL-STATUS-START-GUARD` | active | `BACKLOG-BOARD.md` | Terminal Status Start Guard |
-| 29.1.1 | Task 29.1.1 | task | `TASK-AR-612` | `TASKSET-AR-TERMINAL-STATUS-START-GUARD` | planned | `agents/lead_engineer/tasks/TASK-AR-612.md` | Make closed/released tasks and their registered Korean aliases terminal in taskset se… |
-| 29.1.1.1 | Unit 29.1.1.1 | unit | `UNIT-TASK-AR-612-001` | `TASK-AR-612` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-612/UNIT-TASK-AR-612-001.md` | UNIT-TASK-AR-612-001 - Treat closed and released task statuses as terminal |
+| 29.1.1 | Task 29.1.1 | task | `TASK-AR-612` | `TASKSET-AR-TERMINAL-STATUS-START-GUARD` | in_progress | `agents/lead_engineer/tasks/TASK-AR-612.md` | Make closed/released tasks and their registered Korean aliases terminal in taskset se… |
+| 29.1.1.1 | Unit 29.1.1.1 | unit | `UNIT-TASK-AR-612-001` | `TASK-AR-612` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-612/UNIT-TASK-AR-612-001.md` | UNIT-TASK-AR-612-001 - Treat closed and released task statuses as terminal |
 | 30 | Initiative 30 | initiative | `INIT-AR-RELEASE-CADENCE-QUERY-RECOVERY` | - | active | `agents/project/initiatives/INIT-AR-RELEASE-CADENCE-QUERY-RECOVERY.md` | Release Cadence Query Recovery |
 | 30.1 | Taskset 30.1 | taskset | `TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY` | `INIT-AR-RELEASE-CADENCE-QUERY-RECOVERY` | complete | `BACKLOG-BOARD.md` | Release Cadence Query Recovery |
 | 30.1.1 | Task 30.1.1 | task | `TASK-AR-613` | `TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY` | completed | `agents/lead_engineer/tasks/TASK-AR-613.md` | Close GitHub issue 316 by preventing a valid tagged cadence from collapsing into rele… |

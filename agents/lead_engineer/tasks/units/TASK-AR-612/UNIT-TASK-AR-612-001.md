@@ -9,11 +9,12 @@ task_id: TASK-AR-612
 task_set_id: TASKSET-AR-TERMINAL-STATUS-START-GUARD
 initiative_id: INIT-AR-TERMINAL-STATUS-START-GUARD
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-22T21:43:00+09:00
-updated_at: 2026-07-22T21:43:00+09:00
+updated_at: 2026-07-23T08:02:09+09:00
+started_at: 2026-07-23T08:02:09+09:00
 origin_type: review_finding
 origin_ref: reviews/ROLE-REVIEW-2026-07-22-TASK-AR-604-SKEPTIC.md
 created_by: codex-root-planner
