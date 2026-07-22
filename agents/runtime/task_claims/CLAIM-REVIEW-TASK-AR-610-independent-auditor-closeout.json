@@ -1,0 +1,31 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-REVIEW-TASK-AR-610-independent-auditor-closeout",
+  "task_id": "REVIEW-TASK-AR-610-independent-auditor",
+  "task_set_id": "TASKSET-AR-PR303-CI-SCHEMA-RECOVERY",
+  "active_scope": "TASKSET-AR-PR303-CI-SCHEMA-RECOVERY",
+  "agent_role": "independent-auditor",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "independent-auditor-CLAIM-REVIEW-TASK-AR-610-independent-auditor-closeout",
+  "display_name": "independent-auditor@review",
+  "mode": "review",
+  "status": "released",
+  "status_text": "Additive independent-auditor review pass for TASK-AR-610 (closeout)",
+  "claimed_at": "2026-07-22T18:42:04+09:00",
+  "last_heartbeat": "2026-07-22T18:42:40+09:00",
+  "updated_at": "2026-07-22T18:42:40+09:00",
+  "tags": [
+    "review",
+    "additive",
+    "review-trigger:closeout"
+  ],
+  "overlay": true,
+  "parent_task_id": "TASK-AR-610",
+  "parent_task_set_id": "TASKSET-AR-PR303-CI-SCHEMA-RECOVERY",
+  "handoff_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-610-independent-auditor-closeout.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-610-independent-auditor-closeout.log.md",
+  "released_at": "2026-07-22T18:42:40+09:00",
+  "verified_by": "codex-root-task-ar-610",
+  "verifier_role": "lead-engineer",
+  "verification_evidence": "reviews/W4B-2026-07-22-TASK-AR-610.md"
+}
