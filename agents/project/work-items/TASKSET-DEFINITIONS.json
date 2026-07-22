@@ -92,6 +92,12 @@
       "order": 602
     },
     {
+      "task_set_id": "TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY",
+      "display_name": "Backlog Taskset Test Recovery",
+      "summary": "Update the canonical real-backlog taskset expectation for all newly registered tasksets and prove the full package suite remains green.",
+      "order": 603
+    },
+    {
       "task_set_id": "TASKSET-AR-SELF-IMPROVEMENT-CADENCE",
       "display_name": "Self Improvement Cadence",
       "summary": "Detect low-frequency roles and runtime assets, run review/retro/meeting/seminar/compound/doc-steward/scribe cycles from evidence, and publish measurable maturity signals.",

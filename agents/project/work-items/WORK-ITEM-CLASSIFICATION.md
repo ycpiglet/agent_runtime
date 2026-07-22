@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-22T18:33:54+09:00
-record_count: 414
+generated_at: 2026-07-22T18:48:39+09:00
+record_count: 418
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `414` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `418` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `28` records |
-| Tasksets | pass | `52` records |
-| Tasks | pass | `274` records |
-| Units | pass | `60` records |
+| Initiatives | pass | `29` records |
+| Tasksets | pass | `53` records |
+| Tasks | pass | `275` records |
+| Units | pass | `61` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -453,6 +453,10 @@ record_count: 414
 | 27.1 | Taskset 27.1 | taskset | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | `INIT-AR-PR303-CI-SCHEMA-RECOVERY` | active | `BACKLOG-BOARD.md` | CI Schema Recovery |
 | 27.1.1 | Task 27.1.1 | task | `TASK-AR-610` | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | planned | `agents/lead_engineer/tasks/TASK-AR-610.md` | Make the existing TASK-AR-594 record satisfy the canonical work-item schema while pre… |
 | 27.1.1.1 | Unit 27.1.1.1 | unit | `UNIT-TASK-AR-610-001` | `TASK-AR-610` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-610/UNIT-TASK-AR-610-001.md` | UNIT-TASK-AR-610-001 - Normalize legacy closeout evidence metadata |
+| 28 | Initiative 28 | initiative | `INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY` | - | active | `agents/project/initiatives/INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY.md` | Backlog Taskset Test Recovery |
+| 28.1 | Taskset 28.1 | taskset | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | `INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY` | active | `BACKLOG-BOARD.md` | Backlog Taskset Test Recovery |
+| 28.1.1 | Task 28.1.1 | task | `TASK-AR-611` | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | planned | `agents/lead_engineer/tasks/TASK-AR-611.md` | Make the real-backlog classification test recognize every taskset registered by the J… |
+| 28.1.1.1 | Unit 28.1.1.1 | unit | `UNIT-TASK-AR-611-001` | `TASK-AR-611` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-611/UNIT-TASK-AR-611-001.md` | UNIT-TASK-AR-611-001 - Add newly registered tasksets to the exact-set regression test |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

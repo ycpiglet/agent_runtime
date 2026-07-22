@@ -911,8 +911,27 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-PR303-CI-SCHEMA-RECOVERY",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-611",
+      "expires_at": "2026-07-23T18:48:38+09:00",
+      "fulfilled_at": "2026-07-22T18:48:38+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-611.md",
+      "fulfilled_task_id": "TASK-AR-611",
+      "fulfilled_task_uid": "7dd220e9-1b3d-41d5-a2b3-bf877ba7a8d2",
+      "initiative_id": "INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY",
+      "kind": "task",
+      "owner_id": "codex-root-planner",
+      "reason": "work registration TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY",
+      "reservation_group_id": "RES-20260722-184838-3dcdb3b7",
+      "reservation_id": "RES-20260722-184838-3dcdb3b7-01",
+      "reserved_at": "2026-07-22T18:48:38+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-07-22T18:26:18+09:00"
+  "updated_at": "2026-07-22T18:48:38+09:00"
 }

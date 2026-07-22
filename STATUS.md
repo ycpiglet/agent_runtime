@@ -1,5 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-22 - TASK-AR-611 active; PR #303 package-test recovery
+
+- Active: claim `CLAIM-20260722-184910-task-ar-611-c34b` runs `TASK-AR-611` in `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY`.
+- Cause: GitHub Actions run `29909181630` passed governance/schema checks but the full package suite found one stale exact-set assertion in `tests/test_backlog_board_tasksets.py`.
+- Scope: add the three newly registered taskset IDs without changing production backlog parsing or weakening exact equality.
+- Next: pass focused/full pytest, independent W4b, update PR #303, and confirm Python 3.10/3.11/3.12 CI plus auto-merge.
+
 ## 2026-07-22 - TASK-AR-610 active; PR #303 CI baseline recovery
 
 - Active: `TASK-AR-610` in `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` normalizes legacy closeout evidence metadata that blocks PR #303 governance CI.

@@ -1,5 +1,11 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-07-22 TASK-AR-611 active; PR #303 package-test recovery
+
+- Active: `TASK-AR-611` in `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` synchronizes the exact real-backlog taskset expectation after GitHub Actions run `29909181630` exposed stale registered-taskset IDs.
+- Scope: add the July remediation, PR #303 schema-recovery, and this recovery taskset IDs to `tests/test_backlog_board_tasksets.py`; keep exact equality and production classification behavior unchanged.
+- Parent: TASK-AR-600 and TASK-AR-610 passed W4b; PR #303 integration resumes after focused and full package tests pass.
+
 ## 2026-07-22 TASK-AR-610 active; PR #303 CI schema recovery
 
 - Active: `TASK-AR-610` in `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` restores the governance baseline discovered by PR #303.
@@ -32,6 +38,8 @@
 | 529 | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | Decision Cockpit |
 | 600 | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | Merge Truth Keeper |
 | 601 | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | Release Impact Remediator |
+| 602 | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | CI Schema Recovery |
+| 603 | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | Backlog Taskset Test Recovery |
 | 615 | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | Self Improvement Cadence |
 | 616 | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | Self Improvement Remediation |
 | 617 | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | Business Operations Teams |
