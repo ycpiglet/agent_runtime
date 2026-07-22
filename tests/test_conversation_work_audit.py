@@ -143,6 +143,12 @@ def test_task_id_extractor_does_not_match_inside_larger_tokens() -> None:
     assert conversation_work_audit.TASK_ID_RE.findall(text) == []
 
 
+def test_task_id_extractor_does_not_match_inside_unicode_words() -> None:
+    text = "éTASK-AR-901 TASK-AR-902é 작업TASK-AR-903 TASK-AR-904작업 αTASK-905β"
+
+    assert conversation_work_audit.TASK_ID_RE.findall(text) == []
+
+
 def test_planning_record_referencing_missing_task_file_is_block(tmp_path: Path) -> None:
     body = (
         "## Proposed Follow-Up Registration\n\n"

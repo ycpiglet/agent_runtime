@@ -233,6 +233,12 @@ def test_body_order_deduplicates_and_ignores_unrelated_ids(tmp_path: Path) -> No
     assert [task.task_id for task in tasks] == ["TASK-219", "TASK-220", "TASK-217"]
 
 
+def test_body_order_ignores_task_ids_embedded_in_unicode_words() -> None:
+    body = "## Tasks\n\n- 작업TASK-AR-999\n- αTASK-998β\n"
+
+    assert dispatcher._ordered_task_ids(body) == []  # noqa: SLF001
+
+
 def test_canonical_order_skips_completed_task_without_reordering_remainder(tmp_path: Path) -> None:
     task_set_id = "TASKSET-DYNAMIC-ORDER"
     _write_taskset(tmp_path, task_set_id, task_order=("TASK-219", "TASK-220", "TASK-217"))
