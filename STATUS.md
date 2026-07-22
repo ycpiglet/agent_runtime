@@ -1,10 +1,11 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-07-22 - TASK-AR-605/#294 active
+## 2026-07-22 - TASK-AR-605/#294 verified; integration active
 
-- Active: claim `CLAIM-20260722-221746-task-ar-605-d678` runs TASK-AR-605 in `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION`.
-- Scope: make the generated-host session dashboard return a bounded read-only W0 fallback when repository-only `scripts/work.py` is absent; do not ship the full work CLI dependency graph.
-- Verification: add failure-first clean-template execution coverage, preserve the richer repository path, then run focused tests, host-lock parity, W4a, independent W4b, and skeptic review.
+- Active: integration claim `CLAIM-20260722-225245-task-ar-605-integration1` keeps TASK-AR-605 claimed through pull-request and post-merge main CI.
+- Contract: generated hosts without repository-only `scripts/work.py` now return bounded, read-only claim/worktree/in-flight W0 data; repository checkouts retain the richer `work.status_work` path.
+- Quality loop: initial skeptic REJECT found invalid UTF-8, malformed count, and unexpected-helper escape paths; failure-first rework, refreshed task/unit W4a (`25 passed`), independent W4b, and a 32-case skeptic matrix now all pass.
+- Scope boundary: quoted `#` frontmatter truncation observed during W4a is already registered as TASK-AR-608/#298; it was not folded into TASK-AR-605.
 - Follow-up: PR #308 exposed rerun-only release test state leakage; preserve runs `29921037792` and `29921668702` as collection-order evidence for registered TASK-AR-607/#297.
 
 ## 2026-07-22 - TASK-AR-604/#293 complete; TASK-AR-605 next; terminal residual registered
