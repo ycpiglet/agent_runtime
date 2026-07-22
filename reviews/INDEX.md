@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-22T21:24:52+09:00
-record_count: 726
+generated_at: 2026-07-22T21:31:11+09:00
+record_count: 729
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `726` review and evidence records under `reviews/`.
+- Summary: indexed `729` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `726` files |
+| Reviews covered | pass | `729` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -527,6 +527,7 @@ record_count: 726
 | `reviews/REVIEW-2026-07-22-task-ar-600-scope-transition-approval.md` | `REVIEW-2026-07-22-task-ar-600-scope-transition-approval` | planning | record | pass | TASK-AR-600 taskset scope transition approval |
 | `reviews/REVIEW-2026-07-22-task-ar-600-verification-frontmatter-amendment.md` | `REVIEW-2026-07-22-task-ar-600-verification-frontmatter-amendment` | planning | record | pass | TASK-AR-600 verification frontmatter amendment |
 | `reviews/REVIEW-2026-07-22-task-ar-603-unicode-boundary-t3-replan.md` | `REVIEW-2026-07-22-task-ar-603-unicode-boundary-t3-replan` | md | record | pass | TASK-AR-603 Unicode Token Boundary T3 Replan |
+| `reviews/REVIEW-2026-07-22-task-ar-604-integration-t3-replan.md` | `REVIEW-2026-07-22-task-ar-604-integration-t3-replan` | md | record | pass | TASK-AR-604 Integration T3 Replan |
 | `reviews/REVIEW-2026-07-22-task-ar-610-scope-amendment.md` | `REVIEW-2026-07-22-task-ar-610-scope-amendment` | md | record | pass | TASK-AR-610 scope amendment |
 | `reviews/REVIEW-2026-07-22-taskset-ar-backlog-taskset-test-recovery-registration.md` | `REVIEW-2026-07-22-taskset-ar-backlog-taskset-test-recovery-registration` | md | record | pass | Backlog Taskset Test Recovery Registration |
 | `reviews/REVIEW-2026-07-22-taskset-ar-july-release-impact-remediation-registration.md` | `REVIEW-2026-07-22-taskset-ar-july-release-impact-remediation-registration` | md | record | pass | Release Impact Remediator Registration |
@@ -553,6 +554,7 @@ record_count: 726
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-600-SKEPTIC.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-600-SKEPTIC` | md | record | block | TASK-AR-600 skeptical high-risk and external-effect review |
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-603-SKEPTIC-BLOCK.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-603-SKEPTIC-BLOCK` | md | record | fail | TASK-AR-603 Skeptic Adversarial Review - BLOCK |
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-603-SKEPTIC-REWORK.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-603-SKEPTIC-REWORK` | md | record | pass | TASK-AR-603 Skeptic Unicode Boundary Rework Review |
+| `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-604-SKEPTIC.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-604-SKEPTIC` | md | record | pass | TASK-AR-604 Skeptic High-Risk Review |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SCRIBE-2026-06-21-business-operating-system.md` | `SCRIBE-2026-06-21-business-operating-system` | scribe | recorded | pass | Business Operating System Scribe Log |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
@@ -756,6 +758,7 @@ record_count: 726
 | `reviews/W4B-2026-07-22-TASK-AR-600.md` | `W4B-2026-07-22-TASK-AR-600` | w4b-independent-verification | approved | pass | W4b Independent Verification — TASK-AR-600 |
 | `reviews/W4B-2026-07-22-TASK-AR-603-UNICODE-REWORK.md` | `W4B-2026-07-22-TASK-AR-603-UNICODE-REWORK` | md | record | pass | TASK-AR-603 Unicode Rework Independent W4b Verification |
 | `reviews/W4B-2026-07-22-TASK-AR-603.md` | `W4B-2026-07-22-TASK-AR-603` | md | record | pass | TASK-AR-603 Independent W4b Verification |
+| `reviews/W4B-2026-07-22-TASK-AR-604.md` | `W4B-2026-07-22-TASK-AR-604` | md | record | pass | TASK-AR-604 Independent W4b Verification |
 | `reviews/W4B-2026-07-22-TASK-AR-610.md` | `W4B-2026-07-22-TASK-AR-610` | md | record | pass | TASK-AR-610 Independent W4b |
 | `reviews/W4B-2026-07-22-TASK-AR-611.md` | `W4B-2026-07-22-TASK-AR-611` | md | record | pass | TASK-AR-611 Independent W4b |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
