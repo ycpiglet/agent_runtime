@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-22T20:03:08+09:00",
+  "generated_at": "2026-07-22T21:08:34+09:00",
   "record_count": 418,
   "finding_count": 0,
   "findings": [],
@@ -4370,7 +4370,7 @@
       "title": "Close GitHub #299 by defining one case-compatible canonical task-ID contract used by…",
       "path": "agents/lead_engineer/tasks/TASK-AR-603.md",
       "parent_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-603-001",
@@ -4381,7 +4381,7 @@
       "title": "UNIT-TASK-AR-603-001 - Adopt a shared canonical task-ID contract",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md",
       "parent_id": "TASK-AR-603",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-604",

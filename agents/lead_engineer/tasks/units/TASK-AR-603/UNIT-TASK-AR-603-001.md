@@ -9,11 +9,12 @@ task_id: TASK-AR-603
 task_set_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 initiative_id: INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T20:50:11+09:00
+started_at: 2026-07-22T20:10:11+09:00
+updated_at: 2026-07-22T21:08:31+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
 created_by: codex-root-planner
@@ -59,6 +60,11 @@ evidence_refs:
   - reviews/VERIFY-2026-07-22-unit-task-ar-603-001-20260722202039.json
   - reviews/VERIFY-2026-07-22-unit-task-ar-603-001-20260722202956.json
   - reviews/VERIFY-2026-07-22-unit-task-ar-603-001-20260722205011.json
+resolution: done
+completed_at: 2026-07-22T21:08:31+09:00
+closed_by: codex-root
+actual_hours: 1.0
+actual_tokens: 50000
 ---
 
 # UNIT-TASK-AR-603-001 - Adopt a shared canonical task-ID contract
@@ -117,3 +123,17 @@ Report the accepted ID grammar, migrated consumers, regression matrix, parity re
 ## Stop Boundary
 
 Stop if a required consumer lies outside the declared footprint; register the expansion before editing it.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-22T21:08:31+09:00`
+- Resolution: `done`
+- Actual hours: `1.0`
+- Actual tokens: `50000`
+- Closed by: `codex-root`
+- Evidence:
+  - `reviews/VERIFY-2026-07-22-unit-task-ar-603-001-20260722202039.json`
+  - `reviews/VERIFY-2026-07-22-unit-task-ar-603-001-20260722202956.json`
+  - `reviews/VERIFY-2026-07-22-unit-task-ar-603-001-20260722205011.json`
+<!-- work-close:end -->

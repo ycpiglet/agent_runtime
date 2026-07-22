@@ -1,5 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-22 - TASK-AR-603/#299 complete; TASK-AR-604 next
+
+- Completed: PR #305 merged at `4646ea3fe5f6c4e88ab6f118150560219958ef92`; pull-request run `29917901170` and post-merge main run `29918111357` passed on Python 3.10/3.11/3.12.
+- Contract: allocation, taskset dispatch, and conversation audit now share numeric/timestamp task-ID grammar, preserve timestamp suffix case, and reject partial matches inside ASCII or Unicode larger tokens.
+- Quality loop: initial W4b approval was challenged by a skeptic Unicode counterexample; T3 replan, failure-first rework, refreshed W4a, independent W4b, and skeptic recheck all passed before merge.
+- W5/W6: GitHub #299 is closed, all TASK-AR-603 claims are released, its worktree and local/remote branch are cleaned, and task/unit records are completed.
+- Next: `TASK-AR-604` for GitHub #293 in `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION`.
+
 ## 2026-07-22 - PR #303 merged; release-impact remediation resumes at TASK-AR-603
 
 - Completed: PR #303 merged at `cc5a832956bcb50c5bcd62c34f3641a9f6d002e0`, post-merge `main` CI run `29913917494` passed on Python 3.10/3.11/3.12, and GitHub #291 is closed.

@@ -9,7 +9,7 @@
   "callsite_id": "codex-root-20260722",
   "pane_id": "root",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
   "active_scope": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
   "scope_transition_approved": true,
@@ -27,12 +27,12 @@
   "worktree_path": ".worktrees/TASK-AR-603",
   "branch": "codex/task-ar-603-task-id-contract",
   "claimed_at": "2026-07-22T20:58:55+09:00",
-  "last_heartbeat": "2026-07-22T20:58:55+09:00",
-  "updated_at": "2026-07-22T20:58:55+09:00",
+  "last_heartbeat": "2026-07-22T21:07:35+09:00",
+  "updated_at": "2026-07-22T21:07:35+09:00",
   "expires_at": "2026-07-23T00:58:55+09:00",
   "lease": {
     "claimed_at": "2026-07-22T20:58:55+09:00",
-    "heartbeat_at": "2026-07-22T20:58:55+09:00",
+    "heartbeat_at": "2026-07-22T21:07:35+09:00",
     "expires_at": "2026-07-23T00:58:55+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260722-205855-task-ar-603-e584.handoff.md",
@@ -61,5 +61,9 @@
     "tests/test_taskset_dispatcher.py",
     "tests/test_conversation_work_audit.py",
     "tests/fixtures/host/agent_runtime.lock.json"
-  ]
+  ],
+  "released_at": "2026-07-22T21:07:35+09:00",
+  "verified_by": "codex-task-ar-603-independent-auditor-rework1",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-22-TASK-AR-603-UNICODE-REWORK.md"
 }
