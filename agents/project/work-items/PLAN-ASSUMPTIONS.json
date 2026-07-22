@@ -10,16 +10,31 @@
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "35e9b6132cdeee9adbd5ad833598bb55237e98ce07fee4ad5d927c4ed4c4d9c0"
+          "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/taskset_dispatcher.py",
+          "value": "7be761496a6a951db11a45369c7dc0493caf040c33c991fe1e42158515f1a2c7"
         },
         {
           "kind": "sha256",
           "path": "scripts/work.py",
           "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/auto_merge.py",
+          "value": "2f96df3f64fa7ea3b186fdab441993c9ee948de49f9e8cda36101f6abe338600"
+        },
+        {
+          "kind": "absent",
+          "path": "tests/test_auto_merge_execution.py",
+          "value": ""
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-19-auto-merge-execution-readback.md",
-      "recorded_at": "2026-07-19T10:36:52+09:00",
+      "design_record": "reviews/REVIEW-2026-07-22-post-merge-plan-revalidation.md",
+      "recorded_at": "2026-07-22T16:53:38+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-AUTO-MERGE-INTEGRITY"
     },
@@ -222,7 +237,7 @@
         {
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration.md",
-          "value": "c7308dd74bc09ac4cb86480b87347ffc58a37dec42eca04bbdd57c21f0bd080e"
+          "value": "d4be2649e4be037cf69f4b2ea4e281877f09a10d449bab1a79ebae0d1d0d4b76"
         },
         {
           "kind": "sha256",
@@ -242,7 +257,7 @@
         {
           "kind": "sha256",
           "path": "scripts/taskset_dispatcher.py",
-          "value": "1a29801eea90d90cce298ed451e15adc61e9a44c39d36162035e8e8d34393fe0"
+          "value": "7be761496a6a951db11a45369c7dc0493caf040c33c991fe1e42158515f1a2c7"
         },
         {
           "kind": "sha256",
@@ -250,8 +265,8 @@
           "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration.md",
-      "recorded_at": "2026-07-19T12:08:15+09:00",
+      "design_record": "reviews/REVIEW-2026-07-22-post-merge-plan-revalidation.md",
+      "recorded_at": "2026-07-22T16:53:37+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT"
     },
@@ -498,5 +513,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-19T12:08:15+09:00"
+  "updated_at": "2026-07-22T16:53:38+09:00"
 }

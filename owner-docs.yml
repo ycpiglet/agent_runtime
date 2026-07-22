@@ -1,5 +1,6 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
+  - reviews/REVIEW-2026-07-22-post-merge-plan-revalidation.md
   - reviews/REVIEW-2026-07-22-remote-main-integration-id-collision.md
   - reviews/REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration.md
   - reviews/REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration.md

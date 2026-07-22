@@ -1,13 +1,30 @@
 ---
 type: integration-decision
+title: Remote Main Integration and Task ID Collision
 date: 2026-07-22
 project_id: PROJECT-AGENT-RUNTIME
 task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 status: approved
 owner: lead-engineer
+signal: pass
+score: 96
 ---
 
 # Remote main integration and TASK-AR-600 collision
+
+## Bottom Line
+
+The published remote task keeps `TASK-AR-600`, while the unstarted local
+release task moves to `TASK-AR-602`; both histories remain intact and the
+normal merge path stays safe.
+
+## Signal
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Published identity preserved | pass | remote auto-merge task remains `TASK-AR-600` |
+| Local identity deconflicted | pass | release task and unit resolve as `TASK-AR-602` |
+| Integration strategy | pass | normal merge; no force-push or history discard |
 
 ## Context
 
@@ -31,6 +48,14 @@ cannot preserve both records.
 - Regenerate board/classification views after the merge and re-record plan
   assumptions before dispatching the next implementation claim.
 
+## Action Board
+
+| Action | Owner | Status |
+| --- | --- | --- |
+| Rename the unpublished release record | lead-engineer | complete |
+| Merge `origin/main` and regenerate views | lead-engineer | complete |
+| Revalidate both tasksets before dispatch | lead-engineer | required |
+
 ## Verification
 
 - `TASK-AR-600` and `TASK-AR-602` each resolve to exactly one task file and one
@@ -46,3 +71,14 @@ cannot preserve both records.
 
 This decision repairs the merge-time identity collision only. It does not
 implement the remote auto-merge task or change release readiness by itself.
+
+## Risks / Blockers
+
+- Stale references to the old local `TASK-AR-600` identity would route release
+  work to the wrong record; identity and generated-view gates must remain green.
+- A force-push would discard published work and is outside this decision.
+
+## Next
+
+- Record post-merge assumptions for both affected tasksets.
+- Dispatch only the next registered, unclaimed unit after all T2 checks pass.
