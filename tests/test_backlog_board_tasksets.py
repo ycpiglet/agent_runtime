@@ -77,6 +77,8 @@ def test_frontmatter_plain_scalar_quote_does_not_hide_comment() -> None:
     for parser in _frontmatter_parsers():
         assert parser.strip_comment("plain 'PR #167' # outside") == "plain 'PR "
         assert parser.strip_comment('plain "PR #167" # outside') == 'plain "PR '
+        assert parser.strip_comment("plain - 'PR #167' # outside") == "plain - 'PR "
+        assert parser.strip_comment('plain, "PR #167" # outside') == 'plain, "PR '
         assert (
             parser.strip_comment('summary: plain "unterminated # outside')
             == 'summary: plain "unterminated '
