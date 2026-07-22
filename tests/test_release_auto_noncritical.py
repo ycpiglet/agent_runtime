@@ -30,6 +30,7 @@ _SENSITIVE_ASSIGNMENT_RE = re.compile(
     r"(?i)\b(password|passwd|token|access[_-]?token|secret|authorization)"
     r"\s*[:=]\s*[^\r\n]*"
 )
+_FIXTURE_GIT_MAX_ATTEMPTS = 3
 
 
 def _sanitize_git_diagnostic(value: str) -> str:
@@ -37,21 +38,50 @@ def _sanitize_git_diagnostic(value: str) -> str:
     return _SENSITIVE_ASSIGNMENT_RE.sub(r"\1=[REDACTED]", value)
 
 
+def _is_retryable_fixture_commit_failure(
+    command: list[str], result: subprocess.CompletedProcess[str]
+) -> bool:
+    """Recognize only the observed pre-commit HEAD parse transient.
+
+    Git mutations are not generally idempotent, so ambiguous failures must not
+    be replayed. This exact result occurs before `git commit` advances HEAD and
+    is therefore the sole bounded-retry exception for this test fixture.
+    """
+    return (
+        command[1:2] == ["commit"]
+        and result.returncode == 128
+        and not (result.stdout or "").strip()
+        and (result.stderr or "").strip() == "fatal: could not parse HEAD"
+    )
+
+
 def _git(repo: Path, *args: str, env: dict[str, str] | None = None) -> None:
     merged = dict(os.environ)
     if env:
         merged.update(env)
     command = ["git", *args]
-    result = subprocess.run(
-        command,
-        cwd=repo,
-        check=False,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        env=merged,
-    )
+    attempts = 0
+    while True:
+        attempts += 1
+        result = subprocess.run(
+            command,
+            cwd=repo,
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env=merged,
+        )
+        if result.returncode == 0:
+            return
+        if (
+            attempts >= _FIXTURE_GIT_MAX_ATTEMPTS
+            or not _is_retryable_fixture_commit_failure(command, result)
+        ):
+            break
+        time.sleep(0.05 * attempts)
+
     if result.returncode != 0:
         rendered_command = subprocess.list2cmdline(
             [_sanitize_git_diagnostic(part) for part in command]
@@ -62,6 +92,7 @@ def _git(repo: Path, *args: str, env: dict[str, str] | None = None) -> None:
             "git helper failed\n"
             f"command: {rendered_command}\n"
             f"return code: {result.returncode}\n"
+            f"attempts: {attempts}\n"
             f"stdout:\n{stdout}\n"
             f"stderr:\n{stderr}"
         )
@@ -192,6 +223,40 @@ def test_git_does_not_retry_ambiguous_or_unrelated_failures(
 
     assert attempts == 1
     assert "attempts: 1" in str(caught.value)
+
+
+def test_git_stops_when_retryable_failure_is_followed_by_ambiguous_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    responses = [
+        subprocess.CompletedProcess(
+            ["git", "commit"],
+            returncode=128,
+            stdout="",
+            stderr="fatal: could not parse HEAD",
+        ),
+        subprocess.CompletedProcess(
+            ["git", "commit"],
+            returncode=128,
+            stdout="",
+            stderr="fatal: detected dubious ownership",
+        ),
+    ]
+    sleeps: list[float] = []
+
+    def _run(command, **kwargs):
+        return responses.pop(0)
+
+    monkeypatch.setattr(subprocess, "run", _run)
+    monkeypatch.setattr(time, "sleep", sleeps.append)
+
+    with pytest.raises(AssertionError) as caught:
+        _git(tmp_path, "commit", "--allow-empty", "-m", "x")
+
+    assert responses == []
+    assert sleeps == [0.05]
+    assert "attempts: 2" in str(caught.value)
+    assert "fatal: detected dubious ownership" in str(caught.value)
 
 
 def _commit(repo: Path, subject: str, *, env: dict[str, str] | None = None) -> None:
