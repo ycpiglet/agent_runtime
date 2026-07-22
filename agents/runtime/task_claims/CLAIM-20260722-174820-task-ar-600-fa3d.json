@@ -49,6 +49,7 @@
   ],
   "target_files": [
     "src/agent_runtime/templates/project/scripts/auto_merge.py",
-    "new:tests/test_auto_merge_execution.py"
+    "new:tests/test_auto_merge_execution.py",
+    "tests/fixtures/host/agent_runtime.lock.json"
   ]
 }

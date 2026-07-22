@@ -14,6 +14,11 @@
         },
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-22-task-ar-600-host-lock-scope-amendment.md",
+          "value": "804689d43c6f0564abf23b4a3e870224a86b2fb265c1beb74445701d094c8ceb"
+        },
+        {
+          "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
           "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
         },
@@ -36,10 +41,15 @@
           "kind": "absent",
           "path": "tests/test_auto_merge_execution.py",
           "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/fixtures/host/agent_runtime.lock.json",
+          "value": "bd16c4ecd35595811a1b5af1daec27b7e9f81c5983e560a2d39abc13349c67b1"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-22-release-impact-verification-command-correction.md",
-      "recorded_at": "2026-07-22T17:47:47+09:00",
+      "design_record": "reviews/REVIEW-2026-07-22-task-ar-600-host-lock-scope-amendment.md",
+      "recorded_at": "2026-07-22T17:51:13+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-AUTO-MERGE-INTEGRITY"
     },
@@ -591,5 +601,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-22T17:47:47+09:00"
+  "updated_at": "2026-07-22T17:51:13+09:00"
 }
