@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY
 registered_at: 2026-07-23T03:09:36+09:00
 created_at: 2026-07-23T03:09:36+09:00
-updated_at: 2026-07-23T03:09:36+09:00
+updated_at: 2026-07-23T03:37:58+09:00
 title: Retry recognized pre-commit HEAD parse transients in release-auto fixtures
 status: planned
 priority: P0
@@ -30,11 +30,20 @@ summary: Bound retry recovery to the observed `fatal: could not parse HEAD` fixt
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python -m pytest tests/test_release_auto_noncritical.py tests/test_release_cadence_trigger.py -q
+  - python -m pytest tests/test_backlog_board_tasksets.py -q
+  - python scripts/taskset_work_gate.py --check
 tags:
   - github-320
   - ci-flake
   - release-auto
   - test-fixture
+verification_status: passed
+verified_at: 2026-07-23T03:37:58+09:00
+verified_by: codex-root-task-ar-615
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-task-ar-615-20260723033758.json
 ---
 
 # TASK-AR-615 - Retry recognized pre-commit HEAD parse transients in release-auto fixtures

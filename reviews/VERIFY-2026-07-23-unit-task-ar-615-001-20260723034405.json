@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-23-unit-task-ar-615-001-20260723034405",
+  "work_id": "UNIT-TASK-AR-615-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-615/UNIT-TASK-AR-615-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-615",
+  "unit_id": "UNIT-TASK-AR-615-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-23T03:44:05+09:00",
+  "verified_by": "codex-root-task-ar-615",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_release_auto_noncritical.py tests/test_release_cadence_trigger.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T03:44:05+09:00",
+      "finished_at": "2026-07-23T03:50:06+09:00",
+      "stdout": "........................................................................ [ 87%]\n..........                                                               [100%]\n82 passed in 359.95s (0:05:59)\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest tests/test_backlog_board_tasksets.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T03:50:06+09:00",
+      "finished_at": "2026-07-23T03:50:09+09:00",
+      "stdout": ".........                                                                [100%]\n9 passed in 0.91s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/taskset_work_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T03:50:09+09:00",
+      "finished_at": "2026-07-23T03:50:09+09:00",
+      "stdout": "taskset-work-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-615\nfindings=0\n",
+      "stderr": ""
+    }
+  ]
+}
