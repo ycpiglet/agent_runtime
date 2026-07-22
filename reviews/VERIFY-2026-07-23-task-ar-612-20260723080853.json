@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-23-task-ar-612-20260723080853",
+  "work_id": "TASK-AR-612",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-612.md",
+  "kind": "task",
+  "task_id": "TASK-AR-612",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-23T08:08:53+09:00",
+  "verified_by": "codex-root-task-ar-612",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_taskset_dispatcher.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T08:08:53+09:00",
+      "finished_at": "2026-07-23T08:09:33+09:00",
+      "stdout": "........................................................................ [ 76%]\n......................                                                   [100%]\n94 passed in 38.85s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/regen_host_lock_if_needed.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T08:09:33+09:00",
+      "finished_at": "2026-07-23T08:09:34+09:00",
+      "stdout": "OK: C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-612\\tests\\fixtures\\host\\agent_runtime.lock.json is up to date.\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/taskset_work_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T08:09:34+09:00",
+      "finished_at": "2026-07-23T08:09:34+09:00",
+      "stdout": "taskset-work-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-612\nfindings=0\n",
+      "stderr": ""
+    }
+  ]
+}

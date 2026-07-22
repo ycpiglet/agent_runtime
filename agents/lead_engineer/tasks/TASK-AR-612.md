@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-TERMINAL-STATUS-START-GUARD
 registered_at: 2026-07-22T21:43:00+09:00
 created_at: 2026-07-22T21:43:00+09:00
-updated_at: 2026-07-23T08:02:09+09:00
+updated_at: 2026-07-23T08:08:53+09:00
 started_at: 2026-07-23T08:02:09+09:00
 title: Block taskset restart of closed and released records
 status: in_progress
@@ -31,8 +31,17 @@ summary: Make closed/released tasks and their registered Korean aliases terminal
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python -m pytest tests/test_taskset_dispatcher.py -q
+  - python scripts/regen_host_lock_if_needed.py --check
+  - python scripts/taskset_work_gate.py --check
 tags:
   - work-cli-created
+verification_status: passed
+verified_at: 2026-07-23T08:08:53+09:00
+verified_by: codex-root-task-ar-612
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-task-ar-612-20260723080853.json
 ---
 
 # TASK-AR-612 - Block taskset restart of closed and released records

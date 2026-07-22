@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T07:52:08+09:00
-record_count: 801
+generated_at: 2026-07-23T08:09:35+09:00
+record_count: 803
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `801` review and evidence records under `reviews/`.
+- Summary: indexed `803` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `801` files |
+| Reviews covered | pass | `803` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -710,6 +710,7 @@ record_count: 801
 | `reviews/VERIFY-2026-07-23-task-ar-608-20260723064958.json` | `VERIFY-2026-07-23-task-ar-608-20260723064958` | json | record | n/a | VERIFY-2026-07-23-task-ar-608-20260723064958 |
 | `reviews/VERIFY-2026-07-23-task-ar-609-20260723072306.json` | `VERIFY-2026-07-23-task-ar-609-20260723072306` | json | record | n/a | VERIFY-2026-07-23-task-ar-609-20260723072306 |
 | `reviews/VERIFY-2026-07-23-task-ar-609-20260723073137.json` | `VERIFY-2026-07-23-task-ar-609-20260723073137` | json | record | n/a | VERIFY-2026-07-23-task-ar-609-20260723073137 |
+| `reviews/VERIFY-2026-07-23-task-ar-612-20260723080853.json` | `VERIFY-2026-07-23-task-ar-612-20260723080853` | json | record | n/a | VERIFY-2026-07-23-task-ar-612-20260723080853 |
 | `reviews/VERIFY-2026-07-23-task-ar-613-20260723014533.json` | `VERIFY-2026-07-23-task-ar-613-20260723014533` | json | record | n/a | VERIFY-2026-07-23-task-ar-613-20260723014533 |
 | `reviews/VERIFY-2026-07-23-task-ar-613-20260723022608.json` | `VERIFY-2026-07-23-task-ar-613-20260723022608` | json | record | n/a | VERIFY-2026-07-23-task-ar-613-20260723022608 |
 | `reviews/VERIFY-2026-07-23-task-ar-614-20260723043608.json` | `VERIFY-2026-07-23-task-ar-614-20260723043608` | json | record | n/a | VERIFY-2026-07-23-task-ar-614-20260723043608 |
@@ -722,6 +723,7 @@ record_count: 801
 | `reviews/VERIFY-2026-07-23-unit-task-ar-609-001-20260723072326.json` | `VERIFY-2026-07-23-unit-task-ar-609-001-20260723072326` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-609-001-20260723072326 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-609-001-20260723073123.json` | `VERIFY-2026-07-23-unit-task-ar-609-001-20260723073123` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-609-001-20260723073123 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-609-001-20260723073144.json` | `VERIFY-2026-07-23-unit-task-ar-609-001-20260723073144` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-609-001-20260723073144 |
+| `reviews/VERIFY-2026-07-23-unit-task-ar-612-001-20260723080740.json` | `VERIFY-2026-07-23-unit-task-ar-612-001-20260723080740` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-612-001-20260723080740 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-613-001-20260723015000.json` | `VERIFY-2026-07-23-unit-task-ar-613-001-20260723015000` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-613-001-20260723015000 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-613-001-20260723023209.json` | `VERIFY-2026-07-23-unit-task-ar-613-001-20260723023209` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-613-001-20260723023209 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-614-001-20260723043928.json` | `VERIFY-2026-07-23-unit-task-ar-614-001-20260723043928` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-614-001-20260723043928 |
