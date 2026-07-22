@@ -9,7 +9,8 @@ kind: task
 parent_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 registered_at: 2026-07-22T17:45:00+09:00
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T17:45:00+09:00
+updated_at: 2026-07-22T22:42:20+09:00
+started_at: 2026-07-22T22:17:46+09:00
 title: Make the generated session dashboard self-contained
 status: planned
 priority: P1
@@ -25,14 +26,22 @@ reservation_id: RES-20260722-174500-dbaf8585-03
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
 created_by: codex-root-planner
-summary: Close GitHub #294 by making the template W0 dashboard work when repository-only scripts/work.py is absent.
+summary: Close GitHub issue 294 by making the template W0 dashboard work when repository-only scripts/work.py is absent.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python -m pytest tests/test_session_dashboard.py -q
+  - python scripts/regen_host_lock_if_needed.py --check
 tags:
   - github-294
   - generated-host
   - session-dashboard
+verification_status: passed
+verified_at: 2026-07-22T22:42:20+09:00
+verified_by: codex-root-task-ar-605
+evidence_refs:
+  - reviews/VERIFY-2026-07-22-task-ar-605-20260722224220.json
 ---
 
 # TASK-AR-605 - Make the generated session dashboard self-contained
