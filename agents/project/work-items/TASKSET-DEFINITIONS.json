@@ -86,6 +86,12 @@
       "order": 601
     },
     {
+      "task_set_id": "TASKSET-AR-PR303-CI-SCHEMA-RECOVERY",
+      "display_name": "CI Schema Recovery",
+      "summary": "Normalize the legacy TASK-AR-594 evidence reference into the canonical work-item schema.",
+      "order": 602
+    },
+    {
       "task_set_id": "TASKSET-AR-SELF-IMPROVEMENT-CADENCE",
       "display_name": "Self Improvement Cadence",
       "summary": "Detect low-frequency roles and runtime assets, run review/retro/meeting/seminar/compound/doc-steward/scribe cycles from evidence, and publish measurable maturity signals.",

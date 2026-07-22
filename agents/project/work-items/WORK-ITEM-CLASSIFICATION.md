@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-22T17:45:29+09:00
-record_count: 410
+generated_at: 2026-07-22T18:26:58+09:00
+record_count: 414
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `410` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `414` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `27` records |
-| Tasksets | pass | `51` records |
-| Tasks | pass | `273` records |
-| Units | pass | `59` records |
+| Initiatives | pass | `28` records |
+| Tasksets | pass | `52` records |
+| Tasks | pass | `274` records |
+| Units | pass | `60` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -449,6 +449,10 @@ record_count: 410
 | 26.1.6.1 | Unit 26.1.6.1 | unit | `UNIT-TASK-AR-608-001` | `TASK-AR-608` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-608/UNIT-TASK-AR-608-001.md` | UNIT-TASK-AR-608-001 - Make frontmatter comment scanning quote-aware |
 | 26.1.7 | Task 26.1.7 | task | `TASK-AR-609` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-609.md` | Close GitHub #300 by preventing taskset records from being duplicated into the initia… |
 | 26.1.7.1 | Unit 26.1.7.1 | unit | `UNIT-TASK-AR-609-001` | `TASK-AR-609` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-609/UNIT-TASK-AR-609-001.md` | UNIT-TASK-AR-609-001 - Filter classifier initiative collection by record kind |
+| 27 | Initiative 27 | initiative | `INIT-AR-PR303-CI-SCHEMA-RECOVERY` | - | active | `agents/project/initiatives/INIT-AR-PR303-CI-SCHEMA-RECOVERY.md` | PR 303 CI Schema Recovery |
+| 27.1 | Taskset 27.1 | taskset | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | `INIT-AR-PR303-CI-SCHEMA-RECOVERY` | active | `BACKLOG-BOARD.md` | CI Schema Recovery |
+| 27.1.1 | Task 27.1.1 | task | `TASK-AR-610` | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | planned | `agents/lead_engineer/tasks/TASK-AR-610.md` | Make the existing TASK-AR-594 record satisfy the canonical work-item schema while pre… |
+| 27.1.1.1 | Unit 27.1.1.1 | unit | `UNIT-TASK-AR-610-001` | `TASK-AR-610` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-610/UNIT-TASK-AR-610-001.md` | UNIT-TASK-AR-610-001 - Fold the legacy failure link into canonical evidence refs |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.
