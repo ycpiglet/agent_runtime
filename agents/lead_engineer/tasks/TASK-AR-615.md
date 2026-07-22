@@ -10,6 +10,7 @@ parent_id: TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY
 registered_at: 2026-07-23T03:09:36+09:00
 created_at: 2026-07-23T03:09:36+09:00
 updated_at: 2026-07-23T04:15:10+09:00
+started_at: 2026-07-23T03:25:49+09:00
 title: Retry recognized pre-commit HEAD parse transients in release-auto fixtures
 status: completed
 priority: P0

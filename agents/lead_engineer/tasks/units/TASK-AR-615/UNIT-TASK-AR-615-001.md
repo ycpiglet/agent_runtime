@@ -14,6 +14,7 @@ verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-23T03:09:36+09:00
 updated_at: 2026-07-23T04:15:08+09:00
+started_at: 2026-07-23T03:25:49+09:00
 origin_type: ci_failure
 origin_ref: reviews/REVIEW-2026-07-23-release-auto-fixture-head-recovery-plan.md
 created_by: codex-root-planner
