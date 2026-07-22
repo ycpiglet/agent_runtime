@@ -154,6 +154,33 @@ def test_git_recovers_one_transient_fixture_commit_head_parse_failure(
     assert sleeps == [0.05]
 
 
+def test_git_recovers_after_three_transient_fixture_commit_head_parse_failures(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    attempts = 0
+    sleeps: list[float] = []
+
+    def _run(command, **kwargs):
+        nonlocal attempts
+        attempts += 1
+        if attempts <= 3:
+            return subprocess.CompletedProcess(
+                command,
+                returncode=128,
+                stdout="",
+                stderr="fatal: could not parse HEAD\n",
+            )
+        return subprocess.CompletedProcess(command, returncode=0, stdout="", stderr="")
+
+    monkeypatch.setattr(subprocess, "run", _run)
+    monkeypatch.setattr(time, "sleep", sleeps.append)
+
+    _git(tmp_path, "commit", "--allow-empty", "-q", "-m", "chore: tick 36")
+
+    assert attempts == 4
+    assert sleeps == [0.1, 0.2, 0.4]
+
+
 def test_git_exhausts_recognized_fixture_commit_head_parse_failure(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
