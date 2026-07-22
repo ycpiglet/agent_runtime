@@ -1,0 +1,101 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "review_finding",
+  "origin_ref": "reviews/REVIEW-2026-07-23-self-eval-query-integrity-plan.md",
+  "created_by": "codex-root-planner",
+  "now": "2026-07-23T02:23:56+09:00",
+  "initiative": {
+    "id": "INIT-AR-SELF-EVAL-QUERY-INTEGRITY",
+    "title": "Self-Eval Query Integrity",
+    "summary": "Prevent exhausted Git queries from being reported as successful zero-valued self-evaluation metrics.",
+    "owner": "lead-engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY",
+    "display_name": "Self-Eval Query Integrity",
+    "summary": "Make self-eval fail loud and preserve structured evidence whenever its shared Git queries exhaust retries.",
+    "order": 724,
+    "plan_slug": "2026-07-23-self-eval-query-integrity",
+    "planner_model_tier": "planner_high",
+    "worker_model_tier": "worker_standard",
+    "reviewer_model_tier": "reviewer_standard"
+  },
+  "tasks": [
+    {
+      "title": "Reject partial self-eval metrics after exhausted Git queries",
+      "goal": "Close GitHub issue 318 by preventing self-eval from converting exhausted Git queries into passing zero or empty metrics.",
+      "scope": "Change only self-eval query lifecycle/error propagation and focused regressions. Preserve fixed-metric formulas, WORK-SCHEMA collection, cadence policy, and non-mutating behavior.",
+      "priority": "P0",
+      "difficulty": "M",
+      "est_hours": 2,
+      "est_tokens": 7000,
+      "owner": "lead_engineer",
+      "team": "agent-runtime-core",
+      "summary": "Surface shared Git query exhaustion as a self-eval error instead of a passing partial report.",
+      "planner_model_tier": "planner_high",
+      "worker_model_tier": "worker_standard",
+      "reviewer_model_tier": "reviewer_standard",
+      "tags": [
+        "github-318",
+        "self-eval",
+        "git-query",
+        "data-integrity"
+      ],
+      "acceptance": [
+        "Every exhausted direct Git query invalidates the aggregate self-eval report regardless of other collected metrics.",
+        "The report preserves sanitized structured git_query_errors and does not label partial Git-derived values as collected.",
+        "Successful and deterministic no-baseline fixtures preserve their current semantics.",
+        "Self-eval, cadence, semantic-version, host-lock, and taskset gates pass."
+      ],
+      "verification": [
+        "python -m pytest tests/test_self_eval_metrics.py tests/test_release_cadence_trigger.py tests/test_semver_bump_property.py -q",
+        "python scripts/regen_host_lock_if_needed.py --check",
+        "python scripts/taskset_work_gate.py --check"
+      ],
+      "units": [
+        {
+          "title": "Propagate shared Git query errors through self-eval",
+          "context": "TASK-AR-613 W4b independently reproduced a tagged self-eval window where rev-list exhausted rc 128 three times but the report remained pass with commit_count zero and no error evidence. GitHub issue 318 tracks the defect. The release-cadence unit explicitly forbids modifying unrelated status consumers, so this is a separate registered remediation.",
+          "inputs": [
+            "reviews/REVIEW-2026-07-23-self-eval-query-integrity-plan.md",
+            "reviews/W4B-2026-07-23-TASK-AR-613.md",
+            "reviews/ROLE-REVIEW-2026-07-23-TASK-AR-613-SKEPTIC.md",
+            "GitHub issue 318",
+            "scripts/self_eval_metrics.py",
+            "scripts/release_cadence_trigger.py"
+          ],
+          "target_files": [
+            "scripts/self_eval_metrics.py",
+            "tests/test_self_eval_metrics.py"
+          ],
+          "scope": "Add failure-first coverage for every self-eval call into the shared cadence Git helper, isolate query-error state at report start, and return a loud non-mutating error report with sanitized structured evidence whenever any query exhausts retries.",
+          "steps": [
+            "Reproduce an exhausted baseline, subject, count, merge-count, tag-time, and ref-timestamp query while other fixture data remains valid.",
+            "Reset shared query-error state at self-eval report start and detect errors before returning any pass result.",
+            "Invalidate partial Git-derived metrics, preserve structured diagnostics, and add deterministic CLI output assertions.",
+            "Run focused and cross-consumer regressions, host-lock validation, and independent W4b."
+          ],
+          "acceptance": [
+            "Three failed attempts for any direct self-eval Git query yield status error/unevaluated and structured evidence.",
+            "No partial Git-derived metric is marked collected after a query error.",
+            "A successful tagged window and a genuine no-tag repository keep their existing results.",
+            "Release cadence behavior remains unchanged and all registered verification commands pass."
+          ],
+          "verification": [
+            "python -m pytest tests/test_self_eval_metrics.py tests/test_release_cadence_trigger.py tests/test_semver_bump_property.py -q",
+            "python scripts/regen_host_lock_if_needed.py --check",
+            "python scripts/taskset_work_gate.py --check"
+          ],
+          "handoff": "Report failure-first evidence by query type, state isolation behavior, error schema and CLI output, successful/no-tag compatibility, cross-consumer regression results, and independent W4b.",
+          "stop_condition": "Stop if truthful self-eval reporting requires changing cadence thresholds, version policy, or unrelated WORK-SCHEMA metric formulas.",
+          "escalation_triggers": [
+            "reliability",
+            "cross_cutting",
+            "data_integrity"
+          ]
+        }
+      ]
+    }
+  ]
+}

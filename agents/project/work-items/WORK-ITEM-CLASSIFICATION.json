@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-23T01:17:16+09:00",
-  "record_count": 426,
+  "generated_at": "2026-07-23T02:24:40+09:00",
+  "record_count": 430,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4689,6 +4689,50 @@
       "title": "UNIT-TASK-AR-613-001 - Classify and retry unexpected non-zero cadence queries",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-613/UNIT-TASK-AR-613-001.md",
       "parent_id": "TASK-AR-613",
+      "status": "worker_ready"
+    },
+    {
+      "key": "initiative:INIT-AR-SELF-EVAL-QUERY-INTEGRITY",
+      "level": "initiative",
+      "number": "31",
+      "label": "Initiative 31",
+      "id": "INIT-AR-SELF-EVAL-QUERY-INTEGRITY",
+      "title": "Self-Eval Query Integrity",
+      "path": "agents/project/initiatives/INIT-AR-SELF-EVAL-QUERY-INTEGRITY.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY",
+      "level": "taskset",
+      "number": "31.1",
+      "label": "Taskset 31.1",
+      "id": "TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY",
+      "title": "Self-Eval Query Integrity",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-SELF-EVAL-QUERY-INTEGRITY",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-614",
+      "level": "task",
+      "number": "31.1.1",
+      "label": "Task 31.1.1",
+      "id": "TASK-AR-614",
+      "title": "Close GitHub issue 318 by preventing self-eval from converting exhausted Git queries…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-614.md",
+      "parent_id": "TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-614-001",
+      "level": "unit",
+      "number": "31.1.1.1",
+      "label": "Unit 31.1.1.1",
+      "id": "UNIT-TASK-AR-614-001",
+      "title": "UNIT-TASK-AR-614-001 - Propagate shared Git query errors through self-eval",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-614/UNIT-TASK-AR-614-001.md",
+      "parent_id": "TASK-AR-614",
       "status": "worker_ready"
     }
   ]

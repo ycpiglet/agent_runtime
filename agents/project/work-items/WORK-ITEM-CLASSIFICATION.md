@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-23T01:17:16+09:00
-record_count: 426
+generated_at: 2026-07-23T02:24:40+09:00
+record_count: 430
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `426` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `430` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `31` records |
-| Tasksets | pass | `55` records |
-| Tasks | pass | `277` records |
-| Units | pass | `63` records |
+| Initiatives | pass | `32` records |
+| Tasksets | pass | `56` records |
+| Tasks | pass | `278` records |
+| Units | pass | `64` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -465,6 +465,10 @@ record_count: 426
 | 30.1 | Taskset 30.1 | taskset | `TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY` | `INIT-AR-RELEASE-CADENCE-QUERY-RECOVERY` | active | `BACKLOG-BOARD.md` | Release Cadence Query Recovery |
 | 30.1.1 | Task 30.1.1 | task | `TASK-AR-613` | `TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY` | planned | `agents/lead_engineer/tasks/TASK-AR-613.md` | Close GitHub issue 316 by preventing a valid tagged cadence from collapsing into rele… |
 | 30.1.1.1 | Unit 30.1.1.1 | unit | `UNIT-TASK-AR-613-001` | `TASK-AR-613` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-613/UNIT-TASK-AR-613-001.md` | UNIT-TASK-AR-613-001 - Classify and retry unexpected non-zero cadence queries |
+| 31 | Initiative 31 | initiative | `INIT-AR-SELF-EVAL-QUERY-INTEGRITY` | - | active | `agents/project/initiatives/INIT-AR-SELF-EVAL-QUERY-INTEGRITY.md` | Self-Eval Query Integrity |
+| 31.1 | Taskset 31.1 | taskset | `TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY` | `INIT-AR-SELF-EVAL-QUERY-INTEGRITY` | active | `BACKLOG-BOARD.md` | Self-Eval Query Integrity |
+| 31.1.1 | Task 31.1.1 | task | `TASK-AR-614` | `TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-614.md` | Close GitHub issue 318 by preventing self-eval from converting exhausted Git queries… |
+| 31.1.1.1 | Unit 31.1.1.1 | unit | `UNIT-TASK-AR-614-001` | `TASK-AR-614` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-614/UNIT-TASK-AR-614-001.md` | UNIT-TASK-AR-614-001 - Propagate shared Git query errors through self-eval |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

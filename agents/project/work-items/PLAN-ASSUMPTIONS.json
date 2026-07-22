@@ -540,6 +540,34 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-23-self-eval-query-integrity-plan.md",
+          "value": "2168da6b9d696492871e2847cfd4b832952b375bbac6490372731f30c0581c2c"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/self_eval_metrics.py",
+          "value": "732c46380d73c145ac3fafe97b497acb25a1bb940ea7d200a03e7d044fb07fda"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-23-self-eval-query-integrity-plan.md",
+      "recorded_at": "2026-07-23T02:24:41+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-17-taskset-ar-self-improvement-cadence-t3-replan-after-report.md",
           "value": "0258f24e5deb282038df779fb900c7dbf6d0d3333d1fdcbe966f98659f23d44a"
         },
@@ -678,5 +706,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-23T01:17:16+09:00"
+  "updated_at": "2026-07-23T02:24:41+09:00"
 }

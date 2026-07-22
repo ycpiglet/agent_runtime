@@ -968,8 +968,27 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-614",
+      "expires_at": "2026-07-24T02:23:56+09:00",
+      "fulfilled_at": "2026-07-23T02:23:56+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-614.md",
+      "fulfilled_task_id": "TASK-AR-614",
+      "fulfilled_task_uid": "81421501-db98-4020-8aea-6003710b6f14",
+      "initiative_id": "INIT-AR-SELF-EVAL-QUERY-INTEGRITY",
+      "kind": "task",
+      "owner_id": "codex-root-planner",
+      "reason": "work registration TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY",
+      "reservation_group_id": "RES-20260723-022356-195470fd",
+      "reservation_id": "RES-20260723-022356-195470fd-01",
+      "reserved_at": "2026-07-23T02:23:56+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-07-23T01:16:34+09:00"
+  "updated_at": "2026-07-23T02:23:56+09:00"
 }
