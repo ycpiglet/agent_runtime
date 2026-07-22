@@ -9,11 +9,12 @@ task_id: TASK-AR-617
 task_set_id: TASKSET-AR-WORK-CLI-INTEGRITY
 initiative_id: INIT-AR-WORK-CLI-INTEGRITY
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-23T08:40:51+09:00
-updated_at: 2026-07-23T08:40:51+09:00
+updated_at: 2026-07-23T08:42:50+09:00
+started_at: 2026-07-23T08:42:50+09:00
 origin_type: review_finding
 origin_ref: reviews/REVIEW-2026-07-23-work-cli-integrity-design.md
 created_by: codex-root-planner

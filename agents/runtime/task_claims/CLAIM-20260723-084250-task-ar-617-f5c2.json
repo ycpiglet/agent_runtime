@@ -1,0 +1,56 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260723-084250-task-ar-617-f5c2",
+  "task_id": "TASK-AR-617",
+  "agent_role": "lead-engineer",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "codex-root-task-ar-617",
+  "display_name": "lead_engineer@orchestrator-01",
+  "callsite_id": "codex-root-20260723",
+  "pane_id": "root",
+  "mode": "orchestrator",
+  "status": "claimed",
+  "task_set_id": "TASKSET-AR-WORK-CLI-INTEGRITY",
+  "active_scope": "TASKSET-AR-WORK-CLI-INTEGRITY",
+  "scope_transition_approved": true,
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "unit_id": "UNIT-TASK-AR-617-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-617/UNIT-TASK-AR-617-001.md",
+  "model_tier": "worker_standard",
+  "wip_slot": 0,
+  "stop_condition": "Stop if exact value preservation requires replacing the shared parser or changing canonical work schema.",
+  "phase": "planning",
+  "progress_pct": 5,
+  "step_index": 1,
+  "step_total": 7,
+  "status_text": "T2 passed; preparing frontmatter round-trip failure-first coverage",
+  "worktree_path": ".worktrees/TASK-AR-617",
+  "branch": "codex/task-ar-617-frontmatter-roundtrip",
+  "claimed_at": "2026-07-23T08:42:50+09:00",
+  "last_heartbeat": "2026-07-23T08:42:50+09:00",
+  "updated_at": "2026-07-23T08:42:50+09:00",
+  "expires_at": "2026-07-23T09:42:50+09:00",
+  "lease": {
+    "claimed_at": "2026-07-23T08:42:50+09:00",
+    "heartbeat_at": "2026-07-23T08:42:50+09:00",
+    "expires_at": "2026-07-23T09:42:50+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260723-084250-task-ar-617-f5c2.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260723-084250-task-ar-617-f5c2.log.md",
+  "allow_parallel_task_set": false,
+  "tags": [
+    "work-cli",
+    "frontmatter"
+  ],
+  "escalation_triggers": [
+    "data_integrity",
+    "cross_cutting",
+    "ambiguity"
+  ],
+  "target_files": [
+    "scripts/work.py",
+    "tests/test_work_registration.py",
+    "tests/test_work_verify.py",
+    "tests/test_work_close.py"
+  ]
+}

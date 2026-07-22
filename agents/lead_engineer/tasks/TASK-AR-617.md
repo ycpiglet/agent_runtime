@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-WORK-CLI-INTEGRITY
 registered_at: 2026-07-23T08:40:51+09:00
 created_at: 2026-07-23T08:40:51+09:00
-updated_at: 2026-07-23T08:40:51+09:00
+updated_at: 2026-07-23T08:42:50+09:00
+started_at: 2026-07-23T08:42:50+09:00
 title: Preserve work frontmatter values across lifecycle rewrites
-status: planned
+status: in_progress
 priority: P0
 difficulty: M
 est_hours: 3
