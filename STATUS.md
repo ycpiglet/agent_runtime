@@ -5,7 +5,8 @@
 - Completed: PR #322 merged at `d0ae9ac89c635ebd4e29646db43f7c92841ad9b2`; final PR run `29949646217` and post-merge main run `29949869950` passed Python 3.10, 3.11, and 3.12 on their first attempts, and GitHub #320 is closed.
 - Contract: the release-auto test fixture retries only the exact pre-commit `fatal: could not parse HEAD` result for `git commit`, rc 128, and logically empty stdout; recovery is capped at three attempts and all ambiguous mutations fail closed.
 - Quality loop: failure-first provenance, task/unit W4a at 82 release-auto/cadence tests plus 9 taskset tests, independent W4b, skeptic W4b, real-repository non-duplication, secret sanitization, and the post-CI evidence-index delta all finished with APPROVE.
-- Next: execute GitHub #318 / P0 `TASK-AR-614` in `TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY`, then TASK-AR-608, TASK-AR-609, terminal-status residual TASK-AR-612, and the v0.7.0 release TASK-AR-602.
+- Active: claim `CLAIM-20260723-042722-task-ar-614-bf84` executes GitHub #318 / P0 `TASK-AR-614` in `TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY`; T2 plan-assumption revalidation passed before claim creation.
+- Next: complete TASK-AR-614, then TASK-AR-608, TASK-AR-609, terminal-status residual TASK-AR-612, and the v0.7.0 release TASK-AR-602.
 
 ## 2026-07-23 - TASK-AR-613/#316 complete; TASK-AR-615 active after main CI fixture failure
 

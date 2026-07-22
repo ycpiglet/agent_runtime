@@ -397,8 +397,25 @@ def build_report(
         "mutation_boundary": MUTATION_BOUNDARY,
     }
 
+    # The cadence helper owns process-local query diagnostics. Self-eval is a
+    # separate report boundary, so stale failures from an earlier consumer or
+    # invocation must never contaminate this evaluation.
+    cadence._QUERY_ERRORS.clear()
     resolved_from = from_ref or _latest_tag(root)
     if resolved_from is None:
+        if cadence._QUERY_ERRORS:
+            base.update(
+                {
+                    "status": "error",
+                    "evaluation": "unevaluated",
+                    "from_ref": None,
+                    "to_ref": to_ref,
+                    "reason": "git-query-error",
+                    "fixed_metrics": None,
+                    "git_query_errors": list(cadence._QUERY_ERRORS),
+                }
+            )
+            return base
         base.update(
             {
                 "status": "pass",
@@ -422,6 +439,26 @@ def build_report(
     rework = _rework_count(subjects)
     merges = _merge_commit_count(root, rng)
     days = _days_since_tag(root, resolved_from, now_ts=now_ts)
+
+    # Resolve both window bounds before accepting any metric. A missing bound
+    # is as integrity-sensitive as a missing count because WORK-SCHEMA records
+    # would otherwise be filtered against a partial/open interval.
+    lo = _ref_timestamp(root, resolved_from)
+    hi = _ref_timestamp(root, to_ref)
+    if cadence._QUERY_ERRORS:
+        base.update(
+            {
+                "status": "error",
+                "evaluation": "unevaluated",
+                "from_ref": resolved_from,
+                "to_ref": to_ref,
+                "range": rng,
+                "reason": "git-query-error",
+                "fixed_metrics": None,
+                "git_query_errors": list(cadence._QUERY_ERRORS),
+            }
+        )
+        return base
 
     rework_ratio = (rework / commit_count) if commit_count else 0.0
     first_pass_proxy = max(0.0, 1.0 - rework_ratio) if commit_count else None
@@ -453,8 +490,6 @@ def build_report(
 
     # WORK-SCHEMA-derived metrics: read the real closure/measurement source for
     # the same window (bounded by the from/to ref commit timestamps).
-    lo = _ref_timestamp(root, resolved_from)
-    hi = _ref_timestamp(root, to_ref)
     fixed_metrics.update(_work_schema_metrics(root, lo, hi))
 
     base.update(
@@ -475,6 +510,17 @@ def build_report(
 
 
 def _print_report(report: dict[str, Any]) -> None:
+    if report.get("reason") == "git-query-error":
+        print(_ascii("self-eval: ERROR git-query-error (metrics could not be evaluated)"))
+        for error in report.get("git_query_errors", []):
+            print(
+                _ascii(
+                    f"self-eval:   {error['command']}: {error['error']}"
+                    f" returncode={error['returncode']} attempts={error['attempts']}"
+                )
+            )
+        print(_ascii(f"self-eval: {MUTATION_BOUNDARY}"))
+        return
     if report.get("reason") == "no-baseline-tag":
         print(_ascii("self-eval: pass no-baseline-tag (no tag found; nothing to compare)"))
         return

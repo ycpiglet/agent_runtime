@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-23T04:15:11+09:00
+generated_at: 2026-07-23T04:28:30+09:00
 record_count: 434
 ---
 
@@ -467,8 +467,8 @@ record_count: 434
 | 30.1.1.1 | Unit 30.1.1.1 | unit | `UNIT-TASK-AR-613-001` | `TASK-AR-613` | completed | `agents/lead_engineer/tasks/units/TASK-AR-613/UNIT-TASK-AR-613-001.md` | UNIT-TASK-AR-613-001 - Classify and retry unexpected non-zero cadence queries |
 | 31 | Initiative 31 | initiative | `INIT-AR-SELF-EVAL-QUERY-INTEGRITY` | - | active | `agents/project/initiatives/INIT-AR-SELF-EVAL-QUERY-INTEGRITY.md` | Self-Eval Query Integrity |
 | 31.1 | Taskset 31.1 | taskset | `TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY` | `INIT-AR-SELF-EVAL-QUERY-INTEGRITY` | active | `BACKLOG-BOARD.md` | Self-Eval Query Integrity |
-| 31.1.1 | Task 31.1.1 | task | `TASK-AR-614` | `TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-614.md` | Close GitHub issue 318 by preventing self-eval from converting exhausted Git queries… |
-| 31.1.1.1 | Unit 31.1.1.1 | unit | `UNIT-TASK-AR-614-001` | `TASK-AR-614` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-614/UNIT-TASK-AR-614-001.md` | UNIT-TASK-AR-614-001 - Propagate shared Git query errors through self-eval |
+| 31.1.1 | Task 31.1.1 | task | `TASK-AR-614` | `TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY` | in_progress | `agents/lead_engineer/tasks/TASK-AR-614.md` | Close GitHub issue 318 by preventing self-eval from converting exhausted Git queries… |
+| 31.1.1.1 | Unit 31.1.1.1 | unit | `UNIT-TASK-AR-614-001` | `TASK-AR-614` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-614/UNIT-TASK-AR-614-001.md` | UNIT-TASK-AR-614-001 - Propagate shared Git query errors through self-eval |
 | 32 | Initiative 32 | initiative | `INIT-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY` | - | active | `agents/project/initiatives/INIT-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY.md` | Release-Auto Fixture HEAD Recovery |
 | 32.1 | Taskset 32.1 | taskset | `TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY` | `INIT-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY` | complete | `BACKLOG-BOARD.md` | Release-Auto Fixture HEAD Recovery |
 | 32.1.1 | Task 32.1.1 | task | `TASK-AR-615` | `TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY` | completed | `agents/lead_engineer/tasks/TASK-AR-615.md` | Close GitHub issue 320 by making the release-auto fixture recover from the observed t… |

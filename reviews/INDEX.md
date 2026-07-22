@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T04:15:12+09:00
-record_count: 774
+generated_at: 2026-07-23T04:52:03+09:00
+record_count: 778
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `774` review and evidence records under `reviews/`.
+- Summary: indexed `778` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `774` files |
+| Reviews covered | pass | `778` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -574,6 +574,7 @@ record_count: 774
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC` | md | record | fail | TASK-AR-606 Security and Cross-Platform Skeptic Review |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-607-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-607-SKEPTIC` | md | record | pass | TASK-AR-607 Skeptic and Adversarial Review |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-613-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-613-SKEPTIC` | md | record | fail | TASK-AR-613 Skeptic and Adversarial W4b |
+| `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-614-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-614-SKEPTIC` | md | record | pass | TASK-AR-614 Skeptic and Adversarial W4b |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-615-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-615-SKEPTIC` | md | record | pass | TASK-AR-615 Skeptic and Adversarial W4b |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SCRIBE-2026-06-21-business-operating-system.md` | `SCRIBE-2026-06-21-business-operating-system` | scribe | recorded | pass | Business Operating System Scribe Log |
@@ -699,10 +700,12 @@ record_count: 774
 | `reviews/VERIFY-2026-07-23-task-ar-607-20260723003910.json` | `VERIFY-2026-07-23-task-ar-607-20260723003910` | json | record | n/a | VERIFY-2026-07-23-task-ar-607-20260723003910 |
 | `reviews/VERIFY-2026-07-23-task-ar-613-20260723014533.json` | `VERIFY-2026-07-23-task-ar-613-20260723014533` | json | record | n/a | VERIFY-2026-07-23-task-ar-613-20260723014533 |
 | `reviews/VERIFY-2026-07-23-task-ar-613-20260723022608.json` | `VERIFY-2026-07-23-task-ar-613-20260723022608` | json | record | n/a | VERIFY-2026-07-23-task-ar-613-20260723022608 |
+| `reviews/VERIFY-2026-07-23-task-ar-614-20260723043608.json` | `VERIFY-2026-07-23-task-ar-614-20260723043608` | json | record | n/a | VERIFY-2026-07-23-task-ar-614-20260723043608 |
 | `reviews/VERIFY-2026-07-23-task-ar-615-20260723033758.json` | `VERIFY-2026-07-23-task-ar-615-20260723033758` | json | record | n/a | VERIFY-2026-07-23-task-ar-615-20260723033758 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-607-001-20260723003750.json` | `VERIFY-2026-07-23-unit-task-ar-607-001-20260723003750` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-607-001-20260723003750 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-613-001-20260723015000.json` | `VERIFY-2026-07-23-unit-task-ar-613-001-20260723015000` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-613-001-20260723015000 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-613-001-20260723023209.json` | `VERIFY-2026-07-23-unit-task-ar-613-001-20260723023209` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-613-001-20260723023209 |
+| `reviews/VERIFY-2026-07-23-unit-task-ar-614-001-20260723043928.json` | `VERIFY-2026-07-23-unit-task-ar-614-001-20260723043928` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-614-001-20260723043928 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-615-001-20260723034405.json` | `VERIFY-2026-07-23-unit-task-ar-615-001-20260723034405` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-615-001-20260723034405 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
@@ -805,6 +808,7 @@ record_count: 774
 | `reviews/W4B-2026-07-22-TASK-AR-611.md` | `W4B-2026-07-22-TASK-AR-611` | md | record | pass | TASK-AR-611 Independent W4b |
 | `reviews/W4B-2026-07-23-TASK-AR-607.md` | `W4B-2026-07-23-TASK-AR-607` | md | record | pass | TASK-AR-607 Independent W4b Verification |
 | `reviews/W4B-2026-07-23-TASK-AR-613.md` | `W4B-2026-07-23-TASK-AR-613` | md | record | fail | TASK-AR-613 Independent W4b Verification |
+| `reviews/W4B-2026-07-23-TASK-AR-614.md` | `W4B-2026-07-23-TASK-AR-614` | md | record | pass | TASK-AR-614 Independent W4b Verification |
 | `reviews/W4B-2026-07-23-TASK-AR-615.md` | `W4B-2026-07-23-TASK-AR-615` | md | record | pass | TASK-AR-615 Independent W4b Verification |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |

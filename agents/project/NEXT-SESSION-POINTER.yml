@@ -1,17 +1,22 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-23T04:15:10+09:00
+updated_at: 2026-07-23T04:27:22+09:00
 updated_by: codex-root
 current_state:
-  summary: "TASK-AR-615 is merged, independently approved, and closed; TASK-AR-614 is next to restore self-eval Git query integrity."
+  summary: "TASK-AR-614 is active to prevent exhausted shared Git queries from producing passing partial self-eval reports."
   status: active
   task_set_status: in_progress
   task_set_id: "TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY"
   step_index: 1
   step_total: 1
-  progress_pct: 0
-  status_text: "TASK-AR-614 is registered and ready for T2 revalidation and claim-first execution after TASK-AR-615 closeout."
+  progress_pct: 5
+  status_text: "TASK-AR-614 is claimed; reproducing shared self-eval Git query fail-open behavior before failure-first implementation."
 active_work:
-  current_agents: []
+  current_agents:
+    - claim_id: CLAIM-20260723-042722-task-ar-614-bf84
+      agent_role: lead-engineer
+      agent_instance_id: codex-root-task-ar-614
+      display_name: lead_engineer@orchestrator-01
+      callsite_id: codex-root-20260723
   current_teams: []
 resume:
   active_task: TASK-AR-614
@@ -23,7 +28,8 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260723-042722-task-ar-614-bf84.json
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
     active_claim: null

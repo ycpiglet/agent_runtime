@@ -1,0 +1,56 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260723-042722-task-ar-614-bf84",
+  "task_id": "TASK-AR-614",
+  "agent_role": "lead-engineer",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "codex-root-task-ar-614",
+  "display_name": "lead_engineer@orchestrator-01",
+  "callsite_id": "codex-root-20260723",
+  "pane_id": "root",
+  "mode": "orchestrator",
+  "status": "claimed",
+  "task_set_id": "TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY",
+  "active_scope": "TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY",
+  "scope_transition_approved": true,
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "unit_id": "UNIT-TASK-AR-614-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-614/UNIT-TASK-AR-614-001.md",
+  "model_tier": "worker_standard",
+  "wip_slot": 0,
+  "stop_condition": "Stop if truthful self-eval reporting requires changing cadence thresholds, version policy, or unrelated WORK-SCHEMA metric formulas.",
+  "phase": "implementation",
+  "progress_pct": 5,
+  "step_index": 1,
+  "step_total": 7,
+  "status_text": "TASK-AR-614 claimed; reproducing shared self-eval Git query fail-open behavior",
+  "worktree_path": ".worktrees/TASK-AR-614",
+  "branch": "codex/task-ar-614-self-eval-query-integrity",
+  "claimed_at": "2026-07-23T04:27:22+09:00",
+  "last_heartbeat": "2026-07-23T04:27:22+09:00",
+  "updated_at": "2026-07-23T04:27:22+09:00",
+  "expires_at": "2026-07-23T07:27:22+09:00",
+  "lease": {
+    "claimed_at": "2026-07-23T04:27:22+09:00",
+    "heartbeat_at": "2026-07-23T04:27:22+09:00",
+    "expires_at": "2026-07-23T07:27:22+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260723-042722-task-ar-614-bf84.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260723-042722-task-ar-614-bf84.log.md",
+  "allow_parallel_task_set": false,
+  "tags": [
+    "github-318",
+    "self-eval",
+    "git-query",
+    "data-integrity"
+  ],
+  "escalation_triggers": [
+    "reliability",
+    "cross_cutting",
+    "data_integrity"
+  ],
+  "target_files": [
+    "scripts/self_eval_metrics.py",
+    "tests/test_self_eval_metrics.py"
+  ]
+}
