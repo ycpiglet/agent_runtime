@@ -1,0 +1,56 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260722-221746-task-ar-605-d678",
+  "task_id": "TASK-AR-605",
+  "agent_role": "lead-engineer",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "codex-root-task-ar-605",
+  "display_name": "codex/task-ar-605",
+  "callsite_id": "codex-root-20260722",
+  "pane_id": "root",
+  "mode": "orchestrator",
+  "status": "claimed",
+  "task_set_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
+  "active_scope": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
+  "scope_transition_approved": true,
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "unit_id": "UNIT-TASK-AR-605-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-605/UNIT-TASK-AR-605-001.md",
+  "model_tier": "worker_standard",
+  "wip_slot": 0,
+  "stop_condition": "Stop before adding repository-only work.py or its transitive dependency graph to the template.",
+  "phase": "implementation",
+  "progress_pct": 5,
+  "step_index": 3,
+  "step_total": 7,
+  "status_text": "TASK-AR-605 claimed; adding failure-first clean-template W0 fallback coverage",
+  "worktree_path": ".worktrees/TASK-AR-605",
+  "branch": "codex/task-ar-605-session-dashboard-fallback",
+  "claimed_at": "2026-07-22T22:17:46+09:00",
+  "last_heartbeat": "2026-07-22T22:17:46+09:00",
+  "updated_at": "2026-07-22T22:17:46+09:00",
+  "expires_at": "2026-07-23T02:17:46+09:00",
+  "lease": {
+    "claimed_at": "2026-07-22T22:17:46+09:00",
+    "heartbeat_at": "2026-07-22T22:17:46+09:00",
+    "expires_at": "2026-07-23T02:17:46+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260722-221746-task-ar-605-d678.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260722-221746-task-ar-605-d678.log.md",
+  "allow_parallel_task_set": false,
+  "tags": [
+    "github-294",
+    "generated-host",
+    "session-dashboard"
+  ],
+  "escalation_triggers": [
+    "cross_cutting",
+    "data_integrity"
+  ],
+  "target_files": [
+    "scripts/session_dashboard.py",
+    "src/agent_runtime/templates/project/scripts/session_dashboard.py",
+    "tests/test_session_dashboard.py",
+    "tests/fixtures/host/agent_runtime.lock.json"
+  ]
+}

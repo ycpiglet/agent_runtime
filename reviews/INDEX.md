@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-22T21:44:08+09:00
-record_count: 730
+generated_at: 2026-07-22T22:17:33+09:00
+record_count: 731
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `730` review and evidence records under `reviews/`.
+- Summary: indexed `731` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `730` files |
+| Reviews covered | pass | `731` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -528,6 +528,7 @@ record_count: 730
 | `reviews/REVIEW-2026-07-22-task-ar-600-verification-frontmatter-amendment.md` | `REVIEW-2026-07-22-task-ar-600-verification-frontmatter-amendment` | planning | record | pass | TASK-AR-600 verification frontmatter amendment |
 | `reviews/REVIEW-2026-07-22-task-ar-603-unicode-boundary-t3-replan.md` | `REVIEW-2026-07-22-task-ar-603-unicode-boundary-t3-replan` | md | record | pass | TASK-AR-603 Unicode Token Boundary T3 Replan |
 | `reviews/REVIEW-2026-07-22-task-ar-604-integration-t3-replan.md` | `REVIEW-2026-07-22-task-ar-604-integration-t3-replan` | md | record | pass | TASK-AR-604 Integration T3 Replan |
+| `reviews/REVIEW-2026-07-22-task-ar-605-dispatch-t3-replan.md` | `REVIEW-2026-07-22-task-ar-605-dispatch-t3-replan` | md | record | pass | TASK-AR-605 Dispatch T3 Replan |
 | `reviews/REVIEW-2026-07-22-task-ar-610-scope-amendment.md` | `REVIEW-2026-07-22-task-ar-610-scope-amendment` | md | record | pass | TASK-AR-610 scope amendment |
 | `reviews/REVIEW-2026-07-22-taskset-ar-backlog-taskset-test-recovery-registration.md` | `REVIEW-2026-07-22-taskset-ar-backlog-taskset-test-recovery-registration` | md | record | pass | Backlog Taskset Test Recovery Registration |
 | `reviews/REVIEW-2026-07-22-taskset-ar-july-release-impact-remediation-registration.md` | `REVIEW-2026-07-22-taskset-ar-july-release-impact-remediation-registration` | md | record | pass | Release Impact Remediator Registration |
