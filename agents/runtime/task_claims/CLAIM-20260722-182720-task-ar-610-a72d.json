@@ -47,6 +47,14 @@
     "ci"
   ],
   "target_files": [
-    "agents/lead_engineer/tasks/TASK-AR-594.md"
+    "agents/lead_engineer/tasks/TASK-AR-594.md",
+    "agents/lead_engineer/tasks/TASK-AR-595.md",
+    "agents/lead_engineer/tasks/TASK-AR-596.md",
+    "agents/lead_engineer/tasks/TASK-AR-597.md",
+    "agents/lead_engineer/tasks/TASK-AR-598.md",
+    "agents/lead_engineer/tasks/TASK-AR-601.md",
+    "agents/lead_engineer/tasks/units/TASK-AR-596/UNIT-TASK-AR-596-001.md",
+    "agents/lead_engineer/tasks/units/TASK-AR-597/UNIT-TASK-AR-597-001.md",
+    "agents/lead_engineer/tasks/units/TASK-AR-598/UNIT-TASK-AR-598-001.md"
   ]
 }

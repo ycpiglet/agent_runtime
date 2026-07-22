@@ -10,7 +10,7 @@ parent_id: TASKSET-AR-PR303-CI-SCHEMA-RECOVERY
 registered_at: 2026-07-22T18:26:18+09:00
 created_at: 2026-07-22T18:26:18+09:00
 updated_at: 2026-07-22T18:26:18+09:00
-title: Normalize legacy failed verification evidence references
+title: Normalize legacy closeout evidence metadata
 status: planned
 priority: P0
 difficulty: S
@@ -25,7 +25,7 @@ reservation_id: RES-20260722-182618-821b1891-01
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-pr-303-ci-baseline-schema-recovery.md
 created_by: codex-root-planner
-summary: Merge the nonstandard failed_evidence_refs entry into canonical evidence_refs and restore PR #303 governance CI.
+summary: Fold legacy closeout evidence keys into canonical evidence_refs or Markdown closeout records and restore PR #303 governance CI.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
@@ -48,10 +48,12 @@ tags:
 ## Acceptance Criteria
 
 - TASK-AR-594 contains no schema-unknown failed_evidence_refs key.
-- The failed W4a evidence path remains linked from canonical evidence_refs.
-- Taskset work and Owner governance gates pass.
+- All referenced W4a/W4b evidence paths remain linked from canonical evidence_refs.
+- Implementation commit and remote closeout values remain recorded in Markdown.
+- Taskset work, RBAC write, and Owner governance gates pass.
 
 ## Verification
 
 - `python scripts/taskset_work_gate.py --check`
+- `python scripts/rbac_write_gate.py --check`
 - `python scripts/owner_governance_gate.py --allow-empty-owner-docs`

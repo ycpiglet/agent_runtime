@@ -440,8 +440,8 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-22-pr-303-ci-baseline-schema-recovery.md",
-          "value": "f0d6bda5c347086b6812d59c2c8616e2d0d75139a7458af14385eab61d65ed05"
+          "path": "reviews/REVIEW-2026-07-22-task-ar-610-scope-amendment.md",
+          "value": "382962418f4a7765f1aedd6ec05d4ceb62e48f9a7d5b3c56ab93b96f9a571f36"
         },
         {
           "kind": "sha256",
@@ -454,8 +454,8 @@
           "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-22-pr-303-ci-baseline-schema-recovery.md",
-      "recorded_at": "2026-07-22T18:26:58+09:00",
+      "design_record": "reviews/REVIEW-2026-07-22-task-ar-610-scope-amendment.md",
+      "recorded_at": "2026-07-22T18:31:10+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-PR303-CI-SCHEMA-RECOVERY"
     },
@@ -634,5 +634,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-22T18:26:58+09:00"
+  "updated_at": "2026-07-22T18:31:10+09:00"
 }
