@@ -48,10 +48,8 @@ verified_at: 2026-07-19T11:59:06+09:00
 verified_by: codex-root-task-ar-596
 evidence_refs:
   - reviews/VERIFY-2026-07-19-unit-task-ar-596-001-20260719115906.json
-review_evidence_refs:
   - reviews/W4B-2026-07-19-TASK-AR-596.md
   - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-596-INDEPENDENT-AUDITOR.md
-implementation_commit: 1abfe76
 resolution: done
 completed_at: 2026-07-19T12:07:12+09:00
 closed_by: codex-root-task-ar-596
@@ -115,6 +113,7 @@ Stop if multiple canonical files claim the same task ID; surface the ambiguity r
 - Actual hours: `0.15`
 - Actual tokens: `3500`
 - Closed by: `codex-root-task-ar-596`
+- Implementation commit: `1abfe76`
 - Evidence:
   - `reviews/VERIFY-2026-07-19-unit-task-ar-596-001-20260719115906.json`
 <!-- work-close:end -->

@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-22T17:33:23+09:00
-record_count: 679
+generated_at: 2026-07-22T19:54:11+09:00
+record_count: 713
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `679` review and evidence records under `reviews/`.
+- Summary: indexed `713` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `679` files |
+| Reviews covered | pass | `713` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -518,8 +518,18 @@ record_count: 679
 | `reviews/REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration.md` | `REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration` | md | record | pass | Upstream Intake Closer Registration |
 | `reviews/REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration.md` | `REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration` | md | record | pass | Role Routing Closeout Reliability Registration |
 | `reviews/REVIEW-2026-07-22-post-merge-plan-revalidation.md` | `REVIEW-2026-07-22-post-merge-plan-revalidation` | plan-revalidation | approved | pass | Post-merge plan revalidation |
+| `reviews/REVIEW-2026-07-22-pr-303-ci-baseline-schema-recovery.md` | `REVIEW-2026-07-22-pr-303-ci-baseline-schema-recovery` | md | record | pass | PR 303 CI baseline schema recovery |
+| `reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md` | `REVIEW-2026-07-22-release-impact-issues-291-300-audit` | planning | record | action | Release-impact issue audit for #291 through #300 |
+| `reviews/REVIEW-2026-07-22-release-impact-verification-command-correction.md` | `REVIEW-2026-07-22-release-impact-verification-command-correction` | planning | record | pass | Release-impact verification command correction |
 | `reviews/REVIEW-2026-07-22-remote-main-integration-id-collision.md` | `REVIEW-2026-07-22-remote-main-integration-id-collision` | integration-decision | approved | pass | Remote main integration and TASK-AR-600 collision |
 | `reviews/REVIEW-2026-07-22-task-ar-599-packaging-scope-amendment.md` | `REVIEW-2026-07-22-task-ar-599-packaging-scope-amendment` | md | record | pass | TASK-AR-599 packaging scope amendment |
+| `reviews/REVIEW-2026-07-22-task-ar-600-host-lock-scope-amendment.md` | `REVIEW-2026-07-22-task-ar-600-host-lock-scope-amendment` | planning | record | pass | TASK-AR-600 host lock scope amendment |
+| `reviews/REVIEW-2026-07-22-task-ar-600-scope-transition-approval.md` | `REVIEW-2026-07-22-task-ar-600-scope-transition-approval` | planning | record | pass | TASK-AR-600 taskset scope transition approval |
+| `reviews/REVIEW-2026-07-22-task-ar-600-verification-frontmatter-amendment.md` | `REVIEW-2026-07-22-task-ar-600-verification-frontmatter-amendment` | planning | record | pass | TASK-AR-600 verification frontmatter amendment |
+| `reviews/REVIEW-2026-07-22-task-ar-610-scope-amendment.md` | `REVIEW-2026-07-22-task-ar-610-scope-amendment` | md | record | pass | TASK-AR-610 scope amendment |
+| `reviews/REVIEW-2026-07-22-taskset-ar-backlog-taskset-test-recovery-registration.md` | `REVIEW-2026-07-22-taskset-ar-backlog-taskset-test-recovery-registration` | md | record | pass | Backlog Taskset Test Recovery Registration |
+| `reviews/REVIEW-2026-07-22-taskset-ar-july-release-impact-remediation-registration.md` | `REVIEW-2026-07-22-taskset-ar-july-release-impact-remediation-registration` | md | record | pass | Release Impact Remediator Registration |
+| `reviews/REVIEW-2026-07-22-taskset-ar-pr303-ci-schema-recovery-registration.md` | `REVIEW-2026-07-22-taskset-ar-pr303-ci-schema-recovery-registration` | md | record | pass | CI Schema Recovery Registration |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
@@ -536,6 +546,10 @@ record_count: 679
 | `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC` | role-review | record | n/a | TASK-AR-601 Skeptic Role Review |
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-599-SKEPTIC-REWORK.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-599-SKEPTIC-REWORK` | md | record | pass | TASK-AR-599 skeptical rework review |
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-599-SKEPTIC.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-599-SKEPTIC` | md | record | block | TASK-AR-599 skeptical security and external-effect review |
+| `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-600-SKEPTIC-REWORK.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-600-SKEPTIC-REWORK` | md | record | block | TASK-AR-600 skeptical high-risk rework review |
+| `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-600-SKEPTIC-REWORK2.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-600-SKEPTIC-REWORK2` | md | record | block | TASK-AR-600 skeptical high-risk rework 2 review |
+| `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-600-SKEPTIC-REWORK3.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-600-SKEPTIC-REWORK3` | md | record | pass | TASK-AR-600 skeptical high-risk rework 3 review |
+| `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-600-SKEPTIC.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-600-SKEPTIC` | md | record | block | TASK-AR-600 skeptical high-risk and external-effect review |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SCRIBE-2026-06-21-business-operating-system.md` | `SCRIBE-2026-06-21-business-operating-system` | scribe | recorded | pass | Business Operating System Scribe Log |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
@@ -624,8 +638,22 @@ record_count: 679
 | `reviews/VERIFY-2026-07-22-task-ar-598-20260722163903.json` | `VERIFY-2026-07-22-task-ar-598-20260722163903` | json | record | n/a | VERIFY-2026-07-22-task-ar-598-20260722163903 |
 | `reviews/VERIFY-2026-07-22-task-ar-599-20260722171444.json` | `VERIFY-2026-07-22-task-ar-599-20260722171444` | json | record | n/a | VERIFY-2026-07-22-task-ar-599-20260722171444 |
 | `reviews/VERIFY-2026-07-22-task-ar-599-20260722172533.json` | `VERIFY-2026-07-22-task-ar-599-20260722172533` | json | record | n/a | VERIFY-2026-07-22-task-ar-599-20260722172533 |
+| `reviews/VERIFY-2026-07-22-task-ar-600-20260722175324.json` | `VERIFY-2026-07-22-task-ar-600-20260722175324` | json | record | n/a | VERIFY-2026-07-22-task-ar-600-20260722175324 |
+| `reviews/VERIFY-2026-07-22-task-ar-600-20260722175452.json` | `VERIFY-2026-07-22-task-ar-600-20260722175452` | json | record | n/a | VERIFY-2026-07-22-task-ar-600-20260722175452 |
+| `reviews/VERIFY-2026-07-22-task-ar-600-20260722175618.json` | `VERIFY-2026-07-22-task-ar-600-20260722175618` | json | record | n/a | VERIFY-2026-07-22-task-ar-600-20260722175618 |
+| `reviews/VERIFY-2026-07-22-task-ar-600-20260722180529.json` | `VERIFY-2026-07-22-task-ar-600-20260722180529` | json | record | n/a | VERIFY-2026-07-22-task-ar-600-20260722180529 |
+| `reviews/VERIFY-2026-07-22-task-ar-600-20260722181037.json` | `VERIFY-2026-07-22-task-ar-600-20260722181037` | json | record | n/a | VERIFY-2026-07-22-task-ar-600-20260722181037 |
+| `reviews/VERIFY-2026-07-22-task-ar-600-20260722181559.json` | `VERIFY-2026-07-22-task-ar-600-20260722181559` | json | record | n/a | VERIFY-2026-07-22-task-ar-600-20260722181559 |
+| `reviews/VERIFY-2026-07-22-task-ar-610-20260722183640.json` | `VERIFY-2026-07-22-task-ar-610-20260722183640` | json | record | n/a | VERIFY-2026-07-22-task-ar-610-20260722183640 |
+| `reviews/VERIFY-2026-07-22-task-ar-611-20260722193355.json` | `VERIFY-2026-07-22-task-ar-611-20260722193355` | json | record | n/a | VERIFY-2026-07-22-task-ar-611-20260722193355 |
 | `reviews/VERIFY-2026-07-22-unit-task-ar-599-001-20260722171357.json` | `VERIFY-2026-07-22-unit-task-ar-599-001-20260722171357` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-599-001-20260722171357 |
 | `reviews/VERIFY-2026-07-22-unit-task-ar-599-001-20260722172509.json` | `VERIFY-2026-07-22-unit-task-ar-599-001-20260722172509` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-599-001-20260722172509 |
+| `reviews/VERIFY-2026-07-22-unit-task-ar-600-001-20260722175209.json` | `VERIFY-2026-07-22-unit-task-ar-600-001-20260722175209` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-600-001-20260722175209 |
+| `reviews/VERIFY-2026-07-22-unit-task-ar-600-001-20260722180521.json` | `VERIFY-2026-07-22-unit-task-ar-600-001-20260722180521` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-600-001-20260722180521 |
+| `reviews/VERIFY-2026-07-22-unit-task-ar-600-001-20260722181034.json` | `VERIFY-2026-07-22-unit-task-ar-600-001-20260722181034` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-600-001-20260722181034 |
+| `reviews/VERIFY-2026-07-22-unit-task-ar-600-001-20260722181556.json` | `VERIFY-2026-07-22-unit-task-ar-600-001-20260722181556` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-600-001-20260722181556 |
+| `reviews/VERIFY-2026-07-22-unit-task-ar-610-001-20260722183557.json` | `VERIFY-2026-07-22-unit-task-ar-610-001-20260722183557` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-610-001-20260722183557 |
+| `reviews/VERIFY-2026-07-22-unit-task-ar-611-001-20260722192021.json` | `VERIFY-2026-07-22-unit-task-ar-611-001-20260722192021` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-611-001-20260722192021 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
@@ -711,6 +739,12 @@ record_count: 679
 | `reviews/W4B-2026-07-19-TASK-AR-601.md` | `W4B-2026-07-19-TASK-AR-601` | w4b-independent-verification | rejected | fail | TASK-AR-601 W4b Independent Verification |
 | `reviews/W4B-2026-07-22-TASK-AR-599-REWORK.md` | `W4B-2026-07-22-TASK-AR-599-REWORK` | w4b-independent-verification | approved | pass | W4b Independent Verification — TASK-AR-599 Rework |
 | `reviews/W4B-2026-07-22-TASK-AR-599.md` | `W4B-2026-07-22-TASK-AR-599` | w4b-independent-verification | approved | pass | W4b Independent Verification — TASK-AR-599 |
+| `reviews/W4B-2026-07-22-TASK-AR-600-REWORK.md` | `W4B-2026-07-22-TASK-AR-600-REWORK` | w4b-independent-verification | approved | pass | W4b Independent Verification — TASK-AR-600 Rework |
+| `reviews/W4B-2026-07-22-TASK-AR-600-REWORK2.md` | `W4B-2026-07-22-TASK-AR-600-REWORK2` | w4b-independent-verification | approved | pass | W4b Independent Verification — TASK-AR-600 Second Rework |
+| `reviews/W4B-2026-07-22-TASK-AR-600-REWORK3.md` | `W4B-2026-07-22-TASK-AR-600-REWORK3` | w4b-independent-verification | approved | pass | W4b Independent Verification — TASK-AR-600 Third Remediation |
+| `reviews/W4B-2026-07-22-TASK-AR-600.md` | `W4B-2026-07-22-TASK-AR-600` | w4b-independent-verification | approved | pass | W4b Independent Verification — TASK-AR-600 |
+| `reviews/W4B-2026-07-22-TASK-AR-610.md` | `W4B-2026-07-22-TASK-AR-610` | md | record | pass | TASK-AR-610 Independent W4b |
+| `reviews/W4B-2026-07-22-TASK-AR-611.md` | `W4B-2026-07-22-TASK-AR-611` | md | record | pass | TASK-AR-611 Independent W4b |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 

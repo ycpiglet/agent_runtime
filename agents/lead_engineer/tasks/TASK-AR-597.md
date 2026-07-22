@@ -40,10 +40,8 @@ verified_at: 2026-07-19T12:21:24+09:00
 verified_by: codex-root-task-ar-597
 evidence_refs:
   - reviews/VERIFY-2026-07-19-task-ar-597-20260719122124.json
-review_evidence_refs:
   - reviews/W4B-2026-07-19-TASK-AR-597.md
   - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-597-INDEPENDENT-AUDITOR.md
-implementation_commit: 2afa258
 resolution: done
 completed_at: 2026-07-19T12:25:31+09:00
 closed_by: codex-root-task-ar-597
@@ -79,6 +77,7 @@ actual_tokens: 5000
 - Actual hours: `0.35`
 - Actual tokens: `5000`
 - Closed by: `codex-root-task-ar-597`
+- Implementation commit: `2afa258`
 - Evidence:
   - `reviews/VERIFY-2026-07-19-task-ar-597-20260719122124.json`
 <!-- work-close:end -->

@@ -1,0 +1,75 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "downstream_bug",
+  "origin_ref": "github-actions:run-29909181630",
+  "created_by": "codex-root-planner",
+  "initiative": {
+    "id": "INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY",
+    "title": "Backlog Taskset Test Recovery",
+    "summary": "Restore PR #303 package CI after the real-backlog classification test fell behind newly registered tasksets.",
+    "owner": "lead-engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY",
+    "display_name": "Backlog Taskset Test Recovery",
+    "summary": "Update the canonical real-backlog taskset expectation for all newly registered tasksets and prove the full package suite remains green.",
+    "order": 603,
+    "plan_slug": "2026-07-22-backlog-taskset-test-recovery"
+  },
+  "tasks": [
+    {
+      "title": "Synchronize the real-backlog taskset expectation",
+      "goal": "Make the real-backlog classification test recognize every taskset registered by the July remediation and PR #303 CI-recovery work.",
+      "scope": "Update only the expected taskset IDs in tests/test_backlog_board_tasksets.py. Do not change backlog parsing, task classification behavior, or production code.",
+      "priority": "P0",
+      "difficulty": "XS",
+      "est_hours": 0.5,
+      "est_tokens": 2500,
+      "owner": "lead-engineer",
+      "team": "agent-runtime-core",
+      "acceptance": [
+        "The expected set includes TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION, TASKSET-AR-PR303-CI-SCHEMA-RECOVERY, and TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY.",
+        "The focused backlog taskset test passes.",
+        "The full tests suite passes under the same PYTHONPATH=src invocation used by CI."
+      ],
+      "verification": [
+        "python -m pytest tests/test_backlog_board_tasksets.py -q",
+        "python -m pytest tests -q",
+        "python scripts/taskset_work_gate.py --check",
+        "python scripts/rbac_write_gate.py --check"
+      ],
+      "units": [
+        {
+          "title": "Add newly registered tasksets to the exact-set regression test",
+          "context": "GitHub Actions run 29909181630 reported one failure: test_real_backlog_tasks_are_classified_into_registered_task_sets rejected two newly registered tasksets. Registering this recovery taskset adds one more legitimate ID that the same exact-set assertion must include.",
+          "inputs": [
+            "GitHub Actions run 29909181630 failed log",
+            "agents/project/work-items/TASKSET-DEFINITIONS.json",
+            "tests/test_backlog_board_tasksets.py"
+          ],
+          "target_files": [
+            "tests/test_backlog_board_tasksets.py"
+          ],
+          "scope": "Add exactly the three newly registered taskset IDs to the expected set. No production-code changes and no weakening from exact equality to subset checks.",
+          "steps": [
+            "Confirm the actual extra IDs from the CI failure and taskset registry.",
+            "Add the three registered IDs to the exact expected set.",
+            "Run the focused test and full package suite.",
+            "Run taskset, RBAC, classifier, and Owner governance gates."
+          ],
+          "acceptance": [
+            "Exact-set assertion remains exact and passes with every currently registered taskset.",
+            "No file outside the test and generated governance records changes."
+          ],
+          "verification": [
+            "python -m pytest tests/test_backlog_board_tasksets.py -q",
+            "python -m pytest tests -q"
+          ],
+          "handoff": "Provide focused/full pytest counts, exact verified HEAD, and independent W4b evidence.",
+          "stop_condition": "Stop if the actual taskset registry contains any additional unplanned ID or if fixing the failure requires production classifier changes."
+        }
+      ]
+    }
+  ]
+}

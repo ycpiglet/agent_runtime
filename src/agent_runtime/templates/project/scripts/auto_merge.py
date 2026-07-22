@@ -25,6 +25,7 @@ import json
 import re
 import subprocess
 import sys
+from datetime import datetime
 
 try:  # Windows 콘솔(cp949)에서도 UTF-8 출력
     sys.stdout.reconfigure(encoding="utf-8")
@@ -32,6 +33,12 @@ except Exception:
     pass
 
 CODE_LINE_CAP = 600  # 비문서 변경 라인(additions+deletions) 소프트 상한
+GH_COMMAND_TIMEOUT_SECONDS = 30
+REMOTE_MERGED_MARKER = "원격 MERGED 확인됨"
+PR_NUMBER_PATTERN = re.compile(r"^[1-9][0-9]*$", re.ASCII)
+RFC3339_TIMESTAMP = re.compile(
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$"
+)
 
 # 비가역/고-blast surface — 하나라도 변경되면 R3(사람 결정).
 R3_PATTERNS = [
@@ -49,18 +56,54 @@ DOC_PATTERNS = [
 ]
 
 
+def _normalize_pr_number(value: object) -> str:
+    """Return an ASCII decimal PR number that cannot be parsed as a gh option."""
+    if not isinstance(value, str) or not PR_NUMBER_PATTERN.fullmatch(value):
+        raise ValueError("PR 번호는 1 이상의 ASCII 십진 정수여야 합니다")
+    return value
+
+
 def gh_json(pr: str, fields: str) -> dict:
-    out = subprocess.run(
-        ["gh", "pr", "view", pr, "--json", fields],
-        capture_output=True, text=True, encoding="utf-8",
-    )
+    try:
+        safe_pr = _normalize_pr_number(pr)
+    except ValueError:
+        raise SystemExit("PR 번호 형식 오류") from None
+    try:
+        out = subprocess.run(
+            ["gh", "pr", "view", safe_pr, "--json", fields],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=GH_COMMAND_TIMEOUT_SECONDS,
+        )
+    except Exception as exc:
+        raise SystemExit(f"gh 조회 실패: {exc.__class__.__name__}") from None
     if out.returncode != 0:
-        raise SystemExit(f"gh 실패: {out.stderr.strip()}")
-    return json.loads(out.stdout)
+        raise SystemExit(f"gh 조회 실패: exit={out.returncode}")
+    try:
+        return json.loads(out.stdout)
+    except (json.JSONDecodeError, TypeError) as exc:
+        raise SystemExit(f"gh 응답 해석 실패: {exc.__class__.__name__}") from None
 
 
 def is_doc(path: str) -> bool:
     return any(p.search(path) for p in DOC_PATTERNS)
+
+
+def _safe_status_text(value: object, *, limit: int = 160) -> str:
+    """Render untrusted descriptive text without control or reserved status tokens."""
+    escaped = []
+    for char in str(value):
+        if char == "\\":
+            escaped.append("\\\\")
+        elif char == '"':
+            escaped.append('\\"')
+        elif not char.isprintable():
+            escaped.append(f"\\u{ord(char):04x}")
+        else:
+            escaped.append(char)
+    rendered = "".join(escaped).replace(REMOTE_MERGED_MARKER, "[reserved-status-marker]")
+    return rendered[:limit]
 
 
 def r3_hits(files: list) -> list:
@@ -75,10 +118,12 @@ def r3_hits(files: list) -> list:
 
 
 def evaluate(pr: str) -> tuple:
-    d = gh_json(pr, "state,mergeStateStatus,mergeable,reviewDecision,statusCheckRollup,files,title")
+    d = gh_json(pr, "state,isDraft,mergeStateStatus,mergeable,reviewDecision,statusCheckRollup,files,title")
     reasons_block = []  # R3/escalate 사유
     if d.get("state") != "OPEN":
         return "SKIP", [f"PR state={d.get('state')} (이미 닫힘/머지)"], d
+    if d.get("isDraft"):
+        reasons_block.append("isDraft=true (Draft PR은 자동 머지하지 않음)")
 
     checks = d.get("statusCheckRollup") or []
     bad = []
@@ -113,26 +158,99 @@ def evaluate(pr: str) -> tuple:
     return "AUTO-MERGE", [f"코드 {code_lines}줄, 파일 {len(files)}개, 전 check green, CLEAN"], d
 
 
+def _valid_merged_at(value: object) -> bool:
+    """Accept only a timezone-aware RFC 3339 timestamp string."""
+    if not isinstance(value, str) or not RFC3339_TIMESTAMP.fullmatch(value):
+        return False
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return parsed.tzinfo is not None
+
+
+def execute_merge(pr: str) -> tuple[bool, str, dict]:
+    """Request a merge and confirm only a validated authoritative remote state."""
+    try:
+        safe_pr = _normalize_pr_number(pr)
+    except ValueError:
+        return False, "PR 번호 형식 오류", {}
+
+    try:
+        merge = subprocess.run(
+            ["gh", "pr", "merge", safe_pr, "--squash", "--delete-branch"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=GH_COMMAND_TIMEOUT_SECONDS,
+        )
+        command_status = f"exit={merge.returncode}"
+    except Exception as exc:
+        command_status = f"exception={exc.__class__.__name__}"
+
+    try:
+        remote = gh_json(safe_pr, "state,isDraft,mergedAt,mergeCommit")
+    except SystemExit:
+        return False, f"원격 상태 재확인 실패: SystemExit; merge {command_status}", {}
+    except Exception as exc:
+        return (
+            False,
+            f"원격 상태 재확인 실패: {exc.__class__.__name__}; merge {command_status}",
+            {},
+        )
+
+    if not isinstance(remote, dict):
+        return False, f"원격 상태 응답 형식 오류; merge {command_status}", {}
+
+    state = remote.get("state")
+    merged_at = remote.get("mergedAt")
+    safe_state = (
+        state
+        if isinstance(state, str) and state in {"OPEN", "CLOSED", "MERGED"}
+        else "INVALID"
+    )
+    safe_remote = {"state": safe_state}
+    if state == "MERGED" and _valid_merged_at(merged_at):
+        safe_remote["mergedAt"] = merged_at
+        return True, f"원격 머지 상태 확인 완료; merge {command_status}", safe_remote
+
+    return (
+        False,
+        f"원격 머지 확인 실패: state={safe_state}, mergedAt=invalid; merge {command_status}",
+        safe_remote,
+    )
+
+
 def main() -> int:
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    if not args:
+    raw_args = sys.argv[1:]
+    execute = "--execute" in raw_args
+    unknown_options = [arg for arg in raw_args if arg.startswith("-") and arg != "--execute"]
+    positionals = [arg for arg in raw_args if not arg.startswith("-")]
+    if unknown_options or len(positionals) != 1:
         print(__doc__)
         return 2
-    pr = args[0]
-    execute = "--execute" in sys.argv
+    try:
+        pr = _normalize_pr_number(positionals[0])
+    except ValueError:
+        print("[auto_merge] PR 번호 형식 오류")
+        return 2
     verdict, reasons, d = evaluate(pr)
-    print(f"[auto_merge] PR #{pr} \"{d.get('title','')[:50]}\" → {verdict}")
+    safe_pr = _safe_status_text(pr, limit=50)
+    safe_title = _safe_status_text(d.get("title", ""), limit=50)
+    print(f"[auto_merge] PR #{safe_pr} \"{safe_title}\" → {verdict}")
     for r in reasons:
-        print(f"  - {r}")
+        print(f"  - {_safe_status_text(r)}")
     if verdict == "AUTO-MERGE":
         if execute:
-            m = subprocess.run(
-                ["gh", "pr", "merge", pr, "--squash", "--delete-branch"],
-                capture_output=True, text=True, encoding="utf-8",
+            merged, detail, remote = execute_merge(pr)
+            print(detail)
+            if not merged:
+                print("  → 머지 미확정: 원격 PR이 MERGED가 아니므로 실패 처리.")
+                return 1
+            print(
+                f"  → {REMOTE_MERGED_MARKER}"
+                f"(mergedAt={remote.get('mergedAt')}). 로컬 상태는 git fetch로 별도 동기화."
             )
-            # gh 는 원격 머지 후 로컬 정리에서 SSH 실패할 수 있으나 머지 자체는 API.
-            print(m.stdout.strip() or m.stderr.strip())
-            print("  → 머지 실행됨(--execute). 로컬 main 동기화 필요: git fetch && git reset --hard origin/main")
         else:
             print("  → 게이트 통과. 머지하려면 --execute (R2: 머지 후 BRIEF 에 deploy+rollback 1줄).")
         return 0

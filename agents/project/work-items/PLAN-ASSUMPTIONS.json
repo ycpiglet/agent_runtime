@@ -9,6 +9,26 @@
         },
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-22-release-impact-verification-command-correction.md",
+          "value": "53d93c255b1bec5a9218d32948375b7245bb565c0f264c76ee1b22b209390088"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-22-task-ar-600-host-lock-scope-amendment.md",
+          "value": "804689d43c6f0564abf23b4a3e870224a86b2fb265c1beb74445701d094c8ceb"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-22-task-ar-600-verification-frontmatter-amendment.md",
+          "value": "ac3f544606e2208e1ae9aba433c51941447833a1e322f12478aefa0a0aa123f8"
+        },
+        {
+          "kind": "sha256",
+          "path": "agents/lead_engineer/tasks/TASK-AR-600.md",
+          "value": "30694f8dad0b4f9efe3031e7c2bc41b7fd00d2168e61936f1ac5163e8faede89"
+        },
+        {
+          "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
           "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
         },
@@ -31,12 +51,40 @@
           "kind": "absent",
           "path": "tests/test_auto_merge_execution.py",
           "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/fixtures/host/agent_runtime.lock.json",
+          "value": "bd16c4ecd35595811a1b5af1daec27b7e9f81c5983e560a2d39abc13349c67b1"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-22-post-merge-plan-revalidation.md",
-      "recorded_at": "2026-07-22T16:53:38+09:00",
+      "design_record": "reviews/REVIEW-2026-07-22-task-ar-600-verification-frontmatter-amendment.md",
+      "recorded_at": "2026-07-22T17:52:52+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-AUTO-MERGE-INTEGRITY"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-22-taskset-ar-backlog-taskset-test-recovery-registration.md",
+          "value": "36142b1e2cd2df19484c4ccecfdf1abb707b42dfdceff04b2817f6335091bff5"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-22-taskset-ar-backlog-taskset-test-recovery-registration.md",
+      "recorded_at": "2026-07-22T18:48:40+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY"
     },
     {
       "anchors": [
@@ -236,6 +284,79 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md",
+          "value": "bc9ffcf954b274c8634432ddac4c73bdec3726c832a6a84e305779f9860447ac"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-22-release-impact-verification-command-correction.md",
+          "value": "53d93c255b1bec5a9218d32948375b7245bb565c0f264c76ee1b22b209390088"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/backlog_board.py",
+          "value": "bbadc3eac3afd695e299b941eed5f95a6f566fbbd8afdbd237188817ad9a6f89"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/bootstrap_dev_env.py",
+          "value": "d702398f1b5a687720ef40fcf0f8760c07a0229fa816fa1ea4cee326ee8e0db6"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/conversation_work_audit.py",
+          "value": "57ee40b838e45a36f7ee5caa53a1850aae78c3d8ab1e196f3b09f0fbedfac4fc"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/lock_merge_driver.py",
+          "value": "cc465e57aa92c89c1cdd694a5046349b2dd36c790f50036bfe2de12968879765"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/release_cadence_trigger.py",
+          "value": "f6cee6df842e66915e35032ecd9d6dee9b0246eef17f1254ba415df1a4709f1b"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/session_dashboard.py",
+          "value": "1ba6a9a0eb17d1d3e074a761fc197f389c6822a2d736b3549c0e9b02c219c76d"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_identity.py",
+          "value": "2e7ee638d90e3e14688acf9632d0bf84c34635ed40691a4697f0a2540fe79a95"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/taskset_dispatcher.py",
+          "value": "7be761496a6a951db11a45369c7dc0493caf040c33c991fe1e42158515f1a2c7"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work_item_classifier.py",
+          "value": "9d2525973f7ad0e03dc42afce1e21e5752ad767bba9726aa800aa5cf7faec116"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-22-release-impact-verification-command-correction.md",
+      "recorded_at": "2026-07-22T17:47:47+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration.md",
           "value": "d4be2649e4be037cf69f4b2ea4e281877f09a10d449bab1a79ebae0d1d0d4b76"
         },
@@ -337,6 +458,29 @@
       "recorded_at": "2026-06-13T13:16:22+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-PARALLEL-WAVE-EXECUTION"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-22-task-ar-610-scope-amendment.md",
+          "value": "382962418f4a7765f1aedd6ec05d4ceb62e48f9a7d5b3c56ab93b96f9a571f36"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-22-task-ar-610-scope-amendment.md",
+      "recorded_at": "2026-07-22T18:31:10+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-PR303-CI-SCHEMA-RECOVERY"
     },
     {
       "anchors": [
@@ -513,5 +657,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-22T16:53:38+09:00"
+  "updated_at": "2026-07-22T18:48:40+09:00"
 }

@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-22T17:31:49+09:00
-record_count: 394
+generated_at: 2026-07-22T18:48:39+09:00
+record_count: 418
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `394` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `418` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `26` records |
-| Tasksets | pass | `50` records |
-| Tasks | pass | `266` records |
-| Units | pass | `52` records |
+| Initiatives | pass | `29` records |
+| Tasksets | pass | `53` records |
+| Tasks | pass | `275` records |
+| Units | pass | `61` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -433,6 +433,30 @@ record_count: 394
 | 25.1 | Taskset 25.1 | taskset | `TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | `INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | complete | `BACKLOG-BOARD.md` | Role Routing Closeout Reliability |
 | 25.1.1 | Task 25.1.1 | task | `TASK-AR-601` | `TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | completed | `agents/lead_engineer/tasks/TASK-AR-601.md` | Ensure role_routing overlay claims carry required lifecycle artifacts and releasing a… |
 | 25.1.1.1 | Unit 25.1.1.1 | unit | `UNIT-TASK-AR-601-001` | `TASK-AR-601` | completed | `agents/lead_engineer/tasks/units/TASK-AR-601/UNIT-TASK-AR-601-001.md` | UNIT-TASK-AR-601-001 - Repair overlay lifecycle artifacts and recursion guard |
+| 26 | Initiative 26 | initiative | `INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION` | - | active | `agents/project/initiatives/INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION.md` | July Release Impact Remediation |
+| 26.1 | Taskset 26.1 | taskset | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | `INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION` | active | `BACKLOG-BOARD.md` | Release Impact Remediator |
+| 26.1.1 | Task 26.1.1 | task | `TASK-AR-603` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-603.md` | Close GitHub #299 by defining one case-compatible canonical task-ID contract used by… |
+| 26.1.1.1 | Unit 26.1.1.1 | unit | `UNIT-TASK-AR-603-001` | `TASK-AR-603` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md` | UNIT-TASK-AR-603-001 - Adopt a shared canonical task-ID contract |
+| 26.1.2 | Task 26.1.2 | task | `TASK-AR-604` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-604.md` | Close GitHub #293 by separating normalized comparison aliases from the canonical stat… |
+| 26.1.2.1 | Unit 26.1.2.1 | unit | `UNIT-TASK-AR-604-001` | `TASK-AR-604` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-604/UNIT-TASK-AR-604-001.md` | UNIT-TASK-AR-604-001 - Separate task status normalization from persistence |
+| 26.1.3 | Task 26.1.3 | task | `TASK-AR-605` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-605.md` | Close GitHub #294 by making the template W0 dashboard work when repository-only scrip… |
+| 26.1.3.1 | Unit 26.1.3.1 | unit | `UNIT-TASK-AR-605-001` | `TASK-AR-605` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-605/UNIT-TASK-AR-605-001.md` | UNIT-TASK-AR-605-001 - Add a clean-template W0 fallback |
+| 26.1.4 | Task 26.1.4 | task | `TASK-AR-606` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-606.md` | Close GitHub #295 by preserving executable hook activation in source and repairing it… |
+| 26.1.4.1 | Unit 26.1.4.1 | unit | `UNIT-TASK-AR-606-001` | `TASK-AR-606` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-606/UNIT-TASK-AR-606-001.md` | UNIT-TASK-AR-606-001 - Make hook activation executable and idempotent |
+| 26.1.5 | Task 26.1.5 | task | `TASK-AR-607` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-607.md` | Close GitHub #297 by isolating release-cadence transient-spawn recovery state so the… |
+| 26.1.5.1 | Unit 26.1.5.1 | unit | `UNIT-TASK-AR-607-001` | `TASK-AR-607` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-607/UNIT-TASK-AR-607-001.md` | UNIT-TASK-AR-607-001 - Isolate transient-spawn recovery state |
+| 26.1.6 | Task 26.1.6 | task | `TASK-AR-608` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-608.md` | Close GitHub #298 by making comment stripping quote-aware while preserving existing u… |
+| 26.1.6.1 | Unit 26.1.6.1 | unit | `UNIT-TASK-AR-608-001` | `TASK-AR-608` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-608/UNIT-TASK-AR-608-001.md` | UNIT-TASK-AR-608-001 - Make frontmatter comment scanning quote-aware |
+| 26.1.7 | Task 26.1.7 | task | `TASK-AR-609` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-609.md` | Close GitHub #300 by preventing taskset records from being duplicated into the initia… |
+| 26.1.7.1 | Unit 26.1.7.1 | unit | `UNIT-TASK-AR-609-001` | `TASK-AR-609` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-609/UNIT-TASK-AR-609-001.md` | UNIT-TASK-AR-609-001 - Filter classifier initiative collection by record kind |
+| 27 | Initiative 27 | initiative | `INIT-AR-PR303-CI-SCHEMA-RECOVERY` | - | active | `agents/project/initiatives/INIT-AR-PR303-CI-SCHEMA-RECOVERY.md` | PR 303 CI Schema Recovery |
+| 27.1 | Taskset 27.1 | taskset | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | `INIT-AR-PR303-CI-SCHEMA-RECOVERY` | active | `BACKLOG-BOARD.md` | CI Schema Recovery |
+| 27.1.1 | Task 27.1.1 | task | `TASK-AR-610` | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | planned | `agents/lead_engineer/tasks/TASK-AR-610.md` | Make the existing TASK-AR-594 record satisfy the canonical work-item schema while pre… |
+| 27.1.1.1 | Unit 27.1.1.1 | unit | `UNIT-TASK-AR-610-001` | `TASK-AR-610` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-610/UNIT-TASK-AR-610-001.md` | UNIT-TASK-AR-610-001 - Normalize legacy closeout evidence metadata |
+| 28 | Initiative 28 | initiative | `INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY` | - | active | `agents/project/initiatives/INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY.md` | Backlog Taskset Test Recovery |
+| 28.1 | Taskset 28.1 | taskset | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | `INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY` | active | `BACKLOG-BOARD.md` | Backlog Taskset Test Recovery |
+| 28.1.1 | Task 28.1.1 | task | `TASK-AR-611` | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | planned | `agents/lead_engineer/tasks/TASK-AR-611.md` | Make the real-backlog classification test recognize every taskset registered by the J… |
+| 28.1.1.1 | Unit 28.1.1.1 | unit | `UNIT-TASK-AR-611-001` | `TASK-AR-611` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-611/UNIT-TASK-AR-611-001.md` | UNIT-TASK-AR-611-001 - Add newly registered tasksets to the exact-set regression test |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

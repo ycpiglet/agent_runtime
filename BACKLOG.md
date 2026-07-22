@@ -1,10 +1,22 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
-## 2026-07-22 TASK-AR-599 approved; release-impact audit next
+## 2026-07-22 TASK-AR-611 active; PR #303 package-test recovery
 
-- Completed and independently approved: `TASK-AR-594` through `TASK-AR-599`; `TASK-AR-601` completed its separate routing-closeout taskset.
-- Integration boundary: merge `codex/task-ar-599-allimbot` and close issue #279; no allimbot secret, repository variable, or live provider was configured.
-- Next registered execution: `TASK-AR-600` in `TASKSET-AR-AUTO-MERGE-INTEGRITY` fixes issue #291's false-success auto-merge path, followed by the issue #292-#300 audit and release-only `TASK-AR-602`.
+- Active: `TASK-AR-611` in `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` synchronizes the exact real-backlog taskset expectation after GitHub Actions run `29909181630` exposed stale registered-taskset IDs.
+- Scope: add the July remediation, PR #303 schema-recovery, and this recovery taskset IDs to `tests/test_backlog_board_tasksets.py`; keep exact equality and production classification behavior unchanged.
+- Parent: TASK-AR-600 and TASK-AR-610 passed W4b; PR #303 integration resumes after focused and full package tests pass.
+
+## 2026-07-22 TASK-AR-610 active; PR #303 CI schema recovery
+
+- Active: `TASK-AR-610` in `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` restores the governance baseline discovered by PR #303.
+- Scope: normalize noncanonical closeout evidence fields in the declared TASK-AR-594/595/596/597/598/601 task and unit records without deleting evidence or expanding the global schema.
+- Parent: TASK-AR-600 implementation and final W4b are complete; PR #303 integration resumes after this P0 CI blocker passes.
+
+## 2026-07-22 TASK-AR-600 active; release-impact remediation queued
+
+- Active: `TASK-AR-600` in `TASKSET-AR-AUTO-MERGE-INTEGRITY` fixes issue #291's false-success auto-merge path.
+- Queued in `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION`: TASK-AR-603 through TASK-AR-609 cover every remaining open issue in the audited #291-#300 range.
+- Release boundary: `TASK-AR-602` remains last and may start only after all eight defect issues are merged and remotely closed.
 
 <!-- BACKLOG-INDEX:START (generated from TASKSET-DEFINITIONS.json — do not edit by hand) -->
 
@@ -25,6 +37,9 @@
 | 528 | `TASKSET-AR-AGENT-ORG-DELEGATION` | Org Conductor |
 | 529 | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | Decision Cockpit |
 | 600 | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | Merge Truth Keeper |
+| 601 | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | Release Impact Remediator |
+| 602 | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | CI Schema Recovery |
+| 603 | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | Backlog Taskset Test Recovery |
 | 615 | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | Self Improvement Cadence |
 | 616 | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | Self Improvement Remediation |
 | 617 | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | Business Operations Teams |

@@ -41,12 +41,9 @@ verified_at: 2026-07-22T16:39:03+09:00
 verified_by: codex-root-task-ar-598
 evidence_refs:
   - reviews/VERIFY-2026-07-22-task-ar-598-20260722163903.json
-review_evidence_refs:
   - reviews/W4B-2026-07-19-TASK-AR-598-REWORK.md
   - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-598-INDEPENDENT-AUDITOR.md
   - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-598-SKEPTIC.md
-implementation_commit: 498febc
-remote_closeout: pending_push_and_supersession
 resolution: done
 completed_at: 2026-07-22T16:39:40+09:00
 closed_by: codex-root-task-ar-598
@@ -83,6 +80,8 @@ actual_tokens: 22000
 - Actual hours: `1.2`
 - Actual tokens: `22000`
 - Closed by: `codex-root-task-ar-598`
+- Implementation commit: `498febc`
+- Remote closeout at task completion: `pending_push_and_supersession`
 - Evidence:
   - `reviews/VERIFY-2026-07-22-task-ar-598-20260722163903.json`
 <!-- work-close:end -->

@@ -42,7 +42,6 @@ verified_by: codex-root-task-ar-601
 evidence_refs:
   - reviews/VERIFY-2026-07-19-task-ar-601-20260719112303.json
   - reviews/VERIFY-2026-07-19-task-ar-601-20260719114310.json
-review_evidence_refs:
   - reviews/W4B-2026-07-19-TASK-AR-601-HARDENING.md
   - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC-RECHECK.md
 resolution: done

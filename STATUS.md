@@ -1,11 +1,25 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-07-22 - TASK-AR-599 independently approved; integration pending
+## 2026-07-22 - TASK-AR-611 active; PR #303 package-test recovery
 
-- Completed: optional allimbot delivery, lifecycle wiring, aggregate CI failure routing, loopback-only dashboard credentials, packaging, documentation, and task closeout are recorded on `codex/task-ar-599-allimbot`.
-- Verification: W4a passed all four registered commands (`52` focused tests); independent auditor and skeptic rework reviews both approved HEAD `329389b`. Claim `CLAIM-20260722-170010-task-ar-599-5d41` and both high-risk review overlays are released.
-- Safety boundary: configuration remains blank by default, no live notification or external probe was sent, remote dashboard URLs cannot receive the token, and unverified work cannot emit an authoritative completion message.
-- Remaining: merge the TASK-AR-599 PR and close issue #279, execute registered `TASK-AR-600` in `TASKSET-AR-AUTO-MERGE-INTEGRITY` for issue #291, audit issues #292-#300, then run release-only `TASK-AR-602` for v0.7.0.
+- Active: claim `CLAIM-20260722-184910-task-ar-611-c34b` runs `TASK-AR-611` in `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY`.
+- Cause: GitHub Actions run `29909181630` passed governance/schema checks but the full package suite found one stale exact-set assertion in `tests/test_backlog_board_tasksets.py`.
+- Scope: add the three newly registered taskset IDs without changing production backlog parsing or weakening exact equality.
+- Next: pass focused/full pytest, independent W4b, update PR #303, and confirm Python 3.10/3.11/3.12 CI plus auto-merge.
+
+## 2026-07-22 - TASK-AR-610 active; PR #303 CI baseline recovery
+
+- Active: `TASK-AR-610` in `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` normalizes legacy closeout evidence metadata that blocks PR #303 governance CI.
+- Preserved: failed W4a and W4b review paths remain in canonical `evidence_refs`; implementation commit and remote closeout values move to Markdown closeout text.
+- Parent delivery: TASK-AR-600 passed W4a and two independent final reviews; PR #303 remains open until the baseline recovery push passes Python 3.10/3.11/3.12 CI.
+- Next: release TASK-AR-610 after W4b, merge PR #303, close #291, then continue TASK-AR-603 through TASK-AR-609 before release TASK-AR-602.
+
+## 2026-07-22 - TASK-AR-600 active; release-impact queue registered
+
+- Completed: TASK-AR-599 merged in PR #302, issue #279 is closed, and all local/remote task branch and worktree cleanup is complete.
+- Active: claim `CLAIM-20260722-174820-task-ar-600-fa3d` implements remote merge-state read-back for issue #291 in `TASKSET-AR-AUTO-MERGE-INTEGRITY`.
+- Registered from the #291-#300 audit: TASK-AR-603(#299), 604(#293), 605(#294), 606(#295), 607(#297), 608(#298), and 609(#300), each with one worker-ready unit and a T0 snapshot.
+- Remaining: close #291 and the seven registered defects through independent W4b/PR CI, then run release-only TASK-AR-602 for v0.7.0.
 
 ## 2026-07-06 (2차) - 이슈 전량 정리: #128/#132/#250 종료 — 열린 이슈 0 도달
 

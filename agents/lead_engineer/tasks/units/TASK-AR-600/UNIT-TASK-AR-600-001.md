@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-AUTO-MERGE-INTEGRITY
 initiative_id: INIT-AR-AUTO-MERGE-INTEGRITY
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-19T10:34:25+09:00
-updated_at: 2026-07-19T10:34:25+09:00
+updated_at: 2026-07-22T18:15:56+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-19-auto-merge-execution-readback.md
 created_by: codex-root
@@ -30,15 +30,23 @@ inputs:
 target_files:
   - src/agent_runtime/templates/project/scripts/auto_merge.py
   - new:tests/test_auto_merge_execution.py
+  - tests/fixtures/host/agent_runtime.lock.json
 scope: Template helper and deterministic package regression only.
 acceptance:
   - False success is impossible when the remote PR remains OPEN.
   - Remote MERGED read-back is authoritative.
 verification:
   - python -m pytest tests/test_auto_merge_execution.py src/agent_runtime/templates/project/scripts/test_auto_merge.py -q
-  - python scripts/root_template_parity_gate.py --check
+  - python scripts/regen_host_lock_if_needed.py --check
 handoff: Report exact head, tests, issue/PR links, rollback, and residual risks.
 stop_condition: Stop on workflow, secret, force-push, branch-protection, or unrelated merge-policy changes.
+verified_at: 2026-07-22T18:15:56+09:00
+verified_by: codex-root-task-ar-600-rework3
+evidence_refs:
+  - reviews/VERIFY-2026-07-22-unit-task-ar-600-001-20260722175209.json
+  - reviews/VERIFY-2026-07-22-unit-task-ar-600-001-20260722180521.json
+  - reviews/VERIFY-2026-07-22-unit-task-ar-600-001-20260722181034.json
+  - reviews/VERIFY-2026-07-22-unit-task-ar-600-001-20260722181556.json
 ---
 
 # UNIT-TASK-AR-600-001 - Patch auto-merge execution read-back
@@ -56,6 +64,7 @@ Autofolio BUG-014 reproduced a Draft merge false-success in the managed template
 
 - src/agent_runtime/templates/project/scripts/auto_merge.py
 - new:tests/test_auto_merge_execution.py
+- tests/fixtures/host/agent_runtime.lock.json
 
 ## Scope
 
@@ -75,7 +84,7 @@ Template helper and deterministic package regression only.
 ## Verification
 
 - `python -m pytest tests/test_auto_merge_execution.py src/agent_runtime/templates/project/scripts/test_auto_merge.py -q`
-- `python scripts/root_template_parity_gate.py --check`
+- `python scripts/regen_host_lock_if_needed.py --check`
 
 ## Handoff
 

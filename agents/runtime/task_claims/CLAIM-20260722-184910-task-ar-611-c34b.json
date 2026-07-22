@@ -1,0 +1,56 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260722-184910-task-ar-611-c34b",
+  "task_id": "TASK-AR-611",
+  "agent_role": "lead-engineer",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "codex-root-task-ar-611",
+  "display_name": "lead_engineer@orchestrator-01",
+  "callsite_id": "codex-root-20260722",
+  "pane_id": "root",
+  "mode": "orchestrator",
+  "status": "released",
+  "task_set_id": "TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY",
+  "active_scope": "TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY",
+  "scope_transition_approved": true,
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "unit_id": "UNIT-TASK-AR-611-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-611/UNIT-TASK-AR-611-001.md",
+  "model_tier": "worker_standard",
+  "wip_slot": 1,
+  "stop_condition": "Stop if additional unplanned tasksets appear or production classifier changes are required.",
+  "phase": "self-verified",
+  "progress_pct": 90,
+  "step_index": 3,
+  "step_total": 4,
+  "status_text": "TASK-AR-611 W4a passed; awaiting independent W4b",
+  "worktree_path": ".worktrees/TASK-AR-600",
+  "branch": "codex/task-ar-600-merge-readback",
+  "claimed_at": "2026-07-22T18:49:10+09:00",
+  "last_heartbeat": "2026-07-22T19:52:57+09:00",
+  "updated_at": "2026-07-22T19:52:57+09:00",
+  "expires_at": "2026-07-22T20:16:57+09:00",
+  "lease": {
+    "claimed_at": "2026-07-22T18:49:10+09:00",
+    "heartbeat_at": "2026-07-22T19:52:57+09:00",
+    "expires_at": "2026-07-22T20:16:57+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260722-184910-task-ar-611-c34b.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260722-184910-task-ar-611-c34b.log.md",
+  "allow_parallel_task_set": false,
+  "tags": [
+    "pr-303",
+    "ci"
+  ],
+  "escalation_triggers": [
+    "ambiguity",
+    "data_integrity"
+  ],
+  "target_files": [
+    "tests/test_backlog_board_tasksets.py"
+  ],
+  "released_at": "2026-07-22T19:52:57+09:00",
+  "verified_by": "codex-task-ar-611-auditor-20260722",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-22-TASK-AR-611.md"
+}

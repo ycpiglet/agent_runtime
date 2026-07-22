@@ -42,10 +42,8 @@ verified_at: 2026-07-19T12:12:42+09:00
 verified_by: codex-root-task-ar-597
 evidence_refs:
   - reviews/VERIFY-2026-07-19-unit-task-ar-597-001-20260719121242.json
-review_evidence_refs:
   - reviews/W4B-2026-07-19-TASK-AR-597.md
   - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-597-INDEPENDENT-AUDITOR.md
-implementation_commit: 2afa258
 resolution: done
 completed_at: 2026-07-19T12:25:29+09:00
 closed_by: codex-root-task-ar-597
@@ -103,6 +101,7 @@ Stop if exposing stderr could leak credentials; sanitize sensitive command argum
 - Actual hours: `0.3`
 - Actual tokens: `3500`
 - Closed by: `codex-root-task-ar-597`
+- Implementation commit: `2afa258`
 - Evidence:
   - `reviews/VERIFY-2026-07-19-unit-task-ar-597-001-20260719121242.json`
 <!-- work-close:end -->
