@@ -1,27 +1,21 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-23T08:02:09+09:00
+updated_at: 2026-07-23T08:29:00+09:00
 updated_by: codex-root
 current_state:
-  summary: "TASK-AR-609 and GitHub issue 300 are fully closed; TASK-AR-612 is claimed after a clean T2 check."
-  status: active
-  task_set_status: in_progress
-  task_set_id: "TASKSET-AR-TERMINAL-STATUS-START-GUARD"
+  summary: "TASK-AR-612 is independently verified, merged through PR 332, and closed after all main CI jobs passed."
+  status: ready
+  task_set_status: planned
+  task_set_id: "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT"
   step_index: 0
   step_total: 1
-  progress_pct: 5
-  status_text: "TASK-AR-612 is claimed; terminal-status failure-first coverage is next."
+  progress_pct: 0
+  status_text: "TASK-AR-602 remains the release target; register and resolve the discovered work.py defects before its release preflight."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260723-080209-task-ar-612-9b9e
-      agent_role: lead-engineer
-      agent_instance_id: codex-root-task-ar-612
-      display_name: lead_engineer@orchestrator-01
-      callsite_id: codex-root-20260723
-  current_teams:
-    - agent-runtime-core
+  current_agents: []
+  current_teams: []
 resume:
-  active_task: TASK-AR-612
-  active_task_set: "TASKSET-AR-TERMINAL-STATUS-START-GUARD"
+  active_task: TASK-AR-602
+  active_task_set: "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -29,8 +23,7 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260723-080209-task-ar-612-9b9e.json
+  active_claims: []
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
     active_claim: null

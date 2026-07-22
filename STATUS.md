@@ -1,5 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-23 - TASK-AR-612 complete; release preflight remains queued
+
+- Completed: TASK-AR-612 merged through PR #332 at `ecf90a637c8544813d31ff659940fa1146ff3867`; pull-request and post-merge `main` runs passed Python 3.10, 3.11, and 3.12.
+- Contract: `closed`, `released`, and their registered Korean aliases are terminal for taskset selection and start persistence, while planned/active and localized start behavior remains intact.
+- Quality loop: failure-first proof, 94 focused tests, host-lock and taskset gates, independent W4b, and skeptic review all passed before merge; claims are released and the merged feature worktree is removed.
+- Next: `TASK-AR-602` in `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` remains the v0.7.0 release target. Register and resolve the newly observed `work.py` frontmatter serialization and selector defects before current-head release preflight.
+
 ## 2026-07-23 - TASK-AR-608/#298 active after T3 revalidation
 
 - Active: claim `CLAIM-20260723-063127-task-ar-608-076c` executes TASK-AR-608 after T2 detected stale release-cadence/auto anchors and T3 re-recorded 11 current assumptions.
