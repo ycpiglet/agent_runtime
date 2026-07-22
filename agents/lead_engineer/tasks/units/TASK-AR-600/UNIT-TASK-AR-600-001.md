@@ -9,11 +9,11 @@ task_id: TASK-AR-600
 task_set_id: TASKSET-AR-AUTO-MERGE-INTEGRITY
 initiative_id: INIT-AR-AUTO-MERGE-INTEGRITY
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-19T10:34:25+09:00
-updated_at: 2026-07-22T18:15:56+09:00
+updated_at: 2026-07-22T20:03:00+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-19-auto-merge-execution-readback.md
 created_by: codex-root
@@ -47,6 +47,11 @@ evidence_refs:
   - reviews/VERIFY-2026-07-22-unit-task-ar-600-001-20260722180521.json
   - reviews/VERIFY-2026-07-22-unit-task-ar-600-001-20260722181034.json
   - reviews/VERIFY-2026-07-22-unit-task-ar-600-001-20260722181556.json
+resolution: done
+completed_at: 2026-07-22T20:03:00+09:00
+closed_by: codex-root
+actual_hours: 0.5
+actual_tokens: 28000
 ---
 
 # UNIT-TASK-AR-600-001 - Patch auto-merge execution read-back
@@ -93,3 +98,18 @@ Report exact head, tests, issue/PR links, rollback, and residual risks.
 ## Stop Boundary
 
 Stop on workflow, secret, force-push, branch-protection, or unrelated merge-policy changes.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-22T20:03:00+09:00`
+- Resolution: `done`
+- Actual hours: `0.5`
+- Actual tokens: `28000`
+- Closed by: `codex-root`
+- Evidence:
+  - `reviews/VERIFY-2026-07-22-unit-task-ar-600-001-20260722175209.json`
+  - `reviews/VERIFY-2026-07-22-unit-task-ar-600-001-20260722180521.json`
+  - `reviews/VERIFY-2026-07-22-unit-task-ar-600-001-20260722181034.json`
+  - `reviews/VERIFY-2026-07-22-unit-task-ar-600-001-20260722181556.json`
+<!-- work-close:end -->

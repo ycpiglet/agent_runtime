@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-AUTO-MERGE-INTEGRITY
 registered_at: 2026-07-19T10:34:25+09:00
 created_at: 2026-07-19T10:34:25+09:00
-updated_at: 2026-07-22T18:15:59+09:00
+updated_at: 2026-07-22T20:03:01+09:00
 title: Confirm remote merge state before success
-status: planned
+status: completed
+started_at: 2026-07-22T17:48:20+09:00
 priority: P1
 difficulty: M
 est_hours: 1
@@ -39,12 +40,15 @@ tags:
 verified_at: 2026-07-22T18:15:59+09:00
 verified_by: codex-root-task-ar-600-rework3
 evidence_refs:
-  - reviews/VERIFY-2026-07-22-task-ar-600-20260722175324.json
-  - reviews/VERIFY-2026-07-22-task-ar-600-20260722175452.json
   - reviews/VERIFY-2026-07-22-task-ar-600-20260722175618.json
   - reviews/VERIFY-2026-07-22-task-ar-600-20260722180529.json
   - reviews/VERIFY-2026-07-22-task-ar-600-20260722181037.json
   - reviews/VERIFY-2026-07-22-task-ar-600-20260722181559.json
+resolution: done
+completed_at: 2026-07-22T20:03:01+09:00
+closed_by: codex-root
+actual_hours: 0.6
+actual_tokens: 30000
 ---
 
 # TASK-AR-600 - Confirm remote merge state before success
@@ -68,3 +72,23 @@ evidence_refs:
 - `python -m pytest tests/test_auto_merge_execution.py src/agent_runtime/templates/project/scripts/test_auto_merge.py -q`
 - `python scripts/regen_host_lock_if_needed.py --check`
 - `python scripts/owner_governance_gate.py --allow-empty-owner-docs`
+
+## Superseded verification attempts
+
+- `reviews/VERIFY-2026-07-22-task-ar-600-20260722175324.json` — failure-first evidence retained; superseded by the later passing W4a runs.
+- `reviews/VERIFY-2026-07-22-task-ar-600-20260722175452.json` — intermediate failed evidence retained; superseded by the later passing W4a runs.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-22T20:03:01+09:00`
+- Resolution: `done`
+- Actual hours: `0.6`
+- Actual tokens: `30000`
+- Closed by: `codex-root`
+- Evidence:
+  - `reviews/VERIFY-2026-07-22-task-ar-600-20260722175618.json`
+  - `reviews/VERIFY-2026-07-22-task-ar-600-20260722180529.json`
+  - `reviews/VERIFY-2026-07-22-task-ar-600-20260722181037.json`
+  - `reviews/VERIFY-2026-07-22-task-ar-600-20260722181559.json`
+<!-- work-close:end -->

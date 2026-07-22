@@ -1,21 +1,21 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-22T19:53:16+09:00
+updated_at: 2026-07-22T20:05:00+09:00
 updated_by: codex-root
 current_state:
-  summary: "TASK-AR-600, TASK-AR-610, and TASK-AR-611 passed W4b; PR #303 is ready for the final CI update."
-  status: watch
+  summary: "PR #303 merged, post-merge main CI passed, GitHub #291 closed, and TASK-AR-600/610/611 completed W6 closeout."
+  status: active
   task_set_status: in_progress
-  task_set_id: "TASKSET-AR-AUTO-MERGE-INTEGRITY"
-  step_index: 4
-  step_total: 5
-  progress_pct: 95
-  status_text: "All PR #303 recovery W4b checks passed; pushing final CI update."
+  task_set_id: "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION"
+  step_index: 1
+  step_total: 7
+  progress_pct: 0
+  status_text: "Next worker-ready item is TASK-AR-603 for GitHub #299 canonical task-ID compatibility."
 active_work:
   current_agents: []
   current_teams: []
 resume:
-  active_task: TASK-AR-600
-  active_task_set: "TASKSET-AR-AUTO-MERGE-INTEGRITY"
+  active_task: TASK-AR-603
+  active_task_set: "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."

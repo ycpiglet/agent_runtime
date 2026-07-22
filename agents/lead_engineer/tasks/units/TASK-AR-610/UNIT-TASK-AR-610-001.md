@@ -9,11 +9,11 @@ task_id: TASK-AR-610
 task_set_id: TASKSET-AR-PR303-CI-SCHEMA-RECOVERY
 initiative_id: INIT-AR-PR303-CI-SCHEMA-RECOVERY
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T18:26:18+09:00
-updated_at: 2026-07-22T18:35:57+09:00
+updated_at: 2026-07-22T20:03:02+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-pr-303-ci-baseline-schema-recovery.md
 created_by: codex-root-planner
@@ -53,6 +53,11 @@ verified_at: 2026-07-22T18:35:57+09:00
 verified_by: codex-root-task-ar-610
 evidence_refs:
   - reviews/VERIFY-2026-07-22-unit-task-ar-610-001-20260722183557.json
+resolution: done
+completed_at: 2026-07-22T20:03:02+09:00
+closed_by: codex-root
+actual_hours: 0.2
+actual_tokens: 4500
 ---
 
 # UNIT-TASK-AR-610-001 - Normalize legacy closeout evidence metadata
@@ -108,3 +113,15 @@ Report the original CI finding, preserved failed evidence path, local gate resul
 ## Stop Boundary
 
 Stop before changing the global work-item schema or deleting any verification evidence.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-22T20:03:02+09:00`
+- Resolution: `done`
+- Actual hours: `0.2`
+- Actual tokens: `4500`
+- Closed by: `codex-root`
+- Evidence:
+  - `reviews/VERIFY-2026-07-22-unit-task-ar-610-001-20260722183557.json`
+<!-- work-close:end -->
