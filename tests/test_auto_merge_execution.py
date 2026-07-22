@@ -124,3 +124,21 @@ def test_remote_readback_failure_is_non_success(monkeypatch) -> None:
     assert merged is False
     assert remote == {}
     assert "원격 상태 재확인 실패" in detail
+
+
+def test_execute_mode_returns_nonzero_until_remote_merge_is_confirmed(monkeypatch, capsys) -> None:
+    module = _load()
+    monkeypatch.setattr(module, "evaluate", lambda _pr: ("AUTO-MERGE", ["green"], _green_pr()))
+    monkeypatch.setattr(
+        module,
+        "execute_merge",
+        lambda _pr: (False, "remote state OPEN", {"state": "OPEN", "mergedAt": None}),
+    )
+    monkeypatch.setattr(module.sys, "argv", [str(SCRIPT), "123", "--execute"])
+
+    result = module.main()
+    output = capsys.readouterr().out
+
+    assert result == 1
+    assert "머지 미확정" in output
+    assert "원격 MERGED 확인됨" not in output
