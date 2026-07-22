@@ -328,6 +328,18 @@ def _load_module():
     return module
 
 
+def test_loaded_module_subprocess_patch_is_process_local(monkeypatch) -> None:
+    module = _load_module()
+    parent_run = subprocess.run
+
+    def _sentinel(*args, **kwargs):
+        raise AssertionError("test-only subprocess sentinel")
+
+    monkeypatch.setattr(module.subprocess, "run", _sentinel)
+
+    assert subprocess.run is parent_run
+
+
 def test_spawn_failure_reports_git_query_error(tmp_path: Path, monkeypatch) -> None:
     module = _load_module()
     monkeypatch.setattr(module.time, "sleep", lambda _s: None)
