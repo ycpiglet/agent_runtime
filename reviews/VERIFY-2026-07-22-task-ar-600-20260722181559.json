@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-22-task-ar-600-20260722181559",
+  "work_id": "TASK-AR-600",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-600.md",
+  "kind": "task",
+  "task_id": "TASK-AR-600",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-22T18:15:59+09:00",
+  "verified_by": "codex-root-task-ar-600-rework3",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_auto_merge_execution.py src/agent_runtime/templates/project/scripts/test_auto_merge.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-22T18:15:59+09:00",
+      "finished_at": "2026-07-22T18:16:00+09:00",
+      "stdout": ".....................                                                    [100%]\n21 passed in 0.29s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/regen_host_lock_if_needed.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-22T18:16:00+09:00",
+      "finished_at": "2026-07-22T18:16:01+09:00",
+      "stdout": "OK: C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-600\\tests\\fixtures\\host\\agent_runtime.lock.json is up to date.\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/owner_governance_gate.py --allow-empty-owner-docs",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-22T18:16:01+09:00",
+      "finished_at": "2026-07-22T18:16:18+09:00",
+      "stdout": "t status=active lifecycle=keep paths=1 evidence=3 usage=10 reuse=2\n- metric capability.work kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.update_notify kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.session_dashboard kind=script status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=1\n- metric hook.session_dashboard kind=hook status=active lifecycle=keep paths=2 evidence=2 usage=9 reuse=2\n- metric skill.wave_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=7 reuse=2\n- metric skill.merge_integrator kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=15 reuse=2\n- metric skill.independent_verification kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=11 reuse=2\n- metric skill.work_analytics kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=14 reuse=2\n- metric skill.release_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=5 reuse=2\n- metric skill.scm_steward kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=19 reuse=2\nowner-governance: result: scripts/runtime_asset_usage.py --check -> 0\nowner-governance: start: scripts/state_sync_gate.py --check\nstate-sync-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-600\nfindings=0\nblock=0\nwatch=0\nowner-governance: result: scripts/state_sync_gate.py --check -> 0\nowner-governance: start: scripts/automation_rules_gate.py --check\nautomation-rules-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-600\nrules_total=0\nrules_active=0\nrules_executed=0\nrules_invalid=0\nactions=0\nfindings=0\nowner-governance: result: scripts/automation_rules_gate.py --check -> 0\nowner-governance: start: scripts/scheduled_dispatch_gate.py --check\nscheduled-dispatch-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-600\nschedules_total=0\nschedules_active=0\nschedules_invalid=0\ndue=0\ndispatches=0\nreminders=0\nfindings=0\nowner-governance: result: scripts/scheduled_dispatch_gate.py --check -> 0\nowner-governance: start: scripts/release_cadence_trigger.py --check\nrelease-cadence: watch finding=release-cadence:proposal recommended_bump=minor recommended_version=0.7.0\nrelease-cadence: baseline tag=v0.6.0 commits=148 feat=7 fix=20 breaking=0 days=16 (thresholds commits>=40 feat>=5 days>=14)\nrelease-cadence: trigger reasons: commits>=40 (actual 148); feat>=5 (actual 7); days>=14 (actual 16)\nrelease-cadence: current version=0.6.0 source=pyproject.toml\nrelease-cadence: bump targets: pyproject.toml\nrelease-cadence: non-blocking watch; no version bump, tag, push, publish, or release execution\nowner-governance: result: scripts/release_cadence_trigger.py --check -> 0\nowner-governance: start: scripts/conversation_work_audit.py --check\nconversation-work-audit: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-600\nplanning_records=19\nfindings=0 block=0 watch=0\nowner-governance: result: scripts/conversation_work_audit.py --check -> 0\nowner-governance: start: scripts/knowledge_lint_gate.py --check\nknowledge-lint-gate: pass (enforced; changed=59>=10; no block findings)\nowner-governance: result: scripts/knowledge_lint_gate.py --check -> 0\nowner-governance: start: scripts/planning_loop.py gate --trigger hook --action scan\nstatus=pass\nowner-governance: result: scripts/planning_loop.py gate --trigger hook --action scan -> 0\nowner-governance: start: scripts/compound_cadence_gate.py --obligation\ncompound-cadence-gate: watch\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-600\nreviews=312\ncompounds=3\nretros=5\ncompound_retro_total=8\nratio=39.0\nthreshold=20\nwatch=1\n- watch [compound-cadence]: 312 REVIEW-* vs 8 COMPOUND-*/RETRO-* (ratio 39.0, threshold 20); consider compounding lessons into COMPOUND-* or RETRO-* documents\nowner-governance: result: scripts/compound_cadence_gate.py --obligation -> 1\nowner-governance: advisory: compound obligation due (review:compound ratio high) -- not blocking\n",
+      "stderr": ""
+    }
+  ]
+}
