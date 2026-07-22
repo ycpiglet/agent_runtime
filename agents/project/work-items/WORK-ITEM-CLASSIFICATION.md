@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-22T21:43:21+09:00
+generated_at: 2026-07-22T23:02:23+09:00
 record_count: 422
 ---
 
@@ -439,8 +439,8 @@ record_count: 422
 | 26.1.1.1 | Unit 26.1.1.1 | unit | `UNIT-TASK-AR-603-001` | `TASK-AR-603` | completed | `agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md` | UNIT-TASK-AR-603-001 - Adopt a shared canonical task-ID contract |
 | 26.1.2 | Task 26.1.2 | task | `TASK-AR-604` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | completed | `agents/lead_engineer/tasks/TASK-AR-604.md` | Close GitHub #293 by separating normalized comparison aliases from the canonical stat… |
 | 26.1.2.1 | Unit 26.1.2.1 | unit | `UNIT-TASK-AR-604-001` | `TASK-AR-604` | completed | `agents/lead_engineer/tasks/units/TASK-AR-604/UNIT-TASK-AR-604-001.md` | UNIT-TASK-AR-604-001 - Separate task status normalization from persistence |
-| 26.1.3 | Task 26.1.3 | task | `TASK-AR-605` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-605.md` | Close GitHub #294 by making the template W0 dashboard work when repository-only scrip… |
-| 26.1.3.1 | Unit 26.1.3.1 | unit | `UNIT-TASK-AR-605-001` | `TASK-AR-605` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-605/UNIT-TASK-AR-605-001.md` | UNIT-TASK-AR-605-001 - Add a clean-template W0 fallback |
+| 26.1.3 | Task 26.1.3 | task | `TASK-AR-605` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | completed | `agents/lead_engineer/tasks/TASK-AR-605.md` | Close GitHub #294 by making the template W0 dashboard work when repository-only scrip… |
+| 26.1.3.1 | Unit 26.1.3.1 | unit | `UNIT-TASK-AR-605-001` | `TASK-AR-605` | completed | `agents/lead_engineer/tasks/units/TASK-AR-605/UNIT-TASK-AR-605-001.md` | UNIT-TASK-AR-605-001 - Add a clean-template W0 fallback |
 | 26.1.4 | Task 26.1.4 | task | `TASK-AR-606` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-606.md` | Close GitHub #295 by preserving executable hook activation in source and repairing it… |
 | 26.1.4.1 | Unit 26.1.4.1 | unit | `UNIT-TASK-AR-606-001` | `TASK-AR-606` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-606/UNIT-TASK-AR-606-001.md` | UNIT-TASK-AR-606-001 - Make hook activation executable and idempotent |
 | 26.1.5 | Task 26.1.5 | task | `TASK-AR-607` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-607.md` | Close GitHub #297 by isolating release-cadence transient-spawn recovery state so the… |

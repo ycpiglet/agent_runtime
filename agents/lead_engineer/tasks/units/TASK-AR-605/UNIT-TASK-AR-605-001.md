@@ -9,11 +9,12 @@ task_id: TASK-AR-605
 task_set_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 initiative_id: INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T22:42:06+09:00
+updated_at: 2026-07-22T23:02:21+09:00
+started_at: 2026-07-22T22:17:46+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
 created_by: codex-root-planner
@@ -47,6 +48,11 @@ verified_by: codex-root-task-ar-605
 evidence_refs:
   - reviews/VERIFY-2026-07-22-unit-task-ar-605-001-20260722222914.json
   - reviews/VERIFY-2026-07-22-unit-task-ar-605-001-20260722224206.json
+resolution: done
+completed_at: 2026-07-22T23:02:21+09:00
+closed_by: codex-root
+actual_hours: 0.8
+actual_tokens: 60000
 ---
 
 # UNIT-TASK-AR-605-001 - Add a clean-template W0 fallback
@@ -95,3 +101,16 @@ Report clean-template output, fallback boundaries, root behavior, and issue #294
 ## Stop Boundary
 
 Stop before adding repository-only work.py or its transitive dependency graph to the template.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-22T23:02:21+09:00`
+- Resolution: `done`
+- Actual hours: `0.8`
+- Actual tokens: `60000`
+- Closed by: `codex-root`
+- Evidence:
+  - `reviews/VERIFY-2026-07-22-unit-task-ar-605-001-20260722222914.json`
+  - `reviews/VERIFY-2026-07-22-unit-task-ar-605-001-20260722224206.json`
+<!-- work-close:end -->
