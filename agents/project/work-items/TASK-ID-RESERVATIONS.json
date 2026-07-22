@@ -930,8 +930,27 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-612",
+      "expires_at": "2026-07-23T21:43:00+09:00",
+      "fulfilled_at": "2026-07-22T21:43:00+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-612.md",
+      "fulfilled_task_id": "TASK-AR-612",
+      "fulfilled_task_uid": "a6489013-6f3e-4efa-b26f-a95d24266c88",
+      "initiative_id": "INIT-AR-TERMINAL-STATUS-START-GUARD",
+      "kind": "task",
+      "owner_id": "codex-root-planner",
+      "reason": "work registration TASKSET-AR-TERMINAL-STATUS-START-GUARD",
+      "reservation_group_id": "RES-20260722-214300-77bc3d99",
+      "reservation_id": "RES-20260722-214300-77bc3d99-01",
+      "reserved_at": "2026-07-22T21:43:00+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-TERMINAL-STATUS-START-GUARD",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-07-22T18:48:38+09:00"
+  "updated_at": "2026-07-22T21:43:00+09:00"
 }

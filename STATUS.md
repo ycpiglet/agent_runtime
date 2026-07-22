@@ -1,5 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-22 - TASK-AR-604/#293 complete; TASK-AR-605 next; terminal residual registered
+
+- Completed: PR #307 merged at `83902729348a680092c9a7710221b32f30ad837d`; pull-request run `29920182446` and post-merge main run `29920394674` passed on Python 3.10/3.11/3.12.
+- Contract: localized taskset starts now persist `진행 중`, English records continue to persist `in_progress`, and emitted machine payloads remain normalized without rewriting protected/terminal/review statuses.
+- Quality loop: focused W4a, independent W4b, and a 32-case skeptic matrix passed; GitHub #293 is closed and the merged worktree plus local/remote branch are cleaned.
+- Residual intake: the skeptic found that `closed`/`released` and their Korean aliases are still considered actionable by the dispatcher. The separate worker-ready `TASK-AR-612` / `TASKSET-AR-TERMINAL-STATUS-START-GUARD` is registered; it was not folded into TASK-AR-604.
+- Next: `TASK-AR-605` for GitHub #294 in `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION`.
+
 ## 2026-07-22 - TASK-AR-603/#299 complete; TASK-AR-604 next
 
 - Completed: PR #305 merged at `4646ea3fe5f6c4e88ab6f118150560219958ef92`; pull-request run `29917901170` and post-merge main run `29918111357` passed on Python 3.10/3.11/3.12.

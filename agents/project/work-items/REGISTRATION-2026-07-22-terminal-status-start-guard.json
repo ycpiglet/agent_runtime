@@ -1,0 +1,82 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "review_finding",
+  "origin_ref": "reviews/ROLE-REVIEW-2026-07-22-TASK-AR-604-SKEPTIC.md",
+  "created_by": "codex-root-planner",
+  "initiative": {
+    "id": "INIT-AR-TERMINAL-STATUS-START-GUARD",
+    "title": "Terminal Status Start Guard",
+    "summary": "Prevent taskset dispatch from selecting or restarting closed and released work records.",
+    "owner": "lead-engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-TERMINAL-STATUS-START-GUARD",
+    "display_name": "Terminal Status Start Guard",
+    "summary": "Align taskset terminal-status selection and start transitions with the established closed/released status vocabulary.",
+    "order": 604,
+    "plan_slug": "2026-07-22-terminal-status-start-guard"
+  },
+  "tasks": [
+    {
+      "title": "Block taskset restart of closed and released records",
+      "goal": "Make closed/released tasks and their registered Korean aliases terminal in taskset selection and start persistence.",
+      "scope": "Change only taskset_dispatcher terminal-status membership and start-target behavior, its generated-host mirror, focused regressions, and the host lock. Do not redesign the shared status schema or change unrelated status consumers.",
+      "priority": "P1",
+      "difficulty": "S",
+      "est_hours": 1.0,
+      "est_tokens": 5000,
+      "owner": "lead-engineer",
+      "team": "agent-runtime-core",
+      "acceptance": [
+        "Taskset planning does not select closed, released, 종결, 종료, 릴리스됨, or 배포됨 task records as actionable work.",
+        "The start-target helper returns no transition for every closed/released canonical value and registered alias.",
+        "Existing planned/active/localized start behavior and completed/done terminal behavior remain unchanged.",
+        "Root/template parity and the generated-host lock remain current."
+      ],
+      "verification": [
+        "python -m pytest tests/test_taskset_dispatcher.py -q",
+        "python scripts/regen_host_lock_if_needed.py --check",
+        "python scripts/taskset_work_gate.py --check"
+      ],
+      "units": [
+        {
+          "title": "Treat closed and released task statuses as terminal",
+          "context": "TASK-AR-604 skeptic verification found a pre-existing counterexample: _target_status_for_work_start maps closed/released and the aliases 종결/종료/릴리스됨/배포됨 back to in_progress. The same dispatcher-local DONE_STATUSES set omits these terminal values, so selection can also treat them as actionable.",
+          "inputs": [
+            "reviews/ROLE-REVIEW-2026-07-22-TASK-AR-604-SKEPTIC.md",
+            "scripts/status_alias.py",
+            "scripts/taskset_dispatcher.py"
+          ],
+          "target_files": [
+            "scripts/taskset_dispatcher.py",
+            "src/agent_runtime/templates/project/scripts/taskset_dispatcher.py",
+            "tests/test_taskset_dispatcher.py",
+            "tests/fixtures/host/agent_runtime.lock.json"
+          ],
+          "scope": "Add failure-first selection and transition coverage, then make only the dispatcher-local terminal checks recognize closed/released and their aliases. Preserve the shared status schema and other consumers.",
+          "steps": [
+            "Reproduce terminal records being selected or mapped to an in-progress start target.",
+            "Align dispatcher-local terminal membership and start-target behavior with normalized closed/released values.",
+            "Mirror the runtime implementation and regenerate the host lock.",
+            "Run focused tests, parity, lock, taskset gates, W4a, independent W4b, and skeptic review."
+          ],
+          "acceptance": [
+            "All six canonical/alias terminal cases are no-select and no-transition paths.",
+            "No global status vocabulary or unrelated consumer changes are included."
+          ],
+          "verification": [
+            "python -m pytest tests/test_taskset_dispatcher.py -q",
+            "python scripts/regen_host_lock_if_needed.py --check"
+          ],
+          "handoff": "Report failure-first evidence, terminal selection/start matrix, focused tests, template parity, host lock, and independent review.",
+          "stop_condition": "Stop if the fix requires changing the shared schema or any status consumer outside taskset_dispatcher.",
+          "escalation_triggers": [
+            "data_integrity",
+            "ambiguity"
+          ]
+        }
+      ]
+    }
+  ]
+}

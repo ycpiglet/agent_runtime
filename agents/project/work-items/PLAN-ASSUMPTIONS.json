@@ -573,6 +573,34 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/ROLE-REVIEW-2026-07-22-TASK-AR-604-SKEPTIC.md",
+          "value": "935bfd54d69ec0e62575f4fa33eda80cf1a958d419276a0a95e3fedafa6b057a"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/taskset_dispatcher.py",
+          "value": "a78f2706a2ef39a92ae339d149fb8b10524e24dc1510f75a386c342c475292d9"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        }
+      ],
+      "design_record": "reviews/ROLE-REVIEW-2026-07-22-TASK-AR-604-SKEPTIC.md",
+      "recorded_at": "2026-07-22T21:43:02+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-TERMINAL-STATUS-START-GUARD"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-20-taskset-ar-visual-asset-adoption-registration.md",
           "value": "c93551e9f2b50b26f56a7a2d3c61c4a7fdf598f5ad5b09a7db589d7c7371e4b1"
         },
@@ -617,5 +645,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-22T21:32:44+09:00"
+  "updated_at": "2026-07-22T21:43:02+09:00"
 }
