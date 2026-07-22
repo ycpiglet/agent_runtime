@@ -1,20 +1,48 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-18T17:48:46+09:00
+updated_at: 2026-07-22T17:10:09+09:00
+updated_by: codex-root-task-ar-599
 current_state:
-  summary: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE is complete; the persistent self-improvement goal is improving but still active."
+  summary: "TASK-AR-599 allimbot integration is in W4 governance after focused tests and wheel verification passed."
   status: watch
-  task_set_status: completed
-  task_set_id: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
-  step_index: 4
-  step_total: 4
-  progress_pct: 100
-  status_text: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE closed at improving 70/100; full maturity remains open."
+  task_set_status: in_progress
+  task_set_id: "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT"
+  step_index: 6
+  step_total: 7
+  progress_pct: 75
+  status_text: "TASK-AR-599 implementation complete; full governance and independent W4b remain."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - display_name: codex/task-ar-599
+      agent_role: lead-engineer
+      agent_instance_id: codex-root-task-ar-599
+      callsite_id: codex-root-20260722
+      team_id: agent-runtime-core
+      pane_id: root
+      task_id: TASK-AR-599
+      status: claimed
+      phase: implementation
+      progress_pct: 60
+      step_index: 4
+      step_total: 7
+      status_text: "Implementation and focused tests pass; running full governance"
+      worktree_path: .worktrees/TASK-AR-599
+      branch: codex/task-ar-599-allimbot
+      claim_id: CLAIM-20260722-170010-task-ar-599-5d41
+      claim_path: agents/runtime/task_claims/CLAIM-20260722-170010-task-ar-599-5d41.json
+      handoff_path: agents/runtime/task_claims/CLAIM-20260722-170010-task-ar-599-5d41.handoff.md
+      last_heartbeat: 2026-07-22T17:10:09+09:00
+  current_teams:
+    - team_id: agent-runtime-core
+      status: active
+      phase: implementation
+      progress_pct: 60
+      active_task: TASK-AR-599
+      task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
+      pane_ids:
+        - root
 resume:
-  active_task: none
-  active_task_set: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
+  active_task: TASK-AR-599
+  active_task_set: "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -22,7 +50,8 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260722-170010-task-ar-599-5d41.json
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
     active_claim: null

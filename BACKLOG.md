@@ -1,5 +1,11 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-07-22 TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT active
+
+- Current task: `TASK-AR-599` (optional allimbot notifications), W4 governance in progress.
+- Completed predecessors: `TASK-AR-594` through `TASK-AR-598`; `TASK-AR-601` completed its separate routing-closeout taskset.
+- Next in this taskset: finish independent verification and integration for `TASK-AR-599`, audit release-impact issues, then run release-only `TASK-AR-602`.
+
 <!-- BACKLOG-INDEX:START (generated from TASKSET-DEFINITIONS.json — do not edit by hand) -->
 
 ## Registered tasksets (generated)

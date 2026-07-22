@@ -1,5 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-22 - TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT / TASK-AR-599 active
+
+- Active task: `TASK-AR-599` is in W4 governance after the optional allimbot client, lifecycle wiring, focused tests, host lock, and wheel packaging checks passed.
+- Active claim: `CLAIM-20260722-170010-task-ar-599-5d41`; worktree `.worktrees/TASK-AR-599`; branch `codex/task-ar-599-allimbot`.
+- Safety boundary: notification configuration is blank by default, network attempts are capped at three seconds, verification uses mocks/build inspection only, and no repository notification variable or secret is configured.
+- Remaining: full governance, independent auditor and skeptic W4b, integration, issue #279 closeout, then the release-impact issue audit and `TASK-AR-602`.
+
 ## 2026-07-06 (2차) - 이슈 전량 정리: #128/#132/#250 종료 — 열린 이슈 0 도달
 
 - Owner 지시("#128 정리 후 132, 250 정리")로 잔여 이슈 3건을 전부 종료했다. **열린 이슈 0 + 백로그 보드 open 0.**
