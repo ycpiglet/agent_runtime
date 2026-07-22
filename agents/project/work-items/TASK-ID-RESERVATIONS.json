@@ -949,8 +949,27 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-TERMINAL-STATUS-START-GUARD",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-613",
+      "expires_at": "2026-07-24T01:16:34+09:00",
+      "fulfilled_at": "2026-07-23T01:16:34+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-613.md",
+      "fulfilled_task_id": "TASK-AR-613",
+      "fulfilled_task_uid": "26230ebe-4bff-43d5-8ef4-57749db3ec33",
+      "initiative_id": "INIT-AR-RELEASE-CADENCE-QUERY-RECOVERY",
+      "kind": "task",
+      "owner_id": "codex-root-planner",
+      "reason": "work registration TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY",
+      "reservation_group_id": "RES-20260723-011634-32012327",
+      "reservation_id": "RES-20260723-011634-32012327-01",
+      "reserved_at": "2026-07-23T01:16:34+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-07-22T21:43:00+09:00"
+  "updated_at": "2026-07-23T01:16:34+09:00"
 }

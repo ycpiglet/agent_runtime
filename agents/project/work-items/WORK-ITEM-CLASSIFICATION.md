@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-23T01:02:19+09:00
-record_count: 422
+generated_at: 2026-07-23T01:17:16+09:00
+record_count: 426
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `422` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `426` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `30` records |
-| Tasksets | pass | `54` records |
-| Tasks | pass | `276` records |
-| Units | pass | `62` records |
+| Initiatives | pass | `31` records |
+| Tasksets | pass | `55` records |
+| Tasks | pass | `277` records |
+| Units | pass | `63` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -461,6 +461,10 @@ record_count: 422
 | 29.1 | Taskset 29.1 | taskset | `TASKSET-AR-TERMINAL-STATUS-START-GUARD` | `INIT-AR-TERMINAL-STATUS-START-GUARD` | active | `BACKLOG-BOARD.md` | Terminal Status Start Guard |
 | 29.1.1 | Task 29.1.1 | task | `TASK-AR-612` | `TASKSET-AR-TERMINAL-STATUS-START-GUARD` | planned | `agents/lead_engineer/tasks/TASK-AR-612.md` | Make closed/released tasks and their registered Korean aliases terminal in taskset se… |
 | 29.1.1.1 | Unit 29.1.1.1 | unit | `UNIT-TASK-AR-612-001` | `TASK-AR-612` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-612/UNIT-TASK-AR-612-001.md` | UNIT-TASK-AR-612-001 - Treat closed and released task statuses as terminal |
+| 30 | Initiative 30 | initiative | `INIT-AR-RELEASE-CADENCE-QUERY-RECOVERY` | - | active | `agents/project/initiatives/INIT-AR-RELEASE-CADENCE-QUERY-RECOVERY.md` | Release Cadence Query Recovery |
+| 30.1 | Taskset 30.1 | taskset | `TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY` | `INIT-AR-RELEASE-CADENCE-QUERY-RECOVERY` | active | `BACKLOG-BOARD.md` | Release Cadence Query Recovery |
+| 30.1.1 | Task 30.1.1 | task | `TASK-AR-613` | `TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY` | planned | `agents/lead_engineer/tasks/TASK-AR-613.md` | Close GitHub issue 316 by preventing a valid tagged cadence from collapsing into rele… |
+| 30.1.1.1 | Unit 30.1.1.1 | unit | `UNIT-TASK-AR-613-001` | `TASK-AR-613` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-613/UNIT-TASK-AR-613-001.md` | UNIT-TASK-AR-613-001 - Classify and retry unexpected non-zero cadence queries |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

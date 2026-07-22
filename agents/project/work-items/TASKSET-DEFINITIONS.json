@@ -180,6 +180,12 @@
       "display_name": "Visual System Integration & Verification",
       "summary": "Wire the new visual components into every relevant live view, boot-verify the served console, fix integration gaps, and run a WCAG AA + responsive pass on the new visual system. Permissive, no-build, token-driven.",
       "order": 626
+    },
+    {
+      "task_set_id": "TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY",
+      "display_name": "Release Cadence Query Recovery",
+      "summary": "Harden the cadence query boundary and prove release-auto fails loud on exhausted transient queries while preserving genuine no-tag behavior.",
+      "order": 723
     }
   ]
 }

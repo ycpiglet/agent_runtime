@@ -1,0 +1,103 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "ci_failure",
+  "origin_ref": "reviews/REVIEW-2026-07-23-release-cadence-query-recovery-plan.md",
+  "created_by": "codex-root-planner",
+  "now": "2026-07-23T01:16:34+09:00",
+  "initiative": {
+    "id": "INIT-AR-RELEASE-CADENCE-QUERY-RECOVERY",
+    "title": "Release Cadence Query Recovery",
+    "summary": "Prevent transient Git query failures from being misclassified as a clean release cadence no-op.",
+    "owner": "lead-engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY",
+    "display_name": "Release Cadence Query Recovery",
+    "summary": "Harden the cadence query boundary and prove release-auto fails loud on exhausted transient queries while preserving genuine no-tag behavior.",
+    "order": 723,
+    "plan_slug": "2026-07-23-release-cadence-query-recovery",
+    "planner_model_tier": "planner_high",
+    "worker_model_tier": "worker_standard",
+    "reviewer_model_tier": "reviewer_standard"
+  },
+  "tasks": [
+    {
+      "title": "Recover transient non-zero cadence queries without false not-triggered",
+      "goal": "Close GitHub issue 316 by preventing a valid tagged cadence from collapsing into release-auto not-triggered after a transient non-zero Git query result.",
+      "scope": "Change only release-cadence Git query classification/retry behavior, its generated-host mirror, focused release cadence and release-auto regressions, and the host lock. Preserve cadence thresholds, bump policy, and the legitimate no-tag quiet path.",
+      "priority": "P0",
+      "difficulty": "M",
+      "est_hours": 2,
+      "est_tokens": 8000,
+      "owner": "lead_engineer",
+      "team": "agent-runtime-core",
+      "summary": "Close GitHub issue 316 by distinguishing legitimate no-tag responses from transient non-zero Git query failures.",
+      "planner_model_tier": "planner_high",
+      "worker_model_tier": "worker_standard",
+      "reviewer_model_tier": "reviewer_standard",
+      "tags": [
+        "github-316",
+        "ci-flake",
+        "release-cadence",
+        "release-auto"
+      ],
+      "acceptance": [
+        "One transient unexpected non-zero Git query result is retried and a subsequent valid cadence answer triggers normally.",
+        "Exhausted unexpected non-zero Git query results produce git-query-error diagnostics and release-auto trigger-error rather than not-triggered.",
+        "A repository with no tags remains a deterministic quiet pass.",
+        "Cadence thresholds, bump semantics, root/template parity, and the generated-host lock remain correct."
+      ],
+      "verification": [
+        "python -m pytest tests/test_release_cadence_trigger.py tests/test_release_auto_noncritical.py -q",
+        "python scripts/regen_host_lock_if_needed.py --check",
+        "python scripts/taskset_work_gate.py --check"
+      ],
+      "units": [
+        {
+          "title": "Classify and retry unexpected non-zero cadence queries",
+          "context": "PR 315 CI run 29936269777 attempt 1 returned release-auto not-triggered for a valid v0.2.0 plus 40-commit fixture; the unchanged retry passed. TASK-AR-607 isolated dynamically loaded test module facades but intentionally left production query handling unchanged. release_cadence_trigger._git currently treats every positive non-zero return code as a deterministic empty answer, which can collapse a transient Git failure into no-tag or below-threshold state.",
+          "inputs": [
+            "reviews/REVIEW-2026-07-23-release-cadence-query-recovery-plan.md",
+            "GitHub issue 316",
+            "GitHub Actions run 29936269777 attempts 1 and 2",
+            "scripts/release_cadence_trigger.py",
+            "scripts/release_auto_noncritical.py"
+          ],
+          "target_files": [
+            "scripts/release_cadence_trigger.py",
+            "src/agent_runtime/templates/project/scripts/release_cadence_trigger.py",
+            "tests/test_release_cadence_trigger.py",
+            "tests/test_release_auto_noncritical.py",
+            "tests/fixtures/host/agent_runtime.lock.json"
+          ],
+          "scope": "Add failure-first query result classification and retry coverage, then distinguish the expected no-tag Git response from unexpected non-zero failures. Retry only the unexpected transient path, record exhausted diagnostics, mirror the runtime implementation, and regenerate the host lock.",
+          "steps": [
+            "Reproduce one unexpected non-zero Git query result collapsing a valid tagged fixture into not-triggered.",
+            "Add a deterministic no-tag classifier and retry unexpected non-zero query results without changing thresholds.",
+            "Prove exhausted failures surface git-query-error through cadence and release-auto.",
+            "Mirror the implementation, regenerate the host lock, and run repeated focused probes plus the full matrix."
+          ],
+          "acceptance": [
+            "A transient non-zero result followed by real Git output recovers without query errors.",
+            "Three unexpected non-zero results yield structured command, return code, and sanitized diagnostic evidence.",
+            "The known no-tag stderr remains a quiet no-baseline-tag result.",
+            "Root and generated-host implementations are byte-identical and all focused tests pass."
+          ],
+          "verification": [
+            "python -m pytest tests/test_release_cadence_trigger.py tests/test_release_auto_noncritical.py -q",
+            "python scripts/regen_host_lock_if_needed.py --check",
+            "python scripts/taskset_work_gate.py --check"
+          ],
+          "handoff": "Report failure-first evidence, the non-zero/no-tag classification matrix, retry counts, structured diagnostics, focused and repeated test results, parity, host lock, and independent W4b review.",
+          "stop_condition": "Stop if the fix requires weakening a release gate, changing cadence thresholds, or modifying unrelated status consumers.",
+          "escalation_triggers": [
+            "reliability",
+            "cross_cutting",
+            "data_integrity"
+          ]
+        }
+      ]
+    }
+  ]
+}

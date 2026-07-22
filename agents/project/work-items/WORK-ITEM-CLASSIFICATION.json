@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-23T01:02:19+09:00",
-  "record_count": 422,
+  "generated_at": "2026-07-23T01:17:16+09:00",
+  "record_count": 426,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4645,6 +4645,50 @@
       "title": "UNIT-TASK-AR-612-001 - Treat closed and released task statuses as terminal",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-612/UNIT-TASK-AR-612-001.md",
       "parent_id": "TASK-AR-612",
+      "status": "worker_ready"
+    },
+    {
+      "key": "initiative:INIT-AR-RELEASE-CADENCE-QUERY-RECOVERY",
+      "level": "initiative",
+      "number": "30",
+      "label": "Initiative 30",
+      "id": "INIT-AR-RELEASE-CADENCE-QUERY-RECOVERY",
+      "title": "Release Cadence Query Recovery",
+      "path": "agents/project/initiatives/INIT-AR-RELEASE-CADENCE-QUERY-RECOVERY.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY",
+      "level": "taskset",
+      "number": "30.1",
+      "label": "Taskset 30.1",
+      "id": "TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY",
+      "title": "Release Cadence Query Recovery",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-RELEASE-CADENCE-QUERY-RECOVERY",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-613",
+      "level": "task",
+      "number": "30.1.1",
+      "label": "Task 30.1.1",
+      "id": "TASK-AR-613",
+      "title": "Close GitHub issue 316 by preventing a valid tagged cadence from collapsing into rele…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-613.md",
+      "parent_id": "TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-613-001",
+      "level": "unit",
+      "number": "30.1.1.1",
+      "label": "Unit 30.1.1.1",
+      "id": "UNIT-TASK-AR-613-001",
+      "title": "UNIT-TASK-AR-613-001 - Classify and retry unexpected non-zero cadence queries",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-613/UNIT-TASK-AR-613-001.md",
+      "parent_id": "TASK-AR-613",
       "status": "worker_ready"
     }
   ]
