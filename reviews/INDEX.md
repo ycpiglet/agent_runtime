@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T08:09:35+09:00
-record_count: 803
+generated_at: 2026-07-23T08:20:01+09:00
+record_count: 805
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `803` review and evidence records under `reviews/`.
+- Summary: indexed `805` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `803` files |
+| Reviews covered | pass | `805` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -579,6 +579,7 @@ record_count: 803
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-607-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-607-SKEPTIC` | md | record | pass | TASK-AR-607 Skeptic and Adversarial Review |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-608-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-608-SKEPTIC` | md | record | pass | TASK-AR-608 Skeptic and Adversarial W4b |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-609-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-609-SKEPTIC` | md | record | pass | TASK-AR-609 Skeptic and Adversarial W4b |
+| `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-612-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-612-SKEPTIC` | md | record | pass | TASK-AR-612 Skeptic and Adversarial W4b Review |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-613-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-613-SKEPTIC` | md | record | fail | TASK-AR-613 Skeptic and Adversarial W4b |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-614-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-614-SKEPTIC` | md | record | pass | TASK-AR-614 Skeptic and Adversarial W4b |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-615-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-615-SKEPTIC` | md | record | pass | TASK-AR-615 Skeptic and Adversarial W4b |
@@ -831,6 +832,7 @@ record_count: 803
 | `reviews/W4B-2026-07-23-TASK-AR-607.md` | `W4B-2026-07-23-TASK-AR-607` | md | record | pass | TASK-AR-607 Independent W4b Verification |
 | `reviews/W4B-2026-07-23-TASK-AR-608.md` | `W4B-2026-07-23-TASK-AR-608` | md | record | pass | TASK-AR-608 Independent W4b Verification |
 | `reviews/W4B-2026-07-23-TASK-AR-609.md` | `W4B-2026-07-23-TASK-AR-609` | md | record | pass | TASK-AR-609 Independent W4b Verification |
+| `reviews/W4B-2026-07-23-TASK-AR-612.md` | `W4B-2026-07-23-TASK-AR-612` | md | record | pass | TASK-AR-612 Independent W4b Verification |
 | `reviews/W4B-2026-07-23-TASK-AR-613.md` | `W4B-2026-07-23-TASK-AR-613` | md | record | fail | TASK-AR-613 Independent W4b Verification |
 | `reviews/W4B-2026-07-23-TASK-AR-614.md` | `W4B-2026-07-23-TASK-AR-614` | md | record | pass | TASK-AR-614 Independent W4b Verification |
 | `reviews/W4B-2026-07-23-TASK-AR-615.md` | `W4B-2026-07-23-TASK-AR-615` | md | record | pass | TASK-AR-615 Independent W4b Verification |
