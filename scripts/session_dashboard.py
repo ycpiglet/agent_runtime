@@ -80,7 +80,7 @@ def _active_claim_count(root: Path) -> tuple[int, list[str]]:
     for path in paths:
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as exc:
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
             notes.append(
                 f"claim ignored: {_ascii(path.name)} ({_ascii(exc.__class__.__name__)})"
             )
@@ -141,6 +141,29 @@ def _fallback_worktrees(
     return _parse_git_worktrees(proc.stdout), None
 
 
+def _validated_inflight_counts(value: Any) -> dict[str, int] | None:
+    if not isinstance(value, dict):
+        return None
+    normalized: dict[str, int] = {}
+    for key in (
+        "divergent_tasks",
+        "divergent_records",
+        "branches_with_divergence",
+        "claimless",
+    ):
+        raw = value.get(key, 0)
+        if isinstance(raw, bool):
+            return None
+        try:
+            count = int(raw)
+        except (TypeError, ValueError, OverflowError):
+            return None
+        if count < 0 or (isinstance(raw, float) and raw != count):
+            return None
+        normalized[key] = count
+    return normalized
+
+
 def _fallback_inflight(root: Path, timeout: float) -> tuple[str, dict[str, Any], str | None]:
     script = SCRIPTS_DIR / "inflight_overlay.py"
     unavailable = "inflight: unavailable"
@@ -168,10 +191,14 @@ def _fallback_inflight(root: Path, timeout: float) -> tuple[str, dict[str, Any],
     if not isinstance(overlay, dict):
         return unavailable, {}, "inflight scan unavailable: invalid payload"
 
-    counts = overlay.get("summary") if isinstance(overlay.get("summary"), dict) else {}
+    raw_counts = overlay.get("summary")
     if overlay.get("error"):
         note = f"inflight scan unavailable: {_ascii(overlay.get('error'))}"
+        counts = _validated_inflight_counts(raw_counts) or {}
         return f"inflight: unavailable ({_ascii(overlay.get('error'))})", counts, note
+    counts = _validated_inflight_counts(raw_counts)
+    if counts is None:
+        return unavailable, {}, "inflight scan unavailable: invalid count payload"
     summary = (
         f"inflight: {counts.get('divergent_tasks', 0)} tasks diverge "
         f"across {counts.get('branches_with_divergence', 0)} branches"
@@ -191,12 +218,23 @@ def _fallback_w0_section(
     """Build structured W0 data using only read-only host-visible assets."""
     fallback_reason = f"repository work API unavailable: {_ascii(cause.__class__.__name__)}"
     notes: list[str] = []
-    claims, claim_notes = _active_claim_count(root)
+    try:
+        claims, claim_notes = _active_claim_count(root)
+    except Exception as exc:
+        claims, claim_notes = 0, [f"claim scan unexpected {_ascii(exc.__class__.__name__)}"]
     notes.extend(claim_notes)
-    worktrees, worktree_note = _fallback_worktrees(root, timeout)
+    try:
+        worktrees, worktree_note = _fallback_worktrees(root, timeout)
+    except Exception as exc:
+        worktrees = None
+        worktree_note = f"worktree scan unexpected {_ascii(exc.__class__.__name__)}"
     if worktree_note:
         notes.append(worktree_note)
-    inflight_summary, inflight_counts, inflight_note = _fallback_inflight(root, timeout)
+    try:
+        inflight_summary, inflight_counts, inflight_note = _fallback_inflight(root, timeout)
+    except Exception as exc:
+        inflight_summary, inflight_counts = "inflight: unavailable", {}
+        inflight_note = f"inflight scan unexpected {_ascii(exc.__class__.__name__)}"
     if inflight_note:
         notes.append(inflight_note)
     return {
@@ -231,7 +269,20 @@ def build_w0_section(root: Path) -> dict[str, Any]:
             "notes": [],
         }
     except Exception as exc:
-        return _fallback_w0_section(root, cause=exc)
+        try:
+            return _fallback_w0_section(root, cause=exc)
+        except Exception as fallback_exc:
+            note = f"w0 fallback unavailable: {_ascii(fallback_exc.__class__.__name__)}"
+            return {
+                "status": "error",
+                "source": "fallback",
+                "active_claims": 0,
+                "worktrees": None,
+                "inflight_summary": "inflight: unavailable",
+                "inflight_counts": {},
+                "notes": [note],
+                "note": note,
+            }
 
 
 def build_update_section(root: Path) -> dict[str, Any]:
