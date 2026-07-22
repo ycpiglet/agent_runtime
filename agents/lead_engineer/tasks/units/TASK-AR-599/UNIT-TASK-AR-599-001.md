@@ -10,12 +10,12 @@ task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 initiative_id: INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T10:28:06+09:00
+updated_at: 2026-07-22T17:13:57+09:00
 origin_type: owner_request
-origin_ref: chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277
+origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
 summary: Wire optional allimbot notifications end to end
 horizon: unit
@@ -24,7 +24,7 @@ escalation_triggers:
   - external_effect
   - security
   - cross_cutting
-context: GitHub #279 proposes the host-proven ycpiglet/allimbot standard-library client with local /trigger and ntfy fallback, never-block semantics, and four primary runtime/CI integration points.
+context: GitHub
 inputs:
   - https://github.com/ycpiglet/allimbot/blob/main/clients/allimbot.py
   - https://github.com/ycpiglet/allimbot/blob/main/docs/INTEGRATION.md
@@ -60,6 +60,10 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Report each wired event, no-op/error behavior, configuration documentation, tests, and secret-gate output.
 stop_condition: Stop before sending a real notification or committing any secret; verify only with mocks or local test servers.
+verified_at: 2026-07-22T17:13:57+09:00
+verified_by: codex-root-task-ar-599
+evidence_refs:
+  - reviews/VERIFY-2026-07-22-unit-task-ar-599-001-20260722171357.json
 ---
 
 # UNIT-TASK-AR-599-001 - Wire optional allimbot notifications end to end

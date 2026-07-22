@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-22T17:05:55+09:00
-record_count: 671
+generated_at: 2026-07-22T17:15:09+09:00
+record_count: 673
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `671` review and evidence records under `reviews/`.
+- Summary: indexed `673` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `671` files |
+| Reviews covered | pass | `673` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -620,6 +620,8 @@ record_count: 671
 | `reviews/VERIFY-2026-07-19-unit-task-ar-601-001-20260719111759.json` | `VERIFY-2026-07-19-unit-task-ar-601-001-20260719111759` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-601-001-20260719111759 |
 | `reviews/VERIFY-2026-07-19-unit-task-ar-601-001-20260719113247.json` | `VERIFY-2026-07-19-unit-task-ar-601-001-20260719113247` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-601-001-20260719113247 |
 | `reviews/VERIFY-2026-07-22-task-ar-598-20260722163903.json` | `VERIFY-2026-07-22-task-ar-598-20260722163903` | json | record | n/a | VERIFY-2026-07-22-task-ar-598-20260722163903 |
+| `reviews/VERIFY-2026-07-22-task-ar-599-20260722171444.json` | `VERIFY-2026-07-22-task-ar-599-20260722171444` | json | record | n/a | VERIFY-2026-07-22-task-ar-599-20260722171444 |
+| `reviews/VERIFY-2026-07-22-unit-task-ar-599-001-20260722171357.json` | `VERIFY-2026-07-22-unit-task-ar-599-001-20260722171357` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-599-001-20260722171357 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |

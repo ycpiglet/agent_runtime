@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 registered_at: 2026-07-19T10:28:06+09:00
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T10:28:06+09:00
+updated_at: 2026-07-22T17:14:44+09:00
 title: Adopt never-blocking allimbot notifications
 status: planned
 priority: P1
@@ -24,7 +24,7 @@ task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 unit_spec: agents/lead_engineer/tasks/units/TASK-AR-599/UNIT-TASK-AR-599-001.md
 reservation_id: RES-20260719-102806-bbbc9438-06
 origin_type: owner_request
-origin_ref: chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277
+origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
 summary: Add local dashboard/ntfy notification support for task completion, governance blockage, session end, update notices, and CI failure with blank-by-default configuration.
 planner_model_tier: planner_high
@@ -37,6 +37,11 @@ verification:
   - python scripts/verify_wheel_dotfiles.py --check
   - python scripts/owner_governance_gate.py
   - python scripts/regen_host_lock_if_needed.py --check
+verification_status: passed
+verified_at: 2026-07-22T17:14:44+09:00
+verified_by: codex-root-task-ar-599
+evidence_refs:
+  - reviews/VERIFY-2026-07-22-task-ar-599-20260722171444.json
 ---
 
 # TASK-AR-599 - Adopt never-blocking allimbot notifications
