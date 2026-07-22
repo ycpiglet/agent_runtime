@@ -29,6 +29,11 @@ summary: Make auto_merge execute fail closed when GitHub rejects a merge and pre
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python -m pytest tests/test_auto_merge_execution.py src/agent_runtime/templates/project/scripts/test_auto_merge.py -q
+  - python scripts/regen_host_lock_if_needed.py --check
+  - python scripts/owner_governance_gate.py --allow-empty-owner-docs
+verification_status: pending
 tags:
   - work-cli-created
 ---

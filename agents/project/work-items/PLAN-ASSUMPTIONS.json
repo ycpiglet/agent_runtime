@@ -19,6 +19,16 @@
         },
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-22-task-ar-600-verification-frontmatter-amendment.md",
+          "value": "ac3f544606e2208e1ae9aba433c51941447833a1e322f12478aefa0a0aa123f8"
+        },
+        {
+          "kind": "sha256",
+          "path": "agents/lead_engineer/tasks/TASK-AR-600.md",
+          "value": "30694f8dad0b4f9efe3031e7c2bc41b7fd00d2168e61936f1ac5163e8faede89"
+        },
+        {
+          "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
           "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
         },
@@ -48,8 +58,8 @@
           "value": "bd16c4ecd35595811a1b5af1daec27b7e9f81c5983e560a2d39abc13349c67b1"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-22-task-ar-600-host-lock-scope-amendment.md",
-      "recorded_at": "2026-07-22T17:51:13+09:00",
+      "design_record": "reviews/REVIEW-2026-07-22-task-ar-600-verification-frontmatter-amendment.md",
+      "recorded_at": "2026-07-22T17:52:52+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-AUTO-MERGE-INTEGRITY"
     },
@@ -601,5 +611,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-22T17:51:13+09:00"
+  "updated_at": "2026-07-22T17:52:52+09:00"
 }
