@@ -13,7 +13,7 @@ status: in_progress
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-23T06:37:12+09:00
+updated_at: 2026-07-23T06:44:14+09:00
 started_at: 2026-07-23T06:31:27+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
@@ -43,10 +43,11 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Report the supported scanner grammar, adversarial cases, parity, and GitHub issue 298 evidence.
 stop_condition: Stop before expanding the parser into a general YAML implementation.
-verified_at: 2026-07-23T06:37:12+09:00
+verified_at: 2026-07-23T06:44:14+09:00
 verified_by: codex-root-task-ar-608
 evidence_refs:
   - reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723063712.json
+  - reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723064414.json
 ---
 
 # UNIT-TASK-AR-608-001 - Make frontmatter comment scanning quote-aware
