@@ -284,8 +284,8 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-22-task-ar-603-unicode-boundary-t3-replan.md",
-          "value": "7f8bd2a262179439d9aa9af384db3f9b04fad3357b4393e7ab8a495be401475f"
+          "path": "reviews/REVIEW-2026-07-22-task-ar-604-integration-t3-replan.md",
+          "value": "6cbf67921c4ec2b43e5dab5d06c197199add6624c0023d79db33a30e78b7b2ce"
         },
         {
           "kind": "sha256",
@@ -299,47 +299,17 @@
         },
         {
           "kind": "sha256",
-          "path": "scripts/task_id_contract.py",
-          "value": "6b78813ba4da71f33b19e558ad9dac5524748cbdbda5c1b20eba4b9337a87dc8"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/task_identity.py",
-          "value": "b91a07348e7a513a348509a68d08e0a56a12efa599945576dfaea5aebe6892bb"
-        },
-        {
-          "kind": "sha256",
           "path": "scripts/taskset_dispatcher.py",
-          "value": "5b5a06c0c00bdef8698d8e4c9c3b2e825d7a7f05ac7a3f1e17255aa1481abb49"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/conversation_work_audit.py",
-          "value": "371f9c18d19dd8d7230451dd2a9cfbf386863352b02380fcc22934d2d3e96d3c"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/task_id_contract.py",
-          "value": "6b78813ba4da71f33b19e558ad9dac5524748cbdbda5c1b20eba4b9337a87dc8"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/task_identity.py",
-          "value": "2e886173674b379f5208e40a9d713a5fb1713bb10ee6d7a895935fe812eb0548"
+          "value": "a78f2706a2ef39a92ae339d149fb8b10524e24dc1510f75a386c342c475292d9"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/taskset_dispatcher.py",
-          "value": "5b5a06c0c00bdef8698d8e4c9c3b2e825d7a7f05ac7a3f1e17255aa1481abb49"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/conversation_work_audit.py",
-          "value": "371f9c18d19dd8d7230451dd2a9cfbf386863352b02380fcc22934d2d3e96d3c"
+          "value": "a78f2706a2ef39a92ae339d149fb8b10524e24dc1510f75a386c342c475292d9"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-22-task-ar-603-unicode-boundary-t3-replan.md",
-      "recorded_at": "2026-07-22T20:58:45+09:00",
+      "design_record": "reviews/REVIEW-2026-07-22-task-ar-604-integration-t3-replan.md",
+      "recorded_at": "2026-07-22T21:32:44+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION"
     },
@@ -647,5 +617,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-22T20:58:45+09:00"
+  "updated_at": "2026-07-22T21:32:44+09:00"
 }
