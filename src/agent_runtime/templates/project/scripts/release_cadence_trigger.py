@@ -36,6 +36,22 @@ CONVENTIONAL_RE = re.compile(r"^(?P<type>[a-z]+)(?:\([^)]*\))?!?:")
 # footer line anywhere in the commit message body.
 BREAKING_SUBJECT_RE = re.compile(r"^[a-z]+(?:\([^)]*\))?!:")
 BREAKING_FOOTER_RE = re.compile(r"(?m)^BREAKING[ -]CHANGE:")
+_URL_USERINFO_RE = re.compile(r"(?i)([a-z][a-z0-9+.-]*://)[^/@\s]+@")
+_SENSITIVE_ASSIGNMENT_RE = re.compile(
+    r"(?im)\b(password|passwd|token|access[_-]?token|secret|authorization)"
+    r"\s*[:=]\s*[^\r\n]*"
+)
+_NO_TAG_STDERR_RES = (
+    re.compile(r"fatal: No names found, cannot describe anything\.\Z"),
+    re.compile(
+        r"fatal: No tags can describe '[^'\r\n]+'\.\n"
+        r"Try --always, or create some tags\.\Z"
+    ),
+    re.compile(
+        r"fatal: No annotated tags can describe '[^'\r\n]+'\.\n"
+        r"However, there were unannotated tags: try --tags\.\Z"
+    ),
+)
 
 
 def _ascii(text: str) -> str:
@@ -46,15 +62,34 @@ def _ascii(text: str) -> str:
 # pass. A query that exhausts its retries is an evaluation failure, not a git
 # answer: callers must be able to tell "no data" apart from "could not ask".
 # Module-level because this is a single-threaded CLI/import-time helper.
-_QUERY_ERRORS: list[dict[str, str]] = []
+_QUERY_ERRORS: list[dict[str, Any]] = []
+
+
+def _expected_no_tag_result(args: tuple[str, ...], result: Any) -> bool:
+    """Return true only for git-describe's deterministic no-tag response."""
+    if args != ("describe", "--tags", "--abbrev=0"):
+        return False
+    if result.returncode != 128 or (result.stdout or "").strip():
+        return False
+    diagnostic = (result.stderr or "").replace("\r\n", "\n").strip()
+    return any(pattern.fullmatch(diagnostic) for pattern in _NO_TAG_STDERR_RES)
+
+
+def _sanitize_git_diagnostic(value: str) -> str:
+    value = _URL_USERINFO_RE.sub(r"\1[REDACTED]@", value)
+    value = _SENSITIVE_ASSIGNMENT_RE.sub(r"\1=[REDACTED]", value)
+    return " | ".join(value.strip().splitlines())[:500] or "no diagnostic output"
 
 
 def _git(root: Path, *args: str) -> str | None:
     # Read-only, idempotent git queries. Under loaded CI runners the spawn
     # itself can fail transiently (OSError) or git can be killed by a signal
-    # (negative returncode); both are retried briefly. A normal non-zero exit
-    # is a deterministic git answer (e.g. no tag yet) and is not retried.
+    # (negative returncode); both are retried briefly. Positive non-zero exits
+    # are also retried unless git-describe explicitly reports the deterministic
+    # no-tag condition. Treating every non-zero as an empty answer can silently
+    # collapse a transient runner failure into "not-triggered".
     last_error = ""
+    last_returncode: int | None = None
     for attempt in range(3):
         if attempt:
             time.sleep(0.2 * attempt)
@@ -69,15 +104,30 @@ def _git(root: Path, *args: str) -> str | None:
                 check=False,
             )
         except OSError as exc:
-            last_error = f"{type(exc).__name__}: {exc}"
+            last_returncode = None
+            last_error = _sanitize_git_diagnostic(f"{type(exc).__name__}: {exc}")
             continue
         if result.returncode < 0:
+            last_returncode = result.returncode
             last_error = f"killed by signal {-result.returncode}"
             continue
         if result.returncode != 0:
-            return None
+            if _expected_no_tag_result(tuple(args), result):
+                return None
+            last_returncode = result.returncode
+            last_error = _sanitize_git_diagnostic(
+                f"exit {result.returncode}: {result.stderr or result.stdout or ''}"
+            )
+            continue
         return result.stdout
-    _QUERY_ERRORS.append({"command": "git " + " ".join(args), "error": last_error})
+    _QUERY_ERRORS.append(
+        {
+            "command": _sanitize_git_diagnostic("git " + " ".join(args)),
+            "error": last_error,
+            "returncode": last_returncode,
+            "attempts": 3,
+        }
+    )
     return None
 
 
@@ -302,13 +352,20 @@ def build_report(
         }
     )
     if _QUERY_ERRORS:
-        base["git_query_errors"] = list(_QUERY_ERRORS)
-        if not triggered:
-            # Metrics were computed on top of failed git queries (e.g. rev-list
-            # never answered, so commits collapsed to 0). "pass" would be a
-            # silent skip; surface it as an evaluation error instead.
-            base["status"] = "error"
-            base["reason"] = "git-query-error"
+        # Any missing query makes the combined metrics untrustworthy. A
+        # successful metric must never override a failed one and trigger a
+        # release from a partial view of the repository.
+        base.update(
+            {
+                "status": "error",
+                "triggered": False,
+                "finding": None,
+                "reason": "git-query-error",
+                "recommended_bump": None,
+                "recommended_version": None,
+                "git_query_errors": list(_QUERY_ERRORS),
+            }
+        )
     return base
 
 

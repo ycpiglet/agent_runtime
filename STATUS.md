@@ -1,5 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-23 - TASK-AR-613 active; release cadence query recovery
+
+- Active: `TASK-AR-613` in `TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY` closes GitHub issue 316 after two independent CI runs classified valid tagged/40-commit release fixtures as `not-triggered`.
+- Contract: explicit no-tag responses stay quiet; unexpected positive non-zero Git query results retry three times and then surface sanitized `git-query-error` evidence to release-auto.
+- Verification in progress: failure-first 3/3 reproduced; cadence 26, release-auto 32, shared-consumer 22, and deterministic 100/100 recovery, exhaustion, and no-tag probes pass.
+- Next: independent W4b and CI, then resume `TASK-AR-608` in the July release-impact remediation queue.
+
 ## 2026-07-23 - TASK-AR-606/#295 complete; TASK-AR-607 next
 
 - Completed: PR #312 merged at `b5562058c92dfc160862988d0e2d1e8b9bbae623`; pull-request run `29931062061` and post-merge main run `29931322171` passed on Python 3.10/3.11/3.12, and GitHub #295 is closed.

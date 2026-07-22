@@ -184,7 +184,7 @@
       "scripts/query_tasks.py": "sha256:a7ad83ed124cc480fa83d0917c20a5d7b49867f6c858da18fd54ba26dbb4c067",
       "scripts/ralph_migration_inventory.py": "sha256:5118836e61c3e855397b4401c5bd2f5499c482683c2bcab657541b7d897545e3",
       "scripts/rbac_write_gate.py": "sha256:6ac6c8996b9ec3ed853c89f8b2e78d364c72ac0dd9a0464ec5bcb37d90c9d84c",
-      "scripts/release_cadence_trigger.py": "sha256:f6cee6df842e66915e35032ecd9d6dee9b0246eef17f1254ba415df1a4709f1b",
+      "scripts/release_cadence_trigger.py": "sha256:74a99681642f840757806e96889b9cab5ece948803f321f44711340507daa242",
       "scripts/response_contract_gate.py": "sha256:83f26ab8dd7c2317bb2b408809190e32324cada770b13eef0c241e501f49e74a",
       "scripts/role_mentions.py": "sha256:d5f0488c514f7e6c43c0291f9bb46c4ebf7971b59ec8f01e197ccfda4c81738d",
       "scripts/runtime_asset_usage.py": "sha256:5209e4446b96a1a7752856865492debab0d69eaeed62e38d8c1843d28eecff38",
@@ -284,7 +284,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.6.0",
-    "template_digest": "sha256:33b7832636a9d10b53e95eeeb5e8a2f47a2638717563684928f8967f76ab7a01",
+    "template_digest": "sha256:a7869f9de222bcda574558794c1465650cb167ce80133b60bd08e519c6fedc48",
     "template_files": 281
   },
   "project": "fixture-host",

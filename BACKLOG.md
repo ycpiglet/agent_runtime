@@ -40,6 +40,7 @@
 | 601 | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | Release Impact Remediator |
 | 602 | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | CI Schema Recovery |
 | 603 | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | Backlog Taskset Test Recovery |
+| 604 | `TASKSET-AR-TERMINAL-STATUS-START-GUARD` | Terminal Status Start Guard |
 | 615 | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | Self Improvement Cadence |
 | 616 | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | Self Improvement Remediation |
 | 617 | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | Business Operations Teams |
@@ -53,6 +54,7 @@
 | 624 | `TASKSET-AR-RELEASE-AUTO-NONCRITICAL` | Noncritical Release Auto-Execution |
 | 625 | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | Visual Asset Adoption |
 | 626 | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | Visual System Integration & Verification |
+| 723 | `TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY` | Release Cadence Query Recovery |
 
 <!-- BACKLOG-INDEX:END -->
 
