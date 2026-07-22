@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-22T23:02:24+09:00
-record_count: 739
+generated_at: 2026-07-22T23:16:36+09:00
+record_count: 740
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `739` review and evidence records under `reviews/`.
+- Summary: indexed `740` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `739` files |
+| Reviews covered | pass | `740` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -530,6 +530,7 @@ record_count: 739
 | `reviews/REVIEW-2026-07-22-task-ar-604-integration-t3-replan.md` | `REVIEW-2026-07-22-task-ar-604-integration-t3-replan` | md | record | pass | TASK-AR-604 Integration T3 Replan |
 | `reviews/REVIEW-2026-07-22-task-ar-605-dispatch-t3-replan.md` | `REVIEW-2026-07-22-task-ar-605-dispatch-t3-replan` | md | record | pass | TASK-AR-605 Dispatch T3 Replan |
 | `reviews/REVIEW-2026-07-22-task-ar-605-integration-t3-replan.md` | `REVIEW-2026-07-22-task-ar-605-integration-t3-replan` | md | record | pass | TASK-AR-605 Integration T3 Replan |
+| `reviews/REVIEW-2026-07-22-task-ar-606-dispatch-t3-replan.md` | `REVIEW-2026-07-22-task-ar-606-dispatch-t3-replan` | md | record | pass | TASK-AR-606 Dispatch T3 Replan |
 | `reviews/REVIEW-2026-07-22-task-ar-610-scope-amendment.md` | `REVIEW-2026-07-22-task-ar-610-scope-amendment` | md | record | pass | TASK-AR-610 scope amendment |
 | `reviews/REVIEW-2026-07-22-taskset-ar-backlog-taskset-test-recovery-registration.md` | `REVIEW-2026-07-22-taskset-ar-backlog-taskset-test-recovery-registration` | md | record | pass | Backlog Taskset Test Recovery Registration |
 | `reviews/REVIEW-2026-07-22-taskset-ar-july-release-impact-remediation-registration.md` | `REVIEW-2026-07-22-taskset-ar-july-release-impact-remediation-registration` | md | record | pass | Release Impact Remediator Registration |

@@ -24,7 +24,7 @@ escalation_triggers:
   - security
   - cross_platform
   - external_effect
-context: GitHub #295 shows core.hooksPath alone is insufficient on POSIX because both tracked hooks have mode 100644. Archive/install paths may also lose executable metadata, so installation must repair it safely.
+context: GitHub issue 295 shows core.hooksPath alone is insufficient on POSIX because both tracked hooks have mode 100644. Archive/install paths may also lose executable metadata, so installation must repair it safely.
 inputs:
   - reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
   - .githooks/pre-commit
@@ -47,7 +47,7 @@ verification:
   - python -m pytest tests/test_lock_merge_driver.py tests/test_bootstrap_dev_env.py -q
   - python scripts/regen_host_lock_if_needed.py --check
   - git ls-files -s .githooks/pre-commit src/agent_runtime/templates/project/.githooks/pre-commit
-handoff: Report Git modes, installer behavior on POSIX/Windows, tests, and issue #295 evidence.
+handoff: Report Git modes, installer behavior on POSIX/Windows, tests, and GitHub issue 295 evidence.
 stop_condition: Stop before changing hook contents or enabling any additional hook.
 ---
 
