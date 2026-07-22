@@ -293,6 +293,11 @@ HTML = """<!doctype html>
             <h2 id="work-state-title" data-i18n="work_state.title">Work state</h2>
           </div>
           <span id="work-state-total" class="work-state-total" aria-live="polite"></span>
+          <button type="button" id="work-state-collapse" class="work-state-collapse"
+                  aria-expanded="true" aria-controls="work-state-board"
+                  aria-label="Toggle work state" data-i18n-aria-label="work_state.collapse">
+            <span class="wsh-caret" aria-hidden="true"></span>
+          </button>
         </header>
         <div id="work-state-board" class="work-state-board" role="list"></div>
         <p id="work-state-empty" class="work-state-empty" hidden data-i18n="work_state.empty">No active work state.</p>
@@ -2093,6 +2098,13 @@ textarea:focus {
   padding: var(--space-3xl);
 }
 .shell[data-work-surface-open="false"] .work-surface {
+  display: none;
+}
+/* TASK-AR-603: the create-task / runtime-command forms belong to the board and
+   work views. On every other view they were unrelated noise pinned above the
+   content, so scope them out unless board/work is active. */
+.shell:not([data-active-view="board"]):not([data-active-view="work"]) .create-form,
+.shell:not([data-active-view="board"]):not([data-active-view="work"]) .runtime-form {
   display: none;
 }
 .create-form,
@@ -6927,7 +6939,26 @@ pre {
   font-weight: 700; text-transform: uppercase;
 }
 .work-state-head h2 { margin: 0; color: var(--ink); font-size: 1.1rem; }
-.work-state-total { color: var(--muted); font-size: 0.84rem; white-space: nowrap; }
+.work-state-total { color: var(--muted); font-size: 0.84rem; white-space: nowrap; margin-left: auto; }
+/* TASK-AR-603: collapse toggle demotes the work-state hero (cockpit stays the
+   top-of-screen focus). Defaults expanded, so initial geometry is unchanged. */
+.work-state-collapse {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.6rem; height: 1.6rem; padding: 0; flex: none;
+  background: transparent; border: 1px solid var(--line); border-radius: var(--radius);
+  color: var(--muted); cursor: pointer;
+}
+.work-state-collapse:hover { color: var(--ink); border-color: var(--line-strong); }
+.work-state-collapse:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.wsh-caret {
+  width: 0.5rem; height: 0.5rem; border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor; transform: rotate(45deg) translate(-1px, -1px);
+  transition: transform 0.15s ease;
+}
+.work-state-hero.is-collapsed .wsh-caret { transform: rotate(-45deg) translate(-1px, 1px); }
+.work-state-hero.is-collapsed .work-state-board,
+.work-state-hero.is-collapsed .work-state-empty { display: none; }
+@media (prefers-reduced-motion: reduce) { .wsh-caret { transition: none; } }
 .work-state-board {
   display: grid; gap: 0.75rem;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -7434,6 +7465,28 @@ function applyTranslations() {
   });
   const moreLabel = document.querySelector(".sidebar-more-summary .sidebar-label");
   if (moreLabel && i18nStrings["nav.more"]) moreLabel.textContent = t("nav.more");
+}
+
+// TASK-AR-603: collapse toggle for the work-state hero. Defaults expanded so the
+// initial layout is unchanged; the Owner can collapse it to keep the cockpit as
+// the top-of-screen focus. State persists in localStorage.
+function initWorkStateCollapse() {
+  const hero = $("work-state-hero");
+  const btn = $("work-state-collapse");
+  if (!hero || !btn) return;
+  const KEY = "ar603:workStateCollapsed";
+  let collapsed = false;
+  try { collapsed = window.localStorage.getItem(KEY) === "1"; } catch (error) {}
+  const apply = () => {
+    hero.classList.toggle("is-collapsed", collapsed);
+    btn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+  };
+  apply();
+  btn.addEventListener("click", () => {
+    collapsed = !collapsed;
+    try { window.localStorage.setItem(KEY, collapsed ? "1" : "0"); } catch (error) {}
+    apply();
+  });
 }
 
 function setLanguage(lang, persist) {
@@ -13840,7 +13893,12 @@ function activateView(view, { updateHash = true } = {}) {
   const target = $(`view-${view}`);
   if (!target) return;
   const shell = $("runtime-console-app");
-  if (shell) shell.dataset.workSurfaceOpen = "true";
+  if (shell) {
+    shell.dataset.workSurfaceOpen = "true";
+    // TASK-AR-603: expose the active view so the task/runtime action forms can
+    // be scoped to board/work only (they are noise atop Labels, graphs, etc.).
+    shell.dataset.activeView = view;
+  }
   let activeLink = null;
   navLinks().forEach((item) => {
     const isActive = item.dataset.view === view;
@@ -14589,6 +14647,7 @@ $("import-commit-btn")?.addEventListener("click", async (event) => {
 initExperienceSettings();
 initOnboardingTour();
 initContextualHelp();
+initWorkStateCollapse();
 // TASK-AR-341: language bootstrap + i18n string load.
 initLanguage();
 loadI18n();

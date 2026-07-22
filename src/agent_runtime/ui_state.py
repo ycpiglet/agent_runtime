@@ -2521,6 +2521,7 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     "work_state.kicker": {"ko": "작업", "en": "Work"},
     "work_state.title": {"ko": "작업 상태", "en": "Work state"},
     "work_state.empty": {"ko": "활성 작업 상태가 없습니다.", "en": "No active work state."},
+    "work_state.collapse": {"ko": "작업 상태 접기/펼치기", "en": "Toggle work state"},
     "work_state.unavailable": {"ko": "작업 상태를 불러올 수 없습니다", "en": "work state unavailable"},
     "work_state.total.none": {"ko": "작업 상태 없음", "en": "no work state"},
     "work_state.total.tasksets": {"ko": "태스크셋", "en": "tasksets"},

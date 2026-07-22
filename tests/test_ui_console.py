@@ -5143,3 +5143,33 @@ _ORG_MODEL_MIN = "\n".join(
         "",
     ]
 )
+
+
+def test_ar603_forms_scoped_to_board_and_work_views(tmp_path):
+    # TASK-AR-603: the create-task / runtime-command forms must be scoped to the
+    # board and work views (they were noise pinned atop every other view).
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert 'data-active-view' in css
+    assert '.create-form' in css and '.runtime-form' in css
+    # activateView stamps the active view so the CSS scope can key off it.
+    assert 'dataset.activeView = view' in js
+
+
+def test_ar603_empty_attention_groups_are_not_rendered(tmp_path):
+    # Regression lock: zero-item attention groups must be skipped (calm cockpit).
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    start = js.index("function renderCockpit(")
+    end = js.index("function ", start + 1)
+    body = js[start:end]
+    assert "if (!items.length) continue;" in body
+
+
+def test_ar603_work_state_hero_has_collapse_toggle(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    assert 'id="work-state-collapse"' in html
+    assert 'function initWorkStateCollapse()' in js
+    assert 'initWorkStateCollapse();' in js
+    assert '.work-state-hero.is-collapsed' in css
