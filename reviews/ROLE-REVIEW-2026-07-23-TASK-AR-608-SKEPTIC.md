@@ -1,18 +1,21 @@
 ---
 title: TASK-AR-608 Skeptic and Adversarial W4b
 date: 2026-07-23
-signal: fail
-score: 82
+signal: pass
+score: 98
 task_id: TASK-AR-608
-verified_head: 97b6bffa138de3b71117dd7b001e110eca825da5
-implementation_sha: 097758859e1f5f54655623fe077599718ec82292
+verified_head: 98498904008fc6876104053953d3e53c047e7098
+implementation_sha: 44d16a9abce8c539f812905b9c80f27cab147213
 original_rejected_head: 1c9ebc1c9b0841c8d64de3ed3b6f3b8ab4aad7e7
 original_implementation_sha: 871b6b9ed863647321129319ff37fac4e0473acc
+remediation_rejected_head: 97b6bffa138de3b71117dd7b001e110eca825da5
+remediation_rejected_implementation_sha: 097758859e1f5f54655623fe077599718ec82292
 failure_first_sha: 45085b33e0e29c48485edbc322b23026d0023c95
+structural_failure_first_sha: 7b50c8b1436b302d3ad37f113261de8a943aedb7
 verified_by: codex-task-ar-608-skeptic-20260723
 worker: codex-root-task-ar-608
 role: skeptic
-verdict: REJECT
+verdict: APPROVE
 tags: [task-ar-608, skeptic, adversarial, frontmatter, parser, comments, parity]
 ---
 
@@ -268,3 +271,151 @@ their prior behavior is therefore not yet satisfied.
 This re-review modified only this skeptic report. It did not modify product
 code, tests, task/unit metadata, runtime state, W4a evidence,
 `reviews/INDEX.md`, or the separately present untracked W4b report.
+
+## Final Scalar-State Re-review
+
+This section records the final independent re-review of scalar-state
+implementation `44d16a9abce8c539f812905b9c80f27cab147213` at W4a HEAD
+`98498904008fc6876104053953d3e53c047e7098`. The two historical REJECT
+sections and their exact counterexamples remain unchanged above. The
+frontmatter now represents this final reviewed state and explicitly retains
+both earlier rejected revisions.
+
+### Findings
+
+No blocking finding was reproduced at the final implementation SHA.
+
+The new scanner replaces punctuation look-back with explicit state:
+
+- `scalar_expected` distinguishes the start of a scalar/item from consumed
+  plain content;
+- `flow_stack` distinguishes top-level punctuation from list/map structure;
+- `top_level_separator_seen` prevents a URL or later colon from reopening
+  quote state; and
+- quote close, flow comma, flow-map colon, and block bullet transitions update
+  scalar state at their actual structural boundaries.
+
+This closes both historical false-positive classes without adding a YAML
+dependency or expanding the parser beyond the registered lexical subset.
+
+### Independent Adversarial Matrix
+
+Both root and host-template parsers produced the expected result for all 20
+cases. Malformed cases were executed twice to confirm deterministic behavior.
+
+| Boundary family | Cases | Result |
+| --- | ---: | --- |
+| plain scalar quote boundaries | mid single, mid double, `plain -`, top-level `plain,`, apostrophe | 5/5 pass |
+| malformed plain/quoted input | unmatched mid quote, unterminated leading quote | 2/2 pass |
+| colon context | URL/second colon, quoted mapping value, flow-map value colon | 3/3 pass |
+| collection context | quoted bullet, flow-list comma, nested flow, two mismatched closers | 5/5 pass |
+| quote escaping | escaped double quote, doubled single quote | 2/2 pass |
+| legacy outside comment | ordinary unquoted comment | 1/1 pass |
+| consumed-plain bracket guards | `plain [` and `plain {` before a quote | 2/2 pass |
+| **Total** | **20** | **20/20 pass** |
+
+Representative closures:
+
+```text
+plain - 'PR #167' # outside
+=> "plain - 'PR " (trailing space)
+
+plain, "PR #167" # outside
+=> 'plain, "PR ' (trailing space)
+
+summary: https://example.invalid:443 "PR #167" # outside
+=> 'summary: https://example.invalid:443 "PR ' (trailing space)
+
+meta: {label: "PR #167", note: 'issue #298'} # outside
+=> preserves both quoted hashes and removes the outside comment
+```
+
+Leading quoted mapping values, block bullets, flow-list items, nested flow
+values, escaped double quotes, YAML-style doubled single quotes, and quoted
+hashes remain preserved. Unquoted and mid-plain hashes retain the legacy first-
+hash removal behavior. Mismatched closers do not crash, do not diverge between
+root/template, and remove the outside comment deterministically.
+
+### Failure-First Provenance
+
+Both registered failure-first stages are causal:
+
+| Failure-first revision | Counterexample before fix | Final result |
+| --- | --- | --- |
+| `45085b33e0e29c48485edbc322b23026d0023c95` | leading `"PR #167 intact"` truncated to `"PR ` | preserved as `"PR #167 intact" ` |
+| `7b50c8b1436b302d3ad37f113261de8a943aedb7` against `09775885` | `plain -` and top-level `plain,` retained inner hash | both remove from the first hash at `44d16a9a` |
+
+The second failure-first commit changes only
+`tests/test_backlog_board_tasksets.py` and precedes the scalar-state
+implementation. AST-extracted functions from `45085b33`, `09775885`, and the
+current worktree reproduced the failing-before/passing-after outputs without a
+checkout or production-file mutation.
+
+### Parity, Regression, Lock, and Scope Evidence
+
+Root and template `strip_comment()` functions have identical normalized AST
+with SHA-256:
+
+```text
+8a2b213aa51cb4ac187833aa65bf39e9ac80084e8be7fbecb2ea4ff1f767e3b9
+```
+
+Independent registered verification passed:
+
+```text
+python -m pytest tests/test_backlog_board_tasksets.py -q
+16 passed in 1.11s
+
+python scripts/regen_host_lock_if_needed.py --check
+OK: tests/fixtures/host/agent_runtime.lock.json is up to date.
+
+git diff --check 7b50c8b1..44d16a9a
+pass
+
+git diff --name-status 7b50c8b1..44d16a9a
+M scripts/backlog_board.py
+M src/agent_runtime/templates/project/scripts/backlog_board.py
+M tests/fixtures/host/agent_runtime.lock.json
+```
+
+The implementation commit therefore changes only the two declared parser
+copies and their generated host lock. The preceding failure-first commit owns
+the two added assertions in the already-declared focused test file. No YAML
+dependency, unrelated parser expansion, or out-of-scope product file appears.
+
+The final W4a task and unit evidence records parse correctly, identify worker
+`codex-root-task-ar-608`, and each contain 16 passing tests plus a current host
+lock with zero return codes and empty stderr:
+
+- `reviews/VERIFY-2026-07-23-task-ar-608-20260723064958.json`
+- `reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723065008.json`
+
+### Final Validation Metrics
+
+| Metric | Threshold | Measured value | Status |
+| --- | --- | --- | --- |
+| adversarial scalar-state matrix | all cases pass in root/template | 20/20 | pass |
+| malformed-input determinism | repeat output and parser parity | 4/4 checks | pass |
+| first failure-first provenance | old fails, final passes | causal | pass |
+| structural failure-first provenance | `09775885` fails, final passes | 2/2 causal | pass |
+| root/template AST parity | identical | identical | pass |
+| focused regression suite | all tests pass | 16/16 | pass |
+| generated host lock | no drift | current | pass |
+| implementation scope | declared parser pair plus lock only | 3 files, 0 extra | pass |
+| diff hygiene | no whitespace errors | clean | pass |
+
+### Final Verdict
+
+**APPROVE** TASK-AR-608 at exact W4a HEAD
+`98498904008fc6876104053953d3e53c047e7098`, implementation commit
+`44d16a9abce8c539f812905b9c80f27cab147213`.
+
+The scalar-state implementation closes both historical blockers, preserves the
+original quoted-hash fix and unquoted-comment contract, maintains exact
+root/template behavior, and passes the registered suite and generated lock
+gate. The intentional residual boundary is the pre-existing hand-written YAML
+subset; general YAML parsing remains out of scope by design.
+
+This final re-review modified only this skeptic report. It did not modify
+implementation files, tests, task/unit metadata, runtime state, W4a evidence,
+or `reviews/INDEX.md`.
