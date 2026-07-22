@@ -12,7 +12,11 @@ current_state:
   status_text: "TASK-AR-616 is claimed; failure-first fourth-attempt recovery coverage is next."
 active_work:
   current_agents:
-    - codex-root-task-ar-616
+    - claim_id: CLAIM-20260723-051406-task-ar-616-c439
+      agent_role: lead-engineer
+      agent_instance_id: codex-root-task-ar-616
+      display_name: lead_engineer@orchestrator-01
+      callsite_id: codex-root-20260723
   current_teams:
     - agent-runtime-core
 resume:
@@ -26,7 +30,7 @@ roles:
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
   active_claims:
-    - CLAIM-20260723-051406-task-ar-616-c439
+    - agents/runtime/task_claims/CLAIM-20260723-051406-task-ar-616-c439.json
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
     active_claim: null
