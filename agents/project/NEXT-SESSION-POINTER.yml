@@ -1,21 +1,48 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-22T18:42:40+09:00
-updated_by: codex-root
+updated_at: 2026-07-22T18:49:10+09:00
+updated_by: codex-root-task-ar-611
 current_state:
-  summary: "TASK-AR-600 and TASK-AR-610 passed W4b; PR #303 is awaiting the schema-recovery update and CI rerun."
+  summary: "TASK-AR-611 is claimed to restore PR #303 package CI by synchronizing the real-backlog taskset expectation."
   status: watch
   task_set_status: in_progress
-  task_set_id: "TASKSET-AR-AUTO-MERGE-INTEGRITY"
-  step_index: 4
-  step_total: 5
-  progress_pct: 90
-  status_text: "W4b complete; integrating PR #303 schema recovery and rerunning CI."
+  task_set_id: "TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY"
+  step_index: 1
+  step_total: 4
+  progress_pct: 5
+  status_text: "TASK-AR-611 claimed; synchronizing exact taskset expectation."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - display_name: lead_engineer@orchestrator-01
+      agent_role: lead-engineer
+      agent_instance_id: codex-root-task-ar-611
+      callsite_id: codex-root-20260722
+      team_id: agent-runtime-core
+      pane_id: root
+      task_id: TASK-AR-611
+      status: claimed
+      phase: implementation
+      progress_pct: 5
+      step_index: 1
+      step_total: 4
+      status_text: "TASK-AR-611 claimed; synchronizing exact taskset expectation"
+      worktree_path: .worktrees/TASK-AR-600
+      branch: codex/task-ar-600-merge-readback
+      claim_id: CLAIM-20260722-184910-task-ar-611-c34b
+      claim_path: agents/runtime/task_claims/CLAIM-20260722-184910-task-ar-611-c34b.json
+      handoff_path: agents/runtime/task_claims/CLAIM-20260722-184910-task-ar-611-c34b.handoff.md
+      last_heartbeat: 2026-07-22T18:49:10+09:00
+  current_teams:
+    - team_id: agent-runtime-core
+      status: active
+      phase: implementation
+      progress_pct: 5
+      active_task: TASK-AR-611
+      task_set_id: TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY
+      pane_ids:
+        - root
 resume:
-  active_task: TASK-AR-600
-  active_task_set: "TASKSET-AR-AUTO-MERGE-INTEGRITY"
+  active_task: TASK-AR-611
+  active_task_set: "TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -23,7 +50,8 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260722-184910-task-ar-611-c34b.json
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
     active_claim: null
