@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY
 registered_at: 2026-07-23T02:23:56+09:00
 created_at: 2026-07-23T02:23:56+09:00
-updated_at: 2026-07-23T02:23:56+09:00
+updated_at: 2026-07-23T04:27:22+09:00
+started_at: 2026-07-23T04:27:22+09:00
 title: Reject partial self-eval metrics after exhausted Git queries
-status: planned
+status: in_progress
 priority: P0
 difficulty: M
 est_hours: 2
@@ -30,6 +31,10 @@ summary: Surface shared Git query exhaustion as a self-eval error instead of a p
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python -m pytest tests/test_self_eval_metrics.py tests/test_release_cadence_trigger.py tests/test_semver_bump_property.py -q
+  - python scripts/regen_host_lock_if_needed.py --check
+  - python scripts/taskset_work_gate.py --check
 tags:
   - github-318
   - self-eval

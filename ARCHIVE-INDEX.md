@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-07-23
-archived_count: 273
+archived_count: 274
 ---
 
 # Archived Task Files
 
-- `273` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `274` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -286,3 +286,4 @@ archived_count: 273
 | `TASK-AR-591` | `a5da8af2-1b7…` | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | completed | 2026-06-20T05:18:36+09:00 | 2026-06-20T08:12:15+09:00 | 2026-06-20T08:25:00+09:00 | 2026-06-20T08:25:00+09:00 | Ensure the AR-587..590 visual components actually appear in the relevant live console… |
 | `TASK-AR-592` | `57b81740-6ec…` | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | completed | 2026-06-20T05:18:36+09:00 | 2026-06-20T07:13:38+09:00 | 2026-06-20T07:40:00+09:00 | 2026-06-20T07:40:00+09:00 | Ensure the new visual components meet WCAG AA (contrast, roles, labels, keyboard, red… |
 | `TASK-AR-613` | `26230ebe-4bf…` | `TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY` | completed | 2026-07-23T01:16:34+09:00 | 2026-07-23T01:25:41+09:00 | 2026-07-23T03:13:02+09:00 | 2026-07-23T03:13:02+09:00 | Close GitHub issue 316 by preventing a valid tagged cadence from collapsing into rele… |
+| `TASK-AR-615` | `dcbfa286-be0…` | `TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY` | completed | 2026-07-23T03:09:36+09:00 | 2026-07-23T03:25:49+09:00 | 2026-07-23T04:15:10+09:00 | 2026-07-23T04:15:10+09:00 | Close GitHub issue 320 by making the release-auto fixture recover from the observed t… |

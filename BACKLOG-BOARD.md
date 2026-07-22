@@ -74,10 +74,10 @@ completed_task_set_count: 53
 
 - Flow: Make self-eval fail loud and preserve structured evidence whenever its shared Git queries exhaust retries.
 - Progress: `0/1` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-614` | INIT-AR-SELF-EVAL-QUERY-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-614/UNIT-TASK-AR-614-001.md | planned | Action | P0 | Critical | Medium | 2h/7000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Close GitHub issue 318 by preventing self-eval from converting exhausted Git queries… |
+| `TASK-AR-614` | INIT-AR-SELF-EVAL-QUERY-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-614/UNIT-TASK-AR-614-001.md | in_progress | Action | P0 | Critical | Medium | 2h/7000tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Close GitHub issue 318 by preventing self-eval from converting exhausted Git queries… |
 
 ## Archived Task Sets
 

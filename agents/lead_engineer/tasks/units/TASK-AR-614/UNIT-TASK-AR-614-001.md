@@ -9,11 +9,12 @@ task_id: TASK-AR-614
 task_set_id: TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY
 initiative_id: INIT-AR-SELF-EVAL-QUERY-INTEGRITY
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead_engineer
 created_at: 2026-07-23T02:23:56+09:00
-updated_at: 2026-07-23T02:23:56+09:00
+updated_at: 2026-07-23T04:27:22+09:00
+started_at: 2026-07-23T04:27:22+09:00
 origin_type: review_finding
 origin_ref: reviews/REVIEW-2026-07-23-self-eval-query-integrity-plan.md
 created_by: codex-root-planner
