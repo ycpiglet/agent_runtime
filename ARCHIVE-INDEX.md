@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-07-23
-archived_count: 275
+archived_count: 276
 ---
 
 # Archived Task Files
 
-- `275` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `276` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -288,3 +288,4 @@ archived_count: 275
 | `TASK-AR-613` | `26230ebe-4bf…` | `TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY` | completed | 2026-07-23T01:16:34+09:00 | 2026-07-23T01:25:41+09:00 | 2026-07-23T03:13:02+09:00 | 2026-07-23T03:13:02+09:00 | Close GitHub issue 316 by preventing a valid tagged cadence from collapsing into rele… |
 | `TASK-AR-614` | `81421501-db9…` | `TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY` | completed | 2026-07-23T02:23:56+09:00 | 2026-07-23T04:27:22+09:00 | 2026-07-23T05:04:00+09:00 | 2026-07-23T05:04:00+09:00 | Close GitHub issue 318 by preventing self-eval from converting exhausted Git queries… |
 | `TASK-AR-615` | `dcbfa286-be0…` | `TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY` | completed | 2026-07-23T03:09:36+09:00 | 2026-07-23T03:25:49+09:00 | 2026-07-23T04:15:10+09:00 | 2026-07-23T04:15:10+09:00 | Close GitHub issue 320 by making the release-auto fixture recover from the observed t… |
+| `TASK-AR-616` | `8bfdf2e2-d52…` | `TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW` | completed | 2026-07-23T05:01:18+09:00 | 2026-07-23T05:14:06+09:00 | 2026-07-23T06:19:39+09:00 | 2026-07-23T06:19:39+09:00 | Resolve the reopened GitHub issue 320 by recovering when three consecutive recognized… |

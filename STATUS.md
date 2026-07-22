@@ -1,5 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-23 - TASK-AR-616/#320 complete; TASK-AR-608 next
+
+- Completed: PR #326 merged at `a98f10f966ae2f392cbd59573c22666cd062ed9a`; corrected PR run `29958248675` and post-merge main run `29958451909` passed Python 3.10, 3.11, and 3.12, and GitHub #320 is closed.
+- Contract: the fixture-only classifier remains byte-identical while the deterministic recovery window is capped at six attempts and 2.5 seconds; fourth-attempt recovery, permanent exhaustion, ambiguous stop, and real commit delta one are covered.
+- Quality: task/unit W4a passed 84 release-auto/cadence tests plus 9 backlog tests and the taskset gate; independent and skeptic W4b both ended APPROVE, including Git-source adjudication of the inherited whitespace normalization contract.
+- Next: execute TASK-AR-608/#298, TASK-AR-609/#300, terminal-status TASK-AR-612, then v0.7.0 TASK-AR-602.
+
 ## 2026-07-23 - TASK-AR-614 closeout green; TASK-AR-616 claimed
 
 - Completed: TASK-AR-614 closeout PR #325 merged at `0d0d9de2ba6a23d6f8215a636b776996042e2fc8`; PR run `29953743076` and post-merge main run `29953969270` both passed Python 3.10, 3.11, and 3.12 on their first attempt.
