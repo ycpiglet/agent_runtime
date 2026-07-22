@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-22T16:49:30+09:00
+generated_at: 2026-07-22T17:31:49+09:00
 record_count: 394
 ---
 
@@ -421,8 +421,8 @@ record_count: 394
 | 23.1.4.1 | Unit 23.1.4.1 | unit | `UNIT-TASK-AR-597-001` | `TASK-AR-597` | completed | `agents/lead_engineer/tasks/units/TASK-AR-597/UNIT-TASK-AR-597-001.md` | UNIT-TASK-AR-597-001 - Add diagnostic Git helper failures |
 | 23.1.5 | Task 23.1.5 | task | `TASK-AR-598` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | `agents/lead_engineer/tasks/TASK-AR-598.md` | Resolve GitHub #274 and supersede or merge PR #277 by shipping the host-proven sessio… |
 | 23.1.5.1 | Unit 23.1.5.1 | unit | `UNIT-TASK-AR-598-001` | `TASK-AR-598` | completed | `agents/lead_engineer/tasks/units/TASK-AR-598/UNIT-TASK-AR-598-001.md` | UNIT-TASK-AR-598-001 - Rebase and verify session resume recovery |
-| 23.1.6 | Task 23.1.6 | task | `TASK-AR-599` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | planned | `agents/lead_engineer/tasks/TASK-AR-599.md` | Resolve GitHub #279 by shipping an optional, zero-dependency notification client and… |
-| 23.1.6.1 | Unit 23.1.6.1 | unit | `UNIT-TASK-AR-599-001` | `TASK-AR-599` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-599/UNIT-TASK-AR-599-001.md` | UNIT-TASK-AR-599-001 - Wire optional allimbot notifications end to end |
+| 23.1.6 | Task 23.1.6 | task | `TASK-AR-599` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | `agents/lead_engineer/tasks/TASK-AR-599.md` | Resolve GitHub #279 by shipping an optional, zero-dependency notification client and… |
+| 23.1.6.1 | Unit 23.1.6.1 | unit | `UNIT-TASK-AR-599-001` | `TASK-AR-599` | completed | `agents/lead_engineer/tasks/units/TASK-AR-599/UNIT-TASK-AR-599-001.md` | UNIT-TASK-AR-599-001 - Wire optional allimbot notifications end to end |
 | 23.1.7 | Task 23.1.7 | task | `TASK-AR-602` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | planned | `agents/lead_engineer/tasks/TASK-AR-602.md` | Resolve GitHub #280 after every intake unit is merged by refreshing current-state rec… |
 | 23.1.7.1 | Unit 23.1.7.1 | unit | `UNIT-TASK-AR-602-001` | `TASK-AR-602` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md` | UNIT-TASK-AR-602-001 - Close state and publish v0.7.0 |
 | 24 | Initiative 24 | initiative | `INIT-AR-AUTO-MERGE-INTEGRITY` | - | active | `agents/project/initiatives/INIT-AR-AUTO-MERGE-INTEGRITY.md` | Auto-merge execution integrity |

@@ -6,7 +6,7 @@ User-facing commands:
   /go-to-work               start a work session (lists candidate roles & tasks)
   /leave-for-work           end the work session (snapshots and stops heartbeats)
   /spawn <role> [--task X]  register a new agent in the session registry
-  /kill <agent_id>          mark a session as stopping/closed
+  /kill <agent_id>          mark a session stopped, completed, or failed
   /call <role> <message>    write a request message to agents/messages/inbox/
   /qa "..."                 alias for `/call qa ...`
   /lead-engineer "..."      alias for `/call lead-engineer ...`
@@ -34,6 +34,7 @@ from pathlib import Path
 # TASK-086 safety gate — import local module
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import orchestrator_safety_gate as safety_gate  # noqa: E402
+import allimbot  # noqa: E402
 import cycle_gate  # noqa: E402
 import subagent_dispatch  # noqa: E402
 
@@ -258,6 +259,16 @@ def task_meta(task_id: str) -> dict | None:
         if meta.get("id") == task_id:
             return meta
     return None
+
+
+def task_completion_is_authoritative(task_id: str) -> bool:
+    """Return true only after the task record is both closed and verified."""
+    meta = task_meta(task_id)
+    if not meta:
+        return False
+    status = str(meta.get("status") or "").strip().lower()
+    verification_status = str(meta.get("verification_status") or "").strip().lower()
+    return status in {"completed", "done", "closed", "완료"} and verification_status == "passed"
 
 
 def routing_grade_for_task(task_id: str, fallback: str = "Medium") -> str:
@@ -585,12 +596,28 @@ def cmd_kill(args: argparse.Namespace) -> Outcome:
         record = json.loads(p.read_text(encoding="utf-8"))
     except Exception as exc:
         raise SystemExit(f"session file unreadable: {exc}")
-    record["status"] = "stopping"
+    outcome = str(getattr(args, "outcome", "stopped") or "stopped")
+    record["status"] = "closed" if outcome in {"completed", "failed"} else "stopping"
+    record["outcome"] = outcome
     record["stopped_at"] = ts_now_iso()
     payload = {"dry_run": args.dry_run, "session": record}
     summary = f"kill agent_id={agent_id} dry_run={args.dry_run}"
     if not args.dry_run:
         write_session_json(p, record)
+        try:
+            task_id = str(record.get("task_id") or "none")
+            if task_id != "none" and outcome == "completed" and task_completion_is_authoritative(task_id):
+                allimbot.notify(
+                    f"{task_id} completed and verified",
+                    title="agent_runtime task completed",
+                )
+            elif task_id != "none" and outcome == "failed":
+                allimbot.notify(
+                    f"{task_id} worker session reported failed",
+                    title="agent_runtime worker failure",
+                )
+        except Exception:
+            pass
     return Outcome(0, summary, payload)
 
 
@@ -937,8 +964,14 @@ def build_parser() -> argparse.ArgumentParser:
     add_dry_run(p_spawn)
     p_spawn.set_defaults(func=cmd_spawn)
 
-    p_kill = sp("kill", help="mark an agent session as stopping")
+    p_kill = sp("kill", help="close an agent session with an explicit outcome")
     p_kill.add_argument("agent_id")
+    p_kill.add_argument(
+        "--outcome",
+        choices=("stopped", "completed", "failed"),
+        default="stopped",
+        help="send a task notification only for completed or failed",
+    )
     add_dry_run(p_kill)
     p_kill.set_defaults(func=cmd_kill)
 

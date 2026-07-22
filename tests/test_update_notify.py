@@ -74,6 +74,26 @@ def test_newer_tag_prints_notice_once(tmp_path, capsys, monkeypatch):
     out.encode("ascii")  # notice must be plain ASCII
 
 
+def test_newer_tag_sends_optional_allimbot_notice(tmp_path, capsys, monkeypatch):
+    _write_host_config(tmp_path, ref="v0.1.8")
+    monkeypatch.setattr(update_notify.subprocess, "run", _FakeRun())
+    calls: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        update_notify.allimbot,
+        "notify",
+        lambda message, title="agent_runtime", **_kwargs: calls.append((message, title)) or False,
+    )
+
+    assert main(["update-notify", "--root", str(tmp_path)]) == 0
+    assert calls == [
+        (
+            NOTICE_LINE + "\n" + update_notify.HINT_LINE,
+            "agent_runtime update available",
+        )
+    ]
+    assert capsys.readouterr().err == ""
+
+
 def test_git_terminal_prompt_forced_to_zero_even_when_inherited(tmp_path, capsys, monkeypatch):
     """An inherited GIT_TERMINAL_PROMPT=1 must be overridden, not kept."""
     _write_host_config(tmp_path, ref="v0.1.8")

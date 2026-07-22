@@ -11,6 +11,22 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def notify_governance_block(returncode: int) -> None:
+    """Best-effort alert for a blocking owner gate; never changes the gate result."""
+    try:
+        source_root = str(ROOT / "src")
+        if source_root not in sys.path:
+            sys.path.insert(0, source_root)
+        from agent_runtime.allimbot import notify
+
+        notify(
+            f"owner governance gate blocked (exit {returncode})",
+            title="agent_runtime governance blocked",
+        )
+    except Exception:
+        pass
+
+
 def run(args: list[str]) -> int:
     label = " ".join(args)
     print(f"owner-governance: start: {label}", flush=True)
@@ -76,6 +92,8 @@ def main() -> int:
         rc = run(check)
         if rc:
             failed = rc
+    if failed:
+        notify_governance_block(failed)
     # Advisory (non-blocking): compound-cadence obligation. Source-repo only --
     # consumer projects lack this script, so guard on existence and skip silently
     # (never affects this gate's exit code).

@@ -182,6 +182,14 @@ def test_template_chain_scripts_ship_in_template() -> None:
     )
 
 
+def test_both_governance_gates_notify_only_after_a_block() -> None:
+    for path in (ROOT_GATE, TEMPLATE_GATE):
+        text = path.read_text(encoding="utf-8")
+        assert "def notify_governance_block(returncode: int)" in text
+        assert "if failed:\n        notify_governance_block(failed)" in text
+        assert "except Exception:\n        pass" in text
+
+
 def test_evidence_index_generator_template_mirror_matches_root() -> None:
     root_script = (REPO_ROOT / "scripts" / "evidence_index_generator.py").read_text(encoding="utf-8")
     template_script = (TEMPLATE_SCRIPTS_DIR / "evidence_index_generator.py").read_text(encoding="utf-8")

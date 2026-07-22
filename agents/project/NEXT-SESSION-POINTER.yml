@@ -1,20 +1,21 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-18T17:48:46+09:00
+updated_at: 2026-07-22T17:32:50+09:00
+updated_by: codex-root-task-ar-599-closeout
 current_state:
-  summary: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE is complete; the persistent self-improvement goal is improving but still active."
-  status: watch
-  task_set_status: completed
-  task_set_id: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
-  step_index: 4
-  step_total: 4
-  progress_pct: 100
-  status_text: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE closed at improving 70/100; full maturity remains open."
+  summary: "TASK-AR-599 is independently approved and closed; integration is pending before TASK-AR-600 begins."
+  status: ready
+  task_set_status: in_progress
+  task_set_id: "TASKSET-AR-AUTO-MERGE-INTEGRITY"
+  step_index: 0
+  step_total: 1
+  progress_pct: 0
+  status_text: "Merge TASK-AR-599, then claim registered TASK-AR-600 for issue #291."
 active_work:
   current_agents: []
   current_teams: []
 resume:
-  active_task: none
-  active_task_set: "TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE"
+  active_task: TASK-AR-600
+  active_task_set: "TASKSET-AR-AUTO-MERGE-INTEGRITY"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."

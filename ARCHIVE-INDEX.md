@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-07-22
-archived_count: 263
+archived_count: 264
 ---
 
 # Archived Task Files
 
-- `263` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `264` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -25,6 +25,7 @@ archived_count: 263
 | `TASK-AR-596` | `5f9cdb53-373…` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | 2026-07-19T10:28:06+09:00 | 2026-07-19T11:55:48+09:00 | 2026-07-19T12:07:13+09:00 | 2026-07-19T12:07:13+09:00 | Resolve GitHub #290 so active pointers find canonical TASK files with descriptive slu… |
 | `TASK-AR-595` | `833d0b22-5c7…` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | 2026-07-19T10:28:06+09:00 | 2026-07-19T11:45:07+09:00 | 2026-07-19T11:54:41+09:00 | 2026-07-19T11:54:41+09:00 | Resolve GitHub #287 so host updates honor pyproject build-system requirements instead… |
 | `TASK-AR-598` | `f8e1d34f-014…` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | 2026-07-19T10:28:06+09:00 | 2026-07-19T12:26:12+09:00 | 2026-07-22T16:39:40+09:00 | 2026-07-22T16:39:40+09:00 | Resolve GitHub #274 and supersede or merge PR #277 by shipping the host-proven sessio… |
+| `TASK-AR-599` | `15e52ef5-f08…` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | 2026-07-19T10:28:06+09:00 | 2026-07-22T17:00:10+09:00 | 2026-07-22T17:31:48+09:00 | 2026-07-22T17:31:48+09:00 | Resolve GitHub #279 by shipping an optional, zero-dependency notification client and… |
 | `TASK-AR-601` | `8cc19b2e-59a…` | `TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | completed | 2026-07-19T11:03:47+09:00 | 2026-07-19T11:09:38+09:00 | 2026-07-19T11:43:51+09:00 | 2026-07-19T11:43:51+09:00 | Ensure role_routing overlay claims carry required lifecycle artifacts and releasing a… |
 | `TASK-AR-205` | `fb3af52e-1ae…` | `TASKSET-AR-QUALITY-LOOP` | completed | 2026-06-11 | 2026-06-11 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | 오프라인에서 정답 보유 영역은 구조화된 데이터셋으로 재현 가능한 평가를 수행하고, 90% 미만이면 릴리스를 막는다. |
 | `TASK-AR-217` | `06b35d56-8b2…` | `TASKSET-AR-QUALITY-LOOP` | completed | 2026-06-09 | 2026-06-09 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | `v0.1.8` 공개 후보(2026-07-02/07-09/07-16)를 가정한 `release-preflight`, 오프라인 90% 게이트, review… |

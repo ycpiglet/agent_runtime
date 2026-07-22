@@ -22,6 +22,7 @@ import sys
 import time
 from pathlib import Path
 
+from . import allimbot
 from .config import load_config
 
 CACHE_RELATIVE_PATH = Path(".tmp") / "update-notify-cache.json"
@@ -161,6 +162,8 @@ def run_update_notify(root: Path, *, no_cache: bool = False, verbose: bool = Fal
         lines = _notice_lines(pinned_ref, latest_tag)
         for line in lines:
             print(line)
+        if lines:
+            allimbot.notify("\n".join(lines), title="agent_runtime update available")
         if not lines and verbose:
             print(f"agent-runtime up to date: {pinned_ref} (latest release tag: {latest_tag})")
         return 0

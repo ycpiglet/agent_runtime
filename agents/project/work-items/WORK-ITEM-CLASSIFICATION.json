@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-22T16:49:30+09:00",
+  "generated_at": "2026-07-22T17:31:49+09:00",
   "record_count": 394,
   "finding_count": 0,
   "findings": [],
@@ -4216,7 +4216,7 @@
       "title": "Resolve GitHub #279 by shipping an optional, zero-dependency notification client and…",
       "path": "agents/lead_engineer/tasks/TASK-AR-599.md",
       "parent_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-599-001",
@@ -4227,7 +4227,7 @@
       "title": "UNIT-TASK-AR-599-001 - Wire optional allimbot notifications end to end",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-599/UNIT-TASK-AR-599-001.md",
       "parent_id": "TASK-AR-599",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-602",

@@ -21,6 +21,19 @@ SOURCE_ONLY_CHECKS = {"scripts/collaboration_governance_gate.py", "scripts/runti
 ROOT_STATE_CHECKS = {"scripts/state_sync_gate.py", "scripts/taskset_work_gate.py"}
 
 
+def notify_governance_block(returncode: int) -> None:
+    """Best-effort alert for a blocking owner gate; never changes the gate result."""
+    try:
+        import allimbot
+
+        allimbot.notify(
+            f"owner governance gate blocked (exit {returncode})",
+            title="agent_runtime governance blocked",
+        )
+    except Exception:
+        pass
+
+
 def skip_reason(args: list[str]) -> str:
     """Why this check cannot run in this checkout ('' when it can)."""
     script = args[0]
@@ -113,6 +126,8 @@ def main() -> int:
         rc = run(check)
         if rc:
             failed = rc
+    if failed:
+        notify_governance_block(failed)
     return failed
 
 

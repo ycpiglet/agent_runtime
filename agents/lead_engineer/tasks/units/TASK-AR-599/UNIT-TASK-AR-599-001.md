@@ -9,13 +9,13 @@ task_id: TASK-AR-599
 task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 initiative_id: INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T10:28:06+09:00
+updated_at: 2026-07-22T17:31:47+09:00
 origin_type: owner_request
-origin_ref: chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277
+origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
 summary: Wire optional allimbot notifications end to end
 horizon: unit
@@ -24,7 +24,7 @@ escalation_triggers:
   - external_effect
   - security
   - cross_cutting
-context: GitHub #279 proposes the host-proven ycpiglet/allimbot standard-library client with local /trigger and ntfy fallback, never-block semantics, and four primary runtime/CI integration points.
+context: GitHub
 inputs:
   - https://github.com/ycpiglet/allimbot/blob/main/clients/allimbot.py
   - https://github.com/ycpiglet/allimbot/blob/main/docs/INTEGRATION.md
@@ -40,6 +40,7 @@ target_files:
   - new:src/agent_runtime/templates/project/.env.example
   - scripts/owner_governance_gate.py
   - .github/workflows/test.yml
+  - pyproject.toml
   - new:docs/ALLIMBOT-INTEGRATION.md
   - new:tests/test_allimbot.py
   - tests/test_update_notify.py
@@ -54,10 +55,21 @@ acceptance:
   - Secret scanning and host fixture lock checks pass.
 verification:
   - python -m pytest tests/test_allimbot.py tests/test_update_notify.py tests/test_orchestrator_atomic_writes.py tests/test_owner_governance_chain_parity.py -q
+  - python scripts/verify_wheel_dotfiles.py --check
   - python scripts/owner_governance_gate.py
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Report each wired event, no-op/error behavior, configuration documentation, tests, and secret-gate output.
 stop_condition: Stop before sending a real notification or committing any secret; verify only with mocks or local test servers.
+verified_at: 2026-07-22T17:25:09+09:00
+verified_by: codex-root-task-ar-599-rework
+evidence_refs:
+  - reviews/VERIFY-2026-07-22-unit-task-ar-599-001-20260722171357.json
+  - reviews/VERIFY-2026-07-22-unit-task-ar-599-001-20260722172509.json
+resolution: done
+completed_at: 2026-07-22T17:31:47+09:00
+closed_by: codex-root-task-ar-599-closeout
+actual_hours: 0.8
+actual_tokens: 30000
 ---
 
 # UNIT-TASK-AR-599-001 - Wire optional allimbot notifications end to end
@@ -84,6 +96,7 @@ GitHub #279 proposes the host-proven ycpiglet/allimbot standard-library client w
 - new:src/agent_runtime/templates/project/.env.example
 - scripts/owner_governance_gate.py
 - .github/workflows/test.yml
+- pyproject.toml
 - new:docs/ALLIMBOT-INTEGRATION.md
 - new:tests/test_allimbot.py
 - tests/test_update_notify.py
@@ -111,6 +124,7 @@ Implement the optional client, connect task completion/governance block/session 
 ## Verification
 
 - `python -m pytest tests/test_allimbot.py tests/test_update_notify.py tests/test_orchestrator_atomic_writes.py tests/test_owner_governance_chain_parity.py -q`
+- `python scripts/verify_wheel_dotfiles.py --check`
 - `python scripts/owner_governance_gate.py`
 - `python scripts/regen_host_lock_if_needed.py --check`
 
@@ -121,3 +135,16 @@ Report each wired event, no-op/error behavior, configuration documentation, test
 ## Stop Boundary
 
 Stop before sending a real notification or committing any secret; verify only with mocks or local test servers.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-22T17:31:47+09:00`
+- Resolution: `done`
+- Actual hours: `0.8`
+- Actual tokens: `30000`
+- Closed by: `codex-root-task-ar-599-closeout`
+- Evidence:
+  - `reviews/VERIFY-2026-07-22-unit-task-ar-599-001-20260722171357.json`
+  - `reviews/VERIFY-2026-07-22-unit-task-ar-599-001-20260722172509.json`
+<!-- work-close:end -->
