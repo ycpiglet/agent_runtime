@@ -75,10 +75,12 @@ def r3_hits(files: list) -> list:
 
 
 def evaluate(pr: str) -> tuple:
-    d = gh_json(pr, "state,mergeStateStatus,mergeable,reviewDecision,statusCheckRollup,files,title")
+    d = gh_json(pr, "state,isDraft,mergeStateStatus,mergeable,reviewDecision,statusCheckRollup,files,title")
     reasons_block = []  # R3/escalate 사유
     if d.get("state") != "OPEN":
         return "SKIP", [f"PR state={d.get('state')} (이미 닫힘/머지)"], d
+    if d.get("isDraft"):
+        reasons_block.append("isDraft=true (Draft PR은 자동 머지하지 않음)")
 
     checks = d.get("statusCheckRollup") or []
     bad = []
@@ -113,6 +115,32 @@ def evaluate(pr: str) -> tuple:
     return "AUTO-MERGE", [f"코드 {code_lines}줄, 파일 {len(files)}개, 전 check green, CLEAN"], d
 
 
+def execute_merge(pr: str) -> tuple[bool, str, dict]:
+    """Run the merge request and confirm success from authoritative remote state."""
+    merge = subprocess.run(
+        ["gh", "pr", "merge", pr, "--squash", "--delete-branch"],
+        capture_output=True, text=True, encoding="utf-8",
+    )
+    command_output = (merge.stdout.strip() or merge.stderr.strip()).strip()
+    try:
+        remote = gh_json(pr, "state,isDraft,mergedAt,mergeCommit")
+    except SystemExit as exc:
+        return False, f"{command_output}\n원격 상태 재확인 실패: {exc}".strip(), {}
+
+    if remote.get("state") == "MERGED" and remote.get("mergedAt"):
+        detail = command_output or "gh merge 명령 출력 없음"
+        if merge.returncode != 0:
+            detail += f"\nmerge 명령 exit={merge.returncode}; 원격 MERGED 상태로 성공 확정"
+        return True, detail, remote
+
+    detail = command_output or "gh merge 명령 출력 없음"
+    detail += (
+        f"\n원격 상태가 MERGED가 아님: state={remote.get('state')}, "
+        f"mergedAt={remote.get('mergedAt')}, merge exit={merge.returncode}"
+    )
+    return False, detail, remote
+
+
 def main() -> int:
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     if not args:
@@ -126,13 +154,15 @@ def main() -> int:
         print(f"  - {r}")
     if verdict == "AUTO-MERGE":
         if execute:
-            m = subprocess.run(
-                ["gh", "pr", "merge", pr, "--squash", "--delete-branch"],
-                capture_output=True, text=True, encoding="utf-8",
+            merged, detail, remote = execute_merge(pr)
+            print(detail)
+            if not merged:
+                print("  → 머지 미확정: 원격 PR이 MERGED가 아니므로 실패 처리.")
+                return 1
+            print(
+                "  → 원격 MERGED 확인됨"
+                f"(mergedAt={remote.get('mergedAt')}). 로컬 상태는 git fetch로 별도 동기화."
             )
-            # gh 는 원격 머지 후 로컬 정리에서 SSH 실패할 수 있으나 머지 자체는 API.
-            print(m.stdout.strip() or m.stderr.strip())
-            print("  → 머지 실행됨(--execute). 로컬 main 동기화 필요: git fetch && git reset --hard origin/main")
         else:
             print("  → 게이트 통과. 머지하려면 --execute (R2: 머지 후 BRIEF 에 deploy+rollback 1줄).")
         return 0
