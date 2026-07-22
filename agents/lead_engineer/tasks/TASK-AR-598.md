@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 registered_at: 2026-07-19T10:28:06+09:00
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T10:28:06+09:00
+updated_at: 2026-07-22T16:39:03+09:00
 title: Integrate crash-safe session resume audit
 status: planned
 priority: P1
@@ -24,7 +24,7 @@ task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 unit_spec: agents/lead_engineer/tasks/units/TASK-AR-598/UNIT-TASK-AR-598-001.md
 reservation_id: RES-20260719-102806-bbbc9438-05
 origin_type: owner_request
-origin_ref: chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277
+origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
 summary: Rebase the stale PR's report-only crash recovery auditor onto current main, preserve SessionStart order, and verify malformed state never blocks startup.
 planner_model_tier: planner_high
@@ -35,6 +35,11 @@ tags:
 verification:
   - python -m pytest tests/test_session_resume_check.py tests/test_orchestrator_atomic_writes.py -q
   - python scripts/regen_host_lock_if_needed.py --check
+verification_status: passed
+verified_at: 2026-07-22T16:39:03+09:00
+verified_by: codex-root-task-ar-598
+evidence_refs:
+  - reviews/VERIFY-2026-07-22-task-ar-598-20260722163903.json
 ---
 
 # TASK-AR-598 - Integrate crash-safe session resume audit

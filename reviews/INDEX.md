@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-19T12:42:06+09:00
-record_count: 662
+generated_at: 2026-07-22T16:39:29+09:00
+record_count: 666
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `662` review and evidence records under `reviews/`.
+- Summary: indexed `666` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `662` files |
+| Reviews covered | pass | `666` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -524,6 +524,8 @@ record_count: 662
 | `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-595-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-595-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-595 Independent Auditor Role Review |
 | `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-596-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-596-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-596 Independent Auditor Role Review |
 | `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-597-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-597-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-597 Independent Auditor Role Review |
+| `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-598-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-598-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-598 Independent Auditor Role Review |
+| `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-598-SKEPTIC.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-598-SKEPTIC` | role-review | record | n/a | TASK-AR-598 Skeptic Closeout Review |
 | `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-601-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-601-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-601 Independent Auditor Role Review |
 | `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC-RECHECK.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC-RECHECK` | role-review | record | n/a | TASK-AR-601 Skeptic Hardening Recheck |
 | `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC` | role-review | record | n/a | TASK-AR-601 Skeptic Role Review |
@@ -612,6 +614,7 @@ record_count: 662
 | `reviews/VERIFY-2026-07-19-unit-task-ar-601-001-20260719111136.json` | `VERIFY-2026-07-19-unit-task-ar-601-001-20260719111136` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-601-001-20260719111136 |
 | `reviews/VERIFY-2026-07-19-unit-task-ar-601-001-20260719111759.json` | `VERIFY-2026-07-19-unit-task-ar-601-001-20260719111759` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-601-001-20260719111759 |
 | `reviews/VERIFY-2026-07-19-unit-task-ar-601-001-20260719113247.json` | `VERIFY-2026-07-19-unit-task-ar-601-001-20260719113247` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-601-001-20260719113247 |
+| `reviews/VERIFY-2026-07-22-task-ar-598-20260722163903.json` | `VERIFY-2026-07-22-task-ar-598-20260722163903` | json | record | n/a | VERIFY-2026-07-22-task-ar-598-20260722163903 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
@@ -690,6 +693,7 @@ record_count: 662
 | `reviews/W4B-2026-07-19-TASK-AR-595.md` | `W4B-2026-07-19-TASK-AR-595` | w4b-independent-verification | approved | pass | TASK-AR-595 W4b Independent Verification |
 | `reviews/W4B-2026-07-19-TASK-AR-596.md` | `W4B-2026-07-19-TASK-AR-596` | w4b-independent-verification | approved | pass | TASK-AR-596 W4b Independent Verification |
 | `reviews/W4B-2026-07-19-TASK-AR-597.md` | `W4B-2026-07-19-TASK-AR-597` | w4b-independent-verification | approved | pass | TASK-AR-597 W4b Independent Verification |
+| `reviews/W4B-2026-07-19-TASK-AR-598-REWORK.md` | `W4B-2026-07-19-TASK-AR-598-REWORK` | w4b-independent-verification | approved | pass | W4b Independent Verification — TASK-AR-598 Rework |
 | `reviews/W4B-2026-07-19-TASK-AR-598.md` | `W4B-2026-07-19-TASK-AR-598` | w4b-independent-verification | approved | pass | W4b Independent Verification — TASK-AR-598 |
 | `reviews/W4B-2026-07-19-TASK-AR-601-HARDENING.md` | `W4B-2026-07-19-TASK-AR-601-HARDENING` | w4b-independent-verification | approved | pass | TASK-AR-601 Hardening W4b Independent Verification |
 | `reviews/W4B-2026-07-19-TASK-AR-601-RECHECK.md` | `W4B-2026-07-19-TASK-AR-601-RECHECK` | w4b-independent-verification | approved | pass | TASK-AR-601 W4b Independent Verification Recheck |

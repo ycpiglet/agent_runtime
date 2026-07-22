@@ -1,0 +1,34 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-22-task-ar-598-20260722163903",
+  "work_id": "TASK-AR-598",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-598.md",
+  "kind": "task",
+  "task_id": "TASK-AR-598",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-22T16:39:03+09:00",
+  "verified_by": "codex-root-task-ar-598",
+  "command_count": 2,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_session_resume_check.py tests/test_orchestrator_atomic_writes.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-22T16:39:03+09:00",
+      "finished_at": "2026-07-22T16:39:05+09:00",
+      "stdout": "............                                                             [100%]\n12 passed in 1.21s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/regen_host_lock_if_needed.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-22T16:39:05+09:00",
+      "finished_at": "2026-07-22T16:39:09+09:00",
+      "stdout": "OK: C:\\Users\\ycpig\\agent_runtime\\tests\\fixtures\\host\\agent_runtime.lock.json is up to date.\n",
+      "stderr": ""
+    }
+  ]
+}
