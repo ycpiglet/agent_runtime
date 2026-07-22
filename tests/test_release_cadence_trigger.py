@@ -517,7 +517,14 @@ def test_partial_query_error_overrides_other_trigger_metrics(tmp_path: Path, mon
 
 @pytest.mark.parametrize(
     "query_kind",
-    ["subjects", "commit-count", "tag-time", "breaking", "names", "stat"],
+    [
+        "subjects",
+        "commit-count",
+        "tag-time",
+        "breaking",
+        "template-diff",
+        "schema-diff",
+    ],
 )
 def test_each_partial_query_failure_invalidates_triggered_report(
     tmp_path: Path, monkeypatch, query_kind: str
@@ -541,10 +548,10 @@ def test_each_partial_query_failure_invalidates_triggered_report(
         if query_kind == "tag-time":
             return args[:3] == ["log", "-1", "--format=%ct"]
         if query_kind == "breaking":
-            return args[:2] == ["log", "--format=%B"]
-        if query_kind == "names":
-            return args[:2] == ["diff", "--name-only"]
-        return args[:2] == ["diff", "--stat"]
+            return args[:2] == ["log", "--format=%s%n%b%x00"]
+        if query_kind == "template-diff":
+            return args[:2] == ["diff", "--name-status"]
+        return args[:2] == ["diff", "--name-only"]
 
     def _fail_selected(cmd, **kwargs):
         nonlocal failed_calls
@@ -610,6 +617,10 @@ def test_expected_no_tag_result_is_not_retried(tmp_path: Path, monkeypatch) -> N
         (
             "fatal: No tags can describe 'abc123'.\n"
             "Try --always, or create some tags.",
+        ),
+        (
+            "fatal: No annotated tags can describe 'abc123'.\n"
+            "However, there were unannotated tags: try --tags.",
         ),
     ],
 )
@@ -681,6 +692,9 @@ def test_sensitive_diagnostics_redact_complete_values_and_bound_length() -> None
         "Authorization: Bearer auth-secret\n"
         'token="two word-secret"\n'
         "password=first-secret secret=second-secret\n"
+        "PASSWD: Basic passwd-secret\n"
+        "access-token=access token-secret\n"
+        'access_token="underscore underscore-secret"\n'
         "fetch https://user-one:pass-one@example.invalid/a "
         "and https://user-two:pass-two@example.invalid/b\n"
         + ("x" * 800)
@@ -693,13 +707,16 @@ def test_sensitive_diagnostics_redact_complete_values_and_bound_length() -> None
         "word-secret",
         "first-secret",
         "second-secret",
+        "passwd-secret",
+        "token-secret",
+        "underscore-secret",
         "user-one",
         "pass-one",
         "user-two",
         "pass-two",
     ):
         assert secret not in sanitized
-    assert sanitized.count("[REDACTED]") >= 5
+    assert sanitized.count("[REDACTED]") >= 8
     assert len(sanitized) <= 500
 
 
@@ -724,7 +741,15 @@ def test_mixed_retry_oserror_resets_returncode_and_sanitizes_evidence(
 
     monkeypatch.setattr(module.subprocess, "run", _mixed)
     module._QUERY_ERRORS.clear()
-    assert module._git(tmp_path, "rev-list", "--count", "HEAD") is None
+    assert (
+        module._git(
+            tmp_path,
+            "rev-list",
+            "https://command-user:command-pass@example.invalid/repo",
+            "token=command-secret",
+        )
+        is None
+    )
 
     assert attempts == 3
     error = module._QUERY_ERRORS[0]
@@ -734,6 +759,10 @@ def test_mixed_retry_oserror_resets_returncode_and_sanitizes_evidence(
     assert "os-password" not in error["error"]
     assert "[REDACTED]" in error["error"]
     assert len(error["error"]) <= 500
+    assert "command-user" not in error["command"]
+    assert "command-pass" not in error["command"]
+    assert "command-secret" not in error["command"]
+    assert "[REDACTED]" in error["command"]
 
 
 def test_git_query_error_prints_loud_without_verbose(capsys) -> None:
