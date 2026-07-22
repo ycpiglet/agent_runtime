@@ -30,6 +30,7 @@ inputs:
 target_files:
   - src/agent_runtime/templates/project/scripts/auto_merge.py
   - new:tests/test_auto_merge_execution.py
+  - tests/fixtures/host/agent_runtime.lock.json
 scope: Template helper and deterministic package regression only.
 acceptance:
   - False success is impossible when the remote PR remains OPEN.
@@ -56,6 +57,7 @@ Autofolio BUG-014 reproduced a Draft merge false-success in the managed template
 
 - src/agent_runtime/templates/project/scripts/auto_merge.py
 - new:tests/test_auto_merge_execution.py
+- tests/fixtures/host/agent_runtime.lock.json
 
 ## Scope
 
