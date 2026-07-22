@@ -1,0 +1,25 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-19-unit-task-ar-595-001-20260719114606",
+  "work_id": "UNIT-TASK-AR-595-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-595/UNIT-TASK-AR-595-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-595",
+  "unit_id": "UNIT-TASK-AR-595-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-19T11:46:06+09:00",
+  "verified_by": "codex-root-task-ar-595",
+  "command_count": 1,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_inventory_sync_sanitize.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-19T11:46:06+09:00",
+      "finished_at": "2026-07-19T11:46:13+09:00",
+      "stdout": "........................................................................ [ 72%]\n............................                                             [100%]\n100 passed in 5.64s\n",
+      "stderr": ""
+    }
+  ]
+}

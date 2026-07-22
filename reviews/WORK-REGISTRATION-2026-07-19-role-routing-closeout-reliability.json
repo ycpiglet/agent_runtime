@@ -1,0 +1,87 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "origin_type": "runtime_discovery",
+  "origin_ref": "TASK-AR-594 closeout overlay release failure",
+  "created_by": "codex-root-planner",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "initiative": {
+    "id": "INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
+    "title": "Role Routing Closeout Reliability",
+    "summary": "Make automatically routed review overlays releasable without recursive review-claim creation.",
+    "owner": "lead-engineer",
+    "status": "active"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
+    "display_name": "Role Routing Closeout Reliability",
+    "summary": "Repair the overlay claim lifecycle gap discovered while closing TASK-AR-594.",
+    "owner": "lead-engineer",
+    "status": "active",
+    "order": 11,
+    "planner_model_tier": "planner_high",
+    "worker_model_tier": "worker_standard",
+    "reviewer_model_tier": "reviewer_standard"
+  },
+  "tasks": [
+    {
+      "title": "Make routed review overlays cleanly releasable",
+      "goal": "Ensure role_routing overlay claims carry required lifecycle artifacts and releasing an overlay cannot recursively route another overlay.",
+      "summary": "Add handoff/log artifacts at overlay creation and a recursion guard at release.",
+      "scope": "Change the live-checkout role-routing claim creation/release seam and focused tests; preserve flag gating and additive review behavior. Host-template routing is out of scope because the generated host scaffold does not ship role_routing.py or enable this live-only seam.",
+      "priority": "P0",
+      "difficulty": "S",
+      "est_hours": 2,
+      "est_tokens": 5000,
+      "owner": "lead-engineer",
+      "team": "agent-runtime-core",
+      "origin_ref": "runtime:TASK-AR-594-overlay-closeout",
+      "acceptance": [
+        "Every generated overlay claim points to existing handoff and log records.",
+        "Releasing an overlay with role routing enabled creates no nested REVIEW-REVIEW claim.",
+        "Ordinary worker release still routes the configured additive reviews exactly once."
+      ],
+      "verification": [
+        "python -m pytest tests/test_role_routing.py tests/test_role_routing_wiring.py tests/test_task_claim_dispatcher.py -q",
+        "python scripts/regen_host_lock_if_needed.py --check"
+      ],
+      "units": [
+        {
+          "title": "Repair overlay lifecycle artifacts and recursion guard",
+          "context": "TASK-AR-594 release generated two overlay claims without handoff/log pointers, so the standard release command refused them; after manual pointers, release would have routed nested overlays unless role routing was temporarily disabled.",
+          "inputs": [
+            "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-594-independent-auditor-closeout.json",
+            "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-594-skeptic-closeout.json",
+            "scripts/role_routing.py",
+            "scripts/task_claim_dispatcher.py"
+          ],
+          "target_files": [
+            "scripts/role_routing.py",
+            "scripts/task_claim_dispatcher.py",
+            "tests/test_role_routing.py",
+            "tests/test_role_routing_wiring.py",
+            "tests/test_task_claim_dispatcher.py",
+            "tests/fixtures/host/agent_runtime.lock.json"
+          ],
+          "scope": "Create atomic handoff/log records together with each overlay claim and skip role-review routing when the released claim is itself an overlay.",
+          "steps": [
+            "Add deterministic overlay handoff/log paths and atomic initial records.",
+            "Guard release-time routing for overlay claims while preserving ordinary release behavior.",
+            "Add end-to-end regression tests and confirm the untouched host-template lock remains current."
+          ],
+          "acceptance": [
+            "Generated overlay lifecycle pointers resolve to files.",
+            "Overlay release succeeds with evidence and does not create nested overlays.",
+            "Focused routing and dispatcher suites pass."
+          ],
+          "verification": [
+            "python -m pytest tests/test_role_routing.py tests/test_role_routing_wiring.py tests/test_task_claim_dispatcher.py -q",
+            "python scripts/regen_host_lock_if_needed.py --check"
+          ],
+          "handoff": "Report the original failure, lifecycle artifact paths, recursion guard behavior, and focused test output.",
+          "stop_condition": "Stop if overlay claims require a separate lifecycle schema or if suppressing recursive routing would skip ordinary worker closeout reviews.",
+          "escalation_triggers": ["cross_cutting", "data_integrity"]
+        }
+      ]
+    }
+  ]
+}

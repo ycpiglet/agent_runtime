@@ -1,0 +1,25 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-19-task-ar-597-20260719122124",
+  "work_id": "TASK-AR-597",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-597.md",
+  "kind": "task",
+  "task_id": "TASK-AR-597",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-19T12:21:24+09:00",
+  "verified_by": "codex-root-task-ar-597",
+  "command_count": 1,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_release_auto_noncritical.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-19T12:21:24+09:00",
+      "finished_at": "2026-07-19T12:23:19+09:00",
+      "stdout": "...............................                                          [100%]\n31 passed in 113.75s (0:01:53)\n",
+      "stderr": ""
+    }
+  ]
+}

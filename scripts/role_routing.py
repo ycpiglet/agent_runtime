@@ -113,6 +113,15 @@ def _config_enabled(root: Path, key: str) -> bool | None:
     return value if isinstance(value, bool) else None
 
 
+def _feature_enabled(root: Path, key: str, env_flag: str) -> bool:
+    """Resolve one feature flag with an explicit environment kill switch."""
+    env_value = os.environ.get(env_flag)
+    if env_value is not None and env_value != "":
+        return _truthy(env_value, False)
+    configured = _config_enabled(root, key)
+    return configured if configured is not None else False
+
+
 # ---------------------------------------------------------------------------
 # Shared helpers
 # ---------------------------------------------------------------------------
@@ -130,6 +139,14 @@ def _claim_dir(root: Path) -> Path:
 
 def _claim_path(root: Path, claim_id: str) -> Path:
     return _claim_dir(root) / f"{claim_id}.json"
+
+
+def _artifact_path(root: Path, claim_id: str, suffix: str) -> Path:
+    return _claim_dir(root) / f"{claim_id}.{suffix}.md"
+
+
+def _rel(root: Path, path: Path) -> str:
+    return path.resolve().relative_to(root.resolve()).as_posix()
 
 
 def _write_overlay_claim(
@@ -158,6 +175,8 @@ def _write_overlay_claim(
     path = _claim_path(root, claim_id)
     if path.exists():
         return None
+    handoff_path = _artifact_path(root, claim_id, "handoff")
+    log_path = _artifact_path(root, claim_id, "log")
     claim: dict[str, Any] = {
         "schema": SCHEMA,
         "claim_id": claim_id,
@@ -178,9 +197,44 @@ def _write_overlay_claim(
         "overlay": True,            # additive orchestration overlay marker
         "parent_task_id": parent_task_id,
         "parent_task_set_id": parent_task_set_id,
+        "handoff_path": _rel(root, handoff_path),
+        "log_path": _rel(root, log_path),
     }
     path.parent.mkdir(parents=True, exist_ok=True)
-    atomic_io.write_json_atomic(path, claim)
+    published_artifacts: list[Path] = []
+    try:
+        atomic_io.write_text_atomic(
+            handoff_path,
+            (
+                f"# Handoff: {claim_id}\n\n"
+                f"- task_id: {task_id}\n"
+                f"- parent_task_id: {parent_task_id or '-'}\n"
+                f"- agent_role: {agent_role}\n"
+                f"- mode: {mode}\n"
+                f"- status: claimed\n"
+                f"- status_text: {status_text}\n"
+            ),
+        )
+        published_artifacts.append(handoff_path)
+        atomic_io.write_text_atomic(
+            log_path,
+            (
+                f"# Claim Log: {claim_id}\n\n"
+                f"- claimed_at: {now}\n"
+                f"- task_id: {task_id}\n"
+                f"- agent_instance_id: {claim['agent_instance_id']}\n"
+                f"- status_text: {status_text}\n"
+            ),
+        )
+        published_artifacts.append(log_path)
+        atomic_io.write_json_atomic(path, claim)
+    except BaseException:
+        for artifact in reversed(published_artifacts):
+            try:
+                artifact.unlink()
+            except OSError:
+                pass
+        raise
     if event_name:
         append_event(
             root,
@@ -236,9 +290,7 @@ def route_review_pass(
     covers it and no second skeptic overlay is created.
     """
     root = root.resolve()
-    enabled = _config_enabled(root, "role_routing")
-    if enabled is None:
-        enabled = role_routing_enabled()
+    enabled = _feature_enabled(root, "role_routing", ROLE_ROUTING_FLAG)
     if not enabled:
         return {"enabled": False, "created": []}
 
@@ -315,9 +367,7 @@ def dispatch_wave_hooks(
     (``is_w6=True``) is a council deliberation additionally dispatched.
     """
     root = root.resolve()
-    enabled = _config_enabled(root, "scout_council")
-    if enabled is None:
-        enabled = scout_council_enabled()
+    enabled = _feature_enabled(root, "scout_council", SCOUT_COUNCIL_FLAG)
     if not enabled:
         return {"enabled": False, "created": []}
 
@@ -386,9 +436,7 @@ def maybe_activate_beta(
     """
     root = root.resolve()
     due = str(due_state or "").strip().lower() in {"due", "overdue"}
-    enabled = _config_enabled(root, "beta_activation")
-    if enabled is None:
-        enabled = beta_activation_enabled()
+    enabled = _feature_enabled(root, "beta_activation", BETA_ACTIVATION_FLAG)
     if not enabled:
         return {"enabled": False, "due": due, "created": []}
     if not due:

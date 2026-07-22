@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-19T10:36:52+09:00
-record_count: 623
+generated_at: 2026-07-22T16:53:40+09:00
+record_count: 670
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `623` review and evidence records under `reviews/`.
+- Summary: indexed `670` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `623` files |
+| Reviews covered | pass | `670` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -515,10 +515,24 @@ record_count: 623
 | `reviews/REVIEW-2026-06-22-system-health-rsi-diagnosis.md` | `REVIEW-2026-06-22-system-health-rsi-diagnosis` | review | assessed | watch | System-health / RSI diagnosis (2026-06-22) |
 | `reviews/REVIEW-2026-07-19-auto-merge-execution-readback.md` | `REVIEW-2026-07-19-AUTO-MERGE-READBACK` | review | approved | n/a | Auto-merge execution read-back design |
 | `reviews/REVIEW-2026-07-19-taskset-ar-auto-merge-integrity-registration.md` | `REVIEW-2026-07-19-taskset-ar-auto-merge-integrity-registration` | md | record | pass | Merge Truth Keeper Registration |
+| `reviews/REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration.md` | `REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration` | md | record | pass | Upstream Intake Closer Registration |
+| `reviews/REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration.md` | `REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration` | md | record | pass | Role Routing Closeout Reliability Registration |
+| `reviews/REVIEW-2026-07-22-post-merge-plan-revalidation.md` | `REVIEW-2026-07-22-post-merge-plan-revalidation` | plan-revalidation | approved | pass | Post-merge plan revalidation |
+| `reviews/REVIEW-2026-07-22-remote-main-integration-id-collision.md` | `REVIEW-2026-07-22-remote-main-integration-id-collision` | integration-decision | approved | pass | Remote main integration and TASK-AR-600 collision |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
 | `reviews/RFC-2026-06-23-visual-identity-and-agent-characters.md` | `RFC-2026-06-23-visual-identity-and-agent-characters` | rfc | proposal | decide | RFC — Visual Identity & Agent Characters |
+| `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-594-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-594-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-594 Independent Auditor Role Review |
+| `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-594-SKEPTIC.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-594-SKEPTIC` | role-review | record | n/a | TASK-AR-594 Skeptic Role Review |
+| `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-595-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-595-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-595 Independent Auditor Role Review |
+| `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-596-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-596-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-596 Independent Auditor Role Review |
+| `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-597-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-597-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-597 Independent Auditor Role Review |
+| `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-598-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-598-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-598 Independent Auditor Role Review |
+| `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-598-SKEPTIC.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-598-SKEPTIC` | role-review | record | n/a | TASK-AR-598 Skeptic Closeout Review |
+| `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-601-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-601-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-601 Independent Auditor Role Review |
+| `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC-RECHECK.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC-RECHECK` | role-review | record | n/a | TASK-AR-601 Skeptic Hardening Recheck |
+| `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC` | role-review | record | n/a | TASK-AR-601 Skeptic Role Review |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SCRIBE-2026-06-21-business-operating-system.md` | `SCRIBE-2026-06-21-business-operating-system` | scribe | recorded | pass | Business Operating System Scribe Log |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
@@ -585,6 +599,26 @@ record_count: 623
 | `reviews/VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421.json` | `VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421` | json | record | n/a | VERIFY-2026-06-20-unit-task-ar-588-002-20260620114421 |
 | `reviews/VERIFY-2026-06-21-task-ar-593-20260621171220.json` | `VERIFY-2026-06-21-task-ar-593-20260621171220` | json | record | n/a | VERIFY-2026-06-21-task-ar-593-20260621171220 |
 | `reviews/VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000.json` | `VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000` | json | record | n/a | VERIFY-2026-06-21-unit-task-ar-593-001-20260621171000 |
+| `reviews/VERIFY-2026-07-19-task-ar-594-20260719105444.json` | `VERIFY-2026-07-19-task-ar-594-20260719105444` | json | record | n/a | VERIFY-2026-07-19-task-ar-594-20260719105444 |
+| `reviews/VERIFY-2026-07-19-task-ar-594-20260719110720.json` | `VERIFY-2026-07-19-task-ar-594-20260719110720` | json | record | n/a | VERIFY-2026-07-19-task-ar-594-20260719110720 |
+| `reviews/VERIFY-2026-07-19-task-ar-594-20260719110741.json` | `VERIFY-2026-07-19-task-ar-594-20260719110741` | json | record | n/a | VERIFY-2026-07-19-task-ar-594-20260719110741 |
+| `reviews/VERIFY-2026-07-19-task-ar-595-20260719115127.json` | `VERIFY-2026-07-19-task-ar-595-20260719115127` | json | record | n/a | VERIFY-2026-07-19-task-ar-595-20260719115127 |
+| `reviews/VERIFY-2026-07-19-task-ar-596-20260719120359.json` | `VERIFY-2026-07-19-task-ar-596-20260719120359` | json | record | n/a | VERIFY-2026-07-19-task-ar-596-20260719120359 |
+| `reviews/VERIFY-2026-07-19-task-ar-597-20260719122124.json` | `VERIFY-2026-07-19-task-ar-597-20260719122124` | json | record | n/a | VERIFY-2026-07-19-task-ar-597-20260719122124 |
+| `reviews/VERIFY-2026-07-19-task-ar-601-20260719112303.json` | `VERIFY-2026-07-19-task-ar-601-20260719112303` | json | record | n/a | VERIFY-2026-07-19-task-ar-601-20260719112303 |
+| `reviews/VERIFY-2026-07-19-task-ar-601-20260719114310.json` | `VERIFY-2026-07-19-task-ar-601-20260719114310` | json | record | n/a | VERIFY-2026-07-19-task-ar-601-20260719114310 |
+| `reviews/VERIFY-2026-07-19-unit-task-ar-594-001-20260719103702.json` | `VERIFY-2026-07-19-unit-task-ar-594-001-20260719103702` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-594-001-20260719103702 |
+| `reviews/VERIFY-2026-07-19-unit-task-ar-594-001-20260719110031.json` | `VERIFY-2026-07-19-unit-task-ar-594-001-20260719110031` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-594-001-20260719110031 |
+| `reviews/VERIFY-2026-07-19-unit-task-ar-595-001-20260719114606.json` | `VERIFY-2026-07-19-unit-task-ar-595-001-20260719114606` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-595-001-20260719114606 |
+| `reviews/VERIFY-2026-07-19-unit-task-ar-596-001-20260719115906.json` | `VERIFY-2026-07-19-unit-task-ar-596-001-20260719115906` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-596-001-20260719115906 |
+| `reviews/VERIFY-2026-07-19-unit-task-ar-597-001-20260719121242.json` | `VERIFY-2026-07-19-unit-task-ar-597-001-20260719121242` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-597-001-20260719121242 |
+| `reviews/VERIFY-2026-07-19-unit-task-ar-598-001-20260719122843.json` | `VERIFY-2026-07-19-unit-task-ar-598-001-20260719122843` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-598-001-20260719122843 |
+| `reviews/VERIFY-2026-07-19-unit-task-ar-598-001-20260719123919.json` | `VERIFY-2026-07-19-unit-task-ar-598-001-20260719123919` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-598-001-20260719123919 |
+| `reviews/VERIFY-2026-07-19-unit-task-ar-598-001-20260719124202.json` | `VERIFY-2026-07-19-unit-task-ar-598-001-20260719124202` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-598-001-20260719124202 |
+| `reviews/VERIFY-2026-07-19-unit-task-ar-601-001-20260719111136.json` | `VERIFY-2026-07-19-unit-task-ar-601-001-20260719111136` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-601-001-20260719111136 |
+| `reviews/VERIFY-2026-07-19-unit-task-ar-601-001-20260719111759.json` | `VERIFY-2026-07-19-unit-task-ar-601-001-20260719111759` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-601-001-20260719111759 |
+| `reviews/VERIFY-2026-07-19-unit-task-ar-601-001-20260719113247.json` | `VERIFY-2026-07-19-unit-task-ar-601-001-20260719113247` | json | record | n/a | VERIFY-2026-07-19-unit-task-ar-601-001-20260719113247 |
+| `reviews/VERIFY-2026-07-22-task-ar-598-20260722163903.json` | `VERIFY-2026-07-22-task-ar-598-20260722163903` | json | record | n/a | VERIFY-2026-07-22-task-ar-598-20260722163903 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
@@ -657,6 +691,19 @@ record_count: 623
 | `reviews/W4B-2026-06-20-TASK-AR-591.md` | `W4B-2026-06-20-TASK-AR-591` | md | accepted | n/a | W4B Independent Verification - TASK-AR-591 |
 | `reviews/W4B-2026-06-20-TASK-AR-592.md` | `W4B-2026-06-20-TASK-AR-592` | md | accepted | n/a | W4B Independent Verification - TASK-AR-592 |
 | `reviews/W4B-2026-06-21-TASK-AR-593.md` | `W4B-2026-06-21-TASK-AR-593` | w4b-independent-verification | approved | pass | W4b Independent Verification: TASK-AR-593 |
+| `reviews/W4B-2026-07-19-TASK-AR-594-RECHECK.md` | `W4B-2026-07-19-TASK-AR-594-RECHECK` | w4b-independent-verification | approved | pass | W4b Independent Verification Recheck: TASK-AR-594 |
+| `reviews/W4B-2026-07-19-TASK-AR-594-REWORK.md` | `W4B-2026-07-19-TASK-AR-594-REWORK` | w4b-independent-verification | approved | pass | TASK-AR-594 Rework W4b Independent Verification |
+| `reviews/W4B-2026-07-19-TASK-AR-594.md` | `W4B-2026-07-19-TASK-AR-594` | w4b-independent-verification | conditional_reject | fail | W4b Independent Verification: TASK-AR-594 |
+| `reviews/W4B-2026-07-19-TASK-AR-595.md` | `W4B-2026-07-19-TASK-AR-595` | w4b-independent-verification | approved | pass | TASK-AR-595 W4b Independent Verification |
+| `reviews/W4B-2026-07-19-TASK-AR-596.md` | `W4B-2026-07-19-TASK-AR-596` | w4b-independent-verification | approved | pass | TASK-AR-596 W4b Independent Verification |
+| `reviews/W4B-2026-07-19-TASK-AR-597.md` | `W4B-2026-07-19-TASK-AR-597` | w4b-independent-verification | approved | pass | TASK-AR-597 W4b Independent Verification |
+| `reviews/W4B-2026-07-19-TASK-AR-598-REWORK.md` | `W4B-2026-07-19-TASK-AR-598-REWORK` | w4b-independent-verification | approved | pass | W4b Independent Verification — TASK-AR-598 Rework |
+| `reviews/W4B-2026-07-19-TASK-AR-598.md` | `W4B-2026-07-19-TASK-AR-598` | w4b-independent-verification | approved | pass | W4b Independent Verification — TASK-AR-598 |
+| `reviews/W4B-2026-07-19-TASK-AR-601-HARDENING.md` | `W4B-2026-07-19-TASK-AR-601-HARDENING` | w4b-independent-verification | approved | pass | TASK-AR-601 Hardening W4b Independent Verification |
+| `reviews/W4B-2026-07-19-TASK-AR-601-RECHECK.md` | `W4B-2026-07-19-TASK-AR-601-RECHECK` | w4b-independent-verification | approved | pass | TASK-AR-601 W4b Independent Verification Recheck |
+| `reviews/W4B-2026-07-19-TASK-AR-601.md` | `W4B-2026-07-19-TASK-AR-601` | w4b-independent-verification | rejected | fail | TASK-AR-601 W4b Independent Verification |
+| `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
+| `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.

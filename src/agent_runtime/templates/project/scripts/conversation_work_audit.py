@@ -168,6 +168,24 @@ def _rel(root: Path, path: Path) -> str:
         return path.as_posix()
 
 
+def _task_record_candidates(root: Path, task_id: str) -> list[Path]:
+    """Resolve a task ID by canonical metadata or a boundary-safe filename."""
+    tasks_dir = root / TASKS_DIR
+    if not tasks_dir.is_dir():
+        return []
+    candidates: list[Path] = []
+    for path in sorted(tasks_dir.glob("*.md"), key=lambda item: item.name.lower()):
+        stem_match = path.stem == task_id or path.stem.startswith(f"{task_id}-")
+        meta = parse_frontmatter(_read(path))
+        meta_match = any(
+            str(meta.get(key) or "").strip() == task_id
+            for key in ("work_id", "id", "display_id", "task_id")
+        )
+        if stem_match or meta_match:
+            candidates.append(path)
+    return candidates
+
+
 def _audit_record(root: Path, path: Path, board_text: str, findings: list[Finding]) -> None:
     rel = _rel(root, path)
     text = _read(path)
@@ -230,15 +248,29 @@ def _audit_pointer(root: Path, board_text: str, findings: list[Finding]) -> None
         task_id = active_task.group(1)
         # `none`/empty and other non-task-id sentinels mean "no active task";
         # only a real TASK-* id should be resolved to a file on disk.
-        if task_id.startswith("TASK-") and not (root / TASKS_DIR / f"{task_id}.md").exists():
-            findings.append(
-                Finding(
-                    "watch",
-                    "pointer-task-missing",
-                    POINTER_PATH,
-                    f"resume.active_task {task_id} has no file {TASKS_DIR}/{task_id}.md",
+        if task_id.startswith("TASK-"):
+            candidates = _task_record_candidates(root, task_id)
+            if not candidates:
+                findings.append(
+                    Finding(
+                        "watch",
+                        "pointer-task-missing",
+                        POINTER_PATH,
+                        f"resume.active_task {task_id} has no canonical file under {TASKS_DIR}",
+                    )
                 )
-            )
+            elif len(candidates) > 1:
+                findings.append(
+                    Finding(
+                        "watch",
+                        "pointer-task-ambiguous",
+                        POINTER_PATH,
+                        (
+                            f"resume.active_task {task_id} resolves to multiple files: "
+                            + ", ".join(_rel(root, path) for path in candidates)
+                        ),
+                    )
+                )
 
     for key in ("active_task_set", "task_set_id"):
         for match in re.finditer(rf"(?m)^\s*{key}:\s*[\"']?(TASKSET-[A-Z0-9-]+)", text):

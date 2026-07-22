@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-19
-task_count: 258
-open_count: 1
-completed_count: 257
-task_set_count: 1
-completed_task_set_count: 47
+generated_at: 2026-07-22
+task_count: 266
+open_count: 3
+completed_count: 263
+task_set_count: 2
+completed_task_set_count: 48
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `1` open or active tasks; `257` completed tasks are archived from this live board.
+- Summary: `3` open or active tasks; `263` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `1` / Ask `0` / Review `0` / Later `0` / Done `257`.
-- Task Sets: `1` active workflows; `47` completed workflows are hidden from the live action board.
+- Status: Action `3` / Ask `0` / Review `0` / Later `0` / Done `263`.
+- Task Sets: `2` active workflows; `48` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -42,6 +42,16 @@ completed_task_set_count: 47
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
 
+### Upstream Intake Closer (`TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT`)
+
+- Flow: Fix the four open host-reported defects, integrate crash recovery and allimbot notifications, synchronize project state, then cut and verify v0.7.0.
+- Progress: `5/7` done; `2` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-602` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md | planned | Action | P0 | Critical | High | 5h/12000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #280 after every intake unit is merged by refreshing current-state rec… |
+| `TASK-AR-599` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-599/UNIT-TASK-AR-599-001.md | planned | Action | P1 | High | High | 7h/15000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #279 by shipping an optional, zero-dependency notification client and… |
+
 ### Merge Truth Keeper (`TASKSET-AR-AUTO-MERGE-INTEGRITY`)
 
 - Flow: Close downstream BUG-014 with deterministic remote read-back.
@@ -57,6 +67,7 @@ completed_task_set_count: 47
 | Task Set | Flow | Progress | Evidence |
 |---|---|---:|---|
 | Context Cartographer (`TASKSET-AR-CONTEXT-KNOWLEDGE`) | Project context, source routing, and reusable knowledge structure. | `7/7` done | `7` completed task files archived |
+| Role Routing Closeout Reliability (`TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY`) | Repair the overlay claim lifecycle gap discovered while closing TASK-AR-594. | `1/1` done | `1` completed task files archived |
 | Quality Sentinel (`TASKSET-AR-QUALITY-LOOP`) | Offline evals, live review, correction loops, and traceable validation. | `7/7` done | `7` completed task files archived |
 | Migration Archivist (`TASKSET-AR-MIGRATION-PARITY`) | Legacy-source parity, migration evidence, and skill/hook/script provenance. | `6/6` done | `6` completed task files archived |
 | Release Steward (`TASKSET-AR-RELEASE-STEWARD`) | Version decisions, release closeout, and consistency checks. | `9/9` done | `9` completed task files archived |
@@ -108,9 +119,9 @@ completed_task_set_count: 47
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `1` open across `1` task sets (see Action Board above).
-- Archived task sets: `47` (see Archived Task Sets above).
-- Archived task files: `257` — see `ARCHIVE-INDEX.md`.
+- Active: `3` open across `2` task sets (see Action Board above).
+- Archived task sets: `48` (see Archived Task Sets above).
+- Archived task files: `263` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

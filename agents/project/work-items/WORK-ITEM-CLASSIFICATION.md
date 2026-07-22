@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-19T10:36:48+09:00
-record_count: 374
+generated_at: 2026-07-22T16:49:30+09:00
+record_count: 394
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `374` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `394` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `24` records |
-| Tasksets | pass | `48` records |
-| Tasks | pass | `258` records |
-| Units | pass | `44` records |
+| Initiatives | pass | `26` records |
+| Tasksets | pass | `50` records |
+| Tasks | pass | `266` records |
+| Units | pass | `52` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -409,10 +409,30 @@ record_count: 374
 | 22.1 | Taskset 22.1 | taskset | `TASKSET-AR-BUSINESS-OPERATING-SYSTEM` | `INIT-AR-BUSINESS-OPERATING-SYSTEM` | complete | `BACKLOG-BOARD.md` | Business Operating System |
 | 22.1.1 | Task 22.1.1 | task | `TASK-AR-593` | `TASKSET-AR-BUSINESS-OPERATING-SYSTEM` | completed | `agents/lead_engineer/tasks/TASK-AR-593.md` | Define operations/support and planning/strategy teams alongside finance, marketing, a… |
 | 22.1.1.1 | Unit 22.1.1.1 | unit | `UNIT-TASK-AR-593-001` | `TASK-AR-593` | completed | `agents/lead_engineer/tasks/units/TASK-AR-593/UNIT-TASK-AR-593-001.md` | UNIT-TASK-AR-593-001 - Publish business operating lanes and cycle packet |
-| 23 | Initiative 23 | initiative | `INIT-AR-AUTO-MERGE-INTEGRITY` | - | active | `agents/project/initiatives/INIT-AR-AUTO-MERGE-INTEGRITY.md` | Auto-merge execution integrity |
-| 23.1 | Taskset 23.1 | taskset | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | `INIT-AR-AUTO-MERGE-INTEGRITY` | active | `BACKLOG-BOARD.md` | Merge Truth Keeper |
-| 23.1.1 | Task 23.1.1 | task | `TASK-AR-600` | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-600.md` | Make auto_merge execute fail closed when GitHub rejects a merge and preserve success… |
-| 23.1.1.1 | Unit 23.1.1.1 | unit | `UNIT-TASK-AR-600-001` | `TASK-AR-600` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md` | UNIT-TASK-AR-600-001 - Patch auto-merge execution read-back |
+| 23 | Initiative 23 | initiative | `INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | - | active | `agents/project/initiatives/INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT.md` | July Upstream Intake Closeout |
+| 23.1 | Taskset 23.1 | taskset | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | `INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | active | `BACKLOG-BOARD.md` | Upstream Intake Closer |
+| 23.1.1 | Task 23.1.1 | task | `TASK-AR-594` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | `agents/lead_engineer/tasks/TASK-AR-594.md` | Resolve GitHub #289 so taskset dispatch selects explicit canonical task order before… |
+| 23.1.1.1 | Unit 23.1.1.1 | unit | `UNIT-TASK-AR-594-001` | `TASK-AR-594` | completed | `agents/lead_engineer/tasks/units/TASK-AR-594/UNIT-TASK-AR-594-001.md` | UNIT-TASK-AR-594-001 - Implement canonical task order selection |
+| 23.1.2 | Task 23.1.2 | task | `TASK-AR-595` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | `agents/lead_engineer/tasks/TASK-AR-595.md` | Resolve GitHub #287 so host updates honor pyproject build-system requirements instead… |
+| 23.1.2.1 | Unit 23.1.2.1 | unit | `UNIT-TASK-AR-595-001` | `TASK-AR-595` | completed | `agents/lead_engineer/tasks/units/TASK-AR-595/UNIT-TASK-AR-595-001.md` | UNIT-TASK-AR-595-001 - Repair updater build isolation |
+| 23.1.3 | Task 23.1.3 | task | `TASK-AR-596` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | `agents/lead_engineer/tasks/TASK-AR-596.md` | Resolve GitHub #290 so active pointers find canonical TASK files with descriptive slu… |
+| 23.1.3.1 | Unit 23.1.3.1 | unit | `UNIT-TASK-AR-596-001` | `TASK-AR-596` | completed | `agents/lead_engineer/tasks/units/TASK-AR-596/UNIT-TASK-AR-596-001.md` | UNIT-TASK-AR-596-001 - Implement task-ID-aware pointer resolution |
+| 23.1.4 | Task 23.1.4 | task | `TASK-AR-597` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | `agents/lead_engineer/tasks/TASK-AR-597.md` | Resolve GitHub #285 so transient Git setup failures include actionable stdout/stderr… |
+| 23.1.4.1 | Unit 23.1.4.1 | unit | `UNIT-TASK-AR-597-001` | `TASK-AR-597` | completed | `agents/lead_engineer/tasks/units/TASK-AR-597/UNIT-TASK-AR-597-001.md` | UNIT-TASK-AR-597-001 - Add diagnostic Git helper failures |
+| 23.1.5 | Task 23.1.5 | task | `TASK-AR-598` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | `agents/lead_engineer/tasks/TASK-AR-598.md` | Resolve GitHub #274 and supersede or merge PR #277 by shipping the host-proven sessio… |
+| 23.1.5.1 | Unit 23.1.5.1 | unit | `UNIT-TASK-AR-598-001` | `TASK-AR-598` | completed | `agents/lead_engineer/tasks/units/TASK-AR-598/UNIT-TASK-AR-598-001.md` | UNIT-TASK-AR-598-001 - Rebase and verify session resume recovery |
+| 23.1.6 | Task 23.1.6 | task | `TASK-AR-599` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | planned | `agents/lead_engineer/tasks/TASK-AR-599.md` | Resolve GitHub #279 by shipping an optional, zero-dependency notification client and… |
+| 23.1.6.1 | Unit 23.1.6.1 | unit | `UNIT-TASK-AR-599-001` | `TASK-AR-599` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-599/UNIT-TASK-AR-599-001.md` | UNIT-TASK-AR-599-001 - Wire optional allimbot notifications end to end |
+| 23.1.7 | Task 23.1.7 | task | `TASK-AR-602` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | planned | `agents/lead_engineer/tasks/TASK-AR-602.md` | Resolve GitHub #280 after every intake unit is merged by refreshing current-state rec… |
+| 23.1.7.1 | Unit 23.1.7.1 | unit | `UNIT-TASK-AR-602-001` | `TASK-AR-602` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md` | UNIT-TASK-AR-602-001 - Close state and publish v0.7.0 |
+| 24 | Initiative 24 | initiative | `INIT-AR-AUTO-MERGE-INTEGRITY` | - | active | `agents/project/initiatives/INIT-AR-AUTO-MERGE-INTEGRITY.md` | Auto-merge execution integrity |
+| 24.1 | Taskset 24.1 | taskset | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | `INIT-AR-AUTO-MERGE-INTEGRITY` | active | `BACKLOG-BOARD.md` | Merge Truth Keeper |
+| 24.1.1 | Task 24.1.1 | task | `TASK-AR-600` | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-600.md` | Make auto_merge execute fail closed when GitHub rejects a merge and preserve success… |
+| 24.1.1.1 | Unit 24.1.1.1 | unit | `UNIT-TASK-AR-600-001` | `TASK-AR-600` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md` | UNIT-TASK-AR-600-001 - Patch auto-merge execution read-back |
+| 25 | Initiative 25 | initiative | `INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | - | active | `agents/project/initiatives/INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY.md` | Role Routing Closeout Reliability |
+| 25.1 | Taskset 25.1 | taskset | `TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | `INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | complete | `BACKLOG-BOARD.md` | Role Routing Closeout Reliability |
+| 25.1.1 | Task 25.1.1 | task | `TASK-AR-601` | `TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | completed | `agents/lead_engineer/tasks/TASK-AR-601.md` | Ensure role_routing overlay claims carry required lifecycle artifacts and releasing a… |
+| 25.1.1.1 | Unit 25.1.1.1 | unit | `UNIT-TASK-AR-601-001` | `TASK-AR-601` | completed | `agents/lead_engineer/tasks/units/TASK-AR-601/UNIT-TASK-AR-601-001.md` | UNIT-TASK-AR-601-001 - Repair overlay lifecycle artifacts and recursion guard |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

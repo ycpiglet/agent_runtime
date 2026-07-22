@@ -10,16 +10,31 @@
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "35e9b6132cdeee9adbd5ad833598bb55237e98ce07fee4ad5d927c4ed4c4d9c0"
+          "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/taskset_dispatcher.py",
+          "value": "7be761496a6a951db11a45369c7dc0493caf040c33c991fe1e42158515f1a2c7"
         },
         {
           "kind": "sha256",
           "path": "scripts/work.py",
           "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/auto_merge.py",
+          "value": "2f96df3f64fa7ea3b186fdab441993c9ee948de49f9e8cda36101f6abe338600"
+        },
+        {
+          "kind": "absent",
+          "path": "tests/test_auto_merge_execution.py",
+          "value": ""
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-19-auto-merge-execution-readback.md",
-      "recorded_at": "2026-07-19T10:36:52+09:00",
+      "design_record": "reviews/REVIEW-2026-07-22-post-merge-plan-revalidation.md",
+      "recorded_at": "2026-07-22T16:53:38+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-AUTO-MERGE-INTEGRITY"
     },
@@ -221,6 +236,44 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration.md",
+          "value": "d4be2649e4be037cf69f4b2ea4e281877f09a10d449bab1a79ebae0d1d0d4b76"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/conversation_work_audit.py",
+          "value": "57ee40b838e45a36f7ee5caa53a1850aae78c3d8ab1e196f3b09f0fbedfac4fc"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/owner_governance_gate.py",
+          "value": "5f88423f4dba20d026726b934ee2de6153cf762f9dc7623f8ed6e1efeaa8d38b"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/taskset_dispatcher.py",
+          "value": "7be761496a6a951db11a45369c7dc0493caf040c33c991fe1e42158515f1a2c7"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-22-post-merge-plan-revalidation.md",
+      "recorded_at": "2026-07-22T16:53:37+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "scripts/taskset_dispatcher.py",
           "value": "ac78599e2197c7999eaffc406449034dab76e34f11c1dd41da4f555478499a6b"
         },
@@ -317,6 +370,34 @@
       "recorded_at": "2026-06-18T22:27:24+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-RELEASE-AUTO-NONCRITICAL"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration.md",
+          "value": "900f05fd15fb06c7e5d249dbaa2a0b15aa472d71ba149c8e993641e628cd0606"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/role_routing.py",
+          "value": "f9270a522e9988a0c70b0e92790b9f55d1de7dd53d7ef67df5ccafa748fc2f88"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "35e9b6132cdeee9adbd5ad833598bb55237e98ce07fee4ad5d927c4ed4c4d9c0"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration.md",
+      "recorded_at": "2026-07-19T11:17:34+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY"
     },
     {
       "anchors": [
@@ -432,5 +513,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-19T10:36:52+09:00"
+  "updated_at": "2026-07-22T16:53:38+09:00"
 }

@@ -1,0 +1,33 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-REVIEW-TASK-AR-601-skeptic-closeout",
+  "task_id": "REVIEW-TASK-AR-601-skeptic",
+  "task_set_id": "TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
+  "active_scope": "TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
+  "agent_role": "skeptic",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "skeptic-CLAIM-REVIEW-TASK-AR-601-skeptic-closeout",
+  "display_name": "skeptic@review",
+  "mode": "review",
+  "status": "released",
+  "status_text": "Additive skeptic adversarial review pass for TASK-AR-601 (closeout; high-risk: cross_cutting)",
+  "claimed_at": "2026-07-19T11:22:13+09:00",
+  "last_heartbeat": "2026-07-19T11:42:38+09:00",
+  "updated_at": "2026-07-19T11:42:38+09:00",
+  "tags": [
+    "review",
+    "additive",
+    "high-risk",
+    "review-trigger:closeout",
+    "cross_cutting"
+  ],
+  "overlay": true,
+  "parent_task_id": "TASK-AR-601",
+  "parent_task_set_id": "TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
+  "handoff_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-601-skeptic-closeout.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-601-skeptic-closeout.log.md",
+  "released_at": "2026-07-19T11:42:38+09:00",
+  "verified_by": "codex-root-role-review-coordinator-601",
+  "verifier_role": "lead-engineer",
+  "verification_evidence": "reviews/ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC-RECHECK.md"
+}

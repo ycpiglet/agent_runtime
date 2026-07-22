@@ -45,6 +45,8 @@ CANONICAL_TASKSET_SCHEMA = "agent-runtime-work-item/v1"
 STRUCTURED_WORKTREE_FIELDS = ("repository_path", "worktree_path", "branch", "base_ref")
 PROTECTED_BRANCHES = {"develop", "development", "main", "master", "production", "release"}
 SAFE_GIT_REF = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]*$")
+TASK_ID_TOKEN = re.compile(r"(?<![A-Z0-9-])(TASK(?:-AR)?-\d+)(?![A-Z0-9-])")
+TASK_ID_VALUE = re.compile(r"TASK(?:-AR)?-\d+")
 
 
 def _slug(value: str) -> str:
@@ -81,21 +83,67 @@ def _rel(root: Path, path: Path) -> str:
         return path.as_posix()
 
 
+def _ordered_task_ids(body: str) -> list[str]:
+    """Return task IDs in the canonical record's explicit Tasks section.
+
+    Taskset prose can mention task IDs in background, risks, or verification.
+    Only an explicit task-order section is authoritative. Duplicate IDs are
+    folded at their first occurrence so they cannot perturb later valid tasks.
+    """
+    section: list[str] = []
+    in_tasks = False
+    for line in body.splitlines():
+        heading = re.match(r"^#{2,}\s+(.+?)\s*$", line)
+        if heading:
+            title = re.sub(r"\s+", " ", heading.group(1).strip()).lower()
+            if in_tasks:
+                break
+            in_tasks = title in {
+                "tasks",
+                "task order",
+                "ordered tasks",
+                "execution order",
+                "included tasks",
+                "포함 태스크",
+            }
+            continue
+        if in_tasks:
+            section.append(line)
+
+    ordered: list[str] = []
+    seen: set[str] = set()
+    for match in TASK_ID_TOKEN.finditer("\n".join(section)):
+        task_id = match.group(1)
+        if task_id not in seen:
+            seen.add(task_id)
+            ordered.append(task_id)
+    return ordered
+
+
 def _canonical_taskset_records(
     root: Path,
-) -> list[tuple[backlog_board.TaskSetInfo, tuple[str, ...] | None]]:
+) -> list[tuple[backlog_board.TaskSetInfo, tuple[str, ...] | None, bool]]:
+    """Return canonical tasksets, their order, and whether membership is strict.
+
+    A frontmatter ``tasks`` list is the current strict schema. Legacy host
+    records may instead declare order in an explicit localized body section;
+    that order is advisory so unrelated IDs are ignored and omitted members
+    retain score-based fallback order.
+    """
     tasksets_dir = root / "agents" / "project" / "initiatives"
     if not tasksets_dir.is_dir():
         return []
 
-    tasksets: list[tuple[backlog_board.TaskSetInfo, tuple[str, ...] | None]] = []
+    tasksets: list[
+        tuple[backlog_board.TaskSetInfo, tuple[str, ...] | None, bool]
+    ] = []
     paths = sorted(tasksets_dir.glob("TASKSET-*.md"), key=lambda item: item.name.lower())
     for index, path in enumerate(paths, start=1):
         try:
             text = path.read_text(encoding="utf-8")
         except OSError as exc:
             raise SystemExit(f"invalid canonical task set record: {_rel(root, path)}: {exc}") from exc
-        meta, _ = backlog_board.parse_frontmatter(text)
+        meta, body = backlog_board.parse_frontmatter(text)
         schema_version = str(meta.get("schema_version") or "").strip()
         kind = str(meta.get("kind") or "").strip()
         work_id = str(meta.get("work_id") or "").strip()
@@ -112,7 +160,9 @@ def _canonical_taskset_records(
             errors.append(f"filename {path.stem!r} must match work_id {work_id!r}")
 
         ordered_tasks: tuple[str, ...] | None = None
+        strict_membership = False
         if "tasks" in meta:
+            strict_membership = True
             raw_tasks = meta.get("tasks")
             if not isinstance(raw_tasks, list):
                 errors.append("tasks must be a YAML list when declared")
@@ -133,6 +183,10 @@ def _canonical_taskset_records(
                     errors.append("tasks contains duplicate task ids: " + ", ".join(duplicates))
                 if not invalid and not duplicates:
                     ordered_tasks = tuple(values)
+        else:
+            body_order = _ordered_task_ids(body)
+            if body_order:
+                ordered_tasks = tuple(body_order)
         if errors:
             raise SystemExit(
                 f"invalid canonical task set record: {_rel(root, path)}: " + "; ".join(errors)
@@ -149,20 +203,23 @@ def _canonical_taskset_records(
                     order=1000 + index,
                 ),
                 ordered_tasks,
+                strict_membership,
             )
         )
     return tasksets
 
 
 def _canonical_tasksets(root: Path) -> list[backlog_board.TaskSetInfo]:
-    return [info for info, _ordered_tasks in _canonical_taskset_records(root)]
+    return [info for info, _ordered_tasks, _strict in _canonical_taskset_records(root)]
 
 
-def _canonical_task_order(root: Path, task_set_id: str) -> tuple[str, ...] | None:
-    for info, ordered_tasks in _canonical_taskset_records(root):
+def _canonical_task_order(
+    root: Path, task_set_id: str
+) -> tuple[tuple[str, ...] | None, bool]:
+    for info, ordered_tasks, strict_membership in _canonical_taskset_records(root):
         if info.task_set_id == task_set_id:
-            return ordered_tasks
-    return None
+            return ordered_tasks, strict_membership
+    return None, False
 
 
 def _register_alias(
@@ -236,10 +293,21 @@ def _resolve_taskset(value: str, root: Path | None = None) -> backlog_board.Task
 
 def _tasks_for(root: Path, task_set_id: str) -> list[backlog_board.Task]:
     tasks = backlog_board.load_tasks(root / "agents" / "lead_engineer" / "tasks")
-    members = [task for task in tasks if task.task_set_id == task_set_id]
-    ordered_ids = _canonical_task_order(root, task_set_id)
+    fallback = sorted(
+        [task for task in tasks if task.task_set_id == task_set_id],
+        key=backlog_board.task_set_sort_key,
+    )
+    ordered_ids, strict_membership = _canonical_task_order(root, task_set_id)
     if ordered_ids is None:
-        return sorted(members, key=backlog_board.task_set_sort_key)
+        return fallback
+
+    if not strict_membership:
+        by_member_id = {task.task_id: task for task in fallback}
+        ordered = [
+            by_member_id[task_id] for task_id in ordered_ids if task_id in by_member_id
+        ]
+        selected = {task.task_id for task in ordered}
+        return [*ordered, *(task for task in fallback if task.task_id not in selected)]
 
     by_id: dict[str, backlog_board.Task] = {}
     duplicate_records: set[str] = set()
@@ -260,7 +328,7 @@ def _tasks_for(root: Path, task_set_id: str) -> list[backlog_board.Task]:
         if task_id in by_id and by_id[task_id].task_set_id != task_set_id
     ]
     declared = set(ordered_ids)
-    omitted = sorted(task.task_id for task in members if task.task_id not in declared)
+    omitted = sorted(task.task_id for task in fallback if task.task_id not in declared)
     errors: list[str] = []
     if unknown:
         errors.append("unknown task ids: " + ", ".join(unknown))

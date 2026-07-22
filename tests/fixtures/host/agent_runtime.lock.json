@@ -1,7 +1,7 @@
 {
   "installed": {
     "managed_files": {
-      ".codex/hooks.json": "sha256:90f632efc1634338bc23d1bdab4619a51386b46cc664d698b332777d3454ead8",
+      ".codex/hooks.json": "sha256:0ce8889258365b8dc239053c0a02f932369c0a865a02880e8881cee65ce72080",
       ".gitattributes": "sha256:22ec718362af48d401e6717569dfcc89ec3573d553dc3f3530f4db8a1625b79b",
       ".githooks/post-merge": "sha256:b112da8578360cd49b871f518afa9c2ffb9f266c416daa02a8a9b17a84196e39",
       ".githooks/pre-commit": "sha256:9b5b120d9b18f39977021db0b543953267cbfcd60f817cf92edd93812d560457",
@@ -124,7 +124,7 @@
       "scripts/collaboration_governance_gate.py": "sha256:e290b3f222a0a6761f8be61658facdfdffd7be920de024d7c943dff0a58636e5",
       "scripts/compound_metrics.py": "sha256:2dfb0c74f030d1c4070abcc60fbb965ef018d997bdacecda46a13c5ffeeb9817",
       "scripts/continuity_contract_gate.py": "sha256:51e96499cab2ade5e2ecfcaa2e2b8ce041b05df1464635fa6ca62c87e894febc",
-      "scripts/conversation_work_audit.py": "sha256:7279a081414e1aa3929929c88491289512f2b62c157038021622fb8198d1d47f",
+      "scripts/conversation_work_audit.py": "sha256:57ee40b838e45a36f7ee5caa53a1850aae78c3d8ab1e196f3b09f0fbedfac4fc",
       "scripts/cycle_gate.py": "sha256:8316cdeeef228f0078427d5c275060c5a79a23835bb6f31906e970ccbdf1e617",
       "scripts/deadlock_watchdog.py": "sha256:93b317f0ac03a0c337cc36141b37589b0b090e2f9d91fc9d3558221595eac1d5",
       "scripts/deliberation_guard.py": "sha256:28a1cead74225ed11d09579709f95b2bd14de1c37fe9917200976596168408e7",
@@ -192,6 +192,7 @@
       "scripts/scribe_due.py": "sha256:3ba9579be478a9e0a6e0983d4847074f6a503ba64eb67d060ca56ff548c449bb",
       "scripts/secretary_digest.py": "sha256:66a5e85681877eec911fc3dca0f1b19b71004a840f87500d1c78f10cda55b004",
       "scripts/session_dashboard.py": "sha256:1ba6a9a0eb17d1d3e074a761fc197f389c6822a2d736b3549c0e9b02c219c76d",
+      "scripts/session_resume_check.py": "sha256:5a21ce70f57d8987c63699acfa03e88c9b14a24c8483027a025bb86fb43a4c88",
       "scripts/session_start_hook.py": "sha256:a688e6e77d3bf156ddac3409082b224775732ec0d86bd581332b1274b5ef4e86",
       "scripts/state_machine_gate.py": "sha256:b1ce42970658b1d7eed94b0285a47fca74e2566ff9094b71ed99a5ad10206e7f",
       "scripts/state_sync_gate.py": "sha256:414748a65191d7ff3924e6f4a786c2f8b7b926f4d675b193d4f1463e90476c2a",
@@ -211,7 +212,7 @@
       "scripts/task_mcp.py": "sha256:b257379d6269dd70d85df7eb5523c6de83f11d197d25ca96f69e69a2af7b5018",
       "scripts/task_unit_readiness_gate.py": "sha256:7eac1361a3c65b6e7bbcec1ae21fcebab7952486179b7619c08ec37a4eba6632",
       "scripts/taskset_boundary_gate.py": "sha256:0cc438aeec1f24540ddc6838837d24cf1c4444799781ee6ca8f175be392a86f0",
-      "scripts/taskset_dispatcher.py": "sha256:1861e7d3932086c1c94faa9e4c2b6cf6ed90931ca31d792dfedb111191e3b68d",
+      "scripts/taskset_dispatcher.py": "sha256:7be761496a6a951db11a45369c7dc0493caf040c33c991fe1e42158515f1a2c7",
       "scripts/taskset_prompt_hook.cmd": "sha256:f6914c735d43c8ab967158fa84439753a6dd555c2df2c4192c0213c08b72b81e",
       "scripts/taskset_prompt_hook.py": "sha256:13eef2aa9d927be6ac52456266ef3f40b76442b5dad3a5bcaeb46e0f69e08e70",
       "scripts/taskset_work_gate.py": "sha256:fe840225c2fe9e6a11769d370f3f9920f532bd95fcc20a59a75449ff226652e6",
@@ -279,8 +280,8 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.6.0",
-    "template_digest": "sha256:65002f9541c738a0add6c659a6ecef4757189573850d79c661442618c2dc5e3d",
-    "template_files": 276
+    "template_digest": "sha256:de9a97684b97d20b99deccab95cbdae5f30afd323163804e17c3e4a5670e67a3",
+    "template_files": 277
   },
   "project": "fixture-host",
   "schema": "agent-runtime-lock/v1",
