@@ -13,7 +13,7 @@ status: worker_ready
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T20:20:39+09:00
+updated_at: 2026-07-22T20:29:56+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
 created_by: codex-root-planner
@@ -53,10 +53,11 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Report the accepted ID grammar, migrated consumers, regression matrix, parity result, and exact GitHub issue 299 evidence.
 stop_condition: Stop if a required consumer lies outside the declared footprint; register the expansion before editing it.
-verified_at: 2026-07-22T20:20:39+09:00
-verified_by: codex-root-task-ar-603
+verified_at: 2026-07-22T20:29:56+09:00
+verified_by: codex-root
 evidence_refs:
   - reviews/VERIFY-2026-07-22-unit-task-ar-603-001-20260722202039.json
+  - reviews/VERIFY-2026-07-22-unit-task-ar-603-001-20260722202956.json
 ---
 
 # UNIT-TASK-AR-603-001 - Adopt a shared canonical task-ID contract
