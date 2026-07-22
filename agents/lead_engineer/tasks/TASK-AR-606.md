@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 registered_at: 2026-07-22T17:45:00+09:00
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T23:36:31+09:00
+updated_at: 2026-07-22T23:49:57+09:00
 title: Activate configured pre-commit hooks on POSIX hosts
 status: planned
 priority: P1
@@ -38,11 +38,12 @@ tags:
   - git-hooks
   - governance
 verification_status: passed
-verified_at: 2026-07-22T23:36:31+09:00
+verified_at: 2026-07-22T23:49:57+09:00
 verified_by: codex-root-task-ar-606
 evidence_refs:
   - reviews/VERIFY-2026-07-22-task-ar-606-20260722232457.json
   - reviews/VERIFY-2026-07-22-task-ar-606-20260722233631.json
+  - reviews/VERIFY-2026-07-22-task-ar-606-20260722234957.json
 ---
 
 # TASK-AR-606 - Activate configured pre-commit hooks on POSIX hosts

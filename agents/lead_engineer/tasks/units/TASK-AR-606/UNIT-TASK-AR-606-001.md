@@ -13,7 +13,7 @@ status: worker_ready
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T23:36:21+09:00
+updated_at: 2026-07-22T23:49:51+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
 created_by: codex-root-planner
@@ -49,11 +49,12 @@ verification:
   - git ls-files -s .githooks/pre-commit src/agent_runtime/templates/project/.githooks/pre-commit
 handoff: Report Git modes, installer behavior on POSIX/Windows, tests, and GitHub issue 295 evidence.
 stop_condition: Stop before changing hook contents or enabling any additional hook.
-verified_at: 2026-07-22T23:36:21+09:00
+verified_at: 2026-07-22T23:49:51+09:00
 verified_by: codex-root-task-ar-606
 evidence_refs:
   - reviews/VERIFY-2026-07-22-unit-task-ar-606-001-20260722232426.json
   - reviews/VERIFY-2026-07-22-unit-task-ar-606-001-20260722233621.json
+  - reviews/VERIFY-2026-07-22-unit-task-ar-606-001-20260722234951.json
 ---
 
 # UNIT-TASK-AR-606-001 - Make hook activation executable and idempotent
