@@ -12,7 +12,7 @@
   "status": "claimed",
   "task_set_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
   "active_scope": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
-  "scope_transition_approved": false,
+  "scope_transition_approved": true,
   "project_id": "PROJECT-AGENT-RUNTIME",
   "unit_id": "UNIT-TASK-AR-599-001",
   "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-599/UNIT-TASK-AR-599-001.md",
