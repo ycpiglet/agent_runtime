@@ -1,0 +1,25 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-22-unit-task-ar-606-001-20260722230117",
+  "work_id": "UNIT-TASK-AR-606-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-606/UNIT-TASK-AR-606-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-606",
+  "unit_id": "UNIT-TASK-AR-606-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-22T23:01:17+09:00",
+  "verified_by": "work.py verify",
+  "command_count": 1,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_session_dashboard.py tests/test_backlog_board_tasksets.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-22T23:01:17+09:00",
+      "finished_at": "2026-07-22T23:01:18+09:00",
+      "stdout": "................................                                         [100%]\n32 passed in 1.66s\n",
+      "stderr": ""
+    }
+  ]
+}

@@ -144,12 +144,76 @@ def build_scm_section(root: Path, *, timeout: float = SCM_TIMEOUT_SECONDS) -> di
     return {"status": "ok", "counts": counts, "issues_known": issues_known}
 
 
+def build_flow_section(root: Path, *, window_days: int = 7) -> dict[str, Any]:
+    """Last-N-day flow delta: completed count, median cycle hours, rework sum.
+
+    TASK-AR-606: pushes the otherwise pull-only flow metrics to session start so
+    the Owner sees movement without asking. Reads task frontmatter directly and
+    degrades to a note; never raises.
+    """
+    try:
+        from datetime import datetime, timedelta, timezone
+
+        import backlog_board
+
+        tasks_dir = root / "agents" / "lead_engineer" / "tasks"
+        if not tasks_dir.exists():
+            return {"status": "empty", "note": "no tasks dir", "window_days": window_days}
+
+        def _parse_dt(value: Any):
+            text = str(value or "").strip()
+            if not text:
+                return None
+            try:
+                dt = datetime.fromisoformat(text)
+            except ValueError:
+                return None
+            return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+
+        now = datetime.now(timezone.utc)
+        cutoff = now - timedelta(days=window_days)
+        completed = 0
+        rework = 0
+        cycles: list[float] = []
+        for path in tasks_dir.glob("TASK-*.md"):
+            try:
+                meta, _ = backlog_board.parse_frontmatter(path.read_text(encoding="utf-8"))
+            except OSError:
+                continue
+            completed_at = _parse_dt(meta.get("completed_at"))
+            if not completed_at or completed_at < cutoff:
+                continue
+            completed += 1
+            try:
+                rework += int(str(meta.get("rework_count") or "0").strip() or "0")
+            except ValueError:
+                pass
+            started_at = _parse_dt(meta.get("started_at"))
+            if started_at and completed_at >= started_at:
+                cycles.append((completed_at - started_at).total_seconds() / 3600.0)
+        median_cycle = None
+        if cycles:
+            ordered = sorted(cycles)
+            mid = len(ordered) // 2
+            median_cycle = ordered[mid] if len(ordered) % 2 else (ordered[mid - 1] + ordered[mid]) / 2.0
+        return {
+            "status": "ok",
+            "window_days": window_days,
+            "completed": completed,
+            "median_cycle_hours": round(median_cycle, 1) if median_cycle is not None else None,
+            "rework": rework,
+        }
+    except Exception as exc:  # never raise on a session-start read
+        return {"status": "error", "note": str(exc)[:80], "window_days": window_days}
+
+
 def build_dashboard(root: Path | str, *, scm_timeout: float = SCM_TIMEOUT_SECONDS) -> dict[str, Any]:
     root_path = Path(root).resolve()
     return {
         "schema": SCHEMA,
         "root": str(root_path),
         "w0": build_w0_section(root_path),
+        "flow": build_flow_section(root_path),
         "update": build_update_section(root_path),
         "scm": build_scm_section(root_path, timeout=scm_timeout),
     }
@@ -168,6 +232,18 @@ def _w0_line(w0: dict[str, Any]) -> str:
     return (
         f"W0  | claims={w0.get('active_claims', 0)} "
         f"worktrees={worktree_text} | {_ascii(w0.get('inflight_summary'))}"
+    )
+
+
+def _flow_line(flow: dict[str, Any]) -> str:
+    if flow.get("status") != "ok":
+        return f"FLOW| {_ascii(flow.get('note') or 'unavailable')}"
+    days = flow.get("window_days", 7)
+    median = flow.get("median_cycle_hours")
+    median_text = "n/a" if median is None else f"{median}h"
+    return (
+        f"FLOW| last {days}d: completed={flow.get('completed', 0)} "
+        f"median_cycle={median_text} rework={flow.get('rework', 0)}"
     )
 
 
@@ -216,6 +292,7 @@ def render_panel(dashboard: dict[str, Any]) -> str:
                 lines.append(f"{prefix} {text}")
         else:
             lines.append("UPD | up to date")
+    lines.append(_flow_line(dashboard.get("flow") or {}))
     lines.append(_scm_line(dashboard.get("scm") or {}))
     lines.append("=" * 31)
     return "\n".join(lines)

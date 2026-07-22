@@ -13,7 +13,7 @@ import argparse
 import json
 import re
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Iterable
 
@@ -696,6 +696,21 @@ def _parse_dt(value: object) -> datetime | None:
     return parsed
 
 
+def weekly_throughput(tasks: list[Task], *, window_days: int = 7) -> int:
+    """TASK-AR-606: count tasks completed within the last window_days.
+
+    A single glanceable flow number for the board Rollups; reuses each task's
+    completed_at. Records without a parseable completed_at are ignored.
+    """
+    cutoff = datetime.now(timezone.utc) - timedelta(days=window_days)
+    count = 0
+    for task in tasks:
+        completed = _parse_dt(task.completed_at)
+        if completed and completed >= cutoff:
+            count += 1
+    return count
+
+
 def flow_by_task_set(root: Path | None) -> dict[str, dict[str, object]]:
     if root is None:
         return {}
@@ -894,6 +909,7 @@ def render(tasks: list[Task], *, root: Path | None = None) -> str:
         f"- Needs attention: `{needs_attention}` — triage awaiting `{len(triage_tasks)}`, owner-decision (Ask) `{counts.get('Ask', 0)}` (TASK-AR-538).",
         f"- Triage: `{len(triage_tasks)}` awaiting accept/defer{' (see Triage above)' if triage_tasks else ''}.",
         f"- Active: `{len(open_tasks)}` open across `{len(task_set_ids)}` task sets (see Action Board above).",
+        f"- Throughput (7d): `{weekly_throughput(tasks)}` tasks completed in the last 7 days (TASK-AR-606).",
         f"- Archived task sets: `{len(completed_task_set_ids)}` (see Archived Task Sets above).",
         f"- Archived task files: `{len(completed_tasks)}` — see `ARCHIVE-INDEX.md`.",
     ])

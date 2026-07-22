@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-CONSOLE-OVERHAUL-P0
 initiative_id: INIT-AR-CONSOLE-OVERHAUL-P0
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-22T17:45:27+09:00
-updated_at: 2026-07-22T17:45:27+09:00
+updated_at: 2026-07-22T23:01:17+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-22-decision-console-overhaul-masterplan.md
 created_by: claude-session-overhaul-planner
@@ -39,6 +39,10 @@ verification:
   - python -m pytest tests/test_session_dashboard.py tests/test_backlog_board_tasksets.py -q
 handoff: session_dashboard 출력 예시와 보드 diff를 evidence로 남긴다.
 stop_condition: 주간 FLOW-DIGEST 문서 파이프라인 구축으로 넓히지 말 것 — P1(1-8).
+verified_at: 2026-07-22T23:01:17+09:00
+verified_by: work.py verify
+evidence_refs:
+  - reviews/VERIFY-2026-07-22-unit-task-ar-606-001-20260722230117.json
 ---
 
 # UNIT-TASK-AR-606-001 - session_dashboard flow delta 1줄 + 보드 throughput 숫자

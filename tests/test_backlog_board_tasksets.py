@@ -349,3 +349,21 @@ def test_real_backlog_tasks_are_classified_into_registered_task_sets() -> None:
         "TASKSET-AR-CONSOLE-OVERHAUL-P1",
         "TASKSET-AR-CONSOLE-OVERHAUL-P2",
     }
+
+
+def test_ar606_weekly_throughput_counts_recent_completions(tmp_path):
+    # TASK-AR-606: board Rollups surfaces a 7-day throughput number.
+    from datetime import datetime, timedelta, timezone
+    now = datetime.now(timezone.utc)
+    recent = (now - timedelta(days=1)).isoformat()
+    old = (now - timedelta(days=40)).isoformat()
+    def _mk(tid, completed_at):
+        return backlog_board.Task(
+            path=tmp_path / f"{tid}.md",
+            meta={"id": tid, "status": "completed", "completed_at": completed_at},
+            goal="g",
+        )
+    tasks = [_mk("TASK-AR-991", recent), _mk("TASK-AR-992", old)]
+    assert backlog_board.weekly_throughput(tasks) == 1
+    board = backlog_board.render(tasks, root=tmp_path)
+    assert "Throughput (7d)" in board

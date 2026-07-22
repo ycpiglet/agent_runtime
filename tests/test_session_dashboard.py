@@ -339,3 +339,60 @@ def test_template_script_is_byte_identical_mirror() -> None:
         / "session_dashboard.py"
     ).read_bytes()
     assert canonical == template
+
+
+# ---------------------------------------------------------------------------
+# TASK-AR-606: flow delta section
+# ---------------------------------------------------------------------------
+
+
+def _write_task(root: Path, task_id: str, *, completed_at: str, started_at: str, rework: int = 0) -> None:
+    path = root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "\n".join([
+            "---",
+            f"id: {task_id}",
+            "kind: task",
+            "status: completed",
+            f"started_at: {started_at}",
+            f"completed_at: {completed_at}",
+            f"rework_count: {rework}",
+            "---",
+            "",
+            "# body",
+            "",
+        ]),
+        encoding="utf-8",
+    )
+
+
+def test_flow_section_counts_recent_completions(tmp_path: Path) -> None:
+    from datetime import datetime, timedelta, timezone
+
+    now = datetime.now(timezone.utc)
+    recent = now - timedelta(days=2)
+    started = recent - timedelta(hours=4)
+    old = now - timedelta(days=30)
+    _write_task(tmp_path, "TASK-AR-901", completed_at=recent.isoformat(), started_at=started.isoformat(), rework=1)
+    _write_task(tmp_path, "TASK-AR-902", completed_at=old.isoformat(), started_at=(old - timedelta(hours=2)).isoformat())
+    section = session_dashboard.build_flow_section(tmp_path)
+    assert section["status"] == "ok"
+    assert section["completed"] == 1          # old one excluded
+    assert section["rework"] == 1
+    assert section["median_cycle_hours"] == 4.0
+    line = session_dashboard._flow_line(section)
+    assert "FLOW|" in line and "completed=1" in line and "4.0h" in line
+    assert line.encode("ascii")               # human path stays ASCII
+
+
+def test_flow_section_degrades_without_tasks_dir(tmp_path: Path) -> None:
+    section = session_dashboard.build_flow_section(tmp_path)
+    assert section["status"] == "empty"
+    assert session_dashboard._flow_line(section).startswith("FLOW|")
+
+
+def test_flow_line_present_in_panel(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_sections(monkeypatch)
+    panel = session_dashboard.render_panel(session_dashboard.build_dashboard(REPO_ROOT))
+    assert "FLOW|" in panel
