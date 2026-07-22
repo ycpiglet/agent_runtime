@@ -79,7 +79,7 @@ completed_task_set_count: 48
 
 - Flow: Normalize the legacy TASK-AR-594 evidence reference into the canonical work-item schema.
 - Progress: `0/1` done; `1` open or active.
-- WIP: active `1/3`; oldest `0.1h`; stale `0`.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-610` | INIT-AR-PR303-CI-SCHEMA-RECOVERY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-610/UNIT-TASK-AR-610-001.md | planned | Action | P0 | Critical | Low | 0.5h/3000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make the existing TASK-AR-594 record satisfy the canonical work-item schema while pre… |
