@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 registered_at: 2026-07-22T17:45:00+09:00
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T17:45:00+09:00
+updated_at: 2026-07-22T21:24:21+09:00
 title: Persist canonical task start status
 status: planned
 priority: P1
@@ -25,13 +25,21 @@ reservation_id: RES-20260722-174500-dbaf8585-02
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
 created_by: codex-root-planner
-summary: Close GitHub #293 by separating normalized comparison aliases from the canonical status written to task frontmatter.
+summary: Close GitHub
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python -m pytest tests/test_taskset_dispatcher.py -q
+  - python scripts/regen_host_lock_if_needed.py --check
 tags:
   - github-293
   - taskset-dispatch
+verification_status: passed
+verified_at: 2026-07-22T21:24:21+09:00
+verified_by: codex-root-task-ar-604
+evidence_refs:
+  - reviews/VERIFY-2026-07-22-task-ar-604-20260722212421.json
 ---
 
 # TASK-AR-604 - Persist canonical task start status
