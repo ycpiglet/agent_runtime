@@ -96,6 +96,104 @@ def test_git_failure_reports_sanitized_command_and_output(
     assert "authorization=[REDACTED]" in message
 
 
+def test_git_recovers_one_transient_fixture_commit_head_parse_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    attempts = 0
+    sleeps: list[float] = []
+
+    def _run(command, **kwargs):
+        nonlocal attempts
+        attempts += 1
+        if attempts == 1:
+            return subprocess.CompletedProcess(
+                command,
+                returncode=128,
+                stdout="",
+                stderr="fatal: could not parse HEAD\n",
+            )
+        return subprocess.CompletedProcess(command, returncode=0, stdout="", stderr="")
+
+    monkeypatch.setattr(subprocess, "run", _run)
+    monkeypatch.setattr(time, "sleep", sleeps.append)
+
+    _git(tmp_path, "commit", "--allow-empty", "-q", "-m", "chore: tick 36")
+
+    assert attempts == 2
+    assert sleeps == [0.05]
+
+
+def test_git_exhausts_recognized_fixture_commit_head_parse_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    attempts = 0
+    sleeps: list[float] = []
+
+    def _run(command, **kwargs):
+        nonlocal attempts
+        attempts += 1
+        return subprocess.CompletedProcess(
+            command,
+            returncode=128,
+            stdout="",
+            stderr="fatal: could not parse HEAD\n",
+        )
+
+    monkeypatch.setattr(subprocess, "run", _run)
+    monkeypatch.setattr(time, "sleep", sleeps.append)
+
+    with pytest.raises(AssertionError) as caught:
+        _git(tmp_path, "commit", "--allow-empty", "-q", "-m", "chore: tick 36")
+
+    assert attempts == 3
+    assert sleeps == [0.05, 0.1]
+    assert "attempts: 3" in str(caught.value)
+    assert "fatal: could not parse HEAD" in str(caught.value)
+
+
+@pytest.mark.parametrize(
+    ("args", "returncode", "stdout", "stderr"),
+    [
+        (("commit", "--allow-empty", "-m", "x"), 1, "", "fatal: could not parse HEAD"),
+        (("commit", "--allow-empty", "-m", "x"), 128, "created", "fatal: could not parse HEAD"),
+        (
+            ("commit", "--allow-empty", "-m", "x"),
+            128,
+            "",
+            "fatal: could not parse HEAD\nfatal: detected dubious ownership",
+        ),
+        (("rev-parse", "HEAD"), 128, "", "fatal: could not parse HEAD"),
+    ],
+)
+def test_git_does_not_retry_ambiguous_or_unrelated_failures(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    args: tuple[str, ...],
+    returncode: int,
+    stdout: str,
+    stderr: str,
+) -> None:
+    attempts = 0
+
+    def _run(command, **kwargs):
+        nonlocal attempts
+        attempts += 1
+        return subprocess.CompletedProcess(
+            command,
+            returncode=returncode,
+            stdout=stdout,
+            stderr=stderr,
+        )
+
+    monkeypatch.setattr(subprocess, "run", _run)
+
+    with pytest.raises(AssertionError) as caught:
+        _git(tmp_path, *args)
+
+    assert attempts == 1
+    assert "attempts: 1" in str(caught.value)
+
+
 def _commit(repo: Path, subject: str, *, env: dict[str, str] | None = None) -> None:
     _git(repo, "commit", "--allow-empty", "-q", "-m", subject, env=env)
 
