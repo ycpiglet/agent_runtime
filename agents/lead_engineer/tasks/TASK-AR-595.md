@@ -40,7 +40,6 @@ verified_at: 2026-07-19T11:51:27+09:00
 verified_by: codex-root-task-ar-595
 evidence_refs:
   - reviews/VERIFY-2026-07-19-task-ar-595-20260719115127.json
-review_evidence_refs:
   - reviews/W4B-2026-07-19-TASK-AR-595.md
   - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-595-INDEPENDENT-AUDITOR.md
 resolution: done

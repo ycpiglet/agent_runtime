@@ -50,11 +50,9 @@ evidence_refs:
   - reviews/VERIFY-2026-07-19-unit-task-ar-598-001-20260719122843.json
   - reviews/VERIFY-2026-07-19-unit-task-ar-598-001-20260719123919.json
   - reviews/VERIFY-2026-07-19-unit-task-ar-598-001-20260719124202.json
-review_evidence_refs:
   - reviews/W4B-2026-07-19-TASK-AR-598-REWORK.md
   - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-598-INDEPENDENT-AUDITOR.md
   - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-598-SKEPTIC.md
-implementation_commit: 498febc
 resolution: done
 completed_at: 2026-07-22T16:39:37+09:00
 closed_by: codex-root-task-ar-598
@@ -118,6 +116,7 @@ Stop if the PR contains host-specific behavior or destructive recovery; retain r
 - Actual hours: `1.0`
 - Actual tokens: `15000`
 - Closed by: `codex-root-task-ar-598`
+- Implementation commit: `498febc`
 - Evidence:
   - `reviews/VERIFY-2026-07-19-unit-task-ar-598-001-20260719122843.json`
   - `reviews/VERIFY-2026-07-19-unit-task-ar-598-001-20260719123919.json`

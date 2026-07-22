@@ -43,7 +43,6 @@ evidence_refs:
   - reviews/VERIFY-2026-07-19-task-ar-594-20260719105444.json
   - reviews/VERIFY-2026-07-19-task-ar-594-20260719110741.json
   - reviews/VERIFY-2026-07-19-task-ar-594-20260719110720.json
-review_evidence_refs:
   - reviews/W4B-2026-07-19-TASK-AR-594-REWORK.md
   - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-594-SKEPTIC.md
 resolution: done

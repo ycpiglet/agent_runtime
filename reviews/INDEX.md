@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-22T18:28:07+09:00
-record_count: 705
+generated_at: 2026-07-22T18:32:34+09:00
+record_count: 706
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `705` review and evidence records under `reviews/`.
+- Summary: indexed `706` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `705` files |
+| Reviews covered | pass | `706` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -526,6 +526,7 @@ record_count: 705
 | `reviews/REVIEW-2026-07-22-task-ar-600-host-lock-scope-amendment.md` | `REVIEW-2026-07-22-task-ar-600-host-lock-scope-amendment` | planning | record | pass | TASK-AR-600 host lock scope amendment |
 | `reviews/REVIEW-2026-07-22-task-ar-600-scope-transition-approval.md` | `REVIEW-2026-07-22-task-ar-600-scope-transition-approval` | planning | record | pass | TASK-AR-600 taskset scope transition approval |
 | `reviews/REVIEW-2026-07-22-task-ar-600-verification-frontmatter-amendment.md` | `REVIEW-2026-07-22-task-ar-600-verification-frontmatter-amendment` | planning | record | pass | TASK-AR-600 verification frontmatter amendment |
+| `reviews/REVIEW-2026-07-22-task-ar-610-scope-amendment.md` | `REVIEW-2026-07-22-task-ar-610-scope-amendment` | md | record | pass | TASK-AR-610 scope amendment |
 | `reviews/REVIEW-2026-07-22-taskset-ar-july-release-impact-remediation-registration.md` | `REVIEW-2026-07-22-taskset-ar-july-release-impact-remediation-registration` | md | record | pass | Release Impact Remediator Registration |
 | `reviews/REVIEW-2026-07-22-taskset-ar-pr303-ci-schema-recovery-registration.md` | `REVIEW-2026-07-22-taskset-ar-pr303-ci-schema-recovery-registration` | md | record | pass | CI Schema Recovery Registration |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
