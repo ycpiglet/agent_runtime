@@ -30,6 +30,10 @@ summary: Close GitHub issue 300 by preventing taskset records from being duplica
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python -m pytest tests/test_work_item_classifier.py tests/test_template_work_item_classifier.py -q
+  - python scripts/work_item_classifier.py --write --check
+  - python scripts/regen_host_lock_if_needed.py --check
 tags:
   - github-300
   - classifier
