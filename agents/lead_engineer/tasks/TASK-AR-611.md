@@ -26,7 +26,7 @@ reservation_id: RES-20260722-184838-3dcdb3b7-01
 origin_type: downstream_bug
 origin_ref: github-actions:run-29909181630
 created_by: codex-root-planner
-summary: Make the real-backlog classification test recognize every taskset registered by the July remediation and PR
+summary: Make the real-backlog classification test recognize every taskset registered by the July remediation and PR 303 CI-recovery work.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
