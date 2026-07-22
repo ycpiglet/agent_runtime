@@ -2,7 +2,7 @@
   "installed": {
     "managed_files": {
       ".codex/hooks.json": "sha256:947dc7366dbff526e3a13a403989ea2fd75ce6f363a8ca02c92b9b5c36ba6bc8",
-      ".env.example": "sha256:486c41f492791ff2753c891a203ec7de1bc9615bbd5ff8cff455d7cbecb852b1",
+      ".env.example": "sha256:a91fca7b04c48cbd8a98ee6e33541fbbd6c9baa40aca90e4aa145efa70a873cd",
       ".gitattributes": "sha256:22ec718362af48d401e6717569dfcc89ec3573d553dc3f3530f4db8a1625b79b",
       ".githooks/post-merge": "sha256:b112da8578360cd49b871f518afa9c2ffb9f266c416daa02a8a9b17a84196e39",
       ".githooks/pre-commit": "sha256:9b5b120d9b18f39977021db0b543953267cbfcd60f817cf92edd93812d560457",
@@ -91,13 +91,13 @@
       "scripts/agent_live_session.py": "sha256:645a835288bb6428cd60ed927f3a66cbf7c19734519fd67e2501b47a8b296321",
       "scripts/agent_loop.py": "sha256:a4b7b9a17f1a719cb429e2f5377586d078712b711a8940ec1ded9d906999cb6c",
       "scripts/agent_observer.py": "sha256:783d8382e0aab02074d4b78bbb94ce1e739311f15aba5e86aa6b8783495fd8c6",
-      "scripts/agent_orchestrator.py": "sha256:79f952bc7ddaf713acc6494b0cd90b68694da2d27f61b7f80edba90be77a4588",
+      "scripts/agent_orchestrator.py": "sha256:dbc90b72acc13be5837ab02dc9aad8f9896247ed2d004e637a17b5388cb2d6ed",
       "scripts/agent_retro.py": "sha256:f363eeacfa49ba49fd55cd97ceacbcdeb2272ce3f77c43a142d9fd004e3267c6",
       "scripts/agent_runtime_migration_inventory.py": "sha256:e6f6006c00ad7d858df9e43437641d54cfcc3febb219c785a2ee8f01d633d992",
       "scripts/agent_seminar.py": "sha256:836b9706a0531e701591ec1d827c6a64385e557accf1dcaa826ae32461db94e1",
       "scripts/agent_terminal.py": "sha256:8f0f140c3ee42d543f57173069926b6683788fa2e67bb1cdae8e0d535440609c",
       "scripts/agent_worker.py": "sha256:373e13c739197069f437fca8bb69c8ab1aee25fb8a0ea786e098e39272eeca46",
-      "scripts/allimbot.py": "sha256:f4476073cdf719a2f31687f7b62ac81e75d0e8b670ba3cdafa88b0443cf10f3a",
+      "scripts/allimbot.py": "sha256:9c307b2b1d2ad832da82167a98f405333bb268c2345a4ad326c7d08e90be1327",
       "scripts/allimbot_stop_hook.cmd": "sha256:71275ae976730cdbb0225f6b5d3e07186463c9c2fa6ae694464d2b1051d9b18b",
       "scripts/ambiguity_scan.py": "sha256:9d34915e12ddc4249de63d36ddcdd5afd06ca90e1e0d66ae002fe04231159ad5",
       "scripts/atomic_io.py": "sha256:95e71fed4860a0d9cfafca45bdf0422fe5b2b33241f13d6da103e0a41ecdb9df",
@@ -283,7 +283,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.6.0",
-    "template_digest": "sha256:045d3c4a4521ecbeb30a90fa34b1190ca8caed2ee10005ac769ef22b0fd295a1",
+    "template_digest": "sha256:4be15ec47e4c531b78b3cd5f53d980b6115187174fa7a62b817c5e4462fd3544",
     "template_files": 280
   },
   "project": "fixture-host",

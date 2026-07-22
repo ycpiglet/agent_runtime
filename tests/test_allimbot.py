@@ -121,6 +121,24 @@ def test_dashboard_failure_falls_back_to_ntfy(client, monkeypatch) -> None:
     assert [call[2] for call in calls] == [3.0, 3.0]
 
 
+def test_dashboard_token_is_never_sent_to_a_non_loopback_url(client, monkeypatch) -> None:
+    _clear_config(monkeypatch)
+    monkeypatch.setenv("ALLIMBOT_TOKEN", "local-only-token")
+    monkeypatch.setenv("ALLIMBOT_URL", "https://example.com/collect")
+    monkeypatch.setenv("ALLIMBOT_NTFY_TOPIC", "fallback-topic")
+    calls: list[str] = []
+
+    def fake_urlopen(request, *, timeout):
+        calls.append(request.full_url)
+        assert b"local-only-token" not in request.data
+        assert timeout == 3.0
+        return _Response(200)
+
+    monkeypatch.setattr(client.urllib.request, "urlopen", fake_urlopen)
+    assert client.notify("done") is True
+    assert calls == ["https://ntfy.sh"]
+
+
 def test_all_delivery_errors_are_swallowed(client, monkeypatch, capsys) -> None:
     _clear_config(monkeypatch)
     monkeypatch.setenv("ALLIMBOT_TOKEN", "test-token")
@@ -150,13 +168,15 @@ def test_decorator_preserves_success_and_original_failure(monkeypatch) -> None:
 
     @package_allimbot.notify_on_complete(title="daily")
     def fail():
-        raise ValueError("original")
+        raise ValueError("secret-value-must-not-leave-process")
 
     assert succeed() == 42
-    with pytest.raises(ValueError, match="original"):
+    with pytest.raises(ValueError, match="secret-value-must-not-leave-process"):
         fail()
     assert "completed" in calls[0][0]
     assert "failed" in calls[1][0]
+    assert "ValueError" in calls[1][0]
+    assert "secret-value" not in calls[1][0]
     assert [title for _, title in calls] == ["daily", "daily"]
 
 
@@ -182,9 +202,12 @@ def test_template_stop_hook_and_blank_configuration_are_shipped() -> None:
     assert '"templates/project/.env.example"' in package_config
 
 
-def test_ci_failure_delivery_is_explicitly_opt_in_and_single_matrix() -> None:
+def test_ci_failure_delivery_is_explicitly_opt_in_and_aggregate() -> None:
     workflow = (ROOT / ".github" / "workflows" / "test.yml").read_text(encoding="utf-8")
     assert "vars.ALLIMBOT_CI_NOTIFY_ENABLED == 'true'" in workflow
-    assert "matrix.python-version == '3.12'" in workflow
+    assert "notify_failure:" in workflow
+    assert "needs: test" in workflow
+    assert "needs.test.result == 'failure'" in workflow
     assert "secrets.ALLIMBOT_NTFY_TOPIC" in workflow
     assert "templates/project/scripts/allimbot.py" in workflow
+    assert workflow.count("Send optional allimbot CI failure notification") == 1

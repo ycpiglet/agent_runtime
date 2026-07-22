@@ -267,8 +267,17 @@ jobs:
             --tag v0.6.0 \
             --warning-summary-gate-strict-refs "${{ steps.resolve_warning_summary_strict_refs.outputs.strict_refs }}" \
             --check
+
+  notify_failure:
+    needs: test
+    if: always() && needs.test.result == 'failure' && vars.ALLIMBOT_CI_NOTIFY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Send optional allimbot CI failure notification
-        if: failure() && matrix.python-version == '3.12' && vars.ALLIMBOT_CI_NOTIFY_ENABLED == 'true'
         env:
           ALLIMBOT_NTFY_TOPIC: ${{ secrets.ALLIMBOT_NTFY_TOPIC }}
         run: >-

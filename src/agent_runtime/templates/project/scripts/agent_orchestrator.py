@@ -261,6 +261,16 @@ def task_meta(task_id: str) -> dict | None:
     return None
 
 
+def task_completion_is_authoritative(task_id: str) -> bool:
+    """Return true only after the task record is both closed and verified."""
+    meta = task_meta(task_id)
+    if not meta:
+        return False
+    status = str(meta.get("status") or "").strip().lower()
+    verification_status = str(meta.get("verification_status") or "").strip().lower()
+    return status in {"completed", "done", "closed", "완료"} and verification_status == "passed"
+
+
 def routing_grade_for_task(task_id: str, fallback: str = "Medium") -> str:
     if task_id == "none":
         return fallback
@@ -596,10 +606,15 @@ def cmd_kill(args: argparse.Namespace) -> Outcome:
         write_session_json(p, record)
         try:
             task_id = str(record.get("task_id") or "none")
-            if task_id != "none" and outcome in {"completed", "failed"}:
+            if task_id != "none" and outcome == "completed" and task_completion_is_authoritative(task_id):
                 allimbot.notify(
-                    f"{task_id} {outcome}",
-                    title=f"agent_runtime task {outcome}",
+                    f"{task_id} completed and verified",
+                    title="agent_runtime task completed",
+                )
+            elif task_id != "none" and outcome == "failed":
+                allimbot.notify(
+                    f"{task_id} worker session reported failed",
+                    title="agent_runtime worker failure",
                 )
         except Exception:
             pass

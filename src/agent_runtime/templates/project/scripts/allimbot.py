@@ -14,9 +14,11 @@ import time
 import urllib.request
 from collections.abc import Callable
 from typing import Any
+from urllib.parse import urlparse
 
 DEFAULT_TIMEOUT = 3.0
 DEFAULT_URL = "http://127.0.0.1:8787"
+LOOPBACK_HOSTS = {"127.0.0.1", "::1", "localhost"}
 __all__ = ["notify", "notify_on_complete"]
 
 
@@ -38,6 +40,24 @@ def _post_json(url: str, payload: dict[str, str], timeout: float) -> bool:
         return 200 <= response.status < 300
 
 
+def _dashboard_trigger_url(raw_url: str) -> str | None:
+    """Return a loopback-only trigger URL so a token cannot be sent remotely."""
+    try:
+        parsed = urlparse(raw_url)
+        if (
+            parsed.scheme not in {"http", "https"}
+            or parsed.hostname not in LOOPBACK_HOSTS
+            or parsed.username is not None
+            or parsed.password is not None
+            or parsed.query
+            or parsed.fragment
+        ):
+            return None
+        return raw_url.rstrip("/") + "/trigger"
+    except Exception:
+        return None
+
+
 def notify(
     message: str,
     title: str = "agent_runtime",
@@ -53,10 +73,10 @@ def notify(
             return False
 
         if token:
-            base = os.environ.get("ALLIMBOT_URL", DEFAULT_URL).rstrip("/")
+            trigger_url = _dashboard_trigger_url(os.environ.get("ALLIMBOT_URL", DEFAULT_URL))
             try:
-                if _post_json(
-                    base + "/trigger",
+                if trigger_url and _post_json(
+                    trigger_url,
                     {
                         "token": token,
                         "message": str(message),
@@ -95,7 +115,7 @@ def notify_on_complete(title: str | None = None, provider: str | None = None) ->
             except Exception as exc:
                 elapsed = time.monotonic() - started
                 notify(
-                    f"{function.__name__} failed ({elapsed:.0f}s): {exc}",
+                    f"{function.__name__} failed ({elapsed:.0f}s): {exc.__class__.__name__}",
                     title=title or "agent_runtime task failed",
                     provider=provider,
                 )

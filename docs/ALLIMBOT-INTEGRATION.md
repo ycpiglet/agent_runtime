@@ -9,7 +9,9 @@ delivery is never part of the success criteria for the host operation.
 The client tries these routes in order:
 
 1. The local allimbot dashboard at `ALLIMBOT_URL/trigger` when
-   `ALLIMBOT_TOKEN` is set.
+   `ALLIMBOT_TOKEN` is set. The URL must resolve syntactically to loopback
+   (`127.0.0.1`, `::1`, or `localhost`); other hosts are ignored so the token
+   cannot be sent to a remote endpoint.
 2. The fixed `https://ntfy.sh` endpoint when `ALLIMBOT_NTFY_TOPIC` is set.
 
 Missing configuration returns `False` without output or a network request.
@@ -20,8 +22,10 @@ credentials, account data, private prompts, or other sensitive context.
 
 ## Configuration
 
-Copy the blank template values into an untracked `.env` or the process
-environment. Never commit real values.
+Export the values into the process environment using the host's existing
+environment loader or service configuration. The zero-dependency client does
+not read `.env` files itself; `.env.example` is a blank reference only. Never
+commit real values.
 
 ```dotenv
 ALLIMBOT_URL=http://127.0.0.1:8787
@@ -33,21 +37,24 @@ ALLIMBOT_PROVIDER=
 - `ALLIMBOT_TOKEN` enables the local dashboard path and its guardrails/history.
 - `ALLIMBOT_NTFY_TOPIC` enables the direct fallback.
 - `ALLIMBOT_PROVIDER` optionally selects a dashboard provider.
-- `ALLIMBOT_URL` defaults to loopback and is only read when a token is set.
+- `ALLIMBOT_URL` defaults to loopback, accepts loopback hosts only, and is only
+  read when a token is set.
 
 ## Wired lifecycle events
 
 | Event | Surface | Message policy |
 | --- | --- | --- |
-| Task completion/failure | template `agent_orchestrator.py` | explicit `/kill --outcome completed|failed`; task ID only |
+| Verified task completion | template `agent_orchestrator.py` | explicit `/kill --outcome completed`, but only when the task record is closed and verification passed; task ID only |
+| Worker-session failure | template `agent_orchestrator.py` | explicit `/kill --outcome failed`; labeled as a worker report, never authoritative task completion |
 | Owner governance block | root and template governance gates | exit code only |
 | Session stop request | template Codex Stop hook | static message |
 | Upstream update notice | package `update_notify.py` | the public version notice |
 | CI failure | GitHub Actions test workflow | workflow, ref, and run URL |
 
-The CI path is disabled by default. It runs once from the Python 3.12 matrix
-only when repository variable `ALLIMBOT_CI_NOTIFY_ENABLED` equals `true`; the
-ntfy topic must be stored as an `ALLIMBOT_NTFY_TOPIC` Actions secret.
+The CI path is disabled by default. A single follow-up job observes the
+aggregate test matrix result and runs only when it failed and repository
+variable `ALLIMBOT_CI_NOTIFY_ENABLED` equals `true`; the ntfy topic must be
+stored as an `ALLIMBOT_NTFY_TOPIC` Actions secret.
 
 ## Direct use
 
@@ -64,3 +71,6 @@ def maintain() -> None:
 Generated hosts can use `scripts/allimbot.py` with the same API. Its CLI is
 silent and exits zero by default even when delivery is disabled or fails;
 `--verbose` is available only for an explicit operator diagnostic.
+
+`notify_on_complete` reports an exception class on failure, never the exception
+message or traceback, to avoid leaking sensitive runtime details.

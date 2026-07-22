@@ -62,7 +62,7 @@ def test_no_session_record_site_uses_direct_write_text() -> None:
             raise AssertionError(f"direct session write: {line.strip()}")
 
 
-def test_kill_notifies_only_an_explicit_completed_outcome(tmp_path: Path, monkeypatch) -> None:
+def test_kill_does_not_claim_unverified_task_completion(tmp_path: Path, monkeypatch) -> None:
     mod = _load()
     monkeypatch.setattr(mod, "SESSIONS_DIR", tmp_path)
     agent_id = "agent_0123456789ab"
@@ -83,7 +83,58 @@ def test_kill_notifies_only_an_explicit_completed_outcome(tmp_path: Path, monkey
     record = json.loads((tmp_path / f"{agent_id}.json").read_text(encoding="utf-8"))
     assert record["status"] == "closed"
     assert record["outcome"] == "completed"
-    assert calls == [("TASK-123 completed", "agent_runtime task completed")]
+    assert calls == []
+
+
+def test_kill_notifies_only_authoritative_task_completion(tmp_path: Path, monkeypatch) -> None:
+    mod = _load()
+    sessions_dir = tmp_path / "sessions"
+    tasks_dir = tmp_path / "tasks"
+    tasks_dir.mkdir()
+    monkeypatch.setattr(mod, "SESSIONS_DIR", sessions_dir)
+    monkeypatch.setattr(mod, "TASKS_DIR", tasks_dir)
+    agent_id = "agent_1234567890ab"
+    task_id = "TASK-123"
+    mod.write_session_json(
+        sessions_dir / f"{agent_id}.json",
+        {"agent_id": agent_id, "task_id": task_id, "status": "active"},
+    )
+    (tasks_dir / f"{task_id}.md").write_text(
+        "---\nid: TASK-123\nstatus: completed\nverification_status: passed\n---\n",
+        encoding="utf-8",
+    )
+    calls: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        mod.allimbot,
+        "notify",
+        lambda message, title="agent_runtime", **_kwargs: calls.append((message, title)) or False,
+    )
+
+    outcome = mod.cmd_kill(Namespace(agent_id=agent_id, dry_run=False, outcome="completed"))
+
+    assert outcome.code == 0
+    assert calls == [("TASK-123 completed and verified", "agent_runtime task completed")]
+
+
+def test_kill_failure_is_labeled_as_worker_report(tmp_path: Path, monkeypatch) -> None:
+    mod = _load()
+    monkeypatch.setattr(mod, "SESSIONS_DIR", tmp_path)
+    agent_id = "agent_fedcba987654"
+    mod.write_session_json(
+        tmp_path / f"{agent_id}.json",
+        {"agent_id": agent_id, "task_id": "TASK-789", "status": "active"},
+    )
+    calls: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        mod.allimbot,
+        "notify",
+        lambda message, title="agent_runtime", **_kwargs: calls.append((message, title)) or False,
+    )
+
+    outcome = mod.cmd_kill(Namespace(agent_id=agent_id, dry_run=False, outcome="failed"))
+
+    assert outcome.code == 0
+    assert calls == [("TASK-789 worker session reported failed", "agent_runtime worker failure")]
 
 
 def test_kill_default_stop_does_not_claim_task_completion(tmp_path: Path, monkeypatch) -> None:
