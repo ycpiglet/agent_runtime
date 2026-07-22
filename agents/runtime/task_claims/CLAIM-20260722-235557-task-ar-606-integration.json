@@ -9,7 +9,7 @@
   "callsite_id": "codex-root-20260722",
   "pane_id": "root",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
   "active_scope": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
   "scope_transition_approved": true,
@@ -27,12 +27,12 @@
   "worktree_path": ".worktrees/TASK-AR-606",
   "branch": "codex/task-ar-606-precommit-executable",
   "claimed_at": "2026-07-22T23:55:57+09:00",
-  "last_heartbeat": "2026-07-22T23:55:57+09:00",
-  "updated_at": "2026-07-22T23:55:57+09:00",
+  "last_heartbeat": "2026-07-23T00:04:22+09:00",
+  "updated_at": "2026-07-23T00:04:22+09:00",
   "expires_at": "2026-07-23T03:55:57+09:00",
   "lease": {
     "claimed_at": "2026-07-22T23:55:57+09:00",
-    "heartbeat_at": "2026-07-22T23:55:57+09:00",
+    "heartbeat_at": "2026-07-23T00:04:22+09:00",
     "expires_at": "2026-07-23T03:55:57+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260722-235557-task-ar-606-integration.handoff.md",
@@ -58,5 +58,9 @@
     "tests/test_lock_merge_driver.py",
     "tests/test_bootstrap_dev_env.py",
     "tests/fixtures/host/agent_runtime.lock.json"
-  ]
+  ],
+  "released_at": "2026-07-23T00:04:22+09:00",
+  "verified_by": "codex-task-ar-606-rework2-independent-auditor-20260722",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-22-TASK-AR-606-REWORK2.md"
 }

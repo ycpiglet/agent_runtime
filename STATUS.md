@@ -1,5 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-23 - TASK-AR-606/#295 complete; TASK-AR-607 next
+
+- Completed: PR #312 merged at `b5562058c92dfc160862988d0e2d1e8b9bbae623`; pull-request run `29931062061` and post-merge main run `29931322171` passed on Python 3.10/3.11/3.12, and GitHub #295 is closed.
+- Contract: root and generated-host pre-commit hooks are tracked as `100755` with unchanged bodies; POSIX install repair uses no-follow, same-descriptor, single-link, and nonblocking checks before configuring `core.hooksPath`.
+- Cross-platform: unsafe/missing/non-regular/multi-link hooks fail installation before Git configuration, Windows performs no POSIX chmod, and bootstrap preserves its watch-only exit-zero contract with explicit `FIX` output.
+- Quality loop: the initial skeptic review found linked-path and false-success boundaries; first rework reviews then found FIFO blocking. Two failure-first rework rounds, refreshed task/unit W4a (`24 passed`, two Windows-only POSIX skips), independent W4b, and skeptic REWORK2 all passed before merge.
+- Next: TASK-AR-607 for GitHub #297. Preserve collection-order evidence from runs `29921037792`, `29921668702`, and main run `29927077404` attempt 1 failure followed by attempt 2 success.
+
 ## 2026-07-22 - TASK-AR-605/#294 complete; TASK-AR-606 next
 
 - Completed: PR #309 merged at `be2abbf46f04a0683f847e87d1f225130ad006e8`; pull-request run `29926080215` and post-merge main run `29926311186` passed on Python 3.10/3.11/3.12, and GitHub #294 is closed.

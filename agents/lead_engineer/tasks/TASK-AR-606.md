@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 registered_at: 2026-07-22T17:45:00+09:00
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T23:49:57+09:00
+updated_at: 2026-07-23T00:04:40+09:00
+started_at: 2026-07-22T23:17:20+09:00
 title: Activate configured pre-commit hooks on POSIX hosts
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 2
@@ -44,6 +45,11 @@ evidence_refs:
   - reviews/VERIFY-2026-07-22-task-ar-606-20260722232457.json
   - reviews/VERIFY-2026-07-22-task-ar-606-20260722233631.json
   - reviews/VERIFY-2026-07-22-task-ar-606-20260722234957.json
+resolution: done
+completed_at: 2026-07-23T00:04:40+09:00
+closed_by: codex-root
+actual_hours: 0.8
+actual_tokens: 75000
 ---
 
 # TASK-AR-606 - Activate configured pre-commit hooks on POSIX hosts
@@ -67,3 +73,17 @@ evidence_refs:
 - `python -m pytest tests/test_lock_merge_driver.py tests/test_bootstrap_dev_env.py -q`
 - `python scripts/regen_host_lock_if_needed.py --check`
 - `git ls-files -s .githooks/pre-commit src/agent_runtime/templates/project/.githooks/pre-commit`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T00:04:40+09:00`
+- Resolution: `done`
+- Actual hours: `0.8`
+- Actual tokens: `75000`
+- Closed by: `codex-root`
+- Evidence:
+  - `reviews/VERIFY-2026-07-22-task-ar-606-20260722232457.json`
+  - `reviews/VERIFY-2026-07-22-task-ar-606-20260722233631.json`
+  - `reviews/VERIFY-2026-07-22-task-ar-606-20260722234957.json`
+<!-- work-close:end -->

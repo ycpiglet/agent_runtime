@@ -9,11 +9,11 @@ task_id: TASK-AR-606
 task_set_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 initiative_id: INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T23:49:51+09:00
+updated_at: 2026-07-23T00:04:39+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
 created_by: codex-root-planner
@@ -55,6 +55,11 @@ evidence_refs:
   - reviews/VERIFY-2026-07-22-unit-task-ar-606-001-20260722232426.json
   - reviews/VERIFY-2026-07-22-unit-task-ar-606-001-20260722233621.json
   - reviews/VERIFY-2026-07-22-unit-task-ar-606-001-20260722234951.json
+resolution: done
+completed_at: 2026-07-23T00:04:39+09:00
+closed_by: codex-root
+actual_hours: 0.8
+actual_tokens: 75000
 ---
 
 # UNIT-TASK-AR-606-001 - Make hook activation executable and idempotent
@@ -109,3 +114,17 @@ Report Git modes, installer behavior on POSIX/Windows, tests, and issue #295 evi
 ## Stop Boundary
 
 Stop before changing hook contents or enabling any additional hook.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T00:04:39+09:00`
+- Resolution: `done`
+- Actual hours: `0.8`
+- Actual tokens: `75000`
+- Closed by: `codex-root`
+- Evidence:
+  - `reviews/VERIFY-2026-07-22-unit-task-ar-606-001-20260722232426.json`
+  - `reviews/VERIFY-2026-07-22-unit-task-ar-606-001-20260722233621.json`
+  - `reviews/VERIFY-2026-07-22-unit-task-ar-606-001-20260722234951.json`
+<!-- work-close:end -->
