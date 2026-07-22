@@ -41,8 +41,10 @@ ACTIVE_STATUSES = {
 }
 
 DONE_STATUSES = {
+    "closed",
     "completed",
     "done",
+    "released",
 }
 
 CANONICAL_TASKSET_SCHEMA = "agent-runtime-work-item/v1"
@@ -496,7 +498,7 @@ def _active_taskset_claims(root: Path, task_set_id: str) -> list[dict[str, Any]]
 
 def _target_status_for_work_start(current: str | None) -> str | None:
     normalized = _normalize_status(current)
-    if normalized in {"completed", "done"}:
+    if normalized in DONE_STATUSES:
         return None
     if normalized.startswith("hold") or normalized == "blocked":
         return normalized
