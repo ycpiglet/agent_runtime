@@ -780,7 +780,7 @@
         {
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan.md",
-          "value": "c09ef3a474d007e855fa663d7dc362c4fd12e67611fcd5452dbc582af45c7277"
+          "value": "6b3f8cb667bc2e626bb3bd1b8322f45ec24400d75a1e9cd8043a17c99ef2c765"
         },
         {
           "kind": "sha256",
@@ -829,11 +829,11 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan.md",
-      "recorded_at": "2026-07-23T08:50:06+09:00",
+      "recorded_at": "2026-07-23T08:53:22+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-WORK-CLI-INTEGRITY"
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-23T08:50:06+09:00"
+  "updated_at": "2026-07-23T08:53:22+09:00"
 }

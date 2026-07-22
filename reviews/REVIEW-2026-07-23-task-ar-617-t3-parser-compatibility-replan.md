@@ -66,7 +66,9 @@ loss occurs during `_frontmatter` re-emission rather than fixture setup.
 - `python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py tests/test_backlog_board_tasksets.py -q`
 - `python scripts/work_schema_gate.py --check`
 - `python scripts/regen_host_lock_if_needed.py --check`
-- root/template `backlog_board.py` SHA-256 equality.
+- root/template parsers both pass the same marker scalar/list and legacy
+  compatibility matrix; the files remain intentionally different outside the
+  shared frontmatter surface.
 
 ## T3 Decision
 
