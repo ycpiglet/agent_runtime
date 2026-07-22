@@ -6,6 +6,7 @@ and a post-merge hook regenerates the authoritative lock. RETRO-2026-06-14 actio
 """
 
 import json
+import inspect
 import os
 import stat
 import subprocess
@@ -182,6 +183,40 @@ def test_executable_repair_refuses_multi_link_hook(tmp_path):
     assert lmd.repair_pre_commit_executable(repo, posix=True) is False
     assert lmd.is_pre_commit_executable(repo, posix=True) is False
     assert outside.stat().st_mode == before
+
+
+def test_posix_hook_open_requests_nonblocking_mode():
+    source = inspect.getsource(lmd._open_pre_commit_fd)
+    assert "O_NONBLOCK" in source
+
+
+@pytest.mark.skipif(
+    os.name == "nt" or not hasattr(os, "mkfifo"),
+    reason="requires a POSIX FIFO",
+)
+def test_executable_repair_rejects_fifo_without_blocking(tmp_path):
+    repo = tmp_path / "repo"
+    hooks = repo / ".githooks"
+    hooks.mkdir(parents=True)
+    os.mkfifo(hooks / "pre-commit")
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(ROOT / "scripts") + os.pathsep + env.get("PYTHONPATH", "")
+    code = (
+        "from pathlib import Path; import lock_merge_driver as lmd; "
+        f"print(lmd.repair_pre_commit_executable(Path({str(repo)!r}), posix=True))"
+    )
+
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        cwd=ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=2,
+        check=True,
+    )
+
+    assert result.stdout.strip() == "False"
 
 
 def test_committed_post_merge_hook_invokes_driver():
