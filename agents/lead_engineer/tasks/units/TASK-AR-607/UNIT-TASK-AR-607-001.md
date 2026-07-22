@@ -24,7 +24,7 @@ escalation_triggers:
   - repeated_failure
   - ci
   - ambiguity
-context: GitHub #297 records intermittent CI failure in a recovery regression. Reproduce with repeated and ordered runs, identify global/module/monkeypatch leakage, and make the test deterministic without weakening its oracle.
+context: GitHub issue 297 records intermittent CI failure in a recovery regression. Reproduce with repeated and ordered runs, identify global/module/monkeypatch leakage, and make the test deterministic without weakening its oracle.
 inputs:
   - reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
   - tests/test_release_cadence_trigger.py
@@ -38,7 +38,7 @@ acceptance:
   - At least 100 repeated executions pass without rerun-only recovery.
 verification:
   - python -m pytest tests/test_release_cadence_trigger.py -q
-handoff: Report the reproduced interaction, preserved oracle, repeat count, and issue #297 evidence.
+handoff: Report the reproduced interaction, preserved oracle, repeat count, and GitHub issue 297 evidence.
 stop_condition: Stop if reproduction requires changing release thresholds or masking a production error.
 ---
 

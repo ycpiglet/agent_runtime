@@ -25,7 +25,7 @@ reservation_id: RES-20260722-174500-dbaf8585-05
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
 created_by: codex-root-planner
-summary: Close GitHub #297 by isolating release-cadence transient-spawn recovery state so the regression cannot intermittently report false metrics.
+summary: Close GitHub issue 297 by isolating release-cadence transient-spawn recovery state so the regression cannot intermittently report false metrics.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
