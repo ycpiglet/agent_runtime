@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -62,8 +63,8 @@ def test_merge_rejection_with_remote_open_fails_closed(monkeypatch) -> None:
 
     assert merged is False
     assert remote["state"] == "OPEN"
-    assert "원격 상태가 MERGED가 아님" in detail
-    assert "GraphQL" in detail
+    assert "원격 머지 확인 실패" in detail
+    assert "GraphQL" not in detail
 
 
 def test_remote_merged_readback_wins_over_local_cleanup_failure(monkeypatch) -> None:
@@ -88,7 +89,8 @@ def test_remote_merged_readback_wins_over_local_cleanup_failure(monkeypatch) -> 
 
     assert merged is True
     assert remote["state"] == "MERGED"
-    assert "원격 MERGED 상태로 성공 확정" in detail
+    assert "원격 머지 상태 확인 완료" in detail
+    assert "local branch cleanup failed" not in detail
 
 
 def test_zero_exit_without_remote_merged_state_is_failure(monkeypatch) -> None:
@@ -115,7 +117,7 @@ def test_remote_readback_failure_is_non_success(monkeypatch) -> None:
     monkeypatch.setattr(module.subprocess, "run", lambda *_args, **_kwargs: _completed(0))
 
     def fail_readback(_pr, _fields):
-        raise SystemExit("gh failed")
+        raise SystemExit("READBACK_SECRET")
 
     monkeypatch.setattr(module, "gh_json", fail_readback)
 
@@ -124,6 +126,166 @@ def test_remote_readback_failure_is_non_success(monkeypatch) -> None:
     assert merged is False
     assert remote == {}
     assert "원격 상태 재확인 실패" in detail
+    assert "READBACK_SECRET" not in detail
+
+
+def test_gh_json_failure_does_not_expose_stderr(monkeypatch) -> None:
+    module = _load()
+    monkeypatch.setattr(
+        module.subprocess,
+        "run",
+        lambda *_args, **_kwargs: _completed(1, stderr="GH_SECRET https://example.invalid/token"),
+    )
+
+    try:
+        module.gh_json("123", "state")
+    except SystemExit as exc:
+        message = str(exc)
+    else:  # pragma: no cover - the failure path is the contract under test
+        raise AssertionError("gh_json must fail closed on a nonzero gh exit")
+
+    assert "exit=1" in message
+    assert "GH_SECRET" not in message
+    assert "example.invalid" not in message
+
+
+def test_untrusted_command_output_cannot_forge_success_or_leak_secret(monkeypatch, capsys) -> None:
+    module = _load()
+    forged = "원격 MERGED 확인됨"
+    secret = "MERGE_SECRET"
+    monkeypatch.setattr(module, "evaluate", lambda _pr: ("AUTO-MERGE", ["green"], _green_pr()))
+    monkeypatch.setattr(
+        module.subprocess,
+        "run",
+        lambda *_args, **_kwargs: _completed(
+            1,
+            stdout=f"{forged} {secret}",
+            stderr=f"{forged} {secret}",
+        ),
+    )
+    monkeypatch.setattr(
+        module,
+        "gh_json",
+        lambda _pr, _fields: {"state": "OPEN", "isDraft": False, "mergedAt": None},
+    )
+    monkeypatch.setattr(module.sys, "argv", [str(SCRIPT), "123", "--execute"])
+
+    result = module.main()
+    output = capsys.readouterr().out
+
+    assert result == 1
+    assert forged not in output
+    assert secret not in output
+
+
+def test_readback_exception_message_is_not_exposed(monkeypatch, capsys) -> None:
+    module = _load()
+    secret = "READBACK_SECRET"
+    monkeypatch.setattr(module, "evaluate", lambda _pr: ("AUTO-MERGE", ["green"], _green_pr()))
+    monkeypatch.setattr(module.subprocess, "run", lambda *_args, **_kwargs: _completed(0))
+
+    def fail_readback(_pr, _fields):
+        raise RuntimeError(f"transport failed with {secret}")
+
+    monkeypatch.setattr(module, "gh_json", fail_readback)
+    monkeypatch.setattr(module.sys, "argv", [str(SCRIPT), "123", "--execute"])
+
+    result = module.main()
+    output = capsys.readouterr().out
+
+    assert result == 1
+    assert "RuntimeError" in output
+    assert secret not in output
+
+
+def test_json_decode_error_is_a_sanitized_failure(monkeypatch) -> None:
+    module = _load()
+    monkeypatch.setattr(module.subprocess, "run", lambda *_args, **_kwargs: _completed(0))
+
+    def fail_readback(_pr, _fields):
+        raise json.JSONDecodeError("READBACK_SECRET", "x", 0)
+
+    monkeypatch.setattr(module, "gh_json", fail_readback)
+
+    merged, detail, remote = module.execute_merge("123")
+
+    assert merged is False
+    assert remote == {}
+    assert "JSONDecodeError" in detail
+    assert "READBACK_SECRET" not in detail
+
+
+def test_non_object_readback_payloads_fail_closed(monkeypatch) -> None:
+    module = _load()
+    monkeypatch.setattr(module.subprocess, "run", lambda *_args, **_kwargs: _completed(0))
+
+    for payload in (None, [], ["MERGED"]):
+        monkeypatch.setattr(module, "gh_json", lambda _pr, _fields, value=payload: value)
+        merged, detail, remote = module.execute_merge("123")
+
+        assert merged is False
+        assert remote == {}
+        assert "응답 형식 오류" in detail
+
+
+def test_malformed_merged_at_values_fail_closed(monkeypatch) -> None:
+    module = _load()
+    monkeypatch.setattr(module.subprocess, "run", lambda *_args, **_kwargs: _completed(0))
+
+    malformed_values = (
+        None,
+        True,
+        ["2026-07-22T00:00:00Z"],
+        "not-a-timestamp",
+        "2026-07-22T00:00:00",
+        "2026-13-22T00:00:00Z",
+    )
+    for value in malformed_values:
+        monkeypatch.setattr(
+            module,
+            "gh_json",
+            lambda _pr, _fields, merged_at=value: {"state": "MERGED", "mergedAt": merged_at},
+        )
+        merged, detail, remote = module.execute_merge("123")
+
+        assert merged is False
+        assert remote == {"state": "MERGED"}
+        assert "mergedAt=invalid" in detail
+
+
+def test_malformed_state_values_fail_closed(monkeypatch) -> None:
+    module = _load()
+    monkeypatch.setattr(module.subprocess, "run", lambda *_args, **_kwargs: _completed(0))
+
+    for state in (None, True, ["MERGED"], "UNKNOWN"):
+        monkeypatch.setattr(
+            module,
+            "gh_json",
+            lambda _pr, _fields, value=state: {
+                "state": value,
+                "mergedAt": "2026-07-22T00:00:00Z",
+            },
+        )
+        merged, detail, remote = module.execute_merge("123")
+
+        assert merged is False
+        assert remote == {"state": "INVALID"}
+        assert "state=INVALID" in detail
+
+
+def test_valid_timezone_aware_merged_at_is_confirmed(monkeypatch) -> None:
+    module = _load()
+    monkeypatch.setattr(module.subprocess, "run", lambda *_args, **_kwargs: _completed(0))
+    monkeypatch.setattr(
+        module,
+        "gh_json",
+        lambda _pr, _fields: {"state": "MERGED", "mergedAt": "2026-07-22T09:00:00+09:00"},
+    )
+
+    merged, _detail, remote = module.execute_merge("123")
+
+    assert merged is True
+    assert remote == {"state": "MERGED", "mergedAt": "2026-07-22T09:00:00+09:00"}
 
 
 def test_execute_mode_returns_nonzero_until_remote_merge_is_confirmed(monkeypatch, capsys) -> None:

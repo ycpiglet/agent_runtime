@@ -25,6 +25,7 @@ import json
 import re
 import subprocess
 import sys
+from datetime import datetime
 
 try:  # Windows 콘솔(cp949)에서도 UTF-8 출력
     sys.stdout.reconfigure(encoding="utf-8")
@@ -32,6 +33,10 @@ except Exception:
     pass
 
 CODE_LINE_CAP = 600  # 비문서 변경 라인(additions+deletions) 소프트 상한
+GH_COMMAND_TIMEOUT_SECONDS = 30
+RFC3339_TIMESTAMP = re.compile(
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$"
+)
 
 # 비가역/고-blast surface — 하나라도 변경되면 R3(사람 결정).
 R3_PATTERNS = [
@@ -50,13 +55,22 @@ DOC_PATTERNS = [
 
 
 def gh_json(pr: str, fields: str) -> dict:
-    out = subprocess.run(
-        ["gh", "pr", "view", pr, "--json", fields],
-        capture_output=True, text=True, encoding="utf-8",
-    )
+    try:
+        out = subprocess.run(
+            ["gh", "pr", "view", pr, "--json", fields],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=GH_COMMAND_TIMEOUT_SECONDS,
+        )
+    except Exception as exc:
+        raise SystemExit(f"gh 조회 실패: {exc.__class__.__name__}") from None
     if out.returncode != 0:
-        raise SystemExit(f"gh 실패: {out.stderr.strip()}")
-    return json.loads(out.stdout)
+        raise SystemExit(f"gh 조회 실패: exit={out.returncode}")
+    try:
+        return json.loads(out.stdout)
+    except (json.JSONDecodeError, TypeError) as exc:
+        raise SystemExit(f"gh 응답 해석 실패: {exc.__class__.__name__}") from None
 
 
 def is_doc(path: str) -> bool:
@@ -115,30 +129,62 @@ def evaluate(pr: str) -> tuple:
     return "AUTO-MERGE", [f"코드 {code_lines}줄, 파일 {len(files)}개, 전 check green, CLEAN"], d
 
 
+def _valid_merged_at(value: object) -> bool:
+    """Accept only a timezone-aware RFC 3339 timestamp string."""
+    if not isinstance(value, str) or not RFC3339_TIMESTAMP.fullmatch(value):
+        return False
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return parsed.tzinfo is not None
+
+
 def execute_merge(pr: str) -> tuple[bool, str, dict]:
-    """Run the merge request and confirm success from authoritative remote state."""
-    merge = subprocess.run(
-        ["gh", "pr", "merge", pr, "--squash", "--delete-branch"],
-        capture_output=True, text=True, encoding="utf-8",
-    )
-    command_output = (merge.stdout.strip() or merge.stderr.strip()).strip()
+    """Request a merge and confirm only a validated authoritative remote state."""
+    try:
+        merge = subprocess.run(
+            ["gh", "pr", "merge", pr, "--squash", "--delete-branch"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=GH_COMMAND_TIMEOUT_SECONDS,
+        )
+        command_status = f"exit={merge.returncode}"
+    except Exception as exc:
+        command_status = f"exception={exc.__class__.__name__}"
+
     try:
         remote = gh_json(pr, "state,isDraft,mergedAt,mergeCommit")
-    except SystemExit as exc:
-        return False, f"{command_output}\n원격 상태 재확인 실패: {exc}".strip(), {}
+    except SystemExit:
+        return False, f"원격 상태 재확인 실패: SystemExit; merge {command_status}", {}
+    except Exception as exc:
+        return (
+            False,
+            f"원격 상태 재확인 실패: {exc.__class__.__name__}; merge {command_status}",
+            {},
+        )
 
-    if remote.get("state") == "MERGED" and remote.get("mergedAt"):
-        detail = command_output or "gh merge 명령 출력 없음"
-        if merge.returncode != 0:
-            detail += f"\nmerge 명령 exit={merge.returncode}; 원격 MERGED 상태로 성공 확정"
-        return True, detail, remote
+    if not isinstance(remote, dict):
+        return False, f"원격 상태 응답 형식 오류; merge {command_status}", {}
 
-    detail = command_output or "gh merge 명령 출력 없음"
-    detail += (
-        f"\n원격 상태가 MERGED가 아님: state={remote.get('state')}, "
-        f"mergedAt={remote.get('mergedAt')}, merge exit={merge.returncode}"
+    state = remote.get("state")
+    merged_at = remote.get("mergedAt")
+    safe_state = (
+        state
+        if isinstance(state, str) and state in {"OPEN", "CLOSED", "MERGED"}
+        else "INVALID"
     )
-    return False, detail, remote
+    safe_remote = {"state": safe_state}
+    if state == "MERGED" and _valid_merged_at(merged_at):
+        safe_remote["mergedAt"] = merged_at
+        return True, f"원격 머지 상태 확인 완료; merge {command_status}", safe_remote
+
+    return (
+        False,
+        f"원격 머지 확인 실패: state={safe_state}, mergedAt=invalid; merge {command_status}",
+        safe_remote,
+    )
 
 
 def main() -> int:
