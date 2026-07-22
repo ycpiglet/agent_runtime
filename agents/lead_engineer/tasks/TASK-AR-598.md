@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 registered_at: 2026-07-19T10:28:06+09:00
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-22T16:39:03+09:00
+started_at: 2026-07-19T12:26:12+09:00
+updated_at: 2026-07-22T16:39:40+09:00
 title: Integrate crash-safe session resume audit
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 3
@@ -40,6 +41,17 @@ verified_at: 2026-07-22T16:39:03+09:00
 verified_by: codex-root-task-ar-598
 evidence_refs:
   - reviews/VERIFY-2026-07-22-task-ar-598-20260722163903.json
+review_evidence_refs:
+  - reviews/W4B-2026-07-19-TASK-AR-598-REWORK.md
+  - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-598-INDEPENDENT-AUDITOR.md
+  - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-598-SKEPTIC.md
+implementation_commit: 498febc
+remote_closeout: pending_push_and_supersession
+resolution: done
+completed_at: 2026-07-22T16:39:40+09:00
+closed_by: codex-root-task-ar-598
+actual_hours: 1.2
+actual_tokens: 22000
 ---
 
 # TASK-AR-598 - Integrate crash-safe session resume audit
@@ -62,3 +74,15 @@ evidence_refs:
 
 - `python -m pytest tests/test_session_resume_check.py tests/test_orchestrator_atomic_writes.py -q`
 - `python scripts/regen_host_lock_if_needed.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-22T16:39:40+09:00`
+- Resolution: `done`
+- Actual hours: `1.2`
+- Actual tokens: `22000`
+- Closed by: `codex-root-task-ar-598`
+- Evidence:
+  - `reviews/VERIFY-2026-07-22-task-ar-598-20260722163903.json`
+<!-- work-close:end -->

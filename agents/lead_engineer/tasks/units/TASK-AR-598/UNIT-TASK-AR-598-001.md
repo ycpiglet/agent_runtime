@@ -9,11 +9,12 @@ task_id: TASK-AR-598
 task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 initiative_id: INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T12:42:02+09:00
+started_at: 2026-07-19T12:26:12+09:00
+updated_at: 2026-07-22T16:39:37+09:00
 origin_type: owner_request
 origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
@@ -49,6 +50,16 @@ evidence_refs:
   - reviews/VERIFY-2026-07-19-unit-task-ar-598-001-20260719122843.json
   - reviews/VERIFY-2026-07-19-unit-task-ar-598-001-20260719123919.json
   - reviews/VERIFY-2026-07-19-unit-task-ar-598-001-20260719124202.json
+review_evidence_refs:
+  - reviews/W4B-2026-07-19-TASK-AR-598-REWORK.md
+  - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-598-INDEPENDENT-AUDITOR.md
+  - reviews/ROLE-REVIEW-2026-07-19-TASK-AR-598-SKEPTIC.md
+implementation_commit: 498febc
+resolution: done
+completed_at: 2026-07-22T16:39:37+09:00
+closed_by: codex-root-task-ar-598
+actual_hours: 1.0
+actual_tokens: 15000
 ---
 
 # UNIT-TASK-AR-598-001 - Rebase and verify session resume recovery
@@ -98,3 +109,17 @@ Report PR conflict resolution, hook order, malformed-state tests, and the remote
 ## Stop Boundary
 
 Stop if the PR contains host-specific behavior or destructive recovery; retain report-only behavior and document the incompatible portion.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-22T16:39:37+09:00`
+- Resolution: `done`
+- Actual hours: `1.0`
+- Actual tokens: `15000`
+- Closed by: `codex-root-task-ar-598`
+- Evidence:
+  - `reviews/VERIFY-2026-07-19-unit-task-ar-598-001-20260719122843.json`
+  - `reviews/VERIFY-2026-07-19-unit-task-ar-598-001-20260719123919.json`
+  - `reviews/VERIFY-2026-07-19-unit-task-ar-598-001-20260719124202.json`
+<!-- work-close:end -->

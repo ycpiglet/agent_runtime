@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-19T12:25:31+09:00",
+  "generated_at": "2026-07-22T16:39:40+09:00",
   "record_count": 390,
   "finding_count": 0,
   "findings": [],
@@ -4194,7 +4194,7 @@
       "title": "Resolve GitHub #274 and supersede or merge PR #277 by shipping the host-proven sessio…",
       "path": "agents/lead_engineer/tasks/TASK-AR-598.md",
       "parent_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-598-001",
@@ -4205,7 +4205,7 @@
       "title": "UNIT-TASK-AR-598-001 - Rebase and verify session resume recovery",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-598/UNIT-TASK-AR-598-001.md",
       "parent_id": "TASK-AR-598",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-599",
