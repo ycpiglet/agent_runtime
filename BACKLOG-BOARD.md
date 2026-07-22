@@ -55,7 +55,7 @@ completed_task_set_count: 51
 
 - Flow: Repair canonical identity, task start state, host dashboard dependencies, hook activation, CI isolation, frontmatter parsing, and classifier semantics.
 - Progress: `3/7` done; `4` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-606` | INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-606/UNIT-TASK-AR-606-001.md | planned | Action | P1 | High | Medium | 2h/8000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Close GitHub #295 by preserving executable hook activation in source and repairing it… |
