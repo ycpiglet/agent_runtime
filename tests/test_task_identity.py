@@ -7,6 +7,12 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "task_identity.py"
+SCRIPTS_DIR = REPO_ROOT / "scripts"
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+import task_identity as task_identity_module  # noqa: E402
+
 # TASK-AR-536: task_uid is now UUIDv7 (time-sortable); legacy v4 keys stay valid.
 UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[47][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
 
@@ -111,6 +117,7 @@ def test_task_identity_create_uses_uuid_backed_task_id_and_metadata(tmp_path: Pa
     task_path = tmp_path / path_line.split("=", 1)[1]
     meta = _frontmatter(task_path)
     assert meta["id"].startswith("TASK-AR-20260610-120000-")
+    assert task_identity_module.is_canonical_task_id(meta["id"])
     assert UUID_RE.match(meta["task_uid"])
     assert meta["registered_at"] == "2026-06-10T12:00:00+09:00"
     assert meta["updated_at"] == "2026-06-10T12:00:00+09:00"

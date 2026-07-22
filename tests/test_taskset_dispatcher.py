@@ -190,6 +190,26 @@ def test_plan_honors_canonical_task_order_before_score_sort(tmp_path: Path) -> N
     ]
 
 
+@pytest.mark.parametrize(
+    "task_id",
+    [
+        "TASK-AR-20260721-221825-f53b6746",
+        "TASK-AR-20260721-221825-F53B6746",
+    ],
+)
+def test_plan_accepts_timestamp_task_ids_without_case_rewriting(
+    tmp_path: Path, task_id: str
+) -> None:
+    task_set_id = "TASKSET-DYNAMIC-TIMESTAMP-IDS"
+    _write_taskset(tmp_path, task_set_id, tasks=[task_id])
+    _write_task(tmp_path, task_id, task_set_id)
+
+    result = _run(tmp_path, "plan", task_set_id, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["next_task_id"] == task_id
+
+
 def test_body_order_deduplicates_and_ignores_unrelated_ids(tmp_path: Path) -> None:
     task_set_id = "TASKSET-DYNAMIC-ORDER"
     _write_taskset(tmp_path, task_set_id)

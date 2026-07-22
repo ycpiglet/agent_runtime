@@ -4,6 +4,8 @@ import importlib.util
 import sys
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "conversation_work_audit.py"
@@ -103,6 +105,36 @@ def test_planning_record_with_review_task_board_and_pointer_links_passes(tmp_pat
     assert len(records) == 1
     assert findings == []
     assert conversation_work_audit.main(["--root", str(root), "--check"]) == 0
+
+
+@pytest.mark.parametrize(
+    "task_id",
+    [
+        "TASK-AR-20260721-221825-f53b6746",
+        "TASK-AR-20260721-221825-F53B6746",
+    ],
+)
+def test_planning_record_accepts_timestamp_task_id_suffix_case(
+    tmp_path: Path, task_id: str
+) -> None:
+    body = (
+        "## Proposed Follow-Up Registration\n\n"
+        "| Proposed Task | Scope |\n"
+        "| --- | --- |\n"
+        f"| `{task_id}` | allocator-to-audit contract |\n"
+    )
+    root = _fixture_repo(tmp_path, body, with_task=False)
+    _write(
+        root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md",
+        f"---\nid: {task_id}\nstatus: planned\n---\n\n# Timestamp task\n",
+    )
+
+    _, findings = conversation_work_audit.analyze(root)
+
+    assert not any(
+        finding.kind in {"unmapped-planning-record", "missing-task-file"}
+        for finding in findings
+    )
 
 
 def test_planning_record_referencing_missing_task_file_is_block(tmp_path: Path) -> None:
