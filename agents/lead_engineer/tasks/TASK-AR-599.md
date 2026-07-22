@@ -9,9 +9,9 @@ kind: task
 parent_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 registered_at: 2026-07-19T10:28:06+09:00
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-22T17:25:33+09:00
+updated_at: 2026-07-22T17:31:48+09:00
 title: Adopt never-blocking allimbot notifications
-status: planned
+status: completed
 priority: P1
 difficulty: L
 est_hours: 7
@@ -43,6 +43,11 @@ verified_by: codex-root-task-ar-599-rework
 evidence_refs:
   - reviews/VERIFY-2026-07-22-task-ar-599-20260722171444.json
   - reviews/VERIFY-2026-07-22-task-ar-599-20260722172533.json
+resolution: done
+completed_at: 2026-07-22T17:31:48+09:00
+closed_by: codex-root-task-ar-599-closeout
+actual_hours: 1.0
+actual_tokens: 35000
 ---
 
 # TASK-AR-599 - Adopt never-blocking allimbot notifications
@@ -68,3 +73,16 @@ evidence_refs:
 - `python scripts/verify_wheel_dotfiles.py --check`
 - `python scripts/owner_governance_gate.py`
 - `python scripts/regen_host_lock_if_needed.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-22T17:31:48+09:00`
+- Resolution: `done`
+- Actual hours: `1.0`
+- Actual tokens: `35000`
+- Closed by: `codex-root-task-ar-599-closeout`
+- Evidence:
+  - `reviews/VERIFY-2026-07-22-task-ar-599-20260722171444.json`
+  - `reviews/VERIFY-2026-07-22-task-ar-599-20260722172533.json`
+<!-- work-close:end -->

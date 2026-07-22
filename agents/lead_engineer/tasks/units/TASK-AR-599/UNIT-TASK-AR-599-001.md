@@ -9,11 +9,11 @@ task_id: TASK-AR-599
 task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 initiative_id: INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-22T17:25:09+09:00
+updated_at: 2026-07-22T17:31:47+09:00
 origin_type: owner_request
 origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
@@ -65,6 +65,11 @@ verified_by: codex-root-task-ar-599-rework
 evidence_refs:
   - reviews/VERIFY-2026-07-22-unit-task-ar-599-001-20260722171357.json
   - reviews/VERIFY-2026-07-22-unit-task-ar-599-001-20260722172509.json
+resolution: done
+completed_at: 2026-07-22T17:31:47+09:00
+closed_by: codex-root-task-ar-599-closeout
+actual_hours: 0.8
+actual_tokens: 30000
 ---
 
 # UNIT-TASK-AR-599-001 - Wire optional allimbot notifications end to end
@@ -130,3 +135,16 @@ Report each wired event, no-op/error behavior, configuration documentation, test
 ## Stop Boundary
 
 Stop before sending a real notification or committing any secret; verify only with mocks or local test servers.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-22T17:31:47+09:00`
+- Resolution: `done`
+- Actual hours: `0.8`
+- Actual tokens: `30000`
+- Closed by: `codex-root-task-ar-599-closeout`
+- Evidence:
+  - `reviews/VERIFY-2026-07-22-unit-task-ar-599-001-20260722171357.json`
+  - `reviews/VERIFY-2026-07-22-unit-task-ar-599-001-20260722172509.json`
+<!-- work-close:end -->
