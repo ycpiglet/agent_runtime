@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-07-22
-task_count: 274
-open_count: 10
+task_count: 275
+open_count: 11
 completed_count: 264
-task_set_count: 4
+task_set_count: 5
 completed_task_set_count: 48
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `10` open or active tasks; `264` completed tasks are archived from this live board.
+- Summary: `11` open or active tasks; `264` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `10` / Ask `0` / Review `0` / Later `0` / Done `264`.
-- Task Sets: `4` active workflows; `48` completed workflows are hidden from the live action board.
+- Status: Action `11` / Ask `0` / Review `0` / Later `0` / Done `264`.
+- Task Sets: `5` active workflows; `48` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -79,10 +79,19 @@ completed_task_set_count: 48
 
 - Flow: Normalize the legacy TASK-AR-594 evidence reference into the canonical work-item schema.
 - Progress: `0/1` done; `1` open or active.
-- WIP: active `1/3`; oldest `0.1h`; stale `0`.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-610` | INIT-AR-PR303-CI-SCHEMA-RECOVERY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-610/UNIT-TASK-AR-610-001.md | planned | Action | P0 | Critical | Low | 0.5h/3000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make the existing TASK-AR-594 record satisfy the canonical work-item schema while pre… |
+
+### Backlog Taskset Test Recovery (`TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY`)
+
+- Flow: Update the canonical real-backlog taskset expectation for all newly registered tasksets and prove the full package suite remains green.
+- Progress: `0/1` done; `1` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-611` | INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-611/UNIT-TASK-AR-611-001.md | planned | Action | P0 | Critical | XS | 0.5h/2500tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Make the real-backlog classification test recognize every taskset registered by the J… |
 
 ## Archived Task Sets
 
@@ -142,7 +151,7 @@ completed_task_set_count: 48
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `10` open across `4` task sets (see Action Board above).
+- Active: `11` open across `5` task sets (see Action Board above).
 - Archived task sets: `48` (see Archived Task Sets above).
 - Archived task files: `264` — see `ARCHIVE-INDEX.md`.
 

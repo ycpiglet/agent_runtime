@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-22T18:33:54+09:00",
-  "record_count": 414,
+  "generated_at": "2026-07-22T18:48:39+09:00",
+  "record_count": 418,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4557,6 +4557,50 @@
       "title": "UNIT-TASK-AR-610-001 - Normalize legacy closeout evidence metadata",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-610/UNIT-TASK-AR-610-001.md",
       "parent_id": "TASK-AR-610",
+      "status": "worker_ready"
+    },
+    {
+      "key": "initiative:INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY",
+      "level": "initiative",
+      "number": "28",
+      "label": "Initiative 28",
+      "id": "INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY",
+      "title": "Backlog Taskset Test Recovery",
+      "path": "agents/project/initiatives/INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY",
+      "level": "taskset",
+      "number": "28.1",
+      "label": "Taskset 28.1",
+      "id": "TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY",
+      "title": "Backlog Taskset Test Recovery",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-611",
+      "level": "task",
+      "number": "28.1.1",
+      "label": "Task 28.1.1",
+      "id": "TASK-AR-611",
+      "title": "Make the real-backlog classification test recognize every taskset registered by the J…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-611.md",
+      "parent_id": "TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-611-001",
+      "level": "unit",
+      "number": "28.1.1.1",
+      "label": "Unit 28.1.1.1",
+      "id": "UNIT-TASK-AR-611-001",
+      "title": "UNIT-TASK-AR-611-001 - Add newly registered tasksets to the exact-set regression test",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-611/UNIT-TASK-AR-611-001.md",
+      "parent_id": "TASK-AR-611",
       "status": "worker_ready"
     }
   ]
