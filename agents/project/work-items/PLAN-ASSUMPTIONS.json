@@ -284,8 +284,8 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-23-task-ar-608-dispatch-t3-replan.md",
-          "value": "51f2cc490b39c8e7637432c9f19a7c3ef29c3c052bc8e7124ec6f62579121529"
+          "path": "reviews/REVIEW-2026-07-23-task-ar-609-dispatch-t3-replan.md",
+          "value": "e52665ae325c054005af1ec22b13ff006eade5546d7de9709e39301e374c9a3f"
         },
         {
           "kind": "sha256",
@@ -300,22 +300,17 @@
         {
           "kind": "sha256",
           "path": "scripts/backlog_board.py",
-          "value": "bbadc3eac3afd695e299b941eed5f95a6f566fbbd8afdbd237188817ad9a6f89"
+          "value": "6e1f1b2a40f2d8b2a66e4ec5685531d4870e295a2a9e5791571faabd906accfd"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/backlog_board.py",
-          "value": "8ec4b85ecf81826c2cfc24aca06dadeedc20e7138ae8e902fae481a62cac1331"
+          "value": "4455c3d28114130e18821a1eed53868cab16c4ffbc564300eb0578e3f85572ef"
         },
         {
           "kind": "sha256",
           "path": "tests/test_backlog_board_tasksets.py",
-          "value": "778fdabe453d0cf4b9c28f94039c85b9adb1ad09398110d11dc19f449634fec1"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "6cbd2641bb38bc349cc9fd42d21d5245a1ca22580d303fb392ec89da355825dd"
+          "value": "b3e79a6a43b3a8ab049c44f6b7b022662f854482017dcfca72c274976cf0917e"
         },
         {
           "kind": "sha256",
@@ -336,10 +331,15 @@
           "kind": "sha256",
           "path": "tests/test_template_work_item_classifier.py",
           "value": "e2dcc272fc996a6741b4c5d0b41924887a4cc6bf81788cd472b8a6280679b4c4"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/fixtures/host/agent_runtime.lock.json",
+          "value": "e8460b4fd84626125040ef3e93d433f989d549b63aeb89f2e333f2eecb5222c0"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-23-task-ar-608-dispatch-t3-replan.md",
-      "recorded_at": "2026-07-23T06:31:07+09:00",
+      "design_record": "reviews/REVIEW-2026-07-23-task-ar-609-dispatch-t3-replan.md",
+      "recorded_at": "2026-07-23T07:16:49+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION"
     },
@@ -777,5 +777,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-23T06:31:07+09:00"
+  "updated_at": "2026-07-23T07:16:49+09:00"
 }
