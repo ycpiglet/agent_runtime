@@ -42,7 +42,6 @@ verified_by: codex-root-task-ar-594-rework
 evidence_refs:
   - reviews/VERIFY-2026-07-19-task-ar-594-20260719105444.json
   - reviews/VERIFY-2026-07-19-task-ar-594-20260719110741.json
-failed_evidence_refs:
   - reviews/VERIFY-2026-07-19-task-ar-594-20260719110720.json
 review_evidence_refs:
   - reviews/W4B-2026-07-19-TASK-AR-594-REWORK.md
