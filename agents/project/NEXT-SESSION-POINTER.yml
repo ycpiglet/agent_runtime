@@ -1,26 +1,20 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-23T06:31:27+09:00
+updated_at: 2026-07-23T07:08:00+09:00
 updated_by: codex-root
 current_state:
-  summary: "TASK-AR-616/#320 is fully closed; TASK-AR-608/#298 is claimed after T3 plan revalidation."
+  summary: "TASK-AR-608/#298 is fully closed after PR #328 and main CI; TASK-AR-609/#300 is next."
   status: active
   task_set_status: in_progress
   task_set_id: "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION"
-  step_index: 6
+  step_index: 7
   step_total: 7
-  progress_pct: 72
-  status_text: "TASK-AR-608 is claimed; failure-first quoted-hash parser coverage is next."
+  progress_pct: 86
+  status_text: "TASK-AR-608 is closed; run W0 and T2 revalidation before claiming TASK-AR-609."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260723-063127-task-ar-608-076c
-      agent_role: lead-engineer
-      agent_instance_id: codex-root-task-ar-608
-      display_name: lead_engineer@orchestrator-01
-      callsite_id: codex-root-20260723
-  current_teams:
-    - agent-runtime-core
+  current_agents: []
+  current_teams: []
 resume:
-  active_task: TASK-AR-608
+  active_task: TASK-AR-609
   active_task_set: "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
@@ -29,8 +23,7 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260723-063127-task-ar-608-076c.json
+  active_claims: []
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
     active_claim: null
@@ -319,7 +312,7 @@ pointers:
     - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-221-quality-loop-closeout.md
     - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-243-planning-evidence-link.md
 next_actions:
-  - "Execute TASK-AR-608 next, then TASK-AR-609; after the July remediation tasks, execute registered TASK-AR-612 to prevent taskset restart of closed/released records."
+  - "Execute TASK-AR-609 next; after the July remediation tasks, execute registered TASK-AR-612 to prevent taskset restart of closed/released records."
   - "Continue TASKSET-AR-AGENT-ORG-DELEGATION units TASK-AR-558..562 (each via superpowers:writing-plans; pattern: docs/superpowers/plans/2026-06-15-agent-org-delegation-unit1-role-registry.md). Spec: docs/superpowers/specs/2026-06-14-agent-org-delegation-model-design.md; research: reviews/RESEARCH-2026-06-14-agent-org-design-references.md."
   - "Resume UI redesign + product-structure change: brainstorm sub-project #1 (decision-first IA) then #3 (visual identity / 2.5D agent characters / insight graph). Entry: reviews/HANDOFF-2026-06-15-ui-redesign-and-product-structure.md."
   - "For the Owner's A2A/metadata follow-up, start TASKSET-AR-WORK-METADATA-ANALYTICS from BACKLOG-BOARD.md; first candidates are TASK-AR-514 and TASK-AR-515."

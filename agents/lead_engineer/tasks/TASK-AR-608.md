@@ -9,10 +9,10 @@ kind: task
 parent_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 registered_at: 2026-07-22T17:45:00+09:00
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-23T06:49:58+09:00
+updated_at: 2026-07-23T07:07:32+09:00
 started_at: 2026-07-23T06:31:27+09:00
 title: Preserve quoted hashes in frontmatter scalars
-status: in_progress
+status: completed
 priority: P1
 difficulty: M
 est_hours: 2
@@ -44,6 +44,11 @@ evidence_refs:
   - reviews/VERIFY-2026-07-23-task-ar-608-20260723063647.json
   - reviews/VERIFY-2026-07-23-task-ar-608-20260723064403.json
   - reviews/VERIFY-2026-07-23-task-ar-608-20260723064958.json
+resolution: done
+completed_at: 2026-07-23T07:07:32+09:00
+closed_by: codex-root-task-ar-608
+actual_hours: 0.6
+actual_tokens: 28000
 ---
 
 # TASK-AR-608 - Preserve quoted hashes in frontmatter scalars
@@ -66,3 +71,17 @@ evidence_refs:
 
 - `python -m pytest tests/test_backlog_board_tasksets.py -q`
 - `python scripts/regen_host_lock_if_needed.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T07:07:32+09:00`
+- Resolution: `done`
+- Actual hours: `0.6`
+- Actual tokens: `28000`
+- Closed by: `codex-root-task-ar-608`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-task-ar-608-20260723063647.json`
+  - `reviews/VERIFY-2026-07-23-task-ar-608-20260723064403.json`
+  - `reviews/VERIFY-2026-07-23-task-ar-608-20260723064958.json`
+<!-- work-close:end -->

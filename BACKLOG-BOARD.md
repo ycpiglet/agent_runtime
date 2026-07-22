@@ -9,8 +9,8 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-07-23
 task_count: 280
-open_count: 4
-completed_count: 276
+open_count: 3
+completed_count: 277
 task_set_count: 3
 completed_task_set_count: 55
 ---
@@ -18,11 +18,11 @@ completed_task_set_count: 55
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `4` open or active tasks; `276` completed tasks are archived from this live board.
+- Summary: `3` open or active tasks; `277` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `4` / Ask `0` / Review `0` / Later `0` / Done `276`.
+- Status: Action `3` / Ask `0` / Review `0` / Later `0` / Done `277`.
 - Task Sets: `3` active workflows; `55` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -54,11 +54,10 @@ completed_task_set_count: 55
 ### Release Impact Remediator (`TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION`)
 
 - Flow: Repair canonical identity, task start state, host dashboard dependencies, hook activation, CI isolation, frontmatter parsing, and classifier semantics.
-- Progress: `5/7` done; `2` open or active.
-- WIP: active `1/3`; oldest `0.0h`; stale `0`.
+- Progress: `6/7` done; `1` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-608` | INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-608/UNIT-TASK-AR-608-001.md | in_progress | Action | P1 | High | Medium | 2h/7000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Close GitHub #298 by making comment stripping quote-aware while preserving existing u… |
 | `TASK-AR-609` | INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-609/UNIT-TASK-AR-609-001.md | planned | Action | P1 | High | Medium | 2h/7000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Close GitHub #300 by preventing taskset records from being duplicated into the initia… |
 
 ### Terminal Status Start Guard (`TASKSET-AR-TERMINAL-STATUS-START-GUARD`)
@@ -135,9 +134,9 @@ completed_task_set_count: 55
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `4` open across `3` task sets (see Action Board above).
+- Active: `3` open across `3` task sets (see Action Board above).
 - Archived task sets: `55` (see Archived Task Sets above).
-- Archived task files: `276` — see `ARCHIVE-INDEX.md`.
+- Archived task files: `277` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

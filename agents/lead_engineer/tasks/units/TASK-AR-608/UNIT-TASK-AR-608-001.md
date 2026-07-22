@@ -9,11 +9,11 @@ task_id: TASK-AR-608
 task_set_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 initiative_id: INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-23T06:50:08+09:00
+updated_at: 2026-07-23T07:07:24+09:00
 started_at: 2026-07-23T06:31:27+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
@@ -49,6 +49,11 @@ evidence_refs:
   - reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723063712.json
   - reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723064414.json
   - reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723065008.json
+resolution: done
+completed_at: 2026-07-23T07:07:24+09:00
+closed_by: codex-root-task-ar-608
+actual_hours: 0.6
+actual_tokens: 28000
 ---
 
 # UNIT-TASK-AR-608-001 - Make frontmatter comment scanning quote-aware
@@ -97,3 +102,17 @@ Report the supported scanner grammar, adversarial cases, parity, and issue #298 
 ## Stop Boundary
 
 Stop before expanding the parser into a general YAML implementation.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T07:07:24+09:00`
+- Resolution: `done`
+- Actual hours: `0.6`
+- Actual tokens: `28000`
+- Closed by: `codex-root-task-ar-608`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723063712.json`
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723064414.json`
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723065008.json`
+<!-- work-close:end -->
