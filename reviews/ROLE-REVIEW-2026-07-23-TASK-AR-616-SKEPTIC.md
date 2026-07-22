@@ -1,8 +1,8 @@
 ---
 title: TASK-AR-616 Skeptic and Adversarial W4b
 date: 2026-07-23
-signal: fail
-score: 68
+signal: pass
+score: 96
 task_id: TASK-AR-616
 verified_head: b52ab3d6208d27e355896011691b8367dfa60e23
 implementation_sha: 57b04e37fbdfbf50c1d24a729fa90b505858b8cf
@@ -10,7 +10,7 @@ baseline_sha: dd3a615c
 verified_by: codex-task-ar-616-skeptic-20260723
 worker: codex-root-task-ar-616
 role: skeptic
-verdict: REJECT
+verdict: APPROVE
 tags: [task-ar-616, skeptic, adversarial, release-auto, git, fixture, retry, duplicate]
 ---
 
@@ -323,3 +323,28 @@ address the earlier duplicate counterexample. Under the canonical TASK-AR-616
 contract it is defense-in-depth, not a prerequisite for the final APPROVE,
 because that counterexample was not a realizable result from the reviewed Git
 execution path and the task explicitly required classifier preservation.
+
+## Post-W4b Delta Quick Check — c81e3c23400b004b3805c0067ee8460a64d19bf7
+
+**POST-DELTA REJECT** for the review-integration delta. The implementation
+verdict above remains **APPROVE**.
+
+The `b52ab3d6..c81e3c23` delta contains exactly the two W4b reports and generated
+`reviews/INDEX.md`, with no code or task/runtime metadata change. Each report
+path appears exactly once in the index. However, the index registers
+`W4B-2026-07-23-TASK-AR-616.md` as `pass` and registers this skeptic report as
+`fail`, not `pass`. The requested invariant that both reports be indexed once
+as pass is therefore false.
+
+Both executable gates are clean:
+
+```text
+evidence_index_generator.py --check: pass; findings=0
+taskset_work_gate.py --check: pass; findings=0
+```
+
+Those gates prove the generated index matches the current report metadata; they
+do not override the semantic mismatch between this report's historical
+frontmatter signal and its appended final reconsidered APPROVE. Resolve the
+canonical report signal/verdict representation, regenerate `reviews/INDEX.md`,
+and re-run both gates before accepting the post-W4b integration delta.
