@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY
 initiative_id: INIT-AR-RELEASE-CADENCE-QUERY-RECOVERY
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-23T01:16:34+09:00
-updated_at: 2026-07-23T01:16:34+09:00
+updated_at: 2026-07-23T01:50:00+09:00
 origin_type: ci_failure
 origin_ref: reviews/REVIEW-2026-07-23-release-cadence-query-recovery-plan.md
 created_by: codex-root-planner
@@ -49,6 +49,10 @@ verification:
   - python scripts/taskset_work_gate.py --check
 handoff: Report failure-first evidence, the non-zero/no-tag classification matrix, retry counts, structured diagnostics, focused and repeated test results, parity, host lock, and independent W4b review.
 stop_condition: Stop if the fix requires weakening a release gate, changing cadence thresholds, or modifying unrelated status consumers.
+verified_at: 2026-07-23T01:50:00+09:00
+verified_by: codex-root-task-ar-613
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-unit-task-ar-613-001-20260723015000.json
 ---
 
 # UNIT-TASK-AR-613-001 - Classify and retry unexpected non-zero cadence queries

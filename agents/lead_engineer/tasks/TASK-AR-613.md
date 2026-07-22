@@ -9,7 +9,8 @@ kind: task
 parent_id: TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY
 registered_at: 2026-07-23T01:16:34+09:00
 created_at: 2026-07-23T01:16:34+09:00
-updated_at: 2026-07-23T01:16:34+09:00
+updated_at: 2026-07-23T01:45:33+09:00
+started_at: 2026-07-23T01:25:41+09:00
 title: Recover transient non-zero cadence queries without false not-triggered
 status: planned
 priority: P0
@@ -30,11 +31,20 @@ summary: Close GitHub issue 316 by distinguishing legitimate no-tag responses fr
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python -m pytest tests/test_release_cadence_trigger.py tests/test_release_auto_noncritical.py -q
+  - python scripts/regen_host_lock_if_needed.py --check
+  - python scripts/taskset_work_gate.py --check
 tags:
   - github-316
   - ci-flake
   - release-cadence
   - release-auto
+verification_status: passed
+verified_at: 2026-07-23T01:45:33+09:00
+verified_by: codex-root-task-ar-613
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-task-ar-613-20260723014533.json
 ---
 
 # TASK-AR-613 - Recover transient non-zero cadence queries without false not-triggered
