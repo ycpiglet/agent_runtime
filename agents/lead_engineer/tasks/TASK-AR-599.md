@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 registered_at: 2026-07-19T10:28:06+09:00
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-22T17:14:44+09:00
+updated_at: 2026-07-22T17:25:33+09:00
 title: Adopt never-blocking allimbot notifications
 status: planned
 priority: P1
@@ -38,10 +38,11 @@ verification:
   - python scripts/owner_governance_gate.py
   - python scripts/regen_host_lock_if_needed.py --check
 verification_status: passed
-verified_at: 2026-07-22T17:14:44+09:00
-verified_by: codex-root-task-ar-599
+verified_at: 2026-07-22T17:25:33+09:00
+verified_by: codex-root-task-ar-599-rework
 evidence_refs:
   - reviews/VERIFY-2026-07-22-task-ar-599-20260722171444.json
+  - reviews/VERIFY-2026-07-22-task-ar-599-20260722172533.json
 ---
 
 # TASK-AR-599 - Adopt never-blocking allimbot notifications

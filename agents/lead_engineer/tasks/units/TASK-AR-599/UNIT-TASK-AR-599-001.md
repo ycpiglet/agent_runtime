@@ -13,7 +13,7 @@ status: worker_ready
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-22T17:13:57+09:00
+updated_at: 2026-07-22T17:25:09+09:00
 origin_type: owner_request
 origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
@@ -60,10 +60,11 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Report each wired event, no-op/error behavior, configuration documentation, tests, and secret-gate output.
 stop_condition: Stop before sending a real notification or committing any secret; verify only with mocks or local test servers.
-verified_at: 2026-07-22T17:13:57+09:00
-verified_by: codex-root-task-ar-599
+verified_at: 2026-07-22T17:25:09+09:00
+verified_by: codex-root-task-ar-599-rework
 evidence_refs:
   - reviews/VERIFY-2026-07-22-unit-task-ar-599-001-20260722171357.json
+  - reviews/VERIFY-2026-07-22-unit-task-ar-599-001-20260722172509.json
 ---
 
 # UNIT-TASK-AR-599-001 - Wire optional allimbot notifications end to end
