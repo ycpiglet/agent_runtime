@@ -732,7 +732,10 @@ def lane_counts(tasks: Iterable[Task]) -> dict[str, int]:
 
 
 def render(tasks: list[Task], *, root: Path | None = None) -> str:
-    today = date.today().isoformat()
+    # TASK-AR-602: ISO second precision (not date-only) so the decision board's
+    # own freshness is legible; taskset_work_gate masks this wall-clock field
+    # before its drift comparison, so second-level churn does not fail the gate.
+    today = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
     open_tasks = [t for t in tasks if not is_done(t) and not is_triage(t)]
     triage_tasks = [t for t in tasks if is_triage(t)]
     completed_tasks = [t for t in tasks if is_done(t)]
