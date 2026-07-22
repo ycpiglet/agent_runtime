@@ -12,8 +12,8 @@
   "status": "released",
   "status_text": "Additive independent-auditor review pass for TASK-AR-603 (closeout)",
   "claimed_at": "2026-07-22T20:36:32+09:00",
-  "last_heartbeat": "2026-07-22T20:37:19+09:00",
-  "updated_at": "2026-07-22T20:37:19+09:00",
+  "last_heartbeat": "2026-07-22T20:57:49+09:00",
+  "updated_at": "2026-07-22T20:57:49+09:00",
   "tags": [
     "review",
     "additive",
@@ -24,8 +24,8 @@
   "parent_task_set_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
   "handoff_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-603-independent-auditor-closeout.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-603-independent-auditor-closeout.log.md",
-  "released_at": "2026-07-22T20:37:19+09:00",
-  "verified_by": "codex-task-ar-603-independent-auditor",
+  "released_at": "2026-07-22T20:57:49+09:00",
+  "verified_by": "codex-task-ar-603-independent-auditor-rework1",
   "verifier_role": "independent-auditor",
-  "verification_evidence": "reviews/W4B-2026-07-22-TASK-AR-603.md"
+  "verification_evidence": "reviews/W4B-2026-07-22-TASK-AR-603-UNICODE-REWORK.md"
 }

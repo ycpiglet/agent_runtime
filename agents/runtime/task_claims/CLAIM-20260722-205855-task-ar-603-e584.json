@@ -1,15 +1,15 @@
 {
   "schema": "agent-runtime-task-claim/v1",
-  "claim_id": "CLAIM-20260722-204445-task-ar-603-265e",
+  "claim_id": "CLAIM-20260722-205855-task-ar-603-e584",
   "task_id": "TASK-AR-603",
   "agent_role": "lead-engineer",
   "team_id": "agent-runtime-core",
-  "agent_instance_id": "codex-root-task-ar-603-rework1",
-  "display_name": "codex/task-ar-603-rework1",
+  "agent_instance_id": "codex-root-task-ar-603-integration1",
+  "display_name": "codex/task-ar-603-integration1",
   "callsite_id": "codex-root-20260722",
   "pane_id": "root",
   "mode": "orchestrator",
-  "status": "released",
+  "status": "claimed",
   "task_set_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
   "active_scope": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
   "scope_transition_approved": true,
@@ -18,30 +18,30 @@
   "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md",
   "model_tier": "worker_standard",
   "wip_slot": 0,
-  "stop_condition": "Stop if a required consumer lies outside the declared footprint; register the expansion before editing it.",
-  "phase": "implementation",
-  "progress_pct": 80,
-  "step_index": 5,
+  "stop_condition": "Stop if PR checks reveal a code defect; reopen implementation before merging.",
+  "phase": "integration",
+  "progress_pct": 95,
+  "step_index": 6,
   "step_total": 7,
-  "status_text": "TASK-AR-603 reopened for Unicode token-boundary rework after skeptic BLOCK",
+  "status_text": "TASK-AR-603 verified; maintaining claim continuity through PR and main CI",
   "worktree_path": ".worktrees/TASK-AR-603",
   "branch": "codex/task-ar-603-task-id-contract",
-  "claimed_at": "2026-07-22T20:44:45+09:00",
-  "last_heartbeat": "2026-07-22T20:57:35+09:00",
-  "updated_at": "2026-07-22T20:57:35+09:00",
-  "expires_at": "2026-07-23T00:44:45+09:00",
+  "claimed_at": "2026-07-22T20:58:55+09:00",
+  "last_heartbeat": "2026-07-22T20:58:55+09:00",
+  "updated_at": "2026-07-22T20:58:55+09:00",
+  "expires_at": "2026-07-23T00:58:55+09:00",
   "lease": {
-    "claimed_at": "2026-07-22T20:44:45+09:00",
-    "heartbeat_at": "2026-07-22T20:57:35+09:00",
-    "expires_at": "2026-07-23T00:44:45+09:00"
+    "claimed_at": "2026-07-22T20:58:55+09:00",
+    "heartbeat_at": "2026-07-22T20:58:55+09:00",
+    "expires_at": "2026-07-23T00:58:55+09:00"
   },
-  "handoff_path": "agents/runtime/task_claims/CLAIM-20260722-204445-task-ar-603-265e.handoff.md",
-  "log_path": "agents/runtime/task_claims/CLAIM-20260722-204445-task-ar-603-265e.log.md",
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260722-205855-task-ar-603-e584.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260722-205855-task-ar-603-e584.log.md",
   "allow_parallel_task_set": false,
   "tags": [
     "github-299",
     "identity",
-    "rework"
+    "integration"
   ],
   "escalation_triggers": [
     "cross_cutting",
@@ -61,9 +61,5 @@
     "tests/test_taskset_dispatcher.py",
     "tests/test_conversation_work_audit.py",
     "tests/fixtures/host/agent_runtime.lock.json"
-  ],
-  "released_at": "2026-07-22T20:57:35+09:00",
-  "verified_by": "codex-task-ar-603-independent-auditor-rework1",
-  "verifier_role": "independent-auditor",
-  "verification_evidence": "reviews/W4B-2026-07-22-TASK-AR-603-UNICODE-REWORK.md"
+  ]
 }

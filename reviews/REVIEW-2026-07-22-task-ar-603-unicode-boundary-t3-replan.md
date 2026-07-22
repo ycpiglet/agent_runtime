@@ -66,3 +66,12 @@ expand into unrelated task parsing behavior.
 - Create a new TASK-AR-603 rework claim pointing at the existing worktree and
   branch.
 - Implement only the Unicode token-boundary correction and its regressions.
+
+## Integration Re-anchor
+
+The Unicode correction subsequently passed refreshed W4a, independent W4b,
+and skeptic recheck at the final evidence HEAD. Re-record the same declared
+anchors at that accepted state and keep a narrow integration-phase claim on
+the existing worktree until the PR merges and main CI succeeds. This preserves
+claim-first worktree continuity without expanding implementation scope or
+using `--skip-plan-check`.

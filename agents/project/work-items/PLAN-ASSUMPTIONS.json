@@ -285,7 +285,7 @@
         {
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-22-task-ar-603-unicode-boundary-t3-replan.md",
-          "value": "194095dab22a37462c13d88d088212bbc622065bfd431f2216af84639622da5b"
+          "value": "7f8bd2a262179439d9aa9af384db3f9b04fad3357b4393e7ab8a495be401475f"
         },
         {
           "kind": "sha256",
@@ -300,7 +300,7 @@
         {
           "kind": "sha256",
           "path": "scripts/task_id_contract.py",
-          "value": "b10d025dbd4022c9c5c7e98dff465af33c1b1978ef57df89b4dfa84c390cc37c"
+          "value": "6b78813ba4da71f33b19e558ad9dac5524748cbdbda5c1b20eba4b9337a87dc8"
         },
         {
           "kind": "sha256",
@@ -320,7 +320,7 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/task_id_contract.py",
-          "value": "b10d025dbd4022c9c5c7e98dff465af33c1b1978ef57df89b4dfa84c390cc37c"
+          "value": "6b78813ba4da71f33b19e558ad9dac5524748cbdbda5c1b20eba4b9337a87dc8"
         },
         {
           "kind": "sha256",
@@ -339,7 +339,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-22-task-ar-603-unicode-boundary-t3-replan.md",
-      "recorded_at": "2026-07-22T20:44:33+09:00",
+      "recorded_at": "2026-07-22T20:58:45+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION"
     },
@@ -647,5 +647,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-22T20:44:33+09:00"
+  "updated_at": "2026-07-22T20:58:45+09:00"
 }
