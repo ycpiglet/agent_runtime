@@ -18,6 +18,16 @@ if str(SCRIPTS_DIR) not in sys.path:
 import taskset_dispatcher as dispatcher  # noqa: E402
 
 
+TERMINAL_RESTART_STATUSES = (
+    "closed",
+    "released",
+    "종결",
+    "종료",
+    "릴리스됨",
+    "배포됨",
+)
+
+
 def _write_task(
     root: Path,
     task_id: str,
@@ -1553,6 +1563,42 @@ def test_plan_skips_completed_tasks(tmp_path: Path) -> None:
         "TASK-AR-901",
         "TASKSET-AR-RELEASE-STEWARD",
         status="completed",
+    )
+    _write_task(
+        tmp_path,
+        "TASK-AR-902",
+        "TASKSET-AR-RELEASE-STEWARD",
+        status="planned",
+    )
+
+    result = _run(tmp_path, "plan", "release-steward", "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["next_task_id"] == "TASK-AR-902"
+    assert payload["next_task_status"] == "planned"
+
+
+@pytest.mark.parametrize("terminal_status", TERMINAL_RESTART_STATUSES)
+def test_closed_released_terminal_status_has_no_start_transition(
+    terminal_status: str,
+) -> None:
+    normalized = dispatcher._normalize_status(terminal_status)  # noqa: SLF001
+
+    assert dispatcher._target_status_for_work_start(terminal_status) is None  # noqa: SLF001
+    assert normalized in dispatcher.DONE_STATUSES
+
+
+@pytest.mark.parametrize("terminal_status", TERMINAL_RESTART_STATUSES)
+def test_plan_skips_closed_released_terminal_tasks(
+    tmp_path: Path,
+    terminal_status: str,
+) -> None:
+    _write_task(
+        tmp_path,
+        "TASK-AR-901",
+        "TASKSET-AR-RELEASE-STEWARD",
+        status=terminal_status,
     )
     _write_task(
         tmp_path,
