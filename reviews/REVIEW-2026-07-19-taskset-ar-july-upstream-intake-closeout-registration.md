@@ -40,7 +40,7 @@ Implementation order and boundaries are fixed as follows:
    never-blocking channel. Empty configuration is a silent no-op, tests use
    mocks/local servers, and no real notification or secret is allowed during
    verification.
-5. `TASK-AR-600` is release-only and cannot start until all six predecessor
+5. `TASK-AR-602` is release-only and cannot start until all six predecessor
    tasks have W4a/W4b evidence and are integrated. The old v0.7.0 candidate SHA
    from issue #280 is superseded; the release candidate must be rebuilt from
    the then-current verified `main`.
@@ -60,7 +60,7 @@ preflight.
 | `TASK-AR-597` | Preserve Git stderr in release-auto test failures | planned |
 | `TASK-AR-598` | Integrate crash-safe session resume audit | planned |
 | `TASK-AR-599` | Adopt never-blocking allimbot notifications | planned |
-| `TASK-AR-600` | Synchronize state and release v0.7.0 | planned |
+| `TASK-AR-602` | Synchronize state and release v0.7.0 | planned |
 
 ## Risks / Blockers
 

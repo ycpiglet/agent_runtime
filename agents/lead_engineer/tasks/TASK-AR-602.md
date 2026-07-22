@@ -1,9 +1,9 @@
 ---
 schema_version: agent-runtime-work-item/v1
-id: TASK-AR-600
-display_id: TASK-AR-600
+id: TASK-AR-602
+display_id: TASK-AR-602
 task_uid: efd21353-1697-4993-b007-cc3472708332
-work_id: TASK-AR-600
+work_id: TASK-AR-602
 work_uid: efd21353-1697-4993-b007-cc3472708332
 kind: task
 parent_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
@@ -21,7 +21,7 @@ team: release-integrity
 initiative_id: INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 project_id: PROJECT-AGENT-RUNTIME
 task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
-unit_spec: agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md
+unit_spec: agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md
 reservation_id: RES-20260719-102806-bbbc9438-07
 origin_type: owner_request
 origin_ref: chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277
@@ -39,7 +39,7 @@ verification:
   - python scripts/work.py status
 ---
 
-# TASK-AR-600 - Synchronize state and release v0.7.0
+# TASK-AR-602 - Synchronize state and release v0.7.0
 
 ## Goal
 

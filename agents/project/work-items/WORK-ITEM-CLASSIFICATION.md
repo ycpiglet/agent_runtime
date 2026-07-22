@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-22T16:39:40+09:00
+generated_at: 2026-07-22T16:43:02+09:00
 record_count: 390
 ---
 
@@ -423,8 +423,8 @@ record_count: 390
 | 23.1.5.1 | Unit 23.1.5.1 | unit | `UNIT-TASK-AR-598-001` | `TASK-AR-598` | completed | `agents/lead_engineer/tasks/units/TASK-AR-598/UNIT-TASK-AR-598-001.md` | UNIT-TASK-AR-598-001 - Rebase and verify session resume recovery |
 | 23.1.6 | Task 23.1.6 | task | `TASK-AR-599` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | planned | `agents/lead_engineer/tasks/TASK-AR-599.md` | Resolve GitHub #279 by shipping an optional, zero-dependency notification client and… |
 | 23.1.6.1 | Unit 23.1.6.1 | unit | `UNIT-TASK-AR-599-001` | `TASK-AR-599` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-599/UNIT-TASK-AR-599-001.md` | UNIT-TASK-AR-599-001 - Wire optional allimbot notifications end to end |
-| 23.1.7 | Task 23.1.7 | task | `TASK-AR-600` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | planned | `agents/lead_engineer/tasks/TASK-AR-600.md` | Resolve GitHub #280 after every intake unit is merged by refreshing current-state rec… |
-| 23.1.7.1 | Unit 23.1.7.1 | unit | `UNIT-TASK-AR-600-001` | `TASK-AR-600` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md` | UNIT-TASK-AR-600-001 - Close state and publish v0.7.0 |
+| 23.1.7 | Task 23.1.7 | task | `TASK-AR-602` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | planned | `agents/lead_engineer/tasks/TASK-AR-602.md` | Resolve GitHub #280 after every intake unit is merged by refreshing current-state rec… |
+| 23.1.7.1 | Unit 23.1.7.1 | unit | `UNIT-TASK-AR-602-001` | `TASK-AR-602` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md` | UNIT-TASK-AR-602-001 - Close state and publish v0.7.0 |
 | 24 | Initiative 24 | initiative | `INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | - | active | `agents/project/initiatives/INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY.md` | Role Routing Closeout Reliability |
 | 24.1 | Taskset 24.1 | taskset | `TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | `INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | complete | `BACKLOG-BOARD.md` | Role Routing Closeout Reliability |
 | 24.1.1 | Task 24.1.1 | task | `TASK-AR-601` | `TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | completed | `agents/lead_engineer/tasks/TASK-AR-601.md` | Ensure role_routing overlay claims carry required lifecycle artifacts and releasing a… |

@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-22T16:39:40+09:00",
+  "generated_at": "2026-07-22T16:43:02+09:00",
   "record_count": 390,
   "finding_count": 0,
   "findings": [],
@@ -4230,25 +4230,25 @@
       "status": "worker_ready"
     },
     {
-      "key": "task:TASK-AR-600",
+      "key": "task:TASK-AR-602",
       "level": "task",
       "number": "23.1.7",
       "label": "Task 23.1.7",
-      "id": "TASK-AR-600",
+      "id": "TASK-AR-602",
       "title": "Resolve GitHub #280 after every intake unit is merged by refreshing current-state rec…",
-      "path": "agents/lead_engineer/tasks/TASK-AR-600.md",
+      "path": "agents/lead_engineer/tasks/TASK-AR-602.md",
       "parent_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
       "status": "planned"
     },
     {
-      "key": "unit:UNIT-TASK-AR-600-001",
+      "key": "unit:UNIT-TASK-AR-602-001",
       "level": "unit",
       "number": "23.1.7.1",
       "label": "Unit 23.1.7.1",
-      "id": "UNIT-TASK-AR-600-001",
-      "title": "UNIT-TASK-AR-600-001 - Close state and publish v0.7.0",
-      "path": "agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md",
-      "parent_id": "TASK-AR-600",
+      "id": "UNIT-TASK-AR-602-001",
+      "title": "UNIT-TASK-AR-602-001 - Close state and publish v0.7.0",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md",
+      "parent_id": "TASK-AR-602",
       "status": "worker_ready"
     },
     {

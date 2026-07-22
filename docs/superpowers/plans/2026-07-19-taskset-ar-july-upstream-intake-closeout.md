@@ -32,7 +32,7 @@ summary: Fix the four open host-reported defects, integrate crash recovery and a
 | `TASK-AR-597` | Preserve Git stderr in release-auto test failures |
 | `TASK-AR-598` | Integrate crash-safe session resume audit |
 | `TASK-AR-599` | Adopt never-blocking allimbot notifications |
-| `TASK-AR-600` | Synchronize state and release v0.7.0 |
+| `TASK-AR-602` | Synchronize state and release v0.7.0 |
 
 ## Unit Specs
 
@@ -44,7 +44,7 @@ summary: Fix the four open host-reported defects, integrate crash recovery and a
 | `UNIT-TASK-AR-597-001` | `TASK-AR-597` | Add diagnostic Git helper failures |
 | `UNIT-TASK-AR-598-001` | `TASK-AR-598` | Rebase and verify session resume recovery |
 | `UNIT-TASK-AR-599-001` | `TASK-AR-599` | Wire optional allimbot notifications end to end |
-| `UNIT-TASK-AR-600-001` | `TASK-AR-600` | Close state and publish v0.7.0 |
+| `UNIT-TASK-AR-602-001` | `TASK-AR-602` | Close state and publish v0.7.0 |
 
 ## Verification
 

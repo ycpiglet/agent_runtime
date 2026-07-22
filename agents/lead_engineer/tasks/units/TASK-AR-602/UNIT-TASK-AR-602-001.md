@@ -1,11 +1,11 @@
 ---
 schema_version: agent-runtime-work-item/v1
-work_id: UNIT-TASK-AR-600-001
+work_id: UNIT-TASK-AR-602-001
 work_uid: 84ffe575-403e-4360-b246-6481085544f2
 kind: unit
-parent_id: TASK-AR-600
-unit_id: UNIT-TASK-AR-600-001
-task_id: TASK-AR-600
+parent_id: TASK-AR-602
+unit_id: UNIT-TASK-AR-602-001
+task_id: TASK-AR-602
 task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 initiative_id: INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 project_id: PROJECT-AGENT-RUNTIME
@@ -65,7 +65,7 @@ handoff: Provide release URL, tag/commit SHA, full gate/test results, closed iss
 stop_condition: Stop before release if any required test/gate is red, current main differs from the verified release commit, or a secret/credential boundary is unclear.
 ---
 
-# UNIT-TASK-AR-600-001 - Close state and publish v0.7.0
+# UNIT-TASK-AR-602-001 - Close state and publish v0.7.0
 
 ## Context
 

@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-22T16:40:26+09:00
-record_count: 666
+generated_at: 2026-07-22T16:43:04+09:00
+record_count: 667
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `666` review and evidence records under `reviews/`.
+- Summary: indexed `667` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `666` files |
+| Reviews covered | pass | `667` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -515,6 +515,7 @@ record_count: 666
 | `reviews/REVIEW-2026-06-22-system-health-rsi-diagnosis.md` | `REVIEW-2026-06-22-system-health-rsi-diagnosis` | review | assessed | watch | System-health / RSI diagnosis (2026-06-22) |
 | `reviews/REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration.md` | `REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration` | md | record | pass | Upstream Intake Closer Registration |
 | `reviews/REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration.md` | `REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration` | md | record | pass | Role Routing Closeout Reliability Registration |
+| `reviews/REVIEW-2026-07-22-remote-main-integration-id-collision.md` | `REVIEW-2026-07-22-remote-main-integration-id-collision` | integration-decision | approved | n/a | Remote main integration and TASK-AR-600 collision |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
