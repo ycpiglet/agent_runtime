@@ -1,25 +1,20 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-22T23:02:22+09:00
+updated_at: 2026-07-23T00:04:40+09:00
 updated_by: codex-root
 current_state:
-  summary: "TASK-AR-605 and GitHub #294 are closed after PR #309 and post-merge main CI; TASK-AR-606 is next."
+  summary: "TASK-AR-606 and GitHub #295 are closed after PR #312 and post-merge main CI; TASK-AR-607 is next."
   status: ready
   task_set_status: in_progress
   task_set_id: "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION"
-  step_index: 4
+  step_index: 5
   step_total: 7
-  progress_pct: 43
-  status_text: "TASK-AR-606 is the next planned unit after TASK-AR-605 W6 closeout."
+  progress_pct: 57
+  status_text: "TASK-AR-607 is the next planned unit after TASK-AR-606 W6 closeout."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260722-235557-task-ar-606-integration
-      agent_role: lead-engineer
-      agent_instance_id: codex-root-task-ar-606-integration
-      display_name: codex/task-ar-606-integration
-      callsite_id: codex-root-20260722
+  current_agents: []
   current_teams: []
 resume:
-  active_task: TASK-AR-606
+  active_task: TASK-AR-607
   active_task_set: "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
