@@ -74,7 +74,7 @@ completed_task_set_count: 51
 
 - Flow: Harden the cadence query boundary and prove release-auto fails loud on exhausted transient queries while preserving genuine no-tag behavior.
 - Progress: `0/1` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-613` | INIT-AR-RELEASE-CADENCE-QUERY-RECOVERY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-613/UNIT-TASK-AR-613-001.md | planned | Action | P0 | Critical | Medium | 2h/8000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Close GitHub issue 316 by preventing a valid tagged cadence from collapsing into rele… |
