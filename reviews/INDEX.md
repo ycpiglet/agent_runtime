@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-22T22:42:33+09:00
-record_count: 736
+generated_at: 2026-07-22T22:50:37+09:00
+record_count: 738
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `736` review and evidence records under `reviews/`.
+- Summary: indexed `738` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `736` files |
+| Reviews covered | pass | `738` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -557,6 +557,7 @@ record_count: 736
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-603-SKEPTIC-BLOCK.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-603-SKEPTIC-BLOCK` | md | record | fail | TASK-AR-603 Skeptic Adversarial Review - BLOCK |
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-603-SKEPTIC-REWORK.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-603-SKEPTIC-REWORK` | md | record | pass | TASK-AR-603 Skeptic Unicode Boundary Rework Review |
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-604-SKEPTIC.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-604-SKEPTIC` | md | record | pass | TASK-AR-604 Skeptic High-Risk Review |
+| `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-605-SKEPTIC-REWORK.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-605-SKEPTIC-REWORK` | md | record | pass | TASK-AR-605 High-Risk Skeptic Rework Review |
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-605-SKEPTIC.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-605-SKEPTIC` | md | record | fail | TASK-AR-605 High-Risk Skeptic Review |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SCRIBE-2026-06-21-business-operating-system.md` | `SCRIBE-2026-06-21-business-operating-system` | scribe | recorded | pass | Business Operating System Scribe Log |
@@ -765,6 +766,7 @@ record_count: 736
 | `reviews/W4B-2026-07-22-TASK-AR-603-UNICODE-REWORK.md` | `W4B-2026-07-22-TASK-AR-603-UNICODE-REWORK` | md | record | pass | TASK-AR-603 Unicode Rework Independent W4b Verification |
 | `reviews/W4B-2026-07-22-TASK-AR-603.md` | `W4B-2026-07-22-TASK-AR-603` | md | record | pass | TASK-AR-603 Independent W4b Verification |
 | `reviews/W4B-2026-07-22-TASK-AR-604.md` | `W4B-2026-07-22-TASK-AR-604` | md | record | pass | TASK-AR-604 Independent W4b Verification |
+| `reviews/W4B-2026-07-22-TASK-AR-605-REWORK.md` | `W4B-2026-07-22-TASK-AR-605-REWORK` | md | record | pass | TASK-AR-605 Rework Independent W4b Verification |
 | `reviews/W4B-2026-07-22-TASK-AR-605.md` | `W4B-2026-07-22-TASK-AR-605` | md | record | pass | TASK-AR-605 Independent W4b Verification |
 | `reviews/W4B-2026-07-22-TASK-AR-610.md` | `W4B-2026-07-22-TASK-AR-610` | md | record | pass | TASK-AR-610 Independent W4b |
 | `reviews/W4B-2026-07-22-TASK-AR-611.md` | `W4B-2026-07-22-TASK-AR-611` | md | record | pass | TASK-AR-611 Independent W4b |
