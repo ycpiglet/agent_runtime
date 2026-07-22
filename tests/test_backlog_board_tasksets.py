@@ -73,6 +73,16 @@ def test_frontmatter_distinguishes_plain_apostrophes_and_closed_quotes() -> None
         assert parser.strip_comment("'owner''s PR #167' # outside") == "'owner''s PR #167' "
 
 
+def test_frontmatter_plain_scalar_quote_does_not_hide_comment() -> None:
+    for parser in _frontmatter_parsers():
+        assert parser.strip_comment("plain 'PR #167' # outside") == "plain 'PR "
+        assert parser.strip_comment('plain "PR #167" # outside') == 'plain "PR '
+        assert (
+            parser.strip_comment('summary: plain "unterminated # outside')
+            == 'summary: plain "unterminated '
+        )
+
+
 def _write_task(tasks_dir: Path, task_id: str, task_set_id: str, status: str = "planned", priority: str = "P0") -> None:
     tasks_dir.mkdir(parents=True, exist_ok=True)
     (tasks_dir / f"{task_id}.md").write_text(

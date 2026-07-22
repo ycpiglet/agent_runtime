@@ -451,8 +451,10 @@ def strip_comment(line: str) -> str:
         if char == "#":
             return line[:index]
         if char in {'"', "'"}:
-            previous = line[index - 1] if index else ""
-            if index == 0 or previous.isspace() or previous in ":,[{-":
+            previous_index = index - 1
+            while previous_index >= 0 and line[previous_index].isspace():
+                previous_index -= 1
+            if previous_index < 0 or line[previous_index] in ":,[{-":
                 quote = char
         index += 1
     return line
