@@ -1006,8 +1006,27 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-616",
+      "expires_at": "2026-07-24T05:01:18+09:00",
+      "fulfilled_at": "2026-07-23T05:01:18+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-616.md",
+      "fulfilled_task_id": "TASK-AR-616",
+      "fulfilled_task_uid": "8bfdf2e2-d528-45e4-afd2-6edcf82f79c7",
+      "initiative_id": "INIT-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW",
+      "kind": "task",
+      "owner_id": "codex-root-planner",
+      "reason": "work registration TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW",
+      "reservation_group_id": "RES-20260723-050118-d714d556",
+      "reservation_id": "RES-20260723-050118-d714d556-01",
+      "reserved_at": "2026-07-23T05:01:18+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-07-23T03:09:36+09:00"
+  "updated_at": "2026-07-23T05:01:18+09:00"
 }

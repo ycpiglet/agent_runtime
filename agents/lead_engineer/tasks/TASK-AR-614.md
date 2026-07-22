@@ -9,10 +9,10 @@ kind: task
 parent_id: TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY
 registered_at: 2026-07-23T02:23:56+09:00
 created_at: 2026-07-23T02:23:56+09:00
-updated_at: 2026-07-23T04:36:08+09:00
+updated_at: 2026-07-23T05:04:00+09:00
 started_at: 2026-07-23T04:27:22+09:00
 title: Reject partial self-eval metrics after exhausted Git queries
-status: in_progress
+status: completed
 priority: P0
 difficulty: M
 est_hours: 2
@@ -45,6 +45,11 @@ verified_at: 2026-07-23T04:36:08+09:00
 verified_by: codex-root-task-ar-614
 evidence_refs:
   - reviews/VERIFY-2026-07-23-task-ar-614-20260723043608.json
+resolution: done
+completed_at: 2026-07-23T05:04:00+09:00
+closed_by: codex-root-task-ar-614
+actual_hours: 0.7
+actual_tokens: 40000
 ---
 
 # TASK-AR-614 - Reject partial self-eval metrics after exhausted Git queries
@@ -69,3 +74,15 @@ evidence_refs:
 - `python -m pytest tests/test_self_eval_metrics.py tests/test_release_cadence_trigger.py tests/test_semver_bump_property.py -q`
 - `python scripts/regen_host_lock_if_needed.py --check`
 - `python scripts/taskset_work_gate.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T05:04:00+09:00`
+- Resolution: `done`
+- Actual hours: `0.7`
+- Actual tokens: `40000`
+- Closed by: `codex-root-task-ar-614`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-task-ar-614-20260723043608.json`
+<!-- work-close:end -->

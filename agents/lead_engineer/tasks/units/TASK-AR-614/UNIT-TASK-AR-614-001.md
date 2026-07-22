@@ -9,11 +9,11 @@ task_id: TASK-AR-614
 task_set_id: TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY
 initiative_id: INIT-AR-SELF-EVAL-QUERY-INTEGRITY
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
+status: completed
 verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-23T02:23:56+09:00
-updated_at: 2026-07-23T04:39:28+09:00
+updated_at: 2026-07-23T05:03:58+09:00
 started_at: 2026-07-23T04:27:22+09:00
 origin_type: review_finding
 origin_ref: reviews/REVIEW-2026-07-23-self-eval-query-integrity-plan.md
@@ -52,6 +52,11 @@ verified_at: 2026-07-23T04:39:28+09:00
 verified_by: codex-root-task-ar-614
 evidence_refs:
   - reviews/VERIFY-2026-07-23-unit-task-ar-614-001-20260723043928.json
+resolution: done
+completed_at: 2026-07-23T05:03:58+09:00
+closed_by: codex-root-task-ar-614
+actual_hours: 0.7
+actual_tokens: 40000
 ---
 
 # UNIT-TASK-AR-614-001 - Propagate shared Git query errors through self-eval
@@ -105,3 +110,15 @@ Report failure-first evidence by query type, state isolation behavior, error sch
 ## Stop Boundary
 
 Stop if truthful self-eval reporting requires changing cadence thresholds, version policy, or unrelated WORK-SCHEMA metric formulas.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T05:03:58+09:00`
+- Resolution: `done`
+- Actual hours: `0.7`
+- Actual tokens: `40000`
+- Closed by: `codex-root-task-ar-614`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-614-001-20260723043928.json`
+<!-- work-close:end -->

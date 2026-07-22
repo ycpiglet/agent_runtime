@@ -1,5 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-23 - TASK-AR-614/#318 complete; TASK-AR-616 next after fixture retry exhaustion
+
+- Completed: PR #324 merged at `92f0dae57bd589e95f79198c50b5c2dd0022c2fa`; final PR run `29952887714` passed Python 3.10, 3.11, and 3.12 on its first attempt, GitHub #318 is closed, and task/unit W4a plus independent/skeptic W4b all passed.
+- Contract: any exhausted self-eval Git query now yields `status=error`, `evaluation=unevaluated`, `fixed_metrics=null`, and sanitized structured errors; report boundaries clear shared query state while genuine no-tag and successful tagged windows retain their semantics.
+- Main CI follow-up: run `29953104959` failed only in the separate release-auto fixture at `chore: tick 36` after the exact recognized `fatal: could not parse HEAD` response exhausted all three attempts. GitHub #320 remains open and P0 `TASK-AR-616` in `TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW` is registered from that evidence.
+- Next: execute TASK-AR-616 first, then TASK-AR-608, TASK-AR-609, terminal-status residual TASK-AR-612, and v0.7.0 release TASK-AR-602.
+
 ## 2026-07-23 - TASK-AR-615/#320 complete; TASK-AR-614 next
 
 - Completed: PR #322 merged at `d0ae9ac89c635ebd4e29646db43f7c92841ad9b2`; final PR run `29949646217` and post-merge main run `29949869950` passed Python 3.10, 3.11, and 3.12 on their first attempts, and GitHub #320 is closed.

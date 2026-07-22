@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-23T04:28:30+09:00",
-  "record_count": 434,
+  "generated_at": "2026-07-23T05:04:00+09:00",
+  "record_count": 438,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4711,7 +4711,7 @@
       "title": "Self-Eval Query Integrity",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-SELF-EVAL-QUERY-INTEGRITY",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-614",
@@ -4722,7 +4722,7 @@
       "title": "Close GitHub issue 318 by preventing self-eval from converting exhausted Git queries…",
       "path": "agents/lead_engineer/tasks/TASK-AR-614.md",
       "parent_id": "TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-614-001",
@@ -4733,7 +4733,7 @@
       "title": "UNIT-TASK-AR-614-001 - Propagate shared Git query errors through self-eval",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-614/UNIT-TASK-AR-614-001.md",
       "parent_id": "TASK-AR-614",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "initiative:INIT-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY",
@@ -4778,6 +4778,50 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-615/UNIT-TASK-AR-615-001.md",
       "parent_id": "TASK-AR-615",
       "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW",
+      "level": "initiative",
+      "number": "33",
+      "label": "Initiative 33",
+      "id": "INIT-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW",
+      "title": "Release-Auto Fixture Recovery Window",
+      "path": "agents/project/initiatives/INIT-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW",
+      "level": "taskset",
+      "number": "33.1",
+      "label": "Taskset 33.1",
+      "id": "TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW",
+      "title": "Release-Auto Fixture Recovery Window",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-616",
+      "level": "task",
+      "number": "33.1.1",
+      "label": "Task 33.1.1",
+      "id": "TASK-AR-616",
+      "title": "Resolve the reopened GitHub issue 320 by recovering when three consecutive recognized…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-616.md",
+      "parent_id": "TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-616-001",
+      "level": "unit",
+      "number": "33.1.1.1",
+      "label": "Unit 33.1.1.1",
+      "id": "UNIT-TASK-AR-616-001",
+      "title": "UNIT-TASK-AR-616-001 - Harden the bounded fixture commit recovery window",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-616/UNIT-TASK-AR-616-001.md",
+      "parent_id": "TASK-AR-616",
+      "status": "worker_ready"
     }
   ]
 }

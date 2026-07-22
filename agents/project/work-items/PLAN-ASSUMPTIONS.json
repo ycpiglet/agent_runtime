@@ -474,6 +474,29 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-23-release-auto-fixture-recovery-window-plan.md",
+          "value": "0c895292c2ed34b02064559d905b59dda7fe868158ca1a143f3565c62c442278"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-23-release-auto-fixture-recovery-window-plan.md",
+      "recorded_at": "2026-07-23T05:02:50+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-18-taskset-ar-release-auto-noncritical-registration.md",
           "value": "386fa27d870862d9141f5e936adac85d7f605c5baa486b12f984dd7309b59e6c"
         },
@@ -729,5 +752,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-23T03:10:17+09:00"
+  "updated_at": "2026-07-23T05:02:50+09:00"
 }
