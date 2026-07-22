@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-22T17:31:50+09:00
-record_count: 675
+generated_at: 2026-07-22T17:33:23+09:00
+record_count: 679
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `675` review and evidence records under `reviews/`.
+- Summary: indexed `679` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `675` files |
+| Reviews covered | pass | `679` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -534,6 +534,8 @@ record_count: 675
 | `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-601-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-601-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-601 Independent Auditor Role Review |
 | `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC-RECHECK.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC-RECHECK` | role-review | record | n/a | TASK-AR-601 Skeptic Hardening Recheck |
 | `reviews/ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC.md` | `ROLE-REVIEW-2026-07-19-TASK-AR-601-SKEPTIC` | role-review | record | n/a | TASK-AR-601 Skeptic Role Review |
+| `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-599-SKEPTIC-REWORK.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-599-SKEPTIC-REWORK` | md | record | pass | TASK-AR-599 skeptical rework review |
+| `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-599-SKEPTIC.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-599-SKEPTIC` | md | record | block | TASK-AR-599 skeptical security and external-effect review |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SCRIBE-2026-06-21-business-operating-system.md` | `SCRIBE-2026-06-21-business-operating-system` | scribe | recorded | pass | Business Operating System Scribe Log |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
@@ -707,6 +709,8 @@ record_count: 675
 | `reviews/W4B-2026-07-19-TASK-AR-601-HARDENING.md` | `W4B-2026-07-19-TASK-AR-601-HARDENING` | w4b-independent-verification | approved | pass | TASK-AR-601 Hardening W4b Independent Verification |
 | `reviews/W4B-2026-07-19-TASK-AR-601-RECHECK.md` | `W4B-2026-07-19-TASK-AR-601-RECHECK` | w4b-independent-verification | approved | pass | TASK-AR-601 W4b Independent Verification Recheck |
 | `reviews/W4B-2026-07-19-TASK-AR-601.md` | `W4B-2026-07-19-TASK-AR-601` | w4b-independent-verification | rejected | fail | TASK-AR-601 W4b Independent Verification |
+| `reviews/W4B-2026-07-22-TASK-AR-599-REWORK.md` | `W4B-2026-07-22-TASK-AR-599-REWORK` | w4b-independent-verification | approved | pass | W4b Independent Verification — TASK-AR-599 Rework |
+| `reviews/W4B-2026-07-22-TASK-AR-599.md` | `W4B-2026-07-22-TASK-AR-599` | w4b-independent-verification | approved | pass | W4b Independent Verification — TASK-AR-599 |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 
