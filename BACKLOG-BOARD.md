@@ -55,7 +55,7 @@ completed_task_set_count: 51
 
 - Flow: Repair canonical identity, task start state, host dashboard dependencies, hook activation, CI isolation, frontmatter parsing, and classifier semantics.
 - Progress: `0/7` done; `7` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.1h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-603` | INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md | planned | Action | P0 | Critical | High | 4h/18000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Close GitHub #299 by defining one case-compatible canonical task-ID contract used by… |
