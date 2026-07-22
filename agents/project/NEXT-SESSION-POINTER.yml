@@ -1,21 +1,21 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-23T08:29:00+09:00
+updated_at: 2026-07-23T08:41:00+09:00
 updated_by: codex-root
 current_state:
-  summary: "TASK-AR-612 is independently verified, merged through PR 332, and closed after all main CI jobs passed."
+  summary: "TASK-AR-612 is closed; TASK-AR-617 and TASK-AR-618 are registered to remove two work CLI integrity defects before release."
   status: ready
   task_set_status: planned
-  task_set_id: "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT"
+  task_set_id: "TASKSET-AR-WORK-CLI-INTEGRITY"
   step_index: 0
   step_total: 1
   progress_pct: 0
-  status_text: "TASK-AR-602 remains the release target; register and resolve the discovered work.py defects before its release preflight."
+  status_text: "TASK-AR-617 is the next worker-ready item; TASK-AR-618 follows, then TASK-AR-602 release preflight."
 active_work:
   current_agents: []
   current_teams: []
 resume:
-  active_task: TASK-AR-602
-  active_task_set: "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT"
+  active_task: TASK-AR-617
+  active_task_set: "TASKSET-AR-WORK-CLI-INTEGRITY"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."

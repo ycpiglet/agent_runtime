@@ -774,8 +774,31 @@
       "recorded_at": "2026-06-20T08:11:18+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-VISUAL-SYSTEM-INTEGRATION"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-23-work-cli-integrity-design.md",
+          "value": "396332e8fbd17b1c081fa73e53e6e8cfc4a665790a28147a9cceddd32ee8b936"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-23-work-cli-integrity-design.md",
+      "recorded_at": "2026-07-23T08:40:53+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-WORK-CLI-INTEGRITY"
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-23T07:16:49+09:00"
+  "updated_at": "2026-07-23T08:40:53+09:00"
 }

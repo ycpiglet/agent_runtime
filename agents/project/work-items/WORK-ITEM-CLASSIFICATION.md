@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-23T08:29:51+09:00
-record_count: 438
+generated_at: 2026-07-23T08:40:53+09:00
+record_count: 444
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `438` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `444` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `34` records |
-| Tasksets | pass | `58` records |
-| Tasks | pass | `280` records |
-| Units | pass | `66` records |
+| Initiatives | pass | `35` records |
+| Tasksets | pass | `59` records |
+| Tasks | pass | `282` records |
+| Units | pass | `68` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -477,6 +477,12 @@ record_count: 438
 | 33.1 | Taskset 33.1 | taskset | `TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW` | `INIT-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW` | complete | `BACKLOG-BOARD.md` | Release-Auto Fixture Recovery Window |
 | 33.1.1 | Task 33.1.1 | task | `TASK-AR-616` | `TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW` | completed | `agents/lead_engineer/tasks/TASK-AR-616.md` | Resolve the reopened GitHub issue 320 by recovering when three consecutive recognized… |
 | 33.1.1.1 | Unit 33.1.1.1 | unit | `UNIT-TASK-AR-616-001` | `TASK-AR-616` | completed | `agents/lead_engineer/tasks/units/TASK-AR-616/UNIT-TASK-AR-616-001.md` | UNIT-TASK-AR-616-001 - Harden the bounded fixture commit recovery window |
+| 34 | Initiative 34 | initiative | `INIT-AR-WORK-CLI-INTEGRITY` | - | active | `agents/project/initiatives/INIT-AR-WORK-CLI-INTEGRITY.md` | Work CLI Metadata Integrity |
+| 34.1 | Taskset 34.1 | taskset | `TASKSET-AR-WORK-CLI-INTEGRITY` | `INIT-AR-WORK-CLI-INTEGRITY` | active | `BACKLOG-BOARD.md` | Work CLI Integrity |
+| 34.1.1 | Task 34.1.1 | task | `TASK-AR-617` | `TASKSET-AR-WORK-CLI-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-617.md` | Prevent work registration, verification, and close operations from truncating or chan… |
+| 34.1.1.1 | Unit 34.1.1.1 | unit | `UNIT-TASK-AR-617-001` | `TASK-AR-617` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-617/UNIT-TASK-AR-617-001.md` | UNIT-TASK-AR-617-001 - Implement round-trip-safe work frontmatter emission |
+| 34.1.2 | Task 34.1.2 | task | `TASK-AR-618` | `TASKSET-AR-WORK-CLI-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-618.md` | Allow generic work commands to address a canonical task by exact ID without treating… |
+| 34.1.2.1 | Unit 34.1.2.1 | unit | `UNIT-TASK-AR-618-001` | `TASK-AR-618` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-618/UNIT-TASK-AR-618-001.md` | UNIT-TASK-AR-618-001 - Implement exact work-item selector precedence |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

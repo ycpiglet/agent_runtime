@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-23T08:29:51+09:00",
-  "record_count": 438,
+  "generated_at": "2026-07-23T08:40:53+09:00",
+  "record_count": 444,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4822,6 +4822,72 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-616/UNIT-TASK-AR-616-001.md",
       "parent_id": "TASK-AR-616",
       "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-WORK-CLI-INTEGRITY",
+      "level": "initiative",
+      "number": "34",
+      "label": "Initiative 34",
+      "id": "INIT-AR-WORK-CLI-INTEGRITY",
+      "title": "Work CLI Metadata Integrity",
+      "path": "agents/project/initiatives/INIT-AR-WORK-CLI-INTEGRITY.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-WORK-CLI-INTEGRITY",
+      "level": "taskset",
+      "number": "34.1",
+      "label": "Taskset 34.1",
+      "id": "TASKSET-AR-WORK-CLI-INTEGRITY",
+      "title": "Work CLI Integrity",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-WORK-CLI-INTEGRITY",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-617",
+      "level": "task",
+      "number": "34.1.1",
+      "label": "Task 34.1.1",
+      "id": "TASK-AR-617",
+      "title": "Prevent work registration, verification, and close operations from truncating or chan…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-617.md",
+      "parent_id": "TASKSET-AR-WORK-CLI-INTEGRITY",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-617-001",
+      "level": "unit",
+      "number": "34.1.1.1",
+      "label": "Unit 34.1.1.1",
+      "id": "UNIT-TASK-AR-617-001",
+      "title": "UNIT-TASK-AR-617-001 - Implement round-trip-safe work frontmatter emission",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-617/UNIT-TASK-AR-617-001.md",
+      "parent_id": "TASK-AR-617",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-618",
+      "level": "task",
+      "number": "34.1.2",
+      "label": "Task 34.1.2",
+      "id": "TASK-AR-618",
+      "title": "Allow generic work commands to address a canonical task by exact ID without treating…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-618.md",
+      "parent_id": "TASKSET-AR-WORK-CLI-INTEGRITY",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-618-001",
+      "level": "unit",
+      "number": "34.1.2.1",
+      "label": "Unit 34.1.2.1",
+      "id": "UNIT-TASK-AR-618-001",
+      "title": "UNIT-TASK-AR-618-001 - Implement exact work-item selector precedence",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-618/UNIT-TASK-AR-618-001.md",
+      "parent_id": "TASK-AR-618",
+      "status": "worker_ready"
     }
   ]
 }
