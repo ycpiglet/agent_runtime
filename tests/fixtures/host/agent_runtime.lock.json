@@ -270,7 +270,7 @@
       "scripts/verification_freshness_gate.py": "sha256:ecd9af5956ba6b9692f8af35bbab181d6cf6f07ca1205e3461e8dd76f66fe410",
       "scripts/verify_sdk_backend.py": "sha256:d3b25541b8ea286ba630d4da1d01644b4e0da1d6b14ac1b193610e4d4e8d7e9f",
       "scripts/wave_dispatcher.py": "sha256:5be689e2f709dcdf1763dbf8570888fb201ff117e3e72d1f030998cef2a348c3",
-      "scripts/work_item_classifier.py": "sha256:e37d3e99a41bea1ec052dc90b695b5dec9f762e2e89b9740fe12e89775fce1bf",
+      "scripts/work_item_classifier.py": "sha256:a4db5698381de9b9abb90132393da5b03f018de400c21fba7b6fac4ae7e566bb",
       "scripts/work_schema_gate.py": "sha256:e06879641cfd9aae89261f7d61a633f8b8a238fd7cebaf10dd24705cdc1f1b18",
       "scripts/worktree_lifecycle_gate.py": "sha256:a86313971b469113582b7e06064bd528867270ea741a66b46396059277e09143",
       "skills/independent-verification/SKILL.md": "sha256:13bc34701cd087a3cf04d852d00d9a3ca7ed057c2e8cd1d40df46769b07327b0",
@@ -284,7 +284,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.6.0",
-    "template_digest": "sha256:1dbcb5c2b2bb3c3aa2f3877f3a02eeb53c489e07638919daf85b630388c76e50",
+    "template_digest": "sha256:8ece24d571dcb3f2dfef086eea98d76d25ac1a44168bbea49a62a7de19f37084",
     "template_files": 281
   },
   "project": "fixture-host",
