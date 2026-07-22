@@ -34,6 +34,7 @@ except Exception:
 
 CODE_LINE_CAP = 600  # 비문서 변경 라인(additions+deletions) 소프트 상한
 GH_COMMAND_TIMEOUT_SECONDS = 30
+REMOTE_MERGED_MARKER = "원격 MERGED 확인됨"
 RFC3339_TIMESTAMP = re.compile(
     r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$"
 )
@@ -75,6 +76,22 @@ def gh_json(pr: str, fields: str) -> dict:
 
 def is_doc(path: str) -> bool:
     return any(p.search(path) for p in DOC_PATTERNS)
+
+
+def _safe_status_text(value: object, *, limit: int = 160) -> str:
+    """Render untrusted descriptive text without control or reserved status tokens."""
+    escaped = []
+    for char in str(value):
+        if char == "\\":
+            escaped.append("\\\\")
+        elif char == '"':
+            escaped.append('\\"')
+        elif not char.isprintable():
+            escaped.append(f"\\u{ord(char):04x}")
+        else:
+            escaped.append(char)
+    rendered = "".join(escaped).replace(REMOTE_MERGED_MARKER, "[reserved-status-marker]")
+    return rendered[:limit]
 
 
 def r3_hits(files: list) -> list:
@@ -195,9 +212,11 @@ def main() -> int:
     pr = args[0]
     execute = "--execute" in sys.argv
     verdict, reasons, d = evaluate(pr)
-    print(f"[auto_merge] PR #{pr} \"{d.get('title','')[:50]}\" → {verdict}")
+    safe_pr = _safe_status_text(pr, limit=50)
+    safe_title = _safe_status_text(d.get("title", ""), limit=50)
+    print(f"[auto_merge] PR #{safe_pr} \"{safe_title}\" → {verdict}")
     for r in reasons:
-        print(f"  - {r}")
+        print(f"  - {_safe_status_text(r)}")
     if verdict == "AUTO-MERGE":
         if execute:
             merged, detail, remote = execute_merge(pr)
@@ -206,7 +225,7 @@ def main() -> int:
                 print("  → 머지 미확정: 원격 PR이 MERGED가 아니므로 실패 처리.")
                 return 1
             print(
-                "  → 원격 MERGED 확인됨"
+                f"  → {REMOTE_MERGED_MARKER}"
                 f"(mergedAt={remote.get('mergedAt')}). 로컬 상태는 git fetch로 별도 동기화."
             )
         else:

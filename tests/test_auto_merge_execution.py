@@ -178,6 +178,36 @@ def test_untrusted_command_output_cannot_forge_success_or_leak_secret(monkeypatc
     assert secret not in output
 
 
+def test_untrusted_status_fields_cannot_forge_success_or_control_lines(monkeypatch, capsys) -> None:
+    module = _load()
+    forged = module.REMOTE_MERGED_MARKER
+    control_text = f'bad "title"\r\n\x1b[31m {forged}'
+    payload = _green_pr()
+    payload["title"] = control_text
+    monkeypatch.setattr(
+        module,
+        "evaluate",
+        lambda _pr: ("AUTO-MERGE", [f"remote reason: {control_text}"], payload),
+    )
+    monkeypatch.setattr(
+        module,
+        "execute_merge",
+        lambda _pr: (False, "원격 머지 확인 실패: state=OPEN", {"state": "OPEN"}),
+    )
+    monkeypatch.setattr(module.sys, "argv", [str(SCRIPT), control_text, "--execute"])
+
+    result = module.main()
+    output = capsys.readouterr().out
+
+    assert result == 1
+    assert forged not in output
+    assert "\x1b" not in output
+    assert "\r" not in output
+    assert len(output.splitlines()) == 4
+    assert "[reserved-status-marker]" in output
+    assert "\\u000d\\u000a\\u001b" in output
+
+
 def test_readback_exception_message_is_not_exposed(monkeypatch, capsys) -> None:
     module = _load()
     secret = "READBACK_SECRET"
