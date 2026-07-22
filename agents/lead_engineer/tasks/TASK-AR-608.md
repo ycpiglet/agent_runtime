@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 registered_at: 2026-07-22T17:45:00+09:00
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-23T06:31:27+09:00
+updated_at: 2026-07-23T06:36:47+09:00
 started_at: 2026-07-23T06:31:27+09:00
 title: Preserve quoted hashes in frontmatter scalars
 status: in_progress
@@ -26,7 +26,7 @@ reservation_id: RES-20260722-174500-dbaf8585-06
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
 created_by: codex-root-planner
-summary: Close GitHub #298 by making comment stripping quote-aware while preserving existing unquoted comment behavior.
+summary: Close GitHub issue 298 by making comment stripping quote-aware while preserving existing unquoted comment behavior.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
@@ -37,6 +37,11 @@ tags:
   - github-298
   - frontmatter
   - parser
+verification_status: passed
+verified_at: 2026-07-23T06:36:47+09:00
+verified_by: codex-root-task-ar-608
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-task-ar-608-20260723063647.json
 ---
 
 # TASK-AR-608 - Preserve quoted hashes in frontmatter scalars
