@@ -8548,32 +8548,30 @@ function renderGroupedList(view, items, rowTemplate, emptyLabel) {
 }
 
 /* ===== Command palette (Ctrl+K) groundwork ===== */
-const COMMAND_PALETTE_VIEWS = [
-  "board", "work", "meeting", "tasksets", "tsboard", "team", "agents",
-  "messages", "events", "evidence", "planner", "triage", "roadmap", "map", "sources",
-  "automation", "properties", "labels", "portability", "writes",
-];
 let commandPaletteIndex = 0;
 
+// TASK-AR-604: derive palette targets from the live sidebar nav instead of a
+// hardcoded list that drifted out of date (growth/workload/office/org/inbox/
+// channels/calendar/deps/knowledge-graph were unreachable). Single source of
+// truth = the nav links, so every registered view is always jumpable.
 function commandPaletteCommands() {
-  const commands = COMMAND_PALETTE_VIEWS.map((view) => ({
-    id: `view:${view}`,
-    label: `Go to ${view}`,
-    run: () => activateView(view),
-  }));
+  const seen = new Set();
+  const commands = [];
+  navLinks().forEach((link) => {
+    const view = link.dataset.view;
+    if (!view || seen.has(view)) return;
+    seen.add(view);
+    const label = (link.querySelector(".sidebar-label")?.textContent || view).trim();
+    commands.push({ id: `view:${view}`, label: `Go to ${label}`, run: () => activateView(view) });
+  });
   commands.push({ id: "action:refresh", label: "Refresh state", run: loadState });
   return commands;
 }
 
-function activateView(view) {
-  const tab = document.querySelector(`.tab[data-view="${view}"]`);
-  if (!tab) return;
-  document.querySelectorAll(".tab").forEach((item) => item.classList.remove("is-active"));
-  document.querySelectorAll(".view").forEach((item) => item.classList.remove("is-active"));
-  tab.classList.add("is-active");
-  const node = $(`view-${view}`);
-  if (node) node.classList.add("is-active");
-}
+// TASK-AR-604: the .tab-based activateView here was dead (the real nav uses
+// .sidebar-link, and the later activateView declaration overrode this one), so
+// it never ran. Removed to end the confusing duplicate. The canonical
+// activateView(view, {updateHash}) lives with the hash router below.
 
 function openCommandPalette() {
   const palette = $("command-palette");

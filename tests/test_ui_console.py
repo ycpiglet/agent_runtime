@@ -5173,3 +5173,23 @@ def test_ar603_work_state_hero_has_collapse_toggle(tmp_path):
     assert 'function initWorkStateCollapse()' in js
     assert 'initWorkStateCollapse();' in js
     assert '.work-state-hero.is-collapsed' in css
+
+
+def test_ar604_palette_derived_from_nav_no_dead_activateview(tmp_path):
+    # TASK-AR-604: palette targets come from the live nav (every view jumpable),
+    # and the dead .tab-based activateView duplicate is gone.
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert "COMMAND_PALETTE_VIEWS" not in js  # hardcoded stale list removed
+    assert "navLinks().forEach" in js         # palette derived from nav
+    # exactly one activateView definition remains (the canonical router one)
+    assert js.count("function activateView(") == 1
+
+
+def test_ar604_i18n_api_serves_strings(tmp_path):
+    # Regression lock: /api/i18n must serve the string table (it already did;
+    # the masterplan's "empty response" note was inaccurate — verified here).
+    import json
+    payload = json.loads(ui_console.build_response("/api/i18n", tmp_path).body.decode("utf-8"))
+    items = payload.get("items", payload)
+    assert items.get("strings"), "i18n string table must be non-empty"
+    assert len(items["strings"]) > 100

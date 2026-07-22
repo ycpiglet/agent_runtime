@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-CONSOLE-OVERHAUL-P0
 initiative_id: INIT-AR-CONSOLE-OVERHAUL-P0
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-22T17:45:27+09:00
-updated_at: 2026-07-22T17:45:27+09:00
+updated_at: 2026-07-22T18:14:59+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-22-decision-console-overhaul-masterplan.md
 created_by: claude-session-overhaul-planner
@@ -23,7 +23,7 @@ model_tier: worker_standard
 escalation_triggers:
   - ambiguity
   - data_integrity
-context: 커맨드 팔레트 뷰 목록이 구버전에 고정돼 신규 뷰로 점프 불가하고(ui_console_assets.py:8480-8484), activateView가 8497·13782행에 중복 정의되며 8497행은 존재하지 않는 .tab 셀렉터를 조회한다. 사이드바 아이콘은 HTML 엔티티 재탕(&#9776; 4곳, &#9783; 5곳)이고, 타이포는 8/9px 토큰이 존재하며, 다크 canvas는 순흑(#010102), 칸반은 6레인을 3열 2행으로 감는다.
+context: 커맨드 팔레트 뷰 목록이 구버전에 고정돼 신규 뷰로 점프 불가하고(ui_console_assets.py:8480-8484), activateView가 8497·13782행에 중복 정의되며 8497행은 존재하지 않는 .tab 셀렉터를 조회한다. 사이드바 아이콘은 HTML 엔티티 재탕(&
 inputs:
   - src/agent_runtime/ui_console_assets.py:8480-8505 (팔레트/activateView)
   - src/agent_runtime/ui_console_assets.py:134-251 (사이드바 아이콘)
@@ -45,6 +45,10 @@ verification:
   - python scripts/i18n_literal_gate.py --check
 handoff: 각 수정 항목별 diff 근거와 게이트 통과 로그를 W4a 리포트에 남긴다.
 stop_condition: KR i18n 정적 카피 전수 번역이나 컬러 상태 문법 전면 도입으로 넓히지 말 것 — P1(1-10).
+verified_at: 2026-07-22T18:14:59+09:00
+verified_by: work.py verify
+evidence_refs:
+  - reviews/VERIFY-2026-07-22-unit-task-ar-604-001-20260722181459.json
 ---
 
 # UNIT-TASK-AR-604-001 - 커맨드 팔레트 동기화 + 죽은 activateView 제거 + 아이콘/토큰/칸반 위생
