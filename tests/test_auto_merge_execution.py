@@ -194,7 +194,7 @@ def test_untrusted_status_fields_cannot_forge_success_or_control_lines(monkeypat
         "execute_merge",
         lambda _pr: (False, "원격 머지 확인 실패: state=OPEN", {"state": "OPEN"}),
     )
-    monkeypatch.setattr(module.sys, "argv", [str(SCRIPT), control_text, "--execute"])
+    monkeypatch.setattr(module.sys, "argv", [str(SCRIPT), "123", "--execute"])
 
     result = module.main()
     output = capsys.readouterr().out
@@ -206,6 +206,66 @@ def test_untrusted_status_fields_cannot_forge_success_or_control_lines(monkeypat
     assert len(output.splitlines()) == 4
     assert "[reserved-status-marker]" in output
     assert "\\u000d\\u000a\\u001b" in output
+
+
+def test_option_like_and_malformed_pr_inputs_make_zero_subprocess_calls(monkeypatch, capsys) -> None:
+    module = _load()
+    calls = []
+    monkeypatch.setattr(module.subprocess, "run", lambda *args, **kwargs: calls.append((args, kwargs)))
+    invalid_argv = (
+        [],
+        ["-Rattacker/other-repository"],
+        ["-d"],
+        ["--repo", "owner/repo"],
+        ["0"],
+        ["+1"],
+        [" 1"],
+        ["1 "],
+        ["１２３"],
+        ["1;echo-pwned"],
+        ["https://github.com/owner/repo/pull/1"],
+        ["123", "extra"],
+    )
+
+    for argv in invalid_argv:
+        monkeypatch.setattr(module.sys, "argv", [str(SCRIPT), *argv, "--execute"])
+        assert module.main() == 2
+        capsys.readouterr()
+
+    assert calls == []
+
+
+def test_direct_merge_and_readback_reject_option_like_pr_without_subprocess(monkeypatch) -> None:
+    module = _load()
+    calls = []
+    monkeypatch.setattr(module.subprocess, "run", lambda *args, **kwargs: calls.append((args, kwargs)))
+
+    merged, detail, remote = module.execute_merge("-Rattacker/other-repository")
+
+    assert merged is False
+    assert detail == "PR 번호 형식 오류"
+    assert remote == {}
+    try:
+        module.gh_json("--repo", "state")
+    except SystemExit as exc:
+        assert str(exc) == "PR 번호 형식 오류"
+    else:  # pragma: no cover - direct read-back must reject the input
+        raise AssertionError("gh_json accepted an option-like PR identifier")
+    assert calls == []
+
+
+def test_valid_pr_number_is_forwarded_as_a_single_positional(monkeypatch) -> None:
+    module = _load()
+    commands = []
+
+    def fake_run(command, **_kwargs):
+        commands.append(command)
+        return _completed(0, stdout='{"state":"OPEN"}')
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    assert module.gh_json("123", "state") == {"state": "OPEN"}
+    assert commands == [["gh", "pr", "view", "123", "--json", "state"]]
 
 
 def test_readback_exception_message_is_not_exposed(monkeypatch, capsys) -> None:

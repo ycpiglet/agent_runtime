@@ -35,6 +35,7 @@ except Exception:
 CODE_LINE_CAP = 600  # 비문서 변경 라인(additions+deletions) 소프트 상한
 GH_COMMAND_TIMEOUT_SECONDS = 30
 REMOTE_MERGED_MARKER = "원격 MERGED 확인됨"
+PR_NUMBER_PATTERN = re.compile(r"^[1-9][0-9]*$", re.ASCII)
 RFC3339_TIMESTAMP = re.compile(
     r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$"
 )
@@ -55,10 +56,21 @@ DOC_PATTERNS = [
 ]
 
 
+def _normalize_pr_number(value: object) -> str:
+    """Return an ASCII decimal PR number that cannot be parsed as a gh option."""
+    if not isinstance(value, str) or not PR_NUMBER_PATTERN.fullmatch(value):
+        raise ValueError("PR 번호는 1 이상의 ASCII 십진 정수여야 합니다")
+    return value
+
+
 def gh_json(pr: str, fields: str) -> dict:
     try:
+        safe_pr = _normalize_pr_number(pr)
+    except ValueError:
+        raise SystemExit("PR 번호 형식 오류") from None
+    try:
         out = subprocess.run(
-            ["gh", "pr", "view", pr, "--json", fields],
+            ["gh", "pr", "view", safe_pr, "--json", fields],
             capture_output=True,
             text=True,
             encoding="utf-8",
@@ -160,8 +172,13 @@ def _valid_merged_at(value: object) -> bool:
 def execute_merge(pr: str) -> tuple[bool, str, dict]:
     """Request a merge and confirm only a validated authoritative remote state."""
     try:
+        safe_pr = _normalize_pr_number(pr)
+    except ValueError:
+        return False, "PR 번호 형식 오류", {}
+
+    try:
         merge = subprocess.run(
-            ["gh", "pr", "merge", pr, "--squash", "--delete-branch"],
+            ["gh", "pr", "merge", safe_pr, "--squash", "--delete-branch"],
             capture_output=True,
             text=True,
             encoding="utf-8",
@@ -172,7 +189,7 @@ def execute_merge(pr: str) -> tuple[bool, str, dict]:
         command_status = f"exception={exc.__class__.__name__}"
 
     try:
-        remote = gh_json(pr, "state,isDraft,mergedAt,mergeCommit")
+        remote = gh_json(safe_pr, "state,isDraft,mergedAt,mergeCommit")
     except SystemExit:
         return False, f"원격 상태 재확인 실패: SystemExit; merge {command_status}", {}
     except Exception as exc:
@@ -205,12 +222,18 @@ def execute_merge(pr: str) -> tuple[bool, str, dict]:
 
 
 def main() -> int:
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    if not args:
+    raw_args = sys.argv[1:]
+    execute = "--execute" in raw_args
+    unknown_options = [arg for arg in raw_args if arg.startswith("-") and arg != "--execute"]
+    positionals = [arg for arg in raw_args if not arg.startswith("-")]
+    if unknown_options or len(positionals) != 1:
         print(__doc__)
         return 2
-    pr = args[0]
-    execute = "--execute" in sys.argv
+    try:
+        pr = _normalize_pr_number(positionals[0])
+    except ValueError:
+        print("[auto_merge] PR 번호 형식 오류")
+        return 2
     verdict, reasons, d = evaluate(pr)
     safe_pr = _safe_status_text(pr, limit=50)
     safe_title = _safe_status_text(d.get("title", ""), limit=50)
