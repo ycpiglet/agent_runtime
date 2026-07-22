@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-23T02:24:40+09:00
-record_count: 430
+generated_at: 2026-07-23T03:10:16+09:00
+record_count: 434
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `430` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `434` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `32` records |
-| Tasksets | pass | `56` records |
-| Tasks | pass | `278` records |
-| Units | pass | `64` records |
+| Initiatives | pass | `33` records |
+| Tasksets | pass | `57` records |
+| Tasks | pass | `279` records |
+| Units | pass | `65` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -469,6 +469,10 @@ record_count: 430
 | 31.1 | Taskset 31.1 | taskset | `TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY` | `INIT-AR-SELF-EVAL-QUERY-INTEGRITY` | active | `BACKLOG-BOARD.md` | Self-Eval Query Integrity |
 | 31.1.1 | Task 31.1.1 | task | `TASK-AR-614` | `TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-614.md` | Close GitHub issue 318 by preventing self-eval from converting exhausted Git queries… |
 | 31.1.1.1 | Unit 31.1.1.1 | unit | `UNIT-TASK-AR-614-001` | `TASK-AR-614` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-614/UNIT-TASK-AR-614-001.md` | UNIT-TASK-AR-614-001 - Propagate shared Git query errors through self-eval |
+| 32 | Initiative 32 | initiative | `INIT-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY` | - | active | `agents/project/initiatives/INIT-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY.md` | Release-Auto Fixture HEAD Recovery |
+| 32.1 | Taskset 32.1 | taskset | `TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY` | `INIT-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY` | active | `BACKLOG-BOARD.md` | Release-Auto Fixture HEAD Recovery |
+| 32.1.1 | Task 32.1.1 | task | `TASK-AR-615` | `TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY` | planned | `agents/lead_engineer/tasks/TASK-AR-615.md` | Close GitHub issue 320 by making the release-auto fixture recover from the observed t… |
+| 32.1.1.1 | Unit 32.1.1.1 | unit | `UNIT-TASK-AR-615-001` | `TASK-AR-615` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-615/UNIT-TASK-AR-615-001.md` | UNIT-TASK-AR-615-001 - Bound retry for transient release-auto fixture commits |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

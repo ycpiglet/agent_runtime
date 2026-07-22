@@ -987,8 +987,27 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-615",
+      "expires_at": "2026-07-24T03:09:36+09:00",
+      "fulfilled_at": "2026-07-23T03:09:36+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-615.md",
+      "fulfilled_task_id": "TASK-AR-615",
+      "fulfilled_task_uid": "dcbfa286-be09-470e-ac3f-85ac4649f049",
+      "initiative_id": "INIT-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY",
+      "kind": "task",
+      "owner_id": "codex-root-planner",
+      "reason": "work registration TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY",
+      "reservation_group_id": "RES-20260723-030936-5a67a518",
+      "reservation_id": "RES-20260723-030936-5a67a518-01",
+      "reserved_at": "2026-07-23T03:09:36+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-07-23T02:23:56+09:00"
+  "updated_at": "2026-07-23T03:09:36+09:00"
 }

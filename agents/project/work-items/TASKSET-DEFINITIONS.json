@@ -192,6 +192,12 @@
       "display_name": "Self-Eval Query Integrity",
       "summary": "Make self-eval fail loud and preserve structured evidence whenever its shared Git queries exhaust retries.",
       "order": 724
+    },
+    {
+      "task_set_id": "TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY",
+      "display_name": "Release-Auto Fixture HEAD Recovery",
+      "summary": "Make the release-auto test fixture resilient to a proven pre-commit HEAD parse transient without hiding deterministic Git failures.",
+      "order": 725
     }
   ]
 }

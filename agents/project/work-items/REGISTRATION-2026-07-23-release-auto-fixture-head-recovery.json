@@ -1,0 +1,97 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "ci_failure",
+  "origin_ref": "reviews/REVIEW-2026-07-23-release-auto-fixture-head-recovery-plan.md",
+  "created_by": "codex-root-planner",
+  "now": "2026-07-23T03:09:36+09:00",
+  "initiative": {
+    "id": "INIT-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY",
+    "title": "Release-Auto Fixture HEAD Recovery",
+    "summary": "Recover narrowly recognized transient Git HEAD parsing failures during release-auto fixture construction.",
+    "owner": "lead-engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY",
+    "display_name": "Release-Auto Fixture HEAD Recovery",
+    "summary": "Make the release-auto test fixture resilient to a proven pre-commit HEAD parse transient without hiding deterministic Git failures.",
+    "order": 725,
+    "plan_slug": "2026-07-23-release-auto-fixture-head-recovery",
+    "planner_model_tier": "planner_high",
+    "worker_model_tier": "worker_standard",
+    "reviewer_model_tier": "reviewer_standard"
+  },
+  "tasks": [
+    {
+      "title": "Retry recognized pre-commit HEAD parse transients in release-auto fixtures",
+      "goal": "Close GitHub issue 320 by making the release-auto fixture recover from the observed transient Git commit failure while preserving immediate failure for unknown errors.",
+      "scope": "Change only tests/test_release_auto_noncritical.py fixture helper retry classification and focused regressions. Do not change production code or broad CI policy.",
+      "priority": "P0",
+      "difficulty": "S",
+      "est_hours": 1,
+      "est_tokens": 4500,
+      "owner": "lead_engineer",
+      "team": "agent-runtime-core",
+      "summary": "Bound retry recovery to the observed `fatal: could not parse HEAD` fixture commit failure.",
+      "planner_model_tier": "planner_high",
+      "worker_model_tier": "worker_standard",
+      "reviewer_model_tier": "reviewer_standard",
+      "tags": [
+        "github-320",
+        "ci-flake",
+        "release-auto",
+        "test-fixture"
+      ],
+      "acceptance": [
+        "A recognized could-not-parse-HEAD failure followed by success recovers after exactly one retry.",
+        "Repeated recognized failures exhaust at the configured bound with sanitized evidence.",
+        "Unknown Git failures are not retried and still fail immediately with sanitized diagnostics.",
+        "Full release-auto/cadence regressions and the taskset gate pass."
+      ],
+      "verification": [
+        "python -m pytest tests/test_release_auto_noncritical.py tests/test_release_cadence_trigger.py -q",
+        "python -m pytest tests/test_backlog_board_tasksets.py -q",
+        "python scripts/taskset_work_gate.py --check"
+      ],
+      "units": [
+        {
+          "title": "Bound retry for transient release-auto fixture commits",
+          "context": "Main run 29945156772 job 89008561485 failed after 36 successful fixture commits when the next git commit returned rc 128 fatal: could not parse HEAD. The immediately preceding PR CI passed on identical product code. The fixture helper emits sanitized evidence but currently has no retry classification.",
+          "inputs": [
+            "reviews/REVIEW-2026-07-23-release-auto-fixture-head-recovery-plan.md",
+            "GitHub issue 320",
+            "GitHub Actions run 29945156772 job 89008561485",
+            "tests/test_release_auto_noncritical.py"
+          ],
+          "target_files": [
+            "tests/test_release_auto_noncritical.py"
+          ],
+          "scope": "Add failure-first helper coverage, classify only the exact pre-commit HEAD parse transient, retry it with a short fixed bound, and retain immediate sanitized assertions for every other failure.",
+          "steps": [
+            "Reproduce the helper raising on one could-not-parse-HEAD result followed by a successful subprocess result.",
+            "Add a narrow transient classifier and bounded retry loop without changing the existing diagnostic sanitizer.",
+            "Prove recovery, exhaustion, unknown-error single-attempt behavior, and exact attempt counts.",
+            "Run full cadence/release-auto tests, taskset expectation tests, and independent W4b."
+          ],
+          "acceptance": [
+            "The observed transient followed by success returns normally after two total attempts.",
+            "Three observed transients fail loud and report the final sanitized diagnostic.",
+            "An unrelated rc 128 failure is attempted once only.",
+            "No production file changes and all registered verification commands pass."
+          ],
+          "verification": [
+            "python -m pytest tests/test_release_auto_noncritical.py tests/test_release_cadence_trigger.py -q",
+            "python -m pytest tests/test_backlog_board_tasksets.py -q",
+            "python scripts/taskset_work_gate.py --check"
+          ],
+          "handoff": "Report first-attempt CI evidence, failure-first result, classification boundary, attempt counts, sanitization, full regressions, and independent W4b.",
+          "stop_condition": "Stop if recovery requires retrying ambiguous mutations, changing production Git behavior, or weakening a CI/release gate.",
+          "escalation_triggers": [
+            "reliability",
+            "data_integrity"
+          ]
+        }
+      ]
+    }
+  ]
+}
