@@ -9,7 +9,7 @@
   "callsite_id": "codex-root-20260722",
   "pane_id": "root",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-AUTO-MERGE-INTEGRITY",
   "active_scope": "TASKSET-AR-AUTO-MERGE-INTEGRITY",
   "scope_transition_approved": true,
@@ -27,12 +27,12 @@
   "worktree_path": ".worktrees/TASK-AR-600",
   "branch": "codex/task-ar-600-merge-readback",
   "claimed_at": "2026-07-22T17:48:20+09:00",
-  "last_heartbeat": "2026-07-22T17:48:20+09:00",
-  "updated_at": "2026-07-22T17:48:20+09:00",
+  "last_heartbeat": "2026-07-22T18:21:26+09:00",
+  "updated_at": "2026-07-22T18:21:26+09:00",
   "expires_at": "2026-07-22T21:48:20+09:00",
   "lease": {
     "claimed_at": "2026-07-22T17:48:20+09:00",
-    "heartbeat_at": "2026-07-22T17:48:20+09:00",
+    "heartbeat_at": "2026-07-22T18:21:26+09:00",
     "expires_at": "2026-07-22T21:48:20+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260722-174820-task-ar-600-fa3d.handoff.md",
@@ -51,5 +51,9 @@
     "src/agent_runtime/templates/project/scripts/auto_merge.py",
     "new:tests/test_auto_merge_execution.py",
     "tests/fixtures/host/agent_runtime.lock.json"
-  ]
+  ],
+  "released_at": "2026-07-22T18:21:26+09:00",
+  "verified_by": "codex-task-ar-600-auditor-rework3-20260722",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-22-TASK-AR-600-REWORK3.md"
 }
