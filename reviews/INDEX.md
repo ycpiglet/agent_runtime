@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-22T18:48:40+09:00
-record_count: 698
+generated_at: 2026-07-22T19:52:50+09:00
+record_count: 699
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `698` review and evidence records under `reviews/`.
+- Summary: indexed `699` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `698` files |
+| Reviews covered | pass | `699` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -730,6 +730,7 @@ record_count: 698
 | `reviews/W4B-2026-07-22-TASK-AR-600-REWORK3.md` | `W4B-2026-07-22-TASK-AR-600-REWORK3` | w4b-independent-verification | approved | pass | W4b Independent Verification — TASK-AR-600 Third Remediation |
 | `reviews/W4B-2026-07-22-TASK-AR-600.md` | `W4B-2026-07-22-TASK-AR-600` | w4b-independent-verification | approved | pass | W4b Independent Verification — TASK-AR-600 |
 | `reviews/W4B-2026-07-22-TASK-AR-610.md` | `W4B-2026-07-22-TASK-AR-610` | md | record | pass | TASK-AR-610 Independent W4b |
+| `reviews/W4B-2026-07-22-TASK-AR-611.md` | `W4B-2026-07-22-TASK-AR-611` | md | record | pass | TASK-AR-611 Independent W4b |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 
