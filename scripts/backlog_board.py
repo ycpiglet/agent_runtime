@@ -428,6 +428,9 @@ def strip_comment(line: str) -> str:
         return line
     quote: str | None = None
     escaped = False
+    flow_stack: list[str] = []
+    scalar_expected = True
+    top_level_separator_seen = False
     index = 0
     while index < len(line):
         char = line[index]
@@ -438,6 +441,7 @@ def strip_comment(line: str) -> str:
                 escaped = True
             elif char == '"':
                 quote = None
+                scalar_expected = False
             index += 1
             continue
         if quote == "'":
@@ -446,16 +450,50 @@ def strip_comment(line: str) -> str:
                 continue
             if char == "'":
                 quote = None
+                scalar_expected = False
             index += 1
             continue
         if char == "#":
             return line[:index]
+        if char.isspace():
+            index += 1
+            continue
         if char in {'"', "'"}:
-            previous_index = index - 1
-            while previous_index >= 0 and line[previous_index].isspace():
-                previous_index -= 1
-            if previous_index < 0 or line[previous_index] in ":,[{-":
+            if scalar_expected:
                 quote = char
+            else:
+                scalar_expected = False
+            index += 1
+            continue
+        if char in "[{":
+            if scalar_expected:
+                flow_stack.append("]" if char == "[" else "}")
+                scalar_expected = True
+            else:
+                scalar_expected = False
+        elif char in "]}":
+            if flow_stack and flow_stack[-1] == char:
+                flow_stack.pop()
+            scalar_expected = False
+        elif char == ",":
+            scalar_expected = bool(flow_stack)
+        elif char == ":":
+            if flow_stack and flow_stack[-1] == "}" and not scalar_expected:
+                scalar_expected = True
+            elif not flow_stack and not top_level_separator_seen:
+                top_level_separator_seen = True
+                scalar_expected = True
+            else:
+                scalar_expected = False
+        elif (
+            char == "-"
+            and scalar_expected
+            and not flow_stack
+            and (index + 1 == len(line) or line[index + 1].isspace())
+        ):
+            scalar_expected = True
+        else:
+            scalar_expected = False
         index += 1
     return line
 
