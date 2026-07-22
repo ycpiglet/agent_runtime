@@ -1,5 +1,11 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-07-22 TASK-AR-610 active; PR #303 CI schema recovery
+
+- Active: `TASK-AR-610` in `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` restores the governance baseline discovered by PR #303.
+- Scope: normalize noncanonical closeout evidence fields in the declared TASK-AR-594/595/596/597/598/601 task and unit records without deleting evidence or expanding the global schema.
+- Parent: TASK-AR-600 implementation and final W4b are complete; PR #303 integration resumes after this P0 CI blocker passes.
+
 ## 2026-07-22 TASK-AR-600 active; release-impact remediation queued
 
 - Active: `TASK-AR-600` in `TASKSET-AR-AUTO-MERGE-INTEGRITY` fixes issue #291's false-success auto-merge path.
