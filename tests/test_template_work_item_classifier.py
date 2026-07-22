@@ -134,6 +134,28 @@ status: active
 # Legacy Initiative
 """,
     )
+    _write(
+        tmp_path / "agents" / "project" / "initiatives" / "INIT-TYPE-TASKSET.md",
+        """---
+kind: "   "
+type: taskset
+id: INIT-TYPE-TASKSET
+---
+
+# Type Alias Taskset
+""",
+    )
+    _write(
+        tmp_path / "agents" / "project" / "initiatives" / "SPACE-ID.md",
+        """---
+kind: initiative
+id: "   "
+work_id: INIT-WORK-SPACE-ID
+---
+
+# Normalized Work ID Initiative
+""",
+    )
     result = subprocess.run(
         [
             sys.executable,
@@ -163,3 +185,6 @@ status: active
     assert "INIT-WORK-ID" in initiative_ids
     assert "WORK-ID-FILENAME" not in initiative_ids
     assert "INIT-LEGACY" in initiative_ids
+    assert "INIT-TYPE-TASKSET" not in initiative_ids
+    assert "INIT-WORK-SPACE-ID" in initiative_ids
+    assert "SPACE-ID" not in initiative_ids

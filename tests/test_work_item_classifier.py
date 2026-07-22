@@ -162,6 +162,30 @@ created_at: 2026-06-09T00:00:00+09:00
 # Legacy Initiative
 """,
     )
+    _write(
+        tmp_path / "agents" / "project" / "initiatives" / "INIT-TYPE-TASKSET.md",
+        """---
+kind: "   "
+type: taskset
+id: INIT-TYPE-TASKSET
+status: planned
+---
+
+# Type Alias Taskset
+""",
+    )
+    _write(
+        tmp_path / "agents" / "project" / "initiatives" / "SPACE-ID.md",
+        """---
+kind: initiative
+id: "   "
+work_id: INIT-WORK-SPACE-ID
+status: planned
+---
+
+# Normalized Work ID Initiative
+""",
+    )
 
     result = _run(tmp_path, "--write", "--check")
 
@@ -176,6 +200,9 @@ created_at: 2026-06-09T00:00:00+09:00
     assert "INIT-ID-WINS" in initiative_ids
     assert "INIT-WORK-ID-IGNORED" not in initiative_ids
     assert "INIT-LEGACY" in initiative_ids
+    assert "INIT-TYPE-TASKSET" not in initiative_ids
+    assert "INIT-WORK-SPACE-ID" in initiative_ids
+    assert "SPACE-ID" not in initiative_ids
 
 
 def test_work_item_classifier_check_fails_when_generated_json_is_stale(tmp_path: Path) -> None:
