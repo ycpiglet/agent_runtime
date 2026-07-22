@@ -396,3 +396,22 @@ def test_flow_line_present_in_panel(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_sections(monkeypatch)
     panel = session_dashboard.render_panel(session_dashboard.build_dashboard(REPO_ROOT))
     assert "FLOW|" in panel
+
+
+def test_flow_section_skips_single_corrupt_file_not_whole_section(tmp_path: Path) -> None:
+    # W4b regression: a non-UTF8 task file must skip only itself, not degrade the
+    # entire flow section to error (UnicodeDecodeError is a ValueError subclass).
+    from datetime import datetime, timedelta, timezone
+
+    now = datetime.now(timezone.utc)
+    _write_task(
+        tmp_path,
+        "TASK-AR-901",
+        completed_at=(now - timedelta(days=1)).isoformat(),
+        started_at=(now - timedelta(hours=3)).isoformat(),
+    )
+    bad = tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-902.md"
+    bad.write_bytes(b"\xff\xfe\x00 completed_at: garbage")
+    section = session_dashboard.build_flow_section(tmp_path)
+    assert section["status"] == "ok"
+    assert section["completed"] == 1

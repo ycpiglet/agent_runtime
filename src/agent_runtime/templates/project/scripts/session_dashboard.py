@@ -178,7 +178,11 @@ def build_flow_section(root: Path, *, window_days: int = 7) -> dict[str, Any]:
         for path in tasks_dir.glob("TASK-*.md"):
             try:
                 meta, _ = backlog_board.parse_frontmatter(path.read_text(encoding="utf-8"))
-            except OSError:
+            except Exception:
+                # Skip only the unreadable/undecodable/malformed file (W4b: a
+                # non-UTF8 file raises UnicodeDecodeError, a ValueError subclass
+                # not caught by OSError, which would else degrade the whole
+                # section instead of just this one record).
                 continue
             completed_at = _parse_dt(meta.get("completed_at"))
             if not completed_at or completed_at < cutoff:

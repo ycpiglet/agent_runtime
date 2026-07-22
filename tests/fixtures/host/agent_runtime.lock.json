@@ -192,7 +192,7 @@
       "scripts/scm_steward.py": "sha256:023a3d5910957e866dc51295b7788c6105cc74cee21a98402a4260a4055961da",
       "scripts/scribe_due.py": "sha256:3ba9579be478a9e0a6e0983d4847074f6a503ba64eb67d060ca56ff548c449bb",
       "scripts/secretary_digest.py": "sha256:66a5e85681877eec911fc3dca0f1b19b71004a840f87500d1c78f10cda55b004",
-      "scripts/session_dashboard.py": "sha256:a2ceb8cce95f51d35ae154e9aa127982787339782ea67c776e6832378091257a",
+      "scripts/session_dashboard.py": "sha256:1fc0a620ef43a6511c4be420f4f502dd7ec1fc1983f466e0b2a02dad87257ab9",
       "scripts/session_start_hook.py": "sha256:a688e6e77d3bf156ddac3409082b224775732ec0d86bd581332b1274b5ef4e86",
       "scripts/state_machine_gate.py": "sha256:b1ce42970658b1d7eed94b0285a47fca74e2566ff9094b71ed99a5ad10206e7f",
       "scripts/state_sync_gate.py": "sha256:414748a65191d7ff3924e6f4a786c2f8b7b926f4d675b193d4f1463e90476c2a",
@@ -281,7 +281,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.6.0",
-    "template_digest": "sha256:bbf05150762d7bbbfd9276734ab4897f369c741664c61ff6797ae544b3423418",
+    "template_digest": "sha256:7999bc01b2da2801591489e2c8143572c9ef18239ebc86d1ac087f57f3795491",
     "template_files": 278
   },
   "project": "fixture-host",
