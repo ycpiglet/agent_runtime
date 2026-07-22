@@ -152,6 +152,16 @@ created_at: 2026-06-10T00:00:00+09:00
 # Canonical ID Initiative
 """,
     )
+    _write(
+        tmp_path / "agents" / "project" / "initiatives" / "INIT-LEGACY.md",
+        """---
+status: active
+created_at: 2026-06-09T00:00:00+09:00
+---
+
+# Legacy Initiative
+""",
+    )
 
     result = _run(tmp_path, "--write", "--check")
 
@@ -165,6 +175,7 @@ created_at: 2026-06-10T00:00:00+09:00
     assert "WORK-ID-FILENAME" not in initiative_ids
     assert "INIT-ID-WINS" in initiative_ids
     assert "INIT-WORK-ID-IGNORED" not in initiative_ids
+    assert "INIT-LEGACY" in initiative_ids
 
 
 def test_work_item_classifier_check_fails_when_generated_json_is_stale(tmp_path: Path) -> None:

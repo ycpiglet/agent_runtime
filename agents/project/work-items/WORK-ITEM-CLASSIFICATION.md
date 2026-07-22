@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-23T07:08:34+09:00
+generated_at: 2026-07-23T07:21:20+09:00
 record_count: 438
 ---
 
@@ -447,8 +447,8 @@ record_count: 438
 | 26.1.5.1 | Unit 26.1.5.1 | unit | `UNIT-TASK-AR-607-001` | `TASK-AR-607` | completed | `agents/lead_engineer/tasks/units/TASK-AR-607/UNIT-TASK-AR-607-001.md` | UNIT-TASK-AR-607-001 - Isolate transient-spawn recovery state |
 | 26.1.6 | Task 26.1.6 | task | `TASK-AR-608` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | completed | `agents/lead_engineer/tasks/TASK-AR-608.md` | Close GitHub #298 by making comment stripping quote-aware while preserving existing u… |
 | 26.1.6.1 | Unit 26.1.6.1 | unit | `UNIT-TASK-AR-608-001` | `TASK-AR-608` | completed | `agents/lead_engineer/tasks/units/TASK-AR-608/UNIT-TASK-AR-608-001.md` | UNIT-TASK-AR-608-001 - Make frontmatter comment scanning quote-aware |
-| 26.1.7 | Task 26.1.7 | task | `TASK-AR-609` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-609.md` | Close GitHub #300 by preventing taskset records from being duplicated into the initia… |
-| 26.1.7.1 | Unit 26.1.7.1 | unit | `UNIT-TASK-AR-609-001` | `TASK-AR-609` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-609/UNIT-TASK-AR-609-001.md` | UNIT-TASK-AR-609-001 - Filter classifier initiative collection by record kind |
+| 26.1.7 | Task 26.1.7 | task | `TASK-AR-609` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | in_progress | `agents/lead_engineer/tasks/TASK-AR-609.md` | Close GitHub #300 by preventing taskset records from being duplicated into the initia… |
+| 26.1.7.1 | Unit 26.1.7.1 | unit | `UNIT-TASK-AR-609-001` | `TASK-AR-609` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-609/UNIT-TASK-AR-609-001.md` | UNIT-TASK-AR-609-001 - Filter classifier initiative collection by record kind |
 | 27 | Initiative 27 | initiative | `INIT-AR-PR303-CI-SCHEMA-RECOVERY` | - | active | `agents/project/initiatives/INIT-AR-PR303-CI-SCHEMA-RECOVERY.md` | PR 303 CI Schema Recovery |
 | 27.1 | Taskset 27.1 | taskset | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | `INIT-AR-PR303-CI-SCHEMA-RECOVERY` | complete | `BACKLOG-BOARD.md` | CI Schema Recovery |
 | 27.1.1 | Task 27.1.1 | task | `TASK-AR-610` | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | completed | `agents/lead_engineer/tasks/TASK-AR-610.md` | Make the existing TASK-AR-594 record satisfy the canonical work-item schema while pre… |

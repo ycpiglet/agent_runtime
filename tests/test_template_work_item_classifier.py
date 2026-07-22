@@ -125,6 +125,15 @@ status: planned
 # Work ID Initiative
 """,
     )
+    _write(
+        tmp_path / "agents" / "project" / "initiatives" / "INIT-LEGACY.md",
+        """---
+status: active
+---
+
+# Legacy Initiative
+""",
+    )
     result = subprocess.run(
         [
             sys.executable,
@@ -153,3 +162,4 @@ status: planned
     assert all_ids.count("TASKSET-TEMPLATE-SMOKE") == 1
     assert "INIT-WORK-ID" in initiative_ids
     assert "WORK-ID-FILENAME" not in initiative_ids
+    assert "INIT-LEGACY" in initiative_ids
