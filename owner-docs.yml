@@ -1,5 +1,6 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
+  - reviews/REVIEW-2026-07-23-taskset-ar-release-auto-fixture-recovery-window-registration.md
   - reviews/REVIEW-2026-07-23-taskset-ar-release-auto-fixture-head-recovery-registration.md
   - reviews/REVIEW-2026-07-23-taskset-ar-self-eval-query-integrity-registration.md
   - reviews/REVIEW-2026-07-23-taskset-ar-release-cadence-query-recovery-registration.md

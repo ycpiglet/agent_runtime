@@ -57,6 +57,7 @@
 | 723 | `TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY` | Release Cadence Query Recovery |
 | 724 | `TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY` | Self-Eval Query Integrity |
 | 725 | `TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY` | Release-Auto Fixture HEAD Recovery |
+| 727 | `TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW` | Release-Auto Fixture Recovery Window |
 
 <!-- BACKLOG-INDEX:END -->
 
