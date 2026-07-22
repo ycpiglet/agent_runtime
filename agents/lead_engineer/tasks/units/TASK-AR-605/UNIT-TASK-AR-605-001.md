@@ -39,7 +39,6 @@ acceptance:
   - Fallback failures degrade to explicit read-only notes and exit successfully.
 verification:
   - python -m pytest tests/test_session_dashboard.py -q
-  - python scripts/root_template_parity_gate.py --check
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Report clean-template output, fallback boundaries, root behavior, and issue #294 evidence.
 stop_condition: Stop before adding repository-only work.py or its transitive dependency graph to the template.
@@ -82,7 +81,6 @@ Implement a self-contained read-only fallback in the dashboard pair and a clean-
 ## Verification
 
 - `python -m pytest tests/test_session_dashboard.py -q`
-- `python scripts/root_template_parity_gate.py --check`
 - `python scripts/regen_host_lock_if_needed.py --check`
 
 ## Handoff

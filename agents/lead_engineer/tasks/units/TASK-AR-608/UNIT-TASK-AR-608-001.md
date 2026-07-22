@@ -39,7 +39,6 @@ acceptance:
   - Root/template parsers remain identical.
 verification:
   - python -m pytest tests/test_backlog_board_tasksets.py -q
-  - python scripts/root_template_parity_gate.py --check
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Report the supported scanner grammar, adversarial cases, parity, and issue #298 evidence.
 stop_condition: Stop before expanding the parser into a general YAML implementation.
@@ -82,7 +81,6 @@ Replace only lexical comment stripping for the supported frontmatter subset and 
 ## Verification
 
 - `python -m pytest tests/test_backlog_board_tasksets.py -q`
-- `python scripts/root_template_parity_gate.py --check`
 - `python scripts/regen_host_lock_if_needed.py --check`
 
 ## Handoff

@@ -52,5 +52,5 @@ tags:
 ## Verification
 
 - `python -m pytest tests/test_auto_merge_execution.py src/agent_runtime/templates/project/scripts/test_auto_merge.py -q`
-- `python scripts/root_template_parity_gate.py --check`
+- `python scripts/regen_host_lock_if_needed.py --check`
 - `python scripts/owner_governance_gate.py --allow-empty-owner-docs`

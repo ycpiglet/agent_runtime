@@ -50,7 +50,6 @@ acceptance:
   - Root and template implementations remain equivalent.
 verification:
   - python -m pytest tests/test_task_identity.py tests/test_taskset_dispatcher.py tests/test_conversation_work_audit.py -q
-  - python scripts/root_template_parity_gate.py --check
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Report the accepted ID grammar, migrated consumers, regression matrix, parity result, and exact issue #299 evidence.
 stop_condition: Stop if a required consumer lies outside the declared footprint; register the expansion before editing it.
@@ -103,7 +102,6 @@ Introduce one shared parser/pattern for numeric and timestamp TASK-AR identifier
 ## Verification
 
 - `python -m pytest tests/test_task_identity.py tests/test_taskset_dispatcher.py tests/test_conversation_work_audit.py -q`
-- `python scripts/root_template_parity_gate.py --check`
 - `python scripts/regen_host_lock_if_needed.py --check`
 
 ## Handoff

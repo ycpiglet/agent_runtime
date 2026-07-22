@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-22T17:45:30+09:00
-record_count: 681
+generated_at: 2026-07-22T17:47:59+09:00
+record_count: 682
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `681` review and evidence records under `reviews/`.
+- Summary: indexed `682` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `681` files |
+| Reviews covered | pass | `682` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -519,6 +519,7 @@ record_count: 681
 | `reviews/REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration.md` | `REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration` | md | record | pass | Role Routing Closeout Reliability Registration |
 | `reviews/REVIEW-2026-07-22-post-merge-plan-revalidation.md` | `REVIEW-2026-07-22-post-merge-plan-revalidation` | plan-revalidation | approved | pass | Post-merge plan revalidation |
 | `reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md` | `REVIEW-2026-07-22-release-impact-issues-291-300-audit` | planning | record | action | Release-impact issue audit for #291 through #300 |
+| `reviews/REVIEW-2026-07-22-release-impact-verification-command-correction.md` | `REVIEW-2026-07-22-release-impact-verification-command-correction` | planning | record | pass | Release-impact verification command correction |
 | `reviews/REVIEW-2026-07-22-remote-main-integration-id-collision.md` | `REVIEW-2026-07-22-remote-main-integration-id-collision` | integration-decision | approved | pass | Remote main integration and TASK-AR-600 collision |
 | `reviews/REVIEW-2026-07-22-task-ar-599-packaging-scope-amendment.md` | `REVIEW-2026-07-22-task-ar-599-packaging-scope-amendment` | md | record | pass | TASK-AR-599 packaging scope amendment |
 | `reviews/REVIEW-2026-07-22-taskset-ar-july-release-impact-remediation-registration.md` | `REVIEW-2026-07-22-taskset-ar-july-release-impact-remediation-registration` | md | record | pass | Release Impact Remediator Registration |

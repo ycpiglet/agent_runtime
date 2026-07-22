@@ -38,7 +38,6 @@ acceptance:
   - Existing English-status tasks remain compatible.
 verification:
   - python -m pytest tests/test_taskset_dispatcher.py -q
-  - python scripts/root_template_parity_gate.py --check
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Report before/after frontmatter, normalized payload behavior, focused tests, and issue #293 evidence.
 stop_condition: Stop before changing unrelated status consumers or schema vocabulary.
@@ -80,7 +79,6 @@ Change only taskset start status persistence and its regression coverage; do not
 ## Verification
 
 - `python -m pytest tests/test_taskset_dispatcher.py -q`
-- `python scripts/root_template_parity_gate.py --check`
 - `python scripts/regen_host_lock_if_needed.py --check`
 
 ## Handoff
