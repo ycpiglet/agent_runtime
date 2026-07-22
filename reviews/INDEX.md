@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-20T13:25:51+09:00
-record_count: 630
+generated_at: 2026-07-22T17:47:02+09:00
+record_count: 634
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `630` review and evidence records under `reviews/`.
+- Summary: indexed `634` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `630` files |
+| Reviews covered | pass | `634` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -518,6 +518,10 @@ record_count: 630
 | `reviews/REVIEW-2026-07-19-taskset-ar-auto-merge-integrity-registration.md` | `REVIEW-2026-07-19-taskset-ar-auto-merge-integrity-registration` | md | record | pass | Merge Truth Keeper Registration |
 | `reviews/REVIEW-2026-07-20-hook-portability-and-worktree-cleanup.md` | `REVIEW-2026-07-20-hook-portability-and-worktree-cleanup` | md | record | pass | Hook Portability and Worktree Cleanup |
 | `reviews/REVIEW-2026-07-20-taskset-ar-hook-portability-cleanup-registration.md` | `REVIEW-2026-07-20-taskset-ar-hook-portability-cleanup-registration` | md | record | pass | Hook Portability Maintainer Registration |
+| `reviews/REVIEW-2026-07-22-decision-console-overhaul-masterplan.md` | `REVIEW-2026-07-22-decision-console-overhaul-masterplan` | md | record | pass | Decision Console Overhaul Masterplan |
+| `reviews/REVIEW-2026-07-22-taskset-ar-console-overhaul-p0-registration.md` | `REVIEW-2026-07-22-taskset-ar-console-overhaul-p0-registration` | md | record | pass | Console Overhaul P0 — Trust & Hygiene Registration |
+| `reviews/REVIEW-2026-07-22-taskset-ar-console-overhaul-p1-registration.md` | `REVIEW-2026-07-22-taskset-ar-console-overhaul-p1-registration` | md | record | pass | Console Overhaul P1 — Core Structure Registration |
+| `reviews/REVIEW-2026-07-22-taskset-ar-console-overhaul-p2-registration.md` | `REVIEW-2026-07-22-taskset-ar-console-overhaul-p2-registration` | md | record | pass | Console Overhaul P2 — Structure Complete Registration |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |

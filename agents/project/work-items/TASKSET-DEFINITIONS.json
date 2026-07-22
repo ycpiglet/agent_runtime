@@ -68,10 +68,28 @@
       "order": 600
     },
     {
+      "task_set_id": "TASKSET-AR-CONSOLE-OVERHAUL-P0",
+      "display_name": "Console Overhaul P0 — Trust & Hygiene",
+      "summary": "결정 비종속 quick-win 묶음. 신선도 배지·캐시 사각지대 해소, 홈 요약 위계 정리, 프론트 위생(죽은 코드·아이콘·i18n·다크베이스·칸반), 데이터 위생(타임스탬프 게이트·actuals/rework 자동화), 세션 delta·throughput 전달 씨앗, REPORTING-FORMAT/OPS 계약 봉합, requirements-lint·NEEDS CLARIFICATION 마커 씨앗. 1–2주.",
+      "order": 601
+    },
+    {
       "task_set_id": "TASKSET-AR-HOOK-PORTABILITY-CLEANUP",
       "display_name": "Hook Portability Maintainer",
       "summary": "Repair cross-platform hook commands, activate Git hook wiring, and verify a clean worktree lifecycle.",
       "order": 601
+    },
+    {
+      "task_set_id": "TASKSET-AR-CONSOLE-OVERHAUL-P1",
+      "display_name": "Console Overhaul P1 — Core Structure",
+      "summary": "attention 단일 정본화, 홈 Decision Screenfit 완성(verdict 배지+어텐션 큐+집계 스트립+흐름 타일), renderAll 해체, /clarify 인터뷰 게이트+EARS, 요구-검증-증거 3자 추적성, W4c 이해도 퀴즈 게이트 승격+held-out, Owner 승인 위험 티어링, FLOW-DIGEST 주간 자동+actor 스탬프+Ownership Concentration. 1–2개월. Phase 0 완료가 전제.",
+      "order": 602
+    },
+    {
+      "task_set_id": "TASKSET-AR-CONSOLE-OVERHAUL-P2",
+      "display_name": "Console Overhaul P2 — Structure Complete",
+      "summary": "프론트 물리 파일 분리(빌드리스), IA 재프루닝 2.0(관제 6허브+drawer)+확장기 산출물 정산+VISION.md 갱신, 상태 전이 이벤트 로그 실체화(JSONL+샤딩+하트비트), 실패 패턴 압축 파이프라인, 축3 패턴군 UI 통합(InterviewPanel·QuizGate 카드), orchestrator 권한 3분할, 에이전트 상호검증 debate 확장. 2개월+. Phase 0/1 안착이 전제.",
+      "order": 603
     },
     {
       "task_set_id": "TASKSET-AR-SELF-IMPROVEMENT-CADENCE",

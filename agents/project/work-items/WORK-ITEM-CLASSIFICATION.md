@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-20T13:26:53+09:00
-record_count: 378
+generated_at: 2026-07-22T17:45:34+09:00
+record_count: 413
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `378` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `413` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `25` records |
-| Tasksets | pass | `49` records |
-| Tasks | pass | `259` records |
-| Units | pass | `45` records |
+| Initiatives | pass | `28` records |
+| Tasksets | pass | `52` records |
+| Tasks | pass | `281` records |
+| Units | pass | `52` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -417,6 +417,41 @@ record_count: 378
 | 24.1 | Taskset 24.1 | taskset | `TASKSET-AR-HOOK-PORTABILITY-CLEANUP` | `INIT-AR-HOOK-PORTABILITY-CLEANUP` | complete | `BACKLOG-BOARD.md` | Hook Portability Maintainer |
 | 24.1.1 | Task 24.1.1 | task | `TASK-AR-601` | `TASKSET-AR-HOOK-PORTABILITY-CLEANUP` | completed | `agents/lead_engineer/tasks/TASK-AR-601.md` | Replace platform-specific hook commands, enforce executable Git hook metadata, instal… |
 | 24.1.1.1 | Unit 24.1.1.1 | unit | `UNIT-TASK-AR-601-001` | `TASK-AR-601` | completed | `agents/lead_engineer/tasks/units/TASK-AR-601/UNIT-TASK-AR-601-001.md` | UNIT-TASK-AR-601-001 - Make hook execution portable and close the worktree lifecycle |
+| 25 | Initiative 25 | initiative | `INIT-AR-CONSOLE-OVERHAUL-P0` | - | active | `agents/project/initiatives/INIT-AR-CONSOLE-OVERHAUL-P0.md` | Decision Console Overhaul — Phase 0 (Trust & Hygiene) |
+| 25.1 | Taskset 25.1 | taskset | `TASKSET-AR-CONSOLE-OVERHAUL-P0` | `INIT-AR-CONSOLE-OVERHAUL-P0` | active | `BACKLOG-BOARD.md` | Console Overhaul P0 — Trust & Hygiene |
+| 25.1.1 | Task 25.1.1 | task | `TASK-AR-602` | `TASKSET-AR-CONSOLE-OVERHAUL-P0` | planned | `agents/lead_engineer/tasks/TASK-AR-602.md` | 콘솔·보드가 표시하는 데이터가 얼마나 오래되었는지 항상 보이게 하고, 감시 사각지대로 인한 최대 300초 stale을 없앤다. |
+| 25.1.1.1 | Unit 25.1.1.1 | unit | `UNIT-TASK-AR-602-001` | `TASK-AR-602` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md` | UNIT-TASK-AR-602-001 - 상태 시그니처 감시 디렉터리 확장 + 홈 신선도 배지 배선 |
+| 25.1.2 | Task 25.1.2 | task | `TASK-AR-603` | `TASKSET-AR-CONSOLE-OVERHAUL-P0` | planned | `agents/lead_engineer/tasks/TASK-AR-603.md` | 홈 최상단의 시각적 소음과 위계 붕괴를 마크업/CSS 이동 수준에서 즉시 완화한다. |
+| 25.1.2.1 | Unit 25.1.2.1 | unit | `UNIT-TASK-AR-603-001` | `TASK-AR-603` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md` | UNIT-TASK-AR-603-001 - 전역 폼 스코프 축소 + 0건 그룹 렌더 생략 + 히어로 강등 |
+| 25.1.3 | Task 25.1.3 | task | `TASK-AR-604` | `TASKSET-AR-CONSOLE-OVERHAUL-P0` | planned | `agents/lead_engineer/tasks/TASK-AR-604.md` | P1 화면 작업 전에 저위험 단건 결함들을 정리해 소음을 제거한다. |
+| 25.1.3.1 | Unit 25.1.3.1 | unit | `UNIT-TASK-AR-604-001` | `TASK-AR-604` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-604/UNIT-TASK-AR-604-001.md` | UNIT-TASK-AR-604-001 - 커맨드 팔레트 동기화 + 죽은 activateView 제거 + 아이콘/토큰/칸반 위생 |
+| 25.1.4 | Task 25.1.4 | task | `TASK-AR-605` | `TASKSET-AR-CONSOLE-OVERHAUL-P0` | planned | `agents/lead_engineer/tasks/TASK-AR-605.md` | 흐름 지표의 원료를 신뢰 가능하게 만든다: 타임스탬프 모순 차단, 수동 기입 폐지. |
+| 25.1.4.1 | Unit 25.1.4.1 | unit | `UNIT-TASK-AR-605-001` | `TASK-AR-605` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-605/UNIT-TASK-AR-605-001.md` | UNIT-TASK-AR-605-001 - 타임스탬프 단조성 게이트 + actuals/rework 자동 파생 |
+| 25.1.5 | Task 25.1.5 | task | `TASK-AR-606` | `TASKSET-AR-CONSOLE-OVERHAUL-P0` | planned | `agents/lead_engineer/tasks/TASK-AR-606.md` | 이미 있는 데이터를 Owner에게 전달하는 최소 경로를 심는다. |
+| 25.1.5.1 | Unit 25.1.5.1 | unit | `UNIT-TASK-AR-606-001` | `TASK-AR-606` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-606/UNIT-TASK-AR-606-001.md` | UNIT-TASK-AR-606-001 - session_dashboard flow delta 1줄 + 보드 throughput 숫자 |
+| 25.1.6 | Task 25.1.6 | task | `TASK-AR-607` | `TASKSET-AR-CONSOLE-OVERHAUL-P0` | planned | `agents/lead_engineer/tasks/TASK-AR-607.md` | 신설 스킬(/clarify·/quiz)이 등재될 canonical surface를 먼저 정상화한다. |
+| 25.1.6.1 | Unit 25.1.6.1 | unit | `UNIT-TASK-AR-607-001` | `TASK-AR-607` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-607/UNIT-TASK-AR-607-001.md` | UNIT-TASK-AR-607-001 - REPORTING-FORMAT 복원 + response_contract_gate 강화 + OPS 참조 정정 |
+| 25.1.7 | Task 25.1.7 | task | `TASK-AR-608` | `TASKSET-AR-CONSOLE-OVERHAUL-P0` | planned | `agents/lead_engineer/tasks/TASK-AR-608.md` | 요구 명확화·측정 검증 게이트의 기계적 토대를 심어 P1 승격 전 캘리브레이션 데이터를 모은다. |
+| 25.1.7.1 | Unit 25.1.7.1 | unit | `UNIT-TASK-AR-608-001` | `TASK-AR-608` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-608/UNIT-TASK-AR-608-001.md` | UNIT-TASK-AR-608-001 - requirements-lint 게이트 + NEEDS CLARIFICATION 마커 거부 |
+| 26 | Initiative 26 | initiative | `INIT-AR-CONSOLE-OVERHAUL-P1` | - | active | `agents/project/initiatives/INIT-AR-CONSOLE-OVERHAUL-P1.md` | Decision Console Overhaul — Phase 1 (Core Structure) |
+| 26.1 | Taskset 26.1 | taskset | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | `INIT-AR-CONSOLE-OVERHAUL-P1` | active | `BACKLOG-BOARD.md` | Console Overhaul P1 — Core Structure |
+| 26.1.1 | Task 26.1.1 | task | `TASK-AR-609` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-609.md` | 보드 Rollups 휴리스틱과 콘솔 attention_inbox를 하나의 모듈로 통합해 두 표면이 다른 현황을 말하는 구조를 원천 차단하고, watch… |
+| 26.1.2 | Task 26.1.2 | task | `TASK-AR-610` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-610.md` | 스크롤 없이 5초 내 '개입 필요 여부'에 예/아니오로 답하는 단일 화면을 완성한다. |
+| 26.1.3 | Task 26.1.3 | task | `TASK-AR-611` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-611.md` | 매 4초 37개 렌더 함수 전량 재실행을 활성 뷰+콕핏 선택 렌더로 바꾸고 4s/8s/15s+SSE 4중 경로를 단일 디스패처로 통합한다. |
+| 26.1.4 | Task 26.1.4 | task | `TASK-AR-612` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-612.md` | 엔지니어링 요구에 대해 모호성을 탐지하고 불일치 지점만 인터뷰해 합의된 EARS 수용 기준을 강제한다. |
+| 26.1.5 | Task 26.1.5 | task | `TASK-AR-613` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-613.md` | acceptance criterion에 ID를 부여하고 검증 명령과 매핑해 dangling(검증 없는 요구/요구 없는 검증)을 기계 적발한다. |
+| 26.1.6 | Task 26.1.6 | task | `TASK-AR-614` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-614.md` | diff를 이해했는지 pre-PR 단계에서 독립 출제자가 퀴즈로 검증하고, 통과 못 하면 teach-back으로 반복 학습시킨다. |
+| 26.1.7 | Task 26.1.7 | task | `TASK-AR-615` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-615.md` | 저위험 승인을 council 위임으로 돌려 퀴즈/체크포인트로 늘어나는 Owner 접점을 상쇄한다. |
+| 26.1.8 | Task 26.1.8 | task | `TASK-AR-616` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-616.md` | 흐름 인사이트를 주간 다이제스트로 자동 전달하고, 주체별 점유를 측정 가능하게 만들어 독박을 지표로 확인한다. |
+| 27 | Initiative 27 | initiative | `INIT-AR-CONSOLE-OVERHAUL-P2` | - | active | `agents/project/initiatives/INIT-AR-CONSOLE-OVERHAUL-P2.md` | Decision Console Overhaul — Phase 2 (Structure Complete) |
+| 27.1 | Taskset 27.1 | taskset | `TASKSET-AR-CONSOLE-OVERHAUL-P2` | `INIT-AR-CONSOLE-OVERHAUL-P2` | active | `BACKLOG-BOARD.md` | Console Overhaul P2 — Structure Complete |
+| 27.1.1 | Task 27.1.1 | task | `TASK-AR-617` | `TASKSET-AR-CONSOLE-OVERHAUL-P2` | planned | `agents/lead_engineer/tasks/TASK-AR-617.md` | 파이썬 문자열 3종에 내장된 16,800줄 프론트를 static/console/ 실파일 + 네이티브 ES modules로 분리해 대규모 작업을 diff/… |
+| 27.1.2 | Task 27.1.2 | task | `TASK-AR-618` | `TASKSET-AR-CONSOLE-OVERHAUL-P2` | planned | `agents/lead_engineer/tasks/TASK-AR-618.md` | 35개 뷰를 관제 6허브(Home/Work/Agents/Records/Ops/Search)+drawer로 재편하고, 확장기 산출물 존치/폐기를 정산하며,… |
+| 27.1.3 | Task 27.1.3 | task | `TASK-AR-619` | `TASKSET-AR-CONSOLE-OVERHAUL-P2` | planned | `agents/lead_engineer/tasks/TASK-AR-619.md` | 설계됐으나 없는 agents/runtime/events/*.jsonl을 훅 체인이 생산하게 해 단계별 체류시간·병목·stall을 관측한다. |
+| 27.1.4 | Task 27.1.4 | task | `TASK-AR-620` | `TASKSET-AR-CONSOLE-OVERHAUL-P2` | planned | `agents/lead_engineer/tasks/TASK-AR-620.md` | 게이트 실패·W4b 반려·VERIFY 실패를 원인/파일 기준 클러스터링해 top recurring failure를 뽑아 regression으로 전환한다. |
+| 27.1.5 | Task 27.1.5 | task | `TASK-AR-621` | `TASKSET-AR-CONSOLE-OVERHAUL-P2` | planned | `agents/lead_engineer/tasks/TASK-AR-621.md` | 1-4~1-6에서 확정된 데이터 계약(INTERVIEW/QUIZ 스키마)을 콘솔에 1급 컴포넌트로 통합한다. |
+| 27.1.6 | Task 27.1.6 | task | `TASK-AR-622` | `TASKSET-AR-CONSOLE-OVERHAUL-P2` | planned | `agents/lead_engineer/tasks/TASK-AR-622.md` | lead-engineer에 집중된 독박을 분해해 planner(W1)와 integrator(W5)를 우선 실체화하고 산출물 크기를 비례화한다. |
+| 27.1.7 | Task 27.1.7 | task | `TASK-AR-623` | `TASKSET-AR-CONSOLE-OVERHAUL-P2` | planned | `agents/lead_engineer/tasks/TASK-AR-623.md` | 사람 퀴즈 장치를 에이전트 간 상호검증으로 확장해 설명자-심문자-심판 3역 debate 구조를 도입한다. |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

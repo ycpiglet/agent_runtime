@@ -73,6 +73,105 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-22-decision-console-overhaul-masterplan.md",
+          "value": "8c3bf9c7caec90acd6b8a503c161b7db35876520a6dcb1040ff232970588ab3e"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/backlog_board.py",
+          "value": "bbadc3eac3afd695e299b941eed5f95a6f566fbbd8afdbd237188817ad9a6f89"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/owner_governance_gate.py",
+          "value": "5f88423f4dba20d026726b934ee2de6153cf762f9dc7623f8ed6e1efeaa8d38b"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/response_contract_gate.py",
+          "value": "83f26ab8dd7c2317bb2b408809190e32324cada770b13eef0c241e501f49e74a"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/session_dashboard.py",
+          "value": "1ba6a9a0eb17d1d3e074a761fc197f389c6822a2d736b3549c0e9b02c219c76d"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "35e9b6132cdeee9adbd5ad833598bb55237e98ce07fee4ad5d927c4ed4c4d9c0"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_unit_readiness_gate.py",
+          "value": "7eac1361a3c65b6e7bbcec1ae21fcebab7952486179b7619c08ec37a4eba6632"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work_schema_gate.py",
+          "value": "e06879641cfd9aae89261f7d61a633f8b8a238fd7cebaf10dd24705cdc1f1b18"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-22-decision-console-overhaul-masterplan.md",
+      "recorded_at": "2026-07-22T17:45:27+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-CONSOLE-OVERHAUL-P0"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-22-decision-console-overhaul-masterplan.md",
+          "value": "8c3bf9c7caec90acd6b8a503c161b7db35876520a6dcb1040ff232970588ab3e"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "35e9b6132cdeee9adbd5ad833598bb55237e98ce07fee4ad5d927c4ed4c4d9c0"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-22-decision-console-overhaul-masterplan.md",
+      "recorded_at": "2026-07-22T17:45:34+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-CONSOLE-OVERHAUL-P1"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-22-decision-console-overhaul-masterplan.md",
+          "value": "8c3bf9c7caec90acd6b8a503c161b7db35876520a6dcb1040ff232970588ab3e"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "35e9b6132cdeee9adbd5ad833598bb55237e98ce07fee4ad5d927c4ed4c4d9c0"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-22-decision-console-overhaul-masterplan.md",
+      "recorded_at": "2026-07-22T17:45:34+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-CONSOLE-OVERHAUL-P2"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-assetization-registration.md",
           "value": "3ffa3b5a633cc6246deb1d231e3aac0d95aed4f2ac0ff8d54484f626b5840a9b"
         },
@@ -455,5 +554,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-20T12:56:06+09:00"
+  "updated_at": "2026-07-22T17:45:34+09:00"
 }

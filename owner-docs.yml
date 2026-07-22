@@ -1,5 +1,8 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
+  - reviews/REVIEW-2026-07-22-taskset-ar-console-overhaul-p2-registration.md
+  - reviews/REVIEW-2026-07-22-taskset-ar-console-overhaul-p1-registration.md
+  - reviews/REVIEW-2026-07-22-taskset-ar-console-overhaul-p0-registration.md
   - reviews/REVIEW-2026-07-20-taskset-ar-hook-portability-cleanup-registration.md
   - reviews/REVIEW-2026-07-19-taskset-ar-auto-merge-integrity-registration.md
   - reviews/REVIEW-2026-06-21-taskset-ar-business-operating-system-registration.md

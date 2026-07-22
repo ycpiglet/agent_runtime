@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-20
-task_count: 259
-open_count: 1
+generated_at: 2026-07-22
+task_count: 281
+open_count: 23
 completed_count: 258
-task_set_count: 1
+task_set_count: 4
 completed_task_set_count: 48
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `1` open or active tasks; `258` completed tasks are archived from this live board.
+- Summary: `23` open or active tasks; `258` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `1` / Ask `0` / Review `0` / Later `0` / Done `258`.
-- Task Sets: `1` active workflows; `48` completed workflows are hidden from the live action board.
+- Status: Action `20` / Ask `2` / Review `0` / Later `1` / Done `258`.
+- Task Sets: `4` active workflows; `48` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -50,6 +50,52 @@ completed_task_set_count: 48
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-600` | INIT-AR-AUTO-MERGE-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md | planned | Action | P1 | High | Medium | 1h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make auto_merge execute fail closed when GitHub rejects a merge and preserve success… |
+
+### Console Overhaul P0 — Trust & Hygiene (`TASKSET-AR-CONSOLE-OVERHAUL-P0`)
+
+- Flow: 결정 비종속 quick-win 묶음. 신선도 배지·캐시 사각지대 해소, 홈 요약 위계 정리, 프론트 위생(죽은 코드·아이콘·i18n·다크베이스·칸반), 데이터 위생(타임스탬프 게이트·actuals/rework 자동화), 세션 delta·throughput 전달 씨앗, REPORTING-FORMAT/OPS 계약 봉합, requirements-lint·NEEDS CLARIFICATION 마커 씨앗. 1–2주.
+- Progress: `0/7` done; `7` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-603` | INIT-AR-CONSOLE-OVERHAUL-P0 | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md | planned | Action | P1 | High | Low | 3h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 홈 최상단의 시각적 소음과 위계 붕괴를 마크업/CSS 이동 수준에서 즉시 완화한다. |
+| `TASK-AR-602` | INIT-AR-CONSOLE-OVERHAUL-P0 | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md | planned | Action | P1 | High | Medium | 4h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 콘솔·보드가 표시하는 데이터가 얼마나 오래되었는지 항상 보이게 하고, 감시 사각지대로 인한 최대 300초 stale을 없앤다. |
+| `TASK-AR-605` | INIT-AR-CONSOLE-OVERHAUL-P0 | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-605/UNIT-TASK-AR-605-001.md | planned | Action | P1 | High | Medium | 5h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 흐름 지표의 원료를 신뢰 가능하게 만든다: 타임스탬프 모순 차단, 수동 기입 폐지. |
+| `TASK-AR-608` | INIT-AR-CONSOLE-OVERHAUL-P0 | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-608/UNIT-TASK-AR-608-001.md | planned | Action | P1 | High | Medium | 6h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 요구 명확화·측정 검증 게이트의 기계적 토대를 심어 P1 승격 전 캘리브레이션 데이터를 모은다. |
+| `TASK-AR-606` | INIT-AR-CONSOLE-OVERHAUL-P0 | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-606/UNIT-TASK-AR-606-001.md | planned | Ask | P2 | Medium | Low | 3h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | 이미 있는 데이터를 Owner에게 전달하는 최소 경로를 심는다. |
+| `TASK-AR-607` | INIT-AR-CONSOLE-OVERHAUL-P0 | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-607/UNIT-TASK-AR-607-001.md | planned | Action | P2 | Medium | Low | 3h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 신설 스킬(/clarify·/quiz)이 등재될 canonical surface를 먼저 정상화한다. |
+| `TASK-AR-604` | INIT-AR-CONSOLE-OVERHAUL-P0 | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-604/UNIT-TASK-AR-604-001.md | planned | Action | P2 | Medium | Medium | 5h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | P1 화면 작업 전에 저위험 단건 결함들을 정리해 소음을 제거한다. |
+
+### Console Overhaul P1 — Core Structure (`TASKSET-AR-CONSOLE-OVERHAUL-P1`)
+
+- Flow: attention 단일 정본화, 홈 Decision Screenfit 완성(verdict 배지+어텐션 큐+집계 스트립+흐름 타일), renderAll 해체, /clarify 인터뷰 게이트+EARS, 요구-검증-증거 3자 추적성, W4c 이해도 퀴즈 게이트 승격+held-out, Owner 승인 위험 티어링, FLOW-DIGEST 주간 자동+actor 스탬프+Ownership Concentration. 1–2개월. Phase 0 완료가 전제.
+- Progress: `0/8` done; `8` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-609` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | Medium | 6h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 보드 Rollups 휴리스틱과 콘솔 attention_inbox를 하나의 모듈로 통합해 두 표면이 다른 현황을 말하는 구조를 원천 차단하고, watch… |
+| `TASK-AR-615` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Ask | P1 | High | Medium | 7h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Owner/agent decision | 저위험 승인을 council 위임으로 돌려 퀴즈/체크포인트로 늘어나는 Owner 접점을 상쇄한다. |
+| `TASK-AR-613` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | Medium | 8h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | acceptance criterion에 ID를 부여하고 검증 명령과 매핑해 dangling(검증 없는 요구/요구 없는 검증)을 기계 적발한다. |
+| `TASK-AR-610` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | High | 12h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 스크롤 없이 5초 내 '개입 필요 여부'에 예/아니오로 답하는 단일 화면을 완성한다. |
+| `TASK-AR-612` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | High | 12h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 엔지니어링 요구에 대해 모호성을 탐지하고 불일치 지점만 인터뷰해 합의된 EARS 수용 기준을 강제한다. |
+| `TASK-AR-614` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | High | 14h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | diff를 이해했는지 pre-PR 단계에서 독립 출제자가 퀴즈로 검증하고, 통과 못 하면 teach-back으로 반복 학습시킨다. |
+| `TASK-AR-611` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | High | 10h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 매 4초 37개 렌더 함수 전량 재실행을 활성 뷰+콕핏 선택 렌더로 바꾸고 4s/8s/15s+SSE 4중 경로를 단일 디스패처로 통합한다. |
+| `TASK-AR-616` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | High | 10h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 흐름 인사이트를 주간 다이제스트로 자동 전달하고, 주체별 점유를 측정 가능하게 만들어 독박을 지표로 확인한다. |
+
+### Console Overhaul P2 — Structure Complete (`TASKSET-AR-CONSOLE-OVERHAUL-P2`)
+
+- Flow: 프론트 물리 파일 분리(빌드리스), IA 재프루닝 2.0(관제 6허브+drawer)+확장기 산출물 정산+VISION.md 갱신, 상태 전이 이벤트 로그 실체화(JSONL+샤딩+하트비트), 실패 패턴 압축 파이프라인, 축3 패턴군 UI 통합(InterviewPanel·QuizGate 카드), orchestrator 권한 3분할, 에이전트 상호검증 debate 확장. 2개월+. Phase 0/1 안착이 전제.
+- Progress: `0/7` done; `7` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-619` | INIT-AR-CONSOLE-OVERHAUL-P2 | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | Medium | 8h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 설계됐으나 없는 agents/runtime/events/*.jsonl을 훅 체인이 생산하게 해 단계별 체류시간·병목·stall을 관측한다. |
+| `TASK-AR-618` | INIT-AR-CONSOLE-OVERHAUL-P2 | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | High | 14h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 35개 뷰를 관제 6허브(Home/Work/Agents/Records/Ops/Search)+drawer로 재편하고, 확장기 산출물 존치/폐기를 정산하며,… |
+| `TASK-AR-620` | INIT-AR-CONSOLE-OVERHAUL-P2 | PROJECT-AGENT-RUNTIME | - | planned | Action | P3 | Low | Medium | 7h/1000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 게이트 실패·W4b 반려·VERIFY 실패를 원인/파일 기준 클러스터링해 top recurring failure를 뽑아 regression으로 전환한다. |
+| `TASK-AR-621` | INIT-AR-CONSOLE-OVERHAUL-P2 | PROJECT-AGENT-RUNTIME | - | planned | Action | P3 | Low | High | 12h/1000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 1-4~1-6에서 확정된 데이터 계약(INTERVIEW/QUIZ 스키마)을 콘솔에 1급 컴포넌트로 통합한다. |
+| `TASK-AR-622` | INIT-AR-CONSOLE-OVERHAUL-P2 | PROJECT-AGENT-RUNTIME | - | planned | Action | P3 | Low | High | 12h/1000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | lead-engineer에 집중된 독박을 분해해 planner(W1)와 integrator(W5)를 우선 실체화하고 산출물 크기를 비례화한다. |
+| `TASK-AR-623` | INIT-AR-CONSOLE-OVERHAUL-P2 | PROJECT-AGENT-RUNTIME | - | planned | Action | P3 | Low | High | 12h/1000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | 사람 퀴즈 장치를 에이전트 간 상호검증으로 확장해 설명자-심문자-심판 3역 debate 구조를 도입한다. |
+| `TASK-AR-617` | INIT-AR-CONSOLE-OVERHAUL-P2 | PROJECT-AGENT-RUNTIME | - | planned | Later | P2 | Medium | High | 16h/1000tok | Low | 5 | agent-runtime-core | lead-engineer | Wait for dependency | 파이썬 문자열 3종에 내장된 16,800줄 프론트를 static/console/ 실파일 + 네이티브 ES modules로 분리해 대규모 작업을 diff/… |
 
 ## Archived Task Sets
 
@@ -107,9 +153,9 @@ completed_task_set_count: 48
 
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
-- Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
+- Needs attention: `2` — triage awaiting `0`, owner-decision (Ask) `2` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `1` open across `1` task sets (see Action Board above).
+- Active: `23` open across `4` task sets (see Action Board above).
 - Archived task sets: `48` (see Archived Task Sets above).
 - Archived task files: `258` — see `ARCHIVE-INDEX.md`.
 
