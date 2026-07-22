@@ -9,11 +9,12 @@ task_id: TASK-AR-616
 task_set_id: TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW
 initiative_id: INIT-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead_engineer
 created_at: 2026-07-23T05:01:18+09:00
-updated_at: 2026-07-23T05:01:18+09:00
+updated_at: 2026-07-23T05:14:06+09:00
+started_at: 2026-07-23T05:14:06+09:00
 origin_type: ci_failure
 origin_ref: reviews/REVIEW-2026-07-23-release-auto-fixture-recovery-window-plan.md
 created_by: codex-root-planner

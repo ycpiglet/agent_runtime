@@ -1,18 +1,20 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-23T05:04:00+09:00
+updated_at: 2026-07-23T05:14:06+09:00
 updated_by: codex-root
 current_state:
-  summary: "TASK-AR-614 is merged, independently approved, and closed; TASK-AR-616 is next after main exhausted the exact fixture HEAD recovery window."
+  summary: "TASK-AR-614 closeout is merged with green main CI; TASK-AR-616 is claimed after T2 revalidation to extend the exact fixture HEAD recovery window."
   status: active
   task_set_status: in_progress
   task_set_id: "TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW"
   step_index: 1
-  step_total: 1
-  progress_pct: 0
-  status_text: "TASK-AR-616 is registered and ready for T2 revalidation and claim-first recovery-window hardening."
+  step_total: 7
+  progress_pct: 5
+  status_text: "TASK-AR-616 is claimed; failure-first fourth-attempt recovery coverage is next."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - codex-root-task-ar-616
+  current_teams:
+    - agent-runtime-core
 resume:
   active_task: TASK-AR-616
   active_task_set: "TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW"
@@ -23,7 +25,8 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - CLAIM-20260723-051406-task-ar-616-c439
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
     active_claim: null

@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW
 registered_at: 2026-07-23T05:01:18+09:00
 created_at: 2026-07-23T05:01:18+09:00
-updated_at: 2026-07-23T05:01:18+09:00
+updated_at: 2026-07-23T05:14:06+09:00
+started_at: 2026-07-23T05:14:06+09:00
 title: Extend the exact fixture HEAD recovery window
-status: planned
+status: in_progress
 priority: P0
 difficulty: S
 est_hours: 1
@@ -30,6 +31,10 @@ summary: Lengthen the capped recovery window after the exact transient exhausted
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python -m pytest tests/test_release_auto_noncritical.py tests/test_release_cadence_trigger.py -q
+  - python -m pytest tests/test_backlog_board_tasksets.py -q
+  - python scripts/taskset_work_gate.py --check
 tags:
   - github-320
   - ci-flake
