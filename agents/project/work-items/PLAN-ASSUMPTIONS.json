@@ -284,8 +284,8 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-22-task-ar-606-dispatch-t3-replan.md",
-          "value": "4c2dbc28e24173fb6955b0a88a68477ecdc19ce79093418df0fd479a7770ab68"
+          "path": "reviews/REVIEW-2026-07-22-task-ar-606-integration-t3-replan.md",
+          "value": "acfdc36aed3fdc0bffd78edb356205108f57641de456eca60e8ab0548510561f"
         },
         {
           "kind": "sha256",
@@ -300,17 +300,17 @@
         {
           "kind": "sha256",
           "path": "scripts/lock_merge_driver.py",
-          "value": "cc465e57aa92c89c1cdd694a5046349b2dd36c790f50036bfe2de12968879765"
+          "value": "900fd9d1742c97aa73928e8e3c4c9508668ec749d2ae635f64bb436190aa4d34"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/lock_merge_driver.py",
-          "value": "cc465e57aa92c89c1cdd694a5046349b2dd36c790f50036bfe2de12968879765"
+          "value": "900fd9d1742c97aa73928e8e3c4c9508668ec749d2ae635f64bb436190aa4d34"
         },
         {
           "kind": "sha256",
           "path": "scripts/bootstrap_dev_env.py",
-          "value": "d702398f1b5a687720ef40fcf0f8760c07a0229fa816fa1ea4cee326ee8e0db6"
+          "value": "1b9464253d9077179ca490828b2758bf89d95a107fbd13e37d5afcff96459445"
         },
         {
           "kind": "sha256",
@@ -323,8 +323,8 @@
           "value": "9b5b120d9b18f39977021db0b543953267cbfcd60f817cf92edd93812d560457"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-22-task-ar-606-dispatch-t3-replan.md",
-      "recorded_at": "2026-07-22T23:16:37+09:00",
+      "design_record": "reviews/REVIEW-2026-07-22-task-ar-606-integration-t3-replan.md",
+      "recorded_at": "2026-07-22T23:55:48+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION"
     },
@@ -660,5 +660,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-22T23:16:37+09:00"
+  "updated_at": "2026-07-22T23:55:48+09:00"
 }

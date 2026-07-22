@@ -12,10 +12,10 @@ current_state:
   status_text: "TASK-AR-606 is the next planned unit after TASK-AR-605 W6 closeout."
 active_work:
   current_agents:
-    - claim_id: CLAIM-20260722-231720-task-ar-606-5d57
+    - claim_id: CLAIM-20260722-235557-task-ar-606-integration
       agent_role: lead-engineer
-      agent_instance_id: codex-root-task-ar-606
-      display_name: codex/task-ar-606
+      agent_instance_id: codex-root-task-ar-606-integration
+      display_name: codex/task-ar-606-integration
       callsite_id: codex-root-20260722
   current_teams: []
 resume:

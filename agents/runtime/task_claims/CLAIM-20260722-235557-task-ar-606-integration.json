@@ -1,15 +1,15 @@
 {
   "schema": "agent-runtime-task-claim/v1",
-  "claim_id": "CLAIM-20260722-231720-task-ar-606-5d57",
+  "claim_id": "CLAIM-20260722-235557-task-ar-606-integration",
   "task_id": "TASK-AR-606",
   "agent_role": "lead-engineer",
   "team_id": "agent-runtime-core",
-  "agent_instance_id": "codex-root-task-ar-606",
-  "display_name": "codex/task-ar-606",
+  "agent_instance_id": "codex-root-task-ar-606-integration",
+  "display_name": "codex/task-ar-606-integration",
   "callsite_id": "codex-root-20260722",
   "pane_id": "root",
   "mode": "orchestrator",
-  "status": "released",
+  "status": "claimed",
   "task_set_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
   "active_scope": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
   "scope_transition_approved": true,
@@ -18,30 +18,31 @@
   "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-606/UNIT-TASK-AR-606-001.md",
   "model_tier": "worker_standard",
   "wip_slot": 0,
-  "stop_condition": "Stop before changing hook contents or enabling any additional hook.",
-  "phase": "implementation",
-  "progress_pct": 5,
-  "step_index": 3,
+  "stop_condition": "Stop if PR checks reveal a code defect; reopen implementation before merging.",
+  "phase": "integration",
+  "progress_pct": 95,
+  "step_index": 6,
   "step_total": 7,
-  "status_text": "TASK-AR-606 claimed; adding failure-first executable-hook activation coverage",
+  "status_text": "TASK-AR-606 verified after security rework; maintaining claim continuity through PR and main CI",
   "worktree_path": ".worktrees/TASK-AR-606",
   "branch": "codex/task-ar-606-precommit-executable",
-  "claimed_at": "2026-07-22T23:17:20+09:00",
-  "last_heartbeat": "2026-07-22T23:54:45+09:00",
-  "updated_at": "2026-07-22T23:54:45+09:00",
-  "expires_at": "2026-07-23T03:17:20+09:00",
+  "claimed_at": "2026-07-22T23:55:57+09:00",
+  "last_heartbeat": "2026-07-22T23:55:57+09:00",
+  "updated_at": "2026-07-22T23:55:57+09:00",
+  "expires_at": "2026-07-23T03:55:57+09:00",
   "lease": {
-    "claimed_at": "2026-07-22T23:17:20+09:00",
-    "heartbeat_at": "2026-07-22T23:54:45+09:00",
-    "expires_at": "2026-07-23T03:17:20+09:00"
+    "claimed_at": "2026-07-22T23:55:57+09:00",
+    "heartbeat_at": "2026-07-22T23:55:57+09:00",
+    "expires_at": "2026-07-23T03:55:57+09:00"
   },
-  "handoff_path": "agents/runtime/task_claims/CLAIM-20260722-231720-task-ar-606-5d57.handoff.md",
-  "log_path": "agents/runtime/task_claims/CLAIM-20260722-231720-task-ar-606-5d57.log.md",
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260722-235557-task-ar-606-integration.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260722-235557-task-ar-606-integration.log.md",
   "allow_parallel_task_set": false,
   "tags": [
     "github-295",
     "git-hooks",
-    "cross-platform"
+    "cross-platform",
+    "integration"
   ],
   "escalation_triggers": [
     "security",
@@ -57,9 +58,5 @@
     "tests/test_lock_merge_driver.py",
     "tests/test_bootstrap_dev_env.py",
     "tests/fixtures/host/agent_runtime.lock.json"
-  ],
-  "released_at": "2026-07-22T23:54:45+09:00",
-  "verified_by": "codex-task-ar-606-rework2-independent-auditor-20260722",
-  "verifier_role": "independent-auditor",
-  "verification_evidence": "reviews/W4B-2026-07-22-TASK-AR-606-REWORK2.md"
+  ]
 }
