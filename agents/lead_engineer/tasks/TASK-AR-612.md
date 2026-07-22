@@ -9,10 +9,10 @@ kind: task
 parent_id: TASKSET-AR-TERMINAL-STATUS-START-GUARD
 registered_at: 2026-07-22T21:43:00+09:00
 created_at: 2026-07-22T21:43:00+09:00
-updated_at: 2026-07-23T08:08:53+09:00
+updated_at: 2026-07-23T08:28:16+09:00
 started_at: 2026-07-23T08:02:09+09:00
 title: Block taskset restart of closed and released records
-status: in_progress
+status: completed
 priority: P1
 difficulty: S
 est_hours: 1.0
@@ -42,6 +42,11 @@ verified_at: 2026-07-23T08:08:53+09:00
 verified_by: codex-root-task-ar-612
 evidence_refs:
   - reviews/VERIFY-2026-07-23-task-ar-612-20260723080853.json
+resolution: done
+completed_at: 2026-07-23T08:28:16+09:00
+closed_by: work.py close
+actual_hours: 0.5
+actual_tokens: 18000
 ---
 
 # TASK-AR-612 - Block taskset restart of closed and released records
@@ -66,3 +71,15 @@ evidence_refs:
 - `python -m pytest tests/test_taskset_dispatcher.py -q`
 - `python scripts/regen_host_lock_if_needed.py --check`
 - `python scripts/taskset_work_gate.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T08:28:16+09:00`
+- Resolution: `done`
+- Actual hours: `0.5`
+- Actual tokens: `18000`
+- Closed by: `work.py close`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-task-ar-612-20260723080853.json`
+<!-- work-close:end -->

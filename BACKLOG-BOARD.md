@@ -9,21 +9,21 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-07-23
 task_count: 280
-open_count: 2
-completed_count: 278
-task_set_count: 2
-completed_task_set_count: 56
+open_count: 1
+completed_count: 279
+task_set_count: 1
+completed_task_set_count: 57
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `2` open or active tasks; `278` completed tasks are archived from this live board.
+- Summary: `1` open or active tasks; `279` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `2` / Ask `0` / Review `0` / Later `0` / Done `278`.
-- Task Sets: `2` active workflows; `56` completed workflows are hidden from the live action board.
+- Status: Action `1` / Ask `0` / Review `0` / Later `0` / Done `279`.
+- Task Sets: `1` active workflows; `57` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -50,15 +50,6 @@ completed_task_set_count: 56
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-602` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md | planned | Action | P0 | Critical | High | 5h/12000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #280 after every intake unit is merged by refreshing current-state rec… |
-
-### Terminal Status Start Guard (`TASKSET-AR-TERMINAL-STATUS-START-GUARD`)
-
-- Flow: Align taskset terminal-status selection and start transitions with the established closed/released status vocabulary.
-- Progress: `0/1` done; `1` open or active.
-- WIP: active `1/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-612` | INIT-AR-TERMINAL-STATUS-START-GUARD | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-612/UNIT-TASK-AR-612-001.md | in_progress | Action | P1 | High | Low | 1h/5000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make closed/released tasks and their registered Korean aliases terminal in taskset se… |
 
 ## Archived Task Sets
 
@@ -104,6 +95,7 @@ completed_task_set_count: 56
 | Release Impact Remediator (`TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION`) | Repair canonical identity, task start state, host dashboard dependencies, hook activation, CI isolation, frontmatter parsing, and classifier semantics. | `7/7` done | `7` completed task files archived |
 | CI Schema Recovery (`TASKSET-AR-PR303-CI-SCHEMA-RECOVERY`) | Normalize the legacy TASK-AR-594 evidence reference into the canonical work-item schema. | `1/1` done | `1` completed task files archived |
 | Backlog Taskset Test Recovery (`TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY`) | Update the canonical real-backlog taskset expectation for all newly registered tasksets and prove the full package suite remains green. | `1/1` done | `1` completed task files archived |
+| Terminal Status Start Guard (`TASKSET-AR-TERMINAL-STATUS-START-GUARD`) | Align taskset terminal-status selection and start transitions with the established closed/released status vocabulary. | `1/1` done | `1` completed task files archived |
 | Self Improvement Cadence (`TASKSET-AR-SELF-IMPROVEMENT-CADENCE`) | Detect low-frequency roles and runtime assets, run review/retro/meeting/seminar/compound/doc-steward/scribe cycles from evidence, and publish measurable maturity signals. | `3/3` done | `3` completed task files archived |
 | Self Improvement Remediation (`TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE`) | Burn down the first-cycle maturity blockers: scribe waiver debt, dormant monitored-role evidence, low-reuse runtime assets, and a follow-up measurable report. | `4/4` done | `4` completed task files archived |
 | Business Operations Teams (`TASKSET-AR-BUSINESS-OPERATIONS-TEAMS`) | Extend the live org overlay and host scaffold with business-side teams for monetization, asset management, marketing, and compliant sales automation. | `1/1` done | `1` completed task files archived |
@@ -126,9 +118,9 @@ completed_task_set_count: 56
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `2` open across `2` task sets (see Action Board above).
-- Archived task sets: `56` (see Archived Task Sets above).
-- Archived task files: `278` — see `ARCHIVE-INDEX.md`.
+- Active: `1` open across `1` task sets (see Action Board above).
+- Archived task sets: `57` (see Archived Task Sets above).
+- Archived task files: `279` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

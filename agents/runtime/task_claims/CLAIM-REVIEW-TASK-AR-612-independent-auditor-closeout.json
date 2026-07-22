@@ -1,0 +1,33 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-REVIEW-TASK-AR-612-independent-auditor-closeout",
+  "task_id": "REVIEW-TASK-AR-612-independent-auditor",
+  "task_set_id": "TASKSET-AR-TERMINAL-STATUS-START-GUARD",
+  "active_scope": "TASKSET-AR-TERMINAL-STATUS-START-GUARD",
+  "agent_role": "independent-auditor",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "independent-auditor-CLAIM-REVIEW-TASK-AR-612-independent-auditor-closeout",
+  "display_name": "independent-auditor@review",
+  "mode": "review",
+  "status": "released",
+  "status_text": "Additive independent-auditor review pass for TASK-AR-612 (closeout)",
+  "phase": "verified",
+  "progress_pct": 100,
+  "claimed_at": "2026-07-23T08:27:47+09:00",
+  "last_heartbeat": "2026-07-23T08:28:32+09:00",
+  "updated_at": "2026-07-23T08:28:32+09:00",
+  "tags": [
+    "review",
+    "additive",
+    "review-trigger:closeout"
+  ],
+  "overlay": true,
+  "parent_task_id": "TASK-AR-612",
+  "parent_task_set_id": "TASKSET-AR-TERMINAL-STATUS-START-GUARD",
+  "handoff_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-612-independent-auditor-closeout.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-612-independent-auditor-closeout.log.md",
+  "released_at": "2026-07-23T08:28:32+09:00",
+  "verified_by": "codex-task-ar-612-skeptic-20260723",
+  "verifier_role": "skeptic",
+  "verification_evidence": "reviews/ROLE-REVIEW-2026-07-23-TASK-AR-612-SKEPTIC.md"
+}
