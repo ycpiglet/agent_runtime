@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 
@@ -336,13 +337,16 @@ def _load_module():
 def test_loaded_module_subprocess_patch_is_process_local(monkeypatch) -> None:
     module = _load_module()
     parent_run = subprocess.run
+    parent_sleep = time.sleep
 
     def _sentinel(*args, **kwargs):
         raise AssertionError("test-only subprocess sentinel")
 
     monkeypatch.setattr(module.subprocess, "run", _sentinel)
+    monkeypatch.setattr(module.time, "sleep", _sentinel)
 
     assert subprocess.run is parent_run
+    assert time.sleep is parent_sleep
 
 
 def test_spawn_failure_reports_git_query_error(tmp_path: Path, monkeypatch) -> None:
