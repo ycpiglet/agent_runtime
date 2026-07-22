@@ -9,11 +9,12 @@ task_id: TASK-AR-609
 task_set_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 initiative_id: INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T17:45:00+09:00
+updated_at: 2026-07-23T07:17:12+09:00
+started_at: 2026-07-23T07:17:12+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
 created_by: codex-root-planner
@@ -23,7 +24,7 @@ model_tier: worker_standard
 escalation_triggers:
   - data_integrity
   - cross_cutting
-context: GitHub #300 shows _initiative_records reads mixed records from the initiatives directory without checking kind and falls back to a taskset filename stem, duplicating IDs across hierarchy levels while reporting pass.
+context: GitHub issue 300 shows _initiative_records reads mixed records from the initiatives directory without checking kind and falls back to a taskset filename stem, duplicating IDs across hierarchy levels while reporting pass.
 inputs:
   - reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
   - scripts/work_item_classifier.py
@@ -42,7 +43,7 @@ verification:
   - python -m pytest tests/test_work_item_classifier.py tests/test_template_work_item_classifier.py -q
   - python scripts/work_item_classifier.py --write --check
   - python scripts/regen_host_lock_if_needed.py --check
-handoff: Report mixed-fixture counts, duplicate oracle, generated view impact, and issue #300 evidence.
+handoff: Report mixed-fixture counts, duplicate oracle, generated view impact, and GitHub issue 300 evidence.
 stop_condition: Stop before moving canonical records or changing hierarchy semantics beyond the kind filter.
 ---
 
