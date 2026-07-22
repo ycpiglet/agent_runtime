@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-22T17:54:44+09:00
-record_count: 687
+generated_at: 2026-07-22T17:56:31+09:00
+record_count: 689
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `687` review and evidence records under `reviews/`.
+- Summary: indexed `689` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `687` files |
+| Reviews covered | pass | `689` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -631,6 +631,8 @@ record_count: 687
 | `reviews/VERIFY-2026-07-22-task-ar-599-20260722171444.json` | `VERIFY-2026-07-22-task-ar-599-20260722171444` | json | record | n/a | VERIFY-2026-07-22-task-ar-599-20260722171444 |
 | `reviews/VERIFY-2026-07-22-task-ar-599-20260722172533.json` | `VERIFY-2026-07-22-task-ar-599-20260722172533` | json | record | n/a | VERIFY-2026-07-22-task-ar-599-20260722172533 |
 | `reviews/VERIFY-2026-07-22-task-ar-600-20260722175324.json` | `VERIFY-2026-07-22-task-ar-600-20260722175324` | json | record | n/a | VERIFY-2026-07-22-task-ar-600-20260722175324 |
+| `reviews/VERIFY-2026-07-22-task-ar-600-20260722175452.json` | `VERIFY-2026-07-22-task-ar-600-20260722175452` | json | record | n/a | VERIFY-2026-07-22-task-ar-600-20260722175452 |
+| `reviews/VERIFY-2026-07-22-task-ar-600-20260722175618.json` | `VERIFY-2026-07-22-task-ar-600-20260722175618` | json | record | n/a | VERIFY-2026-07-22-task-ar-600-20260722175618 |
 | `reviews/VERIFY-2026-07-22-unit-task-ar-599-001-20260722171357.json` | `VERIFY-2026-07-22-unit-task-ar-599-001-20260722171357` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-599-001-20260722171357 |
 | `reviews/VERIFY-2026-07-22-unit-task-ar-599-001-20260722172509.json` | `VERIFY-2026-07-22-unit-task-ar-599-001-20260722172509` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-599-001-20260722172509 |
 | `reviews/VERIFY-2026-07-22-unit-task-ar-600-001-20260722175209.json` | `VERIFY-2026-07-22-unit-task-ar-600-001-20260722175209` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-600-001-20260722175209 |

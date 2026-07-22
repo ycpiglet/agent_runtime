@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-AUTO-MERGE-INTEGRITY
 registered_at: 2026-07-19T10:34:25+09:00
 created_at: 2026-07-19T10:34:25+09:00
-updated_at: 2026-07-22T17:53:24+09:00
+updated_at: 2026-07-22T17:56:18+09:00
 title: Confirm remote merge state before success
 status: planned
 priority: P1
@@ -33,13 +33,15 @@ verification:
   - python -m pytest tests/test_auto_merge_execution.py src/agent_runtime/templates/project/scripts/test_auto_merge.py -q
   - python scripts/regen_host_lock_if_needed.py --check
   - python scripts/owner_governance_gate.py --allow-empty-owner-docs
-verification_status: failed
+verification_status: passed
 tags:
   - work-cli-created
-verified_at: 2026-07-22T17:53:24+09:00
+verified_at: 2026-07-22T17:56:18+09:00
 verified_by: codex-root-task-ar-600
 evidence_refs:
   - reviews/VERIFY-2026-07-22-task-ar-600-20260722175324.json
+  - reviews/VERIFY-2026-07-22-task-ar-600-20260722175452.json
+  - reviews/VERIFY-2026-07-22-task-ar-600-20260722175618.json
 ---
 
 # TASK-AR-600 - Confirm remote merge state before success
