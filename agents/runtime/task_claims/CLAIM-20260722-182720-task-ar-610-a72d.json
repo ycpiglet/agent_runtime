@@ -1,0 +1,52 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260722-182720-task-ar-610-a72d",
+  "task_id": "TASK-AR-610",
+  "agent_role": "lead-engineer",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "codex-root-task-ar-610",
+  "display_name": "lead_engineer@orchestrator-01",
+  "callsite_id": "codex-root-20260722",
+  "pane_id": "root",
+  "mode": "orchestrator",
+  "status": "claimed",
+  "task_set_id": "TASKSET-AR-PR303-CI-SCHEMA-RECOVERY",
+  "active_scope": "TASKSET-AR-PR303-CI-SCHEMA-RECOVERY",
+  "scope_transition_approved": true,
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "unit_id": "UNIT-TASK-AR-610-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-610/UNIT-TASK-AR-610-001.md",
+  "model_tier": "worker_standard",
+  "wip_slot": 1,
+  "stop_condition": "Stop before changing the global work-item schema or deleting any verification evidence.",
+  "phase": "implementation",
+  "progress_pct": 5,
+  "step_index": 1,
+  "step_total": 5,
+  "status_text": "TASK-AR-610 claimed; normalizing legacy failed evidence reference",
+  "worktree_path": ".worktrees/TASK-AR-600",
+  "branch": "codex/task-ar-600-merge-readback",
+  "claimed_at": "2026-07-22T18:27:20+09:00",
+  "last_heartbeat": "2026-07-22T18:27:20+09:00",
+  "updated_at": "2026-07-22T18:27:20+09:00",
+  "expires_at": "2026-07-22T18:57:20+09:00",
+  "lease": {
+    "claimed_at": "2026-07-22T18:27:20+09:00",
+    "heartbeat_at": "2026-07-22T18:27:20+09:00",
+    "expires_at": "2026-07-22T18:57:20+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260722-182720-task-ar-610-a72d.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260722-182720-task-ar-610-a72d.log.md",
+  "allow_parallel_task_set": false,
+  "tags": [
+    "pr-303",
+    "ci"
+  ],
+  "escalation_triggers": [
+    "data_integrity",
+    "ci"
+  ],
+  "target_files": [
+    "agents/lead_engineer/tasks/TASK-AR-594.md"
+  ]
+}
