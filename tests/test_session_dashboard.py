@@ -8,6 +8,7 @@ clean output; hook wiring present in both .codex/hooks.json copies.
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -20,6 +21,16 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 import session_dashboard
 
 SCRIPT = REPO_ROOT / "scripts" / "session_dashboard.py"
+TEMPLATE_SCRIPT = (
+    REPO_ROOT
+    / "src"
+    / "agent_runtime"
+    / "templates"
+    / "project"
+    / "scripts"
+    / "session_dashboard.py"
+)
+TEMPLATE_INFLIGHT = TEMPLATE_SCRIPT.with_name("inflight_overlay.py")
 
 
 # ---------------------------------------------------------------------------
@@ -174,6 +185,86 @@ def test_real_run_exits_zero_and_prints_panel() -> None:
     assert proc.returncode == 0
     assert "session dashboard" in proc.stdout
     proc.stdout.encode("cp949")  # cp949-safe end to end
+
+
+def test_clean_template_without_work_py_uses_read_only_w0_fallback(tmp_path: Path) -> None:
+    """A generated host must not need the repository-only scripts/work.py."""
+    host = tmp_path / "host"
+    scripts = host / "scripts"
+    scripts.mkdir(parents=True)
+    shutil.copy2(TEMPLATE_SCRIPT, scripts / "session_dashboard.py")
+    shutil.copy2(TEMPLATE_INFLIGHT, scripts / "inflight_overlay.py")
+    assert not (scripts / "work.py").exists()
+
+    subprocess.run(["git", "init", "-b", "main", str(host)], check=True, capture_output=True)
+    (host / "README.md").write_text("clean host\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(host), "add", "."], check=True, capture_output=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(host),
+            "-c",
+            "user.name=Agent Runtime Test",
+            "-c",
+            "user.email=test@example.invalid",
+            "commit",
+            "-m",
+            "initialize clean host",
+        ],
+        check=True,
+        capture_output=True,
+    )
+    claims = host / "agents" / "runtime" / "task_claims"
+    claims.mkdir(parents=True)
+    (claims / "CLAIM-clean-host.json").write_text(
+        json.dumps(
+            {
+                "claim_id": "CLAIM-clean-host",
+                "task_id": "TASK-HOST-001",
+                "task_set_id": "TASKSET-HOST-W0",
+                "status": "in_progress",
+                "agent_instance_id": "host-worker",
+            }
+        ),
+        encoding="utf-8",
+    )
+    before = {
+        path.relative_to(host): path.read_bytes()
+        for path in host.rglob("*")
+        if path.is_file()
+    }
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(scripts / "session_dashboard.py"),
+            "--root",
+            str(host),
+            "--json",
+            "--scm-timeout",
+            "0.1",
+        ],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=15,
+    )
+
+    assert proc.returncode == 0, proc.stderr
+    payload = json.loads(proc.stdout)
+    assert payload["w0"]["status"] == "ok"
+    assert payload["w0"]["source"] == "fallback"
+    assert payload["w0"]["active_claims"] == 1
+    assert payload["w0"]["worktrees"] == 1
+    assert payload["w0"]["inflight_counts"]["divergent_tasks"] == 0
+    assert any("work API unavailable" in note for note in payload["w0"]["notes"])
+    after = {
+        path.relative_to(host): path.read_bytes()
+        for path in host.rglob("*")
+        if path.is_file()
+    }
+    assert after == before
 
 
 # ---------------------------------------------------------------------------
