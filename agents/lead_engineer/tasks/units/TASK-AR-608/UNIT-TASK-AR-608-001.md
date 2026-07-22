@@ -9,11 +9,12 @@ task_id: TASK-AR-608
 task_set_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 initiative_id: INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: in_progress
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T17:45:00+09:00
+updated_at: 2026-07-23T06:50:08+09:00
+started_at: 2026-07-23T06:31:27+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
 created_by: codex-root-planner
@@ -23,7 +24,7 @@ model_tier: worker_standard
 escalation_triggers:
   - data_integrity
   - security
-context: GitHub #298 proves the hand-written parser truncates valid quoted YAML scalars at # before scalar parsing. The supported subset needs a small scanner that tracks single/double quote and escape state.
+context: GitHub issue 298 proves the hand-written parser truncates valid quoted YAML scalars at hash markers before scalar parsing. The supported subset needs a small scanner that tracks single/double quote and escape state.
 inputs:
   - reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
   - scripts/backlog_board.py
@@ -34,14 +35,20 @@ target_files:
   - tests/fixtures/host/agent_runtime.lock.json
 scope: Replace only lexical comment stripping for the supported frontmatter subset and add adversarial parser tests. Do not introduce a new YAML dependency.
 acceptance:
-  - PR # markers inside quotes are preserved exactly.
+  - PR-number markers inside quotes are preserved exactly.
   - Outside-quote comments are still removed.
   - Root/template parsers remain identical.
 verification:
   - python -m pytest tests/test_backlog_board_tasksets.py -q
   - python scripts/regen_host_lock_if_needed.py --check
-handoff: Report the supported scanner grammar, adversarial cases, parity, and issue #298 evidence.
+handoff: Report the supported scanner grammar, adversarial cases, parity, and GitHub issue 298 evidence.
 stop_condition: Stop before expanding the parser into a general YAML implementation.
+verified_at: 2026-07-23T06:50:08+09:00
+verified_by: codex-root-task-ar-608
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723063712.json
+  - reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723064414.json
+  - reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723065008.json
 ---
 
 # UNIT-TASK-AR-608-001 - Make frontmatter comment scanning quote-aware

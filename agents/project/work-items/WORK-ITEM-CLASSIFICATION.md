@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-23T06:20:41+09:00
+generated_at: 2026-07-23T06:54:38+09:00
 record_count: 438
 ---
 
@@ -445,8 +445,8 @@ record_count: 438
 | 26.1.4.1 | Unit 26.1.4.1 | unit | `UNIT-TASK-AR-606-001` | `TASK-AR-606` | completed | `agents/lead_engineer/tasks/units/TASK-AR-606/UNIT-TASK-AR-606-001.md` | UNIT-TASK-AR-606-001 - Make hook activation executable and idempotent |
 | 26.1.5 | Task 26.1.5 | task | `TASK-AR-607` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | completed | `agents/lead_engineer/tasks/TASK-AR-607.md` | Close GitHub #297 by isolating release-cadence transient-spawn recovery state so the… |
 | 26.1.5.1 | Unit 26.1.5.1 | unit | `UNIT-TASK-AR-607-001` | `TASK-AR-607` | completed | `agents/lead_engineer/tasks/units/TASK-AR-607/UNIT-TASK-AR-607-001.md` | UNIT-TASK-AR-607-001 - Isolate transient-spawn recovery state |
-| 26.1.6 | Task 26.1.6 | task | `TASK-AR-608` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-608.md` | Close GitHub #298 by making comment stripping quote-aware while preserving existing u… |
-| 26.1.6.1 | Unit 26.1.6.1 | unit | `UNIT-TASK-AR-608-001` | `TASK-AR-608` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-608/UNIT-TASK-AR-608-001.md` | UNIT-TASK-AR-608-001 - Make frontmatter comment scanning quote-aware |
+| 26.1.6 | Task 26.1.6 | task | `TASK-AR-608` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | in_progress | `agents/lead_engineer/tasks/TASK-AR-608.md` | Close GitHub #298 by making comment stripping quote-aware while preserving existing u… |
+| 26.1.6.1 | Unit 26.1.6.1 | unit | `UNIT-TASK-AR-608-001` | `TASK-AR-608` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-608/UNIT-TASK-AR-608-001.md` | UNIT-TASK-AR-608-001 - Make frontmatter comment scanning quote-aware |
 | 26.1.7 | Task 26.1.7 | task | `TASK-AR-609` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-609.md` | Close GitHub #300 by preventing taskset records from being duplicated into the initia… |
 | 26.1.7.1 | Unit 26.1.7.1 | unit | `UNIT-TASK-AR-609-001` | `TASK-AR-609` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-609/UNIT-TASK-AR-609-001.md` | UNIT-TASK-AR-609-001 - Filter classifier initiative collection by record kind |
 | 27 | Initiative 27 | initiative | `INIT-AR-PR303-CI-SCHEMA-RECOVERY` | - | active | `agents/project/initiatives/INIT-AR-PR303-CI-SCHEMA-RECOVERY.md` | PR 303 CI Schema Recovery |

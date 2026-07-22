@@ -284,8 +284,8 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-23-task-ar-607-dispatch-t3-replan.md",
-          "value": "58361e3b27e0c003744956150908c8bf77259ab2c5f52648eed2e643c135ec49"
+          "path": "reviews/REVIEW-2026-07-23-task-ar-608-dispatch-t3-replan.md",
+          "value": "51f2cc490b39c8e7637432c9f19a7c3ef29c3c052bc8e7124ec6f62579121529"
         },
         {
           "kind": "sha256",
@@ -299,22 +299,47 @@
         },
         {
           "kind": "sha256",
-          "path": "tests/test_release_cadence_trigger.py",
-          "value": "619f22c8b7a2dca12ac3379f8cee16a11369a58ddbf715a092435fe9c3ec5667"
+          "path": "scripts/backlog_board.py",
+          "value": "bbadc3eac3afd695e299b941eed5f95a6f566fbbd8afdbd237188817ad9a6f89"
         },
         {
           "kind": "sha256",
-          "path": "scripts/release_cadence_trigger.py",
-          "value": "f6cee6df842e66915e35032ecd9d6dee9b0246eef17f1254ba415df1a4709f1b"
+          "path": "src/agent_runtime/templates/project/scripts/backlog_board.py",
+          "value": "8ec4b85ecf81826c2cfc24aca06dadeedc20e7138ae8e902fae481a62cac1331"
         },
         {
           "kind": "sha256",
-          "path": "tests/test_release_auto_noncritical.py",
-          "value": "66f9ee2c43dea465b3048868eab43b9c1fa40b4c39b7466b448964b93425edae"
+          "path": "tests/test_backlog_board_tasksets.py",
+          "value": "778fdabe453d0cf4b9c28f94039c85b9adb1ad09398110d11dc19f449634fec1"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/fixtures/host/agent_runtime.lock.json",
+          "value": "6cbd2641bb38bc349cc9fd42d21d5245a1ca22580d303fb392ec89da355825dd"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work_item_classifier.py",
+          "value": "9d2525973f7ad0e03dc42afce1e21e5752ad767bba9726aa800aa5cf7faec116"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/work_item_classifier.py",
+          "value": "d1d1ec4e1394bcee0f393e496e67ff1e8b579798380594989af200344d8e4c92"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_work_item_classifier.py",
+          "value": "f068c56e1022117ab713934d1efb2c877636c801b45412a8ac6527067462146a"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_template_work_item_classifier.py",
+          "value": "e2dcc272fc996a6741b4c5d0b41924887a4cc6bf81788cd472b8a6280679b4c4"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-23-task-ar-607-dispatch-t3-replan.md",
-      "recorded_at": "2026-07-23T00:17:41+09:00",
+      "design_record": "reviews/REVIEW-2026-07-23-task-ar-608-dispatch-t3-replan.md",
+      "recorded_at": "2026-07-23T06:31:07+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION"
     },
@@ -752,5 +777,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-23T05:02:50+09:00"
+  "updated_at": "2026-07-23T06:31:07+09:00"
 }

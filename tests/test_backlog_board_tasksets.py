@@ -1,12 +1,88 @@
+import importlib.util
+import json
 import sys
 from pathlib import Path
-import json
 
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import backlog_board  # noqa: E402
+
+
+def _frontmatter_parsers():
+    template_path = (
+        ROOT
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "scripts"
+        / "backlog_board.py"
+    )
+    spec = importlib.util.spec_from_file_location(
+        "tmpl_backlog_board_frontmatter", template_path
+    )
+    assert spec is not None and spec.loader is not None
+    template = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = template
+    spec.loader.exec_module(template)
+    return (backlog_board, template)
+
+
+def _parse_summary(parser, value: str):
+    meta, _ = parser.parse_frontmatter(f"---\nsummary: {value}\n---\n")
+    return meta["summary"]
+
+
+def test_frontmatter_preserves_hashes_inside_quoted_scalars() -> None:
+    for parser in _frontmatter_parsers():
+        assert _parse_summary(parser, '"PR #167 intact" # outside') == "PR #167 intact"
+        assert _parse_summary(parser, "'issue #298 intact' # outside") == "issue #298 intact"
+
+
+def test_frontmatter_preserves_hash_after_escaped_double_quotes() -> None:
+    for parser in _frontmatter_parsers():
+        assert (
+            _parse_summary(parser, '"said \\"PR #167\\" intact" # outside')
+            == 'said \\"PR #167\\" intact'
+        )
+
+
+def test_frontmatter_preserves_hashes_inside_flow_lists() -> None:
+    text = '---\ntags: ["PR #167", \'issue #298\', plain] # outside\n---\n'
+    for parser in _frontmatter_parsers():
+        meta, _ = parser.parse_frontmatter(text)
+        assert meta["tags"] == ["PR #167", "issue #298", "plain"]
+
+
+def test_frontmatter_unterminated_quote_preserves_remaining_text() -> None:
+    for parser in _frontmatter_parsers():
+        assert _parse_summary(parser, '"PR #167 remains') == "PR #167 remains"
+
+
+def test_frontmatter_still_strips_unquoted_comments() -> None:
+    for parser in _frontmatter_parsers():
+        assert _parse_summary(parser, "plain value # outside") == "plain value"
+
+
+def test_frontmatter_distinguishes_plain_apostrophes_and_closed_quotes() -> None:
+    for parser in _frontmatter_parsers():
+        assert parser.strip_comment("owner's value # outside") == "owner's value "
+        assert parser.strip_comment('"PR #167" # outside') == '"PR #167" '
+        assert parser.strip_comment("'owner''s PR #167' # outside") == "'owner''s PR #167' "
+
+
+def test_frontmatter_plain_scalar_quote_does_not_hide_comment() -> None:
+    for parser in _frontmatter_parsers():
+        assert parser.strip_comment("plain 'PR #167' # outside") == "plain 'PR "
+        assert parser.strip_comment('plain "PR #167" # outside') == 'plain "PR '
+        assert parser.strip_comment("plain - 'PR #167' # outside") == "plain - 'PR "
+        assert parser.strip_comment('plain, "PR #167" # outside') == 'plain, "PR '
+        assert (
+            parser.strip_comment('summary: plain "unterminated # outside')
+            == 'summary: plain "unterminated '
+        )
 
 
 def _write_task(tasks_dir: Path, task_id: str, task_set_id: str, status: str = "planned", priority: str = "P0") -> None:

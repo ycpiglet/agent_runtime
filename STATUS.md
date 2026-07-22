@@ -1,5 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-23 - TASK-AR-608/#298 active after T3 revalidation
+
+- Active: claim `CLAIM-20260723-063127-task-ar-608-076c` executes TASK-AR-608 after T2 detected stale release-cadence/auto anchors and T3 re-recorded 11 current assumptions.
+- Baseline: GitHub #298 remains open; `summary: "PR #167 intact"` still parses as `"PR"`; 9 existing backlog tests pass and the generated host lock is current.
+- Scope: make only root/template frontmatter comment scanning quote-aware, preserve unquoted comments, cover escaped quotes/flow lists/malformed input, and avoid a general YAML dependency.
+- Next: failure-first parser cases, root/template parity, lock verification, W4a/W4b, PR/main CI, then TASK-AR-609.
+
 ## 2026-07-23 - TASK-AR-616/#320 complete; TASK-AR-608 next
 
 - Completed: PR #326 merged at `a98f10f966ae2f392cbd59573c22666cd062ed9a`; corrected PR run `29958248675` and post-merge main run `29958451909` passed Python 3.10, 3.11, and 3.12, and GitHub #320 is closed.

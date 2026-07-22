@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "codex-root-task-ar-608",
+  "callsign": "lead_engineer@orchestrator-01",
+  "callsite_id": "codex-root-20260723",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260723-063127-task-ar-608-076c.json"
+  ],
+  "created_at": "2026-07-23T06:31:27+09:00",
+  "decision_cycle_id": "",
+  "display_name": "lead_engineer@orchestrator-01",
+  "model": "",
+  "model_tier": "worker_standard",
+  "on_behalf_of": "UNIT-TASK-AR-608-001",
+  "pane_id": "root",
+  "parent_instance_id": "",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "lead-engineer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-07-23T06:31:27+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-608",
+  "task_set_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
+  "team_id": "agent-runtime-core",
+  "unit_id": "UNIT-TASK-AR-608-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-608/UNIT-TASK-AR-608-001.md",
+  "updated_at": "2026-07-23T06:31:27+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-608"
+}

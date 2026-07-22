@@ -435,7 +435,76 @@ class Task:
 def strip_comment(line: str) -> str:
     if "#" not in line:
         return line
-    return line.split("#", 1)[0]
+    quote: str | None = None
+    escaped = False
+    flow_stack: list[str] = []
+    scalar_expected = True
+    top_level_separator_seen = False
+    index = 0
+    while index < len(line):
+        char = line[index]
+        if quote == '"':
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                quote = None
+                scalar_expected = False
+            index += 1
+            continue
+        if quote == "'":
+            if char == "'" and index + 1 < len(line) and line[index + 1] == "'":
+                index += 2
+                continue
+            if char == "'":
+                quote = None
+                scalar_expected = False
+            index += 1
+            continue
+        if char == "#":
+            return line[:index]
+        if char.isspace():
+            index += 1
+            continue
+        if char in {'"', "'"}:
+            if scalar_expected:
+                quote = char
+            else:
+                scalar_expected = False
+            index += 1
+            continue
+        if char in "[{":
+            if scalar_expected:
+                flow_stack.append("]" if char == "[" else "}")
+                scalar_expected = True
+            else:
+                scalar_expected = False
+        elif char in "]}":
+            if flow_stack and flow_stack[-1] == char:
+                flow_stack.pop()
+            scalar_expected = False
+        elif char == ",":
+            scalar_expected = bool(flow_stack)
+        elif char == ":":
+            if flow_stack and flow_stack[-1] == "}" and not scalar_expected:
+                scalar_expected = True
+            elif not flow_stack and not top_level_separator_seen:
+                top_level_separator_seen = True
+                scalar_expected = True
+            else:
+                scalar_expected = False
+        elif (
+            char == "-"
+            and scalar_expected
+            and not flow_stack
+            and (index + 1 == len(line) or line[index + 1].isspace())
+        ):
+            scalar_expected = True
+        else:
+            scalar_expected = False
+        index += 1
+    return line
 
 
 def parse_scalar(value: str) -> object:
