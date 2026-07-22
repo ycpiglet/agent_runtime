@@ -61,11 +61,14 @@ def _uses_posix_modes(posix: bool | None) -> bool:
 
 def _open_pre_commit_fd(repo_root: Path) -> tuple[int, os.stat_result] | None:
     """Securely open the hook without following its directory or final entry."""
-    if not all(hasattr(os, name) for name in ("O_DIRECTORY", "O_NOFOLLOW", "fchmod")):
+    if not all(
+        hasattr(os, name)
+        for name in ("O_DIRECTORY", "O_NOFOLLOW", "O_NONBLOCK", "fchmod")
+    ):
         return None
     close_on_exec = getattr(os, "O_CLOEXEC", 0)
     directory_flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | close_on_exec
-    hook_flags = os.O_RDONLY | os.O_NOFOLLOW | close_on_exec
+    hook_flags = os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | close_on_exec
     try:
         hooks_fd = os.open(str(Path(repo_root) / PRE_COMMIT_HOOK.parent), directory_flags)
     except (OSError, TypeError, NotImplementedError):
