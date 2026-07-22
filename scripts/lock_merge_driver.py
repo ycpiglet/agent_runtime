@@ -59,6 +59,35 @@ def _uses_posix_modes(posix: bool | None) -> bool:
     return os.name != "nt" if posix is None else posix
 
 
+def _open_pre_commit_fd(repo_root: Path) -> tuple[int, os.stat_result] | None:
+    """Securely open the hook without following its directory or final entry."""
+    if not all(hasattr(os, name) for name in ("O_DIRECTORY", "O_NOFOLLOW", "fchmod")):
+        return None
+    close_on_exec = getattr(os, "O_CLOEXEC", 0)
+    directory_flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | close_on_exec
+    hook_flags = os.O_RDONLY | os.O_NOFOLLOW | close_on_exec
+    try:
+        hooks_fd = os.open(str(Path(repo_root) / PRE_COMMIT_HOOK.parent), directory_flags)
+    except (OSError, TypeError, NotImplementedError):
+        return None
+    try:
+        try:
+            hook_fd = os.open(PRE_COMMIT_HOOK.name, hook_flags, dir_fd=hooks_fd)
+        except (OSError, TypeError, NotImplementedError):
+            return None
+    finally:
+        os.close(hooks_fd)
+    try:
+        metadata = os.fstat(hook_fd)
+    except OSError:
+        os.close(hook_fd)
+        return None
+    if not stat.S_ISREG(metadata.st_mode) or metadata.st_nlink != 1:
+        os.close(hook_fd)
+        return None
+    return hook_fd, metadata
+
+
 def is_pre_commit_executable(
     repo_root: Path | None = None,
     *,
@@ -72,12 +101,14 @@ def is_pre_commit_executable(
     """
     if not _uses_posix_modes(posix):
         return True
-    hook = Path(repo_root or REPO_ROOT) / PRE_COMMIT_HOOK
-    try:
-        mode = hook.lstat().st_mode
-    except OSError:
+    opened = _open_pre_commit_fd(Path(repo_root or REPO_ROOT))
+    if opened is None:
         return False
-    return stat.S_ISREG(mode) and bool(mode & stat.S_IXUSR)
+    hook_fd, metadata = opened
+    try:
+        return bool(metadata.st_mode & stat.S_IXUSR)
+    finally:
+        os.close(hook_fd)
 
 
 def repair_pre_commit_executable(
@@ -92,18 +123,19 @@ def repair_pre_commit_executable(
     """
     if not _uses_posix_modes(posix):
         return False
-    hook = Path(repo_root or REPO_ROOT) / PRE_COMMIT_HOOK
+    opened = _open_pre_commit_fd(Path(repo_root or REPO_ROOT))
+    if opened is None:
+        return False
+    hook_fd, metadata = opened
     try:
-        mode = hook.lstat().st_mode
-    except OSError:
-        return False
-    if not stat.S_ISREG(mode):
-        return False
-    desired = stat.S_IMODE(mode) | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
-    if stat.S_IMODE(mode) == desired:
-        return False
-    hook.chmod(desired)
-    return True
+        current = stat.S_IMODE(metadata.st_mode)
+        desired = current | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
+        if current == desired:
+            return False
+        os.fchmod(hook_fd, desired)
+        return True
+    finally:
+        os.close(hook_fd)
 
 
 def regenerate(host_root: Path) -> bool:
@@ -163,21 +195,33 @@ def install(repo_root: Path | None = None, *, posix: bool | None = None) -> int:
     (which carry the post-merge regenerator). Idempotent."""
     cwd = repo_root or REPO_ROOT
 
+    if _uses_posix_modes(posix):
+        try:
+            repaired = repair_pre_commit_executable(cwd, posix=posix)
+        except OSError as exc:
+            print(
+                f"lock-merge-driver: not installed: pre-commit chmod failed:"
+                f" {type(exc).__name__}: {exc}",
+                file=sys.stderr,
+            )
+            return 1
+        if not is_pre_commit_executable(cwd, posix=posix):
+            print(
+                "lock-merge-driver: not installed: POSIX pre-commit hook is"
+                " missing, linked, non-regular, or not executable",
+                file=sys.stderr,
+            )
+            return 1
+        hook_state = "pre-commit executable" + (" (repaired)" if repaired else "")
+    else:
+        hook_state = "pre-commit POSIX mode not required"
+
     def _cfg(key: str, value: str) -> None:
         subprocess.run(["git", "config", key, value], cwd=str(cwd), check=True)
 
     _cfg(f"merge.{DRIVER_NAME}.name", "Keep ours; the post-merge hook regenerates the lock")
     _cfg(f"merge.{DRIVER_NAME}.driver", "true")
     _cfg("core.hooksPath", ".githooks")
-    repaired = repair_pre_commit_executable(cwd, posix=posix)
-    if _uses_posix_modes(posix):
-        hook_state = "pre-commit executable"
-        if not is_pre_commit_executable(cwd, posix=posix):
-            hook_state = "pre-commit executable repair unavailable"
-        elif repaired:
-            hook_state += " (repaired)"
-    else:
-        hook_state = "pre-commit POSIX mode not required"
     print(
         f"lock-merge-driver: installed merge.{DRIVER_NAME}=true"
         f" + core.hooksPath=.githooks; {hook_state}"

@@ -154,7 +154,7 @@
       "scripts/knowledge_lint.py": "sha256:2bcd8bf5510f563025d051db06e16c12f5f86bd9607bd7a38a1ac9c171963db0",
       "scripts/knowledge_lint_gate.py": "sha256:d864c5f67a5419a8c30f6e3b76e9e52c1a910e40819fc5e283b67a3cac331ed2",
       "scripts/local_schedule_daemon.py": "sha256:548b5ce03b04f44ac1fd833b6347a7850665895f299f8aceeacfa4b7cf5d4f8d",
-      "scripts/lock_merge_driver.py": "sha256:1841d485583b2d6c0f7c2773903cb622e4e25ef41634f66037d1c927a565e7cc",
+      "scripts/lock_merge_driver.py": "sha256:ba5d0e27b5b674352a7151604de2cd0d7ccd71e022217c9c36a48b7acbf80b69",
       "scripts/macro_detect.py": "sha256:15a7ecad24ee5e73922ba7f276d3e8439a37f6a6e2e6b95fdcfc843cababd813",
       "scripts/merge_queue.py": "sha256:fa58f4b4a7fd0a7a59a9a2e3606705a83300508d49abc16871d1b7cd4b9ea41f",
       "scripts/message_queue.py": "sha256:3c6eb116d0c6db0229daad7eda983afd2d048bc43ed15f7348ba325b9ccb4c7a",
@@ -284,7 +284,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.6.0",
-    "template_digest": "sha256:2438e0a074ff86c08b160a231ba32446a5e512066059133cdfa3276a42745857",
+    "template_digest": "sha256:0b34d8333afc0f80c143931728b77d469b26d6eead7c1921f0350c059ad2aef8",
     "template_files": 281
   },
   "project": "fixture-host",
