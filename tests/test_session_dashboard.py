@@ -141,6 +141,31 @@ def test_json_shape(monkeypatch: pytest.MonkeyPatch) -> None:
     json.dumps(dashboard, ensure_ascii=True)
 
 
+def test_w0_prefers_richer_repository_work_path(monkeypatch: pytest.MonkeyPatch) -> None:
+    import work
+
+    monkeypatch.setattr(
+        work,
+        "status_work",
+        lambda root: {
+            "active_claims": [{"claim_id": "CLAIM-root"}],
+            "worktrees": [{"path": str(root), "branch": "main"}],
+            "inflight": {
+                "summary": "inflight: 0 tasks diverge across 0 branches",
+                "counts": {"divergent_tasks": 0, "branches_with_divergence": 0},
+            },
+        },
+    )
+
+    section = session_dashboard.build_w0_section(REPO_ROOT)
+
+    assert section["status"] == "ok"
+    assert section["source"] == "work"
+    assert section["active_claims"] == 1
+    assert section["worktrees"] == 1
+    assert section["notes"] == []
+
+
 # ---------------------------------------------------------------------------
 # Exit 0 / degradation when a section errors
 # ---------------------------------------------------------------------------
@@ -164,6 +189,34 @@ def test_scm_subprocess_timeout_degrades_to_note(monkeypatch: pytest.MonkeyPatch
     section = session_dashboard.build_scm_section(REPO_ROOT, timeout=10)
     assert section["status"] == "timeout"
     assert "timed out" in section["note"]
+
+
+def test_w0_fallback_partial_failures_remain_explicit_notes(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(session_dashboard, "SCRIPTS_DIR", tmp_path / "missing-scripts")
+
+    section = session_dashboard._fallback_w0_section(
+        tmp_path / "not-a-repository",
+        cause=ModuleNotFoundError("work"),
+        timeout=0.1,
+    )
+
+    assert section["status"] == "ok"
+    assert section["source"] == "fallback"
+    assert section["active_claims"] == 0
+    assert section["worktrees"] is None
+    assert section["inflight_summary"] == "inflight: unavailable"
+    assert "work API unavailable" in section["fallback_reason"]
+    assert any("worktree scan unavailable" in note for note in section["notes"])
+    assert any("script missing" in note for note in section["notes"])
+    assert session_dashboard.is_clean(
+        {
+            "w0": section,
+            "update": {"status": "ok", "lines": []},
+            "scm": {"status": "ok", "counts": {}},
+        }
+    ) is False
 
 
 def test_main_exits_zero_when_scm_section_errors(monkeypatch: pytest.MonkeyPatch, capsys) -> None:
@@ -258,7 +311,8 @@ def test_clean_template_without_work_py_uses_read_only_w0_fallback(tmp_path: Pat
     assert payload["w0"]["active_claims"] == 1
     assert payload["w0"]["worktrees"] == 1
     assert payload["w0"]["inflight_counts"]["divergent_tasks"] == 0
-    assert any("work API unavailable" in note for note in payload["w0"]["notes"])
+    assert "work API unavailable" in payload["w0"]["fallback_reason"]
+    assert payload["w0"]["notes"] == []
     after = {
         path.relative_to(host): path.read_bytes()
         for path in host.rglob("*")
@@ -345,12 +399,14 @@ def _session_start_commands(hooks_path: Path) -> list[str]:
     return [hook["command"] for hook in _session_start_hooks(hooks_path)]
 
 
-# Worst case the script body waits on two serial network ops, each internally
-# bounded at 10s (update_notify ls-remote + scm_steward subprocess). The outer
-# hook timeout must exceed their sum plus startup, or the runner preempts the
-# process and the always-exit-0 guarantee is voided.
+# Worst case the generated-host fallback waits on two serial W0 subprocesses,
+# then two serial network-aware operations (update_notify + scm_steward). The
+# outer hook timeout must exceed their sum plus startup, or the runner preempts
+# the process and the always-exit-0 guarantee is voided.
 _MIN_DASHBOARD_HOOK_TIMEOUT = (
-    int(session_dashboard.SCM_TIMEOUT_SECONDS) + 10  # scm + update_notify ls-remote
+    (2 * int(session_dashboard.W0_FALLBACK_TIMEOUT_SECONDS))
+    + int(session_dashboard.SCM_TIMEOUT_SECONDS)
+    + 10  # update_notify ls-remote
 )
 
 
