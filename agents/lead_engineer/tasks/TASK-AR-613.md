@@ -9,10 +9,10 @@ kind: task
 parent_id: TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY
 registered_at: 2026-07-23T01:16:34+09:00
 created_at: 2026-07-23T01:16:34+09:00
-updated_at: 2026-07-23T02:26:08+09:00
+updated_at: 2026-07-23T03:13:02+09:00
 started_at: 2026-07-23T01:25:41+09:00
 title: Recover transient non-zero cadence queries without false not-triggered
-status: planned
+status: completed
 priority: P0
 difficulty: M
 est_hours: 2
@@ -46,6 +46,11 @@ verified_by: codex-root-task-ar-613
 evidence_refs:
   - reviews/VERIFY-2026-07-23-task-ar-613-20260723014533.json
   - reviews/VERIFY-2026-07-23-task-ar-613-20260723022608.json
+resolution: done
+completed_at: 2026-07-23T03:13:02+09:00
+closed_by: codex-root-task-ar-613
+actual_hours: 2.0
+actual_tokens: 100000
 ---
 
 # TASK-AR-613 - Recover transient non-zero cadence queries without false not-triggered
@@ -70,3 +75,16 @@ evidence_refs:
 - `python -m pytest tests/test_release_cadence_trigger.py tests/test_release_auto_noncritical.py -q`
 - `python scripts/regen_host_lock_if_needed.py --check`
 - `python scripts/taskset_work_gate.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T03:13:02+09:00`
+- Resolution: `done`
+- Actual hours: `2.0`
+- Actual tokens: `100000`
+- Closed by: `codex-root-task-ar-613`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-task-ar-613-20260723014533.json`
+  - `reviews/VERIFY-2026-07-23-task-ar-613-20260723022608.json`
+<!-- work-close:end -->

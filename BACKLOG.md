@@ -55,6 +55,8 @@
 | 625 | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | Visual Asset Adoption |
 | 626 | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | Visual System Integration & Verification |
 | 723 | `TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY` | Release Cadence Query Recovery |
+| 724 | `TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY` | Self-Eval Query Integrity |
+| 725 | `TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY` | Release-Auto Fixture HEAD Recovery |
 
 <!-- BACKLOG-INDEX:END -->
 

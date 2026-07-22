@@ -9,11 +9,11 @@ task_id: TASK-AR-613
 task_set_id: TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY
 initiative_id: INIT-AR-RELEASE-CADENCE-QUERY-RECOVERY
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-23T01:16:34+09:00
-updated_at: 2026-07-23T02:32:09+09:00
+updated_at: 2026-07-23T03:12:59+09:00
 origin_type: ci_failure
 origin_ref: reviews/REVIEW-2026-07-23-release-cadence-query-recovery-plan.md
 created_by: codex-root-planner
@@ -54,6 +54,11 @@ verified_by: codex-root-task-ar-613
 evidence_refs:
   - reviews/VERIFY-2026-07-23-unit-task-ar-613-001-20260723015000.json
   - reviews/VERIFY-2026-07-23-unit-task-ar-613-001-20260723023209.json
+resolution: done
+completed_at: 2026-07-23T03:12:59+09:00
+closed_by: codex-root-task-ar-613
+actual_hours: 2.0
+actual_tokens: 100000
 ---
 
 # UNIT-TASK-AR-613-001 - Classify and retry unexpected non-zero cadence queries
@@ -109,3 +114,16 @@ Report failure-first evidence, the non-zero/no-tag classification matrix, retry 
 ## Stop Boundary
 
 Stop if the fix requires weakening a release gate, changing cadence thresholds, or modifying unrelated status consumers.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T03:12:59+09:00`
+- Resolution: `done`
+- Actual hours: `2.0`
+- Actual tokens: `100000`
+- Closed by: `codex-root-task-ar-613`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-613-001-20260723015000.json`
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-613-001-20260723023209.json`
+<!-- work-close:end -->

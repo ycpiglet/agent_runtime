@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-23T03:10:16+09:00",
+  "generated_at": "2026-07-23T03:13:03+09:00",
   "record_count": 434,
   "finding_count": 0,
   "findings": [],
@@ -4667,7 +4667,7 @@
       "title": "Release Cadence Query Recovery",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-RELEASE-CADENCE-QUERY-RECOVERY",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-613",
@@ -4678,7 +4678,7 @@
       "title": "Close GitHub issue 316 by preventing a valid tagged cadence from collapsing into rele…",
       "path": "agents/lead_engineer/tasks/TASK-AR-613.md",
       "parent_id": "TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-613-001",
@@ -4689,7 +4689,7 @@
       "title": "UNIT-TASK-AR-613-001 - Classify and retry unexpected non-zero cadence queries",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-613/UNIT-TASK-AR-613-001.md",
       "parent_id": "TASK-AR-613",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "initiative:INIT-AR-SELF-EVAL-QUERY-INTEGRITY",
