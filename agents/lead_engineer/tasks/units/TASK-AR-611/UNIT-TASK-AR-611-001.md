@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY
 initiative_id: INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T18:48:38+09:00
-updated_at: 2026-07-22T18:48:38+09:00
+updated_at: 2026-07-22T19:20:21+09:00
 origin_type: downstream_bug
 origin_ref: github-actions:run-29909181630
 created_by: codex-root-planner
@@ -39,6 +39,10 @@ verification:
   - python -m pytest tests -q
 handoff: Provide focused/full pytest counts, exact verified HEAD, and independent W4b evidence.
 stop_condition: Stop if the actual taskset registry contains any additional unplanned ID or if fixing the failure requires production classifier changes.
+verified_at: 2026-07-22T19:20:21+09:00
+verified_by: codex-root-task-ar-611
+evidence_refs:
+  - reviews/VERIFY-2026-07-22-unit-task-ar-611-001-20260722192021.json
 ---
 
 # UNIT-TASK-AR-611-001 - Add newly registered tasksets to the exact-set regression test
