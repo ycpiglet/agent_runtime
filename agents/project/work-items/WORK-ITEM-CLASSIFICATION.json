@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-23T03:13:03+09:00",
+  "generated_at": "2026-07-23T04:15:11+09:00",
   "record_count": 434,
   "finding_count": 0,
   "findings": [],
@@ -4755,7 +4755,7 @@
       "title": "Release-Auto Fixture HEAD Recovery",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-615",
@@ -4766,7 +4766,7 @@
       "title": "Close GitHub issue 320 by making the release-auto fixture recover from the observed t…",
       "path": "agents/lead_engineer/tasks/TASK-AR-615.md",
       "parent_id": "TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-615-001",
@@ -4777,7 +4777,7 @@
       "title": "UNIT-TASK-AR-615-001 - Bound retry for transient release-auto fixture commits",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-615/UNIT-TASK-AR-615-001.md",
       "parent_id": "TASK-AR-615",
-      "status": "worker_ready"
+      "status": "completed"
     }
   ]
 }

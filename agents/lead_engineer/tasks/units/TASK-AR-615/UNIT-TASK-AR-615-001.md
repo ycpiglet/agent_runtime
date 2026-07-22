@@ -9,11 +9,12 @@ task_id: TASK-AR-615
 task_set_id: TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY
 initiative_id: INIT-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-23T03:09:36+09:00
-updated_at: 2026-07-23T03:44:05+09:00
+updated_at: 2026-07-23T04:15:08+09:00
+started_at: 2026-07-23T03:25:49+09:00
 origin_type: ci_failure
 origin_ref: reviews/REVIEW-2026-07-23-release-auto-fixture-head-recovery-plan.md
 created_by: codex-root-planner
@@ -47,6 +48,11 @@ verified_at: 2026-07-23T03:44:05+09:00
 verified_by: codex-root-task-ar-615
 evidence_refs:
   - reviews/VERIFY-2026-07-23-unit-task-ar-615-001-20260723034405.json
+resolution: done
+completed_at: 2026-07-23T04:15:08+09:00
+closed_by: codex-root-task-ar-615
+actual_hours: 1.1
+actual_tokens: 30000
 ---
 
 # UNIT-TASK-AR-615-001 - Bound retry for transient release-auto fixture commits
@@ -97,3 +103,15 @@ Report first-attempt CI evidence, failure-first result, classification boundary,
 ## Stop Boundary
 
 Stop if recovery requires retrying ambiguous mutations, changing production Git behavior, or weakening a CI/release gate.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T04:15:08+09:00`
+- Resolution: `done`
+- Actual hours: `1.1`
+- Actual tokens: `30000`
+- Closed by: `codex-root-task-ar-615`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-615-001-20260723034405.json`
+<!-- work-close:end -->

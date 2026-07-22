@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY
 registered_at: 2026-07-23T03:09:36+09:00
 created_at: 2026-07-23T03:09:36+09:00
-updated_at: 2026-07-23T03:37:58+09:00
+updated_at: 2026-07-23T04:15:10+09:00
+started_at: 2026-07-23T03:25:49+09:00
 title: Retry recognized pre-commit HEAD parse transients in release-auto fixtures
-status: planned
+status: completed
 priority: P0
 difficulty: S
 est_hours: 1
@@ -44,6 +45,11 @@ verified_at: 2026-07-23T03:37:58+09:00
 verified_by: codex-root-task-ar-615
 evidence_refs:
   - reviews/VERIFY-2026-07-23-task-ar-615-20260723033758.json
+resolution: done
+completed_at: 2026-07-23T04:15:10+09:00
+closed_by: codex-root-task-ar-615
+actual_hours: 1.1
+actual_tokens: 30000
 ---
 
 # TASK-AR-615 - Retry recognized pre-commit HEAD parse transients in release-auto fixtures
@@ -68,3 +74,15 @@ evidence_refs:
 - `python -m pytest tests/test_release_auto_noncritical.py tests/test_release_cadence_trigger.py -q`
 - `python -m pytest tests/test_backlog_board_tasksets.py -q`
 - `python scripts/taskset_work_gate.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T04:15:10+09:00`
+- Resolution: `done`
+- Actual hours: `1.1`
+- Actual tokens: `30000`
+- Closed by: `codex-root-task-ar-615`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-task-ar-615-20260723033758.json`
+<!-- work-close:end -->
