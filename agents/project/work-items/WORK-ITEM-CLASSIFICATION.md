@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-22T21:08:34+09:00
-record_count: 418
+generated_at: 2026-07-22T21:43:21+09:00
+record_count: 422
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `418` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `422` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `29` records |
-| Tasksets | pass | `53` records |
-| Tasks | pass | `275` records |
-| Units | pass | `61` records |
+| Initiatives | pass | `30` records |
+| Tasksets | pass | `54` records |
+| Tasks | pass | `276` records |
+| Units | pass | `62` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -437,8 +437,8 @@ record_count: 418
 | 26.1 | Taskset 26.1 | taskset | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | `INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION` | active | `BACKLOG-BOARD.md` | Release Impact Remediator |
 | 26.1.1 | Task 26.1.1 | task | `TASK-AR-603` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | completed | `agents/lead_engineer/tasks/TASK-AR-603.md` | Close GitHub #299 by defining one case-compatible canonical task-ID contract used by… |
 | 26.1.1.1 | Unit 26.1.1.1 | unit | `UNIT-TASK-AR-603-001` | `TASK-AR-603` | completed | `agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md` | UNIT-TASK-AR-603-001 - Adopt a shared canonical task-ID contract |
-| 26.1.2 | Task 26.1.2 | task | `TASK-AR-604` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-604.md` | Close GitHub #293 by separating normalized comparison aliases from the canonical stat… |
-| 26.1.2.1 | Unit 26.1.2.1 | unit | `UNIT-TASK-AR-604-001` | `TASK-AR-604` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-604/UNIT-TASK-AR-604-001.md` | UNIT-TASK-AR-604-001 - Separate task status normalization from persistence |
+| 26.1.2 | Task 26.1.2 | task | `TASK-AR-604` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | completed | `agents/lead_engineer/tasks/TASK-AR-604.md` | Close GitHub #293 by separating normalized comparison aliases from the canonical stat… |
+| 26.1.2.1 | Unit 26.1.2.1 | unit | `UNIT-TASK-AR-604-001` | `TASK-AR-604` | completed | `agents/lead_engineer/tasks/units/TASK-AR-604/UNIT-TASK-AR-604-001.md` | UNIT-TASK-AR-604-001 - Separate task status normalization from persistence |
 | 26.1.3 | Task 26.1.3 | task | `TASK-AR-605` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-605.md` | Close GitHub #294 by making the template W0 dashboard work when repository-only scrip… |
 | 26.1.3.1 | Unit 26.1.3.1 | unit | `UNIT-TASK-AR-605-001` | `TASK-AR-605` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-605/UNIT-TASK-AR-605-001.md` | UNIT-TASK-AR-605-001 - Add a clean-template W0 fallback |
 | 26.1.4 | Task 26.1.4 | task | `TASK-AR-606` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-606.md` | Close GitHub #295 by preserving executable hook activation in source and repairing it… |
@@ -457,6 +457,10 @@ record_count: 418
 | 28.1 | Taskset 28.1 | taskset | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | `INIT-AR-BACKLOG-TASKSET-TEST-RECOVERY` | complete | `BACKLOG-BOARD.md` | Backlog Taskset Test Recovery |
 | 28.1.1 | Task 28.1.1 | task | `TASK-AR-611` | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | completed | `agents/lead_engineer/tasks/TASK-AR-611.md` | Make the real-backlog classification test recognize every taskset registered by the J… |
 | 28.1.1.1 | Unit 28.1.1.1 | unit | `UNIT-TASK-AR-611-001` | `TASK-AR-611` | completed | `agents/lead_engineer/tasks/units/TASK-AR-611/UNIT-TASK-AR-611-001.md` | UNIT-TASK-AR-611-001 - Add newly registered tasksets to the exact-set regression test |
+| 29 | Initiative 29 | initiative | `INIT-AR-TERMINAL-STATUS-START-GUARD` | - | active | `agents/project/initiatives/INIT-AR-TERMINAL-STATUS-START-GUARD.md` | Terminal Status Start Guard |
+| 29.1 | Taskset 29.1 | taskset | `TASKSET-AR-TERMINAL-STATUS-START-GUARD` | `INIT-AR-TERMINAL-STATUS-START-GUARD` | active | `BACKLOG-BOARD.md` | Terminal Status Start Guard |
+| 29.1.1 | Task 29.1.1 | task | `TASK-AR-612` | `TASKSET-AR-TERMINAL-STATUS-START-GUARD` | planned | `agents/lead_engineer/tasks/TASK-AR-612.md` | Make closed/released tasks and their registered Korean aliases terminal in taskset se… |
+| 29.1.1.1 | Unit 29.1.1.1 | unit | `UNIT-TASK-AR-612-001` | `TASK-AR-612` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-612/UNIT-TASK-AR-612-001.md` | UNIT-TASK-AR-612-001 - Treat closed and released task statuses as terminal |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

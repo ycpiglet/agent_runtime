@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-22T21:08:34+09:00",
-  "record_count": 418,
+  "generated_at": "2026-07-22T21:43:21+09:00",
+  "record_count": 422,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4392,7 +4392,7 @@
       "title": "Close GitHub #293 by separating normalized comparison aliases from the canonical stat…",
       "path": "agents/lead_engineer/tasks/TASK-AR-604.md",
       "parent_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-604-001",
@@ -4403,7 +4403,7 @@
       "title": "UNIT-TASK-AR-604-001 - Separate task status normalization from persistence",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-604/UNIT-TASK-AR-604-001.md",
       "parent_id": "TASK-AR-604",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-605",
@@ -4602,6 +4602,50 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-611/UNIT-TASK-AR-611-001.md",
       "parent_id": "TASK-AR-611",
       "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-TERMINAL-STATUS-START-GUARD",
+      "level": "initiative",
+      "number": "29",
+      "label": "Initiative 29",
+      "id": "INIT-AR-TERMINAL-STATUS-START-GUARD",
+      "title": "Terminal Status Start Guard",
+      "path": "agents/project/initiatives/INIT-AR-TERMINAL-STATUS-START-GUARD.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-TERMINAL-STATUS-START-GUARD",
+      "level": "taskset",
+      "number": "29.1",
+      "label": "Taskset 29.1",
+      "id": "TASKSET-AR-TERMINAL-STATUS-START-GUARD",
+      "title": "Terminal Status Start Guard",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-TERMINAL-STATUS-START-GUARD",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-612",
+      "level": "task",
+      "number": "29.1.1",
+      "label": "Task 29.1.1",
+      "id": "TASK-AR-612",
+      "title": "Make closed/released tasks and their registered Korean aliases terminal in taskset se…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-612.md",
+      "parent_id": "TASKSET-AR-TERMINAL-STATUS-START-GUARD",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-612-001",
+      "level": "unit",
+      "number": "29.1.1.1",
+      "label": "Unit 29.1.1.1",
+      "id": "UNIT-TASK-AR-612-001",
+      "title": "UNIT-TASK-AR-612-001 - Treat closed and released task statuses as terminal",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-612/UNIT-TASK-AR-612-001.md",
+      "parent_id": "TASK-AR-612",
+      "status": "worker_ready"
     }
   ]
 }

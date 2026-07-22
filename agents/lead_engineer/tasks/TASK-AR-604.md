@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 registered_at: 2026-07-22T17:45:00+09:00
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T21:24:21+09:00
+updated_at: 2026-07-22T21:43:45+09:00
+started_at: 2026-07-22T21:18:04+09:00
 title: Persist canonical task start status
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 2
@@ -40,6 +41,11 @@ verified_at: 2026-07-22T21:24:21+09:00
 verified_by: codex-root-task-ar-604
 evidence_refs:
   - reviews/VERIFY-2026-07-22-task-ar-604-20260722212421.json
+resolution: done
+completed_at: 2026-07-22T21:43:45+09:00
+closed_by: codex-root
+actual_hours: 0.4
+actual_tokens: 30000
 ---
 
 # TASK-AR-604 - Persist canonical task start status
@@ -62,3 +68,15 @@ evidence_refs:
 
 - `python -m pytest tests/test_taskset_dispatcher.py -q`
 - `python scripts/regen_host_lock_if_needed.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-22T21:43:45+09:00`
+- Resolution: `done`
+- Actual hours: `0.4`
+- Actual tokens: `30000`
+- Closed by: `codex-root`
+- Evidence:
+  - `reviews/VERIFY-2026-07-22-task-ar-604-20260722212421.json`
+<!-- work-close:end -->

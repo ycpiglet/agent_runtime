@@ -9,7 +9,7 @@
   "callsite_id": "codex-root-20260722",
   "pane_id": "root",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
   "active_scope": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
   "scope_transition_approved": true,
@@ -27,12 +27,12 @@
   "worktree_path": ".worktrees/TASK-AR-604",
   "branch": "codex/task-ar-604-canonical-start-status",
   "claimed_at": "2026-07-22T21:32:56+09:00",
-  "last_heartbeat": "2026-07-22T21:32:56+09:00",
-  "updated_at": "2026-07-22T21:32:56+09:00",
+  "last_heartbeat": "2026-07-22T21:41:19+09:00",
+  "updated_at": "2026-07-22T21:41:19+09:00",
   "expires_at": "2026-07-23T01:32:56+09:00",
   "lease": {
     "claimed_at": "2026-07-22T21:32:56+09:00",
-    "heartbeat_at": "2026-07-22T21:32:56+09:00",
+    "heartbeat_at": "2026-07-22T21:41:19+09:00",
     "expires_at": "2026-07-23T01:32:56+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260722-213256-task-ar-604-ffa4.handoff.md",
@@ -52,5 +52,9 @@
     "src/agent_runtime/templates/project/scripts/taskset_dispatcher.py",
     "tests/test_taskset_dispatcher.py",
     "tests/fixtures/host/agent_runtime.lock.json"
-  ]
+  ],
+  "released_at": "2026-07-22T21:41:19+09:00",
+  "verified_by": "codex-task-ar-604-independent-auditor-20260722",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-22-TASK-AR-604.md"
 }

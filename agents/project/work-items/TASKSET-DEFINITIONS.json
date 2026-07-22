@@ -98,6 +98,12 @@
       "order": 603
     },
     {
+      "task_set_id": "TASKSET-AR-TERMINAL-STATUS-START-GUARD",
+      "display_name": "Terminal Status Start Guard",
+      "summary": "Align taskset terminal-status selection and start transitions with the established closed/released status vocabulary.",
+      "order": 604
+    },
+    {
       "task_set_id": "TASKSET-AR-SELF-IMPROVEMENT-CADENCE",
       "display_name": "Self Improvement Cadence",
       "summary": "Detect low-frequency roles and runtime assets, run review/retro/meeting/seminar/compound/doc-steward/scribe cycles from evidence, and publish measurable maturity signals.",
