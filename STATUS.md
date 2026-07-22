@@ -1,12 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-07-23 - TASK-AR-613/#316 complete; TASK-AR-615 next after main CI fixture failure
+## 2026-07-23 - TASK-AR-613/#316 complete; TASK-AR-615 active after main CI fixture failure
 
 - Completed: PR #319 merged at `3defd445636f6fee39d1c8a151681d3f06992b38`; the corrected PR run `29944923029` passed Python 3.10, 3.11, and 3.12 on its first attempt, and GitHub #316 is closed.
 - Contract: cadence queries retry unexpected failures, accept only strict deterministic no-tag evidence, sanitize bounded diagnostics, and invalidate the entire release recommendation when any query exhausts.
 - Quality loop: two failure-first rework rounds, task/unit W4a at 75 tests, independent W4b, skeptic W4b, and a post-CI registration-delta recheck all finished with APPROVE.
 - Adjacent intake: the shared self-eval consumer defect is GitHub #318 / P0 TASK-AR-614. Main run `29945156772` then exposed `fatal: could not parse HEAD` during release-auto fixture commit 37; GitHub #320 / P0 TASK-AR-615 is registered separately.
-- Next: execute TASK-AR-615 in `TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY` first to restore green main CI, then TASK-AR-614, TASK-AR-608, TASK-AR-609, terminal-status residual TASK-AR-612, and the v0.7.0 release TASK-AR-602.
+- Active: claim `CLAIM-20260723-032549-task-ar-615-79e8` executes TASK-AR-615 in `TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY` to restore bounded recovery for the recognized test-fixture commit transient.
+- Next: complete TASK-AR-615 first, then TASK-AR-614, TASK-AR-608, TASK-AR-609, terminal-status residual TASK-AR-612, and the v0.7.0 release TASK-AR-602.
 
 ## 2026-07-23 - TASK-AR-613 active; release cadence query recovery
 

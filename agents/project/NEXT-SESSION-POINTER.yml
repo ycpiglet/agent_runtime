@@ -1,17 +1,22 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-23T03:14:12+09:00
+updated_at: 2026-07-23T03:25:49+09:00
 updated_by: codex-root
 current_state:
-  summary: "TASK-AR-613 and GitHub #316 are closed; TASK-AR-615 is next to recover the post-merge release-auto fixture HEAD transient before TASK-AR-614 and TASK-AR-608."
-  status: ready
-  task_set_status: planned
+  summary: "TASK-AR-615 is active to recover the post-merge release-auto fixture HEAD transient before TASK-AR-614 and TASK-AR-608."
+  status: active
+  task_set_status: in_progress
   task_set_id: "TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY"
   step_index: 1
   step_total: 1
   progress_pct: 0
-  status_text: "TASK-AR-615 is registered and worker-ready after main run 29945156772 exposed a transient fixture commit failure."
+  status_text: "TASK-AR-615 is claimed; reproducing the recognized pre-commit HEAD parse transient before bounded fixture-only recovery."
 active_work:
-  current_agents: []
+  current_agents:
+    - claim_id: CLAIM-20260723-032549-task-ar-615-79e8
+      agent_role: lead-engineer
+      agent_instance_id: codex-root-task-ar-615
+      display_name: lead_engineer@orchestrator-01
+      callsite_id: codex-root-20260723
   current_teams: []
 resume:
   active_task: TASK-AR-615

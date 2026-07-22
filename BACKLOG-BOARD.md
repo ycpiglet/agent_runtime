@@ -83,7 +83,7 @@ completed_task_set_count: 52
 
 - Flow: Make the release-auto test fixture resilient to a proven pre-commit HEAD parse transient without hiding deterministic Git failures.
 - Progress: `0/1` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-615` | INIT-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-615/UNIT-TASK-AR-615-001.md | planned | Action | P0 | Critical | Low | 1h/4500tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Close GitHub issue 320 by making the release-auto fixture recover from the observed t… |
