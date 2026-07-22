@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-22T20:35:49+09:00
-record_count: 718
+generated_at: 2026-07-22T20:44:35+09:00
+record_count: 720
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `718` review and evidence records under `reviews/`.
+- Summary: indexed `720` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `718` files |
+| Reviews covered | pass | `720` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -526,6 +526,7 @@ record_count: 718
 | `reviews/REVIEW-2026-07-22-task-ar-600-host-lock-scope-amendment.md` | `REVIEW-2026-07-22-task-ar-600-host-lock-scope-amendment` | planning | record | pass | TASK-AR-600 host lock scope amendment |
 | `reviews/REVIEW-2026-07-22-task-ar-600-scope-transition-approval.md` | `REVIEW-2026-07-22-task-ar-600-scope-transition-approval` | planning | record | pass | TASK-AR-600 taskset scope transition approval |
 | `reviews/REVIEW-2026-07-22-task-ar-600-verification-frontmatter-amendment.md` | `REVIEW-2026-07-22-task-ar-600-verification-frontmatter-amendment` | planning | record | pass | TASK-AR-600 verification frontmatter amendment |
+| `reviews/REVIEW-2026-07-22-task-ar-603-unicode-boundary-t3-replan.md` | `REVIEW-2026-07-22-task-ar-603-unicode-boundary-t3-replan` | md | record | pass | TASK-AR-603 Unicode Token Boundary T3 Replan |
 | `reviews/REVIEW-2026-07-22-task-ar-610-scope-amendment.md` | `REVIEW-2026-07-22-task-ar-610-scope-amendment` | md | record | pass | TASK-AR-610 scope amendment |
 | `reviews/REVIEW-2026-07-22-taskset-ar-backlog-taskset-test-recovery-registration.md` | `REVIEW-2026-07-22-taskset-ar-backlog-taskset-test-recovery-registration` | md | record | pass | Backlog Taskset Test Recovery Registration |
 | `reviews/REVIEW-2026-07-22-taskset-ar-july-release-impact-remediation-registration.md` | `REVIEW-2026-07-22-taskset-ar-july-release-impact-remediation-registration` | md | record | pass | Release Impact Remediator Registration |
@@ -550,6 +551,7 @@ record_count: 718
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-600-SKEPTIC-REWORK2.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-600-SKEPTIC-REWORK2` | md | record | block | TASK-AR-600 skeptical high-risk rework 2 review |
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-600-SKEPTIC-REWORK3.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-600-SKEPTIC-REWORK3` | md | record | pass | TASK-AR-600 skeptical high-risk rework 3 review |
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-600-SKEPTIC.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-600-SKEPTIC` | md | record | block | TASK-AR-600 skeptical high-risk and external-effect review |
+| `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-603-SKEPTIC-BLOCK.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-603-SKEPTIC-BLOCK` | md | record | fail | TASK-AR-603 Skeptic Adversarial Review - BLOCK |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SCRIBE-2026-06-21-business-operating-system.md` | `SCRIBE-2026-06-21-business-operating-system` | scribe | recorded | pass | Business Operating System Scribe Log |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |

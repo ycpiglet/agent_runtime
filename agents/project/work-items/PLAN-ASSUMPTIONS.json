@@ -284,58 +284,8 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md",
-          "value": "bc9ffcf954b274c8634432ddac4c73bdec3726c832a6a84e305779f9860447ac"
-        },
-        {
-          "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-22-release-impact-verification-command-correction.md",
-          "value": "53d93c255b1bec5a9218d32948375b7245bb565c0f264c76ee1b22b209390088"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/backlog_board.py",
-          "value": "bbadc3eac3afd695e299b941eed5f95a6f566fbbd8afdbd237188817ad9a6f89"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/bootstrap_dev_env.py",
-          "value": "d702398f1b5a687720ef40fcf0f8760c07a0229fa816fa1ea4cee326ee8e0db6"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/conversation_work_audit.py",
-          "value": "57ee40b838e45a36f7ee5caa53a1850aae78c3d8ab1e196f3b09f0fbedfac4fc"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/lock_merge_driver.py",
-          "value": "cc465e57aa92c89c1cdd694a5046349b2dd36c790f50036bfe2de12968879765"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/release_cadence_trigger.py",
-          "value": "f6cee6df842e66915e35032ecd9d6dee9b0246eef17f1254ba415df1a4709f1b"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/session_dashboard.py",
-          "value": "1ba6a9a0eb17d1d3e074a761fc197f389c6822a2d736b3549c0e9b02c219c76d"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/task_claim_dispatcher.py",
-          "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/task_identity.py",
-          "value": "2e7ee638d90e3e14688acf9632d0bf84c34635ed40691a4697f0a2540fe79a95"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/taskset_dispatcher.py",
-          "value": "7be761496a6a951db11a45369c7dc0493caf040c33c991fe1e42158515f1a2c7"
+          "path": "reviews/REVIEW-2026-07-22-task-ar-603-unicode-boundary-t3-replan.md",
+          "value": "194095dab22a37462c13d88d088212bbc622065bfd431f2216af84639622da5b"
         },
         {
           "kind": "sha256",
@@ -344,12 +294,52 @@
         },
         {
           "kind": "sha256",
-          "path": "scripts/work_item_classifier.py",
-          "value": "9d2525973f7ad0e03dc42afce1e21e5752ad767bba9726aa800aa5cf7faec116"
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_id_contract.py",
+          "value": "b10d025dbd4022c9c5c7e98dff465af33c1b1978ef57df89b4dfa84c390cc37c"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_identity.py",
+          "value": "b91a07348e7a513a348509a68d08e0a56a12efa599945576dfaea5aebe6892bb"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/taskset_dispatcher.py",
+          "value": "5b5a06c0c00bdef8698d8e4c9c3b2e825d7a7f05ac7a3f1e17255aa1481abb49"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/conversation_work_audit.py",
+          "value": "371f9c18d19dd8d7230451dd2a9cfbf386863352b02380fcc22934d2d3e96d3c"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/task_id_contract.py",
+          "value": "b10d025dbd4022c9c5c7e98dff465af33c1b1978ef57df89b4dfa84c390cc37c"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/task_identity.py",
+          "value": "2e886173674b379f5208e40a9d713a5fb1713bb10ee6d7a895935fe812eb0548"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/taskset_dispatcher.py",
+          "value": "5b5a06c0c00bdef8698d8e4c9c3b2e825d7a7f05ac7a3f1e17255aa1481abb49"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/conversation_work_audit.py",
+          "value": "371f9c18d19dd8d7230451dd2a9cfbf386863352b02380fcc22934d2d3e96d3c"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-22-release-impact-verification-command-correction.md",
-      "recorded_at": "2026-07-22T17:47:47+09:00",
+      "design_record": "reviews/REVIEW-2026-07-22-task-ar-603-unicode-boundary-t3-replan.md",
+      "recorded_at": "2026-07-22T20:44:33+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION"
     },
@@ -657,5 +647,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-22T18:48:40+09:00"
+  "updated_at": "2026-07-22T20:44:33+09:00"
 }
