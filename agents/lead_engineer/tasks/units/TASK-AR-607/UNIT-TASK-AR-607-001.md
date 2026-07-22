@@ -9,11 +9,11 @@ task_id: TASK-AR-607
 task_set_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 initiative_id: INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-23T00:37:50+09:00
+updated_at: 2026-07-23T01:01:00+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
 created_by: codex-root-planner
@@ -44,6 +44,11 @@ verified_at: 2026-07-23T00:37:50+09:00
 verified_by: codex-root-task-ar-607
 evidence_refs:
   - reviews/VERIFY-2026-07-23-unit-task-ar-607-001-20260723003750.json
+resolution: done
+completed_at: 2026-07-23T01:01:00+09:00
+closed_by: codex-root
+actual_hours: 0.7
+actual_tokens: 50000
 ---
 
 # UNIT-TASK-AR-607-001 - Isolate transient-spawn recovery state
@@ -89,3 +94,15 @@ Report the reproduced interaction, preserved oracle, repeat count, and issue #29
 ## Stop Boundary
 
 Stop if reproduction requires changing release thresholds or masking a production error.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T01:01:00+09:00`
+- Resolution: `done`
+- Actual hours: `0.7`
+- Actual tokens: `50000`
+- Closed by: `codex-root`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-607-001-20260723003750.json`
+<!-- work-close:end -->

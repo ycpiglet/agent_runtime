@@ -9,7 +9,7 @@
   "callsite_id": "codex-root-20260723",
   "pane_id": "root",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
   "active_scope": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
   "scope_transition_approved": true,
@@ -27,13 +27,13 @@
   "worktree_path": ".worktrees/TASK-AR-607",
   "branch": "codex/task-ar-607-isolate-transient-spawn",
   "claimed_at": "2026-07-23T00:18:48+09:00",
-  "last_heartbeat": "2026-07-23T00:18:48+09:00",
-  "updated_at": "2026-07-23T00:18:48+09:00",
-  "expires_at": "2026-07-23T00:48:48+09:00",
+  "last_heartbeat": "2026-07-23T01:00:32+09:00",
+  "updated_at": "2026-07-23T01:00:32+09:00",
+  "expires_at": "2026-07-23T01:17:00+09:00",
   "lease": {
     "claimed_at": "2026-07-23T00:18:48+09:00",
-    "heartbeat_at": "2026-07-23T00:18:48+09:00",
-    "expires_at": "2026-07-23T00:48:48+09:00"
+    "heartbeat_at": "2026-07-23T01:00:32+09:00",
+    "expires_at": "2026-07-23T01:17:00+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260723-001848-task-ar-607-1bfd.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260723-001848-task-ar-607-1bfd.log.md",
@@ -51,5 +51,9 @@
   "target_files": [
     "tests/test_release_cadence_trigger.py",
     "scripts/release_cadence_trigger.py"
-  ]
+  ],
+  "released_at": "2026-07-23T01:00:32+09:00",
+  "verified_by": "codex-task-ar-607-independent-auditor-20260723",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-23-TASK-AR-607.md"
 }
