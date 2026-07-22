@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 initiative_id: INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T17:45:00+09:00
+updated_at: 2026-07-23T00:37:50+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
 created_by: codex-root-planner
@@ -40,6 +40,10 @@ verification:
   - python -m pytest tests/test_release_cadence_trigger.py -q
 handoff: Report the reproduced interaction, preserved oracle, repeat count, and GitHub issue 297 evidence.
 stop_condition: Stop if reproduction requires changing release thresholds or masking a production error.
+verified_at: 2026-07-23T00:37:50+09:00
+verified_by: codex-root-task-ar-607
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-unit-task-ar-607-001-20260723003750.json
 ---
 
 # UNIT-TASK-AR-607-001 - Isolate transient-spawn recovery state

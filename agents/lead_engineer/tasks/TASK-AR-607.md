@@ -9,7 +9,8 @@ kind: task
 parent_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 registered_at: 2026-07-22T17:45:00+09:00
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T17:45:00+09:00
+updated_at: 2026-07-23T00:39:10+09:00
+started_at: 2026-07-23T00:18:48+09:00
 title: Make transient-spawn recovery testing deterministic
 status: planned
 priority: P1
@@ -29,10 +30,17 @@ summary: Close GitHub issue 297 by isolating release-cadence transient-spawn rec
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python -m pytest tests/test_release_cadence_trigger.py -q
 tags:
   - github-297
   - ci-flake
   - release-cadence
+verification_status: passed
+verified_at: 2026-07-23T00:39:10+09:00
+verified_by: codex-root-task-ar-607
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-task-ar-607-20260723003910.json
 ---
 
 # TASK-AR-607 - Make transient-spawn recovery testing deterministic
