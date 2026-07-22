@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-22T18:26:58+09:00",
+  "generated_at": "2026-07-22T18:33:54+09:00",
   "record_count": 414,
   "finding_count": 0,
   "findings": [],
@@ -4554,7 +4554,7 @@
       "number": "27.1.1.1",
       "label": "Unit 27.1.1.1",
       "id": "UNIT-TASK-AR-610-001",
-      "title": "UNIT-TASK-AR-610-001 - Fold the legacy failure link into canonical evidence refs",
+      "title": "UNIT-TASK-AR-610-001 - Normalize legacy closeout evidence metadata",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-610/UNIT-TASK-AR-610-001.md",
       "parent_id": "TASK-AR-610",
       "status": "worker_ready"

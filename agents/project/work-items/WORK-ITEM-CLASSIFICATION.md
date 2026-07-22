@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-22T18:26:58+09:00
+generated_at: 2026-07-22T18:33:54+09:00
 record_count: 414
 ---
 
@@ -452,7 +452,7 @@ record_count: 414
 | 27 | Initiative 27 | initiative | `INIT-AR-PR303-CI-SCHEMA-RECOVERY` | - | active | `agents/project/initiatives/INIT-AR-PR303-CI-SCHEMA-RECOVERY.md` | PR 303 CI Schema Recovery |
 | 27.1 | Taskset 27.1 | taskset | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | `INIT-AR-PR303-CI-SCHEMA-RECOVERY` | active | `BACKLOG-BOARD.md` | CI Schema Recovery |
 | 27.1.1 | Task 27.1.1 | task | `TASK-AR-610` | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | planned | `agents/lead_engineer/tasks/TASK-AR-610.md` | Make the existing TASK-AR-594 record satisfy the canonical work-item schema while pre… |
-| 27.1.1.1 | Unit 27.1.1.1 | unit | `UNIT-TASK-AR-610-001` | `TASK-AR-610` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-610/UNIT-TASK-AR-610-001.md` | UNIT-TASK-AR-610-001 - Fold the legacy failure link into canonical evidence refs |
+| 27.1.1.1 | Unit 27.1.1.1 | unit | `UNIT-TASK-AR-610-001` | `TASK-AR-610` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-610/UNIT-TASK-AR-610-001.md` | UNIT-TASK-AR-610-001 - Normalize legacy closeout evidence metadata |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.
