@@ -507,6 +507,16 @@ def _target_status_for_work_start(current: str | None) -> str | None:
     return "in_progress"
 
 
+def _persisted_status_for_work_start(
+    current: str | None, normalized_target: str
+) -> str:
+    current_text = str(current or "").strip()
+    localized_values = set(status_alias.STATUS_ALIASES) | {"대기"}
+    if normalized_target == "in_progress" and current_text in localized_values:
+        return "진행 중"
+    return normalized_target
+
+
 def _set_task_status(task_path: Path, next_status: str) -> bool:
     try:
         original = task_path.read_text(encoding="utf-8")
@@ -1166,7 +1176,10 @@ def cmd_start(args: argparse.Namespace) -> int:
     target_status = _target_status_for_work_start(payload["next_task_status"])
     status_updated = False
     if target_status and target_status != _normalize_status(payload["next_task_status"]):
-        status_updated = _set_task_status(task_path, target_status)
+        persisted_status = _persisted_status_for_work_start(
+            payload["next_task_status"], target_status
+        )
+        status_updated = _set_task_status(task_path, persisted_status)
 
     if not _sync_backlog_board(root):
         print("failed to rewrite BACKLOG-BOARD.md after task start", file=sys.stderr)
