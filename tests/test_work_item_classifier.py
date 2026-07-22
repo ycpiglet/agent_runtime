@@ -27,6 +27,14 @@ def _run(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
     )
 
 
+def _payload(root: Path) -> dict[str, object]:
+    return json.loads(
+        (root / "agents" / "project" / "work-items" / "WORK-ITEM-CLASSIFICATION.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+
 def _seed(root: Path) -> None:
     _write(
         root / "agents" / "project" / "initiatives" / "INIT-TEST.md",
@@ -102,6 +110,61 @@ def test_work_item_classifier_writes_hierarchy_numbers(tmp_path: Path) -> None:
     assert numbers["TASK-AR-901"] == "1.1.1"
     assert numbers["TASK-AR-902"] == "1.1.2"
     assert numbers["UNIT-TASK-AR-901-001"] == "1.1.1.1"
+
+
+def test_work_item_classifier_filters_mixed_initiative_directory_by_kind(tmp_path: Path) -> None:
+    _seed(tmp_path)
+    _write(
+        tmp_path / "agents" / "project" / "initiatives" / "TASKSET-DUPLICATE.md",
+        """---
+kind: taskset
+type: initiative
+id: TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE
+work_id: TASKSET-IGNORED
+status: active
+---
+
+# Must Not Be An Initiative
+""",
+    )
+    _write(
+        tmp_path / "agents" / "project" / "initiatives" / "WORK-ID-FILENAME.md",
+        """---
+kind: initiative
+work_id: INIT-WORK-ID
+status: planned
+created_at: 2026-06-11T00:00:00+09:00
+---
+
+# Work ID Initiative
+""",
+    )
+    _write(
+        tmp_path / "agents" / "project" / "initiatives" / "ID-WINS.md",
+        """---
+kind: initiative
+id: INIT-ID-WINS
+work_id: INIT-WORK-ID-IGNORED
+status: planned
+created_at: 2026-06-10T00:00:00+09:00
+---
+
+# Canonical ID Initiative
+""",
+    )
+
+    result = _run(tmp_path, "--write", "--check")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    records = _payload(tmp_path)["records"]
+    initiative_ids = [row["id"] for row in records if row["level"] == "initiative"]
+    all_ids = [row["id"] for row in records]
+    assert "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE" not in initiative_ids
+    assert all_ids.count("TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE") == 1
+    assert "INIT-WORK-ID" in initiative_ids
+    assert "WORK-ID-FILENAME" not in initiative_ids
+    assert "INIT-ID-WINS" in initiative_ids
+    assert "INIT-WORK-ID-IGNORED" not in initiative_ids
 
 
 def test_work_item_classifier_check_fails_when_generated_json_is_stale(tmp_path: Path) -> None:
