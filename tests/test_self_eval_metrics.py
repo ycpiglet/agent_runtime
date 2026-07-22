@@ -6,6 +6,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "self_eval_metrics.py"
@@ -472,3 +474,180 @@ def test_not_wired_into_owner_governance_gate() -> None:
     """Source-repo-only tool: must NOT be added to the governance chain."""
     gate = (REPO_ROOT / "scripts" / "owner_governance_gate.py").read_text(encoding="utf-8")
     assert "self_eval_metrics" not in gate
+
+
+# --- Shared Git query integrity (GitHub #318) -------------------------------
+
+
+def _load_query_module():
+    """Load self-eval with a private cadence module and retry seams."""
+    import importlib.util
+    import time
+    import types
+
+    cadence_path = REPO_ROOT / "scripts" / "release_cadence_trigger.py"
+    cadence_spec = importlib.util.spec_from_file_location(
+        "release_cadence_trigger", cadence_path
+    )
+    cadence_module = importlib.util.module_from_spec(cadence_spec)
+    cadence_spec.loader.exec_module(cadence_module)
+    cadence_module.subprocess = types.SimpleNamespace(run=subprocess.run)
+    cadence_module.time = types.SimpleNamespace(sleep=time.sleep, time=time.time)
+
+    previous = sys.modules.get("release_cadence_trigger")
+    sys.modules["release_cadence_trigger"] = cadence_module
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "self_eval_metrics_query_integrity", SCRIPT
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+    finally:
+        if previous is None:
+            sys.modules.pop("release_cadence_trigger", None)
+        else:
+            sys.modules["release_cadence_trigger"] = previous
+    return module
+
+
+def _successful_query_output(args: list[str]) -> str:
+    if args == ["describe", "--tags", "--abbrev=0"]:
+        return "v0.1.0\n"
+    if args[:3] == ["log", "--no-merges", "--format=%s"]:
+        return "feat: one\nfix: two\n"
+    if args[:4] == ["rev-list", "--no-merges", "--count", "v0.1.0..HEAD"]:
+        return "2\n"
+    if args[:4] == ["rev-list", "--merges", "--count", "v0.1.0..HEAD"]:
+        return "0\n"
+    if args[:3] == ["log", "-1", "--format=%ct"]:
+        return "1767225600\n"
+    if args[:3] == ["log", "-1", "--format=%cI"]:
+        return "2026-01-01T00:00:00+00:00\n"
+    raise AssertionError(f"unexpected git query: {args!r}")
+
+
+def _matches_query_kind(args: list[str], query_kind: str) -> bool:
+    if query_kind == "baseline":
+        return args == ["describe", "--tags", "--abbrev=0"]
+    if query_kind == "subjects":
+        return args[:3] == ["log", "--no-merges", "--format=%s"]
+    if query_kind == "commit-count":
+        return args[:3] == ["rev-list", "--no-merges", "--count"]
+    if query_kind == "merge-count":
+        return args[:3] == ["rev-list", "--merges", "--count"]
+    if query_kind == "tag-time":
+        return args[:3] == ["log", "-1", "--format=%ct"]
+    if query_kind == "from-ref-timestamp":
+        return args[:4] == ["log", "-1", "--format=%cI", "v0.1.0"]
+    if query_kind == "to-ref-timestamp":
+        return args[:4] == ["log", "-1", "--format=%cI", "HEAD"]
+    raise AssertionError(f"unknown query kind: {query_kind}")
+
+
+@pytest.mark.parametrize(
+    "query_kind",
+    [
+        "baseline",
+        "subjects",
+        "commit-count",
+        "merge-count",
+        "tag-time",
+        "from-ref-timestamp",
+        "to-ref-timestamp",
+    ],
+)
+def test_each_exhausted_git_query_invalidates_self_eval_report(
+    tmp_path: Path, monkeypatch, query_kind: str
+) -> None:
+    module = _load_query_module()
+    monkeypatch.setattr(module.cadence.time, "sleep", lambda _seconds: None)
+    failed_calls = 0
+
+    def _run(cmd, **_kwargs):
+        nonlocal failed_calls
+        args = list(cmd[1:])
+        if _matches_query_kind(args, query_kind):
+            failed_calls += 1
+            return subprocess.CompletedProcess(
+                cmd,
+                returncode=128,
+                stdout="",
+                stderr=(
+                    f"fatal: {query_kind} unavailable token=query-secret "
+                    "https://query-user:query-password@example.invalid/repo"
+                ),
+            )
+        return subprocess.CompletedProcess(
+            cmd, returncode=0, stdout=_successful_query_output(args), stderr=""
+        )
+
+    monkeypatch.setattr(module.cadence.subprocess, "run", _run)
+    report = module.build_report(
+        tmp_path,
+        from_ref=None if query_kind == "baseline" else "v0.1.0",
+        now_ts=1767312000,
+    )
+
+    assert failed_calls == 3
+    assert report["status"] == "error"
+    assert report["reason"] == "git-query-error"
+    assert report["fixed_metrics"] is None
+    assert len(report["git_query_errors"]) == 1
+    error = report["git_query_errors"][0]
+    assert error["attempts"] == 3
+    assert error["returncode"] == 128
+    for secret in ("query-secret", "query-user", "query-password"):
+        assert secret not in json.dumps(error)
+
+
+def test_query_error_state_is_isolated_between_self_eval_reports(
+    tmp_path: Path, monkeypatch
+) -> None:
+    module = _load_query_module()
+    module.cadence._QUERY_ERRORS.append(
+        {"command": "stale", "error": "stale", "returncode": 1, "attempts": 3}
+    )
+
+    def _run(cmd, **_kwargs):
+        args = list(cmd[1:])
+        return subprocess.CompletedProcess(
+            cmd, returncode=0, stdout=_successful_query_output(args), stderr=""
+        )
+
+    monkeypatch.setattr(module.cadence.subprocess, "run", _run)
+    report = module.build_report(tmp_path, from_ref="v0.1.0", now_ts=1767312000)
+
+    assert report["status"] == "pass"
+    assert "git_query_errors" not in report
+    assert module.cadence._QUERY_ERRORS == []
+
+
+def test_query_error_console_output_is_loud_sanitized_and_unevaluated(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    module = _load_query_module()
+    monkeypatch.setattr(module.cadence.time, "sleep", lambda _seconds: None)
+
+    def _run(cmd, **_kwargs):
+        args = list(cmd[1:])
+        if args[:3] == ["rev-list", "--no-merges", "--count"]:
+            return subprocess.CompletedProcess(
+                cmd,
+                returncode=128,
+                stdout="",
+                stderr="fatal: unavailable password=console-secret",
+            )
+        return subprocess.CompletedProcess(
+            cmd, returncode=0, stdout=_successful_query_output(args), stderr=""
+        )
+
+    monkeypatch.setattr(module.cadence.subprocess, "run", _run)
+    report = module.build_report(tmp_path, from_ref="v0.1.0", now_ts=1767312000)
+    module._print_report(report)
+    output = capsys.readouterr().out
+
+    assert "self-eval: ERROR git-query-error" in output
+    assert "git rev-list --no-merges --count" in output
+    assert "attempts=3" in output
+    assert "console-secret" not in output
+    assert "commit_count = 0" not in output
