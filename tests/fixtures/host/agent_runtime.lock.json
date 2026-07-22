@@ -106,7 +106,7 @@
       "scripts/auto_merge.py": "sha256:0fe30e17d778bcc040adcfaccf8dbac7ed53d5f86581552e397a5fcccf88a69b",
       "scripts/auto_runner.py": "sha256:d0168f9cee6e149925db326f2bfb62a59b5b6485ae2a39e9c35ac9ca6dc28549",
       "scripts/automation_rules_gate.py": "sha256:0677ae6b8464e819ad83bbda5271de963369f5b87febc86e3aaa611abdd6d5d2",
-      "scripts/backlog_board.py": "sha256:8ec4b85ecf81826c2cfc24aca06dadeedc20e7138ae8e902fae481a62cac1331",
+      "scripts/backlog_board.py": "sha256:d38e05dd28188935ad3ae241b9c76d591e973e4c9ea7a3bd75223a287ba8af6c",
       "scripts/backlog_sweep.py": "sha256:f9698b5f05fcce53b522c8c5ccf6053cfd525e5f2156f2206b23e3667fa2e92d",
       "scripts/beta_tester_due.py": "sha256:32e9d7b142a4ca829f15dc7cdf403873dc08fe1ebceaf5c02226f2314b03c85f",
       "scripts/budget_estimate.py": "sha256:5d180aa4854f8923a631790d38eeeeb26639ca836d4738d600d0900fa8d31d13",
@@ -284,7 +284,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.6.0",
-    "template_digest": "sha256:a7869f9de222bcda574558794c1465650cb167ce80133b60bd08e519c6fedc48",
+    "template_digest": "sha256:57115a47778657f57bf876162c94e0af7029a1542e08add67f2494e2b6293d33",
     "template_files": 281
   },
   "project": "fixture-host",

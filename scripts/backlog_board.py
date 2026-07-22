@@ -426,7 +426,36 @@ class Task:
 def strip_comment(line: str) -> str:
     if "#" not in line:
         return line
-    return line.split("#", 1)[0]
+    quote: str | None = None
+    escaped = False
+    index = 0
+    while index < len(line):
+        char = line[index]
+        if quote == '"':
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                quote = None
+            index += 1
+            continue
+        if quote == "'":
+            if char == "'" and index + 1 < len(line) and line[index + 1] == "'":
+                index += 2
+                continue
+            if char == "'":
+                quote = None
+            index += 1
+            continue
+        if char == "#":
+            return line[:index]
+        if char in {'"', "'"}:
+            previous = line[index - 1] if index else ""
+            if index == 0 or previous.isspace() or previous in ":,[{-":
+                quote = char
+        index += 1
+    return line
 
 
 def parse_scalar(value: str) -> object:

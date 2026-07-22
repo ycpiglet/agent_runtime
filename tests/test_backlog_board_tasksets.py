@@ -66,6 +66,13 @@ def test_frontmatter_still_strips_unquoted_comments() -> None:
         assert _parse_summary(parser, "plain value # outside") == "plain value"
 
 
+def test_frontmatter_distinguishes_plain_apostrophes_and_closed_quotes() -> None:
+    for parser in _frontmatter_parsers():
+        assert parser.strip_comment("owner's value # outside") == "owner's value "
+        assert parser.strip_comment('"PR #167" # outside') == '"PR #167" '
+        assert parser.strip_comment("'owner''s PR #167' # outside") == "'owner''s PR #167' "
+
+
 def _write_task(tasks_dir: Path, task_id: str, task_set_id: str, status: str = "planned", priority: str = "P0") -> None:
     tasks_dir.mkdir(parents=True, exist_ok=True)
     (tasks_dir / f"{task_id}.md").write_text(
