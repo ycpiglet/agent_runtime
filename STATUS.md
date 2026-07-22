@@ -1,11 +1,11 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-07-22 - TASK-AR-599 independently approved; integration pending
+## 2026-07-22 - TASK-AR-600 active; release-impact queue registered
 
-- Completed: optional allimbot delivery, lifecycle wiring, aggregate CI failure routing, loopback-only dashboard credentials, packaging, documentation, and task closeout are recorded on `codex/task-ar-599-allimbot`.
-- Verification: W4a passed all four registered commands (`52` focused tests); independent auditor and skeptic rework reviews both approved HEAD `329389b`. Claim `CLAIM-20260722-170010-task-ar-599-5d41` and both high-risk review overlays are released.
-- Safety boundary: configuration remains blank by default, no live notification or external probe was sent, remote dashboard URLs cannot receive the token, and unverified work cannot emit an authoritative completion message.
-- Remaining: merge the TASK-AR-599 PR and close issue #279, execute registered `TASK-AR-600` in `TASKSET-AR-AUTO-MERGE-INTEGRITY` for issue #291, audit issues #292-#300, then run release-only `TASK-AR-602` for v0.7.0.
+- Completed: TASK-AR-599 merged in PR #302, issue #279 is closed, and all local/remote task branch and worktree cleanup is complete.
+- Active: claim `CLAIM-20260722-174820-task-ar-600-fa3d` implements remote merge-state read-back for issue #291 in `TASKSET-AR-AUTO-MERGE-INTEGRITY`.
+- Registered from the #291-#300 audit: TASK-AR-603(#299), 604(#293), 605(#294), 606(#295), 607(#297), 608(#298), and 609(#300), each with one worker-ready unit and a T0 snapshot.
+- Remaining: close #291 and the seven registered defects through independent W4b/PR CI, then run release-only TASK-AR-602 for v0.7.0.
 
 ## 2026-07-06 (2차) - 이슈 전량 정리: #128/#132/#250 종료 — 열린 이슈 0 도달
 

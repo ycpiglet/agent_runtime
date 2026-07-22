@@ -1,10 +1,10 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
-## 2026-07-22 TASK-AR-599 approved; release-impact audit next
+## 2026-07-22 TASK-AR-600 active; release-impact remediation queued
 
-- Completed and independently approved: `TASK-AR-594` through `TASK-AR-599`; `TASK-AR-601` completed its separate routing-closeout taskset.
-- Integration boundary: merge `codex/task-ar-599-allimbot` and close issue #279; no allimbot secret, repository variable, or live provider was configured.
-- Next registered execution: `TASK-AR-600` in `TASKSET-AR-AUTO-MERGE-INTEGRITY` fixes issue #291's false-success auto-merge path, followed by the issue #292-#300 audit and release-only `TASK-AR-602`.
+- Active: `TASK-AR-600` in `TASKSET-AR-AUTO-MERGE-INTEGRITY` fixes issue #291's false-success auto-merge path.
+- Queued in `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION`: TASK-AR-603 through TASK-AR-609 cover every remaining open issue in the audited #291-#300 range.
+- Release boundary: `TASK-AR-602` remains last and may start only after all eight defect issues are merged and remotely closed.
 
 <!-- BACKLOG-INDEX:START (generated from TASKSET-DEFINITIONS.json — do not edit by hand) -->
 
@@ -25,6 +25,7 @@
 | 528 | `TASKSET-AR-AGENT-ORG-DELEGATION` | Org Conductor |
 | 529 | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | Decision Cockpit |
 | 600 | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | Merge Truth Keeper |
+| 601 | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | Release Impact Remediator |
 | 615 | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | Self Improvement Cadence |
 | 616 | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | Self Improvement Remediation |
 | 617 | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | Business Operations Teams |
