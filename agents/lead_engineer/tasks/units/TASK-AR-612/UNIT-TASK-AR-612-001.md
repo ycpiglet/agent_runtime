@@ -9,11 +9,12 @@ task_id: TASK-AR-612
 task_set_id: TASKSET-AR-TERMINAL-STATUS-START-GUARD
 initiative_id: INIT-AR-TERMINAL-STATUS-START-GUARD
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: in_progress
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T21:43:00+09:00
-updated_at: 2026-07-22T21:43:00+09:00
+updated_at: 2026-07-23T08:07:40+09:00
+started_at: 2026-07-23T08:02:09+09:00
 origin_type: review_finding
 origin_ref: reviews/ROLE-REVIEW-2026-07-22-TASK-AR-604-SKEPTIC.md
 created_by: codex-root-planner
@@ -42,6 +43,10 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Report failure-first evidence, terminal selection/start matrix, focused tests, template parity, host lock, and independent review.
 stop_condition: Stop if the fix requires changing the shared schema or any status consumer outside taskset_dispatcher.
+verified_at: 2026-07-23T08:07:40+09:00
+verified_by: codex-root-task-ar-612
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-unit-task-ar-612-001-20260723080740.json
 ---
 
 # UNIT-TASK-AR-612-001 - Treat closed and released task statuses as terminal

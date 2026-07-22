@@ -55,10 +55,10 @@ completed_task_set_count: 56
 
 - Flow: Align taskset terminal-status selection and start transitions with the established closed/released status vocabulary.
 - Progress: `0/1` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-612` | INIT-AR-TERMINAL-STATUS-START-GUARD | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-612/UNIT-TASK-AR-612-001.md | planned | Action | P1 | High | Low | 1h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Make closed/released tasks and their registered Korean aliases terminal in taskset se… |
+| `TASK-AR-612` | INIT-AR-TERMINAL-STATUS-START-GUARD | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-612/UNIT-TASK-AR-612-001.md | in_progress | Action | P1 | High | Low | 1h/5000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make closed/released tasks and their registered Korean aliases terminal in taskset se… |
 
 ## Archived Task Sets
 
