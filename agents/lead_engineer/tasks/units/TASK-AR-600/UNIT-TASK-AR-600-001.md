@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-AUTO-MERGE-INTEGRITY
 initiative_id: INIT-AR-AUTO-MERGE-INTEGRITY
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-19T10:34:25+09:00
-updated_at: 2026-07-19T10:34:25+09:00
+updated_at: 2026-07-22T17:52:09+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-19-auto-merge-execution-readback.md
 created_by: codex-root
@@ -40,6 +40,10 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Report exact head, tests, issue/PR links, rollback, and residual risks.
 stop_condition: Stop on workflow, secret, force-push, branch-protection, or unrelated merge-policy changes.
+verified_at: 2026-07-22T17:52:09+09:00
+verified_by: codex-root-task-ar-600
+evidence_refs:
+  - reviews/VERIFY-2026-07-22-unit-task-ar-600-001-20260722175209.json
 ---
 
 # UNIT-TASK-AR-600-001 - Patch auto-merge execution read-back
