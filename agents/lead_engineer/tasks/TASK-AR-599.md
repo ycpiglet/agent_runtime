@@ -44,6 +44,7 @@ evidence_refs:
   - reviews/VERIFY-2026-07-22-task-ar-599-20260722171444.json
   - reviews/VERIFY-2026-07-22-task-ar-599-20260722172533.json
 resolution: done
+started_at: 2026-07-22T17:00:10+09:00
 completed_at: 2026-07-22T17:31:48+09:00
 closed_by: codex-root-task-ar-599-closeout
 actual_hours: 1.0
