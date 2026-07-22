@@ -16,6 +16,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+try:
+    from task_id_contract import build_timestamp_task_id, is_canonical_task_id
+except ImportError:  # imported as scripts.<name> (namespace package)
+    from scripts.task_id_contract import build_timestamp_task_id, is_canonical_task_id
+
 
 ROOT = Path(__file__).resolve().parents[1]
 TASKS_DIR = Path("agents/lead_engineer/tasks")
@@ -184,6 +189,8 @@ def check_root(root: Path) -> list[str]:
         task_id = str(meta.get("id") or path.stem).strip()
         task_uid = str(meta.get("task_uid") or "").strip().lower()
         ids[task_id].append(path)
+        if not is_canonical_task_id(task_id):
+            findings.append(f"{_rel(root, path)}: task-identity:invalid-task-id:{task_id}")
         if task_uid:
             uids[task_uid].append(path)
         else:
@@ -265,7 +272,11 @@ def cmd_create(args: argparse.Namespace) -> int:
     now_text = _now_text(args.now)
     task_uid = uuid.uuid4()
     timestamp = _timestamp_slug(now_text)
-    task_id = args.task_id or f"TASK-AR-{timestamp}-{task_uid.hex[:8]}"
+    task_id = args.task_id or build_timestamp_task_id(timestamp, task_uid.hex[:8])
+    if not is_canonical_task_id(task_id):
+        print("task-identity-create: fail", file=sys.stderr)
+        print(f"reason=invalid-task-id:{task_id}", file=sys.stderr)
+        return 1
     task_path = root / TASKS_DIR / f"{task_id}.md"
     if task_path.exists():
         print(f"task file already exists: {_rel(root, task_path)}", file=sys.stderr)

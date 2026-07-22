@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 initiative_id: INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T17:45:00+09:00
+updated_at: 2026-07-22T20:50:11+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
 created_by: codex-root-planner
@@ -24,7 +24,7 @@ escalation_triggers:
   - cross_cutting
   - data_integrity
   - repeated_failure
-context: GitHub #299 proves that task_identity emits lowercase UUID hex, taskset_dispatcher accepts a different class, and conversation_work_audit recognizes only one case. The generated ID must travel through allocation, taskset planning, readiness, and audit without rekeying.
+context: GitHub issue 299 proves that task_identity emits lowercase UUID hex, taskset_dispatcher accepts a different class, and conversation_work_audit recognizes only one case. The generated ID must travel through allocation, taskset planning, readiness, and audit without rekeying.
 inputs:
   - reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
   - scripts/task_identity.py
@@ -51,8 +51,14 @@ acceptance:
 verification:
   - python -m pytest tests/test_task_identity.py tests/test_taskset_dispatcher.py tests/test_conversation_work_audit.py -q
   - python scripts/regen_host_lock_if_needed.py --check
-handoff: Report the accepted ID grammar, migrated consumers, regression matrix, parity result, and exact issue #299 evidence.
+handoff: Report the accepted ID grammar, migrated consumers, regression matrix, parity result, and exact GitHub issue 299 evidence.
 stop_condition: Stop if a required consumer lies outside the declared footprint; register the expansion before editing it.
+verified_at: 2026-07-22T20:50:11+09:00
+verified_by: codex-root-task-ar-603-rework1
+evidence_refs:
+  - reviews/VERIFY-2026-07-22-unit-task-ar-603-001-20260722202039.json
+  - reviews/VERIFY-2026-07-22-unit-task-ar-603-001-20260722202956.json
+  - reviews/VERIFY-2026-07-22-unit-task-ar-603-001-20260722205011.json
 ---
 
 # UNIT-TASK-AR-603-001 - Adopt a shared canonical task-ID contract

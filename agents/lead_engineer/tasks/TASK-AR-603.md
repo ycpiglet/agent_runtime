@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 registered_at: 2026-07-22T17:45:00+09:00
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T17:45:00+09:00
+updated_at: 2026-07-22T20:50:45+09:00
 title: Unify canonical task ID producers and consumers
 status: planned
 priority: P0
@@ -29,10 +29,20 @@ summary: Make allocator-generated timestamp IDs pass every canonical routing con
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python -m pytest tests/test_task_identity.py tests/test_taskset_dispatcher.py tests/test_conversation_work_audit.py -q
+  - python scripts/regen_host_lock_if_needed.py --check
 tags:
   - github-299
   - identity
   - cross-cutting
+verification_status: passed
+verified_at: 2026-07-22T20:50:45+09:00
+verified_by: codex-root-task-ar-603-rework1
+evidence_refs:
+  - reviews/VERIFY-2026-07-22-task-ar-603-20260722202126.json
+  - reviews/VERIFY-2026-07-22-task-ar-603-20260722203041.json
+  - reviews/VERIFY-2026-07-22-task-ar-603-20260722205045.json
 ---
 
 # TASK-AR-603 - Unify canonical task ID producers and consumers

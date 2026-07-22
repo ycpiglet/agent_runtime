@@ -190,6 +190,26 @@ def test_plan_honors_canonical_task_order_before_score_sort(tmp_path: Path) -> N
     ]
 
 
+@pytest.mark.parametrize(
+    "task_id",
+    [
+        "TASK-AR-20260721-221825-f53b6746",
+        "TASK-AR-20260721-221825-F53B6746",
+    ],
+)
+def test_plan_accepts_timestamp_task_ids_without_case_rewriting(
+    tmp_path: Path, task_id: str
+) -> None:
+    task_set_id = "TASKSET-DYNAMIC-TIMESTAMP-IDS"
+    _write_taskset(tmp_path, task_set_id, tasks=[task_id])
+    _write_task(tmp_path, task_id, task_set_id)
+
+    result = _run(tmp_path, "plan", task_set_id, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["next_task_id"] == task_id
+
+
 def test_body_order_deduplicates_and_ignores_unrelated_ids(tmp_path: Path) -> None:
     task_set_id = "TASKSET-DYNAMIC-ORDER"
     _write_taskset(tmp_path, task_set_id)
@@ -211,6 +231,12 @@ def test_body_order_deduplicates_and_ignores_unrelated_ids(tmp_path: Path) -> No
     tasks = dispatcher._tasks_for(tmp_path, task_set_id)  # noqa: SLF001
 
     assert [task.task_id for task in tasks] == ["TASK-219", "TASK-220", "TASK-217"]
+
+
+def test_body_order_ignores_task_ids_embedded_in_unicode_words() -> None:
+    body = "## Tasks\n\n- 작업TASK-AR-999\n- αTASK-998β\n"
+
+    assert dispatcher._ordered_task_ids(body) == []  # noqa: SLF001
 
 
 def test_canonical_order_skips_completed_task_without_reordering_remainder(tmp_path: Path) -> None:

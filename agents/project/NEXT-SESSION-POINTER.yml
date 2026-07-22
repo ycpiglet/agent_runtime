@@ -1,18 +1,45 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-22T20:05:00+09:00
+updated_at: 2026-07-22T20:58:55+09:00
 updated_by: codex-root
 current_state:
-  summary: "PR #303 merged, post-merge main CI passed, GitHub #291 closed, and TASK-AR-600/610/611 completed W6 closeout."
+  summary: "TASK-AR-603 Unicode token-boundary rework passed W4a, independent W4b, and skeptic recheck; implementation PR and merge verification remain."
   status: active
   task_set_status: in_progress
   task_set_id: "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION"
-  step_index: 1
+  step_index: 6
   step_total: 7
-  progress_pct: 0
-  status_text: "Next worker-ready item is TASK-AR-603 for GitHub #299 canonical task-ID compatibility."
+  progress_pct: 95
+  status_text: "TASK-AR-603 verified; maintaining claim continuity through PR and main CI."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - display_name: codex/task-ar-603-integration1
+      agent_role: lead-engineer
+      agent_instance_id: codex-root-task-ar-603-integration1
+      callsite_id: codex-root-20260722
+      team_id: agent-runtime-core
+      pane_id: root
+      task_id: TASK-AR-603
+      status: claimed
+      phase: integration
+      progress_pct: 95
+      step_index: 6
+      step_total: 7
+      status_text: "TASK-AR-603 verified; maintaining claim continuity through PR and main CI"
+      worktree_path: .worktrees/TASK-AR-603
+      branch: codex/task-ar-603-task-id-contract
+      claim_id: CLAIM-20260722-205855-task-ar-603-e584
+      claim_path: agents/runtime/task_claims/CLAIM-20260722-205855-task-ar-603-e584.json
+      handoff_path: agents/runtime/task_claims/CLAIM-20260722-205855-task-ar-603-e584.handoff.md
+      last_heartbeat: 2026-07-22T20:58:55+09:00
+  current_teams:
+    - team_id: agent-runtime-core
+      status: active
+      phase: integration
+      progress_pct: 95
+      active_task: TASK-AR-603
+      task_set_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
+      pane_ids:
+        - root
 resume:
   active_task: TASK-AR-603
   active_task_set: "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION"
@@ -23,7 +50,8 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260722-205855-task-ar-603-e584.json
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
     active_claim: null
