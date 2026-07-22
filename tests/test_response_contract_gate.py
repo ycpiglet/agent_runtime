@@ -101,3 +101,20 @@ def test_owner_governance_runs_response_contract_gate():
 
     assert "response_contract_gate.py" in root_gate
     assert "response_contract_gate.py" in template_gate
+
+
+def test_response_contract_gate_flags_missing_canonical_reporting_format(tmp_path: Path):
+    # TASK-AR-607: the canonical live agents/lead_engineer/REPORTING-FORMAT.md must
+    # exist; its absence is now a hard finding (previously silent when only the
+    # template copy was present).
+    result = _run_gate(tmp_path)  # empty root: no canonical reporting format
+    assert result.returncode == 1
+    assert "response-contract:reporting-format-missing" in result.stdout
+
+
+def test_ops_reference_lists_the_six_missing_skills():
+    # TASK-AR-607: OPS skill table must register the previously-missing skills.
+    ops = (REPO_ROOT / "OPS-COMMAND-REFERENCE.md").read_text(encoding="utf-8")
+    for skill in ("grill", "enable", "scaffold", "rsi-planning-loop", "failure-to-regression", "session-closeout"):
+        assert f"`{skill}`" in ops, f"OPS reference missing skill: {skill}"
+    assert "powershell" not in ops.lower()

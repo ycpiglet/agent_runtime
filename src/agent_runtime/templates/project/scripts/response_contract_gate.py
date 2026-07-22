@@ -66,8 +66,17 @@ def check_text(text: str, *, require_response_contract: bool) -> list[str]:
     return findings
 
 
+CANONICAL_RESPONSE_CONTRACT_PATH = "agents/lead_engineer/REPORTING-FORMAT.md"
+
+
 def check_root(root: Path) -> list[str]:
     findings: list[str] = []
+    # TASK-AR-607: the canonical live REPORTING-FORMAT must exist. Previously its
+    # absence passed silently whenever the template copy alone was present, so a
+    # checkout with no canonical reporting contract went undetected. Registration
+    # path absence is now a hard finding.
+    if not (root / CANONICAL_RESPONSE_CONTRACT_PATH).exists():
+        findings.append("response-contract:reporting-format-missing")
     candidates = [root / rel for rel in NORMATIVE_COLOR_STATUS_PATHS]
     existing = [path for path in candidates if path.exists()]
     if not existing:

@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-CONSOLE-OVERHAUL-P0
 initiative_id: INIT-AR-CONSOLE-OVERHAUL-P0
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-22T17:45:27+09:00
-updated_at: 2026-07-22T17:45:27+09:00
+updated_at: 2026-07-22T23:06:05+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-22-decision-console-overhaul-masterplan.md
 created_by: claude-session-overhaul-planner
@@ -42,6 +42,10 @@ verification:
   - python scripts/owner_governance_gate.py --allow-empty-owner-docs
 handoff: 게이트 강화 전후 동작 차이를 evidence로 남긴다.
 stop_condition: /clarify·/quiz 스킬 파일 작성으로 넓히지 말 것 — 별도 태스크.
+verified_at: 2026-07-22T23:06:05+09:00
+verified_by: work.py verify
+evidence_refs:
+  - reviews/VERIFY-2026-07-22-unit-task-ar-607-001-20260722230605.json
 ---
 
 # UNIT-TASK-AR-607-001 - REPORTING-FORMAT 복원 + response_contract_gate 강화 + OPS 참조 정정

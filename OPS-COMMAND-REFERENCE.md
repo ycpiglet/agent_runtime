@@ -98,6 +98,12 @@ signal: pass
 | `release-conductor` | Drive release cadence + v2 release flow | trigger: "release", "cadence", "release flow" -> Skill tool | trigger-based | W5 |
 | `taskset-dispatch` | Work a `TASKSET-AR-*` lane via the taskset dispatcher | trigger: "taskset", "TASKSET-AR", "진행" -> Skill tool | trigger-based | W1/W2 |
 | `scm-steward` | Periodic repo-hygiene loop (worktrees, branches, stashes, claims, PRs) | trigger: "scm", "hygiene", "형상관리" -> Skill tool | trigger-based | W5/W6 |
+| `grill` | Discovery interview -> blueprint + vision for a program/asset (planning-strategy entry) | trigger: "grill", "blueprint", "vision", "discovery interview" -> Skill tool | trigger-based | W1 |
+| `enable` | Build the enablement pack from a grill blueprint | trigger: "enable", "enablement pack" -> Skill tool | trigger-based | W1 |
+| `scaffold` | Scaffold an asset/program structure from an approved blueprint | trigger: "scaffold" -> Skill tool | trigger-based | W1 |
+| `rsi-planning-loop` | Drive the recursive self-improvement planning loop | trigger: "rsi", "self-improvement planning", "rsi loop" -> Skill tool | trigger-based | W1 |
+| `failure-to-regression` | Turn a gate/verify failure into a fixture/gate/regression task | trigger: "failure to regression", "regression from failure" -> Skill tool | trigger-based | W4/W6 |
+| `session-closeout` | Run the W6 session closeout (retro, regeneration, handoff) | trigger: "session closeout", "closeout", "마무리" -> Skill tool | trigger-based | W6 |
 
 ## Decision
 
