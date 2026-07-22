@@ -9,6 +9,7 @@ does (both scripts side by side, classifier importing the sibling board).
 
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 import sys
@@ -98,3 +99,92 @@ def test_template_board_task_exposes_initiative_id(tmp_path: Path) -> None:
         errors="replace",
     )
     assert result.returncode == 0, f"stdout={result.stdout}\nstderr={result.stderr}"
+
+
+def test_template_classifier_filters_taskset_records_from_initiatives(tmp_path: Path) -> None:
+    _seed_consumer_repo(tmp_path)
+    _write(
+        tmp_path / "agents" / "project" / "initiatives" / "TASKSET-TEMPLATE-SMOKE.md",
+        """---
+kind: taskset
+type: initiative
+id: TASKSET-TEMPLATE-SMOKE
+---
+
+# Must Not Be An Initiative
+""",
+    )
+    _write(
+        tmp_path / "agents" / "project" / "initiatives" / "WORK-ID-FILENAME.md",
+        """---
+kind: initiative
+work_id: INIT-WORK-ID
+status: planned
+---
+
+# Work ID Initiative
+""",
+    )
+    _write(
+        tmp_path / "agents" / "project" / "initiatives" / "INIT-LEGACY.md",
+        """---
+status: active
+---
+
+# Legacy Initiative
+""",
+    )
+    _write(
+        tmp_path / "agents" / "project" / "initiatives" / "INIT-TYPE-TASKSET.md",
+        """---
+kind: "   "
+type: taskset
+id: INIT-TYPE-TASKSET
+---
+
+# Type Alias Taskset
+""",
+    )
+    _write(
+        tmp_path / "agents" / "project" / "initiatives" / "SPACE-ID.md",
+        """---
+kind: initiative
+id: "   "
+work_id: INIT-WORK-SPACE-ID
+---
+
+# Normalized Work ID Initiative
+""",
+    )
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(tmp_path / "scripts" / "work_item_classifier.py"),
+            "--root",
+            str(tmp_path),
+            "--write",
+            "--check",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+    assert result.returncode == 0, f"stdout={result.stdout}\nstderr={result.stderr}"
+    payload = json.loads(
+        (tmp_path / "agents" / "project" / "work-items" / "WORK-ITEM-CLASSIFICATION.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    initiative_ids = [row["id"] for row in payload["records"] if row["level"] == "initiative"]
+    all_ids = [row["id"] for row in payload["records"]]
+    assert "TASKSET-TEMPLATE-SMOKE" not in initiative_ids
+    assert all_ids.count("TASKSET-TEMPLATE-SMOKE") == 1
+    assert "INIT-WORK-ID" in initiative_ids
+    assert "WORK-ID-FILENAME" not in initiative_ids
+    assert "INIT-LEGACY" in initiative_ids
+    assert "INIT-TYPE-TASKSET" not in initiative_ids
+    assert "INIT-WORK-SPACE-ID" in initiative_ids
+    assert "SPACE-ID" not in initiative_ids

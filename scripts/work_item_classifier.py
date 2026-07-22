@@ -81,7 +81,17 @@ def _initiative_records(root: Path) -> dict[str, dict[str, str]]:
         return records
     for path in sorted(base.glob("*.md")):
         meta, body = _parse_meta(path)
-        initiative_id = str(meta.get("id") or path.stem).strip()
+        initiative_id = str(meta.get("id") or "").strip()
+        if not initiative_id:
+            initiative_id = str(meta.get("work_id") or "").strip()
+        if not initiative_id:
+            initiative_id = path.stem.strip()
+        kind = str(meta.get("kind") or "").strip().lower()
+        if not kind:
+            kind = str(meta.get("type") or "").strip().lower()
+        is_legacy_initiative = not kind and initiative_id.startswith("INIT-")
+        if kind != "initiative" and not is_legacy_initiative:
+            continue
         if not initiative_id:
             continue
         records[initiative_id] = {

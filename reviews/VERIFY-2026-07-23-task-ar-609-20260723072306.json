@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-23-task-ar-609-20260723072306",
+  "work_id": "TASK-AR-609",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-609.md",
+  "kind": "task",
+  "task_id": "TASK-AR-609",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-23T07:23:06+09:00",
+  "verified_by": "codex-root-task-ar-609",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_work_item_classifier.py tests/test_template_work_item_classifier.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T07:23:06+09:00",
+      "finished_at": "2026-07-23T07:23:10+09:00",
+      "stdout": ".......                                                                  [100%]\n7 passed in 2.48s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/work_item_classifier.py --write --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T07:23:10+09:00",
+      "finished_at": "2026-07-23T07:23:12+09:00",
+      "stdout": "wrote=agents/project/work-items/WORK-ITEM-CLASSIFICATION.json\nwrote=agents/project/work-items/WORK-ITEM-CLASSIFICATION.md\nwork-item-classifier: pass\nfindings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/regen_host_lock_if_needed.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T07:23:12+09:00",
+      "finished_at": "2026-07-23T07:23:12+09:00",
+      "stdout": "OK: C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-609\\tests\\fixtures\\host\\agent_runtime.lock.json is up to date.\n",
+      "stderr": ""
+    }
+  ]
+}
