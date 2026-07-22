@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-22T22:17:33+09:00
-record_count: 731
+generated_at: 2026-07-22T22:29:24+09:00
+record_count: 732
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `731` review and evidence records under `reviews/`.
+- Summary: indexed `732` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `731` files |
+| Reviews covered | pass | `732` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -667,6 +667,7 @@ record_count: 731
 | `reviews/VERIFY-2026-07-22-unit-task-ar-603-001-20260722202956.json` | `VERIFY-2026-07-22-unit-task-ar-603-001-20260722202956` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-603-001-20260722202956 |
 | `reviews/VERIFY-2026-07-22-unit-task-ar-603-001-20260722205011.json` | `VERIFY-2026-07-22-unit-task-ar-603-001-20260722205011` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-603-001-20260722205011 |
 | `reviews/VERIFY-2026-07-22-unit-task-ar-604-001-20260722212349.json` | `VERIFY-2026-07-22-unit-task-ar-604-001-20260722212349` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-604-001-20260722212349 |
+| `reviews/VERIFY-2026-07-22-unit-task-ar-605-001-20260722222914.json` | `VERIFY-2026-07-22-unit-task-ar-605-001-20260722222914` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-605-001-20260722222914 |
 | `reviews/VERIFY-2026-07-22-unit-task-ar-610-001-20260722183557.json` | `VERIFY-2026-07-22-unit-task-ar-610-001-20260722183557` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-610-001-20260722183557 |
 | `reviews/VERIFY-2026-07-22-unit-task-ar-611-001-20260722192021.json` | `VERIFY-2026-07-22-unit-task-ar-611-001-20260722192021` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-611-001-20260722192021 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
