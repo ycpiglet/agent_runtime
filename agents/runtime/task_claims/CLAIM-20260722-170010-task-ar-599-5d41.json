@@ -57,6 +57,7 @@
     "new:src/agent_runtime/templates/project/.env.example",
     "scripts/owner_governance_gate.py",
     ".github/workflows/test.yml",
+    "pyproject.toml",
     "new:docs/ALLIMBOT-INTEGRATION.md",
     "new:tests/test_allimbot.py",
     "tests/test_update_notify.py",

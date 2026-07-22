@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-22T16:53:40+09:00
-record_count: 670
+generated_at: 2026-07-22T17:05:55+09:00
+record_count: 671
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `670` review and evidence records under `reviews/`.
+- Summary: indexed `671` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `670` files |
+| Reviews covered | pass | `671` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -519,6 +519,7 @@ record_count: 670
 | `reviews/REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration.md` | `REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration` | md | record | pass | Role Routing Closeout Reliability Registration |
 | `reviews/REVIEW-2026-07-22-post-merge-plan-revalidation.md` | `REVIEW-2026-07-22-post-merge-plan-revalidation` | plan-revalidation | approved | pass | Post-merge plan revalidation |
 | `reviews/REVIEW-2026-07-22-remote-main-integration-id-collision.md` | `REVIEW-2026-07-22-remote-main-integration-id-collision` | integration-decision | approved | pass | Remote main integration and TASK-AR-600 collision |
+| `reviews/REVIEW-2026-07-22-task-ar-599-packaging-scope-amendment.md` | `REVIEW-2026-07-22-task-ar-599-packaging-scope-amendment` | md | record | pass | TASK-AR-599 packaging scope amendment |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |

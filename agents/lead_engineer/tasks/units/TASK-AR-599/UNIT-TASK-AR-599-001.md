@@ -40,6 +40,7 @@ target_files:
   - new:src/agent_runtime/templates/project/.env.example
   - scripts/owner_governance_gate.py
   - .github/workflows/test.yml
+  - pyproject.toml
   - new:docs/ALLIMBOT-INTEGRATION.md
   - new:tests/test_allimbot.py
   - tests/test_update_notify.py
@@ -54,6 +55,7 @@ acceptance:
   - Secret scanning and host fixture lock checks pass.
 verification:
   - python -m pytest tests/test_allimbot.py tests/test_update_notify.py tests/test_orchestrator_atomic_writes.py tests/test_owner_governance_chain_parity.py -q
+  - python scripts/verify_wheel_dotfiles.py --check
   - python scripts/owner_governance_gate.py
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Report each wired event, no-op/error behavior, configuration documentation, tests, and secret-gate output.
@@ -84,6 +86,7 @@ GitHub #279 proposes the host-proven ycpiglet/allimbot standard-library client w
 - new:src/agent_runtime/templates/project/.env.example
 - scripts/owner_governance_gate.py
 - .github/workflows/test.yml
+- pyproject.toml
 - new:docs/ALLIMBOT-INTEGRATION.md
 - new:tests/test_allimbot.py
 - tests/test_update_notify.py
@@ -111,6 +114,7 @@ Implement the optional client, connect task completion/governance block/session 
 ## Verification
 
 - `python -m pytest tests/test_allimbot.py tests/test_update_notify.py tests/test_orchestrator_atomic_writes.py tests/test_owner_governance_chain_parity.py -q`
+- `python scripts/verify_wheel_dotfiles.py --check`
 - `python scripts/owner_governance_gate.py`
 - `python scripts/regen_host_lock_if_needed.py --check`
 

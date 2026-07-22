@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-22T16:49:30+09:00
+generated_at: 2026-07-22T17:06:06+09:00
 record_count: 394
 ---
 
