@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-PR303-CI-SCHEMA-RECOVERY
 initiative_id: INIT-AR-PR303-CI-SCHEMA-RECOVERY
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T18:26:18+09:00
-updated_at: 2026-07-22T18:26:18+09:00
+updated_at: 2026-07-22T18:35:57+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-pr-303-ci-baseline-schema-recovery.md
 created_by: codex-root-planner
@@ -23,7 +23,7 @@ model_tier: worker_standard
 escalation_triggers:
   - data_integrity
   - ci
-context: PR #303 CI reproduced the same unknown-field failure on Python 3.10, 3.11, and 3.12. The referenced failed verification JSON must remain discoverable.
+context: PR
 inputs:
   - reviews/REVIEW-2026-07-22-pr-303-ci-baseline-schema-recovery.md
   - agents/lead_engineer/tasks/TASK-AR-594.md
@@ -49,6 +49,10 @@ verification:
   - python scripts/owner_governance_gate.py --allow-empty-owner-docs
 handoff: Report the original CI finding, preserved failed evidence path, local gate results, and PR rerun outcome.
 stop_condition: Stop before changing the global work-item schema or deleting any verification evidence.
+verified_at: 2026-07-22T18:35:57+09:00
+verified_by: codex-root-task-ar-610
+evidence_refs:
+  - reviews/VERIFY-2026-07-22-unit-task-ar-610-001-20260722183557.json
 ---
 
 # UNIT-TASK-AR-610-001 - Normalize legacy closeout evidence metadata
