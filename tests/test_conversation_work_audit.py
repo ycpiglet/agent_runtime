@@ -137,6 +137,12 @@ def test_planning_record_accepts_timestamp_task_id_suffix_case(
     )
 
 
+def test_task_id_extractor_does_not_match_inside_larger_tokens() -> None:
+    text = "prefix_TASK-AR-901 suffixTASK-AR-902 TASK-AR-903_suffix"
+
+    assert conversation_work_audit.TASK_ID_RE.findall(text) == []
+
+
 def test_planning_record_referencing_missing_task_file_is_block(tmp_path: Path) -> None:
     body = (
         "## Proposed Follow-Up Registration\n\n"

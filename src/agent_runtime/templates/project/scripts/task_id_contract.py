@@ -12,11 +12,11 @@ import re
 
 
 TASK_ID_PATTERN = (
-    r"TASK(?:-AR)?-(?:\d{8}-\d{6}-[0-9A-Fa-f]{8}|\d+)"
+    r"(?:TASK-\d+|TASK-AR-(?:\d{8}-\d{6}-[0-9A-Fa-f]{8}|\d+))"
 )
 TASK_ID_VALUE_RE = re.compile(rf"^{TASK_ID_PATTERN}$")
 TASK_ID_TOKEN_RE = re.compile(
-    rf"(?<![A-Za-z0-9-])({TASK_ID_PATTERN})(?![A-Za-z0-9-])"
+    rf"(?<![A-Za-z0-9_-])({TASK_ID_PATTERN})(?![A-Za-z0-9_-])"
 )
 TIMESTAMP_SLUG_RE = re.compile(r"^\d{8}-\d{6}$")
 HEX_SUFFIX_RE = re.compile(r"^[0-9A-Fa-f]{8}$")

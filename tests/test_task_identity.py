@@ -118,6 +118,11 @@ def test_task_identity_create_uses_uuid_backed_task_id_and_metadata(tmp_path: Pa
     meta = _frontmatter(task_path)
     assert meta["id"].startswith("TASK-AR-20260610-120000-")
     assert task_identity_module.is_canonical_task_id(meta["id"])
+    assert task_identity_module.is_canonical_task_id("TASK-901")
+    assert task_identity_module.is_canonical_task_id("TASK-AR-901")
+    assert not task_identity_module.is_canonical_task_id(
+        "TASK-20260610-120000-f53b6746"
+    )
     assert UUID_RE.match(meta["task_uid"])
     assert meta["registered_at"] == "2026-06-10T12:00:00+09:00"
     assert meta["updated_at"] == "2026-06-10T12:00:00+09:00"
