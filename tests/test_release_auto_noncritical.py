@@ -461,6 +461,44 @@ def test_unexpected_nonzero_cadence_query_halts_release_auto_loud(
     assert result["git_query_errors"]
 
 
+def test_partial_cadence_query_error_halts_even_when_commit_threshold_fires(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _make_repo(tmp_path)
+    spec = importlib.util.spec_from_file_location(
+        "release_cadence_trigger_release_auto_partial_query", CADENCE_SCRIPT
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    real_run = subprocess.run
+    module.subprocess = types.SimpleNamespace(run=real_run)
+    module.time = types.SimpleNamespace(sleep=time.sleep, time=time.time)
+    monkeypatch.setattr(module.time, "sleep", lambda _s: None)
+    failed_diff_calls = 0
+
+    def _fail_diff_queries(cmd, **kwargs):
+        nonlocal failed_diff_calls
+        if len(cmd) > 1 and cmd[1] == "diff":
+            failed_diff_calls += 1
+            return subprocess.CompletedProcess(
+                cmd,
+                returncode=128,
+                stdout="",
+                stderr="fatal: transient runner resource failure",
+            )
+        return real_run(cmd, **kwargs)
+
+    monkeypatch.setattr(module.subprocess, "run", _fail_diff_queries)
+    monkeypatch.setattr(orch, "cadence", module)
+    result = _run(repo, ci_status="green", criticality="noncritical")
+
+    assert failed_diff_calls == 6
+    assert result["cadence"]["triggered"] is False
+    assert result["result"] == orch.RESULT_TRIGGER_ERROR
+    assert result["mutated"] is False
+    assert len(result["git_query_errors"]) == 2
+
+
 def test_genuinely_quiet_repo_is_still_not_triggered(tmp_path: Path) -> None:
     repo = _make_repo(tmp_path, triggered=False)
     result = _run(repo, ci_status="green", criticality="noncritical")

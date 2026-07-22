@@ -476,6 +476,43 @@ def test_exhausted_unexpected_nonzero_git_failure_is_error(tmp_path: Path, monke
     assert "[REDACTED]" in error["error"]
 
 
+def test_partial_query_error_overrides_other_trigger_metrics(tmp_path: Path, monkeypatch) -> None:
+    repo = _init_repo(tmp_path)
+    _git(repo, "tag", "v0.1.0")
+    for index in range(40):
+        _commit(repo, f"chore: tick {index}")
+
+    module = _load_module()
+    monkeypatch.setattr(module.time, "sleep", lambda _s: None)
+    real_run = subprocess.run
+    failed_diff_calls = 0
+
+    def _fail_diff_queries(cmd, **kwargs):
+        nonlocal failed_diff_calls
+        if len(cmd) > 1 and cmd[1] == "diff":
+            failed_diff_calls += 1
+            return subprocess.CompletedProcess(
+                cmd,
+                returncode=128,
+                stdout="",
+                stderr="fatal: transient runner resource failure",
+            )
+        return real_run(cmd, **kwargs)
+
+    monkeypatch.setattr(module.subprocess, "run", _fail_diff_queries)
+    report = module.build_report(repo)
+
+    assert failed_diff_calls == 6
+    assert report["metrics"]["commits"] == 40
+    assert report["status"] == "error"
+    assert report["triggered"] is False
+    assert report["finding"] is None
+    assert report["reason"] == "git-query-error"
+    assert len(report["git_query_errors"]) == 2
+    assert report["recommended_bump"] is None
+    assert report["recommended_version"] is None
+
+
 def test_no_baseline_tag_is_still_a_quiet_pass(tmp_path: Path) -> None:
     repo = _init_repo(tmp_path)  # commits but no tag: deterministic non-zero from describe
     module = _load_module()
