@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-22T16:43:02+09:00",
-  "record_count": 390,
+  "generated_at": "2026-07-22T16:49:30+09:00",
+  "record_count": 394,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4252,10 +4252,54 @@
       "status": "worker_ready"
     },
     {
-      "key": "initiative:INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
+      "key": "initiative:INIT-AR-AUTO-MERGE-INTEGRITY",
       "level": "initiative",
       "number": "24",
       "label": "Initiative 24",
+      "id": "INIT-AR-AUTO-MERGE-INTEGRITY",
+      "title": "Auto-merge execution integrity",
+      "path": "agents/project/initiatives/INIT-AR-AUTO-MERGE-INTEGRITY.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-AUTO-MERGE-INTEGRITY",
+      "level": "taskset",
+      "number": "24.1",
+      "label": "Taskset 24.1",
+      "id": "TASKSET-AR-AUTO-MERGE-INTEGRITY",
+      "title": "Merge Truth Keeper",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-AUTO-MERGE-INTEGRITY",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-600",
+      "level": "task",
+      "number": "24.1.1",
+      "label": "Task 24.1.1",
+      "id": "TASK-AR-600",
+      "title": "Make auto_merge execute fail closed when GitHub rejects a merge and preserve success…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-600.md",
+      "parent_id": "TASKSET-AR-AUTO-MERGE-INTEGRITY",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-600-001",
+      "level": "unit",
+      "number": "24.1.1.1",
+      "label": "Unit 24.1.1.1",
+      "id": "UNIT-TASK-AR-600-001",
+      "title": "UNIT-TASK-AR-600-001 - Patch auto-merge execution read-back",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md",
+      "parent_id": "TASK-AR-600",
+      "status": "worker_ready"
+    },
+    {
+      "key": "initiative:INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
+      "level": "initiative",
+      "number": "25",
+      "label": "Initiative 25",
       "id": "INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
       "title": "Role Routing Closeout Reliability",
       "path": "agents/project/initiatives/INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY.md",
@@ -4265,8 +4309,8 @@
     {
       "key": "taskset:TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
       "level": "taskset",
-      "number": "24.1",
-      "label": "Taskset 24.1",
+      "number": "25.1",
+      "label": "Taskset 25.1",
       "id": "TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
       "title": "Role Routing Closeout Reliability",
       "path": "BACKLOG-BOARD.md",
@@ -4276,8 +4320,8 @@
     {
       "key": "task:TASK-AR-601",
       "level": "task",
-      "number": "24.1.1",
-      "label": "Task 24.1.1",
+      "number": "25.1.1",
+      "label": "Task 25.1.1",
       "id": "TASK-AR-601",
       "title": "Ensure role_routing overlay claims carry required lifecycle artifacts and releasing a…",
       "path": "agents/lead_engineer/tasks/TASK-AR-601.md",
@@ -4287,8 +4331,8 @@
     {
       "key": "unit:UNIT-TASK-AR-601-001",
       "level": "unit",
-      "number": "24.1.1.1",
-      "label": "Unit 24.1.1.1",
+      "number": "25.1.1.1",
+      "label": "Unit 25.1.1.1",
       "id": "UNIT-TASK-AR-601-001",
       "title": "UNIT-TASK-AR-601-001 - Repair overlay lifecycle artifacts and recursion guard",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-601/UNIT-TASK-AR-601-001.md",

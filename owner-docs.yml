@@ -1,7 +1,9 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
+  - reviews/REVIEW-2026-07-22-remote-main-integration-id-collision.md
   - reviews/REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration.md
   - reviews/REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration.md
+  - reviews/REVIEW-2026-07-19-taskset-ar-auto-merge-integrity-registration.md
   - reviews/REVIEW-2026-06-21-taskset-ar-business-operating-system-registration.md
   - reviews/REVIEW-2026-06-20-taskset-ar-visual-system-integration-registration.md
   - reviews/REVIEW-2026-06-20-taskset-ar-visual-asset-adoption-registration.md

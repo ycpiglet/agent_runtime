@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-22T16:43:02+09:00
-record_count: 390
+generated_at: 2026-07-22T16:49:30+09:00
+record_count: 394
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `390` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `394` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `25` records |
-| Tasksets | pass | `49` records |
-| Tasks | pass | `265` records |
-| Units | pass | `51` records |
+| Initiatives | pass | `26` records |
+| Tasksets | pass | `50` records |
+| Tasks | pass | `266` records |
+| Units | pass | `52` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -425,10 +425,14 @@ record_count: 390
 | 23.1.6.1 | Unit 23.1.6.1 | unit | `UNIT-TASK-AR-599-001` | `TASK-AR-599` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-599/UNIT-TASK-AR-599-001.md` | UNIT-TASK-AR-599-001 - Wire optional allimbot notifications end to end |
 | 23.1.7 | Task 23.1.7 | task | `TASK-AR-602` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | planned | `agents/lead_engineer/tasks/TASK-AR-602.md` | Resolve GitHub #280 after every intake unit is merged by refreshing current-state rec… |
 | 23.1.7.1 | Unit 23.1.7.1 | unit | `UNIT-TASK-AR-602-001` | `TASK-AR-602` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md` | UNIT-TASK-AR-602-001 - Close state and publish v0.7.0 |
-| 24 | Initiative 24 | initiative | `INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | - | active | `agents/project/initiatives/INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY.md` | Role Routing Closeout Reliability |
-| 24.1 | Taskset 24.1 | taskset | `TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | `INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | complete | `BACKLOG-BOARD.md` | Role Routing Closeout Reliability |
-| 24.1.1 | Task 24.1.1 | task | `TASK-AR-601` | `TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | completed | `agents/lead_engineer/tasks/TASK-AR-601.md` | Ensure role_routing overlay claims carry required lifecycle artifacts and releasing a… |
-| 24.1.1.1 | Unit 24.1.1.1 | unit | `UNIT-TASK-AR-601-001` | `TASK-AR-601` | completed | `agents/lead_engineer/tasks/units/TASK-AR-601/UNIT-TASK-AR-601-001.md` | UNIT-TASK-AR-601-001 - Repair overlay lifecycle artifacts and recursion guard |
+| 24 | Initiative 24 | initiative | `INIT-AR-AUTO-MERGE-INTEGRITY` | - | active | `agents/project/initiatives/INIT-AR-AUTO-MERGE-INTEGRITY.md` | Auto-merge execution integrity |
+| 24.1 | Taskset 24.1 | taskset | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | `INIT-AR-AUTO-MERGE-INTEGRITY` | active | `BACKLOG-BOARD.md` | Merge Truth Keeper |
+| 24.1.1 | Task 24.1.1 | task | `TASK-AR-600` | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-600.md` | Make auto_merge execute fail closed when GitHub rejects a merge and preserve success… |
+| 24.1.1.1 | Unit 24.1.1.1 | unit | `UNIT-TASK-AR-600-001` | `TASK-AR-600` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md` | UNIT-TASK-AR-600-001 - Patch auto-merge execution read-back |
+| 25 | Initiative 25 | initiative | `INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | - | active | `agents/project/initiatives/INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY.md` | Role Routing Closeout Reliability |
+| 25.1 | Taskset 25.1 | taskset | `TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | `INIT-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | complete | `BACKLOG-BOARD.md` | Role Routing Closeout Reliability |
+| 25.1.1 | Task 25.1.1 | task | `TASK-AR-601` | `TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | completed | `agents/lead_engineer/tasks/TASK-AR-601.md` | Ensure role_routing overlay claims carry required lifecycle artifacts and releasing a… |
+| 25.1.1.1 | Unit 25.1.1.1 | unit | `UNIT-TASK-AR-601-001` | `TASK-AR-601` | completed | `agents/lead_engineer/tasks/units/TASK-AR-601/UNIT-TASK-AR-601-001.md` | UNIT-TASK-AR-601-001 - Repair overlay lifecycle artifacts and recursion guard |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

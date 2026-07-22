@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-07-22
-task_count: 265
-open_count: 2
+task_count: 266
+open_count: 3
 completed_count: 263
-task_set_count: 1
+task_set_count: 2
 completed_task_set_count: 48
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `2` open or active tasks; `263` completed tasks are archived from this live board.
+- Summary: `3` open or active tasks; `263` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `2` / Ask `0` / Review `0` / Later `0` / Done `263`.
-- Task Sets: `1` active workflows; `48` completed workflows are hidden from the live action board.
+- Status: Action `3` / Ask `0` / Review `0` / Later `0` / Done `263`.
+- Task Sets: `2` active workflows; `48` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -51,6 +51,15 @@ completed_task_set_count: 48
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-602` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md | planned | Action | P0 | Critical | High | 5h/12000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #280 after every intake unit is merged by refreshing current-state rec… |
 | `TASK-AR-599` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-599/UNIT-TASK-AR-599-001.md | planned | Action | P1 | High | High | 7h/15000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #279 by shipping an optional, zero-dependency notification client and… |
+
+### Merge Truth Keeper (`TASKSET-AR-AUTO-MERGE-INTEGRITY`)
+
+- Flow: Close downstream BUG-014 with deterministic remote read-back.
+- Progress: `0/1` done; `1` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-600` | INIT-AR-AUTO-MERGE-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-600/UNIT-TASK-AR-600-001.md | planned | Action | P1 | High | Medium | 1h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make auto_merge execute fail closed when GitHub rejects a merge and preserve success… |
 
 ## Archived Task Sets
 
@@ -110,7 +119,7 @@ completed_task_set_count: 48
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `2` open across `1` task sets (see Action Board above).
+- Active: `3` open across `2` task sets (see Action Board above).
 - Archived task sets: `48` (see Archived Task Sets above).
 - Archived task files: `263` — see `ARCHIVE-INDEX.md`.
 

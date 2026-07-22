@@ -740,6 +740,25 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-600",
+      "expires_at": "2026-07-20T10:34:25+09:00",
+      "fulfilled_at": "2026-07-19T10:34:25+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-600.md",
+      "fulfilled_task_id": "TASK-AR-600",
+      "fulfilled_task_uid": "99ec8f63-17da-485c-b398-c78a154d07ce",
+      "initiative_id": "INIT-AR-AUTO-MERGE-INTEGRITY",
+      "kind": "task",
+      "owner_id": "codex-root",
+      "reason": "work registration TASKSET-AR-AUTO-MERGE-INTEGRITY",
+      "reservation_group_id": "RES-20260719-103425-89ccc7c0",
+      "reservation_id": "RES-20260719-103425-89ccc7c0-01",
+      "reserved_at": "2026-07-19T10:34:25+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-AUTO-MERGE-INTEGRITY",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",

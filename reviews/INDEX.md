@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-22T16:43:04+09:00
-record_count: 667
+generated_at: 2026-07-22T16:49:32+09:00
+record_count: 669
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `667` review and evidence records under `reviews/`.
+- Summary: indexed `669` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `667` files |
+| Reviews covered | pass | `669` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -513,6 +513,8 @@ record_count: 667
 | `reviews/REVIEW-2026-06-22-autofolio-upstream-candidates.md` | `REVIEW-2026-06-22-autofolio-upstream-candidates` | review | assessed | pass | autofolio → agent_runtime upstream-candidate assessment |
 | `reviews/REVIEW-2026-06-22-subsystem-verification-audit.md` | `REVIEW-2026-06-22-subsystem-verification-audit` | review | assessed | watch | Subsystem verification audit (2026-06-22) |
 | `reviews/REVIEW-2026-06-22-system-health-rsi-diagnosis.md` | `REVIEW-2026-06-22-system-health-rsi-diagnosis` | review | assessed | watch | System-health / RSI diagnosis (2026-06-22) |
+| `reviews/REVIEW-2026-07-19-auto-merge-execution-readback.md` | `REVIEW-2026-07-19-AUTO-MERGE-READBACK` | review | approved | n/a | Auto-merge execution read-back design |
+| `reviews/REVIEW-2026-07-19-taskset-ar-auto-merge-integrity-registration.md` | `REVIEW-2026-07-19-taskset-ar-auto-merge-integrity-registration` | md | record | pass | Merge Truth Keeper Registration |
 | `reviews/REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration.md` | `REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration` | md | record | pass | Upstream Intake Closer Registration |
 | `reviews/REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration.md` | `REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration` | md | record | pass | Role Routing Closeout Reliability Registration |
 | `reviews/REVIEW-2026-07-22-remote-main-integration-id-collision.md` | `REVIEW-2026-07-22-remote-main-integration-id-collision` | integration-decision | approved | n/a | Remote main integration and TASK-AR-600 collision |

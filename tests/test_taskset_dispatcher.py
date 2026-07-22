@@ -25,9 +25,13 @@ def _write_task(
     *,
     status: str = "planned",
     priority: str = "P1",
+    depends_on: list[str] | None = None,
 ) -> None:
     tasks_dir = root / "agents" / "lead_engineer" / "tasks"
     tasks_dir.mkdir(parents=True, exist_ok=True)
+    dependency_line = (
+        f"depends_on: [{', '.join(depends_on)}]\n" if depends_on is not None else ""
+    )
     (tasks_dir / f"{task_id}.md").write_text(
         f"""---
 id: {task_id}
@@ -38,7 +42,7 @@ est_hours: 2
 est_tokens: 200
 task_set_id: {task_set_id}
 project_id: PROJECT-AGENT-RUNTIME
-tags: [test]
+{dependency_line}tags: [test]
 ---
 
 ## Goal
@@ -58,14 +62,13 @@ def _write_taskset(
     kind: str = "taskset",
     title: str = "Runtime Liaison",
     task_order: tuple[str, ...] = (),
+    tasks: list[str] | str | None = None,
 ) -> None:
     tasksets_dir = root / "agents" / "project" / "initiatives"
     tasksets_dir.mkdir(parents=True, exist_ok=True)
     target = tasksets_dir / f"{filename or task_set_id}.md"
     task_section = ""
-    task_frontmatter = ""
     if task_order:
-        task_frontmatter = "tasks:\n" + "\n".join(f"  - {task_id}" for task_id in task_order)
         rows = "\n".join(f"  - {task_id}" for task_id in task_order)
         task_section = f"""
 
@@ -74,6 +77,19 @@ def _write_taskset(
 tasks:
 {rows}
 """
+    declared_tasks: list[str] | str | None = tasks
+    if declared_tasks is None and task_order:
+        declared_tasks = list(task_order)
+    if declared_tasks is None:
+        task_lines = ""
+    elif isinstance(declared_tasks, list) and declared_tasks:
+        task_lines = "tasks:\n" + "".join(
+            f"  - {task_id}\n" for task_id in declared_tasks
+        )
+    elif isinstance(declared_tasks, list):
+        task_lines = "tasks: []\n"
+    else:
+        task_lines = f"tasks: {declared_tasks}\n"
     target.write_text(
         f"""---
 schema_version: {schema_version}
@@ -81,25 +97,37 @@ work_id: {task_set_id}
 kind: {kind}
 title: {title}
 summary: Test dynamic task set.
-{task_frontmatter}
----
+{task_lines}---
 {task_section}
 """,
         encoding="utf-8",
     )
 
 
-def _write_unit(root: Path, task_id: str, **metadata: str) -> None:
+def _write_unit(
+    root: Path,
+    task_id: str,
+    *,
+    status: str = "worker_ready",
+    **metadata: str | bool | list[str],
+) -> None:
     units_dir = root / "agents" / "lead_engineer" / "tasks" / "units" / task_id
     units_dir.mkdir(parents=True, exist_ok=True)
     lines = [
         "---",
         f"unit_id: UNIT-{task_id}-001",
         f"task_id: {task_id}",
-        "status: worker_ready",
+        f"status: {status}",
         "model_tier: worker_standard",
     ]
-    lines.extend(f"{key}: {value}" for key, value in metadata.items())
+    for key, value in metadata.items():
+        if isinstance(value, list):
+            encoded = f"[{', '.join(value)}]"
+        elif isinstance(value, bool):
+            encoded = str(value).lower()
+        else:
+            encoded = value
+        lines.append(f"{key}: {encoded}")
     lines.extend(["---", ""])
     (units_dir / f"UNIT-{task_id}-001.md").write_text("\n".join(lines), encoding="utf-8")
 
@@ -162,12 +190,18 @@ def test_plan_honors_canonical_task_order_before_score_sort(tmp_path: Path) -> N
     ]
 
 
-def test_canonical_order_deduplicates_and_ignores_unrelated_ids(tmp_path: Path) -> None:
+def test_body_order_deduplicates_and_ignores_unrelated_ids(tmp_path: Path) -> None:
     task_set_id = "TASKSET-DYNAMIC-ORDER"
-    _write_taskset(
-        tmp_path,
-        task_set_id,
-        task_order=("TASK-999", "TASK-219", "TASK-219", "TASK-888", "TASK-220"),
+    _write_taskset(tmp_path, task_set_id)
+    record = tmp_path / "agents" / "project" / "initiatives" / f"{task_set_id}.md"
+    record.write_text(
+        record.read_text(encoding="utf-8")
+        + (
+            "\n## 포함 태스크\n\ntasks:\n"
+            "  - TASK-999\n  - TASK-219\n  - TASK-219\n"
+            "  - TASK-888\n  - TASK-220\n"
+        ),
+        encoding="utf-8",
     )
     _write_task(tmp_path, "TASK-217", task_set_id, priority="P0")
     _write_task(tmp_path, "TASK-219", task_set_id, priority="P2")
@@ -287,6 +321,221 @@ def test_dynamic_taskset_parser_rejects_duplicate_aliases(tmp_path: Path) -> Non
     assert "shared-lane" in (result.stderr or result.stdout)
 
 
+def test_plan_uses_canonical_tasks_order_before_backlog_score(tmp_path: Path) -> None:
+    taskset = "TASKSET-DYNAMIC-ORDERED"
+    _write_taskset(tmp_path, taskset, tasks=["TASK-902", "TASK-901"])
+    _write_task(tmp_path, "TASK-901", taskset)
+    _write_task(tmp_path, "TASK-902", taskset)
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["next_task_id"] == "TASK-902"
+    assert (payload["step_index"], payload["step_total"]) == (1, 2)
+
+
+def test_plan_advances_to_next_canonical_task_after_first_is_complete(tmp_path: Path) -> None:
+    taskset = "TASKSET-DYNAMIC-ADVANCE"
+    _write_taskset(tmp_path, taskset, tasks=["TASK-901", "TASK-902"])
+    _write_task(tmp_path, "TASK-901", taskset, status="completed")
+    _write_task(tmp_path, "TASK-902", taskset)
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["next_task_id"] == "TASK-902"
+    assert (payload["step_index"], payload["step_total"]) == (2, 2)
+
+
+def test_plan_rejects_non_list_canonical_tasks_field(tmp_path: Path) -> None:
+    taskset = "TASKSET-DYNAMIC-TASKS-SCALAR"
+    _write_taskset(tmp_path, taskset, tasks="TASK-901")
+    _write_task(tmp_path, "TASK-901", taskset)
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 1
+    assert "tasks must be a YAML list" in (result.stderr or result.stdout)
+
+
+def test_plan_preserves_score_based_fallback_without_tasks_field(tmp_path: Path) -> None:
+    taskset = "TASKSET-DYNAMIC-LEGACY"
+    _write_taskset(tmp_path, taskset)
+    _write_task(tmp_path, "TASK-901", taskset, priority="P3")
+    _write_task(tmp_path, "TASK-902", taskset, priority="P0")
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["next_task_id"] == "TASK-902"
+
+
+@pytest.mark.parametrize(
+    ("declared", "task_records", "message"),
+    [
+        (
+            ["TASK-901", "TASK-901"],
+            [("TASK-901", "TASKSET-DYNAMIC-MEMBERS")],
+            "duplicate task ids",
+        ),
+        (["TASK-999"], [], "unknown task ids"),
+        (
+            ["TASK-901"],
+            [("TASK-901", "TASKSET-OTHER")],
+            "wrong task_set_id membership",
+        ),
+        (
+            ["TASK-901"],
+            [
+                ("TASK-901", "TASKSET-DYNAMIC-MEMBERS"),
+                ("TASK-902", "TASKSET-DYNAMIC-MEMBERS"),
+            ],
+            "omitted",
+        ),
+    ],
+)
+def test_plan_rejects_invalid_canonical_task_membership(
+    tmp_path: Path,
+    declared: list[str],
+    task_records: list[tuple[str, str]],
+    message: str,
+) -> None:
+    taskset = "TASKSET-DYNAMIC-MEMBERS"
+    _write_taskset(tmp_path, taskset, tasks=declared)
+    for task_id, membership in task_records:
+        _write_task(tmp_path, task_id, membership)
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 1
+    assert message in (result.stderr or result.stdout)
+
+
+def test_plan_blocks_on_first_open_task_dependency_instead_of_skipping(
+    tmp_path: Path,
+) -> None:
+    taskset = "TASKSET-DYNAMIC-DEPENDENCY"
+    _write_taskset(tmp_path, taskset, tasks=["TASK-901", "TASK-902"])
+    _write_task(tmp_path, "TASK-900", "TASKSET-OTHER", status="planned")
+    _write_task(tmp_path, "TASK-901", taskset, depends_on=["TASK-900"])
+    _write_task(tmp_path, "TASK-902", taskset)
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 1
+    assert "TASK-901 has incomplete dependencies" in (result.stderr or result.stdout)
+    assert "refusing to skip ahead: TASK-900" in (result.stderr or result.stdout)
+
+
+@pytest.mark.parametrize("dependency", ["TASK-999", "TASK-901"], ids=["unknown", "self"])
+def test_plan_rejects_invalid_selected_task_dependency(
+    tmp_path: Path,
+    dependency: str,
+) -> None:
+    taskset = "TASKSET-DYNAMIC-TASK-DEPS-INVALID"
+    _write_taskset(tmp_path, taskset, tasks=["TASK-901"])
+    _write_task(tmp_path, "TASK-901", taskset, depends_on=[dependency])
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 1
+    message = result.stderr or result.stdout
+    assert "depend" in message.lower()
+    assert "TASK-901" in message
+    assert dependency in message
+
+
+def test_plan_allows_completed_selected_task_dependency(tmp_path: Path) -> None:
+    taskset = "TASKSET-DYNAMIC-TASK-DEPS-COMPLETE"
+    _write_taskset(tmp_path, taskset, tasks=["TASK-901", "TASK-902"])
+    _write_task(tmp_path, "TASK-901", taskset, depends_on=["TASK-902"])
+    _write_task(tmp_path, "TASK-902", taskset, status="completed")
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["next_task_id"] == "TASK-901"
+
+
+def test_plan_blocks_when_selected_unit_dependency_is_not_complete(tmp_path: Path) -> None:
+    taskset = "TASKSET-DYNAMIC-UNIT-DEPS"
+    _write_taskset(tmp_path, taskset, tasks=["TASK-901", "TASK-902"])
+    _write_task(tmp_path, "TASK-901", taskset)
+    _write_task(tmp_path, "TASK-902", taskset)
+    _write_unit(tmp_path, "TASK-901", depends_on=["UNIT-TASK-902-001"])
+    _write_unit(tmp_path, "TASK-902")
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 1
+    message = result.stderr or result.stdout
+    assert "UNIT-TASK-901-001" in message
+    assert "UNIT-TASK-902-001" in message
+
+
+def test_plan_allows_completed_selected_unit_dependency(tmp_path: Path) -> None:
+    taskset = "TASKSET-DYNAMIC-UNIT-DEPS-COMPLETE"
+    _write_taskset(tmp_path, taskset, tasks=["TASK-901", "TASK-902"])
+    _write_task(tmp_path, "TASK-901", taskset)
+    _write_task(tmp_path, "TASK-902", taskset)
+    _write_unit(tmp_path, "TASK-901", depends_on=["UNIT-TASK-902-001"])
+    _write_unit(tmp_path, "TASK-902", status="completed")
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["unit_id"] == "UNIT-TASK-901-001"
+
+
+@pytest.mark.parametrize(
+    "dependency",
+    ["UNIT-TASK-999-001", "UNIT-TASK-901-001"],
+    ids=["unknown", "self"],
+)
+def test_plan_rejects_invalid_selected_unit_dependency(
+    tmp_path: Path,
+    dependency: str,
+) -> None:
+    taskset = "TASKSET-DYNAMIC-UNIT-DEPS-INVALID"
+    _write_taskset(tmp_path, taskset, tasks=["TASK-901"])
+    _write_task(tmp_path, "TASK-901", taskset)
+    _write_unit(tmp_path, "TASK-901", depends_on=[dependency])
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 1
+    message = result.stderr or result.stdout
+    assert "UNIT-TASK-901-001" in message
+    assert dependency in message
+
+
+def test_plan_allows_completed_task_dependency_for_selected_unit(tmp_path: Path) -> None:
+    taskset = "TASKSET-DYNAMIC-UNIT-TASK-DEPS-COMPLETE"
+    _write_taskset(tmp_path, taskset, tasks=["TASK-901", "TASK-902"])
+    _write_task(tmp_path, "TASK-901", taskset)
+    _write_task(tmp_path, "TASK-902", taskset, status="completed")
+    _write_unit(tmp_path, "TASK-901", depends_on=["TASK-902"])
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["unit_id"] == "UNIT-TASK-901-001"
+
+
+def test_plan_rejects_open_task_when_all_unit_specs_are_completed(tmp_path: Path) -> None:
+    taskset = "TASKSET-DYNAMIC-COMPLETED-UNIT"
+    _write_taskset(tmp_path, taskset, tasks=["TASK-901"])
+    _write_task(tmp_path, "TASK-901", taskset)
+    _write_unit(tmp_path, "TASK-901", status="completed")
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 1
+    assert "TASK-901 has unit specs but no open unit" in (result.stderr or result.stdout)
+
+
 def test_resolve_taskset_preserves_static_alias_import_contract() -> None:
     resolved = dispatcher._resolve_taskset("quality-loop")  # noqa: SLF001
 
@@ -331,6 +580,340 @@ def test_plan_uses_complete_structured_worktree_tuple(tmp_path: Path) -> None:
     claim_command = payload["claim_command"]
     assert claim_command[claim_command.index("--mode") + 1] == "orchestrator"
     assert claim_command[claim_command.index("--worktree-path") + 1] == str(worktree)
+
+
+def _git(repository: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["git", *arguments],
+        cwd=repository,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+
+def _init_repository(repository: Path) -> None:
+    repository.mkdir()
+    _git(repository, "init", "-q", "-b", "main")
+    _git(repository, "config", "user.email", "taskset-test@example.com")
+    _git(repository, "config", "user.name", "Taskset Test")
+    (repository / "README.md").write_text("fixture\n", encoding="utf-8")
+    _git(repository, "add", "README.md")
+    _git(repository, "commit", "-q", "-m", "fixture")
+
+
+def test_adoption_reuses_existing_local_branch_without_dash_b(tmp_path: Path) -> None:
+    repository = tmp_path / "repository"
+    _init_repository(repository)
+    _git(repository, "branch", "fix/existing")
+    _git(
+        repository,
+        "update-ref",
+        "refs/remotes/origin/fix/existing",
+        "refs/heads/fix/existing",
+    )
+    worktree = repository / ".worktrees" / "TASK-905"
+    payload = dispatcher._worktree_tuple(  # noqa: SLF001
+        tmp_path,
+        {
+            "repository_path": str(repository),
+            "worktree_path": str(worktree),
+            "branch": "fix/existing",
+            "base_ref": "origin/fix/existing",
+            "adopt_existing_branch": True,
+        },
+        default_worktree="unused",
+        default_branch="unused",
+    )
+
+    assert payload["adopt_existing_branch"] is True
+    assert payload["worktree_command"] == [
+        "git", "worktree", "add", str(worktree), "fix/existing"
+    ]
+    assert dispatcher._ensure_worktree(tmp_path, payload) is True  # noqa: SLF001
+    assert _git(worktree, "branch", "--show-current").stdout.strip() == "fix/existing"
+
+
+def test_adoption_normalizes_full_local_ref_before_worktree_add(tmp_path: Path) -> None:
+    repository = tmp_path / "repository"
+    _init_repository(repository)
+    _git(repository, "branch", "fix/existing")
+    _git(
+        repository,
+        "update-ref",
+        "refs/remotes/origin/fix/existing",
+        "refs/heads/fix/existing",
+    )
+    worktree = repository / ".worktrees" / "TASK-905-FULL-REF"
+    payload = dispatcher._worktree_tuple(  # noqa: SLF001
+        tmp_path,
+        {
+            "repository_path": str(repository),
+            "worktree_path": str(worktree),
+            "branch": "refs/heads/fix/existing",
+            "base_ref": "origin/fix/existing",
+            "adopt_existing_branch": True,
+        },
+        default_worktree="unused",
+        default_branch="unused",
+    )
+
+    assert dispatcher._ensure_worktree(tmp_path, payload) is True  # noqa: SLF001
+    assert payload["worktree_command"] == [
+        "git", "worktree", "add", str(worktree), "fix/existing"
+    ]
+    assert _git(worktree, "branch", "--show-current").stdout.strip() == "fix/existing"
+
+
+def test_adoption_normalizes_full_ref_before_fresh_branch_creation(tmp_path: Path) -> None:
+    repository = tmp_path / "repository"
+    _init_repository(repository)
+    worktree = repository / ".worktrees" / "TASK-905-FRESH-FULL-REF"
+    payload = dispatcher._worktree_tuple(  # noqa: SLF001
+        tmp_path,
+        {
+            "repository_path": str(repository),
+            "worktree_path": str(worktree),
+            "branch": "refs/heads/fix/fresh",
+            "base_ref": "main",
+            "adopt_existing_branch": True,
+        },
+        default_worktree="unused",
+        default_branch="unused",
+    )
+
+    assert dispatcher._ensure_worktree(tmp_path, payload) is True  # noqa: SLF001
+    assert payload["worktree_command"] == [
+        "git", "worktree", "add", "-b", "fix/fresh", str(worktree), "main"
+    ]
+    assert _git(worktree, "branch", "--show-current").stdout.strip() == "fix/fresh"
+
+
+@pytest.mark.parametrize(
+    "branch",
+    [
+        "refs/heads/HEAD",
+        "refs/heads/-danger",
+        "refs/heads/.hidden",
+        "refs/heads/foo/.hidden",
+    ],
+)
+def test_adoption_rejects_invalid_normalized_local_branch_before_worktree_add(
+    tmp_path: Path,
+    branch: str,
+) -> None:
+    repository = tmp_path / "repository"
+    _init_repository(repository)
+    if branch == "refs/heads/HEAD":
+        _git(repository, "update-ref", branch, "refs/heads/main")
+    worktree = repository / ".worktrees" / "TASK-905-INVALID-FULL-REF"
+
+    with pytest.raises(SystemExit, match="invalid local branch name"):
+        dispatcher._worktree_tuple(  # noqa: SLF001
+            tmp_path,
+            {
+                "repository_path": str(repository),
+                "worktree_path": str(worktree),
+                "branch": branch,
+                "base_ref": "main",
+                "adopt_existing_branch": True,
+            },
+            default_worktree="unused",
+            default_branch="unused",
+        )
+
+    assert not worktree.exists()
+    assert str(worktree) not in _git(repository, "worktree", "list", "--porcelain").stdout
+
+
+def test_adoption_rejects_local_branch_behind_declared_base_ref(tmp_path: Path) -> None:
+    repository = tmp_path / "repository"
+    _init_repository(repository)
+    _git(repository, "branch", "fix/existing")
+    (repository / "NEXT.md").write_text("remote advance\n", encoding="utf-8")
+    _git(repository, "add", "NEXT.md")
+    _git(repository, "commit", "-q", "-m", "advance remote base")
+    _git(
+        repository,
+        "update-ref",
+        "refs/remotes/origin/fix/existing",
+        "refs/heads/main",
+    )
+
+    with pytest.raises(SystemExit, match="behind or diverged"):
+        dispatcher._worktree_tuple(  # noqa: SLF001
+            tmp_path,
+            {
+                "repository_path": str(repository),
+                "worktree_path": str(repository / ".worktrees" / "TASK-905"),
+                "branch": "fix/existing",
+                "base_ref": "origin/fix/existing",
+                "adopt_existing_branch": True,
+            },
+            default_worktree="unused",
+            default_branch="unused",
+        )
+
+
+def test_adoption_accepts_local_branch_ahead_of_declared_base_ref(tmp_path: Path) -> None:
+    repository = tmp_path / "repository"
+    _init_repository(repository)
+    base_sha = _git(repository, "rev-parse", "HEAD").stdout.strip()
+    _git(repository, "branch", "fix/existing")
+    _git(repository, "update-ref", "refs/remotes/origin/fix/existing", base_sha)
+    _git(repository, "switch", "-q", "fix/existing")
+    (repository / "AHEAD.md").write_text("local advance\n", encoding="utf-8")
+    _git(repository, "add", "AHEAD.md")
+    _git(repository, "commit", "-q", "-m", "advance local branch")
+    _git(repository, "switch", "-q", "main")
+    worktree = repository / ".worktrees" / "TASK-905"
+
+    payload = dispatcher._worktree_tuple(  # noqa: SLF001
+        tmp_path,
+        {
+            "repository_path": str(repository),
+            "worktree_path": str(worktree),
+            "branch": "fix/existing",
+            "base_ref": "origin/fix/existing",
+            "adopt_existing_branch": True,
+        },
+        default_worktree="unused",
+        default_branch="unused",
+    )
+
+    assert payload["worktree_command"] == [
+        "git", "worktree", "add", str(worktree), "fix/existing"
+    ]
+    assert dispatcher._ensure_worktree(tmp_path, payload) is True  # noqa: SLF001
+
+
+def test_adoption_rejects_missing_base_before_fresh_branch_creation(tmp_path: Path) -> None:
+    repository = tmp_path / "repository"
+    _init_repository(repository)
+
+    with pytest.raises(SystemExit, match="base_ref is missing or not a commit"):
+        dispatcher._worktree_tuple(  # noqa: SLF001
+            tmp_path,
+            {
+                "repository_path": str(repository),
+                "worktree_path": str(repository / ".worktrees" / "TASK-905"),
+                "branch": "fix/missing",
+                "base_ref": "origin/fix/missing",
+                "adopt_existing_branch": True,
+            },
+            default_worktree="unused",
+            default_branch="unused",
+        )
+
+
+def test_adoption_rechecks_preexisting_worktree_after_base_moves(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    repository = tmp_path / "repository"
+    _init_repository(repository)
+    base_sha = _git(repository, "rev-parse", "HEAD").stdout.strip()
+    _git(repository, "branch", "fix/existing")
+    _git(repository, "update-ref", "refs/remotes/origin/fix/existing", base_sha)
+    worktree = repository / ".worktrees" / "TASK-905"
+    payload = dispatcher._worktree_tuple(  # noqa: SLF001
+        tmp_path,
+        {
+            "repository_path": str(repository),
+            "worktree_path": str(worktree),
+            "branch": "fix/existing",
+            "base_ref": "origin/fix/existing",
+            "adopt_existing_branch": True,
+        },
+        default_worktree="unused",
+        default_branch="unused",
+    )
+    assert dispatcher._ensure_worktree(tmp_path, payload) is True  # noqa: SLF001
+
+    (repository / "NEXT.md").write_text("remote advance\n", encoding="utf-8")
+    _git(repository, "add", "NEXT.md")
+    _git(repository, "commit", "-q", "-m", "advance remote base")
+    _git(
+        repository,
+        "update-ref",
+        "refs/remotes/origin/fix/existing",
+        "refs/heads/main",
+    )
+
+    assert dispatcher._ensure_worktree(tmp_path, payload) is False  # noqa: SLF001
+    assert "behind or diverged" in capsys.readouterr().err
+
+
+def test_adoption_rejects_preexisting_worktree_on_wrong_branch(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    repository = tmp_path / "repository"
+    _init_repository(repository)
+    _git(repository, "branch", "fix/expected")
+    _git(
+        repository,
+        "update-ref",
+        "refs/remotes/origin/fix/expected",
+        "refs/heads/fix/expected",
+    )
+    worktree = repository / ".worktrees" / "TASK-906"
+    _git(repository, "worktree", "add", "-q", "-b", "fix/actual", str(worktree), "main")
+    payload = dispatcher._worktree_tuple(  # noqa: SLF001
+        tmp_path,
+        {
+            "repository_path": str(repository),
+            "worktree_path": str(worktree),
+            "branch": "fix/expected",
+            "base_ref": "origin/fix/expected",
+            "adopt_existing_branch": True,
+        },
+        default_worktree="unused",
+        default_branch="unused",
+    )
+
+    assert dispatcher._ensure_worktree(tmp_path, payload) is False  # noqa: SLF001
+    assert "worktree branch mismatch" in capsys.readouterr().err
+
+
+def test_adoption_requires_complete_structured_tuple() -> None:
+    with pytest.raises(SystemExit, match="requires a complete structured worktree tuple"):
+        dispatcher._worktree_tuple(  # noqa: SLF001
+            Path.cwd(),
+            {"adopt_existing_branch": True},
+            default_worktree=".worktrees/TASK-907",
+            default_branch="fix/task-907",
+        )
+
+
+def test_plan_treats_explicit_false_adoption_as_legacy_default(tmp_path: Path) -> None:
+    taskset = "TASKSET-DYNAMIC-ADOPT-FALSE"
+    task_id = "TASK-907"
+    _write_taskset(tmp_path, taskset, tasks=[task_id])
+    _write_task(tmp_path, task_id, taskset)
+    _write_unit(tmp_path, task_id, adopt_existing_branch=False)
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["adopt_existing_branch"] is False
+    assert payload["worktree_path"] == f".worktrees/{task_id}"
+
+
+def test_plan_rejects_non_boolean_adoption_flag(tmp_path: Path) -> None:
+    taskset = "TASKSET-DYNAMIC-ADOPT-INVALID"
+    task_id = "TASK-908"
+    _write_taskset(tmp_path, taskset, tasks=[task_id])
+    _write_task(tmp_path, task_id, taskset)
+    _write_unit(tmp_path, task_id, adopt_existing_branch="invalid")
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 1
+    assert "adopt_existing_branch must be a boolean" in (result.stderr or result.stdout)
 
 
 @pytest.mark.parametrize("missing", ["repository_path", "worktree_path", "branch", "base_ref"])
@@ -403,11 +986,10 @@ def test_plan_rejects_unsafe_structured_worktree_tuple(
     metadata: dict[str, str],
     message: str,
 ) -> None:
-    # Keep the fixture absolute on both POSIX and Windows. ``/tmp/...`` is a
-    # relative drive-root path to pathlib.WindowsPath, which otherwise makes
-    # every case fail at the first repository_path check.
+    repository = str((tmp_path / "repository").resolve())
+    outside = str((tmp_path / "outside").resolve())
     metadata = {
-        key: str(tmp_path / Path(value).relative_to("/tmp")) if value.startswith("/tmp/") else value
+        key: value.replace("/tmp/repository", repository).replace("/tmp/outside", outside)
         for key, value in metadata.items()
     }
     task_set_id = "TASKSET-DYNAMIC-UNSAFE"
