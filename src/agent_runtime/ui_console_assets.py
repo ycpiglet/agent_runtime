@@ -267,7 +267,10 @@ HTML = """<!doctype html>
           <span class="cockpit-total" id="inbox-total" aria-live="polite"></span>
         </header>
         <div class="cockpit-grid" id="inbox-groups" role="list"></div>
-        <p class="cockpit-empty" id="inbox-empty" hidden data-i18n="cockpit.empty">Nothing needs you right now.</p>
+        <p class="cockpit-empty" id="inbox-empty" hidden>
+          <span data-i18n="cockpit.empty">Nothing needs you right now.</span>
+          <span class="cockpit-empty-asof" id="inbox-empty-asof"></span>
+        </p>
       </section>
       <div id="inbox-detail-backdrop" class="inbox-detail-backdrop" hidden></div>
       <aside id="inbox-detail-drawer" class="inbox-detail-drawer" role="dialog" aria-modal="true"
@@ -1746,6 +1749,16 @@ h1 {
   margin-top: var(--space-sm-half);
   color: var(--muted);
   font-size: var(--font-size-ui-13);
+}
+/* TASK-AR-602: freshness badge turns amber only when the snapshot nears the
+   server TTL backstop; a quiet, recent console stays muted (calm by default). */
+#status-line.is-stale {
+  color: var(--warning);
+  font-weight: 600;
+}
+.cockpit-empty-asof {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 .toolbar {
   display: flex;
@@ -7681,6 +7694,11 @@ function renderCockpit(data) {
   }
   const empty = $("inbox-empty");
   if (empty) empty.hidden = total > 0;
+  // TASK-AR-602: stamp the reference time so an empty cockpit reads as
+  // "nothing to do as of HH:MM:SS", never an ambiguous stale/blank screen.
+  const emptyAsOf = $("inbox-empty-asof");
+  // Middot via char code to keep this JS block ASCII-only (see AR-341 guard).
+  if (emptyAsOf) emptyAsOf.textContent = " " + String.fromCharCode(183) + " " + t("cockpit.empty.asof") + " " + freshnessClock();
   grid.hidden = total === 0;
   grid.innerHTML = "";
   const groups = (data && data.groups) || {};
@@ -8869,6 +8887,35 @@ function handleListKeyboardNav(event) {
   }
 }
 
+// TASK-AR-602: freshness of the assembled snapshot. built_at is fixed for the
+// life of a cached build (generated_at re-stamps every poll), so its age is the
+// real "how current is this data" signal. Watch color only near the server TTL
+// backstop (300s) -- a quiet system with recent data must stay calm.
+const FRESHNESS_STALE_SECONDS = 240;
+
+function parseIsoDate(value) {
+  if (!value) return null;
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function freshnessAgeText(seconds) {
+  if (seconds < 5) return t("status.age_now");
+  if (seconds < 90) return Math.round(seconds) + t("status.age_seconds_suffix");
+  return Math.round(seconds / 60) + t("status.age_minutes_suffix");
+}
+
+function stateFreshness() {
+  const built = parseIsoDate(runtimeState.built_at || runtimeState.generated_at);
+  const ageSec = built ? Math.max(0, (Date.now() - built.getTime()) / 1000) : 0;
+  return { built, ageSec, stale: built ? ageSec >= FRESHNESS_STALE_SECONDS : false };
+}
+
+function freshnessClock() {
+  const f = stateFreshness();
+  return f.built ? f.built.toLocaleTimeString() : "--:--:--";
+}
+
 function renderDashboard() {
   const tasks = runtimeState.tasks || [];
   const counts = taskCounts(tasks);
@@ -8876,7 +8923,17 @@ function renderDashboard() {
   setText("metric-active", counts.active);
   setText("metric-blocked", counts.blocked);
   setText("metric-warnings", (runtimeState.warnings || []).length + (runtimeState.gaps || []).length);
-  $("status-line").textContent = t("status.generated_prefix") + " " + runtimeState.generated_at + " - " + tasks.length + " " + t("status.tasks_suffix");
+  const line = $("status-line");
+  if (line) {
+    const f = stateFreshness();
+    let text = t("status.freshness_prefix") + " " + freshnessClock()
+      + " (" + freshnessAgeText(f.ageSec) + ") - " + tasks.length + " " + t("status.tasks_suffix");
+    if (f.stale) text += " - " + t("status.stale_note");
+    line.textContent = text;
+    line.classList.toggle("is-stale", f.stale);
+    line.setAttribute("title", t("status.generated_prefix") + " " + (runtimeState.generated_at || "")
+      + (runtimeState.source_latest_at ? " / src " + runtimeState.source_latest_at : ""));
+  }
 }
 
 function renderTaskSets() {

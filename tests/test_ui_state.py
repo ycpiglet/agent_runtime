@@ -3307,3 +3307,37 @@ def test_build_state_exposes_org_chart_resource(tmp_path):
     assert state["org_chart"]["root"]["id"] == "managing-partner"
     payload = ui_state.build_resource(tmp_path, "org_chart", now="2026-06-21T00:00:00+09:00")
     assert payload["resource"] == "org_chart"
+
+
+def test_state_signature_tracks_messages_outbox_and_status(tmp_path):
+    # TASK-AR-602: edits to the attention/outbox/STATUS surfaces must bust the
+    # cache signature; before the fix these were blind spots (up to 300s stale).
+    base = ui_state._state_signature(tmp_path)
+    _write(tmp_path / "STATUS.md", "# status\n")
+    after_status = ui_state._state_signature(tmp_path)
+    assert after_status != base
+
+    _write(tmp_path / ".ui_outbox" / "COMMAND-1.json", "{}\n")
+    after_outbox = ui_state._state_signature(tmp_path)
+    assert after_outbox != after_status
+
+    _write(tmp_path / "agents" / "messages" / "m-1.json", "{}\n")
+    after_messages = ui_state._state_signature(tmp_path)
+    assert after_messages != after_outbox
+
+
+def test_source_latest_iso_empty_then_stamped(tmp_path):
+    assert ui_state._source_latest_iso(tmp_path) == ""
+    _write(tmp_path / "STATUS.md", "# status\n")
+    stamped = ui_state._source_latest_iso(tmp_path)
+    assert stamped and stamped[0].isdigit()
+
+
+def test_build_state_exposes_built_at_and_source_latest_at(tmp_path):
+    # built_at marks assembly time (fixed across cache hits); source_latest_at is
+    # when the underlying records last changed. Both feed the freshness badge.
+    _write(tmp_path / "reviews" / "REVIEW-x.md", "# r\n")
+    state = ui_state.build_state(tmp_path, now="2026-07-22T18:00:00+09:00")
+    assert state["built_at"] == "2026-07-22T18:00:00+09:00"
+    assert state["generated_at"] == "2026-07-22T18:00:00+09:00"
+    assert state["source_latest_at"]

@@ -74,7 +74,7 @@
         {
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-22-decision-console-overhaul-masterplan.md",
-          "value": "8c3bf9c7caec90acd6b8a503c161b7db35876520a6dcb1040ff232970588ab3e"
+          "value": "f7de61b717e85116f7b1d76b594303b22a43d1f4ec434d08b79efb80a20e79dd"
         },
         {
           "kind": "sha256",
@@ -118,7 +118,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-22-decision-console-overhaul-masterplan.md",
-      "recorded_at": "2026-07-22T17:45:27+09:00",
+      "recorded_at": "2026-07-22T17:54:56+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-CONSOLE-OVERHAUL-P0"
     },
@@ -554,5 +554,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-22T17:45:34+09:00"
+  "updated_at": "2026-07-22T17:54:56+09:00"
 }

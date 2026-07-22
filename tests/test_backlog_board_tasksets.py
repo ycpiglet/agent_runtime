@@ -341,4 +341,11 @@ def test_real_backlog_tasks_are_classified_into_registered_task_sets() -> None:
         "TASKSET-AR-AUTO-MERGE-INTEGRITY",
         "TASKSET-AR-VISUAL-ASSET-ADOPTION",
         "TASKSET-AR-VISUAL-SYSTEM-INTEGRATION",
+        # Pre-existing: TASK-AR-601's taskset predates this session but was never
+        # added to this golden set (base main already failed this assertion).
+        "TASKSET-AR-HOOK-PORTABILITY-CLEANUP",
+        # Decision Console Overhaul (this session).
+        "TASKSET-AR-CONSOLE-OVERHAUL-P0",
+        "TASKSET-AR-CONSOLE-OVERHAUL-P1",
+        "TASKSET-AR-CONSOLE-OVERHAUL-P2",
     }

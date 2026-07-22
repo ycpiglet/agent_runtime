@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-CONSOLE-OVERHAUL-P0
 initiative_id: INIT-AR-CONSOLE-OVERHAUL-P0
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-22T17:45:27+09:00
-updated_at: 2026-07-22T17:45:27+09:00
+updated_at: 2026-07-22T18:04:06+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-22-decision-console-overhaul-masterplan.md
 created_by: claude-session-overhaul-planner
@@ -41,6 +41,10 @@ verification:
   - python -m pytest tests/test_ui_state.py tests/test_ui_console.py -q
 handoff: 변경 요약 + 신규 테스트 통과 로그를 W4a 리포트로 남기고, 보드 generated_at 초 단위화(A1-1 잔여)를 후속 스텝으로 명시한다.
 stop_condition: 홈 레이아웃 전면 재구성(A1-2)이나 attention 로직 통합(A1-3)으로 범위를 넓히지 말 것 — 그것은 P1이다.
+verified_at: 2026-07-22T18:04:06+09:00
+verified_by: work.py verify
+evidence_refs:
+  - reviews/VERIFY-2026-07-22-unit-task-ar-602-001-20260722180406.json
 ---
 
 # UNIT-TASK-AR-602-001 - 상태 시그니처 감시 디렉터리 확장 + 홈 신선도 배지 배선

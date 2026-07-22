@@ -2390,6 +2390,7 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     },
     "cockpit.title": {"ko": "지금 필요한 일", "en": "What needs you now"},
     "cockpit.empty": {"ko": "지금 필요한 항목이 없습니다.", "en": "Nothing needs you right now."},
+    "cockpit.empty.asof": {"ko": "기준", "en": "as of"},
     "cockpit.total.clear": {"ko": "모두 정상", "en": "all clear"},
     "cockpit.total.one": {"ko": "1개 항목 확인 필요", "en": "1 item needs attention"},
     "cockpit.total.many_suffix": {"ko": "개 항목 확인 필요", "en": "items need attention"},
@@ -2548,6 +2549,12 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     },
     "status.generated_prefix": {"ko": "생성됨", "en": "Generated"},
     "status.tasks_suffix": {"ko": "개 작업", "en": "tasks"},
+    # TASK-AR-602: freshness badge on the topbar status line.
+    "status.freshness_prefix": {"ko": "데이터 기준", "en": "Data as of"},
+    "status.age_now": {"ko": "방금", "en": "just now"},
+    "status.age_seconds_suffix": {"ko": "초 전", "en": "s ago"},
+    "status.age_minutes_suffix": {"ko": "분 전", "en": "m ago"},
+    "status.stale_note": {"ko": "갱신 지연", "en": "update lagging"},
     # toast copy
     "toast.undo": {"ko": "실행 취소", "en": "Undo"},
     "toast.taskset_action_prefix": {"ko": "태스크셋", "en": "taskset"},
@@ -8120,35 +8127,67 @@ _STATE_SIG_DIRS = (
     "agents/runtime",
     "agents/project",
     "reviews",
+    # TASK-AR-602: the attention inbox and command-outbox surfaces feed the home
+    # cockpit; without them here an edit to a queued command or agent message did
+    # not bust the cache, so a "quiet" home could be up to _STATE_TTL_BACKSTOP
+    # seconds stale with no way to tell. Non-existent dirs are skipped below.
+    "agents/messages",
+    ".ui_outbox",
 )
+# Single files (not directories) that must also bust the cache when edited.
+_STATE_SIG_FILES = ("STATUS.md",)
 
 
-def _state_signature(root_path: Path) -> tuple:
-    """Cheap change-detector: (rel, file count, latest mtime) per source dir.
-
-    os.walk + os.stat (no pathlib object churn) so this stays ~0.3s even over the
-    whole runtime/project/reviews tree -- two orders of magnitude under a rebuild.
-    Any add/remove/edit under these dirs changes the tuple and busts the cache.
-    """
-    parts: list[tuple[str, int, float]] = []
+def _iter_source_mtimes(root_path: Path):
+    """Yield mtimes for every watched source file (dirs walked, files stat'd)."""
     for rel in _STATE_SIG_DIRS:
         base = root_path / rel
         if not base.exists():
             continue
-        count = 0
-        latest = 0.0
         for dirpath, dirnames, filenames in os.walk(base):
             dirnames[:] = [d for d in dirnames if d not in ("__pycache__", ".git", "node_modules")]
             for filename in filenames:
-                count += 1
                 try:
-                    mtime = os.stat(os.path.join(dirpath, filename)).st_mtime
+                    yield rel, os.stat(os.path.join(dirpath, filename)).st_mtime
                 except OSError:
                     continue
-                if mtime > latest:
-                    latest = mtime
-        parts.append((rel, count, round(latest, 3)))
-    return tuple(parts)
+    for rel in _STATE_SIG_FILES:
+        path = root_path / rel
+        try:
+            yield rel, path.stat().st_mtime
+        except OSError:
+            continue
+
+
+def _state_signature(root_path: Path) -> tuple:
+    """Cheap change-detector: (rel, file count, latest mtime) per source.
+
+    os.walk + os.stat (no pathlib object churn) so this stays ~0.3s even over the
+    whole runtime/project/reviews tree -- two orders of magnitude under a rebuild.
+    Any add/remove/edit under these sources changes the tuple and busts the cache.
+    """
+    counts: dict[str, int] = {}
+    latest: dict[str, float] = {}
+    for rel, mtime in _iter_source_mtimes(root_path):
+        counts[rel] = counts.get(rel, 0) + 1
+        if mtime > latest.get(rel, 0.0):
+            latest[rel] = mtime
+    return tuple((rel, counts[rel], round(latest[rel], 3)) for rel in sorted(counts))
+
+
+def _source_latest_iso(root_path: Path) -> str:
+    """ISO timestamp of the newest watched source file, or "" when none exist.
+
+    Surfaced as ``source_latest_at`` so the console can show when the underlying
+    records last changed, independent of when the response was assembled.
+    """
+    latest = 0.0
+    for _rel, mtime in _iter_source_mtimes(root_path):
+        if mtime > latest:
+            latest = mtime
+    if latest <= 0.0:
+        return ""
+    return datetime.fromtimestamp(latest, timezone.utc).astimezone().isoformat(timespec="seconds")
 
 
 def build_state(root: Path | str, now: str | None = None) -> dict[str, Any]:
@@ -8301,6 +8340,12 @@ def _build_state_uncached(root: Path | str, now: str | None = None) -> dict[str,
     i18n = build_i18n(generated_at)
     state: dict[str, Any] = {
         "generated_at": generated_at,
+        # TASK-AR-602: built_at marks when this snapshot was actually assembled.
+        # Unlike generated_at (re-stamped to "now" on every cache hit) it stays
+        # fixed for the life of a cached build, so the console can show real cache
+        # age. source_latest_at is when the underlying records last changed.
+        "built_at": generated_at,
+        "source_latest_at": _source_latest_iso(root_path),
         "sources": sources,
         "tasks": tasks,
         "agents": agents,
