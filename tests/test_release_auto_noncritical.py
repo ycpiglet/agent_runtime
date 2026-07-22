@@ -30,7 +30,8 @@ _SENSITIVE_ASSIGNMENT_RE = re.compile(
     r"(?i)\b(password|passwd|token|access[_-]?token|secret|authorization)"
     r"\s*[:=]\s*[^\r\n]*"
 )
-_FIXTURE_GIT_MAX_ATTEMPTS = 3
+_FIXTURE_GIT_RETRY_DELAYS = (0.1, 0.2, 0.4, 0.8, 1.0)
+_FIXTURE_GIT_MAX_ATTEMPTS = len(_FIXTURE_GIT_RETRY_DELAYS) + 1
 
 
 def _sanitize_git_diagnostic(value: str) -> str:
@@ -80,7 +81,7 @@ def _git(repo: Path, *args: str, env: dict[str, str] | None = None) -> None:
             or not _is_retryable_fixture_commit_failure(command, result)
         ):
             break
-        time.sleep(0.05 * attempts)
+        time.sleep(_FIXTURE_GIT_RETRY_DELAYS[attempts - 1])
 
     if result.returncode != 0:
         rendered_command = subprocess.list2cmdline(
@@ -151,7 +152,7 @@ def test_git_recovers_one_transient_fixture_commit_head_parse_failure(
     _git(tmp_path, "commit", "--allow-empty", "-q", "-m", "chore: tick 36")
 
     assert attempts == 2
-    assert sleeps == [0.05]
+    assert sleeps == [0.1]
 
 
 def test_git_recovers_after_three_transient_fixture_commit_head_parse_failures(
@@ -203,9 +204,10 @@ def test_git_exhausts_recognized_fixture_commit_head_parse_failure(
     with pytest.raises(AssertionError) as caught:
         _git(tmp_path, "commit", "--allow-empty", "-q", "-m", "chore: tick 36")
 
-    assert attempts == 3
-    assert sleeps == [0.05, 0.1]
-    assert "attempts: 3" in str(caught.value)
+    assert attempts == 6
+    assert sleeps == [0.1, 0.2, 0.4, 0.8, 1.0]
+    assert sum(sleeps) == 2.5
+    assert "attempts: 6" in str(caught.value)
     assert "fatal: could not parse HEAD" in str(caught.value)
 
 
@@ -281,13 +283,80 @@ def test_git_stops_when_retryable_failure_is_followed_by_ambiguous_failure(
         _git(tmp_path, "commit", "--allow-empty", "-m", "x")
 
     assert responses == []
-    assert sleeps == [0.05]
+    assert sleeps == [0.1]
     assert "attempts: 2" in str(caught.value)
     assert "fatal: detected dubious ownership" in str(caught.value)
 
 
 def _commit(repo: Path, subject: str, *, env: dict[str, str] | None = None) -> None:
     _git(repo, "commit", "--allow-empty", "-q", "-m", subject, env=env)
+
+
+def test_git_real_fixture_commit_after_three_transients_advances_head_once(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git(repo, "init", "-q", "-b", "main")
+    _git(repo, "config", "user.email", "test@example.com")
+    _git(repo, "config", "user.name", "Test")
+    _git(repo, "config", "commit.gpgsign", "false")
+    _commit(repo, "chore: init")
+
+    actual_run = subprocess.run
+    transient_failures = 3
+    commit_attempts = 0
+    sleeps: list[float] = []
+
+    def _run(command, **kwargs):
+        nonlocal transient_failures, commit_attempts
+        if command[1:2] == ["commit"]:
+            commit_attempts += 1
+            if transient_failures:
+                transient_failures -= 1
+                return subprocess.CompletedProcess(
+                    command,
+                    returncode=128,
+                    stdout="",
+                    stderr="fatal: could not parse HEAD\n",
+                )
+        return actual_run(command, **kwargs)
+
+    before = int(
+        actual_run(
+            ["git", "rev-list", "--count", "HEAD"],
+            cwd=repo,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+    )
+    monkeypatch.setattr(subprocess, "run", _run)
+    monkeypatch.setattr(time, "sleep", sleeps.append)
+
+    _commit(repo, "chore: tick 36")
+
+    after = int(
+        actual_run(
+            ["git", "rev-list", "--count", "HEAD"],
+            cwd=repo,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+    )
+    subjects = actual_run(
+        ["git", "log", "--format=%s"],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+    assert commit_attempts == 4
+    assert transient_failures == 0
+    assert sleeps == [0.1, 0.2, 0.4]
+    assert after - before == 1
+    assert subjects.count("chore: tick 36") == 1
 
 
 def _make_repo(tmp_path: Path, *, version: str = "0.2.0", triggered: bool = True) -> Path:
