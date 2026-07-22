@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-07-22
-archived_count: 267
+archived_count: 268
 ---
 
 # Archived Task Files
 
-- `267` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `268` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -254,6 +254,7 @@ archived_count: 267
 | `TASK-AR-564` | `30fd8b46-ee5…` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | 2026-06-15T17:43:04+09:00 | 2026-06-15T20:30:00+09:00 | 2026-06-15T22:50:00+09:00 | 2026-06-15T22:50:00+09:00 | Serve the attention inbox at /api/inbox and replace the 80-screen home with the cockp… |
 | `TASK-AR-566` | `324b1b84-070…` | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | completed | 2026-06-15T17:43:04+09:00 | 2026-06-16T22:05:45+09:00 | 2026-06-16T22:21:17+09:00 | 2026-06-16T22:21:17+09:00 | Counts/summaries on screen; detail opens in a keyboard-accessible side drawer on clic… |
 | `TASK-AR-600` | `99ec8f63-17d…` | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | completed | 2026-07-19T10:34:25+09:00 | 2026-07-22T17:48:20+09:00 | 2026-07-22T20:03:01+09:00 | 2026-07-22T20:03:01+09:00 | Make auto_merge execute fail closed when GitHub rejects a merge and preserve success… |
+| `TASK-AR-603` | `c67cb336-d52…` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | completed | 2026-07-22T17:45:00+09:00 | 2026-07-22T20:10:11+09:00 | 2026-07-22T21:08:34+09:00 | 2026-07-22T21:08:34+09:00 | Close GitHub #299 by defining one case-compatible canonical task-ID contract used by… |
 | `TASK-AR-610` | `956cd4ea-419…` | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | completed | 2026-07-22T18:26:18+09:00 | 2026-07-22T18:27:20+09:00 | 2026-07-22T20:03:03+09:00 | 2026-07-22T20:03:03+09:00 | Make the existing TASK-AR-594 record satisfy the canonical work-item schema while pre… |
 | `TASK-AR-611` | `7dd220e9-1b3…` | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | completed | 2026-07-22T18:48:38+09:00 | 2026-07-22T18:49:10+09:00 | 2026-07-22T20:03:05+09:00 | 2026-07-22T20:03:05+09:00 | Make the real-backlog classification test recognize every taskset registered by the J… |
 | `TASK-AR-570` | `f004f017-f9e…` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | 2026-06-17T08:31:23+09:00 | 2026-06-17T08:35:06+09:00 | 2026-06-17T08:50:16+09:00 | 2026-06-17T08:50:16+09:00 | Create a deterministic baseline that identifies low-frequency agent roles, low-reuse… |

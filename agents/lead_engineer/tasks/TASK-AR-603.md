@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 registered_at: 2026-07-22T17:45:00+09:00
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T20:50:45+09:00
+started_at: 2026-07-22T20:10:11+09:00
+updated_at: 2026-07-22T21:08:34+09:00
 title: Unify canonical task ID producers and consumers
-status: planned
+status: completed
 priority: P0
 difficulty: L
 est_hours: 4
@@ -43,6 +44,11 @@ evidence_refs:
   - reviews/VERIFY-2026-07-22-task-ar-603-20260722202126.json
   - reviews/VERIFY-2026-07-22-task-ar-603-20260722203041.json
   - reviews/VERIFY-2026-07-22-task-ar-603-20260722205045.json
+resolution: done
+completed_at: 2026-07-22T21:08:34+09:00
+closed_by: codex-root
+actual_hours: 1.0
+actual_tokens: 50000
 ---
 
 # TASK-AR-603 - Unify canonical task ID producers and consumers
@@ -66,3 +72,17 @@ evidence_refs:
 
 - `python -m pytest tests/test_task_identity.py tests/test_taskset_dispatcher.py tests/test_conversation_work_audit.py -q`
 - `python scripts/regen_host_lock_if_needed.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-22T21:08:34+09:00`
+- Resolution: `done`
+- Actual hours: `1.0`
+- Actual tokens: `50000`
+- Closed by: `codex-root`
+- Evidence:
+  - `reviews/VERIFY-2026-07-22-task-ar-603-20260722202126.json`
+  - `reviews/VERIFY-2026-07-22-task-ar-603-20260722203041.json`
+  - `reviews/VERIFY-2026-07-22-task-ar-603-20260722205045.json`
+<!-- work-close:end -->

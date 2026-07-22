@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-22T20:03:08+09:00
+generated_at: 2026-07-22T21:08:34+09:00
 record_count: 418
 ---
 
@@ -435,8 +435,8 @@ record_count: 418
 | 25.1.1.1 | Unit 25.1.1.1 | unit | `UNIT-TASK-AR-601-001` | `TASK-AR-601` | completed | `agents/lead_engineer/tasks/units/TASK-AR-601/UNIT-TASK-AR-601-001.md` | UNIT-TASK-AR-601-001 - Repair overlay lifecycle artifacts and recursion guard |
 | 26 | Initiative 26 | initiative | `INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION` | - | active | `agents/project/initiatives/INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION.md` | July Release Impact Remediation |
 | 26.1 | Taskset 26.1 | taskset | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | `INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION` | active | `BACKLOG-BOARD.md` | Release Impact Remediator |
-| 26.1.1 | Task 26.1.1 | task | `TASK-AR-603` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-603.md` | Close GitHub #299 by defining one case-compatible canonical task-ID contract used by… |
-| 26.1.1.1 | Unit 26.1.1.1 | unit | `UNIT-TASK-AR-603-001` | `TASK-AR-603` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md` | UNIT-TASK-AR-603-001 - Adopt a shared canonical task-ID contract |
+| 26.1.1 | Task 26.1.1 | task | `TASK-AR-603` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | completed | `agents/lead_engineer/tasks/TASK-AR-603.md` | Close GitHub #299 by defining one case-compatible canonical task-ID contract used by… |
+| 26.1.1.1 | Unit 26.1.1.1 | unit | `UNIT-TASK-AR-603-001` | `TASK-AR-603` | completed | `agents/lead_engineer/tasks/units/TASK-AR-603/UNIT-TASK-AR-603-001.md` | UNIT-TASK-AR-603-001 - Adopt a shared canonical task-ID contract |
 | 26.1.2 | Task 26.1.2 | task | `TASK-AR-604` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-604.md` | Close GitHub #293 by separating normalized comparison aliases from the canonical stat… |
 | 26.1.2.1 | Unit 26.1.2.1 | unit | `UNIT-TASK-AR-604-001` | `TASK-AR-604` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-604/UNIT-TASK-AR-604-001.md` | UNIT-TASK-AR-604-001 - Separate task status normalization from persistence |
 | 26.1.3 | Task 26.1.3 | task | `TASK-AR-605` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | planned | `agents/lead_engineer/tasks/TASK-AR-605.md` | Close GitHub #294 by making the template W0 dashboard work when repository-only scrip… |
