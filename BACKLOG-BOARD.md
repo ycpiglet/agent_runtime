@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-07-23
-task_count: 278
+task_count: 279
 open_count: 6
-completed_count: 272
+completed_count: 273
 task_set_count: 5
-completed_task_set_count: 51
+completed_task_set_count: 52
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `6` open or active tasks; `272` completed tasks are archived from this live board.
+- Summary: `6` open or active tasks; `273` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `6` / Ask `0` / Review `0` / Later `0` / Done `272`.
-- Task Sets: `5` active workflows; `51` completed workflows are hidden from the live action board.
+- Status: Action `6` / Ask `0` / Review `0` / Later `0` / Done `273`.
+- Task Sets: `5` active workflows; `52` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -70,15 +70,6 @@ completed_task_set_count: 51
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-612` | INIT-AR-TERMINAL-STATUS-START-GUARD | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-612/UNIT-TASK-AR-612-001.md | planned | Action | P1 | High | Low | 1h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Make closed/released tasks and their registered Korean aliases terminal in taskset se… |
 
-### Release Cadence Query Recovery (`TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY`)
-
-- Flow: Harden the cadence query boundary and prove release-auto fails loud on exhausted transient queries while preserving genuine no-tag behavior.
-- Progress: `0/1` done; `1` open or active.
-- WIP: active `1/3`; oldest `1.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-613` | INIT-AR-RELEASE-CADENCE-QUERY-RECOVERY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-613/UNIT-TASK-AR-613-001.md | planned | Action | P0 | Critical | Medium | 2h/8000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Close GitHub issue 316 by preventing a valid tagged cadence from collapsing into rele… |
-
 ### Self-Eval Query Integrity (`TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY`)
 
 - Flow: Make self-eval fail loud and preserve structured evidence whenever its shared Git queries exhaust retries.
@@ -87,6 +78,15 @@ completed_task_set_count: 51
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-614` | INIT-AR-SELF-EVAL-QUERY-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-614/UNIT-TASK-AR-614-001.md | planned | Action | P0 | Critical | Medium | 2h/7000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Close GitHub issue 318 by preventing self-eval from converting exhausted Git queries… |
+
+### Release-Auto Fixture HEAD Recovery (`TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY`)
+
+- Flow: Make the release-auto test fixture resilient to a proven pre-commit HEAD parse transient without hiding deterministic Git failures.
+- Progress: `0/1` done; `1` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-615` | INIT-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-615/UNIT-TASK-AR-615-001.md | planned | Action | P0 | Critical | Low | 1h/4500tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Close GitHub issue 320 by making the release-auto fixture recover from the observed t… |
 
 ## Archived Task Sets
 
@@ -144,14 +144,15 @@ completed_task_set_count: 51
 | Noncritical Release Auto-Execution (`TASKSET-AR-RELEASE-AUTO-NONCRITICAL`) | Fix the stale release execution gate (parameterize the hardcoded v0.1.8) and wire a cadence-bound auto-release path that runs the agent-council vote, gates, tag, and push for noncritical releases on green main CI, while keeping major/breaking/critical releases Owner-gated. Correct the release-conductor skill doc to match the implemented tier rule. | `2/2` done | `2` completed task files archived |
 | Visual Asset Adoption (`TASKSET-AR-VISUAL-ASSET-ADOPTION`) | Implement the research-backed visual upgrade: DiceBear CC0 seeded agent avatars with role accents; Dagre+d3-force graph rendering for dependency/state-machine/live-agent views; Geist OFL fonts; Lucide icons; unDraw state illustrations; Radix+Carbon data-viz palette tokens and sparklines. Permissive-only, no-build, self-hosted, token-driven, landed experimental. | `4/4` done | `4` completed task files archived |
 | Visual System Integration & Verification (`TASKSET-AR-VISUAL-SYSTEM-INTEGRATION`) | Wire the new visual components into every relevant live view, boot-verify the served console, fix integration gaps, and run a WCAG AA + responsive pass on the new visual system. Permissive, no-build, token-driven. | `2/2` done | `2` completed task files archived |
+| Release Cadence Query Recovery (`TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY`) | Harden the cadence query boundary and prove release-auto fails loud on exhausted transient queries while preserving genuine no-tag behavior. | `1/1` done | `1` completed task files archived |
 
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
 - Active: `6` open across `5` task sets (see Action Board above).
-- Archived task sets: `51` (see Archived Task Sets above).
-- Archived task files: `272` — see `ARCHIVE-INDEX.md`.
+- Archived task sets: `52` (see Archived Task Sets above).
+- Archived task files: `273` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

@@ -1,26 +1,21 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-23T01:42:58+09:00
+updated_at: 2026-07-23T03:14:12+09:00
 updated_by: codex-root
 current_state:
-  summary: "TASK-AR-613 is active to close the release-auto false not-triggered defect before resuming TASK-AR-608."
-  status: active
-  task_set_status: in_progress
-  task_set_id: "TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY"
+  summary: "TASK-AR-613 and GitHub #316 are closed; TASK-AR-615 is next to recover the post-merge release-auto fixture HEAD transient before TASK-AR-614 and TASK-AR-608."
+  status: ready
+  task_set_status: planned
+  task_set_id: "TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY"
   step_index: 1
   step_total: 1
-  progress_pct: 5
-  status_text: "TASK-AR-613 is claimed; transient non-zero cadence query recovery is under verification."
+  progress_pct: 0
+  status_text: "TASK-AR-615 is registered and worker-ready after main run 29945156772 exposed a transient fixture commit failure."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260723-012541-task-ar-613-e3a0
-      agent_role: lead-engineer
-      agent_instance_id: codex-root-task-ar-613
-      display_name: lead_engineer@orchestrator-01
-      callsite_id: codex-root-20260723
+  current_agents: []
   current_teams: []
 resume:
-  active_task: TASK-AR-613
-  active_task_set: "TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY"
+  active_task: TASK-AR-615
+  active_task_set: "TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
