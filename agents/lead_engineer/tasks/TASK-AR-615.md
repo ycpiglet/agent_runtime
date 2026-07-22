@@ -30,6 +30,10 @@ summary: Bound retry recovery to the observed `fatal: could not parse HEAD` fixt
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python -m pytest tests/test_release_auto_noncritical.py tests/test_release_cadence_trigger.py -q
+  - python -m pytest tests/test_backlog_board_tasksets.py -q
+  - python scripts/taskset_work_gate.py --check
 tags:
   - github-320
   - ci-flake
