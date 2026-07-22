@@ -321,10 +321,15 @@ def test_swallowed_error_is_visible_on_stdout(tmp_path: Path, monkeypatch) -> No
 # --------------------------------------------------------------------------- #
 def _load_module():
     import importlib.util
+    import types
 
     spec = importlib.util.spec_from_file_location("release_cadence_trigger_query_errors", SCRIPT)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
+    # The imported module initially holds the process-global subprocess module.
+    # Give query-error tests a private facade so monkeypatching its run callable
+    # cannot leak into unrelated subprocess-based tests in collection order.
+    module.subprocess = types.SimpleNamespace(run=subprocess.run)
     return module
 
 
