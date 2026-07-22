@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY
 registered_at: 2026-07-23T02:23:56+09:00
 created_at: 2026-07-23T02:23:56+09:00
-updated_at: 2026-07-23T04:27:22+09:00
+updated_at: 2026-07-23T04:36:08+09:00
 started_at: 2026-07-23T04:27:22+09:00
 title: Reject partial self-eval metrics after exhausted Git queries
 status: in_progress
@@ -40,6 +40,11 @@ tags:
   - self-eval
   - git-query
   - data-integrity
+verification_status: passed
+verified_at: 2026-07-23T04:36:08+09:00
+verified_by: codex-root-task-ar-614
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-task-ar-614-20260723043608.json
 ---
 
 # TASK-AR-614 - Reject partial self-eval metrics after exhausted Git queries

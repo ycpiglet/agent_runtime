@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY
 initiative_id: INIT-AR-SELF-EVAL-QUERY-INTEGRITY
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: pending
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-23T02:23:56+09:00
-updated_at: 2026-07-23T04:27:22+09:00
+updated_at: 2026-07-23T04:39:28+09:00
 started_at: 2026-07-23T04:27:22+09:00
 origin_type: review_finding
 origin_ref: reviews/REVIEW-2026-07-23-self-eval-query-integrity-plan.md
@@ -48,6 +48,10 @@ verification:
   - python scripts/taskset_work_gate.py --check
 handoff: Report failure-first evidence by query type, state isolation behavior, error schema and CLI output, successful/no-tag compatibility, cross-consumer regression results, and independent W4b.
 stop_condition: Stop if truthful self-eval reporting requires changing cadence thresholds, version policy, or unrelated WORK-SCHEMA metric formulas.
+verified_at: 2026-07-23T04:39:28+09:00
+verified_by: codex-root-task-ar-614
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-unit-task-ar-614-001-20260723043928.json
 ---
 
 # UNIT-TASK-AR-614-001 - Propagate shared Git query errors through self-eval
