@@ -98,6 +98,14 @@ def test_executable_repair_is_noop_on_non_posix(tmp_path):
     assert hook.stat().st_mode == before
 
 
+def test_executable_repair_refuses_non_regular_hook(tmp_path):
+    hook = tmp_path / ".githooks" / "pre-commit"
+    hook.mkdir(parents=True)
+
+    assert lmd.repair_pre_commit_executable(tmp_path, posix=True) is False
+    assert lmd.is_pre_commit_executable(tmp_path, posix=True) is False
+
+
 def test_committed_post_merge_hook_invokes_driver():
     hook = ROOT / ".githooks" / "post-merge"
     assert hook.exists()

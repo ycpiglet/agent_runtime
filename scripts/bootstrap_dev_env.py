@@ -26,6 +26,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from lock_merge_driver import is_pre_commit_executable, repair_pre_commit_executable
+
 ROOT = Path(__file__).resolve().parent.parent
 HOOKS_DIR = ".githooks"
 
@@ -84,15 +86,29 @@ def check_editable_install(apply: bool) -> str:
 def check_hooks_path(apply: bool) -> str:
     rc, current = _run("git", "config", "core.hooksPath")
     normalized = current.replace("\\", "/").rstrip("/")
-    if rc == 0 and normalized.endswith(HOOKS_DIR):
-        return f"ok   hooksPath: {current}"
+    path_ready = rc == 0 and normalized.endswith(HOOKS_DIR)
+    hook_ready = is_pre_commit_executable(ROOT)
+    if path_ready and hook_ready:
+        return f"ok   hooksPath: {current}; pre-commit activation ready"
     if apply:
-        rc2, _ = _run("git", "config", "core.hooksPath", HOOKS_DIR)
-        if rc2 == 0:
-            return f"ok   hooksPath: set to {HOOKS_DIR} (was: {current or 'unset'})"
+        if not path_ready:
+            rc2, _ = _run("git", "config", "core.hooksPath", HOOKS_DIR)
+            path_ready = rc2 == 0
+        if not hook_ready:
+            try:
+                repair_pre_commit_executable(ROOT)
+            except OSError:
+                pass
+            hook_ready = is_pre_commit_executable(ROOT)
+        if path_ready and hook_ready:
+            changed = "" if normalized.endswith(HOOKS_DIR) else f" (was: {current or 'unset'})"
+            return f"ok   hooksPath: set to {HOOKS_DIR}{changed}; pre-commit activation ready"
+    hook_detail = ""
+    if not hook_ready:
+        hook_detail = "; pre-commit is not executable -> run: chmod +x .githooks/pre-commit"
     return (
         f"FIX  hooksPath: {current or 'unset'} -> gates/lock-regen will NOT run"
-        f" on local commits; run: git config core.hooksPath {HOOKS_DIR}"
+        f" on local commits; run: git config core.hooksPath {HOOKS_DIR}{hook_detail}"
     )
 
 

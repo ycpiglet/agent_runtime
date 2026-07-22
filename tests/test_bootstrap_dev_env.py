@@ -57,7 +57,7 @@ def test_apply_repairs_non_executable_pre_commit(monkeypatch) -> None:
     result = bootstrap.check_hooks_path(apply=True)
 
     assert result.startswith("ok   hooksPath:")
-    assert "pre-commit executable" in result
+    assert "pre-commit activation ready" in result
 
 
 def test_check_reports_non_executable_pre_commit(monkeypatch) -> None:
@@ -71,6 +71,27 @@ def test_check_reports_non_executable_pre_commit(monkeypatch) -> None:
     monkeypatch.setattr(bootstrap, "is_pre_commit_executable", lambda _root: False)
 
     result = bootstrap.check_hooks_path(apply=False)
+
+    assert result.startswith("FIX  hooksPath:")
+    assert "pre-commit is not executable" in result
+
+
+def test_apply_reports_fix_when_chmod_fails(monkeypatch) -> None:
+    monkeypatch.setattr(
+        bootstrap,
+        "_run",
+        lambda *args, **_kwargs: (0, ".githooks")
+        if args == ("git", "config", "core.hooksPath")
+        else (_ for _ in ()).throw(AssertionError(args)),
+    )
+    monkeypatch.setattr(bootstrap, "is_pre_commit_executable", lambda _root: False)
+    monkeypatch.setattr(
+        bootstrap,
+        "repair_pre_commit_executable",
+        lambda _root: (_ for _ in ()).throw(PermissionError("denied")),
+    )
+
+    result = bootstrap.check_hooks_path(apply=True)
 
     assert result.startswith("FIX  hooksPath:")
     assert "pre-commit is not executable" in result

@@ -30,6 +30,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -40,6 +42,7 @@ if str(REPO_ROOT / "src") not in sys.path:
 
 DRIVER_NAME = "arlock-keepours"
 LOCK_NAME = "agent_runtime.lock.json"
+PRE_COMMIT_HOOK = Path(".githooks") / "pre-commit"
 
 
 def _git(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess:
@@ -50,6 +53,57 @@ def _host_roots() -> list[Path]:
     """Every tracked agent_runtime.lock.json maps to a host root (its parent dir)."""
     out = _git("ls-files", f"*{LOCK_NAME}")
     return [REPO_ROOT / Path(p).parent for p in out.stdout.split() if p.strip()]
+
+
+def _uses_posix_modes(posix: bool | None) -> bool:
+    return os.name != "nt" if posix is None else posix
+
+
+def is_pre_commit_executable(
+    repo_root: Path | None = None,
+    *,
+    posix: bool | None = None,
+) -> bool:
+    """Return whether the configured hook is ready for POSIX Git execution.
+
+    Windows does not use POSIX execute bits, so it is ready without chmod.
+    Symlinks and other non-regular entries are rejected to avoid chmod outside
+    the checkout through a crafted hook path.
+    """
+    if not _uses_posix_modes(posix):
+        return True
+    hook = Path(repo_root or REPO_ROOT) / PRE_COMMIT_HOOK
+    try:
+        mode = hook.lstat().st_mode
+    except OSError:
+        return False
+    return stat.S_ISREG(mode) and bool(mode & stat.S_IXUSR)
+
+
+def repair_pre_commit_executable(
+    repo_root: Path | None = None,
+    *,
+    posix: bool | None = None,
+) -> bool:
+    """Idempotently add execute bits to a regular POSIX pre-commit hook.
+
+    Returns True only when the mode changed. Missing hooks and non-regular
+    entries are left untouched; chmod errors propagate to installer callers.
+    """
+    if not _uses_posix_modes(posix):
+        return False
+    hook = Path(repo_root or REPO_ROOT) / PRE_COMMIT_HOOK
+    try:
+        mode = hook.lstat().st_mode
+    except OSError:
+        return False
+    if not stat.S_ISREG(mode):
+        return False
+    desired = stat.S_IMODE(mode) | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
+    if stat.S_IMODE(mode) == desired:
+        return False
+    hook.chmod(desired)
+    return True
 
 
 def regenerate(host_root: Path) -> bool:
@@ -104,7 +158,7 @@ def post_merge() -> int:
     return 0
 
 
-def install(repo_root: Path | None = None) -> int:
+def install(repo_root: Path | None = None, *, posix: bool | None = None) -> int:
     """Register the keep-ours merge driver and activate the committed .githooks
     (which carry the post-merge regenerator). Idempotent."""
     cwd = repo_root or REPO_ROOT
@@ -115,7 +169,19 @@ def install(repo_root: Path | None = None) -> int:
     _cfg(f"merge.{DRIVER_NAME}.name", "Keep ours; the post-merge hook regenerates the lock")
     _cfg(f"merge.{DRIVER_NAME}.driver", "true")
     _cfg("core.hooksPath", ".githooks")
-    print(f"lock-merge-driver: installed merge.{DRIVER_NAME}=true + core.hooksPath=.githooks")
+    repaired = repair_pre_commit_executable(cwd, posix=posix)
+    if _uses_posix_modes(posix):
+        hook_state = "pre-commit executable"
+        if not is_pre_commit_executable(cwd, posix=posix):
+            hook_state = "pre-commit executable repair unavailable"
+        elif repaired:
+            hook_state += " (repaired)"
+    else:
+        hook_state = "pre-commit POSIX mode not required"
+    print(
+        f"lock-merge-driver: installed merge.{DRIVER_NAME}=true"
+        f" + core.hooksPath=.githooks; {hook_state}"
+    )
     return 0
 
 
