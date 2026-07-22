@@ -63,8 +63,8 @@ def test_regenerate_restores_stale_lock(tmp_path):
 
 def test_install_sets_driver_and_hookspath(tmp_path):
     subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
-    assert lmd.install(tmp_path) == 0
-    assert lmd.install(tmp_path) == 0  # idempotent
+    assert lmd.install(tmp_path, posix=False) == 0
+    assert lmd.install(tmp_path, posix=False) == 0  # idempotent
 
     def _cfg(key):
         return subprocess.run(["git", "config", "--get", key], cwd=tmp_path, capture_output=True, text=True).stdout.strip()
@@ -84,8 +84,46 @@ def test_install_repairs_pre_commit_executable_mode(tmp_path):
     assert lmd.install(tmp_path, posix=True) == 0
     assert stat.S_IMODE(hook.stat().st_mode) == 0o755
 
+    subprocess.run(
+        ["git", "config", "user.email", "hook-test@example.invalid"],
+        cwd=tmp_path,
+        check=True,
+    )
+    subprocess.run(["git", "config", "user.name", "Hook Test"], cwd=tmp_path, check=True)
+    marker = tmp_path / "hook-ran"
+    hook.write_text(f"#!/bin/sh\nprintf ran > '{marker.as_posix()}'\n", encoding="utf-8")
+    hook.chmod(0o644)
     assert lmd.install(tmp_path, posix=True) == 0
     assert stat.S_IMODE(hook.stat().st_mode) == 0o755
+    subprocess.run(["git", "commit", "--allow-empty", "-m", "hook probe"], cwd=tmp_path, check=True)
+    assert marker.read_text(encoding="utf-8") == "ran"
+
+
+def test_install_rejects_missing_posix_hook_before_configuring(tmp_path):
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+
+    assert lmd.install(tmp_path, posix=True) == 1
+    configured = subprocess.run(
+        ["git", "config", "--get", "core.hooksPath"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert configured.returncode != 0
+
+
+def test_install_rejects_non_regular_posix_hook_before_configuring(tmp_path):
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    (tmp_path / ".githooks" / "pre-commit").mkdir(parents=True)
+
+    assert lmd.install(tmp_path, posix=True) == 1
+    configured = subprocess.run(
+        ["git", "config", "--get", "core.hooksPath"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert configured.returncode != 0
 
 
 def test_executable_repair_is_noop_on_non_posix(tmp_path):
@@ -104,6 +142,46 @@ def test_executable_repair_refuses_non_regular_hook(tmp_path):
 
     assert lmd.repair_pre_commit_executable(tmp_path, posix=True) is False
     assert lmd.is_pre_commit_executable(tmp_path, posix=True) is False
+
+
+def test_executable_repair_refuses_linked_hooks_directory(tmp_path):
+    repo = tmp_path / "repo"
+    outside = tmp_path / "outside"
+    repo.mkdir()
+    outside.mkdir()
+    hook = outside / "pre-commit"
+    hook.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    before = hook.stat().st_mode
+    linked = repo / ".githooks"
+    if os.name == "nt":
+        subprocess.run(
+            ["cmd", "/c", "mklink", "/J", str(linked), str(outside)],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    else:
+        linked.symlink_to(outside, target_is_directory=True)
+
+    assert lmd.repair_pre_commit_executable(repo, posix=True) is False
+    assert lmd.is_pre_commit_executable(repo, posix=True) is False
+    assert hook.stat().st_mode == before
+
+
+def test_executable_repair_refuses_multi_link_hook(tmp_path):
+    repo = tmp_path / "repo"
+    hooks = repo / ".githooks"
+    hooks.mkdir(parents=True)
+    outside = tmp_path / "outside-hook"
+    outside.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    hook = hooks / "pre-commit"
+    os.link(outside, hook)
+    before = outside.stat().st_mode
+    assert hook.stat().st_nlink > 1
+
+    assert lmd.repair_pre_commit_executable(repo, posix=True) is False
+    assert lmd.is_pre_commit_executable(repo, posix=True) is False
+    assert outside.stat().st_mode == before
 
 
 def test_committed_post_merge_hook_invokes_driver():
