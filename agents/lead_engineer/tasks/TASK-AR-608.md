@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 registered_at: 2026-07-22T17:45:00+09:00
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T17:45:00+09:00
+updated_at: 2026-07-23T06:31:27+09:00
+started_at: 2026-07-23T06:31:27+09:00
 title: Preserve quoted hashes in frontmatter scalars
-status: planned
+status: in_progress
 priority: P1
 difficulty: M
 est_hours: 2
@@ -29,6 +30,9 @@ summary: Close GitHub #298 by making comment stripping quote-aware while preserv
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python -m pytest tests/test_backlog_board_tasksets.py -q
+  - python scripts/regen_host_lock_if_needed.py --check
 tags:
   - github-298
   - frontmatter

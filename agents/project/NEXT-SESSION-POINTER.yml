@@ -1,18 +1,24 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-23T06:19:39+09:00
+updated_at: 2026-07-23T06:31:27+09:00
 updated_by: codex-root
 current_state:
-  summary: "TASK-AR-616/#320 is merged, independently approved, green on main, released, and closed; TASK-AR-608/#298 is next."
+  summary: "TASK-AR-616/#320 is fully closed; TASK-AR-608/#298 is claimed after T3 plan revalidation."
   status: active
   task_set_status: in_progress
   task_set_id: "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION"
   step_index: 6
   step_total: 7
-  progress_pct: 71
-  status_text: "TASK-AR-608 is registered and next for T2 revalidation and claim-first quoted-hash parser remediation."
+  progress_pct: 72
+  status_text: "TASK-AR-608 is claimed; failure-first quoted-hash parser coverage is next."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260723-063127-task-ar-608-076c
+      agent_role: lead-engineer
+      agent_instance_id: codex-root-task-ar-608
+      display_name: lead_engineer@orchestrator-01
+      callsite_id: codex-root-20260723
+  current_teams:
+    - agent-runtime-core
 resume:
   active_task: TASK-AR-608
   active_task_set: "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION"
@@ -23,7 +29,8 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260723-063127-task-ar-608-076c.json
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
     active_claim: null

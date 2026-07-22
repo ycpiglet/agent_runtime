@@ -9,11 +9,12 @@ task_id: TASK-AR-608
 task_set_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 initiative_id: INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T17:45:00+09:00
+updated_at: 2026-07-23T06:31:27+09:00
+started_at: 2026-07-23T06:31:27+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
 created_by: codex-root-planner
