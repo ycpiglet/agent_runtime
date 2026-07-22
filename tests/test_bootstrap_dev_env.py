@@ -4,6 +4,9 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "bootstrap_dev_env.py"
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+
+import bootstrap_dev_env as bootstrap  # noqa: E402
 
 
 def _run(*extra: str) -> subprocess.CompletedProcess[str]:
@@ -29,6 +32,48 @@ def test_apply_never_blocks() -> None:
     # --apply may fix hooksPath but must still exit 0 regardless of state.
     result = _run("--apply")
     assert result.returncode == 0, result.stderr
+
+
+def test_apply_repairs_non_executable_pre_commit(monkeypatch) -> None:
+    state = {"executable": False}
+
+    def fake_run(*args: str, timeout: int = 30) -> tuple[int, str]:
+        if args == ("git", "config", "core.hooksPath"):
+            return 0, ".githooks"
+        raise AssertionError(args)
+
+    def repair(_root: Path) -> bool:
+        state["executable"] = True
+        return True
+
+    monkeypatch.setattr(bootstrap, "_run", fake_run)
+    monkeypatch.setattr(
+        bootstrap,
+        "is_pre_commit_executable",
+        lambda _root: state["executable"],
+    )
+    monkeypatch.setattr(bootstrap, "repair_pre_commit_executable", repair)
+
+    result = bootstrap.check_hooks_path(apply=True)
+
+    assert result.startswith("ok   hooksPath:")
+    assert "pre-commit executable" in result
+
+
+def test_check_reports_non_executable_pre_commit(monkeypatch) -> None:
+    monkeypatch.setattr(
+        bootstrap,
+        "_run",
+        lambda *args, **_kwargs: (0, ".githooks")
+        if args == ("git", "config", "core.hooksPath")
+        else (_ for _ in ()).throw(AssertionError(args)),
+    )
+    monkeypatch.setattr(bootstrap, "is_pre_commit_executable", lambda _root: False)
+
+    result = bootstrap.check_hooks_path(apply=False)
+
+    assert result.startswith("FIX  hooksPath:")
+    assert "pre-commit is not executable" in result
 
 
 def test_output_is_ascii_only() -> None:

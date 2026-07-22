@@ -6,9 +6,13 @@ and a post-merge hook regenerates the authoritative lock. RETRO-2026-06-14 actio
 """
 
 import json
+import os
+import stat
 import subprocess
 import sys
 from pathlib import Path
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -69,6 +73,31 @@ def test_install_sets_driver_and_hookspath(tmp_path):
     assert _cfg("core.hooksPath") == ".githooks"
 
 
+@pytest.mark.skipif(os.name == "nt", reason="POSIX execute bits are not represented by Windows chmod")
+def test_install_repairs_pre_commit_executable_mode(tmp_path):
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    hook = tmp_path / ".githooks" / "pre-commit"
+    hook.parent.mkdir()
+    hook.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    hook.chmod(0o644)
+
+    assert lmd.install(tmp_path, posix=True) == 0
+    assert stat.S_IMODE(hook.stat().st_mode) == 0o755
+
+    assert lmd.install(tmp_path, posix=True) == 0
+    assert stat.S_IMODE(hook.stat().st_mode) == 0o755
+
+
+def test_executable_repair_is_noop_on_non_posix(tmp_path):
+    hook = tmp_path / ".githooks" / "pre-commit"
+    hook.parent.mkdir()
+    hook.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    before = hook.stat().st_mode
+
+    assert lmd.repair_pre_commit_executable(tmp_path, posix=False) is False
+    assert hook.stat().st_mode == before
+
+
 def test_committed_post_merge_hook_invokes_driver():
     hook = ROOT / ".githooks" / "post-merge"
     assert hook.exists()
@@ -112,3 +141,19 @@ def test_committed_pre_commit_hooks_invoke_driver():
         ROOT / "src" / "agent_runtime" / "templates" / "project" / ".githooks" / "pre-commit",
     ):
         assert "lock_merge_driver.py pre-commit" in hook.read_text(encoding="utf-8"), hook
+
+
+def test_committed_pre_commit_hooks_are_tracked_executable():
+    paths = (
+        ".githooks/pre-commit",
+        "src/agent_runtime/templates/project/.githooks/pre-commit",
+    )
+    result = subprocess.run(
+        ["git", "ls-files", "-s", *paths],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    modes = {line.split(maxsplit=1)[0] for line in result.stdout.splitlines()}
+    assert modes == {"100755"}
