@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-07-23
-archived_count: 277
+archived_count: 278
 ---
 
 # Archived Task Files
 
-- `277` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `278` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -259,6 +259,7 @@ archived_count: 277
 | `TASK-AR-606` | `5ef12a21-e06…` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | completed | 2026-07-22T17:45:00+09:00 | 2026-07-22T23:17:20+09:00 | 2026-07-23T00:04:40+09:00 | 2026-07-23T00:04:40+09:00 | Close GitHub #295 by preserving executable hook activation in source and repairing it… |
 | `TASK-AR-607` | `7d42af70-4f7…` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | completed | 2026-07-22T17:45:00+09:00 | 2026-07-23T00:18:48+09:00 | 2026-07-23T01:01:01+09:00 | 2026-07-23T01:01:01+09:00 | Close GitHub #297 by isolating release-cadence transient-spawn recovery state so the… |
 | `TASK-AR-608` | `d8884a2d-8a9…` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | completed | 2026-07-22T17:45:00+09:00 | 2026-07-23T06:31:27+09:00 | 2026-07-23T07:07:32+09:00 | 2026-07-23T07:07:32+09:00 | Close GitHub #298 by making comment stripping quote-aware while preserving existing u… |
+| `TASK-AR-609` | `66ffb2ff-f4c…` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | completed | 2026-07-22T17:45:00+09:00 | 2026-07-23T07:17:12+09:00 | 2026-07-23T07:50:24+09:00 | 2026-07-23T07:50:24+09:00 | Close GitHub #300 by preventing taskset records from being duplicated into the initia… |
 | `TASK-AR-605` | `010bff90-0ad…` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | completed | 2026-07-22T17:45:00+09:00 | 2026-07-22T22:17:46+09:00 | 2026-07-22T23:02:22+09:00 | 2026-07-22T23:02:22+09:00 | Close GitHub #294 by making the template W0 dashboard work when repository-only scrip… |
 | `TASK-AR-610` | `956cd4ea-419…` | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | completed | 2026-07-22T18:26:18+09:00 | 2026-07-22T18:27:20+09:00 | 2026-07-22T20:03:03+09:00 | 2026-07-22T20:03:03+09:00 | Make the existing TASK-AR-594 record satisfy the canonical work-item schema while pre… |
 | `TASK-AR-611` | `7dd220e9-1b3…` | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | completed | 2026-07-22T18:48:38+09:00 | 2026-07-22T18:49:10+09:00 | 2026-07-22T20:03:05+09:00 | 2026-07-22T20:03:05+09:00 | Make the real-backlog classification test recognize every taskset registered by the J… |

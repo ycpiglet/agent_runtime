@@ -9,11 +9,11 @@ task_id: TASK-AR-609
 task_set_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 initiative_id: INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-23T07:31:44+09:00
+updated_at: 2026-07-23T07:50:22+09:00
 started_at: 2026-07-23T07:17:12+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
@@ -51,6 +51,11 @@ evidence_refs:
   - reviews/VERIFY-2026-07-23-unit-task-ar-609-001-20260723072326.json
   - reviews/VERIFY-2026-07-23-unit-task-ar-609-001-20260723073123.json
   - reviews/VERIFY-2026-07-23-unit-task-ar-609-001-20260723073144.json
+resolution: done
+completed_at: 2026-07-23T07:50:22+09:00
+closed_by: codex-root-task-ar-609
+actual_hours: 0.6
+actual_tokens: 28000
 ---
 
 # UNIT-TASK-AR-609-001 - Filter classifier initiative collection by record kind
@@ -101,3 +106,17 @@ Report mixed-fixture counts, duplicate oracle, generated view impact, and issue 
 ## Stop Boundary
 
 Stop before moving canonical records or changing hierarchy semantics beyond the kind filter.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T07:50:22+09:00`
+- Resolution: `done`
+- Actual hours: `0.6`
+- Actual tokens: `28000`
+- Closed by: `codex-root-task-ar-609`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-609-001-20260723072326.json`
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-609-001-20260723073123.json`
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-609-001-20260723073144.json`
+<!-- work-close:end -->
