@@ -9,11 +9,11 @@ task_id: TASK-AR-616
 task_set_id: TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW
 initiative_id: INIT-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
+status: completed
 verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-23T05:01:18+09:00
-updated_at: 2026-07-23T05:36:47+09:00
+updated_at: 2026-07-23T06:19:36+09:00
 started_at: 2026-07-23T05:14:06+09:00
 origin_type: ci_failure
 origin_ref: reviews/REVIEW-2026-07-23-release-auto-fixture-recovery-window-plan.md
@@ -51,6 +51,11 @@ verified_at: 2026-07-23T05:36:47+09:00
 verified_by: codex-root-task-ar-616
 evidence_refs:
   - reviews/VERIFY-2026-07-23-unit-task-ar-616-001-20260723053647.json
+resolution: done
+completed_at: 2026-07-23T06:19:36+09:00
+closed_by: codex-root-task-ar-616
+actual_hours: 1.1
+actual_tokens: 55000
 ---
 
 # UNIT-TASK-AR-616-001 - Harden the bounded fixture commit recovery window
@@ -103,3 +108,15 @@ Report the CI recurrence, failure-first fourth-attempt case, capped delay schedu
 ## Stop Boundary
 
 Stop before broadening the retry classifier, retrying ambiguous mutations, changing product Git operations, or weakening CI/release gates.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T06:19:36+09:00`
+- Resolution: `done`
+- Actual hours: `1.1`
+- Actual tokens: `55000`
+- Closed by: `codex-root-task-ar-616`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-616-001-20260723053647.json`
+<!-- work-close:end -->
