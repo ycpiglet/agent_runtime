@@ -8,6 +8,7 @@ clean output; hook wiring present in both .codex/hooks.json copies.
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -20,6 +21,73 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 import session_dashboard
 
 SCRIPT = REPO_ROOT / "scripts" / "session_dashboard.py"
+TEMPLATE_SCRIPT = (
+    REPO_ROOT
+    / "src"
+    / "agent_runtime"
+    / "templates"
+    / "project"
+    / "scripts"
+    / "session_dashboard.py"
+)
+TEMPLATE_INFLIGHT = TEMPLATE_SCRIPT.with_name("inflight_overlay.py")
+
+
+def _make_clean_dashboard_host(
+    tmp_path: Path, *, inflight_source: str | None = None
+) -> tuple[Path, Path]:
+    host = tmp_path / "host"
+    scripts = host / "scripts"
+    scripts.mkdir(parents=True)
+    shutil.copy2(TEMPLATE_SCRIPT, scripts / "session_dashboard.py")
+    if inflight_source is None:
+        shutil.copy2(TEMPLATE_INFLIGHT, scripts / "inflight_overlay.py")
+    else:
+        (scripts / "inflight_overlay.py").write_text(inflight_source, encoding="utf-8")
+    assert not (scripts / "work.py").exists()
+
+    subprocess.run(["git", "init", "-b", "main", str(host)], check=True, capture_output=True)
+    (host / "README.md").write_text("clean host\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(host), "add", "."], check=True, capture_output=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(host),
+            "-c",
+            "user.name=Agent Runtime Test",
+            "-c",
+            "user.email=test@example.invalid",
+            "commit",
+            "-m",
+            "initialize clean host",
+        ],
+        check=True,
+        capture_output=True,
+    )
+    return host, scripts
+
+
+def _run_clean_dashboard(host: Path, scripts: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [
+            sys.executable,
+            str(scripts / "session_dashboard.py"),
+            "--root",
+            str(host),
+            "--json",
+            "--scm-timeout",
+            "0.1",
+        ],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=15,
+    )
+
+
+def _file_snapshot(root: Path) -> dict[Path, bytes]:
+    return {path.relative_to(root): path.read_bytes() for path in root.rglob("*") if path.is_file()}
 
 
 # ---------------------------------------------------------------------------
@@ -130,6 +198,31 @@ def test_json_shape(monkeypatch: pytest.MonkeyPatch) -> None:
     json.dumps(dashboard, ensure_ascii=True)
 
 
+def test_w0_prefers_richer_repository_work_path(monkeypatch: pytest.MonkeyPatch) -> None:
+    import work
+
+    monkeypatch.setattr(
+        work,
+        "status_work",
+        lambda root: {
+            "active_claims": [{"claim_id": "CLAIM-root"}],
+            "worktrees": [{"path": str(root), "branch": "main"}],
+            "inflight": {
+                "summary": "inflight: 0 tasks diverge across 0 branches",
+                "counts": {"divergent_tasks": 0, "branches_with_divergence": 0},
+            },
+        },
+    )
+
+    section = session_dashboard.build_w0_section(REPO_ROOT)
+
+    assert section["status"] == "ok"
+    assert section["source"] == "work"
+    assert section["active_claims"] == 1
+    assert section["worktrees"] == 1
+    assert section["notes"] == []
+
+
 # ---------------------------------------------------------------------------
 # Exit 0 / degradation when a section errors
 # ---------------------------------------------------------------------------
@@ -155,6 +248,55 @@ def test_scm_subprocess_timeout_degrades_to_note(monkeypatch: pytest.MonkeyPatch
     assert "timed out" in section["note"]
 
 
+def test_w0_fallback_partial_failures_remain_explicit_notes(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(session_dashboard, "SCRIPTS_DIR", tmp_path / "missing-scripts")
+
+    section = session_dashboard._fallback_w0_section(
+        tmp_path / "not-a-repository",
+        cause=ModuleNotFoundError("work"),
+        timeout=0.1,
+    )
+
+    assert section["status"] == "ok"
+    assert section["source"] == "fallback"
+    assert section["active_claims"] == 0
+    assert section["worktrees"] is None
+    assert section["inflight_summary"] == "inflight: unavailable"
+    assert "work API unavailable" in section["fallback_reason"]
+    assert any("worktree scan unavailable" in note for note in section["notes"])
+    assert any("script missing" in note for note in section["notes"])
+    assert session_dashboard.is_clean(
+        {
+            "w0": section,
+            "update": {"status": "ok", "lines": []},
+            "scm": {"status": "ok", "counts": {}},
+        }
+    ) is False
+
+
+@pytest.mark.parametrize("component", ["_active_claim_count", "_fallback_worktrees", "_fallback_inflight"])
+def test_w0_fallback_contains_unexpected_component_exceptions(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, component: str
+) -> None:
+    monkeypatch.setattr(
+        session_dashboard,
+        component,
+        lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("unexpected")),
+    )
+
+    section = session_dashboard._fallback_w0_section(
+        tmp_path,
+        cause=ModuleNotFoundError("work"),
+        timeout=0.1,
+    )
+
+    assert section["status"] == "ok"
+    assert section["source"] == "fallback"
+    assert any("unexpected RuntimeError" in note for note in section["notes"])
+
+
 def test_main_exits_zero_when_scm_section_errors(monkeypatch: pytest.MonkeyPatch, capsys) -> None:
     _stub_sections(monkeypatch, scm={"status": "error", "note": "scm hygiene unavailable: OSError"})
     rc = session_dashboard.main(["--root", str(REPO_ROOT)])
@@ -174,6 +316,75 @@ def test_real_run_exits_zero_and_prints_panel() -> None:
     assert proc.returncode == 0
     assert "session dashboard" in proc.stdout
     proc.stdout.encode("cp949")  # cp949-safe end to end
+
+
+def test_clean_template_without_work_py_uses_read_only_w0_fallback(tmp_path: Path) -> None:
+    """A generated host must not need the repository-only scripts/work.py."""
+    host, scripts = _make_clean_dashboard_host(tmp_path)
+    claims = host / "agents" / "runtime" / "task_claims"
+    claims.mkdir(parents=True)
+    (claims / "CLAIM-clean-host.json").write_text(
+        json.dumps(
+            {
+                "claim_id": "CLAIM-clean-host",
+                "task_id": "TASK-HOST-001",
+                "task_set_id": "TASKSET-HOST-W0",
+                "status": "in_progress",
+                "agent_instance_id": "host-worker",
+            }
+        ),
+        encoding="utf-8",
+    )
+    before = _file_snapshot(host)
+
+    proc = _run_clean_dashboard(host, scripts)
+
+    assert proc.returncode == 0, proc.stderr
+    payload = json.loads(proc.stdout)
+    assert payload["w0"]["status"] == "ok"
+    assert payload["w0"]["source"] == "fallback"
+    assert payload["w0"]["active_claims"] == 1
+    assert payload["w0"]["worktrees"] == 1
+    assert payload["w0"]["inflight_counts"]["divergent_tasks"] == 0
+    assert "work API unavailable" in payload["w0"]["fallback_reason"]
+    assert payload["w0"]["notes"] == []
+    assert _file_snapshot(host) == before
+
+
+def test_clean_template_invalid_utf8_claim_degrades_read_only(tmp_path: Path) -> None:
+    host, scripts = _make_clean_dashboard_host(tmp_path)
+    claims = host / "agents" / "runtime" / "task_claims"
+    claims.mkdir(parents=True)
+    (claims / "CLAIM-invalid-utf8.json").write_bytes(b'{"status":"claimed","bad":"\xff"}')
+    before = _file_snapshot(host)
+
+    proc = _run_clean_dashboard(host, scripts)
+
+    assert proc.returncode == 0, proc.stderr
+    w0 = json.loads(proc.stdout)["w0"]
+    assert w0["status"] == "ok"
+    assert w0["active_claims"] == 0
+    assert any("UnicodeDecodeError" in note for note in w0["notes"])
+    assert _file_snapshot(host) == before
+
+
+def test_clean_template_wrong_typed_inflight_counts_degrade_read_only(tmp_path: Path) -> None:
+    inflight_source = (
+        'print(\'{"summary":{"divergent_tasks":0,'
+        '"branches_with_divergence":0,"claimless":"abc"}}\')\n'
+    )
+    host, scripts = _make_clean_dashboard_host(tmp_path, inflight_source=inflight_source)
+    before = _file_snapshot(host)
+
+    proc = _run_clean_dashboard(host, scripts)
+
+    assert proc.returncode == 0, proc.stderr
+    w0 = json.loads(proc.stdout)["w0"]
+    assert w0["status"] == "ok"
+    assert w0["inflight_summary"] == "inflight: unavailable"
+    assert w0["inflight_counts"] == {}
+    assert any("invalid count payload" in note for note in w0["notes"])
+    assert _file_snapshot(host) == before
 
 
 # ---------------------------------------------------------------------------
@@ -254,12 +465,14 @@ def _session_start_commands(hooks_path: Path) -> list[str]:
     return [hook["command"] for hook in _session_start_hooks(hooks_path)]
 
 
-# Worst case the script body waits on two serial network ops, each internally
-# bounded at 10s (update_notify ls-remote + scm_steward subprocess). The outer
-# hook timeout must exceed their sum plus startup, or the runner preempts the
-# process and the always-exit-0 guarantee is voided.
+# Worst case the generated-host fallback waits on two serial W0 subprocesses,
+# then two serial network-aware operations (update_notify + scm_steward). The
+# outer hook timeout must exceed their sum plus startup, or the runner preempts
+# the process and the always-exit-0 guarantee is voided.
 _MIN_DASHBOARD_HOOK_TIMEOUT = (
-    int(session_dashboard.SCM_TIMEOUT_SECONDS) + 10  # scm + update_notify ls-remote
+    (2 * int(session_dashboard.W0_FALLBACK_TIMEOUT_SECONDS))
+    + int(session_dashboard.SCM_TIMEOUT_SECONDS)
+    + 10  # update_notify ls-remote
 )
 
 

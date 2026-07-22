@@ -1,5 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-22 - TASK-AR-605/#294 verified; integration active
+
+- Active: integration claim `CLAIM-20260722-225245-task-ar-605-integration1` keeps TASK-AR-605 claimed through pull-request and post-merge main CI.
+- Contract: generated hosts without repository-only `scripts/work.py` now return bounded, read-only claim/worktree/in-flight W0 data; repository checkouts retain the richer `work.status_work` path.
+- Quality loop: initial skeptic REJECT found invalid UTF-8, malformed count, and unexpected-helper escape paths; failure-first rework, refreshed task/unit W4a (`25 passed`), independent W4b, and a 32-case skeptic matrix now all pass.
+- Scope boundary: quoted `#` frontmatter truncation observed during W4a is already registered as TASK-AR-608/#298; it was not folded into TASK-AR-605.
+- Follow-up: PR #308 exposed rerun-only release test state leakage; preserve runs `29921037792` and `29921668702` as collection-order evidence for registered TASK-AR-607/#297.
+
 ## 2026-07-22 - TASK-AR-604/#293 complete; TASK-AR-605 next; terminal residual registered
 
 - Completed: PR #307 merged at `83902729348a680092c9a7710221b32f30ad837d`; pull-request run `29920182446` and post-merge main run `29920394674` passed on Python 3.10/3.11/3.12.

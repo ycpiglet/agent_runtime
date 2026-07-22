@@ -284,8 +284,8 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-22-task-ar-604-integration-t3-replan.md",
-          "value": "6cbf67921c4ec2b43e5dab5d06c197199add6624c0023d79db33a30e78b7b2ce"
+          "path": "reviews/REVIEW-2026-07-22-task-ar-605-integration-t3-replan.md",
+          "value": "3d665eb0cf33d68b40e0ba950940632d0a81be05daa542db1b3a71498b1a66f5"
         },
         {
           "kind": "sha256",
@@ -299,17 +299,17 @@
         },
         {
           "kind": "sha256",
-          "path": "scripts/taskset_dispatcher.py",
-          "value": "a78f2706a2ef39a92ae339d149fb8b10524e24dc1510f75a386c342c475292d9"
+          "path": "scripts/session_dashboard.py",
+          "value": "bf7dac32fb101a34ee1283d9b9646c9b5489f979069ceea23c122360c014236a"
         },
         {
           "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/taskset_dispatcher.py",
-          "value": "a78f2706a2ef39a92ae339d149fb8b10524e24dc1510f75a386c342c475292d9"
+          "path": "src/agent_runtime/templates/project/scripts/session_dashboard.py",
+          "value": "bf7dac32fb101a34ee1283d9b9646c9b5489f979069ceea23c122360c014236a"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-22-task-ar-604-integration-t3-replan.md",
-      "recorded_at": "2026-07-22T21:32:44+09:00",
+      "design_record": "reviews/REVIEW-2026-07-22-task-ar-605-integration-t3-replan.md",
+      "recorded_at": "2026-07-22T22:54:04+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION"
     },
@@ -645,5 +645,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-22T21:43:02+09:00"
+  "updated_at": "2026-07-22T22:54:04+09:00"
 }

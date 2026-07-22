@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 initiative_id: INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T17:45:00+09:00
+updated_at: 2026-07-22T22:42:06+09:00
 origin_type: downstream_bug
 origin_ref: reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
 created_by: codex-root-planner
@@ -23,7 +23,7 @@ model_tier: worker_standard
 escalation_triggers:
   - cross_cutting
   - data_integrity
-context: GitHub #294 demonstrates that the generated session_dashboard imports repository-only work.py, which the template and host lock do not ship. The fallback must remain read-only and tolerate partial Git/runtime state.
+context: GitHub issue 294 demonstrates that the generated session_dashboard imports repository-only work.py, which the template and host lock do not ship. The fallback must remain read-only and tolerate partial Git/runtime state.
 inputs:
   - reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md
   - scripts/session_dashboard.py
@@ -40,8 +40,13 @@ acceptance:
 verification:
   - python -m pytest tests/test_session_dashboard.py -q
   - python scripts/regen_host_lock_if_needed.py --check
-handoff: Report clean-template output, fallback boundaries, root behavior, and issue #294 evidence.
+handoff: Report clean-template output, fallback boundaries, root behavior, and GitHub issue 294 evidence.
 stop_condition: Stop before adding repository-only work.py or its transitive dependency graph to the template.
+verified_at: 2026-07-22T22:42:06+09:00
+verified_by: codex-root-task-ar-605
+evidence_refs:
+  - reviews/VERIFY-2026-07-22-unit-task-ar-605-001-20260722222914.json
+  - reviews/VERIFY-2026-07-22-unit-task-ar-605-001-20260722224206.json
 ---
 
 # UNIT-TASK-AR-605-001 - Add a clean-template W0 fallback
