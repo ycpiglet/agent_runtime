@@ -9,10 +9,10 @@ kind: task
 parent_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 registered_at: 2026-07-22T17:45:00+09:00
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-22T22:42:20+09:00
+updated_at: 2026-07-22T23:02:22+09:00
 started_at: 2026-07-22T22:17:46+09:00
 title: Make the generated session dashboard self-contained
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 3
@@ -42,6 +42,11 @@ verified_at: 2026-07-22T22:42:20+09:00
 verified_by: codex-root-task-ar-605
 evidence_refs:
   - reviews/VERIFY-2026-07-22-task-ar-605-20260722224220.json
+resolution: done
+completed_at: 2026-07-22T23:02:22+09:00
+closed_by: codex-root
+actual_hours: 0.8
+actual_tokens: 60000
 ---
 
 # TASK-AR-605 - Make the generated session dashboard self-contained
@@ -64,3 +69,15 @@ evidence_refs:
 
 - `python -m pytest tests/test_session_dashboard.py -q`
 - `python scripts/regen_host_lock_if_needed.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-22T23:02:22+09:00`
+- Resolution: `done`
+- Actual hours: `0.8`
+- Actual tokens: `60000`
+- Closed by: `codex-root`
+- Evidence:
+  - `reviews/VERIFY-2026-07-22-task-ar-605-20260722224220.json`
+<!-- work-close:end -->

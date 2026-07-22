@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-22T21:43:21+09:00",
+  "generated_at": "2026-07-22T23:02:23+09:00",
   "record_count": 422,
   "finding_count": 0,
   "findings": [],
@@ -4414,7 +4414,7 @@
       "title": "Close GitHub #294 by making the template W0 dashboard work when repository-only scrip…",
       "path": "agents/lead_engineer/tasks/TASK-AR-605.md",
       "parent_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-605-001",
@@ -4425,7 +4425,7 @@
       "title": "UNIT-TASK-AR-605-001 - Add a clean-template W0 fallback",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-605/UNIT-TASK-AR-605-001.md",
       "parent_id": "TASK-AR-605",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-606",
