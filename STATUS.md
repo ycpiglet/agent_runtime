@@ -1526,3 +1526,11 @@ Decision
 - B-mode proposal-only RSI planning is available locally.
 - C-mode remains blocked until the promotion gate prerequisites are met.
 - Owner-only/external/release/destructive actions remain out of scope.
+## 2026-07-23 - TASK-AR-607/#297 complete; TASK-AR-608 next
+
+- TASK-AR-607 isolated dynamically loaded release-cadence test modules from process-global `subprocess.run`, `time.sleep`, and `time.time` monkeypatch state without changing production or template release code.
+- Failure-first commits independently reproduced the subprocess and time leaks; focused tests passed 23/23, collection-order tests passed 31/31, and two independent 100-run probes recovered 100/100 transient first-spawn failures with zero global leaks.
+- Independent W4b and skeptic reviews both approved exact implementation HEAD `a8d89026026dd84ab06f2e3260a9cf99a9863cdc`.
+- PR #314 CI run `29935529242` and post-merge main run `29935760999` both passed Python 3.10/3.11/3.12 on attempt 1; GitHub issue #297 was closed completed with evidence comment `5048456934`.
+- W5 cleanup removed the feature worktree and local/remote branch; W0 now reports zero active claims, one main worktree, and zero divergent tasks.
+- Next: TASK-AR-608 for GitHub #298, which owns the quote-unaware frontmatter parser defect observed during TASK-AR-604 through TASK-AR-607 metadata handling.
