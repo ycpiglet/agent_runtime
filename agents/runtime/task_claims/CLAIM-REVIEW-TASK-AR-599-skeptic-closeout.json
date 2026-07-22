@@ -9,11 +9,11 @@
   "agent_instance_id": "skeptic-CLAIM-REVIEW-TASK-AR-599-skeptic-closeout",
   "display_name": "skeptic@review",
   "mode": "review",
-  "status": "claimed",
+  "status": "released",
   "status_text": "Additive skeptic adversarial review pass for TASK-AR-599 (closeout; high-risk: cross_cutting, external_effect, security)",
   "claimed_at": "2026-07-22T17:15:52+09:00",
-  "last_heartbeat": "2026-07-22T17:15:52+09:00",
-  "updated_at": "2026-07-22T17:15:52+09:00",
+  "last_heartbeat": "2026-07-22T17:31:09+09:00",
+  "updated_at": "2026-07-22T17:31:09+09:00",
   "tags": [
     "review",
     "additive",
@@ -27,5 +27,9 @@
   "parent_task_id": "TASK-AR-599",
   "parent_task_set_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
   "handoff_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-599-skeptic-closeout.handoff.md",
-  "log_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-599-skeptic-closeout.log.md"
+  "log_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-599-skeptic-closeout.log.md",
+  "released_at": "2026-07-22T17:31:09+09:00",
+  "verified_by": "codex-root-role-review-coordinator-599-skeptic",
+  "verifier_role": "lead-engineer",
+  "verification_evidence": "reviews/ROLE-REVIEW-2026-07-22-TASK-AR-599-SKEPTIC-REWORK.md"
 }
