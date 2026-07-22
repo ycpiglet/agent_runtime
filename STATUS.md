@@ -1,5 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-22 - TASK-AR-610 active; PR #303 CI baseline recovery
+
+- Active: `TASK-AR-610` in `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` normalizes legacy closeout evidence metadata that blocks PR #303 governance CI.
+- Preserved: failed W4a and W4b review paths remain in canonical `evidence_refs`; implementation commit and remote closeout values move to Markdown closeout text.
+- Parent delivery: TASK-AR-600 passed W4a and two independent final reviews; PR #303 remains open until the baseline recovery push passes Python 3.10/3.11/3.12 CI.
+- Next: release TASK-AR-610 after W4b, merge PR #303, close #291, then continue TASK-AR-603 through TASK-AR-609 before release TASK-AR-602.
+
 ## 2026-07-22 - TASK-AR-600 active; release-impact queue registered
 
 - Completed: TASK-AR-599 merged in PR #302, issue #279 is closed, and all local/remote task branch and worktree cleanup is complete.
