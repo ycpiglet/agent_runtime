@@ -9,21 +9,21 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-07-23
 task_count: 280
-open_count: 3
-completed_count: 277
-task_set_count: 3
-completed_task_set_count: 55
+open_count: 2
+completed_count: 278
+task_set_count: 2
+completed_task_set_count: 56
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `3` open or active tasks; `277` completed tasks are archived from this live board.
+- Summary: `2` open or active tasks; `278` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `3` / Ask `0` / Review `0` / Later `0` / Done `277`.
-- Task Sets: `3` active workflows; `55` completed workflows are hidden from the live action board.
+- Status: Action `2` / Ask `0` / Review `0` / Later `0` / Done `278`.
+- Task Sets: `2` active workflows; `56` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -50,15 +50,6 @@ completed_task_set_count: 55
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-602` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md | planned | Action | P0 | Critical | High | 5h/12000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #280 after every intake unit is merged by refreshing current-state rec… |
-
-### Release Impact Remediator (`TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION`)
-
-- Flow: Repair canonical identity, task start state, host dashboard dependencies, hook activation, CI isolation, frontmatter parsing, and classifier semantics.
-- Progress: `6/7` done; `1` open or active.
-- WIP: active `1/3`; oldest `0.4h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-609` | INIT-AR-JULY-RELEASE-IMPACT-REMEDIATION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-609/UNIT-TASK-AR-609-001.md | in_progress | Action | P1 | High | Medium | 2h/7000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Close GitHub #300 by preventing taskset records from being duplicated into the initia… |
 
 ### Terminal Status Start Guard (`TASKSET-AR-TERMINAL-STATUS-START-GUARD`)
 
@@ -110,6 +101,7 @@ completed_task_set_count: 55
 | Org Conductor (`TASKSET-AR-AGENT-ORG-DELEGATION`) | Operationalize a Director->Lead->Worker+Reviewer agent org by reconciling the template org-suite (roles.yml/orchestrator/subagent/seminar) with the repo claim/wave execution: role/team/tier registry + owner normalization, lead taskset->unit decomposition, seam-aware + risk-based dispatch gate, orchestrator with a swappable WorkerBackend (sub-agents now, headless daemon later), a blind-Delphi persona-diversity deliberation layer, and a minimal org/state read-API. Research-grounded (Karpathy autonomy, gstack, multi-agent architectures, persona diversity); seam-aware parallelism + phased autonomy; token cost binding (~15x). | `6/6` done | `6` completed task files archived |
 | Decision Cockpit (`TASKSET-AR-DECISION-FIRST-CONSOLE-IA`) | UI redesign #1: turn the 80-screen data-dump home into a decision-first cockpit whose hero is an Attention Inbox ('what needs me now', 6 signal groups derived from existing gates/records), prune nav 67->core 7 (+More), progressive disclosure (essentials on screen, detail on interaction), preserve the just-landed maturity behaviors (responsive/a11y/SSE/i18n/validation), and a KO/EN UI toggle. Incremental on the monolith; component/token extraction + 2.5D characters + insight graph are sub-project #3. | `7/7` done | `7` completed task files archived |
 | Merge Truth Keeper (`TASKSET-AR-AUTO-MERGE-INTEGRITY`) | Close downstream BUG-014 with deterministic remote read-back. | `1/1` done | `1` completed task files archived |
+| Release Impact Remediator (`TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION`) | Repair canonical identity, task start state, host dashboard dependencies, hook activation, CI isolation, frontmatter parsing, and classifier semantics. | `7/7` done | `7` completed task files archived |
 | CI Schema Recovery (`TASKSET-AR-PR303-CI-SCHEMA-RECOVERY`) | Normalize the legacy TASK-AR-594 evidence reference into the canonical work-item schema. | `1/1` done | `1` completed task files archived |
 | Backlog Taskset Test Recovery (`TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY`) | Update the canonical real-backlog taskset expectation for all newly registered tasksets and prove the full package suite remains green. | `1/1` done | `1` completed task files archived |
 | Self Improvement Cadence (`TASKSET-AR-SELF-IMPROVEMENT-CADENCE`) | Detect low-frequency roles and runtime assets, run review/retro/meeting/seminar/compound/doc-steward/scribe cycles from evidence, and publish measurable maturity signals. | `3/3` done | `3` completed task files archived |
@@ -134,9 +126,9 @@ completed_task_set_count: 55
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `3` open across `3` task sets (see Action Board above).
-- Archived task sets: `55` (see Archived Task Sets above).
-- Archived task files: `277` — see `ARCHIVE-INDEX.md`.
+- Active: `2` open across `2` task sets (see Action Board above).
+- Archived task sets: `56` (see Archived Task Sets above).
+- Archived task files: `278` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.
