@@ -2,10 +2,12 @@
 title: TASK-AR-608 Skeptic and Adversarial W4b
 date: 2026-07-23
 signal: fail
-score: 74
+score: 82
 task_id: TASK-AR-608
-verified_head: 1c9ebc1c9b0841c8d64de3ed3b6f3b8ab4aad7e7
-implementation_sha: 871b6b9ed863647321129319ff37fac4e0473acc
+verified_head: 97b6bffa138de3b71117dd7b001e110eca825da5
+implementation_sha: 097758859e1f5f54655623fe077599718ec82292
+original_rejected_head: 1c9ebc1c9b0841c8d64de3ed3b6f3b8ab4aad7e7
+original_implementation_sha: 871b6b9ed863647321129319ff37fac4e0473acc
 failure_first_sha: 45085b33e0e29c48485edbc322b23026d0023c95
 verified_by: codex-task-ar-608-skeptic-20260723
 worker: codex-root-task-ar-608
@@ -146,3 +148,123 @@ This skeptic pass created only
 `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-608-SKEPTIC.md`. It did not modify
 implementation files, tests, task/unit metadata, runtime state, W4a evidence,
 or `reviews/INDEX.md`.
+
+## Remediation Re-review
+
+This section records the independent re-review of remediation implementation
+`097758859e1f5f54655623fe077599718ec82292` at W4a HEAD
+`97b6bffa138de3b71117dd7b001e110eca825da5`. The original REJECT narrative,
+counterexamples, commands, and findings above remain unchanged as audit
+history. The frontmatter now identifies the latest reviewed state while
+retaining the original SHAs explicitly.
+
+### Original Counterexample Closure
+
+The remediation skips whitespace before deciding whether a quote follows a
+structural delimiter. This closes all specifically requested regressions in
+both the root and host-template parsers:
+
+| Boundary | Expected | Result |
+| --- | --- | --- |
+| `plain 'PR #167' # outside` | legacy first-hash removal | pass |
+| `plain "PR #167" # outside` | legacy first-hash removal | pass |
+| `owner ' fragment # outside` | unmatched mid-plain quote does not hide comment | pass |
+| leading single/double quoted scalar | quoted hash preserved, outside comment removed | pass |
+| escaped double quote | escaped quote does not close scalar | pass |
+| doubled single quote | doubled quote does not close scalar | pass |
+| mixed flow list | quoted hashes preserved, outside comment removed | pass |
+| plain outside comment | legacy comment removal | pass |
+| root/template AST | identical `strip_comment()` functions | pass |
+
+The independent requested matrix measured 9/9 passing cases. The focused suite
+also expanded from 15 to 16 tests and passed independently. The host lock is
+current.
+
+### [P1] Residual delimiter-lookback false positives keep the fix incomplete
+
+The remediation still does not track whether plain scalar content has already
+been consumed. It only skips whitespace and inspects the preceding non-space
+character. As a result, an ordinary hyphen or comma inside an already-started
+plain scalar is mistaken for a structural list/flow delimiter:
+
+```text
+input:           plain - 'PR #167' # outside
+legacy expected: "plain - 'PR " (trailing space)
+09775885 actual: "plain - 'PR #167' " (trailing space)
+
+input:           plain, "PR #167" # outside
+legacy expected: 'plain, "PR ' (trailing space)
+09775885 actual: 'plain, "PR #167" ' (trailing space)
+```
+
+Both root and template return the same incorrect results. A local PyYAML
+reference parse independently produced `plain - 'PR` and `plain, "PR`,
+confirming that the first hash is a comment boundary in these plain scalars.
+The finding does not depend on PyYAML: AST-extracted `strip_comment()` from
+`45085b33` gives the same expected first-hash removal required by the task's
+legacy-compatibility criterion.
+
+Required rework: track scalar/item-start state rather than inferring it solely
+from the previous punctuation character. For a mapping value, determine quote
+style from the first non-space value character. Within a flow list, reset item
+start only after an actual flow comma. Do not let `-`, `,`, `[`, `{`, or `:`
+appearing after already-consumed plain content reopen quote state. Add the two
+counterexamples above to the root/template matrix.
+
+### Remediation Validation Metrics
+
+| Metric | Threshold | Measured value | Status |
+| --- | --- | --- | --- |
+| Requested remediation matrix | all pass in root/template | 9/9 | pass |
+| Residual plain-scalar compatibility | all equal legacy behavior | 0/2 | **fail** |
+| Focused regression suite | all tests pass | 16/16 | pass |
+| Root/template AST parity | identical | identical | pass |
+| Generated host lock | no drift | current | pass |
+| Remediation scope | declared four targets only | 4/4, 0 extra | pass |
+| Remediation diff hygiene | no whitespace errors | clean | pass |
+
+### Remediation Commands and W4a Evidence
+
+```text
+python -m pytest tests/test_backlog_board_tasksets.py -q
+16 passed in 1.83s
+
+python scripts/regen_host_lock_if_needed.py --check
+OK: tests/fixtures/host/agent_runtime.lock.json is up to date.
+
+git diff --check 1c9ebc1c..09775885
+pass
+
+git diff --name-status 1c9ebc1c..09775885
+M scripts/backlog_board.py
+M src/agent_runtime/templates/project/scripts/backlog_board.py
+M tests/fixtures/host/agent_runtime.lock.json
+M tests/test_backlog_board_tasksets.py
+```
+
+The in-memory adversarial command imported both current parsers, AST-extracted
+the legacy function from `45085b33`, ran the requested nine-case matrix, added
+the two residual delimiter cases, compared root/template AST, and used PyYAML
+only as a secondary semantic reference. It wrote no files.
+
+The fresh W4a task and unit records parse correctly, identify worker
+`codex-root-task-ar-608`, and each record 16 passing tests plus a current host
+lock with return code zero and empty stderr:
+
+- `reviews/VERIFY-2026-07-23-task-ar-608-20260723064403.json`
+- `reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723064414.json`
+
+### Final Remediation Verdict
+
+**REJECT** TASK-AR-608 at W4a HEAD
+`97b6bffa138de3b71117dd7b001e110eca825da5`, remediation implementation
+`097758859e1f5f54655623fe077599718ec82292`.
+
+The originally reported examples are closed, but the same quote-start
+heuristic still suppresses valid plain-scalar comment boundaries after common
+punctuation. The explicit acceptance criterion that unquoted comments retain
+their prior behavior is therefore not yet satisfied.
+
+This re-review modified only this skeptic report. It did not modify product
+code, tests, task/unit metadata, runtime state, W4a evidence,
+`reviews/INDEX.md`, or the separately present untracked W4b report.

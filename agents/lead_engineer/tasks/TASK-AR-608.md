@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION
 registered_at: 2026-07-22T17:45:00+09:00
 created_at: 2026-07-22T17:45:00+09:00
-updated_at: 2026-07-23T06:44:03+09:00
+updated_at: 2026-07-23T06:49:58+09:00
 started_at: 2026-07-23T06:31:27+09:00
 title: Preserve quoted hashes in frontmatter scalars
 status: in_progress
@@ -38,11 +38,12 @@ tags:
   - frontmatter
   - parser
 verification_status: passed
-verified_at: 2026-07-23T06:44:03+09:00
+verified_at: 2026-07-23T06:49:58+09:00
 verified_by: codex-root-task-ar-608
 evidence_refs:
   - reviews/VERIFY-2026-07-23-task-ar-608-20260723063647.json
   - reviews/VERIFY-2026-07-23-task-ar-608-20260723064403.json
+  - reviews/VERIFY-2026-07-23-task-ar-608-20260723064958.json
 ---
 
 # TASK-AR-608 - Preserve quoted hashes in frontmatter scalars
