@@ -27,7 +27,7 @@ reservation_id: RES-20260723-084051-a1975741-01
 origin_type: review_finding
 origin_ref: reviews/REVIEW-2026-07-23-work-cli-integrity-design.md
 created_by: codex-root-planner
-summary: Serialize work frontmatter scalars so literal hash markers and quotes survive every parse and rewrite boundary.
+summary: Serialize unsafe work frontmatter scalars and decode their JSON-style representation across every parse and rewrite boundary.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
@@ -43,7 +43,7 @@ tags:
 
 ## Scope
 
-- Change only scripts/work.py frontmatter emission and focused registration, verify, and close tests; retain the existing lightweight parser and deterministic output shape.
+- Change `scripts/work.py` frontmatter emission plus minimal JSON double-quoted scalar decoding in the root/template lightweight parser, focused parser and lifecycle tests, and the generated-host lock. Do not change comment scanning or add a YAML dependency.
 
 ## Acceptance Criteria
 
@@ -53,5 +53,6 @@ tags:
 
 ## Verification
 
-- `python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py -q`
+- `python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py tests/test_backlog_board_tasksets.py -q`
 - `python scripts/work_schema_gate.py --check`
+- `python scripts/regen_host_lock_if_needed.py --check`

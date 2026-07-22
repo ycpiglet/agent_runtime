@@ -35,17 +35,22 @@ inputs:
   - tests/test_work_close.py
 target_files:
   - scripts/work.py
+  - scripts/backlog_board.py
+  - src/agent_runtime/templates/project/scripts/backlog_board.py
   - tests/test_work_registration.py
   - tests/test_work_verify.py
   - tests/test_work_close.py
-scope: Add a deterministic scalar emitter compatible with the existing reader, use it for scalar and list values, and prove preservation at initial registration and mutation boundaries.
+  - tests/test_backlog_board_tasksets.py
+  - tests/fixtures/host/agent_runtime.lock.json
+scope: Add a deterministic unsafe-scalar emitter and minimal JSON double-quoted decoding to the root/template lightweight reader, use one contract for scalar and list values, and prove preservation at registration and mutation boundaries.
 acceptance:
   - Every failure-first value parses identically before and after each lifecycle mutation.
   - No existing focused work CLI test changes its expected lifecycle semantics.
   - The implementation does not modify the shared comment scanner.
 verification:
-  - python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py -q
+  - python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py tests/test_backlog_board_tasksets.py -q
   - python scripts/work_schema_gate.py --check
+  - python scripts/regen_host_lock_if_needed.py --check
 handoff: Provide the failure-first commit, a value-by-value round-trip matrix, changed-file summary, focused test output, and any parser compatibility limitation.
 stop_condition: Stop if exact value preservation requires replacing the shared parser or changing canonical work schema; record the incompatible examples for replan.
 ---
@@ -68,13 +73,17 @@ Completed task lifecycle commands reproduced silent truncation because scripts/w
 ## Target Files
 
 - scripts/work.py
+- scripts/backlog_board.py
+- src/agent_runtime/templates/project/scripts/backlog_board.py
 - tests/test_work_registration.py
 - tests/test_work_verify.py
 - tests/test_work_close.py
+- tests/test_backlog_board_tasksets.py
+- tests/fixtures/host/agent_runtime.lock.json
 
 ## Scope
 
-Add a deterministic scalar emitter compatible with the existing reader, use it for scalar and list values, and prove preservation at initial registration and mutation boundaries.
+Add a deterministic unsafe-scalar emitter and minimal JSON double-quoted decoding to the root/template lightweight reader, use one contract for scalar and list values, and prove preservation at registration and mutation boundaries.
 
 ## Steps
 
@@ -90,8 +99,9 @@ Add a deterministic scalar emitter compatible with the existing reader, use it f
 
 ## Verification
 
-- `python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py -q`
+- `python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py tests/test_backlog_board_tasksets.py -q`
 - `python scripts/work_schema_gate.py --check`
+- `python scripts/regen_host_lock_if_needed.py --check`
 
 ## Handoff
 

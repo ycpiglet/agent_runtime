@@ -49,8 +49,12 @@
   ],
   "target_files": [
     "scripts/work.py",
+    "scripts/backlog_board.py",
+    "src/agent_runtime/templates/project/scripts/backlog_board.py",
     "tests/test_work_registration.py",
     "tests/test_work_verify.py",
-    "tests/test_work_close.py"
+    "tests/test_work_close.py",
+    "tests/test_backlog_board_tasksets.py",
+    "tests/fixtures/host/agent_runtime.lock.json"
   ]
 }

@@ -779,8 +779,8 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-23-work-cli-integrity-design.md",
-          "value": "396332e8fbd17b1c081fa73e53e6e8cfc4a665790a28147a9cceddd32ee8b936"
+          "path": "reviews/REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan.md",
+          "value": "c3e990e28d11a0869463084c228ac73a04084fb3cf881b3bc97b4491cf602b55"
         },
         {
           "kind": "sha256",
@@ -791,14 +791,49 @@
           "kind": "sha256",
           "path": "scripts/work.py",
           "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/backlog_board.py",
+          "value": "6e1f1b2a40f2d8b2a66e4ec5685531d4870e295a2a9e5791571faabd906accfd"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/backlog_board.py",
+          "value": "4455c3d28114130e18821a1eed53868cab16c4ffbc564300eb0578e3f85572ef"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_work_registration.py",
+          "value": "5c80c2f3d05cc6e600222233349aaa924caa51c308abf47328509be7bc7442ed"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_work_verify.py",
+          "value": "88b1af1427973f1d18c5f35eebe44c271aa9d2f980faeb0eb6931b6dc4ffb768"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_work_close.py",
+          "value": "a322c7faebf5eae41d5f10823102b15076a8f1269cb7d37d7871dde5ca7750b9"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_backlog_board_tasksets.py",
+          "value": "b3e79a6a43b3a8ab049c44f6b7b022662f854482017dcfca72c274976cf0917e"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/fixtures/host/agent_runtime.lock.json",
+          "value": "1eb08c31423e2c63d079cdd8858c6c155bc82007c426bb96f5b4131111085554"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-23-work-cli-integrity-design.md",
-      "recorded_at": "2026-07-23T08:40:53+09:00",
+      "design_record": "reviews/REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan.md",
+      "recorded_at": "2026-07-23T08:48:01+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-WORK-CLI-INTEGRITY"
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-23T08:40:53+09:00"
+  "updated_at": "2026-07-23T08:48:01+09:00"
 }
