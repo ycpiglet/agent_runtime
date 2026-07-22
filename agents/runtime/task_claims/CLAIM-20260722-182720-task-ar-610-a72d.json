@@ -9,7 +9,7 @@
   "callsite_id": "codex-root-20260722",
   "pane_id": "root",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-PR303-CI-SCHEMA-RECOVERY",
   "active_scope": "TASKSET-AR-PR303-CI-SCHEMA-RECOVERY",
   "scope_transition_approved": true,
@@ -27,12 +27,12 @@
   "worktree_path": ".worktrees/TASK-AR-600",
   "branch": "codex/task-ar-600-merge-readback",
   "claimed_at": "2026-07-22T18:27:20+09:00",
-  "last_heartbeat": "2026-07-22T18:27:20+09:00",
-  "updated_at": "2026-07-22T18:27:20+09:00",
+  "last_heartbeat": "2026-07-22T18:42:04+09:00",
+  "updated_at": "2026-07-22T18:42:04+09:00",
   "expires_at": "2026-07-22T18:57:20+09:00",
   "lease": {
     "claimed_at": "2026-07-22T18:27:20+09:00",
-    "heartbeat_at": "2026-07-22T18:27:20+09:00",
+    "heartbeat_at": "2026-07-22T18:42:04+09:00",
     "expires_at": "2026-07-22T18:57:20+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260722-182720-task-ar-610-a72d.handoff.md",
@@ -56,5 +56,9 @@
     "agents/lead_engineer/tasks/units/TASK-AR-596/UNIT-TASK-AR-596-001.md",
     "agents/lead_engineer/tasks/units/TASK-AR-597/UNIT-TASK-AR-597-001.md",
     "agents/lead_engineer/tasks/units/TASK-AR-598/UNIT-TASK-AR-598-001.md"
-  ]
+  ],
+  "released_at": "2026-07-22T18:42:04+09:00",
+  "verified_by": "codex-task-ar-610-auditor-20260722",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-22-TASK-AR-610.md"
 }
