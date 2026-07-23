@@ -1,0 +1,70 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-23-unit-task-ar-602-001-20260723141048",
+  "work_id": "UNIT-TASK-AR-602-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-602",
+  "unit_id": "UNIT-TASK-AR-602-001",
+  "status": "failed",
+  "signal": "fail",
+  "verified_at": "2026-07-23T14:10:48+09:00",
+  "verified_by": "/root/task-ar-602",
+  "command_count": 6,
+  "commands": [
+    {
+      "command": "python scripts/release_version_cascade.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T14:10:48+09:00",
+      "finished_at": "2026-07-23T14:10:48+09:00",
+      "stdout": "release-cascade: consistent at 0.7.0 across 12 refs\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/owner_governance_gate.py",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T14:10:48+09:00",
+      "finished_at": "2026-07-23T14:11:08+09:00",
+      "stdout": "ive lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric gate.work_schema kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=8 reuse=2\n- metric capability.wave_dispatcher kind=script status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric capability.merge_queue kind=script status=active lifecycle=keep paths=1 evidence=3 usage=11 reuse=2\n- metric capability.scm_steward kind=script status=active lifecycle=keep paths=1 evidence=2 usage=12 reuse=2\n- metric capability.inflight_overlay kind=script status=active lifecycle=keep paths=1 evidence=3 usage=10 reuse=2\n- metric capability.work kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.update_notify kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.session_dashboard kind=script status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=1\n- metric hook.session_dashboard kind=hook status=active lifecycle=keep paths=2 evidence=2 usage=9 reuse=2\n- metric skill.wave_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=7 reuse=2\n- metric skill.merge_integrator kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=15 reuse=2\n- metric skill.independent_verification kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=11 reuse=2\n- metric skill.work_analytics kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=14 reuse=2\n- metric skill.release_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=5 reuse=2\n- metric skill.scm_steward kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=19 reuse=2\nowner-governance: result: scripts/runtime_asset_usage.py --check -> 0\nowner-governance: start: scripts/state_sync_gate.py --check\nstate-sync-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-602\nfindings=0\nblock=0\nwatch=0\nowner-governance: result: scripts/state_sync_gate.py --check -> 0\nowner-governance: start: scripts/automation_rules_gate.py --check\nautomation-rules-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-602\nrules_total=0\nrules_active=0\nrules_executed=0\nrules_invalid=0\nactions=0\nfindings=0\nowner-governance: result: scripts/automation_rules_gate.py --check -> 0\nowner-governance: start: scripts/scheduled_dispatch_gate.py --check\nscheduled-dispatch-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-602\nschedules_total=0\nschedules_active=0\nschedules_invalid=0\ndue=0\ndispatches=0\nreminders=0\nfindings=0\nowner-governance: result: scripts/scheduled_dispatch_gate.py --check -> 0\nowner-governance: start: scripts/release_cadence_trigger.py --check\nowner-governance: result: scripts/release_cadence_trigger.py --check -> 0\nowner-governance: start: scripts/conversation_work_audit.py --check\nconversation-work-audit: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-602\nplanning_records=19\nfindings=0 block=0 watch=0\nowner-governance: result: scripts/conversation_work_audit.py --check -> 0\nowner-governance: start: scripts/knowledge_lint_gate.py --check\nknowledge-lint-gate: pass (enforced; changed=138>=10; no block findings)\nowner-governance: result: scripts/knowledge_lint_gate.py --check -> 0\nowner-governance: start: scripts/planning_loop.py gate --trigger hook --action scan\nstatus=pass\nowner-governance: result: scripts/planning_loop.py gate --trigger hook --action scan -> 0\nowner-governance: start: scripts/compound_cadence_gate.py --obligation\ncompound-cadence-gate: watch\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-602\nreviews=349\ncompounds=3\nretros=6\ncompound_retro_total=9\nratio=38.8\nthreshold=20\nwatch=1\n- watch [compound-cadence]: 349 REVIEW-* vs 9 COMPOUND-*/RETRO-* (ratio 38.8, threshold 20); consider compounding lessons into COMPOUND-* or RETRO-* documents\nowner-governance: result: scripts/compound_cadence_gate.py --obligation -> 1\nowner-governance: advisory: compound obligation due (review:compound ratio high) -- not blocking\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest -q",
+      "status": "failed",
+      "returncode": 1,
+      "started_at": "2026-07-23T14:11:08+09:00",
+      "finished_at": "2026-07-23T14:24:45+09:00",
+      "stdout": ",\n            \"TASKSET-AR-UI-CONSOLE\",\n            \"TASKSET-AR-RSI-PLANNING\",\n            \"TASKSET-AR-RSI-OPERATING-SYSTEM\",\n            \"TASKSET-AR-PANE-PROGRESS\",\n            \"TASKSET-AR-COLLAB-CONCURRENCY\",\n            \"TASKSET-AR-GOVERNANCE-OPS\",\n            \"TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE\",\n            \"TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION\",\n            \"TASKSET-AR-TASK-IDENTITY\",\n            \"TASKSET-AR-UI-DESIGN-SYSTEM\",\n            \"TASKSET-AR-UI-DESIGN-IMPLEMENTATION\",\n            \"TASKSET-AR-REPO-HYGIENE\",\n            \"TASKSET-AR-OPS-FEEDBACK-ANALYSIS\",\n            \"TASKSET-AR-VISION-GAP-CLOSURE\",\n            \"TASKSET-AR-UI-UX-V2\",\n            \"TASKSET-AR-UI-PLATFORM-EXTENSIONS\",\n            \"TASKSET-AR-UI-LIVING-CONSOLE\",\n            \"TASKSET-AR-PM-OPERATING-SYSTEM\",\n            \"TASKSET-AR-DOC-TO-PLAN\",\n            \"TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE\",\n            \"TASKSET-AR-PARALLEL-WAVE-EXECUTION\",\n            \"TASKSET-AR-AGENT-IDENTITY-CONTRACT\",\n            \"TASKSET-AR-WORK-METADATA-ANALYTICS\",\n            \"TASKSET-AR-OPS-ERGONOMICS\",\n            \"TASKSET-AR-HOST-FEEDBACK-INTAKE\",\n            \"TASKSET-AR-WORK-STORE-RESTRUCTURE\",\n            \"TASKSET-AR-UNIFIED-DECISION-CONSOLE\",\n            \"TASKSET-AR-PRODUCT-MATURITY-UPLIFT\",\n            \"TASKSET-AR-AGENT-ORG-DELEGATION\",\n            \"TASKSET-AR-DECISION-FIRST-CONSOLE-IA\",\n            \"TASKSET-AR-BUSINESS-OPERATIONS-TEAMS\",\n            \"TASKSET-AR-BUSINESS-OPERATING-SYSTEM\",\n            \"TASKSET-AR-SELF-IMPROVEMENT-CADENCE\",\n            \"TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE\",\n            \"TASKSET-AR-DESIGN-SYSTEM-GOVERNANCE\",\n            \"TASKSET-AR-DESIGN-SYSTEM-ASSETIZATION\",\n            \"TASKSET-AR-DESIGN-SYSTEM-COMPONENT-PATTERNS\",\n            \"TASKSET-AR-DESIGN-SYSTEM-TOKEN-DEBT\",\n            \"TASKSET-AR-DESIGN-SYSTEM-SERVED-ASSET-SPLIT\",\n            \"TASKSET-AR-DESIGN-SYSTEM-DEBT-CONSOLIDATION\",\n            \"TASKSET-AR-RELEASE-AUTO-NONCRITICAL\",\n            \"TASKSET-AR-AUTO-MERGE-INTEGRITY\",\n            \"TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION\",\n            \"TASKSET-AR-PR303-CI-SCHEMA-RECOVERY\",\n            \"TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY\",\n                \"TASKSET-AR-TERMINAL-STATUS-START-GUARD\",\n                \"TASKSET-AR-WORK-CLI-INTEGRITY\",\n                \"TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION\",\n                \"TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY\",\n                \"TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY\",\n            \"TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY\",\n            \"TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY\",\n            \"TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW\",\n            \"TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY\",\n            \"TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT\",\n            \"TASKSET-AR-VISUAL-ASSET-ADOPTION\",\n            \"TASKSET-AR-VISUAL-SYSTEM-INTEGRATION\",\n        }\nE       AssertionError: assert {'TASKSET-AR-...S-TEAMS', ...} == {'TASKSET-AR-...S-TEAMS', ...}\nE         \nE         Extra items in the left set:\nE         'TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY'\nE         Use -v to get more diff\n\ntests\\test_backlog_board_tasksets.py:386: AssertionError\n============================== warnings summary ===============================\ntests/test_ui_console_beta_exploration.py::test_http_get_route_sweep_never_5xx\ntests/test_ui_console_beta_exploration.py::test_http_get_route_sweep_never_5xx\ntests/test_ui_console_beta_exploration.py::test_http_get_route_sweep_never_5xx\ntests/test_ui_console_beta_exploration.py::test_http_get_route_sweep_never_5xx\n  <unknown>:8127: DeprecationWarning: invalid escape sequence '\\/'\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ===========================\nFAILED tests/test_backlog_board_tasksets.py::test_real_backlog_tasks_are_classified_into_registered_task_sets\n1 failed, 2197 passed, 6 skipped, 4 warnings in 814.95s (0:13:34)\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/work.py status",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T14:24:45+09:00",
+      "finished_at": "2026-07-23T14:24:48+09:00",
+      "stdout": "work-status: ok\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-602\nactive_claims=1\n- task=TASK-AR-602 status=claimed agent=lead_engineer@release-orchestrator-01 claim=CLAIM-20260723-125621-task-ar-602-ef25 worktree=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-602\nworktrees=2\n- path=C:/Users/ycpig/agent_runtime branch=main\n- path=C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-602 branch=codex/task-ar-602-v0-7-0-release\ninflight: 1 tasks diverge across 1 branches (1 claimless)\n",
+      "stderr": ""
+    },
+    {
+      "command": "git cat-file -t v0.7.0",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T14:24:48+09:00",
+      "finished_at": "2026-07-23T14:24:48+09:00",
+      "stdout": "tag\n",
+      "stderr": ""
+    },
+    {
+      "command": "git rev-parse v0.7.0~0",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T14:24:48+09:00",
+      "finished_at": "2026-07-23T14:24:49+09:00",
+      "stdout": "23c4be4059dc4c12d107ac8cc5fefa795dfab7f8\n",
+      "stderr": ""
+    }
+  ]
+}

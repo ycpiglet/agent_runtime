@@ -33,6 +33,9 @@ treats `^` as an escape character.
   the shell-portable equivalent `git rev-parse v0.7.0~0`.
 - Preserve the failed evidence file; it is part of the project history and is
   not overwritten by the passing rerun.
+- Synchronize the repository's exhaustive real-taskset test expectation with
+  the newly registered taskset. This is registration bookkeeping, not
+  implementation of the runner fix.
 
 ## Boundaries
 
@@ -41,6 +44,9 @@ treats `^` as an escape character.
   or historical evidence.
 - The implementation must define and test the cross-platform command contract
   before changing process execution semantics.
+- The release closeout may update only the exhaustive taskset expectation in
+  `tests/test_backlog_board_tasksets.py` so registration does not make the
+  existing governance baseline red.
 
 ## Next actions
 
@@ -49,4 +55,5 @@ treats `^` as an escape character.
 2. Amend TASK-AR-602 task/unit verification metadata and body to use
    `git rev-parse v0.7.0~0`.
 3. Rerun W4a and retain both failed and passing evidence references.
-
+4. Verify the synchronized backlog expectation with the focused backlog test
+   before another full-suite W4a run.
