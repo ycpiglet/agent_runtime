@@ -825,8 +825,18 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-23-task-ar-617-t3-cross-consumer-replan.md",
-          "value": "0f7703f9a314b602ca62b114e319f3ef05994302026bf6346c09fbbb1c3b6d0d"
+          "path": "reviews/REVIEW-2026-07-23-task-ar-618-t3-selector-replan.md",
+          "value": "16174d7becfc7098954bc010fd9c3336d04669072b8f71b2317a320abf3e90f9"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-23-work-cli-integrity-design.md",
+          "value": "396332e8fbd17b1c081fa73e53e6e8cfc4a665790a28147a9cceddd32ee8b936"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "51dd560b4c1a7128e58a9b3cbe36b10e277f054ba4bebd4ec24f8192bf981cc8"
         },
         {
           "kind": "sha256",
@@ -835,86 +845,96 @@
         },
         {
           "kind": "sha256",
-          "path": "scripts/work.py",
-          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+          "path": "scripts/plan_assumption_gate.py",
+          "value": "6fc083b0c3a724c252ac64e31d6232203b04aa4fd64db01c9243ed9553e7d06c"
         },
         {
           "kind": "sha256",
           "path": "scripts/backlog_board.py",
-          "value": "6e1f1b2a40f2d8b2a66e4ec5685531d4870e295a2a9e5791571faabd906accfd"
+          "value": "216a87886318ee54157781b29b3f49d6e47344be4b476435789ca4d388d148e8"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/backlog_board.py",
-          "value": "4455c3d28114130e18821a1eed53868cab16c4ffbc564300eb0578e3f85572ef"
+          "value": "aa01ab042c27229dbb24260305a551036a4eaa05659c5fc8e0f40c68b7067d4f"
         },
         {
           "kind": "sha256",
           "path": "scripts/org_model_gate.py",
-          "value": "ad208883e385ee3c974e34e8638dea8630dc6a25d6ccb66935865d1aeaa15ab3"
+          "value": "dcb6028895e11afb245114df44b2e2dd3915d24a86106b53f5df2d0720df9dda"
         },
         {
           "kind": "sha256",
           "path": "scripts/work_schema_gate.py",
-          "value": "e06879641cfd9aae89261f7d61a633f8b8a238fd7cebaf10dd24705cdc1f1b18"
+          "value": "81de2b47431b74a2f442a3b094d79680bdbaa461bdea11ac18659de5cf83fa54"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/work_schema_gate.py",
-          "value": "e06879641cfd9aae89261f7d61a633f8b8a238fd7cebaf10dd24705cdc1f1b18"
+          "value": "81de2b47431b74a2f442a3b094d79680bdbaa461bdea11ac18659de5cf83fa54"
         },
         {
           "kind": "sha256",
           "path": "tests/test_work_registration.py",
-          "value": "5c80c2f3d05cc6e600222233349aaa924caa51c308abf47328509be7bc7442ed"
+          "value": "06c67fede5a0e1ea22882e2d99df3fe7f6c94eb45b5d52a850befe0acbe5e2fd"
         },
         {
           "kind": "sha256",
           "path": "tests/test_work_verify.py",
-          "value": "88b1af1427973f1d18c5f35eebe44c271aa9d2f980faeb0eb6931b6dc4ffb768"
+          "value": "cee4e72376d4da1d229b5f65df48dc782c25f26936aa994cad2e5ce4fbde9c3f"
         },
         {
           "kind": "sha256",
           "path": "tests/test_work_close.py",
-          "value": "a322c7faebf5eae41d5f10823102b15076a8f1269cb7d37d7871dde5ca7750b9"
+          "value": "6c4545cdc4e27fdd4061099c97498ebcecb70433fd7541ae64b24819def3fc20"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_work_assign.py",
+          "value": "83087f942eb1e766d7a2c75d6a6964f30bf38c3d73dfdf5a535857248523edd8"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_work_criteria.py",
+          "value": "1d53bbcab893801358d19d2bc88e3ce8953e03355e4f89ddd0ebcc4ba0a82c8f"
         },
         {
           "kind": "sha256",
           "path": "tests/test_backlog_board_tasksets.py",
-          "value": "b3e79a6a43b3a8ab049c44f6b7b022662f854482017dcfca72c274976cf0917e"
+          "value": "29b57532c5a6d3a0babf6e97b8cdf89c38c43ddf36f7faa8fd09a323076485af"
         },
         {
           "kind": "sha256",
           "path": "tests/test_org_model_gate.py",
-          "value": "8e4b9486110a25834122a2ddb7d5f31c865cba84d594057d05d7bd4d7d7c04c9"
+          "value": "74e44e1d0e286d15d4173b5eb0834e9454410c07221d3faa3f92f3f5814cf055"
         },
         {
           "kind": "sha256",
           "path": "tests/test_attention_inbox.py",
-          "value": "e808a4d8b601fe41008e743621af016ae46f303c16b27d9f02be85221c26bf71"
+          "value": "4c9212f2221dc077bfafe1129b78ea74511bc49f8d1c822473412d5ffcc488cf"
         },
         {
           "kind": "sha256",
           "path": "tests/test_dispatch_gate.py",
-          "value": "3349c3ce09955eeeed36d7a7a74a968a5bc4ecb1d2e289e402152c121353a155"
+          "value": "8a2bfb6a2e4442541d52b0498b2dbf4eaa9d8aa75513c666f1f4d04951f6dad5"
         },
         {
           "kind": "sha256",
           "path": "tests/test_work_schema_gate.py",
-          "value": "f1ee383b810fa0b0c0e4a18b1c822fcab8e890ca8d133ba6a8b8ea848ca0e463"
+          "value": "66efdf8a52a5f2dfd04e83dfe654620e6b864be4cc09aeca49e705a296b8bb47"
         },
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "1eb08c31423e2c63d079cdd8858c6c155bc82007c426bb96f5b4131111085554"
+          "value": "b8d4f87e13157b44849447f4adbe0f0f9009849f8a9ba7db8fb1429cf8f1f711"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-23-task-ar-617-t3-cross-consumer-replan.md",
-      "recorded_at": "2026-07-23T09:22:15+09:00",
+      "design_record": "reviews/REVIEW-2026-07-23-task-ar-618-t3-selector-replan.md",
+      "recorded_at": "2026-07-23T12:12:12+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-WORK-CLI-INTEGRITY"
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-23T11:20:10+09:00"
+  "updated_at": "2026-07-23T12:12:12+09:00"
 }

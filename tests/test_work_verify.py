@@ -107,6 +107,36 @@ Stop after verification.
     return path
 
 
+def _write_task(root: Path, *, command: str, task_id: str = "TASK-AR-901") -> Path:
+    path = root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        f"""---
+schema_version: agent-runtime-work-item/v1
+id: {task_id}
+display_id: {task_id}
+task_uid: 22222222-2222-4222-8222-000000000001
+work_id: {task_id}
+work_uid: 22222222-2222-4222-8222-000000000001
+kind: task
+parent_id: TASKSET-TEST
+status: in_progress
+owner: lead-engineer
+created_at: 2026-06-12T12:00:00+09:00
+updated_at: 2026-06-12T12:00:00+09:00
+acceptance:
+  - "Task verification evidence is written."
+verification:
+  - "{command}"
+---
+
+# {task_id} - Verification Test
+""",
+        encoding="utf-8",
+    )
+    return path
+
+
 def _frontmatter(path: Path) -> dict[str, str]:
     meta: dict[str, str] = {}
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -228,3 +258,58 @@ def test_work_verify_blocks_unit_without_commands(tmp_path: Path) -> None:
     assert "verification:no-commands" in result.stderr
     assert "verification_status: pending" in unit_path.read_text(encoding="utf-8")
     assert not (tmp_path / "reviews").exists()
+
+
+def test_work_verify_exact_task_id_ignores_descendant_unit(tmp_path: Path) -> None:
+    script = tmp_path / "scripts" / "check.py"
+    script.parent.mkdir(parents=True)
+    script.write_text("print('verify task ok')\n", encoding="utf-8")
+    command = f"{sys.executable} scripts/check.py"
+    unit_path = _write_unit(tmp_path, command=command)
+    unit_before = unit_path.read_text(encoding="utf-8")
+    task_path = _write_task(tmp_path, command=command)
+
+    result = _run(
+        tmp_path,
+        "verify",
+        "TASK-AR-901",
+        "--now",
+        "2026-06-12T13:20:00+09:00",
+        "--actor",
+        "tester-instance",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout[result.stdout.index("{") :])
+    assert payload["work_id"] == "TASK-AR-901"
+    assert payload["work_path"] == "agents/lead_engineer/tasks/TASK-AR-901.md"
+    assert _frontmatter(task_path)["verification_status"] == "passed"
+    assert unit_path.read_text(encoding="utf-8") == unit_before
+
+
+def test_work_verify_duplicate_unit_id_is_ambiguous(tmp_path: Path) -> None:
+    script = tmp_path / "scripts" / "check.py"
+    script.parent.mkdir(parents=True)
+    script.write_text("print('verify unit ok')\n", encoding="utf-8")
+    first = _write_unit(tmp_path, command=f"{sys.executable} scripts/check.py")
+    second = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-902"
+        / "UNIT-TASK-AR-901-001.md"
+    )
+    second.parent.mkdir(parents=True, exist_ok=True)
+    second.write_text(first.read_text(encoding="utf-8"), encoding="utf-8")
+
+    result = _run(tmp_path, "verify", "UNIT-TASK-AR-901-001", "--json")
+
+    assert result.returncode == 1
+    assert (
+        "work-verify:ambiguous:UNIT-TASK-AR-901-001:"
+        "agents/lead_engineer/tasks/units/TASK-AR-901/UNIT-TASK-AR-901-001.md,"
+        "agents/lead_engineer/tasks/units/TASK-AR-902/UNIT-TASK-AR-901-001.md"
+    ) in result.stderr

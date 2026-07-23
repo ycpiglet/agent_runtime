@@ -310,3 +310,30 @@ def test_work_close_blocks_done_without_actuals_without_mutating(tmp_path: Path)
     assert "work-close:missing-actual-hours" in result.stderr
     assert "work-close:missing-actual-tokens" in result.stderr
     assert unit_path.read_text(encoding="utf-8") == before
+
+
+def test_work_close_exact_task_id_ignores_descendant_unit(tmp_path: Path) -> None:
+    unit_path = _write_unit(tmp_path)
+    unit_before = unit_path.read_text(encoding="utf-8")
+    task_path = tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md"
+
+    result = _run(
+        tmp_path,
+        "close",
+        "TASK-AR-901",
+        "--resolution",
+        "superseded",
+        "--now",
+        "2026-06-12T13:40:00+09:00",
+        "--actor",
+        "tester-instance",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout[result.stdout.index("{") :])
+    assert payload["work_id"] == "TASK-AR-901"
+    assert payload["work_path"] == "agents/lead_engineer/tasks/TASK-AR-901.md"
+    assert payload["resolution"] == "superseded"
+    assert _frontmatter(task_path)["status"] == "completed"
+    assert unit_path.read_text(encoding="utf-8") == unit_before

@@ -1277,7 +1277,6 @@ def _candidate_work_paths(root: Path, work_id: str) -> list[Path]:
         candidates.extend(sorted((root / UNITS_DIR).glob(f"*/{work_id}.md")))
     if TASK_DISPLAY_RE.match(work_id):
         candidates.append(root / TASKS_DIR / f"{work_id}.md")
-        candidates.extend(sorted((root / UNITS_DIR / work_id).glob("UNIT-*.md")))
     return [path for path in candidates if path.exists()]
 
 
@@ -1285,7 +1284,7 @@ def _load_work_item(root: Path, work_id: str, *, command_name: str) -> tuple[Pat
     paths = _candidate_work_paths(root, work_id)
     if not paths:
         raise WorkRegistrationError([f"{command_name}:not-found:{work_id}"])
-    if len(paths) > 1 and not UNIT_DISPLAY_RE.match(work_id):
+    if len(paths) > 1:
         raise WorkRegistrationError([f"{command_name}:ambiguous:{work_id}:{','.join(_rel(root, path) for path in paths)}"])
     path = paths[0]
     text = path.read_text(encoding="utf-8")
