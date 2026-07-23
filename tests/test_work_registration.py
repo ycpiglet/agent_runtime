@@ -166,6 +166,8 @@ def test_work_new_preserves_type_like_strings_for_org_model_consumers(tmp_path: 
     task_meta = org_model_gate.parse_frontmatter(task_path.read_text(encoding="utf-8"))
     unit_meta = org_model_gate.parse_frontmatter(unit_path.read_text(encoding="utf-8"))
     assert task_meta["title"] == "true"
+    assert task_meta["est_tokens"] == 1000
+    assert task_meta["est_hours"] == 1
     assert unit_meta["context"] == "False"
     assert unit_meta["target_files"] == ["007"]
     assert unit_meta["acceptance"] == ["-7"]

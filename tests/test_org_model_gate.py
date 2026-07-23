@@ -1,4 +1,5 @@
 import json
+import sys
 from pathlib import Path
 import importlib.util
 
@@ -148,3 +149,33 @@ def test_frontmatter_decodes_work_emitter_marker_for_scalars_and_lists():
 
     assert meta["title"] == title
     assert meta["target_files"] == [target]
+
+
+def test_work_emitter_distinguishes_type_like_strings_from_native_fields():
+    mod = _load()
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import work
+
+    for value in ("true", "True", "false", "False", "0", "-7", "007"):
+        meta = mod.parse_frontmatter(
+            work._frontmatter({"title": value, "target_files": [value]})
+        )
+        assert meta["title"] == value
+        assert meta["target_files"] == [value]
+
+    native = mod.parse_frontmatter(
+        work._frontmatter(
+            {
+                "approval_required": "false",
+                "security_sensitive": "True",
+                "est_tokens": "007",
+                "actual_tokens": "-7",
+            }
+        )
+    )
+    assert native == {
+        "approval_required": False,
+        "security_sensitive": True,
+        "est_tokens": 7,
+        "actual_tokens": -7,
+    }
