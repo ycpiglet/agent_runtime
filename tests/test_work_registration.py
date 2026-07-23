@@ -321,9 +321,26 @@ def test_work_new_round_trips_hash_and_quote_bearing_frontmatter_values(tmp_path
     payload = _payload(include_units=True)
     task_summary = 'Preserve issue #167 with both \'single\' and "double" quotes.'
     unit_context = 'Keep issue #168 with both \'single\' and "double" quotes.'
+    splitline_values = [
+        f"left{separator}right"
+        for separator in (
+            "\n",
+            "\r",
+            "\r\n",
+            "\v",
+            "\f",
+            "\x1c",
+            "\x1d",
+            "\x1e",
+            "\x85",
+            "\u2028",
+            "\u2029",
+        )
+    ]
     acceptance = [
         "Preserve PR #167 and Owner's note.",
         'Preserve PR #168 and the "reviewed" label.',
+        *splitline_values,
     ]
     bracketed_summary = "[planned, done]"
     payload["tasks"][0]["summary"] = task_summary  # type: ignore[index]
