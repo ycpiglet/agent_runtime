@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-23T09:22:17+09:00
+generated_at: 2026-07-23T09:59:33+09:00
 record_count: 444
 ---
 
@@ -479,8 +479,8 @@ record_count: 444
 | 33.1.1.1 | Unit 33.1.1.1 | unit | `UNIT-TASK-AR-616-001` | `TASK-AR-616` | completed | `agents/lead_engineer/tasks/units/TASK-AR-616/UNIT-TASK-AR-616-001.md` | UNIT-TASK-AR-616-001 - Harden the bounded fixture commit recovery window |
 | 34 | Initiative 34 | initiative | `INIT-AR-WORK-CLI-INTEGRITY` | - | active | `agents/project/initiatives/INIT-AR-WORK-CLI-INTEGRITY.md` | Work CLI Metadata Integrity |
 | 34.1 | Taskset 34.1 | taskset | `TASKSET-AR-WORK-CLI-INTEGRITY` | `INIT-AR-WORK-CLI-INTEGRITY` | active | `BACKLOG-BOARD.md` | Work CLI Integrity |
-| 34.1.1 | Task 34.1.1 | task | `TASK-AR-617` | `TASKSET-AR-WORK-CLI-INTEGRITY` | in_progress | `agents/lead_engineer/tasks/TASK-AR-617.md` | Prevent work registration, verification, and close operations from truncating or chan… |
-| 34.1.1.1 | Unit 34.1.1.1 | unit | `UNIT-TASK-AR-617-001` | `TASK-AR-617` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-617/UNIT-TASK-AR-617-001.md` | UNIT-TASK-AR-617-001 - Implement round-trip-safe work frontmatter emission |
+| 34.1.1 | Task 34.1.1 | task | `TASK-AR-617` | `TASKSET-AR-WORK-CLI-INTEGRITY` | completed | `agents/lead_engineer/tasks/TASK-AR-617.md` | Prevent work registration, verification, and close operations from truncating or chan… |
+| 34.1.1.1 | Unit 34.1.1.1 | unit | `UNIT-TASK-AR-617-001` | `TASK-AR-617` | completed | `agents/lead_engineer/tasks/units/TASK-AR-617/UNIT-TASK-AR-617-001.md` | UNIT-TASK-AR-617-001 - Implement round-trip-safe work frontmatter emission |
 | 34.1.2 | Task 34.1.2 | task | `TASK-AR-618` | `TASKSET-AR-WORK-CLI-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-618.md` | Allow generic work commands to address a canonical task by exact ID without treating… |
 | 34.1.2.1 | Unit 34.1.2.1 | unit | `UNIT-TASK-AR-618-001` | `TASK-AR-618` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-618/UNIT-TASK-AR-618-001.md` | UNIT-TASK-AR-618-001 - Implement exact work-item selector precedence |
 

@@ -1,5 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-23 - TASK-AR-617 complete; TASK-AR-618 next
+
+- Completed: PR #334 merged at `56203757dc296e85f8856333b255adb354b96da9`; the pull-request run and the second post-merge main attempt passed Python 3.10, 3.11, and 3.12.
+- Contract: unsafe scalar/list values now round-trip through registration, verify, close, backlog, org-model, work-schema, attention, and dispatch consumers; type-like free-form strings remain strings while schema-native boolean/numeric fields retain their native semantics.
+- Quality: task/unit W4a passed 82 focused tests plus schema/host-lock checks; independent W4b approved at 96/100 and skeptic W4b at 98/100 before merge.
+- Main CI note: the first post-merge attempt had one isolated `release_cadence_trigger` tag-time injection flake (`1 failed, 2191 passed`); a complete three-version rerun passed and no TASK-AR-617 assertion failed.
+- Next: execute worker-ready `TASK-AR-618` through W0~W6, then run the queued `TASK-AR-602` v0.7.0 release workflow.
+
 ## 2026-07-23 - Work CLI integrity intake registered before release
 
 - Registered: `TASK-AR-617` and `TASK-AR-618` in `TASKSET-AR-WORK-CLI-INTEGRITY`, each with one worker-ready unit and a recorded T0 plan-assumption snapshot.

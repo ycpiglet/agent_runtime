@@ -9,10 +9,10 @@ kind: task
 parent_id: TASKSET-AR-WORK-CLI-INTEGRITY
 registered_at: 2026-07-23T08:40:51+09:00
 created_at: 2026-07-23T08:40:51+09:00
-updated_at: 2026-07-23T09:40:20+09:00
+updated_at: 2026-07-23T09:57:31+09:00
 started_at: 2026-07-23T08:42:50+09:00
 title: Preserve work frontmatter values across lifecycle rewrites
-status: in_progress
+status: completed
 priority: P0
 difficulty: M
 est_hours: 3
@@ -45,6 +45,11 @@ evidence_refs:
   - reviews/VERIFY-2026-07-23-task-ar-617-20260723091656.json
   - reviews/VERIFY-2026-07-23-task-ar-617-20260723093020.json
   - reviews/VERIFY-2026-07-23-task-ar-617-20260723094020.json
+resolution: done
+completed_at: 2026-07-23T09:57:31+09:00
+closed_by: codex-root-task-ar-617
+actual_hours: 1.25
+actual_tokens: 60000
 ---
 
 # TASK-AR-617 - Preserve work frontmatter values across lifecycle rewrites
@@ -68,3 +73,18 @@ evidence_refs:
 - `python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py tests/test_backlog_board_tasksets.py tests/test_org_model_gate.py tests/test_attention_inbox.py tests/test_dispatch_gate.py tests/test_work_schema_gate.py -q`
 - `python scripts/work_schema_gate.py --check`
 - `python scripts/regen_host_lock_if_needed.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T09:57:31+09:00`
+- Resolution: `done`
+- Actual hours: `1.25`
+- Actual tokens: `60000`
+- Closed by: `codex-root-task-ar-617`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-task-ar-617-20260723091055.json`
+  - `reviews/VERIFY-2026-07-23-task-ar-617-20260723091656.json`
+  - `reviews/VERIFY-2026-07-23-task-ar-617-20260723093020.json`
+  - `reviews/VERIFY-2026-07-23-task-ar-617-20260723094020.json`
+<!-- work-close:end -->
