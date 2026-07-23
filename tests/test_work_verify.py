@@ -215,6 +215,72 @@ def test_work_verify_returns_failure_and_records_failed_evidence(tmp_path: Path)
     assert _frontmatter(unit_path)["verification_status"] == "failed"
 
 
+def test_work_verify_preserves_caret_bearing_revision_argument(tmp_path: Path) -> None:
+    script = tmp_path / "scripts" / "check.py"
+    script.parent.mkdir(parents=True)
+    script.write_text(
+        "import json\n"
+        "import sys\n"
+        "print(json.dumps(sys.argv[1:]))\n",
+        encoding="utf-8",
+    )
+    revision = "v0.7.0^{}"
+    command = f"{sys.executable} scripts/check.py {revision}"
+    _write_unit(tmp_path, command=command)
+
+    result = _run(
+        tmp_path,
+        "verify",
+        "UNIT-TASK-AR-901-001",
+        "--now",
+        "2026-06-12T13:11:30+09:00",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout[result.stdout.index("{") :])
+    evidence_payload = json.loads((tmp_path / payload["evidence"]).read_text(encoding="utf-8"))
+    command_result = evidence_payload["commands"][0]
+    assert command_result["command"] == command
+    assert json.loads(command_result["stdout"]) == [revision]
+
+
+def test_work_verify_timeout_retains_result_evidence_fields(tmp_path: Path) -> None:
+    script = tmp_path / "scripts" / "check.py"
+    script.parent.mkdir(parents=True)
+    script.write_text("import time\ntime.sleep(5)\n", encoding="utf-8")
+    command = f"{sys.executable} scripts/check.py"
+    _write_unit(tmp_path, command=command)
+
+    result = _run(
+        tmp_path,
+        "verify",
+        "UNIT-TASK-AR-901-001",
+        "--now",
+        "2026-06-12T13:11:45+09:00",
+        "--timeout",
+        "1",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    payload = json.loads(result.stdout[result.stdout.index("{") :])
+    evidence_payload = json.loads((tmp_path / payload["evidence"]).read_text(encoding="utf-8"))
+    command_result = evidence_payload["commands"][0]
+    assert command_result["command"] == command
+    assert command_result["status"] == "timeout"
+    assert command_result["returncode"] is None
+    assert set(command_result) == {
+        "command",
+        "status",
+        "returncode",
+        "started_at",
+        "finished_at",
+        "stdout",
+        "stderr",
+    }
+
+
 def test_work_verify_preserves_quoted_hash_scalar_and_list_values(tmp_path: Path) -> None:
     script = tmp_path / "scripts" / "check.py"
     script.parent.mkdir(parents=True)
