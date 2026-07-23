@@ -337,6 +337,35 @@ def _load_module():
     return module
 
 
+def _successful_cadence_query(cmd: list[str]) -> subprocess.CompletedProcess[str]:
+    """Return a complete, deterministic tagged-repository query surface.
+
+    Query-failure tests must fail only the query selected by the scenario. A
+    fallback to real Git lets an unrelated runner transient stop build_report()
+    before the selected query is reached and turns the retry-count assertion
+    into a false failure.
+    """
+    args = list(cmd[1:])
+    if args == ["describe", "--tags", "--abbrev=0"]:
+        stdout = "v0.1.0\n"
+    elif args[:2] == ["log", "--format=%s"]:
+        stdout = "".join(
+            f"{'feat' if index < 5 else 'chore'}: tick {index}\n"
+            for index in range(40)
+        )
+    elif args[:2] == ["rev-list", "--count"]:
+        stdout = "40\n"
+    elif args[:3] == ["log", "-1", "--format=%ct"]:
+        stdout = "1767225600\n"
+    elif args[:2] == ["log", "--format=%s%n%b%x00"]:
+        stdout = "".join(f"chore: tick {index}\x00" for index in range(40))
+    elif args[:2] in (["diff", "--name-status"], ["diff", "--name-only"]):
+        stdout = ""
+    else:
+        raise AssertionError(f"unexpected cadence query: {args!r}")
+    return subprocess.CompletedProcess(cmd, returncode=0, stdout=stdout, stderr="")
+
+
 def test_loaded_module_subprocess_patch_is_process_local(monkeypatch) -> None:
     module = _load_module()
     parent_run = subprocess.run
@@ -479,14 +508,10 @@ def test_exhausted_unexpected_nonzero_git_failure_is_error(tmp_path: Path, monke
 
 
 def test_partial_query_error_overrides_other_trigger_metrics(tmp_path: Path, monkeypatch) -> None:
-    repo = _init_repo(tmp_path)
-    _git(repo, "tag", "v0.1.0")
-    for index in range(40):
-        _commit(repo, f"chore: tick {index}")
+    repo = tmp_path
 
     module = _load_module()
     monkeypatch.setattr(module.time, "sleep", lambda _s: None)
-    real_run = subprocess.run
     failed_diff_calls = 0
 
     def _fail_diff_queries(cmd, **kwargs):
@@ -499,7 +524,7 @@ def test_partial_query_error_overrides_other_trigger_metrics(tmp_path: Path, mon
                 stdout="",
                 stderr="fatal: transient runner resource failure",
             )
-        return real_run(cmd, **kwargs)
+        return _successful_cadence_query(cmd)
 
     monkeypatch.setattr(module.subprocess, "run", _fail_diff_queries)
     report = module.build_report(repo)
@@ -529,15 +554,10 @@ def test_partial_query_error_overrides_other_trigger_metrics(tmp_path: Path, mon
 def test_each_partial_query_failure_invalidates_triggered_report(
     tmp_path: Path, monkeypatch, query_kind: str
 ) -> None:
-    repo = _init_repo(tmp_path)
-    _git(repo, "tag", "v0.1.0")
-    for index in range(40):
-        kind = "feat" if index < 5 else "chore"
-        _commit(repo, f"{kind}: tick {index}")
+    repo = tmp_path
 
     module = _load_module()
     monkeypatch.setattr(module.time, "sleep", lambda _s: None)
-    real_run = subprocess.run
     failed_calls = 0
 
     def _matches(args: list[str]) -> bool:
@@ -563,7 +583,7 @@ def test_each_partial_query_failure_invalidates_triggered_report(
                 stdout="",
                 stderr=f"fatal: {query_kind} query unavailable",
             )
-        return real_run(cmd, **kwargs)
+        return _successful_cadence_query(cmd)
 
     monkeypatch.setattr(module.subprocess, "run", _fail_selected)
     report = module.build_report(repo)

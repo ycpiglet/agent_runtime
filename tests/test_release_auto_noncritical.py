@@ -407,6 +407,26 @@ def _run(repo: Path, **kwargs):
     )
 
 
+def _successful_cadence_query(cmd: list[str]) -> subprocess.CompletedProcess[str]:
+    """Return deterministic cadence answers for release-auto injection tests."""
+    args = list(cmd[1:])
+    if args == ["describe", "--tags", "--abbrev=0"]:
+        stdout = "v0.2.0\n"
+    elif args[:2] == ["log", "--format=%s"]:
+        stdout = "".join(f"chore: tick {index}\n" for index in range(40))
+    elif args[:2] == ["rev-list", "--count"]:
+        stdout = "40\n"
+    elif args[:3] == ["log", "-1", "--format=%ct"]:
+        stdout = "1767225600\n"
+    elif args[:2] == ["log", "--format=%s%n%b%x00"]:
+        stdout = "".join(f"chore: tick {index}\x00" for index in range(40))
+    elif args[:2] in (["diff", "--name-status"], ["diff", "--name-only"]):
+        stdout = ""
+    else:
+        raise AssertionError(f"unexpected cadence query: {args!r}")
+    return subprocess.CompletedProcess(cmd, returncode=0, stdout=stdout, stderr="")
+
+
 # --------------------------------------------------------------------------- #
 # Noncritical happy path: dry-run reaches "executed" without a real tag/push.
 # --------------------------------------------------------------------------- #
@@ -729,8 +749,7 @@ def test_partial_cadence_query_error_halts_even_when_commit_threshold_fires(
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    real_run = subprocess.run
-    module.subprocess = types.SimpleNamespace(run=real_run)
+    module.subprocess = types.SimpleNamespace(run=_successful_cadence_query)
     module.time = types.SimpleNamespace(sleep=time.sleep, time=time.time)
     monkeypatch.setattr(module.time, "sleep", lambda _s: None)
     failed_diff_calls = 0
@@ -745,7 +764,7 @@ def test_partial_cadence_query_error_halts_even_when_commit_threshold_fires(
                 stdout="",
                 stderr="fatal: transient runner resource failure",
             )
-        return real_run(cmd, **kwargs)
+        return _successful_cadence_query(cmd)
 
     monkeypatch.setattr(module.subprocess, "run", _fail_diff_queries)
     monkeypatch.setattr(orch, "cadence", module)
