@@ -57,5 +57,5 @@ tags:
 ## Verification
 
 - `python -m pytest tests/test_release_cadence_trigger.py tests/test_release_auto_noncritical.py -q`
-- `python -m pytest tests/test_release_cadence_trigger.py::test_each_partial_query_failure_invalidates_triggered_report tests/test_release_auto_noncritical.py::test_partial_cadence_query_error_halts_even_when_commit_threshold_fires -q --count=20`
+- `python -m pytest tests/test_release_cadence_trigger.py::test_each_partial_query_failure_invalidates_triggered_report tests/test_release_auto_noncritical.py::test_partial_cadence_query_error_halts_even_when_commit_threshold_fires -q`
 - `python scripts/taskset_work_gate.py --check`
