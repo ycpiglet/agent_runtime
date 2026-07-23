@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-23T14:08:19+09:00",
-  "record_count": 456,
+  "generated_at": "2026-07-23T15:01:40+09:00",
+  "record_count": 460,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -5019,6 +5019,50 @@
       "title": "UNIT-TASK-AR-621-001 - Define and test cross-platform verification execution",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-621/UNIT-TASK-AR-621-001.md",
       "parent_id": "TASK-AR-621",
+      "status": "worker_ready"
+    },
+    {
+      "key": "initiative:INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
+      "level": "initiative",
+      "number": "38",
+      "label": "Initiative 38",
+      "id": "INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
+      "title": "Work Frontmatter Scalar Integrity",
+      "path": "agents/project/initiatives/INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
+      "level": "taskset",
+      "number": "38.1",
+      "label": "Taskset 38.1",
+      "id": "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
+      "title": "Work Frontmatter Scalar Integrity",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-622",
+      "level": "task",
+      "number": "38.1.1",
+      "label": "Task 38.1.1",
+      "id": "TASK-AR-622",
+      "title": "Ensure work registration and lifecycle rewrites round-trip scalar values containing Y…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-622.md",
+      "parent_id": "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-622-001",
+      "level": "unit",
+      "number": "38.1.1.1",
+      "label": "Unit 38.1.1.1",
+      "id": "UNIT-TASK-AR-622-001",
+      "title": "UNIT-TASK-AR-622-001 - Define and test lossless work scalar serialization",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-622/UNIT-TASK-AR-622-001.md",
+      "parent_id": "TASK-AR-622",
       "status": "worker_ready"
     }
   ]
