@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T14:09:39+09:00
-record_count: 854
+generated_at: 2026-07-23T14:10:20+09:00
+record_count: 856
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `854` review and evidence records under `reviews/`.
+- Summary: indexed `856` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `854` files |
+| Reviews covered | pass | `856` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -562,8 +562,10 @@ record_count: 854
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-cadence-query-recovery-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-cadence-query-recovery-registration` | md | record | pass | Release Cadence Query Recovery Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-self-eval-query-integrity-registration.md` | `REVIEW-2026-07-23-taskset-ar-self-eval-query-integrity-registration` | md | record | pass | Self-Eval Query Integrity Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-work-cli-integrity-registration.md` | `REVIEW-2026-07-23-taskset-ar-work-cli-integrity-registration` | md | record | pass | Work CLI Integrity Registration |
+| `reviews/REVIEW-2026-07-23-taskset-ar-work-verify-windows-shell-integrity-registration.md` | `REVIEW-2026-07-23-taskset-ar-work-verify-windows-shell-integrity-registration` | md | record | pass | Work Verify Windows Shell Integrity Registration |
 | `reviews/REVIEW-2026-07-23-v0.7.0-release-notes-prepublication.md` | `REVIEW-2026-07-23-v0.7.0-release-notes-prepublication` | md | approved | pass | v0.7.0 Release Notes Prepublication Review |
 | `reviews/REVIEW-2026-07-23-work-cli-integrity-design.md` | `REVIEW-2026-07-23-work-cli-integrity-design` | md | record | pass | Work CLI Metadata Integrity Design |
+| `reviews/REVIEW-2026-07-23-work-verify-windows-shell-registration.md` | `REVIEW-2026-07-23-work-verify-windows-shell-registration` | md | registered | n/a | Windows work-verify shell argument preservation defect |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |

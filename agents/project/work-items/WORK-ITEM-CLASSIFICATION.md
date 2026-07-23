@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-23T12:36:26+09:00
-record_count: 452
+generated_at: 2026-07-23T14:08:19+09:00
+record_count: 456
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `452` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `456` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `37` records |
-| Tasksets | pass | `61` records |
-| Tasks | pass | `284` records |
-| Units | pass | `70` records |
+| Initiatives | pass | `38` records |
+| Tasksets | pass | `62` records |
+| Tasks | pass | `285` records |
+| Units | pass | `71` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -491,6 +491,10 @@ record_count: 452
 | 36.1 | Taskset 36.1 | taskset | `TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY` | `INIT-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY` | complete | `BACKLOG-BOARD.md` | Cadence Isolation Backlog Expectation Recovery |
 | 36.1.1 | Task 36.1.1 | task | `TASK-AR-620` | `TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY` | completed | `agents/lead_engineer/tasks/TASK-AR-620.md` | Restore PR #336 package tests without weakening the real-backlog exact-set contract. |
 | 36.1.1.1 | Unit 36.1.1.1 | unit | `UNIT-TASK-AR-620-001` | `TASK-AR-620` | completed | `agents/lead_engineer/tasks/units/TASK-AR-620/UNIT-TASK-AR-620-001.md` | UNIT-TASK-AR-620-001 - Add cadence isolation tasksets to the exact expected set |
+| 37 | Initiative 37 | initiative | `INIT-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY` | - | active | `agents/project/initiatives/INIT-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY.md` | Work Verify Windows Shell Integrity |
+| 37.1 | Taskset 37.1 | taskset | `TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY` | `INIT-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY` | active | `BACKLOG-BOARD.md` | Work Verify Windows Shell Integrity |
+| 37.1.1 | Task 37.1.1 | task | `TASK-AR-621` | `TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-621.md` | Prevent shell metacharacters in registered verification commands from being silently… |
+| 37.1.1.1 | Unit 37.1.1.1 | unit | `UNIT-TASK-AR-621-001` | `TASK-AR-621` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-621/UNIT-TASK-AR-621-001.md` | UNIT-TASK-AR-621-001 - Define and test cross-platform verification execution |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.
