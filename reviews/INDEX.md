@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T15:13:36+09:00
-record_count: 865
+generated_at: 2026-07-23T15:18:39+09:00
+record_count: 866
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `865` review and evidence records under `reviews/`.
+- Summary: indexed `866` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `865` files |
+| Reviews covered | pass | `866` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -598,6 +598,7 @@ record_count: 865
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC-REWORK2.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC-REWORK2` | md | record | pass | TASK-AR-606 Security and Cross-Platform Skeptic Rework 2 Review |
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC` | md | record | fail | TASK-AR-606 Security and Cross-Platform Skeptic Review |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-602-CANDIDATE-SKEPTIC-APPROVAL.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-602-CANDIDATE-SKEPTIC-APPROVAL` | md | conditional_approval | conditional_pass | TASK-AR-602 v0.7.0 Candidate Skeptic Approval |
+| `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC-RECHECK-2.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC-RECHECK-2` | md | approved | pass | TASK-AR-602 Final Skeptic Recheck Addendum 2 |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC-RECHECK.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC-RECHECK` | md | hold | fail | TASK-AR-602 Final Skeptic Recheck Addendum |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC` | md | hold | fail | TASK-AR-602 Final Skeptic W4b |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-607-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-607-SKEPTIC` | md | record | pass | TASK-AR-607 Skeptic and Adversarial Review |
