@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-WORK-CLI-INTEGRITY
 initiative_id: INIT-AR-WORK-CLI-INTEGRITY
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-23T08:40:51+09:00
-updated_at: 2026-07-23T08:40:51+09:00
+updated_at: 2026-07-23T12:28:00+09:00
 origin_type: review_finding
 origin_ref: reviews/REVIEW-2026-07-23-work-cli-integrity-design.md
 created_by: codex-root-planner
@@ -47,6 +47,10 @@ verification:
   - python scripts/work_schema_gate.py --check
 handoff: Provide the failure-first commit, selector precedence table, focused test output, and confirmation that no command-specific semantics changed.
 stop_condition: Stop if deterministic exact-ID selection requires changing work hierarchy or accepting duplicate canonical task records; escalate with the conflicting paths.
+verified_at: 2026-07-23T12:28:00+09:00
+verified_by: /root/task-ar-618
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-unit-task-ar-618-001-20260723122800.json
 ---
 
 # UNIT-TASK-AR-618-001 - Implement exact work-item selector precedence
