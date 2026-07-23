@@ -375,17 +375,48 @@ def _has_text_value(value: Any) -> bool:
     return bool(_text_lines(value))
 
 
+_FRONTMATTER_LINE_BOUNDARIES = "\n\r\v\f\x1c\x1d\x1e\x85\u2028\u2029"
+_FRONTMATTER_BOOLEAN_FIELDS = {"approval_required", "security_sensitive"}
+_FRONTMATTER_NUMERIC_FIELDS = set(STATS_EXPORT_NUMERIC_FIELDS) | {"order", "xp_value"}
+
+
+def _frontmatter_scalar(value: Any, *, key: str = "") -> str:
+    text = str(value)
+    splitline_boundary = any(separator in text for separator in _FRONTMATTER_LINE_BOUNDARIES)
+    boolean_like_string = isinstance(value, str) and text in {"true", "True", "false", "False"}
+    integer_like_string = isinstance(value, str) and re.fullmatch(r"-?\d+", text) is not None
+    type_like_string = (
+        (boolean_like_string and key not in _FRONTMATTER_BOOLEAN_FIELDS)
+        or (integer_like_string and key not in _FRONTMATTER_NUMERIC_FIELDS)
+    )
+    unsafe = (
+        "#" in text
+        or splitline_boundary
+        or type_like_string
+        or text != text.strip()
+        or (text.startswith("[") and text.endswith("]"))
+        or text.startswith(("'", '"'))
+        or text.endswith(("'", '"'))
+    )
+    if not unsafe:
+        return text
+    return json.dumps(
+        backlog_board.ENCODED_WORK_SCALAR_PREFIX + text,
+        ensure_ascii=True,
+    )
+
+
 def _frontmatter(meta: dict[str, Any]) -> str:
     lines = ["---"]
     for key, value in meta.items():
         if isinstance(value, list):
             lines.append(f"{key}:")
             for item in value:
-                lines.append(f"  - {item}")
+                lines.append(f"  - {_frontmatter_scalar(item, key=key)}")
         elif isinstance(value, bool):
             lines.append(f"{key}: {'true' if value else 'false'}")
         elif value is not None and str(value) != "":
-            lines.append(f"{key}: {value}")
+            lines.append(f"{key}: {_frontmatter_scalar(value, key=key)}")
     lines.append("---")
     return "\n".join(lines)
 

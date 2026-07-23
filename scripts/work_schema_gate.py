@@ -6,6 +6,11 @@ import argparse
 import re
 from pathlib import Path
 
+try:
+    import backlog_board
+except ImportError:  # Imported as scripts.work_schema_gate from the repository root.
+    from scripts import backlog_board
+
 
 DEFAULT_SCHEMA_PATH = Path("agents/project/WORK-SCHEMA.yml")
 SCHEMA_VERSION = "agent-runtime-work-schema/v1"
@@ -162,6 +167,9 @@ def _parse_inline_list(value: str) -> list[str]:
 
 def _clean_scalar(value: str) -> str | list[str]:
     stripped = value.strip()
+    decoded = backlog_board.decode_encoded_work_scalar(stripped)
+    if decoded is not None:
+        return decoded
     if stripped.startswith("[") and stripped.endswith("]"):
         return _parse_inline_list(stripped)
     if (stripped.startswith('"') and stripped.endswith('"')) or (stripped.startswith("'") and stripped.endswith("'")):

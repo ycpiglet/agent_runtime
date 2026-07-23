@@ -1,0 +1,148 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "origin_type": "review_finding",
+  "origin_ref": "reviews/REVIEW-2026-07-23-work-cli-integrity-design.md",
+  "created_by": "codex-root-planner",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "initiative": {
+    "id": "INIT-AR-WORK-CLI-INTEGRITY",
+    "title": "Work CLI Metadata Integrity",
+    "summary": "Remove silent metadata corruption and false parent-child ambiguity from canonical work lifecycle commands before v0.7.0.",
+    "owner": "lead-engineer",
+    "status": "active"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-WORK-CLI-INTEGRITY",
+    "display_name": "Work CLI Integrity",
+    "summary": "Make work-item serialization round-trip safe and exact task or unit selectors deterministic before release preflight.",
+    "owner": "lead-engineer",
+    "status": "active",
+    "order": 10,
+    "planner_model_tier": "planner_high",
+    "worker_model_tier": "worker_standard",
+    "reviewer_model_tier": "reviewer_standard"
+  },
+  "tasks": [
+    {
+      "title": "Preserve work frontmatter values across lifecycle rewrites",
+      "goal": "Prevent work registration, verification, and close operations from truncating or changing canonical string and list metadata.",
+      "summary": "Serialize work frontmatter scalars so literal hash markers and quotes survive every parse and rewrite boundary.",
+      "scope": "Change only scripts/work.py frontmatter emission and focused registration, verify, and close tests; retain the existing lightweight parser and deterministic output shape.",
+      "priority": "P0",
+      "difficulty": "M",
+      "est_hours": 3,
+      "est_tokens": 7500,
+      "owner": "lead-engineer",
+      "team": "agent-runtime-core",
+      "origin_ref": "reviews/REVIEW-2026-07-23-work-cli-integrity-design.md",
+      "acceptance": [
+        "Scalar and list metadata containing literal hash markers retain their complete parsed values after registration, verification, and close rewrites.",
+        "Quote-bearing values and ordinary existing metadata retain their exact parsed values without double escaping or type-like coercion.",
+        "Frontmatter key ordering, list ordering, body content, evidence linkage, and existing lifecycle behavior remain unchanged."
+      ],
+      "verification": [
+        "python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py -q",
+        "python scripts/work_schema_gate.py --check"
+      ],
+      "units": [
+        {
+          "title": "Implement round-trip-safe work frontmatter emission",
+          "context": "Completed task lifecycle commands reproduced silent truncation because scripts/work.py::_frontmatter emits raw values while the canonical reader treats an unquoted hash marker as a comment.",
+          "inputs": [
+            "reviews/REVIEW-2026-07-23-work-cli-integrity-design.md",
+            "scripts/work.py",
+            "scripts/backlog_board.py",
+            "tests/test_work_registration.py",
+            "tests/test_work_verify.py",
+            "tests/test_work_close.py"
+          ],
+          "target_files": [
+            "scripts/work.py",
+            "tests/test_work_registration.py",
+            "tests/test_work_verify.py",
+            "tests/test_work_close.py"
+          ],
+          "scope": "Add a deterministic scalar emitter compatible with the existing reader, use it for scalar and list values, and prove preservation at initial registration and mutation boundaries.",
+          "steps": [
+            "Add failure-first registration, verification, and close cases for literal hash and quote-bearing values.",
+            "Implement the smallest compatible scalar emission rule without adding a YAML dependency.",
+            "Run focused modules and schema checks, then inspect historical compatibility fixtures."
+          ],
+          "acceptance": [
+            "Every failure-first value parses identically before and after each lifecycle mutation.",
+            "No existing focused work CLI test changes its expected lifecycle semantics.",
+            "The implementation does not modify the shared comment scanner."
+          ],
+          "verification": [
+            "python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py -q",
+            "python scripts/work_schema_gate.py --check"
+          ],
+          "handoff": "Provide the failure-first commit, a value-by-value round-trip matrix, changed-file summary, focused test output, and any parser compatibility limitation.",
+          "stop_condition": "Stop if exact value preservation requires replacing the shared parser or changing canonical work schema; record the incompatible examples for replan.",
+          "escalation_triggers": ["data_integrity", "cross_cutting", "ambiguity"]
+        }
+      ]
+    },
+    {
+      "title": "Resolve exact task and unit selectors deterministically",
+      "goal": "Allow generic work commands to address a canonical task by exact ID without treating its descendant units as competing matches.",
+      "summary": "Give exact task records and exact unit records deterministic selector precedence while preserving genuine ambiguity failures.",
+      "scope": "Change only scripts/work.py candidate resolution and focused verify, close, assign, and criteria tests; do not alter hierarchy or command-specific mutation contracts.",
+      "priority": "P1",
+      "difficulty": "S",
+      "est_hours": 2,
+      "est_tokens": 5000,
+      "owner": "lead-engineer",
+      "team": "agent-runtime-core",
+      "origin_ref": "reviews/W4B-2026-07-19-TASK-AR-594-RECHECK.md",
+      "acceptance": [
+        "An exact task ID resolves only the canonical task record even when one or more units exist below it.",
+        "An exact unit ID and an explicit relative or absolute path retain their current deterministic behavior.",
+        "Missing records and genuinely duplicated canonical unit records remain bounded failures rather than arbitrary selection."
+      ],
+      "verification": [
+        "python -m pytest tests/test_work_verify.py tests/test_work_close.py tests/test_work_assign.py tests/test_work_criteria.py -q",
+        "python scripts/work_schema_gate.py --check"
+      ],
+      "units": [
+        {
+          "title": "Implement exact work-item selector precedence",
+          "context": "Independent verification for TASK-AR-594 and the TASK-AR-612 lifecycle both showed that an exact TASK ID expands to its task file plus descendant units and exits as ambiguous.",
+          "inputs": [
+            "reviews/W4B-2026-07-19-TASK-AR-594-RECHECK.md",
+            "scripts/work.py",
+            "tests/test_work_verify.py",
+            "tests/test_work_close.py",
+            "tests/test_work_assign.py",
+            "tests/test_work_criteria.py"
+          ],
+          "target_files": [
+            "scripts/work.py",
+            "tests/test_work_verify.py",
+            "tests/test_work_close.py",
+            "tests/test_work_assign.py",
+            "tests/test_work_criteria.py"
+          ],
+          "scope": "Separate task identity from descendant unit discovery in the shared candidate resolver and pin the behavior across every generic command consumer.",
+          "steps": [
+            "Add failure-first cases for a task with multiple units across verify, close, assign, and criteria.",
+            "Refine exact-ID candidate construction while preserving unit glob ambiguity and explicit paths.",
+            "Run focused consumers and schema checks, then document selector precedence."
+          ],
+          "acceptance": [
+            "Task commands no longer require an explicit path solely because units exist.",
+            "Unit commands never fall through to the parent task.",
+            "Duplicate or missing canonical records remain visible with stable error text."
+          ],
+          "verification": [
+            "python -m pytest tests/test_work_verify.py tests/test_work_close.py tests/test_work_assign.py tests/test_work_criteria.py -q",
+            "python scripts/work_schema_gate.py --check"
+          ],
+          "handoff": "Provide the failure-first commit, selector precedence table, focused test output, and confirmation that no command-specific semantics changed.",
+          "stop_condition": "Stop if deterministic exact-ID selection requires changing work hierarchy or accepting duplicate canonical task records; escalate with the conflicting paths.",
+          "escalation_triggers": ["data_integrity", "ambiguity"]
+        }
+      ]
+    }
+  ]
+}

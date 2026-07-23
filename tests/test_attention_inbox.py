@@ -132,3 +132,18 @@ def test_inbox_rank_groups_higher_severity_first_within_tier(tmp_path):
     data = mod.inbox(tmp_path, now=now)
     gate_ids = [i["id"] for i in data["ranked"] if i["rank"] == "gate"]
     assert gate_ids == ["TASK-G1", "TASK-G2"]
+
+
+def test_blocked_item_preserves_work_emitter_encoded_title(tmp_path):
+    mod = _load()
+    import work
+
+    title = "true"
+    (tmp_path / "TASK-AR-913.md").write_text(
+        work._frontmatter({"id": "TASK-AR-913", "title": title, "status": "blocked"}) + "\n",
+        encoding="utf-8",
+    )
+
+    items = mod.blocked(mod._load_tasks(tmp_path))
+
+    assert items[0]["title"] == title

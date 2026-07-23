@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from scripts import backlog_board
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "work.py"
@@ -242,6 +244,37 @@ def test_work_close_requires_passed_evidence_and_writes_closeout_metadata(tmp_pa
     assert (tmp_path / "BACKLOG-BOARD.md").exists()
     assert (tmp_path / "agents" / "project" / "work-items" / "WORK-ITEM-CLASSIFICATION.md").exists()
     assert evidence.relative_to(tmp_path).as_posix() in (tmp_path / "reviews" / "INDEX.md").read_text(encoding="utf-8")
+
+
+def test_work_close_preserves_quoted_hash_metadata(tmp_path: Path) -> None:
+    unit_path = _write_unit(tmp_path)
+    _write_passed_evidence(tmp_path)
+    expected = 'Close issue #167 with both \'single\' and "double" quotes.'
+    encoded = json.dumps(backlog_board.ENCODED_WORK_SCALAR_PREFIX + expected)
+    text = unit_path.read_text(encoding="utf-8").replace(
+        'context: "Close a verified unit."',
+        f"context: {encoded}",
+    )
+    unit_path.write_text(text, encoding="utf-8")
+
+    result = _run(
+        tmp_path,
+        "close",
+        "UNIT-TASK-AR-901-001",
+        "--now",
+        "2026-06-12T13:31:00+09:00",
+        "--actor",
+        "tester-instance",
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    after, _ = backlog_board.parse_frontmatter(unit_path.read_text(encoding="utf-8"))
+    assert after["context"] == expected
 
 
 def test_work_close_blocks_without_passed_verification_or_evidence_refs(tmp_path: Path) -> None:

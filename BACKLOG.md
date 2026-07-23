@@ -1,5 +1,11 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-07-23 work CLI integrity tasks queued before v0.7.0
+
+- Next: `TASK-AR-617` in `TASKSET-AR-WORK-CLI-INTEGRITY` protects canonical frontmatter values across registration and lifecycle rewrites.
+- Then: `TASK-AR-618` removes false task-versus-unit selector ambiguity while retaining bounded failures for genuine duplicate or missing records.
+- Release boundary: `TASK-AR-602` remains last and begins only after both integrity tasks pass independent verification, PR and post-merge CI, and closeout cleanup.
+
 ## 2026-07-22 TASK-AR-611 active; PR #303 package-test recovery
 
 - Active: `TASK-AR-611` in `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` synchronizes the exact real-backlog taskset expectation after GitHub Actions run `29909181630` exposed stale registered-taskset IDs.
@@ -25,6 +31,7 @@
 | Order | Taskset | Name |
 | --- | --- | --- |
 | 10 | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | Upstream Intake Closer |
+| 10 | `TASKSET-AR-WORK-CLI-INTEGRITY` | Work CLI Integrity |
 | 11 | `TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY` | Role Routing Closeout Reliability |
 | 512 | `TASKSET-AR-AGENT-IDENTITY-CONTRACT` | Agent Identity Contract |
 | 513 | `TASKSET-AR-WORK-METADATA-ANALYTICS` | Work Metadata Analyst |

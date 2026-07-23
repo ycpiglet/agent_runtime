@@ -49,6 +49,21 @@ def test_frontmatter_preserves_hash_after_escaped_double_quotes() -> None:
         )
 
 
+def test_frontmatter_decodes_only_marker_bearing_work_scalars() -> None:
+    expected = 'Preserve issue #167 with both \'single\' and "double" quotes.'
+    for parser in _frontmatter_parsers():
+        encoded = json.dumps(
+            parser.ENCODED_WORK_SCALAR_PREFIX + expected,
+            ensure_ascii=False,
+        )
+        assert _parse_summary(parser, encoded) == expected
+        meta, _ = parser.parse_frontmatter(
+            f"---\nacceptance:\n  - {encoded}\n---\n"
+        )
+        assert meta["acceptance"] == [expected]
+        assert _parse_summary(parser, '"legacy \\"quoted\\" value"') == 'legacy \\"quoted\\" value'
+
+
 def test_frontmatter_preserves_hashes_inside_flow_lists() -> None:
     text = '---\ntags: ["PR #167", \'issue #298\', plain] # outside\n---\n'
     for parser in _frontmatter_parsers():
@@ -418,8 +433,9 @@ def test_real_backlog_tasks_are_classified_into_registered_task_sets() -> None:
         "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
         "TASKSET-AR-PR303-CI-SCHEMA-RECOVERY",
         "TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY",
-        "TASKSET-AR-TERMINAL-STATUS-START-GUARD",
-        "TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY",
+            "TASKSET-AR-TERMINAL-STATUS-START-GUARD",
+            "TASKSET-AR-WORK-CLI-INTEGRITY",
+            "TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY",
         "TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY",
         "TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY",
         "TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW",

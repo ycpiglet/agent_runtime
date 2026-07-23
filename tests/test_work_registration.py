@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from scripts import backlog_board, org_model_gate
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "work.py"
@@ -136,6 +138,39 @@ def test_work_new_creates_initiative_taskset_tasks_review_and_views(tmp_path: Pa
     assert (tmp_path / "agents" / "project" / "initiatives" / "INIT-TEST-WORK-CLI.md").exists()
     assert (tmp_path / "docs" / "superpowers" / "plans" / "2026-06-12-test-work-cli.md").exists()
     assert (tmp_path / "reviews" / "REVIEW-2026-06-12-taskset-test-work-cli-registration.md").exists()
+
+
+def test_work_new_preserves_type_like_strings_for_org_model_consumers(tmp_path: Path) -> None:
+    payload = _payload(include_units=True)
+    first_task = payload["tasks"][0]
+    first_task["title"] = "true"
+    unit = first_task["units"][0]
+    unit["context"] = "False"
+    unit["target_files"] = ["007"]
+    unit["acceptance"] = ["-7"]
+    input_path = _write_input(tmp_path, payload)
+
+    result = _run(tmp_path, input_path)
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    task_path = tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md"
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-901"
+        / "UNIT-TASK-AR-901-001.md"
+    )
+    task_meta = org_model_gate.parse_frontmatter(task_path.read_text(encoding="utf-8"))
+    unit_meta = org_model_gate.parse_frontmatter(unit_path.read_text(encoding="utf-8"))
+    assert task_meta["title"] == "true"
+    assert task_meta["est_tokens"] == 1000
+    assert task_meta["est_hours"] == 1
+    assert unit_meta["context"] == "False"
+    assert unit_meta["target_files"] == ["007"]
+    assert unit_meta["acceptance"] == ["-7"]
     first = tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md"
     second = tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-902.md"
     assert first.exists()
@@ -313,3 +348,61 @@ def test_work_new_blocks_missing_unit_required_fields_without_partial_files(tmp_
     assert result.returncode == 1
     assert "input:tasks[1].units[1]:missing:context" in result.stderr
     assert not (tmp_path / "agents").exists()
+
+
+def test_work_new_round_trips_hash_and_quote_bearing_frontmatter_values(tmp_path: Path) -> None:
+    payload = _payload(include_units=True)
+    task_summary = 'Preserve issue #167 with both \'single\' and "double" quotes.'
+    unit_context = 'Keep issue #168 with both \'single\' and "double" quotes.'
+    splitline_values = [
+        f"left{separator}right"
+        for separator in (
+            "\n",
+            "\r",
+            "\r\n",
+            "\v",
+            "\f",
+            "\x1c",
+            "\x1d",
+            "\x1e",
+            "\x85",
+            "\u2028",
+            "\u2029",
+        )
+    ]
+    acceptance = [
+        "Preserve PR #167 and Owner's note.",
+        'Preserve PR #168 and the "reviewed" label.',
+        *splitline_values,
+    ]
+    bracketed_summary = "[planned, done]"
+    payload["tasks"][0]["summary"] = task_summary  # type: ignore[index]
+    payload["tasks"][0]["units"][0]["context"] = unit_context  # type: ignore[index]
+    payload["tasks"][0]["units"][0]["acceptance"] = acceptance  # type: ignore[index]
+    payload["tasks"][1]["summary"] = bracketed_summary  # type: ignore[index]
+    input_path = _write_input(tmp_path, payload)
+
+    result = _run(tmp_path, input_path)
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    task_path = tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md"
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-901"
+        / "UNIT-TASK-AR-901-001.md"
+    )
+    task_meta, _ = backlog_board.parse_frontmatter(task_path.read_text(encoding="utf-8"))
+    unit_meta, _ = backlog_board.parse_frontmatter(unit_path.read_text(encoding="utf-8"))
+    second_meta, _ = backlog_board.parse_frontmatter(
+        (tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-902.md").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert task_meta["summary"] == task_summary
+    assert unit_meta["context"] == unit_context
+    assert unit_meta["acceptance"] == acceptance
+    assert second_meta["summary"] == bracketed_summary

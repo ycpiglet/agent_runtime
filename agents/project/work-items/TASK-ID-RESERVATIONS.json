@@ -1025,8 +1025,46 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-617",
+      "expires_at": "2026-07-24T08:40:51+09:00",
+      "fulfilled_at": "2026-07-23T08:40:51+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-617.md",
+      "fulfilled_task_id": "TASK-AR-617",
+      "fulfilled_task_uid": "2bc4aabb-cd0d-41a6-aaba-46a99b2be23d",
+      "initiative_id": "INIT-AR-WORK-CLI-INTEGRITY",
+      "kind": "task",
+      "owner_id": "codex-root-planner",
+      "reason": "work registration TASKSET-AR-WORK-CLI-INTEGRITY",
+      "reservation_group_id": "RES-20260723-084051-a1975741",
+      "reservation_id": "RES-20260723-084051-a1975741-01",
+      "reserved_at": "2026-07-23T08:40:51+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-WORK-CLI-INTEGRITY",
+      "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-618",
+      "expires_at": "2026-07-24T08:40:51+09:00",
+      "fulfilled_at": "2026-07-23T08:40:51+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-618.md",
+      "fulfilled_task_id": "TASK-AR-618",
+      "fulfilled_task_uid": "30389a6c-e64c-42f4-9b99-df4c280ff6b7",
+      "initiative_id": "INIT-AR-WORK-CLI-INTEGRITY",
+      "kind": "task",
+      "owner_id": "codex-root-planner",
+      "reason": "work registration TASKSET-AR-WORK-CLI-INTEGRITY",
+      "reservation_group_id": "RES-20260723-084051-a1975741",
+      "reservation_id": "RES-20260723-084051-a1975741-02",
+      "reserved_at": "2026-07-23T08:40:51+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-WORK-CLI-INTEGRITY",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-07-23T05:01:18+09:00"
+  "updated_at": "2026-07-23T08:40:51+09:00"
 }

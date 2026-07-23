@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from scripts import backlog_board
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "work.py"
@@ -181,6 +183,40 @@ def test_work_verify_returns_failure_and_records_failed_evidence(tmp_path: Path)
     assert evidence_payload["status"] == "failed"
     assert evidence_payload["commands"][0]["returncode"] == 7
     assert _frontmatter(unit_path)["verification_status"] == "failed"
+
+
+def test_work_verify_preserves_quoted_hash_scalar_and_list_values(tmp_path: Path) -> None:
+    script = tmp_path / "scripts" / "check.py"
+    script.parent.mkdir(parents=True)
+    script.write_text("print('verify ok')\n", encoding="utf-8")
+    unit_path = _write_unit(tmp_path, command=f"{sys.executable} scripts/check.py")
+    expected = "Preserve issue #167 and Owner's note."
+    text = unit_path.read_text(encoding="utf-8")
+    text = text.replace(
+        'context: "Verify command execution."',
+        'context: "Preserve issue #167 and Owner\'s note."',
+    ).replace(
+        '  - "Verification evidence is written."',
+        '  - "Preserve issue #167 and Owner\'s note."',
+    )
+    unit_path.write_text(text, encoding="utf-8")
+    before, _ = backlog_board.parse_frontmatter(text)
+    assert before["context"] == expected
+    assert before["acceptance"] == [expected]
+
+    result = _run(
+        tmp_path,
+        "verify",
+        "UNIT-TASK-AR-901-001",
+        "--now",
+        "2026-06-12T13:12:00+09:00",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    after, _ = backlog_board.parse_frontmatter(unit_path.read_text(encoding="utf-8"))
+    assert after["context"] == expected
+    assert after["acceptance"] == [expected]
 
 
 def test_work_verify_blocks_unit_without_commands(tmp_path: Path) -> None:

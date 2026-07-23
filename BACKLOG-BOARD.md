@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-07-23
-task_count: 280
-open_count: 1
+task_count: 282
+open_count: 3
 completed_count: 279
-task_set_count: 1
+task_set_count: 2
 completed_task_set_count: 57
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `1` open or active tasks; `279` completed tasks are archived from this live board.
+- Summary: `3` open or active tasks; `279` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `1` / Ask `0` / Review `0` / Later `0` / Done `279`.
-- Task Sets: `1` active workflows; `57` completed workflows are hidden from the live action board.
+- Status: Action `3` / Ask `0` / Review `0` / Later `0` / Done `279`.
+- Task Sets: `2` active workflows; `57` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -50,6 +50,16 @@ completed_task_set_count: 57
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-602` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md | planned | Action | P0 | Critical | High | 5h/12000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #280 after every intake unit is merged by refreshing current-state rec… |
+
+### Work CLI Integrity (`TASKSET-AR-WORK-CLI-INTEGRITY`)
+
+- Flow: Make work-item serialization round-trip safe and exact task or unit selectors deterministic before release preflight.
+- Progress: `0/2` done; `2` open or active.
+- WIP: active `1/3`; oldest `0.7h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-617` | INIT-AR-WORK-CLI-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-617/UNIT-TASK-AR-617-001.md | in_progress | Action | P0 | Critical | Medium | 3h/7500tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Prevent work registration, verification, and close operations from truncating or chan… |
+| `TASK-AR-618` | INIT-AR-WORK-CLI-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-618/UNIT-TASK-AR-618-001.md | planned | Action | P1 | High | Low | 2h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Allow generic work commands to address a canonical task by exact ID without treating… |
 
 ## Archived Task Sets
 
@@ -118,7 +128,7 @@ completed_task_set_count: 57
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `1` open across `1` task sets (see Action Board above).
+- Active: `3` open across `2` task sets (see Action Board above).
 - Archived task sets: `57` (see Archived Task Sets above).
 - Archived task files: `279` — see `ARCHIVE-INDEX.md`.
 

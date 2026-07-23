@@ -8,6 +8,12 @@
       "order": 10
     },
     {
+      "task_set_id": "TASKSET-AR-WORK-CLI-INTEGRITY",
+      "display_name": "Work CLI Integrity",
+      "summary": "Make work-item serialization round-trip safe and exact task or unit selectors deterministic before release preflight.",
+      "order": 10
+    },
+    {
       "task_set_id": "TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY",
       "display_name": "Role Routing Closeout Reliability",
       "summary": "Repair the overlay claim lifecycle gap discovered while closing TASK-AR-594.",

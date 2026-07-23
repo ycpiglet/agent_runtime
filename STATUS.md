@@ -1,5 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-23 - Work CLI integrity intake registered before release
+
+- Registered: `TASK-AR-617` and `TASK-AR-618` in `TASKSET-AR-WORK-CLI-INTEGRITY`, each with one worker-ready unit and a recorded T0 plan-assumption snapshot.
+- Evidence: lifecycle rewrites can truncate unprotected literal hash metadata, and an exact task ID falsely competes with all descendant units in the shared work-item selector.
+- Sequence: execute TASK-AR-617 first, then TASK-AR-618, each through independent W4b, PR and post-merge CI, and W5/W6 cleanup.
+- Release boundary: `TASK-AR-602` remains the v0.7.0 release target and starts only after both integrity tasks are closed on verified `main`.
+
 ## 2026-07-23 - TASK-AR-612 complete; release preflight remains queued
 
 - Completed: TASK-AR-612 merged through PR #332 at `ecf90a637c8544813d31ff659940fa1146ff3867`; pull-request and post-merge `main` runs passed Python 3.10, 3.11, and 3.12.
