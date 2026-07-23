@@ -2,7 +2,7 @@
 id: REVIEW-2026-07-23-task-ar-621-verification-command-contract
 title: TASK-AR-621 portable verification command execution contract
 kind: implementation-review
-status: rework_verified
+status: w4a_verified
 date: 2026-07-23
 task_id: TASK-AR-621
 task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
@@ -79,5 +79,8 @@ scalar handling remains separately registered as TASK-AR-622.
 - failure-first: `c06615ff`, caret regression failed as expected
 - first W4a: `02e111e1`, `8 passed`
 - first skeptical W4b: blocked on the real terminal-quote compatibility case
+- compatibility rework: `0b5da107`
 - revised focused run: `9 passed`, including that exact legacy shape
-- revised W4a and W4b are required on the follow-up exact HEAD before closeout
+- revised W4a:
+  `reviews/VERIFY-2026-07-23-unit-task-ar-621-001-20260723160351.json`
+- a fresh W4b is required on the follow-up exact HEAD before closeout
