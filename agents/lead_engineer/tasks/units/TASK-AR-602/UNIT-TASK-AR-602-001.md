@@ -60,7 +60,8 @@ verification:
   - python scripts/owner_governance_gate.py
   - python -m pytest -q
   - python scripts/work.py status
-  - git tag -v v0.7.0
+  - git cat-file -t v0.7.0
+  - "git rev-parse 'v0.7.0^{}'"
 handoff: Provide release URL, tag/commit SHA, full gate/test results, closed issue list, current W0 status, and rollback notes.
 stop_condition: Stop before release if any required test/gate is red, current main differs from the verified release commit, or a secret/credential boundary is unclear.
 ---
@@ -122,7 +123,8 @@ Reconcile state, bump the deterministic cascade to 0.7.0, run full validation an
 - `python scripts/owner_governance_gate.py`
 - `python -m pytest -q`
 - `python scripts/work.py status`
-- `git tag -v v0.7.0`
+- `git cat-file -t v0.7.0`
+- `git rev-parse 'v0.7.0^{}'`
 
 ## Handoff
 
