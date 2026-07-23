@@ -94,6 +94,37 @@ Stop after proposal output.
     return path
 
 
+def _write_task(root: Path) -> Path:
+    task_id = "TASK-AR-901"
+    path = root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        f"""---
+schema_version: agent-runtime-work-item/v1
+id: {task_id}
+display_id: {task_id}
+task_uid: 22222222-2222-4222-8222-000000000001
+work_id: {task_id}
+work_uid: 22222222-2222-4222-8222-000000000001
+kind: task
+parent_id: TASKSET-TEST
+status: in_progress
+owner: lead-engineer
+created_at: 2026-06-12T12:00:00+09:00
+updated_at: 2026-06-12T12:00:00+09:00
+acceptance:
+  - "Exact task criteria are measurable."
+verification:
+  - "python scripts/work.py criteria TASK-AR-901 --json"
+---
+
+# {task_id} - Criteria Test
+""",
+        encoding="utf-8",
+    )
+    return path
+
+
 def test_work_criteria_writes_b_mode_proposal_without_mutating_work_item(tmp_path: Path) -> None:
     unit_path = _write_unit(tmp_path, include_verification=False)
     before = unit_path.read_text(encoding="utf-8")
@@ -158,3 +189,34 @@ def test_work_criteria_blocks_missing_work_without_writes(tmp_path: Path) -> Non
     assert result.returncode == 1
     assert "work-criteria:not-found:UNIT-TASK-AR-901-001" in result.stderr
     assert not (tmp_path / "agents").exists()
+
+
+def test_work_criteria_exact_task_id_ignores_descendant_unit(tmp_path: Path) -> None:
+    task_path = _write_task(tmp_path)
+    task_before = task_path.read_text(encoding="utf-8")
+    unit_path = _write_unit(tmp_path)
+    unit_before = unit_path.read_text(encoding="utf-8")
+
+    result = _run(tmp_path, "criteria", "TASK-AR-901", "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout[result.stdout.index("{") :])
+    assert payload["status"] == "pass"
+    assert payload["work_id"] == "TASK-AR-901"
+    assert payload["work_path"] == "agents/lead_engineer/tasks/TASK-AR-901.md"
+    assert task_path.read_text(encoding="utf-8") == task_before
+    assert unit_path.read_text(encoding="utf-8") == unit_before
+
+
+def test_work_criteria_explicit_task_path_preserves_exact_selection(tmp_path: Path) -> None:
+    task_path = _write_task(tmp_path)
+    _write_unit(tmp_path)
+    task_ref = task_path.relative_to(tmp_path).as_posix()
+
+    result = _run(tmp_path, "criteria", task_ref, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout[result.stdout.index("{") :])
+    assert payload["status"] == "pass"
+    assert payload["work_id"] == "TASK-AR-901"
+    assert payload["work_path"] == task_ref
