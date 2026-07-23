@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION
 registered_at: 2026-07-23T10:15:00+09:00
 created_at: 2026-07-23T10:15:00+09:00
-updated_at: 2026-07-23T10:15:00+09:00
+updated_at: 2026-07-23T10:37:34+09:00
 title: Isolate cadence query-failure injection tests from real Git
 status: planned
 priority: P0
@@ -30,11 +30,20 @@ summary: Supply deterministic successful answers for every non-target cadence qu
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python -m pytest tests/test_release_cadence_trigger.py tests/test_release_auto_noncritical.py -q
+  - python -m pytest tests/test_release_cadence_trigger.py::test_each_partial_query_failure_invalidates_triggered_report tests/test_release_auto_noncritical.py::test_partial_cadence_query_error_halts_even_when_commit_threshold_fires -q
+  - python scripts/taskset_work_gate.py --check
 tags:
   - ci-flake
   - test-isolation
   - release-cadence
   - release-auto
+verification_status: passed
+verified_at: 2026-07-23T10:37:34+09:00
+verified_by: codex-root-worker
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-task-ar-619-20260723103734.json
 ---
 
 # TASK-AR-619 - Isolate cadence query-failure injection tests from real Git
