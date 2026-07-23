@@ -1063,8 +1063,46 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-WORK-CLI-INTEGRITY",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-619",
+      "expires_at": "2026-07-24T10:15:00+09:00",
+      "fulfilled_at": "2026-07-23T10:15:00+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-619.md",
+      "fulfilled_task_id": "TASK-AR-619",
+      "fulfilled_task_uid": "d1cb4ea0-ca83-497c-a938-caf541dc2f29",
+      "initiative_id": "INIT-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION",
+      "kind": "task",
+      "owner_id": "codex-root-planner",
+      "reason": "work registration TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION",
+      "reservation_group_id": "RES-20260723-101500-1ff230a3",
+      "reservation_id": "RES-20260723-101500-1ff230a3-01",
+      "reserved_at": "2026-07-23T10:15:00+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION",
+      "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-620",
+      "expires_at": "2026-07-24T11:20:00+09:00",
+      "fulfilled_at": "2026-07-23T11:20:00+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-620.md",
+      "fulfilled_task_id": "TASK-AR-620",
+      "fulfilled_task_uid": "69b08f2f-a8bd-4e56-9e4a-2b97fd134a4e",
+      "initiative_id": "INIT-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY",
+      "kind": "task",
+      "owner_id": "codex-root-planner",
+      "reason": "work registration TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY",
+      "reservation_group_id": "RES-20260723-112000-715eb478",
+      "reservation_id": "RES-20260723-112000-715eb478-01",
+      "reserved_at": "2026-07-23T11:20:00+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-07-23T08:40:51+09:00"
+  "updated_at": "2026-07-23T11:20:00+09:00"
 }

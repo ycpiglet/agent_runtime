@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-23T09:59:33+09:00
-record_count: 444
+generated_at: 2026-07-23T11:20:09+09:00
+record_count: 452
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `444` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `452` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `35` records |
-| Tasksets | pass | `59` records |
-| Tasks | pass | `282` records |
-| Units | pass | `68` records |
+| Initiatives | pass | `37` records |
+| Tasksets | pass | `61` records |
+| Tasks | pass | `284` records |
+| Units | pass | `70` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -483,6 +483,14 @@ record_count: 444
 | 34.1.1.1 | Unit 34.1.1.1 | unit | `UNIT-TASK-AR-617-001` | `TASK-AR-617` | completed | `agents/lead_engineer/tasks/units/TASK-AR-617/UNIT-TASK-AR-617-001.md` | UNIT-TASK-AR-617-001 - Implement round-trip-safe work frontmatter emission |
 | 34.1.2 | Task 34.1.2 | task | `TASK-AR-618` | `TASKSET-AR-WORK-CLI-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-618.md` | Allow generic work commands to address a canonical task by exact ID without treating… |
 | 34.1.2.1 | Unit 34.1.2.1 | unit | `UNIT-TASK-AR-618-001` | `TASK-AR-618` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-618/UNIT-TASK-AR-618-001.md` | UNIT-TASK-AR-618-001 - Implement exact work-item selector precedence |
+| 35 | Initiative 35 | initiative | `INIT-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION` | - | active | `agents/project/initiatives/INIT-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION.md` | Release Cadence Injection Test Isolation |
+| 35.1 | Taskset 35.1 | taskset | `TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION` | `INIT-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION` | active | `BACKLOG-BOARD.md` | Release Cadence Injection Test Isolation |
+| 35.1.1 | Task 35.1.1 | task | `TASK-AR-619` | `TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION` | planned | `agents/lead_engineer/tasks/TASK-AR-619.md` | Prevent non-target Git process transients from producing zero-call false failures in… |
+| 35.1.1.1 | Unit 35.1.1.1 | unit | `UNIT-TASK-AR-619-001` | `TASK-AR-619` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-619/UNIT-TASK-AR-619-001.md` | UNIT-TASK-AR-619-001 - Make cadence failure injection query-complete and hermetic |
+| 36 | Initiative 36 | initiative | `INIT-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY` | - | active | `agents/project/initiatives/INIT-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY.md` | Cadence Isolation Backlog Expectation Recovery |
+| 36.1 | Taskset 36.1 | taskset | `TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY` | `INIT-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY` | active | `BACKLOG-BOARD.md` | Cadence Isolation Backlog Expectation Recovery |
+| 36.1.1 | Task 36.1.1 | task | `TASK-AR-620` | `TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY` | planned | `agents/lead_engineer/tasks/TASK-AR-620.md` | Restore PR #336 package tests without weakening the real-backlog exact-set contract. |
+| 36.1.1.1 | Unit 36.1.1.1 | unit | `UNIT-TASK-AR-620-001` | `TASK-AR-620` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-620/UNIT-TASK-AR-620-001.md` | UNIT-TASK-AR-620-001 - Add cadence isolation tasksets to the exact expected set |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

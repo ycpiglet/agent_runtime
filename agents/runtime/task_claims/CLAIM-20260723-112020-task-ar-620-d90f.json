@@ -1,0 +1,52 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260723-112020-task-ar-620-d90f",
+  "task_id": "TASK-AR-620",
+  "agent_role": "lead-engineer",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "/root/task-ar-620",
+  "display_name": "lead_engineer@orchestrator-02",
+  "callsite_id": "terminal:wt-task-ar-620:tab-02",
+  "pane_id": "terminal:wt-task-ar-620:tab-02",
+  "mode": "orchestrator",
+  "status": "claimed",
+  "task_set_id": "TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY",
+  "active_scope": "TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY",
+  "scope_transition_approved": true,
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "unit_id": "UNIT-TASK-AR-620-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-620/UNIT-TASK-AR-620-001.md",
+  "model_tier": "worker_standard",
+  "wip_slot": 2,
+  "stop_condition": "",
+  "phase": "independent-verification",
+  "progress_pct": 95,
+  "step_index": 4,
+  "step_total": 4,
+  "status_text": "W4a passed; W4b approved; PR CI pending",
+  "worktree_path": "C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-620",
+  "branch": "codex/task-ar-620-backlog-expectation",
+  "claimed_at": "2026-07-23T11:20:20+09:00",
+  "last_heartbeat": "2026-07-23T11:28:30+09:00",
+  "updated_at": "2026-07-23T11:28:30+09:00",
+  "expires_at": "2026-07-23T11:58:30+09:00",
+  "lease": {
+    "claimed_at": "2026-07-23T11:20:20+09:00",
+    "heartbeat_at": "2026-07-23T11:28:30+09:00",
+    "expires_at": "2026-07-23T11:58:30+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260723-112020-task-ar-620-d90f.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260723-112020-task-ar-620-d90f.log.md",
+  "allow_parallel_task_set": false,
+  "tags": [
+    "ci-recovery",
+    "backlog"
+  ],
+  "escalation_triggers": [
+    "reliability",
+    "repeated_failure"
+  ],
+  "target_files": [
+    "tests/test_backlog_board_tasksets.py"
+  ]
+}

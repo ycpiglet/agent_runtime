@@ -1,21 +1,32 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-23T09:58:30+09:00
+updated_at: 2026-07-23T11:21:00+09:00
 updated_by: codex-root
 current_state:
-  summary: "TASK-AR-617 is complete on verified main; TASK-AR-618 is next, then TASK-AR-602 releases v0.7.0."
-  status: ready
+  summary: "TASK-AR-619 implementation is verified but PR #336 is blocked by one adjacent backlog expectation; TASK-AR-620 is the active CI recovery."
+  status: in_progress
   task_set_status: in_progress
-  task_set_id: "TASKSET-AR-WORK-CLI-INTEGRITY"
+  task_set_id: "TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY"
   step_index: 1
-  step_total: 2
-  progress_pct: 50
-  status_text: "TASK-AR-618 is worker-ready and must begin again at W0 before T2 claim creation."
+  step_total: 4
+  progress_pct: 10
+  status_text: "TASK-AR-620 is claimed to synchronize the two new taskset IDs in the exact backlog expectation, then PR #336 CI resumes."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260723-101241-task-ar-619-77ec
+      agent_role: lead-engineer
+      agent_instance_id: "/root"
+      display_name: "lead_engineer@orchestrator-01"
+      callsite_id: "terminal:wt-task-ar-619:tab-01"
+    - claim_id: CLAIM-20260723-112020-task-ar-620-d90f
+      agent_role: lead-engineer
+      agent_instance_id: "/root/task-ar-620"
+      display_name: "lead_engineer@orchestrator-02"
+      callsite_id: "terminal:wt-task-ar-620:tab-02"
+  current_teams:
+    - agent-runtime-core
 resume:
-  active_task: TASK-AR-618
-  active_task_set: "TASKSET-AR-WORK-CLI-INTEGRITY"
+  active_task: TASK-AR-620
+  active_task_set: "TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -23,7 +34,9 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260723-101241-task-ar-619-77ec.json
+    - agents/runtime/task_claims/CLAIM-20260723-112020-task-ar-620-d90f.json
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
     active_claim: null

@@ -210,6 +210,18 @@
       "display_name": "Release-Auto Fixture Recovery Window",
       "summary": "Extend the bounded wait for an already-recognized fixture-only Git transient without broadening mutation retries.",
       "order": 727
+    },
+    {
+      "task_set_id": "TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION",
+      "display_name": "Release Cadence Injection Test Isolation",
+      "summary": "Make cadence and release-auto failure-injection tests hermetic while preserving exact retry and fail-loud contracts.",
+      "order": 7231
+    },
+    {
+      "task_set_id": "TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY",
+      "display_name": "Cadence Isolation Backlog Expectation Recovery",
+      "summary": "Synchronize the exact real-backlog taskset expectation with the two new registered tasksets.",
+      "order": 7232
     }
   ]
 }

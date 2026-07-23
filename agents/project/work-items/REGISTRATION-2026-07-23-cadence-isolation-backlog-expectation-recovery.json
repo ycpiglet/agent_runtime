@@ -1,0 +1,84 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "ci_failure",
+  "origin_ref": "reviews/REVIEW-2026-07-23-cadence-isolation-backlog-expectation-recovery-plan.md",
+  "created_by": "codex-root-planner",
+  "now": "2026-07-23T11:20:00+09:00",
+  "initiative": {
+    "id": "INIT-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY",
+    "title": "Cadence Isolation Backlog Expectation Recovery",
+    "summary": "Restore the exact registered-taskset expectation after TASK-AR-619 intake.",
+    "owner": "lead-engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY",
+    "display_name": "Cadence Isolation Backlog Expectation Recovery",
+    "summary": "Synchronize the exact real-backlog taskset expectation with the two new registered tasksets.",
+    "order": 7232,
+    "plan_slug": "2026-07-23-cadence-isolation-backlog-expectation-recovery",
+    "planner_model_tier": "planner_high",
+    "worker_model_tier": "worker_standard",
+    "reviewer_model_tier": "reviewer_standard"
+  },
+  "tasks": [
+    {
+      "title": "Synchronize cadence isolation tasksets in the exact backlog expectation",
+      "goal": "Restore PR #336 package tests without weakening the real-backlog exact-set contract.",
+      "scope": "Change only the expected taskset set in tests/test_backlog_board_tasksets.py and lifecycle evidence. Add the cadence injection and this recovery taskset IDs; preserve exact equality and production behavior.",
+      "priority": "P0",
+      "difficulty": "S",
+      "est_hours": 0.5,
+      "est_tokens": 2500,
+      "owner": "lead_engineer",
+      "team": "agent-runtime-core",
+      "summary": "Add the two newly registered taskset IDs to the exact real-backlog expectation.",
+      "planner_model_tier": "planner_high",
+      "worker_model_tier": "worker_standard",
+      "reviewer_model_tier": "reviewer_standard",
+      "tags": ["ci-recovery", "backlog", "taskset-classification", "task-ar-619"],
+      "acceptance": [
+        "The exact expected set includes TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION.",
+        "The exact expected set includes TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY.",
+        "No existing expected taskset ID or exact-equality assertion is removed or weakened.",
+        "Focused backlog tests and the supported Python CI matrix pass."
+      ],
+      "verification": [
+        "python -m pytest tests/test_backlog_board_tasksets.py -q",
+        "python scripts/taskset_work_gate.py --check"
+      ],
+      "units": [
+        {
+          "title": "Add cadence isolation tasksets to the exact expected set",
+          "context": "PR #336 run 29973935786 attempt 1 had exactly one failure after 2193 passes: the real-backlog classifier returned the newly registered cadence injection taskset as an extra item. Registering this recovery taskset creates one additional canonical ID that must be included in the same exact expectation.",
+          "inputs": [
+            "reviews/REVIEW-2026-07-23-cadence-isolation-backlog-expectation-recovery-plan.md",
+            "GitHub Actions run 29973935786",
+            "tests/test_backlog_board_tasksets.py",
+            "agents/project/work-items/TASKSET-DEFINITIONS.json"
+          ],
+          "target_files": ["tests/test_backlog_board_tasksets.py"],
+          "scope": "Add exactly the cadence injection and cadence isolation backlog recovery taskset IDs to the expected set. Do not change assertion type, classifier code, fixtures, or other IDs.",
+          "steps": [
+            "Reproduce the two missing IDs against the newly registered real backlog.",
+            "Add both IDs to the exact expected set in canonical ordering.",
+            "Run focused backlog tests and taskset gates.",
+            "Obtain independent W4b and the full PR matrix before integration."
+          ],
+          "acceptance": [
+            "The real-backlog exact set equals the canonical registered taskset set.",
+            "The diff contains two additive string literals and no assertion weakening.",
+            "All focused tests and gates pass."
+          ],
+          "verification": [
+            "python -m pytest tests/test_backlog_board_tasksets.py -q",
+            "python scripts/taskset_work_gate.py --check"
+          ],
+          "handoff": "Report the CI failure evidence, two-ID additive diff, exact-set preservation, focused results, independent W4b, and matrix results.",
+          "stop_condition": "Stop if recovery requires classifier behavior changes or any assertion weakening.",
+          "escalation_triggers": ["reliability", "repeated_failure"]
+        }
+      ]
+    }
+  ]
+}

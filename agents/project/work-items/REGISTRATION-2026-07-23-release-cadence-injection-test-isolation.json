@@ -1,0 +1,99 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "ci_failure",
+  "origin_ref": "reviews/REVIEW-2026-07-23-release-cadence-injection-test-isolation-plan.md",
+  "created_by": "codex-root-planner",
+  "now": "2026-07-23T10:15:00+09:00",
+  "initiative": {
+    "id": "INIT-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION",
+    "title": "Release Cadence Injection Test Isolation",
+    "summary": "Remove real Git process dependence from cadence query-failure injection scenarios.",
+    "owner": "lead-engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION",
+    "display_name": "Release Cadence Injection Test Isolation",
+    "summary": "Make cadence and release-auto failure-injection tests hermetic while preserving exact retry and fail-loud contracts.",
+    "order": 7231,
+    "plan_slug": "2026-07-23-release-cadence-injection-test-isolation",
+    "planner_model_tier": "planner_high",
+    "worker_model_tier": "worker_standard",
+    "reviewer_model_tier": "reviewer_standard"
+  },
+  "tasks": [
+    {
+      "title": "Isolate cadence query-failure injection tests from real Git",
+      "goal": "Prevent non-target Git process transients from producing zero-call false failures in cadence query-failure tests.",
+      "scope": "Change only the cadence and release-auto query-failure test harness and focused regression coverage. Preserve production behavior, retry counts, cadence thresholds, and release classification.",
+      "priority": "P0",
+      "difficulty": "S",
+      "est_hours": 1,
+      "est_tokens": 5000,
+      "owner": "lead_engineer",
+      "team": "agent-runtime-core",
+      "summary": "Supply deterministic successful answers for every non-target cadence query during failure injection.",
+      "planner_model_tier": "planner_high",
+      "worker_model_tier": "worker_standard",
+      "reviewer_model_tier": "reviewer_standard",
+      "tags": [
+        "ci-flake",
+        "test-isolation",
+        "release-cadence",
+        "release-auto"
+      ],
+      "acceptance": [
+        "The cadence per-query failure matrix no longer calls real Git after its injected module is configured.",
+        "The release-auto partial-query failure scenario no longer calls real Git for cadence answers after failure injection begins.",
+        "Selected queries retain exact retry counts and both reports retain git-query-error semantics.",
+        "Focused tests pass repeatedly and the full supported Python matrix passes."
+      ],
+      "verification": [
+        "python -m pytest tests/test_release_cadence_trigger.py tests/test_release_auto_noncritical.py -q",
+        "python -m pytest tests/test_release_cadence_trigger.py::test_each_partial_query_failure_invalidates_triggered_report tests/test_release_auto_noncritical.py::test_partial_cadence_query_error_halts_even_when_commit_threshold_fires -q",
+        "python scripts/taskset_work_gate.py --check"
+      ],
+      "units": [
+        {
+          "title": "Make cadence failure injection query-complete and hermetic",
+          "context": "Main CI runs 29970171133 and 29970914790 each failed a different query-injection test with zero injected calls, while unchanged retries passed or were rerun. Both helpers isolate mutable module facades but delegate non-target Git queries to subprocess.run, so an unrelated runner transient can prevent the target query from being reached.",
+          "inputs": [
+            "reviews/REVIEW-2026-07-23-release-cadence-injection-test-isolation-plan.md",
+            "GitHub Actions runs 29970171133 and 29970914790",
+            "tests/test_release_cadence_trigger.py",
+            "tests/test_release_auto_noncritical.py",
+            "scripts/release_cadence_trigger.py"
+          ],
+          "target_files": [
+            "tests/test_release_cadence_trigger.py",
+            "tests/test_release_auto_noncritical.py"
+          ],
+          "scope": "Add or share deterministic cadence-query answer helpers in the two focused test modules, route all non-selected queries through those helpers, and keep selected-query failure counts plus report semantics unchanged.",
+          "steps": [
+            "Add a failure-first guard proving the injected cadence path does not delegate non-target queries to real subprocess.run.",
+            "Model deterministic answers for baseline tag, subjects, commit count, tag time, breaking messages, and diff queries.",
+            "Use the deterministic responder in both partial-query injection families without altering production code.",
+            "Run repeated focused probes, focused files, taskset gates, independent W4b review, and the full matrix."
+          ],
+          "acceptance": [
+            "No non-target cadence query invokes a real Git process in either affected injection family.",
+            "Each parameterized selected query records exactly three failures and both diff queries record exactly six failures.",
+            "Cadence and release-auto return structured git-query-error evidence with no mutation.",
+            "No production files change."
+          ],
+          "verification": [
+            "python -m pytest tests/test_release_cadence_trigger.py tests/test_release_auto_noncritical.py -q",
+            "python -m pytest tests/test_release_cadence_trigger.py::test_each_partial_query_failure_invalidates_triggered_report tests/test_release_auto_noncritical.py::test_partial_cadence_query_error_halts_even_when_commit_threshold_fires -q",
+            "python scripts/taskset_work_gate.py --check"
+          ],
+          "handoff": "Report the failure-first guard, deterministic query matrix, exact injected call counts, repeated focused results, full matrix, and independent W4b evidence.",
+          "stop_condition": "Stop if isolation requires production behavior changes, relaxed assertions, or a global pytest retry.",
+          "escalation_triggers": [
+            "reliability",
+            "repeated_failure"
+          ]
+        }
+      ]
+    }
+  ]
+}

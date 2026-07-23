@@ -1,5 +1,19 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-23 - TASK-AR-620 active; PR #336 exact-backlog CI recovery
+
+- Active: `TASK-AR-620` in `TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY` has a T2-verified claim and will update only `tests/test_backlog_board_tasksets.py`.
+- Evidence: PR #336 run `29973935786` failed one exact-set assertion after `2193 passed`; the sole unexpected item was the correctly registered `TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION`.
+- Scope: add both the cadence injection taskset and this recovery taskset to the expected set without weakening exact equality or changing classifier behavior.
+- Next: merge TASK-AR-620, synchronize PR #336 with verified main, obtain the three-version matrix, and resume TASK-AR-619 W4b closeout.
+
+## 2026-07-23 - TASK-AR-619 active; cadence injection tests being isolated
+
+- Active: `TASK-AR-619` in `TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION` has a T2-verified claim and dedicated worktree.
+- Evidence: post-merge runs `29970171133` and `29970914790` each failed a different query-failure injection test with zero injected calls; unchanged reruns passed all Python 3.10/3.11/3.12 jobs.
+- Scope: replace real-Git fallbacks inside the two affected test families with deterministic successful query answers while preserving exact retry counts and production behavior.
+- Next: complete focused repetition, independent W4b, PR and post-merge CI, then resume `TASK-AR-618` and finally `TASK-AR-602` for v0.7.0.
+
 ## 2026-07-23 - TASK-AR-617 complete; TASK-AR-618 next
 
 - Completed: PR #334 merged at `56203757dc296e85f8856333b255adb354b96da9`; the pull-request run and the second post-merge main attempt passed Python 3.10, 3.11, and 3.12.
