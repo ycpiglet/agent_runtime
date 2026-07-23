@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 registered_at: 2026-07-19T10:28:06+09:00
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T10:28:06+09:00
+updated_at: 2026-07-23T14:38:48+09:00
 title: Synchronize state and release v0.7.0
 status: planned
 priority: P0
@@ -24,7 +24,7 @@ task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 unit_spec: agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md
 reservation_id: RES-20260719-102806-bbbc9438-07
 origin_type: owner_request
-origin_ref: chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277
+origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
 summary: Close the taskset through full governance, current-head release preflight, version cascade, tag, GitHub release, issue reconciliation, and W5/W6 cleanup.
 planner_model_tier: planner_high
@@ -39,6 +39,11 @@ verification:
   - python scripts/work.py status
   - git cat-file -t v0.7.0
   - git rev-parse v0.7.0~0
+verification_status: passed
+verified_at: 2026-07-23T14:38:48+09:00
+verified_by: /root/task-ar-602
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-task-ar-602-20260723143848.json
 ---
 
 # TASK-AR-602 - Synchronize state and release v0.7.0

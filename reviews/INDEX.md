@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T14:38:00+09:00
-record_count: 858
+generated_at: 2026-07-23T14:52:54+09:00
+record_count: 859
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `858` review and evidence records under `reviews/`.
+- Summary: indexed `859` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `858` files |
+| Reviews covered | pass | `859` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -730,6 +730,7 @@ record_count: 858
 | `reviews/VERIFY-2026-07-22-unit-task-ar-606-001-20260722234951.json` | `VERIFY-2026-07-22-unit-task-ar-606-001-20260722234951` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-606-001-20260722234951 |
 | `reviews/VERIFY-2026-07-22-unit-task-ar-610-001-20260722183557.json` | `VERIFY-2026-07-22-unit-task-ar-610-001-20260722183557` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-610-001-20260722183557 |
 | `reviews/VERIFY-2026-07-22-unit-task-ar-611-001-20260722192021.json` | `VERIFY-2026-07-22-unit-task-ar-611-001-20260722192021` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-611-001-20260722192021 |
+| `reviews/VERIFY-2026-07-23-task-ar-602-20260723143848.json` | `VERIFY-2026-07-23-task-ar-602-20260723143848` | json | record | n/a | VERIFY-2026-07-23-task-ar-602-20260723143848 |
 | `reviews/VERIFY-2026-07-23-task-ar-607-20260723003910.json` | `VERIFY-2026-07-23-task-ar-607-20260723003910` | json | record | n/a | VERIFY-2026-07-23-task-ar-607-20260723003910 |
 | `reviews/VERIFY-2026-07-23-task-ar-608-20260723063647.json` | `VERIFY-2026-07-23-task-ar-608-20260723063647` | json | record | n/a | VERIFY-2026-07-23-task-ar-608-20260723063647 |
 | `reviews/VERIFY-2026-07-23-task-ar-608-20260723064403.json` | `VERIFY-2026-07-23-task-ar-608-20260723064403` | json | record | n/a | VERIFY-2026-07-23-task-ar-608-20260723064403 |
