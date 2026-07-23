@@ -41,7 +41,7 @@ acceptance:
   - No production files change.
 verification:
   - python -m pytest tests/test_release_cadence_trigger.py tests/test_release_auto_noncritical.py -q
-  - python -m pytest tests/test_release_cadence_trigger.py::test_each_partial_query_failure_invalidates_triggered_report tests/test_release_auto_noncritical.py::test_partial_cadence_query_error_halts_even_when_commit_threshold_fires -q --count=20
+  - python -m pytest tests/test_release_cadence_trigger.py::test_each_partial_query_failure_invalidates_triggered_report tests/test_release_auto_noncritical.py::test_partial_cadence_query_error_halts_even_when_commit_threshold_fires -q
   - python scripts/taskset_work_gate.py --check
 handoff: Report the failure-first guard, deterministic query matrix, exact injected call counts, repeated focused results, full matrix, and independent W4b evidence.
 stop_condition: Stop if isolation requires production behavior changes, relaxed assertions, or a global pytest retry.
@@ -87,7 +87,7 @@ Add or share deterministic cadence-query answer helpers in the two focused test 
 ## Verification
 
 - `python -m pytest tests/test_release_cadence_trigger.py tests/test_release_auto_noncritical.py -q`
-- `python -m pytest tests/test_release_cadence_trigger.py::test_each_partial_query_failure_invalidates_triggered_report tests/test_release_auto_noncritical.py::test_partial_cadence_query_error_halts_even_when_commit_threshold_fires -q --count=20`
+- `python -m pytest tests/test_release_cadence_trigger.py::test_each_partial_query_failure_invalidates_triggered_report tests/test_release_auto_noncritical.py::test_partial_cadence_query_error_halts_even_when_commit_threshold_fires -q`
 - `python scripts/taskset_work_gate.py --check`
 
 ## Handoff
