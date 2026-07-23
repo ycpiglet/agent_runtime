@@ -64,7 +64,7 @@ completed_task_set_count: 57
 
 - Flow: Make cadence and release-auto failure-injection tests hermetic while preserving exact retry and fail-loud contracts.
 - Progress: `0/1` done; `1` open or active.
-- WIP: active `1/3`; oldest `0.1h`; stale `0`.
+- WIP: active `1/3`; oldest `0.5h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-619` | INIT-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-619/UNIT-TASK-AR-619-001.md | planned | Action | P0 | Critical | Low | 1h/5000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Prevent non-target Git process transients from producing zero-call false failures in… |
