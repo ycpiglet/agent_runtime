@@ -30,6 +30,8 @@ inputs:
   - reviews/REVIEW-2026-07-23-work-cli-integrity-design.md
   - scripts/work.py
   - scripts/backlog_board.py
+  - scripts/org_model_gate.py
+  - scripts/work_schema_gate.py
   - tests/test_work_registration.py
   - tests/test_work_verify.py
   - tests/test_work_close.py
@@ -37,18 +39,25 @@ target_files:
   - scripts/work.py
   - scripts/backlog_board.py
   - src/agent_runtime/templates/project/scripts/backlog_board.py
+  - scripts/org_model_gate.py
+  - scripts/work_schema_gate.py
+  - src/agent_runtime/templates/project/scripts/work_schema_gate.py
   - tests/test_work_registration.py
   - tests/test_work_verify.py
   - tests/test_work_close.py
   - tests/test_backlog_board_tasksets.py
+  - tests/test_org_model_gate.py
+  - tests/test_attention_inbox.py
+  - tests/test_dispatch_gate.py
+  - tests/test_work_schema_gate.py
   - tests/fixtures/host/agent_runtime.lock.json
-scope: Add a deterministic unsafe-scalar emitter and minimal JSON double-quoted decoding to the root/template lightweight reader, use one contract for scalar and list values, and prove preservation at registration and mutation boundaries.
+scope: Add a deterministic unsafe-scalar emitter and one shared marker decoder across backlog, org-model, and root/template work-schema readers, then prove preservation at registration, mutation, attention, and dispatch boundaries.
 acceptance:
   - Every failure-first value parses identically before and after each lifecycle mutation.
   - No existing focused work CLI test changes its expected lifecycle semantics.
   - The implementation does not modify the shared comment scanner.
 verification:
-  - python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py tests/test_backlog_board_tasksets.py -q
+  - python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py tests/test_backlog_board_tasksets.py tests/test_org_model_gate.py tests/test_attention_inbox.py tests/test_dispatch_gate.py tests/test_work_schema_gate.py -q
   - python scripts/work_schema_gate.py --check
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Provide the failure-first commit, a value-by-value round-trip matrix, changed-file summary, focused test output, and any parser compatibility limitation.
@@ -66,6 +75,8 @@ Completed task lifecycle commands reproduced silent truncation because scripts/w
 - reviews/REVIEW-2026-07-23-work-cli-integrity-design.md
 - scripts/work.py
 - scripts/backlog_board.py
+- scripts/org_model_gate.py
+- scripts/work_schema_gate.py
 - tests/test_work_registration.py
 - tests/test_work_verify.py
 - tests/test_work_close.py
@@ -75,15 +86,22 @@ Completed task lifecycle commands reproduced silent truncation because scripts/w
 - scripts/work.py
 - scripts/backlog_board.py
 - src/agent_runtime/templates/project/scripts/backlog_board.py
+- scripts/org_model_gate.py
+- scripts/work_schema_gate.py
+- src/agent_runtime/templates/project/scripts/work_schema_gate.py
 - tests/test_work_registration.py
 - tests/test_work_verify.py
 - tests/test_work_close.py
 - tests/test_backlog_board_tasksets.py
+- tests/test_org_model_gate.py
+- tests/test_attention_inbox.py
+- tests/test_dispatch_gate.py
+- tests/test_work_schema_gate.py
 - tests/fixtures/host/agent_runtime.lock.json
 
 ## Scope
 
-Add a deterministic unsafe-scalar emitter and minimal JSON double-quoted decoding to the root/template lightweight reader, use one contract for scalar and list values, and prove preservation at registration and mutation boundaries.
+Add a deterministic unsafe-scalar emitter and one shared marker decoder across backlog, org-model, and root/template work-schema readers, then prove preservation at registration, mutation, attention, and dispatch boundaries.
 
 ## Steps
 
@@ -99,7 +117,7 @@ Add a deterministic unsafe-scalar emitter and minimal JSON double-quoted decodin
 
 ## Verification
 
-- `python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py tests/test_backlog_board_tasksets.py -q`
+- `python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py tests/test_backlog_board_tasksets.py tests/test_org_model_gate.py tests/test_attention_inbox.py tests/test_dispatch_gate.py tests/test_work_schema_gate.py -q`
 - `python scripts/work_schema_gate.py --check`
 - `python scripts/regen_host_lock_if_needed.py --check`
 

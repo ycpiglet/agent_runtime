@@ -27,12 +27,12 @@ reservation_id: RES-20260723-084051-a1975741-01
 origin_type: review_finding
 origin_ref: reviews/REVIEW-2026-07-23-work-cli-integrity-design.md
 created_by: codex-root-planner
-summary: Serialize unsafe work frontmatter scalars and decode their JSON-style representation across every parse and rewrite boundary.
+summary: Serialize unsafe work frontmatter scalars and preserve their semantic values across lifecycle and operational consumers.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 verification:
-  - python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py tests/test_backlog_board_tasksets.py -q
+  - python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py tests/test_backlog_board_tasksets.py tests/test_org_model_gate.py tests/test_attention_inbox.py tests/test_dispatch_gate.py tests/test_work_schema_gate.py -q
   - python scripts/work_schema_gate.py --check
   - python scripts/regen_host_lock_if_needed.py --check
 tags:
@@ -47,7 +47,7 @@ tags:
 
 ## Scope
 
-- Change `scripts/work.py` frontmatter emission plus minimal JSON double-quoted scalar decoding in the root/template lightweight parser, focused parser and lifecycle tests, and the generated-host lock. Do not change comment scanning or add a YAML dependency.
+- Change `scripts/work.py` frontmatter emission plus shared marker decoding in backlog, org-model, and root/template work-schema parsers, focused lifecycle and operational-consumer tests, and the generated-host lock. Do not change attention/dispatch production behavior, comment scanning, or add a YAML dependency.
 
 ## Acceptance Criteria
 
@@ -57,6 +57,6 @@ tags:
 
 ## Verification
 
-- `python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py tests/test_backlog_board_tasksets.py -q`
+- `python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py tests/test_backlog_board_tasksets.py tests/test_org_model_gate.py tests/test_attention_inbox.py tests/test_dispatch_gate.py tests/test_work_schema_gate.py -q`
 - `python scripts/work_schema_gate.py --check`
 - `python scripts/regen_host_lock_if_needed.py --check`

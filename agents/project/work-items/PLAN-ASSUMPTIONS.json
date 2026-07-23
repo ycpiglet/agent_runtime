@@ -779,8 +779,8 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan.md",
-          "value": "6b3f8cb667bc2e626bb3bd1b8322f45ec24400d75a1e9cd8043a17c99ef2c765"
+          "path": "reviews/REVIEW-2026-07-23-task-ar-617-t3-cross-consumer-replan.md",
+          "value": "0f7703f9a314b602ca62b114e319f3ef05994302026bf6346c09fbbb1c3b6d0d"
         },
         {
           "kind": "sha256",
@@ -804,6 +804,21 @@
         },
         {
           "kind": "sha256",
+          "path": "scripts/org_model_gate.py",
+          "value": "ad208883e385ee3c974e34e8638dea8630dc6a25d6ccb66935865d1aeaa15ab3"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work_schema_gate.py",
+          "value": "e06879641cfd9aae89261f7d61a633f8b8a238fd7cebaf10dd24705cdc1f1b18"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/work_schema_gate.py",
+          "value": "e06879641cfd9aae89261f7d61a633f8b8a238fd7cebaf10dd24705cdc1f1b18"
+        },
+        {
+          "kind": "sha256",
           "path": "tests/test_work_registration.py",
           "value": "5c80c2f3d05cc6e600222233349aaa924caa51c308abf47328509be7bc7442ed"
         },
@@ -824,16 +839,36 @@
         },
         {
           "kind": "sha256",
+          "path": "tests/test_org_model_gate.py",
+          "value": "8e4b9486110a25834122a2ddb7d5f31c865cba84d594057d05d7bd4d7d7c04c9"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_attention_inbox.py",
+          "value": "e808a4d8b601fe41008e743621af016ae46f303c16b27d9f02be85221c26bf71"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_dispatch_gate.py",
+          "value": "3349c3ce09955eeeed36d7a7a74a968a5bc4ecb1d2e289e402152c121353a155"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_work_schema_gate.py",
+          "value": "f1ee383b810fa0b0c0e4a18b1c822fcab8e890ca8d133ba6a8b8ea848ca0e463"
+        },
+        {
+          "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
           "value": "1eb08c31423e2c63d079cdd8858c6c155bc82007c426bb96f5b4131111085554"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan.md",
-      "recorded_at": "2026-07-23T08:53:22+09:00",
+      "design_record": "reviews/REVIEW-2026-07-23-task-ar-617-t3-cross-consumer-replan.md",
+      "recorded_at": "2026-07-23T09:22:15+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-WORK-CLI-INTEGRITY"
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-23T08:53:22+09:00"
+  "updated_at": "2026-07-23T09:22:15+09:00"
 }

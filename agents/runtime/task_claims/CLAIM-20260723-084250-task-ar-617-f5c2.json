@@ -51,10 +51,17 @@
     "scripts/work.py",
     "scripts/backlog_board.py",
     "src/agent_runtime/templates/project/scripts/backlog_board.py",
+    "scripts/org_model_gate.py",
+    "scripts/work_schema_gate.py",
+    "src/agent_runtime/templates/project/scripts/work_schema_gate.py",
     "tests/test_work_registration.py",
     "tests/test_work_verify.py",
     "tests/test_work_close.py",
     "tests/test_backlog_board_tasksets.py",
+    "tests/test_org_model_gate.py",
+    "tests/test_attention_inbox.py",
+    "tests/test_dispatch_gate.py",
+    "tests/test_work_schema_gate.py",
     "tests/fixtures/host/agent_runtime.lock.json"
   ]
 }
