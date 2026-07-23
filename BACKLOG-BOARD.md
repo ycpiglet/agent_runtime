@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-07-23
-task_count: 282
-open_count: 2
+task_count: 283
+open_count: 3
 completed_count: 280
-task_set_count: 2
+task_set_count: 3
 completed_task_set_count: 57
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `2` open or active tasks; `280` completed tasks are archived from this live board.
+- Summary: `3` open or active tasks; `280` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `2` / Ask `0` / Review `0` / Later `0` / Done `280`.
-- Task Sets: `2` active workflows; `57` completed workflows are hidden from the live action board.
+- Status: Action `3` / Ask `0` / Review `0` / Later `0` / Done `280`.
+- Task Sets: `3` active workflows; `57` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -59,6 +59,15 @@ completed_task_set_count: 57
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-618` | INIT-AR-WORK-CLI-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-618/UNIT-TASK-AR-618-001.md | planned | Action | P1 | High | Low | 2h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Allow generic work commands to address a canonical task by exact ID without treating… |
+
+### Release Cadence Injection Test Isolation (`TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION`)
+
+- Flow: Make cadence and release-auto failure-injection tests hermetic while preserving exact retry and fail-loud contracts.
+- Progress: `0/1` done; `1` open or active.
+- WIP: active `1/3`; oldest `0.1h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-619` | INIT-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-619/UNIT-TASK-AR-619-001.md | planned | Action | P0 | Critical | Low | 1h/5000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Prevent non-target Git process transients from producing zero-call false failures in… |
 
 ## Archived Task Sets
 
@@ -127,7 +136,7 @@ completed_task_set_count: 57
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `2` open across `2` task sets (see Action Board above).
+- Active: `3` open across `3` task sets (see Action Board above).
 - Archived task sets: `57` (see Archived Task Sets above).
 - Archived task files: `280` — see `ARCHIVE-INDEX.md`.
 

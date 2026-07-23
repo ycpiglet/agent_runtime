@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T09:59:26+09:00
-record_count: 825
+generated_at: 2026-07-23T10:11:17+09:00
+record_count: 827
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `825` review and evidence records under `reviews/`.
+- Summary: indexed `827` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `825` files |
+| Reviews covered | pass | `827` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -539,6 +539,7 @@ record_count: 825
 | `reviews/REVIEW-2026-07-22-taskset-ar-terminal-status-start-guard-registration.md` | `REVIEW-2026-07-22-taskset-ar-terminal-status-start-guard-registration` | md | record | pass | Terminal Status Start Guard Registration |
 | `reviews/REVIEW-2026-07-23-release-auto-fixture-head-recovery-plan.md` | `REVIEW-2026-07-23-release-auto-fixture-head-recovery-plan` | md | record | needs-fix | Release-Auto Fixture HEAD Recovery Plan |
 | `reviews/REVIEW-2026-07-23-release-auto-fixture-recovery-window-plan.md` | `REVIEW-2026-07-23-release-auto-fixture-recovery-window-plan` | md | record | needs-fix | Release-Auto Fixture Recovery Window Hardening Plan |
+| `reviews/REVIEW-2026-07-23-release-cadence-injection-test-isolation-plan.md` | `REVIEW-2026-07-23-release-cadence-injection-test-isolation-plan` | md | record | needs-fix | Release Cadence Injection Test Isolation Plan |
 | `reviews/REVIEW-2026-07-23-release-cadence-query-recovery-plan.md` | `REVIEW-2026-07-23-release-cadence-query-recovery-plan` | md | record | needs-fix | Release Cadence Query Recovery Plan |
 | `reviews/REVIEW-2026-07-23-self-eval-query-integrity-plan.md` | `REVIEW-2026-07-23-self-eval-query-integrity-plan` | md | record | needs-fix | Self-Eval Query Integrity Recovery Plan |
 | `reviews/REVIEW-2026-07-23-task-ar-607-dispatch-t3-replan.md` | `REVIEW-2026-07-23-task-ar-607-dispatch-t3-replan` | md | record | pass | TASK-AR-607 Dispatch T3 Replan |
@@ -548,6 +549,7 @@ record_count: 825
 | `reviews/REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan.md` | `REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan` | md | record | pass | TASK-AR-617 Parser Compatibility T3 Replan |
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-auto-fixture-head-recovery-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-auto-fixture-head-recovery-registration` | md | record | pass | Release-Auto Fixture HEAD Recovery Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-auto-fixture-recovery-window-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-auto-fixture-recovery-window-registration` | md | record | pass | Release-Auto Fixture Recovery Window Registration |
+| `reviews/REVIEW-2026-07-23-taskset-ar-release-cadence-injection-test-isolation-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-cadence-injection-test-isolation-registration` | md | record | pass | Release Cadence Injection Test Isolation Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-cadence-query-recovery-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-cadence-query-recovery-registration` | md | record | pass | Release Cadence Query Recovery Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-self-eval-query-integrity-registration.md` | `REVIEW-2026-07-23-taskset-ar-self-eval-query-integrity-registration` | md | record | pass | Self-Eval Query Integrity Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-work-cli-integrity-registration.md` | `REVIEW-2026-07-23-taskset-ar-work-cli-integrity-registration` | md | record | pass | Work CLI Integrity Registration |

@@ -555,6 +555,29 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-23-release-cadence-injection-test-isolation-plan.md",
+          "value": "d6645c00eab8422fd8de2b9dd66cca4ea238c034916632e4af4e2ecbce00eb69"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "51dd560b4c1a7128e58a9b3cbe36b10e277f054ba4bebd4ec24f8192bf981cc8"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-23-release-cadence-injection-test-isolation-plan.md",
+      "recorded_at": "2026-07-23T10:11:17+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-23-release-cadence-query-recovery-plan.md",
           "value": "dc9e0422e8b61ebeb480fe97d758c1b1b94b2d7e71e856b66797cc7b61073e07"
         },
@@ -870,5 +893,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-23T09:22:15+09:00"
+  "updated_at": "2026-07-23T10:11:17+09:00"
 }

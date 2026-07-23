@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-23T09:59:33+09:00",
-  "record_count": 444,
+  "generated_at": "2026-07-23T10:11:16+09:00",
+  "record_count": 448,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4887,6 +4887,50 @@
       "title": "UNIT-TASK-AR-618-001 - Implement exact work-item selector precedence",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-618/UNIT-TASK-AR-618-001.md",
       "parent_id": "TASK-AR-618",
+      "status": "worker_ready"
+    },
+    {
+      "key": "initiative:INIT-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION",
+      "level": "initiative",
+      "number": "35",
+      "label": "Initiative 35",
+      "id": "INIT-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION",
+      "title": "Release Cadence Injection Test Isolation",
+      "path": "agents/project/initiatives/INIT-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION",
+      "level": "taskset",
+      "number": "35.1",
+      "label": "Taskset 35.1",
+      "id": "TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION",
+      "title": "Release Cadence Injection Test Isolation",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-619",
+      "level": "task",
+      "number": "35.1.1",
+      "label": "Task 35.1.1",
+      "id": "TASK-AR-619",
+      "title": "Prevent non-target Git process transients from producing zero-call false failures in…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-619.md",
+      "parent_id": "TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-619-001",
+      "level": "unit",
+      "number": "35.1.1.1",
+      "label": "Unit 35.1.1.1",
+      "id": "UNIT-TASK-AR-619-001",
+      "title": "UNIT-TASK-AR-619-001 - Make cadence failure injection query-complete and hermetic",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-619/UNIT-TASK-AR-619-001.md",
+      "parent_id": "TASK-AR-619",
       "status": "worker_ready"
     }
   ]
