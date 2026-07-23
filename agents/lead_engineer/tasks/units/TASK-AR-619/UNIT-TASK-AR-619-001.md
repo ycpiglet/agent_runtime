@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION
 initiative_id: INIT-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-23T10:15:00+09:00
-updated_at: 2026-07-23T10:15:00+09:00
+updated_at: 2026-07-23T11:03:42+09:00
 origin_type: ci_failure
 origin_ref: reviews/REVIEW-2026-07-23-release-cadence-injection-test-isolation-plan.md
 created_by: codex-root-planner
@@ -45,6 +45,11 @@ verification:
   - python scripts/taskset_work_gate.py --check
 handoff: Report the failure-first guard, deterministic query matrix, exact injected call counts, repeated focused results, full matrix, and independent W4b evidence.
 stop_condition: Stop if isolation requires production behavior changes, relaxed assertions, or a global pytest retry.
+verified_at: 2026-07-23T11:03:42+09:00
+verified_by: codex-root-worker
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-unit-task-ar-619-001-20260723103124.json
+  - reviews/VERIFY-2026-07-23-unit-task-ar-619-001-20260723110342.json
 ---
 
 # UNIT-TASK-AR-619-001 - Make cadence failure injection query-complete and hermetic

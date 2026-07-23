@@ -407,6 +407,37 @@ def _run(repo: Path, **kwargs):
     )
 
 
+def _successful_cadence_query(cmd: list[str]) -> subprocess.CompletedProcess[str]:
+    """Return deterministic cadence answers for release-auto injection tests."""
+    args = list(cmd[1:])
+    if args == ["describe", "--tags", "--abbrev=0"]:
+        stdout = "v0.2.0\n"
+    elif args == ["log", "--format=%s", "v0.2.0..HEAD"]:
+        stdout = "".join(f"chore: tick {index}\n" for index in range(40))
+    elif args == ["rev-list", "--count", "v0.2.0..HEAD"]:
+        stdout = "40\n"
+    elif args == ["log", "-1", "--format=%ct", "v0.2.0"]:
+        stdout = "1767225600\n"
+    elif args == ["log", "--format=%s%n%b%x00", "v0.2.0..HEAD"]:
+        stdout = "".join(f"chore: tick {index}\x00" for index in range(40))
+    elif args == [
+        "diff",
+        "--name-status",
+        "v0.2.0..HEAD",
+        "--",
+        "src/agent_runtime/templates/",
+    ] or args == ["diff", "--name-only", "v0.2.0..HEAD", "--", "schemas/"]:
+        stdout = ""
+    else:
+        raise AssertionError(f"unexpected cadence query: {args!r}")
+    return subprocess.CompletedProcess(cmd, returncode=0, stdout=stdout, stderr="")
+
+
+def test_successful_release_auto_cadence_query_rejects_wrong_range() -> None:
+    with pytest.raises(AssertionError, match="unexpected cadence query"):
+        _successful_cadence_query(["git", "rev-list", "--count", "WRONG..HEAD"])
+
+
 # --------------------------------------------------------------------------- #
 # Noncritical happy path: dry-run reaches "executed" without a real tag/push.
 # --------------------------------------------------------------------------- #
@@ -729,8 +760,7 @@ def test_partial_cadence_query_error_halts_even_when_commit_threshold_fires(
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    real_run = subprocess.run
-    module.subprocess = types.SimpleNamespace(run=real_run)
+    module.subprocess = types.SimpleNamespace(run=_successful_cadence_query)
     module.time = types.SimpleNamespace(sleep=time.sleep, time=time.time)
     monkeypatch.setattr(module.time, "sleep", lambda _s: None)
     failed_diff_calls = 0
@@ -745,7 +775,7 @@ def test_partial_cadence_query_error_halts_even_when_commit_threshold_fires(
                 stdout="",
                 stderr="fatal: transient runner resource failure",
             )
-        return real_run(cmd, **kwargs)
+        return _successful_cadence_query(cmd)
 
     monkeypatch.setattr(module.subprocess, "run", _fail_diff_queries)
     monkeypatch.setattr(orch, "cadence", module)

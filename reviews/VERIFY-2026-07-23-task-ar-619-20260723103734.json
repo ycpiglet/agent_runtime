@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-23-task-ar-619-20260723103734",
+  "work_id": "TASK-AR-619",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-619.md",
+  "kind": "task",
+  "task_id": "TASK-AR-619",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-23T10:37:34+09:00",
+  "verified_by": "codex-root-worker",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_release_cadence_trigger.py tests/test_release_auto_noncritical.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T10:37:34+09:00",
+      "finished_at": "2026-07-23T10:42:01+09:00",
+      "stdout": "........................................................................ [ 85%]\n............                                                             [100%]\n84 passed in 264.99s (0:04:24)\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest tests/test_release_cadence_trigger.py::test_each_partial_query_failure_invalidates_triggered_report tests/test_release_auto_noncritical.py::test_partial_cadence_query_error_halts_even_when_commit_threshold_fires -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T10:42:01+09:00",
+      "finished_at": "2026-07-23T10:42:16+09:00",
+      "stdout": ".......                                                                  [100%]\n7 passed in 13.32s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/taskset_work_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T10:42:16+09:00",
+      "finished_at": "2026-07-23T10:42:16+09:00",
+      "stdout": "taskset-work-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-619\nfindings=0\n",
+      "stderr": ""
+    }
+  ]
+}
