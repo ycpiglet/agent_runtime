@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from scripts import backlog_board
+from scripts import backlog_board, org_model_gate
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -138,6 +138,37 @@ def test_work_new_creates_initiative_taskset_tasks_review_and_views(tmp_path: Pa
     assert (tmp_path / "agents" / "project" / "initiatives" / "INIT-TEST-WORK-CLI.md").exists()
     assert (tmp_path / "docs" / "superpowers" / "plans" / "2026-06-12-test-work-cli.md").exists()
     assert (tmp_path / "reviews" / "REVIEW-2026-06-12-taskset-test-work-cli-registration.md").exists()
+
+
+def test_work_new_preserves_type_like_strings_for_org_model_consumers(tmp_path: Path) -> None:
+    payload = _payload(include_units=True)
+    first_task = payload["tasks"][0]
+    first_task["title"] = "true"
+    unit = first_task["units"][0]
+    unit["context"] = "False"
+    unit["target_files"] = ["007"]
+    unit["acceptance"] = ["-7"]
+    input_path = _write_input(tmp_path, payload)
+
+    result = _run(tmp_path, input_path)
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    task_path = tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md"
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-901"
+        / "UNIT-TASK-AR-901-001.md"
+    )
+    task_meta = org_model_gate.parse_frontmatter(task_path.read_text(encoding="utf-8"))
+    unit_meta = org_model_gate.parse_frontmatter(unit_path.read_text(encoding="utf-8"))
+    assert task_meta["title"] == "true"
+    assert unit_meta["context"] == "False"
+    assert unit_meta["target_files"] == ["007"]
+    assert unit_meta["acceptance"] == ["-7"]
     first = tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md"
     second = tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-902.md"
     assert first.exists()

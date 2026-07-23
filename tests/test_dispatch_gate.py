@@ -1,8 +1,9 @@
 import importlib.util
-import json
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "scripts"))
 
 
 def _load():
@@ -60,23 +61,22 @@ def test_concurrency_cap_serializes_excess():
 def test_unit_frontmatter_preserves_encoded_worker_order_fields(tmp_path):
     dispatch = _load()
     orchestrator = _load_orchestrator()
+    import work
 
-    def encoded(value: str) -> str:
-        return json.dumps("\x1eagent-runtime-work-scalar-v1:" + value, ensure_ascii=True)
-
-    context = 'Handle issue #1 "exactly"'
-    target = "src/#generated.py"
-    acceptance = "Preserve # markers"
+    context = "False"
+    target = "007"
+    acceptance = "-7"
     unit = tmp_path / "UNIT-TEST-001.md"
     unit.write_text(
-        "---\n"
-        "unit_id: UNIT-TEST-001\n"
-        f"context: {encoded(context)}\n"
-        "target_files:\n"
-        f"  - {encoded(target)}\n"
-        "acceptance:\n"
-        f"  - {encoded(acceptance)}\n"
-        "---\n",
+        work._frontmatter(
+            {
+                "unit_id": "UNIT-TEST-001",
+                "context": context,
+                "target_files": [target],
+                "acceptance": [acceptance],
+            }
+        )
+        + "\n",
         encoding="utf-8",
     )
 

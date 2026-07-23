@@ -1,6 +1,5 @@
 import datetime as dt
 import importlib.util
-import json
 import sys
 from pathlib import Path
 
@@ -137,10 +136,11 @@ def test_inbox_rank_groups_higher_severity_first_within_tier(tmp_path):
 
 def test_blocked_item_preserves_work_emitter_encoded_title(tmp_path):
     mod = _load()
-    title = 'Blocked #1 "quoted"'
-    encoded = json.dumps("\x1eagent-runtime-work-scalar-v1:" + title, ensure_ascii=True)
+    import work
+
+    title = "true"
     (tmp_path / "TASK-AR-913.md").write_text(
-        f"---\nid: TASK-AR-913\ntitle: {encoded}\nstatus: blocked\n---\n",
+        work._frontmatter({"id": "TASK-AR-913", "title": title, "status": "blocked"}) + "\n",
         encoding="utf-8",
     )
 
