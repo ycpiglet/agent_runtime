@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-07-23
-archived_count: 280
+archived_count: 282
 ---
 
 # Archived Task Files
 
-- `280` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `282` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -293,3 +293,5 @@ archived_count: 280
 | `TASK-AR-614` | `81421501-db9…` | `TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY` | completed | 2026-07-23T02:23:56+09:00 | 2026-07-23T04:27:22+09:00 | 2026-07-23T05:04:00+09:00 | 2026-07-23T05:04:00+09:00 | Close GitHub issue 318 by preventing self-eval from converting exhausted Git queries… |
 | `TASK-AR-615` | `dcbfa286-be0…` | `TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY` | completed | 2026-07-23T03:09:36+09:00 | 2026-07-23T03:25:49+09:00 | 2026-07-23T04:15:10+09:00 | 2026-07-23T04:15:10+09:00 | Close GitHub issue 320 by making the release-auto fixture recover from the observed t… |
 | `TASK-AR-616` | `8bfdf2e2-d52…` | `TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW` | completed | 2026-07-23T05:01:18+09:00 | 2026-07-23T05:14:06+09:00 | 2026-07-23T06:19:39+09:00 | 2026-07-23T06:19:39+09:00 | Resolve the reopened GitHub issue 320 by recovering when three consecutive recognized… |
+| `TASK-AR-619` | `d1cb4ea0-ca8…` | `TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION` | completed | 2026-07-23T10:15:00+09:00 | 2026-07-23T10:12:41+09:00 | 2026-07-23T12:00:13+09:00 | 2026-07-23T12:00:13+09:00 | Prevent non-target Git process transients from producing zero-call false failures in… |
+| `TASK-AR-620` | `69b08f2f-a8b…` | `TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY` | completed | 2026-07-23T11:20:00+09:00 | 2026-07-23T11:20:20+09:00 | 2026-07-23T11:38:03+09:00 | 2026-07-23T11:38:03+09:00 | Restore PR #336 package tests without weakening the real-backlog exact-set contract. |

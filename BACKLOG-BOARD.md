@@ -55,7 +55,7 @@ completed_task_set_count: 59
 
 - Flow: Make work-item serialization round-trip safe and exact task or unit selectors deterministic before release preflight.
 - Progress: `1/2` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-618` | INIT-AR-WORK-CLI-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-618/UNIT-TASK-AR-618-001.md | planned | Action | P1 | High | Low | 2h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Allow generic work commands to address a canonical task by exact ID without treating… |

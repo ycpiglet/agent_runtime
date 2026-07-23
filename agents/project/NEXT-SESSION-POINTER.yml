@@ -1,18 +1,24 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-23T12:01:00+09:00
+updated_at: 2026-07-23T12:20:00+09:00
 updated_by: codex-root
 current_state:
-  summary: "TASK-AR-619 and TASK-AR-620 are complete with green PR and post-merge matrices; TASK-AR-618 is next."
-  status: ready
+  summary: "TASK-AR-619 and TASK-AR-620 are complete; TASK-AR-618 exact selector precedence is claimed and in implementation."
+  status: in_progress
   task_set_status: in_progress
   task_set_id: "TASKSET-AR-WORK-CLI-INTEGRITY"
-  step_index: 0
+  step_index: 1
   step_total: 4
   progress_pct: 0
-  status_text: "Start TASK-AR-618 from its worker-ready unit, then run TASK-AR-602 for v0.7.0."
+  status_text: "TASK-AR-618 T3 replan and T2 claim passed; prepare failure-first selector tests in the claimed worktree."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260723-121549-task-ar-618-fc7c
+      agent_role: lead-engineer
+      agent_instance_id: "/root/task-ar-618"
+      display_name: "lead_engineer@orchestrator-01"
+      callsite_id: "terminal:wt-task-ar-618:tab-01"
+  current_teams:
+    - agent-runtime-core
 resume:
   active_task: TASK-AR-618
   active_task_set: "TASKSET-AR-WORK-CLI-INTEGRITY"
@@ -23,7 +29,8 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260723-121549-task-ar-618-fc7c.json
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
     active_claim: null
