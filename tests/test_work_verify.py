@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 from scripts import backlog_board
 
 
@@ -251,6 +253,30 @@ def test_work_verify_preserves_caret_bearing_revision_argument(tmp_path: Path) -
     command_result = evidence_payload["commands"][0]
     assert command_result["command"] == command
     assert json.loads(command_result["stdout"]) == [revision]
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="Windows command-line compatibility")
+def test_work_verify_keeps_legacy_terminal_quote_command_executable(tmp_path: Path) -> None:
+    command = f'{sys.executable} -c "print(\'legacy-ok\')"'
+    _write_unit(tmp_path, command=command)
+
+    result = _run(
+        tmp_path,
+        "verify",
+        "UNIT-TASK-AR-901-001",
+        "--now",
+        "2026-06-12T13:11:40+09:00",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout[result.stdout.index("{") :])
+    evidence_payload = json.loads((tmp_path / payload["evidence"]).read_text(encoding="utf-8"))
+    command_result = evidence_payload["commands"][0]
+    assert command_result["command"] == command[:-1]
+    assert command_result["status"] == "passed"
+    assert command_result["returncode"] == 0
+    assert command_result["stdout"].strip() == "legacy-ok"
 
 
 def test_work_verify_timeout_retains_result_evidence_fields(tmp_path: Path) -> None:
