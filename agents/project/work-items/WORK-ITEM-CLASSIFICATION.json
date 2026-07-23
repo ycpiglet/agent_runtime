@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-23T12:36:26+09:00",
-  "record_count": 452,
+  "generated_at": "2026-07-23T14:08:19+09:00",
+  "record_count": 456,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4976,6 +4976,50 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-620/UNIT-TASK-AR-620-001.md",
       "parent_id": "TASK-AR-620",
       "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+      "level": "initiative",
+      "number": "37",
+      "label": "Initiative 37",
+      "id": "INIT-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+      "title": "Work Verify Windows Shell Integrity",
+      "path": "agents/project/initiatives/INIT-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+      "level": "taskset",
+      "number": "37.1",
+      "label": "Taskset 37.1",
+      "id": "TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+      "title": "Work Verify Windows Shell Integrity",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-621",
+      "level": "task",
+      "number": "37.1.1",
+      "label": "Task 37.1.1",
+      "id": "TASK-AR-621",
+      "title": "Prevent shell metacharacters in registered verification commands from being silently…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-621.md",
+      "parent_id": "TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-621-001",
+      "level": "unit",
+      "number": "37.1.1.1",
+      "label": "Unit 37.1.1.1",
+      "id": "UNIT-TASK-AR-621-001",
+      "title": "UNIT-TASK-AR-621-001 - Define and test cross-platform verification execution",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-621/UNIT-TASK-AR-621-001.md",
+      "parent_id": "TASK-AR-621",
+      "status": "worker_ready"
     }
   ]
 }

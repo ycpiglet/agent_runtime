@@ -998,8 +998,31 @@
       "recorded_at": "2026-07-23T12:12:12+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-WORK-CLI-INTEGRITY"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-23-work-verify-windows-shell-registration.md",
+          "value": "830c0d248497637594f0ca4fb0a62bfcced386da13c34908ba0d664a8ff6bc54"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "7035aeb39aea13a4cde195665cf52d6b13c3d81cdc2f1c56d52efe7c1aed6f9f"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-23-work-verify-windows-shell-registration.md",
+      "recorded_at": "2026-07-23T14:08:20+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY"
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-23T12:54:17+09:00"
+  "updated_at": "2026-07-23T14:08:20+09:00"
 }
