@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T10:11:17+09:00
-record_count: 827
+generated_at: 2026-07-23T11:20:10+09:00
+record_count: 829
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `827` review and evidence records under `reviews/`.
+- Summary: indexed `829` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `827` files |
+| Reviews covered | pass | `829` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -537,6 +537,7 @@ record_count: 827
 | `reviews/REVIEW-2026-07-22-taskset-ar-july-release-impact-remediation-registration.md` | `REVIEW-2026-07-22-taskset-ar-july-release-impact-remediation-registration` | md | record | pass | Release Impact Remediator Registration |
 | `reviews/REVIEW-2026-07-22-taskset-ar-pr303-ci-schema-recovery-registration.md` | `REVIEW-2026-07-22-taskset-ar-pr303-ci-schema-recovery-registration` | md | record | pass | CI Schema Recovery Registration |
 | `reviews/REVIEW-2026-07-22-taskset-ar-terminal-status-start-guard-registration.md` | `REVIEW-2026-07-22-taskset-ar-terminal-status-start-guard-registration` | md | record | pass | Terminal Status Start Guard Registration |
+| `reviews/REVIEW-2026-07-23-cadence-isolation-backlog-expectation-recovery-plan.md` | `REVIEW-2026-07-23-cadence-isolation-backlog-expectation-recovery-plan` | md | record | needs-fix | Cadence Isolation Backlog Expectation Recovery Plan |
 | `reviews/REVIEW-2026-07-23-release-auto-fixture-head-recovery-plan.md` | `REVIEW-2026-07-23-release-auto-fixture-head-recovery-plan` | md | record | needs-fix | Release-Auto Fixture HEAD Recovery Plan |
 | `reviews/REVIEW-2026-07-23-release-auto-fixture-recovery-window-plan.md` | `REVIEW-2026-07-23-release-auto-fixture-recovery-window-plan` | md | record | needs-fix | Release-Auto Fixture Recovery Window Hardening Plan |
 | `reviews/REVIEW-2026-07-23-release-cadence-injection-test-isolation-plan.md` | `REVIEW-2026-07-23-release-cadence-injection-test-isolation-plan` | md | record | needs-fix | Release Cadence Injection Test Isolation Plan |
@@ -547,6 +548,7 @@ record_count: 827
 | `reviews/REVIEW-2026-07-23-task-ar-609-dispatch-t3-replan.md` | `REVIEW-2026-07-23-task-ar-609-dispatch-t3-replan` | md | record | pass | TASK-AR-609 Dispatch T3 Replan |
 | `reviews/REVIEW-2026-07-23-task-ar-617-t3-cross-consumer-replan.md` | `REVIEW-2026-07-23-task-ar-617-t3-cross-consumer-replan` | md | record | pass | TASK-AR-617 Cross-Consumer T3 Replan |
 | `reviews/REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan.md` | `REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan` | md | record | pass | TASK-AR-617 Parser Compatibility T3 Replan |
+| `reviews/REVIEW-2026-07-23-taskset-ar-cadence-isolation-backlog-expectation-recovery-registration.md` | `REVIEW-2026-07-23-taskset-ar-cadence-isolation-backlog-expectation-recovery-registration` | md | record | pass | Cadence Isolation Backlog Expectation Recovery Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-auto-fixture-head-recovery-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-auto-fixture-head-recovery-registration` | md | record | pass | Release-Auto Fixture HEAD Recovery Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-auto-fixture-recovery-window-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-auto-fixture-recovery-window-registration` | md | record | pass | Release-Auto Fixture Recovery Window Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-cadence-injection-test-isolation-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-cadence-injection-test-isolation-registration` | md | record | pass | Release Cadence Injection Test Isolation Registration |

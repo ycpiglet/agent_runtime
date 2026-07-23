@@ -1,5 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-23 - TASK-AR-620 active; PR #336 exact-backlog CI recovery
+
+- Active: `TASK-AR-620` in `TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY` has a T2-verified claim and will update only `tests/test_backlog_board_tasksets.py`.
+- Evidence: PR #336 run `29973935786` failed one exact-set assertion after `2193 passed`; the sole unexpected item was the correctly registered `TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION`.
+- Scope: add both the cadence injection taskset and this recovery taskset to the expected set without weakening exact equality or changing classifier behavior.
+- Next: merge TASK-AR-620, synchronize PR #336 with verified main, obtain the three-version matrix, and resume TASK-AR-619 W4b closeout.
+
 ## 2026-07-23 - TASK-AR-619 active; cadence injection tests being isolated
 
 - Active: `TASK-AR-619` in `TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION` has a T2-verified claim and dedicated worktree.

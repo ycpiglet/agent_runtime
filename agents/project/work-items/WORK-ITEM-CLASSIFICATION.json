@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-23T10:11:16+09:00",
-  "record_count": 448,
+  "generated_at": "2026-07-23T11:20:09+09:00",
+  "record_count": 452,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4931,6 +4931,50 @@
       "title": "UNIT-TASK-AR-619-001 - Make cadence failure injection query-complete and hermetic",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-619/UNIT-TASK-AR-619-001.md",
       "parent_id": "TASK-AR-619",
+      "status": "worker_ready"
+    },
+    {
+      "key": "initiative:INIT-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY",
+      "level": "initiative",
+      "number": "36",
+      "label": "Initiative 36",
+      "id": "INIT-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY",
+      "title": "Cadence Isolation Backlog Expectation Recovery",
+      "path": "agents/project/initiatives/INIT-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY",
+      "level": "taskset",
+      "number": "36.1",
+      "label": "Taskset 36.1",
+      "id": "TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY",
+      "title": "Cadence Isolation Backlog Expectation Recovery",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-620",
+      "level": "task",
+      "number": "36.1.1",
+      "label": "Task 36.1.1",
+      "id": "TASK-AR-620",
+      "title": "Restore PR #336 package tests without weakening the real-backlog exact-set contract.",
+      "path": "agents/lead_engineer/tasks/TASK-AR-620.md",
+      "parent_id": "TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-620-001",
+      "level": "unit",
+      "number": "36.1.1.1",
+      "label": "Unit 36.1.1.1",
+      "id": "UNIT-TASK-AR-620-001",
+      "title": "UNIT-TASK-AR-620-001 - Add cadence isolation tasksets to the exact expected set",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-620/UNIT-TASK-AR-620-001.md",
+      "parent_id": "TASK-AR-620",
       "status": "worker_ready"
     }
   ]

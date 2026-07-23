@@ -1,5 +1,11 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-07-23 TASK-AR-620 active for PR #336 CI recovery
+
+- Active: `TASK-AR-620` in `TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY` synchronizes the exact registered-taskset expectation after TASK-AR-619 intake.
+- Scope: add two taskset string literals only; preserve exact equality and production classification.
+- Sequence: verify and merge TASK-AR-620, rerun PR #336 on updated main, finish TASK-AR-619, then continue TASK-AR-618 and v0.7.0 TASK-AR-602.
+
 ## 2026-07-23 TASK-AR-619 active before TASK-AR-618 and v0.7.0
 
 - Active: `TASK-AR-619` in `TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION` removes real Git process dependence from the two cadence query-failure injection families.
