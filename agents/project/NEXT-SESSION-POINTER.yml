@@ -1,27 +1,21 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-23T11:39:30+09:00
+updated_at: 2026-07-23T12:01:00+09:00
 updated_by: codex-root
 current_state:
-  summary: "TASK-AR-620 is complete with green PR and post-merge matrices; TASK-AR-619 resumes on verified main."
-  status: in_progress
+  summary: "TASK-AR-619 and TASK-AR-620 are complete with green PR and post-merge matrices; TASK-AR-618 is next."
+  status: ready
   task_set_status: in_progress
-  task_set_id: "TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION"
-  step_index: 4
+  task_set_id: "TASKSET-AR-WORK-CLI-INTEGRITY"
+  step_index: 0
   step_total: 4
-  progress_pct: 90
-  status_text: "Synchronize PR #336 with verified main, rerun the supported-Python matrix, then complete TASK-AR-619 W4b closeout."
+  progress_pct: 0
+  status_text: "Start TASK-AR-618 from its worker-ready unit, then run TASK-AR-602 for v0.7.0."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260723-101241-task-ar-619-77ec
-      agent_role: lead-engineer
-      agent_instance_id: "/root"
-      display_name: "lead_engineer@orchestrator-01"
-      callsite_id: "terminal:wt-task-ar-619:tab-01"
-  current_teams:
-    - agent-runtime-core
+  current_agents: []
+  current_teams: []
 resume:
-  active_task: TASK-AR-619
-  active_task_set: "TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION"
+  active_task: TASK-AR-618
+  active_task_set: "TASKSET-AR-WORK-CLI-INTEGRITY"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -29,8 +23,7 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260723-101241-task-ar-619-77ec.json
+  active_claims: []
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
     active_claim: null

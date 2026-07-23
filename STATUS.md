@@ -1,5 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-23 - TASK-AR-619 complete; TASK-AR-618 next
+
+- Completed: PR #336 merged at `9acaffe499a4b99d2a7718516950d850b7eb2478`; pull-request run `29975465431` and post-merge main run `29975603058` passed Python 3.10, 3.11, and 3.12.
+- Contract: the cadence query-failure injection tests now answer all non-target Git queries deterministically, match the complete target argv, reject malformed range/path variants, and preserve exact retry/error behavior.
+- Quality: combined focused verification passed 103/103; independent W4b finalized at 100/100 and skeptic W4b at 98/100 with zero blockers.
+- Next: execute worker-ready `TASK-AR-618`, then run `TASK-AR-602` for the v0.7.0 release workflow.
+
 ## 2026-07-23 - TASK-AR-620 complete; TASK-AR-619 resumed
 
 - Completed: PR #337 merged at `8228d7c3281f82071d16f53ae81789c154f6c6db`; its pull-request run `29974597205` and post-merge main run `29974742678` passed Python 3.10, 3.11, and 3.12.
