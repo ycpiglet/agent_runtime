@@ -375,12 +375,15 @@ def _has_text_value(value: Any) -> bool:
     return bool(_text_lines(value))
 
 
+_FRONTMATTER_LINE_BOUNDARIES = "\n\r\v\f\x1c\x1d\x1e\x85\u2028\u2029"
+
+
 def _frontmatter_scalar(value: Any) -> str:
     text = str(value)
+    splitline_boundary = any(separator in text for separator in _FRONTMATTER_LINE_BOUNDARIES)
     unsafe = (
         "#" in text
-        or "\r" in text
-        or "\n" in text
+        or splitline_boundary
         or text != text.strip()
         or (text.startswith("[") and text.endswith("]"))
         or text.startswith(("'", '"'))
@@ -390,7 +393,7 @@ def _frontmatter_scalar(value: Any) -> str:
         return text
     return json.dumps(
         backlog_board.ENCODED_WORK_SCALAR_PREFIX + text,
-        ensure_ascii=False,
+        ensure_ascii=True,
     )
 
 
