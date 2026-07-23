@@ -370,18 +370,23 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-23-task-ar-602-t3-release-replan.md",
+          "value": "76f564e9b08eee33098b3538a4d487170efdf4f4809ccb846c809c8ed5698180"
+        },
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration.md",
           "value": "d4be2649e4be037cf69f4b2ea4e281877f09a10d449bab1a79ebae0d1d0d4b76"
         },
         {
           "kind": "sha256",
-          "path": "scripts/conversation_work_audit.py",
-          "value": "57ee40b838e45a36f7ee5caa53a1850aae78c3d8ab1e196f3b09f0fbedfac4fc"
+          "path": "agents/lead_engineer/tasks/TASK-AR-602.md",
+          "value": "82b731124a2626d19373ad2f05e24144b8151955ce8aec82ca44cfc505602ee6"
         },
         {
           "kind": "sha256",
-          "path": "scripts/owner_governance_gate.py",
-          "value": "5f88423f4dba20d026726b934ee2de6153cf762f9dc7623f8ed6e1efeaa8d38b"
+          "path": "agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md",
+          "value": "55ddf35b93d45b0e289a05b0c5f32b1cb49866e47a44bac157039ad6e867f6c1"
         },
         {
           "kind": "sha256",
@@ -391,16 +396,76 @@
         {
           "kind": "sha256",
           "path": "scripts/taskset_dispatcher.py",
-          "value": "7be761496a6a951db11a45369c7dc0493caf040c33c991fe1e42158515f1a2c7"
+          "value": "0d0947d2cd88b3f53ddef384f1520bb3e1ec3ca2a2bbf66f48f4a22b60d5bfe5"
         },
         {
           "kind": "sha256",
           "path": "scripts/work.py",
-          "value": "16292d68b100c04d0a8b5150e64e91898250d3d93da518fadfe935439ddb3c36"
+          "value": "7035aeb39aea13a4cde195665cf52d6b13c3d81cdc2f1c56d52efe7c1aed6f9f"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/conversation_work_audit.py",
+          "value": "371f9c18d19dd8d7230451dd2a9cfbf386863352b02380fcc22934d2d3e96d3c"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/owner_governance_gate.py",
+          "value": "cf5d6cd0a9892bfc716cf32911f374de3513f35e1649d53a5f4e6fb47e847a12"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/release_version_cascade.py",
+          "value": "ae5d4f91e8494ed17707c37723336cb33ec168c86fa41202b3269f6851de85f0"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/release_preflight.py",
+          "value": "ad780d8dad7f12b9aabb918dc081e6050279086e3e1bd6ef05f5c9bbb80eb3ec"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/publish_tag_smoke.py",
+          "value": "332832254c58d96d33909bda9f8a6c926a47d2c1edbcbc8941aeb020cf9a7ac0"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/publish_github_plan.py",
+          "value": "c6614b43bad25cb3465f4a864018caf07f7dbf2b7fdb41b15b29bc5753b641ef"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/publish_github_execute.py",
+          "value": "aa641a572ea8902b6bc9ecdce737c15b60a1c93c9f987ddd97e08df3dcaa6f86"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/cli.py",
+          "value": "4d26c54350ffce368c49ceafe4c2c406195f070c63f89fa6972671fa73e01bc4"
+        },
+        {
+          "kind": "sha256",
+          "path": ".github/workflows/test.yml",
+          "value": "150222acef81924a12a5995906261ff8ef068f144818fb1b22cc95c92ed4f6fd"
+        },
+        {
+          "kind": "sha256",
+          "path": "agents/project/RELEASE-GATE-TEMPLATE.yml",
+          "value": "409f8541f7c1311d6fbcee677371ad6366ed7169da6f55611481de3873869b80"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/fixtures/host/agent_runtime.yml",
+          "value": "8184078c03dcb6cb353cac89b553eb6701bd42780508552478d6f8eca23ca490"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/fixtures/host/agent_runtime.lock.json",
+          "value": "b8d4f87e13157b44849447f4adbe0f0f9009849f8a9ba7db8fb1429cf8f1f711"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-22-post-merge-plan-revalidation.md",
-      "recorded_at": "2026-07-22T16:53:37+09:00",
+      "design_record": "reviews/REVIEW-2026-07-23-task-ar-602-t3-release-replan.md",
+      "recorded_at": "2026-07-23T12:54:17+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT"
     },
@@ -936,5 +1001,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-23T12:12:12+09:00"
+  "updated_at": "2026-07-23T12:54:17+09:00"
 }

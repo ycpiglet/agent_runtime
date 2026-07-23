@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T12:40:06+09:00
-record_count: 846
+generated_at: 2026-07-23T13:41:34+09:00
+record_count: 850
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `846` review and evidence records under `reviews/`.
+- Summary: indexed `850` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `846` files |
+| Reviews covered | pass | `850` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -169,6 +169,7 @@ record_count: 846
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0.json` | `RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0 |
 | `reviews/RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8.json` | `RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8 |
 | `reviews/RELEASE-EXECUTION-GATE-2026-06-13-v0.2.0.json` | `RELEASE-EXECUTION-GATE-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-EXECUTION-GATE-2026-06-13-v0.2.0 |
+| `reviews/RELEASE-READINESS-2026-07-23-v0.7.0-CANDIDATE.md` | `RELEASE-READINESS-2026-07-23-v0.7.0-CANDIDATE` | md | candidate_ready | pass | v0.7.0 Candidate Release Readiness |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-09-v0.1.8.json` | `RELEASE-READINESS-SUMMARY-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-09-v0.1.8 |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current.json` | `RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0.json` | `RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0 |
@@ -544,6 +545,7 @@ record_count: 846
 | `reviews/REVIEW-2026-07-23-release-cadence-injection-test-isolation-plan.md` | `REVIEW-2026-07-23-release-cadence-injection-test-isolation-plan` | md | record | needs-fix | Release Cadence Injection Test Isolation Plan |
 | `reviews/REVIEW-2026-07-23-release-cadence-query-recovery-plan.md` | `REVIEW-2026-07-23-release-cadence-query-recovery-plan` | md | record | needs-fix | Release Cadence Query Recovery Plan |
 | `reviews/REVIEW-2026-07-23-self-eval-query-integrity-plan.md` | `REVIEW-2026-07-23-self-eval-query-integrity-plan` | md | record | needs-fix | Self-Eval Query Integrity Recovery Plan |
+| `reviews/REVIEW-2026-07-23-task-ar-602-t3-release-replan.md` | `REVIEW-2026-07-23-task-ar-602-t3-release-replan` | md | approved | watch | TASK-AR-602 T3 Release Replan |
 | `reviews/REVIEW-2026-07-23-task-ar-607-dispatch-t3-replan.md` | `REVIEW-2026-07-23-task-ar-607-dispatch-t3-replan` | md | record | pass | TASK-AR-607 Dispatch T3 Replan |
 | `reviews/REVIEW-2026-07-23-task-ar-608-dispatch-t3-replan.md` | `REVIEW-2026-07-23-task-ar-608-dispatch-t3-replan` | md | record | pass | TASK-AR-608 Dispatch T3 Replan |
 | `reviews/REVIEW-2026-07-23-task-ar-609-dispatch-t3-replan.md` | `REVIEW-2026-07-23-task-ar-609-dispatch-t3-replan` | md | record | pass | TASK-AR-609 Dispatch T3 Replan |
@@ -587,6 +589,7 @@ record_count: 846
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC-REWORK.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC-REWORK` | md | record | fail | TASK-AR-606 Security and Cross-Platform Skeptic Rework Review |
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC-REWORK2.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC-REWORK2` | md | record | pass | TASK-AR-606 Security and Cross-Platform Skeptic Rework 2 Review |
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC` | md | record | fail | TASK-AR-606 Security and Cross-Platform Skeptic Review |
+| `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-602-CANDIDATE-SKEPTIC-APPROVAL.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-602-CANDIDATE-SKEPTIC-APPROVAL` | md | conditional_approval | conditional_pass | TASK-AR-602 v0.7.0 Candidate Skeptic Approval |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-607-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-607-SKEPTIC` | md | record | pass | TASK-AR-607 Skeptic and Adversarial Review |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-608-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-608-SKEPTIC` | md | record | pass | TASK-AR-608 Skeptic and Adversarial W4b |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-609-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-609-SKEPTIC` | md | record | pass | TASK-AR-609 Skeptic and Adversarial W4b |
@@ -862,6 +865,7 @@ record_count: 846
 | `reviews/W4B-2026-07-22-TASK-AR-606.md` | `W4B-2026-07-22-TASK-AR-606` | md | record | pass | TASK-AR-606 Independent W4b Verification |
 | `reviews/W4B-2026-07-22-TASK-AR-610.md` | `W4B-2026-07-22-TASK-AR-610` | md | record | pass | TASK-AR-610 Independent W4b |
 | `reviews/W4B-2026-07-22-TASK-AR-611.md` | `W4B-2026-07-22-TASK-AR-611` | md | record | pass | TASK-AR-611 Independent W4b |
+| `reviews/W4B-2026-07-23-TASK-AR-602-CANDIDATE-APPROVAL.md` | `W4B-2026-07-23-TASK-AR-602-CANDIDATE-APPROVAL` | md | candidate_approved | pass | TASK-AR-602 v0.7.0 Candidate Independent W4b Approval |
 | `reviews/W4B-2026-07-23-TASK-AR-607.md` | `W4B-2026-07-23-TASK-AR-607` | md | record | pass | TASK-AR-607 Independent W4b Verification |
 | `reviews/W4B-2026-07-23-TASK-AR-608.md` | `W4B-2026-07-23-TASK-AR-608` | md | record | pass | TASK-AR-608 Independent W4b Verification |
 | `reviews/W4B-2026-07-23-TASK-AR-609.md` | `W4B-2026-07-23-TASK-AR-609` | md | record | pass | TASK-AR-609 Independent W4b Verification |

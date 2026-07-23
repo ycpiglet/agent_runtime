@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-07-23
-archived_count: 282
+archived_count: 283
 ---
 
 # Archived Task Files
 
-- `282` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `283` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -24,6 +24,7 @@ archived_count: 282
 | `TASK-AR-594` | `49059d8b-28c…` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | 2026-07-19T10:28:06+09:00 | 2026-07-19T10:32:13+09:00 | 2026-07-19T11:08:22+09:00 | 2026-07-19T11:08:22+09:00 | Resolve GitHub #289 so taskset dispatch selects explicit canonical task order before… |
 | `TASK-AR-597` | `5bb7344a-d7a…` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | 2026-07-19T10:28:06+09:00 | 2026-07-19T12:08:44+09:00 | 2026-07-19T12:25:31+09:00 | 2026-07-19T12:25:31+09:00 | Resolve GitHub #285 so transient Git setup failures include actionable stdout/stderr… |
 | `TASK-AR-596` | `5f9cdb53-373…` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | 2026-07-19T10:28:06+09:00 | 2026-07-19T11:55:48+09:00 | 2026-07-19T12:07:13+09:00 | 2026-07-19T12:07:13+09:00 | Resolve GitHub #290 so active pointers find canonical TASK files with descriptive slu… |
+| `TASK-AR-618` | `30389a6c-e64…` | `TASKSET-AR-WORK-CLI-INTEGRITY` | completed | 2026-07-23T08:40:51+09:00 | 2026-07-23T12:15:49+09:00 | 2026-07-23T12:39:01+09:00 | 2026-07-23T12:39:01+09:00 | Allow generic work commands to address a canonical task by exact ID without treating… |
 | `TASK-AR-595` | `833d0b22-5c7…` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | 2026-07-19T10:28:06+09:00 | 2026-07-19T11:45:07+09:00 | 2026-07-19T11:54:41+09:00 | 2026-07-19T11:54:41+09:00 | Resolve GitHub #287 so host updates honor pyproject build-system requirements instead… |
 | `TASK-AR-598` | `f8e1d34f-014…` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | 2026-07-19T10:28:06+09:00 | 2026-07-19T12:26:12+09:00 | 2026-07-22T16:39:40+09:00 | 2026-07-22T16:39:40+09:00 | Resolve GitHub #274 and supersede or merge PR #277 by shipping the host-proven sessio… |
 | `TASK-AR-599` | `15e52ef5-f08…` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | 2026-07-19T10:28:06+09:00 | 2026-07-22T17:00:10+09:00 | 2026-07-22T17:31:48+09:00 | 2026-07-22T17:31:48+09:00 | Resolve GitHub #279 by shipping an optional, zero-dependency notification client and… |

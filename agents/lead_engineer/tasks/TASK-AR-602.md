@@ -37,6 +37,8 @@ verification:
   - python scripts/owner_governance_gate.py
   - python -m pytest -q
   - python scripts/work.py status
+  - git cat-file -t v0.7.0
+  - "git rev-parse 'v0.7.0^{}'"
 ---
 
 # TASK-AR-602 - Synchronize state and release v0.7.0
@@ -62,3 +64,5 @@ verification:
 - `python scripts/owner_governance_gate.py`
 - `python -m pytest -q`
 - `python scripts/work.py status`
+- `git cat-file -t v0.7.0`
+- `git rev-parse 'v0.7.0^{}'`
