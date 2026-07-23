@@ -9,11 +9,12 @@ task_id: TASK-AR-620
 task_set_id: TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY
 initiative_id: INIT-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-23T11:20:00+09:00
-updated_at: 2026-07-23T11:22:51+09:00
+updated_at: 2026-07-23T11:38:00+09:00
+started_at: 2026-07-23T11:20:20+09:00
 origin_type: ci_failure
 origin_ref: reviews/REVIEW-2026-07-23-cadence-isolation-backlog-expectation-recovery-plan.md
 created_by: codex-root-planner
@@ -45,6 +46,11 @@ verified_at: 2026-07-23T11:22:51+09:00
 verified_by: codex-root-task-ar-620
 evidence_refs:
   - reviews/VERIFY-2026-07-23-unit-task-ar-620-001-20260723112251.json
+resolution: done
+completed_at: 2026-07-23T11:38:00+09:00
+closed_by: /root/task-ar-620
+actual_hours: 0.35
+actual_tokens: 3500
 ---
 
 # UNIT-TASK-AR-620-001 - Add cadence isolation tasksets to the exact expected set
@@ -93,3 +99,15 @@ Report the CI failure evidence, two-ID additive diff, exact-set preservation, fo
 ## Stop Boundary
 
 Stop if recovery requires classifier behavior changes or any assertion weakening.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T11:38:00+09:00`
+- Resolution: `done`
+- Actual hours: `0.35`
+- Actual tokens: `3500`
+- Closed by: `/root/task-ar-620`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-620-001-20260723112251.json`
+<!-- work-close:end -->

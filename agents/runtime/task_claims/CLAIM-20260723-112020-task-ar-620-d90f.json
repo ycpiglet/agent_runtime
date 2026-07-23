@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-620:tab-02",
   "pane_id": "terminal:wt-task-ar-620:tab-02",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY",
   "active_scope": "TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY",
   "scope_transition_approved": true,
@@ -19,20 +19,20 @@
   "model_tier": "worker_standard",
   "wip_slot": 2,
   "stop_condition": "",
-  "phase": "independent-verification",
-  "progress_pct": 95,
+  "phase": "verified",
+  "progress_pct": 100,
   "step_index": 4,
   "step_total": 4,
-  "status_text": "W4a passed; W4b approved; PR CI pending",
+  "status_text": "TASK-AR-620 complete; PR #337 and post-merge matrix passed",
   "worktree_path": "C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-620",
   "branch": "codex/task-ar-620-backlog-expectation",
   "claimed_at": "2026-07-23T11:20:20+09:00",
-  "last_heartbeat": "2026-07-23T11:28:30+09:00",
-  "updated_at": "2026-07-23T11:28:30+09:00",
+  "last_heartbeat": "2026-07-23T11:37:34+09:00",
+  "updated_at": "2026-07-23T11:37:34+09:00",
   "expires_at": "2026-07-23T11:58:30+09:00",
   "lease": {
     "claimed_at": "2026-07-23T11:20:20+09:00",
-    "heartbeat_at": "2026-07-23T11:28:30+09:00",
+    "heartbeat_at": "2026-07-23T11:37:34+09:00",
     "expires_at": "2026-07-23T11:58:30+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260723-112020-task-ar-620-d90f.handoff.md",
@@ -48,5 +48,9 @@
   ],
   "target_files": [
     "tests/test_backlog_board_tasksets.py"
-  ]
+  ],
+  "released_at": "2026-07-23T11:37:34+09:00",
+  "verified_by": "codex-task-ar-620-independent-auditor-20260723",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-23-TASK-AR-620-APPROVAL.md"
 }

@@ -3,13 +3,16 @@ title: TASK-AR-620 Skeptical W4b Approval
 date: 2026-07-23
 signal: pass
 task_id: TASK-AR-620
-verified_head: 34174eacb6d3048672286c6159efca6c5f6f0bd0
+verified_head: 35cf09c01c6fa26650c87115e42066c0306c5069
 verified_by: codex-task-ar-611-auditor
 worker: codex-root-task-ar-620
 role: skeptic
 verdict: APPROVE
-score: 96
-merge_gate: supported-python-matrix-pending
+score: 99
+merge_gate: passed
+pull_request: 337
+ci_run: 29974597205
+ci_matrix: 3/3 passed
 tags: [task-ar-620, skeptic, w4b, backlog, exact-set, ci-recovery]
 ---
 
@@ -17,8 +20,8 @@ tags: [task-ar-620, skeptic, w4b, backlog, exact-set, ci-recovery]
 
 ## 판정
 
-**APPROVE — 96/100** at exact HEAD
-`34174eacb6d3048672286c6159efca6c5f6f0bd0`.
+**FINAL APPROVE — 99/100** at exact HEAD
+`35cf09c01c6fa26650c87115e42066c0306c5069`.
 
 요구된 회귀 복구 범위는 정확하다. 테스트의 expected set은 59개에서 61개로
 늘었고, 추가분은 아래 두 ID뿐이며 삭제된 ID는 없다.
@@ -31,9 +34,10 @@ classifier 결과도 61개로 expected set과 완전히 같고, recovery task �
 자체 taskset도 포함된다. classifier·production·fixture·다른 ID 변경은 없으며 대상
 테스트 diff는 두 문자열 리터럴의 `+2/-0`뿐이다.
 
-이 승인은 로컬 W4b 승인이다. 정확한 현재 HEAD의 Python 3.10/3.11/3.12 CI matrix는
-아직 실행되지 않았으므로 **병합 전 필수 외부 게이트**로 남는다. 3/3 성공 전에는 이
-승인을 통합 가능 판정으로 확대해서는 안 된다.
+로컬 W4b 뒤 남아 있던 외부 게이트도 닫혔다. worktree HEAD, PR #337 head, GitHub
+Actions run `29974597205`의 head SHA가 모두 위 SHA와 정확히 일치한다. 해당 run은
+completed/success이고 Python 3.10/3.11/3.12가 **3/3 성공**했다. PR #337도 독립 확인
+시점에 `MERGED` 상태다. 따라서 이 판정은 조건부가 아닌 최종 CI-aware 승인이다.
 
 ## 측정 결과
 
@@ -51,7 +55,8 @@ classifier 결과도 61개로 expected set과 완전히 같고, recovery task �
 | taskset gate / diff 형식 | findings 0 / 오류 0 | pass / pass | gate, `git diff --check` | PASS | 유지 |
 | W4a 내용 유효성 | schema·명령·rc·상태 일치 | task/unit 모두 일치, 독립 재현 | 두 VERIFY JSON | PASS | 유지 |
 | W4a source freshness 결속 | exact source hash 식별 가능 | freshness block 없음, 자동 판정 unknown/watch | freshness gate | WARN | 다음 evidence부터 source hash/freshness 기록 |
-| 현재 HEAD Python matrix | 3.10/3.11/3.12 모두 성공 | 아직 0/3; 원격에 HEAD 없음 | remote containment, Actions | PENDING | 병합 전 3/3 성공 필수 |
+| 현재 HEAD/PR/run SHA 결속 | 세 SHA가 정확히 동일 | 모두 `35cf09c01...c5069` | Git, PR #337, run 29974597205 | PASS | 유지 |
+| 현재 HEAD Python matrix | 3.10/3.11/3.12 모두 성공 | **3/3 성공** | run 29974597205 | PASS | 완료 |
 
 ## 통과한 적대적 확인
 
@@ -124,13 +129,27 @@ provenance 개선 항목으로 남긴다.
 
 ## 비차단 잔여 위험
 
-### [P2] 현재 HEAD의 지원 Python matrix는 아직 없다
+### 닫힌 외부 게이트: exact-HEAD Python matrix 3/3 성공
 
-검토 시점에 `git branch -r --contains HEAD` 결과가 비어 있어 exact HEAD의 CI 결과는
-없다. 이 작업은 test-only set literal 변경이고 Python 3.10에서 반복 통과했지만,
-task acceptance는 supported matrix 통과를 요구한다. 브랜치를 원격 CI에 올린 뒤
-Python 3.10/3.11/3.12가 모두 성공해야 병합할 수 있다. 실패하면 이 승인은 자동으로
-보류되고 재검토해야 한다.
+PR #337의 `statusCheckRollup`과 Actions run을 각각 조회했다. PR head와 run head는
+모두 exact verified HEAD와 같고 결과는 다음과 같다.
+
+```text
+worktree HEAD = 35cf09c01c6fa26650c87115e42066c0306c5069
+PR #337 head  = 35cf09c01c6fa26650c87115e42066c0306c5069
+run head      = 35cf09c01c6fa26650c87115e42066c0306c5069
+run status    = completed
+run result    = success
+test (3.10)   = completed/success
+test (3.11)   = completed/success
+test (3.12)   = completed/success
+matrix        = 3/3 passed
+PR state      = MERGED
+```
+
+초기 W4b 뒤의 merge commit에서도 대상 테스트 파일은 구현 commit `34174eac`과
+동일함을 `git diff --exit-code 34174eac..HEAD -- tests/test_backlog_board_tasksets.py`로
+확인했다. 따라서 CI는 감사한 exact test implementation을 그대로 검증했다.
 
 ### [P3] W4a artifact가 source hash에 결속되지 않는다
 
@@ -152,8 +171,9 @@ expectation drift다. exact equality는 의도한 회귀 계약이므로 이번 
 - exact assertion 및 실제 classifier 일치: 25/25
 - 범위·프로덕션 무변경: 20/20
 - focused 반복·gate·W4a 재현: 15/15
-- release/provenance 증거: 6/10
-- 합계: **96/100**
+- exact-HEAD CI matrix 및 release 증거: 9/10
+- 합계: **99/100**
 
-기능·범위 blocking finding은 0개다. matrix 3/3은 병합 전 필수 조건이며, 이 보고서
-외에 구현, 테스트, task/index/claim, 기존 verification evidence는 수정하지 않았다.
+기능·범위·CI blocking finding은 0개다. freshness source 결속 watch만 P3 잔여로
+유지한다. 이 보고서 외에 구현, 테스트, task/index/claim, 기존 verification
+evidence는 수정하지 않았다.
