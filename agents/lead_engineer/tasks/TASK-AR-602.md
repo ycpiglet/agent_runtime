@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 registered_at: 2026-07-19T10:28:06+09:00
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-23T14:38:48+09:00
+started_at: 2026-07-23T12:56:21+09:00
+updated_at: 2026-07-23T15:20:21+09:00
 title: Synchronize state and release v0.7.0
-status: planned
+status: completed
 priority: P0
 difficulty: L
 est_hours: 5
@@ -24,7 +25,7 @@ task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 unit_spec: agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md
 reservation_id: RES-20260719-102806-bbbc9438-07
 origin_type: owner_request
-origin_ref: "chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277"
+origin_ref: "\u001eagent-runtime-work-scalar-v1:chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277"
 created_by: codex-root-planner
 summary: Close the taskset through full governance, current-head release preflight, version cascade, tag, GitHub release, issue reconciliation, and W5/W6 cleanup.
 planner_model_tier: planner_high
@@ -44,6 +45,11 @@ verified_at: 2026-07-23T14:38:48+09:00
 verified_by: /root/task-ar-602
 evidence_refs:
   - reviews/VERIFY-2026-07-23-task-ar-602-20260723143848.json
+resolution: done
+completed_at: 2026-07-23T15:20:21+09:00
+closed_by: /root/task-ar-602
+actual_hours: 3.0
+actual_tokens: 36000
 ---
 
 # TASK-AR-602 - Synchronize state and release v0.7.0
@@ -71,3 +77,15 @@ evidence_refs:
 - `python scripts/work.py status`
 - `git cat-file -t v0.7.0`
 - `git rev-parse v0.7.0~0`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T15:20:21+09:00`
+- Resolution: `done`
+- Actual hours: `3.0`
+- Actual tokens: `36000`
+- Closed by: `/root/task-ar-602`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-task-ar-602-20260723143848.json`
+<!-- work-close:end -->

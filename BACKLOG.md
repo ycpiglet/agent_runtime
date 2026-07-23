@@ -66,6 +66,8 @@
 | 602 | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | CI Schema Recovery |
 | 603 | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | Backlog Taskset Test Recovery |
 | 604 | `TASKSET-AR-TERMINAL-STATUS-START-GUARD` | Terminal Status Start Guard |
+| 604 | `TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY` | Work Verify Windows Shell Integrity |
+| 605 | `TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY` | Work Frontmatter Scalar Integrity |
 | 615 | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | Self Improvement Cadence |
 | 616 | `TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE` | Self Improvement Remediation |
 | 617 | `TASKSET-AR-BUSINESS-OPERATIONS-TEAMS` | Business Operations Teams |
@@ -83,6 +85,8 @@
 | 724 | `TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY` | Self-Eval Query Integrity |
 | 725 | `TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY` | Release-Auto Fixture HEAD Recovery |
 | 727 | `TASKSET-AR-RELEASE-AUTO-FIXTURE-RECOVERY-WINDOW` | Release-Auto Fixture Recovery Window |
+| 7231 | `TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION` | Release Cadence Injection Test Isolation |
+| 7232 | `TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY` | Cadence Isolation Backlog Expectation Recovery |
 
 <!-- BACKLOG-INDEX:END -->
 

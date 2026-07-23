@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-602:tab-01",
   "pane_id": "terminal:wt-task-ar-602:tab-01",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
   "active_scope": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
   "scope_transition_approved": true,
@@ -19,20 +19,20 @@
   "model_tier": "worker_standard",
   "wip_slot": 1,
   "stop_condition": "Stop before release if any required test/gate is red, current main differs from the verified release commit, or a secret/credential boundary is unclear.",
-  "phase": "implementation",
-  "progress_pct": 0,
-  "step_index": 1,
+  "phase": "taskset-completed",
+  "progress_pct": 100,
+  "step_index": 4,
   "step_total": 4,
-  "status_text": "TASK-AR-602 claimed; preparing v0.7.0 candidate",
+  "status_text": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT completed with v0.7.0 published",
   "worktree_path": "C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-602",
   "branch": "codex/task-ar-602-v0-7-0-release",
   "claimed_at": "2026-07-23T12:56:21+09:00",
-  "last_heartbeat": "2026-07-23T12:56:21+09:00",
-  "updated_at": "2026-07-23T12:56:21+09:00",
+  "last_heartbeat": "2026-07-23T15:19:33+09:00",
+  "updated_at": "2026-07-23T15:19:33+09:00",
   "expires_at": "2026-07-23T18:56:21+09:00",
   "lease": {
     "claimed_at": "2026-07-23T12:56:21+09:00",
-    "heartbeat_at": "2026-07-23T12:56:21+09:00",
+    "heartbeat_at": "2026-07-23T15:19:33+09:00",
     "expires_at": "2026-07-23T18:56:21+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260723-125621-task-ar-602-ef25.handoff.md",
@@ -67,5 +67,9 @@
     "ARCHIVE-INDEX.md",
     "STATUS.md",
     "reviews/INDEX.md"
-  ]
+  ],
+  "released_at": "2026-07-23T15:19:33+09:00",
+  "verified_by": "/root/task_ar_611_auditor",
+  "verifier_role": "skeptic",
+  "verification_evidence": "reviews/ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC-RECHECK-2.md"
 }

@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T15:18:39+09:00
-record_count: 866
+generated_at: 2026-07-23T15:24:28+09:00
+record_count: 868
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `866` review and evidence records under `reviews/`.
+- Summary: indexed `868` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `866` files |
+| Reviews covered | pass | `868` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -171,6 +171,7 @@ record_count: 866
 | `reviews/RELEASE-EXECUTION-GATE-2026-06-13-v0.2.0.json` | `RELEASE-EXECUTION-GATE-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-EXECUTION-GATE-2026-06-13-v0.2.0 |
 | `reviews/RELEASE-NOTES-2026-07-23-v0.7.0.md` | `RELEASE-NOTES-2026-07-23-v0.7.0` | md | record | n/a | Agent Runtime v0.7.0 |
 | `reviews/RELEASE-READINESS-2026-07-23-v0.7.0-CANDIDATE.md` | `RELEASE-READINESS-2026-07-23-v0.7.0-CANDIDATE` | md | candidate_ready | pass | v0.7.0 Candidate Release Readiness |
+| `reviews/RELEASE-READINESS-2026-07-23-v0.7.0-CLOSEOUT.md` | `RELEASE-READINESS-2026-07-23-v0.7.0-CLOSEOUT` | md | pass | n/a | v0.7.0 release closeout readiness |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-09-v0.1.8.json` | `RELEASE-READINESS-SUMMARY-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-09-v0.1.8 |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current.json` | `RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0.json` | `RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0 |
@@ -216,6 +217,7 @@ record_count: 866
 | `reviews/RETRO-2026-06-14-knowledge-stack.md` | `RETRO-2026-06-14-knowledge-stack` | retro | watch | watch | RETRO 2026-06-14 — Agent knowledge stack (#1–#4) |
 | `reviews/RETRO-2026-06-17-self-improvement-cycle.md` | `RETRO-2026-06-17-self-improvement-cycle` | retro | record | n/a | RETRO 2026-06-17 - Self Improvement Cycle |
 | `reviews/RETRO-2026-06-21-business-operating-system.md` | `RETRO-2026-06-21-business-operating-system` | retro | recorded | pass | Business Operating System Retro |
+| `reviews/RETRO-2026-07-23-july-upstream-intake-closeout.md` | `RETRO-2026-07-23-july-upstream-intake-closeout` | md | complete | n/a | July upstream intake closeout and v0.7.0 release retro |
 | `reviews/RETRO-2026-07-23-taskset-ar-work-cli-integrity.md` | `RETRO-2026-07-23-taskset-ar-work-cli-integrity` | md | complete | n/a | TASKSET-AR-WORK-CLI-INTEGRITY Retrospective |
 | `reviews/REVIEW-2026-06-08-agent-runtime-after-pass-1.md` | `REVIEW-2026-06-08-agent-runtime-after-pass-1` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-after-pass-1 |
 | `reviews/REVIEW-2026-06-08-agent-runtime-baseline.md` | `REVIEW-2026-06-08-agent-runtime-baseline` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-baseline |
