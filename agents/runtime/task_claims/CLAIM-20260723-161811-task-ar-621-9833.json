@@ -1,0 +1,56 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260723-161811-task-ar-621-9833",
+  "task_id": "TASK-AR-621",
+  "agent_role": "lead-engineer",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "/root/task-ar-621-integration",
+  "display_name": "lead_engineer@integration-orchestrator-01",
+  "callsite_id": "terminal:wt-task-ar-621:tab-01",
+  "pane_id": "terminal:wt-task-ar-621:tab-01",
+  "mode": "orchestrator",
+  "status": "claimed",
+  "task_set_id": "TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+  "active_scope": "TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+  "scope_transition_approved": true,
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "unit_id": "UNIT-TASK-AR-621-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-621/UNIT-TASK-AR-621-001.md",
+  "model_tier": "worker_standard",
+  "wip_slot": 1,
+  "stop_condition": "Stop after verified PR integration and W5 cleanup; do not alter verified implementation semantics.",
+  "phase": "integration",
+  "progress_pct": 95,
+  "step_index": 5,
+  "step_total": 5,
+  "status_text": "TASK-AR-621 W4b approved; integrating verified branch",
+  "worktree_path": "C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-621",
+  "branch": "codex/task-ar-621-windows-verify-integrity",
+  "claimed_at": "2026-07-23T16:18:11+09:00",
+  "last_heartbeat": "2026-07-23T16:18:11+09:00",
+  "updated_at": "2026-07-23T16:18:11+09:00",
+  "expires_at": "2026-07-23T16:48:11+09:00",
+  "lease": {
+    "claimed_at": "2026-07-23T16:18:11+09:00",
+    "heartbeat_at": "2026-07-23T16:18:11+09:00",
+    "expires_at": "2026-07-23T16:48:11+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260723-161811-task-ar-621-9833.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260723-161811-task-ar-621-9833.log.md",
+  "allow_parallel_task_set": false,
+  "tags": [
+    "work-cli",
+    "windows",
+    "integration"
+  ],
+  "escalation_triggers": [
+    "data_integrity",
+    "cross_platform",
+    "runtime"
+  ],
+  "target_files": [
+    "scripts/work.py",
+    "tests/test_work_verify.py",
+    "reviews/"
+  ]
+}

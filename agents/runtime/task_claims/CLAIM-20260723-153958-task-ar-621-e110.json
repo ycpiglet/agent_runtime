@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-621:tab-01",
   "pane_id": "terminal:wt-task-ar-621:tab-01",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
   "active_scope": "TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
   "scope_transition_approved": true,
@@ -19,20 +19,20 @@
   "model_tier": "worker_standard",
   "wip_slot": 1,
   "stop_condition": "Stop before changing the verification evidence schema, accepting commands from a new source, or rewriting historical evidence.",
-  "phase": "self-verified",
-  "progress_pct": 90,
-  "step_index": 4,
+  "phase": "verified",
+  "progress_pct": 100,
+  "step_index": 5,
   "step_total": 5,
-  "status_text": "TASK-AR-621 compatibility rework passed W4a; fresh independent W4b recheck in progress",
+  "status_text": "TASK-AR-621 W4b approved; claim released for integration",
   "worktree_path": "C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-621",
   "branch": "codex/task-ar-621-windows-verify-integrity",
   "claimed_at": "2026-07-23T15:39:58+09:00",
-  "last_heartbeat": "2026-07-23T16:05:30+09:00",
-  "updated_at": "2026-07-23T16:05:30+09:00",
+  "last_heartbeat": "2026-07-23T16:15:52+09:00",
+  "updated_at": "2026-07-23T16:15:52+09:00",
   "expires_at": "2026-07-23T16:35:30+09:00",
   "lease": {
     "claimed_at": "2026-07-23T15:39:58+09:00",
-    "heartbeat_at": "2026-07-23T16:05:30+09:00",
+    "heartbeat_at": "2026-07-23T16:15:52+09:00",
     "expires_at": "2026-07-23T16:35:30+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260723-153958-task-ar-621-e110.handoff.md",
@@ -52,5 +52,9 @@
     "scripts/work.py",
     "tests/test_work_verify.py",
     "reviews/"
-  ]
+  ],
+  "released_at": "2026-07-23T16:15:52+09:00",
+  "verified_by": "/root/task_ar_603_auditor",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-23-TASK-AR-621-RELEASE.md"
 }
