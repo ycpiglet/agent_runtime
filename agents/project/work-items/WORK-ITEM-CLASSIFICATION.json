@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-23T12:36:26+09:00",
-  "record_count": 452,
+  "generated_at": "2026-07-23T15:20:22+09:00",
+  "record_count": 460,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -4095,7 +4095,7 @@
       "title": "Upstream Intake Closer",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-594",
@@ -4238,7 +4238,7 @@
       "title": "Resolve GitHub #280 after every intake unit is merged by refreshing current-state rec…",
       "path": "agents/lead_engineer/tasks/TASK-AR-602.md",
       "parent_id": "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-602-001",
@@ -4249,7 +4249,7 @@
       "title": "UNIT-TASK-AR-602-001 - Close state and publish v0.7.0",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md",
       "parent_id": "TASK-AR-602",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "initiative:INIT-AR-AUTO-MERGE-INTEGRITY",
@@ -4976,6 +4976,94 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-620/UNIT-TASK-AR-620-001.md",
       "parent_id": "TASK-AR-620",
       "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+      "level": "initiative",
+      "number": "37",
+      "label": "Initiative 37",
+      "id": "INIT-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+      "title": "Work Verify Windows Shell Integrity",
+      "path": "agents/project/initiatives/INIT-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+      "level": "taskset",
+      "number": "37.1",
+      "label": "Taskset 37.1",
+      "id": "TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+      "title": "Work Verify Windows Shell Integrity",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-621",
+      "level": "task",
+      "number": "37.1.1",
+      "label": "Task 37.1.1",
+      "id": "TASK-AR-621",
+      "title": "Prevent shell metacharacters in registered verification commands from being silently…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-621.md",
+      "parent_id": "TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-621-001",
+      "level": "unit",
+      "number": "37.1.1.1",
+      "label": "Unit 37.1.1.1",
+      "id": "UNIT-TASK-AR-621-001",
+      "title": "UNIT-TASK-AR-621-001 - Define and test cross-platform verification execution",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-621/UNIT-TASK-AR-621-001.md",
+      "parent_id": "TASK-AR-621",
+      "status": "worker_ready"
+    },
+    {
+      "key": "initiative:INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
+      "level": "initiative",
+      "number": "38",
+      "label": "Initiative 38",
+      "id": "INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
+      "title": "Work Frontmatter Scalar Integrity",
+      "path": "agents/project/initiatives/INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
+      "level": "taskset",
+      "number": "38.1",
+      "label": "Taskset 38.1",
+      "id": "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
+      "title": "Work Frontmatter Scalar Integrity",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-622",
+      "level": "task",
+      "number": "38.1.1",
+      "label": "Task 38.1.1",
+      "id": "TASK-AR-622",
+      "title": "Ensure work registration and lifecycle rewrites round-trip scalar values containing Y…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-622.md",
+      "parent_id": "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-622-001",
+      "level": "unit",
+      "number": "38.1.1.1",
+      "label": "Unit 38.1.1.1",
+      "id": "UNIT-TASK-AR-622-001",
+      "title": "UNIT-TASK-AR-622-001 - Define and test lossless work scalar serialization",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-622/UNIT-TASK-AR-622-001.md",
+      "parent_id": "TASK-AR-622",
+      "status": "worker_ready"
     }
   ]
 }

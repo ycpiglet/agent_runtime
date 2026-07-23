@@ -1636,3 +1636,28 @@ Decision
 - PR #314 CI run `29935529242` and post-merge main run `29935760999` both passed Python 3.10/3.11/3.12 on attempt 1; GitHub issue #297 was closed completed with evidence comment `5048456934`.
 - W5 cleanup removed the feature worktree and local/remote branch; W0 now reports zero active claims, one main worktree, and zero divergent tasks.
 - Next: TASK-AR-608 for GitHub #298, which owns the quote-unaware frontmatter parser defect observed during TASK-AR-604 through TASK-AR-607 metadata handling.
+
+## 2026-07-23 - v0.7.0 published and July upstream intake taskset closed
+
+### Bottom Line
+
+- `v0.7.0` is a public, non-draft, non-prerelease GitHub release from annotated tag object `99292aadd72284b83f6e55b1de4e48102f449512`, peeled to verified main commit `23c4be4059dc4c12d107ac8cc5fefa795dfab7f8`.
+- `TASK-AR-602` and `UNIT-TASK-AR-602-001` are completed after independent W4b; `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT --require-complete` passes with findings 0.
+- GitHub issues `#274`, `#279`, `#280`, `#285`, `#287`, `#289`, and `#290` are closed.
+- No active claim remains. `TASK-AR-621` in `TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY` and `TASK-AR-622` in `TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY` preserve two follow-up defects found during closeout; neither is claimed or implemented in this release task.
+
+### Signal
+
+| Signal | State | Evidence |
+| --- | --- | --- |
+| Release | pass | `https://github.com/ycpiglet/agent_runtime/releases/tag/v0.7.0` |
+| Tag target | pass | `v0.7.0~0` = `23c4be4059dc4c12d107ac8cc5fefa795dfab7f8` |
+| Candidate/post-merge CI | pass | runs `29980218065`, `29980353636`; Python 3.10/3.11/3.12 success |
+| W4a | pass | `reviews/VERIFY-2026-07-23-unit-task-ar-602-001-20260723142627.json`, `reviews/VERIFY-2026-07-23-task-ar-602-20260723143848.json` |
+| W4b | pass | `reviews/W4B-2026-07-23-TASK-AR-602-FINAL.md`, final skeptical recheck 96/100 |
+| Taskset completion | pass | named `taskset_work_gate --require-complete`, findings 0 |
+
+### Decision
+
+- The v0.7.0 release and intake taskset are complete. W5 closeout branch integration and local worktree/branch removal remain the final mechanical cleanup before the next W0 session.
+- Do not move or delete the published tag. If a release defect is discovered, publish a warning and forward-fix as v0.7.1; immutable v0.6.0 remains the prior known release.

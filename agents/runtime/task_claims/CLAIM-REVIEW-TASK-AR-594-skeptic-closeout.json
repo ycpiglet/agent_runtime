@@ -10,6 +10,8 @@
   "display_name": "skeptic@review",
   "mode": "review",
   "status": "released",
+  "phase": "taskset-completed",
+  "progress_pct": 100,
   "status_text": "Additive skeptic adversarial review pass for TASK-AR-594 (closeout; high-risk: cross_cutting, high_risk)",
   "claimed_at": "2026-07-19T10:50:24+09:00",
   "last_heartbeat": "2026-07-19T10:56:50+09:00",

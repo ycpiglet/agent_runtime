@@ -10,6 +10,8 @@
   "display_name": "independent-auditor@review",
   "mode": "review",
   "status": "released",
+  "phase": "taskset-completed",
+  "progress_pct": 100,
   "status_text": "Additive independent-auditor review pass for TASK-AR-598 (closeout)",
   "claimed_at": "2026-07-19T12:48:57+09:00",
   "last_heartbeat": "2026-07-22T16:39:24+09:00",

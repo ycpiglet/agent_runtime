@@ -110,6 +110,18 @@
       "order": 604
     },
     {
+      "task_set_id": "TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+      "display_name": "Work Verify Windows Shell Integrity",
+      "summary": "Define and enforce a cross-platform execution contract for work.py verify.",
+      "order": 604
+    },
+    {
+      "task_set_id": "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
+      "display_name": "Work Frontmatter Scalar Integrity",
+      "summary": "Define and enforce lossless work-item frontmatter scalar serialization.",
+      "order": 605
+    },
+    {
       "task_set_id": "TASKSET-AR-SELF-IMPROVEMENT-CADENCE",
       "display_name": "Self Improvement Cadence",
       "summary": "Detect low-frequency roles and runtime assets, run review/retro/meeting/seminar/compound/doc-steward/scribe cycles from evidence, and publish measurable maturity signals.",

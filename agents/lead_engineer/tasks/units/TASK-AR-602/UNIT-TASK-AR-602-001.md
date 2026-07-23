@@ -9,13 +9,13 @@ task_id: TASK-AR-602
 task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 initiative_id: INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-19T10:28:06+09:00
+updated_at: 2026-07-23T15:20:19+09:00
 origin_type: owner_request
-origin_ref: chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277
+origin_ref: "\u001eagent-runtime-work-scalar-v1:chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277"
 created_by: codex-root-planner
 summary: Close state and publish v0.7.0
 horizon: unit
@@ -25,7 +25,7 @@ escalation_triggers:
   - high_risk
   - cross_cutting
   - release
-context: GitHub #280 approved v0.7.0 from an older SHA; current main has additional fixes, so the candidate must be rebuilt and verified only after every open intake item is integrated.
+context: "\u001eagent-runtime-work-scalar-v1:GitHub #280 approved v0.7.0 from an older SHA; current main has additional fixes, so the candidate must be rebuilt and verified only after every open intake item is integrated."
 inputs:
   - https://github.com/ycpiglet/agent_runtime/issues/280
   - scripts/release_version_cascade.py
@@ -61,9 +61,18 @@ verification:
   - python -m pytest -q
   - python scripts/work.py status
   - git cat-file -t v0.7.0
-  - "git rev-parse 'v0.7.0^{}'"
+  - git rev-parse v0.7.0~0
 handoff: Provide release URL, tag/commit SHA, full gate/test results, closed issue list, current W0 status, and rollback notes.
 stop_condition: Stop before release if any required test/gate is red, current main differs from the verified release commit, or a secret/credential boundary is unclear.
+verified_at: 2026-07-23T14:26:27+09:00
+verified_by: /root/task-ar-602
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-unit-task-ar-602-001-20260723142627.json
+resolution: done
+completed_at: 2026-07-23T15:20:19+09:00
+closed_by: /root/task-ar-602
+actual_hours: 3.0
+actual_tokens: 36000
 ---
 
 # UNIT-TASK-AR-602-001 - Close state and publish v0.7.0
@@ -124,12 +133,30 @@ Reconcile state, bump the deterministic cascade to 0.7.0, run full validation an
 - `python -m pytest -q`
 - `python scripts/work.py status`
 - `git cat-file -t v0.7.0`
-- `git rev-parse 'v0.7.0^{}'`
+- `git rev-parse v0.7.0~0`
 
 ## Handoff
 
 Provide release URL, tag/commit SHA, full gate/test results, closed issue list, current W0 status, and rollback notes.
 
+## Verification History
+
+- Failed evidence retained: `reviews/VERIFY-2026-07-23-unit-task-ar-602-001-20260723135202.json` (Windows shell changed the caret-bearing tag peel command; general runner follow-up is TASK-AR-621).
+- Failed evidence retained: `reviews/VERIFY-2026-07-23-unit-task-ar-602-001-20260723141048.json` (new taskset registration required the exhaustive backlog expectation sync).
+- Final passing evidence: `reviews/VERIFY-2026-07-23-unit-task-ar-602-001-20260723142627.json`.
+
 ## Stop Boundary
 
 Stop before release if any required test/gate is red, current main differs from the verified release commit, or a secret/credential boundary is unclear.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T15:20:19+09:00`
+- Resolution: `done`
+- Actual hours: `3.0`
+- Actual tokens: `36000`
+- Closed by: `/root/task-ar-602`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-602-001-20260723142627.json`
+<!-- work-close:end -->

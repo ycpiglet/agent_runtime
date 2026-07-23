@@ -1,5 +1,7 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
+  - reviews/REVIEW-2026-07-23-taskset-ar-work-frontmatter-scalar-integrity-registration.md
+  - reviews/REVIEW-2026-07-23-taskset-ar-work-verify-windows-shell-integrity-registration.md
   - reviews/REVIEW-2026-07-23-taskset-ar-cadence-isolation-backlog-expectation-recovery-registration.md
   - reviews/REVIEW-2026-07-23-taskset-ar-release-cadence-injection-test-isolation-registration.md
   - reviews/REVIEW-2026-07-23-taskset-ar-work-cli-integrity-registration.md

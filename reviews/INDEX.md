@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T13:41:34+09:00
-record_count: 850
+generated_at: 2026-07-23T15:24:28+09:00
+record_count: 868
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `850` review and evidence records under `reviews/`.
+- Summary: indexed `868` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `850` files |
+| Reviews covered | pass | `868` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -169,7 +169,9 @@ record_count: 850
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0.json` | `RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0 |
 | `reviews/RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8.json` | `RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8 |
 | `reviews/RELEASE-EXECUTION-GATE-2026-06-13-v0.2.0.json` | `RELEASE-EXECUTION-GATE-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-EXECUTION-GATE-2026-06-13-v0.2.0 |
+| `reviews/RELEASE-NOTES-2026-07-23-v0.7.0.md` | `RELEASE-NOTES-2026-07-23-v0.7.0` | md | record | n/a | Agent Runtime v0.7.0 |
 | `reviews/RELEASE-READINESS-2026-07-23-v0.7.0-CANDIDATE.md` | `RELEASE-READINESS-2026-07-23-v0.7.0-CANDIDATE` | md | candidate_ready | pass | v0.7.0 Candidate Release Readiness |
+| `reviews/RELEASE-READINESS-2026-07-23-v0.7.0-CLOSEOUT.md` | `RELEASE-READINESS-2026-07-23-v0.7.0-CLOSEOUT` | md | pass | n/a | v0.7.0 release closeout readiness |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-09-v0.1.8.json` | `RELEASE-READINESS-SUMMARY-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-09-v0.1.8 |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current.json` | `RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0.json` | `RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0 |
@@ -215,6 +217,7 @@ record_count: 850
 | `reviews/RETRO-2026-06-14-knowledge-stack.md` | `RETRO-2026-06-14-knowledge-stack` | retro | watch | watch | RETRO 2026-06-14 — Agent knowledge stack (#1–#4) |
 | `reviews/RETRO-2026-06-17-self-improvement-cycle.md` | `RETRO-2026-06-17-self-improvement-cycle` | retro | record | n/a | RETRO 2026-06-17 - Self Improvement Cycle |
 | `reviews/RETRO-2026-06-21-business-operating-system.md` | `RETRO-2026-06-21-business-operating-system` | retro | recorded | pass | Business Operating System Retro |
+| `reviews/RETRO-2026-07-23-july-upstream-intake-closeout.md` | `RETRO-2026-07-23-july-upstream-intake-closeout` | md | complete | n/a | July upstream intake closeout and v0.7.0 release retro |
 | `reviews/RETRO-2026-07-23-taskset-ar-work-cli-integrity.md` | `RETRO-2026-07-23-taskset-ar-work-cli-integrity` | md | complete | n/a | TASKSET-AR-WORK-CLI-INTEGRITY Retrospective |
 | `reviews/REVIEW-2026-06-08-agent-runtime-after-pass-1.md` | `REVIEW-2026-06-08-agent-runtime-after-pass-1` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-after-pass-1 |
 | `reviews/REVIEW-2026-06-08-agent-runtime-baseline.md` | `REVIEW-2026-06-08-agent-runtime-baseline` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-baseline |
@@ -546,6 +549,7 @@ record_count: 850
 | `reviews/REVIEW-2026-07-23-release-cadence-query-recovery-plan.md` | `REVIEW-2026-07-23-release-cadence-query-recovery-plan` | md | record | needs-fix | Release Cadence Query Recovery Plan |
 | `reviews/REVIEW-2026-07-23-self-eval-query-integrity-plan.md` | `REVIEW-2026-07-23-self-eval-query-integrity-plan` | md | record | needs-fix | Self-Eval Query Integrity Recovery Plan |
 | `reviews/REVIEW-2026-07-23-task-ar-602-t3-release-replan.md` | `REVIEW-2026-07-23-task-ar-602-t3-release-replan` | md | approved | watch | TASK-AR-602 T3 Release Replan |
+| `reviews/REVIEW-2026-07-23-task-ar-602-w4a-command-replan.md` | `REVIEW-2026-07-23-task-ar-602-w4a-command-replan` | md | approved | n/a | TASK-AR-602 W4a command portability replan |
 | `reviews/REVIEW-2026-07-23-task-ar-607-dispatch-t3-replan.md` | `REVIEW-2026-07-23-task-ar-607-dispatch-t3-replan` | md | record | pass | TASK-AR-607 Dispatch T3 Replan |
 | `reviews/REVIEW-2026-07-23-task-ar-608-dispatch-t3-replan.md` | `REVIEW-2026-07-23-task-ar-608-dispatch-t3-replan` | md | record | pass | TASK-AR-608 Dispatch T3 Replan |
 | `reviews/REVIEW-2026-07-23-task-ar-609-dispatch-t3-replan.md` | `REVIEW-2026-07-23-task-ar-609-dispatch-t3-replan` | md | record | pass | TASK-AR-609 Dispatch T3 Replan |
@@ -553,6 +557,7 @@ record_count: 850
 | `reviews/REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan.md` | `REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan` | md | record | pass | TASK-AR-617 Parser Compatibility T3 Replan |
 | `reviews/REVIEW-2026-07-23-task-ar-618-selector-precedence.md` | `REVIEW-2026-07-23-task-ar-618-selector-precedence` | md | implemented | n/a | TASK-AR-618 Exact Selector Precedence |
 | `reviews/REVIEW-2026-07-23-task-ar-618-t3-selector-replan.md` | `REVIEW-2026-07-23-task-ar-618-t3-selector-replan` | md | record | pass | TASK-AR-618 Exact Selector T3 Replan |
+| `reviews/REVIEW-2026-07-23-task-ar-622-t3-legacy-scalar-replan.md` | `REVIEW-2026-07-23-task-ar-622-t3-legacy-scalar-replan` | md | approved | n/a | TASK-AR-622 T3 legacy scalar replan and re-anchor |
 | `reviews/REVIEW-2026-07-23-taskset-ar-cadence-isolation-backlog-expectation-recovery-registration.md` | `REVIEW-2026-07-23-taskset-ar-cadence-isolation-backlog-expectation-recovery-registration` | md | record | pass | Cadence Isolation Backlog Expectation Recovery Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-auto-fixture-head-recovery-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-auto-fixture-head-recovery-registration` | md | record | pass | Release-Auto Fixture HEAD Recovery Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-auto-fixture-recovery-window-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-auto-fixture-recovery-window-registration` | md | record | pass | Release-Auto Fixture Recovery Window Registration |
@@ -560,7 +565,12 @@ record_count: 850
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-cadence-query-recovery-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-cadence-query-recovery-registration` | md | record | pass | Release Cadence Query Recovery Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-self-eval-query-integrity-registration.md` | `REVIEW-2026-07-23-taskset-ar-self-eval-query-integrity-registration` | md | record | pass | Self-Eval Query Integrity Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-work-cli-integrity-registration.md` | `REVIEW-2026-07-23-taskset-ar-work-cli-integrity-registration` | md | record | pass | Work CLI Integrity Registration |
+| `reviews/REVIEW-2026-07-23-taskset-ar-work-frontmatter-scalar-integrity-registration.md` | `REVIEW-2026-07-23-taskset-ar-work-frontmatter-scalar-integrity-registration` | md | record | pass | Work Frontmatter Scalar Integrity Registration |
+| `reviews/REVIEW-2026-07-23-taskset-ar-work-verify-windows-shell-integrity-registration.md` | `REVIEW-2026-07-23-taskset-ar-work-verify-windows-shell-integrity-registration` | md | record | pass | Work Verify Windows Shell Integrity Registration |
+| `reviews/REVIEW-2026-07-23-v0.7.0-release-notes-prepublication.md` | `REVIEW-2026-07-23-v0.7.0-release-notes-prepublication` | md | approved | pass | v0.7.0 Release Notes Prepublication Review |
 | `reviews/REVIEW-2026-07-23-work-cli-integrity-design.md` | `REVIEW-2026-07-23-work-cli-integrity-design` | md | record | pass | Work CLI Metadata Integrity Design |
+| `reviews/REVIEW-2026-07-23-work-frontmatter-scalar-integrity-registration.md` | `REVIEW-2026-07-23-work-frontmatter-scalar-integrity-registration` | md | registered | n/a | Work frontmatter scalar integrity defect |
+| `reviews/REVIEW-2026-07-23-work-verify-windows-shell-registration.md` | `REVIEW-2026-07-23-work-verify-windows-shell-registration` | md | registered | n/a | Windows work-verify shell argument preservation defect |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
@@ -590,6 +600,9 @@ record_count: 850
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC-REWORK2.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC-REWORK2` | md | record | pass | TASK-AR-606 Security and Cross-Platform Skeptic Rework 2 Review |
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC` | md | record | fail | TASK-AR-606 Security and Cross-Platform Skeptic Review |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-602-CANDIDATE-SKEPTIC-APPROVAL.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-602-CANDIDATE-SKEPTIC-APPROVAL` | md | conditional_approval | conditional_pass | TASK-AR-602 v0.7.0 Candidate Skeptic Approval |
+| `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC-RECHECK-2.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC-RECHECK-2` | md | approved | pass | TASK-AR-602 Final Skeptic Recheck Addendum 2 |
+| `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC-RECHECK.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC-RECHECK` | md | hold | fail | TASK-AR-602 Final Skeptic Recheck Addendum |
+| `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC` | md | hold | fail | TASK-AR-602 Final Skeptic W4b |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-607-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-607-SKEPTIC` | md | record | pass | TASK-AR-607 Skeptic and Adversarial Review |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-608-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-608-SKEPTIC` | md | record | pass | TASK-AR-608 Skeptic and Adversarial W4b |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-609-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-609-SKEPTIC` | md | record | pass | TASK-AR-609 Skeptic and Adversarial W4b |
@@ -725,6 +738,7 @@ record_count: 850
 | `reviews/VERIFY-2026-07-22-unit-task-ar-606-001-20260722234951.json` | `VERIFY-2026-07-22-unit-task-ar-606-001-20260722234951` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-606-001-20260722234951 |
 | `reviews/VERIFY-2026-07-22-unit-task-ar-610-001-20260722183557.json` | `VERIFY-2026-07-22-unit-task-ar-610-001-20260722183557` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-610-001-20260722183557 |
 | `reviews/VERIFY-2026-07-22-unit-task-ar-611-001-20260722192021.json` | `VERIFY-2026-07-22-unit-task-ar-611-001-20260722192021` | json | record | n/a | VERIFY-2026-07-22-unit-task-ar-611-001-20260722192021 |
+| `reviews/VERIFY-2026-07-23-task-ar-602-20260723143848.json` | `VERIFY-2026-07-23-task-ar-602-20260723143848` | json | record | n/a | VERIFY-2026-07-23-task-ar-602-20260723143848 |
 | `reviews/VERIFY-2026-07-23-task-ar-607-20260723003910.json` | `VERIFY-2026-07-23-task-ar-607-20260723003910` | json | record | n/a | VERIFY-2026-07-23-task-ar-607-20260723003910 |
 | `reviews/VERIFY-2026-07-23-task-ar-608-20260723063647.json` | `VERIFY-2026-07-23-task-ar-608-20260723063647` | json | record | n/a | VERIFY-2026-07-23-task-ar-608-20260723063647 |
 | `reviews/VERIFY-2026-07-23-task-ar-608-20260723064403.json` | `VERIFY-2026-07-23-task-ar-608-20260723064403` | json | record | n/a | VERIFY-2026-07-23-task-ar-608-20260723064403 |
@@ -745,6 +759,9 @@ record_count: 850
 | `reviews/VERIFY-2026-07-23-task-ar-619-20260723103734.json` | `VERIFY-2026-07-23-task-ar-619-20260723103734` | json | record | n/a | VERIFY-2026-07-23-task-ar-619-20260723103734 |
 | `reviews/VERIFY-2026-07-23-task-ar-619-20260723110846.json` | `VERIFY-2026-07-23-task-ar-619-20260723110846` | json | record | n/a | VERIFY-2026-07-23-task-ar-619-20260723110846 |
 | `reviews/VERIFY-2026-07-23-task-ar-620-20260723112305.json` | `VERIFY-2026-07-23-task-ar-620-20260723112305` | json | record | n/a | VERIFY-2026-07-23-task-ar-620-20260723112305 |
+| `reviews/VERIFY-2026-07-23-unit-task-ar-602-001-20260723135202.json` | `VERIFY-2026-07-23-unit-task-ar-602-001-20260723135202` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-602-001-20260723135202 |
+| `reviews/VERIFY-2026-07-23-unit-task-ar-602-001-20260723141048.json` | `VERIFY-2026-07-23-unit-task-ar-602-001-20260723141048` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-602-001-20260723141048 |
+| `reviews/VERIFY-2026-07-23-unit-task-ar-602-001-20260723142627.json` | `VERIFY-2026-07-23-unit-task-ar-602-001-20260723142627` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-602-001-20260723142627 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-607-001-20260723003750.json` | `VERIFY-2026-07-23-unit-task-ar-607-001-20260723003750` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-607-001-20260723003750 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723063712.json` | `VERIFY-2026-07-23-unit-task-ar-608-001-20260723063712` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-608-001-20260723063712 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723064414.json` | `VERIFY-2026-07-23-unit-task-ar-608-001-20260723064414` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-608-001-20260723064414 |
@@ -866,6 +883,7 @@ record_count: 850
 | `reviews/W4B-2026-07-22-TASK-AR-610.md` | `W4B-2026-07-22-TASK-AR-610` | md | record | pass | TASK-AR-610 Independent W4b |
 | `reviews/W4B-2026-07-22-TASK-AR-611.md` | `W4B-2026-07-22-TASK-AR-611` | md | record | pass | TASK-AR-611 Independent W4b |
 | `reviews/W4B-2026-07-23-TASK-AR-602-CANDIDATE-APPROVAL.md` | `W4B-2026-07-23-TASK-AR-602-CANDIDATE-APPROVAL` | md | candidate_approved | pass | TASK-AR-602 v0.7.0 Candidate Independent W4b Approval |
+| `reviews/W4B-2026-07-23-TASK-AR-602-FINAL.md` | `W4B-2026-07-23-TASK-AR-602-FINAL` | md | final_approved | pass | TASK-AR-602 v0.7.0 Final Independent W4b Technical Approval |
 | `reviews/W4B-2026-07-23-TASK-AR-607.md` | `W4B-2026-07-23-TASK-AR-607` | md | record | pass | TASK-AR-607 Independent W4b Verification |
 | `reviews/W4B-2026-07-23-TASK-AR-608.md` | `W4B-2026-07-23-TASK-AR-608` | md | record | pass | TASK-AR-608 Independent W4b Verification |
 | `reviews/W4B-2026-07-23-TASK-AR-609.md` | `W4B-2026-07-23-TASK-AR-609` | md | record | pass | TASK-AR-609 Independent W4b Verification |

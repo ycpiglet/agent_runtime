@@ -445,4 +445,6 @@ def test_real_backlog_tasks_are_classified_into_registered_task_sets() -> None:
         "TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT",
         "TASKSET-AR-VISUAL-ASSET-ADOPTION",
         "TASKSET-AR-VISUAL-SYSTEM-INTEGRATION",
+        "TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+        "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
     }

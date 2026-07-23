@@ -1101,8 +1101,46 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-621",
+      "expires_at": "2026-07-24T14:08:00+09:00",
+      "fulfilled_at": "2026-07-23T14:08:00+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-621.md",
+      "fulfilled_task_id": "TASK-AR-621",
+      "fulfilled_task_uid": "fda7eb07-f96d-4713-9ce3-24bc24c7fd1c",
+      "initiative_id": "INIT-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+      "kind": "task",
+      "owner_id": "codex-root-planner",
+      "reason": "work registration TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+      "reservation_group_id": "RES-20260723-140800-58712166",
+      "reservation_id": "RES-20260723-140800-58712166-01",
+      "reserved_at": "2026-07-23T14:08:00+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+      "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-622",
+      "expires_at": "2026-07-24T15:01:03+09:00",
+      "fulfilled_at": "2026-07-23T15:01:03+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-622.md",
+      "fulfilled_task_id": "TASK-AR-622",
+      "fulfilled_task_uid": "94fa1156-59b8-4012-b64d-df9af471ef30",
+      "initiative_id": "INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
+      "kind": "task",
+      "owner_id": "codex-root-planner",
+      "reason": "work registration TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
+      "reservation_group_id": "RES-20260723-150103-538c9c74",
+      "reservation_id": "RES-20260723-150103-538c9c74-01",
+      "reserved_at": "2026-07-23T15:01:03+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-07-23T11:20:00+09:00"
+  "updated_at": "2026-07-23T15:01:03+09:00"
 }
