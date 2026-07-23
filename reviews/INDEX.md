@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T13:41:34+09:00
-record_count: 850
+generated_at: 2026-07-23T14:09:39+09:00
+record_count: 854
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `850` review and evidence records under `reviews/`.
+- Summary: indexed `854` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `850` files |
+| Reviews covered | pass | `854` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -169,6 +169,7 @@ record_count: 850
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0.json` | `RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0 |
 | `reviews/RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8.json` | `RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8 |
 | `reviews/RELEASE-EXECUTION-GATE-2026-06-13-v0.2.0.json` | `RELEASE-EXECUTION-GATE-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-EXECUTION-GATE-2026-06-13-v0.2.0 |
+| `reviews/RELEASE-NOTES-2026-07-23-v0.7.0.md` | `RELEASE-NOTES-2026-07-23-v0.7.0` | md | record | n/a | Agent Runtime v0.7.0 |
 | `reviews/RELEASE-READINESS-2026-07-23-v0.7.0-CANDIDATE.md` | `RELEASE-READINESS-2026-07-23-v0.7.0-CANDIDATE` | md | candidate_ready | pass | v0.7.0 Candidate Release Readiness |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-09-v0.1.8.json` | `RELEASE-READINESS-SUMMARY-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-09-v0.1.8 |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current.json` | `RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current |
@@ -546,6 +547,7 @@ record_count: 850
 | `reviews/REVIEW-2026-07-23-release-cadence-query-recovery-plan.md` | `REVIEW-2026-07-23-release-cadence-query-recovery-plan` | md | record | needs-fix | Release Cadence Query Recovery Plan |
 | `reviews/REVIEW-2026-07-23-self-eval-query-integrity-plan.md` | `REVIEW-2026-07-23-self-eval-query-integrity-plan` | md | record | needs-fix | Self-Eval Query Integrity Recovery Plan |
 | `reviews/REVIEW-2026-07-23-task-ar-602-t3-release-replan.md` | `REVIEW-2026-07-23-task-ar-602-t3-release-replan` | md | approved | watch | TASK-AR-602 T3 Release Replan |
+| `reviews/REVIEW-2026-07-23-task-ar-602-w4a-command-replan.md` | `REVIEW-2026-07-23-task-ar-602-w4a-command-replan` | md | approved | n/a | TASK-AR-602 W4a command portability replan |
 | `reviews/REVIEW-2026-07-23-task-ar-607-dispatch-t3-replan.md` | `REVIEW-2026-07-23-task-ar-607-dispatch-t3-replan` | md | record | pass | TASK-AR-607 Dispatch T3 Replan |
 | `reviews/REVIEW-2026-07-23-task-ar-608-dispatch-t3-replan.md` | `REVIEW-2026-07-23-task-ar-608-dispatch-t3-replan` | md | record | pass | TASK-AR-608 Dispatch T3 Replan |
 | `reviews/REVIEW-2026-07-23-task-ar-609-dispatch-t3-replan.md` | `REVIEW-2026-07-23-task-ar-609-dispatch-t3-replan` | md | record | pass | TASK-AR-609 Dispatch T3 Replan |
@@ -560,6 +562,7 @@ record_count: 850
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-cadence-query-recovery-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-cadence-query-recovery-registration` | md | record | pass | Release Cadence Query Recovery Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-self-eval-query-integrity-registration.md` | `REVIEW-2026-07-23-taskset-ar-self-eval-query-integrity-registration` | md | record | pass | Self-Eval Query Integrity Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-work-cli-integrity-registration.md` | `REVIEW-2026-07-23-taskset-ar-work-cli-integrity-registration` | md | record | pass | Work CLI Integrity Registration |
+| `reviews/REVIEW-2026-07-23-v0.7.0-release-notes-prepublication.md` | `REVIEW-2026-07-23-v0.7.0-release-notes-prepublication` | md | approved | pass | v0.7.0 Release Notes Prepublication Review |
 | `reviews/REVIEW-2026-07-23-work-cli-integrity-design.md` | `REVIEW-2026-07-23-work-cli-integrity-design` | md | record | pass | Work CLI Metadata Integrity Design |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
@@ -745,6 +748,7 @@ record_count: 850
 | `reviews/VERIFY-2026-07-23-task-ar-619-20260723103734.json` | `VERIFY-2026-07-23-task-ar-619-20260723103734` | json | record | n/a | VERIFY-2026-07-23-task-ar-619-20260723103734 |
 | `reviews/VERIFY-2026-07-23-task-ar-619-20260723110846.json` | `VERIFY-2026-07-23-task-ar-619-20260723110846` | json | record | n/a | VERIFY-2026-07-23-task-ar-619-20260723110846 |
 | `reviews/VERIFY-2026-07-23-task-ar-620-20260723112305.json` | `VERIFY-2026-07-23-task-ar-620-20260723112305` | json | record | n/a | VERIFY-2026-07-23-task-ar-620-20260723112305 |
+| `reviews/VERIFY-2026-07-23-unit-task-ar-602-001-20260723135202.json` | `VERIFY-2026-07-23-unit-task-ar-602-001-20260723135202` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-602-001-20260723135202 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-607-001-20260723003750.json` | `VERIFY-2026-07-23-unit-task-ar-607-001-20260723003750` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-607-001-20260723003750 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723063712.json` | `VERIFY-2026-07-23-unit-task-ar-608-001-20260723063712` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-608-001-20260723063712 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723064414.json` | `VERIFY-2026-07-23-unit-task-ar-608-001-20260723064414` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-608-001-20260723064414 |

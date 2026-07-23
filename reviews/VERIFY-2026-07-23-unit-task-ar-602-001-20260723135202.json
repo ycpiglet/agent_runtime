@@ -1,0 +1,70 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-23-unit-task-ar-602-001-20260723135202",
+  "work_id": "UNIT-TASK-AR-602-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-602",
+  "unit_id": "UNIT-TASK-AR-602-001",
+  "status": "failed",
+  "signal": "fail",
+  "verified_at": "2026-07-23T13:52:02+09:00",
+  "verified_by": "/root/task-ar-602",
+  "command_count": 6,
+  "commands": [
+    {
+      "command": "python scripts/release_version_cascade.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T13:52:02+09:00",
+      "finished_at": "2026-07-23T13:52:02+09:00",
+      "stdout": "release-cascade: consistent at 0.7.0 across 12 refs\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/owner_governance_gate.py",
+      "status": "failed",
+      "returncode": 1,
+      "started_at": "2026-07-23T13:52:02+09:00",
+      "finished_at": "2026-07-23T13:52:23+09:00",
+      "stdout": " status=active lifecycle=keep paths=1 evidence=3 usage=10 reuse=2\n- metric capability.work kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.update_notify kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.session_dashboard kind=script status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=1\n- metric hook.session_dashboard kind=hook status=active lifecycle=keep paths=2 evidence=2 usage=9 reuse=2\n- metric skill.wave_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=7 reuse=2\n- metric skill.merge_integrator kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=15 reuse=2\n- metric skill.independent_verification kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=11 reuse=2\n- metric skill.work_analytics kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=14 reuse=2\n- metric skill.release_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=5 reuse=2\n- metric skill.scm_steward kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=19 reuse=2\nowner-governance: result: scripts/runtime_asset_usage.py --check -> 0\nowner-governance: start: scripts/state_sync_gate.py --check\nstate-sync-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-602\nfindings=0\nblock=0\nwatch=0\nowner-governance: result: scripts/state_sync_gate.py --check -> 0\nowner-governance: start: scripts/automation_rules_gate.py --check\nautomation-rules-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-602\nrules_total=0\nrules_active=0\nrules_executed=0\nrules_invalid=0\nactions=0\nfindings=0\nowner-governance: result: scripts/automation_rules_gate.py --check -> 0\nowner-governance: start: scripts/scheduled_dispatch_gate.py --check\nscheduled-dispatch-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-602\nschedules_total=0\nschedules_active=0\nschedules_invalid=0\ndue=0\ndispatches=0\nreminders=0\nfindings=0\nowner-governance: result: scripts/scheduled_dispatch_gate.py --check -> 0\nowner-governance: start: scripts/release_cadence_trigger.py --check\nrelease-cadence: watch finding=release-cadence:proposal recommended_bump=minor recommended_version=0.8.0\nrelease-cadence: baseline tag=v0.6.0 commits=415 feat=7 fix=45 breaking=0 days=17 (thresholds commits>=40 feat>=5 days>=14)\nrelease-cadence: trigger reasons: commits>=40 (actual 415); feat>=5 (actual 7); days>=14 (actual 17)\nrelease-cadence: current version=0.7.0 source=pyproject.toml\nrelease-cadence: bump targets: pyproject.toml\nrelease-cadence: non-blocking watch; no version bump, tag, push, publish, or release execution\nowner-governance: result: scripts/release_cadence_trigger.py --check -> 0\nowner-governance: start: scripts/conversation_work_audit.py --check\nconversation-work-audit: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-602\nplanning_records=19\nfindings=0 block=0 watch=0\nowner-governance: result: scripts/conversation_work_audit.py --check -> 0\nowner-governance: start: scripts/knowledge_lint_gate.py --check\nknowledge-lint-gate: pass (enforced; changed=133>=10; no block findings)\nowner-governance: result: scripts/knowledge_lint_gate.py --check -> 0\nowner-governance: start: scripts/planning_loop.py gate --trigger hook --action scan\nstatus=pass\nowner-governance: result: scripts/planning_loop.py gate --trigger hook --action scan -> 0\nowner-governance: start: scripts/compound_cadence_gate.py --obligation\ncompound-cadence-gate: watch\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-602\nreviews=346\ncompounds=3\nretros=6\ncompound_retro_total=9\nratio=38.4\nthreshold=20\nwatch=1\n- watch [compound-cadence]: 346 REVIEW-* vs 9 COMPOUND-*/RETRO-* (ratio 38.4, threshold 20); consider compounding lessons into COMPOUND-* or RETRO-* documents\nowner-governance: result: scripts/compound_cadence_gate.py --obligation -> 1\nowner-governance: advisory: compound obligation due (review:compound ratio high) -- not blocking\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T13:52:23+09:00",
+      "finished_at": "2026-07-23T14:05:59+09:00",
+      "stdout": "........................................................................ [  3%]\n........................................................................ [  6%]\n........................................................................ [  9%]\n........................................................................ [ 13%]\n........................................................................ [ 16%]\n........................................................................ [ 19%]\n........................................................................ [ 22%]\n........................................................................ [ 26%]\n........................................................................ [ 29%]\n.s.......s.............................................................. [ 32%]\n........................................................................ [ 35%]\n........................................................................ [ 39%]\n........................................................................ [ 42%]\n........................................................................ [ 45%]\n........................................................................ [ 49%]\n........................................................................ [ 52%]\n........................................................................ [ 55%]\n........................................................................ [ 58%]\n........................................................................ [ 62%]\n........................................................................ [ 65%]\n........................................................................ [ 68%]\n........................................................................ [ 71%]\n........................................................................ [ 75%]\n........................................................................ [ 78%]\n..........................ss.............ss............................. [ 81%]\n........................................................................ [ 84%]\n........................................................................ [ 88%]\n........................................................................ [ 91%]\n........................................................................ [ 94%]\n........................................................................ [ 98%]\n............................................                             [100%]\n============================== warnings summary ===============================\ntests/test_ui_console_beta_exploration.py::test_http_get_route_sweep_never_5xx\ntests/test_ui_console_beta_exploration.py::test_http_get_route_sweep_never_5xx\ntests/test_ui_console_beta_exploration.py::test_http_get_route_sweep_never_5xx\ntests/test_ui_console_beta_exploration.py::test_http_get_route_sweep_never_5xx\n  <unknown>:8127: DeprecationWarning: invalid escape sequence '\\/'\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2198 passed, 6 skipped, 4 warnings in 814.29s (0:13:34)\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/work.py status",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T14:05:59+09:00",
+      "finished_at": "2026-07-23T14:06:02+09:00",
+      "stdout": "work-status: ok\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-602\nactive_claims=1\n- task=TASK-AR-602 status=claimed agent=lead_engineer@release-orchestrator-01 claim=CLAIM-20260723-125621-task-ar-602-ef25 worktree=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-602\nworktrees=2\n- path=C:/Users/ycpig/agent_runtime branch=main\n- path=C:/Users/ycpig/agent_runtime/.worktrees/TASK-AR-602 branch=codex/task-ar-602-v0-7-0-release\ninflight: 0 tasks diverge across 0 branches\n",
+      "stderr": ""
+    },
+    {
+      "command": "git cat-file -t v0.7.0",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T14:06:02+09:00",
+      "finished_at": "2026-07-23T14:06:03+09:00",
+      "stdout": "tag\n",
+      "stderr": ""
+    },
+    {
+      "command": "git rev-parse 'v0.7.0^{}",
+      "status": "failed",
+      "returncode": 128,
+      "started_at": "2026-07-23T14:06:03+09:00",
+      "finished_at": "2026-07-23T14:06:03+09:00",
+      "stdout": "'v0.7.0{}\n",
+      "stderr": "fatal: ambiguous argument ''v0.7.0{}': unknown revision or path not in the working tree.\nUse '--' to separate paths from revisions, like this:\n'git <command> [<revision>...] -- [<file>...]'\n"
+    }
+  ]
+}
