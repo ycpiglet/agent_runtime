@@ -46,7 +46,7 @@ completed_task_set_count: 61
 
 - Flow: Define and enforce a cross-platform execution contract for work.py verify.
 - Progress: `0/1` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-621` | INIT-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-621/UNIT-TASK-AR-621-001.md | planned | Action | P1 | High | Medium | 2h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Prevent shell metacharacters in registered verification commands from being silently… |
