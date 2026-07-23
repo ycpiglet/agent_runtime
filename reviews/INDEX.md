@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T12:54:15+09:00
-record_count: 847
+generated_at: 2026-07-23T13:29:37+09:00
+record_count: 848
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `847` review and evidence records under `reviews/`.
+- Summary: indexed `848` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `847` files |
+| Reviews covered | pass | `848` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -169,6 +169,7 @@ record_count: 847
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0.json` | `RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0 |
 | `reviews/RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8.json` | `RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8 |
 | `reviews/RELEASE-EXECUTION-GATE-2026-06-13-v0.2.0.json` | `RELEASE-EXECUTION-GATE-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-EXECUTION-GATE-2026-06-13-v0.2.0 |
+| `reviews/RELEASE-READINESS-2026-07-23-v0.7.0-CANDIDATE.md` | `RELEASE-READINESS-2026-07-23-v0.7.0-CANDIDATE` | md | candidate_ready | pass | v0.7.0 Candidate Release Readiness |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-09-v0.1.8.json` | `RELEASE-READINESS-SUMMARY-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-09-v0.1.8 |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current.json` | `RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-10-task-ar-223-root-current |
 | `reviews/RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0.json` | `RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-READINESS-SUMMARY-2026-06-13-v0.2.0 |
