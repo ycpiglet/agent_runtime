@@ -20,6 +20,7 @@ import hashlib
 import io
 import json
 import re
+import shlex
 import subprocess
 import sys
 import uuid
@@ -2190,13 +2191,32 @@ def _replace_closeout_block(body: str, block: str) -> str:
     return body.rstrip() + "\n\n" + block + "\n"
 
 
+def _verification_argv(command: str) -> list[str]:
+    """Parse a registered verification command using one portable contract.
+
+    Whitespace separates arguments, single and double quotes group arguments,
+    and backslashes remain literal so Windows paths survive unchanged. The
+    resulting argv executes directly without an implicit OS shell, keeping
+    metacharacters literal. Commands that require a shell must name it
+    explicitly, for example ``cmd /c``, ``powershell -Command``, or ``sh -c``.
+    """
+
+    lexer = shlex.shlex(command, posix=True)
+    lexer.whitespace_split = True
+    lexer.commenters = ""
+    lexer.escape = ""
+    return list(lexer)
+
+
 def _run_verification_command(root: Path, command: str, timeout: int) -> dict[str, Any]:
     started_at = now_util.local_iso()
     try:
+        argv = _verification_argv(command)
+        if not argv:
+            raise ValueError("verification command is empty")
         completed = subprocess.run(
-            command,
+            argv,
             cwd=root,
-            shell=True,
             check=False,
             capture_output=True,
             text=True,
@@ -2224,6 +2244,17 @@ def _run_verification_command(root: Path, command: str, timeout: int) -> dict[st
             "finished_at": finished_at,
             "stdout": str(exc.stdout or "")[-4000:],
             "stderr": str(exc.stderr or "")[-4000:],
+        }
+    except (OSError, ValueError) as exc:
+        finished_at = now_util.local_iso()
+        return {
+            "command": command,
+            "status": "failed",
+            "returncode": 127 if isinstance(exc, OSError) else 2,
+            "started_at": started_at,
+            "finished_at": finished_at,
+            "stdout": "",
+            "stderr": str(exc)[-4000:],
         }
 
 

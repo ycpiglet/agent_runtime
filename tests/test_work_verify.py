@@ -193,7 +193,13 @@ def test_work_verify_runs_unit_commands_writes_evidence_and_updates_frontmatter(
 def test_work_verify_returns_failure_and_records_failed_evidence(tmp_path: Path) -> None:
     script = tmp_path / "scripts" / "check.py"
     script.parent.mkdir(parents=True)
-    script.write_text("import sys\nprint('bad check')\nsys.exit(7)\n", encoding="utf-8")
+    script.write_text(
+        "import sys\n"
+        "print('bad check')\n"
+        "print('bad error', file=sys.stderr)\n"
+        "sys.exit(7)\n",
+        encoding="utf-8",
+    )
     command = f"{sys.executable} scripts/check.py"
     unit_path = _write_unit(tmp_path, command=command)
 
@@ -212,6 +218,8 @@ def test_work_verify_returns_failure_and_records_failed_evidence(tmp_path: Path)
     evidence_payload = json.loads((tmp_path / payload["evidence"]).read_text(encoding="utf-8"))
     assert evidence_payload["status"] == "failed"
     assert evidence_payload["commands"][0]["returncode"] == 7
+    assert "bad check" in evidence_payload["commands"][0]["stdout"]
+    assert "bad error" in evidence_payload["commands"][0]["stderr"]
     assert _frontmatter(unit_path)["verification_status"] == "failed"
 
 
