@@ -10,7 +10,7 @@
   "display_name": "independent-auditor@review",
   "mode": "review",
   "status": "released",
-  "phase": "verified",
+  "phase": "taskset-completed",
   "progress_pct": 100,
   "status_text": "Additive independent-auditor closeout review released with skeptic approval evidence",
   "claimed_at": "2026-07-23T09:56:54+09:00",

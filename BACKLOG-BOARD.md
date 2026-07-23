@@ -9,21 +9,21 @@ priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-07-23
 task_count: 284
-open_count: 2
-completed_count: 282
-task_set_count: 2
-completed_task_set_count: 59
+open_count: 1
+completed_count: 283
+task_set_count: 1
+completed_task_set_count: 60
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `2` open or active tasks; `282` completed tasks are archived from this live board.
+- Summary: `1` open or active tasks; `283` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `2` / Ask `0` / Review `0` / Later `0` / Done `282`.
-- Task Sets: `2` active workflows; `59` completed workflows are hidden from the live action board.
+- Status: Action `1` / Ask `0` / Review `0` / Later `0` / Done `283`.
+- Task Sets: `1` active workflows; `60` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -51,21 +51,13 @@ completed_task_set_count: 59
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-602` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md | planned | Action | P0 | Critical | High | 5h/12000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #280 after every intake unit is merged by refreshing current-state rec… |
 
-### Work CLI Integrity (`TASKSET-AR-WORK-CLI-INTEGRITY`)
-
-- Flow: Make work-item serialization round-trip safe and exact task or unit selectors deterministic before release preflight.
-- Progress: `1/2` done; `1` open or active.
-- WIP: active `1/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-618` | INIT-AR-WORK-CLI-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-618/UNIT-TASK-AR-618-001.md | planned | Action | P1 | High | Low | 2h/5000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Allow generic work commands to address a canonical task by exact ID without treating… |
-
 ## Archived Task Sets
 
 - Archive rule: completed task sets stay out of the live Action Board but remain visible as workflow-level completion evidence.
 | Task Set | Flow | Progress | Evidence |
 |---|---|---:|---|
 | Context Cartographer (`TASKSET-AR-CONTEXT-KNOWLEDGE`) | Project context, source routing, and reusable knowledge structure. | `7/7` done | `7` completed task files archived |
+| Work CLI Integrity (`TASKSET-AR-WORK-CLI-INTEGRITY`) | Make work-item serialization round-trip safe and exact task or unit selectors deterministic before release preflight. | `2/2` done | `2` completed task files archived |
 | Role Routing Closeout Reliability (`TASKSET-AR-ROLE-ROUTING-CLOSEOUT-RELIABILITY`) | Repair the overlay claim lifecycle gap discovered while closing TASK-AR-594. | `1/1` done | `1` completed task files archived |
 | Quality Sentinel (`TASKSET-AR-QUALITY-LOOP`) | Offline evals, live review, correction loops, and traceable validation. | `7/7` done | `7` completed task files archived |
 | Migration Archivist (`TASKSET-AR-MIGRATION-PARITY`) | Legacy-source parity, migration evidence, and skill/hook/script provenance. | `6/6` done | `6` completed task files archived |
@@ -129,9 +121,9 @@ completed_task_set_count: 59
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `2` open across `2` task sets (see Action Board above).
-- Archived task sets: `59` (see Archived Task Sets above).
-- Archived task files: `282` — see `ARCHIVE-INDEX.md`.
+- Active: `1` open across `1` task sets (see Action Board above).
+- Archived task sets: `60` (see Archived Task Sets above).
+- Archived task files: `283` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.
