@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T15:02:24+09:00
-record_count: 861
+generated_at: 2026-07-23T15:02:54+09:00
+record_count: 863
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `861` review and evidence records under `reviews/`.
+- Summary: indexed `863` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `861` files |
+| Reviews covered | pass | `863` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -562,9 +562,11 @@ record_count: 861
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-cadence-query-recovery-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-cadence-query-recovery-registration` | md | record | pass | Release Cadence Query Recovery Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-self-eval-query-integrity-registration.md` | `REVIEW-2026-07-23-taskset-ar-self-eval-query-integrity-registration` | md | record | pass | Self-Eval Query Integrity Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-work-cli-integrity-registration.md` | `REVIEW-2026-07-23-taskset-ar-work-cli-integrity-registration` | md | record | pass | Work CLI Integrity Registration |
+| `reviews/REVIEW-2026-07-23-taskset-ar-work-frontmatter-scalar-integrity-registration.md` | `REVIEW-2026-07-23-taskset-ar-work-frontmatter-scalar-integrity-registration` | md | record | pass | Work Frontmatter Scalar Integrity Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-work-verify-windows-shell-integrity-registration.md` | `REVIEW-2026-07-23-taskset-ar-work-verify-windows-shell-integrity-registration` | md | record | pass | Work Verify Windows Shell Integrity Registration |
 | `reviews/REVIEW-2026-07-23-v0.7.0-release-notes-prepublication.md` | `REVIEW-2026-07-23-v0.7.0-release-notes-prepublication` | md | approved | pass | v0.7.0 Release Notes Prepublication Review |
 | `reviews/REVIEW-2026-07-23-work-cli-integrity-design.md` | `REVIEW-2026-07-23-work-cli-integrity-design` | md | record | pass | Work CLI Metadata Integrity Design |
+| `reviews/REVIEW-2026-07-23-work-frontmatter-scalar-integrity-registration.md` | `REVIEW-2026-07-23-work-frontmatter-scalar-integrity-registration` | md | registered | n/a | Work frontmatter scalar integrity defect |
 | `reviews/REVIEW-2026-07-23-work-verify-windows-shell-registration.md` | `REVIEW-2026-07-23-work-verify-windows-shell-registration` | md | registered | n/a | Windows work-verify shell argument preservation defect |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |

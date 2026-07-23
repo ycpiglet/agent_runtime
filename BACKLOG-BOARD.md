@@ -8,22 +8,22 @@ score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
 generated_at: 2026-07-23
-task_count: 285
-open_count: 2
+task_count: 286
+open_count: 3
 completed_count: 283
-task_set_count: 2
+task_set_count: 3
 completed_task_set_count: 60
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `2` open or active tasks; `283` completed tasks are archived from this live board.
+- Summary: `3` open or active tasks; `283` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `2` / Ask `0` / Review `0` / Later `0` / Done `283`.
-- Task Sets: `2` active workflows; `60` completed workflows are hidden from the live action board.
+- Status: Action `3` / Ask `0` / Review `0` / Later `0` / Done `283`.
+- Task Sets: `3` active workflows; `60` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -46,7 +46,7 @@ completed_task_set_count: 60
 
 - Flow: Fix the four open host-reported defects, integrate crash recovery and allimbot notifications, synchronize project state, then cut and verify v0.7.0.
 - Progress: `6/7` done; `1` open or active.
-- WIP: active `1/3`; oldest `1.2h`; stale `0`.
+- WIP: active `1/3`; oldest `2.1h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-602` | INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md | planned | Action | P0 | Critical | High | 5h/12000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Resolve GitHub #280 after every intake unit is merged by refreshing current-state rec… |
@@ -59,6 +59,15 @@ completed_task_set_count: 60
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-621` | INIT-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-621/UNIT-TASK-AR-621-001.md | planned | Action | P1 | High | Medium | 2h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Prevent shell metacharacters in registered verification commands from being silently… |
+
+### Work Frontmatter Scalar Integrity (`TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY`)
+
+- Flow: Define and enforce lossless work-item frontmatter scalar serialization.
+- Progress: `0/1` done; `1` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-622` | INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-622/UNIT-TASK-AR-622-001.md | planned | Action | P1 | High | Medium | 2h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Ensure work registration and lifecycle rewrites round-trip scalar values containing Y… |
 
 ## Archived Task Sets
 
@@ -130,7 +139,7 @@ completed_task_set_count: 60
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `2` open across `2` task sets (see Action Board above).
+- Active: `3` open across `3` task sets (see Action Board above).
 - Archived task sets: `60` (see Archived Task Sets above).
 - Archived task files: `283` — see `ARCHIVE-INDEX.md`.
 
