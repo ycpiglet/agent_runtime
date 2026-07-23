@@ -10,13 +10,22 @@ import glob
 import re
 from pathlib import Path
 
+try:
+    import backlog_board
+except ImportError:  # Imported as scripts.org_model_gate from the repository root.
+    from scripts import backlog_board
+
 ROOT = Path(__file__).resolve().parent.parent
 REGISTRY = ROOT / "agents" / "project" / "ORG-MODEL.yml"
 DEFAULT_GLOB = "agents/lead_engineer/tasks/TASK-*.md"
 
 
 def _coerce(v: str):
-    v = v.strip().strip("'\"")
+    v = v.strip()
+    decoded = backlog_board.decode_encoded_work_scalar(v)
+    if decoded is not None:
+        return decoded
+    v = v.strip("'\"")
     if v in ("true", "True"):
         return True
     if v in ("false", "False"):

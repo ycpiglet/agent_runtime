@@ -271,7 +271,7 @@
       "scripts/verify_sdk_backend.py": "sha256:d3b25541b8ea286ba630d4da1d01644b4e0da1d6b14ac1b193610e4d4e8d7e9f",
       "scripts/wave_dispatcher.py": "sha256:5be689e2f709dcdf1763dbf8570888fb201ff117e3e72d1f030998cef2a348c3",
       "scripts/work_item_classifier.py": "sha256:a4db5698381de9b9abb90132393da5b03f018de400c21fba7b6fac4ae7e566bb",
-      "scripts/work_schema_gate.py": "sha256:e06879641cfd9aae89261f7d61a633f8b8a238fd7cebaf10dd24705cdc1f1b18",
+      "scripts/work_schema_gate.py": "sha256:81de2b47431b74a2f442a3b094d79680bdbaa461bdea11ac18659de5cf83fa54",
       "scripts/worktree_lifecycle_gate.py": "sha256:a86313971b469113582b7e06064bd528867270ea741a66b46396059277e09143",
       "skills/independent-verification/SKILL.md": "sha256:13bc34701cd087a3cf04d852d00d9a3ca7ed057c2e8cd1d40df46769b07327b0",
       "skills/merge-integrator/SKILL.md": "sha256:37d4425836b34090a1b654147dcc1d829e1ac827b0815e6644c98d77cc81698c",
@@ -284,7 +284,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.6.0",
-    "template_digest": "sha256:6001e85b0e775a08aff804917e047df9569b01a67542a9083412c5fe026ed803",
+    "template_digest": "sha256:0987e883abc2805e6b17cb70fe0a54af66151d8f33b41b30c8d5207c289924b1",
     "template_files": 281
   },
   "project": "fixture-host",
