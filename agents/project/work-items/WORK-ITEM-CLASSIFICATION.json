@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-23T09:22:17+09:00",
+  "generated_at": "2026-07-23T09:59:33+09:00",
   "record_count": 444,
   "finding_count": 0,
   "findings": [],
@@ -4854,7 +4854,7 @@
       "title": "Prevent work registration, verification, and close operations from truncating or chan…",
       "path": "agents/lead_engineer/tasks/TASK-AR-617.md",
       "parent_id": "TASKSET-AR-WORK-CLI-INTEGRITY",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-617-001",
@@ -4865,7 +4865,7 @@
       "title": "UNIT-TASK-AR-617-001 - Implement round-trip-safe work frontmatter emission",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-617/UNIT-TASK-AR-617-001.md",
       "parent_id": "TASK-AR-617",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-618",

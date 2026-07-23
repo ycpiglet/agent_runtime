@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-07-23
-archived_count: 279
+archived_count: 280
 ---
 
 # Archived Task Files
 
-- `279` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `280` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -20,6 +20,7 @@ archived_count: 279
 | `TASK-AR-203` | `cb363212-ce9…` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | 2026-06-11 | 2026-06-11T11:45:00+09:00 | 2026-06-11T11:50:00+09:00 | 2026-06-11T11:50:00+09:00 | 지식창고 문서를 `빠른 참조, 차원 설명, 핵심 테이블, 주의사항/패턴, 상위 문맥 링크` 형식으로 표준화해 사람이 즉시 구조를 읽고 판단할 수 있게 한… |
 | `TASK-AR-211` | `d477effb-70e…` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | 2026-06-11 | 2026-06-11T11:45:00+09:00 | 2026-06-11T11:50:00+09:00 | 2026-06-11T11:50:00+09:00 | 에이전트 런타임을 여러 프로젝트에서 공통 reuse할 때 프로젝트 고유의 vision/roadmap/조직/연결 문맥을 오버레이로 주입한다. |
 | `TASK-AR-215` | `08b01bc0-2ee…` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | 2026-06-09 | 2026-06-09T11:00:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | 다른 프로젝트로 에이전트를 투입할 때 공용 런타임은 유지하고 오버레이만 교체해 vision, roadmap, 조직도, 팀, 링크, 협의기록을 즉시 맥락에… |
+| `TASK-AR-617` | `2bc4aabb-cd0…` | `TASKSET-AR-WORK-CLI-INTEGRITY` | completed | 2026-07-23T08:40:51+09:00 | 2026-07-23T08:42:50+09:00 | 2026-07-23T09:57:31+09:00 | 2026-07-23T09:57:31+09:00 | Prevent work registration, verification, and close operations from truncating or chan… |
 | `TASK-AR-594` | `49059d8b-28c…` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | 2026-07-19T10:28:06+09:00 | 2026-07-19T10:32:13+09:00 | 2026-07-19T11:08:22+09:00 | 2026-07-19T11:08:22+09:00 | Resolve GitHub #289 so taskset dispatch selects explicit canonical task order before… |
 | `TASK-AR-597` | `5bb7344a-d7a…` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | 2026-07-19T10:28:06+09:00 | 2026-07-19T12:08:44+09:00 | 2026-07-19T12:25:31+09:00 | 2026-07-19T12:25:31+09:00 | Resolve GitHub #285 so transient Git setup failures include actionable stdout/stderr… |
 | `TASK-AR-596` | `5f9cdb53-373…` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | 2026-07-19T10:28:06+09:00 | 2026-07-19T11:55:48+09:00 | 2026-07-19T12:07:13+09:00 | 2026-07-19T12:07:13+09:00 | Resolve GitHub #290 so active pointers find canonical TASK files with descriptive slu… |

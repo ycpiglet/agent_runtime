@@ -9,11 +9,11 @@ task_id: TASK-AR-617
 task_set_id: TASKSET-AR-WORK-CLI-INTEGRITY
 initiative_id: INIT-AR-WORK-CLI-INTEGRITY
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-23T08:40:51+09:00
-updated_at: 2026-07-23T09:41:01+09:00
+updated_at: 2026-07-23T09:57:29+09:00
 started_at: 2026-07-23T08:42:50+09:00
 origin_type: review_finding
 origin_ref: reviews/REVIEW-2026-07-23-work-cli-integrity-design.md
@@ -69,6 +69,11 @@ evidence_refs:
   - reviews/VERIFY-2026-07-23-unit-task-ar-617-001-20260723091709.json
   - reviews/VERIFY-2026-07-23-unit-task-ar-617-001-20260723093043.json
   - reviews/VERIFY-2026-07-23-unit-task-ar-617-001-20260723094101.json
+resolution: done
+completed_at: 2026-07-23T09:57:29+09:00
+closed_by: codex-root-task-ar-617
+actual_hours: 1.25
+actual_tokens: 60000
 ---
 
 # UNIT-TASK-AR-617-001 - Implement round-trip-safe work frontmatter emission
@@ -135,3 +140,18 @@ Provide the failure-first commit, a value-by-value round-trip matrix, changed-fi
 ## Stop Boundary
 
 Stop if exact value preservation requires replacing the shared parser or changing canonical work schema; record the incompatible examples for replan.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T09:57:29+09:00`
+- Resolution: `done`
+- Actual hours: `1.25`
+- Actual tokens: `60000`
+- Closed by: `codex-root-task-ar-617`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-617-001-20260723091106.json`
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-617-001-20260723091709.json`
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-617-001-20260723093043.json`
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-617-001-20260723094101.json`
+<!-- work-close:end -->

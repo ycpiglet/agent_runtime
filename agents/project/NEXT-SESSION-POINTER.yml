@@ -1,26 +1,20 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-23T08:42:50+09:00
+updated_at: 2026-07-23T09:58:30+09:00
 updated_by: codex-root
 current_state:
-  summary: "TASK-AR-617 is claimed after a clean T2 check; TASK-AR-618 and TASK-AR-602 remain queued."
-  status: active
+  summary: "TASK-AR-617 is complete on verified main; TASK-AR-618 is next, then TASK-AR-602 releases v0.7.0."
+  status: ready
   task_set_status: in_progress
   task_set_id: "TASKSET-AR-WORK-CLI-INTEGRITY"
-  step_index: 0
-  step_total: 1
-  progress_pct: 5
-  status_text: "TASK-AR-617 is preparing frontmatter round-trip failure-first coverage."
+  step_index: 1
+  step_total: 2
+  progress_pct: 50
+  status_text: "TASK-AR-618 is worker-ready and must begin again at W0 before T2 claim creation."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260723-084250-task-ar-617-f5c2
-      agent_role: lead-engineer
-      agent_instance_id: codex-root-task-ar-617
-      display_name: lead_engineer@orchestrator-01
-      callsite_id: codex-root-20260723
-  current_teams:
-    - agent-runtime-core
+  current_agents: []
+  current_teams: []
 resume:
-  active_task: TASK-AR-617
+  active_task: TASK-AR-618
   active_task_set: "TASKSET-AR-WORK-CLI-INTEGRITY"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
@@ -29,8 +23,7 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260723-084250-task-ar-617-f5c2.json
+  active_claims: []
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
     active_claim: null
