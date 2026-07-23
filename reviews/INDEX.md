@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T15:24:28+09:00
-record_count: 868
+generated_at: 2026-07-23T15:39:15+09:00
+record_count: 869
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `868` review and evidence records under `reviews/`.
+- Summary: indexed `869` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `868` files |
+| Reviews covered | pass | `869` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -557,6 +557,7 @@ record_count: 868
 | `reviews/REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan.md` | `REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan` | md | record | pass | TASK-AR-617 Parser Compatibility T3 Replan |
 | `reviews/REVIEW-2026-07-23-task-ar-618-selector-precedence.md` | `REVIEW-2026-07-23-task-ar-618-selector-precedence` | md | implemented | n/a | TASK-AR-618 Exact Selector Precedence |
 | `reviews/REVIEW-2026-07-23-task-ar-618-t3-selector-replan.md` | `REVIEW-2026-07-23-task-ar-618-t3-selector-replan` | md | record | pass | TASK-AR-618 Exact Selector T3 Replan |
+| `reviews/REVIEW-2026-07-23-task-ar-621-t3-windows-shell-replan.md` | `REVIEW-2026-07-23-task-ar-621-t3-windows-shell-replan` | md | approved | n/a | TASK-AR-621 T3 Windows verification shell replan and re-anchor |
 | `reviews/REVIEW-2026-07-23-task-ar-622-t3-legacy-scalar-replan.md` | `REVIEW-2026-07-23-task-ar-622-t3-legacy-scalar-replan` | md | approved | n/a | TASK-AR-622 T3 legacy scalar replan and re-anchor |
 | `reviews/REVIEW-2026-07-23-taskset-ar-cadence-isolation-backlog-expectation-recovery-registration.md` | `REVIEW-2026-07-23-taskset-ar-cadence-isolation-backlog-expectation-recovery-registration` | md | record | pass | Cadence Isolation Backlog Expectation Recovery Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-auto-fixture-head-recovery-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-auto-fixture-head-recovery-registration` | md | record | pass | Release-Auto Fixture HEAD Recovery Registration |
