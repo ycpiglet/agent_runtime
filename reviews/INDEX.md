@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T16:04:17+09:00
-record_count: 874
+generated_at: 2026-07-23T16:10:21+09:00
+record_count: 876
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `874` review and evidence records under `reviews/`.
+- Summary: indexed `876` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `874` files |
+| Reviews covered | pass | `876` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -558,7 +558,7 @@ record_count: 874
 | `reviews/REVIEW-2026-07-23-task-ar-618-selector-precedence.md` | `REVIEW-2026-07-23-task-ar-618-selector-precedence` | md | implemented | n/a | TASK-AR-618 Exact Selector Precedence |
 | `reviews/REVIEW-2026-07-23-task-ar-618-t3-selector-replan.md` | `REVIEW-2026-07-23-task-ar-618-t3-selector-replan` | md | record | pass | TASK-AR-618 Exact Selector T3 Replan |
 | `reviews/REVIEW-2026-07-23-task-ar-621-t3-windows-shell-replan.md` | `REVIEW-2026-07-23-task-ar-621-t3-windows-shell-replan` | md | approved | n/a | TASK-AR-621 T3 Windows verification shell replan and re-anchor |
-| `reviews/REVIEW-2026-07-23-task-ar-621-verification-command-contract.md` | `REVIEW-2026-07-23-task-ar-621-verification-command-contract` | md | rework_verified | n/a | TASK-AR-621 portable verification command execution contract |
+| `reviews/REVIEW-2026-07-23-task-ar-621-verification-command-contract.md` | `REVIEW-2026-07-23-task-ar-621-verification-command-contract` | md | approved | n/a | TASK-AR-621 portable verification command execution contract |
 | `reviews/REVIEW-2026-07-23-task-ar-622-t3-legacy-scalar-replan.md` | `REVIEW-2026-07-23-task-ar-622-t3-legacy-scalar-replan` | md | approved | n/a | TASK-AR-622 T3 legacy scalar replan and re-anchor |
 | `reviews/REVIEW-2026-07-23-taskset-ar-cadence-isolation-backlog-expectation-recovery-registration.md` | `REVIEW-2026-07-23-taskset-ar-cadence-isolation-backlog-expectation-recovery-registration` | md | record | pass | Cadence Isolation Backlog Expectation Recovery Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-auto-fixture-head-recovery-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-auto-fixture-head-recovery-registration` | md | record | pass | Release-Auto Fixture HEAD Recovery Registration |
@@ -619,6 +619,7 @@ record_count: 874
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-618-SKEPTIC-APPROVAL.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-618-SKEPTIC-APPROVAL` | md | record | pass | TASK-AR-618 회의적 W4b 검토 |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-619-SKEPTIC-APPROVAL.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-619-SKEPTIC-APPROVAL` | md | record | pass | TASK-AR-619 회의적 W4b 검토 |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-620-SKEPTIC-APPROVAL.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-620-SKEPTIC-APPROVAL` | md | record | pass | TASK-AR-620 회의적 W4b 검토 |
+| `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-621-SKEPTIC-RECHECK.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-621-SKEPTIC-RECHECK` | md | approved | pass | TASK-AR-621 Skeptic Recheck |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-621-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-621-SKEPTIC` | md | hold | fail | TASK-AR-621 Skeptic and Adversarial Review |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SCRIBE-2026-06-21-business-operating-system.md` | `SCRIBE-2026-06-21-business-operating-system` | scribe | recorded | pass | Business Operating System Scribe Log |
@@ -905,6 +906,7 @@ record_count: 874
 | `reviews/W4B-2026-07-23-TASK-AR-619-APPROVAL.md` | `W4B-2026-07-23-TASK-AR-619-APPROVAL` | md | record | pass | TASK-AR-619 Final CI-Aware Independent W4b Approval |
 | `reviews/W4B-2026-07-23-TASK-AR-620-APPROVAL.md` | `W4B-2026-07-23-TASK-AR-620-APPROVAL` | md | record | pass | TASK-AR-620 Final CI-Aware Independent W4b Approval |
 | `reviews/W4B-2026-07-23-TASK-AR-621-APPROVAL.md` | `W4B-2026-07-23-TASK-AR-621-APPROVAL` | md | approved | pass | TASK-AR-621 Independent W4b Technical Approval |
+| `reviews/W4B-2026-07-23-TASK-AR-621-RECHECK.md` | `W4B-2026-07-23-TASK-AR-621-RECHECK` | md | approved | pass | TASK-AR-621 Independent W4b Recheck |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |

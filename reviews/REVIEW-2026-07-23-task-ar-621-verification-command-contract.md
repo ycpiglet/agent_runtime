@@ -2,7 +2,7 @@
 id: REVIEW-2026-07-23-task-ar-621-verification-command-contract
 title: TASK-AR-621 portable verification command execution contract
 kind: implementation-review
-status: w4a_verified
+status: approved
 date: 2026-07-23
 task_id: TASK-AR-621
 task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
@@ -83,4 +83,7 @@ scalar handling remains separately registered as TASK-AR-622.
 - revised focused run: `9 passed`, including that exact legacy shape
 - revised W4a:
   `reviews/VERIFY-2026-07-23-unit-task-ar-621-001-20260723160351.json`
-- a fresh W4b is required on the follow-up exact HEAD before closeout
+- fresh W4b technical approval: `99/100`, no blockers,
+  `reviews/W4B-2026-07-23-TASK-AR-621-RECHECK.md`
+- fresh skeptical approval: `97/100`, prior blocker resolved,
+  `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-621-SKEPTIC-RECHECK.md`
