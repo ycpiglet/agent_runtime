@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-23T11:38:03+09:00",
+  "generated_at": "2026-07-23T12:00:14+09:00",
   "record_count": 452,
   "finding_count": 0,
   "findings": [],
@@ -4909,7 +4909,7 @@
       "title": "Release Cadence Injection Test Isolation",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-619",
@@ -4920,7 +4920,7 @@
       "title": "Prevent non-target Git process transients from producing zero-call false failures in…",
       "path": "agents/lead_engineer/tasks/TASK-AR-619.md",
       "parent_id": "TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-619-001",
@@ -4931,7 +4931,7 @@
       "title": "UNIT-TASK-AR-619-001 - Make cadence failure injection query-complete and hermetic",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-619/UNIT-TASK-AR-619-001.md",
       "parent_id": "TASK-AR-619",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "initiative:INIT-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY",

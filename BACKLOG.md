@@ -1,21 +1,27 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-07-23 TASK-AR-619 complete; TASK-AR-618 next
+
+- Completed: PR #336 and its post-merge main run both passed Python 3.10/3.11/3.12 after deterministic cadence query isolation and exact argv hardening.
+- Verified: combined focused tests passed 103/103; independent and skeptical W4b finalized with no blockers.
+- Sequence: execute TASK-AR-618, then run the queued TASK-AR-602 v0.7.0 release workflow.
+
 ## 2026-07-23 TASK-AR-620 complete; PR #336 unblocked
 
 - Completed: PR #337 added only the two required taskset IDs, then both the pull-request and post-merge Python 3.10/3.11/3.12 matrices passed.
 - Verified: exact equality and production classification remain unchanged; independent and skeptical W4b are final.
 - Sequence: synchronize and finish PR #336/TASK-AR-619, then continue TASK-AR-618 and v0.7.0 TASK-AR-602.
 
-## 2026-07-23 TASK-AR-619 active before TASK-AR-618 and v0.7.0
+## 2026-07-23 TASK-AR-619 implementation record
 
-- Active: `TASK-AR-619` in `TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION` removes real Git process dependence from the two cadence query-failure injection families.
+- Completed: `TASK-AR-619` in `TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION` removes real Git process dependence from the two cadence query-failure injection families.
 - Evidence boundary: two distinct first-attempt `main` CI failures observed zero target injections, while unchanged reruns passed; production cadence semantics remain out of scope.
-- Sequence: finish TASK-AR-619 through independent W4b and verified main, then execute `TASK-AR-618`, then the queued `TASK-AR-602` v0.7.0 release workflow.
+- Sequence: execute `TASK-AR-618`, then the queued `TASK-AR-602` v0.7.0 release workflow.
 
 ## 2026-07-23 work CLI integrity tasks queued before v0.7.0
 
-- Next: `TASK-AR-617` in `TASKSET-AR-WORK-CLI-INTEGRITY` protects canonical frontmatter values across registration and lifecycle rewrites.
-- Then: `TASK-AR-618` removes false task-versus-unit selector ambiguity while retaining bounded failures for genuine duplicate or missing records.
+- Completed: `TASK-AR-617` protects canonical frontmatter values across registration and lifecycle rewrites.
+- Next: `TASK-AR-618` removes false task-versus-unit selector ambiguity while retaining bounded failures for genuine duplicate or missing records.
 - Release boundary: `TASK-AR-602` remains last and begins only after both integrity tasks pass independent verification, PR and post-merge CI, and closeout cleanup.
 
 ## 2026-07-22 TASK-AR-611 active; PR #303 package-test recovery

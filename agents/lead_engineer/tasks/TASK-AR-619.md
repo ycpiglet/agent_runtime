@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION
 registered_at: 2026-07-23T10:15:00+09:00
 created_at: 2026-07-23T10:15:00+09:00
-updated_at: 2026-07-23T11:08:46+09:00
+updated_at: 2026-07-23T12:00:13+09:00
+started_at: 2026-07-23T10:12:41+09:00
 title: Isolate cadence query-failure injection tests from real Git
-status: planned
+status: completed
 priority: P0
 difficulty: S
 est_hours: 1
@@ -45,6 +46,11 @@ verified_by: codex-root-worker
 evidence_refs:
   - reviews/VERIFY-2026-07-23-task-ar-619-20260723103734.json
   - reviews/VERIFY-2026-07-23-task-ar-619-20260723110846.json
+resolution: done
+completed_at: 2026-07-23T12:00:13+09:00
+closed_by: /root
+actual_hours: 1.75
+actual_tokens: 9000
 ---
 
 # TASK-AR-619 - Isolate cadence query-failure injection tests from real Git
@@ -69,3 +75,16 @@ evidence_refs:
 - `python -m pytest tests/test_release_cadence_trigger.py tests/test_release_auto_noncritical.py -q`
 - `python -m pytest tests/test_release_cadence_trigger.py::test_each_partial_query_failure_invalidates_triggered_report tests/test_release_auto_noncritical.py::test_partial_cadence_query_error_halts_even_when_commit_threshold_fires -q`
 - `python scripts/taskset_work_gate.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T12:00:13+09:00`
+- Resolution: `done`
+- Actual hours: `1.75`
+- Actual tokens: `9000`
+- Closed by: `/root`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-task-ar-619-20260723103734.json`
+  - `reviews/VERIFY-2026-07-23-task-ar-619-20260723110846.json`
+<!-- work-close:end -->

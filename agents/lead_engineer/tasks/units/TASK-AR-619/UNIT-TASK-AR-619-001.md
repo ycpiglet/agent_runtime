@@ -9,11 +9,12 @@ task_id: TASK-AR-619
 task_set_id: TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION
 initiative_id: INIT-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-23T10:15:00+09:00
-updated_at: 2026-07-23T11:03:42+09:00
+updated_at: 2026-07-23T12:00:09+09:00
+started_at: 2026-07-23T10:12:41+09:00
 origin_type: ci_failure
 origin_ref: reviews/REVIEW-2026-07-23-release-cadence-injection-test-isolation-plan.md
 created_by: codex-root-planner
@@ -50,6 +51,11 @@ verified_by: codex-root-worker
 evidence_refs:
   - reviews/VERIFY-2026-07-23-unit-task-ar-619-001-20260723103124.json
   - reviews/VERIFY-2026-07-23-unit-task-ar-619-001-20260723110342.json
+resolution: done
+completed_at: 2026-07-23T12:00:09+09:00
+closed_by: /root
+actual_hours: 1.75
+actual_tokens: 9000
 ---
 
 # UNIT-TASK-AR-619-001 - Make cadence failure injection query-complete and hermetic
@@ -102,3 +108,16 @@ Report the failure-first guard, deterministic query matrix, exact injected call 
 ## Stop Boundary
 
 Stop if isolation requires production behavior changes, relaxed assertions, or a global pytest retry.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T12:00:09+09:00`
+- Resolution: `done`
+- Actual hours: `1.75`
+- Actual tokens: `9000`
+- Closed by: `/root`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-619-001-20260723103124.json`
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-619-001-20260723110342.json`
+<!-- work-close:end -->
