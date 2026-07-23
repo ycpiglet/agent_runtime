@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY
 registered_at: 2026-07-23T11:20:00+09:00
 created_at: 2026-07-23T11:20:00+09:00
-updated_at: 2026-07-23T11:20:00+09:00
+updated_at: 2026-07-23T11:23:05+09:00
 title: Synchronize cadence isolation tasksets in the exact backlog expectation
 status: planned
 priority: P0
@@ -30,11 +30,19 @@ summary: Add the two newly registered taskset IDs to the exact real-backlog expe
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python -m pytest tests/test_backlog_board_tasksets.py -q
+  - python scripts/taskset_work_gate.py --check
 tags:
   - ci-recovery
   - backlog
   - taskset-classification
   - task-ar-619
+verification_status: passed
+verified_at: 2026-07-23T11:23:05+09:00
+verified_by: codex-root-task-ar-620
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-task-ar-620-20260723112305.json
 ---
 
 # TASK-AR-620 - Synchronize cadence isolation tasksets in the exact backlog expectation

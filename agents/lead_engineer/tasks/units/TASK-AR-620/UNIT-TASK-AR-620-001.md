@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY
 initiative_id: INIT-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-23T11:20:00+09:00
-updated_at: 2026-07-23T11:20:00+09:00
+updated_at: 2026-07-23T11:22:51+09:00
 origin_type: ci_failure
 origin_ref: reviews/REVIEW-2026-07-23-cadence-isolation-backlog-expectation-recovery-plan.md
 created_by: codex-root-planner
@@ -41,6 +41,10 @@ verification:
   - python scripts/taskset_work_gate.py --check
 handoff: Report the CI failure evidence, two-ID additive diff, exact-set preservation, focused results, independent W4b, and matrix results.
 stop_condition: Stop if recovery requires classifier behavior changes or any assertion weakening.
+verified_at: 2026-07-23T11:22:51+09:00
+verified_by: codex-root-task-ar-620
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-unit-task-ar-620-001-20260723112251.json
 ---
 
 # UNIT-TASK-AR-620-001 - Add cadence isolation tasksets to the exact expected set
