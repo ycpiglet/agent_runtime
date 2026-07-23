@@ -348,22 +348,33 @@ def _successful_cadence_query(cmd: list[str]) -> subprocess.CompletedProcess[str
     args = list(cmd[1:])
     if args == ["describe", "--tags", "--abbrev=0"]:
         stdout = "v0.1.0\n"
-    elif args[:2] == ["log", "--format=%s"]:
+    elif args == ["log", "--format=%s", "v0.1.0..HEAD"]:
         stdout = "".join(
             f"{'feat' if index < 5 else 'chore'}: tick {index}\n"
             for index in range(40)
         )
-    elif args[:2] == ["rev-list", "--count"]:
+    elif args == ["rev-list", "--count", "v0.1.0..HEAD"]:
         stdout = "40\n"
-    elif args[:3] == ["log", "-1", "--format=%ct"]:
+    elif args == ["log", "-1", "--format=%ct", "v0.1.0"]:
         stdout = "1767225600\n"
-    elif args[:2] == ["log", "--format=%s%n%b%x00"]:
+    elif args == ["log", "--format=%s%n%b%x00", "v0.1.0..HEAD"]:
         stdout = "".join(f"chore: tick {index}\x00" for index in range(40))
-    elif args[:2] in (["diff", "--name-status"], ["diff", "--name-only"]):
+    elif args == [
+        "diff",
+        "--name-status",
+        "v0.1.0..HEAD",
+        "--",
+        "src/agent_runtime/templates/",
+    ] or args == ["diff", "--name-only", "v0.1.0..HEAD", "--", "schemas/"]:
         stdout = ""
     else:
         raise AssertionError(f"unexpected cadence query: {args!r}")
     return subprocess.CompletedProcess(cmd, returncode=0, stdout=stdout, stderr="")
+
+
+def test_successful_cadence_query_rejects_wrong_range() -> None:
+    with pytest.raises(AssertionError, match="unexpected cadence query"):
+        _successful_cadence_query(["git", "log", "--format=%s", "WRONG..HEAD"])
 
 
 def test_loaded_module_subprocess_patch_is_process_local(monkeypatch) -> None:
