@@ -6,16 +6,16 @@ current_state:
   status: review
   task_set_status: completed
   task_set_id: "TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY"
-  step_index: 1
+  step_index: 5
   step_total: 5
   progress_pct: 95
   status_text: "TASK-AR-621 verified branch integration pending; TASK-AR-622 is next."
 active_work:
   current_agents:
-    - claim_id: CLAIM-20260723-153958-task-ar-621-e110
+    - claim_id: CLAIM-20260723-161811-task-ar-621-9833
       agent_role: lead-engineer
-      agent_instance_id: /root/task-ar-621
-      display_name: lead_engineer@orchestrator-01
+      agent_instance_id: /root/task-ar-621-integration
+      display_name: lead_engineer@integration-orchestrator-01
       callsite_id: terminal:wt-task-ar-621:tab-01
   current_teams:
     - agent-runtime-core
@@ -30,7 +30,7 @@ roles:
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
   active_claims:
-    - agents/runtime/task_claims/CLAIM-20260723-153958-task-ar-621-e110.json
+    - agents/runtime/task_claims/CLAIM-20260723-161811-task-ar-621-9833.json
   registered_followups:
     - task_id: TASK-AR-621
       task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY

@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "/root/task-ar-621-integration",
+  "callsign": "lead_engineer@integration-orchestrator-01",
+  "callsite_id": "terminal:wt-task-ar-621:tab-01",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260723-161811-task-ar-621-9833.json"
+  ],
+  "created_at": "2026-07-23T16:18:11+09:00",
+  "decision_cycle_id": "",
+  "display_name": "lead_engineer@integration-orchestrator-01",
+  "model": "",
+  "model_tier": "worker_standard",
+  "on_behalf_of": "UNIT-TASK-AR-621-001",
+  "pane_id": "terminal:wt-task-ar-621:tab-01",
+  "parent_instance_id": "",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "lead-engineer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-07-23T16:18:11+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-621",
+  "task_set_id": "TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY",
+  "team_id": "agent-runtime-core",
+  "unit_id": "UNIT-TASK-AR-621-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-621/UNIT-TASK-AR-621-001.md",
+  "updated_at": "2026-07-23T16:18:11+09:00",
+  "workspace": "",
+  "worktree_path": "C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-621"
+}
