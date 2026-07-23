@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-WORK-CLI-INTEGRITY
 initiative_id: INIT-AR-WORK-CLI-INTEGRITY
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-23T08:40:51+09:00
-updated_at: 2026-07-23T08:42:50+09:00
+updated_at: 2026-07-23T09:11:06+09:00
 started_at: 2026-07-23T08:42:50+09:00
 origin_type: review_finding
 origin_ref: reviews/REVIEW-2026-07-23-work-cli-integrity-design.md
@@ -62,6 +62,10 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Provide the failure-first commit, a value-by-value round-trip matrix, changed-file summary, focused test output, and any parser compatibility limitation.
 stop_condition: Stop if exact value preservation requires replacing the shared parser or changing canonical work schema; record the incompatible examples for replan.
+verified_at: 2026-07-23T09:11:06+09:00
+verified_by: codex-root-task-ar-617
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-unit-task-ar-617-001-20260723091106.json
 ---
 
 # UNIT-TASK-AR-617-001 - Implement round-trip-safe work frontmatter emission

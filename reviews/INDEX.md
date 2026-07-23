@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T09:22:19+09:00
-record_count: 810
+generated_at: 2026-07-23T09:11:14+09:00
+record_count: 811
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `810` review and evidence records under `reviews/`.
+- Summary: indexed `811` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `810` files |
+| Reviews covered | pass | `811` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -544,7 +544,6 @@ record_count: 810
 | `reviews/REVIEW-2026-07-23-task-ar-607-dispatch-t3-replan.md` | `REVIEW-2026-07-23-task-ar-607-dispatch-t3-replan` | md | record | pass | TASK-AR-607 Dispatch T3 Replan |
 | `reviews/REVIEW-2026-07-23-task-ar-608-dispatch-t3-replan.md` | `REVIEW-2026-07-23-task-ar-608-dispatch-t3-replan` | md | record | pass | TASK-AR-608 Dispatch T3 Replan |
 | `reviews/REVIEW-2026-07-23-task-ar-609-dispatch-t3-replan.md` | `REVIEW-2026-07-23-task-ar-609-dispatch-t3-replan` | md | record | pass | TASK-AR-609 Dispatch T3 Replan |
-| `reviews/REVIEW-2026-07-23-task-ar-617-t3-cross-consumer-replan.md` | `REVIEW-2026-07-23-task-ar-617-t3-cross-consumer-replan` | md | record | pass | TASK-AR-617 Cross-Consumer T3 Replan |
 | `reviews/REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan.md` | `REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan` | md | record | pass | TASK-AR-617 Parser Compatibility T3 Replan |
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-auto-fixture-head-recovery-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-auto-fixture-head-recovery-registration` | md | record | pass | Release-Auto Fixture HEAD Recovery Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-auto-fixture-recovery-window-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-auto-fixture-recovery-window-registration` | md | record | pass | Release-Auto Fixture Recovery Window Registration |
@@ -721,6 +720,7 @@ record_count: 810
 | `reviews/VERIFY-2026-07-23-task-ar-614-20260723043608.json` | `VERIFY-2026-07-23-task-ar-614-20260723043608` | json | record | n/a | VERIFY-2026-07-23-task-ar-614-20260723043608 |
 | `reviews/VERIFY-2026-07-23-task-ar-615-20260723033758.json` | `VERIFY-2026-07-23-task-ar-615-20260723033758` | json | record | n/a | VERIFY-2026-07-23-task-ar-615-20260723033758 |
 | `reviews/VERIFY-2026-07-23-task-ar-616-20260723052952.json` | `VERIFY-2026-07-23-task-ar-616-20260723052952` | json | record | n/a | VERIFY-2026-07-23-task-ar-616-20260723052952 |
+| `reviews/VERIFY-2026-07-23-task-ar-617-20260723091055.json` | `VERIFY-2026-07-23-task-ar-617-20260723091055` | json | record | n/a | VERIFY-2026-07-23-task-ar-617-20260723091055 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-607-001-20260723003750.json` | `VERIFY-2026-07-23-unit-task-ar-607-001-20260723003750` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-607-001-20260723003750 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723063712.json` | `VERIFY-2026-07-23-unit-task-ar-608-001-20260723063712` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-608-001-20260723063712 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-608-001-20260723064414.json` | `VERIFY-2026-07-23-unit-task-ar-608-001-20260723064414` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-608-001-20260723064414 |
@@ -734,6 +734,7 @@ record_count: 810
 | `reviews/VERIFY-2026-07-23-unit-task-ar-614-001-20260723043928.json` | `VERIFY-2026-07-23-unit-task-ar-614-001-20260723043928` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-614-001-20260723043928 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-615-001-20260723034405.json` | `VERIFY-2026-07-23-unit-task-ar-615-001-20260723034405` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-615-001-20260723034405 |
 | `reviews/VERIFY-2026-07-23-unit-task-ar-616-001-20260723053647.json` | `VERIFY-2026-07-23-unit-task-ar-616-001-20260723053647` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-616-001-20260723053647 |
+| `reviews/VERIFY-2026-07-23-unit-task-ar-617-001-20260723091106.json` | `VERIFY-2026-07-23-unit-task-ar-617-001-20260723091106` | json | record | n/a | VERIFY-2026-07-23-unit-task-ar-617-001-20260723091106 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |

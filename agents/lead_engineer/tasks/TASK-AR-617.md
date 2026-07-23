@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-WORK-CLI-INTEGRITY
 registered_at: 2026-07-23T08:40:51+09:00
 created_at: 2026-07-23T08:40:51+09:00
-updated_at: 2026-07-23T08:42:50+09:00
+updated_at: 2026-07-23T09:10:55+09:00
 started_at: 2026-07-23T08:42:50+09:00
 title: Preserve work frontmatter values across lifecycle rewrites
 status: in_progress
@@ -37,6 +37,11 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 tags:
   - work-cli-created
+verification_status: passed
+verified_at: 2026-07-23T09:10:55+09:00
+verified_by: codex-root-task-ar-617
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-task-ar-617-20260723091055.json
 ---
 
 # TASK-AR-617 - Preserve work frontmatter values across lifecycle rewrites
