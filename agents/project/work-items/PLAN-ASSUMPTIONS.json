@@ -136,6 +136,29 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-23-cadence-isolation-backlog-expectation-recovery-plan.md",
+          "value": "dadb5422fa72d6b36fc28bf5e7035ec726bfabfe4e6471a128047c484bf868b6"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "51dd560b4c1a7128e58a9b3cbe36b10e277f054ba4bebd4ec24f8192bf981cc8"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-23-cadence-isolation-backlog-expectation-recovery-plan.md",
+      "recorded_at": "2026-07-23T11:20:10+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-assetization-registration.md",
           "value": "3ffa3b5a633cc6246deb1d231e3aac0d95aed4f2ac0ff8d54484f626b5840a9b"
         },
@@ -893,5 +916,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-23T10:11:17+09:00"
+  "updated_at": "2026-07-23T11:20:10+09:00"
 }
