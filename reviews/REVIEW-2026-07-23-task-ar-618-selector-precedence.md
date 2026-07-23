@@ -40,4 +40,3 @@ The shared work-item resolver now treats an exact task ID as the canonical task 
 
 - `python -m pytest tests/test_work_verify.py tests/test_work_close.py tests/test_work_assign.py tests/test_work_criteria.py -q` -> `20 passed in 8.70s`
 - `python scripts/work_schema_gate.py --check` -> pass, zero findings and warnings
-

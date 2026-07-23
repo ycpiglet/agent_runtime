@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-WORK-CLI-INTEGRITY
 registered_at: 2026-07-23T08:40:51+09:00
 created_at: 2026-07-23T08:40:51+09:00
-updated_at: 2026-07-23T08:40:51+09:00
+updated_at: 2026-07-23T12:39:01+09:00
+started_at: 2026-07-23T12:15:49+09:00
 title: Resolve exact task and unit selectors deterministically
-status: planned
+status: completed
 priority: P1
 difficulty: S
 est_hours: 2
@@ -30,8 +31,21 @@ summary: Give exact task records and exact unit records deterministic selector p
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python -m pytest tests/test_work_verify.py tests/test_work_close.py tests/test_work_assign.py tests/test_work_criteria.py -q
+  - python scripts/work_schema_gate.py --check
 tags:
   - work-cli-created
+verification_status: passed
+verified_at: 2026-07-23T12:38:00+09:00
+verified_by: /root/task-ar-618
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-task-ar-618-20260723123800.json
+resolution: done
+completed_at: 2026-07-23T12:39:01+09:00
+closed_by: /root/task-ar-618
+actual_hours: 1.5
+actual_tokens: 7000
 ---
 
 # TASK-AR-618 - Resolve exact task and unit selectors deterministically
@@ -54,3 +68,15 @@ tags:
 
 - `python -m pytest tests/test_work_verify.py tests/test_work_close.py tests/test_work_assign.py tests/test_work_criteria.py -q`
 - `python scripts/work_schema_gate.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T12:39:01+09:00`
+- Resolution: `done`
+- Actual hours: `1.5`
+- Actual tokens: `7000`
+- Closed by: `/root/task-ar-618`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-task-ar-618-20260723123800.json`
+<!-- work-close:end -->

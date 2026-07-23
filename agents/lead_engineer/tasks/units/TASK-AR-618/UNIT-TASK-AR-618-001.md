@@ -9,11 +9,11 @@ task_id: TASK-AR-618
 task_set_id: TASKSET-AR-WORK-CLI-INTEGRITY
 initiative_id: INIT-AR-WORK-CLI-INTEGRITY
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-23T08:40:51+09:00
-updated_at: 2026-07-23T12:28:00+09:00
+updated_at: 2026-07-23T12:39:00+09:00
 origin_type: review_finding
 origin_ref: reviews/REVIEW-2026-07-23-work-cli-integrity-design.md
 created_by: codex-root-planner
@@ -51,6 +51,11 @@ verified_at: 2026-07-23T12:28:00+09:00
 verified_by: /root/task-ar-618
 evidence_refs:
   - reviews/VERIFY-2026-07-23-unit-task-ar-618-001-20260723122800.json
+resolution: done
+completed_at: 2026-07-23T12:39:00+09:00
+closed_by: /root/task-ar-618
+actual_hours: 1.5
+actual_tokens: 7000
 ---
 
 # UNIT-TASK-AR-618-001 - Implement exact work-item selector precedence
@@ -104,3 +109,15 @@ Provide the failure-first commit, selector precedence table, focused test output
 ## Stop Boundary
 
 Stop if deterministic exact-ID selection requires changing work hierarchy or accepting duplicate canonical task records; escalate with the conflicting paths.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T12:39:00+09:00`
+- Resolution: `done`
+- Actual hours: `1.5`
+- Actual tokens: `7000`
+- Closed by: `/root/task-ar-618`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-618-001-20260723122800.json`
+<!-- work-close:end -->

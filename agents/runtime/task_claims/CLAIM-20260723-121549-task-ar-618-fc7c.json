@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-618:tab-01",
   "pane_id": "terminal:wt-task-ar-618:tab-01",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-WORK-CLI-INTEGRITY",
   "active_scope": "TASKSET-AR-WORK-CLI-INTEGRITY",
   "scope_transition_approved": true,
@@ -19,20 +19,20 @@
   "model_tier": "worker_standard",
   "wip_slot": 1,
   "stop_condition": "Stop if deterministic exact-ID selection requires changing work hierarchy or accepting duplicate canonical task records; escalate with the conflicting paths.",
-  "phase": "implementation",
-  "progress_pct": 0,
-  "step_index": 1,
+    "phase": "taskset-completed",
+    "progress_pct": 100,
+    "step_index": 4,
   "step_total": 4,
-  "status_text": "TASK-AR-618 claimed; preparing failure-first selector tests",
+    "status_text": "TASK-AR-618 complete; PR #340 and post-merge Python 3.10/3.11/3.12 matrices passed",
   "worktree_path": "C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-618",
   "branch": "codex/task-ar-618-selector-precedence",
   "claimed_at": "2026-07-23T12:15:49+09:00",
-  "last_heartbeat": "2026-07-23T12:15:49+09:00",
-  "updated_at": "2026-07-23T12:15:49+09:00",
+  "last_heartbeat": "2026-07-23T12:37:02+09:00",
+  "updated_at": "2026-07-23T12:37:02+09:00",
   "expires_at": "2026-07-23T14:15:49+09:00",
   "lease": {
     "claimed_at": "2026-07-23T12:15:49+09:00",
-    "heartbeat_at": "2026-07-23T12:15:49+09:00",
+    "heartbeat_at": "2026-07-23T12:37:02+09:00",
     "expires_at": "2026-07-23T14:15:49+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260723-121549-task-ar-618-fc7c.handoff.md",
@@ -53,5 +53,9 @@
     "tests/test_work_close.py",
     "tests/test_work_assign.py",
     "tests/test_work_criteria.py"
-  ]
+  ],
+  "released_at": "2026-07-23T12:37:02+09:00",
+  "verified_by": "codex-task-ar-618-independent-auditor-20260723",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-23-TASK-AR-618-APPROVAL.md"
 }

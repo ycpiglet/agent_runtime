@@ -1,5 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-23 - TASK-AR-618 and Work CLI integrity taskset complete; v0.7.0 release next
+
+- Completed: PR #340 merged at `d573b9512b3a43c54079ff8e138046a8628e4637`; pull-request run `29977028574` and post-merge main run `29977179983` passed Python 3.10, 3.11, and 3.12.
+- Contract: exact task IDs now resolve only the canonical task, duplicate exact unit IDs fail closed with stable sorted paths, and explicit relative or absolute paths keep deterministic path-first behavior.
+- Quality: failure-first proof reproduced five selector defects; task/unit W4a passed 20 focused tests plus schema checks; independent W4b approved 100/100 and skeptic W4b 99/100 with zero blockers.
+- Next: execute `TASK-AR-602` in `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` for the full v0.7.0 release workflow.
+
 ## 2026-07-23 - TASK-AR-619 complete; TASK-AR-618 next
 
 - Completed: PR #336 merged at `9acaffe499a4b99d2a7718516950d850b7eb2478`; pull-request run `29975465431` and post-merge main run `29975603058` passed Python 3.10, 3.11, and 3.12.
