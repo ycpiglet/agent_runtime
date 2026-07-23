@@ -24,7 +24,7 @@ task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 unit_spec: agents/lead_engineer/tasks/units/TASK-AR-602/UNIT-TASK-AR-602-001.md
 reservation_id: RES-20260719-102806-bbbc9438-07
 origin_type: owner_request
-origin_ref: chat:2026-07-19-all-open-intake; github:
+origin_ref: "chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277"
 created_by: codex-root-planner
 summary: Close the taskset through full governance, current-head release preflight, version cascade, tag, GitHub release, issue reconciliation, and W5/W6 cleanup.
 planner_model_tier: planner_high

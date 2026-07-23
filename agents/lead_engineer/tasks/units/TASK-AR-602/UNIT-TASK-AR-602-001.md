@@ -15,7 +15,7 @@ owner: lead-engineer
 created_at: 2026-07-19T10:28:06+09:00
 updated_at: 2026-07-23T14:26:27+09:00
 origin_type: owner_request
-origin_ref: chat:2026-07-19-all-open-intake; github:
+origin_ref: "chat:2026-07-19-all-open-intake; github:#274,#279,#280,#285,#287,#289,#290; pr:#277"
 created_by: codex-root-planner
 summary: Close state and publish v0.7.0
 horizon: unit
@@ -25,7 +25,7 @@ escalation_triggers:
   - high_risk
   - cross_cutting
   - release
-context: GitHub
+context: "GitHub #280 approved v0.7.0 from an older SHA; current main has additional fixes, so the candidate must be rebuilt and verified only after every open intake item is integrated."
 inputs:
   - https://github.com/ycpiglet/agent_runtime/issues/280
   - scripts/release_version_cascade.py
