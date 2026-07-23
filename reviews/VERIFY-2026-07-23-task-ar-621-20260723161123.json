@@ -1,0 +1,34 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-23-task-ar-621-20260723161123",
+  "work_id": "TASK-AR-621",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-621.md",
+  "kind": "task",
+  "task_id": "TASK-AR-621",
+  "unit_id": "",
+  "status": "failed",
+  "signal": "fail",
+  "verified_at": "2026-07-23T16:11:23+09:00",
+  "verified_by": "/root/task-ar-621",
+  "command_count": 2,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_work_verify.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-23T16:11:23+09:00",
+      "finished_at": "2026-07-23T16:11:29+09:00",
+      "stdout": ".........                                                                [100%]\n9 passed in 5.08s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/owner_governance_gate.py",
+      "status": "failed",
+      "returncode": 1,
+      "started_at": "2026-07-23T16:11:29+09:00",
+      "finished_at": "2026-07-23T16:11:48+09:00",
+      "stdout": "e lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric gate.work_schema kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=8 reuse=2\n- metric capability.wave_dispatcher kind=script status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric capability.merge_queue kind=script status=active lifecycle=keep paths=1 evidence=3 usage=11 reuse=2\n- metric capability.scm_steward kind=script status=active lifecycle=keep paths=1 evidence=2 usage=12 reuse=2\n- metric capability.inflight_overlay kind=script status=active lifecycle=keep paths=1 evidence=3 usage=10 reuse=2\n- metric capability.work kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.update_notify kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.session_dashboard kind=script status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=1\n- metric hook.session_dashboard kind=hook status=active lifecycle=keep paths=2 evidence=2 usage=9 reuse=2\n- metric skill.wave_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=7 reuse=2\n- metric skill.merge_integrator kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=15 reuse=2\n- metric skill.independent_verification kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=11 reuse=2\n- metric skill.work_analytics kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=14 reuse=2\n- metric skill.release_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=5 reuse=2\n- metric skill.scm_steward kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=19 reuse=2\nowner-governance: result: scripts/runtime_asset_usage.py --check -> 0\nowner-governance: start: scripts/state_sync_gate.py --check\nstate-sync-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-621\nfindings=0\nblock=0\nwatch=0\nowner-governance: result: scripts/state_sync_gate.py --check -> 0\nowner-governance: start: scripts/automation_rules_gate.py --check\nautomation-rules-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-621\nrules_total=0\nrules_active=0\nrules_executed=0\nrules_invalid=0\nactions=0\nfindings=0\nowner-governance: result: scripts/automation_rules_gate.py --check -> 0\nowner-governance: start: scripts/scheduled_dispatch_gate.py --check\nscheduled-dispatch-gate: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-621\nschedules_total=0\nschedules_active=0\nschedules_invalid=0\ndue=0\ndispatches=0\nreminders=0\nfindings=0\nowner-governance: result: scripts/scheduled_dispatch_gate.py --check -> 0\nowner-governance: start: scripts/release_cadence_trigger.py --check\nowner-governance: result: scripts/release_cadence_trigger.py --check -> 0\nowner-governance: start: scripts/conversation_work_audit.py --check\nconversation-work-audit: pass\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-621\nplanning_records=19\nfindings=0 block=0 watch=0\nowner-governance: result: scripts/conversation_work_audit.py --check -> 0\nowner-governance: start: scripts/knowledge_lint_gate.py --check\nknowledge-lint-gate: pass (enforced; changed=143>=10; no block findings)\nowner-governance: result: scripts/knowledge_lint_gate.py --check -> 0\nowner-governance: start: scripts/planning_loop.py gate --trigger hook --action scan\nstatus=pass\nowner-governance: result: scripts/planning_loop.py gate --trigger hook --action scan -> 0\nowner-governance: start: scripts/compound_cadence_gate.py --obligation\ncompound-cadence-gate: watch\nroot=C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-621\nreviews=354\ncompounds=3\nretros=7\ncompound_retro_total=10\nratio=35.4\nthreshold=20\nwatch=1\n- watch [compound-cadence]: 354 REVIEW-* vs 10 COMPOUND-*/RETRO-* (ratio 35.4, threshold 20); consider compounding lessons into COMPOUND-* or RETRO-* documents\nowner-governance: result: scripts/compound_cadence_gate.py --obligation -> 1\nowner-governance: advisory: compound obligation due (review:compound ratio high) -- not blocking\n",
+      "stderr": ""
+    }
+  ]
+}

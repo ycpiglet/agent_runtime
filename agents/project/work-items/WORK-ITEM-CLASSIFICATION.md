@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-23T15:20:22+09:00
+generated_at: 2026-07-23T16:14:39+09:00
 record_count: 460
 ---
 
@@ -492,9 +492,9 @@ record_count: 460
 | 36.1.1 | Task 36.1.1 | task | `TASK-AR-620` | `TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY` | completed | `agents/lead_engineer/tasks/TASK-AR-620.md` | Restore PR #336 package tests without weakening the real-backlog exact-set contract. |
 | 36.1.1.1 | Unit 36.1.1.1 | unit | `UNIT-TASK-AR-620-001` | `TASK-AR-620` | completed | `agents/lead_engineer/tasks/units/TASK-AR-620/UNIT-TASK-AR-620-001.md` | UNIT-TASK-AR-620-001 - Add cadence isolation tasksets to the exact expected set |
 | 37 | Initiative 37 | initiative | `INIT-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY` | - | active | `agents/project/initiatives/INIT-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY.md` | Work Verify Windows Shell Integrity |
-| 37.1 | Taskset 37.1 | taskset | `TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY` | `INIT-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY` | active | `BACKLOG-BOARD.md` | Work Verify Windows Shell Integrity |
-| 37.1.1 | Task 37.1.1 | task | `TASK-AR-621` | `TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-621.md` | Prevent shell metacharacters in registered verification commands from being silently… |
-| 37.1.1.1 | Unit 37.1.1.1 | unit | `UNIT-TASK-AR-621-001` | `TASK-AR-621` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-621/UNIT-TASK-AR-621-001.md` | UNIT-TASK-AR-621-001 - Define and test cross-platform verification execution |
+| 37.1 | Taskset 37.1 | taskset | `TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY` | `INIT-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY` | complete | `BACKLOG-BOARD.md` | Work Verify Windows Shell Integrity |
+| 37.1.1 | Task 37.1.1 | task | `TASK-AR-621` | `TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY` | completed | `agents/lead_engineer/tasks/TASK-AR-621.md` | Prevent shell metacharacters in registered verification commands from being silently… |
+| 37.1.1.1 | Unit 37.1.1.1 | unit | `UNIT-TASK-AR-621-001` | `TASK-AR-621` | completed | `agents/lead_engineer/tasks/units/TASK-AR-621/UNIT-TASK-AR-621-001.md` | UNIT-TASK-AR-621-001 - Define and test cross-platform verification execution |
 | 38 | Initiative 38 | initiative | `INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY` | - | active | `agents/project/initiatives/INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY.md` | Work Frontmatter Scalar Integrity |
 | 38.1 | Taskset 38.1 | taskset | `TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY` | `INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY` | active | `BACKLOG-BOARD.md` | Work Frontmatter Scalar Integrity |
 | 38.1.1 | Task 38.1.1 | task | `TASK-AR-622` | `TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-622.md` | Ensure work registration and lifecycle rewrites round-trip scalar values containing Y… |

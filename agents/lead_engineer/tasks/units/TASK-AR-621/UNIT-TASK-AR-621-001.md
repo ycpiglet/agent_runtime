@@ -9,11 +9,11 @@ task_id: TASK-AR-621
 task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
 initiative_id: INIT-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-23T14:08:00+09:00
-updated_at: 2026-07-23T14:08:00+09:00
+updated_at: 2026-07-23T16:14:15+09:00
 origin_type: runtime_bug
 origin_ref: reviews/REVIEW-2026-07-23-work-verify-windows-shell-registration.md
 created_by: codex-root-planner
@@ -44,6 +44,16 @@ verification:
   - python scripts/owner_governance_gate.py
 handoff: Report the reproduced command mutation, chosen execution contract, focused test results, governance result, and any compatibility limitation.
 stop_condition: Stop before changing the verification evidence schema, accepting arbitrary untrusted commands from a new source, or rewriting historical evidence.
+verified_at: 2026-07-23T16:03:51+09:00
+verified_by: /root/task-ar-621
+evidence_refs:
+  - reviews/VERIFY-2026-07-23-unit-task-ar-621-001-20260723155106.json
+  - reviews/VERIFY-2026-07-23-unit-task-ar-621-001-20260723160351.json
+resolution: done
+completed_at: 2026-07-23T16:14:15+09:00
+closed_by: /root/task-ar-621
+actual_hours: 0.8
+actual_tokens: 12000
 ---
 
 # UNIT-TASK-AR-621-001 - Define and test cross-platform verification execution
@@ -93,3 +103,16 @@ Report the reproduced command mutation, chosen execution contract, focused test 
 ## Stop Boundary
 
 Stop before changing the verification evidence schema, accepting arbitrary untrusted commands from a new source, or rewriting historical evidence.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T16:14:15+09:00`
+- Resolution: `done`
+- Actual hours: `0.8`
+- Actual tokens: `12000`
+- Closed by: `/root/task-ar-621`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-621-001-20260723155106.json`
+  - `reviews/VERIFY-2026-07-23-unit-task-ar-621-001-20260723160351.json`
+<!-- work-close:end -->

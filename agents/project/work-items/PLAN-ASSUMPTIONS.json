@@ -1031,8 +1031,8 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-23-work-verify-windows-shell-registration.md",
-          "value": "830c0d248497637594f0ca4fb0a62bfcced386da13c34908ba0d664a8ff6bc54"
+          "path": "reviews/REVIEW-2026-07-23-task-ar-621-t3-windows-shell-replan.md",
+          "value": "e81d2af200a3d54ca1e92cfc27138e77bf6024320e0449bf2939eaf9ee6aadd0"
         },
         {
           "kind": "sha256",
@@ -1045,12 +1045,12 @@
           "value": "7035aeb39aea13a4cde195665cf52d6b13c3d81cdc2f1c56d52efe7c1aed6f9f"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-23-work-verify-windows-shell-registration.md",
-      "recorded_at": "2026-07-23T14:08:20+09:00",
+      "design_record": "reviews/REVIEW-2026-07-23-task-ar-621-t3-windows-shell-replan.md",
+      "recorded_at": "2026-07-23T15:38:29+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY"
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-23T15:13:18+09:00"
+  "updated_at": "2026-07-23T15:38:29+09:00"
 }

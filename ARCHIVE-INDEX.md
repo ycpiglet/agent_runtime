@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-07-23
-archived_count: 283
+archived_count: 285
 ---
 
 # Archived Task Files
 
-- `283` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `285` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -22,6 +22,7 @@ archived_count: 283
 | `TASK-AR-215` | `08b01bc0-2ee…` | `TASKSET-AR-CONTEXT-KNOWLEDGE` | completed | 2026-06-09 | 2026-06-09T11:00:00+09:00 | 2026-06-11T00:00:00+09:00 | 2026-06-11T00:00:00+09:00 | 다른 프로젝트로 에이전트를 투입할 때 공용 런타임은 유지하고 오버레이만 교체해 vision, roadmap, 조직도, 팀, 링크, 협의기록을 즉시 맥락에… |
 | `TASK-AR-617` | `2bc4aabb-cd0…` | `TASKSET-AR-WORK-CLI-INTEGRITY` | completed | 2026-07-23T08:40:51+09:00 | 2026-07-23T08:42:50+09:00 | 2026-07-23T09:57:31+09:00 | 2026-07-23T09:57:31+09:00 | Prevent work registration, verification, and close operations from truncating or chan… |
 | `TASK-AR-594` | `49059d8b-28c…` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | 2026-07-19T10:28:06+09:00 | 2026-07-19T10:32:13+09:00 | 2026-07-19T11:08:22+09:00 | 2026-07-19T11:08:22+09:00 | Resolve GitHub #289 so taskset dispatch selects explicit canonical task order before… |
+| `TASK-AR-602` | `efd21353-169…` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | 2026-07-19T10:28:06+09:00 | 2026-07-23T12:56:21+09:00 | 2026-07-23T15:20:21+09:00 | 2026-07-23T15:20:21+09:00 | Resolve GitHub #280 after every intake unit is merged by refreshing current-state rec… |
 | `TASK-AR-597` | `5bb7344a-d7a…` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | 2026-07-19T10:28:06+09:00 | 2026-07-19T12:08:44+09:00 | 2026-07-19T12:25:31+09:00 | 2026-07-19T12:25:31+09:00 | Resolve GitHub #285 so transient Git setup failures include actionable stdout/stderr… |
 | `TASK-AR-596` | `5f9cdb53-373…` | `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT` | completed | 2026-07-19T10:28:06+09:00 | 2026-07-19T11:55:48+09:00 | 2026-07-19T12:07:13+09:00 | 2026-07-19T12:07:13+09:00 | Resolve GitHub #290 so active pointers find canonical TASK files with descriptive slu… |
 | `TASK-AR-618` | `30389a6c-e64…` | `TASKSET-AR-WORK-CLI-INTEGRITY` | completed | 2026-07-23T08:40:51+09:00 | 2026-07-23T12:15:49+09:00 | 2026-07-23T12:39:01+09:00 | 2026-07-23T12:39:01+09:00 | Allow generic work commands to address a canonical task by exact ID without treating… |
@@ -266,6 +267,7 @@ archived_count: 283
 | `TASK-AR-610` | `956cd4ea-419…` | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | completed | 2026-07-22T18:26:18+09:00 | 2026-07-22T18:27:20+09:00 | 2026-07-22T20:03:03+09:00 | 2026-07-22T20:03:03+09:00 | Make the existing TASK-AR-594 record satisfy the canonical work-item schema while pre… |
 | `TASK-AR-611` | `7dd220e9-1b3…` | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | completed | 2026-07-22T18:48:38+09:00 | 2026-07-22T18:49:10+09:00 | 2026-07-22T20:03:05+09:00 | 2026-07-22T20:03:05+09:00 | Make the real-backlog classification test recognize every taskset registered by the J… |
 | `TASK-AR-612` | `a6489013-6f3…` | `TASKSET-AR-TERMINAL-STATUS-START-GUARD` | completed | 2026-07-22T21:43:00+09:00 | 2026-07-23T08:02:09+09:00 | 2026-07-23T08:28:16+09:00 | 2026-07-23T08:28:16+09:00 | Make closed/released tasks and their registered Korean aliases terminal in taskset se… |
+| `TASK-AR-621` | `fda7eb07-f96…` | `TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY` | completed | 2026-07-23T14:08:00+09:00 | 2026-07-23T15:39:58+09:00 | 2026-07-23T16:14:17+09:00 | 2026-07-23T16:14:17+09:00 | Prevent shell metacharacters in registered verification commands from being silently… |
 | `TASK-AR-570` | `f004f017-f9e…` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | 2026-06-17T08:31:23+09:00 | 2026-06-17T08:35:06+09:00 | 2026-06-17T08:50:16+09:00 | 2026-06-17T08:50:16+09:00 | Create a deterministic baseline that identifies low-frequency agent roles, low-reuse… |
 | `TASK-AR-571` | `610c4d58-2c0…` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | 2026-06-17T08:31:23+09:00 | 2026-06-17T09:02:21+09:00 | 2026-06-17T16:26:25+09:00 | 2026-06-17T16:26:25+09:00 | Use review, meeting, seminar, retro, compound, scribe, and doc-steward surfaces to re… |
 | `TASK-AR-572` | `d5f5d125-a5e…` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | 2026-06-17T08:31:23+09:00 | 2026-06-17T16:38:29+09:00 | 2026-06-17T17:09:00+09:00 | 2026-06-17T17:09:00+09:00 | Define measurable maturity criteria for low-frequency agent/skill self-improvement an… |
