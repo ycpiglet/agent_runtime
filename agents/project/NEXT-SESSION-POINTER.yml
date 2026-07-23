@@ -1,15 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-23T15:42:00+09:00
+updated_at: 2026-07-23T16:20:00+09:00
 updated_by: codex-root
 current_state:
-  summary: "TASK-AR-621 is claimed after a passing T3 revalidation; Windows verification command mutation reproduction and implementation are in progress."
-  status: in_progress
-  task_set_status: in_progress
+  summary: "TASK-AR-621 implementation and lifecycle records are complete after W4b approval; integration cleanup remains, and TASK-AR-622 is the next resumable task."
+  status: review
+  task_set_status: completed
   task_set_id: "TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY"
   step_index: 1
   step_total: 5
-  progress_pct: 5
-  status_text: "TASK-AR-621 claimed; reproducing Windows command mutation."
+  progress_pct: 95
+  status_text: "TASK-AR-621 verified branch integration pending; TASK-AR-622 is next."
 active_work:
   current_agents:
     - claim_id: CLAIM-20260723-153958-task-ar-621-e110
@@ -20,8 +20,8 @@ active_work:
   current_teams:
     - agent-runtime-core
 resume:
-  active_task: TASK-AR-621
-  active_task_set: "TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY"
+  active_task: TASK-AR-622
+  active_task_set: "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY"
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -34,7 +34,7 @@ pointers:
   registered_followups:
     - task_id: TASK-AR-621
       task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
-      status: in_progress
+      status: completed
     - task_id: TASK-AR-622
       task_set_id: TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY
       status: planned
