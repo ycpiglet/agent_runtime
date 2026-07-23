@@ -31,6 +31,10 @@ summary: Serialize unsafe work frontmatter scalars and decode their JSON-style r
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+verification:
+  - python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py tests/test_backlog_board_tasksets.py -q
+  - python scripts/work_schema_gate.py --check
+  - python scripts/regen_host_lock_if_needed.py --check
 tags:
   - work-cli-created
 ---
