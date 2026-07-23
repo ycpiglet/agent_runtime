@@ -25,7 +25,7 @@ reservation_id: RES-20260723-150103-538c9c74-01
 origin_type: verification_audit_finding
 origin_ref: reviews/ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC.md
 created_by: codex-root-planner
-summary: Specify lossless scalar encoding/quoting and add regressions for hash-bearing provenance and context.
+summary: Specify lossless scalar encoding plus fail-closed legacy detection and add regressions for hash-bearing provenance and context.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
@@ -39,16 +39,17 @@ tags:
 
 ## Goal
 
-- Ensure work registration and lifecycle rewrites round-trip scalar values containing YAML-significant characters without data loss.
+- Ensure work registration and lifecycle rewrites round-trip scalar values containing YAML-significant characters without data loss, and refuse unsafe legacy raw scalars before they can be silently truncated.
 
 ## Scope
 
-- Ensure work registration and lifecycle rewrites round-trip scalar values containing YAML-significant characters without data loss.
+- Define parser-safe registration and rewrite behavior plus fail-closed detection or an explicitly reviewed migration path for legacy unquoted scalars whose raw `#` suffix would otherwise be lost.
 
 ## Acceptance Criteria
 
 - Registration writes hash-bearing scalar metadata in a parser-safe representation.
 - Verify and close rewrites preserve the exact parser-visible scalar value.
+- Verify and close refuse a legacy unquoted hash-bearing raw scalar before rewrite unless an explicit reviewed migration preserves the intended source value.
 - Focused registration, verify, close, and Owner governance tests pass.
 
 ## Verification

@@ -1003,8 +1003,8 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-23-taskset-ar-work-frontmatter-scalar-integrity-registration.md",
-          "value": "9f9f8947ddb793bc2e9eb53adda79a523197af5039402e34c58ac37ff938f447"
+          "path": "reviews/REVIEW-2026-07-23-task-ar-622-t3-legacy-scalar-replan.md",
+          "value": "5ab205886614ea167d5a091bf708bf3abe6b3ad3afea52d6b6901561b9541cdf"
         },
         {
           "kind": "sha256",
@@ -1015,10 +1015,15 @@
           "kind": "sha256",
           "path": "scripts/work.py",
           "value": "7035aeb39aea13a4cde195665cf52d6b13c3d81cdc2f1c56d52efe7c1aed6f9f"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/backlog_board.py",
+          "value": "216a87886318ee54157781b29b3f49d6e47344be4b476435789ca4d388d148e8"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-23-taskset-ar-work-frontmatter-scalar-integrity-registration.md",
-      "recorded_at": "2026-07-23T15:01:41+09:00",
+      "design_record": "reviews/REVIEW-2026-07-23-task-ar-622-t3-legacy-scalar-replan.md",
+      "recorded_at": "2026-07-23T15:13:18+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY"
     },
@@ -1047,5 +1052,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-23T15:01:41+09:00"
+  "updated_at": "2026-07-23T15:13:18+09:00"
 }

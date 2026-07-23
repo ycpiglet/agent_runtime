@@ -13,14 +13,14 @@ updated_at: 2026-07-23T15:01:03+09:00
 origin_type: verification_audit_finding
 origin_ref: reviews/ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC.md
 created_by: codex-root-planner
-summary: Define and enforce lossless work-item frontmatter scalar serialization.
+summary: Define lossless work-item scalar serialization and fail-closed legacy raw-scalar handling.
 ---
 
 # Work Frontmatter Scalar Integrity
 
 ## Goal
 
-- Define and enforce lossless work-item frontmatter scalar serialization.
+- Define and enforce lossless work-item frontmatter scalar serialization, including fail-closed detection or explicitly reviewed migration for unsafe legacy raw scalars.
 
 ## Tasks
 

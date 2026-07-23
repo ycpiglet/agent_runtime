@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T15:02:54+09:00
-record_count: 863
+generated_at: 2026-07-23T15:13:36+09:00
+record_count: 865
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `863` review and evidence records under `reviews/`.
+- Summary: indexed `865` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `863` files |
+| Reviews covered | pass | `865` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -555,6 +555,7 @@ record_count: 863
 | `reviews/REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan.md` | `REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan` | md | record | pass | TASK-AR-617 Parser Compatibility T3 Replan |
 | `reviews/REVIEW-2026-07-23-task-ar-618-selector-precedence.md` | `REVIEW-2026-07-23-task-ar-618-selector-precedence` | md | implemented | n/a | TASK-AR-618 Exact Selector Precedence |
 | `reviews/REVIEW-2026-07-23-task-ar-618-t3-selector-replan.md` | `REVIEW-2026-07-23-task-ar-618-t3-selector-replan` | md | record | pass | TASK-AR-618 Exact Selector T3 Replan |
+| `reviews/REVIEW-2026-07-23-task-ar-622-t3-legacy-scalar-replan.md` | `REVIEW-2026-07-23-task-ar-622-t3-legacy-scalar-replan` | md | approved | n/a | TASK-AR-622 T3 legacy scalar replan and re-anchor |
 | `reviews/REVIEW-2026-07-23-taskset-ar-cadence-isolation-backlog-expectation-recovery-registration.md` | `REVIEW-2026-07-23-taskset-ar-cadence-isolation-backlog-expectation-recovery-registration` | md | record | pass | Cadence Isolation Backlog Expectation Recovery Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-auto-fixture-head-recovery-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-auto-fixture-head-recovery-registration` | md | record | pass | Release-Auto Fixture HEAD Recovery Registration |
 | `reviews/REVIEW-2026-07-23-taskset-ar-release-auto-fixture-recovery-window-registration.md` | `REVIEW-2026-07-23-taskset-ar-release-auto-fixture-recovery-window-registration` | md | record | pass | Release-Auto Fixture Recovery Window Registration |
@@ -597,6 +598,7 @@ record_count: 863
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC-REWORK2.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC-REWORK2` | md | record | pass | TASK-AR-606 Security and Cross-Platform Skeptic Rework 2 Review |
 | `reviews/ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC.md` | `ROLE-REVIEW-2026-07-22-TASK-AR-606-SKEPTIC` | md | record | fail | TASK-AR-606 Security and Cross-Platform Skeptic Review |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-602-CANDIDATE-SKEPTIC-APPROVAL.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-602-CANDIDATE-SKEPTIC-APPROVAL` | md | conditional_approval | conditional_pass | TASK-AR-602 v0.7.0 Candidate Skeptic Approval |
+| `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC-RECHECK.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC-RECHECK` | md | hold | fail | TASK-AR-602 Final Skeptic Recheck Addendum |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC` | md | hold | fail | TASK-AR-602 Final Skeptic W4b |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-607-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-607-SKEPTIC` | md | record | pass | TASK-AR-607 Skeptic and Adversarial Review |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-608-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-608-SKEPTIC` | md | record | pass | TASK-AR-608 Skeptic and Adversarial W4b |
