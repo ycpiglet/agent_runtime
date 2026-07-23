@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import importlib.util
 
@@ -125,3 +126,25 @@ def test_corrupt_registry_is_watch_safe(tmp_path, monkeypatch):
     f.write_text("---\nowner: x\n---\n", encoding="utf-8")
     assert mod.cmd_check([str(f)], enforce=False) == 0
     assert mod.cmd_check([str(f)], enforce=True) == 1
+
+
+def test_frontmatter_decodes_work_emitter_marker_for_scalars_and_lists():
+    mod = _load()
+
+    def encoded(value: str) -> str:
+        return json.dumps("\x1eagent-runtime-work-scalar-v1:" + value, ensure_ascii=True)
+
+    title = 'Plan #1 "quoted"'
+    target = "src/#generated.py"
+    text = (
+        "---\n"
+        f"title: {encoded(title)}\n"
+        "target_files:\n"
+        f"  - {encoded(target)}\n"
+        "---\n"
+    )
+
+    meta = mod.parse_frontmatter(text)
+
+    assert meta["title"] == title
+    assert meta["target_files"] == [target]

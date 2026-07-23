@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import importlib.util
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -43,6 +45,22 @@ def _template_schema_path() -> Path:
         / "project"
         / "WORK-SCHEMA.yml"
     )
+
+
+def _load_template_gate():
+    path = (
+        REPO_ROOT
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "scripts"
+        / "work_schema_gate.py"
+    )
+    spec = importlib.util.spec_from_file_location("template_work_schema_gate", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def _catalog_field(path: Path, field: str) -> dict[str, str | list[str]]:
@@ -97,6 +115,28 @@ def test_repo_work_schema_passes_gate() -> None:
 
     assert result.returncode == 0, result.stdout + result.stderr
     assert "work-schema-gate: pass" in result.stdout
+
+
+def test_root_and_template_frontmatter_decode_work_emitter_marker():
+    template_gate = _load_template_gate()
+
+    def encoded(value: str) -> str:
+        return json.dumps("\x1eagent-runtime-work-scalar-v1:" + value, ensure_ascii=True)
+
+    summary = 'Schema #1 "quoted"'
+    target = "src/#generated.py"
+    text = (
+        "---\n"
+        f"summary: {encoded(summary)}\n"
+        "target_files:\n"
+        f"  - {encoded(target)}\n"
+        "---\n"
+    )
+
+    for parser in (schema_gate._frontmatter, template_gate._frontmatter):  # noqa: SLF001
+        meta = parser(text)
+        assert meta["summary"] == summary
+        assert meta["target_files"] == [target]
 
 
 def test_gate_blocks_missing_required_catalog_field(tmp_path: Path) -> None:
