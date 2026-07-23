@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-RELEASE-CADENCE-INJECTION-TEST-ISOLATION
 registered_at: 2026-07-23T10:15:00+09:00
 created_at: 2026-07-23T10:15:00+09:00
-updated_at: 2026-07-23T10:37:34+09:00
+updated_at: 2026-07-23T11:08:46+09:00
 title: Isolate cadence query-failure injection tests from real Git
 status: planned
 priority: P0
@@ -40,10 +40,11 @@ tags:
   - release-cadence
   - release-auto
 verification_status: passed
-verified_at: 2026-07-23T10:37:34+09:00
+verified_at: 2026-07-23T11:08:46+09:00
 verified_by: codex-root-worker
 evidence_refs:
   - reviews/VERIFY-2026-07-23-task-ar-619-20260723103734.json
+  - reviews/VERIFY-2026-07-23-task-ar-619-20260723110846.json
 ---
 
 # TASK-AR-619 - Isolate cadence query-failure injection tests from real Git
