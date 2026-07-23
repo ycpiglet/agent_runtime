@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-CADENCE-ISOLATION-BACKLOG-EXPECTATION-RECOVERY
 registered_at: 2026-07-23T11:20:00+09:00
 created_at: 2026-07-23T11:20:00+09:00
-updated_at: 2026-07-23T11:23:05+09:00
+updated_at: 2026-07-23T11:38:03+09:00
+started_at: 2026-07-23T11:20:20+09:00
 title: Synchronize cadence isolation tasksets in the exact backlog expectation
-status: planned
+status: completed
 priority: P0
 difficulty: S
 est_hours: 0.5
@@ -43,6 +44,11 @@ verified_at: 2026-07-23T11:23:05+09:00
 verified_by: codex-root-task-ar-620
 evidence_refs:
   - reviews/VERIFY-2026-07-23-task-ar-620-20260723112305.json
+resolution: done
+completed_at: 2026-07-23T11:38:03+09:00
+closed_by: /root/task-ar-620
+actual_hours: 0.35
+actual_tokens: 3500
 ---
 
 # TASK-AR-620 - Synchronize cadence isolation tasksets in the exact backlog expectation
@@ -66,3 +72,15 @@ evidence_refs:
 
 - `python -m pytest tests/test_backlog_board_tasksets.py -q`
 - `python scripts/taskset_work_gate.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-23T11:38:03+09:00`
+- Resolution: `done`
+- Actual hours: `0.35`
+- Actual tokens: `3500`
+- Closed by: `/root/task-ar-620`
+- Evidence:
+  - `reviews/VERIFY-2026-07-23-task-ar-620-20260723112305.json`
+<!-- work-close:end -->
