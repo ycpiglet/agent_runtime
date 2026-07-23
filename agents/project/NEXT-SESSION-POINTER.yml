@@ -1,15 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-23T15:42:00+09:00
+updated_at: 2026-07-23T16:05:30+09:00
 updated_by: codex-root
 current_state:
-  summary: "TASK-AR-621 is claimed after a passing T3 revalidation; Windows verification command mutation reproduction and implementation are in progress."
+  summary: "TASK-AR-621 compatibility rework passed W4a after resolving a real legacy terminal-quote blocker; fresh independent W4b is in progress."
   status: in_progress
   task_set_status: in_progress
   task_set_id: "TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY"
-  step_index: 1
+  step_index: 4
   step_total: 5
-  progress_pct: 5
-  status_text: "TASK-AR-621 claimed; reproducing Windows command mutation."
+  progress_pct: 90
+  status_text: "TASK-AR-621 compatibility rework passed W4a; fresh independent W4b recheck in progress."
 active_work:
   current_agents:
     - claim_id: CLAIM-20260723-153958-task-ar-621-e110
