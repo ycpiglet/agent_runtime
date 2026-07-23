@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 initiative_id: INIT-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: failed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-19T10:28:06+09:00
-updated_at: 2026-07-23T14:10:48+09:00
+updated_at: 2026-07-23T14:26:27+09:00
 origin_type: owner_request
 origin_ref: chat:2026-07-19-all-open-intake; github:
 created_by: codex-root-planner
@@ -64,11 +64,12 @@ verification:
   - git rev-parse v0.7.0~0
 handoff: Provide release URL, tag/commit SHA, full gate/test results, closed issue list, current W0 status, and rollback notes.
 stop_condition: Stop before release if any required test/gate is red, current main differs from the verified release commit, or a secret/credential boundary is unclear.
-verified_at: 2026-07-23T14:10:48+09:00
+verified_at: 2026-07-23T14:26:27+09:00
 verified_by: /root/task-ar-602
 evidence_refs:
   - reviews/VERIFY-2026-07-23-unit-task-ar-602-001-20260723135202.json
   - reviews/VERIFY-2026-07-23-unit-task-ar-602-001-20260723141048.json
+  - reviews/VERIFY-2026-07-23-unit-task-ar-602-001-20260723142627.json
 ---
 
 # UNIT-TASK-AR-602-001 - Close state and publish v0.7.0
