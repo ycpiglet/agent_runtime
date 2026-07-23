@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T16:21:29+09:00
-record_count: 879
+generated_at: 2026-07-23T16:31:30+09:00
+record_count: 881
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `879` review and evidence records under `reviews/`.
+- Summary: indexed `881` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `879` files |
+| Reviews covered | pass | `881` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -219,6 +219,7 @@ record_count: 879
 | `reviews/RETRO-2026-06-21-business-operating-system.md` | `RETRO-2026-06-21-business-operating-system` | retro | recorded | pass | Business Operating System Retro |
 | `reviews/RETRO-2026-07-23-july-upstream-intake-closeout.md` | `RETRO-2026-07-23-july-upstream-intake-closeout` | md | complete | n/a | July upstream intake closeout and v0.7.0 release retro |
 | `reviews/RETRO-2026-07-23-taskset-ar-work-cli-integrity.md` | `RETRO-2026-07-23-taskset-ar-work-cli-integrity` | md | complete | n/a | TASKSET-AR-WORK-CLI-INTEGRITY Retrospective |
+| `reviews/RETRO-2026-07-23-taskset-ar-work-verify-windows-shell-integrity.md` | `RETRO-2026-07-23-taskset-ar-work-verify-windows-shell-integrity` | md | complete | n/a | TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY Retrospective |
 | `reviews/REVIEW-2026-06-08-agent-runtime-after-pass-1.md` | `REVIEW-2026-06-08-agent-runtime-after-pass-1` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-after-pass-1 |
 | `reviews/REVIEW-2026-06-08-agent-runtime-baseline.md` | `REVIEW-2026-06-08-agent-runtime-baseline` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-baseline |
 | `reviews/REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25.md` | `REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25 |
@@ -557,6 +558,7 @@ record_count: 879
 | `reviews/REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan.md` | `REVIEW-2026-07-23-task-ar-617-t3-parser-compatibility-replan` | md | record | pass | TASK-AR-617 Parser Compatibility T3 Replan |
 | `reviews/REVIEW-2026-07-23-task-ar-618-selector-precedence.md` | `REVIEW-2026-07-23-task-ar-618-selector-precedence` | md | implemented | n/a | TASK-AR-618 Exact Selector Precedence |
 | `reviews/REVIEW-2026-07-23-task-ar-618-t3-selector-replan.md` | `REVIEW-2026-07-23-task-ar-618-t3-selector-replan` | md | record | pass | TASK-AR-618 Exact Selector T3 Replan |
+| `reviews/REVIEW-2026-07-23-task-ar-621-closeout.md` | `REVIEW-2026-07-23-task-ar-621-closeout` | md | complete | n/a | TASK-AR-621 Closeout |
 | `reviews/REVIEW-2026-07-23-task-ar-621-t3-windows-shell-replan.md` | `REVIEW-2026-07-23-task-ar-621-t3-windows-shell-replan` | md | approved | n/a | TASK-AR-621 T3 Windows verification shell replan and re-anchor |
 | `reviews/REVIEW-2026-07-23-task-ar-621-verification-command-contract.md` | `REVIEW-2026-07-23-task-ar-621-verification-command-contract` | md | approved | n/a | TASK-AR-621 portable verification command execution contract |
 | `reviews/REVIEW-2026-07-23-task-ar-622-t3-legacy-scalar-replan.md` | `REVIEW-2026-07-23-task-ar-622-t3-legacy-scalar-replan` | md | approved | n/a | TASK-AR-622 T3 legacy scalar replan and re-anchor |

@@ -1,5 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-23 - TASK-AR-621 complete; TASK-AR-622 next
+
+- Completed: PR #344 merged at `c600bf1cbaafe6319529b7126574ae1316f73984`; pull-request run `29988050884` and post-merge main run `29988207028` passed Python 3.10, 3.11, and 3.12.
+- Contract: Windows verification now sends the original command string directly to `CreateProcess` without implicit `cmd.exe` rewriting, while POSIX retains its existing shell contract and explicit `cmd /c` or `powershell -Command` remains available when Windows shell behavior is intentional.
+- Quality: failure-first evidence reproduced caret loss; an independent skeptic found legacy terminal-quote incompatibility in the first fix; the reworked implementation passed 9 focused tests, task/unit W4a, independent W4b, skeptic W4b, PR CI, and post-merge main CI.
+- Next: execute worker-ready `TASK-AR-622` in `TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY` through a fresh W0~W6 lifecycle.
+
 ## 2026-07-23 - TASK-AR-618 and Work CLI integrity taskset complete; v0.7.0 release next
 
 - Completed: PR #340 merged at `d573b9512b3a43c54079ff8e138046a8628e4637`; pull-request run `29977028574` and post-merge main run `29977179983` passed Python 3.10, 3.11, and 3.12.
