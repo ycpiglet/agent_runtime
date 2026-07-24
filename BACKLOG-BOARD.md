@@ -46,7 +46,7 @@ completed_task_set_count: 62
 
 - Flow: Define and enforce lossless work-item frontmatter scalar serialization.
 - Progress: `0/1` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-622` | INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-622/UNIT-TASK-AR-622-001.md | planned | Action | P1 | High | Medium | 2h/6000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Ensure work registration and lifecycle rewrites round-trip scalar values containing Y… |
