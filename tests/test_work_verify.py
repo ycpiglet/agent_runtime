@@ -350,7 +350,13 @@ def test_work_verify_preserves_quoted_hash_scalar_and_list_values(tmp_path: Path
 
 
 def test_work_verify_rejects_unsafe_legacy_hash_scalar_without_mutating(tmp_path: Path) -> None:
-    unit_path = _write_unit(tmp_path, command=f"{sys.executable} -c \"print('must not run')\"")
+    script = tmp_path / "scripts" / "must_not_run.py"
+    script.parent.mkdir(parents=True)
+    script.write_text(
+        "from pathlib import Path\nPath('verification-ran').write_text('unexpected')\n",
+        encoding="utf-8",
+    )
+    unit_path = _write_unit(tmp_path, command=f"{sys.executable} scripts/must_not_run.py")
     text = unit_path.read_text(encoding="utf-8").replace(
         'context: "Verify command execution."',
         "context: #274 must survive before verification.",
@@ -375,6 +381,7 @@ def test_work_verify_rejects_unsafe_legacy_hash_scalar_without_mutating(tmp_path
     assert ":context:line-" in result.stderr
     assert ":acceptance:line-" in result.stderr
     assert unit_path.read_bytes() == before
+    assert not (tmp_path / "verification-ran").exists()
     assert not (tmp_path / "reviews").exists()
 
 
