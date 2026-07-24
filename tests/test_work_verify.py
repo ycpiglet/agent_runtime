@@ -349,6 +349,17 @@ def test_work_verify_preserves_quoted_hash_scalar_and_list_values(tmp_path: Path
     assert after["acceptance"] == [expected]
 
 
+def test_legacy_detector_allows_complete_nested_flow_with_trailing_comment() -> None:
+    text = """---
+context: [[safe], {issue: "#277"}] # reviewed YAML comment
+---
+
+# Body #277
+"""
+
+    assert backlog_board.unsafe_legacy_frontmatter_scalars(text) == []
+
+
 def test_work_verify_rejects_unsafe_legacy_hash_scalar_without_mutating(tmp_path: Path) -> None:
     script = tmp_path / "scripts" / "must_not_run.py"
     script.parent.mkdir(parents=True)
@@ -363,6 +374,9 @@ def test_work_verify_rejects_unsafe_legacy_hash_scalar_without_mutating(tmp_path
     ).replace(
         '  - "Verification evidence is written."',
         "    - #275 must survive before verification.",
+    ).replace(
+        'scope: "Run one verification command."',
+        "scope: [[safe] #277] must survive before verification.",
     )
     unit_path.write_text(text, encoding="utf-8")
     before = unit_path.read_bytes()
@@ -380,6 +394,7 @@ def test_work_verify_rejects_unsafe_legacy_hash_scalar_without_mutating(tmp_path
     assert "work-verify:unsafe-legacy-frontmatter-scalar:" in result.stderr
     assert ":context:line-" in result.stderr
     assert ":acceptance:line-" in result.stderr
+    assert ":scope:line-" in result.stderr
     assert unit_path.read_bytes() == before
     assert not (tmp_path / "verification-ran").exists()
     assert not (tmp_path / "reviews").exists()

@@ -503,9 +503,63 @@ def _is_delimited_frontmatter_scalar(value: str) -> bool:
     value = value.strip()
     if len(value) < 2:
         return False
-    if value[0] == value[-1] and value[0] in {'"', "'"}:
-        return True
-    return (value[0], value[-1]) in {("[", "]"), ("{", "}")}
+    if value[0] in {'"', "'"}:
+        quote = value[0]
+        escaped = False
+        index = 1
+        while index < len(value):
+            char = value[index]
+            if quote == '"':
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == quote:
+                    return index == len(value) - 1
+            elif char == quote:
+                if index + 1 < len(value) and value[index + 1] == quote:
+                    index += 2
+                    continue
+                return index == len(value) - 1
+            index += 1
+        return False
+    if value[0] not in "[{":
+        return False
+
+    flow_stack: list[str] = []
+    quote: str | None = None
+    escaped = False
+    index = 0
+    while index < len(value):
+        char = value[index]
+        if quote == '"':
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = None
+            index += 1
+            continue
+        if quote == "'":
+            if char == quote and index + 1 < len(value) and value[index + 1] == quote:
+                index += 2
+                continue
+            if char == quote:
+                quote = None
+            index += 1
+            continue
+        if char in {'"', "'"}:
+            quote = char
+        elif char in "[{":
+            flow_stack.append("]" if char == "[" else "}")
+        elif char in "]}":
+            if not flow_stack or flow_stack.pop() != char:
+                return False
+            if not flow_stack and index != len(value) - 1:
+                return False
+        index += 1
+    return not flow_stack and quote is None
 
 
 def unsafe_legacy_frontmatter_scalars(text: str) -> list[tuple[int, str]]:

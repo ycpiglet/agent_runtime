@@ -352,6 +352,7 @@ def test_work_new_blocks_missing_unit_required_fields_without_partial_files(tmp_
 
 def test_work_new_round_trips_hash_and_quote_bearing_frontmatter_values(tmp_path: Path) -> None:
     payload = _payload(include_units=True)
+    origin_ref = "reviews/REVIEW-TEST.md#issue-167"
     task_summary = 'Preserve issue #167 with both \'single\' and "double" quotes.'
     unit_context = 'Keep issue #168 with both \'single\' and "double" quotes.'
     splitline_values = [
@@ -376,6 +377,7 @@ def test_work_new_round_trips_hash_and_quote_bearing_frontmatter_values(tmp_path
         *splitline_values,
     ]
     bracketed_summary = "[planned, done]"
+    payload["origin_ref"] = origin_ref
     payload["tasks"][0]["summary"] = task_summary  # type: ignore[index]
     payload["tasks"][0]["units"][0]["context"] = unit_context  # type: ignore[index]
     payload["tasks"][0]["units"][0]["acceptance"] = acceptance  # type: ignore[index]
@@ -403,7 +405,9 @@ def test_work_new_round_trips_hash_and_quote_bearing_frontmatter_values(tmp_path
         )
     )
     assert task_meta["summary"] == task_summary
+    assert task_meta["origin_ref"] == origin_ref
     assert unit_meta["context"] == unit_context
+    assert unit_meta["origin_ref"] == origin_ref
     assert unit_meta["acceptance"] == acceptance
     assert second_meta["summary"] == bracketed_summary
     encoded_prefix = json.dumps(backlog_board.ENCODED_WORK_SCALAR_PREFIX)[1:-1]

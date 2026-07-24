@@ -283,6 +283,9 @@ def test_work_close_rejects_unsafe_legacy_hash_scalar_without_mutating(tmp_path:
     text = unit_path.read_text(encoding="utf-8").replace(
         'context: "Close a verified unit."',
         "context: #274 must survive before closeout.",
+    ).replace(
+        'scope: "Record deterministic closeout metadata."',
+        "scope: [[safe] #277] must survive before closeout.",
     )
     unit_path.write_text(text, encoding="utf-8")
     before = unit_path.read_bytes()
@@ -305,6 +308,7 @@ def test_work_close_rejects_unsafe_legacy_hash_scalar_without_mutating(tmp_path:
     assert result.returncode == 1
     assert "work-close:unsafe-legacy-frontmatter-scalar:" in result.stderr
     assert ":context:line-" in result.stderr
+    assert ":scope:line-" in result.stderr
     assert unit_path.read_bytes() == before
     assert not (tmp_path / "BACKLOG-BOARD.md").exists()
 
