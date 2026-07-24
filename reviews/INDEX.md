@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-24T15:50:20+09:00
-record_count: 885
+generated_at: 2026-07-24T15:53:27+09:00
+record_count: 886
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `885` review and evidence records under `reviews/`.
+- Summary: indexed `886` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `885` files |
+| Reviews covered | pass | `886` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -625,6 +625,7 @@ record_count: 885
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-620-SKEPTIC-APPROVAL.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-620-SKEPTIC-APPROVAL` | md | record | pass | TASK-AR-620 회의적 W4b 검토 |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-621-SKEPTIC-RECHECK.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-621-SKEPTIC-RECHECK` | md | approved | pass | TASK-AR-621 Skeptic Recheck |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-621-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-621-SKEPTIC` | md | hold | fail | TASK-AR-621 Skeptic and Adversarial Review |
+| `reviews/ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC.md` | `ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC` | md | hold | fail | TASK-AR-622 Skeptic and Adversarial Review |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SCRIBE-2026-06-21-business-operating-system.md` | `SCRIBE-2026-06-21-business-operating-system` | scribe | recorded | pass | Business Operating System Scribe Log |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
