@@ -9,11 +9,11 @@ task_id: TASK-AR-622
 task_set_id: TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY
 initiative_id: INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-23T15:01:03+09:00
-updated_at: 2026-07-24T16:01:43+09:00
+updated_at: 2026-07-24T16:11:54+09:00
 origin_type: verification_audit_finding
 origin_ref: reviews/ROLE-REVIEW-2026-07-23-TASK-AR-602-FINAL-SKEPTIC.md
 created_by: codex-root-planner
@@ -58,6 +58,11 @@ evidence_refs:
   - reviews/VERIFY-2026-07-24-unit-task-ar-622-001-20260724154051.json
   - reviews/VERIFY-2026-07-24-unit-task-ar-622-001-20260724155415.json
   - reviews/VERIFY-2026-07-24-unit-task-ar-622-001-20260724160143.json
+resolution: done
+completed_at: 2026-07-24T16:11:54+09:00
+closed_by: /root/task-ar-622
+actual_hours: 0.8
+actual_tokens: 16000
 ---
 
 # UNIT-TASK-AR-622-001 - Define and test lossless work scalar serialization
@@ -116,3 +121,17 @@ Report the reproduction, chosen scalar contract, legacy fail-closed or reviewed-
 ## Stop Boundary
 
 Stop before bulk-rewriting historical work records, changing the evidence schema, inferring a discarded suffix, or accepting silent value normalization.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-24T16:11:54+09:00`
+- Resolution: `done`
+- Actual hours: `0.8`
+- Actual tokens: `16000`
+- Closed by: `/root/task-ar-622`
+- Evidence:
+  - `reviews/VERIFY-2026-07-24-unit-task-ar-622-001-20260724154051.json`
+  - `reviews/VERIFY-2026-07-24-unit-task-ar-622-001-20260724155415.json`
+  - `reviews/VERIFY-2026-07-24-unit-task-ar-622-001-20260724160143.json`
+<!-- work-close:end -->

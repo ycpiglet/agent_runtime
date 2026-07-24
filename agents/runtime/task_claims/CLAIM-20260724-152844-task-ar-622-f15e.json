@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-622:tab-01",
   "pane_id": "terminal:wt-task-ar-622:tab-01",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
   "active_scope": "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
   "scope_transition_approved": true,
@@ -27,12 +27,12 @@
   "worktree_path": "C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-622",
   "branch": "codex/task-ar-622-frontmatter-scalar-integrity",
   "claimed_at": "2026-07-24T15:28:44+09:00",
-  "last_heartbeat": "2026-07-24T15:28:44+09:00",
-  "updated_at": "2026-07-24T15:28:44+09:00",
+  "last_heartbeat": "2026-07-24T16:13:32+09:00",
+  "updated_at": "2026-07-24T16:13:32+09:00",
   "expires_at": "2026-07-24T17:28:44+09:00",
   "lease": {
     "claimed_at": "2026-07-24T15:28:44+09:00",
-    "heartbeat_at": "2026-07-24T15:28:44+09:00",
+    "heartbeat_at": "2026-07-24T16:13:32+09:00",
     "expires_at": "2026-07-24T17:28:44+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260724-152844-task-ar-622-f15e.handoff.md",
@@ -55,5 +55,9 @@
     "tests/test_work_verify.py",
     "tests/test_work_close.py",
     "reviews/"
-  ]
+  ],
+  "released_at": "2026-07-24T16:13:32+09:00",
+  "verified_by": "/root/task_ar_603_auditor",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-24-TASK-AR-622-FINAL.md"
 }

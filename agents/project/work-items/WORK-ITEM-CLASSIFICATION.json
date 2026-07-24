@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-24T15:29:54+09:00",
+  "generated_at": "2026-07-24T16:13:18+09:00",
   "record_count": 460,
   "finding_count": 0,
   "findings": [],
@@ -5041,7 +5041,7 @@
       "title": "Work Frontmatter Scalar Integrity",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-622",
@@ -5052,7 +5052,7 @@
       "title": "Ensure work registration and lifecycle rewrites round-trip scalar values containing Y…",
       "path": "agents/lead_engineer/tasks/TASK-AR-622.md",
       "parent_id": "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-622-001",
@@ -5063,7 +5063,7 @@
       "title": "UNIT-TASK-AR-622-001 - Define and test lossless work scalar serialization",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-622/UNIT-TASK-AR-622-001.md",
       "parent_id": "TASK-AR-622",
-      "status": "worker_ready"
+      "status": "completed"
     }
   ]
 }

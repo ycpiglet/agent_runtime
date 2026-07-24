@@ -1,24 +1,18 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-24T15:32:00+09:00
+updated_at: 2026-07-24T16:16:00+09:00
 updated_by: codex-root
 current_state:
-  summary: "TASK-AR-622 is claimed after current-head T3 revalidation and a passing T2 assumption check; failure-first scalar regressions are next."
-  status: active
-  task_set_status: active
+  summary: "TASK-AR-622 implementation and local lifecycle closeout are complete after W4a plus dual W4b approval; all claims are released and verified branch integration remains."
+  status: integration_pending
+  task_set_status: integration_pending
   task_set_id: "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY"
-  step_index: 1
+  step_index: 5
   step_total: 5
-  progress_pct: 5
-  status_text: "TASK-AR-622 T2 passed; preparing raw legacy scalar failure-first regressions."
+  progress_pct: 95
+  status_text: "TASK-AR-622 W4b approved at 99/98; push, PR CI, merge, and worktree cleanup remain."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260724-152844-task-ar-622-f15e
-      agent_role: lead-engineer
-      agent_instance_id: /root/task-ar-622
-      display_name: lead_engineer@orchestrator-01
-      callsite_id: terminal:wt-task-ar-622:tab-01
-  current_teams:
-    - agent-runtime-core
+  current_agents: []
+  current_teams: []
 resume:
   active_task: TASK-AR-622
   active_task_set: "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY"
@@ -29,15 +23,14 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260724-152844-task-ar-622-f15e.json
+  active_claims: []
   registered_followups:
     - task_id: TASK-AR-621
       task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
       status: completed
     - task_id: TASK-AR-622
       task_set_id: TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY
-      status: active
+      status: completed
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
     active_claim: null

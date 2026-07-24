@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-24T15:29:54+09:00
+generated_at: 2026-07-24T16:13:18+09:00
 record_count: 460
 ---
 
@@ -496,9 +496,9 @@ record_count: 460
 | 37.1.1 | Task 37.1.1 | task | `TASK-AR-621` | `TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY` | completed | `agents/lead_engineer/tasks/TASK-AR-621.md` | Prevent shell metacharacters in registered verification commands from being silently… |
 | 37.1.1.1 | Unit 37.1.1.1 | unit | `UNIT-TASK-AR-621-001` | `TASK-AR-621` | completed | `agents/lead_engineer/tasks/units/TASK-AR-621/UNIT-TASK-AR-621-001.md` | UNIT-TASK-AR-621-001 - Define and test cross-platform verification execution |
 | 38 | Initiative 38 | initiative | `INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY` | - | active | `agents/project/initiatives/INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY.md` | Work Frontmatter Scalar Integrity |
-| 38.1 | Taskset 38.1 | taskset | `TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY` | `INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY` | active | `BACKLOG-BOARD.md` | Work Frontmatter Scalar Integrity |
-| 38.1.1 | Task 38.1.1 | task | `TASK-AR-622` | `TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-622.md` | Ensure work registration and lifecycle rewrites round-trip scalar values containing Y… |
-| 38.1.1.1 | Unit 38.1.1.1 | unit | `UNIT-TASK-AR-622-001` | `TASK-AR-622` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-622/UNIT-TASK-AR-622-001.md` | UNIT-TASK-AR-622-001 - Define and test lossless work scalar serialization |
+| 38.1 | Taskset 38.1 | taskset | `TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY` | `INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY` | complete | `BACKLOG-BOARD.md` | Work Frontmatter Scalar Integrity |
+| 38.1.1 | Task 38.1.1 | task | `TASK-AR-622` | `TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY` | completed | `agents/lead_engineer/tasks/TASK-AR-622.md` | Ensure work registration and lifecycle rewrites round-trip scalar values containing Y… |
+| 38.1.1.1 | Unit 38.1.1.1 | unit | `UNIT-TASK-AR-622-001` | `TASK-AR-622` | completed | `agents/lead_engineer/tasks/units/TASK-AR-622/UNIT-TASK-AR-622-001.md` | UNIT-TASK-AR-622-001 - Define and test lossless work scalar serialization |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.
