@@ -499,6 +499,72 @@ def strip_comment(line: str) -> str:
     return line
 
 
+def _is_delimited_frontmatter_scalar(value: str) -> bool:
+    value = value.strip()
+    if len(value) < 2:
+        return False
+    if value[0] == value[-1] and value[0] in {'"', "'"}:
+        return True
+    return (value[0], value[-1]) in {("[", "]"), ("{", "}")}
+
+
+def unsafe_legacy_frontmatter_scalars(text: str) -> list[tuple[int, str]]:
+    """Return line/key pairs whose plain scalar is truncated by ``#`` parsing.
+
+    Quoted and complete flow-style values may have a genuine trailing YAML
+    comment without losing scalar data. Plain values cannot distinguish an
+    intended comment from discarded data, so lifecycle rewrites must fail
+    closed until a reviewed migration quotes or re-encodes the value.
+    """
+
+    lines = text.splitlines()
+    if not lines:
+        return []
+
+    if lines[0].strip() == "---":
+        start = 1
+    elif re.match(r"^[A-Za-z0-9_-]+:\s*", lines[0]):
+        start = 0
+    else:
+        return []
+
+    end = len(lines)
+    for index, line in enumerate(lines[start:], start=start):
+        stripped = line.strip()
+        if (start == 1 and stripped == "---") or stripped.startswith("## "):
+            end = index
+            break
+        if start == 0 and stripped == "---":
+            end = index
+            break
+
+    findings: list[tuple[int, str]] = []
+    current_list: str | None = None
+    for index in range(start, end):
+        raw = lines[index]
+        uncommented = strip_comment(raw).rstrip()
+        if not uncommented.strip():
+            continue
+
+        if uncommented.startswith("  - ") and current_list:
+            item = uncommented[4:].strip()
+            if uncommented != raw.rstrip() and item and not _is_delimited_frontmatter_scalar(item):
+                findings.append((index + 1, current_list))
+            continue
+
+        match = re.match(r"^([A-Za-z0-9_-]+):\s*(.*)$", uncommented)
+        if not match:
+            continue
+        key, value = match.group(1), match.group(2).strip()
+        if not value:
+            current_list = key
+            continue
+        if uncommented != raw.rstrip() and not _is_delimited_frontmatter_scalar(value):
+            findings.append((index + 1, key))
+        current_list = None
+    return findings
+
+
 def decode_encoded_work_scalar(value: str) -> str | None:
     if len(value) < 2 or value[0] != '"' or value[-1] != '"':
         return None

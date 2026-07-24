@@ -324,7 +324,7 @@ def test_work_verify_preserves_quoted_hash_scalar_and_list_values(tmp_path: Path
     text = unit_path.read_text(encoding="utf-8")
     text = text.replace(
         'context: "Verify command execution."',
-        'context: "Preserve issue #167 and Owner\'s note."',
+        'context: "Preserve issue #167 and Owner\'s note." # reviewed YAML comment',
     ).replace(
         '  - "Verification evidence is written."',
         '  - "Preserve issue #167 and Owner\'s note."',
@@ -354,6 +354,9 @@ def test_work_verify_rejects_unsafe_legacy_hash_scalar_without_mutating(tmp_path
     text = unit_path.read_text(encoding="utf-8").replace(
         'context: "Verify command execution."',
         "context: Preserve GitHub issue #274 before verification.",
+    ).replace(
+        '  - "Verification evidence is written."',
+        "  - Preserve pull request #275 before verification.",
     )
     unit_path.write_text(text, encoding="utf-8")
     before = unit_path.read_bytes()
@@ -370,6 +373,7 @@ def test_work_verify_rejects_unsafe_legacy_hash_scalar_without_mutating(tmp_path
     assert result.returncode == 1
     assert "work-verify:unsafe-legacy-frontmatter-scalar:" in result.stderr
     assert ":context:line-" in result.stderr
+    assert ":acceptance:line-" in result.stderr
     assert unit_path.read_bytes() == before
     assert not (tmp_path / "reviews").exists()
 

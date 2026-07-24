@@ -1280,7 +1280,13 @@ def _candidate_work_paths(root: Path, work_id: str) -> list[Path]:
     return [path for path in candidates if path.exists()]
 
 
-def _load_work_item(root: Path, work_id: str, *, command_name: str) -> tuple[Path, dict[str, Any], str]:
+def _load_work_item(
+    root: Path,
+    work_id: str,
+    *,
+    command_name: str,
+    reject_unsafe_legacy_scalars: bool = False,
+) -> tuple[Path, dict[str, Any], str]:
     paths = _candidate_work_paths(root, work_id)
     if not paths:
         raise WorkRegistrationError([f"{command_name}:not-found:{work_id}"])
@@ -1288,6 +1294,17 @@ def _load_work_item(root: Path, work_id: str, *, command_name: str) -> tuple[Pat
         raise WorkRegistrationError([f"{command_name}:ambiguous:{work_id}:{','.join(_rel(root, path) for path in paths)}"])
     path = paths[0]
     text = path.read_text(encoding="utf-8")
+    if reject_unsafe_legacy_scalars:
+        unsafe_scalars = backlog_board.unsafe_legacy_frontmatter_scalars(text)
+        if unsafe_scalars:
+            rel_path = _rel(root, path)
+            raise WorkRegistrationError(
+                [
+                    f"{command_name}:unsafe-legacy-frontmatter-scalar:"
+                    f"{rel_path}:{key}:line-{line_number}"
+                    for line_number, key in unsafe_scalars
+                ]
+            )
     meta, body = backlog_board.parse_frontmatter(text)
     if not meta:
         raise WorkRegistrationError([f"{_rel(root, path)}: missing-frontmatter"])
@@ -1295,7 +1312,12 @@ def _load_work_item(root: Path, work_id: str, *, command_name: str) -> tuple[Pat
 
 
 def _load_verifiable_work(root: Path, work_id: str) -> tuple[Path, dict[str, Any], str]:
-    return _load_work_item(root, work_id, command_name="work-verify")
+    return _load_work_item(
+        root,
+        work_id,
+        command_name="work-verify",
+        reject_unsafe_legacy_scalars=True,
+    )
 
 
 def _work_id_from_meta(path: Path, meta: dict[str, Any]) -> str:
@@ -2372,7 +2394,12 @@ def close_work(
     now_text = _now_text(now)
     if resolution not in RESOLUTION_VALUES:
         raise WorkRegistrationError([f"work-close:invalid-resolution:{resolution}"])
-    path, meta, body = _load_work_item(root, work_id, command_name="work-close")
+    path, meta, body = _load_work_item(
+        root,
+        work_id,
+        command_name="work-close",
+        reject_unsafe_legacy_scalars=True,
+    )
     resolved_id = _work_id_from_meta(path, meta)
     findings: list[str] = []
     actual_hours_text = "" if actual_hours is None else str(actual_hours).strip()
