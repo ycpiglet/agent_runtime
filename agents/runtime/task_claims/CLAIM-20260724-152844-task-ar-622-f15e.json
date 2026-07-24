@@ -1,0 +1,59 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260724-152844-task-ar-622-f15e",
+  "task_id": "TASK-AR-622",
+  "agent_role": "lead-engineer",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "/root/task-ar-622",
+  "display_name": "lead_engineer@orchestrator-01",
+  "callsite_id": "terminal:wt-task-ar-622:tab-01",
+  "pane_id": "terminal:wt-task-ar-622:tab-01",
+  "mode": "orchestrator",
+  "status": "claimed",
+  "task_set_id": "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
+  "active_scope": "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
+  "scope_transition_approved": true,
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "unit_id": "UNIT-TASK-AR-622-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-622/UNIT-TASK-AR-622-001.md",
+  "model_tier": "worker_standard",
+  "wip_slot": 1,
+  "stop_condition": "Stop before bulk-rewriting historical records, changing the evidence schema, inferring discarded suffixes, or accepting silent normalization.",
+  "phase": "implementation",
+  "progress_pct": 5,
+  "step_index": 1,
+  "step_total": 5,
+  "status_text": "TASK-AR-622 T2 passed; preparing failure-first scalar regressions",
+  "worktree_path": "C:\\Users\\ycpig\\agent_runtime\\.worktrees\\TASK-AR-622",
+  "branch": "codex/task-ar-622-frontmatter-scalar-integrity",
+  "claimed_at": "2026-07-24T15:28:44+09:00",
+  "last_heartbeat": "2026-07-24T15:28:44+09:00",
+  "updated_at": "2026-07-24T15:28:44+09:00",
+  "expires_at": "2026-07-24T17:28:44+09:00",
+  "lease": {
+    "claimed_at": "2026-07-24T15:28:44+09:00",
+    "heartbeat_at": "2026-07-24T15:28:44+09:00",
+    "expires_at": "2026-07-24T17:28:44+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260724-152844-task-ar-622-f15e.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260724-152844-task-ar-622-f15e.log.md",
+  "allow_parallel_task_set": false,
+  "tags": [
+    "work-cli",
+    "frontmatter",
+    "data-integrity"
+  ],
+  "escalation_triggers": [
+    "data_integrity",
+    "cross_cutting",
+    "runtime"
+  ],
+  "target_files": [
+    "scripts/work.py",
+    "scripts/backlog_board.py",
+    "tests/test_work_registration.py",
+    "tests/test_work_verify.py",
+    "tests/test_work_close.py",
+    "reviews/"
+  ]
+}
