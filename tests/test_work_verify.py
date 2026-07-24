@@ -324,7 +324,7 @@ def test_work_verify_preserves_quoted_hash_scalar_and_list_values(tmp_path: Path
     text = unit_path.read_text(encoding="utf-8")
     text = text.replace(
         'context: "Verify command execution."',
-        'context: "Preserve issue #167 and Owner\'s note."',
+        'context: "Preserve issue #167 and Owner\'s note." # reviewed YAML comment',
     ).replace(
         '  - "Verification evidence is written."',
         '  - "Preserve issue #167 and Owner\'s note."',
@@ -347,6 +347,57 @@ def test_work_verify_preserves_quoted_hash_scalar_and_list_values(tmp_path: Path
     after, _ = backlog_board.parse_frontmatter(unit_path.read_text(encoding="utf-8"))
     assert after["context"] == expected
     assert after["acceptance"] == [expected]
+
+
+def test_legacy_detector_allows_complete_nested_flow_with_trailing_comment() -> None:
+    text = """---
+context: [[safe], {issue: "#277"}] # reviewed YAML comment
+---
+
+# Body #277
+"""
+
+    assert backlog_board.unsafe_legacy_frontmatter_scalars(text) == []
+
+
+def test_work_verify_rejects_unsafe_legacy_hash_scalar_without_mutating(tmp_path: Path) -> None:
+    script = tmp_path / "scripts" / "must_not_run.py"
+    script.parent.mkdir(parents=True)
+    script.write_text(
+        "from pathlib import Path\nPath('verification-ran').write_text('unexpected')\n",
+        encoding="utf-8",
+    )
+    unit_path = _write_unit(tmp_path, command=f"{sys.executable} scripts/must_not_run.py")
+    text = unit_path.read_text(encoding="utf-8").replace(
+        'context: "Verify command execution."',
+        "context: #274 must survive before verification.",
+    ).replace(
+        '  - "Verification evidence is written."',
+        "    - #275 must survive before verification.",
+    ).replace(
+        'scope: "Run one verification command."',
+        "scope: [[safe] #277] must survive before verification.",
+    )
+    unit_path.write_text(text, encoding="utf-8")
+    before = unit_path.read_bytes()
+
+    result = _run(
+        tmp_path,
+        "verify",
+        "UNIT-TASK-AR-901-001",
+        "--now",
+        "2026-06-12T13:12:30+09:00",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "work-verify:unsafe-legacy-frontmatter-scalar:" in result.stderr
+    assert ":context:line-" in result.stderr
+    assert ":acceptance:line-" in result.stderr
+    assert ":scope:line-" in result.stderr
+    assert unit_path.read_bytes() == before
+    assert not (tmp_path / "verification-ran").exists()
+    assert not (tmp_path / "reviews").exists()
 
 
 def test_work_verify_blocks_unit_without_commands(tmp_path: Path) -> None:

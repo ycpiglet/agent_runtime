@@ -499,6 +499,131 @@ def strip_comment(line: str) -> str:
     return line
 
 
+def _is_delimited_frontmatter_scalar(value: str) -> bool:
+    value = value.strip()
+    if len(value) < 2:
+        return False
+    if value[0] in {'"', "'"}:
+        quote = value[0]
+        escaped = False
+        index = 1
+        while index < len(value):
+            char = value[index]
+            if quote == '"':
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == quote:
+                    return index == len(value) - 1
+            elif char == quote:
+                if index + 1 < len(value) and value[index + 1] == quote:
+                    index += 2
+                    continue
+                return index == len(value) - 1
+            index += 1
+        return False
+    if value[0] not in "[{":
+        return False
+
+    flow_stack: list[str] = []
+    quote: str | None = None
+    escaped = False
+    index = 0
+    while index < len(value):
+        char = value[index]
+        if quote == '"':
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = None
+            index += 1
+            continue
+        if quote == "'":
+            if char == quote and index + 1 < len(value) and value[index + 1] == quote:
+                index += 2
+                continue
+            if char == quote:
+                quote = None
+            index += 1
+            continue
+        if char in {'"', "'"}:
+            quote = char
+        elif char in "[{":
+            flow_stack.append("]" if char == "[" else "}")
+        elif char in "]}":
+            if not flow_stack or flow_stack.pop() != char:
+                return False
+            if not flow_stack and index != len(value) - 1:
+                return False
+        index += 1
+    return not flow_stack and quote is None
+
+
+def unsafe_legacy_frontmatter_scalars(text: str) -> list[tuple[int, str]]:
+    """Return line/key pairs whose plain scalar is truncated by ``#`` parsing.
+
+    Quoted and complete flow-style values may have a genuine trailing YAML
+    comment without losing scalar data. Plain values cannot distinguish an
+    intended comment from discarded data, so lifecycle rewrites must fail
+    closed until a reviewed migration quotes or re-encodes the value.
+    """
+
+    lines = text.splitlines()
+    if not lines:
+        return []
+
+    if lines[0].strip() == "---":
+        start = 1
+    elif re.match(r"^[A-Za-z0-9_-]+:\s*", lines[0]):
+        start = 0
+    else:
+        return []
+
+    end = len(lines)
+    for index, line in enumerate(lines[start:], start=start):
+        stripped = line.strip()
+        if (start == 1 and stripped == "---") or stripped.startswith("## "):
+            end = index
+            break
+        if start == 0 and stripped == "---":
+            end = index
+            break
+
+    findings: list[tuple[int, str]] = []
+    current_list: str | None = None
+    for index in range(start, end):
+        raw = lines[index]
+        uncommented = strip_comment(raw).rstrip()
+        if not uncommented.strip():
+            continue
+        has_unquoted_hash = uncommented != raw.rstrip()
+
+        if re.match(r"^\s+-(?:\s+.*)?$", uncommented) and current_list:
+            item = uncommented.lstrip()[1:].strip()
+            if has_unquoted_hash and not _is_delimited_frontmatter_scalar(item):
+                findings.append((index + 1, current_list))
+            continue
+
+        match = re.match(r"^([A-Za-z0-9_-]+):\s*(.*)$", uncommented)
+        if not match:
+            continue
+        key, value = match.group(1), match.group(2).strip()
+        if not value:
+            if has_unquoted_hash:
+                findings.append((index + 1, key))
+                current_list = None
+            else:
+                current_list = key
+            continue
+        if has_unquoted_hash and not _is_delimited_frontmatter_scalar(value):
+            findings.append((index + 1, key))
+        current_list = None
+    return findings
+
+
 def decode_encoded_work_scalar(value: str) -> str | None:
     if len(value) < 2 or value[0] != '"' or value[-1] != '"':
         return None

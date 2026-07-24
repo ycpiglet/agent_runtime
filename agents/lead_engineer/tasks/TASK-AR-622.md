@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY
 registered_at: 2026-07-23T15:01:03+09:00
 created_at: 2026-07-23T15:01:03+09:00
-updated_at: 2026-07-23T15:01:03+09:00
+started_at: 2026-07-24T15:28:44+09:00
+updated_at: 2026-07-24T16:13:17+09:00
 title: Preserve literal work frontmatter scalars across rewrites
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 2
@@ -33,6 +34,19 @@ tags:
   - work-cli
   - frontmatter
   - data-integrity
+verification:
+  - python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py -q
+  - python scripts/owner_governance_gate.py
+verification_status: passed
+verified_at: 2026-07-24T16:12:22+09:00
+verified_by: /root/task-ar-622
+evidence_refs:
+  - reviews/VERIFY-2026-07-24-task-ar-622-20260724161222.json
+resolution: done
+completed_at: 2026-07-24T16:13:17+09:00
+closed_by: /root/task-ar-622
+actual_hours: 0.8
+actual_tokens: 16000
 ---
 
 # TASK-AR-622 - Preserve literal work frontmatter scalars across rewrites
@@ -56,3 +70,15 @@ tags:
 
 - `python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py -q`
 - `python scripts/owner_governance_gate.py`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-24T16:13:17+09:00`
+- Resolution: `done`
+- Actual hours: `0.8`
+- Actual tokens: `16000`
+- Closed by: `/root/task-ar-622`
+- Evidence:
+  - `reviews/VERIFY-2026-07-24-task-ar-622-20260724161222.json`
+<!-- work-close:end -->

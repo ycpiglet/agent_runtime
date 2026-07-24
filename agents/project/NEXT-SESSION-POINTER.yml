@@ -1,15 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-23T16:31:00+09:00
+updated_at: 2026-07-24T16:16:00+09:00
 updated_by: codex-root
 current_state:
-  summary: "TASK-AR-621 and its taskset are complete after PR #344 and post-merge main CI; TASK-AR-622 is the next worker-ready task."
-  status: planned
-  task_set_status: planned
+  summary: "TASK-AR-622 implementation and local lifecycle closeout are complete after W4a plus dual W4b approval; all claims are released and verified branch integration remains."
+  status: integration_pending
+  task_set_status: integration_pending
   task_set_id: "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY"
-  step_index: 0
-  step_total: 1
-  progress_pct: 0
-  status_text: "TASK-AR-621 complete; resume TASK-AR-622 through a fresh W0~W6 lifecycle."
+  step_index: 5
+  step_total: 5
+  progress_pct: 95
+  status_text: "TASK-AR-622 W4b approved at 99/98; push, PR CI, merge, and worktree cleanup remain."
 active_work:
   current_agents: []
   current_teams: []
@@ -30,7 +30,7 @@ pointers:
       status: completed
     - task_id: TASK-AR-622
       task_set_id: TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY
-      status: planned
+      status: completed
   llm_wiki_preservation:
     taskset: TASKSET-AR-LLM-WIKI
     active_claim: null
