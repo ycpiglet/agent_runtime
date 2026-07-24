@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-24T16:13:19+09:00
-record_count: 893
+generated_at: 2026-07-24T16:27:11+09:00
+record_count: 895
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `893` review and evidence records under `reviews/`.
+- Summary: indexed `895` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `893` files |
+| Reviews covered | pass | `895` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -220,6 +220,7 @@ record_count: 893
 | `reviews/RETRO-2026-07-23-july-upstream-intake-closeout.md` | `RETRO-2026-07-23-july-upstream-intake-closeout` | md | complete | n/a | July upstream intake closeout and v0.7.0 release retro |
 | `reviews/RETRO-2026-07-23-taskset-ar-work-cli-integrity.md` | `RETRO-2026-07-23-taskset-ar-work-cli-integrity` | md | complete | n/a | TASKSET-AR-WORK-CLI-INTEGRITY Retrospective |
 | `reviews/RETRO-2026-07-23-taskset-ar-work-verify-windows-shell-integrity.md` | `RETRO-2026-07-23-taskset-ar-work-verify-windows-shell-integrity` | md | complete | n/a | TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY Retrospective |
+| `reviews/RETRO-2026-07-24-work-frontmatter-scalar-integrity.md` | `RETRO-2026-07-24-work-frontmatter-scalar-integrity` | md | completed | pass | Work Frontmatter Scalar Integrity Retrospective |
 | `reviews/REVIEW-2026-06-08-agent-runtime-after-pass-1.md` | `REVIEW-2026-06-08-agent-runtime-after-pass-1` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-after-pass-1 |
 | `reviews/REVIEW-2026-06-08-agent-runtime-baseline.md` | `REVIEW-2026-06-08-agent-runtime-baseline` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-baseline |
 | `reviews/REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25.md` | `REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25 |
@@ -575,6 +576,7 @@ record_count: 893
 | `reviews/REVIEW-2026-07-23-work-cli-integrity-design.md` | `REVIEW-2026-07-23-work-cli-integrity-design` | md | record | pass | Work CLI Metadata Integrity Design |
 | `reviews/REVIEW-2026-07-23-work-frontmatter-scalar-integrity-registration.md` | `REVIEW-2026-07-23-work-frontmatter-scalar-integrity-registration` | md | registered | n/a | Work frontmatter scalar integrity defect |
 | `reviews/REVIEW-2026-07-23-work-verify-windows-shell-registration.md` | `REVIEW-2026-07-23-work-verify-windows-shell-registration` | md | registered | n/a | Windows work-verify shell argument preservation defect |
+| `reviews/REVIEW-2026-07-24-task-ar-622-closeout.md` | `REVIEW-2026-07-24-task-ar-622-closeout` | md | passed | pass | TASK-AR-622 Lifecycle Closeout |
 | `reviews/REVIEW-2026-07-24-task-ar-622-frontmatter-scalar-contract.md` | `REVIEW-2026-07-24-task-ar-622-frontmatter-scalar-contract` | md | approved | n/a | TASK-AR-622 Frontmatter Scalar Integrity Contract |
 | `reviews/REVIEW-2026-07-24-task-ar-622-t3-current-head-revalidation.md` | `REVIEW-2026-07-24-task-ar-622-t3-current-head-revalidation` | md | approved | n/a | TASK-AR-622 Current-Head T3 Revalidation |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |

@@ -1,21 +1,21 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-24T16:16:00+09:00
+updated_at: 2026-07-24T16:27:00+09:00
 updated_by: codex-root
 current_state:
-  summary: "TASK-AR-622 implementation and local lifecycle closeout are complete after W4a plus dual W4b approval; all claims are released and verified branch integration remains."
-  status: integration_pending
-  task_set_status: integration_pending
+  summary: "TASK-AR-622 and its taskset are complete after PR #346 plus post-merge main CI; all claims are released and the live backlog has no open tasks."
+  status: completed
+  task_set_status: completed
   task_set_id: "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY"
   step_index: 5
   step_total: 5
-  progress_pct: 95
-  status_text: "TASK-AR-622 W4b approved at 99/98; push, PR CI, merge, and worktree cleanup remain."
+  progress_pct: 100
+  status_text: "TASK-AR-622 complete; PR #346 and main CI passed, with W4b approval at 99/98."
 active_work:
   current_agents: []
   current_teams: []
 resume:
-  active_task: TASK-AR-622
-  active_task_set: "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY"
+  active_task: none
+  active_task_set: none
   branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
