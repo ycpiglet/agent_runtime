@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-23T16:31:30+09:00
-record_count: 881
+generated_at: 2026-07-24T15:28:06+09:00
+record_count: 882
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `881` review and evidence records under `reviews/`.
+- Summary: indexed `882` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `881` files |
+| Reviews covered | pass | `882` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -575,6 +575,7 @@ record_count: 881
 | `reviews/REVIEW-2026-07-23-work-cli-integrity-design.md` | `REVIEW-2026-07-23-work-cli-integrity-design` | md | record | pass | Work CLI Metadata Integrity Design |
 | `reviews/REVIEW-2026-07-23-work-frontmatter-scalar-integrity-registration.md` | `REVIEW-2026-07-23-work-frontmatter-scalar-integrity-registration` | md | registered | n/a | Work frontmatter scalar integrity defect |
 | `reviews/REVIEW-2026-07-23-work-verify-windows-shell-registration.md` | `REVIEW-2026-07-23-work-verify-windows-shell-registration` | md | registered | n/a | Windows work-verify shell argument preservation defect |
+| `reviews/REVIEW-2026-07-24-task-ar-622-t3-current-head-revalidation.md` | `REVIEW-2026-07-24-task-ar-622-t3-current-head-revalidation` | md | approved | n/a | TASK-AR-622 Current-Head T3 Revalidation |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
