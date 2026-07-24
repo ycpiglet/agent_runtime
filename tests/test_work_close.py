@@ -282,7 +282,7 @@ def test_work_close_rejects_unsafe_legacy_hash_scalar_without_mutating(tmp_path:
     _write_passed_evidence(tmp_path)
     text = unit_path.read_text(encoding="utf-8").replace(
         'context: "Close a verified unit."',
-        "context: Preserve GitHub issue #274 before closeout.",
+        "context: #274 must survive before closeout.",
     )
     unit_path.write_text(text, encoding="utf-8")
     before = unit_path.read_bytes()

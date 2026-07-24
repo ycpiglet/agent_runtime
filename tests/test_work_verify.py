@@ -353,10 +353,10 @@ def test_work_verify_rejects_unsafe_legacy_hash_scalar_without_mutating(tmp_path
     unit_path = _write_unit(tmp_path, command=f"{sys.executable} -c \"print('must not run')\"")
     text = unit_path.read_text(encoding="utf-8").replace(
         'context: "Verify command execution."',
-        "context: Preserve GitHub issue #274 before verification.",
+        "context: #274 must survive before verification.",
     ).replace(
         '  - "Verification evidence is written."',
-        "  - Preserve pull request #275 before verification.",
+        "    - #275 must survive before verification.",
     )
     unit_path.write_text(text, encoding="utf-8")
     before = unit_path.read_bytes()

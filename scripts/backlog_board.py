@@ -545,10 +545,11 @@ def unsafe_legacy_frontmatter_scalars(text: str) -> list[tuple[int, str]]:
         uncommented = strip_comment(raw).rstrip()
         if not uncommented.strip():
             continue
+        has_unquoted_hash = uncommented != raw.rstrip()
 
-        if uncommented.startswith("  - ") and current_list:
-            item = uncommented[4:].strip()
-            if uncommented != raw.rstrip() and item and not _is_delimited_frontmatter_scalar(item):
+        if re.match(r"^\s+-(?:\s+.*)?$", uncommented) and current_list:
+            item = uncommented.lstrip()[1:].strip()
+            if has_unquoted_hash and not _is_delimited_frontmatter_scalar(item):
                 findings.append((index + 1, current_list))
             continue
 
@@ -557,9 +558,13 @@ def unsafe_legacy_frontmatter_scalars(text: str) -> list[tuple[int, str]]:
             continue
         key, value = match.group(1), match.group(2).strip()
         if not value:
-            current_list = key
+            if has_unquoted_hash:
+                findings.append((index + 1, key))
+                current_list = None
+            else:
+                current_list = key
             continue
-        if uncommented != raw.rstrip() and not _is_delimited_frontmatter_scalar(value):
+        if has_unquoted_hash and not _is_delimited_frontmatter_scalar(value):
             findings.append((index + 1, key))
         current_list = None
     return findings
