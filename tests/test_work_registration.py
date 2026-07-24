@@ -406,3 +406,5 @@ def test_work_new_round_trips_hash_and_quote_bearing_frontmatter_values(tmp_path
     assert unit_meta["context"] == unit_context
     assert unit_meta["acceptance"] == acceptance
     assert second_meta["summary"] == bracketed_summary
+    encoded_prefix = json.dumps(backlog_board.ENCODED_WORK_SCALAR_PREFIX)[1:-1]
+    assert encoded_prefix in task_path.read_text(encoding="utf-8")

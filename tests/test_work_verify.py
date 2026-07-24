@@ -349,6 +349,31 @@ def test_work_verify_preserves_quoted_hash_scalar_and_list_values(tmp_path: Path
     assert after["acceptance"] == [expected]
 
 
+def test_work_verify_rejects_unsafe_legacy_hash_scalar_without_mutating(tmp_path: Path) -> None:
+    unit_path = _write_unit(tmp_path, command=f"{sys.executable} -c \"print('must not run')\"")
+    text = unit_path.read_text(encoding="utf-8").replace(
+        'context: "Verify command execution."',
+        "context: Preserve GitHub issue #274 before verification.",
+    )
+    unit_path.write_text(text, encoding="utf-8")
+    before = unit_path.read_bytes()
+
+    result = _run(
+        tmp_path,
+        "verify",
+        "UNIT-TASK-AR-901-001",
+        "--now",
+        "2026-06-12T13:12:30+09:00",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "work-verify:unsafe-legacy-frontmatter-scalar:" in result.stderr
+    assert ":context:line-" in result.stderr
+    assert unit_path.read_bytes() == before
+    assert not (tmp_path / "reviews").exists()
+
+
 def test_work_verify_blocks_unit_without_commands(tmp_path: Path) -> None:
     unit_path = _write_unit(tmp_path, command="")
 

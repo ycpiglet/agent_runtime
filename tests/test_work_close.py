@@ -277,6 +277,38 @@ def test_work_close_preserves_quoted_hash_metadata(tmp_path: Path) -> None:
     assert after["context"] == expected
 
 
+def test_work_close_rejects_unsafe_legacy_hash_scalar_without_mutating(tmp_path: Path) -> None:
+    unit_path = _write_unit(tmp_path)
+    _write_passed_evidence(tmp_path)
+    text = unit_path.read_text(encoding="utf-8").replace(
+        'context: "Close a verified unit."',
+        "context: Preserve GitHub issue #274 before closeout.",
+    )
+    unit_path.write_text(text, encoding="utf-8")
+    before = unit_path.read_bytes()
+
+    result = _run(
+        tmp_path,
+        "close",
+        "UNIT-TASK-AR-901-001",
+        "--now",
+        "2026-06-12T13:31:30+09:00",
+        "--actor",
+        "tester-instance",
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "work-close:unsafe-legacy-frontmatter-scalar:" in result.stderr
+    assert ":context:line-" in result.stderr
+    assert unit_path.read_bytes() == before
+    assert not (tmp_path / "BACKLOG-BOARD.md").exists()
+
+
 def test_work_close_blocks_without_passed_verification_or_evidence_refs(tmp_path: Path) -> None:
     unit_path = _write_unit(tmp_path, verification_status="pending", evidence_ref="")
     before = unit_path.read_text(encoding="utf-8")
