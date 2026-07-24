@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-24T16:02:28+09:00
-record_count: 890
+generated_at: 2026-07-24T16:11:22+09:00
+record_count: 892
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `890` review and evidence records under `reviews/`.
+- Summary: indexed `892` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `890` files |
+| Reviews covered | pass | `892` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -625,6 +625,7 @@ record_count: 890
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-620-SKEPTIC-APPROVAL.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-620-SKEPTIC-APPROVAL` | md | record | pass | TASK-AR-620 회의적 W4b 검토 |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-621-SKEPTIC-RECHECK.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-621-SKEPTIC-RECHECK` | md | approved | pass | TASK-AR-621 Skeptic Recheck |
 | `reviews/ROLE-REVIEW-2026-07-23-TASK-AR-621-SKEPTIC.md` | `ROLE-REVIEW-2026-07-23-TASK-AR-621-SKEPTIC` | md | hold | fail | TASK-AR-621 Skeptic and Adversarial Review |
+| `reviews/ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC-FINAL.md` | `ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC-FINAL` | md | approved | pass | TASK-AR-622 Final Skeptical W4b Review |
 | `reviews/ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC-RECHECK.md` | `ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC-RECHECK` | md | approved | pass | TASK-AR-622 Skeptic Recheck |
 | `reviews/ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC.md` | `ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC` | md | hold | fail | TASK-AR-622 Skeptic and Adversarial Review |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
@@ -919,6 +920,7 @@ record_count: 890
 | `reviews/W4B-2026-07-23-TASK-AR-621-APPROVAL.md` | `W4B-2026-07-23-TASK-AR-621-APPROVAL` | md | approved | pass | TASK-AR-621 Independent W4b Technical Approval |
 | `reviews/W4B-2026-07-23-TASK-AR-621-RECHECK.md` | `W4B-2026-07-23-TASK-AR-621-RECHECK` | md | approved | pass | TASK-AR-621 Independent W4b Recheck |
 | `reviews/W4B-2026-07-23-TASK-AR-621-RELEASE.md` | `W4B-2026-07-23-TASK-AR-621-RELEASE` | md | approved | pass | TASK-AR-621 Independent W4b Release Evidence |
+| `reviews/W4B-2026-07-24-TASK-AR-622-FINAL.md` | `W4B-2026-07-24-TASK-AR-622-FINAL` | md | approved | pass | TASK-AR-622 Final Independent W4b Verification |
 | `reviews/W4B-2026-07-24-TASK-AR-622-INDEPENDENT.md` | `W4B-2026-07-24-TASK-AR-622-INDEPENDENT` | md | blocked | block | TASK-AR-622 Independent W4b Technical Verification |
 | `reviews/W4B-2026-07-24-TASK-AR-622-RECHECK.md` | `W4B-2026-07-24-TASK-AR-622-RECHECK` | md | blocked | block | TASK-AR-622 Independent W4b Recheck |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
