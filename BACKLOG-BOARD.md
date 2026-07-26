@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-26T13:19:48+09:00
-task_count: 293
-open_count: 7
+generated_at: 2026-07-26T20:41:34+09:00
+task_count: 302
+open_count: 16
 completed_count: 286
-task_set_count: 1
+task_set_count: 2
 completed_task_set_count: 63
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `7` open or active tasks; `286` completed tasks are archived from this live board.
+- Summary: `16` open or active tasks; `286` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `6` / Ask `1` / Review `0` / Later `0` / Done `286`.
-- Task Sets: `1` active workflows; `63` completed workflows are hidden from the live action board.
+- Status: Action `13` / Ask `3` / Review `0` / Later `0` / Done `286`.
+- Task Sets: `2` active workflows; `63` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -56,6 +56,23 @@ completed_task_set_count: 63
 | `TASK-AR-627` | INIT-AR-CONSOLE-OVERHAUL-P0 | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-627/UNIT-TASK-AR-627-001.md | planned | Ask | P2 | Medium | Low | 3h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | 이미 있는 데이터를 Owner에게 전달하는 최소 경로를 심는다. |
 | `TASK-AR-628` | INIT-AR-CONSOLE-OVERHAUL-P0 | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-628/UNIT-TASK-AR-628-001.md | planned | Action | P2 | Medium | Low | 3h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 신설 스킬(/clarify·/quiz)이 등재될 canonical surface를 먼저 정상화한다. |
 | `TASK-AR-625` | INIT-AR-CONSOLE-OVERHAUL-P0 | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-625/UNIT-TASK-AR-625-001.md | planned | Action | P2 | Medium | Medium | 5h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | P1 화면 작업 전에 저위험 단건 결함들을 정리해 소음을 제거한다. |
+
+### Console Overhaul P1 — Core Structure (`TASKSET-AR-CONSOLE-OVERHAUL-P1`)
+
+- Flow: Owner 결정 확정(2026-07-26) 반영 P1 본대. attention 단일 정본화(#1 웹=1차), 홈 Screenfit, renderAll 해체, /clarify+EARS(#8 별도 스킬), 3자 추적성, W4c 퀴즈(explainer 5문항 medium+선택지 랜덤화+loud escape, #4/#5/#6), 승인 티어링(#9), 임계 기반 FLOW-DIGEST+actor 스탬프(#13, #10 분업의 측정 선행), 디자인 패스(#15). 1-2개월.
+- Progress: `0/9` done; `9` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-630` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | Medium | 6h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 보드 Rollups 휴리스틱과 콘솔 attention_inbox를 하나의 모듈로 통합해 두 표면이 다른 현황을 말하는 구조를 원천 차단하고, watch… |
+| `TASK-AR-636` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Ask | P1 | High | Medium | 7h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Owner/agent decision | 저위험 승인을 council 위임으로 돌려 퀴즈/체크포인트로 늘어나는 Owner 접점을 상쇄한다. |
+| `TASK-AR-634` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | Medium | 8h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | acceptance criterion에 ID를 부여하고 검증 명령과 매핑해 dangling(검증 없는 요구/요구 없는 검증)을 기계 적발한다. |
+| `TASK-AR-631` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | High | 12h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 스크롤 없이 5초 내 '개입 필요 여부'에 예/아니오로 답하는 단일 화면을 완성한다. |
+| `TASK-AR-633` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | High | 12h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 엔지니어링 요구에 대해 모호성을 탐지하고 불일치 지점만 인터뷰해 합의된 EARS 수용 기준을 강제한다. |
+| `TASK-AR-635` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | High | 14h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | diff를 이해했는지 pre-PR 단계에서 독립 출제자가 퀴즈로 검증하고, 통과 못 하면 teach-back으로 반복 학습시킨다. |
+| `TASK-AR-632` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | High | 10h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 매 4초 37개 렌더 함수 전량 재실행을 활성 뷰+콕핏 선택 렌더로 바꾸고 4s/8s/15s+SSE 4중 경로를 단일 디스패처로 통합한다. |
+| `TASK-AR-637` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | High | 10h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 흐름 인사이트를 주간 다이제스트로 자동 전달하고, 주체별 점유를 측정 가능하게 만들어 독박을 지표로 확인한다. |
+| `TASK-AR-638` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Ask | P2 | Medium | High | 12h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | 홈 재구성과 병행해 한국어 단독 Owner와의 언어 불일치를 끝내고, 컬러/토큰/아이콘/칸반의 시각 언어를 '조용한 의사결정 콘솔'로 재정렬한다. |
 
 ## Archived Task Sets
 
@@ -128,9 +145,9 @@ completed_task_set_count: 63
 
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
-- Needs attention: `1` — triage awaiting `0`, owner-decision (Ask) `1` (TASK-AR-538).
+- Needs attention: `3` — triage awaiting `0`, owner-decision (Ask) `3` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `7` open across `1` task sets (see Action Board above).
+- Active: `16` open across `2` task sets (see Action Board above).
 - Throughput (7d): `24` tasks completed in the last 7 days (TASK-AR-627).
 - Archived task sets: `63` (see Archived Task Sets above).
 - Archived task files: `286` — see `ARCHIVE-INDEX.md`.

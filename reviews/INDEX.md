@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-26T13:19:49+09:00
-record_count: 904
+generated_at: 2026-07-26T20:41:34+09:00
+record_count: 906
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `904` review and evidence records under `reviews/`.
+- Summary: indexed `906` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `904` files |
+| Reviews covered | pass | `906` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -580,7 +580,9 @@ record_count: 904
 | `reviews/REVIEW-2026-07-24-task-ar-622-closeout.md` | `REVIEW-2026-07-24-task-ar-622-closeout` | md | passed | pass | TASK-AR-622 Lifecycle Closeout |
 | `reviews/REVIEW-2026-07-24-task-ar-622-frontmatter-scalar-contract.md` | `REVIEW-2026-07-24-task-ar-622-frontmatter-scalar-contract` | md | approved | n/a | TASK-AR-622 Frontmatter Scalar Integrity Contract |
 | `reviews/REVIEW-2026-07-24-task-ar-622-t3-current-head-revalidation.md` | `REVIEW-2026-07-24-task-ar-622-t3-current-head-revalidation` | md | approved | n/a | TASK-AR-622 Current-Head T3 Revalidation |
+| `reviews/REVIEW-2026-07-26-console-overhaul-owner-decisions.md` | `REVIEW-2026-07-26-console-overhaul-owner-decisions` | md | record | pass | Console Overhaul Owner Decisions (15) Resolved |
 | `reviews/REVIEW-2026-07-26-taskset-ar-console-overhaul-p0-registration.md` | `REVIEW-2026-07-26-taskset-ar-console-overhaul-p0-registration` | md | record | pass | Console Overhaul P0 — Trust & Hygiene Registration |
+| `reviews/REVIEW-2026-07-26-taskset-ar-console-overhaul-p1-registration.md` | `REVIEW-2026-07-26-taskset-ar-console-overhaul-p1-registration` | md | record | pass | Console Overhaul P1 — Core Structure Registration |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |

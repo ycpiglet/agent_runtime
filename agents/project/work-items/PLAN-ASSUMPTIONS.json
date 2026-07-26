@@ -212,6 +212,29 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-26-console-overhaul-owner-decisions.md",
+          "value": "221f171fae84a8fc3a29a2c974436e2aed35af9ef1bed876108d1ce92b83d2ef"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "efb96fa7f4283a11501cf19ffc8177a432d048b2dcc854e0ab7bd59ed363d17a"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-26-console-overhaul-owner-decisions.md",
+      "recorded_at": "2026-07-26T20:41:05+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-CONSOLE-OVERHAUL-P1"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-assetization-registration.md",
           "value": "3ffa3b5a633cc6246deb1d231e3aac0d95aed4f2ac0ff8d54484f626b5840a9b"
         },
@@ -1105,5 +1128,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-26T13:16:03+09:00"
+  "updated_at": "2026-07-26T20:41:05+09:00"
 }

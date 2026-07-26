@@ -7,22 +7,22 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-26T13:19:49+09:00
-record_count: 476
+generated_at: 2026-07-26T20:41:34+09:00
+record_count: 487
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `476` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `487` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `40` records |
-| Tasksets | pass | `64` records |
-| Tasks | pass | `293` records |
+| Initiatives | pass | `41` records |
+| Tasksets | pass | `65` records |
+| Tasks | pass | `302` records |
 | Units | pass | `79` records |
 | Findings | pass | `0` findings |
 
@@ -515,6 +515,17 @@ record_count: 476
 | 39.1.6.1 | Unit 39.1.6.1 | unit | `UNIT-TASK-AR-628-001` | `TASK-AR-628` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-628/UNIT-TASK-AR-628-001.md` | UNIT-TASK-AR-628-001 - REPORTING-FORMAT 복원 + response_contract_gate 강화 + OPS 참조 정정 |
 | 39.1.7 | Task 39.1.7 | task | `TASK-AR-629` | `TASKSET-AR-CONSOLE-OVERHAUL-P0` | planned | `agents/lead_engineer/tasks/TASK-AR-629.md` | 요구 명확화·측정 검증 게이트의 기계적 토대를 심어 P1 승격 전 캘리브레이션 데이터를 모은다. |
 | 39.1.7.1 | Unit 39.1.7.1 | unit | `UNIT-TASK-AR-629-001` | `TASK-AR-629` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-629/UNIT-TASK-AR-629-001.md` | UNIT-TASK-AR-629-001 - requirements-lint 게이트 + NEEDS CLARIFICATION 마커 거부 |
+| 40 | Initiative 40 | initiative | `INIT-AR-CONSOLE-OVERHAUL-P1` | - | active | `agents/project/initiatives/INIT-AR-CONSOLE-OVERHAUL-P1.md` | Decision Console Overhaul — Phase 1 (Core Structure) |
+| 40.1 | Taskset 40.1 | taskset | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | `INIT-AR-CONSOLE-OVERHAUL-P1` | active | `BACKLOG-BOARD.md` | Console Overhaul P1 — Core Structure |
+| 40.1.1 | Task 40.1.1 | task | `TASK-AR-630` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-630.md` | 보드 Rollups 휴리스틱과 콘솔 attention_inbox를 하나의 모듈로 통합해 두 표면이 다른 현황을 말하는 구조를 원천 차단하고, watch… |
+| 40.1.2 | Task 40.1.2 | task | `TASK-AR-631` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-631.md` | 스크롤 없이 5초 내 '개입 필요 여부'에 예/아니오로 답하는 단일 화면을 완성한다. |
+| 40.1.3 | Task 40.1.3 | task | `TASK-AR-632` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-632.md` | 매 4초 37개 렌더 함수 전량 재실행을 활성 뷰+콕핏 선택 렌더로 바꾸고 4s/8s/15s+SSE 4중 경로를 단일 디스패처로 통합한다. |
+| 40.1.4 | Task 40.1.4 | task | `TASK-AR-633` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-633.md` | 엔지니어링 요구에 대해 모호성을 탐지하고 불일치 지점만 인터뷰해 합의된 EARS 수용 기준을 강제한다. |
+| 40.1.5 | Task 40.1.5 | task | `TASK-AR-634` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-634.md` | acceptance criterion에 ID를 부여하고 검증 명령과 매핑해 dangling(검증 없는 요구/요구 없는 검증)을 기계 적발한다. |
+| 40.1.6 | Task 40.1.6 | task | `TASK-AR-635` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-635.md` | diff를 이해했는지 pre-PR 단계에서 독립 출제자가 퀴즈로 검증하고, 통과 못 하면 teach-back으로 반복 학습시킨다. |
+| 40.1.7 | Task 40.1.7 | task | `TASK-AR-636` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-636.md` | 저위험 승인을 council 위임으로 돌려 퀴즈/체크포인트로 늘어나는 Owner 접점을 상쇄한다. |
+| 40.1.8 | Task 40.1.8 | task | `TASK-AR-637` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-637.md` | 흐름 인사이트를 주간 다이제스트로 자동 전달하고, 주체별 점유를 측정 가능하게 만들어 독박을 지표로 확인한다. |
+| 40.1.9 | Task 40.1.9 | task | `TASK-AR-638` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-638.md` | 홈 재구성과 병행해 한국어 단독 Owner와의 언어 불일치를 끝내고, 컬러/토큰/아이콘/칸반의 시각 언어를 '조용한 의사결정 콘솔'로 재정렬한다. |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.
