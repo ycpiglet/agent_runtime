@@ -98,6 +98,12 @@
       "order": 601
     },
     {
+      "task_set_id": "TASKSET-AR-CONSOLE-OVERHAUL-P1",
+      "display_name": "Console Overhaul P1 — Core Structure",
+      "summary": "Owner 결정 확정(2026-07-26) 반영 P1 본대. attention 단일 정본화(#1 웹=1차), 홈 Screenfit, renderAll 해체, /clarify+EARS(#8 별도 스킬), 3자 추적성, W4c 퀴즈(explainer 5문항 medium+선택지 랜덤화+loud escape, #4/#5/#6), 승인 티어링(#9), 임계 기반 FLOW-DIGEST+actor 스탬프(#13, #10 분업의 측정 선행), 디자인 패스(#15). 1-2개월.",
+      "order": 602
+    },
+    {
       "task_set_id": "TASKSET-AR-PR303-CI-SCHEMA-RECOVERY",
       "display_name": "CI Schema Recovery",
       "summary": "Normalize the legacy TASK-AR-594 evidence reference into the canonical work-item schema.",
