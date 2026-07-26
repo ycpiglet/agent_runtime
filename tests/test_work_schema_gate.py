@@ -437,3 +437,30 @@ def test_template_carries_work_schema_gate_and_catalog() -> None:
     assert (
         REPO_ROOT / "src" / "agent_runtime" / "templates" / "project" / "agents" / "project" / "WORK-SCHEMA.yml"
     ).exists()
+
+
+def test_ar626_gate_flags_nonmonotonic_timestamps(tmp_path: Path) -> None:
+    # TASK-AR-626: started_at after completed_at is a contradiction the gate flags.
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-TEST-001.md",
+        _minimal_task_frontmatter(
+            extra="started_at: 2026-06-12T12:00:00+09:00\ncompleted_at: 2026-06-12T09:00:00+09:00"
+        ),
+    )
+    result = _run("--root", str(tmp_path), "--path", str(_schema_path()), "--items", "--check")
+    assert result.returncode == 1
+    assert "work-item:timestamp-not-monotonic:started_at>completed_at" in result.stdout
+
+
+def test_ar626_backfilled_marker_exempts_nonmonotonic(tmp_path: Path) -> None:
+    # A record explicitly marked backfilled is isolated, not flagged.
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-TEST-001.md",
+        _minimal_task_frontmatter(
+            extra="started_at: 2026-06-12T12:00:00+09:00\n"
+            "completed_at: 2026-06-12T09:00:00+09:00\n"
+            "timestamp_quality: backfilled"
+        ),
+    )
+    result = _run("--root", str(tmp_path), "--path", str(_schema_path()), "--items", "--check")
+    assert "timestamp-not-monotonic" not in result.stdout

@@ -1,4 +1,5 @@
 ---
+timestamp_quality: backfilled
 schema_version: agent-runtime-work-item/v1
 id: TASK-AR-619
 display_id: TASK-AR-619

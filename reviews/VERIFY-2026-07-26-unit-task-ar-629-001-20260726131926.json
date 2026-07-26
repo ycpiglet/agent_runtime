@@ -1,0 +1,34 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-26-unit-task-ar-629-001-20260726131926",
+  "work_id": "UNIT-TASK-AR-629-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-629/UNIT-TASK-AR-629-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-629",
+  "unit_id": "UNIT-TASK-AR-629-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-26T13:19:26+09:00",
+  "verified_by": "work.py verify",
+  "command_count": 2,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_work_item_classifier.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-26T13:19:26+09:00",
+      "finished_at": "2026-07-26T13:19:26+09:00",
+      "stdout": "....                                                                     [100%]\n4 passed in 0.24s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/owner_governance_gate.py --allow-empty-owner-docs",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-26T13:19:26+09:00",
+      "finished_at": "2026-07-26T13:19:30+09:00",
+      "stdout": "age=10 reuse=2\n- metric capability.work kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.update_notify kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.session_dashboard kind=script status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=1\n- metric hook.session_dashboard kind=hook status=active lifecycle=keep paths=2 evidence=2 usage=9 reuse=2\n- metric skill.wave_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=7 reuse=2\n- metric skill.merge_integrator kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=15 reuse=2\n- metric skill.independent_verification kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=11 reuse=2\n- metric skill.work_analytics kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=14 reuse=2\n- metric skill.release_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=5 reuse=2\n- metric skill.scm_steward kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=19 reuse=2\nowner-governance: result: scripts/runtime_asset_usage.py --check -> 0\nowner-governance: start: scripts/state_sync_gate.py --check\nstate-sync-gate: pass\nroot=/home/keti-itp-01/ycpiglet/agent_runtime\nfindings=1\nblock=0\nwatch=1\n- watch pointer:no-active-taskset agents/project/NEXT-SESSION-POINTER.yml: pointer has no active taskset\nowner-governance: result: scripts/state_sync_gate.py --check -> 0\nowner-governance: start: scripts/automation_rules_gate.py --check\nautomation-rules-gate: pass\nroot=/home/keti-itp-01/ycpiglet/agent_runtime\nrules_total=0\nrules_active=0\nrules_executed=0\nrules_invalid=0\nactions=0\nfindings=0\nowner-governance: result: scripts/automation_rules_gate.py --check -> 0\nowner-governance: start: scripts/scheduled_dispatch_gate.py --check\nscheduled-dispatch-gate: pass\nroot=/home/keti-itp-01/ycpiglet/agent_runtime\nschedules_total=0\nschedules_active=0\nschedules_invalid=0\ndue=0\ndispatches=0\nreminders=0\nfindings=0\nowner-governance: result: scripts/scheduled_dispatch_gate.py --check -> 0\nowner-governance: start: scripts/release_cadence_trigger.py --check\nrelease-cadence: watch finding=release-cadence:proposal recommended_bump=minor recommended_version=0.8.0\nrelease-cadence: baseline tag=v0.6.0 commits=465 feat=7 fix=51 breaking=0 days=20 (thresholds commits>=40 feat>=5 days>=14)\nrelease-cadence: trigger reasons: commits>=40 (actual 465); feat>=5 (actual 7); days>=14 (actual 20)\nrelease-cadence: current version=0.7.0 source=pyproject.toml\nrelease-cadence: bump targets: pyproject.toml\nrelease-cadence: non-blocking watch; no version bump, tag, push, publish, or release execution\nowner-governance: result: scripts/release_cadence_trigger.py --check -> 0\nowner-governance: start: scripts/conversation_work_audit.py --check\nconversation-work-audit: pass\nroot=/home/keti-itp-01/ycpiglet/agent_runtime\nplanning_records=19\nfindings=0 block=0 watch=0\nowner-governance: result: scripts/conversation_work_audit.py --check -> 0\nowner-governance: start: scripts/knowledge_lint_gate.py --check\nknowledge-lint-gate: pass (enforced; changed=33>=10; no block findings)\nowner-governance: result: scripts/knowledge_lint_gate.py --check -> 0\nowner-governance: start: scripts/planning_loop.py gate --trigger hook --action scan\nstatus=pass\nowner-governance: result: scripts/planning_loop.py gate --trigger hook --action scan -> 0\nowner-governance: start: scripts/compound_cadence_gate.py --obligation\ncompound-cadence-gate: watch\nroot=/home/keti-itp-01/ycpiglet/agent_runtime\nreviews=360\ncompounds=3\nretros=9\ncompound_retro_total=12\nratio=30.0\nthreshold=20\nwatch=1\n- watch [compound-cadence]: 360 REVIEW-* vs 12 COMPOUND-*/RETRO-* (ratio 30.0, threshold 20); consider compounding lessons into COMPOUND-* or RETRO-* documents\nowner-governance: result: scripts/compound_cadence_gate.py --obligation -> 1\nowner-governance: advisory: compound obligation due (review:compound ratio high) -- not blocking\n",
+      "stderr": ""
+    }
+  ]
+}

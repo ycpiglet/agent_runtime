@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-24T16:27:11+09:00
-record_count: 895
+generated_at: 2026-07-26T13:19:49+09:00
+record_count: 904
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `895` review and evidence records under `reviews/`.
+- Summary: indexed `904` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `895` files |
+| Reviews covered | pass | `904` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -524,6 +524,7 @@ record_count: 895
 | `reviews/REVIEW-2026-07-19-taskset-ar-auto-merge-integrity-registration.md` | `REVIEW-2026-07-19-taskset-ar-auto-merge-integrity-registration` | md | record | pass | Merge Truth Keeper Registration |
 | `reviews/REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration.md` | `REVIEW-2026-07-19-taskset-ar-july-upstream-intake-closeout-registration` | md | record | pass | Upstream Intake Closer Registration |
 | `reviews/REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration.md` | `REVIEW-2026-07-19-taskset-ar-role-routing-closeout-reliability-registration` | md | record | pass | Role Routing Closeout Reliability Registration |
+| `reviews/REVIEW-2026-07-22-decision-console-overhaul-masterplan.md` | `REVIEW-2026-07-22-decision-console-overhaul-masterplan` | md | record | pass | Decision Console Overhaul Masterplan |
 | `reviews/REVIEW-2026-07-22-post-merge-plan-revalidation.md` | `REVIEW-2026-07-22-post-merge-plan-revalidation` | plan-revalidation | approved | pass | Post-merge plan revalidation |
 | `reviews/REVIEW-2026-07-22-pr-303-ci-baseline-schema-recovery.md` | `REVIEW-2026-07-22-pr-303-ci-baseline-schema-recovery` | md | record | pass | PR 303 CI baseline schema recovery |
 | `reviews/REVIEW-2026-07-22-release-impact-issues-291-300-audit.md` | `REVIEW-2026-07-22-release-impact-issues-291-300-audit` | planning | record | action | Release-impact issue audit for #291 through #300 |
@@ -579,6 +580,7 @@ record_count: 895
 | `reviews/REVIEW-2026-07-24-task-ar-622-closeout.md` | `REVIEW-2026-07-24-task-ar-622-closeout` | md | passed | pass | TASK-AR-622 Lifecycle Closeout |
 | `reviews/REVIEW-2026-07-24-task-ar-622-frontmatter-scalar-contract.md` | `REVIEW-2026-07-24-task-ar-622-frontmatter-scalar-contract` | md | approved | n/a | TASK-AR-622 Frontmatter Scalar Integrity Contract |
 | `reviews/REVIEW-2026-07-24-task-ar-622-t3-current-head-revalidation.md` | `REVIEW-2026-07-24-task-ar-622-t3-current-head-revalidation` | md | approved | n/a | TASK-AR-622 Current-Head T3 Revalidation |
+| `reviews/REVIEW-2026-07-26-taskset-ar-console-overhaul-p0-registration.md` | `REVIEW-2026-07-26-taskset-ar-console-overhaul-p0-registration` | md | record | pass | Console Overhaul P0 — Trust & Hygiene Registration |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
@@ -804,6 +806,13 @@ record_count: 895
 | `reviews/VERIFY-2026-07-24-unit-task-ar-622-001-20260724154051.json` | `VERIFY-2026-07-24-unit-task-ar-622-001-20260724154051` | json | record | n/a | VERIFY-2026-07-24-unit-task-ar-622-001-20260724154051 |
 | `reviews/VERIFY-2026-07-24-unit-task-ar-622-001-20260724155415.json` | `VERIFY-2026-07-24-unit-task-ar-622-001-20260724155415` | json | record | n/a | VERIFY-2026-07-24-unit-task-ar-622-001-20260724155415 |
 | `reviews/VERIFY-2026-07-24-unit-task-ar-622-001-20260724160143.json` | `VERIFY-2026-07-24-unit-task-ar-622-001-20260724160143` | json | record | n/a | VERIFY-2026-07-24-unit-task-ar-622-001-20260724160143 |
+| `reviews/VERIFY-2026-07-26-unit-task-ar-623-001-20260726131911.json` | `VERIFY-2026-07-26-unit-task-ar-623-001-20260726131911` | json | record | n/a | VERIFY-2026-07-26-unit-task-ar-623-001-20260726131911 |
+| `reviews/VERIFY-2026-07-26-unit-task-ar-624-001-20260726131913.json` | `VERIFY-2026-07-26-unit-task-ar-624-001-20260726131913` | json | record | n/a | VERIFY-2026-07-26-unit-task-ar-624-001-20260726131913 |
+| `reviews/VERIFY-2026-07-26-unit-task-ar-625-001-20260726131916.json` | `VERIFY-2026-07-26-unit-task-ar-625-001-20260726131916` | json | record | n/a | VERIFY-2026-07-26-unit-task-ar-625-001-20260726131916 |
+| `reviews/VERIFY-2026-07-26-unit-task-ar-626-001-20260726131919.json` | `VERIFY-2026-07-26-unit-task-ar-626-001-20260726131919` | json | record | n/a | VERIFY-2026-07-26-unit-task-ar-626-001-20260726131919 |
+| `reviews/VERIFY-2026-07-26-unit-task-ar-627-001-20260726131920.json` | `VERIFY-2026-07-26-unit-task-ar-627-001-20260726131920` | json | record | n/a | VERIFY-2026-07-26-unit-task-ar-627-001-20260726131920 |
+| `reviews/VERIFY-2026-07-26-unit-task-ar-628-001-20260726131923.json` | `VERIFY-2026-07-26-unit-task-ar-628-001-20260726131923` | json | record | n/a | VERIFY-2026-07-26-unit-task-ar-628-001-20260726131923 |
+| `reviews/VERIFY-2026-07-26-unit-task-ar-629-001-20260726131926.json` | `VERIFY-2026-07-26-unit-task-ar-629-001-20260726131926` | json | record | n/a | VERIFY-2026-07-26-unit-task-ar-629-001-20260726131926 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |

@@ -86,6 +86,12 @@
       "order": 600
     },
     {
+      "task_set_id": "TASKSET-AR-CONSOLE-OVERHAUL-P0",
+      "display_name": "Console Overhaul P0 — Trust & Hygiene",
+      "summary": "결정 비종속 quick-win 묶음. 신선도 배지·캐시 사각지대 해소, 홈 요약 위계 정리, 프론트 위생(죽은 코드·아이콘·i18n·다크베이스·칸반), 데이터 위생(타임스탬프 게이트·actuals/rework 자동화), 세션 delta·throughput 전달 씨앗, REPORTING-FORMAT/OPS 계약 봉합, requirements-lint·NEEDS CLARIFICATION 마커 씨앗. 1–2주.",
+      "order": 601
+    },
+    {
       "task_set_id": "TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION",
       "display_name": "Release Impact Remediator",
       "summary": "Repair canonical identity, task start state, host dashboard dependencies, hook activation, CI isolation, frontmatter parsing, and classifier semantics.",

@@ -267,7 +267,10 @@ HTML = """<!doctype html>
           <span class="cockpit-total" id="inbox-total" aria-live="polite"></span>
         </header>
         <div class="cockpit-grid" id="inbox-groups" role="list"></div>
-        <p class="cockpit-empty" id="inbox-empty" hidden data-i18n="cockpit.empty">Nothing needs you right now.</p>
+        <p class="cockpit-empty" id="inbox-empty" hidden>
+          <span data-i18n="cockpit.empty">Nothing needs you right now.</span>
+          <span class="cockpit-empty-asof" id="inbox-empty-asof"></span>
+        </p>
       </section>
       <div id="inbox-detail-backdrop" class="inbox-detail-backdrop" hidden></div>
       <aside id="inbox-detail-drawer" class="inbox-detail-drawer" role="dialog" aria-modal="true"
@@ -290,6 +293,11 @@ HTML = """<!doctype html>
             <h2 id="work-state-title" data-i18n="work_state.title">Work state</h2>
           </div>
           <span id="work-state-total" class="work-state-total" aria-live="polite"></span>
+          <button type="button" id="work-state-collapse" class="work-state-collapse"
+                  aria-expanded="true" aria-controls="work-state-board"
+                  aria-label="Toggle work state" data-i18n-aria-label="work_state.collapse">
+            <span class="wsh-caret" aria-hidden="true"></span>
+          </button>
         </header>
         <div id="work-state-board" class="work-state-board" role="list"></div>
         <p id="work-state-empty" class="work-state-empty" hidden data-i18n="work_state.empty">No active work state.</p>
@@ -1747,6 +1755,16 @@ h1 {
   color: var(--muted);
   font-size: var(--font-size-ui-13);
 }
+/* TASK-AR-623: freshness badge turns amber only when the snapshot nears the
+   server TTL backstop; a quiet, recent console stays muted (calm by default). */
+#status-line.is-stale {
+  color: var(--warning);
+  font-weight: 600;
+}
+.cockpit-empty-asof {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
 .toolbar {
   display: flex;
   align-items: center;
@@ -2080,6 +2098,13 @@ textarea:focus {
   padding: var(--space-3xl);
 }
 .shell[data-work-surface-open="false"] .work-surface {
+  display: none;
+}
+/* TASK-AR-624: the create-task / runtime-command forms belong to the board and
+   work views. On every other view they were unrelated noise pinned above the
+   content, so scope them out unless board/work is active. */
+.shell:not([data-active-view="board"]):not([data-active-view="work"]) .create-form,
+.shell:not([data-active-view="board"]):not([data-active-view="work"]) .runtime-form {
   display: none;
 }
 .create-form,
@@ -6914,7 +6939,26 @@ pre {
   font-weight: 700; text-transform: uppercase;
 }
 .work-state-head h2 { margin: 0; color: var(--ink); font-size: 1.1rem; }
-.work-state-total { color: var(--muted); font-size: 0.84rem; white-space: nowrap; }
+.work-state-total { color: var(--muted); font-size: 0.84rem; white-space: nowrap; margin-left: auto; }
+/* TASK-AR-624: collapse toggle demotes the work-state hero (cockpit stays the
+   top-of-screen focus). Defaults expanded, so initial geometry is unchanged. */
+.work-state-collapse {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.6rem; height: 1.6rem; padding: 0; flex: none;
+  background: transparent; border: 1px solid var(--line); border-radius: var(--radius);
+  color: var(--muted); cursor: pointer;
+}
+.work-state-collapse:hover { color: var(--ink); border-color: var(--line-strong); }
+.work-state-collapse:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.wsh-caret {
+  width: 0.5rem; height: 0.5rem; border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor; transform: rotate(45deg) translate(-1px, -1px);
+  transition: transform 0.15s ease;
+}
+.work-state-hero.is-collapsed .wsh-caret { transform: rotate(-45deg) translate(-1px, 1px); }
+.work-state-hero.is-collapsed .work-state-board,
+.work-state-hero.is-collapsed .work-state-empty { display: none; }
+@media (prefers-reduced-motion: reduce) { .wsh-caret { transition: none; } }
 .work-state-board {
   display: grid; gap: 0.75rem;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -7423,6 +7467,28 @@ function applyTranslations() {
   if (moreLabel && i18nStrings["nav.more"]) moreLabel.textContent = t("nav.more");
 }
 
+// TASK-AR-624: collapse toggle for the work-state hero. Defaults expanded so the
+// initial layout is unchanged; the Owner can collapse it to keep the cockpit as
+// the top-of-screen focus. State persists in localStorage.
+function initWorkStateCollapse() {
+  const hero = $("work-state-hero");
+  const btn = $("work-state-collapse");
+  if (!hero || !btn) return;
+  const KEY = "ar624:workStateCollapsed";
+  let collapsed = false;
+  try { collapsed = window.localStorage.getItem(KEY) === "1"; } catch (error) {}
+  const apply = () => {
+    hero.classList.toggle("is-collapsed", collapsed);
+    btn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+  };
+  apply();
+  btn.addEventListener("click", () => {
+    collapsed = !collapsed;
+    try { window.localStorage.setItem(KEY, collapsed ? "1" : "0"); } catch (error) {}
+    apply();
+  });
+}
+
 function setLanguage(lang, persist) {
   currentLanguage = SUPPORTED_LANGUAGES.indexOf(lang) >= 0 ? lang : DEFAULT_LANGUAGE;
   document.documentElement.setAttribute("lang", currentLanguage);
@@ -7681,6 +7747,11 @@ function renderCockpit(data) {
   }
   const empty = $("inbox-empty");
   if (empty) empty.hidden = total > 0;
+  // TASK-AR-623: stamp the reference time so an empty cockpit reads as
+  // "nothing to do as of HH:MM:SS", never an ambiguous stale/blank screen.
+  const emptyAsOf = $("inbox-empty-asof");
+  // Middot via char code to keep this JS block ASCII-only (see AR-341 guard).
+  if (emptyAsOf) emptyAsOf.textContent = " " + String.fromCharCode(183) + " " + t("cockpit.empty.asof") + " " + freshnessClock();
   grid.hidden = total === 0;
   grid.innerHTML = "";
   const groups = (data && data.groups) || {};
@@ -8477,32 +8548,30 @@ function renderGroupedList(view, items, rowTemplate, emptyLabel) {
 }
 
 /* ===== Command palette (Ctrl+K) groundwork ===== */
-const COMMAND_PALETTE_VIEWS = [
-  "board", "work", "meeting", "tasksets", "tsboard", "team", "agents",
-  "messages", "events", "evidence", "planner", "triage", "roadmap", "map", "sources",
-  "automation", "properties", "labels", "portability", "writes",
-];
 let commandPaletteIndex = 0;
 
+// TASK-AR-625: derive palette targets from the live sidebar nav instead of a
+// hardcoded list that drifted out of date (growth/workload/office/org/inbox/
+// channels/calendar/deps/knowledge-graph were unreachable). Single source of
+// truth = the nav links, so every registered view is always jumpable.
 function commandPaletteCommands() {
-  const commands = COMMAND_PALETTE_VIEWS.map((view) => ({
-    id: `view:${view}`,
-    label: `Go to ${view}`,
-    run: () => activateView(view),
-  }));
+  const seen = new Set();
+  const commands = [];
+  navLinks().forEach((link) => {
+    const view = link.dataset.view;
+    if (!view || seen.has(view)) return;
+    seen.add(view);
+    const label = (link.querySelector(".sidebar-label")?.textContent || view).trim();
+    commands.push({ id: `view:${view}`, label: `Go to ${label}`, run: () => activateView(view) });
+  });
   commands.push({ id: "action:refresh", label: "Refresh state", run: loadState });
   return commands;
 }
 
-function activateView(view) {
-  const tab = document.querySelector(`.tab[data-view="${view}"]`);
-  if (!tab) return;
-  document.querySelectorAll(".tab").forEach((item) => item.classList.remove("is-active"));
-  document.querySelectorAll(".view").forEach((item) => item.classList.remove("is-active"));
-  tab.classList.add("is-active");
-  const node = $(`view-${view}`);
-  if (node) node.classList.add("is-active");
-}
+// TASK-AR-625: the .tab-based activateView here was dead (the real nav uses
+// .sidebar-link, and the later activateView declaration overrode this one), so
+// it never ran. Removed to end the confusing duplicate. The canonical
+// activateView(view, {updateHash}) lives with the hash router below.
 
 function openCommandPalette() {
   const palette = $("command-palette");
@@ -8869,6 +8938,35 @@ function handleListKeyboardNav(event) {
   }
 }
 
+// TASK-AR-623: freshness of the assembled snapshot. built_at is fixed for the
+// life of a cached build (generated_at re-stamps every poll), so its age is the
+// real "how current is this data" signal. Watch color only near the server TTL
+// backstop (300s) -- a quiet system with recent data must stay calm.
+const FRESHNESS_STALE_SECONDS = 240;
+
+function parseIsoDate(value) {
+  if (!value) return null;
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function freshnessAgeText(seconds) {
+  if (seconds < 5) return t("status.age_now");
+  if (seconds < 90) return Math.round(seconds) + t("status.age_seconds_suffix");
+  return Math.round(seconds / 60) + t("status.age_minutes_suffix");
+}
+
+function stateFreshness() {
+  const built = parseIsoDate(runtimeState.built_at || runtimeState.generated_at);
+  const ageSec = built ? Math.max(0, (Date.now() - built.getTime()) / 1000) : 0;
+  return { built, ageSec, stale: built ? ageSec >= FRESHNESS_STALE_SECONDS : false };
+}
+
+function freshnessClock() {
+  const f = stateFreshness();
+  return f.built ? f.built.toLocaleTimeString() : "--:--:--";
+}
+
 function renderDashboard() {
   const tasks = runtimeState.tasks || [];
   const counts = taskCounts(tasks);
@@ -8876,7 +8974,17 @@ function renderDashboard() {
   setText("metric-active", counts.active);
   setText("metric-blocked", counts.blocked);
   setText("metric-warnings", (runtimeState.warnings || []).length + (runtimeState.gaps || []).length);
-  $("status-line").textContent = t("status.generated_prefix") + " " + runtimeState.generated_at + " - " + tasks.length + " " + t("status.tasks_suffix");
+  const line = $("status-line");
+  if (line) {
+    const f = stateFreshness();
+    let text = t("status.freshness_prefix") + " " + freshnessClock()
+      + " (" + freshnessAgeText(f.ageSec) + ") - " + tasks.length + " " + t("status.tasks_suffix");
+    if (f.stale) text += " - " + t("status.stale_note");
+    line.textContent = text;
+    line.classList.toggle("is-stale", f.stale);
+    line.setAttribute("title", t("status.generated_prefix") + " " + (runtimeState.generated_at || "")
+      + (runtimeState.source_latest_at ? " / src " + runtimeState.source_latest_at : ""));
+  }
 }
 
 function renderTaskSets() {
@@ -13783,7 +13891,12 @@ function activateView(view, { updateHash = true } = {}) {
   const target = $(`view-${view}`);
   if (!target) return;
   const shell = $("runtime-console-app");
-  if (shell) shell.dataset.workSurfaceOpen = "true";
+  if (shell) {
+    shell.dataset.workSurfaceOpen = "true";
+    // TASK-AR-624: expose the active view so the task/runtime action forms can
+    // be scoped to board/work only (they are noise atop Labels, graphs, etc.).
+    shell.dataset.activeView = view;
+  }
   let activeLink = null;
   navLinks().forEach((item) => {
     const isActive = item.dataset.view === view;
@@ -14532,6 +14645,7 @@ $("import-commit-btn")?.addEventListener("click", async (event) => {
 initExperienceSettings();
 initOnboardingTour();
 initContextualHelp();
+initWorkStateCollapse();
 // TASK-AR-341: language bootstrap + i18n string load.
 initLanguage();
 loadI18n();

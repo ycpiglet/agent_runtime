@@ -159,6 +159,59 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-22-decision-console-overhaul-masterplan.md",
+          "value": "f7de61b717e85116f7b1d76b594303b22a43d1f4ec434d08b79efb80a20e79dd"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/backlog_board.py",
+          "value": "028b2a0a5f86fd804ae3282488974cf2134473d8a879d7e25ef0f0656052dd11"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/owner_governance_gate.py",
+          "value": "cf5d6cd0a9892bfc716cf32911f374de3513f35e1649d53a5f4e6fb47e847a12"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/response_contract_gate.py",
+          "value": "dc9200729702cf220828e3a40d34d3f2a2111589fcabeb995e4b2e1e01e0a798"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/session_dashboard.py",
+          "value": "c1e809abfe4339dd6f9fef885c3f6890c06554f6110f6b1775de6955a2b50bbe"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_unit_readiness_gate.py",
+          "value": "48c8161aa4ab82ec3d4dc393eeec13b1e450d376c09ea8b707b1512e1bc6089f"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "efb96fa7f4283a11501cf19ffc8177a432d048b2dcc854e0ab7bd59ed363d17a"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work_schema_gate.py",
+          "value": "1bded14163db20761862c3a6b618955897772f668e1cfedd040a4dbcfdc85cd8"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-22-decision-console-overhaul-masterplan.md",
+      "recorded_at": "2026-07-26T13:16:03+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-CONSOLE-OVERHAUL-P0"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-18-taskset-ar-design-system-assetization-registration.md",
           "value": "3ffa3b5a633cc6246deb1d231e3aac0d95aed4f2ac0ff8d54484f626b5840a9b"
         },
@@ -1052,5 +1105,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-24T15:27:57+09:00"
+  "updated_at": "2026-07-26T13:16:03+09:00"
 }

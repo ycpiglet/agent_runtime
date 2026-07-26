@@ -204,3 +204,28 @@ def test_gate_skips_glob_and_domain_like_entries(tmp_path: Path) -> None:
     result = _run(tmp_path, "--task-id", "TASK-AR-344", "--check")
 
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+def _inject(root: Path, task_id: str, marker: str) -> None:
+    path = root / "agents" / "lead_engineer" / "tasks" / "units" / task_id / f"UNIT-{task_id}-001.md"
+    text = path.read_text(encoding="utf-8").replace("- It passes.", f"- It passes {marker}.")
+    path.write_text(text, encoding="utf-8")
+
+
+def test_ar629_needs_clarification_marker_blocks(tmp_path: Path) -> None:
+    # TASK-AR-629: an unresolved [NEEDS CLARIFICATION: ...] placeholder is not worker-ready.
+    _write_task(tmp_path, "TASK-AR-344")
+    _write_unit(tmp_path, "TASK-AR-344")
+    _inject(tmp_path, "TASK-AR-344", "[NEEDS CLARIFICATION: which output format?]")
+    result = _run(tmp_path, "--check")
+    assert result.returncode == 1
+    assert "unit:unresolved-clarification" in result.stdout
+
+
+def test_ar629_prose_mention_without_colon_not_blocked(tmp_path: Path) -> None:
+    # Describing the convention ("[NEEDS CLARIFICATION] marker", no colon) must not trip the gate.
+    _write_task(tmp_path, "TASK-AR-344")
+    _write_unit(tmp_path, "TASK-AR-344")
+    _inject(tmp_path, "TASK-AR-344", "documented via the [NEEDS CLARIFICATION] marker")
+    result = _run(tmp_path, "--check")
+    assert "unit:unresolved-clarification" not in result.stdout
