@@ -4,12 +4,31 @@ from __future__ import annotations
 
 import argparse
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 
 try:
     import backlog_board
 except ImportError:  # Imported as scripts.work_schema_gate from the repository root.
     from scripts import backlog_board
+
+
+# TASK-AR-626: lifecycle timestamps must be monotonic
+# (registered_at <= started_at <= completed_at). Records with contradictory
+# backfilled timestamps carry `timestamp_quality: backfilled` and are excluded
+# from this check (and from flow metrics) rather than retro-corrected.
+_MONOTONIC_TIMESTAMP_FIELDS = ("registered_at", "started_at", "completed_at")
+
+
+def _parse_iso(value: object) -> datetime | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        parsed = datetime.fromisoformat(text[:-1] + "+00:00" if text.endswith("Z") else text)
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
 
 
 DEFAULT_SCHEMA_PATH = Path("agents/project/WORK-SCHEMA.yml")
@@ -289,6 +308,18 @@ def check_items(root: Path, schema_path: Path) -> tuple[list[str], list[str]]:
         for field in sorted(computed_fields):
             if field in meta:
                 findings.append(f"{rel_path}: work-item:computed-field-stored:{field}")
+
+        # TASK-AR-626: lifecycle timestamp monotonicity. Records explicitly marked
+        # `timestamp_quality: backfilled` are exempt (their contradiction is known
+        # and isolated); any other out-of-order pair is a finding.
+        if str(meta.get("timestamp_quality") or "").strip().lower() != "backfilled":
+            stamps = [(f, _parse_iso(meta.get(f))) for f in _MONOTONIC_TIMESTAMP_FIELDS]
+            present = [(f, dt) for f, dt in stamps if dt is not None]
+            for (earlier_field, earlier), (later_field, later) in zip(present, present[1:]):
+                if earlier > later:
+                    findings.append(
+                        f"{rel_path}: work-item:timestamp-not-monotonic:{earlier_field}>{later_field}"
+                    )
 
         for field in sorted(meta):
             if field not in catalog_fields and field not in computed_fields:

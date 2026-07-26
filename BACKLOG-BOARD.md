@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-24
-task_count: 286
-open_count: 0
+generated_at: 2026-07-26T13:19:48+09:00
+task_count: 293
+open_count: 7
 completed_count: 286
-task_set_count: 0
+task_set_count: 1
 completed_task_set_count: 63
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `0` open or active tasks; `286` completed tasks are archived from this live board.
+- Summary: `7` open or active tasks; `286` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `0` / Ask `0` / Review `0` / Later `0` / Done `286`.
-- Task Sets: `0` active workflows; `63` completed workflows are hidden from the live action board.
+- Status: Action `6` / Ask `1` / Review `0` / Later `0` / Done `286`.
+- Task Sets: `1` active workflows; `63` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -41,6 +41,21 @@ completed_task_set_count: 63
 ## Action Board
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
+
+### Console Overhaul P0 — Trust & Hygiene (`TASKSET-AR-CONSOLE-OVERHAUL-P0`)
+
+- Flow: 결정 비종속 quick-win 묶음. 신선도 배지·캐시 사각지대 해소, 홈 요약 위계 정리, 프론트 위생(죽은 코드·아이콘·i18n·다크베이스·칸반), 데이터 위생(타임스탬프 게이트·actuals/rework 자동화), 세션 delta·throughput 전달 씨앗, REPORTING-FORMAT/OPS 계약 봉합, requirements-lint·NEEDS CLARIFICATION 마커 씨앗. 1–2주.
+- Progress: `0/7` done; `7` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-624` | INIT-AR-CONSOLE-OVERHAUL-P0 | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-624/UNIT-TASK-AR-624-001.md | planned | Action | P1 | High | Low | 3h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 홈 최상단의 시각적 소음과 위계 붕괴를 마크업/CSS 이동 수준에서 즉시 완화한다. |
+| `TASK-AR-623` | INIT-AR-CONSOLE-OVERHAUL-P0 | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-623/UNIT-TASK-AR-623-001.md | planned | Action | P1 | High | Medium | 4h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 콘솔·보드가 표시하는 데이터가 얼마나 오래되었는지 항상 보이게 하고, 감시 사각지대로 인한 최대 300초 stale을 없앤다. |
+| `TASK-AR-626` | INIT-AR-CONSOLE-OVERHAUL-P0 | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-626/UNIT-TASK-AR-626-001.md | planned | Action | P1 | High | Medium | 5h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 흐름 지표의 원료를 신뢰 가능하게 만든다: 타임스탬프 모순 차단, 수동 기입 폐지. |
+| `TASK-AR-629` | INIT-AR-CONSOLE-OVERHAUL-P0 | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-629/UNIT-TASK-AR-629-001.md | planned | Action | P1 | High | Medium | 6h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 요구 명확화·측정 검증 게이트의 기계적 토대를 심어 P1 승격 전 캘리브레이션 데이터를 모은다. |
+| `TASK-AR-627` | INIT-AR-CONSOLE-OVERHAUL-P0 | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-627/UNIT-TASK-AR-627-001.md | planned | Ask | P2 | Medium | Low | 3h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | 이미 있는 데이터를 Owner에게 전달하는 최소 경로를 심는다. |
+| `TASK-AR-628` | INIT-AR-CONSOLE-OVERHAUL-P0 | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-628/UNIT-TASK-AR-628-001.md | planned | Action | P2 | Medium | Low | 3h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 신설 스킬(/clarify·/quiz)이 등재될 canonical surface를 먼저 정상화한다. |
+| `TASK-AR-625` | INIT-AR-CONSOLE-OVERHAUL-P0 | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-625/UNIT-TASK-AR-625-001.md | planned | Action | P2 | Medium | Medium | 5h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | P1 화면 작업 전에 저위험 단건 결함들을 정리해 소음을 제거한다. |
 
 ## Archived Task Sets
 
@@ -113,9 +128,10 @@ completed_task_set_count: 63
 
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
-- Needs attention: `0` — triage awaiting `0`, owner-decision (Ask) `0` (TASK-AR-538).
+- Needs attention: `1` — triage awaiting `0`, owner-decision (Ask) `1` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `0` open across `0` task sets (see Action Board above).
+- Active: `7` open across `1` task sets (see Action Board above).
+- Throughput (7d): `24` tasks completed in the last 7 days (TASK-AR-627).
 - Archived task sets: `63` (see Archived Task Sets above).
 - Archived task files: `286` — see `ARCHIVE-INDEX.md`.
 

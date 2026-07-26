@@ -5143,3 +5143,53 @@ _ORG_MODEL_MIN = "\n".join(
         "",
     ]
 )
+
+
+def test_ar624_forms_scoped_to_board_and_work_views(tmp_path):
+    # TASK-AR-624: the create-task / runtime-command forms must be scoped to the
+    # board and work views (they were noise pinned atop every other view).
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert 'data-active-view' in css
+    assert '.create-form' in css and '.runtime-form' in css
+    # activateView stamps the active view so the CSS scope can key off it.
+    assert 'dataset.activeView = view' in js
+
+
+def test_ar624_empty_attention_groups_are_not_rendered(tmp_path):
+    # Regression lock: zero-item attention groups must be skipped (calm cockpit).
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    start = js.index("function renderCockpit(")
+    end = js.index("function ", start + 1)
+    body = js[start:end]
+    assert "if (!items.length) continue;" in body
+
+
+def test_ar624_work_state_hero_has_collapse_toggle(tmp_path):
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    css = ui_console.build_response("/app.css", tmp_path).body.decode("utf-8")
+    assert 'id="work-state-collapse"' in html
+    assert 'function initWorkStateCollapse()' in js
+    assert 'initWorkStateCollapse();' in js
+    assert '.work-state-hero.is-collapsed' in css
+
+
+def test_ar625_palette_derived_from_nav_no_dead_activateview(tmp_path):
+    # TASK-AR-625: palette targets come from the live nav (every view jumpable),
+    # and the dead .tab-based activateView duplicate is gone.
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert "COMMAND_PALETTE_VIEWS" not in js  # hardcoded stale list removed
+    assert "navLinks().forEach" in js         # palette derived from nav
+    # exactly one activateView definition remains (the canonical router one)
+    assert js.count("function activateView(") == 1
+
+
+def test_ar625_i18n_api_serves_strings(tmp_path):
+    # Regression lock: /api/i18n must serve the string table (it already did;
+    # the masterplan's "empty response" note was inaccurate — verified here).
+    import json
+    payload = json.loads(ui_console.build_response("/api/i18n", tmp_path).body.decode("utf-8"))
+    items = payload.get("items", payload)
+    assert items.get("strings"), "i18n string table must be non-empty"
+    assert len(items["strings"]) > 100

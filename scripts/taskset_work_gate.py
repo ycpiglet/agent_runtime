@@ -18,7 +18,11 @@ DONE_TASK_STATUSES = {"completed", "done", "released"}
 # the freshness comparison masks them on both sides. Record-derived fields
 # (task rows, lane counts, WIP `active` counts) stay unmasked so real
 # staleness — task add/remove, status change, claim change — is still caught.
-_WALL_CLOCK_GENERATED_AT = re.compile(r"^generated_at: \d{4}-\d{2}-\d{2}$", re.MULTILINE)
+# TASK-AR-623: match both date-only (archive index) and ISO-second (board)
+# generated_at so the wall-clock field is masked before the drift comparison.
+_WALL_CLOCK_GENERATED_AT = re.compile(
+    r"^generated_at: \d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}[+\-]\d{2}:\d{2})?$", re.MULTILINE
+)
 _WALL_CLOCK_WIP = re.compile(
     r"^(- WIP: active `[^`\n]*`; oldest `)[0-9.]+h(`; stale `)\d+(`\.)$",
     re.MULTILINE,

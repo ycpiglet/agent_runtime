@@ -54,6 +54,9 @@ _PATH_LIKE_RE = re.compile(r"^[A-Za-z0-9_.\-/\\]+$")
 # Scheme-less web references such as `github.com/fnando/sparkline` look
 # path-like; treat a leading domain segment as a non-repo reference.
 _DOMAIN_LIKE_RE = re.compile(r"^[\w-]+(\.[\w-]+)+/")
+# TASK-AR-629: unresolved clarification placeholder (colon form only, so prose
+# that merely names the convention like "[NEEDS CLARIFICATION] marker" is exempt).
+_NEEDS_CLARIFICATION_RE = re.compile(r"\[NEEDS CLARIFICATION:")
 
 
 def _path_entries(value: object) -> list[str]:
@@ -183,6 +186,14 @@ def validate_unit(root: Path, path: Path, meta: dict[str, Any], body: str, *, re
     unit_task = str(meta.get("task_id") or "").strip()
     if unit_task and f"/{unit_task}/" not in rel:
         findings.append(f"{rel}: unit:path-task-mismatch:{unit_task}")
+
+    # TASK-AR-629: a unit carrying an unresolved clarification placeholder
+    # (`[NEEDS CLARIFICATION: <question>]`, colon form) is not worker-ready —
+    # the /clarify interview must resolve it before dispatch. The rendered body
+    # includes the acceptance items; prose mentions without the colon (e.g.
+    # describing the convention) do not match.
+    if _NEEDS_CLARIFICATION_RE.search(body):
+        findings.append(f"{rel}: unit:unresolved-clarification")
 
     findings.extend(_path_existence_findings(root, rel, meta))
     return findings

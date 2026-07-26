@@ -368,6 +368,13 @@ fields:
     source: runtime
     consumed_by: [task_identity_gate, stats]
     query_use: Calculate cycle time and closeout history.
+  timestamp_quality:
+    type: string
+    required_for: []
+    populated_by: work_schema_gate
+    source: generator
+    consumed_by: [work_schema_gate, stats]
+    query_use: Isolate records with backfilled lifecycle timestamps from flow metrics.
   resolution:
     type: enum
     allowed_values: [done, wontfix, duplicate, superseded, moved_to_vault]

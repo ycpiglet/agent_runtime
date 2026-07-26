@@ -319,6 +319,14 @@ fields:
     consumed_by: [task_identity_gate, stats]
     query_use: Calculate cycle time and closeout history.
     mutable: closeout_only
+  timestamp_quality:
+    type: string
+    required_for: []
+    populated_by: work_schema_gate
+    source: generator
+    consumed_by: [work_schema_gate, stats]
+    query_use: Isolate records with backfilled/contradictory lifecycle timestamps from flow metrics (TASK-AR-626).
+    mutable: lifecycle_tools
   closed_by:
     type: string
     required_for: []

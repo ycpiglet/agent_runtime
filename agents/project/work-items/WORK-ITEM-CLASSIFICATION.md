@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-24T16:13:18+09:00
-record_count: 460
+generated_at: 2026-07-26T13:19:49+09:00
+record_count: 476
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `460` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `476` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `39` records |
-| Tasksets | pass | `63` records |
-| Tasks | pass | `286` records |
-| Units | pass | `72` records |
+| Initiatives | pass | `40` records |
+| Tasksets | pass | `64` records |
+| Tasks | pass | `293` records |
+| Units | pass | `79` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -499,6 +499,22 @@ record_count: 460
 | 38.1 | Taskset 38.1 | taskset | `TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY` | `INIT-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY` | complete | `BACKLOG-BOARD.md` | Work Frontmatter Scalar Integrity |
 | 38.1.1 | Task 38.1.1 | task | `TASK-AR-622` | `TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY` | completed | `agents/lead_engineer/tasks/TASK-AR-622.md` | Ensure work registration and lifecycle rewrites round-trip scalar values containing Y… |
 | 38.1.1.1 | Unit 38.1.1.1 | unit | `UNIT-TASK-AR-622-001` | `TASK-AR-622` | completed | `agents/lead_engineer/tasks/units/TASK-AR-622/UNIT-TASK-AR-622-001.md` | UNIT-TASK-AR-622-001 - Define and test lossless work scalar serialization |
+| 39 | Initiative 39 | initiative | `INIT-AR-CONSOLE-OVERHAUL-P0` | - | active | `agents/project/initiatives/INIT-AR-CONSOLE-OVERHAUL-P0.md` | Decision Console Overhaul — Phase 0 (Trust & Hygiene) |
+| 39.1 | Taskset 39.1 | taskset | `TASKSET-AR-CONSOLE-OVERHAUL-P0` | `INIT-AR-CONSOLE-OVERHAUL-P0` | active | `BACKLOG-BOARD.md` | Console Overhaul P0 — Trust & Hygiene |
+| 39.1.1 | Task 39.1.1 | task | `TASK-AR-623` | `TASKSET-AR-CONSOLE-OVERHAUL-P0` | planned | `agents/lead_engineer/tasks/TASK-AR-623.md` | 콘솔·보드가 표시하는 데이터가 얼마나 오래되었는지 항상 보이게 하고, 감시 사각지대로 인한 최대 300초 stale을 없앤다. |
+| 39.1.1.1 | Unit 39.1.1.1 | unit | `UNIT-TASK-AR-623-001` | `TASK-AR-623` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-623/UNIT-TASK-AR-623-001.md` | UNIT-TASK-AR-623-001 - 상태 시그니처 감시 디렉터리 확장 + 홈 신선도 배지 배선 |
+| 39.1.2 | Task 39.1.2 | task | `TASK-AR-624` | `TASKSET-AR-CONSOLE-OVERHAUL-P0` | planned | `agents/lead_engineer/tasks/TASK-AR-624.md` | 홈 최상단의 시각적 소음과 위계 붕괴를 마크업/CSS 이동 수준에서 즉시 완화한다. |
+| 39.1.2.1 | Unit 39.1.2.1 | unit | `UNIT-TASK-AR-624-001` | `TASK-AR-624` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-624/UNIT-TASK-AR-624-001.md` | UNIT-TASK-AR-624-001 - 전역 폼 스코프 축소 + 0건 그룹 렌더 생략 + 히어로 강등 |
+| 39.1.3 | Task 39.1.3 | task | `TASK-AR-625` | `TASKSET-AR-CONSOLE-OVERHAUL-P0` | planned | `agents/lead_engineer/tasks/TASK-AR-625.md` | P1 화면 작업 전에 저위험 단건 결함들을 정리해 소음을 제거한다. |
+| 39.1.3.1 | Unit 39.1.3.1 | unit | `UNIT-TASK-AR-625-001` | `TASK-AR-625` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-625/UNIT-TASK-AR-625-001.md` | UNIT-TASK-AR-625-001 - 커맨드 팔레트 동기화 + 죽은 activateView 제거 + 아이콘/토큰/칸반 위생 |
+| 39.1.4 | Task 39.1.4 | task | `TASK-AR-626` | `TASKSET-AR-CONSOLE-OVERHAUL-P0` | planned | `agents/lead_engineer/tasks/TASK-AR-626.md` | 흐름 지표의 원료를 신뢰 가능하게 만든다: 타임스탬프 모순 차단, 수동 기입 폐지. |
+| 39.1.4.1 | Unit 39.1.4.1 | unit | `UNIT-TASK-AR-626-001` | `TASK-AR-626` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-626/UNIT-TASK-AR-626-001.md` | UNIT-TASK-AR-626-001 - 타임스탬프 단조성 게이트 + actuals/rework 자동 파생 |
+| 39.1.5 | Task 39.1.5 | task | `TASK-AR-627` | `TASKSET-AR-CONSOLE-OVERHAUL-P0` | planned | `agents/lead_engineer/tasks/TASK-AR-627.md` | 이미 있는 데이터를 Owner에게 전달하는 최소 경로를 심는다. |
+| 39.1.5.1 | Unit 39.1.5.1 | unit | `UNIT-TASK-AR-627-001` | `TASK-AR-627` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-627/UNIT-TASK-AR-627-001.md` | UNIT-TASK-AR-627-001 - session_dashboard flow delta 1줄 + 보드 throughput 숫자 |
+| 39.1.6 | Task 39.1.6 | task | `TASK-AR-628` | `TASKSET-AR-CONSOLE-OVERHAUL-P0` | planned | `agents/lead_engineer/tasks/TASK-AR-628.md` | 신설 스킬(/clarify·/quiz)이 등재될 canonical surface를 먼저 정상화한다. |
+| 39.1.6.1 | Unit 39.1.6.1 | unit | `UNIT-TASK-AR-628-001` | `TASK-AR-628` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-628/UNIT-TASK-AR-628-001.md` | UNIT-TASK-AR-628-001 - REPORTING-FORMAT 복원 + response_contract_gate 강화 + OPS 참조 정정 |
+| 39.1.7 | Task 39.1.7 | task | `TASK-AR-629` | `TASKSET-AR-CONSOLE-OVERHAUL-P0` | planned | `agents/lead_engineer/tasks/TASK-AR-629.md` | 요구 명확화·측정 검증 게이트의 기계적 토대를 심어 P1 승격 전 캘리브레이션 데이터를 모은다. |
+| 39.1.7.1 | Unit 39.1.7.1 | unit | `UNIT-TASK-AR-629-001` | `TASK-AR-629` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-629/UNIT-TASK-AR-629-001.md` | UNIT-TASK-AR-629-001 - requirements-lint 게이트 + NEEDS CLARIFICATION 마커 거부 |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

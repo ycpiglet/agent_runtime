@@ -2,13 +2,13 @@
 type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
-generated_at: 2026-07-24
-archived_count: 285
+generated_at: 2026-07-26
+archived_count: 286
 ---
 
 # Archived Task Files
 
-- `285` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `286` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -268,6 +268,7 @@ archived_count: 285
 | `TASK-AR-611` | `7dd220e9-1b3…` | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | completed | 2026-07-22T18:48:38+09:00 | 2026-07-22T18:49:10+09:00 | 2026-07-22T20:03:05+09:00 | 2026-07-22T20:03:05+09:00 | Make the real-backlog classification test recognize every taskset registered by the J… |
 | `TASK-AR-612` | `a6489013-6f3…` | `TASKSET-AR-TERMINAL-STATUS-START-GUARD` | completed | 2026-07-22T21:43:00+09:00 | 2026-07-23T08:02:09+09:00 | 2026-07-23T08:28:16+09:00 | 2026-07-23T08:28:16+09:00 | Make closed/released tasks and their registered Korean aliases terminal in taskset se… |
 | `TASK-AR-621` | `fda7eb07-f96…` | `TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY` | completed | 2026-07-23T14:08:00+09:00 | 2026-07-23T15:39:58+09:00 | 2026-07-23T16:14:17+09:00 | 2026-07-23T16:14:17+09:00 | Prevent shell metacharacters in registered verification commands from being silently… |
+| `TASK-AR-622` | `94fa1156-59b…` | `TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY` | completed | 2026-07-23T15:01:03+09:00 | 2026-07-24T15:28:44+09:00 | 2026-07-24T16:13:17+09:00 | 2026-07-24T16:13:17+09:00 | Ensure work registration and lifecycle rewrites round-trip scalar values containing Y… |
 | `TASK-AR-570` | `f004f017-f9e…` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | 2026-06-17T08:31:23+09:00 | 2026-06-17T08:35:06+09:00 | 2026-06-17T08:50:16+09:00 | 2026-06-17T08:50:16+09:00 | Create a deterministic baseline that identifies low-frequency agent roles, low-reuse… |
 | `TASK-AR-571` | `610c4d58-2c0…` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | 2026-06-17T08:31:23+09:00 | 2026-06-17T09:02:21+09:00 | 2026-06-17T16:26:25+09:00 | 2026-06-17T16:26:25+09:00 | Use review, meeting, seminar, retro, compound, scribe, and doc-steward surfaces to re… |
 | `TASK-AR-572` | `d5f5d125-a5e…` | `TASKSET-AR-SELF-IMPROVEMENT-CADENCE` | completed | 2026-06-17T08:31:23+09:00 | 2026-06-17T16:38:29+09:00 | 2026-06-17T17:09:00+09:00 | 2026-06-17T17:09:00+09:00 | Define measurable maturity criteria for low-frequency agent/skill self-improvement an… |

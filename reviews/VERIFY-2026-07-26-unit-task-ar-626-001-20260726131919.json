@@ -1,0 +1,34 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-26-unit-task-ar-626-001-20260726131919",
+  "work_id": "UNIT-TASK-AR-626-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-626/UNIT-TASK-AR-626-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-626",
+  "unit_id": "UNIT-TASK-AR-626-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-26T13:19:19+09:00",
+  "verified_by": "work.py verify",
+  "command_count": 2,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_work_schema_gate.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-26T13:19:19+09:00",
+      "finished_at": "2026-07-26T13:19:20+09:00",
+      "stdout": "..........................                                               [100%]\n26 passed in 0.84s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/work_schema_gate.py --items --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-26T13:19:20+09:00",
+      "finished_at": "2026-07-26T13:19:20+09:00",
+      "stdout": "work-schema-gate: pass\npath=/home/keti-itp-01/ycpiglet/agent_runtime/agents/project/WORK-SCHEMA.yml\nfindings=0\nwarnings=0\n",
+      "stderr": ""
+    }
+  ]
+}
