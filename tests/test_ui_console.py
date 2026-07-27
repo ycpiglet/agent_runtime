@@ -5193,3 +5193,12 @@ def test_ar625_i18n_api_serves_strings(tmp_path):
     items = payload.get("items", payload)
     assert items.get("strings"), "i18n string table must be non-empty"
     assert len(items["strings"]) > 100
+
+
+def test_ar630_gate_watch_group_wired_into_cockpit_vocab(tmp_path):
+    # TASK-AR-630: gate watch promoted as a low-emphasis card in the gate tier.
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert 'gate_watch:        { labelKey: "inbox.group.gate_watch"' in js
+    assert 'tone: "low"' in js
+    assert 'gate_watch: "gate"' in js
+    assert '"review gate": "inbox.action.review_gate"' in js

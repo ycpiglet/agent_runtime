@@ -7,7 +7,7 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-26T20:41:34+09:00
+generated_at: 2026-07-27T10:30:38+09:00
 task_count: 302
 open_count: 16
 completed_count: 286
@@ -145,7 +145,8 @@ completed_task_set_count: 63
 
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
-- Needs attention: `3` — triage awaiting `0`, owner-decision (Ask) `3` (TASK-AR-538).
+- Needs attention: `36` — cost_anomalies `36` (single source: scripts/attention_inbox.py = console cockpit, TASK-AR-630).
+- Owner lanes: triage awaiting `0`, owner-decision (Ask) `3` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
 - Active: `16` open across `2` task sets (see Action Board above).
 - Throughput (7d): `24` tasks completed in the last 7 days (TASK-AR-627).

@@ -260,3 +260,12 @@ def test_session_closeout_verifier_invokes_taskset_and_owner_gates() -> None:
     assert "TASKSET-AR-SESSION-CLOSEOUT-AUTOMATION" in script
     assert "scripts/taskset_work_gate.py" in script
     assert "scripts/owner_governance_gate.py" in script
+
+
+def test_ar630_attention_line_is_wall_clock_masked():
+    # TASK-AR-630: the canonical attention rollup includes the time-decaying
+    # stale group; the freshness diff must not go red purely by time passing.
+    import taskset_work_gate as gate
+    a = gate._mask_wall_clock_fields("- Needs attention: `3` — stale `3` (single source: scripts/attention_inbox.py = console cockpit, TASK-AR-630).")
+    b = gate._mask_wall_clock_fields("- Needs attention: `4` — stale `4` (single source: scripts/attention_inbox.py = console cockpit, TASK-AR-630).")
+    assert a == b == "- Needs attention: <wall-clock>"

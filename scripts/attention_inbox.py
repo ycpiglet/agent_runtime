@@ -24,7 +24,7 @@ DONE = {"completed", "closed", "done"}
 ACTIVE = {"active", "in_progress"}
 # Unowned work is "ready but no one has it": planned/ready, not done, no owner/claim.
 READY = {"planned", "ready", "todo", "open", "backlog"}
-GROUP_ORDER = ["approval_pending", "blocked", "gate_failures",
+GROUP_ORDER = ["approval_pending", "blocked", "gate_failures", "gate_watch",
                "runtime_anomalies", "cost_anomalies", "stale", "unowned"]
 
 # Decision-first console IA P1 (RFC-2026-06-23): the Owner-chosen urgency order
@@ -34,6 +34,7 @@ RANK_TIERS = ["gate", "blocked", "stale", "risk", "unowned"]
 GROUP_TIER = {
     "approval_pending": "gate",   # owner gate awaiting approval
     "gate_failures": "gate",      # failed gate
+    "gate_watch": "gate",         # gate in watch state (low-emphasis, TASK-AR-630)
     "blocked": "blocked",         # blocked chain
     "stale": "stale",             # stale claim / no update
     "runtime_anomalies": "risk",  # cross-host claim conflict
@@ -131,6 +132,44 @@ def unowned(tasks: list[dict]) -> list[dict]:
     return out
 
 
+def gate_watch(root: Path) -> list[dict]:
+    """Gates whose LATEST record is in the watch state (TASK-AR-630).
+
+    The masterplan gap: watch-state gate signals (e.g. compound_cadence ratio
+    over threshold) lived only in reviews/*GATE*.json and never reached the
+    cockpit, so the Owner saw block-or-nothing. Promote them as low-severity
+    (severity 0) items in the gate tier — visible, but quiet. Only the newest
+    record per gate kind counts: a gate that recovered to pass emits nothing.
+    """
+    reviews_dir = root / "reviews"
+    if not reviews_dir.is_dir():
+        return []
+    latest: dict[str, tuple[str, str]] = {}  # kind -> (generated_at, status)
+    for path in sorted(reviews_dir.glob("*GATE*.json")):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8", errors="replace"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(data, dict):
+            continue
+        status = str(data.get("status") or data.get("result") or "").strip().lower()
+        schema = str(data.get("schema") or "")
+        kind = schema.split("/")[0].replace("agent-runtime-", "") if schema else path.stem
+        stamp = str(data.get("generated_at") or "")
+        prev = latest.get(kind)
+        if prev is None or stamp >= prev[0]:
+            latest[kind] = (stamp, status)
+    out = []
+    for kind in sorted(latest):
+        stamp, status = latest[kind]
+        if status != "watch":
+            continue
+        out.append({"group": "gate_watch", "id": kind, "title": kind,
+                    "why": "latest gate record is watch", "age_days": 0,
+                    "severity": 0, "action": "review gate"})
+    return out
+
+
 def _claim_conflicts(root: Path):
     try:
         from multi_host_claim_gate import detect_conflicts, load_claims
@@ -157,6 +196,7 @@ def inbox(root: Path, *, now=None, stale_days: int = 7) -> dict:
         "approval_pending": approval_pending(tasks),
         "blocked": blocked(tasks),
         "gate_failures": gate_failures(tasks),
+        "gate_watch": gate_watch(root),
         "runtime_anomalies": runtime_anomalies(root),
         "cost_anomalies": cost_anomalies(tasks),
         "stale": stale(tasks, now=now, stale_days=stale_days),

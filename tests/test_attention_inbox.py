@@ -65,8 +65,8 @@ def test_inbox_aggregates_and_empty_state(tmp_path):
     empty = mod.inbox(tmp_path, now=now)
     assert empty["total"] == 0
     assert set(empty["groups"]) == {"approval_pending", "blocked", "stale",
-                                    "gate_failures", "cost_anomalies", "runtime_anomalies",
-                                    "unowned"}
+                                    "gate_failures", "gate_watch", "cost_anomalies",
+                                    "runtime_anomalies", "unowned"}
     assert empty["counts"]["blocked"] == 0
     _task(td, "TASK-AR-909", status="blocked")
     one = mod.inbox(tmp_path, now=now)
@@ -147,3 +147,40 @@ def test_blocked_item_preserves_work_emitter_encoded_title(tmp_path):
     items = mod.blocked(mod._load_tasks(tmp_path))
 
     assert items[0]["title"] == title
+
+
+def _gate_json(root: Path, name: str, *, status: str, kind_schema: str, generated_at: str) -> None:
+    import json as _json
+    reviews = root / "reviews"
+    reviews.mkdir(parents=True, exist_ok=True)
+    (reviews / name).write_text(
+        _json.dumps({"schema": kind_schema, "status": status, "generated_at": generated_at}),
+        encoding="utf-8",
+    )
+
+
+def test_ar630_gate_watch_promotes_latest_watch_only(tmp_path):
+    # TASK-AR-630: only gates whose LATEST record is watch are promoted, as
+    # low-severity items in the gate tier.
+    mod = _load()
+    _gate_json(tmp_path, "COMPOUND-GATE-1.json", status="watch",
+               kind_schema="agent-runtime-compound-cadence/v1", generated_at="2026-07-20T10:00:00+09:00")
+    _gate_json(tmp_path, "OTHER-GATE-old.json", status="watch",
+               kind_schema="agent-runtime-other-gate/v1", generated_at="2026-07-01T10:00:00+09:00")
+    _gate_json(tmp_path, "OTHER-GATE-new.json", status="pass",
+               kind_schema="agent-runtime-other-gate/v1", generated_at="2026-07-25T10:00:00+09:00")
+    _gate_json(tmp_path, "BLOCKED-GATE-1.json", status="block",
+               kind_schema="agent-runtime-blocked-gate/v1", generated_at="2026-07-25T10:00:00+09:00")
+    items = mod.gate_watch(tmp_path)
+    assert [i["id"] for i in items] == ["compound-cadence"]  # recovered + block excluded
+    assert items[0]["severity"] == 0 and items[0]["group"] == "gate_watch"
+    assert mod.GROUP_TIER["gate_watch"] == "gate"
+
+
+def test_ar630_inbox_includes_gate_watch_group(tmp_path):
+    mod = _load()
+    _gate_json(tmp_path, "COMPOUND-GATE-1.json", status="watch",
+               kind_schema="agent-runtime-compound-cadence/v1", generated_at="2026-07-20T10:00:00+09:00")
+    data = mod.inbox(tmp_path)
+    assert "gate_watch" in data["groups"] and data["counts"]["gate_watch"] == 1
+    assert data["total"] >= 1
