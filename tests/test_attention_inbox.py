@@ -184,3 +184,18 @@ def test_ar630_inbox_includes_gate_watch_group(tmp_path):
     data = mod.inbox(tmp_path)
     assert "gate_watch" in data["groups"] and data["counts"]["gate_watch"] == 1
     assert data["total"] >= 1
+
+
+def test_ar630_recovered_pass_without_stamp_clears_watch(tmp_path):
+    # W4b(630): a recovery record missing generated_at must still supersede an
+    # older watch (file-order fallback), not leave the watch stuck forever.
+    import json as _json
+    reviews = tmp_path / "reviews"
+    reviews.mkdir(parents=True)
+    (reviews / "X-GATE-1-watch.json").write_text(
+        _json.dumps({"schema": "agent-runtime-x-gate/v1", "status": "watch",
+                     "generated_at": "2026-07-20T10:00:00+09:00"}), encoding="utf-8")
+    (reviews / "X-GATE-2-recovered.json").write_text(
+        _json.dumps({"schema": "agent-runtime-x-gate/v1", "status": "pass"}), encoding="utf-8")
+    mod = _load()
+    assert mod.gate_watch(tmp_path) == []

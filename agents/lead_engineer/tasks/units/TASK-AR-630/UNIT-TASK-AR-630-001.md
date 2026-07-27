@@ -13,7 +13,7 @@ status: worker_ready
 verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-27T10:00:00+09:00
-updated_at: 2026-07-27T10:30:21+09:00
+updated_at: 2026-07-27T10:47:28+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-26-console-overhaul-owner-decisions.md
 created_by: claude-worker-630
@@ -53,10 +53,11 @@ verification:
   - python scripts/taskset_work_gate.py --check
 handoff: 보드/콕핏 동일 집계 스냅샷과 테스트 로그를 evidence로 남긴다. gate watch 실데이터 검증은 watch 상태 GATE json이 생길 때 콕핏에서 확인.
 stop_condition: 홈 Decision Screenfit(631) 또는 renderAll 해체(632) 범위로 확장하지 말 것.
-verified_at: 2026-07-27T10:30:21+09:00
+verified_at: 2026-07-27T10:47:28+09:00
 verified_by: work.py verify
 evidence_refs:
   - reviews/VERIFY-2026-07-27-unit-task-ar-630-001-20260727103021.json
+  - reviews/VERIFY-2026-07-27-unit-task-ar-630-001-20260727104728.json
 ---
 
 # UNIT-TASK-AR-630-001 - attention 신호 단일 정본화

@@ -2450,6 +2450,10 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
         "ko": "자동 점검(게이트)에 실패해서 확인이 필요해요.",
         "en": "An automatic check (gate) failed and needs a look.",
     },
+    "inbox.mean.gate_watch": {
+        "ko": "자동 점검(게이트)이 주의 상태예요. 차단은 아니지만 살펴봐 주세요.",
+        "en": "An automatic check (gate) is in watch state. Not blocking, but worth a look.",
+    },
     "inbox.mean.runtime_anomalies": {
         "ko": "실행 중 충돌이 감지돼서 정리가 필요해요.",
         "en": "A runtime conflict was detected and needs resolving.",

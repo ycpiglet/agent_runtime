@@ -478,6 +478,7 @@ def test_ar630_board_needs_attention_matches_console_inbox(tmp_path):
     _write_task(tasks_dir, "TASK-AR-901", "TASKSET-AR-QUALITY-LOOP", status="blocked")
     _write_task(tasks_dir, "TASK-AR-902", "TASKSET-AR-QUALITY-LOOP", status="in_progress")
     canonical = attention_inbox.inbox(tmp_path)
+    assert canonical["total"] > 0  # W4b: guard against a degenerate 0==0 pass
     tasks = backlog_board.load_tasks(tasks_dir)
     board = backlog_board.render(tasks, root=tmp_path)
     assert f"- Needs attention: `{canonical['total']}`" in board
