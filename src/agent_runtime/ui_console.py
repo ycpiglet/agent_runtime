@@ -119,15 +119,18 @@ def _sse_response(payload: object) -> ConsoleResponse:
     return ConsoleResponse(200, "text/event-stream; charset=utf-8", _bytes(body))
 
 
-# The 6 attention-inbox groups (kept in sync with scripts/attention_inbox.py's
-# GROUP_ORDER) so the degraded fallback returns the same shape the cockpit expects.
+# The attention-inbox groups (kept in sync with scripts/attention_inbox.py's
+# GROUP_ORDER) so the degraded fallback returns the same shape the cockpit
+# expects. TASK-AR-630: added gate_watch and the previously-missing unowned.
 _INBOX_GROUP_ORDER = (
     "approval_pending",
     "blocked",
     "gate_failures",
+    "gate_watch",
     "runtime_anomalies",
     "cost_anomalies",
     "stale",
+    "unowned",
 )
 
 

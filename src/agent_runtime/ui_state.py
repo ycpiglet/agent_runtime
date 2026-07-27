@@ -2411,6 +2411,7 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     "inbox.group.blocked": {"ko": "차단됨", "en": "Blocked"},
     "inbox.group.runtime_anomalies": {"ko": "런타임 이상", "en": "Runtime anomalies"},
     "inbox.group.gate_failures": {"ko": "게이트 실패", "en": "Gate failures"},
+    "inbox.group.gate_watch": {"ko": "게이트 주의", "en": "Gate watch"},
     "inbox.group.cost_anomalies": {"ko": "비용 이상", "en": "Cost anomalies"},
     "inbox.group.stale": {"ko": "오래됨", "en": "Stale"},
     "inbox.group.unowned": {"ko": "담당 없음", "en": "Unowned"},
@@ -2421,6 +2422,7 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     "inbox.action.review_cost": {"ko": "비용 검토", "en": "review cost"},
     "inbox.action.review_refresh": {"ko": "검토 / 갱신", "en": "review / refresh"},
     "inbox.action.resolve_claim": {"ko": "클레임 해소", "en": "resolve claim"},
+    "inbox.action.review_gate": {"ko": "게이트 검토", "en": "review gate"},
     "inbox.why.approval_required": {"ko": "승인 필요", "en": "approval_required"},
     "inbox.why.status": {"ko": "상태", "en": "status"},
     "inbox.why.gate_failures": {"ko": "게이트 실패", "en": "gate failures"},
@@ -2447,6 +2449,10 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     "inbox.mean.gate_failures": {
         "ko": "자동 점검(게이트)에 실패해서 확인이 필요해요.",
         "en": "An automatic check (gate) failed and needs a look.",
+    },
+    "inbox.mean.gate_watch": {
+        "ko": "자동 점검(게이트)이 주의 상태예요. 차단은 아니지만 살펴봐 주세요.",
+        "en": "An automatic check (gate) is in watch state. Not blocking, but worth a look.",
     },
     "inbox.mean.runtime_anomalies": {
         "ko": "실행 중 충돌이 감지돼서 정리가 필요해요.",

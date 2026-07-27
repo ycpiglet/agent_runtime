@@ -46,6 +46,17 @@ try:
     import status_alias
 except ImportError:  # imported as scripts.<name> (namespace package)
     from scripts import status_alias
+# TASK-AR-630: the board's "Needs attention" rollup and the console cockpit must
+# tell the same story, so both consume scripts/attention_inbox.py as the single
+# source of attention truth. Optional: a host checkout without the helper (or a
+# render without a root) falls back to the legacy lane-based line.
+try:
+    import attention_inbox as _attention_inbox
+except Exception:  # noqa: BLE001 - optional sibling; degrade to lane heuristic
+    try:
+        from scripts import attention_inbox as _attention_inbox
+    except Exception:  # noqa: BLE001
+        _attention_inbox = None
 DONE_STATUSES = status_alias.DONE_STATUSES
 # TASK-AR-538: intake states held OUT of the active board until accepted/deferred.
 TRIAGE_STATUSES = {"triage", "intake"}
@@ -1114,12 +1125,36 @@ def render(tasks: list[Task], *, root: Path | None = None) -> str:
                 + " |"
             )
 
+    # TASK-AR-630: with a root, the headline "Needs attention" number is the SAME
+    # canonical inbox the console cockpit renders (single source of truth); the
+    # legacy triage+Ask heuristic remains only as the rootless/degraded fallback.
+    attention_line = ""
+    if root is not None and _attention_inbox is not None:
+        try:
+            canonical = _attention_inbox.inbox(Path(root))
+            breakdown = ", ".join(
+                f"{group} `{count}`"
+                for group, count in canonical["counts"].items()
+                if count
+            ) or "all clear"
+            attention_line = (
+                f"- Needs attention: `{canonical['total']}` — {breakdown} "
+                "(single source: scripts/attention_inbox.py = console cockpit, TASK-AR-630)."
+            )
+        except Exception:  # noqa: BLE001 - board must render even if inbox breaks
+            attention_line = ""
     needs_attention = len(triage_tasks) + counts.get("Ask", 0)
+    if not attention_line:
+        attention_line = (
+            f"- Needs attention: `{needs_attention}` — triage awaiting `{len(triage_tasks)}`, "
+            f"owner-decision (Ask) `{counts.get('Ask', 0)}` (TASK-AR-538)."
+        )
     lines.extend([
         "",
         "## Rollups",
         "- Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).",
-        f"- Needs attention: `{needs_attention}` — triage awaiting `{len(triage_tasks)}`, owner-decision (Ask) `{counts.get('Ask', 0)}` (TASK-AR-538).",
+        attention_line,
+        f"- Owner lanes: triage awaiting `{len(triage_tasks)}`, owner-decision (Ask) `{counts.get('Ask', 0)}` (TASK-AR-538).",
         f"- Triage: `{len(triage_tasks)}` awaiting accept/defer{' (see Triage above)' if triage_tasks else ''}.",
         f"- Active: `{len(open_tasks)}` open across `{len(task_set_ids)}` task sets (see Action Board above).",
         f"- Throughput (7d): `{weekly_throughput(tasks)}` tasks completed in the last 7 days (TASK-AR-627).",

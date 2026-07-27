@@ -468,3 +468,27 @@ def test_ar627_weekly_throughput_counts_recent_completions(tmp_path):
     assert backlog_board.weekly_throughput(tasks) == 1
     board = backlog_board.render(tasks, root=tmp_path)
     assert "Throughput (7d)" in board
+
+
+def test_ar630_board_needs_attention_matches_console_inbox(tmp_path):
+    # TASK-AR-630: the board's headline attention number and the console cockpit
+    # must come from the same module and agree on the same state.
+    import attention_inbox
+    tasks_dir = tmp_path / "agents" / "lead_engineer" / "tasks"
+    _write_task(tasks_dir, "TASK-AR-901", "TASKSET-AR-QUALITY-LOOP", status="blocked")
+    _write_task(tasks_dir, "TASK-AR-902", "TASKSET-AR-QUALITY-LOOP", status="in_progress")
+    canonical = attention_inbox.inbox(tmp_path)
+    assert canonical["total"] > 0  # W4b: guard against a degenerate 0==0 pass
+    tasks = backlog_board.load_tasks(tasks_dir)
+    board = backlog_board.render(tasks, root=tmp_path)
+    assert f"- Needs attention: `{canonical['total']}`" in board
+    assert "single source: scripts/attention_inbox.py" in board
+
+
+def test_ar630_board_without_root_falls_back_to_lane_heuristic(tmp_path):
+    # Rootless render (host degraded path) keeps the legacy triage+Ask line.
+    tasks_dir = tmp_path / "tasks"
+    _write_task(tasks_dir, "TASK-AR-901", "TASKSET-AR-QUALITY-LOOP", status="in_progress")
+    board = backlog_board.render(backlog_board.load_tasks(tasks_dir))
+    assert "- Needs attention:" in board
+    assert "single source" not in board

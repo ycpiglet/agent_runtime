@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-26T20:41:34+09:00",
-  "record_count": 487,
+  "generated_at": "2026-07-27T10:30:38+09:00",
+  "record_count": 488,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -5273,6 +5273,17 @@
       "path": "agents/lead_engineer/tasks/TASK-AR-630.md",
       "parent_id": "TASKSET-AR-CONSOLE-OVERHAUL-P1",
       "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-630-001",
+      "level": "unit",
+      "number": "40.1.1.1",
+      "label": "Unit 40.1.1.1",
+      "id": "UNIT-TASK-AR-630-001",
+      "title": "UNIT-TASK-AR-630-001 - attention 신호 단일 정본화",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-630/UNIT-TASK-AR-630-001.md",
+      "parent_id": "TASK-AR-630",
+      "status": "worker_ready"
     },
     {
       "key": "task:TASK-AR-631",

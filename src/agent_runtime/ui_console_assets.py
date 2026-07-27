@@ -7646,6 +7646,7 @@ const INBOX_GROUPS = {
   blocked:           { labelKey: "inbox.group.blocked", icon: "\\u26D4", tone: "high" },
   runtime_anomalies: { labelKey: "inbox.group.runtime_anomalies", icon: "\\u26A1", tone: "high" },
   gate_failures:     { labelKey: "inbox.group.gate_failures", icon: "\\u2717", tone: "mid" },
+  gate_watch:        { labelKey: "inbox.group.gate_watch", icon: "\\u25CE", tone: "low" },
   cost_anomalies:    { labelKey: "inbox.group.cost_anomalies", icon: "$", tone: "mid" },
   stale:             { labelKey: "inbox.group.stale", icon: "\\u231B", tone: "low" },
   unowned:           { labelKey: "inbox.group.unowned", icon: "\\u25CB", tone: "low" },
@@ -7657,6 +7658,7 @@ const INBOX_TIER_ORDER = ["gate", "blocked", "stale", "risk", "unowned"];
 const INBOX_GROUP_TIER = {
   approval_pending: "gate",
   gate_failures: "gate",
+  gate_watch: "gate",
   blocked: "blocked",
   stale: "stale",
   runtime_anomalies: "risk",
@@ -7699,6 +7701,7 @@ function localizedInboxAction(action) {
     "review / refresh": "inbox.action.review_refresh",
     "resolve claim": "inbox.action.resolve_claim",
     "assign owner": "inbox.action.assign_owner",
+    "review gate": "inbox.action.review_gate",
   };
   const key = map[String(action || "")];
   return key ? t(key) : (action || "");
