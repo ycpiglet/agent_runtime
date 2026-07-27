@@ -2492,6 +2492,21 @@ I18N_STRINGS: dict[str, dict[str, str]] = {
     "inbox.decide.tally": {"ko": "이번 세션 결정", "en": "decisions this session"},
     "inbox.decide.undo": {"ko": "되돌리기", "en": "Undo"},
     # ----- SPEC-health-snapshot-v1: insight-first work-status health strip --------
+    # TASK-AR-631: decision screenfit — bottom line, summary strip, flow tiles.
+    "home.bottomline.clear": {"ko": "지금 결정할 항목이 없습니다.", "en": "Nothing needs a decision right now."},
+    "home.bottomline.attention": {"ko": "{n}건이 확인을 기다립니다.", "en": "{n} items are waiting for you."},
+    "strip.aria": {"ko": "요약 스트립", "en": "Summary strip"},
+    "strip.open": {"ko": "열림", "en": "open"},
+    "strip.gates": {"ko": "게이트", "en": "gates"},
+    "strip.agents": {"ko": "에이전트", "en": "agents"},
+    "strip.active": {"ko": "작업 중", "en": "active"},
+    "strip.idle": {"ko": "대기", "en": "idle"},
+    "tiles.aria": {"ko": "흐름 지표 타일", "en": "Flow metric tiles"},
+    "tile.wip": {"ko": "진행 중 (WIP)", "en": "Work in progress"},
+    "tile.throughput": {"ko": "주간 처리량", "en": "Weekly throughput"},
+    "tile.cycle": {"ko": "중위 사이클 타임", "en": "Median cycle time"},
+    "tile.per_week": {"ko": "/주", "en": "/wk"},
+    "cockpit.more_groups": {"ko": "+{n}개 그룹, {m}건 더 있음", "en": "+{n} more groups ({m} items)"},
     "health.verdict.healthy": {"ko": "전반적으로 양호", "en": "Overall healthy"},
     "health.verdict.watch": {"ko": "주의 필요", "en": "Needs attention"},
     "health.verdict.at_risk": {"ko": "위험 — 바로 확인", "en": "At risk — act now"},
@@ -8100,6 +8115,63 @@ def build_ops_metrics(
         "peak_week": max((item["done"] for item in weekly), default=0),
     }
 
+    # ---- TASK-AR-631: weekly median cycle-time (real-series honesty rule) ----
+    # Duration = completed_at - started_at for done tasks whose stamps both parse
+    # and are ordered. Records isolated as ``timestamp_quality: backfilled``
+    # (TASK-AR-626) are excluded so contradictory legacy stamps cannot skew the
+    # home flow tiles. The weekly series aligns 1:1 with velocity.weeks so the
+    # cockpit sparklines share one x-axis.
+    def _ops_parse_dt(value: Any) -> datetime | None:
+        text = str(value or "").strip()
+        if not text:
+            return None
+        try:
+            parsed = datetime.fromisoformat(text[:-1] + "+00:00" if text.endswith("Z") else text)
+        except ValueError:
+            return None
+        return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+
+    def _ops_median(values: list[float]) -> float | None:
+        if not values:
+            return None
+        ordered = sorted(values)
+        mid = len(ordered) // 2
+        return ordered[mid] if len(ordered) % 2 else (ordered[mid - 1] + ordered[mid]) / 2.0
+
+    cycle_by_week: dict[str, list[float]] = {}
+    cycle_all: list[float] = []
+    for task in tasks:
+        if _status_bucket(task) != "done":
+            continue
+        if str(task.get("timestamp_quality") or "").strip().lower() == "backfilled":
+            continue
+        started = _ops_parse_dt(task.get("started_at"))
+        completed = _ops_parse_dt(task.get("completed_at"))
+        if started is None or completed is None or completed < started:
+            continue
+        hours = (completed - started).total_seconds() / 3600.0
+        week = _ops_iso_week(task.get("completed_at"))
+        if week:
+            cycle_by_week.setdefault(week, []).append(hours)
+        cycle_all.append(hours)
+    cycle_weeks = []
+    for item in weekly:
+        week_median = _ops_median(cycle_by_week.get(item["week"], []))
+        cycle_weeks.append(
+            {
+                "week": item["week"],
+                "median_hours": round(week_median, 1) if week_median is not None else None,
+                "count": len(cycle_by_week.get(item["week"], [])),
+            }
+        )
+    cycle_median = _ops_median(cycle_all)
+    cycle_time = {
+        "available": bool(cycle_all),
+        "median_hours": round(cycle_median, 1) if cycle_median is not None else None,
+        "sample": len(cycle_all),
+        "weeks": cycle_weeks,
+    }
+
     return {
         "schema": OPS_METRICS_SCHEMA,
         "generated_at": now,
@@ -8114,6 +8186,7 @@ def build_ops_metrics(
         "gates": gates,
         "burndown": burndown,
         "velocity": velocity,
+        "cycle_time": cycle_time,
     }
 
 

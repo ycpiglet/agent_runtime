@@ -3341,3 +3341,34 @@ def test_build_state_exposes_built_at_and_source_latest_at(tmp_path):
     assert state["built_at"] == "2026-07-22T18:00:00+09:00"
     assert state["generated_at"] == "2026-07-22T18:00:00+09:00"
     assert state["source_latest_at"]
+
+
+def test_ar631_cycle_time_weekly_median_series(tmp_path):
+    # TASK-AR-631: weekly median cycle-time aligns with velocity.weeks; records
+    # isolated as timestamp_quality: backfilled are excluded (TASK-AR-626).
+    def _done_task(tid, started, completed, extra=""):
+        _write(
+            tmp_path / "agents" / "lead_engineer" / "tasks" / f"{tid}.md",
+            f"---\nid: {tid}\nstatus: completed\nstarted_at: {started}\ncompleted_at: {completed}\n{extra}---\n\n## Goal\n- x\n",
+        )
+    _done_task("TASK-AR-951", "2026-07-20T08:00:00+09:00", "2026-07-20T12:00:00+09:00")  # 4h
+    _done_task("TASK-AR-952", "2026-07-20T08:00:00+09:00", "2026-07-20T14:00:00+09:00")  # 6h
+    _done_task("TASK-AR-953", "2026-07-25T20:00:00+09:00", "2026-07-20T08:00:00+09:00",
+               extra="timestamp_quality: backfilled\n")  # contradictory, isolated
+    state = ui_state.build_state(tmp_path, now="2026-07-27T00:00:00+09:00")
+    cycle = state["ops_metrics"]["cycle_time"]
+    assert cycle["available"] is True
+    assert cycle["median_hours"] == 5.0
+    assert cycle["sample"] == 2
+    velocity_weeks = [w["week"] for w in state["ops_metrics"]["velocity"]["weeks"]]
+    assert [w["week"] for w in cycle["weeks"]] == velocity_weeks  # shared x-axis
+    by_week = {w["week"]: w for w in cycle["weeks"]}
+    populated = [w for w in cycle["weeks"] if w["count"]]
+    assert populated and populated[0]["median_hours"] == 5.0
+
+
+def test_ar631_i18n_has_screenfit_keys():
+    strings = ui_state.I18N_STRINGS
+    for key in ("home.bottomline.clear", "home.bottomline.attention", "strip.open",
+                "tile.wip", "tile.throughput", "tile.cycle", "cockpit.more_groups"):
+        assert strings[key]["ko"] and strings[key]["en"], key

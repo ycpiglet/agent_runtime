@@ -1,0 +1,34 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-27-unit-task-ar-631-001-20260727111227",
+  "work_id": "UNIT-TASK-AR-631-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-631/UNIT-TASK-AR-631-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-631",
+  "unit_id": "UNIT-TASK-AR-631-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-27T11:12:27+09:00",
+  "verified_by": "work.py verify",
+  "command_count": 2,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_ui_state.py tests/test_ui_console.py tests/test_ui_console_e2e.py tests/test_ui_console_microinteractions.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-27T11:12:27+09:00",
+      "finished_at": "2026-07-27T11:12:43+09:00",
+      "stdout": "........................................................................ [ 18%]\n........................................................................ [ 37%]\n........................................................................ [ 56%]\n........................................................................ [ 74%]\n........................................................................ [ 93%]\n.........................                                                [100%]\n385 passed in 15.57s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/i18n_literal_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-27T11:12:43+09:00",
+      "finished_at": "2026-07-27T11:12:43+09:00",
+      "stdout": "i18n-literal-gate: pass scanned=2 findings=0\n",
+      "stderr": ""
+    }
+  ]
+}
