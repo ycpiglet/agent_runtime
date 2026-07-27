@@ -265,7 +265,16 @@ def test_session_closeout_verifier_invokes_taskset_and_owner_gates() -> None:
 def test_ar630_attention_line_is_wall_clock_masked():
     # TASK-AR-630: the canonical attention rollup includes the time-decaying
     # stale group; the freshness diff must not go red purely by time passing.
-    import taskset_work_gate as gate
+    # Load by explicit path: this test file otherwise drives the gate via
+    # subprocess only, so scripts/ is not reliably on sys.path (the gate itself
+    # imports sibling scripts like backlog_board, so the dir must be importable).
+    import importlib.util
+    scripts_dir = str(REPO_ROOT / "scripts")
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+    spec = importlib.util.spec_from_file_location("tsg_ar630", SCRIPT)
+    gate = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gate)
     a = gate._mask_wall_clock_fields("- Needs attention: `3` — stale `3` (single source: scripts/attention_inbox.py = console cockpit, TASK-AR-630).")
     b = gate._mask_wall_clock_fields("- Needs attention: `4` — stale `4` (single source: scripts/attention_inbox.py = console cockpit, TASK-AR-630).")
     assert a == b == "- Needs attention: <wall-clock>"
