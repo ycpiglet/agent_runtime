@@ -219,15 +219,15 @@ into a form the proposal engine can use.
 | --- | --- |
 | `case_id` | `CASE-CI-FLAKY-TEMP-GIT` |
 | `dedupe_key` | `ci-flaky-temp-git` |
-| `symptom` | `test_release_auto_noncritical`/`test_release_cadence_trigger` intermittently fail with `not-triggered` in CI (passed locally + in deterministic-order reproduction); two PR runs failed on *different* single tests ("1 failed, 1492 passed"). |
-| `trigger` | Temp-git-repo gate tests under CI runner load; a flaky `git` subprocess returns non-zero so `_latest_tag`/count reads empty → cadence reports not-triggered. |
+| `symptom` | `test_release_auto_noncritical`/`test_release_cadence_trigger` intermittently fail in CI despite exact PR/local passes. Outcomes include false `not-triggered`, `trigger-error`, and a fixture commit exhausting six retries with `fatal: could not parse HEAD`. |
+| `trigger` | Temp-git-repo gate tests under CI runner load; a flaky `git` subprocess can make tag/count reads empty or leave fixture `HEAD` unreadable beyond the current bounded retry. |
 | `owner_boundary` | local |
 | `affected_gate` | `.github/workflows/test.yml` (`Run package tests`) |
-| `recurrence_count` | 3+ (two earlier PR runs plus main run 30350865552) |
-| `source_refs` | `COMPOUND-2026-06-22-001`, `reviews/COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction.md`, main run `30350865552` |
+| `recurrence_count` | 4+ (two earlier PR runs, main run 30350865552, and TASK-AR-646 main run 30406516812) |
+| `source_refs` | `COMPOUND-2026-06-22-001`, `reviews/COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction.md`, `agents/project/knowledge/compounds/records/COMPOUND-20260729-081348-temp-git-fixture-head-corruption-survives-bounde-2514bdcf5f65.json`, main runs `30350865552` and `30406516812` |
 | `reproduction` | non-deterministic; not reproduced locally (full suite + deterministic order both green). |
 | `linked_regression_fixture` | n/a |
-| `task_proposal` | TASK-AR-651: add bounded observable retry plus deterministic fixture at the remaining query boundary, or remove the unstable temp-git mechanism from release-critical decisions |
+| `task_proposal` | TASK-AR-651: add observable recovery plus a deterministic fixture at every remaining temp-git boundary, or remove the unstable mechanism from release-critical decisions; a bare rerun is not prevention |
 | `prevention_status` | needs enforcement |
 
 ### CASE-W4-GREEN-CROSS-SURFACE-GAP

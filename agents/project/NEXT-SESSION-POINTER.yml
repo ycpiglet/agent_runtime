@@ -1,22 +1,22 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-29T07:51:41+09:00
-updated_by: /root
+updated_at: 2026-07-29T08:14:56+09:00
+updated_by: codex-root-v080-orchestrator
 current_state:
-  summary: "UNIT-TASK-AR-646-001 passed independent W4b and is waiting for serial integration."
+  summary: "TASK-AR-646 is integrated and closed with provider-aware routing, deterministic-first dispatch, truthful economic evidence, independent review, and a task-linked recurrence record; TASK-AR-647 is next."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 7
-  step_total: 7
-  progress_pct: 95
-  status_text: "W4b APPROVE 98/100; implementation and additive review claims are released; serial merge-queue integration is next."
+  step_index: 0
+  step_total: 6
+  progress_pct: 0
+  status_text: "TASK-AR-646 passed exact-head W4a/W4b and protected-main CI; W6 now links the known ci-flaky-temp-git recurrence to TASK-AR-651 prevention without making live-provider or savings claims."
 active_work:
   current_agents: []
   current_teams: []
 resume:
-  active_task: TASK-AR-646
+  active_task: TASK-AR-647
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-  branch_policy: "Integrate codex/unit-task-ar-646-001-wave serially, then run W5/W6; stop before live billable calls, consumer mutation, version/release operations, provider credentials, global Codex config, or a shared budget authority."
+  branch_policy: "After TASK-AR-646 closeout integration, run a fresh W0/T2 assumption check for UNIT-TASK-AR-647-001 before claim creation; stop before changing Allimbot consumer state or production credentials, sending live external notifications, or performing version/tag/publish/release operations."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -48,7 +48,10 @@ pointers:
       status: completed
     - task_id: TASK-AR-646
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-      status: in_progress
+      status: completed
+    - task_id: TASK-AR-647
+      task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
+      status: planned
     - task_id: TASK-AR-621
       task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
       status: completed

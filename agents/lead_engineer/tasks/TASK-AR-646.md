@@ -9,10 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T07:35:20+09:00
+updated_at: 2026-07-29T08:14:24+09:00
 started_at: 2026-07-29T06:42:09+09:00
 title: Make model routing economically effective and auditable
-status: in_progress
+status: completed
 priority: P0
 difficulty: L
 est_hours: 10
@@ -39,8 +39,18 @@ verification_status: passed
 verified_at: 2026-07-29T07:35:20+09:00
 verified_by: le-20260729-kst-646001
 evidence_refs:
-  - reviews/VERIFY-2026-07-29-task-ar-646-20260729073326.json
   - reviews/VERIFY-2026-07-29-task-ar-646-20260729073520.json
+review_refs:
+  - reviews/W4B-2026-07-29-unit-task-ar-646-001.md
+  - reviews/RETRO-2026-07-29-task-ar-646-model-routing.md
+compound_refs:
+  - agents/project/knowledge/compounds/records/COMPOUND-20260729-081348-temp-git-fixture-head-corruption-survives-bounde-2514bdcf5f65.json
+defect_signatures:
+  - defect:ci-flaky-temp-git:d1ff9421d45168c6
+resolution: done
+completed_at: 2026-07-29T08:14:24+09:00
+closed_by: codex-root-v080-orchestrator
+measurement_unavailable_reason: Exact task hours and token telemetry were not captured; no live provider usage occurred, so configured routes cannot be converted into observed usage or monetary savings.
 ---
 
 # TASK-AR-646 - Make model routing economically effective and auditable
@@ -68,3 +78,28 @@ evidence_refs:
 - `python -m pytest src/agent_runtime/templates/project/scripts/test_model_routing.py src/agent_runtime/templates/project/scripts/test_subagent_dispatch.py src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py src/agent_runtime/templates/project/scripts/test_auto_dispatch.py src/agent_runtime/templates/project/scripts/test_eval_harness.py -q`
 - `python scripts/runtime_asset_usage.py --check`
 - `python -m pytest -q`
+
+## Superseded Verification Attempts
+
+- `reviews/VERIFY-2026-07-29-task-ar-646-20260729073326.json` is preserved as
+  immutable failure-first evidence. Its one-second timeout and invalid prose
+  command were corrected by the later passing verification; it is historical,
+  not active closeout evidence.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-29T08:14:24+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Exact task hours and token telemetry were not captured; no live provider usage occurred, so configured routes cannot be converted into observed usage or monetary savings.
+- Closed by: `codex-root-v080-orchestrator`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-29-task-ar-646-20260729073520.json`
+- Reviews:
+  - `reviews/W4B-2026-07-29-unit-task-ar-646-001.md`
+  - `reviews/RETRO-2026-07-29-task-ar-646-model-routing.md`
+- Compounds:
+  - `agents/project/knowledge/compounds/records/COMPOUND-20260729-081348-temp-git-fixture-head-corruption-survives-bounde-2514bdcf5f65.json`
+<!-- work-close:end -->

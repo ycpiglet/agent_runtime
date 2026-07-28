@@ -1,5 +1,14 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-29 - TASK-AR-646 complete; TASK-AR-647 next
+
+- Completed: `TASK-AR-646` added low-cost routine routing, explicit risk escalation, deterministic-first no-call completion, provider/native equivalence matrices, correlated dispatch/completion telemetry, and truthful token-versus-billed-cost evaluation.
+- Safety: requested, resolved, and observed model state remain separate; unavailable observations stay unavailable, and no live provider call, credential write, consumer mutation, version, tag, package, publication, release, or deployment occurred.
+- Quality: exact implementation head `7d61659a` passed 136 root focused tests, 113 shipped-template tests, and 2,420 full-suite tests with 3 skipped; independent W4b approved 98/100, and PR #377 passed Python 3.10/3.11/3.12 before merging at `50cd5663`.
+- Learning: main workflow `30406516812` first reproduced the known `ci-flaky-temp-git` signature after six fixture retries and then passed unchanged on all supported Python versions. The recurrence is linked to TASK-AR-646/UNIT-001 by a canonical compound record, with prevention owned by `TASK-AR-651`.
+- Taskset: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` remains active and advances to `TASK-AR-647`.
+- Next: begin `TASK-AR-647` at W0/T2, revalidate current Allimbot `v1/events`, recipe allowlists, spool, redaction, and fail-open boundaries before claiming work. Do not send live notifications or alter Allimbot consumer state or production credentials.
+
 ## 2026-07-29 - TASK-AR-645 complete; TASK-AR-646 next
 
 - Completed: `TASK-AR-645` added immutable task-linked compound records, deterministic defect-signature lookup, linked closeout validation, generic Markdown/JSON Scribe adapters, and bounded digest-bound projections.

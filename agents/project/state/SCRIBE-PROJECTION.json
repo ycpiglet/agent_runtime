@@ -2,8 +2,8 @@
   "finding_codes": [
     "scribe-overdue"
   ],
-  "generated_at": "2026-07-29T06:08:27+09:00",
-  "hot_count": 757,
+  "generated_at": "2026-07-29T08:16:09+09:00",
+  "hot_count": 763,
   "projection_path": "agents/project/state/SCRIBE-PROJECTION.json",
   "schema": "agent-runtime-scribe-projection/v1",
   "selected_count": 10,
@@ -12,13 +12,43 @@
     {
       "adapter": "conventional",
       "cold_count": 0,
-      "digest": "612be6b110df57130c32d4590bb522929f9379239908b5be05f0d621c347aaf2",
+      "digest": "114b740412f9961f5f6021c787ea765e0df04e40229686112bb82995bcedfd9f",
       "finding_codes": [],
-      "hot_count": 757,
+      "hot_count": 763,
       "path": "STATUS.md",
       "present": true,
       "selected_count": 10,
       "selected_items": [
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-646 complete; TASK-AR-647 next",
+          "item": "Completed: `TASK-AR-646` added low-cost routine routing, explicit risk escalation, deterministic-first no-call completion, provider/native equivalence matrices, correlated dispatch/completion telemetry, and truthful token-versus-billed-cos…"
+        },
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-646 complete; TASK-AR-647 next",
+          "item": "Safety: requested, resolved, and observed model state remain separate; unavailable observations stay unavailable, and no live provider call, credential write, consumer mutation, version, tag, package, publication, release, or deployment oc…"
+        },
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-646 complete; TASK-AR-647 next",
+          "item": "Quality: exact implementation head `7d61659a` passed 136 root focused tests, 113 shipped-template tests, and 2,420 full-suite tests with 3 skipped; independent W4b approved 98/100, and PR #377 passed Python 3.10/3.11/3.12 before merging at…"
+        },
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-646 complete; TASK-AR-647 next",
+          "item": "Learning: main workflow `30406516812` first reproduced the known `ci-flaky-temp-git` signature after six fixture retries and then passed unchanged on all supported Python versions. The recurrence is linked to TASK-AR-646/UNIT-001 by a cano…"
+        },
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-646 complete; TASK-AR-647 next",
+          "item": "Taskset: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` remains active and advances to `TASK-AR-647`."
+        },
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-646 complete; TASK-AR-647 next",
+          "item": "Next: begin `TASK-AR-647` at W0/T2, revalidate current Allimbot `v1/events`, recipe allowlists, spool, redaction, and fail-open boundaries before claiming work. Do not send live notifications or alter Allimbot consumer state or production…"
+        },
         {
           "checklist": "none",
           "heading": "2026-07-29 - TASK-AR-645 complete; TASK-AR-646 next",
@@ -38,42 +68,12 @@
           "checklist": "none",
           "heading": "2026-07-29 - TASK-AR-645 complete; TASK-AR-646 next",
           "item": "Learning: the failed source-layout verification remains preserved and was superseded by a passing run after declaring `PYTHONPATH=src`; failed-then-passed evidence handling and complete board/archive regeneration are carried into TASK-AR-6…"
-        },
-        {
-          "checklist": "none",
-          "heading": "2026-07-29 - TASK-AR-645 complete; TASK-AR-646 next",
-          "item": "Taskset: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` remains active and advances to `TASK-AR-646`."
-        },
-        {
-          "checklist": "none",
-          "heading": "2026-07-29 - TASK-AR-645 complete; TASK-AR-646 next",
-          "item": "Next: begin `TASK-AR-646` at W0, revalidate effective model-tier detection and dispatch-cost ledger assumptions, and claim only after T2 passes or a bounded T3 replan is recorded. Consumer pilot mutation and release actions remain deferred."
-        },
-        {
-          "checklist": "none",
-          "heading": "2026-07-29 - TASK-AR-644 complete; TASK-AR-645 next",
-          "item": "Completed: `TASK-AR-644` added portable Codex lifecycle dispatch, bounded compact checkpoints, restart rebootstrap, explicit owner-run Claude installation, and doctor/packaging enforcement."
-        },
-        {
-          "checklist": "none",
-          "heading": "2026-07-29 - TASK-AR-644 complete; TASK-AR-645 next",
-          "item": "[REDACTED]"
-        },
-        {
-          "checklist": "none",
-          "heading": "2026-07-29 - TASK-AR-644 complete; TASK-AR-645 next",
-          "item": "Quality: CI-follow-up W4b approved 99/100; PR #368 passed Python 3.10, 3.11, and 3.12 and merged at `b14333ce`; merged-main verification passed 66 focused tests, public sanitization with zero findings, and the full suite at 2358 passed wit…"
-        },
-        {
-          "checklist": "none",
-          "heading": "2026-07-29 - TASK-AR-644 complete; TASK-AR-645 next",
-          "item": "Consumer boundary: Bean Wiki, Allimbot, Autofolio, and Tag Manual were not mutated."
         }
       ],
       "state": "overdue",
-      "total_count": 757
+      "total_count": 763
     }
   ],
   "state": "overdue",
-  "total_count": 757
+  "total_count": 763
 }
