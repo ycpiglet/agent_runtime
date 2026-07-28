@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-28T21:22:25+09:00
-record_count: 940
+generated_at: 2026-07-28T21:30:43+09:00
+record_count: 941
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `940` review and evidence records under `reviews/`.
+- Summary: indexed `941` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `940` files |
+| Reviews covered | pass | `941` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -970,6 +970,7 @@ record_count: 940
 | `reviews/W4B-2026-07-28-unit-task-ar-639-002.md` | `W4B-2026-07-28-unit-task-ar-639-002` | verification | blocked | fail | UNIT-TASK-AR-639-002 Independent W4b Blocking Review |
 | `reviews/W4B-2026-07-28-unit-task-ar-640-001-recheck.md` | `W4B-2026-07-28-unit-task-ar-640-001-recheck` | md | approved | pass | TASK-AR-640 UNIT-001 Independent W4b Recheck |
 | `reviews/W4B-2026-07-28-unit-task-ar-640-001.md` | `W4B-2026-07-28-unit-task-ar-640-001` | md | changes_required | fail | TASK-AR-640 UNIT-001 Independent W4b Verification |
+| `reviews/W4B-2026-07-28-unit-task-ar-641-001-final.md` | `W4B-2026-07-28-unit-task-ar-641-001-final` | md | changes_required | fail | TASK-AR-641 UNIT-001 Final Independent W4b |
 | `reviews/W4B-2026-07-28-unit-task-ar-641-001.md` | `W4B-2026-07-28-unit-task-ar-641-001` | md | changes_required | fail | TASK-AR-641 UNIT-001 Independent W4b Verification |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
