@@ -169,10 +169,22 @@ def test_sessionstart_hook_chain_wires_resume_check() -> None:
     )
     session_start = hooks["hooks"]["SessionStart"][0]["hooks"]
     commands = [entry["command"] for entry in session_start]
-    assert commands[:5] == [
-        "scripts\\update_notify_hook.cmd",
-        "python scripts/session_dashboard.py --root .",
-        "python scripts/claim_reaper_hook.py --root .",
-        "python scripts/interrupted_run_detector.py --root .",
-        "python scripts/session_resume_check.py --root .",
-    ]
+    assert commands == ["python3 -m agent_runtime.hook_runtime session-start"]
+    assert session_start[0]["commandWindows"] == "py -3 -m agent_runtime.hook_runtime session-start"
+
+
+def test_development_root_resume_mirror_resolves_packaged_dependency() -> None:
+    root_script = REPO_ROOT / "scripts" / "session_resume_check.py"
+
+    result = subprocess.run(
+        [sys.executable, str(root_script), "--root", str(REPO_ROOT), "--json"],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert isinstance(json.loads(result.stdout), dict)

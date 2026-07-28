@@ -218,3 +218,102 @@ def test_doctor_repair_json_does_not_mix_human_output(tmp_path, capsys):
     payload = json.loads(capsys.readouterr().out)
     assert payload["schema"] == "agent-runtime-doctor/v1"
     assert "repair_actions" in payload
+
+
+def _codex_hook_findings(root: Path) -> list[doctor.DoctorFinding]:
+    findings: list[doctor.DoctorFinding] = []
+    doctor._check_codex_hooks(root, findings)
+    return findings
+
+
+def _hook_payload(root: Path) -> dict:
+    path = root / ".codex" / "hooks.json"
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _write_hook_payload(root: Path, payload: dict) -> None:
+    (root / ".codex" / "hooks.json").write_text(
+        json.dumps(payload),
+        encoding="utf-8",
+    )
+
+
+def test_codex_hook_contract_accepts_valid_hooks_and_requires_trust_review(tmp_path):
+    root = _prepare_host_root(tmp_path)
+
+    findings = _codex_hook_findings(root)
+
+    assert not any(item.severity == "blocker" for item in findings)
+    assert [item.kind for item in findings] == ["trust-review"]
+
+
+def test_codex_hook_contract_reports_malformed_file_without_trust_claim(tmp_path):
+    root = _prepare_host_root(tmp_path)
+    (root / ".codex" / "hooks.json").write_text("{", encoding="utf-8")
+
+    findings = _codex_hook_findings(root)
+
+    assert any(item.kind == "malformed-hooks" for item in findings)
+    assert not any(item.kind == "trust-review" for item in findings)
+
+
+def test_codex_hook_contract_reports_missing_mode_but_allows_foreign_hook(tmp_path):
+    root = _prepare_host_root(tmp_path)
+    payload = _hook_payload(root)
+    payload["hooks"].pop("PostCompact")
+    payload["hooks"]["SessionStart"].append(
+        {"hooks": [{"type": "command", "command": "foreign command"}]}
+    )
+    _write_hook_payload(root, payload)
+
+    findings = _codex_hook_findings(root)
+
+    assert any(
+        item.kind == "missing-required-mode" and "post-compact" in item.detail
+        for item in findings
+    )
+    assert not any(
+        item.kind == "stale-hook-command" and "foreign" in item.detail
+        for item in findings
+    )
+    assert not any(item.kind == "trust-review" for item in findings)
+
+
+def test_codex_hook_contract_reports_missing_windows_command(tmp_path):
+    root = _prepare_host_root(tmp_path)
+    payload = _hook_payload(root)
+    payload["hooks"]["SessionStart"][0]["hooks"][0].pop("commandWindows")
+    _write_hook_payload(root, payload)
+
+    findings = _codex_hook_findings(root)
+
+    assert any(item.kind == "missing-command-windows" for item in findings)
+
+
+def test_codex_hook_contract_reports_stale_posix_and_windows_commands(tmp_path):
+    root = _prepare_host_root(tmp_path)
+    payload = _hook_payload(root)
+    hook = payload["hooks"]["SessionStart"][0]["hooks"][0]
+    hook["command"] = r"scripts\session_start_hook.cmd"
+    hook["commandWindows"] = r"C:\Python310\python.exe scripts\session_start_hook.py"
+    _write_hook_payload(root, payload)
+
+    findings = _codex_hook_findings(root)
+    kinds = {item.kind for item in findings}
+
+    assert "stale-hook-command" in kinds
+    assert "stale-command-windows" in kinds
+    assert "missing-required-mode" in kinds
+
+
+def test_codex_hook_contract_reports_missing_dispatch_target(tmp_path):
+    root = _prepare_host_root(tmp_path)
+    (root / "scripts" / "session_compact_hook.py").unlink()
+
+    findings = _codex_hook_findings(root)
+
+    assert any(
+        item.kind == "missing-hook-target"
+        and item.path == "scripts/session_compact_hook.py"
+        for item in findings
+    )

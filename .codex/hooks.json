@@ -2,27 +2,40 @@
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "*",
+        "matcher": "startup|resume|clear|compact",
         "hooks": [
           {
             "type": "command",
-            "command": "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe scripts/session_baseline.py --root . --json",
+            "command": "python3 -m agent_runtime.hook_runtime session-start",
+            "commandWindows": "py -3 -m agent_runtime.hook_runtime session-start",
+            "timeout": 45,
+            "additionalContextLimit": 6000
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "manual|auto",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -m agent_runtime.hook_runtime pre-compact",
+            "commandWindows": "py -3 -m agent_runtime.hook_runtime pre-compact",
             "timeout": 10
-          },
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "matcher": "manual|auto",
+        "hooks": [
           {
             "type": "command",
-            "command": "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe scripts/session_dashboard.py --root .",
-            "timeout": 35
-          },
-          {
-            "type": "command",
-            "command": "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe scripts/claim_reaper_hook.py --root .",
-            "timeout": 30
-          },
-          {
-            "type": "command",
-            "command": "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe scripts/interrupted_run_detector.py --root .",
-            "timeout": 15
+            "command": "python3 -m agent_runtime.hook_runtime post-compact",
+            "commandWindows": "py -3 -m agent_runtime.hook_runtime post-compact",
+            "timeout": 10
           }
         ]
       }
@@ -32,7 +45,24 @@
         "hooks": [
           {
             "type": "command",
-            "command": "scripts\\taskset_prompt_hook.cmd"
+            "command": "python3 -m agent_runtime.hook_runtime prompt-submit",
+            "commandWindows": "py -3 -m agent_runtime.hook_runtime prompt-submit",
+            "timeout": 20,
+            "additionalContextLimit": 2000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|apply_patch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -m agent_runtime.hook_runtime posttool-owner-doc",
+            "commandWindows": "py -3 -m agent_runtime.hook_runtime posttool-owner-doc",
+            "timeout": 20,
+            "additionalContextLimit": 2000
           }
         ]
       }
@@ -42,40 +72,21 @@
         "hooks": [
           {
             "type": "command",
-            "command": "scripts\\stop_hook_owner_governance.cmd",
+            "command": "python3 -m agent_runtime.hook_runtime stop-owner",
+            "commandWindows": "py -3 -m agent_runtime.hook_runtime stop-owner",
             "timeout": 120
-          }
-        ]
-      },
-      {
-        "matcher": "*",
-        "hooks": [
+          },
           {
             "type": "command",
-            "command": "scripts\\stop_hook_dirty_intake.cmd",
-            "timeout": 60
-          }
-        ]
-      },
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe scripts/stop_hook_closure_gate.py",
+            "command": "python3 -m agent_runtime.hook_runtime stop-closure",
+            "commandWindows": "py -3 -m agent_runtime.hook_runtime stop-closure",
             "timeout": 30
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
+          },
           {
             "type": "command",
-            "command": "C:\\Users\\ycpig\\AppData\\Local\\Programs\\Python\\Python310\\python.exe scripts/owner_doc_format_gate.py --manifest owner-docs.yml",
-            "timeout": 20
+            "command": "python3 -m agent_runtime.hook_runtime stop-dirty",
+            "commandWindows": "py -3 -m agent_runtime.hook_runtime stop-dirty",
+            "timeout": 60
           }
         ]
       }

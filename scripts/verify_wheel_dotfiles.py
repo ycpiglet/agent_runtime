@@ -32,6 +32,7 @@ REQUIRED_FILES = [
     "agent_runtime/templates/project/skills/independent-verification/SKILL.md",
     "agent_runtime/templates/project/skills/work-analytics/SKILL.md",
     "agent_runtime/templates/project/skills/session-closeout/SKILL.md",
+    "agent_runtime/templates/project/agents/runtime/session_checkpoints/.gitignore",
 ]
 REQUIRED_SUBTREES = [
     "agent_runtime/templates/project/.githooks/",

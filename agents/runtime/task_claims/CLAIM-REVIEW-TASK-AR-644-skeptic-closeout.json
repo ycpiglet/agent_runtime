@@ -1,0 +1,33 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-REVIEW-TASK-AR-644-skeptic-closeout",
+  "task_id": "REVIEW-TASK-AR-644-skeptic",
+  "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+  "active_scope": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+  "agent_role": "skeptic",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "skeptic-CLAIM-REVIEW-TASK-AR-644-skeptic-closeout",
+  "display_name": "skeptic@review",
+  "mode": "review",
+  "status": "released",
+  "status_text": "Additive skeptic adversarial review pass for TASK-AR-644 (closeout; high-risk: cross_cutting)",
+  "claimed_at": "2026-07-29T02:31:18+09:00",
+  "last_heartbeat": "2026-07-29T02:33:07+09:00",
+  "updated_at": "2026-07-29T02:33:07+09:00",
+  "tags": [
+    "review",
+    "additive",
+    "high-risk",
+    "review-trigger:closeout",
+    "cross_cutting"
+  ],
+  "overlay": true,
+  "parent_task_id": "TASK-AR-644",
+  "parent_task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+  "handoff_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-skeptic-closeout.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-skeptic-closeout.log.md",
+  "released_at": "2026-07-29T02:33:07+09:00",
+  "verified_by": "/root/w4b_task_ar_640_001",
+  "verifier_role": "independent-verifier",
+  "verification_evidence": "reviews/W4B-2026-07-29-unit-task-ar-644-001.md"
+}

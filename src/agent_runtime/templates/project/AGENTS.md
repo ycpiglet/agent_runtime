@@ -535,11 +535,10 @@ agent_runtime lock --root . --write
 
 The update path must preserve host edits and only apply managed template files.
 
-New upstream releases are announced automatically: the `.codex/hooks.json`
-SessionStart hook runs `scripts\update_notify_hook.cmd`
-(`python -m agent_runtime.cli update-notify`), which prints one non-blocking
-notice line when the latest upstream release tag is newer than the pinned
-`upstream.ref`. On notice: bump `upstream.ref` in `agent_runtime.yml`, then run
+New upstream releases are announced through the portable `.codex/hooks.json`
+dispatcher (`python3 -m agent_runtime.hook_runtime session-start`; Windows
+`py -3 -m agent_runtime.hook_runtime session-start`). Its bounded SessionStart
+summary includes a bounded advisory update notice (which may refresh its local cache). On notice: bump `upstream.ref` in `agent_runtime.yml`, then run
 `update-plan --check` and the `update --check/--diff/--apply` chain above.
 Failures (offline, timeout) exit 0 silently and never block a session.
 

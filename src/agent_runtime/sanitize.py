@@ -31,6 +31,9 @@ ALLOWED_LOCAL_CONFIG_PATHS = {
     "src/agent_runtime/templates/project/.codex/hooks.json",
 }
 ALLOWED_PROJECT_TEMPLATE_HOST_PATHS = {
+    # The tracked marker creates the runtime-owned directory in clean hosts;
+    # actual checkpoint state under this prefix remains forbidden.
+    "agents/runtime/session_checkpoints/.gitignore",
     "agents/lead_engineer/tasks/units/README.md",
     "agents/lead_engineer/tasks/units/examples/UNIT-EXAMPLE-001.md",
     # Structural schema docs only — actual BRIEF/PLAN records stay forbidden.

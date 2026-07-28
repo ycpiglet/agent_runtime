@@ -41,7 +41,6 @@ def test_stop_hook_owner_governance_emits_stop_decision_json(tmp_path):
 
 def test_codex_hooks_include_session_closeout_guards():
     hooks = json.loads((REPO_ROOT / ".codex" / "hooks.json").read_text(encoding="utf-8"))
-    text = json.dumps(hooks)
     commands = [
         hook["command"]
         for entries in hooks.get("hooks", {}).values()
@@ -50,10 +49,12 @@ def test_codex_hooks_include_session_closeout_guards():
         if isinstance(hook, dict) and "command" in hook
     ]
 
-    assert "scripts/session_baseline.py" in text
-    assert "scripts\\stop_hook_dirty_intake.cmd" in commands
-    assert "scripts/dirty_intake.py" not in text
-    assert "scripts/owner_doc_format_gate.py" in text
+    assert "python3 -m agent_runtime.hook_runtime session-start" in commands
+    assert "python3 -m agent_runtime.hook_runtime stop-dirty" in commands
+    assert "python3 -m agent_runtime.hook_runtime posttool-owner-doc" in commands
+    from agent_runtime.hook_runtime import SCRIPTS
+    assert SCRIPTS["session-start"] == "scripts/session_start_hook.py"
+    assert SCRIPTS["stop-dirty"] == "scripts/stop_hook_dirty_intake.py"
 
 
 def test_stop_hook_dirty_intake_emits_stop_json_without_exit_failure():

@@ -101,6 +101,14 @@ OPTIONAL_DEPENDENCY_EXTRAS = {
 
 SCRIPT_HELP_TIMEOUT_SECONDS = 12
 REPAIR_ACTION_PREFIX = "[doctor][repair]"
+CODEX_HOOK_REQUIREMENTS = (
+    ("SessionStart", "session-start", "scripts/session_start_hook.py"),
+    ("PreCompact", "pre-compact", "scripts/session_compact_hook.py"),
+    ("PostCompact", "post-compact", "scripts/session_compact_hook.py"),
+    ("UserPromptSubmit", "prompt-submit", "scripts/taskset_prompt_hook.py"),
+    ("Stop", "stop-owner", "scripts/stop_hook_owner_governance.py"),
+    ("Stop", "stop-closure", "scripts/stop_hook_closure_gate.py"),
+)
 
 
 def _safe_unlink(path: Path) -> bool:
@@ -178,6 +186,176 @@ def _run_subcommand(root: Path, script_name: str, args: tuple[str, ...], timeout
         timeout=timeout,
     )
     return process.returncode, (process.stdout or "") + (process.stderr or "")
+
+
+def _hook_entries(hooks: dict[str, object], event: str) -> list[dict[str, object]]:
+    entries: list[dict[str, object]] = []
+    groups = hooks.get(event, [])
+    if not isinstance(groups, list):
+        return entries
+    for group in groups:
+        if not isinstance(group, dict):
+            continue
+        commands = group.get("hooks", [])
+        if not isinstance(commands, list):
+            continue
+        entries.extend(command for command in commands if isinstance(command, dict))
+    return entries
+
+
+def _runtime_hook_candidate(
+    hook: dict[str, object],
+    *,
+    mode: str,
+    target: str,
+) -> bool:
+    commands = " ".join(
+        str(hook.get(field) or "").replace("\\", "/")
+        for field in ("command", "commandWindows")
+    )
+    target_stem = Path(target).stem
+    return (
+        f"agent_runtime.hook_runtime {mode}" in commands
+        or target in commands
+        or target_stem in commands
+    )
+
+
+def _dispatcher_available(root: Path) -> bool:
+    if (
+        (root / "src" / "agent_runtime" / "hook_runtime.py").exists()
+        or (root / "agent_runtime" / "hook_runtime.py").exists()
+    ):
+        return True
+    try:
+        return importlib.util.find_spec("agent_runtime.hook_runtime") is not None
+    except (ImportError, ModuleNotFoundError, AttributeError):
+        return False
+
+
+def _check_codex_hooks(root: Path, findings: list[DoctorFinding]) -> None:
+    """Validate the portable tracked hook contract without changing trust."""
+    initial_count = len(findings)
+    path = root / ".codex" / "hooks.json"
+    if not path.exists():
+        _findings_append(
+            findings,
+            "blocker",
+            area="codex-hooks",
+            path=".codex/hooks.json",
+            kind="missing-hooks",
+            detail="tracked Codex lifecycle hook configuration missing",
+        )
+        return
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        _findings_append(
+            findings,
+            "blocker",
+            area="codex-hooks",
+            path=".codex/hooks.json",
+            kind="malformed-hooks",
+            detail=str(exc),
+        )
+        return
+    hooks = data.get("hooks") if isinstance(data, dict) else None
+    if not isinstance(hooks, dict):
+        _findings_append(
+            findings,
+            "blocker",
+            area="codex-hooks",
+            path=".codex/hooks.json",
+            kind="malformed-hooks",
+            detail="hooks object missing",
+        )
+        return
+
+    for event, mode, target in CODEX_HOOK_REQUIREMENTS:
+        expected_posix = f"python3 -m agent_runtime.hook_runtime {mode}"
+        expected_windows = f"py -3 -m agent_runtime.hook_runtime {mode}"
+        entries = _hook_entries(hooks, event)
+        candidates = [
+            hook
+            for hook in entries
+            if _runtime_hook_candidate(hook, mode=mode, target=target)
+        ]
+        matching = [
+            hook
+            for hook in candidates
+            if str(hook.get("command") or "").strip() == expected_posix
+        ]
+        if not matching:
+            _findings_append(
+                findings,
+                "blocker",
+                area="codex-hooks",
+                path=".codex/hooks.json",
+                kind="missing-required-mode",
+                detail=f"{event}:{mode}",
+            )
+
+        for hook in candidates:
+            command = str(hook.get("command") or "").strip()
+            if command != expected_posix:
+                _findings_append(
+                    findings,
+                    "blocker",
+                    area="codex-hooks",
+                    path=".codex/hooks.json",
+                    kind="stale-hook-command",
+                    detail=f"{event}:{mode}: {command or '<missing>'}",
+                )
+            windows = str(hook.get("commandWindows") or "").strip()
+            if not windows:
+                _findings_append(
+                    findings,
+                    "blocker",
+                    area="codex-hooks",
+                    path=".codex/hooks.json",
+                    kind="missing-command-windows",
+                    detail=f"{event}:{mode}",
+                )
+            elif windows != expected_windows:
+                _findings_append(
+                    findings,
+                    "blocker",
+                    area="codex-hooks",
+                    path=".codex/hooks.json",
+                    kind="stale-command-windows",
+                    detail=f"{event}:{mode}: {windows}",
+                )
+
+        if not (root / target).exists():
+            _findings_append(
+                findings,
+                "blocker",
+                area="codex-hooks",
+                path=target,
+                kind="missing-hook-target",
+                detail=f"required by {event}:{mode}",
+            )
+
+    if not _dispatcher_available(root):
+        _findings_append(
+            findings,
+            "blocker",
+            area="codex-hooks",
+            path="agent_runtime/hook_runtime.py",
+            kind="missing-dispatcher",
+            detail="hook dispatcher missing",
+        )
+
+    new_findings = findings[initial_count:]
+    if not any(finding.severity == "blocker" for finding in new_findings):
+        _findings_append(
+            findings,
+            "info",
+            area="codex-hooks",
+            path=".codex/hooks.json",
+            kind="trust-review",
+            detail="tracked lifecycle hooks present; review with /hooks before enabling local settings",
+        )
 
 
 def _extract_frontmatter(path: Path) -> tuple[dict[str, object], str]:
@@ -468,6 +646,7 @@ def _run_lock_check(root: Path, findings: list[DoctorFinding], cfg_ok: bool) -> 
 def build_doctor_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
     findings: list[DoctorFinding] = []
     root = root.resolve()
+    _check_codex_hooks(root, findings)
 
     for rel in REQUIRED_TEMPLATE_FILES:
         target = root / rel

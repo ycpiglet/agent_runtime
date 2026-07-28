@@ -32,6 +32,35 @@ ROOT = Path(__file__).resolve().parent.parent
 HOOKS_DIR = ".githooks"
 
 
+def check_codex_hook_contract() -> str:
+    """Report tracked Codex hook wiring only; local user settings are never edited."""
+    try:
+        source_root = str(ROOT / "src")
+        if source_root not in sys.path:
+            sys.path.insert(0, source_root)
+        from agent_runtime.doctor import _check_codex_hooks
+
+        findings = []
+        _check_codex_hooks(ROOT, findings)
+    except Exception as exc:
+        return (
+            "FIX  Codex hooks: contract check unavailable "
+            f"({exc.__class__.__name__}; run doctor --check)"
+        )
+
+    blockers = [finding for finding in findings if finding.severity == "blocker"]
+    if blockers:
+        kinds = ", ".join(sorted({finding.kind for finding in blockers})[:3])
+        return (
+            f"FIX  Codex hooks: {len(blockers)} tracked contract issue(s) "
+            f"({kinds}; run doctor --check)"
+        )
+    return (
+        "ok   Codex hooks: tracked portable contract present "
+        "(review with /hooks; user settings untouched)"
+    )
+
+
 def _run(*args: str, timeout: int = 30) -> tuple[int, str]:
     try:
         proc = subprocess.run(
@@ -156,6 +185,7 @@ def main(argv: list[str] | None = None) -> int:
         check_python(),
         check_editable_install(apply=args.apply),
         check_hooks_path(apply=args.apply),
+        check_codex_hook_contract(),
         check_push_transport(ssh_push=args.apply and args.ssh_push),
         check_gh_cli(),
     ]

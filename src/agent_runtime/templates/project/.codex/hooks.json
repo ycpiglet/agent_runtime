@@ -2,31 +2,40 @@
   "hooks": {
     "SessionStart": [
       {
+        "matcher": "startup|resume|clear|compact",
         "hooks": [
           {
             "type": "command",
-            "command": "scripts\\update_notify_hook.cmd",
-            "timeout": 30
-          },
+            "command": "python3 -m agent_runtime.hook_runtime session-start",
+            "commandWindows": "py -3 -m agent_runtime.hook_runtime session-start",
+            "timeout": 45,
+            "additionalContextLimit": 6000
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "manual|auto",
+        "hooks": [
           {
             "type": "command",
-            "command": "python scripts/session_dashboard.py --root .",
-            "timeout": 35
-          },
+            "command": "python3 -m agent_runtime.hook_runtime pre-compact",
+            "commandWindows": "py -3 -m agent_runtime.hook_runtime pre-compact",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "matcher": "manual|auto",
+        "hooks": [
           {
             "type": "command",
-            "command": "python scripts/claim_reaper_hook.py --root .",
-            "timeout": 30
-          },
-          {
-            "type": "command",
-            "command": "python scripts/interrupted_run_detector.py --root .",
-            "timeout": 15
-          },
-          {
-            "type": "command",
-            "command": "python scripts/session_resume_check.py --root .",
-            "timeout": 30
+            "command": "python3 -m agent_runtime.hook_runtime post-compact",
+            "commandWindows": "py -3 -m agent_runtime.hook_runtime post-compact",
+            "timeout": 10
           }
         ]
       }
@@ -36,7 +45,10 @@
         "hooks": [
           {
             "type": "command",
-            "command": "scripts\\taskset_prompt_hook.cmd"
+            "command": "python3 -m agent_runtime.hook_runtime prompt-submit",
+            "commandWindows": "py -3 -m agent_runtime.hook_runtime prompt-submit",
+            "timeout": 20,
+            "additionalContextLimit": 2000
           }
         ]
       }
@@ -46,17 +58,14 @@
         "hooks": [
           {
             "type": "command",
-            "command": "scripts\\stop_hook_owner_governance.cmd",
+            "command": "python3 -m agent_runtime.hook_runtime stop-owner",
+            "commandWindows": "py -3 -m agent_runtime.hook_runtime stop-owner",
             "timeout": 120
-          }
-        ]
-      },
-      {
-        "matcher": "*",
-        "hooks": [
+          },
           {
             "type": "command",
-            "command": "python scripts/stop_hook_closure_gate.py",
+            "command": "python3 -m agent_runtime.hook_runtime stop-closure",
+            "commandWindows": "py -3 -m agent_runtime.hook_runtime stop-closure",
             "timeout": 30
           }
         ]

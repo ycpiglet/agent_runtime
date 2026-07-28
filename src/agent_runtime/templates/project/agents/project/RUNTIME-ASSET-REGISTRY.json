@@ -137,6 +137,7 @@
     },
     {"id":"capability.work","kind":"script","status":"active","lifecycle":"keep","paths":["scripts/work.py"],"evidence_paths":["agents/project/WORK-LANE-PLAYBOOKS.md"],"tokens":["work.py"],"min_recent_uses":1},
     {"id":"capability.session_closeout","kind":"script","status":"active","lifecycle":"keep","paths":["scripts/session_baseline.py","scripts/dirty_intake.py"],"evidence_paths":["skills/session-closeout/SKILL.md"],"tokens":["session_baseline.py","dirty_intake.py"],"min_recent_uses":1},
-    {"id":"capability.save_report","kind":"script","status":"active","lifecycle":"keep","paths":["scripts/save_report.py"],"evidence_paths":["docs/agent_bootstrap/codex.md"],"tokens":["save_report.py"],"min_recent_uses":1}
+    {"id":"capability.save_report","kind":"script","status":"active","lifecycle":"keep","paths":["scripts/save_report.py"],"evidence_paths":["docs/agent_bootstrap/codex.md"],"tokens":["save_report.py"],"min_recent_uses":1},
+    {"id":"hook.session_continuity","kind":"hook","status":"active","lifecycle":"keep","paths":[".codex/hooks.json","scripts/session_start_hook.py","scripts/session_compact_hook.py","scripts/session_resume_check.py"],"evidence_paths":["AGENTS.md","CLAUDE.md",".codex/hooks.json"],"tokens":["session-start","pre-compact","post-compact"],"min_recent_uses":1}
   ]
 }
