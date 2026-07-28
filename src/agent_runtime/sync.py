@@ -257,37 +257,50 @@ def _print_output(text: str) -> None:
 
 
 def apply_updates(plan: SyncPlan) -> int:
-    if plan.conflicts:
-        _print_output(render_check(plan))
+    fresh = build_sync_plan(plan.root, template_root=plan.template_root)
+    if fresh.conflicts:
+        _print_output(render_check(fresh))
         _print_output("applied=0")
         return 1
+    for update in fresh.updates:
+        if _unsafe_target(fresh.root, update.target):
+            _print_output(render_check(fresh))
+            _print_output("applied=0")
+            return 1
     applied = 0
-    for update in plan.updates:
+    for update in fresh.updates:
         update.target.parent.mkdir(parents=True, exist_ok=True)
         update.target.write_text(_read(update.source), encoding="utf-8")
         applied += 1
-    if not plan.updates:
+    if not fresh.updates:
         _print_output("No template updates available.")
     else:
-        _print_output(render_check(plan))
+        _print_output(render_check(fresh))
     _print_output(f"applied={applied}")
     return 0
 
 
 def apply_safe_updates(plan: SyncPlan) -> int:
+    fresh = build_sync_plan(plan.root, template_root=plan.template_root)
+    planned_conflicts = {item.path for item in plan.conflicts}
+    if any(item.path not in planned_conflicts for item in fresh.conflicts):
+        _print_output(render_reconcile(fresh))
+        _print_output("applied=0")
+        _print_output(f"remaining_conflicts={len(fresh.conflicts)}")
+        return 1
     applied = 0
     unsafe = 0
-    for update in plan.updates:
-        if _unsafe_target(plan.root, update.target):
+    for update in fresh.updates:
+        if _unsafe_target(fresh.root, update.target):
             unsafe += 1
             continue
         update.target.parent.mkdir(parents=True, exist_ok=True)
         update.target.write_bytes(update.source.read_bytes())
         applied += 1
-    _print_output(render_reconcile(plan))
+    _print_output(render_reconcile(fresh))
     _print_output(f"applied={applied}")
-    _print_output(f"remaining_conflicts={len(plan.conflicts) + unsafe}")
-    return 1 if plan.conflicts or unsafe else 0
+    _print_output(f"remaining_conflicts={len(fresh.conflicts) + unsafe}")
+    return 1 if fresh.conflicts or unsafe else 0
 
 
 def run_sync(root: Path, mode: str, template_root: Path | None = None, json_output: bool = False) -> int:

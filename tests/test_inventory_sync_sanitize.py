@@ -33,6 +33,8 @@ from agent_runtime import release_preflight
 from agent_runtime.publish_tag_smoke import build_tag_smoke_plan
 from agent_runtime.sanitize import analyze as analyze_sanitize
 from agent_runtime.sync import _template_files
+from agent_runtime.sync import apply_safe_updates
+from agent_runtime.sync import apply_updates
 from agent_runtime.sync import build_sync_plan
 from agent_runtime.sync import run_sync
 from agent_runtime.sync import reconcile_json
@@ -1030,6 +1032,20 @@ def test_nonregular_target_boundaries_diff_and_apply_safe_do_not_write(tmp_path,
     assert plan.conflicts and plan.conflicts[0].safety == "unsafe"
     assert run_sync(host, "diff", templates) == 0
     assert run_sync(host, "apply-safe", templates) == 1
+
+
+@pytest.mark.parametrize("apply", [apply_updates, apply_safe_updates])
+def test_precomputed_plan_revalidates_symlink_escape_before_apply(tmp_path, apply):
+    host, templates, outside = tmp_path / "host", tmp_path / "templates", tmp_path / "outside"
+    outside.mkdir()
+    _write(host / "agent_runtime.yml", "project: demo\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\n")
+    _write(templates / "first.py", "first\n")
+    _write(templates / "linked" / "file.py", "outside\n")
+    plan = build_sync_plan(host, templates)
+    (host / "linked").symlink_to(outside, target_is_directory=True)
+    assert apply(plan) == 1
+    assert not (host / "first.py").exists()
+    assert not (outside / "file.py").exists()
 
 
 def test_template_files_use_stable_posix_relative_order(tmp_path):
