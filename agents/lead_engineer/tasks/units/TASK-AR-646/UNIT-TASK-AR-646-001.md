@@ -9,11 +9,11 @@ task_id: TASK-AR-646
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T07:28:48+09:00
+updated_at: 2026-07-29T08:14:17+09:00
 started_at: 2026-07-29T06:42:09+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -87,6 +87,16 @@ verified_at: 2026-07-29T07:28:48+09:00
 verified_by: le-20260729-kst-646001
 evidence_refs:
   - reviews/VERIFY-2026-07-29-unit-task-ar-646-001-20260729072848.json
+review_refs:
+  - reviews/W4B-2026-07-29-unit-task-ar-646-001.md
+compound_refs:
+  - agents/project/knowledge/compounds/records/COMPOUND-20260729-081348-temp-git-fixture-head-corruption-survives-bounde-2514bdcf5f65.json
+defect_signatures:
+  - defect:ci-flaky-temp-git:d1ff9421d45168c6
+resolution: done
+completed_at: 2026-07-29T08:14:17+09:00
+closed_by: codex-root-v080-orchestrator
+measurement_unavailable_reason: Exact per-unit hours and token telemetry were not captured; no live provider usage occurred and completion telemetry remained unavailable where the provider did not report it.
 ---
 
 # UNIT-TASK-AR-646-001 - Add provider-aware routing and dispatch telemetry
@@ -198,3 +208,20 @@ token-versus-billed-cost reporting examples.
 Stop before live billable calls, unverified economic claims, provider credential
 storage, global Codex config changes, a shared persistent budget authority,
 consumer mutation, or release/version operations.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-29T08:14:17+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Exact per-unit hours and token telemetry were not captured; no live provider usage occurred and completion telemetry remained unavailable where the provider did not report it.
+- Closed by: `codex-root-v080-orchestrator`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-646-001-20260729072848.json`
+- Reviews:
+  - `reviews/W4B-2026-07-29-unit-task-ar-646-001.md`
+- Compounds:
+  - `agents/project/knowledge/compounds/records/COMPOUND-20260729-081348-temp-git-fixture-head-corruption-survives-bounde-2514bdcf5f65.json`
+<!-- work-close:end -->

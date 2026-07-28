@@ -5,7 +5,7 @@ date: 2026-07-28
 status: recorded
 signal: watch
 casebook: agents/project/casebooks/failure-and-compound-casebook.md
-related: [TASK-AR-639, TASK-AR-640, TASK-AR-645, TASK-AR-651, PR #353, PR #354, PR #355, PR #356, PR #357]
+related: [TASK-AR-639, TASK-AR-640, TASK-AR-645, TASK-AR-646, TASK-AR-651, PR #353, PR #354, PR #355, PR #356, PR #357, PR #377, main run 30406516812]
 ---
 
 # v0.8 lifecycle, closeout, and CI friction
@@ -92,6 +92,17 @@ Route: TASK-AR-651 must either add a bounded, observable retry at the remaining
 git-query boundary with a deterministic regression fixture or explicitly
 exclude the unstable mechanism from release-critical decisions.
 
+TASK-AR-646 confirmed that the boundary remains release-critical. Its exact PR
+CI passed, but main run `30406516812` attempt 1 failed on Python 3.11 in
+`test_decision_record_is_agent_council_noncritical`: a temp-repo commit at
+`chore: tick 22` exhausted six retryable attempts and ended with
+`fatal: could not parse HEAD`. The PR did not modify that test, and an
+unchanged workflow rerun passed Python 3.10/3.11/3.12. This raises the known
+signature to recurrence 4+ and requires a canonical task-linked compound
+record at
+`agents/project/knowledge/compounds/records/COMPOUND-20260729-081348-temp-git-fixture-head-corruption-survives-bounde-2514bdcf5f65.json`;
+preserving both workflow attempts is part of the evidence contract.
+
 ## Additional release watches
 
 - `.githooks/post-merge` is shipped without its executable bit. TASK-AR-644
@@ -110,6 +121,8 @@ exclude the unstable mechanism from release-critical decisions.
 ## Feed-forward
 
 - Casebook recurrence updated for `ci-flaky-temp-git`.
+- TASK-AR-646 adds a canonical task/unit-linked `ci-flaky-temp-git` record and
+  keeps TASK-AR-651 as its prevention owner.
 - New casebook entries:
   `w4-green-cross-surface-gap`,
   `closeout-evidence-producer-consumer-gap`, and
