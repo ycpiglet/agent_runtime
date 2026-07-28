@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T03:43:12+09:00
+updated_at: 2026-07-29T04:20:42+09:00
 started_at: 2026-07-29T03:43:12+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -83,6 +83,11 @@ handoff: Provide a repeat-defect fixture showing create, indexed retrieval at cl
 stop_condition: Stop before bulk-rewriting historical compound logs, changing consumer repositories, or weakening passed-verification JSON requirements.
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260729-034312-task-ar-645-645001.json
+verified_at: 2026-07-29T04:20:42+09:00
+verified_by: le-20260729-0343-kst-645001
+evidence_refs:
+  - reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729041748.json
+  - reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729042042.json
 ---
 
 # UNIT-TASK-AR-645-001 - Introduce per-entry task-linked compound records and retrieval
