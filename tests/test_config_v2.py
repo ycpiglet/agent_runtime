@@ -157,6 +157,21 @@ sync:
         load_config(tmp_path)
 
 
+def test_host_context_scalar_comments_preserve_apostrophes_and_quoted_hashes(tmp_path):
+    _write(tmp_path, _v2())
+    context = tmp_path / CANONICAL_HOST_CONTEXT
+    context.parent.mkdir(parents=True)
+    context.write_text(
+        "schema: host-context/v1\n"
+        "purpose: world's coffee # trailing comment\n"
+        'domain: "editors # research" # trailing comment\n',
+        encoding="utf-8",
+    )
+    config = load_config(tmp_path)
+    assert config.host_context.purpose == "world's coffee"
+    assert config.host_context.domain == "editors # research"
+
+
 def test_host_context_is_optional_and_consumed_from_canonical_location(tmp_path):
     _write(tmp_path, _v2("""host:
   context: agents/host/HOST-CONTEXT.yml

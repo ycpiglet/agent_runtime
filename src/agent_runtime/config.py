@@ -82,26 +82,24 @@ def _parse_bool(value: object) -> bool:
 
 
 def _strip_comment(value: str) -> str:
-    quote = ""
     for index, char in enumerate(value):
-        if char in "\"'":
-            if not quote:
-                quote = char
-            elif quote == char:
-                quote = ""
-        elif char == "#" and not quote and (index == 0 or value[index - 1].isspace()):
+        if char == "#" and (index == 0 or value[index - 1].isspace()):
             return value[:index].rstrip()
     return value.rstrip()
 
 
 def _scalar(value: str) -> str:
-    value = _strip_comment(value).strip()
-    if value[:1] in {"\"", "'"} or value[-1:] in {"\"", "'"}:
-        if len(value) < 2 or value[0] != value[-1] or value[0] not in {"\"", "'"}:
-            raise ValueError(f"malformed quoted scalar: {value!r}")
-    if len(value) >= 2 and value[0] in "\"'" and value[-1] == value[0]:
-        return value[1:-1]
-    return value
+    value = value.strip()
+    if value[:1] not in {"\"", "'"}:
+        return _strip_comment(value).strip()
+    quote = value[0]
+    end = value.find(quote, 1)
+    if end < 0:
+        raise ValueError(f"malformed quoted scalar: {value!r}")
+    trailing = value[end + 1 :].strip()
+    if trailing and not trailing.startswith("#"):
+        raise ValueError(f"malformed quoted scalar: {value!r}")
+    return value[1:end]
 
 
 def _parse_document(path: Path) -> dict[str, Any]:

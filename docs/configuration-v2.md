@@ -5,6 +5,11 @@ changing existing sync or lock behavior. There is no YAML package dependency:
 only scalar mappings, scalar lists, quoted scalars, comments, and documented
 folded context scalars are supported.
 
+An unquoted `#` preceded by whitespace starts a comment; apostrophes in an
+unquoted scalar are literal. Quoted mode starts only when the first non-space
+character is a quote, preserving `#` inside the quoted value; an opened quote
+must be closed before an optional trailing comment.
+
 ```yaml
 schema: agent-runtime-config/v2
 project: example
