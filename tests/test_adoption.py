@@ -7,7 +7,8 @@ import subprocess
 from pathlib import Path
 
 from agent_runtime import cli
-from agent_runtime.adoption import build_adoption_plan, plan_json
+from agent_runtime import adoption
+from agent_runtime.adoption import build_adoption_plan, plan_json, render
 from agent_runtime import doctor
 
 
@@ -34,7 +35,7 @@ def test_adoption_git_ignore_generated_and_assets_are_deterministic_and_read_onl
     root = tmp_path / "bean shape"
     root.mkdir()
     _git(root)
-    _write(root, ".gitignore", "ignored/\n.next/\nnode_modules/\n")
+    _write(root, ".gitignore", "ignored/\n.next/\nnode_modules/\n.claude/worktrees/\n")
     _write(root, "AGENTS.md")
     _write(root, "CLAUDE.md")
     _write(root, ".claude/agents/editor.md")
@@ -44,6 +45,7 @@ def test_adoption_git_ignore_generated_and_assets_are_deterministic_and_read_onl
     _write(root, "ignored/secret.md")
     _write(root, ".next/cache/file")
     _write(root, "node_modules/pkg/index.js")
+    _write(root, ".claude/worktrees/feature/.next/cache/file")
     before = _snapshot(root)
     first, second = build_adoption_plan(root), build_adoption_plan(root)
     assert plan_json(first) == plan_json(second)
@@ -51,6 +53,7 @@ def test_adoption_git_ignore_generated_and_assets_are_deterministic_and_read_onl
     assert "ignored/secret.md" not in first.source_paths
     assert ".next/cache/file" in first.generated_paths
     assert "node_modules/pkg/index.js" in first.generated_paths
+    assert set(first.generated_roots) >= {".next", "node_modules", ".claude/worktrees/feature/.next"}
     assert {"AGENTS.md", "CLAUDE.md", ".claude/agents/editor.md", ".claude/skills/editing/SKILL.md", "docs/editorial-guide.md"} <= set(first.assets)
     assert all(action.path not in {"ignored/secret.md", ".next/cache/file"} or action.action == "skip" for action in first.actions)
     assert _snapshot(root) == before
@@ -67,6 +70,70 @@ def test_adoption_fallback_is_conservative_and_records_warning(tmp_path, monkeyp
     assert plan.scan_warnings
     assert "src/app.py" in plan.source_paths
     assert "dist/bundle.js" in plan.generated_paths
+
+
+def test_plan_renderers_do_not_rescan_after_plan_is_built(tmp_path, monkeypatch):
+    root = tmp_path / "host"
+    root.mkdir()
+    _git(root)
+    _write(root, ".gitignore", ".next/\n")
+    _write(root, ".next/cache/x")
+    plan = build_adoption_plan(root)
+    monkeypatch.setattr(adoption, "adoption_scan", lambda _root: (_ for _ in ()).throw(AssertionError("renderer rescanned")))
+    payload = json.loads(plan_json(plan))
+    assert payload["inventory"]["ignored_count"] == plan.ignored_count
+    assert payload["inventory"]["generated_roots"] == [".next"]
+    assert "generated_roots=.next" in render(plan)
+
+
+def test_ignored_git_query_failure_falls_back_conservatively(tmp_path, monkeypatch):
+    root = tmp_path / "host"
+    root.mkdir()
+    _git(root)
+    _write(root, ".gitignore", "ignored/\n")
+    _write(root, "src/app.py")
+    _write(root, "ignored/private.md")
+    real_run = subprocess.run
+
+    def fail_ignored_query(command, *args, **kwargs):
+        if "ls-files" in command and "-oi" in command:
+            return subprocess.CompletedProcess(command, 1, b"", b"forced ignored-query failure")
+        return real_run(command, *args, **kwargs)
+
+    monkeypatch.setattr("agent_runtime.inventory.subprocess.run", fail_ignored_query)
+    plan = build_adoption_plan(root)
+    assert plan.scan_strategy == "filesystem-conservative"
+    assert plan.scan_warnings
+    assert "src/app.py" in plan.source_paths
+
+
+def test_explicit_generated_missing_skips_while_existing_seed_files_preserve(tmp_path):
+    root = tmp_path / "host"
+    root.mkdir()
+    _git(root)
+    _write(
+        root,
+        "agent_runtime.yml",
+        """schema: agent-runtime-config/v2
+project: demo
+sync:
+  mode: check-diff-apply
+  allow_silent_overwrite: false
+ownership:
+  generated:
+    - AGENTS.md
+""",
+    )
+    _write(root, "CURSOR.md", "host cursor\n")
+    _write(root, "GEMINI.md", "host gemini\n")
+    plan = build_adoption_plan(root)
+    actions = {action.path: action for action in plan.actions}
+    assert actions["AGENTS.md"].action == "skip"
+    assert actions["AGENTS.md"].ownership == "generated"
+    assert actions["CURSOR.md"].action == "preserve"
+    assert actions["CURSOR.md"].ownership == "seed_once"
+    assert actions["GEMINI.md"].action == "preserve"
+    assert actions["GEMINI.md"].ownership == "seed_once"
 
 
 def test_allimbot_shape_and_cli_json_pre_adoption_do_not_write(tmp_path, capsys):

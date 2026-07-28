@@ -30,6 +30,8 @@ class AdoptionPlan:
     scan_warnings: tuple[str, ...]
     source_paths: tuple[str, ...]
     generated_paths: tuple[str, ...]
+    ignored_count: int
+    generated_roots: tuple[str, ...]
     assets: tuple[str, ...]
     actions: tuple[AdoptionAction, ...]
     findings: tuple[str, ...]
@@ -83,6 +85,17 @@ def _ownership(config: _config.AgentRuntimeConfig | None, path: str) -> str:
     return "managed"
 
 
+def _generated_roots(paths: tuple[str, ...]) -> tuple[str, ...]:
+    roots = set()
+    for path in paths:
+        parts = path.split("/")
+        for index, part in enumerate(parts):
+            if part in {".next", ".venv", ".vinext", ".wrangler", ".vercel", "build", "dist", "node_modules", ".temp"}:
+                roots.add("/".join(parts[: index + 1]))
+                break
+    return tuple(sorted(roots))
+
+
 def build_adoption_plan(root: Path) -> AdoptionPlan:
     root = root.resolve()
     scan = adoption_scan(root)
@@ -132,7 +145,7 @@ def build_adoption_plan(root: Path) -> AdoptionPlan:
             actions.append(AdoptionAction(rel, "add", ownership, "missing packaged template file; plan only"))
     return AdoptionPlan(
         root=root, profiles=tuple(profiles), capabilities=tuple(capabilities), scan_strategy=scan.strategy,
-        scan_warnings=tuple(sorted(scan.warnings)), source_paths=scan.paths, generated_paths=scan.generated_paths,
+        scan_warnings=tuple(sorted(scan.warnings)), source_paths=scan.paths, generated_paths=scan.generated_paths, ignored_count=scan.ignored_count, generated_roots=_generated_roots(scan.generated_paths),
         assets=_detected_assets(scan.paths), actions=tuple(sorted(actions, key=lambda action: (action.path, action.action, action.ownership))),
         findings=tuple(sorted(findings)), config_invalid=config_invalid,
     )
@@ -142,7 +155,7 @@ def plan_json(plan: AdoptionPlan) -> str:
     payload = {
         "schema": "agent-runtime-adoption-plan/v1", "root": str(plan.root), "profiles": list(plan.profiles),
         "capabilities": list(plan.capabilities),
-        "inventory": {"included_count": len(plan.source_paths), "ignored_count": getattr(adoption_scan(plan.root), "ignored_count", 0), "generated_count": len(plan.generated_paths), "generated_roots": sorted({path.split("/")[0] for path in plan.generated_paths}), "scan_strategy": plan.scan_strategy, "warnings": list(plan.scan_warnings)},
+        "inventory": {"included_count": len(plan.source_paths), "ignored_count": plan.ignored_count, "generated_count": len(plan.generated_paths), "generated_roots": list(plan.generated_roots), "scan_strategy": plan.scan_strategy, "warnings": list(plan.scan_warnings)},
         "assets": list(plan.assets), "actions": [action.as_dict() for action in plan.actions], "findings": list(plan.findings),
         "readiness": {"conflicts": len(plan.conflicts), "ready": not plan.conflicts and not plan.config_invalid and not any("external symlink" in item for item in plan.findings)},
     }
@@ -150,7 +163,7 @@ def plan_json(plan: AdoptionPlan) -> str:
 
 
 def render(plan: AdoptionPlan) -> str:
-    lines = ["# Agent Runtime Adoption Plan", "", f"root={plan.root}", f"scan_strategy={plan.scan_strategy}", f"source_paths={len(plan.source_paths)}", f"generated_paths={len(plan.generated_paths)}", f"conflicts={len(plan.conflicts)}", "", "| Path | Action | Ownership | Reason |", "|---|---|---|---|"]
+    lines = ["# Agent Runtime Adoption Plan", "", f"root={plan.root}", f"scan_strategy={plan.scan_strategy}", f"included_paths={len(plan.source_paths)}", f"ignored_paths={plan.ignored_count}", f"generated_paths={len(plan.generated_paths)}", f"generated_roots={','.join(plan.generated_roots)}", f"conflicts={len(plan.conflicts)}", "", "| Path | Action | Ownership | Reason |", "|---|---|---|---|"]
     lines.extend(f"| `{a.path}` | {a.action} | {a.ownership} | {a.reason} |" for a in plan.actions)
     return "\n".join(lines)
 

@@ -295,27 +295,26 @@ def adoption_scan(root: Path) -> AdoptionScan:
             raise RuntimeError(result.stderr.decode("utf-8", "replace").strip() or f"git rc={result.returncode}")
         candidates = [entry.decode("utf-8", "surrogateescape") for entry in result.stdout.split(b"\0") if entry]
         ignored = subprocess.run(["git", "-C", str(root), "ls-files", "-oi", "--exclude-standard", "-z"], check=False, capture_output=True, text=False, timeout=10)
-        ignored_count = len([entry for entry in ignored.stdout.split(b"\0") if entry]) if ignored.returncode == 0 else 0
+        if ignored.returncode != 0:
+            raise RuntimeError(ignored.stderr.decode("utf-8", "replace").strip() or f"git ignored-query rc={ignored.returncode}")
+        ignored_paths = [entry.decode("utf-8", "surrogateescape") for entry in ignored.stdout.split(b"\0") if entry]
+        ignored_count = len(ignored_paths)
         strategy, warnings = "git-ignore-aware", ()
     except Exception as exc:
         candidates = [path.relative_to(root).as_posix() for path in iter_repo_paths(root)]
+        ignored_paths = []
         strategy, warnings, ignored_count = "filesystem-conservative", (f"git ignore query unavailable; conservative fallback: {exc}",), 0
-    all_generated = {
-        path.relative_to(root).as_posix()
-        for path in root.rglob("*")
-        if path.is_file() and ".git" not in path.relative_to(root).parts and is_generated_path(path.relative_to(root).as_posix())
-    }
     visible: list[str] = []
     generated: list[str] = []
-    for rel in sorted(set(candidates)):
+    for rel in sorted(set(candidates + ignored_paths)):
         path = root / rel
         if not path.exists() and not path.is_symlink():
             continue
         if is_generated_path(rel):
             generated.append(rel)
-        else:
+        elif rel in candidates:
             visible.append(rel)
-    return AdoptionScan(tuple(visible), tuple(sorted(set(generated) | all_generated)), strategy, warnings, ignored_count)
+    return AdoptionScan(tuple(visible), tuple(sorted(set(generated))), strategy, warnings, ignored_count)
 
 
 def analyze(root: Path) -> list[InventoryItem]:
