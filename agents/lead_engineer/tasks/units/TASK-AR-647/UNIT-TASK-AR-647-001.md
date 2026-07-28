@@ -9,11 +9,12 @@ task_id: TASK-AR-647
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T08:38:42+09:00
+updated_at: 2026-07-29T08:54:44+09:00
+started_at: 2026-07-29T08:54:44+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
@@ -25,6 +26,8 @@ escalation_triggers:
   - data_integrity
   - external_effect
   - cross_cutting
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260729-085444-task-ar-647-4e9b.json
 risk_tier: high
 approval_required: false
 security_sensitive: true

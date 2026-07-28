@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T08:38:42+09:00
+updated_at: 2026-07-29T08:54:44+09:00
+started_at: 2026-07-29T08:54:44+09:00
 title: Adopt native Allimbot events and security-service guardrails
-status: planned
+status: in_progress
 priority: P0
 difficulty: L
 est_hours: 10
@@ -37,6 +38,8 @@ tags:
   - work-cli-created
 review_refs:
   - reviews/REVIEW-2026-07-29-task-ar-647-w0-t3-replan.md
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260729-085444-task-ar-647-4e9b.json
 ---
 
 # TASK-AR-647 - Adopt native Allimbot events and security-service guardrails

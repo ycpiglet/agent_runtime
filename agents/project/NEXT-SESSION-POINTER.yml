@@ -1,29 +1,37 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-29T08:14:56+09:00
-updated_by: codex-root-v080-orchestrator
+updated_at: 2026-07-29T08:54:44+09:00
+updated_by: le-20260729-kst-647001
 current_state:
-  summary: "TASK-AR-646 is integrated and closed with provider-aware routing, deterministic-first dispatch, truthful economic evidence, independent review, and a task-linked recurrence record; TASK-AR-647 is next."
+  summary: "UNIT-TASK-AR-647-001 is implementing strict native Allimbot events and security-service pre-claim enforcement."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 0
-  step_total: 6
-  progress_pct: 0
-  status_text: "TASK-AR-646 passed exact-head W4a/W4b and protected-main CI; W6 now links the known ci-flaky-temp-git recurrence to TASK-AR-651 prevention without making live-provider or savings claims."
+  step_index: 1
+  step_total: 7
+  progress_pct: 5
+  status_text: "T3 and T2 passed on merged main; the worker_standard request escalated to planner_high for security, data-integrity, external-effect, and cross-cutting signals."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260729-085444-task-ar-647-4e9b
+      agent_role: lead-engineer
+      agent_instance_id: le-20260729-kst-647001
+      display_name: lead_engineer@unit-647-001-codex
+      callsite_id: codex:root:task-ar-647-unit-001
+      pane_id: codex:root:task-ar-647-unit-001
+  current_teams:
+    - risk-and-safety
 resume:
   active_task: TASK-AR-647
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-  branch_policy: "After TASK-AR-646 closeout integration, run a fresh W0/T2 assumption check for UNIT-TASK-AR-647-001 before claim creation; stop before changing Allimbot consumer state or production credentials, sending live external notifications, or performing version/tag/publish/release operations."
+  branch_policy: "Continue only UNIT-TASK-AR-647-001 in .worktrees/TASK-AR-647; stop before reading or changing production credentials, flushing the spool, sending a live event, adding a direct network fallback, mutating Bean Wiki/Allimbot/Autofolio, weakening an Owner boundary, or performing version/tag/publish/release work."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260729-085444-task-ar-647-4e9b.json
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
@@ -51,7 +59,7 @@ pointers:
       status: completed
     - task_id: TASK-AR-647
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-      status: planned
+      status: in_progress
     - task_id: TASK-AR-621
       task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
       status: completed
