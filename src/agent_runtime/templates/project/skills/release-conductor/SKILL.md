@@ -5,6 +5,7 @@ description: Prepare a release proposal and run generic verification; never tags
 triggers: [release, 배포, version]
 dependencies:
   - scripts/owner_governance_gate.py
+  - scripts/save_report.py
 registry_id: release-conductor
 template_path: skills/release-conductor/SKILL.md
 ---

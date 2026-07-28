@@ -275,7 +275,10 @@ def analyze(root: Path, profiles: tuple[str, ...] = ("core",)) -> tuple[list[Fin
     if isinstance(assets, list):
         for asset in assets:
             if isinstance(asset, dict):
-                metrics.append(_analyze_asset(root, asset, findings, selected if root == template_root else None))
+                # Development root keeps its own product registry metrics; a
+                # synced/installed host carries the manifest and is checked
+                # against the immutable template projection.
+                metrics.append(_analyze_asset(root, asset, findings, selected if (root / PROFILE_MANIFEST_PATH).exists() else None))
             else:
                 findings.append(Finding("block", "asset:not-object", REGISTRY_PATH.as_posix(), "asset entries must be JSON objects"))
     return findings, metrics
