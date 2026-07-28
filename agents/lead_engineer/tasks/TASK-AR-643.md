@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T16:36:01+09:00
+updated_at: 2026-07-28T23:37:20+09:00
 title: Enforce consumer template and skill dependency closure
 status: planned
 priority: P0
@@ -55,3 +55,4 @@ tags:
 
 - `python -m pytest tests/test_template_smoke.py tests/test_runtime_asset_usage.py tests/test_wheel_dotfiles_packaging.py -q`
 - `python scripts/runtime_asset_usage.py --check`
+- `python scripts/verify_wheel_dotfiles.py --check`
