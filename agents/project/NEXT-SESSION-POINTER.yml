@@ -1,25 +1,18 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-28T20:54:00+09:00
+updated_at: 2026-07-28T21:46:30+09:00
 updated_by: le-20260728-205400-kst-641001
 current_state:
-  summary: "UNIT-TASK-AR-641-001 is implementing deterministic read-only brownfield adoption planning."
+  summary: "UNIT-TASK-AR-641-001 implementation and independent verification are complete; implementation PR integration is pending."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 2
+  step_index: 5
   step_total: 6
-  progress_pct: 5
-  status_text: "W0/T3 assumptions are pinned; implementation is isolated in the claimed TASK-AR-641 worktree."
+  progress_pct: 95
+  status_text: "W4b approved at 97/100; claims are released and PR #360 is awaiting green CI and merge."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260728-205400-task-ar-641-641001
-      agent_role: lead-engineer
-      agent_instance_id: le-20260728-205400-kst-641001
-      display_name: lead_engineer@unit-641-001-terra
-      callsite_id: codex:subagent:w3-task-ar-641-001
-      pane_id: codex:subagent:w3-task-ar-641-001
-  current_teams:
-    - agent-runtime-core
+  current_agents: []
+  current_teams: []
 resume:
   active_task: TASK-AR-641
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
@@ -30,8 +23,7 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260728-205400-task-ar-641-641001.json
+  active_claims: []
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT

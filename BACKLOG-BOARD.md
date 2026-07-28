@@ -7,7 +7,7 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-28T20:55:22+09:00
+generated_at: 2026-07-28T21:48:44+09:00
 task_count: 315
 open_count: 26
 completed_count: 289
@@ -77,7 +77,7 @@ completed_task_set_count: 63
 
 - Flow: Deliver brownfield profiles, lifecycle truth, consumer-complete assets, continuity hooks, knowledge and model-economy enforcement, then validate two pilots and one upgrade rehearsal.
 - Progress: `2/13` done; `11` open or active.
-- WIP: active `1/3`; oldest `0.0h`; stale `0`.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-641` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-641/UNIT-TASK-AR-641-001.md | in_progress | Action | P0 | Critical | High | 12h/26000tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Let an existing repository understand exactly what Agent Runtime would add, own, pres… |
