@@ -37,16 +37,26 @@ dispatcher.
 Scribe 는 정기 작업이 아니라 **조건부 게이트**다. 아래는 주관 판단("너무 길다")을 없애기 위한
 정량 트리거다 (설계: AUDIT-YYYY-MM-DD-NNN, 최초 1회 실행 후 빈도 미설계였던 문제 해소).
 
-### 1. 정량 트리거 — STATUS 핫 항목 수 (primary)
+### 1. 정량 트리거 — configured state hot 항목 수 (primary)
 
-`agents/lead_engineer/STATUS.md` 의 `## 현재 한 줄 요약` 섹션에서 `- ` 로 시작하는 **핫 항목 수**가:
+`agent_runtime.yml`의 `host.state_adapters`가 가리키는 Markdown/JSON state
+source를 공통 구조 파서로 평가한다. adapter가 없으면 제한된 conventional
+경로 중 첫 번째 존재 파일을 사용한다. 특정 문서명, 언어, heading 문구는
+판정 조건이 아니다.
+
+각 source의 unchecked task와 일반 bullet(또는 list가 없는 문서의 bounded
+heading) **핫 항목 수**가:
 
 - **≤ 12**: 압축 불요 (light 만, 필요 시).
 - **13 ~ 15**: 압축 **권장(due)** — 다음 사이클/거버넌스에서 archive 압축.
 - **> 15**: 압축 **필수** — 스킵 불가. 가장 오래된 항목부터 묶어 단일 아카이브 라인으로,
   **최신 10개는 hot 으로 유지**.
 
-판정은 `python scripts/scribe_due.py` 로 자동화(읽기 전용 advisory, source of truth 아님).
+판정은 `python scripts/scribe_due.py --root .` 로 자동화한다. 기본 호출,
+Doctor, SessionStart는 읽기 전용이며 source of truth가 아니다. 압축이
+필요하면 먼저 `--write-projection`으로 최대 10개 derived item만 담은
+generated projection을 원자적으로 갱신한다. source state 자체는 이
+명령으로 수정하지 않는다.
 
 ### 2. cadence backstop
 
@@ -63,7 +73,7 @@ Scribe 는 정기 작업이 아니라 **조건부 게이트**다. 아래는 주�
 
 ### no-touch (항상)
 
-최신 hot 기록은 압축하지 않는다: 현재 STATUS 핫 항목 최신 10개, 최신 `CYCLE-*`/`REVIEW-*`,
+최신 hot 기록은 압축하지 않는다: projection에 선택된 hot 항목 최대 10개, 최신 `CYCLE-*`/`REVIEW-*`,
 활성 TASK, 미해소 AUDIT. 정본(CYCLE/REVIEW/AUDIT/retros/seminars/meetings)은 **이동·요약하지 않고
 링크로 보존**한다.
 

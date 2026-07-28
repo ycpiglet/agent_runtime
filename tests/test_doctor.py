@@ -7,6 +7,7 @@ from pathlib import Path
 
 from agent_runtime import cli as cli_module
 from agent_runtime import doctor
+from agent_runtime import state_projection
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_TEMPLATES = PACKAGE_ROOT / "src" / "agent_runtime" / "templates" / "project"
@@ -147,6 +148,48 @@ def test_doctor_success_for_synced_host(tmp_path):
     assert not any(
         f.kind == "toolrunner-audit-missing" for f in plan.findings
     )
+
+
+def test_doctor_reports_scribe_missing_overdue_and_fresh_without_writing(tmp_path):
+    root = _prepare_host_root(tmp_path)
+    (root / "agent_runtime.yml").write_text(
+        "schema: agent-runtime-config/v2\n"
+        "project: fixture-host\n"
+        "sync:\n"
+        "  mode: check-diff-apply\n"
+        "  allow_silent_overwrite: false\n"
+        "host:\n"
+        "  state_adapters:\n"
+        "    status: STATUS.md\n",
+        encoding="utf-8",
+    )
+    source = root / "STATUS.md"
+    source.write_text(
+        "# State\n" + "".join(f"- active {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    source_mtime = source.stat().st_mtime_ns
+
+    missing, _ = doctor.build_doctor_plan(root)
+    kinds = {finding.kind for finding in missing.findings if finding.area == "scribe"}
+    assert {"scribe-overdue", "projection-missing"}.issubset(kinds)
+    assert missing.scribe and missing.scribe["closure_blocking"] is True
+    assert not (root / state_projection.DEFAULT_PROJECTION_PATH).exists()
+    assert source.stat().st_mtime_ns == source_mtime
+
+    state_projection.write_projection(
+        root, now="2026-07-29T00:00:00+09:00"
+    )
+    projection = root / state_projection.DEFAULT_PROJECTION_PATH
+    projection_mtime = projection.stat().st_mtime_ns
+    fresh, _ = doctor.build_doctor_plan(root)
+    assert any(
+        finding.area == "scribe" and finding.kind == "projection-fresh"
+        for finding in fresh.findings
+    )
+    assert fresh.scribe and fresh.scribe["closure_blocking"] is False
+    assert source.stat().st_mtime_ns == source_mtime
+    assert projection.stat().st_mtime_ns == projection_mtime
 
 
 def test_doctor_blocks_invalid_config(tmp_path):

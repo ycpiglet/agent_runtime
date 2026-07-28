@@ -52,6 +52,83 @@ def test_decide_disabled_always_approves():
     assert d["reason"] == "closure-gate-disabled"
 
 
+def _scribe_evaluation(*, state="overdue", projection="missing", blocking=True):
+    return {
+        "state": state,
+        "readiness": "blocked" if blocking else "ready",
+        "projection": {
+            "path": "agents/project/state/SCRIBE-PROJECTION.json",
+            "status": projection,
+        },
+        "overdue_sources": ["STATUS.md"] if state == "overdue" else [],
+        "closure_blocking": blocking,
+    }
+
+
+def test_substantial_closeout_blocks_for_overdue_missing_projection():
+    base = closure_gate.decide(
+        200,
+        {"compound": False, "review": True, "retro": False},
+        threshold=80,
+        disabled=False,
+        now_lines=200,
+    )
+    result = closure_gate.apply_scribe_obligation(
+        base,
+        _scribe_evaluation(),
+        substantial_lines=200,
+        threshold=80,
+        disabled=False,
+    )
+    assert result["decision"] == "block"
+    assert result["reason"] == "scribe-projection-overdue"
+    assert result["missing"] == ["scribe_projection"]
+
+
+def test_mini_closeout_and_due_state_keep_scribe_advisory():
+    for lines, evaluation in (
+        (20, _scribe_evaluation()),
+        (
+            200,
+            _scribe_evaluation(state="due", projection="missing", blocking=False),
+        ),
+    ):
+        base = closure_gate.decide(
+            lines,
+            {"compound": False, "review": True, "retro": False},
+            threshold=80,
+            disabled=False,
+            now_lines=lines,
+        )
+        result = closure_gate.apply_scribe_obligation(
+            base,
+            evaluation,
+            substantial_lines=lines,
+            threshold=80,
+            disabled=False,
+        )
+        assert result["decision"] == "approve"
+
+
+def test_fresh_projection_satisfies_substantial_scribe_obligation():
+    base = closure_gate.decide(
+        200,
+        {"compound": False, "review": True, "retro": False},
+        threshold=80,
+        disabled=False,
+        now_lines=200,
+    )
+    result = closure_gate.apply_scribe_obligation(
+        base,
+        _scribe_evaluation(projection="fresh", blocking=False),
+        substantial_lines=200,
+        threshold=80,
+        disabled=False,
+    )
+    assert result["decision"] == "approve"
+    assert result["scribe"]["projection"]["status"] == "fresh"
+
+
 # --- closure record detection ---
 
 def test_has_closure_record_detects_today(tmp_path):

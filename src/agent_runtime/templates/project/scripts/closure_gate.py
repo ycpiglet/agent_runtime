@@ -24,6 +24,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+from agent_runtime import state_projection
+
 try:
     import backlog_board
     import compound_record
@@ -410,6 +412,59 @@ def decide(
     }
 
 
+def apply_scribe_obligation(
+    result: dict[str, Any],
+    evaluation: dict[str, Any],
+    *,
+    substantial_lines: int,
+    threshold: int,
+    disabled: bool,
+) -> dict[str, Any]:
+    """Add the projection obligation without weakening linked closure evidence."""
+
+    summary = {
+        "state": evaluation.get("state", "unavailable"),
+        "readiness": evaluation.get("readiness", "advisory"),
+        "projection": evaluation.get(
+            "projection", {"path": "", "status": "missing"}
+        ),
+        "overdue_sources": list(evaluation.get("overdue_sources", [])),
+        "closure_blocking": bool(evaluation.get("closure_blocking")),
+    }
+    result["scribe"] = summary
+    if (
+        disabled
+        or substantial_lines < threshold
+        or not summary["closure_blocking"]
+    ):
+        return result
+
+    projection = summary["projection"]
+    message = (
+        "A present state source is overdue and its bounded Scribe projection is "
+        f"{projection.get('status', 'missing')}. Generate only "
+        f"{projection.get('path', state_projection.DEFAULT_PROJECTION_PATH)} with "
+        "`python scripts/scribe_due.py --write-projection`; do not edit canonical "
+        "host state as part of this gate."
+    )
+    if result["decision"] == "approve":
+        result.update(
+            {
+                "decision": "block",
+                "reason": "scribe-projection-overdue",
+                "missing": ["scribe_projection"],
+                "message": message,
+            }
+        )
+    else:
+        missing = list(result.get("missing", []))
+        if "scribe_projection" not in missing:
+            missing.append("scribe_projection")
+        result["missing"] = missing
+        result["message"] = (str(result.get("message") or "") + " " + message).strip()
+    return result
+
+
 def assess(
     root: Path,
     *,
@@ -426,6 +481,27 @@ def assess(
     lines = count_substantial_lines(root, now=moment, window_hours=window_hours)
     records = has_closure_record(root, now=moment, work_id=work_id)
     result = decide(lines, records, threshold=threshold, disabled=disabled, now_lines=lines)
+    try:
+        scribe_evaluation = state_projection.evaluate_state(Path(root))
+    except Exception as exc:
+        scribe_evaluation = {
+            "state": "unavailable",
+            "readiness": "advisory",
+            "projection": {
+                "path": state_projection.DEFAULT_PROJECTION_PATH,
+                "status": "unavailable",
+            },
+            "overdue_sources": [],
+            "closure_blocking": False,
+            "error": str(exc),
+        }
+    result = apply_scribe_obligation(
+        result,
+        scribe_evaluation,
+        substantial_lines=lines,
+        threshold=threshold,
+        disabled=disabled,
+    )
     result["substantial_lines"] = lines
     result["records"] = records
     result["threshold"] = threshold

@@ -14,6 +14,7 @@ from typing import Callable
 from . import config as _config
 from . import adoption as _adoption
 from . import lock as _lock
+from . import state_projection as _state_projection
 from . import sync as _sync
 
 
@@ -31,6 +32,7 @@ class DoctorPlan:
     root: Path
     findings: tuple[DoctorFinding, ...]
     config_loaded: bool = False
+    scribe: dict[str, object] | None = None
 
     @property
     def blocker_count(self) -> int:
@@ -783,6 +785,7 @@ def build_doctor_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
         )
 
     cfg_ok = True
+    scribe_report: dict[str, object] | None = None
     try:
         cfg = _config.load_config(root)
         _findings_append(
@@ -803,6 +806,30 @@ def build_doctor_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
             kind="config-invalid",
             detail=str(exc),
         )
+
+    if cfg_ok:
+        try:
+            scribe_report = _state_projection.evaluate_state(root, config=cfg)
+            for finding in scribe_report["findings"]:
+                _findings_append(
+                    findings,
+                    "info"
+                    if finding.get("severity") == "info"
+                    else "warning",
+                    area="scribe",
+                    path=str(finding.get("path") or "."),
+                    kind=str(finding.get("code") or "state-unknown"),
+                    detail=str(finding.get("detail") or ""),
+                )
+        except Exception as exc:
+            _findings_append(
+                findings,
+                "warning",
+                area="scribe",
+                path=cfg.state_projection,
+                kind="state-evaluation-failed",
+                detail=str(exc),
+            )
 
     _run_lock_check(root, findings, cfg_ok)
     _run_sync_check(root, findings)
@@ -861,7 +888,12 @@ def build_doctor_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
 
     _run_toolrunner_import_checks(root, findings)
 
-    return DoctorPlan(root=root, findings=tuple(findings), config_loaded=cfg_ok), findings
+    return DoctorPlan(
+        root=root,
+        findings=tuple(findings),
+        config_loaded=cfg_ok,
+        scribe=scribe_report,
+    ), findings
 
 
 def build_pre_adoption_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
@@ -969,6 +1001,7 @@ def _config_json(root: Path) -> dict[str, object]:
             "role_overlay": cfg.role_overlay,
             "risk_paths": list(cfg.risk_paths),
             "state_adapters": dict(cfg.state_adapters),
+            "state_projection": cfg.state_projection,
         },
     }
 
@@ -989,6 +1022,8 @@ def render_json(plan: DoctorPlan, *, actions: list[str] | None = None) -> str:
             "infos": plan.info_count,
         },
     }
+    if plan.scribe is not None:
+        payload["scribe"] = plan.scribe
     if actions is not None:
         payload["repair_actions"] = actions
     return json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2)

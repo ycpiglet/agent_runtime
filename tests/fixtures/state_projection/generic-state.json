@@ -1,0 +1,19 @@
+{
+  "items": [
+    {"id": "W-001", "title": "Validate source discovery", "status": "active", "body": "must never be projected"},
+    {"id": "W-002", "title": "Validate digest matching", "status": "active"},
+    {"id": "W-003", "title": "Validate bounded output", "status": "active"},
+    {"id": "W-004", "title": "Validate atomic replacement", "status": "active"},
+    {"id": "W-005", "title": "Validate read-only doctor", "status": "active"},
+    {"id": "W-006", "title": "Validate read-only start", "status": "active"},
+    {"id": "W-007", "title": "Validate mini exemption", "status": "active"},
+    {"id": "W-008", "title": "Validate substantial blocking", "status": "active"},
+    {"id": "W-009", "title": "Validate redaction", "summary": "api_key: PRIVATE-FIXTURE-VALUE", "status": "active"},
+    {"id": "W-010", "title": "Validate missing input", "status": "active"},
+    {"id": "W-011", "title": "Validate stale input", "status": "active"},
+    {"id": "W-012", "title": "Validate source order", "status": "active"},
+    {"id": "W-013", "title": "Validate finding codes", "status": "active"},
+    {"id": "W-014", "title": "Validate exact timestamps", "status": "active"},
+    {"id": "W-015", "title": "Completed control", "status": "completed", "prompt": "must never be projected"}
+  ]
+}
