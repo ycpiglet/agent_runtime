@@ -7,7 +7,7 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-29T01:26:43+09:00
+generated_at: 2026-07-29T02:41:21+09:00
 task_count: 315
 open_count: 23
 completed_count: 292
@@ -77,7 +77,7 @@ completed_task_set_count: 63
 
 - Flow: Deliver brownfield profiles, lifecycle truth, consumer-complete assets, continuity hooks, knowledge and model-economy enforcement, then validate two pilots and one upgrade rehearsal.
 - Progress: `5/13` done; `8` open or active.
-- WIP: active `1/3`; oldest `0.0h`; stale `0`.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-644` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-644/UNIT-TASK-AR-644-001.md | in_progress | Action | P0 | Critical | High | 10h/22000tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Make the harness actually enter and re-enter its governance path on supported agent c… |

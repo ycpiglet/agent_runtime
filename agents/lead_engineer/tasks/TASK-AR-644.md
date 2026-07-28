@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T01:25:32+09:00
+updated_at: 2026-07-29T02:35:58+09:00
 started_at: 2026-07-29T01:25:32+09:00
 title: Provide cross-platform start, compact, and resume continuity hooks
 status: in_progress
@@ -35,6 +35,11 @@ tags:
   - work-cli-created
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.json
+verification_status: passed
+verified_at: 2026-07-29T02:35:58+09:00
+verified_by: codex-root-v080-integrator
+evidence_refs:
+  - reviews/VERIFY-2026-07-29-task-ar-644-20260729023558.json
 ---
 
 # TASK-AR-644 - Provide cross-platform start, compact, and resume continuity hooks

@@ -13,7 +13,7 @@ status: in_progress
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T02:21:42+09:00
+updated_at: 2026-07-29T02:33:34+09:00
 started_at: 2026-07-29T01:25:32+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -32,7 +32,10 @@ inputs:
   - src/agent_runtime/templates/project/scripts/session_start_hook.py
   - src/agent_runtime/templates/project/scripts/install_hooks.py
 target_files:
+  - BACKLOG-BOARD.md
+  - agents/lead_engineer/tasks/TASK-AR-644.md
   - agents/lead_engineer/tasks/units/TASK-AR-644/UNIT-TASK-AR-644-001.md
+  - agents/project/NEXT-SESSION-POINTER.yml
   - .codex/hooks.json
   - scripts/bootstrap_dev_env.py
   - scripts/verify_wheel_dotfiles.py
@@ -67,9 +70,19 @@ target_files:
   - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.json
   - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.log.md
   - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.handoff.md
+  - agents/runtime/a2a/messages.jsonl
+  - agents/runtime/pane_events/pane-events.jsonl
+  - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-independent-auditor-closeout.handoff.md
+  - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-independent-auditor-closeout.json
+  - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-independent-auditor-closeout.log.md
+  - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-skeptic-closeout.handoff.md
+  - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-skeptic-closeout.json
+  - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-skeptic-closeout.log.md
   - reviews/W4A-2026-07-29-unit-task-ar-644-001.md
   - reviews/W4B-2026-07-29-unit-task-ar-644-001.md
   - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142.json
+  - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729023334.json
+  - reviews/VERIFY-2026-07-29-task-ar-644-20260729023558.json
   - reviews/INDEX.md
 scope: Use one allowlisted Python dispatcher with POSIX and commandWindows commands, add bounded derived compact checkpoints and SessionStart reinjection, retain explicit owner-run Claude installation, and verify tracked hook health. Do not mutate consumer repositories or real per-user settings, persist prompt/transcript content, redesign compound/scribe, commit checkpoint state, or perform a release.
 acceptance:
@@ -88,10 +101,11 @@ handoff: Provide the client/OS hook matrix, simulated manual/automatic compact a
 stop_condition: Stop before editing per-user agent settings without explicit Owner action.
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.json
-verified_at: 2026-07-29T02:21:42+09:00
-verified_by: codex-root-v080-w4a
+verified_at: 2026-07-29T02:33:34+09:00
+verified_by: codex-root-v080-integrator
 evidence_refs:
   - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142.json
+  - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729023334.json
 ---
 
 # UNIT-TASK-AR-644-001 - Replace platform-specific hook shims with verified Python entrypoints
@@ -114,7 +128,10 @@ Codex and Claude hook contracts support `SessionStart`, `PreCompact`, and
 
 ## Target Files
 
+- BACKLOG-BOARD.md
+- agents/lead_engineer/tasks/TASK-AR-644.md
 - agents/lead_engineer/tasks/units/TASK-AR-644/UNIT-TASK-AR-644-001.md
+- agents/project/NEXT-SESSION-POINTER.yml
 - .codex/hooks.json
 - scripts/bootstrap_dev_env.py
 - scripts/verify_wheel_dotfiles.py
@@ -149,9 +166,19 @@ Codex and Claude hook contracts support `SessionStart`, `PreCompact`, and
 - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.json
 - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.log.md
 - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.handoff.md
+- agents/runtime/a2a/messages.jsonl
+- agents/runtime/pane_events/pane-events.jsonl
+- agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-independent-auditor-closeout.handoff.md
+- agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-independent-auditor-closeout.json
+- agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-independent-auditor-closeout.log.md
+- agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-skeptic-closeout.handoff.md
+- agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-skeptic-closeout.json
+- agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-skeptic-closeout.log.md
 - reviews/W4A-2026-07-29-unit-task-ar-644-001.md
 - reviews/W4B-2026-07-29-unit-task-ar-644-001.md
 - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142.json
+- reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729023334.json
+- reviews/VERIFY-2026-07-29-task-ar-644-20260729023558.json
 - reviews/INDEX.md
 
 ## Scope

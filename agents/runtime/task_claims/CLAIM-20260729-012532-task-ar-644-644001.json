@@ -9,7 +9,7 @@
   "callsite_id": "codex:subagent:w3-task-ar-644-001",
   "pane_id": "codex:subagent:w3-task-ar-644-001",
   "mode": "implementation",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "active_scope": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "scope_transition_approved": true,
@@ -27,12 +27,12 @@
   "worktree_path": "/home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-644",
   "branch": "codex/unit-task-ar-644-001-wave",
   "claimed_at": "2026-07-29T01:25:32+09:00",
-  "last_heartbeat": "2026-07-29T02:17:22+09:00",
-  "updated_at": "2026-07-29T02:17:22+09:00",
+  "last_heartbeat": "2026-07-29T02:31:18+09:00",
+  "updated_at": "2026-07-29T02:31:18+09:00",
   "expires_at": "2026-07-29T08:17:22+09:00",
   "lease": {
     "claimed_at": "2026-07-29T01:25:32+09:00",
-    "heartbeat_at": "2026-07-29T02:17:22+09:00",
+    "heartbeat_at": "2026-07-29T02:31:18+09:00",
     "expires_at": "2026-07-29T08:17:22+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.handoff.md",
@@ -48,7 +48,10 @@
     "data_integrity"
   ],
   "target_files": [
+    "BACKLOG-BOARD.md",
+    "agents/lead_engineer/tasks/TASK-AR-644.md",
     "agents/lead_engineer/tasks/units/TASK-AR-644/UNIT-TASK-AR-644-001.md",
+    "agents/project/NEXT-SESSION-POINTER.yml",
     ".codex/hooks.json",
     "scripts/bootstrap_dev_env.py",
     "scripts/verify_wheel_dotfiles.py",
@@ -83,9 +86,23 @@
     "agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.json",
     "agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.log.md",
     "agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.handoff.md",
+    "agents/runtime/a2a/messages.jsonl",
+    "agents/runtime/pane_events/pane-events.jsonl",
+    "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-independent-auditor-closeout.handoff.md",
+    "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-independent-auditor-closeout.json",
+    "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-independent-auditor-closeout.log.md",
+    "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-skeptic-closeout.handoff.md",
+    "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-skeptic-closeout.json",
+    "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-skeptic-closeout.log.md",
     "reviews/W4A-2026-07-29-unit-task-ar-644-001.md",
     "reviews/W4B-2026-07-29-unit-task-ar-644-001.md",
     "reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142.json",
+    "reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729023334.json",
+    "reviews/VERIFY-2026-07-29-task-ar-644-20260729023558.json",
     "reviews/INDEX.md"
-  ]
+  ],
+  "released_at": "2026-07-29T02:31:18+09:00",
+  "verified_by": "/root/w4b_task_ar_640_001",
+  "verifier_role": "independent-verifier",
+  "verification_evidence": "reviews/W4B-2026-07-29-unit-task-ar-644-001.md"
 }
