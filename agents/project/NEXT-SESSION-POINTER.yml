@@ -1,22 +1,22 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-28T19:19:17+09:00
-updated_by: le-20260728-170130-kst-codexroot-v080-639-001
+updated_at: 2026-07-28T20:34:48+09:00
+updated_by: le-20260728-194821-kst-640001
 current_state:
-  summary: "TASK-AR-631 recovery and TASK-AR-639 lifecycle truth are closed; TASK-AR-640 W0 revalidation is next."
-  status: planned
+  summary: "UNIT-TASK-AR-640-001 passed independent W4b and its claim is released; PR integration is pending."
+  status: review
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 0
+  step_index: 5
   step_total: 6
-  progress_pct: 0
-  status_text: "TASK-AR-639 closed with zero state-sync findings; revalidate TASK-AR-640 before W2."
+  progress_pct: 95
+  status_text: "Claim released after independent W4b approval; integrate through exact-head PR/CI."
 active_work:
   current_agents: []
   current_teams: []
 resume:
   active_task: TASK-AR-640
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-  branch_policy: "Begin TASK-AR-640 at W0; revalidate config/profile assumptions before creating a W2 worker claim."
+  branch_policy: "Integrate the independently approved UNIT-TASK-AR-640-001 branch through exact-head PR/CI, then close its W6 lifecycle."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -30,7 +30,7 @@ pointers:
       status: completed
     - task_id: TASK-AR-640
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-      status: planned
+      status: in_progress
     - task_id: TASK-AR-621
       task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
       status: completed

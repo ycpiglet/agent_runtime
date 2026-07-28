@@ -22,7 +22,7 @@ into a form the proposal engine can use.
 | Open issues/board drift from merged reality | `stale-open-state-debt` | `COMPOUND-2026-07-04`, PR #239/#242 + sweep PR #249/#251/#257/#259/#260 | tooling+scheduled | open_state_sweep v1.3 SHIPPED: stale issues, dangling lanes, merged-branch debris, untriaged stashes (ledger `agents/project/archive-stash-triage.json`); weekly workflow surfaces findings as a dedup'd issue |
 | Shared-checkout ref race (concurrent agents) | `shared-checkout-ref-race` | `COMPOUND-2026-06-22-001` | proposal | verify live tip before destructive ref ops; no cleanup during concurrency |
 | Non-hermetic test mutates tracked files | `nonhermetic-test-tracked-mutation` | `COMPOUND-2026-06-22-001`, PR #258 | partial | fixture-lock freshness assert is now read-only (PR #258; the old form rewrote the tracked fixture exactly when failing); board/archive hermeticity + explicit pathspec on release commits remain open |
-| CI flaky temp-git gate tests | `ci-flaky-temp-git` | `COMPOUND-2026-06-22-001`, PR #252/#254 | watch | trigger-side class root-fixed (spawn retries + loud `git-query-error`, see `silent-query-error-as-no-data`); other temp-git suites stay watch, re-run on flake |
+| CI flaky temp-git gate tests | `ci-flaky-temp-git` | `COMPOUND-2026-06-22-001`, `COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction`, PR #252/#254, run 30350865552 | needs enforcement | recurrence 3+; TASK-AR-651 must harden or remove the remaining release-critical temp-git boundary |
 | Query failure classified as "no data" in a decision path | `silent-query-error-as-no-data` | `COMPOUND-2026-07-04`, PR #254/#255, CI run 28680340240 | gate+fixture | trigger records git query errors; `git-query-error` → `trigger-error` (exit 5) fails the run red instead of a quiet `not-triggered`; contract tests pin both layers |
 | Consumer-project path assumption | `consumer-project-path-assumption` | issue #185, PR #187 | gate+fixture | gates resolve root-OR-template; v0.3.1 shipped |
 | Work concentrates on lead-engineer | `role-concentration` | `REVIEW-2026-06-22-system-health-rsi-diagnosis`, self_improvement_cycle assess | tooling+proposal | `role_concentration_gate` flags it (advisory); dispatch rebalance to dormant review/skeptic/scout roles is an Owner-tier proposal |
@@ -30,6 +30,9 @@ into a form the proposal engine can use.
 | A2A built but not wired into live dispatch | `a2a-dormant-not-wired` | `REVIEW-2026-06-22-subsystem-verification-audit` | proposal | router complete + tested, 0 runtime traffic; wire emit_message into claim/handoff/decision (TASK-AR-518 intent) |
 | Asset-prune loop detect-only | `asset-prune-detect-only` | `REVIEW-2026-06-22-subsystem-verification-audit` | tooling | `asset_lifecycle.py` (shipped) closes detect→action via reversible keep→observe; deprecate/remove Owner-gated |
 | beta_tester role dormant | `beta-tester-dormant` | `REVIEW-2026-06-22-subsystem-verification-audit` | proposal | advisory beta_tester_due only; activate scheduled exploration rounds → BTC-* → QA bugs |
+| W4a green but cross-surface acceptance incomplete | `w4-green-cross-surface-gap` | `COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction`, TASK-AR-639 | process+proposal | require independent W4b plus root/template/worker/overlay/taskset/pointer/read-model matrix for tuple changes |
+| Mandatory W4b evidence cannot be consumed by closeout | `closeout-evidence-producer-consumer-gap` | `COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction`, TASK-AR-639 | needs enforcement | TASK-AR-645 first-class task-linked review evidence; TASK-AR-651 no-manual-edit lifecycle smoke |
+| Released unit conflated with completed taskset | `released-unit-taskset-phase-conflation` | `COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction`, TASK-AR-639 | needs enforcement | TASK-AR-645 split phase semantics; RC blocks if honest intermediate close still needs a waiver |
 
 ## Detailed Cases
 
@@ -220,12 +223,63 @@ into a form the proposal engine can use.
 | `trigger` | Temp-git-repo gate tests under CI runner load; a flaky `git` subprocess returns non-zero so `_latest_tag`/count reads empty → cadence reports not-triggered. |
 | `owner_boundary` | local |
 | `affected_gate` | `.github/workflows/test.yml` (`Run package tests`) |
-| `recurrence_count` | 2 (two PR runs this session) |
-| `source_refs` | `COMPOUND-2026-06-22-001` |
+| `recurrence_count` | 3+ (two earlier PR runs plus main run 30350865552) |
+| `source_refs` | `COMPOUND-2026-06-22-001`, `reviews/COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction.md`, main run `30350865552` |
 | `reproduction` | non-deterministic; not reproduced locally (full suite + deterministic order both green). |
 | `linked_regression_fixture` | n/a |
-| `task_proposal` | propose hardening the cadence/orchestrator `_git` helper (small bounded retry on transient non-zero) OR mark accepted watch with CI re-run policy |
-| `prevention_status` | watch |
+| `task_proposal` | TASK-AR-651: add bounded observable retry plus deterministic fixture at the remaining query boundary, or remove the unstable temp-git mechanism from release-critical decisions |
+| `prevention_status` | needs enforcement |
+
+### CASE-W4-GREEN-CROSS-SURFACE-GAP
+
+| Field | Value |
+| --- | --- |
+| `case_id` | `CASE-W4-GREEN-CROSS-SURFACE-GAP` |
+| `dedupe_key` | `w4-green-cross-surface-gap` |
+| `symptom` | Focused implementation tests pass, but independent W4b finds lifecycle tuple disagreements across overlay, taskset, pointer, root/template schema, or read-model consumers. |
+| `trigger` | A task changes a durable tuple consumed by multiple runtime surfaces and W4a tests only the implementation-local path. |
+| `owner_boundary` | local |
+| `affected_gate` | independent W4b; root/template parity and lifecycle integration suites |
+| `recurrence_count` | 2 in TASK-AR-639 |
+| `source_refs` | `reviews/COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction.md`, TASK-AR-639 W4b/recheck evidence |
+| `reproduction` | Exercise the same tuple as an active worker, explicit overlay, taskset member, pointer target, root record, template record, and UI/read-model input. |
+| `linked_regression_fixture` | pending cross-surface matrix under TASK-AR-643 or TASK-AR-651 |
+| `task_proposal` | Keep independent W4b mandatory for TASK-AR-640 through TASK-AR-647; add the matrix to clean-host release evidence. |
+| `prevention_status` | process+proposal |
+
+### CASE-CLOSEOUT-EVIDENCE-PRODUCER-CONSUMER-GAP
+
+| Field | Value |
+| --- | --- |
+| `case_id` | `CASE-CLOSEOUT-EVIDENCE-PRODUCER-CONSUMER-GAP` |
+| `dedupe_key` | `closeout-evidence-producer-consumer-gap` |
+| `symptom` | Mandatory Markdown W4b evidence exists but `work close` cannot consume its reference, requiring a temporary omission and manual restoration. |
+| `trigger` | Close a verified unit using the artifact format emitted by the independent-review phase. |
+| `owner_boundary` | local |
+| `affected_gate` | `scripts/work.py close`, W4b evidence contract |
+| `recurrence_count` | 2 (TASK-AR-639 UNIT-001 and UNIT-002) |
+| `source_refs` | `reviews/COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction.md` |
+| `reproduction` | Attach the emitted `reviews/W4B-*.md` path to a unit and run the normal close transition without manually editing the projection. |
+| `linked_regression_fixture` | pending no-manual-edit lifecycle smoke |
+| `task_proposal` | TASK-AR-645 consumes task-linked compound/review records; TASK-AR-651 proves the complete lifecycle in a clean host. |
+| `prevention_status` | needs enforcement |
+
+### CASE-RELEASED-UNIT-TASKSET-PHASE-CONFLATION
+
+| Field | Value |
+| --- | --- |
+| `case_id` | `CASE-RELEASED-UNIT-TASKSET-PHASE-CONFLATION` |
+| `dedupe_key` | `released-unit-taskset-phase-conflation` |
+| `symptom` | A legitimately released unit claim is warned unless it says `taskset-completed`, even though sibling tasks in the taskset remain planned. |
+| `trigger` | Release and close one unit inside a still-active multi-task taskset. |
+| `owner_boundary` | local |
+| `affected_gate` | collaboration governance and claim lifecycle projection |
+| `recurrence_count` | 2+ tasksets |
+| `source_refs` | `reviews/COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction.md`, `reviews/RETRO-2026-07-23-taskset-ar-work-cli-integrity.md` |
+| `reproduction` | Release a verified unit with `progress_pct: 100` while its parent taskset remains active, then run collaboration governance. |
+| `linked_regression_fixture` | pending phase-state matrix |
+| `task_proposal` | TASK-AR-645 separates unit/task/claim/taskset terminal facts; TASK-AR-651 rejects an RC that still needs a false phase or waiver. |
+| `prevention_status` | needs enforcement |
 
 ### CASE-CONSUMER-PATH-ASSUMPTION
 

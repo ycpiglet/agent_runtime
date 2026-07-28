@@ -210,3 +210,11 @@ def test_doctor_repair_reports_no_action_when_clean(tmp_path, capsys):
     assert rc == 0
     assert "no actions needed" in captured.out
 
+
+def test_doctor_repair_json_does_not_mix_human_output(tmp_path, capsys):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    capsys.readouterr()
+    assert cli_module.main(["doctor", "--root", str(root), "--repair", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["schema"] == "agent-runtime-doctor/v1"
+    assert "repair_actions" in payload
