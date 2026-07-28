@@ -1,29 +1,37 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-29T03:13:59+09:00
-updated_by: codex-root-v080-w6
+updated_at: 2026-07-29T03:43:12+09:00
+updated_by: le-20260729-0343-kst-645001
 current_state:
-  summary: "TASK-AR-644 is complete on verified main; TASK-AR-645 is the next planned task."
-  status: planned
+  summary: "UNIT-TASK-AR-645-001 is implementing per-record compound knowledge, claim-time retrieval, linked closeout, and ownership-safe compatibility."
+  status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 0
+  step_index: 1
   step_total: 6
-  progress_pct: 0
-  status_text: "TASK-AR-644 CI-follow-up W4b approved 99/100; PR #368 passed Python 3.10-3.12, merged at b14333ce, and merged-main verification passed 66 focused plus 2358 full-suite tests."
+  progress_pct: 5
+  status_text: "TASK-AR-645 W0/T3 is merged at 0a351962; UNIT-001 has an isolated worker_standard claim and explicit normalized footprint."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260729-034312-task-ar-645-645001
+      agent_role: lead-engineer
+      agent_instance_id: le-20260729-0343-kst-645001
+      display_name: lead_engineer@unit-645-001-codex
+      callsite_id: codex:root:task-ar-645
+      pane_id: codex:root:task-ar-645
+  current_teams:
+    - agent-runtime-core
 resume:
   active_task: TASK-AR-645
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-  branch_policy: "Begin TASK-AR-645 at W0, revalidate compound/task linkage and scribe adapter scope, then claim before implementation; stop before TASK-AR-646 or later, consumer mutation, release, tag, publish, bulk historical compound rewrites, or real per-user setting changes."
+  branch_policy: "Continue only UNIT-TASK-AR-645-001 in .worktrees/TASK-AR-645; stop before UNIT-002, TASK-AR-646+, consumer mutation, release, tag, publish, bulk historical compound rewrites, or weakening passed verification JSON."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260729-034312-task-ar-645-645001.json
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
@@ -45,7 +53,7 @@ pointers:
       status: completed
     - task_id: TASK-AR-645
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-      status: planned
+      status: in_progress
     - task_id: TASK-AR-621
       task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
       status: completed
