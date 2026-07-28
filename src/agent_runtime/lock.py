@@ -78,6 +78,8 @@ def build_lock_record(root: Path, template_root: Path | None = None) -> dict[str
     return {
         "schema": "agent-runtime-lock/v2",
         "project": config.project,
+        "profiles": list(config.profiles),
+        "capabilities": list(config.capabilities),
         "upstream": {
             "package": config.upstream_package,
             "remote_url": config.upstream_remote_url,

@@ -886,7 +886,7 @@ def test_sync_check_fails_when_conflicts_exist(tmp_path):
     assert main(["sync", "--root", str(host), "--template-root", str(templates), "--check"]) == 1
 
 
-def test_apply_safe_writes_independent_updates_but_legacy_apply_is_atomic(tmp_path):
+def test_apply_safe_writes_independent_updates_but_legacy_apply_is_atomic(tmp_path, capsys):
     host = tmp_path / "host"
     templates = tmp_path / "templates"
     _write(host / "agent_runtime.yml", "project: demo\nupstream:\n  remote_url: https://github.com/example/agent_runtime.git\n  ref: v0.1.0\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\n")
@@ -897,8 +897,12 @@ def test_apply_safe_writes_independent_updates_but_legacy_apply_is_atomic(tmp_pa
     (host / "scripts/nonregular.py").mkdir(parents=True)
     _write(host / "agent_runtime.lock.json", json.dumps({"schema": "agent-runtime-lock/v1", "installed": {"managed_files": {"scripts/update.py": _digest("old\n")}}}) + "\n")
     assert run_sync(host, "apply", template_root=templates) == 1
+    assert "applied=0" in capsys.readouterr().out
     assert not (host / "scripts/create.py").exists()
     assert run_sync(host, "apply-safe", template_root=templates) == 1
+    output = capsys.readouterr().out
+    assert "applied=2" in output and "remaining_conflicts=2" in output
+    assert "scripts/conflict.py" in output and "scripts/nonregular.py" in output
     assert (host / "scripts/create.py").read_text(encoding="utf-8") == "new\n"
     assert (host / "scripts/update.py").read_text(encoding="utf-8") == "new\n"
     assert (host / "scripts/conflict.py").read_text(encoding="utf-8") == "host\n"
@@ -1035,7 +1039,7 @@ def test_nonregular_target_boundaries_diff_and_apply_safe_do_not_write(tmp_path,
 
 
 @pytest.mark.parametrize("apply", [apply_updates, apply_safe_updates])
-def test_precomputed_plan_revalidates_symlink_escape_before_apply(tmp_path, apply):
+def test_precomputed_plan_revalidates_symlink_escape_before_apply(tmp_path, apply, capsys):
     host, templates, outside = tmp_path / "host", tmp_path / "templates", tmp_path / "outside"
     outside.mkdir()
     _write(host / "agent_runtime.yml", "project: demo\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\n")
@@ -1044,8 +1048,31 @@ def test_precomputed_plan_revalidates_symlink_escape_before_apply(tmp_path, appl
     plan = build_sync_plan(host, templates)
     (host / "linked").symlink_to(outside, target_is_directory=True)
     assert apply(plan) == 1
+    assert "applied=0" in capsys.readouterr().out
     assert not (host / "first.py").exists()
     assert not (outside / "file.py").exists()
+
+
+def test_lock_v2_records_effective_profile_and_capability_order(tmp_path):
+    host, templates = tmp_path / "host", tmp_path / "templates"
+    _write(host / "agent_runtime.yml", "schema: agent-runtime-config/v2\nproject: demo\nprofiles:\n  - security-service\ncapabilities:\n  - web-content\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\n")
+    _write(templates / "scripts/a.py", "x\n")
+    record = build_lock_record(host, templates)
+    assert record["profiles"] == ["core", "security-service"]
+    assert record["capabilities"] == ["lifecycle", "continuity", "verification", "compound", "scribe", "model-routing", "web-content", "security-service"]
+
+
+def test_autofolio_shaped_v1_unmanaged_seams_remain_excluded(tmp_path):
+    host, templates = tmp_path / "host", tmp_path / "templates"
+    _write(host / "agent_runtime.yml", "project: autofolio\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\n  unmanaged:\n    - AGENTS.md\n    - agents/roles\n    - schemas\n    - reports\n    - scripts/local.py\n")
+    for rel in ("AGENTS.md", "agents/roles/editor.md", "schemas/local.json", "reports/status.md", "scripts/local.py"):
+        _write(host / rel, "host\n"); _write(templates / rel, "template\n")
+    _write(templates / "scripts/managed.py", "new\n")
+    plan = build_sync_plan(host, templates)
+    assert {item.path for item in plan.excluded} >= {"AGENTS.md", "agents/roles/editor.md", "schemas/local.json", "reports/status.md", "scripts/local.py"}
+    assert run_sync(host, "apply-safe", templates) == 0
+    assert (host / "scripts/managed.py").read_text() == "new\n"
+    assert (host / "agents/roles/editor.md").read_text() == "host\n"
 
 
 def test_template_files_use_stable_posix_relative_order(tmp_path):

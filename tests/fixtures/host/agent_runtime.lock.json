@@ -1,4 +1,14 @@
 {
+  "capabilities": [
+    "lifecycle",
+    "continuity",
+    "verification",
+    "compound",
+    "scribe",
+    "model-routing",
+    "web-content",
+    "security-service"
+  ],
   "installed": {
     "managed_files": {
       ".codex/hooks.json": "sha256:947dc7366dbff526e3a13a403989ea2fd75ce6f363a8ca02c92b9b5c36ba6bc8",
@@ -568,6 +578,11 @@
     "template_digest": "sha256:1a004b4f35545a9334987285477225207256bb7b701b4b555d0c5343facd6d90",
     "template_files": 282
   },
+  "profiles": [
+    "core",
+    "web-content",
+    "security-service"
+  ],
   "project": "fixture-host",
   "schema": "agent-runtime-lock/v2",
   "upstream": {
