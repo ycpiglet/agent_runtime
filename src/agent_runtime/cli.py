@@ -168,6 +168,7 @@ def build_parser() -> argparse.ArgumentParser:
     doctor_parser.add_argument("--root", type=doctor.Path, default=doctor.Path.cwd(), help="Host project root")
     doctor_parser.add_argument("--check", action="store_true", help="Fail if blocker findings exist")
     doctor_parser.add_argument("--repair", action="store_true", help="Attempt safe host repairs")
+    doctor_parser.add_argument("--json", action="store_true", help="Emit machine-readable doctor report")
 
     ui_state_parser = subparsers.add_parser("ui-state", help="Emit read-only UI runtime state")
     ui_state_parser.add_argument("--root", type=ui_state.Path, default=ui_state.Path.cwd(), help="Host project root")
@@ -292,7 +293,7 @@ def main(argv: list[str] | None = None) -> int:
             warning_summary_gate_strict_refs=args.warning_summary_gate_strict_refs,
         )
     if args.command == "doctor":
-        return doctor.run_doctor(args.root, check=args.check, repair=args.repair)
+        return doctor.run_doctor(args.root, check=args.check, repair=args.repair, json_output=args.json)
     if args.command == "ui-state":
         return ui_state.run_ui_state(args.root, resource=args.resource, json_output=args.json)
     if args.command == "ui-console":
@@ -304,4 +305,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

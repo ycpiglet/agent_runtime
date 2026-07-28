@@ -19,3 +19,4 @@ def test_convention_doc_exists_and_names_the_entry_point():
     doc = (REPO_ROOT / "docs" / "host-context-read-location.md").read_text(encoding="utf-8")
     assert "agents/host/HOST-CONTEXT.yml" in doc
     assert "sync.unmanaged" in doc
+    assert "host-context/v1" in doc

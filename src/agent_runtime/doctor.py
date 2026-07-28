@@ -705,10 +705,95 @@ def render(plan: DoctorPlan) -> str:
     return "\n".join(lines)
 
 
-def run_doctor(root: Path, *, check: bool, repair: bool = False) -> int:
+def _finding_json(finding: DoctorFinding) -> dict[str, str]:
+    return {
+        "severity": finding.severity,
+        "area": finding.area,
+        "path": finding.path,
+        "kind": finding.kind,
+        "detail": finding.detail,
+    }
+
+
+def _config_json(root: Path) -> dict[str, object]:
+    """Return a useful projection even when configuration validation failed."""
+    source_path = root / _config.CONFIG_FILE
+    try:
+        cfg = _config.load_config(root)
+    except Exception:
+        source_schema = "unknown"
+        try:
+            document = _config._parse_document(_config.config_path(root))
+            source_schema = str(document.get("schema", _config.V1_SCHEMA))
+            source_path = _config.config_path(root)
+        except Exception:
+            pass
+        return {"source_schema": source_schema, "source_path": str(source_path), "valid": False}
+    ownership = {mode: list(paths) for mode, paths in cfg.ownership}
+    return {
+        "valid": True,
+        "source_schema": cfg.source_schema,
+        "effective_schema": cfg.effective_schema,
+        "source_path": str(cfg.path),
+        "project": cfg.project,
+        "upstream": {
+            "package": cfg.upstream_package,
+            "remote_url": cfg.upstream_remote_url,
+            "ref": cfg.upstream_ref,
+        },
+        "sync": {
+            "mode": cfg.sync_mode,
+            "allow_silent_overwrite": cfg.allow_silent_overwrite,
+            "unmanaged_paths": list(cfg.unmanaged_paths),
+        },
+        "profiles": list(cfg.profiles),
+        "capabilities": list(cfg.capabilities),
+        "ownership": ownership,
+        "host": {
+            "context": {
+                "path": cfg.host_context.path,
+                "present": cfg.host_context.present,
+                "purpose": cfg.host_context.purpose,
+                "domain": cfg.host_context.domain,
+                "safety_constraints": list(cfg.host_context.safety_constraints),
+                "role_mapping": dict(cfg.host_context.role_mapping),
+                "read_more": list(cfg.host_context.read_more),
+            },
+            "role_overlay": cfg.role_overlay,
+            "risk_paths": list(cfg.risk_paths),
+            "state_adapters": dict(cfg.state_adapters),
+        },
+    }
+
+
+def render_json(plan: DoctorPlan, *, actions: list[str] | None = None) -> str:
+    findings = sorted(
+        (_finding_json(finding) for finding in plan.findings),
+        key=lambda item: (item["severity"], item["area"], item["path"], item["kind"], item["detail"]),
+    )
+    payload: dict[str, object] = {
+        "schema": "agent-runtime-doctor/v1",
+        "root": str(plan.root),
+        "config": _config_json(plan.root),
+        "findings": findings,
+        "summary": {
+            "blockers": plan.blocker_count,
+            "warnings": plan.warning_count,
+            "infos": plan.info_count,
+        },
+    }
+    if actions is not None:
+        payload["repair_actions"] = actions
+    return json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2)
+
+
+def run_doctor(root: Path, *, check: bool, repair: bool = False, json_output: bool = False) -> int:
     plan, _ = build_doctor_plan(root)
     if repair:
         updated, actions = apply_doctor_repairs(root, plan)
+        if json_output:
+            print(render_json(updated, actions=actions))
+            return 1 if check and updated.blocker_count else 0
         print(render(updated))
         if actions:
             print(f"{REPAIR_ACTION_PREFIX} performed {len(actions)} actions")
@@ -720,7 +805,7 @@ def run_doctor(root: Path, *, check: bool, repair: bool = False) -> int:
             return 1
         return 0
 
-    print(render(plan))
+    print(render_json(plan) if json_output else render(plan))
     if check and plan.blocker_count:
         return 1
     return 0
@@ -731,13 +816,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Host project root")
     parser.add_argument("--check", action="store_true", help="Fail if blockers exist")
     parser.add_argument("--repair", action="store_true", help="Attempt safe auto-repair actions")
+    parser.add_argument("--json", action="store_true", help="Emit machine-readable doctor report")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-    return run_doctor(args.root, check=args.check, repair=args.repair)
+    return run_doctor(args.root, check=args.check, repair=args.repair, json_output=args.json)
 
 
 if __name__ == "__main__":
