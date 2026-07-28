@@ -1,0 +1,25 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-28-unit-task-ar-639-001-20260728170913",
+  "work_id": "UNIT-TASK-AR-639-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-639/UNIT-TASK-AR-639-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-639",
+  "unit_id": "UNIT-TASK-AR-639-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-28T17:09:13+09:00",
+  "verified_by": "le-20260728-170130-kst-codexroot-v080-639-001",
+  "command_count": 1,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-28T17:09:13+09:00",
+      "finished_at": "2026-07-28T17:09:18+09:00",
+      "stdout": ".............s................                                           [100%]\n29 passed, 1 skipped in 3.49s\n",
+      "stderr": ""
+    }
+  ]
+}

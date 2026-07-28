@@ -9,11 +9,11 @@ task_id: TASK-AR-639
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: review
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T16:36:01+09:00
+updated_at: 2026-07-28T17:09:13+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
@@ -44,6 +44,10 @@ verification:
   - python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py -q
 handoff: Report the failing-before/passing-after round trip and the compatibility behavior for existing task records.
 stop_condition: Stop if the fix requires changing work-item identity or rewriting historical completed records.
+verified_at: 2026-07-28T17:09:13+09:00
+verified_by: le-20260728-170130-kst-codexroot-v080-639-001
+evidence_refs:
+  - reviews/VERIFY-2026-07-28-unit-task-ar-639-001-20260728170913.json
 ---
 
 # UNIT-TASK-AR-639-001 - Align work registration output with verify and close consumers

@@ -574,6 +574,10 @@ def _render_task(
 ) -> str:
     display_id = str(task["display_id"])
     tags = _list_value(task.get("tags")) or ["work-cli-created"]
+    acceptance = _list_value(task.get("acceptance")) or [task["goal"]]
+    verification = _list_value(task.get("verification")) or [
+        "python scripts/task_identity.py check --check"
+    ]
     meta = {
         "schema_version": WORK_ITEM_SCHEMA,
         "id": display_id,
@@ -607,6 +611,8 @@ def _render_task(
         "worker_model_tier": task.get("worker_model_tier", taskset.get("worker_model_tier", "worker_standard")),
         "reviewer_model_tier": task.get("reviewer_model_tier", taskset.get("reviewer_model_tier", "reviewer_standard")),
         "tags": tags,
+        "acceptance": acceptance,
+        "verification": verification,
     }
     return (
         _frontmatter(meta)
@@ -617,10 +623,10 @@ def _render_task(
         + "## Scope\n\n"
         + f"- {task.get('scope', task['goal'])}\n\n"
         + "## Acceptance Criteria\n\n"
-        + "\n".join(f"- {item}" for item in _list_value(task.get("acceptance")) or [task["goal"]])
+        + "\n".join(f"- {item}" for item in acceptance)
         + "\n\n"
         + "## Verification\n\n"
-        + "\n".join(f"- `{item}`" for item in _list_value(task.get("verification")) or ["python scripts/task_identity.py check --check"])
+        + "\n".join(f"- `{item}`" for item in verification)
         + "\n"
     )
 
@@ -2131,15 +2137,23 @@ def _validate_done_closeout(
     resolved_id: str,
     *,
     actual_hours: str | None,
-    actual_tokens: int | None,
+    actual_tokens: str | None,
+    measurement_unavailable_reason: str | None,
 ) -> list[str]:
     findings: list[str] = []
     rel_path = _rel(root, path)
     status = str(meta.get("verification_status") or "").strip()
     if status != "passed":
         findings.append(f"{rel_path}: closeout:verification-status-not-passed:{status or 'missing'}")
-    _validate_actual_number(actual_hours, "actual-hours", findings)
-    _validate_actual_number(actual_tokens, "actual-tokens", findings)
+    measurement_reason = str(measurement_unavailable_reason or "").strip()
+    if actual_hours:
+        _validate_actual_number(actual_hours, "actual-hours", findings)
+    elif not measurement_reason:
+        _validate_actual_number(actual_hours, "actual-hours", findings)
+    if actual_tokens:
+        _validate_actual_number(actual_tokens, "actual-tokens", findings)
+    elif not measurement_reason:
+        _validate_actual_number(actual_tokens, "actual-tokens", findings)
 
     refs = _list_value(meta.get("evidence_refs"))
     if not refs:
@@ -2183,20 +2197,28 @@ def _closeout_block(
     actual_hours: str,
     actual_tokens: str,
     actual_cost: str,
+    measurement_unavailable_reason: str,
     closed_by: str,
     evidence_refs: list[str],
 ) -> str:
+    unavailable = bool(measurement_unavailable_reason)
+    hours_display = actual_hours or ("unavailable" if unavailable else "-")
+    tokens_display = actual_tokens or ("unavailable" if unavailable else "-")
     lines = [
         CLOSEOUT_START,
         "## Closeout",
         "",
         f"- Completed at: `{completed_at}`",
         f"- Resolution: `{resolution}`",
-        f"- Actual hours: `{actual_hours or '-'}`",
-        f"- Actual tokens: `{actual_tokens or '-'}`",
+        f"- Actual hours: `{hours_display}`",
+        f"- Actual tokens: `{tokens_display}`",
     ]
     if actual_cost:
         lines.append(f"- Actual cost: `{actual_cost}`")
+    if measurement_unavailable_reason:
+        lines.append(
+            f"- Measurement unavailable reason: {measurement_unavailable_reason}"
+        )
     lines.append(f"- Closed by: `{closed_by}`")
     lines.extend(["- Evidence:", *[f"  - `{ref}`" for ref in evidence_refs], CLOSEOUT_END])
     return "\n".join(lines)
@@ -2278,7 +2300,7 @@ def verify_work(root: Path, work_id: str, *, actor: str, now: str | None = None,
     now_text = _now_text(now)
     path, meta, body = _load_verifiable_work(root, work_id)
     resolved_id = _work_id_from_meta(path, meta)
-    commands = _verification_commands(meta)
+    commands = _criteria_verification_commands(meta, body)
     if not commands:
         raise WorkRegistrationError([f"{_rel(root, path)}: verification:no-commands"])
 
@@ -2388,6 +2410,7 @@ def close_work(
     actual_hours: str | None = None,
     actual_tokens: int | None = None,
     actual_cost: str | None = None,
+    measurement_unavailable_reason: str | None = None,
     now: str | None = None,
 ) -> dict[str, Any]:
     root = root.resolve()
@@ -2405,6 +2428,9 @@ def close_work(
     actual_hours_text = "" if actual_hours is None else str(actual_hours).strip()
     actual_tokens_text = "" if actual_tokens is None else str(actual_tokens).strip()
     actual_cost_text = "" if actual_cost is None else str(actual_cost).strip()
+    measurement_unavailable_reason_text = " ".join(
+        str(measurement_unavailable_reason or "").split()
+    )
 
     if resolution == "done":
         findings.extend(
@@ -2414,7 +2440,8 @@ def close_work(
                 meta,
                 resolved_id,
                 actual_hours=actual_hours_text,
-                actual_tokens=actual_tokens,
+                actual_tokens=actual_tokens_text,
+                measurement_unavailable_reason=measurement_unavailable_reason_text,
             )
         )
     if actual_cost_text:
@@ -2436,6 +2463,8 @@ def close_work(
         meta["actual_tokens"] = actual_tokens_text
     if actual_cost_text:
         meta["actual_cost"] = actual_cost_text
+    if measurement_unavailable_reason_text:
+        meta["measurement_unavailable_reason"] = measurement_unavailable_reason_text
 
     closeout = _closeout_block(
         completed_at=now_text,
@@ -2443,6 +2472,7 @@ def close_work(
         actual_hours=actual_hours_text,
         actual_tokens=actual_tokens_text,
         actual_cost=actual_cost_text,
+        measurement_unavailable_reason=measurement_unavailable_reason_text,
         closed_by=actor,
         evidence_refs=refs,
     )
@@ -2458,6 +2488,7 @@ def close_work(
         "actual_hours": actual_hours_text,
         "actual_tokens": actual_tokens_text,
         "actual_cost": actual_cost_text,
+        "measurement_unavailable_reason": measurement_unavailable_reason_text,
     }
 
 
@@ -3293,6 +3324,7 @@ def cmd_close(args: argparse.Namespace) -> int:
             actual_hours=args.actual_hours,
             actual_tokens=args.actual_tokens,
             actual_cost=args.actual_cost,
+            measurement_unavailable_reason=args.measurement_unavailable_reason,
             now=args.now,
         )
     except WorkRegistrationError as exc:
@@ -3498,6 +3530,13 @@ def build_parser() -> argparse.ArgumentParser:
     close_cmd.add_argument("--actual-hours")
     close_cmd.add_argument("--actual-tokens", type=int)
     close_cmd.add_argument("--actual-cost")
+    close_cmd.add_argument(
+        "--measurement-unavailable-reason",
+        help=(
+            "Explicit reason that missing actual hours or token measurements "
+            "are unavailable; preserves unknown values instead of coercing them to zero"
+        ),
+    )
     close_cmd.add_argument("--now")
     close_cmd.add_argument("--json", action="store_true")
     close_cmd.set_defaults(func=cmd_close)

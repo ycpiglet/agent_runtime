@@ -348,6 +348,37 @@ def test_work_close_blocks_done_without_actuals_without_mutating(tmp_path: Path)
     assert unit_path.read_text(encoding="utf-8") == before
 
 
+def test_work_close_records_explicit_unavailable_measurement_reason(tmp_path: Path) -> None:
+    unit_path = _write_unit(tmp_path)
+    _write_passed_evidence(tmp_path)
+    reason = "Historical work predates runtime measurement instrumentation."
+
+    result = _run(
+        tmp_path,
+        "close",
+        "UNIT-TASK-AR-901-001",
+        "--now",
+        "2026-06-12T13:35:00+09:00",
+        "--actor",
+        "recovery-auditor",
+        "--measurement-unavailable-reason",
+        reason,
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout[result.stdout.index("{") :])
+    assert payload["measurement_unavailable_reason"] == reason
+    meta, _ = backlog_board.parse_frontmatter(unit_path.read_text(encoding="utf-8"))
+    assert "actual_hours" not in meta
+    assert "actual_tokens" not in meta
+    assert meta["measurement_unavailable_reason"] == reason
+    text = unit_path.read_text(encoding="utf-8")
+    assert "- Actual hours: `unavailable`" in text
+    assert "- Actual tokens: `unavailable`" in text
+    assert f"- Measurement unavailable reason: {reason}" in text
+
+
 def test_work_close_exact_task_id_ignores_descendant_unit(tmp_path: Path) -> None:
     unit_path = _write_unit(tmp_path)
     unit_before = unit_path.read_text(encoding="utf-8")

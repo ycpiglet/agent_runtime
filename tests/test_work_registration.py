@@ -25,6 +25,18 @@ def _run(root: Path, input_path: Path, *args: str) -> subprocess.CompletedProces
     )
 
 
+def _run_work(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(SCRIPT), "--root", str(root), *args],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+
 def _write_input(root: Path, payload: dict[str, object]) -> Path:
     path = root / "registration.json"
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -138,6 +150,42 @@ def test_work_new_creates_initiative_taskset_tasks_review_and_views(tmp_path: Pa
     assert (tmp_path / "agents" / "project" / "initiatives" / "INIT-TEST-WORK-CLI.md").exists()
     assert (tmp_path / "docs" / "superpowers" / "plans" / "2026-06-12-test-work-cli.md").exists()
     assert (tmp_path / "reviews" / "REVIEW-2026-06-12-taskset-test-work-cli-registration.md").exists()
+
+
+def test_work_new_task_round_trips_into_verify_without_frontmatter_repair(tmp_path: Path) -> None:
+    payload = _payload()
+    payload["tasks"] = [payload["tasks"][0]]  # type: ignore[index]
+    command = "python scripts/registered_check.py"
+    payload["tasks"][0]["verification"] = [command]  # type: ignore[index]
+    script = tmp_path / "scripts" / "registered_check.py"
+    script.parent.mkdir(parents=True)
+    script.write_text("print('registered task verified')\n", encoding="utf-8")
+    input_path = _write_input(tmp_path, payload)
+
+    registered = _run(tmp_path, input_path)
+
+    assert registered.returncode == 0, registered.stderr or registered.stdout
+    task_path = tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md"
+    task_meta, _ = backlog_board.parse_frontmatter(task_path.read_text(encoding="utf-8"))
+    assert task_meta["acceptance"] == ["First task exists."]
+    assert task_meta["verification"] == [command]
+
+    verified = _run_work(
+        tmp_path,
+        "verify",
+        "TASK-AR-901",
+        "--now",
+        "2026-06-12T12:20:00+09:00",
+        "--actor",
+        "round-trip-test",
+        "--json",
+    )
+
+    assert verified.returncode == 0, verified.stderr or verified.stdout
+    result = json.loads(verified.stdout[verified.stdout.index("{") :])
+    evidence = json.loads((tmp_path / result["evidence"]).read_text(encoding="utf-8"))
+    assert evidence["commands"][0]["command"] == command
+    assert evidence["commands"][0]["stdout"].strip() == "registered task verified"
 
 
 def test_work_new_preserves_type_like_strings_for_org_model_consumers(tmp_path: Path) -> None:
