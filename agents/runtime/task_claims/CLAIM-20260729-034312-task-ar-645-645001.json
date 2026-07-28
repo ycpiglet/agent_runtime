@@ -9,7 +9,7 @@
   "callsite_id": "codex:root:task-ar-645",
   "pane_id": "codex:root:task-ar-645",
   "mode": "implementation",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "active_scope": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "scope_transition_approved": true,
@@ -27,12 +27,12 @@
   "worktree_path": "/home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-645",
   "branch": "codex/unit-task-ar-645-001-wave",
   "claimed_at": "2026-07-29T03:43:12+09:00",
-  "last_heartbeat": "2026-07-29T03:43:12+09:00",
-  "updated_at": "2026-07-29T03:43:12+09:00",
+  "last_heartbeat": "2026-07-29T04:32:25+09:00",
+  "updated_at": "2026-07-29T04:32:25+09:00",
   "expires_at": "2026-07-29T09:43:12+09:00",
   "lease": {
     "claimed_at": "2026-07-29T03:43:12+09:00",
-    "heartbeat_at": "2026-07-29T03:43:12+09:00",
+    "heartbeat_at": "2026-07-29T04:32:25+09:00",
     "expires_at": "2026-07-29T09:43:12+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260729-034312-task-ar-645-645001.handoff.md",
@@ -82,5 +82,9 @@
     "tests/test_work_schema_gate.py",
     "tests/test_template_smoke.py",
     "tests/fixtures/host/agent_runtime.lock.json"
-  ]
+  ],
+  "released_at": "2026-07-29T04:32:25+09:00",
+  "verified_by": "codex-root-v080-w4b-independent",
+  "verifier_role": "independent-verifier",
+  "verification_evidence": "reviews/W4B-2026-07-29-unit-task-ar-645-001.md"
 }
