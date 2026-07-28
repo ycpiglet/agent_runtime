@@ -67,6 +67,8 @@
     "tests/test_allimbot.py",
     "tests/fixtures/host/agent_runtime.lock.json",
     "agents/runtime/task_claims/CLAIM-20260728-234228-task-ar-643-643001.json",
-    "agents/runtime/task_claims/CLAIM-20260728-234228-task-ar-643-643001.log.md"
+    "agents/runtime/task_claims/CLAIM-20260728-234228-task-ar-643-643001.log.md",
+    "reviews/W4B-2026-07-29-unit-task-ar-643-001-approved.md",
+    "reviews/INDEX.md"
   ]
 }
