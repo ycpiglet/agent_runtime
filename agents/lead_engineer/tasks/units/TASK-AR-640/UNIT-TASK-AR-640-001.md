@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T19:48:21+09:00
+updated_at: 2026-07-28T20:31:45+09:00
 started_at: 2026-07-28T19:48:21+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -52,6 +52,12 @@ handoff: Document the v1-to-v2 compatibility table and effective config JSON.
 stop_condition: Stop before mutating a real host or introducing product-specific paths into core defaults.
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260728-194821-task-ar-640-640001.json
+verified_at: 2026-07-28T20:30:48+09:00
+verified_by: le-20260728-194821-kst-640001
+evidence_refs:
+  - reviews/VERIFY-2026-07-28-unit-task-ar-640-001-20260728203048.json
+  - reviews/VERIFY-2026-07-28-unit-task-ar-640-001-20260728202444.json
+  - reviews/W4B-2026-07-28-unit-task-ar-640-001-recheck.md
 ---
 
 # UNIT-TASK-AR-640-001 - Add backward-compatible profile and ownership config schema
