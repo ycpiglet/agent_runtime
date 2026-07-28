@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T17:55:15+09:00
+updated_at: 2026-07-28T18:15:38+09:00
 started_at: 2026-07-28T17:55:15+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -62,6 +62,10 @@ handoff: Provide the contradiction matrix, recovery schema, and governance-chain
 stop_condition: Stop before inventing a generic event-sourcing migration or mutating completed historical claims.
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260728-175515-task-ar-639-639002.json
+verified_at: 2026-07-28T18:15:38+09:00
+verified_by: le-20260728-task-ar-639-002-terra
+evidence_refs:
+  - reviews/VERIFY-2026-07-28-unit-task-ar-639-002-20260728181538.json
 ---
 
 # UNIT-TASK-AR-639-002 - Block task-claim-projection split-brain and support explicit recovery
