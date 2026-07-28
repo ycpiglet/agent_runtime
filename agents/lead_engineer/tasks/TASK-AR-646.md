@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T16:36:01+09:00
+updated_at: 2026-07-29T06:29:18+09:00
 title: Make model routing economically effective and auditable
 status: planned
 priority: P0
@@ -26,7 +26,7 @@ reservation_id: RES-20260728-163601-b8c2a87a-08
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
-summary: Use lower-cost native subagents by default where appropriate and prove when escalation actually changed the invoked model.
+summary: Make routine native/provider delegation low-cost by default and prove the resolved and observed execution instead of trusting semantic tier labels.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
@@ -42,15 +42,20 @@ tags:
 
 ## Scope
 
-- Detect provider capabilities, distinguish advisory from enforced routing, record dispatch justification and actual usage, and block false cost-saving claims.
+- Resolve provider capabilities at the real claim, provider, and native-session dispatch boundaries; enforce deterministic-first delegation; record execution/usage truth; and block false cost-saving claims.
 
 ## Acceptance Criteria
 
-- Equivalent tier mappings are reported as ineffective.
-- Every subagent dispatch records reason, requested tier, resolved model, escalation signal, and actual usage when available.
-- Deterministic tools run before model delegation.
-- Runtime uses native provider agents rather than rebuilding an executor.
+- Newly registered precise routine units default to `worker_low`; explicit ambiguity, data-integrity, security, cross-cutting, external-effect, high-risk, or repeated-failure signals visibly escalate.
+- Equivalent or unresolved provider tier mappings are reported as ineffective/unverified and cannot contribute to savings claims.
+- Every generic, provider-worker, and native-session subagent dispatch records its reason, requested/selected tier, resolved/observed model, escalation signal, deterministic preflight, latency, and actual usage/cost availability.
+- Lookup-only work cannot emit a model dispatch until deterministic tools are recorded as insufficient; sufficient deterministic work emits no call.
+- Runtime uses the provider/native subagent execution surface rather than rebuilding an executor.
+- Monetary savings are verified only from comparable billed-cost evidence; token deltas remain explicitly labeled token evidence.
 
 ## Verification
 
-- `python -m pytest tests/test_model_routing.py tests/test_role_routing.py tests/test_role_routing_wiring.py tests/test_provider_import_contract.py -q`
+- `python -m pytest tests/test_model_routing.py tests/test_work_registration.py tests/test_task_claim_dispatcher.py tests/test_doctor.py tests/test_role_routing.py tests/test_role_routing_wiring.py tests/test_provider_import_contract.py tests/test_template_smoke.py -q`
+- Template routing, native bridge, provider-worker, auto-dispatch, and eval-harness tests.
+- `python scripts/runtime_asset_usage.py --check`
+- `python -m pytest -q`
