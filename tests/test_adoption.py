@@ -8,7 +8,8 @@ from pathlib import Path
 
 from agent_runtime import cli
 from agent_runtime import adoption
-from agent_runtime.adoption import build_adoption_plan, plan_json, render
+from agent_runtime.adoption import _template_files, build_adoption_plan, plan_json, render
+from agent_runtime.inventory import is_generated_path
 from agent_runtime import doctor
 
 
@@ -53,7 +54,7 @@ def test_adoption_git_ignore_generated_and_assets_are_deterministic_and_read_onl
     assert "ignored/secret.md" not in first.source_paths
     assert ".next/cache/file" in first.generated_paths
     assert "node_modules/pkg/index.js" in first.generated_paths
-    assert set(first.generated_roots) >= {".next", "node_modules", ".claude/worktrees/feature/.next"}
+    assert set(first.generated_roots) >= {".next", "node_modules", ".claude/worktrees"}
     assert {"AGENTS.md", "CLAUDE.md", ".claude/agents/editor.md", ".claude/skills/editing/SKILL.md", "docs/editorial-guide.md"} <= set(first.assets)
     assert all(action.path not in {"ignored/secret.md", ".next/cache/file"} or action.action == "skip" for action in first.actions)
     assert _snapshot(root) == before
@@ -134,6 +135,25 @@ ownership:
     assert actions["CURSOR.md"].ownership == "seed_once"
     assert actions["GEMINI.md"].action == "preserve"
     assert actions["GEMINI.md"].ownership == "seed_once"
+
+
+def test_template_enumeration_prunes_generated_members_and_is_cache_state_invariant(tmp_path, monkeypatch):
+    root = tmp_path / "host"
+    template = tmp_path / "template"
+    root.mkdir()
+    _write(template, "AGENTS.md", "template\n")
+    _write(template, "scripts/worker.py", "print('ok')\n")
+    monkeypatch.setattr(adoption, "_template_root", lambda: template)
+    before = build_adoption_plan(root)
+    _write(template, "scripts/__pycache__/worker.cpython-311.pyc", "cache")
+    _write(template, ".worktrees/task/file.py", "worktree")
+    _write(template, "src/pkg.egg-info/PKG-INFO", "metadata")
+    _write(template, "web/next-env.d.ts", "generated")
+    after = build_adoption_plan(root)
+    assert tuple(_template_files()) == ("AGENTS.md", "scripts/worker.py")
+    assert tuple(action.path for action in before.actions) == tuple(action.path for action in after.actions)
+    assert plan_json(before) == plan_json(after)
+    assert not any(is_generated_path(path) for path in _template_files())
 
 
 def test_allimbot_shape_and_cli_json_pre_adoption_do_not_write(tmp_path, capsys):

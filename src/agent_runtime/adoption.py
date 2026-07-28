@@ -3,11 +3,12 @@ from __future__ import annotations
 """Read-only brownfield adoption planning; this module intentionally has no apply path."""
 
 import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
 from . import config as _config
-from .inventory import adoption_scan
+from .inventory import adoption_scan, generated_path_root, is_generated_path
 
 
 @dataclass(frozen=True)
@@ -48,11 +49,21 @@ def _template_root() -> Path:
 
 def _template_files() -> dict[str, Path]:
     root = _template_root()
-    return {
-        path.relative_to(root).as_posix(): path
-        for path in sorted(root.rglob("*"), key=lambda item: item.as_posix())
-        if path.is_file() and ".git" not in path.relative_to(root).parts
-    }
+    files: dict[str, Path] = {}
+    for current, directories, names in os.walk(root, followlinks=False):
+        current_path = Path(current)
+        relative_current = current_path.relative_to(root)
+        directories[:] = sorted(
+            directory
+            for directory in directories
+            if directory != ".git" and not is_generated_path(relative_current / directory)
+        )
+        for name in sorted(names):
+            path = current_path / name
+            relative = path.relative_to(root).as_posix()
+            if path.is_file() and not is_generated_path(relative):
+                files[relative] = path
+    return files
 
 
 def _detected_assets(paths: tuple[str, ...]) -> tuple[str, ...]:
@@ -86,14 +97,7 @@ def _ownership(config: _config.AgentRuntimeConfig | None, path: str) -> str:
 
 
 def _generated_roots(paths: tuple[str, ...]) -> tuple[str, ...]:
-    roots = set()
-    for path in paths:
-        parts = path.split("/")
-        for index, part in enumerate(parts):
-            if part in {".next", ".venv", ".vinext", ".wrangler", ".vercel", "build", "dist", "node_modules", ".temp"}:
-                roots.add("/".join(parts[: index + 1]))
-                break
-    return tuple(sorted(roots))
+    return tuple(sorted({root for path in paths if (root := generated_path_root(path)) is not None}))
 
 
 def build_adoption_plan(root: Path) -> AdoptionPlan:

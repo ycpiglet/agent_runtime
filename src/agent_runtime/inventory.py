@@ -20,7 +20,11 @@ SKIP_DIRS = {
     "node_modules",
 }
 
-GENERATED_DIRS = {".next", ".venv", ".vinext", ".wrangler", ".vercel", "build", "dist", "node_modules", "__pycache__", ".pytest_cache", ".temp"}
+GENERATED_COMPONENTS = {
+    ".branches", ".next", ".pytest_cache", ".temp", ".venv", ".vercel", ".vinext", ".worktrees",
+    ".wrangler", "__pycache__", "build", "dist", "node_modules", "worktrees",
+}
+GENERATED_FILENAMES = {"next-env.d.ts", "tsconfig.tsbuildinfo"}
 
 
 @dataclass(frozen=True)
@@ -279,8 +283,20 @@ def iter_repo_paths(root: Path) -> list[Path]:
     return sorted(paths, key=lambda p: p.relative_to(root).as_posix().lower())
 
 
-def is_generated_path(path: str) -> bool:
-    return any(part in GENERATED_DIRS for part in PurePosixPath(path).parts)
+def generated_path_root(path: str | Path) -> str | None:
+    """Return the generated boundary responsible for a repo-relative path."""
+    normalized = _normalize(path)
+    parts = PurePosixPath(normalized).parts
+    for index, part in enumerate(parts):
+        if part in GENERATED_COMPONENTS or part.endswith(".egg-info"):
+            return "/".join(parts[: index + 1])
+    if parts and parts[-1] in GENERATED_FILENAMES:
+        return normalized
+    return None
+
+
+def is_generated_path(path: str | Path) -> bool:
+    return generated_path_root(path) is not None
 
 
 def adoption_scan(root: Path) -> AdoptionScan:
