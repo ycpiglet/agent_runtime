@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-28T22:13:10+09:00
-record_count: 946
+generated_at: 2026-07-28T23:04:38+09:00
+record_count: 947
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `946` review and evidence records under `reviews/`.
+- Summary: indexed `947` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `946` files |
+| Reviews covered | pass | `947` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -977,6 +977,7 @@ record_count: 946
 | `reviews/W4B-2026-07-28-unit-task-ar-641-001-approved.md` | `W4B-2026-07-28-unit-task-ar-641-001-approved` | md | approved | pass | TASK-AR-641 UNIT-001 Final Independent W4b Approval |
 | `reviews/W4B-2026-07-28-unit-task-ar-641-001-final.md` | `W4B-2026-07-28-unit-task-ar-641-001-final` | md | changes_required | fail | TASK-AR-641 UNIT-001 Final Independent W4b |
 | `reviews/W4B-2026-07-28-unit-task-ar-641-001.md` | `W4B-2026-07-28-unit-task-ar-641-001` | md | changes_required | fail | TASK-AR-641 UNIT-001 Independent W4b Verification |
+| `reviews/W4B-2026-07-28-unit-task-ar-642-001-approved.md` | `W4B-2026-07-28-unit-task-ar-642-001-approved` | md | approved | pass | TASK-AR-642 UNIT-001 Independent W4b Approval |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |
