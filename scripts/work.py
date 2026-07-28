@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Any
 
 import backlog_board
+import compound_record
 import evidence_index_generator
 import inflight_overlay
 import now as now_util
@@ -1219,6 +1220,8 @@ def register(root: Path, input_path: Path, *, now: str | None = None) -> dict[st
 
 def _is_plan_flow_script(entry: str) -> bool:
     normalized = entry.replace("\\", "/").strip()
+    if normalized.startswith("new:"):
+        normalized = normalized.removeprefix("new:").strip()
     return normalized.startswith("scripts/") and normalized.endswith(".py")
 
 
@@ -1243,7 +1246,10 @@ def _plan_snapshot_anchors(payload: dict[str, Any], design_record: str) -> list[
         for source in sources:
             for entry in _text_lines(source):
                 if _is_plan_flow_script(entry):
-                    anchors.add(entry.replace("\\", "/").strip())
+                    normalized = entry.replace("\\", "/").strip()
+                    if normalized.startswith("new:"):
+                        normalized = normalized.removeprefix("new:").strip()
+                    anchors.add(normalized)
     return sorted(anchors)
 
 
@@ -2187,6 +2193,122 @@ def _validate_done_closeout(
 
     if not passed_refs:
         findings.append(f"{rel_path}: closeout:no-passed-verification-evidence:{resolved_id}")
+    findings.extend(_validate_linked_closeout_refs(root, meta, resolved_id))
+    return findings
+
+
+def _accepted_work_ids(meta: dict[str, Any], resolved_id: str) -> set[str]:
+    values = {
+        resolved_id,
+        str(meta.get("work_id") or "").strip(),
+        str(meta.get("task_id") or "").strip(),
+        str(meta.get("unit_id") or "").strip(),
+    }
+    parent = str(meta.get("parent_id") or "").strip()
+    if parent.startswith("TASK-"):
+        values.add(parent)
+    return {value for value in values if value}
+
+
+def _review_payload(path: Path) -> dict[str, Any]:
+    if path.suffix.lower() == ".json":
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        return payload if isinstance(payload, dict) else {}
+    meta, _body = backlog_board.parse_frontmatter(path.read_text(encoding="utf-8"))
+    return dict(meta)
+
+
+def _review_links_work(
+    payload: dict[str, Any],
+    *,
+    work_ids: set[str],
+    defect_signatures: list[str],
+) -> bool:
+    linked_work = {
+        str(payload.get(field) or "").strip()
+        for field in ("work_id", "task_id", "unit_id")
+    }
+    if work_ids.intersection(linked_work):
+        return True
+    try:
+        linked_signatures = set(
+            compound_record.normalize_signatures(
+                _list_value(payload.get("defect_signatures"))
+            )
+        )
+    except compound_record.CompoundRecordError:
+        return False
+    return bool(set(defect_signatures).intersection(linked_signatures))
+
+
+def _validate_linked_closeout_refs(
+    root: Path, meta: dict[str, Any], resolved_id: str
+) -> list[str]:
+    findings: list[str] = []
+    work_ids = _accepted_work_ids(meta, resolved_id)
+    try:
+        defect_signatures = compound_record.normalize_signatures(
+            _list_value(meta.get("defect_signatures"))
+        )
+    except compound_record.CompoundRecordError as exc:
+        return [f"{resolved_id}: closeout:{finding}" for finding in exc.findings]
+
+    evidence_refs = set(_list_value(meta.get("evidence_refs")))
+    review_refs = _list_value(meta.get("review_refs"))
+    compound_refs = _list_value(meta.get("compound_refs"))
+    mixed_refs = evidence_refs.intersection({*review_refs, *compound_refs})
+    for ref in sorted(mixed_refs):
+        findings.append(f"{ref}: closeout:mixed-evidence-and-learning-ref")
+
+    for ref in review_refs:
+        try:
+            normalized = compound_record.normalize_ref(ref)
+            path = _resolve_ref(root, normalized)
+            if not path.is_file():
+                findings.append(f"{normalized}: closeout:review-missing")
+                continue
+            payload = _review_payload(path)
+        except (OSError, json.JSONDecodeError, compound_record.CompoundRecordError) as exc:
+            findings.append(f"{ref}: closeout:review-invalid:{exc}")
+            continue
+        if not _review_links_work(
+            payload, work_ids=work_ids, defect_signatures=defect_signatures
+        ):
+            findings.append(f"{normalized}: closeout:review-work-mismatch:{resolved_id}")
+
+    current_compounds = 0
+    for ref in compound_refs:
+        try:
+            _path, record = compound_record.load_record_ref(root, ref)
+        except compound_record.CompoundRecordError as exc:
+            findings.extend(
+                f"{ref}: closeout:{finding}" for finding in exc.findings
+            )
+            continue
+        if not compound_record.record_links(
+            record,
+            work_ids=work_ids,
+            defect_signatures=defect_signatures,
+        ):
+            findings.append(f"{ref}: closeout:compound-work-mismatch:{resolved_id}")
+            continue
+        if work_ids.intersection(record["work_ids"]):
+            current_compounds += 1
+
+    if defect_signatures:
+        try:
+            prior = compound_record.search_records(
+                root, defect_signatures=defect_signatures, limit=100
+            )
+        except compound_record.CompoundRecordError as exc:
+            findings.extend(
+                f"{resolved_id}: closeout:{finding}" for finding in exc.findings
+            )
+        else:
+            if prior and current_compounds == 0:
+                findings.append(
+                    f"{resolved_id}: closeout:repeat-defect-current-compound-required"
+                )
     return findings
 
 
@@ -2200,6 +2322,8 @@ def _closeout_block(
     measurement_unavailable_reason: str,
     closed_by: str,
     evidence_refs: list[str],
+    review_refs: list[str],
+    compound_refs: list[str],
 ) -> str:
     unavailable = bool(measurement_unavailable_reason)
     hours_display = actual_hours or ("unavailable" if unavailable else "-")
@@ -2220,7 +2344,12 @@ def _closeout_block(
             f"- Measurement unavailable reason: {measurement_unavailable_reason}"
         )
     lines.append(f"- Closed by: `{closed_by}`")
-    lines.extend(["- Evidence:", *[f"  - `{ref}`" for ref in evidence_refs], CLOSEOUT_END])
+    lines.extend(["- Verification evidence:", *[f"  - `{ref}`" for ref in evidence_refs]])
+    if review_refs:
+        lines.extend(["- Reviews:", *[f"  - `{ref}`" for ref in review_refs]])
+    if compound_refs:
+        lines.extend(["- Compounds:", *[f"  - `{ref}`" for ref in compound_refs]])
+    lines.append(CLOSEOUT_END)
     return "\n".join(lines)
 
 
@@ -2411,6 +2540,9 @@ def close_work(
     actual_tokens: int | None = None,
     actual_cost: str | None = None,
     measurement_unavailable_reason: str | None = None,
+    review_refs: list[str] | None = None,
+    compound_refs: list[str] | None = None,
+    defect_signatures: list[str] | None = None,
     now: str | None = None,
 ) -> dict[str, Any]:
     root = root.resolve()
@@ -2431,6 +2563,41 @@ def close_work(
     measurement_unavailable_reason_text = " ".join(
         str(measurement_unavailable_reason or "").split()
     )
+    try:
+        normalized_reviews = list(
+            dict.fromkeys(
+                compound_record.normalize_ref(ref)
+                for ref in [
+                    *_list_value(meta.get("review_refs")),
+                    *(review_refs or []),
+                ]
+            )
+        )
+        normalized_compounds = list(
+            dict.fromkeys(
+                compound_record.normalize_ref(ref)
+                for ref in [
+                    *_list_value(meta.get("compound_refs")),
+                    *(compound_refs or []),
+                ]
+            )
+        )
+        normalized_signatures = compound_record.normalize_signatures(
+            [
+                *_list_value(meta.get("defect_signatures")),
+                *(defect_signatures or []),
+            ]
+        )
+    except compound_record.CompoundRecordError as exc:
+        raise WorkRegistrationError(
+            [f"work-close:{finding}" for finding in exc.findings]
+        ) from exc
+    if normalized_reviews:
+        meta["review_refs"] = normalized_reviews
+    if normalized_compounds:
+        meta["compound_refs"] = normalized_compounds
+    if normalized_signatures:
+        meta["defect_signatures"] = normalized_signatures
 
     if resolution == "done":
         findings.extend(
@@ -2450,6 +2617,8 @@ def close_work(
         raise WorkRegistrationError(findings)
 
     refs = _list_value(meta.get("evidence_refs"))
+    review_ref_values = _list_value(meta.get("review_refs"))
+    compound_ref_values = _list_value(meta.get("compound_refs"))
     meta["status"] = "completed"
     meta["resolution"] = resolution
     meta["completed_at"] = now_text
@@ -2475,6 +2644,8 @@ def close_work(
         measurement_unavailable_reason=measurement_unavailable_reason_text,
         closed_by=actor,
         evidence_refs=refs,
+        review_refs=review_ref_values,
+        compound_refs=compound_ref_values,
     )
     _rewrite_frontmatter(path, meta, _replace_closeout_block(body, closeout))
     _refresh_generated_views(root)
@@ -2485,6 +2656,9 @@ def close_work(
         "resolution": resolution,
         "completed_at": now_text,
         "evidence_refs": refs,
+        "review_refs": review_ref_values,
+        "compound_refs": compound_ref_values,
+        "defect_signatures": _list_value(meta.get("defect_signatures")),
         "actual_hours": actual_hours_text,
         "actual_tokens": actual_tokens_text,
         "actual_cost": actual_cost_text,
@@ -3325,6 +3499,9 @@ def cmd_close(args: argparse.Namespace) -> int:
             actual_tokens=args.actual_tokens,
             actual_cost=args.actual_cost,
             measurement_unavailable_reason=args.measurement_unavailable_reason,
+            review_refs=args.review_ref,
+            compound_refs=args.compound_ref,
+            defect_signatures=args.defect_signature,
             now=args.now,
         )
     except WorkRegistrationError as exc:
@@ -3530,6 +3707,24 @@ def build_parser() -> argparse.ArgumentParser:
     close_cmd.add_argument("--actual-hours")
     close_cmd.add_argument("--actual-tokens", type=int)
     close_cmd.add_argument("--actual-cost")
+    close_cmd.add_argument(
+        "--review-ref",
+        action="append",
+        default=[],
+        help="Task/signature-linked review record (repeatable; kept separate from verification evidence)",
+    )
+    close_cmd.add_argument(
+        "--compound-ref",
+        action="append",
+        default=[],
+        help="Validated canonical compound record (repeatable; kept separate from verification evidence)",
+    )
+    close_cmd.add_argument(
+        "--defect-signature",
+        action="append",
+        default=[],
+        help="Explicit defect signature or stable raw defect phrase (repeatable)",
+    )
     close_cmd.add_argument(
         "--measurement-unavailable-reason",
         help=(

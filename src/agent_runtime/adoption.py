@@ -97,9 +97,7 @@ def _ownership(config: _config.AgentRuntimeConfig | None, path: str) -> str:
         for mode, paths in config.ownership:
             if any(path == candidate or path.startswith(candidate.rstrip("/") + "/") for candidate in paths):
                 return mode
-    if path in {"AGENTS.md", "CLAUDE.md", "CURSOR.md", "GEMINI.md", "agents/project/NEXT-SESSION-POINTER.yml"}:
-        return "seed_once"
-    return "managed"
+    return _config.default_ownership(path)
 
 
 def _generated_roots(paths: tuple[str, ...]) -> tuple[str, ...]:

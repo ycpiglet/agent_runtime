@@ -42,6 +42,11 @@ import json
 from pathlib import Path
 from typing import Any
 
+try:
+    import compound_record
+except ImportError:  # imported as scripts.<name>
+    from scripts import compound_record
+
 REPORT_SCHEMA = "agent-runtime-compound-cadence/v1"
 REVIEWS_DIR = Path("reviews")
 DEFAULT_RATIO = 20
@@ -66,11 +71,26 @@ def _count_files(reviews_dir: Path) -> tuple[int, int, int]:
     return review_count, compound_count, retro_count
 
 
+def _count_all(root: Path) -> tuple[int, int, int, int]:
+    review_count, legacy_compounds, retro_count = _count_files(root / REVIEWS_DIR)
+    try:
+        canonical_compounds = len(compound_record.load_records(root))
+    except compound_record.CompoundRecordError:
+        # Invalid records are not credited toward cadence. The compound-record
+        # integrity check reports the concrete malformed-store finding.
+        canonical_compounds = 0
+    return (
+        review_count,
+        legacy_compounds + canonical_compounds,
+        retro_count,
+        canonical_compounds,
+    )
+
+
 def analyze(root: Path, *, ratio: int = DEFAULT_RATIO) -> list[dict[str, Any]]:
     """Analyze reviews under root and return a list of finding dicts."""
     root = root.resolve()
-    reviews_dir = root / REVIEWS_DIR
-    review_count, compound_count, retro_count = _count_files(reviews_dir)
+    review_count, compound_count, retro_count, _canonical_count = _count_all(root)
 
     compound_retro_total = compound_count + retro_count
     findings: list[dict[str, Any]] = []
@@ -113,8 +133,7 @@ def build_report(
     ratio: int = DEFAULT_RATIO,
 ) -> dict[str, Any]:
     root = root.resolve()
-    reviews_dir = root / REVIEWS_DIR
-    review_count, compound_count, retro_count = _count_files(reviews_dir)
+    review_count, compound_count, retro_count, canonical_count = _count_all(root)
     compound_retro_total = compound_count + retro_count
 
     if review_count > 0 and compound_retro_total > 0:
@@ -132,6 +151,7 @@ def build_report(
         "counts": {
             "reviews": review_count,
             "compounds": compound_count,
+            "canonical_compounds": canonical_count,
             "retros": retro_count,
             "compound_retro_total": compound_retro_total,
             "ratio": actual_ratio,

@@ -112,6 +112,65 @@ def test_sync_and_smoke_runtime_scripts(tmp_path):
         assert result.returncode == 0
 
 
+def test_synced_host_creates_and_searches_canonical_compound_record(tmp_path):
+    host = _host_from_fixture(tmp_path)
+    env = dict(os.environ, PYTHONPATH=str(REPO_ROOT / "src"))
+    _run(
+        [PYTHON, "-m", "agent_runtime.cli", "sync", "--root", str(host), "--apply"],
+        cwd=REPO_ROOT,
+        env=env,
+    )
+
+    created = _run(
+        [
+            PYTHON,
+            "scripts/compound_record.py",
+            "--root",
+            str(host),
+            "create",
+            "--work-id",
+            "TASK-AR-645",
+            "--signature",
+            "kedb ignored canonical records",
+            "--title",
+            "Search canonical knowledge",
+            "--summary",
+            "The legacy reader did not see per-record knowledge.",
+            "--cause",
+            "KEDB only parsed one Markdown file.",
+            "--prevention",
+            "Search validated canonical records before legacy fallback.",
+            "--source-ref",
+            "reviews/REVIEW-source.md",
+            "--prevention-ref",
+            "scripts/kedb_search.py",
+            "--verification-ref",
+            "tests/test_template_smoke.py",
+            "--created-at",
+            "2026-07-29T05:00:00+09:00",
+        ],
+        cwd=host,
+    )
+    assert json.loads(created.stdout)["status"] == "created"
+
+    searched = _run(
+        [
+            PYTHON,
+            "scripts/kedb_search.py",
+            "--root",
+            str(host),
+            "--work-id",
+            "TASK-AR-645",
+            "--format",
+            "json",
+        ],
+        cwd=host,
+    )
+    rows = json.loads(searched.stdout)
+    assert rows[0]["source"] == "record"
+    assert rows[0]["work_ids"] == ["TASK-AR-645"]
+
+
 def test_worker_processes_one_dummy_message(tmp_path):
     host = _host_from_fixture(tmp_path)
     env = dict(os.environ)
