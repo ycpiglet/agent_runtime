@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-28T23:44:26+09:00
+generated_at: 2026-07-29T00:57:52+09:00
 record_count: 519
 ---
 
@@ -539,8 +539,8 @@ record_count: 519
 | 41.1.3.1 | Unit 41.1.3.1 | unit | `UNIT-TASK-AR-641-001` | `TASK-AR-641` | completed | `agents/lead_engineer/tasks/units/TASK-AR-641/UNIT-TASK-AR-641-001.md` | UNIT-TASK-AR-641-001 - Implement read-only brownfield adoption planner |
 | 41.1.4 | Task 41.1.4 | task | `TASK-AR-642` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | `agents/lead_engineer/tasks/TASK-AR-642.md` | Update safe runtime files without overwriting host state or allowing one expected sea… |
 | 41.1.4.1 | Unit 41.1.4.1 | unit | `UNIT-TASK-AR-642-001` | `TASK-AR-642` | completed | `agents/lead_engineer/tasks/units/TASK-AR-642/UNIT-TASK-AR-642-001.md` | UNIT-TASK-AR-642-001 - Implement ownership manifest and sync reconcile |
-| 41.1.5 | Task 41.1.5 | task | `TASK-AR-643` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | in_progress | `agents/lead_engineer/tasks/TASK-AR-643.md` | Guarantee that every capability advertised to a clean host has all executable depende… |
-| 41.1.5.1 | Unit 41.1.5.1 | unit | `UNIT-TASK-AR-643-001` | `TASK-AR-643` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-643/UNIT-TASK-AR-643-001.md` | UNIT-TASK-AR-643-001 - Add profile-aware asset dependency closure and clean-host lifecycle smoke |
+| 41.1.5 | Task 41.1.5 | task | `TASK-AR-643` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | `agents/lead_engineer/tasks/TASK-AR-643.md` | Guarantee that every capability advertised to a clean host has all executable depende… |
+| 41.1.5.1 | Unit 41.1.5.1 | unit | `UNIT-TASK-AR-643-001` | `TASK-AR-643` | completed | `agents/lead_engineer/tasks/units/TASK-AR-643/UNIT-TASK-AR-643-001.md` | UNIT-TASK-AR-643-001 - Add profile-aware asset dependency closure and clean-host lifecycle smoke |
 | 41.1.6 | Task 41.1.6 | task | `TASK-AR-644` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-644.md` | Make the harness actually enter and re-enter its governance path on supported agent c… |
 | 41.1.6.1 | Unit 41.1.6.1 | unit | `UNIT-TASK-AR-644-001` | `TASK-AR-644` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-644/UNIT-TASK-AR-644-001.md` | UNIT-TASK-AR-644-001 - Replace platform-specific hook shims with verified Python entrypoints |
 | 41.1.7 | Task 41.1.7 | task | `TASK-AR-645` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-645.md` | Prevent repeated mistakes and accumulated context without forcing every host into one… |
