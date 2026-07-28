@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-28T20:31:23+09:00
-record_count: 934
+generated_at: 2026-07-28T20:43:34+09:00
+record_count: 935
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `934` review and evidence records under `reviews/`.
+- Summary: indexed `935` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `934` files |
+| Reviews covered | pass | `935` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -827,6 +827,7 @@ record_count: 934
 | `reviews/VERIFY-2026-07-27-unit-task-ar-631-001-20260727111227.json` | `VERIFY-2026-07-27-unit-task-ar-631-001-20260727111227` | json | record | n/a | VERIFY-2026-07-27-unit-task-ar-631-001-20260727111227 |
 | `reviews/VERIFY-2026-07-28-task-ar-631-20260728163046.json` | `VERIFY-2026-07-28-task-ar-631-20260728163046` | json | record | n/a | VERIFY-2026-07-28-task-ar-631-20260728163046 |
 | `reviews/VERIFY-2026-07-28-task-ar-639-20260728191831.json` | `VERIFY-2026-07-28-task-ar-639-20260728191831` | json | record | n/a | VERIFY-2026-07-28-task-ar-639-20260728191831 |
+| `reviews/VERIFY-2026-07-28-task-ar-640-20260728204500.json` | `VERIFY-2026-07-28-task-ar-640-20260728204500` | json | record | n/a | VERIFY-2026-07-28-task-ar-640-20260728204500 |
 | `reviews/VERIFY-2026-07-28-unit-task-ar-639-001-20260728170913.json` | `VERIFY-2026-07-28-unit-task-ar-639-001-20260728170913` | json | record | n/a | VERIFY-2026-07-28-unit-task-ar-639-001-20260728170913 |
 | `reviews/VERIFY-2026-07-28-unit-task-ar-639-002-20260728181538.json` | `VERIFY-2026-07-28-unit-task-ar-639-002-20260728181538` | json | record | n/a | VERIFY-2026-07-28-unit-task-ar-639-002-20260728181538 |
 | `reviews/VERIFY-2026-07-28-unit-task-ar-639-002-20260728183121.json` | `VERIFY-2026-07-28-unit-task-ar-639-002-20260728183121` | json | record | n/a | VERIFY-2026-07-28-unit-task-ar-639-002-20260728183121 |

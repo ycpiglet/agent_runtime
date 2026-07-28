@@ -9,10 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T19:48:21+09:00
+updated_at: 2026-07-28T20:45:30+09:00
 started_at: 2026-07-28T19:48:21+09:00
 title: Introduce profile and ownership-aware host configuration
-status: in_progress
+status: completed
 priority: P0
 difficulty: L
 est_hours: 10
@@ -35,6 +35,15 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+verification_status: passed
+verified_at: 2026-07-28T20:45:00+09:00
+verified_by: codex-root-v080-w6
+evidence_refs:
+  - reviews/VERIFY-2026-07-28-task-ar-640-20260728204500.json
+resolution: done
+completed_at: 2026-07-28T20:45:30+09:00
+closed_by: codex-root-v080-w6
+measurement_unavailable_reason: Task execution included W0 contract revalidation, repeated adversarial W4b repairs, PR and matrix CI, and lifecycle closeout before reliable task-level time and token metering was available.
 ---
 
 # TASK-AR-640 - Introduce profile and ownership-aware host configuration
@@ -57,3 +66,16 @@ tags:
 ## Verification
 
 - `python -m pytest tests/test_doctor.py tests/test_project_context_overlay.py tests/test_host_context_read_location.py tests/test_inventory_sync_sanitize.py -q`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-28T20:45:30+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Task execution included W0 contract revalidation, repeated adversarial W4b repairs, PR and matrix CI, and lifecycle closeout before reliable task-level time and token metering was available.
+- Closed by: `codex-root-v080-w6`
+- Evidence:
+  - `reviews/VERIFY-2026-07-28-task-ar-640-20260728204500.json`
+<!-- work-close:end -->
