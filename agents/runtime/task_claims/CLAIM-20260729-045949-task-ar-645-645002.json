@@ -9,7 +9,7 @@
   "callsite_id": "codex:root:task-ar-645-unit-002",
   "pane_id": "codex:root:task-ar-645-unit-002",
   "mode": "implementation",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "active_scope": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "scope_transition_approved": true,
@@ -27,12 +27,12 @@
   "worktree_path": "/home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-645-002",
   "branch": "codex/unit-task-ar-645-002-wave",
   "claimed_at": "2026-07-29T04:59:49+09:00",
-  "last_heartbeat": "2026-07-29T04:59:49+09:00",
-  "updated_at": "2026-07-29T04:59:49+09:00",
+  "last_heartbeat": "2026-07-29T05:43:40+09:00",
+  "updated_at": "2026-07-29T05:43:40+09:00",
   "expires_at": "2026-07-29T10:59:49+09:00",
   "lease": {
     "claimed_at": "2026-07-29T04:59:49+09:00",
-    "heartbeat_at": "2026-07-29T04:59:49+09:00",
+    "heartbeat_at": "2026-07-29T05:43:40+09:00",
     "expires_at": "2026-07-29T10:59:49+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260729-045949-task-ar-645-645002.handoff.md",
@@ -82,5 +82,9 @@
     "tests/fixtures/state_projection/allimbot-project-status.ko.md",
     "tests/fixtures/state_projection/autofolio-status.md",
     "tests/fixtures/state_projection/generic-state.json"
-  ]
+  ],
+  "released_at": "2026-07-29T05:43:40+09:00",
+  "verified_by": "codex-root-v080-w4b-independent",
+  "verifier_role": "independent-verifier",
+  "verification_evidence": "reviews/W4B-2026-07-29-unit-task-ar-645-002.md"
 }

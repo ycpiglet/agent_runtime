@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T05:42:48+09:00
-record_count: 976
+generated_at: 2026-07-29T05:48:40+09:00
+record_count: 979
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `976` review and evidence records under `reviews/`.
+- Summary: indexed `979` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `976` files |
+| Reviews covered | pass | `979` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -857,6 +857,7 @@ record_count: 976
 | `reviews/VERIFY-2026-07-29-task-ar-644-20260729023558.json` | `VERIFY-2026-07-29-task-ar-644-20260729023558` | json | record | n/a | VERIFY-2026-07-29-task-ar-644-20260729023558 |
 | `reviews/VERIFY-2026-07-29-task-ar-644-20260729025243.json` | `VERIFY-2026-07-29-task-ar-644-20260729025243` | json | record | n/a | VERIFY-2026-07-29-task-ar-644-20260729025243 |
 | `reviews/VERIFY-2026-07-29-task-ar-644-20260729031017.json` | `VERIFY-2026-07-29-task-ar-644-20260729031017` | json | record | n/a | VERIFY-2026-07-29-task-ar-644-20260729031017 |
+| `reviews/VERIFY-2026-07-29-task-ar-645-20260729054620.json` | `VERIFY-2026-07-29-task-ar-645-20260729054620` | json | record | n/a | VERIFY-2026-07-29-task-ar-645-20260729054620 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-643-001-20260729003236.json` | `VERIFY-2026-07-29-unit-task-ar-643-001-20260729003236` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-643-001-20260729003236 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-643-001-20260729005339.json` | `VERIFY-2026-07-29-unit-task-ar-643-001-20260729005339` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-643-001-20260729005339 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142.json` | `VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142 |
@@ -866,6 +867,8 @@ record_count: 976
 | `reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729041748.json` | `VERIFY-2026-07-29-unit-task-ar-645-001-20260729041748` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-645-001-20260729041748 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729042042.json` | `VERIFY-2026-07-29-unit-task-ar-645-001-20260729042042` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-645-001-20260729042042 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729043455.json` | `VERIFY-2026-07-29-unit-task-ar-645-001-20260729043455` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-645-001-20260729043455 |
+| `reviews/VERIFY-2026-07-29-unit-task-ar-645-002-20260729054357.json` | `VERIFY-2026-07-29-unit-task-ar-645-002-20260729054357` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-645-002-20260729054357 |
+| `reviews/VERIFY-2026-07-29-unit-task-ar-645-002-20260729054503.json` | `VERIFY-2026-07-29-unit-task-ar-645-002-20260729054503` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-645-002-20260729054503 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |

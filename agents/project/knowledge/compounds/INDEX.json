@@ -1,0 +1,35 @@
+{
+  "by_signature": {
+    "defect:source-layout-cli-verification-omitted-pythonpat:737e2a5c17884615": [
+      "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
+    ]
+  },
+  "by_work": {
+    "TASK-AR-645": [
+      "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
+    ],
+    "UNIT-TASK-AR-645-002": [
+      "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
+    ]
+  },
+  "record_count": 1,
+  "records": [
+    {
+      "created_at": "2026-07-29T05:46:10+09:00",
+      "defect_signatures": [
+        "defect:source-layout-cli-verification-omitted-pythonpat:737e2a5c17884615"
+      ],
+      "id": "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c.json",
+      "recurrence_count": 1,
+      "status": "resolved",
+      "title": "Source-layout CLI verification must declare PYTHONPATH",
+      "work_ids": [
+        "TASK-AR-645",
+        "UNIT-TASK-AR-645-002"
+      ]
+    }
+  ],
+  "schema": "agent-runtime-compound-index/v1",
+  "source_digest": "sha256:4e7ca9f70624d5822967f46652e8c23bcb0a2af16a136b68d776d664d3323bd1"
+}
