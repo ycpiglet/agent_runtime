@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-28T23:20:11+09:00",
+  "generated_at": "2026-07-28T23:44:26+09:00",
   "record_count": 519,
   "finding_count": 0,
   "findings": [],
@@ -5514,7 +5514,7 @@
       "title": "Guarantee that every capability advertised to a clean host has all executable depende…",
       "path": "agents/lead_engineer/tasks/TASK-AR-643.md",
       "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
-      "status": "planned"
+      "status": "in_progress"
     },
     {
       "key": "unit:UNIT-TASK-AR-643-001",
@@ -5525,7 +5525,7 @@
       "title": "UNIT-TASK-AR-643-001 - Add profile-aware asset dependency closure and clean-host lifecycle smoke",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-643/UNIT-TASK-AR-643-001.md",
       "parent_id": "TASK-AR-643",
-      "status": "worker_ready"
+      "status": "in_progress"
     },
     {
       "key": "task:TASK-AR-644",
