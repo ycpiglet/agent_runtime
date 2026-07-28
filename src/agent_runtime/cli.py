@@ -4,6 +4,7 @@ import argparse
 import sys
 
 from . import __version__
+from . import adoption
 from . import doctor
 from . import exporter
 from . import host_update
@@ -33,6 +34,11 @@ def build_parser() -> argparse.ArgumentParser:
     inventory_parser.add_argument("--json", action="store_true", help="Emit machine-readable inventory")
     inventory_parser.add_argument("--check", action="store_true", help="Fail if unsafe paths are export candidates")
     inventory_parser.add_argument("--limit", type=int, default=20, help="Text report export-candidate sample size")
+
+    adopt_parser = subparsers.add_parser("adopt", help="Plan read-only brownfield Agent Runtime adoption")
+    adopt_parser.add_argument("--root", type=adoption.Path, default=adoption.Path.cwd(), help="Host project root")
+    adopt_parser.add_argument("--plan", action="store_true", help="Emit a read-only adoption plan (required)")
+    adopt_parser.add_argument("--json", action="store_true", help="Emit machine-readable plan")
 
     sync_parser = subparsers.add_parser("sync", help="Check/diff/apply host template updates")
     sync_parser.add_argument("--root", type=sync.Path, default=sync.Path.cwd(), help="Host project root")
@@ -169,6 +175,7 @@ def build_parser() -> argparse.ArgumentParser:
     doctor_parser.add_argument("--check", action="store_true", help="Fail if blocker findings exist")
     doctor_parser.add_argument("--repair", action="store_true", help="Attempt safe host repairs")
     doctor_parser.add_argument("--json", action="store_true", help="Emit machine-readable doctor report")
+    doctor_parser.add_argument("--pre-adoption", action="store_true", help="Run read-only brownfield adoption readiness checks")
 
     ui_state_parser = subparsers.add_parser("ui-state", help="Emit read-only UI runtime state")
     ui_state_parser.add_argument("--root", type=ui_state.Path, default=ui_state.Path.cwd(), help="Host project root")
@@ -199,6 +206,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "inventory":
         return inventory.run_inventory(args.root, json_output=args.json, check=args.check, limit=args.limit)
+    if args.command == "adopt":
+        return adoption.run_adopt(args.root, plan_only=args.plan, json_output=args.json)
     if args.command == "sync":
         if args.check:
             mode = "check"
@@ -293,7 +302,7 @@ def main(argv: list[str] | None = None) -> int:
             warning_summary_gate_strict_refs=args.warning_summary_gate_strict_refs,
         )
     if args.command == "doctor":
-        return doctor.run_doctor(args.root, check=args.check, repair=args.repair, json_output=args.json)
+        return doctor.run_doctor(args.root, check=args.check, repair=args.repair, json_output=args.json, pre_adoption=args.pre_adoption)
     if args.command == "ui-state":
         return ui_state.run_ui_state(args.root, resource=args.resource, json_output=args.json)
     if args.command == "ui-console":

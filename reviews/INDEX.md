@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-28T20:53:12+09:00
-record_count: 936
+generated_at: 2026-07-28T21:02:42+09:00
+record_count: 937
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `936` review and evidence records under `reviews/`.
+- Summary: indexed `937` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `936` files |
+| Reviews covered | pass | `937` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -839,6 +839,7 @@ record_count: 936
 | `reviews/VERIFY-2026-07-28-unit-task-ar-640-001-20260728202110.json` | `VERIFY-2026-07-28-unit-task-ar-640-001-20260728202110` | json | record | n/a | VERIFY-2026-07-28-unit-task-ar-640-001-20260728202110 |
 | `reviews/VERIFY-2026-07-28-unit-task-ar-640-001-20260728202444.json` | `VERIFY-2026-07-28-unit-task-ar-640-001-20260728202444` | json | record | n/a | VERIFY-2026-07-28-unit-task-ar-640-001-20260728202444 |
 | `reviews/VERIFY-2026-07-28-unit-task-ar-640-001-20260728203048.json` | `VERIFY-2026-07-28-unit-task-ar-640-001-20260728203048` | json | record | n/a | VERIFY-2026-07-28-unit-task-ar-640-001-20260728203048 |
+| `reviews/VERIFY-2026-07-28-unit-task-ar-641-001-20260728210208.json` | `VERIFY-2026-07-28-unit-task-ar-641-001-20260728210208` | json | record | n/a | VERIFY-2026-07-28-unit-task-ar-641-001-20260728210208 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
