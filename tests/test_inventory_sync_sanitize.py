@@ -899,6 +899,26 @@ def test_apply_safe_writes_independent_updates_but_legacy_apply_is_atomic(tmp_pa
     assert (host / "scripts/conflict.py").read_text(encoding="utf-8") == "host\n"
 
 
+def test_reconcile_digest_matches_v2_lock_and_unsafe_ancestor_never_writes(tmp_path):
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    _write(host / "agent_runtime.yml", "project: demo\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\n")
+    _write(templates / "linked" / "file.py", "new\n")
+    (host / "linked").symlink_to(outside, target_is_directory=True)
+    from agent_runtime.sync import reconcile_json
+    plan = build_sync_plan(host, template_root=templates)
+    assert plan.conflicts and plan.conflicts[0].safety == "unsafe"
+    assert run_sync(host, "diff", template_root=templates) == 0
+    assert run_sync(host, "apply-safe", template_root=templates) == 1
+    assert not (outside / "file.py").exists()
+    record = build_lock_record(host, template_root=templates)
+    payload = json.loads(reconcile_json(plan))
+    assert payload["lock_migration"] == "new"
+    assert payload["template_digest"] == record["installed"]["template_digest"]
+
+
 def test_template_files_use_stable_posix_relative_order(tmp_path):
     _write(tmp_path / "AGENT_RUNTIME.md", "runtime\n")
     _write(tmp_path / "AGENTS.md", "agents\n")
