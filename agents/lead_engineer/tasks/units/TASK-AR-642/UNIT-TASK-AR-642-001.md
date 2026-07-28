@@ -13,7 +13,7 @@ status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T22:36:47+09:00
+updated_at: 2026-07-28T22:50:34+09:00
 started_at: 2026-07-28T22:14:34+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md

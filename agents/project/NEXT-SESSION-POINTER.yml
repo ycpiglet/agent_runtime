@@ -1,5 +1,5 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-28T22:36:47+09:00
+updated_at: 2026-07-28T22:50:34+09:00
 updated_by: le-20260728-221434-kst-642001
 current_state:
   summary: "UNIT-TASK-AR-642-001 is implementing ownership-aware sync, deterministic reconcile, and explicit safe-only application."
@@ -8,8 +8,8 @@ current_state:
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
   step_index: 3
   step_total: 6
-  progress_pct: 65
-  status_text: "W4b found an apply-time symlink escape and stale v1 canonical fixture; the claimed worker is reworking both before re-verification."
+  progress_pct: 78
+  status_text: "The apply-time escape and v2 fixture are fixed; W4b found missing profiles/capabilities in lock v2, so bounded metadata rework is active."
 active_work:
   current_agents:
     - claim_id: CLAIM-20260728-221434-task-ar-642-642001
