@@ -1,0 +1,25 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-28-task-ar-640-20260728204500",
+  "work_id": "TASK-AR-640",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-640.md",
+  "kind": "task",
+  "task_id": "TASK-AR-640",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-28T20:45:00+09:00",
+  "verified_by": "codex-root-v080-w6",
+  "command_count": 1,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_doctor.py tests/test_project_context_overlay.py tests/test_host_context_read_location.py tests/test_inventory_sync_sanitize.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-28T20:43:18+09:00",
+      "finished_at": "2026-07-28T20:43:27+09:00",
+      "stdout": "........................................................................ [ 63%]\n..........................................                               [100%]\n=============================== warnings summary ===============================\nsrc/agent_runtime/ui_console_assets.py:8274\n  /home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-640-closeout/src/agent_runtime/ui_console_assets.py:8274: DeprecationWarning: invalid escape sequence '\\/'\n    \"\"\" + ui_design_assets.UI_COMPONENTS_JS + \"\"\"\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n114 passed, 1 warning in 8.50s\n",
+      "stderr": ""
+    }
+  ]
+}

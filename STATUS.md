@@ -1,11 +1,11 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-07-28 - TASK-AR-631 recovery and TASK-AR-639 complete; TASK-AR-640 next
+## 2026-07-28 - TASK-AR-640 complete; TASK-AR-641 next
 
-- Completed: `TASK-AR-631` in `TASKSET-AR-CONSOLE-OVERHAUL-P1` passed independent W4b at implementation commit `8be1fe24`; its lifecycle-only recovery is now closed without fabricating a historical claim or measurements.
-- Completed: `TASK-AR-639` restored task/unit/claim/pointer/branch/worktree state reconciliation and Work CLI producer-consumer parity; parent verification passed with zero state-sync findings.
-- Registered: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` contains `TASK-AR-639` through `TASK-AR-651`; `TASK-AR-639` is closed and `TASK-AR-640` is the next W0 target, with the remaining units covering brownfield profiles/adoption/sync, consumer closure, hooks, compound/scribe, model economy, Allimbot, pilots, migration, and RC.
-- Next: begin `TASK-AR-640` at W0, revalidate profile/config assumptions, then create a clean W2 worker claim only after the scope is evidence-backed.
+- Completed: `TASK-AR-640` added the backward-compatible config v2 diagnostic contract for profiles, capabilities, ownership modes, host context, and stable doctor JSON without enabling host mutation.
+- Quality: independent W4b approved 97/100; PR #358 passed Python 3.10, 3.11, and 3.12 CI and merged at `2c67d37d`.
+- Registered: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` now advances to `TASK-AR-641`, with later tasks covering ownership-aware sync, dependency closure, portable lifecycle hooks, compound/scribe, model economy, Allimbot, pilots, Autofolio migration, and RC.
+- Next: begin `TASK-AR-641` at W0, revalidate read-only brownfield adoption and generated-tree filtering boundaries, then create a clean W2 worker claim.
 
 ## 2026-07-23 - TASK-AR-621 complete; TASK-AR-622 next
 

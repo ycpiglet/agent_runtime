@@ -7,10 +7,10 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-28T20:37:14+09:00
+generated_at: 2026-07-28T20:44:00+09:00
 task_count: 315
-open_count: 27
-completed_count: 288
+open_count: 26
+completed_count: 289
 task_set_count: 3
 completed_task_set_count: 63
 ---
@@ -18,11 +18,11 @@ completed_task_set_count: 63
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `27` open or active tasks; `288` completed tasks are archived from this live board.
+- Summary: `26` open or active tasks; `289` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `22` / Ask `5` / Review `0` / Later `0` / Done `288`.
+- Status: Action `22` / Ask `4` / Review `0` / Later `0` / Done `289`.
 - Task Sets: `3` active workflows; `63` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -76,11 +76,10 @@ completed_task_set_count: 63
 ### v0.8 Adoption and Enforcement (`TASKSET-AR-V080-ADOPTION-ENFORCEMENT`)
 
 - Flow: Deliver brownfield profiles, lifecycle truth, consumer-complete assets, continuity hooks, knowledge and model-economy enforcement, then validate two pilots and one upgrade rehearsal.
-- Progress: `1/13` done; `12` open or active.
+- Progress: `2/13` done; `11` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-640` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-640/UNIT-TASK-AR-640-001.md | in_progress | Ask | P0 | Critical | High | 10h/22000tok | Medium | 8 | agent-runtime-core | lead-engineer | Owner/agent decision | Represent shared capabilities and host ownership without requiring a project-specific… |
 | `TASK-AR-648` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-001.md | planned | Action | P0 | Critical | Medium | 8h/16000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Prove lightweight adoption preserves the existing editorial harness while adding task… |
 | `TASK-AR-651` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-651/UNIT-TASK-AR-651-001.md | planned | Action | P0 | Critical | High | 8h/16000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Produce an exact, installable v0.8.0-rc.1 candidate whose release claims are backed b… |
 | `TASK-AR-643` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-643/UNIT-TASK-AR-643-001.md | planned | Action | P0 | Critical | High | 10h/22000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Guarantee that every capability advertised to a clean host has all executable depende… |
@@ -165,12 +164,12 @@ completed_task_set_count: 63
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `36` — cost_anomalies `36` (single source: scripts/attention_inbox.py = console cockpit, TASK-AR-630).
-- Owner lanes: triage awaiting `0`, owner-decision (Ask) `5` (TASK-AR-538).
+- Owner lanes: triage awaiting `0`, owner-decision (Ask) `4` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `27` open across `3` task sets (see Action Board above).
-- Throughput (7d): `26` tasks completed in the last 7 days (TASK-AR-627).
+- Active: `26` open across `3` task sets (see Action Board above).
+- Throughput (7d): `27` tasks completed in the last 7 days (TASK-AR-627).
 - Archived task sets: `63` (see Archived Task Sets above).
-- Archived task files: `288` — see `ARCHIVE-INDEX.md`.
+- Archived task files: `289` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.
