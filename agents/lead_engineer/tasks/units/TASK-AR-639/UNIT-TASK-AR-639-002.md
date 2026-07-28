@@ -9,11 +9,11 @@ task_id: TASK-AR-639
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T18:54:09+09:00
+updated_at: 2026-07-28T19:08:33+09:00
 started_at: 2026-07-28T17:55:15+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -70,6 +70,10 @@ evidence_refs:
   - reviews/VERIFY-2026-07-28-unit-task-ar-639-002-20260728183401.json
   - reviews/VERIFY-2026-07-28-unit-task-ar-639-002-20260728184625.json
   - reviews/W4B-2026-07-28-unit-task-ar-639-002-recheck-2.md
+resolution: done
+completed_at: 2026-07-28T19:08:33+09:00
+closed_by: codex-root-v080-w6
+measurement_unavailable_reason: Work spanned repeated adversarial W4b repairs, CI, claim release, and manual lifecycle projection before reliable per-unit time and token metering was available.
 ---
 
 # UNIT-TASK-AR-639-002 - Block task-claim-projection split-brain and support explicit recovery
@@ -144,3 +148,20 @@ Provide the contradiction matrix, recovery schema, and governance-chain result.
 ## Stop Boundary
 
 Stop before inventing a generic event-sourcing migration or mutating completed historical claims.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-28T19:08:33+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Work spanned repeated adversarial W4b repairs, CI, claim release, and manual lifecycle projection before reliable per-unit time and token metering was available.
+- Closed by: `codex-root-v080-w6`
+- Evidence:
+  - `reviews/VERIFY-2026-07-28-unit-task-ar-639-002-20260728181538.json`
+  - `reviews/VERIFY-2026-07-28-unit-task-ar-639-002-20260728183121.json`
+  - `reviews/VERIFY-2026-07-28-unit-task-ar-639-002-20260728183401.json`
+  - `reviews/VERIFY-2026-07-28-unit-task-ar-639-002-20260728184625.json`
+  - `reviews/W4B-2026-07-28-unit-task-ar-639-002-recheck-2.md`
+<!-- work-close:end -->
