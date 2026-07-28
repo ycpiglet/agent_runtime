@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-28T19:18:51+09:00
-record_count: 925
+generated_at: 2026-07-28T19:45:25+09:00
+record_count: 927
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `925` review and evidence records under `reviews/`.
+- Summary: indexed `927` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `925` files |
+| Reviews covered | pass | `927` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -73,6 +73,7 @@ record_count: 925
 | `reviews/COMPOUND-2026-06-21-business-operating-system.md` | `COMPOUND-2026-06-21-business-operating-system` | compound | recorded | pass | Business Operating System Compound Note |
 | `reviews/COMPOUND-2026-06-22-release-ops-and-concurrency.md` | `COMPOUND-2026-06-22-release-ops-and-concurrency` | compound | recorded | pass | Release-ops + shared-checkout concurrency compound |
 | `reviews/COMPOUND-2026-07-04-silent-wiring-and-stale-state.md` | `COMPOUND-2026-07-04-silent-wiring-and-stale-state` | compound | recorded | pass | Silent cross-step wiring failures + stale open-state compound |
+| `reviews/COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction.md` | `COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction` | compound | recorded | watch | v0.8 lifecycle, closeout, and CI friction |
 | `reviews/CONTEXT-KNOWLEDGE-GATE-2026-06-11-final.json` | `CONTEXT-KNOWLEDGE-GATE-2026-06-11-final` | json | record | n/a | CONTEXT-KNOWLEDGE-GATE-2026-06-11-final |
 | `reviews/CORRECTION-COLLECTOR-2026-06-09-task-ar-207.json` | `CORRECTION-COLLECTOR-2026-06-09-task-ar-207` | json | record | n/a | CORRECTION-COLLECTOR-2026-06-09-task-ar-207 |
 | `reviews/CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current.json` | `CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current` | json | record | n/a | CORRECTION-COLLECTOR-2026-06-10-task-ar-207-current |
@@ -585,6 +586,7 @@ record_count: 925
 | `reviews/REVIEW-2026-07-26-taskset-ar-console-overhaul-p0-registration.md` | `REVIEW-2026-07-26-taskset-ar-console-overhaul-p0-registration` | md | record | pass | Console Overhaul P0 — Trust & Hygiene Registration |
 | `reviews/REVIEW-2026-07-26-taskset-ar-console-overhaul-p1-registration.md` | `REVIEW-2026-07-26-taskset-ar-console-overhaul-p1-registration` | md | record | pass | Console Overhaul P1 — Core Structure Registration |
 | `reviews/REVIEW-2026-07-28-task-ar-639-unit-002-t3-replan.md` | `REVIEW-2026-07-28-task-ar-639-unit-002-t3-replan` | md | record | pass | TASK-AR-639 UNIT-002 T3 Replan |
+| `reviews/REVIEW-2026-07-28-task-ar-640-w0-t3-replan.md` | `REVIEW-2026-07-28-task-ar-640-w0-t3-replan` | md | record | pass | TASK-AR-640 W0 T3 Replan |
 | `reviews/REVIEW-2026-07-28-taskset-ar-v080-adoption-enforcement-registration.md` | `REVIEW-2026-07-28-taskset-ar-v080-adoption-enforcement-registration` | md | record | pass | v0.8 Adoption and Enforcement Registration |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |

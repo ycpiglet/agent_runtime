@@ -925,82 +925,102 @@
         },
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-28-task-ar-639-unit-002-t3-replan.md",
-          "value": "e1cf2c17fd57bc8ebf087cb8cfca5746703381ee2d481176be712c9f1c1dcbb6"
+          "path": "reviews/REVIEW-2026-07-28-task-ar-640-w0-t3-replan.md",
+          "value": "d58f3245b8ed227b632571aec0971939833173f3e6e7c4ac5d8cda363ef2a901"
         },
         {
           "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/units/TASK-AR-639/UNIT-TASK-AR-639-002.md",
-          "value": "0dd4a0e0b9289a9df64475679a410a8f5dda2cd5f1584f528c0754a067c38ab5"
+          "path": "reviews/COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction.md",
+          "value": "2a695b55a18a5775073ca4ba858764ebe5d95302025db879ab9b9cb134df8b9e"
         },
         {
           "kind": "sha256",
-          "path": "agents/project/WORK-SCHEMA.yml",
-          "value": "d9e4dac88d2d365553d7802f928dd4203084af96a3cb6a1e34e14fda99837a2e"
+          "path": "agents/lead_engineer/tasks/TASK-AR-640.md",
+          "value": "f413e727baacc7855af30d9f17ad2eda5d3ffe6ca5b8d4677a9824028d989468"
         },
         {
           "kind": "sha256",
-          "path": "scripts/closure_gate.py",
-          "value": "479806ae1be4501d503cbedb153dc71dd36b29a153da0822edc6396f7419dc2c"
+          "path": "agents/lead_engineer/tasks/units/TASK-AR-640/UNIT-TASK-AR-640-001.md",
+          "value": "87c85d7fbeb2b077340624378a5e9d1d521ee50e9fed2290b1d7d7e962d7420d"
         },
         {
           "kind": "sha256",
-          "path": "scripts/compound_cadence_gate.py",
-          "value": "6ba22bd5ead4d460777c73c15d42f4fbd77abee8b5728b85e1b3b51dd9c5a086"
+          "path": "agents/project/casebooks/failure-and-compound-casebook.md",
+          "value": "a39a20cc240ea4e2eb71ecc927b1609904ec41575b0d764ba1110267991d24c4"
         },
         {
           "kind": "sha256",
-          "path": "scripts/model_routing.py",
-          "value": "dbf72e76b277a023e2bdb55bfc6d572ac4aeae6438cb2b9292e866a3f9681ab7"
+          "path": "docs/host-context-read-location.md",
+          "value": "555b008be5353100d4abb389bcf7bb71959c8159aa5e5913444a6d88949962ff"
         },
         {
           "kind": "absent",
-          "path": "scripts/pilot_acceptance.py",
+          "path": "docs/configuration-v2.md",
           "value": ""
         },
         {
           "kind": "sha256",
-          "path": "scripts/release_cadence_trigger.py",
-          "value": "74a99681642f840757806e96889b9cab5ece948803f321f44711340507daa242"
+          "path": "src/agent_runtime/config.py",
+          "value": "6d5a645362b7fe277cea0d3c5f110b107e73af38c157fe5f3237a1a73a7f20b1"
         },
         {
           "kind": "sha256",
-          "path": "scripts/release_version_cascade.py",
-          "value": "ae5d4f91e8494ed17707c37723336cb33ec168c86fa41202b3269f6851de85f0"
+          "path": "src/agent_runtime/doctor.py",
+          "value": "5fa4b74252792fd01df84cc5b3747cba48d6a65d2c24f265c28128cc293d1918"
         },
         {
           "kind": "sha256",
-          "path": "scripts/runtime_asset_usage.py",
-          "value": "5209e4446b96a1a7752856865492debab0d69eaeed62e38d8c1843d28eecff38"
+          "path": "src/agent_runtime/cli.py",
+          "value": "b878c1f3e144b5b496c69eecf47dc31c9eeeb8136cbbe626dbe81fd1ba86447b"
         },
         {
           "kind": "sha256",
-          "path": "scripts/scribe_due.py",
-          "value": "3ba9579be478a9e0a6e0983d4847074f6a503ba64eb67d060ca56ff548c449bb"
+          "path": "src/agent_runtime/sync.py",
+          "value": "faca0bfbebf01013ce8e31f5eea9c79104f3f809e1717775e346fd7c95bb5c8e"
         },
         {
           "kind": "sha256",
-          "path": "scripts/state_sync_gate.py",
-          "value": "414748a65191d7ff3924e6f4a786c2f8b7b926f4d675b193d4f1463e90476c2a"
+          "path": "src/agent_runtime/lock.py",
+          "value": "4cd8ea1f8bd4b3e3d256139c3a691d609d0e5e1268ed22b684e91f6c69e24c8f"
+        },
+        {
+          "kind": "absent",
+          "path": "tests/test_config_v2.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_doctor.py",
+          "value": "8e338923b542f95d1758ee61b8b54a3c49f3da8a02ed6db561b213a0c2aee958"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_host_context_read_location.py",
+          "value": "09c38ccc4be5b17c4483d919ae3ff71cbd0e8e745326a9c0aa502e13740da588"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_inventory_sync_sanitize.py",
+          "value": "71e62d1573ddc030f3628c1e1f3a7144f45ca744aa48f082d72a47e0c0bbb829"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_project_context_overlay.py",
+          "value": "43711596b88a97b3444809921148709c2f7e93bb6d430ee180b4de5845d9361d"
         },
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
+          "value": "6865a21c4d637a88e8c87cfe06250c49cb4ccacf1e06a8712ef03e066dc1b086"
         },
         {
           "kind": "sha256",
           "path": "scripts/work.py",
           "value": "28e326e8350cbf96063cf427efe397932c31d72a8098de26b89b4b42a98fa0bc"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/work_schema_gate.py",
-          "value": "fda6489974e6b36d9cb85cc834bf21faaaa195b4abb55ef773394b070f34558e"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-28-task-ar-639-unit-002-t3-replan.md",
-      "recorded_at": "2026-07-28T17:53:48+09:00",
+      "design_record": "reviews/REVIEW-2026-07-28-task-ar-640-w0-t3-replan.md",
+      "recorded_at": "2026-07-28T19:46:20+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1216,5 +1236,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-28T17:53:48+09:00"
+  "updated_at": "2026-07-28T19:46:20+09:00"
 }

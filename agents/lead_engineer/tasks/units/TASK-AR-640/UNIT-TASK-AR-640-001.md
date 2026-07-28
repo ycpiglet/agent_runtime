@@ -13,7 +13,7 @@ status: worker_ready
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T16:36:01+09:00
+updated_at: 2026-07-28T19:46:04+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
@@ -27,21 +27,26 @@ context: AgentRuntimeConfig currently exposes only project, upstream, sync mode,
 inputs:
   - src/agent_runtime/config.py
   - docs/host-context-read-location.md
+  - reviews/REVIEW-2026-07-28-task-ar-640-w0-t3-replan.md
+  - reviews/COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction.md
   - autofolio agent_runtime.yml audit findings
 target_files:
   - src/agent_runtime/config.py
   - src/agent_runtime/doctor.py
+  - src/agent_runtime/cli.py
+  - tests/test_config_v2.py
   - tests/test_doctor.py
   - tests/test_host_context_read_location.py
   - docs/configuration-v2.md
-scope: Implement parsing, validation, defaults, and doctor reporting for config v2. Do not implement sync application in this unit.
+scope: Implement bounded v1/v2 parsing, typed normalization, validation, HOST-CONTEXT consumption, and deterministic doctor JSON reporting. Do not change sync/lock application, profile manifests, adapter execution, or host files in this unit.
 acceptance:
   - v1 fixtures remain green.
-  - v2 profile composition is deterministic.
-  - Invalid ownership overlap is a blocker.
-  - Host context has one canonical path.
+  - v2 profile and capability composition is deterministic and unknown identifiers block.
+  - Invalid or unsafe ownership overlap is a blocker while v1 unmanaged_paths remains compatible.
+  - Optional host context is consumed from one canonical path and invalid present context blocks.
+  - doctor --json exposes the normalized effective configuration without changing --check behavior.
 verification:
-  - python -m pytest tests/test_doctor.py tests/test_host_context_read_location.py tests/test_inventory_sync_sanitize.py -q
+  - python -m pytest tests/test_config_v2.py tests/test_doctor.py tests/test_host_context_read_location.py tests/test_inventory_sync_sanitize.py tests/test_project_context_overlay.py -q
 handoff: Document the v1-to-v2 compatibility table and effective config JSON.
 stop_condition: Stop before mutating a real host or introducing product-specific paths into core defaults.
 ---
@@ -56,37 +61,53 @@ AgentRuntimeConfig currently exposes only project, upstream, sync mode, overwrit
 
 - src/agent_runtime/config.py
 - docs/host-context-read-location.md
+- reviews/REVIEW-2026-07-28-task-ar-640-w0-t3-replan.md
+- reviews/COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction.md
 - autofolio agent_runtime.yml audit findings
 
 ## Target Files
 
 - src/agent_runtime/config.py
 - src/agent_runtime/doctor.py
+- src/agent_runtime/cli.py
+- tests/test_config_v2.py
 - tests/test_doctor.py
 - tests/test_host_context_read_location.py
 - docs/configuration-v2.md
 
 ## Scope
 
-Implement parsing, validation, defaults, and doctor reporting for config v2. Do not implement sync application in this unit.
+Implement bounded v1/v2 parsing, typed normalization, validation,
+`HOST-CONTEXT` consumption, and deterministic doctor JSON reporting. Do not
+change sync/lock application, profile manifests, adapter execution, or host
+files in this unit.
 
 ## Steps
 
-1. Define typed profile, capability, ownership, and host-adapter fields.
-2. Parse v1 and v2 deterministically without a new YAML dependency.
-3. Validate incompatible or unknown profile combinations.
-4. Expose effective configuration through doctor JSON.
+1. Define typed source/effective schema, profile, capability, ownership, and
+   host-adapter fields from the W0 contract.
+2. Parse v1, bounded v2, and optional `host-context/v1` deterministically
+   without a new YAML dependency.
+3. Validate incompatible or unknown profile/capability combinations and
+   unsafe mixed ownership.
+4. Expose effective configuration through `doctor --json`, including valid
+   JSON for invalid configuration.
 
 ## Acceptance Criteria
 
 - v1 fixtures remain green.
-- v2 profile composition is deterministic.
-- Invalid ownership overlap is a blocker.
-- Host context has one canonical path.
+- v2 profile and capability composition is deterministic and unknown
+  identifiers block.
+- Invalid or unsafe ownership overlap is a blocker while v1
+  `unmanaged_paths` remains compatible.
+- Optional host context is consumed from one canonical path and invalid
+  present context blocks.
+- `doctor --json` exposes the normalized effective configuration without
+  changing `--check` behavior.
 
 ## Verification
 
-- `python -m pytest tests/test_doctor.py tests/test_host_context_read_location.py tests/test_inventory_sync_sanitize.py -q`
+- `python -m pytest tests/test_config_v2.py tests/test_doctor.py tests/test_host_context_read_location.py tests/test_inventory_sync_sanitize.py tests/test_project_context_overlay.py -q`
 
 ## Handoff
 
