@@ -11,7 +11,7 @@
   ],
   "installed": {
     "managed_files": {
-      ".codex/hooks.json": "sha256:7acfec61ea4505940efa6e58a135f1caa5a86284b8b90866b2e9965caaeb42b3",
+      ".codex/hooks.json": "sha256:bb5a6d4f27b6efaa76dc2c0b9f6e5a2cca87e22a8d6dfba4e2162a92ee5bf3a4",
       ".env.example": "sha256:a91fca7b04c48cbd8a98ee6e33541fbbd6c9baa40aca90e4aa145efa70a873cd",
       ".gitattributes": "sha256:22ec718362af48d401e6717569dfcc89ec3573d553dc3f3530f4db8a1625b79b",
       ".githooks/post-merge": "sha256:b112da8578360cd49b871f518afa9c2ffb9f266c416daa02a8a9b17a84196e39",
@@ -205,10 +205,10 @@
       "scripts/scribe_due.py": "sha256:3ba9579be478a9e0a6e0983d4847074f6a503ba64eb67d060ca56ff548c449bb",
       "scripts/secretary_digest.py": "sha256:66a5e85681877eec911fc3dca0f1b19b71004a840f87500d1c78f10cda55b004",
       "scripts/session_baseline.py": "sha256:adf81af3b935c0876f353360a99e92d32bb106a927086786dc627e537c56ed10",
-      "scripts/session_compact_hook.py": "sha256:3b9bacd25cb7badf8edd0abbba4c31ff855880710a31d4894da7994ba633935e",
+      "scripts/session_compact_hook.py": "sha256:414fd08a0b996042a6a05073a93ee63e92653b238edc8db57a82c49f50202f85",
       "scripts/session_dashboard.py": "sha256:45fa7cf2c1e09aabfc8ecfc1198f9fb42dcfdca8e59bba5e48b4f8030eb5bc97",
-      "scripts/session_resume_check.py": "sha256:5a21ce70f57d8987c63699acfa03e88c9b14a24c8483027a025bb86fb43a4c88",
-      "scripts/session_start_hook.py": "sha256:272d4e6f167aa3155702122b57f79cfb10b8a32a7b61043a08ca2d12a4424abf",
+      "scripts/session_resume_check.py": "sha256:291fd36f514c4d63ffd258040cf63718a268ad5c3145e1b483bb10a6f3bb0eec",
+      "scripts/session_start_hook.py": "sha256:8157c99231b3e5798267501c0a634b290f7a09098ca2180f71180531bb19a08b",
       "scripts/state_machine_gate.py": "sha256:b1ce42970658b1d7eed94b0285a47fca74e2566ff9094b71ed99a5ad10206e7f",
       "scripts/state_sync_gate.py": "sha256:b85e89fc9de4916376c2784acd47328923fcc596f485b6cc0b35185be13431dd",
       "scripts/status_alias.py": "sha256:9d1ac9fab5c716b617a183188091e53f50aedeb2db1b20d87f3585532b14de7c",
@@ -499,7 +499,7 @@
     },
     "package_version": "0.7.0",
     "seeded": [],
-    "template_digest": "sha256:d3cec086b4f703cd0af7043423282d26c2042c34ce82b332b7c9605aef6b99e1",
+    "template_digest": "sha256:68f13a14fb02e1683fd0c36609fa2245688544e2bb4da26f3163670605d36ef2",
     "template_files": 244
   },
   "profiles": [

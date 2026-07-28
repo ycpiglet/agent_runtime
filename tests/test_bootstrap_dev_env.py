@@ -1,3 +1,5 @@
+import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -101,6 +103,50 @@ def test_output_is_ascii_only() -> None:
     # Onboarding runs on fresh consoles (cp949 on Windows); keep output ASCII.
     result = _run("--check")
     result.stdout.encode("ascii")
+
+
+def _hook_host(tmp_path: Path) -> Path:
+    host = tmp_path / "host"
+    template = REPO_ROOT / "src" / "agent_runtime" / "templates" / "project"
+    shutil.copytree(template, host)
+    return host
+
+
+def test_codex_hook_check_accepts_valid_tracked_contract(monkeypatch, tmp_path) -> None:
+    host = _hook_host(tmp_path)
+    monkeypatch.setattr(bootstrap, "ROOT", host)
+
+    result = bootstrap.check_codex_hook_contract()
+
+    assert result.startswith("ok   Codex hooks:")
+    assert "/hooks" in result
+
+
+def test_codex_hook_check_reports_malformed_contract(monkeypatch, tmp_path) -> None:
+    host = _hook_host(tmp_path)
+    (host / ".codex" / "hooks.json").write_text("{", encoding="utf-8")
+    monkeypatch.setattr(bootstrap, "ROOT", host)
+
+    result = bootstrap.check_codex_hook_contract()
+
+    assert result.startswith("FIX  Codex hooks:")
+    assert "malformed-hooks" in result
+
+
+def test_codex_hook_check_reports_stale_windows_command(monkeypatch, tmp_path) -> None:
+    host = _hook_host(tmp_path)
+    path = host / ".codex" / "hooks.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["hooks"]["SessionStart"][0]["hooks"][0]["commandWindows"] = (
+        r"C:\Python310\python.exe scripts\session_start_hook.py"
+    )
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setattr(bootstrap, "ROOT", host)
+
+    result = bootstrap.check_codex_hook_contract()
+
+    assert result.startswith("FIX  Codex hooks:")
+    assert "stale-command-windows" in result
 
 
 def test_one_shot_wrappers_delegate_to_bootstrap() -> None:

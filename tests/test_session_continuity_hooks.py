@@ -172,3 +172,89 @@ def test_checkpoint_ignore_is_packaged_template_data() -> None:
     assert '"templates/project/**/.gitignore"' in (ROOT / "pyproject.toml").read_text()
     verifier = load("verify_wheel_dotfiles", ROOT / "scripts/verify_wheel_dotfiles.py")
     assert "agent_runtime/templates/project/agents/runtime/session_checkpoints/.gitignore" in verifier.REQUIRED_FILES
+
+
+def test_shared_continuity_scripts_are_exact_template_mirrors() -> None:
+    template_scripts = ROOT / "src" / "agent_runtime" / "templates" / "project" / "scripts"
+    for name in (
+        "session_start_hook.py",
+        "session_compact_hook.py",
+        "session_resume_check.py",
+    ):
+        assert (ROOT / "scripts" / name).read_bytes() == (
+            template_scripts / name
+        ).read_bytes()
+
+
+def test_dispatcher_rejects_empty_or_extra_mode_arguments() -> None:
+    assert DISPATCH.main([]) == 2
+    assert DISPATCH.main(["session-start", "unexpected"]) == 2
+
+
+def test_dispatcher_times_out_advisory_child_without_blocking(tmp_path: Path) -> None:
+    root = git_repo(tmp_path)
+
+    def fake_run(args, **kwargs):
+        if args[0] == "git":
+            return subprocess.CompletedProcess(args, 0, str(root) + "\n", "")
+        raise subprocess.TimeoutExpired(args, kwargs["timeout"])
+
+    event = json.dumps({"cwd": str(root)})
+    with (
+        patch.object(DISPATCH.subprocess, "run", fake_run),
+        patch.object(sys, "stdin", io.StringIO(event)),
+        contextlib.redirect_stdout(io.StringIO()) as out,
+    ):
+        assert DISPATCH.main(["session-start"]) == 0
+
+    payload = json.loads(out.getvalue())
+    context = payload["hookSpecificOutput"]["additionalContext"]
+    assert "TimeoutExpired" in context
+
+
+def test_dispatcher_times_out_blocking_child_as_failure(tmp_path: Path) -> None:
+    root = git_repo(tmp_path)
+
+    def fake_run(args, **kwargs):
+        if args[0] == "git":
+            return subprocess.CompletedProcess(args, 0, str(root) + "\n", "")
+        raise subprocess.TimeoutExpired(args, kwargs["timeout"])
+
+    event = json.dumps({"cwd": str(root)})
+    with (
+        patch.object(DISPATCH.subprocess, "run", fake_run),
+        patch.object(sys, "stdin", io.StringIO(event)),
+        contextlib.redirect_stderr(io.StringIO()) as err,
+    ):
+        assert DISPATCH.main(["stop-owner"]) == 1
+
+    assert "stop-owner failed" in err.getvalue()
+
+
+def test_compact_git_timeout_is_recorded_as_unknown_not_failure(tmp_path: Path) -> None:
+    root = git_repo(tmp_path)
+    with patch.object(
+        COMPACT.subprocess,
+        "run",
+        side_effect=subprocess.TimeoutExpired(["git"], 2),
+    ):
+        invoke(
+            COMPACT.main,
+            ["--root", str(root), "--phase", "pre-compact"],
+            {"session_id": "timeout-session"},
+        )
+
+    checkpoint = json.loads(
+        (
+            root
+            / "agents"
+            / "runtime"
+            / "session_checkpoints"
+            / "timeout-session.json"
+        ).read_text()
+    )
+    assert checkpoint["git"] == {
+        "branch": None,
+        "head": None,
+        "dirty_count": None,
+    }

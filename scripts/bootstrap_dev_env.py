@@ -34,16 +34,31 @@ HOOKS_DIR = ".githooks"
 
 def check_codex_hook_contract() -> str:
     """Report tracked Codex hook wiring only; local user settings are never edited."""
-    path = ROOT / ".codex" / "hooks.json"
-    if not path.exists():
-        return "FIX  Codex hooks: tracked .codex/hooks.json missing (run doctor --check)"
     try:
-        import json
-        hooks = json.loads(path.read_text(encoding="utf-8")).get("hooks", {})
-    except Exception:
-        return "FIX  Codex hooks: tracked configuration malformed (run doctor --check)"
-    required = {"SessionStart", "PreCompact", "PostCompact", "UserPromptSubmit"}
-    return "ok   Codex hooks: tracked lifecycle contract present (review with /hooks; user settings untouched)" if required <= set(hooks) else "FIX  Codex hooks: lifecycle events missing (run doctor --check)"
+        source_root = str(ROOT / "src")
+        if source_root not in sys.path:
+            sys.path.insert(0, source_root)
+        from agent_runtime.doctor import _check_codex_hooks
+
+        findings = []
+        _check_codex_hooks(ROOT, findings)
+    except Exception as exc:
+        return (
+            "FIX  Codex hooks: contract check unavailable "
+            f"({exc.__class__.__name__}; run doctor --check)"
+        )
+
+    blockers = [finding for finding in findings if finding.severity == "blocker"]
+    if blockers:
+        kinds = ", ".join(sorted({finding.kind for finding in blockers})[:3])
+        return (
+            f"FIX  Codex hooks: {len(blockers)} tracked contract issue(s) "
+            f"({kinds}; run doctor --check)"
+        )
+    return (
+        "ok   Codex hooks: tracked portable contract present "
+        "(review with /hooks; user settings untouched)"
+    )
 
 
 def _run(*args: str, timeout: int = 30) -> tuple[int, str]:

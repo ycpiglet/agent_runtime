@@ -1,10 +1,12 @@
 """Tests for the non-blocking upstream release notice (TASK-AR-509)."""
 from __future__ import annotations
 
+import importlib.util
 import json
 import subprocess
 import time
 from pathlib import Path
+from unittest.mock import patch
 
 from agent_runtime import update_notify
 from agent_runtime.cli import main
@@ -334,5 +336,20 @@ def test_template_wires_session_start_update_notify_hook():
     session_start = hooks["hooks"]["SessionStart"]
     commands = [hook["command"] for group in session_start for hook in group["hooks"]]
     assert commands == ["python3 -m agent_runtime.hook_runtime session-start"]
-    start = (template_root / "scripts" / "session_start_hook.py").read_text(encoding="utf-8")
-    assert '"-m","agent_runtime.cli","update-notify"' in start
+
+    start_path = template_root / "scripts" / "session_start_hook.py"
+    spec = importlib.util.spec_from_file_location("template_session_start_hook", start_path)
+    assert spec and spec.loader
+    start_hook = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(start_hook)
+    completed = subprocess.CompletedProcess([], 0, "", "")
+    with patch.object(start_hook.subprocess, "run", return_value=completed) as run:
+        assert start_hook.run(template_root, "update-notify") == "none"
+    command = run.call_args.args[0]
+    assert command[1:] == [
+        "-m",
+        "agent_runtime.cli",
+        "update-notify",
+        "--root",
+        str(template_root),
+    ]

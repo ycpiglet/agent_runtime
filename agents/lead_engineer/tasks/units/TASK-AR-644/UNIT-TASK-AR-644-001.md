@@ -13,7 +13,7 @@ status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T01:25:32+09:00
+updated_at: 2026-07-29T02:17:22+09:00
 started_at: 2026-07-29T01:25:32+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -34,16 +34,22 @@ inputs:
 target_files:
   - .codex/hooks.json
   - scripts/bootstrap_dev_env.py
+  - scripts/verify_wheel_dotfiles.py
   - scripts/session_start_hook.py
   - scripts/session_compact_hook.py
   - scripts/session_resume_check.py
+  - agents/project/RUNTIME-ASSET-REGISTRY.json
+  - agents/runtime/session_checkpoints/.gitignore
+  - pyproject.toml
   - src/agent_runtime/hook_runtime.py
   - src/agent_runtime/doctor.py
   - src/agent_runtime/templates/project/.codex/hooks.json
+  - src/agent_runtime/templates/project/agents/runtime/session_checkpoints/.gitignore
   - src/agent_runtime/templates/project/scripts/session_start_hook.py
   - src/agent_runtime/templates/project/scripts/session_compact_hook.py
   - src/agent_runtime/templates/project/scripts/session_resume_check.py
   - src/agent_runtime/templates/project/scripts/install_hooks.py
+  - src/agent_runtime/templates/project/scripts/test_install_hooks.py
   - src/agent_runtime/templates/project/AGENTS.md
   - src/agent_runtime/templates/project/CLAUDE.md
   - src/agent_runtime/templates/project/agents/project/RUNTIME-ASSET-REGISTRY.json
@@ -53,6 +59,15 @@ target_files:
   - tests/test_interrupted_run_detector.py
   - tests/test_doctor.py
   - tests/test_template_smoke.py
+  - tests/test_session_dashboard.py
+  - tests/test_stop_hook_owner_governance.py
+  - tests/test_update_notify.py
+  - tests/fixtures/host/agent_runtime.lock.json
+  - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.json
+  - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.log.md
+  - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.handoff.md
+  - reviews/W4A-2026-07-29-unit-task-ar-644-001.md
+  - reviews/W4B-2026-07-29-unit-task-ar-644-001.md
 scope: Use one allowlisted Python dispatcher with POSIX and commandWindows commands, add bounded derived compact checkpoints and SessionStart reinjection, retain explicit owner-run Claude installation, and verify tracked hook health. Do not mutate consumer repositories or real per-user settings, persist prompt/transcript content, redesign compound/scribe, commit checkpoint state, or perform a release.
 acceptance:
   - No POSIX path depends on a .cmd file.
@@ -94,16 +109,22 @@ Codex and Claude hook contracts support `SessionStart`, `PreCompact`, and
 
 - .codex/hooks.json
 - scripts/bootstrap_dev_env.py
+- scripts/verify_wheel_dotfiles.py
 - scripts/session_start_hook.py
 - scripts/session_compact_hook.py
 - scripts/session_resume_check.py
+- agents/project/RUNTIME-ASSET-REGISTRY.json
+- agents/runtime/session_checkpoints/.gitignore
+- pyproject.toml
 - src/agent_runtime/hook_runtime.py
 - src/agent_runtime/doctor.py
 - src/agent_runtime/templates/project/.codex/hooks.json
+- src/agent_runtime/templates/project/agents/runtime/session_checkpoints/.gitignore
 - src/agent_runtime/templates/project/scripts/session_start_hook.py
 - src/agent_runtime/templates/project/scripts/session_compact_hook.py
 - src/agent_runtime/templates/project/scripts/session_resume_check.py
 - src/agent_runtime/templates/project/scripts/install_hooks.py
+- src/agent_runtime/templates/project/scripts/test_install_hooks.py
 - src/agent_runtime/templates/project/AGENTS.md
 - src/agent_runtime/templates/project/CLAUDE.md
 - src/agent_runtime/templates/project/agents/project/RUNTIME-ASSET-REGISTRY.json
@@ -113,6 +134,15 @@ Codex and Claude hook contracts support `SessionStart`, `PreCompact`, and
 - tests/test_interrupted_run_detector.py
 - tests/test_doctor.py
 - tests/test_template_smoke.py
+- tests/test_session_dashboard.py
+- tests/test_stop_hook_owner_governance.py
+- tests/test_update_notify.py
+- tests/fixtures/host/agent_runtime.lock.json
+- agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.json
+- agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.log.md
+- agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.handoff.md
+- reviews/W4A-2026-07-29-unit-task-ar-644-001.md
+- reviews/W4B-2026-07-29-unit-task-ar-644-001.md
 
 ## Scope
 

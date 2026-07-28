@@ -39,11 +39,29 @@ import re
 import sys
 from pathlib import Path
 
-# Reuse the vendored message_queue helpers (same scripts/ dir).
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-import message_queue as mq  # noqa: E402
+# Reuse the vendored message_queue helpers. Synced hosts keep it beside this
+# script; the Agent Runtime development checkout resolves the packaged template
+# copy so the exact root/template mirror remains directly executable.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(_SCRIPT_DIR))
+try:
+    import message_queue as mq  # noqa: E402
+except ModuleNotFoundError:
+    _TEMPLATE_SCRIPTS = (
+        _SCRIPT_DIR.parent
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "scripts"
+    )
+    if not (_TEMPLATE_SCRIPTS / "message_queue.py").exists():
+        raise
+    sys.path.insert(0, str(_TEMPLATE_SCRIPTS))
+    import message_queue as mq  # noqa: E402
 
 _SAFE_MESSAGE_ID_RE = re.compile(r"MSG-[A-Za-z0-9._-]+\Z")
+DEFAULT_ROOT = Path(__file__).resolve().parent.parent
 
 
 def _configure_stdio() -> None:
@@ -525,8 +543,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Crash-recovery + session-resume auditor (report-only, "
                     "non-blocking; always exits 0 unless --strict).")
-    parser.add_argument("--root", default=str(mq.REPO_ROOT),
-                        help="repo root (default: message_queue.REPO_ROOT)")
+    parser.add_argument(
+        "--root",
+        default=str(DEFAULT_ROOT),
+        help="repo root (default: this script's repository)",
+    )
     parser.add_argument("--json", action="store_true",
                         help="print the report dict as JSON instead of text")
     parser.add_argument("--max-session-age-hours", type=float, default=6.0,
