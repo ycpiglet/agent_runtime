@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-28T20:25:06+09:00
-record_count: 932
+generated_at: 2026-07-28T20:30:28+09:00
+record_count: 933
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `932` review and evidence records under `reviews/`.
+- Summary: indexed `933` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `932` files |
+| Reviews covered | pass | `933` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -962,6 +962,7 @@ record_count: 932
 | `reviews/W4B-2026-07-28-unit-task-ar-639-002-recheck-2.md` | `W4B-2026-07-28-unit-task-ar-639-002-recheck-2` | verification | passed | pass | UNIT-TASK-AR-639-002 Independent W4b Approval Recheck |
 | `reviews/W4B-2026-07-28-unit-task-ar-639-002-recheck.md` | `W4B-2026-07-28-unit-task-ar-639-002-recheck` | verification | blocked | fail | UNIT-TASK-AR-639-002 Independent W4b Recheck |
 | `reviews/W4B-2026-07-28-unit-task-ar-639-002.md` | `W4B-2026-07-28-unit-task-ar-639-002` | verification | blocked | fail | UNIT-TASK-AR-639-002 Independent W4b Blocking Review |
+| `reviews/W4B-2026-07-28-unit-task-ar-640-001-recheck.md` | `W4B-2026-07-28-unit-task-ar-640-001-recheck` | md | approved | pass | TASK-AR-640 UNIT-001 Independent W4b Recheck |
 | `reviews/W4B-2026-07-28-unit-task-ar-640-001.md` | `W4B-2026-07-28-unit-task-ar-640-001` | md | changes_required | fail | TASK-AR-640 UNIT-001 Independent W4b Verification |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
