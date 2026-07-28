@@ -925,6 +925,21 @@
         },
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-28-task-ar-639-unit-002-t3-replan.md",
+          "value": "e1cf2c17fd57bc8ebf087cb8cfca5746703381ee2d481176be712c9f1c1dcbb6"
+        },
+        {
+          "kind": "sha256",
+          "path": "agents/lead_engineer/tasks/units/TASK-AR-639/UNIT-TASK-AR-639-002.md",
+          "value": "0dd4a0e0b9289a9df64475679a410a8f5dda2cd5f1584f528c0754a067c38ab5"
+        },
+        {
+          "kind": "sha256",
+          "path": "agents/project/WORK-SCHEMA.yml",
+          "value": "d9e4dac88d2d365553d7802f928dd4203084af96a3cb6a1e34e14fda99837a2e"
+        },
+        {
+          "kind": "sha256",
           "path": "scripts/closure_gate.py",
           "value": "479806ae1be4501d503cbedb153dc71dd36b29a153da0822edc6396f7419dc2c"
         },
@@ -976,11 +991,16 @@
         {
           "kind": "sha256",
           "path": "scripts/work.py",
-          "value": "efb96fa7f4283a11501cf19ffc8177a432d048b2dcc854e0ab7bd59ed363d17a"
+          "value": "28e326e8350cbf96063cf427efe397932c31d72a8098de26b89b4b42a98fa0bc"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work_schema_gate.py",
+          "value": "fda6489974e6b36d9cb85cc834bf21faaaa195b4abb55ef773394b070f34558e"
         }
       ],
-      "design_record": "reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md",
-      "recorded_at": "2026-07-28T16:36:02+09:00",
+      "design_record": "reviews/REVIEW-2026-07-28-task-ar-639-unit-002-t3-replan.md",
+      "recorded_at": "2026-07-28T17:53:48+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1196,5 +1216,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-28T16:36:02+09:00"
+  "updated_at": "2026-07-28T17:53:48+09:00"
 }
