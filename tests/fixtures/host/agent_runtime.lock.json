@@ -204,10 +204,10 @@
       "scripts/scribe_due.py": "sha256:3ba9579be478a9e0a6e0983d4847074f6a503ba64eb67d060ca56ff548c449bb",
       "scripts/secretary_digest.py": "sha256:66a5e85681877eec911fc3dca0f1b19b71004a840f87500d1c78f10cda55b004",
       "scripts/session_baseline.py": "sha256:adf81af3b935c0876f353360a99e92d32bb106a927086786dc627e537c56ed10",
-      "scripts/session_compact_hook.py": "sha256:a663a97cd1bd1e824fd5bcfa7f346c92fd4c3a7ccc5a295104ada90a850189d1",
+      "scripts/session_compact_hook.py": "sha256:45b401e54e10ddc0173042a8e0eb937b1c5f8378a24d987dba94157d787e74d4",
       "scripts/session_dashboard.py": "sha256:45fa7cf2c1e09aabfc8ecfc1198f9fb42dcfdca8e59bba5e48b4f8030eb5bc97",
       "scripts/session_resume_check.py": "sha256:5a21ce70f57d8987c63699acfa03e88c9b14a24c8483027a025bb86fb43a4c88",
-      "scripts/session_start_hook.py": "sha256:6e4047d6775dee50c7217a209aed8cb50b3bef34efb6b724f1419e468d5461ac",
+      "scripts/session_start_hook.py": "sha256:c62c4869804ee08a06d6757efd31d9cf9a1df0b7b69f7cced3d5d6215b19d633",
       "scripts/state_machine_gate.py": "sha256:b1ce42970658b1d7eed94b0285a47fca74e2566ff9094b71ed99a5ad10206e7f",
       "scripts/state_sync_gate.py": "sha256:b85e89fc9de4916376c2784acd47328923fcc596f485b6cc0b35185be13431dd",
       "scripts/status_alias.py": "sha256:9d1ac9fab5c716b617a183188091e53f50aedeb2db1b20d87f3585532b14de7c",
@@ -497,7 +497,7 @@
     },
     "package_version": "0.7.0",
     "seeded": [],
-    "template_digest": "sha256:6baf70b3046a9bca8aa5244d63383bdbdcca6f2e127cad559f1cbbd3887066fa",
+    "template_digest": "sha256:55aa6eb73c2812c387bda42cdd83a85b140fd925b107a1ea23a1e889e1f66f89",
     "template_files": 243
   },
   "profiles": [

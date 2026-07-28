@@ -6,8 +6,14 @@ SCRIPTS={"session-start":"scripts/session_start_hook.py","pre-compact":"scripts/
 ADVISORY={"session-start","pre-compact","post-compact"}
 def root_for(cwd:str)->Path:
  p=Path(cwd or ".").resolve()
- try:return Path(subprocess.run(["git","-C",str(p),"rev-parse","--show-toplevel"],capture_output=True,text=True,check=True).stdout.strip())
+ try:return Path(subprocess.run(["git","-C",str(p),"rev-parse","--show-toplevel"],capture_output=True,text=True,check=True,timeout=2).stdout.strip())
  except Exception:return p
+def start_payload(stdout: str) -> str:
+ try:
+  parsed=json.loads(stdout)
+  if isinstance(parsed,dict): return json.dumps(parsed, ensure_ascii=False)
+ except Exception: pass
+ return json.dumps({"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":stdout[:6000]}})
 def main(argv=None):
  mode=(argv or sys.argv[1:])[0] if (argv or sys.argv[1:]) else ""
  if mode not in SCRIPTS:return 2
@@ -23,7 +29,8 @@ def main(argv=None):
   if mode in ADVISORY: print("{}"); return 0
   return 1
  if mode in ADVISORY:
-  print(r.stdout if r.returncode==0 and r.stdout.strip() else "{}")
+  if mode == "session-start": print(start_payload(r.stdout) if r.returncode == 0 and r.stdout.strip() else start_payload("continuity collectors unavailable"))
+  else: print("{}")
   return 0
  sys.stdout.write(r.stdout); sys.stderr.write(r.stderr); return r.returncode
 if __name__=="__main__":raise SystemExit(main())
