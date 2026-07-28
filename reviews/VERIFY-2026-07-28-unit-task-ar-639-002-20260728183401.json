@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-28-unit-task-ar-639-002-20260728183401",
+  "work_id": "UNIT-TASK-AR-639-002",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-639/UNIT-TASK-AR-639-002.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-639",
+  "unit_id": "UNIT-TASK-AR-639-002",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-28T18:34:01+09:00",
+  "verified_by": "le-20260728-task-ar-639-002-terra",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_state_sync_gate.py tests/test_task_claim_dispatcher.py tests/test_work_schema_gate.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-28T18:34:01+09:00",
+      "finished_at": "2026-07-28T18:34:06+09:00",
+      "stdout": "........................................................................ [ 93%]\n.....                                                                    [100%]\n77 passed in 4.26s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/state_sync_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-28T18:34:06+09:00",
+      "finished_at": "2026-07-28T18:34:06+09:00",
+      "stdout": "state-sync-gate: pass\nroot=/home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-639-002\nfindings=1\nblock=0\nwatch=1\n- watch recovery:without-claim:TASK-AR-631 /home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-639-002/agents/lead_engineer/tasks/TASK-AR-631.md: historical missing claim is explicitly recovered from independent evidence\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/work_schema_gate.py --items --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-28T18:34:06+09:00",
+      "finished_at": "2026-07-28T18:34:06+09:00",
+      "stdout": "work-schema-gate: pass\npath=/home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-639-002/agents/project/WORK-SCHEMA.yml\nfindings=0\nwarnings=0\n",
+      "stderr": ""
+    }
+  ]
+}

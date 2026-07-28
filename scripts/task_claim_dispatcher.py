@@ -151,6 +151,10 @@ def _is_active(payload: dict[str, Any]) -> bool:
     return str(payload.get("status") or "").strip().lower() in ACTIVE_STATUSES
 
 
+def _is_explicit_overlay(payload: dict[str, Any]) -> bool:
+    return payload.get("overlay") is True
+
+
 def _resolved_worktree(root: Path, value: str) -> Path:
     path = Path(value)
     if not path.is_absolute():
@@ -686,6 +690,50 @@ def _find_claim(root: Path, claim_id: str) -> tuple[Path, dict[str, Any]] | None
     return None
 
 
+def cmd_projection(args: argparse.Namespace) -> int:
+    """Emit the deterministic active-work projection required after dispatch.
+
+    The dispatcher remains claim-only: generated board and canonical work-item
+    writes belong to the serial projection owner.  This command prevents the
+    former scalar-ID workaround by giving that owner the exact task/unit refs
+    and complete ``current_agents`` record to project.
+    """
+    root = args.root.resolve()
+    found = _find_claim(root, args.claim_id)
+    if found is None:
+        print(f"claim not found: {args.claim_id}", file=sys.stderr)
+        return 1
+    path, claim = found
+    if not _is_active(claim):
+        print(f"projection requires an active worker claim: {args.claim_id}", file=sys.stderr)
+        return 1
+    if _is_explicit_overlay(claim):
+        print(f"projection does not apply to overlay claim: {args.claim_id}", file=sys.stderr)
+        return 1
+    rel_path = _rel(root, path)
+    agent = {
+        key: claim.get(key)
+        for key in ("claim_id", "agent_role", "agent_instance_id", "display_name", "callsite_id", "pane_id")
+    }
+    projection = {
+        "status": "projection",
+        "operation": "merge",
+        "claim_id": claim.get("claim_id"),
+        "task_claim_ref": rel_path,
+        "task_id": claim.get("task_id"),
+        "unit_id": claim.get("unit_id"),
+        "task_set_id": claim.get("task_set_id"),
+        "pointer": {
+            "active_task": claim.get("task_id"),
+            "active_task_set": claim.get("task_set_id"),
+            "active_claims": [rel_path],
+            "current_agents": [agent],
+        },
+    }
+    _emit(projection, as_json=args.json)
+    return 0
+
+
 def _normalize_evidence_ref(root: Path, value: str) -> str:
     """Normalize an evidence path into a repo-relative POSIX ref."""
     text = str(value or "").strip()
@@ -971,6 +1019,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     create.add_argument("--json", action="store_true")
     create.set_defaults(func=cmd_create)
+
+    projection = sub.add_parser("projection", help="Emit the required active task/unit/pointer projection for a claim")
+    projection.add_argument("--claim-id", required=True)
+    projection.add_argument("--json", action="store_true")
+    projection.set_defaults(func=cmd_projection)
 
     release = sub.add_parser(
         "release",

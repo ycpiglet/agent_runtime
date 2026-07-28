@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-28T17:38:23+09:00",
+  "generated_at": "2026-07-28T17:56:50+09:00",
   "record_count": 519,
   "finding_count": 0,
   "findings": [],
@@ -5415,7 +5415,7 @@
       "title": "Make registered work executable and make implemented-but-unclaimed work visible witho…",
       "path": "agents/lead_engineer/tasks/TASK-AR-639.md",
       "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
-      "status": "planned"
+      "status": "in_progress"
     },
     {
       "key": "unit:UNIT-TASK-AR-639-001",
@@ -5437,7 +5437,7 @@
       "title": "UNIT-TASK-AR-639-002 - Block task-claim-projection split-brain and support explicit recovery",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-639/UNIT-TASK-AR-639-002.md",
       "parent_id": "TASK-AR-639",
-      "status": "worker_ready"
+      "status": "in_progress"
     },
     {
       "key": "task:TASK-AR-640",

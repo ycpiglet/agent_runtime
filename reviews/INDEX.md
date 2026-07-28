@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-28T17:38:24+09:00
-record_count: 916
+generated_at: 2026-07-28T18:52:11+09:00
+record_count: 924
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `916` review and evidence records under `reviews/`.
+- Summary: indexed `924` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `916` files |
+| Reviews covered | pass | `924` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -584,6 +584,7 @@ record_count: 916
 | `reviews/REVIEW-2026-07-26-console-overhaul-owner-decisions.md` | `REVIEW-2026-07-26-console-overhaul-owner-decisions` | md | record | pass | Console Overhaul Owner Decisions (15) Resolved |
 | `reviews/REVIEW-2026-07-26-taskset-ar-console-overhaul-p0-registration.md` | `REVIEW-2026-07-26-taskset-ar-console-overhaul-p0-registration` | md | record | pass | Console Overhaul P0 — Trust & Hygiene Registration |
 | `reviews/REVIEW-2026-07-26-taskset-ar-console-overhaul-p1-registration.md` | `REVIEW-2026-07-26-taskset-ar-console-overhaul-p1-registration` | md | record | pass | Console Overhaul P1 — Core Structure Registration |
+| `reviews/REVIEW-2026-07-28-task-ar-639-unit-002-t3-replan.md` | `REVIEW-2026-07-28-task-ar-639-unit-002-t3-replan` | md | record | pass | TASK-AR-639 UNIT-002 T3 Replan |
 | `reviews/REVIEW-2026-07-28-taskset-ar-v080-adoption-enforcement-registration.md` | `REVIEW-2026-07-28-taskset-ar-v080-adoption-enforcement-registration` | md | record | pass | v0.8 Adoption and Enforcement Registration |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
@@ -824,6 +825,10 @@ record_count: 916
 | `reviews/VERIFY-2026-07-27-unit-task-ar-631-001-20260727111227.json` | `VERIFY-2026-07-27-unit-task-ar-631-001-20260727111227` | json | record | n/a | VERIFY-2026-07-27-unit-task-ar-631-001-20260727111227 |
 | `reviews/VERIFY-2026-07-28-task-ar-631-20260728163046.json` | `VERIFY-2026-07-28-task-ar-631-20260728163046` | json | record | n/a | VERIFY-2026-07-28-task-ar-631-20260728163046 |
 | `reviews/VERIFY-2026-07-28-unit-task-ar-639-001-20260728170913.json` | `VERIFY-2026-07-28-unit-task-ar-639-001-20260728170913` | json | record | n/a | VERIFY-2026-07-28-unit-task-ar-639-001-20260728170913 |
+| `reviews/VERIFY-2026-07-28-unit-task-ar-639-002-20260728181538.json` | `VERIFY-2026-07-28-unit-task-ar-639-002-20260728181538` | json | record | n/a | VERIFY-2026-07-28-unit-task-ar-639-002-20260728181538 |
+| `reviews/VERIFY-2026-07-28-unit-task-ar-639-002-20260728183121.json` | `VERIFY-2026-07-28-unit-task-ar-639-002-20260728183121` | json | record | n/a | VERIFY-2026-07-28-unit-task-ar-639-002-20260728183121 |
+| `reviews/VERIFY-2026-07-28-unit-task-ar-639-002-20260728183401.json` | `VERIFY-2026-07-28-unit-task-ar-639-002-20260728183401` | json | record | n/a | VERIFY-2026-07-28-unit-task-ar-639-002-20260728183401 |
+| `reviews/VERIFY-2026-07-28-unit-task-ar-639-002-20260728184625.json` | `VERIFY-2026-07-28-unit-task-ar-639-002-20260728184625` | json | record | n/a | VERIFY-2026-07-28-unit-task-ar-639-002-20260728184625 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
@@ -947,6 +952,9 @@ record_count: 916
 | `reviews/W4B-2026-07-24-TASK-AR-622-INDEPENDENT.md` | `W4B-2026-07-24-TASK-AR-622-INDEPENDENT` | md | blocked | block | TASK-AR-622 Independent W4b Technical Verification |
 | `reviews/W4B-2026-07-24-TASK-AR-622-RECHECK.md` | `W4B-2026-07-24-TASK-AR-622-RECHECK` | md | blocked | block | TASK-AR-622 Independent W4b Recheck |
 | `reviews/W4B-2026-07-28-unit-task-ar-639-001.md` | `W4B-2026-07-28-unit-task-ar-639-001` | verification | record | n/a | W4b Independent Verification — UNIT-TASK-AR-639-001 |
+| `reviews/W4B-2026-07-28-unit-task-ar-639-002-recheck-2.md` | `W4B-2026-07-28-unit-task-ar-639-002-recheck-2` | verification | passed | pass | UNIT-TASK-AR-639-002 Independent W4b Approval Recheck |
+| `reviews/W4B-2026-07-28-unit-task-ar-639-002-recheck.md` | `W4B-2026-07-28-unit-task-ar-639-002-recheck` | verification | blocked | fail | UNIT-TASK-AR-639-002 Independent W4b Recheck |
+| `reviews/W4B-2026-07-28-unit-task-ar-639-002.md` | `W4B-2026-07-28-unit-task-ar-639-002` | verification | blocked | fail | UNIT-TASK-AR-639-002 Independent W4b Blocking Review |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |

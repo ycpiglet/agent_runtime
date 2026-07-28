@@ -327,6 +327,46 @@ fields:
     consumed_by: [work_schema_gate, stats]
     query_use: Isolate records with backfilled/contradictory lifecycle timestamps from flow metrics (TASK-AR-626).
     mutable: lifecycle_tools
+  recovered_without_claim:
+    type: boolean
+    required_for: []
+    populated_by: lifecycle_recovery
+    source: runtime
+    consumed_by: [state_sync_gate, audit]
+    query_use: Explicitly identify historical work recovered without fabricating a W2 claim.
+    mutable: lifecycle_tools
+  recovery_reason:
+    type: string
+    required_for: []
+    populated_by: lifecycle_recovery
+    source: runtime
+    consumed_by: [state_sync_gate, audit]
+    query_use: Explain why a durable historical claim is unavailable.
+    mutable: lifecycle_tools
+  recovered_at:
+    type: datetime
+    required_for: []
+    populated_by: lifecycle_recovery
+    source: runtime
+    consumed_by: [state_sync_gate, audit]
+    query_use: Record when missing-claim recovery was evaluated.
+    mutable: lifecycle_tools
+  recovered_by:
+    type: string
+    required_for: []
+    populated_by: lifecycle_recovery
+    source: runtime
+    consumed_by: [state_sync_gate, audit]
+    query_use: Attribute missing-claim recovery to its responsible reviewer or tool.
+    mutable: lifecycle_tools
+  recovery_independent_evidence_refs:
+    type: list
+    required_for: []
+    populated_by: lifecycle_recovery
+    source: runtime
+    consumed_by: [state_sync_gate, evidence_index, audit]
+    query_use: Preserve existing independent evidence supporting a no-claim recovery.
+    mutable: lifecycle_tools
   closed_by:
     type: string
     required_for: []
@@ -604,6 +644,14 @@ fields:
     consumed_by: [parallel_worktree_gate, audit, stats]
     query_use: Link work to runtime claims and pane handoffs.
     mutable: lifecycle_tools
+  measurement_unavailable_reason:
+    type: string
+    required_for: []
+    populated_by: work_close
+    source: runtime
+    consumed_by: [work_close, stats, audit]
+    query_use: Explain why a completion intentionally omits unreliable time, token, or cost measurement.
+    mutable: closeout_only
   est_tokens:
     type: integer
     required_for: []

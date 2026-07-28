@@ -15,6 +15,13 @@ owner: lead_engineer
 created_at: 2026-07-27T11:12:27+09:00
 updated_at: 2026-07-28T16:31:01+09:00
 timestamp_quality: backfilled
+recovered_without_claim: true
+recovery_reason: Historical implementation and W4 evidence predate a durable W2 claim; recovery preserves the absence instead of synthesizing a claim.
+recovered_at: 2026-07-28T16:31:01+09:00
+recovered_by: codex-root-v080-recovery-20260728
+recovery_independent_evidence_refs:
+  - reviews/ROLE-REVIEW-2026-07-28-TASK-AR-631-W4B.md
+  - reviews/VERIFY-2026-07-27-unit-task-ar-631-001-20260727111227.json
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-26-console-overhaul-owner-decisions.md
 created_by: claude-worker-631
