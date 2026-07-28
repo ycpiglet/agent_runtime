@@ -342,8 +342,7 @@ def analyze(root: Path) -> list[Finding]:
 
     if not task_set_id or task_set_id == "none":
         findings.append(Finding("watch", "pointer:no-active-taskset", POINTER.as_posix(), "pointer has no active taskset"))
-        return findings
-    if not taskset_tasks:
+    elif not taskset_tasks:
         findings.append(Finding("block", f"taskset:missing:{task_set_id}", TASKS_DIR.as_posix(), "active taskset has no canonical task files"))
     if active_task and active_task != "none":
         task = by_id.get(active_task)
@@ -353,12 +352,12 @@ def analyze(root: Path) -> list[Finding]:
             findings.append(Finding("block", f"active-task:taskset-mismatch:{active_task}", task.path.as_posix(), f"active task belongs to {task.task_set_id}, pointer says {task_set_id}"))
     open_tasks = [task for task in taskset_tasks if task.status not in DONE_STATUSES]
     taskset_is_complete = bool(taskset_tasks) and not open_tasks
-    if pointer_status in {"active", "in_progress"} and taskset_tasks and not open_tasks:
+    if task_set_id and task_set_id != "none" and pointer_status in {"active", "in_progress"} and taskset_tasks and not open_tasks:
         findings.append(Finding("block", f"taskset:active-but-complete:{task_set_id}", POINTER.as_posix(), "pointer says active but all taskset tasks are done"))
     for path in (BOARD, BACKLOG, STATUS):
         if not (root / path).exists():
             findings.append(Finding("block", f"surface:missing:{path.as_posix()}", path.as_posix(), "required state surface is missing"))
-        elif not (path == BOARD and taskset_is_complete and pointer_status not in {"active", "in_progress"}) and not _contains(root, path, task_set_id):
+        elif task_set_id and task_set_id != "none" and not (path == BOARD and taskset_is_complete and pointer_status not in {"active", "in_progress"}) and not _contains(root, path, task_set_id):
             findings.append(Finding("block", f"surface:missing-taskset:{path.as_posix()}", path.as_posix(), f"{path.as_posix()} does not mention active taskset {task_set_id}"))
     if active_task and active_task != "none":
         for path in (BOARD, STATUS):
@@ -373,11 +372,16 @@ def analyze(root: Path) -> list[Finding]:
         if _is_active(claim):
             findings.extend(_validate_active_claim(root, claim_path, claim, by_id, units_by_id, task_set_id, active_task, pointer_claim_refs, pointer_agents))
     active_workers = [claim for _, claim in records if _is_active(claim) and not _is_explicit_overlay(claim)]
-    if active_task and active_task != "none" and active_workers and not any(
-        str(claim.get("task_id") or "") == active_task and str(claim.get("task_set_id") or "") == task_set_id
-        for claim in active_workers
-    ):
-        findings.append(Finding("block", f"pointer:primary-worker-missing:{active_task}", POINTER.as_posix(), "primary pointer task/taskset does not correspond to any active worker claim"))
+    if active_workers:
+        if not task_set_id or task_set_id == "none":
+            findings.append(Finding("block", "pointer:primary-worker-missing-taskset", POINTER.as_posix(), "active worker claims require a primary pointer taskset"))
+        elif not active_task or active_task == "none":
+            findings.append(Finding("block", "pointer:primary-worker-missing-task", POINTER.as_posix(), "active worker claims require a primary pointer task"))
+        elif not any(
+            str(claim.get("task_id") or "") == active_task and str(claim.get("task_set_id") or "") == task_set_id
+            for claim in active_workers
+        ):
+            findings.append(Finding("block", f"pointer:primary-worker-missing:{active_task}", POINTER.as_posix(), "primary pointer task/taskset does not correspond to any active worker claim"))
 
     # Verified, still-current units must have a durable claim trace or an explicit
     # recovery. This catches the TASK-AR-631 shape without migrating closed legacy work.

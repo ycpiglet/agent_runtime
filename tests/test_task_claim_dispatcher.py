@@ -233,6 +233,7 @@ def test_projection_emits_full_pointer_agent_record_not_scalar_claim_id(tmp_path
 
     assert result.returncode == 0, result.stderr or result.stdout
     projection = json.loads(result.stdout)
+    assert projection["operation"] == "merge"
     assert projection["task_claim_ref"].endswith(f"{claim['claim_id']}.json")
     assert projection["pointer"]["active_task"] == "TASK-AR-246"
     assert projection["pointer"]["current_agents"] == [{
@@ -243,6 +244,37 @@ def test_projection_emits_full_pointer_agent_record_not_scalar_claim_id(tmp_path
         "callsite_id": claim["callsite_id"],
         "pane_id": claim["pane_id"],
     }]
+
+
+def test_projection_rejects_released_or_overlay_claims(tmp_path: Path):
+    (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_worktree(tmp_path, "TASK-AR-246")
+    created = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id", "TASK-AR-246",
+        "--agent-role", "lead-engineer",
+        "--now", "2026-06-10T14:30:12+09:00",
+        "--suffix", "reject-projection",
+        "--json",
+    )
+    assert created.returncode == 0, created.stderr or created.stdout
+    claim = json.loads(created.stdout)["claim"]
+    path = tmp_path / "agents/runtime/task_claims" / f"{claim['claim_id']}.json"
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["status"] = "released"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    inactive = _run_dispatcher(tmp_path, "projection", "--claim-id", claim["claim_id"], "--json")
+    assert inactive.returncode == 1
+    assert "requires an active worker claim" in inactive.stderr
+
+    payload["status"] = "claimed"
+    payload["overlay"] = True
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    overlay = _run_dispatcher(tmp_path, "projection", "--claim-id", claim["claim_id"], "--json")
+    assert overlay.returncode == 1
+    assert "does not apply to overlay claim" in overlay.stderr
 
 
 def test_release_claim_requires_existing_handoff_and_log_files(tmp_path: Path):

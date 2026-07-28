@@ -151,6 +151,10 @@ def _is_active(payload: dict[str, Any]) -> bool:
     return str(payload.get("status") or "").strip().lower() in ACTIVE_STATUSES
 
 
+def _is_explicit_overlay(payload: dict[str, Any]) -> bool:
+    return payload.get("overlay") is True
+
+
 def _resolved_worktree(root: Path, value: str) -> Path:
     path = Path(value)
     if not path.is_absolute():
@@ -700,6 +704,12 @@ def cmd_projection(args: argparse.Namespace) -> int:
         print(f"claim not found: {args.claim_id}", file=sys.stderr)
         return 1
     path, claim = found
+    if not _is_active(claim):
+        print(f"projection requires an active worker claim: {args.claim_id}", file=sys.stderr)
+        return 1
+    if _is_explicit_overlay(claim):
+        print(f"projection does not apply to overlay claim: {args.claim_id}", file=sys.stderr)
+        return 1
     rel_path = _rel(root, path)
     agent = {
         key: claim.get(key)
@@ -707,6 +717,7 @@ def cmd_projection(args: argparse.Namespace) -> int:
     }
     projection = {
         "status": "projection",
+        "operation": "merge",
         "claim_id": claim.get("claim_id"),
         "task_claim_ref": rel_path,
         "task_id": claim.get("task_id"),

@@ -57,7 +57,7 @@ resume:
     write(root / "STATUS.md", f"# Status\n\n{task_set_id}\n{active_task}\n")
 
 
-def write_unit(root: Path, task_id: str, unit_id: str, *, verified: bool = False, recovery: str = "") -> None:
+def write_unit(root: Path, task_id: str, unit_id: str, *, task_set_id: str = "TASKSET-AR-GOVERNANCE-OPS", verified: bool = False, recovery: str = "") -> None:
     verification = "passed" if verified else "pending"
     extra = recovery
     write(
@@ -69,7 +69,7 @@ kind: unit
 parent_id: {task_id}
 task_id: {task_id}
 unit_id: {unit_id}
-task_set_id: TASKSET-AR-GOVERNANCE-OPS
+task_set_id: {task_set_id}
 status: review
 verification_status: {verification}
 owner: lead-engineer
@@ -83,27 +83,37 @@ created_by: tester
     )
 
 
-def write_claim(root: Path, *, task_id: str, unit_id: str, overlay: object | None = None) -> str:
-    claim_id = "CLAIM-TEST-001"
+def write_claim(
+    root: Path,
+    *,
+    task_id: str,
+    unit_id: str,
+    claim_id: str = "CLAIM-TEST-001",
+    task_set_id: str = "TASKSET-AR-GOVERNANCE-OPS",
+    agent_instance_id: str = "worker-test",
+    overlay: object | None = None,
+) -> str:
     claim_path = f"agents/runtime/task_claims/{claim_id}.json"
-    worktree = root / ".worktrees" / task_id
+    worktree = root / ".worktrees" / claim_id
     repository = root / ".fixture-repository"
-    subprocess.run(["git", "init", "-q", "-b", "base", str(repository)], check=True)
-    subprocess.run(["git", "-C", str(repository), "config", "user.email", "tests@example.invalid"], check=True)
-    subprocess.run(["git", "-C", str(repository), "config", "user.name", "State Sync Tests"], check=True)
-    subprocess.run(["git", "-C", str(repository), "commit", "--allow-empty", "-qm", "fixture"], check=True)
-    subprocess.run(["git", "-C", str(repository), "worktree", "add", "-q", "-b", "worker", str(worktree)], check=True)
+    if not repository.exists():
+        subprocess.run(["git", "init", "-q", "-b", "base", str(repository)], check=True)
+        subprocess.run(["git", "-C", str(repository), "config", "user.email", "tests@example.invalid"], check=True)
+        subprocess.run(["git", "-C", str(repository), "config", "user.name", "State Sync Tests"], check=True)
+        subprocess.run(["git", "-C", str(repository), "commit", "--allow-empty", "-qm", "fixture"], check=True)
+    branch = "worker-" + claim_id.lower().replace("claim-", "")
+    subprocess.run(["git", "-C", str(repository), "worktree", "add", "-q", "-b", branch, str(worktree)], check=True)
     claim = {
         "schema": "agent-runtime-task-claim/v1",
         "claim_id": claim_id,
         "task_id": task_id,
-        "task_set_id": "TASKSET-AR-GOVERNANCE-OPS",
+        "task_set_id": task_set_id,
         "unit_id": unit_id,
         "agent_role": "lead-engineer",
-        "agent_instance_id": "worker-test",
+        "agent_instance_id": agent_instance_id,
         "status": "claimed",
-        "worktree_path": f".worktrees/{task_id}",
-        "branch": "worker",
+        "worktree_path": f".worktrees/{claim_id}",
+        "branch": branch,
     }
     if overlay is not None:
         claim["overlay"] = overlay
@@ -137,6 +147,30 @@ resume:
 pointers:
   active_claims:
     - {claim_path}
+""",
+    )
+
+
+def write_multi_claim_pointer(root: Path, *, task_set_id: str, primary_task: str, claims: list[dict[str, str]]) -> None:
+    agents = "\n".join(
+        "    - claim_id: {claim_id}\n      agent_role: lead-engineer\n      agent_instance_id: {agent_instance_id}".format(**claim)
+        for claim in claims
+    )
+    refs = "\n".join(f"    - {claim['path']}" for claim in claims)
+    write(
+        root / "agents/project/NEXT-SESSION-POINTER.yml",
+        f"""current_state:
+  status: in_progress
+  task_set_id: {task_set_id}
+active_work:
+  current_agents:
+{agents}
+resume:
+  active_task: {primary_task}
+  active_task_set: {task_set_id}
+pointers:
+  active_claims:
+{refs}
 """,
     )
 
@@ -222,6 +256,72 @@ def test_active_worker_claim_correlates_task_unit_pointer_and_refs(tmp_path):
     assert not [finding for finding in findings if finding.severity == "block"]
 
 
+def test_two_active_workers_can_share_one_primary_pointer_when_both_are_projected(tmp_path):
+    gate = load_module()
+    primary = ("TASK-AR-631", "UNIT-TASK-AR-631-001", "TASKSET-AR-GOVERNANCE-OPS", "CLAIM-TEST-001", "worker-test")
+    secondary = ("TASK-AR-632", "UNIT-TASK-AR-632-001", "TASKSET-AR-SECONDARY", "CLAIM-TEST-002", "worker-test-2")
+    claims = []
+    for task_id, unit_id, taskset_id, claim_id, agent_id in (primary, secondary):
+        write_task(tmp_path, task_id, taskset_id)
+        write_unit(tmp_path, task_id, unit_id, task_set_id=taskset_id)
+        path = write_claim(
+            tmp_path,
+            task_id=task_id,
+            unit_id=unit_id,
+            task_set_id=taskset_id,
+            claim_id=claim_id,
+            agent_instance_id=agent_id,
+        )
+        attach_claim_refs(tmp_path, task_id, unit_id, path)
+        claims.append({"claim_id": claim_id, "agent_instance_id": agent_id, "path": path})
+    write_multi_claim_pointer(tmp_path, task_set_id=primary[2], primary_task=primary[0], claims=claims)
+    write(tmp_path / "BACKLOG-BOARD.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "BACKLOG.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "STATUS.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+
+    findings = gate.analyze(tmp_path)
+
+    assert not [finding for finding in findings if finding.severity == "block"]
+
+
+def test_active_worker_with_no_pointer_taskset_still_validates_and_blocks(tmp_path):
+    gate = load_module()
+    write_task(tmp_path, "TASK-AR-631", "TASKSET-AR-GOVERNANCE-OPS")
+    write_unit(tmp_path, "TASK-AR-631", "UNIT-TASK-AR-631-001")
+    path = write_claim(tmp_path, task_id="TASK-AR-631", unit_id="UNIT-TASK-AR-631-001")
+    attach_claim_refs(tmp_path, "TASK-AR-631", "UNIT-TASK-AR-631-001", path)
+    write(tmp_path / "agents/project/NEXT-SESSION-POINTER.yml", "resume:\n  active_task: none\n")
+    write(tmp_path / "BACKLOG-BOARD.md", "# Board\n")
+    write(tmp_path / "BACKLOG.md", "# Backlog\n")
+    write(tmp_path / "STATUS.md", "# Status\n")
+
+    findings = gate.analyze(tmp_path)
+
+    assert any(f.subject == "pointer:primary-worker-missing-taskset" for f in findings)
+    assert any(f.subject == "claim:pointer-missing-active-ref:CLAIM-TEST-001" for f in findings)
+
+
+def test_active_worker_with_pointer_task_none_blocks(tmp_path):
+    gate = load_module()
+    write_task(tmp_path, "TASK-AR-631", "TASKSET-AR-GOVERNANCE-OPS")
+    write_unit(tmp_path, "TASK-AR-631", "UNIT-TASK-AR-631-001")
+    path = write_claim(tmp_path, task_id="TASK-AR-631", unit_id="UNIT-TASK-AR-631-001")
+    attach_claim_refs(tmp_path, "TASK-AR-631", "UNIT-TASK-AR-631-001", path)
+    write_multi_claim_pointer(
+        tmp_path,
+        task_set_id="TASKSET-AR-GOVERNANCE-OPS",
+        primary_task="none",
+        claims=[{"claim_id": "CLAIM-TEST-001", "agent_instance_id": "worker-test", "path": path}],
+    )
+    write(tmp_path / "BACKLOG-BOARD.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "BACKLOG.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "STATUS.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+
+    findings = gate.analyze(tmp_path)
+
+    assert any(f.subject == "pointer:primary-worker-missing-task" for f in findings)
+
+
 def test_verified_current_work_without_claim_or_recovery_blocks(tmp_path):
     gate = load_module()
     task_id = "TASK-AR-631"
@@ -257,6 +357,28 @@ recovery_independent_evidence_refs:
     assert any(f.subject == "recovery:without-claim:TASK-AR-631" for f in findings)
 
 
+def test_recovery_with_a_missing_independent_evidence_ref_blocks(tmp_path):
+    gate = load_module()
+    recovery = """recovered_without_claim: true
+recovery_reason: Historical claim absent.
+recovered_at: 2026-07-28T16:30:00+09:00
+recovered_by: independent-auditor
+recovery_independent_evidence_refs:
+  - reviews/W4B-EXISTS.md
+  - reviews/W4B-MISSING.md
+"""
+    write(tmp_path / "reviews/W4B-EXISTS.md", "# evidence\n")
+    write_task(tmp_path, "TASK-AR-631", "TASKSET-AR-GOVERNANCE-OPS", status="review", verified=True)
+    task = tmp_path / "agents/lead_engineer/tasks/TASK-AR-631.md"
+    task.write_text(task.read_text(encoding="utf-8").replace("---\n", "---\n" + recovery, 1), encoding="utf-8")
+    write_unit(tmp_path, "TASK-AR-631", "UNIT-TASK-AR-631-001", verified=True, recovery=recovery)
+    write_surfaces(tmp_path, "TASKSET-AR-GOVERNANCE-OPS", "none")
+
+    findings = gate.analyze(tmp_path)
+
+    assert any(f.subject == "recovery:invalid:TASK-AR-631" and "W4B-MISSING" in f.detail for f in findings)
+
+
 def test_malformed_worker_claim_cannot_use_overlay_omission_to_bypass_requirements(tmp_path):
     gate = load_module()
     write_task(tmp_path, "TASK-AR-631", "TASKSET-AR-GOVERNANCE-OPS")
@@ -274,6 +396,40 @@ def test_malformed_worker_claim_cannot_use_overlay_omission_to_bypass_requiremen
     findings = gate.analyze(tmp_path)
 
     assert any(f.subject == "claim:missing-worker-field:CLAIM-TEST-001:worktree_path" for f in findings)
+
+
+def test_false_or_string_true_overlay_markers_remain_worker_claims(tmp_path):
+    gate = load_module()
+    for index, overlay in enumerate((False, "true"), start=1):
+        task_id = f"TASK-AR-63{index}"
+        unit_id = f"UNIT-TASK-AR-63{index}-001"
+        claim_id = f"CLAIM-TEST-00{index}"
+        write_task(tmp_path, task_id, "TASKSET-AR-GOVERNANCE-OPS")
+        write_unit(tmp_path, task_id, unit_id)
+        path = write_claim(tmp_path, task_id=task_id, unit_id=unit_id, claim_id=claim_id, overlay=overlay)
+        payload = json.loads((tmp_path / path).read_text(encoding="utf-8"))
+        payload.pop("worktree_path")
+        (tmp_path / path).write_text(json.dumps(payload), encoding="utf-8")
+        attach_claim_refs(tmp_path, task_id, unit_id, path)
+    write_multi_claim_pointer(
+        tmp_path,
+        task_set_id="TASKSET-AR-GOVERNANCE-OPS",
+        primary_task="TASK-AR-631",
+        claims=[
+            {"claim_id": "CLAIM-TEST-001", "agent_instance_id": "worker-test", "path": "agents/runtime/task_claims/CLAIM-TEST-001.json"},
+            {"claim_id": "CLAIM-TEST-002", "agent_instance_id": "worker-test", "path": "agents/runtime/task_claims/CLAIM-TEST-002.json"},
+        ],
+    )
+    write(tmp_path / "BACKLOG-BOARD.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "BACKLOG.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "STATUS.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+
+    findings = gate.analyze(tmp_path)
+
+    assert {f.subject for f in findings if "missing-worker-field" in f.subject} == {
+        "claim:missing-worker-field:CLAIM-TEST-001:worktree_path",
+        "claim:missing-worker-field:CLAIM-TEST-002:worktree_path",
+    }
 
 
 def test_worker_claim_branch_must_match_the_real_worktree_branch(tmp_path):
