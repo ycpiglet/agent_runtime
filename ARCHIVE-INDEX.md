@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-07-29
-archived_count: 291
+archived_count: 292
 ---
 
 # Archived Task Files
 
-- `291` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `292` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -296,6 +296,7 @@ archived_count: 291
 | `TASK-AR-592` | `57b81740-6ec…` | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | completed | 2026-06-20T05:18:36+09:00 | 2026-06-20T07:13:38+09:00 | 2026-06-20T07:40:00+09:00 | 2026-06-20T07:40:00+09:00 | Ensure the new visual components meet WCAG AA (contrast, roles, labels, keyboard, red… |
 | `TASK-AR-639` | `5affd6b2-dab…` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | 2026-07-28T16:36:01+09:00 | 2026-07-28T17:55:15+09:00 | 2026-07-28T19:18:44+09:00 | 2026-07-28T19:18:44+09:00 | Make registered work executable and make implemented-but-unclaimed work visible witho… |
 | `TASK-AR-640` | `cefa88c8-fab…` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | 2026-07-28T16:36:01+09:00 | 2026-07-28T19:48:21+09:00 | 2026-07-28T20:45:30+09:00 | 2026-07-28T20:45:30+09:00 | Represent shared capabilities and host ownership without requiring a project-specific… |
+| `TASK-AR-643` | `34e50cc4-74b…` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | 2026-07-28T16:36:01+09:00 | 2026-07-28T23:42:28+09:00 | 2026-07-29T00:56:59+09:00 | 2026-07-29T00:56:59+09:00 | Guarantee that every capability advertised to a clean host has all executable depende… |
 | `TASK-AR-641` | `eb3e329f-b0e…` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | 2026-07-28T16:36:01+09:00 | 2026-07-28T20:54:00+09:00 | 2026-07-28T21:55:47+09:00 | 2026-07-28T21:55:47+09:00 | Let an existing repository understand exactly what Agent Runtime would add, own, pres… |
 | `TASK-AR-642` | `b1117f99-eb9…` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | 2026-07-28T16:36:01+09:00 | 2026-07-28T22:14:34+09:00 | 2026-07-28T23:17:36+09:00 | 2026-07-28T23:17:36+09:00 | Update safe runtime files without overwriting host state or allowing one expected sea… |
 | `TASK-AR-613` | `26230ebe-4bf…` | `TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY` | completed | 2026-07-23T01:16:34+09:00 | 2026-07-23T01:25:41+09:00 | 2026-07-23T03:13:02+09:00 | 2026-07-23T03:13:02+09:00 | Close GitHub issue 316 by preventing a valid tagged cadence from collapsing into rele… |

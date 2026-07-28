@@ -1,13 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-07-28 - TASK-AR-642 complete; TASK-AR-643 next
+## 2026-07-29 - TASK-AR-643 complete; TASK-AR-644 next
 
-- Completed: `TASK-AR-642` added ownership-aware reconciliation, deterministic `--reconcile` text/JSON, opt-in `--apply-safe`, legacy atomic apply preservation, v1-to-v2 lock migration, and exact-ref host-update routing.
-- Safety: two independent W4b repair rounds closed an apply-time ancestor-symlink escape and missing lock profile/capability metadata; the Autofolio-shaped v1 migration seam remains covered.
-- Quality: independent W4b approved 98/100; implementation PR #362 passed Python 3.10, 3.11, and 3.12 CI and merged at `b5643140`; merged-main verification passed 134 task tests, 125 focused unit tests, and the full suite at 2328 passed with 3 skipped.
+- Completed: `TASK-AR-643` added profile-aware dependency closure, generic work/session/report helpers, reduced-profile safety, and clean-host plus built-wheel execution proof.
+- Safety: product-specific release automation is excluded from consumer promises, Allimbot helpers remain security-profile-only, and every advertised core capability closes over its shipped executable dependencies.
+- Quality: independent W4b approved 96/100; implementation PR #364 passed Python 3.10, 3.11, and 3.12 CI and merged at `442d31ef`; merged-main verification passed 15 task tests, 144 focused unit tests, and the full suite at 2333 passed with 3 skipped.
 - Consumer boundary: Bean Wiki, Allimbot, Autofolio, and Tag Manual were not mutated.
-- Taskset: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` remains active and advances to `TASK-AR-643`.
-- Next: begin `TASK-AR-643` at W0 and revalidate clean-host dependency closure, shipped skill/helper completeness, profile-reduction safety, and executable template smoke before W2. Consumer pilot mutation remains deferred to its registered later task.
+- Taskset: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` remains active and advances to `TASK-AR-644`.
+- Next: begin `TASK-AR-644` at W0 and revalidate cross-platform SessionStart, compact checkpoint/rebootstrap, interrupted-session recovery, and doctor visibility before W2. Consumer pilot mutation and release actions remain deferred.
 
 ## 2026-07-23 - TASK-AR-621 complete; TASK-AR-622 next
 
