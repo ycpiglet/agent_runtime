@@ -139,6 +139,31 @@ verification:
     return path
 
 
+def _write_legacy_body_only_task(
+    root: Path,
+    *,
+    command: str,
+    task_id: str = "TASK-AR-901",
+) -> Path:
+    path = _write_task(root, command=command, task_id=task_id)
+    text = path.read_text(encoding="utf-8")
+    text = text.replace(
+        'acceptance:\n'
+        '  - "Task verification evidence is written."\n'
+        'verification:\n'
+        f'  - "{command}"\n',
+        "",
+    )
+    text = text.rstrip() + (
+        "\n\n## Acceptance Criteria\n\n"
+        "- Task verification evidence is written.\n\n"
+        "## Verification\n\n"
+        f"- `{command}`\n"
+    )
+    path.write_text(text, encoding="utf-8")
+    return path
+
+
 def _frontmatter(path: Path) -> dict[str, str]:
     meta: dict[str, str] = {}
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -409,6 +434,55 @@ def test_work_verify_blocks_unit_without_commands(tmp_path: Path) -> None:
     assert "verification:no-commands" in result.stderr
     assert "verification_status: pending" in unit_path.read_text(encoding="utf-8")
     assert not (tmp_path / "reviews").exists()
+
+
+def test_work_verify_executes_legacy_body_only_task_commands(tmp_path: Path) -> None:
+    script = tmp_path / "scripts" / "legacy_check.py"
+    script.parent.mkdir(parents=True)
+    script.write_text("print('legacy body verified')\n", encoding="utf-8")
+    command = f"{sys.executable} scripts/legacy_check.py"
+    _write_legacy_body_only_task(tmp_path, command=command)
+
+    result = _run(
+        tmp_path,
+        "verify",
+        "TASK-AR-901",
+        "--now",
+        "2026-06-12T13:15:00+09:00",
+        "--actor",
+        "legacy-round-trip-test",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout[result.stdout.index("{") :])
+    evidence = json.loads((tmp_path / payload["evidence"]).read_text(encoding="utf-8"))
+    assert evidence["commands"][0]["command"] == command
+    assert evidence["commands"][0]["stdout"].strip() == "legacy body verified"
+
+
+def test_work_verify_records_legacy_unsupported_command_failure(tmp_path: Path) -> None:
+    command = "manual: inspect the historical artifact"
+    _write_legacy_body_only_task(tmp_path, command=command)
+
+    result = _run(
+        tmp_path,
+        "verify",
+        "TASK-AR-901",
+        "--now",
+        "2026-06-12T13:16:00+09:00",
+        "--actor",
+        "legacy-round-trip-test",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "work-verify: failed" in result.stdout
+    payload = json.loads(result.stdout[result.stdout.index("{") :])
+    evidence = json.loads((tmp_path / payload["evidence"]).read_text(encoding="utf-8"))
+    assert evidence["commands"][0]["command"] == command
+    assert evidence["commands"][0]["status"] == "failed"
+    assert evidence["commands"][0]["returncode"] != 0
 
 
 def test_work_verify_exact_task_id_ignores_descendant_unit(tmp_path: Path) -> None:
