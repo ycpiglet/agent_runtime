@@ -48,7 +48,8 @@ class WorkItem:
 
     @property
     def status(self) -> str:
-        return str(self.meta.get("status") or "unknown").strip().lower()
+        value = self.meta.get("status")
+        return status_alias.normalize_status(value) if isinstance(value, str) and value.strip() else "unknown"
 
     @property
     def task_set_id(self) -> str:
@@ -208,7 +209,41 @@ def _rel(root: Path, path: Path) -> str:
 
 def _worktree(root: Path, value: str) -> Path:
     path = Path(value)
-    return path if path.is_absolute() else root / path
+    if path.is_absolute():
+        return path
+    root_candidate = root / path
+    if root_candidate.exists():
+        return root_candidate
+    primary_root = _git_primary_root(root)
+    if primary_root is not None and primary_root != root:
+        primary_candidate = primary_root / path
+        if primary_candidate.exists():
+            return primary_candidate
+    return root_candidate
+
+
+def _git_primary_root(root: Path) -> Path | None:
+    """Return the Git common-dir parent, without guessing when Git is absent."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "--git-common-dir"],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError:
+        return None
+    if result.returncode != 0 or not result.stdout.strip():
+        return None
+    common = Path(result.stdout.strip())
+    if not common.is_absolute():
+        common = root / common
+    try:
+        return common.resolve().parent
+    except OSError:
+        return common.absolute().parent
 
 
 def _branch_matches_worktree(worktree: Path, branch: str) -> bool:
@@ -229,20 +264,8 @@ def _branch_matches_worktree(worktree: Path, branch: str) -> bool:
 
 def _is_main_checkout(worktree: Path) -> bool:
     """Return true only when Git proves this path is its common-dir parent."""
-    try:
-        result = subprocess.run(
-            ["git", "-C", str(worktree), "rev-parse", "--path-format=absolute", "--git-common-dir"],
-            check=False,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-        )
-    except OSError:
-        return False
-    if result.returncode != 0 or not result.stdout.strip():
-        return False
-    return worktree.resolve() == Path(result.stdout.strip()).resolve().parent
+    primary_root = _git_primary_root(worktree)
+    return primary_root is not None and worktree.resolve() == primary_root.resolve()
 
 
 def _recovery_errors(root: Path, item: WorkItem) -> list[str]:
@@ -302,6 +325,17 @@ def _validate_active_claim(
         findings.append(Finding("block", f"claim:unit-mismatch:{claim_id}", rel_claim_path, "claim unit is missing or belongs to another task"))
     if task and str(claim.get("task_set_id") or "") != task.task_set_id:
         findings.append(Finding("block", f"claim:taskset-mismatch:{claim_id}", rel_claim_path, "claim and task taskset differ"))
+    allowed_lifecycle_statuses = {"active", "in_progress", "blocked", "review"}
+    for item, label in ((task, "task"), (unit, "unit")):
+        if item and item.status not in allowed_lifecycle_statuses:
+            findings.append(
+                Finding(
+                    "block",
+                    f"claim:{label}-invalid-lifecycle:{claim_id}:{item.status or 'missing'}",
+                    item.path.as_posix(),
+                    "active worker claim requires canonical work projected to active/in_progress/blocked/review",
+                )
+            )
     for item, label in ((task, "task"), (unit, "unit")):
         if item and rel_claim_path not in _values(item.meta, "claim_refs"):
             findings.append(Finding("block", f"claim:missing-{label}-ref:{claim_id}", item.path.as_posix(), "claim path is not projected in claim_refs"))

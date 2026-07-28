@@ -57,7 +57,7 @@ resume:
     write(root / "STATUS.md", f"# Status\n\n{task_set_id}\n{active_task}\n")
 
 
-def write_unit(root: Path, task_id: str, unit_id: str, *, task_set_id: str = "TASKSET-AR-GOVERNANCE-OPS", verified: bool = False, recovery: str = "") -> None:
+def write_unit(root: Path, task_id: str, unit_id: str, *, task_set_id: str = "TASKSET-AR-GOVERNANCE-OPS", status: str = "review", verified: bool = False, recovery: str = "") -> None:
     verification = "passed" if verified else "pending"
     extra = recovery
     write(
@@ -70,7 +70,7 @@ parent_id: {task_id}
 task_id: {task_id}
 unit_id: {unit_id}
 task_set_id: {task_set_id}
-status: review
+status: {status}
 verification_status: {verification}
 owner: lead-engineer
 created_at: 2026-07-28T00:00:00+09:00
@@ -254,6 +254,152 @@ def test_active_worker_claim_correlates_task_unit_pointer_and_refs(tmp_path):
     findings = gate.analyze(tmp_path)
 
     assert not [finding for finding in findings if finding.severity == "block"]
+
+
+def test_active_worker_claim_blocks_completed_task_even_with_open_taskset_sibling(tmp_path):
+    gate = load_module()
+    write_task(tmp_path, "TASK-AR-631", "TASKSET-AR-GOVERNANCE-OPS", status="completed")
+    write_task(tmp_path, "TASK-AR-632", "TASKSET-AR-GOVERNANCE-OPS", status="in_progress")
+    write_unit(tmp_path, "TASK-AR-631", "UNIT-TASK-AR-631-001")
+    path = write_claim(tmp_path, task_id="TASK-AR-631", unit_id="UNIT-TASK-AR-631-001")
+    attach_claim_refs(tmp_path, "TASK-AR-631", "UNIT-TASK-AR-631-001", path)
+    write_claim_pointer(tmp_path, "TASK-AR-631", path)
+    write(tmp_path / "BACKLOG-BOARD.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "BACKLOG.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "STATUS.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+
+    findings = gate.analyze(tmp_path)
+
+    assert any(f.subject == "claim:task-invalid-lifecycle:CLAIM-TEST-001:completed" for f in findings)
+
+
+def test_active_worker_claim_blocks_completed_unit(tmp_path):
+    gate = load_module()
+    write_task(tmp_path, "TASK-AR-631", "TASKSET-AR-GOVERNANCE-OPS")
+    write_unit(tmp_path, "TASK-AR-631", "UNIT-TASK-AR-631-001", status="completed")
+    path = write_claim(tmp_path, task_id="TASK-AR-631", unit_id="UNIT-TASK-AR-631-001")
+    attach_claim_refs(tmp_path, "TASK-AR-631", "UNIT-TASK-AR-631-001", path)
+    write_claim_pointer(tmp_path, "TASK-AR-631", path)
+    write(tmp_path / "BACKLOG-BOARD.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "BACKLOG.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "STATUS.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+
+    findings = gate.analyze(tmp_path)
+
+    assert any(f.subject == "claim:unit-invalid-lifecycle:CLAIM-TEST-001:completed" for f in findings)
+
+
+def test_active_worker_claim_blocks_predispatch_or_unknown_canonical_statuses(tmp_path):
+    gate = load_module()
+    for index, status in enumerate(("planned", "worker_ready", "unknown", ""), start=1):
+        task_id = f"TASK-AR-63{index}"
+        unit_id = f"UNIT-TASK-AR-63{index}-001"
+        claim_id = f"CLAIM-TEST-00{index}"
+        write_task(tmp_path, task_id, "TASKSET-AR-GOVERNANCE-OPS", status=status)
+        write_unit(tmp_path, task_id, unit_id, status=status)
+        path = write_claim(tmp_path, task_id=task_id, unit_id=unit_id, claim_id=claim_id)
+        attach_claim_refs(tmp_path, task_id, unit_id, path)
+    write_multi_claim_pointer(
+        tmp_path,
+        task_set_id="TASKSET-AR-GOVERNANCE-OPS",
+        primary_task="TASK-AR-631",
+        claims=[
+            {"claim_id": f"CLAIM-TEST-00{index}", "agent_instance_id": "worker-test", "path": f"agents/runtime/task_claims/CLAIM-TEST-00{index}.json"}
+            for index in range(1, 5)
+        ],
+    )
+    write(tmp_path / "BACKLOG-BOARD.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "BACKLOG.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "STATUS.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+
+    findings = gate.analyze(tmp_path)
+
+    subjects = {f.subject for f in findings}
+    for index, status in enumerate(("planned", "worker_ready", "unknown", "unknown"), start=1):
+        assert f"claim:task-invalid-lifecycle:CLAIM-TEST-00{index}:{status}" in subjects
+        assert f"claim:unit-invalid-lifecycle:CLAIM-TEST-00{index}:{status}" in subjects
+
+
+def test_active_worker_claim_blocks_missing_canonical_statuses(tmp_path):
+    gate = load_module()
+    write_task(tmp_path, "TASK-AR-631", "TASKSET-AR-GOVERNANCE-OPS")
+    write_unit(tmp_path, "TASK-AR-631", "UNIT-TASK-AR-631-001")
+    for path in (
+        tmp_path / "agents/lead_engineer/tasks/TASK-AR-631.md",
+        tmp_path / "agents/lead_engineer/tasks/units/TASK-AR-631/UNIT-TASK-AR-631-001.md",
+    ):
+        path.write_text(path.read_text(encoding="utf-8").replace("status: in_progress\n", "").replace("status: review\n", ""), encoding="utf-8")
+    claim_path = write_claim(tmp_path, task_id="TASK-AR-631", unit_id="UNIT-TASK-AR-631-001")
+    attach_claim_refs(tmp_path, "TASK-AR-631", "UNIT-TASK-AR-631-001", claim_path)
+    write_claim_pointer(tmp_path, "TASK-AR-631", claim_path)
+    write(tmp_path / "BACKLOG-BOARD.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "BACKLOG.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "STATUS.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+
+    findings = gate.analyze(tmp_path)
+
+    assert any(f.subject == "claim:task-invalid-lifecycle:CLAIM-TEST-001:unknown" for f in findings)
+    assert any(f.subject == "claim:unit-invalid-lifecycle:CLAIM-TEST-001:unknown" for f in findings)
+
+
+def test_active_worker_claim_accepts_normalized_korean_lifecycle_aliases(tmp_path):
+    gate = load_module()
+    write_task(tmp_path, "TASK-AR-631", "TASKSET-AR-GOVERNANCE-OPS", status="진행중")
+    write_unit(tmp_path, "TASK-AR-631", "UNIT-TASK-AR-631-001", status="차단됨")
+    path = write_claim(tmp_path, task_id="TASK-AR-631", unit_id="UNIT-TASK-AR-631-001")
+    attach_claim_refs(tmp_path, "TASK-AR-631", "UNIT-TASK-AR-631-001", path)
+    write_claim_pointer(tmp_path, "TASK-AR-631", path)
+    write(tmp_path / "BACKLOG-BOARD.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "BACKLOG.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "STATUS.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+
+    findings = gate.analyze(tmp_path)
+
+    assert not [f for f in findings if "invalid-lifecycle" in f.subject]
+
+
+def test_linked_checkout_resolves_relative_worker_path_from_primary_checkout(tmp_path):
+    gate = load_module()
+    primary = tmp_path / "primary"
+    subprocess.run(["git", "init", "-q", "-b", "base", str(primary)], check=True)
+    subprocess.run(["git", "-C", str(primary), "config", "user.email", "tests@example.invalid"], check=True)
+    subprocess.run(["git", "-C", str(primary), "config", "user.name", "State Sync Tests"], check=True)
+    subprocess.run(["git", "-C", str(primary), "commit", "--allow-empty", "-qm", "base"], check=True)
+    write_task(primary, "TASK-AR-631", "TASKSET-AR-GOVERNANCE-OPS")
+    write_unit(primary, "TASK-AR-631", "UNIT-TASK-AR-631-001")
+    claim_path = "agents/runtime/task_claims/CLAIM-TEST-001.json"
+    write(
+        primary / claim_path,
+        json.dumps({
+            "schema": "agent-runtime-task-claim/v1",
+            "claim_id": "CLAIM-TEST-001",
+            "task_id": "TASK-AR-631",
+            "task_set_id": "TASKSET-AR-GOVERNANCE-OPS",
+            "unit_id": "UNIT-TASK-AR-631-001",
+            "agent_role": "lead-engineer",
+            "agent_instance_id": "worker-test",
+            "status": "claimed",
+            "worktree_path": ".worktrees/TASK-AR-631",
+            "branch": "worker",
+        }),
+    )
+    attach_claim_refs(primary, "TASK-AR-631", "UNIT-TASK-AR-631-001", claim_path)
+    write_claim_pointer(primary, "TASK-AR-631", claim_path)
+    write(primary / "BACKLOG-BOARD.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(primary / "BACKLOG.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(primary / "STATUS.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    subprocess.run(["git", "-C", str(primary), "add", "."], check=True)
+    subprocess.run(["git", "-C", str(primary), "commit", "-qm", "fixture state"], check=True)
+    worker = primary / ".worktrees" / "TASK-AR-631"
+    reviewer = tmp_path / "reviewer"
+    subprocess.run(["git", "-C", str(primary), "worktree", "add", "-q", "-b", "worker", str(worker)], check=True)
+    subprocess.run(["git", "-C", str(primary), "worktree", "add", "-q", "-b", "reviewer", str(reviewer)], check=True)
+
+    findings = gate.analyze(reviewer)
+
+    assert not any(f.subject == "claim:invalid-worktree:CLAIM-TEST-001" for f in findings)
+    assert not any(f.subject == "claim:branch-mismatch:CLAIM-TEST-001" for f in findings)
+    assert not [f for f in findings if f.severity == "block"]
 
 
 def test_two_active_workers_can_share_one_primary_pointer_when_both_are_projected(tmp_path):
