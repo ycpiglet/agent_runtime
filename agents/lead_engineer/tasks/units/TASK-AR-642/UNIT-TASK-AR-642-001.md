@@ -9,11 +9,11 @@ task_id: TASK-AR-642
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T22:50:34+09:00
+updated_at: 2026-07-28T23:17:35+09:00
 started_at: 2026-07-28T22:14:34+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -56,6 +56,15 @@ handoff: Provide transition-matrix evidence, an Autofolio-shaped v1 migration fi
 stop_condition: Stop before automatic three-way merges, profile-specific file manifests, dependency closure, pilot mutation, claim-lifecycle fixes, or UI work.
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260728-221434-task-ar-642-642001.json
+verified_at: 2026-07-28T23:15:13+09:00
+verified_by: codex-root-v080-w6
+evidence_refs:
+  - reviews/VERIFY-2026-07-28-unit-task-ar-642-001-20260728231513.json
+  - reviews/W4B-2026-07-28-unit-task-ar-642-001-approved.md
+resolution: done
+completed_at: 2026-07-28T23:17:35+09:00
+closed_by: codex-root-v080-w6
+measurement_unavailable_reason: Work included ownership-mode implementation, two adversarial W4b repair rounds, apply-time boundary hardening, deterministic lock v2 migration, local and Python 3.10-3.12 matrix CI, claim release, PR integration, and lifecycle reconciliation before reliable per-unit time and token metering was available.
 ---
 
 # UNIT-TASK-AR-642-001 - Implement ownership manifest and sync reconcile
@@ -136,3 +145,17 @@ evidence, and pinned-source host-update evidence.
 
 Stop before automatic three-way merges, profile-specific file manifests,
 dependency closure, pilot mutation, claim-lifecycle fixes, or UI work.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-28T23:17:35+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Work included ownership-mode implementation, two adversarial W4b repair rounds, apply-time boundary hardening, deterministic lock v2 migration, local and Python 3.10-3.12 matrix CI, claim release, PR integration, and lifecycle reconciliation before reliable per-unit time and token metering was available.
+- Closed by: `codex-root-v080-w6`
+- Evidence:
+  - `reviews/VERIFY-2026-07-28-unit-task-ar-642-001-20260728231513.json`
+  - `reviews/W4B-2026-07-28-unit-task-ar-642-001-approved.md`
+<!-- work-close:end -->

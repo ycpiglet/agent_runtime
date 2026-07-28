@@ -9,10 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T22:14:34+09:00
+updated_at: 2026-07-28T23:17:36+09:00
 started_at: 2026-07-28T22:14:34+09:00
 title: Make sync ownership-aware and explicitly reconcilable
-status: in_progress
+status: completed
 priority: P0
 difficulty: L
 est_hours: 12
@@ -35,6 +35,16 @@ tags:
   - work-cli-created
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260728-221434-task-ar-642-642001.json
+verification_status: passed
+verified_at: 2026-07-28T23:14:33+09:00
+verified_by: codex-root-v080-w6
+evidence_refs:
+  - reviews/VERIFY-2026-07-28-task-ar-642-20260728231433.json
+  - reviews/W4B-2026-07-28-unit-task-ar-642-001-approved.md
+resolution: done
+completed_at: 2026-07-28T23:17:36+09:00
+closed_by: codex-root-v080-w6
+measurement_unavailable_reason: Task execution included W0 revalidation, ownership-aware sync and lock v2 delivery, two adversarial W4b repair rounds, local and Python 3.10-3.12 matrix CI, claim release, PR integration, and lifecycle closeout before reliable task-level time and token metering was available.
 ---
 
 # TASK-AR-642 - Make sync ownership-aware and explicitly reconcilable
@@ -57,3 +67,17 @@ claim_refs:
 ## Verification
 
 - `python -m pytest tests/test_inventory_sync_sanitize.py tests/test_doctor.py tests/test_template_smoke.py -q`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-28T23:17:36+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Task execution included W0 revalidation, ownership-aware sync and lock v2 delivery, two adversarial W4b repair rounds, local and Python 3.10-3.12 matrix CI, claim release, PR integration, and lifecycle closeout before reliable task-level time and token metering was available.
+- Closed by: `codex-root-v080-w6`
+- Evidence:
+  - `reviews/VERIFY-2026-07-28-task-ar-642-20260728231433.json`
+  - `reviews/W4B-2026-07-28-unit-task-ar-642-001-approved.md`
+<!-- work-close:end -->
