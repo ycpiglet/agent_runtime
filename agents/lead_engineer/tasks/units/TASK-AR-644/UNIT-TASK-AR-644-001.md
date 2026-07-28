@@ -47,6 +47,7 @@ target_files:
   - pyproject.toml
   - src/agent_runtime/hook_runtime.py
   - src/agent_runtime/doctor.py
+  - src/agent_runtime/sanitize.py
   - src/agent_runtime/templates/project/.codex/hooks.json
   - src/agent_runtime/templates/project/agents/runtime/session_checkpoints/.gitignore
   - src/agent_runtime/templates/project/scripts/session_start_hook.py
@@ -66,6 +67,7 @@ target_files:
   - tests/test_session_dashboard.py
   - tests/test_stop_hook_owner_governance.py
   - tests/test_update_notify.py
+  - tests/test_inventory_sync_sanitize.py
   - tests/fixtures/host/agent_runtime.lock.json
   - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.json
   - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.log.md
@@ -143,6 +145,7 @@ Codex and Claude hook contracts support `SessionStart`, `PreCompact`, and
 - pyproject.toml
 - src/agent_runtime/hook_runtime.py
 - src/agent_runtime/doctor.py
+- src/agent_runtime/sanitize.py
 - src/agent_runtime/templates/project/.codex/hooks.json
 - src/agent_runtime/templates/project/agents/runtime/session_checkpoints/.gitignore
 - src/agent_runtime/templates/project/scripts/session_start_hook.py
@@ -162,6 +165,7 @@ Codex and Claude hook contracts support `SessionStart`, `PreCompact`, and
 - tests/test_session_dashboard.py
 - tests/test_stop_hook_owner_governance.py
 - tests/test_update_notify.py
+- tests/test_inventory_sync_sanitize.py
 - tests/fixtures/host/agent_runtime.lock.json
 - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.json
 - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.log.md

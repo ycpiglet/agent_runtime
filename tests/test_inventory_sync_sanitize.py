@@ -1489,6 +1489,30 @@ def test_sanitize_blocks_forbidden_paths_nested_under_project_templates(tmp_path
     assert "sanitize:forbidden-template-path" in {finding.kind for finding in github_plan.findings}
 
 
+def test_sanitize_allows_checkpoint_marker_but_blocks_checkpoint_state(tmp_path):
+    source = tmp_path / "source"
+    _write_public_source(source)
+    checkpoint_dir = (
+        source
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "agents"
+        / "runtime"
+        / "session_checkpoints"
+    )
+    marker = checkpoint_dir / ".gitignore"
+    state = checkpoint_dir / "latest.json"
+    _write(marker, "*\n!.gitignore\n")
+    _write(state, '{"session_id":"must-not-ship"}\n')
+
+    sanitize_findings = {(finding.path, finding.kind) for finding in analyze_sanitize(source)}
+
+    assert (marker.relative_to(source).as_posix(), "forbidden-template-path") not in sanitize_findings
+    assert (state.relative_to(source).as_posix(), "forbidden-template-path") in sanitize_findings
+
+
 def test_sanitize_blocks_host_history_references_in_project_template_docs(tmp_path):
     source = tmp_path / "source"
     _write_public_source(source)
