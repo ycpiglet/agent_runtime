@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T02:17:22+09:00
+updated_at: 2026-07-29T02:21:42+09:00
 started_at: 2026-07-29T01:25:32+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -69,6 +69,7 @@ target_files:
   - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.handoff.md
   - reviews/W4A-2026-07-29-unit-task-ar-644-001.md
   - reviews/W4B-2026-07-29-unit-task-ar-644-001.md
+  - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142.json
   - reviews/INDEX.md
 scope: Use one allowlisted Python dispatcher with POSIX and commandWindows commands, add bounded derived compact checkpoints and SessionStart reinjection, retain explicit owner-run Claude installation, and verify tracked hook health. Do not mutate consumer repositories or real per-user settings, persist prompt/transcript content, redesign compound/scribe, commit checkpoint state, or perform a release.
 acceptance:
@@ -87,6 +88,10 @@ handoff: Provide the client/OS hook matrix, simulated manual/automatic compact a
 stop_condition: Stop before editing per-user agent settings without explicit Owner action.
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.json
+verified_at: 2026-07-29T02:21:42+09:00
+verified_by: codex-root-v080-w4a
+evidence_refs:
+  - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142.json
 ---
 
 # UNIT-TASK-AR-644-001 - Replace platform-specific hook shims with verified Python entrypoints
@@ -146,6 +151,7 @@ Codex and Claude hook contracts support `SessionStart`, `PreCompact`, and
 - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.handoff.md
 - reviews/W4A-2026-07-29-unit-task-ar-644-001.md
 - reviews/W4B-2026-07-29-unit-task-ar-644-001.md
+- reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142.json
 - reviews/INDEX.md
 
 ## Scope
