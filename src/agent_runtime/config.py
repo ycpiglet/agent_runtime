@@ -96,6 +96,9 @@ def _strip_comment(value: str) -> str:
 
 def _scalar(value: str) -> str:
     value = _strip_comment(value).strip()
+    if value[:1] in {"\"", "'"} or value[-1:] in {"\"", "'"}:
+        if len(value) < 2 or value[0] != value[-1] or value[0] not in {"\"", "'"}:
+            raise ValueError(f"malformed quoted scalar: {value!r}")
     if len(value) >= 2 and value[0] in "\"'" and value[-1] == value[0]:
         return value[1:-1]
     return value
@@ -159,7 +162,9 @@ def _parse_document(path: Path) -> dict[str, Any]:
 
     if not lines:
         return {}
-    parsed, index = parse_block(0, lines[0][0])
+    if lines[0][0] != 0:
+        raise ValueError(f"{path} must contain a zero-indented top-level mapping")
+    parsed, index = parse_block(0, 0)
     if index != len(lines) or not isinstance(parsed, dict):
         raise ValueError(f"{path} must contain a top-level mapping")
     return parsed
@@ -181,11 +186,19 @@ def _as_list(value: object, name: str, path: Path) -> list[str]:
     return value
 
 
-def _normal_path(value: object, name: str, path: Path) -> str:
+def _scalar_value(value: object, name: str, path: Path) -> str:
+    if not isinstance(value, str):
+        raise ValueError(f"{path} {name} must be a scalar string")
+    return value
+
+
+def _normal_path(value: object, name: str, path: Path, *, allow_trailing_slash: bool = False) -> str:
     if not isinstance(value, str):
         raise ValueError(f"{path} {name} must be a path string")
     raw = value.strip()
-    if not raw or "\\" in raw or raw.startswith("/") or raw.startswith("~"):
+    if allow_trailing_slash:
+        raw = raw.rstrip("/")
+    if not raw or "\\" in raw or raw.startswith("/") or raw.startswith("~") or (len(raw) >= 2 and raw[1] == ":"):
         raise ValueError(f"{path} {name} is not a safe repo-relative POSIX path: {value!r}")
     parts = raw.split("/")
     if any(part in {"", ".", ".."} for part in parts) or parts[0] == ".git":
@@ -241,7 +254,7 @@ def _ownership(value: object, unmanaged: tuple[str, ...], path: Path) -> tuple[t
             values.extend(unmanaged)
         values = list(_unique(values))
         for item in values:
-            if item.startswith("agents/host/") and mode != "host_owned":
+            if (item == "agents/host" or item.startswith("agents/host/")) and mode != "host_owned":
                 raise ValueError(f"{path} agents/host paths may only be host_owned: {item}")
             classified.append((item, mode))
         by_mode[mode] = tuple(values)
@@ -255,13 +268,16 @@ def _ownership(value: object, unmanaged: tuple[str, ...], path: Path) -> tuple[t
 
 
 def _read_host_context(root: Path, host: dict[str, Any], path: Path) -> tuple[HostContext, str, tuple[str, ...], tuple[tuple[str, str], ...]]:
+    unknown_host = sorted(set(host) - {"context", "role_overlay", "risk_paths", "state_adapters"})
+    if unknown_host:
+        raise ValueError(f"{path} host has unknown keys: {', '.join(unknown_host)}")
     context_path = host.get("context", CANONICAL_HOST_CONTEXT)
     if context_path != CANONICAL_HOST_CONTEXT:
         raise ValueError(f"{path} host.context must be {CANONICAL_HOST_CONTEXT}")
     role_overlay = _normal_path(host["role_overlay"], "host.role_overlay", path) if "role_overlay" in host else ""
-    risk_paths = tuple(_normal_path(item, "host.risk_paths", path) for item in _as_list(host.get("risk_paths"), "host.risk_paths", path))
+    risk_paths = tuple(_normal_path(item, "host.risk_paths", path, allow_trailing_slash=True) for item in _as_list(host.get("risk_paths"), "host.risk_paths", path))
     adapters = _as_mapping(host.get("state_adapters"), "host.state_adapters", path)
-    state_adapters = tuple(sorted((str(key), _normal_path(value, f"host.state_adapters.{key}", path)) for key, value in adapters.items()))
+    state_adapters = tuple(sorted((key, _normal_path(value, f"host.state_adapters.{key}", path)) for key, value in adapters.items()))
     context_file = root / CANONICAL_HOST_CONTEXT
     if not context_file.exists():
         return HostContext(), role_overlay, _unique(list(risk_paths)), state_adapters
@@ -274,14 +290,18 @@ def _read_host_context(root: Path, host: dict[str, Any], path: Path) -> tuple[Ho
     if unknown:
         raise ValueError(f"{context_file} has unknown keys: {', '.join(unknown)}")
     role_mapping = _as_mapping(document.get("role_mapping"), "role_mapping", context_file)
+    purpose = _scalar_value(document.get("purpose", ""), "purpose", context_file)
+    domain = _scalar_value(document.get("domain", ""), "domain", context_file)
+    if any(not isinstance(value, str) for value in role_mapping.values()):
+        raise ValueError(f"{context_file} role_mapping values must be scalar strings")
     read_more = tuple(_normal_path(item, "read_more", context_file) for item in _as_list(document.get("read_more"), "read_more", context_file))
     return (
         HostContext(
             present=True,
-            purpose=str(document.get("purpose", "")),
-            domain=str(document.get("domain", "")),
+            purpose=purpose,
+            domain=domain,
             safety_constraints=_unique(_as_list(document.get("safety_constraints"), "safety_constraints", context_file)),
-            role_mapping=tuple(sorted((str(key), str(value)) for key, value in role_mapping.items())),
+            role_mapping=tuple(sorted(role_mapping.items())),
             read_more=_unique(list(read_more)),
         ),
         role_overlay,
@@ -304,20 +324,41 @@ def load_config(root: Path) -> AgentRuntimeConfig:
     root = root.resolve()
     path = config_path(root)
     document = _parse_document(path)
+    explicit_schema = "schema" in document
     source_schema = document.get("schema", V1_SCHEMA)
-    if source_schema not in {V1_SCHEMA, V2_SCHEMA}:
+    if explicit_schema and source_schema != V2_SCHEMA:
         raise ValueError(f"{path} has unsupported schema: {source_schema}")
-    project = str(document.get("project", "")).strip()
+    allowed_root = {"project", "upstream", "sync"} if not explicit_schema else {
+        "schema", "project", "upstream", "sync", "profiles", "capabilities", "ownership", "host"
+    }
+    unknown_root = sorted(set(document) - allowed_root)
+    if unknown_root:
+        raise ValueError(f"{path} has unknown root keys: {', '.join(unknown_root)}")
+    project = _scalar_value(document.get("project", ""), "project", path).strip()
     sync = _as_mapping(document.get("sync"), "sync", path)
-    sync_mode = str(sync.get("mode", "")).strip()
+    allowed_sync = {"mode", "allow_silent_overwrite", "unmanaged"}
+    unknown_sync = sorted(set(sync) - allowed_sync)
+    if unknown_sync:
+        raise ValueError(f"{path} sync has unknown keys: {', '.join(unknown_sync)}")
+    sync_mode = _scalar_value(sync.get("mode", ""), "sync.mode", path).strip()
     if not project:
         raise ValueError(f"{path} is missing project")
     if not sync_mode:
         raise ValueError(f"{path} is missing sync.mode")
     if "allow_silent_overwrite" not in sync:
         raise ValueError(f"{path} is missing sync.allow_silent_overwrite")
-    unmanaged = tuple(_normal_path(item, "sync.unmanaged", path) for item in _as_list(sync.get("unmanaged"), "sync.unmanaged", path))
+    if explicit_schema and "unmanaged" in sync:
+        raise ValueError(f"{path} v2 sync.unmanaged is unsupported; use ownership.host_owned")
+    unmanaged = tuple(
+        _normal_path(item.replace("\\", "/"), "sync.unmanaged", path)
+        for item in _as_list(sync.get("unmanaged"), "sync.unmanaged", path)
+    )
     upstream = _as_mapping(document.get("upstream"), "upstream", path)
+    unknown_upstream = sorted(set(upstream) - {"package", "remote_url", "ref"})
+    if unknown_upstream:
+        raise ValueError(f"{path} upstream has unknown keys: {', '.join(unknown_upstream)}")
+    for key, value in upstream.items():
+        _scalar_value(value, f"upstream.{key}", path)
     host = _as_mapping(document.get("host"), "host", path)
     profiles = _profiles(document.get("profiles"), path, source_schema)
     context, role_overlay, risk_paths, state_adapters = _read_host_context(root, host, path)
@@ -326,9 +367,9 @@ def load_config(root: Path) -> AgentRuntimeConfig:
         sync_mode=sync_mode,
         allow_silent_overwrite=_parse_bool(sync["allow_silent_overwrite"]),
         path=path,
-        upstream_package=str(upstream.get("package", "")),
-        upstream_remote_url=str(upstream.get("remote_url", "")),
-        upstream_ref=str(upstream.get("ref", "")),
+        upstream_package=_scalar_value(upstream.get("package", ""), "upstream.package", path),
+        upstream_remote_url=_scalar_value(upstream.get("remote_url", ""), "upstream.remote_url", path),
+        upstream_ref=_scalar_value(upstream.get("ref", ""), "upstream.ref", path),
         unmanaged_paths=unmanaged,
         source_schema=source_schema,
         profiles=profiles,

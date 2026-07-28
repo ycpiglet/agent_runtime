@@ -728,13 +728,13 @@ def _config_json(root: Path) -> dict[str, object]:
             source_path = _config.config_path(root)
         except Exception:
             pass
-        return {"source_schema": source_schema, "source_path": str(source_path), "valid": False}
+        return {"source_schema": source_schema, "source_path": _rel(root, source_path), "valid": False}
     ownership = {mode: list(paths) for mode, paths in cfg.ownership}
     return {
         "valid": True,
         "source_schema": cfg.source_schema,
         "effective_schema": cfg.effective_schema,
-        "source_path": str(cfg.path),
+        "source_path": _rel(root, cfg.path),
         "project": cfg.project,
         "upstream": {
             "package": cfg.upstream_package,
