@@ -1,37 +1,29 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-28T20:31:45+09:00
+updated_at: 2026-07-28T20:34:48+09:00
 updated_by: le-20260728-194821-kst-640001
 current_state:
-  summary: "UNIT-TASK-AR-640-001 passed independent W4b; claim release and PR integration are pending."
-  status: in_progress
+  summary: "UNIT-TASK-AR-640-001 passed independent W4b and its claim is released; PR integration is pending."
+  status: review
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
   step_index: 5
   step_total: 6
   progress_pct: 95
-  status_text: "Config v2 and doctor JSON passed W4a/W4b; release only against the recorded independent evidence."
+  status_text: "Claim released after independent W4b approval; integrate through exact-head PR/CI."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260728-194821-task-ar-640-640001
-      agent_role: lead-engineer
-      agent_instance_id: le-20260728-194821-kst-640001
-      display_name: lead_engineer@unit-640-001-terra
-      callsite_id: codex:subagent:w3-task-ar-640-001
-      pane_id: codex:subagent:w3-task-ar-640-001
-  current_teams:
-    - agent-runtime-core
+  current_agents: []
+  current_teams: []
 resume:
   active_task: TASK-AR-640
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-  branch_policy: "Continue only UNIT-TASK-AR-640-001 in .worktrees/TASK-AR-640; stop before sync/lock behavior, profile manifests, adapter execution, or host mutation."
+  branch_policy: "Integrate the independently approved UNIT-TASK-AR-640-001 branch through exact-head PR/CI, then close its W6 lifecycle."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260728-194821-task-ar-640-640001.json
+  active_claims: []
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
