@@ -181,6 +181,25 @@ def _validate_declared_dependencies(host_root: Path, template_root: Path, select
                 findings.append(Finding("block", "dependency-missing", dependency, f"referenced by {rel} is absent from template"))
 
 
+def profile_matrix(template_root: Path) -> dict[str, dict[str, int]]:
+    """Deterministic selected-path and declared-edge counts for all profiles."""
+    combinations = {
+        "core": ("core",),
+        "core+web-content": ("core", "web-content"),
+        "core+security-service": ("core", "security-service"),
+        "full-runtime": ("core", "web-content", "security-service"),
+    }
+    result: dict[str, dict[str, int]] = {}
+    for name, profiles in combinations.items():
+        selected = _profile_paths(template_root, profiles) or set()
+        edges = 0
+        for rel in selected:
+            if (rel.startswith("skills/") and rel.endswith("SKILL.md")) or rel in {".codex/hooks.json", "docs/agent_bootstrap/codex.md", "agents/lead_engineer/REPORTING-FORMAT.md"}:
+                edges += len(_references(_read_text(template_root / rel)))
+        result[name] = {"selected_files": len(selected), "dependency_edges": edges}
+    return result
+
+
 def _validate_template_registry(template_root: Path, selected: set[str] | None, findings: list[Finding]) -> None:
     registry = _read_json(template_root / REGISTRY_PATH) or {}
     for asset in registry.get("assets", []):
@@ -299,6 +318,7 @@ def render(root: Path, findings: list[Finding], metrics: list[AssetMetric]) -> s
         f"watch={counts.get('watch', 0)}",
         "by_kind=" + json.dumps(dict(sorted(by_kind.items())), sort_keys=True),
         "by_lifecycle=" + json.dumps(dict(sorted(by_lifecycle.items())), sort_keys=True),
+        "profile_matrix=" + json.dumps(profile_matrix(_template_root(root)), sort_keys=True),
     ]
     for metric in metrics:
         lines.append(
@@ -331,6 +351,7 @@ def main(argv: list[str] | None = None) -> int:
                     "status": "fail" if any(f.severity == "block" for f in findings) else "pass",
                     "findings": [finding.__dict__ for finding in findings],
                     "metrics": [metric.__dict__ for metric in metrics],
+                    "profile_matrix": profile_matrix(_template_root(args.root)),
                 },
                 indent=2,
                 sort_keys=True,

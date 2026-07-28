@@ -15,3 +15,14 @@ def test_pyproject_package_data_enumerates_template_dotpaths() -> None:
         "templates/project/.codex/**/*",
     ):
         assert pattern in text, f"package-data missing dot-path: {pattern}"
+
+
+def test_wheel_guard_requires_profile_and_lifecycle_contract() -> None:
+    guard = (ROOT / "scripts/verify_wheel_dotfiles.py").read_text(encoding="utf-8")
+    for path in (
+        "RUNTIME-PROFILE-MANIFEST.json", "scripts/work.py", "scripts/session_baseline.py",
+        "scripts/dirty_intake.py", "scripts/save_report.py", "scripts/runtime_asset_usage.py",
+        "skills/independent-verification/SKILL.md", "skills/work-analytics/SKILL.md",
+        "skills/session-closeout/SKILL.md", "skills/release-conductor/SKILL.md",
+    ):
+        assert path in guard

@@ -121,3 +121,30 @@ def test_deprecate_requires_replacement_or_rationale(tmp_path):
     findings, _metrics = usage.analyze(tmp_path)
 
     assert any(f.severity == "block" and f.subject == "asset-decision-incomplete:script.old" for f in findings)
+
+
+def test_profile_matrix_is_deterministic_and_security_is_additive():
+    usage = load_module()
+    root = Path(__file__).resolve().parents[1] / "src/agent_runtime/templates/project"
+    first = usage.profile_matrix(root)
+    assert first == usage.profile_matrix(root)
+    assert first["core"] == first["core+web-content"]
+    assert first["core+security-service"]["selected_files"] > first["core"]["selected_files"]
+    assert first["full-runtime"] == first["core+security-service"]
+    core = usage._profile_paths(root, ("core",))
+    security = usage._profile_paths(root, ("core", "security-service"))
+    assert "scripts/allimbot.py" not in core
+    assert "scripts/allimbot.py" in security
+    assert "scripts/allimbot_stop_hook.cmd" not in core
+
+
+def test_missing_and_cross_profile_findings_are_distinct(tmp_path):
+    usage = load_module()
+    findings = []
+    asset = {"id": "script.edge", "kind": "script", "status": "active", "lifecycle": "keep", "paths": ["scripts/edge.py"]}
+    usage._analyze_asset(tmp_path, asset, findings, {"scripts/edge.py"})
+    assert any(f.subject == "asset-missing:script.edge" for f in findings)
+    (tmp_path / "scripts").mkdir(); (tmp_path / "scripts/edge.py").write_text("# edge")
+    findings = []
+    usage._analyze_asset(tmp_path, asset, findings, set())
+    assert any(f.subject == "asset-cross-profile:script.edge" for f in findings)
