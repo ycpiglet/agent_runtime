@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T16:36:01+09:00
+updated_at: 2026-07-29T08:38:42+09:00
 title: Adopt native Allimbot events and security-service guardrails
 status: planned
 priority: P0
@@ -30,27 +30,56 @@ summary: Use current durable, allowlisted Allimbot delivery and add reusable sec
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
+risk_tier: high
+approval_required: false
+security_sensitive: true
 tags:
   - work-cli-created
+review_refs:
+  - reviews/REVIEW-2026-07-29-task-ar-647-w0-t3-replan.md
 ---
 
 # TASK-AR-647 - Adopt native Allimbot events and security-service guardrails
 
 ## Goal
 
-- Use current durable, allowlisted Allimbot delivery and add reusable security/external-effect controls for service hosts.
+- Use Allimbot's current durable, allowlisted project-event boundary and make
+  the `security-service` profile enforce service-risk metadata before a claim
+  can start.
 
 ## Scope
 
-- Replace the legacy runtime notifier with ProjectEmitter-compatible events, add the security-service profile, and preserve fail-open delivery without secret leakage.
+- Replace `/trigger` and direct-ntfy delivery with a strict
+  `ProjectEmitter` adapter that only enqueues locally, migrate runtime call
+  sites to structured events, repair clean-core dependency closure, and add a
+  profile-scoped pre-claim security gate for secrets, auth, migrations, and
+  production external effects.
 
 ## Acceptance Criteria
 
-- Runtime emits only allowlisted current Allimbot events.
-- Delivery uses v1/events and durable spool behavior.
-- Allimbot unavailability never blocks local work.
-- Security-service profile covers secrets, auth, migration, and production external effects.
+- Runtime accepts only the four events and metadata fields in Allimbot's
+  `agent-runtime.json` recipe at `origin/main@5a51ed4b`.
+- Event summaries are generated from bounded structured fields; prompts,
+  exception messages, credentials, arbitrary body text, and provider
+  destinations never cross the runtime event boundary.
+- With Allimbot installed, `emit` performs only a durable local spool enqueue;
+  Runtime never calls `flush` or sends directly to `/trigger`, ntfy, or
+  `/v1/events`.
+- Missing Allimbot/configuration/spool availability is a structured fail-open
+  delivery result, while unknown events, unexpected metadata, and policy drift
+  fail closed before delivery.
+- A clean `core` host imports and runs without the optional Allimbot package.
+- The `security-service` profile adds a machine-readable policy and pre-claim
+  gate that classifies secrets, auth, migration, and production-external-effect
+  paths and requires the corresponding risk metadata and review sections.
+- Legacy CI and environment wiring cannot bypass the native event/spool
+  boundary.
 
 ## Verification
 
-- `python -m pytest tests/test_allimbot.py tests/test_notify_routing.py tests/test_owner_governance_consumer_host.py tests/test_doctor.py -q`
+- `python -m pytest tests/test_allimbot.py tests/test_security_service.py tests/test_task_claim_dispatcher.py tests/test_doctor.py tests/test_session_continuity_hooks.py tests/test_inventory_sync_sanitize.py tests/test_runtime_asset_usage.py tests/test_owner_governance_consumer_host.py tests/test_owner_governance_chain_parity.py tests/test_update_notify.py tests/test_notify_routing.py -q`
+- `python scripts/runtime_asset_usage.py --check`
+- clean `core` and `core+security-service` generated-host smoke
+- isolated Allimbot `origin/main@5a51ed4b` enqueue/allowlist contract smoke with
+  a temporary spool and no network
+- `python -m pytest -q`

@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-29T08:14:24+09:00",
+  "generated_at": "2026-07-29T08:45:17+09:00",
   "record_count": 519,
   "finding_count": 0,
   "findings": [],
@@ -5610,7 +5610,7 @@
       "number": "41.1.9",
       "label": "Task 41.1.9",
       "id": "TASK-AR-647",
-      "title": "Use current durable, allowlisted Allimbot delivery and add reusable security/external…",
+      "title": "Use Allimbot's current durable, allowlisted project-event boundary and make the `secu…",
       "path": "agents/lead_engineer/tasks/TASK-AR-647.md",
       "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
       "status": "planned"
@@ -5621,7 +5621,7 @@
       "number": "41.1.9.1",
       "label": "Unit 41.1.9.1",
       "id": "UNIT-TASK-AR-647-001",
-      "title": "UNIT-TASK-AR-647-001 - Replace legacy notifier with optional native ProjectEmitter adapter",
+      "title": "UNIT-TASK-AR-647-001 - Add native events and security-service guardrails",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-647/UNIT-TASK-AR-647-001.md",
       "parent_id": "TASK-AR-647",
       "status": "worker_ready"

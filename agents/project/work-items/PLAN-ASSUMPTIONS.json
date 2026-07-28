@@ -920,8 +920,8 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-29-task-ar-646-w0-t3-replan.md",
-          "value": "bdff57e69b3327c4c1047028871c2a4ff8a552c19f5ef7db9a67665ff65b81d5"
+          "path": "reviews/REVIEW-2026-07-29-task-ar-647-w0-t3-replan.md",
+          "value": "2a3652bcd16678800b53c61ec71e4da555e35c3722a440dacf19cb423ce759fb"
         },
         {
           "kind": "sha256",
@@ -930,167 +930,212 @@
         },
         {
           "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/TASK-AR-646.md",
-          "value": "ddce3ee9748cb568519730f31715a67b9e5b0f9f56a7bbe38c696852f0153806"
+          "path": "agents/lead_engineer/tasks/TASK-AR-647.md",
+          "value": "88e64ddd1ae760c65281990c5a761ad0ac1b3f9b73899f777a735675eb38312d"
         },
         {
           "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/units/TASK-AR-646/UNIT-TASK-AR-646-001.md",
-          "value": "23b06baad1f5154bd3d4a40cb806dd5e81e5d1a58f5a68f436c0379fbfe0466d"
+          "path": "agents/lead_engineer/tasks/units/TASK-AR-647/UNIT-TASK-AR-647-001.md",
+          "value": "dca780655e7f5850908c606fdbe07cbe042e7210b358c1040edb7a8937f5ee86"
         },
         {
           "kind": "sha256",
           "path": "scripts/work.py",
-          "value": "dc609f23db72391ef9960006e749fd4c24b48c7c9bb51335b164be9680ef7720"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/work.py",
-          "value": "dc609f23db72391ef9960006e749fd4c24b48c7c9bb51335b164be9680ef7720"
+          "value": "55b952a8ebe376962d9cc0f28b1242e493365e7b557b25c5fe5c5228d0981dae"
         },
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "0fedcd762c9f6d6e6ab00a9c1aae6bb2b5294ecbbdc2c2a00ebdeca999a9adc0"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
-          "value": "47e9502a775e3c2d4edbff3bc42e10bb67fd9a428873fa1e987d44879fb0e025"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/model_routing.py",
-          "value": "dbf72e76b277a023e2bdb55bfc6d572ac4aeae6438cb2b9292e866a3f9681ab7"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/model_routing.py",
-          "value": "dbf72e76b277a023e2bdb55bfc6d572ac4aeae6438cb2b9292e866a3f9681ab7"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/subagent_dispatch.py",
-          "value": "a07ead3b8b38bb800322acbe4e24025a12f54d99ea1105b88156d5713b46380c"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/codex_subagent_bridge.py",
-          "value": "fb4814510196d0ef763cceb1973d6d2baa73e8a767365fde88235d582789bad5"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/agent_worker.py",
-          "value": "373e13c739197069f437fca8bb69c8ab1aee25fb8a0ea786e098e39272eeca46"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/auto_dispatch.py",
-          "value": "74e7e5c55723695ed98ad621b01cee2410dc286014530b8265626598a8fc1e82"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/eval_harness.py",
-          "value": "af1cd6bc9bedfc3b120792b5f8d70cb564f664f902a23181af3aeb53f2ccb68f"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/doctor.py",
-          "value": "f78a8dfbe00681bb5fe603c00632692c0af959d6fa6f212648dec4d1228b413f"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/docs/agent_bootstrap/codex.md",
-          "value": "179603f1a26370aba82d6c41e176043b94b48e22a5ddf72ccf371dc8ad23b963"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/agents/lead_engineer/TOKEN-BUDGET.md",
-          "value": "437a3e676948572f37737e71db55edd29c62f8fea916feb864954349cccc402a"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_model_routing.py",
-          "value": "65c2395aca9789ab504c58afa193d1d0364808ecf527d12fba04ccfd011c5cad"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_work_registration.py",
-          "value": "5e5decac1019e71220dbd1d4e7386fec47c2e81fab51c19073134dd99a17743c"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_task_claim_dispatcher.py",
-          "value": "1f737befa90cdb9e3d4f1f6b6208d6b94a6bfaa34282b17a1c00faa48af16134"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_doctor.py",
-          "value": "7ef2df61ccaeaf0d321dbac270dc7f0b82fa3d3e146cb72ed6b7a3514ec8310b"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_role_routing.py",
-          "value": "8eacfb983ca93cb6b2ba73af5e92409d3fe63a48eb16728a1ed4a7cafd9a03aa"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_role_routing_wiring.py",
-          "value": "d07f51f46642c3cc5320c19fb3bd37e4e16ae2b2d92c39f02cca86abce7f8ca7"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_provider_import_contract.py",
-          "value": "1b4792380f512fc83ceb84b44c90aa5d6711eb6e3a1585e96f1fccf1ba451f1c"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_template_smoke.py",
-          "value": "2a8531ef5d4c8479a5fc8fc4ec97451172b5de6ace57b203f47296ba14148702"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/test_model_routing.py",
-          "value": "7b96188ca723378d149bf2dba4ba43b7f1ce075345c8ff76db182d94574252ef"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/test_subagent_dispatch.py",
-          "value": "3fd015ec1c3630a4d74e2624406cd9a47443248b1f196dd230720987dcab36b7"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py",
-          "value": "5768c3705264d29c36b86c35a780b260f0a8720e2c417323bc17bbb8fb96cc82"
-        },
-        {
-          "kind": "absent",
-          "path": "src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py",
-          "value": ""
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/test_auto_dispatch.py",
-          "value": "a534cc0e4c10ffd9ec39e03fbeb2632063ec1aefba55768c169a8dc3e845daca"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/test_eval_harness.py",
-          "value": "5e5aee7e49b38764f16bed8d988e1821870f3f2168cfdfe9e836fdba121a0a8f"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "19a7afe2575f332ba0565510eb09823fd2290d7746a655b34986041363e0e7c4"
+          "value": "b949e5caefcaaf98a2a729620396d3c604e79a5266a0e50ad9442c09d7ab1557"
         },
         {
           "kind": "sha256",
           "path": "scripts/runtime_asset_usage.py",
           "value": "e1d1d9c690943dd1f5c867af66e9547fb20bc2f056b463440a551b26b75d7966"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/allimbot.py",
+          "value": "9c307b2b1d2ad832da82167a98f405333bb268c2345a4ad326c7d08e90be1327"
+        },
+        {
+          "kind": "absent",
+          "path": "src/agent_runtime/security_service.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/hook_runtime.py",
+          "value": "20f13ac9fbdc854f05df623ec769cae69b02829d995183638eeabccaa582d6c9"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/update_notify.py",
+          "value": "dd8796211d0300f988969080e01bde03458450b18b76f62f61bc491e27f1b5df"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/doctor.py",
+          "value": "c050084e1e026fc1f2efb9fcb7fd6c468ccfa52307a401187a908dcb1a11e985"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/owner_governance_gate.py",
+          "value": "cf5d6cd0a9892bfc716cf32911f374de3513f35e1649d53a5f4e6fb47e847a12"
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/security_service_gate.py",
+          "value": ""
+        },
+        {
+          "kind": "absent",
+          "path": "agents/project/SECURITY-SERVICE-POLICY.json",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "pyproject.toml",
+          "value": "0988befbcfe06e12ef394cb338301c065055c185c83eae4bf87032f0b5840a93"
+        },
+        {
+          "kind": "absent",
+          "path": "src/agent_runtime/templates/project/.allimbot.json",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/.env.example",
+          "value": "a91fca7b04c48cbd8a98ee6e33541fbbd6c9baa40aca90e4aa145efa70a873cd"
+        },
+        {
+          "kind": "absent",
+          "path": "src/agent_runtime/templates/project/agents/project/SECURITY-SERVICE-POLICY.json",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/agents/project/RUNTIME-PROFILE-MANIFEST.json",
+          "value": "ca130a24ffb1318ad2a27bc1d905892df69831959cf53c446cd5c988a8fa7cfb"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/allimbot.py",
+          "value": "9c307b2b1d2ad832da82167a98f405333bb268c2345a4ad326c7d08e90be1327"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/allimbot_stop_hook.cmd",
+          "value": "0b0bc2271a9af50962fed22aca3e02f0f5623b39702857fe8652a7fe3618cd7f"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/agent_orchestrator.py",
+          "value": "dbc90b72acc13be5837ab02dc9aad8f9896247ed2d004e637a17b5388cb2d6ed"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/owner_governance_gate.py",
+          "value": "8fa1f45b24992f25f29750c3a0a333599e4ab57821de37f285dcbba2a6b636ce"
+        },
+        {
+          "kind": "absent",
+          "path": "src/agent_runtime/templates/project/scripts/security_service_gate.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
+          "value": "b949e5caefcaaf98a2a729620396d3c604e79a5266a0e50ad9442c09d7ab1557"
+        },
+        {
+          "kind": "sha256",
+          "path": "schemas/task-unit.schema.json",
+          "value": "a2ec98443ce0c01204f3d58c5c16ec7f825740db193966cc33303c5d879b3dca"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/schemas/task-unit.schema.json",
+          "value": "a2ec98443ce0c01204f3d58c5c16ec7f825740db193966cc33303c5d879b3dca"
+        },
+        {
+          "kind": "sha256",
+          "path": ".github/workflows/test.yml",
+          "value": "51087f8fa1d1291620654a0e67f1dbd162698edeb8dde2b3d2b779172d8c195f"
+        },
+        {
+          "kind": "sha256",
+          "path": "docs/ALLIMBOT-INTEGRATION.md",
+          "value": "9d9b8ad86b203ade1ae98803f116298563d3b096982c20e3087605e3f19c8537"
+        },
+        {
+          "kind": "absent",
+          "path": "src/agent_runtime/templates/project/docs/security-service.md",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_allimbot.py",
+          "value": "26323dca6ed7fa9f2caf2fe92e8882cd6c8492a899773209c9b66d5f6b580b1c"
+        },
+        {
+          "kind": "absent",
+          "path": "tests/test_security_service.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_task_claim_dispatcher.py",
+          "value": "83aade48b125d71623a22f05d093338333e42d50f9e89e5f94f0eb13b5ef15ef"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_doctor.py",
+          "value": "3974b08aff79b485269a5a013030ba66582b183b168afabe934e28656b5d8d36"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_session_continuity_hooks.py",
+          "value": "9fd685015d26faecc6a4303d5ec63db235c63198244a2bd36b5ce032a373c8a5"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_inventory_sync_sanitize.py",
+          "value": "4b369790843d833f837f6d3e735a02e71552bf35df4dee7c3aff7ca24ce0082b"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_runtime_asset_usage.py",
+          "value": "0adba541d288a76f990df9b9e2ee907b3a7b1e6a4440250c7db352d2e0d2beea"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_owner_governance_consumer_host.py",
+          "value": "4fba58bedbfd5ffe7d9a2c98183383c47729ce9ee77364c958bca03090c41330"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_owner_governance_chain_parity.py",
+          "value": "a7815b9ac4c592c98f0b8e57b6d47da964c5e9b6f504f5de93e14a906c3c162b"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_update_notify.py",
+          "value": "1546842bce4faaa53a91fa32dd61a2fb7eafc77a61179218fbd277a3ed613f3a"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_notify_routing.py",
+          "value": "9a7073f0b017f097f14deabbe38a152f99b0ab318850e42f435410d68df9af6c"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/fixtures/host/agent_runtime.lock.json",
+          "value": "7818a01491101817fae97117c5f2f782e7d56b23f85a4d12246f967547e13fe2"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-29-task-ar-646-w0-t3-replan.md",
-      "recorded_at": "2026-07-29T06:35:04+09:00",
+      "design_record": "reviews/REVIEW-2026-07-29-task-ar-647-w0-t3-replan.md",
+      "recorded_at": "2026-07-29T08:45:17+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1306,5 +1351,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-29T06:35:04+09:00"
+  "updated_at": "2026-07-29T08:45:17+09:00"
 }
