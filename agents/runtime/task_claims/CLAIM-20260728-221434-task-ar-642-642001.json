@@ -9,7 +9,7 @@
   "callsite_id": "codex:subagent:w3-task-ar-642-001",
   "pane_id": "codex:subagent:w3-task-ar-642-001",
   "mode": "implementation",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "active_scope": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "scope_transition_approved": true,
@@ -19,20 +19,20 @@
   "model_tier": "worker_standard",
   "wip_slot": 0,
   "stop_condition": "Stop before automatic three-way merges, profile-specific file manifests, dependency closure, pilot mutation, claim-lifecycle fixes, or UI work.",
-  "phase": "implementation",
-  "progress_pct": 78,
-  "step_index": 3,
+  "phase": "verified",
+  "progress_pct": 95,
+  "step_index": 5,
   "step_total": 6,
-  "status_text": "Apply-time revalidation and the v2 fixture now pass; W4b found lock v2 omits required effective profiles/capabilities, so bounded metadata rework is active.",
+  "status_text": "Implementation and independent W4b are complete; claim released for implementation PR integration.",
   "worktree_path": "/home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-642",
   "branch": "codex/unit-task-ar-642-001-wave",
   "claimed_at": "2026-07-28T22:14:34+09:00",
-  "last_heartbeat": "2026-07-28T22:50:34+09:00",
-  "updated_at": "2026-07-28T22:50:34+09:00",
+  "last_heartbeat": "2026-07-28T23:05:55+09:00",
+  "updated_at": "2026-07-28T23:05:55+09:00",
   "expires_at": "2026-07-28T23:35:34+09:00",
   "lease": {
     "claimed_at": "2026-07-28T22:14:34+09:00",
-    "heartbeat_at": "2026-07-28T22:50:34+09:00",
+    "heartbeat_at": "2026-07-28T23:05:55+09:00",
     "expires_at": "2026-07-28T23:35:34+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260728-221434-task-ar-642-642001.handoff.md",
@@ -55,5 +55,9 @@
     "tests/test_inventory_sync_sanitize.py",
     "tests/test_template_smoke.py",
     "tests/fixtures/host/agent_runtime.lock.json"
-  ]
+  ],
+  "released_at": "2026-07-28T23:05:55+09:00",
+  "verified_by": "/root/w4b_task_ar_640_001",
+  "verifier_role": "independent-verifier",
+  "verification_evidence": "reviews/W4B-2026-07-28-unit-task-ar-642-001-approved.md"
 }
