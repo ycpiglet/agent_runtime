@@ -11,6 +11,8 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Sequence
 
+from agent_runtime import state_projection
+
 
 COLLECTOR_TIMEOUT_SECONDS = 8
 COLLECTOR_OUTPUT_LIMIT = 500
@@ -96,6 +98,16 @@ def compound_summary(path: Path) -> str:
     return f"compound: count={len(headings)}, latest={latest}"
 
 
+def scribe_summary(root: Path) -> str:
+    """Evaluate Scribe readiness without writing sources or projection."""
+
+    try:
+        evaluation = state_projection.evaluate_state(root)
+    except Exception:
+        return "scribe: unavailable"
+    return f"scribe: {state_projection.compact_summary(evaluation)}"
+
+
 def _read_event() -> dict[str, object]:
     try:
         event = json.load(sys.stdin)
@@ -145,6 +157,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     lines.append(
         compound_summary(root / "agents" / "lead_engineer" / "compound_log.md")
     )
+    lines.append(scribe_summary(root))
     context = "\n".join(lines)[:CONTEXT_OUTPUT_LIMIT]
     print(
         json.dumps(

@@ -10,6 +10,7 @@ visible blocker rather than silently accepting a YAML feature we do not own.
 
 from dataclasses import dataclass
 from pathlib import Path
+import re
 from typing import Any
 
 CONFIG_FILE = "agent_runtime.yml"
@@ -19,6 +20,8 @@ V2_SCHEMA = "agent-runtime-config/v2"
 EFFECTIVE_SCHEMA = V2_SCHEMA
 HOST_CONTEXT_SCHEMA = "host-context/v1"
 CANONICAL_HOST_CONTEXT = "agents/host/HOST-CONTEXT.yml"
+DEFAULT_STATE_PROJECTION = "agents/project/state/SCRIBE-PROJECTION.json"
+MAX_STATE_ADAPTERS = 8
 
 PROFILE_ORDER = ("core", "web-content", "security-service")
 PROFILE_CAPABILITIES = {
@@ -43,11 +46,22 @@ DEFAULT_OWNERSHIP = (
     ),
     (
         "host_owned",
-        ("agents/project/knowledge/compounds/records",),
+        (
+            "agents/project/knowledge/compounds/records",
+            "agents/lead_engineer/STATUS.md",
+            "STATUS.md",
+            "BACKLOG.md",
+            "docs/PROJECT_STATUS.md",
+            "docs/PROJECT_STATUS.ko.md",
+            "PROJECT_STATUS.md",
+        ),
     ),
     (
         "generated",
-        ("agents/project/knowledge/compounds/INDEX.json",),
+        (
+            "agents/project/knowledge/compounds/INDEX.json",
+            DEFAULT_STATE_PROJECTION,
+        ),
     ),
 )
 
@@ -62,6 +76,19 @@ def default_ownership(path: str) -> str:
         ):
             return mode
     return "managed"
+
+
+def _effective_ownership(
+    path: str,
+    ownership: tuple[tuple[str, tuple[str, ...]], ...],
+) -> str:
+    for mode, owned_paths in ownership:
+        if any(
+            path == candidate or path.startswith(candidate.rstrip("/") + "/")
+            for candidate in owned_paths
+        ):
+            return mode
+    return default_ownership(path)
 
 
 @dataclass(frozen=True)
@@ -97,6 +124,7 @@ class AgentRuntimeConfig:
     role_overlay: str = ""
     risk_paths: tuple[str, ...] = ()
     state_adapters: tuple[tuple[str, str], ...] = ()
+    state_projection: str = DEFAULT_STATE_PROJECTION
 
     def ownership_for(self, mode: str) -> tuple[str, ...]:
         return dict(self.ownership).get(mode, ())
@@ -300,8 +328,27 @@ def _ownership(value: object, unmanaged: tuple[str, ...], path: Path) -> tuple[t
     return tuple((mode, by_mode[mode]) for mode in OWNERSHIP_MODES)
 
 
-def _read_host_context(root: Path, host: dict[str, Any], path: Path) -> tuple[HostContext, str, tuple[str, ...], tuple[tuple[str, str], ...]]:
-    unknown_host = sorted(set(host) - {"context", "role_overlay", "risk_paths", "state_adapters"})
+def _read_host_context(
+    root: Path,
+    host: dict[str, Any],
+    path: Path,
+) -> tuple[
+    HostContext,
+    str,
+    tuple[str, ...],
+    tuple[tuple[str, str], ...],
+    str,
+]:
+    unknown_host = sorted(
+        set(host)
+        - {
+            "context",
+            "role_overlay",
+            "risk_paths",
+            "state_adapters",
+            "state_projection",
+        }
+    )
     if unknown_host:
         raise ValueError(f"{path} host has unknown keys: {', '.join(unknown_host)}")
     context_path = host.get("context", CANONICAL_HOST_CONTEXT)
@@ -310,10 +357,35 @@ def _read_host_context(root: Path, host: dict[str, Any], path: Path) -> tuple[Ho
     role_overlay = _normal_path(host["role_overlay"], "host.role_overlay", path) if "role_overlay" in host else ""
     risk_paths = tuple(_normal_path(item, "host.risk_paths", path, allow_trailing_slash=True) for item in _as_list(host.get("risk_paths"), "host.risk_paths", path))
     adapters = _as_mapping(host.get("state_adapters"), "host.state_adapters", path)
+    if len(adapters) > MAX_STATE_ADAPTERS:
+        raise ValueError(
+            f"{path} host.state_adapters supports at most {MAX_STATE_ADAPTERS} sources"
+        )
+    invalid_labels = sorted(
+        key
+        for key in adapters
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}", key)
+    )
+    if invalid_labels:
+        raise ValueError(
+            f"{path} has invalid host.state_adapters identifiers: "
+            + ", ".join(invalid_labels)
+        )
     state_adapters = tuple(sorted((key, _normal_path(value, f"host.state_adapters.{key}", path)) for key, value in adapters.items()))
+    state_projection = _normal_path(
+        host.get("state_projection", DEFAULT_STATE_PROJECTION),
+        "host.state_projection",
+        path,
+    )
     context_file = root / CANONICAL_HOST_CONTEXT
     if not context_file.exists():
-        return HostContext(), role_overlay, _unique(list(risk_paths)), state_adapters
+        return (
+            HostContext(),
+            role_overlay,
+            _unique(list(risk_paths)),
+            state_adapters,
+            state_projection,
+        )
     document = _parse_document(context_file)
     schema = document.get("schema", "")
     if schema != HOST_CONTEXT_SCHEMA:
@@ -340,6 +412,7 @@ def _read_host_context(root: Path, host: dict[str, Any], path: Path) -> tuple[Ho
         role_overlay,
         _unique(list(risk_paths)),
         state_adapters,
+        state_projection,
     )
 
 
@@ -394,7 +467,43 @@ def load_config(root: Path) -> AgentRuntimeConfig:
         _scalar_value(value, f"upstream.{key}", path)
     host = _as_mapping(document.get("host"), "host", path)
     profiles = _profiles(document.get("profiles"), path, source_schema)
-    context, role_overlay, risk_paths, state_adapters = _read_host_context(root, host, path)
+    ownership = _ownership(document.get("ownership"), unmanaged, path)
+    (
+        context,
+        role_overlay,
+        risk_paths,
+        state_adapters,
+        state_projection,
+    ) = _read_host_context(root, host, path)
+    if state_projection in {adapter_path for _label, adapter_path in state_adapters}:
+        raise ValueError(
+            f"{path} host.state_projection must be distinct from every state adapter source"
+        )
+    invalid_source_owners = [
+        f"{label}={adapter_path} ({_effective_ownership(adapter_path, ownership)})"
+        for label, adapter_path in state_adapters
+        if _effective_ownership(adapter_path, ownership)
+        not in {"host_owned", "seed_once"}
+    ]
+    if invalid_source_owners:
+        raise ValueError(
+            f"{path} host.state_adapters sources must be host_owned or seed_once: "
+            + ", ".join(invalid_source_owners)
+        )
+    if (
+        state_projection != DEFAULT_STATE_PROJECTION
+        and state_projection not in dict(ownership).get("generated", ())
+    ):
+        raise ValueError(
+            f"{path} custom host.state_projection must be explicitly listed in ownership.generated: "
+            f"{state_projection}"
+        )
+    projection_owner = _effective_ownership(state_projection, ownership)
+    if projection_owner != "generated":
+        raise ValueError(
+            f"{path} host.state_projection must have generated ownership: "
+            f"{state_projection} is {projection_owner}"
+        )
     return AgentRuntimeConfig(
         project=project,
         sync_mode=sync_mode,
@@ -407,9 +516,10 @@ def load_config(root: Path) -> AgentRuntimeConfig:
         source_schema=source_schema,
         profiles=profiles,
         capabilities=_capabilities(profiles, document.get("capabilities"), path),
-        ownership=_ownership(document.get("ownership"), unmanaged, path),
+        ownership=ownership,
         host_context=context,
         role_overlay=role_overlay,
         risk_paths=risk_paths,
         state_adapters=state_adapters,
+        state_projection=state_projection,
     )

@@ -121,8 +121,8 @@
       "status": "active",
       "lifecycle": "keep",
       "paths": ["scripts/scribe_due.py"],
-      "evidence_paths": ["agents/project/COLLABORATION-GOVERNANCE.json", "AGENT_RUNTIME_GOVERNANCE_OPS_BRIEF.md"],
-      "tokens": ["scribe_due.py", "scribe"],
+      "evidence_paths": ["docs/configuration-v2.md", "tests/test_scribe_due.py"],
+      "tokens": ["scribe_due.py", "state_projection", "write-projection", "scribe"],
       "min_recent_uses": 1
     },
     {
@@ -302,7 +302,7 @@
       "lifecycle": "keep",
       "paths": ["scripts/session_start_hook.py", "scripts/session_compact_hook.py", "src/agent_runtime/hook_runtime.py", ".codex/hooks.json"],
       "evidence_paths": ["tests/test_session_continuity_hooks.py", "src/agent_runtime/templates/project/.codex/hooks.json"],
-      "tokens": ["session-start", "pre-compact", "post-compact", "hook.session_continuity"],
+      "tokens": ["session-start", "pre-compact", "post-compact", "state_projection", "hook.session_continuity"],
       "min_recent_uses": 1
     },
     {

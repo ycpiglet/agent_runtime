@@ -34,6 +34,8 @@ host:
     - app/production
   state_adapters:
     status: STATUS.md
+    backlog: BACKLOG.md
+  state_projection: agents/project/state/SCRIBE-PROJECTION.json
 ```
 
 ## Compatibility
@@ -67,6 +69,54 @@ This release does not apply declarations; sync/lock semantics come later.
 mapping, and read-more links appear in `agent_runtime doctor --json`.
 `host.context`, if set, must be the canonical context path.
 
+## Scribe state adapters and projection
+
+`host.state_adapters` accepts at most eight descriptive identifiers mapped to
+safe relative Markdown or JSON paths. Identifiers describe sources; they do
+not select a product-specific parser. If adapters are omitted, Scribe uses the
+first existing conventional state path from
+`agents/lead_engineer/STATUS.md`, `STATUS.md`, `BACKLOG.md`,
+`docs/PROJECT_STATUS.md`, `docs/PROJECT_STATUS.ko.md`, and
+`PROJECT_STATUS.md`. A missing configured source or unavailable fallback is
+reported explicitly and is never counted as zero.
+
+Conventional state paths default to `host_owned`. Any other configured source
+must be declared under `ownership.host_owned` or `ownership.seed_once`; live
+host state can never become a permanently managed or generated template
+asset.
+
+The default generated projection is
+`agents/project/state/SCRIBE-PROJECTION.json`. A custom
+`host.state_projection` must be distinct from every source and must also be
+listed exactly under `ownership.generated`. Canonical status and backlog files
+remain host-owned; the runtime never edits them.
+
+```yaml
+ownership:
+  generated:
+    - .agent-runtime/state/scribe.json
+host:
+  state_adapters:
+    status: STATUS.md
+  state_projection: .agent-runtime/state/scribe.json
+```
+
+`python scripts/scribe_due.py --root . --json` is read-only.
+`--write-projection` is the sole projection write path and uses an atomic
+same-directory replacement. The projection holds only source paths and
+SHA-256 digests, counts, bounded derived headings/items, checklist state,
+timestamps, and finding codes. It is limited to eight sources, ten selected
+items, and 32 KiB; credentials, environment assignments, prompt/transcript
+content, private-key markers, and arbitrary JSON fields are omitted or
+redacted.
+
+Each source is `ok` at 12 or fewer hot items, `due` at 13–15, and `overdue`
+at 16 or more. A projection is fresh only while all current source paths and
+digests match. Doctor and SessionStart evaluate this state without writing.
+Substantial closeout blocks only for a present overdue source whose projection
+is missing or stale; due, unavailable optional sources, and mini work remain
+advisory.
+
 ## Effective configuration report
 
 `agent_runtime doctor --root . --json` emits
@@ -74,4 +124,6 @@ mapping, and read-more links appear in `agent_runtime doctor --json`.
 effective schema, compatibility sync fields, profile/capability selections,
 ownership, and host context. It remains valid JSON if config is invalid; then
 `config.valid` is false and `findings` contains the blocker. `--repair --json`
-includes `repair_actions` in the same document.
+includes `repair_actions` in the same document. The host block also includes
+the effective `state_projection`, and valid hosts receive a read-only `scribe`
+evaluation with source and projection freshness findings.

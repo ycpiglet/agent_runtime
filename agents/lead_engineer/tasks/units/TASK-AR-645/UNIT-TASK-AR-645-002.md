@@ -9,11 +9,12 @@ task_id: TASK-AR-645
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: in_progress
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T04:52:04+09:00
+updated_at: 2026-07-29T05:45:03+09:00
+started_at: 2026-07-29T04:59:49+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
@@ -70,9 +71,16 @@ acceptance:
 verification:
   - python -m pytest tests/test_scribe_due.py tests/test_config_v2.py tests/test_doctor.py tests/test_session_continuity_hooks.py tests/test_closure_gate.py tests/test_inventory_sync_sanitize.py tests/test_template_smoke.py -q
   - python scripts/runtime_asset_usage.py --check
-  - python -m agent_runtime.cli sanitize --root . --check
+  - PYTHONPATH=src python -m agent_runtime.cli sanitize --root . --check
 handoff: Provide fixture outputs for runtime, Bean Wiki, Allimbot, and Autofolio; prove projection freshness, bounded/redacted content, read-only doctor/start, substantial closeout enforcement, and mini-task exemption.
 stop_condition: Stop before changing host status/backlog files, embedding host product semantics in core, persisting prompt/transcript content, or mutating consumer repositories.
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260729-045949-task-ar-645-645002.json
+verified_at: 2026-07-29T05:45:03+09:00
+verified_by: codex-root-v080-orchestrator
+evidence_refs:
+  - reviews/VERIFY-2026-07-29-unit-task-ar-645-002-20260729054357.json
+  - reviews/VERIFY-2026-07-29-unit-task-ar-645-002-20260729054503.json
 ---
 
 # UNIT-TASK-AR-645-002 - Add configurable scribe state adapters and generated projections
@@ -169,7 +177,7 @@ an overdue projection remains unresolved.
 
 - `python -m pytest tests/test_scribe_due.py tests/test_config_v2.py tests/test_doctor.py tests/test_session_continuity_hooks.py tests/test_closure_gate.py tests/test_inventory_sync_sanitize.py tests/test_template_smoke.py -q`
 - `python scripts/runtime_asset_usage.py --check`
-- `python -m agent_runtime.cli sanitize --root . --check`
+- `PYTHONPATH=src python -m agent_runtime.cli sanitize --root . --check`
 
 ## Handoff
 

@@ -92,6 +92,43 @@ def test_start_reads_compact_session_and_emits_bounded_safe_json(tmp_path: Path)
     assert set(calls[2:]) == {"session_dashboard.py", "interrupted_run_detector.py", "session_resume_check.py", "update-notify"}
 
 
+def test_start_scribe_summary_is_read_only_for_missing_and_fresh_projection(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "agent_runtime.yml").write_text(
+        "schema: agent-runtime-config/v2\n"
+        "project: continuity\n"
+        "sync:\n"
+        "  mode: check-diff-apply\n"
+        "  allow_silent_overwrite: false\n"
+        "host:\n"
+        "  state_adapters:\n"
+        "    status: STATUS.md\n",
+        encoding="utf-8",
+    )
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# State\n" + "".join(f"- active {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    source_mtime = source.stat().st_mtime_ns
+
+    missing = START.scribe_summary(tmp_path)
+    assert "state=overdue" in missing and "projection=missing" in missing
+    projection = tmp_path / START.state_projection.DEFAULT_PROJECTION_PATH
+    assert not projection.exists()
+    assert source.stat().st_mtime_ns == source_mtime
+
+    START.state_projection.write_projection(
+        tmp_path, now="2026-07-29T00:00:00+09:00"
+    )
+    projection_mtime = projection.stat().st_mtime_ns
+    fresh = START.scribe_summary(tmp_path)
+    assert "projection=fresh" in fresh and "readiness=ready" in fresh
+    assert source.stat().st_mtime_ns == source_mtime
+    assert projection.stat().st_mtime_ns == projection_mtime
+
+
 def test_dispatcher_discovers_git_root_and_preserves_blocking_streams(tmp_path: Path) -> None:
     root = git_repo(tmp_path)
     child = root / "nested"; child.mkdir()

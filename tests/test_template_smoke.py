@@ -112,6 +112,49 @@ def test_sync_and_smoke_runtime_scripts(tmp_path):
         assert result.returncode == 0
 
 
+def test_synced_host_scribe_projection_is_explicit_and_bounded(tmp_path):
+    host = _host_from_fixture(tmp_path)
+    env = dict(os.environ, PYTHONPATH=str(REPO_ROOT / "src"))
+    _run(
+        [PYTHON, "-m", "agent_runtime.cli", "sync", "--root", str(host), "--apply"],
+        cwd=REPO_ROOT,
+        env=env,
+    )
+    source = host / "STATUS.md"
+    source.write_text(
+        "# State\n" + "".join(f"- active {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    source_mtime = source.stat().st_mtime_ns
+
+    read_only = _run(
+        [PYTHON, "scripts/scribe_due.py", "--root", str(host), "--json"],
+        cwd=host,
+        env=env,
+    )
+    assert json.loads(read_only.stdout)["projection"]["status"] == "missing"
+    projection = host / "agents/project/state/SCRIBE-PROJECTION.json"
+    assert not projection.exists()
+
+    written = _run(
+        [
+            PYTHON,
+            "scripts/scribe_due.py",
+            "--root",
+            str(host),
+            "--write-projection",
+            "--now",
+            "2026-07-29T00:00:00+09:00",
+            "--json",
+        ],
+        cwd=host,
+        env=env,
+    )
+    assert json.loads(written.stdout)["projection"]["status"] == "fresh"
+    assert projection.stat().st_size <= 32 * 1024
+    assert source.stat().st_mtime_ns == source_mtime
+
+
 def test_synced_host_creates_and_searches_canonical_compound_record(tmp_path):
     host = _host_from_fixture(tmp_path)
     env = dict(os.environ, PYTHONPATH=str(REPO_ROOT / "src"))

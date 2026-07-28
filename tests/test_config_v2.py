@@ -8,6 +8,7 @@ import pytest
 from agent_runtime import cli
 from agent_runtime.config import (
     CANONICAL_HOST_CONTEXT,
+    DEFAULT_STATE_PROJECTION,
     _scalar,
     default_ownership,
     load_config,
@@ -83,6 +84,9 @@ def test_compound_store_ownership_defaults_are_safe_without_host_config_entries(
         default_ownership("agents/project/knowledge/compounds/INDEX.json")
         == "generated"
     )
+    assert default_ownership(DEFAULT_STATE_PROJECTION) == "generated"
+    assert default_ownership("STATUS.md") == "host_owned"
+    assert default_ownership("docs/PROJECT_STATUS.ko.md") == "host_owned"
     assert default_ownership("scripts/compound_record.py") == "managed"
 
 
@@ -234,6 +238,81 @@ read_more:
     assert config.role_overlay == "agents/host/ROLE-OVERLAY.yml"
     assert config.risk_paths == ("app/production",)
     assert dict(config.state_adapters) == {"backlog": "BACKLOG.md", "status": "STATUS.md"}
+    assert config.state_projection == DEFAULT_STATE_PROJECTION
+
+
+def test_custom_state_projection_is_safe_distinct_and_explicitly_generated(tmp_path):
+    _write(tmp_path, _v2("""ownership:
+  generated:
+    - .agent-runtime/state/scribe.json
+host:
+  state_adapters:
+    status: STATUS.md
+  state_projection: .agent-runtime/state/scribe.json
+"""))
+    assert load_config(tmp_path).state_projection == ".agent-runtime/state/scribe.json"
+
+    _write(tmp_path, _v2("""host:
+  state_adapters:
+    status: STATUS.md
+  state_projection: .agent-runtime/state/scribe.json
+"""))
+    with pytest.raises(ValueError, match="ownership.generated"):
+        load_config(tmp_path)
+
+    _write(tmp_path, _v2("""ownership:
+  generated:
+    - STATUS.md
+host:
+  state_adapters:
+    status: STATUS.md
+  state_projection: STATUS.md
+"""))
+    with pytest.raises(ValueError, match="distinct"):
+        load_config(tmp_path)
+
+
+def test_state_adapter_count_and_identifier_are_bounded(tmp_path):
+    adapters = "\n".join(f"    source{i}: state/{i}.md" for i in range(9))
+    _write(tmp_path, _v2("host:\n  state_adapters:\n" + adapters))
+    with pytest.raises(ValueError, match="at most 8"):
+        load_config(tmp_path)
+
+    _write(tmp_path, _v2("""host:
+  state_adapters:
+    bad label: STATUS.md
+"""))
+    with pytest.raises(ValueError, match="invalid host.state_adapters identifiers"):
+        load_config(tmp_path)
+
+
+def test_default_state_projection_cannot_be_reclassified_as_host_owned(tmp_path):
+    _write(tmp_path, _v2(f"""ownership:
+  host_owned:
+    - {DEFAULT_STATE_PROJECTION}
+"""))
+    with pytest.raises(ValueError, match="must have generated ownership"):
+        load_config(tmp_path)
+
+
+def test_custom_state_source_requires_host_owned_or_seed_once(tmp_path):
+    _write(tmp_path, _v2("""host:
+  state_adapters:
+    custom: state/current.json
+"""))
+    with pytest.raises(ValueError, match="host_owned or seed_once"):
+        load_config(tmp_path)
+
+    _write(tmp_path, _v2("""ownership:
+  host_owned:
+    - state/current.json
+host:
+  state_adapters:
+    custom: state/current.json
+"""))
+    assert dict(load_config(tmp_path).state_adapters) == {
+        "custom": "state/current.json"
+    }
 
 
 def test_invalid_present_host_context_blocks(tmp_path):

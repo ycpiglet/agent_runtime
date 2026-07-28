@@ -1,0 +1,29 @@
+{
+  "cause": "The unit and parent task recorded python -m agent_runtime.cli as though the package were installed, while work verify executes commands directly in a source checkout.",
+  "created_at": "2026-07-29T05:46:10+09:00",
+  "created_by": "codex-root-v080-orchestrator",
+  "defect_signatures": [
+    "defect:source-layout-cli-verification-omitted-pythonpat:737e2a5c17884615"
+  ],
+  "id": "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c",
+  "prevention": "Record repository-local package commands as PYTHONPATH=src python -m agent_runtime.cli, preserve the first failed VERIFY artifact, and require a subsequent canonical passing VERIFY artifact before closeout.",
+  "prevention_refs": [
+    "agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-002.md",
+    "agents/lead_engineer/tasks/TASK-AR-645.md"
+  ],
+  "recurrence_count": 1,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "reviews/VERIFY-2026-07-29-unit-task-ar-645-002-20260729054357.json"
+  ],
+  "status": "resolved",
+  "summary": "Canonical work verification passed tests and gates but failed the package CLI command because the repository uses a src layout and the recorded command did not expose src on the module path.",
+  "title": "Source-layout CLI verification must declare PYTHONPATH",
+  "verification_refs": [
+    "reviews/VERIFY-2026-07-29-unit-task-ar-645-002-20260729054503.json"
+  ],
+  "work_ids": [
+    "TASK-AR-645",
+    "UNIT-TASK-AR-645-002"
+  ]
+}
