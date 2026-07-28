@@ -9,11 +9,11 @@ task_id: TASK-AR-641
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T20:54:00+09:00
+updated_at: 2026-07-28T21:55:46+09:00
 started_at: 2026-07-28T20:54:00+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -54,6 +54,16 @@ handoff: Attach Bean Wiki and Allimbot before/after inventory counts, sample own
 stop_condition: Stop before adopt --apply, profile manifests, ownership-aware sync, seed/generated transitions, adapter execution, or any host file modification.
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260728-205400-task-ar-641-641001.json
+verified_at: 2026-07-28T21:55:37+09:00
+verified_by: codex-root-v080-w6
+evidence_refs:
+  - reviews/VERIFY-2026-07-28-unit-task-ar-641-001-20260728215537.json
+  - reviews/VERIFY-2026-07-28-unit-task-ar-641-001-20260728213523.json
+  - reviews/W4B-2026-07-28-unit-task-ar-641-001-approved.md
+resolution: done
+completed_at: 2026-07-28T21:55:46+09:00
+closed_by: codex-root-v080-w6
+measurement_unavailable_reason: Work included iterative adversarial W4b repair, local and matrix CI, live read-only Bean Wiki and Allimbot probes, claim release, PR integration, and lifecycle reconciliation before reliable per-unit time and token metering was available.
 ---
 
 # UNIT-TASK-AR-641-001 - Implement read-only brownfield adoption planner
@@ -120,3 +130,18 @@ evidence.
 
 Stop before `adopt --apply`, profile manifests, ownership-aware sync,
 seed/generated transitions, adapter execution, or any host file modification.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-28T21:55:46+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Work included iterative adversarial W4b repair, local and matrix CI, live read-only Bean Wiki and Allimbot probes, claim release, PR integration, and lifecycle reconciliation before reliable per-unit time and token metering was available.
+- Closed by: `codex-root-v080-w6`
+- Evidence:
+  - `reviews/VERIFY-2026-07-28-unit-task-ar-641-001-20260728215537.json`
+  - `reviews/VERIFY-2026-07-28-unit-task-ar-641-001-20260728213523.json`
+  - `reviews/W4B-2026-07-28-unit-task-ar-641-001-approved.md`
+<!-- work-close:end -->
