@@ -1,15 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-28T17:55:15+09:00
-updated_by: le-20260728-task-ar-639-002-terra
+updated_at: 2026-07-28T18:17:09+09:00
+updated_by: codex-root-v080-orchestrator
 current_state:
-  summary: "UNIT-TASK-AR-639-002 is actively implementing lifecycle tuple reconciliation and explicit TASK-AR-631 missing-claim recovery."
-  status: in_progress
+  summary: "UNIT-TASK-AR-639-002 passed W4a after lifecycle projection hardening; independent W4b is pending."
+  status: review
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 2
+  step_index: 4
   step_total: 6
-  progress_pct: 5
-  status_text: "Implementing claim/task/unit/worktree/pointer reconciliation and explicit recovery."
+  progress_pct: 90
+  status_text: "W4a passed; independent W4b review pending."
 active_work:
   current_agents:
     - claim_id: CLAIM-20260728-175515-task-ar-639-639002
