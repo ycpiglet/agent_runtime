@@ -9,11 +9,12 @@ task_id: TASK-AR-646
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T06:29:18+09:00
+updated_at: 2026-07-29T06:42:09+09:00
+started_at: 2026-07-29T06:42:09+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
@@ -23,6 +24,8 @@ model_tier: worker_standard
 escalation_triggers:
   - ambiguity
   - data_integrity
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260729-064209-task-ar-646-0823.json
 context: Codex API haiku, sonnet, and opus tiers resolve to one model; registration defaults and fabricated ambiguity defeat low-cost routing; provider workers and the native Codex bridge do not prove the observed model or cost.
 inputs:
   - scripts/model_routing.py

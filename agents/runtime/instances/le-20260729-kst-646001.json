@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "le-20260729-kst-646001",
+  "callsign": "lead_engineer@unit-646-001-codex",
+  "callsite_id": "codex:root:task-ar-646-unit-001",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260729-064209-task-ar-646-0823.json"
+  ],
+  "created_at": "2026-07-29T06:42:09+09:00",
+  "decision_cycle_id": "",
+  "display_name": "lead_engineer@unit-646-001-codex",
+  "model": "",
+  "model_tier": "worker_standard",
+  "on_behalf_of": "UNIT-TASK-AR-646-001",
+  "pane_id": "codex:root:task-ar-646-unit-001",
+  "parent_instance_id": "",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "lead-engineer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-07-29T06:42:09+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-646",
+  "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+  "team_id": "evaluation-office",
+  "unit_id": "UNIT-TASK-AR-646-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-646/UNIT-TASK-AR-646-001.md",
+  "updated_at": "2026-07-29T06:42:09+09:00",
+  "workspace": "",
+  "worktree_path": "/home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-646"
+}
