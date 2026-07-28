@@ -9,13 +9,13 @@ task_id: TASK-AR-631
 task_set_id: TASKSET-AR-CONSOLE-OVERHAUL-P1
 initiative_id: INIT-AR-CONSOLE-OVERHAUL-P1
 project_id: PROJECT-AGENT-RUNTIME
-status: review
+status: completed
 verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-27T11:12:27+09:00
-updated_at: 2026-07-28T16:31:01+09:00
+updated_at: 2026-07-28T19:18:04+09:00
 timestamp_quality: backfilled
-recovered_without_claim: true
+recovered_without_claim: "\u001eagent-runtime-work-scalar-v1:true"
 recovery_reason: Historical implementation and W4 evidence predate a durable W2 claim; recovery preserves the absence instead of synthesizing a claim.
 recovered_at: 2026-07-28T16:31:01+09:00
 recovered_by: codex-root-v080-recovery-20260728
@@ -63,6 +63,10 @@ evidence_refs:
   - reviews/VERIFY-2026-07-27-unit-task-ar-631-001-20260727111227.json
 review_refs:
   - reviews/ROLE-REVIEW-2026-07-28-TASK-AR-631-W4B.md
+resolution: done
+completed_at: 2026-07-28T19:18:04+09:00
+closed_by: le-20260728-170130-kst-codexroot-v080-639-001
+measurement_unavailable_reason: Historical implementation predates durable W2 claim and per-unit metering; recovery relies on preserved W4a and independent W4b evidence, so time and token measurements are unavailable.
 ---
 
 # UNIT-TASK-AR-631-001 - 홈 Decision Screenfit
@@ -120,3 +124,16 @@ fold 예산 회복 수치(모바일 1737->2화면 이내)와 verdict/타일 렌�
 ## Stop Boundary
 
 renderAll 해체(632), IA 재프루닝(P2), 디자인 토큰 재설계(638)로 확장하지 말 것.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-28T19:18:04+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Historical implementation predates durable W2 claim and per-unit metering; recovery relies on preserved W4a and independent W4b evidence, so time and token measurements are unavailable.
+- Closed by: `le-20260728-170130-kst-codexroot-v080-639-001`
+- Evidence:
+  - `reviews/VERIFY-2026-07-27-unit-task-ar-631-001-20260727111227.json`
+<!-- work-close:end -->

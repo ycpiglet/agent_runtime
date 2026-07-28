@@ -7,10 +7,10 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-28T19:08:47+09:00
+generated_at: 2026-07-28T19:18:51+09:00
 task_count: 315
-open_count: 29
-completed_count: 286
+open_count: 27
+completed_count: 288
 task_set_count: 3
 completed_task_set_count: 63
 ---
@@ -18,11 +18,11 @@ completed_task_set_count: 63
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `29` open or active tasks; `286` completed tasks are archived from this live board.
+- Summary: `27` open or active tasks; `288` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `23` / Ask `5` / Review `1` / Later `0` / Done `286`.
+- Status: Action `22` / Ask `5` / Review `0` / Later `0` / Done `288`.
 - Task Sets: `3` active workflows; `63` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
@@ -60,7 +60,7 @@ completed_task_set_count: 63
 ### Console Overhaul P1 — Core Structure (`TASKSET-AR-CONSOLE-OVERHAUL-P1`)
 
 - Flow: Owner 결정 확정(2026-07-26) 반영 P1 본대. attention 단일 정본화(#1 웹=1차), 홈 Screenfit, renderAll 해체, /clarify+EARS(#8 별도 스킬), 3자 추적성, W4c 퀴즈(explainer 5문항 medium+선택지 랜덤화+loud escape, #4/#5/#6), 승인 티어링(#9), 임계 기반 FLOW-DIGEST+actor 스탬프(#13, #10 분업의 측정 선행), 디자인 패스(#15). 1-2개월.
-- Progress: `0/9` done; `9` open or active.
+- Progress: `1/9` done; `8` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
@@ -71,17 +71,15 @@ completed_task_set_count: 63
 | `TASK-AR-635` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | High | 14h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | diff를 이해했는지 pre-PR 단계에서 독립 출제자가 퀴즈로 검증하고, 통과 못 하면 teach-back으로 반복 학습시킨다. |
 | `TASK-AR-632` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | High | 10h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 매 4초 37개 렌더 함수 전량 재실행을 활성 뷰+콕핏 선택 렌더로 바꾸고 4s/8s/15s+SSE 4중 경로를 단일 디스패처로 통합한다. |
 | `TASK-AR-637` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | High | 10h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 흐름 인사이트를 주간 다이제스트로 자동 전달하고, 주체별 점유를 측정 가능하게 만들어 독박을 지표로 확인한다. |
-| `TASK-AR-631` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | review | Review | P1 | High | High | 12h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Review evidence | 스크롤 없이 5초 내 '개입 필요 여부'에 예/아니오로 답하는 단일 화면을 완성한다. |
 | `TASK-AR-638` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Ask | P2 | Medium | High | 12h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | 홈 재구성과 병행해 한국어 단독 Owner와의 언어 불일치를 끝내고, 컬러/토큰/아이콘/칸반의 시각 언어를 '조용한 의사결정 콘솔'로 재정렬한다. |
 
 ### v0.8 Adoption and Enforcement (`TASKSET-AR-V080-ADOPTION-ENFORCEMENT`)
 
 - Flow: Deliver brownfield profiles, lifecycle truth, consumer-complete assets, continuity hooks, knowledge and model-economy enforcement, then validate two pilots and one upgrade rehearsal.
-- Progress: `0/13` done; `13` open or active.
+- Progress: `1/13` done; `12` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-639` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-639/UNIT-TASK-AR-639-001.md | in_progress | Action | P0 | Critical | High | 10h/24000tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Make registered work executable and make implemented-but-unclaimed work visible witho… |
 | `TASK-AR-648` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-001.md | planned | Action | P0 | Critical | Medium | 8h/16000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Prove lightweight adoption preserves the existing editorial harness while adding task… |
 | `TASK-AR-651` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-651/UNIT-TASK-AR-651-001.md | planned | Action | P0 | Critical | High | 8h/16000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Produce an exact, installable v0.8.0-rc.1 candidate whose release claims are backed b… |
 | `TASK-AR-640` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-640/UNIT-TASK-AR-640-001.md | planned | Ask | P0 | Critical | High | 10h/22000tok | Low | 7 | agent-runtime-core | lead-engineer | Owner/agent decision | Represent shared capabilities and host ownership without requiring a project-specific… |
@@ -169,10 +167,10 @@ completed_task_set_count: 63
 - Needs attention: `36` — cost_anomalies `36` (single source: scripts/attention_inbox.py = console cockpit, TASK-AR-630).
 - Owner lanes: triage awaiting `0`, owner-decision (Ask) `5` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `29` open across `3` task sets (see Action Board above).
-- Throughput (7d): `24` tasks completed in the last 7 days (TASK-AR-627).
+- Active: `27` open across `3` task sets (see Action Board above).
+- Throughput (7d): `26` tasks completed in the last 7 days (TASK-AR-627).
 - Archived task sets: `63` (see Archived Task Sets above).
-- Archived task files: `286` — see `ARCHIVE-INDEX.md`.
+- Archived task files: `288` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

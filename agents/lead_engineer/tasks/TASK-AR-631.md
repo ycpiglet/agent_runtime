@@ -11,16 +11,16 @@ registered_at: 2026-07-26T20:41:04+09:00
 created_at: 2026-07-26T20:41:04+09:00
 started_at: 2026-07-27T11:12:27+09:00
 timestamp_quality: backfilled
-recovered_without_claim: true
+recovered_without_claim: "\u001eagent-runtime-work-scalar-v1:true"
 recovery_reason: Historical implementation and W4 evidence predate a durable W2 claim; recovery preserves the absence instead of synthesizing a claim.
 recovered_at: 2026-07-28T16:30:46+09:00
 recovered_by: codex-root-v080-recovery-20260728
 recovery_independent_evidence_refs:
   - reviews/ROLE-REVIEW-2026-07-28-TASK-AR-631-W4B.md
   - reviews/VERIFY-2026-07-28-task-ar-631-20260728163046.json
-updated_at: 2026-07-28T16:30:46+09:00
+updated_at: 2026-07-28T19:18:05+09:00
 title: 홈 Decision Screenfit 완성
-status: review
+status: completed
 priority: P1
 difficulty: L
 est_hours: 12
@@ -50,6 +50,10 @@ verified_at: 2026-07-28T16:30:46+09:00
 verified_by: codex-root-v080-recovery-20260728
 evidence_refs:
   - reviews/VERIFY-2026-07-28-task-ar-631-20260728163046.json
+resolution: done
+completed_at: 2026-07-28T19:18:05+09:00
+closed_by: le-20260728-170130-kst-codexroot-v080-639-001
+measurement_unavailable_reason: Historical implementation predates durable W2 claim and task-level metering; recovery relies on preserved W4a and independent W4b evidence, so time and token measurements are unavailable.
 ---
 
 # TASK-AR-631 - 홈 Decision Screenfit 완성
@@ -73,3 +77,16 @@ evidence_refs:
 
 - `python -m pytest tests/test_ui_console.py tests/test_ui_console_e2e.py tests/test_ui_console_microinteractions.py -q`
 - `python scripts/nav_budget_gate.py`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-28T19:18:05+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Historical implementation predates durable W2 claim and task-level metering; recovery relies on preserved W4a and independent W4b evidence, so time and token measurements are unavailable.
+- Closed by: `le-20260728-170130-kst-codexroot-v080-639-001`
+- Evidence:
+  - `reviews/VERIFY-2026-07-28-task-ar-631-20260728163046.json`
+<!-- work-close:end -->

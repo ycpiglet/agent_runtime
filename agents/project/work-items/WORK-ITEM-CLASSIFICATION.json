@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-28T19:08:48+09:00",
+  "generated_at": "2026-07-28T19:18:51+09:00",
   "record_count": 519,
   "finding_count": 0,
   "findings": [],
@@ -5294,7 +5294,7 @@
       "title": "스크롤 없이 5초 내 '개입 필요 여부'에 예/아니오로 답하는 단일 화면을 완성한다.",
       "path": "agents/lead_engineer/tasks/TASK-AR-631.md",
       "parent_id": "TASKSET-AR-CONSOLE-OVERHAUL-P1",
-      "status": "review"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-631-001",
@@ -5305,7 +5305,7 @@
       "title": "UNIT-TASK-AR-631-001 - 홈 Decision Screenfit",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-631/UNIT-TASK-AR-631-001.md",
       "parent_id": "TASK-AR-631",
-      "status": "review"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-632",
@@ -5415,7 +5415,7 @@
       "title": "Make registered work executable and make implemented-but-unclaimed work visible witho…",
       "path": "agents/lead_engineer/tasks/TASK-AR-639.md",
       "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-639-001",
