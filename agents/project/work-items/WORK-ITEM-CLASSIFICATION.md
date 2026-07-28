@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-28T20:44:01+09:00
+generated_at: 2026-07-28T20:55:22+09:00
 record_count: 519
 ---
 
@@ -535,8 +535,8 @@ record_count: 519
 | 41.1.1.2 | Unit 41.1.1.2 | unit | `UNIT-TASK-AR-639-002` | `TASK-AR-639` | completed | `agents/lead_engineer/tasks/units/TASK-AR-639/UNIT-TASK-AR-639-002.md` | UNIT-TASK-AR-639-002 - Block task-claim-projection split-brain and support explicit recovery |
 | 41.1.2 | Task 41.1.2 | task | `TASK-AR-640` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | `agents/lead_engineer/tasks/TASK-AR-640.md` | Represent shared capabilities and host ownership without requiring a project-specific… |
 | 41.1.2.1 | Unit 41.1.2.1 | unit | `UNIT-TASK-AR-640-001` | `TASK-AR-640` | completed | `agents/lead_engineer/tasks/units/TASK-AR-640/UNIT-TASK-AR-640-001.md` | UNIT-TASK-AR-640-001 - Add backward-compatible profile and ownership config schema |
-| 41.1.3 | Task 41.1.3 | task | `TASK-AR-641` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-641.md` | Let an existing repository understand exactly what Agent Runtime would add, own, pres… |
-| 41.1.3.1 | Unit 41.1.3.1 | unit | `UNIT-TASK-AR-641-001` | `TASK-AR-641` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-641/UNIT-TASK-AR-641-001.md` | UNIT-TASK-AR-641-001 - Implement read-only brownfield adoption planner |
+| 41.1.3 | Task 41.1.3 | task | `TASK-AR-641` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | in_progress | `agents/lead_engineer/tasks/TASK-AR-641.md` | Let an existing repository understand exactly what Agent Runtime would add, own, pres… |
+| 41.1.3.1 | Unit 41.1.3.1 | unit | `UNIT-TASK-AR-641-001` | `TASK-AR-641` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-641/UNIT-TASK-AR-641-001.md` | UNIT-TASK-AR-641-001 - Implement read-only brownfield adoption planner |
 | 41.1.4 | Task 41.1.4 | task | `TASK-AR-642` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-642.md` | Update safe runtime files without overwriting host state or allowing one expected sea… |
 | 41.1.4.1 | Unit 41.1.4.1 | unit | `UNIT-TASK-AR-642-001` | `TASK-AR-642` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-642/UNIT-TASK-AR-642-001.md` | UNIT-TASK-AR-642-001 - Implement ownership manifest and sync reconcile |
 | 41.1.5 | Task 41.1.5 | task | `TASK-AR-643` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-643.md` | Guarantee that every capability advertised to a clean host has all executable depende… |

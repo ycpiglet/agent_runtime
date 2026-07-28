@@ -9,11 +9,12 @@ task_id: TASK-AR-641
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T20:52:00+09:00
+updated_at: 2026-07-28T20:54:00+09:00
+started_at: 2026-07-28T20:54:00+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
@@ -51,6 +52,8 @@ verification:
   - python -m pytest tests/test_adoption.py tests/test_inventory_sync_sanitize.py tests/test_doctor.py -q
 handoff: Attach Bean Wiki and Allimbot before/after inventory counts, sample ownership plans, repeated-run stability, and file-list/content/mtime immutability evidence.
 stop_condition: Stop before adopt --apply, profile manifests, ownership-aware sync, seed/generated transitions, adapter execution, or any host file modification.
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260728-205400-task-ar-641-641001.json
 ---
 
 # UNIT-TASK-AR-641-001 - Implement read-only brownfield adoption planner
