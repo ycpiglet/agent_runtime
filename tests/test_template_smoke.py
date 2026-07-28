@@ -196,7 +196,12 @@ def test_clean_host_runs_work_session_report_and_dependency_lifecycle(tmp_path):
     assert "| ID | Kind | Date | Audience | Title |" in index and f"[{report.stem}]({report.name})" in index
     assert (host / "agents/lead_engineer/reports/VIEW-by-kind.md").exists()
     docs = _run([PYTHON, "scripts/check_agent_docs.py"], cwd=host, expect_zero=False)
-    assert report.name not in docs.stdout
+    # The minimal fixture intentionally lacks several legacy documentation
+    # baseline records, so its whole-project checker is not yet zero-exit.
+    # A saved report must nevertheless add no validator diagnostic on either
+    # stream (the checker has emitted diagnostics on both across versions).
+    docs_output = (docs.stdout or "") + (docs.stderr or "")
+    assert report.name not in docs_output
     _run([PYTHON, "scripts/generate_report_views.py", "--check"], cwd=host)
     gate = _run([PYTHON, "scripts/runtime_asset_usage.py", "--root", str(host), "--check"], cwd=host)
     assert "block=0" in gate.stdout
