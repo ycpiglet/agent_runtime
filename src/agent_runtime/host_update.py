@@ -172,6 +172,10 @@ def _step_name(args: list[str]) -> str:
             return "sync-check"
         if "--diff" in args:
             return "sync-diff"
+        if "--reconcile" in args:
+            return "sync-reconcile"
+        if "--apply-safe" in args:
+            return "sync-apply-safe"
         if "--apply" in args:
             return "sync-apply"
     if args[:1] == ["lock"] and "--write" in args:
@@ -235,7 +239,7 @@ def build_update_plan(root: Path, install_dir: Path) -> HostUpdatePlan:
 
 
 def build_update_execution(root: Path, install_dir: Path, *, mode: str) -> HostUpdateExecution:
-    if mode not in {"check", "diff", "apply"}:
+    if mode not in {"check", "diff", "reconcile", "apply", "apply-safe"}:
         raise ValueError(f"unknown update mode: {mode}")
     plan = build_update_plan(root, install_dir)
     findings = _execution_findings(plan)
@@ -259,11 +263,15 @@ def build_update_execution(root: Path, install_dir: Path, *, mode: str) -> HostU
             )
         )
         steps.append(_template_check_step(plan.install_dir))
-        steps.append(_cli_step(plan.install_dir, ["sync", "--root", str(plan.root), "--check"]))
-        if mode in {"diff", "apply"}:
+        if mode in {"check", "diff", "apply"}:
+            steps.append(_cli_step(plan.install_dir, ["sync", "--root", str(plan.root), "--check"]))
+        if mode in {"diff", "apply", "apply-safe"}:
             steps.append(_cli_step(plan.install_dir, ["sync", "--root", str(plan.root), "--diff"]))
-        if mode == "apply":
-            steps.append(_cli_step(plan.install_dir, ["sync", "--root", str(plan.root), "--apply"]))
+        if mode == "reconcile":
+            steps.append(_cli_step(plan.install_dir, ["sync", "--root", str(plan.root), "--reconcile"]))
+        if mode in {"apply", "apply-safe"}:
+            apply_flag = "--apply-safe" if mode == "apply-safe" else "--apply"
+            steps.append(_cli_step(plan.install_dir, ["sync", "--root", str(plan.root), apply_flag]))
             steps.append(_cli_step(plan.install_dir, ["sync", "--root", str(plan.root), "--check"]))
             steps.append(_cli_step(plan.install_dir, ["lock", "--root", str(plan.root), "--write"]))
     return HostUpdateExecution(plan=plan, mode=mode, steps=tuple(steps), findings=findings)

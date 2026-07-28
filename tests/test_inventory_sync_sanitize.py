@@ -881,6 +881,24 @@ def test_sync_check_fails_when_conflicts_exist(tmp_path):
     assert main(["sync", "--root", str(host), "--template-root", str(templates), "--check"]) == 1
 
 
+def test_apply_safe_writes_independent_updates_but_legacy_apply_is_atomic(tmp_path):
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    _write(host / "agent_runtime.yml", "project: demo\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\n")
+    for rel in ("scripts/create.py", "scripts/update.py", "scripts/conflict.py", "scripts/nonregular.py"):
+        _write(templates / rel, "new\n")
+    _write(host / "scripts/update.py", "old\n")
+    _write(host / "scripts/conflict.py", "host\n")
+    (host / "scripts/nonregular.py").mkdir(parents=True)
+    _write(host / "agent_runtime.lock.json", json.dumps({"schema": "agent-runtime-lock/v1", "installed": {"managed_files": {"scripts/update.py": _digest("old\n")}}}) + "\n")
+    assert run_sync(host, "apply", template_root=templates) == 1
+    assert not (host / "scripts/create.py").exists()
+    assert run_sync(host, "apply-safe", template_root=templates) == 1
+    assert (host / "scripts/create.py").read_text(encoding="utf-8") == "new\n"
+    assert (host / "scripts/update.py").read_text(encoding="utf-8") == "new\n"
+    assert (host / "scripts/conflict.py").read_text(encoding="utf-8") == "host\n"
+
+
 def test_template_files_use_stable_posix_relative_order(tmp_path):
     _write(tmp_path / "AGENT_RUNTIME.md", "runtime\n")
     _write(tmp_path / "AGENTS.md", "agents\n")

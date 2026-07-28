@@ -47,6 +47,9 @@ def build_parser() -> argparse.ArgumentParser:
     mode.add_argument("--check", action="store_true", help="Report available updates without writing")
     mode.add_argument("--diff", action="store_true", help="Show exact template changes")
     mode.add_argument("--apply", action="store_true", help="Apply safe selected updates")
+    mode.add_argument("--apply-safe", action="store_true", help="Apply only independently safe updates")
+    mode.add_argument("--reconcile", action="store_true", help="Render ownership-aware read-only plan")
+    sync_parser.add_argument("--json", action="store_true", help="Use JSON with --reconcile")
 
     sanitize_parser = subparsers.add_parser("sanitize", help="Check staged public package content")
     sanitize_parser.add_argument("--root", type=sanitize.Path, default=sanitize.Path.cwd(), help="Package root")
@@ -131,6 +134,8 @@ def build_parser() -> argparse.ArgumentParser:
     update_mode.add_argument("--check", action="store_true", help="Install upstream and report available host updates")
     update_mode.add_argument("--diff", action="store_true", help="Install upstream and show exact host update diff")
     update_mode.add_argument("--apply", action="store_true", help="Install upstream, apply safe updates, and write agent_runtime.lock.json")
+    update_mode.add_argument("--apply-safe", action="store_true", help="Install upstream and apply independently safe updates")
+    update_mode.add_argument("--reconcile", action="store_true", help="Install upstream and render reconcile plan")
 
     update_notify_parser = subparsers.add_parser(
         "update-notify",
@@ -209,13 +214,19 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "adopt":
         return adoption.run_adopt(args.root, plan_only=args.plan, json_output=args.json)
     if args.command == "sync":
+        if args.json and not args.reconcile:
+            parser.error("sync --json is only valid with --reconcile")
         if args.check:
             mode = "check"
         elif args.diff:
             mode = "diff"
-        else:
+        elif args.apply:
             mode = "apply"
-        return sync.run_sync(args.root, mode, template_root=args.template_root)
+        elif args.apply_safe:
+            mode = "apply-safe"
+        else:
+            mode = "reconcile"
+        return sync.run_sync(args.root, mode, template_root=args.template_root, json_output=args.json)
     if args.command == "sanitize":
         return sanitize.run_sanitize(args.root, check=args.check)
     if args.command == "export":
@@ -279,8 +290,12 @@ def main(argv: list[str] | None = None) -> int:
             mode = "check"
         elif args.diff:
             mode = "diff"
-        else:
+        elif args.apply:
             mode = "apply"
+        elif args.apply_safe:
+            mode = "apply-safe"
+        else:
+            mode = "reconcile"
         install_dir = args.install_dir or host_update.default_install_dir(args.root)
         return host_update.run_update(args.root, install_dir, mode=mode)
     if args.command == "update-notify":

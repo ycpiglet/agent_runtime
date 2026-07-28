@@ -20,6 +20,9 @@ class TemplateUpdate:
     action: str
     source: Path
     target: Path
+    ownership: str = "managed"
+    reason: str = ""
+    safety: str = "safe"
 
 
 @dataclass(frozen=True)
@@ -29,6 +32,11 @@ class SyncPlan:
     template_root: Path
     updates: tuple[TemplateUpdate, ...] = ()
     conflicts: tuple[TemplateUpdate, ...] = ()
+    preserved: tuple[TemplateUpdate, ...] = ()
+    excluded: tuple[TemplateUpdate, ...] = ()
+    lock_schema: str = "none"
+    prior_managed: tuple[str, ...] = ()
+    seeded: tuple[str, ...] = ()
 
 
 def default_template_root() -> Path:
@@ -65,7 +73,7 @@ def _content_digest(path: Path) -> str:
     return f"sha256:{hashlib.sha256(_canonical_content(path)).hexdigest()}"
 
 
-def _load_managed_files(root: Path) -> dict[str, str]:
+def _load_lock(root: Path) -> dict[str, object]:
     lock_path = root / LOCK_FILE
     if not lock_path.exists():
         lock_path = root / LEGACY_LOCK_FILE
@@ -75,10 +83,24 @@ def _load_managed_files(root: Path) -> dict[str, str]:
         data = json.loads(lock_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
         return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _load_managed_files(root: Path) -> dict[str, str]:
+    data = _load_lock(root)
     managed = data.get("installed", {}).get("managed_files", {})
     if not isinstance(managed, dict):
         return {}
     return {str(path): str(digest) for path, digest in managed.items()}
+
+
+def _ownership(config: AgentRuntimeConfig, path: str) -> str:
+    for mode, paths in config.ownership:
+        if any(path == candidate or path.startswith(candidate.rstrip("/") + "/") for candidate in paths):
+            return mode
+    if path in {"AGENTS.md", "CLAUDE.md", "CURSOR.md", "GEMINI.md", "agents/project/NEXT-SESSION-POINTER.yml"}:
+        return "seed_once"
+    return "managed"
 
 
 def build_sync_plan(root: Path, template_root: Path | None = None) -> SyncPlan:
@@ -87,31 +109,51 @@ def build_sync_plan(root: Path, template_root: Path | None = None) -> SyncPlan:
         resolved_template_root = Path(template_root) if template_root is not None else default_template_root()
     except TypeError as exc:
         raise TypeError("template_root must be path-like") from exc
+    lock = _load_lock(root)
     managed_files = _load_managed_files(root)
-    unmanaged_paths = set(config.unmanaged_paths)
+    installed = lock.get("installed", {}) if isinstance(lock.get("installed", {}), dict) else {}
+    seeded = {str(path) for path in installed.get("seeded", [])} if isinstance(installed.get("seeded", []), list) else set()
     updates: list[TemplateUpdate] = []
     conflicts: list[TemplateUpdate] = []
+    preserved: list[TemplateUpdate] = []
+    excluded: list[TemplateUpdate] = []
     for source in _template_files(resolved_template_root):
         rel = source.relative_to(resolved_template_root).as_posix()
-        if rel in unmanaged_paths:
-            continue
+        ownership = _ownership(config, rel)
         target = root / rel
-        update = TemplateUpdate(rel, "create", source, target)
+        if ownership in {"host_owned", "generated"}:
+            excluded.append(TemplateUpdate(rel, "excluded", source, target, ownership, "owner-controlled path", "never"))
+            continue
+        if target.is_symlink() or (target.exists() and not target.is_file()):
+            conflicts.append(TemplateUpdate(rel, "conflict", source, target, ownership, "non-regular target", "unsafe"))
+            continue
+        if ownership == "seed_once":
+            if target.exists():
+                preserved.append(TemplateUpdate(rel, "preserve", source, target, ownership, "existing seed", "never"))
+            elif rel in seeded or rel in managed_files:
+                preserved.append(TemplateUpdate(rel, "preserve", source, target, ownership, "prior seed evidence", "never"))
+            else:
+                updates.append(TemplateUpdate(rel, "seed", source, target, ownership, "first installation", "safe"))
+            continue
+        update = TemplateUpdate(rel, "create", source, target, ownership, "missing target", "safe")
         if not target.exists():
             updates.append(update)
             continue
         if _read(source) == _read(target):
+            preserved.append(TemplateUpdate(rel, "identical", source, target, ownership, "matches template", "never"))
             continue
         if managed_files.get(rel) == _content_digest(target):
-            updates.append(TemplateUpdate(rel, "update", source, target))
+            updates.append(TemplateUpdate(rel, "update", source, target, ownership, "matches prior managed digest", "safe"))
             continue
-        conflicts.append(TemplateUpdate(rel, "conflict", source, target))
+        conflicts.append(TemplateUpdate(rel, "conflict", source, target, ownership, "host content differs", "unsafe"))
     return SyncPlan(
         root=root,
         config=config,
         template_root=resolved_template_root,
         updates=tuple(updates),
         conflicts=tuple(conflicts),
+        preserved=tuple(preserved), excluded=tuple(excluded), lock_schema=str(lock.get("schema", "none")),
+        prior_managed=tuple(sorted(managed_files)), seeded=tuple(sorted(seeded)),
     )
 
 
@@ -132,6 +174,31 @@ def render_check(plan: SyncPlan) -> str:
     for conflict in plan.conflicts:
         lines.append(f"- conflict {conflict.path}")
     return "\n".join(lines)
+
+
+def reconcile_json(plan: SyncPlan) -> str:
+    actions = sorted([*plan.updates, *plan.conflicts, *plan.preserved, *plan.excluded], key=lambda item: item.path)
+    payload = {"schema": "agent-runtime-sync-reconcile/v1", "root": str(plan.root), "project": plan.config.project,
+        "profiles": list(plan.config.profiles), "capabilities": list(plan.config.capabilities),
+        "upstream": {"package": plan.config.upstream_package, "remote_url": plan.config.upstream_remote_url, "ref": plan.config.upstream_ref},
+        "template_root": str(plan.template_root), "template_digest": _template_digest(plan.template_root), "lock_schema": plan.lock_schema,
+        "actions": [{"path": a.path, "ownership": a.ownership, "action": a.action, "reason": a.reason, "safety": a.safety} for a in actions],
+        "counts": {"safe_updates": len(plan.updates), "conflicts": len(plan.conflicts), "preserved": len(plan.preserved), "excluded": len(plan.excluded)}}
+    return json.dumps(payload, indent=2, sort_keys=True)
+
+
+def render_reconcile(plan: SyncPlan) -> str:
+    lines = ["# Agent Runtime Sync Reconcile", f"project={plan.config.project}", f"template_root={plan.template_root}", f"safe_updates={len(plan.updates)}", f"conflicts={len(plan.conflicts)}", f"preserved={len(plan.preserved)}", f"excluded={len(plan.excluded)}"]
+    lines.extend(f"- {a.path} {a.ownership} {a.action} {a.safety}: {a.reason}" for a in sorted([*plan.updates, *plan.conflicts, *plan.preserved, *plan.excluded], key=lambda item: item.path))
+    return "\n".join(lines)
+
+
+def _template_digest(root: Path) -> str:
+    digest = hashlib.sha256()
+    for path in _template_files(root):
+        digest.update(path.relative_to(root).as_posix().encode())
+        digest.update(_canonical_content(path))
+    return f"sha256:{digest.hexdigest()}"
 
 
 def _diff_update(update: TemplateUpdate) -> str:
@@ -185,7 +252,19 @@ def apply_updates(plan: SyncPlan) -> int:
     return 0
 
 
-def run_sync(root: Path, mode: str, template_root: Path | None = None) -> int:
+def apply_safe_updates(plan: SyncPlan) -> int:
+    applied = 0
+    for update in plan.updates:
+        update.target.parent.mkdir(parents=True, exist_ok=True)
+        update.target.write_bytes(update.source.read_bytes())
+        applied += 1
+    _print_output(render_reconcile(plan))
+    _print_output(f"applied={applied}")
+    _print_output(f"remaining_conflicts={len(plan.conflicts)}")
+    return 1 if plan.conflicts else 0
+
+
+def run_sync(root: Path, mode: str, template_root: Path | None = None, json_output: bool = False) -> int:
     plan = build_sync_plan(root, template_root=template_root)
     if plan.config.allow_silent_overwrite:
         _print_output(render_check(plan))
@@ -199,6 +278,11 @@ def run_sync(root: Path, mode: str, template_root: Path | None = None) -> int:
         _print_output(render_diff(plan))
     elif mode == "apply":
         return apply_updates(plan)
+    elif mode == "apply-safe":
+        return apply_safe_updates(plan)
+    elif mode == "reconcile":
+        _print_output(reconcile_json(plan) if json_output else render_reconcile(plan))
+        return 1 if plan.conflicts else 0
     else:
         raise ValueError(f"unknown sync mode: {mode}")
     return 0
@@ -212,16 +296,25 @@ def build_parser() -> argparse.ArgumentParser:
     mode.add_argument("--check", action="store_true", help="Report available updates without writing")
     mode.add_argument("--diff", action="store_true", help="Show exact template changes")
     mode.add_argument("--apply", action="store_true", help="Apply safe selected updates")
+    mode.add_argument("--apply-safe", action="store_true")
+    mode.add_argument("--reconcile", action="store_true")
+    parser.add_argument("--json", action="store_true")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if args.json and not args.reconcile:
+        parser.error("--json is only valid with --reconcile")
     if args.check:
         mode = "check"
     elif args.diff:
         mode = "diff"
-    else:
+    elif args.apply:
         mode = "apply"
-    return run_sync(args.root, mode, template_root=args.template_root)
+    elif args.apply_safe:
+        mode = "apply-safe"
+    else:
+        mode = "reconcile"
+    return run_sync(args.root, mode, template_root=args.template_root, json_output=args.json)
