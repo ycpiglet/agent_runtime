@@ -13,7 +13,7 @@ import argparse
 import json
 import re
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Iterable
 
@@ -21,6 +21,10 @@ from typing import Iterable
 ROOT = Path(__file__).resolve().parent.parent
 TASKS_DIR = ROOT / "agents" / "lead_engineer" / "tasks"
 DEFAULT_OUTPUT = ROOT / "BACKLOG-BOARD.md"
+ARCHIVE_INDEX_OUTPUT = ROOT / "ARCHIVE-INDEX.md"
+TASK_SET_REGISTRY = Path("agents/project/work-items/TASKSET-DEFINITIONS.json")
+ENCODED_WORK_SCALAR_PREFIX = "\x1eagent-runtime-work-scalar-v1:"
+TASK_SET_REGISTRY_SCHEMA = "agent-runtime-taskset-definitions/v1"
 
 DISPLAY_REPLACEMENTS = {
     "레거시 전신 프로젝트(" + "tag" + "_manual)": "레거시 전신 프로젝트",
@@ -42,7 +46,20 @@ try:
     import status_alias
 except ImportError:  # imported as scripts.<name> (namespace package)
     from scripts import status_alias
+# TASK-AR-630: the board's "Needs attention" rollup and the console cockpit must
+# tell the same story, so both consume scripts/attention_inbox.py as the single
+# source of attention truth. Optional: a host checkout without the helper (or a
+# render without a root) falls back to the legacy lane-based line.
+try:
+    import attention_inbox as _attention_inbox
+except Exception:  # noqa: BLE001 - optional sibling; degrade to lane heuristic
+    try:
+        from scripts import attention_inbox as _attention_inbox
+    except Exception:  # noqa: BLE001
+        _attention_inbox = None
 DONE_STATUSES = status_alias.DONE_STATUSES
+# TASK-AR-538: intake states held OUT of the active board until accepted/deferred.
+TRIAGE_STATUSES = {"triage", "intake"}
 ACTIVE_CLAIM_STATUSES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
 DEFAULT_WIP_LIMIT = 3
 DIFFICULTY_LABEL = {"S": "Low", "M": "Medium", "L": "High", "XL": "Critical", "하": "Low", "중": "Medium", "상": "High"}
@@ -202,12 +219,6 @@ TASK_SET_DEFINITIONS = [
         "Initiative vocabulary, collision-free task registration, shared backlog deconfliction, and unit-readiness migration.",
         98,
     ),
-    TaskSetInfo(
-        "TASKSET-AR-PARALLEL-WAVE-EXECUTION",
-        "Wave Conductor",
-        "Claim-time footprint conflict gate, wave dispatcher with cascade/parallel modes, integrator merge queue, and claim-first enforcement.",
-        99,
-    ),
 ]
 TASK_SET_INFO = {item.task_set_id: item for item in TASK_SET_DEFINITIONS}
 UNCLASSIFIED_TASK_SET = TaskSetInfo(
@@ -217,14 +228,39 @@ UNCLASSIFIED_TASK_SET = TaskSetInfo(
     999,
 )
 
-# Mirror of the root backlog_board registry-sync writer (TASK-AR-329). The UI
-# console emits a proposal under .ui_outbox for taskset create/rename/archive;
-# the runtime executor consumes it and calls sync_taskset_registry so the
-# canonical registry, the generated board, and the state-sync gate stay
-# consistent. The console never writes the registry directly.
-TASK_SET_REGISTRY = Path("agents/project/work-items/TASKSET-DEFINITIONS.json")
-ENCODED_WORK_SCALAR_PREFIX = "\x1eagent-runtime-work-scalar-v1:"
-TASK_SET_REGISTRY_SCHEMA = "agent-runtime-taskset-definitions/v1"
+
+def _load_task_set_registry(root: Path | None = None) -> dict[str, TaskSetInfo]:
+    base = (root or ROOT).resolve()
+    path = base / TASK_SET_REGISTRY
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    if str(payload.get("schema") or "") != TASK_SET_REGISTRY_SCHEMA:
+        return {}
+    loaded: dict[str, TaskSetInfo] = {}
+    for row in payload.get("tasksets", []):
+        if not isinstance(row, dict):
+            continue
+        task_set_id = str(row.get("task_set_id") or "").strip()
+        display_name = str(row.get("display_name") or "").strip()
+        summary = str(row.get("summary") or "").strip()
+        if not task_set_id or not display_name or not summary:
+            continue
+        try:
+            order = int(row.get("order", 500))
+        except (TypeError, ValueError):
+            order = 500
+        loaded[task_set_id] = TaskSetInfo(task_set_id, display_name, summary, order)
+    return loaded
+
+
+def _task_set_info_map(root: Path | None = None) -> dict[str, TaskSetInfo]:
+    merged = dict(TASK_SET_INFO)
+    merged.update(_load_task_set_registry(root))
+    return merged
 
 
 def sync_taskset_registry(
@@ -238,10 +274,16 @@ def sync_taskset_registry(
 ) -> dict[str, object]:
     """Upsert a taskset definition into ``TASKSET-DEFINITIONS.json``.
 
-    Registry auto-sync path for UI ``taskset.create`` / ``taskset.rename`` /
-    ``taskset.archive`` proposals. The console emits a proposal only; the
-    runtime executor calls this so a UI-created taskset shows up in the board
-    without a second source of truth.
+    This is the registry auto-sync path used by the runtime executor when a UI
+    command (``taskset.create`` / ``taskset.rename`` / ``taskset.archive``)
+    proposal is consumed. The console NEVER calls this directly: it only emits a
+    proposal under ``.ui_outbox``. Keeping the writer here (rather than in the
+    console) keeps the canonical registry, the generated board, and the
+    state-sync gate consistent: the same module that renders the board also owns
+    the registry mutation, so a UI-created taskset shows up in the board on the
+    next ``--write`` without a second source of truth.
+
+    Returns a small result dict describing the action taken.
     """
     base = Path(root).resolve()
     path = base / TASK_SET_REGISTRY
@@ -303,46 +345,6 @@ def sync_taskset_registry(
         "archived": bool(archived),
         "registry": TASK_SET_REGISTRY.as_posix(),
     }
-
-
-def _load_task_set_registry(root: Path | None = None) -> dict[str, TaskSetInfo]:
-    """Read UI-created/edited taskset definitions from the registry.
-
-    Mirror of the root reader so a taskset created from the console (via the
-    sync writer above) renders with its registered name/summary on the board
-    instead of falling back to ``Unclassified``.
-    """
-    base = (root or ROOT).resolve()
-    path = base / TASK_SET_REGISTRY
-    if not path.exists():
-        return {}
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}
-    if str(payload.get("schema") or "") != TASK_SET_REGISTRY_SCHEMA:
-        return {}
-    loaded: dict[str, TaskSetInfo] = {}
-    for row in payload.get("tasksets", []):
-        if not isinstance(row, dict):
-            continue
-        task_set_id = str(row.get("task_set_id") or "").strip()
-        display_name = str(row.get("display_name") or "").strip()
-        summary = str(row.get("summary") or "").strip()
-        if not task_set_id or not display_name or not summary:
-            continue
-        try:
-            order = int(row.get("order", 500))
-        except (TypeError, ValueError):
-            order = 500
-        loaded[task_set_id] = TaskSetInfo(task_set_id, display_name, summary, order)
-    return loaded
-
-
-def _task_set_info_map(root: Path | None = None) -> dict[str, TaskSetInfo]:
-    merged = dict(TASK_SET_INFO)
-    merged.update(_load_task_set_registry(root))
-    return merged
 
 
 @dataclass
@@ -506,6 +508,131 @@ def strip_comment(line: str) -> str:
             scalar_expected = False
         index += 1
     return line
+
+
+def _is_delimited_frontmatter_scalar(value: str) -> bool:
+    value = value.strip()
+    if len(value) < 2:
+        return False
+    if value[0] in {'"', "'"}:
+        quote = value[0]
+        escaped = False
+        index = 1
+        while index < len(value):
+            char = value[index]
+            if quote == '"':
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == quote:
+                    return index == len(value) - 1
+            elif char == quote:
+                if index + 1 < len(value) and value[index + 1] == quote:
+                    index += 2
+                    continue
+                return index == len(value) - 1
+            index += 1
+        return False
+    if value[0] not in "[{":
+        return False
+
+    flow_stack: list[str] = []
+    quote: str | None = None
+    escaped = False
+    index = 0
+    while index < len(value):
+        char = value[index]
+        if quote == '"':
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = None
+            index += 1
+            continue
+        if quote == "'":
+            if char == quote and index + 1 < len(value) and value[index + 1] == quote:
+                index += 2
+                continue
+            if char == quote:
+                quote = None
+            index += 1
+            continue
+        if char in {'"', "'"}:
+            quote = char
+        elif char in "[{":
+            flow_stack.append("]" if char == "[" else "}")
+        elif char in "]}":
+            if not flow_stack or flow_stack.pop() != char:
+                return False
+            if not flow_stack and index != len(value) - 1:
+                return False
+        index += 1
+    return not flow_stack and quote is None
+
+
+def unsafe_legacy_frontmatter_scalars(text: str) -> list[tuple[int, str]]:
+    """Return line/key pairs whose plain scalar is truncated by ``#`` parsing.
+
+    Quoted and complete flow-style values may have a genuine trailing YAML
+    comment without losing scalar data. Plain values cannot distinguish an
+    intended comment from discarded data, so lifecycle rewrites must fail
+    closed until a reviewed migration quotes or re-encodes the value.
+    """
+
+    lines = text.splitlines()
+    if not lines:
+        return []
+
+    if lines[0].strip() == "---":
+        start = 1
+    elif re.match(r"^[A-Za-z0-9_-]+:\s*", lines[0]):
+        start = 0
+    else:
+        return []
+
+    end = len(lines)
+    for index, line in enumerate(lines[start:], start=start):
+        stripped = line.strip()
+        if (start == 1 and stripped == "---") or stripped.startswith("## "):
+            end = index
+            break
+        if start == 0 and stripped == "---":
+            end = index
+            break
+
+    findings: list[tuple[int, str]] = []
+    current_list: str | None = None
+    for index in range(start, end):
+        raw = lines[index]
+        uncommented = strip_comment(raw).rstrip()
+        if not uncommented.strip():
+            continue
+        has_unquoted_hash = uncommented != raw.rstrip()
+
+        if re.match(r"^\s+-(?:\s+.*)?$", uncommented) and current_list:
+            item = uncommented.lstrip()[1:].strip()
+            if has_unquoted_hash and not _is_delimited_frontmatter_scalar(item):
+                findings.append((index + 1, current_list))
+            continue
+
+        match = re.match(r"^([A-Za-z0-9_-]+):\s*(.*)$", uncommented)
+        if not match:
+            continue
+        key, value = match.group(1), match.group(2).strip()
+        if not value:
+            if has_unquoted_hash:
+                findings.append((index + 1, key))
+                current_list = None
+            else:
+                current_list = key
+            continue
+        if has_unquoted_hash and not _is_delimited_frontmatter_scalar(value):
+            findings.append((index + 1, key))
+        current_list = None
+    return findings
 
 
 def decode_encoded_work_scalar(value: str) -> str | None:
@@ -694,6 +821,10 @@ def is_done(task: Task) -> bool:
     return task.status.lower() in DONE_STATUSES
 
 
+def is_triage(task: Task) -> bool:
+    return task.status.lower() in TRIAGE_STATUSES
+
+
 def value_for(task: Task) -> str:
     score = score_for(task)
     if score >= 14:
@@ -789,6 +920,21 @@ def _parse_dt(value: object) -> datetime | None:
     return parsed
 
 
+def weekly_throughput(tasks: list[Task], *, window_days: int = 7) -> int:
+    """TASK-AR-627: count tasks completed within the last window_days.
+
+    A single glanceable flow number for the board Rollups; reuses each task's
+    completed_at. Records without a parseable completed_at are ignored.
+    """
+    cutoff = datetime.now(timezone.utc) - timedelta(days=window_days)
+    count = 0
+    for task in tasks:
+        completed = _parse_dt(task.completed_at)
+        if completed and completed >= cutoff:
+            count += 1
+    return count
+
+
 def flow_by_task_set(root: Path | None) -> dict[str, dict[str, object]]:
     if root is None:
         return {}
@@ -825,8 +971,12 @@ def lane_counts(tasks: Iterable[Task]) -> dict[str, int]:
 
 
 def render(tasks: list[Task], *, root: Path | None = None) -> str:
-    today = date.today().isoformat()
-    open_tasks = [t for t in tasks if not is_done(t)]
+    # TASK-AR-623: ISO second precision (not date-only) so the decision board's
+    # own freshness is legible; taskset_work_gate masks this wall-clock field
+    # before its drift comparison, so second-level churn does not fail the gate.
+    today = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
+    open_tasks = [t for t in tasks if not is_done(t) and not is_triage(t)]
+    triage_tasks = [t for t in tasks if is_triage(t)]
     completed_tasks = [t for t in tasks if is_done(t)]
     counts = lane_counts(tasks)
     task_set_ids = task_sets_for(open_tasks, root)
@@ -897,16 +1047,17 @@ def render(tasks: list[Task], *, root: Path | None = None) -> str:
             f"- Flow: {set_info.summary}",
             f"- Progress: `{len(set_completed)}/{len(total_set_tasks)}` done; `{len(set_tasks)}` open or active.",
             f"- WIP: active `{set_flow['active']}/{set_flow['wip_limit']}`; oldest `{float(set_flow['oldest_age_hours']):.1f}h`; stale `{set_flow['stale']}`.",
-            "| Task | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |",
-            "|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|",
+            "| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |",
+            "|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|",
         ])
         if not set_tasks:
-            lines.append("| - | - | - | - | - | - | - | - | - | - | - | - | - |")
+            lines.append("| - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - |")
             continue
         for task in set_tasks:
             cost = f"{task.est_hours:g}h/{task.est_tokens}tok"
             row = [
                 f"`{task.task_id}`",
+                task.initiative_id,
                 task.project_id,
                 task.unit_spec or "-",
                 task.status,
@@ -950,33 +1101,66 @@ def render(tasks: list[Task], *, root: Path | None = None) -> str:
                 + " |"
             )
 
-    if completed_tasks:
+    if triage_tasks:
         lines.extend([
             "",
-            "## Archived Task Files",
+            "## Triage",
             "",
-            "- Restore rule: completed tasks stay hidden from the live Action Board, but every completed task file remains visible here with identity and lifecycle metadata.",
-            "| Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |",
-            "|---|---|---|---|---|---|---|---|---|",
+            "- Intake inbox (TASK-AR-538): items awaiting an accept (-> planned/backlog) or defer (-> someday) decision. Held OUT of the Active board until accepted; host feedback enters here (TASK-AR-526).",
+            "| Task | Task Set | P | Status | Summary |",
+            "|---|---|---:|---|---|",
         ])
-        for task in sorted(completed_tasks, key=task_set_sort_key):
+        for task in sorted(triage_tasks, key=lambda task: task_set_sort_key(task, root)):
             lines.append(
                 "| "
                 + " | ".join(
                     [
                         f"`{task.display_id}`",
-                        f"`{shorten(task.task_uid, 13)}`" if task.task_uid else "-",
                         f"`{task.task_set_id}`",
+                        task.priority,
                         task.status,
-                        task.registered_at or "-",
-                        task.started_at or "-",
-                        task.completed_at or "-",
-                        task.updated_at or "-",
                         task.goal.replace("|", "/"),
                     ]
                 )
                 + " |"
             )
+
+    # TASK-AR-630: with a root, the headline "Needs attention" number is the SAME
+    # canonical inbox the console cockpit renders (single source of truth); the
+    # legacy triage+Ask heuristic remains only as the rootless/degraded fallback.
+    attention_line = ""
+    if root is not None and _attention_inbox is not None:
+        try:
+            canonical = _attention_inbox.inbox(Path(root))
+            breakdown = ", ".join(
+                f"{group} `{count}`"
+                for group, count in canonical["counts"].items()
+                if count
+            ) or "all clear"
+            attention_line = (
+                f"- Needs attention: `{canonical['total']}` — {breakdown} "
+                "(single source: scripts/attention_inbox.py = console cockpit, TASK-AR-630)."
+            )
+        except Exception:  # noqa: BLE001 - board must render even if inbox breaks
+            attention_line = ""
+    needs_attention = len(triage_tasks) + counts.get("Ask", 0)
+    if not attention_line:
+        attention_line = (
+            f"- Needs attention: `{needs_attention}` — triage awaiting `{len(triage_tasks)}`, "
+            f"owner-decision (Ask) `{counts.get('Ask', 0)}` (TASK-AR-538)."
+        )
+    lines.extend([
+        "",
+        "## Rollups",
+        "- Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).",
+        attention_line,
+        f"- Owner lanes: triage awaiting `{len(triage_tasks)}`, owner-decision (Ask) `{counts.get('Ask', 0)}` (TASK-AR-538).",
+        f"- Triage: `{len(triage_tasks)}` awaiting accept/defer{' (see Triage above)' if triage_tasks else ''}.",
+        f"- Active: `{len(open_tasks)}` open across `{len(task_set_ids)}` task sets (see Action Board above).",
+        f"- Throughput (7d): `{weekly_throughput(tasks)}` tasks completed in the last 7 days (TASK-AR-627).",
+        f"- Archived task sets: `{len(completed_task_set_ids)}` (see Archived Task Sets above).",
+        f"- Archived task files: `{len(completed_tasks)}` — see `ARCHIVE-INDEX.md`.",
+    ])
 
     lines.extend([
         "",
@@ -1000,6 +1184,57 @@ def render(tasks: list[Task], *, root: Path | None = None) -> str:
     return "\n".join(lines)
 
 
+def render_archive_index(tasks: list[Task], *, root: Path | None = None) -> str:
+    """Render the per-file archive detail extracted from the live board (TASK-AR-533).
+
+    The board used to inline every completed task file (~69% of its length). That
+    turned an attention surface into a data dump. The board now shows a rollup
+    count + pointer; the full identity/lifecycle detail lives here so nothing is
+    lost and completed work stays queryable.
+    """
+    today = date.today().isoformat()
+    completed_tasks = [task for task in tasks if is_done(task)]
+    lines: list[str] = [
+        "---",
+        "type: archive_index",
+        "id: ARCHIVE-INDEX-agent-runtime",
+        "audience: owner",
+        f"generated_at: {today}",
+        f"archived_count: {len(completed_tasks)}",
+        "---",
+        "",
+        "# Archived Task Files",
+        "",
+        f"- `{len(completed_tasks)}` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.",
+        "- Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.",
+        "",
+        "| Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |",
+        "|---|---|---|---|---|---|---|---|---|",
+    ]
+    if not completed_tasks:
+        lines.append("| - | - | - | - | - | - | - | - | - |")
+    for task in sorted(completed_tasks, key=lambda task: task_set_sort_key(task, root)):
+        lines.append(
+            "| "
+            + " | ".join(
+                [
+                    f"`{task.display_id}`",
+                    f"`{shorten(task.task_uid, 13)}`" if task.task_uid else "-",
+                    f"`{task.task_set_id}`",
+                    task.status,
+                    task.registered_at or "-",
+                    task.started_at or "-",
+                    task.completed_at or "-",
+                    task.updated_at or "-",
+                    task.goal.replace("|", "/"),
+                ]
+            )
+            + " |"
+        )
+    lines.append("")
+    return "\n".join(lines)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Generate Owner-facing backlog decision board")
     parser.add_argument("--tasks-dir", default=str(TASKS_DIR))
@@ -1009,11 +1244,14 @@ def main() -> int:
 
     tasks = load_tasks(Path(args.tasks_dir))
     text = render(tasks, root=ROOT)
+    archive_text = render_archive_index(tasks, root=ROOT)
     if args.write:
         output = Path(args.output)
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(text, encoding="utf-8")
+        ARCHIVE_INDEX_OUTPUT.write_text(archive_text, encoding="utf-8")
         print(f"wrote={output}")
+        print(f"wrote={ARCHIVE_INDEX_OUTPUT}")
         print(f"tasks={len(tasks)}")
     else:
         print(text)
