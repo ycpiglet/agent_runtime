@@ -9,7 +9,7 @@
   "callsite_id": "codex:subagent:w3-task-ar-643-001",
   "pane_id": "codex:subagent:w3-task-ar-643-001",
   "mode": "implementation",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "active_scope": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "scope_transition_approved": true,
@@ -19,20 +19,20 @@
   "model_tier": "worker_standard",
   "wip_slot": 0,
   "stop_condition": "Stop if closure would require shipping a product-specific role or path in core; do not mutate consumer repositories, release, tag, publish, or enter TASK-AR-644+.",
-  "phase": "waiting_review",
-  "progress_pct": 90,
-  "step_index": 4,
+  "phase": "verified",
+  "progress_pct": 95,
+  "step_index": 5,
   "step_total": 6,
-  "status_text": "Worker verification complete; independent adversarial verification pending.",
+  "status_text": "Implementation and independent W4b are complete; claim released for implementation PR integration.",
   "worktree_path": "/home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-643",
   "branch": "codex/unit-task-ar-643-001-wave",
   "claimed_at": "2026-07-28T23:42:28+09:00",
-  "last_heartbeat": "2026-07-29T00:19:23+09:00",
-  "updated_at": "2026-07-29T00:19:23+09:00",
+  "last_heartbeat": "2026-07-29T00:35:29+09:00",
+  "updated_at": "2026-07-29T00:35:29+09:00",
   "expires_at": "2026-07-29T01:19:23+09:00",
   "lease": {
     "claimed_at": "2026-07-28T23:42:28+09:00",
-    "heartbeat_at": "2026-07-29T00:19:23+09:00",
+    "heartbeat_at": "2026-07-29T00:35:29+09:00",
     "expires_at": "2026-07-29T01:19:23+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260728-234228-task-ar-643-643001.handoff.md",
@@ -70,5 +70,9 @@
     "agents/runtime/task_claims/CLAIM-20260728-234228-task-ar-643-643001.log.md",
     "reviews/W4B-2026-07-29-unit-task-ar-643-001-approved.md",
     "reviews/INDEX.md"
-  ]
+  ],
+  "released_at": "2026-07-29T00:35:29+09:00",
+  "verified_by": "/root/w4b_task_ar_640_001",
+  "verifier_role": "independent-verifier",
+  "verification_evidence": "reviews/W4B-2026-07-29-unit-task-ar-643-001-approved.md"
 }

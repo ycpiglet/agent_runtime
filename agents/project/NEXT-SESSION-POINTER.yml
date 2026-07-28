@@ -1,25 +1,18 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-28T23:42:28+09:00
+updated_at: 2026-07-29T00:35:55+09:00
 updated_by: le-20260728-234228-kst-643001
 current_state:
-  summary: "UNIT-TASK-AR-643-001 is implementing one profile manifest, consumer dependency closure, and clean-host lifecycle smoke."
+  summary: "UNIT-TASK-AR-643-001 implementation and independent verification are complete; implementation PR integration is pending."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 2
+  step_index: 5
   step_total: 6
-  progress_pct: 5
-  status_text: "W0/T3 assumptions are pinned; TASK-AR-643 implementation is isolated in its claimed worktree."
+  progress_pct: 95
+  status_text: "W4b approved at 96/100; worker and additive review claims are released, and the implementation branch is ready for PR CI and merge."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260728-234228-task-ar-643-643001
-      agent_role: lead-engineer
-      agent_instance_id: le-20260728-234228-kst-643001
-      display_name: lead_engineer@unit-643-001-terra
-      callsite_id: codex:subagent:w3-task-ar-643-001
-      pane_id: codex:subagent:w3-task-ar-643-001
-  current_teams:
-    - agent-runtime-core
+  current_agents: []
+  current_teams: []
 resume:
   active_task: TASK-AR-643
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
@@ -30,8 +23,7 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260728-234228-task-ar-643-643001.json
+  active_claims: []
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT

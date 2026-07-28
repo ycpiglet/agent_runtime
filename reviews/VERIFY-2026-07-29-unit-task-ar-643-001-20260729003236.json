@@ -1,0 +1,52 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-29-unit-task-ar-643-001-20260729003236",
+  "work_id": "UNIT-TASK-AR-643-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-643/UNIT-TASK-AR-643-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-643",
+  "unit_id": "UNIT-TASK-AR-643-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-29T00:32:36+09:00",
+  "verified_by": "codex-root-v080-integrator",
+  "command_count": 4,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_runtime_asset_usage.py tests/test_template_smoke.py tests/test_wheel_dotfiles_packaging.py tests/test_adoption.py tests/test_inventory_sync_sanitize.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-29T00:32:36+09:00",
+      "finished_at": "2026-07-29T00:32:51+09:00",
+      "stdout": "........................................................................ [ 50%]\n........................................................................ [100%]\n144 passed in 14.60s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/runtime_asset_usage.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-29T00:32:51+09:00",
+      "finished_at": "2026-07-29T00:32:51+09:00",
+      "stdout": "selected_files\": 240}, \"core+security-service\": {\"dependency_edges\": 46, \"selected_files\": 242}, \"core+web-content\": {\"dependency_edges\": 46, \"selected_files\": 240}, \"full-runtime\": {\"dependency_edges\": 46, \"selected_files\": 242}}\n- metric gate.owner_governance kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=6 reuse=2\n- metric gate.collaboration_governance kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=12 reuse=2\n- metric gate.runtime_asset_usage kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=7 reuse=2\n- metric gate.state_sync kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=2\n- metric report.governance_ops kind=script status=active lifecycle=keep paths=1 evidence=3 usage=7 reuse=2\n- metric hook.taskset_prompt kind=hook status=active lifecycle=keep paths=2 evidence=3 usage=7 reuse=2\n- metric hook.stop_owner_governance kind=hook status=active lifecycle=keep paths=2 evidence=2 usage=15 reuse=2\n- metric trigger.planning kind=trigger status=watch lifecycle=observe paths=1 evidence=2 usage=9 reuse=2\n- metric capability.ralph_loop kind=script status=active lifecycle=keep paths=1 evidence=2 usage=2 reuse=2\n- metric capability.agent_retro kind=script status=active lifecycle=keep paths=1 evidence=2 usage=11 reuse=2\n- metric capability.retro_forward kind=script status=active lifecycle=keep paths=1 evidence=2 usage=7 reuse=2\n- metric capability.scribe_due kind=script status=active lifecycle=keep paths=1 evidence=2 usage=11 reuse=2\n- metric capability.doc_steward_due kind=script status=active lifecycle=keep paths=1 evidence=2 usage=5 reuse=2\n- metric skill.taskset_dispatch kind=skill status=active lifecycle=keep paths=1 evidence=2 usage=4 reuse=2\n- metric gate.footprint_conflict kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric gate.worktree_lifecycle kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=10 reuse=2\n- metric gate.attribution kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=7 reuse=2\n- metric gate.verification_freshness kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=6 reuse=2\n- metric gate.release_cadence kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=11 reuse=2\n- metric gate.conversation_work_audit kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric gate.work_schema kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=8 reuse=2\n- metric capability.wave_dispatcher kind=script status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric capability.merge_queue kind=script status=active lifecycle=keep paths=1 evidence=3 usage=11 reuse=2\n- metric capability.scm_steward kind=script status=active lifecycle=keep paths=1 evidence=2 usage=12 reuse=2\n- metric capability.inflight_overlay kind=script status=active lifecycle=keep paths=1 evidence=3 usage=10 reuse=2\n- metric capability.work kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.update_notify kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.session_dashboard kind=script status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=1\n- metric hook.session_dashboard kind=hook status=active lifecycle=keep paths=2 evidence=2 usage=9 reuse=2\n- metric skill.wave_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=7 reuse=2\n- metric skill.merge_integrator kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=15 reuse=2\n- metric skill.independent_verification kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=11 reuse=2\n- metric skill.work_analytics kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=14 reuse=2\n- metric skill.release_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=5 reuse=2\n- metric skill.scm_steward kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=19 reuse=2\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/verify_wheel_dotfiles.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-29T00:32:51+09:00",
+      "finished_at": "2026-07-29T00:32:54+09:00",
+      "stdout": "verify-wheel-dotfiles: template dot-file entries in wheel: 6\n  agent_runtime/templates/project/.codex/hooks.json\n  agent_runtime/templates/project/.env.example\n  agent_runtime/templates/project/.gitattributes\n  agent_runtime/templates/project/.githooks/post-merge\n  agent_runtime/templates/project/.githooks/pre-commit\n  agent_runtime/templates/project/.github/workflows/owner-doc-format.yml\nverify-wheel-dotfiles: pass\nfindings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-29T00:32:54+09:00",
+      "finished_at": "2026-07-29T00:34:46+09:00",
+      "stdout": "........................................................................ [  3%]\n........................................................................ [  6%]\n........................................................................ [  9%]\n........................................................................ [ 12%]\n........................................................................ [ 15%]\n........................................................................ [ 18%]\n........................................................................ [ 21%]\n........................................................................ [ 24%]\n........................................................................ [ 27%]\n........................................................................ [ 30%]\n........................................................................ [ 33%]\n........................................................................ [ 36%]\n........................................................................ [ 40%]\n........................................................................ [ 43%]\n........................................................................ [ 46%]\n........................................................................ [ 49%]\n........................................................................ [ 52%]\n........................................................................ [ 55%]\n........................................................................ [ 58%]\n........................................................................ [ 61%]\n........................................................................ [ 64%]\n........................................................................ [ 67%]\n........................................................................ [ 70%]\n........................................................................ [ 73%]\n........................................................................ [ 77%]\n..................................................................ss.... [ 80%]\n........................................................................ [ 83%]\n........................................................................ [ 86%]\n........................................................................ [ 89%]\n........................................................................ [ 92%]\n........................................................................ [ 95%]\n........................................................................ [ 98%]\n.s..............................                                         [100%]\n=============================== warnings summary ===============================\ntests/test_ui_console_beta_exploration.py::test_http_get_route_sweep_never_5xx\ntests/test_ui_console_beta_exploration.py::test_http_get_route_sweep_never_5xx\ntests/test_ui_console_beta_exploration.py::test_http_get_route_sweep_never_5xx\ntests/test_ui_console_beta_exploration.py::test_http_get_route_sweep_never_5xx\n  <unknown>:8274: DeprecationWarning: invalid escape sequence '\\/'\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2333 passed, 3 skipped, 4 warnings in 111.65s (0:01:51)\n",
+      "stderr": ""
+    }
+  ]
+}

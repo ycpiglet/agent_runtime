@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T23:42:28+09:00
+updated_at: 2026-07-29T00:32:36+09:00
 started_at: 2026-07-28T23:42:28+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -63,6 +63,10 @@ handoff: Report selected-file and dependency counts per profile, the eight basel
 stop_condition: Stop if closure would require shipping a product-specific role or path in core.
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260728-234228-task-ar-643-643001.json
+verified_at: 2026-07-29T00:32:36+09:00
+verified_by: codex-root-v080-integrator
+evidence_refs:
+  - reviews/VERIFY-2026-07-29-unit-task-ar-643-001-20260729003236.json
 ---
 
 # UNIT-TASK-AR-643-001 - Add profile-aware asset dependency closure and clean-host lifecycle smoke
