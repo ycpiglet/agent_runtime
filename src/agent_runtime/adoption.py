@@ -33,6 +33,7 @@ class AdoptionPlan:
     assets: tuple[str, ...]
     actions: tuple[AdoptionAction, ...]
     findings: tuple[str, ...]
+    config_invalid: bool = False
 
     @property
     def conflicts(self) -> tuple[AdoptionAction, ...]:
@@ -75,9 +76,9 @@ def _detected_assets(paths: tuple[str, ...]) -> tuple[str, ...]:
 def _ownership(config: _config.AgentRuntimeConfig | None, path: str) -> str:
     if config:
         for mode, paths in config.ownership:
-            if path in paths:
+            if any(path == candidate or path.startswith(candidate.rstrip("/") + "/") for candidate in paths):
                 return mode
-    if path in {"AGENTS.md", "CLAUDE.md", "agents/project/NEXT-SESSION-POINTER.yml"}:
+    if path in {"AGENTS.md", "CLAUDE.md", "CURSOR.md", "GEMINI.md", "agents/project/NEXT-SESSION-POINTER.yml"}:
         return "seed_once"
     return "managed"
 
@@ -86,6 +87,7 @@ def build_adoption_plan(root: Path) -> AdoptionPlan:
     root = root.resolve()
     scan = adoption_scan(root)
     findings = list(scan.warnings)
+    config_invalid = False
     try:
         config = _config.load_config(root)
     except FileNotFoundError:
@@ -95,13 +97,24 @@ def build_adoption_plan(root: Path) -> AdoptionPlan:
         config = None
         profiles, capabilities = ("core",), _config.PROFILE_CAPABILITIES["core"]
         findings.append(f"config unavailable for adoption projection: {exc}")
+        config_invalid = True
     else:
         profiles, capabilities = config.profiles, config.capabilities
 
     actions: list[AdoptionAction] = []
+    for rel in scan.paths:
+        target = root / rel
+        if target.is_symlink():
+            try:
+                target.resolve().relative_to(root)
+            except ValueError:
+                findings.append(f"external symlink cannot be adopted: {rel}")
     for rel, template in _template_files().items():
         ownership = _ownership(config, rel)
         target = root / rel
+        if ownership == "generated":
+            actions.append(AdoptionAction(rel, "skip", "generated", "generated lifecycle is producer-owned"))
+            continue
         if target.is_symlink():
             try:
                 target.resolve().relative_to(root)
@@ -117,13 +130,11 @@ def build_adoption_plan(root: Path) -> AdoptionPlan:
                 actions.append(AdoptionAction(rel, "conflict", ownership, "existing managed path differs from packaged template"))
         else:
             actions.append(AdoptionAction(rel, "add", ownership, "missing packaged template file; plan only"))
-    for path in scan.generated_paths:
-        actions.append(AdoptionAction(path, "skip", "generated", "known generated/dependency/build path"))
     return AdoptionPlan(
         root=root, profiles=tuple(profiles), capabilities=tuple(capabilities), scan_strategy=scan.strategy,
         scan_warnings=tuple(sorted(scan.warnings)), source_paths=scan.paths, generated_paths=scan.generated_paths,
         assets=_detected_assets(scan.paths), actions=tuple(sorted(actions, key=lambda action: (action.path, action.action, action.ownership))),
-        findings=tuple(sorted(findings)),
+        findings=tuple(sorted(findings)), config_invalid=config_invalid,
     )
 
 
@@ -131,9 +142,9 @@ def plan_json(plan: AdoptionPlan) -> str:
     payload = {
         "schema": "agent-runtime-adoption-plan/v1", "root": str(plan.root), "profiles": list(plan.profiles),
         "capabilities": list(plan.capabilities),
-        "inventory": {"source_count": len(plan.source_paths), "generated_count": len(plan.generated_paths), "scan_strategy": plan.scan_strategy, "warnings": list(plan.scan_warnings)},
+        "inventory": {"included_count": len(plan.source_paths), "ignored_count": getattr(adoption_scan(plan.root), "ignored_count", 0), "generated_count": len(plan.generated_paths), "generated_roots": sorted({path.split("/")[0] for path in plan.generated_paths}), "scan_strategy": plan.scan_strategy, "warnings": list(plan.scan_warnings)},
         "assets": list(plan.assets), "actions": [action.as_dict() for action in plan.actions], "findings": list(plan.findings),
-        "readiness": {"conflicts": len(plan.conflicts), "ready": not plan.conflicts},
+        "readiness": {"conflicts": len(plan.conflicts), "ready": not plan.conflicts and not plan.config_invalid and not any("external symlink" in item for item in plan.findings)},
     }
     return json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2)
 

@@ -29,6 +29,7 @@ class AdoptionScan:
     generated_paths: tuple[str, ...]
     strategy: str
     warnings: tuple[str, ...] = ()
+    ignored_count: int = 0
 
 LOCAL_PREFIXES = (
     ".agents/",
@@ -293,10 +294,12 @@ def adoption_scan(root: Path) -> AdoptionScan:
         if result.returncode != 0:
             raise RuntimeError(result.stderr.decode("utf-8", "replace").strip() or f"git rc={result.returncode}")
         candidates = [entry.decode("utf-8", "surrogateescape") for entry in result.stdout.split(b"\0") if entry]
+        ignored = subprocess.run(["git", "-C", str(root), "ls-files", "-oi", "--exclude-standard", "-z"], check=False, capture_output=True, text=False, timeout=10)
+        ignored_count = len([entry for entry in ignored.stdout.split(b"\0") if entry]) if ignored.returncode == 0 else 0
         strategy, warnings = "git-ignore-aware", ()
     except Exception as exc:
         candidates = [path.relative_to(root).as_posix() for path in iter_repo_paths(root)]
-        strategy, warnings = "filesystem-conservative", (f"git ignore query unavailable; conservative fallback: {exc}",)
+        strategy, warnings, ignored_count = "filesystem-conservative", (f"git ignore query unavailable; conservative fallback: {exc}",), 0
     all_generated = {
         path.relative_to(root).as_posix()
         for path in root.rglob("*")
@@ -312,13 +315,12 @@ def adoption_scan(root: Path) -> AdoptionScan:
             generated.append(rel)
         else:
             visible.append(rel)
-    return AdoptionScan(tuple(visible), tuple(sorted(set(generated) | all_generated)), strategy, warnings)
+    return AdoptionScan(tuple(visible), tuple(sorted(set(generated) | all_generated)), strategy, warnings, ignored_count)
 
 
 def analyze(root: Path) -> list[InventoryItem]:
     items: list[InventoryItem] = []
-    for path in iter_repo_paths(root):
-        rel = path.relative_to(root).as_posix()
+    for rel in adoption_scan(root).paths:
         classification, reason = classify_path(rel)
         items.append(InventoryItem(rel, classification, reason))
     return items

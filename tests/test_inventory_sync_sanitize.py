@@ -65,6 +65,19 @@ def _write(path: Path, text: str = ""):
     path.write_text(text, encoding="utf-8")
 
 
+def test_public_inventory_uses_git_ignore_and_generated_boundary(tmp_path):
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    _write(tmp_path / ".gitignore", "ignored/\n.next/\n")
+    _write(tmp_path / "ignored" / "private.md")
+    _write(tmp_path / ".next" / "cache" / "x")
+    _write(tmp_path / "space name.md")
+    from agent_runtime.inventory import analyze
+    paths = {item.path for item in analyze(tmp_path)}
+    assert "space name.md" in paths
+    assert "ignored/private.md" not in paths
+    assert ".next/cache/x" not in paths
+
+
 def _digest(text: str) -> str:
     canonical = text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
     return f"sha256:{hashlib.sha256(canonical).hexdigest()}"

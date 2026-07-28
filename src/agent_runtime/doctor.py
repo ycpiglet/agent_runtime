@@ -703,7 +703,9 @@ def build_pre_adoption_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]
     for asset in plan.assets:
         _findings_append(findings, "info", area="adoption-assets", path=asset, kind="host-asset-detected", detail="source-visible host asset preserved by adoption planning")
     for action in plan.conflicts:
-        _findings_append(findings, "blocker", area="adoption", path=action.path, kind="adoption-conflict", detail=action.reason)
+            _findings_append(findings, "blocker", area="adoption", path=action.path, kind="adoption-conflict", detail=action.reason)
+    if plan.config_invalid:
+        _findings_append(findings, "blocker", area="adoption", path="agent_runtime.yml", kind="config-invalid", detail="present config is malformed for adoption planning")
     for finding in plan.findings:
         if finding.startswith("external symlink"):
             _findings_append(findings, "blocker", area="adoption", path=".", kind="unsafe-symlink", detail=finding)
@@ -845,6 +847,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--check", action="store_true", help="Fail if blockers exist")
     parser.add_argument("--repair", action="store_true", help="Attempt safe auto-repair actions")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable doctor report")
+    parser.add_argument("--pre-adoption", action="store_true", help="Run read-only brownfield adoption readiness checks")
     return parser
 
 

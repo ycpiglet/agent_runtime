@@ -103,3 +103,25 @@ def test_adopt_requires_plan(tmp_path):
         assert "requires --plan" in str(exc)
     else:
         raise AssertionError("adopt without --plan must fail")
+
+
+def test_generated_is_compact_external_symlink_and_bad_config_block(tmp_path, capsys):
+    root = tmp_path / "host"
+    root.mkdir()
+    _git(root)
+    _write(root, ".gitignore", "node_modules/\n")
+    _write(root, "node_modules/a.js")
+    _write(root, "agent_runtime.yml", "schema: agent-runtime-config/v2\nproject:\n  bad: value\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\n")
+    outside = tmp_path / "outside"
+    outside.write_text("x", encoding="utf-8")
+    (root / "src-link").symlink_to(outside)
+    plan = build_adoption_plan(root)
+    assert len(plan.actions) == len({action.path for action in plan.actions})
+    assert "node_modules/a.js" not in {action.path for action in plan.actions}
+    assert plan.config_invalid and any("external symlink" in finding for finding in plan.findings)
+    payload = json.loads(plan_json(plan))
+    assert payload["inventory"]["ignored_count"] >= 1
+    assert payload["readiness"]["ready"] is False
+    assert cli.main(["doctor", "--root", str(root), "--pre-adoption", "--check"]) == 1
+    capsys.readouterr()
+    assert doctor.main(["--root", str(root), "--pre-adoption", "--check"]) == 1
