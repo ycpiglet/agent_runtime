@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T04:24:46+09:00
-record_count: 971
+generated_at: 2026-07-29T04:31:41+09:00
+record_count: 972
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `971` review and evidence records under `reviews/`.
+- Summary: indexed `972` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `971` files |
+| Reviews covered | pass | `972` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1002,6 +1002,7 @@ record_count: 971
 | `reviews/W4B-2026-07-29-unit-task-ar-643-001-approved.md` | `W4B-2026-07-29-unit-task-ar-643-001-approved` | md | approved | pass | TASK-AR-643 UNIT-001 Independent W4b Approval |
 | `reviews/W4B-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4B-2026-07-29-unit-task-ar-644-001-ci-followup` | md | approved | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4b |
 | `reviews/W4B-2026-07-29-unit-task-ar-644-001.md` | `W4B-2026-07-29-unit-task-ar-644-001` | md | approved | pass | TASK-AR-644 UNIT-001 Independent W4b Verification |
+| `reviews/W4B-2026-07-29-unit-task-ar-645-001.md` | `W4B-2026-07-29-unit-task-ar-645-001` | md | approved | pass | TASK-AR-645 UNIT-001 Independent W4b Verification |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |
