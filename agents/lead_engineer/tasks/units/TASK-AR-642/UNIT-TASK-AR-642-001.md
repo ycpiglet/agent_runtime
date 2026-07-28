@@ -13,7 +13,7 @@ status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T22:14:34+09:00
+updated_at: 2026-07-28T22:36:47+09:00
 started_at: 2026-07-28T22:14:34+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -39,6 +39,7 @@ target_files:
   - src/agent_runtime/config.py
   - tests/test_inventory_sync_sanitize.py
   - tests/test_template_smoke.py
+  - tests/fixtures/host/agent_runtime.lock.json
 scope: Classify the current packaged template by effective ownership, add deterministic read-only reconcile text/JSON, add opt-in safe-only application, write/read lock v2 with seed completion, and keep exact-ref host update authoritative. Do not auto-merge host edits.
 acceptance:
   - No host-owned or generated file enters an apply set.
@@ -50,6 +51,7 @@ acceptance:
   - No silent overwrite path is introduced.
 verification:
   - python -m pytest tests/test_inventory_sync_sanitize.py tests/test_template_smoke.py -q
+  - python -m pytest -q
 handoff: Provide transition-matrix evidence, an Autofolio-shaped v1 migration fixture, deterministic reconcile/lock output, mixed safe/conflict apply evidence, and pinned-source host-update evidence.
 stop_condition: Stop before automatic three-way merges, profile-specific file manifests, dependency closure, pilot mutation, claim-lifecycle fixes, or UI work.
 claim_refs:
@@ -83,6 +85,7 @@ Consumer repositories remain read-only.
 - src/agent_runtime/config.py
 - tests/test_inventory_sync_sanitize.py
 - tests/test_template_smoke.py
+- tests/fixtures/host/agent_runtime.lock.json
 
 ## Scope
 
@@ -121,6 +124,7 @@ authoritative. Do not auto-merge host edits.
 ## Verification
 
 - `python -m pytest tests/test_inventory_sync_sanitize.py tests/test_template_smoke.py -q`
+- `python -m pytest -q`
 
 ## Handoff
 
