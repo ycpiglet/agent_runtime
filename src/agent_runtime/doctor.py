@@ -180,6 +180,36 @@ def _run_subcommand(root: Path, script_name: str, args: tuple[str, ...], timeout
     return process.returncode, (process.stdout or "") + (process.stderr or "")
 
 
+def _check_codex_hooks(root: Path, findings: list[DoctorFinding]) -> None:
+    path = root / ".codex" / "hooks.json"
+    if not path.exists():
+        _findings_append(findings, "blocker", area="codex-hooks", path=".codex/hooks.json", kind="missing-hooks", detail="tracked Codex lifecycle hook configuration missing")
+        return
+    try: data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        _findings_append(findings, "blocker", area="codex-hooks", path=".codex/hooks.json", kind="malformed-hooks", detail=str(exc)); return
+    hooks = data.get("hooks") if isinstance(data, dict) else None
+    if not isinstance(hooks, dict):
+        _findings_append(findings, "blocker", area="codex-hooks", path=".codex/hooks.json", kind="malformed-hooks", detail="hooks object missing"); return
+    required_modes = (("SessionStart", "session-start", "scripts/session_start_hook.py"), ("PreCompact", "pre-compact", "scripts/session_compact_hook.py"), ("PostCompact", "post-compact", "scripts/session_compact_hook.py"), ("UserPromptSubmit", "prompt-submit", "scripts/taskset_prompt_hook.py"), ("Stop", "stop-owner", "scripts/stop_hook_owner_governance.py"), ("Stop", "stop-closure", "scripts/stop_hook_closure_gate.py"))
+    for event, mode, target in required_modes:
+        entries = [hook for group in hooks.get(event, []) if isinstance(group, dict) for hook in group.get("hooks", []) if isinstance(hook, dict)]
+        matching = [hook for hook in entries if f"agent_runtime.hook_runtime {mode}" in str(hook.get("command") or "")]
+        if not matching:
+            _findings_append(findings, "blocker", area="codex-hooks", path=".codex/hooks.json", kind="missing-required-mode", detail=f"{event}:{mode}"); continue
+        for hook in matching:
+            command = str(hook.get("command") or "").replace("\\", "/")
+            if ".cmd" in command or "scripts/" in command or ":/" in command:
+                _findings_append(findings, "blocker", area="codex-hooks", path=".codex/hooks.json", kind="stale-hook-command", detail=f"{event}: {command}")
+            if not hook.get("commandWindows"):
+                _findings_append(findings, "blocker", area="codex-hooks", path=".codex/hooks.json", kind="missing-command-windows", detail=event)
+        if not (root / target).exists():
+            _findings_append(findings, "blocker", area="codex-hooks", path=target, kind="missing-hook-target", detail=f"required by {event}:{mode}")
+    if not ((root / "src/agent_runtime/hook_runtime.py").exists() or (root / "agent_runtime/hook_runtime.py").exists() or importlib.util.find_spec("agent_runtime.hook_runtime")):
+        _findings_append(findings, "blocker", area="codex-hooks", path="agent_runtime/hook_runtime.py", kind="missing-dispatcher", detail="hook dispatcher missing")
+    _findings_append(findings, "info", area="codex-hooks", path=".codex/hooks.json", kind="trust-review", detail="tracked lifecycle hooks present; review with /hooks before enabling local settings")
+
+
 def _extract_frontmatter(path: Path) -> tuple[dict[str, object], str]:
     if not path.exists():
         return {}, "missing"
@@ -468,6 +498,7 @@ def _run_lock_check(root: Path, findings: list[DoctorFinding], cfg_ok: bool) -> 
 def build_doctor_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
     findings: list[DoctorFinding] = []
     root = root.resolve()
+    _check_codex_hooks(root, findings)
 
     for rel in REQUIRED_TEMPLATE_FILES:
         target = root / rel

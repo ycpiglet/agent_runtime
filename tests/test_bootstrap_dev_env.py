@@ -24,7 +24,7 @@ def _run(*extra: str) -> subprocess.CompletedProcess[str]:
 def test_check_is_watch_only_and_reports_every_item() -> None:
     result = _run("--check")
     assert result.returncode == 0, result.stderr
-    for item in ("python:", "editable install:", "hooksPath:", "push transport:", "gh:"):
+    for item in ("python:", "editable install:", "hooksPath:", "Codex hooks:", "push transport:", "gh:"):
         assert item in result.stdout, f"missing report line for {item}\n{result.stdout}"
 
 

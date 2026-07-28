@@ -218,3 +218,11 @@ def test_doctor_repair_json_does_not_mix_human_output(tmp_path, capsys):
     payload = json.loads(capsys.readouterr().out)
     assert payload["schema"] == "agent-runtime-doctor/v1"
     assert "repair_actions" in payload
+def test_codex_hook_contract_reports_missing_mode_but_allows_foreign_hook(tmp_path):
+    from agent_runtime import doctor
+    (tmp_path / ".codex").mkdir()
+    (tmp_path / ".codex/hooks.json").write_text('{"hooks":{"SessionStart":[{"hooks":[{"command":"foreign command"}]}]}}')
+    findings = []
+    doctor._check_codex_hooks(tmp_path, findings)
+    assert any(item.kind == "missing-required-mode" for item in findings)
+    assert not any(item.kind == "stale-hook-command" for item in findings)

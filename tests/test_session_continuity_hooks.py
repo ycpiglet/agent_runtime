@@ -77,7 +77,7 @@ def test_start_reads_compact_session_and_emits_bounded_safe_json(tmp_path: Path)
     checkpoint = root / "agents/runtime/session_checkpoints"; checkpoint.mkdir(parents=True)
     (checkpoint / "sid.json").write_text(json.dumps({"session_id":"sid","active_task":"TASK-X","rebootstrap_required":True}))
     (root / "agents/lead_engineer").mkdir(parents=True)
-    (root / "agents/lead_engineer/compound_log.md").write_text("compound")
+    (root / "agents/lead_engineer/compound_log.md").write_text("## COMPOUND-42 latest lesson\n")
     calls = []
     def fake_run(root_arg, script, **kwargs):
         calls.append(script); return script + " ok"
@@ -86,7 +86,7 @@ def test_start_reads_compact_session_and_emits_bounded_safe_json(tmp_path: Path)
     payload = json.loads(raw)
     context = payload["hookSpecificOutput"]["additionalContext"]
     assert payload["hookSpecificOutput"]["hookEventName"] == "SessionStart"
-    assert f"host={root}" in context and "source=compact" in context and "TASK-X" in context and "compound_log.md" in context
+    assert f"host={root}" in context and "source=compact" in context and "TASK-X" in context and "compound: count=1, latest=COMPOUND-42 latest lesson" in context
     assert "DO NOT ECHO" not in context and len(context) <= 6000
     assert calls[:2] == ["session_baseline.py", "claim_reaper_hook.py"]
     assert set(calls[2:]) == {"session_dashboard.py", "interrupted_run_detector.py", "session_resume_check.py"}
@@ -146,7 +146,9 @@ def test_hook_configs_cover_lifecycle_windows_and_root_only_extensions() -> None
             for group in groups:
                 for hook in group["hooks"]:
                     assert hook["commandWindows"].startswith("py -3 -m agent_runtime.hook_runtime")
-                    assert hook["timeout"] > 0 and hook["additionalContextLimit"] > 0
+                    assert hook["timeout"] > 0
+                    if path == ROOT / ".codex/hooks.json" and "PostToolUse" in hooks and hook["command"].endswith(("session-start", "prompt-submit", "posttool-owner-doc")):
+                        assert hook["additionalContextLimit"] > 0
     root_hooks = json.loads((ROOT / ".codex/hooks.json").read_text())["hooks"]
     assert "PostToolUse" in root_hooks
     assert any("stop-dirty" in hook["command"] for hook in root_hooks["Stop"][0]["hooks"])

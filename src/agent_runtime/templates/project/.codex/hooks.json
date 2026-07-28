@@ -1,9 +1,9 @@
 {
   "hooks": {
     "SessionStart": [{"matcher": "startup|resume|clear|compact", "hooks": [{"type": "command", "command": "python3 -m agent_runtime.hook_runtime session-start", "commandWindows": "py -3 -m agent_runtime.hook_runtime session-start", "timeout": 45, "additionalContextLimit": 6000}]}],
-    "PreCompact": [{"matcher": "manual|auto", "hooks": [{"type": "command", "command": "python3 -m agent_runtime.hook_runtime pre-compact", "commandWindows": "py -3 -m agent_runtime.hook_runtime pre-compact", "timeout": 10, "additionalContextLimit": 1}]}],
-    "PostCompact": [{"matcher": "manual|auto", "hooks": [{"type": "command", "command": "python3 -m agent_runtime.hook_runtime post-compact", "commandWindows": "py -3 -m agent_runtime.hook_runtime post-compact", "timeout": 10, "additionalContextLimit": 1}]}],
+    "PreCompact": [{"matcher": "manual|auto", "hooks": [{"type": "command", "command": "python3 -m agent_runtime.hook_runtime pre-compact", "commandWindows": "py -3 -m agent_runtime.hook_runtime pre-compact", "timeout": 10}]}],
+    "PostCompact": [{"matcher": "manual|auto", "hooks": [{"type": "command", "command": "python3 -m agent_runtime.hook_runtime post-compact", "commandWindows": "py -3 -m agent_runtime.hook_runtime post-compact", "timeout": 10}]}],
     "UserPromptSubmit": [{"hooks": [{"type": "command", "command": "python3 -m agent_runtime.hook_runtime prompt-submit", "commandWindows": "py -3 -m agent_runtime.hook_runtime prompt-submit", "timeout": 20, "additionalContextLimit": 2000}]}],
-    "Stop": [{"hooks": [{"type": "command", "command": "python3 -m agent_runtime.hook_runtime stop-owner", "commandWindows": "py -3 -m agent_runtime.hook_runtime stop-owner", "timeout": 30, "additionalContextLimit": 2000}, {"type": "command", "command": "python3 -m agent_runtime.hook_runtime stop-closure", "commandWindows": "py -3 -m agent_runtime.hook_runtime stop-closure", "timeout": 30, "additionalContextLimit": 2000}]}]
+    "Stop": [{"hooks": [{"type": "command", "command": "python3 -m agent_runtime.hook_runtime stop-owner", "commandWindows": "py -3 -m agent_runtime.hook_runtime stop-owner", "timeout": 120}, {"type": "command", "command": "python3 -m agent_runtime.hook_runtime stop-closure", "commandWindows": "py -3 -m agent_runtime.hook_runtime stop-closure", "timeout": 30}]}]
   }
 }

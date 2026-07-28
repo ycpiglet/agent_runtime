@@ -17,8 +17,14 @@ def _hook_python() -> str:
     return f'"{value}"' if any(ch.isspace() for ch in value) else value
 
 
-SESSION_CMD = f"{_hook_python()} scripts/session_start_hook.py"
-PROMPT_CMD = f"{_hook_python()} scripts/prompt_clarity_hook.py"
+COMMANDS = {
+    "SessionStart": f"{_hook_python()} -m agent_runtime.hook_runtime session-start",
+    "PreCompact": f"{_hook_python()} -m agent_runtime.hook_runtime pre-compact",
+    "PostCompact": f"{_hook_python()} -m agent_runtime.hook_runtime post-compact",
+    "UserPromptSubmit": f"{_hook_python()} -m agent_runtime.hook_runtime prompt-submit",
+}
+SESSION_CMD = COMMANDS["SessionStart"]
+PROMPT_CMD = COMMANDS["UserPromptSubmit"]
 
 
 def _run(args, tmp):
@@ -38,9 +44,10 @@ def _commands(data, event):
 def test_registers_into_empty(tmp_path):
     assert _run([], tmp_path).returncode == 0
     data = json.loads((tmp_path / "settings.json").read_text(encoding="utf-8"))
-    assert SESSION_CMD in _commands(data, "SessionStart")
-    assert PROMPT_CMD in _commands(data, "UserPromptSubmit")
-    assert f"Bash({SESSION_CMD})" in data["permissions"]["allow"]
+    for event, command in COMMANDS.items():
+        assert _commands(data, event) == [command]
+    for command in COMMANDS.values():
+        assert f"Bash({command})" in data["permissions"]["allow"]
     assert data["enabledPlugins"]["ralph-loop@claude-plugins-official"] is False
     assert data["enabledPlugins"]["security-guidance@claude-plugins-official"] is False
     # 슬래시 커맨드도 설치

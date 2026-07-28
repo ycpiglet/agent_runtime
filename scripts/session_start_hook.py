@@ -32,8 +32,10 @@ def main(argv=None):
   futures=[(label,pool.submit(run,r,script)) for label,script in collectors]
   lines += [f"{label}: {future.result()}" for label,future in futures]
  compound=r/"agents/lead_engineer/compound_log.md"
- compound=compound if compound.exists() else None
- lines.append("compound: " + (compound.name if compound else "unavailable"))
+ try:
+  headings=[line.strip()[3:] for line in compound.read_text(encoding="utf-8")[:12000].splitlines() if line.startswith("## COMPOUND-")]
+  lines.append(f"compound: count={len(headings)}, latest={headings[-1][:240] if headings else 'none'}")
+ except OSError: lines.append("compound: unavailable")
  context="\n".join(lines)[:6000]
  print(json.dumps({"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":context}},ensure_ascii=False)); return 0
 if __name__=="__main__": raise SystemExit(main())

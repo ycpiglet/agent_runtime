@@ -125,13 +125,10 @@ Do not infer timestamps from memory or the chat clock.
 
 ## Upstream Update Notice
 
-At session start, the `.codex/hooks.json` SessionStart hook runs
-`scripts\update_notify_hook.cmd`, which calls
-`python -m agent_runtime.cli update-notify`. When the upstream Agent Runtime
-has a newer release tag than the `upstream.ref` pinned in `agent_runtime.yml`,
-it prints one notice line. The check is non-blocking: offline or failed checks
-exit 0 silently, and the result is cached for 24 hours in
-`.tmp/update-notify-cache.json`.
+At session start, the `.codex/hooks.json` SessionStart hook invokes the portable
+dispatcher `python3 -m agent_runtime.hook_runtime session-start` (Windows:
+`py -3 -m agent_runtime.hook_runtime session-start`). The dispatcher reports
+continuity only; check the upstream explicitly with `agent_runtime update-plan --check`.
 
 When you see the notice:
 

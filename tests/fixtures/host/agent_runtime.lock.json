@@ -11,7 +11,7 @@
   ],
   "installed": {
     "managed_files": {
-      ".codex/hooks.json": "sha256:422c7a62e3712a01436c2fa3d4627a6311e9f1ba84594c40db9c1f10b9220159",
+      ".codex/hooks.json": "sha256:7acfec61ea4505940efa6e58a135f1caa5a86284b8b90866b2e9965caaeb42b3",
       ".env.example": "sha256:a91fca7b04c48cbd8a98ee6e33541fbbd6c9baa40aca90e4aa145efa70a873cd",
       ".gitattributes": "sha256:22ec718362af48d401e6717569dfcc89ec3573d553dc3f3530f4db8a1625b79b",
       ".githooks/post-merge": "sha256:b112da8578360cd49b871f518afa9c2ffb9f266c416daa02a8a9b17a84196e39",
@@ -153,7 +153,7 @@
       "scripts/goal_supervisor.py": "sha256:818a734d008563aeeb4b3bee02a15b80c754d1229e03cad0111ca39f1846f181",
       "scripts/governance_ops_report.py": "sha256:a4f100c46a2f1227a2fc60ab3170aebf98b3e872dcc570b705d8dbe4cf8f2595",
       "scripts/inflight_overlay.py": "sha256:16be0bdf91d7549c07d14683f2688c5aa75388de3bc1254b5b06e87c3fb1f32b",
-      "scripts/install_hooks.py": "sha256:0045cdb5f160521f30bb95595a2681433bc19d7e8811fa54817a0767bd3113f7",
+      "scripts/install_hooks.py": "sha256:8fc9e44f3dc468651f63e3b3e1bbc0ca365fb4e3da49709d103f78e1c0b45678",
       "scripts/interrupted_run_detector.py": "sha256:98b5207c74f2b01caf22e321f18a70ea1aac9eff74cd41b7ff648c949965c5ed",
       "scripts/kedb_search.py": "sha256:b2b714723f8be28fb9f09de571b2b5414ff6c0213c98d35dc9cc42e102e38b82",
       "scripts/knowledge_ask.py": "sha256:2b518d182c76f7383f050478650373d083e6f5d06b87df7ad16005a33b82959b",
@@ -208,7 +208,7 @@
       "scripts/session_compact_hook.py": "sha256:61aaa46507e319496cdd7173b683ada6bc87bfacf3e8453cacd4e041fa537a25",
       "scripts/session_dashboard.py": "sha256:45fa7cf2c1e09aabfc8ecfc1198f9fb42dcfdca8e59bba5e48b4f8030eb5bc97",
       "scripts/session_resume_check.py": "sha256:5a21ce70f57d8987c63699acfa03e88c9b14a24c8483027a025bb86fb43a4c88",
-      "scripts/session_start_hook.py": "sha256:98e9145e68e840ad540ad8418ee4bc709c7a837340c6d86aa849fa1ab8d82735",
+      "scripts/session_start_hook.py": "sha256:d0748b81e105c3216300ce9a9fedbe26e9a4d857d0511d2e4dec65a22519b0b1",
       "scripts/state_machine_gate.py": "sha256:b1ce42970658b1d7eed94b0285a47fca74e2566ff9094b71ed99a5ad10206e7f",
       "scripts/state_sync_gate.py": "sha256:b85e89fc9de4916376c2784acd47328923fcc596f485b6cc0b35185be13431dd",
       "scripts/status_alias.py": "sha256:9d1ac9fab5c716b617a183188091e53f50aedeb2db1b20d87f3585532b14de7c",
@@ -499,7 +499,7 @@
     },
     "package_version": "0.7.0",
     "seeded": [],
-    "template_digest": "sha256:709743366d5d878c9d29f81733e13601f77adc710fc344de6fd8c9ebf0f3cf7d",
+    "template_digest": "sha256:1f4cd979d0cb71ac8ea6a2e0b0e444cd7ad216aab27d0b643164a6c3360a6604",
     "template_files": 244
   },
   "profiles": [

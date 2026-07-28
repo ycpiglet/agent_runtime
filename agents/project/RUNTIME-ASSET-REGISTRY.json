@@ -286,13 +286,13 @@
       "min_recent_uses": 1
     },
     {
-      "id": "hook.session_dashboard",
+      "id": "hook.session_continuity",
       "kind": "hook",
       "status": "active",
       "lifecycle": "keep",
-      "paths": ["scripts/session_dashboard.py", ".codex/hooks.json"],
-      "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-523.md", "src/agent_runtime/templates/project/.codex/hooks.json"],
-      "tokens": ["session_dashboard.py", "SessionStart", "hook.session_dashboard"],
+      "paths": ["scripts/session_start_hook.py", "scripts/session_compact_hook.py", "src/agent_runtime/hook_runtime.py", ".codex/hooks.json"],
+      "evidence_paths": ["tests/test_session_continuity_hooks.py", "src/agent_runtime/templates/project/.codex/hooks.json"],
+      "tokens": ["session-start", "pre-compact", "post-compact", "hook.session_continuity"],
       "min_recent_uses": 1
     },
     {

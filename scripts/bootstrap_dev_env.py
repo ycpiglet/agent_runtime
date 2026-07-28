@@ -32,6 +32,20 @@ ROOT = Path(__file__).resolve().parent.parent
 HOOKS_DIR = ".githooks"
 
 
+def check_codex_hook_contract() -> str:
+    """Report tracked Codex hook wiring only; local user settings are never edited."""
+    path = ROOT / ".codex" / "hooks.json"
+    if not path.exists():
+        return "FIX  Codex hooks: tracked .codex/hooks.json missing (run doctor --check)"
+    try:
+        import json
+        hooks = json.loads(path.read_text(encoding="utf-8")).get("hooks", {})
+    except Exception:
+        return "FIX  Codex hooks: tracked configuration malformed (run doctor --check)"
+    required = {"SessionStart", "PreCompact", "PostCompact", "UserPromptSubmit"}
+    return "ok   Codex hooks: tracked lifecycle contract present (review with /hooks; user settings untouched)" if required <= set(hooks) else "FIX  Codex hooks: lifecycle events missing (run doctor --check)"
+
+
 def _run(*args: str, timeout: int = 30) -> tuple[int, str]:
     try:
         proc = subprocess.run(
@@ -156,6 +170,7 @@ def main(argv: list[str] | None = None) -> int:
         check_python(),
         check_editable_install(apply=args.apply),
         check_hooks_path(apply=args.apply),
+        check_codex_hook_contract(),
         check_push_transport(ssh_push=args.apply and args.ssh_push),
         check_gh_cli(),
     ]

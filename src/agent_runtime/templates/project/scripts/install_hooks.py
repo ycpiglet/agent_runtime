@@ -175,7 +175,17 @@ def _has_hook(settings: dict, event: str, cmd: str) -> bool:
 
 
 def _same_repo_hook_script(command: str, mode: str) -> bool:
-    return "agent_runtime.hook_runtime" in command and command.strip().endswith(mode)
+    normalized = command.replace("\\", "/").strip()
+    legacy = {
+        "session-start": "scripts/session_start_hook.py",
+        "pre-compact": "scripts/session_compact_hook.py --phase pre-compact",
+        "post-compact": "scripts/session_compact_hook.py --phase post-compact",
+        "prompt-submit": "scripts/prompt_clarity_hook.py",
+    }
+    return (
+        ("agent_runtime.hook_runtime" in normalized and normalized.endswith(mode))
+        or normalized.endswith(legacy[mode])
+    )
 
 
 def _remove_stale_hook_commands(settings: dict, event: str, cmd: str) -> bool:
