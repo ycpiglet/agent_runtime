@@ -9,10 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T17:55:15+09:00
+updated_at: 2026-07-28T19:18:44+09:00
 started_at: 2026-07-28T17:55:15+09:00
 title: Restore lifecycle truth and Work CLI producer-consumer parity
-status: in_progress
+status: completed
 priority: P0
 difficulty: L
 est_hours: 10
@@ -35,6 +35,15 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+verification_status: passed
+verified_at: 2026-07-28T19:18:31+09:00
+verified_by: le-20260728-170130-kst-codexroot-v080-639-001
+evidence_refs:
+  - reviews/VERIFY-2026-07-28-task-ar-639-20260728191831.json
+resolution: done
+completed_at: 2026-07-28T19:18:44+09:00
+closed_by: le-20260728-170130-kst-codexroot-v080-639-001
+measurement_unavailable_reason: Task execution combined two units, repeated adversarial W4b repairs, PR and main CI, and historical recovery before reliable task-level time and token metering was available.
 ---
 
 # TASK-AR-639 - Restore lifecycle truth and Work CLI producer-consumer parity
@@ -59,3 +68,16 @@ tags:
 - `python -m pytest tests/test_work_registration.py tests/test_work_verify.py tests/test_work_close.py tests/test_state_sync_gate.py -q`
 - `python scripts/state_sync_gate.py --check`
 - `python scripts/work_schema_gate.py --items --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-28T19:18:44+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Task execution combined two units, repeated adversarial W4b repairs, PR and main CI, and historical recovery before reliable task-level time and token metering was available.
+- Closed by: `le-20260728-170130-kst-codexroot-v080-639-001`
+- Evidence:
+  - `reviews/VERIFY-2026-07-28-task-ar-639-20260728191831.json`
+<!-- work-close:end -->

@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-28T19:08:48+09:00
+generated_at: 2026-07-28T19:18:51+09:00
 record_count: 519
 ---
 
@@ -519,8 +519,8 @@ record_count: 519
 | 40.1 | Taskset 40.1 | taskset | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | `INIT-AR-CONSOLE-OVERHAUL-P1` | active | `BACKLOG-BOARD.md` | Console Overhaul P1 — Core Structure |
 | 40.1.1 | Task 40.1.1 | task | `TASK-AR-630` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-630.md` | 보드 Rollups 휴리스틱과 콘솔 attention_inbox를 하나의 모듈로 통합해 두 표면이 다른 현황을 말하는 구조를 원천 차단하고, watch… |
 | 40.1.1.1 | Unit 40.1.1.1 | unit | `UNIT-TASK-AR-630-001` | `TASK-AR-630` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-630/UNIT-TASK-AR-630-001.md` | UNIT-TASK-AR-630-001 - attention 신호 단일 정본화 |
-| 40.1.2 | Task 40.1.2 | task | `TASK-AR-631` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | review | `agents/lead_engineer/tasks/TASK-AR-631.md` | 스크롤 없이 5초 내 '개입 필요 여부'에 예/아니오로 답하는 단일 화면을 완성한다. |
-| 40.1.2.1 | Unit 40.1.2.1 | unit | `UNIT-TASK-AR-631-001` | `TASK-AR-631` | review | `agents/lead_engineer/tasks/units/TASK-AR-631/UNIT-TASK-AR-631-001.md` | UNIT-TASK-AR-631-001 - 홈 Decision Screenfit |
+| 40.1.2 | Task 40.1.2 | task | `TASK-AR-631` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | completed | `agents/lead_engineer/tasks/TASK-AR-631.md` | 스크롤 없이 5초 내 '개입 필요 여부'에 예/아니오로 답하는 단일 화면을 완성한다. |
+| 40.1.2.1 | Unit 40.1.2.1 | unit | `UNIT-TASK-AR-631-001` | `TASK-AR-631` | completed | `agents/lead_engineer/tasks/units/TASK-AR-631/UNIT-TASK-AR-631-001.md` | UNIT-TASK-AR-631-001 - 홈 Decision Screenfit |
 | 40.1.3 | Task 40.1.3 | task | `TASK-AR-632` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-632.md` | 매 4초 37개 렌더 함수 전량 재실행을 활성 뷰+콕핏 선택 렌더로 바꾸고 4s/8s/15s+SSE 4중 경로를 단일 디스패처로 통합한다. |
 | 40.1.4 | Task 40.1.4 | task | `TASK-AR-633` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-633.md` | 엔지니어링 요구에 대해 모호성을 탐지하고 불일치 지점만 인터뷰해 합의된 EARS 수용 기준을 강제한다. |
 | 40.1.5 | Task 40.1.5 | task | `TASK-AR-634` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-634.md` | acceptance criterion에 ID를 부여하고 검증 명령과 매핑해 dangling(검증 없는 요구/요구 없는 검증)을 기계 적발한다. |
@@ -530,7 +530,7 @@ record_count: 519
 | 40.1.9 | Task 40.1.9 | task | `TASK-AR-638` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-638.md` | 홈 재구성과 병행해 한국어 단독 Owner와의 언어 불일치를 끝내고, 컬러/토큰/아이콘/칸반의 시각 언어를 '조용한 의사결정 콘솔'로 재정렬한다. |
 | 41 | Initiative 41 | initiative | `INIT-AR-V080-ADOPTION-ENFORCEMENT` | - | active | `agents/project/initiatives/INIT-AR-V080-ADOPTION-ENFORCEMENT.md` | Agent Runtime v0.8 Adoption and Enforcement |
 | 41.1 | Taskset 41.1 | taskset | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | `INIT-AR-V080-ADOPTION-ENFORCEMENT` | active | `BACKLOG-BOARD.md` | v0.8 Adoption and Enforcement |
-| 41.1.1 | Task 41.1.1 | task | `TASK-AR-639` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | in_progress | `agents/lead_engineer/tasks/TASK-AR-639.md` | Make registered work executable and make implemented-but-unclaimed work visible witho… |
+| 41.1.1 | Task 41.1.1 | task | `TASK-AR-639` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | `agents/lead_engineer/tasks/TASK-AR-639.md` | Make registered work executable and make implemented-but-unclaimed work visible witho… |
 | 41.1.1.1 | Unit 41.1.1.1 | unit | `UNIT-TASK-AR-639-001` | `TASK-AR-639` | completed | `agents/lead_engineer/tasks/units/TASK-AR-639/UNIT-TASK-AR-639-001.md` | UNIT-TASK-AR-639-001 - Align work registration output with verify and close consumers |
 | 41.1.1.2 | Unit 41.1.1.2 | unit | `UNIT-TASK-AR-639-002` | `TASK-AR-639` | completed | `agents/lead_engineer/tasks/units/TASK-AR-639/UNIT-TASK-AR-639-002.md` | UNIT-TASK-AR-639-002 - Block task-claim-projection split-brain and support explicit recovery |
 | 41.1.2 | Task 41.1.2 | task | `TASK-AR-640` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-640.md` | Represent shared capabilities and host ownership without requiring a project-specific… |

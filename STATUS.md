@@ -1,11 +1,11 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-07-28 - TASK-AR-631 W4b complete; v0.8 Adoption and Enforcement registered
+## 2026-07-28 - TASK-AR-631 recovery and TASK-AR-639 complete; TASK-AR-640 next
 
-- Active: `TASK-AR-631` in `TASKSET-AR-CONSOLE-OVERHAUL-P1` passed independent W4b at implementation commit `8be1fe24`; lifecycle-only recovery records and integration remain.
-- Recovery: the missing historical claim is recorded explicitly and is not being fabricated retroactively. Task/unit/pointer/status surfaces now expose the integration-pending state.
-- Registered: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` contains `TASK-AR-639` through `TASK-AR-651`, with 15 worker-ready units covering lifecycle truth, brownfield profiles/adoption/sync, consumer closure, hooks, compound/scribe, model economy, Allimbot, pilots, migration, and RC.
-- Next: integrate and close TASK-AR-631, then claim `UNIT-TASK-AR-639-001` in a clean worktree before any further implementation.
+- Completed: `TASK-AR-631` in `TASKSET-AR-CONSOLE-OVERHAUL-P1` passed independent W4b at implementation commit `8be1fe24`; its lifecycle-only recovery is now closed without fabricating a historical claim or measurements.
+- Completed: `TASK-AR-639` restored task/unit/claim/pointer/branch/worktree state reconciliation and Work CLI producer-consumer parity; parent verification passed with zero state-sync findings.
+- Registered: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` contains `TASK-AR-639` through `TASK-AR-651`; `TASK-AR-639` is closed and `TASK-AR-640` is the next W0 target, with the remaining units covering brownfield profiles/adoption/sync, consumer closure, hooks, compound/scribe, model economy, Allimbot, pilots, migration, and RC.
+- Next: begin `TASK-AR-640` at W0, revalidate profile/config assumptions, then create a clean W2 worker claim only after the scope is evidence-backed.
 
 ## 2026-07-23 - TASK-AR-621 complete; TASK-AR-622 next
 
