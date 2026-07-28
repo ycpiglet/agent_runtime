@@ -127,7 +127,8 @@ def _browser_home_metrics(console_url: str, viewport: dict[str, int]) -> dict:
                         layout: box(".layout"),
                         cockpit: box("#cockpit"),
                         workState: box("#work-state-hero"),
-                        dashboard: box(".dashboard"),
+                        homeVerdict: box("#home-verdict"),
+                        flowTiles: box("#flow-tiles"),
                         workSurface: box(".work-surface"),
                       },
                     };
@@ -280,9 +281,15 @@ def test_decision_first_home_budget_and_maturity_regression(console_url):  # TAS
     assert home.count('class="view is-active"') == 1
     assert ".view {\n  display: none;" in css and ".view.is-active {\n  display: block;" in css
 
-    assert home.index('id="cockpit"') < home.index('id="work-state-hero"')
-    assert home.index('id="work-state-hero"') < home.index('class="dashboard"')
-    assert home.index('class="dashboard"') < shell_end
+    # TASK-AR-631 decision screenfit order: verdict strip -> decision queue
+    # (cockpit) -> summary strip -> flow tiles -> second-tier hero. The legacy
+    # 4-metric dashboard section was removed (superseded by strip + flow tiles).
+    assert home.index('id="home-verdict"') < home.index('id="cockpit"')
+    assert home.index('id="cockpit"') < home.index('id="home-strip"')
+    assert home.index('id="home-strip"') < home.index('id="flow-tiles"')
+    assert home.index('id="flow-tiles"') < home.index('id="work-state-hero"')
+    assert 'class="dashboard"' not in home
+    assert home.index('id="work-state-hero"') < shell_end
 
     assert "@media" in css and "max-width" in css
     assert 'class="skip-link"' in home and 'href="#main"' in home and 'id="main"' in home

@@ -1,0 +1,34 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-28-task-ar-631-20260728163046",
+  "work_id": "TASK-AR-631",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-631.md",
+  "kind": "task",
+  "task_id": "TASK-AR-631",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-28T16:30:46+09:00",
+  "verified_by": "codex-root-v080-recovery-20260728",
+  "command_count": 2,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_ui_console.py tests/test_ui_console_e2e.py tests/test_ui_console_microinteractions.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-28T16:30:46+09:00",
+      "finished_at": "2026-07-28T16:31:01+09:00",
+      "stdout": "........................................................................ [ 26%]\n........................................................................ [ 53%]\n........................................................................ [ 80%]\n.....................................................                    [100%]\n269 passed in 14.89s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/nav_budget_gate.py",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-28T16:31:01+09:00",
+      "finished_at": "2026-07-28T16:31:01+09:00",
+      "stdout": "nav-budget-gate: pass top_level=7 budget=7\n",
+      "stderr": ""
+    }
+  ]
+}

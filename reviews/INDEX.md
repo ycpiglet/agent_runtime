@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-27T10:47:31+09:00
-record_count: 908
+generated_at: 2026-07-28T16:38:07+09:00
+record_count: 913
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `908` review and evidence records under `reviews/`.
+- Summary: indexed `913` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `908` files |
+| Reviews covered | pass | `913` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -212,6 +212,7 @@ record_count: 908
 | `reviews/RESEARCH-2026-06-18-design-system-governance-role-topology.md` | `RESEARCH-2026-06-18-design-system-governance-role-topology` | md | synthesized (partial verification) | n/a | RESEARCH — Design-System Governance & Design-Org Role Topology |
 | `reviews/RESEARCH-2026-06-20-ui-ux-visual-resources.md` | `RESEARCH-2026-06-20-ui-ux-visual-resources` | md | synthesized (Strands 1-2 verified; 3-5 from fetched sources + established knowledge) | n/a | RESEARCH — UI/UX Visual Resources (graph · character · fonts · icons · color) |
 | `reviews/RESEARCH-2026-06-24-oss-sprite-generators.md` | `RESEARCH-2026-06-24-oss-sprite-generators` | md | synthesized (license + animation facts fetched from primary sources this run; integration sketch is design, not yet spiked) | n/a | RESEARCH — OSS Sprite Generators for Cute, Role-Distinct, Animated Office-Map Characters |
+| `reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md` | `RESEARCH-2026-07-28-v080-adoption-enforcement-scope` | md | record | watch | Agent Runtime v0.8 Adoption and Enforcement Scope |
 | `reviews/RETRO-2026-06-10-agent-runtime-governance-ops.md` | `RETRO-2026-06-10-agent-runtime-governance-ops` | retro | watch | watch | RETRO-2026-06-10 agent runtime governance ops |
 | `reviews/RETRO-2026-06-14-agent-runtime-process-integrity.md` | `RETRO-2026-06-14-agent-runtime-process-integrity` | retro | watch | watch | RETRO 2026-06-14 — Process Integrity (verification / merge / compound-review-retro) |
 | `reviews/RETRO-2026-06-14-knowledge-stack.md` | `RETRO-2026-06-14-knowledge-stack` | retro | watch | watch | RETRO 2026-06-14 — Agent knowledge stack (#1–#4) |
@@ -583,6 +584,7 @@ record_count: 908
 | `reviews/REVIEW-2026-07-26-console-overhaul-owner-decisions.md` | `REVIEW-2026-07-26-console-overhaul-owner-decisions` | md | record | pass | Console Overhaul Owner Decisions (15) Resolved |
 | `reviews/REVIEW-2026-07-26-taskset-ar-console-overhaul-p0-registration.md` | `REVIEW-2026-07-26-taskset-ar-console-overhaul-p0-registration` | md | record | pass | Console Overhaul P0 — Trust & Hygiene Registration |
 | `reviews/REVIEW-2026-07-26-taskset-ar-console-overhaul-p1-registration.md` | `REVIEW-2026-07-26-taskset-ar-console-overhaul-p1-registration` | md | record | pass | Console Overhaul P1 — Core Structure Registration |
+| `reviews/REVIEW-2026-07-28-taskset-ar-v080-adoption-enforcement-registration.md` | `REVIEW-2026-07-28-taskset-ar-v080-adoption-enforcement-registration` | md | record | pass | v0.8 Adoption and Enforcement Registration |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
@@ -634,6 +636,7 @@ record_count: 908
 | `reviews/ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC-FINAL.md` | `ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC-FINAL` | md | approved | pass | TASK-AR-622 Final Skeptical W4b Review |
 | `reviews/ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC-RECHECK.md` | `ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC-RECHECK` | md | approved | pass | TASK-AR-622 Skeptic Recheck |
 | `reviews/ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC.md` | `ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC` | md | hold | fail | TASK-AR-622 Skeptic and Adversarial Review |
+| `reviews/ROLE-REVIEW-2026-07-28-TASK-AR-631-W4B.md` | `ROLE-REVIEW-2026-07-28-TASK-AR-631-W4B` | md | record | watch | TASK-AR-631 Independent W4b and Lifecycle Recovery Review |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SCRIBE-2026-06-21-business-operating-system.md` | `SCRIBE-2026-06-21-business-operating-system` | scribe | recorded | pass | Business Operating System Scribe Log |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
@@ -817,6 +820,8 @@ record_count: 908
 | `reviews/VERIFY-2026-07-26-unit-task-ar-629-001-20260726131926.json` | `VERIFY-2026-07-26-unit-task-ar-629-001-20260726131926` | json | record | n/a | VERIFY-2026-07-26-unit-task-ar-629-001-20260726131926 |
 | `reviews/VERIFY-2026-07-27-unit-task-ar-630-001-20260727103021.json` | `VERIFY-2026-07-27-unit-task-ar-630-001-20260727103021` | json | record | n/a | VERIFY-2026-07-27-unit-task-ar-630-001-20260727103021 |
 | `reviews/VERIFY-2026-07-27-unit-task-ar-630-001-20260727104728.json` | `VERIFY-2026-07-27-unit-task-ar-630-001-20260727104728` | json | record | n/a | VERIFY-2026-07-27-unit-task-ar-630-001-20260727104728 |
+| `reviews/VERIFY-2026-07-27-unit-task-ar-631-001-20260727111227.json` | `VERIFY-2026-07-27-unit-task-ar-631-001-20260727111227` | json | record | n/a | VERIFY-2026-07-27-unit-task-ar-631-001-20260727111227 |
+| `reviews/VERIFY-2026-07-28-task-ar-631-20260728163046.json` | `VERIFY-2026-07-28-task-ar-631-20260728163046` | json | record | n/a | VERIFY-2026-07-28-task-ar-631-20260728163046 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |

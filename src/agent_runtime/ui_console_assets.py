@@ -261,6 +261,10 @@ HTML = """<!doctype html>
     <div id="sidebar-scrim" class="sidebar-scrim" hidden></div>
 
     <main class="layout" id="main">
+      <section class="home-verdict" id="home-verdict" aria-live="polite" hidden>
+        <span id="verdict-badge" class="verdict-badge"></span>
+        <span id="verdict-line" class="verdict-line"></span>
+      </section>
       <section class="cockpit" id="cockpit" data-home-default="cockpit" aria-label="Attention inbox - what needs you now" data-i18n-aria-label="cockpit.aria">
         <header class="cockpit-head">
           <h2 class="cockpit-title" data-i18n="cockpit.title">What needs you now</h2>
@@ -272,6 +276,10 @@ HTML = """<!doctype html>
           <span class="cockpit-empty-asof" id="inbox-empty-asof"></span>
         </p>
       </section>
+      <section class="home-strip" id="home-strip" aria-label="Summary strip" data-i18n-aria-label="strip.aria">
+        <span id="strip-line"></span>
+      </section>
+      <section class="flow-tiles" id="flow-tiles" aria-label="Flow metrics" data-i18n-aria-label="tiles.aria"></section>
       <div id="inbox-detail-backdrop" class="inbox-detail-backdrop" hidden></div>
       <aside id="inbox-detail-drawer" class="inbox-detail-drawer" role="dialog" aria-modal="true"
              aria-labelledby="inbox-detail-title" hidden tabindex="-1">
@@ -303,12 +311,6 @@ HTML = """<!doctype html>
         <p id="work-state-empty" class="work-state-empty" hidden data-i18n="work_state.empty">No active work state.</p>
       </section>
 
-      <section class="dashboard" aria-label="Dashboard">
-        <div class="metric"><span>Total Tasks</span><strong id="metric-tasks">0</strong></div>
-        <div class="metric"><span>Active</span><strong id="metric-active">0</strong></div>
-        <div class="metric"><span>Blocked</span><strong id="metric-blocked">0</strong></div>
-        <div class="metric"><span>Warnings</span><strong id="metric-warnings">0</strong></div>
-      </section>
 
       <section class="work-surface">
         <form id="create-task-form" class="create-form">
@@ -1764,6 +1766,56 @@ h1 {
 .cockpit-empty-asof {
   color: var(--muted);
   font-variant-numeric: tabular-nums;
+}
+/* TASK-AR-631: decision screenfit — verdict strip, summary strip, flow tiles.
+   Quiet by default: neutral panel surfaces, semantic state color only on the
+   verdict badge and an over-limit WIP tile. */
+.home-verdict {
+  display: flex; align-items: center; gap: var(--space-lg);
+  margin: 0 0 0.85rem;
+}
+.verdict-badge {
+  font-weight: 700; font-size: 0.86rem; padding: 0.18rem 0.65rem;
+  border-radius: var(--radius-pill); border: 1px solid var(--line-strong);
+  color: var(--ink); background: var(--panel-strong);
+}
+.verdict-badge[data-verdict="healthy"] { color: var(--success); background: var(--success-soft); border-color: var(--success-line); }
+.verdict-badge[data-verdict="watch"] { color: var(--warning); background: var(--warning-soft); border-color: var(--warning-line); }
+.verdict-badge[data-verdict="at_risk"] { color: var(--danger); background: var(--danger-soft); border-color: var(--danger-line); }
+.verdict-line { color: var(--ink); font-size: 0.9rem; }
+.home-strip {
+  margin: 0.85rem 0 0.6rem; color: var(--muted); font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+}
+.flow-tiles {
+  display: grid; grid-template-columns: repeat(3, minmax(150px, 1fr));
+  gap: var(--space-lg); margin: 0 0 1rem;
+}
+.flow-tiles:empty { display: none; }
+.flow-tile {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 0.65rem 0.85rem; display: flex; flex-direction: column; gap: 0.2rem;
+  box-shadow: var(--shadow);
+}
+.flow-tile .ft-label {
+  color: var(--muted); font-size: 0.72rem; text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.flow-tile .ft-value {
+  font-size: 1.4rem; font-weight: 700; color: var(--ink);
+  font-variant-numeric: tabular-nums; display: flex; align-items: baseline; gap: 0.4rem;
+}
+.flow-tile .ft-value .ft-unit { font-size: 0.78rem; color: var(--muted); font-weight: 500; }
+.flow-tile.ft-warn .ft-value { color: var(--warning); }
+.flow-tile .ft-spark { min-height: 24px; }
+.inbox-card-more {
+  justify-content: center; align-items: center; color: var(--muted);
+  font-size: 0.85rem; border-style: dashed;
+}
+@media (max-width: 760px) {
+  .flow-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-md); }
+  .flow-tile .ft-value { font-size: 1.05rem; }
+  .flow-tile .ft-spark { display: none; }
 }
 .toolbar {
   display: flex;
@@ -7475,8 +7527,11 @@ function initWorkStateCollapse() {
   const btn = $("work-state-collapse");
   if (!hero || !btn) return;
   const KEY = "ar624:workStateCollapsed";
-  let collapsed = false;
-  try { collapsed = window.localStorage.getItem(KEY) === "1"; } catch (error) {}
+  // TASK-AR-631: the hero is second-tier -- collapsed by default so the verdict
+  // strip, decision queue, summary strip and flow tiles own the fold. An
+  // explicit expand (stored "0") persists across sessions.
+  let collapsed = true;
+  try { collapsed = window.localStorage.getItem(KEY) !== "0"; } catch (error) {}
   const apply = () => {
     hero.classList.toggle("is-collapsed", collapsed);
     btn.setAttribute("aria-expanded", collapsed ? "false" : "true");
@@ -7763,7 +7818,11 @@ function renderCockpit(data) {
   const orderedKeys = Object.keys(groups).sort(
     (a, b) => inboxGroupRank(a) - inboxGroupRank(b)
   );
-  for (const key of orderedKeys) {
+  // TASK-AR-631: the decision queue caps at 5 group cards above the fold; any
+  // further non-empty groups collapse into one quiet "+N groups" note card.
+  const nonEmptyKeys = orderedKeys.filter((key) => (groups[key] || []).length);
+  const visibleKeys = nonEmptyKeys.slice(0, 5);
+  for (const key of visibleKeys) {
     const items = groups[key] || [];
     if (!items.length) continue;
     const meta = inboxGroupMeta(key);
@@ -7786,6 +7845,20 @@ function renderCockpit(data) {
     card.appendChild(action);
     grid.appendChild(card);
   }
+  if (nonEmptyKeys.length > visibleKeys.length) {
+    const hiddenGroups = nonEmptyKeys.length - visibleKeys.length;
+    const hiddenItems = nonEmptyKeys.slice(5).reduce((n, key) => n + (groups[key] || []).length, 0);
+    const more = inboxEl(
+      "article",
+      "inbox-card inbox-card-more tone-low",
+      t("cockpit.more_groups").replace("{n}", String(hiddenGroups)).replace("{m}", String(hiddenItems))
+    );
+    more.setAttribute("role", "listitem");
+    grid.appendChild(more);
+  }
+  // TASK-AR-631: the bottom line references the inbox total, so refresh the
+  // verdict strip whenever the cockpit data changes.
+  if (typeof renderHomeSummary === "function") renderHomeSummary();
 }
 
 // SPEC-decision-inbox-v1: how many decisions the operator has recorded this
@@ -8968,6 +9041,88 @@ function stateFreshness() {
 function freshnessClock() {
   const f = stateFreshness();
   return f.built ? f.built.toLocaleTimeString() : "--:--:--";
+}
+
+// TASK-AR-631: decision screenfit. One glance answers "do I need to step in?":
+// verdict badge + bottom line (from health_snapshot + inbox total), a quiet
+// one-line summary strip, and three flow tiles (WIP / weekly throughput /
+// median cycle time) with real-series sparklines only (honesty rule).
+const HOME_ACTIVE_CLAIM_STATUSES = ["assigned", "claimed", "in_progress", "review", "waiting_review", "working"];
+const HOME_WIP_LIMIT = 3;
+const HOME_DONE_STATUSES = ["completed", "done", "closed"];
+
+function flowTileHtml(label, value, unit, series, warn) {
+  const spark = series && series.length >= 2 && typeof componentSparkline === "function"
+    ? componentSparkline(series, { width: 96, height: 24 })
+    : "";
+  return '<div class="flow-tile' + (warn ? " ft-warn" : "") + '">' +
+    '<span class="ft-label">' + escapeHtml(label) + '</span>' +
+    '<span class="ft-value">' + escapeHtml(value) +
+    (unit ? '<span class="ft-unit">' + escapeHtml(unit) + "</span>" : "") + "</span>" +
+    '<span class="ft-spark">' + spark + "</span></div>";
+}
+
+function renderHomeSummary() {
+  const ops = (runtimeState && runtimeState.ops_metrics) || {};
+  const health = ops.health_snapshot || {};
+  const verdict = String(health.verdict || "");
+  const wrap = $("home-verdict");
+  const badge = $("verdict-badge");
+  const line = $("verdict-line");
+  const inboxTotal = cockpitData && typeof cockpitData.total === "number" ? cockpitData.total : null;
+  if (wrap) {
+    wrap.hidden = !verdict;
+    if (badge && verdict) {
+      badge.textContent = t("health.verdict." + verdict);
+      badge.setAttribute("data-verdict", verdict);
+    }
+    if (line) {
+      let text = "";
+      if (inboxTotal === 0) text = t("home.bottomline.clear");
+      else if (inboxTotal !== null) text = t("home.bottomline.attention").replace("{n}", String(inboxTotal));
+      line.textContent = text;
+    }
+  }
+  const tasks = runtimeState.tasks || [];
+  const openCount = tasks.filter(
+    (task) => HOME_DONE_STATUSES.indexOf(String(task.status || "").toLowerCase()) < 0
+  ).length;
+  const claims = (runtimeState.task_claims || []).filter(
+    (claim) => HOME_ACTIVE_CLAIM_STATUSES.indexOf(String(claim.status || "").toLowerCase()) >= 0
+  );
+  const wip = claims.length;
+  const activeAgents = new Set(
+    claims.map((claim) => String(claim.agent_instance_id || claim.agent || "")).filter(Boolean)
+  ).size;
+  const gateCounts = (ops.gates && ops.gates.counts) || {};
+  const stripEl = $("strip-line");
+  if (stripEl) {
+    const gatesText = Number(gateCounts.block || 0) > 0
+      ? "block " + gateCounts.block
+      : Number(gateCounts.watch || 0) > 0
+        ? "watch " + gateCounts.watch
+        : "pass";
+    const agentsText = activeAgents > 0 ? activeAgents + " " + t("strip.active") : t("strip.idle");
+    const dot = " " + String.fromCharCode(183) + " ";
+    stripEl.textContent =
+      t("strip.open") + " " + openCount +
+      dot + "WIP " + wip + "/" + HOME_WIP_LIMIT +
+      dot + t("strip.gates") + " " + gatesText +
+      dot + t("strip.agents") + " " + agentsText;
+  }
+  const tiles = $("flow-tiles");
+  if (tiles) {
+    const weeks = ((ops.velocity || {}).weeks || []).map((week) => Number(week.done || 0));
+    const throughput = weeks.length ? weeks[weeks.length - 1] : null;
+    const cycle = ops.cycle_time || {};
+    const cycleSeries = (cycle.weeks || [])
+      .map((week) => (week.median_hours == null ? null : Number(week.median_hours)))
+      .filter((value) => value !== null);
+    tiles.innerHTML =
+      flowTileHtml(t("tile.wip"), String(wip), "/" + HOME_WIP_LIMIT, null, wip > HOME_WIP_LIMIT) +
+      flowTileHtml(t("tile.throughput"), throughput === null ? "-" : String(throughput), t("tile.per_week"), weeks, false) +
+      flowTileHtml(t("tile.cycle"), cycle.median_hours == null ? "-" : String(cycle.median_hours), "h", cycleSeries, false);
+  }
 }
 
 function renderDashboard() {
@@ -13836,6 +13991,7 @@ function renderDetail() {
 
 function renderAll() {
   renderDashboard();
+  renderHomeSummary();
   renderKanban();
   renderWorkExplorer();
   renderMeetingRoom();

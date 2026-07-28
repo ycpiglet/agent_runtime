@@ -212,6 +212,12 @@
       "order": 626
     },
     {
+      "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+      "display_name": "v0.8 Adoption and Enforcement",
+      "summary": "Deliver brownfield profiles, lifecycle truth, consumer-complete assets, continuity hooks, knowledge and model-economy enforcement, then validate two pilots and one upgrade rehearsal.",
+      "order": 640
+    },
+    {
       "task_set_id": "TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY",
       "display_name": "Release Cadence Query Recovery",
       "summary": "Harden the cadence query boundary and prove release-auto fails loud on exhausted transient queries while preserving genuine no-tag behavior.",

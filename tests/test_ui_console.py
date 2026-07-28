@@ -5202,3 +5202,20 @@ def test_ar630_gate_watch_group_wired_into_cockpit_vocab(tmp_path):
     assert 'tone: "low"' in js
     assert 'gate_watch: "gate"' in js
     assert '"review gate": "inbox.action.review_gate"' in js
+
+
+def test_ar631_home_screenfit_sections_and_js(tmp_path):
+    # TASK-AR-631: verdict strip above the cockpit; summary strip + flow tiles
+    # after it; renderer wired into renderAll and cockpit refresh.
+    html = ui_console.build_response("/", tmp_path).body.decode("utf-8")
+    js = ui_console.build_response("/app.js", tmp_path).body.decode("utf-8")
+    assert html.index('id="home-verdict"') < html.index('id="cockpit"')
+    assert html.index('id="cockpit"') < html.index('id="home-strip"')
+    assert html.index('id="home-strip"') < html.index('id="flow-tiles"')
+    assert html.index('id="flow-tiles"') < html.index('id="work-state-hero"')
+    assert "function renderHomeSummary()" in js
+    assert "renderHomeSummary();" in js
+    assert "componentSparkline(series" in js
+    # decision queue caps at 5 group cards with a quiet overflow note
+    assert "nonEmptyKeys.slice(0, 5)" in js
+    assert "cockpit.more_groups" in js

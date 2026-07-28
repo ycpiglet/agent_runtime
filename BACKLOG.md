@@ -1,5 +1,12 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-07-28 v0.8 Adoption and Enforcement active
+
+- Integration first: `TASK-AR-631` in `TASKSET-AR-CONSOLE-OVERHAUL-P1` passed exact-commit independent W4b; integrate its lifecycle recovery and then complete W6 closeout.
+- P0 next: `TASK-AR-639` restores Work CLI producer-consumer parity and blocks task/claim/pointer/branch projection split-brain.
+- Sequence: `TASK-AR-640` profiles -> `641` adopt plan -> `642` ownership sync -> `643` consumer closure -> `644` hooks -> `645` compound/scribe -> `646` model economy -> `647` Allimbot/security -> `648` Bean pilot -> `649` Allimbot pilot -> `650` Autofolio migration -> `651` RC.
+- Release boundary: no v0.8 tag or GitHub Release until both pilots, the Autofolio rehearsal, clean-host install, full suite, and mandatory browser smoke pass.
+
 ## 2026-07-23 TASK-AR-619 complete; TASK-AR-618 next
 
 - Completed: PR #336 and its post-merge main run both passed Python 3.10/3.11/3.12 after deterministic cadence query isolation and exact argv hardening.

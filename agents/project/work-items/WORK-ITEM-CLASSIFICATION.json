@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-27T10:30:38+09:00",
-  "record_count": 488,
+  "generated_at": "2026-07-28T16:38:07+09:00",
+  "record_count": 519,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -5294,7 +5294,18 @@
       "title": "스크롤 없이 5초 내 '개입 필요 여부'에 예/아니오로 답하는 단일 화면을 완성한다.",
       "path": "agents/lead_engineer/tasks/TASK-AR-631.md",
       "parent_id": "TASKSET-AR-CONSOLE-OVERHAUL-P1",
-      "status": "planned"
+      "status": "review"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-631-001",
+      "level": "unit",
+      "number": "40.1.2.1",
+      "label": "Unit 40.1.2.1",
+      "id": "UNIT-TASK-AR-631-001",
+      "title": "UNIT-TASK-AR-631-001 - 홈 Decision Screenfit",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-631/UNIT-TASK-AR-631-001.md",
+      "parent_id": "TASK-AR-631",
+      "status": "review"
     },
     {
       "key": "task:TASK-AR-632",
@@ -5372,6 +5383,336 @@
       "path": "agents/lead_engineer/tasks/TASK-AR-638.md",
       "parent_id": "TASKSET-AR-CONSOLE-OVERHAUL-P1",
       "status": "planned"
+    },
+    {
+      "key": "initiative:INIT-AR-V080-ADOPTION-ENFORCEMENT",
+      "level": "initiative",
+      "number": "41",
+      "label": "Initiative 41",
+      "id": "INIT-AR-V080-ADOPTION-ENFORCEMENT",
+      "title": "Agent Runtime v0.8 Adoption and Enforcement",
+      "path": "agents/project/initiatives/INIT-AR-V080-ADOPTION-ENFORCEMENT.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+      "level": "taskset",
+      "number": "41.1",
+      "label": "Taskset 41.1",
+      "id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+      "title": "v0.8 Adoption and Enforcement",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-V080-ADOPTION-ENFORCEMENT",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-639",
+      "level": "task",
+      "number": "41.1.1",
+      "label": "Task 41.1.1",
+      "id": "TASK-AR-639",
+      "title": "Make registered work executable and make implemented-but-unclaimed work visible witho…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-639.md",
+      "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-639-001",
+      "level": "unit",
+      "number": "41.1.1.1",
+      "label": "Unit 41.1.1.1",
+      "id": "UNIT-TASK-AR-639-001",
+      "title": "UNIT-TASK-AR-639-001 - Align work registration output with verify and close consumers",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-639/UNIT-TASK-AR-639-001.md",
+      "parent_id": "TASK-AR-639",
+      "status": "worker_ready"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-639-002",
+      "level": "unit",
+      "number": "41.1.1.2",
+      "label": "Unit 41.1.1.2",
+      "id": "UNIT-TASK-AR-639-002",
+      "title": "UNIT-TASK-AR-639-002 - Block task-claim-projection split-brain and support explicit recovery",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-639/UNIT-TASK-AR-639-002.md",
+      "parent_id": "TASK-AR-639",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-640",
+      "level": "task",
+      "number": "41.1.2",
+      "label": "Task 41.1.2",
+      "id": "TASK-AR-640",
+      "title": "Represent shared capabilities and host ownership without requiring a project-specific…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-640.md",
+      "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-640-001",
+      "level": "unit",
+      "number": "41.1.2.1",
+      "label": "Unit 41.1.2.1",
+      "id": "UNIT-TASK-AR-640-001",
+      "title": "UNIT-TASK-AR-640-001 - Add backward-compatible profile and ownership config schema",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-640/UNIT-TASK-AR-640-001.md",
+      "parent_id": "TASK-AR-640",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-641",
+      "level": "task",
+      "number": "41.1.3",
+      "label": "Task 41.1.3",
+      "id": "TASK-AR-641",
+      "title": "Let an existing repository understand exactly what Agent Runtime would add, own, pres…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-641.md",
+      "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-641-001",
+      "level": "unit",
+      "number": "41.1.3.1",
+      "label": "Unit 41.1.3.1",
+      "id": "UNIT-TASK-AR-641-001",
+      "title": "UNIT-TASK-AR-641-001 - Implement read-only brownfield adoption planner",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-641/UNIT-TASK-AR-641-001.md",
+      "parent_id": "TASK-AR-641",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-642",
+      "level": "task",
+      "number": "41.1.4",
+      "label": "Task 41.1.4",
+      "id": "TASK-AR-642",
+      "title": "Update safe runtime files without overwriting host state or allowing one expected sea…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-642.md",
+      "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-642-001",
+      "level": "unit",
+      "number": "41.1.4.1",
+      "label": "Unit 41.1.4.1",
+      "id": "UNIT-TASK-AR-642-001",
+      "title": "UNIT-TASK-AR-642-001 - Implement ownership manifest and sync reconcile",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-642/UNIT-TASK-AR-642-001.md",
+      "parent_id": "TASK-AR-642",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-643",
+      "level": "task",
+      "number": "41.1.5",
+      "label": "Task 41.1.5",
+      "id": "TASK-AR-643",
+      "title": "Guarantee that every capability advertised to a clean host has all executable depende…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-643.md",
+      "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-643-001",
+      "level": "unit",
+      "number": "41.1.5.1",
+      "label": "Unit 41.1.5.1",
+      "id": "UNIT-TASK-AR-643-001",
+      "title": "UNIT-TASK-AR-643-001 - Add profile-aware asset dependency closure and clean-host lifecycle smoke",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-643/UNIT-TASK-AR-643-001.md",
+      "parent_id": "TASK-AR-643",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-644",
+      "level": "task",
+      "number": "41.1.6",
+      "label": "Task 41.1.6",
+      "id": "TASK-AR-644",
+      "title": "Make the harness actually enter and re-enter its governance path on supported agent c…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-644.md",
+      "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-644-001",
+      "level": "unit",
+      "number": "41.1.6.1",
+      "label": "Unit 41.1.6.1",
+      "id": "UNIT-TASK-AR-644-001",
+      "title": "UNIT-TASK-AR-644-001 - Replace platform-specific hook shims with verified Python entrypoints",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-644/UNIT-TASK-AR-644-001.md",
+      "parent_id": "TASK-AR-644",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-645",
+      "level": "task",
+      "number": "41.1.7",
+      "label": "Task 41.1.7",
+      "id": "TASK-AR-645",
+      "title": "Prevent repeated mistakes and accumulated context without forcing every host into one…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-645.md",
+      "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-645-001",
+      "level": "unit",
+      "number": "41.1.7.1",
+      "label": "Unit 41.1.7.1",
+      "id": "UNIT-TASK-AR-645-001",
+      "title": "UNIT-TASK-AR-645-001 - Introduce per-entry task-linked compound records and retrieval",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-001.md",
+      "parent_id": "TASK-AR-645",
+      "status": "worker_ready"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-645-002",
+      "level": "unit",
+      "number": "41.1.7.2",
+      "label": "Unit 41.1.7.2",
+      "id": "UNIT-TASK-AR-645-002",
+      "title": "UNIT-TASK-AR-645-002 - Add configurable scribe state adapters and generated projections",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-002.md",
+      "parent_id": "TASK-AR-645",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-646",
+      "level": "task",
+      "number": "41.1.8",
+      "label": "Task 41.1.8",
+      "id": "TASK-AR-646",
+      "title": "Use lower-cost native subagents by default where appropriate and prove when escalatio…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-646.md",
+      "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-646-001",
+      "level": "unit",
+      "number": "41.1.8.1",
+      "label": "Unit 41.1.8.1",
+      "id": "UNIT-TASK-AR-646-001",
+      "title": "UNIT-TASK-AR-646-001 - Add effective-tier detection and dispatch cost ledger",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-646/UNIT-TASK-AR-646-001.md",
+      "parent_id": "TASK-AR-646",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-647",
+      "level": "task",
+      "number": "41.1.9",
+      "label": "Task 41.1.9",
+      "id": "TASK-AR-647",
+      "title": "Use current durable, allowlisted Allimbot delivery and add reusable security/external…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-647.md",
+      "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-647-001",
+      "level": "unit",
+      "number": "41.1.9.1",
+      "label": "Unit 41.1.9.1",
+      "id": "UNIT-TASK-AR-647-001",
+      "title": "UNIT-TASK-AR-647-001 - Replace legacy notifier with optional native ProjectEmitter adapter",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-647/UNIT-TASK-AR-647-001.md",
+      "parent_id": "TASK-AR-647",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-648",
+      "level": "task",
+      "number": "41.1.10",
+      "label": "Task 41.1.10",
+      "id": "TASK-AR-648",
+      "title": "Prove lightweight adoption preserves the existing editorial harness while adding task…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-648.md",
+      "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-001",
+      "level": "unit",
+      "number": "41.1.10.1",
+      "label": "Unit 41.1.10.1",
+      "id": "UNIT-TASK-AR-648-001",
+      "title": "UNIT-TASK-AR-648-001 - Adopt and exercise core plus web-content in Bean Wiki",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-001.md",
+      "parent_id": "TASK-AR-648",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-649",
+      "level": "task",
+      "number": "41.1.11",
+      "label": "Task 41.1.11",
+      "id": "TASK-AR-649",
+      "title": "Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-649.md",
+      "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-649-001",
+      "level": "unit",
+      "number": "41.1.11.1",
+      "label": "Unit 41.1.11.1",
+      "id": "UNIT-TASK-AR-649-001",
+      "title": "UNIT-TASK-AR-649-001 - Adopt and exercise core plus security-service in Allimbot",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md",
+      "parent_id": "TASK-AR-649",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-650",
+      "level": "task",
+      "number": "41.1.12",
+      "label": "Task 41.1.12",
+      "id": "TASK-AR-650",
+      "title": "Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-650.md",
+      "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-650-001",
+      "level": "unit",
+      "number": "41.1.12.1",
+      "label": "Unit 41.1.12.1",
+      "id": "UNIT-TASK-AR-650-001",
+      "title": "UNIT-TASK-AR-650-001 - Execute and document the Autofolio migration rehearsal",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-650/UNIT-TASK-AR-650-001.md",
+      "parent_id": "TASK-AR-650",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-651",
+      "level": "task",
+      "number": "41.1.13",
+      "label": "Task 41.1.13",
+      "id": "TASK-AR-651",
+      "title": "Produce an exact, installable v0.8.0-rc.1 candidate whose release claims are backed b…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-651.md",
+      "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-651-001",
+      "level": "unit",
+      "number": "41.1.13.1",
+      "label": "Unit 41.1.13.1",
+      "id": "UNIT-TASK-AR-651-001",
+      "title": "UNIT-TASK-AR-651-001 - Assemble and verify the v0.8.0-rc.1 release candidate",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-651/UNIT-TASK-AR-651-001.md",
+      "parent_id": "TASK-AR-651",
+      "status": "worker_ready"
     }
   ]
 }
