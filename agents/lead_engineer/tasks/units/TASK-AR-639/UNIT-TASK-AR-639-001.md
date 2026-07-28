@@ -9,11 +9,11 @@ task_id: TASK-AR-639
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: review
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T17:09:13+09:00
+updated_at: 2026-07-28T17:36:56+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
@@ -48,6 +48,11 @@ verified_at: 2026-07-28T17:09:13+09:00
 verified_by: le-20260728-170130-kst-codexroot-v080-639-001
 evidence_refs:
   - reviews/VERIFY-2026-07-28-unit-task-ar-639-001-20260728170913.json
+  - reviews/W4B-2026-07-28-unit-task-ar-639-001.md
+resolution: done
+completed_at: 2026-07-28T17:36:56+09:00
+closed_by: codex-root-v080-w6
+measurement_unavailable_reason: Pilot work spanned lifecycle recovery, CI, independent verification, and manual projection reconciliation before reliable per-unit time and token metering was available.
 ---
 
 # UNIT-TASK-AR-639-001 - Align work registration output with verify and close consumers
@@ -99,3 +104,17 @@ Report the failing-before/passing-after round trip and the compatibility behavio
 ## Stop Boundary
 
 Stop if the fix requires changing work-item identity or rewriting historical completed records.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-28T17:36:56+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Pilot work spanned lifecycle recovery, CI, independent verification, and manual projection reconciliation before reliable per-unit time and token metering was available.
+- Closed by: `codex-root-v080-w6`
+- Evidence:
+  - `reviews/VERIFY-2026-07-28-unit-task-ar-639-001-20260728170913.json`
+  - `reviews/W4B-2026-07-28-unit-task-ar-639-001.md`
+<!-- work-close:end -->
