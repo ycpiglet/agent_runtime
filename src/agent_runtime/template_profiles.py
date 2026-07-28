@@ -34,11 +34,14 @@ def selected_paths(template_root: Path, profiles: tuple[str, ...]) -> tuple[Path
     requested = ("core", *[profile for profile in profiles if profile != "core"])
     if any(profile not in declared for profile in requested):
         raise ValueError("unknown template profile")
-    files = sorted((path for path in template_root.rglob("*") if path.is_file()), key=lambda path: path.relative_to(template_root).as_posix())
+    files = sorted(
+        (path for path in template_root.rglob("*") if path.is_file() and "__pycache__" not in path.parts and path.suffix not in {".pyc", ".pyo"}),
+        key=lambda path: path.relative_to(template_root).as_posix(),
+    )
     selected: set[Path] = set()
     for profile in requested:
         rules = declared[profile]
-        for pattern in [*rules["include"], *rules["exclude"]]:
+        for pattern in rules["include"]:
             if not any(fnmatch.fnmatch(path.relative_to(template_root).as_posix(), pattern) for path in files):
                 raise ValueError(f"unmatched template profile pattern: {pattern}")
         for path in files:

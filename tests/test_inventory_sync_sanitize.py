@@ -96,6 +96,7 @@ def test_packaged_profile_selection_is_deterministic_across_effective_combinatio
     assert "scripts/allimbot.py" not in names(core)
     assert "scripts/allimbot.py" in names(security) <= names(full)
     assert all(not path.startswith("scripts/test_") for path in names(full))
+    assert all("__pycache__" not in path and not path.endswith((".pyc", ".pyo")) for path in names(full))
 
 
 def test_tracked_generated_boundaries_are_excluded_from_inventory_and_adoption(tmp_path):

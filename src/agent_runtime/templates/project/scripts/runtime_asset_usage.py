@@ -10,7 +10,10 @@ without hiding drift.
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
+import re
+import sys
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
@@ -18,6 +21,8 @@ from typing import Any
 
 
 REGISTRY_PATH = Path("agents/project/RUNTIME-ASSET-REGISTRY.json")
+PROFILE_MANIFEST_PATH = Path("agents/project/RUNTIME-PROFILE-MANIFEST.json")
+PROFILE_SCHEMA = "agent-runtime-template-profiles/v1"
 VALID_SCHEMA = "agent-runtime-asset-registry/v1"
 VALID_STATUSES = {"active", "watch", "deprecated", "removed"}
 VALID_LIFECYCLES = {"keep", "modify", "deprecate", "remove", "observe"}
@@ -73,6 +78,59 @@ def _read_text(path: Path) -> str:
         return ""
 
 
+def _template_root(root: Path) -> Path:
+    """Locate the immutable template inventory, never the host's product tree."""
+    source = root / "src/agent_runtime/templates/project"
+    if source.is_dir():
+        return source
+    try:
+        from agent_runtime.sync import default_template_root
+        return default_template_root()
+    except ModuleNotFoundError:
+        # Standalone, copied-script compatibility only. Installed hosts have the
+        # package available; this branch is intentionally not used by sync.
+        return root
+
+
+def _profile_paths(template_root: Path, profiles: tuple[str, ...]) -> set[str] | None:
+    """Return the effective host projection, or ``None`` when unmanaged.
+
+    The manifest is shipped with the template and therefore remains available
+    after sync.  Absence or malformed contents are a blocking condition; the
+    gate must never silently validate a wider, accidental file set.
+    """
+    manifest = _read_json(template_root / PROFILE_MANIFEST_PATH)
+    if manifest is None:
+        return None
+    if manifest.get("schema") != PROFILE_SCHEMA or not isinstance(manifest.get("profiles"), dict):
+        return None
+    declared = manifest["profiles"]
+    requested = ("core", *[profile for profile in profiles if profile != "core"])
+    if any(profile not in declared for profile in requested):
+        return None
+    files = {
+        _rel(template_root, path)
+        for path in template_root.rglob("*")
+        if path.is_file() and "__pycache__" not in path.parts and path.suffix not in {".pyc", ".pyo"}
+    }
+    selected: set[str] = set()
+    for profile in requested:
+        rules = declared[profile]
+        if not isinstance(rules, dict):
+            return None
+        includes = rules.get("include", [])
+        excludes = rules.get("exclude", [])
+        if not all(isinstance(item, str) and item for item in [*includes, *excludes]):
+            return None
+        for pattern in includes:
+            if not any(fnmatch.fnmatch(path, pattern) for path in files):
+                return None
+            selected.update(path for path in files if fnmatch.fnmatch(path, pattern))
+        for pattern in excludes:
+            selected.difference_update(path for path in files if fnmatch.fnmatch(path, pattern))
+    return selected
+
+
 def _token_hits(text: str, tokens: list[str]) -> int:
     lowered = text.lower()
     return sum(lowered.count(token.lower()) for token in tokens if token.strip())
@@ -101,7 +159,40 @@ def _validate_registry(root: Path, findings: list[Finding]) -> dict[str, Any]:
     return registry
 
 
-def _analyze_asset(root: Path, asset: dict[str, Any], findings: list[Finding]) -> AssetMetric:
+def _references(text: str) -> set[str]:
+    return {match.replace("\\", "/") for match in re.findall(r"(?:scripts|skills)/[A-Za-z0-9_./-]+(?:\.py|\.cmd|\.md)?", text)}
+
+
+def _validate_declared_dependencies(host_root: Path, template_root: Path, selected: set[str] | None, findings: list[Finding]) -> None:
+    if selected is None:
+        return
+    surface_root = host_root if (host_root / PROFILE_MANIFEST_PATH).exists() else template_root
+    installed_root = host_root if (host_root / PROFILE_MANIFEST_PATH).exists() else template_root
+    for rel in sorted(selected):
+        if not (rel.startswith("skills/") and rel.endswith("SKILL.md")) and rel not in {".codex/hooks.json", "docs/agent_bootstrap/codex.md", "agents/lead_engineer/REPORTING-FORMAT.md"}:
+            continue
+        for dependency in _references(_read_text(surface_root / rel)):
+            if dependency in selected:
+                if not (installed_root / dependency).exists():
+                    findings.append(Finding("block", "dependency-missing-installed", dependency, f"selected dependency referenced by {rel} is absent from host"))
+            elif (template_root / dependency).exists():
+                findings.append(Finding("block", "dependency-cross-profile", dependency, f"referenced by {rel} but excluded from effective profile set"))
+            else:
+                findings.append(Finding("block", "dependency-missing", dependency, f"referenced by {rel} is absent from template"))
+
+
+def _validate_template_registry(template_root: Path, selected: set[str] | None, findings: list[Finding]) -> None:
+    registry = _read_json(template_root / REGISTRY_PATH) or {}
+    for asset in registry.get("assets", []):
+        if not isinstance(asset, dict):
+            continue
+        for dependency in _as_list(asset.get("paths")):
+            if dependency not in (selected or set()):
+                subject = "dependency-cross-profile" if (template_root / dependency).exists() else "dependency-missing"
+                findings.append(Finding("block", subject, dependency, "registry asset is not supplied by effective profile"))
+
+
+def _analyze_asset(root: Path, asset: dict[str, Any], findings: list[Finding], selected: set[str] | None) -> AssetMetric:
     asset_id = str(asset.get("id") or "").strip() or "asset:missing-id"
     kind = str(asset.get("kind") or "unknown").strip()
     status = str(asset.get("status") or "watch").strip()
@@ -123,6 +214,8 @@ def _analyze_asset(root: Path, asset: dict[str, Any], findings: list[Finding]) -
         path = root / raw_path
         if path.exists():
             existing_paths += 1
+            if selected is not None and raw_path not in selected:
+                findings.append(Finding("block", f"asset-cross-profile:{asset_id}", raw_path, "registered asset is outside the effective profile set"))
         elif status in {"active", "watch"}:
             findings.append(Finding("block", f"asset-missing:{asset_id}", raw_path, "registered active asset path is missing"))
 
@@ -167,16 +260,22 @@ def _analyze_asset(root: Path, asset: dict[str, Any], findings: list[Finding]) -
     return AssetMetric(asset_id, kind, status, lifecycle, existing_paths, evidence_count, usage_count, distinct_hits)
 
 
-def analyze(root: Path) -> tuple[list[Finding], list[AssetMetric]]:
+def analyze(root: Path, profiles: tuple[str, ...] = ("core",)) -> tuple[list[Finding], list[AssetMetric]]:
     root = root.resolve()
     findings: list[Finding] = []
     metrics: list[AssetMetric] = []
+    template_root = _template_root(root)
+    selected = _profile_paths(template_root, profiles)
+    if selected is None:
+        findings.append(Finding("block", "profile-manifest:missing-or-invalid", PROFILE_MANIFEST_PATH.as_posix(), "a valid profile manifest and requested profile selection are required"))
+    _validate_declared_dependencies(root, template_root, selected, findings)
+    _validate_template_registry(template_root, selected, findings)
     registry = _validate_registry(root, findings)
     assets = registry.get("assets") if registry else []
     if isinstance(assets, list):
         for asset in assets:
             if isinstance(asset, dict):
-                metrics.append(_analyze_asset(root, asset, findings))
+                metrics.append(_analyze_asset(root, asset, findings, selected if root == template_root else None))
             else:
                 findings.append(Finding("block", "asset:not-object", REGISTRY_PATH.as_posix(), "asset entries must be JSON objects"))
     return findings, metrics
@@ -215,12 +314,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Repository root")
     parser.add_argument("--check", action="store_true", help="Fail on block findings")
     parser.add_argument("--json", action="store_true", help="Emit JSON payload")
+    parser.add_argument("--profile", action="append", default=[], help="Additive profile name (core is always selected)")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    findings, metrics = analyze(args.root)
+    findings, metrics = analyze(args.root, tuple(args.profile or ["core"]))
     if args.json:
         print(
             json.dumps(
