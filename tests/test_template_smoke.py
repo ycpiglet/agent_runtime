@@ -187,7 +187,8 @@ def test_clean_host_runs_work_session_report_and_dependency_lifecycle(tmp_path):
     _run(["git", "add", "."], cwd=host); _run(["git", "commit", "-qm", "lifecycle"], cwd=host)
     baseline = _run([PYTHON, "scripts/session_baseline.py", "--root", str(host), "--output-dir", str(host / "agents/runtime/session_baselines"), "--json"], cwd=host)
     baseline_path = Path(json.loads(baseline.stdout)["baseline"])
-    _run([PYTHON, "scripts/dirty_intake.py", "--root", str(host), "--baseline", str(baseline_path), "--declared-path", str(baseline_path.relative_to(host)), "--declared-path", "scripts/__pycache__/session_baseline.cpython-310.pyc", "--check", "--json"], cwd=host)
+    session_cache = f"scripts/__pycache__/session_baseline.{sys.implementation.cache_tag}.pyc"
+    _run([PYTHON, "scripts/dirty_intake.py", "--root", str(host), "--baseline", str(baseline_path), "--declared-path", str(baseline_path.relative_to(host)), "--declared-path", session_cache, "--check", "--json"], cwd=host)
     body = host / "body.md"; body.write_text("ready", encoding="utf-8")
     _run([PYTHON, "scripts/save_report.py", "brief", "--title", "Smoke", "--audience", "Owner", "--scale", "mini", "--body-file", str(body), "--now", "2026-07-29T00:00:00+09:00", "--root", str(host)], cwd=host)
     report = next((host / "agents/lead_engineer/reports").glob("BRIEF-*.md"))
