@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from collections import Counter
 from dataclasses import dataclass
@@ -18,6 +19,21 @@ SKIP_DIRS = {
     ".ruff_cache",
     "node_modules",
 }
+
+GENERATED_COMPONENTS = {
+    ".branches", ".next", ".pytest_cache", ".temp", ".venv", ".vercel", ".vinext", ".worktrees",
+    ".wrangler", "__pycache__", "build", "dist", "node_modules", "worktrees",
+}
+GENERATED_FILENAMES = {"next-env.d.ts", "tsconfig.tsbuildinfo"}
+
+
+@dataclass(frozen=True)
+class AdoptionScan:
+    paths: tuple[str, ...]
+    generated_paths: tuple[str, ...]
+    strategy: str
+    warnings: tuple[str, ...] = ()
+    ignored_count: int = 0
 
 LOCAL_PREFIXES = (
     ".agents/",
@@ -267,10 +283,59 @@ def iter_repo_paths(root: Path) -> list[Path]:
     return sorted(paths, key=lambda p: p.relative_to(root).as_posix().lower())
 
 
+def generated_path_root(path: str | Path) -> str | None:
+    """Return the generated boundary responsible for a repo-relative path."""
+    normalized = _normalize(path)
+    parts = PurePosixPath(normalized).parts
+    for index, part in enumerate(parts):
+        if part in GENERATED_COMPONENTS or part.endswith(".egg-info"):
+            return "/".join(parts[: index + 1])
+    if parts and parts[-1] in GENERATED_FILENAMES:
+        return normalized
+    return None
+
+
+def is_generated_path(path: str | Path) -> bool:
+    return generated_path_root(path) is not None
+
+
+def adoption_scan(root: Path) -> AdoptionScan:
+    """Return source-visible files using Git's ignore engine when available."""
+    root = root.resolve()
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "-co", "--exclude-standard", "-z"],
+            check=False, capture_output=True, text=False, timeout=10,
+        )
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr.decode("utf-8", "replace").strip() or f"git rc={result.returncode}")
+        candidates = [entry.decode("utf-8", "surrogateescape") for entry in result.stdout.split(b"\0") if entry]
+        ignored = subprocess.run(["git", "-C", str(root), "ls-files", "-oi", "--exclude-standard", "-z"], check=False, capture_output=True, text=False, timeout=10)
+        if ignored.returncode != 0:
+            raise RuntimeError(ignored.stderr.decode("utf-8", "replace").strip() or f"git ignored-query rc={ignored.returncode}")
+        ignored_paths = [entry.decode("utf-8", "surrogateescape") for entry in ignored.stdout.split(b"\0") if entry]
+        ignored_count = len(ignored_paths)
+        strategy, warnings = "git-ignore-aware", ()
+    except Exception as exc:
+        candidates = [path.relative_to(root).as_posix() for path in iter_repo_paths(root)]
+        ignored_paths = []
+        strategy, warnings, ignored_count = "filesystem-conservative", (f"git ignore query unavailable; conservative fallback: {exc}",), 0
+    visible: list[str] = []
+    generated: list[str] = []
+    for rel in sorted(set(candidates + ignored_paths)):
+        path = root / rel
+        if not path.exists() and not path.is_symlink():
+            continue
+        if is_generated_path(rel):
+            generated.append(rel)
+        elif rel in candidates:
+            visible.append(rel)
+    return AdoptionScan(tuple(visible), tuple(sorted(set(generated))), strategy, warnings, ignored_count)
+
+
 def analyze(root: Path) -> list[InventoryItem]:
     items: list[InventoryItem] = []
-    for path in iter_repo_paths(root):
-        rel = path.relative_to(root).as_posix()
+    for rel in adoption_scan(root).paths:
         classification, reason = classify_path(rel)
         items.append(InventoryItem(rel, classification, reason))
     return items

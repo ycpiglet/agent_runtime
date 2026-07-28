@@ -65,6 +65,51 @@ def _write(path: Path, text: str = ""):
     path.write_text(text, encoding="utf-8")
 
 
+def test_public_inventory_uses_git_ignore_and_generated_boundary(tmp_path):
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    _write(tmp_path / ".gitignore", "ignored/\n.next/\n")
+    _write(tmp_path / "ignored" / "private.md")
+    _write(tmp_path / ".next" / "cache" / "x")
+    _write(tmp_path / "space name.md")
+    from agent_runtime.inventory import analyze
+    paths = {item.path for item in analyze(tmp_path)}
+    assert "space name.md" in paths
+    assert "ignored/private.md" not in paths
+    assert ".next/cache/x" not in paths
+
+
+def test_tracked_generated_boundaries_are_excluded_from_inventory_and_adoption(tmp_path):
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    generated = {
+        ".worktrees/task/file.py",
+        ".claude/worktrees/task/file.py",
+        "src/pkg.egg-info/PKG-INFO",
+        "supabase/.branches/a/db",
+        "web/next-env.d.ts",
+        "web/tsconfig.tsbuildinfo",
+    }
+    for rel in generated | {"src/source.py"}:
+        _write(tmp_path / rel, "x\n")
+    subprocess.run(["git", "-C", str(tmp_path), "add", "-f", *sorted(generated | {"src/source.py"})], check=True)
+    from agent_runtime.adoption import build_adoption_plan, plan_json
+    from agent_runtime.inventory import analyze
+
+    plan = build_adoption_plan(tmp_path)
+    public_paths = {item.path for item in analyze(tmp_path)}
+    assert "src/source.py" in public_paths and "src/source.py" in plan.source_paths
+    assert not (generated & public_paths)
+    assert generated <= set(plan.generated_paths)
+    payload = json.loads(plan_json(plan))
+    assert set(payload["inventory"]["generated_roots"]) >= {
+        ".worktrees",
+        ".claude/worktrees",
+        "src/pkg.egg-info",
+        "supabase/.branches",
+        "web/next-env.d.ts",
+        "web/tsconfig.tsbuildinfo",
+    }
+
+
 def _digest(text: str) -> str:
     canonical = text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
     return f"sha256:{hashlib.sha256(canonical).hexdigest()}"

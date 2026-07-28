@@ -1,0 +1,25 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-28-unit-task-ar-641-001-20260728210208",
+  "work_id": "UNIT-TASK-AR-641-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-641/UNIT-TASK-AR-641-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-641",
+  "unit_id": "UNIT-TASK-AR-641-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-28T21:02:08+09:00",
+  "verified_by": "worker_standard",
+  "command_count": 3,
+  "commands": [
+    {"command": "python -m pytest tests/test_adoption.py tests/test_inventory_sync_sanitize.py tests/test_doctor.py -q", "status": "passed", "returncode": 0, "stdout": "113 passed in 8.24s", "stderr": ""},
+    {"command": "python -m pytest -q", "status": "passed", "returncode": 0, "stdout": "2304 passed, 3 skipped, 4 warnings in 109.09s", "stderr": "pre-existing invalid escape warning in ui_console_assets.py"},
+    {"command": "python -m compileall -q src/agent_runtime", "status": "passed", "returncode": 0, "stdout": "", "stderr": ""}
+  ],
+  "pilot_read_only": {
+    "bean_wiki": {"scan_strategy": "git-ignore-aware", "source_paths": 361, "generated_paths": 72129, "assets": 17, "actions": 72431, "conflicts": 0, "stable": true},
+    "allimbot": {"scan_strategy": "git-ignore-aware", "source_paths": 276, "generated_paths": 56246, "assets": 12, "actions": 56548, "conflicts": 2, "stable": true},
+    "immutability": "git status and git diff binary hashes were identical before and after both read-only plan computations"
+  },
+  "notes": ["No host files were written; adopt has no apply mode.", "Generated files are filtered from source-visible asset/conflict detection."]
+}

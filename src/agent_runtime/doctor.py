@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Callable
 
 from . import config as _config
+from . import adoption as _adoption
 from . import lock as _lock
 from . import sync as _sync
 
@@ -684,6 +685,33 @@ def build_doctor_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
     return DoctorPlan(root=root, findings=tuple(findings), config_loaded=cfg_ok), findings
 
 
+def build_pre_adoption_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
+    """Read-only checks for a host that has not installed Agent Runtime yet."""
+    root = root.resolve()
+    findings: list[DoctorFinding] = []
+    if not root.is_dir():
+        _findings_append(findings, "blocker", area="adoption", path=str(root), kind="root-missing", detail="host root is not readable")
+        return DoctorPlan(root=root, findings=tuple(findings)), findings
+    try:
+        plan = _adoption.build_adoption_plan(root)
+    except Exception as exc:
+        _findings_append(findings, "blocker", area="adoption", path=".", kind="adoption-plan-failed", detail=str(exc))
+        return DoctorPlan(root=root, findings=tuple(findings)), findings
+    _findings_append(findings, "info", area="adoption", path=".", kind="adoption-plan-ready", detail=f"scan={plan.scan_strategy} source_paths={len(plan.source_paths)}")
+    for warning in plan.scan_warnings:
+        _findings_append(findings, "warning", area="adoption", path=".", kind="scan-fallback", detail=warning)
+    for asset in plan.assets:
+        _findings_append(findings, "info", area="adoption-assets", path=asset, kind="host-asset-detected", detail="source-visible host asset preserved by adoption planning")
+    for action in plan.conflicts:
+            _findings_append(findings, "blocker", area="adoption", path=action.path, kind="adoption-conflict", detail=action.reason)
+    if plan.config_invalid:
+        _findings_append(findings, "blocker", area="adoption", path="agent_runtime.yml", kind="config-invalid", detail="present config is malformed for adoption planning")
+    for finding in plan.findings:
+        if finding.startswith("external symlink"):
+            _findings_append(findings, "blocker", area="adoption", path=".", kind="unsafe-symlink", detail=finding)
+    return DoctorPlan(root=root, findings=tuple(findings), config_loaded=False), findings
+
+
 def render(plan: DoctorPlan) -> str:
     lines = [
         "# Agent Runtime Doctor",
@@ -787,8 +815,10 @@ def render_json(plan: DoctorPlan, *, actions: list[str] | None = None) -> str:
     return json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2)
 
 
-def run_doctor(root: Path, *, check: bool, repair: bool = False, json_output: bool = False) -> int:
-    plan, _ = build_doctor_plan(root)
+def run_doctor(root: Path, *, check: bool, repair: bool = False, json_output: bool = False, pre_adoption: bool = False) -> int:
+    if pre_adoption and repair:
+        raise ValueError("doctor --pre-adoption cannot be combined with --repair")
+    plan, _ = build_pre_adoption_plan(root) if pre_adoption else build_doctor_plan(root)
     if repair:
         updated, actions = apply_doctor_repairs(root, plan)
         if json_output:
@@ -817,13 +847,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--check", action="store_true", help="Fail if blockers exist")
     parser.add_argument("--repair", action="store_true", help="Attempt safe auto-repair actions")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable doctor report")
+    parser.add_argument("--pre-adoption", action="store_true", help="Run read-only brownfield adoption readiness checks")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-    return run_doctor(args.root, check=args.check, repair=args.repair, json_output=args.json)
+    return run_doctor(args.root, check=args.check, repair=args.repair, json_output=args.json, pre_adoption=args.pre_adoption)
 
 
 if __name__ == "__main__":
