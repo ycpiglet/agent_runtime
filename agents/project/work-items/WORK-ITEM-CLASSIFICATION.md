@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-28T17:38:23+09:00
+generated_at: 2026-07-28T17:56:50+09:00
 record_count: 519
 ---
 
@@ -530,9 +530,9 @@ record_count: 519
 | 40.1.9 | Task 40.1.9 | task | `TASK-AR-638` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-638.md` | 홈 재구성과 병행해 한국어 단독 Owner와의 언어 불일치를 끝내고, 컬러/토큰/아이콘/칸반의 시각 언어를 '조용한 의사결정 콘솔'로 재정렬한다. |
 | 41 | Initiative 41 | initiative | `INIT-AR-V080-ADOPTION-ENFORCEMENT` | - | active | `agents/project/initiatives/INIT-AR-V080-ADOPTION-ENFORCEMENT.md` | Agent Runtime v0.8 Adoption and Enforcement |
 | 41.1 | Taskset 41.1 | taskset | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | `INIT-AR-V080-ADOPTION-ENFORCEMENT` | active | `BACKLOG-BOARD.md` | v0.8 Adoption and Enforcement |
-| 41.1.1 | Task 41.1.1 | task | `TASK-AR-639` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-639.md` | Make registered work executable and make implemented-but-unclaimed work visible witho… |
+| 41.1.1 | Task 41.1.1 | task | `TASK-AR-639` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | in_progress | `agents/lead_engineer/tasks/TASK-AR-639.md` | Make registered work executable and make implemented-but-unclaimed work visible witho… |
 | 41.1.1.1 | Unit 41.1.1.1 | unit | `UNIT-TASK-AR-639-001` | `TASK-AR-639` | completed | `agents/lead_engineer/tasks/units/TASK-AR-639/UNIT-TASK-AR-639-001.md` | UNIT-TASK-AR-639-001 - Align work registration output with verify and close consumers |
-| 41.1.1.2 | Unit 41.1.1.2 | unit | `UNIT-TASK-AR-639-002` | `TASK-AR-639` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-639/UNIT-TASK-AR-639-002.md` | UNIT-TASK-AR-639-002 - Block task-claim-projection split-brain and support explicit recovery |
+| 41.1.1.2 | Unit 41.1.1.2 | unit | `UNIT-TASK-AR-639-002` | `TASK-AR-639` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-639/UNIT-TASK-AR-639-002.md` | UNIT-TASK-AR-639-002 - Block task-claim-projection split-brain and support explicit recovery |
 | 41.1.2 | Task 41.1.2 | task | `TASK-AR-640` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-640.md` | Represent shared capabilities and host ownership without requiring a project-specific… |
 | 41.1.2.1 | Unit 41.1.2.1 | unit | `UNIT-TASK-AR-640-001` | `TASK-AR-640` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-640/UNIT-TASK-AR-640-001.md` | UNIT-TASK-AR-640-001 - Add backward-compatible profile and ownership config schema |
 | 41.1.3 | Task 41.1.3 | task | `TASK-AR-641` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-641.md` | Let an existing repository understand exactly what Agent Runtime would add, own, pres… |

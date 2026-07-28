@@ -1,31 +1,36 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-28T16:36:01+09:00
-updated_by: codex-root-v080-recovery-20260728
+updated_at: 2026-07-28T17:55:15+09:00
+updated_by: le-20260728-task-ar-639-002-terra
 current_state:
-  summary: "TASK-AR-631 product implementation passed independent W4b; its historical missing-claim and stale projection gap is recorded, and TASKSET-AR-V080-ADOPTION-ENFORCEMENT is registered. Integration and W6 closeout remain."
-  status: waiting_integration
+  summary: "UNIT-TASK-AR-639-002 is actively implementing lifecycle tuple reconciliation and explicit TASK-AR-631 missing-claim recovery."
+  status: in_progress
   task_set_status: active
-  task_set_id: "TASKSET-AR-CONSOLE-OVERHAUL-P1"
-  step_index: 4
+  task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
+  step_index: 2
   step_total: 6
-  progress_pct: 80
-  status_text: "TASK-AR-631 W4a/W4b passed at 8be1fe24; lifecycle recovery metadata and v0.8 registration await integration."
+  progress_pct: 5
+  status_text: "Implementing claim/task/unit/worktree/pointer reconciliation and explicit recovery."
 active_work:
   current_agents:
-    - codex-root-v080-recovery-20260728
+    - claim_id: CLAIM-20260728-175515-task-ar-639-639002
+      agent_role: lead-engineer
+      agent_instance_id: le-20260728-task-ar-639-002-terra
+      display_name: lead_engineer@unit-639-002-terra
+      callsite_id: codex:subagent:unit-task-ar-639-002-worker
   current_teams:
     - agent-runtime-core
 resume:
-  active_task: TASK-AR-631
-  active_task_set: TASKSET-AR-CONSOLE-OVERHAUL-P1
-  branch_policy: "Integrate and close TASK-AR-631 first. Then start UNIT-TASK-AR-639-001 through a fresh claim and dispatcher-created worktree; do not implement it in this root checkout."
+  active_task: TASK-AR-639
+  active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
+  branch_policy: "Continue only UNIT-TASK-AR-639-002 in its claimed worktree. Apply the verified recovery contract to TASK-AR-631, then stop for independent W4b."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260728-175515-task-ar-639-639002.json
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT

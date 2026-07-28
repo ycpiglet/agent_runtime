@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T16:36:01+09:00
+updated_at: 2026-07-28T17:55:15+09:00
+started_at: 2026-07-28T17:55:15+09:00
 title: Restore lifecycle truth and Work CLI producer-consumer parity
-status: planned
+status: in_progress
 priority: P0
 difficulty: L
 est_hours: 10
@@ -23,6 +24,8 @@ project_id: PROJECT-AGENT-RUNTIME
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 unit_spec: agents/lead_engineer/tasks/units/TASK-AR-639/UNIT-TASK-AR-639-001.md
 reservation_id: RES-20260728-163601-b8c2a87a-01
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260728-175515-task-ar-639-639002.json
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
