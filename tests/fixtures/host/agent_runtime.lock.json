@@ -11,7 +11,7 @@
   ],
   "installed": {
     "managed_files": {
-      ".codex/hooks.json": "sha256:44d9bee3142a02414449976159ddca8514891e11c74851bdb1a3f91ddc14fbf9",
+      ".codex/hooks.json": "sha256:422c7a62e3712a01436c2fa3d4627a6311e9f1ba84594c40db9c1f10b9220159",
       ".env.example": "sha256:a91fca7b04c48cbd8a98ee6e33541fbbd6c9baa40aca90e4aa145efa70a873cd",
       ".gitattributes": "sha256:22ec718362af48d401e6717569dfcc89ec3573d553dc3f3530f4db8a1625b79b",
       ".githooks/post-merge": "sha256:b112da8578360cd49b871f518afa9c2ffb9f266c416daa02a8a9b17a84196e39",
@@ -73,6 +73,7 @@
       "agents/research_agent/SKILL.md": "sha256:70abe7f718adb86727cdd46ca0e7c555cd59e3ae429d1b1b0cc157b169047a72",
       "agents/research_agent/notes/EVIDENCE-2026-06-03-001-requirement-elicitation.md": "sha256:b07cbaf1e1561603dfb0716de3771d85d9b8f74c2ec6c3822c76afd6fcb8db16",
       "agents/roles.yml": "sha256:68fdabe53a249d9c8639f15bb98b28ea3cbd44ddf250d8c6a9d16f2211f9ec8b",
+      "agents/runtime/session_checkpoints/.gitignore": "sha256:240a3e0d37d2e86b614063f5347eb02d4f99ca6c254de6b82871ff8d95532a7d",
       "agents/scribe/SKILL.md": "sha256:4ba9ab06776759853eaeb05c79b8774f6abd95ea753ec517537f47a85c2837f0",
       "agents/secretary/SKILL.md": "sha256:861ae7a9306e2b992270382363517cc5333ea692e0f261f4c9705734d19279cf",
       "agents/timeline_agent/SKILL.md": "sha256:97d74f064c695550f5f8032341ca0a810ff83706d96e0c1e7044cb86c13fb01c",
@@ -152,7 +153,7 @@
       "scripts/goal_supervisor.py": "sha256:818a734d008563aeeb4b3bee02a15b80c754d1229e03cad0111ca39f1846f181",
       "scripts/governance_ops_report.py": "sha256:a4f100c46a2f1227a2fc60ab3170aebf98b3e872dcc570b705d8dbe4cf8f2595",
       "scripts/inflight_overlay.py": "sha256:16be0bdf91d7549c07d14683f2688c5aa75388de3bc1254b5b06e87c3fb1f32b",
-      "scripts/install_hooks.py": "sha256:36b27356e164bc7fccbbf3f9a5afe2cb0ee8af8a12bfaa73e86efc9f3ebeb36e",
+      "scripts/install_hooks.py": "sha256:0045cdb5f160521f30bb95595a2681433bc19d7e8811fa54817a0767bd3113f7",
       "scripts/interrupted_run_detector.py": "sha256:98b5207c74f2b01caf22e321f18a70ea1aac9eff74cd41b7ff648c949965c5ed",
       "scripts/kedb_search.py": "sha256:b2b714723f8be28fb9f09de571b2b5414ff6c0213c98d35dc9cc42e102e38b82",
       "scripts/knowledge_ask.py": "sha256:2b518d182c76f7383f050478650373d083e6f5d06b87df7ad16005a33b82959b",
@@ -204,10 +205,10 @@
       "scripts/scribe_due.py": "sha256:3ba9579be478a9e0a6e0983d4847074f6a503ba64eb67d060ca56ff548c449bb",
       "scripts/secretary_digest.py": "sha256:66a5e85681877eec911fc3dca0f1b19b71004a840f87500d1c78f10cda55b004",
       "scripts/session_baseline.py": "sha256:adf81af3b935c0876f353360a99e92d32bb106a927086786dc627e537c56ed10",
-      "scripts/session_compact_hook.py": "sha256:45b401e54e10ddc0173042a8e0eb937b1c5f8378a24d987dba94157d787e74d4",
+      "scripts/session_compact_hook.py": "sha256:61aaa46507e319496cdd7173b683ada6bc87bfacf3e8453cacd4e041fa537a25",
       "scripts/session_dashboard.py": "sha256:45fa7cf2c1e09aabfc8ecfc1198f9fb42dcfdca8e59bba5e48b4f8030eb5bc97",
       "scripts/session_resume_check.py": "sha256:5a21ce70f57d8987c63699acfa03e88c9b14a24c8483027a025bb86fb43a4c88",
-      "scripts/session_start_hook.py": "sha256:c62c4869804ee08a06d6757efd31d9cf9a1df0b7b69f7cced3d5d6215b19d633",
+      "scripts/session_start_hook.py": "sha256:98e9145e68e840ad540ad8418ee4bc709c7a837340c6d86aa849fa1ab8d82735",
       "scripts/state_machine_gate.py": "sha256:b1ce42970658b1d7eed94b0285a47fca74e2566ff9094b71ed99a5ad10206e7f",
       "scripts/state_sync_gate.py": "sha256:b85e89fc9de4916376c2784acd47328923fcc596f485b6cc0b35185be13431dd",
       "scripts/status_alias.py": "sha256:9d1ac9fab5c716b617a183188091e53f50aedeb2db1b20d87f3585532b14de7c",
@@ -318,6 +319,7 @@
       "agents/research_agent/SKILL.md": "managed",
       "agents/research_agent/notes/EVIDENCE-2026-06-03-001-requirement-elicitation.md": "managed",
       "agents/roles.yml": "managed",
+      "agents/runtime/session_checkpoints/.gitignore": "managed",
       "agents/scribe/SKILL.md": "managed",
       "agents/secretary/SKILL.md": "managed",
       "agents/timeline_agent/SKILL.md": "managed",
@@ -497,8 +499,8 @@
     },
     "package_version": "0.7.0",
     "seeded": [],
-    "template_digest": "sha256:55aa6eb73c2812c387bda42cdd83a85b140fd925b107a1ea23a1e889e1f66f89",
-    "template_files": 243
+    "template_digest": "sha256:709743366d5d878c9d29f81733e13601f77adc710fc344de6fd8c9ebf0f3cf7d",
+    "template_files": 244
   },
   "profiles": [
     "core",

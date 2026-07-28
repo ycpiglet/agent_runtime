@@ -26,7 +26,8 @@ def main(argv=None):
  if mode=="posttool-owner-doc":args += ["--manifest","owner-docs.yml"]
  try:r=subprocess.run(args,input=raw,text=True,capture_output=True,cwd=root)
  except Exception:
-  if mode in ADVISORY: print("{}"); return 0
+  if mode in ADVISORY:
+   print(start_payload("continuity dispatcher unavailable") if mode == "session-start" else "{}"); return 0
   return 1
  if mode in ADVISORY:
   if mode == "session-start": print(start_payload(r.stdout) if r.returncode == 0 and r.stdout.strip() else start_payload("continuity collectors unavailable"))

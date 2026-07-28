@@ -15,11 +15,11 @@ def pointer_state(path: Path) -> dict:
  return data
 def active_claims(root: Path) -> list[dict]:
  found=[]
- for path in sorted((root/"agents/runtime/task_claims").glob("*.json"))[:100]:
+ for path in reversed(sorted((root/"agents/runtime/task_claims").glob("*.json"))):
   try: claim=json.loads(path.read_text(encoding="utf-8"))
   except Exception: continue
   if isinstance(claim,dict) and str(claim.get("status","")).lower() in ACTIVE:
-   found.append({key:str(claim.get(key, ""))[:240] for key in ("claim_id","task","branch") if claim.get(key)})
+   found.append({key:str(claim.get(key, ""))[:240] for key in ("claim_id","task_id","branch") if claim.get(key)})
   if len(found)>=12: break
  return found
 def atomic_json(path: Path, data: dict) -> None:

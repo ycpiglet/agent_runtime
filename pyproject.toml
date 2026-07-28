@@ -38,6 +38,8 @@ agent_runtime = [
     "templates/project/.github/**/*",
     "templates/project/.codex/**/*",
     "templates/project/**/.gitkeep",
+    "templates/project/**/.gitignore",
+    "templates/project/agents/runtime/session_checkpoints/.gitignore",
 ]
 
 [tool.pytest.ini_options]

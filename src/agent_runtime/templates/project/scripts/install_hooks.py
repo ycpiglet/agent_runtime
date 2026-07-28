@@ -32,11 +32,11 @@ try:
 except Exception:
     pass
 
-HOOK_SCRIPTS: dict[str, str] = {
-    "SessionStart": "scripts/session_start_hook.py",
-    "PreCompact": "scripts/session_compact_hook.py --phase pre-compact",
-    "PostCompact": "scripts/session_compact_hook.py --phase post-compact",
-    "UserPromptSubmit": "scripts/prompt_clarity_hook.py",
+HOOK_MODES: dict[str, str] = {
+    "SessionStart": "session-start",
+    "PreCompact": "pre-compact",
+    "PostCompact": "post-compact",
+    "UserPromptSubmit": "prompt-submit",
 }
 
 
@@ -57,12 +57,12 @@ def _hook_python() -> str:
     return _shell_token(sys.executable or "python")
 
 
-def _hook_command(script: str) -> str:
-    return f"{_hook_python()} {script}"
+def _hook_command(mode: str) -> str:
+    return f"{_hook_python()} -m agent_runtime.hook_runtime {mode}"
 
 
 # event -> hook command. 신규 훅을 늘리려면 HOOK_SCRIPTS 에만 추가한다.
-HOOKS: dict[str, str] = {event: _hook_command(script) for event, script in HOOK_SCRIPTS.items()}
+HOOKS: dict[str, str] = {event: _hook_command(mode) for event, mode in HOOK_MODES.items()}
 
 # Windows 환경에서 반복적으로 code 1 을 낸 Claude plugin hook.
 # repo-local 훅은 유지하고, 이 advisory plugin hook 들만 머신 설정에서 끈다.
@@ -174,12 +174,12 @@ def _has_hook(settings: dict, event: str, cmd: str) -> bool:
     return False
 
 
-def _same_repo_hook_script(command: str, script: str) -> bool:
-    return command.replace("\\", "/").strip().endswith(script)
+def _same_repo_hook_script(command: str, mode: str) -> bool:
+    return "agent_runtime.hook_runtime" in command and command.strip().endswith(mode)
 
 
 def _remove_stale_hook_commands(settings: dict, event: str, cmd: str) -> bool:
-    script = HOOK_SCRIPTS[event]
+    script = HOOK_MODES[event]
     groups = settings.setdefault("hooks", {}).setdefault(event, [])
     changed = False
     new_groups = []
@@ -205,7 +205,7 @@ def _remove_stale_hook_commands(settings: dict, event: str, cmd: str) -> bool:
 def _stale_hook_commands(settings: dict) -> list[tuple[str, str]]:
     stale = []
     for event, expected in HOOKS.items():
-        script = HOOK_SCRIPTS[event]
+        script = HOOK_MODES[event]
         for group in settings.get("hooks", {}).get(event, []):
             for hook in group.get("hooks", []):
                 cmd = hook.get("command")
@@ -235,7 +235,7 @@ def _stale_permissions(settings: dict) -> list[str]:
     stale = []
     allow = settings.get("permissions", {}).get("allow", [])
     for event, expected in HOOKS.items():
-        script = HOOK_SCRIPTS[event]
+        script = HOOK_MODES[event]
         for entry in allow:
             cmd = _permission_cmd(entry)
             if cmd and cmd != expected and _same_repo_hook_script(cmd, script):
@@ -326,7 +326,7 @@ def main(argv: list[str] | None = None) -> int:
         if _ensure_hook(settings, ev, cmd):
             print(f"[install_hooks] + hook {ev}: {cmd}")
             settings_changed = True
-        if _ensure_permission(settings, cmd, HOOK_SCRIPTS[ev]):
+        if _ensure_permission(settings, cmd, HOOK_MODES[ev]):
             print(f"[install_hooks] + permission Bash({cmd})")
             settings_changed = True
 

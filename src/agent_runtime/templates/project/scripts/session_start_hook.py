@@ -12,22 +12,26 @@ def run(root, script, *, root_arg=True):
  except Exception: return "unavailable"
 def checkpoint_summary(path, session_id):
  try:
-  candidate=path.parent/(str(session_id).replace("/","_")+".json") if session_id else path
+  normalized=__import__("re").sub(r"[^A-Za-z0-9_-]","_",str(session_id))[:80]
+  candidate=path.parent/(normalized+".json") if session_id else path
   data=json.loads((candidate if candidate.exists() else path).read_text(encoding="utf-8"))
-  return "checkpoint: " + ", ".join(f"{k}={data[k]}" for k in ("session_id","active_task","active_task_set","rebootstrap_required") if k in data)[:800]
+  fields=("session_id","active_task","active_task_set","rebootstrap_required")
+  active=", ".join(str(item.get("task_id") or item.get("task") or item.get("claim_id")) for item in data.get("active_claims",[])[:4] if isinstance(item,dict))
+  return ("checkpoint: " + ", ".join(f"{k}={data[k]}" for k in fields if k in data) + (f", active_work={active}" if active else ""))[:800]
  except Exception: return "checkpoint: unavailable"
 def main(argv=None):
  p=argparse.ArgumentParser(); p.add_argument("--root",type=Path,default=Path.cwd()); a=p.parse_args(argv); r=a.root
  try: event=json.load(sys.stdin)
  except Exception: event={}
  session_id=str(event.get("session_id") or "")[:80]; source=str(event.get("source") or event.get("trigger") or "unknown")[:80]
- checkpoint=r/"agents/runtime/session_checkpoints/latest.json"; lines=[f"agent-runtime source={source}",checkpoint_summary(checkpoint,session_id)]
+ checkpoint=r/"agents/runtime/session_checkpoints/latest.json"; lines=[f"agent-runtime host={r} source={source}",checkpoint_summary(checkpoint,session_id)]
  lines += [f"baseline: {run(r,'session_baseline.py')}",f"claim-reaper: {run(r,'claim_reaper_hook.py')}"]
  collectors=(("dashboard","session_dashboard.py"),("interrupted","interrupted_run_detector.py"),("resume","session_resume_check.py"))
  with ThreadPoolExecutor(max_workers=3) as pool:
   futures=[(label,pool.submit(run,r,script)) for label,script in collectors]
   lines += [f"{label}: {future.result()}" for label,future in futures]
- compound=next(iter(sorted((r/"agents/project").glob("*compound*"))),None)
+ compound=r/"agents/lead_engineer/compound_log.md"
+ compound=compound if compound.exists() else None
  lines.append("compound: " + (compound.name if compound else "unavailable"))
  context="\n".join(lines)[:6000]
  print(json.dumps({"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":context}},ensure_ascii=False)); return 0

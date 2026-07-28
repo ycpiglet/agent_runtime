@@ -478,12 +478,7 @@ _MIN_DASHBOARD_HOOK_TIMEOUT = (
 
 def test_main_hooks_json_wires_dashboard_after_baseline() -> None:
     commands = _session_start_commands(REPO_ROOT / ".codex" / "hooks.json")
-    assert any("session_dashboard.py" in cmd for cmd in commands)
-    assert any("session_baseline.py" in cmd for cmd in commands)
-    # dashboard runs AFTER session_baseline (do not remove baseline)
-    baseline_idx = next(i for i, cmd in enumerate(commands) if "session_baseline.py" in cmd)
-    dashboard_idx = next(i for i, cmd in enumerate(commands) if "session_dashboard.py" in cmd)
-    assert dashboard_idx > baseline_idx
+    assert commands == ["python3 -m agent_runtime.hook_runtime session-start"]
 
 
 def test_template_hooks_json_wires_dashboard() -> None:
@@ -491,7 +486,7 @@ def test_template_hooks_json_wires_dashboard() -> None:
         REPO_ROOT / "src" / "agent_runtime" / "templates" / "project" / ".codex" / "hooks.json"
     )
     commands = _session_start_commands(template_hooks)
-    assert any("session_dashboard.py" in cmd for cmd in commands)
+    assert commands == ["python3 -m agent_runtime.hook_runtime session-start"]
 
 
 @pytest.mark.parametrize(
@@ -502,10 +497,8 @@ def test_template_hooks_json_wires_dashboard() -> None:
     ],
 )
 def test_dashboard_hook_timeout_exceeds_internal_network_budget(hooks_path: Path) -> None:
-    dashboard_hooks = [
-        hook for hook in _session_start_hooks(hooks_path) if "session_dashboard.py" in hook["command"]
-    ]
-    assert dashboard_hooks, f"no session_dashboard hook in {hooks_path}"
+    dashboard_hooks = _session_start_hooks(hooks_path)
+    assert dashboard_hooks, f"no SessionStart hook in {hooks_path}"
     for hook in dashboard_hooks:
         assert hook["timeout"] > _MIN_DASHBOARD_HOOK_TIMEOUT, (
             f"hook timeout {hook['timeout']} must exceed worst-case serial "
