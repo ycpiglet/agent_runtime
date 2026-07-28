@@ -1,22 +1,22 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-29T05:50:12+09:00
+updated_at: 2026-07-29T06:05:10+09:00
 updated_by: codex-root-v080-orchestrator
 current_state:
-  summary: "UNIT-TASK-AR-645-002 implementation and independent verification are complete; protected-main PR integration is pending."
+  summary: "TASK-AR-645 is integrated and closed with task-linked compound evidence, a fresh bounded Scribe projection, independent review, and a wave retrospective; TASK-AR-646 is next."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 5
+  step_index: 0
   step_total: 6
-  progress_pct: 95
-  status_text: "W4b approved at 98/100; the worker claim is released, canonical Unit and Task verification passed, and the branch is ready for PR CI and merge."
+  progress_pct: 0
+  status_text: "Both TASK-AR-645 units passed independent W4b and protected-main CI; Unit 002 merged as b6b0bdb5 and Unit/Task W6 closeout now passes compound, review, retro, and Scribe gates."
 active_work:
   current_agents: []
   current_teams: []
 resume:
-  active_task: TASK-AR-645
+  active_task: TASK-AR-646
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-  branch_policy: "Integrate UNIT-TASK-AR-645-002 through protected-main PR CI, perform W6 closeout for Unit 002 and TASK-AR-645, then run a fresh W0/T2 recheck before TASK-AR-646; stop before consumer mutation, version bump, tag, publish, release, prompt/transcript persistence, or product-specific parser logic."
+  branch_policy: "After TASK-AR-645 closeout integration, run a fresh W0/T2 assumption check for UNIT-TASK-AR-646-001 before claim creation; stop before consumer mutation, version bump, tag, publish, release, provider credential storage, or a separate agent executor."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -45,7 +45,10 @@ pointers:
       status: completed
     - task_id: TASK-AR-645
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-      status: in_progress
+      status: completed
+    - task_id: TASK-AR-646
+      task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
+      status: planned
     - task_id: TASK-AR-621
       task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
       status: completed

@@ -1,0 +1,79 @@
+{
+  "finding_codes": [
+    "scribe-overdue"
+  ],
+  "generated_at": "2026-07-29T06:08:27+09:00",
+  "hot_count": 757,
+  "projection_path": "agents/project/state/SCRIBE-PROJECTION.json",
+  "schema": "agent-runtime-scribe-projection/v1",
+  "selected_count": 10,
+  "source_count": 1,
+  "sources": [
+    {
+      "adapter": "conventional",
+      "cold_count": 0,
+      "digest": "612be6b110df57130c32d4590bb522929f9379239908b5be05f0d621c347aaf2",
+      "finding_codes": [],
+      "hot_count": 757,
+      "path": "STATUS.md",
+      "present": true,
+      "selected_count": 10,
+      "selected_items": [
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-645 complete; TASK-AR-646 next",
+          "item": "Completed: `TASK-AR-645` added immutable task-linked compound records, deterministic defect-signature lookup, linked closeout validation, generic Markdown/JSON Scribe adapters, and bounded digest-bound projections."
+        },
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-645 complete; TASK-AR-646 next",
+          "item": "[REDACTED]"
+        },
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-645 complete; TASK-AR-646 next",
+          "item": "Quality: both units passed independent W4b; Unit 002 passed 2,408 tests with 3 skipped, clean-wheel/privacy/path/freshness checks, and PR #374's Python 3.10/3.11/3.12 matrix before merging at `b6b0bdb5`."
+        },
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-645 complete; TASK-AR-646 next",
+          "item": "Learning: the failed source-layout verification remains preserved and was superseded by a passing run after declaring `PYTHONPATH=src`; failed-then-passed evidence handling and complete board/archive regeneration are carried into TASK-AR-6…"
+        },
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-645 complete; TASK-AR-646 next",
+          "item": "Taskset: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` remains active and advances to `TASK-AR-646`."
+        },
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-645 complete; TASK-AR-646 next",
+          "item": "Next: begin `TASK-AR-646` at W0, revalidate effective model-tier detection and dispatch-cost ledger assumptions, and claim only after T2 passes or a bounded T3 replan is recorded. Consumer pilot mutation and release actions remain deferred."
+        },
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-644 complete; TASK-AR-645 next",
+          "item": "Completed: `TASK-AR-644` added portable Codex lifecycle dispatch, bounded compact checkpoints, restart rebootstrap, explicit owner-run Claude installation, and doctor/packaging enforcement."
+        },
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-644 complete; TASK-AR-645 next",
+          "item": "[REDACTED]"
+        },
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-644 complete; TASK-AR-645 next",
+          "item": "Quality: CI-follow-up W4b approved 99/100; PR #368 passed Python 3.10, 3.11, and 3.12 and merged at `b14333ce`; merged-main verification passed 66 focused tests, public sanitization with zero findings, and the full suite at 2358 passed wit…"
+        },
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-644 complete; TASK-AR-645 next",
+          "item": "Consumer boundary: Bean Wiki, Allimbot, Autofolio, and Tag Manual were not mutated."
+        }
+      ],
+      "state": "overdue",
+      "total_count": 757
+    }
+  ],
+  "state": "overdue",
+  "total_count": 757
+}

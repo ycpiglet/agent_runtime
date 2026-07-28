@@ -1,5 +1,14 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-29 - TASK-AR-645 complete; TASK-AR-646 next
+
+- Completed: `TASK-AR-645` added immutable task-linked compound records, deterministic defect-signature lookup, linked closeout validation, generic Markdown/JSON Scribe adapters, and bounded digest-bound projections.
+- Safety: Doctor, SessionStart, and closure checks remain read-only; the explicit generated projection is capped at ten derived items and 32 KiB, and no canonical host state, consumer repository, prompt/transcript content, version, tag, package, or release was mutated.
+- Quality: both units passed independent W4b; Unit 002 passed 2,408 tests with 3 skipped, clean-wheel/privacy/path/freshness checks, and PR #374's Python 3.10/3.11/3.12 matrix before merging at `b6b0bdb5`.
+- Learning: the failed source-layout verification remains preserved and was superseded by a passing run after declaring `PYTHONPATH=src`; failed-then-passed evidence handling and complete board/archive regeneration are carried into TASK-AR-651's required no-manual-edit lifecycle smoke.
+- Taskset: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` remains active and advances to `TASK-AR-646`.
+- Next: begin `TASK-AR-646` at W0, revalidate effective model-tier detection and dispatch-cost ledger assumptions, and claim only after T2 passes or a bounded T3 replan is recorded. Consumer pilot mutation and release actions remain deferred.
+
 ## 2026-07-29 - TASK-AR-644 complete; TASK-AR-645 next
 
 - Completed: `TASK-AR-644` added portable Codex lifecycle dispatch, bounded compact checkpoints, restart rebootstrap, explicit owner-run Claude installation, and doctor/packaging enforcement.
