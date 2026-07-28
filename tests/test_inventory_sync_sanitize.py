@@ -20,6 +20,7 @@ from agent_runtime.host_update import run_update
 from agent_runtime.inventory import classify_path
 from agent_runtime.lock import build_lock_plan
 from agent_runtime.lock import build_lock_record
+from agent_runtime.lock import run_lock
 from agent_runtime.publish_bundle import build_bundle_plan
 from agent_runtime.publish_check import analyze as analyze_publish
 from agent_runtime.publish_github_plan import build_github_plan
@@ -34,6 +35,8 @@ from agent_runtime.sanitize import analyze as analyze_sanitize
 from agent_runtime.sync import _template_files
 from agent_runtime.sync import build_sync_plan
 from agent_runtime.sync import run_sync
+from agent_runtime.sync import reconcile_json
+from agent_runtime.sync import render_reconcile
 
 CURRENT_RELEASE_VERSION = "0.7.0"
 CURRENT_RELEASE_TAG = f"v{CURRENT_RELEASE_VERSION}"
@@ -884,7 +887,7 @@ def test_sync_check_fails_when_conflicts_exist(tmp_path):
 def test_apply_safe_writes_independent_updates_but_legacy_apply_is_atomic(tmp_path):
     host = tmp_path / "host"
     templates = tmp_path / "templates"
-    _write(host / "agent_runtime.yml", "project: demo\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\n")
+    _write(host / "agent_runtime.yml", "project: demo\nupstream:\n  remote_url: https://github.com/example/agent_runtime.git\n  ref: v0.1.0\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\n")
     for rel in ("scripts/create.py", "scripts/update.py", "scripts/conflict.py", "scripts/nonregular.py"):
         _write(templates / rel, "new\n")
     _write(host / "scripts/update.py", "old\n")
@@ -917,6 +920,116 @@ def test_reconcile_digest_matches_v2_lock_and_unsafe_ancestor_never_writes(tmp_p
     payload = json.loads(reconcile_json(plan))
     assert payload["lock_migration"] == "new"
     assert payload["template_digest"] == record["installed"]["template_digest"]
+
+
+@pytest.mark.parametrize("config_extra", ["sync:\n  unmanaged:\n    - overlays\n", "ownership:\n  host_owned:\n    - overlays\n"])
+def test_ownership_descendant_v1_v2_host_owned_is_excluded_and_never_written(tmp_path, config_extra):
+    host, templates = tmp_path / "host", tmp_path / "templates"
+    _write(host / "agent_runtime.yml", "schema: agent-runtime-config/v2\nproject: demo\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\n" + config_extra if "ownership" in config_extra else "project: demo\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\n  unmanaged:\n    - overlays\n")
+    _write(host / "overlays" / "nested.md", "host\n")
+    _write(templates / "overlays" / "nested.md", "template\n")
+    plan = build_sync_plan(host, template_root=templates)
+    assert [(item.path, item.ownership) for item in plan.excluded] == [("overlays/nested.md", "host_owned")]
+    assert run_sync(host, "apply-safe", template_root=templates) == 0
+    assert (host / "overlays/nested.md").read_text() == "host\n"
+
+
+def test_generated_descendant_is_never_written(tmp_path):
+    host, templates = tmp_path / "host", tmp_path / "templates"
+    _write(host / "agent_runtime.yml", "schema: agent-runtime-config/v2\nproject: demo\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\nownership:\n  generated:\n    - generated\n")
+    _write(templates / "generated/a.txt", "template\n")
+    plan = build_sync_plan(host, template_root=templates)
+    assert plan.updates == () and plan.excluded[0].ownership == "generated"
+    assert run_sync(host, "apply-safe", template_root=templates) == 0
+    assert not (host / "generated/a.txt").exists()
+
+
+def test_seed_lifecycle_v2_and_v1_evidence_prevent_recreation(tmp_path):
+    host, templates = tmp_path / "host", tmp_path / "templates"
+    _write(host / "agent_runtime.yml", "project: demo\nupstream:\n  remote_url: https://github.com/example/agent_runtime.git\n  ref: v0.1.0\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\n")
+    _write(templates / "AGENTS.md", "seed\n")
+    assert run_sync(host, "apply-safe", template_root=templates) == 0
+    assert run_lock(host, mode="write", template_root=templates) == 0
+    (host / "AGENTS.md").unlink()
+    assert build_sync_plan(host, template_root=templates).updates == ()
+    assert build_sync_plan(host, template_root=templates).preserved[0].reason == "prior seed evidence"
+    (host / "agent_runtime.lock.json").write_text(json.dumps({"schema": "agent-runtime-lock/v1", "installed": {"managed_files": {"AGENTS.md": _digest("seed\n")}}}) + "\n")
+    assert build_sync_plan(host, template_root=templates).updates == ()
+
+
+def test_lock_write_does_not_bless_planned_missing_seed(tmp_path):
+    host, templates = tmp_path / "host", tmp_path / "templates"
+    _write(host / "agent_runtime.yml", "project: demo\nupstream:\n  remote_url: https://github.com/example/agent_runtime.git\n  ref: v0.1.0\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\n")
+    _write(templates / "AGENTS.md", "seed\n")
+    assert run_lock(host, mode="write", template_root=templates) == 0
+    assert json.loads((host / "agent_runtime.lock.json").read_text())["installed"]["seeded"] == []
+
+
+def test_reconcile_is_deterministic_and_reports_lock_migration_and_identical(tmp_path):
+    host, templates = tmp_path / "host", tmp_path / "templates"
+    _write(host / "agent_runtime.yml", "project: demo\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\n")
+    _write(templates / "scripts/a.py", "same\n")
+    _write(host / "scripts/a.py", "same\n")
+    _write(host / "agent_runtime.lock.json", json.dumps({"schema": "agent-runtime-lock/v1", "installed": {"managed_files": {}}}))
+    first, second = build_sync_plan(host, templates), build_sync_plan(host, templates)
+    assert reconcile_json(first) == reconcile_json(second) and render_reconcile(first) == render_reconcile(second)
+    assert json.loads(reconcile_json(first))["lock_migration"] == "migrate-v1"
+    assert first.preserved[0].action == "identical"
+    (host / "agent_runtime.lock.json").write_text(json.dumps(build_lock_record(host, templates)))
+    assert json.loads(reconcile_json(build_sync_plan(host, templates)))["lock_migration"] == "current"
+
+
+def test_lock_refuses_conflicts_and_clean_v2_record_is_deterministic(tmp_path):
+    host, templates = tmp_path / "host", tmp_path / "templates"
+    _write(host / "agent_runtime.yml", "project: demo\nupstream:\n  remote_url: https://github.com/example/agent_runtime.git\n  ref: v0.1.0\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\n")
+    _write(templates / "scripts/a.py", "new\n")
+    _write(host / "scripts/a.py", "host\n")
+    old = b'{"existing": true}\n'
+    (host / "agent_runtime.lock.json").write_bytes(old)
+    assert run_lock(host, mode="write", template_root=templates) == 1
+    assert (host / "agent_runtime.lock.json").read_bytes() == old
+    (host / "scripts/a.py").unlink()
+    assert run_lock(host, mode="write", template_root=templates) == 0
+    record = json.loads((host / "agent_runtime.lock.json").read_text())
+    assert record["schema"] == "agent-runtime-lock/v2"
+    assert {"ownership", "managed_files", "seeded"} <= set(record["installed"])
+
+
+def test_host_update_reconcile_apply_safe_routes_without_conflict_precheck(tmp_path):
+    _write_host_config(tmp_path, remote_url="https://github.com/example/agent_runtime.git", ref="v0.1.0")
+    plan = build_update_plan(tmp_path, tmp_path / ".tmp" / "vendor")
+    assert "@v0.1.0" in plan.install_spec
+    reconcile = build_update_execution(tmp_path, plan.install_dir, mode="reconcile")
+    safe = build_update_execution(tmp_path, plan.install_dir, mode="apply-safe")
+    reconcile_names = [step.name for step in reconcile.steps]
+    safe_names = [step.name for step in safe.steps]
+    assert reconcile_names == ["install-upstream", "verify-templates", "sync-reconcile"]
+    assert safe_names[:4] == ["install-upstream", "verify-templates", "sync-diff", "sync-apply-safe"]
+    assert "sync-check" not in reconcile_names + safe_names[:4]
+
+
+def test_sync_json_requires_reconcile_and_export_apply_cli_regression(tmp_path):
+    _write(tmp_path / "agent_runtime.yml", "project: demo\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\n")
+    with pytest.raises(SystemExit):
+        main(["sync", "--root", str(tmp_path), "--check", "--json"])
+    package = tmp_path / "package"
+    _write(tmp_path / "scripts/agent_worker.py", "x\n")
+    assert main(["export", "--host-root", str(tmp_path), "--package-root", str(package), "--apply"]) == 0
+
+
+@pytest.mark.parametrize("kind", ["directory", "non-directory-ancestor"])
+def test_nonregular_target_boundaries_diff_and_apply_safe_do_not_write(tmp_path, kind):
+    host, templates = tmp_path / "host", tmp_path / "templates"
+    _write(host / "agent_runtime.yml", "project: demo\nsync:\n  mode: check-diff-apply\n  allow_silent_overwrite: false\n")
+    _write(templates / "a" / "b.py", "new\n")
+    if kind == "directory":
+        (host / "a" / "b.py").mkdir(parents=True)
+    else:
+        _write(host / "a", "not-dir\n")
+    plan = build_sync_plan(host, templates)
+    assert plan.conflicts and plan.conflicts[0].safety == "unsafe"
+    assert run_sync(host, "diff", templates) == 0
+    assert run_sync(host, "apply-safe", templates) == 1
 
 
 def test_template_files_use_stable_posix_relative_order(tmp_path):
