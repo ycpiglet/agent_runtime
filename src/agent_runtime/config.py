@@ -96,8 +96,10 @@ def _scalar(value: str) -> str:
     end = value.find(quote, 1)
     if end < 0:
         raise ValueError(f"malformed quoted scalar: {value!r}")
-    trailing = value[end + 1 :].strip()
-    if trailing and not trailing.startswith("#"):
+    trailing = value[end + 1 :]
+    if trailing and not trailing[0].isspace():
+        raise ValueError(f"malformed quoted scalar: {value!r}")
+    if trailing.strip() and not trailing.lstrip().startswith("#"):
         raise ValueError(f"malformed quoted scalar: {value!r}")
     return value[1:end]
 

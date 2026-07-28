@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from agent_runtime import cli
-from agent_runtime.config import CANONICAL_HOST_CONTEXT, load_config
+from agent_runtime.config import CANONICAL_HOST_CONTEXT, _scalar, load_config
 
 
 def _write(root: Path, text: str) -> None:
@@ -170,6 +170,12 @@ def test_host_context_scalar_comments_preserve_apostrophes_and_quoted_hashes(tmp
     config = load_config(tmp_path)
     assert config.host_context.purpose == "world's coffee"
     assert config.host_context.domain == "editors # research"
+
+
+def test_quoted_scalar_tail_requires_whitespace_before_a_comment():
+    assert _scalar('"x" # good') == "x"
+    with pytest.raises(ValueError, match="malformed quoted scalar"):
+        _scalar('"x"#bad')
 
 
 def test_host_context_is_optional_and_consumed_from_canonical_location(tmp_path):
