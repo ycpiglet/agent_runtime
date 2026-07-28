@@ -9,11 +9,11 @@ task_id: TASK-AR-645
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T04:34:55+09:00
+updated_at: 2026-07-29T04:42:09+09:00
 started_at: 2026-07-29T03:43:12+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -39,6 +39,8 @@ target_files:
   - agents/lead_engineer/tasks/TASK-AR-645.md
   - agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-001.md
   - agents/project/NEXT-SESSION-POINTER.yml
+  - agents/project/work-items/WORK-ITEM-CLASSIFICATION.json
+  - agents/project/work-items/WORK-ITEM-CLASSIFICATION.md
   - new:src/agent_runtime/knowledge_records.py
   - new:scripts/compound_record.py
   - new:src/agent_runtime/templates/project/scripts/compound_record.py
@@ -110,6 +112,12 @@ evidence_refs:
   - reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729041748.json
   - reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729042042.json
   - reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729043455.json
+review_refs:
+  - reviews/W4B-2026-07-29-unit-task-ar-645-001.md
+resolution: done
+completed_at: 2026-07-29T04:42:09+09:00
+closed_by: codex-root-v080-integrator
+measurement_unavailable_reason: Actual hours and token telemetry were not captured across this multi-agent implementation, independent verification, and CI integration cycle.
 ---
 
 # UNIT-TASK-AR-645-001 - Introduce per-entry task-linked compound records and retrieval
@@ -139,6 +147,8 @@ default. Autofolio demonstrates the cost with a 5,235-line shared log.
 - agents/lead_engineer/tasks/TASK-AR-645.md
 - agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-001.md
 - agents/project/NEXT-SESSION-POINTER.yml
+- agents/project/work-items/WORK-ITEM-CLASSIFICATION.json
+- agents/project/work-items/WORK-ITEM-CLASSIFICATION.md
 - new:src/agent_runtime/knowledge_records.py
 - new:scripts/compound_record.py
 - new:src/agent_runtime/templates/project/scripts/compound_record.py
@@ -243,3 +253,20 @@ fallback, and ownership behavior.
 
 Stop before bulk-rewriting historical compound logs, changing consumer
 repositories, or weakening passed-verification JSON requirements.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-29T04:42:09+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Actual hours and token telemetry were not captured across this multi-agent implementation, independent verification, and CI integration cycle.
+- Closed by: `codex-root-v080-integrator`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729041748.json`
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729042042.json`
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729043455.json`
+- Reviews:
+  - `reviews/W4B-2026-07-29-unit-task-ar-645-001.md`
+<!-- work-close:end -->

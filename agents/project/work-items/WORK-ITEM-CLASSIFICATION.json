@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-29T03:45:25+09:00",
+  "generated_at": "2026-07-29T04:42:09+09:00",
   "record_count": 519,
   "finding_count": 0,
   "findings": [],
@@ -5569,7 +5569,7 @@
       "title": "UNIT-TASK-AR-645-001 - Introduce per-entry task-linked compound records and retrieval",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-001.md",
       "parent_id": "TASK-AR-645",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-645-002",
